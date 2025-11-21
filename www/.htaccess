@@ -15,4 +15,4 @@ RewriteCond %{REQUEST_URI} ^/\w\w/.*$
 RewriteRule ^\w\w/(.*)$ $1 [L,QSA]
 
 RewriteRule ^(css|js)/(.*)\.[0-9]+\.(.*)$ /$1/$2.$3 [L]
-RewriteRule ^(ogame/calc/css|ogame/calc/js)/(.*)\.[0-9]+\.(.*)$ /$1/$2.$3 [L]
+RewriteRule ^(ogame/calc/css|/ogame/calc/js)/(.*)\.[0-9]+\.(.*)$ /$1/$2.$3 [L]
