@@ -1,0 +1,11 @@
+#expeditions { margin: auto; width: 750px; }
+.ui-subheader, .ui-widget-content .ui-subheader { margin-bottom: 7px; }
+.level-input { width: 40px; text-align: center; margin-left: 2px; margin-right: 8px; }
+.count-input { width: 60px; text-align: center; margin-left: 2px; margin-right: 8px; }
+.percent-input { width: 60px; text-align: center; margin-left: 2px; margin-right: 2px; }
+.first-column { padding-left: 5px;}
+
+#data-panel { background: none; }
+#api-accordion-inner { padding: 0.5em;} 
+
+#lf-bonuses-txtarea:focus {  border: 1px solid #ccc; background: none; font-weight: normal;  }

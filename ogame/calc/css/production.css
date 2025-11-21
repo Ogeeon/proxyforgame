@@ -1,0 +1,41 @@
+#production { margin: auto; width: 900px; }
+#energy-tech-level, #universe-speed { margin-right: 10px; }
+#tabtag1 { padding: .1em 1em; }
+#tabtag2 { padding: .1em 1em; }
+#one-planet-panel { padding: 0px; }
+#all-planets-panel { padding: 0px; }
+
+#planet-temp-div { float: left; padding-left: 4px; padding-top: 2px; }
+#planet-pos-div { float: left; padding-left: 4px; padding-top: 2px; }
+#energy-boost-div { float: left; padding-left: 4px; padding-top: 2px; }
+#prod-coeff-div { width: auto; text-align: center; height: 20px; padding-top: 4px; }
+#extended-view-div { float: right; padding-right: 5px; padding-top: 2px; }
+#addtnl-info-div { float: right; padding-right: 5px; padding-top: 2px; }
+
+.table-line-2px { background-color: #6A8DA6; height: 2px; }
+.table-line-3px { background-color: #6A8DA6; height: 3px; }
+.ui-spaced-input-r { margin: 0; margin-right: 10px; }
+.ui-spaced-input-l { margin: 0; margin-left: 10px; margin-right: 3px;}
+
+#max-planet-temp.red-border {border: 3px solid red;}
+
+#storage-cap-met.red-border {border: 2px solid red;}
+#storage-cap-crys.red-border {border: 2px solid red;}
+#storage-cap-deut.red-border {border: 2px solid red;}
+
+#one-planet-accordion div { padding: 1px 2px; }
+#all-planets-accordion div { padding: 1px 2px; }
+
+#save-planet-data span, #clone-planet-data span { display: inline; padding: 0px; font-weight: lighter;}
+.control-buttons { width: 60px; }
+.control-btn { width: 30px;}
+.uni-control-btn { width: 30px; height: 20px;}
+
+.visible-span {
+    visibility: visible;
+}
+.hidden-span {
+    visibility: hidden;
+}
+
+.er-input-margin { margin-left: -4px; }

@@ -1,0 +1,35 @@
+#trade { margin: auto; width: 680px; }
+#main .ui-panel { margin: 0; padding: 2px; }
+
+#main { margin: 4px; }
+table#tmain, table#trate { width: auto; }
+td.res-panel { width: 50%; }
+td.arrow { text-align: center; }
+#res-src, #res-dst { height: 14em; }
+#res-type-dst-2 { margin-bottom: 0.8em; }
+.res-input { width: 15em; padding: 1px; }
+.rate-input { width: 40px; padding: 1px; text-align: center; }
+.hr { border-bottom: 1px solid #c5dbec; margin: 3px 0; }
+.hrs { border-bottom: 1px solid #c5dbec; margin: 3px 0; width: 60%; }
+.res-type { margin: 7px; }
+.res-subtype { margin: 3px; margin-left: 20px; }
+.res-mix-balance { width: 120px; font-size: 0.7em !important; float: right; margin: 0.8em 0.4em 0 0; }
+#mix-fix1, #mix-fix2 { width: 150px; }
+#link, #text, #bbcode { margin: 2em 0; font-size: 0.8em; text-align: center; }
+#abbcode { width: 650px; }
+.tdr { text-align: right; white-space: nowrap; }
+
+#rate-mc { text-align: center; }
+
+.ui-button-text, .ui-button .ui-button-text { padding: 0.1em; }
+.rbutton { text-align: center; }
+.rbutton button { width: 7em; }
+
+#big-arrow {
+	display: block;
+	-moz-box-sizing: border-box;
+	box-sizing: border-box;
+	width: 40px; /* Width of new image */
+	height: 100px; /* Height of new image */
+	padding-left: 40px; /* Equal to width of new image */ 
+}

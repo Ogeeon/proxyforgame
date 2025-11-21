@@ -1,0 +1,54 @@
+body { background: white; }
+.hr { border-bottom: 1px solid #c0c0c0; margin: 3px 0; }
+
+table.lined th { background: #AACDE6; font-weight: lighter; }
+table.lined tr.odd { background: #F8F8F8; }
+table.lined tr.even { background: #ECECEC; }
+table.lined td.border-w { border-left: solid 2px; border-color: #6A8DA6; }
+table.lined td.border-e { border-right: solid 2px; border-color: #6A8DA6; }
+table.lined td.border-n { border-top: solid 2px; border-color: #6A8DA6; }
+table.lined td.border-s { border-bottom: solid 2px; border-color: #6A8DA6; }
+
+.ui-input, .ui-widget-content .ui-input { background: #fcfdfd; }
+.ui-panel, .ui-widget-content .ui-panel { background: #f4f4f4; }
+
+.spin-button.locked {
+	background-color: #F4F4F4;	/* simulate disabled input element */	
+}
+
+input.spin-button {
+	background-color: #FCFDFD;
+	background-image: url(images/spinbtn-updn.gif);
+	border: 1px solid #C5DBEC;
+	color: #2E6E9E;
+}
+
+#startpage { color: black;}
+
+#sidebar .feedback {
+	color: #2E6E9E;
+}
+
+#langs-options a {
+	border-color: #C5DBEC;
+	color: #2E6E9E;
+}
+
+#hint { background: #E2F2FF; border: 1px solid #CFDFEC; }
+
+#big-arrow {
+	background: url(images/big-arrow.png) no-repeat; 
+}
+
+#trade .trade-editable { background: #ffffe8; }
+
+.result-subtitle {color: #2e6e9e; font-weight: bold;}
+
+#donate-dlg-btn {
+	background: url(images/cash-receiving-32.png) no-repeat; 
+}
+
+.bolder-label {
+	font-weight: bolder;
+	color: #2E6E9E;
+}

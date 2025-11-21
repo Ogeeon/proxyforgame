@@ -1,0 +1,61 @@
+body { background: #181818; }
+.hr { border-bottom: 1px solid #c0c0c0; margin: 3px 0; }
+
+table.lined th { background: #01387B; font-weight: lighter; }
+table.lined tr.odd { background: #4B4B4B; }
+table.lined tr.even { background: #303030; }
+table.lined td.border-w { border-left: solid 2px; }
+table.lined td.border-e { border-right: solid 2px; }
+table.lined td.border-n { border-top: solid 2px; }
+table.lined td.border-s { border-bottom: solid 2px; }
+
+.spin-button.locked {
+	background-color: #333333;	/* simulate disabled input element */	
+}
+
+input.spin-button {
+	background-color: #FCFDFD;
+	background-image: url(images/spinbtn-updn.gif);
+	border: 1px solid #6A6A6A;
+	color: #AAAAAA;
+}
+
+#startpage { color: #eeeeee; }
+
+#sidebar .feedback {
+	color: #3EA0EA;
+	background: #000b13;
+}
+
+#langs-options a {
+	border-color: #C5DBEC;
+	color: #3EA0EA;
+	background: #000b13 url(images/ui-bg_highlight-soft_35_222222_1x100.png) 50% 50%;
+}
+
+#hint { background: #01387B; border: 1px solid #CFDFEC; color: #EEEEEE; }
+
+#big-arrow {
+	background: url(images/big-arrow.png) no-repeat; 
+}
+
+
+#trade .trade-editable { background: #001a55; }
+#vtablec #link, #text, #bbcode {color: #EEEEEE; }
+#alink {color: #3EA0EA; }
+#rate-md.ui-state-error { border: 1px solid #ffb73d; background: #ffc73d url(images/ui-bg_glass_40_ffc73d_1x400.png) 50% 50% repeat-x; color: #111111; }
+#trade .ui-state-focus { border: 1px solid #eeeeee; }
+
+.result-subtitle {color: #eeeeee; font-weight: bold;}
+
+#donate-dlg-btn {
+	background: url(images/cash-receiving-32.png) no-repeat; 
+}
+
+.ui-widget input { font-family: Arial, sans-serif; font-size: 1em; } 
+
+
+.bolder-label {
+	font-weight: bolder;
+	color: #3EA0EA;
+}

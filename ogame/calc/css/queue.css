@@ -1,0 +1,21 @@
+#queue { margin: auto; width: 1100px; }
+.ui-subheader, .ui-widget-content .ui-subheader { margin: 1px; }
+#src-panel, #dst-panel { margin-top: 2px; }
+.level-input { width: 25px; text-align: center; margin-left: 2px; margin-right: 8px; }
+.total-fld-input { margin-top: 2px; }
+
+#tabtag-2, #tabtag-3  { padding: .1em 1em; }
+#tab-2, #tab-3 { padding: 0em; }
+
+.table-line-2px { background-color: #6A8DA6; height: 2px; }
+.table-line-3px { background-color: #6A8DA6; height: 3px; }
+.ui-spaced-input-r { margin: 0; margin-right: 10px; }
+.ui-spaced-input-l { margin: 0; margin-left: 10px; margin-right: 3px;}
+
+#clear-2 { padding: 3px; cursor: pointer; float: right; margin: 2px; }
+#clear-3 { padding: 3px; cursor: pointer; float: right; margin: 2px; }
+
+.ui-buttonset { margin-right: -10px; }
+.ui-button-text-icon-primary .ui-button-text, .ui-button-text-icons .ui-button-text { padding: 0.4em 1em; }
+
+.startdate-input { width: 140px; text-align: center; margin: 2px;}

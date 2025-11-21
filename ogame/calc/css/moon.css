@@ -1,0 +1,14 @@
+#moon { margin: auto; width: 750px; }
+#spacer { margin-top: 15px; margin-bottom: 15px; }
+.ui-subheader, .ui-widget-content .ui-subheader { margin-bottom: 7px; }
+.level-input { width: 40px; text-align: center; margin-left: 2px; margin-right: 8px; }
+.energy-input { width: 50px; text-align: center; margin-left: 2px; margin-right: 8px; }
+.energy-show { width: 60px; text-align: center; margin-right: 8px; }
+.resource-show { width: 100px; text-align: center;  margin-left: 2px; margin-right: 8px; }
+.time-show { width: 140px; text-align: center;  margin-left: 2px; margin-right: 8px; }
+.transport-show { width: 160px; text-align: center;  margin-left: 2px; margin-right: 8px; }
+.td  { margin: 4px; }
+#reset-ds { padding: 4px; cursor: pointer; float: right; margin: 4px; }
+#reset-cr { padding: 4px; cursor: pointer; float: right; margin: 4px; margin-top: 0px;}
+.max-label { font-size: 0.8em; margin: 8px;}
+.count-input { width: 60px; text-align: center; margin-left: 2px; margin-right: 12px; }

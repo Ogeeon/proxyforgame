@@ -1,0 +1,10 @@
+#terraformer { margin: auto; width: 760px; }
+.ui-subheader, .ui-widget-content .ui-subheader { margin-bottom: 7px; }
+.level-input { width: 40px; text-align: center; margin-left: 2px; margin-right: 8px; }
+.energy-input { width: 50px; text-align: center; margin-left: 2px; margin-right: 8px; }
+.energy-show { width: 60px; text-align: center; margin-right: 8px; }
+.resource-show { width: 100px; text-align: center;  margin-left: 2px; margin-right: 8px; }
+.time-show { width: 140px; text-align: center;  margin-left: 2px; margin-right: 8px; }
+.transport-show { width: 160px; text-align: center;  margin-left: 2px; margin-right: 8px; }
+.td  { margin: 4px; }
+#single-level {margin-left: -3px;}
