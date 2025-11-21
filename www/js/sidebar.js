@@ -124,10 +124,6 @@ function showEmailWindow() {
 	updateButtonsState('email');
 }
 
-function showDonateInfoWindow() {
-	$("#donate-dialog").dialog( "open" );
-}
-
 function sendEmail() {
 	showSendDiv('email', 'progress');
 	$.post(
@@ -185,27 +181,6 @@ function fillChangelogTable(changes) {
 }
 
 $(function(){	
-	$("#donate-dialog").dialog({
-		autoOpen: false,
-		height: 440,
-		width: 590,
-		modal: true,
-		resizable: false,
-		buttons: {
-			done: function() {
-				$(this).dialog("close");
-			}
-		},
-		close: function() {
-		}
-	});
-	var dialog = $('div[aria-labelledby="ui-dialog-title-donate-dialog"]');
-	var buttons = dialog.find('div.ui-dialog-buttonset');
-	buttons[0].children[0].children[0].innerHTML = buttonsText.ok;
-	buttons[0].children[0].id = "donate-btn-ok";
-	$("#donate-dialog").dialog("option", "step", 0);
-	
-	
 	$("#report-form").dialog({
 		autoOpen: false,
 		height: 255,
@@ -316,14 +291,6 @@ $(function(){
 });
 
 document.onkeypress = getText;
-
-$(document).ready(function() {
-	$( "#payments-accordion" ).accordion({
-		autoHeight: false,
-		collapsible: true,
-		active: 0
-	});
-});	
 
 var lastChange = $.cookie("lastChange");
 if(lastChange) {

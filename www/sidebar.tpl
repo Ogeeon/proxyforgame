@@ -66,15 +66,6 @@ var currLang = '<?=$lang ?>';
 		<?=$loc['feedbackItems']['discord']?>
 	</div>
 	<div class="spacer">&nbsp;</div>
-	
-	<div class="ui-panel"><?=$loc['donateStrings']['header']?></div>
-	<div class="ui-state-active feedback">
-		<table align="center"><tr><td>
-		<a id="donate-link" href="#" onclick="showDonateInfoWindow();">
-			<img id="donate-dlg-btn" alt="">
-		</a>
-		</td></tr></table>
-	</div>
 		
 	<div class="spacer">&nbsp;</div>
 	<div class="ui-panel">Cookies</div>
@@ -87,49 +78,6 @@ var currLang = '<?=$lang ?>';
 		<a href="#" onclick="requestAndShowChangelog(-1);"><?=$loc['changelogStrings']['changelog']?></a>
 	</div>
 
-</div>
-
-<div id="donate-dialog" title="<?=$loc['donateStrings']['why_caption']?>" style="display: none">
-	<div id="donate-dlg-body" class="ui-dialog-content ui-widget-content">
-		<div id="donate-dlg-info">
-			<?=$loc['donateStrings']['why_text']?><br/>
-			<div id="payments-accordion">
-				<h3><a href="#">Webmoney.Funding</a></h3>
-				<div>
-<?php if ($_SERVER['HTTP_HOST'] == 'proxyforgame.com' && $lang == 'ru'): ?>
-					<iframe src="https://funding.webmoney.ru/widgets/horizontal/646155b8-3fd6-4191-afd8-431ef3d6bdba?bt=0&hs=1&sum=10" width="468" height="150" scrolling="no" style="border:none;"></iframe>
-<?php elseif ($_SERVER['HTTP_HOST'] == 'proxyforgame.com'): ?>
-					<iframe src="https://funding.wmtransfer.com/widgets/horizontal/646155b8-3fd6-4191-afd8-431ef3d6bdba?bt=0&hs=1&sum=10&hsb=1&hab=1" width="468" height="150" scrolling="no" style="border:none;"></iframe>
-<?php endif; ?>
-				</div>
-				<h3><a href="#"><?=$loc['donateStrings']['alternatives']?></a></h3>
-				<div>
-					<table align="center">
-						<tr>
-							<td colspan="2" height="20px;"><a href="https://paypal.me/ProxyForGame" target="_blank">paypal.me/ProxyForGame</a>
-							<span style="display: inline-block; width:30px;"></span>ePayments: 000-562870</td>
-							<td>PerfectMoney:</td>
-						</tr>
-						<tr>
-							<td height="20px;">BTC</td>
-							<td>1CgoSRfUyVj76QycGmNhgrLWvwWiByuESJ</td>
-							<td><span style="display: inline-block; width:20px;"></span>U17256587</td>
-						</tr>
-						<tr>
-							<td height="20px;">ETH:</td>
-							<td>0x58915237F041422492abbB3E371225E6DF5EbF52</td>
-							<td><span style="display: inline-block; width:20px;"></span>E17208900</td>
-						</tr>						
-						<tr>
-							<td height="20px;">LTC:</td>
-							<td>ltc1qvyt8ru8xmljs8l3vmwtwm27l4j0zjhd0lyteml</td>
-							<td></td>
-						</tr>
-					</table>
-				</div>	
-			</div>
-		</div>
-	</div>
 </div>
 
 <div id="report-form" title="<?=$loc['reportStrings']['title']?>" class="ui-helper-hidden">
