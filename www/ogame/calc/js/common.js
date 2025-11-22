@@ -622,7 +622,7 @@ function getBuildEnergyCostLF(techID, techLevel, techData, ionTechLevel, bldCost
  * // When fullNumbers is false:
  * // shorten(1500000, "M") -> "1.5M" (format depends on numberToShortenedString implementation)
  */
-function ogemizeNum(num, suffix) {
+function ogamizeNum(num, suffix) {
 	if (options.prm.fullNumbers)
 		return numToOGame(num);
 	else

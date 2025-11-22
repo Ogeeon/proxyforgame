@@ -319,16 +319,16 @@ function updateRow() {
 				energyCost = 0;
 			}
 		}
-		$(row.children[firstDataCol]).html(ogemizeNum(resCost[0], options.unitSuffix));
-		$(row.children[firstDataCol+1]).html(ogemizeNum(resCost[1], options.unitSuffix));
-		$(row.children[firstDataCol+2]).html(ogemizeNum(resCost[2], options.unitSuffix));
-		$(row.children[firstDataCol+3]).html(ogemizeNum(energyCost, options.unitSuffix));
+		$(row.children[firstDataCol]).html(ogamizeNum(resCost[0], options.unitSuffix));
+		$(row.children[firstDataCol+1]).html(ogamizeNum(resCost[1], options.unitSuffix));
+		$(row.children[firstDataCol+2]).html(ogamizeNum(resCost[2], options.unitSuffix));
+		$(row.children[firstDataCol+3]).html(ogamizeNum(energyCost, options.unitSuffix));
 		$(row.children[firstDataCol+4]).html(timespanToShortenedString(timeSpan, options.datetimeW, options.datetimeD, options.datetimeH, options.datetimeM, options.datetimeS, true));
-		$(row.children[firstDataCol+5]).html(ogemizeNum(points, options.unitSuffix));
+		$(row.children[firstDataCol+5]).html(ogamizeNum(points, options.unitSuffix));
 		let tmCost = 0;
 		if (outerTab === 0 && techID < 200) {
 			tmCost = getHalvingCost(techID, timeSpan);
-			$(row.children[firstDataCol+6]).html(ogemizeNum(tmCost, options.unitSuffix));
+			$(row.children[firstDataCol+6]).html(ogamizeNum(tmCost, options.unitSuffix));
 		} else {
 			$(row.children[firstDataCol+6]).html('0');
 		}
@@ -458,19 +458,19 @@ function updateParams() {
 					// Если оказалось, что исследование невозможно выполнить, придётся стереть всю строку
 					if (newTime > 0) {
 						options.techData[key][0] = newCost[0];
-						$(rows[idx].children[firstDataCol]).html(ogemizeNum(newCost[0], options.unitSuffix));
+						$(rows[idx].children[firstDataCol]).html(ogamizeNum(newCost[0], options.unitSuffix));
 						options.techData[key][1] = newCost[1];
-						$(rows[idx].children[firstDataCol+1]).html(ogemizeNum(newCost[1], options.unitSuffix));
+						$(rows[idx].children[firstDataCol+1]).html(ogamizeNum(newCost[1], options.unitSuffix));
 						options.techData[key][2] = newCost[2];
-						$(rows[idx].children[firstDataCol+2]).html(ogemizeNum(newCost[2], options.unitSuffix));
+						$(rows[idx].children[firstDataCol+2]).html(ogamizeNum(newCost[2], options.unitSuffix));
 						options.techData[key][3] = energyCost;
-						$(rows[idx].children[firstDataCol+3]).html(ogemizeNum(energyCost, options.unitSuffix));
+						$(rows[idx].children[firstDataCol+3]).html(ogamizeNum(energyCost, options.unitSuffix));
 						options.techData[key][4] = newTime;
 						$(rows[idx].children[firstDataCol+4]).html(timespanToShortenedString(newTime, options.datetimeW, options.datetimeD, options.datetimeH, options.datetimeM, options.datetimeS, true));
 						if (Number(keyParts[1]) === 0) {
 							if (Number(keyParts[2]) < 5) {
 								let tmCost = getHalvingCost(techID, newTime);
-								$(rows[idx].children[firstDataCol + 6]).html(ogemizeNum(tmCost, options.unitSuffix));
+								$(rows[idx].children[firstDataCol + 6]).html(ogamizeNum(tmCost, options.unitSuffix));
 							} else {
 								$(rows[idx].children[firstDataCol + 6]).html(0);
 							}
@@ -531,16 +531,16 @@ function updateTotals(needUpd) {
 				}
 			}
 			$(rows[row].children[2]).html(innerIdx < 2 ? takenFields : '');
-			$(rows[row].children[3]).html('<b>'+ogemizeNum(totals[0], options.unitSuffix)+'</b>');
-			$(rows[row].children[4]).html('<b>'+ogemizeNum(totals[1], options.unitSuffix)+'</b>');
-			$(rows[row].children[5]).html('<b>'+ogemizeNum(totals[2], options.unitSuffix)+'</b>');
-			$(rows[row].children[6]).html('<b>'+ogemizeNum(totals[3], options.unitSuffix)+'</b>');
+			$(rows[row].children[3]).html('<b>'+ogamizeNum(totals[0], options.unitSuffix)+'</b>');
+			$(rows[row].children[4]).html('<b>'+ogamizeNum(totals[1], options.unitSuffix)+'</b>');
+			$(rows[row].children[5]).html('<b>'+ogamizeNum(totals[2], options.unitSuffix)+'</b>');
+			$(rows[row].children[6]).html('<b>'+ogamizeNum(totals[3], options.unitSuffix)+'</b>');
 			$(rows[row].children[7]).html('<b>'+timespanToShortenedString(totals[4], options.datetimeW, options.datetimeD, options.datetimeH, options.datetimeM, options.datetimeS, true)+'</b>');
-			$(rows[row].children[8]).html('<b>'+ogemizeNum(totals[5], options.unitSuffix)+'</b>');
+			$(rows[row].children[8]).html('<b>'+ogamizeNum(totals[5], options.unitSuffix)+'</b>');
 
 			if (outer === 0 && innerIdx > 2) {
 				let tmCost = getHalvingCost(1000, totals[4]);
-				$(rows[row].children[9]).html('<b>'+ogemizeNum(tmCost, options.unitSuffix)+'</b>');
+				$(rows[row].children[9]).html('<b>'+ogamizeNum(tmCost, options.unitSuffix)+'</b>');
 			}
 			let subTotalRes = totals[0] + totals[1] + totals[2];
 			let capSC = 5000.0 * (1 + 0.05 * options.prm.hyperTechLevel);
@@ -569,12 +569,12 @@ function updateTotals(needUpd) {
 			let inner = innerNums[innerIdx];
 			let rows = $('#table-'+outer+'-'+inner+' tr');
 			let row = rows.length-2;
-			$(rows[row].children[2]).html('<b>'+ogemizeNum(grandTotals[0], options.unitSuffix)+'</b>');
-			$(rows[row].children[3]).html('<b>'+ogemizeNum(grandTotals[1], options.unitSuffix)+'</b>');
-			$(rows[row].children[4]).html('<b>'+ogemizeNum(grandTotals[2], options.unitSuffix)+'</b>');
-			$(rows[row].children[5]).html('<b>'+ogemizeNum(grandTotals[3], options.unitSuffix)+'</b>');
+			$(rows[row].children[2]).html('<b>'+ogamizeNum(grandTotals[0], options.unitSuffix)+'</b>');
+			$(rows[row].children[3]).html('<b>'+ogamizeNum(grandTotals[1], options.unitSuffix)+'</b>');
+			$(rows[row].children[4]).html('<b>'+ogamizeNum(grandTotals[2], options.unitSuffix)+'</b>');
+			$(rows[row].children[5]).html('<b>'+ogamizeNum(grandTotals[3], options.unitSuffix)+'</b>');
 			$(rows[row].children[6]).html('<b>'+timespanToShortenedString(grandTotals[4], options.datetimeW, options.datetimeD, options.datetimeH, options.datetimeM, options.datetimeS, true)+'</b>');
-			$(rows[row].children[7]).html('<b>'+ogemizeNum(grandTotals[5], options.unitSuffix)+'</b>');
+			$(rows[row].children[7]).html('<b>'+ogamizeNum(grandTotals[5], options.unitSuffix)+'</b>');
 			if (outer === 0)
 				$(rows[row].children[8]).html('<b>0</b>');
 			let totalRes = grandTotals[0] + grandTotals[1] + grandTotals[2];
@@ -692,21 +692,21 @@ function updateOneMultTab() {
 		rowStr = '';
 		rowData.push(i+1);
 		resCost = getBuildCost_C(techID, i, i + 1, options.techCosts);
-		rowData.push(ogemizeNum(resCost[0], options.unitSuffix));
-		rowData.push(ogemizeNum(resCost[1], options.unitSuffix));
-		rowData.push(ogemizeNum(resCost[2], options.unitSuffix));
+		rowData.push(ogamizeNum(resCost[0], options.unitSuffix));
+		rowData.push(ogamizeNum(resCost[1], options.unitSuffix));
+		rowData.push(ogamizeNum(resCost[2], options.unitSuffix));
 		totalMet += resCost[0];
 		totalCrys += resCost[1];
 		totalDeut += resCost[2];
 		energy = getBuildEnergyCost_C(techID, i + 1, options.techCosts);
-		rowData.push(ogemizeNum(energy, options.unitSuffix));
+		rowData.push(ogamizeNum(energy, options.unitSuffix));
 		maxEnrg = Math.max(maxEnrg, energy);
 		let time = getAdjustedTime(techID, i, i + 1, false);
 		rowData.push(timespanToShortenedString(time, options.datetimeW, options.datetimeD, options.datetimeH, options.datetimeM, options.datetimeS, true));
 		totalTime += time;
 		points = (resCost[0] + resCost[1] + resCost[2]) / 1000.0;
 		totalPts += points;
-		rowData.push(ogemizeNum(Math.round((resCost[0] + resCost[1] + resCost[2])/1000.0), options.unitSuffix));
+		rowData.push(ogamizeNum(Math.round((resCost[0] + resCost[1] + resCost[2])/1000.0), options.unitSuffix));
 		if (isProducer) {
 			let energyTechLevel = getInputNumber($('#energy-tech-level')[0]);
 			let plasmaTechLevel = getInputNumber($('#plasma-tech-level')[0]);
@@ -721,12 +721,12 @@ function updateOneMultTab() {
 			let fullCrew = geologist && engineer && admiral && commander && technocrat;
 			let plnPos = getInputNumber($('#planet-pos')[0]);
 			production = getProductionRate(techID, i + 1, energyTechLevel, plasmaTechLevel, maxTemp, plnPos, uniSpeed, geologist, engineer, 1, 1, booster, fullCrew, options.prm.playerClass);
-			rowData.push(ogemizeNum(production, options.unitSuffix));
+			rowData.push(ogamizeNum(production, options.unitSuffix));
 			maxProd = Math.max(maxProd, production);
 			// Производящие что-то здания могут потреблять или не потреблять, а остальным техам эта ячейка таблицы не нужна
 			if (isConsumer) {
 				consumption = getHourlyConsumption(techID, i + 1, $('#universe-speed')[0].value, 1);
-				rowData.push(ogemizeNum(consumption, options.unitSuffix));
+				rowData.push(ogamizeNum(consumption, options.unitSuffix));
 				maxCons = Math.max(maxCons, consumption);
 			} else {
 				rowData.push('-');
@@ -743,15 +743,15 @@ function updateOneMultTab() {
 	footer.appendTo('#'+targetTable);
 	let rows = $('#'+targetTable+' tr');
 	let totalsRow = rows.length - 2;
-	rows[totalsRow].children[1].innerHTML = '<b>'+ogemizeNum(totalMet, options.unitSuffix)+'</b>';
-	rows[totalsRow].children[2].innerHTML = '<b>'+ogemizeNum(totalCrys, options.unitSuffix)+'</b>';
-	rows[totalsRow].children[3].innerHTML = '<b>'+ogemizeNum(totalDeut, options.unitSuffix)+'</b>';
-	rows[totalsRow].children[4].innerHTML = '<b>'+ogemizeNum(maxEnrg, options.unitSuffix)+'</b>';
+	rows[totalsRow].children[1].innerHTML = '<b>'+ogamizeNum(totalMet, options.unitSuffix)+'</b>';
+	rows[totalsRow].children[2].innerHTML = '<b>'+ogamizeNum(totalCrys, options.unitSuffix)+'</b>';
+	rows[totalsRow].children[3].innerHTML = '<b>'+ogamizeNum(totalDeut, options.unitSuffix)+'</b>';
+	rows[totalsRow].children[4].innerHTML = '<b>'+ogamizeNum(maxEnrg, options.unitSuffix)+'</b>';
 	rows[totalsRow].children[5].innerHTML = '<b>'+timespanToShortenedString(totalTime, options.datetimeW, options.datetimeD, options.datetimeH, options.datetimeM, options.datetimeS, true)+'</b>';
-	rows[totalsRow].children[6].innerHTML = '<b>'+ogemizeNum(Math.round(totalPts), options.unitSuffix)+'</b>';
+	rows[totalsRow].children[6].innerHTML = '<b>'+ogamizeNum(Math.round(totalPts), options.unitSuffix)+'</b>';
 	if (isProducer) {
-		rows[totalsRow].children[7].innerHTML = '<b>'+ogemizeNum(maxProd, options.unitSuffix)+'</b>';
-		rows[totalsRow].children[8].innerHTML = '<b>'+ogemizeNum(maxCons, options.unitSuffix)+'</b>';
+		rows[totalsRow].children[7].innerHTML = '<b>'+ogamizeNum(maxProd, options.unitSuffix)+'</b>';
+		rows[totalsRow].children[8].innerHTML = '<b>'+ogamizeNum(maxCons, options.unitSuffix)+'</b>';
 	}
 	let totalRes = totalMet + totalCrys + totalDeut;
 	let capSC = 5000.0 * (1 + 0.05 * options.prm.hyperTechLevel);
