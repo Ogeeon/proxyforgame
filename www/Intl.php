@@ -43,6 +43,8 @@ class Intl
 
     /**
      * Get translations for a given locale. 
+     * Merges 'common' translations with section-specific translations.
+     * Section-specific translations take precedence in case of conflicts.
      */
     public static function getTranslations($locale, $section)
     {
@@ -55,7 +57,21 @@ class Intl
         {   
             self::$translations[$locale] = json_decode(file_get_contents($locale_dir.'/'.$locale.'.json'), true);
         }
-        return self::$translations[$locale][$section];
+        
+        // Start with common translations (if section is not 'common')
+        $result = [];
+        if($section !== 'common' && isset(self::$translations[$locale]['common']))
+        {
+            $result = self::$translations[$locale]['common'];
+        }
+        
+        // Merge with section-specific translations (these override common ones)
+        if(isset(self::$translations[$locale][$section]))
+        {
+            $result = array_merge($result, self::$translations[$locale][$section]);
+        }
+        
+        return $result;
     }
 
     /**
