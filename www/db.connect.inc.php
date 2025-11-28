@@ -1,0 +1,44 @@
+﻿<?php
+mb_internal_encoding("utf-8");
+
+function loadEnv($path) {
+    if (!file_exists($path)) {
+		echo ".env file not found at $path";
+        return;
+    }
+    $lines = file($path, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+    foreach ($lines as $line) {
+        if (strpos(trim($line), '#') === 0) {
+            continue;
+        }
+        list($name, $value) = array_map('trim', explode('=', $line, 2));
+        putenv("$name=$value");
+        $_ENV[$name] = $value;
+        $_SERVER[$name] = $value;
+    }
+}
+
+function SqlQuery($query) {	
+    global $connection;
+	$res = array();
+
+	if ($result = mysqli_query($connection, $query)) {
+		if ($result === TRUE) return FALSE; // для не-select'ов возвращаем FALSE, потому что нет результата
+		while ($row = mysqli_fetch_assoc($result)) {
+		    array_push($res, $row);
+		}
+		mysqli_free_result($result);
+	} else {
+		return FALSE;
+	}
+
+	return count($res) > 0 ? $res : FALSE;
+	
+}
+
+loadEnv(dirname(__DIR__) . DIRECTORY_SEPARATOR . '.env');
+
+$connection = mysqli_connect(getenv('DB_HOST'), getenv('DB_USER'), getenv('DB_PASS'), getenv('DB_NAME'));
+mysqli_set_charset($connection, "utf8");
+
+?>

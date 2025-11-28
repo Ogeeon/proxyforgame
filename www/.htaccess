@@ -1,0 +1,18 @@
+<Files ~ ".(tpl|cron.php|inc.php)$">
+    Order allow,deny
+    Deny from all
+</Files>
+
+Options -Indexes
+RewriteEngine On
+
+#RewriteBase /
+RewriteCond %{REQUEST_URI} !^/js$
+RewriteCond %{REQUEST_URI} ^/\w\w$
+RewriteRule ^(\w\w)$ /$1/ [R=permanent]
+RewriteCond %{REQUEST_URI} !^/js/.*$
+RewriteCond %{REQUEST_URI} ^/\w\w/.*$
+RewriteRule ^\w\w/(.*)$ $1 [L,QSA]
+
+RewriteRule ^(css|js)/(.*)\.[0-9]+\.(.*)$ /$1/$2.$3 [L]
+RewriteRule ^(ogame/calc/css|/ogame/calc/js)/(.*)\.[0-9]+\.(.*)$ /$1/$2.$3 [L]

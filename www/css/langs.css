@@ -1,0 +1,45 @@
+#langs-menu {
+	width: 115px; 
+	float: right;
+	text-align: left;
+	cursor: pointer;
+	z-index: 99;
+}
+
+#langs-options {
+	position: absolute;
+	left: 300px; 
+	top: 10px;
+	width: 117px; 
+	text-align: left;
+	display: none;
+	z-index: 99;
+}
+
+#langs-options a {
+	display: block;
+	border-top-width: 0px;
+	border-bottom-width: 0px;
+	padding: 2px;
+	text-decoration: none;
+}
+
+#langs-options .last-option {
+	border-bottom-width: 1px;
+}
+
+#langs-options a:hover {	
+	color: #E17009;
+}
+
+.lang-icon {
+	margin-right: 6px;
+}
+
+#lang-options-stub {
+	position: absolute;
+	width: 115px;
+	height: 3px;
+	z-index: -1;
+	display: none;
+}

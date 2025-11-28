@@ -1,0 +1,31 @@
+#flight { margin: auto; width: 900px; }
+.level-input { width: 40px; text-align: center; margin-left: 2px; margin-right: 8px; }
+.level-input-small { width: 30px; text-align: center; margin-left: 2px; margin-right: 8px; }
+.coord-input { width: 30px; text-align: center; margin-left: 0px; margin-right: 0px; }
+.coord-input-small { width: 20px; text-align: center; margin-left: 0px; margin-right: 0px; }
+.count-input { width: 60px; text-align: center; margin-left: 2px; margin-right: 12px; }
+.float-count-input { width: 50px; text-align: center; margin-left: 2px; margin-right: 12px; }
+.speed-label { font-size: 0.8em; margin: 8px;}
+.startdate-input { width: 140px; text-align: center; margin: 2px;}
+.flight-time-input { width: 80px; text-align: center; margin: 2px;}
+.tolerance-time-input { width: 50px; text-align: center; margin: 2px;}
+.button-remove, .button-toggle { padding: 0px; cursor: pointer; margin: 0px; }
+.button-taketocalc { cursor: pointer; }
+.mrg-left-5 { margin-left: 5px; }
+.mrg-left-10 { margin-left: 10px; }
+.mrg-right-5 { margin-right: 5px; }
+.mrg-right-10 { margin-right: 10px; }
+
+#tabtag1 { padding: .1em 1em; }
+#tabtag2 { padding: .1em 1em; }
+#flight-times-panel { padding: 0px; }
+#save-points-panel { padding: 3px; }
+
+#set-save-departure-now span { display: inline; padding: 0px; font-weight: lighter;}
+#calculate-savepoints span { display: inline; }
+
+#accordion-prm { padding-bottom: 0.5em; padding-top: 0em; }
+#accordion-lf-prm { padding-bottom: 0.5em; padding-top: 0em; }
+#accordion-ships { padding-bottom: 0.5em; padding-top: 0.1em; }
+.uni-control-btn { width: 30px; height: 20px;}
+#lf-bonuses-txtarea:focus {  border: 1px solid #ccc; background: none; font-weight: normal;  }

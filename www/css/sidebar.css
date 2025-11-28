@@ -1,0 +1,71 @@
+#sidebar {
+/*	float: left;
+	height: 98%;
+	position: absolute;
+	margin-top: -4px;
+	margin-left: -4px; */
+}
+
+#sidebar a, #sidebar .ui-state-default, #sidebar .ui-state-active {
+	display: block;
+	padding: 4px;
+	text-align: center;
+	text-decoration: none;
+}
+
+#sidebar .ui-state-default, #sidebar .ui-state-active {
+	margin: 1px;
+}
+
+#sidebar .ui-panel {
+	margin-top: 8px;
+	text-align: center;
+	padding: 3px;
+	font-weight: bold;
+	background: #f4f4f4;
+}
+
+.spacer { height: 10px; }
+.small-spacer { height: 5px; }
+
+#sidebar .feedback {
+	padding: 1px;
+	font-weight: normal;
+	font-size: 0.8em;
+}
+
+div .changelog {
+	border: none !important;
+	background: none !important;
+	font-weight: bold !important;
+}
+
+#report-data {
+	width: 370px;
+	height: 139px;
+}
+
+#report-info {
+	padding: 3px; 
+	text-align: center; 
+}
+
+.correction-input {	width: 360px; }
+
+#report-progress, #email-progress { width: 100%; text-align: center;}
+#progress-text { height: 30px; text-align: center;}
+
+#email-form-address { width: 250px; }
+#email-form-subject { width: 99%; }
+#email-form-body { width: 99%; }
+
+#donate-link { padding: 0px !important; }
+
+#donate-dlg-btn {
+	display: block;
+	-moz-box-sizing: border-box;
+	box-sizing: border-box;
+	width: 32px; /* Width of new image */
+	height: 32px; /* Height of new image */
+	padding-left: 32px; /* Equal to width of new image */ 
+}

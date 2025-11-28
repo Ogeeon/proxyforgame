@@ -1,0 +1,28 @@
+#costs { margin: auto; width: 890px; }
+#lfcosts { margin: auto; width: 930px; }
+.ui-subheader, .ui-widget-content .ui-subheader { margin-bottom: 7px; }
+.level-input { width: 40px; text-align: center; margin-left: 2px; margin-right: 8px; }
+.fleet-input { width: 50px; text-align: center; margin-left: 2px; margin-right: 8px; }
+.res-input { width: 100px; text-align: center; margin-left: -10px; margin-right: -10px; }
+#technocrat, #engineer, #geologist, #admiral, #commander, #research-bonus, #full-numbers { margin-left: 0px; margin-right: 5px;}
+
+#tabtag-0, #tabtag-1, #tabtag-2, #tabtag-0-1, #tabtag-1-1, #tabtag-0-2, #tabtag-0-3, #tabtag-0-4, #tabtag-0-5, #tabtag-0-6, #tabtag-1-2, #tabtag-1-3, #tabtag-1-4 { padding: .1em 1em; }
+#tab-0, #tab-1, #tab-2 { padding: 0em; }
+#tab-0-1, #tab-1-1, #tab-0-2, #tab-0-3, #tab-0-4, #tab-0-5, #tab-0-6, #tab-1-2, #tab-1-3, #tab-1-4 { padding: .3em 0em; }
+
+#irn-calc { margin: auto; width: 350px; }
+div.irn-calc-info {padding: 3px; text-align: center; }
+#research-lab-level { margin-right: 2px; }
+#open-llc-dialog { margin-right: 8px; vertical-align: text-top;}
+#lab-levels-div { height: 228px; overflow: auto;}
+
+#research-cost-reduction, #research-time-reduction { margin-right: -5px; }
+
+#costs td {
+    width: auto;
+}
+
+td.min {
+    width: 1%;
+    white-space: nowrap;
+}
