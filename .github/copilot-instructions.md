@@ -1,3 +1,51 @@
+# Copilot Instructions (repo-specific)
+
+Purpose: short, actionable guidance to help AI coding agents work productively in this repository.
+
+## Big Picture
+- Small WAMP-style PHP site: each page is a minimal PHP controller that sets `$lang` and context, calls `Intl::getTranslations($lang, '<page>')`, then `require_once('<page>.tpl')` to render HTML + inline JS.
+- Single AJAX surface: `www/ajax.php` receives POSTs (param `service`) and returns two-line responses in the format `"<code>\n<payload>"` (where `0` = success). Many client actions call these services.
+- Calculators live in `www/ogame/calc/` and usually require touching PHP, the `.tpl` template, and client JS in `js/`.
+
+## Key Files & Patterns
+- `www/ajax.php` — central dispatcher. Search for `case '...':` to find services.
+- `www/Intl.php`, `www/langs.php`, `www/locale/*.json` — translation and language mapping pipeline.
+- `www/db.connect.inc.php` — DB connection and SQL helper functions.
+- `www/ogame/calc/*.{php,tpl}` and `www/ogame/calc/js/*` — calculator logic, templates, and client integration.
+
+## Project Conventions (do this exactly)
+- Controller → Template: always set `$lang`, call `Intl::getTranslations($lang, '<page>')`, then `require_once('<page>.tpl')`.
+- Ajax response format: `"<code>\n<payload>"`. Always check the numeric `code` first (0 = OK). Follow existing services for example responses.
+- Cookie storage: calculators persist options using cookie keys like `options_expeditions`. Note: `options.prm.fleet` uses `~` as a comma placeholder.
+- Fleet mapping: client JS (e.g. `ogame/calc/js/expeditions.js`) maps short ship codes to indices. If you change ship order, update both PHP and JS mapping.
+- Translations: when changing visible text, update `locale/*.json` and ensure server calls (via `Intl::getTranslations`) include the new keys.
+
+## Local Dev & Useful Commands
+- PHP path used in repo (PowerShell example):
+  ```powershell
+  & 'd:\wamp64\bin\php\php7.4.9\php.exe' .\ogame\calc\flight.php
+  ```
+- Full-site testing: start your WAMP stack and open `http://localhost/<project-path>/`.
+- VS Code task: use `Run In Terminal` — the task runs `d:/wamp64/bin/php/php7.4.9/php.exe ${file}`.
+
+## Integration Points & Risks
+- Legacy frontend: jQuery 1.5.1 and jQuery UI 1.8.x. Upgrading can break calculators — test thoroughly if you change these.
+- External services: `https://logserver.net/api/proxyforgame/` (used by `GetDataCode`) and SMTP code inside `www/ajax.php` — do not commit credentials.
+
+## Debugging Tips
+- To trace an AJAX flow, add temporary logging or `error_log()` calls around `case` blocks in `www/ajax.php` and follow the `"<code>\n<payload>"` response format.
+- For missing translation keys, check `www/Intl.php` and the corresponding `www/locale/<lang>.json` file.
+
+## Quick Task Starters
+- Change UI text: update `www/locale/<lang>.json` and ensure templates or controllers pass the new keys to the client.
+- Add/modify a calculator: change `www/ogame/calc/*.php`, update `*.tpl` and `js/*`, then run the matching PHP script manually or test in browser.
+- Add an AJAX service: add a `case` to `www/ajax.php` and return `"<code>\n<payload>"` consistent with existing services.
+
+## Safety Notes
+- Never commit hard-coded secrets. Move credentials out of `www/ajax.php` into environment-config during deploy.
+- Avoid big client library upgrades without manual QA across `ogame/calc` pages.
+
+If you'd like a follow-up, I can: (A) add a small PR checklist (secrets, translations, QA), (B) paste example diffs for a specific calculator, or (C) run a quick smoke-test command. Which do you want next?
 ## Purpose
 Short, practical guidance to help AI coding agents work productively in this repo: architecture, conventions, workflows, and integration points.
 
