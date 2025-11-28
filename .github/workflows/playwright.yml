@@ -40,10 +40,12 @@ jobs:
       # Start PHP built-in server on port 8000
       - name: Start PHP dev server
         run: php -S localhost:8000 -t www > /dev/null 2>&1 &
-        working-directory: .
+        working-directory: ${{ github.workspace }}
 
-        # ^ serves your whole repo root as the web root
-        # Adjust -t . if your index.php is in a subfolder
+      - name: Debug folder
+        run: |
+          pwd
+          ls -R
 
       # Run Playwright tests
       - name: Run Playwright tests
