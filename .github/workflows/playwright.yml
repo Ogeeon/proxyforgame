@@ -41,10 +41,24 @@ jobs:
       - name: Start PHP dev server
         run: php -S localhost:8000 -t "${{ github.workspace }}/www" > /dev/null 2>&1 &
 
-      - name: Debug folder
+      # Diagnostic: wait for server and verify it serves index.php
+      - name: Verify PHP dev server
         run: |
-          pwd
-          ls -R
+          echo "Waiting for server..."
+          for i in {1..20}; do
+            STATUS=$(curl -o /dev/null -s -w "%{http_code}" http://localhost:8000)
+            if [ "$STATUS" = "200" ] || [ "$STATUS" = "302" ]; then
+              echo "Server is up (HTTP $STATUS)"
+              # Show first lines of returned HTML/PHP
+              curl -s http://localhost:8000 | head -n 20
+              exit 0
+            fi
+            sleep 1
+          done
+          echo "Server did not start correctly."
+          echo "Final response:"
+          curl -v http://localhost:8000
+          exit 1
 
       # Run Playwright tests
       - name: Run Playwright tests
@@ -56,6 +70,7 @@ jobs:
       # Upload test artifacts (only on failure)
       - name: Upload Playwright artifacts
         uses: actions/upload-artifact@v4
+        if: failure()
         with:
           name: playwright-artifacts
           path: playwright-tests/test-results/
