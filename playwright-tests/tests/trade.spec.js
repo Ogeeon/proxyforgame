@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 
 test.describe('Trade Calculator Page', () => {
     test.beforeEach(async ({ page }) => {
-        await page.goto('http://pfg.wmp/en/ogame/calc/trade.php');
+        await page.goto('/en/ogame/calc/trade.php');
     });
 
     test('page loads successfully', async ({ page }) => {
@@ -59,6 +59,6 @@ test.describe('Trade Calculator Page', () => {
     await page.locator('#mix-fix1').press('Enter');
     await expect(page.locator('#res-dst-c')).toContainText('20.000');
     await expect(page.locator('#res-dst-d')).toContainText('28.333');
-    await expect(page.locator('#alink')).toContainText('http://pfg.wmp/en/ogame/calc/trade.php#rmd=2.4&rcd=1.5&st=0&dt=2&dmt=2&fix1=20000&m=100000&l=en:101');    
+    await expect(page.locator('#alink')).toContainText('/en/ogame/calc/trade.php#rmd=2.4&rcd=1.5&st=0&dt=2&dmt=2&fix1=20000&m=100000&l=en:101');
   });
 });
