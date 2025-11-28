@@ -39,8 +39,7 @@ jobs:
 
       # Start PHP built-in server on port 8000
       - name: Start PHP dev server
-        run: php -S localhost:8000 -t www > /dev/null 2>&1 &
-        working-directory: ${{ github.workspace }}
+        run: php -S localhost:8000 -t "${{ github.workspace }}/www" > /dev/null 2>&1 &
 
       - name: Debug folder
         run: |
