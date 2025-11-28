@@ -40,6 +40,7 @@ jobs:
       # Start PHP built-in server on port 8000
       - name: Start PHP dev server
         run: php -S localhost:8000 -t www > /dev/null 2>&1 &
+        working-directory: .
 
         # ^ serves your whole repo root as the web root
         # Adjust -t . if your index.php is in a subfolder
@@ -53,7 +54,6 @@ jobs:
 
       # Upload test artifacts (only on failure)
       - name: Upload Playwright artifacts
-        if: failure()
         uses: actions/upload-artifact@v4
         with:
           name: playwright-artifacts
