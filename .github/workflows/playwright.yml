@@ -84,6 +84,12 @@ jobs:
           echo "------ server.log tail ------"
           tail -n +1 server.log | sed -n '1,200p' || true
 
+          echo "------ curl: show headers and body for trade page (/en/ogame/calc/trade.php) ------"
+          curl -v -i http://localhost:8000/en/ogame/calc/trade.php 2>&1 | sed -n '1,300p' || true
+
+          echo "------ curl: show headers only for trade page (no follow) ------"
+          curl -I -sS http://localhost:8000/en/ogame/calc/trade.php || true
+
           echo "------ php process list ------"
           ps aux | grep '[p]hp -S' || true
 
