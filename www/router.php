@@ -3,6 +3,9 @@
 // Path to requested file
 $path = parse_url($_SERVER["REQUEST_URI"], PHP_URL_PATH);
 
+// Normalize path to ensure leading slash
+$path = '/' . ltrim($path, '/');
+
 // Serve existing files directly
 $file = __DIR__ . $path;
 if (is_file($file)) {
@@ -42,7 +45,8 @@ if (preg_match('#^/(ogame/calc/css|ogame/calc/js)/(.*)\.[0-9]+\.(.*)$#', $path, 
     $path = $new;
 }
 
-// After rewrite, compute final file path
+// After rewrite, compute final file path (normalize again)
+$path = '/' . ltrim($path, '/');
 $final = __DIR__ . $path;
 
 // If file exists → serve it
