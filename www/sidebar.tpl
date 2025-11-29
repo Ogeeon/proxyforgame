@@ -17,8 +17,11 @@ $ogamePages = array(
 );
 
 require_once('db.connect.inc.php');
-$result = sqlQuery("SELECT MAX(id) as m FROM change_headers");
-$currChange = isset($result[0]['m']) ? $result[0]['m'] : 0;
+$result = SqlQuery("SELECT MAX(id) as m FROM change_headers");
+$currChange = 0;
+if ($result !== FALSE && isset($result[0]['m'])) {
+	$currChange = $result[0]['m'];
+}
 if ( $_SERVER['SERVER_NAME'] == 'proxyforgame.com') {
 	$pfgPath = $_SERVER['DOCUMENT_ROOT']; 
 } else {
@@ -26,7 +29,8 @@ if ( $_SERVER['SERVER_NAME'] == 'proxyforgame.com') {
 }
 ?>
 
-<link type="text/css" href="/css/sidebar.css?v=<?php echo filemtime($pfgPath.'/css/sidebar.css'); ?>" rel="stylesheet" />
+<?php $sidebarCss = $pfgPath . '/css/sidebar.css'; ?>
+<link type="text/css" href="/css/sidebar.css?v=<?php echo (file_exists($sidebarCss) ? filemtime($sidebarCss) : 0); ?>" rel="stylesheet" />
 <script type="text/javascript">
 var buttonsText = {};
 buttonsText.send = '<?=$loc['reportStrings']['send']?>';
@@ -37,7 +41,8 @@ var currUrl = '<?=$_SERVER['REQUEST_URI']?>';
 var currChange = <?=$currChange ?>;
 var currLang = '<?=$lang ?>';
 </script>
-<script type="text/javascript" src="/js/sidebar.js?v=<?php echo filemtime($pfgPath.'/js/sidebar.js'); ?>"></script>
+<?php $sidebarJs = $pfgPath . '/js/sidebar.js'; ?>
+<script type="text/javascript" src="/js/sidebar.js?v=<?php echo (file_exists($sidebarJs) ? filemtime($sidebarJs) : 0); ?>"></script>
 
 <div id="sidebar">
 	<a class="ui-widget-header" href="/<?=$lang?>/"><?=$loc['ogameMenuItems']['main-title']?></a>

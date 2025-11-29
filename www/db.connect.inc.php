@@ -43,7 +43,23 @@ function SqlQuery($query) {
 
 loadEnv(dirname(__DIR__) . DIRECTORY_SEPARATOR . '.env');
 
-$connection = mysqli_connect(getenv('DB_HOST'), getenv('DB_USER'), getenv('DB_PASS'), getenv('DB_NAME'));
-mysqli_set_charset($connection, "utf8");
+$dbHost = getenv('DB_HOST');
+$dbUser = getenv('DB_USER');
+$dbPass = getenv('DB_PASS');
+$dbName = getenv('DB_NAME');
+
+if ($dbHost && $dbUser && $dbName) {
+    // Suppress warnings and handle failure gracefully
+    $connection = @mysqli_connect($dbHost, $dbUser, $dbPass, $dbName);
+    if ($connection) {
+        mysqli_set_charset($connection, "utf8");
+    } else {
+        error_log("Could not connect to DB: host={$dbHost} user={$dbUser} db={$dbName}");
+        $connection = false;
+    }
+} else {
+    // No DB credentials provided (CI/test environment)
+    $connection = false;
+}
 
 ?>
