@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 
 test.describe('Trade Calculator Page', () => {
     test.beforeEach(async ({ page }) => {
-        await page.goto('/ogame/calc/trade.php');
+        await page.goto('/en/ogame/calc/trade.php');
     });
 
     test('page loads successfully', async ({ page }) => {
