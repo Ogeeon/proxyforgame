@@ -94,6 +94,8 @@ jobs:
           ls -la www || true
           ls -la www/ogame || true
           ls -la www/ogame/calc || true
+          echo "------ curl: show debug paths from debug_paths.php ------"
+          curl -sS http://localhost:8000/debug_paths.php || true
 
           echo "------ curl: show headers and body for trade page (/en/ogame/calc/trade.php) ------"
           curl -v -i http://localhost:8000/en/ogame/calc/trade.php 2>&1 | sed -n '1,300p' || true
