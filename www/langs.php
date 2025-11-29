@@ -32,7 +32,9 @@ if (!preg_match($availLangs, $lang)) {
 if ($uriLang != $lang) {
   $up['path'] = strlen($uriLang) > 0 ? preg_replace('@^/(\w\w)(/.*)@', '/' . $lang . '$2', $up['path']) : "/$lang" . $up['path'];
   $newuri = $up['path'] . ((isset($up['query']) && strlen($up['query']) > 0) ? '?' . $up['query'] : '');
-  header('Location: ' . (isset($_SERVER['HTTPS']) ? 'https' : 'http') . '://' . $_SERVER['HTTP_HOST'] . $newuri);
+  // Use a relative redirect to avoid host-name mismatches (localhost vs 127.0.0.1)
+  // which can cause infinite redirect loops in CI environments.
+  header('Location: ' . $newuri);
   die();
 }
 
