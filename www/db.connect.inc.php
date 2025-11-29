@@ -3,7 +3,8 @@ mb_internal_encoding("utf-8");
 
 function loadEnv($path) {
     if (!file_exists($path)) {
-		echo ".env file not found at $path";
+        // .env is optional in CI/test environments; log to stderr instead of echoing to page
+        error_log(".env file not found at $path");
         return;
     }
     $lines = file($path, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
@@ -21,6 +22,10 @@ function loadEnv($path) {
 function SqlQuery($query) {	
     global $connection;
 	$res = array();
+
+    if (!isset($connection) || $connection === false || $connection === null) {
+        return FALSE;
+    }
 
 	if ($result = mysqli_query($connection, $query)) {
 		if ($result === TRUE) return FALSE; // для не-select'ов возвращаем FALSE, потому что нет результата
