@@ -11,6 +11,8 @@ $file = __DIR__ . $path;
 if (is_file($file)) {
     return false;
 }
+// Log initial file check for diagnostics
+error_log("ROUTER INIT: REQUEST_URI={$_SERVER['REQUEST_URI']} PATH={$path} FILE={$file} ISFILE=" . (is_file($file) ? '1' : '0'));
 
 // --- Recreate .htaccess rewrite logic ---
 
@@ -53,6 +55,9 @@ $final = __DIR__ . $path;
 if (is_file($final)) {
     return false;
 }
+
+// Log failing final file check to server log for CI diagnostics
+error_log("ROUTER MISS: ORIG_REQUEST_URI=" . (isset($_SERVER['ORIG_REQUEST_URI']) ? $_SERVER['ORIG_REQUEST_URI'] : '-') . " REQUEST_URI={$_SERVER['REQUEST_URI']} PATH={$path} FINAL={$final} ISFILE=" . (is_file($final) ? '1' : '0'));
 
 // Default: pass request to index.php
 $_SERVER["SCRIPT_NAME"] = '/index.php';
