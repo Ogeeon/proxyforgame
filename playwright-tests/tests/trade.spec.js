@@ -8,7 +8,7 @@ test.describe('Trade Calculator Page', () => {
     test('page loads successfully', async ({ page }) => {
         await expect(page).toHaveTitle(/Trade/);
     });
-/*
+
     test('trade.js functionality is available', async ({ page }) => {
         // Check if the options object exists
         const optionsExists = await page.evaluate(() => typeof options !== 'undefined');
@@ -59,6 +59,6 @@ test.describe('Trade Calculator Page', () => {
     await page.locator('#mix-fix1').press('Enter');
     await expect(page.locator('#res-dst-c')).toContainText('20.000');
     await expect(page.locator('#res-dst-d')).toContainText('28.333');
-    await expect(page.locator('#alink')).toContainText('/en/ogame/calc/trade.php#rmd=2.4&rcd=1.5&st=0&dt=2&dmt=2&fix1=20000&m=100000&l=en:101');
-  });*/
+    await expect(page.locator('#alink')).toContainText('/ogame/calc/trade.php#rmd=2.4&rcd=1.5&st=0&dt=2&dmt=2&fix1=20000&m=100000&l=en:101');
+  });
 });
