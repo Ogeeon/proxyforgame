@@ -28,8 +28,11 @@ if (!preg_match($availLangs, $lang)) {
 }
 
 // 4. редирект на скорректированный язык, если требуется
-if ($uriLang != $lang) {
-  $up['path'] = strlen($uriLang) > 0 ? preg_replace('@^/(\w\w)(/.*)@', '/' . $lang . '$2', $up['path']) : "/$lang" . $up['path'];
+// BUT: only redirect if user explicitly used a WRONG language prefix (e.g., /xx/path where xx is invalid)
+// If no language prefix was used at all, accept the default language without redirecting
+if ($uriLang != '' && $uriLang != $lang) {
+  // User provided a language prefix, but it was invalid or needs correction
+  $up['path'] = preg_replace('@^/(\w\w)(/.*)@', '/' . $lang . '$2', $up['path']);
   $newuri = $up['path'] . ((isset($up['query']) && strlen($up['query']) > 0) ? '?' . $up['query'] : '');
   // Use a relative redirect to avoid host-name mismatches (localhost vs 127.0.0.1)
   // which can cause infinite redirect loops in CI environments.
