@@ -53,7 +53,12 @@ $final = __DIR__ . $path;
 
 // If file exists → serve it
 if (is_file($final)) {
-    return false;
+    // The request was internally rewritten (language prefix stripped).
+    // Serve the rewritten target file directly instead of returning false
+    // (returning false makes the built-in server try to serve the original
+    // requested path, which may not exist and leads to 404).
+    include $final;
+    return true;
 }
 
 // Log failing final file check to server log for CI diagnostics
