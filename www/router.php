@@ -1,63 +1,51 @@
 <?php
 
-$uri = urldecode(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH));
-$docroot = __DIR__;
+// Path to requested file
+$path = parse_url($_SERVER["REQUEST_URI"], PHP_URL_PATH);
 
-// --------------------------------------------------------------------------
-// 1. Block forbidden file types (.tpl, .cron.php, .inc.php)
-// --------------------------------------------------------------------------
-if (preg_match('/\.(tpl|cron\.php|inc\.php)$/i', $uri)) {
-    header("HTTP/1.1 403 Forbidden");
-    echo "403 Forbidden";
-    exit;
-}
-
-// --------------------------------------------------------------------------
-// 2. Serve existing static files normally
-// --------------------------------------------------------------------------
-$requested = $docroot . $uri;
-if ($uri !== '/' && file_exists($requested) && !is_dir($requested)) {
+// Serve existing files directly
+$file = __DIR__ . $path;
+if (is_file($file)) {
     return false;
 }
 
-// --------------------------------------------------------------------------
-// 3. Redirect /xx → /xx/  (language folder redirect to trailing slash)
-// --------------------------------------------------------------------------
-if (preg_match('#^/(\w\w)$#', $uri)) {
-    header("Location: {$uri}/", true, 301);
+// --- Recreate .htaccess rewrite logic ---
+
+// 1) Redirect /xx → /xx/
+if (preg_match('#^/(\w\w)$#', $path)) {
+    header("Location: $path/", true, 301);
     exit;
 }
 
-// --------------------------------------------------------------------------
-// 4. Rewrite /xx/... → /... (strip 2-letter language prefix)
-// --------------------------------------------------------------------------
-if (preg_match('#^/\w\w/(.*)$#', $uri, $matches)) {
-    $_SERVER['REQUEST_URI'] = '/' . $matches[1];
-    $uri = $_SERVER['REQUEST_URI'];
-}
-
-// --------------------------------------------------------------------------
-// 5. Remove cache-busting hashes from css/js filenames
-//    e.g. /css/style.12345.css → /css/style.css
-// --------------------------------------------------------------------------
-if (preg_match('#^/(css|js)/(.*)\.[0-9]+\.(.*)$#', $uri, $m)) {
-    $clean = "/{$m[1]}/{$m[2]}.{$m[3]}";
-    if (file_exists($docroot . $clean)) {
-        $_SERVER['REQUEST_URI'] = $clean;
-        $uri = $clean;
+// 2) Strip /xx/ prefix unless it's /js or /js/... (according to your rules)
+if (preg_match('#^/(\w\w)/(.*)$#', $path, $m)) {
+    if (!preg_match('#^/js($|/)#', $path)) {
+        // Forward internally without language code
+        $_SERVER['REQUEST_URI'] = '/' . $m[2];
+        $path = $_SERVER['REQUEST_URI'];
     }
 }
 
-// ogame version
-if (preg_match('#^/(ogame/calc/css|ogame/calc/js)/(.*)\.[0-9]+\.(.*)$#', $uri, $m)) {
-    $clean = "/{$m[1]}/{$m[2]}.{$m[3]}";
-    if (file_exists($docroot . $clean)) {
-        $_SERVER['REQUEST_URI'] = $clean;
-        $uri = $clean;
-    }
+// 3) Versioned assets: css|js|ogame/calc/css|ogame/calc/js
+if (preg_match('#^/(css|js)/(.*)\.[0-9]+\.(.*)$#', $path, $m)) {
+    $new = "/{$m[1]}/{$m[2]}.{$m[3]}";
+    $_SERVER["REQUEST_URI"] = $new;
+    $path = $new;
+}
+if (preg_match('#^/(ogame/calc/css|ogame/calc/js)/(.*)\.[0-9]+\.(.*)$#', $path, $m)) {
+    $new = "/{$m[1]}/{$m[2]}.{$m[3]}";
+    $_SERVER["REQUEST_URI"] = $new;
+    $path = $new;
 }
 
-// --------------------------------------------------------------------------
-// 6. Everything else → index.php
-// --------------------------------------------------------------------------
-require $docroot . '/index.php';
+// After rewrite, compute final file path
+$final = __DIR__ . $path;
+
+// If file exists → serve it
+if (is_file($final)) {
+    return false;
+}
+
+// Default: pass request to index.php
+$_SERVER["SCRIPT_NAME"] = '/index.php';
+include __DIR__ . '/index.php';
