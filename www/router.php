@@ -20,6 +20,10 @@ if (preg_match('#^/(\w\w)$#', $path)) {
 // 2) Strip /xx/ prefix unless it's /js or /js/... (according to your rules)
 if (preg_match('#^/(\w\w)/(.*)$#', $path, $m)) {
     if (!preg_match('#^/js($|/)#', $path)) {
+        // Preserve original request URI so downstream code can see the language prefix
+        if (!isset($_SERVER['ORIG_REQUEST_URI'])) {
+            $_SERVER['ORIG_REQUEST_URI'] = $_SERVER['REQUEST_URI'];
+        }
         // Forward internally without language code
         $_SERVER['REQUEST_URI'] = '/' . $m[2];
         $path = $_SERVER['REQUEST_URI'];

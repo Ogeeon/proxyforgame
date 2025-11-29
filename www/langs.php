@@ -14,8 +14,7 @@ function first_non_empty($s1, $s2) {
 $availLangs = '@^(en|us|ru|de|pl|es|fr|it|nl|sk|tr|pt|bs)$@';
 $availLangsList = array('en' => 'English (GB)', 'us' => 'English (US)', 'ru' => 'Русский', 'de' => 'Deutsch', 'pl' => 'Polski', 'es' => 'Español', 'fr' => 'Français', 'it' => 'Italiano', 'nl' => 'Nederlands', 'sk' => 'Slovenčina', 'tr' => 'Türkçe', 'pt' => 'Português', 'bs' => 'Bosnian');
 
-// 1. язык из uri: /XX/index.php
-$uri = $_SERVER['REQUEST_URI'];
+$uri = isset($_SERVER['ORIG_REQUEST_URI']) ? $_SERVER['ORIG_REQUEST_URI'] : $_SERVER['REQUEST_URI'];
 $up = parse_url($uri);
 $uriLang = preg_match('@^/(\w\w)((/.*)|$)@', $up['path'], $r) ? strtolower($r[1]) : '';
 
