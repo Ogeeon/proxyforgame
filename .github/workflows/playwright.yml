@@ -38,15 +38,8 @@ jobs:
         working-directory: playwright-tests
 
       # Start PHP built-in server on port 8000
-      #- name: Start PHP dev server
-      #  run: php -S localhost:8000 -t "${{ github.workspace }}/www" > /dev/null 2>&1 &
-      - name: Start PHP dev server (debug)
-        run: |
-          echo "Starting PHP server..."
-          php -S localhost:8000 -t "${{ github.workspace }}/www" 2>&1 | tee php-server.log &
-          sleep 2
-          echo "--- PHP server log ---"
-          cat php-server.log || true
+      - name: Start PHP dev server
+        run: php -S localhost:8000 -t "${{ github.workspace }}/www" "${{ github.workspace }}/www/router.php" > /dev/null 2>&1 &
 
       # Diagnostic: wait for server and verify it serves index.php
       - name: Verify PHP dev server
