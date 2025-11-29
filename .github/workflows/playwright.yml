@@ -27,18 +27,13 @@ jobs:
           ini-values: post_max_size=256M, upload_max_filesize=256M
 
       # -------------------------------------------------------------
-      # Start PHP built-in server with router.php
+      # Start PHP built-in server (no router needed)
       # -------------------------------------------------------------
       - name: Start PHP server
-        working-directory: ${{ github.workspace }}
+        working-directory: ${{ github.workspace }}/www
         run: |
-          cd www
-
-          echo "------ Router.php exists? ------"
-          ls -l router.php || echo "router.php NOT FOUND!"
-
           echo "------ Starting PHP server ------"
-          php -S localhost:8000 -t . router.php > server.log 2>&1 &
+          php -S localhost:8000 > server.log 2>&1 &
 
           echo "Server PID: $!"
 
@@ -62,55 +57,15 @@ jobs:
           fi
 
       # -------------------------------------------------------------
-      # Diagnostics: dump redirect chain and server headers
-      # (runs after PHP server start and before installing Node)
-      # -------------------------------------------------------------
-      - name: Diagnostics - dump redirect chain and server headers
-        working-directory: ${{ github.workspace }}
+      # Quick diagnostics (before Playwright tests)
+      # ---------------------------------------------------------------
+      - name: Quick server check
         run: |
-          echo "------ curl: show redirect chain for /en/ ------"
-          # show full redirect chain with headers and locations
-          curl -i -v -L --max-redirs 20 http://localhost:8000/en/ 2>&1 | sed -n '1,200p' || true
-
-          echo "------ curl: show only headers (no follow) ------"
-          curl -I -sS http://localhost:8000/en/ || true
-
-          echo "------ curl: show headers when Host is 127.0.0.1 ------"
-          curl -I -sS -H 'Host: 127.0.0.1' http://localhost:8000/en/ || true
-
-          echo "------ curl: show headers when Host is pfg.wmp ------"
-          curl -I -sS -H 'Host: pfg.wmp' http://localhost:8000/en/ || true
-
-          echo "------ server.log (www) tail ------"
-          if [ -f www/server.log ]; then
-            echo "Found www/server.log - showing last 200 lines:";
-            tail -n 200 www/server.log | sed -n '1,200p' || true
-          else
-            echo "www/server.log not found - printing php -S process stdout via /proc if available";
-            ps aux | grep '[p]hp -S' || true
-          fi
-
-          echo "------ listing www/ and www/ogame/calc ------"
-          ls -la www || true
-          ls -la www/ogame || true
-          ls -la www/ogame/calc || true
-          echo "------ curl: show debug paths from debug_paths.php ------"
-          curl -sS http://localhost:8000/debug_paths.php || true
-
-          echo "------ curl: show headers and body for trade page (/en/ogame/calc/trade.php) ------"
-          curl -v -i http://localhost:8000/en/ogame/calc/trade.php 2>&1 | sed -n '1,300p' || true
-
-          echo "------ curl: show headers only for trade page (no follow) ------"
-          curl -I -sS http://localhost:8000/en/ogame/calc/trade.php || true
-
-          echo "------ php process list ------"
-          ps aux | grep '[p]hp -S' || true
-
-          echo "------ Listening ports ------"
-          (ss -ltnp 2>/dev/null || netstat -ltnp 2>/dev/null || true)
-
-        # echo "------ Environment info ------"
-        # env | sed -n '1,200p' || true
+          echo "------ Testing homepage ------"
+          curl -s -I http://localhost:8000/ || true
+          echo ""
+          echo "------ Testing trade page ------"
+          curl -s -I http://localhost:8000/ogame/calc/trade.php || true
 
 
 
