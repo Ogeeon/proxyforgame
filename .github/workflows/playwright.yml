@@ -4,107 +4,95 @@ on:
   push:
     branches: [ main ]
   pull_request:
-    branches: [ main ]
 
 jobs:
   test:
     runs-on: ubuntu-latest
 
     steps:
-      # -----------------------------
+      # -------------------------------------------------------------
       # Checkout repository
-      # -----------------------------
-      - name: Checkout repository
+      # -------------------------------------------------------------
+      - name: Checkout code
         uses: actions/checkout@v4
 
-      # -----------------------------
-      # Install PHP
-      # -----------------------------
-      - name: Set up PHP
+      # -------------------------------------------------------------
+      # Install PHP (with Apache-like extensions)
+      # -------------------------------------------------------------
+      - name: Install PHP
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.2'
-          coverage: none
-          extensions: mbstring, curl, pdo_mysql, gd
+          extensions: mbstring, intl, mysqli
+          ini-values: post_max_size=256M, upload_max_filesize=256M
 
-      # -----------------------------
-      # Install Node
-      # -----------------------------
-      - name: Setup Node.js
+      # -------------------------------------------------------------
+      # Start PHP built-in server with router.php
+      # -------------------------------------------------------------
+      - name: Start PHP server
+        working-directory: ${{ github.workspace }}
+        run: |
+          cd www
+
+          echo "------ Router.php exists? ------"
+          ls -l router.php || echo "router.php NOT FOUND!"
+
+          echo "------ Starting PHP server ------"
+          php -S localhost:8000 -t . router.php > server.log 2>&1 &
+
+          echo "Server PID: $!"
+
+          # Wait for server to respond
+          echo "------ Waiting for server... ------"
+          for i in {1..30}; do
+            if curl -s -I http://localhost:8000 | grep -q "200\|302"; then
+              echo "Server is up!"
+              break
+            fi
+            echo "Still waiting..."
+            sleep 1
+          done
+
+          # If still not up → print logs
+          if ! curl -s -I http://localhost:8000 | grep -q "200\|302"; then
+            echo "Server did not start:"
+            echo "------ server.log ------"
+            cat server.log
+            exit 1
+          fi
+
+      # -------------------------------------------------------------
+      # Set up Node + Playwright
+      # -------------------------------------------------------------
+      - name: Set up Node
         uses: actions/setup-node@v4
         with:
           node-version: 20
 
-      # -----------------------------
-      # Install Node dependencies
-      # -----------------------------
       - name: Install dependencies
-        run: npm ci
-        working-directory: playwright-tests
-
-      # -----------------------------
-      # Install Playwright browsers
-      # -----------------------------
-      - name: Install Playwright browsers
-        run: npx playwright install --with-deps
-        working-directory: playwright-tests
-
-      # -----------------------------
-      # DEBUG — Show docroot
-      # -----------------------------
-      - name: Debug docroot
         run: |
-          echo "Docroot = ${{ github.workspace }}/www"
-          ls -la "${{ github.workspace }}/www"
+          cd playwright-tests
+          npm ci
 
-      # -----------------------------
-      # Start PHP server (with router.php)
-      # -----------------------------
-      - name: Start PHP dev server
+      - name: Install browsers
         run: |
-          echo "Starting PHP dev server..."
-          php -S localhost:8000 -t "${{ github.workspace }}/www" "${{ github.workspace }}/www/router.php" > server.log 2>&1 &
-          sleep 2
-          echo "--- PHP server log ---"
-          cat server.log
+          npx playwright install --with-deps
 
-      # -----------------------------
-      # Verify server is running correctly
-      # -----------------------------
-      - name: Verify PHP dev server
-        run: |
-          echo "Waiting for server..."
-          for i in {1..20}; do
-            STATUS=$(curl -o /dev/null -s -w "%{http_code}" http://localhost:8000)
-            echo "Attempt $i: HTTP $STATUS"
-            if [ "$STATUS" = "200" ] || [ "$STATUS" = "302" ]; then
-              echo "Server is UP"
-              curl -I http://localhost:8000
-              curl -s http://localhost:8000 | head -n 50
-              exit 0
-            fi
-            sleep 1
-          done
-          echo "Server did NOT start!"
-          echo "--- Full curl output ---"
-          curl -v http://localhost:8000
-          exit 1
-
-      # -----------------------------
+      # -------------------------------------------------------------
       # Run Playwright tests
-      # -----------------------------
-      - name: Run Playwright tests
-        env:
-          PLAYWRIGHT_BASE_URL: http://localhost:8000
-        run: npx playwright test
+      # -------------------------------------------------------------
+      - name: Run tests
         working-directory: playwright-tests
+        run: |
+          echo "Running tests..."
+          npx playwright test
 
-      # -----------------------------
-      # Upload test artifacts (if failed)
-      # -----------------------------
-      - name: Upload Playwright artifacts
-        if: failure()
+      # -------------------------------------------------------------
+      # Upload Playwright report (always)
+      # -------------------------------------------------------------
+      - name: Upload Playwright HTML Report
+        if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: playwright-artifacts
-          path: playwright-tests/test-results/
+          name: playwright-report
+          path: playwright-tests/playwright-report/
