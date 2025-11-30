@@ -20,9 +20,9 @@ jobs:
         image: mysql:8.0
         env:
           MYSQL_ROOT_PASSWORD: root
-          MYSQL_DATABASE: proxyforgame
-          MYSQL_USER: pfg_usr
-          MYSQL_PASSWORD: secret
+          MYSQL_DATABASE: ${{ env.DB_NAME }}
+          MYSQL_USER: ${{ env.DB_USER }}
+          MYSQL_PASSWORD: ${{ env.DB_PASS }}
         ports:
           - 3306:3306
         options: >-
