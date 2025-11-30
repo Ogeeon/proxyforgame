@@ -102,17 +102,6 @@ jobs:
           fi
 
       # -------------------------------------------------------------
-      # Quick diagnostics (before Playwright tests)
-      # ---------------------------------------------------------------
-      - name: Quick server check
-        run: |
-          echo "------ Testing homepage ------"
-          curl -s -I http://localhost:8000/ || true
-          echo ""
-          echo "------ Testing trade page ------"
-          curl -s -I http://localhost:8000/ogame/calc/trade.php || true
-
-      # -------------------------------------------------------------
       # Set up Node + Playwright
       # -------------------------------------------------------------
       - name: Set up Node
