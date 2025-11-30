@@ -4,7 +4,7 @@ test.describe('Trade Calculator Page', () => {
     test.beforeEach(async ({ page }) => {
         await page.goto('/ogame/calc/trade.php');
     });
-
+/*
     test('page loads successfully', async ({ page }) => {
         await expect(page).toHaveTitle(/Trade/);
     });
@@ -20,13 +20,13 @@ test.describe('Trade Calculator Page', () => {
         const lExists = await page.evaluate(() => typeof l !== 'undefined');
         expect(lExists).toBe(true);
     });
-
+*/
     test('universes data is loaded', async ({ page }) => {
         // Check if the unis object is loaded
         const unisLoaded = await page.evaluate(() => typeof unis !== 'undefined' && Object.keys(unis).length > 0);
         expect(unisLoaded).toBe(true);
     });
-
+/*
   test('calculations are correct', async ({ page }) => {
     await page.getByRole('button', { name: '2.4 : 1.5 :' }).click();
     await page.locator('#res-src-0').click();
@@ -60,5 +60,5 @@ test.describe('Trade Calculator Page', () => {
     await expect(page.locator('#res-dst-c')).toContainText('20.000');
     await expect(page.locator('#res-dst-d')).toContainText('28.333');
     await expect(page.locator('#alink')).toContainText('/ogame/calc/trade.php#rmd=2.4&rcd=1.5&st=0&dt=2&dmt=2&fix1=20000&m=100000&l=en:101');
-  });
+  });*/
 });

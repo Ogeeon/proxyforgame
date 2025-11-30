@@ -42,11 +42,33 @@ jobs:
           extensions: mbstring, intl, mysqli
           ini-values: post_max_size=256M, upload_max_filesize=256M
 
-      # Seed database with schema.sql
-      # (MySQL service is now ready after health check passes)
+      # Prepare MySQL client and create CI-friendly .env, then seed schema
       # -------------------------------------------------------------
+      - name: Prepare DB client and create .env
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y default-mysql-client
+          echo "Creating .env with TCP DB host for CI"
+          cat > .env <<'EOF'
+          DB_HOST=127.0.0.1
+          DB_USER=pfg_usr
+          DB_PASS=secret
+          DB_NAME=proxyforgame
+          EOF
+
       - name: Seed MySQL database
         run: |
+          # Wait for the MySQL service to accept connections, retry for up to ~60s
+          for i in {1..30}; do
+            if mysql -h 127.0.0.1 -u pfg_usr -psecret -e 'SELECT 1' >/dev/null 2>&1; then
+              echo "MySQL is ready"
+              break
+            fi
+            echo "Waiting for MySQL... ($i)"
+            sleep 2
+          done
+
+          echo "Importing schema.sql"
           mysql -h 127.0.0.1 -u pfg_usr -psecret proxyforgame < schema.sql
 
       # -------------------------------------------------------------
