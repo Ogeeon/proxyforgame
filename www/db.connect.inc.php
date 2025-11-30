@@ -19,29 +19,7 @@ function loadEnv($path) {
     }
 }
 
-function SqlQuery($query) {	
-    global $connection;
-	$res = array();
-
-    if (!isset($connection) || $connection === false || $connection === null) {
-        return FALSE;
-    }
-
-	if ($result = mysqli_query($connection, $query)) {
-		if ($result === TRUE) return FALSE; // для не-select'ов возвращаем FALSE, потому что нет результата
-		while ($row = mysqli_fetch_assoc($result)) {
-		    array_push($res, $row);
-		}
-		mysqli_free_result($result);
-	} else {
-		return FALSE;
-	}
-
-	return count($res) > 0 ? $res : FALSE;
-	
-}
-
-function SqlQueryEscape($query, $params) {
+function SqlQuery($query, $params) {
     global $connection;
     $res = array();
 
@@ -62,7 +40,7 @@ function SqlQueryEscape($query, $params) {
     }
 
     if ($result = mysqli_query($connection, $finalQuery)) {
-        if ($result === TRUE) return FALSE; // для не-select'ов возвращаем FALSE, потому что нет результата
+        if ($result === TRUE) return FALSE; // If the query is not a select, return FALSE because there is no result
         while ($row = mysqli_fetch_assoc($result)) {
             array_push($res, $row);
         }
@@ -82,7 +60,7 @@ $dbUser = getenv('DB_USER');
 $dbPass = getenv('DB_PASS');
 $dbName = getenv('DB_NAME');
 
-if ($dbHost && $dbUser && $dbName) {
+if ($dbHost && $dbName && $dbUser && $dbPass) {
     // Attempt connection inside try/catch to avoid uncaught exceptions in environments
     // where MySQL server/socket is not available.
     try {
@@ -98,9 +76,5 @@ if ($dbHost && $dbUser && $dbName) {
         error_log("mysqli_sql_exception while connecting to DB: " . $e->getMessage());
         $connection = false;
     }
-} else {
-    // No DB credentials provided (CI/test environment)
-    $connection = false;
 }
-
 ?>

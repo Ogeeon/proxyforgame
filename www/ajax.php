@@ -105,7 +105,8 @@
 				die("1\nmalformed");
 			if ($lang == 'us')
 				$lang = 'en';
-			$result = SqlQuery("select ch.ts, cd.description from change_headers ch join change_descriptions cd on (ch.id = cd.id) where lang like '$lang' and ch.id > $lastSeen order by ch.id desc");
+			$result = SqlQuery("select ch.ts, cd.description from change_headers ch join change_descriptions cd on (ch.id = cd.id) 
+				where lang like ? and ch.id > ? order by ch.id desc", array($lang, $lastSeen));
 			$repsonse = json_encode($result);
 			die('0\n'.$repsonse);
 		}

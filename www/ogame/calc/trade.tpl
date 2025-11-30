@@ -16,12 +16,9 @@
 ?>
 	<link id="light-theme" type="text/css" href="/css/redmond/jquery.ui.all.css" rel="stylesheet"/>
 	<link id="dark-theme" type="text/css" href="/css/dark-hive/jquery.ui.all.css" rel="stylesheet" disabled="disabled"/>
-	<?php $langCss = $pfgPath . '/css/langs.css'; ?>
-	<link type="text/css" href="/css/langs.css?v=<?php echo (file_exists($langCss) ? filemtime($langCss) : 0); ?>" rel="stylesheet" />
-	<?php $commonCss = $pfgPath . '/css/common.css'; ?>
-	<link type="text/css" href="/css/common.css?v=<?php echo (file_exists($commonCss) ? filemtime($commonCss) : 0); ?>" rel="stylesheet"/>
-	<?php $tradeCss = $pfgPath . '/ogame/calc/css/trade.css'; ?>
-	<link type="text/css" href="/ogame/calc/css/trade.css?v=<?php echo (file_exists($tradeCss) ? filemtime($tradeCss) : 0); ?>" rel="stylesheet"/>
+	<link type="text/css" href="/css/langs.css?v=<?php echo filemtime($pfgPath.'/css/langs.css'); ?>" rel="stylesheet" />
+	<link type="text/css" href="/css/common.css?v=<?php echo filemtime($pfgPath.'/css/common.css'); ?>" rel="stylesheet"/>
+	<link type="text/css" href="/ogame/calc/css/trade.css?v=<?php echo filemtime($pfgPath.'/ogame/calc/css/trade.css'); ?>" rel="stylesheet"/>
 		
 <?php if ( $_SERVER['SERVER_NAME'] == 'proxyforgame.com'): ?>
 	<script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.min.js"></script>
@@ -35,10 +32,8 @@
 <?php endif; ?>
 	<script type="text/javascript" src="/js/jquery.cookie.js"></script>
 <?php require_once('../../social.head.tpl'); ?>
-	<?php $utilsJs = $pfgPath . '/js/utils.js'; ?>
-	<script type="text/javascript" src="/js/utils.js?v=<?php echo (file_exists($utilsJs) ? filemtime($utilsJs) : 0); ?>"></script>
-	<?php $tradeJs = $pfgPath . '/ogame/calc/js/trade.js'; ?>
-	<script type="text/javascript" src="/ogame/calc/js/trade.js?v=<?php echo (file_exists($tradeJs) ? filemtime($tradeJs) : 0); ?>"></script>
+	<script type="text/javascript" src="/js/utils.js?v=<?php echo filemtime($pfgPath.'/js/utils.js'); ?>"></script>
+	<script type="text/javascript" src="/ogame/calc/js/trade.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/trade.js'); ?>"></script>
 
 	<script type="text/javascript">
 		l.sc = '<?= $l['sc-short'] ?>';
