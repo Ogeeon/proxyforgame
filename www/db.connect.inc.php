@@ -41,6 +41,40 @@ function SqlQuery($query) {
 	
 }
 
+function SqlQueryEscape($query, $params) {
+    global $connection;
+    $res = array();
+
+    if (!isset($connection) || $connection === false || $connection === null) {
+        return FALSE;
+    }
+
+    // Escape all parameters
+    $escaped = array();
+    foreach ($params as $param) {
+        $escaped[] = is_null($param) ? 'NULL' : "'" . mysqli_real_escape_string($connection, $param) . "'";
+    }
+
+    // Replace ? placeholders with escaped values
+    $finalQuery = $query;
+    foreach ($escaped as $value) {
+        $finalQuery = preg_replace('/\?/', $value, $finalQuery, 1);
+    }
+
+    if ($result = mysqli_query($connection, $finalQuery)) {
+        if ($result === TRUE) return FALSE; // для не-select'ов возвращаем FALSE, потому что нет результата
+        while ($row = mysqli_fetch_assoc($result)) {
+            array_push($res, $row);
+        }
+        mysqli_free_result($result);
+    } else {
+        return FALSE;
+    }
+
+    return count($res) > 0 ? $res : FALSE;
+}
+	
+
 loadEnv(dirname(__DIR__) . DIRECTORY_SEPARATOR . '.env');
 
 $dbHost = getenv('DB_HOST');
