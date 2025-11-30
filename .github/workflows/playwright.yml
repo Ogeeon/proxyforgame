@@ -110,11 +110,12 @@ jobs:
           node-version: 20
 
       - name: Install dependencies
+        working-directory: playwright-tests
         run: |
-          cd playwright-tests
           npm ci
 
       - name: Install browsers
+        working-directory: playwright-tests
         run: |
           npx playwright install --with-deps
 
