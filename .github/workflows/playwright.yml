@@ -8,6 +8,12 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    env:
+      PLAYWRIGHT_BASE_URL: 'http://localhost:8000'
+      DB_HOST: '127.0.0.1'
+      DB_USER: 'pfg_usr'
+      DB_PASS: 'secret'
+      DB_NAME: 'proxyforgame'
 
     services:
       mysql:
@@ -42,25 +48,20 @@ jobs:
           extensions: mbstring, intl, mysqli
           ini-values: post_max_size=256M, upload_max_filesize=256M
 
+      # -------------------------------------------------------------
       # Prepare MySQL client and create CI-friendly .env, then seed schema
       # -------------------------------------------------------------
-      - name: Prepare DB client and create .env
+      - name: Prepare DB client (no .env creation) — rely on job-level DB_* env vars
         run: |
           sudo apt-get update
           sudo apt-get install -y default-mysql-client
-          echo "Creating .env with TCP DB host for CI"
-          cat > .env <<'EOF'
-          DB_HOST=127.0.0.1
-          DB_USER=pfg_usr
-          DB_PASS=secret
-          DB_NAME=proxyforgame
-          EOF
+          echo "DB client installed; using job-level DB_* environment variables (no .env will be written)."
 
       - name: Seed MySQL database
         run: |
           # Wait for the MySQL service to accept connections, retry for up to ~60s
           for i in {1..30}; do
-            if mysql -h 127.0.0.1 -u pfg_usr -psecret -e 'SELECT 1' >/dev/null 2>&1; then
+            if mysql -h "$DB_HOST" -u "$DB_USER" -p"$DB_PASS" -e 'SELECT 1' >/dev/null 2>&1; then
               echo "MySQL is ready"
               break
             fi
@@ -69,7 +70,7 @@ jobs:
           done
 
           echo "Importing schema.sql"
-          mysql -h 127.0.0.1 -u pfg_usr -psecret proxyforgame < schema.sql
+          mysql -h "$DB_HOST" -u "$DB_USER" -p"$DB_PASS" "$DB_NAME" < schema.sql
 
       # -------------------------------------------------------------
       # Start PHP built-in server (no router needed)
