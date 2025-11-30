@@ -9,6 +9,22 @@ jobs:
   test:
     runs-on: ubuntu-latest
 
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: proxyforgame
+          MYSQL_USER: pfg_usr
+          MYSQL_PASSWORD: secret
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping --silent"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
     steps:
       # -------------------------------------------------------------
       # Checkout repository
@@ -25,6 +41,13 @@ jobs:
           php-version: '8.2'
           extensions: mbstring, intl, mysqli
           ini-values: post_max_size=256M, upload_max_filesize=256M
+
+      # Seed database with schema.sql
+      # (MySQL service is now ready after health check passes)
+      # -------------------------------------------------------------
+      - name: Seed MySQL database
+        run: |
+          mysql -h 127.0.0.1 -u pfg_usr -psecret proxyforgame < schema.sql
 
       # -------------------------------------------------------------
       # Start PHP built-in server (no router needed)
