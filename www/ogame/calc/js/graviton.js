@@ -148,6 +148,7 @@ function updateNumbers() {
 	energyPerSat += options.prm.isTrader ? 0.05 * baseEnergyPerSat : 0;
 
 	let disChEnergyBonus = Math.floor(options.prm.disChLevel * 0.015 * totalEnergy);
+	energyPerSat += Math.floor(options.prm.disChLevel * 0.015 * baseEnergyPerSat);
 	var lfTechBonus = Math.round(options.prm.totalLFEnrgBonus * 0.01 * totalEnergy);
 	energyPerSat += 0.01 * options.prm.totalLFEnrgBonus * baseEnergyPerSat;
 	
