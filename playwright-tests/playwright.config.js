@@ -8,7 +8,7 @@ export default defineConfig({
     // Base URL used by page.goto(), e.g. page.goto('/en/');
     // In CI: http://localhost:8000  (set in workflow)
     // Locally: http://pfg.wmp       (set manually or fallback to CI-style URL)
-    baseURL: process.env.PLAYWRIGHT_BASE_URL || 'http://localhost:8000',
+    baseURL: process.env.PFG_BASE_URL || 'http://localhost:8000',
 
     headless: true,
     trace: 'on-first-retry',

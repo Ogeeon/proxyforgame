@@ -222,8 +222,8 @@
 						</tr>
 					</table>
 				</td>
-				<td id="rb1" class="rbutton"><button>4 : 2 : 1</button></td>
-				<td id="rb4" class="rbutton"><button>2.5 : 1.5 : 1</button></td>
+				<td id="rb1" class="rbutton"><button id="rate-btn-1">4 : 2 : 1</button></td>
+				<td id="rb4" class="rbutton"><button id="rate-btn-4">2.5 : 1.5 : 1</button></td>
 			</tr>
 			<tr>
 				<td class="tdr"><?= $l['crystal'] ?> : <?= $l['deuterium'] ?></td>
@@ -240,8 +240,8 @@
 						</tr>
 					</table>
 				</td>
-				<td id="rb2" class="rbutton"><button>3 : 2 : 1</button></td>
-				<td id="rb5" class="rbutton"><button>2 : 1.5 : 1</button></td>
+				<td id="rb2" class="rbutton"><button id="rate-btn-2">3 : 2 : 1</button></td>
+				<td id="rb5" class="rbutton"><button id="rate-btn-5">2 : 1.5 : 1</button></td>
 			</tr>
 			<tr>
 				<td class="tdr"><?= $l['metal'] ?> : <?= $l['crystal'] ?></td>
@@ -258,8 +258,8 @@
 						</tr>
 					</table>
 				</td>
-				<td id="rb3" class="rbutton"><button>3 : 1.5 : 1</button></td>
-				<td id="rb6" class="rbutton"><button>2.4 : 1.5 : 1</button></td>
+				<td id="rb3" class="rbutton"><button id="rate-btn-3">3 : 1.5 : 1</button></td>
+				<td id="rb6" class="rbutton"><button id="rate-btn-6">2.4 : 1.5 : 1</button></td>
 			</tr>
 		</table>
 		</div>
