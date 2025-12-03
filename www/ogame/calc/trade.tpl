@@ -31,7 +31,6 @@
 	<script type="text/javascript" src="/js/jquery-ui-1.8.11.min.js"></script>
 <?php endif; ?>
 	<script type="text/javascript" src="/js/jquery.cookie.js"></script>
-<?php require_once('../../social.head.tpl'); ?>
 	<script type="text/javascript" src="/js/utils.js?v=<?php echo filemtime($pfgPath.'/js/utils.js'); ?>"></script>
 	<script type="text/javascript" src="/ogame/calc/js/trade.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/trade.js'); ?>"></script>
 

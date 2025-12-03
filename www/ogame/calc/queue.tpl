@@ -33,7 +33,6 @@
 <?php endif; ?>
 	<script type="text/javascript" src="/js/jquery.inputmask.js"></script>
 	<script type="text/javascript" src="/js/jquery.cookie.js"></script>
-<?php require_once('../../social.head.tpl'); ?>
 	<script type="text/javascript" src="/js/utils.js?v=<?php echo filemtime($pfgPath.'/js/utils.js'); ?>"></script>
 	<script type="text/javascript" src="/ogame/calc/js/common.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/common.js'); ?>"></script>	
 	<script type="text/javascript" src="/ogame/calc/js/queue.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/queue.js'); ?>"></script>
