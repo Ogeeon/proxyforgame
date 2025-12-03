@@ -43,52 +43,41 @@ var options = {
 	coordp: 0,
 	hyperTech: 0,
 
-	load: function() {
-		var data = $.cookie('options_trade');
-		if (data) {
-			data = data.split(',', 16);
-			try {
-				if (isset(data[0])) this.rates.md = validateNumber(parseFloat(data[0]), 1, 5, this.rates.md);
-				if (isset(data[1])) this.rates.cd = validateNumber(parseFloat(data[1]), 1, 5, this.rates.cd);
-				this.rates.mc = (this.rates.md / this.rates.cd).toFixed(3);
-				if (isset(data[3])) this.srcType = validateNumber(parseInt(data[3]), 0, 5, this.srcType);
-				if (isset(data[4])) this.dstType = validateNumber(parseInt(data[4]), 0, 5, this.dstType);
-				if (isset(data[5])) this.dstMixType = validateNumber(parseInt(data[5]), 0, 3, this.dstMixType);
-				if (isset(data[6])) this.mixBalance = validateNumber(parseFloat(data[6]), 0, 100, this.mixBalance);
-				if (isset(data[7])) this.mixProp1 = validateNumber(parseInt(data[7]), 0, 100, this.mixProp1);
-				if (isset(data[8])) this.mixProp2 = validateNumber(parseInt(data[8]), 0, 100, this.mixProp2);
-				if (isset(data[9])) this.country = data[9]; else this.country = getUrlLang();
-				if (isset(data[10])) this.universe = data[10];
-				if (isset(data[11])) this.coordg = validateNumber(parseInt(data[11]), 0, 12, this.coordg);
-				if (isset(data[12])) this.coords = validateNumber(parseInt(data[12]), 0, 550, this.coords);
-				if (isset(data[13])) this.coordp = validateNumber(parseInt(data[13]), 0, 15, this.coordp);
-				if (isset(data[14])) this.hyperTech = validateNumber(parseInt(data[14]), 0, 50, this.hyperTech);
-				if (isset(data[15])) this.moon = data[15] === 'true';
-			} catch(e) {
-				alert(e);
-			}
+	validate: function(field, value) {
+		switch (field) {
+			case 'metal': return validateNumber(parseInt(value), 0, Infinity, 0);
+			case 'crystal': return validateNumber(parseInt(value), 0, Infinity, 0);
+			case 'deuterium': return validateNumber(parseInt(value), 0, Infinity, 0);
+			case 'srcType': return validateNumber(parseInt(value), 0, 5, this.srcType);
+			case 'dstType': return validateNumber(parseInt(value), 0, 5, this.dstType);
+			case 'dstMixType': return validateNumber(parseInt(value), 0, 3, this.dstMixType);
+			case 'mixBalance': return validateNumber(parseFloat(value), 0, 100, this.mixBalance);
+			case 'mixProp1': return validateNumber(parseInt(value), 0, 100, this.mixProp1);
+			case 'mixProp2': return validateNumber(parseInt(value), 0, 100, this.mixProp2);
+			case 'country': return value;
+			case 'universe': return validateNumber(parseInt(value), 0, Infinity, 101);
+			case 'coordg': return validateNumber(parseInt(value), 0, 12, this.coordg);
+			case 'coords': return validateNumber(parseInt(value), 0, 550, this.coords);
+			case 'coordp': return validateNumber(parseInt(value), 0, 15, this.coordp);
+			case 'hyperTech': return validateNumber(parseInt(value), 0, 50, this.hyperTech);
+			case 'moon': return value === true || value === 'true';
+			default: return value;
 		}
-		this.rates.mc = (this.rates.md / this.rates.cd).toFixed(3);
+	},
+
+	load: function() {
+		try {
+			loadFromCookie('options_trade', options);
+			this.rates.mc = (this.rates.md / this.rates.cd).toFixed(3);
+			// consoleLog("loaded from cookies: ");
+			// consoleLog(options);
+		} catch(e) {
+			alert(e);
+		}
 	},
 
 	save: function() {
-		var data = 	this.rates.md + ',' +
-					this.rates.cd + ',' +
-					this.rates.mc + ',' +
-					this.srcType + ',' +
-					this.dstType + ',' +
-					this.dstMixType + ',' +
-					this.mixBalance + ',' +
-					this.mixProp1 + ',' +
-					this.mixProp2 + ',' +
-					this.country + ',' +
-					this.universe + ',' +
-					this.coordg + ',' +
-					this.coords + ',' +
-					this.coordp + ',' +
-					this.hyperTech + ',' +
-					this.moon;
-		$.cookie('options_trade', data, { expires: 365, path: '/' });
+		saveToCookie('options_trade', options);
 	},
 
 	parseFromUri: function() {

@@ -477,6 +477,11 @@ function saveToCookie(name, data) {
 			if (jQuery.type(data[key]) == 'function') {
 				return;
 			}
+			if (jQuery.type(data[key]) == 'object' && !Array.isArray(data[key])) {
+				// Handle plain objects by JSON encoding
+				saveStr += key+';__JSON__'+JSON.stringify(data[key])+',';
+				return;
+			}
 			if (jQuery.type(data[key]) == 'array') {
 				var arr = data[key];
 				for (var i = 0; i < arr.length; i++) {
@@ -544,7 +549,18 @@ function loadFromCookie(name, params) {
 			}
 			else {
 				if (parts[0] in params) {
-					params[parts[0]] = params.validate(parts[0], parts[1]);
+					// Check if value is a JSON-encoded object
+					if (parts[1] && parts[1].indexOf('__JSON__') === 0) {
+						try {
+							var jsonStr = parts.slice(1).join(';').substring(8); // Remove __JSON__ prefix and rejoin in case semicolons were in the JSON
+							params[parts[0]] = JSON.parse(jsonStr);
+						} catch (e) {
+							// If JSON parsing fails, fall back to validate
+							params[parts[0]] = params.validate(parts[0], parts[1]);
+						}
+					} else {
+						params[parts[0]] = params.validate(parts[0], parts[1]);
+					}
 				}
 			}
 		}

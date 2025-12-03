@@ -8,41 +8,53 @@ function getCoord(el, prop) {
 }
 
 function showLangsMenu(event) {
-	if ($('#langs-options').css('display') == 'none') {
-		var el = (event.currentTarget) ? event.currentTarget : event.srcElement;
-		var left = getCoord($('#langs-menu')[0], 'offsetLeft');
-		var top = getCoord($('#langs-menu')[0], 'offsetTop') + $('#langs-menu')[0].offsetHeight;
-		var opts = $('#langs-options')[0];
-		var stub = $('#lang-options-stub')[0];
-		$(opts).css('left', left);
-		$(stub).css('left', left);
-		$(opts).css('top', top);
-		$(stub).css('top', top - 3);
-		$('#lang-options-stub').slideDown("fast");
-		$('#langs-options').slideDown("fast");
+	var optsEl = document.getElementById('langs-options');
+	var stubEl = document.getElementById('lang-options-stub');
+	var menuEl = document.getElementById('langs-menu');
+	
+	if (window.getComputedStyle(optsEl).display === 'none') {
+		var el = event.currentTarget || event.srcElement;
+		var left = getCoord(menuEl, 'offsetLeft');
+		var top = getCoord(menuEl, 'offsetTop') + menuEl.offsetHeight;
+		
+		optsEl.style.left = left + 'px';
+		stubEl.style.left = left + 'px';
+		optsEl.style.top = top + 'px';
+		stubEl.style.top = (top - 3) + 'px';
+		
+		stubEl.style.display = 'block';
+		optsEl.style.display = 'block';
 	} else {
-		$('#langs-options').slideUp("fast");
-		$('#lang-options-stub').slideUp("fast");
+		optsEl.style.display = 'none';
+		stubEl.style.display = 'none';
 	}
 }
 
 function hideLangsMenu(event) {
-	if ($('#langs-options').css('display') == 'none')
+	var optsEl = document.getElementById('langs-options');
+	var stubEl = document.getElementById('lang-options-stub');
+	var menuEl = document.getElementById('langs-menu');
+	
+	if (window.getComputedStyle(optsEl).display === 'none')
 		return;
+	
 	var x = event.pageX || event.x;
 	var y = event.pageY || event.y;
-	var el = (event.currentTarget) ? event.currentTarget : event.srcElement;
-	var menuLeft = getCoord($('#langs-options')[0], 'offsetLeft');
-	var menuRight = menuLeft + $('#langs-options')[0].offsetWidth;
-	var menuTop = getCoord($('#langs-menu')[0], 'offsetTop');
-	var menuBottom = menuTop + $('#langs-menu')[0].offsetHeight + $('#langs-options')[0].offsetHeight;
+	var el = event.currentTarget || event.srcElement;
+	var menuLeft = getCoord(optsEl, 'offsetLeft');
+	var menuRight = menuLeft + optsEl.offsetWidth;
+	var menuTop = getCoord(menuEl, 'offsetTop');
+	var menuBottom = menuTop + menuEl.offsetHeight + optsEl.offsetHeight;
+	
 	if (x < menuLeft || x > menuRight || y < menuTop || y > menuBottom) {
-		$('#langs-options').slideUp("fast");
-		$('#lang-options-stub').hide();
+		optsEl.style.display = 'none';
+		stubEl.style.display = 'none';
 	}
 }
 
-$(function(){$('body').click(hideLangsMenu);});
+document.addEventListener('DOMContentLoaded', function() {
+	document.body.addEventListener('click', hideLangsMenu);
+});
 
 </script>
 
