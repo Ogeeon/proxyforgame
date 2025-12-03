@@ -68,9 +68,17 @@ var options = {
 	load: function() {
 		try {
 			loadFromCookie('options_trade', options);
+			// Validate that rates is an object and re-init if needed
+			if (typeof this.rates !== 'object' || this.rates === null) {
+				this.rates = {
+					md: (rateLimits.md.min + rateLimits.md.max) / 2,
+					cd: (rateLimits.cd.min + rateLimits.cd.max) / 2,
+					mc: 0
+				};
+			}
 			this.rates.mc = (this.rates.md / this.rates.cd).toFixed(3);
-			// consoleLog("loaded from cookies: ");
-			// consoleLog(options);
+			consoleLog("loaded from cookies: ");
+			consoleLog(options);
 		} catch(e) {
 			alert(e);
 		}
