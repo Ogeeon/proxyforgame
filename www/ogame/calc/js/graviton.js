@@ -38,7 +38,7 @@ var options = {
 				case 'debrisPercent': return validateNumber(parseFloat(value), 0, 40, 100);
 				case 'isCollector': return value === 'true';
 				case 'isTrader': return value === 'true';
-				case 'energyBoost': return validateNumber(parseInt(value), 0, 8, 0);
+				case 'energyBoost': return validateNumber(Number.parseInt(value), 0, 8, 0);
 				case 'disChLevel': return validateNumber(parseFloat(value), 0, 100, 0);
 				case 'gravitonLevel': return validateNumber(parseFloat(value), 0, 100, 0);
 				case 'totalLFEnrgBonus': return validateNumber(parseFloat(value), 0, 100, 0);

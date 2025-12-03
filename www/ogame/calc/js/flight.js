@@ -1157,9 +1157,9 @@ function readShipsBonuses() {
 	}
 	try {
 		for (i = 0; i < 17; i++) {
-			options.prm.lfShipsBonuses[j][0] = parseFloat(lines[scLineIdx + i * 8 + 4].replace('%', '').replace('-', '0'));
-			options.prm.lfShipsBonuses[j][1] = parseFloat(lines[scLineIdx + i * 8 + 5].replace('%', '').replace('-', '0'));
-			options.prm.lfShipsBonuses[j][2] = parseFloat(lines[scLineIdx + i * 8 + 6].replace('%', '').replace('-', '0'));
+			options.prm.lfShipsBonuses[j][0] = Number.parseFloat(lines[scLineIdx + i * 8 + 4].replace('%', '').replace('-', '0'));
+			options.prm.lfShipsBonuses[j][1] = Number.parseFloat(lines[scLineIdx + i * 8 + 5].replace('%', '').replace('-', '0'));
+			options.prm.lfShipsBonuses[j][2] = Number.parseFloat(lines[scLineIdx + i * 8 + 6].replace('%', '').replace('-', '0'));
 			if (i == 9 || i == 13) i++; // пропустим лампочку и краулер
 			j++;
 		}
@@ -1182,7 +1182,7 @@ function ajaxAPI(code) {
 			{service: "ogameAPI", code: code},
 			function(data) {
 				try {
-					var rcode = parseInt(data.substr(0, data.indexOf('\n')));
+					var rcode = Number.parseInt(data.substr(0, data.indexOf('\n')));
 					if (rcode == 4) {
 						alert(options.badSRCode);
 						return;

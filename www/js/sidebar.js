@@ -99,7 +99,7 @@ function sendReport() {
 			{service: "report", url: currUrl, wrong: $('#misspelled-text')[0].value, right: $('#corrected-text')[0].value},
 			function(data) {
 				try {
-					var rcode = parseInt(data.substr(0, data.indexOf('\n')));
+					var rcode = Number.parseInt(data.substr(0, data.indexOf('\n')));
 					showSendDiv('report', 'err-'+rcode);
 					if (rcode == 0)
 						$("#report-form").dialog("option", "step", 3);
@@ -131,7 +131,7 @@ function sendEmail() {
 			{service: "email", address: $('#email-form-address')[0].value, subject: $('#email-form-subject')[0].value, body: $('#email-form-body')[0].value},
 			function(data) {
 				try {
-					var rcode = parseInt(data.substr(0, data.indexOf('\n')));
+					var rcode = Number.parseInt(data.substr(0, data.indexOf('\n')));
 					showSendDiv('email', 'err-'+rcode);
 					if (rcode == 0)
 						$("#email-form").dialog("option", "step", 3);
@@ -152,7 +152,7 @@ function requestAndShowChangelog(fromChange) {
 		function(data) {
 			//consoleLog('response: '+data);
 			try {
-				var rcode = parseInt(data.substr(0, data.indexOf('\n')));
+				var rcode = Number.parseInt(data.substr(0, data.indexOf('\n')));
 				var payload = data.substr(3, data.length);
 				//consoleLog(payload);
 				var changes = JSON.parse(payload);

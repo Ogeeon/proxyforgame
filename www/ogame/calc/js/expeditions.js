@@ -154,7 +154,7 @@ function createFleetJSON() {
         const abbreviation = inputId.replace('num', '');
         const code = fleetCodeMapping[abbreviation];        
         if (code) {
-            const value = parseInt(input.value) || 0;
+            const value = Number.parseInt(input.value) || 0;
             jsonData[code] = value;
         }
     });
@@ -200,7 +200,7 @@ function readShipsBonuses() {
 	}
 	try {
 		for (i = 0; i < 17; i++) {
-			options.prm.lfShipsBonuses[j] = parseFloat(lines[scLineIdx + i * 8 + 4].replace('%', '').replace('-', '0'));
+			options.prm.lfShipsBonuses[j] = Number.parseFloat(lines[scLineIdx + i * 8 + 4].replace('%', '').replace('-', '0'));
 			if (i == 9 || i == 13) i++; // пропустим лампочку и краулер
 			j++;
 		}
@@ -262,7 +262,7 @@ function compute() {
         c = $("#player-class")[0].options[a].value;
     options.prm.playerClass = Number(c);
     a = $("#universe-speed")[0].selectedIndex;
-    var b = parseInt($("#universe-speed")[0].options[a].text, 10);
+    var b = Number.parseInt($("#universe-speed")[0].options[a].text, 10);
     options.prm.universeSpeed = b;
     a = getInputNumber($("#tech_hyper-level")[0]);
     options.prm.hyperTechLevel = a;
@@ -289,7 +289,7 @@ function compute() {
     // New parameters
     var darkMatterDiscoveryBonus = getInputNumber($("#dark-matter-discovery-bonus")[0]);
     options.prm.darkMatterDiscoveryBonus = darkMatterDiscoveryBonus;
-    var resourceDiscoveryBooster = parseInt($("#resource-discovery-booster")[0].value, 10) || 0;
+    var resourceDiscoveryBooster = Number.parseInt($("#resource-discovery-booster")[0].value, 10) || 0;
     options.prm.resourceDiscoveryBooster = resourceDiscoveryBooster;
 
     var totalCapacity = getCargoCapacity();
@@ -303,7 +303,7 @@ function compute() {
         $("#can" + shipProperties[d][0]).attr("class", "");
     }
     for (d = 0; d < shipProperties.length; d++) {
-        var f = parseInt($("#num" + shipProperties[d][0])[0].value, 10);
+        var f = Number.parseInt($("#num" + shipProperties[d][0])[0].value, 10);
         if (2 < d && 0 < f) {
             for (j = 3; j <= d; j++) {
                 $("#can" + shipProperties[j][0]).text(LOCA_YES);
@@ -321,7 +321,7 @@ function compute() {
     a = e = totalCapacity;
     
     f = $("#highTop")[0].selectedIndex;
-    d = parseInt($("#highTop")[0].options[f].value, 10);
+    d = Number.parseInt($("#highTop")[0].options[f].value, 10);
     options.prm.highTop = d;
     f = 1;
     if (h) { // there are Pathfinders in the fleet

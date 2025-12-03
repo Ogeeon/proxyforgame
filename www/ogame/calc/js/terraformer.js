@@ -60,7 +60,7 @@ let options = {
 				case 'isCollector':
 					return value === 'true';
 				case 'energyBoost':
-					return validateNumber(parseInt(value), 0, 4, 0);
+					return validateNumber(Number.parseInt(value), 0, 4, 0);
 				case 'isTrader':
 					return value === 'true';
 				case 'disChLevel':

@@ -82,7 +82,7 @@ function validateInputNumberOnBlur (event) {
 		needRecalc = true;
 	}
 	var value = input.value.replace(decimalSeparator, '.');
-	value = parseFloat(value);
+	value = Number.parseFloat(value);
 	var minConstr = getConstraint(input, 'min', null);
 	if (minConstr != null && value < minConstr) {
 		// Если известны div-ы и текст для сообщения об ошибке, выведем туда это сообщение, а потом исправим значение
@@ -206,7 +206,7 @@ function getInputNumber(input) {
 	let decimalSeparator = getOptionValue('decimalSeparator', '.');
 	let n = 0;
 	try {
-		n = parseFloat(input.value.replace(decimalSeparator, '.'));
+		n = Number.parseFloat(input.value.replace(decimalSeparator, '.'));
 	} catch (e) {
 		consoleLog(e);
 	}

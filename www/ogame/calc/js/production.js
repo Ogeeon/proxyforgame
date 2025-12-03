@@ -84,9 +84,9 @@ let options = {
 				case 'planetPos':
 					return validateNumber(parseFloat(value), 1, 16, 8);
 				case 'energyBoost':
-					return validateNumber(parseInt(value), 0, 4, 0);
+					return validateNumber(Number.parseInt(value), 0, 4, 0);
 				case 'aPS':
-					return validateNumber(parseInt(value), -272, Infinity, 0);
+					return validateNumber(Number.parseInt(value), -272, Infinity, 0);
 				case 'showAddInf':
 					return value === 'true';
 				case 'inclSats':

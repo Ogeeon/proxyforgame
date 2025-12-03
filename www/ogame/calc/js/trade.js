@@ -45,21 +45,21 @@ var options = {
 
 	validate: function(field, value) {
 		switch (field) {
-			case 'metal': return validateNumber(parseInt(value), 0, Infinity, 0);
-			case 'crystal': return validateNumber(parseInt(value), 0, Infinity, 0);
-			case 'deuterium': return validateNumber(parseInt(value), 0, Infinity, 0);
-			case 'srcType': return validateNumber(parseInt(value), 0, 5, this.srcType);
-			case 'dstType': return validateNumber(parseInt(value), 0, 5, this.dstType);
-			case 'dstMixType': return validateNumber(parseInt(value), 0, 3, this.dstMixType);
-			case 'mixBalance': return validateNumber(parseFloat(value), 0, 100, this.mixBalance);
-			case 'mixProp1': return validateNumber(parseInt(value), 0, 100, this.mixProp1);
-			case 'mixProp2': return validateNumber(parseInt(value), 0, 100, this.mixProp2);
+			case 'metal': return validateNumber(Number.parseInt(value), 0, Infinity, 0);
+			case 'crystal': return validateNumber(Number.parseInt(value), 0, Infinity, 0);
+			case 'deuterium': return validateNumber(Number.parseInt(value), 0, Infinity, 0);
+			case 'srcType': return validateNumber(Number.parseInt(value), 0, 5, this.srcType);
+			case 'dstType': return validateNumber(Number.parseInt(value), 0, 5, this.dstType);
+			case 'dstMixType': return validateNumber(Number.parseInt(value), 0, 3, this.dstMixType);
+			case 'mixBalance': return validateNumber(Number.parseFloat(value), 0, 100, this.mixBalance);
+			case 'mixProp1': return validateNumber(Number.parseInt(value), 0, 100, this.mixProp1);
+			case 'mixProp2': return validateNumber(Number.parseInt(value), 0, 100, this.mixProp2);
 			case 'country': return value;
-			case 'universe': return validateNumber(parseInt(value), 0, Infinity, 101);
-			case 'coordg': return validateNumber(parseInt(value), 0, 12, this.coordg);
-			case 'coords': return validateNumber(parseInt(value), 0, 550, this.coords);
-			case 'coordp': return validateNumber(parseInt(value), 0, 15, this.coordp);
-			case 'hyperTech': return validateNumber(parseInt(value), 0, 50, this.hyperTech);
+			case 'universe': return validateNumber(Number.parseInt(value), 0, Infinity, 101);
+			case 'coordg': return validateNumber(Number.parseInt(value), 0, 12, this.coordg);
+			case 'coords': return validateNumber(Number.parseInt(value), 0, 550, this.coords);
+			case 'coordp': return validateNumber(Number.parseInt(value), 0, 15, this.coordp);
+			case 'hyperTech': return validateNumber(Number.parseInt(value), 0, 50, this.hyperTech);
 			case 'moon': return value === true || value === 'true';
 			default: return value;
 		}
@@ -91,23 +91,23 @@ var options = {
 					p[unescape(t[0]).toLowerCase()] = unescape(t[1]).toLowerCase();
 				}
 			}
-			if (isset(p['rmd'])) this.rates.md = validateNumber(parseFloat(p['rmd']), 1, 5, this.rates.md);
-			if (isset(p['rcd'])) this.rates.cd = validateNumber(parseFloat(p['rcd']), 1, 5, this.rates.cd);
+			if (isset(p['rmd'])) this.rates.md = validateNumber(Number.parseFloat(p['rmd']), 1, 5, this.rates.md);
+			if (isset(p['rcd'])) this.rates.cd = validateNumber(Number.parseFloat(p['rcd']), 1, 5, this.rates.cd);
 			this.rates.mc = (this.rates.md / this.rates.cd).toFixed(3);
-			if (isset(p['st'])) this.srcType = validateNumber(parseInt(p['st']), 0, 5, this.srcType);
-			if (isset(p['dt'])) this.dstType = validateNumber(parseInt(p['dt']), 0, 5, this.dstType);
-			if (isset(p['dmt'])) this.dstMixType = validateNumber(parseInt(p['dmt']), 0, 3, this.dstMixType);
-			if (isset(p['mix'])) this.mixBalance = validateNumber(parseFloat(p['mix']), 0, 100, this.mixBalance);
-			if (isset(p['mp1'])) { this.mixProp1 = validateNumber(parseInt(p['mp1']), 0, 100, this.mixProp1); $('#mix-balance-prop1').val(this.mixProp1 == 0 ? '' : this.mixProp1); }
-			if (isset(p['mp2'])) { this.mixProp2 = validateNumber(parseInt(p['mp2']), 0, 100, this.mixProp2); $('#mix-balance-prop2').val(this.mixProp2 == 0 ? '' : this.mixProp2); }
-			if (isset(p['fix1'])) { this.fix1 = validateNumber(parseInt(p['fix1']), 0, Infinity, this.fix1); $('#mix-fix1').val(this.fix1 == 0 ? '' : this.fix1); }
-			if (isset(p['fix2'])) { this.fix2 = validateNumber(parseInt(p['fix2']), 0, Infinity, this.fix2); $('#mix-fix2').val(this.fix2 == 0 ? '' : this.fix2); }
-			if (isset(p['m'])) { var m = validateNumber(parseInt(p['m']), 0, Infinity, 0); $('#res-src-m').val(m == 0 ? '' : m); }
-			if (isset(p['c'])) { var c = validateNumber(parseInt(p['c']), 0, Infinity, 0); $('#res-src-c').val(c == 0 ? '' : c); }
-			if (isset(p['d'])) { var d = validateNumber(parseInt(p['d']), 0, Infinity, 0); $('#res-src-d').val(d == 0 ? '' : d); }
-			if (isset(p['l'])) { var m = p['l'].split(':'); if (m.length == 2) { this.country = checkCountryLang(m[0]); this.universe = validateNumber(parseInt(m[1]), 0, Infinity, 101); } }
-			if (isset(p['lc'])) { var m = p['lc'].split(':'); if (m.length == 3) { this.coordg = validateNumber(parseInt(m[0]), 0, 12, 0); this.coords = validateNumber(parseInt(m[1]), 0, 550, 0); this.coordp = validateNumber(parseInt(m[2]), 0, 15, 0); } }
-			if (isset(p['lm'])) { var lm = validateNumber(parseInt(p['lm']), 0, 1, 0); $('#moon')[0].checked = lm !== 0; this.moon = lm !== 0; } else this.moon = false;
+			if (isset(p['st'])) this.srcType = validateNumber(Number.parseInt(p['st']), 0, 5, this.srcType);
+			if (isset(p['dt'])) this.dstType = validateNumber(Number.parseInt(p['dt']), 0, 5, this.dstType);
+			if (isset(p['dmt'])) this.dstMixType = validateNumber(Number.parseInt(p['dmt']), 0, 3, this.dstMixType);
+			if (isset(p['mix'])) this.mixBalance = validateNumber(Number.parseFloat(p['mix']), 0, 100, this.mixBalance);
+			if (isset(p['mp1'])) { this.mixProp1 = validateNumber(Number.parseInt(p['mp1']), 0, 100, this.mixProp1); $('#mix-balance-prop1').val(this.mixProp1 == 0 ? '' : this.mixProp1); }
+			if (isset(p['mp2'])) { this.mixProp2 = validateNumber(Number.parseInt(p['mp2']), 0, 100, this.mixProp2); $('#mix-balance-prop2').val(this.mixProp2 == 0 ? '' : this.mixProp2); }
+			if (isset(p['fix1'])) { this.fix1 = validateNumber(Number.parseInt(p['fix1']), 0, Infinity, this.fix1); $('#mix-fix1').val(this.fix1 == 0 ? '' : this.fix1); }
+			if (isset(p['fix2'])) { this.fix2 = validateNumber(Number.parseInt(p['fix2']), 0, Infinity, this.fix2); $('#mix-fix2').val(this.fix2 == 0 ? '' : this.fix2); }
+			if (isset(p['m'])) { var m = validateNumber(Number.parseInt(p['m']), 0, Infinity, 0); $('#res-src-m').val(m == 0 ? '' : m); }
+			if (isset(p['c'])) { var c = validateNumber(Number.parseInt(p['c']), 0, Infinity, 0); $('#res-src-c').val(c == 0 ? '' : c); }
+			if (isset(p['d'])) { var d = validateNumber(Number.parseInt(p['d']), 0, Infinity, 0); $('#res-src-d').val(d == 0 ? '' : d); }
+			if (isset(p['l'])) { var m = p['l'].split(':'); if (m.length == 2) { this.country = checkCountryLang(m[0]); this.universe = validateNumber(Number.parseInt(m[1]), 0, Infinity, 101); } }
+			if (isset(p['lc'])) { var m = p['lc'].split(':'); if (m.length == 3) { this.coordg = validateNumber(Number.parseInt(m[0]), 0, 12, 0); this.coords = validateNumber(Number.parseInt(m[1]), 0, 550, 0); this.coordp = validateNumber(Number.parseInt(m[2]), 0, 15, 0); } }
+			if (isset(p['lm'])) { var lm = validateNumber(Number.parseInt(p['lm']), 0, 1, 0); $('#moon')[0].checked = lm !== 0; this.moon = lm !== 0; } else this.moon = false;
 		}
 	},
 
@@ -651,7 +651,7 @@ try {
 		range: 'min', value: options.rates.md, min: rateLimits.md.min, max: rateLimits.md.max, step: 0.05,
 		slide: function(event, ui) {
 			$('#rate-md').val(ui.value);
-			options.rates.md = parseFloat(ui.value);
+			options.rates.md = Number.parseFloat(ui.value);
 			options.rates.mc = (options.rates.md / options.rates.cd).toFixed(3);
 			updateNumbers();
 			$('#rate-mc').text(options.rates.mc);
@@ -664,7 +664,7 @@ try {
 		range: 'min', value: options.rates.cd, min: rateLimits.cd.min, max: rateLimits.cd.max, step: 0.05,
 		slide: function(event, ui) {
 			$('#rate-cd').val(ui.value);
-			options.rates.cd = parseFloat(ui.value);
+			options.rates.cd = Number.parseFloat(ui.value);
 			options.rates.mc = (options.rates.md / options.rates.cd).toFixed(3);
 			updateNumbers();
 			$('#rate-mc').text(options.rates.mc);
@@ -680,7 +680,7 @@ try {
 	$('#mix-balance').slider({
 		range: 'min', value: options.mixBalance, min: 0, max: 100, step: 5,
 		slide: function(event, ui) {
-			options.mixBalance = parseFloat(ui.value);
+			options.mixBalance = Number.parseFloat(ui.value);
 			$('#mix-balance-proc').val(options.mixBalance);
 			if (options.dstType != 2 || options.dstMixType != 0) {
 				options.dstMixType = 0;
@@ -744,9 +744,9 @@ try {
 
 	validateRateLimits();
 
-	$('#res-src input:radio').change(function(ev) { options.srcType = parseInt($(this).val()); onUpdateSrcType(); });
-	$('#res-dst input[name=dst]').change(function(ev) { options.dstType = parseInt($(this).val()); onUpdateDstType(); });
-	$('#dst-mix-block input:radio').change(function(ev) { options.dstMixType = parseInt($(this).val()); if (forceDstMix()) onUpdateDstType(); else onUpdateDstMixType(); });
+	$('#res-src input:radio').change(function(ev) { options.srcType = Number.parseInt($(this).val()); onUpdateSrcType(); });
+	$('#res-dst input[name=dst]').change(function(ev) { options.dstType = Number.parseInt($(this).val()); onUpdateDstType(); });
+	$('#dst-mix-block input:radio').change(function(ev) { options.dstMixType = Number.parseInt($(this).val()); if (forceDstMix()) onUpdateDstType(); else onUpdateDstMixType(); });
 	$('#mix-balance-proc').keyup(function(ev) { var n = clampNumber(getInputNumber(this), 0, 100); $('#mix-balance').slider('value', n); options.mixBalance = n; options.save(); });
 	$('#mix-balance-prop1').keyup(function(ev) { options.mixProp1 = clampNumber(getInputNumber(this), 0, 100); options.save(); });
 	$('#mix-balance-prop2').keyup(function(ev) { options.mixProp2 = clampNumber(getInputNumber(this), 0, 100); options.save(); });
