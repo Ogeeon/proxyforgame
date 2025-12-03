@@ -153,8 +153,9 @@ $(document).ready(function() {
 	$('#reset-ds').click(resetDestroyParams);
 	$('#reset-cr').click(resetCreateParams);
 
-	var theme = $.cookie("theme");
-	toggleLight(theme == 'light');
+	var theme = { value: 'light', validate: function(key, val) { return val; } };
+	loadFromCookie('theme', theme);
+	toggleLight(theme.value == 'light');
 	$('#cb-light-theme').click(function(){toggleLight($('#cb-light-theme')[0].checked);});
 	
 	updateNumbers();

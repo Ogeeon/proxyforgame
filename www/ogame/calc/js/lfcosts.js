@@ -700,8 +700,9 @@ $(document).ready(function() {
 	$('#research-cost-reduction').data('constrains', {'min': 0, 'max': 25, 'def': 0, 'allowFloat': true, 'allowNegative': false});
 	$('#research-time-reduction').data('constrains', {'min': 0, 'max': 99, 'def': 0, 'allowFloat': true, 'allowNegative': false});
 
-	let theme = $.cookie("theme");
-	toggleLight(theme === 'light');
+	let theme = { value: 'light', validate: function(key, val) { return val; } };
+	loadFromCookie('theme', theme);
+	toggleLight(theme.value === 'light');
 	$('#cb-light-theme').click(function(){toggleLight($('#cb-light-theme')[0].checked);});
 
 	restoreTabsState();

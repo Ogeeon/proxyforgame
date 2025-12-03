@@ -27,8 +27,9 @@
 	<script type="text/javascript" src="/js/utils.js"></script>
 	<script type="text/javascript">
 		$(document).ready(function() {
-			var theme = $.cookie("theme");
-			toggleLight(theme == 'light');
+			var theme = { value: 'light', validate: function(key, val) { return val; } };
+			loadFromCookie('theme', theme);
+			toggleLight(theme.value == 'light');
 			$('#cb-light-theme').click(function(){toggleLight($('#cb-light-theme')[0].checked);});
 	  });
 	</script>	

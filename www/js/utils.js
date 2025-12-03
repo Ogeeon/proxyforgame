@@ -578,16 +578,19 @@ function loadFromStorage(name) {
 }
 
 function toggleLight(on) {
+	var theme = { value: 'light' };
 	if (on) {
 		$('#cb-light-theme')[0].checked = true;		
 		$("#dark-theme").attr('disabled', 'disabled');
 		$("#light-theme").removeAttr('disabled');
-		$.cookie("theme", "light", { expires: 365, path: '/' });
+		theme.value = 'light';
+		saveToCookie("theme", theme);
 	} else {
 		$('#cb-light-theme')[0].checked = false;
 		$("#dark-theme").removeAttr('disabled');		
 		$("#light-theme").attr('disabled', 'disabled');
-		$.cookie("theme", "dark", { expires: 365, path: '/' });
+		theme.value = 'dark';
+		saveToCookie("theme", theme);
 	}	
 }
 

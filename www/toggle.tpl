@@ -1,9 +1,9 @@
 <script type="text/javascript">
-var data = $.cookie("theme");
-if(data) {
-} else {
-	$.cookie("theme", "light", { expires: 365, path: '/' });
-}
+	let theme = { value: 'light', validate: function(key, val) { return val; } };
+	loadFromCookie('theme', theme);
+	if (!theme) {
+		saveToCookie('theme', theme);
+	}
 </script>
 
 <table cellpadding="0" cellspacing="0" border="0">

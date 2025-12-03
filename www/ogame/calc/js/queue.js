@@ -248,8 +248,9 @@ function build() {
 		totals[0] = totals[0] + 1;
 	}
 	
-	var theme = $.cookie("theme");
-	var fontColor = (totals[0] > totalFlds) ? "brown" : (theme == "light" ? "black" : "white");
+	var theme = { value: 'light', validate: function(key, val) { return val; } };
+	loadFromCookie('theme', theme);
+	var fontColor = (totals[0] > totalFlds) ? "brown" : (theme.value == "light" ? "black" : "white");
 	
 	if (techId == 33) {
 		var bonus = (nextLevel % 2 == 0) ? 6 : 5;
@@ -358,8 +359,9 @@ function deconstruct() {
 	
 	totals[0] = totals[0] - 1;
 	
-	var theme = $.cookie("theme");
-	var fontColor = (totals[0] > totalFlds) ? "brown" : (theme == "light" ? "black" : "white")
+	var theme = { value: 'light', validate: function(key, val) { return val; } };
+	loadFromCookie('theme', theme);
+	var fontColor = (totals[0] > totalFlds) ? "brown" : (theme.value == "light" ? "black" : "white")
 	var tbl = $('#table-dst-'+dstTbl)[0];
 	var footer = $('#table-dst-'+dstTbl+' tr').slice(tbl.rows.length-2).detach();
 	
@@ -558,8 +560,9 @@ function refreshQueue(planet) {
 	for (var i = tbl.rows.length-3; i > 0; i--)
 		$(tbl.rows[i]).remove();
 	var footer = $('#table-dst-'+tabNum+' tr').slice(tbl.rows.length-2).detach();
-	var theme = $.cookie("theme");
-	var fontColor = theme == "light" ? "black" : "white";
+	var theme = { value: 'light', validate: function(key, val) { return val; } };
+	loadFromCookie('theme', theme);
+	var fontColor = theme.value == "light" ? "black" : "white";
 	
 	var rows;
 	var techId = 0;
@@ -804,7 +807,8 @@ $(document).ready(function() {
 	$('#set-start-now-2').click('planet', setStartNow);
 	$('#set-start-now-3').click('moon', setStartNow);
 
-	var theme = $.cookie("theme");	
-	toggleLight(theme == 'light');
+	var theme = { value: 'light', validate: function(key, val) { return val; } };
+	loadFromCookie('theme', theme);
+	toggleLight(theme.value == 'light');
 	$('#cb-light-theme').click(function(){toggleLight($('#cb-light-theme')[0].checked); refreshBothQueues()});
 });

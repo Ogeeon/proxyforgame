@@ -1358,7 +1358,6 @@ jQuery(function($) {
 	for (i = 0; i < flightData.length; i++)
 		addFlightRow(flightData[i]);
 	updateArrival();
-	// let tabsData = $.cookie('ui-tabs-1');
 	
 	let tabNum = 0
 	try {
@@ -1465,8 +1464,9 @@ jQuery(function($) {
 		$('#fleet-name-select').append(new Option(key.replace("flight_fleet_", ""), key));
 	}
 
-	let theme = $.cookie("theme");
-	toggleLight(theme === 'light');
+	let theme = { value: 'light', validate: function(key, val) { return val; } };
+	loadFromCookie('theme', theme);
+	toggleLight(theme.value === 'light');
 	$('#cb-light-theme').click(function(){toggleLight($('#cb-light-theme')[0].checked);});
 	
 	updateNumbers();

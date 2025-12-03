@@ -473,7 +473,8 @@ jQuery(function($) {
 
     compute();
     
-	let theme = $.cookie("theme");
-	toggleLight(theme === 'light');
+	let theme = { value: 'light', validate: function(key, val) { return val; } };
+	loadFromCookie('theme', theme);
+	toggleLight(theme.value === 'light');
 	$('#cb-light-theme').click(function(){toggleLight($('#cb-light-theme')[0].checked);});
 });

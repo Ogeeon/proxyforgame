@@ -292,11 +292,13 @@ $(function(){
 
 document.onkeypress = getText;
 
-var lastChange = $.cookie("lastChange");
+// TODO: set on 2025-12-03, replace with 0 after some time
+let lastChange = { value: '42', validate: function(key, val) { return val; } };
+loadFromCookie('lastChange', lastChange);
 if(lastChange) {
-	//consoleLog("lastChange="+lastChange+", currChange="+currChange);
-	if (lastChange < currChange) {
+	// consoleLog("lastChange="+lastChange.value+", currChange="+currChange);
+	if (lastChange.value < currChange) {
 		requestAndShowChangelog(lastChange);
 	}
 }
-$.cookie("lastChange", currChange, { expires: 365, path: '/' });
+saveToCookie('lastChange', lastChange);

@@ -515,8 +515,9 @@ function updateOnePlnTab() {
 	let koeff = prodData[4];
 	
 	$('#prod-coeff')[0].innerHTML = '<b>'+Math.floor(koeff * 100)+'%</b>';
-	let theme = $.cookie("theme");
-	let color = koeff < 1 ? "brown" : (theme === "light" ? "black" : "white");
+	let theme = { value: 'light', validate: function(key, val) { return val; } };
+	loadFromCookie('theme', theme);
+	let color = koeff < 1 ? "brown" : (theme.value === "light" ? "black" : "white");
 	$('#prod-coeff').css('color', color);
 	
 	// Выведем данные о текущем производстве и подведем итоги
@@ -1221,8 +1222,9 @@ try {
 		$('#universe-name-select').append(new Option(key.replace("prod_uni_", ""), key));
 	}
 
-	let theme = $.cookie("theme");
-	toggleLight(theme === 'light');
+	let theme = { value: 'light', validate: function(key, val) { return val; } };
+	loadFromCookie('theme', theme);
+	toggleLight(theme.value === 'light');
 	$('#cb-light-theme').click(function(){toggleLight($('#cb-light-theme')[0].checked);});
 	
 	updateParams();
