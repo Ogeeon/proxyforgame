@@ -77,8 +77,8 @@ var options = {
 				};
 			}
 			this.rates.mc = (this.rates.md / this.rates.cd).toFixed(3);
-			consoleLog("loaded from cookies: ");
-			consoleLog(options);
+			// consoleLog("loaded from cookies: ");
+			// consoleLog(options);
 		} catch(e) {
 			alert(e);
 		}
@@ -106,16 +106,16 @@ var options = {
 			if (isset(p['dt'])) this.dstType = validateNumber(Number.parseInt(p['dt']), 0, 5, this.dstType);
 			if (isset(p['dmt'])) this.dstMixType = validateNumber(Number.parseInt(p['dmt']), 0, 3, this.dstMixType);
 			if (isset(p['mix'])) this.mixBalance = validateNumber(Number.parseFloat(p['mix']), 0, 100, this.mixBalance);
-			if (isset(p['mp1'])) { this.mixProp1 = validateNumber(Number.parseInt(p['mp1']), 0, 100, this.mixProp1); $('#mix-balance-prop1').val(this.mixProp1 == 0 ? '' : this.mixProp1); }
-			if (isset(p['mp2'])) { this.mixProp2 = validateNumber(Number.parseInt(p['mp2']), 0, 100, this.mixProp2); $('#mix-balance-prop2').val(this.mixProp2 == 0 ? '' : this.mixProp2); }
-			if (isset(p['fix1'])) { this.fix1 = validateNumber(Number.parseInt(p['fix1']), 0, Infinity, this.fix1); $('#mix-fix1').val(this.fix1 == 0 ? '' : this.fix1); }
-			if (isset(p['fix2'])) { this.fix2 = validateNumber(Number.parseInt(p['fix2']), 0, Infinity, this.fix2); $('#mix-fix2').val(this.fix2 == 0 ? '' : this.fix2); }
-			if (isset(p['m'])) { var m = validateNumber(Number.parseInt(p['m']), 0, Infinity, 0); $('#res-src-m').val(m == 0 ? '' : m); }
-			if (isset(p['c'])) { var c = validateNumber(Number.parseInt(p['c']), 0, Infinity, 0); $('#res-src-c').val(c == 0 ? '' : c); }
-			if (isset(p['d'])) { var d = validateNumber(Number.parseInt(p['d']), 0, Infinity, 0); $('#res-src-d').val(d == 0 ? '' : d); }
+			if (isset(p['mp1'])) { this.mixProp1 = validateNumber(Number.parseInt(p['mp1']), 0, 100, this.mixProp1); document.getElementById('mix-balance-prop1').value = this.mixProp1 == 0 ? '' : this.mixProp1; }
+			if (isset(p['mp2'])) { this.mixProp2 = validateNumber(Number.parseInt(p['mp2']), 0, 100, this.mixProp2); document.getElementById('mix-balance-prop2').value = this.mixProp2 == 0 ? '' : this.mixProp2; }
+			if (isset(p['fix1'])) { this.fix1 = validateNumber(Number.parseInt(p['fix1']), 0, Infinity, this.fix1); document.getElementById('mix-fix1').value = this.fix1 == 0 ? '' : this.fix1; }
+			if (isset(p['fix2'])) { this.fix2 = validateNumber(Number.parseInt(p['fix2']), 0, Infinity, this.fix2); document.getElementById('mix-fix2').value = this.fix2 == 0 ? '' : this.fix2; }
+			if (isset(p['m'])) { var m = validateNumber(Number.parseInt(p['m']), 0, Infinity, 0); document.getElementById('res-src-m').value = m == 0 ? '' : m; }
+			if (isset(p['c'])) { var c = validateNumber(Number.parseInt(p['c']), 0, Infinity, 0); document.getElementById('res-src-c').value = c == 0 ? '' : c; }
+			if (isset(p['d'])) { var d = validateNumber(Number.parseInt(p['d']), 0, Infinity, 0); document.getElementById('res-src-d').value = d == 0 ? '' : d; }
 			if (isset(p['l'])) { var m = p['l'].split(':'); if (m.length == 2) { this.country = checkCountryLang(m[0]); this.universe = validateNumber(Number.parseInt(m[1]), 0, Infinity, 101); } }
 			if (isset(p['lc'])) { var m = p['lc'].split(':'); if (m.length == 3) { this.coordg = validateNumber(Number.parseInt(m[0]), 0, 12, 0); this.coords = validateNumber(Number.parseInt(m[1]), 0, 550, 0); this.coordp = validateNumber(Number.parseInt(m[2]), 0, 15, 0); } }
-			if (isset(p['lm'])) { var lm = validateNumber(Number.parseInt(p['lm']), 0, 1, 0); $('#moon')[0].checked = lm !== 0; this.moon = lm !== 0; } else this.moon = false;
+			if (isset(p['lm'])) { var lm = validateNumber(Number.parseInt(p['lm']), 0, 1, 0); document.getElementById('moon').checked = lm !== 0; this.moon = lm !== 0; } else this.moon = false;
 		}
 	},
 
@@ -166,8 +166,8 @@ var options = {
 		txt += l.rates + ' ' + options.rates.md + ':' + options.rates.cd + ':1. ';
 
 		if (this.coordg && this.coords && this.coordp) {
-			var server = $('#country :selected').text().match(/\((.+)\)/)[1];
-			var uni = $('#universe :selected').text().match(/^(.+) \(/)[1];
+			var server = document.querySelector('#country option:checked').textContent.match(/\((.+)\)/)[1];
+			var uni = document.querySelector('#universe option:checked').textContent.match(/^(.+) \(/)[1];
 			txt += l.coords + ' [' + this.coordg + ':' + this.coords + ':' + this.coordp + ']';
 			txt += this.moon ? ', '+ l.moonstr : '';
 			txt += ' (' + uni + ', ' + server + ')';
@@ -182,7 +182,8 @@ var options = {
  * @param uni текущая вселенная: 1,2,3,..101,102,...
  */
 function setUniList(lang, uni) {
-	$('#universe').empty();
+	const universeEl = document.getElementById('universe');
+	universeEl.innerHTML = '';
 	var ulist = unis[lang] || [];
 
 	// проверяем, имеется ли такая вселенная в указанной стране. если нет, сбрасываем на начало списка
@@ -199,9 +200,12 @@ function setUniList(lang, uni) {
 	}
 
 	for (var i = 0; i < ulist.length; i++) {
-		$('#universe').append($('<option value="' + ulist[i][0] + '">' + ulist[i][2] + ' (' + ulist[i][1] + ')</option>'));
+		const option = document.createElement('option');
+		option.value = ulist[i][0];
+		option.textContent = ulist[i][2] + ' (' + ulist[i][1] + ')';
+		universeEl.appendChild(option);
 	}
-	$('#universe').val(uni);
+	universeEl.value = uni;
 }
 
 /**
@@ -217,8 +221,9 @@ function getUrlLang() {
  */
 function checkCountryLang(lang) {
 	var f = false;
-	$('#country option').each(function() {
-		if (this.value === lang) f = true;
+	const options = document.querySelectorAll('#country option');
+	options.forEach(function(option) {
+		if (option.value === lang) f = true;
 	});
 	return f ? lang : getUrlLang();
 }
@@ -246,9 +251,9 @@ function getDstInputState(srcType, dstType) {
  * Обрабатывает смену переключателя srcType.
  */
 function onUpdateSrcType() {
-	var input = $('#res-src-' + options.srcType);
-	if (!input.is(':checked')) {
-		input.attr('checked', true);
+	var input = document.getElementById('res-src-' + options.srcType);
+	if (!input.checked) {
+		input.checked = true;
 	}
 	updateSrcInputState(resTypes[options.srcType]);
 	updateDstFromSrc();
@@ -263,9 +268,9 @@ function onUpdateDstType() {
 	if (options.srcType > 2) {
 		options.dstType = 0;
 	}
-	var input = $('#res-dst-' + options.dstType);
-	if (!input.is(':checked')) {
-		input.attr('checked', true);
+	var input = document.getElementById('res-dst-' + options.dstType);
+	if (!input.checked) {
+		input.checked = true;
 	}
 	updateDstInputState(getDstInputState(options.srcType, options.dstType));
 	onUpdateDstMixType();
@@ -276,12 +281,13 @@ function onUpdateDstType() {
  */
 function onUpdateDstMixType() {
 	if (options.dstType == 2) {
-		var input = $('#res-dst-mix-' + options.dstMixType);
-		if (!input.is(':checked')) {
-			input.attr('checked', true);
+		var input = document.getElementById('res-dst-mix-' + options.dstMixType);
+		if (!input.checked) {
+			input.checked = true;
 		}
 	} else {
-		$('#dst-mix-block input:radio').attr('checked', false);
+		const radios = document.querySelectorAll('#dst-mix-block input[type="radio"]');
+		radios.forEach(r => r.checked = false);
 	}
 	updateNumbers();
 	options.save();
@@ -338,13 +344,14 @@ function activateDstMixType(obj) {
 function updateSrcInputState(resEnable) {
 	var classNames = ['res-src-m', 'res-src-c', 'res-src-d'];
 	for (var i = 0; i < 3; i++) {
-		var elems = $('#res-src-panel .' + classNames[i]);
+		var elems = document.querySelectorAll('#res-src-panel .' + classNames[i]);
+		var inputs = document.querySelectorAll('input.' + classNames[i]);
 		if (resEnable[i] == 1) {
-			elems.removeClass('ui-state-disabled');
-			$('input.' + classNames[i]).removeAttr('disabled');
+			elems.forEach(el => el.classList.remove('ui-state-disabled'));
+			inputs.forEach(inp => inp.removeAttribute('disabled'));
 		} else {
-			elems.addClass('ui-state-disabled');
-			$('input.' + classNames[i]).attr('disabled', true);
+			elems.forEach(el => el.classList.add('ui-state-disabled'));
+			inputs.forEach(inp => inp.disabled = true);
 		}
 	}
 }
@@ -361,43 +368,43 @@ function updateDstFromSrc() {
 	// обновляем подписи к типу ресурсов
 	switch (options.srcType) {
 		case 0:
-			$('#res-type-dst-lbl-0').text(l.crystal);
-			$('#res-type-dst-lbl-1').text(l.deuterium);
-			$('#res-type-dst-lbl-2').text(l.crystal + ' + ' + l.deuterium);
-			$('#mix-lbl').text(l.crys);
-			$('#mix-prop-lbl').text(l.crys + ' / ' + l.deut);
-			$('#mix-fix1-lbl').text(l.fix + '. ' + l.crys);
-			$('#mix-fix2-lbl').text(l.fix + '. ' + l.deut);
+			document.getElementById('res-type-dst-lbl-0').textContent = l.crystal;
+			document.getElementById('res-type-dst-lbl-1').textContent = l.deuterium;
+			document.getElementById('res-type-dst-lbl-2').textContent = l.crystal + ' + ' + l.deuterium;
+			document.getElementById('mix-lbl').textContent = l.crys;
+			document.getElementById('mix-prop-lbl').textContent = l.crys + ' / ' + l.deut;
+			document.getElementById('mix-fix1-lbl').textContent = l.fix + '. ' + l.crys;
+			document.getElementById('mix-fix2-lbl').textContent = l.fix + '. ' + l.deut;
 			break;
 		case 1:
-			$('#res-type-dst-lbl-0').text(l.metal);
-			$('#res-type-dst-lbl-1').text(l.deuterium);
-			$('#res-type-dst-lbl-2').text(l.metal + ' + ' + l.deuterium);
-			$('#mix-lbl').text(l.met);
-			$('#mix-prop-lbl').text(l.met + ' / ' + l.deut);
-			$('#mix-fix1-lbl').text(l.fix + '. ' + l.met);
-			$('#mix-fix2-lbl').text(l.fix + '. ' + l.deut);
+			document.getElementById('res-type-dst-lbl-0').textContent = l.metal;
+			document.getElementById('res-type-dst-lbl-1').textContent = l.deuterium;
+			document.getElementById('res-type-dst-lbl-2').textContent = l.metal + ' + ' + l.deuterium;
+			document.getElementById('mix-lbl').textContent = l.met;
+			document.getElementById('mix-prop-lbl').textContent = l.met + ' / ' + l.deut;
+			document.getElementById('mix-fix1-lbl').textContent = l.fix + '. ' + l.met;
+			document.getElementById('mix-fix2-lbl').textContent = l.fix + '. ' + l.deut;
 			break;
 		case 2:
-			$('#res-type-dst-lbl-0').text(l.metal);
-			$('#res-type-dst-lbl-1').text(l.crystal);
-			$('#res-type-dst-lbl-2').text(l.metal + ' + ' + l.crystal);
-			$('#mix-lbl').text(l.met);
-			$('#mix-prop-lbl').text(l.met + ' / ' + l.crys);
-			$('#mix-fix1-lbl').text(l.fix + '. ' + l.met);
-			$('#mix-fix2-lbl').text(l.fix + '. ' + l.crys);
+			document.getElementById('res-type-dst-lbl-0').textContent = l.metal;
+			document.getElementById('res-type-dst-lbl-1').textContent = l.crystal;
+			document.getElementById('res-type-dst-lbl-2').textContent = l.metal + ' + ' + l.crystal;
+			document.getElementById('mix-lbl').textContent = l.met;
+			document.getElementById('mix-prop-lbl').textContent = l.met + ' / ' + l.crys;
+			document.getElementById('mix-fix1-lbl').textContent = l.fix + '. ' + l.met;
+			document.getElementById('mix-fix2-lbl').textContent = l.fix + '. ' + l.crys;
 			break;
 		case 3:
-			$('#res-type-dst-lbl-0').text(l.deuterium);
+			document.getElementById('res-type-dst-lbl-0').textContent = l.deuterium;
 			break;
 		case 4:
-			$('#res-type-dst-lbl-0').text(l.crystal);
+			document.getElementById('res-type-dst-lbl-0').textContent = l.crystal;
 			break;
 		case 5:
-			$('#res-type-dst-lbl-0').text(l.metal);
+			document.getElementById('res-type-dst-lbl-0').textContent = l.metal;
 			break;
 	}
-	$('#dst-block').css('visibility', options.srcType < 3 ? 'visible' : 'hidden');
+	document.getElementById('dst-block').style.visibility = options.srcType < 3 ? 'visible' : 'hidden';
 }
 
 /**
@@ -407,11 +414,11 @@ function updateDstFromSrc() {
 function updateDstInputState(resEnable) {
 	var classNames = ['res-dst-m', 'res-dst-c', 'res-dst-d'];
 	for (var i = 0; i < 3; i++) {
-		var elems = $('#res-dst-panel .' + classNames[i]);
+		var elems = document.querySelectorAll('#res-dst-panel .' + classNames[i]);
 		if (resEnable[i] == 0) {
-			elems.removeClass('ui-state-disabled');
+			elems.forEach(el => el.classList.remove('ui-state-disabled'));
 		} else {
-			elems.addClass('ui-state-disabled');
+			elems.forEach(el => el.classList.add('ui-state-disabled'));
 		}
 	}
 }
@@ -431,23 +438,23 @@ function resetParams() {
 	options.hyperTech = 0;
 	options.moon = false;
 
-	$('#res-src-m').val('');
-	$('#res-src-c').val('');
-	$('#res-src-d').val('');
-	$('#rate-md').val(options.rates.md);
-	$('#rate-cd').val(options.rates.cd);
-	$('#rate-mc').text(options.rates.mc);
-	$('#md-slider').slider('value', options.rates.md);
-	$('#cd-slider').slider('value', options.rates.cd);
-	$('#mc-slider').slider('value', options.rates.mc);
-	$('#mix-balance-proc').val(options.mixBalance);
-	$('#mix-balance-prop1').val(options.mixProp1);
-	$('#mix-balance-prop2').val(options.mixProp2);
-	$('#mix-balance').slider('value', options.mixBalance);
-	$('#mix-fix1').val('');
-	$('#mix-fix2').val('');
-	$('#hypertech-lvl').val(0);
-	$('#moon')[0].checked = false;
+	document.getElementById('res-src-m').value = '';
+	document.getElementById('res-src-c').value = '';
+	document.getElementById('res-src-d').value = '';
+	document.getElementById('rate-md').value = options.rates.md;
+	document.getElementById('rate-cd').value = options.rates.cd;
+	document.getElementById('rate-mc').textContent = options.rates.mc;
+	document.getElementById('md-slider').value = options.rates.md;
+	document.getElementById('cd-slider').value = options.rates.cd;
+	document.getElementById('mc-slider').value = options.rates.mc;
+	document.getElementById('mix-balance-proc').value = options.mixBalance;
+	document.getElementById('mix-balance-prop1').value = options.mixProp1;
+	document.getElementById('mix-balance-prop2').value = options.mixProp2;
+	document.getElementById('mix-balance').value = options.mixBalance;
+	document.getElementById('mix-fix1').value = '';
+	document.getElementById('mix-fix2').value = '';
+	document.getElementById('hypertech-lvl').value = 0;
+	document.getElementById('moon').checked = false;
 	onUpdateSrcType();
 	validateRateLimits();
 	options.save();
@@ -457,20 +464,24 @@ function resetParams() {
  * Проверяет, находятся ли курсы в допустимых пределах, и если это не так - подкрашивает input красным.
  */
 function validateRateLimits() {
+	const rateMd = document.getElementById('rate-md');
+	const rateCd = document.getElementById('rate-cd');
+	const rateMc = document.getElementById('rate-mc');
+	
 	if (options.rates.md >= rateLimits.md.min && options.rates.md <= rateLimits.md.max) {
-		$('#rate-md').removeClass('ui-state-error');
+		rateMd.classList.remove('ui-state-error');
 	} else {
-		$('#rate-md').addClass('ui-state-error');
+		rateMd.classList.add('ui-state-error');
 	}
 	if (options.rates.cd >= rateLimits.cd.min && options.rates.cd <= rateLimits.cd.max) {
-		$('#rate-cd').removeClass('ui-state-error');
+		rateCd.classList.remove('ui-state-error');
 	} else {
-		$('#rate-cd').addClass('ui-state-error');
+		rateCd.classList.add('ui-state-error');
 	}
 	if (options.rates.mc >= rateLimits.mc.min && options.rates.mc <= rateLimits.mc.max) {
-		$('#rate-mc').removeClass('ui-state-error');
+		rateMc.classList.remove('ui-state-error');
 	} else {
-		$('#rate-mc').addClass('ui-state-error');
+		rateMc.classList.add('ui-state-error');
 	}
 }
 
@@ -479,9 +490,9 @@ function validateRateLimits() {
  */
 function updateNumbers() {
 	// исходные ресурсы
-	var sm = clampNumber(getInputNumber($('#res-src-m')[0]), 0, Infinity);
-	var sc = clampNumber(getInputNumber($('#res-src-c')[0]), 0, Infinity);
-	var sd = clampNumber(getInputNumber($('#res-src-d')[0]), 0, Infinity);
+	var sm = clampNumber(getInputNumber(document.getElementById('res-src-m')), 0, Infinity);
+	var sc = clampNumber(getInputNumber(document.getElementById('res-src-c')), 0, Infinity);
+	var sd = clampNumber(getInputNumber(document.getElementById('res-src-d')), 0, Infinity);
 
 	options.metal = sm;
 	options.crystal = sc;
@@ -503,8 +514,8 @@ function updateNumbers() {
 	var dd = 0;
 
 	// фиксированные ресурсы из микса
-	var fix1 = getInputNumber($('#mix-fix1')[0]);
-	var fix2 = getInputNumber($('#mix-fix2')[0]);
+	var fix1 = getInputNumber(document.getElementById('mix-fix1'));
+	var fix2 = getInputNumber(document.getElementById('mix-fix2'));
 	options.fix1 = fix1;
 	options.fix2 = fix2;
 
@@ -600,9 +611,9 @@ function updateNumbers() {
 	dm = Math.round(dm);
 	dc = Math.round(dc);
 	dd = Math.round(dd);
-	$('#res-dst-m').text(numToOGame(dm));
-	$('#res-dst-c').text(numToOGame(dc));
-	$('#res-dst-d').text(numToOGame(dd));
+	document.getElementById('res-dst-m').textContent = numToOGame(dm);
+	document.getElementById('res-dst-c').textContent = numToOGame(dc);
+	document.getElementById('res-dst-d').textContent = numToOGame(dd);
 
 	var st = 0;
 	switch (options.srcType) {
@@ -620,28 +631,32 @@ function updateNumbers() {
 			break;
 	}
 	
-	var ht = clampNumber(getInputNumber($('#hypertech-lvl')[0]), 0, Infinity);
+	var ht = clampNumber(getInputNumber(document.getElementById('hypertech-lvl')), 0, Infinity);
 	options.hyperTech = ht;
 	var capSC = 5000.0 * (1 + 0.05 * ht);
 	var capLC = 25000.0 * (1 + 0.05 * ht);
 	var mt = st / capSC;
 	var bt = st / capLC;
-	$('#res-src-cargo').text(numToOGame(Math.ceil(mt)) + ' ' + l.sc + ' / ' + numToOGame(Math.ceil(bt)) + ' ' + l.lc);
+	document.getElementById('res-src-cargo').textContent = numToOGame(Math.ceil(mt)) + ' ' + l.sc + ' / ' + numToOGame(Math.ceil(bt)) + ' ' + l.lc;
 	st = dm + dc + dd;
 	mt = st / capSC;
 	bt = st / capLC;
-	$('#res-dst-cargo').text(numToOGame(Math.ceil(mt)) + ' ' + l.sc + ' / ' + numToOGame(Math.ceil(bt)) + ' ' + l.lc);
+	document.getElementById('res-dst-cargo').textContent = numToOGame(Math.ceil(mt)) + ' ' + l.sc + ' / ' + numToOGame(Math.ceil(bt)) + ' ' + l.lc;
 
 	if (sm || sc || sd) {
 		var uri = options.makeUri();
 		var txt = options.makeString(dm, dc, dd);
-		$('#alink').attr('href', uri).text(uri);
-		$('#atext').text(txt);
-		setTimeout(function() { $('#abbcode').text('[url=' + uri + ']' + txt + '[/url]'); }, 200);
+		const alink = document.getElementById('alink');
+		alink.href = uri;
+		alink.textContent = uri;
+		document.getElementById('atext').textContent = txt;
+		setTimeout(function() { document.getElementById('abbcode').textContent = '[url=' + uri + ']' + txt + '[/url]'; }, 200);
 	} else {
-		$('#alink').attr('href', '').text('');
-		$('#atext').text('');
-		$('#abbcode').text('');
+		const alink = document.getElementById('alink');
+		alink.href = '';
+		alink.textContent = '';
+		document.getElementById('atext').textContent = '';
+		document.getElementById('abbcode').textContent = '';
 	}
 	options.save();
 }
@@ -649,134 +664,165 @@ function updateNumbers() {
 /**
  *
  */
-$(document).ready(function() {
+document.addEventListener('DOMContentLoaded', function() {
 try {
-	$("button").button();
 	options.load();
 	options.parseFromUri();
 
-	$('#md-slider').slider({
-		range: 'min', value: options.rates.md, min: rateLimits.md.min, max: rateLimits.md.max, step: 0.05,
-		slide: function(event, ui) {
-			$('#rate-md').val(ui.value);
-			options.rates.md = Number.parseFloat(ui.value);
-			options.rates.mc = (options.rates.md / options.rates.cd).toFixed(3);
-			updateNumbers();
-			$('#rate-mc').text(options.rates.mc);
-			$('#mc-slider').slider('value', options.rates.mc);
-			validateRateLimits();
-			options.save();
-		}
-	});
-	$('#cd-slider').slider({
-		range: 'min', value: options.rates.cd, min: rateLimits.cd.min, max: rateLimits.cd.max, step: 0.05,
-		slide: function(event, ui) {
-			$('#rate-cd').val(ui.value);
-			options.rates.cd = Number.parseFloat(ui.value);
-			options.rates.mc = (options.rates.md / options.rates.cd).toFixed(3);
-			updateNumbers();
-			$('#rate-mc').text(options.rates.mc);
-			$('#mc-slider').slider('value', options.rates.mc);
-			validateRateLimits();
-			options.save();
-		}
-	});
-	$('#mc-slider').slider({
-		range: 'min', value: options.rates.mc, min: rateLimits.mc.min, max: rateLimits.mc.max, step: 0.05,
-		disabled: true
-	});
-	$('#mix-balance').slider({
-		range: 'min', value: options.mixBalance, min: 0, max: 100, step: 5,
-		slide: function(event, ui) {
-			options.mixBalance = Number.parseFloat(ui.value);
-			$('#mix-balance-proc').val(options.mixBalance);
-			if (options.dstType != 2 || options.dstMixType != 0) {
-				options.dstMixType = 0;
-				if (forceDstMix()) onUpdateDstType(); else onUpdateDstMixType();
-			}
-			updateNumbers();
-			options.save();
-		}
+	const mdSlider = document.getElementById('md-slider');
+	mdSlider.min = rateLimits.md.min;
+	mdSlider.max = rateLimits.md.max;
+	mdSlider.step = 0.05;
+	mdSlider.value = options.rates.md;
+	mdSlider.addEventListener('input', function() {
+		const val = Number.parseFloat(this.value);
+		document.getElementById('rate-md').value = val;
+		options.rates.md = val;
+		options.rates.mc = (options.rates.md / options.rates.cd).toFixed(3);
+		updateNumbers();
+		document.getElementById('rate-mc').textContent = options.rates.mc;
+		document.getElementById('mc-slider').value = options.rates.mc;
+		validateRateLimits();
+		options.save();
 	});
 
-	$('#hypertech-lvl').val(options.hyperTech);
-	$('#country').val(options.country);
+	const cdSlider = document.getElementById('cd-slider');
+	cdSlider.min = rateLimits.cd.min;
+	cdSlider.max = rateLimits.cd.max;
+	cdSlider.step = 0.05;
+	cdSlider.value = options.rates.cd;
+	cdSlider.addEventListener('input', function() {
+		const val = Number.parseFloat(this.value);
+		document.getElementById('rate-cd').value = val;
+		options.rates.cd = val;
+		options.rates.mc = (options.rates.md / options.rates.cd).toFixed(3);
+		updateNumbers();
+		document.getElementById('rate-mc').textContent = options.rates.mc;
+		document.getElementById('mc-slider').value = options.rates.mc;
+		validateRateLimits();
+		options.save();
+	});
+
+	const mcSlider = document.getElementById('mc-slider');
+	mcSlider.min = rateLimits.mc.min;
+	mcSlider.max = rateLimits.mc.max;
+	mcSlider.step = 0.05;
+	mcSlider.value = options.rates.mc;
+	mcSlider.disabled = true;
+
+	const mixBalanceSlider = document.getElementById('mix-balance');
+	mixBalanceSlider.min = 0;
+	mixBalanceSlider.max = 100;
+	mixBalanceSlider.step = 5;
+	mixBalanceSlider.value = options.mixBalance;
+	mixBalanceSlider.addEventListener('input', function() {
+		const val = Number.parseFloat(this.value);
+		options.mixBalance = val;
+		document.getElementById('mix-balance-proc').value = options.mixBalance;
+		if (options.dstType != 2 || options.dstMixType != 0) {
+			options.dstMixType = 0;
+			if (forceDstMix()) onUpdateDstType(); else onUpdateDstMixType();
+		}
+		updateNumbers();
+		options.save();
+	});
+
+	document.getElementById('hypertech-lvl').value = options.hyperTech;
+	document.getElementById('country').value = options.country;
 	setUniList(options.country, options.universe);
 
-	$('#rate-md-min').text(rateLimits.md.min.toFixed(1));
-	$('#rate-md-max').text(rateLimits.md.max.toFixed(1));
-	$('#rate-cd-min').text(rateLimits.cd.min.toFixed(1));
-	$('#rate-cd-max').text(rateLimits.cd.max.toFixed(1));
-	$('#rate-mc-min').text(rateLimits.mc.min.toFixed(1));
-	$('#rate-mc-max').text(rateLimits.mc.max.toFixed(1));
-	$('#rate-md').val(options.rates.md);
-	$('#rate-cd').val(options.rates.cd);
-	$('#rate-mc').text(options.rates.mc);
-	$('#mix-balance-proc').val(options.mixBalance);
-	$('#mix-balance-prop1').val(options.mixProp1);
-	$('#mix-balance-prop2').val(options.mixProp2);
-	$('#coord-g').val(options.coordg ? options.coordg : '');
-	$('#coord-s').val(options.coords ? options.coords : '');
-	$('#coord-p').val(options.coordp ? options.coordp : '');
-	$('#moon')[0].checked = options.moon;
+	document.getElementById('rate-md-min').textContent = rateLimits.md.min.toFixed(1);
+	document.getElementById('rate-md-max').textContent = rateLimits.md.max.toFixed(1);
+	document.getElementById('rate-cd-min').textContent = rateLimits.cd.min.toFixed(1);
+	document.getElementById('rate-cd-max').textContent = rateLimits.cd.max.toFixed(1);
+	document.getElementById('rate-mc-min').textContent = rateLimits.mc.min.toFixed(1);
+	document.getElementById('rate-mc-max').textContent = rateLimits.mc.max.toFixed(1);
+	document.getElementById('rate-md').value = options.rates.md;
+	document.getElementById('rate-cd').value = options.rates.cd;
+	document.getElementById('rate-mc').textContent = options.rates.mc;
+	document.getElementById('mix-balance-proc').value = options.mixBalance;
+	document.getElementById('mix-balance-prop1').value = options.mixProp1;
+	document.getElementById('mix-balance-prop2').value = options.mixProp2;
+	document.getElementById('coord-g').value = options.coordg ? options.coordg : '';
+	document.getElementById('coord-s').value = options.coords ? options.coords : '';
+	document.getElementById('coord-p').value = options.coordp ? options.coordp : '';
+	document.getElementById('moon').checked = options.moon;
 
-	$('input').focusin(function() {
-		$(this).addClass('ui-state-focus');
-	});
-	$('input').focusout(function() {
-		$(this).removeClass('ui-state-focus');
+	document.querySelectorAll('input').forEach(function(input) {
+		input.addEventListener('focusin', function() {
+			this.classList.add('ui-state-focus');
+		});
+		input.addEventListener('focusout', function() {
+			this.classList.remove('ui-state-focus');
+		});
 	});
 
-	$('#reset').click(resetParams);
+	document.getElementById('reset').addEventListener('click', resetParams);
 
 	var rbf = function(r1, r2) {
 		options.rates.md = r1;
 		options.rates.cd = r2;
 		options.rates.mc = (r1 / r2).toFixed(3);
-		$('#rate-md').val(options.rates.md);
-		$('#rate-cd').val(options.rates.cd);
-		$('#rate-mc').text(options.rates.mc);
-		$('#md-slider').slider('value', options.rates.md);
-		$('#cd-slider').slider('value', options.rates.cd);
-		$('#mc-slider').slider('value', options.rates.mc);
+		document.getElementById('rate-md').value = options.rates.md;
+		document.getElementById('rate-cd').value = options.rates.cd;
+		document.getElementById('rate-mc').textContent = options.rates.mc;
+		document.getElementById('md-slider').value = options.rates.md;
+		document.getElementById('cd-slider').value = options.rates.cd;
+		document.getElementById('mc-slider').value = options.rates.mc;
 		updateNumbers();
 		validateRateLimits();
 		options.save();
 	}
-	$('#rb1').click(function() { rbf(4, 2); });
-	$('#rb2').click(function() { rbf(3, 2); });
-	$('#rb3').click(function() { rbf(3, 1.5); });
-	$('#rb4').click(function() { rbf(2.5, 1.5); });
-	$('#rb5').click(function() { rbf(2, 1.5); });
-	$('#rb6').click(function() { rbf(2.4, 1.5); });
+	document.getElementById('rb1').addEventListener('click', function() { rbf(4, 2); });
+	document.getElementById('rb2').addEventListener('click', function() { rbf(3, 2); });
+	document.getElementById('rb3').addEventListener('click', function() { rbf(3, 1.5); });
+	document.getElementById('rb4').addEventListener('click', function() { rbf(2.5, 1.5); });
+	document.getElementById('rb5').addEventListener('click', function() { rbf(2, 1.5); });
+	document.getElementById('rb6').addEventListener('click', function() { rbf(2.4, 1.5); });
 
 	validateRateLimits();
 
-	$('#res-src input:radio').change(function(ev) { options.srcType = Number.parseInt($(this).val()); onUpdateSrcType(); });
-	$('#res-dst input[name=dst]').change(function(ev) { options.dstType = Number.parseInt($(this).val()); onUpdateDstType(); });
-	$('#dst-mix-block input:radio').change(function(ev) { options.dstMixType = Number.parseInt($(this).val()); if (forceDstMix()) onUpdateDstType(); else onUpdateDstMixType(); });
-	$('#mix-balance-proc').keyup(function(ev) { var n = clampNumber(getInputNumber(this), 0, 100); $('#mix-balance').slider('value', n); options.mixBalance = n; options.save(); });
-	$('#mix-balance-prop1').keyup(function(ev) { options.mixProp1 = clampNumber(getInputNumber(this), 0, 100); options.save(); });
-	$('#mix-balance-prop2').keyup(function(ev) { options.mixProp2 = clampNumber(getInputNumber(this), 0, 100); options.save(); });
-	$('#res-src-panel input:text').keyup(updateNumbers);
-	$('#dst-mix-block input:text').keyup(updateNumbers);
-	$('#dst-mix-block input:text').focusin(function(ev) { activateDstMixType(this); });
-	var cev = function(ev) { options.country = $('#country').val(); setUniList(options.country, options.universe); updateNumbers(); options.save(); }
-	$('#country').change(cev).keyup(cev);
-	var uev = function(ev) { options.universe = $('#universe').val(); updateNumbers(); options.save(); }
-	$('#universe').change(uev).keyup(uev);
-	$('#coord-g').keyup(function(ev) { options.coordg = clampNumber(getInputNumber(this), 0, 12); updateNumbers(); options.save(); });
-	$('#coord-s').keyup(function(ev) { options.coords = clampNumber(getInputNumber(this), 0, 550); updateNumbers(); options.save(); });
-	$('#coord-p').keyup(function(ev) { options.coordp = clampNumber(getInputNumber(this), 0, 15); updateNumbers(); options.save(); });
-	$('#rate-md').keyup(function(ev) { options.rates.md = clampNumber(getInputNumber(this), 1, 5); $('#md-slider').slider('value', options.rates.md); options.rates.mc = (options.rates.md / options.rates.cd).toFixed(3); $('#rate-mc').text(options.rates.mc); $('#mc-slider').slider('value', options.rates.mc); updateNumbers(); validateRateLimits(); options.save(); });
-	$('#rate-cd').keyup(function(ev) { options.rates.cd = clampNumber(getInputNumber(this), 1, 5); $('#cd-slider').slider('value', options.rates.cd); options.rates.mc = (options.rates.md / options.rates.cd).toFixed(3); $('#rate-mc').text(options.rates.mc); $('#mc-slider').slider('value', options.rates.mc); updateNumbers(); validateRateLimits(); options.save(); });
-	$('#hypertech-lvl').keyup('updateNumbers', validateInputNumber);
-	$('#moon').click(function(ev) { options.moon = $('#moon')[0].checked; updateNumbers(); options.save(); });
+	document.querySelectorAll('#res-src input[type="radio"]').forEach(function(radio) {
+		radio.addEventListener('change', function() { options.srcType = Number.parseInt(this.value); onUpdateSrcType(); });
+	});
+	document.querySelectorAll('#res-dst input[name="dst"]').forEach(function(radio) {
+		radio.addEventListener('change', function() { options.dstType = Number.parseInt(this.value); onUpdateDstType(); });
+	});
+	document.querySelectorAll('#dst-mix-block input[type="radio"]').forEach(function(radio) {
+		radio.addEventListener('change', function() { options.dstMixType = Number.parseInt(this.value); if (forceDstMix()) onUpdateDstType(); else onUpdateDstMixType(); });
+	});
+	document.getElementById('mix-balance-proc').addEventListener('keyup', function() { var n = clampNumber(getInputNumber(this), 0, 100); document.getElementById('mix-balance').value = n; options.mixBalance = n; options.save(); });
+	document.getElementById('mix-balance-prop1').addEventListener('keyup', function() { options.mixProp1 = clampNumber(getInputNumber(this), 0, 100); options.save(); });
+	document.getElementById('mix-balance-prop2').addEventListener('keyup', function() { options.mixProp2 = clampNumber(getInputNumber(this), 0, 100); options.save(); });
+	document.querySelectorAll('#res-src-panel input[type="text"]').forEach(function(input) {
+		input.addEventListener('keyup', updateNumbers);
+	});
+	document.querySelectorAll('#dst-mix-block input[type="text"]').forEach(function(input) {
+		input.addEventListener('keyup', updateNumbers);
+		input.addEventListener('focusin', function() { activateDstMixType(this); });
+	});
+	var cev = function() { options.country = document.getElementById('country').value; setUniList(options.country, options.universe); updateNumbers(); options.save(); }
+	document.getElementById('country').addEventListener('change', cev);
+	document.getElementById('country').addEventListener('keyup', cev);
+	var uev = function() { options.universe = document.getElementById('universe').value; updateNumbers(); options.save(); }
+	document.getElementById('universe').addEventListener('change', uev);
+	document.getElementById('universe').addEventListener('keyup', uev);
+	document.getElementById('coord-g').addEventListener('keyup', function() { options.coordg = clampNumber(getInputNumber(this), 0, 12); updateNumbers(); options.save(); });
+	document.getElementById('coord-s').addEventListener('keyup', function() { options.coords = clampNumber(getInputNumber(this), 0, 550); updateNumbers(); options.save(); });
+	document.getElementById('coord-p').addEventListener('keyup', function() { options.coordp = clampNumber(getInputNumber(this), 0, 15); updateNumbers(); options.save(); });
+	document.getElementById('rate-md').addEventListener('keyup', function() { options.rates.md = clampNumber(getInputNumber(this), 1, 5); document.getElementById('md-slider').value = options.rates.md; options.rates.mc = (options.rates.md / options.rates.cd).toFixed(3); document.getElementById('rate-mc').textContent = options.rates.mc; document.getElementById('mc-slider').value = options.rates.mc; updateNumbers(); validateRateLimits(); options.save(); });
+	document.getElementById('rate-cd').addEventListener('keyup', function() { options.rates.cd = clampNumber(getInputNumber(this), 1, 5); document.getElementById('cd-slider').value = options.rates.cd; options.rates.mc = (options.rates.md / options.rates.cd).toFixed(3); document.getElementById('rate-mc').textContent = options.rates.mc; document.getElementById('mc-slider').value = options.rates.mc; updateNumbers(); validateRateLimits(); options.save(); });
+	var event = {currentTarget: document.getElementById('hypertech-lvl'), data: 'updateNumbers'};
+	document.getElementById('hypertech-lvl').addEventListener('keyup', function() { validateInputNumber.call(this, event); });
+	document.getElementById('moon').addEventListener('click', function() { options.moon = document.getElementById('moon').checked; updateNumbers(); options.save(); });
 
 	let theme = { value: 'light', validate: function(key, val) { return val; } };
 	loadFromCookie('theme', theme);
 	toggleLight(theme.value === 'light');
-	$('#cb-light-theme').click(function(){toggleLight($('#cb-light-theme')[0].checked);});
+	const cbLightTheme = document.getElementById('cb-light-theme');
+	if (cbLightTheme) {
+		cbLightTheme.addEventListener('click', function() { toggleLight(this.checked); });
+	}
 	
 	onUpdateSrcType();
 } catch (e) {
