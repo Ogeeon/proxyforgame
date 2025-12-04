@@ -241,7 +241,8 @@ function getOptionValue(opt, def) {
  * @param def значение по умолчанию
  */
 function getConstraint(element, constr, def) {
-	var constraints = $(element).data('constrains');
+	var el = (typeof element === 'string') ? document.getElementById(element) : element;
+	var constraints = el ? el._constrains : undefined;
 	// Если не найдём ограничения в свойствах самого поля, поробуем вязть из options - если и там нет, вернём значение по умолчанию
 	if (typeof(constraints) === 'undefined') {
 		if (typeof(options.defConstraints) === 'undefined')
@@ -473,19 +474,19 @@ function supports_html5_storage() {
  */
 function saveToCookie(name, data) {
 	var saveStr = 'key-value;true,';
-	$.each(data, function(key, value) {
-			if (jQuery.type(data[key]) == 'function') {
+	Object.keys(data).forEach(function(key) {
+			if (typeof data[key] === 'function') {
 				return;
 			}
-			if (jQuery.type(data[key]) == 'object' && !Array.isArray(data[key])) {
+			if (typeof data[key] === 'object' && data[key] !== null && !Array.isArray(data[key])) {
 				// Handle plain objects by JSON encoding
 				saveStr += key+';__JSON__'+JSON.stringify(data[key])+',';
 				return;
 			}
-			if (jQuery.type(data[key]) == 'array') {
+			if (Array.isArray(data[key])) {
 				var arr = data[key];
 				for (var i = 0; i < arr.length; i++) {
-					if (jQuery.type(arr[i]) == 'array') {
+					if (Array.isArray(arr[i])) {
 						var row = arr[i];
 						for (var j = 0; j < row.length; j++) {
 							saveStr += key+'|'+i+'|'+j+';'+row[j]+',';
@@ -497,19 +498,25 @@ function saveToCookie(name, data) {
 				}
 				return;
 			}
-			saveStr += key+';'+value+',';
+			saveStr += key+';'+data[key]+',';
 		}
 	);
 	saveStr = saveStr.substring(0, saveStr.length-1); // последний символ - запятая, она не нужна
 	if (supports_html5_storage()) {
 		try {
 			localStorage.setItem(name, saveStr);
-			$.cookie(name, "", { expires: -1, path: '/' }); // Раз смогли отправить информацию в хранилище, куку можно удалять
+			// Clear old cookie if exists
+			document.cookie = name + '=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/';
 		} catch (e) {
-			$.cookie(name, saveStr, { expires: 365, path: '/' }); // Квота превышена или еще какая гадость случилась - используем старый метод
+			// Quota exceeded - fallback to cookie
+			var d = new Date();
+			d.setTime(d.getTime() + (365*24*60*60*1000));
+			document.cookie = name + '=' + encodeURIComponent(saveStr) + '; expires=' + d.toUTCString() + '; path=/';
 		}
 	} else {
-		$.cookie(name, saveStr, { expires: 365, path: '/' });
+		var d = new Date();
+		d.setTime(d.getTime() + (365*24*60*60*1000));
+		document.cookie = name + '=' + encodeURIComponent(saveStr) + '; expires=' + d.toUTCString() + '; path=/';
 	}
 }
 
@@ -525,12 +532,21 @@ function saveToCookie(name, data) {
 function loadFromCookie(name, params) {
 	var data;
 	data = loadFromStorage(name);
-	if (data === null)
-		data = $.cookie(name);
+	if (data === null) {
+		// Fallback to reading cookie if localStorage is empty
+		const cookies = document.cookie.split(';');
+		for (let i = 0; i < cookies.length; i++) {
+			const cookie = cookies[i].trim();
+			if (cookie.startsWith(name + '=')) {
+				data = decodeURIComponent(cookie.substring(name.length + 1));
+				break;
+			}
+		}
+	}
 	if (!data || data.indexOf('key-value') == -1)
 		return;
 	var strings = data.split(',');
-	$.each(strings, function(key, value) {
+	strings.forEach(function(value, key) {
 			var parts = value.split(';');
 			if (parts[0].indexOf('|') > 0) {
 				var arrparts = parts[0].split('|');
@@ -580,15 +596,15 @@ function loadFromStorage(name) {
 function toggleLight(on) {
 	var theme = { value: 'light' };
 	if (on) {
-		$('#cb-light-theme')[0].checked = true;		
-		$("#dark-theme").attr('disabled', 'disabled');
-		$("#light-theme").removeAttr('disabled');
+		document.getElementById('cb-light-theme').checked = true;		
+		document.getElementById('dark-theme').disabled = true;
+		document.getElementById('light-theme').disabled = false;
 		theme.value = 'light';
 		saveToCookie("theme", theme);
 	} else {
-		$('#cb-light-theme')[0].checked = false;
-		$("#dark-theme").removeAttr('disabled');		
-		$("#light-theme").attr('disabled', 'disabled');
+		document.getElementById('cb-light-theme').checked = false;
+		document.getElementById('dark-theme').disabled = false;		
+		document.getElementById('light-theme').disabled = true;
 		theme.value = 'dark';
 		saveToCookie("theme", theme);
 	}	

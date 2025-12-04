@@ -11,26 +11,19 @@
 	if ($_SERVER['HTTP_HOST'] == 'proxyforgame.com') {
 		$pfgPath = $_SERVER['DOCUMENT_ROOT']; 
 	} else {
-		$pfgPath = "D:\Programming\JS\pfg.wmp\www";
+		$pfgPath ="D:\Programming\JS\pfg.wmp\www";
 	};
 ?>
+	<!-- Bootstrap 5 CSS -->
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 	<link id="light-theme" type="text/css" href="/css/redmond/jquery.ui.all.css" rel="stylesheet"/>
 	<link id="dark-theme" type="text/css" href="/css/dark-hive/jquery.ui.all.css" rel="stylesheet" disabled="disabled"/>
 	<link type="text/css" href="/css/langs.css?v=<?php echo filemtime($pfgPath.'/css/langs.css'); ?>" rel="stylesheet" />
 	<link type="text/css" href="/css/common.css?v=<?php echo filemtime($pfgPath.'/css/common.css'); ?>" rel="stylesheet"/>
 	<link type="text/css" href="/ogame/calc/css/trade.css?v=<?php echo filemtime($pfgPath.'/ogame/calc/css/trade.css'); ?>" rel="stylesheet"/>
-		
-<?php if ( $_SERVER['SERVER_NAME'] == 'proxyforgame.com'): ?>
-	<script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.min.js"></script>
-	<script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jqueryui/1.8.11/jquery-ui.min.js"></script>
-<?php elseif ( $_SERVER['SERVER_NAME'] == 'pfg.wmp'): ?>
-	<script type="text/javascript" src="/js/jquery.min.js"></script>
-	<script type="text/javascript" src="/js/jquery-ui.min.js"></script>
-<?php else: ?>
-	<script type="text/javascript" src="/js/jquery-1.5.1.min.js"></script>
-	<script type="text/javascript" src="/js/jquery-ui-1.8.11.min.js"></script>
-<?php endif; ?>
-	<script type="text/javascript" src="/js/jquery.cookie.js"></script>
+	
+	<!-- Bootstrap 5 JS Bundle (includes Popper) -->
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 	<script type="text/javascript" src="/js/utils.js?v=<?php echo filemtime($pfgPath.'/js/utils.js'); ?>"></script>
 	<script type="text/javascript" src="/ogame/calc/js/trade.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/trade.js'); ?>"></script>
 
@@ -55,7 +48,7 @@
 <?php
 	$f1 = true;
 	foreach ($universes as $ul => $uc) {
-		echo ($f1 ? '' : ",\n").$ul.': [';
+		echo ($f1 ? '' :",\n").$ul.': [';
 		$f2 = true;
 		foreach ($uc as $row) {
 			preg_match('/s(\d+)-/', $row['server'], $pe);
@@ -70,24 +63,24 @@
 	</script>
 <?php require_once('../../cookies.tpl'); ?>
 </head>
-<body class="ui-widget">
+<body>
 
 <table id="vtable" cellspacing="2" cellpadding="0" border="0"><tr>
-<td id="vtablesb"><?php require_once('../../sidebar.tpl'); ?></td>
+
 <td id="vtablec">
 <?php require_once('../../topbar.tpl'); ?>
 
 <div id="trade">
-	<div class="ui-widget-content ui-corner-all">
-		<div id="reset" class="ui-state-error ui-corner-all" title="<?= $l['reset'] ?>"><span class="ui-icon ui-icon-arrowrefresh-1-w"></span></div>
-		<div class="ui-widget-header ui-corner-all c-ui-main-header"><?= $l['title'] ?></div>
-		<div id="tech-settings-panel" class="ui-widget-content c-ui-widget-content ui-corner-all ui-panel">
-			<p class="ui-state-default ui-corner-all ui-subheader"><?= $l['parameters'] ?></p>
+	<div class="border rounded">
+		<div id="reset" class="bg-danger text-white rounded" title="<?= $l['reset'] ?>"><span class="ui-icon ui-icon-arrowrefresh-1-w"></span></div>
+		<div class="bg-primary text-white rounded c-ui-main-header"><?= $l['title'] ?></div>
+		<div id="tech-settings-panel" class="border rounded ui-panel">
+			<p class="bg-light border rounded ui-subheader"><?= $l['parameters'] ?></p>
 			<div id="tech-settings">
 				<table cellpadding="2" cellspacing="0" border="0" align="center">
 					<tr>
 						<td><label for="hypertech-lvl"><?= $l['hyper-tech'] ?></label></td>
-						<td><input id="hypertech-lvl" type="text" name="hypertech-lvl" class="ui-state-default ui-corner-all ui-input rate-input ui-input-margin trade-editable" value="0"/></td>
+						<td><input id="hypertech-lvl" type="text" name="hypertech-lvl" class="form-control form-control-sm rate-input trade-editable" value="0"/></td>
 					</tr>
 				</table>
 			</div>
@@ -97,8 +90,8 @@
 			<tr>
 				<td class="res-panel">
 					<!-- [[ настройки источника ресурсов -->
-					<div id="res-src-panel" class="ui-widget-content ui-corner-all ui-panel">
-						<p class="ui-state-default ui-corner-all ui-subheader"><?= $l['src'] ?></p>
+					<div id="res-src-panel" class="border rounded ui-panel">
+						<p class="bg-light border rounded ui-subheader"><?= $l['src'] ?></p>
 						<table cellpadding="2" cellspacing="0" border="0">
 							<tr>
 								<td colspan="2">
@@ -112,23 +105,23 @@
 									</div>
 								</td>
 							</tr>
-							<tr><td colspan="2"><div class="hr"></div></td></tr>
-							<tr>
-								<td class="res-src-m" align="right"><?= $l['metal'] ?>:</td>
-								<td><input id="res-src-m" type="text" name="res-src-m" class="ui-state-default ui-corner-all ui-input res-src-m ui-input-margin res-input trade-editable" tabindex="7"/></td>
-							</tr>
-							<tr>
-								<td class="res-src-c" align="right"><?= $l['crystal'] ?>:</td>
-								<td><input id="res-src-c" type="text" name="res-src-c" class="ui-state-default ui-corner-all ui-input res-src-c ui-input-margin res-input trade-editable" tabindex="8"/></td>
-							</tr>
-							<tr>
-								<td class="res-src-d" align="right"><?= $l['deuterium'] ?>:</td>
-								<td><input id="res-src-d" type="text" name="res-src-d" class="ui-state-default ui-corner-all ui-input res-src-d ui-input-margin res-input trade-editable" tabindex="9"/></td>
-							</tr>
+						<tr><td colspan="2"><div class="hr"></div></td></tr>
+						<tr>
+							<td class="res-src-m" align="right"><?= $l['metal'] ?>:</td>
+							<td><input id="res-src-m" type="text" name="res-src-m" class="form-control form-control-sm res-src-m res-input trade-editable" tabindex="7"/></td>
+						</tr>
+						<tr>
+							<td class="res-src-c" align="right"><?= $l['crystal'] ?>:</td>
+							<td><input id="res-src-c" type="text" name="res-src-c" class="form-control form-control-sm res-src-c res-input trade-editable" tabindex="8"/></td>
+						</tr>
+						<tr>
+							<td class="res-src-d" align="right"><?= $l['deuterium'] ?>:</td>
+							<td><input id="res-src-d" type="text" name="res-src-d" class="form-control form-control-sm res-src-d res-input trade-editable" tabindex="9"/></td>
+						</tr>
 							<tr><td colspan="2"><div class="hr"></div></td></tr>
 							<tr>
 								<td align="right"><?= $l['cargoes'] ?>:</td>
-								<td><div id="res-src-cargo" class="ui-state-default ui-corner-all ui-input ui-input-margin res-input"></div></td>
+								<td><div id="res-src-cargo" class="border rounded bg-light res-input"></div></td>
 							</tr>
 						</table>
 					</div>
@@ -139,8 +132,8 @@
 
 				<td class="res-panel">
 					<!-- [[ настройки получателя ресурсов -->
-					<div id="res-dst-panel" class="ui-widget-content ui-corner-all ui-panel">
-						<p class="ui-state-default ui-corner-all ui-subheader"><?= $l['dst'] ?></p>
+					<div id="res-dst-panel" class="border rounded ui-panel">
+						<p class="bg-light border rounded ui-subheader"><?= $l['dst'] ?></p>
 						<table cellpadding="2" cellspacing="0" border="0">
 							<tr>
 								<td colspan="2">
@@ -151,49 +144,49 @@
 											<div class="hrs"></div>
 											<div class="res-type" id="res-type-dst-2"><input id="res-dst-2" type="radio" name="dst" value="2" tabindex="12"/><label for="res-dst-2" id="res-type-dst-lbl-2"></label></div>
 											<div id="dst-mix-block">
-												<div class="res-subtype" id="res-subtype-dst-0">
-													<input id="res-dst-mix-0" type="radio" name="sub-dst" value="0">
-													<input id="mix-balance-proc" type="text" name="mix-balance-proc" class="ui-state-default ui-corner-all ui-input rate-input trade-editable" tabindex="13"/> % <span id="mix-lbl"></span>
-													<div id="mix-balance" class="res-mix-balance"></div>
+									<div class="res-subtype" id="res-subtype-dst-0">
+										<input id="res-dst-mix-0" type="radio" name="sub-dst" value="0">
+					<input id="mix-balance-proc" type="text" name="mix-balance-proc" class="form-control form-control-sm rate-input trade-editable" tabindex="13"/> % <span id="mix-lbl"></span>
+					<input id="mix-balance" type="range" class="range-slider form-range res-mix-balance" />
 												</div>
-												<div class="res-subtype" id="res-subtype-dst-1">
-													<input id="res-dst-mix-1" type="radio" name="sub-dst" value="1">
-													<input id="mix-balance-prop1" type="text" name="mix-balance-prop1" class="ui-state-default ui-corner-all ui-input rate-input trade-editable" tabindex="14"/> /
-													<input id="mix-balance-prop2" type="text" name="mix-balance-prop2" class="ui-state-default ui-corner-all ui-input rate-input trade-editable" tabindex="15"/>
-													<span id="mix-prop-lbl"></span>
-												</div>
-												<div class="res-subtype" id="res-subtype-dst-2">
-													<input id="res-dst-mix-2" type="radio" name="sub-dst" value="2">
-													<input id="mix-fix1" type="text" name="mix-fix1" class="ui-state-default ui-corner-all ui-input trade-editable" tabindex="16"/>
-													<span id="mix-fix1-lbl"></span>
-												</div>
-												<div class="res-subtype" id="res-subtype-dst-3">
-													<input id="res-dst-mix-3" type="radio" name="sub-dst" value="3">
-													<input id="mix-fix2" type="text" name="mix-fix2" class="ui-state-default ui-corner-all ui-input trade-editable" tabindex="17"/>
-													<span id="mix-fix2-lbl"></span>
-												</div>
+										<div class="res-subtype" id="res-subtype-dst-1">
+											<input id="res-dst-mix-1" type="radio" name="sub-dst" value="1">
+											<input id="mix-balance-prop1" type="text" name="mix-balance-prop1" class="form-control form-control-sm rate-input trade-editable" tabindex="14"/> /
+											<input id="mix-balance-prop2" type="text" name="mix-balance-prop2" class="form-control form-control-sm rate-input trade-editable" tabindex="15"/>
+											<span id="mix-prop-lbl"></span>
+										</div>
+										<div class="res-subtype" id="res-subtype-dst-2">
+											<input id="res-dst-mix-2" type="radio" name="sub-dst" value="2">
+											<input id="mix-fix1" type="text" name="mix-fix1" class="form-control form-control-sm trade-editable" tabindex="16"/>
+											<span id="mix-fix1-lbl"></span>
+										</div>
+										<div class="res-subtype" id="res-subtype-dst-3">
+											<input id="res-dst-mix-3" type="radio" name="sub-dst" value="3">
+											<input id="mix-fix2" type="text" name="mix-fix2" class="form-control form-control-sm trade-editable" tabindex="17"/>
+											<span id="mix-fix2-lbl"></span>
+										</div>
 											</div>
 										</div>
 									</div>
 								</td>
 							</tr>
-							<tr><td colspan="2"><div class="hr"></div></td></tr>
-							<tr>
-								<td class="res-dst-m" align="right"><?= $l['metal'] ?>:</td>
-								<td><div id="res-dst-m" class="ui-state-default ui-corner-all ui-input res-dst-m ui-input-margin res-input">0</div></td>
-							</tr>
-							<tr>
-								<td class="res-dst-c" align="right"><?= $l['crystal'] ?>:</td>
-								<td><div id="res-dst-c" class="ui-state-default ui-corner-all ui-input res-dst-c ui-input-margin res-input">0</div></td>
-							</tr>
-							<tr>
-								<td class="res-dst-d" align="right"><?= $l['deuterium'] ?>:</td>
-								<td><div id="res-dst-d" class="ui-state-default ui-corner-all ui-input res-dst-d ui-input-margin res-input">0</div></td>
-							</tr>
-							<tr><td colspan="2"><div class="hr"></div></td></tr>
-							<tr>
-								<td align="right"><?= $l['cargoes'] ?>:</td>
-								<td><div id="res-dst-cargo" class="ui-state-default ui-corner-all ui-input ui-input-margin res-input"></div></td>
+						<tr><td colspan="2"><div class="hr"></div></td></tr>
+						<tr>
+							<td class="res-dst-m" align="right"><?= $l['metal'] ?>:</td>
+							<td><div id="res-dst-m" class="border rounded bg-light res-dst-m res-input">0</div></td>
+						</tr>
+						<tr>
+							<td class="res-dst-c" align="right"><?= $l['crystal'] ?>:</td>
+							<td><div id="res-dst-c" class="border rounded bg-light res-dst-c res-input">0</div></td>
+						</tr>
+						<tr>
+							<td class="res-dst-d" align="right"><?= $l['deuterium'] ?>:</td>
+							<td><div id="res-dst-d" class="border rounded bg-light res-dst-d res-input">0</div></td>
+						</tr>
+						<tr><td colspan="2"><div class="hr"></div></td></tr>
+						<tr>
+							<td align="right"><?= $l['cargoes'] ?>:</td>
+							<td><div id="res-dst-cargo" class="border rounded bg-light res-input"></div></td>
 							</tr>
 						</table>
 					</div>
@@ -203,73 +196,73 @@
 		</table>
 		</div>
 
-		<div class="ui-widget-content ui-corner-all ui-panel c-ui-widget-content">
-		<p class="ui-state-default ui-corner-all ui-subheader"><?= $l['rates'] ?></p>
+		<div class="border rounded ui-panel">
+		<p class="bg-light border rounded ui-subheader"><?= $l['rates'] ?></p>
 		<table id="trate" cellpadding="4" border="0" cellspacing="0">
 			<tr>
 				<td class="tdr"><?= $l['metal'] ?> : <?= $l['deuterium'] ?></td>
-				<td><input id="rate-md" type="text" name="rate-md" class="trade-editable ui-state-default ui-corner-all ui-input rate-input" tabindex="18"></td>
+				<td><input id="rate-md" type="text" name="rate-md" class="form-control form-control-sm trade-editable rate-input" tabindex="18"></td>
 				<td style="width:20px"></td>
 				<td style="width: 100%">
 					<table style="width: 100%" cellpadding="4">
 						<tr>
 							<td id="rate-md-min"></td>
 							<td style="width: 100%">
-								<div id="md-slider"></div>
+								<input id="md-slider" type="range" class="range-slider form-range" />
 							</td>
 							<td id="rate-md-max"></td>
 						</tr>
 					</table>
 				</td>
-				<td id="rb1" class="rbutton"><button id="rate-btn-1">4 : 2 : 1</button></td>
-				<td id="rb4" class="rbutton"><button id="rate-btn-4">2.5 : 1.5 : 1</button></td>
+				<td id="rb1" class="rbutton"><button id="rate-btn-1" class="btn btn-sm btn-primary">4 : 2 : 1</button></td>
+				<td id="rb4" class="rbutton"><button id="rate-btn-4" class="btn btn-sm btn-primary">2.5 : 1.5 : 1</button></td>
 			</tr>
 			<tr>
 				<td class="tdr"><?= $l['crystal'] ?> : <?= $l['deuterium'] ?></td>
-				<td><input id="rate-cd" type="text" name="rate-cd" class="trade-editable ui-state-default ui-corner-all ui-input rate-input" tabindex="19"/></td>
+				<td><input id="rate-cd" type="text" name="rate-cd" class="form-control form-control-sm trade-editable rate-input" tabindex="19"/></td>
 				<td style="width:20px"></td>
 				<td>
 					<table style="width: 100%" cellpadding="4">
 						<tr>
 							<td id="rate-cd-min"></td>
 							<td style="width: 100%">
-								<div id="cd-slider"></div>
+								<input id="cd-slider" type="range" class="range-slider form-range" />
 							</td>
 							<td id="rate-cd-max"></td>
 						</tr>
 					</table>
 				</td>
-				<td id="rb2" class="rbutton"><button id="rate-btn-2">3 : 2 : 1</button></td>
-				<td id="rb5" class="rbutton"><button id="rate-btn-5">2 : 1.5 : 1</button></td>
+				<td id="rb2" class="rbutton"><button id="rate-btn-2" class="btn btn-sm btn-primary">3 : 2 : 1</button></td>
+				<td id="rb5" class="rbutton"><button id="rate-btn-5" class="btn btn-sm btn-primary">2 : 1.5 : 1</button></td>
 			</tr>
 			<tr>
 				<td class="tdr"><?= $l['metal'] ?> : <?= $l['crystal'] ?></td>
-				<td><div id="rate-mc" class="ui-state-default ui-corner-all ui-input rate-input"></div></td>
+				<td><div id="rate-mc" class="border rounded bg-light rate-input"></div></td>
 				<td style="width:20px"></td>
 				<td>
 					<table style="width: 100%" cellpadding="4">
 						<tr>
 							<td id="rate-mc-min"></td>
 							<td style="width: 100%">
-								<div id="mc-slider" class="ui-state-disabled"></div>
+								<input id="mc-slider" type="range" class="range-slider form-range" disabled />
 							</td>
 							<td id="rate-mc-max"></td>
 						</tr>
 					</table>
 				</td>
-				<td id="rb3" class="rbutton"><button id="rate-btn-3">3 : 1.5 : 1</button></td>
-				<td id="rb6" class="rbutton"><button id="rate-btn-6">2.4 : 1.5 : 1</button></td>
+				<td id="rb3" class="rbutton"><button id="rate-btn-3" class="btn btn-sm btn-primary">3 : 1.5 : 1</button></td>
+				<td id="rb6" class="rbutton"><button id="rate-btn-6" class="btn btn-sm btn-primary">2.4 : 1.5 : 1</button></td>
 			</tr>
 		</table>
 		</div>
 
-		<div class="ui-widget-content ui-corner-all ui-panel c-ui-widget-content">
-		<p class="ui-state-default ui-corner-all ui-subheader"><?= $l['location'] ?></p>
+		<div class="border rounded ui-panel">
+		<p class="bg-light border rounded ui-subheader"><?= $l['location'] ?></p>
 		<table id="tlocation" cellpadding="4" border="0" cellspacing="0">
 			<tr>
 				<td class="tdr" width="200"><?= $l['country'] ?>:</td>
 				<td>
-					<select id="country" class="ui-state-default ui-corner-all ui-input ui-input-margin" tabindex="21">
+					<select id="country" class="form-select form-select-sm" tabindex="21">
 					<?php if ($countries): ?>
 					<?php foreach ($countries as $row): ?>
 						<option value="<?= $row['lang'] ?>"><?= $row['name'].' ('.$row['server'].')' ?></option>
@@ -280,14 +273,14 @@
 			</tr>
 			<tr>
 				<td class="tdr"><?= $l['universe'] ?>:</td>
-				<td><select id="universe" class="ui-state-default ui-corner-all ui-input ui-input-margin" tabindex="22"></select></td>
+				<td><select id="universe" class="form-select form-select-sm" tabindex="22"></select></td>
 			</tr>
 			<tr>
 				<td class="tdr"><?= $l['coords'] ?>:</td>
 				<td>
-					<input id="coord-g" type="text" class="ui-state-default ui-corner-all ui-input rate-input ui-input-margin" tabindex="23"/>:<input id="coord-s" type="text" class="ui-state-default ui-corner-all ui-input rate-input" tabindex="24"/>:<input id="coord-p" type="text" class="ui-state-default ui-corner-all ui-input rate-input" tabindex="25"/>
+					<input id="coord-g" type="text" class="form-control form-control-sm d-inline-block rate-input" style="width: 60px;" tabindex="23"/>:<input id="coord-s" type="text" class="form-control form-control-sm d-inline-block rate-input" style="width: 60px;" tabindex="24"/>:<input id="coord-p" type="text" class="form-control form-control-sm d-inline-block rate-input" style="width: 60px;" tabindex="25"/>
 					&nbsp;
-					<input id="moon" type="checkbox" name="moon" class="ui-state-default ui-corner-all ui-input ui-input-margin"/>&nbsp;<label for="moon"><?= $l['moon'] ?></label>
+					<input id="moon" type="checkbox" name="moon" class="form-check-input"/>&nbsp;<label for="moon"><?= $l['moon'] ?></label>
 				</td>
 			</tr>
 		</table>
@@ -303,7 +296,7 @@
 <?= $l['text'] ?>:<br><span id="atext"></span>
 </div>
 <div id="bbcode">
-BB-Code:<br><textarea id="abbcode" class="ui-widget-content ui-corner-all" rows="2"></textarea>
+BB-Code:<br><textarea id="abbcode" class="form-control border rounded" rows="2"></textarea>
 </div>
 
 
