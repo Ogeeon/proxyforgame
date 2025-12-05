@@ -757,7 +757,7 @@ try {
 		});
 	});
 
-	document.getElementById('reset').addEventListener('click', resetParams);
+	document.getElementById('reset_bs').addEventListener('click', resetParams);
 
 	var rbf = function(r1, r2) {
 		options.rates.md = r1;
@@ -773,12 +773,12 @@ try {
 		validateRateLimits();
 		options.save();
 	}
-	document.getElementById('rb1').addEventListener('click', function() { rbf(4, 2); });
-	document.getElementById('rb2').addEventListener('click', function() { rbf(3, 2); });
-	document.getElementById('rb3').addEventListener('click', function() { rbf(3, 1.5); });
-	document.getElementById('rb4').addEventListener('click', function() { rbf(2.5, 1.5); });
-	document.getElementById('rb5').addEventListener('click', function() { rbf(2, 1.5); });
-	document.getElementById('rb6').addEventListener('click', function() { rbf(2.4, 1.5); });
+	document.getElementById('rate-btn-1').addEventListener('click', function() { rbf(4, 2); });
+	document.getElementById('rate-btn-2').addEventListener('click', function() { rbf(3, 2); });
+	document.getElementById('rate-btn-3').addEventListener('click', function() { rbf(3, 1.5); });
+	document.getElementById('rate-btn-4').addEventListener('click', function() { rbf(2.5, 1.5); });
+	document.getElementById('rate-btn-5').addEventListener('click', function() { rbf(2, 1.5); });
+	document.getElementById('rate-btn-6').addEventListener('click', function() { rbf(2.4, 1.5); });
 
 	validateRateLimits();
 
@@ -816,13 +816,13 @@ try {
 	document.getElementById('hypertech-lvl').addEventListener('keyup', function() { validateInputNumber.call(this, event); });
 	document.getElementById('moon').addEventListener('click', function() { options.moon = document.getElementById('moon').checked; updateNumbers(); options.save(); });
 
-	let theme = { value: 'light', validate: function(key, val) { return val; } };
-	loadFromCookie('theme', theme);
-	toggleLight(theme.value === 'light');
-	const cbLightTheme = document.getElementById('cb-light-theme');
-	if (cbLightTheme) {
-		cbLightTheme.addEventListener('click', function() { toggleLight(this.checked); });
-	}
+	// let theme = { value: 'light', validate: function(key, val) { return val; } };
+	// loadFromCookie('theme', theme);
+	// toggleLight(theme.value === 'light');
+	// const cbLightTheme = document.getElementById('cb-light-theme');
+	// if (cbLightTheme) {
+	// 	cbLightTheme.addEventListener('click', function() { toggleLight(this.checked); });
+	// }
 	
 	onUpdateSrcType();
 } catch (e) {

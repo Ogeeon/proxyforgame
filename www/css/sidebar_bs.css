@@ -1,0 +1,112 @@
+#sidebar {
+    /* Add your positioning styles as needed */
+}
+
+#sidebar .card-header {
+    font-weight: bold;
+    background-color: #f8f9fa;
+    color: #333;
+}
+
+#sidebar .card-header:hover {
+    background-color: #e9ecef;
+}
+
+#sidebar .sidebar-panel {
+    margin-top: 8px;
+    text-align: center;
+    padding: 8px;
+    font-weight: bold;
+    background-color: #f4f4f4;
+    border-top: 1px solid #dee2e6;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.spacer { 
+    height: 10px; 
+}
+
+.small-spacer { 
+    height: 5px; 
+}
+
+#sidebar .feedback {
+    padding: 8px;
+    font-weight: normal;
+    font-size: 0.9em;
+    cursor: pointer;
+}
+
+#sidebar .feedback:hover {
+    background-color: #f8f9fa;
+}
+
+#sidebar .changelog {
+    border: none !important;
+    background: none !important;
+    font-weight: bold !important;
+    text-align: center;
+}
+
+#sidebar .changelog a {
+    text-decoration: none;
+    color: #0d6efd;
+}
+
+#sidebar .changelog a:hover {
+    text-decoration: underline;
+}
+
+#sidebar .list-group-item {
+    border-left: none;
+    border-right: none;
+}
+
+#sidebar .list-group-item:first-child {
+    border-top: none;
+}
+
+#sidebar .list-group-item.active {
+    background-color: #0d6efd;
+    border-color: #0d6efd;
+    color: white;
+}
+
+/* Modal customizations */
+#report-info {
+    padding: 8px;
+    text-align: center;
+}
+
+.modal .spinner-border {
+    width: 3rem;
+    height: 3rem;
+}
+
+#changelog-tbl {
+    margin-top: 10px;
+}
+
+#changelog-link-div {
+    margin-top: 10px;
+}
+
+.changelog-link {
+    font-weight: bold;
+    text-decoration: none;
+}
+
+.changelog-link:hover {
+    text-decoration: underline;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    #sidebar .sidebar-panel {
+        font-size: 0.9em;
+    }
+    
+    #sidebar .feedback {
+        font-size: 0.85em;
+    }
+}

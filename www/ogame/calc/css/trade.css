@@ -1,34 +1,399 @@
-#trade { margin: auto; width: 680px; }
+#trade { 
+	margin: auto; 
+	max-width: 680px; 
+}
 
-#main { margin: 4px; }
-table#tmain, table#trate { width: auto; }
-td.res-panel { width: 50%; }
-td.arrow { text-align: center; }
-#res-src, #res-dst { height: 14em; }
-#res-type-dst-2 { margin-bottom: 0.8em; }
-.res-input { width: 15em; padding: 1px; }
-.rate-input { width: 40px; padding: 1px; text-align: center; }
-.hr { border-bottom: 1px solid #c5dbec; margin: 3px 0; }
-.hrs { border-bottom: 1px solid #c5dbec; margin: 3px 0; width: 60%; }
-.res-type { margin: 7px; }
-.res-subtype { margin: 3px; margin-left: 20px; }
-.res-mix-balance { width: 120px; font-size: 0.7em !important; float: right; margin: 0.8em 0.4em 0 0; }
-#mix-fix1, #mix-fix2 { width: 150px; }
-#link, #text, #bbcode { margin: 2em 0; font-size: 0.8em; text-align: center; }
-#abbcode { width: 650px; }
-.tdr { text-align: right; white-space: nowrap; }
+#main {
+	margin: 2px;
+}
 
-#rate-mc { text-align: center; }
+#reset_bs { 
+	cursor: pointer;
+	z-index: 10;
+	width: 30px;
+	height: 30px;
+	background-color: #ffe6e6;
+	border: 1px solid #dc3545;
+	border-radius: 8px;
+	margin-right: 0.2rem;
+}
 
-.ui-button-text, .ui-button .ui-button-text { padding: 0.1em; }
-.rbutton { text-align: center; }
-.rbutton button { width: 7em; }
+#res-src, #res-dst {
+	min-height: 12em;
+}
+
+#res-type-dst-2 {
+	margin-bottom: 0.3em;
+}
+
+.rate-input { 
+	width: 40px; 
+	padding: 1px; 
+	text-align: center; 
+}
+
+.hr {
+	border-bottom: 1px solid #c5dbec;
+	margin: 2px 0;
+}
+
+.hrs {
+	border-bottom: 1px solid #c5dbec;
+	margin: 2px 0;
+	width: 60%;
+}
+
+.res-type { 
+	margin-left: 7px; 
+}
+
+.res-subtype {
+	margin: 1px;
+	margin-left: 20px;
+}
+
+/* Add consistent spacing between radio inputs and their labels */
+.res-type input[type="radio"] + label,
+.res-subtype input[type="radio"] + label {
+    margin-left: 0.2rem;
+    cursor: pointer;
+}
+
+.res-mix-balance {
+	margin: 0.2em 0;
+}
+
+#mix-fix1, #mix-fix2 { 
+	width: 150px; 
+}
+
+#link, #text, #bbcode {
+	margin: 0.5em 0;
+	font-size: 0.8em;
+	text-align: center;
+}
+
+#abbcode { 
+	max-width: 650px;
+	margin: 0 auto; 
+}
+
+.tdr { 
+	text-align: right; 
+	white-space: nowrap; 
+}
+
+#rate-mc { 
+	text-align: center; 
+}
+
+/* Rates row layout - stacked on mobile, responsive flex on desktop */
+.rate-row {
+	display: flex;
+	flex-direction: column;
+	gap: 0.5rem;
+}
+
+.rate-label {
+	text-align: right;
+	white-space: nowrap;
+	font-weight: 500;
+	min-width: 0; /* Allow overflow to be handled */
+}
+
+.rate-input-group {
+	display: flex;
+	gap: 0.25rem;
+}
+
+.rate-input-group input,
+.rate-input-group div {
+	flex: 0 1 50px;
+	min-width: 0;
+}
+
+.rate-slider-group {
+	display: flex;
+	align-items: center;
+	gap: 0.25rem;
+}
+
+.rate-slider-group span {
+	flex: 0 0 auto;
+	font-size: 0.8rem;
+}
+
+.rate-slider-group .form-range {
+	flex: 1 1 auto;
+	min-width: 0;
+}
+
+.rate-buttons {
+	display: flex;
+	gap: 0.25rem;
+	flex-wrap: wrap;
+}
+
+.rate-buttons button {
+	flex: 1 1 calc(50% - 0.125rem);
+	min-width: 0;
+	font-size: 0.75rem;
+	padding: 0.25rem 0.5rem;
+	white-space: nowrap;
+}
+
+/* Responsive: side-by-side layout on larger screens */
+@media (min-width: 768px) {
+	.rate-row {
+		flex-direction: row;
+		align-items: center;
+		gap: 0.75rem;
+	}
+
+	.rate-label {
+		flex: 0 0 auto;
+		width: 150px;
+		min-width: 0;
+	}
+
+	.rate-input-group {
+		flex: 0 0 60px;
+	}
+
+	.rate-slider-group {
+		flex: 1 1 auto;
+		min-width: 100px;
+	}
+
+	.rate-buttons {
+		flex: 0 0 auto;
+		width: 160px;
+	}
+
+	.rate-buttons button {
+		flex: 1 1 auto;
+		font-size: 0.8rem;
+	}
+}
+
+.ui-button-text, .ui-button .ui-button-text { 
+	padding: 0.1em; 
+}
+
+.rbutton { 
+	text-align: center; 
+}
+
+.rbutton button { 
+	width: 7em; 
+}
 
 #big-arrow {
-	display: block;
-	-moz-box-sizing: border-box;
-	box-sizing: border-box;
-	width: 40px; /* Width of new image */
-	height: 100px; /* Height of new image */
-	padding-left: 40px; /* Equal to width of new image */ 
+	display: inline-block;
+	color: #6ea8fe;
+	transform-origin: center;
+	font-size: 3rem;
+}
+
+/* Keep the arrow column tight: remove column padding and prevent extra flex growth */
+.arrow-col {
+	padding-left: 0 !important;
+	padding-right: 0 !important;
+	margin-left: 0;
+	margin-right: 0;
+	flex: 0 0 auto;
+	width: 100%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+/* Minimal horizontal margin around the icon itself */
+.arrow-col #big-arrow {
+	margin: 0;
+}
+
+/* Bootstrap grid responsive adjustments */
+@media (max-width: 991.98px) {
+	.arrow-col {
+		width: 100%;
+		padding-top: 0 !important;
+		padding-bottom: 0 !important;
+	}
+	
+	#big-arrow {
+		transform: rotate(90deg);
+		font-size: 2.5rem !important;
+	}
+	
+	.res-input {
+		font-size: 0.9em;
+	}
+	
+	.tdr {
+		text-align: left;
+		margin-bottom: 0.25rem;
+	}
+}
+
+/* Large screens: keep tight */
+@media (min-width: 992px) {
+	.arrow-col {
+		width: auto;
+		padding-left: 0 !important;
+		padding-right: 0 !important;
+		margin-left: -0.5rem;
+		margin-right: -0.5rem;
+	}
+}
+
+/* Ensure panels maintain proper spacing */
+.ui-panel {
+	margin-bottom: 0.25rem;
+}
+
+
+
+/* Resource source and destination panels - equal height and spacing */
+#res-src-panel,
+#res-dst-panel {
+	display: flex;
+	flex-direction: column;
+	flex: 1;
+	height: 100%;
+}
+
+/* Panel header remains fixed size */
+#res-src-panel > p,
+#res-dst-panel > p {
+	flex-shrink: 0;
+	margin-bottom: 0.5rem;
+}
+
+/* Panel content wrapper - grows to fill available space */
+#res-src-panel > div,
+#res-dst-panel > div {
+	display: flex;
+	flex-direction: column;
+	flex: 1;
+	overflow: visible;
+	padding-right: 0.5rem;
+	padding-bottom: 0.5rem;
+}
+
+/* Ensure the inner divs (res-src, res-dst) have identical styling */
+#res-src,
+#res-dst {
+	min-height: 12em;
+	flex-shrink: 0;
+	margin-bottom: 0.5rem;
+}
+
+/* Consistent row spacing in both panels */
+#res-src-panel .row,
+#res-dst-panel .row {
+	margin-bottom: 0.5rem;
+	align-items: center;
+}
+
+/* Last row doesn't need bottom margin */
+#res-src-panel > div > .row:last-child,
+#res-dst-panel > div > .row:last-child {
+	margin-bottom: 0;
+}
+
+/* Input elements styling - ensure consistent heights */
+#res-src-panel .form-control.form-control-sm,
+#res-dst-panel .form-control.form-control-sm {
+	height: 1.5rem;
+	padding: 0.25rem 0.5rem;
+	display: flex;
+	align-items: center;
+	min-height: 1rem;
+}
+
+/* Cargo rows specifically - ensure identical heights */
+#res-src-cargo,
+#res-dst-cargo {
+	min-height: 1.5rem;
+	display: flex;
+	align-items: center;
+}
+
+/* Custom primary color - darker than text-primary but lighter than text-primary-emphasis */
+.text-primary-medium {
+	color: #0a58ca;
+}
+
+/* Focus states */
+.trade-editable:focus {
+	outline: 2px solid #0d6efd;
+	outline-offset: 2px;
+}
+
+
+/* Disabled state styling */
+.ui-state-disabled {
+	opacity: 0.5;
+	pointer-events: none;
+}
+
+/* Disabled inputs should have muted text */
+input:disabled,
+input.ui-state-disabled {
+	color: #6c757d !important;
+	background-color: #e9ecef !important;
+}
+
+/* Read-only display divs (not editable, for display purposes only) */
+.res-input:not(input):not(textarea) {
+	background: repeating-linear-gradient(
+		45deg,
+		#f8f9fa,
+		#f8f9fa 10px,
+		#f1f3f5 10px,
+		#f1f3f5 20px
+	);
+	color: #6c757d;
+	font-weight: 500;
+	cursor: default;
+	border-color: #dee2e6;
+	font-family: monospace;
+}
+
+/* Error state should override normal border */
+.res-input:not(input):not(textarea).ui-state-error {
+	border-color: #dc3545 !important;
+	background: repeating-linear-gradient(
+		45deg,
+		#f8d7da,
+		#f8d7da 10px,
+		#f5c2c7 10px,
+		#f5c2c7 20px
+	) !important;
+}
+
+/* Error state for rate inputs */
+.ui-state-error {
+	border-color: #dc3545 !important;
+	background-color: #f8d7da !important;
+}
+
+/* Range slider styling for better visibility */
+.form-range {
+	height: 0.5rem;
+}
+
+.form-range::-webkit-slider-thumb {
+	width: 1rem;
+	height: 1rem;
+}
+
+.form-range::-moz-range-thumb {
+	width: 1rem;
+	height: 1rem;
+}
+
+#res-dst-m, #res-dst-c, #res-dst-d {
+	height: 1.5rem;
 }

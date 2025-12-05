@@ -1,0 +1,53 @@
+.main-header {
+    width: auto; 
+	font-size: 0.9rem;
+	font-weight: 600;
+	padding: 4px;
+	margin: 2px;
+}
+.subheader {
+    text-align: center;
+	font-weight: 600;
+	margin: 0px !important; 
+}
+.panel {
+    --bs-bg-opacity: .06;
+}
+
+.ui-input-margin { margin: 0; margin-left: 6px; }
+.hint-label { font-size: 0.8em; }
+.ui-checkbox { margin-right: 10px; }
+.no-mp { margin: 0; padding: 0; }
+#reset { padding: 4px; cursor: pointer; float: right; margin: 4px; }
+#tabs { margin: 4px; z-index: 0;}
+#warning { padding: 2px; margin: 4px; text-align: center; display: none; }
+#hint { margin-top: 10px; padding: 2px; margin: 4px; margin-top: 20px; }
+#hint-message { margin-right: .3em; font-weight: lighter; }
+
+#vtable { width: 100%; }
+#vtablesb, #vtablec { vertical-align: top; }
+#vtablesb { white-space: nowrap; }
+#vtablec { width: 100%; }
+#vtablet { text-align: right; }
+#vtablel { text-align: right; }
+
+#topbar { width: 100% }
+#topbar td {white-space:nowrap; vertical-align: center; }
+
+#startpage { font-size: 1.2em; padding: 10px; }
+
+.input-1column { width: 20px; text-align: center; }
+.input-2columns { width: 25px; text-align: center; }
+.input-3columns { width: 30px; text-align: center; }
+.input-4columns { width: 40px; text-align: center; }
+.input-5columns { width: 50px; text-align: center; }
+.input-10columns { width: 90px; text-align: center; }
+.input-20columns { width: 180px; text-align: center; }
+.input-in-table { margin: 0px; }
+.centered {text-align: center }
+.left-aligned { text-align:left }
+.right-aligned { text-align:right }
+
+abbr { border-bottom: .1em dotted; cursor: help; }
+
+

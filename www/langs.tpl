@@ -1,4 +1,5 @@
 <script type="text/javascript">
+/*
 function getCoord(el, prop) {
 	var c = el[prop], b = document.body;
 	while ((el = el.offsetParent)) {
@@ -55,31 +56,22 @@ function hideLangsMenu(event) {
 document.addEventListener('DOMContentLoaded', function() {
 	document.body.addEventListener('click', hideLangsMenu);
 });
-
+*/
 </script>
 
-<div id="langs-menu" class="ui-state-default ui-input ui-corner-all" onclick="showLangsMenu(event);">
-	<table>
-		<tr>
-			<td><img src="/images/langs/<?= $lang ?>.jpg" alt="<?= $lang ?>"/></td>
-			<td><?= $availLangsList[$lang] ?></td>
-		</tr>
-	</table>
-</div>
-<div id="lang-options-stub" class="ui-state-default ui-input"></div>
-<div id="langs-options">
-<?php $c = 0; ?>
-<?php foreach ($availLangsList as $abbrev => $name): ?>
-	<div>
-		<a class="ui-state-active <?=($c == count($availLangsList)-1)?'last-option':''?>" href="/<?= $abbrev . $currUrl ?>">
-			<table>
-				<tr>
-					<td><img src="/images/langs/<?= $abbrev ?>.jpg" alt="<?= $abbrev ?>"/></td>
-					<td><?= $name ?></td>
-				</tr>
-			</table>
-		</a>
-	</div>
-	<?php $c++; ?>
-<?php endforeach; ?>
+<div class="dropdown">
+	<button class="btn btn-light dropdown-toggle d-flex align-items-center gap-2 lang-menu-btn" type="button" id="langs-menu" data-bs-toggle="dropdown" aria-expanded="false">
+		<img src="/images/langs/<?= $lang ?>.jpg" alt="<?= $lang ?>" width="24" height="16"/>
+		<span><?= $availLangsList[$lang] ?></span>
+	</button>
+	<ul class="dropdown-menu" aria-labelledby="langs-menu">
+		<?php foreach ($availLangsList as $abbrev => $name): ?>
+		<li>
+			<a class="dropdown-item lang-menu-item d-flex align-items-center gap-2" href="/<?= $abbrev . $currUrl ?>">
+				<img src="/images/langs/<?= $abbrev ?>.jpg" alt="<?= $abbrev ?>" width="24" height="16"/>
+				<span><?= $name ?></span>
+			</a>
+		</li>
+		<?php endforeach; ?>
+	</ul>
 </div>
