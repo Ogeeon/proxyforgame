@@ -29,8 +29,8 @@ if ( $_SERVER['SERVER_NAME'] == 'proxyforgame.com') {
 }
 ?>
 
-<?php $sidebarCss = $pfgPath . '/css/sidebar.css'; ?>
-<link type="text/css" href="/css/sidebar.css?v=<?php echo (file_exists($sidebarCss) ? filemtime($sidebarCss) : 0); ?>" rel="stylesheet" />
+<?php $sidebarCss = $pfgPath . '/css/sidebar_bs.css'; ?>
+<link type="text/css" href="/css/sidebar_bs.css?v=<?php echo (file_exists($sidebarCss) ? filemtime($sidebarCss) : 0); ?>" rel="stylesheet" />
 <script type="text/javascript">
 var buttonsText = {};
 buttonsText.send = '<?=$loc['reportStrings']['send']?>';
@@ -44,147 +44,166 @@ var currLang = '<?=$lang ?>';
 <?php $sidebarJs = $pfgPath . '/js/sidebar_bs.js'; ?>
 <script type="text/javascript" src="/js/sidebar_bs.js?v=<?php echo (file_exists($sidebarJs) ? filemtime($sidebarJs) : 0); ?>"></script>
 
-<div id="sidebar">
-	<a class="ui-widget-header" href="/<?=$lang?>/"><?=$loc['ogameMenuItems']['main-title']?></a>
-	<div class="ui-panel"><?=$loc['ogameMenuItems']['header']?> <font size="1">(12)</font></div>
-	<div>
-	<?php foreach ($ogamePages as $page): ?>
-		<?php if (!strpos($_SERVER['REQUEST_URI'], $page[0])): ?>
-			<a class="ui-state-default" href="/<?=$lang.$page[0]?>"><?=$loc['ogameMenuItems'][$page[1]]?></a>
-		<?php else: ?>
-			<div class="ui-state-active"><?=$loc['ogameMenuItems'][$page[1]]?></div>
-		<?php endif; ?>
-	<?php endforeach; ?>
-	</div>
-	<div class="spacer">&nbsp;</div>
-	<div class="ui-panel"><?=$loc['feedbackItems']['header']?></div>
-	<div class="ui-state-active feedback">
-		<?=$loc['feedbackItems']['misspelling']?>
-	</div>
-	<div class="ui-state-active feedback">
-		<?=$loc['feedbackItems']['mail']?>
-	</div>
-	<div class="ui-state-active feedback">
-		<?=$loc['feedbackItems']['board']?>
-	</div>
-	<div class="ui-state-active feedback">
-		<?=$loc['feedbackItems']['discord']?>
-	</div>
-	<div class="spacer">&nbsp;</div>
-		
-	<div class="spacer">&nbsp;</div>
-	<div class="ui-panel">Cookies</div>
-	<div class="ui-state-active feedback">
-		<a href="/policy.php" style="display: inline" target="_blank">Privacy Policy</a>
-	</div>
-	
-	<div class="spacer">&nbsp;</div>
-	<div class="ui-state-active changelog">
-		<a href="#" onclick="requestAndShowChangelog(-1);"><?=$loc['changelogStrings']['changelog']?></a>
-	</div>
-
-</div>
-
-<div id="report-form" title="<?=$loc['reportStrings']['title']?>" class="ui-helper-hidden">
-	<div id="report-data" class="ui-widget-content ui-corner-all">
-		<div id="report-info">
-			<?=$loc['reportStrings']['info']?>
+<div id="sidebar" class="card">
+	<a class="card-header text-center text-decoration-none" href="/<?=$lang?>/"><?=$loc['ogameMenuItems']['main-title']?></a>
+	<div class="card-body p-0">
+		<div class="sidebar-panel"><?=$loc['ogameMenuItems']['header']?> <small>(12)</small></div>
+		<div class="list-group list-group-flush">
+		<?php foreach ($ogamePages as $page): ?>
+			<?php if (!strpos($_SERVER['REQUEST_URI'], $page[0])): ?>
+				<a class="list-group-item list-group-item-action text-center" href="/<?=$lang.$page[0]?>"><?=$loc['ogameMenuItems'][$page[1]]?></a>
+			<?php else: ?>
+				<div class="list-group-item list-group-item-action active text-center"><?=$loc['ogameMenuItems'][$page[1]]?></div>
+			<?php endif; ?>
+		<?php endforeach; ?>
 		</div>
-		<table align="center">
-			<tr><td><?=$loc['reportStrings']['input1']?></td></tr>
-			<tr><td><input type="text" class="ui-state-default ui-input ui-corner-all correction-input" id="misspelled-text" value=""/></td></tr>
-			<tr><td><?=$loc['reportStrings']['input2']?></td></tr>
-			<tr><td><input type="text" class="ui-state-default ui-input ui-corner-all correction-input" id="corrected-text" value=""/></td></tr>
-		</table>
-	</div>
-	<div id="report-progress">
-		<div id="progress-text"><?=$loc['reportStrings']['sending-progress']?></div>
-		<div><img src="/images/progress.gif" alt=""/></div>
-	</div>
-	<div id="report-err-0" class="ui-helper-hidden">
-		<p><?=$loc['reportStrings']['msg-0']?></p>
-	</div>
-	<div id="report-err-1" class="ui-helper-hidden">
-		<p><?=$loc['reportStrings']['msg-1']?></p>
-	</div>
-	<div id="report-err-2" class="ui-helper-hidden">
-		<p><?=$loc['reportStrings']['msg-2']?></p>
-	</div>
-	<div id="report-err-3" class="ui-helper-hidden">
-		<p><?=$loc['reportStrings']['msg-3']?></p>
-	</div>
-	<div id="report-err-4" class="ui-helper-hidden">
-		<p><?=$loc['reportStrings']['msg-4']?></p>
-	</div>
-	<div id="report-err-5" class="ui-helper-hidden">
-		<p><?=$loc['reportStrings']['msg-5']?></p>
-	</div>
-	<div id="report-err-6" class="ui-helper-hidden">
-		<p><?=$loc['reportStrings']['msg-6']?></p>
-	</div>
-	<div id="report-err-7" class="ui-helper-hidden">
-		<p><?=$loc['reportStrings']['msg-7']?></p>
-	</div>
-	<div id="report-err-99" class="ui-helper-hidden">
-		<p><?=$loc['reportStrings']['msg-99']?></p>
-	</div>
-</div>
-
-<div id="email-form" title="<?=$loc['emailStrings']['title']?>" class="ui-helper-hidden">
-	<div id="email-data" class="ui-widget-content ui-corner-all">
-		<table align="center" width="100%">
-			<tr><td><?=$loc['emailStrings']['address']?></td></tr>
-			<tr><td><input type="text"  class="ui-state-default ui-input ui-corner-all" id="email-form-address" value=""/></td></tr>
-			<tr><td><?=$loc['emailStrings']['subject']?></td></tr>
-			<tr><td><input type="text" class="ui-state-default ui-input ui-corner-all" id="email-form-subject" value=""/></td></tr>
-			<tr><td><?=$loc['emailStrings']['body']?></td></tr>
-			<tr><td>
-			<textarea id="email-form-body" rows="7" class="ui-state-default ui-input ui-corner-all"></textarea>
-			</td></tr>
-
-		</table>
-	</div>
-	<div id="email-progress">
-		<div id="progress-text"><?=$loc['emailStrings']['sending-progress']?></div>
-		<div><img src="/images/progress.gif"/></div>
-	</div>
-	<div id="email-err-0" class="ui-helper-hidden">
-		<p><?=$loc['emailStrings']['msg-0']?></p>
-	</div>
-	<div id="email-err-1" class="ui-helper-hidden">
-		<p><?=$loc['emailStrings']['msg-1']?></p>
-	</div>
-	<div id="email-err-2" class="ui-helper-hidden">
-		<p><?=$loc['emailStrings']['msg-2']?></p>
-	</div>
-	<div id="email-err-3" class="ui-helper-hidden">
-		<p><?=$loc['emailStrings']['msg-3']?></p>
-	</div>
-	<div id="email-err-4" class="ui-helper-hidden">
-		<p><?=$loc['emailStrings']['msg-4']?></p>
-	</div>
-	<div id="email-err-99" class="ui-helper-hidden">
-		<p><?=$loc['emailStrings']['msg-99']?></p>
-	</div>
-</div>
-
-<div id="changelog-dialog" title="<?=$loc['changelogStrings']['changelog']?>" style="display: none">
-	<div id="changelog-dlg-body" class="ui-dialog-content ui-widget-content">
-		<div id="changelog-dlg-info">
-			<?=$loc['changelogStrings']['chl-dlg-hdr']?>
-			<div class="small-spacer">&nbsp;</div>
-			<table id="changelog-tbl" class="lined" cellpadding="0" cellspacing="1" border="0" width="100%">
-				<tr>
-					<th><?=$loc['changelogStrings']['date']?></th>
-					<th><?=$loc['changelogStrings']['description']?></th>
-				</tr>
-			</table>
-			<div class="small-spacer">&nbsp;</div>
-			<div id="changelog-link-div" class="ui-state-active changelog" style="float:right;">
-				<a id="changelog-link" href="#" onclick="requestAndShowChangelog(-1);"><?=$loc['changelogStrings']['chl-load']?></a>
+		<div class="spacer"></div>
+		<div class="sidebar-panel"><?=$loc['feedbackItems']['header']?></div>
+		<div class="list-group list-group-flush">
+			<div class="list-group-item feedback" onclick="findSelection()">
+				<?=$loc['feedbackItems']['misspelling']?>
+			</div>
+			<div class="list-group-item feedback" onclick="showEmailWindow()">
+				<?=$loc['feedbackItems']['mail']?>
+			</div>
+			<div class="list-group-item feedback">
+				<?=$loc['feedbackItems']['board']?>
+			</div>
+			<div class="list-group-item feedback">
+				<?=$loc['feedbackItems']['discord']?>
+			</div>
+		</div>
+		<div class="spacer"></div>
+		<div class="sidebar-panel">Cookies</div>
+		<div class="list-group list-group-flush">
+			<div class="list-group-item feedback">
+				<a href="/policy.php" class="d-inline" target="_blank">Privacy Policy</a>
+			</div>
+		</div>
+		<div class="spacer"></div>
+		<div class="list-group list-group-flush">
+			<div class="list-group-item changelog">
+				<a href="#" onclick="requestAndShowChangelog(-1); return false;"><?=$loc['changelogStrings']['changelog']?></a>
 			</div>
 		</div>
 	</div>
 </div>
 
+<!-- Report Modal -->
+<div class="modal fade" id="reportModal" tabindex="-1" aria-labelledby="reportModalLabel" aria-hidden="true">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title" id="reportModalLabel"><?=$loc['reportStrings']['title']?></h5>
+				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+			</div>
+			<div class="modal-body">
+				<div id="report-data">
+					<div id="report-info" class="text-center mb-3">
+						<?=$loc['reportStrings']['info']?>
+					</div>
+					<div class="mb-3">
+						<label for="misspelled-text" class="form-label"><?=$loc['reportStrings']['input1']?></label>
+						<input type="text" class="form-control" id="misspelled-text" />
+					</div>
+					<div class="mb-3">
+						<label for="corrected-text" class="form-label"><?=$loc['reportStrings']['input2']?></label>
+						<input type="text" class="form-control" id="corrected-text" />
+					</div>
+				</div>
+				<div id="report-progress" class="d-none text-center">
+					<div id="report-progress-text"><?=$loc['reportStrings']['sending-progress']?></div>
+					<div class="spinner-border mt-3" role="status">
+						<span class="visually-hidden">Loading...</span>
+					</div>
+				</div>
+				<?php for($i = 0; $i <= 7; $i++): ?>
+				<div id="report-err-<?=$i?>" class="alert d-none"></div>
+				<?php endfor; ?>
+				<div id="report-err-99" class="alert d-none"></div>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-secondary" id="report-btn-cancel" data-bs-dismiss="modal"><?=$loc['reportStrings']['cancel']?></button>
+				<button type="button" class="btn btn-primary" id="report-btn-ok"><?=$loc['reportStrings']['send']?></button>
+			</div>
+		</div>
+	</div>
+</div>
 
+<!-- Email Modal -->
+<div class="modal fade" id="emailModal" tabindex="-1" aria-labelledby="emailModalLabel" aria-hidden="true">
+	<div class="modal-dialog modal-lg">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title" id="emailModalLabel"><?=$loc['emailStrings']['title']?></h5>
+				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+			</div>
+			<div class="modal-body">
+				<div id="email-data">
+					<div class="mb-3">
+						<label for="email-form-address" class="form-label"><?=$loc['emailStrings']['address']?></label>
+						<input type="email" class="form-control" id="email-form-address" />
+					</div>
+					<div class="mb-3">
+						<label for="email-form-subject" class="form-label"><?=$loc['emailStrings']['subject']?></label>
+						<input type="text" class="form-control" id="email-form-subject" />
+					</div>
+					<div class="mb-3">
+						<label for="email-form-body" class="form-label"><?=$loc['emailStrings']['body']?></label>
+						<textarea class="form-control" id="email-form-body" rows="7"></textarea>
+					</div>
+				</div>
+				<div id="email-progress" class="d-none text-center">
+					<div id="email-progress-text"><?=$loc['emailStrings']['sending-progress']?></div>
+					<div class="spinner-border mt-3" role="status">
+						<span class="visually-hidden">Loading...</span>
+					</div>
+				</div>
+				<?php for($i = 0; $i <= 4; $i++): ?>
+				<div id="email-err-<?=$i?>" class="alert d-none"></div>
+				<?php endfor; ?>
+				<div id="email-err-99" class="alert d-none"></div>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-secondary" id="email-btn-cancel" data-bs-dismiss="modal"><?=$loc['emailStrings']['cancel']?></button>
+				<button type="button" class="btn btn-primary" id="email-btn-ok"><?=$loc['emailStrings']['send']?></button>
+			</div>
+		</div>
+	</div>
+</div>
+
+<!-- Changelog Modal -->
+<div class="modal fade" id="changelogModal" tabindex="-1" aria-labelledby="changelogModalLabel" aria-hidden="true">
+	<div class="modal-dialog modal-lg">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title" id="changelogModalLabel"><?=$loc['changelogStrings']['changelog']?></h5>
+				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+			</div>
+			<div class="modal-body">
+				<div id="changelog-dlg-info">
+					<?=$loc['changelogStrings']['chl-dlg-hdr']?>
+					<div class="small-spacer"></div>
+					<div class="table-responsive">
+						<table id="changelog-tbl" class="table table-striped table-bordered">
+							<thead>
+								<tr>
+									<th style="width: 20%"><?=$loc['changelogStrings']['date']?></th>
+									<th><?=$loc['changelogStrings']['description']?></th>
+								</tr>
+							</thead>
+							<tbody></tbody>
+						</table>
+					</div>
+					<div class="small-spacer"></div>
+					<div id="changelog-link-div" class="text-end">
+						<a id="changelog-link" href="#" class="changelog-link" onclick="requestAndShowChangelog(-1); return false;"><?=$loc['changelogStrings']['chl-load']?></a>
+					</div>
+				</div>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-primary" id="changelog-btn-ok" data-bs-dismiss="modal">OK</button>
+			</div>
+		</div>
+	</div>
+</div>

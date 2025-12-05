@@ -16,7 +16,6 @@
 		$pfgPath ="D:\Programming\JS\pfg.wmp\www";
 	};
 ?>
-<link id="light-theme" type="text/css" href="/css/redmond/jquery.ui.all.css" rel="stylesheet"/>
 
 	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
 	<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
@@ -67,7 +66,10 @@
 
 <div class="container-fluid">
 	<div class="row">
-		<div class="col-12">
+		<div class="col-2">
+			<?php require_once('../../sidebar_bs.tpl'); ?>
+		</div>
+		<div class="col-10">
 			<?php require_once('../../topbar.tpl'); ?>
 
 			<div id="trade" class="mx-auto" style="max-width: 680px;">
