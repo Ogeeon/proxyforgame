@@ -9,9 +9,9 @@
 	<meta name="keywords" content="<?= $l['keywords'] ?>"/>
 	<link rel="shortcut icon" href="/favicon.ico" type="image/x-icon"/>
 	<link rel="icon" href="/favicon.ico" type="image/x-icon"/>
-<?php 
+<?php
 	if ($_SERVER['HTTP_HOST'] == 'proxyforgame.com') {
-		$pfgPath = $_SERVER['DOCUMENT_ROOT']; 
+		$pfgPath = $_SERVER['DOCUMENT_ROOT'];
 	} else {
 		$pfgPath ="D:\Programming\JS\pfg.wmp\www";
 	};
@@ -22,7 +22,7 @@
 	<link type="text/css" href="/css/langs_bs.css?v=<?php echo filemtime($pfgPath.'/css/langs_bs.css'); ?>" rel="stylesheet" />
 	<link type="text/css" href="/css/common_bs.css?v=<?php echo filemtime($pfgPath.'/css/common_bs.css'); ?>" rel="stylesheet"/>
 	<link type="text/css" href="/ogame/calc/css/trade.css?v=<?php echo filemtime($pfgPath.'/ogame/calc/css/trade.css'); ?>" rel="stylesheet"/>
-	
+
 	<script type="text/javascript" src="/js/utils.js?v=<?php echo filemtime($pfgPath.'/js/utils.js'); ?>"></script>
 	<script type="text/javascript" src="/ogame/calc/js/trade.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/trade.js'); ?>"></script>
 
@@ -70,7 +70,7 @@
 			<?php require_once('../../sidebar_bs.tpl'); ?>
 		</div>
 		<div class="col-10">
-			<?php require_once('../../topbar.tpl'); ?>
+			<?php require_once('../../topbar_bs.tpl'); ?>
 
 			<div id="trade" class="mx-auto" style="max-width: 680px;">
 				<div class="border rounded position-relative">
@@ -84,7 +84,7 @@
 					</div>
 
 					<!-- Technology Settings Panel -->
-					<div id="tech-settings-panel" class="border rounded bg-primary panel m-1">
+					<div id="tech-settings-panel" class="border rounded m-1">
 						<p class="bg-light border rounded subheader bg-primary-subtle text-primary-medium"><?= $l['parameters'] ?></p>
 						<div id="tech-settings">
 							<div class="row align-items-center justify-content-center py-1">
@@ -103,7 +103,7 @@
 						<div class="row g-2 row-tight">
 							<!-- Source Resources Panel -->
 							<div class="col-12 col-lg-6 d-flex flex-column">
-								<div id="res-src-panel" class="border rounded bg-primary panel flex-grow-1">
+								<div id="res-src-panel" class="border rounded flex-grow-1">
 									<p class="bg-light border rounded subheader bg-primary-subtle text-primary-medium mb-1"><?= $l['src'] ?></p>
 									<div class="pe-2 pb-1">
 										<div id="res-src" class="mb-2">
@@ -130,7 +130,7 @@
 										<div class="hr mb-1"></div>
 										<div class="row mb-1 align-items-center">
 											<div class="col-5 text-end"><?= $l['cargoes'] ?>:</div>
-											<div class="col-7"><div id="res-src-cargo" class="border rounded bg-light res-input ps-1"></div></div>
+											<div class="col-7"><div id="res-src-cargo" class="res-input ps-1"></div></div>
 										</div>
 									</div>
 								</div>
@@ -143,7 +143,7 @@
 
 							<!-- Destination Resources Panel -->
 							<div class="col-12 col-lg d-flex flex-column">
-								<div id="res-dst-panel" class="border rounded bg-primary panel flex-grow-1">
+								<div id="res-dst-panel" class="border rounded flex-grow-1">
 									<p class="bg-light border rounded subheader bg-primary-subtle text-primary-medium mb-1"><?= $l['dst'] ?></p>
 									<div class="pe-2 pb-1">
 										<div id="res-dst" class="mb-2">
@@ -155,7 +155,7 @@
 												<div id="dst-mix-block">
 													<div class="res-subtype d-flex align-items-center gap-1" id="res-subtype-dst-0">
 														<input id="res-dst-mix-0" type="radio" name="sub-dst" value="0">
-														<input id="mix-balance-proc" type="text" name="mix-balance-proc" class="form-control form-control-sm rate-input trade-editable" tabindex="13" style="width: 50px;"/> 
+														<input id="mix-balance-proc" type="text" name="mix-balance-proc" class="form-control form-control-sm rate-input trade-editable" tabindex="13" style="width: 50px;"/>
 														<span>%</span>
 														<span id="mix-lbl"></span>
 														<input id="mix-balance" type="range" class="range-slider form-range res-mix-balance flex-grow-1" />
@@ -184,20 +184,20 @@
 										<div class="hr mb-1"></div>
 										<div class="row mb-1 align-items-center">
 											<div class="col-5 text-end res-dst-m"><?= $l['metal'] ?>:</div>
-											<div class="col-7"><div id="res-dst-m" class="border rounded bg-light res-dst-m res-input ps-1">0</div></div>
+											<div class="col-7"><div id="res-dst-m" class="res-dst-m res-input ps-1">0</div></div>
 										</div>
 										<div class="row mb-1 align-items-center">
 											<div class="col-5 text-end res-dst-c"><?= $l['crystal'] ?>:</div>
-											<div class="col-7"><div id="res-dst-c" class="border rounded bg-light res-dst-c res-input ps-1">0</div></div>
+											<div class="col-7"><div id="res-dst-c" class="res-dst-c res-input ps-1">0</div></div>
 										</div>
 										<div class="row mb-1 align-items-center">
 											<div class="col-5 text-end res-dst-d"><?= $l['deuterium'] ?>:</div>
-											<div class="col-7"><div id="res-dst-d" class="border rounded bg-light res-dst-d res-input ps-1">0</div></div>
+											<div class="col-7"><div id="res-dst-d" class="res-dst-d res-input ps-1">0</div></div>
 										</div>
 										<div class="hr mb-1"></div>
 										<div class="row mb-1 align-items-center">
 											<div class="col-5 text-end"><?= $l['cargoes'] ?>:</div>
-											<div class="col-7"><div id="res-dst-cargo" class="border rounded bg-light res-input ps-1"></div></div>
+											<div class="col-7"><div id="res-dst-cargo" class="res-input ps-1"></div></div>
 										</div>
 									</div>
 								</div>
@@ -206,7 +206,7 @@
 					</div>
 
 					<!-- Rates Panel -->
-					<div class="border rounded bg-primary panel me-1 ms-1">
+					<div class="border rounded me-1 ms-1">
 						<p class="bg-light border rounded subheader bg-primary-subtle text-primary-medium mb-1 px-2"><?= $l['rates'] ?></p>
 						<div class="px-2 py-1">
 							<!-- Metal:Deuterium Rate -->
@@ -263,7 +263,7 @@
 					</div>
 
 					<!-- Location Panel -->
-					<div class="border rounded bg-primary panel m-1">
+					<div class="border rounded m-1">
 						<p class="bg-light border rounded subheader bg-primary-subtle text-primary-medium mb-1 px-2"><?= $l['location'] ?></p>
 						<div class="px-2 py-1">
 							<div class="row mb-1 align-items-center">

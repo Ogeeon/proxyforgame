@@ -247,13 +247,6 @@
 	}
 }
 
-/* Ensure panels maintain proper spacing */
-.ui-panel {
-	margin-bottom: 0.25rem;
-}
-
-
-
 /* Resource source and destination panels - equal height and spacing */
 #res-src-panel,
 #res-dst-panel {
@@ -347,18 +340,8 @@ input.ui-state-disabled {
 
 /* Read-only display divs (not editable, for display purposes only) */
 .res-input:not(input):not(textarea) {
-	background: repeating-linear-gradient(
-		45deg,
-		#f8f9fa,
-		#f8f9fa 10px,
-		#f1f3f5 10px,
-		#f1f3f5 20px
-	);
-	color: #6c757d;
 	font-weight: 500;
 	cursor: default;
-	border-color: #dee2e6;
-	font-family: monospace;
 }
 
 /* Error state should override normal border */
