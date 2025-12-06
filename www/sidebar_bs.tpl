@@ -52,7 +52,7 @@
 <!-- Sidebar for larger screens -->
 <div id="sidebar" class="card d-none d-lg-block">
 	<div class="card-body p-0">
-		<div class="sidebar-panel"><?=$loc['ogameMenuItems']['header']?> <small>(12)</small></div>
+		<div class="sidebar-panel bg-primary-subtle text-primary-medium"><?=$loc['ogameMenuItems']['header']?> <small>(12)</small></div>
 		<div class="list-group list-group-flush">
 		<a class="list-group-item list-group-item-action ogame-menu-item text-center" href="/<?=$lang?>/"><?=$loc['ogameMenuItems']['main-title']?></a>
 		<?php foreach ($ogamePages as $page): ?>
@@ -64,7 +64,7 @@
 		<?php endforeach; ?>
 		</div>
 		<div class="spacer"></div>
-		<div class="sidebar-panel"><?=$loc['feedbackItems']['header']?></div>
+		<div class="sidebar-panel bg-primary-subtle text-primary-medium"><?=$loc['feedbackItems']['header']?></div>
 		<div class="list-group list-group-flush">
 			<div class="list-group-item feedback text-center" onclick="findSelection()">
 				<?=str_replace(['<br>', '<br/>'], ' ', $loc['feedbackItems']['misspelling'])?>
@@ -80,7 +80,7 @@
 			</div>
 		</div>
 		<div class="spacer"></div>
-		<div class="sidebar-panel">Cookies</div>
+		<div class="sidebar-panel bg-primary-subtle text-primary-medium">Cookies</div>
 		<div class="list-group list-group-flush">
 			<div class="list-group-item feedback text-center">
 				<a href="/policy.php" class="d-inline" target="_blank">Privacy Policy</a>
