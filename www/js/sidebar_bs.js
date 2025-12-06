@@ -226,6 +226,9 @@ function clearChangelogTable() {
 }
 
 function fillChangelogTable(changes) {
+    if (!changes || changes.length === 0) {
+        return;
+    }
     const tbody = document.querySelector('#changelog-tbl tbody');
     changes.forEach(change => {
         const tr = document.createElement('tr');

@@ -4,7 +4,7 @@
     left: 0;
     top: 0;
     bottom: 0;
-    width: 16.666667%; /* Bootstrap col-2 width */
+    width: 15%;
     margin: 0;
     border-radius: 0 !important;
     overflow-y: auto;
@@ -19,18 +19,23 @@
     border-radius: 0 !important;
 }
 
-/* Sidebar toggle button styling */
+/* Sidebar toggle button styling - FIXED */
 .btn[data-bs-toggle="offcanvas"] {
     position: fixed;
     top: 10px;
     left: 10px;
-    z-index: 1040;
+    z-index: 1050 !important; /* Increased to be above everything */
 }
 
 /* Make sidebar completely hidden below lg breakpoint */
 @media (max-width: 991.98px) {
     .col-2 {
         display: none !important;
+    }
+    
+    /* Ensure button is visible on small screens */
+    .btn[data-bs-toggle="offcanvas"] {
+        display: block !important;
     }
 }
 
@@ -46,9 +51,7 @@
 }
 
 #sidebar .sidebar-panel {
-    margin-top: 8px;
     text-align: center;
-    padding: 8px;
     font-weight: bold;
     background-color: #f4f4f4;
     border-top: 1px solid #dee2e6;
@@ -66,8 +69,8 @@
 #sidebar .feedback {
     padding: 8px;
     font-weight: normal;
-    font-size: 0.9em;
-    cursor: pointer;
+    font-size: 0.8em;
+    cursor: default;
 }
 
 #sidebar .feedback:hover {
@@ -97,6 +100,12 @@
 
 #sidebar .list-group-item:first-child {
     border-top: none;
+}
+
+/* Reduce size of ogame menu items */
+#sidebar .ogame-menu-item {
+    padding: 6px 8px;
+    font-size: 0.9em;
 }
 
 #sidebar .list-group-item.active {

@@ -45,44 +45,44 @@
 <script type="text/javascript" src="/js/sidebar_bs.js?v=<?php echo (file_exists($sidebarJs) ? filemtime($sidebarJs) : 0); ?>"></script>
 
 <!-- Sidebar Toggle Button (visible when sidebar is hidden) -->
-<button class="btn btn-primary d-lg-none mb-3" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebarOffcanvas" aria-controls="sidebarOffcanvas">
+<button class="btn btn-primary d-lg-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebarOffcanvas" aria-controls="sidebarOffcanvas">
 	<i class="bi bi-list"></i> Menu
 </button>
 
 <!-- Sidebar for larger screens -->
 <div id="sidebar" class="card d-none d-lg-block">
-	<a class="card-header text-center text-decoration-none" href="/<?=$lang?>/"><?=$loc['ogameMenuItems']['main-title']?></a>
 	<div class="card-body p-0">
 		<div class="sidebar-panel"><?=$loc['ogameMenuItems']['header']?> <small>(12)</small></div>
 		<div class="list-group list-group-flush">
+		<a class="list-group-item list-group-item-action ogame-menu-item text-center" href="/<?=$lang?>/"><?=$loc['ogameMenuItems']['main-title']?></a>
 		<?php foreach ($ogamePages as $page): ?>
 			<?php if (!strpos($_SERVER['REQUEST_URI'], $page[0])): ?>
-				<a class="list-group-item list-group-item-action text-center" href="/<?=$lang.$page[0]?>"><?=$loc['ogameMenuItems'][$page[1]]?></a>
+				<a class="list-group-item list-group-item-action ogame-menu-item text-center" href="/<?=$lang.$page[0]?>"><?=$loc['ogameMenuItems'][$page[1]]?></a>
 			<?php else: ?>
-				<div class="list-group-item list-group-item-action active text-center"><?=$loc['ogameMenuItems'][$page[1]]?></div>
+				<div class="list-group-item list-group-item-action ogame-menu-item active text-center"><?=$loc['ogameMenuItems'][$page[1]]?></div>
 			<?php endif; ?>
 		<?php endforeach; ?>
 		</div>
 		<div class="spacer"></div>
 		<div class="sidebar-panel"><?=$loc['feedbackItems']['header']?></div>
 		<div class="list-group list-group-flush">
-			<div class="list-group-item feedback" onclick="findSelection()">
-				<?=$loc['feedbackItems']['misspelling']?>
+			<div class="list-group-item feedback text-center" onclick="findSelection()">
+				<?=str_replace(['<br>', '<br/>'], ' ', $loc['feedbackItems']['misspelling'])?>
 			</div>
-			<div class="list-group-item feedback" onclick="showEmailWindow()">
-				<?=$loc['feedbackItems']['mail']?>
+			<div class="list-group-item feedback text-center" onclick="showEmailWindow()">
+				<?=str_replace(['<br>', '<br/>'], ' ', $loc['feedbackItems']['mail'])?>
 			</div>
-			<div class="list-group-item feedback">
-				<?=$loc['feedbackItems']['board']?>
+			<div class="list-group-item feedback text-center">
+				<?=str_replace(['<br>', '<br/>'], ' ', $loc['feedbackItems']['board'])?>
 			</div>
-			<div class="list-group-item feedback">
-				<?=$loc['feedbackItems']['discord']?>
+			<div class="list-group-item feedback text-center">
+				<?=str_replace(['<br>', '<br/>'], ' ', $loc['feedbackItems']['discord'])?>
 			</div>
 		</div>
 		<div class="spacer"></div>
 		<div class="sidebar-panel">Cookies</div>
 		<div class="list-group list-group-flush">
-			<div class="list-group-item feedback">
+			<div class="list-group-item feedback text-center">
 				<a href="/policy.php" class="d-inline" target="_blank">Privacy Policy</a>
 			</div>
 		</div>
@@ -98,40 +98,40 @@
 <!-- Offcanvas Sidebar for mobile/tablet -->
 <div class="offcanvas offcanvas-start d-lg-none" tabindex="-1" id="sidebarOffcanvas" aria-labelledby="sidebarOffcanvasLabel">
 	<div class="offcanvas-header">
-		<h5 class="offcanvas-title" id="sidebarOffcanvasLabel"><?=$loc['ogameMenuItems']['main-title']?></h5>
 		<button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
 	</div>
 	<div class="offcanvas-body p-0">
 		<div class="sidebar-panel"><?=$loc['ogameMenuItems']['header']?> <small>(12)</small></div>
 		<div class="list-group list-group-flush">
+		<a class="list-group-item list-group-item-action ogame-menu-item text-center" href="/<?=$lang?>/"><?=$loc['ogameMenuItems']['main-title']?></a>
 		<?php foreach ($ogamePages as $page): ?>
 			<?php if (!strpos($_SERVER['REQUEST_URI'], $page[0])): ?>
-				<a class="list-group-item list-group-item-action text-center" href="/<?=$lang.$page[0]?>"><?=$loc['ogameMenuItems'][$page[1]]?></a>
+				<a class="list-group-item list-group-item-action ogame-menu-item text-center" href="/<?=$lang.$page[0]?>"><?=$loc['ogameMenuItems'][$page[1]]?></a>
 			<?php else: ?>
-				<div class="list-group-item list-group-item-action active text-center"><?=$loc['ogameMenuItems'][$page[1]]?></div>
+				<div class="list-group-item list-group-item-action ogame-menu-item active text-center"><?=$loc['ogameMenuItems'][$page[1]]?></div>
 			<?php endif; ?>
 		<?php endforeach; ?>
 		</div>
 		<div class="spacer"></div>
 		<div class="sidebar-panel"><?=$loc['feedbackItems']['header']?></div>
 		<div class="list-group list-group-flush">
-			<div class="list-group-item feedback" onclick="findSelection()">
-				<?=$loc['feedbackItems']['misspelling']?>
+			<div class="list-group-item feedback text-center" onclick="findSelection()">
+				<?=str_replace(['<br>', '<br/>'], ' ', $loc['feedbackItems']['misspelling'])?>
 			</div>
-			<div class="list-group-item feedback" onclick="showEmailWindow()">
-				<?=$loc['feedbackItems']['mail']?>
+			<div class="list-group-item feedback text-center" onclick="showEmailWindow()">
+				<?=str_replace(['<br>', '<br/>'], ' ', $loc['feedbackItems']['mail'])?>
 			</div>
-			<div class="list-group-item feedback">
-				<?=$loc['feedbackItems']['board']?>
+			<div class="list-group-item feedback text-center">
+				<?=str_replace(['<br>', '<br/>'], ' ', $loc['feedbackItems']['board'])?>
 			</div>
-			<div class="list-group-item feedback">
-				<?=$loc['feedbackItems']['discord']?>
+			<div class="list-group-item feedback text-center">
+				<?=str_replace(['<br>', '<br/>'], ' ', $loc['feedbackItems']['discord'])?>
 			</div>
 		</div>
 		<div class="spacer"></div>
 		<div class="sidebar-panel">Cookies</div>
 		<div class="list-group list-group-flush">
-			<div class="list-group-item feedback">
+			<div class="list-group-item feedback text-center">
 				<a href="/policy.php" class="d-inline" target="_blank">Privacy Policy</a>
 			</div>
 		</div>
