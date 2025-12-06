@@ -1,8 +1,41 @@
+/* Sidebar positioning - snap to left, full height */
 #sidebar {
-    /* Add your positioning styles as needed */
+    position: fixed;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 16.666667%; /* Bootstrap col-2 width */
+    margin: 0;
+    border-radius: 0 !important;
+    overflow-y: auto;
+    z-index: 1030;
 }
 
-#sidebar .card-header {
+/* Remove rounded corners from all sidebar elements */
+#sidebar .card,
+#sidebar .card-header,
+#sidebar .list-group-item,
+#sidebar .list-group {
+    border-radius: 0 !important;
+}
+
+/* Sidebar toggle button styling */
+.btn[data-bs-toggle="offcanvas"] {
+    position: fixed;
+    top: 10px;
+    left: 10px;
+    z-index: 1040;
+}
+
+/* Make sidebar completely hidden below lg breakpoint */
+@media (max-width: 991.98px) {
+    .col-2 {
+        display: none !important;
+    }
+}
+
+#sidebar .card-header,
+.offcanvas-title {
     font-weight: bold;
     background-color: #f8f9fa;
     color: #333;

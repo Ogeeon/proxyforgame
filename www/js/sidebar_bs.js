@@ -115,7 +115,6 @@ function sendReport() {
             if (rcode === 0) {
                 reportStep = 3;
                 errDiv.classList.remove('alert-info');
-                errDiv.classList.add('alert-success');
             } else {
                 reportStep = 2;
                 errDiv.classList.remove('alert-info');
@@ -171,7 +170,6 @@ function sendEmail() {
             if (rcode === 0) {
                 emailStep = 3;
                 errDiv.classList.remove('alert-info');
-                errDiv.classList.add('alert-success');
             } else {
                 emailStep = 2;
                 errDiv.classList.remove('alert-info');
