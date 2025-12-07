@@ -208,56 +208,56 @@
           <!-- Rates Panel -->
           <div class="border rounded me-1 ms-1">
             <p class="bg-light border rounded subheader bg-primary-subtle text-primary-medium mb-1 px-2"><?= $l['rates'] ?></p>
-            <div class="px-2 py-1">
-              <!-- Metal:Deuterium Rate -->
-              <div class="rate-row mb-2">
-                <div class="rate-label"><?= $l['metal'] ?> : <?= $l['deuterium'] ?></div>
-                <div class="rate-input-group">
-                  <input id="rate-md" type="text" name="rate-md" class="form-control form-control-sm trade-editable rate-input" tabindex="18">
+            <div class="rates-panel-content px-2 py-1">
+              <!-- Rate Labels and Inputs Group -->
+              <div class="rate-labels-inputs-group">
+                <div class="rate-label-input-row">
+                  <div class="rate-label"><?= $l['metal'] ?> : <?= $l['deuterium'] ?></div>
+                  <div class="rate-input-group">
+                    <input id="rate-md" type="text" name="rate-md" class="form-control form-control-sm trade-editable rate-input" tabindex="18">
+                  </div>
                 </div>
-                <div class="rate-slider-group">
+                <div class="rate-label-input-row">
+                  <div class="rate-label"><?= $l['crystal'] ?> : <?= $l['deuterium'] ?></div>
+                  <div class="rate-input-group">
+                    <input id="rate-cd" type="text" name="rate-cd" class="form-control form-control-sm trade-editable rate-input" tabindex="19"/>
+                  </div>
+                </div>
+                <div class="rate-label-input-row">
+                  <div class="rate-label"><?= $l['metal'] ?> : <?= $l['crystal'] ?></div>
+                  <div class="rate-input-group">
+                    <div id="rate-mc" class="border rounded bg-light rate-input p-1 text-center ui-state-disabled"></div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Rate Sliders Group -->
+              <div class="rate-sliders-group mb-2">
+                <div class="rate-slider-row mb-2">
                   <span id="rate-md-min"></span>
                   <input id="md-slider" type="range" class="range-slider form-range" />
                   <span id="rate-md-max"></span>
                 </div>
-                <div class="rate-buttons">
-                  <button id="rate-btn-1" class="btn btn-sm btn-primary">4 : 2 : 1</button>
-                  <button id="rate-btn-4" class="btn btn-sm btn-primary">2.5 : 1.5 : 1</button>
-                </div>
-              </div>
-
-              <!-- Crystal:Deuterium Rate -->
-              <div class="rate-row mb-2">
-                <div class="rate-label"><?= $l['crystal'] ?> : <?= $l['deuterium'] ?></div>
-                <div class="rate-input-group">
-                  <input id="rate-cd" type="text" name="rate-cd" class="form-control form-control-sm trade-editable rate-input" tabindex="19"/>
-                </div>
-                <div class="rate-slider-group">
+                <div class="rate-slider-row mb-2">
                   <span id="rate-cd-min"></span>
                   <input id="cd-slider" type="range" class="range-slider form-range" />
                   <span id="rate-cd-max"></span>
                 </div>
-                <div class="rate-buttons">
-                  <button id="rate-btn-2" class="btn btn-sm btn-primary">3 : 2 : 1</button>
-                  <button id="rate-btn-5" class="btn btn-sm btn-primary">2 : 1.5 : 1</button>
-                </div>
-              </div>
-
-              <!-- Metal:Crystal Rate -->
-              <div class="rate-row">
-                <div class="rate-label"><?= $l['metal'] ?> : <?= $l['crystal'] ?></div>
-                <div class="rate-input-group">
-                  <div id="rate-mc" class="border rounded bg-light rate-input p-1 text-center"></div>
-                </div>
-                <div class="rate-slider-group">
+                <div class="rate-slider-row">
                   <span id="rate-mc-min"></span>
                   <input id="mc-slider" type="range" class="range-slider form-range" disabled />
                   <span id="rate-mc-max"></span>
                 </div>
-                <div class="rate-buttons">
-                  <button id="rate-btn-3" class="btn btn-sm btn-primary">3 : 1.5 : 1</button>
-                  <button id="rate-btn-6" class="btn btn-sm btn-primary">2.4 : 1.5 : 1</button>
-                </div>
+              </div>
+
+              <!-- Rate Buttons Group -->
+              <div class="rate-buttons-group">
+                <button id="rate-btn-1" class="btn btn-sm btn-primary">4 : 2 : 1</button>
+                <button id="rate-btn-4" class="btn btn-sm btn-primary">2.5 : 1.5 : 1</button>
+                <button id="rate-btn-2" class="btn btn-sm btn-primary">3 : 2 : 1</button>
+                <button id="rate-btn-5" class="btn btn-sm btn-primary">2 : 1.5 : 1</button>
+                <button id="rate-btn-3" class="btn btn-sm btn-primary">3 : 1.5 : 1</button>
+                <button id="rate-btn-6" class="btn btn-sm btn-primary">2.4 : 1.5 : 1</button>
               </div>
             </div>
           </div>

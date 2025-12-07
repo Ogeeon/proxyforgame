@@ -27,9 +27,11 @@
 }
 
 .rate-input { 
-    width: 40px; 
+    width: 50px; 
     padding: 1px; 
-    text-align: center; 
+    text-align: center;
+    min-height: 1rem;
+    font-size: 14px;
 }
 
 .hr {
@@ -87,17 +89,26 @@
     text-align: center; 
 }
 
-/* Rates row layout - stacked on mobile, responsive flex on desktop */
-.rate-row {
+/* Rates panel - grouped layout: labels+inputs, then sliders, then buttons */
+
+/* Group 1: Rate Labels and Inputs */
+.rate-labels-inputs-group {
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
 }
 
+.rate-label-input-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
 .rate-label {
+    flex: 0 0 auto;
     text-align: right;
     white-space: nowrap;
-    min-width: 0; /* Allow overflow to be handled */
+    min-width: 150px;
 }
 
 .rate-input-group {
@@ -111,67 +122,69 @@
     min-width: 0;
 }
 
-.rate-slider-group {
+/* Group 2: Rate Sliders */
+.rate-sliders-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.rate-slider-row {
     display: flex;
     align-items: center;
     gap: 0.25rem;
 }
 
-.rate-slider-group span {
+.rate-slider-row span {
     flex: 0 0 auto;
     font-size: 0.8rem;
 }
 
-.rate-slider-group .form-range {
+.rate-slider-row .form-range {
     flex: 1 1 auto;
     min-width: 0;
 }
 
-.rate-buttons {
-    display: flex;
-    gap: 0.25rem;
-    flex-wrap: wrap;
+/* Group 3: Rate Buttons */
+.rate-buttons-group {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.5rem;
 }
 
-.rate-buttons button {
-    flex: 1 1 calc(50% - 0.125rem);
-    min-width: 0;
+.rate-buttons-group button {
     font-size: 0.75rem;
     padding: 0.25rem 0.5rem;
     white-space: nowrap;
 }
 
-/* Responsive: side-by-side layout on larger screens */
+/* Responsive: horizontal layout on larger screens */
 @media (min-width: 768px) {
-    .rate-row {
-        flex-direction: row;
-        align-items: center;
-        gap: 0.75rem;
+    /* Create horizontal layout container */
+    .rates-panel-content {
+        display: flex;
+        gap: 1rem;
+        align-items: flex-start;
     }
-
-    .rate-label {
+    
+    .rate-labels-inputs-group {
         flex: 0 0 auto;
-        width: 150px;
-        min-width: 0;
+        min-width: 200px;
     }
-
-    .rate-input-group {
-        flex: 0 0 60px;
-    }
-
-    .rate-slider-group {
+    
+    .rate-sliders-group {
         flex: 1 1 auto;
-        min-width: 100px;
+        min-width: 200px;
     }
-
-    .rate-buttons {
+    
+    .rate-buttons-group {
         flex: 0 0 auto;
-        width: 160px;
+        grid-template-columns: repeat(2, 1fr);
+        min-width: 180px;
     }
-
-    .rate-buttons button {
-        flex: 1 1 auto;
-        font-size: 0.8rem;
+    
+    .rate-buttons-group button {
+        font-size: 0.75rem;
     }
 }
 
