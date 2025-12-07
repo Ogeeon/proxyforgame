@@ -97,7 +97,6 @@
 .rate-label {
 	text-align: right;
 	white-space: nowrap;
-	font-weight: 500;
 	min-width: 0; /* Allow overflow to be handled */
 }
 
@@ -340,7 +339,6 @@ input.ui-state-disabled {
 
 /* Read-only display divs (not editable, for display purposes only) */
 .res-input:not(input):not(textarea) {
-	font-weight: 500;
 	cursor: default;
 }
 
