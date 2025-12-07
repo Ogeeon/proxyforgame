@@ -27,6 +27,11 @@
     z-index: 1050 !important; /* Increased to be above everything */
 }
 
+/* Hide toggle while offcanvas is open to prevent double menus */
+body.sidebar-offcanvas-open .btn[data-bs-toggle="offcanvas"] {
+    display: none !important;
+}
+
 /* Collapse grid columns below lg while keeping the toggle visible */
 @media (max-width: 991.98px) {
     .col-2,
@@ -43,19 +48,19 @@
         display: inline-flex !important;
     }
 }
-
+/*
 #sidebar .card-header,
 .offcanvas-title {
     font-weight: bold;
     background-color: #f8f9fa;
     color: #333;
-}
+}*/
 
 #sidebar .card-header:hover {
     background-color: #e9ecef;
 }
 
-#sidebar .sidebar-panel {
+#sidebar .sidebar-panel, #sidebarOffcanvas .sidebar-panel {
     text-align: center;
     font-weight: bold;
     border-top: 1px solid #dee2e6;
@@ -70,30 +75,30 @@
     height: 5px; 
 }
 
-#sidebar .feedback {
+#sidebar .feedback, #sidebarOffcanvas .feedback {
     padding: 8px;
     font-weight: normal;
     font-size: 0.8em;
     cursor: default;
 }
 
-#sidebar .feedback:hover {
+#sidebar .feedback:hover, #sidebarOffcanvas .feedback:hover {
     background-color: #f8f9fa;
 }
 
-#sidebar .changelog {
+#sidebar .changelog, #sidebarOffcanvas .changelog {
     border: none !important;
     background: none !important;
     font-weight: bold !important;
     text-align: center;
 }
 
-#sidebar .changelog a {
+#sidebar .changelog a, #sidebarOffcanvas .changelog a {
     text-decoration: none;
     color: #0d6efd;
 }
 
-#sidebar .changelog a:hover {
+#sidebar .changelog a:hover, #sidebarOffcanvas .changelog a:hover {
     text-decoration: underline;
 }
 

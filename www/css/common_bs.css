@@ -10,9 +10,6 @@
 	font-weight: 600;
 	margin: 0px !important; 
 }
-/*.panel {
-    --bs-bg-opacity: .06;
-}*/
 
 .ui-input-margin { margin: 0; margin-left: 6px; }
 .hint-label { font-size: 0.8em; }

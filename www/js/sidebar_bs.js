@@ -188,6 +188,30 @@ function sendEmail() {
     });
 }
 
+function isManualChangelogRequest(fromChange) {
+    if (typeof fromChange === 'number') {
+        return fromChange === -1;
+    }
+    if (typeof fromChange === 'object' && fromChange !== null && 'value' in fromChange) {
+        return Number(fromChange.value) === -1;
+    }
+    return false;
+}
+
+function toggleChangelogHeader(showHeader) {
+    ['changelog-header-text', 'changelog-header-spacer'].forEach(function(id) {
+        var el = document.getElementById(id);
+        if (!el) {
+            return;
+        }
+        if (showHeader) {
+            el.classList.remove('d-none');
+        } else {
+            el.classList.add('d-none');
+        }
+    });
+}
+
 function requestAndShowChangelog(fromChange) {
     const formData = new URLSearchParams();
     formData.append('service', 'changelog');
@@ -209,6 +233,7 @@ function requestAndShowChangelog(fromChange) {
             const changes = JSON.parse(payload);
             clearChangelogTable();
             fillChangelogTable(changes);
+            toggleChangelogHeader(!isManualChangelogRequest(fromChange));
             changelogModal.show();
             setTimeout(() => document.getElementById('changelog-btn-ok').focus(), 300);
         } catch(e) {
@@ -245,6 +270,25 @@ document.addEventListener('DOMContentLoaded', function() {
     reportModal = new bootstrap.Modal(document.getElementById('reportModal'));
     emailModal = new bootstrap.Modal(document.getElementById('emailModal'));
     changelogModal = new bootstrap.Modal(document.getElementById('changelogModal'));
+
+    // Keep the toggle hidden while the offcanvas menu is visible
+    const sidebarToggleBtn = document.querySelector('[data-bs-target="#sidebarOffcanvas"]');
+    const sidebarOffcanvas = document.getElementById('sidebarOffcanvas');
+    const body = document.body;
+    const offcanvasOpenClass = 'sidebar-offcanvas-open';
+    if (sidebarToggleBtn && sidebarOffcanvas) {
+        sidebarOffcanvas.addEventListener('show.bs.offcanvas', function () {
+            sidebarToggleBtn.classList.add('d-none');
+            body.classList.add(offcanvasOpenClass);
+        });
+        sidebarOffcanvas.addEventListener('hide.bs.offcanvas', function () {
+            body.classList.remove(offcanvasOpenClass);
+        });
+        sidebarOffcanvas.addEventListener('hidden.bs.offcanvas', function () {
+            sidebarToggleBtn.classList.remove('d-none');
+            body.classList.remove(offcanvasOpenClass);
+        });
+    }
     
     // Report modal button handlers
     document.getElementById('report-btn-ok').addEventListener('click', function() {
