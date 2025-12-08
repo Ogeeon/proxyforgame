@@ -816,13 +816,13 @@ try {
     document.getElementById('hypertech-lvl').addEventListener('keyup', function() { validateInputNumber.call(this, event); });
     document.getElementById('moon').addEventListener('click', function() { options.moon = document.getElementById('moon').checked; updateNumbers(); options.save(); });
 
-    // let theme = { value: 'light', validate: function(key, val) { return val; } };
-    // loadFromCookie('theme', theme);
-    // toggleLight(theme.value === 'light');
-    // const cbLightTheme = document.getElementById('cb-light-theme');
-    // if (cbLightTheme) {
-    // 	cbLightTheme.addEventListener('click', function() { toggleLight(this.checked); });
-    // }
+    let theme = { value: 'light', validate: function(key, val) { return val; } };
+    loadFromCookie('theme', theme);
+    toggleLightBS(theme.value === 'light');
+    const cbLightTheme = document.getElementById('cb-light-theme');
+    if (cbLightTheme) {
+    	cbLightTheme.addEventListener('click', function() { toggleLightBS(this.checked); });
+    }
     
     onUpdateSrcType();
 } catch (e) {

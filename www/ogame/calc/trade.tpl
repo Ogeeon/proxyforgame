@@ -72,20 +72,20 @@
     <div class="col-10">
       <?php require_once('../../topbar_bs.tpl'); ?>
 
-      <div id="trade" class="mx-auto" style="max-width: 680px;">
+      <div id="trade" class="mx-auto">
         <div class="border rounded position-relative">
           <div class="d-inline-block d-flex align-items-center">
-            <div class="bg-primary text-white rounded main-header text-center flex-grow-1">
+            <div class="bg-body-secondary text-primary-emphasis rounded main-header text-center flex-grow-1">
               <?= $l['title'] ?>
             </div>
-            <div id="reset_bs" class="top-0 end-0 d-flex align-items-center justify-content-center" title="<?= $l['reset'] ?>">
+            <div id="reset_bs" class="top-0 end-0 d-flex align-items-center justify-content-center bg-danger-subtle" title="<?= $l['reset'] ?>">
               <i class="bi bi-arrow-counterclockwise" style="color: #dc3545; font-size: 1.25rem;"></i>
             </div>
           </div>
 
           <!-- Technology Settings Panel -->
           <div id="tech-settings-panel" class="border rounded m-1">
-            <p class="bg-light border rounded subheader bg-primary-subtle text-primary-medium"><?= $l['parameters'] ?></p>
+            <p class="border rounded subheader bg-primary-subtle text-primary-medium"><?= $l['parameters'] ?></p>
             <div id="tech-settings">
               <div class="row align-items-center justify-content-center py-1">
                 <div class="col-auto">
@@ -104,7 +104,7 @@
               <!-- Source Resources Panel -->
               <div class="col-12 col-lg-6 d-flex flex-column">
                 <div id="res-src-panel" class="border rounded flex-grow-1">
-                  <p class="bg-light border rounded subheader bg-primary-subtle text-primary-medium mb-1"><?= $l['src'] ?></p>
+                  <p class="border rounded subheader bg-primary-subtle text-primary-medium mb-1"><?= $l['src'] ?></p>
                   <div class="pe-2 pb-1">
                     <div id="res-src" class="mb-2">
                       <div class="res-type"><input id="res-src-0" type="radio" name="src" value="0" tabindex="1"/><label for="res-src-0"><?= $l['metal'] ?></label></div>
@@ -144,7 +144,7 @@
               <!-- Destination Resources Panel -->
               <div class="col-12 col-lg d-flex flex-column">
                 <div id="res-dst-panel" class="border rounded flex-grow-1">
-                  <p class="bg-light border rounded subheader bg-primary-subtle text-primary-medium mb-1"><?= $l['dst'] ?></p>
+                  <p class="border rounded subheader bg-primary-subtle text-primary-medium mb-1"><?= $l['dst'] ?></p>
                   <div class="pe-2 pb-1">
                     <div id="res-dst" class="mb-2">
                       <div class="res-type" id="res-type-dst-0"><input id="res-dst-0" type="radio" name="dst" value="0" tabindex="10"/><label for="res-dst-0" id="res-type-dst-lbl-0"></label></div>
@@ -207,7 +207,7 @@
 
           <!-- Rates Panel -->
           <div class="border rounded me-1 ms-1">
-            <p class="bg-light border rounded subheader bg-primary-subtle text-primary-medium mb-1 px-2"><?= $l['rates'] ?></p>
+            <p class="border rounded subheader bg-primary-subtle text-primary-medium mb-1 px-2"><?= $l['rates'] ?></p>
             <div class="rates-panel-content px-2 py-1">
               <!-- Rate Labels and Inputs Group -->
               <div class="rate-labels-inputs-group">
@@ -226,7 +226,7 @@
                 <div class="rate-label-input-row">
                   <div class="rate-label"><?= $l['metal'] ?> : <?= $l['crystal'] ?></div>
                   <div class="rate-input-group">
-                    <div id="rate-mc" class="border rounded bg-light rate-input p-1 text-center ui-state-disabled"></div>
+                    <div id="rate-mc" class="border rounded rate-input p-1 text-center ui-state-disabled"></div>
                   </div>
                 </div>
               </div>
@@ -252,19 +252,19 @@
 
               <!-- Rate Buttons Group -->
               <div class="rate-buttons-group">
-                <button id="rate-btn-1" class="btn btn-sm btn-primary">4 : 2 : 1</button>
-                <button id="rate-btn-4" class="btn btn-sm btn-primary">2.5 : 1.5 : 1</button>
-                <button id="rate-btn-2" class="btn btn-sm btn-primary">3 : 2 : 1</button>
-                <button id="rate-btn-5" class="btn btn-sm btn-primary">2 : 1.5 : 1</button>
-                <button id="rate-btn-3" class="btn btn-sm btn-primary">3 : 1.5 : 1</button>
-                <button id="rate-btn-6" class="btn btn-sm btn-primary">2.4 : 1.5 : 1</button>
+                <button id="rate-btn-1" class="btn btn-sm bg-primary-subtle text-primary-medium">4 : 2 : 1</button>
+                <button id="rate-btn-4" class="btn btn-sm bg-primary-subtle text-primary-medium">2.5 : 1.5 : 1</button>
+                <button id="rate-btn-2" class="btn btn-sm bg-primary-subtle text-primary-medium">3 : 2 : 1</button>
+                <button id="rate-btn-5" class="btn btn-sm bg-primary-subtle text-primary-medium">2 : 1.5 : 1</button>
+                <button id="rate-btn-3" class="btn btn-sm bg-primary-subtle text-primary-medium">3 : 1.5 : 1</button>
+                <button id="rate-btn-6" class="btn btn-sm bg-primary-subtle text-primary-medium">2.4 : 1.5 : 1</button>
               </div>
             </div>
           </div>
 
           <!-- Location Panel -->
           <div class="border rounded m-1">
-            <p class="bg-light border rounded subheader bg-primary-subtle text-primary-medium mb-1 px-2"><?= $l['location'] ?></p>
+            <p class="border rounded subheader bg-primary-subtle text-primary-medium mb-1 px-2"><?= $l['location'] ?></p>
             <div class="px-2 py-1">
               <div class="row mb-1 align-items-center">
                 <div class="col-12 col-md-3 text-md-end tdr"><?= $l['country'] ?>:</div>
@@ -301,17 +301,17 @@
             </div>
           </div>
         </div>
-
-        <!-- Link, Text, BBCode sections -->
-        <div id="link" class="my-4 text-center small">
-          <?= $l['link'] ?>:<br><a id="alink" href="#"></a>
-        </div>
-        <div id="text" class="my-4 text-center small">
-          <?= $l['text'] ?>:<br><span id="atext"></span>
-        </div>
-        <div id="bbcode" class="my-4 text-center small">
-          BB-Code:<br><textarea id="abbcode" class="form-control border rounded w-100" rows="2"></textarea>
-        </div>
+      </div>
+      
+      <!-- Link, Text, BBCode sections -->
+      <div id="link" class="my-4 text-center small">
+        <?= $l['link'] ?>:<br><a id="alink" href="#"></a>
+      </div>
+      <div id="text" class="my-4 text-center small">
+        <?= $l['text'] ?>:<br><span id="atext"></span>
+      </div>
+      <div id="bbcode" class="my-4 text-center small">
+        BB-Code:<br><textarea id="abbcode" class="form-control border rounded w-100" rows="2"></textarea>
       </div>
     </div>
   </div>

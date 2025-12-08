@@ -12,7 +12,6 @@
     z-index: 10;
     width: 30px;
     height: 30px;
-    background-color: #ffe6e6;
     border: 1px solid #dc3545;
     border-radius: 8px;
     margin-right: 0.2rem;
@@ -76,7 +75,7 @@
 }
 
 #abbcode { 
-    max-width: 650px;
+    max-width: 800px;
     margin: 0 auto; 
 }
 
@@ -347,7 +346,6 @@
 input:disabled,
 input.ui-state-disabled {
     color: #6c757d !important;
-    background-color: #e9ecef !important;
 }
 
 /* Read-only display divs (not editable, for display purposes only) */
@@ -355,22 +353,10 @@ input.ui-state-disabled {
     cursor: default;
 }
 
-/* Error state should override normal border */
-.res-input:not(input):not(textarea).ui-state-error {
-    border-color: #dc3545 !important;
-    background: repeating-linear-gradient(
-        45deg,
-        #f8d7da,
-        #f8d7da 10px,
-        #f5c2c7 10px,
-        #f5c2c7 20px
-    ) !important;
-}
-
 /* Error state for rate inputs */
 .ui-state-error {
     border-color: #dc3545 !important;
-    background-color: #f8d7da !important;
+    background-color: var(--bs-danger-bg-subtle);
 }
 
 /* Range slider styling for better visibility */
@@ -390,4 +376,8 @@ input.ui-state-disabled {
 
 #res-dst-m, #res-dst-c, #res-dst-d {
     height: 1.5rem;
+}
+
+.rate-buttons-group button {
+  font-weight: bold;
 }
