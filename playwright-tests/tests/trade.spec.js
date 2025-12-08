@@ -1,7 +1,10 @@
 import { test, expect } from '@playwright/test';
 
 test.describe('Trade Calculator Page', () => {
-    test.beforeEach(async ({ page }) => {
+    test.beforeEach(async ({ page }, testInfo) => {
+        if (testInfo.title.includes('parsing from link works')) {
+            return;
+        }
         await page.goto('/ogame/calc/trade.php');
     });
 
@@ -234,5 +237,26 @@ test.describe('Trade Calculator Page', () => {
         await expect(page.locator('#alink')).toContainText('trade.php#rmd=2.4&rcd=1.5&st=0&dt=2&dmt=3&fix2=10000&m=100000&l=en:1&lc=4:3:2&lm=1');
         await expect(page.locator('#atext')).toContainText('Selling 100.000 met. Buying 47.500 crys and 10.000 deut. Exchange rates 2.4:1.5:1. Coordinates [4:3:2], moon (Universe 1, en.ogame.gameforge.com)');
         await expect(page.locator('#abbcode')).toContainText('trade.php#rmd=2.4&rcd=1.5&st=0&dt=2&dmt=3&fix2=10000&m=100000&l=en:1&lc=4:3:2&lm=1]Selling 100.000 met. Buying 47.500 crys and 10.000 deut. Exchange rates 2.4:1.5:1. Coordinates [4:3:2], moon (Universe 1, en.ogame.gameforge.com)[/url]');
+    });
+
+    test('parsing from link works', async ({ page }) => {
+        await page.goto('/ogame/calc/trade.php#rmd=2.4&rcd=1.5&st=1&dt=2&dmt=1&mp1=2&mp2=3&c=100000&l=en:1&lc=1:2:3&lm=1');
+        await expect(page.locator('#res-src-1')).toBeChecked();
+        await expect(page.locator('#res-dst-2')).toBeChecked();
+        await expect(page.locator('#res-dst-mix-1')).toBeChecked();
+        await expect(page.locator('#mix-balance-prop1')).toHaveValue('2');
+        await expect(page.locator('#mix-balance-prop2')).toHaveValue('3');
+        await expect(page.locator('#res-src-c')).toHaveValue('100000');
+        await expect(page.locator('#res-dst-m')).toContainText('34.783');
+        await expect(page.locator('#res-dst-d')).toContainText('52.174');
+        await expect(page.locator('#rate-md')).toHaveValue('2.4');
+        await expect(page.locator('#rate-cd')).toHaveValue('1.5');
+        await expect(page.locator('#trade')).toContainText('1.600');
+        await expect(page.locator('#country')).toHaveValue('en');
+        await expect(page.locator('#universe')).toHaveValue('1');
+        await expect(page.locator('#coord-g')).toHaveValue('1');
+        await expect(page.locator('#coord-s')).toHaveValue('2');
+        await expect(page.locator('#coord-p')).toHaveValue('3');
+        await expect(page.locator('#moon')).toBeChecked();
     });
 });
