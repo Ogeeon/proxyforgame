@@ -1,4 +1,4 @@
-var resTypes = [
+const resTypes = [
     [1,0,0],
     [0,1,0],
     [0,0,1],
@@ -6,16 +6,16 @@ var resTypes = [
     [1,0,1],
     [0,1,1]
 ];
-var rateLimits = {
-    md: { min: 1.8, max: 3.0 },
-    cd: { min: 1.0, max: 2.0 },
-    mc: { min: 1.5, max: 2.0 }
+const rateLimits = {
+    md: { min: 1.8, max: 3 },
+    cd: { min: 1,   max: 2 },
+    mc: { min: 1.5, max: 2 }
 };
 
-var l = {};
-var unis;
+let l = {};
+let unis;
 
-var options = {
+let options = {
     metal: 0,
     crystal: 0,
     deuterium: 0,
@@ -25,7 +25,9 @@ var options = {
     rates: {
         md: (rateLimits.md.min + rateLimits.md.max) / 2,
         cd: (rateLimits.cd.min + rateLimits.cd.max) / 2,
-        mc: (this.md / this.cd).toFixed(3)
+        get mc() {
+            return (this.md / this.cd).toFixed(3);
+        }
     },
 
     srcType: 2,
@@ -77,8 +79,6 @@ var options = {
                 };
             }
             this.rates.mc = (this.rates.md / this.rates.cd).toFixed(3);
-            // consoleLog("loaded from cookies: ");
-            // consoleLog(options);
         } catch(e) {
             alert(e);
         }
@@ -88,91 +88,201 @@ var options = {
         saveToCookie('options_trade', options);
     },
 
-    parseFromUri: function() {
-        var url = window.location.href.split("#");
-        if (url.length > 1) {
-            var params = url[1].split('&');
-            var p = {};
-            for (var ps in params) {
-                var t = params[ps].split('=');
-                if (t.length == 2) {
-                    p[unescape(t[0]).toLowerCase()] = unescape(t[1]).toLowerCase();
-                }
+    _parseUrlParams: function() {
+        const url = globalThis.location.href.split("#");
+        if (url.length <= 1) return null;
+        
+        const params = url[1].split('&');
+        const prm = {};
+        for (const ps in params) {
+            const t = params[ps].split('=');
+            if (t.length == 2) {
+                prm[decodeURIComponent(t[0]).toLowerCase()] = decodeURIComponent(t[1]).toLowerCase();
             }
-            if (isset(p['rmd'])) this.rates.md = validateNumber(Number.parseFloat(p['rmd']), 1, 5, this.rates.md);
-            if (isset(p['rcd'])) this.rates.cd = validateNumber(Number.parseFloat(p['rcd']), 1, 5, this.rates.cd);
-            this.rates.mc = (this.rates.md / this.rates.cd).toFixed(3);
-            if (isset(p['st'])) this.srcType = validateNumber(Number.parseInt(p['st']), 0, 5, this.srcType);
-            if (isset(p['dt'])) this.dstType = validateNumber(Number.parseInt(p['dt']), 0, 5, this.dstType);
-            if (isset(p['dmt'])) this.dstMixType = validateNumber(Number.parseInt(p['dmt']), 0, 3, this.dstMixType);
-            if (isset(p['mix'])) this.mixBalance = validateNumber(Number.parseFloat(p['mix']), 0, 100, this.mixBalance);
-            if (isset(p['mp1'])) { this.mixProp1 = validateNumber(Number.parseInt(p['mp1']), 0, 100, this.mixProp1); document.getElementById('mix-balance-prop1').value = this.mixProp1 == 0 ? '' : this.mixProp1; }
-            if (isset(p['mp2'])) { this.mixProp2 = validateNumber(Number.parseInt(p['mp2']), 0, 100, this.mixProp2); document.getElementById('mix-balance-prop2').value = this.mixProp2 == 0 ? '' : this.mixProp2; }
-            if (isset(p['fix1'])) { this.fix1 = validateNumber(Number.parseInt(p['fix1']), 0, Infinity, this.fix1); document.getElementById('mix-fix1').value = this.fix1 == 0 ? '' : this.fix1; }
-            if (isset(p['fix2'])) { this.fix2 = validateNumber(Number.parseInt(p['fix2']), 0, Infinity, this.fix2); document.getElementById('mix-fix2').value = this.fix2 == 0 ? '' : this.fix2; }
-            if (isset(p['m'])) { var m = validateNumber(Number.parseInt(p['m']), 0, Infinity, 0); document.getElementById('res-src-m').value = m == 0 ? '' : m; }
-            if (isset(p['c'])) { var c = validateNumber(Number.parseInt(p['c']), 0, Infinity, 0); document.getElementById('res-src-c').value = c == 0 ? '' : c; }
-            if (isset(p['d'])) { var d = validateNumber(Number.parseInt(p['d']), 0, Infinity, 0); document.getElementById('res-src-d').value = d == 0 ? '' : d; }
-            if (isset(p['l'])) { var m = p['l'].split(':'); if (m.length == 2) { this.country = checkCountryLang(m[0]); this.universe = validateNumber(Number.parseInt(m[1]), 0, Infinity, 101); } }
-            if (isset(p['lc'])) { var m = p['lc'].split(':'); if (m.length == 3) { this.coordg = validateNumber(Number.parseInt(m[0]), 0, 12, 0); this.coords = validateNumber(Number.parseInt(m[1]), 0, 550, 0); this.coordp = validateNumber(Number.parseInt(m[2]), 0, 15, 0); } }
-            if (isset(p['lm'])) { var lm = validateNumber(Number.parseInt(p['lm']), 0, 1, 0); document.getElementById('moon').checked = lm !== 0; this.moon = lm !== 0; } else this.moon = false;
+        }
+        return prm;
+    },
+
+    _parseRatesFromParams: function(prm) {
+        if (isset(prm['rmd'])) this.rates.md = validateNumber(Number.parseFloat(prm['rmd']), 1, 5, this.rates.md);
+        if (isset(prm['rcd'])) this.rates.cd = validateNumber(Number.parseFloat(prm['rcd']), 1, 5, this.rates.cd);
+        this.rates.mc = (this.rates.md / this.rates.cd).toFixed(3);
+    },
+
+    _parseTypesFromParams: function(prm) {
+        if (isset(prm['st'])) this.srcType = validateNumber(Number.parseInt(prm['st']), 0, 5, this.srcType);
+        if (isset(prm['dt'])) this.dstType = validateNumber(Number.parseInt(prm['dt']), 0, 5, this.dstType);
+        if (isset(prm['dmt'])) this.dstMixType = validateNumber(Number.parseInt(prm['dmt']), 0, 3, this.dstMixType);
+    },
+
+    _parseMixFromParams: function(prm) {
+        if (isset(prm['mix'])) this.mixBalance = validateNumber(Number.parseFloat(prm['mix']), 0, 100, this.mixBalance);
+        
+        if (isset(prm['mp1'])) {
+            this.mixProp1 = validateNumber(Number.parseInt(prm['mp1']), 0, 100, this.mixProp1);
+            document.getElementById('mix-balance-prop1').value = this.mixProp1 == 0 ? '' : this.mixProp1;
+        }
+        if (isset(prm['mp2'])) {
+            this.mixProp2 = validateNumber(Number.parseInt(prm['mp2']), 0, 100, this.mixProp2);
+            document.getElementById('mix-balance-prop2').value = this.mixProp2 == 0 ? '' : this.mixProp2;
+        }
+        if (isset(prm['fix1'])) {
+            this.fix1 = validateNumber(Number.parseInt(prm['fix1']), 0, Infinity, this.fix1);
+            document.getElementById('mix-fix1').value = this.fix1 == 0 ? '' : this.fix1;
+        }
+        if (isset(prm['fix2'])) {
+            this.fix2 = validateNumber(Number.parseInt(prm['fix2']), 0, Infinity, this.fix2);
+            document.getElementById('mix-fix2').value = this.fix2 == 0 ? '' : this.fix2;
         }
     },
 
-    makeUri: function() {
-        var l = window.location;
-        var url = l.protocol + '//' + l.host + l.pathname + l.search +
-                '#rmd=' + this.rates.md + '&rcd=' + this.rates.cd +
-                '&st=' + this.srcType + '&dt=' + this.dstType;
-        if (this.dstType == 2) {
-            url += '&dmt=' + this.dstMixType;
-            switch (this.dstMixType) {
-                case 0: url += '&mix=' + this.mixBalance; break;
-                case 1: url += '&mp1=' + this.mixProp1 + '&mp2=' + this.mixProp2; break;
-                case 2: url += this.fix1 ? '&fix1=' + this.fix1 : ''; break;
-                case 3: url += this.fix2 ? '&fix2=' + this.fix2 : ''; break;
+    _parseResourcesFromParams: function(prm) {
+        if (isset(prm['m'])) {
+            const m = validateNumber(Number.parseInt(prm['m']), 0, Infinity, 0);
+            document.getElementById('res-src-m').value = m == 0 ? '' : m;
+        }
+        if (isset(prm['c'])) {
+            const c = validateNumber(Number.parseInt(prm['c']), 0, Infinity, 0);
+            document.getElementById('res-src-c').value = c == 0 ? '' : c;
+        }
+        if (isset(prm['d'])) {
+            const d = validateNumber(Number.parseInt(prm['d']), 0, Infinity, 0);
+            document.getElementById('res-src-d').value = d == 0 ? '' : d;
+        }
+    },
+
+    _parseLocationFromParams: function(prm) {
+        if (isset(prm['l'])) {
+            const m = prm['l'].split(':');
+            if (m.length == 2) {
+                this.country = checkCountryLang(m[0]);
+                this.universe = validateNumber(Number.parseInt(m[1]), 0, Infinity, 101);
             }
         }
-
-        if (resTypes[this.srcType][0] == 1 && this.metal) url += '&m=' + this.metal;
-        if (resTypes[this.srcType][1] == 1 && this.crystal) url += '&c=' + this.crystal;
-        if (resTypes[this.srcType][2] == 1 && this.deuterium) url += '&d=' + this.deuterium;
-
-        url += '&l=' + this.country + ':' + this.universe;
-        if (this.coordg && this.coords && this.coordp) {
-            url +=  '&lc=' + this.coordg + ':' + this.coords + ':' + this.coordp;
-            url += this.moon ? '&lm=1' : '&lm=0';
+        
+        if (isset(prm['lc'])) {
+            const m = prm['lc'].split(':');
+            if (m.length == 3) {
+                this.coordg = validateNumber(Number.parseInt(m[0]), 0, 12, 0);
+                this.coords = validateNumber(Number.parseInt(m[1]), 0, 550, 0);
+                this.coordp = validateNumber(Number.parseInt(m[2]), 0, 15, 0);
+            }
         }
+        
+        if (isset(prm['lm'])) {
+            const lm = validateNumber(Number.parseInt(prm['lm']), 0, 1, 0);
+            document.getElementById('moon').checked = lm !== 0;
+            this.moon = lm !== 0;
+        } else {
+            this.moon = false;
+        }
+    },
+
+    parseFromUri: function() {
+        const prm = this._parseUrlParams();
+        if (!prm) return;
+        
+        this._parseRatesFromParams(prm);
+        this._parseTypesFromParams(prm);
+        this._parseMixFromParams(prm);
+        this._parseResourcesFromParams(prm);
+        this._parseLocationFromParams(prm);
+    },
+
+    _buildMixTypeParams: function() {
+        const mixTypeBuilders = {
+            0: () => '&mix=' + this.mixBalance,
+            1: () => '&mp1=' + this.mixProp1 + '&mp2=' + this.mixProp2,
+            2: () => this.fix1 ? '&fix1=' + this.fix1 : '',
+            3: () => this.fix2 ? '&fix2=' + this.fix2 : ''
+        };
+        const builder = mixTypeBuilders[this.dstMixType];
+        return builder ? builder() : '';
+    },
+
+    _buildResourceParams: function() {
+        const resources = [
+            { index: 0, value: this.metal, param: 'm' },
+            { index: 1, value: this.crystal, param: 'c' },
+            { index: 2, value: this.deuterium, param: 'd' }
+        ];
+        return resources
+            .filter(r => resTypes[this.srcType][r.index] === 1 && r.value)
+            .map(r => '&' + r.param + '=' + r.value)
+            .join('');
+    },
+
+    _buildCoordinateParams: function() {
+        if (!this.coordg || !this.coords || !this.coordp) return '';
+        const moonParam = this.moon ? '&lm=1' : '&lm=0';
+        return '&lc=' + this.coordg + ':' + this.coords + ':' + this.coordp + moonParam;
+    },
+
+    makeUri: function() {
+        const l = globalThis.location;
+        const baseUrl = l.protocol + '//' + l.host + l.pathname + l.search;
+        const rateParams = '#rmd=' + this.rates.md + '&rcd=' + this.rates.cd;
+        const typeParams = '&st=' + this.srcType + '&dt=' + this.dstType;
+        
+        let url = baseUrl + rateParams + typeParams;
+        
+        if (this.dstType === 2) {
+            url += '&dmt=' + this.dstMixType + this._buildMixTypeParams();
+        }
+
+        url += this._buildResourceParams();
+        url += '&l=' + this.country + ':' + this.universe;
+        url += this._buildCoordinateParams();
+        
         return url;
     },
 
     makeString: function(dm, dc, dd) {
-        var txt = l.src + ' ';
-        var f = false;
-        if (resTypes[this.srcType][0] == 1 && this.metal) { txt += numToOGame(this.metal) + ' ' + l.met; f = true; }
-        if (resTypes[this.srcType][1] == 1 && this.crystal) { txt += (f ? ' ' + l.and + ' ' : '') + numToOGame(this.crystal) + ' ' + l.crys; f = true; }
-        if (resTypes[this.srcType][2] == 1 && this.deuterium) { txt += (f ? ' ' + l.and + ' ' : '') + numToOGame(this.deuterium) + ' ' + l.deut; }
+        const parts = [
+            this._formatSourceResources(),
+            '. ',
+            this._formatDestinationResources(dm, dc, dd),
+            l.rates + ' ' + options.rates.md + ':' + options.rates.cd + ':1. ',
+            this._formatCoordinates()
+        ];
+        return parts.join('');
+    },
 
-        txt += '. ';
-        if (dm || dc || dd) {
-            txt += l.dst + ' ';
-            f = false;
-            if (dm) { txt += numToOGame(dm) + ' ' + l.met; f = true; }
-            if (dc) { txt += (f ? ' ' + l.and + ' ' : '') + numToOGame(dc) + ' ' + l.crys; f = true; }
-            if (dd) { txt += (f ? ' ' + l.and + ' ' : '') + numToOGame(dd) + ' ' + l.deut; }
-            txt += '. ';
+    _addResourceIfNeeded: function(resources, typeIndex, value, label) {
+        if (resTypes[this.srcType][typeIndex] === 1 && value) {
+            resources.push(numToOGame(value) + ' ' + label);
         }
+    },
 
-        txt += l.rates + ' ' + options.rates.md + ':' + options.rates.cd + ':1. ';
+    _formatSourceResources: function() {
+        const resources = [];
+        this._addResourceIfNeeded(resources, 0, this.metal, l.met);
+        this._addResourceIfNeeded(resources, 1, this.crystal, l.crys);
+        this._addResourceIfNeeded(resources, 2, this.deuterium, l.deut);
+        return l.src + ' ' + resources.join(' ' + l.and + ' ');
+    },
 
-        if (this.coordg && this.coords && this.coordp) {
-            var server = document.querySelector('#country option:checked').textContent.match(/\((.+)\)/)[1];
-            var uni = document.querySelector('#universe option:checked').textContent.match(/^(.+) \(/)[1];
-            txt += l.coords + ' [' + this.coordg + ':' + this.coords + ':' + this.coordp + ']';
-            txt += this.moon ? ', '+ l.moonstr : '';
-            txt += ' (' + uni + ', ' + server + ')';
-        }
-        return txt;
+    _formatDestinationResources: function(dm, dc, dd) {
+        if (!dm && !dc && !dd) return '';
+        
+        const resources = [];
+        if (dm) resources.push(numToOGame(dm) + ' ' + l.met);
+        if (dc) resources.push(numToOGame(dc) + ' ' + l.crys);
+        if (dd) resources.push(numToOGame(dd) + ' ' + l.deut);
+        return l.dst + ' ' + resources.join(' ' + l.and + ' ') + '. ';
+    },
+
+    _formatCoordinates: function() {
+        if (!this.coordg || !this.coords || !this.coordp) return '';
+        
+        const serverText = document.querySelector('#country option:checked').textContent;
+        const uniText = document.querySelector('#universe option:checked').textContent;
+        const server = /\((.+)\)/.exec(serverText)[1];
+        const uni = /^(.+) \(/.exec(uniText)[1];
+        
+        const coords = '[' + this.coordg + ':' + this.coords + ':' + this.coordp + ']';
+        const moonPart = this.moon ? ', ' + l.moonstr : '';
+        return l.coords + ' ' + coords + moonPart + ' (' + uni + ', ' + server + ')';
     }
 };
 
@@ -184,12 +294,12 @@ var options = {
 function setUniList(lang, uni) {
     const universeEl = document.getElementById('universe');
     universeEl.innerHTML = '';
-    var ulist = unis[lang] || [];
+    let ulist = unis[lang] || [];
 
     // проверяем, имеется ли такая вселенная в указанной стране. если нет, сбрасываем на начало списка
-    var fu = false;
-    for (var i = 0; i < ulist.length; i++) {
-        if (ulist[i][0] == uni) {
+    let fu = false;
+    for (const item of ulist) {
+        if (item[0] == uni) {
             fu = true;
             break;
         }
@@ -199,10 +309,10 @@ function setUniList(lang, uni) {
         options.save();
     }
 
-    for (var i = 0; i < ulist.length; i++) {
+    for (const item of ulist) {
         const option = document.createElement('option');
-        option.value = ulist[i][0];
-        option.textContent = ulist[i][2] + ' (' + ulist[i][1] + ')';
+        option.value = item[0];
+        option.textContent = item[2] + ' (' + item[1] + ')';
         universeEl.appendChild(option);
     }
     universeEl.value = uni;
@@ -212,7 +322,7 @@ function setUniList(lang, uni) {
  * Возвращает язык, указанный в url. Если не удается распознать язык из урла, возвращается дефолтный.
  */
 function getUrlLang() {
-    var um = window.location.pathname.match(/^\/(\w\w)\//);
+    let um = /^\/(\w\w)\//.exec(globalThis.location.pathname);
     return um ? um[1] : 'en';
 }
 
@@ -220,11 +330,11 @@ function getUrlLang() {
  * Проверяет на валидность язык страны из списка #country. Если такого языка не встречается, то ставим дефолтный.
  */
 function checkCountryLang(lang) {
-    var f = false;
+    let f = false;
     const options = document.querySelectorAll('#country option');
-    options.forEach(function(option) {
+    for (const option of options) {
         if (option.value === lang) f = true;
-    });
+    }
     return f ? lang : getUrlLang();
 }
 
@@ -232,10 +342,10 @@ function checkCountryLang(lang) {
  * Возвращает массив доступности типа ресурсов назначения в зависимости от состояния переключателей srcType и dstType.
  */
 function getDstInputState(srcType, dstType) {
-    var dstEnable = resTypes[srcType].slice(0);
-    var cnt = 0;
+    let dstEnable = resTypes[srcType].slice(0);
+    let cnt = 0;
     if (dstType < 2) {
-        for (var d = 0; d < 3; d++) {
+        for (let d = 0; d < 3; d++) {
             if (dstEnable[d] == 0) {
                 if (cnt != dstType) {
                     dstEnable[d] = 1;
@@ -251,7 +361,7 @@ function getDstInputState(srcType, dstType) {
  * Обрабатывает смену переключателя srcType.
  */
 function onUpdateSrcType() {
-    var input = document.getElementById('res-src-' + options.srcType);
+    let input = document.getElementById('res-src-' + options.srcType);
     if (!input.checked) {
         input.checked = true;
     }
@@ -268,7 +378,7 @@ function onUpdateDstType() {
     if (options.srcType > 2) {
         options.dstType = 0;
     }
-    var input = document.getElementById('res-dst-' + options.dstType);
+    let input = document.getElementById('res-dst-' + options.dstType);
     if (!input.checked) {
         input.checked = true;
     }
@@ -281,13 +391,15 @@ function onUpdateDstType() {
  */
 function onUpdateDstMixType() {
     if (options.dstType == 2) {
-        var input = document.getElementById('res-dst-mix-' + options.dstMixType);
+        let input = document.getElementById('res-dst-mix-' + options.dstMixType);
         if (!input.checked) {
             input.checked = true;
         }
     } else {
         const radios = document.querySelectorAll('#dst-mix-block input[type="radio"]');
-        radios.forEach(r => r.checked = false);
+        for (const r of radios) {
+            r.checked = false;
+        }
     }
     updateNumbers();
     options.save();
@@ -298,11 +410,11 @@ function onUpdateDstMixType() {
  * @return true, если произошла смена состояний и нужно обновить зависимые данные
  */
 function forceDstMix() {
-    if (options.dstType != 2) {
+    if (options.dstType == 2) {
+        return false;
+    } else {
         options.dstType = 2;
         return true;
-    } else {
-        return false;
     }
 }
 
@@ -310,17 +422,17 @@ function forceDstMix() {
  * Активизирует определенный тип микса в зависимости от активного поля ввода obj.
  */
 function activateDstMixType(obj) {
-    var ids = [
+    let ids = [
         ['mix-balance-proc', 0],
         ['mix-balance-prop1', 1],
         ['mix-balance-prop2', 1],
         ['mix-fix1', 2],
         ['mix-fix2', 3]
     ];
-    var type = -1;
-    for (var i = 0; i < ids.length; i++) {
-        if (obj.id == ids[i][0]) {
-            var type = ids[i][1];
+    let type = -1;
+    for (const [id, value] of ids) {
+        if (obj.id == id) {
+            type = value;
             break;
         }
     }
@@ -338,21 +450,31 @@ function activateDstMixType(obj) {
 }
 
 /**
+ * Устанавливает состояние доступности для одного класса ресурса.
+ * @param className имя класса элемента
+ * @param panelSelector селектор панели
+ * @param enabled флаг доступности
+ */
+function updateResourceState(className, panelSelector, enabled) {
+    const elems = document.querySelectorAll(panelSelector + ' .' + className);
+    const inputs = document.querySelectorAll('input.' + className);
+    if (enabled) {
+        for (const el of elems) el.classList.remove('ui-state-disabled');
+        for (const inp of inputs) inp.removeAttribute('disabled');
+    } else {
+        for (const el of elems) el.classList.add('ui-state-disabled');
+        for (const inp of inputs) inp.disabled = true;
+    }
+}
+
+/**
  * Устанавливает доступность полей ресурсов источника.
  * @param resEnable массив доступности полей с input'ами ресурсов: e.g. [1,0,0]
  */
 function updateSrcInputState(resEnable) {
-    var classNames = ['res-src-m', 'res-src-c', 'res-src-d'];
-    for (var i = 0; i < 3; i++) {
-        var elems = document.querySelectorAll('#res-src-panel .' + classNames[i]);
-        var inputs = document.querySelectorAll('input.' + classNames[i]);
-        if (resEnable[i] == 1) {
-            elems.forEach(el => el.classList.remove('ui-state-disabled'));
-            inputs.forEach(inp => inp.removeAttribute('disabled'));
-        } else {
-            elems.forEach(el => el.classList.add('ui-state-disabled'));
-            inputs.forEach(inp => inp.disabled = true);
-        }
+    const classNames = ['res-src-m', 'res-src-c', 'res-src-d'];
+    for (let i = 0; i < 3; i++) {
+        updateResourceState(classNames[i], '#res-src-panel', resEnable[i] == 1);
     }
 }
 
@@ -412,13 +534,13 @@ function updateDstFromSrc() {
  * @param resEnable массив доступности полей с input'ами ресурсов: e.g. [1,0,0]
  */
 function updateDstInputState(resEnable) {
-    var classNames = ['res-dst-m', 'res-dst-c', 'res-dst-d'];
-    for (var i = 0; i < 3; i++) {
-        var elems = document.querySelectorAll('#res-dst-panel .' + classNames[i]);
+    let classNames = ['res-dst-m', 'res-dst-c', 'res-dst-d'];
+    for (let i = 0; i < 3; i++) {
+        let elems = document.querySelectorAll('#res-dst-panel .' + classNames[i]);
         if (resEnable[i] == 0) {
-            elems.forEach(el => el.classList.remove('ui-state-disabled'));
+            for (const el of elems) el.classList.remove('ui-state-disabled');
         } else {
-            elems.forEach(el => el.classList.add('ui-state-disabled'));
+            for (const el of elems) el.classList.add('ui-state-disabled');
         }
     }
 }
@@ -486,20 +608,107 @@ function validateRateLimits() {
 }
 
 /**
+ * Вычисляет целевые ресурсы из металла
+ */
+function calculateFromMetal(dst, p, fix1, fix2, sm) {
+    let dm = 0, dc = 0, dd = 0;
+    switch (options.dstType) {
+        case 0: dc = dst.mc; break;
+        case 1: dd = dst.md; break;
+        case 2:
+            switch (options.dstMixType) {
+                case 0:
+                case 1:
+                    dc = dst.md / ((100 - p) / p + options.rates.mc / options.rates.md);
+                    dd = dst.mc / (p / (100 - p) + options.rates.md / options.rates.mc);
+                    break;
+                case 2:
+                    dc = clampNumber(fix1, 0, dst.mc);
+                    dd = (sm - (dc * options.rates.mc)) / options.rates.md;
+                    break;
+                case 3:
+                    dd = clampNumber(fix2, 0, dst.md);
+                    dc = (sm - (dd * options.rates.md)) / options.rates.mc;
+                    break;
+            }
+            break;
+    }
+    return { dm, dc, dd };
+}
+
+/**
+ * Вычисляет целевые ресурсы из кристалла
+ */
+function calculateFromCrystal(dst, p, fix1, fix2, sc) {
+    let dm = 0, dc = 0, dd = 0;
+    switch (options.dstType) {
+        case 0: dm = dst.cm; break;
+        case 1: dd = dst.cd; break;
+        case 2:
+            switch (options.dstMixType) {
+                case 0:
+                case 1:
+                    dm = dst.cd / ((100 - p) / p + 1 / (options.rates.cd * options.rates.mc));
+                    dd = dst.cm / (p / (100 - p) + options.rates.mc * options.rates.cd);
+                    break;
+                case 2:
+                    dm = clampNumber(fix1, 0, dst.cm);
+                    dd = (sc - (dm / options.rates.mc)) / options.rates.cd;
+                    break;
+                case 3:
+                    dd = clampNumber(fix2, 0, dst.cd);
+                    dm = (sc - (dd * options.rates.cd)) * options.rates.mc;
+                    break;
+            }
+            break;
+    }
+    return { dm, dc, dd };
+}
+
+/**
+ * Вычисляет целевые ресурсы из дейтерия
+ */
+function calculateFromDeuterium(dst, p, fix1, fix2, sd) {
+    let dm = 0, dc = 0, dd = 0;
+    switch (options.dstType) {
+        case 0: dm = dst.dm; break;
+        case 1: dc = dst.dc; break;
+        case 2:
+            switch (options.dstMixType) {
+                case 0:
+                case 1:
+                    dm = dst.dc / ((100 - p) / p + options.rates.cd / options.rates.md);
+                    dc = dst.dm / (p / (100 - p) + options.rates.md / options.rates.cd);
+                    break;
+                case 2:
+                    dm = clampNumber(fix1, 0, dst.dm);
+                    dc = (sd - (dm / options.rates.md)) * options.rates.cd;
+                    break;
+                case 3:
+                    dc = clampNumber(fix2, 0, dst.dc);
+                    dm = (sd - (dc / options.rates.cd)) * options.rates.md;
+                    break;
+            }
+            break;
+    }
+    return { dm, dc, dd };
+}
+
+/**
  * Пересчитывает значения ресурсов в соответствии с настройками в модели.
  */
 function updateNumbers() {
     // исходные ресурсы
-    var sm = clampNumber(getInputNumber(document.getElementById('res-src-m')), 0, Infinity);
-    var sc = clampNumber(getInputNumber(document.getElementById('res-src-c')), 0, Infinity);
-    var sd = clampNumber(getInputNumber(document.getElementById('res-src-d')), 0, Infinity);
+    let sm = clampNumber(getInputNumber(document.getElementById('res-src-m')), 0, Infinity);
+    let sc = clampNumber(getInputNumber(document.getElementById('res-src-c')), 0, Infinity);
+    let sd = clampNumber(getInputNumber(document.getElementById('res-src-d')), 0, Infinity);
 
     options.metal = sm;
     options.crystal = sc;
     options.deuterium = sd;
 
     // расчеты
-    var dst = {
+    let dst = {
         mc: sm / options.rates.mc,	// металл в пересчете на кристалл
         md: sm / options.rates.md,	// металл в пересчете на дейтерий
         cm: sc * options.rates.mc,	// кристалл в пересчете на металл
@@ -509,94 +718,33 @@ function updateNumbers() {
     };
 
     // целевые ресурсы
-    var dm = 0;
-    var dc = 0;
-    var dd = 0;
+    let dm = 0;
+    let dc = 0;
+    let dd = 0;
 
     // фиксированные ресурсы из микса
-    var fix1 = getInputNumber(document.getElementById('mix-fix1'));
-    var fix2 = getInputNumber(document.getElementById('mix-fix2'));
+    let fix1 = getInputNumber(document.getElementById('mix-fix1'));
+    let fix2 = getInputNumber(document.getElementById('mix-fix2'));
     options.fix1 = fix1;
     options.fix2 = fix2;
 
-    if (options.dstMixType == 0) var p = options.mixBalance;
-    else if (options.dstMixType == 1) var p = clampNumber(options.mixProp1 / (options.mixProp1 + options.mixProp2) * 100, 0, 100);
+    let p = 0;
+    if (options.dstMixType == 0) p = options.mixBalance;
+    else if (options.dstMixType == 1) p = clampNumber(options.mixProp1 / (options.mixProp1 + options.mixProp2) * 100, 0, 100);
 
+    let result;
     switch (options.srcType) {
         case 0:
-            switch (options.dstType) {
-                case 0: dc = dst.mc;
-                    break;
-                case 1: dd = dst.md;
-                    break;
-                case 2:
-                    switch (options.dstMixType) {
-                        case 0:
-                        case 1:
-                            dc = dst.md / ((100 - p) / p + options.rates.mc / options.rates.md);
-                            dd = dst.mc / (p / (100 - p) + options.rates.md / options.rates.mc);
-                            break;
-                        case 2:
-                            dc = clampNumber(fix1, 0, dst.mc);
-                            dd = (sm - (dc * options.rates.mc)) / options.rates.md;
-                            break;
-                        case 3:
-                            dd = clampNumber(fix2, 0, dst.md);
-                            dc = (sm - (dd * options.rates.md)) / options.rates.mc;
-                            break;
-                    }
-                    break;
-            }
+            result = calculateFromMetal(dst, p, fix1, fix2, sm);
+            dm = result.dm; dc = result.dc; dd = result.dd;
             break;
         case 1:
-            switch (options.dstType) {
-                case 0: dm = dst.cm;
-                    break;
-                case 1: dd = dst.cd;
-                    break;
-                case 2:
-                    switch (options.dstMixType) {
-                        case 0:
-                        case 1:
-                            dm = dst.cd / ((100 - p) / p + 1 / (options.rates.cd * options.rates.mc));
-                            dd = dst.cm / (p / (100 - p) + options.rates.mc * options.rates.cd);
-                            break;
-                        case 2:
-                            dm = clampNumber(fix1, 0, dst.cm);
-                            dd = (sc - (dm / options.rates.mc)) / options.rates.cd;
-                            break;
-                        case 3:
-                            dd = clampNumber(fix2, 0, dst.cd);
-                            dm = (sc - (dd * options.rates.cd)) * options.rates.mc;
-                            break;
-                    }
-                    break;
-            }
+            result = calculateFromCrystal(dst, p, fix1, fix2, sc);
+            dm = result.dm; dc = result.dc; dd = result.dd;
             break;
         case 2:
-            switch (options.dstType) {
-                case 0: dm = dst.dm;
-                    break;
-                case 1: dc = dst.dc;
-                    break;
-                case 2:
-                    switch (options.dstMixType) {
-                        case 0:
-                        case 1:
-                            dm = dst.dc / ((100 - p) / p + options.rates.cd / options.rates.md);
-                            dc = dst.dm / (p / (100 - p) + options.rates.md / options.rates.cd);
-                            break;
-                        case 2:
-                            dm = clampNumber(fix1, 0, dst.dm);
-                            dc = (sd - (dm / options.rates.md)) * options.rates.cd;
-                            break;
-                        case 3:
-                            dc = clampNumber(fix2, 0, dst.dc);
-                            dm = (sd - (dc / options.rates.cd)) * options.rates.md;
-                            break;
-                    }
-                    break;
-            }
+            result = calculateFromDeuterium(dst, p, fix1, fix2, sd);
+            dm = result.dm; dc = result.dc; dd = result.dd;
             break;
         case 3:
             dd = dst.md + dst.cd;
@@ -615,7 +763,7 @@ function updateNumbers() {
     document.getElementById('res-dst-c').textContent = numToOGame(dc);
     document.getElementById('res-dst-d').textContent = numToOGame(dd);
 
-    var st = 0;
+    let st = 0;
     switch (options.srcType) {
         case 0: st = sm;
             break;
@@ -631,12 +779,12 @@ function updateNumbers() {
             break;
     }
     
-    var ht = clampNumber(getInputNumber(document.getElementById('hypertech-lvl')), 0, Infinity);
+    let ht = clampNumber(getInputNumber(document.getElementById('hypertech-lvl')), 0, Infinity);
     options.hyperTech = ht;
-    var capSC = 5000.0 * (1 + 0.05 * ht);
-    var capLC = 25000.0 * (1 + 0.05 * ht);
-    var mt = st / capSC;
-    var bt = st / capLC;
+    let capSC = 5000 * (1 + 0.05 * ht);
+    let capLC = 25000 * (1 + 0.05 * ht);
+    let mt = st / capSC;
+    let bt = st / capLC;
     document.getElementById('res-src-cargo').textContent = numToOGame(Math.ceil(mt)) + ' ' + l.sc + ' / ' + numToOGame(Math.ceil(bt)) + ' ' + l.lc;
     st = dm + dc + dd;
     mt = st / capSC;
@@ -644,8 +792,8 @@ function updateNumbers() {
     document.getElementById('res-dst-cargo').textContent = numToOGame(Math.ceil(mt)) + ' ' + l.sc + ' / ' + numToOGame(Math.ceil(bt)) + ' ' + l.lc;
 
     if (sm || sc || sd) {
-        var uri = options.makeUri();
-        var txt = options.makeString(dm, dc, dd);
+        let uri = options.makeUri();
+        let txt = options.makeString(dm, dc, dd);
         const alink = document.getElementById('alink');
         alink.href = uri;
         alink.textContent = uri;
@@ -748,18 +896,18 @@ try {
     document.getElementById('coord-p').value = options.coordp ? options.coordp : '';
     document.getElementById('moon').checked = options.moon;
 
-    document.querySelectorAll('input').forEach(function(input) {
+    for (const input of document.querySelectorAll('input')) {
         input.addEventListener('focusin', function() {
             this.classList.add('ui-state-focus');
         });
         input.addEventListener('focusout', function() {
             this.classList.remove('ui-state-focus');
         });
-    });
+    }
 
     document.getElementById('reset_bs').addEventListener('click', resetParams);
 
-    var rbf = function(r1, r2) {
+    let rbf = function(r1, r2) {
         options.rates.md = r1;
         options.rates.cd = r2;
         options.rates.mc = (r1 / r2).toFixed(3);
@@ -782,29 +930,29 @@ try {
 
     validateRateLimits();
 
-    document.querySelectorAll('#res-src input[type="radio"]').forEach(function(radio) {
+    for (const radio of document.querySelectorAll('#res-src input[type="radio"]')) {
         radio.addEventListener('change', function() { options.srcType = Number.parseInt(this.value); onUpdateSrcType(); });
-    });
-    document.querySelectorAll('#res-dst input[name="dst"]').forEach(function(radio) {
+    }
+    for (const radio of document.querySelectorAll('#res-dst input[name="dst"]')) {
         radio.addEventListener('change', function() { options.dstType = Number.parseInt(this.value); onUpdateDstType(); });
-    });
-    document.querySelectorAll('#dst-mix-block input[type="radio"]').forEach(function(radio) {
+    }
+    for (const radio of document.querySelectorAll('#dst-mix-block input[type="radio"]')) {
         radio.addEventListener('change', function() { options.dstMixType = Number.parseInt(this.value); if (forceDstMix()) onUpdateDstType(); else onUpdateDstMixType(); });
-    });
-    document.getElementById('mix-balance-proc').addEventListener('keyup', function() { var n = clampNumber(getInputNumber(this), 0, 100); document.getElementById('mix-balance').value = n; options.mixBalance = n; options.save(); });
+    }
+    document.getElementById('mix-balance-proc').addEventListener('keyup', function() { let n = clampNumber(getInputNumber(this), 0, 100); document.getElementById('mix-balance').value = n; options.mixBalance = n; options.save(); });
     document.getElementById('mix-balance-prop1').addEventListener('keyup', function() { options.mixProp1 = clampNumber(getInputNumber(this), 0, 100); options.save(); });
     document.getElementById('mix-balance-prop2').addEventListener('keyup', function() { options.mixProp2 = clampNumber(getInputNumber(this), 0, 100); options.save(); });
-    document.querySelectorAll('#res-src-panel input[type="text"]').forEach(function(input) {
+    for (const input of document.querySelectorAll('#res-src-panel input[type="text"]')) {
         input.addEventListener('keyup', updateNumbers);
-    });
-    document.querySelectorAll('#dst-mix-block input[type="text"]').forEach(function(input) {
+    }
+    for (const input of document.querySelectorAll('#dst-mix-block input[type="text"]')) {
         input.addEventListener('keyup', updateNumbers);
         input.addEventListener('focusin', function() { activateDstMixType(this); });
-    });
-    var cev = function() { options.country = document.getElementById('country').value; setUniList(options.country, options.universe); updateNumbers(); options.save(); }
+    }
+    let cev = function() { options.country = document.getElementById('country').value; setUniList(options.country, options.universe); updateNumbers(); options.save(); }
     document.getElementById('country').addEventListener('change', cev);
     document.getElementById('country').addEventListener('keyup', cev);
-    var uev = function() { options.universe = document.getElementById('universe').value; updateNumbers(); options.save(); }
+    let uev = function() { options.universe = document.getElementById('universe').value; updateNumbers(); options.save(); }
     document.getElementById('universe').addEventListener('change', uev);
     document.getElementById('universe').addEventListener('keyup', uev);
     document.getElementById('coord-g').addEventListener('keyup', function() { options.coordg = clampNumber(getInputNumber(this), 0, 12); updateNumbers(); options.save(); });
@@ -812,7 +960,7 @@ try {
     document.getElementById('coord-p').addEventListener('keyup', function() { options.coordp = clampNumber(getInputNumber(this), 0, 15); updateNumbers(); options.save(); });
     document.getElementById('rate-md').addEventListener('keyup', function() { options.rates.md = clampNumber(getInputNumber(this), 1, 5); document.getElementById('md-slider').value = options.rates.md; options.rates.mc = (options.rates.md / options.rates.cd).toFixed(3); document.getElementById('rate-mc').textContent = options.rates.mc; document.getElementById('mc-slider').value = options.rates.mc; updateNumbers(); validateRateLimits(); options.save(); });
     document.getElementById('rate-cd').addEventListener('keyup', function() { options.rates.cd = clampNumber(getInputNumber(this), 1, 5); document.getElementById('cd-slider').value = options.rates.cd; options.rates.mc = (options.rates.md / options.rates.cd).toFixed(3); document.getElementById('rate-mc').textContent = options.rates.mc; document.getElementById('mc-slider').value = options.rates.mc; updateNumbers(); validateRateLimits(); options.save(); });
-    var event = {currentTarget: document.getElementById('hypertech-lvl'), data: 'updateNumbers'};
+    let event = {currentTarget: document.getElementById('hypertech-lvl'), data: 'updateNumbers'};
     document.getElementById('hypertech-lvl').addEventListener('keyup', function() { validateInputNumber.call(this, event); });
     document.getElementById('moon').addEventListener('click', function() { options.moon = document.getElementById('moon').checked; updateNumbers(); options.save(); });
 

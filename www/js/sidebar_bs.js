@@ -13,24 +13,20 @@ function showReportWindow(text) {
 }
 
 function getText(e) {
-    if (!e) e = window.event;
+    if (!e) return;
     if ((e.ctrlKey) && ((e.keyCode == 10) || (e.keyCode == 13))) { 
         let mis = getSelectedText();
         if (mis) {
             showReportWindow(mis);
         }
-        return true;
     } 
-    return true;
 }
 
 function getSelectedText() {
-    if (window.getSelection) {
-        return window.getSelection().toString();
-    } else if (document.selection && document.selection.createRange) {
-        return document.selection.createRange().text;
+    if (globalThis.getSelection) {
+        return globalThis.getSelection().toString();
     }
-    return '';
+    return document.selection?.createRange()?.text ?? '';
 }
 
 function findSelection() { 
@@ -42,7 +38,7 @@ function findSelection() {
 
 function showSendDiv(dialog, id) {
     const ids = ['data', 'progress', 'err-0', 'err-1', 'err-2', 'err-3', 'err-4', 'err-5', 'err-6', 'err-7', 'err-99'];
-    ids.forEach(itemId => {
+    for (const itemId of ids) {
         const el = document.getElementById(`${dialog}-${itemId}`);
         if (el) {
             if (id === itemId) {
@@ -54,7 +50,7 @@ function showSendDiv(dialog, id) {
                 el.classList.add('d-none');
             }
         }
-    });
+    }
 }
 
 function updateButtonsState(dlg) {
@@ -108,7 +104,7 @@ function sendReport() {
     .then(response => response.text())
     .then(data => {
         try {
-            const rcode = Number.parseInt(data.substr(0, data.indexOf('\n')));
+            const rcode = Number.parseInt(data.substring(0, data.indexOf('\n')));
             const errDiv = document.getElementById(`report-err-${rcode}`);
             showSendDiv('report', `err-${rcode}`);
             
@@ -163,7 +159,7 @@ function sendEmail() {
     .then(response => response.text())
     .then(data => {
         try {
-            const rcode = Number.parseInt(data.substr(0, data.indexOf('\n')));
+            const rcode = Number.parseInt(data.substring(0, data.indexOf('\n')));
             const errDiv = document.getElementById(`email-err-${rcode}`);
             showSendDiv('email', `err-${rcode}`);
             
@@ -199,17 +195,17 @@ function isManualChangelogRequest(fromChange) {
 }
 
 function toggleChangelogHeader(showHeader) {
-    ['changelog-header-text', 'changelog-header-spacer'].forEach(function(id) {
-        var el = document.getElementById(id);
+    for (const id of ['changelog-header-text', 'changelog-header-spacer']) {
+        const el = document.getElementById(id);
         if (!el) {
-            return;
+            continue;
         }
         if (showHeader) {
             el.classList.remove('d-none');
         } else {
             el.classList.add('d-none');
         }
-    });
+    }
 }
 
 function requestAndShowChangelog(fromChange) {
@@ -228,8 +224,7 @@ function requestAndShowChangelog(fromChange) {
     .then(response => response.text())
     .then(data => {
         try {
-            const rcode = Number.parseInt(data.substr(0, data.indexOf('\n')));
-            const payload = data.substr(3, data.length);
+            const payload = data.substring(3);
             const changes = JSON.parse(payload);
             clearChangelogTable();
             fillChangelogTable(changes);
@@ -255,23 +250,21 @@ function fillChangelogTable(changes) {
         return;
     }
     const tbody = document.querySelector('#changelog-tbl tbody');
-    changes.forEach(change => {
+    for (const change of changes) {
         const tr = document.createElement('tr');
         tr.innerHTML = `
             <td class="text-center">${change.ts}</td>
             <td>${change.description}</td>
         `;
         tbody.appendChild(tr);
-    });
+    }
 }
 
 document.addEventListener('DOMContentLoaded', function() {
-    // Initialize Bootstrap modals
     reportModal = new bootstrap.Modal(document.getElementById('reportModal'));
     emailModal = new bootstrap.Modal(document.getElementById('emailModal'));
     changelogModal = new bootstrap.Modal(document.getElementById('changelogModal'));
 
-    // Keep the toggle hidden while the offcanvas menu is visible
     const sidebarToggleBtn = document.querySelector('[data-bs-target="#sidebarOffcanvas"]');
     const sidebarOffcanvas = document.getElementById('sidebarOffcanvas');
     const body = document.body;
@@ -290,7 +283,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    // Report modal button handlers
     document.getElementById('report-btn-ok').addEventListener('click', function() {
         switch (reportStep) {
             case 0:
@@ -309,7 +301,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
     
-    // Email modal button handlers
     document.getElementById('email-btn-ok').addEventListener('click', function() {
         switch (emailStep) {
             case 0:
@@ -328,7 +319,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
     
-    // Reset state when modals are closed
     document.getElementById('reportModal').addEventListener('hidden.bs.modal', function() {
         reportStep = 0;
         showSendDiv('report', 'data');
@@ -340,9 +330,8 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
-document.onkeypress = getText;
+document.addEventListener('keypress', getText);
 
-// Changelog notification
 let lastChange = { value: '42', validate: function(key, val) { return val; } };
 loadFromCookie('lastChange', lastChange);
 if (lastChange && lastChange.value < currChange) {
