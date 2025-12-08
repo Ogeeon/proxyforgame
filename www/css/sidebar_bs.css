@@ -1,4 +1,8 @@
-/* Sidebar positioning - snap to left, full height */
+/* ========================================
+   SIDEBAR POSITIONING & LAYOUT
+   ======================================== */
+
+/* Fixed sidebar - snap to left, full height */
 #sidebar {
     position: fixed;
     left: 0;
@@ -11,20 +15,16 @@
     z-index: 1030;
 }
 
-/* Remove rounded corners from all sidebar elements */
-#sidebar .card,
-#sidebar .card-header,
-#sidebar .list-group-item,
-#sidebar .list-group {
-    border-radius: 0 !important;
-}
+/* ========================================
+   TOGGLE BUTTON
+   ======================================== */
 
-/* Sidebar toggle button styling - FIXED */
+/* Sidebar toggle button - fixed position */
 .btn[data-bs-toggle="offcanvas"] {
     position: fixed;
     top: 10px;
     left: 10px;
-    z-index: 1050 !important; /* Increased to be above everything */
+    z-index: 1050 !important;
 }
 
 /* Hide toggle while offcanvas is open to prevent double menus */
@@ -32,68 +32,27 @@ body.sidebar-offcanvas-open .btn[data-bs-toggle="offcanvas"] {
     display: none !important;
 }
 
-/* Collapse grid columns below lg while keeping the toggle visible */
-@media (max-width: 991.98px) {
-    .col-2,
-    .col-10 {
-        flex: 0 0 100%;
-        max-width: 100%;
-    }
+/* ========================================
+   SIDEBAR PANELS & HEADERS
+   ======================================== */
 
-    .col-2 {
-        margin-bottom: 0.5rem;
-    }
-
-    .btn[data-bs-toggle="offcanvas"] {
-        display: inline-flex !important;
-    }
-}
-.card {
-    --bs-card-bg: color-mix(in srgb, var(--bs-card-color) 80%, black);
-}
-
-#sidebar .card-header:hover {
-    background-color: #e9ecef;
-}
-
-#sidebar .sidebar-panel, #sidebarOffcanvas .sidebar-panel {
+#sidebar .sidebar-panel,
+#sidebarOffcanvas .sidebar-panel {
     text-align: center;
     font-weight: bold;
     border-top: 1px solid #dee2e6;
     border-bottom: 1px solid #dee2e6;
 }
 
-.spacer { 
-    height: 10px; 
+#sidebar .card-header:hover {
+    background-color: #e9ecef;
 }
 
-.small-spacer { 
-    height: 5px; 
-}
+/* ========================================
+   LIST GROUP ITEMS
+   ======================================== */
 
-#sidebar .feedback, #sidebarOffcanvas .feedback {
-    padding: 8px;
-    font-weight: normal;
-    font-size: 0.8em;
-    cursor: default;
-    color: var(--bs-info-text-emphasis);
-}
-
-#sidebar .changelog, #sidebarOffcanvas .changelog {
-    border: none !important;
-    font-weight: bold !important;
-    text-align: center;
-}
-
-#sidebar .changelog a, #sidebarOffcanvas .changelog a {
-    text-decoration: none;
-    color: #0d6efd;
-}
-
-#sidebar .changelog a:hover, #sidebarOffcanvas .changelog a:hover {
-    text-decoration: underline;
-}
-
+/* Remove side borders from list items */
 #sidebar .list-group-item {
     border-left: none;
     border-right: none;
@@ -103,7 +62,7 @@ body.sidebar-offcanvas-open .btn[data-bs-toggle="offcanvas"] {
     border-top: none;
 }
 
-/* Reduce size of ogame menu items */
+/* OGame menu items - reduced size */
 #sidebar .ogame-menu-item,
 #sidebarOffcanvas .ogame-menu-item {
     padding: 6px 8px;
@@ -111,11 +70,13 @@ body.sidebar-offcanvas-open .btn[data-bs-toggle="offcanvas"] {
     color: var(--bs-info-text-emphasis);
 }
 
+/* Hover state for actionable items */
 #sidebar .list-group-item-action:hover,
 #sidebarOffcanvas .list-group-item-action:hover {
     color: var(--bs-primary-text-emphasis);
 }
 
+/* Active state for current page */
 #sidebar .list-group-item.active,
 #sidebarOffcanvas .list-group-item.active {
     background-color: var(--bs-primary-bg-subtle);
@@ -123,12 +84,68 @@ body.sidebar-offcanvas-open .btn[data-bs-toggle="offcanvas"] {
     font-weight: bold;
 }
 
-[data-bs-theme="dark"] #sidebar .list-group-item,
-[data-bs-theme="dark"] #sidebarOffcanvas .list-group-item {
-  background-color: color-mix(in srgb, var(--bs-list-group-bg) 80%, black);
+/* ========================================
+   FEEDBACK & CONTENT SECTIONS
+   ======================================== */
+
+#sidebar .feedback,
+#sidebarOffcanvas .feedback {
+    padding: 8px;
+    font-weight: normal;
+    font-size: 0.8em;
+    cursor: default;
+    color: var(--bs-info-text-emphasis);
 }
 
-/* Modal customizations */
+#sidebar .changelog,
+#sidebarOffcanvas .changelog {
+    border: none !important;
+    font-weight: bold !important;
+    text-align: center;
+}
+
+#sidebar .changelog a,
+#sidebarOffcanvas .changelog a {
+    text-decoration: none;
+    color: #0d6efd;
+}
+
+#sidebar .changelog a:hover,
+#sidebarOffcanvas .changelog a:hover {
+    text-decoration: underline;
+}
+
+/* ========================================
+   SPACING UTILITIES
+   ======================================== */
+
+.spacer {
+    height: 10px;
+}
+
+.small-spacer {
+    height: 5px;
+}
+
+/* ========================================
+   DARK MODE SUPPORT
+   ======================================== */
+
+/* Card background adjustment */
+.card {
+    --bs-card-bg: color-mix(in srgb, var(--bs-card-color) 80%, black);
+}
+
+/* Dark mode list items */
+[data-bs-theme="dark"] #sidebar .list-group-item,
+[data-bs-theme="dark"] #sidebarOffcanvas .list-group-item {
+    background-color: color-mix(in srgb, var(--bs-list-group-bg) 80%, black);
+}
+
+/* ========================================
+   MODAL CUSTOMIZATIONS
+   ======================================== */
+
 #report-info {
     padding: 8px;
     text-align: center;
@@ -156,7 +173,28 @@ body.sidebar-offcanvas-open .btn[data-bs-toggle="offcanvas"] {
     text-decoration: underline;
 }
 
-/* Responsive adjustments */
+/* ========================================
+   RESPONSIVE DESIGN
+   ======================================== */
+
+/* Collapse grid columns below lg, keep toggle visible */
+@media (max-width: 991.98px) {
+    .col-2,
+    .col-10 {
+        flex: 0 0 100%;
+        max-width: 100%;
+    }
+
+    .col-2 {
+        margin-bottom: 0.5rem;
+    }
+
+    .btn[data-bs-toggle="offcanvas"] {
+        display: inline-flex !important;
+    }
+}
+
+/* Mobile/tablet adjustments */
 @media (max-width: 768px) {
     #sidebar .sidebar-panel {
         font-size: 0.9em;
