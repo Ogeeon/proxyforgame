@@ -88,6 +88,11 @@
 		</div>
 		<div class="spacer"></div>
 		<div class="list-group list-group-flush">
+			<div class="list-group-item text-center">
+				<a href="https://github.com/Ogeeon/proxyforgame" target="_blank" rel="noopener noreferrer" title="ProxyForGame on GitHub">
+					<i class="bi bi-github" style="font-size: 1.5rem;"></i>
+				</a>
+			</div>
 			<div class="list-group-item changelog">
 				<a href="#" onclick="requestAndShowChangelog(-1); return false;"><?=$loc['changelogStrings']['changelog']?></a>
 			</div>
@@ -137,6 +142,11 @@
 		</div>
 		<div class="spacer"></div>
 		<div class="list-group list-group-flush">
+			<div class="list-group-item text-center">
+				<a href="https://github.com/Ogeeon/proxyforgame" target="_blank" rel="noopener noreferrer" title="ProxyForGame on GitHub">
+					<i class="bi bi-github" style="font-size: 1.5rem;"></i>
+				</a>
+			</div>
 			<div class="list-group-item changelog">
 				<a href="#" onclick="requestAndShowChangelog(-1); return false;"><?=$loc['changelogStrings']['changelog']?></a>
 			</div>
