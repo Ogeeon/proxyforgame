@@ -79,6 +79,13 @@ var currLang = '<?=$lang ?>';
 	</div>
 	
 	<div class="spacer">&nbsp;</div>
+	<div >
+		<a href="https://github.com/Ogeeon/proxyforgame" target="_blank" rel="noopener noreferrer" title="ProxyForGame on GitHub">
+			<img src="/images/github.png" alt="ProxyForGame on GitHub"/>
+		</a>
+	</div>
+
+	<div class="spacer">&nbsp;</div>
 	<div class="ui-state-active changelog">
 		<a href="#" onclick="requestAndShowChangelog(-1);"><?=$loc['changelogStrings']['changelog']?></a>
 	</div>
