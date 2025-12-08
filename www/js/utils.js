@@ -621,3 +621,19 @@ function localizeFloat(input) {
 	}
 	return result;
 }
+
+function toggleLightBS(on) {
+	var theme = { value: 'light' };
+	const html = document.documentElement;
+	if (on) {
+		document.getElementById('cb-light-theme').checked = true;		
+		html.setAttribute('data-bs-theme', 'light');
+		theme.value = 'light';
+		saveToCookie("theme", theme);
+	} else {
+		document.getElementById('cb-light-theme').checked = false;
+		html.setAttribute('data-bs-theme', 'dark');
+		theme.value = 'dark';
+		saveToCookie("theme", theme);
+	}	
+}

@@ -48,13 +48,9 @@ body.sidebar-offcanvas-open .btn[data-bs-toggle="offcanvas"] {
         display: inline-flex !important;
     }
 }
-/*
-#sidebar .card-header,
-.offcanvas-title {
-    font-weight: bold;
-    background-color: #f8f9fa;
-    color: #333;
-}*/
+.card {
+    --bs-card-bg: color-mix(in srgb, var(--bs-card-color) 80%, black);
+}
 
 #sidebar .card-header:hover {
     background-color: #e9ecef;
@@ -80,15 +76,11 @@ body.sidebar-offcanvas-open .btn[data-bs-toggle="offcanvas"] {
     font-weight: normal;
     font-size: 0.8em;
     cursor: default;
-}
-
-#sidebar .feedback:hover, #sidebarOffcanvas .feedback:hover {
-    background-color: #f8f9fa;
+    color: var(--bs-info-text-emphasis);
 }
 
 #sidebar .changelog, #sidebarOffcanvas .changelog {
     border: none !important;
-    background: none !important;
     font-weight: bold !important;
     text-align: center;
 }
@@ -112,15 +104,28 @@ body.sidebar-offcanvas-open .btn[data-bs-toggle="offcanvas"] {
 }
 
 /* Reduce size of ogame menu items */
-#sidebar .ogame-menu-item {
+#sidebar .ogame-menu-item,
+#sidebarOffcanvas .ogame-menu-item {
     padding: 6px 8px;
     font-size: 0.9em;
+    color: var(--bs-info-text-emphasis);
 }
 
-#sidebar .list-group-item.active {
-    background-color: #0d6efd;
-    border-color: #0d6efd;
-    color: white;
+#sidebar .list-group-item-action:hover,
+#sidebarOffcanvas .list-group-item-action:hover {
+    color: var(--bs-primary-text-emphasis);
+}
+
+#sidebar .list-group-item.active,
+#sidebarOffcanvas .list-group-item.active {
+    background-color: var(--bs-primary-bg-subtle);
+    color: var(--bs-primary);
+    font-weight: bold;
+}
+
+[data-bs-theme="dark"] #sidebar .list-group-item,
+[data-bs-theme="dark"] #sidebarOffcanvas .list-group-item {
+  background-color: color-mix(in srgb, var(--bs-list-group-bg) 80%, black);
 }
 
 /* Modal customizations */

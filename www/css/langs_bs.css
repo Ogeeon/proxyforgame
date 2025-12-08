@@ -1,20 +1,20 @@
 /* Language menu button styling */
 .lang-menu-btn {
-	border: 1px solid var(--bs-primary-bg-subtle, #cfe2ff) !important;
+	/*border: 1px solid var(--bs-primary-bg-subtle, #cfe2ff) !important;*/
 	transition: all 0.2s ease-in-out;
 }
 
 .lang-menu-btn:hover,
 .lang-menu-btn:focus {
-	border-color: var(--bs-primary-bg-subtle, #cfe2ff) !important;
+	/*border-color: var(--bs-primary-bg-subtle, #cfe2ff) !important;*/
 	box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.15);
 }
-
+/*
 .lang-menu-btn:active,
 .lang-menu-btn.show {
 	border-color: var(--bs-primary-bg-subtle, #cfe2ff) !important;
 	background-color: var(--bs-light, #f8f9fa) !important;
-}
+}*/
 
 /* Language menu dropdown item hover effect */
 .lang-menu-item {
@@ -37,4 +37,14 @@
 .lang-menu-item img {
 	flex-shrink: 0;
 	object-fit: cover;
+}
+
+/* Fix dropdown item alignment - remove extra padding on right */
+.lang-menu-item {
+	padding-right: 0.1rem !important;
+	width: 100%;
+}
+
+.dropdown-menu {
+	padding: 0;
 }

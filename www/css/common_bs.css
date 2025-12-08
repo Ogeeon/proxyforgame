@@ -11,6 +11,16 @@
 	margin: 0px !important; 
 }
 
+[data-bs-theme="dark"] body {
+  background-color: color-mix(in srgb, var(--bs-body-bg) 80%, black);
+  color: var(--bs-info-text-emphasis);
+}
+
+[data-bs-theme="dark"] .form-control,
+[data-bs-theme="dark"] .form-select {
+  color: var(--bs-info-text-emphasis);
+}
+
 .ui-input-margin { margin: 0; margin-left: 6px; }
 .hint-label { font-size: 0.8em; }
 .ui-checkbox { margin-right: 10px; }
