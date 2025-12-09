@@ -38,7 +38,7 @@ buttonsText.cancel = '<?=$loc['reportStrings']['cancel']?>';
 buttonsText.correct = '<?=$loc['reportStrings']['correct']?>';
 buttonsText.ok = 'OK';
 var currUrl = '<?=$_SERVER['REQUEST_URI']?>';
-var currChange = <?=$currChange ?>;
+let currChange = { value: <?=$currChange ?>, validate: function(key, val) { return val; } };
 var currLang = '<?=$lang ?>';
 </script>
 <?php $sidebarJs = $pfgPath . '/js/sidebar.js'; ?>
@@ -81,7 +81,7 @@ var currLang = '<?=$lang ?>';
 	<div class="spacer">&nbsp;</div>
 	<div >
 		<a href="https://github.com/Ogeeon/proxyforgame" target="_blank" rel="noopener noreferrer" title="ProxyForGame on GitHub">
-			<img src="/images/github.png" alt="ProxyForGame on GitHub"/>
+			<img id="github-icon" alt="" width="30" height="30" src="/images/github.png"/>
 		</a>
 	</div>
 

@@ -39,7 +39,7 @@
   buttonsText.correct = '<?=$loc['reportStrings']['correct']?>';
   buttonsText.ok = 'OK';
   var currUrl = '<?=$_SERVER['REQUEST_URI']?>';
-  var currChange = <?=$currChange ?>;
+  let currChange = { value: <?=$currChange ?>, validate: function(key, val) { return val; } };
   var currLang = '<?=$lang ?>';
 </script>
 <?php $sidebarJs = $pfgPath . '/js/sidebar_bs.js'; ?>
@@ -160,20 +160,20 @@
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="reportModalLabel"><?=$loc['reportStrings']['title']?></h5>
+        <h5 class="modal-title text-info-emphasis" id="reportModalLabel"><?=$loc['reportStrings']['title']?></h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
         <div id="report-data">
-          <div id="report-info" class="text-center mb-3">
+          <div id="report-info" class="text-center mb-3 text-info-emphasis">
             <?=$loc['reportStrings']['info']?>
           </div>
           <div class="mb-3">
-            <label for="misspelled-text" class="form-label"><?=$loc['reportStrings']['input1']?></label>
+            <label for="misspelled-text" class="form-label text-info-emphasis"><?=$loc['reportStrings']['input1']?></label>
             <input type="text" class="form-control" id="misspelled-text" />
           </div>
           <div class="mb-3">
-            <label for="corrected-text" class="form-label"><?=$loc['reportStrings']['input2']?></label>
+            <label for="corrected-text" class="form-label text-info-emphasis"><?=$loc['reportStrings']['input2']?></label>
             <input type="text" class="form-control" id="corrected-text" />
           </div>
         </div>
@@ -201,21 +201,21 @@
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="emailModalLabel"><?=$loc['emailStrings']['title']?></h5>
+        <h5 class="modal-title text-info-emphasis" id="emailModalLabel"><?=$loc['emailStrings']['title']?></h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
         <div id="email-data">
           <div class="mb-3">
-            <label for="email-form-address" class="form-label"><?=$loc['emailStrings']['address']?></label>
+            <label for="email-form-address" class="form-label text-info-emphasis"><?=$loc['emailStrings']['address']?></label>
             <input type="email" class="form-control" id="email-form-address" />
           </div>
           <div class="mb-3">
-            <label for="email-form-subject" class="form-label"><?=$loc['emailStrings']['subject']?></label>
+            <label for="email-form-subject" class="form-label text-info-emphasis"><?=$loc['emailStrings']['subject']?></label>
             <input type="text" class="form-control" id="email-form-subject" />
           </div>
           <div class="mb-3">
-            <label for="email-form-body" class="form-label"><?=$loc['emailStrings']['body']?></label>
+            <label for="email-form-body" class="form-label text-info-emphasis"><?=$loc['emailStrings']['body']?></label>
             <textarea class="form-control" id="email-form-body" rows="7"></textarea>
           </div>
         </div>
@@ -243,19 +243,19 @@
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="changelogModalLabel"><?=$loc['changelogStrings']['changelog']?></h5>
+        <h5 class="modal-title text-info-emphasis" id="changelogModalLabel"><?=$loc['changelogStrings']['changelog']?></h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
         <div id="changelog-dlg-info">
-          <div id="changelog-header-text"><?=$loc['changelogStrings']['chl-dlg-hdr']?></div>
+          <div id="changelog-header-text" class="text-info-emphasis"><?=$loc['changelogStrings']['chl-dlg-hdr']?></div>
           <div id="changelog-header-spacer" class="small-spacer"></div>
           <div class="table-responsive">
             <table id="changelog-tbl" class="table table-striped table-bordered">
               <thead>
                 <tr>
-                  <th style="width: 20%"><?=$loc['changelogStrings']['date']?></th>
-                  <th><?=$loc['changelogStrings']['description']?></th>
+                  <th class="text-center text-info-emphasis" style="width: 20%"><?=$loc['changelogStrings']['date']?></th>
+                  <th class="text-info-emphasis"><?=$loc['changelogStrings']['description']?></th>
                 </tr>
               </thead>
               <tbody></tbody>

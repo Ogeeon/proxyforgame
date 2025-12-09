@@ -85,7 +85,7 @@
 
           <!-- Technology Settings Panel -->
           <div id="tech-settings-panel" class="border rounded m-1">
-            <p class="border rounded subheader bg-primary-subtle text-primary-medium"><?= $l['parameters'] ?></p>
+            <p class="border rounded subheader bg-primary-subtle"><?= $l['parameters'] ?></p>
             <div id="tech-settings">
               <div class="row align-items-center justify-content-center py-1">
                 <div class="col-auto">
@@ -104,7 +104,7 @@
               <!-- Source Resources Panel -->
               <div class="col-12 col-lg-6 d-flex flex-column">
                 <div id="res-src-panel" class="border rounded flex-grow-1">
-                  <p class="border rounded subheader bg-primary-subtle text-primary-medium mb-1"><?= $l['src'] ?></p>
+                  <p class="border rounded subheader bg-primary-subtle mb-1"><?= $l['src'] ?></p>
                   <div class="pe-2 pb-1">
                     <div id="res-src" class="mb-2">
                       <div class="res-type"><input id="res-src-0" type="radio" name="src" value="0" tabindex="1"/><label for="res-src-0"><?= $l['metal'] ?></label></div>
@@ -144,7 +144,7 @@
               <!-- Destination Resources Panel -->
               <div class="col-12 col-lg d-flex flex-column">
                 <div id="res-dst-panel" class="border rounded flex-grow-1">
-                  <p class="border rounded subheader bg-primary-subtle text-primary-medium mb-1"><?= $l['dst'] ?></p>
+                  <p class="border rounded subheader bg-primary-subtle mb-1"><?= $l['dst'] ?></p>
                   <div class="pe-2 pb-1">
                     <div id="res-dst" class="mb-2">
                       <div class="res-type" id="res-type-dst-0"><input id="res-dst-0" type="radio" name="dst" value="0" tabindex="10"/><label for="res-dst-0" id="res-type-dst-lbl-0"></label></div>
@@ -207,7 +207,7 @@
 
           <!-- Rates Panel -->
           <div class="border rounded me-1 ms-1">
-            <p class="border rounded subheader bg-primary-subtle text-primary-medium mb-1 px-2"><?= $l['rates'] ?></p>
+            <p class="border rounded subheader bg-primary-subtle mb-1 px-2"><?= $l['rates'] ?></p>
             <div class="rates-panel-content px-2 py-1">
               <!-- Rate Labels and Inputs Group -->
               <div class="rate-labels-inputs-group">
@@ -252,19 +252,19 @@
 
               <!-- Rate Buttons Group -->
               <div class="rate-buttons-group">
-                <button id="rate-btn-1" class="btn btn-sm bg-primary-subtle text-primary-medium">4 : 2 : 1</button>
-                <button id="rate-btn-4" class="btn btn-sm bg-primary-subtle text-primary-medium">2.5 : 1.5 : 1</button>
-                <button id="rate-btn-2" class="btn btn-sm bg-primary-subtle text-primary-medium">3 : 2 : 1</button>
-                <button id="rate-btn-5" class="btn btn-sm bg-primary-subtle text-primary-medium">2 : 1.5 : 1</button>
-                <button id="rate-btn-3" class="btn btn-sm bg-primary-subtle text-primary-medium">3 : 1.5 : 1</button>
-                <button id="rate-btn-6" class="btn btn-sm bg-primary-subtle text-primary-medium">2.4 : 1.5 : 1</button>
+                <button id="rate-btn-1" class="btn btn-sm bg-primary-subtle">4 : 2 : 1</button>
+                <button id="rate-btn-4" class="btn btn-sm bg-primary-subtle">2.5 : 1.5 : 1</button>
+                <button id="rate-btn-2" class="btn btn-sm bg-primary-subtle">3 : 2 : 1</button>
+                <button id="rate-btn-5" class="btn btn-sm bg-primary-subtle">2 : 1.5 : 1</button>
+                <button id="rate-btn-3" class="btn btn-sm bg-primary-subtle">3 : 1.5 : 1</button>
+                <button id="rate-btn-6" class="btn btn-sm bg-primary-subtle">2.4 : 1.5 : 1</button>
               </div>
             </div>
           </div>
 
           <!-- Location Panel -->
           <div class="border rounded m-1">
-            <p class="border rounded subheader bg-primary-subtle text-primary-medium mb-1 px-2"><?= $l['location'] ?></p>
+            <p class="border rounded subheader bg-primary-subtle mb-1 px-2"><?= $l['location'] ?></p>
             <div class="px-2 py-1">
               <div class="row mb-1 align-items-center">
                 <div class="col-12 col-md-3 text-md-end tdr"><?= $l['country'] ?>:</div>

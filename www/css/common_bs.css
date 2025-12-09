@@ -16,8 +16,15 @@
   color: var(--bs-info-text-emphasis);
 }
 
+.subheader,
+button {
+    color: #0a58ca;
+}
+
 [data-bs-theme="dark"] .form-control,
-[data-bs-theme="dark"] .form-select {
+[data-bs-theme="dark"] .form-select,
+[data-bs-theme="dark"] .subheader,
+[data-bs-theme="dark"] button {
   color: var(--bs-info-text-emphasis);
 }
 

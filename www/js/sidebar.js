@@ -148,7 +148,7 @@ function sendEmail() {
 function requestAndShowChangelog(fromChange) {
 	$.post(
 		"/ajax.php",
-		{service: "changelog", lastSeen: fromChange, lang: currLang},
+		{service: "changelog", lastSeen: fromChange.value || -1, lang: currLang},
 		function(data) {
 			//consoleLog('response: '+data);
 			try {
@@ -292,13 +292,12 @@ $(function(){
 
 document.onkeypress = getText;
 
-// TODO: set on 2025-12-03, replace with 0 after some time
-let lastChange = { value: '42', validate: function(key, val) { return val; } };
+let lastChange = { value: 0, validate: function(key, val) { return val; } };
 loadFromCookie('lastChange', lastChange);
 if(lastChange) {
 	// consoleLog("lastChange="+lastChange.value+", currChange="+currChange);
-	if (lastChange.value < currChange) {
+	if (lastChange.value < currChange.value) {
 		requestAndShowChangelog(lastChange);
 	}
 }
-saveToCookie('lastChange', lastChange);
+saveToCookie('lastChange', currChange);

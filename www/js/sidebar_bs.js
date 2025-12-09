@@ -211,7 +211,7 @@ function toggleChangelogHeader(showHeader) {
 function requestAndShowChangelog(fromChange) {
     const formData = new URLSearchParams();
     formData.append('service', 'changelog');
-    formData.append('lastSeen', fromChange);
+    formData.append('lastSeen', fromChange.value || -1);
     formData.append('lang', currLang);
     
     fetch('/ajax.php', {
@@ -253,8 +253,8 @@ function fillChangelogTable(changes) {
     for (const change of changes) {
         const tr = document.createElement('tr');
         tr.innerHTML = `
-            <td class="text-center">${change.ts}</td>
-            <td>${change.description}</td>
+            <td class="text-center text-info-emphasis">${change.ts}</td>
+            <td class="text-info-emphasis">${change.description}</td>
         `;
         tbody.appendChild(tr);
     }
@@ -334,7 +334,7 @@ document.addEventListener('keypress', getText);
 
 let lastChange = { value: '42', validate: function(key, val) { return val; } };
 loadFromCookie('lastChange', lastChange);
-if (lastChange && lastChange.value < currChange) {
+if (lastChange && lastChange.value < currChange.value) {
     requestAndShowChangelog(lastChange);
 }
-saveToCookie('lastChange', lastChange);
+saveToCookie('lastChange', currChange);
