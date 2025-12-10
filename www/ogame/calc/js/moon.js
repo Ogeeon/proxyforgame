@@ -18,8 +18,8 @@ var options = {
 			],
 
 	defConstraints: {
-				min: null,
-				max: null,
+				min: -Infinity,
+				max: Infinity,
 				def: 0,
 				allowFloat: false,
 				allowNegative: false

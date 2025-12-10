@@ -2,8 +2,8 @@ let options = {
 	shipsData: [],
 	driveBonuses: [0, 0, 0],
 	defConstraints: {
-		min: null,
-		max: null,
+		min: -Infinity,
+		max: Infinity,
 		def: 0,
 		allowFloat: false,
 		allowNegative: false
@@ -1256,6 +1256,37 @@ function ajaxAPI(code) {
 								else $("." + i + "-cargo").val(0);
 							if (v["fuel"]) $("." + i + "-fuel").val((v["fuel"] * 100).toString().replace(".", options.decimalSeparator).substr(0, 6));
 								else $("." + i + "-fuel").val(0);
+						});
+
+						const techNamesMapping = [
+							[202, 'small-cargo'],
+							[203, 'large-cargo'],
+							[204, 'light-fighter'],
+							[205, 'heavy-fighter'],
+							[206, 'cruiser'],
+							[207, 'battleship'],
+							[208, 'colony-ship'],
+							[209, 'recycler'],
+							[210, 'esp-probe'],
+							[211, 'bomber'],
+							[213, 'destroyer'],
+							[214, 'death-star'],
+							[215, 'battlecruiser'],
+							[218, 'reaper'],
+							[219, 'pathfinder']
+						];
+						$.each(techNamesMapping, function(idx, val) {
+							$("#" + val[1]).val(0);
+						});
+						// Корабли
+						$.each(result.RESULT_DATA.details["ships"], function (i, v) {
+							if (v.count && v.ship_type) {
+								$.each(techNamesMapping, function(idx, val) {
+									if (val[0] == v.ship_type) {
+										$("#" + val[1]).val(v.count);
+									}
+								});
+							}
 						});
 
 						updateNumbers();
