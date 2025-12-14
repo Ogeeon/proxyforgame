@@ -141,8 +141,8 @@ $(document).ready(function() {
 		$(this).removeClass('ui-state-focus');
 	});
 
-	$('#moon-size').data('constrains', {'min': 1, 'max': 10000, 'def': 1});
-	$('#ds-count').data('constrains', {'min': 1, 'def': 1});
+	document.getElementById('moon-size')._constrains =  {'min': 1, 'max': 10000, 'def': 1};
+	document.getElementById('ds-count')._constrains = {'min': 1, 'def': 1};
 
 	// После того, как событие будет обработано, нужно вызвать функцию пересчета. Её имя передаём в поле data событий.
 	$('#moon input:text').keyup('updateNumbers', validateInputNumber);

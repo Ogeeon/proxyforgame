@@ -316,8 +316,8 @@ $(document).ready(function() {
 		$(this).removeClass('ui-state-focus');
 	});
 
-	$('#shipyard-level').data('constrains', {'min': 1, 'def': 1});
-	$('#max-planet-temp').data('constrains', {'min': -134, 'def': 0, 'allowNegative': true});
+	document.getElementById('shipyard-level')._constrains = {'min': 1, 'def': 1};
+	document.getElementById('max-planet-temp')._constrains = {'min': -134, 'def': 0, 'allowNegative': true};
 
 	// После того, как событие будет обработано, нужно вызвать функцию пересчета. Её имя передаём в поле data событий.
 	$('#terraformer input:text').keyup('updateNumbers', validateInputNumber);

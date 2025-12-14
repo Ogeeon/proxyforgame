@@ -244,8 +244,8 @@ function prepAllPlanetsTable() {
 		let newInputs = $('#all-planets-prod tr:eq(' + (i * 2 + 1) + ') input:text');
 		newInputs.keyup('updateAllPlnTab', validateInputNumber);
 		newInputs.blur('updateAllPlnTab', validateInputNumberOnBlur);
-		$(newInputs[0]).data('constrains', {'min': -134, 'def': 0, 'allowNegative': true});
-		$(newInputs[1]).data('constrains', {'min': 1, 'max': 16, 'def': 8, 'allowNegative': false});
+		newInputs[0]._constrains = {'min': -134, 'def': 0, 'allowNegative': true};
+		newInputs[1]._constrains = {'min': 1, 'max': 16, 'def': 8, 'allowNegative': false};
 
 		$('#control-' + i).buttonset();
 		let editBtn = $('#control-' + i + '-e');
@@ -1149,14 +1149,14 @@ try {
 	$('#universe-add').click(addUniverseData);
 
 	$("#tabs").tabs({	cookie: {	expires: 365, path: '/prod' } });	// UI сохраняет в куках номер открытой вкладки
-	$('#max-planet-temp').data('constrains', {'min': -134, 'def': 0, 'allowNegative': true});
-	$('#planet-pos').data('constrains', {'min': 1, 'max': 16, 'def': 8, 'allowNegative': false});
+	document.getElementById('max-planet-temp')._constrains = {'min': -134, 'def': 0, 'allowNegative': true};
+	document.getElementById('planet-pos')._constrains = {'min': 1, 'max': 16, 'def': 8, 'allowNegative': false};
 	$('#planet-pos').blur('updateOnePlnTab', validateInputNumberOnBlur);
 
 	// После того, как событие будет обработано, нужно вызвать функцию пересчета. Её имя передаём в поле data событий.
-	$('#exchange-rates-m').data('constrains', {'min': 1, 'max': 4, 'def': 1, 'allowFloat': true, 'allowNegative': false});
-	$('#exchange-rates-c').data('constrains', {'min': 1, 'max': 3, 'def': 1, 'allowFloat': true, 'allowNegative': false});
-	$('#exchange-rates-d').data('constrains', {'min': 1, 'max': 2, 'def': 1, 'allowFloat': true, 'allowNegative': false});
+	document.getElementById('exchange-rates-m')._constrains = {'min': 1, 'max': 4, 'def': 1, 'allowFloat': true, 'allowNegative': false};
+	document.getElementById('exchange-rates-c')._constrains = {'min': 1, 'max': 3, 'def': 1, 'allowFloat': true, 'allowNegative': false};
+	document.getElementById('exchange-rates-d')._constrains = {'min': 1, 'max': 2, 'def': 1, 'allowFloat': true, 'allowNegative': false};
 	$('#general-settings-panel input:text').keyup('updateParams', validateInputNumber);
 	$('#general-settings-panel input:text').blur('updateParams', validateInputNumberOnBlur);
 	$('#general-settings-panel select').keyup(updateParams);

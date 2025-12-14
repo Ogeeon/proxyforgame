@@ -693,12 +693,12 @@ $(document).ready(function() {
 		}
 	}
 
-	$('#sc-capacity-increase').data('constrains', {'min': 0, 'max': 1000, 'def': 0, 'allowFloat': true, 'allowNegative': false});
-	$('#lc-capacity-increase').data('constrains', {'min': 0, 'max': 1000, 'def': 0, 'allowFloat': true, 'allowNegative': false});
-	$('#megalith-level').data('constrains', {'min': 0, 'max': 100, 'def': 0, 'allowFloat': false, 'allowNegative': false});
-	$('#mrc-level').data('constrains', {'min': 0, 'max': 100, 'def': 0, 'allowFloat': false, 'allowNegative': false});
-	$('#research-cost-reduction').data('constrains', {'min': 0, 'max': 25, 'def': 0, 'allowFloat': true, 'allowNegative': false});
-	$('#research-time-reduction').data('constrains', {'min': 0, 'max': 99, 'def': 0, 'allowFloat': true, 'allowNegative': false});
+	document.getElementById('sc-capacity-increase')._constrains = {'min': 0, 'max': 1000, 'def': 0, 'allowFloat': true, 'allowNegative': false};
+	document.getElementById('lc-capacity-increase')._constrains = {'min': 0, 'max': 1000, 'def': 0, 'allowFloat': true, 'allowNegative': false};
+	document.getElementById('megalith-level')._constrains = {'min': 0, 'max': 100, 'def': 0, 'allowFloat': false, 'allowNegative': false};
+	document.getElementById('mrc-level')._constrains = {'min': 0, 'max': 100, 'def': 0, 'allowFloat': false, 'allowNegative': false};
+	document.getElementById('research-cost-reduction')._constrains = {'min': 0, 'max': 25, 'def': 0, 'allowFloat': true, 'allowNegative': false};
+	document.getElementById('research-time-reduction')._constrains = {'min': 0, 'max': 99, 'def': 0, 'allowFloat': true, 'allowNegative': false};
 
 	let theme = { value: 'light', validate: function(key, val) { return val; } };
 	loadFromCookie('theme', theme);

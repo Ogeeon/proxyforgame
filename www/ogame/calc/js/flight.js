@@ -371,10 +371,10 @@ function updateNumbers() {
 	options.prm.deutFactor = $('#deut-factor')[0].value;
 	options.prm.deutConsReduction = $('#deut-generals-bonus')[0].value;
 	// Обновим ограничения в соответствии с тем, что (возможно) навводил пользователь
-	$('#departure-g').data('constrains', {'min': 1, 'def': 0, 'max': options.prm.numberOfGalaxies});
-	$('#destination-g').data('constrains', {'min': 1, 'def': 0, 'max': options.prm.numberOfGalaxies});
-	$('#departure-s').data('constrains', {'min': 1, 'def': 0, 'max': options.prm.numberOfSystems});
-	$('#destination-s').data('constrains', {'min': 1, 'def': 0, 'max': options.prm.numberOfSystems});
+	document.getElementById('departure-g')._constrains = {'min': 1, 'def': 0, 'max': options.prm.numberOfGalaxies};
+	document.getElementById('destination-g')._constrains = {'min': 1, 'def': 0, 'max': options.prm.numberOfGalaxies};
+	document.getElementById('departure-s')._constrains = {'min': 1, 'def': 0, 'max': options.prm.numberOfSystems};
+	document.getElementById('destination-s')._constrains = {'min': 1, 'def': 0, 'max': options.prm.numberOfSystems};
 	options.prm.hyperTechLvl = getInputNumber($('#hypertech-lvl')[0]);
 	if ($('#class-2').attr('checked'))
 		options.prm.playerClass = 2;
@@ -1370,7 +1370,7 @@ jQuery(function($) {
 	options.ovrSpeed = 10000;
 	$('#ovr-speed-t').attr('disabled', true);
 	$('#ovr-speed-t').addClass('ui-state-disabled');
-	$('#ovr-speed-t').data('constrains', {'min': 1, 'def': 10000, 'max': 1000000000});
+	document.getElementById('ovr-speed-t')._constrains = {'min': 1, 'def': 10000, 'max': 1000000000};
 	$('#ovr-speed-cb').click(toggleOvrSpeed);
 
 	let flightData = options.prm.flightData.slice();
@@ -1404,11 +1404,11 @@ jQuery(function($) {
 		$(this).removeClass('ui-state-focus');
 	});
 
-	$('#lf-bonuses-accordion input:text').data('constrains', {'min': 0, 'max': Infinity, 'def': 0, 'allowFloat': true, 'allowNegative': false});
-	$('#lf-deut-cons').data('constrains', {'min': 0, 'max': 30, 'def': 0, 'allowFloat': true, 'allowNegative': false});
-	$('#lf-mechan-general-enh').data('constrains', {'min': 0, 'max': Infinity, 'def': 0, 'allowFloat': true, 'allowNegative': false});
-	$('#lf-rocktal-collector-enh').data('constrains', {'min': 0, 'max': Infinity, 'def': 0, 'allowFloat': true, 'allowNegative': false});
-	// $('#universe-name').data('constrains', {});
+	$('#lf-bonuses-accordion input:text').each(function() {
+		this._constrains = {'min': 0, 'max': Infinity, 'def': 0, 'allowFloat': true, 'allowNegative': false};
+	});
+	document.getElementById('lf-mechan-general-enh')._constrains = {'min': 0, 'max': Infinity, 'def': 0, 'allowFloat': true, 'allowNegative': false};
+	document.getElementById('lf-rocktal-collector-enh')._constrains = {'min': 0, 'max': Infinity, 'def': 0, 'allowFloat': true, 'allowNegative': false};
 
 	$('#class-0').click(updateNumbers);
 	$('#class-1').click(updateNumbers);
@@ -1463,12 +1463,12 @@ jQuery(function($) {
 	$('#general-settings input:radio').change(function(ev) { updateNumbers(); });
 
 	// Настраиваем ограничения на поля ввода координат
-	$('#departure-g').data('constrains', {'min': 1, 'def': 0, 'max': 12});
-	$('#destination-g').data('constrains', {'min': 1, 'def': 0, 'max': 12});
-	$('#departure-s').data('constrains', {'min': 1, 'def': 0, 'max': 550});
-	$('#destination-s').data('constrains', {'min': 1, 'def': 0, 'max': 550});
-	$('#departure-p').data('constrains', {'min': 1, 'def': 0, 'max': 16});
-	$('#destination-p').data('constrains', {'min': 1, 'def': 0, 'max': 16});
+	document.getElementById('departure-g')._constrains = {'min': 1, 'def': 0, 'max': 12};
+	document.getElementById('destination-g')._constrains = {'min': 1, 'def': 0, 'max': 12};
+	document.getElementById('departure-s')._constrains = {'min': 1, 'def': 0, 'max': 550};
+	document.getElementById('destination-s')._constrains = {'min': 1, 'def': 0, 'max': 550};
+	document.getElementById('departure-p')._constrains = {'min': 1, 'def': 0, 'max': 16};
+	document.getElementById('destination-p')._constrains = {'min': 1, 'def': 0, 'max': 16};
 
 	let keys = [];
 	for(let i = 0, len = localStorage.length; i < len; i++) {

@@ -959,8 +959,8 @@ $(document).ready(function() {
 		options.resultingLabLevelComputed = false; updateParams.apply($('#research-lab-level')[0]);
 	});
 
-	$('#max-planet-temp').data('constrains', {'min': -134, 'def': 0, 'allowNegative': true});
-	$('#planet-pos').data('constrains', {'min': 1, 'max': 16, 'def': 8, 'allowNegative': false});
+	document.getElementById('max-planet-temp')._constrains = {'min': -134, 'def': 0, 'allowNegative': true};
+	document.getElementById('planet-pos')._constrains = {'min': 1, 'max': 16, 'def': 8, 'allowNegative': false};
 	$('#planet-pos').blur('updateOneMultTab', validateInputNumberOnBlur);
 
 	// После того, как событие будет обработано, нужно вызвать функцию пересчета. Её имя передаём в поле data событий.

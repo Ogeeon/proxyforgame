@@ -449,12 +449,14 @@ jQuery(function($) {
 
 	$('#reset').click(resetParams);
 
-    $('#percent-resources').data('constrains', {'min': 0, 'max': 999, 'def': 0, 'allowNegative': false, 'allowFloat': true});
-    $('#percent-ships').data('constrains', {'min': 0, 'max': 999, 'def': 0, 'allowNegative': false, 'allowFloat': true});
-    $('#class-bonus-collector').data('constrains', {'min': 0, 'max': 999, 'def': 0, 'allowNegative': false, 'allowFloat': true});
-    $('#class-bonus-discoverer').data('constrains', {'min': 0, 'max': 999, 'def': 0, 'allowNegative': false, 'allowFloat': true});
-    $('#dark-matter-discovery-bonus').data('constrains', {'min': 0, 'max': 9999, 'def': 0, 'allowNegative': false, 'allowFloat': true});
-    $('#lf-ships-bonuses input:text').data('constrains', {'min': 0, 'max': Infinity, 'def': 0, 'allowNegative': false, 'allowFloat': true});
+    document.getElementById('percent-resources')._constrains = {'min': 0, 'max': 999, 'def': 0, 'allowNegative': false, 'allowFloat': true};
+    document.getElementById('percent-ships')._constrains = {'min': 0, 'max': 999, 'def': 0, 'allowNegative': false, 'allowFloat': true};
+    document.getElementById('class-bonus-collector')._constrains = {'min': 0, 'max': 999, 'def': 0, 'allowNegative': false, 'allowFloat': true};
+    document.getElementById('class-bonus-discoverer')._constrains = {'min': 0, 'max': 999, 'def': 0, 'allowNegative': false, 'allowFloat': true};
+    document.getElementById('dark-matter-discovery-bonus')._constrains = {'min': 0, 'max': 9999, 'def': 0, 'allowNegative': false, 'allowFloat': true};
+    $('#lf-ships-bonuses input:text').each(function() {
+        this._constrains = {'min': 0, 'max': Infinity, 'def': 0, 'allowNegative': false, 'allowFloat': true};
+    });
 
 	// После того, как событие будет обработано, нужно вызвать функцию пересчета. Её имя передаём в поле data событий.
     $('#settings-panel input:text').keyup('compute', validateInputNumber);
