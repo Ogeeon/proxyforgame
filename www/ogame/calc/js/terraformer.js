@@ -318,6 +318,7 @@ $(document).ready(function() {
 
 	document.getElementById('shipyard-level')._constrains = {'min': 1, 'def': 1};
 	document.getElementById('max-planet-temp')._constrains = {'min': -134, 'def': 0, 'allowNegative': true};
+	document.getElementById('total-lf-energy-bonus')._constrains = {'min': 0, 'max': 999, 'def': 0, 'allowNegative': false, 'allowFloat': true};
 
 	// После того, как событие будет обработано, нужно вызвать функцию пересчета. Её имя передаём в поле data событий.
 	$('#terraformer input:text').keyup('updateNumbers', validateInputNumber);
