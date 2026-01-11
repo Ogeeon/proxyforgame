@@ -236,7 +236,7 @@ function updateParams() {
 	let techLevelFrom;
 	let techLevelTo;
 	const rsrCostRdc = getInputNumber($('#research-cost-reduction')[0]);
-	var bldCostRdc = Number($('#race-selector')[0].value) === 2 ? 0.01 * getInputNumber($('#megalith-level')[0]) : 0;
+	var baseBbldCostRdc = Number($('#race-selector')[0].value) === 2 ? 0.01 * getInputNumber($('#megalith-level')[0]) : 0;
 	const reductables = [1, 2, 3, 4, 12, 2001, 2002];
 	const mrcRdc = Number($('#race-selector')[0].value) === 2 ? 0.005 * getInputNumber($('#mrc-level')[0]) : 0;
 	const ionTechLevel = (techLevelTo > techLevelFrom) ? 0 : getInputNumber($('#ion-tech-level')[0]);
@@ -248,6 +248,7 @@ function updateParams() {
 		//consoleLog(keyParts);
 		// consoleLog('#table-'+keyParts[1]+'-'+keyParts[2]+' tr');
 		if (jQuery.inArray(1*keyParts[2], techTypes) >= 0) {
+			bldCostRdc = baseBbldCostRdc;
 			// consoleLog('#table-'+keyParts[1]+'-'+keyParts[2]+' tr');
 			// мы знаем id техи, которую надо пересчитать, и номера внешней и внутренней вкладок (эти же номера позволят получить id таблицы).
 			// Чтобы пересчитать теху, надо получить все строки таблицы, в которой она сидит, и найти там нужную строку по id
@@ -428,8 +429,12 @@ function getAdjustedTime(techID, techLevelFrom, techLevelTo) {
 }
 
 function updateOneMultTab() {
+	options.prm.robotFactoryLevel = getInputNumber($('#robot-factory-level')[0]);
+	options.prm.naniteFactoryLevel = getInputNumber($('#nanite-factory-level')[0]);
+	options.prm.universeSpeed = $('#universe-speed')[0].value;
 	options.prm.ionTechLevel = getInputNumber($('#ion-tech-level')[0]);
 	options.prm.hyperTechLevel = getInputNumber($('#hyper-tech-level')[0]);
+	options.prm.fullNumbers = $('#full-numbers')[0].checked;
 	options.prm.capIncrSC = getInputNumber($('#sc-capacity-increase')[0]);
 	options.prm.capIncrLC = getInputNumber($('#lc-capacity-increase')[0]);
 	options.prm.megalithLvl = getInputNumber($('#megalith-level')[0]);
