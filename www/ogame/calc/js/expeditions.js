@@ -72,7 +72,7 @@ function resetParams() {
     options.prm.classBonusDiscoverer = 0;
     options.prm.lfShipsBonuses = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
     options.prm.darkMatterDiscoveryBonus = 0;
-    options.prm.resourceDiscoveryBooster = 5;
+    options.prm.resourceDiscoveryBooster = 0;
 
 	$('#universe-speed')[0].selectedIndex = options.prm.universeSpeed;
     $("#highTop").val(options.prm.highTop);
