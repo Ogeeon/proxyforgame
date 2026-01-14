@@ -42,7 +42,7 @@ let options = {
 				case 'naniteFactoryLevel': return validateNumber(parseFloat(value), 0, 100, 0);
 				case 'universeSpeed': return validateNumber(parseFloat(value), 1, 10, 1);
 				case 'researchSpeed': return validateNumber(parseFloat(value), 1, 20, 1);
-				case 'researchLabLevel': return validateNumber(parseFloat(value), 0, 100, 0);
+				case 'researchLabLevel': return validateNumber(parseFloat(value), 0, 999999, 0);
 				case 'energyTechLevel': return validateNumber(parseFloat(value), 0, 50, 0);
 				case 'plasmaTechLevel': return validateNumber(parseFloat(value), 0, 50, 0);
 				case 'ionTechLevel': return validateNumber(parseFloat(value), 0, 50, 0);
