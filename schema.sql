@@ -1137,6 +1137,17 @@ INSERT INTO `universes` (`lang`, `sid`, `server`, `name`) VALUES
 ('us', 282, 's258-us.ogame.gameforge.com', 'Ceres');
 COMMIT;
 
+--
+-- Table structure for table `population_data`
+--
+CREATE TABLE population_data (
+    country VARCHAR(2) NOT NULL,
+    universe SMALLINT(6) NOT NULL,
+    timestamp BIGINT UNSIGNED NOT NULL,
+    population JSON NOT NULL,
+    PRIMARY KEY (country, universe)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
