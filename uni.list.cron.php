@@ -3,7 +3,7 @@
 set_time_limit(1200);
 error_reporting(E_ALL);
 
-//mb_internal_encoding("utf-8");
+mb_internal_encoding("utf-8");
 
 // нужны ли отладочные сообщения
 define('DEBUG', false);
@@ -117,6 +117,7 @@ function saveData($db, $allData)
     foreach ($allData as $ulang => $uni) {
         foreach ($uni as $userver => $uname) {
             sqlQuery($db, "INSERT INTO universes (lang, sid, server, name) VALUES ('$ulang', $sid, '$userver', '$uname')");
+            echo $uname."\n";
             $sid++;
         }
     }
@@ -147,6 +148,7 @@ $unisArr = parseUniverses($unis);
 loadEnv(__DIR__ . DIRECTORY_SEPARATOR . '.env');
 
 $connection = mysqli_connect(getenv('DB_HOST'), getenv('DB_USER'), getenv('DB_PASS'), getenv('DB_NAME'));
+mysqli_set_charset($connection, 'utf8mb4');
 saveData($connection, $unisArr);
 mysqli_close($connection);
 
