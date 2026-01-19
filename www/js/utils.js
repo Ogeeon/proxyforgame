@@ -613,12 +613,23 @@ function toggleLight(on) {
 /**
  * Заменяет десятичный разделитель в строковом представлении полученного числа на указанный в настройках
  */
-function localizeFloat(input) {
+function localizeFloat(input, decimalDigits) {
 	let result = String(input);
 	let decimalSeparator = getOptionValue('decimalSeparator', '.');
+	
+	// Handle decimal digit limiting if specified
+	if (decimalDigits !== undefined) {
+		const dotIndex = result.indexOf('.');
+		if (dotIndex !== -1) {
+			result = result.substring(0, dotIndex + decimalDigits + 1);
+		}
+	}
+	
+	// Replace decimal separator if needed
 	if (decimalSeparator != '.') {
 		result = result.replace('.', decimalSeparator);
 	}
+	
 	return result;
 }
 
@@ -636,4 +647,9 @@ function toggleLightBS(on) {
 		theme.value = 'dark';
 		saveToCookie("theme", theme);
 	}	
+}
+
+function frac(x, n) {
+    const pow = Math.pow(10, n);
+    return Math.round(x * pow) / pow;
 }
