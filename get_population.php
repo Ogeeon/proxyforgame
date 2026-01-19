@@ -1,8 +1,16 @@
 <?php
 
+class ServerDataFetchException extends Exception {}
+class ServerDataParseException extends Exception {}
+class PlayersDataFetchException extends Exception {}
+class PlayersDataParseException extends Exception {}
+class UniverseDataFetchException extends Exception {}
+class UniverseDataParseException extends Exception {}
+class DatabaseException extends Exception {}
+
 function loadEnv($path) {
     if (!file_exists($path)) {
-		echo ".env file not found at $path";
+        echo ".env file not found at $path";
         return;
     }
     $lines = file($path, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
@@ -17,6 +25,43 @@ function loadEnv($path) {
     }
 }
 
+function buildInactivePlayers($playersXml) {
+    $inactivePlayers = [];
+    foreach ($playersXml->player as $player) {
+        $playerId = (int)$player['id'];
+        $status = (string)$player['status'];
+        if (preg_match('/[ib]/i', $status)) {
+            $inactivePlayers[$playerId] = true;
+        }
+    }
+    return $inactivePlayers;
+}
+
+function buildPopulatedSystems($xml, $inactivePlayers) {
+    $populatedSystems = [];
+    foreach ($xml->planet as $planet) {
+        $playerId = (int)$planet['player'];
+        if (isset($inactivePlayers[$playerId])) {
+            continue;
+        }
+        $coords = (string)$planet['coords'];
+        [$galaxy, $system] = explode(':', $coords);
+        $galaxy = (int)$galaxy;
+        $system = (int)$system;
+        if (!isset($populatedSystems[$galaxy])) {
+            $populatedSystems[$galaxy] = [];
+        }
+        if (!in_array($system, $populatedSystems[$galaxy])) {
+            $populatedSystems[$galaxy][] = $system;
+        }
+    }
+    foreach ($populatedSystems as &$systems) {
+        sort($systems);
+    }
+    unset($systems);
+    return $populatedSystems;
+}
+
 function getPopulation($universe, $country, $pdo) {
     // Fetch server data to get galaxies and systems counts
     $serverDataUrl = "https://s{$universe}-{$country}.ogame.gameforge.com/api/serverData.xml";
@@ -24,13 +69,13 @@ function getPopulation($universe, $country, $pdo) {
     $serverDataContent = @file_get_contents($serverDataUrl);
     
     if ($serverDataContent === false) {
-        throw new Exception('Failed to fetch server data');
+        throw new ServerDataFetchException('Failed to fetch server data');
     }
     
     $serverDataXml = simplexml_load_string($serverDataContent);
     
     if ($serverDataXml === false) {
-        throw new Exception('Failed to parse server data XML');
+        throw new ServerDataParseException('Failed to parse server data XML');
     }
 
     if ((int)$serverDataXml->fleetIgnoreEmptySystems !== 1) {
@@ -40,37 +85,22 @@ function getPopulation($universe, $country, $pdo) {
         ];
     }
     
-    // Extract galaxies and systems counts
-    $maxGalaxy = (int)$serverDataXml->galaxies;
-    $maxSystem = (int)$serverDataXml->systems;
-    
     // Fetch players data to determine inactive players
     $playersUrl = "https://s{$universe}-{$country}.ogame.gameforge.com/api/players.xml";
     
     $playersContent = @file_get_contents($playersUrl);
     
     if ($playersContent === false) {
-        throw new Exception('Failed to fetch players data');
+        throw new PlayersDataFetchException('Failed to fetch players data');
     }
     
     $playersXml = simplexml_load_string($playersContent);
     
     if ($playersXml === false) {
-        throw new Exception('Failed to parse players XML');
+        throw new PlayersDataParseException('Failed to parse players XML');
     }
     
-    // Build set of inactive player IDs
-    $inactivePlayers = [];
-    
-    foreach ($playersXml->player as $player) {
-        $playerId = (int)$player['id'];
-        $status = (string)$player['status'];
-        
-        // Check if status contains 'i' or 'I' (inactive), 'v' for vacation, 'b' for banned
-        if (preg_match('/[ivb]/i', $status)) {
-            $inactivePlayers[$playerId] = true;
-        }
-    }
+    $inactivePlayers = buildInactivePlayers($playersXml);
     
     // Fetch universe data
     $universeUrl = "https://s{$universe}-{$country}.ogame.gameforge.com/api/universe.xml";
@@ -78,49 +108,18 @@ function getPopulation($universe, $country, $pdo) {
     $xmlContent = @file_get_contents($universeUrl);
     
     if ($xmlContent === false) {
-        throw new Exception('Failed to fetch universe data');
+        throw new UniverseDataFetchException('Failed to fetch universe data');
     }
     
     // Parse XML
     $xml = simplexml_load_string($xmlContent);
     
     if ($xml === false) {
-        throw new Exception('Failed to parse universe XML');
+        throw new UniverseDataParseException('Failed to parse universe XML');
     }
     
     $timestamp = (int)$xml['timestamp'];
-    
-    // Collect all populated systems organized by galaxy
-    // Only count planets belonging to active players
-    $populatedSystems = [];
-    
-    foreach ($xml->planet as $planet) {
-        $playerId = (int)$planet['player'];
-        
-        // Skip planets owned by inactive players
-        if (isset($inactivePlayers[$playerId])) {
-            continue;
-        }
-        
-        $coords = (string)$planet['coords'];
-        list($galaxy, $system, $position) = explode(':', $coords);
-        
-        $galaxy = (int)$galaxy;
-        $system = (int)$system;
-        
-        if (!isset($populatedSystems[$galaxy])) {
-            $populatedSystems[$galaxy] = [];
-        }
-        if (in_array($system,$populatedSystems[$galaxy]) === false) {
-            $populatedSystems[$galaxy][] = $system;            
-        }
-    }
-    
-    // Sort systems within each galaxy
-    foreach ($populatedSystems as &$systems) {
-        sort($systems);
-    }
-    unset($systems);
+    $populatedSystems = buildPopulatedSystems($xml, $inactivePlayers);
     
     // Store in database
     $stmt = $pdo->prepare("
@@ -216,11 +215,9 @@ try {
         ]
     );
 
-    // $results = updateAllUniverses($pdo);
-    $results = getPopulation(178, 'ru', $pdo);
-    echo json_encode($results, JSON_PRETTY_PRINT);  
+    $results = updateAllUniverses($pdo);
+    // $results = getPopulation(178, 'ru', $pdo);
+    echo json_encode($results, JSON_PRETTY_PRINT);
 } catch (Exception $e) {
     echo $e->getMessage();
 }
-?>
-
