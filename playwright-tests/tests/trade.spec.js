@@ -1,7 +1,11 @@
 import { test, expect } from '@playwright/test';
 
 test.describe('Trade Calculator Page', () => {
-    test.beforeEach(async ({ page }, testInfo) => {
+    test.beforeEach(async ({ context, page }, testInfo) => {
+        // Avoid changelog popup
+        await context.addInitScript(() => {
+            localStorage.setItem('lastChange', 'key-value;true,value;99999');
+        });
         if (testInfo.title.includes('parsing from link works')) {
             return;
         }
