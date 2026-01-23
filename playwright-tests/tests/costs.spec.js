@@ -203,6 +203,118 @@ test.describe('Costs Calculator Page', () => {
         await expect(page.locator('#commons-table tr:nth-child(5) td:nth-child(6)')).toContainText('27w 1h');
         await expect(page.locator('#commons-table tr:nth-child(5) td:nth-child(7)')).toContainText('68.813');
     });
+    
+
+    test('[grand totals - one level] calculations are correct', async ({ page }) => {
+        // Set research lab level to 12
+        await page.locator('#research-lab-level').fill('12');
+        await page.locator('#research-lab-level').press('Enter');
+
+        // First outer tab is already selected (All items - one level)
+        // Fill 10 in the first row of each inner tab and verify grand totals
+
+        // Buildings (planet)
+        await page.getByRole('link', { name: 'Buildings (planet)' }).click();
+        await page.locator('#table-0-2 tr:nth-child(2) td:nth-child(3) input').fill('10');
+        await page.locator('#table-0-2 tr:nth-child(2) td:nth-child(3) input').press('Enter');
+        await expect(page.locator('#table-0-2 tr:nth-last-child(2) td:nth-child(3)')).toContainText('2.306');
+        await expect(page.locator('#table-0-2 tr:nth-last-child(2) td:nth-child(4)')).toContainText('576');
+        await expect(page.locator('#table-0-2 tr:nth-last-child(2) td:nth-child(5)')).toContainText('0');
+        await expect(page.locator('#table-0-2 tr:nth-last-child(2) td:nth-child(6)')).toContainText('0');
+        await expect(page.locator('#table-0-2 tr:nth-last-child(2) td:nth-child(7)')).toContainText('1h 9m 10s');
+        await expect(page.locator('#table-0-2 tr:nth-last-child(2) td:nth-child(8)')).toContainText('2');
+
+        // Buildings (moon)
+        await page.getByRole('link', { name: 'Buildings (moon)' }).click();
+        await page.locator('#table-0-3 tr:nth-child(2) td:nth-child(3) input').fill('10');
+        await page.locator('#table-0-3 tr:nth-child(2) td:nth-child(3) input').press('Enter');
+        await expect(page.locator('#table-0-3 tr:nth-last-child(2) td:nth-child(3)')).toContainText('207.106');
+        await expect(page.locator('#table-0-3 tr:nth-last-child(2) td:nth-child(4)')).toContainText('62.016');
+        await expect(page.locator('#table-0-3 tr:nth-last-child(2) td:nth-child(5)')).toContainText('102.400');
+        await expect(page.locator('#table-0-3 tr:nth-last-child(2) td:nth-child(6)')).toContainText('0');
+        await expect(page.locator('#table-0-3 tr:nth-last-child(2) td:nth-child(7)')).toContainText('4d 11h 38m');
+        await expect(page.locator('#table-0-3 tr:nth-last-child(2) td:nth-child(8)')).toContainText('370');
+
+        // Researches
+        await page.getByRole('link', { name: 'Researches' }).click();
+        await page.locator('#table-0-4 tr:nth-child(2) td:nth-child(3) input').fill('10');
+        await page.locator('#table-0-4 tr:nth-child(2) td:nth-child(3) input').press('Enter');
+        await expect(page.locator('#table-0-4 tr:nth-last-child(2) td:nth-child(3)')).toContainText('309.506');
+        await expect(page.locator('#table-0-4 tr:nth-last-child(2) td:nth-child(4)')).toContainText('574.016');
+        await expect(page.locator('#table-0-4 tr:nth-last-child(2) td:nth-child(5)')).toContainText('204.800');
+        await expect(page.locator('#table-0-4 tr:nth-last-child(2) td:nth-child(6)')).toContainText('0');
+        await expect(page.locator('#table-0-4 tr:nth-last-child(2) td:nth-child(7)')).toContainText('6d 10h 54m');
+        await expect(page.locator('#table-0-4 tr:nth-last-child(2) td:nth-child(8)')).toContainText('1.086');
+
+        // Fleet
+        await page.getByRole('link', { name: 'Fleet' }).click();
+        await page.locator('#table-0-5 tr:nth-child(2) td:nth-child(3) input').fill('10');
+        await page.locator('#table-0-5 tr:nth-child(2) td:nth-child(3) input').press('Enter');
+        await expect(page.locator('#table-0-5 tr:nth-last-child(2) td:nth-child(3)')).toContainText('329.506');
+        await expect(page.locator('#table-0-5 tr:nth-last-child(2) td:nth-child(4)')).toContainText('594.016');
+        await expect(page.locator('#table-0-5 tr:nth-last-child(2) td:nth-child(5)')).toContainText('204.800');
+        await expect(page.locator('#table-0-5 tr:nth-last-child(2) td:nth-child(6)')).toContainText('0');
+        await expect(page.locator('#table-0-5 tr:nth-last-child(2) td:nth-child(7)')).toContainText('1w 2h');
+        await expect(page.locator('#table-0-5 tr:nth-last-child(2) td:nth-child(8)')).toContainText('1.126');
+
+        // Defenses
+        await page.getByRole('link', { name: 'Defenses' }).click();
+        await page.locator('#table-0-6 tr:nth-child(2) td:nth-child(3) input').fill('10');
+        await page.locator('#table-0-6 tr:nth-child(2) td:nth-child(3) input').press('Enter');
+        await expect(page.locator('#table-0-6 tr:nth-last-child(2) td:nth-child(3)')).toContainText('349.506');
+        await expect(page.locator('#table-0-6 tr:nth-last-child(2) td:nth-child(4)')).toContainText('594.016');
+        await expect(page.locator('#table-0-6 tr:nth-last-child(2) td:nth-child(5)')).toContainText('204.800');
+        await expect(page.locator('#table-0-6 tr:nth-last-child(2) td:nth-child(6)')).toContainText('0');
+        await expect(page.locator('#table-0-6 tr:nth-last-child(2) td:nth-child(7)')).toContainText('1w 10h');
+        await expect(page.locator('#table-0-6 tr:nth-last-child(2) td:nth-child(8)')).toContainText('1.146');
+    });
+
+    test('[grand totals - multiple levels] calculations are correct', async ({ page }) => {
+        // Set research lab level to 12
+        await page.locator('#research-lab-level').fill('12');
+        await page.locator('#research-lab-level').press('Enter');
+
+        // Click the second outer tab (All items - multiple levels)
+        await page.getByRole('link', { name: 'All items - multiple levels' }).click();
+
+        // Fill 10 and 11 in the first row of each inner tab and verify grand totals
+
+        // Buildings (planet)
+        await page.getByRole('link', { name: 'Buildings (planet)' }).click();
+        await page.locator('#table-1-2 tr:nth-child(2) td:nth-child(3) input').fill('10');
+        await page.locator('#table-1-2 tr:nth-child(2) td:nth-child(4) input').fill('11');
+        await page.locator('#table-1-2 tr:nth-child(2) td:nth-child(4) input').press('Enter');
+        await expect(page.locator('#table-1-2 tr:nth-last-child(2) td:nth-child(3)')).toContainText('3.459');
+        await expect(page.locator('#table-1-2 tr:nth-last-child(2) td:nth-child(4)')).toContainText('864');
+        await expect(page.locator('#table-1-2 tr:nth-last-child(2) td:nth-child(5)')).toContainText('0');
+        await expect(page.locator('#table-1-2 tr:nth-last-child(2) td:nth-child(6)')).toContainText('0');
+        await expect(page.locator('#table-1-2 tr:nth-last-child(2) td:nth-child(7)')).toContainText('1h 43m 45s');
+        await expect(page.locator('#table-1-2 tr:nth-last-child(2) td:nth-child(8)')).toContainText('4');
+
+        // Buildings (moon)
+        await page.getByRole('link', { name: 'Buildings (moon)' }).click();
+        await page.locator('#table-1-3 tr:nth-child(2) td:nth-child(3) input').fill('10');
+        await page.locator('#table-1-3 tr:nth-child(2) td:nth-child(4) input').fill('11');
+        await page.locator('#table-1-3 tr:nth-child(2) td:nth-child(4) input').press('Enter');
+        await expect(page.locator('#table-1-3 tr:nth-last-child(2) td:nth-child(3)')).toContainText('413.059');
+        await expect(page.locator('#table-1-3 tr:nth-last-child(2) td:nth-child(4)')).toContainText('123.744');
+        await expect(page.locator('#table-1-3 tr:nth-last-child(2) td:nth-child(5)')).toContainText('204.800');
+        await expect(page.locator('#table-1-3 tr:nth-last-child(2) td:nth-child(6)')).toContainText('0');
+        await expect(page.locator('#table-1-3 tr:nth-last-child(2) td:nth-child(7)')).toContainText('1w 1d 22h');
+        await expect(page.locator('#table-1-3 tr:nth-last-child(2) td:nth-child(8)')).toContainText('741');
+
+        // Researches
+        await page.getByRole('link', { name: 'Researches' }).click();
+        await page.locator('#table-1-4 tr:nth-child(2) td:nth-child(3) input').fill('10');
+        await page.locator('#table-1-4 tr:nth-child(2) td:nth-child(4) input').fill('11');
+        await page.locator('#table-1-4 tr:nth-child(2) td:nth-child(4) input').press('Enter');
+        await expect(page.locator('#table-1-4 tr:nth-last-child(2) td:nth-child(3)')).toContainText('617.859');
+        await expect(page.locator('#table-1-4 tr:nth-last-child(2) td:nth-child(4)')).toContainText('1.147M');
+        await expect(page.locator('#table-1-4 tr:nth-last-child(2) td:nth-child(5)')).toContainText('409.600');
+        await expect(page.locator('#table-1-4 tr:nth-last-child(2) td:nth-child(6)')).toContainText('0');
+        await expect(page.locator('#table-1-4 tr:nth-last-child(2) td:nth-child(7)')).toContainText('1w 5d 21h');
+        await expect(page.locator('#table-1-4 tr:nth-last-child(2) td:nth-child(8)')).toContainText('2.174');
+    });
 
     test('deconstruction calculation is correct', async ({ page }) => {
         await page.getByRole('link', { name: 'All items - multiple levels' }).click();
