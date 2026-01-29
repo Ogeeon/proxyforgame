@@ -603,7 +603,7 @@ function refreshQueue(planet) {
 				if (techId != 36) { // космический док не занимает поля на планете
 					totals[0] = totals[0] + inc;
 				}
-				fontColor = (totals[0] > totalFlds) ? "brown" : (theme == "light" ? "black" : "white")
+				fontColor = (totals[0] > totalFlds) ? "brown" : (theme.value == "light" ? "black" : "white")
 				
 				if (techId == 33) {
 					var bonus = (techLvl % 2 == 0) ? 6 : 5;
