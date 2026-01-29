@@ -1,0 +1,28 @@
+{
+  "name": "proxyforgame",
+  "version": "1.0.0",
+  "description": "OGame calculator website - ProxyForGame",
+  "private": true,
+  "scripts": {
+    "validate-translations": "node scripts/validate-translations.js",
+    "sync-translations": "node scripts/sync-translations.js",
+    "sync-translations:report": "node scripts/sync-translations.js --report",
+    "sync-translations:fix": "node scripts/sync-translations.js --fix",
+    "sync-translations:dry": "node scripts/sync-translations.js --dry-run",
+    "check-test-coverage": "node scripts/check-test-coverage.js",
+    "generate-test": "node scripts/generate-test.js",
+    "new-calculator": "node scripts/new-calculator.js",
+    "refactor-calculator": "node scripts/refactor-calculator.js",
+    "check-code-quality": "node scripts/check-code-quality.js",
+    "update-asset-versions": "node scripts/update-asset-versions.js",
+    "validate-database": "node scripts/validate-database-schema.js",
+    "generate-docs": "node scripts/generate-docs.js"
+  },
+  "keywords": [
+    "ogame",
+    "calculator",
+    "php"
+  ],
+  "author": "",
+  "license": "ISC"
+}
