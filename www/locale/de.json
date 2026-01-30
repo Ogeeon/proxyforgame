@@ -164,7 +164,8 @@
     "alliance-bonus": "Allianzbonus",
     "disr-chamber-bonus": "Disruptionskammer-Bonus",
     "total-lf-energy-bonus": "Gesamtbonus der Lebensformen auf Energieproduktion",
-    "lf-tech-bonus": "Lebensformen-Technologiebonus"
+    "lf-tech-bonus": "Lebensformen-Technologiebonus",
+    "country": "Land"
   },
   "index": {
     "title": "ProxyForGame - Hilfsprogramme für das Online-Browsergame OGame",
@@ -434,6 +435,7 @@
     "flight-time": "Reisezeit",
     "save-points": "Savepoint",
     "distance": "Abstand",
+    "empty-systems": "Leere Systeme:",
     "speed": "Geschwindigkeit",
     "flight-duration": "Reisezeit",
     "deut-consumption": "Deuteriumverbrauch",
@@ -492,7 +494,18 @@
     "fuel-decrease": "Treibstoffverbrauch",
     "import-sr": "Importieren",
     "import-hint": "Fügen Sie in dieses Feld den API-Code des Spionageberichts von OGame\noder den Code des auf Logserver.net gespeicherten Berichts ein",
-    "import-bad-code-msg": "Keine Daten gefunden.\\nSind Sie sicher, dass Sie den richtigen Spionagebericht-Code eingegeben haben?"
+    "import-bad-code-msg": "Keine Daten gefunden.\\nSind Sie sicher, dass Sie den richtigen Spionagebericht-Code eingegeben haben?",
+    "character-bonus-hint": "Um diese Boni zu erhalten, gehen Sie zu Ressourcen-Einstellungen - Lebensformen-Spieler-Boni,\ndann scrollen Sie nach unten zu 'Charakterklassen-Boni'",
+    "generals-character-bonus": "Charakterklassenbonus des Generals (%)",
+    "collectors-character-bonus": "Charakterklassenbonus des Kollektors (%)",
+    "speed-fleet-title": "Missionsgeschwindigkeiten:",
+    "speed-fleet-war": "Krieg",
+    "speed-fleet-peaceful": "Friedlich",
+    "speed-fleet-holding": "Halten",
+    "mission-type-title": "Missionstyp:",
+    "mission-type-war": "Krieg",
+    "mission-type-peaceful": "Friedlich",
+    "mission-type-holding": "Halten"
   },
   "graviton": {
     "title": "OGame - Gravitonforschung Rechner",
@@ -684,7 +697,6 @@
     "deut": "deut",
     "rates": "Wechselkurs",
     "location": "Position",
-    "country": "Land",
     "fix": "fix",
     "src": "Verkaufe",
     "dst": "Kaufe",

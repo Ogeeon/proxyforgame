@@ -162,7 +162,8 @@
     "disr-chamber-bonus": "Bonus de la Chambre de Disruption",
     "total-lf-energy-bonus": "Bonus total des Formes de Vie à la production d'énergie",
     "lf-tech-bonus": "Bonus technologique des Formes de Vie",
-    "calc-results": "Les résultats des calculs"
+    "calc-results": "Les résultats des calculs",
+    "country": "Pays"
   },
   "index": {
     "title": "ProxyForGame - l'utilité pour les jeux par navigateurs OGame",
@@ -437,6 +438,7 @@
     "flight-time": "Temps de vol",
     "save-points": "Points de sauvegarde",
     "distance": "Distance",
+    "empty-systems": "Systemes vides:",
     "speed": "Vitesse",
     "flight-duration": "Durée du vol",
     "deut-consumption": "Consommation de carburant",
@@ -496,7 +498,18 @@
     "fuel-decrease": "Consommation de carburant",
     "import-sr": "Importation",
     "import-hint": "Collez dans ce champ le code API du rapport d'espionnage d'OGame\nou le code du rapport sauvegardé sur Logserver.net.",
-    "import-bad-code-msg": "Aucune donnée trouvée.\\nÊtes-vous sûr d'avoir entré le bon code de rapport d'espionnage?"
+    "import-bad-code-msg": "Aucune donnée trouvée.\\nÊtes-vous sûr d'avoir entré le bon code de rapport d'espionnage?",
+    "character-bonus-hint": "Pour obtenir ces bonus, allez dans Paramètres des ressources - Bonus joueur des Formes de Vie,\npuis descendez jusqu'à 'Bonus de classe de personnage'",
+    "generals-character-bonus": "Bonus de classe de personnage du Général (%)",
+    "collectors-character-bonus": "Bonus de classe de personnage du Collecteur (%)",
+    "speed-fleet-title": "Vitesses de mission:",
+    "speed-fleet-war": "Guerre",
+    "speed-fleet-peaceful": "Pacifique",
+    "speed-fleet-holding": "Maintien",
+    "mission-type-title": "Type de mission:",
+    "mission-type-war": "Guerre",
+    "mission-type-peaceful": "Pacifique",
+    "mission-type-holding": "Maintien"
   },
   "graviton": {
     "title": "OGame - Calculateur de Graviton",
@@ -698,7 +711,6 @@
     "deut": "deut",
     "rates": "Taux de change",
     "location": "Lieu",
-    "country": "Pays",
     "fix": "fix",
     "src": "Vendre",
     "dst": "Acheter",

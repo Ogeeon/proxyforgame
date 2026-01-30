@@ -162,7 +162,8 @@
     "disr-chamber": "Komora za disruptiju",
     "disr-chamber-bonus": "Bonus Komore za disruptiju",
     "total-lf-energy-bonus": "Ukupni bonus Oblika života za proizvodnju energije",
-    "lf-tech-bonus": "Tehnološki bonus Oblika života"
+    "lf-tech-bonus": "Tehnološki bonus Oblika života",
+    "country": "Zemlja"
   },
   "index": {
     "title": "ProxyForGame - alati za online igru Ogame",
@@ -439,6 +440,7 @@
     "flight-time": "Trajanje vremena leta",
     "save-points": "Save points",
     "distance": "Razdaljina",
+    "empty-systems": "Prazni sistemi:",
     "speed": "Brzina",
     "flight-duration": "Trajanje leta",
     "deut-consumption": "Potrošnja deuterija",
@@ -495,7 +497,18 @@
     "fuel-decrease": "Potrošnja goriva",
     "import-sr": "Uvoz",
     "import-hint": "Zalijepite u ovo polje API kod špijunskog izvještaja iz OGame-a\nili kod izvještaja sačuvanog na Logserver.net",
-    "import-bad-code-msg": "Podaci nisu pronađeni.\\nJeste li sigurni da ste unijeli ispravan špijunski izvještaj?"
+    "import-bad-code-msg": "Podaci nisu pronađeni.\\nJeste li sigurni da ste unijeli ispravan špijunski izvještaj?",
+    "character-bonus-hint": "Da biste dobili ove bonuse, idite na Postavke resursa - Bonusi igrača Oblika života,\nzatim se spustite do 'Bonusi klase lika'",
+    "generals-character-bonus": "Bonus klase lika Generala (%)",
+    "collectors-character-bonus": "Bonus klase lika Kolektora (%)",
+    "speed-fleet-title": "Brzine misija:",
+    "speed-fleet-war": "Rat",
+    "speed-fleet-peaceful": "Miran",
+    "speed-fleet-holding": "Zadržavanje",
+    "mission-type-title": "Tip misije:",
+    "mission-type-war": "Rat",
+    "mission-type-peaceful": "Miran",
+    "mission-type-holding": "Zadržavanje"
   },
   "graviton": {
     "title": "Ogame - Kalkulator gravitona",
@@ -692,7 +705,6 @@
     "deut": "deut",
     "rates": "Kurs razmjene",
     "location": "Lokacija",
-    "country": "Zemlja",
     "coords": "Koordinate",
     "sc-short": "MT",
     "lc-short": "VT",

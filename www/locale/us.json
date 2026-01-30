@@ -166,7 +166,8 @@
     "alliance-bonus": "Alliance bonus",
     "disr-chamber-bonus": "Disruption Chamber bonus",
     "total-lf-energy-bonus": "Total Life Forms bonus to energy production",
-    "lf-tech-bonus": "Life Forms tech bonus"
+    "lf-tech-bonus": "Life Forms tech bonus",
+    "country": "Country"
   },
   "index": {
     "title": "ProxyForGame - tools for online browser game OGame",
@@ -436,6 +437,7 @@
     "flight-time": "Flight times",
     "save-points": "Save points",
     "distance": "Distance",
+    "empty-systems": "Empty systems:",
     "speed": "Speed",
     "flight-duration": "Flight duration",
     "deut-consumption": "Deut consumption",
@@ -492,7 +494,18 @@
     "fuel-decrease": "Fuel consumption",
     "import-sr": "Import",
     "import-hint": "Paste into this field the API code of the spy report from OGame\nor the code of the report saved on Logserver.net",
-    "import-bad-code-msg": "No data found.\\nAre you sure you entered the correct spy report code?"
+    "import-bad-code-msg": "No data found.\\nAre you sure you entered the correct spy report code?",
+    "character-bonus-hint": "To get these bonuses, go to Resource settings - Lifeform player bonuses,\nthen scroll down to 'Character class bonuses'",
+    "generals-character-bonus": "General's character class bonus (%)",
+    "collectors-character-bonus": "Collector's character class bonus (%)",
+    "speed-fleet-title": "Mission speeds:",
+    "speed-fleet-war": "War",
+    "speed-fleet-peaceful": "Peaceful",
+    "speed-fleet-holding": "Holding",
+    "mission-type-title": "Mission type:",
+    "mission-type-war": "War",
+    "mission-type-peaceful": "Peaceful",
+    "mission-type-holding": "Holding"
   },
   "graviton": {
     "title": "OGame - Graviton calculator",
@@ -682,7 +695,6 @@
     "deut": "deut",
     "rates": "Exchange rates",
     "location": "Location",
-    "country": "Country",
     "fix": "fix",
     "src": "Selling",
     "dst": "Buying",
@@ -690,7 +702,6 @@
     "link": "Link",
     "text": "Text",
     "and": "and",
-    "keywords": "proxyforgame,proxy,online,calc,calculator,ogame,trading calculator,trade calculator,resource exchange",
-    "moon": "moon"
+    "keywords": "proxyforgame,proxy,online,calc,calculator,ogame,trading calculator,trade calculator,resource exchange"
   }
 }

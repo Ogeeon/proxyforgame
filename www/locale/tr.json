@@ -159,7 +159,8 @@
     "disr-chamber": "Disruptör Odası",
     "disr-chamber-bonus": "Disruptör Odası Bonusu",
     "total-lf-energy-bonus": "Enerji üretimi için Yaşam Formları toplam bonusu",
-    "lf-tech-bonus": "Yaşam Formları teknoloji bonusu"
+    "lf-tech-bonus": "Yaşam Formları teknoloji bonusu",
+    "country": "Ülke"
   },
   "index": {
     "title": "ProxyForGame - OGame için hesaplamalar",
@@ -433,6 +434,7 @@
     "flight-time": "Uçuş zamanı",
     "save-points": "Save points",
     "distance": "Uzaklık",
+    "empty-systems": "Bos sistemler:",
     "speed": "Hız",
     "flight-duration": "Uçuş süresi",
     "deut-consumption": "Deu tüketimi",
@@ -490,7 +492,18 @@
     "fuel-decrease": "Yakıt tüketimi",
     "import-sr": "İthalat",
     "import-hint": "Bu alana OGame'den alınan casus raporunun API kodunu\nveya Logserver.net'te kaydedilen raporun kodunu yapıştırın",
-    "import-bad-code-msg": "Veri bulunamadı.\\nDoğru casus rapor kodunu girdiğinizden emin misiniz?"
+    "import-bad-code-msg": "Veri bulunamadı.\\nDoğru casus rapor kodunu girdiğinizden emin misiniz?",
+    "character-bonus-hint": "Bu bonusları almak için, Kaynak ayarları - Yaşam Formları oyuncu bonusları'na gidin,\nsonra 'Karakter sınıfı bonusları'na aşağı kaydırın",
+    "generals-character-bonus": "General'in karakter sınıfı bonusu (%)",
+    "collectors-character-bonus": "Koleksiyoncunun karakter sınıfı bonusu (%)",
+    "speed-fleet-title": "Görev hızları:",
+    "speed-fleet-war": "Savaş",
+    "speed-fleet-peaceful": "Barışçıl",
+    "speed-fleet-holding": "Bekleme",
+    "mission-type-title": "Görev türü:",
+    "mission-type-war": "Savaş",
+    "mission-type-peaceful": "Barışçıl",
+    "mission-type-holding": "Bekleme"
   },
   "graviton": {
     "title": "OGame - Gravitasyon Hesaplayıcı",
@@ -689,7 +702,6 @@
     "deut": "Deu",
     "rates": "Takas oranları",
     "location": "Konum",
-    "country": "Ülke",
     "fix": "fix",
     "src": "Satıyorum",
     "dst": "Alacağım",

@@ -163,7 +163,8 @@
     "disr-chamber": "Komora porušenia",
     "disr-chamber-bonus": "Bonus Komory porušenia",
     "total-lf-energy-bonus": "Celkový bonus Foriem života pre produkciu energie",
-    "lf-tech-bonus": "Technologický bonus Foriem života"
+    "lf-tech-bonus": "Technologický bonus Foriem života",
+    "country": "Krajina"
   },
   "index": {
     "title": "ProxyForGame - software pre online hry v prehliadači OGame",
@@ -431,6 +432,7 @@
     "flight-time": "Časy letu",
     "save-points": "Miesta úkrytu",
     "distance": "Vzdialenosť",
+    "empty-systems": "Prazdne systemy:",
     "speed": "Rýchlosť",
     "flight-duration": "Trvanie letu",
     "deut-consumption": "Spotreba deut.",
@@ -488,7 +490,18 @@
     "fuel-decrease": "Spotreba paliva",
     "import-sr": "Import",
     "import-hint": "Do tohto poľa vložte kód API špionážnej správy z OGame\nalebo kód správy uloženej na Logserver.net",
-    "import-bad-code-msg": "Nenašli sa žiadne údaje.\\nSte si istí, že ste zadali správny kód špionážnej správy?"
+    "import-bad-code-msg": "Nenašli sa žiadne údaje.\\nSte si istí, že ste zadali správny kód špionážnej správy?",
+    "character-bonus-hint": "Ak chcete získať tieto bonusy, prejdite do Nastavenia zdrojov - Bonusy hráča Foriem života,\npotom prejdite nadol k 'Bonusom triedy postavy'",
+    "generals-character-bonus": "Bonus triedy postavy Generála (%)",
+    "collectors-character-bonus": "Bonus triedy postavy Zberateľa (%)",
+    "speed-fleet-title": "Rýchlosti misie:",
+    "speed-fleet-war": "Vojna",
+    "speed-fleet-peaceful": "Mierový",
+    "speed-fleet-holding": "Zdržanie",
+    "mission-type-title": "Typ misie:",
+    "mission-type-war": "Vojna",
+    "mission-type-peaceful": "Mierový",
+    "mission-type-holding": "Zdržanie"
   },
   "graviton": {
     "title": "OGame - Kalkulátor pre Graviton",
@@ -677,7 +690,6 @@
     "deut": "deut",
     "rates": "Výmenné kurzy",
     "location": "Umiestnenie",
-    "country": "Krajina",
     "fix": "presne",
     "src": "Predávam",
     "dst": "Kupujem",

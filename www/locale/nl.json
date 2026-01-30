@@ -158,7 +158,8 @@
     "disr-chamber": "Disruptiekamer",
     "disr-chamber-bonus": "Disruptiekamerbonus",
     "total-lf-energy-bonus": "Totale Life Forms-bonus voor energieproductie",
-    "lf-tech-bonus": "Life Forms-technologiebonus"
+    "lf-tech-bonus": "Life Forms-technologiebonus",
+    "country": "Land"
   },
   "index": {
     "title": "ProxyForGame - instrumenten het browser spel OGame",
@@ -434,6 +435,7 @@
     "flight-time": "Vluchttijden",
     "save-points": "Savepunten",
     "distance": "afstand",
+    "empty-systems": "Lege systemen:",
     "speed": "Snelheid",
     "flight-duration": "Duur van de vlucht",
     "deut-consumption": "Deut verbruik",
@@ -492,7 +494,18 @@
     "fuel-decrease": "Brandstofverbruik",
     "import-sr": "Importeren",
     "import-hint": "Plak in dit veld de API-code van het spionagerapport van OGame\nof de code van het rapport dat is opgeslagen op Logserver.net.",
-    "import-bad-code-msg": "Geen gegevens gevonden.\\nWeet u zeker dat u de juiste spy report code hebt ingevoerd?"
+    "import-bad-code-msg": "Geen gegevens gevonden.\\nWeet u zeker dat u de juiste spy report code hebt ingevoerd?",
+    "character-bonus-hint": "Om deze bonussen te krijgen, ga naar Grondstofinstellingen - Life Forms spelerbonussen,\nscroll dan naar beneden naar 'Karakterklasse bonussen'",
+    "generals-character-bonus": "Karakterklasse bonus van de Generaal (%)",
+    "collectors-character-bonus": "Karakterklasse bonus van de Verzamelaar (%)",
+    "speed-fleet-title": "Missiesnelheden:",
+    "speed-fleet-war": "Oorlog",
+    "speed-fleet-peaceful": "Vredig",
+    "speed-fleet-holding": "Handhaven",
+    "mission-type-title": "Missietype:",
+    "mission-type-war": "Oorlog",
+    "mission-type-peaceful": "Vredig",
+    "mission-type-holding": "Handhaven"
   },
   "graviton": {
     "title": "OGame - Graviton berekening",
@@ -693,7 +706,6 @@
     "deut": "deut",
     "rates": "Wisselkoers",
     "location": "Locatie",
-    "country": "Land",
     "fix": "Verbeter",
     "src": "Verkopen",
     "dst": "Kopen",

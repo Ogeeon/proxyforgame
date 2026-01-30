@@ -162,7 +162,8 @@
     "disr-chamber": "Komora Zakłóceń",
     "disr-chamber-bonus": "Premia Komory Zakłóceń",
     "total-lf-energy-bonus": "Całkowity bonus Form Życia do produkcji energii",
-    "lf-tech-bonus": "Bonus technologiczny Form Życia"
+    "lf-tech-bonus": "Bonus technologiczny Form Życia",
+    "country": "Kraj"
   },
   "index": {
     "title": "Narzedzia do gier przegladarkowych OGame",
@@ -439,6 +440,7 @@
     "flight-time": "Czas lotu",
     "save-points": "Fleet Save",
     "distance": "Odległość",
+    "empty-systems": "Puste systemy:",
     "speed": "Prędkość",
     "flight-duration": "Czas trwania",
     "deut-consumption": "Zużycie deuteru",
@@ -500,7 +502,18 @@
     "fuel-decrease": "Zużycie paliwa",
     "import-sr": "Import",
     "import-hint": "Wklej w to pole kod API raportu szpiegowskiego z OGame\nlub kod raportu zapisanego na Logserver.net.",
-    "import-bad-code-msg": "Nie znaleziono danych.\\nCzy na pewno wprowadziłeś poprawny kod raportu szpiegowskiego?"
+    "import-bad-code-msg": "Nie znaleziono danych.\\nCzy na pewno wprowadziłeś poprawny kod raportu szpiegowskiego?",
+    "character-bonus-hint": "Aby uzyskać te premie, przejdź do Ustawień zasobów - Premie gracza Form Życia,\na następnie przewiń w dół do 'Premie klasy postaci'",
+    "generals-character-bonus": "Premia klasy postaci Generała (%)",
+    "collectors-character-bonus": "Premia klasy postaci Kolekcjonera (%)",
+    "speed-fleet-title": "Prędkości misji:",
+    "speed-fleet-war": "Wojna",
+    "speed-fleet-peaceful": "Pokojowa",
+    "speed-fleet-holding": "Zatrzymanie",
+    "mission-type-title": "Typ misji:",
+    "mission-type-war": "Wojna",
+    "mission-type-peaceful": "Pokojowa",
+    "mission-type-holding": "Zatrzymanie"
   },
   "graviton": {
     "title": "OGame - Kalkulator Rozwoju grawitonow",
@@ -702,7 +715,6 @@
     "deut": "deut",
     "rates": "Przelicznik",
     "location": "Lokalizacja",
-    "country": "Kraj",
     "cargoes": "Transp.",
     "fix": "ustaw",
     "src": "Sprzedawanie",

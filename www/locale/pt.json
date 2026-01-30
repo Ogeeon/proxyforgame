@@ -162,7 +162,8 @@
     "alliance-bonus": "Bónus da Aliança",
     "disr-chamber-bonus": "Bônus da Câmara de Disrupção",
     "total-lf-energy-bonus": "Bônus total das Formas de Vida para produção de energia",
-    "lf-tech-bonus": "Bônus de tecnologia das Formas de Vida"
+    "lf-tech-bonus": "Bônus de tecnologia das Formas de Vida",
+    "country": "País"
   },
   "index": {
     "title": "ProxyForGame - Calculadoras para OGame",
@@ -435,6 +436,7 @@
     "flight-time": "Tempos de voo",
     "save-points": "Coordenadas",
     "distance": "Distancia",
+    "empty-systems": "Sistemas vazios:",
     "speed": "Velocidade",
     "flight-duration": "Duração do voo",
     "deut-consumption": "Consumo de deutério",
@@ -492,7 +494,18 @@
     "fuel-decrease": "Consumo de combustível",
     "import-sr": "Importar",
     "import-hint": "Cola neste campo o código API do relatório espião do OGame\nou o código do relatório guardado no Logserver.net",
-    "import-bad-code-msg": "Não foram encontrados dados.\\nTens a certeza que introduziste o código correto do relatório de espionagem?"
+    "import-bad-code-msg": "Não foram encontrados dados.\\nTens a certeza que introduziste o código correto do relatório de espionagem?",
+    "character-bonus-hint": "Para obter esses bônus, vá para Configurações de recursos - Bônus de jogador de Formas de Vida,\nem seguida, role para baixo até 'Bônus de classe de personagem'",
+    "generals-character-bonus": "Bônus de classe de personagem do General (%)",
+    "collectors-character-bonus": "Bônus de classe de personagem do Coletor (%)",
+    "speed-fleet-title": "Velocidades da missão:",
+    "speed-fleet-war": "Guerra",
+    "speed-fleet-peaceful": "Pacífico",
+    "speed-fleet-holding": "Espera",
+    "mission-type-title": "Tipo de missão:",
+    "mission-type-war": "Guerra",
+    "mission-type-peaceful": "Pacífico",
+    "mission-type-holding": "Espera"
   },
   "graviton": {
     "sc": "Cargueiro Pequeno",
@@ -686,7 +699,6 @@
     "deut": "deut",
     "rates": "Taxas de troca",
     "location": "Localização",
-    "country": "País",
     "fix": "Reparar",
     "src": "Vender",
     "dst": "Comprar",

@@ -1,4 +1,4 @@
-#flight { margin: auto; width: 900px; }
+#flight { margin: auto; width: 1000px; }
 .level-input { width: 40px; text-align: center; margin-left: 2px; margin-right: 8px; }
 .level-input-small { width: 30px; text-align: center; margin-left: 2px; margin-right: 8px; }
 .coord-input { width: 30px; text-align: center; margin-left: 0px; margin-right: 0px; }
@@ -29,3 +29,30 @@
 #accordion-ships { padding-bottom: 0.5em; padding-top: 0.1em; }
 .uni-control-btn { width: 30px; height: 20px;}
 #lf-bonuses-txtarea:focus {  border: 1px solid #ccc; background: none; font-weight: normal;  }
+
+/* Loading overlay */
+.panel-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  border-radius: 4px;
+}
+
+.panel-overlay-content {
+  background: white;
+  padding: 20px;
+  border-radius: 4px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+  text-align: center;
+}
+
+#general-settings-panel.loading {
+  position: relative;
+}

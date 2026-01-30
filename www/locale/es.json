@@ -165,7 +165,8 @@
     "alliance-bonus": "Bonus de alianza",
     "disr-chamber-bonus": "Bonus de la Cámara de Disrupción",
     "total-lf-energy-bonus": "Bonificación total de las Formas de Vida a la producción de energía",
-    "lf-tech-bonus": "Bonificación tecnológica de las Formas de Vida"
+    "lf-tech-bonus": "Bonificación tecnológica de las Formas de Vida",
+    "country": "País"
   },
   "index": {
     "title": "ProxyForGame - herramientas para los juegos de navegador en línea OGame",
@@ -436,6 +437,7 @@
     "flight-time": "Tiempos de vuelo",
     "save-points": "Guardar coordenadas",
     "distance": "Distancia",
+    "empty-systems": "Sistemas vacios:",
     "speed": "Velocidad",
     "flight-duration": "Duración del vuelo",
     "deut-consumption": "Consumo de deuterio",
@@ -493,7 +495,18 @@
     "fuel-decrease": "Consumo de combustible",
     "import-sr": "Importar",
     "import-hint": "Pega en este campo el código API del informe espía de OGame\no el código del informe guardado en Logserver.net",
-    "import-bad-code-msg": "No se han encontrado datos.\\n¿Estás seguro de que has introducido el código correcto del informe espía?"
+    "import-bad-code-msg": "No se han encontrado datos.\\n¿Estás seguro de que has introducido el código correcto del informe espía?",
+    "character-bonus-hint": "Para obtener estas bonificaciones, vaya a Configuración de recursos - Bonificaciones de jugador de Formas de Vida,\nluego desplácese hacia abajo hasta 'Bonificaciones de clase de personaje'",
+    "generals-character-bonus": "Bonificación de clase de personaje del General (%)",
+    "collectors-character-bonus": "Bonificación de clase de personaje del Recolector (%)",
+    "speed-fleet-title": "Velocidades de misión:",
+    "speed-fleet-war": "Guerra",
+    "speed-fleet-peaceful": "Pacífico",
+    "speed-fleet-holding": "Espera",
+    "mission-type-title": "Tipo de misión:",
+    "mission-type-war": "Guerra",
+    "mission-type-peaceful": "Pacífico",
+    "mission-type-holding": "Espera"
   },
   "graviton": {
     "title": "OGame - Calculadora de Gravitón",
@@ -685,7 +698,6 @@
     "deut": "deut",
     "rates": "Ratios de intercambio",
     "location": "Lugar",
-    "country": "País",
     "fix": "fijo",
     "src": "Vendiendo",
     "dst": "Comprando",

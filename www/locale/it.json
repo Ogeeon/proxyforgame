@@ -161,7 +161,8 @@
     "disr-chamber": "Camera di Disruzione",
     "disr-chamber-bonus": "Bonus della Camera di Disruzione",
     "total-lf-energy-bonus": "Bonus totale delle Forme di Vita alla produzione di energia",
-    "lf-tech-bonus": "Bonus tecnologico delle Forme di Vita"
+    "lf-tech-bonus": "Bonus tecnologico delle Forme di Vita",
+    "country": "Paese"
   },
   "index": {
     "title": "ProxyForGame - strumenti per i giochi per browser OGame",
@@ -441,6 +442,7 @@
     "flight-time": "Tempi di viaggio",
     "save-points": "Punti di riparo",
     "distance": "Distanza",
+    "empty-systems": "Sistemi vuoti:",
     "speed": "Velocita",
     "flight-duration": "Durata (solo andata)",
     "deut-consumption": "Consumo di carburante",
@@ -499,7 +501,18 @@
     "fuel-decrease": "Consumo di carburante",
     "import-sr": "Importazione",
     "import-hint": "Incollare in questo campo il codice API del rapporto spia di OGame\no il codice del rapporto salvato su Logserver.net.",
-    "import-bad-code-msg": "Nessun dato trovato.\\nSiete sicuri di aver inserito il codice corretto del rapporto spia?"
+    "import-bad-code-msg": "Nessun dato trovato.\\nSiete sicuri di aver inserito il codice corretto del rapporto spia?",
+    "character-bonus-hint": "Per ottenere questi bonus, vai in Impostazioni risorse - Bonus giocatore Forme di Vita,\nquindi scorri verso il basso fino a 'Bonus classe personaggio'",
+    "generals-character-bonus": "Bonus classe personaggio del Generale (%)",
+    "collectors-character-bonus": "Bonus classe personaggio del Collezionista (%)",
+    "speed-fleet-title": "Velocità della missione:",
+    "speed-fleet-war": "Guerra",
+    "speed-fleet-peaceful": "Pacifico",
+    "speed-fleet-holding": "Sosta",
+    "mission-type-title": "Tipo di missione:",
+    "mission-type-war": "Guerra",
+    "mission-type-peaceful": "Pacifico",
+    "mission-type-holding": "Sosta"
   },
   "graviton": {
     "title": "OGame - Calcolatore per Gravitonica",
@@ -697,7 +710,6 @@
     "deut": "deut",
     "rates": "Tasso di cambio",
     "location": "Ubicazione",
-    "country": "Paese",
     "cargoes": "Carichi",
     "fix": "fisso",
     "src": "Vendita",

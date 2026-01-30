@@ -259,6 +259,7 @@ function GetVar($var, $type)
     $universeData = [
       'speedFleetPeaceful' => (string)$xml->speedFleetPeaceful ?? '',
       'speedFleetWar' => (string)$xml->speedFleetWar ?? '',
+      'speedFleetHolding' => (string)$xml->speedFleetHolding ?? '',
       'galaxies' => (string)$xml->galaxies ?? '',
       'systems' => (string)$xml->systems ?? '',
       'donutGalaxy' => (string)$xml->donutGalaxy ?? '',
