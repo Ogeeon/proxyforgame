@@ -508,7 +508,8 @@
     "mission-type-title": "Tip misije:",
     "mission-type-war": "Rat",
     "mission-type-peaceful": "Miran",
-    "mission-type-holding": "Zadržavanje"
+    "mission-type-holding": "Zadržavanje",
+    "fetchig-data": "Preuzimanje podataka..."
   },
   "graviton": {
     "title": "Ogame - Kalkulator gravitona",

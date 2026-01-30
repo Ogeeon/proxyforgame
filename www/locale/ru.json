@@ -507,7 +507,8 @@
     "mission-type-title": "Тип миссии:",
     "mission-type-war": "Боевая",
     "mission-type-peaceful": "Мирная",
-    "mission-type-holding": "Удержание"
+    "mission-type-holding": "Удержание",
+    "fetchig-data": "Получение данных..."
   },
   "graviton": {
     "title": "OGame - Калькулятор Гравитационной технологии",

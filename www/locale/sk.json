@@ -501,7 +501,8 @@
     "mission-type-title": "Typ misie:",
     "mission-type-war": "Vojna",
     "mission-type-peaceful": "Mierový",
-    "mission-type-holding": "Zdržanie"
+    "mission-type-holding": "Zdržanie",
+    "fetchig-data": "Načítavanie údajov..."
   },
   "graviton": {
     "title": "OGame - Kalkulátor pre Graviton",

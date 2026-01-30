@@ -509,7 +509,8 @@
     "mission-type-title": "Type de mission:",
     "mission-type-war": "Guerre",
     "mission-type-peaceful": "Pacifique",
-    "mission-type-holding": "Maintien"
+    "mission-type-holding": "Maintien",
+    "fetchig-data": "Récupération des données..."
   },
   "graviton": {
     "title": "OGame - Calculateur de Graviton",

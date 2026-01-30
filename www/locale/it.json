@@ -512,7 +512,8 @@
     "mission-type-title": "Tipo di missione:",
     "mission-type-war": "Guerra",
     "mission-type-peaceful": "Pacifico",
-    "mission-type-holding": "Sosta"
+    "mission-type-holding": "Sosta",
+    "fetchig-data": "Recupero dati..."
   },
   "graviton": {
     "title": "OGame - Calcolatore per Gravitonica",

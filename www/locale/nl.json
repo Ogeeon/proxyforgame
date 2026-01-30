@@ -505,7 +505,8 @@
     "mission-type-title": "Missietype:",
     "mission-type-war": "Oorlog",
     "mission-type-peaceful": "Vredig",
-    "mission-type-holding": "Handhaven"
+    "mission-type-holding": "Handhaven",
+    "fetchig-data": "Gegevens ophalen..."
   },
   "graviton": {
     "title": "OGame - Graviton berekening",

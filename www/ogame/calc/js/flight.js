@@ -1317,7 +1317,7 @@ function hidePanelLoadingOverlay(elementId = 'general-settings-panel') {
 }
 
 function ajaxAPI(code) {
-        showPanelLoadingOverlay('general-settings-panel', 'Fetching spy report data');
+        showPanelLoadingOverlay('general-settings-panel', options.dataFetchMsg);
         $.post(
             "/ajax.php",
             {service: "ogameAPI", code: code},
@@ -1823,7 +1823,7 @@ jQuery(function($) {
     });
     $('#universe').change(function() {
         options.prm.universe = this.value; 
-        showPanelLoadingOverlay('general-settings-panel', 'Fetching universe data');
+        showPanelLoadingOverlay('general-settings-panel', options.dataFetchMsg);
         fetchServerData();
         hidePanelLoadingOverlay();
         updateNumbers(); 

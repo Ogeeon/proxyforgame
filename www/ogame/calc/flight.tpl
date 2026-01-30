@@ -87,6 +87,7 @@
     options.smallCargoName = "<?= $l['small-cargo'] ?>";
     options.missingSCName = "<?= $l['no-sc-message'] ?>";
     options.badSRCode = "<?= $l['import-bad-code-msg'] ?>";
+    options.dataFetchMsg = "<?= $l['fetchig-data'] ?>";
 
     unis = {
 <?php

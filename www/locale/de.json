@@ -505,7 +505,8 @@
     "mission-type-title": "Missionstyp:",
     "mission-type-war": "Krieg",
     "mission-type-peaceful": "Friedlich",
-    "mission-type-holding": "Halten"
+    "mission-type-holding": "Halten",
+    "fetchig-data": "Daten werden abgerufen..."
   },
   "graviton": {
     "title": "OGame - Gravitonforschung Rechner",

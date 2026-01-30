@@ -505,7 +505,8 @@
     "mission-type-title": "Tipo de missão:",
     "mission-type-war": "Guerra",
     "mission-type-peaceful": "Pacífico",
-    "mission-type-holding": "Espera"
+    "mission-type-holding": "Espera",
+    "fetchig-data": "Obtendo dados..."
   },
   "graviton": {
     "sc": "Cargueiro Pequeno",

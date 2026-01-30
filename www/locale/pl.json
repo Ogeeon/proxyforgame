@@ -513,7 +513,8 @@
     "mission-type-title": "Typ misji:",
     "mission-type-war": "Wojna",
     "mission-type-peaceful": "Pokojowa",
-    "mission-type-holding": "Zatrzymanie"
+    "mission-type-holding": "Zatrzymanie",
+    "fetchig-data": "Pobieranie danych..."
   },
   "graviton": {
     "title": "OGame - Kalkulator Rozwoju grawitonow",

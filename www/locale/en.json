@@ -505,7 +505,8 @@
     "mission-type-title": "Mission type:",
     "mission-type-war": "War",
     "mission-type-peaceful": "Peaceful",
-    "mission-type-holding": "Holding"
+    "mission-type-holding": "Holding",
+    "fetchig-data": "Fetching data..."
   },
   "graviton": {
     "title": "OGame - Graviton calculator",

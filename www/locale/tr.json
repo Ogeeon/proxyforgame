@@ -503,7 +503,8 @@
     "mission-type-title": "Görev türü:",
     "mission-type-war": "Savaş",
     "mission-type-peaceful": "Barışçıl",
-    "mission-type-holding": "Bekleme"
+    "mission-type-holding": "Bekleme",
+    "fetchig-data": "Veriler alınıyor..."
   },
   "graviton": {
     "title": "OGame - Gravitasyon Hesaplayıcı",
