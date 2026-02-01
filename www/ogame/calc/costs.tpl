@@ -41,11 +41,11 @@
 	<script type="text/javascript" src="/ogame/calc/js/costs-data-collector.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/costs-data-collector.js'); ?>"></script>
 	<script type="text/javascript" src="/ogame/calc/js/costs-renderer.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/costs-renderer.js'); ?>"></script>
 	<script type="text/javascript" src="/ogame/calc/js/costs-orchestration.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/costs-orchestration.js'); ?>"></script>
-	
-	<!-- Original costs.js (modified to support dual-system) -->
-	<script type="text/javascript" src="/ogame/calc/js/costs.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/costs.js'); ?>"></script>
 
 	<script type="text/javascript">
+		// Global options object
+		var options = {};
+
 		// десятичный разделитель будет использоваться в функциях, проверяющих валидность чисел в input-ах
 		options.decimalSeparator='<?= $l['decimal-separator'] ?>';
 		options.datetimeW = '<?= $l['datetime-w'] ?>';
@@ -82,6 +82,16 @@
 			 	<?php $first = false; ?>
 			 	<?php endforeach; ?>
 		};
+
+		// Minimal options.prm for IRN dialog compatibility
+		options.prm = {
+			irnLevel: 0,
+			planetsSpin: 8,
+			labLevels: [0, 0, 0, 0, 0, 0, 0, 0],
+			labChoice: -1
+		};
+		options.currPlanetsCount = 8;
+		options.resultingLabLevelComputed = false;
 
 	</script>
 <?php require_once('../../cookies.tpl'); ?>
@@ -492,6 +502,49 @@
 <?php
 	require_once('../../analitics.tpl');
 ?>
+
+<script type="text/javascript">
+// Initialize jQuery UI widgets
+$(function() {
+	// Initialize IRN dialog
+	$("#irn-calc").dialog({
+		autoOpen: false,
+		height: 450,
+		width: 400,
+		modal: true,
+		buttons: [
+			{
+				text: options.doneTitle,
+				click: function() {
+					$(this).dialog("option", "execute", true);
+					$(this).dialog("close");
+				}
+			},
+			{
+				text: options.cancelTitle,
+				click: function() {
+					$(this).dialog("option", "execute", false);
+					$(this).dialog("close");
+				}
+			}
+		]
+	});
+
+	// Initialize tabs
+	$("#tabs").tabs();
+
+	// Initialize inner tabs for tab-0 and tab-1
+	$("#tabs-0").tabs();
+	$("#tabs-1").tabs();
+
+	// Initialize buttons with jQuery UI button widget
+	$("#reset").button();
+	$("#open-llc-dialog").button();
+
+	// Initialize the calculator app
+	initializeCostsCalculator();
+});
+</script>
 
 </body>
 </html>

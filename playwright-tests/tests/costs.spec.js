@@ -170,6 +170,7 @@ test.describe('Costs Calculator Page', () => {
     });
 
     test('[one item - multiple levels] calculations are correct', async ({ page }) => {
+        await page.locator('#reset').click();
         await page.getByRole('link', { name: 'One item - multiple levels' }).click();
         // When the page loads, Metal Mine is selected by default
         await page.locator('#tab2-from-level').fill('14');

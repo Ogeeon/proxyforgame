@@ -13,11 +13,11 @@ class CostsCalculator {
     this.collector = new DataCollector();
     this.renderer = new Renderer();
     this.changeDetector = new ChangeDetector();
-    
+
     // State
     this.currentParams = null;
     this.isInitialized = false;
-    
+
     // Performance tracking
     this.stats = {
       calculations: 0,
@@ -25,7 +25,7 @@ class CostsCalculator {
       totalTime: 0
     };
   }
-  
+
   /**
    * Initialize the application
    */
@@ -34,55 +34,55 @@ class CostsCalculator {
       console.warn('CostsCalculator already initialized');
       return;
     }
-    
+
     console.log('Initializing CostsCalculator...');
-    
+
     // Load saved state from cookies
     this.loadState();
-    
+
     // Bind all event handlers
     this.bindEvents();
-    
+
     // Initial calculation
     this.recalculateAll();
-    
+
     this.isInitialized = true;
     console.log('CostsCalculator initialized');
   }
-  
+
   // ==========================================================================
   // MAIN CALCULATION METHODS
   // ==========================================================================
-  
+
   /**
    * Recalculate everything from scratch
    * Called on page load and when many things change
    */
   recalculateAll() {
     const startTime = performance.now();
-    
+
     console.log('Recalculating all tables...');
-    
+
     // 1. Collect global parameters
     this.currentParams = this.collector.collectGlobalParams();
-    
+
     // 2. Recalculate single-level tab (tab 0)
     this._recalculateTabGroup(0);
-    
+
     // 3. Recalculate multi-level tab (tab 1)
     this._recalculateTabGroup(1);
-    
+
     // 4. Recalculate range tab (tab 2)
     this.recalculateRangeTab();
-    
+
     // 5. Save state
     this.saveState();
-    
+
     const elapsed = performance.now() - startTime;
     this.stats.totalTime += elapsed;
     console.log(`Recalculation complete in ${elapsed.toFixed(2)}ms`);
   }
-  
+
   /**
    * Recalculate a specific tab group
    * @private
@@ -90,64 +90,64 @@ class CostsCalculator {
   _recalculateTabGroup(outerTab) {
     const tableIds = this._getTableIdsForTab(outerTab);
     const batchRenderer = new BatchRenderer();
-    
+
     const allRequests = {};
     const allResults = {};
-    
+
     // Calculate all tables
     tableIds.forEach(tableId => {
       const requests = this.collector.collectTableRequests(tableId);
       const results = this._calculateRequests(requests);
-      
+
       allRequests[tableId] = requests;
       allResults[tableId] = results;
     });
-    
+
     // Render all tables in one batch
     batchRenderer.renderAllTables(outerTab, allRequests, allResults, this.currentParams);
-    
+
     this.stats.calculations++;
     this.stats.renders++;
   }
-  
+
   /**
    * Recalculate only specific tables
    * @param {string[]} tableIds - Array of table IDs to recalculate
    */
   recalculateTables(tableIds) {
     const startTime = performance.now();
-    
+
     console.log(`Recalculating tables: ${tableIds.join(', ')}`);
-    
+
     // Ensure we have current params
     if (!this.currentParams) {
       this.currentParams = this.collector.collectGlobalParams();
     }
-    
+
     tableIds.forEach(tableId => {
       const requests = this.collector.collectTableRequests(tableId);
       const results = this._calculateRequests(requests);
-      
+
       this.renderer.renderTable(tableId, requests, results, this.currentParams);
     });
-    
+
     // Update grand totals for affected tab groups
     const affectedTabs = new Set();
     tableIds.forEach(id => {
       if (id.startsWith('table-0-')) affectedTabs.add(0);
       if (id.startsWith('table-1-')) affectedTabs.add(1);
     });
-    
+
     affectedTabs.forEach(tab => this._updateGrandTotals(tab));
-    
+
     const elapsed = performance.now() - startTime;
     this.stats.totalTime += elapsed;
     this.stats.calculations++;
     this.stats.renders++;
-    
+
     console.log(`Tables recalculated in ${elapsed.toFixed(2)}ms`);
   }
-  
+
   /**
    * Update grand totals for a tab group
    * @private
@@ -156,54 +156,54 @@ class CostsCalculator {
     const tableIds = this._getTableIdsForTab(outerTab);
     let grandTotal = BuildCost.zero();
     let maxEnergy = 0;
-    
+
     // Collect all results from all tables
     tableIds.forEach(tableId => {
       const requests = this.collector.collectTableRequests(tableId);
       const results = this._calculateRequests(requests);
-      
+
       results.forEach(result => {
         grandTotal = grandTotal.add(result);
         maxEnergy = Math.max(maxEnergy, result.energy);
       });
     });
-    
+
     grandTotal.energy = maxEnergy;
     this.renderer.renderGrandTotals(outerTab, grandTotal, this.currentParams);
   }
-  
+
   /**
    * Recalculate range tab (tab 3)
    */
   recalculateRangeTab() {
     const rangeData = this.collector.collectRangeData();
-    
+
     if (rangeData.requests.length === 0) {
       return; // Nothing to calculate
     }
-    
+
     const { techId, requests } = rangeData;
-    
+
     // Calculate costs for each level
     const results = this._calculateRequests(requests);
-    
+
     // Calculate production/consumption if applicable
     const isProducer = [1, 2, 3, 4, 12, 212].includes(techId);
     const isConsumer = [1, 2, 3, 12].includes(techId);
-    
+
     const productions = {};
     const consumptions = {};
-    
+
     if (isProducer || isConsumer) {
       requests.forEach((req, index) => {
         const level = req.toLevel;
-        
+
         if (isProducer) {
           productions[level] = this.calculator.calculateProduction(
             techId, level, this.currentParams
           );
         }
-        
+
         if (isConsumer) {
           consumptions[level] = this.calculator.calculateConsumption(
             techId, level, this.currentParams
@@ -211,7 +211,7 @@ class CostsCalculator {
         }
       });
     }
-    
+
     // Render
     this.renderer.renderRangeTable(
       rangeData,
@@ -221,7 +221,7 @@ class CostsCalculator {
       this.currentParams
     );
   }
-  
+
   /**
    * Calculate array of requests
    * @private
@@ -229,7 +229,7 @@ class CostsCalculator {
   _calculateRequests(requests) {
     return requests.map(req => {
       const result = this.calculator.calculate(req, this.currentParams);
-      
+
       // Check if research is impossible
       if (result.isZero && req.isValid && req.techType === 'research') {
         // Research requirements not met
@@ -238,36 +238,36 @@ class CostsCalculator {
           this.renderer.showResearchImpossibleError(techName);
         }
       }
-      
+
       return result;
     });
   }
-  
+
   // ==========================================================================
   // EVENT HANDLING
   // ==========================================================================
-  
+
   /**
    * Bind all event handlers
    */
   bindEvents() {
     console.log('Binding event handlers...');
-    
+
     // Global parameter inputs - trigger full recalculation
     this._bindGlobalParamEvents();
-    
+
     // Table inputs - trigger table-specific recalculation
     this._bindTableEvents();
-    
+
     // Range tab - trigger range recalculation
     this._bindRangeTabEvents();
-    
+
     // Special buttons
     this._bindSpecialEvents();
-    
+
     console.log('Event handlers bound');
   }
-  
+
   /**
    * Bind global parameter events
    * @private
@@ -342,17 +342,13 @@ class CostsCalculator {
     $('input[name="class"]').unbind('click');
     $('input[name="class"]').click(() => this._handleParamChange('class'));
   }
-  
+
   /**
    * Bind table input events
    * @private
    */
   _bindTableEvents() {
-    // Remove old event handlers from costs.js to prevent conflicts
-    // The old system uses namespaced events ('updateRow'), so we unbind those specifically
-    $('#tab-0 input:text').unbind('keyup.updateRow');
-    $('#tab-1 input:text').unbind('keyup.updateRow');
-    // Also clear any other keyup handlers to be safe
+    // Clear any existing keyup handlers
     $('#tab-0 input:text').unbind('keyup');
     $('#tab-1 input:text').unbind('keyup');
 
@@ -365,7 +361,7 @@ class CostsCalculator {
       this._handleTableInputChange(event);
     });
   }
-  
+
   /**
    * Bind range tab events
    * @private
@@ -399,7 +395,7 @@ class CostsCalculator {
       this.recalculateRangeTab();
     });
   }
-  
+
   /**
    * Bind special events
    * @private
@@ -417,7 +413,7 @@ class CostsCalculator {
       this._openIRNDialog();
     });
   }
-  
+
   /**
    * Handle global parameter change
    * @private
@@ -425,10 +421,10 @@ class CostsCalculator {
   _handleParamChange(fieldId) {
     // Collect current params
     this.currentParams = this.collector.collectGlobalParams();
-    
+
     // Determine affected tables
     const affectedTables = this.collector.getAffectedTables(fieldId);
-    
+
     if (affectedTables.length === 0 || affectedTables.includes('*')) {
       // Recalculate everything
       this.recalculateAll();
@@ -436,16 +432,16 @@ class CostsCalculator {
       // Recalculate only affected tables
       this.recalculateTables(affectedTables);
     }
-    
+
     // Check if range tab is affected
     if (this.collector.isRangeTabAffected(fieldId)) {
       this.recalculateRangeTab();
     }
-    
+
     // Save state
     this.saveState();
   }
-  
+
   /**
    * Handle table input change
    * @private
@@ -453,16 +449,16 @@ class CostsCalculator {
   _handleTableInputChange(event) {
     // Get the table this input belongs to
     const tableId = this._getTableIdFromInput(event.target);
-    
+
     if (tableId) {
       this.recalculateTables([tableId]);
-      
+
       // Update grand totals for the tab group
       const outerTab = tableId.startsWith('table-1-') ? 1 : 0;
       this._updateGrandTotals(outerTab);
     }
   }
-  
+
   /**
    * Get table ID from an input element
    * @private
@@ -473,10 +469,10 @@ class CostsCalculator {
     while (element && element.tagName !== 'TABLE') {
       element = element.parentElement;
     }
-    
+
     return element ? element.id : null;
   }
-  
+
   // ==========================================================================
   // STATE MANAGEMENT
   // ==========================================================================
@@ -551,22 +547,21 @@ class CostsCalculator {
       console.error('Failed to save state:', e.message);
     }
   }
-  
+
   /**
    * Load state from localStorage
    * Uses native JSON deserialization
-   * Falls back to old loadFromCookie method for backward compatibility
    */
   loadState() {
     try {
       let json = null;
 
-      // Try localStorage first (new format)
+      // Try localStorage first
       if (this._isStorageAvailable()) {
         json = localStorage.getItem(CostsCalculator.STORAGE_KEY);
       }
 
-      // Fallback to cookie if localStorage is empty (new format)
+      // Fallback to cookie if localStorage is empty
       if (!json) {
         const cookies = document.cookie.split(';');
         for (let i = 0; i < cookies.length; i++) {
@@ -579,85 +574,13 @@ class CostsCalculator {
       }
 
       let state = null;
-      let needsMigration = false;
 
-      // Parse new format if found
+      // Parse saved state
       if (json) {
         try {
           state = JSON.parse(json);
         } catch (e) {
-          console.warn('Failed to parse new format, will try old format');
-        }
-      }
-
-      // If new format not found, try old format migration
-      if (!state && typeof loadFromCookie === 'function') {
-        console.log('New storage format not found, attempting migration from old format...');
-
-        // Create a temporary params object with validate method for old loadFromCookie
-        const tempParams = {
-          validate: (key, value) => this._validateParam(key, value),
-          // Initialize with default structure
-          shipyardLevel: 0,
-          robotFactoryLevelPlanet: 0,
-          robotFactoryLevelMoon: 0,
-          naniteFactoryLevel: 0,
-          universeSpeed: 1,
-          researchSpeed: 1,
-          researchLabLevel: 0,
-          energyTechLevel: 0,
-          plasmaTechLevel: 0,
-          ionTechLevel: 0,
-          hyperTechLevel: 0,
-          maxPlanetTemp: 0,
-          planetPos: 8,
-          geologist: false,
-          engineer: false,
-          technocrat: false,
-          admiral: false,
-          commander: false,
-          researchBonus: false,
-          playerClass: 0,
-          booster: 0,
-          irnLevel: 0,
-          labLevels: [],
-          labChoice: 0,
-          fullNumbers: false
-        };
-
-        try {
-          loadFromCookie('options_costs', tempParams);
-          state = {
-            shipyardLevel: tempParams.shipyardLevel,
-            robotFactoryLevelPlanet: tempParams.robotFactoryLevelPlanet,
-            robotFactoryLevelMoon: tempParams.robotFactoryLevelMoon,
-            naniteFactoryLevel: tempParams.naniteFactoryLevel,
-            universeSpeed: tempParams.universeSpeed,
-            researchSpeed: tempParams.researchSpeed,
-            researchLabLevel: tempParams.researchLabLevel,
-            energyTechLevel: tempParams.energyTechLevel,
-            plasmaTechLevel: tempParams.plasmaTechLevel,
-            ionTechLevel: tempParams.ionTechLevel,
-            hyperTechLevel: tempParams.hyperTechLevel,
-            maxPlanetTemp: tempParams.maxPlanetTemp,
-            planetPos: tempParams.planetPos,
-            geologist: tempParams.geologist,
-            engineer: tempParams.engineer,
-            technocrat: tempParams.technocrat,
-            admiral: tempParams.admiral,
-            commander: tempParams.commander,
-            researchBonus: tempParams.researchBonus,
-            playerClass: tempParams.playerClass,
-            booster: tempParams.booster,
-            irnLevel: tempParams.irnLevel,
-            labLevels: tempParams.labLevels,
-            labChoice: tempParams.labChoice,
-            fullNumbers: tempParams.fullNumbers
-          };
-          needsMigration = true;
-          console.log('Successfully migrated from old format');
-        } catch (e) {
-          console.warn('Failed to load from old format:', e.message);
+          console.warn('Failed to parse saved state');
         }
       }
 
@@ -670,12 +593,6 @@ class CostsCalculator {
         // Collect params after applying state
         this.currentParams = this.collector.collectGlobalParams();
 
-        // Save in new format if migration occurred
-        if (needsMigration) {
-          console.log('Saving migrated state in new format...');
-          this.saveState();
-        }
-
         console.log('State loaded');
       }
     } catch (e) {
@@ -683,31 +600,6 @@ class CostsCalculator {
     }
   }
 
-  /**
-   * Validate a parameter value during migration
-   * @private
-   */
-  _validateParam(key, value) {
-    // Convert to appropriate type based on key
-    const booleanKeys = ['geologist', 'engineer', 'technocrat', 'admiral', 'commander', 'researchBonus', 'fullNumbers'];
-    const numberKeys = ['shipyardLevel', 'robotFactoryLevelPlanet', 'robotFactoryLevelMoon', 'naniteFactoryLevel',
-      'universeSpeed', 'researchSpeed', 'researchLabLevel', 'energyTechLevel', 'plasmaTechLevel', 'ionTechLevel',
-      'hyperTechLevel', 'maxPlanetTemp', 'planetPos', 'playerClass', 'booster', 'irnLevel', 'labChoice'];
-
-    if (booleanKeys.includes(key)) {
-      return value === true || value === 'true';
-    }
-    if (numberKeys.includes(key)) {
-      const num = parseFloat(value);
-      return isNaN(num) ? 0 : num;
-    }
-    if (key === 'labLevels') {
-      // Arrays are handled specially by loadFromCookie
-      return value;
-    }
-    return value;
-  }
-  
   /**
    * Apply saved state to UI elements
    * @private
@@ -726,7 +618,7 @@ class CostsCalculator {
     if (state.naniteFactoryLevel !== undefined) {
       $('#nanite-factory-level').val(state.naniteFactoryLevel);
     }
-    
+
     // Speeds
     if (state.universeSpeed !== undefined) {
       $('#universe-speed').val(state.universeSpeed);
@@ -734,7 +626,7 @@ class CostsCalculator {
     if (state.researchSpeed !== undefined) {
       $('#research-speed').val(state.researchSpeed);
     }
-    
+
     // Technologies
     if (state.researchLabLevel !== undefined) {
       $('#research-lab-level').val(state.researchLabLevel);
@@ -757,7 +649,7 @@ class CostsCalculator {
     if (state.planetPos !== undefined) {
       $('#planet-pos').val(state.planetPos);
     }
-    
+
     // Officers/bonuses
     if (state.geologist === true) { $('#geologist').attr('checked', 'checked'); } else { $('#geologist').removeAttr('checked'); }
     if (state.engineer === true) { $('#engineer').attr('checked', 'checked'); } else { $('#engineer').removeAttr('checked'); }
@@ -771,12 +663,12 @@ class CostsCalculator {
     if (state.playerClass !== undefined) {
       $(`#class-${state.playerClass}`).attr('checked', 'checked');
     }
-    
+
     // Booster
     if (state.booster !== undefined) {
       $('#booster').val(state.booster);
     }
-    
+
     // IRN
     if (state.irnLevel !== undefined) {
       $('#irn-level').val(state.irnLevel);
@@ -784,12 +676,12 @@ class CostsCalculator {
     if (state.labLevels && state.labLevels.length > 0) {
       const planetCount = state.labLevels.length;
       $('#planetsSpin').val(planetCount);
-      
+
       // Set lab levels
       state.labLevels.forEach((level, index) => {
         const planetNum = index + 1;
         $(`#lablevel_${planetNum}`).val(level);
-        
+
         if (level > 0) {
           $(`#labchoice_${planetNum}`).removeAttr('disabled');
         }
@@ -800,25 +692,25 @@ class CostsCalculator {
       });
     }
   }
-  
+
   /**
    * Reset all values to defaults
    */
   reset() {
     console.log('Resetting calculator...');
-    
+
     // Reset to default params
     this.currentParams = new GlobalParams();
-    
+
     // Clear all UI inputs
     this._resetUI();
-    
+
     // Recalculate everything
     this.recalculateAll();
-    
+
     console.log('Calculator reset');
   }
-  
+
   /**
    * Reset UI to defaults
    * @private
@@ -1043,18 +935,12 @@ class CostsCalculator {
 
         // Re-bind event handlers for new elements
         $('#lablevel_' + i).unbind('keyup');
-        $('#lablevel_' + i).keyup(function(e) {
-          if (typeof validateInputNumber === 'function') {
-            validateInputNumber.call(this, e);
-          }
-        });
+        $('#lablevel_' + i).bind('keyup', validateAndChangeLabLevel);
 
         $('#labchoice_' + i).unbind('click');
-        $('#labchoice_' + i).click(function() {
-          if (typeof updateResultingLevel === 'function') {
-            updateResultingLevel();
-          }
+        $('#labchoice_' + i).click(function () {
           if (calculatorApp) {
+            calculatorApp._updateResultingLevel();
             calculatorApp.recalculateAll();
           }
         });
@@ -1071,15 +957,13 @@ class CostsCalculator {
     }
 
     // Update resulting level display if function exists
-    if (typeof updateResultingLevel === 'function') {
-      updateResultingLevel();
-    }
+    this._updateResultingLevel();
   }
-  
+
   // ==========================================================================
   // HELPER METHODS
   // ==========================================================================
-  
+
   /**
    * Get table IDs for a tab group
    * @private
@@ -1092,7 +976,71 @@ class CostsCalculator {
     }
     return [];
   }
-  
+
+  /**
+   * Get a number value from an input element
+   * @private
+   */
+  _getInputNumber(selector) {
+    const val = $(selector).val();
+    return val ? parseInt(val, 10) || 0 : 0;
+  }
+
+  /**
+   * Calculate and display IRN resulting lab level
+   * @private
+   */
+  _updateResultingLevel() {
+    const irnLevel = this._getInputNumber('#irn-level');
+    const planetCount = this._getInputNumber('#planetsSpin');
+
+    // First check if any radio button is selected
+    let haveSelection = false;
+    for (let i = 1; i <= planetCount; i++) {
+      if ($(`#labchoice_${i}`)[0].checked) {
+        haveSelection = true;
+        // Update lab choice in options
+        if (options.prm) {
+          options.prm.labChoice = i - 1;
+        }
+        break;
+      }
+    }
+
+    // If no lab is selected, display "?" and return
+    if (!haveSelection) {
+      $('#resulting-level').html('<b>?</b>');
+      return;
+    }
+
+    // Collect lab levels
+    const labs = [];
+    for (let i = 1; i <= planetCount; i++) {
+      const level = this._getInputNumber(`#lablevel_${i}`);
+      if (level > 0) {
+        const isSelected = $(`#labchoice_${i}`)[0].checked;
+        labs.push([level, isSelected]);
+      }
+    }
+
+    // Sort: selected lab first, then by level descending
+    labs.sort((a, b) => {
+      if (b[1] === true) return 1;
+      if (a[1] === true) return -1;
+      return b[0] - a[0];
+    });
+
+    // Calculate resulting level (sum of top IRN labs)
+    const limit = Math.min(irnLevel + 1, labs.length);
+    let resultingLevel = 0;
+    for (let i = 0; i < limit; i++) {
+      resultingLevel += Number(labs[i][0]);
+    }
+
+    // Update display
+    $('#resulting-level').html(`<b>${resultingLevel}</b>`);
+  }
+
   /**
    * Get tech name from ID
    * @private
@@ -1100,7 +1048,7 @@ class CostsCalculator {
   _getTechName(techId) {
     // Look up in the table to get the name
     const tables = ['table-0-4', 'table-1-4']; // Research tables
-    
+
     for (const tableId of tables) {
       const rows = $(`#${tableId} tr`);
       for (let i = 1; i < rows.length - 5; i++) {
@@ -1110,10 +1058,10 @@ class CostsCalculator {
         }
       }
     }
-    
+
     return null;
   }
-  
+
   /**
    * Open IRN calculator dialog
    * @private
@@ -1139,22 +1087,20 @@ class CostsCalculator {
     $("#irn-calc").dialog("open");
 
     // Update resulting level display after dialog opens
-    if (typeof updateResultingLevel === 'function') {
-      updateResultingLevel();
-    }
+    this._updateResultingLevel();
   }
-  
+
   /**
    * Get performance statistics
    */
   getStats() {
     return {
       ...this.stats,
-      avgTime: this.stats.calculations > 0 ? 
+      avgTime: this.stats.calculations > 0 ?
         this.stats.totalTime / this.stats.calculations : 0
     };
   }
-  
+
   /**
    * Reset performance statistics
    */
@@ -1182,8 +1128,8 @@ let calculatorApp = null;
 function initializeCostsCalculator() {
   // Wait for options.techCosts and options.techReqs to be available
   if (typeof options === 'undefined' ||
-      !options.techCosts ||
-      !options.techReqs) {
+    !options.techCosts ||
+    !options.techReqs) {
     console.error('Cannot initialize: options.techCosts or options.techReqs not available');
     return;
   }
@@ -1197,7 +1143,7 @@ function initializeCostsCalculator() {
     $("#planetsSpin").unbind();
 
     // Create a callback that works with the new calculator system
-    const onPlanetsChange = function(newVal, oldVal) {
+    const onPlanetsChange = function (newVal, oldVal) {
       // Validate range
       if (newVal < 1 || newVal > 99) return;
 
@@ -1221,15 +1167,13 @@ function initializeCostsCalculator() {
           '" name="start-pln" value="0" disabled="disabled"/></td>' +
           '</tr>'
         );
-        $('#lablevel_' + newVal).keyup('changeLabLevel', validateInputNumber);
-        $('#labchoice_' + newVal).click(updateResultingLevel);
+        $('#lablevel_' + newVal).bind('keyup', validateAndChangeLabLevel);
+        $('#labchoice_' + newVal).click(() => this._updateResultingLevel());
         options.prm.labLevels.push(0);
       }
 
       // Update resulting level display
-      if (typeof updateResultingLevel === 'function') {
-        updateResultingLevel();
-      }
+      calculatorApp._updateResultingLevel();
 
       // Notify new calculator system to recalculate
       if (calculatorApp) {
@@ -1245,40 +1189,33 @@ function initializeCostsCalculator() {
   // Initialize IRN dialog handlers
   // Lab level inputs - validate on change
   $('#irn-calc input:text').unbind('keyup');
-  $('#irn-calc input:text').keyup('changeLabLevel', validateInputNumber);
+  $('#irn-calc input:text').bind('keyup', validateAndChangeLabLevel);
 
   // Radio buttons for lab choice - update resulting level
   $('#irn-calc input:radio').unbind('click');
-  $('#irn-calc input:radio').click(function() {
-    if (typeof updateResultingLevel === 'function') {
-      updateResultingLevel();
-    }
-    // Notify new calculator system to recalculate
+  $('#irn-calc input:radio').click(function () {
     if (calculatorApp) {
+      calculatorApp._updateResultingLevel();
       calculatorApp.recalculateAll();
     }
   });
 
   // IRN level field - validate and update resulting level
   $('#irn-level').unbind();
-  $('#irn-level').keyup('updateResultingLevel', function(e) {
+  $('#irn-level').keyup(function (e) {
     // Validate input
     validateInputNumber.call(this, e);
 
-    // Update resulting level display
-    if (typeof updateResultingLevel === 'function') {
-      updateResultingLevel();
-    }
-
-    // Notify new calculator system to recalculate
+    // Update resulting level display and notify new calculator system to recalculate
     if (calculatorApp) {
+      calculatorApp._updateResultingLevel();
       calculatorApp.recalculateAll();
     }
   });
 
   // Research lab level - mark as not computed when changed
   $('#research-lab-level').unbind('keyup');
-  $('#research-lab-level').keyup(function(e) {
+  $('#research-lab-level').keyup(function (e) {
     // Validate input first
     validateInputNumber.call(this, e);
     options.resultingLabLevelComputed = false;
@@ -1288,7 +1225,7 @@ function initializeCostsCalculator() {
   });
 
   // Add close handler to IRN dialog to restore state on cancel or trigger recalc on done
-  $('#irn-calc').bind('dialogclose', function() {
+  $('#irn-calc').bind('dialogclose', function () {
     if (!$(this).dialog("option", "execute")) {
       // User cancelled - restore from backup
       const backup = $(this).data('irnBackup');
@@ -1298,7 +1235,7 @@ function initializeCostsCalculator() {
         calculatorApp.currentParams.labLevels = [...backup.labLevels];
         calculatorApp.currentParams.labChoice = backup.labChoice;
 
-        // Also update options.prm for old system compatibility (needed for UI helpers)
+        // Also update options.prm for IRN dialog UI helpers
         options.prm.irnLevel = backup.irnLevel;
         options.prm.planetsSpin = backup.labLevels.length;
         options.prm.labLevels = [...backup.labLevels];
@@ -1333,25 +1270,40 @@ function initializeCostsCalculator() {
           }
 
           // Re-bind event handlers
-          $('#lablevel_' + i).keyup('changeLabLevel', validateInputNumber);
-          $('#labchoice_' + i).click(function() {
-            if (typeof updateResultingLevel === 'function') {
-              updateResultingLevel();
-            }
+          $('#lablevel_' + i).bind('keyup', validateAndChangeLabLevel);
+          $('#labchoice_' + i).click(function () {
             if (calculatorApp) {
+              calculatorApp._updateResultingLevel();
               calculatorApp.recalculateAll();
             }
           });
         }
 
         // Update resulting level display
-        if (typeof updateResultingLevel === 'function') {
-          updateResultingLevel();
+        if (calculatorApp) {
+          calculatorApp._updateResultingLevel();
         }
       }
     } else {
-      // User clicked done - trigger recalculation with new values
+      // User clicked done - copy resulting lab level to research-lab-level input
       if (calculatorApp) {
+        // Get the resulting lab level from the display
+        const resultingLevelText = $('#resulting-level').text();
+        const resultingLevel = parseInt(resultingLevelText, 10);
+
+        // Only update if we have a valid resulting level (not "?")
+        if (!isNaN(resultingLevel)) {
+          // Update the research-lab-level input
+          $('#research-lab-level').val(resultingLevel);
+
+          // Store the resulting level
+          options.resultingLabLevel = resultingLevel;
+          options.resultingLabLevelComputed = true;
+
+          // Update the currentParams
+          calculatorApp.currentParams.researchLabLevel = resultingLevel;
+        }
+
         // Collect new params from DOM
         calculatorApp.currentParams = calculatorApp.collector.collectGlobalParams();
         calculatorApp.recalculateAll();
@@ -1369,102 +1321,48 @@ function initializeCostsCalculator() {
   console.log('Access via window.calculatorApp');
 }
 
-// ============================================================================
-// MIGRATION HELPERS
-// ============================================================================
-
 /**
- * Helper to gradually migrate from old system to new
- * Allows both systems to coexist during migration
+ * Handler for lab level input changes in IRN dialog
+ * Replicates the old changeLabLevel function behavior
  */
-class MigrationBridge {
-  constructor(newCalculator) {
-    this.newCalc = newCalculator;
-    this.useNewSystem = false; // Feature flag
+function changeLabLevel() {
+  // Extract lab number from input id (format: lablevel_N)
+  const parts = this.id.split(/_/);
+  const num = parseInt(parts[1], 10);
+
+  if (this.value == 0) {
+    // Disable and uncheck radio button when level is 0
+    $('#labchoice_' + num)[0].disabled = true;
+    $('#labchoice_' + num)[0].checked = false;
+  } else {
+    // Enable radio button when level > 0
+    $('#labchoice_' + num)[0].disabled = false;
   }
-  
-  /**
-   * Enable new calculation system
-   */
-  enableNewSystem() {
-    this.useNewSystem = true;
-    console.log('New calculation system enabled');
+
+  // Update the lab levels array (array is 0-indexed, rows are 1-indexed)
+  if (options.prm && options.prm.labLevels) {
+    options.prm.labLevels[num - 1] = parseInt(this.value, 10) || 0;
   }
-  
-  /**
-   * Disable new calculation system (revert to old)
-   */
-  disableNewSystem() {
-    this.useNewSystem = false;
-    console.log('Reverted to old calculation system');
-  }
-  
-  /**
-   * Wrapper for updateRow that can use either system
-   */
-  updateRow(event) {
-    if (this.useNewSystem) {
-      // Use new system
-      this.newCalc._handleTableInputChange(event);
-    } else {
-      // Use old system
-      if (typeof updateRow === 'function') {
-        updateRow.call(event.target);
-      }
-    }
-  }
-  
-  /**
-   * Wrapper for updateParams
-   */
-  updateParams(event) {
-    if (this.useNewSystem) {
-      // Use new system
-      const fieldId = event.target.id;
-      this.newCalc._handleParamChange(fieldId);
-    } else {
-      // Use old system
-      if (typeof updateParams === 'function') {
-        updateParams.call(event.target);
-      }
-    }
-  }
-  
-  /**
-   * Compare results between old and new systems
-   */
-  compareResults(tableId) {
-    const collector = this.newCalc.collector;
-    const calculator = this.newCalc.calculator;
-    const params = collector.collectGlobalParams();
-    const requests = collector.collectTableRequests(tableId);
-    
-    console.log(`Comparing results for ${tableId}...`);
-    console.log(`Found ${requests.length} requests`);
-    
-    requests.forEach((req, index) => {
-      const newResult = calculator.calculate(req, params);
-      console.log(`Request ${index + 1}:`, {
-        techId: req.techId,
-        fromLevel: req.fromLevel,
-        toLevel: req.toLevel,
-        result: {
-          metal: newResult.metal,
-          crystal: newResult.crystal,
-          deuterium: newResult.deuterium,
-          time: newResult.time
-        }
-      });
-    });
+
+  // Update resulting level display
+  if (calculatorApp) {
+    calculatorApp._updateResultingLevel();
   }
 }
 
-// ============================================================================
-// EXPORT FOR USE
-// ============================================================================
+/**
+ * Wrapper function that calls validateInputNumber followed by changeLabLevel
+ * Replicates the old behavior where event.data indicated which function to call
+ */
+function validateAndChangeLabLevel(event) {
+  // First validate the input
+  validateInputNumber.call(this, event);
+  // Then update the IRN dialog UI
+  changeLabLevel.call(this, event);
+}
 
+// Expose to window for direct access
 if (typeof window !== 'undefined') {
   window.CostsCalculator = CostsCalculator;
-  window.MigrationBridge = MigrationBridge;
   window.initializeCostsCalculator = initializeCostsCalculator;
 }
