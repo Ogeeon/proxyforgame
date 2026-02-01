@@ -1,3 +1,11 @@
+
+/**
+ * FEATURE FLAG: Toggle between old and new calculation systems
+ * Set to true to use new modular architecture
+ * Set to false to use original monolithic code
+ */
+const USE_NEW_CALCULATOR = true;
+
 let options = {
 	defConstraints: {
 				min: -Infinity,
@@ -98,22 +106,22 @@ function loadLLCData() {
 	$('#planetsSpin').val(options.prm.planetsSpin);
 	options.currPlanetsCount = options.prm.planetsSpin;
 	let tbl = $('#lab-levels-table')[0];
-	for (let i = tbl.rows.length-1; i > 0; i--) {
+	for (let i = tbl.rows.length - 1; i > 0; i--) {
 		$(tbl.rows[i]).remove();
 	}
 	for (let i = 1; i <= options.prm.planetsSpin; i++) {
-		$('#lab-levels-table').append('<tr class="'+((i % 2) === 1 ? 'odd' : 'even')+'">'+
-				'<td align="center" >'+options.planetNumStr+i+'</td>'+
-				'<td align="center" width="20%;"><input type="text" id="lablevel_'+i+'" name="lablevel_'+i+'>" class="ui-state-default ui-corner-all ui-input input-3columns input-in-table" value="'+options.prm.labLevels[i-1]+'" /></td>'+
-				'<td align="center" width="20%;"><input type="radio" id="labchoice_'+i+'" name="start-pln" disabled="disabled"/></td>'+
-				'</tr>');
-		if (options.prm.labLevels[i-1] > 0)
-			$('#labchoice_'+i)[0].disabled = false;
-		if (options.prm.labChoice === i-1)
-			$('#labchoice_'+i)[0].checked = 'checked';
+		$('#lab-levels-table').append('<tr class="' + ((i % 2) === 1 ? 'odd' : 'even') + '">' +
+			'<td align="center" >' + options.planetNumStr + i + '</td>' +
+			'<td align="center" width="20%;"><input type="text" id="lablevel_' + i + '" name="lablevel_' + i + '>" class="ui-state-default ui-corner-all ui-input input-3columns input-in-table" value="' + options.prm.labLevels[i - 1] + '" /></td>' +
+			'<td align="center" width="20%;"><input type="radio" id="labchoice_' + i + '" name="start-pln" disabled="disabled"/></td>' +
+			'</tr>');
+		if (options.prm.labLevels[i - 1] > 0)
+			$('#labchoice_' + i)[0].disabled = false;
+		if (options.prm.labChoice === i - 1)
+			$('#labchoice_' + i)[0].checked = 'checked';
 
-		$('#lablevel_'+i).keyup('changeLabLevel', validateInputNumber);
-		$('#labchoice_'+i).click(updateResultingLevel);
+		$('#lablevel_' + i).keyup('changeLabLevel', validateInputNumber);
+		$('#labchoice_' + i).click(updateResultingLevel);
 	}
 
 }
@@ -704,9 +712,9 @@ function updateOneMultTab() {
 		let time = getAdjustedTime(techID, i, i + 1, false);
 		rowData.push(timespanToShortenedString(time, options.datetimeW, options.datetimeD, options.datetimeH, options.datetimeM, options.datetimeS, true));
 		totalTime += time;
-		points = (resCost[0] + resCost[1] + resCost[2]) / 1000.0;
+		points = Math.floor((resCost[0] + resCost[1] + resCost[2]) / 1000.0);
 		totalPts += points;
-		rowData.push(ogamizeNum(Math.round((resCost[0] + resCost[1] + resCost[2])/1000.0), options.unitSuffix));
+		rowData.push(ogamizeNum(points, options.unitSuffix));
 		if (isProducer) {
 			let energyTechLevel = getInputNumber($('#energy-tech-level')[0]);
 			let plasmaTechLevel = getInputNumber($('#plasma-tech-level')[0]);
@@ -748,7 +756,7 @@ function updateOneMultTab() {
 	rows[totalsRow].children[3].innerHTML = '<b>'+ogamizeNum(totalDeut, options.unitSuffix)+'</b>';
 	rows[totalsRow].children[4].innerHTML = '<b>'+ogamizeNum(maxEnrg, options.unitSuffix)+'</b>';
 	rows[totalsRow].children[5].innerHTML = '<b>'+timespanToShortenedString(totalTime, options.datetimeW, options.datetimeD, options.datetimeH, options.datetimeM, options.datetimeS, true)+'</b>';
-	rows[totalsRow].children[6].innerHTML = '<b>'+ogamizeNum(Math.round(totalPts), options.unitSuffix)+'</b>';
+	rows[totalsRow].children[6].innerHTML = '<b>'+ogamizeNum(totalPts, options.unitSuffix)+'</b>';
 	if (isProducer) {
 		rows[totalsRow].children[7].innerHTML = '<b>'+ogamizeNum(maxProd, options.unitSuffix)+'</b>';
 		rows[totalsRow].children[8].innerHTML = '<b>'+ogamizeNum(maxCons, options.unitSuffix)+'</b>';
@@ -854,13 +862,113 @@ function updateResultingLevel() {
 	$(button).css('display', 'inline');
 }
 
-$(document).ready(function() {
-	// этот вызов нужен, чтобы установить "скин" на чекбоксы и радиокнопки
-	//$("div#costs input").filter(":checkbox,:radio").checkbox();
-	$("#tabs").tabs({	cookie: {	expires: 365 } });	// UI сохраняет в куках номер открытой вкладки
-	$("#tabs-0").tabs({	cookie: {	expires: 365 } });
-	$("#tabs-1").tabs({	cookie: {	expires: 365 } });
 
+/**
+ * Initialize old system (extracted for clarity during migration)
+ */
+function initOldSystem() {
+	console.log('Using OLD calculation system');
+	
+	options.load();
+	
+	// Set initial values from saved options
+	$('#shipyard-level').val(options.prm.shipyardLevel);
+	$('#robot-factory-level').val(options.prm.robotFactoryLevelP);
+	$('#robot-factory-level-moon').val(options.prm.robotFactoryLevelM);
+	$('#nanite-factory-level').val(options.prm.naniteFactoryLevel);
+	$('#universe-speed').val(options.prm.universeSpeed);
+	$('#research-speed').val(options.prm.researchSpeed);
+	$('#research-lab-level').val(options.prm.researchLabLevel);
+	$('#ion-tech-level').val(options.prm.ionTechLevel);
+	$('#hyper-tech-level').val(options.prm.hyperTechLevel);
+	
+	if (options.prm.geologist) $('#geologist')[0].checked = 'checked';
+	if (options.prm.engineer) $('#engineer')[0].checked = 'checked';
+	if (options.prm.technocrat) $('#technocrat')[0].checked = 'checked';
+	if (options.prm.researchBonus === true) $('#research-bonus')[0].checked = 'checked';
+	if (options.prm.fullNumbers === true) $('#full-numbers')[0].checked = 'checked';
+	if (options.prm.admiral) $('#admiral')[0].checked = 'checked';
+	if (options.prm.commander) $('#commander')[0].checked = 'checked';
+	
+	$('#tech-types-select')[0].value = 1;
+	$('#tab2-from-level')[0].value = 0;
+	$('#tab2-to-level')[0].value = 0;
+	$('#energy-tech-level').val(options.prm.energyTechLevel);
+	$('#plasma-tech-level').val(options.prm.plasmaTechLevel);
+	$('#max-planet-temp').val(options.prm.maxPlanetTemp);
+	$('#booster').val(options.prm.booster);
+	$('#class-'+options.prm.playerClass).attr('checked', true);
+	$('#planet-pos').val(options.prm.planetPos);
+	
+	loadLLCData();
+	updateResultingLevel();
+	
+	// Bind all events
+	$('input').focusin(function() { $(this).addClass('ui-state-focus'); });
+	$('input').focusout(function() { $(this).removeClass('ui-state-focus'); });
+	
+	$('#irn-calc input:text').keyup('changeLabLevel', validateInputNumber);
+	$('#irn-calc input:radio').click(updateResultingLevel);
+	$('#irn-level').unbind();
+	$('#irn-level').keyup('updateResultingLevel', validateInputNumber);
+	$('#research-lab-level').keyup(function(){
+		options.resultingLabLevelComputed = false; 
+		updateParams.apply($('#research-lab-level')[0]);
+	});
+	
+	document.getElementById('max-planet-temp')._constrains = {'min': -134, 'def': 0, 'allowNegative': true};
+	document.getElementById('planet-pos')._constrains = {'min': 1, 'max': 16, 'def': 8, 'allowNegative': false};
+	$('#planet-pos').blur('updateOneMultTab', validateInputNumberOnBlur);
+	
+	$('#tab-0 input:text').keyup('updateRow', validateInputNumber);
+	$('#tab-1 input:text').keyup('updateRow', validateInputNumber);
+	$('#tab-2 input:text').keyup('updateOneMultTab', validateInputNumber);
+	$('#tab-2 input:text').blur('updateOneMultTab', validateInputNumberOnBlur);
+	
+	$('#general-settings input:text').keyup('updateParams', validateInputNumber);
+	$('#general-settings select').keyup(updateParams);
+	$('#general-settings select').change(updateParams);
+	$('#technocrat').click(updateParams);
+	$('#research-bonus').click(updateParams);
+	$('#full-numbers').click(updateParams);
+	$('#general-settings input:radio').click(updateParams);
+	
+	$('#open-llc-dialog').click(function() {
+		$("#irn-calc").dialog("option", "execute", false);
+		$("#irn-calc").dialog( "open" );
+	});
+	
+	$('#engineer').click(updateParams);
+	$('#geologist').click(updateParams);
+	$('#admiral').click(updateParams);
+	$('#commander').click(updateParams);
+	$('#reset').click(resetParams);
+	
+	$('#tech-types-select').unbind();
+	$('#tech-types-select').keyup(updateOneMultTab);
+	$('#tech-types-select').change(updateOneMultTab);
+	
+	$('#booster').unbind();
+	$('#booster').keyup(updateOneMultTab);
+	$('#booster').change(updateOneMultTab);
+	
+	$("#planetsSpin").unbind();
+	let spinOptions = { min: 1, max: 99, step: 1, reset: 1, lock: true, onChange: changePlanetsCount };
+	$("#planetsSpin").SpinButton(spinOptions);
+	$('#planetsSpin')[0].value = options.currPlanetsCount;
+	
+	updateTotals();
+	updateOneMultTab();
+}
+
+
+
+$(document).ready(function() {
+	// UI Setup (jQuery UI - keep for now)
+	$("#tabs").tabs({ cookie: { expires: 365 } });
+	$("#tabs-0").tabs({ cookie: { expires: 365 } });
+	$("#tabs-1").tabs({ cookie: { expires: 365 } });
+	
 	$( "#irn-calc" ).dialog({
 		autoOpen: false,
 		height: 445,
@@ -887,129 +995,39 @@ $(document).ready(function() {
 			}
 		}
 	});
+	
 	let dialog = $('div[aria-labelledby="ui-dialog-title-irn-calc"]');
 	let buttons = dialog.find('div.ui-dialog-buttonset');
 	buttons[0].children[0].children[0].innerHTML = options.doneTitle;
 	buttons[0].children[0].id = 'done-btn';
 	$(buttons[0].children[0]).css('display', 'none');
 	buttons[0].children[1].children[0].innerHTML = options.cancelTitle;
-
-	options.load();
-//	consoleLog(options.prm);
-
-	$('#shipyard-level').val(options.prm.shipyardLevel);
-	$('#robot-factory-level').val(options.prm.robotFactoryLevelP);
-	$('#robot-factory-level-moon').val(options.prm.robotFactoryLevelM);
-	$('#nanite-factory-level').val(options.prm.naniteFactoryLevel);
-	$('#universe-speed').val(options.prm.universeSpeed);
-	$('#research-speed').val(options.prm.researchSpeed);
-	$('#research-lab-level').val(options.prm.researchLabLevel);
-	$('#ion-tech-level').val(options.prm.ionTechLevel);
-	$('#hyper-tech-level').val(options.prm.hyperTechLevel);
-	if (options.prm.geologist) {
-		$('#geologist')[0].checked = 'checked';
+	
+	// FEATURE FLAG: Choose which system to use
+	if (USE_NEW_CALCULATOR) {
+		// ========================================
+		// NEW SYSTEM
+		// ========================================
+		console.log('Initializing NEW calculation system...');
+		
+		if (typeof initializeCostsCalculator === 'function') {
+			initializeCostsCalculator();
+			console.log('NEW calculation system ready!');
+		} else {
+			console.error('New calculator not loaded! Falling back to old system.');
+			USE_NEW_CALCULATOR = false;
+			initOldSystem();
+		}
+	} else {
+		// ========================================
+		// OLD SYSTEM (fallback)
+		// ========================================
+		initOldSystem();
 	}
-	if (options.prm.engineer) {
-		$('#engineer')[0].checked = 'checked';
-	}
-	if (options.prm.technocrat) {
-		$('#technocrat')[0].checked = 'checked';
-	}
-	if (options.prm.researchBonus === true) {
-		$('#research-bonus')[0].checked = 'checked';
-	}
-	if (options.prm.fullNumbers === true) {
-		$('#full-numbers')[0].checked = 'checked';
-	}
-	if (options.prm.admiral) {
-		$('#admiral')[0].checked = 'checked';
-	}
-	if (options.prm.commander) {
-		$('#commander')[0].checked = 'checked';
-	}
-	$('#tech-types-select')[0].value = 1;
-	$('#tab2-from-level')[0].value = 0;
-	$('#tab2-to-level')[0].value = 0;
-	$('#energy-tech-level').val(options.prm.energyTechLevel);
-	$('#plasma-tech-level').val(options.prm.plasmaTechLevel);
-	$('#max-planet-temp').val(options.prm.maxPlanetTemp);
-	$('#booster').val(options.prm.booster);
-	$('#class-'+options.prm.playerClass).attr('checked', true);
-	$('#planet-pos').val(options.prm.planetPos);
-
-	loadLLCData();
-	updateResultingLevel();
-
-
-	$('input').focusin(function() {
-		$(this).addClass('ui-state-focus');
-	});
-	$('input').focusout(function() {
-		$(this).removeClass('ui-state-focus');
-	});
-
-	// После того, как событие будет обработано, нужно вызвать функцию пересчета. Её имя передаём в поле data событий.
-	$('#irn-calc input:text').keyup('changeLabLevel', validateInputNumber);
-	$('#irn-calc input:radio').click(updateResultingLevel);
-
-	$('#irn-level').unbind();
-	$('#irn-level').keyup('updateResultingLevel', validateInputNumber);
-	// При изменении значения уровня лаборатории вручную надо запомнить это
-	$('#research-lab-level').keyup(function(){
-		options.resultingLabLevelComputed = false; updateParams.apply($('#research-lab-level')[0]);
-	});
-
-	document.getElementById('max-planet-temp')._constrains = {'min': -134, 'def': 0, 'allowNegative': true};
-	document.getElementById('planet-pos')._constrains = {'min': 1, 'max': 16, 'def': 8, 'allowNegative': false};
-	$('#planet-pos').blur('updateOneMultTab', validateInputNumberOnBlur);
-
-	// После того, как событие будет обработано, нужно вызвать функцию пересчета. Её имя передаём в поле data событий.
-	$('#tab-0 input:text').keyup('updateRow', validateInputNumber);
-	$('#tab-1 input:text').keyup('updateRow', validateInputNumber);
-	$('#tab-2 input:text').keyup('updateOneMultTab', validateInputNumber);
-	$('#tab-2 input:text').blur('updateOneMultTab', validateInputNumberOnBlur);
-
-	$('#general-settings input:text').keyup('updateParams', validateInputNumber);
-	$('#general-settings select').keyup(updateParams);
-	$('#general-settings select').change(updateParams);
-	$('#technocrat').click(updateParams);
-	$('#research-bonus').click(updateParams);
-	$('#full-numbers').click(updateParams);
-	$('#general-settings input:radio').click(updateParams);
-	$('#open-llc-dialog').click(function() {
-		$("#irn-calc").dialog("option", "execute", false);
-		$("#irn-calc").dialog( "open" );
-	});
-
-	$('#engineer').click(updateParams);
-	$('#geologist').click(updateParams);
-	$('#admiral').click(updateParams);
-	$('#commander').click(updateParams);
-	$('#reset').click(resetParams);
-
-	$('#tech-types-select').unbind();
-	$('#tech-types-select').keyup(updateOneMultTab);
-	$('#tech-types-select').change(updateOneMultTab);
-
-	$('#booster').unbind();
-	$('#booster').keyup(updateOneMultTab);
-	$('#booster').change(updateOneMultTab);
-
-
-	$("#planetsSpin").unbind();
-	let spinOptions = { min: 1, max: 99, step: 1, reset: 1, lock: true, onChange: changePlanetsCount };
-	$("#planetsSpin").SpinButton(spinOptions);
-	$('#planetsSpin')[0].value = options.currPlanetsCount;
-
-	/*
-TODO: Навешать constrains и обработчики keyup/blur на контролы 4й вкладки
-	 */
-
+	
 	let theme = { value: 'light', validate: function(key, val) { return val; } };
 	loadFromCookie('theme', theme);
 	toggleLight(theme.value === 'light');
 	$('#cb-light-theme').click(function(){toggleLight($('#cb-light-theme')[0].checked);});
-	
-	updateTotals();
-	updateOneMultTab();
 });
+

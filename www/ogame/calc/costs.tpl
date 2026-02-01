@@ -35,6 +35,14 @@
 	<script type="text/javascript" src="/js/jquery.ui.spinbtn.js"></script>
 	<script type="text/javascript" src="/js/utils.js?v=<?php echo filemtime($pfgPath.'/js/utils.js'); ?>"></script>
 	<script type="text/javascript" src="/ogame/calc/js/common.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/common.js'); ?>"></script>	
+	
+	<!-- New modular calculator architecture -->
+	<script type="text/javascript" src="/ogame/calc/js/costs-core.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/costs-core.js'); ?>"></script>
+	<script type="text/javascript" src="/ogame/calc/js/costs-data-collector.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/costs-data-collector.js'); ?>"></script>
+	<script type="text/javascript" src="/ogame/calc/js/costs-renderer.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/costs-renderer.js'); ?>"></script>
+	<script type="text/javascript" src="/ogame/calc/js/costs-orchestration.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/costs-orchestration.js'); ?>"></script>
+	
+	<!-- Original costs.js (modified to support dual-system) -->
 	<script type="text/javascript" src="/ogame/calc/js/costs.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/costs.js'); ?>"></script>
 
 	<script type="text/javascript">
