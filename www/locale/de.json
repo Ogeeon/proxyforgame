@@ -30,6 +30,7 @@
     "done": "Bereit",
     "cancel": "Abbrechen",
     "universe-speed": "Universumsgeschwindigkeit",
+    "economy-speed": "Wirtschaftstempo",
     "research-speed": "Forschungsgeschwindigkeit",
     "energy-tech-level": "Energietechnik",
     "max-planet-temp": "Maximal Temperatur",
@@ -275,9 +276,12 @@
     "class-collector": "Kollektor",
     "param-tab-common": "Allgemein",
     "param-tab-lifeforms": "Lebensformen",
-    "economy-speed": "Wirtschaftstempo"
+    "param-tab-buildings": "Konstruktion"
   },
   "lfcosts": {
+    "param-tab-common": "Allgemein",
+    "param-tab-lifeforms": "Lebensformen",
+    "param-tab-buildings": "Konstruktion",
     "title": "OGame - Kostenberechnung für Lebensformen",
     "keywords": "proxyforgame,proxy,online,calc,calculator,ogame,Berechnung der Kosten,Baukosten,die Kosten für Forschung,Baukosten,die Kosten für die Flotte,die Kosten der Verteidigung Kostenrechner",
     "cancel": "Stornieren",

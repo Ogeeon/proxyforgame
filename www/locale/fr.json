@@ -30,6 +30,7 @@
     "done": "Fait",
     "cancel": "Annuler",
     "universe-speed": "Vitesse de l'univers",
+    "economy-speed": "Vitesse économique",
     "research-speed": "Vitesse de recherche",
     "energy-tech-level": "Tech. énergétique",
     "max-planet-temp": "Temp. max. de Planète ",
@@ -275,9 +276,12 @@
     "class-collector": "Collecteur",
     "param-tab-common": "Général",
     "param-tab-lifeforms": "Formes de vie",
-    "economy-speed": "Vitesse économique"
+    "param-tab-buildings": "Bâtiments"
   },
   "lfcosts": {
+    "param-tab-common": "Général",
+    "param-tab-lifeforms": "Formes de vie",
+    "param-tab-buildings": "Bâtiments",
     "title": "OGame - Calculateur de coûts pour les formes de vie",
     "keywords": "proxyforgame,proxy,online,calc,calculator,ogame,coûts de construction,coût de la recherche,coûts de construction,coût de la flotte,coût de la défense",
     "buildings": "Bâtiments",

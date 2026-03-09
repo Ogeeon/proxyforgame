@@ -30,6 +30,7 @@
     "done": "Gotovo",
     "cancel": "Otkaži",
     "universe-speed": "Brzina univerzuma",
+    "economy-speed": "Ekonomska brzina",
     "research-speed": "Brzina istraživanja",
     "energy-tech-level": "Level tehnologije za energiju",
     "max-planet-temp": "Maksimalna temperatura planete",
@@ -276,9 +277,12 @@
     "moon": "Mjeseca",
     "param-tab-common": "Opšte",
     "param-tab-lifeforms": "Oblici života",
-    "economy-speed": "Ekonomska brzina"
+    "param-tab-buildings": "Zgrade"
   },
   "lfcosts": {
+    "param-tab-common": "Opšte",
+    "param-tab-lifeforms": "Oblici života",
+    "param-tab-buildings": "Zgrade",
     "sc-short": "MT",
     "lc-short": "VT",
     "energy": "Energija",

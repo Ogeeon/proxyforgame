@@ -30,6 +30,7 @@
     "done": "Feito",
     "cancel": "Cancelar",
     "universe-speed": "Velocidade do Universo",
+    "economy-speed": "Velocidade económica",
     "research-speed": "Velocidade de Pesquisa",
     "energy-tech-level": "Nível tecnologia de energia",
     "max-planet-temp": "Temperatura Max do Planeta",
@@ -275,9 +276,12 @@
     "planet-pos": "Posição",
     "param-tab-common": "Geral",
     "param-tab-lifeforms": "Formas de vida",
-    "economy-speed": "Velocidade económica"
+    "param-tab-buildings": "Edifícios"
   },
   "lfcosts": {
+    "param-tab-common": "Geral",
+    "param-tab-lifeforms": "Formas de vida",
+    "param-tab-buildings": "Edifícios",
     "sc-short": "CP",
     "lc-short": "CG",
     "title": "OGame - Calculadora de Custos para formulários de vida",

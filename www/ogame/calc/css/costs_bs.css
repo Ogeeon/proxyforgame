@@ -172,6 +172,12 @@
   background-color: transparent;
 }
 
+/* Show/hide wrappers for race-specific controls (megalith, MRC) */
+#megalith-level-wrap,
+#mrc-level-wrap {
+  display: flex;
+}
+
 /* Minimum width column */
 td.min {
   width: 1%;
@@ -282,11 +288,40 @@ td.min {
 }
 
 /* ==========================================================================
+   TOOLTIPS
+   ========================================================================== */
+
+.tooltip-inner {
+  background-color: var(--bs-secondary-bg);
+  color: var(--bs-body-color);
+  border: 1px solid var(--bs-border-color);
+  max-width: 250px;
+  text-align: left;
+}
+
+.tooltip.bs-tooltip-top .tooltip-arrow::before {
+  border-top-color: var(--bs-border-color);
+}
+
+.tooltip.bs-tooltip-bottom .tooltip-arrow::before {
+  border-bottom-color: var(--bs-border-color);
+}
+
+.tooltip.bs-tooltip-start .tooltip-arrow::before {
+  border-left-color: var(--bs-border-color);
+}
+
+.tooltip.bs-tooltip-end .tooltip-arrow::before {
+  border-right-color: var(--bs-border-color);
+}
+
+/* ==========================================================================
    RESPONSIVE ADJUSTMENTS
    ========================================================================== */
 
 @media (max-width: 992px) {
-  #costs {
+  #costs,
+  #lfcosts {
     max-width: 100%;
     padding: 0 10px;
   }

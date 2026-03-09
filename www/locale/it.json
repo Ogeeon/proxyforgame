@@ -30,6 +30,7 @@
     "done": "Completato",
     "cancel": "Annulla",
     "universe-speed": "Velocità universo",
+    "economy-speed": "Velocità economia",
     "research-speed": "Velocità di ricerca",
     "energy-tech-level": "Livello di Tecnologia Energetica",
     "max-planet-temp": "Temperatura massima del pianeta",
@@ -277,9 +278,12 @@
     "planet-pos": "Posizione",
     "param-tab-common": "Generale",
     "param-tab-lifeforms": "Forme di vita",
-    "economy-speed": "Velocità economia"
+    "param-tab-buildings": "Edifici"
   },
   "lfcosts": {
+    "param-tab-common": "Generale",
+    "param-tab-lifeforms": "Forme di vita",
+    "param-tab-buildings": "Edifici",
     "title": "OGame - Calcolatore di Costi per le forme di vita",
     "keywords": "proxyforgame,proxy,online,calc,calculator,ogame,price calculation,cost calculation,buildings costs,research costs,fleet costs,defence costs,costs calculator,prices calculator,costi di costruzione, il costo della ricerca, costi di costruzione, il costo della flotta, il costo della difesa, calcolo dei costi",
     "universe-speed": "Universo velocità",

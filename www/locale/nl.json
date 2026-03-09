@@ -30,6 +30,7 @@
     "done": "Klaar!",
     "cancel": "Annuleer",
     "universe-speed": "Snelheid universum",
+    "economy-speed": "Economische snelheid",
     "research-speed": "Snelheid onderzoek",
     "energy-tech-level": "Energietech. level",
     "max-planet-temp": "Max planeet temperatuur",
@@ -273,9 +274,12 @@
     "planet-pos": "Positie",
     "param-tab-common": "Algemeen",
     "param-tab-lifeforms": "Levensvormen",
-    "economy-speed": "Economische snelheid"
+    "param-tab-buildings": "Gebouwen"
   },
   "lfcosts": {
+    "param-tab-common": "Algemeen",
+    "param-tab-lifeforms": "Levensvormen",
+    "param-tab-buildings": "Gebouwen",
     "time": "Tijd",
     "title": "OGame - Kosten berekening voor levensvormen",
     "keywords": "proxyforgame,proxy,online,calc,calculator,ogame,kosten berekening,kosten,kosten de gebouwen,kosten de vloot,kosten de verdediging,kosten de onderzoek",

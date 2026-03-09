@@ -30,6 +30,7 @@
     "done": "Done",
     "cancel": "Cancel",
     "universe-speed": "Universe speed",
+    "economy-speed": "Economy speed",
     "research-speed": "Research speed",
     "energy-tech-level": "Energy tech level",
     "max-planet-temp": "Planet max temperature",
@@ -276,9 +277,12 @@
     "class-collector": "Collector",
     "param-tab-common": "Common",
     "param-tab-lifeforms": "LifeForms",
-    "economy-speed": "Economy speed"
+    "param-tab-buildings": "Buildings"
   },
   "lfcosts": {
+    "param-tab-common": "Common",
+    "param-tab-lifeforms": "LifeForms",
+    "param-tab-buildings": "Buildings",
     "energy": "Energy",
     "title": "OGame - Costs calculator for LifeForms",
     "keywords": "proxyforgame,proxy,online,calc,calculator,ogame,price calculation,cost calculation,buildings costs,research costs,fleet costs,defence costs,costs calculator,prices calculator,lifeforms",

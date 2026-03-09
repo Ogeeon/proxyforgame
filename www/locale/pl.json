@@ -30,6 +30,7 @@
     "done": "Gotowe",
     "cancel": "Anuluj",
     "universe-speed": "Akceleracja wszechświata",
+    "economy-speed": "Prędkość ekonomiczna",
     "research-speed": "Prędkość badawcza",
     "energy-tech-level": "Poziom Tech. energetyczna",
     "max-planet-temp": "Max. temperatura",
@@ -276,9 +277,12 @@
     "planet-pos": "Pozycja",
     "param-tab-common": "Ogólne",
     "param-tab-lifeforms": "Formy życia",
-    "economy-speed": "Prędkość ekonomiczna"
+    "param-tab-buildings": "Budynki"
   },
   "lfcosts": {
+    "param-tab-common": "Ogólne",
+    "param-tab-lifeforms": "Formy życia",
+    "param-tab-buildings": "Budynki",
     "energy": "Energia",
     "title": "OGame - Kalkulator kosztow dla form życia",
     "keywords": "proxyforgame,proxy,online,kalkulator online,ogame,koszty budowy,koszty badań,koszty floty,kalkulator kosztow,kosztów obrony",

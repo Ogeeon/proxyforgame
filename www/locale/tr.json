@@ -30,6 +30,7 @@
     "done": "Tamam",
     "cancel": "İptal Et",
     "universe-speed": "Evren Hızı",
+    "economy-speed": "Ekonomi hızı",
     "research-speed": "Araştırma Hızı",
     "research-event": "Etkinlik: % 25 daha hızlı araştırma",
     "energy-tech-level": "Enerji tekniği seviyesi",
@@ -270,9 +271,12 @@
     "planet-pos": "Konum",
     "param-tab-common": "Genel",
     "param-tab-lifeforms": "Yaşam Formları",
-    "economy-speed": "Ekonomi hızı"
+    "param-tab-buildings": "Binalar"
   },
   "lfcosts": {
+    "param-tab-common": "Genel",
+    "param-tab-lifeforms": "Yaşam Formları",
+    "param-tab-buildings": "Binalar",
     "energy": "Enerji",
     "title": "OGame – Yaşam formları için maliyet hesaplayıcı",
     "keywords": "proxyforgame,proxy,online,calc,calculator,ogame,price calculation,cost calculation,buildings costs,research costs,fleet costs,defence costs,costs calculator,prices calculator",

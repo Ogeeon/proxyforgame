@@ -30,6 +30,7 @@
     "done": "Hotovo",
     "cancel": "Zrušiť",
     "universe-speed": "Rýchlosť vesmíru",
+    "economy-speed": "Rýchlosť ekonomiky",
     "research-speed": "Rýchlosť výskumu",
     "energy-tech-level": "Úroveň energetických tech.",
     "max-planet-temp": "Max. teplota planéty",
@@ -274,9 +275,12 @@
     "planet-pos": "Pozícia",
     "param-tab-common": "Všeobecné",
     "param-tab-lifeforms": "Formy života",
-    "economy-speed": "Rýchlosť ekonomiky"
+    "param-tab-buildings": "Budovy"
   },
   "lfcosts": {
+    "param-tab-common": "Všeobecné",
+    "param-tab-lifeforms": "Formy života",
+    "param-tab-buildings": "Budovy",
     "title": "OGame - Kalkulátor pre ceny pre formy života",
     "buildings": "Budovy",
     "times-note": "Konečný bonus sa líši od planéty k planéte. Ak chcete získať presné výsledky, ručne vypočítajte celkový bonus na planéte, na ktorej začnete výstavbu/výskum.",
