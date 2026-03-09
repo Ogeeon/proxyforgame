@@ -297,7 +297,7 @@ class Renderer {
       hide('#prods-table-div');
       show('#commons-table-div');
     }
-    
+
     // Clear and rebuild table
     this._clearRangeTable(tableId);
     
@@ -330,6 +330,21 @@ class Renderer {
     this._renderRangeTotals(tableId, totals, maxProduction, maxConsumption, params, isProducer);
   }
   
+  /**
+   * Show/hide producer-only range controls based on tech type
+   * @param {number} techId
+   */
+  updateRangeControlVisibility(techId) {
+    const isProducer = [1, 2, 3, 4, 12, 212].includes(techId);
+    ['#range-booster-wrap', '#range-producer-row', '#range-officers-row'].forEach(sel => {
+      if (isProducer) {
+        removeClass(sel, 'd-none');
+      } else {
+        addClass(sel, 'd-none');
+      }
+    });
+  }
+
   /**
    * Clear range table content
    * @private

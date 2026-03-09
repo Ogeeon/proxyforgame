@@ -178,6 +178,9 @@ class CostsCalculator {
   recalculateRangeTab() {
     const rangeData = this.collector.collectRangeData();
 
+    // Update producer-only control visibility regardless of range validity
+    this.renderer.updateRangeControlVisibility(rangeData.techId);
+
     if (rangeData.requests.length === 0) {
       return; // Nothing to calculate
     }
@@ -420,6 +423,15 @@ class CostsCalculator {
     addEvent('#open-llc-dialog', 'click', () => {
       this._openIRNDialog();
     });
+
+    // Theme toggle
+    const cbLightTheme = document.getElementById('cb-light-theme');
+    if (cbLightTheme) {
+      let theme = { value: 'light', validate: function(key, val) { return val; } };
+      loadFromCookie('theme', theme);
+      toggleLightBS(theme.value === 'light');
+      cbLightTheme.addEventListener('click', function() { toggleLightBS(this.checked); });
+    }
   }
 
   /**

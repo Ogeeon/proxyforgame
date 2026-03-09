@@ -87,8 +87,12 @@
   text-align: center;
 }
 
-.input-in-table {
-  padding: 2px 4px;
+.input-in-table,
+.lined .form-control-sm {
+  height: 1.5rem;
+  min-height: unset;
+  padding-top: 0;
+  padding-bottom: 0;
 }
 
 .ui-input-margin {
@@ -150,13 +154,13 @@
 .lined th {
   background-color: var(--bs-tertiary-bg);
   font-weight: 600;
-  padding: 4px 8px;
+  padding: 2px 8px;
   border: 1px solid var(--bs-border-color);
 }
 
 .lined td {
   border: 1px solid var(--bs-border-color);
-  padding: 4px 8px;
+  padding: 2px 8px;
   width: auto;
 }
 
@@ -180,6 +184,11 @@ td.min {
 
 #irn-calc .modal-dialog {
   max-width: 450px;
+}
+
+#irn-calc .table td,
+#irn-calc .table th {
+  padding: 2px 8px;
 }
 
 .irn-calc-info {
