@@ -273,7 +273,10 @@
     "hourly-cons": "Potrošnja po satu",
     "times-note": "Kada računate trajanje izgradnje/istraživanja, alat koristi samo vrijednosti za levele tvornice brodova, tvornica i laboratorija koji su uneseni u gornjem panelu. Ako želite da izračunate vrijeme istraživanja sa levelima koje imate ako imate Intergalaktičku znanstvenu mrežu, molimo kliknite \"Izračunaj\" dugme pored polja \"Centar za istraživanje\".",
     "msg-cant-research": "Na datom levelu Centra za istraživanje, istraživanje \"{0}\" nije dostupno.",
-    "moon": "Mjeseca"
+    "moon": "Mjeseca",
+    "param-tab-common": "Opšte",
+    "param-tab-lifeforms": "Oblici života",
+    "economy-speed": "Ekonomska brzina"
   },
   "lfcosts": {
     "sc-short": "MT",

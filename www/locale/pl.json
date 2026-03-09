@@ -273,7 +273,10 @@
     "times-note": "Podczas obliczania czasu budowy/badania wykorzystywane są tylko poziomy Fabryki, Stoczni i Laboratoriow wpisanych w górnym panelu. Aby obliczyć calkowity poziom Laboratorium, jesli masz MSBN, kliknij przycisk \"Oblicz\" obok poziomu Laboratorium.",
     "msg-cant-research": "Na tym poziomie Laboratorium badawczego badanie \"{0}\" jest niemozliwe.",
     "class-collector": "Zbieracz",
-    "planet-pos": "Pozycja"
+    "planet-pos": "Pozycja",
+    "param-tab-common": "Ogólne",
+    "param-tab-lifeforms": "Formy życia",
+    "economy-speed": "Prędkość ekonomiczna"
   },
   "lfcosts": {
     "energy": "Energia",

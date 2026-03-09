@@ -274,7 +274,10 @@
     "times-note": "Para los cálculos de las duraciones de construcciones/investigaciones, las herramientas sólo usan los valores de los niveles de Hangar, Fábricas de Robots/Nanobots y Laboratorios introducidos en el panel superior. Si necesitas calcular el nivel resultante de tu red de Laboratorios de Investigación al aumentar el nivel de Red de Investigación Intergaláctica, por favor, haz click en el botón \"Calcular\", la lado del campo Nivel de Laboratorio de Investigación.",
     "msg-cant-research": "Con este nivel de Laboratorio de Investigación, la tecnología \"{0}\" no está disponible.",
     "class-collector": "Recolector",
-    "planet-pos": "Posición"
+    "planet-pos": "Posición",
+    "param-tab-common": "General",
+    "param-tab-lifeforms": "Formas de vida",
+    "economy-speed": "Velocidad económica"
   },
   "lfcosts": {
     "title": "OGame - Calculadora de Costes para formas de vida",

@@ -113,98 +113,144 @@
       </div>
     </div>
     <div id="general-settings-panel" class="border rounded m-1">
-      <p class="border rounded subheader bg-primary-subtle"><?= $l['parameters'] ?></p>
-      <div id="general-settings">
-          <table cellpadding="2" cellspacing="0" border="0" align="center">
-            <tr>
-              <td><label for="robot-factory-level"><?= $l['robot-factory'] ?> (<?= $l['planet'] ?>)</label></td>
-              <td><input id="robot-factory-level" type="text" name="robot-factory-level" class="form-control form-control-sm level-input ui-input-margin" value="0" /></td>
-              <td><label for="nanite-factory-level"><?= $l['nanite-factory'] ?></label></td>
-              <td><input id="nanite-factory-level" type="text" name="nanite-factory-level" class="form-control form-control-sm level-input ui-input-margin" value="0" /></td>
-              <td><label for="shipyard-level"><?= $l['shipyard'] ?></label></td>
-              <td><input id="shipyard-level" type="text" name="shipyard-level" class="form-control form-control-sm level-input ui-input-margin" value="0" /></td>
-              <td><label for="universe-speed"><?= $l['universe-speed'] ?></label></td>
-              <td>
-                <select id="universe-speed" name="universe-speed" class="form-select form-select-sm ui-input-margin">
-                  <option value="1" selected="selected">1</option>
-                  <option value="2">2</option>
-                  <option value="3">3</option>
-                  <option value="4">4</option>
-                  <option value="5">5</option>
-                  <option value="6">6</option>
-                  <option value="7">7</option>
-                  <option value="8">8</option>
-                  <option value="9">9</option>
-                  <option value="10">10</option>
-                </select>
-              </td>
-            </tr>
-            <tr>
-              <td><label for="research-lab-level"><?= $l['research-lab'] ?></label></td>
-              <td>
-                <table cellpadding="0" cellspacing="0" border="0">
-                  <tr>
-                    <td>
-                    <input id="research-lab-level" type="text" name="research-lab-level" class="form-control form-control-sm level-input" value="0"/>
-                    </td>
-                    <td>
-                    <button id="open-llc-dialog" class="btn btn-outline-primary btn-sm" type="button" title="<?= $l['calculate'] ?>">
-                      <i class="bi bi-calculator"></i>
-                    </button>
-                    </td>
-                  </tr>
-                </table>
-              </td>
-              <td><input id="technocrat" type="checkbox" name="technocrat" class="form-check-input ui-input-margin"/><label for="technocrat" class="ms-1"><?= $l['technocrat'] ?></label></td>
-              <td></td>
-              <td><label for="ion-tech-level"><?= $l['ion-tech'] ?></label></td>
-              <td><input id="ion-tech-level" type="text" name="ion-tech-level" class="form-control form-control-sm level-input ui-input-margin" value="0" /></td>
-              <td><label for="hyper-tech-level"><?= $l['hyper-tech'] ?></label></td>
-              <td><input id="hyper-tech-level" type="text" name="hyper-tech-level" class="form-control form-control-sm level-input ui-input-margin" value="0" /></td>
-            </tr>
-            <tr>
-              <td><label for="research-speed"><?= $l['research-speed'] ?></label></td>
-              <td>
-                <select id="research-speed" name="research-speed" class="form-select form-select-sm ui-input-margin">
-                  <option value="1" selected="selected">1</option>
-                  <option value="2">2</option>
-                  <option value="3">3</option>
-                  <option value="4">4</option>
-                  <option value="5">5</option>
-                  <option value="6">6</option>
-                  <option value="7">7</option>
-                  <option value="8">8</option>
-                  <option value="9">9</option>
-                  <option value="10">10</option>
-                  <option value="11">11</option>
-                  <option value="12">12</option>
-                  <option value="13">13</option>
-                  <option value="14">14</option>
-                  <option value="15">15</option>
-                  <option value="16">16</option>
-                  <option value="17">17</option>
-                  <option value="18">18</option>
-                  <option value="19">19</option>
-                  <option value="20">20</option>
-                </select>
-              </td>
-              <td colspan="3"><input id="research-bonus" type="checkbox" name="research-bonus" class="form-check-input ui-input-margin"/><label for="research-bonus" class="ms-1"><?= $l['research-event'] ?></label></td>
-              <td></td>
-              <td><label for="robot-factory-level-moon"><?= $l['robot-factory'] ?> (<?= $l['moon'] ?>)</label></td>
-              <td><input id="robot-factory-level-moon" type="text" name="robot-factory-level-moon" class="form-control form-control-sm level-input ui-input-margin" value="0" /></td>
-            </tr>
-          </table>
-          <table cellpadding="2" cellspacing="0" border="0" align="center">
-            <tr>
-              <td><label><?= $l['class'] ?>:</label></td>
-              <td><input id="class-0" type="radio" name="class" value="0" tabindex="1" class="form-check-input"/><label for="class-0" class="ms-1"><?= $l['class-collector'] ?></label></td>
-              <td><input id="class-1" type="radio" name="class" value="1" tabindex="2" class="form-check-input"/><label for="class-1" class="ms-1"><?= $l['class-general'] ?></label></td>
-              <td><input id="class-2" type="radio" name="class" value="2" tabindex="3" class="form-check-input"/><label for="class-2" class="ms-1"><?= $l['class-discoverer'] ?></label></td>
-              <td>&nbsp;</td>
-              <td><input id="full-numbers" type="checkbox" name="full-numbers" class="form-check-input ui-input-margin"/><label for="full-numbers" class="ms-1"><?= $l['full-numbers'] ?></label></td>
-            </tr>
-          </table>
+      <div class="d-flex align-items-center">
+        <p class="border rounded subheader bg-primary-subtle mb-0 flex-grow-1"><?= $l['parameters'] ?></p>
+      </div>
+      <!-- Parameter Tabs -->
+      <ul class="nav nav-tabs nav-tabs-sm" id="paramTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+          <button class="nav-link active" id="param-buildings-tab" data-bs-toggle="tab" data-bs-target="#param-buildings" type="button" role="tab"><?= $l['buildings-common'] ?></button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button class="nav-link" id="param-researches-tab" data-bs-toggle="tab" data-bs-target="#param-researches" type="button" role="tab"><?= $l['researches'] ?></button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button class="nav-link" id="param-common-tab" data-bs-toggle="tab" data-bs-target="#param-common" type="button" role="tab"><?= $l['param-tab-common'] ?></button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button class="nav-link" id="param-lifeforms-tab" data-bs-toggle="tab" data-bs-target="#param-lifeforms" type="button" role="tab"><?= $l['param-tab-lifeforms'] ?></button>
+        </li>
+      </ul>
+      <div class="tab-content" id="paramTabContent">
+        <!-- Buildings tab -->
+        <div class="tab-pane fade show active p-2" id="param-buildings" role="tabpanel">
+          <div class="d-flex flex-wrap gap-2 align-items-center">
+            <div class="d-flex align-items-center gap-1">
+              <label for="robot-factory-level"><?= $l['robot-factory'] ?> (<?= $l['planet'] ?>)</label>
+              <input id="robot-factory-level" type="text" name="robot-factory-level" class="form-control form-control-sm level-input" value="0" />
+            </div>
+            <div class="d-flex align-items-center gap-1">
+              <label for="robot-factory-level-moon"><?= $l['robot-factory'] ?> (<?= $l['moon'] ?>)</label>
+              <input id="robot-factory-level-moon" type="text" name="robot-factory-level-moon" class="form-control form-control-sm level-input" value="0" />
+            </div>
+            <div class="d-flex align-items-center gap-1">
+              <label for="nanite-factory-level"><?= $l['nanite-factory'] ?></label>
+              <input id="nanite-factory-level" type="text" name="nanite-factory-level" class="form-control form-control-sm level-input" value="0" />
+            </div>
+            <div class="d-flex align-items-center gap-1">
+              <label for="shipyard-level"><?= $l['shipyard'] ?></label>
+              <input id="shipyard-level" type="text" name="shipyard-level" class="form-control form-control-sm level-input" value="0" />
+            </div>
+            <div class="d-flex align-items-center gap-1">
+              <label for="research-lab-level"><?= $l['research-lab'] ?></label>
+              <div class="d-flex gap-1">
+                <input id="research-lab-level" type="text" name="research-lab-level" class="form-control form-control-sm level-input" value="0"/>
+                <button id="open-llc-dialog" class="btn btn-outline-primary btn-sm" type="button" title="<?= $l['calculate'] ?>">
+                  <i class="bi bi-calculator"></i>
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
+        <!-- Researches tab -->
+        <div class="tab-pane fade p-2" id="param-researches" role="tabpanel">
+          <div class="d-flex flex-wrap gap-2 align-items-center">
+            <div class="d-flex align-items-center gap-1">
+              <label for="ion-tech-level"><?= $l['ion-tech'] ?></label>
+              <input id="ion-tech-level" type="text" name="ion-tech-level" class="form-control form-control-sm level-input" value="0" />
+            </div>
+            <div class="d-flex align-items-center gap-1">
+              <label for="hyper-tech-level"><?= $l['hyper-tech'] ?></label>
+              <input id="hyper-tech-level" type="text" name="hyper-tech-level" class="form-control form-control-sm level-input" value="0" />
+            </div>
+          </div>
+        </div>
+        <!-- Common tab -->
+        <div class="tab-pane fade p-2" id="param-common" role="tabpanel">
+          <div class="d-flex flex-wrap gap-2 align-items-center mb-1">
+            <div class="d-flex align-items-center gap-1">
+              <label for="universe-speed"><?= $l['economy-speed'] ?></label>
+              <select id="universe-speed" name="universe-speed" class="form-select form-select-sm w-auto">
+                <option value="1" selected="selected">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+                <option value="6">6</option>
+                <option value="7">7</option>
+                <option value="8">8</option>
+                <option value="9">9</option>
+                <option value="10">10</option>
+              </select>
+            </div>
+            <div class="d-flex align-items-center gap-1">
+              <label for="research-speed"><?= $l['research-speed'] ?></label>
+              <select id="research-speed" name="research-speed" class="form-select form-select-sm w-auto">
+                <option value="1" selected="selected">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+                <option value="6">6</option>
+                <option value="7">7</option>
+                <option value="8">8</option>
+                <option value="9">9</option>
+                <option value="10">10</option>
+                <option value="11">11</option>
+                <option value="12">12</option>
+                <option value="13">13</option>
+                <option value="14">14</option>
+                <option value="15">15</option>
+                <option value="16">16</option>
+                <option value="17">17</option>
+                <option value="18">18</option>
+                <option value="19">19</option>
+                <option value="20">20</option>
+              </select>
+            </div>
+            <div class="d-flex align-items-center gap-1">
+              <input id="research-bonus" type="checkbox" name="research-bonus" class="form-check-input"/>
+              <label for="research-bonus"><?= $l['research-event'] ?></label>
+            </div>
+            <div class="d-flex align-items-center gap-1">
+              <input id="technocrat" type="checkbox" name="technocrat" class="form-check-input"/>
+              <label for="technocrat"><?= $l['technocrat'] ?></label>
+            </div>
+          </div>
+          <div class="d-flex flex-wrap gap-2 align-items-center">
+            <label><?= $l['class'] ?>:</label>
+            <div class="d-flex align-items-center gap-1">
+              <input id="class-0" type="radio" name="class" value="0" tabindex="1" class="form-check-input"/>
+              <label for="class-0"><?= $l['class-collector'] ?></label>
+            </div>
+            <div class="d-flex align-items-center gap-1">
+              <input id="class-1" type="radio" name="class" value="1" tabindex="2" class="form-check-input"/>
+              <label for="class-1"><?= $l['class-general'] ?></label>
+            </div>
+            <div class="d-flex align-items-center gap-1">
+              <input id="class-2" type="radio" name="class" value="2" tabindex="3" class="form-check-input"/>
+              <label for="class-2"><?= $l['class-discoverer'] ?></label>
+            </div>
+            <div class="d-flex align-items-center gap-1">
+              <input id="full-numbers" type="checkbox" name="full-numbers" class="form-check-input"/>
+              <label for="full-numbers"><?= $l['full-numbers'] ?></label>
+            </div>
+          </div>
+        </div>
+        <!-- LifeForms tab (empty) -->
+        <div class="tab-pane fade p-2" id="param-lifeforms" role="tabpanel">
+        </div>
+      </div>
       </div>
       <!-- Main Tabs -->
       <ul class="nav nav-tabs" id="mainTabs" role="tablist">

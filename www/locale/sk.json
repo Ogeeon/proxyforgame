@@ -271,7 +271,10 @@
     "times-note": "Ak počítate trvanie výstavby/výskumu, nástroj používa iba hodnoty úrovní lodeníc, tovární a laboratórií vložených v hornom paneli. Ak máte IVS a potrebujete vypočítať výslednú úroveň laboratórií, prosím kliknite na tlačítko \"Vypočítať\" vedľa poľa s úrovňou výskumného laboratória",
     "msg-cant-research": "Na danej úrovní výskumného laboratória je výskum \"{0}\" nemožný.",
     "class-collector": "Collector",
-    "planet-pos": "Pozícia"
+    "planet-pos": "Pozícia",
+    "param-tab-common": "Všeobecné",
+    "param-tab-lifeforms": "Formy života",
+    "economy-speed": "Rýchlosť ekonomiky"
   },
   "lfcosts": {
     "title": "OGame - Kalkulátor pre ceny pre formy života",

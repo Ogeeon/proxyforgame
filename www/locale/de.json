@@ -272,7 +272,10 @@
     "hourly-cons": "Verb. pro Stunde",
     "times-note": "Bei der Berechnung der Dauer für Bau/Forschung verwendet das Tool nur die Werte der Raumschiffswerft, Roboterfabrik und des Labors im oberen Feld. Wenn Sie das I.F. in die Berechnung der Forschung mit einbeziehen möchten, drücken Sie bitte neben dem Forschungslabor Feld, auf das kleine Fenster.",
     "msg-cant-research": "Auf dieser Forschungslabor Stufe Forschung \"{0}\" ist ausgeschlossen.",
-    "class-collector": "Kollektor"
+    "class-collector": "Kollektor",
+    "param-tab-common": "Allgemein",
+    "param-tab-lifeforms": "Lebensformen",
+    "economy-speed": "Wirtschaftstempo"
   },
   "lfcosts": {
     "title": "OGame - Kostenberechnung für Lebensformen",

@@ -270,7 +270,10 @@
     "times-note": "Om de duur van gebouwen/onderzoeken te berekenen, zal je alle velden in moeten vullen van werf, (nano)robotfabriek en onderzoekslab. Heb je IGON? Klik op de \"Bereken\" knop in het veld naast het onderzoekslab.",
     "msg-cant-research": "Met de opgegeven level van onderzoek laboratorium is onderzoek \"{0}\" is niet mogelijk.",
     "class-collector": "Collector",
-    "planet-pos": "Positie"
+    "planet-pos": "Positie",
+    "param-tab-common": "Algemeen",
+    "param-tab-lifeforms": "Levensvormen",
+    "economy-speed": "Economische snelheid"
   },
   "lfcosts": {
     "time": "Tijd",

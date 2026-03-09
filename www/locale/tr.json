@@ -267,7 +267,10 @@
     "times-note": "İnşaat / araştırma sürelerini hesaplarken sadece tersane, bina ve laboratuvar seviyelerini üst panele girin. Eğer galaksiler arası araştırma ağı seviyesini hesaplamak gerekirse \"Hesapla\" butonunun yanındaki Galaksiler arası araştırma ağı seviyesi alanına tıklayın..",
     "msg-cant-research": "Araştırma laboratuvarı verilen seviyede \"{0}\" kullanılamıyor.",
     "class-collector": "Koleksiyoncu",
-    "planet-pos": "Konum"
+    "planet-pos": "Konum",
+    "param-tab-common": "Genel",
+    "param-tab-lifeforms": "Yaşam Formları",
+    "economy-speed": "Ekonomi hızı"
   },
   "lfcosts": {
     "energy": "Enerji",

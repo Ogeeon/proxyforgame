@@ -272,7 +272,10 @@
     "msg-max-constraint-violated": "Valeur {0} {1} est supérieur au maximum {2}. Valeur du champ réglé au maximum.",
     "times-note": "La raison pour laquelle l’accélération de la vitesse de construction des bâtiments n’est pas prise en compte lorsque vous calculez aussi l’augmentation de niveau de votre usine de robots est qu’en fait il n’y a aucun moyen de spécifier un ordre dans la construction des bâtiments.<br>Par exemple, si vous souhaitez augmenter votre usine de robots du niveau 1 à 5 et la mine de métal du niveau 1 à 5:<br>Si vous augmentez l’usine de robots en premier, le temps de construction de la mine sera alors le plus rapide et durera 2m25s.<br>En revanche, si vous décidez d’augmenter votre mine en premier, tout en ayant votre usine de robot au niveau 1, cela prendra 7m16s.<br>Donc a moins d’utiliser un moyen de spécifier un ordre de production, qui compliquerait énormément l’utilisation du calculateur, nous avons décidé d’utiliser simplement le niveau de l’usine de robots spécifié en haut de la table de calcul.",
     "msg-cant-research": "Au niveau donné de laboratoire de recherche, le recherche \"{0}\" n`est pas disponible.",
-    "class-collector": "Collecteur"
+    "class-collector": "Collecteur",
+    "param-tab-common": "Général",
+    "param-tab-lifeforms": "Formes de vie",
+    "economy-speed": "Vitesse économique"
   },
   "lfcosts": {
     "title": "OGame - Calculateur de coûts pour les formes de vie",

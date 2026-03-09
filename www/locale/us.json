@@ -273,7 +273,10 @@
     "hourly-cons": "Consum. per hour",
     "times-note": "When calculating durations of construction/research, the tool uses only the values for levels of the Shipyard, Factories and Laboratory entered in the upper panel. If you need to calculate the resulting Lab level when you have IRN, please click the \"Calculate\" button next to the Research lab level field.",
     "msg-cant-research": "At the given level of Research laboratory research \"{0}\" is unavailable.",
-    "class-collector": "Collector"
+    "class-collector": "Collector",
+    "param-tab-common": "Common",
+    "param-tab-lifeforms": "LifeForms",
+    "economy-speed": "Economy speed"
   },
   "lfcosts": {
     "energy": "Energy",

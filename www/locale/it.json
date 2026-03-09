@@ -274,7 +274,10 @@
     "times-note": "Quando si calcola la durata di costruzione/ricerca, lo strumento utilizza solo i valori per i livelli dei cantieri, fabbriche e Laboratorio entrato nel pannello superiore. Se avete bisogno di calcolare il livello di laboratorio risulta quando si ha RIR, fare clic sul pulsante \"Calcolo\" accanto al campo di ricerca a livello di laboratorio.",
     "msg-cant-research": "Al dato livello di Laboratorio di Ricerca di ricerca \"{0}\" non e disponibile.",
     "class-collector": "Collector",
-    "planet-pos": "Posizione"
+    "planet-pos": "Posizione",
+    "param-tab-common": "Generale",
+    "param-tab-lifeforms": "Forme di vita",
+    "economy-speed": "Velocità economia"
   },
   "lfcosts": {
     "title": "OGame - Calcolatore di Costi per le forme di vita",

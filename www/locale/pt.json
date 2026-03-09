@@ -272,7 +272,10 @@
     "times-note": "Para os cálculos da duração das construções/pesquisas, a ferramenta apenas usa os valores dos níveis do Hangar, Fábricas e Laboratorio introduzidos no painel superior. Se precisas de calcular o total dos níveis do laboratório quando tens a RIP, por favor clica no botão Calcular ao lado do Nível do Laboratório de Pesquisas .",
     "msg-cant-research": "A este nível de laboratório de pesquisas a tecnologia \"{0}\" está indisponível.",
     "class-collector": "Colecionador",
-    "planet-pos": "Posição"
+    "planet-pos": "Posição",
+    "param-tab-common": "Geral",
+    "param-tab-lifeforms": "Formas de vida",
+    "economy-speed": "Velocidade económica"
   },
   "lfcosts": {
     "sc-short": "CP",
