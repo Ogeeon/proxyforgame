@@ -180,12 +180,15 @@ body.sidebar-offcanvas-open .btn[data-bs-toggle="offcanvas"] {
 /* Collapse grid columns below lg, keep toggle visible */
 @media (max-width: 991.98px) {
     .col-2,
-    .col-10 {
+    .col-md-2,
+    .col-10,
+    .col-md-10 {
         flex: 0 0 100%;
         max-width: 100%;
     }
 
-    .col-2 {
+    .col-2,
+    .col-md-2 {
         margin-bottom: 0.5rem;
     }
 
