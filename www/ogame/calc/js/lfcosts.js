@@ -166,9 +166,9 @@ function updateRow() {
     const rsrCostRdc = getInputNumber(document.getElementById('research-cost-reduction'));
     const ionTechLevel = (techLevelTo > techLevelFrom) ? 0 : getInputNumber(document.getElementById('ion-tech-level'));
     var bldCostRdc = Number(document.getElementById('race-selector').value) === 2 ? 0.01 * getInputNumber(document.getElementById('megalith-level')) : 0;
-    const reductables = [1, 2, 3, 4, 12, 2001, 2002];
+    const reductables = new Set([1, 2, 3, 4, 12, 2001, 2002]);
     const mrcRdc = Number(document.getElementById('race-selector').value) === 2 ? 0.005 * getInputNumber(document.getElementById('mrc-level')) : 0;
-    if (reductables.includes(techID))
+    if (reductables.has(techID))
         bldCostRdc += mrcRdc;
     let dataRow = [0, 0, 0, 0, 0, 0];
     // Для зданий возможен снос, по остальным техам - новый уровень должен быть строго больше старого
@@ -250,7 +250,7 @@ function updateParams() {
     let techLevelTo;
     const rsrCostRdc = getInputNumber(document.getElementById('research-cost-reduction'));
     var baseBbldCostRdc = Number(document.getElementById('race-selector').value) === 2 ? 0.01 * getInputNumber(document.getElementById('megalith-level')) : 0;
-    const reductables = [1, 2, 3, 4, 12, 2001, 2002];
+    const reductables = new Set([1, 2, 3, 4, 12, 2001, 2002]);
     const mrcRdc = Number(document.getElementById('race-selector').value) === 2 ? 0.005 * getInputNumber(document.getElementById('mrc-level')) : 0;
     const ionTechLevel = (techLevelTo > techLevelFrom) ? 0 : getInputNumber(document.getElementById('ion-tech-level'));
     Object.entries(options.techData).forEach(([key, value]) => {
@@ -271,7 +271,7 @@ function updateParams() {
                         techLevelFrom = techLevelTo === 0 ? 0 : techLevelTo - 1;
                     }
                     let techID = Number(rowID);
-                    if (reductables.includes(techID))
+                    if (reductables.has(techID))
                         bldCostRdc += mrcRdc;
                     let newCost = getBuildCostLF(techID, techLevelFrom, techLevelTo, options.techCosts, ionTechLevel, rsrCostRdc, bldCostRdc);
                     let newTime = getAdjustedTime(techID, techLevelFrom, techLevelTo);
@@ -503,9 +503,9 @@ function updateOneMultTab() {
     const rsrCostRdc = getInputNumber(document.getElementById('research-cost-reduction'));
     const ionTechLevel = (levelTo > levelFrom) ? 0 : getInputNumber(document.getElementById('ion-tech-level'));
     var bldCostRdc = Number(document.getElementById('race-selector').value) === 2 ? 0.01 * getInputNumber(document.getElementById('megalith-level')) : 0;
-    const reductables = [1, 2, 3, 4, 12, 2001, 2002];
+    const reductables = new Set([1, 2, 3, 4, 12, 2001, 2002]);
     const mrcRdc = Number(document.getElementById('race-selector').value) === 2 ? 0.005 * getInputNumber(document.getElementById('mrc-level')) : 0;
-    if (reductables.includes(techID))
+    if (reductables.has(techID))
         bldCostRdc += mrcRdc;
     let resCost = [0, 0, 0];
     let totalMet = 0, totalCrys = 0, totalDeut = 0, totalTime = 0, points = 0, totalPts = 0;
