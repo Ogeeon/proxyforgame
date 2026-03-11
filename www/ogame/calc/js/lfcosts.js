@@ -425,7 +425,7 @@ function updateTotals(needUpd) {
 }
 
 function getAdjustedTime(techID, techLevelFrom, techLevelTo) {
-    if (techLevelFrom == 0 & techLevelTo == 0)
+    if (techLevelFrom == 0 && techLevelTo == 0)
         return 0;
     const rsrTimeRdc = getInputNumber(document.getElementById('research-time-reduction'));
     const megalithRdc = Math.min(0.99, Number(document.getElementById('race-selector').value) === 2 ? 0.01 * getInputNumber(document.getElementById('megalith-level')) : 0);
