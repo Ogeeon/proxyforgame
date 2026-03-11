@@ -89,19 +89,7 @@ function resetParams() {
         for (const inner of [1, 2]) {
             let rows = document.querySelectorAll('#table-' + outer + '-' + inner + ' tr');
             for (let row = 1; row < rows.length - footerRows; row++) {
-                rows[row].children[2].children[0].value = 0;
-                if (outer === 1)
-                    rows[row].children[3].children[0].value = 0;
-                let firstDataCol = (outer === 1) ? 4 : 3;
-                for (let cell = firstDataCol; cell < firstDataCol + (outer === 0 ? 6 : 5); cell++) {
-                    if (cell === firstDataCol + 3)
-                        rows[row].children[cell].innerHTML = '0' + options.datetimeS;
-                    else
-                        rows[row].children[cell].innerHTML = '0';
-                }
-                let techID = Number(rows[row].children[0].innerHTML);
-                if (ENERGY_TECH_IDS.has(techID))
-                    refreshEnergyTooltip(rows[row], 0);
+                clearTableRow(rows[row], outer);
             }
         }
     }
@@ -390,6 +378,19 @@ function updateTotals(needUpd) {
 }
 
 const ENERGY_TECH_IDS = new Set([1002, 2002, 3002, 4002]);
+
+function clearTableRow(row, outer) {
+    row.children[2].children[0].value = 0;
+    if (outer === 1)
+        row.children[3].children[0].value = 0;
+    const firstDataCol = (outer === 1) ? 4 : 3;
+    for (let cell = firstDataCol; cell < firstDataCol + (outer === 0 ? 6 : 5); cell++) {
+        row.children[cell].innerHTML = (cell === firstDataCol + 3) ? ('0' + options.datetimeS) : '0';
+    }
+    const techID = Number(row.children[0].innerHTML);
+    if (ENERGY_TECH_IDS.has(techID))
+        refreshEnergyTooltip(row, 0);
+}
 
 function refreshEnergyTooltip(row, energyCost) {
     const hintEl = row.children[1].querySelector('.energy-cost-hint');
