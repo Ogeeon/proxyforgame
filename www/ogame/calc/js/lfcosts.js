@@ -600,11 +600,11 @@ function hideNShowItems() {
         }
     }
     const opts = document.querySelectorAll('#tech-types-select option');
-    for (let i = 0; i < opts.length; i++) {
-        if (Math.floor(Number(opts[i].value) / 1000) == race) {
-            opts[i].style.display = '';
+    for (const opt of opts) {
+        if (Math.floor(Number(opt.value) / 1000) == race) {
+            opt.style.display = '';
         } else {
-            opts[i].style.display = 'none';
+            opt.style.display = 'none';
         }
     }
     document.getElementById('tech-types-select').value = '';
