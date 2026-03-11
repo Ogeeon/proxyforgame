@@ -356,8 +356,7 @@ function updateTotals(needUpd) {
         let innerNums = [1, 2];
         let firstDataCol = (outer === 0) ? 3 : 4;
         let grandTotals = [0, 0, 0, 0, 0, 0];
-        for (let innerIdx = 0; innerIdx < innerNums.length; innerIdx++) {
-            let inner = innerNums[innerIdx];
+        for (const inner of innerNums) {
             let rows = document.querySelectorAll('#table-' + outer + '-' + inner + ' tr');
             let totals = [0, 0, 0, 0, 0, 0, 0];
             let row;
@@ -388,8 +387,7 @@ function updateTotals(needUpd) {
             grandTotals[5] += totals[5];
         }
         // После того, как обработали все данные на внутренних вкладках, надо показать общий итог по данной внешней вкладке.
-        for (let innerIdx = 0; innerIdx < innerNums.length; innerIdx++) {
-            let inner = innerNums[innerIdx];
+        for (const inner of innerNums) {
             let rows = document.querySelectorAll('#table-' + outer + '-' + inner + ' tr');
             let row = rows.length - 4;
             rows[row].children[2].innerHTML = '<b>' + ogamizeNum(grandTotals[0], options.unitSuffix) + '</b>';
