@@ -327,7 +327,7 @@ function initTooltips(root) {
     (root || document).querySelectorAll('[data-bs-toggle="tooltip"]').forEach(function (el) {
         const existing = bootstrap.Tooltip.getInstance(el);
         if (existing) existing.dispose();
-        new bootstrap.Tooltip(el);
+        new bootstrap.Tooltip(el); // NOSONAR - Bootstrap registers the tooltip internally via getInstance
     });
 }
 
