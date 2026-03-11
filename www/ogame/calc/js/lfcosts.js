@@ -24,19 +24,19 @@ let options = {
 
         validate: function (field, value) {
             switch (field) {
-                case 'robotFactoryLevel': return validateNumber(parseFloat(value), 0, 100, 0);
-                case 'naniteFactoryLevel': return validateNumber(parseFloat(value), 0, 100, 0);
-                case 'universeSpeed': return validateNumber(parseFloat(value), 1, 10, 1);
-                case 'ionTechLevel': return validateNumber(parseFloat(value), 0, 50, 0);
-                case 'hyperTechLevel': return validateNumber(parseFloat(value), 0, 50, 0);
-                case 'playerClass': return validateNumber(parseFloat(value), 0, 2, 0);
+                case 'robotFactoryLevel': return validateNumber(Number.parseFloat(value), 0, 100, 0);
+                case 'naniteFactoryLevel': return validateNumber(Number.parseFloat(value), 0, 100, 0);
+                case 'universeSpeed': return validateNumber(Number.parseFloat(value), 1, 10, 1);
+                case 'ionTechLevel': return validateNumber(Number.parseFloat(value), 0, 50, 0);
+                case 'hyperTechLevel': return validateNumber(Number.parseFloat(value), 0, 50, 0);
+                case 'playerClass': return validateNumber(Number.parseFloat(value), 0, 2, 0);
                 case 'fullNumbers': return value === 'true';
-                case 'capIncrSC': return validateNumber(parseFloat(value), 0, 1000, 0);
-                case 'capIncrLC': return validateNumber(parseFloat(value), 0, 1000, 0);
-                case 'megalithLvl': return validateNumber(parseFloat(value), 0, 100, 0);
-                case 'mineralResCntrLvl': return validateNumber(parseFloat(value), 0, 100, 0);
-                case 'researchCostReduction': return validateNumber(parseFloat(value), 0, 25, 0);
-                case 'researchTimeReduction': return validateNumber(parseFloat(value), 0, 99, 0);
+                case 'capIncrSC': return validateNumber(Number.parseFloat(value), 0, 1000, 0);
+                case 'capIncrLC': return validateNumber(Number.parseFloat(value), 0, 1000, 0);
+                case 'megalithLvl': return validateNumber(Number.parseFloat(value), 0, 100, 0);
+                case 'mineralResCntrLvl': return validateNumber(Number.parseFloat(value), 0, 100, 0);
+                case 'researchCostReduction': return validateNumber(Number.parseFloat(value), 0, 25, 0);
+                case 'researchTimeReduction': return validateNumber(Number.parseFloat(value), 0, 99, 0);
                 default: return value;
             }
         }
