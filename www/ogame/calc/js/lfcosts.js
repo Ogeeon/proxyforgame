@@ -349,7 +349,7 @@ function updateTotals(needUpd) {
     options.prm.researchTimeReduction = getInputNumber(document.getElementById('research-time-reduction'));
 
     for (let outer = 0; outer < 2; outer++) {
-        if (needUpd && needUpd[outer] === false)
+        if (needUpd?.[outer] === false)
             continue;
         let innerNums = [1, 2];
         let firstDataCol = (outer === 0) ? 3 : 4;
