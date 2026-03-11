@@ -410,17 +410,17 @@ function updateTotals(needUpd) {
             rows[rows.length - 2].children[4].innerHTML = '<b>' + ogamizeNum(needDeut, options.unitSuffix) + '</b>';
 
             let totalRes = needMet + needCrys + needDeut;
-            let capSC = 5000.0 * (1 + 0.05 * options.prm.hyperTechLevel);
+            let capSC = 5000 * (1 + 0.05 * options.prm.hyperTechLevel);
             if (options.prm.playerClass === 0) {
-                capSC += 5000.0 * 0.25;
+                capSC += 5000 * 0.25;
             }
-            capSC += Math.floor(5000.0 * 0.01 * options.prm.capIncrSC);
+            capSC += Math.floor(5000 * 0.01 * options.prm.capIncrSC);
             let needSC = Math.ceil(totalRes / capSC);
-            let capLC = 25000.0 * (1 + 0.05 * options.prm.hyperTechLevel);
+            let capLC = 25000 * (1 + 0.05 * options.prm.hyperTechLevel);
             if (options.prm.playerClass === 0) {
-                capLC += 25000.0 * 0.25;
+                capLC += 25000 * 0.25;
             }
-            capLC += Math.floor(25000.0 * 0.01 * options.prm.capIncrLC);
+            capLC += Math.floor(25000 * 0.01 * options.prm.capIncrLC);
             let needLC = Math.ceil(totalRes / capLC);
             rows[rows.length - 1].children[2].innerHTML = numToOGame(needSC) + ' ' + '<abbr data-bs-toggle="tooltip" title="' + options.scFull + '">' + options.scShort + '</abbr>';
             rows[rows.length - 1].children[3].innerHTML = numToOGame(needLC) + ' ' + '<abbr data-bs-toggle="tooltip" title="' + options.lcFull + '">' + options.lcShort + '</abbr>';
