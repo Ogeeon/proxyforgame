@@ -196,24 +196,13 @@ function updateRow() {
 // Учитывает изменения в параметрах: уровни фабрики роботов, фабрики нанитов, скорость вселенной, . Обновляет время в соответствующих полях глобального массива рассчитанных значений
 function updateParams() {
     const techTypes = new Set([1, 2]);
-    options.prm.robotFactoryLevel = getInputNumber(document.getElementById('robot-factory-level'));
-    options.prm.naniteFactoryLevel = getInputNumber(document.getElementById('nanite-factory-level'));
-    options.prm.universeSpeed = document.getElementById('universe-speed').value;
-    options.prm.ionTechLevel = getInputNumber(document.getElementById('ion-tech-level'));
-    options.prm.hyperTechLevel = getInputNumber(document.getElementById('hyper-tech-level'));
-    options.prm.capIncrSC = getInputNumber(document.getElementById('sc-capacity-increase'));
-    options.prm.capIncrLC = getInputNumber(document.getElementById('lc-capacity-increase'));
-    options.prm.megalithLvl = getInputNumber(document.getElementById('megalith-level'));
-    options.prm.mineralResCntrLvl = getInputNumber(document.getElementById('mrc-level'));
-    options.prm.researchCostReduction = getInputNumber(document.getElementById('research-cost-reduction'));
-    options.prm.researchTimeReduction = getInputNumber(document.getElementById('research-time-reduction'));
+    readParamsFromDOM();
     if (document.getElementById('class-2').checked)
         options.prm.playerClass = 2;
     else if (document.getElementById('class-1').checked)
         options.prm.playerClass = 1;
     else
         options.prm.playerClass = 0;
-    options.prm.fullNumbers = document.getElementById('full-numbers').checked;
     let needUpd = { 0: false, 1: false };
     let techLevelFrom;
     let techLevelTo;
@@ -298,18 +287,7 @@ function initTooltips(root) {
 
 // Обновляет промежуточные и общие итоги на основании данных из глобального массива рассчитанных значений
 function updateTotals(needUpd) {
-    options.prm.robotFactoryLevel = getInputNumber(document.getElementById('robot-factory-level'));
-    options.prm.naniteFactoryLevel = getInputNumber(document.getElementById('nanite-factory-level'));
-    options.prm.universeSpeed = document.getElementById('universe-speed').value;
-    options.prm.ionTechLevel = getInputNumber(document.getElementById('ion-tech-level'));
-    options.prm.hyperTechLevel = getInputNumber(document.getElementById('hyper-tech-level'));
-    options.prm.fullNumbers = document.getElementById('full-numbers').checked;
-    options.prm.capIncrSC = getInputNumber(document.getElementById('sc-capacity-increase'));
-    options.prm.capIncrLC = getInputNumber(document.getElementById('lc-capacity-increase'));
-    options.prm.megalithLvl = getInputNumber(document.getElementById('megalith-level'));
-    options.prm.mineralResCntrLvl = getInputNumber(document.getElementById('mrc-level'));
-    options.prm.researchCostReduction = getInputNumber(document.getElementById('research-cost-reduction'));
-    options.prm.researchTimeReduction = getInputNumber(document.getElementById('research-time-reduction'));
+    readParamsFromDOM();
 
     for (let outer = 0; outer < 2; outer++) {
         if (needUpd?.[outer] === false)
@@ -379,6 +357,21 @@ function updateTotals(needUpd) {
 
 const ENERGY_TECH_IDS = new Set([1002, 2002, 3002, 4002]);
 
+function readParamsFromDOM() {
+    options.prm.robotFactoryLevel = getInputNumber(document.getElementById('robot-factory-level'));
+    options.prm.naniteFactoryLevel = getInputNumber(document.getElementById('nanite-factory-level'));
+    options.prm.universeSpeed = document.getElementById('universe-speed').value;
+    options.prm.ionTechLevel = getInputNumber(document.getElementById('ion-tech-level'));
+    options.prm.hyperTechLevel = getInputNumber(document.getElementById('hyper-tech-level'));
+    options.prm.fullNumbers = document.getElementById('full-numbers').checked;
+    options.prm.capIncrSC = getInputNumber(document.getElementById('sc-capacity-increase'));
+    options.prm.capIncrLC = getInputNumber(document.getElementById('lc-capacity-increase'));
+    options.prm.megalithLvl = getInputNumber(document.getElementById('megalith-level'));
+    options.prm.mineralResCntrLvl = getInputNumber(document.getElementById('mrc-level'));
+    options.prm.researchCostReduction = getInputNumber(document.getElementById('research-cost-reduction'));
+    options.prm.researchTimeReduction = getInputNumber(document.getElementById('research-time-reduction'));
+}
+
 function clearTableRow(row, outer) {
     row.children[2].children[0].value = 0;
     if (outer === 1)
@@ -431,18 +424,7 @@ function clearTableBodyRows(tbl) {
 }
 
 function updateOneMultTab() {
-    options.prm.robotFactoryLevel = getInputNumber(document.getElementById('robot-factory-level'));
-    options.prm.naniteFactoryLevel = getInputNumber(document.getElementById('nanite-factory-level'));
-    options.prm.universeSpeed = document.getElementById('universe-speed').value;
-    options.prm.ionTechLevel = getInputNumber(document.getElementById('ion-tech-level'));
-    options.prm.hyperTechLevel = getInputNumber(document.getElementById('hyper-tech-level'));
-    options.prm.fullNumbers = document.getElementById('full-numbers').checked;
-    options.prm.capIncrSC = getInputNumber(document.getElementById('sc-capacity-increase'));
-    options.prm.capIncrLC = getInputNumber(document.getElementById('lc-capacity-increase'));
-    options.prm.megalithLvl = getInputNumber(document.getElementById('megalith-level'));
-    options.prm.mineralResCntrLvl = getInputNumber(document.getElementById('mrc-level'));
-    options.prm.researchCostReduction = getInputNumber(document.getElementById('research-cost-reduction'));
-    options.prm.researchTimeReduction = getInputNumber(document.getElementById('research-time-reduction'));
+    readParamsFromDOM();
 
     let techID = Number(document.getElementById('tech-types-select').value);
     if (techID == 0) {
