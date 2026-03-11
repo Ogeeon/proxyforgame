@@ -100,15 +100,8 @@ function resetParams() {
                         rows[row].children[cell].innerHTML = '0';
                 }
                 let techID = Number(rows[row].children[0].innerHTML);
-                if ([1002, 2002, 3002, 4002].includes(techID)) {
-                    const hintEl = rows[row].children[1].querySelector('.energy-cost-hint');
-                    if (hintEl) {
-                        const existing = bootstrap.Tooltip.getInstance(hintEl);
-                        if (existing) existing.dispose();
-                        hintEl.setAttribute('title', options.energyCostToBuildLabel + ': 0');
-                        new bootstrap.Tooltip(hintEl);
-                    }
-                }
+                if (ENERGY_TECH_IDS.has(techID))
+                    refreshEnergyTooltip(rows[row], 0);
             }
         }
     }
@@ -190,16 +183,8 @@ function updateRow() {
             let tmCost = getHalvingCost(techID, timeSpan);
             row.children[firstDataCol + 5].innerHTML = ogamizeNum(tmCost, options.unitSuffix);
         }
-        if ([1002, 2002, 3002, 4002].includes(techID)) {
-            const hintEl = row.children[1].querySelector('.energy-cost-hint');
-            if (hintEl) {
-                const tooltipText = options.energyCostToBuildLabel + ': ' + ogamizeNum(energyCost, options.unitSuffix);
-                const existing = bootstrap.Tooltip.getInstance(hintEl);
-                if (existing) existing.dispose();
-                hintEl.setAttribute('title', tooltipText);
-                new bootstrap.Tooltip(hintEl);
-            }
-        }
+        if (ENERGY_TECH_IDS.has(techID))
+            refreshEnergyTooltip(row, energyCost);
         dataRow[0] = resCost[0];
         dataRow[1] = resCost[1];
         dataRow[2] = resCost[2];
@@ -291,16 +276,8 @@ function updateParams() {
                                 rows[idx].children[firstDataCol + 5].innerHTML = '0';
                             }
                         }
-                        if ([1002, 2002, 3002, 4002].includes(techID)) {
-                            const hintEl = rows[idx].children[1].querySelector('.energy-cost-hint');
-                            if (hintEl) {
-                                const tooltipText = options.energyCostToBuildLabel + ': ' + ogamizeNum(newEnergy, options.unitSuffix);
-                                const existing = bootstrap.Tooltip.getInstance(hintEl);
-                                if (existing) existing.dispose();
-                                hintEl.setAttribute('title', tooltipText);
-                                new bootstrap.Tooltip(hintEl);
-                            }
-                        }
+                        if (ENERGY_TECH_IDS.has(techID))
+                            refreshEnergyTooltip(rows[idx], newEnergy);
                     } else {
                         rows[idx].children[2].children[0].value = 0;
                         if (keyParts[1] * 1 === 1)
@@ -410,6 +387,17 @@ function updateTotals(needUpd) {
 
     options.save();
     initTooltips();
+}
+
+const ENERGY_TECH_IDS = new Set([1002, 2002, 3002, 4002]);
+
+function refreshEnergyTooltip(row, energyCost) {
+    const hintEl = row.children[1].querySelector('.energy-cost-hint');
+    if (!hintEl) return;
+    const existing = bootstrap.Tooltip.getInstance(hintEl);
+    if (existing) existing.dispose();
+    hintEl.setAttribute('title', options.energyCostToBuildLabel + ': ' + ogamizeNum(energyCost, options.unitSuffix));
+    new bootstrap.Tooltip(hintEl); // NOSONAR - Bootstrap registers the tooltip internally via getInstance
 }
 
 function calcShipCount(totalRes) {
