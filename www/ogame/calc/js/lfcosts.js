@@ -178,10 +178,10 @@ function updateRow() {
         let energyCost = getBuildEnergyCostLF(techID, techLevelTo, options.techCosts, ionTechLevel, bldCostRdc);
         let points;
         if (techLevelTo > techLevelFrom) {
-            points = Math.floor((resCost[0] + resCost[1] + resCost[2]) / 1000.0);
+            points = Math.floor((resCost[0] + resCost[1] + resCost[2]) / 1000);
         } else {
             let buildResCost = getBuildCostLF(techID, techLevelTo, techLevelFrom, options.techCosts, 0);
-            points = -1 * Math.floor((buildResCost[0] + buildResCost[1] + buildResCost[2]) / 1000.0);
+            points = -1 * Math.floor((buildResCost[0] + buildResCost[1] + buildResCost[2]) / 1000);
         }
         row.children[firstDataCol].innerHTML = ogamizeNum(resCost[0], options.unitSuffix);
         row.children[firstDataCol + 1].innerHTML = ogamizeNum(resCost[1], options.unitSuffix);
