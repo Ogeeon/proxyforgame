@@ -532,8 +532,8 @@ function updateOneMultTab() {
         rowData.push(ogamizeNum(Math.round((resCost[0] + resCost[1] + resCost[2]) / 1000), options.unitSuffix));
 
         rowStr = '<tr class=' + ((i % 2) === 1 ? 'odd' : 'even') + '>';
-        for (let cellNum = 0; cellNum < rowData.length; cellNum++) {
-            rowStr += '<td align="center">' + rowData[cellNum] + '</td>';
+        for (const cell of rowData) {
+            rowStr += '<td align="center">' + cell + '</td>';
         }
         rowStr += '</tr>';
         tbl.tBodies[0].insertAdjacentHTML('beforeend', rowStr);
