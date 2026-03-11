@@ -510,7 +510,6 @@ function updateOneMultTab() {
     let rowStr;
     for (let i = levelFrom; i < levelTo; i++) {
         rowData = new Array();
-        rowStr = '';
         rowData.push(i + 1);
         resCost = getBuildCostLF(techID, i, i + 1, options.techCosts, ionTechLevel, rsrCostRdc, bldCostRdc);
         rowData.push(
