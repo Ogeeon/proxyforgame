@@ -34,7 +34,6 @@
   <script type="text/javascript" src="/ogame/calc/js/lfcosts-data-collector.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/lfcosts-data-collector.js'); ?>"></script>
   <script type="text/javascript" src="/ogame/calc/js/lfcosts-renderer.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/lfcosts-renderer.js'); ?>"></script>
   <script type="text/javascript" src="/ogame/calc/js/lfcosts-orchestration.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/lfcosts-orchestration.js'); ?>"></script>
-  <script type="text/javascript" src="/ogame/calc/js/lfcosts.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/lfcosts.js'); ?>"></script>
 
   <script type="text/javascript">
     // десятичный разделитель будет использоваться в функциях, проверяющих валидность чисел в input-ах

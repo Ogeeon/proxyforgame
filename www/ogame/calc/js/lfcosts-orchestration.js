@@ -2,6 +2,65 @@
 // ORCHESTRATOR — owns all state, wires events, delegates to layers
 // ============================================================================
 
+var options = {
+    defConstraints: {
+        min: -Infinity,
+        max: Infinity,
+        def: 0,
+        allowFloat: false,
+        allowNegative: false
+    },
+    prm: {
+        robotFactoryLevel: 0,
+        naniteFactoryLevel: 0,
+        universeSpeed: 1,
+        ionTechLevel: 0,
+        hyperTechLevel: 0,
+        playerClass: 0,
+        fullNumbers: false,
+        tabsState: "",
+        capIncrSC: 0,
+        capIncrLC: 0,
+        megalithLvl: 0,
+        mineralResCntrLvl: 0,
+        researchCostReduction: 0,
+        researchTimeReduction: 0,
+
+        validate: function (field, value) {
+            switch (field) {
+                case 'robotFactoryLevel':     return validateNumber(Number.parseFloat(value), 0, 100, 0);
+                case 'naniteFactoryLevel':    return validateNumber(Number.parseFloat(value), 0, 100, 0);
+                case 'universeSpeed':         return validateNumber(Number.parseFloat(value), 1, 10,  1);
+                case 'ionTechLevel':          return validateNumber(Number.parseFloat(value), 0, 50,  0);
+                case 'hyperTechLevel':        return validateNumber(Number.parseFloat(value), 0, 50,  0);
+                case 'playerClass':           return validateNumber(Number.parseFloat(value), 0, 2,   0);
+                case 'fullNumbers':           return value === 'true';
+                case 'capIncrSC':             return validateNumber(Number.parseFloat(value), 0, 1000, 0);
+                case 'capIncrLC':             return validateNumber(Number.parseFloat(value), 0, 1000, 0);
+                case 'megalithLvl':           return validateNumber(Number.parseFloat(value), 0, 100, 0);
+                case 'mineralResCntrLvl':     return validateNumber(Number.parseFloat(value), 0, 100, 0);
+                case 'researchCostReduction': return validateNumber(Number.parseFloat(value), 0, 25,  0);
+                case 'researchTimeReduction': return validateNumber(Number.parseFloat(value), 0, 99,  0);
+                default: return value;
+            }
+        }
+    },
+
+    load: function () {
+        try {
+            loadFromCookie('options_lfcosts', options.prm);
+        } catch (e) {
+            alert(e);
+        }
+    },
+
+    save: function () {
+        saveToCookie('options_lfcosts', options.prm);
+    },
+
+    techData: {},
+};
+
 class LfCostsOrchestrator {
     constructor(opts) {
         this.opts       = opts;          // the global options object (TPL writes into it)
@@ -16,6 +75,8 @@ class LfCostsOrchestrator {
     // -------------------------------------------------------------------------
 
     init() {
+        const orchestrator = this;
+
         // Tab-state persistence
         document.getElementById('mainTabs').addEventListener('shown.bs.tab', () => this.storeTabsState());
         const innerTabs0 = document.getElementById('innerTabs0');
@@ -30,7 +91,8 @@ class LfCostsOrchestrator {
         ['tab-0', 'tab-1'].forEach(tabId => {
             document.querySelectorAll(`#${tabId} input[type=text]`).forEach(inp => {
                 inp.addEventListener('input', function (e) {
-                    validateInputNumber({ currentTarget: this, data: 'updateRow' });
+                    validateInputNumber({ currentTarget: this });
+                    orchestrator.handleRowChange(this);
                 });
             });
         });
@@ -38,27 +100,30 @@ class LfCostsOrchestrator {
         // Tab 3 inputs
         document.querySelectorAll('#tab-2 input[type=text]').forEach(inp => {
             inp.addEventListener('input', function (e) {
-                validateInputNumber({ currentTarget: this, data: 'updateOneMultTab' });
+                validateInputNumber({ currentTarget: this });
+                orchestrator.updateTab3();
             });
             inp.addEventListener('blur', function (e) {
-                validateInputNumberOnBlur({ currentTarget: this, data: 'updateOneMultTab' });
+                validateInputNumberOnBlur({ currentTarget: this });
+                orchestrator.updateTab3();
             });
         });
 
         // General settings
         document.querySelectorAll('#general-settings input[type=text]').forEach(inp =>
             inp.addEventListener('input', function (e) {
-                validateInputNumber({ currentTarget: this, data: 'updateParams' });
+                validateInputNumber({ currentTarget: this });
+                orchestrator.handleParamChange();
             }));
         document.querySelectorAll('#general-settings select').forEach(sel => {
-            sel.addEventListener('keyup', updateParams);
-            sel.addEventListener('change', updateParams);
+            sel.addEventListener('keyup', () => orchestrator.handleParamChange());
+            sel.addEventListener('change', () => orchestrator.handleParamChange());
         });
         document.querySelectorAll('#general-settings input[type=radio]').forEach(r =>
-            r.addEventListener('click', updateParams));
-        document.getElementById('full-numbers').addEventListener('click', updateParams);
-        document.getElementById('reset').addEventListener('click', resetParams);
-        document.getElementById('tech-types-select').addEventListener('change', updateOneMultTab);
+            r.addEventListener('click', () => orchestrator.handleParamChange()));
+        document.getElementById('full-numbers').addEventListener('click', () => orchestrator.handleParamChange());
+        document.getElementById('reset').addEventListener('click', () => orchestrator.resetParams());
+        document.getElementById('tech-types-select').addEventListener('change', () => orchestrator.updateTab3());
         document.getElementById('race-selector').addEventListener('change', () => this.handleRaceChange());
 
         // Available-resource inputs — spread across all tabs
@@ -68,7 +133,8 @@ class LfCostsOrchestrator {
                     const el = document.getElementById(`${res}-available-${outer}-${inner}`);
                     if (el) {
                         el.addEventListener('input', function (e) {
-                            validateInputNumber({ currentTarget: this, data: 'spreadValue' });
+                            validateInputNumber({ currentTarget: this });
+                            orchestrator.handleResourceInput(this);
                         });
                     }
                 });
@@ -466,3 +532,9 @@ class LfCostsOrchestrator {
         }
     }
 }
+
+function initializeLfCostsCalculator() {
+    const orch = new LfCostsOrchestrator(options);
+    orch.init();
+}
+window.initializeLfCostsCalculator = initializeLfCostsCalculator;
