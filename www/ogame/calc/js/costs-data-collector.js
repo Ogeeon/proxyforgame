@@ -120,26 +120,28 @@ class DataCollector {
 
     // Skip header row (0) and footer rows (last 5)
     for (let i = 1; i < rows.length - 5; i++) {
-      const row = rows[i];
-      const rowRequests = this._parseTableRow(row, isMultiLevel, isMoonTable);
-
-      // rowRequests may be a single BuildRequest or an array of them
-      if (rowRequests) {
-        if (Array.isArray(rowRequests)) {
-          // Multi-level: add each level's request separately
-          for (const req of rowRequests) {
-            if (req?.isValid) {
-              requests.push(req);
-            }
-          }
-        } else if (rowRequests.isValid) {
-          // Single-level or single request
-          requests.push(rowRequests);
-        }
-      }
+      const rowRequests = this._parseTableRow(rows[i], isMultiLevel, isMoonTable);
+      this._collectRowRequests(rowRequests, requests);
     }
 
     return requests;
+  }
+
+  /**
+   * Push valid requests from a parsed row result into the accumulator
+   * @private
+   */
+  _collectRowRequests(rowRequests, requests) {
+    if (!rowRequests) return;
+    if (Array.isArray(rowRequests)) {
+      for (const req of rowRequests) {
+        if (req?.isValid) {
+          requests.push(req);
+        }
+      }
+    } else if (rowRequests.isValid) {
+      requests.push(rowRequests);
+    }
   }
   
   /**
@@ -164,39 +166,40 @@ class DataCollector {
     }
 
     // Get levels from input fields
-    let fromLevel, toLevel;
-
-    if (isMultiLevel) {
-      // Multi-level tab: has both from and to inputs
-      fromLevel = this._getInputNumberFromElement(row.children[2].children[0]);
-      toLevel = this._getInputNumberFromElement(row.children[3].children[0]);
-    } else {
-      // Single-level tab: only has target level
-      toLevel = this._getInputNumberFromElement(row.children[2].children[0]);
-
-      // For ships/defense, fromLevel is always 0
-      // For buildings, it's toLevel - 1 (unless toLevel is 0)
-      if (techId >= 200) {
-        fromLevel = 0; // Ships and defense
-      } else {
-        fromLevel = (toLevel === 0) ? 0 : toLevel - 1;
-      }
-    }
+    const toLevel = this._getInputNumberFromElement(row.children[isMultiLevel ? 3 : 2].children[0]);
+    const fromLevel = isMultiLevel
+      ? this._getInputNumberFromElement(row.children[2].children[0])
+      : this._resolveFromLevel(techId, toLevel);
 
     // For multi-level tab with multiple levels, create one request per level
     if (isMultiLevel && Math.abs(toLevel - fromLevel) > 1) {
-      const requests = [];
-      const direction = toLevel > fromLevel ? 1 : -1;
-
-      for (let level = fromLevel; direction > 0 ? level < toLevel : level > toLevel; level += direction) {
-        requests.push(new BuildRequest(techId, level, level + direction, isMoon));
-      }
-
-      return requests;
+      return this._expandToLevelRequests(techId, fromLevel, toLevel, isMoon);
     }
 
     // Single-level or single-step change: return one request
     return new BuildRequest(techId, fromLevel, toLevel, isMoon);
+  }
+
+  /**
+   * Resolve the implicit fromLevel for single-level rows
+   * @private
+   */
+  _resolveFromLevel(techId, toLevel) {
+    if (techId >= 200) return 0; // Ships and defense always start at 0
+    return toLevel === 0 ? 0 : toLevel - 1;
+  }
+
+  /**
+   * Expand a multi-step range into individual per-level BuildRequests
+   * @private
+   */
+  _expandToLevelRequests(techId, fromLevel, toLevel, isMoon) {
+    const requests = [];
+    const direction = toLevel > fromLevel ? 1 : -1;
+    for (let level = fromLevel; direction > 0 ? level < toLevel : level > toLevel; level += direction) {
+      requests.push(new BuildRequest(techId, level, level + direction, isMoon));
+    }
+    return requests;
   }
   
   /**
