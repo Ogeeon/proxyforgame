@@ -154,31 +154,13 @@ class Renderer {
     const subtotalRow = rows.length - 5;
     const transportRow = rows.length - 4;
 
-    // Determine table type for column alignment
     const isBuildingTable = tableId.endsWith('-2') || tableId.endsWith('-3');
-    // Fleet and defense tables are tables 5 and 6 in outer tab 0
     const isFleetOrDefenseTable = tableId.endsWith('-5') || tableId.endsWith('-6');
 
-    // Column 2 for subtotal: "Fields taken" sum for buildings, empty for other tables
-    if (isBuildingTable) {
-      // Calculate sum of building levels for the "Fields taken" column
-      let totalLevels = 0;
-      for (let i = 1; i < rows.length - 5; i++) {
-        const row = rows[i];
-        const targetColIdx = isMultiLevel ? 3 : 2;
-        const levelInput = row.cells[targetColIdx].querySelector('input');
-        if (levelInput) {
-          const level = parseFloat(levelInput.value) || 0;
-          if (level > 0) {
-            totalLevels += level;
-          }
-        }
-      }
-      rows[subtotalRow].cells[2].innerHTML = `<b>${totalLevels}</b>`;
-    } else {
-      // For non-building tables, leave column 2 empty
-      rows[subtotalRow].cells[2].innerHTML = '';
-    }
+    // Column 2: sum of building levels for buildings, empty otherwise
+    rows[subtotalRow].cells[2].innerHTML = isBuildingTable
+      ? `<b>${this._sumBuildingLevels(rows, isMultiLevel)}</b>`
+      : '';
 
     // Subtotals row - data columns start at column 3
     const subtotalStartCol = 3;
@@ -189,17 +171,8 @@ class Renderer {
     rows[subtotalRow].cells[subtotalStartCol + 4].innerHTML = `<b>${this._formatTime(totals.time)}</b>`;
     rows[subtotalRow].cells[subtotalStartCol + 5].innerHTML = `<b>${this._formatNumber(totals.points, params)}</b>`;
 
-    // DM column (column 9 for single-level tables)
-    // For fleet and defense tables, calculate DM cost to halve the total time
     if (!isMultiLevel) {
-      if (isFleetOrDefenseTable) {
-        // Fleet and defense use techId 1000 for DM halving cost calculation
-        const dmCost = getHalvingCost(1000, totals.time);
-        rows[subtotalRow].cells[subtotalStartCol + 6].innerHTML = `<b>${this._formatNumber(dmCost, params)}</b>`;
-      } else {
-        // For buildings/research, DM column shows individual row costs only
-        rows[subtotalRow].cells[subtotalStartCol + 6].innerHTML = '';
-      }
+      this._renderSubtotalDmCell(rows[subtotalRow].cells[subtotalStartCol + 6], isFleetOrDefenseTable, totals, params);
     }
 
     // Transport calculations for subtotal
@@ -208,6 +181,38 @@ class Renderer {
       `${transport.small} <abbr title="${this.scFull}">${this.scShort}</abbr>`;
     rows[transportRow].cells[3].innerHTML =
       `${transport.large} <abbr title="${this.lcFull}">${this.lcShort}</abbr>`;
+  }
+
+  /**
+   * Sum the input levels of all building rows in a table
+   * @private
+   */
+  _sumBuildingLevels(rows, isMultiLevel) {
+    const targetColIdx = isMultiLevel ? 3 : 2;
+    let totalLevels = 0;
+    for (let i = 1; i < rows.length - 5; i++) {
+      const levelInput = rows[i].cells[targetColIdx].querySelector('input');
+      if (levelInput) {
+        const level = parseFloat(levelInput.value) || 0;
+        if (level > 0) {
+          totalLevels += level;
+        }
+      }
+    }
+    return totalLevels;
+  }
+
+  /**
+   * Render DM cost cell in the subtotal row
+   * @private
+   */
+  _renderSubtotalDmCell(cell, isFleetOrDefenseTable, totals, params) {
+    if (isFleetOrDefenseTable) {
+      const dmCost = getHalvingCost(1000, totals.time);
+      cell.innerHTML = `<b>${this._formatNumber(dmCost, params)}</b>`;
+    } else {
+      cell.innerHTML = '';
+    }
   }
   
   /**
