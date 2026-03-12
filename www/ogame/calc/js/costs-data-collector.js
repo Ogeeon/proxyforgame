@@ -423,9 +423,7 @@ class DataCollector {
    * @private
    */
   _getRadioChecked(selector) {
-    const element = typeof selector === 'string' ? $(selector) : selector;
-    if (!element) return false;
-    return element.checked === true;
+    return this._getCheckbox(selector);
   }
 
   /**
