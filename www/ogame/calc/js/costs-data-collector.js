@@ -128,7 +128,7 @@ class DataCollector {
         if (Array.isArray(rowRequests)) {
           // Multi-level: add each level's request separately
           for (const req of rowRequests) {
-            if (req && req.isValid) {
+            if (req?.isValid) {
               requests.push(req);
             }
           }
