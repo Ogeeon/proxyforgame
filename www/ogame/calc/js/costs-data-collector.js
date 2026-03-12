@@ -683,7 +683,7 @@ class ChangeDetector {
 // EXPORT FOR USE
 // ============================================================================
 
-if (typeof globalThis.window !== 'undefined') {
+if (globalThis.window !== undefined) {
   globalThis.DataCollector = DataCollector;
   globalThis.ValidationDataCollector = ValidationDataCollector;
   globalThis.ExportDataCollector = ExportDataCollector;
