@@ -188,7 +188,7 @@ class DataCollector {
       const requests = [];
       const direction = toLevel > fromLevel ? 1 : -1;
 
-      for (let level = fromLevel; level !== toLevel; level += direction) {
+      for (let level = fromLevel; direction > 0 ? level < toLevel : level > toLevel; level += direction) {
         requests.push(new BuildRequest(techId, level, level + direction, isMoon));
       }
 
