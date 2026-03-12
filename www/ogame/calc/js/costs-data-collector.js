@@ -152,7 +152,7 @@ class DataCollector {
   _parseTableRow(row, isMultiLevel, defaultIsMoon) {
     // First cell contains tech ID (hidden)
     const techIdCell = row.cells[0].innerHTML;
-    let techId = parseInt(techIdCell);
+    let techId = Number.parseInt(techIdCell);
 
     if (!techId || techId === 0) {
       return null; // Empty or invalid row
@@ -408,7 +408,7 @@ class DataCollector {
   _getSelectNumber(selector) {
     const element = typeof selector === 'string' ? $(selector) : selector;
     if (!element) return 0;
-    return parseInt(element.value) || 0;
+    return Number.parseInt(element.value) || 0;
   }
 
   /**
@@ -591,10 +591,8 @@ class ExportDataCollector extends DataCollector {
  * Tracks what changed to optimize recalculation
  */
 class ChangeDetector {
-  constructor() {
-    this.lastParams = null;
-    this.lastRequests = {};
-  }
+  lastParams = null;
+  lastRequests = {};
   
   /**
    * Detect what changed since last collection
@@ -685,9 +683,9 @@ class ChangeDetector {
 // EXPORT FOR USE
 // ============================================================================
 
-if (typeof window !== 'undefined') {
-  window.DataCollector = DataCollector;
-  window.ValidationDataCollector = ValidationDataCollector;
-  window.ExportDataCollector = ExportDataCollector;
-  window.ChangeDetector = ChangeDetector;
+if (typeof globalThis.window !== 'undefined') {
+  globalThis.DataCollector = DataCollector;
+  globalThis.ValidationDataCollector = ValidationDataCollector;
+  globalThis.ExportDataCollector = ExportDataCollector;
+  globalThis.ChangeDetector = ChangeDetector;
 }
