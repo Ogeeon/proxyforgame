@@ -31,7 +31,7 @@
   <script type="text/javascript" src="/ogame/calc/js/common.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/common.js'); ?>"></script>
 
   <!-- DOM Utilities (jQuery replacement) -->
-  <script type="text/javascript" src="/ogame/calc/js/costs-dom-utils.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/costs-dom-utils.js'); ?>"></script>
+  <script type="text/javascript" src="/ogame/calc/js/dom-utils.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/dom-utils.js'); ?>"></script>
 
   <!-- New modular calculator architecture -->
   <script type="text/javascript" src="/ogame/calc/js/costs-core.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/costs-core.js'); ?>"></script>

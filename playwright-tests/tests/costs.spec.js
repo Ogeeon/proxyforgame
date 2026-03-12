@@ -41,6 +41,7 @@ test.describe('Costs Calculator Page', () => {
         await expect(page.locator('#table-0-2 tr:nth-child(18) td:nth-child(6)')).toContainText('201.730');
         await expect(page.locator('#table-0-2 tr:nth-child(18) td:nth-child(7)')).toContainText('1.000');
         await expect(page.locator('#table-0-2 tr:nth-child(18) td:nth-child(8)')).toContainText('3w 4d 18h');
+        await page.locator('#param-common-tab').click();
         await page.locator('#full-numbers').click();
         await expect(page.locator('#table-0-2 tr:nth-child(18) td:nth-child(4)')).toContainText('1.045.508');
     });
@@ -68,7 +69,7 @@ test.describe('Costs Calculator Page', () => {
 
     test('[all items - one level / researches] calculations are correct', async ({ page }) => {
         await page.getByRole('tab', { name: 'All items - one level' }).click();
-        await page.getByRole('tab', { name: 'Researches' }).click();
+        await page.locator('#tabtag-0-4').click();
         await page.locator('#research-lab-level').fill('12');
         await page.locator('#research-lab-level').press('Enter');
         await fillTableRows(page, '#table-0-4', 2, 17, 1);
@@ -86,6 +87,7 @@ test.describe('Costs Calculator Page', () => {
         await expect(page.locator('#table-0-4 tr:nth-child(18) td:nth-child(8)')).toContainText('5h 49m 42s');
         await expect(page.locator('#table-0-4 tr:nth-child(19) td:nth-child(3)')).toContainText('141 SC');
         await expect(page.locator('#table-0-4 tr:nth-child(19) td:nth-child(4)')).toContainText('29 LC');
+        await page.locator('#param-common-tab').click();
         await page.getByRole('radio', { name: 'General' }).click();
         await expect(page.locator('#table-0-4 tr:nth-child(19) td:nth-child(3)')).toContainText('177 SC');
         await expect(page.locator('#table-0-4 tr:nth-child(19) td:nth-child(4)')).toContainText('36 LC');
@@ -158,7 +160,7 @@ test.describe('Costs Calculator Page', () => {
 
     test('[all items - multiple levels / researches] calculations are correct', async ({ page }) => {
         await page.getByRole('tab', { name: 'All items - multiple levels' }).click();
-        await page.getByRole('tab', { name: 'Researches' }).click();
+        await page.locator('#tabtag-1-4').click();
         await page.locator('#research-lab-level').fill('12');
         await page.locator('#research-lab-level').press('Enter');
         await fillTableRows(page, '#table-1-4', 2, 17, 5, 6);
@@ -188,6 +190,7 @@ test.describe('Costs Calculator Page', () => {
         await expect(page.locator('#prods-table tr:nth-child(4) td:nth-child(7)')).toContainText('53');
         await expect(page.locator('#prods-table tr:nth-child(4) td:nth-child(8)')).toContainText('3.761');
         await expect(page.locator('#prods-table tr:nth-child(4) td:nth-child(9)')).toContainText('735');
+        await page.locator('#param-common-tab').click();
         await page.locator('#universe-speed').selectOption('10');
         await expect(page.locator('#prods-table tr:nth-child(4) td:nth-child(6)')).toContainText('2h 11m 21s');
 
@@ -199,6 +202,7 @@ test.describe('Costs Calculator Page', () => {
         await expect(page.locator('#commons-table tr:nth-child(4) td:nth-child(6)')).toContainText('7w 3h');
         await expect(page.locator('#commons-table tr:nth-child(4) td:nth-child(7)')).toContainText('34.405');
 
+        await page.locator('#param-buildings-tab').click();
         await page.locator('#research-lab-level').fill('12');
         await page.locator('#research-lab-level').press('Enter');
         await page.locator('#tech-types-select').selectOption('106');
@@ -242,7 +246,7 @@ test.describe('Costs Calculator Page', () => {
         await expect(page.locator('#table-0-3 tr:nth-last-child(2) td:nth-child(8)')).toContainText('370');
 
         // Researches
-        await page.getByRole('tab', { name: 'Researches' }).click();
+        await page.locator('#tabtag-0-4').click();
         await page.locator('#table-0-4 tr:nth-child(2) td:nth-child(3) input').fill('10');
         await page.locator('#table-0-4 tr:nth-child(2) td:nth-child(3) input').press('Enter');
         await expect(page.locator('#table-0-4 tr:nth-last-child(2) td:nth-child(3)')).toContainText('309.506');
@@ -310,7 +314,7 @@ test.describe('Costs Calculator Page', () => {
         await expect(page.locator('#table-1-3 tr:nth-last-child(2) td:nth-child(8)')).toContainText('741');
 
         // Researches
-        await page.getByRole('tab', { name: 'Researches' }).click();
+        await page.locator('#tabtag-1-4').click();
         await page.locator('#table-1-4 tr:nth-child(2) td:nth-child(3) input').fill('10');
         await page.locator('#table-1-4 tr:nth-child(2) td:nth-child(4) input').fill('11');
         await page.locator('#table-1-4 tr:nth-child(2) td:nth-child(4) input').press('Enter');
