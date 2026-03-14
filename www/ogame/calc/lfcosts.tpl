@@ -250,7 +250,7 @@
                 $colHeaders[0] = 'building';
             ?>
             <div class="tab-pane fade <?= $j === $firstInnerTab ? 'show active' : '' ?> no-mp" id="tab-<?=$i?>-<?=$j?>" role="tabpanel">
-              <table id="table-<?=$i?>-<?=$j?>" class="lined" cellpadding="0" cellspacing="1" border="0" width="100%">
+              <table id="table-<?=$i?>-<?=$j?>" class="lined" cellpadding="0" cellspacing="1" border="0">
                 <tr>
                   <th style="display: none;"></th>
                   <?php foreach ($colHeaders as $idx => $header) :?>
@@ -366,7 +366,7 @@
             </div>
           </div>
           <div id="commons-table-div">
-            <table id="commons-table" class="lined" cellpadding="0" cellspacing="1" border="0" width="100%">
+            <table id="commons-table" class="lined" cellpadding="0" cellspacing="1" border="0">
               <tr>
               <?php foreach ($colHeadersOneCommon as $colName): ?>
                 <th><?=$l[$colName]?></th>

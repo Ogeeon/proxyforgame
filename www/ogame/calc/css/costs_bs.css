@@ -14,7 +14,8 @@
 }
 
 #lfcosts {
-  max-width: 930px;
+  width: min-content;
+  max-width: 100%;
   margin: 0 auto;
 }
 
@@ -156,6 +157,7 @@
   font-weight: 600;
   padding: 2px 8px;
   border: 1px solid var(--bs-border-color);
+  white-space: nowrap;
 }
 
 .lined td {
@@ -244,7 +246,9 @@ td.min {
 
 /* Allow tables to dictate the width of the entire container hierarchy */
 #costs .tab-content,
-#costs .tab-pane {
+#costs .tab-pane,
+#lfcosts .tab-content,
+#lfcosts .tab-pane {
   min-width: fit-content;
 }
 
