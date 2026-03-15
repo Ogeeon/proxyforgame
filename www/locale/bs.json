@@ -95,6 +95,7 @@
     "researches": "Istraživanja",
     "fleet": "Flota",
     "building": "Zgrade",
+    "buildings": "Zgrade",
     "research": "Istraživanja",
     "ship": "Brod",
     "level": "Level",
@@ -166,7 +167,11 @@
     "lf-tech-bonus": "Tehnološki bonus Oblika života",
     "country": "Zemlja",
     "res-available": "Resources available",
-    "res-needed": "Resources to deliver"
+    "res-needed": "Resources to deliver",
+    "research-cost-reduction": "Research cost reduction",
+    "research-time-reduction": "Research time reduction",
+    "lifeforms": "Oblici života",
+    "param-tab-common": "Opšte"
   },
   "index": {
     "title": "ProxyForGame - alati za online igru Ogame",
@@ -267,7 +272,6 @@
     "irn": "Intergalaktička znanstvena mreža",
     "astrophysics": "Astrofizika",
     "graviton": "Tehnologija za gravitone",
-    "buildings-common": "Zgrade",
     "buildings-planet": "Zgrade (planet)",
     "buildings-moon": "Zgrade (mjesec)",
     "defenses": "Odbrana",
@@ -277,14 +281,10 @@
     "times-note": "Kada računate trajanje izgradnje/istraživanja, alat koristi samo vrijednosti za levele tvornice brodova, tvornica i laboratorija koji su uneseni u gornjem panelu. Ako želite da izračunate vrijeme istraživanja sa levelima koje imate ako imate Intergalaktičku znanstvenu mrežu, molimo kliknite \"Izračunaj\" dugme pored polja \"Centar za istraživanje\".",
     "msg-cant-research": "Na datom levelu Centra za istraživanje, istraživanje \"{0}\" nije dostupno.",
     "moon": "Mjeseca",
-    "param-tab-common": "Opšte",
-    "param-tab-lifeforms": "Oblici života",
-    "param-tab-buildings": "Zgrade"
+    "mineral-res-cntr-lvl": "Mineral Research Centre",
+    "lf-terraformer-rdc": "Smanjenje troškova terraformera"
   },
   "lfcosts": {
-    "param-tab-common": "Opšte",
-    "param-tab-lifeforms": "Oblici života",
-    "param-tab-buildings": "Zgrade",
     "sc-short": "MT",
     "lc-short": "VT",
     "energy": "Energija",
@@ -292,11 +292,8 @@
     "keywords": "proxyforgame,proxy,online,calc,calculator,ogame,price calculation,cost calculation,buildings costs,research costs,fleet costs,defence costs,costs calculator,prices calculator",
     "planet": "Planeta",
     "max-planet-temp": "Maksimalna temp. planeta",
-    "buildings": "Zgrade",
     "times-note": "The final bonus varies from planet to planet. To get accurate results, manually calculate the total bonus on the planet where you will start the construction/research.",
     "race": "Lifeform",
-    "research-cost-reduction": "Research cost reduction %",
-    "research-time-reduction": "Research time reduction %",
     "cargo-cap-increase": "Cargo capacity increase (%): ",
     "times-hint": "Please read the note at the bottom of the page",
     "race-1": "Human",

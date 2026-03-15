@@ -93,6 +93,7 @@
     "ipm": "Medziplanetárne rakety",
     "researches": "Výskumy",
     "building": "budova",
+    "buildings": "Budovy",
     "research": "Výskum",
     "ship": "Loď",
     "level": "Úroveň",
@@ -167,7 +168,11 @@
     "lf-tech-bonus": "Technologický bonus Foriem života",
     "country": "Krajina",
     "res-available": "Dostupné zdroje",
-    "res-needed": "Chýbajúce zdroje"
+    "res-needed": "Chýbajúce zdroje",
+    "research-cost-reduction": "Zníženie nákladov na výskum",
+    "research-time-reduction": "Skrátenie času výskumu",
+    "lifeforms": "Formy života",
+    "param-tab-common": "Všeobecné"
   },
   "index": {
     "title": "ProxyForGame - software pre online hry v prehliadači OGame",
@@ -263,7 +268,6 @@
     "irn": "Intergalaktická výskumná sieť",
     "astrophysics": "Astrofyzika",
     "graviton": "Gravitonové technológie",
-    "buildings-common": "Budovy",
     "buildings-planet": "Budovy (planéta)",
     "buildings-moon": "Budovy (Mesiac)",
     "fleet": "Flotily",
@@ -275,21 +279,14 @@
     "msg-cant-research": "Na danej úrovní výskumného laboratória je výskum \"{0}\" nemožný.",
     "class-collector": "Collector",
     "planet-pos": "Pozícia",
-    "param-tab-common": "Všeobecné",
-    "param-tab-lifeforms": "Formy života",
-    "param-tab-buildings": "Budovy"
+    "mineral-res-cntr-lvl": "Výskumné centrum minerálov",
+    "lf-terraformer-rdc": "Zníženie nákladov na terraformer"
   },
   "lfcosts": {
-    "param-tab-common": "Všeobecné",
-    "param-tab-lifeforms": "Formy života",
-    "param-tab-buildings": "Budovy",
     "title": "OGame - Kalkulátor pre ceny pre formy života",
-    "buildings": "Budovy",
     "times-note": "Konečný bonus sa líši od planéty k planéte. Ak chcete získať presné výsledky, ručne vypočítajte celkový bonus na planéte, na ktorej začnete výstavbu/výskum.",
     "class-collector": "Collector",
     "race": "Forma Života",
-    "research-cost-reduction": "Zníženie nákladov na výskum %",
-    "research-time-reduction": "Skrátenie času výskumu %",
     "cargo-cap-increase": "Zvýšenie kapacity nákladu (%): ",
     "times-hint": "Prečítajte si prosím poznámku v dolnej časti stránky",
     "race-1": "Ľudia",

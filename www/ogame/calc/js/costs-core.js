@@ -50,6 +50,12 @@ class GlobalParams {
 
     // Display options
     this.fullNumbers = false;
+
+    // Lifeform reductions
+    this.lfResCostRdc = 0;      // LF research cost reduction, %
+    this.lfResTimeRdc = 0;      // LF research time reduction, %
+    this.mineralResCntrLvl = 0; // Mineral Research Centre level (Rock'tal)
+    this.lfTerraformerRdc = 0;  // LF Terraformer reduction, %
   }
 
   /**
@@ -62,6 +68,26 @@ class GlobalParams {
     if (this.researchBonus) factor *= 0.75;
     if (this.playerClass === 2) factor *= 0.75; // Discoverer
     return factor;
+  }
+
+  /** LF research cost reduction factor (0–0.5) */
+  get lfResCostFactor() {
+    return Math.min(0.5, this.lfResCostRdc / 100);
+  }
+
+  /** LF research time reduction factor (0–0.99) */
+  get lfResTimeFactor() {
+    return Math.min(0.99, this.lfResTimeRdc / 100);
+  }
+
+  /** Mineral Research Centre cost reduction factor (0–0.5) */
+  get mineralResCntrCostFactor() {
+    return Math.min(0.5, this.mineralResCntrLvl * 0.005);
+  }
+
+  /** LF Terraformer cost/time reduction factor (0–0.5) */
+  get lfTerraformerFactor() {
+    return Math.min(0.5, this.lfTerraformerRdc / 100);
   }
 
   /**
@@ -161,7 +187,11 @@ class GlobalParams {
       planetPos: { min: 1, max: 16, default: 8 },
       irnLevel: { min: 0, max: Infinity, default: 0 },
       booster: { min: 0, max: 4, default: 0 },
-      playerClass: { min: 0, max: 2, default: 0 }
+      playerClass: { min: 0, max: 2, default: 0 },
+      lfResCostRdc: { min: 0, max: 50, default: 0 },
+      lfResTimeRdc: { min: 0, max: 99, default: 0 },
+      mineralResCntrLvl: { min: 0, max: 100, default: 0 },
+      lfTerraformerRdc: { min: 0, max: 50, default: 0 }
     };
 
     const rule = rules[field];
@@ -348,12 +378,22 @@ class Calculator {
     }
 
     // Calculate resource costs
-    const resources = this._calculateResources(
+    let resources = this._calculateResources(
       request.techId,
       request.fromLevel,
       request.toLevel,
       params.ionTechLevel
     );
+
+    // Apply LF cost reductions
+    const costFactor = this._lfCostFactor(request.techId, params);
+    if (costFactor < 1) {
+      resources = {
+        metal: Math.floor(resources.metal * costFactor),
+        crystal: Math.floor(resources.crystal * costFactor),
+        deuterium: Math.floor(resources.deuterium * costFactor)
+      };
+    }
 
     // Calculate energy cost (consumption or production)
     const energy = this._calculateEnergy(
@@ -362,13 +402,19 @@ class Calculator {
     );
 
     // Calculate build/research time
-    const time = this._calculateTime(
+    let time = this._calculateTime(
       request.techId,
       request.fromLevel,
       request.toLevel,
       request.isMoon,
       params
     );
+
+    // Apply LF time reductions
+    const timeFactor = this._lfTimeFactor(request.techId, params);
+    if (timeFactor < 1) {
+      time = Math.floor(time * timeFactor);
+    }
 
     // Calculate points gained/lost
     const points = this._calculatePoints(
@@ -569,6 +615,41 @@ class Calculator {
       const buildCost = this._calculateResources(techId, toLevel, fromLevel, 0);
       return -Math.floor((buildCost.metal + buildCost.crystal + buildCost.deuterium) / 1000);
     }
+  }
+  /**
+   * Calculate the LF cost multiplier for a tech (1 = no reduction)
+   * @private
+   */
+  _lfCostFactor(techId, params) {
+    // Research IDs: 100 < techId <= 200
+    if (techId > 100 && techId <= 200) {
+      return 1 - params.lfResCostFactor;
+    }
+    // Mines and energy buildings affected by Mineral Research Centre
+    if ([1, 2, 3, 4, 12].includes(techId)) {
+      return 1 - params.mineralResCntrCostFactor;
+    }
+    // Terraformer
+    if (techId === 33) {
+      return 1 - params.lfTerraformerFactor;
+    }
+    return 1;
+  }
+
+  /**
+   * Calculate the LF time multiplier for a tech (1 = no reduction)
+   * @private
+   */
+  _lfTimeFactor(techId, params) {
+    // Research IDs: 100 < techId <= 200
+    if (techId > 100 && techId <= 200) {
+      return 1 - params.lfResTimeFactor;
+    }
+    // Terraformer
+    if (techId === 33) {
+      return 1 - params.lfTerraformerFactor;
+    }
+    return 1;
   }
 }
 

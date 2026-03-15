@@ -93,7 +93,7 @@
       <!-- Parameter Tabs -->
       <ul class="nav nav-tabs nav-tabs-sm" id="paramTabs" role="tablist">
         <li class="nav-item" role="presentation">
-          <button class="nav-link" id="param-buildings-tab" data-bs-toggle="tab" data-bs-target="#param-buildings" type="button" role="tab"><?= $l['param-tab-buildings'] ?></button>
+          <button class="nav-link" id="param-buildings-tab" data-bs-toggle="tab" data-bs-target="#param-buildings" type="button" role="tab"><?= $l['buildings'] ?></button>
         </li>
         <li class="nav-item" role="presentation">
           <button class="nav-link" id="param-researches-tab" data-bs-toggle="tab" data-bs-target="#param-researches" type="button" role="tab"><?= $l['researches'] ?></button>
@@ -102,7 +102,7 @@
           <button class="nav-link" id="param-common-tab" data-bs-toggle="tab" data-bs-target="#param-common" type="button" role="tab"><?= $l['param-tab-common'] ?></button>
         </li>
         <li class="nav-item" role="presentation">
-          <button class="nav-link active" id="param-lifeforms-tab" data-bs-toggle="tab" data-bs-target="#param-lifeforms" type="button" role="tab"><?= $l['param-tab-lifeforms'] ?></button>
+          <button class="nav-link active" id="param-lifeforms-tab" data-bs-toggle="tab" data-bs-target="#param-lifeforms" type="button" role="tab"><?= $l['lifeforms'] ?></button>
         </li>
       </ul>
       <div id="general-settings" class="tab-content">

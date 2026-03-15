@@ -85,12 +85,12 @@ test.describe('Costs Calculator Page', () => {
         await expect(page.locator('#table-0-4 tr:nth-child(18) td:nth-child(6)')).toContainText('175.500');
         await expect(page.locator('#table-0-4 tr:nth-child(18) td:nth-child(7)')).toContainText('300.000');
         await expect(page.locator('#table-0-4 tr:nth-child(18) td:nth-child(8)')).toContainText('5h 49m 42s');
-        await expect(page.locator('#table-0-4 tr:nth-child(19) td:nth-child(3)')).toContainText('141 SC');
-        await expect(page.locator('#table-0-4 tr:nth-child(19) td:nth-child(4)')).toContainText('29 LC');
+        await expect(page.locator('#table-0-4 tr:nth-child(23) td:nth-child(3)')).toContainText('141 SC');
+        await expect(page.locator('#table-0-4 tr:nth-child(23) td:nth-child(4)')).toContainText('29 LC');
         await page.locator('#param-common-tab').click();
         await page.getByRole('radio', { name: 'General' }).click();
-        await expect(page.locator('#table-0-4 tr:nth-child(19) td:nth-child(3)')).toContainText('177 SC');
-        await expect(page.locator('#table-0-4 tr:nth-child(19) td:nth-child(4)')).toContainText('36 LC');
+        await expect(page.locator('#table-0-4 tr:nth-child(23) td:nth-child(3)')).toContainText('177 SC');
+        await expect(page.locator('#table-0-4 tr:nth-child(23) td:nth-child(4)')).toContainText('36 LC');
         await page.getByRole('radio', { name: 'Discoverer' }).click();
         await expect(page.locator('#table-0-4 tr:nth-child(18) td:nth-child(8)')).toContainText('4h 22m 16s');
         await page.locator('#technocrat').click();
@@ -374,5 +374,62 @@ test.describe('Costs Calculator Page', () => {
         await page.getByRole('button', { name: 'Done' }).click();
         await page.waitForTimeout(100);
         await expect(page.locator('#research-lab-level')).toHaveValue('36');
+    });
+
+    test('lifeform bonuses are correct', async ({ page }) => {
+        await fillTableRows(page, '#table-0-2', 2, 17, 5);
+        await page.locator('#param-common-tab').click();
+        await page.locator('#full-numbers').click();
+        await expect(page.locator('#table-0-2 tr:nth-child(18) td:nth-child(4)')).toContainText('16.840.582');
+        await expect(page.locator('#table-0-2 tr:nth-child(18) td:nth-child(5)')).toContainText('9.800.061');
+        await expect(page.locator('#table-0-2 tr:nth-child(18) td:nth-child(6)')).toContainText('3.257.139');
+        await expect(page.locator('#table-0-2 tr:nth-child(18) td:nth-child(7)')).toContainText('16.000');
+        await expect(page.locator('#table-0-2 tr:nth-child(18) td:nth-child(8)')).toContainText('61w 2d 8h');
+        await expect(page.locator('#table-0-2 tr:nth-child(18) td:nth-child(9)')).toContainText('29.894');
+
+        await page.locator('#param-lifeforms-tab').click();
+        await page.locator('#mineral-res-cntr-lvl').fill('5');
+        await page.locator('#mineral-res-cntr-lvl').press('Enter');
+        await expect(page.locator('#table-0-2 tr:nth-child(18) td:nth-child(4)')).toContainText('16.840.290');
+        await expect(page.locator('#table-0-2 tr:nth-child(18) td:nth-child(5)')).toContainText('9.799.946');
+        await expect(page.locator('#table-0-2 tr:nth-child(18) td:nth-child(6)')).toContainText('3.257.091');
+        await expect(page.locator('#table-0-2 tr:nth-child(18) td:nth-child(7)')).toContainText('16.000');
+        await expect(page.locator('#table-0-2 tr:nth-child(18) td:nth-child(8)')).toContainText('61w 2d 8h');
+        await expect(page.locator('#table-0-2 tr:nth-child(18) td:nth-child(9)')).toContainText('29.893');
+
+        await page.locator('#lf-terraformer-rdc').fill('20');
+        await page.locator('#lf-terraformer-rdc').press('Enter');
+        await expect(page.locator('#table-0-2 tr:nth-child(18) td:nth-child(4)')).toContainText('16.840.290');
+        await expect(page.locator('#table-0-2 tr:nth-child(18) td:nth-child(5)')).toContainText('9.639.946');
+        await expect(page.locator('#table-0-2 tr:nth-child(18) td:nth-child(6)')).toContainText('2.937.091');
+        await expect(page.locator('#table-0-2 tr:nth-child(18) td:nth-child(7)')).toContainText('16.000');
+        await expect(page.locator('#table-0-2 tr:nth-child(18) td:nth-child(8)')).toContainText('61w 13h');
+        await expect(page.locator('#table-0-2 tr:nth-child(18) td:nth-child(9)')).toContainText('29.413');
+
+        await page.locator('#reset').click();
+        await page.locator('#param-buildings-tab').click();
+        await page.locator('#research-lab-level').fill('12');
+        await page.locator('#research-lab-level').press('Enter');
+        await page.locator('#param-common-tab').click();
+        await page.locator('#full-numbers').click();
+        await page.locator('#tabtag-0-4').click();
+        await fillTableRows(page, '#table-0-4', 2, 17, 5);
+        await expect(page.locator('#table-0-4 tr:nth-child(18) td:nth-child(4)')).toContainText('4.162.300');
+        await expect(page.locator('#table-0-4 tr:nth-child(18) td:nth-child(5)')).toContainText('7.041.400');
+        await expect(page.locator('#table-0-4 tr:nth-child(18) td:nth-child(6)')).toContainText('2.781.500');
+        await expect(page.locator('#table-0-4 tr:nth-child(18) td:nth-child(7)')).toContainText('24.300.000');
+        await expect(page.locator('#table-0-4 tr:nth-child(18) td:nth-child(8)')).toContainText('5w 21h');
+        await expect(page.locator('#table-0-4 tr:nth-child(18) td:nth-child(9)')).toContainText('13.982');
+
+        await page.locator('#param-lifeforms-tab').click();
+        await page.locator('#research-cost-reduction').fill('25');
+        await page.locator('#research-cost-reduction').press('Enter');
+        await page.locator('#research-time-reduction').fill('25');
+        await page.locator('#research-time-reduction').press('Enter');
+        await expect(page.locator('#table-0-4 tr:nth-child(18) td:nth-child(4)')).toContainText('3.121.725');
+        await expect(page.locator('#table-0-4 tr:nth-child(18) td:nth-child(5)')).toContainText('5.281.050');
+        await expect(page.locator('#table-0-4 tr:nth-child(18) td:nth-child(6)')).toContainText('2.086.125');
+        await expect(page.locator('#table-0-4 tr:nth-child(18) td:nth-child(7)')).toContainText('24.300.000');
+        await expect(page.locator('#table-0-4 tr:nth-child(18) td:nth-child(8)')).toContainText('3w 5d 22h');
     });
 });

@@ -62,7 +62,13 @@ class DataCollector {
     // Intergalactic Research Network
     params.irnLevel = this._getInputNumber('#irn-level');
     this._collectLabLevels(params);
-    
+
+    // Lifeform reductions
+    params.lfResCostRdc = this._getInputNumber('#research-cost-reduction');
+    params.lfResTimeRdc = this._getInputNumber('#research-time-reduction');
+    params.mineralResCntrLvl = this._getInputNumber('#mineral-res-cntr-lvl');
+    params.lfTerraformerRdc = this._getInputNumber('#lf-terraformer-rdc');
+
     return params;
   }
     
@@ -340,7 +346,17 @@ class DataCollector {
       'class-2': ['*'],
       
       // Display option - affects all
-      'full-numbers': ['*']
+      'full-numbers': ['*'],
+
+      // LF research reductions affect research tables
+      'research-cost-reduction': ['table-0-4', 'table-1-4'],
+      'research-time-reduction': ['table-0-4', 'table-1-4'],
+
+      // Mineral Research Centre affects planet building tables (mines)
+      'mineral-res-cntr-lvl': ['table-0-2', 'table-1-2'],
+
+      // LF Terraformer reduction affects planet building tables
+      'lf-terraformer-rdc': ['table-0-2', 'table-1-2']
     };
     
     const affected = affectedMap[fieldId];
@@ -372,7 +388,8 @@ class DataCollector {
       'booster', 'universe-speed', 'research-speed', 'technocrat',
       'research-bonus', 'robot-factory-level', 'nanite-factory-level',
       'shipyard-level', 'ion-tech-level', 'hyper-tech-level',
-      'class-0', 'class-1', 'class-2', 'full-numbers'
+      'class-0', 'class-1', 'class-2', 'full-numbers',
+      'research-cost-reduction', 'research-time-reduction', 'mineral-res-cntr-lvl', 'lf-terraformer-rdc'
     ];
     
     return rangeAffecting.includes(fieldId);

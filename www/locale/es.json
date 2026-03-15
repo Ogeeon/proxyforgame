@@ -95,6 +95,7 @@
     "researches": "Investigaciones",
     "fleet": "Flota",
     "building": "Edificios",
+    "buildings": "Edificios",
     "research": "Investigación",
     "ship": "Nave",
     "level": "Nivel",
@@ -169,7 +170,11 @@
     "lf-tech-bonus": "Bonificación tecnológica de las Formas de Vida",
     "country": "País",
     "res-available": "Recursos disponibles",
-    "res-needed": "Faltan recursos"
+    "res-needed": "Faltan recursos",
+    "research-cost-reduction": "Reducción de costes de investigación",
+    "research-time-reduction": "Reducción del tiempo de investigación",
+    "lifeforms": "Formas de vida",
+    "param-tab-common": "General"
   },
   "index": {
     "title": "ProxyForGame - herramientas para los juegos de navegador en línea OGame",
@@ -267,7 +272,6 @@
     "astrophysics": "Astrofísica",
     "graviton": "Tecnología de Gravitón",
     "colony-ship": "Nave Colonizadora",
-    "buildings-common": "Edificios",
     "buildings-planet": "Edificios (planeta)",
     "buildings-moon": "Edificios (luna)",
     "defenses": "Defensas",
@@ -278,22 +282,15 @@
     "msg-cant-research": "Con este nivel de Laboratorio de Investigación, la tecnología \"{0}\" no está disponible.",
     "class-collector": "Recolector",
     "planet-pos": "Posición",
-    "param-tab-common": "General",
-    "param-tab-lifeforms": "Formas de vida",
-    "param-tab-buildings": "Edificios"
+    "mineral-res-cntr-lvl": "Centro de Investigación de Minerales",
+    "lf-terraformer-rdc": "Reducción de costes del terraformador"
   },
   "lfcosts": {
-    "param-tab-common": "General",
-    "param-tab-lifeforms": "Formas de vida",
-    "param-tab-buildings": "Edificios",
     "title": "OGame - Calculadora de Costes para formas de vida",
     "keywords": "proxyforgame,proxy,online,calculadora online,ogame,calculadora de costes,costos de construcción,costo de la investigación,costos de construcción,costo de la flota,costos de defensa",
-    "buildings": "Edificios",
     "times-note": "La bonificación final varía de un planeta a otro. Para obtener resultados precisos, calcula manualmente la bonificación total en el planeta donde vayas a iniciar la construcción/investigación.",
     "class-collector": "Recolector",
     "race": "Forma de vida",
-    "research-cost-reduction": "Reducción de costes de investigación %",
-    "research-time-reduction": "Reducción del tiempo de investigación %",
     "cargo-cap-increase": "Aumento de la capacidad de carga (%): ",
     "times-hint": "Lea la nota al final de la página",
     "race-1": "Humanos",

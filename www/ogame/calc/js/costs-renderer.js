@@ -361,13 +361,13 @@ class Renderer {
   _clearRangeTable(tableId) {
     const rows = getTableRows(`#${tableId}`);
 
-    // Remove all data rows (keep header row at index 0 and last 2 footer rows)
-    // Any row between header and footer is a data row and should be removed
-    for (let i = rows.length - 3; i > 0; i--) {
+    // Remove all data rows (keep header row at index 0 and last 4 footer rows:
+    // totals, available, needed, transport)
+    for (let i = rows.length - 5; i > 0; i--) {
       rows[i].remove();
     }
   }
-  
+
   /**
    * Append a row to range table
    * @private
@@ -395,19 +395,20 @@ class Renderer {
 
     html += `</tr>`;
 
-    // Insert before the totals rows
+    // Insert before the totals row (4th from the end)
     const rows = getTableRows(`#${tableId}`);
-    const insertBefore = rows[rows.length - 2];
+    const insertBefore = rows[rows.length - 4];
     insertBefore.insertAdjacentHTML('beforebegin', html);
   }
-  
+
   /**
    * Render range table totals
    * @private
    */
   _renderRangeTotals(tableId, totals, maxProduction, maxConsumption, params, isProducer) {
     const rows = getTableRows(`#${tableId}`);
-    const totalsRow = rows.length - 2;
+    const totalsRow = rows.length - 4;
+    const neededRow = rows.length - 2;
     const transportRow = rows.length - 1;
 
     // Totals row
@@ -423,8 +424,23 @@ class Renderer {
       rows[totalsRow].cells[8].innerHTML = `<b>${this._formatNumber(maxConsumption, params)}</b>`;
     }
 
-    // Transport row
-    const transport = this._calculateTransport(totals.totalResources, params);
+    // Read available resources from input fields
+    const prefix = isProducer ? 'prods' : 'commons';
+    const metalAvail   = getInputNumber(document.getElementById(`${prefix}-metal-available`)) || 0;
+    const crystalAvail = getInputNumber(document.getElementById(`${prefix}-crystal-available`)) || 0;
+    const deutAvail    = getInputNumber(document.getElementById(`${prefix}-deut-available`)) || 0;
+
+    const needMetal   = Math.max(0, totals.metal      - metalAvail);
+    const needCrystal = Math.max(0, totals.crystal    - crystalAvail);
+    const needDeut    = Math.max(0, totals.deuterium  - deutAvail);
+
+    // Needed row
+    rows[neededRow].cells[1].innerHTML = this._formatNumber(needMetal, params);
+    rows[neededRow].cells[2].innerHTML = this._formatNumber(needCrystal, params);
+    rows[neededRow].cells[3].innerHTML = this._formatNumber(needDeut, params);
+
+    // Transport row (based on needed resources, not total)
+    const transport = this._calculateTransport(needMetal + needCrystal + needDeut, params);
     rows[transportRow].cells[1].innerHTML =
       `${transport.small} <abbr title="${this.scFull}">${this.scShort}</abbr>`;
     rows[transportRow].cells[2].innerHTML =

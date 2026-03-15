@@ -35,7 +35,7 @@ class CostsCalculator {
       return;
     }
 
-    console.log('Initializing CostsCalculator...');
+    // console.log('Initializing CostsCalculator...');
 
     // Load saved state from cookies
     this.loadState();
@@ -47,7 +47,7 @@ class CostsCalculator {
     this.recalculateAll();
 
     this.isInitialized = true;
-    console.log('CostsCalculator initialized');
+    // console.log('CostsCalculator initialized');
   }
 
   // ==========================================================================
@@ -61,7 +61,7 @@ class CostsCalculator {
   recalculateAll() {
     const startTime = performance.now();
 
-    console.log('Recalculating all tables...');
+    // console.log('Recalculating all tables...');
 
     // 1. Collect global parameters
     this.currentParams = this.collector.collectGlobalParams();
@@ -80,7 +80,7 @@ class CostsCalculator {
 
     const elapsed = performance.now() - startTime;
     this.stats.totalTime += elapsed;
-    console.log(`Recalculation complete in ${elapsed.toFixed(2)}ms`);
+    // console.log(`Recalculation complete in ${elapsed.toFixed(2)}ms`);
   }
 
   /**
@@ -117,7 +117,7 @@ class CostsCalculator {
   recalculateTables(tableIds) {
     const startTime = performance.now();
 
-    console.log(`Recalculating tables: ${tableIds.join(', ')}`);
+    // console.log(`Recalculating tables: ${tableIds.join(', ')}`);
 
     // Ensure we have current params
     if (!this.currentParams) {
@@ -145,7 +145,7 @@ class CostsCalculator {
     this.stats.calculations++;
     this.stats.renders++;
 
-    console.log(`Tables recalculated in ${elapsed.toFixed(2)}ms`);
+    // console.log(`Tables recalculated in ${elapsed.toFixed(2)}ms`);
   }
 
   /**
@@ -254,7 +254,7 @@ class CostsCalculator {
    * Bind all event handlers
    */
   bindEvents() {
-    console.log('Binding event handlers...');
+    // console.log('Binding event handlers...');
 
     // Global parameter inputs - trigger full recalculation
     this._bindGlobalParamEvents();
@@ -268,7 +268,7 @@ class CostsCalculator {
     // Special buttons
     this._bindSpecialEvents();
 
-    console.log('Event handlers bound');
+    // console.log('Event handlers bound');
   }
 
   /**
@@ -310,6 +310,24 @@ class CostsCalculator {
       removeAllEvents(selector, 'keyup');
       addEvent(selector, 'keyup', (event) => {
         // Validate input first (if function exists from utils.js)
+        if (typeof validateInputNumber === 'function') {
+          validateInputNumber.call(event.target, event);
+        }
+        this._handleParamChange(selector.substring(1));
+      });
+    });
+
+    // Lifeform reduction inputs
+    const lfInputs = [
+      '#research-cost-reduction',
+      '#research-time-reduction',
+      '#mineral-res-cntr-lvl',
+      '#lf-terraformer-rdc'
+    ];
+
+    lfInputs.forEach(selector => {
+      removeAllEvents(selector, 'keyup');
+      addEvent(selector, 'keyup', (event) => {
         if (typeof validateInputNumber === 'function') {
           validateInputNumber.call(event.target, event);
         }
@@ -405,6 +423,21 @@ class CostsCalculator {
         this.recalculateRangeTab();
       });
     });
+
+    // Available resources inputs — recalculate needed and transport on change
+    const availableInputs = [
+      '#prods-metal-available', '#prods-crystal-available', '#prods-deut-available',
+      '#commons-metal-available', '#commons-crystal-available', '#commons-deut-available'
+    ];
+    availableInputs.forEach(selector => {
+      removeAllEvents(selector, 'keyup');
+      addEvent(selector, 'keyup', (event) => {
+        if (typeof validateInputNumber === 'function') {
+          validateInputNumber.call(event.target, event);
+        }
+        this.recalculateRangeTab();
+      });
+    });
   }
 
   /**
@@ -427,10 +460,10 @@ class CostsCalculator {
     // Theme toggle
     const cbLightTheme = document.getElementById('cb-light-theme');
     if (cbLightTheme) {
-      let theme = { value: 'light', validate: function(key, val) { return val; } };
+      let theme = { value: 'light', validate: function (key, val) { return val; } };
       loadFromCookie('theme', theme);
       toggleLightBS(theme.value === 'light');
-      cbLightTheme.addEventListener('click', function() { toggleLightBS(this.checked); });
+      cbLightTheme.addEventListener('click', function () { toggleLightBS(this.checked); });
     }
   }
 
@@ -549,7 +582,11 @@ class CostsCalculator {
       irnLevel: this.currentParams.irnLevel,
       labLevels: this.currentParams.labLevels,
       labChoice: this.currentParams.labChoice,
-      fullNumbers: this.currentParams.fullNumbers
+      fullNumbers: this.currentParams.fullNumbers,
+      lfResCostRdc: this.currentParams.lfResCostRdc,
+      lfResTimeRdc: this.currentParams.lfResTimeRdc,
+      mineralResCntrLvl: this.currentParams.mineralResCntrLvl,
+      lfTerraformerRdc: this.currentParams.lfTerraformerRdc
     };
 
     try {
@@ -605,7 +642,7 @@ class CostsCalculator {
       }
 
       if (state) {
-        console.log('Loading state from storage...');
+        // console.log('Loading state from storage...');
 
         // Apply state to UI elements
         this._applyStateToUI(state);
@@ -613,7 +650,7 @@ class CostsCalculator {
         // Collect params after applying state
         this.currentParams = this.collector.collectGlobalParams();
 
-        console.log('State loaded');
+        // console.log('State loaded');
       }
     } catch (e) {
       console.error('Failed to load state:', e.message, e.stack);
@@ -679,6 +716,20 @@ class CostsCalculator {
     setChecked('#research-bonus', state.researchBonus === true);
     setChecked('#full-numbers', state.fullNumbers === true);
 
+    // Lifeform reductions
+    if (state.lfResCostRdc !== undefined) {
+      setVal('#research-cost-reduction', state.lfResCostRdc);
+    }
+    if (state.lfResTimeRdc !== undefined) {
+      setVal('#research-time-reduction', state.lfResTimeRdc);
+    }
+    if (state.mineralResCntrLvl !== undefined) {
+      setVal('#mineral-res-cntr-lvl', state.mineralResCntrLvl);
+    }
+    if (state.lfTerraformerRdc !== undefined) {
+      setVal('#lf-terraformer-rdc', state.lfTerraformerRdc);
+    }
+
     // Class
     if (state.playerClass !== undefined) {
       setChecked(`#class-${state.playerClass}`, true);
@@ -727,7 +778,7 @@ class CostsCalculator {
    * Reset all values to defaults
    */
   reset() {
-    console.log('Resetting calculator...');
+    // console.log('Resetting calculator...');
 
     // Reset to default params
     this.currentParams = new GlobalParams();
@@ -738,7 +789,7 @@ class CostsCalculator {
     // Recalculate everything
     this.recalculateAll();
 
-    console.log('Calculator reset');
+    // console.log('Calculator reset');
   }
 
   /**
@@ -832,8 +883,8 @@ class CostsCalculator {
     const firstDataCol = isMultiLevel ? 4 : 3;
     const isBuildingTable = tableId.endsWith('-2') || tableId.endsWith('-3');
 
-    // Clear data rows (skip header and footer rows)
-    for (let i = 1; i < rows.length - 5; i++) {
+    // Clear data rows (skip header and 6 footer rows)
+    for (let i = 1; i < rows.length - 6; i++) {
       // Clear data cells (metal, crystal, deuterium, energy, time, points, DM)
       rows[i].cells[firstDataCol].innerHTML = '0';
       rows[i].cells[firstDataCol + 1].innerHTML = '0';
@@ -846,13 +897,16 @@ class CostsCalculator {
       }
     }
 
-    // Clear subtotal row
-    const subtotalRow = rows.length - 5;
-    const transportRow = rows.length - 4;
-    const grandTotalRow = rows.length - 2;
-    const grandTransportRow = rows.length - 1;
+    // Footer row indices — must match costs-renderer.js:
+    // length-6: subtotal, length-5: spacer, length-4: grand total,
+    // length-3: resources available, length-2: resources to deliver, length-1: transport
+    const subtotalRow = rows.length - 6;
+    const grandTotalRow = rows.length - 4;
+    const resNeededRow = rows.length - 2;
+    const deliveryTransportRow = rows.length - 1;
 
-    const subtotalStartCol = isBuildingTable ? 3 : (isMultiLevel ? 3 : 2);
+    // Clear subtotal row (subtotalStartCol=3 matches renderer)
+    const subtotalStartCol = 3;
     if (isBuildingTable) {
       rows[subtotalRow].cells[2].innerHTML = '<b>0</b>';
     }
@@ -862,13 +916,9 @@ class CostsCalculator {
     rows[subtotalRow].cells[subtotalStartCol + 3].innerHTML = '<b>0</b>';
     rows[subtotalRow].cells[subtotalStartCol + 4].innerHTML = '<b>0' + datetimeS + '</b>';
     rows[subtotalRow].cells[subtotalStartCol + 5].innerHTML = '<b>0</b>';
-    if (!isMultiLevel && tableId.includes('-0-') && (tableId.endsWith('-2') || tableId.endsWith('-3'))) {
+    if (!isMultiLevel) {
       rows[subtotalRow].cells[subtotalStartCol + 6].innerHTML = '<b>0</b>';
     }
-
-    // Clear transport row for subtotal
-    rows[transportRow].cells[2].innerHTML = '0 <abbr title="' + scFull + '">' + scShort + '</abbr>';
-    rows[transportRow].cells[3].innerHTML = '0 <abbr title="' + lcFull + '">' + lcShort + '</abbr>';
 
     // Clear grand total row
     const grandTotalStartCol = 2;
@@ -882,9 +932,14 @@ class CostsCalculator {
       rows[grandTotalRow].cells[grandTotalStartCol + 6].innerHTML = '<b>0</b>';
     }
 
-    // Clear transport row for grand total
-    rows[grandTransportRow].cells[2].innerHTML = '0 <abbr title="' + scFull + '">' + scShort + '</abbr>';
-    rows[grandTransportRow].cells[3].innerHTML = '0 <abbr title="' + lcFull + '">' + lcShort + '</abbr>';
+    // Clear resources-to-deliver row
+    rows[resNeededRow].cells[2].innerHTML = '0';
+    rows[resNeededRow].cells[3].innerHTML = '0';
+    rows[resNeededRow].cells[4].innerHTML = '0';
+
+    // Clear delivery transport row
+    rows[deliveryTransportRow].cells[2].innerHTML = '0 <abbr title="' + scFull + '">' + scShort + '</abbr>';
+    rows[deliveryTransportRow].cells[3].innerHTML = '0 <abbr title="' + lcFull + '">' + lcShort + '</abbr>';
   }
 
   /**
@@ -908,22 +963,29 @@ class CostsCalculator {
       }
     }
 
-    // Reset totals row to zeros
-    const totalsRow = rows.length - 2;
-    const transportRow = rows.length - 1;
+    // Re-read rows after data deletion to get correct footer positions
+    const remainingRows = getTableRows(`#${tableId}`);
+    const totalsRow = remainingRows.length - 4;
+    const neededRow = remainingRows.length - 2;
+    const transportRow = remainingRows.length - 1;
 
-    rows[totalsRow].cells[1].innerHTML = '<b>0</b>';
-    rows[totalsRow].cells[2].innerHTML = '<b>0</b>';
-    rows[totalsRow].cells[3].innerHTML = '<b>0</b>';
-    rows[totalsRow].cells[4].innerHTML = '<b>0</b>';
-    rows[totalsRow].cells[5].innerHTML = '<b>0' + datetimeS + '</b>';
-    rows[totalsRow].cells[6].innerHTML = '<b>0</b>';
+    remainingRows[totalsRow].cells[1].innerHTML = '<b>0</b>';
+    remainingRows[totalsRow].cells[2].innerHTML = '<b>0</b>';
+    remainingRows[totalsRow].cells[3].innerHTML = '<b>0</b>';
+    remainingRows[totalsRow].cells[4].innerHTML = '<b>0</b>';
+    remainingRows[totalsRow].cells[5].innerHTML = '<b>0' + datetimeS + '</b>';
+    remainingRows[totalsRow].cells[6].innerHTML = '<b>0</b>';
 
     // Check if this is a producer table with extra columns
-    if (rows[totalsRow].cells.length > 7) {
-      rows[totalsRow].cells[7].innerHTML = '<b>0</b>';
-      rows[totalsRow].cells[8].innerHTML = '<b>0</b>';
+    if (remainingRows[totalsRow].cells.length > 7) {
+      remainingRows[totalsRow].cells[7].innerHTML = '<b>0</b>';
+      remainingRows[totalsRow].cells[8].innerHTML = '<b>0</b>';
     }
+
+    // Reset needed row
+    remainingRows[neededRow].cells[1].innerHTML = '0';
+    remainingRows[neededRow].cells[2].innerHTML = '0';
+    remainingRows[neededRow].cells[3].innerHTML = '0';
 
     // Reset transport row
     const scShort = options.scShort || 'SC';
@@ -931,8 +993,8 @@ class CostsCalculator {
     const scFull = options.scFull || 'Small Cargo';
     const lcFull = options.lcFull || 'Large Cargo';
 
-    rows[transportRow].cells[1].innerHTML = '0 <abbr title="' + scFull + '">' + scShort + '</abbr>';
-    rows[transportRow].cells[2].innerHTML = '0 <abbr title="' + lcFull + '">' + lcShort + '</abbr>';
+    remainingRows[transportRow].cells[1].innerHTML = '0 <abbr title="' + scFull + '">' + scShort + '</abbr>';
+    remainingRows[transportRow].cells[2].innerHTML = '0 <abbr title="' + lcFull + '">' + lcShort + '</abbr>';
   }
 
   /**
@@ -1415,8 +1477,8 @@ function initializeCostsCalculator() {
   // Expose to window for debugging
   window.calculatorApp = calculatorApp;
 
-  console.log('CostsCalculator ready!');
-  console.log('Access via window.calculatorApp');
+  // console.log('CostsCalculator ready!');
+  // console.log('Access via window.calculatorApp');
 }
 
 /**

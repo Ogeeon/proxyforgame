@@ -119,7 +119,7 @@
       <!-- Parameter Tabs -->
       <ul class="nav nav-tabs nav-tabs-sm" id="paramTabs" role="tablist">
         <li class="nav-item" role="presentation">
-          <button class="nav-link active" id="param-buildings-tab" data-bs-toggle="tab" data-bs-target="#param-buildings" type="button" role="tab"><?= $l['buildings-common'] ?></button>
+          <button class="nav-link active" id="param-buildings-tab" data-bs-toggle="tab" data-bs-target="#param-buildings" type="button" role="tab"><?= $l['buildings'] ?></button>
         </li>
         <li class="nav-item" role="presentation">
           <button class="nav-link" id="param-researches-tab" data-bs-toggle="tab" data-bs-target="#param-researches" type="button" role="tab"><?= $l['researches'] ?></button>
@@ -128,7 +128,7 @@
           <button class="nav-link" id="param-common-tab" data-bs-toggle="tab" data-bs-target="#param-common" type="button" role="tab"><?= $l['param-tab-common'] ?></button>
         </li>
         <li class="nav-item" role="presentation">
-          <button class="nav-link" id="param-lifeforms-tab" data-bs-toggle="tab" data-bs-target="#param-lifeforms" type="button" role="tab"><?= $l['param-tab-lifeforms'] ?></button>
+          <button class="nav-link" id="param-lifeforms-tab" data-bs-toggle="tab" data-bs-target="#param-lifeforms" type="button" role="tab"><?= $l['lifeforms'] ?></button>
         </li>
       </ul>
       <div class="tab-content" id="paramTabContent">
@@ -247,8 +247,29 @@
             </div>
           </div>
         </div>
-        <!-- LifeForms tab (empty) -->
+        <!-- LifeForms tab -->
         <div class="tab-pane fade p-2" id="param-lifeforms" role="tabpanel">
+          <div class="d-flex flex-wrap gap-2 align-items-center">
+            <div class="d-flex align-items-center gap-1">
+              <label for="research-cost-reduction"><?= $l['research-cost-reduction'] ?></label>
+              <input id="research-cost-reduction" type="text" name="research-cost-reduction" class="form-control form-control-sm level-input" value="0" />
+              <span>%</span>
+            </div>
+            <div class="d-flex align-items-center gap-1">
+              <label for="research-time-reduction"><?= $l['research-time-reduction'] ?></label>
+              <input id="research-time-reduction" type="text" name="research-time-reduction" class="form-control form-control-sm level-input" value="0" />
+              <span>%</span>
+            </div>
+            <div class="d-flex align-items-center gap-1">
+              <label for="mineral-res-cntr-lvl"><?= $l['mineral-res-cntr-lvl'] ?></label>
+              <input id="mineral-res-cntr-lvl" type="text" name="mineral-res-cntr-lvl" class="form-control form-control-sm level-input" value="0" />
+            </div>
+            <div class="d-flex align-items-center gap-1">
+              <label for="lf-terraformer-rdc"><?= $l['lf-terraformer-rdc'] ?></label>
+              <input id="lf-terraformer-rdc" type="text" name="lf-terraformer-rdc" class="form-control form-control-sm level-input" value="0" />
+              <span>%</span>
+            </div>
+          </div>
         </div>
       </div>
       </div>
@@ -463,6 +484,20 @@
                   <td align="center" class="border-n border-s" ><b>0</b></td>
                   <td align="center" class="border-n border-s border-e" ><b>0</b></td>
                 </tr>
+                <tr>
+                  <td align="center"><?=$l['res-available']?></td>
+                  <td align="center"><input id="prods-metal-available" type="text" class="form-control form-control-sm" style="text-align:center" value="0" /></td>
+                  <td align="center"><input id="prods-crystal-available" type="text" class="form-control form-control-sm" style="text-align:center" value="0" /></td>
+                  <td align="center"><input id="prods-deut-available" type="text" class="form-control form-control-sm" style="text-align:center" value="0" /></td>
+                  <td colspan="5"></td>
+                </tr>
+                <tr>
+                  <td align="center"><?=$l['res-needed']?></td>
+                  <td align="center">0</td>
+                  <td align="center">0</td>
+                  <td align="center">0</td>
+                  <td colspan="5"></td>
+                </tr>
                 <tr class="<?= ($row % 2) === 1 ? 'odd' : 'even' ?>">
                   <td align="center" ><?=$l['transports-needed-short']?></td>
                   <td align="center" >0 <?=$l['sc-short']?></td>
@@ -489,6 +524,20 @@
                   <td align="center" class="border-n border-s" ><b>0</b></td>
                   <td align="center" class="border-n border-s" ><b>0</b></td>
                   <td align="center" class="border-n border-s border-e" ><b>0</b></td>
+                </tr>
+                <tr>
+                  <td align="center"><?=$l['res-available']?></td>
+                  <td align="center"><input id="commons-metal-available" type="text" class="form-control form-control-sm" style="text-align:center" value="0" /></td>
+                  <td align="center"><input id="commons-crystal-available" type="text" class="form-control form-control-sm" style="text-align:center" value="0" /></td>
+                  <td align="center"><input id="commons-deut-available" type="text" class="form-control form-control-sm" style="text-align:center" value="0" /></td>
+                  <td colspan="3"></td>
+                </tr>
+                <tr>
+                  <td align="center"><?=$l['res-needed']?></td>
+                  <td align="center">0</td>
+                  <td align="center">0</td>
+                  <td align="center">0</td>
+                  <td colspan="3"></td>
                 </tr>
                 <tr class="<?= ($row % 2) === 1 ? 'odd' : 'even' ?>">
                   <td align="center" ><?=$l['transports-needed-short']?></td>
