@@ -11,39 +11,39 @@ class DataCollector {
     // Cache jQuery selectors for performance
     this._selectorCache = {};
   }
-  
+
   // ==========================================================================
   // GLOBAL PARAMETERS COLLECTION
   // ==========================================================================
-  
+
   /**
    * Collect all global parameters from UI
    * @returns {GlobalParams} Complete global settings
    */
   collectGlobalParams() {
     const params = new GlobalParams();
-    
+
     // Building levels
     params.shipyardLevel = this._getInputNumber('#shipyard-level');
     params.robotFactoryLevelPlanet = this._getInputNumber('#robot-factory-level');
     params.robotFactoryLevelMoon = this._getInputNumber('#robot-factory-level-moon');
     params.naniteFactoryLevel = this._getInputNumber('#nanite-factory-level');
-    
+
     // Speed settings
     params.universeSpeed = this._getSelectNumber('#universe-speed');
     params.researchSpeed = this._getSelectNumber('#research-speed');
-    
+
     // Technology levels
     params.researchLabLevel = this._getInputNumber('#research-lab-level');
     params.energyTechLevel = this._getInputNumber('#energy-tech-level');
     params.plasmaTechLevel = this._getInputNumber('#plasma-tech-level');
     params.ionTechLevel = this._getInputNumber('#ion-tech-level');
     params.hyperTechLevel = this._getInputNumber('#hyper-tech-level');
-    
+
     // Planet settings
     params.maxPlanetTemp = this._getInputNumber('#max-planet-temp');
     params.planetPos = this._getInputNumber('#planet-pos');
-    
+
     // Officers/bonuses (checkboxes)
     params.geologist = this._getCheckbox('#geologist');
     params.engineer = this._getCheckbox('#engineer');
@@ -52,13 +52,13 @@ class DataCollector {
     params.commander = this._getCheckbox('#commander');
     params.researchBonus = this._getCheckbox('#research-bonus');
     params.fullNumbers = this._getCheckbox('#full-numbers');
-    
+
     // Booster
     params.booster = this._getSelectNumber('#booster');
-    
+
     // Player class (radio buttons)
     params.playerClass = this._getPlayerClass();
-    
+
     // Intergalactic Research Network
     params.irnLevel = this._getInputNumber('#irn-level');
     this._collectLabLevels(params);
@@ -71,7 +71,7 @@ class DataCollector {
 
     return params;
   }
-    
+
   /**
    * Collect lab levels from IRN dialog
    * @private
@@ -96,7 +96,7 @@ class DataCollector {
     // If resultingLabLevelComputed is false, user manually entered the lab level
     params.useDirectLabLevel = !options.resultingLabLevelComputed;
   }
-  
+
   /**
    * Get player class from radio buttons
    * @private
@@ -106,11 +106,11 @@ class DataCollector {
     if (this._getRadioChecked('#class-1')) return 1; // General
     return 0; // Collector (default)
   }
-  
+
   // ==========================================================================
   // TABLE DATA COLLECTION
   // ==========================================================================
-  
+
   /**
    * Collect build requests from a table (tabs 1 and 2)
    * @param {string} tableId - Table element ID (e.g., 'table-0-2')
@@ -123,10 +123,11 @@ class DataCollector {
     // Determine table type from ID
     const isMultiLevel = tableId.includes('-1-'); // table-1-* are multi-level
     const isMoonTable = tableId.endsWith('-3'); // table-*-3 are moon buildings
+    const hasQtyCol = tableId === 'table-0-2' || tableId === 'table-0-3'; // planet and moon buildings on single level tab have qty column
 
     // Skip header row (0) and footer rows (last 5)
     for (let i = 1; i < rows.length - 5; i++) {
-      const rowRequests = this._parseTableRow(rows[i], isMultiLevel, isMoonTable);
+      const rowRequests = this._parseTableRow(rows[i], isMultiLevel, isMoonTable, hasQtyCol);
       this._collectRowRequests(rowRequests, requests);
     }
 
@@ -149,13 +150,13 @@ class DataCollector {
       requests.push(rowRequests);
     }
   }
-  
+
   /**
    * Parse a single table row into one or more BuildRequests
    * For multi-level, creates one request per level (e.g., 10→15 = 5 requests)
    * @private
    */
-  _parseTableRow(row, isMultiLevel, defaultIsMoon) {
+  _parseTableRow(row, isMultiLevel, defaultIsMoon, hasQtyCol = false) {
     // First cell contains tech ID (hidden)
     const techIdCell = row.cells[0].innerHTML;
     let techId = Number.parseInt(techIdCell);
@@ -177,13 +178,20 @@ class DataCollector {
       ? this._getInputNumberFromElement(row.children[2].children[0])
       : this._resolveFromLevel(techId, toLevel);
 
+    // Get quantity for planet buildings single-level tab
+    let quantity = 1;
+    if (hasQtyCol) {
+      const qtyVal = this._getInputNumberFromElement(row.children[3].children[0]);
+      quantity = Math.max(1, Math.floor(qtyVal || 1));
+    }
+
     // For multi-level tab with multiple levels, create one request per level
     if (isMultiLevel && Math.abs(toLevel - fromLevel) > 1) {
       return this._expandToLevelRequests(techId, fromLevel, toLevel, isMoon);
     }
 
     // Single-level or single-step change: return one request
-    return new BuildRequest(techId, fromLevel, toLevel, isMoon);
+    return new BuildRequest(techId, fromLevel, toLevel, isMoon, quantity);
   }
 
   /**
@@ -207,7 +215,7 @@ class DataCollector {
     }
     return requests;
   }
-  
+
   /**
    * Collect all requests from all tables in a tab group
    * @param {number} outerTab - 0 for single-level, 1 for multi-level
@@ -215,7 +223,7 @@ class DataCollector {
    */
   collectAllTabRequests(outerTab) {
     const result = {};
-    
+
     if (outerTab === 0) {
       // Single-level tab
       result.buildingsPlanet = this.collectTableRequests('table-0-2');
@@ -229,14 +237,14 @@ class DataCollector {
       result.buildingsMoon = this.collectTableRequests('table-1-3');
       result.research = this.collectTableRequests('table-1-4');
     }
-    
+
     return result;
   }
-  
+
   // ==========================================================================
   // RANGE TAB COLLECTION (Tab 3)
   // ==========================================================================
-  
+
   /**
    * Collect data from range calculation tab
    * @returns {Object} Range calculation data
@@ -245,13 +253,13 @@ class DataCollector {
     const techId = this._getSelectNumber('#tech-types-select');
     const fromLevel = this._getInputNumber('#tab2-from-level');
     const toLevel = this._getInputNumber('#tab2-to-level');
-    
+
     // Generate requests for each level in range
     const requests = [];
     for (let level = fromLevel; level < toLevel; level++) {
       requests.push(new BuildRequest(techId, level, level + 1, false));
     }
-    
+
     return {
       techId,
       fromLevel,
@@ -260,7 +268,7 @@ class DataCollector {
       techName: this._getSelectedTechName()
     };
   }
-  
+
   /**
    * Get the name of the selected technology in range tab
    * @private
@@ -270,11 +278,11 @@ class DataCollector {
     if (!select) return '';
     return select.options[select.selectedIndex]?.text || '';
   }
-  
+
   // ==========================================================================
   // CHANGED FIELD DETECTION
   // ==========================================================================
-  
+
   /**
    * Determine which tables are affected by a parameter change
    * This enables optimized recalculation
@@ -287,64 +295,64 @@ class DataCollector {
       'robot-factory-level': [
         'table-0-2', 'table-1-2' // Planet buildings
       ],
-      
+
       // Moon robot factory affects moon buildings
       'robot-factory-level-moon': [
         'table-0-3', 'table-1-3' // Moon buildings
       ],
-      
+
       // Nanite affects all construction
       'nanite-factory-level': [
         'table-0-2', 'table-0-3', 'table-0-5', 'table-0-6',
         'table-1-2', 'table-1-3'
       ],
-      
+
       // Shipyard affects ships and defense
       'shipyard-level': [
         'table-0-5', 'table-0-6'
       ],
-      
+
       // Ion tech affects deconstruction costs
       'ion-tech-level': [
         'table-0-2', 'table-1-2' // Planet buildings
       ],
-      
+
       // Hyper tech affects all (cargo capacity in totals)
       'hyper-tech-level': [
         'table-0-2', 'table-0-3', 'table-0-4', 'table-0-5', 'table-0-6',
         'table-1-2', 'table-1-3', 'table-1-4'
       ],
-      
+
       // Research lab affects research
       'research-lab-level': [
         'table-0-4', 'table-1-4'
       ],
-      
+
       // Technocrat affects research only
       'technocrat': [
         'table-0-4', 'table-1-4'
       ],
-      
+
       // Research bonus affects research only
       'research-bonus': [
         'table-0-4', 'table-1-4'
       ],
-      
+
       // Speed affects all
       'universe-speed': [
         'table-0-2', 'table-0-3', 'table-0-5', 'table-0-6',
         'table-1-2', 'table-1-3'
       ],
-      
+
       'research-speed': [
         'table-0-4', 'table-1-4'
       ],
-      
+
       // Class affects all (time reduction for discoverer, cargo for collector)
       'class-0': ['*'],
       'class-1': ['*'],
       'class-2': ['*'],
-      
+
       // Display option - affects all
       'full-numbers': ['*'],
 
@@ -358,13 +366,13 @@ class DataCollector {
       // LF Terraformer reduction affects planet building tables
       'lf-terraformer-rdc': ['table-0-2', 'table-1-2']
     };
-    
+
     const affected = affectedMap[fieldId];
-    
+
     if (!affected) {
       return []; // No specific tables affected
     }
-    
+
     if (affected.includes('*')) {
       // All tables affected
       return [
@@ -372,10 +380,10 @@ class DataCollector {
         'table-1-2', 'table-1-3', 'table-1-4'
       ];
     }
-    
+
     return affected;
   }
-  
+
   /**
    * Check if range tab is affected by a parameter change
    * @param {string} fieldId - ID of the changed field
@@ -391,14 +399,14 @@ class DataCollector {
       'class-0', 'class-1', 'class-2', 'full-numbers',
       'research-cost-reduction', 'research-time-reduction', 'mineral-res-cntr-lvl', 'lf-terraformer-rdc'
     ];
-    
+
     return rangeAffecting.includes(fieldId);
   }
-  
+
   // ==========================================================================
   // HELPER METHODS - jQuery DOM Access
   // ==========================================================================
-  
+
   /**
    * Get numeric value from input field
    * @private
@@ -454,7 +462,7 @@ class DataCollector {
     const table = typeof tableId === 'string' ? $(`#${tableId}`) : tableId;
     return table ? Array.from(table.querySelectorAll('tr')) : [];
   }
-  
+
   /**
    * Cache and retrieve selector
    * @private
@@ -489,10 +497,10 @@ class ValidationDataCollector extends DataCollector {
   collectAndValidate() {
     const params = this.collectGlobalParams();
     const validation = Validator.validateParams(params);
-    
+
     return { params, validation };
   }
-  
+
   /**
    * Collect table requests and validate each one
    * @param {string} tableId
@@ -501,10 +509,10 @@ class ValidationDataCollector extends DataCollector {
    */
   collectAndValidateTable(tableId, params) {
     const requests = this.collectTableRequests(tableId);
-    const validations = requests.map(req => 
+    const validations = requests.map(req =>
       Validator.validateRequest(req, params, options.techReqs)
     );
-    
+
     return { requests, validations };
   }
 }
@@ -522,7 +530,7 @@ class ExportDataCollector extends DataCollector {
     const singleLevel = this.collectAllTabRequests(0);
     const multiLevel = this.collectAllTabRequests(1);
     const range = this.collectRangeData();
-    
+
     return {
       version: '1.0',
       timestamp: Date.now(),
@@ -534,7 +542,7 @@ class ExportDataCollector extends DataCollector {
       }
     };
   }
-  
+
   /**
    * Convert params to plain JSON
    * @private
@@ -568,7 +576,7 @@ class ExportDataCollector extends DataCollector {
       fullNumbers: params.fullNumbers
     };
   }
-  
+
   /**
    * Convert requests to plain JSON
    * @private
@@ -585,7 +593,7 @@ class ExportDataCollector extends DataCollector {
     }
     return result;
   }
-  
+
   /**
    * Convert range data to plain JSON
    * @private
@@ -610,7 +618,7 @@ class ExportDataCollector extends DataCollector {
 class ChangeDetector {
   lastParams = null;
   lastRequests = {};
-  
+
   /**
    * Detect what changed since last collection
    * @param {GlobalParams} currentParams
@@ -621,10 +629,10 @@ class ChangeDetector {
       this.lastParams = currentParams.clone();
       return ['*']; // Everything is new
     }
-    
+
     const changes = [];
     const fields = Object.keys(currentParams);
-    
+
     for (const field of fields) {
       if (field === 'labLevels') {
         // Special handling for arrays
@@ -635,11 +643,11 @@ class ChangeDetector {
         changes.push(field);
       }
     }
-    
+
     this.lastParams = currentParams.clone();
     return changes;
   }
-  
+
   /**
    * Detect if table data changed
    * @param {string} tableId
@@ -648,33 +656,33 @@ class ChangeDetector {
    */
   detectTableChanges(tableId, currentRequests) {
     const lastRequests = this.lastRequests[tableId];
-    
+
     if (!lastRequests) {
       this.lastRequests[tableId] = currentRequests;
       return true; // New data
     }
-    
+
     // Compare request arrays
     if (lastRequests.length !== currentRequests.length) {
       this.lastRequests[tableId] = currentRequests;
       return true;
     }
-    
+
     for (let i = 0; i < currentRequests.length; i++) {
       const curr = currentRequests[i];
       const last = lastRequests[i];
-      
+
       if (curr.techId !== last.techId ||
-          curr.fromLevel !== last.fromLevel ||
-          curr.toLevel !== last.toLevel) {
+        curr.fromLevel !== last.fromLevel ||
+        curr.toLevel !== last.toLevel) {
         this.lastRequests[tableId] = currentRequests;
         return true;
       }
     }
-    
+
     return false; // No changes
   }
-  
+
   /**
    * Clear change tracking
    */
@@ -682,7 +690,7 @@ class ChangeDetector {
     this.lastParams = null;
     this.lastRequests = {};
   }
-  
+
   /**
    * Compare two arrays for equality
    * @private

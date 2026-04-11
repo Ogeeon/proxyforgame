@@ -36,35 +36,35 @@ test.describe('Costs Calculator Page', () => {
         await page.getByRole('tab', { name: 'All items - one level' }).click();
         await page.getByRole('tab', { name: 'Buildings (planet)' }).click();
         await fillTableRows(page, '#table-0-2', 2, 17, 1);
-        await expect(page.locator('#table-0-2 tr:nth-child(18) td:nth-child(4)')).toContainText('1.045M');
-        await expect(page.locator('#table-0-2 tr:nth-child(18) td:nth-child(5)')).toContainText('612.724');
-        await expect(page.locator('#table-0-2 tr:nth-child(18) td:nth-child(6)')).toContainText('201.730');
-        await expect(page.locator('#table-0-2 tr:nth-child(18) td:nth-child(7)')).toContainText('1.000');
-        await expect(page.locator('#table-0-2 tr:nth-child(18) td:nth-child(8)')).toContainText('3w 4d 18h');
+        await expect(page.locator('#table-0-2 tr:nth-child(18) td:nth-child(5)')).toContainText('1.045M');
+        await expect(page.locator('#table-0-2 tr:nth-child(18) td:nth-child(6)')).toContainText('612.724');
+        await expect(page.locator('#table-0-2 tr:nth-child(18) td:nth-child(7)')).toContainText('201.730');
+        await expect(page.locator('#table-0-2 tr:nth-child(18) td:nth-child(8)')).toContainText('1.000');
+        await expect(page.locator('#table-0-2 tr:nth-child(18) td:nth-child(9)')).toContainText('3w 4d 18h');
         await page.locator('#param-common-tab').click();
         await page.locator('#full-numbers').click();
-        await expect(page.locator('#table-0-2 tr:nth-child(18) td:nth-child(4)')).toContainText('1.045.508');
+        await expect(page.locator('#table-0-2 tr:nth-child(18) td:nth-child(5)')).toContainText('1.045.508');
     });
 
     test('[all items - one level / moon] calculations are correct', async ({ page }) => {
         await page.getByRole('tab', { name: 'All items - one level' }).click();
         await page.getByRole('tab', { name: 'Buildings (moon)' }).click();
         await fillTableRows(page, '#table-0-3', 2, 9, 1);
-        await expect(page.locator('#table-0-3 tr:nth-child(10) td:nth-child(4)')).toContainText('2.043M');
-        await expect(page.locator('#table-0-3 tr:nth-child(10) td:nth-child(5)')).toContainText('4.081M');
-        await expect(page.locator('#table-0-3 tr:nth-child(10) td:nth-child(6)')).toContainText('2.04M');
-        await expect(page.locator('#table-0-3 tr:nth-child(10) td:nth-child(8)')).toContainText('14w 4d');
+        await expect(page.locator('#table-0-3 tr:nth-child(10) td:nth-child(5)')).toContainText('2.043M');
+        await expect(page.locator('#table-0-3 tr:nth-child(10) td:nth-child(6)')).toContainText('4.081M');
+        await expect(page.locator('#table-0-3 tr:nth-child(10) td:nth-child(7)')).toContainText('2.04M');
+        await expect(page.locator('#table-0-3 tr:nth-child(10) td:nth-child(9)')).toContainText('14w 4d');
         // Planet robo and nanite don't affect moon buildings
         await page.locator('#robot-factory-level').fill('10');
         await page.locator('#robot-factory-level').press('Enter');
-        await expect(page.locator('#table-0-3 tr:nth-child(10) td:nth-child(8)')).toContainText('14w 4d');
+        await expect(page.locator('#table-0-3 tr:nth-child(10) td:nth-child(9)')).toContainText('14w 4d');
         await page.locator('#nanite-factory-level').fill('10');
         await page.locator('#nanite-factory-level').press('Enter');
-        await expect(page.locator('#table-0-3 tr:nth-child(10) td:nth-child(8)')).toContainText('14w 4d');
+        await expect(page.locator('#table-0-3 tr:nth-child(10) td:nth-child(9)')).toContainText('14w 4d');
         // But moon robo does
         await page.locator('#robot-factory-level-moon').fill('10');
         await page.locator('#robot-factory-level-moon').press('Enter');
-        await expect(page.locator('#table-0-3 tr:nth-child(10) td:nth-child(8)')).toContainText('1w 2d 6h');
+        await expect(page.locator('#table-0-3 tr:nth-child(10) td:nth-child(9)')).toContainText('1w 2d 6h');
     });
 
     test('[all items - one level / researches] calculations are correct', async ({ page }) => {
@@ -357,6 +357,24 @@ test.describe('Costs Calculator Page', () => {
         await expect(page.locator('#table-0-2 tr:nth-last-child(2) td:nth-child(3)')).not.toContainText(grandMetal.trim());
     });
 
+    test('quantity multiplier works correctly', async ({ page }) => {
+        await page.getByRole('tab', { name: 'All items - one level' }).click();
+
+        // Test for planet buildings
+        await page.getByRole('tab', { name: 'Buildings (planet)' }).click();
+        await page.locator('#table-0-2 tr:nth-child(2) td:nth-child(3) input').fill('1');
+        await page.locator('#table-0-2 tr:nth-child(2) td:nth-child(4) input').fill('5');
+        await page.locator('#table-0-2 tr:nth-child(2) td:nth-child(4) input').press('Enter');
+        await expect(page.locator('#table-0-2 tr:nth-child(18) td:nth-child(5)')).toContainText('300');
+
+        // Test for moon buildings
+        await page.getByRole('tab', { name: 'Buildings (moon)' }).click();
+        await page.locator('#table-0-3 tr:nth-child(2) td:nth-child(3) input').fill('1');
+        await page.locator('#table-0-3 tr:nth-child(2) td:nth-child(4) input').fill('5');
+        await page.locator('#table-0-3 tr:nth-child(2) td:nth-child(4) input').press('Enter');
+        await expect(page.locator('#table-0-3 tr:nth-child(10) td:nth-child(5)')).toContainText('2.000');
+    });
+
     test('IRN calculation works', async ({ page }) => {
         await page.locator('#open-llc-dialog').click();
         await page.locator(`#irn-level`).fill('3');
@@ -380,31 +398,31 @@ test.describe('Costs Calculator Page', () => {
         await fillTableRows(page, '#table-0-2', 2, 17, 5);
         await page.locator('#param-common-tab').click();
         await page.locator('#full-numbers').click();
-        await expect(page.locator('#table-0-2 tr:nth-child(18) td:nth-child(4)')).toContainText('16.840.582');
-        await expect(page.locator('#table-0-2 tr:nth-child(18) td:nth-child(5)')).toContainText('9.800.061');
-        await expect(page.locator('#table-0-2 tr:nth-child(18) td:nth-child(6)')).toContainText('3.257.139');
-        await expect(page.locator('#table-0-2 tr:nth-child(18) td:nth-child(7)')).toContainText('16.000');
-        await expect(page.locator('#table-0-2 tr:nth-child(18) td:nth-child(8)')).toContainText('61w 2d 8h');
-        await expect(page.locator('#table-0-2 tr:nth-child(18) td:nth-child(9)')).toContainText('29.894');
+        await expect(page.locator('#table-0-2 tr:nth-child(18) td:nth-child(5)')).toContainText('16.840.582');
+        await expect(page.locator('#table-0-2 tr:nth-child(18) td:nth-child(6)')).toContainText('9.800.061');
+        await expect(page.locator('#table-0-2 tr:nth-child(18) td:nth-child(7)')).toContainText('3.257.139');
+        await expect(page.locator('#table-0-2 tr:nth-child(18) td:nth-child(8)')).toContainText('16.000');
+        await expect(page.locator('#table-0-2 tr:nth-child(18) td:nth-child(9)')).toContainText('61w 2d 8h');
+        await expect(page.locator('#table-0-2 tr:nth-child(18) td:nth-child(10)')).toContainText('29.894');
 
         await page.locator('#param-lifeforms-tab').click();
         await page.locator('#mineral-res-cntr-lvl').fill('5');
         await page.locator('#mineral-res-cntr-lvl').press('Enter');
-        await expect(page.locator('#table-0-2 tr:nth-child(18) td:nth-child(4)')).toContainText('16.840.290');
-        await expect(page.locator('#table-0-2 tr:nth-child(18) td:nth-child(5)')).toContainText('9.799.946');
-        await expect(page.locator('#table-0-2 tr:nth-child(18) td:nth-child(6)')).toContainText('3.257.091');
-        await expect(page.locator('#table-0-2 tr:nth-child(18) td:nth-child(7)')).toContainText('16.000');
-        await expect(page.locator('#table-0-2 tr:nth-child(18) td:nth-child(8)')).toContainText('61w 2d 8h');
-        await expect(page.locator('#table-0-2 tr:nth-child(18) td:nth-child(9)')).toContainText('29.893');
+        await expect(page.locator('#table-0-2 tr:nth-child(18) td:nth-child(5)')).toContainText('16.840.290');
+        await expect(page.locator('#table-0-2 tr:nth-child(18) td:nth-child(6)')).toContainText('9.799.946');
+        await expect(page.locator('#table-0-2 tr:nth-child(18) td:nth-child(7)')).toContainText('3.257.091');
+        await expect(page.locator('#table-0-2 tr:nth-child(18) td:nth-child(8)')).toContainText('16.000');
+        await expect(page.locator('#table-0-2 tr:nth-child(18) td:nth-child(9)')).toContainText('61w 2d 8h');
+        await expect(page.locator('#table-0-2 tr:nth-child(18) td:nth-child(10)')).toContainText('29.893');
 
         await page.locator('#lf-terraformer-rdc').fill('20');
         await page.locator('#lf-terraformer-rdc').press('Enter');
-        await expect(page.locator('#table-0-2 tr:nth-child(18) td:nth-child(4)')).toContainText('16.840.290');
-        await expect(page.locator('#table-0-2 tr:nth-child(18) td:nth-child(5)')).toContainText('9.639.946');
-        await expect(page.locator('#table-0-2 tr:nth-child(18) td:nth-child(6)')).toContainText('2.937.091');
-        await expect(page.locator('#table-0-2 tr:nth-child(18) td:nth-child(7)')).toContainText('16.000');
-        await expect(page.locator('#table-0-2 tr:nth-child(18) td:nth-child(8)')).toContainText('61w 13h');
-        await expect(page.locator('#table-0-2 tr:nth-child(18) td:nth-child(9)')).toContainText('29.413');
+        await expect(page.locator('#table-0-2 tr:nth-child(18) td:nth-child(5)')).toContainText('16.840.290');
+        await expect(page.locator('#table-0-2 tr:nth-child(18) td:nth-child(6)')).toContainText('9.639.946');
+        await expect(page.locator('#table-0-2 tr:nth-child(18) td:nth-child(7)')).toContainText('2.937.091');
+        await expect(page.locator('#table-0-2 tr:nth-child(18) td:nth-child(8)')).toContainText('16.000');
+        await expect(page.locator('#table-0-2 tr:nth-child(18) td:nth-child(9)')).toContainText('61w 13h');
+        await expect(page.locator('#table-0-2 tr:nth-child(18) td:nth-child(10)')).toContainText('29.413');
 
         await page.locator('#reset').click();
         await page.locator('#param-buildings-tab').click();

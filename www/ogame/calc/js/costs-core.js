@@ -209,11 +209,12 @@ class GlobalParams {
  * Individual build/research request
  */
 class BuildRequest {
-  constructor(techId, fromLevel, toLevel, isMoon = false) {
+  constructor(techId, fromLevel, toLevel, isMoon = false, quantity = 1) {
     this.techId = Number(techId);
     this.fromLevel = Number(fromLevel);
     this.toLevel = Number(toLevel);
     this.isMoon = Boolean(isMoon);
+    this.quantity = Math.max(1, Math.floor(Number(quantity) || 1));
   }
 
   /**
@@ -424,13 +425,14 @@ class Calculator {
       resources
     );
 
+    const qty = request.quantity || 1;
     return new BuildCost(
-      resources.metal,
-      resources.crystal,
-      resources.deuterium,
+      resources.metal * qty,
+      resources.crystal * qty,
+      resources.deuterium * qty,
       energy,
       time,
-      points
+      points * qty
     );
   }
 

@@ -20,11 +20,11 @@ class Renderer {
     this.scFull = options.scFull || 'Small Cargo';
     this.lcFull = options.lcFull || 'Large Cargo';
   }
-  
+
   // ==========================================================================
   // TABLE RENDERING
   // ==========================================================================
-  
+
   /**
    * Render calculation results for a complete table
    * @param {string} tableId - Table element ID
@@ -40,15 +40,16 @@ class Renderer {
 
     const rows = getTableRows(`#${tableId}`);
     const isMultiLevel = tableId.includes('-1-');
-    const firstDataCol = isMultiLevel ? 4 : 3;
-    
+    const hasQtyCol = tableId === 'table-0-2' || tableId === 'table-0-3';
+    const firstDataCol = (isMultiLevel || hasQtyCol) ? 4 : 3;
+
     // Clear all data first
     this._clearTableData(tableId, rows, isMultiLevel);
-    
+
     // Accumulator for totals
     let totals = BuildCost.zero();
     let maxEnergy = 0;
-    
+
     // Render each result
     for (let i = 0; i < results.length; i++) {
       const request = requests[i];
@@ -73,7 +74,7 @@ class Renderer {
     // Render subtotal row (grand totals handled separately by renderGrandTotals)
     this._renderSubtotalRow(tableId, rows, totals, params, isMultiLevel);
   }
-  
+
   /**
    * Render a single row's calculation results
    * @private
@@ -99,14 +100,15 @@ class Renderer {
       row.cells[firstDataCol + 6].innerHTML = this._formatNumber(dmCost, params);
     }
   }
-  
+
   /**
    * Clear all data cells in a table
    * NOTE: Does NOT clear input values - preserves user-entered levels
    * @private
    */
   _clearTableData(_tableId, rows, isMultiLevel) {
-    const firstDataCol = isMultiLevel ? 4 : 3;
+    const hasQtyCol = _tableId === 'table-0-2' || _tableId === 'table-0-3';
+    const firstDataCol = (isMultiLevel || hasQtyCol) ? 4 : 3;
     const numDataCols = isMultiLevel ? 6 : 7;
 
     // Clear data rows (skip header and footer)
@@ -127,7 +129,7 @@ class Renderer {
       // We only reset them if the calculation shows no valid request
     }
   }
-  
+
   /**
    * Find row index by tech ID
    * @private
@@ -145,7 +147,7 @@ class Renderer {
 
     return -1;
   }
-  
+
   /**
    * Render subtotal row for a single table
    * @private
@@ -155,14 +157,15 @@ class Renderer {
 
     const isBuildingTable = tableId.endsWith('-2') || tableId.endsWith('-3');
     const isFleetOrDefenseTable = tableId.endsWith('-5') || tableId.endsWith('-6');
+    const hasQtyCol = tableId === 'table-0-2' || tableId === 'table-0-3';
 
     // Column 2: sum of building levels for buildings, empty otherwise
     rows[subtotalRow].cells[2].innerHTML = isBuildingTable
       ? `<b>${this._sumBuildingLevels(rows, isMultiLevel)}</b>`
       : '';
 
-    // Subtotals row - data columns start at column 3
-    const subtotalStartCol = 3;
+    // Subtotals row - data columns start at column 3 (or 4 for planet buildings with qty col)
+    const subtotalStartCol = hasQtyCol ? 4 : 3;
     rows[subtotalRow].cells[subtotalStartCol].innerHTML = `<b>${this._formatNumber(totals.metal, params)}</b>`;
     rows[subtotalRow].cells[subtotalStartCol + 1].innerHTML = `<b>${this._formatNumber(totals.crystal, params)}</b>`;
     rows[subtotalRow].cells[subtotalStartCol + 2].innerHTML = `<b>${this._formatNumber(totals.deuterium, params)}</b>`;
@@ -207,7 +210,7 @@ class Renderer {
       cell.innerHTML = '';
     }
   }
-  
+
   /**
    * Update grand totals across all tables in a tab group
    * @param {number} outerTab - 0 for single-level, 1 for multi-level
@@ -249,12 +252,12 @@ class Renderer {
       const [, tabOuter, tabInner] = tableId.split('-');
       const resNeededRow = rows.length - 2;
       const deliveryTransportRow = rows.length - 1;
-      const metal   = getInputNumber(document.getElementById(`metal-available-${tabOuter}-${tabInner}`));
+      const metal = getInputNumber(document.getElementById(`metal-available-${tabOuter}-${tabInner}`));
       const crystal = getInputNumber(document.getElementById(`crystal-available-${tabOuter}-${tabInner}`));
-      const deut    = getInputNumber(document.getElementById(`deut-available-${tabOuter}-${tabInner}`));
-      const needMetal   = Math.max(0, grandTotal.metal - metal);
+      const deut = getInputNumber(document.getElementById(`deut-available-${tabOuter}-${tabInner}`));
+      const needMetal = Math.max(0, grandTotal.metal - metal);
       const needCrystal = Math.max(0, grandTotal.crystal - crystal);
-      const needDeut    = Math.max(0, grandTotal.deuterium - deut);
+      const needDeut = Math.max(0, grandTotal.deuterium - deut);
       rows[resNeededRow].cells[2].innerHTML = this._formatNumber(needMetal, params);
       rows[resNeededRow].cells[3].innerHTML = this._formatNumber(needCrystal, params);
       rows[resNeededRow].cells[4].innerHTML = this._formatNumber(needDeut, params);
@@ -265,7 +268,7 @@ class Renderer {
         `${delivery.large} <abbr title="${this.lcFull}">${this.lcShort}</abbr>`;
     });
   }
-  
+
   /**
    * Get all table IDs for a tab group
    * @private
@@ -278,11 +281,11 @@ class Renderer {
     }
     return [];
   }
-  
+
   // ==========================================================================
   // RANGE TAB RENDERING
   // ==========================================================================
-  
+
   /**
    * Render range calculation table (tab 3)
    * @param {Object} rangeData - Range data from collector
@@ -309,13 +312,13 @@ class Renderer {
 
     // Clear and rebuild table
     this._clearRangeTable(tableId);
-    
+
     // Accumulate totals
     let totals = BuildCost.zero();
     let maxEnergy = 0;
     let maxProduction = 0;
     let maxConsumption = 0;
-    
+
     // Render each level
     for (let i = 0; i < results.length; i++) {
       const level = fromLevel + i + 1;
@@ -331,14 +334,14 @@ class Renderer {
       if (production !== null) maxProduction = Math.max(maxProduction, production);
       if (consumption !== null) maxConsumption = Math.max(maxConsumption, consumption);
     }
-    
+
     // Set max energy
     totals.energy = maxEnergy;
-    
+
     // Render totals
     this._renderRangeTotals(tableId, totals, maxProduction, maxConsumption, params, isProducer);
   }
-  
+
   /**
    * Show/hide producer-only range controls based on tech type
    * @param {number} techId
@@ -426,13 +429,13 @@ class Renderer {
 
     // Read available resources from input fields
     const prefix = isProducer ? 'prods' : 'commons';
-    const metalAvail   = getInputNumber(document.getElementById(`${prefix}-metal-available`)) || 0;
+    const metalAvail = getInputNumber(document.getElementById(`${prefix}-metal-available`)) || 0;
     const crystalAvail = getInputNumber(document.getElementById(`${prefix}-crystal-available`)) || 0;
-    const deutAvail    = getInputNumber(document.getElementById(`${prefix}-deut-available`)) || 0;
+    const deutAvail = getInputNumber(document.getElementById(`${prefix}-deut-available`)) || 0;
 
-    const needMetal   = Math.max(0, totals.metal      - metalAvail);
-    const needCrystal = Math.max(0, totals.crystal    - crystalAvail);
-    const needDeut    = Math.max(0, totals.deuterium  - deutAvail);
+    const needMetal = Math.max(0, totals.metal - metalAvail);
+    const needCrystal = Math.max(0, totals.crystal - crystalAvail);
+    const needDeut = Math.max(0, totals.deuterium - deutAvail);
 
     // Needed row
     rows[neededRow].cells[1].innerHTML = this._formatNumber(needMetal, params);
@@ -446,11 +449,11 @@ class Renderer {
     rows[transportRow].cells[2].innerHTML =
       `${transport.large} <abbr title="${this.lcFull}">${this.lcShort}</abbr>`;
   }
-  
+
   // ==========================================================================
   // ERROR AND MESSAGE RENDERING
   // ==========================================================================
-  
+
   /**
    * Show error message for impossible research
    * @param {string} researchName - Name of the research
@@ -463,28 +466,28 @@ class Renderer {
     const message = options.msgCantResearch.replace('{0}', researchName);
 
     setTextContent(`#${options.warnindMsgDivId}`, message);
-    fadeIn(`#${options.warnindDivId}`, 800, function() {
-      setTimeout(function() {
+    fadeIn(`#${options.warnindDivId}`, 800, function () {
+      setTimeout(function () {
         fadeOut(`#${options.warnindDivId}`, 800);
       }, 5000);
     });
   }
-  
+
   /**
    * Show validation errors
    * @param {ValidationResult} validation
    */
   showValidationErrors(validation) {
     if (validation.isValid) return;
-    
+
     const message = validation.errors.join('\n');
     alert(message); // Simple alert for now
   }
-  
+
   // ==========================================================================
   // HELPER METHODS
   // ==========================================================================
-  
+
   /**
    * Format a number for display
    * @private
@@ -499,7 +502,7 @@ class Renderer {
       return ogamizeNum(value, this.unitSuffix);
     }
   }
-  
+
   /**
    * Format time for display
    * @private
@@ -515,7 +518,7 @@ class Renderer {
       true
     );
   }
-  
+
   /**
    * Calculate transport ships needed
    * @private
@@ -550,15 +553,15 @@ class BatchRenderer extends Renderer {
     const tableIds = this._getTableIdsForTab(outerTab);
     let grandTotal = BuildCost.zero();
     let maxGrandEnergy = 0;
-    
+
     // Render each table
     tableIds.forEach(tableId => {
       const requests = allRequests[tableId] || [];
       const results = allResults[tableId] || [];
-      
+
       if (requests.length > 0) {
         this.renderTable(tableId, requests, results, params);
-        
+
         // Accumulate grand totals
         results.forEach(result => {
           grandTotal = grandTotal.add(result);
@@ -566,10 +569,10 @@ class BatchRenderer extends Renderer {
         });
       }
     });
-    
+
     // Set max energy
     grandTotal.energy = maxGrandEnergy;
-    
+
     // Update grand totals across all tables
     this.renderGrandTotals(outerTab, grandTotal, params);
   }
@@ -583,7 +586,7 @@ class IncrementalRenderer extends Renderer {
     super();
     this.lastRendered = {};
   }
-  
+
   /**
    * Render only what changed
    * @param {string} tableId
@@ -594,25 +597,25 @@ class IncrementalRenderer extends Renderer {
   renderIncremental(tableId, requests, results, params) {
     const key = tableId;
     const last = this.lastRendered[key];
-    
+
     if (!last) {
       // First render - do full render
       this.renderTable(tableId, requests, results, params);
       this.lastRendered[key] = { requests, results, params };
       return;
     }
-    
+
     // Simple check: if lengths differ, do full render
     if (requests.length !== last.requests.length) {
       this.renderTable(tableId, requests, results, params);
       this.lastRendered[key] = { requests, results, params };
       return;
     }
-    
+
     this.renderTable(tableId, requests, results, params);
     this.lastRendered[key] = { requests, results, params };
   }
-  
+
   /**
    * Clear cache
    */

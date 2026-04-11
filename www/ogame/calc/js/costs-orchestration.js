@@ -384,6 +384,11 @@ class CostsCalculator {
         if (typeof validateInputNumber === 'function') {
           validateInputNumber.call(event.target, event);
         }
+        // Enforce integer >= 1 for qty inputs
+        if (event.target.classList.contains('qty-input')) {
+          const val = Math.floor(parseFloat(event.target.value) || 1);
+          event.target.value = Math.max(1, val);
+        }
         this._handleTableInputChange(event);
       });
     });
@@ -836,8 +841,10 @@ class CostsCalculator {
     setVal('#planetsSpin', 8);
     this._resetIRNDialog();
 
-    // Clear all table inputs
-    $$('#tab-0 input[type="text"], #tab-1 input[type="text"]').forEach(el => el.value = 0);
+    // Clear all table inputs (except qty inputs which default to 1)
+    $$('#tab-0 input[type="text"], #tab-1 input[type="text"]').forEach(el => {
+      el.value = el.classList.contains('qty-input') ? 1 : 0;
+    });
 
     // Clear all table data cells (including totals)
     this._clearAllTablesData();
@@ -880,7 +887,8 @@ class CostsCalculator {
     const rows = getTableRows(`#${tableId}`);
     if (rows.length === 0) return;
 
-    const firstDataCol = isMultiLevel ? 4 : 3;
+    const hasPlanetQtyCol = tableId === 'table-0-2';
+    const firstDataCol = (isMultiLevel || hasPlanetQtyCol) ? 4 : 3;
     const isBuildingTable = tableId.endsWith('-2') || tableId.endsWith('-3');
 
     // Clear data rows (skip header and 6 footer rows)
@@ -905,8 +913,8 @@ class CostsCalculator {
     const resNeededRow = rows.length - 2;
     const deliveryTransportRow = rows.length - 1;
 
-    // Clear subtotal row (subtotalStartCol=3 matches renderer)
-    const subtotalStartCol = 3;
+    // Clear subtotal row (subtotalStartCol=3, or 4 for planet buildings with qty col)
+    const subtotalStartCol = hasPlanetQtyCol ? 4 : 3;
     if (isBuildingTable) {
       rows[subtotalRow].cells[2].innerHTML = '<b>0</b>';
     }

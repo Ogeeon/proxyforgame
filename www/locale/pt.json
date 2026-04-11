@@ -286,7 +286,7 @@
   "lfcosts": {
     "sc-short": "CP",
     "lc-short": "CG",
-    "title": "OGame - Calculadora de Custos para formulários de vida",
+    "title": "OGame - Calculadora de Custos para Formas de vida",
     "keywords": "proxyforgame,proxy,online,calc,calculator,ogame,price calculation,cost calculation,buildings costs,research costs,fleet costs,defence costs,costs calculator,prices calculator",
     "times-note": "O bónus final varia de planeta para planeta. Para obter resultados precisos, calcule manualmente o bónus total no planeta onde irá iniciar a construção/pesquisa.",
     "class-collector": "Colecionador",

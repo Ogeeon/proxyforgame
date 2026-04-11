@@ -315,6 +315,7 @@
                     $colHeaders[1] = 'level';
                   }
                 }
+                 $hasQtyCol = ($i == 0 && ($j == 2 || $j == 3));
               ?>
               <div class="tab-pane fade <?= $j === $firstInnerTab ? 'show active' : '' ?> no-mp" id="tab-<?=$i?>-<?=$j?>" role="tabpanel">
                 <table id="table-<?=$i?>-<?=$j?>" class="lined" cellpadding="0" cellspacing="1" border="0">
@@ -328,6 +329,9 @@
                         <?=$l[$header] ?>
                       <?php endif; ?>
                     </th>
+                     <?php if ($hasQtyCol && $idx == 1): ?>
+                    <th align="center" style="white-space:nowrap"><?=$l['quantity'] ?></th>
+                    <?php endif; ?>
                     <?php endforeach; ?>
                   </tr>
                   <?php $techs = getTechsByType($j); $row = 1;?>
@@ -346,6 +350,9 @@
                     <?php else: ?>
                       <td align="center"><input type="text" class="form-control form-control-sm level-input ui-input-margin" value="0"/></td>
                     <?php endif; ?>
+                     <?php if ($hasQtyCol): ?>
+<td align="center"><input type="text" class="form-control form-control-sm qty-input ui-input-margin" value="1" min="1" style="text-align:center"/></td>
+                     <?php endif; ?>
                     <td align="center">0</td>
                     <td align="center">0</td>
                     <td align="center">0</td>
@@ -361,6 +368,7 @@
                     <td style="display: none;"></td>
                     <td colspan="<?= ($i == 1)?'2':'1' ?>" class="border-n" ><?=$l['total']?></td>
                     <td align="center" class="border-n" >0</td>
+                    <?php if ($hasQtyCol): ?><td class="border-n"></td><?php endif; ?>
                     <td align="center" class="border-n border-s border-w" ><b>0</b></td>
                     <td align="center" class="border-n border-s" ><b>0</b></td>
                     <td align="center" class="border-n border-s" ><b>0</b></td>
@@ -371,10 +379,10 @@
                     <?php endif; ?>
                     <td align="center" class="border-n border-s border-e" ><b>0</b></td>
                   </tr>
-                  <tr><td colspan="<?= ($i == 1)?'10':'9' ?>" height=5px;>&nbsp;</td></tr>
+                  <tr><td colspan="<?= ($i == 1)?'10':($hasQtyCol?'10':'9') ?>" height=5px;>&nbsp;</td></tr>
                   <tr>
                     <td style="display: none;"></td>
-                    <td colspan="<?= ($i == 1)?'3':'2' ?>" class="border-n border-w" ><?=$l['grand-total']?></td>
+                    <td colspan="<?= ($i == 1)?'3':($hasQtyCol?'3':'2') ?>" class="border-n border-w" ><?=$l['grand-total']?></td>
                     <td align="center" class="border-n" >0</td>
                     <td align="center" class="border-n" >0</td>
                     <td align="center" class="border-n" >0</td>
@@ -387,7 +395,7 @@
                   </tr>
                   <tr>
                     <td style="display: none;"></td>
-                    <td colspan="<?= ($i == 1)?'3':'2' ?>" class="border-w"><?=$l['res-available']?></td>
+                    <td colspan="<?= ($i == 1)?'3':($hasQtyCol?'3':'2') ?>" class="border-w"><?=$l['res-available']?></td>
                     <td align="center"><input id="metal-available-<?=$i?>-<?=$j?>" type="text" name="metal-available" class="form-control form-control-sm" style="text-align:center" value="0" /></td>
                     <td align="center"><input id="crystal-available-<?=$i?>-<?=$j?>" type="text" name="crystal-available" class="form-control form-control-sm" style="text-align:center" value="0" /></td>
                     <td align="center"><input id="deut-available-<?=$i?>-<?=$j?>" type="text" name="deut-available" class="form-control form-control-sm" style="text-align:center" value="0" /></td>
@@ -396,7 +404,7 @@
                   </tr>
                   <tr>
                     <td style="display: none;"></td>
-                    <td colspan="<?= ($i == 1)?'3':'2' ?>" class="border-w"><?=$l['res-needed']?></td>
+                    <td colspan="<?= ($i == 1)?'3':($hasQtyCol?'3':'2') ?>" class="border-w"><?=$l['res-needed']?></td>
                     <td align="center">0</td>
                     <td align="center">0</td>
                     <td align="center">0</td>
@@ -408,7 +416,7 @@
                     <td class="border-s border-w"><?=$l['transports-needed']?></td>
                     <td align="center" class="border-s">0 <?=$l['sc-short']?></td>
                     <td align="center" class="border-s">0 <?=$l['lc-short']?></td>
-                    <td colspan="<?= ($i == 1)?'5':(($i == 0)?'5':'4') ?>" align="center" class="border-s">&nbsp;</td>
+                    <td colspan="<?= ($i == 1)?'5':(($i == 0)?($hasQtyCol?'6':'5'):'4') ?>" align="center" class="border-s">&nbsp;</td>
                     <td align="center" class="border-s border-e">&nbsp;</td>
                   </tr>
                 </table>
