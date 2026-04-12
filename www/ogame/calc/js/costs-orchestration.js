@@ -1470,26 +1470,23 @@ function rebuildLabTable(backup) {
 function changeLabLevel() {
   // Extract lab number from input id (format: lablevel_N)
   const parts = this.id.split(/_/);
-  const num = parseInt(parts[1], 10);
+  const num = Number.parseInt(parts[1], 10);
+  const radioEl = document.getElementById('labchoice_' + num);
 
   if (this.value == 0) {
     // Disable and uncheck radio button when level is 0
-    const radioEl = document.getElementById('labchoice_' + num);
     if (radioEl) {
       radioEl.disabled = true;
       radioEl.checked = false;
     }
   } else {
     // Enable radio button when level > 0
-    const radioEl = document.getElementById('labchoice_' + num);
-    if (radioEl) {
-      radioEl.disabled = false;
-    }
+    radioEl?.removeAttribute('disabled');
   }
 
   // Update the lab levels array (array is 0-indexed, rows are 1-indexed)
   if (options.prm && options.prm.labLevels) {
-    options.prm.labLevels[num - 1] = parseInt(this.value, 10) || 0;
+    options.prm.labLevels[num - 1] = Number.parseInt(this.value, 10) || 0;
   }
 
   // Update resulting level display
