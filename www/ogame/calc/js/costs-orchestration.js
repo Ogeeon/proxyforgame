@@ -936,7 +936,7 @@ class CostsCalculator {
       const row = rows[i];
       const firstCell = row.cells[0].innerHTML;
       // Check if it's a data row (has level in first cell)
-      if (firstCell && !isNaN(parseInt(firstCell))) {
+      if (firstCell && !Number.isNaN(Number.parseInt(firstCell))) {
         row.remove();
       }
     }
@@ -1057,7 +1057,7 @@ class CostsCalculator {
    */
   _getInputNumber(selector) {
     const val = getVal(selector);
-    return val ? parseInt(val, 10) || 0 : 0;
+    return val ? Number.parseInt(val, 10) || 0 : 0;
   }
 
   /**
@@ -1126,7 +1126,7 @@ class CostsCalculator {
     for (const tableId of tables) {
       const rows = getTableRows(`#${tableId}`);
       for (let i = 1; i < rows.length - 5; i++) {
-        const rowTechId = parseInt(rows[i].cells[0].innerHTML);
+        const rowTechId = Number.parseInt(rows[i].cells[0].innerHTML);
         if (rowTechId === techId) {
           return rows[i].cells[1].innerHTML;
         }
