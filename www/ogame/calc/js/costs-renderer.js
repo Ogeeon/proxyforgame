@@ -193,7 +193,7 @@ class Renderer {
     for (let i = 1; i < rows.length - 6; i++) {
       const levelInput = rows[i].cells[targetColIdx].querySelector('input');
       if (levelInput) {
-        const level = parseFloat(levelInput.value) || 0;
+        const level = Number.parseFloat(levelInput.value) || 0;
         if (level > 0) {
           totalLevels += level;
         }
