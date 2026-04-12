@@ -143,7 +143,7 @@ class Renderer {
     const searchId = isMoon ? techId + 10000 : techId;
 
     for (let i = 1; i < rows.length - 6; i++) {
-      const rowTechId = parseInt(rows[i].cells[0].innerHTML);
+      const rowTechId = Number.parseInt(rows[i].cells[0].innerHTML);
       if (rowTechId === searchId) {
         return i;
       }
