@@ -1220,222 +1220,16 @@ function initializeCostsCalculator() {
   const planetsSpinDown = document.getElementById('planetsSpin-down');
 
   if (planetsSpinInput && planetsSpinUp && planetsSpinDown) {
-    // Set initial value
-    planetsSpinInput.value = options.currPlanetsCount || options.prm.planetsSpin || 8;
-
-    // Handler for changing planet count
-    const onPlanetsChange = function (newVal, oldVal) {
-      // Validate range
-      if (newVal < 1 || newVal > 99) return;
-
-      // Update options
-      options.prm.planetsSpin = newVal;
-      options.currPlanetsCount = newVal;
-
-      // Update lab levels array
-      if (newVal < oldVal) {
-        if (oldVal >= 2) {
-          const tbody = document.querySelector('#lab-levels-table tbody');
-          tbody?.lastElementChild?.remove();
-          options.prm.labLevels.pop();
-        }
-      } else {
-        // Add new row for additional planet
-        append('#lab-levels-table',
-          '<tr class="' + ((newVal % 2) === 1 ? 'odd' : 'even') + '">' +
-          '<td align="center">' + options.planetNumStr + newVal + '</td>' +
-          '<td align="center" width="20%;"><input type="text" id="lablevel_' + newVal +
-          '" name="lablevel_' + newVal + '" class="form-control input-3columns input-in-table" value="0" /></td>' +
-          '<td align="center" width="20%;"><input type="radio" id="labchoice_' + newVal +
-          '" name="start-pln" value="0" disabled="disabled"/></td>' +
-          '</tr>'
-        );
-        addEvent('#lablevel_' + newVal, 'keyup', validateAndChangeLabLevel);
-        addEvent('#labchoice_' + newVal, 'click', () => calculatorApp._updateResultingLevel());
-        options.prm.labLevels.push(0);
-      }
-
-      // Update resulting level display
-      calculatorApp._updateResultingLevel();
-
-      // Notify new calculator system to recalculate
-      if (calculatorApp) {
-        calculatorApp.recalculateAll();
-      }
-    };
-
-    // Up button handler
-    addEvent(planetsSpinUp, 'click', () => {
-      const oldVal = Number.parseInt(planetsSpinInput.value) || 0;
-      const newVal = oldVal + 1;
-      if (newVal <= 99) {
-        planetsSpinInput.value = newVal;
-        onPlanetsChange(newVal, oldVal);
-      }
-    });
-
-    // Down button handler
-    addEvent(planetsSpinDown, 'click', () => {
-      const oldVal = Number.parseInt(planetsSpinInput.value) || 0;
-      const newVal = oldVal - 1;
-      if (newVal >= 1) {
-        planetsSpinInput.value = newVal;
-        onPlanetsChange(newVal, oldVal);
-      }
-    });
+    setupPlanetsSpin(planetsSpinInput, planetsSpinUp, planetsSpinDown);
   }
 
   // Initialize IRN dialog handlers
-  // Lab level inputs - validate on change
-  const labInputs = document.querySelectorAll('#irn-calc input[type="text"]');
-  labInputs.forEach(input => {
-    removeAllEvents(input, 'keyup');
-    addEvent(input, 'keyup', validateAndChangeLabLevel);
-  });
-
-  // Radio buttons for lab choice - update resulting level
-  const radioInputs = document.querySelectorAll('#irn-calc input[type="radio"]');
-  radioInputs.forEach(radio => {
-    removeAllEvents(radio, 'click');
-    addEvent(radio, 'click', () => {
-      if (calculatorApp) {
-        calculatorApp._updateResultingLevel();
-        calculatorApp.recalculateAll();
-      }
-    });
-  });
-
-  // IRN level field - validate and update resulting level
-  const irnLevelInput = document.getElementById('irn-level');
-  if (irnLevelInput) {
-    removeAllEvents(irnLevelInput, 'keyup');
-    addEvent(irnLevelInput, 'keyup', (e) => {
-      // Validate input
-      validateInputNumber.call(irnLevelInput, e);
-
-      // Update resulting level display and notify new calculator system to recalculate
-      if (calculatorApp) {
-        calculatorApp._updateResultingLevel();
-        calculatorApp.recalculateAll();
-      }
-    });
-  }
-
-  // Research lab level - mark as not computed when changed
-  const researchLabInput = document.getElementById('research-lab-level');
-  if (researchLabInput) {
-    removeAllEvents(researchLabInput, 'keyup');
-    addEvent(researchLabInput, 'keyup', (e) => {
-      // Validate input first
-      validateInputNumber.call(researchLabInput, e);
-      options.resultingLabLevelComputed = false;
-      if (calculatorApp) {
-        calculatorApp._handleParamChange('research-lab-level');
-      }
-    });
-  }
+  setupIrnInputHandlers();
 
   // Add Bootstrap modal event handler for IRN dialog
   const irnModal = document.getElementById('irn-calc');
   if (irnModal) {
-    addEvent(irnModal, 'hidden.bs.modal', () => {
-      if (!irnModal._irnExecute) {
-        // User cancelled - restore from backup
-        const backup = irnModal._irnBackup;
-        if (backup && calculatorApp) {
-          // Restore new system's currentParams
-          calculatorApp.currentParams.irnLevel = backup.irnLevel;
-          calculatorApp.currentParams.labLevels = [...backup.labLevels];
-          calculatorApp.currentParams.labChoice = backup.labChoice;
-
-          // Also update options.prm for IRN dialog UI helpers
-          options.prm.irnLevel = backup.irnLevel;
-          options.prm.planetsSpin = backup.labLevels.length;
-          options.prm.labLevels = [...backup.labLevels];
-          options.prm.labChoice = backup.labChoice;
-          options.currPlanetsCount = backup.labLevels.length;
-
-          // Restore UI elements
-          setVal('#irn-level', backup.irnLevel);
-          if (planetsSpinInput) {
-            planetsSpinInput.value = backup.labLevels.length;
-          }
-
-          // Rebuild lab levels table
-          const table = document.getElementById('lab-levels-table');
-          if (table) {
-            // Remove all rows except header
-            while (table.rows.length > 1) {
-              table.deleteRow(1);
-            }
-
-            // Re-add rows from backup
-            for (let i = 1; i <= backup.labLevels.length; i++) {
-              append('#lab-levels-table',
-                '<tr class="' + ((i % 2) === 1 ? 'odd' : 'even') + '">' +
-                '<td align="center">' + options.planetNumStr + i + '</td>' +
-                '<td align="center" width="20%;"><input type="text" id="lablevel_' + i +
-                '" name="lablevel_' + i + '" class="form-control input-3columns input-in-table" value="' +
-                backup.labLevels[i - 1] + '" /></td>' +
-                '<td align="center" width="20%;"><input type="radio" id="labchoice_' + i +
-                '" name="start-pln" disabled="disabled"/></td>' +
-                '</tr>'
-              );
-
-              const radioEl = document.getElementById('labchoice_' + i);
-              if (backup.labLevels[i - 1] > 0 && radioEl) {
-                radioEl.disabled = false;
-              }
-              if (backup.labChoice === i - 1 && radioEl) {
-                radioEl.checked = true;
-              }
-
-              // Re-bind event handlers
-              addEvent('#lablevel_' + i, 'keyup', validateAndChangeLabLevel);
-              addEvent('#labchoice_' + i, 'click', () => {
-                if (calculatorApp) {
-                  calculatorApp._updateResultingLevel();
-                  calculatorApp.recalculateAll();
-                }
-              });
-            }
-          }
-
-          // Update resulting level display
-          if (calculatorApp) {
-            calculatorApp._updateResultingLevel();
-          }
-        }
-      } else {
-        // User clicked done - copy resulting lab level to research-lab-level input
-        if (calculatorApp) {
-          // Get the resulting lab level from the display
-          const resultingLevelText = getTextContent('#resulting-level');
-          const resultingLevel = parseInt(resultingLevelText, 10);
-
-          // Only update if we have a valid resulting level (not "?")
-          if (!isNaN(resultingLevel)) {
-            // Update the research-lab-level input
-            setVal('#research-lab-level', resultingLevel);
-
-            // Store the resulting level
-            options.resultingLabLevel = resultingLevel;
-            options.resultingLabLevelComputed = true;
-
-            // Update the currentParams
-            calculatorApp.currentParams.researchLabLevel = resultingLevel;
-          }
-
-          // Collect new params from DOM
-          calculatorApp.currentParams = calculatorApp.collector.collectGlobalParams();
-          calculatorApp.recalculateAll();
-        }
-      }
-
-      // Remove backup in all cases
-      delete irnModal._irnBackup;
-      delete irnModal._irnExecute;
-    });
+    setupIrnModalHandlers(irnModal, planetsSpinInput);
   }
 
   // Handle Done button in IRN dialog
@@ -1450,11 +1244,223 @@ function initializeCostsCalculator() {
     });
   }
 
-  // Expose to window for debugging
-  window.calculatorApp = calculatorApp;
+  // Expose to globalThis for debugging
+  globalThis.calculatorApp = calculatorApp;
+}
 
-  // console.log('CostsCalculator ready!');
-  // console.log('Access via window.calculatorApp');
+/**
+ * Set up the planet count spin buttons for the IRN dialog.
+ * @param {HTMLElement} planetsSpinInput
+ * @param {HTMLElement} planetsSpinUp
+ * @param {HTMLElement} planetsSpinDown
+ */
+function setupPlanetsSpin(planetsSpinInput, planetsSpinUp, planetsSpinDown) {
+  planetsSpinInput.value = options.currPlanetsCount || options.prm.planetsSpin || 8;
+
+  const onPlanetsChange = function (newVal, oldVal) {
+    if (newVal < 1 || newVal > 99) return;
+
+    options.prm.planetsSpin = newVal;
+    options.currPlanetsCount = newVal;
+
+    if (newVal < oldVal) {
+      if (oldVal >= 2) {
+        const tbody = document.querySelector('#lab-levels-table tbody');
+        tbody?.lastElementChild?.remove();
+        options.prm.labLevels.pop();
+      }
+    } else {
+      append('#lab-levels-table',
+        '<tr class="' + ((newVal % 2) === 1 ? 'odd' : 'even') + '">' +
+        '<td align="center">' + options.planetNumStr + newVal + '</td>' +
+        '<td align="center" width="20%;"><input type="text" id="lablevel_' + newVal +
+        '" name="lablevel_' + newVal + '" class="form-control input-3columns input-in-table" value="0" /></td>' +
+        '<td align="center" width="20%;"><input type="radio" id="labchoice_' + newVal +
+        '" name="start-pln" value="0" disabled="disabled"/></td>' +
+        '</tr>'
+      );
+      addEvent('#lablevel_' + newVal, 'keyup', validateAndChangeLabLevel);
+      addEvent('#labchoice_' + newVal, 'click', () => calculatorApp._updateResultingLevel());
+      options.prm.labLevels.push(0);
+    }
+
+    calculatorApp._updateResultingLevel();
+    if (calculatorApp) {
+      calculatorApp.recalculateAll();
+    }
+  };
+
+  addEvent(planetsSpinUp, 'click', () => {
+    const oldVal = Number.parseInt(planetsSpinInput.value) || 0;
+    const newVal = oldVal + 1;
+    if (newVal <= 99) {
+      planetsSpinInput.value = newVal;
+      onPlanetsChange(newVal, oldVal);
+    }
+  });
+
+  addEvent(planetsSpinDown, 'click', () => {
+    const oldVal = Number.parseInt(planetsSpinInput.value) || 0;
+    const newVal = oldVal - 1;
+    if (newVal >= 1) {
+      planetsSpinInput.value = newVal;
+      onPlanetsChange(newVal, oldVal);
+    }
+  });
+}
+
+/**
+ * Bind keyup/click handlers for the IRN dialog inputs.
+ */
+function setupIrnInputHandlers() {
+  const labInputs = document.querySelectorAll('#irn-calc input[type="text"]');
+  labInputs.forEach(input => {
+    removeAllEvents(input, 'keyup');
+    addEvent(input, 'keyup', validateAndChangeLabLevel);
+  });
+
+  const radioInputs = document.querySelectorAll('#irn-calc input[type="radio"]');
+  radioInputs.forEach(radio => {
+    removeAllEvents(radio, 'click');
+    addEvent(radio, 'click', () => {
+      if (calculatorApp) {
+        calculatorApp._updateResultingLevel();
+        calculatorApp.recalculateAll();
+      }
+    });
+  });
+
+  const irnLevelInput = document.getElementById('irn-level');
+  if (irnLevelInput) {
+    removeAllEvents(irnLevelInput, 'keyup');
+    addEvent(irnLevelInput, 'keyup', (e) => {
+      validateInputNumber.call(irnLevelInput, e);
+      if (calculatorApp) {
+        calculatorApp._updateResultingLevel();
+        calculatorApp.recalculateAll();
+      }
+    });
+  }
+
+  const researchLabInput = document.getElementById('research-lab-level');
+  if (researchLabInput) {
+    removeAllEvents(researchLabInput, 'keyup');
+    addEvent(researchLabInput, 'keyup', (e) => {
+      validateInputNumber.call(researchLabInput, e);
+      options.resultingLabLevelComputed = false;
+      if (calculatorApp) {
+        calculatorApp._handleParamChange('research-lab-level');
+      }
+    });
+  }
+}
+
+/**
+ * Bind the hidden.bs.modal handler for the IRN dialog.
+ * @param {HTMLElement} irnModal
+ * @param {HTMLElement|null} planetsSpinInput
+ */
+function setupIrnModalHandlers(irnModal, planetsSpinInput) {
+  addEvent(irnModal, 'hidden.bs.modal', () => {
+    if (irnModal._irnExecute && calculatorApp) {
+      applyIrnResult();
+    } else {
+      cancelIrnDialog(irnModal, planetsSpinInput);
+    }
+
+    delete irnModal._irnBackup;
+    delete irnModal._irnExecute;
+  });
+}
+
+/**
+ * Apply the IRN dialog result to the research-lab-level input.
+ */
+function applyIrnResult() {
+  const resultingLevelText = getTextContent('#resulting-level');
+  const resultingLevel = Number.parseInt(resultingLevelText, 10);
+
+  if (!Number.isNaN(resultingLevel)) {
+    setVal('#research-lab-level', resultingLevel);
+    options.resultingLabLevel = resultingLevel;
+    options.resultingLabLevelComputed = true;
+    calculatorApp.currentParams.researchLabLevel = resultingLevel;
+  }
+
+  calculatorApp.currentParams = calculatorApp.collector.collectGlobalParams();
+  calculatorApp.recalculateAll();
+}
+
+/**
+ * Restore the IRN dialog state when the user cancels.
+ * @param {HTMLElement} irnModal
+ * @param {HTMLElement|null} planetsSpinInput
+ */
+function cancelIrnDialog(irnModal, planetsSpinInput) {
+  const backup = irnModal._irnBackup;
+  if (!backup || !calculatorApp) return;
+
+  calculatorApp.currentParams.irnLevel = backup.irnLevel;
+  calculatorApp.currentParams.labLevels = [...backup.labLevels];
+  calculatorApp.currentParams.labChoice = backup.labChoice;
+
+  options.prm.irnLevel = backup.irnLevel;
+  options.prm.planetsSpin = backup.labLevels.length;
+  options.prm.labLevels = [...backup.labLevels];
+  options.prm.labChoice = backup.labChoice;
+  options.currPlanetsCount = backup.labLevels.length;
+
+  setVal('#irn-level', backup.irnLevel);
+  if (planetsSpinInput) {
+    planetsSpinInput.value = backup.labLevels.length;
+  }
+
+  rebuildLabTable(backup);
+  calculatorApp._updateResultingLevel();
+}
+
+/**
+ * Rebuild the lab levels table from a backup snapshot.
+ * @param {Object} backup
+ */
+function rebuildLabTable(backup) {
+  const table = document.getElementById('lab-levels-table');
+  if (!table) return;
+
+  while (table.rows.length > 1) {
+    table.deleteRow(1);
+  }
+
+  for (let i = 1; i <= backup.labLevels.length; i++) {
+    append('#lab-levels-table',
+      '<tr class="' + ((i % 2) === 1 ? 'odd' : 'even') + '">' +
+      '<td align="center">' + options.planetNumStr + i + '</td>' +
+      '<td align="center" width="20%;"><input type="text" id="lablevel_' + i +
+      '" name="lablevel_' + i + '" class="form-control input-3columns input-in-table" value="' +
+      backup.labLevels[i - 1] + '" /></td>' +
+      '<td align="center" width="20%;"><input type="radio" id="labchoice_' + i +
+      '" name="start-pln" disabled="disabled"/></td>' +
+      '</tr>'
+    );
+
+    const radioEl = document.getElementById('labchoice_' + i);
+    if (radioEl) {
+      if (backup.labLevels[i - 1] > 0) {
+        radioEl.disabled = false;
+      }
+      if (backup.labChoice === i - 1) {
+        radioEl.checked = true;
+      }
+    }
+
+    addEvent('#lablevel_' + i, 'keyup', validateAndChangeLabLevel);
+    addEvent('#labchoice_' + i, 'click', () => {
+      if (calculatorApp) {
+        calculatorApp._updateResultingLevel();
+        calculatorApp.recalculateAll();
+      }
+    });
+  }
 }
 
 /**
