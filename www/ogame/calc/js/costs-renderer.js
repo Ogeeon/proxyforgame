@@ -267,9 +267,10 @@ class Renderer {
       rows[resNeededRow].cells[4].innerHTML = this._formatNumber(needDeut, params);
       const delivery = this._calculateTransport(needMetal + needCrystal + needDeut, params);
       rows[deliveryTransportRow].cells[2].innerHTML =
-        `${delivery.small} <abbr title="${this.scFull}">${this.scShort}</abbr>`;
+        `${delivery.small} <abbr data-bs-toggle="tooltip" title="${this.scFull}">${this.scShort}</abbr>`;
       rows[deliveryTransportRow].cells[3].innerHTML =
-        `${delivery.large} <abbr title="${this.lcFull}">${this.lcShort}</abbr>`;
+        `${delivery.large} <abbr data-bs-toggle="tooltip" title="${this.lcFull}">${this.lcShort}</abbr>`;
+      this.initTooltips(rows[deliveryTransportRow]);
     });
   }
 
@@ -449,9 +450,18 @@ class Renderer {
     // Transport row (based on needed resources, not total)
     const transport = this._calculateTransport(needMetal + needCrystal + needDeut, params);
     rows[transportRow].cells[1].innerHTML =
-      `${transport.small} <abbr title="${this.scFull}">${this.scShort}</abbr>`;
+      `${transport.small} <abbr data-bs-toggle="tooltip" title="${this.scFull}">${this.scShort}</abbr>`;
     rows[transportRow].cells[2].innerHTML =
-      `${transport.large} <abbr title="${this.lcFull}">${this.lcShort}</abbr>`;
+      `${transport.large} <abbr data-bs-toggle="tooltip" title="${this.lcFull}">${this.lcShort}</abbr>`;
+    this.initTooltips(rows[transportRow]);
+  }
+
+  initTooltips(root) {
+    (root || document).querySelectorAll('[data-bs-toggle="tooltip"]').forEach(function(el) {
+      const existing = bootstrap.Tooltip.getInstance(el);
+      if (existing) existing.dispose();
+      new bootstrap.Tooltip(el);
+    });
   }
 
   // ==========================================================================

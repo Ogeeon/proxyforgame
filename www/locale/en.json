@@ -279,6 +279,7 @@
     "hourly-prod": "Prod. per hour",
     "hourly-cons": "Consum. per hour",
     "times-note": "When calculating durations of construction/research, the tool uses only the values for levels of the Shipyard, Factories and Laboratory entered in the upper panel. If you need to calculate the resulting Lab level when you have IRN, please click the \"Calculate\" button next to the Research lab level field.",
+    "robot-nanite-hint": "The tool cannot account for build order. The construction speed bonus from the Robotics Factory and Nanite Factory uses the level entered in the upper panel — not a level being upgraded in the same batch.<br>Example: if you upgrade the Robotics Factory from level 1 to 5 and the Metal Mine from level 1 to 5 — upgrading the factory first means the mine construction takes ~2m25s per level; upgrading the mine first (with factory still at level 1) takes ~7m16s per level.<br>To avoid this ambiguity, the tool always uses the factory level specified at the top of the table.",
     "msg-cant-research": "At the given level of Research laboratory research \"{0}\" is unavailable.",
     "class-collector": "Collector",
     "mineral-res-cntr-lvl": "Mineral Research Centre",

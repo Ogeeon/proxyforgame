@@ -324,7 +324,7 @@
                     <?php foreach ($colHeaders as $idx => $header) :?>
                     <th <?=($idx > 0)?'align="center"':''?> style="white-space:nowrap">
                       <?php if ($header == 'dm-abbr'): ?>
-                        <abbr title="<?= $l['dm-explanation'] ?>"><?=$l[$header] ?></abbr>
+                        <abbr data-bs-toggle="tooltip" title="<?= $l['dm-explanation'] ?>"><?=$l[$header] ?></abbr>
                       <?php else: ?>
                         <?=$l[$header] ?>
                       <?php endif; ?>
@@ -341,7 +341,7 @@
                   ?>
                   <tr class="<?= ($row++ % 2) === 1 ? 'odd' : 'even' ?>">
                     <td style="display: none;"><?=$techID?></td>
-                    <td style="white-space: nowrap"><?=$l[$techData[$tech][0]]?></td>
+                    <td style="white-space: nowrap"><?=$l[$techData[$tech][0]]?><?php if ($tech == 14 || $tech == 15): ?> <i class="bi bi-info-circle text-primary" data-bs-toggle="popover" data-bs-trigger="hover focus" data-bs-html="true" data-bs-content="<?= htmlspecialchars($l['robot-nanite-hint'], ENT_QUOTES) ?>" style="cursor: pointer;"></i><?php endif; ?></td>
                     <?php if ($i == 1): ?>
                     <td align="center"><input type="text" class="form-control form-control-sm level-input ui-input-margin" value="0"/></td>
                     <?php endif;?>
@@ -594,6 +594,16 @@
 document.addEventListener('DOMContentLoaded', function() {
   // Bootstrap tabs are auto-initialized from markup
   // Bootstrap modals are auto-initialized from markup
+
+  // Initialize Bootstrap tooltips
+  document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(function(el) {
+    new bootstrap.Tooltip(el);
+  });
+
+  // Initialize Bootstrap popovers for hint icons
+  document.querySelectorAll('[data-bs-toggle="popover"]').forEach(function(el) {
+    new bootstrap.Popover(el);
+  });
 
   // Initialize the calculator app
   initializeCostsCalculator();

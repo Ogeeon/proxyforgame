@@ -279,6 +279,7 @@
     "hourly-prod": "Producción por hora",
     "hourly-cons": "Consumo por hora",
     "times-note": "Para los cálculos de las duraciones de construcciones/investigaciones, las herramientas sólo usan los valores de los niveles de Hangar, Fábricas de Robots/Nanobots y Laboratorios introducidos en el panel superior. Si necesitas calcular el nivel resultante de tu red de Laboratorios de Investigación al aumentar el nivel de Red de Investigación Intergaláctica, por favor, haz click en el botón \"Calcular\", la lado del campo Nivel de Laboratorio de Investigación.",
+    "robot-nanite-hint": "La herramienta no puede tener en cuenta el orden de construcción. El bonus de velocidad de construcción de la Fábrica de Robots y la Fábrica de Nanobots usa el nivel introducido en el panel superior — no el nivel que se está mejorando en el mismo lote.<br>Ejemplo: si mejoras la Fábrica de Robots del nivel 1 al 5 y la Mina de Metal del nivel 1 al 5 — mejorando la fábrica primero, la construcción de la mina tarda ~2m25s por nivel; mejorando la mina primero (con la fábrica aún en nivel 1), tarda ~7m16s por nivel.<br>Para evitar esta ambigüedad, la herramienta siempre usa el nivel de fábrica especificado en la parte superior de la tabla.",
     "msg-cant-research": "Con este nivel de Laboratorio de Investigación, la tecnología \"{0}\" no está disponible.",
     "class-collector": "Recolector",
     "planet-pos": "Posición",

@@ -275,6 +275,7 @@
     "hourly-prod": "Productie per uur",
     "hourly-cons": "Verbruik per uur",
     "times-note": "Om de duur van gebouwen/onderzoeken te berekenen, zal je alle velden in moeten vullen van werf, (nano)robotfabriek en onderzoekslab. Heb je IGON? Klik op de \"Bereken\" knop in het veld naast het onderzoekslab.",
+    "robot-nanite-hint": "De tool kan geen bouwvolgorde bijhouden. De bouwsnelheidsbonus van de Robotfabriek en de Nanorobotfabriek gebruikt het niveau dat in het bovenste paneel is ingevoerd — niet het niveau dat in hetzelfde batch wordt opgewaardeerd.<br>Voorbeeld: als je de Robotfabriek upgradet van niveau 1 naar 5 en de Metaalmijn van niveau 1 naar 5 — als je eerst de fabriek upgradet, duurt de bouw van de mijn ~2m25s per niveau; als je eerst de mijn upgradet (met de fabriek nog op niveau 1), duurt het ~7m16s per niveau.<br>Om deze onduidelijkheid te vermijden, gebruikt de tool altijd het fabrieksniveau dat bovenaan de tabel is opgegeven.",
     "msg-cant-research": "Met de opgegeven level van onderzoek laboratorium is onderzoek \"{0}\" is niet mogelijk.",
     "class-collector": "Collector",
     "planet-pos": "Positie",

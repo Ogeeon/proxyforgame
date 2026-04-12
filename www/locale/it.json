@@ -279,6 +279,7 @@
     "hourly-prod": "Prod. per ora",
     "hourly-cons": "Cons. per ora",
     "times-note": "Quando si calcola la durata di costruzione/ricerca, lo strumento utilizza solo i valori per i livelli dei cantieri, fabbriche e Laboratorio entrato nel pannello superiore. Se avete bisogno di calcolare il livello di laboratorio risulta quando si ha RIR, fare clic sul pulsante \"Calcolo\" accanto al campo di ricerca a livello di laboratorio.",
+    "robot-nanite-hint": "Lo strumento non può tenere conto dell'ordine di costruzione. Il bonus di velocità di costruzione della Fabbrica di Robot e della Fabbrica di Nanobot utilizza il livello inserito nel pannello superiore — non il livello che viene aggiornato nello stesso gruppo.<br>Esempio: se migliori la Fabbrica di Robot dal livello 1 al 5 e la Miniera di Metallo dal livello 1 al 5 — migliorando prima la fabbrica, la costruzione della miniera richiede ~2m25s per livello; migliorando prima la miniera (con la fabbrica ancora al livello 1), richiede ~7m16s per livello.<br>Per evitare questa ambiguità, lo strumento utilizza sempre il livello della fabbrica specificato nella parte superiore della tabella.",
     "msg-cant-research": "Al dato livello di Laboratorio di Ricerca di ricerca \"{0}\" non e disponibile.",
     "class-collector": "Collector",
     "planet-pos": "Posizione",

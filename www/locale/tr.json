@@ -272,6 +272,7 @@
     "hourly-prod": "Saat başına üretilen",
     "hourly-cons": "Saat başına tüketilen",
     "times-note": "İnşaat / araştırma sürelerini hesaplarken sadece tersane, bina ve laboratuvar seviyelerini üst panele girin. Eğer galaksiler arası araştırma ağı seviyesini hesaplamak gerekirse \"Hesapla\" butonunun yanındaki Galaksiler arası araştırma ağı seviyesi alanına tıklayın..",
+    "robot-nanite-hint": "Araç, inşaat sırasını dikkate alamaz. Robotik Fabrikası ve Nanit Fabrikası'nın inşaat hızı bonusu, üst panele girilen seviyeyi kullanır — aynı grup içinde yükseltilen seviyeyi değil.<br>Örnek: Robotik Fabrikasını seviye 1'den 5'e ve Metal Madenini seviye 1'den 5'e yükseltiyorsanız — önce fabrikayı yükseltirseniz maden inşaatı ~2d25s sürer; önce madeni yükseltirseniz (fabrika hâlâ seviye 1'deyken) ~7d16s sürer.<br>Bu belirsizliği önlemek için araç, tablonun üst kısmında belirtilen fabrika seviyesini her zaman kullanır.",
     "msg-cant-research": "Araştırma laboratuvarı verilen seviyede \"{0}\" kullanılamıyor.",
     "class-collector": "Koleksiyoncu",
     "planet-pos": "Konum",

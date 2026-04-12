@@ -279,6 +279,7 @@
     "hourly-prod": "Proizv. po satu",
     "hourly-cons": "Potrošnja po satu",
     "times-note": "Kada računate trajanje izgradnje/istraživanja, alat koristi samo vrijednosti za levele tvornice brodova, tvornica i laboratorija koji su uneseni u gornjem panelu. Ako želite da izračunate vrijeme istraživanja sa levelima koje imate ako imate Intergalaktičku znanstvenu mrežu, molimo kliknite \"Izračunaj\" dugme pored polja \"Centar za istraživanje\".",
+    "robot-nanite-hint": "Alat ne može uzeti u obzir redoslijed izgradnje. Bonus brzine izgradnje Tvornice robota i Nanobot tvornice koristi nivo unesen u gornjem panelu — ne nivo koji se nadograđuje u istoj seriji.<br>Primjer: ako nadgrađujete Tvornicu robota od nivoa 1 do 5 i Rudnik metala od nivoa 1 do 5 — ako prvo nadgradite tvornicu, izgradnja rudnika traje ~2m25s po nivou; ako prvo nadgradite rudnik (dok je tvornica još na nivou 1), traje ~7m16s po nivou.<br>Kako bi se izbjegla ova nejasnoća, alat uvijek koristi nivo tvornice naveden na vrhu tabele.",
     "msg-cant-research": "Na datom levelu Centra za istraživanje, istraživanje \"{0}\" nije dostupno.",
     "moon": "Mjeseca",
     "mineral-res-cntr-lvl": "Mineral Research Centre",

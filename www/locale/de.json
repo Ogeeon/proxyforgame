@@ -278,6 +278,7 @@
     "hourly-prod": "Prod. pro Stunde",
     "hourly-cons": "Verb. pro Stunde",
     "times-note": "Bei der Berechnung der Dauer für Bau/Forschung verwendet das Tool nur die Werte der Raumschiffswerft, Roboterfabrik und des Labors im oberen Feld. Wenn Sie das I.F. in die Berechnung der Forschung mit einbeziehen möchten, drücken Sie bitte neben dem Forschungslabor Feld, auf das kleine Fenster.",
+    "robot-nanite-hint": "Das Tool kann die Baureihenfolge nicht berücksichtigen. Der Baubeschleunigungsbonus der Roboterfabrik und der Nanitefabrik verwendet den im oberen Panel eingegebenen Level — nicht den Level, der im selben Stapel aufgewertet wird.<br>Beispiel: Wenn Sie die Roboterfabrik von Stufe 1 auf 5 und die Metallmine von Stufe 1 auf 5 aufwerten — wenn Sie zuerst die Fabrik aufwerten, dauert der Minenbau ~2m25s pro Stufe; wenn Sie zuerst die Mine aufwerten (Fabrik noch auf Stufe 1), dauert es ~7m16s pro Stufe.<br>Um diese Mehrdeutigkeit zu vermeiden, verwendet das Tool immer den oben in der Tabelle angegebenen Fabrik-Level.",
     "msg-cant-research": "Auf dieser Forschungslabor Stufe Forschung \"{0}\" ist ausgeschlossen.",
     "class-collector": "Kollektor",
     "mineral-res-cntr-lvl": "Mineral-Forschungszentrum",
