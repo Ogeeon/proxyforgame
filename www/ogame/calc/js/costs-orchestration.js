@@ -626,8 +626,8 @@ class CostsCalculator {
       // Fallback to cookie if localStorage is empty
       if (!json) {
         const cookies = document.cookie.split(';');
-        for (let i = 0; i < cookies.length; i++) {
-          const cookie = cookies[i].trim();
+        for (const rawCookie of cookies) {
+          const cookie = rawCookie.trim();
           if (cookie.startsWith(CostsCalculator.STORAGE_KEY + '=')) {
             json = decodeURIComponent(cookie.substring(CostsCalculator.STORAGE_KEY.length + 1));
             break;
@@ -641,7 +641,7 @@ class CostsCalculator {
       if (json) {
         try {
           state = JSON.parse(json);
-        } catch (e) {
+        } catch {
           console.warn('Failed to parse saved state');
         }
       }
