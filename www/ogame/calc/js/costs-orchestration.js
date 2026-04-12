@@ -667,49 +667,32 @@ class CostsCalculator {
    * @private
    */
   _applyStateToUI(state) {
-    // Building levels
-    if (state.shipyardLevel !== undefined) {
-      setVal('#shipyard-level', state.shipyardLevel);
-    }
-    if (state.robotFactoryLevelPlanet !== undefined) {
-      setVal('#robot-factory-level', state.robotFactoryLevelPlanet);
-    }
-    if (state.robotFactoryLevelMoon !== undefined) {
-      setVal('#robot-factory-level-moon', state.robotFactoryLevelMoon);
-    }
-    if (state.naniteFactoryLevel !== undefined) {
-      setVal('#nanite-factory-level', state.naniteFactoryLevel);
-    }
+    const fieldMap = {
+      shipyardLevel: '#shipyard-level',
+      robotFactoryLevelPlanet: '#robot-factory-level',
+      robotFactoryLevelMoon: '#robot-factory-level-moon',
+      naniteFactoryLevel: '#nanite-factory-level',
+      universeSpeed: '#universe-speed',
+      researchSpeed: '#research-speed',
+      researchLabLevel: '#research-lab-level',
+      ionTechLevel: '#ion-tech-level',
+      hyperTechLevel: '#hyper-tech-level',
+      energyTechLevel: '#energy-tech-level',
+      plasmaTechLevel: '#plasma-tech-level',
+      maxPlanetTemp: '#max-planet-temp',
+      planetPos: '#planet-pos',
+      lfResCostRdc: '#research-cost-reduction',
+      lfResTimeRdc: '#research-time-reduction',
+      mineralResCntrLvl: '#mineral-res-cntr-lvl',
+      lfTerraformerRdc: '#lf-terraformer-rdc',
+      booster: '#booster',
+      irnLevel: '#irn-level',
+    };
 
-    // Speeds
-    if (state.universeSpeed !== undefined) {
-      setVal('#universe-speed', state.universeSpeed);
-    }
-    if (state.researchSpeed !== undefined) {
-      setVal('#research-speed', state.researchSpeed);
-    }
-
-    // Technologies
-    if (state.researchLabLevel !== undefined) {
-      setVal('#research-lab-level', state.researchLabLevel);
-    }
-    if (state.ionTechLevel !== undefined) {
-      setVal('#ion-tech-level', state.ionTechLevel);
-    }
-    if (state.hyperTechLevel !== undefined) {
-      setVal('#hyper-tech-level', state.hyperTechLevel);
-    }
-    if (state.energyTechLevel !== undefined) {
-      setVal('#energy-tech-level', state.energyTechLevel);
-    }
-    if (state.plasmaTechLevel !== undefined) {
-      setVal('#plasma-tech-level', state.plasmaTechLevel);
-    }
-    if (state.maxPlanetTemp !== undefined) {
-      setVal('#max-planet-temp', state.maxPlanetTemp);
-    }
-    if (state.planetPos !== undefined) {
-      setVal('#planet-pos', state.planetPos);
+    for (const [key, selector] of Object.entries(fieldMap)) {
+      if (state[key] !== undefined) {
+        setVal(selector, state[key]);
+      }
     }
 
     // Officers/bonuses
@@ -721,62 +704,49 @@ class CostsCalculator {
     setChecked('#research-bonus', state.researchBonus === true);
     setChecked('#full-numbers', state.fullNumbers === true);
 
-    // Lifeform reductions
-    if (state.lfResCostRdc !== undefined) {
-      setVal('#research-cost-reduction', state.lfResCostRdc);
-    }
-    if (state.lfResTimeRdc !== undefined) {
-      setVal('#research-time-reduction', state.lfResTimeRdc);
-    }
-    if (state.mineralResCntrLvl !== undefined) {
-      setVal('#mineral-res-cntr-lvl', state.mineralResCntrLvl);
-    }
-    if (state.lfTerraformerRdc !== undefined) {
-      setVal('#lf-terraformer-rdc', state.lfTerraformerRdc);
-    }
-
     // Class
     if (state.playerClass !== undefined) {
       setChecked(`#class-${state.playerClass}`, true);
     }
 
-    // Booster
-    if (state.booster !== undefined) {
-      setVal('#booster', state.booster);
-    }
-
-    // IRN
-    if (state.irnLevel !== undefined) {
-      setVal('#irn-level', state.irnLevel);
-    }
+    // IRN lab levels
     if (state.labLevels && state.labLevels.length > 0) {
-      const planetCount = state.labLevels.length;
-      setVal('#planetsSpin', planetCount);
-      options.currPlanetsCount = planetCount;
-      options.prm.planetsSpin = planetCount;
+      this._applyLabLevels(state);
+    }
+  }
 
-      // Trim table rows to match saved planet count
-      const tbody = document.querySelector('#lab-levels-table tbody');
-      if (tbody) {
-        while (tbody.rows.length > planetCount) {
-          tbody.deleteRow(tbody.rows.length - 1);
-        }
+  /**
+   * Apply saved lab levels to the UI
+   * @param {Object} state
+   * @private
+   */
+  _applyLabLevels(state) {
+    const planetCount = state.labLevels.length;
+    setVal('#planetsSpin', planetCount);
+    options.currPlanetsCount = planetCount;
+    options.prm.planetsSpin = planetCount;
+
+    // Trim table rows to match saved planet count
+    const tbody = document.querySelector('#lab-levels-table tbody');
+    if (tbody) {
+      while (tbody.rows.length > planetCount) {
+        tbody.deleteRow(tbody.rows.length - 1);
+      }
+    }
+
+    // Set lab levels
+    state.labLevels.forEach((level, index) => {
+      const planetNum = index + 1;
+      setVal(`#lablevel_${planetNum}`, level);
+
+      if (level > 0) {
+        removeAttr(`#labchoice_${planetNum}`, 'disabled');
       }
 
-      // Set lab levels
-      state.labLevels.forEach((level, index) => {
-        const planetNum = index + 1;
-        setVal(`#lablevel_${planetNum}`, level);
-
-        if (level > 0) {
-          removeAttr(`#labchoice_${planetNum}`, 'disabled');
-        }
-
-        if (state.labChoice === index) {
-          setChecked(`#labchoice_${planetNum}`, true);
-        }
-      });
-    }
+      if (state.labChoice === index) {
+        setChecked(`#labchoice_${planetNum}`, true);
+      }
+    });
   }
 
   /**
