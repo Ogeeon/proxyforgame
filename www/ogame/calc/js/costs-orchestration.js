@@ -1506,8 +1506,8 @@ function validateAndChangeLabLevel(event) {
   changeLabLevel.call(this, event);
 }
 
-// Expose to window for direct access
-if (typeof window !== 'undefined') {
-  window.CostsCalculator = CostsCalculator;
-  window.initializeCostsCalculator = initializeCostsCalculator;
+// Expose to globalThis for direct access
+if (typeof globalThis.window !== 'undefined') {
+  globalThis.CostsCalculator = CostsCalculator;
+  globalThis.initializeCostsCalculator = initializeCostsCalculator;
 }
