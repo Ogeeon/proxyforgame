@@ -460,7 +460,7 @@ class Renderer {
     (root || document).querySelectorAll('[data-bs-toggle="tooltip"]').forEach(function(el) {
       const existing = bootstrap.Tooltip.getInstance(el);
       if (existing) existing.dispose();
-      new bootstrap.Tooltip(el);
+      bootstrap.Tooltip.getOrCreateInstance(el);
     });
   }
 
