@@ -642,8 +642,8 @@ class IncrementalRenderer extends Renderer {
 // EXPORT FOR USE
 // ============================================================================
 
-if (typeof window !== 'undefined') {
-  window.Renderer = Renderer;
-  window.BatchRenderer = BatchRenderer;
-  window.IncrementalRenderer = IncrementalRenderer;
+if (typeof globalThis.window !== 'undefined') {
+  globalThis.Renderer = Renderer;
+  globalThis.BatchRenderer = BatchRenderer;
+  globalThis.IncrementalRenderer = IncrementalRenderer;
 }
