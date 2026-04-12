@@ -463,6 +463,31 @@ class Calculator {
       return 0;
     }
 
+    // For energy buildings, getProductionRate returns only base production without
+    // engineer/allStaff bonuses, because in production.js those bonuses are applied
+    // to the total energy balance as separate rows. In the range calculator we show
+    // production for a single building, so we include these bonuses directly.
+    if (techId === 4 || techId === 12 || techId === 212) {
+      const prod = getProductionRateSplit(
+        techId,
+        level,
+        params.energyTechLevel,
+        params.plasmaTechLevel,
+        params.maxPlanetTemp,
+        params.planetPos,
+        params.universeSpeed,
+        params.geologist,
+        params.engineer,
+        1, // energyRatio
+        1, // productionRatio
+        params.booster,
+        params.hasFullCrew,
+        params.playerClass
+      );
+      const allStaffBonus = params.hasFullCrew ? Math.round(prod[1] * 0.02) : 0;
+      return prod[1] + prod[5] + allStaffBonus; // base + engineer bonus + all-officers bonus
+    }
+
     // Calculate production rate
     return getProductionRate(
       techId,

@@ -351,7 +351,7 @@
                       <td align="center"><input type="text" class="form-control form-control-sm level-input ui-input-margin" value="0"/></td>
                     <?php endif; ?>
                      <?php if ($hasQtyCol): ?>
-<td align="center"><input type="text" class="form-control form-control-sm qty-input ui-input-margin" value="1" min="1" style="text-align:center"/></td>
+                      <td align="center"><input type="text" class="form-control form-control-sm qty-input ui-input-margin" value="1" min="1" style="text-align:center"/></td>
                      <?php endif; ?>
                     <td align="center">0</td>
                     <td align="center">0</td>

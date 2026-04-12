@@ -124,11 +124,13 @@ function getProductionRateSplit(techID, techLevel, energyTechLevel, plasmaTechLe
 			//productionRate = Math.floor(20.0 * techLevel * Math.pow(1.1, techLevel) * engineerFactor * powerFactor);
 			basePR = Math.floor(20.0 * techLevel * Math.pow(1.1, techLevel) * powerFactor);
 			rows[1] = Math.floor(basePR);
+			rows[5] = Math.round(basePR * engineerFactor);
 			break;
 		case 12:
 			//productionRate = Math.floor(30.0 * techLevel * Math.pow((1.05 + energyTechLevel * 0.01), techLevel) * engineerFactor * powerFactor);
 			basePR = Math.floor(30.0 * techLevel * Math.pow((1.05 + energyTechLevel * 0.01), techLevel) * powerFactor);
 			rows[1] = Math.floor(basePR);
+			rows[5] = Math.round(basePR * engineerFactor);
 			break;
 		case 212:
 			//productionRate = techLevel * Math.floor((maxTemp + 140) / 6) * engineerFactor * powerFactor;
