@@ -196,7 +196,7 @@ class GlobalParams {
     if (!rule) return value;
 
     const num = Number(value);
-    if (isNaN(num)) return rule.default;
+    if (Number.isNaN(num)) return rule.default;
     if (num < rule.min) return rule.min;
     if (num > rule.max) return rule.max;
     return num;
