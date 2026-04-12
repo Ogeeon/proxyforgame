@@ -386,7 +386,7 @@ class CostsCalculator {
         }
         // Enforce integer >= 1 for qty inputs
         if (event.target.classList.contains('qty-input')) {
-          const val = Math.floor(parseFloat(event.target.value) || 1);
+          const val = Math.floor(Number.parseFloat(event.target.value) || 1);
           event.target.value = Math.max(1, val);
         }
         this._handleTableInputChange(event);
