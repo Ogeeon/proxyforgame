@@ -546,8 +546,8 @@ class CostsCalculator {
    */
   _isStorageAvailable() {
     try {
-      return 'localStorage' in window && window['localStorage'] !== null;
-    } catch (e) {
+      return 'localStorage' in globalThis && globalThis['localStorage'] !== null;
+    } catch {
       return false;
     }
   }
