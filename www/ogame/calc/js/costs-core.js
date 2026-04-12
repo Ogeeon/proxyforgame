@@ -6,57 +6,55 @@
  * Global configuration and user settings
  */
 class GlobalParams {
-  constructor() {
-    // Building levels
-    this.shipyardLevel = 0;
-    this.robotFactoryLevelPlanet = 0;
-    this.robotFactoryLevelMoon = 0;
-    this.naniteFactoryLevel = 0;
+  // Building levels
+  shipyardLevel = 0;
+  robotFactoryLevelPlanet = 0;
+  robotFactoryLevelMoon = 0;
+  naniteFactoryLevel = 0;
 
-    // Speed settings
-    this.universeSpeed = 1;
-    this.researchSpeed = 1;
+  // Speed settings
+  universeSpeed = 1;
+  researchSpeed = 1;
 
-    // Technology levels
-    this.researchLabLevel = 0;
-    this.energyTechLevel = 0;
-    this.plasmaTechLevel = 0;
-    this.ionTechLevel = 0;
-    this.hyperTechLevel = 0;
+  // Technology levels
+  researchLabLevel = 0;
+  energyTechLevel = 0;
+  plasmaTechLevel = 0;
+  ionTechLevel = 0;
+  hyperTechLevel = 0;
 
-    // Planet settings
-    this.maxPlanetTemp = 0;
-    this.planetPos = 8;
+  // Planet settings
+  maxPlanetTemp = 0;
+  planetPos = 8;
 
-    // Officers/bonuses
-    this.geologist = false;
-    this.engineer = false;
-    this.technocrat = false;
-    this.admiral = false;
-    this.commander = false;
-    this.researchBonus = false;
+  // Officers/bonuses
+  geologist = false;
+  engineer = false;
+  technocrat = false;
+  admiral = false;
+  commander = false;
+  researchBonus = false;
 
-    // Player class: 0=collector, 1=general, 2=discoverer
-    this.playerClass = 0;
+  // Player class: 0=collector, 1=general, 2=discoverer
+  playerClass = 0;
 
-    // Boosters: 0=0%, 1=10%, 2=20%, 3=30%, 4=40%
-    this.booster = 0;
+  // Boosters: 0=0%, 1=10%, 2=20%, 3=30%, 4=40%
+  booster = 0;
 
-    // Intergalactic Research Network
-    this.irnLevel = 0;
-    this.labLevels = []; // Array of lab levels per planet
-    this.labChoice = -1; // Index of planet that starts research
-    this.useDirectLabLevel = false; // If true, use researchLabLevel directly instead of IRN calculation
+  // Intergalactic Research Network
+  irnLevel = 0;
+  labLevels = []; // Array of lab levels per planet
+  labChoice = -1; // Index of planet that starts research
+  useDirectLabLevel = false; // If true, use researchLabLevel directly instead of IRN calculation
 
-    // Display options
-    this.fullNumbers = false;
+  // Display options
+  fullNumbers = false;
 
-    // Lifeform reductions
-    this.lfResCostRdc = 0;      // LF research cost reduction, %
-    this.lfResTimeRdc = 0;      // LF research time reduction, %
-    this.mineralResCntrLvl = 0; // Mineral Research Centre level (Rock'tal)
-    this.lfTerraformerRdc = 0;  // LF Terraformer reduction, %
-  }
+  // Lifeform reductions
+  lfResCostRdc = 0;      // LF research cost reduction, %
+  lfResTimeRdc = 0;      // LF research time reduction, %
+  mineralResCntrLvl = 0; // Mineral Research Centre level (Rock'tal)
+  lfTerraformerRdc = 0;  // LF Terraformer reduction, %
 
   /**
    * Get technocrat time reduction factor
