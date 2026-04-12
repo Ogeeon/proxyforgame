@@ -768,11 +768,11 @@ class Validator {
 // export { GlobalParams, BuildRequest, BuildCost, Calculator, Validator };
 
 // For browser globals (current setup):
-if (typeof window !== 'undefined') {
-  window.GlobalParams = GlobalParams;
-  window.BuildRequest = BuildRequest;
-  window.BuildCost = BuildCost;
-  window.Calculator = Calculator;
-  window.Validator = Validator;
-  window.ValidationResult = ValidationResult;
+if (typeof globalThis.window !== 'undefined') {
+  globalThis.GlobalParams = GlobalParams;
+  globalThis.BuildRequest = BuildRequest;
+  globalThis.BuildCost = BuildCost;
+  globalThis.Calculator = Calculator;
+  globalThis.Validator = Validator;
+  globalThis.ValidationResult = ValidationResult;
 }
