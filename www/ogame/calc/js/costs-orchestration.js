@@ -1236,9 +1236,7 @@ function initializeCostsCalculator() {
       if (newVal < oldVal) {
         if (oldVal >= 2) {
           const tbody = document.querySelector('#lab-levels-table tbody');
-          if (tbody && tbody.lastElementChild) {
-            tbody.lastElementChild.remove();
-          }
+          tbody?.lastElementChild?.remove();
           options.prm.labLevels.pop();
         }
       } else {
@@ -1268,7 +1266,7 @@ function initializeCostsCalculator() {
 
     // Up button handler
     addEvent(planetsSpinUp, 'click', () => {
-      const oldVal = parseInt(planetsSpinInput.value) || 0;
+      const oldVal = Number.parseInt(planetsSpinInput.value) || 0;
       const newVal = oldVal + 1;
       if (newVal <= 99) {
         planetsSpinInput.value = newVal;
@@ -1278,7 +1276,7 @@ function initializeCostsCalculator() {
 
     // Down button handler
     addEvent(planetsSpinDown, 'click', () => {
-      const oldVal = parseInt(planetsSpinInput.value) || 0;
+      const oldVal = Number.parseInt(planetsSpinInput.value) || 0;
       const newVal = oldVal - 1;
       if (newVal >= 1) {
         planetsSpinInput.value = newVal;
