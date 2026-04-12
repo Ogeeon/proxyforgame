@@ -457,7 +457,7 @@ class Renderer {
   }
 
   initTooltips(root) {
-    (root || document).querySelectorAll('[data-bs-toggle="tooltip"]').forEach(function(el) {
+    (root || document).querySelectorAll('[data-bs-toggle="tooltip"]').forEach(function (el) {
       const existing = bootstrap.Tooltip.getInstance(el);
       if (existing) existing.dispose();
       bootstrap.Tooltip.getOrCreateInstance(el);
@@ -642,7 +642,7 @@ class IncrementalRenderer extends Renderer {
 // EXPORT FOR USE
 // ============================================================================
 
-if (typeof globalThis.window !== 'undefined') {
+if (globalThis.window !== undefined) {
   globalThis.Renderer = Renderer;
   globalThis.BatchRenderer = BatchRenderer;
   globalThis.IncrementalRenderer = IncrementalRenderer;
