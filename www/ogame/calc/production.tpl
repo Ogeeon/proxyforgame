@@ -319,21 +319,25 @@
 								</tr>
 							</table>
 							<table id="mines-amort-tbl" class="lined" cellpadding="0" cellspacing="1" border="0" width="100%">
-								<tr>
-									<th><?= $l['mine'] ?></th>
-									<th><?= $l['upgrade-cost'] ?></th>
-									<th><?= $l['production-increase'] ?></th>
-									<th><?= $l['amortization-time'] ?></th>
-								</tr>
-								<tr class="odd">
-									<td><?= $l['metal-mine'] ?></td><td class="centered"></td><td class="centered"></td><td class="centered"></td>
-								</tr>
-								<tr class="even">
-									<td><?= $l['crystal-mine'] ?></td><td class="centered"></td><td class="centered"></td><td class="centered"></td>
-								</tr>
-								<tr class="odd">
-									<td><?= $l['deut-synth'] ?></td><td class="centered"></td><td class="centered"></td><td class="centered"></td>
-								</tr>
+								<thead>
+									<tr>
+										<th><?= $l['mine'] ?></th>
+										<th><?= $l['upgrade-cost'] ?></th>
+										<th><?= $l['production-increase'] ?></th>
+										<th><?= $l['amortization-time'] ?></th>
+									</tr>
+								</thead>
+								<tbody>
+									<tr class="odd">
+										<td><?= $l['metal-mine'] ?></td><td class="centered"></td><td class="centered"></td><td class="centered"></td>
+									</tr>
+									<tr class="even">
+										<td><?= $l['crystal-mine'] ?></td><td class="centered"></td><td class="centered"></td><td class="centered"></td>
+									</tr>
+									<tr class="odd">
+										<td><?= $l['deut-synth'] ?></td><td class="centered"></td><td class="centered"></td><td class="centered"></td>
+									</tr>
+								</tbody>
 							</table>
 							<table cellpadding="0" cellspacing="1" border="0" style="width=100%; margin-top: 15px;">
 								<tr>
@@ -511,21 +515,25 @@
 						<h3><a href="#"><?= $l['plasma-amortization'] ?></a></h3>
 						<div>
 							<table id="plasma-amort-tbl" class="lined" cellpadding="0" cellspacing="1" border="0" width="100%">
-								<tr>
-									<th style="width: 55%"></th>
-									<th style="width: 15%"><?= $l['metal'] ?></th>
-									<th style="width: 15%"><?= $l['crystal'] ?></th>
-									<th style="width: 15%"><?= $l['deuterium'] ?></th>
-								</tr>
-								<tr class="odd">
-									<td><?= $l['upgrade-cost'] ?></td><td class="centered"></td><td class="centered"></td><td class="centered"></td>
-								</tr>
-								<tr class="even">
-									<td><?= $l['production-increase'] ?></td><td class="centered"></td><td class="centered"></td><td class="centered"></td>
-								</tr>
-								<tr class="odd">
-									<td><?= $l['amortization-time'] ?></td><td class="centered" colspan="3"></td>
-								</tr>
+								<thead>
+									<tr>
+										<th style="width: 55%"></th>
+										<th style="width: 15%"><?= $l['metal'] ?></th>
+										<th style="width: 15%"><?= $l['crystal'] ?></th>
+										<th style="width: 15%"><?= $l['deuterium'] ?></th>
+									</tr>
+								</thead>
+								<tbody>
+									<tr class="odd">
+										<td><?= $l['upgrade-cost'] ?></td><td class="centered"></td><td class="centered"></td><td class="centered"></td>
+									</tr>
+									<tr class="even">
+										<td><?= $l['production-increase'] ?></td><td class="centered"></td><td class="centered"></td><td class="centered"></td>
+									</tr>
+									<tr class="odd">
+										<td><?= $l['amortization-time'] ?></td><td class="centered" colspan="3"></td>
+									</tr>
+								</tbody>
 							</table>
 						</div>
 						<h3><a href="#"><?= $l['resources-accumulation'] ?></a></h3>
