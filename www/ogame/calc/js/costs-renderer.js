@@ -50,23 +50,40 @@ class Renderer {
     let totals = BuildCost.zero();
     let maxEnergy = 0;
 
-    // Render each result
+    // Group results by techId before rendering (for multi-level calculations)
+    const groupedResults = new Map();
+
+    // Accumulate totals and group results
     for (let i = 0; i < results.length; i++) {
       const request = requests[i];
       const result = results[i];
-      const rowIndex = this._findRowByTechId(rows, request.techId, request.isMoon);
+      const key = `${request.techId}-${request.isMoon ? 'moon' : 'planet'}`;
 
-      if (rowIndex === -1) continue; // Row not found
+      if (!groupedResults.has(key)) {
+        groupedResults.set(key, BuildCost.zero());
+      }
 
-      const row = rows[rowIndex];
-
-      // Render individual cells
-      this._renderRowCost(row, firstDataCol, result, request.techId, isMultiLevel, params);
+      // Sum results for the same techId (multi-level case)
+      groupedResults.set(key, groupedResults.get(key).add(result));
 
       // Accumulate totals
       totals = totals.add(result);
       maxEnergy = Math.max(maxEnergy, result.energy);
     }
+
+    // Render grouped results
+    groupedResults.forEach((summedResult, key) => {
+      const [techId, type] = key.split('-');
+      const isMoon = type === 'moon';
+      const rowIndex = this._findRowByTechId(rows, Number(techId), isMoon);
+
+      if (rowIndex === -1) return; // Row not found
+
+      const row = rows[rowIndex];
+
+      // Render the summed result
+      this._renderRowCost(row, firstDataCol, summedResult, Number(techId), isMultiLevel, params);
+    });
 
     // Set max energy (not sum)
     totals.energy = maxEnergy;
