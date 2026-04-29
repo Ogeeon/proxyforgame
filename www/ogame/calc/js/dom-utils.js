@@ -275,7 +275,7 @@ const fadeIn = (selector, duration = 400, callback) => {
   if (!el) return;
 
   el.style.opacity = '0';
-  el.style.display = '';
+  el.style.display = 'block';
   el.style.transition = `opacity ${duration}ms`;
 
   requestAnimationFrame(() => {
@@ -410,6 +410,77 @@ const removeAttr = (selector, attr) => {
 };
 
 // ==========================================================================
+// VALIDATION HELPERS
+// ==========================================================================
+
+/**
+ * Native-DOM equivalent of validateInputNumberOnBlur from utils.js.
+ * Clamps the input value to its _constrains min/max on blur and shows the
+ * warning div when a constraint is violated. Use this in Bootstrap 5
+ * calculators that do not load jQuery.
+ *
+ * Relies on validateInputNumber, getConstraint, getOptionValue (utils.js)
+ * and the dom-utils fadeIn/fadeOut/setTextContent helpers.
+ *
+ * @param {Event} event - The blur event
+ */
+const validateInputNumberOnBlurNative = (event) => {
+  validateInputNumber(event);
+  let needRecalc = false;
+  const input = event.currentTarget;
+  const decimalSeparator = getOptionValue('decimalSeparator', '.');
+
+  if (input.value === '-') {
+    input.value = '0';
+    needRecalc = true;
+  }
+  if (input.value.charAt(input.value.length - 1) === decimalSeparator) {
+    input.value += '0';
+    needRecalc = true;
+  }
+
+  const rawValue = input.value.replace(decimalSeparator, '.');
+  const value = Number.parseFloat(rawValue);
+
+  const showWarning = (msg) => {
+    const warnDivId   = getOptionValue('warnindDivId', null);
+    const warnMsgId   = getOptionValue('warnindMsgDivId', null);
+    if (warnDivId && warnMsgId && msg) {
+      setTextContent('#' + warnMsgId, msg);
+      fadeIn('#' + warnDivId, 800, () => {
+        setTimeout(() => fadeOut('#' + warnDivId, 800), 5000);
+      });
+    }
+  };
+
+  const fieldTitle = input.alt || '';
+  const fieldHint = fieldTitle && getOptionValue('fieldHint', null)
+    ? getOptionValue('fieldHint', null).format(fieldTitle)
+    : '';
+
+  const minConstr = getConstraint(input, 'min', null);
+  if (minConstr !== null && value < minConstr) {
+    const msgTpl = getOptionValue('msgMinConstraintViolated', null);
+    showWarning(msgTpl ? msgTpl.format(fieldHint, input.value, minConstr) : null);
+    input.value = (minConstr + '').replace('.', decimalSeparator);
+    needRecalc = true;
+  }
+
+  const maxConstr = getConstraint(input, 'max', null);
+  if (maxConstr !== null && value > maxConstr) {
+    const msgTpl = getOptionValue('msgMaxConstraintViolated', null);
+    showWarning(msgTpl ? msgTpl.format(fieldHint, input.value, maxConstr) : null);
+    input.value = (maxConstr + '').replace('.', decimalSeparator);
+    needRecalc = true;
+  }
+
+  if (needRecalc && event?.data) {
+    // eslint-disable-next-line no-eval
+    eval(event.data).apply(input);
+  }
+};
+
+// ==========================================================================
 // EXPORT TO WINDOW
 // ==========================================================================
 
@@ -462,6 +533,9 @@ if (typeof window !== 'undefined') {
     // Attributes
     getAttr,
     setAttr,
-    removeAttr
+    removeAttr,
+
+    // Validation
+    validateInputNumberOnBlurNative
   });
 }
