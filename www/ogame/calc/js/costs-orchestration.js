@@ -306,6 +306,8 @@ class CostsCalculator {
       '#planet-pos'
     ];
 
+    document.getElementById('max-planet-temp')._constrains = { 'min': -134, 'def': 0, 'allowNegative': true };
+
     techInputs.forEach(selector => {
       removeAllEvents(selector, 'keyup');
       addEvent(selector, 'keyup', (event) => {
@@ -315,6 +317,12 @@ class CostsCalculator {
         }
         this._handleParamChange(selector.substring(1));
       });
+    });
+
+    removeAllEvents('#max-planet-temp', 'blur');
+    addEvent('#max-planet-temp', 'blur', (event) => {
+      validateInputNumberOnBlurNative(event);
+      this._handleParamChange('max-planet-temp');
     });
 
     // Lifeform reduction inputs

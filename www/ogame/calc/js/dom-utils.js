@@ -443,13 +443,22 @@ const validateInputNumberOnBlurNative = (event) => {
   const value = Number.parseFloat(rawValue);
 
   const showWarning = (msg) => {
-    const warnDivId   = getOptionValue('warnindDivId', null);
-    const warnMsgId   = getOptionValue('warnindMsgDivId', null);
+    const warnDivId = getOptionValue('warnindDivId', null);
+    const warnMsgId = getOptionValue('warnindMsgDivId', null);
     if (warnDivId && warnMsgId && msg) {
-      setTextContent('#' + warnMsgId, msg);
-      fadeIn('#' + warnDivId, 800, () => {
-        setTimeout(() => fadeOut('#' + warnDivId, 800), 5000);
-      });
+      const warnDiv = document.getElementById(warnDivId);
+      const warnMsgDiv = document.getElementById(warnMsgId);
+      if (warnDiv && warnMsgDiv) {
+        warnMsgDiv.textContent = msg;
+
+        // Show the warning by adding the visible class
+        warnDiv.classList.add('visible');
+
+        // Hide after 5 seconds by removing the visible class
+        setTimeout(() => {
+          warnDiv.classList.remove('visible');
+        }, 3000);
+      }
     }
   };
 
