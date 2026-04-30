@@ -408,6 +408,7 @@ class Renderer {
     html += `<td align="center">${this._formatNumber(result.metal, params)}</td>`;
     html += `<td align="center">${this._formatNumber(result.crystal, params)}</td>`;
     html += `<td align="center">${this._formatNumber(result.deuterium, params)}</td>`;
+    html += `<td align="center">${this._formatNumber(result.msu, params)}</td>`;
     html += `<td align="center">${this._formatNumber(result.energy, params)}</td>`;
     html += `<td align="center">${this._formatTime(result.time)}</td>`;
     html += `<td align="center">${this._formatNumber(result.points, params)}</td>`;
@@ -443,13 +444,14 @@ class Renderer {
     rows[totalsRow].cells[1].innerHTML = `<b>${this._formatNumber(totals.metal, params)}</b>`;
     rows[totalsRow].cells[2].innerHTML = `<b>${this._formatNumber(totals.crystal, params)}</b>`;
     rows[totalsRow].cells[3].innerHTML = `<b>${this._formatNumber(totals.deuterium, params)}</b>`;
-    rows[totalsRow].cells[4].innerHTML = `<b>${this._formatNumber(totals.energy, params)}</b>`;
-    rows[totalsRow].cells[5].innerHTML = `<b>${this._formatTime(totals.time)}</b>`;
-    rows[totalsRow].cells[6].innerHTML = `<b>${this._formatNumber(totals.points, params)}</b>`;
+    rows[totalsRow].cells[4].innerHTML = `<b>${this._formatNumber(totals.msu, params)}</b>`;
+    rows[totalsRow].cells[5].innerHTML = `<b>${this._formatNumber(totals.energy, params)}</b>`;
+    rows[totalsRow].cells[6].innerHTML = `<b>${this._formatTime(totals.time)}</b>`;
+    rows[totalsRow].cells[7].innerHTML = `<b>${this._formatNumber(totals.points, params)}</b>`;
 
     if (isProducer) {
-      rows[totalsRow].cells[7].innerHTML = `<b>${this._formatNumber(maxProduction, params)}</b>`;
-      rows[totalsRow].cells[8].innerHTML = `<b>${this._formatNumber(maxConsumption, params)}</b>`;
+      rows[totalsRow].cells[8].innerHTML = `<b>${this._formatNumber(maxProduction, params)}</b>`;
+      rows[totalsRow].cells[9].innerHTML = `<b>${this._formatNumber(maxConsumption, params)}</b>`;
     }
 
     // Read available resources from input fields

@@ -962,13 +962,14 @@ class CostsCalculator {
     remainingRows[totalsRow].cells[2].innerHTML = '<b>0</b>';
     remainingRows[totalsRow].cells[3].innerHTML = '<b>0</b>';
     remainingRows[totalsRow].cells[4].innerHTML = '<b>0</b>';
-    remainingRows[totalsRow].cells[5].innerHTML = '<b>0' + datetimeS + '</b>';
-    remainingRows[totalsRow].cells[6].innerHTML = '<b>0</b>';
+    remainingRows[totalsRow].cells[5].innerHTML = '<b>0</b>';
+    remainingRows[totalsRow].cells[6].innerHTML = '<b>0' + datetimeS + '</b>';
+    remainingRows[totalsRow].cells[7].innerHTML = '<b>0</b>';
 
     // Check if this is a producer table with extra columns
-    if (remainingRows[totalsRow].cells.length > 7) {
-      remainingRows[totalsRow].cells[7].innerHTML = '<b>0</b>';
+    if (remainingRows[totalsRow].cells.length > 8) {
       remainingRows[totalsRow].cells[8].innerHTML = '<b>0</b>';
+      remainingRows[totalsRow].cells[9].innerHTML = '<b>0</b>';
     }
 
     // Reset needed row

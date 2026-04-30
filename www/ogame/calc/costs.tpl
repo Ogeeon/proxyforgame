@@ -484,11 +484,12 @@
                 <?php endforeach; ?>
                 </tr>
                 <tr>
-                  <td colspan="9">&nbsp;</td>
+                  <td colspan="10">&nbsp;</td>
                 </tr>
                 <tr class="<?= ($row % 2) === 1 ? 'odd' : 'even' ?>">
                   <td align="center" class="border-n" ><?=$l['total']?></td>
                   <td align="center" class="border-n border-s border-w" ><b>0</b></td>
+                  <td align="center" class="border-n border-s" ><b>0</b></td>
                   <td align="center" class="border-n border-s" ><b>0</b></td>
                   <td align="center" class="border-n border-s" ><b>0</b></td>
                   <td align="center" class="border-n border-s" ><b>0</b></td>
@@ -502,6 +503,7 @@
                   <td align="center"><input id="prods-metal-available" type="text" class="form-control form-control-sm" style="text-align:center" value="0" /></td>
                   <td align="center"><input id="prods-crystal-available" type="text" class="form-control form-control-sm" style="text-align:center" value="0" /></td>
                   <td align="center"><input id="prods-deut-available" type="text" class="form-control form-control-sm" style="text-align:center" value="0" /></td>
+                  <td></td>
                   <td colspan="5"></td>
                 </tr>
                 <tr>
@@ -509,13 +511,14 @@
                   <td align="center">0</td>
                   <td align="center">0</td>
                   <td align="center">0</td>
+                  <td></td>
                   <td colspan="5"></td>
                 </tr>
                 <tr class="<?= ($row % 2) === 1 ? 'odd' : 'even' ?>">
                   <td align="center" ><?=$l['transports-needed-short']?></td>
                   <td align="center" >0 <?=$l['sc-short']?></td>
                   <td align="center" >0 <?=$l['lc-short']?></td>
-                  <td colspan="6" ></td>
+                  <td colspan="7" ></td>
                 </tr>
               </table>
             </div>
@@ -527,11 +530,12 @@
                 <?php endforeach; ?>
                 </tr>
                 <tr>
-                  <td colspan="7">&nbsp;</td>
+                  <td colspan="8">&nbsp;</td>
                 </tr>
                 <tr class="<?= ($row % 2) === 1 ? 'odd' : 'even' ?>">
                   <td align="center" class="border-n" ><?=$l['total']?></td>
                   <td align="center" class="border-n border-s border-w" ><b>0</b></td>
+                  <td align="center" class="border-n border-s" ><b>0</b></td>
                   <td align="center" class="border-n border-s" ><b>0</b></td>
                   <td align="center" class="border-n border-s" ><b>0</b></td>
                   <td align="center" class="border-n border-s" ><b>0</b></td>
@@ -543,6 +547,7 @@
                   <td align="center"><input id="commons-metal-available" type="text" class="form-control form-control-sm" style="text-align:center" value="0" /></td>
                   <td align="center"><input id="commons-crystal-available" type="text" class="form-control form-control-sm" style="text-align:center" value="0" /></td>
                   <td align="center"><input id="commons-deut-available" type="text" class="form-control form-control-sm" style="text-align:center" value="0" /></td>
+                  <td></td>
                   <td colspan="3"></td>
                 </tr>
                 <tr>
@@ -550,13 +555,14 @@
                   <td align="center">0</td>
                   <td align="center">0</td>
                   <td align="center">0</td>
+                  <td></td>
                   <td colspan="3"></td>
                 </tr>
                 <tr class="<?= ($row % 2) === 1 ? 'odd' : 'even' ?>">
                   <td align="center" ><?=$l['transports-needed-short']?></td>
                   <td align="center" >0 <?=$l['sc-short']?></td>
                   <td align="center" >0 <?=$l['lc-short']?></td>
-                  <td colspan="4" ></td>
+                  <td colspan="5" ></td>
                 </tr>
               </table>
             </div>

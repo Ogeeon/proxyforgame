@@ -182,27 +182,31 @@ test.describe('Costs Calculator Page', () => {
         await page.locator('#tab2-to-level').press('Enter');
         await expect(page.locator('#prods-table tr:nth-child(2) td:nth-child(1)')).toContainText('15');
         await expect(page.locator('#prods-table tr:nth-child(3) td:nth-child(1)')).toContainText('16');
-        await expect(page.locator('#prods-table tr:nth-child(1) th:nth-child(8)')).toContainText('Prod. per hour');
-        await expect(page.locator('#prods-table tr:nth-child(1) th:nth-child(9)')).toContainText('Consum. per hour');
+        await expect(page.locator('#prods-table tr:nth-child(1) th:nth-child(5)')).toContainText('MSU');
+        await expect(page.locator('#prods-table tr:nth-child(1) th:nth-child(9)')).toContainText('Prod. per hour');
+        await expect(page.locator('#prods-table tr:nth-child(1) th:nth-child(10)')).toContainText('Consum. per hour');
         await expect(page.locator('#prods-table tr:nth-child(4) td:nth-child(2)')).toContainText('43.788');
         await expect(page.locator('#prods-table tr:nth-child(4) td:nth-child(3)')).toContainText('10.946');
         await expect(page.locator('#prods-table tr:nth-child(4) td:nth-child(4)')).toContainText('0');
-        await expect(page.locator('#prods-table tr:nth-child(4) td:nth-child(5)')).toContainText('0');
-        await expect(page.locator('#prods-table tr:nth-child(4) td:nth-child(6)')).toContainText('21h 53m 36s');
-        await expect(page.locator('#prods-table tr:nth-child(4) td:nth-child(7)')).toContainText('53');
-        await expect(page.locator('#prods-table tr:nth-child(4) td:nth-child(8)')).toContainText('3.761');
-        await expect(page.locator('#prods-table tr:nth-child(4) td:nth-child(9)')).toContainText('735');
+        await expect(page.locator('#prods-table tr:nth-child(4) td:nth-child(5)')).toContainText('65.680');
+        await expect(page.locator('#prods-table tr:nth-child(4) td:nth-child(6)')).toContainText('0');
+        await expect(page.locator('#prods-table tr:nth-child(4) td:nth-child(7)')).toContainText('21h 53m 36s');
+        await expect(page.locator('#prods-table tr:nth-child(4) td:nth-child(8)')).toContainText('53');
+        await expect(page.locator('#prods-table tr:nth-child(4) td:nth-child(9)')).toContainText('3.761');
+        await expect(page.locator('#prods-table tr:nth-child(4) td:nth-child(10)')).toContainText('735');
         await page.locator('#param-common-tab').click();
         await page.locator('#universe-speed').selectOption('10');
-        await expect(page.locator('#prods-table tr:nth-child(4) td:nth-child(6)')).toContainText('2h 11m 21s');
+        await expect(page.locator('#prods-table tr:nth-child(4) td:nth-child(7)')).toContainText('2h 11m 21s');
 
         await page.locator('#tech-types-select').selectOption('21');
         await expect(page.locator('#commons-table tr:nth-child(4) td:nth-child(2)')).toContainText('19.66M');
         await expect(page.locator('#commons-table tr:nth-child(4) td:nth-child(3)')).toContainText('9.83M');
         await expect(page.locator('#commons-table tr:nth-child(4) td:nth-child(4)')).toContainText('4.915M');
-        await expect(page.locator('#commons-table tr:nth-child(4) td:nth-child(5)')).toContainText('0');
-        await expect(page.locator('#commons-table tr:nth-child(4) td:nth-child(6)')).toContainText('7w 3h');
-        await expect(page.locator('#commons-table tr:nth-child(4) td:nth-child(7)')).toContainText('34.405');
+        await expect(page.locator('#commons-table tr:nth-child(1) th:nth-child(5)')).toContainText('MSU');
+        await expect(page.locator('#commons-table tr:nth-child(4) td:nth-child(5)')).toContainText('49.152M');
+        await expect(page.locator('#commons-table tr:nth-child(4) td:nth-child(6)')).toContainText('0');
+        await expect(page.locator('#commons-table tr:nth-child(4) td:nth-child(7)')).toContainText('7w 3h');
+        await expect(page.locator('#commons-table tr:nth-child(4) td:nth-child(8)')).toContainText('34.405');
 
         await page.locator('#param-buildings-tab').click();
         await page.locator('#research-lab-level').fill('12');
@@ -211,9 +215,10 @@ test.describe('Costs Calculator Page', () => {
         await expect(page.locator('#commons-table tr:nth-child(4) td:nth-child(2)')).toContainText('9.83M');
         await expect(page.locator('#commons-table tr:nth-child(4) td:nth-child(3)')).toContainText('49.152M');
         await expect(page.locator('#commons-table tr:nth-child(4) td:nth-child(4)')).toContainText('9.83M');
-        await expect(page.locator('#commons-table tr:nth-child(4) td:nth-child(5)')).toContainText('0');
-        await expect(page.locator('#commons-table tr:nth-child(4) td:nth-child(6)')).toContainText('27w 1h');
-        await expect(page.locator('#commons-table tr:nth-child(4) td:nth-child(7)')).toContainText('68.812');
+        await expect(page.locator('#commons-table tr:nth-child(4) td:nth-child(5)')).toContainText('127.795M');
+        await expect(page.locator('#commons-table tr:nth-child(4) td:nth-child(6)')).toContainText('0');
+        await expect(page.locator('#commons-table tr:nth-child(4) td:nth-child(7)')).toContainText('27w 1h');
+        await expect(page.locator('#commons-table tr:nth-child(4) td:nth-child(8)')).toContainText('68.812');
     });
 
 
