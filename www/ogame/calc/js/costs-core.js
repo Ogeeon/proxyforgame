@@ -283,6 +283,13 @@ class BuildCost {
   }
 
   /**
+   * Get MSU value (metal + 2 * crystal + 2 * deuterium)
+   */
+  get msu() {
+    return this.metal + (2 * this.crystal) + (2 * this.deuterium);
+  }
+
+  /**
    * Add another BuildCost to this one
    */
   add(other) {

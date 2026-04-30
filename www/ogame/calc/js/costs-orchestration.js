@@ -865,21 +865,22 @@ class CostsCalculator {
     const rows = getTableRows(`#${tableId}`);
     if (rows.length === 0) return;
 
-    const hasPlanetQtyCol = tableId === 'table-0-2';
+    const hasPlanetQtyCol = tableId === 'table-0-2' || tableId === 'table-0-3';
     const firstDataCol = (isMultiLevel || hasPlanetQtyCol) ? 4 : 3;
     const isBuildingTable = tableId.endsWith('-2') || tableId.endsWith('-3');
 
     // Clear data rows (skip header and 6 footer rows)
     for (let i = 1; i < rows.length - 6; i++) {
-      // Clear data cells (metal, crystal, deuterium, energy, time, points, DM)
+      // Clear data cells (metal, crystal, deuterium, MSU, energy, time, points, DM)
       rows[i].cells[firstDataCol].innerHTML = '0';
       rows[i].cells[firstDataCol + 1].innerHTML = '0';
       rows[i].cells[firstDataCol + 2].innerHTML = '0';
       rows[i].cells[firstDataCol + 3].innerHTML = '0';
-      rows[i].cells[firstDataCol + 4].innerHTML = '0' + datetimeS;
-      rows[i].cells[firstDataCol + 5].innerHTML = '0';
+      rows[i].cells[firstDataCol + 4].innerHTML = '0';
+      rows[i].cells[firstDataCol + 5].innerHTML = '0' + datetimeS;
+      rows[i].cells[firstDataCol + 6].innerHTML = '0';
       if (!isMultiLevel) {
-        rows[i].cells[firstDataCol + 6].innerHTML = '0';
+        rows[i].cells[firstDataCol + 7].innerHTML = '0';
       }
     }
 
@@ -900,10 +901,11 @@ class CostsCalculator {
     rows[subtotalRow].cells[subtotalStartCol + 1].innerHTML = '<b>0</b>';
     rows[subtotalRow].cells[subtotalStartCol + 2].innerHTML = '<b>0</b>';
     rows[subtotalRow].cells[subtotalStartCol + 3].innerHTML = '<b>0</b>';
-    rows[subtotalRow].cells[subtotalStartCol + 4].innerHTML = '<b>0' + datetimeS + '</b>';
-    rows[subtotalRow].cells[subtotalStartCol + 5].innerHTML = '<b>0</b>';
+    rows[subtotalRow].cells[subtotalStartCol + 4].innerHTML = '<b>0</b>';
+    rows[subtotalRow].cells[subtotalStartCol + 5].innerHTML = '<b>0' + datetimeS + '</b>';
+    rows[subtotalRow].cells[subtotalStartCol + 6].innerHTML = '<b>0</b>';
     if (!isMultiLevel) {
-      rows[subtotalRow].cells[subtotalStartCol + 6].innerHTML = '<b>0</b>';
+      rows[subtotalRow].cells[subtotalStartCol + 7].innerHTML = '<b>0</b>';
     }
 
     // Clear grand total row
@@ -912,10 +914,11 @@ class CostsCalculator {
     rows[grandTotalRow].cells[grandTotalStartCol + 1].innerHTML = '<b>0</b>';
     rows[grandTotalRow].cells[grandTotalStartCol + 2].innerHTML = '<b>0</b>';
     rows[grandTotalRow].cells[grandTotalStartCol + 3].innerHTML = '<b>0</b>';
-    rows[grandTotalRow].cells[grandTotalStartCol + 4].innerHTML = '<b>0' + datetimeS + '</b>';
-    rows[grandTotalRow].cells[grandTotalStartCol + 5].innerHTML = '<b>0</b>';
+    rows[grandTotalRow].cells[grandTotalStartCol + 4].innerHTML = '<b>0</b>';
+    rows[grandTotalRow].cells[grandTotalStartCol + 5].innerHTML = '<b>0' + datetimeS + '</b>';
+    rows[grandTotalRow].cells[grandTotalStartCol + 6].innerHTML = '<b>0</b>';
     if (!isMultiLevel) {
-      rows[grandTotalRow].cells[grandTotalStartCol + 6].innerHTML = '<b>0</b>';
+      rows[grandTotalRow].cells[grandTotalStartCol + 7].innerHTML = '<b>0</b>';
     }
 
     // Clear resources-to-deliver row

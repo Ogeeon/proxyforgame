@@ -357,6 +357,7 @@
                     <td align="center">0</td>
                     <td align="center">0</td>
                     <td align="center">0</td>
+                    <td align="center">0</td>
                     <td align="center">0<?=$l['datetime-s']?></td>
                     <td align="center">0</td>
                     <?php if ($i == 0):?>
@@ -374,15 +375,17 @@
                     <td align="center" class="border-n border-s" ><b>0</b></td>
                     <td align="center" class="border-n border-s" ><b>0</b></td>
                     <td align="center" class="border-n border-s" ><b>0</b></td>
+                    <td align="center" class="border-n border-s" ><b>0</b></td>
                     <?php if ($i == 0):?>
                     <td align="center" class="border-n border-s" ><b>0</b></td>
                     <?php endif; ?>
                     <td align="center" class="border-n border-s border-e" ><b>0</b></td>
                   </tr>
-                  <tr><td colspan="<?= ($i == 1)?'10':($hasQtyCol?'10':'9') ?>" height=5px;>&nbsp;</td></tr>
+                  <tr><td colspan="<?= ($i == 1)?'11':($hasQtyCol?'11':'10') ?>" height=5px;>&nbsp;</td></tr>
                   <tr>
                     <td style="display: none;"></td>
                     <td colspan="<?= ($i == 1)?'3':($hasQtyCol?'3':'2') ?>" class="border-n border-w" ><?=$l['grand-total']?></td>
+                    <td align="center" class="border-n" >0</td>
                     <td align="center" class="border-n" >0</td>
                     <td align="center" class="border-n" >0</td>
                     <td align="center" class="border-n" >0</td>
@@ -399,6 +402,7 @@
                     <td align="center"><input id="metal-available-<?=$i?>-<?=$j?>" type="text" name="metal-available" class="form-control form-control-sm" style="text-align:center" value="0" /></td>
                     <td align="center"><input id="crystal-available-<?=$i?>-<?=$j?>" type="text" name="crystal-available" class="form-control form-control-sm" style="text-align:center" value="0" /></td>
                     <td align="center"><input id="deut-available-<?=$i?>-<?=$j?>" type="text" name="deut-available" class="form-control form-control-sm" style="text-align:center" value="0" /></td>
+                    <td></td>
                     <td colspan="<?= ($i == 1)?'2':'3' ?>"></td>
                     <td class="border-e"></td>
                   </tr>
@@ -408,6 +412,7 @@
                     <td align="center">0</td>
                     <td align="center">0</td>
                     <td align="center">0</td>
+                    <td></td>
                     <td colspan="<?= ($i == 1)?'2':'3' ?>"></td>
                     <td class="border-e"></td>
                   </tr>
@@ -416,7 +421,7 @@
                     <td class="border-s border-w"><?=$l['transports-needed']?></td>
                     <td align="center" class="border-s">0 <?=$l['sc-short']?></td>
                     <td align="center" class="border-s">0 <?=$l['lc-short']?></td>
-                    <td colspan="<?= ($i == 1)?'5':(($i == 0)?($hasQtyCol?'6':'5'):'4') ?>" align="center" class="border-s">&nbsp;</td>
+                    <td colspan="<?= ($i == 1)?'6':(($i == 0)?($hasQtyCol?'7':'6'):'5') ?>" align="center" class="border-s">&nbsp;</td>
                     <td align="center" class="border-s border-e">&nbsp;</td>
                   </tr>
                 </table>

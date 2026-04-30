@@ -97,19 +97,20 @@ class Renderer {
    * @private
    */
   _renderRowCost(row, firstDataCol, result, techId, isMultiLevel, params) {
-    // Metal, Crystal, Deuterium
+    // Metal, Crystal, Deuterium, MSU
     row.cells[firstDataCol].innerHTML = this._formatNumber(result.metal, params);
     row.cells[firstDataCol + 1].innerHTML = this._formatNumber(result.crystal, params);
     row.cells[firstDataCol + 2].innerHTML = this._formatNumber(result.deuterium, params);
+    row.cells[firstDataCol + 3].innerHTML = this._formatNumber(result.msu, params);
 
     // Energy
-    row.cells[firstDataCol + 3].innerHTML = this._formatNumber(result.energy, params);
+    row.cells[firstDataCol + 4].innerHTML = this._formatNumber(result.energy, params);
 
     // Time
-    row.cells[firstDataCol + 4].innerHTML = this._formatTime(result.time);
+    row.cells[firstDataCol + 5].innerHTML = this._formatTime(result.time);
 
     // Points
-    row.cells[firstDataCol + 5].innerHTML = this._formatNumber(result.points, params);
+    row.cells[firstDataCol + 6].innerHTML = this._formatNumber(result.points, params);
 
     // Dark Matter (only for single-level building/research tabs - not fleet/defense)
     if (!isMultiLevel && techId < 200) {
@@ -118,7 +119,7 @@ class Renderer {
       if (params.playerClass === 2 && techId > 100 && techId < 200) {
         dmCost = Math.max(750, Math.ceil(dmCost * 0.9));
       }
-      row.cells[firstDataCol + 6].innerHTML = this._formatNumber(dmCost, params);
+      row.cells[firstDataCol + 7].innerHTML = this._formatNumber(dmCost, params);
     }
   }
 
@@ -130,14 +131,14 @@ class Renderer {
   _clearTableData(_tableId, rows, isMultiLevel) {
     const hasQtyCol = _tableId === 'table-0-2' || _tableId === 'table-0-3';
     const firstDataCol = (isMultiLevel || hasQtyCol) ? 4 : 3;
-    const numDataCols = isMultiLevel ? 6 : 7;
+    const numDataCols = isMultiLevel ? 7 : 8;
 
     // Clear data rows (skip header and footer)
     // Only clear calculated result cells, NOT input cells
     for (let i = 1; i < rows.length - 6; i++) {
       for (let col = 0; col < numDataCols; col++) {
         const cellIndex = firstDataCol + col;
-        if (col === 4) {
+        if (col === 5) {
           // Time cell
           rows[i].cells[cellIndex].innerHTML = '0' + this.datetimeS;
         } else {
@@ -190,12 +191,13 @@ class Renderer {
     rows[subtotalRow].cells[subtotalStartCol].innerHTML = `<b>${this._formatNumber(totals.metal, params)}</b>`;
     rows[subtotalRow].cells[subtotalStartCol + 1].innerHTML = `<b>${this._formatNumber(totals.crystal, params)}</b>`;
     rows[subtotalRow].cells[subtotalStartCol + 2].innerHTML = `<b>${this._formatNumber(totals.deuterium, params)}</b>`;
-    rows[subtotalRow].cells[subtotalStartCol + 3].innerHTML = `<b>${this._formatNumber(totals.energy, params)}</b>`;
-    rows[subtotalRow].cells[subtotalStartCol + 4].innerHTML = `<b>${this._formatTime(totals.time)}</b>`;
-    rows[subtotalRow].cells[subtotalStartCol + 5].innerHTML = `<b>${this._formatNumber(totals.points, params)}</b>`;
+    rows[subtotalRow].cells[subtotalStartCol + 3].innerHTML = `<b>${this._formatNumber(totals.msu, params)}</b>`;
+    rows[subtotalRow].cells[subtotalStartCol + 4].innerHTML = `<b>${this._formatNumber(totals.energy, params)}</b>`;
+    rows[subtotalRow].cells[subtotalStartCol + 5].innerHTML = `<b>${this._formatTime(totals.time)}</b>`;
+    rows[subtotalRow].cells[subtotalStartCol + 6].innerHTML = `<b>${this._formatNumber(totals.points, params)}</b>`;
 
     if (!isMultiLevel) {
-      this._renderSubtotalDmCell(rows[subtotalRow].cells[subtotalStartCol + 6], isFleetOrDefenseTable, totals, params);
+      this._renderSubtotalDmCell(rows[subtotalRow].cells[subtotalStartCol + 7], isFleetOrDefenseTable, totals, params);
     }
 
   }
@@ -254,18 +256,19 @@ class Renderer {
       rows[grandTotalRow].cells[startCol].innerHTML = `<b>${this._formatNumber(grandTotal.metal, params)}</b>`;
       rows[grandTotalRow].cells[startCol + 1].innerHTML = `<b>${this._formatNumber(grandTotal.crystal, params)}</b>`;
       rows[grandTotalRow].cells[startCol + 2].innerHTML = `<b>${this._formatNumber(grandTotal.deuterium, params)}</b>`;
-      rows[grandTotalRow].cells[startCol + 3].innerHTML = `<b>${this._formatNumber(grandTotal.energy, params)}</b>`;
-      rows[grandTotalRow].cells[startCol + 4].innerHTML = `<b>${this._formatTime(grandTotal.time)}</b>`;
-      rows[grandTotalRow].cells[startCol + 5].innerHTML = `<b>${this._formatNumber(grandTotal.points, params)}</b>`;
+      rows[grandTotalRow].cells[startCol + 3].innerHTML = `<b>${this._formatNumber(grandTotal.msu, params)}</b>`;
+      rows[grandTotalRow].cells[startCol + 4].innerHTML = `<b>${this._formatNumber(grandTotal.energy, params)}</b>`;
+      rows[grandTotalRow].cells[startCol + 5].innerHTML = `<b>${this._formatTime(grandTotal.time)}</b>`;
+      rows[grandTotalRow].cells[startCol + 6].innerHTML = `<b>${this._formatNumber(grandTotal.points, params)}</b>`;
 
       // DM column: Calculate for fleet/defense tables, leave empty for others
       if (!isMultiLevel) {
         // Fleet and defense tables are table-0-5 and table-0-6
         if (tableId === 'table-0-5' || tableId === 'table-0-6') {
           const dmCost = getHalvingCost(1000, grandTotal.time);
-          rows[grandTotalRow].cells[startCol + 6].innerHTML = `<b>${this._formatNumber(dmCost, params)}</b>`;
+          rows[grandTotalRow].cells[startCol + 7].innerHTML = `<b>${this._formatNumber(dmCost, params)}</b>`;
         } else {
-          rows[grandTotalRow].cells[startCol + 6].innerHTML = '';
+          rows[grandTotalRow].cells[startCol + 7].innerHTML = '';
         }
       }
 
