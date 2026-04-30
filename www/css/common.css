@@ -61,6 +61,7 @@
     padding: 2px;
     margin: 4px;
     text-align: center;
+    display: none;
 }
 
 #hint {
