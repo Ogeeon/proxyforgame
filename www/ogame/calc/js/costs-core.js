@@ -56,6 +56,9 @@ class GlobalParams {
   mineralResCntrLvl = 0; // Mineral Research Centre level (Rock'tal)
   lfTerraformerRdc = 0;  // LF Terraformer reduction, %
 
+  // Exchange rates (M:C:D weights, normalized to metal=1)
+  rates = [1, 1.5, 3];
+
   /**
    * Get technocrat time reduction factor
    * @returns {number} Multiplicative factor (0.75 = 25% reduction)
@@ -283,10 +286,14 @@ class BuildCost {
   }
 
   /**
-   * Get MSU value (metal + 2 * crystal + 2 * deuterium)
+   * Get MSU value using exchange rates [m, c, d] (normalized to metal=1).
+   * @param {number[]} rates - Exchange rates array, defaults to [1, 1.5, 3]
    */
-  get msu() {
-    return this.metal + (2 * this.crystal) + (2 * this.deuterium);
+  msu(rates = [1, 1.5, 3]) {
+    const m = rates[0] || 1;
+    const cMult = (rates[1] || 1.5) / m;
+    const dMult = (rates[2] || 3)   / m;
+    return this.metal + cMult * this.crystal + dMult * this.deuterium;
   }
 
   /**

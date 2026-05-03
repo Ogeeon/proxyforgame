@@ -101,7 +101,7 @@ class Renderer {
     row.cells[firstDataCol].innerHTML = this._formatNumber(result.metal, params);
     row.cells[firstDataCol + 1].innerHTML = this._formatNumber(result.crystal, params);
     row.cells[firstDataCol + 2].innerHTML = this._formatNumber(result.deuterium, params);
-    row.cells[firstDataCol + 3].innerHTML = this._formatNumber(result.msu, params);
+    row.cells[firstDataCol + 3].innerHTML = this._formatNumber(result.msu(params.rates), params);
 
     // Energy
     row.cells[firstDataCol + 4].innerHTML = this._formatNumber(result.energy, params);
@@ -191,7 +191,7 @@ class Renderer {
     rows[subtotalRow].cells[subtotalStartCol].innerHTML = `<b>${this._formatNumber(totals.metal, params)}</b>`;
     rows[subtotalRow].cells[subtotalStartCol + 1].innerHTML = `<b>${this._formatNumber(totals.crystal, params)}</b>`;
     rows[subtotalRow].cells[subtotalStartCol + 2].innerHTML = `<b>${this._formatNumber(totals.deuterium, params)}</b>`;
-    rows[subtotalRow].cells[subtotalStartCol + 3].innerHTML = `<b>${this._formatNumber(totals.msu, params)}</b>`;
+    rows[subtotalRow].cells[subtotalStartCol + 3].innerHTML = `<b>${this._formatNumber(totals.msu(params.rates), params)}</b>`;
     rows[subtotalRow].cells[subtotalStartCol + 4].innerHTML = `<b>${this._formatNumber(totals.energy, params)}</b>`;
     rows[subtotalRow].cells[subtotalStartCol + 5].innerHTML = `<b>${this._formatTime(totals.time)}</b>`;
     rows[subtotalRow].cells[subtotalStartCol + 6].innerHTML = `<b>${this._formatNumber(totals.points, params)}</b>`;
@@ -256,7 +256,7 @@ class Renderer {
       rows[grandTotalRow].cells[startCol].innerHTML = `<b>${this._formatNumber(grandTotal.metal, params)}</b>`;
       rows[grandTotalRow].cells[startCol + 1].innerHTML = `<b>${this._formatNumber(grandTotal.crystal, params)}</b>`;
       rows[grandTotalRow].cells[startCol + 2].innerHTML = `<b>${this._formatNumber(grandTotal.deuterium, params)}</b>`;
-      rows[grandTotalRow].cells[startCol + 3].innerHTML = `<b>${this._formatNumber(grandTotal.msu, params)}</b>`;
+      rows[grandTotalRow].cells[startCol + 3].innerHTML = `<b>${this._formatNumber(grandTotal.msu(params.rates), params)}</b>`;
       rows[grandTotalRow].cells[startCol + 4].innerHTML = `<b>${this._formatNumber(grandTotal.energy, params)}</b>`;
       rows[grandTotalRow].cells[startCol + 5].innerHTML = `<b>${this._formatTime(grandTotal.time)}</b>`;
       rows[grandTotalRow].cells[startCol + 6].innerHTML = `<b>${this._formatNumber(grandTotal.points, params)}</b>`;
@@ -408,7 +408,7 @@ class Renderer {
     html += `<td align="center">${this._formatNumber(result.metal, params)}</td>`;
     html += `<td align="center">${this._formatNumber(result.crystal, params)}</td>`;
     html += `<td align="center">${this._formatNumber(result.deuterium, params)}</td>`;
-    html += `<td align="center">${this._formatNumber(result.msu, params)}</td>`;
+    html += `<td align="center">${this._formatNumber(result.msu(params.rates), params)}</td>`;
     html += `<td align="center">${this._formatNumber(result.energy, params)}</td>`;
     html += `<td align="center">${this._formatTime(result.time)}</td>`;
     html += `<td align="center">${this._formatNumber(result.points, params)}</td>`;
@@ -444,7 +444,7 @@ class Renderer {
     rows[totalsRow].cells[1].innerHTML = `<b>${this._formatNumber(totals.metal, params)}</b>`;
     rows[totalsRow].cells[2].innerHTML = `<b>${this._formatNumber(totals.crystal, params)}</b>`;
     rows[totalsRow].cells[3].innerHTML = `<b>${this._formatNumber(totals.deuterium, params)}</b>`;
-    rows[totalsRow].cells[4].innerHTML = `<b>${this._formatNumber(totals.msu, params)}</b>`;
+    rows[totalsRow].cells[4].innerHTML = `<b>${this._formatNumber(totals.msu(params.rates), params)}</b>`;
     rows[totalsRow].cells[5].innerHTML = `<b>${this._formatNumber(totals.energy, params)}</b>`;
     rows[totalsRow].cells[6].innerHTML = `<b>${this._formatTime(totals.time)}</b>`;
     rows[totalsRow].cells[7].innerHTML = `<b>${this._formatNumber(totals.points, params)}</b>`;

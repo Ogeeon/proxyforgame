@@ -343,6 +343,28 @@ class CostsCalculator {
       });
     });
 
+    // Exchange rate inputs
+    const rateInputs = ['#exchange-rates-m', '#exchange-rates-c', '#exchange-rates-d'];
+    document.getElementById('exchange-rates-m')._constrains = { min: 0.1, max: 100, def: 1,   allowFloat: true, allowNegative: false };
+    document.getElementById('exchange-rates-c')._constrains = { min: 0.1, max: 100, def: 1.5, allowFloat: true, allowNegative: false };
+    document.getElementById('exchange-rates-d')._constrains = { min: 0.1, max: 100, def: 3,   allowFloat: true, allowNegative: false };
+    rateInputs.forEach(selector => {
+      removeAllEvents(selector, 'keyup');
+      addEvent(selector, 'keyup', (event) => {
+        if (typeof validateInputNumber === 'function') {
+          validateInputNumber.call(event.target, event);
+        }
+        this._handleParamChange('exchange-rates');
+      });
+      removeAllEvents(selector, 'blur');
+      addEvent(selector, 'blur', (event) => {
+        if (typeof validateInputNumberOnBlurNative === 'function') {
+          validateInputNumberOnBlurNative(event);
+        }
+        this._handleParamChange('exchange-rates');
+      });
+    });
+
     // Selects
     ['#universe-speed', '#research-speed', '#booster'].forEach(selector => {
       removeAllEvents(selector, 'change');
@@ -599,7 +621,8 @@ class CostsCalculator {
       lfResCostRdc: this.currentParams.lfResCostRdc,
       lfResTimeRdc: this.currentParams.lfResTimeRdc,
       mineralResCntrLvl: this.currentParams.mineralResCntrLvl,
-      lfTerraformerRdc: this.currentParams.lfTerraformerRdc
+      lfTerraformerRdc: this.currentParams.lfTerraformerRdc,
+      rates: this.currentParams.rates
     };
 
     try {
@@ -701,6 +724,13 @@ class CostsCalculator {
       if (state[key] !== undefined) {
         setVal(selector, state[key]);
       }
+    }
+
+    // Exchange rates (stored as array)
+    if (Array.isArray(state.rates) && state.rates.length === 3) {
+      setVal('#exchange-rates-m', state.rates[0]);
+      setVal('#exchange-rates-c', state.rates[1]);
+      setVal('#exchange-rates-d', state.rates[2]);
     }
 
     // Officers/bonuses
@@ -813,6 +843,11 @@ class CostsCalculator {
 
     // Booster
     setVal('#booster', 0);
+
+    // Exchange rates
+    setVal('#exchange-rates-m', 1);
+    setVal('#exchange-rates-c', 1.5);
+    setVal('#exchange-rates-d', 3);
 
     // IRN
     setVal('#irn-level', 0);

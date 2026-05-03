@@ -69,6 +69,13 @@ class DataCollector {
     params.mineralResCntrLvl = this._getInputNumber('#mineral-res-cntr-lvl');
     params.lfTerraformerRdc = this._getInputNumber('#lf-terraformer-rdc');
 
+    // Exchange rates
+    params.rates = [
+      this._getInputNumber('#exchange-rates-m') || 1,
+      this._getInputNumber('#exchange-rates-c') || 1.5,
+      this._getInputNumber('#exchange-rates-d') || 3,
+    ];
+
     return params;
   }
 
@@ -364,7 +371,10 @@ class DataCollector {
       'mineral-res-cntr-lvl': ['table-0-2', 'table-1-2'],
 
       // LF Terraformer reduction affects planet building tables
-      'lf-terraformer-rdc': ['table-0-2', 'table-1-2']
+      'lf-terraformer-rdc': ['table-0-2', 'table-1-2'],
+
+      // Exchange rates affect MSU in all tables
+      'exchange-rates': ['*']
     };
 
     const affected = affectedMap[fieldId];
@@ -397,7 +407,8 @@ class DataCollector {
       'research-bonus', 'robot-factory-level', 'nanite-factory-level',
       'shipyard-level', 'ion-tech-level', 'hyper-tech-level',
       'class-0', 'class-1', 'class-2', 'full-numbers',
-      'research-cost-reduction', 'research-time-reduction', 'mineral-res-cntr-lvl', 'lf-terraformer-rdc'
+      'research-cost-reduction', 'research-time-reduction', 'mineral-res-cntr-lvl', 'lf-terraformer-rdc',
+      'exchange-rates'
     ];
 
     return rangeAffecting.includes(fieldId);

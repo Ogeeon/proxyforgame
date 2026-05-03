@@ -39,13 +39,13 @@ test.describe('Costs Calculator Page', () => {
         await expect(page.locator('#table-0-2 tr:nth-child(18) td:nth-child(5)')).toContainText('1.045M');
         await expect(page.locator('#table-0-2 tr:nth-child(18) td:nth-child(6)')).toContainText('612.724');
         await expect(page.locator('#table-0-2 tr:nth-child(18) td:nth-child(7)')).toContainText('201.730');
-        await expect(page.locator('#table-0-2 tr:nth-child(18) td:nth-child(8)')).toContainText('2.674M');
+        await expect(page.locator('#table-0-2 tr:nth-child(18) td:nth-child(8)')).toContainText('2.569M');
         await expect(page.locator('#table-0-2 tr:nth-child(18) td:nth-child(9)')).toContainText('1.000');
         await expect(page.locator('#table-0-2 tr:nth-child(18) td:nth-child(10)')).toContainText('3w 4d 18h');
         await page.locator('#param-common-tab').click();
         await page.locator('#full-numbers').click();
         await expect(page.locator('#table-0-2 tr:nth-child(18) td:nth-child(5)')).toContainText('1.045.508');
-        await expect(page.locator('#table-0-2 tr:nth-child(18) td:nth-child(8)')).toContainText('2.674.416');
+        await expect(page.locator('#table-0-2 tr:nth-child(18) td:nth-child(8)')).toContainText('2.569.784');
     });
 
     test('[all items - one level / moon] calculations are correct', async ({ page }) => {
@@ -188,7 +188,7 @@ test.describe('Costs Calculator Page', () => {
         await expect(page.locator('#prods-table tr:nth-child(4) td:nth-child(2)')).toContainText('43.788');
         await expect(page.locator('#prods-table tr:nth-child(4) td:nth-child(3)')).toContainText('10.946');
         await expect(page.locator('#prods-table tr:nth-child(4) td:nth-child(4)')).toContainText('0');
-        await expect(page.locator('#prods-table tr:nth-child(4) td:nth-child(5)')).toContainText('65.680');
+        await expect(page.locator('#prods-table tr:nth-child(4) td:nth-child(5)')).toContainText('60.207');
         await expect(page.locator('#prods-table tr:nth-child(4) td:nth-child(6)')).toContainText('0');
         await expect(page.locator('#prods-table tr:nth-child(4) td:nth-child(7)')).toContainText('21h 53m 36s');
         await expect(page.locator('#prods-table tr:nth-child(4) td:nth-child(8)')).toContainText('53');
@@ -215,7 +215,7 @@ test.describe('Costs Calculator Page', () => {
         await expect(page.locator('#commons-table tr:nth-child(4) td:nth-child(2)')).toContainText('9.83M');
         await expect(page.locator('#commons-table tr:nth-child(4) td:nth-child(3)')).toContainText('49.152M');
         await expect(page.locator('#commons-table tr:nth-child(4) td:nth-child(4)')).toContainText('9.83M');
-        await expect(page.locator('#commons-table tr:nth-child(4) td:nth-child(5)')).toContainText('127.795M');
+        await expect(page.locator('#commons-table tr:nth-child(4) td:nth-child(5)')).toContainText('113.049M');
         await expect(page.locator('#commons-table tr:nth-child(4) td:nth-child(6)')).toContainText('0');
         await expect(page.locator('#commons-table tr:nth-child(4) td:nth-child(7)')).toContainText('27w 1h');
         await expect(page.locator('#commons-table tr:nth-child(4) td:nth-child(8)')).toContainText('68.812');
@@ -237,7 +237,7 @@ test.describe('Costs Calculator Page', () => {
         await expect(page.locator('#table-0-2 tr:nth-last-child(4) td:nth-child(3)')).toContainText('2.306');
         await expect(page.locator('#table-0-2 tr:nth-last-child(4) td:nth-child(4)')).toContainText('576');
         await expect(page.locator('#table-0-2 tr:nth-last-child(4) td:nth-child(5)')).toContainText('0');
-        await expect(page.locator('#table-0-2 tr:nth-last-child(4) td:nth-child(6)')).toContainText('3.458');
+        await expect(page.locator('#table-0-2 tr:nth-last-child(4) td:nth-child(6)')).toContainText('3.170');
         await expect(page.locator('#table-0-2 tr:nth-last-child(4) td:nth-child(7)')).toContainText('0');
         await expect(page.locator('#table-0-2 tr:nth-last-child(4) td:nth-child(8)')).toContainText('1h 9m 10s');
         await expect(page.locator('#table-0-2 tr:nth-last-child(4) td:nth-child(9)')).toContainText('2');
@@ -457,5 +457,25 @@ test.describe('Costs Calculator Page', () => {
         await expect(page.locator('#table-0-4 tr:nth-child(18) td:nth-child(6)')).toContainText('2.086.125');
         await expect(page.locator('#table-0-4 tr:nth-child(18) td:nth-child(8)')).toContainText('24.300.000');
         await expect(page.locator('#table-0-4 tr:nth-child(18) td:nth-child(9)')).toContainText('3w 5d 22h');
+    });
+
+    test('[exchange rates] MSU column reflects user-entered rates', async ({ page }) => {
+        await page.getByRole('tab', { name: 'All items - one level' }).click();
+        await page.getByRole('tab', { name: 'Buildings (planet)' }).click();
+        await fillTableRows(page, '#table-0-2', 2, 17, 1);
+        await page.locator('#param-common-tab').click();
+        await page.locator('#full-numbers').click();
+        // Default rates 1:1.5:3 → MSU = m + 1.5c + 3d = 2.569.784
+        await expect(page.locator('#table-0-2 tr:nth-child(18) td:nth-child(8)')).toContainText('2.569.784');
+        // Rates 1:2:2 → multipliers match old hardcoded formula → MSU = 2.674.416
+        await page.locator('#exchange-rates-c').fill('2');
+        await page.locator('#exchange-rates-c').press('Enter');
+        await page.locator('#exchange-rates-d').fill('2');
+        await page.locator('#exchange-rates-d').press('Enter');
+        await expect(page.locator('#table-0-2 tr:nth-child(18) td:nth-child(8)')).toContainText('2.674.416');
+        // Rates 2:2:2 → cMult=dMult=1 → MSU = m + c + d = 1.859.962
+        await page.locator('#exchange-rates-m').fill('2');
+        await page.locator('#exchange-rates-m').press('Enter');
+        await expect(page.locator('#table-0-2 tr:nth-child(18) td:nth-child(8)')).toContainText('1.859.962');
     });
 });
