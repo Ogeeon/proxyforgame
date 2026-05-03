@@ -35,10 +35,11 @@ class LfRenderer {
         row.children[fdc    ].innerHTML = this._fmt(result.metal);
         row.children[fdc + 1].innerHTML = this._fmt(result.crystal);
         row.children[fdc + 2].innerHTML = this._fmt(result.deut);
-        row.children[fdc + 3].innerHTML = this._fmtTime(result.time);
-        row.children[fdc + 4].innerHTML = this._fmt(result.points);
+        row.children[fdc + 3].innerHTML = this._fmt(this._msu(result));
+        row.children[fdc + 4].innerHTML = this._fmtTime(result.time);
+        row.children[fdc + 5].innerHTML = this._fmt(result.points);
         if (outerTab === 0) {
-            row.children[fdc + 5].innerHTML = this._fmt(getHalvingCost(techID, result.time));
+            row.children[fdc + 6].innerHTML = this._fmt(getHalvingCost(techID, result.time));
         }
         if (ENERGY_TECH_IDS.has(techID)) {
             this.renderEnergyTooltip(row, result.energy);
@@ -50,9 +51,9 @@ class LfRenderer {
         row.children[2].children[0].value = 0;
         if (outerTab === 1) row.children[3].children[0].value = 0;
         const fdc = outerTab === 1 ? 4 : 3;
-        const numCells = outerTab === 0 ? 6 : 5;
+        const numCells = outerTab === 0 ? 7 : 6;
         for (let cell = fdc; cell < fdc + numCells; cell++) {
-            row.children[cell].innerHTML = (cell === fdc + 3) ? ('0' + this.opts.datetimeS) : '0';
+            row.children[cell].innerHTML = (cell === fdc + 4) ? ('0' + this.opts.datetimeS) : '0';
         }
         const techID = Number(row.children[0].innerHTML);
         if (ENERGY_TECH_IDS.has(techID)) this.renderEnergyTooltip(row, 0);
@@ -82,8 +83,9 @@ class LfRenderer {
         row.children[3].innerHTML = '<b>' + this._fmt(totals.metal)   + '</b>';
         row.children[4].innerHTML = '<b>' + this._fmt(totals.crystal) + '</b>';
         row.children[5].innerHTML = '<b>' + this._fmt(totals.deut)    + '</b>';
-        row.children[6].innerHTML = '<b>' + this._fmtTime(totals.time) + '</b>';
-        row.children[7].innerHTML = '<b>' + this._fmt(totals.points)  + '</b>';
+        row.children[6].innerHTML = '<b>' + this._fmt(this._msu(totals)) + '</b>';
+        row.children[7].innerHTML = '<b>' + this._fmtTime(totals.time) + '</b>';
+        row.children[8].innerHTML = '<b>' + this._fmt(totals.points)  + '</b>';
     }
 
     // -------------------------------------------------------------------------
@@ -103,9 +105,10 @@ class LfRenderer {
         gtRow.children[2].innerHTML = '<b>' + this._fmt(grandTotals.metal)   + '</b>';
         gtRow.children[3].innerHTML = '<b>' + this._fmt(grandTotals.crystal) + '</b>';
         gtRow.children[4].innerHTML = '<b>' + this._fmt(grandTotals.deut)    + '</b>';
-        gtRow.children[5].innerHTML = '<b>' + this._fmtTime(grandTotals.time) + '</b>';
-        gtRow.children[6].innerHTML = '<b>' + this._fmt(grandTotals.points)  + '</b>';
-        if (outerTab === 0) gtRow.children[7].innerHTML = '<b>0</b>';
+        gtRow.children[5].innerHTML = '<b>' + this._fmt(this._msu(grandTotals)) + '</b>';
+        gtRow.children[6].innerHTML = '<b>' + this._fmtTime(grandTotals.time) + '</b>';
+        gtRow.children[7].innerHTML = '<b>' + this._fmt(grandTotals.points)  + '</b>';
+        if (outerTab === 0) gtRow.children[8].innerHTML = '<b>0</b>';
 
         const needMet  = Math.max(0, grandTotals.metal   - availRes.metal);
         const needCrys = Math.max(0, grandTotals.crystal - availRes.crystal);
@@ -138,19 +141,12 @@ class LfRenderer {
 
     renderHideNShow(race) {
         for (let outer = 0; outer < 2; outer++) {
-            for (let inner = 1; inner < 3; inner++) {
-                const rows = getTableRows(`#table-${outer}-${inner}`);
-                for (let row = 1; row < rows.length - FOOTER_ROWS; row++) {
-                    const rowID = Number(rows[row].children[0].innerHTML);
-                    rows[row].style.display = (Math.floor(rowID / 1000) == race) ? '' : 'none';
-                }
+            const rows = getTableRows(`#table-${outer}-1`);
+            for (let row = 1; row < rows.length - FOOTER_ROWS; row++) {
+                const rowID = Number(rows[row].children[0].innerHTML);
+                rows[row].style.display = (Math.floor(rowID / 1000) == race) ? '' : 'none';
             }
         }
-        const opts = document.querySelectorAll('#tech-types-select option');
-        for (const opt of opts) {
-            opt.style.display = (Math.floor(Number(opt.value) / 1000) == race) ? '' : 'none';
-        }
-        document.getElementById('tech-types-select').value = '';
 
         const isRocktal = Number(race) === 2;
         ['megalith-level-wrap', 'mrc-level-wrap'].forEach(id => {
@@ -182,6 +178,7 @@ class LfRenderer {
             rowStr += `<td align="center">${this._fmt(result.metal)}</td>`;
             rowStr += `<td align="center">${this._fmt(result.crystal)}</td>`;
             rowStr += `<td align="center">${this._fmt(result.deut)}</td>`;
+            rowStr += `<td align="center">${this._fmt(this._msu(result))}</td>`;
             rowStr += `<td align="center">${this._fmtTime(result.time)}</td>`;
             rowStr += `<td align="center">${this._fmt(Math.round(result.points))}</td>`;
             rowStr += '</tr>';
@@ -210,8 +207,9 @@ class LfRenderer {
         rows[totalsRow].children[1].innerHTML = '<b>' + this._fmt(totals.metal)          + '</b>';
         rows[totalsRow].children[2].innerHTML = '<b>' + this._fmt(totals.crystal)        + '</b>';
         rows[totalsRow].children[3].innerHTML = '<b>' + this._fmt(totals.deut)           + '</b>';
-        rows[totalsRow].children[4].innerHTML = '<b>' + this._fmtTime(totals.time)       + '</b>';
-        rows[totalsRow].children[5].innerHTML = '<b>' + this._fmt(Math.round(totals.points)) + '</b>';
+        rows[totalsRow].children[4].innerHTML = '<b>' + this._fmt(this._msu(totals))     + '</b>';
+        rows[totalsRow].children[5].innerHTML = '<b>' + this._fmtTime(totals.time)       + '</b>';
+        rows[totalsRow].children[6].innerHTML = '<b>' + this._fmt(Math.round(totals.points)) + '</b>';
 
         const needMet  = Math.max(0, totals.metal   - availRes.metal);
         const needCrys = Math.max(0, totals.crystal - availRes.crystal);
@@ -237,8 +235,9 @@ class LfRenderer {
         rows[totalsRow].children[1].innerHTML = '<b>0</b>';
         rows[totalsRow].children[2].innerHTML = '<b>0</b>';
         rows[totalsRow].children[3].innerHTML = '<b>0</b>';
-        rows[totalsRow].children[4].innerHTML = '<b>' + this._fmtTime(0) + '</b>';
-        rows[totalsRow].children[5].innerHTML = '<b>0</b>';
+        rows[totalsRow].children[4].innerHTML = '<b>0</b>';
+        rows[totalsRow].children[5].innerHTML = '<b>' + this._fmtTime(0) + '</b>';
+        rows[totalsRow].children[6].innerHTML = '<b>0</b>';
         rows[totalsRow + 2].children[1].innerHTML = '<b>0</b>';
         rows[totalsRow + 2].children[2].innerHTML = '<b>0</b>';
         rows[totalsRow + 2].children[3].innerHTML = '<b>0</b>';
@@ -258,6 +257,10 @@ class LfRenderer {
         return timespanToShortenedString(seconds,
             this.opts.datetimeW, this.opts.datetimeD, this.opts.datetimeH,
             this.opts.datetimeM, this.opts.datetimeS, true);
+    }
+
+    _msu(cost) {
+        return cost.metal + (2 * cost.crystal) + (2 * cost.deut);
     }
 
     _clearTableBodyRows(tbl) {

@@ -64,6 +64,12 @@
             <?php endforeach; ?>
         };
 
+    options.researchList = [
+        <?php $first = true; foreach ($techData as $id => $tech): if ($tech[1] == 2): ?>
+        <?=(!$first)?',':''?>{id: <?=$id?>, name: <?=json_encode($l[$tech[0]])?>, race: <?=(int)($id/1000)?>}
+        <?php $first = false; endif; endforeach; ?>
+    ];
+
   </script>
 <?php require_once('../../cookies.tpl'); ?>
 </head>
@@ -250,6 +256,18 @@
                 $colHeaders[0] = 'building';
             ?>
             <div class="tab-pane fade <?= $j === $firstInnerTab ? 'show active' : '' ?> no-mp" id="tab-<?=$i?>-<?=$j?>" role="tabpanel">
+              <?php if ($j == 2): ?>
+              <div id="research-race-selector-<?=$i?>" class="d-flex flex-wrap gap-2 align-items-center p-2 research-race-selector">
+                <label for="research-race-dd-<?=$i?>"><?= $l['race'] ?></label>
+                <select id="research-race-dd-<?=$i?>" class="form-select form-select-sm w-auto research-race-dropdown" data-tab="<?=$i?>">
+                  <?php for ($r = 1; $r <= 4; $r++):?>
+                  <option value="<?=$r?>"><?= $l['race-'.$r] ?></option>
+                  <?php endfor; ?>
+                </select>
+                <select id="research-select-<?=$i?>" class="form-select form-select-sm w-auto"></select>
+                <button id="research-add-btn-<?=$i?>" class="btn btn-sm btn-primary research-add-btn" data-tab="<?=$i?>"><?= $l['universe-add'] ?></button>
+              </div>
+              <?php endif; ?>
               <table id="table-<?=$i?>-<?=$j?>" class="lined" cellpadding="0" cellspacing="1" border="0">
                 <tr>
                   <th style="display: none;"></th>
@@ -263,6 +281,7 @@
                   </th>
                   <?php endforeach; ?>
                 </tr>
+                <?php if ($j != 2): ?>
                 <?php $techs = getTechsByType($j); $row = 1; ?>
                 <?php $energyHintBuildings = [1002, 2002, 3002, 4002]; ?>
                 <?php foreach ($techs as $tech) :?>
@@ -276,6 +295,7 @@
                   <td align="center">0</td>
                   <td align="center">0</td>
                   <td align="center">0</td>
+                  <td align="center">0</td>
                   <td align="center">0<?=$l['datetime-s']?></td>
                   <td align="center">0</td>
                   <?php if ($i == 0):?>
@@ -283,6 +303,7 @@
                   <?php endif; ?>
                 </tr>
                 <?php endforeach; ?>
+                <?php endif; ?>
                 <tr>
                   <td style="display: none;">t</td>
                   <td colspan="<?= ($i == 1)?'2':'1' ?>" class="border-n"><?=$l['total']?></td>
@@ -291,15 +312,17 @@
                   <td align="center" class="border-n border-s"><b>0</b></td>
                   <td align="center" class="border-n border-s"><b>0</b></td>
                   <td align="center" class="border-n border-s"><b>0</b></td>
+                  <td align="center" class="border-n border-s"><b>0</b></td>
                   <?php if ($i == 0):?>
                   <td align="center" class="border-n border-s"><b>0</b></td>
                   <?php endif; ?>
                   <td align="center" class="border-n border-s border-e"><b>0</b></td>
                 </tr>
-                <tr><td colspan="9" height="5px">&nbsp;</td></tr>
+                <tr><td colspan="10" height="5px">&nbsp;</td></tr>
                 <tr>
                   <td style="display: none;">gt</td>
                   <td colspan="<?= ($i == 1)?'3':'2' ?>" class="border-n border-w"><?=$l['grand-total']?></td>
+                  <td align="center" class="border-n">0</td>
                   <td align="center" class="border-n">0</td>
                   <td align="center" class="border-n">0</td>
                   <td align="center" class="border-n">0</td>
@@ -316,6 +339,7 @@
                   <td align="center"><input id="crystal-available-<?=$i?>-<?=$j?>" type="text" name="crystal-available" class="form-control form-control-sm res-input" value="0" /></td>
                   <td align="center"><input id="deut-available-<?=$i?>-<?=$j?>" type="text" name="deut-available" class="form-control form-control-sm res-input" value="0" /></td>
                   <td></td>
+                  <td></td>
                   <?php if ($i == 0):?>
                   <td></td>
                   <?php endif; ?>
@@ -328,6 +352,7 @@
                   <td align="center">0</td>
                   <td align="center">0</td>
                   <td></td>
+                  <td></td>
                   <?php if ($i == 0):?>
                   <td></td>
                   <?php endif; ?>
@@ -338,7 +363,7 @@
                   <td class="border-s border-w"><?=$l['transports-needed']?></td>
                   <td align="center" class="border-s">0 <?=$l['sc-short']?></td>
                   <td align="center" class="border-s">0 <?=$l['lc-short']?></td>
-                  <td colspan="<?= ($i == 1)?'4':(($i == 0)?'4':'3') ?>" align="center" class="border-s">&nbsp;</td>
+                  <td colspan="<?= ($i == 1)?'5':(($i == 0)?'5':'4') ?>" align="center" class="border-s">&nbsp;</td>
                   <td align="center" class="border-s border-e">&nbsp;</td>
                 </tr>
               </table>
@@ -349,15 +374,22 @@
           <div class="p-2">
             <div class="d-flex align-items-center flex-wrap gap-2 py-1">
               <select id="tech-types-select" name="tech-types-select" class="form-select form-select-sm w-auto">
-              <?php $techTypes = array(1 => 'buildings', 2 => 'researches'); ?>
-              <?php foreach ($techTypes as $type => $typeName) :?>
-                <optgroup label="<?=$l[$typeName]?>">
-                <?php $techs = getTechsByType($type);?>
+                <optgroup label="<?=$l['buildings']?>">
+                <?php $techs = getTechsByType(1);?>
                 <?php foreach ($techs as $tech) :?>
                   <option value="<?=$tech?>" <?= ($tech==1)?'selected="selected"':'' ?>><?=$l[$techData[$tech][0]]?></option>
                 <?php endforeach; ?>
                 </optgroup>
-              <?php endforeach; ?>
+                <?php $researchTechs = getTechsByType(2);?>
+                <?php for ($r = 1; $r <= 4; $r++):?>
+                <optgroup label="<?=$l['researches']?> (<?=$l['race-'.$r]?>)">
+                <?php foreach ($researchTechs as $tech) :?>
+                  <?php if (floor($tech / 1000) == $r): ?>
+                  <option value="<?=$tech?>"><?=$l[$techData[$tech][0]]?></option>
+                  <?php endif; ?>
+                <?php endforeach; ?>
+                </optgroup>
+                <?php endfor; ?>
               </select>
               <label for="tab2-from-level"><?= $l['from-level'] ?></label>
               <input id="tab2-from-level" type="text" name="tab2-from-level" class="form-control form-control-sm level-input" value="0"/>
@@ -373,10 +405,11 @@
               <?php endforeach; ?>
               </tr>
               <tr>
-                <td colspan="6">&nbsp;</td>
+                <td colspan="7">&nbsp;</td>
               </tr>
               <tr class="<?= ($row % 2) === 1 ? 'odd' : 'even' ?>">
                 <td class="border-n border-w"><?=$l['total']?></td>
+                <td align="center" class="border-n"><b>0</b></td>
                 <td align="center" class="border-n"><b>0</b></td>
                 <td align="center" class="border-n"><b>0</b></td>
                 <td align="center" class="border-n"><b>0</b></td>
@@ -389,6 +422,7 @@
                 <td align="center"><input id="crystal-available-2-1" type="text" name="crystal-available" class="form-control form-control-sm res-input" value="0" /></td>
                 <td align="center"><input id="deut-available-2-1" type="text" name="deut-available" class="form-control form-control-sm res-input" value="0" /></td>
                 <td></td>
+                <td></td>
                 <td class="border-e"></td>
               </tr>
               <tr>
@@ -397,13 +431,14 @@
                 <td align="center">0</td>
                 <td align="center">0</td>
                 <td></td>
+                <td></td>
                 <td class="border-e"></td>
               </tr>
               <tr class="<?= ($row % 2) === 1 ? 'odd' : 'even' ?>">
                 <td class="border-s border-w"><?=$l['transports-needed']?></td>
                 <td align="center" class="border-s">0 <?=$l['sc-short']?></td>
                 <td align="center" class="border-s">0 <?=$l['lc-short']?></td>
-                <td colspan="3" class="border-s border-e"></td>
+                <td colspan="4" class="border-s border-e"></td>
               </tr>
             </table>
           </div>

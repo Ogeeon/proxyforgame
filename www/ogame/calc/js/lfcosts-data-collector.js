@@ -24,8 +24,15 @@ class LfDataCollector {
             researchCostReduction:getInputNumber(document.getElementById('research-cost-reduction')),
             researchTimeReduction:getInputNumber(document.getElementById('research-time-reduction')),
             race:                 Number(document.getElementById('race-selector').value),
+            researchRaceOneLevel: this.collectResearchRace(0),
+            researchRaceMultLevel:this.collectResearchRace(1),
             playerClass,
         };
+    }
+
+    collectResearchRace(outerTab) {
+        const sel = document.getElementById(`research-race-dd-${outerTab}`);
+        return sel ? Number(sel.value) : 1;
     }
 
     /**

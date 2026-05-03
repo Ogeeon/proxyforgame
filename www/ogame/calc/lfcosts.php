@@ -133,9 +133,9 @@ $techData = array(
 
 $techTypes = array(1 => 'buildings', 2 => 'researches');
 $tabTitles = array('all-items-one-level', 'all-items-mult-levels', 'one-item-mult-levels');
-$colHeadersAllOne = array('building', 'level', 'metal', 'crystal', 'deuterium', 'time', 'points', 'dm-abbr');
-$colHeadersAllMult = array('building', 'from-level', 'to-level', 'metal', 'crystal', 'deuterium', 'time', 'points');
-$colHeadersOneCommon = array('level', 'metal', 'crystal', 'deuterium', 'time', 'points');
+$colHeadersAllOne = array('building', 'level', 'metal', 'crystal', 'deuterium', 'msu', 'time', 'points', 'dm-abbr');
+$colHeadersAllMult = array('building', 'from-level', 'to-level', 'metal', 'crystal', 'deuterium', 'msu', 'time', 'points');
+$colHeadersOneCommon = array('level', 'metal', 'crystal', 'deuterium', 'msu', 'time', 'points');
 
 function getTechsByType($type) {
 	global $techData;

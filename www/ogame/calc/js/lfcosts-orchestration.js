@@ -87,14 +87,32 @@ class LfCostsOrchestrator {
         this.opts.load();
         this._restoreInputsFromPrm();
 
-        // Table inputs (outer tabs 0 and 1)
-        ['tab-0', 'tab-1'].forEach(tabId => {
-            document.querySelectorAll(`#${tabId} input[type=text]`).forEach(inp => {
+        // Table inputs for buildings (outer tabs 0 and 1, inner tab 1 only)
+        [0, 1].forEach(outer => {
+            document.querySelectorAll(`#table-${outer}-1 input[type=text]`).forEach(inp => {
                 inp.addEventListener('input', function (e) {
                     validateInputNumber({ currentTarget: this });
                     orchestrator.handleRowChange(this);
                 });
             });
+            // Delegated listeners for dynamically added research rows
+            const resTbl = document.getElementById(`table-${outer}-2`);
+            if (resTbl) {
+                resTbl.addEventListener('input', function (e) {
+                    const inp = e.target;
+                    if (inp.tagName === 'INPUT' && inp.type === 'text') {
+                        validateInputNumber({ currentTarget: inp });
+                        orchestrator.handleRowChange(inp);
+                    }
+                });
+                resTbl.addEventListener('click', function (e) {
+                    const btn = e.target.closest('.research-remove-btn');
+                    if (btn) {
+                        const row = btn.closest('tr');
+                        orchestrator.removeResearchRow(row, outer);
+                    }
+                });
+            }
         });
 
         // Tab 3 inputs
@@ -121,6 +139,16 @@ class LfCostsOrchestrator {
         });
         document.querySelectorAll('#general-settings input[type=radio]').forEach(r =>
             r.addEventListener('click', () => orchestrator.handleParamChange()));
+        document.querySelectorAll('.research-race-dropdown').forEach(sel => {
+            sel.addEventListener('change', function () {
+                orchestrator._populateResearchDropdown(Number(this.dataset.tab));
+            });
+        });
+        document.querySelectorAll('.research-add-btn').forEach(btn => {
+            btn.addEventListener('click', function () {
+                orchestrator.addResearchRow(Number(this.dataset.tab));
+            });
+        });
         document.getElementById('full-numbers').addEventListener('click', () => orchestrator.handleParamChange());
         document.getElementById('reset').addEventListener('click', () => orchestrator.resetParams());
         document.getElementById('tech-types-select').addEventListener('change', () => orchestrator.updateTab3());
@@ -156,6 +184,8 @@ class LfCostsOrchestrator {
         if (cbLight) cbLight.addEventListener('click', function () { toggleLightBS(this.checked); });
 
         this.restoreTabsState();
+        this._populateResearchDropdown(0);
+        this._populateResearchDropdown(1);
         this.renderer.renderHideNShow(Number(document.getElementById('race-selector').value));
         this.updateTotals();
         this.updateTab3();
@@ -208,9 +238,10 @@ class LfCostsOrchestrator {
             row.children[fdc    ].innerHTML = '0';
             row.children[fdc + 1].innerHTML = '0';
             row.children[fdc + 2].innerHTML = '0';
-            row.children[fdc + 3].innerHTML = '0' + this.opts.datetimeS;
-            row.children[fdc + 4].innerHTML = '0';
-            if (outerTab === 0) row.children[fdc + 5].innerHTML = '0';
+            row.children[fdc + 3].innerHTML = '0';
+            row.children[fdc + 4].innerHTML = '0' + this.opts.datetimeS;
+            row.children[fdc + 5].innerHTML = '0';
+            if (outerTab === 0) row.children[fdc + 6].innerHTML = '0';
             this.techData[rowKey] = null;
         }
 
@@ -299,7 +330,7 @@ class LfCostsOrchestrator {
                     const techID = rows[row].children[0].innerHTML;
                     const rowKey = techID + '-' + outer + '-' + inner;
                     const cached = this.techData[rowKey];
-                    if (cached) {
+                    if (cached && rows[row].style.display !== 'none') {
                         totals.metal   += cached[0];
                         totals.crystal += cached[1];
                         totals.deut    += cached[2];
@@ -392,6 +423,7 @@ class LfCostsOrchestrator {
     handleRaceChange() {
         const race = Number(document.getElementById('race-selector').value);
         this.renderer.renderHideNShow(race);
+        this.updateTotals();
         this.updateTab3();
     }
 
@@ -430,6 +462,8 @@ class LfCostsOrchestrator {
         prm.mineralResCntrLvl   = 0;
         prm.researchCostReduction = 0;
         prm.researchTimeReduction = 0;
+        prm.researchRaceOneLevel = 1;
+        prm.researchRaceMultLevel = 1;
 
         setVal('#robot-factory-level', prm.robotFactoryLevel);
         setVal('#nanite-factory-level', prm.naniteFactoryLevel);
@@ -444,12 +478,11 @@ class LfCostsOrchestrator {
         setVal('#research-time-reduction', prm.researchTimeReduction);
 
         for (let outer = 0; outer < 2; outer++) {
-            for (const inner of [1, 2]) {
-                const rows = getTableRows(`#table-${outer}-${inner}`);
-                for (let row = 1; row < rows.length - FOOTER_ROWS; row++) {
-                    this.renderer.clearRow(rows[row], outer);
-                }
+            const rows = getTableRows(`#table-${outer}-1`);
+            for (let row = 1; row < rows.length - FOOTER_ROWS; row++) {
+                this.renderer.clearRow(rows[row], outer);
             }
+            this._clearResearchRows(outer);
         }
         Object.keys(this.techData).forEach(key => { this.techData[key] = null; });
 
@@ -460,6 +493,7 @@ class LfCostsOrchestrator {
         setChecked('#full-numbers', false);
         this._clearAvailableResourceInputs();
 
+        this.renderer.renderHideNShow(Number(document.getElementById('race-selector').value));
         this.updateTotals();
         this.updateTab3();
     }
@@ -529,6 +563,69 @@ class LfCostsOrchestrator {
                     if (el) el.value = 0;
                 });
             }
+        }
+    }
+
+    _populateResearchDropdown(outerTab) {
+        const raceDD = document.getElementById(`research-race-dd-${outerTab}`);
+        const resDD  = document.getElementById(`research-select-${outerTab}`);
+        if (!raceDD || !resDD) return;
+        const race = Number(raceDD.value);
+        resDD.innerHTML = '';
+        (this.opts.researchList || []).filter(r => r.race === race).forEach(r => {
+            const opt = document.createElement('option');
+            opt.value = r.id;
+            opt.textContent = r.name;
+            resDD.appendChild(opt);
+        });
+    }
+
+    addResearchRow(outerTab) {
+        const resDD = document.getElementById(`research-select-${outerTab}`);
+        if (!resDD || !resDD.value) return;
+        const techID   = Number(resDD.value);
+        const techName = resDD.options[resDD.selectedIndex].text;
+
+        const rows = getTableRows(`#table-${outerTab}-2`);
+        for (let i = 1; i < rows.length - FOOTER_ROWS; i++) {
+            if (Number(rows[i].children[0].innerHTML) === techID) return;
+        }
+
+        const dataRowCount = rows.length - FOOTER_ROWS - 1;
+        const rowClass = dataRowCount % 2 === 0 ? 'odd' : 'even';
+        const removeBtn = `<button class="btn btn-sm btn-danger research-remove-btn ms-1" style="padding:1px 5px;line-height:1;">&times;</button>`;
+
+        let rowHtml = `<tr class="${rowClass}"><td style="display:none;">${techID}</td>`;
+        rowHtml += `<td class="min">${techName}${removeBtn}</td>`;
+        if (outerTab === 1) {
+            rowHtml += `<td align="center"><input type="text" class="form-control form-control-sm level-input ui-input-margin" value="0"/></td>`;
+            rowHtml += `<td align="center"><input type="text" class="form-control form-control-sm level-input ui-input-margin" value="0"/></td>`;
+        } else {
+            rowHtml += `<td align="center"><input type="text" class="form-control form-control-sm level-input ui-input-margin" value="0"/></td>`;
+        }
+        const numDataCells = outerTab === 0 ? 7 : 6;
+        const timeOffset   = 4;
+        for (let c = 0; c < numDataCells; c++) {
+            rowHtml += `<td align="center">${c === timeOffset ? '0' + this.opts.datetimeS : '0'}</td>`;
+        }
+        rowHtml += '</tr>';
+
+        rows[rows.length - FOOTER_ROWS].insertAdjacentHTML('beforebegin', rowHtml);
+        this.updateTotals();
+    }
+
+    removeResearchRow(row, outerTab) {
+        const techID = Number(row.children[0].innerHTML);
+        const rowKey = `${techID}-${outerTab}-2`;
+        this.techData[rowKey] = null;
+        row.remove();
+        this.updateTotals();
+    }
+
+    _clearResearchRows(outerTab) {
+        const rows = getTableRows(`#table-${outerTab}-2`);
+        for (let i = rows.length - FOOTER_ROWS - 1; i >= 1; i--) {
+            rows[i].remove();
         }
     }
 }
