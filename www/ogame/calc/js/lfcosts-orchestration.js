@@ -25,6 +25,7 @@ var options = {
         mineralResCntrLvl: 0,
         researchCostReduction: 0,
         researchTimeReduction: 0,
+        rates: [1, 1.5, 3],
 
         validate: function (field, value) {
             switch (field) {
@@ -41,6 +42,7 @@ var options = {
                 case 'mineralResCntrLvl':     return validateNumber(Number.parseFloat(value), 0, 100, 0);
                 case 'researchCostReduction': return validateNumber(Number.parseFloat(value), 0, 25,  0);
                 case 'researchTimeReduction': return validateNumber(Number.parseFloat(value), 0, 99,  0);
+                case 'rates':                 return validateNumber(Number.parseFloat(value), 0.1, 100, 1);
                 default: return value;
             }
         }
@@ -176,6 +178,9 @@ class LfCostsOrchestrator {
         document.getElementById('mrc-level')._constrains             = { min: 0, max: 100,  def: 0, allowFloat: false, allowNegative: false };
         document.getElementById('research-cost-reduction')._constrains = { min: 0, max: 25, def: 0, allowFloat: true,  allowNegative: false };
         document.getElementById('research-time-reduction')._constrains = { min: 0, max: 99, def: 0, allowFloat: true,  allowNegative: false };
+        document.getElementById('exchange-rates-m')._constrains        = { min: 0.1, max: 100, def: 1,   allowFloat: true, allowNegative: false };
+        document.getElementById('exchange-rates-c')._constrains        = { min: 0.1, max: 100, def: 1.5, allowFloat: true, allowNegative: false };
+        document.getElementById('exchange-rates-d')._constrains        = { min: 0.1, max: 100, def: 3,   allowFloat: true, allowNegative: false };
 
         let theme = { value: 'light', validate: function (key, val) { return val; } };
         loadFromCookie('theme', theme);
@@ -464,6 +469,7 @@ class LfCostsOrchestrator {
         prm.researchTimeReduction = 0;
         prm.researchRaceOneLevel = 1;
         prm.researchRaceMultLevel = 1;
+        prm.rates = [1, 1.5, 3];
 
         setVal('#robot-factory-level', prm.robotFactoryLevel);
         setVal('#nanite-factory-level', prm.naniteFactoryLevel);
@@ -476,6 +482,9 @@ class LfCostsOrchestrator {
         setVal('#mrc-level', prm.mineralResCntrLvl);
         setVal('#research-cost-reduction', prm.researchCostReduction);
         setVal('#research-time-reduction', prm.researchTimeReduction);
+        setVal('#exchange-rates-m', prm.rates[0]);
+        setVal('#exchange-rates-c', prm.rates[1]);
+        setVal('#exchange-rates-d', prm.rates[2]);
 
         for (let outer = 0; outer < 2; outer++) {
             const rows = getTableRows(`#table-${outer}-1`);
@@ -553,6 +562,9 @@ class LfCostsOrchestrator {
         setVal('#mrc-level', prm.mineralResCntrLvl);
         setVal('#research-cost-reduction', prm.researchCostReduction);
         setVal('#research-time-reduction', prm.researchTimeReduction);
+        setVal('#exchange-rates-m', prm.rates[0]);
+        setVal('#exchange-rates-c', prm.rates[1]);
+        setVal('#exchange-rates-d', prm.rates[2]);
     }
 
     _clearAvailableResourceInputs() {

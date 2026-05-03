@@ -174,7 +174,8 @@
     "research-cost-reduction": "Reduzierung der Forschungskosten",
     "research-time-reduction": "Reduzierung der Forschungszeit",
     "lifeforms": "Lebensformen",
-    "param-tab-common": "Allgemein"
+    "param-tab-common": "Allgemein",
+    "exchange-rates": "Wechselkurse"
   },
   "index": {
     "title": "ProxyForGame - Hilfsprogramme für das Online-Browsergame OGame",
@@ -595,7 +596,6 @@
     "show-addtnl-info": "Booster und Last % anzeigen",
     "addtnl-row": "Booster / Last %",
     "energy-short": "En.: ",
-    "exchange-rates": "Wechselkurse",
     "mines-amortization": "Amortisation von Minen",
     "plasma-amortization": "Amortisation von Plasmatechnik",
     "mine": "Gebäude",

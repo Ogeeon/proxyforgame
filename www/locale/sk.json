@@ -173,7 +173,8 @@
     "research-cost-reduction": "Zníženie nákladov na výskum",
     "research-time-reduction": "Skrátenie času výskumu",
     "lifeforms": "Formy života",
-    "param-tab-common": "Všeobecné"
+    "param-tab-common": "Všeobecné",
+    "exchange-rates": "Výmenné kurzy"
   },
   "index": {
     "title": "ProxyForGame - software pre online hry v prehliadači OGame",
@@ -589,7 +590,6 @@
     "show-addtnl-info": "Zobraziť boostery a zaťaženie%",
     "addtnl-row": "Boostery / zaťaženie%",
     "energy-short": "En.: ",
-    "exchange-rates": "Výmenné kurzy",
     "mines-amortization": "Amortizácia baní",
     "plasma-amortization": "Amortizácia plazmovej technológie",
     "mine": "Budova",

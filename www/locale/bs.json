@@ -172,7 +172,8 @@
     "research-cost-reduction": "Research cost reduction",
     "research-time-reduction": "Research time reduction",
     "lifeforms": "Oblici života",
-    "param-tab-common": "Opšte"
+    "param-tab-common": "Opšte",
+    "exchange-rates": "Omjer trgovine"
   },
   "index": {
     "title": "ProxyForGame - alati za online igru Ogame",
@@ -600,7 +601,6 @@
     "show-addtnl-info": "Pokaži pojačivaće i % opterećenja",
     "addtnl-row": "Pojačivaći / opterećenje%",
     "energy-short": "En.: ",
-    "exchange-rates": "Omjer trgovine",
     "mines-amortization": "Amortizacija rudnika",
     "plasma-amortization": "Amortisation of Plasma Technology",
     "mine": "Zgrada",

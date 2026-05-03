@@ -171,7 +171,8 @@
     "research-cost-reduction": "Riduzione dei costi di ricerca",
     "research-time-reduction": "Riduzione del tempo di ricerca",
     "lifeforms": "Forme di vita",
-    "param-tab-common": "Generale"
+    "param-tab-common": "Generale",
+    "exchange-rates": "Tassi di cambio"
   },
   "index": {
     "title": "ProxyForGame - strumenti per i giochi per browser OGame",
@@ -602,7 +603,6 @@
     "show-addtnl-info": "Mostra booster e carico %",
     "addtnl-row": "Booster / carico %",
     "energy-short": "En.: ",
-    "exchange-rates": "Tassi di cambio",
     "mines-amortization": "Ammortamento delle miniere",
     "plasma-amortization": "Ammortamento della tecnologia al plasma",
     "mine": "Edificio",

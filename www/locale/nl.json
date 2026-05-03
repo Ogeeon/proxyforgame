@@ -168,7 +168,8 @@
     "research-cost-reduction": "Vermindering onderzoekskosten",
     "research-time-reduction": "Verkorting onderzoekstijd",
     "lifeforms": "Levensvormen",
-    "param-tab-common": "Algemeen"
+    "param-tab-common": "Algemeen",
+    "exchange-rates": "Wisselkoersen"
   },
   "index": {
     "title": "ProxyForGame - instrumenten het browser spel OGame",
@@ -598,7 +599,6 @@
     "show-addtnl-info": "Toon boosters en belasting %",
     "addtnl-row": "Boosters / belasting %",
     "energy-short": "En.: ",
-    "exchange-rates": "Wisselkoersen",
     "mines-amortization": "Afschrijving van mijnen",
     "plasma-amortization": "Afschrijving van Plasma Technologie",
     "mine": "Gebouw",

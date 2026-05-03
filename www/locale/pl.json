@@ -172,7 +172,8 @@
     "research-cost-reduction": "Redukcja kosztów badań",
     "research-time-reduction": "Skrócenie czasu badań",
     "lifeforms": "Formy życia",
-    "param-tab-common": "Ogólne"
+    "param-tab-common": "Ogólne",
+    "exchange-rates": "Kursy wymiany walut"
   },
   "index": {
     "title": "Narzedzia do gier przegladarkowych OGame",
@@ -611,7 +612,6 @@
     "show-addtnl-info": "Pokaż dopalacze i obciążenie %",
     "addtnl-row": "Dopalacze / obciążenie %",
     "energy-short": "En.: ",
-    "exchange-rates": "Kursy wymiany walut",
     "mines-amortization": "Amortyzacja kopalń",
     "plasma-amortization": "Amortyzacja technologii plazmowej",
     "mine": "Budowa",

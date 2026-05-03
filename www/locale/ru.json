@@ -177,7 +177,8 @@
     "research-cost-reduction": "Уменьшение стоимости исследования",
     "research-time-reduction": "Уменьшение времени исследования",
     "lifeforms": "Формы жизни",
-    "param-tab-common": "Общие"
+    "param-tab-common": "Общие",
+    "exchange-rates": "Курсы обмена"
   },
   "index": {
     "title": "ProxyForGame - утилиты для браузерной онлайн-игры OGame",
@@ -590,7 +591,6 @@
     "show-addtnl-info": "Показывать бустеры и % загрузки",
     "addtnl-row": "Бустеры / % загрузки",
     "energy-short": "Эн.: ",
-    "exchange-rates": "Курсы обмена",
     "mines-amortization": "Окупаемость шахт",
     "plasma-amortization": "Окупаемость Плазменной технологии",
     "mine": "Шахта",

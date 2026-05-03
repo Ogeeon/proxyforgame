@@ -27,6 +27,11 @@ class LfDataCollector {
             researchRaceOneLevel: this.collectResearchRace(0),
             researchRaceMultLevel:this.collectResearchRace(1),
             playerClass,
+            rates: [
+                getInputNumber(document.getElementById('exchange-rates-m')) || 1,
+                getInputNumber(document.getElementById('exchange-rates-c')) || 1.5,
+                getInputNumber(document.getElementById('exchange-rates-d')) || 3,
+            ],
         };
     }
 

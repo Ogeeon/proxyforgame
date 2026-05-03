@@ -169,7 +169,8 @@
     "research-cost-reduction": "Araştırma maliyetlerinin azaltılması",
     "research-time-reduction": "Araştırma süresinin kısaltılması",
     "lifeforms": "Yaşam Formları",
-    "param-tab-common": "Genel"
+    "param-tab-common": "Genel",
+    "exchange-rates": "Ticaret oranları"
   },
   "index": {
     "title": "ProxyForGame - OGame için hesaplamalar",
@@ -594,7 +595,6 @@
     "show-addtnl-info": "Güçlendiriciler ve yük% göster",
     "addtnl-row": "Güçlendiriciler / yük%",
     "energy-short": "En.: ",
-    "exchange-rates": "Ticaret oranları",
     "mines-amortization": "Madenlerin amortismanı",
     "plasma-amortization": "Plazma Teknolojisinin Amortismanı",
     "mine": "Bina",

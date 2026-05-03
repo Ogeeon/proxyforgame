@@ -160,6 +160,12 @@
               <input id="class-2" type="radio" name="class" value="2" tabindex="3" class="form-check-input"/>
               <label for="class-2"><?= $l['class-discoverer'] ?></label>
             </div>
+            <div class="d-flex align-items-center">
+              <label for="exchange-rates-m" class="me-1"><?= $l['exchange-rates'] ?>:</label>
+              <input id="exchange-rates-m" type="text" name="exchange-rates-m" class="form-control form-control-sm level-input" value="1"/>:
+              <input id="exchange-rates-c" type="text" name="exchange-rates-c" class="form-control form-control-sm level-input" value="1.5"/>:
+              <input id="exchange-rates-d" type="text" name="exchange-rates-d" class="form-control form-control-sm level-input" value="3"/>
+            </div>
           </div>
         </div>
         <!-- Researches tab: ion tech, hyper tech, cost/time reduction -->

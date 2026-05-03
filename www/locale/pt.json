@@ -172,7 +172,8 @@
     "research-cost-reduction": "Redução dos custos da investigação",
     "research-time-reduction": "Redução do tempo de investigação",
     "lifeforms": "Formas de vida",
-    "param-tab-common": "Geral"
+    "param-tab-common": "Geral",
+    "exchange-rates": "Taxas de câmbio"
   },
   "index": {
     "title": "ProxyForGame - Calculadoras para OGame",
@@ -595,7 +596,6 @@
     "show-addtnl-info": "Mostrar impulsionadores e carga",
     "addtnl-row": "Reforçadores / carga %",
     "energy-short": "En.: ",
-    "exchange-rates": "Taxas de câmbio",
     "mines-amortization": "Amortização de minas",
     "plasma-amortization": "Amortização da Tecnologia do Plasma",
     "mine": "Edifício",

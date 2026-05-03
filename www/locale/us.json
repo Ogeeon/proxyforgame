@@ -176,7 +176,8 @@
     "research-cost-reduction": "Research cost reduction",
     "research-time-reduction": "Research time reduction",
     "lifeforms": "LifeForms",
-    "param-tab-common": "Common"
+    "param-tab-common": "Common",
+    "exchange-rates": "Exchange rates"
   },
   "index": {
     "title": "ProxyForGame - tools for online browser game OGame",
@@ -596,7 +597,6 @@
     "show-addtnl-info": "Show boosters and load %",
     "addtnl-row": "Boosters / load %",
     "energy-short": "En.: ",
-    "exchange-rates": "Exchange rates",
     "mines-amortization": "Amortisation of mines",
     "plasma-amortization": "Amortisation of Plasma Technology",
     "mine": "Building",
