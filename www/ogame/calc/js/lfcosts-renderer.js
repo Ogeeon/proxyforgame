@@ -148,9 +148,19 @@ class LfRenderer {
             }
         }
 
-        const isRocktal = Number(race) === 2;
-        ['megalith-level-wrap', 'mrc-level-wrap'].forEach(id => {
-            if (isRocktal) show(`#${id}`); else hide(`#${id}`);
+        const raceWrappers = {
+            1: ['research-centre-level-wrap'],
+            2: ['rune-tech-level-wrap', 'megalith-level-wrap', 'mrc-level-wrap'],
+            3: ['rbt-res-centre-level-wrap'],
+            4: ['vortex-chamber-level-wrap'],
+        };
+        const allWrappers = ['research-centre-level-wrap', 'rune-tech-level-wrap',
+                             'megalith-level-wrap', 'mrc-level-wrap',
+                             'rbt-res-centre-level-wrap', 'vortex-chamber-level-wrap'];
+        const visible = new Set(raceWrappers[race] || []);
+        allWrappers.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.style.display = visible.has(id) ? 'flex' : 'none';
         });
     }
 

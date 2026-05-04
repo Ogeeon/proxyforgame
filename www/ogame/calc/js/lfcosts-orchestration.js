@@ -23,6 +23,10 @@ var options = {
         capIncrLC: 0,
         megalithLvl: 0,
         mineralResCntrLvl: 0,
+        resCentreLvl: 0,
+        runeTechLvl: 0,
+        rbtResCentreLvl: 0,
+        vortexChamberLvl: 0,
         researchCostReduction: 0,
         researchTimeReduction: 0,
         rates: [1, 1.5, 3],
@@ -40,6 +44,10 @@ var options = {
                 case 'capIncrLC':             return validateNumber(Number.parseFloat(value), 0, 1000, 0);
                 case 'megalithLvl':           return validateNumber(Number.parseFloat(value), 0, 100, 0);
                 case 'mineralResCntrLvl':     return validateNumber(Number.parseFloat(value), 0, 100, 0);
+                case 'resCentreLvl':          return validateNumber(Number.parseFloat(value), 0, 100, 0);
+                case 'runeTechLvl':           return validateNumber(Number.parseFloat(value), 0, 100, 0);
+                case 'rbtResCentreLvl':       return validateNumber(Number.parseFloat(value), 0, 100, 0);
+                case 'vortexChamberLvl':      return validateNumber(Number.parseFloat(value), 0, 100, 0);
                 case 'researchCostReduction': return validateNumber(Number.parseFloat(value), 0, 25,  0);
                 case 'researchTimeReduction': return validateNumber(Number.parseFloat(value), 0, 99,  0);
                 case 'rates':                 return validateNumber(Number.parseFloat(value), 0.1, 100, 1);
@@ -223,7 +231,7 @@ class LfCostsOrchestrator {
         }
 
         const params      = this.collector.collectParams();
-        const rsrCostRdc  = params.researchCostReduction;
+        const rsrCostRdc  = this.calculator.computeRsrCostRdc(params);
         const ionTechLevel = (levelTo > levelFrom) ? 0 : params.ionTechLevel;
         const bldCostRdc  = this.calculator.computeBldCostRdc(techID, params.race, params.megalithLvl, params.mineralResCntrLvl);
 
@@ -264,7 +272,7 @@ class LfCostsOrchestrator {
 
         const techTypes   = new Set([1, 2]);
         const needUpd     = { 0: false, 1: false };
-        const rsrCostRdc  = params.researchCostReduction;
+        const rsrCostRdc  = this.calculator.computeRsrCostRdc(params);
         const ionTechLevel = params.ionTechLevel;
 
         Object.entries(this.techData).forEach(([key, value]) => {
@@ -393,7 +401,7 @@ class LfCostsOrchestrator {
             if (el && el === document.activeElement) focusedInputId = `${input}-available-2-1`;
         });
 
-        const rsrCostRdc  = params.researchCostReduction;
+        const rsrCostRdc  = this.calculator.computeRsrCostRdc(params);
         const ionTechLevel = (levelTo > levelFrom) ? 0 : params.ionTechLevel;
         const bldCostRdc  = this.calculator.computeBldCostRdc(techID, params.race, params.megalithLvl, params.mineralResCntrLvl);
 
@@ -464,7 +472,11 @@ class LfCostsOrchestrator {
         prm.capIncrSC            = 0;
         prm.capIncrLC            = 0;
         prm.megalithLvl          = 0;
-        prm.mineralResCntrLvl   = 0;
+        prm.mineralResCntrLvl    = 0;
+        prm.resCentreLvl         = 0;
+        prm.runeTechLvl          = 0;
+        prm.rbtResCentreLvl      = 0;
+        prm.vortexChamberLvl     = 0;
         prm.researchCostReduction = 0;
         prm.researchTimeReduction = 0;
         prm.researchRaceOneLevel = 1;
@@ -480,6 +492,10 @@ class LfCostsOrchestrator {
         setVal('#lc-capacity-increase', prm.capIncrLC);
         setVal('#megalith-level', prm.megalithLvl);
         setVal('#mrc-level', prm.mineralResCntrLvl);
+        setVal('#research-centre-level', prm.resCentreLvl);
+        setVal('#rune-tech-level', prm.runeTechLvl);
+        setVal('#rbt-res-centre-level', prm.rbtResCentreLvl);
+        setVal('#vortex-chamber-level', prm.vortexChamberLvl);
         setVal('#research-cost-reduction', prm.researchCostReduction);
         setVal('#research-time-reduction', prm.researchTimeReduction);
         setVal('#exchange-rates-m', prm.rates[0]);
@@ -560,6 +576,10 @@ class LfCostsOrchestrator {
         setVal('#lc-capacity-increase', prm.capIncrLC);
         setVal('#megalith-level', prm.megalithLvl);
         setVal('#mrc-level', prm.mineralResCntrLvl);
+        setVal('#research-centre-level', prm.resCentreLvl);
+        setVal('#rune-tech-level', prm.runeTechLvl);
+        setVal('#rbt-res-centre-level', prm.rbtResCentreLvl);
+        setVal('#vortex-chamber-level', prm.vortexChamberLvl);
         setVal('#research-cost-reduction', prm.researchCostReduction);
         setVal('#research-time-reduction', prm.researchTimeReduction);
         setVal('#exchange-rates-m', prm.rates[0]);

@@ -59,11 +59,24 @@ class LfCalculator {
         return bldCostRdc;
     }
 
+    computeRsrCostRdc(params) {
+        const lvl = params.race === 1 ? params.resCentreLvl :
+                    params.race === 2 ? params.runeTechLvl :
+                    params.race === 3 ? params.rbtResCentreLvl :
+                    params.race === 4 ? params.vortexChamberLvl : 0;
+        return params.researchCostReduction + 0.25 * lvl;
+    }
+
     _getAdjustedTime(techID, levelFrom, levelTo, params) {
         if (levelFrom == 0 && levelTo == 0) return 0;
         const megalithRdc = Math.min(0.99, params.race === 2 ? 0.01 * params.megalithLvl : 0);
+        const lvl = params.race === 1 ? params.resCentreLvl :
+                    params.race === 2 ? params.runeTechLvl :
+                    params.race === 3 ? params.rbtResCentreLvl :
+                    params.race === 4 ? params.vortexChamberLvl : 0;
+        const effectiveTimeRdc = params.researchTimeReduction + 2 * lvl;
         return getBuildTimeLF(techID, levelFrom, levelTo, this.techCosts,
             params.robotFactoryLevel, params.naniteFactoryLevel, params.universeSpeed,
-            params.researchTimeReduction, megalithRdc);
+            effectiveTimeRdc, megalithRdc);
     }
 }

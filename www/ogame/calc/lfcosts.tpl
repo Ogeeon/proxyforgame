@@ -200,6 +200,22 @@
               <label id="lbl-mrc-level" for="mrc-level"><?= $l['mineral-res-centre'] ?></label>
               <input id="mrc-level" type="text" name="mrc-level" class="form-control form-control-sm level-input" value="0" />
             </div>
+            <div id="research-centre-level-wrap" class="align-items-center gap-1" style="display: none;">
+              <label id="lbl-research-centre-level" for="research-centre-level"><?= $l['research-centre'] ?></label>
+              <input id="research-centre-level" type="text" name="research-centre-level" class="form-control form-control-sm level-input" value="0" />
+            </div>
+            <div id="rune-tech-level-wrap" class="align-items-center gap-1" style="display: none;">
+              <label id="lbl-rune-tech-level" for="rune-tech-level"><?= $l['rune-tech'] ?></label>
+              <input id="rune-tech-level" type="text" name="rune-tech-level" class="form-control form-control-sm level-input" value="0" />
+            </div>
+            <div id="rbt-res-centre-level-wrap" class="align-items-center gap-1" style="display: none;">
+              <label id="lbl-rbt-res-centre-level" for="rbt-res-centre-level"><?= $l['rbt-res-centre'] ?></label>
+              <input id="rbt-res-centre-level" type="text" name="rbt-res-centre-level" class="form-control form-control-sm level-input" value="0" />
+            </div>
+            <div id="vortex-chamber-level-wrap" class="align-items-center gap-1" style="display: none;">
+              <label id="lbl-vortex-chamber-level" for="vortex-chamber-level"><?= $l['vortex-chamber'] ?></label>
+              <input id="vortex-chamber-level" type="text" name="vortex-chamber-level" class="form-control form-control-sm level-input" value="0" />
+            </div>
           </div>
           <div class="d-flex flex-wrap gap-2 align-items-center mb-1">
             <div class="d-flex align-items-center gap-1">

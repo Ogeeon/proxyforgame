@@ -448,5 +448,55 @@ test.describe('Lifeforms costs Calculator Page', () => {
         });
     });
 
+    test('[researches / human / research-centre bonus] reduces costs and time', async ({ page }) => {
+        await page.locator('#tabtag-0').click();
+        await page.locator('#tabtag-0-2').click();
+        await addAllResearchesForRace(page, 0, '1');
+        await fillTableRows(page, '#table-0-2', 2, 19, 2);
+
+        await page.locator('#param-lifeforms-tab').click();
+        await page.locator('#research-centre-level').fill('10');
+        await page.locator('#research-centre-level').press('Enter');
+        await expect(page.locator('#table-0-2 tr:nth-child(20) td:nth-child(4)')).toContainText('7.698M');
+        await expect(page.locator('#table-0-2 tr:nth-child(20) td:nth-child(5)')).toContainText('5.007M');
+        await expect(page.locator('#table-0-2 tr:nth-child(20) td:nth-child(6)')).toContainText('2.656M');
+        await expect(page.locator('#table-0-2 tr:nth-child(20) td:nth-child(8)')).toContainText('4d 1h 42m');
+
+        // Stacks additively with manual research-cost-reduction
+        await page.locator('#research-cost-reduction').fill('10');
+        await page.locator('#research-cost-reduction').press('Enter');
+        await expect(page.locator('#table-0-2 tr:nth-child(20) td:nth-child(4)')).toContainText('6.909M');
+        await expect(page.locator('#table-0-2 tr:nth-child(20) td:nth-child(5)')).toContainText('4.493M');
+        await expect(page.locator('#table-0-2 tr:nth-child(20) td:nth-child(6)')).toContainText('2.383M');
+        await expect(page.locator('#table-0-2 tr:nth-child(20) td:nth-child(8)')).toContainText('4d 1h 42m');
+
+        // Stacks with manual research-time-reduction
+        await page.locator('#research-time-reduction').fill('10');
+        await page.locator('#research-time-reduction').press('Enter');
+        await expect(page.locator('#table-0-2 tr:nth-child(20) td:nth-child(8)')).toContainText('3d 13h 29m');
+    });
+
+    test('[researches / rocktal / rune-tech bonus] reduces research costs', async ({ page }) => {
+        await page.locator('#param-lifeforms-tab').click();
+        await page.locator('#race-selector').selectOption('2');
+
+        await page.locator('#tabtag-0').click();
+        await page.locator('#tabtag-0-2').click();
+        await addAllResearchesForRace(page, 0, '2');
+        await fillTableRows(page, '#table-0-2', 2, 19, 2);
+
+        // Baseline
+        await expect(page.locator('#table-0-2 tr:nth-child(20) td:nth-child(4)')).toContainText('7.100M');
+        await expect(page.locator('#table-0-2 tr:nth-child(20) td:nth-child(5)')).toContainText('4.359M');
+        await expect(page.locator('#table-0-2 tr:nth-child(20) td:nth-child(6)')).toContainText('3.243M');
+
+        await page.locator('#param-lifeforms-tab').click();
+        await page.locator('#rune-tech-level').fill('10');
+        await page.locator('#rune-tech-level').press('Enter');
+        await expect(page.locator('#table-0-2 tr:nth-child(20) td:nth-child(4)')).toContainText('6.922M');
+        await expect(page.locator('#table-0-2 tr:nth-child(20) td:nth-child(5)')).toContainText('4.25M');
+        await expect(page.locator('#table-0-2 tr:nth-child(20) td:nth-child(6)')).toContainText('3.162M');
+    });
+
     // todo: hyperspace, class bonus and lf bonuses to cargo cap
 });
