@@ -5,3 +5,4 @@
 setup-statusline.ps1
 /.mcp.json
 /run_tests.bat
+changelog.sql
