@@ -1286,7 +1286,7 @@ function initializeCostsCalculator() {
       if (irnModal) {
         irnModal._irnExecute = true;
         const modal = bootstrap.Modal.getInstance(irnModal);
-        if (modal) modal.hide();
+        if (modal) { irnDoneBtn.blur(); modal.hide(); }
       }
     });
   }
