@@ -220,12 +220,12 @@
           <div class="d-flex flex-wrap gap-2 align-items-center mb-1">
             <div class="d-flex align-items-center gap-1">
               <label for="research-cost-reduction"><?= $l['research-cost-reduction'] ?></label>
-              <input id="research-cost-reduction" type="text" name="research-cost-reduction" class="form-control form-control-sm fleet-input" value="0" />
+              <input id="research-cost-reduction" type="text" name="research-cost-reduction" class="form-control form-control-sm fleet-input" value="0" />%
               <i class="bi bi-question-circle ms-1" data-bs-toggle="tooltip" title="<?= $l['times-hint'] ?>"></i>
             </div>
             <div class="d-flex align-items-center gap-1">
               <label for="research-time-reduction"><?= $l['research-time-reduction'] ?></label>
-              <input id="research-time-reduction" type="text" name="research-time-reduction" class="form-control form-control-sm fleet-input" value="0" />
+              <input id="research-time-reduction" type="text" name="research-time-reduction" class="form-control form-control-sm fleet-input" value="0" />%
               <i class="bi bi-question-circle ms-1" data-bs-toggle="tooltip" title="<?= $l['times-hint'] ?>"></i>
             </div>
           </div>
