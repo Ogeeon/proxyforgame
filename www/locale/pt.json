@@ -291,7 +291,7 @@
     "lc-short": "CG",
     "title": "OGame - Calculadora de Custos para Formas de vida",
     "keywords": "proxyforgame,proxy,online,calc,calculator,ogame,price calculation,cost calculation,buildings costs,research costs,fleet costs,defence costs,costs calculator,prices calculator",
-    "times-note": "O bónus final varia de planeta para planeta. Para obter resultados precisos, calcule manualmente o bónus total no planeta onde irá iniciar a construção/pesquisa.",
+    "times-note": "O bónus final à velocidade e custo de pesquisas consiste no bónus do terceiro edifício num planeta específico e no bónus global das Formas de Vida.",
     "class-collector": "Colecionador",
     "race": "Forma de vida",
     "cargo-cap-increase": "Aumento da capacidade de carga (%): ",
@@ -419,7 +419,7 @@
     "psy-sh-matrix": "Matriz de Escudo Psiónico",
     "kaelesh-disc-enh": "Melhoramento de Descobridor dos Kaelesh",
     "max-planet-temp": "Planeta temperatura max",
-    "energy-cost-to-build": "Custo de energia para construir"
+    "energy-cost-to-build": "Energia necessária para a construção"
   },
   "flight": {
     "flight-time-format": "99 H:s:s",

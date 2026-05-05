@@ -293,7 +293,7 @@
     "keywords": "proxyforgame,proxy,online,kalkulator online,ogame,koszty budowy,koszty badań,koszty floty,kalkulator kosztow,kosztów obrony",
     "msg-min-constraint-violated": "Wartość wpisana {0} {1} mniejsza niż minimalna {2}. Ustawione na minimalna wartość pola.",
     "msg-max-constraint-violated": "Wartość wpisana {1} większa niż maksymalna {2}. Ustawione na maksymalną wartość pola.",
-    "times-note": "Ostateczny bonus różni się w zależności od planety. Aby uzyskać dokładne wyniki, ręcznie oblicz całkowity bonus na planecie, na której rozpoczniesz budowę/badania.",
+    "times-note": "Ostateczny bonus do prędkości i kosztu badań składa się z bonusu trzeciego budynku na danej planecie oraz globalnego bonusu Form Życia.",
     "class-collector": "Zbieracz",
     "race": "Forma życia",
     "cargo-cap-increase": "Zwiększenie pojemności ładunku (%): ",
@@ -422,7 +422,7 @@
     "ovrc-battleship": "Przetaktowanie (Okręt Wojenny)",
     "psy-sh-matrix": "Psioniczna Matryca Ochronna",
     "kaelesh-disc-enh": "Wzmocnienie Odkrywcy Kaeleshów",
-    "energy-cost-to-build": "Koszt energii przy budowie"
+    "energy-cost-to-build": "Energia wymagana do budowy"
   },
   "flight": {
     "flight-time-format": "99 H:s:s",

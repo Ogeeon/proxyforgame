@@ -287,7 +287,7 @@
   },
   "lfcosts": {
     "title": "OGame - Kalkulátor pre ceny pre formy života",
-    "times-note": "Konečný bonus sa líši od planéty k planéte. Ak chcete získať presné výsledky, ručne vypočítajte celkový bonus na planéte, na ktorej začnete výstavbu/výskum.",
+    "times-note": "Konečný bonus na rýchlosť a náklady výskumu sa skladá z bonusu tretej budovy na konkrétnej planéte a globálneho bonusu Foriem života.",
     "class-collector": "Collector",
     "race": "Forma Života",
     "cargo-cap-increase": "Zvýšenie kapacity nákladu (%): ",
@@ -416,7 +416,7 @@
     "ovrc-battleship": "Pretaktovanie (Bojová loď)",
     "psy-sh-matrix": "Psionický matricový štít",
     "kaelesh-disc-enh": "Objaviteľský rozlet kaelešov",
-    "energy-cost-to-build": "Energetické náklady pri výstavbe"
+    "energy-cost-to-build": "Energia potrebná na výstavbu"
   },
   "flight": {
     "flight-time-format": "99 H:s:s",

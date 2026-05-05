@@ -285,7 +285,7 @@
     "energy": "Enerji",
     "title": "OGame – Yaşam formları için maliyet hesaplayıcı",
     "keywords": "proxyforgame,proxy,online,calc,calculator,ogame,price calculation,cost calculation,buildings costs,research costs,fleet costs,defence costs,costs calculator,prices calculator",
-    "times-note": "Nihai bonus gezegenden gezegene değişir. Doğru sonuçlar elde etmek için, inşaata/araştırmaya başlayacağınız gezegendeki toplam bonusu manuel olarak hesaplayın.",
+    "times-note": "Araştırma hızı ve maliyetine verilen nihai bonus, belirli bir gezegende üçüncü binanın sağladığı bonustan ve global Yaşam Formları bonusundan oluşur.",
     "class-collector": "Koleksiyoncu",
     "race": "Yaşam formu",
     "cargo-cap-increase": "Kargo kapasitesi artışı (%): ",
@@ -414,7 +414,7 @@
     "ovrc-battleship": "Hız Aşırtma (Savaş Gemisi)",
     "psy-sh-matrix": "Psionik Koruma Matrisi",
     "kaelesh-disc-enh": "Kaelesh Kaşif Takviyesi",
-    "energy-cost-to-build": "İnşaat enerji maliyeti"
+    "energy-cost-to-build": "İnşaat için gereken enerji"
   },
   "flight": {
     "datetime-format-hint": "gg.aa.yyyy sa:dd:ss",

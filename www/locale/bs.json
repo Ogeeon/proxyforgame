@@ -295,7 +295,7 @@
     "keywords": "proxyforgame,proxy,online,calc,calculator,ogame,price calculation,cost calculation,buildings costs,research costs,fleet costs,defence costs,costs calculator,prices calculator",
     "planet": "Planeta",
     "max-planet-temp": "Maksimalna temp. planeta",
-    "times-note": "The final bonus varies from planet to planet. To get accurate results, manually calculate the total bonus on the planet where you will start the construction/research.",
+    "times-note": "Konačni bonus na brzinu i troškove istraživanja sastoji se od bonusa trećeg objekta na određenoj planeti i globalnog bonusa Oblika života.",
     "race": "Lifeform",
     "cargo-cap-increase": "Cargo capacity increase (%): ",
     "times-hint": "Please read the note at the bottom of the page",
@@ -423,7 +423,7 @@
     "ovrc-battleship": "Overclocking (Battleship)",
     "psy-sh-matrix": "Psionic Shield Matrix",
     "kaelesh-disc-enh": "Kaelesh Discoverer Enhancement",
-    "energy-cost-to-build": "Energetski trošak izgradnje"
+    "energy-cost-to-build": "Energija potrebna za izgradnju"
   },
   "flight": {
     "flight-time-format": "99 H:s:s",

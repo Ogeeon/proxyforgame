@@ -291,7 +291,7 @@
     "keywords": "proxyforgame,proxy,online,calc,calculator,ogame,coûts de construction,coût de la recherche,coûts de construction,coût de la flotte,coût de la défense",
     "msg-min-constraint-violated": "Valeur {0} {1} est inférieure au minimum {2}. Valeur du champ réglé au minimum.",
     "msg-max-constraint-violated": "Valeur {0} {1} est supérieur au maximum {2}. Valeur du champ réglé au maximum.",
-    "times-note": "Le bonus final varie d'une planète à l'autre. Pour obtenir des résultats précis, calculez manuellement le bonus total sur la planète où vous commencerez la construction/recherche.",
+    "times-note": "Le bonus final sur la vitesse et le coût des recherches est composé du bonus fourni par le troisième bâtiment sur une planète donnée et du bonus global des Formes de Vie.",
     "class-collector": "Collecteur",
     "race": "Forme de vie",
     "cargo-cap-increase": "Aug. de la capacité de chargement (%): ",
@@ -420,7 +420,7 @@
     "ovrc-battleship": "Surcadençage (vaisseau de bataille)",
     "psy-sh-matrix": "Matrice de protection psionique",
     "kaelesh-disc-enh": "Renforcement d`explorateur kaelesh",
-    "energy-cost-to-build": "Coût en énergie pour la construction"
+    "energy-cost-to-build": "Énergie requise pour la construction"
   },
   "flight": {
     "datetime-format": "m.d.y H:s:s",

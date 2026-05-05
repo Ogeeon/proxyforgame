@@ -293,7 +293,7 @@
     "keywords": "proxyforgame,proxy,online,calc,calculator,ogame,price calculation,cost calculation,buildings costs,research costs,fleet costs,defence costs,costs calculator,prices calculator,costi di costruzione, il costo della ricerca, costi di costruzione, il costo della flotta, il costo della difesa, calcolo dei costi",
     "universe-speed": "Universo velocità",
     "hyper-tech": "Tecnologia Iperspaziale ",
-    "times-note": "Il bonus finale varia da pianeta a pianeta. Per ottenere risultati precisi, calcolate manualmente il bonus totale sul pianeta in cui inizierete la costruzione/ricerca.",
+    "times-note": "Il bonus finale alla velocità e al costo delle ricerche è composto dal bonus del terzo edificio su uno specifico pianeta e dal bonus globale delle Forme di Vita.",
     "class-collector": "Collector",
     "race": "Forma di vita",
     "cargo-cap-increase": "Aumento della capacità di carico (%): ",
@@ -424,7 +424,7 @@
     "kaelesh-disc-enh": "Rinforzo Esploratore Kaelesh",
     "energy-tech-level": "Livello di Tec. Energetica",
     "max-planet-temp": "Temp. massima del pianeta",
-    "energy-cost-to-build": "Costo di energia per la costruzione"
+    "energy-cost-to-build": "Energia necessaria per la costruzione"
   },
   "flight": {
     "datetime-format": "m.d.y H:s:s",

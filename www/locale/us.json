@@ -291,7 +291,7 @@
     "energy": "Energy",
     "title": "OGame - Costs calculator for LifeForms",
     "keywords": "proxyforgame,proxy,online,calc,calculator,ogame,price calculation,cost calculation,buildings costs,research costs,fleet costs,defence costs,costs calculator,prices calculator,lifeforms",
-    "times-note": "The final bonus varies from planet to planet. To get accurate results, manually calculate the total bonus on the planet where you will start the construction/research.",
+    "times-note": "The final bonus to research speed and cost consists of the bonus provided by the third building on a specific planet and the global Life Forms bonus.",
     "class-collector": "Collector",
     "race": "Lifeform",
     "cargo-cap-increase": "Cargo capacity increase (%): ",
@@ -419,7 +419,7 @@
     "ovrc-battleship": "Overclocking (Battleship)",
     "psy-sh-matrix": "Psionic Shield Matrix",
     "kaelesh-disc-enh": "Kaelesh Discoverer Enhancement",
-    "energy-cost-to-build": "Energy cost to build"
+    "energy-cost-to-build": "Energy required for construction"
   },
   "flight": {
     "flight-time-format": "99 H:s:s",

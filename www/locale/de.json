@@ -290,7 +290,7 @@
     "title": "OGame - Kostenberechnung für Lebensformen",
     "keywords": "proxyforgame,proxy,online,calc,calculator,ogame,Berechnung der Kosten,Baukosten,die Kosten für Forschung,Baukosten,die Kosten für die Flotte,die Kosten der Verteidigung Kostenrechner",
     "cancel": "Stornieren",
-    "times-note": "Der endgültige Bonus variiert von Planet zu Planet. Um genaue Ergebnisse zu erhalten, berechnen Sie manuell den Gesamtbonus auf dem Planeten, auf dem Sie mit dem Bau/der Forschung beginnen werden.",
+    "times-note": "Der endgültige Bonus auf Forschungsgeschwindigkeit und -kosten setzt sich aus dem Bonus des dritten Gebäudes auf dem jeweiligen Planeten und dem globalen Lebensformen-Bonus zusammen.",
     "class-collector": "Kollektor",
     "race": "Lebensform",
     "cargo-cap-increase": "Erhöhung der Frachtkapazität (%): ",
@@ -418,7 +418,7 @@
     "ovrc-battleship": "Übertaktung (Schlachtschiff)",
     "psy-sh-matrix": "Psionische Schutzmatrix",
     "kaelesh-disc-enh": "Kaelesh-Entdeckerverstärkung",
-    "energy-cost-to-build": "Energiekosten für den Bau"
+    "energy-cost-to-build": "Für den Bau benötigte Energie"
   },
   "flight": {
     "flight-time-format": "99 H:s:s",
