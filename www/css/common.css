@@ -65,10 +65,8 @@
 }
 
 #hint {
-    margin-top: 10px;
     padding: 2px;
-    margin: 4px;
-    margin-top: 20px;
+    margin: 20px 4px 4px 4px;
 }
 
 #hint-message {
