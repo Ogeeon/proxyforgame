@@ -307,6 +307,7 @@ class CostsCalculator {
     ];
 
     document.getElementById('max-planet-temp')._constrains = { 'min': -134, 'def': 0, 'allowNegative': true };
+    document.getElementById('planet-pos')._constrains = { 'min': 1, 'max': 16, 'def': 8, 'allowNegative': false };
 
     techInputs.forEach(selector => {
       removeAllEvents(selector, 'keyup');
@@ -325,6 +326,12 @@ class CostsCalculator {
       this._handleParamChange('max-planet-temp');
     });
 
+    removeAllEvents('#planet-pos', 'blur');
+    addEvent('#planet-pos', 'blur', (event) => {
+      validateInputNumberOnBlurNative(event);
+      this._handleParamChange('planet-pos');
+    });
+
     // Lifeform reduction inputs
     const lfInputs = [
       '#research-cost-reduction',
@@ -333,11 +340,23 @@ class CostsCalculator {
       '#lf-terraformer-rdc'
     ];
 
+    // Research cost/time reduction are capped (cost ≤ 50%, time ≤ 99%);
+    // clamp the entered value to the max on blur, like the temperature field.
+    document.getElementById('research-cost-reduction')._constrains = { min: 0, max: 50, def: 0, allowFloat: true, allowNegative: false };
+    document.getElementById('research-time-reduction')._constrains = { min: 0, max: 99, def: 0, allowFloat: true, allowNegative: false };
+
     lfInputs.forEach(selector => {
       removeAllEvents(selector, 'keyup');
       addEvent(selector, 'keyup', (event) => {
         if (typeof validateInputNumber === 'function') {
           validateInputNumber.call(event.target, event);
+        }
+        this._handleParamChange(selector.substring(1));
+      });
+      removeAllEvents(selector, 'blur');
+      addEvent(selector, 'blur', (event) => {
+        if (typeof validateInputNumberOnBlurNative === 'function') {
+          validateInputNumberOnBlurNative(event);
         }
         this._handleParamChange(selector.substring(1));
       });
