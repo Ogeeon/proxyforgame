@@ -64,7 +64,7 @@ class LfCalculator {
                     params.race === 2 ? params.runeTechLvl :
                     params.race === 3 ? params.rbtResCentreLvl :
                     params.race === 4 ? params.vortexChamberLvl : 0;
-        return params.researchCostReduction + 0.25 * lvl;
+        return Math.min(50, params.researchCostReduction + 0.25 * lvl);
     }
 
     _getAdjustedTime(techID, levelFrom, levelTo, params) {
@@ -74,7 +74,7 @@ class LfCalculator {
                     params.race === 2 ? params.runeTechLvl :
                     params.race === 3 ? params.rbtResCentreLvl :
                     params.race === 4 ? params.vortexChamberLvl : 0;
-        const effectiveTimeRdc = params.researchTimeReduction + 2 * lvl;
+        const effectiveTimeRdc = Math.min(99, params.researchTimeReduction + 2 * lvl);
         return getBuildTimeLF(techID, levelFrom, levelTo, this.techCosts,
             params.robotFactoryLevel, params.naniteFactoryLevel, params.universeSpeed,
             effectiveTimeRdc, megalithRdc);

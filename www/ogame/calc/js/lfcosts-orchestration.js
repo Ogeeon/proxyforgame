@@ -48,7 +48,7 @@ var options = {
                 case 'runeTechLvl':           return validateNumber(Number.parseFloat(value), 0, 100, 0);
                 case 'rbtResCentreLvl':       return validateNumber(Number.parseFloat(value), 0, 100, 0);
                 case 'vortexChamberLvl':      return validateNumber(Number.parseFloat(value), 0, 100, 0);
-                case 'researchCostReduction': return validateNumber(Number.parseFloat(value), 0, 25,  0);
+                case 'researchCostReduction': return validateNumber(Number.parseFloat(value), 0, 50,  0);
                 case 'researchTimeReduction': return validateNumber(Number.parseFloat(value), 0, 99,  0);
                 case 'rates':                 return validateNumber(Number.parseFloat(value), 0.1, 100, 1);
                 default: return value;
@@ -132,17 +132,22 @@ class LfCostsOrchestrator {
                 orchestrator.updateTab3();
             });
             inp.addEventListener('blur', function (e) {
-                validateInputNumberOnBlur({ currentTarget: this });
+                validateInputNumberOnBlurNative({ currentTarget: this });
                 orchestrator.updateTab3();
             });
         });
 
         // General settings
-        document.querySelectorAll('#general-settings input[type=text]').forEach(inp =>
+        document.querySelectorAll('#general-settings input[type=text]').forEach(inp => {
             inp.addEventListener('input', function (e) {
                 validateInputNumber({ currentTarget: this });
                 orchestrator.handleParamChange();
-            }));
+            });
+            inp.addEventListener('blur', function (e) {
+                validateInputNumberOnBlurNative({ currentTarget: this });
+                orchestrator.handleParamChange();
+            });
+        });
         document.querySelectorAll('#general-settings select').forEach(sel => {
             sel.addEventListener('keyup', () => orchestrator.handleParamChange());
             sel.addEventListener('change', () => orchestrator.handleParamChange());
@@ -184,7 +189,7 @@ class LfCostsOrchestrator {
         document.getElementById('lc-capacity-increase')._constrains  = { min: 0, max: 1000, def: 0, allowFloat: true,  allowNegative: false };
         document.getElementById('megalith-level')._constrains        = { min: 0, max: 100,  def: 0, allowFloat: false, allowNegative: false };
         document.getElementById('mrc-level')._constrains             = { min: 0, max: 100,  def: 0, allowFloat: false, allowNegative: false };
-        document.getElementById('research-cost-reduction')._constrains = { min: 0, max: 25, def: 0, allowFloat: true,  allowNegative: false };
+        document.getElementById('research-cost-reduction')._constrains = { min: 0, max: 50, def: 0, allowFloat: true,  allowNegative: false };
         document.getElementById('research-time-reduction')._constrains = { min: 0, max: 99, def: 0, allowFloat: true,  allowNegative: false };
         document.getElementById('exchange-rates-m')._constrains        = { min: 0.1, max: 100, def: 1,   allowFloat: true, allowNegative: false };
         document.getElementById('exchange-rates-c')._constrains        = { min: 0.1, max: 100, def: 1.5, allowFloat: true, allowNegative: false };
