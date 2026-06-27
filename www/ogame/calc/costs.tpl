@@ -275,6 +275,17 @@
               <input id="lf-terraformer-rdc" type="text" name="lf-terraformer-rdc" class="form-control form-control-sm level-input" value="0" />
               <span>%</span>
             </div>
+            <div class="d-flex align-items-center gap-2">
+              <span><?= $l['cargo-cap-increase'] ?></span>
+              <div class="d-flex align-items-center gap-1">
+                <label for="sc-capacity-increase"><?= $l['sc-short'] ?></label>
+                <input id="sc-capacity-increase" type="text" name="sc-capacity-increase" class="form-control form-control-sm level-input" value="0" />
+              </div>
+              <div class="d-flex align-items-center gap-1">
+                <label for="lc-capacity-increase"><?= $l['lc-short'] ?></label>
+                <input id="lc-capacity-increase" type="text" name="lc-capacity-increase" class="form-control form-control-sm level-input" value="0" />
+              </div>
+            </div>
           </div>
         </div>
       </div>

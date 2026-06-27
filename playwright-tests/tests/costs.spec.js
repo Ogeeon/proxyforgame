@@ -478,4 +478,46 @@ test.describe('Costs Calculator Page', () => {
         await page.locator('#exchange-rates-m').press('Enter');
         await expect(page.locator('#table-0-2 tr:nth-child(18) td:nth-child(8)')).toContainText('1.859.962');
     });
+
+    test('[research reduction fields] clamp entered value to max on blur', async ({ page }) => {
+        await page.locator('#param-lifeforms-tab').click();
+
+        // Cost reduction is capped at 50%
+        await page.locator('#research-cost-reduction').fill('150');
+        await page.locator('#research-cost-reduction').blur();
+        await expect(page.locator('#research-cost-reduction')).toHaveValue('50');
+
+        // Time reduction is capped at 99%
+        await page.locator('#research-time-reduction').fill('150');
+        await page.locator('#research-time-reduction').blur();
+        await expect(page.locator('#research-time-reduction')).toHaveValue('99');
+
+        // Values within range are left untouched
+        await page.locator('#research-cost-reduction').fill('30');
+        await page.locator('#research-cost-reduction').blur();
+        await expect(page.locator('#research-cost-reduction')).toHaveValue('30');
+
+        await page.locator('#research-time-reduction').fill('80');
+        await page.locator('#research-time-reduction').blur();
+        await expect(page.locator('#research-time-reduction')).toHaveValue('80');
+    });
+
+    test('[one item - multiple levels] planet position clamps to valid range on blur', async ({ page }) => {
+        await page.getByRole('tab', { name: 'One item - multiple levels' }).click();
+
+        // Position is capped at 16
+        await page.locator('#planet-pos').fill('20');
+        await page.locator('#planet-pos').blur();
+        await expect(page.locator('#planet-pos')).toHaveValue('16');
+
+        // Position below 1 is raised to 1
+        await page.locator('#planet-pos').fill('0');
+        await page.locator('#planet-pos').blur();
+        await expect(page.locator('#planet-pos')).toHaveValue('1');
+
+        // Values within range are left untouched
+        await page.locator('#planet-pos').fill('10');
+        await page.locator('#planet-pos').blur();
+        await expect(page.locator('#planet-pos')).toHaveValue('10');
+    });
 });

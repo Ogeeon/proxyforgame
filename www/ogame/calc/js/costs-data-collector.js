@@ -69,6 +69,10 @@ class DataCollector {
     params.mineralResCntrLvl = this._getInputNumber('#mineral-res-cntr-lvl');
     params.lfTerraformerRdc = this._getInputNumber('#lf-terraformer-rdc');
 
+    // Cargo capacity increase
+    params.scCapacityIncrease = this._getInputNumber('#sc-capacity-increase');
+    params.lcCapacityIncrease = this._getInputNumber('#lc-capacity-increase');
+
     // Exchange rates
     params.rates = [
       this._getInputNumber('#exchange-rates-m') || 1,
@@ -373,6 +377,10 @@ class DataCollector {
       // LF Terraformer reduction affects planet building tables
       'lf-terraformer-rdc': ['table-0-2', 'table-1-2'],
 
+      // Cargo capacity increase affects the transports-needed row under every table
+      'sc-capacity-increase': ['*'],
+      'lc-capacity-increase': ['*'],
+
       // Exchange rates affect MSU in all tables
       'exchange-rates': ['*']
     };
@@ -408,6 +416,7 @@ class DataCollector {
       'shipyard-level', 'ion-tech-level', 'hyper-tech-level',
       'class-0', 'class-1', 'class-2', 'full-numbers',
       'research-cost-reduction', 'research-time-reduction', 'mineral-res-cntr-lvl', 'lf-terraformer-rdc',
+      'sc-capacity-increase', 'lc-capacity-increase',
       'exchange-rates'
     ];
 

@@ -337,13 +337,17 @@ class CostsCalculator {
       '#research-cost-reduction',
       '#research-time-reduction',
       '#mineral-res-cntr-lvl',
-      '#lf-terraformer-rdc'
+      '#lf-terraformer-rdc',
+      '#sc-capacity-increase',
+      '#lc-capacity-increase'
     ];
 
     // Research cost/time reduction are capped (cost ≤ 50%, time ≤ 99%);
     // clamp the entered value to the max on blur, like the temperature field.
     document.getElementById('research-cost-reduction')._constrains = { min: 0, max: 50, def: 0, allowFloat: true, allowNegative: false };
     document.getElementById('research-time-reduction')._constrains = { min: 0, max: 99, def: 0, allowFloat: true, allowNegative: false };
+    document.getElementById('sc-capacity-increase')._constrains = { min: 0, max: 1000, def: 0, allowFloat: true, allowNegative: false };
+    document.getElementById('lc-capacity-increase')._constrains = { min: 0, max: 1000, def: 0, allowFloat: true, allowNegative: false };
 
     lfInputs.forEach(selector => {
       removeAllEvents(selector, 'keyup');
@@ -641,6 +645,8 @@ class CostsCalculator {
       lfResTimeRdc: this.currentParams.lfResTimeRdc,
       mineralResCntrLvl: this.currentParams.mineralResCntrLvl,
       lfTerraformerRdc: this.currentParams.lfTerraformerRdc,
+      scCapacityIncrease: this.currentParams.scCapacityIncrease,
+      lcCapacityIncrease: this.currentParams.lcCapacityIncrease,
       rates: this.currentParams.rates
     };
 
@@ -735,6 +741,8 @@ class CostsCalculator {
       lfResTimeRdc: '#research-time-reduction',
       mineralResCntrLvl: '#mineral-res-cntr-lvl',
       lfTerraformerRdc: '#lf-terraformer-rdc',
+      scCapacityIncrease: '#sc-capacity-increase',
+      lcCapacityIncrease: '#lc-capacity-increase',
       booster: '#booster',
       irnLevel: '#irn-level',
     };
@@ -867,6 +875,10 @@ class CostsCalculator {
     setVal('#exchange-rates-m', 1);
     setVal('#exchange-rates-c', 1.5);
     setVal('#exchange-rates-d', 3);
+
+    // Cargo capacity increase
+    setVal('#sc-capacity-increase', 0);
+    setVal('#lc-capacity-increase', 0);
 
     // IRN
     setVal('#irn-level', 0);

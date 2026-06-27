@@ -56,6 +56,10 @@ class GlobalParams {
   mineralResCntrLvl = 0; // Mineral Research Centre level (Rock'tal)
   lfTerraformerRdc = 0;  // LF Terraformer reduction, %
 
+  // Cargo capacity increase (e.g. from lifeform bonuses), %
+  scCapacityIncrease = 0; // Small Cargo capacity increase, %
+  lcCapacityIncrease = 0; // Large Cargo capacity increase, %
+
   // Exchange rates (M:C:D weights, normalized to metal=1)
   rates = [1, 1.5, 3];
 
@@ -131,23 +135,29 @@ class GlobalParams {
   }
 
   /**
-   * Get small cargo ship capacity
+   * Get small cargo ship capacity.
+   * Hyperspace tech, Collector class and the cargo capacity increase are all
+   * additive to the base capacity (matches the LFCosts calculator).
    */
   get smallCargoCapacity() {
     const baseCapacity = 5000;
-    const hyperBonus = 1 + 0.05 * this.hyperTechLevel;
-    const classBonus = this.playerClass === 0 ? 1.25 : 1; // Collector +25%
-    return baseCapacity * hyperBonus * classBonus;
+    let cap = baseCapacity * (1 + 0.05 * this.hyperTechLevel);
+    if (this.playerClass === 0) cap += baseCapacity * 0.25; // Collector +25%
+    cap += Math.floor(baseCapacity * 0.01 * this.scCapacityIncrease);
+    return cap;
   }
 
   /**
-   * Get large cargo ship capacity
+   * Get large cargo ship capacity.
+   * Hyperspace tech, Collector class and the cargo capacity increase are all
+   * additive to the base capacity (matches the LFCosts calculator).
    */
   get largeCargoCapacity() {
     const baseCapacity = 25000;
-    const hyperBonus = 1 + 0.05 * this.hyperTechLevel;
-    const classBonus = this.playerClass === 0 ? 1.25 : 1; // Collector +25%
-    return baseCapacity * hyperBonus * classBonus;
+    let cap = baseCapacity * (1 + 0.05 * this.hyperTechLevel);
+    if (this.playerClass === 0) cap += baseCapacity * 0.25; // Collector +25%
+    cap += Math.floor(baseCapacity * 0.01 * this.lcCapacityIncrease);
+    return cap;
   }
 
   /**
