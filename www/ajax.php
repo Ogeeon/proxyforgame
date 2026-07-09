@@ -79,15 +79,21 @@ function GetVar($var, $type)
   }
   
   function socketmail($to, $subject, $message) {
+    $smtpUser = getenv('SMTP_USER');
+    $smtpPass = getenv('SMTP_PASS');
+    if (!$smtpUser || !$smtpPass) {
+      error_log("SMTP_USER/SMTP_PASS not configured in .env");
+      return false;
+    }
     $server = "ssl://smtp.gmail.com";
     $socket = fsockopen($server, 465, $errno, $errstr, 30);
     if (!$socket)
       die("99\Server $server. Connection failed: $errno, $errstr");
     fputs($socket, "HELO proxyforgame.com\r\n"); fgets($socket, 256);
     fputs($socket, 'AUTH LOGIN'."\r\n"); fgets($socket, 256);
-    fputs($socket, base64_encode("pfgwebsitemailer@gmail.com")."\r\n"); fgets($socket, 256);
-    fputs($socket, base64_encode("khndzgjtwmlzobtd")."\r\n"); fgets($socket, 256);
-    fputs($socket, "MAIL FROM: <pfgwebsitemailer@gmail.com>\r\n"); fgets($socket, 256);
+    fputs($socket, base64_encode($smtpUser)."\r\n"); fgets($socket, 256);
+    fputs($socket, base64_encode($smtpPass)."\r\n"); fgets($socket, 256);
+    fputs($socket, "MAIL FROM: <$smtpUser>\r\n"); fgets($socket, 256);
     fputs($socket, "RCPT TO: <$to>\r\n"); fgets($socket, 256);
     fputs($socket, "DATA\r\n"); fgets($socket, 256);
   
