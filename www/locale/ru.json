@@ -179,7 +179,10 @@
     "research-time-reduction": "Уменьшение времени исследования",
     "lifeforms": "Формы жизни",
     "param-tab-common": "Общие",
-    "exchange-rates": "Курсы обмена"
+    "exchange-rates": "Курсы обмена",
+    "cookie-consent-message": "Этот сайт использует cookie-файлы для персонализации контента и сохранения значений, которые вы вводите в калькуляторах.",
+    "cookie-consent-accept": "Понятно",
+    "cookie-consent-policy": "Политика конфиденциальности"
   },
   "index": {
     "title": "ProxyForGame - утилиты для браузерной онлайн-игры OGame",

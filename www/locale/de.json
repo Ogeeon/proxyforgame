@@ -176,7 +176,10 @@
     "research-time-reduction": "Reduzierung der Forschungszeit",
     "lifeforms": "Lebensformen",
     "param-tab-common": "Allgemein",
-    "exchange-rates": "Wechselkurse"
+    "exchange-rates": "Wechselkurse",
+    "cookie-consent-message": "Diese Website verwendet Cookies, um Inhalte zu personalisieren und die von Ihnen in den Rechnern eingegebenen Werte zu speichern.",
+    "cookie-consent-accept": "Verstanden",
+    "cookie-consent-policy": "Datenschutzrichtlinie"
   },
   "index": {
     "title": "ProxyForGame - Hilfsprogramme für das Online-Browsergame OGame",

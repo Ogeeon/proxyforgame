@@ -177,7 +177,10 @@
     "research-time-reduction": "Reducción del tiempo de investigación",
     "lifeforms": "Formas de vida",
     "param-tab-common": "General",
-    "exchange-rates": "Tipos de cambio"
+    "exchange-rates": "Tipos de cambio",
+    "cookie-consent-message": "Este sitio utiliza cookies para personalizar el contenido y guardar los valores que introduces en sus calculadoras.",
+    "cookie-consent-accept": "Entendido",
+    "cookie-consent-policy": "Política de privacidad"
   },
   "index": {
     "title": "ProxyForGame - herramientas para los juegos de navegador en línea OGame",

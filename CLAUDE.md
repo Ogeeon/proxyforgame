@@ -76,6 +76,9 @@ Calculators in `www/ogame/calc/` consist of three files:
 
 ## Project Conventions
 
+### Code Comments
+Write all comments in code files in English only.
+
 ### Cookie Storage
 Calculator options persist via cookies (e.g., `options_expeditions`). Note that `options.prm.fleet` uses `~` as a comma placeholder for encoded values.
 

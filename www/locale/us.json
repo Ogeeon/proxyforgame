@@ -178,7 +178,10 @@
     "research-time-reduction": "Research time reduction",
     "lifeforms": "LifeForms",
     "param-tab-common": "Common",
-    "exchange-rates": "Exchange rates"
+    "exchange-rates": "Exchange rates",
+    "cookie-consent-message": "This site uses cookies to personalize content and to store values you enter in its calculators.",
+    "cookie-consent-accept": "Got it",
+    "cookie-consent-policy": "Privacy Policy"
   },
   "index": {
     "title": "ProxyForGame - tools for online browser game OGame",

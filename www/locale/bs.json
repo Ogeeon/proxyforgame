@@ -174,7 +174,10 @@
     "research-time-reduction": "Research time reduction",
     "lifeforms": "Oblici života",
     "param-tab-common": "Opšte",
-    "exchange-rates": "Omjer trgovine"
+    "exchange-rates": "Omjer trgovine",
+    "cookie-consent-message": "Ova stranica koristi kolačiće za personalizaciju sadržaja i čuvanje vrijednosti koje unesete u kalkulatorima.",
+    "cookie-consent-accept": "Razumijem",
+    "cookie-consent-policy": "Politika privatnosti"
   },
   "index": {
     "title": "ProxyForGame - alati za online igru Ogame",

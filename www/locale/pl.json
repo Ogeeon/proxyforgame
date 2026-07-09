@@ -174,7 +174,10 @@
     "research-time-reduction": "Skrócenie czasu badań",
     "lifeforms": "Formy życia",
     "param-tab-common": "Ogólne",
-    "exchange-rates": "Kursy wymiany walut"
+    "exchange-rates": "Kursy wymiany walut",
+    "cookie-consent-message": "Ta strona używa plików cookie do personalizacji treści oraz zapisywania wartości wprowadzanych w kalkulatorach.",
+    "cookie-consent-accept": "Rozumiem",
+    "cookie-consent-policy": "Polityka prywatności"
   },
   "index": {
     "title": "Narzedzia do gier przegladarkowych OGame",

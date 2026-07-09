@@ -170,7 +170,10 @@
     "research-time-reduction": "Verkorting onderzoekstijd",
     "lifeforms": "Levensvormen",
     "param-tab-common": "Algemeen",
-    "exchange-rates": "Wisselkoersen"
+    "exchange-rates": "Wisselkoersen",
+    "cookie-consent-message": "Deze site gebruikt cookies om inhoud te personaliseren en de waarden die u in de rekenmachines invoert op te slaan.",
+    "cookie-consent-accept": "Begrepen",
+    "cookie-consent-policy": "Privacybeleid"
   },
   "index": {
     "title": "ProxyForGame - instrumenten het browser spel OGame",

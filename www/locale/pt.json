@@ -174,7 +174,10 @@
     "research-time-reduction": "Redução do tempo de investigação",
     "lifeforms": "Formas de vida",
     "param-tab-common": "Geral",
-    "exchange-rates": "Taxas de câmbio"
+    "exchange-rates": "Taxas de câmbio",
+    "cookie-consent-message": "Este site usa cookies para personalizar o conteúdo e armazenar os valores que você insere nas calculadoras.",
+    "cookie-consent-accept": "Entendi",
+    "cookie-consent-policy": "Política de Privacidade"
   },
   "index": {
     "title": "ProxyForGame - Calculadoras para OGame",

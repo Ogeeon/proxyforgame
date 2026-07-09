@@ -175,7 +175,10 @@
     "research-time-reduction": "Skrátenie času výskumu",
     "lifeforms": "Formy života",
     "param-tab-common": "Všeobecné",
-    "exchange-rates": "Výmenné kurzy"
+    "exchange-rates": "Výmenné kurzy",
+    "cookie-consent-message": "Táto stránka používa cookies na prispôsobenie obsahu a ukladanie hodnôt, ktoré zadáte do kalkulačiek.",
+    "cookie-consent-accept": "Rozumiem",
+    "cookie-consent-policy": "Zásady ochrany osobných údajov"
   },
   "index": {
     "title": "ProxyForGame - software pre online hry v prehliadači OGame",

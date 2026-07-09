@@ -171,7 +171,10 @@
     "research-time-reduction": "Araştırma süresinin kısaltılması",
     "lifeforms": "Yaşam Formları",
     "param-tab-common": "Genel",
-    "exchange-rates": "Ticaret oranları"
+    "exchange-rates": "Ticaret oranları",
+    "cookie-consent-message": "Bu site, içeriği kişiselleştirmek ve hesap makinelerine girdiğiniz değerleri saklamak için çerezler kullanır.",
+    "cookie-consent-accept": "Anladım",
+    "cookie-consent-policy": "Gizlilik Politikası"
   },
   "index": {
     "title": "ProxyForGame - OGame için hesaplamalar",
