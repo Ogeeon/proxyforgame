@@ -159,20 +159,14 @@
           <label><?= $l['class'] ?>:</label>
           <input id="player-class-0" type="radio" name="player-class" value="0" class="form-check-input"/>
           <label for="player-class-0"><?= $l['class-collector'] ?></label>
-        </div>
-        <div class="d-flex align-items-center gap-1">
           <input id="player-class-1" type="radio" name="player-class" value="1" class="form-check-input"/>
           <label for="player-class-1"><?= $l['class-general'] ?></label>
-        </div>
-        <div class="d-flex align-items-center gap-1">
           <input id="player-class-2" type="radio" name="player-class" value="2" class="form-check-input"/>
           <label for="player-class-2"><?= $l['class-discoverer'] ?></label>
         </div>
         <div class="d-flex align-items-center gap-1">
           <label for="sc-capacity-increase"><?= $l['cargo-cap-increase'] ?><?= $l['sc-short'] ?></label>
           <input id="sc-capacity-increase" type="text" name="sc-capacity-increase" class="form-control form-control-sm level-input" value="0"/>
-        </div>
-        <div class="d-flex align-items-center gap-1">
           <label for="lc-capacity-increase"><?= $l['lc-short'] ?></label>
           <input id="lc-capacity-increase" type="text" name="lc-capacity-increase" class="form-control form-control-sm level-input" value="0"/>
         </div>
