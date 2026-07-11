@@ -4,8 +4,20 @@
  */
 
 #queue {
+  /* max-content (not min-content): queue's src/dst panels are laid out
+     side-by-side via flex-wrap, and min-content would collapse a wrapping
+     flex container to its widest single item, forcing panels to stack. */
+  width: max-content;
+  max-width: 100%;
+  margin: 0 auto;
   position: relative;
   overflow-x: auto;
+}
+
+/* Allow tables to dictate the width of the entire container hierarchy */
+#queue .tab-content,
+#queue .tab-pane {
+  min-width: fit-content;
 }
 
 .main-header {
@@ -147,6 +159,11 @@
 
 /* Responsive */
 @media (max-width: 992px) {
+  #queue {
+    max-width: 100%;
+    padding: 0 10px;
+  }
+
   .lined td,
   .lined th {
     padding: 2px 4px;
