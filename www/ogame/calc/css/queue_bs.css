@@ -20,6 +20,17 @@
   min-width: fit-content;
 }
 
+/* The settings panel's flex-wrap row has a large *unwrapped* intrinsic width
+   (sum of all its items), which would otherwise inflate #queue's max-content
+   size beyond what the tables need. width:0 removes its contribution to that
+   calculation; min-width:100% then stretches it back to the resolved,
+   table-driven width so its own items still wrap normally. */
+#general-settings-panel {
+  width: 0;
+  min-width: 100%;
+  box-sizing: border-box;
+}
+
 .main-header {
   width: auto;
   font-size: 0.95rem;
