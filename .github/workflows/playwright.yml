@@ -36,7 +36,7 @@ jobs:
       # Checkout repository
       # -------------------------------------------------------------
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       # -------------------------------------------------------------
       # Install PHP (with Apache-like extensions)
@@ -106,9 +106,9 @@ jobs:
       # Set up Node + Playwright
       # -------------------------------------------------------------
       - name: Set up Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
-          node-version: 20
+          node-version: 24
 
       - name: Install dependencies
         working-directory: playwright-tests
@@ -134,7 +134,7 @@ jobs:
       # -------------------------------------------------------------
       - name: Upload Playwright HTML Report
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: playwright-report
           path: playwright-tests/playwright-report/
