@@ -16,7 +16,11 @@ class QueueDataCollector {
     const hyperTechLevel = Number.parseFloat(getVal('#hyper-tech-level')) || 0;
     const totFldPln = Number.parseInt(getVal('#total-fields-2'), 10) || 0;
     const totFldMn = Number.parseInt(getVal('#total-fields-3'), 10) || 0;
-    return { universeSpeed, ionTechLevel, hyperTechLevel, totFldPln, totFldMn };
+    const checkedClass = document.querySelector('input[name="player-class"]:checked');
+    const playerClass = checkedClass ? Number.parseInt(checkedClass.value, 10) : 0;
+    const scCapacityIncrease = Number.parseFloat(getVal('#sc-capacity-increase')) || 0;
+    const lcCapacityIncrease = Number.parseFloat(getVal('#lc-capacity-increase')) || 0;
+    return { universeSpeed, ionTechLevel, hyperTechLevel, totFldPln, totFldMn, playerClass, scCapacityIncrease, lcCapacityIncrease };
   }
 
   /**

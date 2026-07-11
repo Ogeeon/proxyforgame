@@ -57,6 +57,10 @@ class QueueCalculatorApp {
     setVal('#hyper-tech-level', options.prm.hyperTechLevel);
     setVal('#total-fields-2', options.prm.totFldPln);
     setVal('#total-fields-3', options.prm.totFldMn);
+    const classRadio = $(`#player-class-${options.prm.playerClass}`);
+    if (classRadio) classRadio.checked = true;
+    setVal('#sc-capacity-increase', options.prm.scCapacityIncrease);
+    setVal('#lc-capacity-increase', options.prm.lcCapacityIncrease);
     if (options.prm.sDTP) {
       setVal('#start-2', getDateStr(options.prm.sDTP, options.datetimeFormat));
     }
@@ -147,13 +151,18 @@ class QueueCalculatorApp {
     addEvent('#reset', 'click', () => this._resetParams());
 
     // Inputs that affect all queues
-    ['#universe-speed', '#ion-tech-level', '#hyper-tech-level'].forEach((sel) => {
+    ['#universe-speed', '#ion-tech-level', '#hyper-tech-level', '#sc-capacity-increase', '#lc-capacity-increase'].forEach((sel) => {
       const el = $(sel);
       if (!el) return;
       this._attachConstrains(el);
       addEvent(el, 'change', () => this.refreshBoth());
       addEvent(el, 'keyup', (e) => { validateInputNumber(e); this.refreshBoth(); });
       addEvent(el, 'blur', validateInputNumberOnBlurNative);
+    });
+
+    // Player class radios
+    document.querySelectorAll('input[name="player-class"]').forEach((radio) => {
+      radio.addEventListener('change', () => this.refreshBoth());
     });
 
     // Per-tab input recompute
@@ -217,6 +226,9 @@ class QueueCalculatorApp {
     options.prm.hyperTechLevel = g.hyperTechLevel;
     options.prm.totFldPln = g.totFldPln;
     options.prm.totFldMn = g.totFldMn;
+    options.prm.playerClass = g.playerClass;
+    options.prm.scCapacityIncrease = g.scCapacityIncrease;
+    options.prm.lcCapacityIncrease = g.lcCapacityIncrease;
     return g;
   }
 
@@ -320,7 +332,7 @@ class QueueCalculatorApp {
     state.nanites = nanites;
 
     QueueRenderer.updateTotals(tabNum, state.totals, totalFlds, fontColor);
-    QueueRenderer.updateTransports(tabNum, state.totals, g.hyperTechLevel);
+    QueueRenderer.updateTransports(tabNum, state.totals, g.hyperTechLevel, g.playerClass, g.scCapacityIncrease, g.lcCapacityIncrease);
     this._updateCompletion(tabNum);
     options.save();
   }
@@ -394,6 +406,9 @@ class QueueCalculatorApp {
     options.prm.universeSpeed = 1;
     options.prm.ionTechLevel = 0;
     options.prm.hyperTechLevel = 0;
+    options.prm.playerClass = 0;
+    options.prm.scCapacityIncrease = 0;
+    options.prm.lcCapacityIncrease = 0;
     options.prm.sDTP = 0;
     options.prm.sDTM = 0;
     options.prm.qp = [];
@@ -402,6 +417,10 @@ class QueueCalculatorApp {
     setVal('#universe-speed', 1);
     setVal('#ion-tech-level', 0);
     setVal('#hyper-tech-level', 0);
+    const classRadio0 = $('#player-class-0');
+    if (classRadio0) classRadio0.checked = true;
+    setVal('#sc-capacity-increase', 0);
+    setVal('#lc-capacity-increase', 0);
     setVal('#total-fields-2', options.defPlfFlds);
     setVal('#total-fields-3', options.defMnFlds);
     setVal('#start-2', '');

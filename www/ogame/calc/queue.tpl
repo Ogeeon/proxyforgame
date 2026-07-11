@@ -47,6 +47,9 @@
         universeSpeed: 1,
         ionTechLevel: 0,
         hyperTechLevel: 0,
+        playerClass: 0,
+        scCapacityIncrease: 0,
+        lcCapacityIncrease: 0,
         totFldPln: 163,
         totFldMn: 1,
         sDTP: 0,
@@ -61,6 +64,9 @@
             case 'universeSpeed':  return validateNumber(Number.parseFloat(value), 0, 10, 1);
             case 'ionTechLevel':   return validateNumber(Number.parseFloat(value), 0, 50, 0);
             case 'hyperTechLevel': return validateNumber(Number.parseFloat(value), 0, 50, 0);
+            case 'playerClass':    return validateNumber(Number.parseInt(value), 0, 2, 0);
+            case 'scCapacityIncrease': return validateNumber(Number.parseInt(value), 0, Infinity, 0);
+            case 'lcCapacityIncrease': return validateNumber(Number.parseInt(value), 0, Infinity, 0);
             case 'totFldPln':      return validateNumber(Number.parseFloat(value), 1, Infinity, 163);
             case 'totFldMn':       return validateNumber(Number.parseFloat(value), 1, Infinity, 1);
             case 'sDTP':           return validateNumber(Number.parseFloat(value), 0, Infinity, 0);
@@ -148,6 +154,29 @@
         <div class="d-flex align-items-center gap-1">
           <label for="hyper-tech-level"><?= $l['hyper-tech'] ?></label>
           <input id="hyper-tech-level" type="text" name="hyper-tech-level" class="form-control form-control-sm level-input" value="0" />
+        </div>
+        <div class="d-flex align-items-center gap-1">
+          <label><?= $l['class'] ?>:</label>
+        </div>
+        <div class="d-flex align-items-center gap-1">
+          <input id="player-class-0" type="radio" name="player-class" value="0" class="form-check-input"/>
+          <label for="player-class-0"><?= $l['class-collector'] ?></label>
+        </div>
+        <div class="d-flex align-items-center gap-1">
+          <input id="player-class-1" type="radio" name="player-class" value="1" class="form-check-input"/>
+          <label for="player-class-1"><?= $l['class-general'] ?></label>
+        </div>
+        <div class="d-flex align-items-center gap-1">
+          <input id="player-class-2" type="radio" name="player-class" value="2" class="form-check-input"/>
+          <label for="player-class-2"><?= $l['class-discoverer'] ?></label>
+        </div>
+        <div class="d-flex align-items-center gap-1">
+          <label for="sc-capacity-increase"><?= $l['cargo-cap-increase'] ?><?= $l['sc-short'] ?></label>
+          <input id="sc-capacity-increase" type="text" name="sc-capacity-increase" class="form-control form-control-sm level-input" value="0"/>
+        </div>
+        <div class="d-flex align-items-center gap-1">
+          <label for="lc-capacity-increase"><?= $l['lc-short'] ?></label>
+          <input id="lc-capacity-increase" type="text" name="lc-capacity-increase" class="form-control form-control-sm level-input" value="0"/>
         </div>
       </div>
     </div>
