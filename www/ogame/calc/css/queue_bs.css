@@ -23,11 +23,15 @@
 /* The settings panel's flex-wrap row has a large *unwrapped* intrinsic width
    (sum of all its items), which would otherwise inflate #queue's max-content
    size beyond what the tables need. width:0 removes its contribution to that
-   calculation; min-width:100% then stretches it back to the resolved,
-   table-driven width so its own items still wrap normally. */
+   calculation; min-width then stretches it back to the resolved, table-driven
+   width so its own items still wrap normally. The panel also carries the
+   Bootstrap m-1 utility (0.25rem margin per side); since margin sits outside
+   the width, min-width:100% would add that 0.5rem back on top of the parent's
+   width and overflow it — subtract it here so the panel's outer box (content
+   + margin) exactly matches the parent's width. */
 #general-settings-panel {
   width: 0;
-  min-width: 100%;
+  min-width: calc(100% - 0.5rem);
   box-sizing: border-box;
 }
 
