@@ -11,7 +11,7 @@ function showReportWindow(text) {
 function getText(e) {
 	if (!e) e = window.event;
 	var mis;
-	if ((e.ctrlKey) && ((e.keyCode==10)||(e.keyCode==13))) { 
+	if ((e.ctrlKey) && ((e.key === 'Enter')||(e.keyCode==10)||(e.keyCode==13))) {
 		if(navigator.appName == 'Microsoft Internet Explorer') {
 			if (document.selection.createRange()) {
 				var range = document.selection.createRange();
@@ -290,7 +290,7 @@ $(function(){
 	buttons[0].children[0].id = "changelog-btn-ok";
 });
 
-document.onkeypress = getText;
+document.onkeydown = getText;
 
 let lastChange = { value: 0, validate: function(key, val) { return val; } };
 loadFromCookie('lastChange', lastChange);

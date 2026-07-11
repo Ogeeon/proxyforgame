@@ -14,12 +14,12 @@ function showReportWindow(text) {
 
 function getText(e) {
     if (!e) return;
-    if ((e.ctrlKey) && ((e.keyCode == 10) || (e.keyCode == 13))) { 
+    if (e.ctrlKey && (e.key === 'Enter' || e.keyCode === 13 || e.keyCode === 10)) {
         let mis = getSelectedText();
         if (mis) {
             showReportWindow(mis);
         }
-    } 
+    }
 }
 
 function getSelectedText() {
@@ -330,7 +330,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
-document.addEventListener('keypress', getText);
+document.addEventListener('keydown', getText);
 
 let lastChange = { value: '42', validate: function(key, val) { return val; } };
 loadFromCookie('lastChange', lastChange);
