@@ -157,8 +157,6 @@
         </div>
         <div class="d-flex align-items-center gap-1">
           <label><?= $l['class'] ?>:</label>
-        </div>
-        <div class="d-flex align-items-center gap-1">
           <input id="player-class-0" type="radio" name="player-class" value="0" class="form-check-input"/>
           <label for="player-class-0"><?= $l['class-collector'] ?></label>
         </div>
