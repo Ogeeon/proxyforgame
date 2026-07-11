@@ -218,11 +218,11 @@
                   <td align="center"><input id="startlvl-<?=$i?>-<?=$tech?>" type="text" class="form-control form-control-sm level-input" value="0"/></td>
                   <td align="center" style="white-space: nowrap;">
                     <span id="nextlvl-<?=$i?>-<?=$tech?>">0</span>
-                    <button type="button" data-tech="<?=$tech?>" class="btn btn-outline-secondary btn-sm button-build" title="<?= $l['build'] ?>">
+                    <button id="build-<?=$tech?>" type="button" data-tech="<?=$tech?>" class="btn btn-outline-secondary btn-sm button-build" title="<?= $l['build'] ?>">
                       <i class="bi bi-arrow-right"></i>
                     </button>
                     <?php if (!in_array($tech, [33, 36, 41])): ?>
-                    <button type="button" data-tech="<?=$tech?>" class="btn btn-outline-secondary btn-sm button-destroy" title="<?= $l['destroy'] ?>">
+                    <button id="destroy-<?=$tech?>" type="button" data-tech="<?=$tech?>" class="btn btn-outline-secondary btn-sm button-destroy" title="<?= $l['destroy'] ?>">
                       <i class="bi bi-arrow-left"></i>
                     </button>
                     <?php endif; ?>

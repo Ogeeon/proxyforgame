@@ -219,8 +219,10 @@ test.describe('Construction Queue Calculator Page', () => {
     test('[ion tech effect] demolition resources calculated correctly', async ({ page }) => {
         // First, build metal mine from level 0 to 1
         await addToQueue(page, 1, 0);
-        // Then build it again from level 1 to 2
-        await addToQueue(page, 1, 1);
+        // Then build it again from level 1 to 2 (startLevel stays 0: the queue itself
+        // tracks progression via nextLevels, passing startLevel>0 here would instead
+        // overwrite the start-level input and retroactively reinterpret the first entry)
+        await addToQueue(page, 1, 0);
 
         // Now demolish from level 2 to level 1
         await page.locator('#table-src-2 #destroy-1').click({ force: true });
@@ -231,10 +233,10 @@ test.describe('Construction Queue Calculator Page', () => {
 
         // In OGame, demolition costs resources (you must pay to demolish)
         // With ion tech 0, demolishing a level 2 metal mine costs additional resources
-        // Total includes: build 0→1 (60m/15c), build 1→2 (90m/23c), demolish 2→1 (210m/50c)
-        expect(totals.level).toBe('2/163');
-        expect(totals.metal).toBe('360');
-        expect(totals.crystal).toBe('88');
+        // Total includes: build 0→1 (60m/15c), build 1→2 (90m/22c), demolish 2→1 (60m/15c)
+        expect(totals.level).toBe('1/163');
+        expect(totals.metal).toBe('210');
+        expect(totals.crystal).toBe('52');
     });
 
     test('[moon queue / lunar base + robotics factories] handles field limits correctly', async ({ page }) => {

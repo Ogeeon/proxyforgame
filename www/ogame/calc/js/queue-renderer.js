@@ -81,9 +81,9 @@ class QueueRenderer {
       `<td align="center">${colorOpen}${QueueRenderer.formatTime(costs[3])}${colorClose}</td>` +
       `<td>` +
         `<div class="btn-group btn-group-sm" role="group">` +
-          `<button type="button" class="btn btn-outline-secondary queue-row-up" data-tab="${tabNum}" data-row="${rowIndex}" title="${options.moveUpTitle || ''}"><i class="bi bi-arrow-up"></i></button>` +
-          `<button type="button" class="btn btn-outline-secondary queue-row-down" data-tab="${tabNum}" data-row="${rowIndex}" title="${options.moveDownTitle || ''}"><i class="bi bi-arrow-down"></i></button>` +
-          `<button type="button" class="btn btn-outline-danger queue-row-del" data-tab="${tabNum}" data-row="${rowIndex}" title="${options.removeRowTitle || ''}"><i class="bi bi-x"></i></button>` +
+          `<button id="control-${tabNum}-${rowIndex}-a" type="button" class="btn btn-outline-secondary queue-row-up" data-tab="${tabNum}" data-row="${rowIndex}" title="${options.moveUpTitle || ''}"><i class="bi bi-arrow-up"></i></button>` +
+          `<button id="control-${tabNum}-${rowIndex}-b" type="button" class="btn btn-outline-secondary queue-row-down" data-tab="${tabNum}" data-row="${rowIndex}" title="${options.moveDownTitle || ''}"><i class="bi bi-arrow-down"></i></button>` +
+          `<button id="control-${tabNum}-${rowIndex}-c" type="button" class="btn btn-outline-danger queue-row-del" data-tab="${tabNum}" data-row="${rowIndex}" title="${options.removeRowTitle || ''}"><i class="bi bi-x"></i></button>` +
         `</div>` +
       `</td>`;
     return tr;
