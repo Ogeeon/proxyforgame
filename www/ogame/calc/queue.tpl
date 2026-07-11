@@ -206,11 +206,13 @@
 
           <!-- Build queue (dst) -->
           <div>
-            <div id="dst-panel-<?=$i?>" class="border rounded p-2 position-relative">
-              <button type="button" id="clear-<?=$i?>" class="btn btn-outline-danger btn-sm position-absolute top-0 end-0 m-1" title="<?= $l['clear'] ?>">
-                <i class="bi bi-trash"></i>
-              </button>
-              <p class="border rounded subheader bg-primary-subtle mb-2"><b><?= $l['queue'] ?></b></p>
+            <div id="dst-panel-<?=$i?>" class="border rounded p-2">
+              <div class="subheader-row d-flex align-items-center gap-1 mb-2">
+                <p class="border rounded subheader bg-primary-subtle mb-0 flex-grow-1"><b><?= $l['queue'] ?></b></p>
+                <button type="button" id="clear-<?=$i?>" class="btn btn-outline-danger btn-sm" title="<?= $l['clear'] ?>">
+                  <i class="bi bi-trash"></i>
+                </button>
+              </div>
               <div id="times-<?=$i?>" class="d-flex flex-wrap align-items-center gap-2 mb-2">
                 <label for="start-<?=$i?>"><?= $l['start-time'] ?></label>
                 <input type="text" id="start-<?=$i?>" class="form-control form-control-sm startdate-input" title="<?= $l['datetime-format-hint'] ?>" placeholder="<?= $l['datetime-format-hint'] ?>"/>

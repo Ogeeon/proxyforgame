@@ -35,6 +35,13 @@
   padding: 2px 6px;
 }
 
+/* Header row pairing a subheader with a button (e.g. the queue clear button):
+   the subheader's own margin-bottom !important would otherwise inflate the
+   flex row's height and throw off align-items: center. */
+.subheader-row .subheader {
+  margin-bottom: 0 !important;
+}
+
 #reset {
   cursor: pointer;
   z-index: 10;
