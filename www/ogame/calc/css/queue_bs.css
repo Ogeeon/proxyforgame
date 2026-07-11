@@ -1,0 +1,158 @@
+/*
+ * Queue Calculator - Bootstrap 5 Styles
+ * Migrated from jQuery UI to Bootstrap 5.3.8
+ */
+
+#queue {
+  position: relative;
+  overflow-x: auto;
+}
+
+.main-header {
+  width: auto;
+  font-size: 0.95rem;
+  font-weight: 600;
+  padding: 4px;
+  margin: 2px;
+}
+
+.subheader {
+  text-align: center;
+  font-weight: 600;
+  margin: 0 0 6px 0 !important;
+  padding: 2px 6px;
+}
+
+#reset {
+  cursor: pointer;
+  z-index: 10;
+  width: 30px;
+  height: 30px;
+  border: 1px solid #dc3545;
+  border-radius: 8px;
+  margin-right: 0.2rem;
+}
+
+/* Inputs */
+.level-input {
+  width: 50px;
+  text-align: center;
+  margin-left: 2px;
+  margin-right: 6px;
+}
+
+.total-fld-input {
+  width: 70px;
+}
+
+.startdate-input {
+  width: 160px;
+  text-align: center;
+}
+
+#finish-moment-2,
+#finish-moment-3 {
+  display: inline-block;
+  text-align: center;
+}
+
+/* Table styling (shared with costs/lfcosts/trade) */
+.lined {
+  border-collapse: collapse;
+}
+
+.lined th {
+  background-color: var(--bs-tertiary-bg);
+  font-weight: 600;
+  padding: 2px 8px;
+  border: 1px solid var(--bs-border-color);
+  white-space: nowrap;
+}
+
+.lined td {
+  border: 1px solid var(--bs-border-color);
+  padding: 2px 8px;
+  white-space: nowrap;
+}
+
+.lined tr.odd {
+  background-color: var(--bs-table-striped-bg);
+}
+
+.lined tr.even {
+  background-color: transparent;
+}
+
+/* Border helpers used by totals/transports rows */
+.border-n { border-top: none !important; }
+.border-s { border-bottom: 1px solid var(--bs-border-color) !important; }
+.border-w { border-left: 1px solid var(--bs-border-color) !important; }
+.border-e { border-right: 1px solid var(--bs-border-color) !important; }
+
+/* Action buttons in queue rows: keep them compact */
+.queue-row-up,
+.queue-row-down,
+.queue-row-del {
+  padding: 0.1rem 0.35rem;
+}
+
+.button-build,
+.button-destroy {
+  padding: 0.1rem 0.4rem;
+  margin-left: 2px;
+}
+
+/* Warning banner */
+#warning {
+  position: absolute;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 9999;
+  padding: 10px 20px;
+  text-align: center;
+  background-color: var(--bs-warning-bg-subtle);
+  border: 1px solid var(--bs-warning-border-subtle);
+  border-radius: var(--bs-border-radius);
+  color: var(--bs-body-color);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  min-width: 300px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.4s ease-in-out;
+}
+
+#warning.visible {
+  opacity: 1;
+  pointer-events: auto;
+  display: block;
+}
+
+/* Dark theme: dim the bright red outlines */
+[data-bs-theme="dark"] .btn-outline-danger.queue-row-del {
+  --bs-btn-color: #b05050;
+  --bs-btn-border-color: #b05050;
+  --bs-btn-hover-color: #fff;
+  --bs-btn-hover-bg: #7a3030;
+  --bs-btn-hover-border-color: #7a3030;
+  --bs-btn-active-color: #fff;
+  --bs-btn-active-bg: #7a3030;
+  --bs-btn-active-border-color: #7a3030;
+}
+
+[data-bs-theme="dark"] .is-invalid {
+  border-color: #b05050 !important;
+  box-shadow: none !important;
+}
+
+/* Responsive */
+@media (max-width: 992px) {
+  .lined td,
+  .lined th {
+    padding: 2px 4px;
+    font-size: 0.9rem;
+  }
+
+  .level-input { width: 45px; }
+  .startdate-input { width: 140px; }
+}

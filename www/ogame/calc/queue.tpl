@@ -1,221 +1,277 @@
 <!DOCTYPE html>
 <head>
-	<meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
-	<meta http-equiv="Cache-Control" content="no-cache" />
-	<title><?= $l['title'] ?></title>
-	<meta name="description" content="<?= $l['title'] ?>"/>
-	<meta name="keywords" content="<?= $l['keywords'] ?>"/>
-	<link rel="shortcut icon" href="/favicon.ico" type="image/x-icon"/>
-	<link rel="icon" href="/favicon.ico" type="image/x-icon"/>
-<?php 
-	if ($_SERVER['HTTP_HOST'] == 'proxyforgame.com') {
-		$pfgPath = $_SERVER['DOCUMENT_ROOT'];
-	} else {
-		$pfgPath = "D:\Programming\JS\pfg.wmp\www";
-	};
+  <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
+  <meta http-equiv="Cache-Control" content="no-cache" />
+  <title><?= $l['title'] ?></title>
+  <meta name="description" content="<?= $l['title'] ?>"/>
+  <meta name="keywords" content="<?= $l['keywords'] ?>"/>
+  <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon"/>
+  <link rel="icon" href="/favicon.ico" type="image/x-icon"/>
+<?php
+  if ($_SERVER['HTTP_HOST'] == 'proxyforgame.com') {
+    $pfgPath = $_SERVER['DOCUMENT_ROOT'];
+  } else {
+    $pfgPath = "D:\Programming\JS\pfg.wmp\www";
+  };
 ?>
-	<link id="light-theme" type="text/css" href="/css/redmond/jquery.ui.all.css" rel="stylesheet"/>
-	<link id="dark-theme" type="text/css" href="/css/dark-hive/jquery.ui.all.css" rel="stylesheet" disabled="disabled"/>
-	<link type="text/css" href="/css/jquery.ui.spinbtn.css" rel="stylesheet"/>
-	<link type="text/css" href="/css/langs.css?v=<?php echo filemtime($pfgPath.'/css/langs.css'); ?>" rel="stylesheet" />
-	<link type="text/css" href="/css/common.css?v=<?php echo filemtime($pfgPath.'/css/common.css'); ?>" rel="stylesheet"/>
-	<link type="text/css" href="/ogame/calc/css/queue.css?v=<?php echo filemtime($pfgPath.'/ogame/calc/css/queue.css'); ?>" rel="stylesheet"/>
-	
-<?php if ( $_SERVER['SERVER_NAME'] == 'proxyforgame.com'): ?>
-	<script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.min.js"></script>
-	<script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jqueryui/1.8.11/jquery-ui.min.js"></script>
-<?php elseif ( $_SERVER['SERVER_NAME'] == 'pfg.wmp'): ?>
-	<script type="text/javascript" src="/js/jquery.min.js"></script>
-	<script type="text/javascript" src="/js/jquery-ui.min.js"></script>
-<?php else: ?>
-	<script type="text/javascript" src="/js/jquery-1.5.1.min.js"></script>
-	<script type="text/javascript" src="/js/jquery-ui-1.8.11.min.js"></script>
-<?php endif; ?>
-	<script type="text/javascript" src="/js/jquery.inputmask.js"></script>
-	<script type="text/javascript" src="/js/jquery.cookie.js"></script>
-	<script type="text/javascript" src="/js/utils.js?v=<?php echo filemtime($pfgPath.'/js/utils.js'); ?>"></script>
-	<script type="text/javascript" src="/ogame/calc/js/common.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/common.js'); ?>"></script>	
-	<script type="text/javascript" src="/ogame/calc/js/queue.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/queue.js'); ?>"></script>
+  <!-- Bootstrap 5 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet"/>
 
-	<script type="text/javascript">
-		$(function() {
-			$("#start-2").inputmask("<?= $l['datetime-format'] ?>");
-			$("#start-3").inputmask("<?= $l['datetime-format'] ?>");
-		});
+  <!-- Custom styles -->
+  <link type="text/css" href="/css/langs_bs.css?v=<?php echo filemtime($pfgPath.'/css/langs_bs.css'); ?>" rel="stylesheet" />
+  <link type="text/css" href="/css/common_bs.css?v=<?php echo filemtime($pfgPath.'/css/common_bs.css'); ?>" rel="stylesheet"/>
+  <link type="text/css" href="/ogame/calc/css/queue_bs.css?v=<?php echo filemtime($pfgPath.'/ogame/calc/css/queue_bs.css'); ?>" rel="stylesheet"/>
 
-		// десятичный разделитель будет использоваться в функциях, проверяющих валидность чисел в input-ах
-		options.decimalSeparator='<?= $l['decimal-separator'] ?>';
-		options.datetimeW = '<?= $l['datetime-w'] ?>';
-		options.datetimeD = '<?= $l['datetime-d'] ?>';
-		options.datetimeH = '<?= $l['datetime-h'] ?>';
-		options.datetimeM = '<?= $l['datetime-m'] ?>';
-		options.datetimeS = '<?= $l['datetime-s'] ?>';
-		options.unitSuffix = '<?= $l['unit-suffix'] ?>';
-		options.scShort = '<?= $l['sc-short'] ?>';
-		options.lcShort = '<?= $l['lc-short'] ?>';
-		options.scFull = '<?= $l['small-cargo'] ?>';
-		options.lcFull = '<?= $l['large-cargo'] ?>';
-		options.datetimeFormat = '<?= $l['datetime-format'] ?>';
+  <!-- Bootstrap 5 JS Bundle -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
 
+  <!-- Utility libraries -->
+  <script type="text/javascript" src="/js/utils.js?v=<?php echo filemtime($pfgPath.'/js/utils.js'); ?>"></script>
+  <script type="text/javascript" src="/ogame/calc/js/common.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/common.js'); ?>"></script>
 
-		options.techCosts = {
-							<?php $first = true; ?>
-							<?php foreach ($techData as $id => $tech): ?>
-							<?=(!$first)?',':''?><?= $id ?>:[<?= $tech[2] ?>, <?= $tech[3] ?>, <?= $tech[4] ?>, <?= $tech[5] ?>]
-							<?php $first = false; ?>
-							<?php endforeach; ?>
-			};
+  <!-- DOM utilities (jQuery replacement) -->
+  <script type="text/javascript" src="/ogame/calc/js/dom-utils.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/dom-utils.js'); ?>"></script>
 
-	</script>
+  <!-- Queue calculator modules -->
+  <script type="text/javascript" src="/ogame/calc/js/queue-core.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/queue-core.js'); ?>"></script>
+  <script type="text/javascript" src="/ogame/calc/js/queue-data-collector.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/queue-data-collector.js'); ?>"></script>
+  <script type="text/javascript" src="/ogame/calc/js/queue-renderer.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/queue-renderer.js'); ?>"></script>
+  <script type="text/javascript" src="/ogame/calc/js/queue-orchestration.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/queue-orchestration.js'); ?>"></script>
+
+  <script type="text/javascript">
+    var options = {
+      defConstraints: { min: -Infinity, max: Infinity, def: 0, allowFloat: false, allowNegative: false },
+
+      prm: {
+        universeSpeed: 1,
+        ionTechLevel: 0,
+        hyperTechLevel: 0,
+        totFldPln: 163,
+        totFldMn: 1,
+        sDTP: 0,
+        sDTM: 0,
+        slp: [],
+        slm: [],
+        qp: [],
+        qm: [],
+
+        validate: function(field, value) {
+          switch (field) {
+            case 'universeSpeed':  return validateNumber(Number.parseFloat(value), 0, 10, 1);
+            case 'ionTechLevel':   return validateNumber(Number.parseFloat(value), 0, 50, 0);
+            case 'hyperTechLevel': return validateNumber(Number.parseFloat(value), 0, 50, 0);
+            case 'totFldPln':      return validateNumber(Number.parseFloat(value), 1, Infinity, 163);
+            case 'totFldMn':       return validateNumber(Number.parseFloat(value), 1, Infinity, 1);
+            case 'sDTP':           return validateNumber(Number.parseFloat(value), 0, Infinity, 0);
+            case 'sDTM':           return validateNumber(Number.parseFloat(value), 0, Infinity, 0);
+            case 'slp': case 'slm': return validateNumber(Number.parseFloat(value), 0, Infinity, 0);
+            case 'qp':  case 'qm':  return validateNumber(Number.parseFloat(value), 0, Infinity, 1);
+            default: return value;
+          }
+        }
+      },
+
+      load: function() {
+        try { loadFromCookie('options_queue', options.prm); } catch (e) { console.error(e); }
+      },
+      save: function() { saveToCookie('options_queue', options.prm); },
+
+      defPlfFlds: 163,
+      defMnFlds: 1
+    };
+
+    // Localized strings used by JS modules
+    options.decimalSeparator = '<?= $l['decimal-separator'] ?>';
+    options.datetimeW = '<?= $l['datetime-w'] ?>';
+    options.datetimeD = '<?= $l['datetime-d'] ?>';
+    options.datetimeH = '<?= $l['datetime-h'] ?>';
+    options.datetimeM = '<?= $l['datetime-m'] ?>';
+    options.datetimeS = '<?= $l['datetime-s'] ?>';
+    options.unitSuffix = '<?= $l['unit-suffix'] ?>';
+    options.scShort = '<?= $l['sc-short'] ?>';
+    options.lcShort = '<?= $l['lc-short'] ?>';
+    options.scFull = '<?= $l['small-cargo'] ?>';
+    options.lcFull = '<?= $l['large-cargo'] ?>';
+    options.datetimeFormat = '<?= $l['datetime-format'] ?>';
+    options.warnindDivId = 'warning';
+    options.warnindMsgDivId = 'warning-message';
+    options.fieldHint = '<?= $l['field-hint'] ?>';
+    options.msgMinConstraintViolated = '<?= $l['msg-min-constraint-violated'] ?>';
+    options.msgMaxConstraintViolated = '<?= $l['msg-max-constraint-violated'] ?>';
+    options.moveUpTitle = '<?= $l['move-up'] ?? '' ?>';
+    options.moveDownTitle = '<?= $l['move-down'] ?? '' ?>';
+    options.removeRowTitle = '<?= $l['remove-row'] ?? '' ?>';
+
+    options.techCosts = {
+<?php $first = true; foreach ($techData as $id => $tech): ?>
+      <?=(!$first)?',':''?><?= $id ?>:[<?= $tech[2] ?>, <?= $tech[3] ?>, <?= $tech[4] ?>, <?= $tech[5] ?>]
+<?php $first = false; endforeach; ?>
+    };
+  </script>
 <?php require_once('../../cookies.tpl'); ?>
 </head>
 
-<body class="ui-widget">
+<body>
 
-<table id="vtable" cellspacing="2" cellpadding="0" border="0"><tr>
-<td id="vtablesb"><?php require_once('../../sidebar.tpl'); ?></td>
-<td id="vtablec">
-<?php require_once('../../topbar.tpl'); ?>
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-md-2"><?php require_once('../../sidebar_bs.tpl'); ?></div>
+    <div class="col-md-10">
+    <?php require_once('../../topbar_bs.tpl'); ?>
 
 <div id="queue">
-	<div class="ui-widget-content ui-corner-all">
-		<div id="reset" class="ui-state-error ui-corner-all" title="<?= $l['reset'] ?>"><span class="ui-icon ui-icon-arrowrefresh-1-w"></span></div>
-		<div class="ui-widget-header ui-corner-all c-ui-main-header"><?= $l['title'] ?></div>
-		<div>
-			<div id="general-settings-panel" class="ui-widget-content c-ui-widget-content ui-corner-all ui-panel">
-				<div id="general-settings">
-					<table cellpadding="2" cellspacing="0" border="0" align="center">
-						<tr>
-							<td><label for="universe-speed"><?= $l['universe-speed'] ?></label></td>
-							<td>
-								<select id="universe-speed" name="universe-speed" class="ui-state-default ui-corner-all ui-input ui-input-margin">
-									<option value="1" selected="selected">1</option>
-									<option value="2">2</option>
-									<option value="3">3</option>
-									<option value="4">4</option>
-									<option value="5">5</option>
-									<option value="6">6</option>
-									<option value="7">7</option>
-									<option value="8">8</option>
-									<option value="9">9</option>
-									<option value="10">10</option>
-								</select>
-							</td>
-							<td><label for="ion-tech-level"><?= $l['ion-tech'] ?></label></td>
-							<td><input id="ion-tech-level" type="text" name="ion-tech-level" class="ui-state-default ui-corner-all ui-input level-input ui-input-margin" value="0" /></td>
-							<td><label for="hyper-tech-level"><?= $l['hyper-tech'] ?></label></td>
-							<td><input id="hyper-tech-level" type="text" name="hyper-tech-level" class="ui-state-default ui-corner-all ui-input level-input ui-input-margin" value="0" /></td>
-						</tr>
-					</table>
-				</div>
-			</div>
-			<div id="tabs">
-				<ul>
-					<li><a id="tabtag-2" href="#tab-2"><?= $l['planet'] ?></a></li>
-					<li><a id="tabtag-3" href="#tab-3"><?= $l['moon'] ?></a></li>
-				</ul>
-				<?php foreach ($techTypes as $i => $type):?>
-				<div id="tab-<?=$i?>">
-					<table id="wrapper-<?=$i?>" cellpadding="0" border="0" cellspacing="0" width="100%">
-						<tr>
-							<td valign="top">
-								<div id="src-panel" class="ui-widget-content ui-corner-all ui-panel">
-									<p class="ui-state-default ui-corner-all ui-subheader"><b><?= $l['buildings'] ?></b></p>
-									<table align="center" cellpadding="0" cellspacing="1" border="0" >
-										<tr>
-											<td><?= $l['total-fields'] ?></td>
-											<td><input id="total-fields-<?=$i?>" type="text" name="total-fields-<?=$i?>" class="ui-state-default ui-corner-all ui-input level-input total-fld-input" value="0" /></td>
-										</tr>
-									</table>
-									<table id="table-src-<?=$i?>" class="lined" cellpadding="0" cellspacing="1" border="0" width="100%">
-										<tr>
-											<th style="display: none;">ID</th>
-											<?php foreach ($colHeadersSrc as $idx => $header) :?>
-											<th <?=($idx > 0)?'align="center"':''?>><?=$l[$header] ?></th>
-											<?php endforeach; ?>
-										</tr>
-										<?php $techs = getTechsByType($i); $row = 1;?>
-										<?php foreach ($techs as $tech) :?>
-										<tr class="<?= ($row++ % 2) === 1 ? 'odd' : 'even' ?>">
-				 							<td style="display: none;"><?=$tech?></td>
-											<td><?=$l[$techData[$tech][0]]?></td>
-											<td align="center"><input id="startlvl-<?=$i?>-<?= $tech ?>" type="text" class="ui-state-default ui-corner-all ui-input level-input ui-input-margin" value="0"/></td>
-											<td align="center">
-												<span id="nextlvl-<?=$i?>-<?= $tech ?>">0</span>
-												<div id="build-<?= $tech ?>" class="ui-state-default ui-corner-all button-build" title="<?= $l['build'] ?>" style="display:inline-block">
-													<span style="margin: auto;" class="ui-icon ui-icon-arrowthick-1-e"></span>
-												</div>
-												<?php if ($tech != 33 && $tech != 36 && $tech != 41): ?>
-												<div id="destroy-<?= $tech ?>" class="ui-state-default ui-corner-all button-destroy" title="<?= $l['destroy'] ?>" style="display:inline-block">
-													<span style="margin: auto;" class="ui-icon ui-icon-arrowthick-1-w"></span>
-												</div>
-												<?php endif; ?>
-											</td>
-										</tr>
-										<?php endforeach; ?>
-									</table>
-								</div>
-							</td>
-							<td style="width: 5px;"></td>
-							<td valign="top">
-								<div id="dst-panel" class="ui-widget-content ui-corner-all ui-panel">
-									<div id="clear-<?=$i?>" title="<?= $l['clear'] ?>"><span class="ui-icon ui-icon-trash"></span></div>
-									<p class="ui-state-default ui-corner-all ui-subheader"><b><?=$l['queue']?></b></p>
-									<table id="times-<?=$i?>" align="center"  cellpadding="0" cellspacing="0" border="0">
-										<tr>
-											<td><label for="start-<?=$i?>"><?= $l['start-time'] ?></label></td>
-											<td><input type="text" id="start-<?=$i?>" class="ui-state-default ui-corner-all ui-input startdate-input"  title="<?= $l['datetime-format-hint'] ?>"/></td>
-											<td>
-												<div id="set-start-now-<?=$i?>" class="ui-state-default ui-corner-all" style="cursor: pointer; " title="<?= $l['start-now-hint'] ?>">
-													<span style="font-size: xx-small; "><?= $l['start-now'] ?></span>
-												</div>
-											</td>
-											<td >
-												<label style="margin-left: 10px;"><?= $l['finish-time'] ?></label>
-											</td>
-											<td>
-												<div id="finish-moment-<?=$i?>" class="ui-state-default ui-corner-all ui-input startdate-input">?</div>
-											</td>
-										</tr>
-									</table>
-									<table id="table-dst-<?=$i?>" class="lined" cellpadding="0" cellspacing="1" border="0" width="100%">
-										<tr>
-											<?php foreach ($colHeadersDst as $idx => $header) :?>
-											<th <?=($idx > 0)?'align="center"':''?>><?= $header == '-' ? '' : $l[$header] ?></th>
-											<?php endforeach; ?>
-										</tr>
-										<tr class="even">
-											<td class="border-n" ><?=$l['total']?></td>
-											<td align="center" class="border-n" >0</td>
-											<td align="center" class="border-n border-s border-w" ><b>0</b></td>
-											<td align="center" class="border-n border-s" ><b>0</b></td>
-											<td align="center" class="border-n border-s" ><b>0</b></td>
-											<td align="center" class="border-n border-s border-e" ><b>0</b></td>
-											<td></td>
-										</tr>
-										<tr class="even">
-											<td ><?=$l['transports-needed']?></td>
-											<td colspan="2" align="center" >0 <?=$l['sc-short']?></td>
-											<td colspan="2" align="center" >0 <?=$l['lc-short']?></td>
-											<td colspan="3" ></td>
-										</tr>
-									</table>
-								</div>
-							</td>
-						</tr>
-					</table>
-				</div>
-				<?php endforeach; ?>
-			</div>
-		</div>
-	</div>
+  <div class="border rounded position-relative">
+    <div class="d-inline-block d-flex align-items-center">
+      <div class="bg-body-secondary text-primary-emphasis rounded main-header text-center flex-grow-1">
+        <?= $l['title'] ?>
+      </div>
+      <div id="reset" class="top-0 end-0 d-flex align-items-center justify-content-center bg-danger-subtle" title="<?= $l['reset'] ?>">
+        <i class="bi bi-arrow-counterclockwise" style="color: #dc3545; font-size: 1.25rem;"></i>
+      </div>
+    </div>
+
+    <div id="general-settings-panel" class="border rounded m-1 p-2">
+      <div class="d-flex flex-wrap gap-2 align-items-center">
+        <div class="d-flex align-items-center gap-1">
+          <label for="universe-speed"><?= $l['universe-speed'] ?></label>
+          <select id="universe-speed" name="universe-speed" class="form-select form-select-sm w-auto">
+            <?php for ($s = 1; $s <= 10; $s++): ?>
+            <option value="<?=$s?>" <?= $s === 1 ? 'selected="selected"' : '' ?>><?=$s?></option>
+            <?php endfor; ?>
+          </select>
+        </div>
+        <div class="d-flex align-items-center gap-1">
+          <label for="ion-tech-level"><?= $l['ion-tech'] ?></label>
+          <input id="ion-tech-level" type="text" name="ion-tech-level" class="form-control form-control-sm level-input" value="0" />
+        </div>
+        <div class="d-flex align-items-center gap-1">
+          <label for="hyper-tech-level"><?= $l['hyper-tech'] ?></label>
+          <input id="hyper-tech-level" type="text" name="hyper-tech-level" class="form-control form-control-sm level-input" value="0" />
+        </div>
+      </div>
+    </div>
+
+    <!-- Planet / Moon tabs -->
+    <ul class="nav nav-tabs" id="mainTabs" role="tablist">
+      <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="tabtag-2" data-bs-toggle="tab" data-bs-target="#tab-2" type="button" role="tab"><?= $l['planet'] ?></button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" id="tabtag-3" data-bs-toggle="tab" data-bs-target="#tab-3" type="button" role="tab"><?= $l['moon'] ?></button>
+      </li>
+    </ul>
+
+    <div class="tab-content" id="mainTabContent">
+      <?php foreach ($techTypes as $i => $type): ?>
+      <div class="tab-pane fade <?= $i === 2 ? 'show active' : '' ?> p-2" id="tab-<?=$i?>" role="tabpanel">
+        <div class="d-flex flex-wrap gap-2 align-items-start">
+          <!-- Available buildings (src) -->
+          <div>
+            <div id="src-panel-<?=$i?>" class="border rounded p-2">
+              <p class="border rounded subheader bg-primary-subtle mb-2"><b><?= $l['buildings'] ?></b></p>
+              <div class="d-flex align-items-center gap-2 mb-2">
+                <label for="total-fields-<?=$i?>"><?= $l['total-fields'] ?></label>
+                <input id="total-fields-<?=$i?>" type="text" name="total-fields-<?=$i?>" class="form-control form-control-sm level-input total-fld-input" value="0" />
+              </div>
+              <table id="table-src-<?=$i?>" class="lined" cellpadding="0" cellspacing="1" border="0">
+                <tr>
+                  <th style="display: none;">ID</th>
+                  <?php foreach ($colHeadersSrc as $idx => $header): ?>
+                  <th <?=($idx > 0)?'align="center"':''?>><?= $l[$header] ?></th>
+                  <?php endforeach; ?>
+                </tr>
+                <?php $techs = getTechsByType($i); $row = 1; ?>
+                <?php foreach ($techs as $tech): ?>
+                <tr class="<?= ($row++ % 2) === 1 ? 'odd' : 'even' ?>">
+                  <td style="display: none;"><?=$tech?></td>
+                  <td><?= $l[$techData[$tech][0]] ?></td>
+                  <td align="center"><input id="startlvl-<?=$i?>-<?=$tech?>" type="text" class="form-control form-control-sm level-input" value="0"/></td>
+                  <td align="center" style="white-space: nowrap;">
+                    <span id="nextlvl-<?=$i?>-<?=$tech?>">0</span>
+                    <button type="button" data-tech="<?=$tech?>" class="btn btn-outline-secondary btn-sm button-build" title="<?= $l['build'] ?>">
+                      <i class="bi bi-arrow-right"></i>
+                    </button>
+                    <?php if (!in_array($tech, [33, 36, 41])): ?>
+                    <button type="button" data-tech="<?=$tech?>" class="btn btn-outline-secondary btn-sm button-destroy" title="<?= $l['destroy'] ?>">
+                      <i class="bi bi-arrow-left"></i>
+                    </button>
+                    <?php endif; ?>
+                  </td>
+                </tr>
+                <?php endforeach; ?>
+              </table>
+            </div>
+          </div>
+
+          <!-- Build queue (dst) -->
+          <div>
+            <div id="dst-panel-<?=$i?>" class="border rounded p-2 position-relative">
+              <button type="button" id="clear-<?=$i?>" class="btn btn-outline-danger btn-sm position-absolute top-0 end-0 m-1" title="<?= $l['clear'] ?>">
+                <i class="bi bi-trash"></i>
+              </button>
+              <p class="border rounded subheader bg-primary-subtle mb-2"><b><?= $l['queue'] ?></b></p>
+              <div id="times-<?=$i?>" class="d-flex flex-wrap align-items-center gap-2 mb-2">
+                <label for="start-<?=$i?>"><?= $l['start-time'] ?></label>
+                <input type="text" id="start-<?=$i?>" class="form-control form-control-sm startdate-input" title="<?= $l['datetime-format-hint'] ?>" placeholder="<?= $l['datetime-format-hint'] ?>"/>
+                <button type="button" id="set-start-now-<?=$i?>" class="btn btn-outline-secondary btn-sm" title="<?= $l['start-now-hint'] ?>">
+                  <?= $l['start-now'] ?>
+                </button>
+                <div class="d-flex align-items-center gap-2 flex-nowrap">
+                  <label><?= $l['finish-time'] ?></label>
+                  <span id="finish-moment-<?=$i?>" class="form-control form-control-sm startdate-input d-inline-block bg-body-tertiary">?</span>
+                </div>
+              </div>
+
+              <table id="table-dst-<?=$i?>" class="lined" cellpadding="0" cellspacing="1" border="0">
+                <tr>
+                  <?php foreach ($colHeadersDst as $idx => $header): ?>
+                  <th <?=($idx > 0)?'align="center"':''?>><?= $header == '-' ? '' : $l[$header] ?></th>
+                  <?php endforeach; ?>
+                </tr>
+                <tr class="even">
+                  <td class="border-n"><?= $l['total'] ?></td>
+                  <td align="center" class="border-n"><b>0</b></td>
+                  <td align="center" class="border-n border-s border-w"><b>0</b></td>
+                  <td align="center" class="border-n border-s"><b>0</b></td>
+                  <td align="center" class="border-n border-s"><b>0</b></td>
+                  <td align="center" class="border-n border-s border-e"><b>0</b></td>
+                  <td></td>
+                </tr>
+                <tr class="even">
+                  <td><?= $l['transports-needed'] ?></td>
+                  <td colspan="2" align="center">0 <?= $l['sc-short'] ?></td>
+                  <td colspan="2" align="center">0 <?= $l['lc-short'] ?></td>
+                  <td colspan="2"></td>
+                </tr>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+      <?php endforeach; ?>
+    </div>
+
+  </div>
+  <div id="warning">
+    <div id="warning-message"></div>
+  </div>
 </div>
 
-</td>
-</tr></table>
-<?php
-	require_once('../../analitics.tpl');
-?>
+    </div> <!-- End col-md-10 -->
+  </div> <!-- End row -->
+</div> <!-- End container-fluid -->
+
+<?php require_once('../../analitics.tpl'); ?>
+
+<script type="text/javascript">
+  document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(function(el) {
+      new bootstrap.Tooltip(el);
+    });
+    initializeQueueCalculator();
+  });
+</script>
 
 </body>
 </html>
