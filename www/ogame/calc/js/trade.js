@@ -44,6 +44,9 @@ let options = {
     coords: 0,
     coordp: 0,
     hyperTech: 0,
+    playerClass: 0,
+    scCapacityIncrease: 0,
+    lcCapacityIncrease: 0,
 
     validate: function(field, value) {
         switch (field) {
@@ -62,6 +65,9 @@ let options = {
             case 'coords': return validateNumber(Number.parseInt(value), 0, 550, this.coords);
             case 'coordp': return validateNumber(Number.parseInt(value), 0, 15, this.coordp);
             case 'hyperTech': return validateNumber(Number.parseInt(value), 0, 50, this.hyperTech);
+            case 'playerClass': return validateNumber(Number.parseInt(value), 0, 2, this.playerClass);
+            case 'scCapacityIncrease': return validateNumber(Number.parseInt(value), 0, Infinity, this.scCapacityIncrease);
+            case 'lcCapacityIncrease': return validateNumber(Number.parseInt(value), 0, Infinity, this.lcCapacityIncrease);
             case 'moon': return value === true || value === 'true';
             default: return value;
         }
@@ -558,6 +564,9 @@ function resetParams() {
     options.fix1 = 0;
     options.fix2 = 0;
     options.hyperTech = 0;
+    options.playerClass = 0;
+    options.scCapacityIncrease = 0;
+    options.lcCapacityIncrease = 0;
     options.moon = false;
 
     document.getElementById('res-src-m').value = '';
@@ -576,6 +585,9 @@ function resetParams() {
     document.getElementById('mix-fix1').value = '';
     document.getElementById('mix-fix2').value = '';
     document.getElementById('hypertech-lvl').value = 0;
+    document.getElementById('player-class-0').checked = true;
+    document.getElementById('sc-capacity-increase').value = 0;
+    document.getElementById('lc-capacity-increase').value = 0;
     document.getElementById('moon').checked = false;
     onUpdateSrcType();
     validateRateLimits();
@@ -781,8 +793,16 @@ function updateNumbers() {
     
     let ht = clampNumber(getInputNumber(document.getElementById('hypertech-lvl')), 0, Infinity);
     options.hyperTech = ht;
-    let capSC = 5000 * (1 + 0.05 * ht);
-    let capLC = 25000 * (1 + 0.05 * ht);
+    const checkedClass = document.querySelector('input[name="player-class"]:checked');
+    let pc = checkedClass ? Number.parseInt(checkedClass.value) : 0;
+    options.playerClass = pc;
+    let scInc = clampNumber(getInputNumber(document.getElementById('sc-capacity-increase')), 0, Infinity);
+    let lcInc = clampNumber(getInputNumber(document.getElementById('lc-capacity-increase')), 0, Infinity);
+    options.scCapacityIncrease = scInc;
+    options.lcCapacityIncrease = lcInc;
+    // Hyperspace tech, Collector class and the cargo capacity increase are all additive to the base capacity (matches the Costs/LFCosts calculators).
+    let capSC = 5000 * (1 + 0.05 * ht) + (pc === 0 ? 5000 * 0.25 : 0) + Math.floor(5000 * 0.01 * scInc);
+    let capLC = 25000 * (1 + 0.05 * ht) + (pc === 0 ? 25000 * 0.25 : 0) + Math.floor(25000 * 0.01 * lcInc);
     let mt = st / capSC;
     let bt = st / capLC;
     document.getElementById('res-src-cargo').textContent = numToOGame(Math.ceil(mt)) + ' ' + l.sc + ' / ' + numToOGame(Math.ceil(bt)) + ' ' + l.lc;
@@ -876,6 +896,9 @@ try {
     });
 
     document.getElementById('hypertech-lvl').value = options.hyperTech;
+    document.getElementById('player-class-' + options.playerClass).checked = true;
+    document.getElementById('sc-capacity-increase').value = options.scCapacityIncrease;
+    document.getElementById('lc-capacity-increase').value = options.lcCapacityIncrease;
     document.getElementById('country').value = options.country;
     setUniList(options.country, options.universe);
 
@@ -962,6 +985,13 @@ try {
     document.getElementById('rate-cd').addEventListener('keyup', function() { options.rates.cd = clampNumber(getInputNumber(this), 1, 5); document.getElementById('cd-slider').value = options.rates.cd; options.rates.mc = (options.rates.md / options.rates.cd).toFixed(3); document.getElementById('rate-mc').textContent = options.rates.mc; document.getElementById('mc-slider').value = options.rates.mc; updateNumbers(); validateRateLimits(); options.save(); });
     let event = {currentTarget: document.getElementById('hypertech-lvl'), data: 'updateNumbers'};
     document.getElementById('hypertech-lvl').addEventListener('keyup', function() { validateInputNumber.call(this, event); });
+    for (const radio of document.querySelectorAll('input[name="player-class"]')) {
+        radio.addEventListener('change', function() { options.playerClass = Number.parseInt(this.value); updateNumbers(); options.save(); });
+    }
+    let scEvent = {currentTarget: document.getElementById('sc-capacity-increase'), data: 'updateNumbers'};
+    document.getElementById('sc-capacity-increase').addEventListener('keyup', function() { validateInputNumber.call(this, scEvent); });
+    let lcEvent = {currentTarget: document.getElementById('lc-capacity-increase'), data: 'updateNumbers'};
+    document.getElementById('lc-capacity-increase').addEventListener('keyup', function() { validateInputNumber.call(this, lcEvent); });
     document.getElementById('moon').addEventListener('click', function() { options.moon = document.getElementById('moon').checked; updateNumbers(); options.save(); });
 
     let theme = { value: 'light', validate: function(key, val) { return val; } };
