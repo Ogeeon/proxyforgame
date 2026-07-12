@@ -140,6 +140,15 @@
 }
 
 /* Accordions: keep panels dense like the legacy jQuery UI ones */
+#one-planet-accordion,
+#all-planets-accordion {
+  /* Bootstrap's .accordion-item forces color: var(--bs-accordion-color)
+     (#dee2e6 in dark mode), which reads as white against the calculator's
+     cyan default text. Inherit so panel content matches the rest of the page. */
+  --bs-accordion-color: inherit;
+  --bs-accordion-active-color: inherit;
+}
+
 #one-planet-accordion .accordion-button,
 #all-planets-accordion .accordion-button {
   padding: 0.4rem 0.75rem;
@@ -159,6 +168,15 @@
   width: 0;
   min-width: 100%;
   box-sizing: border-box;
+}
+
+/* The upgrade-cost column carries two resource values ("<metal>, <crystal>")
+   whose nowrap min-content can nudge the table just past the accordion body's
+   table-driven width, triggering a horizontal scrollbar. Let this one column
+   wrap so the table always fits; it only breaks when space is actually tight. */
+#mines-amort-tbl th:nth-child(2),
+#mines-amort-tbl td:nth-child(2) {
+  white-space: normal;
 }
 
 /* Warning banner */
