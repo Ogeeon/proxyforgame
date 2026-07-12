@@ -261,15 +261,9 @@ class Renderer {
       rows[grandTotalRow].cells[startCol + 5].innerHTML = `<b>${this._formatTime(grandTotal.time)}</b>`;
       rows[grandTotalRow].cells[startCol + 6].innerHTML = `<b>${this._formatNumber(grandTotal.points, params)}</b>`;
 
-      // DM column: Calculate for fleet/defense tables, leave empty for others
+      // DM column: Leave empty for all tables
       if (!isMultiLevel) {
-        // Fleet and defense tables are table-0-5 and table-0-6
-        if (tableId === 'table-0-5' || tableId === 'table-0-6') {
-          const dmCost = getHalvingCost(1000, grandTotal.time);
-          rows[grandTotalRow].cells[startCol + 7].innerHTML = `<b>${this._formatNumber(dmCost, params)}</b>`;
-        } else {
-          rows[grandTotalRow].cells[startCol + 7].innerHTML = '';
-        }
+        rows[grandTotalRow].cells[startCol + 7].innerHTML = '';
       }
 
       // Update res-needed and delivery transport rows (grand total minus available resources)
