@@ -80,11 +80,6 @@
 #production .input-10columns { width: 110px; }
 #production .input-20columns { width: 180px; }
 
-#prod-coeff-div {
-  text-align: center;
-  padding: 4px 0;
-}
-
 /* Table styling (shared with queue/costs/lfcosts/trade) */
 .lined {
   border-collapse: collapse;
@@ -153,6 +148,17 @@
 #one-planet-accordion .accordion-body,
 #all-planets-accordion .accordion-body {
   padding: 0.5rem;
+}
+
+/* The mines-amortization accordion holds long explanatory prose (incl-explain,
+   amort-comment) whose full unwrapped width would inflate #production's
+   max-content sizing, over-widening the whole calculator once expanded. width:0
+   drops the body's contribution to that calculation; min-width:100% stretches
+   it back to the resolved, table-driven width so the prose simply wraps. */
+#one-pln-acc-amort .accordion-body {
+  width: 0;
+  min-width: 100%;
+  box-sizing: border-box;
 }
 
 /* Warning banner */
