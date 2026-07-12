@@ -773,7 +773,7 @@ function initializeProductionCalculator() {
 				keys.push(key);
 			}
 		}
-		keys.sort();
+		keys.sort((a, b) => a.localeCompare(b));
 		for (let i = 0; i < keys.length; i++) {
 			let key = keys[i];
 			$('#universe-name-select').append(new Option(key.replace("prod_uni_", ""), key));
