@@ -136,8 +136,14 @@ class QueueRenderer {
     const needSC = Math.ceil(totalRes / capSC) || 0;
     const needLC = Math.ceil(totalRes / capLC) || 0;
     const cells = transportsRow.cells;
-    cells[1].innerHTML = `${numToOGame(needSC)} <abbr title="${options.scFull}">${options.scShort}</abbr>`;
-    cells[2].innerHTML = `${numToOGame(needLC)} <abbr title="${options.lcFull}">${options.lcShort}</abbr>`;
+    cells[1].innerHTML = `${numToOGame(needSC)} <abbr data-bs-toggle="tooltip" title="${options.scFull}">${options.scShort}</abbr>`;
+    cells[2].innerHTML = `${numToOGame(needLC)} <abbr data-bs-toggle="tooltip" title="${options.lcFull}">${options.lcShort}</abbr>`;
+    // Skin the transport abbreviations with Bootstrap tooltips (matches the Costs calculator).
+    transportsRow.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(function (el) {
+      const existing = bootstrap.Tooltip.getInstance(el);
+      if (existing) existing.dispose();
+      bootstrap.Tooltip.getOrCreateInstance(el);
+    });
   }
 
   /**
