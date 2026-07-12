@@ -67,16 +67,13 @@ function stripHTMLTags(input) {
 }
 
 function getSSCost(techID, currLvl, plnData) {
-	// NOTE: options.prm.uniSpeed does not exist (the field is universeSpeed);
-	// keep it as-is — the amortization-with-satellites test values encode this
-	// historical behavior.
-	let currCons = getHourlyConsumption(techID, currLvl, options.prm.uniSpeed, 1);
-	let newCons = getHourlyConsumption(techID, currLvl + 1, options.prm.uniSpeed, 1);
+	let currCons = getHourlyConsumption(techID, currLvl, options.prm.universeSpeed, 1);
+	let newCons = getHourlyConsumption(techID, currLvl + 1, options.prm.universeSpeed, 1);
 	let energyReq = newCons - currCons;
 	let fullCrew = options.prm.geologist && options.prm.engineer && options.prm.admiral && options.prm.commander && options.prm.technocrat;
 	// plnData = [темп., поз., бустер]
 	let oneSSProd = getProductionRate(212, 1, options.prm.energyTechLevel, options.prm.plasmaTechLevel, plnData[0], plnData[1],
-		options.prm.uniSpeed, options.prm.geologist, options.prm.engineer, 1, 1, fullCrew, options.prm.playerClass);
+		options.prm.universeSpeed, options.prm.geologist, options.prm.engineer, 1, 1, fullCrew, options.prm.playerClass);
 	let boosterFactor = 0.1 * plnData[2];
 	let engineerFactor = (options.prm.engineer === true) ? 0.1 : 0;
 	let allStaffFactor = fullCrew === true ? 0.02 : 0;
