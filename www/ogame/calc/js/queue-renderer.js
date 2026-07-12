@@ -27,13 +27,12 @@ class QueueRenderer {
   }
 
   /**
-   * Pick the row text colour based on theme cookie + whether fields overflow.
+   * Pick the row text colour based on whether fields overflow.
+   * Overflowing (invalid) rows are flagged 'brown'; valid rows return an
+   * empty string so they inherit the theme's default text colour.
    */
   static rowFontColor(fieldsOverflow) {
-    if (fieldsOverflow) return 'brown';
-    const theme = { value: 'light', validate: (k, v) => v };
-    loadFromCookie('theme', theme);
-    return theme.value === 'light' ? 'black' : 'white';
+    return fieldsOverflow ? 'brown' : '';
   }
 
   /**
@@ -74,8 +73,8 @@ class QueueRenderer {
     const tr = tbl.insertRow(insertBefore);
     tr.className = (rowIndex % 2 === 0) ? 'odd' : 'even';
 
-    const colorOpen = `<font color="${fontColor}">`;
-    const colorClose = '</font>';
+    const colorOpen = fontColor ? `<font color="${fontColor}">` : '';
+    const colorClose = fontColor ? '</font>' : '';
     const arrow = isDestroy ? ' (&darr;)' : '';
 
     tr.innerHTML =
@@ -113,7 +112,9 @@ class QueueRenderer {
     const totalsRow = tbl.rows[tbl.rows.length - 2];
     if (!totalsRow) return;
     const cells = totalsRow.cells;
-    cells[1].innerHTML = `<font color="${fontColor}"><b>${totals[0]}/${totalFlds}</b></font>`;
+    cells[1].innerHTML = fontColor
+      ? `<font color="${fontColor}"><b>${totals[0]}/${totalFlds}</b></font>`
+      : `<b>${totals[0]}/${totalFlds}</b>`;
     cells[2].innerHTML = `<b>${QueueRenderer.formatNumber(totals[1])}</b>`;
     cells[3].innerHTML = `<b>${QueueRenderer.formatNumber(totals[2])}</b>`;
     cells[4].innerHTML = `<b>${QueueRenderer.formatNumber(totals[3])}</b>`;
