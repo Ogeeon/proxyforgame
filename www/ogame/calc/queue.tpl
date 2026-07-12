@@ -210,11 +210,11 @@
                   <td align="center"><input id="startlvl-<?=$i?>-<?=$tech?>" type="text" class="form-control form-control-sm level-input" value="0"/></td>
                   <td align="center" style="white-space: nowrap;">
                     <span id="nextlvl-<?=$i?>-<?=$tech?>">0</span>
-                    <button id="build-<?=$tech?>" type="button" data-tech="<?=$tech?>" class="btn btn-outline-secondary btn-sm button-build" title="<?= $l['build'] ?>">
+                    <button id="build-<?=$tech?>" type="button" data-tech="<?=$tech?>" class="btn btn-outline-secondary btn-sm button-build" data-bs-toggle="tooltip" title="<?= $l['build'] ?>">
                       <i class="bi bi-arrow-right"></i>
                     </button>
                     <?php if (!in_array($tech, [33, 36, 41])): ?>
-                    <button id="destroy-<?=$tech?>" type="button" data-tech="<?=$tech?>" class="btn btn-outline-secondary btn-sm button-destroy" title="<?= $l['destroy'] ?>">
+                    <button id="destroy-<?=$tech?>" type="button" data-tech="<?=$tech?>" class="btn btn-outline-secondary btn-sm button-destroy" data-bs-toggle="tooltip" title="<?= $l['destroy'] ?>">
                       <i class="bi bi-arrow-left"></i>
                     </button>
                     <?php endif; ?>
@@ -230,14 +230,14 @@
             <div id="dst-panel-<?=$i?>" class="border rounded p-2">
               <div class="subheader-row d-flex align-items-center gap-1 mb-2">
                 <p class="border rounded subheader bg-primary-subtle mb-0 flex-grow-1"><b><?= $l['queue'] ?></b></p>
-                <button type="button" id="clear-<?=$i?>" class="btn btn-outline-danger btn-sm" title="<?= $l['clear'] ?>">
+                <button type="button" id="clear-<?=$i?>" class="btn btn-outline-danger btn-sm" data-bs-toggle="tooltip" title="<?= $l['clear'] ?>">
                   <i class="bi bi-trash"></i>
                 </button>
               </div>
               <div id="times-<?=$i?>" class="d-flex flex-wrap align-items-center gap-2 mb-2">
                 <label for="start-<?=$i?>"><?= $l['start-time'] ?></label>
                 <input type="text" id="start-<?=$i?>" class="form-control form-control-sm startdate-input" title="<?= $l['datetime-format-hint'] ?>" placeholder="<?= $l['datetime-format-hint'] ?>"/>
-                <button type="button" id="set-start-now-<?=$i?>" class="btn btn-outline-secondary btn-sm" title="<?= $l['start-now-hint'] ?>">
+                <button type="button" id="set-start-now-<?=$i?>" class="btn btn-outline-secondary btn-sm" data-bs-toggle="tooltip" title="<?= $l['start-now-hint'] ?>">
                   <?= $l['start-now'] ?>
                 </button>
                 <div class="d-flex align-items-center gap-2 flex-nowrap">

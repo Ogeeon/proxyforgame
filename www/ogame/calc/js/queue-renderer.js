@@ -51,6 +51,12 @@ class QueueRenderer {
     const tbl = $(`#table-dst-${tabNum}`);
     if (!tbl) return;
     while (tbl.rows.length > 3) {
+      // Dispose Bootstrap tooltips before dropping the row so no orphaned
+      // instances or lingering tips are left behind.
+      tbl.rows[1].querySelectorAll('[data-bs-toggle="tooltip"]').forEach(function (el) {
+        const inst = bootstrap.Tooltip.getInstance(el);
+        if (inst) inst.dispose();
+      });
       tbl.deleteRow(1);
     }
   }
@@ -81,11 +87,16 @@ class QueueRenderer {
       `<td align="center">${colorOpen}${QueueRenderer.formatTime(costs[3])}${colorClose}</td>` +
       `<td>` +
         `<div class="btn-group btn-group-sm" role="group">` +
-          `<button id="control-${tabNum}-${rowIndex}-a" type="button" class="btn btn-outline-secondary queue-row-up" data-tab="${tabNum}" data-row="${rowIndex}" title="${options.moveUpTitle || ''}"><i class="bi bi-arrow-up"></i></button>` +
-          `<button id="control-${tabNum}-${rowIndex}-b" type="button" class="btn btn-outline-secondary queue-row-down" data-tab="${tabNum}" data-row="${rowIndex}" title="${options.moveDownTitle || ''}"><i class="bi bi-arrow-down"></i></button>` +
-          `<button id="control-${tabNum}-${rowIndex}-c" type="button" class="btn btn-outline-danger queue-row-del" data-tab="${tabNum}" data-row="${rowIndex}" title="${options.removeRowTitle || ''}"><i class="bi bi-x"></i></button>` +
+          `<button id="control-${tabNum}-${rowIndex}-a" type="button" class="btn btn-outline-secondary queue-row-up" data-tab="${tabNum}" data-row="${rowIndex}" data-bs-toggle="tooltip" title="${options.moveUpTitle || ''}"><i class="bi bi-arrow-up"></i></button>` +
+          `<button id="control-${tabNum}-${rowIndex}-b" type="button" class="btn btn-outline-secondary queue-row-down" data-tab="${tabNum}" data-row="${rowIndex}" data-bs-toggle="tooltip" title="${options.moveDownTitle || ''}"><i class="bi bi-arrow-down"></i></button>` +
+          `<button id="control-${tabNum}-${rowIndex}-c" type="button" class="btn btn-outline-danger queue-row-del" data-tab="${tabNum}" data-row="${rowIndex}" data-bs-toggle="tooltip" title="${options.removeRowTitle || ''}"><i class="bi bi-x"></i></button>` +
         `</div>` +
       `</td>`;
+
+    // Skin the freshly created row control buttons with Bootstrap tooltips.
+    tr.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(function (el) {
+      bootstrap.Tooltip.getOrCreateInstance(el);
+    });
     return tr;
   }
 
