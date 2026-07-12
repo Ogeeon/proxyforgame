@@ -413,10 +413,12 @@
                 </optgroup>
                 <?php endfor; ?>
               </select>
-              <label for="tab2-from-level"><?= $l['from-level'] ?></label>
-              <input id="tab2-from-level" type="text" name="tab2-from-level" class="form-control form-control-sm level-input" value="0"/>
-              <label for="tab2-to-level"><?= $l['to-level'] ?></label>
-              <input id="tab2-to-level" type="text" name="tab2-to-level" class="form-control form-control-sm level-input" value="0"/>
+              <div class="d-flex align-items-center gap-2">
+                <label for="tab2-from-level"><?= $l['from-level'] ?></label>
+                <input id="tab2-from-level" type="text" name="tab2-from-level" class="form-control form-control-sm level-input" value="0"/>
+                <label for="tab2-to-level"><?= $l['to-level'] ?></label>
+                <input id="tab2-to-level" type="text" name="tab2-to-level" class="form-control form-control-sm level-input" value="0"/>
+              </div>
             </div>
           </div>
           <div id="commons-table-div">
