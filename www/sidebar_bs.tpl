@@ -90,7 +90,7 @@
     <div class="spacer"></div>
     <div class="list-group list-group-flush">
       <div class="list-group-item text-center">
-        <a href="https://github.com/Ogeeon/proxyforgame" target="_blank" rel="noopener noreferrer" title="ProxyForGame on GitHub">
+        <a href="https://github.com/Ogeeon/proxyforgame" target="_blank" rel="noopener noreferrer" data-bs-toggle="tooltip" title="ProxyForGame on GitHub">
           <i class="bi bi-github" style="font-size: 1.5rem;"></i>
         </a>
       </div>
@@ -144,7 +144,7 @@
     <div class="spacer"></div>
     <div class="list-group list-group-flush">
       <div class="list-group-item text-center">
-        <a href="https://github.com/Ogeeon/proxyforgame" target="_blank" rel="noopener noreferrer" title="ProxyForGame on GitHub">
+        <a href="https://github.com/Ogeeon/proxyforgame" target="_blank" rel="noopener noreferrer" data-bs-toggle="tooltip" title="ProxyForGame on GitHub">
           <i class="bi bi-github" style="font-size: 1.5rem;"></i>
         </a>
       </div>

@@ -265,6 +265,10 @@ document.addEventListener('DOMContentLoaded', function() {
     emailModal = new bootstrap.Modal(document.getElementById('emailModal'));
     changelogModal = new bootstrap.Modal(document.getElementById('changelogModal'));
 
+    document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(function(el) {
+        new bootstrap.Tooltip(el);
+    });
+
     const sidebarToggleBtn = document.querySelector('[data-bs-target="#sidebarOffcanvas"]');
     const sidebarOffcanvas = document.getElementById('sidebarOffcanvas');
     const body = document.body;
