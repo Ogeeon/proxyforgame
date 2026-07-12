@@ -1,0 +1,203 @@
+/*
+ * Production Calculator - Bootstrap 5 Styles
+ * Migrated from jQuery UI to Bootstrap 5.3.8
+ */
+
+#production {
+  /* max-content (not min-content): the accumulation "what"/"when" panels are
+     laid out side-by-side via flex-wrap, and min-content would collapse a
+     wrapping flex container to its widest single item, forcing panels to
+     stack. */
+  width: max-content;
+  max-width: 100%;
+  margin: 0 auto;
+  position: relative;
+  overflow-x: auto;
+}
+
+/* Allow tables to dictate the width of the entire container hierarchy */
+#production .tab-content,
+#production .tab-pane {
+  min-width: fit-content;
+}
+
+/* The settings panels' flex-wrap rows have a large *unwrapped* intrinsic width
+   (sum of all their items), which would otherwise inflate #production's
+   max-content size beyond what the tables need. width:0 removes their
+   contribution to that calculation; min-width then stretches them back to the
+   resolved, table-driven width so their own items still wrap normally. The
+   panels carry the Bootstrap m-1 utility (0.25rem margin per side); since
+   margin sits outside the width, min-width:100% would add that 0.5rem back on
+   top of the parent's width and overflow it — subtract it here so the panels'
+   outer box (content + margin) exactly matches the parent's width. */
+#universes-panel,
+#general-settings-panel {
+  width: 0;
+  min-width: calc(100% - 0.5rem);
+  box-sizing: border-box;
+}
+
+#reset {
+  cursor: pointer;
+  z-index: 10;
+  width: 30px;
+  height: 30px;
+  border: 1px solid #dc3545;
+  border-radius: 8px;
+  margin-right: 0.2rem;
+}
+
+/* Inputs */
+.level-input {
+  width: 50px;
+  text-align: center;
+}
+
+/* Compact controls placed inside .lined tables */
+.input-in-table,
+.lined .form-control-sm {
+  height: 1.5rem;
+  min-height: unset;
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+.lined .form-select-sm {
+  display: inline-block;
+  width: auto;
+  height: 1.5rem;
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+/* The width classes from common_bs.css are sized for padding-less legacy
+   inputs; Bootstrap form controls carry ~1rem of horizontal padding, so widen
+   them here to keep the values readable. */
+#production .input-1column { width: 32px; }
+#production .input-2columns { width: 38px; }
+#production .input-3columns { width: 48px; }
+#production .input-4columns { width: 58px; }
+#production .input-10columns { width: 110px; }
+#production .input-20columns { width: 180px; }
+
+#prod-coeff-div {
+  text-align: center;
+  padding: 4px 0;
+}
+
+/* Table styling (shared with queue/costs/lfcosts/trade) */
+.lined {
+  border-collapse: collapse;
+}
+
+.lined th {
+  background-color: var(--bs-tertiary-bg);
+  font-weight: 600;
+  padding: 2px 8px;
+  border: 1px solid var(--bs-border-color);
+  white-space: nowrap;
+}
+
+.lined td {
+  border: 1px solid var(--bs-border-color);
+  padding: 2px 8px;
+  white-space: nowrap;
+}
+
+.lined tr.odd {
+  background-color: var(--bs-table-striped-bg);
+}
+
+.lined tr.even {
+  background-color: transparent;
+}
+
+/* Thick separator rows inside the production tables */
+.lined td.table-line-2px,
+.lined td.table-line-3px {
+  padding: 0;
+}
+
+.table-line-2px { background-color: #6A8DA6; height: 2px; }
+.table-line-3px { background-color: #6A8DA6; height: 3px; }
+
+/* Blinking warnings */
+#max-planet-temp.red-border { border: 3px solid red; }
+
+#storage-cap-met.red-border,
+#storage-cap-crys.red-border,
+#storage-cap-deut.red-border { border: 2px solid red; }
+
+/* Additional-info rows of the all-planets table */
+.visible-span { visibility: visible; }
+.hidden-span { visibility: hidden; }
+
+/* Row edit/delete buttons in the all-planets table */
+.control-btn {
+  padding: 0.1rem 0.35rem;
+}
+
+.control-buttons { width: 60px; }
+
+/* Universe save/load buttons */
+.uni-control-btn {
+  padding: 0.1rem 0.4rem;
+}
+
+/* Accordions: keep panels dense like the legacy jQuery UI ones */
+#one-planet-accordion .accordion-button,
+#all-planets-accordion .accordion-button {
+  padding: 0.4rem 0.75rem;
+}
+
+#one-planet-accordion .accordion-body,
+#all-planets-accordion .accordion-body {
+  padding: 0.5rem;
+}
+
+/* Warning banner */
+#warning {
+  position: absolute;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 9999;
+  padding: 10px 20px;
+  text-align: center;
+  background-color: var(--bs-warning-bg-subtle);
+  border: 1px solid var(--bs-warning-border-subtle);
+  border-radius: var(--bs-border-radius);
+  color: var(--bs-body-color);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  min-width: 300px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.4s ease-in-out;
+}
+
+#warning.visible {
+  opacity: 1;
+  pointer-events: auto;
+  display: block;
+}
+
+[data-bs-theme="dark"] .is-invalid {
+  border-color: #b05050 !important;
+  box-shadow: none !important;
+}
+
+/* Responsive */
+@media (max-width: 992px) {
+  #production {
+    max-width: 100%;
+    padding: 0 10px;
+  }
+
+  .lined td,
+  .lined th {
+    padding: 2px 4px;
+    font-size: 0.9rem;
+  }
+
+  .level-input { width: 45px; }
+}
