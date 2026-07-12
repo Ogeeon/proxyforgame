@@ -378,13 +378,13 @@
               <option value="8">80%</option>
             </select>
           </div>
+          <div id="prod-coeff-div" class="d-flex align-items-center gap-1">
+            <?= $l['prod-coeff'] ?>&nbsp;<span id="prod-coeff">0</span>
+          </div>
           <div class="d-flex align-items-center gap-1 ms-auto">
             <input id="one-pln-extended-view" name="one-pln-extended-view" type="checkbox" class="form-check-input"/>
             <label for="one-pln-extended-view"><?= $l['extended-view'] ?></label>
           </div>
-        </div>
-        <div id="prod-coeff-div">
-          <?= $l['prod-coeff'] ?>&nbsp;<span id="prod-coeff">0</span>
         </div>
 
         <table id="one-planet-prod" class="lined" cellpadding="0" cellspacing="1" border="0" width="100%">
