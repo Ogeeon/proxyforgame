@@ -673,7 +673,7 @@
             <tr class="<?= (($i+1) % 2) === 1 ? 'odd' : 'even' ?>">
               <td></td>
               <td><?= $l[$allTblTotalRows[$i]] ?></td>
-              <?php for ($j = 1; $j < 16; $j++): ?>
+              <?php for ($j = 1; $j < 15; $j++): ?>
                 <td align="center"></td>
               <?php endfor; ?>
             </tr>

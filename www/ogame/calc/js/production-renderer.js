@@ -86,7 +86,7 @@ function prepAllPlanetsTable() {
 		tr += '<td></td><td><span class="' + spanType + '">' + options.addtnlRowHeader + '</span></td><td colspan="2"><span class="' + spanType + '"></span></td>';
 		for (let k = 0; k < 10; k++)
 			tr += '<td><span class="' + spanType + '"></span></td>';
-		tr += '<td colspan="3"></td>';
+		tr += '<td colspan="2"></td>';
 		tr += '</tr>';
 		html += tr;
 	}
