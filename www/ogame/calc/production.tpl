@@ -293,14 +293,6 @@
           <label for="plasma-tech-level"><?= $l['plasma-tech-level'] ?></label>
           <input id="plasma-tech-level" type="text" name="plasma-tech-level" class="form-control form-control-sm level-input" value="0"/>
         </div>
-        <div class="d-flex align-items-center gap-1">
-          <label for="universe-speed"><?= $l['universe-speed'] ?></label>
-          <select id="universe-speed" name="universe-speed" class="form-select form-select-sm w-auto">
-            <?php for ($s = 1; $s <= 10; $s++): ?>
-            <option value="<?=$s?>" <?= $s === 1 ? 'selected="selected"' : '' ?>><?=$s?></option>
-            <?php endfor; ?>
-          </select>
-        </div>
       </div>
       <div class="d-flex flex-wrap gap-2 align-items-center justify-content-center mb-1">
         <div class="d-flex align-items-center gap-1">
@@ -337,6 +329,14 @@
         <div class="d-flex align-items-center gap-1">
           <input id="is-trader" type="checkbox" name="is-trader" class="form-check-input"/>
           <label for="is-trader"><?= $l['is-trader'] ?></label>
+        </div>
+        <div class="d-flex align-items-center gap-1">
+          <label for="universe-speed"><?= $l['economy-speed'] ?></label>
+          <select id="universe-speed" name="universe-speed" class="form-select form-select-sm w-auto">
+            <?php for ($s = 1; $s <= 10; $s++): ?>
+            <option value="<?=$s?>" <?= $s === 1 ? 'selected="selected"' : '' ?>><?=$s?></option>
+            <?php endfor; ?>
+          </select>
         </div>
         <div class="d-flex align-items-center gap-1">
           <label for="exchange-rates-m"><?= $l['exchange-rates'] ?></label>
