@@ -266,19 +266,19 @@
           </select>
         </div>
         <div id="universe-control" class="btn-group">
-          <button id="universe-load" type="button" title="<?= $l['universe-load'] ?>" class="btn btn-outline-secondary btn-sm uni-control-btn">
+          <button id="universe-load" type="button" data-bs-toggle="tooltip" title="<?= $l['universe-load'] ?>" class="btn btn-outline-secondary btn-sm uni-control-btn">
             <i class="bi bi-box-arrow-up"></i>
           </button>
-          <button id="universe-save" type="button" title="<?= $l['universe-save'] ?>" class="btn btn-outline-secondary btn-sm uni-control-btn">
+          <button id="universe-save" type="button" data-bs-toggle="tooltip" title="<?= $l['universe-save'] ?>" class="btn btn-outline-secondary btn-sm uni-control-btn">
             <i class="bi bi-box-arrow-in-down"></i>
           </button>
-          <button id="universe-delete" type="button" title="<?= $l['universe-delete'] ?>" class="btn btn-outline-secondary btn-sm uni-control-btn">
+          <button id="universe-delete" type="button" data-bs-toggle="tooltip" title="<?= $l['universe-delete'] ?>" class="btn btn-outline-secondary btn-sm uni-control-btn">
             <i class="bi bi-x-lg"></i>
           </button>
         </div>
         <div class="d-flex align-items-center gap-1">
           <input id="universe-name" type="text" name="universe-name" class="form-control form-control-sm input-20columns"/>
-          <button id="universe-add" type="button" title="<?= $l['universe-add'] ?>" class="btn btn-outline-secondary btn-sm uni-control-btn">
+          <button id="universe-add" type="button" data-bs-toggle="tooltip" title="<?= $l['universe-add'] ?>" class="btn btn-outline-secondary btn-sm uni-control-btn">
             <i class="bi bi-plus-lg"></i>
           </button>
         </div>

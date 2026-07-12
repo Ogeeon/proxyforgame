@@ -52,6 +52,12 @@ function prepAllPlanetsTable() {
 	// 3px line); drop previously rendered planet rows in between.
 	let footerStart = allRows.length - 5;
 	for (let r = 1; r < footerStart; r++) {
+		// Dispose Bootstrap tooltips before dropping the row so no orphaned
+		// instances or lingering tips are left behind.
+		allRows[r].querySelectorAll('[data-bs-toggle="tooltip"]').forEach(function (el) {
+			const inst = bootstrap.Tooltip.getInstance(el);
+			if (inst) inst.dispose();
+		});
 		allRows[r].remove();
 	}
 	let footerFirst = allRows[footerStart];
@@ -74,8 +80,8 @@ function prepAllPlanetsTable() {
 		}
 		tr += '<td class="centered">0</td>'; // коэффициент - тоже заготовка
 		tr += '<td><div id="control-' + i + '" class="btn-group">';
-		tr += '<button id="control-' + i + '-e" type="button" class="btn btn-outline-secondary btn-sm control-btn control-edit" data-pln="' + i + '" title="' + options.editPlanetTitle + '"><i class="bi bi-pencil"></i></button>';
-		tr += '<button id="control-' + i + '-d" type="button" class="btn btn-outline-secondary btn-sm control-btn control-delete" data-pln="' + i + '" title="' + options.deletePlanetTitle + '"><i class="bi bi-x-lg"></i></button>';
+		tr += '<button id="control-' + i + '-e" type="button" class="btn btn-outline-secondary btn-sm control-btn control-edit" data-pln="' + i + '" data-bs-toggle="tooltip" title="' + options.editPlanetTitle + '"><i class="bi bi-pencil"></i></button>';
+		tr += '<button id="control-' + i + '-d" type="button" class="btn btn-outline-secondary btn-sm control-btn control-delete" data-pln="' + i + '" data-bs-toggle="tooltip" title="' + options.deletePlanetTitle + '"><i class="bi bi-x-lg"></i></button>';
 		tr += '</div></td>';
 		tr += '</tr>';
 		html += tr;
@@ -91,6 +97,11 @@ function prepAllPlanetsTable() {
 		html += tr;
 	}
 	footerFirst.insertAdjacentHTML('beforebegin', html);
+
+	// Skin the freshly created row control buttons with Bootstrap tooltips
+	$$('#all-planets-prod [data-bs-toggle="tooltip"]').forEach(function (el) {
+		bootstrap.Tooltip.getOrCreateInstance(el);
+	});
 
 	// Wire validation + recalc on the freshly created inputs
 	let rows = $$('#all-planets-prod tr');
