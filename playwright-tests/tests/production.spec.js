@@ -28,13 +28,21 @@ test('calculator options are available', async ({ page }) => {
     expect(optionsExists).toBe(true);
 });
 
-test('basic functionality works', async ({ page }) => {
-    // Add your specific test here
-    // Example: fill in a form field and check the result
+test('economy speed factored correctly', async ({ page }) => {
+    const totalRow = page.locator('#one-planet-prod tr').filter({ hasText: 'Total per hour' });
 
-    // await page.locator('#some-input').fill('10');
-    // await page.locator('#some-input').press('Enter');
-    // await expect(page.locator('#some-result')).toContainText('expected value');
+    // Default universe speed is 1
+    await expect(totalRow.locator('td').nth(3)).toHaveText('1.353');
+    await expect(totalRow.locator('td').nth(4)).toHaveText('663');
+    await expect(totalRow.locator('td').nth(5)).toHaveText('77');
+    await expect(totalRow.locator('td').nth(6)).toHaveText('511');
+
+    // Set universe speed to 10 and trigger recalculation
+    await page.locator('#universe-speed').selectOption('10');
+    await expect(totalRow.locator('td').nth(3)).toHaveText('13.567');
+    await expect(totalRow.locator('td').nth(4)).toHaveText('6.650');
+    await expect(totalRow.locator('td').nth(5)).toHaveText('786');
+    await expect(totalRow.locator('td').nth(6)).toHaveText('11');
 });
 
 test('officers bonuses calculations are correct', async ({ page }) => {
