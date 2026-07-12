@@ -609,6 +609,8 @@
     "planet-pos-short": "Pos.",
     "planet-name": "Nazwa planety",
     "save-planet-data": "Zapisywanie danych",
+    "edit-planet-tooltip": "Edytuj za pomocą pierwszej zakładki",
+    "delete-planet-tooltip": "Usuń",
     "del-planet-confirm": "Wprowadziłeś dane dla tej planety. Czy na pewno chcesz je usunąć?",
     "clone-planet-data": "Sklonuj dane",
     "clone-confirm": "Wszystkie dane wprowadzone na tej stronie, z wyjątkiem nazwy planety,__BR__jej pozycji i temperatury, zostaną zastosowane do wszystkich dostępnych planet.__BR__Kontynuować klonowanie?",

@@ -205,6 +205,8 @@
     options.cloneConfMsg = "<?= $l['clone-confirm'] ?>";
     options.addtnlRowHeader = "<?= $l['addtnl-row'] ?>";
     options.energyShort = "<?= $l['energy-short'] ?>";
+    options.editPlanetTitle = "<?= $l['edit-planet-tooltip'] ?>";
+    options.deletePlanetTitle = "<?= $l['delete-planet-tooltip'] ?>";
 
     <?php $techs = getTechsByType(2);?>
     options.bldCosts = {

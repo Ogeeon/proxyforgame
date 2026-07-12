@@ -592,6 +592,8 @@
     "planet-pos-short": "Pos.",
     "planet-name": "Gezegen adı",
     "save-planet-data": "Veri kaydet",
+    "edit-planet-tooltip": "İlk sekmeyi kullanarak düzenle",
+    "delete-planet-tooltip": "Sil",
     "del-planet-confirm": "Bu gezegen için veri girdiniz. Silmek istediğinizden emin misiniz?",
     "clone-planet-data": "Verileri klonlayın",
     "clone-confirm": "Gezegenin adı, konumu ve sıcaklığı dışında bu sayfaya girilen tüm veriler,__BR__mevcut tüm gezegenlere uygulanacaktır.__BR__Klonlamaya devam edilsin mi?",

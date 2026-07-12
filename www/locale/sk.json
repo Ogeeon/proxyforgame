@@ -587,6 +587,8 @@
     "planet-pos-short": "Pos.",
     "planet-name": "Názov planéty",
     "save-planet-data": "Uložiť dáta",
+    "edit-planet-tooltip": "Upraviť pomocou prvej karty",
+    "delete-planet-tooltip": "Odstrániť",
     "del-planet-confirm": "Zadali ste údaje pre túto planétu. Naozaj ho chcete odstrániť?",
     "clone-planet-data": "Klonujte údaje",
     "clone-confirm": "Všetky údaje zadané na tejto stránke okrem názvu planéty,__BR__jej polohy a teploty, sa použijú na všetky dostupné planéty.__BR__Pokračovať v klonovaní?",

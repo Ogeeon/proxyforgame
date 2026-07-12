@@ -74,8 +74,8 @@ function prepAllPlanetsTable() {
 		}
 		tr += '<td class="centered">0</td>'; // коэффициент - тоже заготовка
 		tr += '<td><div id="control-' + i + '" class="btn-group">';
-		tr += '<button id="control-' + i + '-e" type="button" class="btn btn-outline-secondary btn-sm control-btn control-edit" data-pln="' + i + '"><i class="bi bi-pencil"></i></button>';
-		tr += '<button id="control-' + i + '-d" type="button" class="btn btn-outline-secondary btn-sm control-btn control-delete" data-pln="' + i + '"><i class="bi bi-x-lg"></i></button>';
+		tr += '<button id="control-' + i + '-e" type="button" class="btn btn-outline-secondary btn-sm control-btn control-edit" data-pln="' + i + '" title="' + options.editPlanetTitle + '"><i class="bi bi-pencil"></i></button>';
+		tr += '<button id="control-' + i + '-d" type="button" class="btn btn-outline-secondary btn-sm control-btn control-delete" data-pln="' + i + '" title="' + options.deletePlanetTitle + '"><i class="bi bi-x-lg"></i></button>';
 		tr += '</div></td>';
 		tr += '</tr>';
 		html += tr;
