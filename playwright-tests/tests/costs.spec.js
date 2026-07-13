@@ -2,9 +2,11 @@ import { test, expect } from '@playwright/test';
 
 test.describe('Costs Calculator Page', () => {
     test.beforeEach(async ({ context, page }) => {
-        // Avoid changelog popup
         await context.addInitScript(() => {
+            // Avoid changelog popup
             localStorage.setItem('lastChange', 'key-value;true,value;99999');
+            // Suppress the robot/nanite factory disclaimer so it doesn't block functional tests
+            document.cookie = 'costs_rn_disclaimer_shown=1; path=/';
         });
         await page.goto('/ogame/calc/costs.php');
     });
@@ -519,5 +521,64 @@ test.describe('Costs Calculator Page', () => {
         await page.locator('#planet-pos').fill('10');
         await page.locator('#planet-pos').blur();
         await expect(page.locator('#planet-pos')).toHaveValue('10');
+    });
+});
+
+test.describe('Costs Calculator - Robot/Nanite factory disclaimer', () => {
+    test.beforeEach(async ({ context, page }) => {
+        // Avoid changelog popup, but do NOT suppress the disclaimer cookie here
+        await context.addInitScript(() => {
+            localStorage.setItem('lastChange', 'key-value;true,value;99999');
+        });
+        await page.goto('/ogame/calc/costs.php');
+    });
+
+    test('modal appears when building the Robotics factory (single-level tab) and only once', async ({ page }) => {
+        const modal = page.locator('#robot-nanite-disclaimer');
+        await expect(modal).toBeHidden();
+
+        const robotLevel = page.locator('#table-0-2 tr', { hasText: 'Robotics factory' })
+            .locator('td:nth-child(3) input');
+        await robotLevel.fill('5');
+        await robotLevel.press('Enter');
+
+        await expect(modal).toBeVisible();
+        // Body links to the construction queue calculator
+        await expect(modal.locator('.modal-body a')).toHaveAttribute('href', /\/ogame\/calc\/queue\.php$/);
+
+        // Dismiss; it must not reappear on further input (remembered via cookie)
+        await modal.locator('.btn-close').click();
+        await expect(modal).toBeHidden();
+
+        await robotLevel.fill('8');
+        await robotLevel.press('Enter');
+        await page.waitForTimeout(200);
+        await expect(modal).toBeHidden();
+    });
+
+    test('modal appears from the "to-level" of a factory on the multi-level tab', async ({ page }) => {
+        const modal = page.locator('#robot-nanite-disclaimer');
+        await page.getByRole('tab', { name: 'All items - multiple levels' }).click();
+        await page.getByRole('tab', { name: 'Buildings (planet)' }).click();
+        await expect(modal).toBeHidden();
+
+        const naniteToLevel = page.locator('#table-1-2 tr', { hasText: 'Nanite factory' })
+            .locator('td:nth-child(4) input');
+        await naniteToLevel.fill('3');
+        await naniteToLevel.press('Enter');
+
+        await expect(modal).toBeVisible();
+    });
+
+    test('a non-factory row does not trigger the disclaimer', async ({ page }) => {
+        const modal = page.locator('#robot-nanite-disclaimer');
+
+        const metalLevel = page.locator('#table-0-2 tr', { hasText: 'Metal Mine' })
+            .locator('td:nth-child(3) input');
+        await metalLevel.fill('10');
+        await metalLevel.press('Enter');
+
+        await page.waitForTimeout(200);
+        await expect(modal).toBeHidden();
     });
 });
