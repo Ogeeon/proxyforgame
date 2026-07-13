@@ -138,7 +138,7 @@ class QueueRenderer {
     const cells = transportsRow.cells;
     cells[1].innerHTML = `${numToOGame(needSC)} <abbr data-bs-toggle="tooltip" title="${options.scFull}">${options.scShort}</abbr>`;
     cells[2].innerHTML = `${numToOGame(needLC)} <abbr data-bs-toggle="tooltip" title="${options.lcFull}">${options.lcShort}</abbr>`;
-    // Skin the transport abbreviations with Bootstrap tooltips (matches the Costs calculator).
+    // Skin the transport abbreviations with Bootstrap tooltips.
     transportsRow.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(function (el) {
       const existing = bootstrap.Tooltip.getInstance(el);
       if (existing) existing.dispose();
