@@ -289,7 +289,9 @@
     "msg-cant-research": "At the given level of Research laboratory research \"{0}\" is unavailable.",
     "class-collector": "Collector",
     "mineral-res-cntr-lvl": "Mineral Research Centre",
-    "lf-terraformer-rdc": "Terraformer cost/build time reduction"
+    "lf-terraformer-rdc": "Terraformer cost/build time reduction",
+    "disclaimer-robot-nanite": "Please take into account the note in the first row of the table when reading build times. If you are building a Robotics factory or a Nanite factory, use the <a href=\"{0}\">Construction queue calculator</a> for accurate build time calculations.",
+    "disclaimer-title": "Please note"
   },
   "lfcosts": {
     "energy": "Energy",

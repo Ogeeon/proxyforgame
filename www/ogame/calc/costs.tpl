@@ -638,6 +638,26 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 
+<!-- Robot/Nanite factory build-time disclaimer Modal -->
+<div class="modal fade" id="robot-nanite-disclaimer" tabindex="-1" aria-labelledby="robot-nanite-disclaimer-label" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title d-flex align-items-center gap-2" id="robot-nanite-disclaimer-label">
+          <i class="bi bi-exclamation-triangle-fill text-warning"></i> <?= $l['disclaimer-title'] ?>
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <?= str_replace('{0}', '/' . $lang . '/ogame/calc/queue.php', $l['disclaimer-robot-nanite']) ?>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" data-bs-dismiss="modal"><?= $l['done'] ?></button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- IRN Calculator Modal -->
 <div class="modal fade" id="irn-calc" tabindex="-1" aria-labelledby="irn-calc-label" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">

@@ -288,7 +288,9 @@
     "class-collector": "Colecionador",
     "planet-pos": "Posição",
     "mineral-res-cntr-lvl": "Centro de Pesquisa de Minerais",
-    "lf-terraformer-rdc": "Redução dos custos do terraformador"
+    "lf-terraformer-rdc": "Redução dos custos do terraformador",
+    "disclaimer-robot-nanite": "Por favor, tenha em conta a nota na primeira linha da tabela ao ler os tempos de construção. Se estiver a construir uma Fábrica de Robôs ou uma Fábrica de Nanites, utilize a <a href=\"{0}\">Calculadora de fila de construção</a> para cálculos precisos do tempo de construção.",
+    "disclaimer-title": "Atenção"
   },
   "lfcosts": {
     "sc-short": "CP",

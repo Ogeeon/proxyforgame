@@ -289,7 +289,9 @@
     "msg-cant-research": "Na datom levelu Centra za istraživanje, istraživanje \"{0}\" nije dostupno.",
     "moon": "Mjeseca",
     "mineral-res-cntr-lvl": "Mineral Research Centre",
-    "lf-terraformer-rdc": "Smanjenje troškova terraformera"
+    "lf-terraformer-rdc": "Smanjenje troškova terraformera",
+    "disclaimer-robot-nanite": "Molimo uzmite u obzir napomenu u prvom redu tablice pri čitanju vremena gradnje. Ako gradite Tvornicu robota ili Tvornicu nanita, koristite <a href=\"{0}\">Kalkulator reda izgradnje</a> za točan izračun vremena gradnje.",
+    "disclaimer-title": "Napomena"
   },
   "lfcosts": {
     "sc-short": "MT",

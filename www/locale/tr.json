@@ -283,7 +283,9 @@
     "class-collector": "Koleksiyoncu",
     "planet-pos": "Konum",
     "mineral-res-cntr-lvl": "Maden Araştırma Merkezi",
-    "lf-terraformer-rdc": "Terraformer maliyet azaltımı"
+    "lf-terraformer-rdc": "Terraformer maliyet azaltımı",
+    "disclaimer-robot-nanite": "İnşa sürelerini okurken tablonun ilk satırındaki notu dikkate alın. Robot Fabrikası veya Nanit Fabrikası inşa ediyorsanız, doğru inşa süresi hesaplamaları için <a href=\"{0}\">İnşaat kuyruğu hesaplayıcısını</a> kullanın.",
+    "disclaimer-title": "Dikkat"
   },
   "lfcosts": {
     "energy": "Enerji",

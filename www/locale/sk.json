@@ -287,7 +287,9 @@
     "class-collector": "Collector",
     "planet-pos": "Pozícia",
     "mineral-res-cntr-lvl": "Výskumné centrum minerálov",
-    "lf-terraformer-rdc": "Zníženie nákladov na terraformer"
+    "lf-terraformer-rdc": "Zníženie nákladov na terraformer",
+    "disclaimer-robot-nanite": "Pri čítaní časov výstavby zohľadnite poznámku v prvom riadku tabuľky. Ak staviate Robotické továrne alebo Nanotechnologické továrne, použite <a href=\"{0}\">Kalkulačku frontu výstavby</a> pre presné výpočty času výstavby.",
+    "disclaimer-title": "Upozornenie"
   },
   "lfcosts": {
     "title": "OGame - Kalkulátor pre ceny pre formy života",

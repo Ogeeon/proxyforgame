@@ -75,7 +75,10 @@ class CostsCalculator {
     // 4. Recalculate range tab (tab 2)
     this.recalculateRangeTab();
 
-    // 5. Save state
+    // 5. Show the robot/nanite factory disclaimer once if applicable
+    this._maybeShowRobotNaniteDisclaimer();
+
+    // 6. Save state
     this.saveState();
 
     const elapsed = performance.now() - startTime;
@@ -554,6 +557,92 @@ class CostsCalculator {
   }
 
   /**
+   * Show the robot/nanite factory disclaimer modal once (per month) when the
+   * user is building a Robotics/Nanite factory in the tables: a non-zero level
+   * on the single-level tab (0) or a non-zero "to-level" on the multi-level
+   * tab (1). Build time calculations ignore construction order, so those rows
+   * can make the shown times misleading (see the queue calculator for accurate
+   * figures).
+   * @private
+   */
+  _maybeShowRobotNaniteDisclaimer() {
+    if (this._getCookie(CostsCalculator.RN_DISCLAIMER_COOKIE) === '1') return;
+    if (!this._isRobotNaniteFactoryBuilt()) return;
+
+    const el = document.getElementById('robot-nanite-disclaimer');
+    if (!el || typeof bootstrap === 'undefined' || !bootstrap.Modal) return;
+
+    bootstrap.Modal.getOrCreateInstance(el).show();
+    this._setCookie(CostsCalculator.RN_DISCLAIMER_COOKIE, '1', 30); // remember for ~1 month
+  }
+
+  /**
+   * Scan the Robotics/Nanite factory rows and report whether any of them is
+   * being built: a non-zero level on tab 0 or a non-zero "to-level" on tab 1.
+   * @private
+   */
+  _isRobotNaniteFactoryBuilt() {
+    const factoryIds = new Set([14, 15]); // robot factory (14, moon 10014), nanite factory (15)
+    // { tableId, multi } — on multi-level tables the "to-level" input is checked
+    const specs = [
+      { tableId: 'table-0-2', multi: false },
+      { tableId: 'table-0-3', multi: false },
+      { tableId: 'table-1-2', multi: true },
+      { tableId: 'table-1-3', multi: true }
+    ];
+
+    for (const spec of specs) {
+      const table = document.getElementById(spec.tableId);
+      if (!table) continue;
+
+      for (const row of table.querySelectorAll('tr')) {
+        if (!row.cells || row.cells.length === 0) continue;
+
+        let techId = Number.parseInt(row.cells[0].innerHTML);
+        if (!techId) continue;
+        if (techId > 10000) techId -= 10000; // moon buildings are offset by 10000
+        if (!factoryIds.has(techId)) continue;
+
+        // Single-level row: level input at children[2]; multi-level: to-level at children[3]
+        const cell = row.children[spec.multi ? 3 : 2];
+        const input = cell && cell.children[0];
+        if (!input) continue;
+
+        const value = parseFloat(String(input.value).replace(',', '.'));
+        if (!isNaN(value) && value > 0) return true;
+      }
+    }
+
+    return false;
+  }
+
+  /**
+   * Read a cookie value by name.
+   * @private
+   */
+  _getCookie(name) {
+    const prefix = name + '=';
+    for (const raw of document.cookie.split(';')) {
+      const cookie = raw.trim();
+      if (cookie.startsWith(prefix)) {
+        return decodeURIComponent(cookie.substring(prefix.length));
+      }
+    }
+    return null;
+  }
+
+  /**
+   * Write a cookie that expires in the given number of days.
+   * @private
+   */
+  _setCookie(name, value, days) {
+    const d = new Date();
+    d.setTime(d.getTime() + days * 24 * 60 * 60 * 1000);
+    document.cookie = name + '=' + encodeURIComponent(value) +
+      '; expires=' + d.toUTCString() + '; path=/';
+  }
+
+  /**
    * Handle table input change
    * @private
    */
@@ -567,6 +656,9 @@ class CostsCalculator {
       // Update grand totals for the tab group
       const outerTab = tableId.startsWith('table-1-') ? 1 : 0;
       this._updateGrandTotals(outerTab);
+
+      // Show the robot/nanite factory disclaimer once if applicable
+      this._maybeShowRobotNaniteDisclaimer();
     }
   }
 
@@ -592,6 +684,7 @@ class CostsCalculator {
    * Storage key for this calculator
    */
   static STORAGE_KEY = 'costs_calculator_state';
+  static RN_DISCLAIMER_COOKIE = 'costs_rn_disclaimer_shown';
 
   /**
    * Check if localStorage is available

@@ -289,7 +289,9 @@
     "class-collector": "Zbieracz",
     "planet-pos": "Pozycja",
     "mineral-res-cntr-lvl": "Centrum Badań Minerałów",
-    "lf-terraformer-rdc": "Redukcja kosztów terraformera"
+    "lf-terraformer-rdc": "Redukcja kosztów terraformera",
+    "disclaimer-robot-nanite": "Przy odczytywaniu czasów budowy uwzględnij uwagę w pierwszym wierszu tabeli. Jeśli budujesz Fabrykę robotów lub Fabrykę nanitów, użyj <a href=\"{0}\">Kalkulatora kolejki budynków</a>, aby dokładnie obliczyć czas budowy.",
+    "disclaimer-title": "Uwaga"
   },
   "lfcosts": {
     "energy": "Energia",

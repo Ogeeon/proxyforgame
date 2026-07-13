@@ -288,7 +288,9 @@
     "msg-cant-research": "Auf dieser Forschungslabor Stufe Forschung \"{0}\" ist ausgeschlossen.",
     "class-collector": "Kollektor",
     "mineral-res-cntr-lvl": "Mineral-Forschungszentrum",
-    "lf-terraformer-rdc": "Reduzierung der Terraformer-Kosten"
+    "lf-terraformer-rdc": "Reduzierung der Terraformer-Kosten",
+    "disclaimer-robot-nanite": "Bitte beachten Sie beim Ablesen der Bauzeiten den Hinweis in der ersten Zeile der Tabelle. Wenn Sie eine Roboterfabrik oder eine Nanitenfabrik bauen, verwenden Sie für genaue Bauzeitberechnungen den <a href=\"{0}\">Konstruktion-Warteschlangen-Rechner</a>.",
+    "disclaimer-title": "Hinweis"
   },
   "lfcosts": {
     "title": "OGame - Kostenberechnung für Lebensformen",

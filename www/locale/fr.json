@@ -288,7 +288,9 @@
     "msg-cant-research": "Au niveau donné de laboratoire de recherche, le recherche \"{0}\" n`est pas disponible.",
     "class-collector": "Collecteur",
     "mineral-res-cntr-lvl": "Centre de recherche sur les minéraux",
-    "lf-terraformer-rdc": "Réduction des coûts du terraformeur"
+    "lf-terraformer-rdc": "Réduction des coûts du terraformeur",
+    "disclaimer-robot-nanite": "Veuillez tenir compte de la remarque figurant sur la première ligne du tableau lors de la lecture des durées de construction. Si vous construisez une Usine de robots ou une Usine de nanites, utilisez le <a href=\"{0}\">Calculateur de file de construction</a> pour des calculs de durée précis.",
+    "disclaimer-title": "Attention"
   },
   "lfcosts": {
     "title": "OGame - Calculateur de coûts pour les formes de vie",
