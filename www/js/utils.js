@@ -593,6 +593,34 @@ function loadFromStorage(name) {
 	return data;
 }
 
+/**
+ * Reads a single cookie value by name. Returns null when the cookie is absent.
+ * @param name - cookie name
+ */
+function getCookie(name) {
+	var prefix = name + '=';
+	var cookies = document.cookie.split(';');
+	for (var i = 0; i < cookies.length; i++) {
+		var cookie = cookies[i].trim();
+		if (cookie.indexOf(prefix) === 0) {
+			return decodeURIComponent(cookie.substring(prefix.length));
+		}
+	}
+	return null;
+}
+
+/**
+ * Writes a cookie that expires in the given number of days.
+ * @param name - cookie name
+ * @param value - cookie value (URI-encoded before storing)
+ * @param days - lifetime in days
+ */
+function setCookie(name, value, days) {
+	var d = new Date();
+	d.setTime(d.getTime() + days * 24 * 60 * 60 * 1000);
+	document.cookie = name + '=' + encodeURIComponent(value) + '; expires=' + d.toUTCString() + '; path=/';
+}
+
 function toggleLight(on) {
 	var theme = { value: 'light' };
 	if (on) {

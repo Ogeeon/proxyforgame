@@ -566,14 +566,14 @@ class CostsCalculator {
    * @private
    */
   _maybeShowRobotNaniteDisclaimer() {
-    if (this._getCookie(CostsCalculator.RN_DISCLAIMER_COOKIE) === '1') return;
+    if (getCookie(CostsCalculator.RN_DISCLAIMER_COOKIE) === '1') return;
     if (!this._isRobotNaniteFactoryBuilt()) return;
 
     const el = document.getElementById('robot-nanite-disclaimer');
     if (!el || typeof bootstrap === 'undefined' || !bootstrap.Modal) return;
 
     bootstrap.Modal.getOrCreateInstance(el).show();
-    this._setCookie(CostsCalculator.RN_DISCLAIMER_COOKIE, '1', 30); // remember for ~1 month
+    setCookie(CostsCalculator.RN_DISCLAIMER_COOKIE, '1', 30); // remember for ~1 month
   }
 
   /**
@@ -614,32 +614,6 @@ class CostsCalculator {
     }
 
     return false;
-  }
-
-  /**
-   * Read a cookie value by name.
-   * @private
-   */
-  _getCookie(name) {
-    const prefix = name + '=';
-    for (const raw of document.cookie.split(';')) {
-      const cookie = raw.trim();
-      if (cookie.startsWith(prefix)) {
-        return decodeURIComponent(cookie.substring(prefix.length));
-      }
-    }
-    return null;
-  }
-
-  /**
-   * Write a cookie that expires in the given number of days.
-   * @private
-   */
-  _setCookie(name, value, days) {
-    const d = new Date();
-    d.setTime(d.getTime() + days * 24 * 60 * 60 * 1000);
-    document.cookie = name + '=' + encodeURIComponent(value) +
-      '; expires=' + d.toUTCString() + '; path=/';
   }
 
   /**
