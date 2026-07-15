@@ -271,6 +271,9 @@ class CostsCalculator {
     // Special buttons
     this._bindSpecialEvents();
 
+    // LifeForm research bonuses full table modal
+    this._bindLfResearchTableEvents();
+
     // console.log('Event handlers bound');
   }
 
@@ -528,6 +531,325 @@ class CostsCalculator {
       toggleLightBS(theme.value === 'light');
       cbLightTheme.addEventListener('click', function () { toggleLightBS(this.checked); });
     }
+  }
+
+  /**
+   * Storage key for the LifeForm research bonuses table
+   */
+  static LF_TABLE_STORAGE_KEY = 'costs_lf_research_table';
+
+  /**
+   * Bind the LifeForm research bonuses full table modal:
+   *  - the opener button on the LifeForms tab
+   *  - per-row cost/time inputs (fractional 0..100 validation)
+   *  - the OK button (copy column minimums to the two reduction fields + persist)
+   *  - the "Get" button (open the paste-from-OGame modal)
+   *  - the Import button (parse pasted OGame text into the table)
+   * @private
+   */
+  _bindLfResearchTableEvents() {
+    // Restore a previously saved table so the modal always reflects it
+    this._loadLfResearchTable();
+
+    // Show the "values differ" warning next to the fields if the saved table
+    // carries per-research values that the single reduction field can't capture
+    this._updateLfResearchWarnings();
+
+    // Fractional 0..100 validation on every cost/time input
+    const inputs = $$('#lf-research-bonuses-tbody input[type="text"]');
+    inputs.forEach(input => {
+      input._constrains = { min: 0, max: 100, def: 0, allowFloat: true, allowNegative: false };
+      removeAllEvents(input, 'keyup');
+      addEvent(input, 'keyup', (event) => {
+        if (typeof validateInputNumber === 'function') {
+          validateInputNumber.call(event.target, event);
+        }
+      });
+      removeAllEvents(input, 'blur');
+      addEvent(input, 'blur', (event) => {
+        if (typeof validateInputNumberOnBlurNative === 'function') {
+          validateInputNumberOnBlurNative(event);
+        }
+      });
+    });
+
+    // Open the table modal
+    removeAllEvents('#lf-research-table-open', 'click');
+    addEvent('#lf-research-table-open', 'click', () => {
+      const el = document.getElementById('lf-research-table');
+      if (el && typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+        bootstrap.Modal.getOrCreateInstance(el).show();
+      }
+    });
+
+    // OK: copy the minimum of each column to the reduction fields, persist, close
+    removeAllEvents('#lf-research-table-ok', 'click');
+    addEvent('#lf-research-table-ok', 'click', () => {
+      this._applyLfResearchTable();
+      const el = document.getElementById('lf-research-table');
+      if (el && typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+        bootstrap.Modal.getOrCreateInstance(el).hide();
+      }
+    });
+
+    // Clear: reset every cost/time input in the table to zero
+    removeAllEvents('#lf-research-table-clear', 'click');
+    addEvent('#lf-research-table-clear', 'click', () => {
+      $$('#lf-research-bonuses-tbody input[type="text"]').forEach(input => {
+        input.value = this._formatDecimal(0);
+      });
+    });
+
+    // Get: open the paste-from-OGame modal on top of the table modal
+    removeAllEvents('#lf-research-table-get', 'click');
+    addEvent('#lf-research-table-get', 'click', () => {
+      const el = document.getElementById('lf-research-paste');
+      if (el && typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+        bootstrap.Modal.getOrCreateInstance(el).show();
+      }
+    });
+
+    // Import: parse the pasted text into the table, then close the paste modal
+    removeAllEvents('#lf-research-paste-import', 'click');
+    addEvent('#lf-research-paste-import', 'click', () => {
+      const txtarea = document.getElementById('lf-research-paste-txtarea');
+      if (!txtarea) return;
+      if (this._importLfResearchBonuses(txtarea.value)) {
+        txtarea.value = '';
+        const el = document.getElementById('lf-research-paste');
+        if (el && typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+          bootstrap.Modal.getOrCreateInstance(el).hide();
+        }
+      }
+    });
+  }
+
+  /**
+   * Read the cost/time value pairs currently entered in the table.
+   * @returns {{cost: number, time: number}[]}
+   * @private
+   */
+  _readLfResearchTable() {
+    const rows = Array.from($$('#lf-research-bonuses-tbody tr'));
+    return rows.map(row => ({
+      cost: this._parsePercent(row.querySelector('.lf-research-cost-input')),
+      time: this._parsePercent(row.querySelector('.lf-research-time-input'))
+    }));
+  }
+
+  /**
+   * The decimal separator for the current language (falls back to '.').
+   * @private
+   */
+  _decimalSeparator() {
+    return (typeof options !== 'undefined' && options.decimalSeparator) || '.';
+  }
+
+  /**
+   * Parse a number written with the current language's decimal separator.
+   * The "other" separator is treated as grouping and dropped.
+   * @private
+   */
+  _parseLocaleFloat(str) {
+    const ds = this._decimalSeparator();
+    const grouping = ds === '.' ? ',' : '.';
+    const normalized = String(str).split(grouping).join('').replace(ds, '.');
+    return parseFloat(normalized);
+  }
+
+  /**
+   * Format a number for display using the current language's decimal separator.
+   * @private
+   */
+  _formatDecimal(num) {
+    return String(num).replace('.', this._decimalSeparator());
+  }
+
+  /**
+   * Parse a percentage input's value into a non-negative float (0 on failure).
+   * @private
+   */
+  _parsePercent(input) {
+    if (!input) return 0;
+    const val = this._parseLocaleFloat(input.value);
+    return isNaN(val) || val < 0 ? 0 : val;
+  }
+
+  /**
+   * Copy the minimum of each column into the two reduction fields (clamped to
+   * their own maximums), then persist the whole table to localStorage and
+   * trigger a recalculation. The reduction fields apply to every research, so
+   * only the smallest per-research bonus is guaranteed across all of them.
+   * @private
+   */
+  _applyLfResearchTable() {
+    const data = this._readLfResearchTable();
+    if (data.length === 0) return;
+
+    const minCost = Math.min(...data.map(d => d.cost));
+    const minTime = Math.min(...data.map(d => d.time));
+
+    // Respect the reduction fields' own caps (cost ≤ 50%, time ≤ 99%)
+    setVal('#research-cost-reduction', this._formatDecimal(Math.min(50, minCost)));
+    setVal('#research-time-reduction', this._formatDecimal(Math.min(99, minTime)));
+
+    this._saveLfResearchTable(data);
+    this._updateLfResearchWarnings(data);
+
+    this._handleParamChange('research-cost-reduction');
+    this._handleParamChange('research-time-reduction');
+  }
+
+  /**
+   * Show or hide the "values differ" warning icon next to each reduction field.
+   * The field only holds the column minimum, so when a column contains values
+   * above that minimum the icon signals that the single value is a simplification.
+   * @param {{cost: number, time: number}[]} [data]
+   * @private
+   */
+  _updateLfResearchWarnings(data) {
+    const rows = data || this._readLfResearchTable();
+    const differs = (values) => values.length > 0 && Math.max(...values) > Math.min(...values);
+    this._toggleWarnIcon('research-cost-reduction-warn', differs(rows.map(d => d.cost)));
+    this._toggleWarnIcon('research-time-reduction-warn', differs(rows.map(d => d.time)));
+  }
+
+  /**
+   * Toggle a warning icon's visibility by id.
+   * @private
+   */
+  _toggleWarnIcon(id, show) {
+    const el = document.getElementById(id);
+    if (el) el.style.display = show ? '' : 'none';
+  }
+
+  /**
+   * Persist the research bonuses table to localStorage.
+   * @param {{cost: number, time: number}[]} [data]
+   * @private
+   */
+  _saveLfResearchTable(data) {
+    if (!this._isStorageAvailable()) return;
+    try {
+      const payload = (data || this._readLfResearchTable()).map(d => [d.cost, d.time]);
+      localStorage.setItem(CostsCalculator.LF_TABLE_STORAGE_KEY, JSON.stringify(payload));
+    } catch (e) {
+      console.error('Failed to save LF research table:', e.message);
+    }
+  }
+
+  /**
+   * Restore the research bonuses table from localStorage into the inputs.
+   * @private
+   */
+  _loadLfResearchTable() {
+    if (!this._isStorageAvailable()) return;
+    let payload = null;
+    try {
+      const json = localStorage.getItem(CostsCalculator.LF_TABLE_STORAGE_KEY);
+      if (json) payload = JSON.parse(json);
+    } catch {
+      return;
+    }
+    if (!Array.isArray(payload)) return;
+
+    const rows = $$('#lf-research-bonuses-tbody tr');
+    rows.forEach((row, i) => {
+      const entry = payload[i];
+      if (!Array.isArray(entry)) return;
+      const costInput = row.querySelector('.lf-research-cost-input');
+      const timeInput = row.querySelector('.lf-research-time-input');
+      if (costInput) costInput.value = this._formatDecimal(entry[0]);
+      if (timeInput) timeInput.value = this._formatDecimal(entry[1]);
+    });
+  }
+
+  /**
+   * Parse a research bonuses table copied from OGame and fill the modal table.
+   *
+   * The pasted text is a flat list of lines. Each research is a group:
+   *   <name>
+   *   <cost>   (either "-" for none, or "X%" followed by a "Max. Y%" line)
+   *   <time>   (either "-" for none, or "X%" followed by a "Max. Y%" line)
+   * Only the value line is meaningful; the "Max." line that always follows a
+   * real value is skipped. Researches are matched to rows by position (the
+   * OGame overview lists them in the same fixed order as the table).
+   *
+   * Two sanity checks guard the positional parsing:
+   *  1. the pasted text must contain the first research's name in the current
+   *     language (used as the anchor to start parsing), and
+   *  2. complete data must be present for all standard researches.
+   * Either failure aborts the import (nothing is written) and warns the user.
+   *
+   * @param {string} text
+   * @returns {boolean} true when the whole table was parsed and applied
+   * @private
+   */
+  _importLfResearchBonuses(text) {
+    const lines = String(text || '').split('\n').map(s => s.trim()).filter(s => s.length > 0);
+    const rows = Array.from($$('#lf-research-bonuses-tbody tr'));
+    if (rows.length === 0) return false;
+
+    // The first research's localized name, taken from the table itself
+    const firstName = rows[0].cells[0] ? rows[0].cells[0].textContent.trim() : '';
+    const firstLower = firstName.toLowerCase();
+
+    // Check 1: the paste must contain the first research name (current language).
+    // It also anchors where the research list starts (skipping any header rows).
+    let start = -1;
+    if (firstLower) {
+      for (let i = 0; i < lines.length; i++) {
+        if (lines[i].toLowerCase() === firstLower) { start = i; break; }
+      }
+    }
+    if (start === -1) {
+      alert((options.lfImportErrNotFound || '').replace('{0}', firstName));
+      return false;
+    }
+
+    let p = start;
+    // Read one column: "-" => 0 (one line); a numeric value consumes the value
+    // line plus the "Max. Y%" line that always follows it. Returns null at EOF.
+    const readColumn = () => {
+      if (p >= lines.length) return null;
+      const line = lines[p];
+      if (line === '-') { p++; return 0; }
+      // OGame always exports numbers with a dot decimal separator
+      const m = line.match(/-?\d+(?:\.\d+)?/);
+      p++;
+      if (m) {
+        if (p < lines.length) p++; // skip the trailing "Max. Y%" line
+        const val = parseFloat(m[0]);
+        return isNaN(val) || val < 0 ? 0 : val;
+      }
+      return 0;
+    };
+
+    // Parse into a buffer first; only apply once every research is complete
+    const parsedRows = [];
+    for (let i = 0; i < rows.length; i++) {
+      if (p >= lines.length) break; // no name line left => incomplete
+      p++; // research name line
+      const cost = readColumn();
+      const time = readColumn();
+      if (cost === null || time === null) break; // truncated columns => incomplete
+      parsedRows.push([cost, time]);
+    }
+
+    // Check 2: data must be present for every standard research
+    if (parsedRows.length < rows.length) {
+      alert(options.lfImportErrIncomplete || '');
+      return false;
+    }
+
+    rows.forEach((row, i) => {
+      const costInput = row.querySelector('.lf-research-cost-input');
+      const timeInput = row.querySelector('.lf-research-time-input');
+      if (costInput) costInput.value = this._formatDecimal(parsedRows[i][0]);
+      if (timeInput) timeInput.value = this._formatDecimal(parsedRows[i][1]);
+    });
+
+    return true;
   }
 
   /**

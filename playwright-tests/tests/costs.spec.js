@@ -1,4 +1,6 @@
 import { test, expect } from '@playwright/test';
+import { readFileSync } from 'fs';
+import { join } from 'path';
 
 test.describe('Costs Calculator Page', () => {
     test.beforeEach(async ({ context, page }) => {
@@ -609,5 +611,252 @@ test.describe('Costs Calculator - Robot/Nanite factory disclaimer', () => {
 
         await page.waitForTimeout(200);
         await expect(modal).toBeHidden();
+    });
+});
+
+// Fixture: a research bonuses table copied from OGame (English tech names).
+// Only Espionage has a cost reduction (24.04%); every research reduces time
+// (4.41%, except Espionage at 52.5%). Column minimums are therefore cost 0%,
+// time 4.41%.
+const LF_RESEARCH_FIXTURE = readFileSync(
+    join(__dirname, '../fixtures/lf_research_bonuses.txt'),
+    'utf-8'
+);
+
+test.describe('Costs Calculator - LifeForm research bonuses table', () => {
+    test.beforeEach(async ({ context, page }) => {
+        await context.addInitScript(() => {
+            localStorage.setItem('lastChange', 'key-value;true,value;99999');
+            document.cookie = 'costs_rn_disclaimer_shown=1; path=/';
+        });
+        await page.goto('/ogame/calc/costs.php');
+    });
+
+    test('import fills the table and OK copies column minimums to the reduction fields', async ({ page }) => {
+        await page.locator('#param-lifeforms-tab').click();
+        await page.locator('#lf-research-table-open').click();
+
+        const tableModal = page.locator('#lf-research-table');
+        await expect(tableModal).toBeVisible();
+
+        // Open the paste-from-OGame modal and import the fixture
+        await page.locator('#lf-research-table-get').click();
+        const pasteModal = page.locator('#lf-research-paste');
+        await expect(pasteModal).toBeVisible();
+        await page.locator('#lf-research-paste-txtarea').fill(LF_RESEARCH_FIXTURE);
+        await page.locator('#lf-research-paste-import').click();
+        await expect(pasteModal).toBeHidden();
+
+        // First row (Espionage) carries both a cost and a time reduction
+        const firstRow = page.locator('#lf-research-bonuses-tbody tr').first();
+        await expect(firstRow.locator('.lf-research-cost-input')).toHaveValue('24.04');
+        await expect(firstRow.locator('.lf-research-time-input')).toHaveValue('52.5');
+
+        // Second row (Computer) has no cost reduction and the common time bonus
+        const secondRow = page.locator('#lf-research-bonuses-tbody tr').nth(1);
+        await expect(secondRow.locator('.lf-research-cost-input')).toHaveValue('0');
+        await expect(secondRow.locator('.lf-research-time-input')).toHaveValue('4.41');
+
+        // OK copies the minimum of each column to the reduction fields
+        await page.locator('#lf-research-table-ok').click();
+        await expect(tableModal).toBeHidden();
+        await expect(page.locator('#research-cost-reduction')).toHaveValue('0');
+        await expect(page.locator('#research-time-reduction')).toHaveValue('4.41');
+
+        // The table is persisted to localStorage
+        const stored = await page.evaluate(() => localStorage.getItem('costs_lf_research_table'));
+        expect(stored).not.toBeNull();
+        const parsed = JSON.parse(stored);
+        expect(parsed[0]).toEqual([24.04, 52.5]);
+        expect(parsed[1]).toEqual([0, 4.41]);
+    });
+
+    test('the clear button resets every input in the table to zero', async ({ page }) => {
+        await page.locator('#param-lifeforms-tab').click();
+        await page.locator('#lf-research-table-open').click();
+        await expect(page.locator('#lf-research-table')).toBeVisible();
+        await page.locator('#lf-research-table-get').click();
+        await expect(page.locator('#lf-research-paste')).toBeVisible();
+        await page.locator('#lf-research-paste-txtarea').fill(LF_RESEARCH_FIXTURE);
+        await page.locator('#lf-research-paste-import').click();
+
+        const firstRow = page.locator('#lf-research-bonuses-tbody tr').first();
+        await expect(firstRow.locator('.lf-research-cost-input')).toHaveValue('24.04');
+
+        await page.locator('#lf-research-table-clear').click();
+
+        // Every cost/time input is back to 0
+        const costInputs = page.locator('#lf-research-bonuses-tbody .lf-research-cost-input');
+        const timeInputs = page.locator('#lf-research-bonuses-tbody .lf-research-time-input');
+        const costCount = await costInputs.count();
+        for (let i = 0; i < costCount; i++) {
+            await expect(costInputs.nth(i)).toHaveValue('0');
+            await expect(timeInputs.nth(i)).toHaveValue('0');
+        }
+    });
+
+    test('shows a "values differ" warning next to a field when a column is not uniform', async ({ page }) => {
+        await page.locator('#param-lifeforms-tab').click();
+
+        const costWarn = page.locator('#research-cost-reduction-warn');
+        const timeWarn = page.locator('#research-time-reduction-warn');
+        await expect(costWarn).toBeHidden();
+        await expect(timeWarn).toBeHidden();
+
+        // Import the fixture: both columns contain values above their minimum
+        await page.locator('#lf-research-table-open').click();
+        await expect(page.locator('#lf-research-table')).toBeVisible();
+        await page.locator('#lf-research-table-get').click();
+        await expect(page.locator('#lf-research-paste')).toBeVisible();
+        await page.locator('#lf-research-paste-txtarea').fill(LF_RESEARCH_FIXTURE);
+        await page.locator('#lf-research-paste-import').click();
+        await page.locator('#lf-research-table-ok').click();
+
+        await expect(costWarn).toBeVisible();
+        await expect(timeWarn).toBeVisible();
+        await expect(costWarn).toHaveAttribute('data-bs-original-title', /.+/);
+    });
+
+    test('the warning is per-column and hides when a column is uniform', async ({ page }) => {
+        await page.locator('#param-lifeforms-tab').click();
+        await page.locator('#lf-research-table-open').click();
+        await expect(page.locator('#lf-research-table')).toBeVisible();
+
+        // Uniform cost column (all zero); a single differing value in the time column
+        await page.locator('#lf-research-table-clear').click();
+        await page.locator('#lf-research-bonuses-tbody tr').first().locator('.lf-research-time-input').fill('10');
+        await page.locator('#lf-research-table-ok').click();
+
+        await expect(page.locator('#research-cost-reduction-warn')).toBeHidden();
+        await expect(page.locator('#research-time-reduction-warn')).toBeVisible();
+
+        // Clearing everything hides both warnings
+        await page.locator('#lf-research-table-open').click();
+        await expect(page.locator('#lf-research-table')).toBeVisible();
+        await page.locator('#lf-research-table-clear').click();
+        await page.locator('#lf-research-table-ok').click();
+        await expect(page.locator('#research-cost-reduction-warn')).toBeHidden();
+        await expect(page.locator('#research-time-reduction-warn')).toBeHidden();
+    });
+
+    test('the warning is shown on page load when the saved table is not uniform', async ({ page }) => {
+        // Import and apply, then reload
+        await page.locator('#param-lifeforms-tab').click();
+        await page.locator('#lf-research-table-open').click();
+        await expect(page.locator('#lf-research-table')).toBeVisible();
+        await page.locator('#lf-research-table-get').click();
+        await expect(page.locator('#lf-research-paste')).toBeVisible();
+        await page.locator('#lf-research-paste-txtarea').fill(LF_RESEARCH_FIXTURE);
+        await page.locator('#lf-research-paste-import').click();
+        await page.locator('#lf-research-table-ok').click();
+
+        await page.reload();
+        await page.locator('#param-lifeforms-tab').click();
+        await expect(page.locator('#research-cost-reduction-warn')).toBeVisible();
+        await expect(page.locator('#research-time-reduction-warn')).toBeVisible();
+    });
+
+    test('imported table survives a page reload', async ({ page }) => {
+        await page.locator('#param-lifeforms-tab').click();
+        await page.locator('#lf-research-table-open').click();
+        await expect(page.locator('#lf-research-table')).toBeVisible();
+        await page.locator('#lf-research-table-get').click();
+        await expect(page.locator('#lf-research-paste')).toBeVisible();
+        await page.locator('#lf-research-paste-txtarea').fill(LF_RESEARCH_FIXTURE);
+        await page.locator('#lf-research-paste-import').click();
+        await page.locator('#lf-research-table-ok').click();
+
+        await page.reload();
+
+        await page.locator('#param-lifeforms-tab').click();
+        await page.locator('#lf-research-table-open').click();
+        await expect(page.locator('#lf-research-table')).toBeVisible();
+        const firstRow = page.locator('#lf-research-bonuses-tbody tr').first();
+        await expect(firstRow.locator('.lf-research-cost-input')).toHaveValue('24.04');
+        await expect(firstRow.locator('.lf-research-time-input')).toHaveValue('52.5');
+    });
+
+    test('import is rejected when the first research name is missing', async ({ page }) => {
+        await page.locator('#param-lifeforms-tab').click();
+        await page.locator('#lf-research-table-open').click();
+        await expect(page.locator('#lf-research-table')).toBeVisible();
+        await page.locator('#lf-research-table-get').click();
+        await expect(page.locator('#lf-research-paste')).toBeVisible();
+
+        let dialogMessage = null;
+        page.once('dialog', (dialog) => {
+            dialogMessage = dialog.message();
+            dialog.dismiss();
+        });
+
+        // Text without the first research name (Espionage) in the current language
+        await page.locator('#lf-research-paste-txtarea').fill('Some header\n5%\nMax. 50%\n-\n');
+        await page.locator('#lf-research-paste-import').click();
+
+        // A warning is shown, the paste modal stays open and nothing is written
+        await expect.poll(() => dialogMessage).not.toBeNull();
+        expect(dialogMessage).toContain('Espionage');
+        await expect(page.locator('#lf-research-paste')).toBeVisible();
+        await expect(page.locator('#lf-research-bonuses-tbody tr').first().locator('.lf-research-cost-input')).toHaveValue('0');
+    });
+
+    test('import is rejected when data for some researches is missing', async ({ page }) => {
+        await page.locator('#param-lifeforms-tab').click();
+        await page.locator('#lf-research-table-open').click();
+        await expect(page.locator('#lf-research-table')).toBeVisible();
+        await page.locator('#lf-research-table-get').click();
+        await expect(page.locator('#lf-research-paste')).toBeVisible();
+
+        let dialogMessage = null;
+        page.once('dialog', (dialog) => {
+            dialogMessage = dialog.message();
+            dialog.dismiss();
+        });
+
+        // Only the first two researches — the first name is present but data is incomplete
+        const partial = [
+            'Espionage technology', '24.04%', 'Max. 50%', '52.5%', 'Max. 99%',
+            'Computer technology', '-', '4.41%', 'Max. 99%'
+        ].join('\n');
+        await page.locator('#lf-research-paste-txtarea').fill(partial);
+        await page.locator('#lf-research-paste-import').click();
+
+        await expect.poll(() => dialogMessage).not.toBeNull();
+        expect(dialogMessage).toContain('16');
+        await expect(page.locator('#lf-research-paste')).toBeVisible();
+        // Nothing was written: the first row's inputs remain at their default
+        await expect(page.locator('#lf-research-bonuses-tbody tr').first().locator('.lf-research-cost-input')).toHaveValue('0');
+    });
+
+    test('respects the current language decimal separator (Russian, comma)', async ({ page }) => {
+        // Russian uses a comma as the decimal separator (options.decimalSeparator)
+        await page.goto('/ru/ogame/calc/costs.php');
+        await page.locator('#param-lifeforms-tab').click();
+        await page.locator('#lf-research-table-open').click();
+        await expect(page.locator('#lf-research-table')).toBeVisible();
+        await page.locator('#lf-research-table-get').click();
+        await expect(page.locator('#lf-research-paste')).toBeVisible();
+
+        // Reuse the English fixture (OGame always exports dot decimals); only the
+        // anchor line must match the first research name in the current language
+        const firstName = (await page.locator('#lf-research-bonuses-tbody tr').first()
+            .locator('td').first().innerText()).trim();
+        const lines = LF_RESEARCH_FIXTURE.split('\n');
+        lines[0] = firstName;
+        await page.locator('#lf-research-paste-txtarea').fill(lines.join('\n'));
+        await page.locator('#lf-research-paste-import').click();
+
+        // Values are displayed with the language's comma separator
+        const firstRow = page.locator('#lf-research-bonuses-tbody tr').first();
+        await expect(firstRow.locator('.lf-research-cost-input')).toHaveValue('24,04');
+        await expect(firstRow.locator('.lf-research-time-input')).toHaveValue('52,5');
+
+        await page.locator('#lf-research-table-ok').click();
+        await expect(page.locator('#research-cost-reduction')).toHaveValue('0');
+        await expect(page.locator('#research-time-reduction')).toHaveValue('4,41');
+
+        // Stored numbers stay locale-independent (dot decimal)
+        const stored = await page.evaluate(() => localStorage.getItem('costs_lf_research_table'));
+        expect(JSON.parse(stored)[0]).toEqual([24.04, 52.5]);
     });
 });

@@ -64,6 +64,8 @@
     options.msgMinConstraintViolated = '<?= $l['msg-min-constraint-violated'] ?>';
     options.msgMaxConstraintViolated = '<?= $l['msg-max-constraint-violated'] ?>';
     options.msgCantResearch = '<?= $l['msg-cant-research'] ?>';
+    options.lfImportErrNotFound = '<?= $l['lf-import-err-not-found'] ?>';
+    options.lfImportErrIncomplete = '<?= $l['lf-import-err-incomplete'] ?>';
 
     options.techCosts = {
               <?php $first = true; ?>
@@ -260,11 +262,19 @@
               <label for="research-cost-reduction"><?= $l['research-cost-reduction'] ?></label>
               <input id="research-cost-reduction" type="text" name="research-cost-reduction" class="form-control form-control-sm level-input" value="0" />
               <span>%</span>
+              <i id="research-cost-reduction-warn" class="bi bi-exclamation-triangle-fill text-warning" style="display: none;" data-bs-toggle="tooltip" title="<?= $l['lf-values-differ-hint'] ?>"></i>
             </div>
             <div class="d-flex align-items-center gap-1">
               <label for="research-time-reduction"><?= $l['research-time-reduction'] ?></label>
               <input id="research-time-reduction" type="text" name="research-time-reduction" class="form-control form-control-sm level-input" value="0" />
               <span>%</span>
+              <i id="research-time-reduction-warn" class="bi bi-exclamation-triangle-fill text-warning" style="display: none;" data-bs-toggle="tooltip" title="<?= $l['lf-values-differ-hint'] ?>"></i>
+            </div>
+            <div class="d-flex align-items-center gap-1">
+              <label><?= $l['lf-full-table'] ?></label>
+              <button type="button" id="lf-research-table-open" class="btn btn-outline-secondary btn-sm" data-bs-toggle="tooltip" title="<?= $l['lf-full-table-hint'] ?>">
+                <i class="bi bi-table"></i>
+              </button>
             </div>
             <div class="d-flex align-items-center gap-1">
               <label for="researcher-class-bonus"><?= $l['researcher-class-bonus'] ?></label>
@@ -720,6 +730,68 @@ document.addEventListener('DOMContentLoaded', function() {
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-primary" id="irn-done-btn"><?= $l['done'] ?></button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><?= $l['cancel'] ?></button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LifeForm research bonuses full table Modal -->
+<div class="modal fade" id="lf-research-table" tabindex="-1" aria-labelledby="lf-research-table-label" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="lf-research-table-label"><?= $l['lf-research-table-title'] ?></h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="mb-2 d-flex justify-content-between align-items-center">
+          <button type="button" class="btn btn-outline-secondary btn-sm" id="lf-research-table-get"><i class="bi bi-clipboard"></i> <?= $l['lf-get-from-ogame'] ?></button>
+          <button type="button" class="btn btn-outline-danger btn-sm" id="lf-research-table-clear" data-bs-toggle="tooltip" title="<?= $l['lf-clear-table'] ?>"><i class="bi bi-trash"></i></button>
+        </div>
+        <table id="lf-research-bonuses-table" class="lined" cellpadding="0" cellspacing="1" border="0">
+          <thead>
+            <tr>
+              <th><?= $l['lf-research-col'] ?></th>
+              <th class="lf-col-value"><?= $l['lf-col-cost-reduction'] ?>,&nbsp;%</th>
+              <th class="lf-col-value"><?= $l['lf-col-time-reduction'] ?>,&nbsp;%</th>
+            </tr>
+          </thead>
+          <tbody id="lf-research-bonuses-tbody">
+            <?php $lfResearchTechs = getTechsByType(4); ?>
+            <?php $row = 0; ?>
+            <?php foreach ($lfResearchTechs as $tech): ?>
+            <tr class="<?= ($row++ % 2) === 1 ? 'odd' : 'even' ?>" data-tech-id="<?= $tech ?>">
+              <td align="left"><?= $l[$techData[$tech][0]] ?></td>
+              <td align="center"><input type="text" class="form-control form-control-sm input-3columns input-in-table lf-research-cost-input" value="0" /></td>
+              <td align="center"><input type="text" class="form-control form-control-sm input-3columns input-in-table lf-research-time-input" value="0" /></td>
+            </tr>
+            <?php endforeach; ?>
+          </tbody>
+        </table>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" id="lf-research-table-ok"><?= $l['done'] ?></button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><?= $l['cancel'] ?></button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LifeForm research bonuses paste-from-OGame Modal -->
+<div class="modal fade" id="lf-research-paste" tabindex="-1" aria-labelledby="lf-research-paste-label" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="lf-research-paste-label"><?= $l['lf-paste-title'] ?></h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="irn-calc-info mb-2"><?= $l['lf-paste-info'] ?></div>
+        <textarea id="lf-research-paste-txtarea" class="form-control" rows="8"></textarea>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" id="lf-research-paste-import"><?= $l['import'] ?></button>
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><?= $l['cancel'] ?></button>
       </div>
     </div>

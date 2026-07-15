@@ -95,6 +95,14 @@
   text-align: center;
 }
 
+/* Wider inputs sized to fit ~6 characters: the LifeForms parameter tab fields
+   and the research bonuses table value inputs */
+#param-lifeforms .level-input,
+#lf-research-bonuses-table .lf-research-cost-input,
+#lf-research-bonuses-table .lf-research-time-input {
+  width: 64px;
+}
+
 .input-in-table,
 .lined .form-control-sm {
   height: 1.5rem;
@@ -199,6 +207,31 @@ td.min {
 
 #irn-calc .modal-dialog {
   max-width: 450px;
+}
+
+/* ==========================================================================
+   LIFEFORM RESEARCH BONUSES TABLE (MODAL)
+   ========================================================================== */
+
+/* Shrink the dialog to just fit the table (no inner scrollbar) */
+#lf-research-table .modal-dialog {
+  width: fit-content;
+  max-width: 95vw;
+}
+
+#lf-research-bonuses-table {
+  margin: 0 auto;
+}
+
+/* Let the header row wrap so the value columns stay narrow */
+#lf-research-bonuses-table th {
+  white-space: normal;
+  text-align: center;
+  vertical-align: bottom;
+}
+
+#lf-research-bonuses-table th.lf-col-value {
+  width: 6.5em;
 }
 
 #irn-calc .table td,
