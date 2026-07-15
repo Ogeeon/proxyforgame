@@ -292,7 +292,9 @@
     "mineral-res-cntr-lvl": "Centro di Mineralogia",
     "lf-terraformer-rdc": "Riduzione dei costi del terraformatore",
     "disclaimer-robot-nanite": "Si prega di tenere conto della nota nella prima riga della tabella quando si leggono i tempi di costruzione. Se stai costruendo una Fabbrica dei Robots o una Fabbrica dei Naniti, usa il <a href=\"{0}\">Calcolatore della coda di costruzione</a> per calcoli precisi dei tempi di costruzione.",
-    "disclaimer-title": "Attenzione"
+    "disclaimer-title": "Attenzione",
+    "researcher-class-bonus": "Bonus classe Discoverer",
+    "researcher-class-bonus-hint": "Si applica solo se nella scheda 'Generale' è selezionata la classe 'Discoverer'"
   },
   "lfcosts": {
     "title": "OGame - Calcolatore di Costi per le forme di vita",

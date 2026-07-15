@@ -267,6 +267,12 @@
               <span>%</span>
             </div>
             <div class="d-flex align-items-center gap-1">
+              <label for="researcher-class-bonus"><?= $l['researcher-class-bonus'] ?></label>
+              <input id="researcher-class-bonus" type="text" name="researcher-class-bonus" class="form-control form-control-sm level-input" value="0" />
+              <span>%</span>
+              <i class="bi bi-question-circle ms-1" data-bs-toggle="tooltip" title="<?= $l['researcher-class-bonus-hint'] ?>"></i>
+            </div>
+            <div class="d-flex align-items-center gap-1">
               <label for="mineral-res-cntr-lvl"><?= $l['mineral-res-cntr-lvl'] ?></label>
               <input id="mineral-res-cntr-lvl" type="text" name="mineral-res-cntr-lvl" class="form-control form-control-sm level-input" value="0" />
             </div>

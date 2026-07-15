@@ -288,7 +288,9 @@
     "mineral-res-cntr-lvl": "Mineralen Onderzoekscentrum",
     "lf-terraformer-rdc": "Vermindering terraformerkosten",
     "disclaimer-robot-nanite": "Houd bij het aflezen van de bouwtijden rekening met de opmerking in de eerste rij van de tabel. Als je een Robotfabriek of een Nanorobotfabriek bouwt, gebruik dan de <a href=\"{0}\">Bouwlijst-calculator</a> voor nauwkeurige berekeningen van de bouwtijd.",
-    "disclaimer-title": "Let op"
+    "disclaimer-title": "Let op",
+    "researcher-class-bonus": "Klassebonus Discoverer",
+    "researcher-class-bonus-hint": "Wordt alleen toegepast als op het tabblad 'Algemeen' de klasse 'Discoverer' is geselecteerd"
   },
   "lfcosts": {
     "time": "Tijd",

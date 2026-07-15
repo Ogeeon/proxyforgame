@@ -68,6 +68,7 @@ class DataCollector {
     params.lfResTimeRdc = this._getInputNumber('#research-time-reduction');
     params.mineralResCntrLvl = this._getInputNumber('#mineral-res-cntr-lvl');
     params.lfTerraformerRdc = this._getInputNumber('#lf-terraformer-rdc');
+    params.researcherClassBonus = this._getInputNumber('#researcher-class-bonus');
 
     // Cargo capacity increase
     params.scCapacityIncrease = this._getInputNumber('#sc-capacity-increase');
@@ -371,6 +372,9 @@ class DataCollector {
       'research-cost-reduction': ['table-0-4', 'table-1-4'],
       'research-time-reduction': ['table-0-4', 'table-1-4'],
 
+      // Researcher class bonus boosts the Discoverer research-speed bonus
+      'researcher-class-bonus': ['table-0-4', 'table-1-4'],
+
       // Mineral Research Centre affects planet building tables (mines)
       'mineral-res-cntr-lvl': ['table-0-2', 'table-1-2'],
 
@@ -415,7 +419,7 @@ class DataCollector {
       'research-bonus', 'robot-factory-level', 'nanite-factory-level',
       'shipyard-level', 'ion-tech-level', 'hyper-tech-level',
       'class-0', 'class-1', 'class-2', 'full-numbers',
-      'research-cost-reduction', 'research-time-reduction', 'mineral-res-cntr-lvl', 'lf-terraformer-rdc',
+      'research-cost-reduction', 'research-time-reduction', 'researcher-class-bonus', 'mineral-res-cntr-lvl', 'lf-terraformer-rdc',
       'sc-capacity-increase', 'lc-capacity-increase',
       'exchange-rates'
     ];

@@ -285,7 +285,9 @@
     "mineral-res-cntr-lvl": "Maden Araştırma Merkezi",
     "lf-terraformer-rdc": "Terraformer maliyet azaltımı",
     "disclaimer-robot-nanite": "İnşa sürelerini okurken tablonun ilk satırındaki notu dikkate alın. Robot Fabrikası veya Nanit Fabrikası inşa ediyorsanız, doğru inşa süresi hesaplamaları için <a href=\"{0}\">İnşaat kuyruğu hesaplayıcısını</a> kullanın.",
-    "disclaimer-title": "Dikkat"
+    "disclaimer-title": "Dikkat",
+    "researcher-class-bonus": "Kaşif sınıfı bonusu",
+    "researcher-class-bonus-hint": "Yalnızca 'Genel' sekmesinde 'Kaşif' sınıfı seçiliyse uygulanır"
   },
   "lfcosts": {
     "energy": "Enerji",

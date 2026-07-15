@@ -291,7 +291,9 @@
     "mineral-res-cntr-lvl": "Mineral Research Centre",
     "lf-terraformer-rdc": "Smanjenje troškova terraformera",
     "disclaimer-robot-nanite": "Molimo uzmite u obzir napomenu u prvom redu tablice pri čitanju vremena gradnje. Ako gradite Tvornicu robota ili Tvornicu nanita, koristite <a href=\"{0}\">Kalkulator reda izgradnje</a> za točan izračun vremena gradnje.",
-    "disclaimer-title": "Napomena"
+    "disclaimer-title": "Napomena",
+    "researcher-class-bonus": "Bonus klase Otkrivač",
+    "researcher-class-bonus-hint": "Primjenjuje se samo ako je na kartici 'Opšte' odabrana klasa 'Otkrivač'"
   },
   "lfcosts": {
     "sc-short": "MT",

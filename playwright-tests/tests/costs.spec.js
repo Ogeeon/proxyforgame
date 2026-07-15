@@ -103,6 +103,35 @@ test.describe('Costs Calculator Page', () => {
         await expect(page.locator('#table-0-4 tr:nth-child(18) td:nth-child(9)')).toContainText('2h 27m 32s');
     });
 
+    test('[researches] researcher class bonus boosts the Discoverer research-speed bonus', async ({ page }) => {
+        await page.getByRole('tab', { name: 'All items - one level' }).click();
+        await page.locator('#tabtag-0-4').click();
+        await page.locator('#research-lab-level').fill('120');
+        await page.locator('#research-lab-level').press('Enter');
+        await fillTableRows(page, '#table-0-4', 2, 17, 1);
+
+        // Baseline: Discoverer class gives the default 25% research-speed bonus (factor 0.75)
+        await page.locator('#param-common-tab').click();
+        await page.getByRole('radio', { name: 'Discoverer' }).click();
+        await expect(page.locator('#table-0-4 tr:nth-child(18) td:nth-child(9)')).toContainText('4h 22m 16s');
+
+        // Researcher class bonus of 100% doubles the class bonus to 50% (factor 0.50)
+        await page.locator('#param-lifeforms-tab').click();
+        await page.locator('#researcher-class-bonus').fill('100');
+        await page.locator('#researcher-class-bonus').press('Enter');
+        await expect(page.locator('#table-0-4 tr:nth-child(18) td:nth-child(9)')).toContainText('2h 54m 51s');
+
+        // The bonus only applies to the Discoverer class: switching to Collector removes any effect
+        await page.locator('#param-common-tab').click();
+        await page.getByRole('radio', { name: 'Collector' }).click();
+        await expect(page.locator('#table-0-4 tr:nth-child(18) td:nth-child(9)')).toContainText('5h 49m 42s');
+        // Changing the researcher class bonus while not a Discoverer must not change the time
+        await page.locator('#param-lifeforms-tab').click();
+        await page.locator('#researcher-class-bonus').fill('50');
+        await page.locator('#researcher-class-bonus').press('Enter');
+        await expect(page.locator('#table-0-4 tr:nth-child(18) td:nth-child(9)')).toContainText('5h 49m 42s');
+    });
+
     test('[all items - one level / fleet] calculations are correct', async ({ page }) => {
         await page.getByRole('tab', { name: 'All items - one level' }).click();
         await page.getByRole('tab', { name: 'Fleet' }).click();
