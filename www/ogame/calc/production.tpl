@@ -332,6 +332,8 @@
           <input id="is-trader" type="checkbox" name="is-trader" class="form-check-input"/>
           <label for="is-trader"><?= $l['is-trader'] ?></label>
         </div>
+      </div>
+      <div class="d-flex flex-wrap gap-2 align-items-center justify-content-center">
         <div class="d-flex align-items-center gap-1">
           <label for="universe-speed"><?= $l['economy-speed'] ?></label>
           <select id="universe-speed" name="universe-speed" class="form-select form-select-sm w-auto">
