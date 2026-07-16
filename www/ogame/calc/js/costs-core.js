@@ -51,8 +51,11 @@ class GlobalParams {
   fullNumbers = false;
 
   // Lifeform reductions
-  lfResCostRdc = 0;      // LF research cost reduction, %
-  lfResTimeRdc = 0;      // LF research time reduction, %
+  // Per-research cost/time reductions (%) keyed by tech id, taken straight from
+  // the "Research bonuses" table. There is no longer a single global research
+  // reduction — each research gets its own value.
+  lfResCostRdcMap = {}; // { techId: cost reduction % }
+  lfResTimeRdcMap = {}; // { techId: time reduction % }
   mineralResCntrLvl = 0; // Mineral Research Centre level (Rock'tal)
   lfTerraformerRdc = 0;  // LF Terraformer reduction, %
 
@@ -81,14 +84,20 @@ class GlobalParams {
     return factor;
   }
 
-  /** LF research cost reduction factor (0–0.5) */
-  get lfResCostFactor() {
-    return Math.min(0.5, this.lfResCostRdc / 100);
+  /**
+   * LF research cost reduction factor (0–0.5) for a specific research.
+   * @param {number} techId
+   */
+  getLfResCostFactor(techId) {
+    return Math.min(0.5, (this.lfResCostRdcMap[techId] || 0) / 100);
   }
 
-  /** LF research time reduction factor (0–0.99) */
-  get lfResTimeFactor() {
-    return Math.min(0.99, this.lfResTimeRdc / 100);
+  /**
+   * LF research time reduction factor (0–0.99) for a specific research.
+   * @param {number} techId
+   */
+  getLfResTimeFactor(techId) {
+    return Math.min(0.99, (this.lfResTimeRdcMap[techId] || 0) / 100);
   }
 
   /** Mineral Research Centre cost reduction factor (0–0.5) */
@@ -181,6 +190,8 @@ class GlobalParams {
     const cloned = new GlobalParams();
     Object.assign(cloned, this);
     cloned.labLevels = [...this.labLevels];
+    cloned.lfResCostRdcMap = { ...this.lfResCostRdcMap };
+    cloned.lfResTimeRdcMap = { ...this.lfResTimeRdcMap };
     return cloned;
   }
 
@@ -205,8 +216,6 @@ class GlobalParams {
       irnLevel: { min: 0, max: Infinity, default: 0 },
       booster: { min: 0, max: 4, default: 0 },
       playerClass: { min: 0, max: 2, default: 0 },
-      lfResCostRdc: { min: 0, max: 50, default: 0 },
-      lfResTimeRdc: { min: 0, max: 99, default: 0 },
       mineralResCntrLvl: { min: 0, max: 100, default: 0 },
       lfTerraformerRdc: { min: 0, max: 50, default: 0 }
     };
@@ -678,7 +687,7 @@ class Calculator {
   _lfCostFactor(techId, params) {
     // Research IDs: 100 < techId <= 200
     if (techId > 100 && techId <= 200) {
-      return 1 - params.lfResCostFactor;
+      return 1 - params.getLfResCostFactor(techId);
     }
     // Mines and energy buildings affected by Mineral Research Centre
     if ([1, 2, 3, 4, 12].includes(techId)) {
@@ -698,7 +707,7 @@ class Calculator {
   _lfTimeFactor(techId, params) {
     // Research IDs: 100 < techId <= 200
     if (techId > 100 && techId <= 200) {
-      return 1 - params.lfResTimeFactor;
+      return 1 - params.getLfResTimeFactor(techId);
     }
     // Terraformer
     if (techId === 33) {

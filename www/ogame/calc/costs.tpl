@@ -257,30 +257,20 @@
         </div>
         <!-- LifeForms tab -->
         <div class="tab-pane fade p-2" id="param-lifeforms" role="tabpanel">
-          <div class="d-flex flex-wrap gap-2 align-items-center">
+          <div class="d-flex flex-wrap gap-3 align-items-center">
             <div class="d-flex align-items-center gap-1">
-              <label for="research-cost-reduction"><?= $l['research-cost-reduction'] ?></label>
-              <input id="research-cost-reduction" type="text" name="research-cost-reduction" class="form-control form-control-sm level-input" value="0" />
-              <span>%</span>
-              <i id="research-cost-reduction-warn" class="bi bi-exclamation-triangle-fill text-warning" style="display: none;" data-bs-toggle="tooltip" title="<?= $l['lf-values-differ-hint'] ?>"></i>
+              <label for="discoverer-class-bonus"><?= $l['discoverer-class-bonus'] ?></label>
+              <div class="input-group input-group-sm w-auto">
+                <input id="discoverer-class-bonus" type="text" name="discoverer-class-bonus" class="form-control level-input m-0" value="0" />
+                <span class="input-group-text">%</span>
+              </div>
+              <i class="bi bi-question-circle" data-bs-toggle="tooltip" title="<?= $l['discoverer-class-bonus-hint'] ?>"></i>
             </div>
             <div class="d-flex align-items-center gap-1">
-              <label for="research-time-reduction"><?= $l['research-time-reduction'] ?></label>
-              <input id="research-time-reduction" type="text" name="research-time-reduction" class="form-control form-control-sm level-input" value="0" />
-              <span>%</span>
-              <i id="research-time-reduction-warn" class="bi bi-exclamation-triangle-fill text-warning" style="display: none;" data-bs-toggle="tooltip" title="<?= $l['lf-values-differ-hint'] ?>"></i>
-            </div>
-            <div class="d-flex align-items-center gap-1">
-              <label><?= $l['lf-full-table'] ?></label>
+              <label><?= $l['lf-research-table-title'] ?></label>
               <button type="button" id="lf-research-table-open" class="btn btn-outline-secondary btn-sm" data-bs-toggle="tooltip" title="<?= $l['lf-full-table-hint'] ?>">
                 <i class="bi bi-table"></i>
               </button>
-            </div>
-            <div class="d-flex align-items-center gap-1">
-              <label for="discoverer-class-bonus"><?= $l['discoverer-class-bonus'] ?></label>
-              <input id="discoverer-class-bonus" type="text" name="discoverer-class-bonus" class="form-control form-control-sm level-input" value="0" />
-              <span>%</span>
-              <i class="bi bi-question-circle ms-1" data-bs-toggle="tooltip" title="<?= $l['discoverer-class-bonus-hint'] ?>"></i>
             </div>
             <div class="d-flex align-items-center gap-1">
               <label for="mineral-res-cntr-lvl"><?= $l['mineral-res-cntr-lvl'] ?></label>
@@ -288,18 +278,26 @@
             </div>
             <div class="d-flex align-items-center gap-1">
               <label for="lf-terraformer-rdc"><?= $l['lf-terraformer-rdc'] ?></label>
-              <input id="lf-terraformer-rdc" type="text" name="lf-terraformer-rdc" class="form-control form-control-sm level-input" value="0" />
-              <span>%</span>
+              <div class="input-group input-group-sm w-auto">
+                <input id="lf-terraformer-rdc" type="text" name="lf-terraformer-rdc" class="form-control level-input m-0" value="0" />
+                <span class="input-group-text">%</span>
+              </div>
             </div>
             <div class="d-flex align-items-center gap-2">
               <span><?= $l['cargo-cap-increase'] ?></span>
               <div class="d-flex align-items-center gap-1">
                 <label for="sc-capacity-increase"><?= $l['sc-short'] ?></label>
-                <input id="sc-capacity-increase" type="text" name="sc-capacity-increase" class="form-control form-control-sm level-input" value="0" />
+                <div class="input-group input-group-sm w-auto">
+                  <input id="sc-capacity-increase" type="text" name="sc-capacity-increase" class="form-control level-input m-0" value="0" />
+                  <span class="input-group-text">%</span>
+                </div>
               </div>
               <div class="d-flex align-items-center gap-1">
                 <label for="lc-capacity-increase"><?= $l['lc-short'] ?></label>
-                <input id="lc-capacity-increase" type="text" name="lc-capacity-increase" class="form-control form-control-sm level-input" value="0" />
+                <div class="input-group input-group-sm w-auto">
+                  <input id="lc-capacity-increase" type="text" name="lc-capacity-increase" class="form-control level-input m-0" value="0" />
+                  <span class="input-group-text">%</span>
+                </div>
               </div>
             </div>
           </div>

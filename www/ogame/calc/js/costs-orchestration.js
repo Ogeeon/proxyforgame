@@ -340,8 +340,6 @@ class CostsCalculator {
 
     // Lifeform reduction inputs
     const lfInputs = [
-      '#research-cost-reduction',
-      '#research-time-reduction',
       '#discoverer-class-bonus',
       '#mineral-res-cntr-lvl',
       '#lf-terraformer-rdc',
@@ -349,10 +347,6 @@ class CostsCalculator {
       '#lc-capacity-increase'
     ];
 
-    // Research cost/time reduction are capped (cost ≤ 50%, time ≤ 99%);
-    // clamp the entered value to the max on blur, like the temperature field.
-    document.getElementById('research-cost-reduction')._constrains = { min: 0, max: 50, def: 0, allowFloat: true, allowNegative: false };
-    document.getElementById('research-time-reduction')._constrains = { min: 0, max: 99, def: 0, allowFloat: true, allowNegative: false };
     document.getElementById('discoverer-class-bonus')._constrains = { min: 0, max: 100, def: 0, allowFloat: true, allowNegative: false };
     document.getElementById('sc-capacity-increase')._constrains = { min: 0, max: 1000, def: 0, allowFloat: true, allowNegative: false };
     document.getElementById('lc-capacity-increase')._constrains = { min: 0, max: 1000, def: 0, allowFloat: true, allowNegative: false };
@@ -539,10 +533,10 @@ class CostsCalculator {
   static LF_TABLE_STORAGE_KEY = 'costs_lf_research_table';
 
   /**
-   * Bind the LifeForm research bonuses full table modal:
+   * Bind the LifeForm research bonuses table modal:
    *  - the opener button on the LifeForms tab
    *  - per-row cost/time inputs (fractional 0..100 validation)
-   *  - the OK button (copy column minimums to the two reduction fields + persist)
+   *  - the OK button (persist the table + recalculate research)
    *  - the "Get" button (open the paste-from-OGame modal)
    *  - the Import button (parse pasted OGame text into the table)
    * @private
@@ -550,10 +544,6 @@ class CostsCalculator {
   _bindLfResearchTableEvents() {
     // Restore a previously saved table so the modal always reflects it
     this._loadLfResearchTable();
-
-    // Show the "values differ" warning next to the fields if the saved table
-    // carries per-research values that the single reduction field can't capture
-    this._updateLfResearchWarnings();
 
     // Fractional 0..100 validation on every cost/time input
     const inputs = $$('#lf-research-bonuses-tbody input[type="text"]');
@@ -714,51 +704,17 @@ class CostsCalculator {
   }
 
   /**
-   * Copy the minimum of each column into the two reduction fields (clamped to
-   * their own maximums), then persist the whole table to localStorage and
-   * trigger a recalculation. The reduction fields apply to every research, so
-   * only the smallest per-research bonus is guaranteed across all of them.
+   * Persist the whole table to localStorage and recalculate the research
+   * tables. The per-research values are read directly from the table during
+   * recalculation, so there is nothing else to sync.
    * @private
    */
   _applyLfResearchTable() {
     const data = this._readLfResearchTable();
     if (data.length === 0) return;
 
-    const minCost = Math.min(...data.map(d => d.cost));
-    const minTime = Math.min(...data.map(d => d.time));
-
-    // Respect the reduction fields' own caps (cost ≤ 50%, time ≤ 99%)
-    setVal('#research-cost-reduction', this._formatDecimal(Math.min(50, minCost)));
-    setVal('#research-time-reduction', this._formatDecimal(Math.min(99, minTime)));
-
     this._saveLfResearchTable(data);
-    this._updateLfResearchWarnings(data);
-
-    this._handleParamChange('research-cost-reduction');
-    this._handleParamChange('research-time-reduction');
-  }
-
-  /**
-   * Show or hide the "values differ" warning icon next to each reduction field.
-   * The field only holds the column minimum, so when a column contains values
-   * above that minimum the icon signals that the single value is a simplification.
-   * @param {{cost: number, time: number}[]} [data]
-   * @private
-   */
-  _updateLfResearchWarnings(data) {
-    const rows = data || this._readLfResearchTable();
-    const differs = (values) => values.length > 0 && Math.max(...values) > Math.min(...values);
-    this._toggleWarnIcon('research-cost-reduction-warn', differs(rows.map(d => d.cost)));
-    this._toggleWarnIcon('research-time-reduction-warn', differs(rows.map(d => d.time)));
-  }
-
-  /**
-   * Toggle a warning icon's visibility by id.
-   * @private
-   */
-  _toggleWarnIcon(id, show) {
-    const el = document.getElementById(id);
-    if (el) el.style.display = show ? '' : 'none';
+    this._handleParamChange('lf-research-table');
   }
 
   /**
@@ -1070,8 +1026,6 @@ class CostsCalculator {
       labLevels: this.currentParams.labLevels,
       labChoice: this.currentParams.labChoice,
       fullNumbers: this.currentParams.fullNumbers,
-      lfResCostRdc: this.currentParams.lfResCostRdc,
-      lfResTimeRdc: this.currentParams.lfResTimeRdc,
       mineralResCntrLvl: this.currentParams.mineralResCntrLvl,
       lfTerraformerRdc: this.currentParams.lfTerraformerRdc,
       scCapacityIncrease: this.currentParams.scCapacityIncrease,
@@ -1166,8 +1120,6 @@ class CostsCalculator {
       plasmaTechLevel: '#plasma-tech-level',
       maxPlanetTemp: '#max-planet-temp',
       planetPos: '#planet-pos',
-      lfResCostRdc: '#research-cost-reduction',
-      lfResTimeRdc: '#research-time-reduction',
       mineralResCntrLvl: '#mineral-res-cntr-lvl',
       lfTerraformerRdc: '#lf-terraformer-rdc',
       scCapacityIncrease: '#sc-capacity-increase',

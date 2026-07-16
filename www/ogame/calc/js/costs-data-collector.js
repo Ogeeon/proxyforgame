@@ -64,8 +64,8 @@ class DataCollector {
     this._collectLabLevels(params);
 
     // Lifeform reductions
-    params.lfResCostRdc = this._getInputNumber('#research-cost-reduction');
-    params.lfResTimeRdc = this._getInputNumber('#research-time-reduction');
+    // Per-research cost/time reductions come straight from the "Research bonuses" table
+    this._collectLfResearchReductions(params);
     params.mineralResCntrLvl = this._getInputNumber('#mineral-res-cntr-lvl');
     params.lfTerraformerRdc = this._getInputNumber('#lf-terraformer-rdc');
     params.discovererClassBonus = this._getInputNumber('#discoverer-class-bonus');
@@ -107,6 +107,24 @@ class DataCollector {
     // Determine whether to use direct lab level input or IRN calculation
     // If resultingLabLevelComputed is false, user manually entered the lab level
     params.useDirectLabLevel = !options.resultingLabLevelComputed;
+  }
+
+  /**
+   * Read the per-research cost/time reductions from the "Research bonuses" table
+   * into maps keyed by tech id. This table is the only source of the research
+   * cost/time bonuses.
+   * @private
+   */
+  _collectLfResearchReductions(params) {
+    params.lfResCostRdcMap = {};
+    params.lfResTimeRdcMap = {};
+    const rows = document.querySelectorAll('#lf-research-bonuses-tbody tr');
+    rows.forEach(row => {
+      const techId = Number.parseInt(row.getAttribute('data-tech-id'));
+      if (!techId) return;
+      params.lfResCostRdcMap[techId] = this._getInputNumberFromElement(row.querySelector('.lf-research-cost-input'));
+      params.lfResTimeRdcMap[techId] = this._getInputNumberFromElement(row.querySelector('.lf-research-time-input'));
+    });
   }
 
   /**
@@ -370,9 +388,8 @@ class DataCollector {
       // Display option - affects all
       'full-numbers': ['*'],
 
-      // LF research reductions affect research tables
-      'research-cost-reduction': ['table-0-4', 'table-1-4'],
-      'research-time-reduction': ['table-0-4', 'table-1-4'],
+      // The "Research bonuses" table drives all research cost/time reductions
+      'lf-research-table': ['table-0-4', 'table-1-4'],
 
       // Discoverer class bonus boosts the Discoverer research-speed bonus
       'discoverer-class-bonus': ['table-0-4', 'table-1-4'],
@@ -421,7 +438,7 @@ class DataCollector {
       'research-bonus', 'robot-factory-level', 'nanite-factory-level',
       'shipyard-level', 'ion-tech-level', 'hyper-tech-level',
       'class-0', 'class-1', 'class-2', 'full-numbers',
-      'research-cost-reduction', 'research-time-reduction', 'discoverer-class-bonus', 'mineral-res-cntr-lvl', 'lf-terraformer-rdc',
+      'lf-research-table', 'discoverer-class-bonus', 'mineral-res-cntr-lvl', 'lf-terraformer-rdc',
       'sc-capacity-increase', 'lc-capacity-increase',
       'exchange-rates'
     ];

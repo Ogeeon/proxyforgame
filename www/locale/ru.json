@@ -8,7 +8,7 @@
     "unit-suffix": "КМГ",
     "sc-short": "МТ",
     "lc-short": "БТ",
-    "cargo-cap-increase": "Увеличение грузоподъёмности (%): ",
+    "cargo-cap-increase": "Увеличение грузоподъёмности: ",
     "decimal-separator": ",",
     "metal": "Металл",
     "crystal": "Кристалл",

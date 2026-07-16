@@ -499,10 +499,19 @@ test.describe('Costs Calculator Page', () => {
         await expect(page.locator('#table-0-4 tr:nth-child(18) td:nth-child(10)')).toContainText('13.982');
 
         await page.locator('#param-lifeforms-tab').click();
-        await page.locator('#research-cost-reduction').fill('25');
-        await page.locator('#research-cost-reduction').press('Enter');
-        await page.locator('#research-time-reduction').fill('25');
-        await page.locator('#research-time-reduction').press('Enter');
+        // Research cost/time reductions now come exclusively from the bonuses
+        // table; a uniform 25% cost / 25% time across every research reproduces
+        // the same totals the old single reduction fields produced.
+        await page.locator('#lf-research-table-open').click();
+        await expect(page.locator('#lf-research-table')).toBeVisible();
+        for (const input of await page.locator('#lf-research-bonuses-tbody .lf-research-cost-input').all()) {
+            await input.fill('25');
+        }
+        for (const input of await page.locator('#lf-research-bonuses-tbody .lf-research-time-input').all()) {
+            await input.fill('25');
+        }
+        await page.locator('#lf-research-table-ok').click();
+        await expect(page.locator('#lf-research-table')).toBeHidden();
         await expect(page.locator('#table-0-4 tr:nth-child(18) td:nth-child(4)')).toContainText('3.121.725');
         await expect(page.locator('#table-0-4 tr:nth-child(18) td:nth-child(5)')).toContainText('5.281.050');
         await expect(page.locator('#table-0-4 tr:nth-child(18) td:nth-child(6)')).toContainText('2.086.125');
@@ -528,29 +537,6 @@ test.describe('Costs Calculator Page', () => {
         await page.locator('#exchange-rates-m').fill('2');
         await page.locator('#exchange-rates-m').press('Enter');
         await expect(page.locator('#table-0-2 tr:nth-child(18) td:nth-child(8)')).toContainText('1.859.962');
-    });
-
-    test('[research reduction fields] clamp entered value to max on blur', async ({ page }) => {
-        await page.locator('#param-lifeforms-tab').click();
-
-        // Cost reduction is capped at 50%
-        await page.locator('#research-cost-reduction').fill('150');
-        await page.locator('#research-cost-reduction').blur();
-        await expect(page.locator('#research-cost-reduction')).toHaveValue('50');
-
-        // Time reduction is capped at 99%
-        await page.locator('#research-time-reduction').fill('150');
-        await page.locator('#research-time-reduction').blur();
-        await expect(page.locator('#research-time-reduction')).toHaveValue('99');
-
-        // Values within range are left untouched
-        await page.locator('#research-cost-reduction').fill('30');
-        await page.locator('#research-cost-reduction').blur();
-        await expect(page.locator('#research-cost-reduction')).toHaveValue('30');
-
-        await page.locator('#research-time-reduction').fill('80');
-        await page.locator('#research-time-reduction').blur();
-        await expect(page.locator('#research-time-reduction')).toHaveValue('80');
     });
 
     test('[one item - multiple levels] planet position clamps to valid range on blur', async ({ page }) => {
@@ -650,7 +636,7 @@ test.describe('Costs Calculator - LifeForm research bonuses table', () => {
         await page.goto('/ogame/calc/costs.php');
     });
 
-    test('import fills the table and OK copies column minimums to the reduction fields', async ({ page }) => {
+    test('import fills the table and OK persists it', async ({ page }) => {
         await page.locator('#param-lifeforms-tab').click();
         await page.locator('#lf-research-table-open').click();
 
@@ -675,11 +661,9 @@ test.describe('Costs Calculator - LifeForm research bonuses table', () => {
         await expect(secondRow.locator('.lf-research-cost-input')).toHaveValue('0');
         await expect(secondRow.locator('.lf-research-time-input')).toHaveValue('4.41');
 
-        // OK copies the minimum of each column to the reduction fields
+        // OK persists the table and closes the modal
         await page.locator('#lf-research-table-ok').click();
         await expect(tableModal).toBeHidden();
-        await expect(page.locator('#research-cost-reduction')).toHaveValue('0');
-        await expect(page.locator('#research-time-reduction')).toHaveValue('4.41');
 
         // The table is persisted to localStorage
         const stored = await page.evaluate(() => localStorage.getItem('costs_lf_research_table'));
@@ -711,67 +695,6 @@ test.describe('Costs Calculator - LifeForm research bonuses table', () => {
             await expect(costInputs.nth(i)).toHaveValue('0');
             await expect(timeInputs.nth(i)).toHaveValue('0');
         }
-    });
-
-    test('shows a "values differ" warning next to a field when a column is not uniform', async ({ page }) => {
-        await page.locator('#param-lifeforms-tab').click();
-
-        const costWarn = page.locator('#research-cost-reduction-warn');
-        const timeWarn = page.locator('#research-time-reduction-warn');
-        await expect(costWarn).toBeHidden();
-        await expect(timeWarn).toBeHidden();
-
-        // Import the fixture: both columns contain values above their minimum
-        await page.locator('#lf-research-table-open').click();
-        await expect(page.locator('#lf-research-table')).toBeVisible();
-        await page.locator('#lf-research-table-get').click();
-        await expect(page.locator('#lf-research-paste')).toBeVisible();
-        await page.locator('#lf-research-paste-txtarea').fill(LF_RESEARCH_FIXTURE);
-        await page.locator('#lf-research-paste-import').click();
-        await page.locator('#lf-research-table-ok').click();
-
-        await expect(costWarn).toBeVisible();
-        await expect(timeWarn).toBeVisible();
-        await expect(costWarn).toHaveAttribute('data-bs-original-title', /.+/);
-    });
-
-    test('the warning is per-column and hides when a column is uniform', async ({ page }) => {
-        await page.locator('#param-lifeforms-tab').click();
-        await page.locator('#lf-research-table-open').click();
-        await expect(page.locator('#lf-research-table')).toBeVisible();
-
-        // Uniform cost column (all zero); a single differing value in the time column
-        await page.locator('#lf-research-table-clear').click();
-        await page.locator('#lf-research-bonuses-tbody tr').first().locator('.lf-research-time-input').fill('10');
-        await page.locator('#lf-research-table-ok').click();
-
-        await expect(page.locator('#research-cost-reduction-warn')).toBeHidden();
-        await expect(page.locator('#research-time-reduction-warn')).toBeVisible();
-
-        // Clearing everything hides both warnings
-        await page.locator('#lf-research-table-open').click();
-        await expect(page.locator('#lf-research-table')).toBeVisible();
-        await page.locator('#lf-research-table-clear').click();
-        await page.locator('#lf-research-table-ok').click();
-        await expect(page.locator('#research-cost-reduction-warn')).toBeHidden();
-        await expect(page.locator('#research-time-reduction-warn')).toBeHidden();
-    });
-
-    test('the warning is shown on page load when the saved table is not uniform', async ({ page }) => {
-        // Import and apply, then reload
-        await page.locator('#param-lifeforms-tab').click();
-        await page.locator('#lf-research-table-open').click();
-        await expect(page.locator('#lf-research-table')).toBeVisible();
-        await page.locator('#lf-research-table-get').click();
-        await expect(page.locator('#lf-research-paste')).toBeVisible();
-        await page.locator('#lf-research-paste-txtarea').fill(LF_RESEARCH_FIXTURE);
-        await page.locator('#lf-research-paste-import').click();
-        await page.locator('#lf-research-table-ok').click();
-
-        await page.reload();
-        await page.locator('#param-lifeforms-tab').click();
-        await expect(page.locator('#research-cost-reduction-warn')).toBeVisible();
-        await expect(page.locator('#research-time-reduction-warn')).toBeVisible();
     });
 
     test('imported table survives a page reload', async ({ page }) => {
@@ -876,8 +799,7 @@ test.describe('Costs Calculator - LifeForm research bonuses table', () => {
             await expect(firstRow.locator('.lf-research-time-input')).toHaveValue('52,5');
 
             await page.locator('#lf-research-table-ok').click();
-            await expect(page.locator('#research-cost-reduction')).toHaveValue('0');
-            await expect(page.locator('#research-time-reduction')).toHaveValue('4,41');
+            await expect(page.locator('#lf-research-table')).toBeHidden();
 
             // Stored numbers stay locale-independent (dot decimal)
             const stored = await page.evaluate(() => localStorage.getItem('costs_lf_research_table'));
