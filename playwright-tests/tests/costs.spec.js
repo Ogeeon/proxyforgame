@@ -828,35 +828,42 @@ test.describe('Costs Calculator - LifeForm research bonuses table', () => {
         await expect(page.locator('#lf-research-bonuses-tbody tr').first().locator('.lf-research-cost-input')).toHaveValue('0');
     });
 
-    test('respects the current language decimal separator (Russian, comma)', async ({ page }) => {
-        // Russian uses a comma as the decimal separator (options.decimalSeparator)
-        await page.goto('/ru/ogame/calc/costs.php');
-        await page.locator('#param-lifeforms-tab').click();
-        await page.locator('#lf-research-table-open').click();
-        await expect(page.locator('#lf-research-table')).toBeVisible();
-        await page.locator('#lf-research-table-get').click();
-        await expect(page.locator('#lf-research-paste')).toBeVisible();
+    // Russian uses a comma as the decimal separator (options.decimalSeparator).
+    // Select the language via the context locale (Accept-Language) rather than a
+    // "/ru/" URL prefix: the prefix relies on an Apache rewrite that is absent
+    // under the PHP built-in server used in CI. The locale drives the language on
+    // both servers, and the outer beforeEach already loads costs.php in Russian.
+    test.describe('Russian locale', () => {
+        test.use({ locale: 'ru-RU' });
 
-        // Reuse the English fixture (OGame always exports dot decimals); only the
-        // anchor line must match the first research name in the current language
-        const firstName = (await page.locator('#lf-research-bonuses-tbody tr').first()
-            .locator('td').first().innerText()).trim();
-        const lines = LF_RESEARCH_FIXTURE.split('\n');
-        lines[0] = firstName;
-        await page.locator('#lf-research-paste-txtarea').fill(lines.join('\n'));
-        await page.locator('#lf-research-paste-import').click();
+        test('respects the current language decimal separator (comma)', async ({ page }) => {
+            await page.locator('#param-lifeforms-tab').click();
+            await page.locator('#lf-research-table-open').click();
+            await expect(page.locator('#lf-research-table')).toBeVisible();
+            await page.locator('#lf-research-table-get').click();
+            await expect(page.locator('#lf-research-paste')).toBeVisible();
 
-        // Values are displayed with the language's comma separator
-        const firstRow = page.locator('#lf-research-bonuses-tbody tr').first();
-        await expect(firstRow.locator('.lf-research-cost-input')).toHaveValue('24,04');
-        await expect(firstRow.locator('.lf-research-time-input')).toHaveValue('52,5');
+            // Reuse the English fixture (OGame always exports dot decimals); only the
+            // anchor line must match the first research name in the current language
+            const firstName = (await page.locator('#lf-research-bonuses-tbody tr').first()
+                .locator('td').first().innerText()).trim();
+            const lines = LF_RESEARCH_FIXTURE.split('\n');
+            lines[0] = firstName;
+            await page.locator('#lf-research-paste-txtarea').fill(lines.join('\n'));
+            await page.locator('#lf-research-paste-import').click();
 
-        await page.locator('#lf-research-table-ok').click();
-        await expect(page.locator('#research-cost-reduction')).toHaveValue('0');
-        await expect(page.locator('#research-time-reduction')).toHaveValue('4,41');
+            // Values are displayed with the language's comma separator
+            const firstRow = page.locator('#lf-research-bonuses-tbody tr').first();
+            await expect(firstRow.locator('.lf-research-cost-input')).toHaveValue('24,04');
+            await expect(firstRow.locator('.lf-research-time-input')).toHaveValue('52,5');
 
-        // Stored numbers stay locale-independent (dot decimal)
-        const stored = await page.evaluate(() => localStorage.getItem('costs_lf_research_table'));
-        expect(JSON.parse(stored)[0]).toEqual([24.04, 52.5]);
+            await page.locator('#lf-research-table-ok').click();
+            await expect(page.locator('#research-cost-reduction')).toHaveValue('0');
+            await expect(page.locator('#research-time-reduction')).toHaveValue('4,41');
+
+            // Stored numbers stay locale-independent (dot decimal)
+            const stored = await page.evaluate(() => localStorage.getItem('costs_lf_research_table'));
+            expect(JSON.parse(stored)[0]).toEqual([24.04, 52.5]);
+        });
     });
 });
