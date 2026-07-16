@@ -348,7 +348,11 @@
                     $colHeaders[1] = 'level';
                   }
                 }
-                 $hasQtyCol = ($i == 0 && ($j == 2 || $j == 3));
+                 // quantity column for planet/moon buildings on both the single- and multi-level tabs
+                 $hasQtyCol = ($j == 2 || $j == 3);
+                 $levelCols = ($i == 1) ? 2 : 1; // level columns: from+to (multi) or a single level
+                 $qtyOffset = $hasQtyCol ? 1 : 0;
+                 $qtyAfterIdx = ($i == 1) ? 2 : 1; // insert qty header after to-level (multi) or level (single)
               ?>
               <div class="tab-pane fade <?= $j === $firstInnerTab ? 'show active' : '' ?> no-mp" id="tab-<?=$i?>-<?=$j?>" role="tabpanel">
                 <table id="table-<?=$i?>-<?=$j?>" class="lined" cellpadding="0" cellspacing="1" border="0">
@@ -362,7 +366,7 @@
                         <?=$l[$header] ?>
                       <?php endif; ?>
                     </th>
-                     <?php if ($hasQtyCol && $idx == 1): ?>
+                     <?php if ($hasQtyCol && $idx == $qtyAfterIdx): ?>
                     <th align="center" style="white-space:nowrap"><?=$l['quantity'] ?></th>
                     <?php endif; ?>
                     <?php endforeach; ?>
@@ -400,7 +404,7 @@
                   <?php endforeach; ?>
                   <tr>
                     <td style="display: none;"></td>
-                    <td colspan="<?= ($i == 1)?'2':'1' ?>" class="border-n" ><?=$l['total']?></td>
+                    <td colspan="<?= $levelCols ?>" class="border-n" ><?=$l['total']?></td>
                     <td align="center" class="border-n" >0</td>
                     <?php if ($hasQtyCol): ?><td class="border-n"></td><?php endif; ?>
                     <td align="center" class="border-n border-s border-w" ><b>0</b></td>
@@ -414,10 +418,10 @@
                     <?php endif; ?>
                     <td align="center" class="border-n border-s border-e" ><b>0</b></td>
                   </tr>
-                  <tr><td colspan="<?= ($i == 1)?'11':($hasQtyCol?'11':'10') ?>" height=5px;>&nbsp;</td></tr>
+                  <tr><td colspan="<?= (($i == 1)?11:10) + $qtyOffset ?>" height=5px;>&nbsp;</td></tr>
                   <tr>
                     <td style="display: none;"></td>
-                    <td colspan="<?= ($i == 1)?'3':($hasQtyCol?'3':'2') ?>" class="border-n border-w" ><?=$l['grand-total']?></td>
+                    <td colspan="<?= 1 + $levelCols + $qtyOffset ?>" class="border-n border-w" ><?=$l['grand-total']?></td>
                     <td align="center" class="border-n" >0</td>
                     <td align="center" class="border-n" >0</td>
                     <td align="center" class="border-n" >0</td>
@@ -431,7 +435,7 @@
                   </tr>
                   <tr>
                     <td style="display: none;"></td>
-                    <td colspan="<?= ($i == 1)?'3':($hasQtyCol?'3':'2') ?>" class="border-w"><?=$l['res-available']?></td>
+                    <td colspan="<?= 1 + $levelCols + $qtyOffset ?>" class="border-w"><?=$l['res-available']?></td>
                     <td align="center"><input id="metal-available-<?=$i?>-<?=$j?>" type="text" name="metal-available" class="form-control form-control-sm" style="text-align:center" value="0" /></td>
                     <td align="center"><input id="crystal-available-<?=$i?>-<?=$j?>" type="text" name="crystal-available" class="form-control form-control-sm" style="text-align:center" value="0" /></td>
                     <td align="center"><input id="deut-available-<?=$i?>-<?=$j?>" type="text" name="deut-available" class="form-control form-control-sm" style="text-align:center" value="0" /></td>
@@ -441,7 +445,7 @@
                   </tr>
                   <tr>
                     <td style="display: none;"></td>
-                    <td colspan="<?= ($i == 1)?'3':($hasQtyCol?'3':'2') ?>" class="border-w"><?=$l['res-needed']?></td>
+                    <td colspan="<?= 1 + $levelCols + $qtyOffset ?>" class="border-w"><?=$l['res-needed']?></td>
                     <td align="center">0</td>
                     <td align="center">0</td>
                     <td align="center">0</td>
@@ -454,7 +458,7 @@
                     <td class="border-s border-w"><?=$l['transports-needed']?></td>
                     <td align="center" class="border-s">0 <?=$l['sc-short']?></td>
                     <td align="center" class="border-s">0 <?=$l['lc-short']?></td>
-                    <td colspan="<?= ($i == 1)?'6':(($i == 0)?($hasQtyCol?'7':'6'):'5') ?>" align="center" class="border-s">&nbsp;</td>
+                    <td colspan="<?= 6 + $qtyOffset ?>" align="center" class="border-s">&nbsp;</td>
                     <td align="center" class="border-s border-e">&nbsp;</td>
                   </tr>
                 </table>

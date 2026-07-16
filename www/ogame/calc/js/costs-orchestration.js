@@ -1360,8 +1360,8 @@ class CostsCalculator {
     const rows = getTableRows(`#${tableId}`);
     if (rows.length === 0) return;
 
-    const hasPlanetQtyCol = tableId === 'table-0-2' || tableId === 'table-0-3';
-    const firstDataCol = (isMultiLevel || hasPlanetQtyCol) ? 4 : 3;
+    const hasPlanetQtyCol = ['table-0-2', 'table-0-3', 'table-1-2', 'table-1-3'].includes(tableId);
+    const firstDataCol = 3 + (isMultiLevel ? 1 : 0) + (hasPlanetQtyCol ? 1 : 0);
     const isBuildingTable = tableId.endsWith('-2') || tableId.endsWith('-3');
 
     // Clear data rows (skip header and 6 footer rows)

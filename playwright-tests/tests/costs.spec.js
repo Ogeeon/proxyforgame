@@ -175,22 +175,22 @@ test.describe('Costs Calculator Page', () => {
         await page.getByRole('tab', { name: 'Buildings (planet)' }).click();
         await fillTableRows(page, '#table-1-2', 2, 17, 5, 6);
         await expect(page.locator('#table-1-2 tr:nth-child(18) td:nth-child(3)')).toContainText('96');
-        await expect(page.locator('#table-1-2 tr:nth-child(18) td:nth-child(4)')).toContainText('34.053M');
-        await expect(page.locator('#table-1-2 tr:nth-child(18) td:nth-child(5)')).toContainText('19.599M');
-        await expect(page.locator('#table-1-2 tr:nth-child(18) td:nth-child(6)')).toContainText('6.607M');
-        await expect(page.locator('#table-1-2 tr:nth-child(18) td:nth-child(8)')).toContainText('32.000');
-        await expect(page.locator('#table-1-2 tr:nth-child(18) td:nth-child(9)')).toContainText('127w 5d 4h');
-        await expect(page.locator('#table-1-2 tr:nth-child(18) td:nth-child(10)')).toContainText('60.256');
+        await expect(page.locator('#table-1-2 tr:nth-child(18) td:nth-child(5)')).toContainText('34.053M');
+        await expect(page.locator('#table-1-2 tr:nth-child(18) td:nth-child(6)')).toContainText('19.599M');
+        await expect(page.locator('#table-1-2 tr:nth-child(18) td:nth-child(7)')).toContainText('6.607M');
+        await expect(page.locator('#table-1-2 tr:nth-child(18) td:nth-child(9)')).toContainText('32.000');
+        await expect(page.locator('#table-1-2 tr:nth-child(18) td:nth-child(10)')).toContainText('127w 5d 4h');
+        await expect(page.locator('#table-1-2 tr:nth-child(18) td:nth-child(11)')).toContainText('60.256');
     });
 
     test('[all items - multiple levels / moon] calculations are correct', async ({ page }) => {
         await page.getByRole('tab', { name: 'All items - multiple levels' }).click();
         await page.getByRole('tab', { name: 'Buildings (moon)' }).click();
         await fillTableRows(page, '#table-1-3', 2, 9, 5, 6);
-        await expect(page.locator('#table-1-3 tr:nth-child(10) td:nth-child(4)')).toContainText('65.401M');
-        await expect(page.locator('#table-1-3 tr:nth-child(10) td:nth-child(5)')).toContainText('130.618M');
-        await expect(page.locator('#table-1-3 tr:nth-child(10) td:nth-child(6)')).toContainText('65.289M');
-        await expect(page.locator('#table-1-3 tr:nth-child(10) td:nth-child(9)')).toContainText('466w 4d 23h');
+        await expect(page.locator('#table-1-3 tr:nth-child(10) td:nth-child(5)')).toContainText('65.401M');
+        await expect(page.locator('#table-1-3 tr:nth-child(10) td:nth-child(6)')).toContainText('130.618M');
+        await expect(page.locator('#table-1-3 tr:nth-child(10) td:nth-child(7)')).toContainText('65.289M');
+        await expect(page.locator('#table-1-3 tr:nth-child(10) td:nth-child(10)')).toContainText('466w 4d 23h');
     });
 
     test('[all items - multiple levels / researches] calculations are correct', async ({ page }) => {
@@ -375,12 +375,12 @@ test.describe('Costs Calculator Page', () => {
         await page.locator(`#table-1-2 tr:nth-child(2) td:nth-child(4) input`).fill('19');
         await page.locator(`#table-1-2 tr:nth-child(2) td:nth-child(4) input`).press('Enter');
 
-        await expect(page.locator('#table-1-2 tr:nth-child(18) td:nth-child(4)')).toContainText('88.673');
-        await expect(page.locator('#table-1-2 tr:nth-child(18) td:nth-child(5)')).toContainText('22.168');
-        await expect(page.locator('#table-1-2 tr:nth-child(18) td:nth-child(6)')).toContainText('0');
-        await expect(page.locator('#table-1-2 tr:nth-child(18) td:nth-child(8)')).toContainText('0');
-        await expect(page.locator('#table-1-2 tr:nth-child(18) td:nth-child(9)')).toContainText('1d 20h 20m');
-        await expect(page.locator('#table-1-2 tr:nth-child(18) td:nth-child(10)')).toContainText('-166');
+        await expect(page.locator('#table-1-2 tr:nth-child(18) td:nth-child(5)')).toContainText('88.673');
+        await expect(page.locator('#table-1-2 tr:nth-child(18) td:nth-child(6)')).toContainText('22.168');
+        await expect(page.locator('#table-1-2 tr:nth-child(18) td:nth-child(7)')).toContainText('0');
+        await expect(page.locator('#table-1-2 tr:nth-child(18) td:nth-child(9)')).toContainText('0');
+        await expect(page.locator('#table-1-2 tr:nth-child(18) td:nth-child(10)')).toContainText('1d 20h 20m');
+        await expect(page.locator('#table-1-2 tr:nth-child(18) td:nth-child(11)')).toContainText('-166');
     });
 
     test('[available resources] delivery transport is correct', async ({ page }) => {
@@ -414,6 +414,24 @@ test.describe('Costs Calculator Page', () => {
         await page.locator('#table-0-3 tr:nth-child(2) td:nth-child(4) input').fill('5');
         await page.locator('#table-0-3 tr:nth-child(2) td:nth-child(4) input').press('Enter');
         await expect(page.locator('#table-0-3 tr:nth-child(10) td:nth-child(5)')).toContainText('2.000');
+    });
+
+    test('quantity multiplier works on the multi-level tab', async ({ page }) => {
+        await page.getByRole('tab', { name: 'All items - multiple levels' }).click();
+        await page.getByRole('tab', { name: 'Buildings (planet)' }).click();
+
+        // Metal Mine (first row): from-level 0, to-level 3, quantity 2.
+        // Level costs 60 + 90 + 135 = 285 metal, times 2 = 570.
+        // Columns on this tab: hidden(1) name(2) from(3) to(4) qty(5) metal(6)...
+        await page.locator('#table-1-2 tr:nth-child(2) td:nth-child(3) input').fill('0');
+        await page.locator('#table-1-2 tr:nth-child(2) td:nth-child(4) input').fill('3');
+        await page.locator('#table-1-2 tr:nth-child(2) td:nth-child(5) input').fill('2');
+        await page.locator('#table-1-2 tr:nth-child(2) td:nth-child(5) input').press('Enter');
+        await expect(page.locator('#table-1-2 tr:nth-child(2) td:nth-child(6)')).toContainText('570');
+
+        // The quantity column is absent for researches on this tab
+        await page.locator('#tabtag-1-4').click();
+        await expect(page.locator('#table-1-4 .qty-input')).toHaveCount(0);
     });
 
     test('IRN calculation works', async ({ page }) => {

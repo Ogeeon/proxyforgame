@@ -135,7 +135,7 @@ class DataCollector {
     // Determine table type from ID
     const isMultiLevel = tableId.includes('-1-'); // table-1-* are multi-level
     const isMoonTable = tableId.endsWith('-3'); // table-*-3 are moon buildings
-    const hasQtyCol = tableId === 'table-0-2' || tableId === 'table-0-3'; // planet and moon buildings on single level tab have qty column
+    const hasQtyCol = ['table-0-2', 'table-0-3', 'table-1-2', 'table-1-3'].includes(tableId); // planet and moon buildings on both tabs have qty column
 
     // Skip header row (0) and footer rows (last 5)
     for (let i = 1; i < rows.length - 5; i++) {
@@ -190,16 +190,18 @@ class DataCollector {
       ? this._getInputNumberFromElement(row.children[2].children[0])
       : this._resolveFromLevel(techId, toLevel);
 
-    // Get quantity for planet buildings single-level tab
+    // Get quantity for planet/moon buildings. The qty input sits after the level
+    // inputs, so it is at children[4] on the multi-level tab and children[3] on the single-level tab.
     let quantity = 1;
     if (hasQtyCol) {
-      const qtyVal = this._getInputNumberFromElement(row.children[3].children[0]);
+      const qtyIdx = isMultiLevel ? 4 : 3;
+      const qtyVal = this._getInputNumberFromElement(row.children[qtyIdx].children[0]);
       quantity = Math.max(1, Math.floor(qtyVal || 1));
     }
 
     // For multi-level tab with multiple levels, create one request per level
     if (isMultiLevel && Math.abs(toLevel - fromLevel) > 1) {
-      return this._expandToLevelRequests(techId, fromLevel, toLevel, isMoon);
+      return this._expandToLevelRequests(techId, fromLevel, toLevel, isMoon, quantity);
     }
 
     // Single-level or single-step change: return one request
@@ -219,11 +221,11 @@ class DataCollector {
    * Expand a multi-step range into individual per-level BuildRequests
    * @private
    */
-  _expandToLevelRequests(techId, fromLevel, toLevel, isMoon) {
+  _expandToLevelRequests(techId, fromLevel, toLevel, isMoon, quantity = 1) {
     const requests = [];
     const direction = toLevel > fromLevel ? 1 : -1;
     for (let level = fromLevel; direction > 0 ? level < toLevel : level > toLevel; level += direction) {
-      requests.push(new BuildRequest(techId, level, level + direction, isMoon));
+      requests.push(new BuildRequest(techId, level, level + direction, isMoon, quantity));
     }
     return requests;
   }

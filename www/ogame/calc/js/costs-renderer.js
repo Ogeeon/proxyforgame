@@ -40,8 +40,8 @@ class Renderer {
 
     const rows = getTableRows(`#${tableId}`);
     const isMultiLevel = tableId.includes('-1-');
-    const hasQtyCol = tableId === 'table-0-2' || tableId === 'table-0-3';
-    const firstDataCol = (isMultiLevel || hasQtyCol) ? 4 : 3;
+    const hasQtyCol = ['table-0-2', 'table-0-3', 'table-1-2', 'table-1-3'].includes(tableId);
+    const firstDataCol = 3 + (isMultiLevel ? 1 : 0) + (hasQtyCol ? 1 : 0);
 
     // Clear all data first
     this._clearTableData(tableId, rows, isMultiLevel);
@@ -129,8 +129,8 @@ class Renderer {
    * @private
    */
   _clearTableData(_tableId, rows, isMultiLevel) {
-    const hasQtyCol = _tableId === 'table-0-2' || _tableId === 'table-0-3';
-    const firstDataCol = (isMultiLevel || hasQtyCol) ? 4 : 3;
+    const hasQtyCol = ['table-0-2', 'table-0-3', 'table-1-2', 'table-1-3'].includes(_tableId);
+    const firstDataCol = 3 + (isMultiLevel ? 1 : 0) + (hasQtyCol ? 1 : 0);
     const numDataCols = isMultiLevel ? 7 : 8;
 
     // Clear data rows (skip header and footer)
@@ -179,7 +179,7 @@ class Renderer {
 
     const isBuildingTable = tableId.endsWith('-2') || tableId.endsWith('-3');
     const isFleetOrDefenseTable = tableId.endsWith('-5') || tableId.endsWith('-6');
-    const hasQtyCol = tableId === 'table-0-2' || tableId === 'table-0-3';
+    const hasQtyCol = ['table-0-2', 'table-0-3', 'table-1-2', 'table-1-3'].includes(tableId);
 
     // Column 2: sum of building levels for buildings, empty otherwise
     rows[subtotalRow].cells[2].innerHTML = isBuildingTable
