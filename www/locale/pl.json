@@ -152,7 +152,7 @@
     "fusion-plant-level": "Poziom Elektrowni fuzyjnej",
     "energy-produced": "Wyprodukowanej energii",
     "energy-needed": "z",
-    "calc-results": "Wyniki obliczen",
+    "calc-results": "Wyniki obliczeń",
     "expences": "Wymagania",
     "cargoes": "Transporterów",
     "recyclers": "Recyklerów",
@@ -551,7 +551,7 @@
     "solar-satellites-needed": "Musisz zbudowac satelit slonecznych",
     "debris-percent": "Struktury wchodzące w PZ",
     "hyper-tech": "Tech. nadprzestrzenna",
-    "graviton-level": "Poziom Gravitrona"
+    "graviton-level": "Poziom Grawitona"
   },
   "moon": {
     "title": "OGame - Kalkulatory dla Księżyce",
@@ -641,8 +641,8 @@
     "upgrade-cost": "Koszt modernizacji",
     "production-increase": "Wzrost produkcji",
     "amortization-time": "Czas amortyzacji",
-    "amort-comment": "Uwaga: Obliczenie ilości wyprodukowanych zasobów zakłada, że kopalnie mają wystarczającą ilość energii i że ich poziom obciążenia jest ustawiony na 100%. Wszystkie inne parametry są wzięte z tej strony bez zmian.",
-    "incl-explain": "Jeśli zwiększysz poziom obciążenia kopalni, zużycie energii wzrośnie. Kalkulator może wziąć tę zmianę pod uwagę i uwzględnić w obliczeniach koszty budowy satelitów słonecznych, które dostarczą potrzebnej energii. Kalkulacja jest przeprowadzana dla każdego budynku z osobna. Czy powinniśmy wziąć te koszty pod uwagę?",
+    "amort-comment": "Uwaga: obliczeńie ilości wyprodukowanych zasobów zakłada, że kopalnie mają wystarczającą ilość energii i że ich poziom obciążenia jest ustawiony na 100%. Wszystkie inne parametry są wzięte z tej strony bez zmian.",
+    "incl-explain": "Jeśli zwiększysz poziom obciążenia kopalni, zużycie energii wzrośnie. Kalkulator może wziąć tę zmianę pod uwagę i uwzględnić w obliczeńiach koszty budowy satelitów słonecznych, które dostarczą potrzebnej energii. Kalkulacja jest przeprowadzana dla każdego budynku z osobna. Czy powinniśmy wziąć te koszty pod uwagę?",
     "incl-yes": "Tak",
     "incl-no": "Nie",
     "alliance-class": "Klasa sojuszu",
