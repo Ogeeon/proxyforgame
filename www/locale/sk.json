@@ -304,8 +304,8 @@
     "lf-terraformer-rdc": "Zníženie nákladov na terraformer",
     "disclaimer-robot-nanite": "Pri čítaní časov výstavby zohľadnite poznámku v prvom riadku tabuľky. Ak staviate Robotické továrne alebo Nanotechnologické továrne, použite <a href=\"{0}\">Kalkulačku frontu výstavby</a> pre presné výpočty času výstavby.",
     "disclaimer-title": "Upozornenie",
-    "researcher-class-bonus": "Bonus triedy Discoverer",
-    "researcher-class-bonus-hint": "Použije sa iba vtedy, ak je na karte 'Všeobecné' vybraná trieda 'Discoverer'"
+    "discoverer-class-bonus": "Bonus triedy Discoverer",
+    "discoverer-class-bonus-hint": "Použije sa iba vtedy, ak je na karte 'Všeobecné' vybraná trieda 'Discoverer'"
   },
   "lfcosts": {
     "title": "OGame - Kalkulátor pre ceny pre formy života",

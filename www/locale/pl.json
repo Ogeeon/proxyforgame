@@ -306,8 +306,8 @@
     "lf-terraformer-rdc": "Redukcja kosztów terraformera",
     "disclaimer-robot-nanite": "Przy odczytywaniu czasów budowy uwzględnij uwagę w pierwszym wierszu tabeli. Jeśli budujesz Fabrykę robotów lub Fabrykę nanitów, użyj <a href=\"{0}\">Kalkulatora kolejki budynków</a>, aby dokładnie obliczyć czas budowy.",
     "disclaimer-title": "Uwaga",
-    "researcher-class-bonus": "Bonus klasy Odkrywca",
-    "researcher-class-bonus-hint": "Stosowany tylko wtedy, gdy na karcie 'Ogólne' wybrano klasę 'Odkrywca'"
+    "discoverer-class-bonus": "Bonus klasy Odkrywca",
+    "discoverer-class-bonus-hint": "Stosowany tylko wtedy, gdy na karcie 'Ogólne' wybrano klasę 'Odkrywca'"
   },
   "lfcosts": {
     "energy": "Energia",

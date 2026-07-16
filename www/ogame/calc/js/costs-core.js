@@ -57,7 +57,7 @@ class GlobalParams {
   lfTerraformerRdc = 0;  // LF Terraformer reduction, %
 
   // LF class bonus that boosts the 25% Discoverer research-speed bonus, %
-  researcherClassBonus = 0;
+  discovererClassBonus = 0;
 
   // Cargo capacity increase (e.g. from lifeform bonuses), %
   scCapacityIncrease = 0; // Small Cargo capacity increase, %
@@ -76,7 +76,7 @@ class GlobalParams {
     if (this.researchBonus) factor *= 0.75;
     if (this.playerClass === 2) {
       // Discoverer: 25% research-speed bonus, boosted by the LF class bonus
-      factor *= 1 - 0.25 * (1 + this.researcherClassBonus / 100);
+      factor *= 1 - 0.25 * (1 + this.discovererClassBonus / 100);
     }
     return factor;
   }

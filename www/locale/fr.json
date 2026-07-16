@@ -305,8 +305,8 @@
     "lf-terraformer-rdc": "Réduction des coûts du terraformeur",
     "disclaimer-robot-nanite": "Veuillez tenir compte de la remarque figurant sur la première ligne du tableau lors de la lecture des durées de construction. Si vous construisez une Usine de robots ou une Usine de nanites, utilisez le <a href=\"{0}\">Calculateur de file de construction</a> pour des calculs de durée précis.",
     "disclaimer-title": "Attention",
-    "researcher-class-bonus": "Bonus de classe Explorateur",
-    "researcher-class-bonus-hint": "S'applique uniquement si la classe 'Explorateur' est sélectionnée dans l'onglet 'Général'"
+    "discoverer-class-bonus": "Bonus de classe Explorateur",
+    "discoverer-class-bonus-hint": "S'applique uniquement si la classe 'Explorateur' est sélectionnée dans l'onglet 'Général'"
   },
   "lfcosts": {
     "title": "OGame - Calculateur de coûts pour les formes de vie",

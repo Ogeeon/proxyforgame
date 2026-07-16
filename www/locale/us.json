@@ -306,8 +306,8 @@
     "lf-terraformer-rdc": "Terraformer cost/build time reduction",
     "disclaimer-robot-nanite": "Please take into account the note in the first row of the table when reading build times. If you are building a Robotics factory or a Nanite factory, use the <a href=\"{0}\">Construction queue calculator</a> for accurate build time calculations.",
     "disclaimer-title": "Please note",
-    "researcher-class-bonus": "Researcher class bonus",
-    "researcher-class-bonus-hint": "Applies only if the 'Discoverer' class is selected on the 'Common' tab"
+    "discoverer-class-bonus": "Discoverer class bonus",
+    "discoverer-class-bonus-hint": "Applies only if the 'Discoverer' class is selected on the 'Common' tab"
   },
   "lfcosts": {
     "energy": "Energy",

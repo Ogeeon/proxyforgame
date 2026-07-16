@@ -342,7 +342,7 @@ class CostsCalculator {
     const lfInputs = [
       '#research-cost-reduction',
       '#research-time-reduction',
-      '#researcher-class-bonus',
+      '#discoverer-class-bonus',
       '#mineral-res-cntr-lvl',
       '#lf-terraformer-rdc',
       '#sc-capacity-increase',
@@ -353,7 +353,7 @@ class CostsCalculator {
     // clamp the entered value to the max on blur, like the temperature field.
     document.getElementById('research-cost-reduction')._constrains = { min: 0, max: 50, def: 0, allowFloat: true, allowNegative: false };
     document.getElementById('research-time-reduction')._constrains = { min: 0, max: 99, def: 0, allowFloat: true, allowNegative: false };
-    document.getElementById('researcher-class-bonus')._constrains = { min: 0, max: 100, def: 0, allowFloat: true, allowNegative: false };
+    document.getElementById('discoverer-class-bonus')._constrains = { min: 0, max: 100, def: 0, allowFloat: true, allowNegative: false };
     document.getElementById('sc-capacity-increase')._constrains = { min: 0, max: 1000, def: 0, allowFloat: true, allowNegative: false };
     document.getElementById('lc-capacity-increase')._constrains = { min: 0, max: 1000, def: 0, allowFloat: true, allowNegative: false };
 

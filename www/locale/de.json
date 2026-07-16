@@ -305,8 +305,8 @@
     "lf-terraformer-rdc": "Reduzierung der Terraformer-Kosten",
     "disclaimer-robot-nanite": "Bitte beachten Sie beim Ablesen der Bauzeiten den Hinweis in der ersten Zeile der Tabelle. Wenn Sie eine Roboterfabrik oder eine Nanitenfabrik bauen, verwenden Sie für genaue Bauzeitberechnungen den <a href=\"{0}\">Konstruktion-Warteschlangen-Rechner</a>.",
     "disclaimer-title": "Hinweis",
-    "researcher-class-bonus": "Klassenbonus Entdecker",
-    "researcher-class-bonus-hint": "Wird nur angewendet, wenn im Reiter 'Allgemein' die Klasse 'Entdecker' ausgewählt ist"
+    "discoverer-class-bonus": "Klassenbonus Entdecker",
+    "discoverer-class-bonus-hint": "Wird nur angewendet, wenn im Reiter 'Allgemein' die Klasse 'Entdecker' ausgewählt ist"
   },
   "lfcosts": {
     "title": "OGame - Kostenberechnung für Lebensformen",
