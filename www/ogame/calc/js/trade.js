@@ -66,8 +66,8 @@ let options = {
             case 'coordp': return validateNumber(Number.parseInt(value), 0, 15, this.coordp);
             case 'hyperTech': return validateNumber(Number.parseInt(value), 0, 50, this.hyperTech);
             case 'playerClass': return validateNumber(Number.parseInt(value), 0, 2, this.playerClass);
-            case 'scCapacityIncrease': return validateNumber(Number.parseInt(value), 0, Infinity, this.scCapacityIncrease);
-            case 'lcCapacityIncrease': return validateNumber(Number.parseInt(value), 0, Infinity, this.lcCapacityIncrease);
+            case 'scCapacityIncrease': return validateNumber(Number.parseFloat(value), 0, Infinity, this.scCapacityIncrease);
+            case 'lcCapacityIncrease': return validateNumber(Number.parseFloat(value), 0, Infinity, this.lcCapacityIncrease);
             case 'moon': return value === true || value === 'true';
             default: return value;
         }
@@ -75,7 +75,13 @@ let options = {
 
     load: function() {
         try {
+            // decimalSeparator is a locale constant supplied by the template, not user data.
+            // It must never be taken from the cookie: in locales where it is a comma it collides
+            // with the comma record delimiter and round-trips to an empty string, which then breaks
+            // both number input (no separator accepted) and display. Keep the template value.
+            const ds = this.decimalSeparator;
             loadFromCookie('options_trade', options);
+            this.decimalSeparator = ds || '.';
             // Validate that rates is an object and re-init if needed
             if (typeof this.rates !== 'object' || this.rates === null) {
                 this.rates = {
@@ -91,7 +97,11 @@ let options = {
     },
 
     save: function() {
+        // Keep the locale separator out of the comma-delimited cookie (see load()).
+        const ds = this.decimalSeparator;
+        delete this.decimalSeparator;
         saveToCookie('options_trade', options);
+        this.decimalSeparator = ds;
     },
 
     _parseUrlParams: function() {
@@ -897,8 +907,10 @@ try {
 
     document.getElementById('hypertech-lvl').value = options.hyperTech;
     document.getElementById('player-class-' + options.playerClass).checked = true;
-    document.getElementById('sc-capacity-increase').value = options.scCapacityIncrease;
-    document.getElementById('lc-capacity-increase').value = options.lcCapacityIncrease;
+    document.getElementById('sc-capacity-increase')._constrains = { min: 0, def: 0, allowFloat: true, allowNegative: false };
+    document.getElementById('lc-capacity-increase')._constrains = { min: 0, def: 0, allowFloat: true, allowNegative: false };
+    document.getElementById('sc-capacity-increase').value = String(options.scCapacityIncrease).replace('.', options.decimalSeparator);
+    document.getElementById('lc-capacity-increase').value = String(options.lcCapacityIncrease).replace('.', options.decimalSeparator);
     document.getElementById('country').value = options.country;
     setUniList(options.country, options.universe);
 

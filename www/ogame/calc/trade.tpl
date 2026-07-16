@@ -42,6 +42,7 @@
     l.coords = '<?= $l['coords'] ?>';
     l.rates = '<?= $l['rates'] ?>';
     l.moonstr = '<?= $l['moon'] ?>';
+    options.decimalSeparator = '<?= $l['decimal-separator'] ?>';
 
     unis = {
 <?php
