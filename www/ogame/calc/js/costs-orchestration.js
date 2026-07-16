@@ -348,6 +348,7 @@ class CostsCalculator {
     ];
 
     document.getElementById('discoverer-class-bonus')._constrains = { min: 0, max: 100, def: 0, allowFloat: true, allowNegative: false };
+    document.getElementById('lf-terraformer-rdc')._constrains = { min: 0, max: 50, def: 0, allowFloat: true, allowNegative: false };
     document.getElementById('sc-capacity-increase')._constrains = { min: 0, max: 1000, def: 0, allowFloat: true, allowNegative: false };
     document.getElementById('lc-capacity-increase')._constrains = { min: 0, max: 1000, def: 0, allowFloat: true, allowNegative: false };
 
@@ -1028,6 +1029,7 @@ class CostsCalculator {
       fullNumbers: this.currentParams.fullNumbers,
       mineralResCntrLvl: this.currentParams.mineralResCntrLvl,
       lfTerraformerRdc: this.currentParams.lfTerraformerRdc,
+      discovererClassBonus: this.currentParams.discovererClassBonus,
       scCapacityIncrease: this.currentParams.scCapacityIncrease,
       lcCapacityIncrease: this.currentParams.lcCapacityIncrease,
       rates: this.currentParams.rates
@@ -1122,23 +1124,29 @@ class CostsCalculator {
       planetPos: '#planet-pos',
       mineralResCntrLvl: '#mineral-res-cntr-lvl',
       lfTerraformerRdc: '#lf-terraformer-rdc',
+      discovererClassBonus: '#discoverer-class-bonus',
       scCapacityIncrease: '#sc-capacity-increase',
       lcCapacityIncrease: '#lc-capacity-increase',
       booster: '#booster',
       irnLevel: '#irn-level',
     };
 
+    // Fields that accept fractional input must be written with the current
+    // locale's decimal separator (e.g. a comma in ru), otherwise a restored
+    // value like 12.5 shows a dot the input's validator would later reject.
+    const floatFields = new Set(['discovererClassBonus', 'lfTerraformerRdc', 'scCapacityIncrease', 'lcCapacityIncrease']);
+
     for (const [key, selector] of Object.entries(fieldMap)) {
       if (state[key] !== undefined) {
-        setVal(selector, state[key]);
+        setVal(selector, floatFields.has(key) ? this._formatDecimal(state[key]) : state[key]);
       }
     }
 
-    // Exchange rates (stored as array)
+    // Exchange rates (stored as array) — also fractional, so localize them too
     if (Array.isArray(state.rates) && state.rates.length === 3) {
-      setVal('#exchange-rates-m', state.rates[0]);
-      setVal('#exchange-rates-c', state.rates[1]);
-      setVal('#exchange-rates-d', state.rates[2]);
+      setVal('#exchange-rates-m', this._formatDecimal(state.rates[0]));
+      setVal('#exchange-rates-c', this._formatDecimal(state.rates[1]));
+      setVal('#exchange-rates-d', this._formatDecimal(state.rates[2]));
     }
 
     // Officers/bonuses
@@ -1252,12 +1260,13 @@ class CostsCalculator {
     // Booster
     setVal('#booster', 0);
 
-    // Exchange rates
-    setVal('#exchange-rates-m', 1);
-    setVal('#exchange-rates-c', 1.5);
-    setVal('#exchange-rates-d', 3);
+    // Exchange rates (localized: the decimal separator may be a comma)
+    setVal('#exchange-rates-m', this._formatDecimal(1));
+    setVal('#exchange-rates-c', this._formatDecimal(1.5));
+    setVal('#exchange-rates-d', this._formatDecimal(3));
 
-    // Cargo capacity increase
+    // Discoverer class bonus and cargo capacity increase
+    setVal('#discoverer-class-bonus', 0);
     setVal('#sc-capacity-increase', 0);
     setVal('#lc-capacity-increase', 0);
 
