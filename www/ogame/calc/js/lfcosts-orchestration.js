@@ -493,19 +493,19 @@ class LfCostsOrchestrator {
         setVal('#universe-speed', prm.universeSpeed);
         setVal('#ion-tech-level', prm.ionTechLevel);
         setVal('#hyper-tech-level', prm.hyperTechLevel);
-        setVal('#sc-capacity-increase', prm.capIncrSC);
-        setVal('#lc-capacity-increase', prm.capIncrLC);
+        setVal('#sc-capacity-increase', this._formatDecimal(prm.capIncrSC));
+        setVal('#lc-capacity-increase', this._formatDecimal(prm.capIncrLC));
         setVal('#megalith-level', prm.megalithLvl);
         setVal('#mrc-level', prm.mineralResCntrLvl);
         setVal('#research-centre-level', prm.resCentreLvl);
         setVal('#rune-tech-level', prm.runeTechLvl);
         setVal('#rbt-res-centre-level', prm.rbtResCentreLvl);
         setVal('#vortex-chamber-level', prm.vortexChamberLvl);
-        setVal('#research-cost-reduction', prm.researchCostReduction);
-        setVal('#research-time-reduction', prm.researchTimeReduction);
-        setVal('#exchange-rates-m', prm.rates[0]);
-        setVal('#exchange-rates-c', prm.rates[1]);
-        setVal('#exchange-rates-d', prm.rates[2]);
+        setVal('#research-cost-reduction', this._formatDecimal(prm.researchCostReduction));
+        setVal('#research-time-reduction', this._formatDecimal(prm.researchTimeReduction));
+        setVal('#exchange-rates-m', this._formatDecimal(prm.rates[0]));
+        setVal('#exchange-rates-c', this._formatDecimal(prm.rates[1]));
+        setVal('#exchange-rates-d', this._formatDecimal(prm.rates[2]));
 
         for (let outer = 0; outer < 2; outer++) {
             const rows = getTableRows(`#table-${outer}-1`);
@@ -565,6 +565,25 @@ class LfCostsOrchestrator {
     // Private helpers
     // -------------------------------------------------------------------------
 
+    /**
+     * The decimal separator for the current language (falls back to '.').
+     * @private
+     */
+    _decimalSeparator() {
+        return (typeof options !== 'undefined' && options.decimalSeparator) || '.';
+    }
+
+    /**
+     * Format a number for display using the current language's decimal
+     * separator. Fractional fields must be written this way, otherwise a
+     * restored value like 1.5 shows a dot the input's validator would reject
+     * in locales that use a comma (e.g. ru).
+     * @private
+     */
+    _formatDecimal(num) {
+        return String(num).replace('.', this._decimalSeparator());
+    }
+
     _restoreInputsFromPrm() {
         const prm = this.opts.prm;
         setVal('#robot-factory-level', prm.robotFactoryLevel);
@@ -577,19 +596,19 @@ class LfCostsOrchestrator {
         setVal('#tab2-to-level', 0);
         setChecked(`#class-${prm.playerClass}`, true);
         setChecked('#full-numbers', prm.fullNumbers);
-        setVal('#sc-capacity-increase', prm.capIncrSC);
-        setVal('#lc-capacity-increase', prm.capIncrLC);
+        setVal('#sc-capacity-increase', this._formatDecimal(prm.capIncrSC));
+        setVal('#lc-capacity-increase', this._formatDecimal(prm.capIncrLC));
         setVal('#megalith-level', prm.megalithLvl);
         setVal('#mrc-level', prm.mineralResCntrLvl);
         setVal('#research-centre-level', prm.resCentreLvl);
         setVal('#rune-tech-level', prm.runeTechLvl);
         setVal('#rbt-res-centre-level', prm.rbtResCentreLvl);
         setVal('#vortex-chamber-level', prm.vortexChamberLvl);
-        setVal('#research-cost-reduction', prm.researchCostReduction);
-        setVal('#research-time-reduction', prm.researchTimeReduction);
-        setVal('#exchange-rates-m', prm.rates[0]);
-        setVal('#exchange-rates-c', prm.rates[1]);
-        setVal('#exchange-rates-d', prm.rates[2]);
+        setVal('#research-cost-reduction', this._formatDecimal(prm.researchCostReduction));
+        setVal('#research-time-reduction', this._formatDecimal(prm.researchTimeReduction));
+        setVal('#exchange-rates-m', this._formatDecimal(prm.rates[0]));
+        setVal('#exchange-rates-c', this._formatDecimal(prm.rates[1]));
+        setVal('#exchange-rates-d', this._formatDecimal(prm.rates[2]));
     }
 
     _clearAvailableResourceInputs() {
