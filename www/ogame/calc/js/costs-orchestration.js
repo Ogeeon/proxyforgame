@@ -582,10 +582,30 @@ class CostsCalculator {
       }
     });
 
+    // Snapshot the table on open and restore it on close unless the user
+    // confirmed with OK, so edits abandoned via Cancel/close are discarded
+    // and don't reappear the next time the modal is opened.
+    const tableModalEl = document.getElementById('lf-research-table');
+    if (tableModalEl) {
+      removeAllEvents(tableModalEl, 'show.bs.modal');
+      addEvent(tableModalEl, 'show.bs.modal', () => {
+        this._lfTableApplied = false;
+        this._lfTableSnapshot = this._readLfResearchTable();
+      });
+      removeAllEvents(tableModalEl, 'hidden.bs.modal');
+      addEvent(tableModalEl, 'hidden.bs.modal', () => {
+        if (!this._lfTableApplied && this._lfTableSnapshot) {
+          this._restoreLfResearchTable(this._lfTableSnapshot);
+        }
+        this._lfTableSnapshot = null;
+      });
+    }
+
     // OK: copy the minimum of each column to the reduction fields, persist, close
     removeAllEvents('#lf-research-table-ok', 'click');
     addEvent('#lf-research-table-ok', 'click', () => {
       this._applyLfResearchTable();
+      this._lfTableApplied = true;
       const el = document.getElementById('lf-research-table');
       if (el && typeof bootstrap !== 'undefined' && bootstrap.Modal) {
         bootstrap.Modal.getOrCreateInstance(el).hide();
@@ -635,6 +655,24 @@ class CostsCalculator {
       cost: this._parsePercent(row.querySelector('.lf-research-cost-input')),
       time: this._parsePercent(row.querySelector('.lf-research-time-input'))
     }));
+  }
+
+  /**
+   * Write a snapshot of value pairs back into the table inputs. Used to revert
+   * the modal to its pre-edit state when the user cancels.
+   * @param {{cost: number, time: number}[]} data
+   * @private
+   */
+  _restoreLfResearchTable(data) {
+    const rows = $$('#lf-research-bonuses-tbody tr');
+    rows.forEach((row, i) => {
+      const entry = data[i];
+      if (!entry) return;
+      const costInput = row.querySelector('.lf-research-cost-input');
+      const timeInput = row.querySelector('.lf-research-time-input');
+      if (costInput) costInput.value = this._formatDecimal(entry.cost);
+      if (timeInput) timeInput.value = this._formatDecimal(entry.time);
+    });
   }
 
   /**
