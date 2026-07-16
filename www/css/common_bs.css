@@ -177,3 +177,13 @@ abbr {
   border-bottom: .1em dotted;
   cursor: help;
 }
+/* Keep value inputs compact when wrapped in a Bootstrap input-group with a unit
+   addon: Bootstrap forces `.input-group > .form-control { flex: 1 1 auto; width: 1% }`,
+   which would otherwise blow these fixed-width numeric fields up to the browser's
+   default text-input width. */
+.input-group > .form-control.level-input,
+.input-group > .form-control.fleet-input,
+.input-group > .form-control.rate-input {
+  flex: 0 0 auto;
+  width: 3.5rem;
+}

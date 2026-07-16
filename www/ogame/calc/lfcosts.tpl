@@ -220,24 +220,36 @@
           <div class="d-flex flex-wrap gap-2 align-items-center mb-1">
             <div class="d-flex align-items-center gap-1">
               <label for="research-cost-reduction"><?= $l['research-cost-reduction'] ?></label>
-              <input id="research-cost-reduction" type="text" name="research-cost-reduction" class="form-control form-control-sm fleet-input" value="0" />%
-              <i class="bi bi-question-circle ms-1" data-bs-toggle="tooltip" title="<?= $l['times-hint'] ?>"></i>
+              <div class="input-group input-group-sm w-auto">
+                <input id="research-cost-reduction" type="text" name="research-cost-reduction" class="form-control fleet-input m-0" value="0" />
+                <span class="input-group-text">%</span>
+              </div>
+              <i class="bi bi-question-circle" data-bs-toggle="tooltip" title="<?= $l['times-hint'] ?>"></i>
             </div>
             <div class="d-flex align-items-center gap-1">
               <label for="research-time-reduction"><?= $l['research-time-reduction'] ?></label>
-              <input id="research-time-reduction" type="text" name="research-time-reduction" class="form-control form-control-sm fleet-input" value="0" />%
-              <i class="bi bi-question-circle ms-1" data-bs-toggle="tooltip" title="<?= $l['times-hint'] ?>"></i>
+              <div class="input-group input-group-sm w-auto">
+                <input id="research-time-reduction" type="text" name="research-time-reduction" class="form-control fleet-input m-0" value="0" />
+                <span class="input-group-text">%</span>
+              </div>
+              <i class="bi bi-question-circle" data-bs-toggle="tooltip" title="<?= $l['times-hint'] ?>"></i>
             </div>
           </div>
           <div class="d-flex flex-wrap gap-2 align-items-center">
             <span><?= $l['cargo-cap-increase'] ?></span>
             <div class="d-flex align-items-center gap-1">
               <label for="sc-capacity-increase"><?= $l['sc-short'] ?></label>
-              <input id="sc-capacity-increase" type="text" name="sc-capacity-increase" class="form-control form-control-sm fleet-input" value="0" />
+              <div class="input-group input-group-sm w-auto">
+                <input id="sc-capacity-increase" type="text" name="sc-capacity-increase" class="form-control fleet-input m-0" value="0" />
+                <span class="input-group-text">%</span>
+              </div>
             </div>
             <div class="d-flex align-items-center gap-1">
               <label for="lc-capacity-increase"><?= $l['lc-short'] ?></label>
-              <input id="lc-capacity-increase" type="text" name="lc-capacity-increase" class="form-control form-control-sm fleet-input" value="0" />
+              <div class="input-group input-group-sm w-auto">
+                <input id="lc-capacity-increase" type="text" name="lc-capacity-increase" class="form-control fleet-input m-0" value="0" />
+                <span class="input-group-text">%</span>
+              </div>
             </div>
           </div>
         </div>

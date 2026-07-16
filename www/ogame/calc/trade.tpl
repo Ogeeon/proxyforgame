@@ -118,11 +118,17 @@
                 </div>
                 <div class="col-auto d-flex align-items-center gap-1">
                   <label for="sc-capacity-increase"><?= $l['sc-short'] ?></label>
-                  <input id="sc-capacity-increase" type="text" name="sc-capacity-increase" class="form-control form-control-sm rate-input trade-editable" value="0"/>
+                  <div class="input-group input-group-sm w-auto">
+                    <input id="sc-capacity-increase" type="text" name="sc-capacity-increase" class="form-control rate-input trade-editable m-0" value="0"/>
+                    <span class="input-group-text">%</span>
+                  </div>
                 </div>
                 <div class="col-auto d-flex align-items-center gap-1">
                   <label for="lc-capacity-increase"><?= $l['lc-short'] ?></label>
-                  <input id="lc-capacity-increase" type="text" name="lc-capacity-increase" class="form-control form-control-sm rate-input trade-editable" value="0"/>
+                  <div class="input-group input-group-sm w-auto">
+                    <input id="lc-capacity-increase" type="text" name="lc-capacity-increase" class="form-control rate-input trade-editable m-0" value="0"/>
+                    <span class="input-group-text">%</span>
+                  </div>
                 </div>
               </div>
             </div>
