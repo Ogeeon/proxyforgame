@@ -533,7 +533,12 @@
     "mission-type-war": "Savaş",
     "mission-type-peaceful": "Barışçıl",
     "mission-type-holding": "Bekleme",
-    "fetchig-data": "Veriler alınıyor..."
+    "fetchig-data": "Veriler alınıyor...",
+    "own-api-reader-hdr": "OGame'den içe aktar",
+    "own-api-reader-info": "OGame'deki 'Filo' sayfasındaki API 2 alanındaki metni buraya yapıştırın. Gemi sayıları, teknolojiler, bonuslar ve başlangıç koordinatları otomatik olarak doldurulur.",
+    "own-api-import-btn": "OGame'den içe aktar",
+    "own-api-import-title": "İçe Aktar",
+    "own-api-bad-json-msg": "Veriler okunamadı.\\n'Filo' sayfasındaki API 2 alanındaki metni yapıştırdığınızdan emin olun."
   },
   "graviton": {
     "title": "OGame - Gravitasyon Hesaplayıcı",

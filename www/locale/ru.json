@@ -537,7 +537,12 @@
     "mission-type-war": "Боевая",
     "mission-type-peaceful": "Мирная",
     "mission-type-holding": "Удержание",
-    "fetchig-data": "Получение данных..."
+    "fetchig-data": "Получение данных...",
+    "own-api-reader-hdr": "Импорт из OGame",
+    "own-api-reader-info": "Вставьте сюда текст из поля API 2 со страницы «Флот» в OGame. Количество кораблей, технологии, бонусы и координаты старта заполнятся автоматически.",
+    "own-api-import-btn": "Импорт из OGame",
+    "own-api-import-title": "Импортировать",
+    "own-api-bad-json-msg": "Не удалось прочитать данные.\\nУбедитесь, что вставили текст из поля API 2 со страницы «Флот»."
   },
   "graviton": {
     "title": "OGame - Калькулятор Гравитационной технологии",

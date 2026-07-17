@@ -542,7 +542,12 @@
     "mission-type-war": "Guerra",
     "mission-type-peaceful": "Pacifico",
     "mission-type-holding": "Sosta",
-    "fetchig-data": "Recupero dati..."
+    "fetchig-data": "Recupero dati...",
+    "own-api-reader-hdr": "Importa da OGame",
+    "own-api-reader-info": "Incolla qui il testo dal campo API 2 della pagina «Flotta» in OGame. Numero di navi, tecnologie, bonus e coordinate di partenza verranno compilati automaticamente.",
+    "own-api-import-btn": "Importa da OGame",
+    "own-api-import-title": "Importa",
+    "own-api-bad-json-msg": "Impossibile leggere i dati.\\nAssicurati di aver incollato il testo dal campo API 2 della pagina «Flotta»."
   },
   "graviton": {
     "title": "OGame - Calcolatore per Gravitonica",

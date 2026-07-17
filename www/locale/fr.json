@@ -539,7 +539,12 @@
     "mission-type-war": "Guerre",
     "mission-type-peaceful": "Pacifique",
     "mission-type-holding": "Maintien",
-    "fetchig-data": "Récupération des données..."
+    "fetchig-data": "Récupération des données...",
+    "own-api-reader-hdr": "Importer depuis OGame",
+    "own-api-reader-info": "Collez ici le texte du champ API 2 de la page « Flotte » dans OGame. Le nombre de vaisseaux, les technologies, les bonus et les coordonnées de départ seront remplis automatiquement.",
+    "own-api-import-btn": "Importer depuis OGame",
+    "own-api-import-title": "Importer",
+    "own-api-bad-json-msg": "Impossible de lire les données.\\nAssurez-vous d'avoir collé le texte du champ API 2 de la page « Flotte »."
   },
   "graviton": {
     "title": "OGame - Calculateur de Graviton",

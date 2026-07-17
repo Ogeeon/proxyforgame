@@ -88,6 +88,8 @@
     options.missingSCName = "<?= $l['no-sc-message'] ?>";
     options.badSRCode = "<?= $l['import-bad-code-msg'] ?>";
     options.dataFetchMsg = "<?= $l['fetchig-data'] ?>";
+    options.ownApiImportTitle = "<?= $l['own-api-import-title'] ?>";
+    options.ownApiBadJsonMsg = "<?= $l['own-api-bad-json-msg'] ?>";
 
     unis = {
 <?php
@@ -126,6 +128,17 @@
   </div>
 </div>
 
+<div id="own-api-reader" title="<?= $l['own-api-reader-hdr'] ?>">
+  <div class="ui-widget-content ui-corner-all width: auto; ">
+    <div class="irn-calc-info">
+      <?= $l['own-api-reader-info'] ?>
+    </div>
+    <div id="own-api-div">
+      <textarea id="own-api-txtarea" rows="10" cols="50"></textarea>
+    </div>
+  </div>
+</div>
+
 <div id="flight">
   <div class="ui-widget-content ui-corner-all">
     <div id="reset" class="ui-state-error ui-corner-all" title="<?= $l['reset'] ?>"><span class="ui-icon ui-icon-arrowrefresh-1-w"></span></div>
@@ -155,15 +168,18 @@
                 <td><button id="universe-add" title="<?= $l['universe-add'] ?>" class="uni-control-btn"></button></td>
                 <td>&nbsp;</td>
               </tr>
-                <td>SR_KEY:</td>
-                <td colspan="4"><input id="api-code" placeholder="API OGame / API LogServer.net" type="text" style="width: 97%;" class="ui-state-default ui-corner-all ui-input ui-input-margin input-20columns"/></td>
-                <td>
-                  <button id="api-get" title="<?= $l['import-sr'] ?>" class="uni-control-btn"></button>
-                </td>
-                <td>
-                  <span class="ui-icon ui-icon-help" title="<?= $l['import-hint'] ?>"></span>
-                </td>
               <tr>
+                <td>SR_KEY:</td>
+                <td colspan="4">
+                  <div style="display: flex; align-items: center; gap: 3px; width: 100%;">
+                    <input id="api-code" placeholder="API OGame / API LogServer.net" type="text" style="flex: 1 1 auto; width: auto; text-align: center;" class="ui-state-default ui-corner-all ui-input ui-input-margin"/>
+                    <span class="ui-icon ui-icon-help" title="<?= $l['import-hint'] ?>" style="flex: 0 0 auto;"></span>
+                    <button id="api-get" title="<?= $l['import-sr'] ?>" class="uni-control-btn" style="margin-right: 14px;"></button>
+                  </div>
+                </td>
+                <td>
+                  <button id="import-own-api" title="<?= $l['own-api-import-btn'] ?>" class="uni-control-btn"></button>
+                </td>
               </tr>
             </table>
           </div>

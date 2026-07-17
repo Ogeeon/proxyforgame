@@ -1316,6 +1316,131 @@ function hidePanelLoadingOverlay(elementId = 'general-settings-panel') {
     panel.find('.panel-overlay').remove();
 }
 
+// Maps OGame shipyard numeric IDs to the ship count input ids used across the flight calculator.
+// Shared by the SR importer (ajaxAPI) and the OGame-export importer (importOwnApi).
+const techNamesMapping = [
+    [202, 'small-cargo'],
+    [203, 'large-cargo'],
+    [204, 'light-fighter'],
+    [205, 'heavy-fighter'],
+    [206, 'cruiser'],
+    [207, 'battleship'],
+    [208, 'colony-ship'],
+    [209, 'recycler'],
+    [210, 'esp-probe'],
+    [211, 'bomber'],
+    [213, 'destroyer'],
+    [214, 'death-star'],
+    [215, 'battlecruiser'],
+    [218, 'reaper'],
+    [219, 'pathfinder']
+];
+
+/**
+ * Imports the flat JSON object exported from the OGame client (see own_api.json) and populates the
+ * calculator fields. Mirrors the field-writing logic of ajaxAPI() but reads the flat structure
+ * directly, without any AJAX round-trip. Returns true on success, false on parse/mapping error.
+ */
+function importOwnApi(jsonText) {
+    let data;
+    try {
+        data = JSON.parse(jsonText);
+    } catch (e) {
+        alert(options.ownApiBadJsonMsg);
+        return false;
+    }
+    // JSON.parse also accepts primitives (e.g. "111" -> 111); make sure we got an OGame export object.
+    if (data === null || typeof data !== 'object' || Array.isArray(data) ||
+        !('coords' in data || 'ships' in data || 'researches' in data ||
+          'fleetspeed' in data || 'characterClassId' in data)) {
+        alert(options.ownApiBadJsonMsg);
+        return false;
+    }
+    try {
+        // Departure coordinates "galaxy:system:position"
+        if (typeof data.coords === 'string') {
+            let coords = data.coords.split(':');
+            $('#departure-g').val(coords[0]);
+            $('#departure-s').val(coords[1]);
+            $('#departure-p').val(coords[2]);
+        }
+
+        // Character class: OGame id 1 -> collector, 2 -> general, 3 -> discoverer
+        let defClass = false;
+        switch (data.characterClassId) {
+            case 1: defClass = 'class-0'; break;
+            case 2: defClass = 'class-1'; break;
+            case 3: defClass = 'class-2'; break;
+            default: defClass = false;
+        }
+        if (defClass) {
+            $('input[name="class"]').removeAttr('checked');
+            $('#' + defClass).attr('checked', true);
+        }
+
+        // Alliance class: 2 -> trader bonus. Trader and warrior bonuses are mutually exclusive.
+        let isTrader = data.allianceClassId == 2;
+        $('#trader-bonus')[0].checked = isTrader;
+        if (isTrader) {
+            $('#warrior-bonus')[0].checked = false;
+        }
+
+        // Drive technologies and hyperspace tech
+        if (data.researches) {
+            $.each(data.researches, function (id, level) {
+                if (id == 115) $('#cmb-drive').val(level);
+                if (id == 117) $('#imp-drive').val(level);
+                if (id == 118) $('#hyp-drive').val(level);
+                if (id == 114) $('#hypertech-lvl').val(level);
+            });
+        }
+
+        // Lifeform character class boosters
+        if (data.bonuses && data.bonuses.characterClassBooster) {
+            $('#lf-rocktal-collector-enh').val(0);
+            $('#lf-mechan-general-enh').val(0);
+            $.each(data.bonuses.characterClassBooster, function (i, v) {
+                if (i == 1) $('#lf-rocktal-collector-enh').val(localizeFloat(frac(v, 6) * 100));
+                if (i == 2) $('#lf-mechan-general-enh').val(localizeFloat(frac(v, 6) * 100));
+            });
+        }
+
+        // Reset all ship counts and per-ship bonuses before applying the imported values
+        $.each(techNamesMapping, function (idx, val) {
+            $('#' + val[1]).val(0);
+            $('.' + val[0] + '-speed').val(0);
+            $('.' + val[0] + '-cargo').val(0);
+            $('.' + val[0] + '-fuel').val(0);
+        });
+
+        // Ships: amount + per-ship speed/cargo/fuel bonuses (stored as percent = fraction * 100)
+        if (data.ships) {
+            $.each(data.ships, function (id, v) {
+                $.each(techNamesMapping, function (idx, val) {
+                    if (val[0] == id) {
+                        $('#' + val[1]).val(v.amount ? v.amount : 0);
+                        if (v.speed) $('.' + id + '-speed').val(localizeFloat(frac(v.speed, 6) * 100, 4));
+                        if (v.cargo) $('.' + id + '-cargo').val(localizeFloat(frac(v.cargo, 6) * 100, 4));
+                        if (v.fuel) $('.' + id + '-fuel').val(localizeFloat(frac(v.fuel, 7) * 100, 5));
+                    }
+                });
+            });
+        }
+
+        // Universe fleet speed: write the war/base speed only (peaceful/holding come from the universe)
+        if (data.fleetspeed) {
+            $('#speed-fleet-war').val(data.fleetspeed);
+        }
+
+        updateNumbers();
+    } catch (e) {
+        consoleLog('own api import exception: ' + e);
+        alert(options.ownApiBadJsonMsg);
+        return false;
+    }
+    return true;
+}
+
 function ajaxAPI(code) {
         showPanelLoadingOverlay('general-settings-panel', options.dataFetchMsg);
         $.post(
@@ -1425,23 +1550,6 @@ function ajaxAPI(code) {
                                 else $("." + i + "-fuel").val(0);
                         });
 
-                        const techNamesMapping = [
-                            [202, 'small-cargo'],
-                            [203, 'large-cargo'],
-                            [204, 'light-fighter'],
-                            [205, 'heavy-fighter'],
-                            [206, 'cruiser'],
-                            [207, 'battleship'],
-                            [208, 'colony-ship'],
-                            [209, 'recycler'],
-                            [210, 'esp-probe'],
-                            [211, 'bomber'],
-                            [213, 'destroyer'],
-                            [214, 'death-star'],
-                            [215, 'battlecruiser'],
-                            [218, 'reaper'],
-                            [219, 'pathfinder']
-                        ];
                         $.each(techNamesMapping, function(idx, val) {
                             $("#" + val[1]).val(0);
                         });
@@ -1633,6 +1741,12 @@ jQuery(function($) {
     $('#api-get').button( { icons: {primary:'ui-icon-arrowthickstop-1-s'} } );
     $('#api-get').click(apiGet);
 
+    $('#import-own-api').button( { icons: {primary:'ui-icon-clipboard'} } );
+    $('#import-own-api').click(function() {
+        $('#own-api-txtarea').val('');
+        $("#own-api-reader").dialog("open");
+    });
+
     $( "#lf-bonuses-reader" ).dialog({
         autoOpen: false,
         height: 300,
@@ -1659,6 +1773,27 @@ jQuery(function($) {
     let buttons = dialog.find('div.ui-dialog-buttonset');
     buttons[0].children[0].children[0].innerHTML = options.readTitle;
     buttons[0].children[1].children[0].innerHTML = options.cancelTitle;
+
+    $("#own-api-reader").dialog({
+        autoOpen: false,
+        height: 340,
+        width: 480,
+        modal: true,
+        resizable: false,
+        buttons: {
+            imp: function() {
+                if (importOwnApi($('#own-api-txtarea').val()))
+                    $(this).dialog("close");
+            },
+            ccl: function() {
+                $(this).dialog("close");
+            }
+        }
+    });
+    let ownApiDialog = $('div[aria-labelledby="ui-dialog-title-own-api-reader"]');
+    let ownApiButtons = ownApiDialog.find('div.ui-dialog-buttonset');
+    ownApiButtons[0].children[0].children[0].innerHTML = options.ownApiImportTitle;
+    ownApiButtons[0].children[1].children[0].innerHTML = options.cancelTitle;
 
     populateParams();
 

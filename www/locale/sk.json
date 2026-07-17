@@ -531,7 +531,12 @@
     "mission-type-war": "Vojna",
     "mission-type-peaceful": "Mierový",
     "mission-type-holding": "Zdržanie",
-    "fetchig-data": "Načítavanie údajov..."
+    "fetchig-data": "Načítavanie údajov...",
+    "own-api-reader-hdr": "Import z OGame",
+    "own-api-reader-info": "Sem vložte text z poľa API 2 na stránke „Flotila“ v OGame. Počet lodí, technológie, bonusy a súradnice štartu sa vyplnia automaticky.",
+    "own-api-import-btn": "Import z OGame",
+    "own-api-import-title": "Importovať",
+    "own-api-bad-json-msg": "Údaje sa nepodarilo načítať.\\nUistite sa, že ste vložili text z poľa API 2 na stránke „Flotila“."
   },
   "graviton": {
     "title": "OGame - Kalkulátor pre Graviton",

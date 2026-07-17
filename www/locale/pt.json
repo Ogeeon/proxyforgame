@@ -535,7 +535,12 @@
     "mission-type-war": "Guerra",
     "mission-type-peaceful": "Pacífico",
     "mission-type-holding": "Espera",
-    "fetchig-data": "Obtendo dados..."
+    "fetchig-data": "Obtendo dados...",
+    "own-api-reader-hdr": "Importar do OGame",
+    "own-api-reader-info": "Cole aqui o texto do campo API 2 da página «Frota» no OGame. O número de naves, tecnologias, bônus e coordenadas de partida serão preenchidos automaticamente.",
+    "own-api-import-btn": "Importar do OGame",
+    "own-api-import-title": "Importar",
+    "own-api-bad-json-msg": "Não foi possível ler os dados.\\nVerifique se você colou o texto do campo API 2 da página «Frota»."
   },
   "graviton": {
     "sc": "Cargueiro Pequeno",
