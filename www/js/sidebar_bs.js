@@ -266,7 +266,7 @@ document.addEventListener('DOMContentLoaded', function() {
     changelogModal = new bootstrap.Modal(document.getElementById('changelogModal'));
 
     document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(function(el) {
-        new bootstrap.Tooltip(el);
+        bootstrap.Tooltip.getOrCreateInstance(el);
     });
 
     const sidebarToggleBtn = document.querySelector('[data-bs-target="#sidebarOffcanvas"]');

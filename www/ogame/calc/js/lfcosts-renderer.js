@@ -65,7 +65,7 @@ class LfRenderer {
         const existing = bootstrap.Tooltip.getInstance(hintEl);
         if (existing) existing.dispose();
         hintEl.setAttribute('title', this.opts.energyCostToBuildLabel + ': ' + this._fmt(energyCost));
-        new bootstrap.Tooltip(hintEl); // NOSONAR
+        bootstrap.Tooltip.getOrCreateInstance(hintEl);
     }
 
     // -------------------------------------------------------------------------
@@ -131,7 +131,7 @@ class LfRenderer {
         (root || document).querySelectorAll('[data-bs-toggle="tooltip"]').forEach(function (el) {
             const existing = bootstrap.Tooltip.getInstance(el);
             if (existing) existing.dispose();
-            new bootstrap.Tooltip(el); // NOSONAR
+            bootstrap.Tooltip.getOrCreateInstance(el);
         });
     }
 
