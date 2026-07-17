@@ -90,7 +90,8 @@ test.describe('Flight Calculator - Spy Report Import', () => {
 });
 
 // Fixture: object exported from the OGame client (API 2 field on the 'Fleet' page).
-// Coordinates 5:254:14, discoverer class, trader alliance, drives 14/10/8, hypertech 9, fleet speed x10.
+// Coordinates 5:254:14, discoverer class, trader alliance, drives 14/10/8, hypertech 9,
+// fleetspeed x10 (universe data, intentionally ignored on import).
 const OWN_API_FIXTURE = readFileSync(
     join(__dirname, '../fixtures/own_api.json'),
     'utf-8'
@@ -142,8 +143,9 @@ test.describe('Flight Calculator - OGame Object Import', () => {
         await expect(page.locator('#esp-probe')).toHaveValue('9994');
         await expect(page.locator('#pathfinder')).toHaveValue('106');
 
-        // fleetspeed -> war speed only
-        await expect(page.locator('#speed-fleet-war')).toHaveValue('10');
+        // Universe data (fleetspeed etc.) from the API 2 export is intentionally ignored,
+        // so the fleet speed select keeps its default value despite fleetspeed x10 in the fixture.
+        await expect(page.locator('#speed-fleet-war')).toHaveValue('1');
 
         // Per-ship LF bonus for light fighter (204): speed 0.003066 -> 0.3066(%)
         const lfSpeed = await page.locator('[class~="204-speed"]').inputValue();
