@@ -536,6 +536,7 @@
     "fetchig-data": "Veriler alınıyor...",
     "own-api-reader-hdr": "OGame'den içe aktar",
     "own-api-reader-info": "OGame'deki 'Filo' sayfasındaki API 2 alanındaki metni buraya yapıştırın. Gemi sayıları, teknolojiler, bonuslar ve başlangıç koordinatları otomatik olarak doldurulur.",
+    "own-api-reader-note": "API 2 kodunun, üç filo hızı seçeneği dahil olmak üzere evren hakkında bilgi içermediğini lütfen unutmayın. Bu verileri otomatik olarak yüklemek için parametreler panelindeki 'Ülke' ve 'Evren' seçicilerini kullanın.",
     "own-api-import-btn": "OGame'den içe aktar",
     "own-api-import-title": "İçe Aktar",
     "own-api-bad-json-msg": "Veriler okunamadı.\\n'Filo' sayfasındaki API 2 alanındaki metni yapıştırdığınızdan emin olun."

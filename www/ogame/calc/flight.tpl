@@ -134,7 +134,10 @@
       <?= $l['own-api-reader-info'] ?>
     </div>
     <div id="own-api-div">
-      <textarea id="own-api-txtarea" rows="10" cols="50"></textarea>
+      <textarea id="own-api-txtarea" rows="6" cols="50"></textarea>
+      <div class="irn-calc-info">
+        <?= $l['own-api-reader-note'] ?>
+      </div>
     </div>
   </div>
 </div>

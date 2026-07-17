@@ -546,6 +546,7 @@
     "fetchig-data": "Pobieranie danych...",
     "own-api-reader-hdr": "Import z OGame",
     "own-api-reader-info": "Wklej tutaj tekst z pola API 2 na stronie „Flota” w OGame. Liczba statków, technologie, bonusy i współrzędne startu zostaną wypełnione automatycznie.",
+    "own-api-reader-note": "Pamiętaj, że kod API 2 nie zawiera informacji o wszechświecie, w tym o trzech wariantach prędkości floty. Aby automatycznie wczytać te dane, użyj list wyboru „Kraj” i „Wszechświat” w panelu parametrów.",
     "own-api-import-btn": "Import z OGame",
     "own-api-import-title": "Importuj",
     "own-api-bad-json-msg": "Nie udało się odczytać danych.\\nUpewnij się, że wkleiłeś tekst z pola API 2 na stronie „Flota”."

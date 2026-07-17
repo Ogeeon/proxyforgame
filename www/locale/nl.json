@@ -538,6 +538,7 @@
     "fetchig-data": "Gegevens ophalen...",
     "own-api-reader-hdr": "Importeren uit OGame",
     "own-api-reader-info": "Plak hier de tekst uit het veld API 2 op de pagina 'Vloot' in OGame. Aantal schepen, technologieën, bonussen en startcoördinaten worden automatisch ingevuld.",
+    "own-api-reader-note": "Houd er rekening mee dat de API 2-code geen informatie over het universum bevat, inclusief de drie vlootsnelheidsopties. Gebruik de keuzelijsten 'Land' en 'Universum' op het parameterpaneel om deze gegevens automatisch te laden.",
     "own-api-import-btn": "Importeren uit OGame",
     "own-api-import-title": "Importeren",
     "own-api-bad-json-msg": "Kan de gegevens niet lezen.\\nControleer of je de tekst uit het veld API 2 op de pagina 'Vloot' hebt geplakt."

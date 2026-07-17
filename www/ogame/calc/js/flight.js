@@ -1352,7 +1352,7 @@ function importOwnApi(jsonText) {
     // JSON.parse also accepts primitives (e.g. "111" -> 111); make sure we got an OGame export object.
     if (data === null || typeof data !== 'object' || Array.isArray(data) ||
         !('coords' in data || 'ships' in data || 'researches' in data ||
-          'fleetspeed' in data || 'characterClassId' in data)) {
+          'characterClassId' in data)) {
         alert(options.ownApiBadJsonMsg);
         return false;
     }
@@ -1427,10 +1427,9 @@ function importOwnApi(jsonText) {
             });
         }
 
-        // Universe fleet speed: write the war/base speed only (peaceful/holding come from the universe)
-        if (data.fleetspeed) {
-            $('#speed-fleet-war').val(data.fleetspeed);
-        }
+        // The API 2 export carries no universe data (fleet speed etc.), so data.fleetspeed
+        // is intentionally ignored. Universe-related fields are set via the Country/Universe
+        // selectors on the parameters panel.
 
         updateNumbers();
     } catch (e) {

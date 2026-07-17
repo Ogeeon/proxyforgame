@@ -534,6 +534,7 @@
     "fetchig-data": "Načítavanie údajov...",
     "own-api-reader-hdr": "Import z OGame",
     "own-api-reader-info": "Sem vložte text z poľa API 2 na stránke „Flotila“ v OGame. Počet lodí, technológie, bonusy a súradnice štartu sa vyplnia automaticky.",
+    "own-api-reader-note": "Upozorňujeme, že kód API 2 neobsahuje informácie o vesmíre vrátane troch variantov rýchlosti flotily. Ak chcete tieto údaje načítať automaticky, použite výberové polia „Krajina“ a „Vesmír“ na paneli parametrov.",
     "own-api-import-btn": "Import z OGame",
     "own-api-import-title": "Importovať",
     "own-api-bad-json-msg": "Údaje sa nepodarilo načítať.\\nUistite sa, že ste vložili text z poľa API 2 na stránke „Flotila“."

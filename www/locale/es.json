@@ -539,6 +539,7 @@
     "fetchig-data": "Obteniendo datos...",
     "own-api-reader-hdr": "Importar desde OGame",
     "own-api-reader-info": "Pega aquí el texto del campo API 2 de la página «Flota» en OGame. El número de naves, las tecnologías, las bonificaciones y las coordenadas de salida se rellenarán automáticamente.",
+    "own-api-reader-note": "Ten en cuenta que el código API 2 no contiene información sobre el universo, incluidas las tres variantes de velocidad de la flota. Para cargar estos datos automáticamente, usa los selectores «País» y «Universo» en el panel de parámetros.",
     "own-api-import-btn": "Importar desde OGame",
     "own-api-import-title": "Importar",
     "own-api-bad-json-msg": "No se pudieron leer los datos.\\nAsegúrate de haber pegado el texto del campo API 2 de la página «Flota»."

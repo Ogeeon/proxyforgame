@@ -541,6 +541,7 @@
     "fetchig-data": "Preuzimanje podataka...",
     "own-api-reader-hdr": "Uvoz iz OGame",
     "own-api-reader-info": "Ovdje zalijepite tekst iz polja API 2 na stranici 'Flota' u OGame. Broj brodova, tehnologije, bonusi i početne koordinate popunit će se automatski.",
+    "own-api-reader-note": "Imajte na umu da kod API 2 ne sadrži informacije o univerzumu, uključujući tri varijante brzine flote. Da biste automatski učitali ove podatke, koristite birače 'Zemlja' i 'Univerzum' na panelu parametara.",
     "own-api-import-btn": "Uvoz iz OGame",
     "own-api-import-title": "Uvezi",
     "own-api-bad-json-msg": "Nije moguće očitati podatke.\\nProvjerite da ste zalijepili tekst iz polja API 2 na stranici 'Flota'."

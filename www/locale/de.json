@@ -538,6 +538,7 @@
     "fetchig-data": "Daten werden abgerufen...",
     "own-api-reader-hdr": "Import aus OGame",
     "own-api-reader-info": "Fügen Sie hier den Text aus dem Feld API 2 auf der Seite „Flotte“ in OGame ein. Schiffszahlen, Technologien, Boni und Startkoordinaten werden automatisch ausgefüllt.",
+    "own-api-reader-note": "Bitte beachten Sie, dass der API-2-Code keine Universumsdaten enthält, einschließlich der drei Flottengeschwindigkeitsvarianten. Um diese Daten automatisch zu laden, verwenden Sie die Auswahlfelder „Land“ und „Universum“ auf der Parameterleiste.",
     "own-api-import-btn": "Import aus OGame",
     "own-api-import-title": "Importieren",
     "own-api-bad-json-msg": "Die Daten konnten nicht gelesen werden.\\nStellen Sie sicher, dass Sie den Text aus dem Feld API 2 auf der Seite „Flotte“ eingefügt haben."
