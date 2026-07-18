@@ -37,20 +37,20 @@ function maxCrawlers(metalMineLvl, crystalMineLvl, deutSynthLvl, geologist) {
 }
 
 /**
- * Cap a crawler-count input at the maximum the mine levels allow and expose
- * that maximum through the field's tooltip. Returns true when the value was
- * lowered (so the caller can refresh anything derived from it).
+ * Refresh the dynamic crawler limit on a crawler-count input: store it as the
+ * field's max constraint (so the shared blur validator clamps to it and shows
+ * the standard out-of-range warning, exactly like every other numeric field)
+ * and surface it through the tooltip. The value itself is left untouched here;
+ * clamping happens on blur, when the field loses focus.
  */
-function applyCrawlerLimit(input, metalMineLvl, crystalMineLvl, deutSynthLvl, geologist) {
-	if (!input) return false;
+function updateCrawlerLimit(input, metalMineLvl, crystalMineLvl, deutSynthLvl, geologist) {
+	if (!input) return;
 	const max = maxCrawlers(metalMineLvl, crystalMineLvl, deutSynthLvl, geologist);
+	input._constrains = { min: 0, max: max, def: 0, allowFloat: false, allowNegative: false };
+	// alt feeds the field name into the blur validator's warning message
+	if (options.crawlerName) input.alt = options.crawlerName;
 	if (options.crawlerLimitHint)
 		input.title = options.crawlerLimitHint.replace('{0}', numToOGame(max));
-	if (getInputNumber(input) > max) {
-		input.value = max;
-		return true;
-	}
-	return false;
 }
 
 function showMainTab(target) {
@@ -214,8 +214,9 @@ function updateOnePlnTab() {
 	options.prm.energyBoost = $('#energy-boost').value;
 	let plnData = [options.prm.maxPlanetTemp, options.prm.planetPos, options.prm.energyBoost];
 	let rows = $$('#one-planet-prod tr');
-	// Cap the crawler count (row 8) at what the mines (rows 2-4) allow.
-	applyCrawlerLimit(
+	// Keep the crawler count (row 8) limit in sync with the mines (rows 2-4);
+	// the value is clamped on blur by the shared numeric-input validator.
+	updateCrawlerLimit(
 		rows[8].children[2].children[0],
 		getInputNumber(rows[2].children[2].children[0]),
 		getInputNumber(rows[3].children[2].children[0]),
@@ -342,13 +343,13 @@ function updateAllPlnTab() {
 	let planetsCount = options.prm.currPlanetsCount;
 	let rows = $$('#all-planets-prod tr');
 	let totalProd = [0, 0, 0];
-	// Cap every planet's crawler count at what its mines allow before the table
-	// is read, so both the stored params and the calculation use the capped value.
+	// Keep every planet's crawler limit in sync with its mines; the values are
+	// clamped on blur by the shared numeric-input validator.
 	// LEVEL_COLUMNS holds the cell indices: [0]=metal, [1]=crystal, [2]=deut, [6]=crawler.
 	let geologist = getChecked('#geologist');
 	for (let i = 0; i < planetsCount; i++) {
 		let plnRow = rows[i * 2 + 1];
-		applyCrawlerLimit(
+		updateCrawlerLimit(
 			plnRow.children[LEVEL_COLUMNS[6]].children[0],
 			getInputNumber(plnRow.children[LEVEL_COLUMNS[0]].children[0]),
 			getInputNumber(plnRow.children[LEVEL_COLUMNS[1]].children[0]),

@@ -212,14 +212,14 @@ test.describe('crawler count capped by mine levels', () => {
         await oneMine(page, 2).press('Tab');
     }
 
-    test('clamps to 8x the sum of mine levels', async ({ page }) => {
+    test('clamps to 8x the sum of mine levels on blur', async ({ page }) => {
         await setMines(page);
         await oneCrawler(page).fill('5000');
         await oneCrawler(page).press('Tab');
         await expect(oneCrawler(page)).toHaveValue('1040');
     });
 
-    test('clamps to 8.8x with a Geologist', async ({ page }) => {
+    test('clamps to 8.8x with a Geologist on blur', async ({ page }) => {
         await setMines(page);
         await page.locator('#geologist').click();
         await oneCrawler(page).fill('5000');
@@ -227,16 +227,22 @@ test.describe('crawler count capped by mine levels', () => {
         await expect(oneCrawler(page)).toHaveValue('1144');
     });
 
-    test('re-clamps when the Geologist is turned off', async ({ page }) => {
+    test('does not clamp until the field loses focus', async ({ page }) => {
         await setMines(page);
-        await page.locator('#geologist').click();
+        // Typing an over-limit value leaves it untouched, like every other field.
+        await oneCrawler(page).fill('5000');
+        await expect(oneCrawler(page)).toHaveValue('5000');
+        // Only leaving the field commits the clamp.
+        await oneCrawler(page).press('Tab');
+        await expect(oneCrawler(page)).toHaveValue('1040');
+    });
+
+    test('shows a warning explaining the clamp', async ({ page }) => {
+        await setMines(page);
         await oneCrawler(page).fill('5000');
         await oneCrawler(page).press('Tab');
-        await expect(oneCrawler(page)).toHaveValue('1144');
-
-        // Toggling the Geologist alone must lower an over-limit value.
-        await page.locator('#geologist').click();
-        await expect(oneCrawler(page)).toHaveValue('1040');
+        await expect(page.locator('#warning')).toHaveClass(/visible/);
+        await expect(page.locator('#warning-message')).toContainText('maximum 1040');
     });
 
     test('forces zero crawlers when there are no mines', async ({ page }) => {
@@ -254,7 +260,7 @@ test.describe('crawler count capped by mine levels', () => {
         await expect(oneCrawler(page)).toHaveAttribute('title', /Max crawlers: 1\.040/);
     });
 
-    test('caps each planet on the All planets tab', async ({ page }) => {
+    test('caps each planet on the All planets tab on blur', async ({ page }) => {
         await page.locator('#tabtag2').click();
 
         // First planet's main row: text inputs are temp(0) pos(1) metal(2)
