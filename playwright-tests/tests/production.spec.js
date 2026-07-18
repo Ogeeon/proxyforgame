@@ -198,6 +198,78 @@ test('accumulation calculations are correct', async ({ page }) => {
     await expect(page.locator('#onepln-accumwhat-deut')).toHaveText('1.872');
 });
 
+test.describe('crawler count capped by mine levels', () => {
+    // One-planet input-in-table order: metal(0) crystal(1) deut(2) solar(3)
+    // fusion(4) sat(5) crawler(6).
+    const oneMine = (page, i) => page.locator('#one-planet-prod input.input-in-table').nth(i);
+    const oneCrawler = (page) => page.locator('#one-planet-prod input.input-in-table').nth(6);
+
+    // Enter 50/40/40 mines (sum 130): max is 8*130=1040, or 8.8*130=1144 with a Geologist.
+    async function setMines(page) {
+        await oneMine(page, 0).fill('50');
+        await oneMine(page, 1).fill('40');
+        await oneMine(page, 2).fill('40');
+        await oneMine(page, 2).press('Tab');
+    }
+
+    test('clamps to 8x the sum of mine levels', async ({ page }) => {
+        await setMines(page);
+        await oneCrawler(page).fill('5000');
+        await oneCrawler(page).press('Tab');
+        await expect(oneCrawler(page)).toHaveValue('1040');
+    });
+
+    test('clamps to 8.8x with a Geologist', async ({ page }) => {
+        await setMines(page);
+        await page.locator('#geologist').click();
+        await oneCrawler(page).fill('5000');
+        await oneCrawler(page).press('Tab');
+        await expect(oneCrawler(page)).toHaveValue('1144');
+    });
+
+    test('re-clamps when the Geologist is turned off', async ({ page }) => {
+        await setMines(page);
+        await page.locator('#geologist').click();
+        await oneCrawler(page).fill('5000');
+        await oneCrawler(page).press('Tab');
+        await expect(oneCrawler(page)).toHaveValue('1144');
+
+        // Toggling the Geologist alone must lower an over-limit value.
+        await page.locator('#geologist').click();
+        await expect(oneCrawler(page)).toHaveValue('1040');
+    });
+
+    test('forces zero crawlers when there are no mines', async ({ page }) => {
+        await oneMine(page, 0).fill('0');
+        await oneMine(page, 1).fill('0');
+        await oneMine(page, 2).fill('0');
+        await oneCrawler(page).fill('500');
+        await oneCrawler(page).press('Tab');
+        await expect(oneCrawler(page)).toHaveValue('0');
+    });
+
+    test('exposes the maximum through the field tooltip', async ({ page }) => {
+        await setMines(page);
+        await oneCrawler(page).press('Tab');
+        await expect(oneCrawler(page)).toHaveAttribute('title', /Max crawlers: 1\.040/);
+    });
+
+    test('caps each planet on the All planets tab', async ({ page }) => {
+        await page.locator('#tabtag2').click();
+
+        // First planet's main row: text inputs are temp(0) pos(1) metal(2)
+        // crystal(3) deut(4) solar(5) fusion(6) sat(7) crawler(8).
+        const planetInputs = page.locator('#all-planets-prod tr').nth(1).locator('input[type=text]');
+        await planetInputs.nth(2).fill('50');  // metal mine
+        await planetInputs.nth(3).fill('40');  // crystal mine
+        await planetInputs.nth(4).fill('40');  // deuterium synthesizer
+        await planetInputs.nth(8).fill('9999'); // crawlers
+        await planetInputs.nth(8).press('Tab');
+
+        await expect(planetInputs.nth(8)).toHaveValue('1040');
+    });
+});
+
 test('amortization calculations are correct', async ({ page }) => {
     // Click on the amortization accordion to expand it
     await page.locator('text=Amortisation of mines').click();
