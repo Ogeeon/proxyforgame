@@ -22,8 +22,10 @@
    --bs-tertiary-bg is set a step darker so table headers (.lined th) and the
    input-group "%" addons (.input-group-text) read as slightly muted, not brighter. */
 [data-bs-theme="light"] {
-  --bs-body-bg: color-mix(in srgb, #fff 94%, black);
-  --bs-tertiary-bg: color-mix(in srgb, #fff 90%, black);
+  --bs-body-bg: color-mix(in srgb, #fff 96%, black);
+  --bs-tertiary-bg: color-mix(in srgb, #fff 82%, black);
+  --bs-border-color: color-mix(in srgb, #fff 70%, black);
+  --bs-body-color: color-mix(in srgb, #000 85%, white);
 }
 
 /* Darken the page surround around the calculator (tune the 88% knob). The panels
@@ -31,7 +33,7 @@
    keep them at #f0f0f0 — otherwise they'd show the darker body through. Elements
    carrying a .bg-* utility (!important) keep their own colour. */
 [data-bs-theme="light"] body {
-  background-color: color-mix(in srgb, #fff 88%, black);
+  background-color: color-mix(in srgb, #fff 90%, black);
 }
 [data-bs-theme="light"] .border.rounded {
   background-color: var(--bs-body-bg);
@@ -44,14 +46,14 @@
    specificity above the .border.rounded rule so a .form-control.border still lifts. */
 [data-bs-theme="light"] .form-control:not([readonly]):not(:disabled),
 [data-bs-theme="light"] .form-select:not([readonly]):not(:disabled) {
-  background-color: color-mix(in srgb, #fff 98%, black);
+  background-color: color-mix(in srgb, #fff 100%, black);
 }
 
 /* Same interactive-light tone for unchecked radios/checkboxes, so they don't blend
    into the panel. Overriding --bs-form-check-bg touches only the unchecked fill;
    the checked state keeps its primary colour. */
 [data-bs-theme="light"] .form-check-input {
-  --bs-form-check-bg: color-mix(in srgb, #fff 98%, black);
+  --bs-form-check-bg: color-mix(in srgb, #fff 100%, black);
 }
 
 /* Slightly darken the calculator title header (next to the reset button).
