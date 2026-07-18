@@ -1180,6 +1180,15 @@ class CostsCalculator {
     options.currPlanetsCount = planetCount;
     options.prm.planetsSpin = planetCount;
 
+    // Keep the parallel options.prm store in sync with the restored planet
+    // count. Without this, options.prm.labLevels keeps its default length (8)
+    // while the table shows planetCount rows, so the spin buttons' push/pop
+    // stay permanently offset from the visible rows.
+    options.prm.labLevels = [...state.labLevels];
+    if (state.labChoice !== undefined) {
+      options.prm.labChoice = state.labChoice;
+    }
+
     // Trim table rows to match saved planet count
     const tbody = document.querySelector('#lab-levels-table tbody');
     if (tbody) {
@@ -1465,7 +1474,7 @@ class CostsCalculator {
 
       // Add 8 default rows with level 0
       for (let i = 1; i <= 8; i++) {
-        append('#lab-levels-table',
+        append('#lab-levels-table tbody',
           '<tr class="' + ((i % 2) === 1 ? 'odd' : 'even') + '">' +
           '<td align="center">' + options.planetNumStr + i + '</td>' +
           '<td align="center" width="20%;"><input type="text" id="lablevel_' + i +
@@ -1733,12 +1742,12 @@ function setupPlanetsSpin(planetsSpinInput, planetsSpinUp, planetsSpinDown) {
 
     if (newVal < oldVal) {
       if (oldVal >= 2) {
-        const tbody = document.querySelector('#lab-levels-table tbody');
-        tbody?.lastElementChild?.remove();
+        const rows = getTableRows('#lab-levels-table');
+        rows[rows.length - 1]?.remove();
         options.prm.labLevels.pop();
       }
     } else {
-      append('#lab-levels-table',
+      append('#lab-levels-table tbody',
         '<tr class="' + ((newVal % 2) === 1 ? 'odd' : 'even') + '">' +
         '<td align="center">' + options.planetNumStr + newVal + '</td>' +
         '<td align="center" width="20%;"><input type="text" id="lablevel_' + newVal +
@@ -1781,7 +1790,7 @@ function setupPlanetsSpin(planetsSpinInput, planetsSpinUp, planetsSpinDown) {
  * Bind keyup/click handlers for the IRN dialog inputs.
  */
 function setupIrnInputHandlers() {
-  const labInputs = document.querySelectorAll('#irn-calc input[type="text"]');
+  const labInputs = document.querySelectorAll('#irn-calc input[type="text"]:not(#planetsSpin)');
   labInputs.forEach(input => {
     removeAllEvents(input, 'keyup');
     addEvent(input, 'keyup', validateAndChangeLabLevel);
@@ -1900,7 +1909,7 @@ function rebuildLabTable(backup) {
   }
 
   for (let i = 1; i <= backup.labLevels.length; i++) {
-    append('#lab-levels-table',
+    append('#lab-levels-table tbody',
       '<tr class="' + ((i % 2) === 1 ? 'odd' : 'even') + '">' +
       '<td align="center">' + options.planetNumStr + i + '</td>' +
       '<td align="center" width="20%;"><input type="text" id="lablevel_' + i +
