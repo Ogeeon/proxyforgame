@@ -144,12 +144,12 @@
                   <p class="border rounded subheader bg-primary-subtle mb-1"><?= $l['src'] ?></p>
                   <div class="pe-2 pb-1">
                     <div id="res-src" class="mb-2">
-                      <div class="res-type"><input id="res-src-0" type="radio" name="src" value="0" tabindex="1"/><label for="res-src-0"><?= $l['metal'] ?></label></div>
-                      <div class="res-type"><input id="res-src-1" type="radio" name="src" value="1" tabindex="2"/><label for="res-src-1"><?= $l['crystal'] ?></label></div>
-                      <div class="res-type"><input id="res-src-2" type="radio" name="src" value="2" tabindex="3"/><label for="res-src-2"><?= $l['deuterium'] ?></label></div>
-                      <div class="res-type"><input id="res-src-3" type="radio" name="src" value="3" tabindex="4"/><label for="res-src-3"><?= $l['metal'] ?> + <?= $l['crystal'] ?></label></div>
-                      <div class="res-type"><input id="res-src-4" type="radio" name="src" value="4" tabindex="5"/><label for="res-src-4"><?= $l['metal'] ?> + <?= $l['deuterium'] ?></label></div>
-                      <div class="res-type"><input id="res-src-5" type="radio" name="src" value="5" tabindex="6"/><label for="res-src-5"><?= $l['crystal'] ?> + <?= $l['deuterium'] ?></label></div>
+                      <div class="res-type"><input id="res-src-0" class="form-check-input" type="radio" name="src" value="0" tabindex="1"/><label for="res-src-0"><?= $l['metal'] ?></label></div>
+                      <div class="res-type"><input id="res-src-1" class="form-check-input" type="radio" name="src" value="1" tabindex="2"/><label for="res-src-1"><?= $l['crystal'] ?></label></div>
+                      <div class="res-type"><input id="res-src-2" class="form-check-input" type="radio" name="src" value="2" tabindex="3"/><label for="res-src-2"><?= $l['deuterium'] ?></label></div>
+                      <div class="res-type"><input id="res-src-3" class="form-check-input" type="radio" name="src" value="3" tabindex="4"/><label for="res-src-3"><?= $l['metal'] ?> + <?= $l['crystal'] ?></label></div>
+                      <div class="res-type"><input id="res-src-4" class="form-check-input" type="radio" name="src" value="4" tabindex="5"/><label for="res-src-4"><?= $l['metal'] ?> + <?= $l['deuterium'] ?></label></div>
+                      <div class="res-type"><input id="res-src-5" class="form-check-input" type="radio" name="src" value="5" tabindex="6"/><label for="res-src-5"><?= $l['crystal'] ?> + <?= $l['deuterium'] ?></label></div>
                     </div>
                     <div class="hr mb-1"></div>
                     <div class="row mb-1 align-items-center">
@@ -184,21 +184,21 @@
                   <p class="border rounded subheader bg-primary-subtle mb-1"><?= $l['dst'] ?></p>
                   <div class="pe-2 pb-1">
                     <div id="res-dst" class="mb-2">
-                      <div class="res-type" id="res-type-dst-0"><input id="res-dst-0" type="radio" name="dst" value="0" tabindex="10"/><label for="res-dst-0" id="res-type-dst-lbl-0"></label></div>
+                      <div class="res-type" id="res-type-dst-0"><input id="res-dst-0" class="form-check-input" type="radio" name="dst" value="0" tabindex="10"/><label for="res-dst-0" id="res-type-dst-lbl-0"></label></div>
                       <div id="dst-block">
-                        <div class="res-type" id="res-type-dst-1"><input id="res-dst-1" type="radio" name="dst" value="1" tabindex="11"/><label for="res-dst-1" id="res-type-dst-lbl-1"></label></div>
+                        <div class="res-type" id="res-type-dst-1"><input id="res-dst-1" class="form-check-input" type="radio" name="dst" value="1" tabindex="11"/><label for="res-dst-1" id="res-type-dst-lbl-1"></label></div>
                         <div class="hrs"></div>
-                        <div class="res-type" id="res-type-dst-2"><input id="res-dst-2" type="radio" name="dst" value="2" tabindex="12"/><label for="res-dst-2" id="res-type-dst-lbl-2"></label></div>
+                        <div class="res-type" id="res-type-dst-2"><input id="res-dst-2" class="form-check-input" type="radio" name="dst" value="2" tabindex="12"/><label for="res-dst-2" id="res-type-dst-lbl-2"></label></div>
                         <div id="dst-mix-block">
                           <div class="res-subtype d-flex align-items-center gap-1" id="res-subtype-dst-0">
-                            <input id="res-dst-mix-0" type="radio" name="sub-dst" value="0">
+                            <input id="res-dst-mix-0" class="form-check-input" type="radio" name="sub-dst" value="0">
                             <input id="mix-balance-proc" type="text" name="mix-balance-proc" class="form-control form-control-sm rate-input trade-editable" tabindex="13" style="width: 50px;"/>
                             <span>%</span>
                             <span id="mix-lbl"></span>
                             <input id="mix-balance" type="range" class="range-slider form-range res-mix-balance flex-grow-1" />
                           </div>
                           <div class="res-subtype d-inline-block" id="res-subtype-dst-1">
-                            <input id="res-dst-mix-1" type="radio" name="sub-dst" value="1">
+                            <input id="res-dst-mix-1" class="form-check-input" type="radio" name="sub-dst" value="1">
                             <div class="d-inline-block">
                               <input id="mix-balance-prop1" type="text" name="mix-balance-prop1" class="form-control form-control-sm rate-input trade-editable d-inline-block" tabindex="14" style="width: 50px;"/> /
                               <input id="mix-balance-prop2" type="text" name="mix-balance-prop2" class="form-control form-control-sm rate-input trade-editable d-inline-block" tabindex="15" style="width: 50px;"/>
@@ -206,12 +206,12 @@
                             </div>
                           </div>
                           <div class="res-subtype d-inline-block" id="res-subtype-dst-2">
-                            <input id="res-dst-mix-2" type="radio" name="sub-dst" value="2">
+                            <input id="res-dst-mix-2" class="form-check-input" type="radio" name="sub-dst" value="2">
                             <input id="mix-fix1" type="text" name="mix-fix1" class="form-control form-control-sm trade-editable d-inline-block" tabindex="16" style="width: 150px;"/>
                             <span id="mix-fix1-lbl"></span>
                           </div>
                           <div class="res-subtype d-inline-block" id="res-subtype-dst-3">
-                            <input id="res-dst-mix-3" type="radio" name="sub-dst" value="3">
+                            <input id="res-dst-mix-3" class="form-check-input" type="radio" name="sub-dst" value="3">
                             <input id="mix-fix2" type="text" name="mix-fix2" class="form-control form-control-sm trade-editable d-inline-block" tabindex="17" style="width: 150px;"/>
                             <span id="mix-fix2-lbl"></span>
                           </div>

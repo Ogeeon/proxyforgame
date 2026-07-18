@@ -17,6 +17,49 @@
   color: var(--bs-info-text-emphasis);
 }
 
+/* Soften the pure-white light theme evenly across the whole UI (tune the 94% knob).
+   Overriding --bs-body-bg cascades to cards, form controls, etc. that inherit it.
+   --bs-tertiary-bg is set a step darker so table headers (.lined th) and the
+   input-group "%" addons (.input-group-text) read as slightly muted, not brighter. */
+[data-bs-theme="light"] {
+  --bs-body-bg: color-mix(in srgb, #fff 94%, black);
+  --bs-tertiary-bg: color-mix(in srgb, #fff 90%, black);
+}
+
+/* Darken the page surround around the calculator (tune the 88% knob). The panels
+   are transparent .border.rounded boxes, so give them an explicit --bs-body-bg to
+   keep them at #f0f0f0 — otherwise they'd show the darker body through. Elements
+   carrying a .bg-* utility (!important) keep their own colour. */
+[data-bs-theme="light"] body {
+  background-color: color-mix(in srgb, #fff 88%, black);
+}
+[data-bs-theme="light"] .border.rounded {
+  background-color: var(--bs-body-bg);
+}
+
+/* Mirror the dark theme, where editable inputs sit at the base --bs-body-bg and
+   thus read lighter than the darkened surround. Here the surround/panels are
+   toned down, so lift editable fields one step above the panels instead.
+   readonly/disabled fields keep the panel tone. The :not()s also raise
+   specificity above the .border.rounded rule so a .form-control.border still lifts. */
+[data-bs-theme="light"] .form-control:not([readonly]):not(:disabled),
+[data-bs-theme="light"] .form-select:not([readonly]):not(:disabled) {
+  background-color: color-mix(in srgb, #fff 98%, black);
+}
+
+/* Same interactive-light tone for unchecked radios/checkboxes, so they don't blend
+   into the panel. Overriding --bs-form-check-bg touches only the unchecked fill;
+   the checked state keeps its primary colour. */
+[data-bs-theme="light"] .form-check-input {
+  --bs-form-check-bg: color-mix(in srgb, #fff 98%, black);
+}
+
+/* Slightly darken the calculator title header (next to the reset button).
+   !important beats the .bg-body-secondary utility that colours it. */
+[data-bs-theme="light"] .main-header {
+  background-color: color-mix(in srgb, var(--bs-secondary-bg) 92%, black) !important;
+}
+
 [data-bs-theme="dark"] .nav-tabs .nav-link.active {
   color: var(--bs-primary);
   /* background-color: var(--bs-primary-bg-subtle); */

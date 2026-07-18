@@ -60,6 +60,15 @@
     cursor: pointer;
 }
 
+/* Resource selectors use Bootstrap .form-check-input; align them inline with
+   their labels and adjacent controls instead of the widget's default top edge. */
+.res-type .form-check-input,
+.res-subtype .form-check-input {
+    margin-top: 0;
+    vertical-align: middle;
+    cursor: pointer;
+}
+
 .res-mix-balance {
     margin: 0.2em 0;
 }

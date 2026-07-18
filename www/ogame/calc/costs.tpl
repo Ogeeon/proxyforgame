@@ -720,7 +720,7 @@ document.addEventListener('DOMContentLoaded', function() {
               <tr class="<?= ($i % 2) === 1 ? 'odd' : 'even' ?>">
                 <td align="center"><?= $l['planet-num'] ?><?=$i?></td>
                 <td align="center"><input type="text" id="lablevel_<?=$i?>" name="lablevel_<?=$i?>" class="form-control form-control-sm input-3columns input-in-table" value="0" /></td>
-                <td align="center"><input type="radio" id="labchoice_<?=$i?>" name="start-pln" disabled/></td>
+                <td align="center"><input type="radio" id="labchoice_<?=$i?>" name="start-pln" class="form-check-input" disabled/></td>
               </tr>
               <?php endfor; ?>
             </tbody>

@@ -1471,7 +1471,7 @@ class CostsCalculator {
           '<td align="center" width="20%;"><input type="text" id="lablevel_' + i +
           '" name="lablevel_' + i + '" class="form-control form-control-sm input-3columns input-in-table" value="0" /></td>' +
           '<td align="center" width="20%;"><input type="radio" id="labchoice_' + i +
-          '" name="start-pln" value="0" disabled/></td>' +
+          '" class="form-check-input" name="start-pln" value="0" disabled/></td>' +
           '</tr>'
         );
 
@@ -1744,7 +1744,7 @@ function setupPlanetsSpin(planetsSpinInput, planetsSpinUp, planetsSpinDown) {
         '<td align="center" width="20%;"><input type="text" id="lablevel_' + newVal +
         '" name="lablevel_' + newVal + '" class="form-control input-3columns input-in-table" value="0" /></td>' +
         '<td align="center" width="20%;"><input type="radio" id="labchoice_' + newVal +
-        '" name="start-pln" value="0" disabled="disabled"/></td>' +
+        '" class="form-check-input" name="start-pln" value="0" disabled="disabled"/></td>' +
         '</tr>'
       );
       addEvent('#lablevel_' + newVal, 'keyup', validateAndChangeLabLevel);
@@ -1907,7 +1907,7 @@ function rebuildLabTable(backup) {
       '" name="lablevel_' + i + '" class="form-control input-3columns input-in-table" value="' +
       backup.labLevels[i - 1] + '" /></td>' +
       '<td align="center" width="20%;"><input type="radio" id="labchoice_' + i +
-      '" name="start-pln" disabled="disabled"/></td>' +
+      '" class="form-check-input" name="start-pln" disabled="disabled"/></td>' +
       '</tr>'
     );
 

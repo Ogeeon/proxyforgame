@@ -239,6 +239,23 @@ td.min {
   padding: 2px 8px;
 }
 
+/* Start-planet radios: make the selectable ones (planets with a lab level) stand
+   out from the inactive ones. Default Bootstrap only dims disabled inputs to 0.5
+   opacity, which is barely visible on the near-white radio fill. */
+#irn-calc .form-check-input:not(:disabled) {
+  border-color: var(--bs-primary);
+  cursor: pointer;
+}
+
+#irn-calc .form-check-input:not(:disabled):hover {
+  box-shadow: 0 0 0 0.2rem rgba(var(--bs-primary-rgb), 0.25);
+}
+
+#irn-calc .form-check-input:disabled {
+  opacity: 0.4;
+  background-color: transparent;
+}
+
 .irn-calc-info {
   padding: 3px;
   text-align: center;
