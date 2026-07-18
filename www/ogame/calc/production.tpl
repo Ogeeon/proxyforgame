@@ -207,6 +207,7 @@
     options.energyShort = "<?= $l['energy-short'] ?>";
     options.editPlanetTitle = "<?= $l['edit-planet-tooltip'] ?>";
     options.deletePlanetTitle = "<?= $l['delete-planet-tooltip'] ?>";
+    options.crawlerLimitHint = "<?= $l['crawler-limit-hint'] ?>";
 
     <?php $techs = getTechsByType(2);?>
     options.bldCosts = {

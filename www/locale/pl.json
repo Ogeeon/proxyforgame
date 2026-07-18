@@ -628,6 +628,7 @@
     "per-week": "Na tydzień",
     "class-collector": "Zbieracz",
     "crawler-short": "Peł.",
+    "crawler-limit-hint": "Maks. Pełzaczy: {0} (8 × suma poziomów kopalń, ×8,8 z Geologiem)",
     "commanding-staff": "Commanding staff",
     "planet-pos": "Position",
     "planet-pos-short": "Pos.",

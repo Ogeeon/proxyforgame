@@ -624,6 +624,7 @@
     "ipm": "Missile Interplanétaire",
     "class-collector": "Collecteur",
     "crawler-short": "For.",
+    "crawler-limit-hint": "Max. Foreuses : {0} (8 × somme des niveaux de mines, ×8,8 avec Géologue)",
     "commanding-staff": "Officier",
     "planet-pos-short": "Pos.",
     "planet-name": "Nom de la planète",

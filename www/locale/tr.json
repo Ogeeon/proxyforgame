@@ -611,6 +611,7 @@
     "per-week": "Haftalık",
     "class-collector": "Koleksiyoncu",
     "crawler-short": "Pal.",
+    "crawler-limit-hint": "Maks. Paletli: {0} (8 × maden seviyeleri toplamı, Jeolog ile ×8,8)",
     "commanding-staff": "Commanding staff",
     "planet-pos": "Position",
     "planet-pos-short": "Pos.",

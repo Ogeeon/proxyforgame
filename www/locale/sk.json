@@ -606,6 +606,7 @@
     "per-week": "Za týždeň",
     "class-collector": "Collector",
     "crawler-short": "Cr.",
+    "crawler-limit-hint": "Max. Crawlerov: {0} (8 × súčet úrovní baňí, ×8,8 s Geológom)",
     "commanding-staff": "Commanding staff",
     "planet-pos": "Position",
     "planet-pos-short": "Pos.",

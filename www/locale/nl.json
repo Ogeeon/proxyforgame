@@ -615,6 +615,7 @@
     "per-week": "Per week",
     "class-collector": "Collector",
     "crawler-short": "Cr.",
+    "crawler-limit-hint": "Max. Crawlers: {0} (8 × som van mijnniveaus, ×8,8 met Geoloog)",
     "commanding-staff": "Commanding staff",
     "planet-pos": "Position",
     "planet-pos-short": "Pos.",

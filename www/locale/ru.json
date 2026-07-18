@@ -608,6 +608,7 @@
     "per-day": "В день",
     "per-week": "В неделю",
     "crawler-short": "Гус.",
+    "crawler-limit-hint": "Максимум Гусеничников: {0} (8 × сумма уровней шахт, ×8,8 с Геологом)",
     "commanding-staff": "Командный состав",
     "planet-pos-short": "Поз.",
     "planet-name": "Название планеты",

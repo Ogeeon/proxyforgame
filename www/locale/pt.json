@@ -612,6 +612,7 @@
     "per-week": "Por semana",
     "class-collector": "Colecionador",
     "crawler-short": "Cr.",
+    "crawler-limit-hint": "Máx. Crawlers: {0} (8 × soma dos níveis das minas, ×8,8 com Geólogo)",
     "commanding-staff": "Commanding staff",
     "planet-pos": "Position",
     "planet-pos-short": "Pos.",

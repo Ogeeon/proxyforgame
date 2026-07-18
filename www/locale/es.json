@@ -613,6 +613,7 @@
     "per-week": "Por semana",
     "class-collector": "Recolector",
     "crawler-short": "Cr.",
+    "crawler-limit-hint": "Máx. Taladradores: {0} (8 × suma de niveles de minas, ×8,8 con Geólogo)",
     "commanding-staff": "Commanding staff",
     "planet-pos": "Position",
     "planet-pos-short": "Pos.",

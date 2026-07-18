@@ -24,6 +24,35 @@ function bindNumericInput(input, recalc) {
 	});
 }
 
+// OGame lets a planet use at most 8 crawlers per summed mine level (metal +
+// crystal + deuterium), or 8.8 per level with a Geologist. Extra crawlers
+// beyond that produce nothing, so the calculator caps the entered count.
+const CRAWLER_CAP_PER_MINE = 8;
+const CRAWLER_CAP_PER_MINE_GEOLOGIST = 8.8;
+
+function maxCrawlers(metalMineLvl, crystalMineLvl, deutSynthLvl, geologist) {
+	const mineSum = metalMineLvl + crystalMineLvl + deutSynthLvl;
+	const factor = geologist ? CRAWLER_CAP_PER_MINE_GEOLOGIST : CRAWLER_CAP_PER_MINE;
+	return Math.floor(factor * mineSum);
+}
+
+/**
+ * Cap a crawler-count input at the maximum the mine levels allow and expose
+ * that maximum through the field's tooltip. Returns true when the value was
+ * lowered (so the caller can refresh anything derived from it).
+ */
+function applyCrawlerLimit(input, metalMineLvl, crystalMineLvl, deutSynthLvl, geologist) {
+	if (!input) return false;
+	const max = maxCrawlers(metalMineLvl, crystalMineLvl, deutSynthLvl, geologist);
+	if (options.crawlerLimitHint)
+		input.title = options.crawlerLimitHint.replace('{0}', numToOGame(max));
+	if (getInputNumber(input) > max) {
+		input.value = max;
+		return true;
+	}
+	return false;
+}
+
 function showMainTab(target) {
 	const trigger = document.querySelector('#mainTabs button[data-bs-target="' + target + '"]');
 	if (trigger && typeof bootstrap !== 'undefined' && bootstrap.Tab) {
@@ -185,6 +214,14 @@ function updateOnePlnTab() {
 	options.prm.energyBoost = $('#energy-boost').value;
 	let plnData = [options.prm.maxPlanetTemp, options.prm.planetPos, options.prm.energyBoost];
 	let rows = $$('#one-planet-prod tr');
+	// Cap the crawler count (row 8) at what the mines (rows 2-4) allow.
+	applyCrawlerLimit(
+		rows[8].children[2].children[0],
+		getInputNumber(rows[2].children[2].children[0]),
+		getInputNumber(rows[3].children[2].children[0]),
+		getInputNumber(rows[4].children[2].children[0]),
+		getChecked('#geologist')
+	);
 	let params = collectOnePlanetParams(rows);
 
 	let prodData = calculateProduction(params, plnData, false);
@@ -305,6 +342,20 @@ function updateAllPlnTab() {
 	let planetsCount = options.prm.currPlanetsCount;
 	let rows = $$('#all-planets-prod tr');
 	let totalProd = [0, 0, 0];
+	// Cap every planet's crawler count at what its mines allow before the table
+	// is read, so both the stored params and the calculation use the capped value.
+	// LEVEL_COLUMNS holds the cell indices: [0]=metal, [1]=crystal, [2]=deut, [6]=crawler.
+	let geologist = getChecked('#geologist');
+	for (let i = 0; i < planetsCount; i++) {
+		let plnRow = rows[i * 2 + 1];
+		applyCrawlerLimit(
+			plnRow.children[LEVEL_COLUMNS[6]].children[0],
+			getInputNumber(plnRow.children[LEVEL_COLUMNS[0]].children[0]),
+			getInputNumber(plnRow.children[LEVEL_COLUMNS[1]].children[0]),
+			getInputNumber(plnRow.children[LEVEL_COLUMNS[2]].children[0]),
+			geologist
+		);
+	}
 	// считаем в массив данные из input-ов таблицы на случай, если имело место прямое редактирование
 	collectAllPlanetsInputs(rows);
 	for (let i = 0; i < planetsCount; i++) {

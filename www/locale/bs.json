@@ -618,6 +618,7 @@
     "per-day": "Po danu",
     "per-week": "Po sedmici",
     "crawler-short": "Puz.",
+    "crawler-limit-hint": "Maks. Puzavaca: {0} (8 × zbir nivoa rudnika, ×8,8 sa Geologom)",
     "commanding-staff": "Zapovjedno osoblje",
     "planet-pos-short": "Poz.",
     "planet-name": "Planet name",
