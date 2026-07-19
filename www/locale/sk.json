@@ -558,10 +558,7 @@
   },
   "production": {
     "param-tab-general": "Všeobecné",
-    "lf-metal-prod-increase": "Zvýšenie produkcie kovu",
-    "lf-crystal-prod-increase": "Zvýšenie produkcie kryštálu",
-    "lf-deut-prod-increase": "Zvýšenie produkcie deutéria",
-    "lf-energy-prod-increase": "Zvýšenie produkcie energie",
+    "lf-prod-increase": "Zvýšenie produkcie",
     "lf-crawlers-boost": "Bonus crawlerov",
     "lf-plasma-cost-reduction": "Zníženie nákladov plazmovej technológie",
     "title": "OGame - Kalkulátor rýchlosti produkcie",
@@ -639,6 +636,7 @@
     "incl-no": "Nie",
     "alliance-class": "Aliančná trieda",
     "lifeform-tech": "Bonus technológie foriem života",
+    "lifeform-level": "Úroveň formy života",
     "is-trader": "Trieda aliancie je \"Obchodníci\""
   },
   "queue": {

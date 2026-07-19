@@ -564,10 +564,7 @@
   },
   "production": {
     "param-tab-general": "Allgemein",
-    "lf-metal-prod-increase": "Metallproduktionssteigerung",
-    "lf-crystal-prod-increase": "Kristallproduktionssteigerung",
-    "lf-deut-prod-increase": "Deuteriumproduktionssteigerung",
-    "lf-energy-prod-increase": "Energieproduktionssteigerung",
+    "lf-prod-increase": "Produktionssteigerung",
     "lf-crawlers-boost": "Crawler-Bonus",
     "lf-plasma-cost-reduction": "Kostenreduktion Plasmatechnik",
     "title": "OGame - Berechnung der Produktion",
@@ -645,6 +642,7 @@
     "incl-no": "Nein",
     "alliance-class": "Allianzklasse",
     "lifeform-tech": "Lebensform-Technologiebonus",
+    "lifeform-level": "Lebensform-Level",
     "is-trader": "Allianzklasse ist \"Händler\""
   },
   "queue": {

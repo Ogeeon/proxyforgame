@@ -572,10 +572,7 @@
   },
   "production": {
     "param-tab-general": "Ogólne",
-    "lf-metal-prod-increase": "Wzrost produkcji metalu",
-    "lf-crystal-prod-increase": "Wzrost produkcji kryształu",
-    "lf-deut-prod-increase": "Wzrost produkcji deuteru",
-    "lf-energy-prod-increase": "Wzrost produkcji energii",
+    "lf-prod-increase": "Wzrost produkcji",
     "lf-crawlers-boost": "Premia pełzaczy",
     "lf-plasma-cost-reduction": "Redukcja kosztu technologii plazmowej",
     "energy": "Energia",
@@ -661,6 +658,7 @@
     "incl-no": "Nie",
     "alliance-class": "Klasa sojuszu",
     "lifeform-tech": "Premia technologii form życia",
+    "lifeform-level": "Poziom formy życia",
     "is-trader": "Klasa sojuszu to \"Handlarz\""
   },
   "queue": {

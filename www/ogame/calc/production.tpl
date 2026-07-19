@@ -73,6 +73,7 @@
         maxPlanetTemp: 0,
         onePlnExtView: false,
         onePlnRace: 0,
+        onePlnRaceLevel: 0,
         onePlnLfLevels: [],
         oPPP: [[0, 100, 0], [0, 100, 0], [0, 100, 0], [0, 100, 0], [0, 100, 0], [0, 100, 0], [0, 100, 0]],
         metStorageLvl: 0,
@@ -123,6 +124,8 @@
               return value === 'true';
             case 'onePlnRace':
               return validateNumber(Number.parseInt(value), 0, 4, 0);
+            case 'onePlnRaceLevel':
+              return validateNumber(Number.parseInt(value), 0, Infinity, 0);
             case 'oPPP':
               return validateNumber(parseFloat(value), -272, Infinity, 0);
             case 'currPlanetsCount':
@@ -264,6 +267,16 @@
       <?php $first = false; ?>
       <?php endforeach; ?>
     };
+
+    // Life form building production/energy bonuses: id => {kind:[base, factor, max]}.
+    // kind is met/cry/deu/enP/enR; pct(level) = min(max*100, base*factor^(level-1)*level).
+    options.lfBonus = {
+      <?php $first = true; ?>
+      <?php foreach ($lfBuildingBonus as $lfId => $lfB): ?>
+      <?=(!$first)?',':''?><?= $lfId ?>:{<?php $bf = true; foreach ($lfB as $kind => $p): ?><?=(!$bf)?',':''?><?= $kind ?>:[<?= $p[0] ?>, <?= $p[1] ?>, <?= $p[2] === null ? 'null' : $p[2] ?>]<?php $bf = false; endforeach; ?>}
+      <?php $first = false; ?>
+      <?php endforeach; ?>
+    };
   </script>
 <?php require_once('../../cookies.tpl'); ?>
 </head>
@@ -401,32 +414,35 @@
         <!-- LifeForms tab -->
         <div class="tab-pane fade p-2 pb-0" id="param-lifeforms" role="tabpanel">
           <div class="d-flex flex-wrap column-gap-3 row-gap-1 align-items-center justify-content-center">
-            <div class="d-flex align-items-center gap-1">
-              <label for="lf-metal-prod-bonus"><?= $l['lf-metal-prod-increase'] ?></label>
-              <div class="input-group input-group-sm w-auto">
-                <input id="lf-metal-prod-bonus" type="text" name="lf-metal-prod-bonus" class="form-control level-input m-0" value="0"/>
-                <span class="input-group-text">%</span>
+            <div class="d-flex flex-wrap align-items-center gap-2 border rounded p-2">
+              <span class="fw-semibold"><?= $l['lf-prod-increase'] ?>:</span>
+              <div class="d-flex align-items-center gap-1">
+                <label for="lf-metal-prod-bonus" class="text-capitalize"><?= $l['metal'] ?></label>
+                <div class="input-group input-group-sm w-auto">
+                  <input id="lf-metal-prod-bonus" type="text" name="lf-metal-prod-bonus" class="form-control level-input m-0" value="0"/>
+                  <span class="input-group-text">%</span>
+                </div>
               </div>
-            </div>
-            <div class="d-flex align-items-center gap-1">
-              <label for="lf-crystal-prod-bonus"><?= $l['lf-crystal-prod-increase'] ?></label>
-              <div class="input-group input-group-sm w-auto">
-                <input id="lf-crystal-prod-bonus" type="text" name="lf-crystal-prod-bonus" class="form-control level-input m-0" value="0"/>
-                <span class="input-group-text">%</span>
+              <div class="d-flex align-items-center gap-1">
+                <label for="lf-crystal-prod-bonus" class="text-capitalize"><?= $l['crystal'] ?></label>
+                <div class="input-group input-group-sm w-auto">
+                  <input id="lf-crystal-prod-bonus" type="text" name="lf-crystal-prod-bonus" class="form-control level-input m-0" value="0"/>
+                  <span class="input-group-text">%</span>
+                </div>
               </div>
-            </div>
-            <div class="d-flex align-items-center gap-1">
-              <label for="lf-deut-prod-bonus"><?= $l['lf-deut-prod-increase'] ?></label>
-              <div class="input-group input-group-sm w-auto">
-                <input id="lf-deut-prod-bonus" type="text" name="lf-deut-prod-bonus" class="form-control level-input m-0" value="0"/>
-                <span class="input-group-text">%</span>
+              <div class="d-flex align-items-center gap-1">
+                <label for="lf-deut-prod-bonus" class="text-capitalize"><?= $l['deuterium'] ?></label>
+                <div class="input-group input-group-sm w-auto">
+                  <input id="lf-deut-prod-bonus" type="text" name="lf-deut-prod-bonus" class="form-control level-input m-0" value="0"/>
+                  <span class="input-group-text">%</span>
+                </div>
               </div>
-            </div>
-            <div class="d-flex align-items-center gap-1">
-              <label for="lf-energy-prod-bonus"><?= $l['lf-energy-prod-increase'] ?></label>
-              <div class="input-group input-group-sm w-auto">
-                <input id="lf-energy-prod-bonus" type="text" name="lf-energy-prod-bonus" class="form-control level-input m-0" value="0"/>
-                <span class="input-group-text">%</span>
+              <div class="d-flex align-items-center gap-1">
+                <label for="lf-energy-prod-bonus" class="text-capitalize"><?= $l['energy'] ?></label>
+                <div class="input-group input-group-sm w-auto">
+                  <input id="lf-energy-prod-bonus" type="text" name="lf-energy-prod-bonus" class="form-control level-input m-0" value="0"/>
+                  <span class="input-group-text">%</span>
+                </div>
               </div>
             </div>
             <div class="d-flex align-items-center gap-1">
@@ -492,6 +508,8 @@
               <option value="<?=$r?>"><?= $l['race-'.$r] ?></option>
               <?php endfor; ?>
             </select>
+            <label for="one-pln-race-level"><?= $l['lifeform-level'] ?></label>
+            <input id="one-pln-race-level" type="text" name="one-pln-race-level" class="form-control form-control-sm input-3columns" value="0" disabled/>
           </div>
           <div class="d-flex align-items-center gap-1 ms-auto">
             <input id="one-pln-extended-view" name="one-pln-extended-view" type="checkbox" class="form-check-input"/>

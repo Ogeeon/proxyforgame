@@ -565,10 +565,7 @@
   },
   "production": {
     "param-tab-general": "Genel",
-    "lf-metal-prod-increase": "Metal üretim artışı",
-    "lf-crystal-prod-increase": "Kristal üretim artışı",
-    "lf-deut-prod-increase": "Döteryum üretim artışı",
-    "lf-energy-prod-increase": "Enerji üretim artışı",
+    "lf-prod-increase": "Üretim artışı",
     "lf-crawlers-boost": "Paletli bonusu",
     "lf-plasma-cost-reduction": "Plazma teknolojisi maliyet azaltma",
     "energy": "Enerji",
@@ -644,6 +641,7 @@
     "incl-no": "Hayır",
     "alliance-class": "Ittifak sınıfı",
     "lifeform-tech": "Yaşam formu teknoloji bonusu",
+    "lifeform-level": "Yaşam formu seviyesi",
     "is-trader": "İttifak sınıfı \"Tüccarlar\""
   },
   "queue": {

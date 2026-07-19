@@ -569,3 +569,119 @@ test.describe('Life Forms building energy consumption', () => {
         await expect(lfRow(page, 2, 2).locator('input')).toHaveValue('15');
     });
 });
+
+test.describe('Life Forms building production bonuses', () => {
+    const lfRow = (page, race, idx) => page.locator(`#one-planet-prod tr.lf-row-${race}`).nth(idx);
+    const named = (page, label) => page.locator('#one-planet-prod tr').filter({ hasText: label });
+    const digits = (s) => parseInt((s ?? '').replace(/\D/g, ''), 10) || 0;
+
+    test('High Energy Smelting adds level*1.5% of the metal mine output', async ({ page }) => {
+        await page.locator('#one-pln-race').selectOption('1');
+
+        // High Energy Smelting is the 6th Human building; level 10 -> +15% metal.
+        const hes = lfRow(page, 1, 5);
+        await hes.locator('input').fill('10');
+        await hes.locator('input').press('Tab');
+
+        const mineMetal = digits(await named(page, 'Metal Mine').locator('td').nth(3).textContent());
+        const lfMetal = digits(await named(page, 'Lifeform Tech Bonus').locator('td').nth(3).textContent());
+        expect(lfMetal).toBe(Math.round(mineMetal * 0.15));
+    });
+
+    test('Metropolis technology bonus amplifies the research production bonus', async ({ page }) => {
+        // Oversized solar plant so the planet stays at 100% even with Metropolis
+        // drawing energy, isolating the technology-bonus effect from starvation.
+        await page.locator('#one-planet-prod tr:not(.lf-row)').nth(5).locator('input').fill('45');
+        await page.locator('#one-planet-prod tr:not(.lf-row)').nth(5).locator('input').press('Tab');
+
+        // Enter a raw research metal bonus on the Life Forms parameter tab.
+        await page.locator('#param-lifeforms-tab').click();
+        await page.locator('#lf-metal-prod-bonus').fill('20');
+        await page.locator('#lf-metal-prod-bonus').press('Tab');
+
+        await page.locator('#one-pln-race').selectOption('1');
+        const mineMetal = digits(await named(page, 'Metal Mine').locator('td').nth(3).textContent());
+
+        // Without Metropolis the Lifeform bonus row is exactly 20% of the mine output.
+        expect(digits(await named(page, 'Lifeform Tech Bonus').locator('td').nth(3).textContent()))
+            .toBe(Math.round(mineMetal * 0.20));
+
+        // Metropolis (Human building 11) level 20 -> +10% technology bonus,
+        // so the research bonus becomes 20% * 1.10 = 22% of the mine output.
+        const metropolis = lfRow(page, 1, 10);
+        await metropolis.locator('input').fill('20');
+        await metropolis.locator('input').press('Tab');
+
+        expect(digits(await named(page, 'Lifeform Tech Bonus').locator('td').nth(3).textContent()))
+            .toBe(Math.round(mineMetal * 0.22));
+    });
+
+    test('lifeform level amplifies the research production bonus by 1% per level', async ({ page }) => {
+        // Oversized solar plant so the planet stays at 100%.
+        await page.locator('#one-planet-prod tr:not(.lf-row)').nth(5).locator('input').fill('45');
+        await page.locator('#one-planet-prod tr:not(.lf-row)').nth(5).locator('input').press('Tab');
+
+        await page.locator('#param-lifeforms-tab').click();
+        await page.locator('#lf-metal-prod-bonus').fill('20');
+        await page.locator('#lf-metal-prod-bonus').press('Tab');
+
+        await page.locator('#one-pln-race').selectOption('1');
+        const mineMetal = digits(await named(page, 'Metal Mine').locator('td').nth(3).textContent());
+        expect(digits(await named(page, 'Lifeform Tech Bonus').locator('td').nth(3).textContent()))
+            .toBe(Math.round(mineMetal * 0.20));
+
+        // Lifeform level 10 -> +10% technology bonus -> 20% * 1.10 = 22%.
+        await page.locator('#one-pln-race-level').fill('10');
+        await page.locator('#one-pln-race-level').press('Tab');
+        expect(digits(await named(page, 'Lifeform Tech Bonus').locator('td').nth(3).textContent()))
+            .toBe(Math.round(mineMetal * 0.22));
+    });
+
+    test('lifeform level field is disabled when no form is selected', async ({ page }) => {
+        // Default race is "none" -> the level field is disabled.
+        await expect(page.locator('#one-pln-race-level')).toBeDisabled();
+
+        await page.locator('#one-pln-race').selectOption('1');
+        await expect(page.locator('#one-pln-race-level')).toBeEnabled();
+
+        await page.locator('#one-pln-race').selectOption('0');
+        await expect(page.locator('#one-pln-race-level')).toBeDisabled();
+    });
+
+    test('lifeform level persists per planet and restores on reload', async ({ page }) => {
+        await page.locator('#tabtag2').click();
+        await page.locator('#all-planets-prod .control-edit').first().click();
+        await page.locator('#one-pln-race').selectOption('3');
+        await page.locator('#one-pln-race-level').fill('25');
+        await page.locator('#one-pln-race-level').press('Tab');
+        await page.locator('#save-planet-data').click();
+
+        await page.reload();
+
+        await page.locator('#tabtag2').click();
+        await page.locator('#all-planets-prod .control-edit').first().click();
+        await expect(page.locator('#one-pln-race-level')).toHaveValue('25');
+    });
+
+    test('Disruption Chamber raises the production coefficient (more energy, less drain)', async ({ page }) => {
+        // Push mines up and power plants down so the planet is energy-starved.
+        await page.locator('#one-pln-race').selectOption('2');
+        const rows = page.locator('#one-planet-prod tr:not(.lf-row)');
+        // rows: 0 header, 1 natural, 2 metal, 3 crystal, 4 deut, 5 solar, 6 fusion
+        await rows.nth(2).locator('input').fill('26');
+        await rows.nth(3).locator('input').fill('26');
+        await rows.nth(4).locator('input').fill('22');
+        await rows.nth(5).locator('input').fill('20');
+        await rows.nth(5).locator('input').press('Tab');
+
+        const coeffBefore = digits(await page.locator('#prod-coeff').textContent());
+
+        // Disruption Chamber is the 7th Rock'tal building: +energy prod, -energy use.
+        const disruption = lfRow(page, 2, 6);
+        await disruption.locator('input').fill('20');
+        await disruption.locator('input').press('Tab');
+
+        const coeffAfter = digits(await page.locator('#prod-coeff').textContent());
+        expect(coeffAfter).toBeGreaterThan(coeffBefore);
+    });
+});

@@ -219,9 +219,10 @@ function updateOnePlnTab() {
 	options.prm.planetPos = getInputNumber($('#planet-pos'));
 	options.prm.energyBoost = $('#energy-boost').value;
 	options.prm.onePlnRace = Number($('#one-pln-race').value);
+	options.prm.onePlnRaceLevel = getInputNumber($('#one-pln-race-level'));
 	options.prm.onePlnLfLevels = readOnePlnLfLevels();
-	let lfCons = lfEnergyConsumption(options.prm.onePlnRace, options.prm.onePlnLfLevels);
-	renderOnePlnLfEnergy(options.prm.onePlnRace, lfCons.perBld);
+	let lfEff = lfBuildingEffects(options.prm.onePlnRace, options.prm.onePlnLfLevels, options.prm.onePlnRaceLevel);
+	renderOnePlnLfEnergy(options.prm.onePlnRace, lfEff.perBldEnergy);
 	let plnData = [options.prm.maxPlanetTemp, options.prm.planetPos, options.prm.energyBoost];
 	let rows = $$('#one-planet-prod tr:not(.lf-row)');
 	// Keep the crawler count (row 8) limit in sync with the mines (rows 2-4);
@@ -235,7 +236,7 @@ function updateOnePlnTab() {
 	);
 	let params = collectOnePlanetParams(rows);
 
-	let prodData = calculateProduction(params, plnData, false, lfCons.total);
+	let prodData = calculateProduction(params, plnData, false, lfEff);
 	let results = prodData[0];
 	let production = prodData[1];
 	let totalEnergyProduced = prodData[2];
@@ -292,12 +293,12 @@ function updateOnePlnTab() {
 	options.prm.oPPP = params;
 
 	rows = $$('#mines-amort-tbl tr');
-	let currProd = calculateProduction(params, plnData, true);
+	let currProd = calculateProduction(params, plnData, true, lfEff);
 	let paramsCopy = params.map(function (arr) {
 		return arr.slice();
 	});
 	paramsCopy[0][0] = paramsCopy[0][0] + 1; paramsCopy[1][0] = paramsCopy[1][0] + 1; paramsCopy[2][0] = paramsCopy[2][0] + 1;
-	let newProd = calculateProduction(paramsCopy, plnData, true);
+	let newProd = calculateProduction(paramsCopy, plnData, true, lfEff);
 	let increase;
 	let rates = collectExchangeRates();
 	options.prm.rates = rates;
@@ -372,7 +373,7 @@ function updateAllPlnTab() {
 	collectAllPlanetsInputs(rows);
 	for (let i = 0; i < planetsCount; i++) {
 		let planet = buildPlanetProdParams(i);
-		let prodData = calculateProduction(planet.prodParams, planet.plnData, false, planet.lfEnergyUsed);
+		let prodData = calculateProduction(planet.prodParams, planet.plnData, false, planet.lfEff);
 		let production = prodData[1];
 		let koeff = prodData[4];
 		rows[i * 2 + 1].children[14].innerHTML = Math.floor(koeff * 100) + '%'; // в последний столбец таблицы запишем коэффициент производства
@@ -420,7 +421,7 @@ function updateAllPlnTab() {
 	let newProd = [0, 0, 0];
 	for (let i = 0; i < planetsCount; i++) {
 		let planet = buildPlanetProdParams(i);
-		let prodData = calculateProduction(planet.prodParams, planet.plnData, false, planet.lfEnergyUsed);
+		let prodData = calculateProduction(planet.prodParams, planet.plnData, false, planet.lfEff);
 		newProd[0] += prodData[1][0];
 		newProd[1] += prodData[1][1];
 		newProd[2] += prodData[1][2];
@@ -477,6 +478,7 @@ function resetParams() {
 	options.prm.planetPos = 8;
 	options.prm.onePlnExtView = false;
 	options.prm.onePlnRace = 0;
+	options.prm.onePlnRaceLevel = 0;
 	options.prm.onePlnLfLevels = [];
 	options.prm.oPPP = [[0, 100, 0], [0, 100, 0], [0, 100, 0], [0, 100, 0], [0, 100, 0], [0, 100, 0], [0, 100, 0]];
 	options.prm.metStorageLvl = 0;
@@ -547,6 +549,8 @@ function updateLifeformRows() {
 			tr.style.display = '';
 		});
 	}
+	// The life form level only makes sense once a form is selected.
+	$('#one-pln-race-level').disabled = (race < 1 || race > 4);
 }
 
 // Read the building levels of the currently selected race from the table into a
@@ -590,6 +594,7 @@ function editRow(plnID) {
 	setVal('#planet-pos', options.prm.aPS[plnID][1]);
 	setVal('#energy-boost', options.prm.aPS[plnID][2]);
 	setVal('#one-pln-race', options.prm.aPS[plnID][24] || 0);
+	setVal('#one-pln-race-level', options.prm.aPS[plnID][37] || 0);
 	updateLifeformRows();
 	writeOnePlnLfLevels(options.prm.aPS[plnID][24] || 0, options.prm.aPS[plnID].slice(25, 37));
 	let rows = $$('#one-planet-prod tr:not(.lf-row)');
@@ -627,6 +632,7 @@ function savePlnData() {
 	target[1] = Number($('#planet-pos').value);
 	target[2] = Number($('#energy-boost').value);
 	target[24] = Number($('#one-pln-race').value);
+	target[37] = getInputNumber($('#one-pln-race-level'));
 	let savedLfLevels = readOnePlnLfLevels();
 	for (let k = 0; k < 12; k++) target[25 + k] = savedLfLevels[k] || 0;
 	for (let i = 1; i < 8; i++) {
@@ -652,9 +658,11 @@ function clonePlnData() {
 	let rows = $$('#one-planet-prod tr:not(.lf-row)');
 	let lfLevels = readOnePlnLfLevels();
 	let cloneRace = Number($('#one-pln-race').value);
+	let cloneRaceLevel = getInputNumber($('#one-pln-race-level'));
 	for (let pln = 0; pln < options.prm.currPlanetsCount; pln++) {
 		let p = options.prm.aPS[pln];
 		p[24] = cloneRace;
+		p[37] = cloneRaceLevel;
 		for (let k = 0; k < 12; k++) p[25 + k] = lfLevels[k] || 0;
 		for (let i = 1; i < 8; i++) {
 			p[i * 3] = getInputNumber(rows[i + 1].children[2].children[0]);
@@ -856,6 +864,8 @@ function initializeProductionCalculator() {
 		$$('#one-planet-prod .lf-row input[type=text]').forEach(function (el) {
 			el._constrains = { 'min': 0, 'def': 0, 'allowFloat': false, 'allowNegative': false };
 		});
+		// Life form level: non-negative integer
+		document.getElementById('one-pln-race-level')._constrains = { 'min': 0, 'def': 0, 'allowFloat': false, 'allowNegative': false };
 
 		// General settings panel
 		$$('#general-settings-panel input[type=text]').forEach(function (el) {

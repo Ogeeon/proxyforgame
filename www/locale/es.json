@@ -563,10 +563,7 @@
   },
   "production": {
     "param-tab-general": "General",
-    "lf-metal-prod-increase": "Aumento de producción de metal",
-    "lf-crystal-prod-increase": "Aumento de producción de cristal",
-    "lf-deut-prod-increase": "Aumento de producción de deuterio",
-    "lf-energy-prod-increase": "Aumento de producción de energía",
+    "lf-prod-increase": "Aumento de producción",
     "lf-crawlers-boost": "Bono de taladradores",
     "lf-plasma-cost-reduction": "Reducción de coste de tecnología de plasma",
     "title": "OGame - Calculadora de Velocidad de Producción",
@@ -646,6 +643,7 @@
     "incl-no": "No",
     "alliance-class": "Clase de alianza",
     "lifeform-tech": "Bono de tecnología de formas de vida",
+    "lifeform-level": "Nivel de forma de vida",
     "is-trader": "La clase de alianza es \"Comerciantes\""
   },
   "queue": {

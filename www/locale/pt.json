@@ -565,10 +565,7 @@
   },
   "production": {
     "param-tab-general": "Geral",
-    "lf-metal-prod-increase": "Aumento da produção de metal",
-    "lf-crystal-prod-increase": "Aumento da produção de cristal",
-    "lf-deut-prod-increase": "Aumento da produção de deutério",
-    "lf-energy-prod-increase": "Aumento da produção de energia",
+    "lf-prod-increase": "Aumento da produção",
     "lf-crawlers-boost": "Bônus de crawlers",
     "lf-plasma-cost-reduction": "Redução de custo da tecnologia de plasma",
     "title": "OGame - Calculadora da velocidade de produção",
@@ -645,6 +642,7 @@
     "incl-no": "Não",
     "alliance-class": "Classe Alliance",
     "lifeform-tech": "Bônus de tecnologia de formas de vida",
+    "lifeform-level": "Nível de forma de vida",
     "is-trader": "A classe Alliance é \"Traders\""
   },
   "queue": {

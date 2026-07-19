@@ -570,10 +570,7 @@
   },
   "production": {
     "param-tab-general": "Opšte",
-    "lf-metal-prod-increase": "Povećanje proizvodnje metala",
-    "lf-crystal-prod-increase": "Povećanje proizvodnje kristala",
-    "lf-deut-prod-increase": "Povećanje proizvodnje deuterija",
-    "lf-energy-prod-increase": "Povećanje proizvodnje energije",
+    "lf-prod-increase": "Povećanje proizvodnje",
     "lf-crawlers-boost": "Bonus puzavaca",
     "lf-plasma-cost-reduction": "Smanjenje troška plazma tehnologije",
     "energy": "Energija",
@@ -650,6 +647,7 @@
     "incl-no": "Ne",
     "alliance-class": "Klasa saveza",
     "lifeform-tech": "Bonus tehnologije oblika života",
+    "lifeform-level": "Nivo životne forme",
     "is-trader": "Klasa saveza je \"Trgovci\""
   },
   "queue": {

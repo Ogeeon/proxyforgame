@@ -14,6 +14,7 @@ function populateParams() {
 	setVal('#max-planet-temp', options.prm.maxPlanetTemp);
 	setChecked('#one-pln-extended-view', options.prm.onePlnExtView);
 	setVal('#one-pln-race', options.prm.onePlnRace);
+	setVal('#one-pln-race-level', options.prm.onePlnRaceLevel);
 	if (typeof updateLifeformRows === 'function') updateLifeformRows();
 	if (typeof writeOnePlnLfLevels === 'function') writeOnePlnLfLevels(options.prm.onePlnRace, options.prm.onePlnLfLevels);
 	setVal('#planet-pos', options.prm.planetPos);
