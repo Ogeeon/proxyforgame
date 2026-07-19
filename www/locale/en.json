@@ -645,6 +645,7 @@
     "incl-yes": "Yes",
     "incl-no": "No",
     "alliance-class": "Alliance class",
+    "lifeform-tech": "Lifeform Tech Bonus",
     "is-trader": "Alliance class is \"Traders\""
   },
   "queue": {

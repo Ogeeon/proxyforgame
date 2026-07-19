@@ -95,8 +95,9 @@ function calculateProduction(prodParams, plnData, normalized = false) {
 	let production = [0, 0, 0];
 	// 0-нат.пр-во, 1-шахта мет., 2-шахта крис., 3-синт.дейт., 4-сол.эл/ст,
 	// 5--термояд.эл/ст., 6-сол.спут., 7-гусен., 8-плазм.тех., 9-предметы,
-	// 10-геолог, 11-инженер, 12-ком.состав, 13-класс
-	for (var i = 0; i < 15; i++) { results.push([0, 0, 0, 0, 0]); } // мет, крис, дейт, энергии производится, энергии требуется
+	// 10-геолог, 11-инженер, 12-ком.состав, 13-класс, 14-класс альянса,
+	// 15-техн. бонус форм жизни
+	for (var i = 0; i < 16; i++) { results.push([0, 0, 0, 0, 0]); } // мет, крис, дейт, энергии производится, энергии требуется
 	var energy = 0, level = 0, perCent = 0, deutCons = 0, totalEnergyProduced = 0, totalEnergyUsed = 0, booster = 0;
 	var fullCrew = options.prm.geologist && options.prm.engineer && options.prm.admiral && options.prm.commander && options.prm.technocrat;
 	let energyArray;
@@ -135,12 +136,15 @@ function calculateProduction(prodParams, plnData, normalized = false) {
 	var allStaffFactor = fullCrew === true ? 0.02 : 0;
 	var classFactor = options.prm.playerClass === 0 ? 0.1 : 0;
 	let allianceClassFactor = options.prm.isTrader ? 0.05 : 0;
+	let lfEnergyFactor = (options.prm.lfEnergyProdBonus || 0) / 100;
 	results[9][3] = Math.round(energyBalance * boosterFactor);
 	results[11][3] = Math.round(energyBalance * engineerFactor);
 	results[12][3] = Math.round(energyBalance * allStaffFactor);
 	results[13][3] = Math.round(energyBalance * classFactor);
 	results[14][3] = Math.round(energyBalance * allianceClassFactor);
-	totalEnergyProduced += results[9][3] + results[11][3] + results[12][3] + results[13][3] + results[14][3];
+	// Техн. бонус форм жизни: прирост производства энергии от базовой выработки
+	results[15][3] = Math.round(energyBalance * lfEnergyFactor);
+	totalEnergyProduced += results[9][3] + results[11][3] + results[12][3] + results[13][3] + results[14][3] + results[15][3];
 
 	// Мы знаем, сколько всего производится энергии на планете - теперь нужно узнать, сколько её потребляется
 	for (var i = 0; i < 3; i++) {
@@ -196,6 +200,20 @@ function calculateProduction(prodParams, plnData, normalized = false) {
 	production[1] += results[7][1];
 	results[7][2] = Math.round(results[3][2] * prodParams[6][0] * 0.0002 * crMult * prodParams[6][1] / 100.0);
 	production[2] += results[7][2];
+
+	// Техн. бонус форм жизни: доп. производство ресурсов. Прирост по каждому
+	// ресурсу применяется к базовой выработке рудника, а буст гусеничников - к
+	// их производству. При нулевых бонусах строка не даёт вклада.
+	let lfMetFactor = (options.prm.lfMetProdBonus || 0) / 100;
+	let lfCrysFactor = (options.prm.lfCrysProdBonus || 0) / 100;
+	let lfDeutFactor = (options.prm.lfDeutProdBonus || 0) / 100;
+	let lfCrawlerFactor = (options.prm.lfCrawlerBonus || 0) / 100;
+	results[15][0] = Math.round(results[1][0] * lfMetFactor) + Math.round(results[7][0] * lfCrawlerFactor);
+	results[15][1] = Math.round(results[2][1] * lfCrysFactor) + Math.round(results[7][1] * lfCrawlerFactor);
+	results[15][2] = Math.round(results[3][2] * lfDeutFactor) + Math.round(results[7][2] * lfCrawlerFactor);
+	production[0] += results[15][0];
+	production[1] += results[15][1];
+	production[2] += results[15][2];
 
 	return [results, production, totalEnergyProduced, totalEnergyUsed, koeff];
 }

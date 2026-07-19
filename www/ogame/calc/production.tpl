@@ -486,7 +486,7 @@
             <th style="display: none;">%</th>
           </tr>
           <?php for($i = 0; $i < count($oneTblProdRows); $i++): ?>
-            <?php if ($i == 15):?>
+            <?php if ($i == 16):?>
               <tr><td colspan="8" class="table-line-2px"></td></tr>
             <?php endif; ?>
             <tr class="<?= ($i % 2) === 1 ? 'odd' : 'even' ?>" >

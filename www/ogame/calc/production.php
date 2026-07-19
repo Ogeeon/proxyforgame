@@ -43,7 +43,7 @@ $techData = array(
 	503 => array('ipm', 6, 12500, 2500, 10000, 1)
 );
 
-$oneTblProdRows = array('natural-production', 'metal-mine', 'crystal-mine', 'deut-synth', 'solar-plant', 'fusion-reactor', 'solar-sat', 'crawler', 'plasma-tech', 'booster', 'geologist', 'engineer', 'commanding-staff', 'class', 'alliance-class', 'prod-per-hour', 'prod-per-day', 'prod-per-week');
+$oneTblProdRows = array('natural-production', 'metal-mine', 'crystal-mine', 'deut-synth', 'solar-plant', 'fusion-reactor', 'solar-sat', 'crawler', 'plasma-tech', 'booster', 'geologist', 'engineer', 'commanding-staff', 'class', 'alliance-class', 'lifeform-tech', 'prod-per-hour', 'prod-per-day', 'prod-per-week');
 $allTblTotalRows = array('prod-per-hour', 'prod-per-day', 'prod-per-week');
 
 function getTechsByType($type) {

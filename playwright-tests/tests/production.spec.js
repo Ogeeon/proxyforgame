@@ -321,6 +321,68 @@ test('amortization calculations are correct', async ({ page }) => {
     await expect(amortTable.locator('tbody tr:nth-child(3) td:nth-child(4)')).toHaveText('6d 8h 35m');
 });
 
+test.describe('Lifeform Tech Bonus row', () => {
+    // Column layout of a production row: td[3]=metal, [4]=crystal, [5]=deut, [6]=energy.
+    const oneRow = (page, label) => page.locator('#one-planet-prod tr').filter({ hasText: label });
+    const cell = (row, col) => row.locator('td').nth(col);
+
+    test('per-resource increases add exactly the base mine output', async ({ page }) => {
+        const lifeform = oneRow(page, 'Lifeform Tech Bonus');
+
+        // With no bonuses the row contributes nothing.
+        await expect(cell(lifeform, 3)).toHaveText('');
+        await expect(cell(lifeform, 4)).toHaveText('');
+        await expect(cell(lifeform, 5)).toHaveText('');
+
+        const mineMetal = (await cell(oneRow(page, 'Metal Mine'), 3).textContent())?.trim() ?? '';
+        const mineCrys = (await cell(oneRow(page, 'Crystal Mine'), 4).textContent())?.trim() ?? '';
+        const mineDeut = (await cell(oneRow(page, 'Deuterium Synthesizer'), 5).textContent())?.trim() ?? '';
+        expect(mineMetal).not.toBe('');
+
+        // A 100% increase adds exactly the base mine/synth output per resource.
+        await page.locator('#param-lifeforms-tab').click();
+        await page.locator('#lf-metal-prod-bonus').fill('100');
+        await page.locator('#lf-crystal-prod-bonus').fill('100');
+        await page.locator('#lf-deut-prod-bonus').fill('100');
+        await page.locator('#lf-deut-prod-bonus').press('Tab');
+
+        await expect(cell(lifeform, 3)).toHaveText(mineMetal);
+        await expect(cell(lifeform, 4)).toHaveText(mineCrys);
+        await expect(cell(lifeform, 5)).toHaveText(mineDeut);
+    });
+
+    test('crawler boost adds crawler output and energy increase adds energy', async ({ page }) => {
+        const lifeform = oneRow(page, 'Lifeform Tech Bonus');
+
+        // A 100% crawler boost adds exactly the crawler production. Read the
+        // crawler output after the bonus triggers a full recalc/render.
+        await page.locator('#param-lifeforms-tab').click();
+        await page.locator('#lf-crawler-bonus').fill('100');
+        await page.locator('#lf-crawler-bonus').press('Tab');
+        const crawlerMetal = (await cell(oneRow(page, 'Crawler'), 3).textContent())?.trim() ?? '';
+        expect(crawlerMetal).not.toBe('');
+        await expect(cell(lifeform, 3)).toHaveText(crawlerMetal);
+
+        // An energy increase surfaces in the energy column.
+        await expect(cell(lifeform, 6)).toHaveText('');
+        await page.locator('#lf-energy-prod-bonus').fill('50');
+        await page.locator('#lf-energy-prod-bonus').press('Tab');
+        await expect(cell(lifeform, 6)).not.toHaveText('');
+    });
+
+    test('feeds the hourly totals', async ({ page }) => {
+        const totalRow = page.locator('#one-planet-prod tr').filter({ hasText: 'Total per hour' });
+        const baseline = (await totalRow.locator('td').nth(3).textContent())?.trim() ?? '';
+
+        await page.locator('#param-lifeforms-tab').click();
+        await page.locator('#lf-metal-prod-bonus').fill('100');
+        await page.locator('#lf-metal-prod-bonus').press('Tab');
+
+        // The extra metal from the Lifeform bonus must change the hourly total.
+        await expect(totalRow.locator('td').nth(3)).not.toHaveText(baseline);
+    });
+});
+
 test.describe('Life Forms plasma technology cost reduction', () => {
     // #plasma-amort-tbl rows: (1) upgrade cost, (2) production increase, (3) payback time.
     const costRow = (page) => page.locator('#plasma-amort-tbl tbody tr:nth-child(1)');

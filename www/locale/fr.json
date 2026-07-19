@@ -655,6 +655,7 @@
     "incl-yes": "Oui",
     "incl-no": "Non",
     "alliance-class": "Classe d'alliance",
+    "lifeform-tech": "Bonus technologie formes de vie",
     "is-trader": "La classe d'alliance est \"Traders\""
   },
   "queue": {

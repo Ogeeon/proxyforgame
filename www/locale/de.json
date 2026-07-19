@@ -644,6 +644,7 @@
     "incl-yes": "Ja",
     "incl-no": "Nein",
     "alliance-class": "Allianzklasse",
+    "lifeform-tech": "Lebensform-Technologiebonus",
     "is-trader": "Allianzklasse ist \"Händler\""
   },
   "queue": {

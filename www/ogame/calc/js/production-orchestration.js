@@ -243,10 +243,11 @@ function updateOnePlnTab() {
 	// brown when energy-starved, otherwise inherit the theme body color
 	coeffSpan.style.color = koeff < 1 ? 'brown' : '';
 
-	// Выведем данные о текущем производстве и подведем итоги
-	let resultRow = options.rowsToTechs.length + 3;
+	// Выведем данные о текущем производстве и подведем итоги.
+	// +4 = заголовок + разделитель + строка "Техн. бонус форм жизни" сверх rowsToTechs.
+	let resultRow = options.rowsToTechs.length + 4;
 	let val, cons = 0;
-	for (let row = 0; row < 15; row++) {
+	for (let row = 0; row < 16; row++) {
 		for (let col = 0; col < 4; col++) {
 			if (row > 0 && row < 4 && col === 3) {
 				cons = results[row][4];
