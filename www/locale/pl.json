@@ -571,6 +571,13 @@
     "moon-create-chance": "Szansa stworzenia księżyca"
   },
   "production": {
+    "param-tab-general": "Ogólne",
+    "lf-metal-prod-increase": "Wzrost produkcji metalu",
+    "lf-crystal-prod-increase": "Wzrost produkcji kryształu",
+    "lf-deut-prod-increase": "Wzrost produkcji deuteru",
+    "lf-energy-prod-increase": "Wzrost produkcji energii",
+    "lf-crawlers-boost": "Premia pełzaczy",
+    "lf-plasma-cost-reduction": "Redukcja kosztu technologii plazmowej",
     "energy": "Energia",
     "title": "OGame - Kalkulator produkcji",
     "keywords": "proxyforgame,online,browser,game,tool,calc,calculator,gra,przeglądarka,kalkulator,ogame,produkcji skrorost,produkcji surowców,bilans energetyczny,bilans energetyczny,gromadzenie zasobów,amortyzacja, zwrot kosztów, odzyskiwanie zasobów",

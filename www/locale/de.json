@@ -563,6 +563,13 @@
     "moon-create-chance": "Chance Mond Erstellung"
   },
   "production": {
+    "param-tab-general": "Allgemein",
+    "lf-metal-prod-increase": "Metallproduktionssteigerung",
+    "lf-crystal-prod-increase": "Kristallproduktionssteigerung",
+    "lf-deut-prod-increase": "Deuteriumproduktionssteigerung",
+    "lf-energy-prod-increase": "Energieproduktionssteigerung",
+    "lf-crawlers-boost": "Crawler-Bonus",
+    "lf-plasma-cost-reduction": "Kostenreduktion Plasmatechnik",
     "title": "OGame - Berechnung der Produktion",
     "keywords": "proxyforgame,proxy,online,browser,game,tool,calc,calculator,ogame,production speed,resource production,resource accumulation,energy balance,energy production,Berechnung der Produktion,Proxy,Online-Spielen,Taschenrechner,ogame,die Geschwindigkeit der Produktion,Rohstoffproduktion,Energiebilanz,Energiebilanz,die Anhäufung von Ressourcen,Amortisation, Ressourcenrückgewinnung",
     "plasma-tech-level": "Plasmatechnik Stufe",

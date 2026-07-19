@@ -562,6 +562,13 @@
     "moon-create-chance": "Posibilidad de creación de la Luna"
   },
   "production": {
+    "param-tab-general": "General",
+    "lf-metal-prod-increase": "Aumento de producción de metal",
+    "lf-crystal-prod-increase": "Aumento de producción de cristal",
+    "lf-deut-prod-increase": "Aumento de producción de deuterio",
+    "lf-energy-prod-increase": "Aumento de producción de energía",
+    "lf-crawlers-boost": "Bono de taladradores",
+    "lf-plasma-cost-reduction": "Reducción de coste de tecnología de plasma",
     "title": "OGame - Calculadora de Velocidad de Producción",
     "keywords": "proxyforgame,online,browser,game,tool,calc,calculator,calculadora de velocidad de producción,acumularán los recursos,proxy,juegos online,navegador,una calculadora,ogame,la velocidad de producción,producción de recursos,balance energético,la acumulación de recursos,amortización,payback,recuperación de recursos",
     "plasma-tech-level": "Plasma tech level",

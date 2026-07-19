@@ -109,6 +109,9 @@ test('player class and Alliance Traders bonuses calculations are correct', async
 });
 
 test('energy tech level 10 and plasma tech level 10 bonuses calculations are correct', async ({ page }) => {
+    // Energy/plasma tech inputs live on the Researches parameter sub-tab
+    await page.locator('#param-researches-tab').click();
+
     // Set energy tech level to 10 and trigger recalculation
     await page.locator('#energy-tech-level').fill('10');
     await page.locator('#energy-tech-level').press('Tab');
@@ -316,4 +319,122 @@ test('amortization calculations are correct', async ({ page }) => {
     await expect(amortTable.locator('tbody tr:nth-child(3) td:nth-child(2)')).toHaveText('12.974 Metal, 10.324 Crystal, 1.500 Deuterium');
     await expect(amortTable.locator('tbody tr:nth-child(3) td:nth-child(3)')).toHaveText('72');
     await expect(amortTable.locator('tbody tr:nth-child(3) td:nth-child(4)')).toHaveText('6d 8h 35m');
+});
+
+test.describe('Life Forms plasma technology cost reduction', () => {
+    // #plasma-amort-tbl rows: (1) upgrade cost, (2) production increase, (3) payback time.
+    const costRow = (page) => page.locator('#plasma-amort-tbl tbody tr:nth-child(1)');
+    const timeValue = (page) => page.locator('#plasma-amort-tbl tbody tr:nth-child(3) td:nth-child(2)');
+    const lfReduction = (page) => page.locator('#lf-plasma-cost-reduction');
+
+    // Open the "All planets" tab and expand its Plasma amortization panel.
+    async function openPlasmaAmort(page) {
+        await page.locator('#tabtag2').click();
+        await page.locator('text=Amortisation of Plasma Technology').click();
+    }
+
+    test('scales the plasma upgrade cost that drives the payback', async ({ page }) => {
+        await openPlasmaAmort(page);
+
+        // Plasma level 0 -> 1 costs 2.000 metal / 4.000 crystal / 1.000 deuterium.
+        await expect(costRow(page).locator('td').nth(1)).toHaveText('2.000');
+        await expect(costRow(page).locator('td').nth(2)).toHaveText('4.000');
+        await expect(costRow(page).locator('td').nth(3)).toHaveText('1.000');
+
+        // The reduction input lives on the Life Forms parameter sub-tab.
+        await page.locator('#param-lifeforms-tab').click();
+
+        // A 50% Life Forms reduction halves every cost component.
+        await lfReduction(page).fill('50');
+        await lfReduction(page).press('Tab');
+        await expect(costRow(page).locator('td').nth(1)).toHaveText('1.000');
+        await expect(costRow(page).locator('td').nth(2)).toHaveText('2.000');
+        await expect(costRow(page).locator('td').nth(3)).toHaveText('500');
+
+        // Removing the bonus restores the full cost.
+        await lfReduction(page).fill('0');
+        await lfReduction(page).press('Tab');
+        await expect(costRow(page).locator('td').nth(1)).toHaveText('2.000');
+        await expect(costRow(page).locator('td').nth(2)).toHaveText('4.000');
+        await expect(costRow(page).locator('td').nth(3)).toHaveText('1.000');
+    });
+
+    test('shortens the plasma payback time on the All planets tab', async ({ page }) => {
+        // Give the first planet productive mines and a power plant so a plasma
+        // level yields a real production increase and thus a finite payback.
+        await page.locator('#tabtag2').click();
+        const planetInputs = page.locator('#all-planets-prod tr').nth(1).locator('input[type=text]');
+        await planetInputs.nth(2).fill('30'); // metal mine
+        await planetInputs.nth(3).fill('26'); // crystal mine
+        await planetInputs.nth(4).fill('22'); // deuterium synthesizer
+        await planetInputs.nth(5).fill('40'); // solar plant
+        await planetInputs.nth(5).press('Tab');
+
+        await page.locator('text=Amortisation of Plasma Technology').click();
+
+        const baseline = (await timeValue(page).textContent())?.trim() ?? '';
+        expect(baseline).not.toBe('');
+
+        // The reduction input lives on the Life Forms parameter sub-tab.
+        await page.locator('#param-lifeforms-tab').click();
+
+        // Halving the cost must recompute a shorter payback.
+        await lfReduction(page).fill('50');
+        await lfReduction(page).press('Tab');
+        const reduced = (await timeValue(page).textContent())?.trim() ?? '';
+        expect(reduced).not.toBe('');
+        expect(reduced).not.toBe(baseline);
+
+        // Removing the bonus restores the original payback exactly.
+        await lfReduction(page).fill('0');
+        await lfReduction(page).press('Tab');
+        await expect(timeValue(page)).toHaveText(baseline);
+    });
+
+    test('energy production increase is a non-negative float and persists', async ({ page }) => {
+        const lfEnergy = page.locator('#lf-energy-prod-bonus');
+
+        await page.locator('#param-lifeforms-tab').click();
+
+        // Accepts a fractional value.
+        await lfEnergy.fill('12.5');
+        await lfEnergy.press('Tab');
+        await expect(lfEnergy).toHaveValue('12.5');
+
+        // Negative input never yields a negative value.
+        await lfEnergy.fill('-5');
+        await lfEnergy.press('Tab');
+        const negValue = await lfEnergy.inputValue();
+        expect(parseFloat(negValue.replace(',', '.'))).toBeGreaterThanOrEqual(0);
+
+        // Survives a reload.
+        await lfEnergy.fill('34.5');
+        await lfEnergy.press('Tab');
+        await page.reload();
+        await page.locator('#param-lifeforms-tab').click();
+        await expect(page.locator('#lf-energy-prod-bonus')).toHaveValue('34.5');
+    });
+
+    test('is clamped to a maximum of 99 on blur', async ({ page }) => {
+        await page.locator('#param-lifeforms-tab').click();
+        await lfReduction(page).fill('150');
+        await lfReduction(page).press('Tab');
+        await expect(lfReduction(page)).toHaveValue('99');
+
+        // A value at or below the cap is left untouched.
+        await lfReduction(page).fill('80');
+        await lfReduction(page).press('Tab');
+        await expect(lfReduction(page)).toHaveValue('80');
+    });
+
+    test('is persisted and restored on reload', async ({ page }) => {
+        await page.locator('#param-lifeforms-tab').click();
+        await lfReduction(page).fill('37.5');
+        await lfReduction(page).press('Tab');
+
+        await page.reload();
+
+        await page.locator('#param-lifeforms-tab').click();
+        await expect(lfReduction(page)).toHaveValue('37.5');
+    });
 });

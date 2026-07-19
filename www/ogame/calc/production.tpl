@@ -88,6 +88,12 @@
         inclSats: 0,
         rates: [3, 2, 1],
         isTrader: false,
+        lfMetProdBonus: 0,
+        lfCrysProdBonus: 0,
+        lfDeutProdBonus: 0,
+        lfEnergyProdBonus: 0,
+        lfCrawlerBonus: 0,
+        lfPlasmaCostReduction: 0,
 
         validate: function (field, value) {
           switch (field) {
@@ -137,6 +143,14 @@
               return validateNumber(parseFloat(value), 1, 4, 1);
             case 'isTrader':
               return value === 'true';
+            case 'lfMetProdBonus':
+            case 'lfCrysProdBonus':
+            case 'lfDeutProdBonus':
+            case 'lfEnergyProdBonus':
+            case 'lfCrawlerBonus':
+              return validateNumber(parseFloat(value), 0, Infinity, 0);
+            case 'lfPlasmaCostReduction':
+              return validateNumber(parseFloat(value), 0, 99, 0);
             default:
               return value;
           }
@@ -287,68 +301,135 @@
       </div>
     </div>
 
-    <div id="general-settings-panel" class="border rounded m-1 p-2">
-      <div class="d-flex flex-wrap gap-2 align-items-center justify-content-center mb-1">
-        <div class="d-flex align-items-center gap-1">
-          <label for="energy-tech-level"><?= $l['energy-tech-level'] ?></label>
-          <input id="energy-tech-level" type="text" name="energy-tech-level" class="form-control form-control-sm level-input" value="0"/>
+    <div id="general-settings-panel" class="border rounded m-1 p-2 pb-1">
+      <!-- Parameter Tabs -->
+      <ul class="nav nav-tabs nav-tabs-sm" id="paramTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+          <button class="nav-link active" id="param-general-tab" data-bs-toggle="tab" data-bs-target="#param-general" type="button" role="tab"><?= $l['param-tab-general'] ?></button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button class="nav-link" id="param-researches-tab" data-bs-toggle="tab" data-bs-target="#param-researches" type="button" role="tab"><?= $l['researches'] ?></button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button class="nav-link" id="param-lifeforms-tab" data-bs-toggle="tab" data-bs-target="#param-lifeforms" type="button" role="tab"><?= $l['lifeforms'] ?></button>
+        </li>
+      </ul>
+      <div class="tab-content" id="paramTabContent">
+        <!-- General tab -->
+        <div class="tab-pane fade show active p-2 pb-0" id="param-general" role="tabpanel">
+          <div class="d-flex flex-wrap gap-2 align-items-center justify-content-center mb-1">
+            <div class="d-flex align-items-center gap-1">
+              <input id="engineer" type="checkbox" name="engineer" class="form-check-input"/>
+              <label for="engineer"><?= $l['engineer'] ?></label>
+            </div>
+            <div class="d-flex align-items-center gap-1">
+              <input id="geologist" type="checkbox" name="geologist" class="form-check-input"/>
+              <label for="geologist"><?= $l['geologist'] ?></label>
+            </div>
+            <div class="d-flex align-items-center gap-1">
+              <input id="technocrat" type="checkbox" name="technocrat" class="form-check-input"/>
+              <label for="technocrat"><?= $l['technocrat'] ?></label>
+            </div>
+            <div class="d-flex align-items-center gap-1">
+              <input id="admiral" type="checkbox" name="admiral" class="form-check-input"/>
+              <label for="admiral"><?= $l['admiral'] ?></label>
+            </div>
+            <div class="d-flex align-items-center gap-1">
+              <input id="commander" type="checkbox" name="commander" class="form-check-input"/>
+              <label for="commander"><?= $l['commander'] ?></label>
+            </div>
+          </div>
+          <div class="d-flex flex-wrap gap-2 align-items-center justify-content-center mb-1">
+            <div class="d-flex align-items-center gap-1 flex-nowrap">
+              <label><?= $l['class'] ?>:</label>
+              <input id="class-0" type="radio" name="class" value="0" class="form-check-input"/>
+              <label for="class-0"><?= $l['class-collector'] ?></label>
+              <input id="class-1" type="radio" name="class" value="1" class="form-check-input"/>
+              <label for="class-1"><?= $l['class-general'] ?></label>
+              <input id="class-2" type="radio" name="class" value="2" class="form-check-input"/>
+              <label for="class-2"><?= $l['class-discoverer'] ?></label>
+            </div>
+            <div class="d-flex align-items-center gap-1">
+              <input id="is-trader" type="checkbox" name="is-trader" class="form-check-input"/>
+              <label for="is-trader"><?= $l['is-trader'] ?></label>
+            </div>
+          </div>
+          <div class="d-flex flex-wrap gap-2 align-items-center justify-content-center">
+            <div class="d-flex align-items-center gap-1">
+              <label for="universe-speed"><?= $l['economy-speed'] ?></label>
+              <select id="universe-speed" name="universe-speed" class="form-select form-select-sm w-auto">
+                <?php for ($s = 1; $s <= 10; $s++): ?>
+                <option value="<?=$s?>" <?= $s === 1 ? 'selected="selected"' : '' ?>><?=$s?></option>
+                <?php endfor; ?>
+              </select>
+            </div>
+            <div class="d-flex align-items-center gap-1">
+              <label for="exchange-rates-m"><?= $l['exchange-rates'] ?></label>
+              <input id="exchange-rates-m" type="text" name="exchange-rates-m" class="form-control form-control-sm input-1column" value="3"/>:
+              <input id="exchange-rates-c" type="text" name="exchange-rates-c" class="form-control form-control-sm input-1column" value="2"/>:
+              <input id="exchange-rates-d" type="text" name="exchange-rates-d" class="form-control form-control-sm input-1column" value="1"/>
+            </div>
+          </div>
         </div>
-        <div class="d-flex align-items-center gap-1">
-          <label for="plasma-tech-level"><?= $l['plasma-tech-level'] ?></label>
-          <input id="plasma-tech-level" type="text" name="plasma-tech-level" class="form-control form-control-sm level-input" value="0"/>
+        <!-- Researches tab -->
+        <div class="tab-pane fade p-2 pb-0" id="param-researches" role="tabpanel">
+          <div class="d-flex flex-wrap gap-2 align-items-center justify-content-center">
+            <div class="d-flex align-items-center gap-1">
+              <label for="energy-tech-level"><?= $l['energy-tech-level'] ?></label>
+              <input id="energy-tech-level" type="text" name="energy-tech-level" class="form-control form-control-sm level-input" value="0"/>
+            </div>
+            <div class="d-flex align-items-center gap-1">
+              <label for="plasma-tech-level"><?= $l['plasma-tech-level'] ?></label>
+              <input id="plasma-tech-level" type="text" name="plasma-tech-level" class="form-control form-control-sm level-input" value="0"/>
+            </div>
+          </div>
         </div>
-      </div>
-      <div class="d-flex flex-wrap gap-2 align-items-center justify-content-center mb-1">
-        <div class="d-flex align-items-center gap-1">
-          <input id="engineer" type="checkbox" name="engineer" class="form-check-input"/>
-          <label for="engineer"><?= $l['engineer'] ?></label>
-        </div>
-        <div class="d-flex align-items-center gap-1">
-          <input id="geologist" type="checkbox" name="geologist" class="form-check-input"/>
-          <label for="geologist"><?= $l['geologist'] ?></label>
-        </div>
-        <div class="d-flex align-items-center gap-1">
-          <input id="technocrat" type="checkbox" name="technocrat" class="form-check-input"/>
-          <label for="technocrat"><?= $l['technocrat'] ?></label>
-        </div>
-        <div class="d-flex align-items-center gap-1">
-          <input id="admiral" type="checkbox" name="admiral" class="form-check-input"/>
-          <label for="admiral"><?= $l['admiral'] ?></label>
-        </div>
-        <div class="d-flex align-items-center gap-1">
-          <input id="commander" type="checkbox" name="commander" class="form-check-input"/>
-          <label for="commander"><?= $l['commander'] ?></label>
-        </div>
-      </div>
-      <div class="d-flex flex-wrap gap-2 align-items-center justify-content-center">
-        <div class="d-flex align-items-center gap-1 flex-nowrap">
-          <label><?= $l['class'] ?>:</label>
-          <input id="class-0" type="radio" name="class" value="0" class="form-check-input"/>
-          <label for="class-0"><?= $l['class-collector'] ?></label>
-          <input id="class-1" type="radio" name="class" value="1" class="form-check-input"/>
-          <label for="class-1"><?= $l['class-general'] ?></label>
-          <input id="class-2" type="radio" name="class" value="2" class="form-check-input"/>
-          <label for="class-2"><?= $l['class-discoverer'] ?></label>
-        </div>
-        <div class="d-flex align-items-center gap-1">
-          <input id="is-trader" type="checkbox" name="is-trader" class="form-check-input"/>
-          <label for="is-trader"><?= $l['is-trader'] ?></label>
-        </div>
-      </div>
-      <div class="d-flex flex-wrap gap-2 align-items-center justify-content-center">
-        <div class="d-flex align-items-center gap-1">
-          <label for="universe-speed"><?= $l['economy-speed'] ?></label>
-          <select id="universe-speed" name="universe-speed" class="form-select form-select-sm w-auto">
-            <?php for ($s = 1; $s <= 10; $s++): ?>
-            <option value="<?=$s?>" <?= $s === 1 ? 'selected="selected"' : '' ?>><?=$s?></option>
-            <?php endfor; ?>
-          </select>
-        </div>
-        <div class="d-flex align-items-center gap-1">
-          <label for="exchange-rates-m"><?= $l['exchange-rates'] ?></label>
-          <input id="exchange-rates-m" type="text" name="exchange-rates-m" class="form-control form-control-sm input-1column" value="3"/>:
-          <input id="exchange-rates-c" type="text" name="exchange-rates-c" class="form-control form-control-sm input-1column" value="2"/>:
-          <input id="exchange-rates-d" type="text" name="exchange-rates-d" class="form-control form-control-sm input-1column" value="1"/>
+        <!-- LifeForms tab -->
+        <div class="tab-pane fade p-2 pb-0" id="param-lifeforms" role="tabpanel">
+          <div class="d-flex flex-wrap column-gap-3 row-gap-1 align-items-center justify-content-center">
+            <div class="d-flex align-items-center gap-1">
+              <label for="lf-metal-prod-bonus"><?= $l['lf-metal-prod-increase'] ?></label>
+              <div class="input-group input-group-sm w-auto">
+                <input id="lf-metal-prod-bonus" type="text" name="lf-metal-prod-bonus" class="form-control level-input m-0" value="0"/>
+                <span class="input-group-text">%</span>
+              </div>
+            </div>
+            <div class="d-flex align-items-center gap-1">
+              <label for="lf-crystal-prod-bonus"><?= $l['lf-crystal-prod-increase'] ?></label>
+              <div class="input-group input-group-sm w-auto">
+                <input id="lf-crystal-prod-bonus" type="text" name="lf-crystal-prod-bonus" class="form-control level-input m-0" value="0"/>
+                <span class="input-group-text">%</span>
+              </div>
+            </div>
+            <div class="d-flex align-items-center gap-1">
+              <label for="lf-deut-prod-bonus"><?= $l['lf-deut-prod-increase'] ?></label>
+              <div class="input-group input-group-sm w-auto">
+                <input id="lf-deut-prod-bonus" type="text" name="lf-deut-prod-bonus" class="form-control level-input m-0" value="0"/>
+                <span class="input-group-text">%</span>
+              </div>
+            </div>
+            <div class="d-flex align-items-center gap-1">
+              <label for="lf-energy-prod-bonus"><?= $l['lf-energy-prod-increase'] ?></label>
+              <div class="input-group input-group-sm w-auto">
+                <input id="lf-energy-prod-bonus" type="text" name="lf-energy-prod-bonus" class="form-control level-input m-0" value="0"/>
+                <span class="input-group-text">%</span>
+              </div>
+            </div>
+            <div class="d-flex align-items-center gap-1">
+              <label for="lf-crawler-bonus"><?= $l['lf-crawlers-boost'] ?></label>
+              <div class="input-group input-group-sm w-auto">
+                <input id="lf-crawler-bonus" type="text" name="lf-crawler-bonus" class="form-control level-input m-0" value="0"/>
+                <span class="input-group-text">%</span>
+              </div>
+            </div>
+            <div class="d-flex align-items-center gap-1">
+              <label for="lf-plasma-cost-reduction"><?= $l['lf-plasma-cost-reduction'] ?></label>
+              <div class="input-group input-group-sm w-auto">
+                <input id="lf-plasma-cost-reduction" type="text" name="lf-plasma-cost-reduction" class="form-control level-input m-0" value="0"/>
+                <span class="input-group-text">%</span>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>

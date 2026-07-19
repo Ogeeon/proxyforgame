@@ -74,6 +74,12 @@ function updateParams() {
 	options.prm.playerClass = g.playerClass;
 	options.prm.energyBoost = g.energyBoost;
 	options.prm.isTrader = g.isTrader;
+	options.prm.lfMetProdBonus = g.lfMetProdBonus;
+	options.prm.lfCrysProdBonus = g.lfCrysProdBonus;
+	options.prm.lfDeutProdBonus = g.lfDeutProdBonus;
+	options.prm.lfEnergyProdBonus = g.lfEnergyProdBonus;
+	options.prm.lfCrawlerBonus = g.lfCrawlerBonus;
+	options.prm.lfPlasmaCostReduction = g.lfPlasmaCostReduction;
 
 	updateOnePlnTab();
 	updateAllPlnTab();
@@ -399,6 +405,10 @@ function updateAllPlnTab() {
 
 	let techData = { 122: [2000, 4000, 1000, 2] };
 	let costs = getBuildCost_C(122, options.prm.plasmaTechLevel, options.prm.plasmaTechLevel + 1, techData, 0);
+	// Life Forms bonus: reduce the plasma upgrade cost used for the payback estimate
+	let plasmaCostFactor = 1 - options.prm.lfPlasmaCostReduction / 100;
+	for (let i = 0; i < 3; i++)
+		costs[i] = Math.round(costs[i] * plasmaCostFactor);
 	let rates = collectExchangeRates();
 	let normCost = costs[0] + (rates[0] / rates[1]) * costs[1] + (rates[0] / rates[2]) * costs[2];
 	options.prm.plasmaTechLevel += 1;
@@ -472,6 +482,12 @@ function resetParams() {
 	options.prm.inclSats = false;
 	options.prm.rates = [3, 2, 1];
 	options.prm.isTrader = false;
+	options.prm.lfMetProdBonus = 0;
+	options.prm.lfCrysProdBonus = 0;
+	options.prm.lfDeutProdBonus = 0;
+	options.prm.lfEnergyProdBonus = 0;
+	options.prm.lfCrawlerBonus = 0;
+	options.prm.lfPlasmaCostReduction = 0;
 
 	populateParams();
 	setVal('#storage-met', 0);
@@ -762,6 +778,13 @@ function initializeProductionCalculator() {
 		document.getElementById('exchange-rates-m')._constrains = { 'min': 1, 'max': 4, 'def': 1, 'allowFloat': true, 'allowNegative': false };
 		document.getElementById('exchange-rates-c')._constrains = { 'min': 1, 'max': 3, 'def': 1, 'allowFloat': true, 'allowNegative': false };
 		document.getElementById('exchange-rates-d')._constrains = { 'min': 1, 'max': 2, 'def': 1, 'allowFloat': true, 'allowNegative': false };
+
+		// Life Forms bonuses: non-negative floating-point percentages
+		['lf-metal-prod-bonus', 'lf-crystal-prod-bonus', 'lf-deut-prod-bonus', 'lf-energy-prod-bonus', 'lf-crawler-bonus'].forEach(function (id) {
+			document.getElementById(id)._constrains = { 'min': 0, 'max': Infinity, 'def': 0, 'allowFloat': true, 'allowNegative': false };
+		});
+		// Plasma technology cost reduction is capped at 99%
+		document.getElementById('lf-plasma-cost-reduction')._constrains = { 'min': 0, 'max': 99, 'def': 0, 'allowFloat': true, 'allowNegative': false };
 
 		// General settings panel
 		$$('#general-settings-panel input[type=text]').forEach(function (el) {

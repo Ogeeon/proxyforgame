@@ -569,6 +569,13 @@
     "moon-create-chance": "Šansa za stvaranje mjeseca"
   },
   "production": {
+    "param-tab-general": "Opšte",
+    "lf-metal-prod-increase": "Povećanje proizvodnje metala",
+    "lf-crystal-prod-increase": "Povećanje proizvodnje kristala",
+    "lf-deut-prod-increase": "Povećanje proizvodnje deuterija",
+    "lf-energy-prod-increase": "Povećanje proizvodnje energije",
+    "lf-crawlers-boost": "Bonus puzavaca",
+    "lf-plasma-cost-reduction": "Smanjenje troška plazma tehnologije",
     "energy": "Energija",
     "title": "Ogame - Kalkulator proizvodnje resursa",
     "keywords": "proxyforgame,proxy,online,browser,game,tool,calc,calculator,ogame,production speed,resource production,resource accumulation,energy balance,energy production,amortization,payback,resource recovery",

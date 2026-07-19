@@ -27,6 +27,12 @@ function populateParams() {
 	setVal('#exchange-rates-d', String(options.prm.rates[2]).replace('.', options.decimalSeparator));
 	setChecked('#include-SS-' + (options.prm.inclSats ? 'y' : 'n'), true);
 	setChecked('#is-trader', options.prm.isTrader);
+	setVal('#lf-metal-prod-bonus', options.prm.lfMetProdBonus);
+	setVal('#lf-crystal-prod-bonus', options.prm.lfCrysProdBonus);
+	setVal('#lf-deut-prod-bonus', options.prm.lfDeutProdBonus);
+	setVal('#lf-energy-prod-bonus', options.prm.lfEnergyProdBonus);
+	setVal('#lf-crawler-bonus', options.prm.lfCrawlerBonus);
+	setVal('#lf-plasma-cost-reduction', options.prm.lfPlasmaCostReduction);
 }
 
 function setOnePlanetProdData() {

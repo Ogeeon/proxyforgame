@@ -565,6 +565,13 @@
     "moon-create-chance": "Maanvormingskans"
   },
   "production": {
+    "param-tab-general": "Algemeen",
+    "lf-metal-prod-increase": "Toename metaalproductie",
+    "lf-crystal-prod-increase": "Toename kristalproductie",
+    "lf-deut-prod-increase": "Toename deuteriumproductie",
+    "lf-energy-prod-increase": "Toename energieproductie",
+    "lf-crawlers-boost": "Crawler-bonus",
+    "lf-plasma-cost-reduction": "Kostenreductie plasmatechnologie",
     "time": "Tijd",
     "title": "OGame - Productie snelheid berekening",
     "keywords": "proxyforgame,proxy,online,calc,calculator,ogame,productie snelheid,energie verbruik,afschrijving, terugverdientijd, terugwinning van hulpbronnen",

@@ -568,6 +568,13 @@
     "moon-create-chance": "Possibilità di creazione Luna"
   },
   "production": {
+    "param-tab-general": "Generale",
+    "lf-metal-prod-increase": "Aumento produzione di metallo",
+    "lf-crystal-prod-increase": "Aumento produzione di cristallo",
+    "lf-deut-prod-increase": "Aumento produzione di deuterio",
+    "lf-energy-prod-increase": "Aumento produzione di energia",
+    "lf-crawlers-boost": "Bonus crawler",
+    "lf-plasma-cost-reduction": "Riduzione costo tecnologia del plasma",
     "title": "OGame - Calcolo della velocità di produzione",
     "keywords": "proxyforgame,proxy,online,calc,calculator,ogame,price calculation,cost calculation,buildings costs,research costs,fleet costs,defence costs,costs calculator,prices calculator,calcolatrice,ogame,velocità di produzione,produzione di risorse,bilancio energetico,bilancio energetico, accumulo di capitale,ammortamento, payback, recupero risorse",
     "plasma-tech-level": "Livello di Tecnologia del Plasma",

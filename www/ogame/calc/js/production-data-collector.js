@@ -25,7 +25,13 @@ function collectGeneralSettings() {
 		commander: getChecked('#commander'),
 		playerClass: getChecked('#class-2') ? 2 : (getChecked('#class-1') ? 1 : 0),
 		isTrader: getChecked('#is-trader'),
-		energyBoost: $('#energy-boost').value
+		energyBoost: $('#energy-boost').value,
+		lfMetProdBonus: getInputNumber($('#lf-metal-prod-bonus')),
+		lfCrysProdBonus: getInputNumber($('#lf-crystal-prod-bonus')),
+		lfDeutProdBonus: getInputNumber($('#lf-deut-prod-bonus')),
+		lfEnergyProdBonus: getInputNumber($('#lf-energy-prod-bonus')),
+		lfCrawlerBonus: getInputNumber($('#lf-crawler-bonus')),
+		lfPlasmaCostReduction: getInputNumber($('#lf-plasma-cost-reduction'))
 	};
 }
 

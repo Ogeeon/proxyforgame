@@ -560,6 +560,13 @@
     "moon-create-chance": "Шанс создания луны"
   },
   "production": {
+    "param-tab-general": "Общие",
+    "lf-metal-prod-increase": "Прирост производства металла",
+    "lf-crystal-prod-increase": "Прирост производства кристалла",
+    "lf-deut-prod-increase": "Прирост производства дейтерия",
+    "lf-energy-prod-increase": "Прирост производства энергии",
+    "lf-crawlers-boost": "Бонус гусеничников",
+    "lf-plasma-cost-reduction": "Снижение стоимости плазменной технологии",
     "title": "OGame - Калькулятор производства ресурсов",
     "keywords": "proxyforgame,proxy,online,browser,game,tool,calc,calculator,прокси,онлайн,игра,браузерная,калькулятор,ogame,огейм,скорость производства,производство ресурсов,баланс энергии,энергетический баланс,накопление ресурсов,амортизация,окупаемость,возврат ресурсов",
     "energy-tech-level": "Уровень Энергетической технологии",
