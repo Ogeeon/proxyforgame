@@ -96,5 +96,6 @@ function buildPlanetProdParams(i) {
 		prodParams[j - 1][2] = options.prm.aPS[i][j * 3 + 2];
 	}
 	let plnData = [options.prm.aPS[i][0], options.prm.aPS[i][1], options.prm.aPS[i][2]];
-	return { prodParams: prodParams, plnData: plnData };
+	let lfEnergyUsed = lfEnergyConsumption(options.prm.aPS[i][24] || 0, options.prm.aPS[i].slice(25, 37)).total;
+	return { prodParams: prodParams, plnData: plnData, lfEnergyUsed: lfEnergyUsed };
 }

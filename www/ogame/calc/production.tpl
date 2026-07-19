@@ -72,6 +72,8 @@
         maxTempEntered: false,
         maxPlanetTemp: 0,
         onePlnExtView: false,
+        onePlnRace: 0,
+        onePlnLfLevels: [],
         oPPP: [[0, 100, 0], [0, 100, 0], [0, 100, 0], [0, 100, 0], [0, 100, 0], [0, 100, 0], [0, 100, 0]],
         metStorageLvl: 0,
         crysStorageLvl: 0,
@@ -119,6 +121,8 @@
               return validateNumber(parseFloat(value), -272, Infinity, 0);
             case 'onePlnExtView':
               return value === 'true';
+            case 'onePlnRace':
+              return validateNumber(Number.parseInt(value), 0, 4, 0);
             case 'oPPP':
               return validateNumber(parseFloat(value), -272, Infinity, 0);
             case 'currPlanetsCount':
@@ -247,6 +251,16 @@
       <?php $first = true; ?>
       <?php foreach ($techs as $tech): ?>
       <?=(!$first)?',':''?><?= $tech ?>:[<?= $techData[$tech][2] ?>, <?= $techData[$tech][3] ?>, <?= $techData[$tech][4] ?>, <?= $techData[$tech][5] ?>]
+      <?php $first = false; ?>
+      <?php endforeach; ?>
+    };
+
+    // Life form building energy consumption: id => [base energy, growth coefficient].
+    // Consumption at level n = floor(base * n * pow(coeff, n)).
+    options.lfEnergy = {
+      <?php $first = true; ?>
+      <?php foreach ($lfBuildingEnergy as $lfId => $lfE): ?>
+      <?=(!$first)?',':''?><?= $lfId ?>:[<?= $lfE[0] ?>, <?= $lfE[1] ?>]
       <?php $first = false; ?>
       <?php endforeach; ?>
     };
@@ -465,8 +479,19 @@
               <option value="8">80%</option>
             </select>
           </div>
-          <div id="prod-coeff-div" class="d-flex align-items-center gap-1">
+          <div id="prod-coeff-div" class="d-flex align-items-center gap-1 ms-auto">
             <?= $l['prod-coeff'] ?>&nbsp;<span id="prod-coeff">0</span>
+          </div>
+        </div>
+        <div class="d-flex flex-wrap gap-2 align-items-center mb-1">
+          <div class="d-flex align-items-center gap-1">
+            <label for="one-pln-race"><?= $l['race'] ?></label>
+            <select id="one-pln-race" name="one-pln-race" class="form-select form-select-sm w-auto">
+              <option value="0" selected="selected"><?= $l['none'] ?></option>
+              <?php for ($r = 1; $r <= 4; $r++): ?>
+              <option value="<?=$r?>"><?= $l['race-'.$r] ?></option>
+              <?php endfor; ?>
+            </select>
           </div>
           <div class="d-flex align-items-center gap-1 ms-auto">
             <input id="one-pln-extended-view" name="one-pln-extended-view" type="checkbox" class="form-check-input"/>
@@ -541,6 +566,21 @@
                   <?php endfor; ?>
                 <?php endif; ?>
             </tr>
+            <?php if ($i == 5): // life form building rows, shown only for the selected race ?>
+              <?php foreach ($lfBuildingKeys as $lfRace => $lfKeys): ?>
+                <?php foreach ($lfKeys as $lfPos => $lfKey): ?>
+                  <tr class="lf-row lf-row-<?= $lfRace ?> <?= ($lfPos % 2) === 1 ? 'odd' : 'even' ?>" style="display: none;">
+                    <td align="left"><?= $lfTr[$lfKey] ?></td>
+                    <td align="center" style="display: none;"></td>
+                    <td align="center">
+                      <input type="text" class="form-control form-control-sm input-3columns lf-level-input" data-lf-id="<?= $lfRace * 1000 + ($lfPos + 1) ?>" value="0" />
+                    </td>
+                    <td align="center"></td><td align="center"></td><td align="center"></td><td align="center"></td>
+                    <td align="center" style="display: none;"></td>
+                  </tr>
+                <?php endforeach; ?>
+              <?php endforeach; ?>
+            <?php endif; ?>
           <?php endfor; ?>
           <tr><td colspan="8" class="table-line-3px"></td></tr>
         </table>

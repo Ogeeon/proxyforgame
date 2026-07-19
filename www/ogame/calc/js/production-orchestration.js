@@ -218,8 +218,12 @@ function updateOnePlnTab() {
 	options.prm.maxPlanetTemp = getInputNumber($('#max-planet-temp'));
 	options.prm.planetPos = getInputNumber($('#planet-pos'));
 	options.prm.energyBoost = $('#energy-boost').value;
+	options.prm.onePlnRace = Number($('#one-pln-race').value);
+	options.prm.onePlnLfLevels = readOnePlnLfLevels();
+	let lfCons = lfEnergyConsumption(options.prm.onePlnRace, options.prm.onePlnLfLevels);
+	renderOnePlnLfEnergy(options.prm.onePlnRace, lfCons.perBld);
 	let plnData = [options.prm.maxPlanetTemp, options.prm.planetPos, options.prm.energyBoost];
-	let rows = $$('#one-planet-prod tr');
+	let rows = $$('#one-planet-prod tr:not(.lf-row)');
 	// Keep the crawler count (row 8) limit in sync with the mines (rows 2-4);
 	// the value is clamped on blur by the shared numeric-input validator.
 	updateCrawlerLimit(
@@ -231,7 +235,7 @@ function updateOnePlnTab() {
 	);
 	let params = collectOnePlanetParams(rows);
 
-	let prodData = calculateProduction(params, plnData, false);
+	let prodData = calculateProduction(params, plnData, false, lfCons.total);
 	let results = prodData[0];
 	let production = prodData[1];
 	let totalEnergyProduced = prodData[2];
@@ -368,7 +372,7 @@ function updateAllPlnTab() {
 	collectAllPlanetsInputs(rows);
 	for (let i = 0; i < planetsCount; i++) {
 		let planet = buildPlanetProdParams(i);
-		let prodData = calculateProduction(planet.prodParams, planet.plnData);
+		let prodData = calculateProduction(planet.prodParams, planet.plnData, false, planet.lfEnergyUsed);
 		let production = prodData[1];
 		let koeff = prodData[4];
 		rows[i * 2 + 1].children[14].innerHTML = Math.floor(koeff * 100) + '%'; // в последний столбец таблицы запишем коэффициент производства
@@ -416,7 +420,7 @@ function updateAllPlnTab() {
 	let newProd = [0, 0, 0];
 	for (let i = 0; i < planetsCount; i++) {
 		let planet = buildPlanetProdParams(i);
-		let prodData = calculateProduction(planet.prodParams, planet.plnData);
+		let prodData = calculateProduction(planet.prodParams, planet.plnData, false, planet.lfEnergyUsed);
 		newProd[0] += prodData[1][0];
 		newProd[1] += prodData[1][1];
 		newProd[2] += prodData[1][2];
@@ -472,6 +476,8 @@ function resetParams() {
 	options.prm.maxPlanetTemp = 0;
 	options.prm.planetPos = 8;
 	options.prm.onePlnExtView = false;
+	options.prm.onePlnRace = 0;
+	options.prm.onePlnLfLevels = [];
 	options.prm.oPPP = [[0, 100, 0], [0, 100, 0], [0, 100, 0], [0, 100, 0], [0, 100, 0], [0, 100, 0], [0, 100, 0]];
 	options.prm.metStorageLvl = 0;
 	options.prm.crysStorageLvl = 0;
@@ -504,6 +510,7 @@ function resetParams() {
 	setVal('#onepln-accumwhen-crys', 0);
 	setVal('#onepln-accumwhen-deut', 0);
 	setChecked('#one-pln-extended-view', options.prm.onePlnExtView);
+	$$('#one-planet-prod .lf-row input[type=text]').forEach(function (el) { el.value = 0; });
 	setOnePlanetProdData();
 	updateOnePlnTab();
 	setOnePlanetView(options.prm.onePlnExtView);
@@ -528,13 +535,64 @@ function toggleOnePlanetView() {
 	options.save();
 }
 
+// Show the life form building rows for the race picked in #one-pln-race
+// (between the fusion reactor and the solar satellites), hiding the others.
+function updateLifeformRows() {
+	let race = Number($('#one-pln-race').value) || 0;
+	$$('#one-planet-prod .lf-row').forEach(function (tr) {
+		tr.style.display = 'none';
+	});
+	if (race >= 1 && race <= 4) {
+		$$('#one-planet-prod .lf-row-' + race).forEach(function (tr) {
+			tr.style.display = '';
+		});
+	}
+}
+
+// Read the building levels of the currently selected race from the table into a
+// positional array (index 0 is the race's first building).
+function readOnePlnLfLevels() {
+	let race = Number($('#one-pln-race').value) || 0;
+	let levels = [];
+	if (race >= 1 && race <= 4) {
+		$$('#one-planet-prod .lf-row-' + race + ' input[type=text]').forEach(function (el) {
+			levels.push(getInputNumber(el));
+		});
+	}
+	return levels;
+}
+
+// Fill the given race's building-level inputs from a positional array.
+function writeOnePlnLfLevels(race, levels) {
+	if (race < 1 || race > 4) return;
+	let inputs = $$('#one-planet-prod .lf-row-' + race + ' input[type=text]');
+	inputs.forEach(function (el, idx) {
+		el.value = (levels && levels[idx] != null) ? levels[idx] : 0;
+	});
+}
+
+// Show each life form building's energy draw in its row (brown, like mines).
+function renderOnePlnLfEnergy(race, perBld) {
+	if (race < 1 || race > 4) return;
+	let rows = $$('#one-planet-prod .lf-row-' + race);
+	rows.forEach(function (tr, idx) {
+		let cons = perBld[idx] || 0;
+		tr.children[6].innerHTML = cons > 0
+			? '<span style="color: brown;">' + numToOGame(cons) + '</span>'
+			: '';
+	});
+}
+
 function editRow(plnID) {
 	options.editedPln = plnID;
 	setVal('#planet-name', options.prm.aPNames[plnID]);
 	setVal('#max-planet-temp', options.prm.aPS[plnID][0]);
 	setVal('#planet-pos', options.prm.aPS[plnID][1]);
 	setVal('#energy-boost', options.prm.aPS[plnID][2]);
-	let rows = $$('#one-planet-prod tr');
+	setVal('#one-pln-race', options.prm.aPS[plnID][24] || 0);
+	updateLifeformRows();
+	writeOnePlnLfLevels(options.prm.aPS[plnID][24] || 0, options.prm.aPS[plnID].slice(25, 37));
+	let rows = $$('#one-planet-prod tr:not(.lf-row)');
 	for (let i = 1; i < 8; i++) {
 		rows[i + 1].children[2].children[0].value = options.prm.aPS[plnID][i * 3];
 		if (i < 7)
@@ -564,10 +622,13 @@ function deleteRow(plnID) {
 function savePlnData() {
 	options.prm.aPNames[options.editedPln] = stripHTMLTags($('#planet-name').value);
 	let target = options.prm.aPS[options.editedPln];
-	let rows = $$('#one-planet-prod tr');
+	let rows = $$('#one-planet-prod tr:not(.lf-row)');
 	target[0] = Number($('#max-planet-temp').value);
 	target[1] = Number($('#planet-pos').value);
 	target[2] = Number($('#energy-boost').value);
+	target[24] = Number($('#one-pln-race').value);
+	let savedLfLevels = readOnePlnLfLevels();
+	for (let k = 0; k < 12; k++) target[25 + k] = savedLfLevels[k] || 0;
 	for (let i = 1; i < 8; i++) {
 		target[i * 3] = getInputNumber(rows[i + 1].children[2].children[0]);
 		target[i * 3 + 1] = Number(rows[i + 1].children[7].children[0].value);
@@ -588,9 +649,13 @@ function clonePlnData() {
 	if (confirm(options.cloneConfMsg) === false) {
 		return;
 	}
-	let rows = $$('#one-planet-prod tr');
+	let rows = $$('#one-planet-prod tr:not(.lf-row)');
+	let lfLevels = readOnePlnLfLevels();
+	let cloneRace = Number($('#one-pln-race').value);
 	for (let pln = 0; pln < options.prm.currPlanetsCount; pln++) {
 		let p = options.prm.aPS[pln];
+		p[24] = cloneRace;
+		for (let k = 0; k < 12; k++) p[25 + k] = lfLevels[k] || 0;
 		for (let i = 1; i < 8; i++) {
 			p[i * 3] = getInputNumber(rows[i + 1].children[2].children[0]);
 			p[i * 3 + 1] = Number(rows[i + 1].children[7].children[0].value);
@@ -787,6 +852,11 @@ function initializeProductionCalculator() {
 		// Plasma technology cost reduction is capped at 99%
 		document.getElementById('lf-plasma-cost-reduction')._constrains = { 'min': 0, 'max': 99, 'def': 0, 'allowFloat': true, 'allowNegative': false };
 
+		// Life form building levels: non-negative integers
+		$$('#one-planet-prod .lf-row input[type=text]').forEach(function (el) {
+			el._constrains = { 'min': 0, 'def': 0, 'allowFloat': false, 'allowNegative': false };
+		});
+
 		// General settings panel
 		$$('#general-settings-panel input[type=text]').forEach(function (el) {
 			bindNumericInput(el, updateParams);
@@ -822,6 +892,9 @@ function initializeProductionCalculator() {
 		addEvent('#clone-planet-data', 'click', clonePlnData);
 		addEvent('#include-SS-y', 'click', updateOnePlnTab);
 		addEvent('#include-SS-n', 'click', updateOnePlnTab);
+		addEvent('#one-pln-race', 'change', updateLifeformRows);
+		// Reflect the race restored from storage on the initial render
+		updateLifeformRows();
 
 		// All-planets tab: the table inputs are (re)bound in prepAllPlanetsTable;
 		// row edit/delete clicks are delegated so they survive table rebuilds
@@ -836,7 +909,7 @@ function initializeProductionCalculator() {
 		setupPlanetsSpin();
 
 		// Производство синтезатора (стр. 4) и спутников (стр. 7) зависит от температуры - напомним о ней
-		let rows = $$('#one-planet-prod tr');
+		let rows = $$('#one-planet-prod tr:not(.lf-row)');
 		addEvent(rows[4].children[2].children[0], 'keyup', blinkMaxTemp);
 		addEvent(rows[7].children[2].children[0], 'keyup', blinkMaxTemp);
 		addEvent('#max-planet-temp', 'keyup', function () { options.prm.maxTempEntered = true; });

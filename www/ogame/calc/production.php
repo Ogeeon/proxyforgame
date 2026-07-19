@@ -7,6 +7,26 @@ $currUrl = '/ogame/calc/production.php';
 require_once('../../Intl.php');
 $l = Intl::getTranslations($lang, 'production');
 
+// Life form building names live in the 'lfcosts' section; pull them so the
+// one-planet table can label each race's building rows.
+$lfTr = Intl::getTranslations($lang, 'lfcosts');
+
+// Life form tech data, shared with the Costs (LF) calculator. From it we build:
+//  - $lfBuildingKeys: building translation keys per race, in in-game order;
+//  - $lfBuildingEnergy: id => [base energy, growth coefficient] for the
+//    energy-consumption formula floor(base * level * coeff^level).
+// A building's id is race*1000 + position (e.g. Humans' first building is 1001).
+require_once(__DIR__.'/lf-techdata.inc.php');
+$lfBuildingKeys = array(1 => array(), 2 => array(), 3 => array(), 4 => array());
+$lfBuildingEnergy = array();
+foreach ($lfTechData as $lfId => $lfRow) {
+	if ($lfRow[1] !== 1) continue; // buildings only (type 1), skip researches
+	$lfRace = intdiv($lfId, 1000);
+	if ($lfRace < 1 || $lfRace > 4) continue;
+	$lfBuildingKeys[$lfRace][] = $lfRow[0];
+	$lfBuildingEnergy[$lfId] = array($lfRow[5], $lfRow[10]);
+}
+
 // id => (ключ_$l, тип, мет, крис, дейт, коэфф.удорожания}
 $techData = array(
 	1 => array('metal-mine', 2, 60, 15, 0, 1.5),

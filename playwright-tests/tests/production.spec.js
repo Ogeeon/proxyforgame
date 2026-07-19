@@ -500,3 +500,72 @@ test.describe('Life Forms plasma technology cost reduction', () => {
         await expect(lfReduction(page)).toHaveValue('37.5');
     });
 });
+
+test.describe('Life Forms building energy consumption', () => {
+    // Building rows for a race appear between the fusion reactor and the solar
+    // satellites; energy consumption = floor(base * level * coeff^level).
+    const lfRow = (page, race, idx) => page.locator(`#one-planet-prod tr.lf-row-${race}`).nth(idx);
+
+    test('shows each building energy draw using floor(base*level*coeff^level)', async ({ page }) => {
+        await page.locator('#one-pln-race').selectOption('1');
+
+        // Biosphere Farm is the 2nd Human building (base 8, coeff 1.02).
+        // Level 10 -> floor(8 * 10 * 1.02^10) = 97.
+        const biosphere = lfRow(page, 1, 1);
+        await biosphere.locator('input').fill('10');
+        await biosphere.locator('input').press('Tab');
+        await expect(biosphere.locator('td').nth(6)).toHaveText('97');
+
+        // Neuro-Calibration Centre is the 5th building (base 30, coeff 1.25).
+        // Level 6 -> floor(30 * 6 * 1.25^6) = 686.
+        const neuro = lfRow(page, 1, 4);
+        await neuro.locator('input').fill('6');
+        await neuro.locator('input').press('Tab');
+        await expect(neuro.locator('td').nth(6)).toHaveText('686');
+    });
+
+    test('drains the planet energy pool and lowers the production coefficient', async ({ page }) => {
+        await page.locator('#one-pln-race').selectOption('1');
+        const coeff = page.locator('#prod-coeff');
+        const before = (await coeff.textContent())?.trim() ?? '';
+
+        // A heavy building level consumes enough energy to starve the mines.
+        const neuro = lfRow(page, 1, 4);
+        await neuro.locator('input').fill('30');
+        await neuro.locator('input').press('Tab');
+
+        await expect(coeff).not.toHaveText(before);
+    });
+
+    test('building levels validate as non-negative integers', async ({ page }) => {
+        await page.locator('#one-pln-race').selectOption('1');
+        const input = lfRow(page, 1, 0).locator('input');
+
+        await input.fill('-5');
+        await input.press('Tab');
+        await expect(input).toHaveValue('5'); // negative sign stripped
+
+        await input.fill('abc');
+        await input.press('Tab');
+        await expect(input).toHaveValue('0'); // non-numeric falls back to default
+    });
+
+    test('per-planet levels persist and restore on reload', async ({ page }) => {
+        // Edit planet 1 on the All planets tab, give it a race and a building level.
+        await page.locator('#tabtag2').click();
+        await page.locator('#all-planets-prod .control-edit').first().click();
+
+        await page.locator('#one-pln-race').selectOption('2');
+        const runeTech = lfRow(page, 2, 2); // Rock'tal Rune Technologium
+        await runeTech.locator('input').fill('15');
+        await runeTech.locator('input').press('Tab');
+        await page.locator('#save-planet-data').click();
+
+        await page.reload();
+
+        await page.locator('#tabtag2').click();
+        await page.locator('#all-planets-prod .control-edit').first().click();
+        await expect(page.locator('#one-pln-race')).toHaveValue('2');
+        await expect(lfRow(page, 2, 2).locator('input')).toHaveValue('15');
+    });
+});

@@ -13,6 +13,9 @@ function populateParams() {
 	setVal('#plasma-tech-level', options.prm.plasmaTechLevel);
 	setVal('#max-planet-temp', options.prm.maxPlanetTemp);
 	setChecked('#one-pln-extended-view', options.prm.onePlnExtView);
+	setVal('#one-pln-race', options.prm.onePlnRace);
+	if (typeof updateLifeformRows === 'function') updateLifeformRows();
+	if (typeof writeOnePlnLfLevels === 'function') writeOnePlnLfLevels(options.prm.onePlnRace, options.prm.onePlnLfLevels);
 	setVal('#planet-pos', options.prm.planetPos);
 	setChecked('#engineer', options.prm.engineer);
 	setChecked('#geologist', options.prm.geologist);
@@ -36,7 +39,7 @@ function populateParams() {
 }
 
 function setOnePlanetProdData() {
-	let rows = $$('#one-planet-prod tr');
+	let rows = $$('#one-planet-prod tr:not(.lf-row)');
 	for (let i = 0; i < options.prm.oPPP.length; i++) {
 		rows[i + 2].children[2].children[0].value = options.prm.oPPP[i][0];
 		if (i < 6)

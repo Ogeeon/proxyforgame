@@ -28,6 +28,8 @@ function convertAllPlanetParams() {
 			prm[j * 3 + 1] = 100; // коэффициент производства
 			prm[j * 3 + 2] = 0; // бустер
 		}
+		prm[24] = 0; // форма жизни (раса)
+		for (let k = 0; k < 12; k++) prm[25 + k] = 0; // уровни зданий форм жизни (12 слотов, позиционно для расы)
 		options.prm.aPS[i] = prm;
 	}
 	options.prm.aPNames = names;
@@ -46,6 +48,8 @@ function createEmptyPlanet() {
 		prm[j * 3 + 1] = 100; // коэффициент производства
 		prm[j * 3 + 2] = 0; // бустер
 	}
+	prm[24] = 0; // форма жизни (раса)
+	for (let k = 0; k < 12; k++) prm[25 + k] = 0; // уровни зданий форм жизни (12 слотов, позиционно для расы)
 	return prm;
 }
 
@@ -90,7 +94,32 @@ function getSSCost(techID, currLvl, plnData) {
 	return getBuildCost_C(212, 0, satsCount, techData);
 }
 
-function calculateProduction(prodParams, plnData, normalized = false) {
+// Energy consumed by a single life form building at a given level.
+// Mirrors OGame's mine-style formula: floor(base * level * coeff^level),
+// where base and coeff come from options.lfEnergy (see lf-techdata.inc.php).
+function lfBuildingEnergy(bldId, level) {
+	level = Number(level) || 0;
+	if (level < 1) return 0;
+	let data = options.lfEnergy ? options.lfEnergy[bldId] : undefined;
+	if (data === undefined) return 0;
+	return Math.floor(data[0] * level * Math.pow(data[1], level));
+}
+
+// Total energy consumed by a race's buildings for a positional array of levels.
+// Returns { total, perBld } where perBld[i] is the consumption of building i.
+function lfEnergyConsumption(race, levels) {
+	let result = { total: 0, perBld: [] };
+	if (!levels || race < 1 || race > 4) return result;
+	for (let pos = 0; pos < levels.length; pos++) {
+		let bldId = race * 1000 + (pos + 1);
+		let e = lfBuildingEnergy(bldId, levels[pos]);
+		result.perBld.push(e);
+		result.total += e;
+	}
+	return result;
+}
+
+function calculateProduction(prodParams, plnData, normalized = false, lfEnergyUsed = 0) {
 	let results = [];
 	let production = [0, 0, 0];
 	// 0-нат.пр-во, 1-шахта мет., 2-шахта крис., 3-синт.дейт., 4-сол.эл/ст,
@@ -168,6 +197,9 @@ function calculateProduction(prodParams, plnData, normalized = false) {
 	let crawlersEenergyCons = Math.round((prodParams[6][0] * (cralwersPwrPcnt + crawlersOlPcnt * 2)) * 50);
 	results[7][3] = -crawlersEenergyCons;
 	totalEnergyUsed += crawlersEenergyCons;
+
+	// Life form buildings draw energy from the same pool as mines and crawlers.
+	totalEnergyUsed += lfEnergyUsed;
 
 	var koeff = 1.0;
 	if (totalEnergyUsed > 0)
