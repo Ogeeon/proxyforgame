@@ -159,12 +159,14 @@
   padding: 0.5rem;
 }
 
-/* The mines-amortization accordion holds long explanatory prose (incl-explain,
-   amort-comment) whose full unwrapped width would inflate #production's
-   max-content sizing, over-widening the whole calculator once expanded. width:0
-   drops the body's contribution to that calculation; min-width:100% stretches
-   it back to the resolved, table-driven width so the prose simply wraps. */
-#one-pln-acc-amort .accordion-body {
+/* The amortization accordions hold long explanatory prose (incl-explain,
+   amort-comment, priority-upgrades-comment) whose full unwrapped width would
+   inflate #production's max-content sizing, over-widening the whole calculator
+   once expanded. width:0 drops the body's contribution to that calculation;
+   min-width:100% stretches it back to the resolved, table-driven width so the
+   prose simply wraps. */
+#one-pln-acc-amort .accordion-body,
+#all-pln-acc-priority .accordion-body {
   width: 0;
   min-width: 100%;
   box-sizing: border-box;
@@ -175,7 +177,11 @@
    table-driven width, triggering a horizontal scrollbar. Let this one column
    wrap so the table always fits; it only breaks when space is actually tight. */
 #mines-amort-tbl th:nth-child(2),
-#mines-amort-tbl td:nth-child(2) {
+#mines-amort-tbl td:nth-child(2),
+#mines-priority-tbl th:nth-child(5),
+#mines-priority-tbl td:nth-child(5),
+#mines-priority-tbl th:nth-child(6),
+#mines-priority-tbl td:nth-child(6) {
   white-space: normal;
 }
 

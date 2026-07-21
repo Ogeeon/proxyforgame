@@ -440,6 +440,80 @@ function updateAllPlnTab() {
 	}
 	if (normIncrease > 0)
 		rows[3].children[1].innerHTML = timespanToShortenedString(Math.ceil(amortTime * 3600), options.datetimeW, options.datetimeD, options.datetimeH, options.datetimeM, options.datetimeS, true);
+
+	updateMinesPriority();
+}
+
+// How many upgrades the priority table lists
+const PRIORITY_UPGRADES_COUNT = 10;
+
+/**
+ * Format a [metal, crystal, deuterium] triple, dropping the zero components.
+ */
+function resourcesToString(res) {
+	let names = [options.metal, options.crystal, options.deuterium];
+	let parts = [];
+	for (let i = 0; i < 3; i++) {
+		if (Math.round(res[i]) === 0)
+			continue;
+		parts.push(numberToShortenedString(res[i], options.unitSuffix) + ' ' + names[i]);
+	}
+	return parts.length > 0 ? parts.join(', ') : '0';
+}
+
+/**
+ * Rank one-level mine upgrades over every planet by their payback time and
+ * list the fastest ones. Costs and production gains are brought to a common
+ * scale with the exchange rates. Like the one-planet amortization table, the
+ * production is computed as normalized (mines have enough energy and run at
+ * 100% load), and the extra solar satellites are not priced in.
+ */
+function updateMinesPriority() {
+	let body = $('#mines-priority-body');
+	if (!body)
+		return;
+	let rates = collectExchangeRates();
+	let resMult = [1, rates[0] / rates[1], rates[0] / rates[2]];
+	let candidates = [];
+	for (let i = 0; i < options.prm.currPlanetsCount; i++) {
+		let planet = buildPlanetProdParams(i);
+		let currProd = calculateProduction(planet.prodParams, planet.plnData, true, planet.lfEff)[1];
+		for (let m = 0; m < 3; m++) {
+			let level = Number(planet.prodParams[m][0]) || 0;
+			let costs = getBuildCost_C(m + 1, level, level + 1, options.bldCosts, 0);
+			let upgraded = planet.prodParams.map(function (arr) { return arr.slice(); });
+			upgraded[m][0] = level + 1;
+			let newProd = calculateProduction(upgraded, planet.plnData, true, planet.lfEff)[1];
+			let delta = [newProd[0] - currProd[0], newProd[1] - currProd[1], newProd[2] - currProd[2]];
+			let normIncrease = delta[0] + resMult[1] * delta[1] + resMult[2] * delta[2];
+			if (normIncrease <= 0)
+				continue;
+			let normCost = costs[0] + resMult[1] * costs[1] + resMult[2] * costs[2];
+			candidates.push({
+				pln: i, mine: m, level: level, costs: costs, delta: delta,
+				time: normCost / normIncrease
+			});
+		}
+	}
+	candidates.sort(function (a, b) { return a.time - b.time; });
+
+	let html = '';
+	let shown = Math.min(candidates.length, PRIORITY_UPGRADES_COUNT);
+	for (let n = 0; n < shown; n++) {
+		let c = candidates[n];
+		html += '<tr class="' + ((n % 2) === 0 ? 'odd' : 'even') + '">';
+		html += '<td class="centered">' + (n + 1) + '</td>';
+		html += '<td>' + options.prm.aPNames[c.pln] + '</td>';
+		html += '<td>' + options.mineNames[c.mine] + '</td>';
+		html += '<td class="centered">' + c.level + '&nbsp;&rarr;&nbsp;' + (c.level + 1) + '</td>';
+		html += '<td class="centered">' + resourcesToString(c.costs) + '</td>';
+		html += '<td class="centered">' + resourcesToString(c.delta) + '</td>';
+		html += '<td class="centered">' + timespanToShortenedString(Math.ceil(c.time * 3600), options.datetimeW, options.datetimeD, options.datetimeH, options.datetimeM, options.datetimeS, true) + '</td>';
+		html += '</tr>';
+	}
+	if (shown === 0)
+		html = '<tr class="odd"><td colspan="7" class="centered">' + options.noUpgradesMsg + '</td></tr>';
+	body.innerHTML = html;
 }
 
 function changePlanetsCount(newVal, oldVal) {

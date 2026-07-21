@@ -230,6 +230,8 @@
     options.deletePlanetTitle = "<?= $l['delete-planet-tooltip'] ?>";
     options.movePlanetUpTitle = "<?= $l['move-planet-up-tooltip'] ?>";
     options.movePlanetDownTitle = "<?= $l['move-planet-down-tooltip'] ?>";
+    options.mineNames = ["<?= $l['metal-mine'] ?>", "<?= $l['crystal-mine'] ?>", "<?= $l['deut-synth'] ?>"];
+    options.noUpgradesMsg = "<?= $l['no-upgrades'] ?>";
     options.crawlerName = "<?= $l['crawler'] ?>";
     options.crawlerLimitHint = "<?= $l['crawler-limit-hint'] ?>";
 
@@ -828,6 +830,32 @@
           <tr><td colspan="16" class="table-line-3px"></td></tr>
         </table>
         <div class="accordion mt-1" id="all-planets-accordion">
+          <div class="accordion-item">
+            <h2 class="accordion-header">
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#all-pln-acc-priority"><?= $l['priority-upgrades'] ?></button>
+            </h2>
+            <div id="all-pln-acc-priority" class="accordion-collapse collapse" data-bs-parent="#all-planets-accordion">
+              <div class="accordion-body">
+                <div class="table-responsive">
+                  <table id="mines-priority-tbl" class="lined" cellpadding="0" cellspacing="1" border="0" width="100%">
+                    <thead>
+                      <tr>
+                        <th>#</th>
+                        <th><?= $l['planet'] ?></th>
+                        <th><?= $l['mine'] ?></th>
+                        <th><?= $l['level'] ?></th>
+                        <th><?= $l['upgrade-cost'] ?></th>
+                        <th><?= $l['production-increase'] ?></th>
+                        <th><?= $l['amortization-time'] ?></th>
+                      </tr>
+                    </thead>
+                    <tbody id="mines-priority-body"></tbody>
+                  </table>
+                </div>
+                <div class="mt-2"><?= $l['priority-upgrades-comment'] ?></div>
+              </div>
+            </div>
+          </div>
           <div class="accordion-item">
             <h2 class="accordion-header">
               <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#all-pln-acc-amort"><?= $l['plasma-amortization'] ?></button>
