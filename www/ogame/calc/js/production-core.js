@@ -38,6 +38,26 @@ function convertAllPlanetParams() {
 	options.prm.aPB = [[]];
 }
 
+/**
+ * Migrate exchange rates saved in the legacy trade-ratio format (metal:crystal:
+ * deuterium, e.g. 3:2:1) to the MSU-weight format shared with the cost
+ * calculators (metal:crystal:deuterium, e.g. 1:1.5:3). The two describe the
+ * same economy, so the stored ratio is preserved, only rewritten.
+ */
+function convertExchangeRates() {
+	if (options.prm.ratesFmt >= 2)
+		return;
+	let old = options.prm.rates;
+	// Ratios like 4:3 do not divide evenly, so round to two decimals: the error is
+	// far below the precision anyone picks a trade ratio with, and it keeps the
+	// migrated value readable in the input.
+	if (Array.isArray(old) && old.length === 3 && old[0] > 0 && old[1] > 0 && old[2] > 0)
+		options.prm.rates = [1, Math.round(old[0] / old[1] * 100) / 100, Math.round(old[0] / old[2] * 100) / 100];
+	else
+		options.prm.rates = [1, 1.5, 3];
+	options.prm.ratesFmt = 2;
+}
+
 function createEmptyPlanet() {
 	let prm = [];
 	// 0 - температура, 1-6 - шахты, электростанции и лампочки, 7 - гусеничники, 8 - позиция

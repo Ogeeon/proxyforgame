@@ -56,17 +56,25 @@ function collectOnePlanetParams(rows) {
 }
 
 /**
- * Read the exchange rates inputs, substituting the defaults for zeroes.
+ * Read the exchange rates inputs, substituting the defaults for zeroes. Like in
+ * the cost calculators, the rates are MSU weights normalized to metal: 1:1.5:3
+ * means one crystal is worth 1.5 metal and one deuterium is worth 3 metal.
  */
 function collectExchangeRates() {
 	let rates = [];
-	rates[0] = getInputNumber($('#exchange-rates-m'));
-	if (rates[0] === 0) rates[0] = 3;
-	rates[1] = getInputNumber($('#exchange-rates-c'));
-	if (rates[1] === 0) rates[1] = 2;
-	rates[2] = getInputNumber($('#exchange-rates-d'));
-	if (rates[2] === 0) rates[2] = 1;
+	rates[0] = getInputNumber($('#exchange-rates-m')) || 1;
+	rates[1] = getInputNumber($('#exchange-rates-c')) || 1.5;
+	rates[2] = getInputNumber($('#exchange-rates-d')) || 3;
 	return rates;
+}
+
+/**
+ * Per-resource MSU multipliers [metal, crystal, deuterium] derived from the
+ * exchange rates, so that metal always costs 1.
+ */
+function collectResourceMultipliers() {
+	let rates = collectExchangeRates();
+	return [1, rates[1] / rates[0], rates[2] / rates[0]];
 }
 
 /**

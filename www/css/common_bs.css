@@ -167,6 +167,20 @@ button {
   padding: 10px;
 }
 
+/* Exchange rate inputs (costs / lfcosts / production). They hold MSU weights,
+   so fractional values like 1,5 or 1,33 are the norm rather than the exception.
+   The text is centered, so the roomy form-control-sm side padding buys nothing
+   but clipping — trading it for content width fits the values without making
+   the fields any wider. */
+#exchange-rates-m,
+#exchange-rates-c,
+#exchange-rates-d {
+  width: 48px;
+  padding-left: 2px;
+  padding-right: 2px;
+  text-align: center;
+}
+
 .input-1column {
   width: 20px;
   text-align: center;

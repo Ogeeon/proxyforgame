@@ -302,6 +302,7 @@ function updateOnePlnTab() {
 	let increase;
 	let rates = collectExchangeRates();
 	options.prm.rates = rates;
+	let msuMult = collectResourceMultipliers();
 	let totalCost;
 	let amortTime;
 	let satsCost = [];
@@ -316,18 +317,13 @@ function updateOnePlnTab() {
 			rows[i].children[1].innerHTML = numberToShortenedString(costs[0], options.unitSuffix) + ' ' + options.metal + ', ' +
 				numberToShortenedString(costs[1], options.unitSuffix) + ' ' + options.crystal + ', ' +
 				numberToShortenedString(costs[2], options.unitSuffix) + ' ' + options.deuterium;
-			totalCost = costs[0] + (rates[0] / rates[1]) * costs[1] + (rates[0] / rates[2]) * costs[2];
+			totalCost = costs[0] + msuMult[1] * costs[1] + msuMult[2] * costs[2];
 		} else {
 			rows[i].children[1].innerHTML = numberToShortenedString(costs[0], options.unitSuffix) + ' ' + options.metal + ', ' +
 				numberToShortenedString(costs[1], options.unitSuffix) + ' ' + options.crystal;
-			totalCost = costs[0] + (rates[0] / rates[1]) * costs[1];
+			totalCost = costs[0] + msuMult[1] * costs[1];
 		}
-		switch (i) {
-			case 1: resMult = 1; break;
-			case 2: resMult = rates[0] / rates[1]; break;
-			case 3: resMult = rates[0] / rates[2]; break;
-			default: resMult = 1;
-		}
+		resMult = msuMult[i - 1] || 1;
 		increase = newProd[1][i - 1] - currProd[1][i - 1];
 		rows[i].children[2].innerHTML = numberToShortenedString(increase, options.unitSuffix);
 		amortTime = totalCost / (increase * resMult);
@@ -415,8 +411,8 @@ function updateAllPlnTab() {
 	let plasmaCostFactor = 1 - options.prm.lfPlasmaCostReduction / 100;
 	for (let i = 0; i < 3; i++)
 		costs[i] = Math.round(costs[i] * plasmaCostFactor);
-	let rates = collectExchangeRates();
-	let normCost = costs[0] + (rates[0] / rates[1]) * costs[1] + (rates[0] / rates[2]) * costs[2];
+	let msuMult = collectResourceMultipliers();
+	let normCost = costs[0] + msuMult[1] * costs[1] + msuMult[2] * costs[2];
 	options.prm.plasmaTechLevel += 1;
 	let newProd = [0, 0, 0];
 	for (let i = 0; i < planetsCount; i++) {
@@ -430,7 +426,7 @@ function updateAllPlnTab() {
 	increase[0] = newProd[0] - totalProd[0];
 	increase[1] = newProd[1] - totalProd[1];
 	increase[2] = newProd[2] - totalProd[2];
-	let normIncrease = increase[0] + (rates[0] / rates[1]) * increase[1] + (rates[0] / rates[2]) * increase[2];
+	let normIncrease = increase[0] + msuMult[1] * increase[1] + msuMult[2] * increase[2];
 	let amortTime = normCost / normIncrease;
 	options.prm.plasmaTechLevel -= 1;
 	rows = $$('#plasma-amort-tbl tr');
@@ -472,8 +468,7 @@ function updateMinesPriority() {
 	let body = $('#mines-priority-body');
 	if (!body)
 		return;
-	let rates = collectExchangeRates();
-	let resMult = [1, rates[0] / rates[1], rates[0] / rates[2]];
+	let resMult = collectResourceMultipliers();
 	let candidates = [];
 	for (let i = 0; i < options.prm.currPlanetsCount; i++) {
 		let planet = buildPlanetProdParams(i);
@@ -563,7 +558,8 @@ function resetParams() {
 	options.prm.energyBoost = 0;
 	options.prm.showAddInf = false;
 	options.prm.inclSats = false;
-	options.prm.rates = [3, 2, 1];
+	options.prm.rates = [1, 1.5, 3];
+	options.prm.ratesFmt = 2;
 	options.prm.isTrader = false;
 	options.prm.lfMetProdBonus = 0;
 	options.prm.lfCrysProdBonus = 0;
@@ -953,9 +949,9 @@ function initializeProductionCalculator() {
 		// Input constraints
 		document.getElementById('max-planet-temp')._constrains = { 'min': -134, 'def': 0, 'allowNegative': true };
 		document.getElementById('planet-pos')._constrains = { 'min': 1, 'max': 16, 'def': 8, 'allowNegative': false };
-		document.getElementById('exchange-rates-m')._constrains = { 'min': 1, 'max': 4, 'def': 1, 'allowFloat': true, 'allowNegative': false };
-		document.getElementById('exchange-rates-c')._constrains = { 'min': 1, 'max': 3, 'def': 1, 'allowFloat': true, 'allowNegative': false };
-		document.getElementById('exchange-rates-d')._constrains = { 'min': 1, 'max': 2, 'def': 1, 'allowFloat': true, 'allowNegative': false };
+		document.getElementById('exchange-rates-m')._constrains = { 'min': 0.1, 'max': 100, 'def': 1,   'allowFloat': true, 'allowNegative': false };
+		document.getElementById('exchange-rates-c')._constrains = { 'min': 0.1, 'max': 100, 'def': 1.5, 'allowFloat': true, 'allowNegative': false };
+		document.getElementById('exchange-rates-d')._constrains = { 'min': 0.1, 'max': 100, 'def': 3,   'allowFloat': true, 'allowNegative': false };
 
 		// Life Forms bonuses: non-negative floating-point percentages
 		['lf-metal-prod-bonus', 'lf-crystal-prod-bonus', 'lf-deut-prod-bonus', 'lf-energy-prod-bonus', 'lf-crawler-bonus'].forEach(function (id) {

@@ -89,7 +89,10 @@
         aPNames: [],
         showAddInf: false,
         inclSats: 0,
-        rates: [3, 2, 1],
+        rates: [1, 1.5, 3],
+        // Format of the stored rates: 1 = legacy trade ratio (3:2:1), 2 = MSU
+        // weights normalized to metal (1:1.5:3), as used by the cost calculators
+        ratesFmt: 1,
         isTrader: false,
         lfMetProdBonus: 0,
         lfCrysProdBonus: 0,
@@ -147,7 +150,9 @@
             case 'inclSats':
               return value === 'true';
             case 'rates':
-              return validateNumber(parseFloat(value), 1, 4, 1);
+              return validateNumber(parseFloat(value), 0.1, 100, 1);
+            case 'ratesFmt':
+              return validateNumber(Number.parseInt(value), 1, 2, 1);
             case 'isTrader':
               return value === 'true';
             case 'lfMetProdBonus':
@@ -177,6 +182,7 @@
         } catch (e) {
           resetParams();
         }
+        convertExchangeRates();
 
         populateParams();
         if (options.prm.planetPos === 0)
@@ -396,9 +402,9 @@
             </div>
             <div class="d-flex align-items-center gap-1">
               <label for="exchange-rates-m"><?= $l['exchange-rates'] ?></label>
-              <input id="exchange-rates-m" type="text" name="exchange-rates-m" class="form-control form-control-sm input-1column" value="3"/>:
-              <input id="exchange-rates-c" type="text" name="exchange-rates-c" class="form-control form-control-sm input-1column" value="2"/>:
-              <input id="exchange-rates-d" type="text" name="exchange-rates-d" class="form-control form-control-sm input-1column" value="1"/>
+              <input id="exchange-rates-m" type="text" name="exchange-rates-m" class="form-control form-control-sm level-input" value="1"/>:
+              <input id="exchange-rates-c" type="text" name="exchange-rates-c" class="form-control form-control-sm level-input" value="1.5"/>:
+              <input id="exchange-rates-d" type="text" name="exchange-rates-d" class="form-control form-control-sm level-input" value="3"/>
             </div>
           </div>
         </div>
