@@ -577,7 +577,7 @@ test.describe('Life Forms building production bonuses', () => {
     const named = (page, label) => page.locator('#one-planet-prod tr').filter({ hasText: label });
     const digits = (s) => parseInt((s ?? '').replace(/\D/g, ''), 10) || 0;
 
-    test('High Energy Smelting adds level*1.5% of the metal mine output', async ({ page }) => {
+    test('High Energy Smelting adds level*1.5% of the metal mine output in its own row', async ({ page }) => {
         await page.locator('#one-pln-race').selectOption('1');
 
         // High Energy Smelting is the 6th Human building; level 10 -> +15% metal.
@@ -586,8 +586,35 @@ test.describe('Life Forms building production bonuses', () => {
         await hes.locator('input').press('Tab');
 
         const mineMetal = digits(await named(page, 'Metal Mine').locator('td').nth(3).textContent());
-        const lfMetal = digits(await named(page, 'Lifeform Tech Bonus').locator('td').nth(3).textContent());
-        expect(lfMetal).toBe(Math.round(mineMetal * 0.15));
+        expect(digits(await hes.locator('td').nth(3).textContent())).toBe(Math.round(mineMetal * 0.15));
+        // Building bonuses are no longer folded into the research bonus row.
+        await expect(named(page, 'Lifeform Tech Bonus').locator('td').nth(3)).toHaveText('');
+    });
+
+    test('High-Performance Transformer shows its energy gain net of its own draw', async ({ page }) => {
+        await page.locator('#one-pln-race').selectOption('3');
+        // A solar plant gives the building's +1%/lvl energy bonus something to
+        // work on; without production the row would only show consumption.
+        const solarRow = page.locator('#one-planet-prod tr:not(.lf-row)').nth(5);
+        await solarRow.locator('input').fill('20');
+        await solarRow.locator('input').press('Tab');
+
+        const transformer = lfRow(page, 3007);
+        await transformer.locator('input').fill('10');
+        await transformer.locator('input').press('Tab');
+
+        // Level 10 -> +10% of the base energy output (solar plant, fusion reactor
+        // and satellites), less its own consumption floor(40 * 10 * 1.05^10) = 651.
+        // Here the draw wins, so the net shows brown.
+        const powerRows = page.locator('#one-planet-prod tr:not(.lf-row)');
+        let baseEnergy = 0;
+        for (const row of [5, 6, 7])
+            baseEnergy += digits(await powerRows.nth(row).locator('td').nth(6).textContent());
+        const net = Math.round(baseEnergy * 0.10) - 651;
+        expect(net).toBeLessThan(0);
+        const cell = transformer.locator('td').nth(6);
+        expect(digits(await cell.textContent())).toBe(-net);
+        await expect(cell.locator('span')).toHaveAttribute('style', /brown/);
     });
 
     test('Metropolis technology bonus amplifies the research production bonus', async ({ page }) => {

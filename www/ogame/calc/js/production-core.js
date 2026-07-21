@@ -140,10 +140,12 @@ function lfBuildingEnergy(bldId, level) {
 //   enP         - energy production increase (%)
 //   enR         - energy consumption reduction (%)
 //   tech        - technology bonus (%) that amplifies the research bonuses
+// `perBld` keeps the same numbers per building (index = building position), so
+// that each building can show its own contribution in the one-planet table.
 // raceLevel is the settled life form's level: it raises that race's technology
 // bonus by 1% per level.
 function lfBuildingEffects(race, levels, raceLevel) {
-	let eff = { energyUsed: 0, perBldEnergy: [], met: 0, cry: 0, deu: 0, enP: 0, enR: 0, tech: 0 };
+	let eff = { energyUsed: 0, perBld: [], met: 0, cry: 0, deu: 0, enP: 0, enR: 0, tech: 0 };
 	if (race < 1 || race > 4) return eff;
 	eff.tech += Number(raceLevel) || 0;
 	if (!levels) return eff;
@@ -151,7 +153,9 @@ function lfBuildingEffects(race, levels, raceLevel) {
 		let level = Number(levels[pos]) || 0;
 		let bldId = race * 1000 + (pos + 1);
 		let e = lfBuildingEnergy(bldId, level);
-		eff.perBldEnergy.push(e);
+		// enR and tech act on the whole planet, so they stay out of the per-building
+		// numbers - only what a single building adds on its own is listed here.
+		let bld = { id: bldId, level: level, energyUsed: e, met: 0, cry: 0, deu: 0, enP: 0 };
 		eff.energyUsed += e;
 		let bonus = options.lfBonus ? options.lfBonus[bldId] : undefined;
 		if (bonus && level > 0) {
@@ -160,17 +164,23 @@ function lfBuildingEffects(race, levels, raceLevel) {
 				let pct = base * Math.pow(factor, level - 1) * level;
 				if (max !== null && max !== undefined) pct = Math.min(max * 100, pct);
 				eff[kind] += pct;
+				if (bld[kind] !== undefined) bld[kind] = pct;
 			}
 		}
+		eff.perBld.push(bld);
 	}
 	return eff;
 }
 
 function calculateProduction(prodParams, plnData, normalized = false, lfEff = null) {
-	if (!lfEff) lfEff = { energyUsed: 0, met: 0, cry: 0, deu: 0, enP: 0, enR: 0, tech: 0 };
+	if (!lfEff) lfEff = { energyUsed: 0, perBld: [], met: 0, cry: 0, deu: 0, enP: 0, enR: 0, tech: 0 };
 	// Technology bonus (from Metropolis, Chip Mass Production, HP-Transformer)
 	// amplifies the life form RESEARCH bonuses entered on the parameters panel.
 	let lfTechMult = 1 + (lfEff.tech || 0) / 100;
+	// What each life form building contributes on its own: [met, crys, deut,
+	// energy produced, energy used]. Reported separately from the results rows so
+	// the one-planet table can show it in the building's own row.
+	let lfBld = (lfEff.perBld || []).map(function (bld) { return [0, 0, 0, 0, bld.energyUsed]; });
 	let results = [];
 	let production = [0, 0, 0];
 	// 0-нат.пр-во, 1-шахта мет., 2-шахта крис., 3-синт.дейт., 4-сол.эл/ст,
@@ -216,7 +226,7 @@ function calculateProduction(prodParams, plnData, normalized = false, lfEff = nu
 	var allStaffFactor = fullCrew === true ? 0.02 : 0;
 	var classFactor = options.prm.playerClass === 0 ? 0.1 : 0;
 	let allianceClassFactor = options.prm.isTrader ? 0.05 : 0;
-	let lfEnergyFactor = ((options.prm.lfEnergyProdBonus || 0) * lfTechMult + lfEff.enP) / 100;
+	let lfEnergyFactor = (options.prm.lfEnergyProdBonus || 0) * lfTechMult / 100;
 	results[9][3] = Math.round(energyBalance * boosterFactor);
 	results[11][3] = Math.round(energyBalance * engineerFactor);
 	results[12][3] = Math.round(energyBalance * allStaffFactor);
@@ -225,6 +235,11 @@ function calculateProduction(prodParams, plnData, normalized = false, lfEff = nu
 	// Техн. бонус форм жизни: прирост производства энергии от базовой выработки
 	results[15][3] = Math.round(energyBalance * lfEnergyFactor);
 	totalEnergyProduced += results[9][3] + results[11][3] + results[12][3] + results[13][3] + results[14][3] + results[15][3];
+	// Прирост производства энергии от зданий - в строку самого здания
+	for (let b = 0; b < lfBld.length; b++) {
+		lfBld[b][3] = Math.round(energyBalance * lfEff.perBld[b].enP / 100);
+		totalEnergyProduced += lfBld[b][3];
+	}
 
 	// Мы знаем, сколько всего производится энергии на планете - теперь нужно узнать, сколько её потребляется
 	for (var i = 0; i < 3; i++) {
@@ -287,12 +302,13 @@ function calculateProduction(prodParams, plnData, normalized = false, lfEff = nu
 	results[7][2] = Math.round(results[3][2] * prodParams[6][0] * 0.0002 * crMult * prodParams[6][1] / 100.0);
 	production[2] += results[7][2];
 
-	// Техн. бонус форм жизни: доп. производство ресурсов. Прирост по каждому
+	// Техн. бонус форм жизни: доп. производство ресурсов от ИССЛЕДОВАНИЙ (проценты
+	// с панели параметров, усиленные технологическим бонусом). Прирост по каждому
 	// ресурсу применяется к базовой выработке рудника, а буст гусеничников - к
 	// их производству. При нулевых бонусах строка не даёт вклада.
-	let lfMetFactor = ((options.prm.lfMetProdBonus || 0) * lfTechMult + lfEff.met) / 100;
-	let lfCrysFactor = ((options.prm.lfCrysProdBonus || 0) * lfTechMult + lfEff.cry) / 100;
-	let lfDeutFactor = ((options.prm.lfDeutProdBonus || 0) * lfTechMult + lfEff.deu) / 100;
+	let lfMetFactor = (options.prm.lfMetProdBonus || 0) * lfTechMult / 100;
+	let lfCrysFactor = (options.prm.lfCrysProdBonus || 0) * lfTechMult / 100;
+	let lfDeutFactor = (options.prm.lfDeutProdBonus || 0) * lfTechMult / 100;
 	let lfCrawlerFactor = (options.prm.lfCrawlerBonus || 0) * lfTechMult / 100;
 	results[15][0] = Math.round(results[1][0] * lfMetFactor) + Math.round(results[7][0] * lfCrawlerFactor);
 	results[15][1] = Math.round(results[2][1] * lfCrysFactor) + Math.round(results[7][1] * lfCrawlerFactor);
@@ -301,5 +317,16 @@ function calculateProduction(prodParams, plnData, normalized = false, lfEff = nu
 	production[1] += results[15][1];
 	production[2] += results[15][2];
 
-	return [results, production, totalEnergyProduced, totalEnergyUsed, koeff];
+	// Прирост добычи от зданий форм жизни - в строку каждого здания
+	let mineProd = [results[1][0], results[2][1], results[3][2]];
+	for (let b = 0; b < lfBld.length; b++) {
+		let bld = lfEff.perBld[b];
+		let pcts = [bld.met, bld.cry, bld.deu];
+		for (let res = 0; res < 3; res++) {
+			lfBld[b][res] = Math.round(mineProd[res] * pcts[res] / 100);
+			production[res] += lfBld[b][res];
+		}
+	}
+
+	return [results, production, totalEnergyProduced, totalEnergyUsed, koeff, lfBld];
 }

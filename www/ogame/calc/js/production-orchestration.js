@@ -222,7 +222,6 @@ function updateOnePlnTab() {
 	options.prm.onePlnRaceLevel = getInputNumber($('#one-pln-race-level'));
 	options.prm.onePlnLfLevels = readOnePlnLfLevels();
 	let lfEff = lfBuildingEffects(options.prm.onePlnRace, options.prm.onePlnLfLevels, options.prm.onePlnRaceLevel);
-	renderOnePlnLfEnergy(options.prm.onePlnRace, lfEff.perBldEnergy);
 	let plnData = [options.prm.maxPlanetTemp, options.prm.planetPos, options.prm.energyBoost];
 	let rows = $$('#one-planet-prod tr:not(.lf-row)');
 	// Keep the crawler count (row 8) limit in sync with the mines (rows 2-4);
@@ -242,6 +241,7 @@ function updateOnePlnTab() {
 	let totalEnergyProduced = prodData[2];
 	let totalEnergyUsed = prodData[3];
 	let koeff = prodData[4];
+	renderOnePlnLfRows(options.prm.onePlnRace, prodData[5]);
 
 	let coeffSpan = $('#prod-coeff');
 	coeffSpan.innerHTML = '<b>' + Math.floor(koeff * 100) + '%</b>';
@@ -653,15 +653,25 @@ function writeOnePlnLfLevels(race, levels) {
 	});
 }
 
-// Show each life form building's energy draw in its row (brown, like mines).
-function renderOnePlnLfEnergy(race, perBld) {
+// Table cell for a life form building contribution: blank at zero, brown when
+// the building takes more than it gives - the same convention as the other rows.
+function lfCellValue(val) {
+	if (!val) return '';
+	return val > 0
+		? numToOGame(val)
+		: '<span style="color: brown;">' + numToOGame(-val) + '</span>';
+}
+
+// Show what each life form building contributes in its own row: extra metal,
+// crystal and deuterium, and its net effect on the planet energy pool.
+function renderOnePlnLfRows(race, lfBld) {
 	if (race < 1 || race > 4) return;
 	let rows = $$('#one-planet-prod .lf-row-' + race);
 	rows.forEach(function (tr) {
-		let cons = perBld[lfRowIndex(tr.querySelector('input[type=text]'))] || 0;
-		tr.children[6].innerHTML = cons > 0
-			? '<span style="color: brown;">' + numToOGame(cons) + '</span>'
-			: '';
+		let bld = lfBld[lfRowIndex(tr.querySelector('input[type=text]'))] || [0, 0, 0, 0, 0];
+		for (let res = 0; res < 3; res++)
+			tr.children[res + 3].innerHTML = lfCellValue(bld[res]);
+		tr.children[6].innerHTML = lfCellValue(bld[3] - bld[4]);
 	});
 }
 
