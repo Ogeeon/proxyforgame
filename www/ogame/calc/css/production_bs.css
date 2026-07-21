@@ -127,12 +127,12 @@
 .visible-span { visibility: visible; }
 .hidden-span { visibility: hidden; }
 
-/* Row edit/delete buttons in the all-planets table */
+/* Row move/edit/delete buttons in the all-planets table */
 .control-btn {
   padding: 0.1rem 0.35rem;
 }
 
-.control-buttons { width: 60px; }
+.control-buttons { width: 120px; }
 
 /* Universe save/load buttons */
 .uni-control-btn {

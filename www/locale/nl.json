@@ -627,6 +627,8 @@
     "save-planet-data": "Gegevens opslaan",
     "edit-planet-tooltip": "Bewerken via het eerste tabblad",
     "delete-planet-tooltip": "Verwijderen",
+    "move-planet-up-tooltip": "Omhoog verplaatsen",
+    "move-planet-down-tooltip": "Omlaag verplaatsen",
     "del-planet-confirm": "Je hebt gegevens voor deze planeet ingevoerd. Weet je zeker dat je deze wilt verwijderen?",
     "clone-planet-data": "De gegevens klonen",
     "clone-confirm": "Alle gegevens die zijn ingevoerd op deze pagina, behalve de naam van de planeet,__BR__zijn positie en temperatuur, zullen worden toegepast op alle beschikbare planeten.__BR__Voortzetten van het klonen?",

@@ -629,6 +629,8 @@
     "save-planet-data": "Spremi podatke",
     "edit-planet-tooltip": "Uredi pomoću prve kartice",
     "delete-planet-tooltip": "Obriši",
+    "move-planet-up-tooltip": "Pomjeri gore",
+    "move-planet-down-tooltip": "Pomjeri dolje",
     "del-planet-confirm": "Već ste unijeli podatke za ovu planetu. Jeste li sigurni da ga želite izbrisati?",
     "clone-planet-data": "Kloniraj podatke",
     "clone-confirm": "Svi podaci uneseni na ovoj stranici, osim imena planete, njenog položaja i temperature,__BR__bit će primijenjeni na sve dostupne planete.__BR__Nastaviti sa kloniranjem?",

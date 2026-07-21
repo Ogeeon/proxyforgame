@@ -228,6 +228,8 @@
     options.energyShort = "<?= $l['energy-short'] ?>";
     options.editPlanetTitle = "<?= $l['edit-planet-tooltip'] ?>";
     options.deletePlanetTitle = "<?= $l['delete-planet-tooltip'] ?>";
+    options.movePlanetUpTitle = "<?= $l['move-planet-up-tooltip'] ?>";
+    options.movePlanetDownTitle = "<?= $l['move-planet-down-tooltip'] ?>";
     options.crawlerName = "<?= $l['crawler'] ?>";
     options.crawlerLimitHint = "<?= $l['crawler-limit-hint'] ?>";
 

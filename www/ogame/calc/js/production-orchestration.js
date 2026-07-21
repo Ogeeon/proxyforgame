@@ -612,6 +612,32 @@ function editRow(plnID) {
 	updateOnePlnTab();
 }
 
+/**
+ * Swap a planet with its neighbour, keeping the table order in sync with aPS.
+ * @param {number} plnID - index of the planet to move
+ * @param {number} delta - -1 to move up, +1 to move down
+ */
+function movePlanet(plnID, delta) {
+	let target = plnID + delta;
+	if (target < 0 || target >= options.prm.currPlanetsCount)
+		return;
+	// Pick up any direct edits made in the table before reordering the arrays
+	collectAllPlanetsInputs($$('#all-planets-prod tr'));
+	let tmpName = options.prm.aPNames[plnID];
+	options.prm.aPNames[plnID] = options.prm.aPNames[target];
+	options.prm.aPNames[target] = tmpName;
+	let tmpPln = options.prm.aPS[plnID];
+	options.prm.aPS[plnID] = options.prm.aPS[target];
+	options.prm.aPS[target] = tmpPln;
+	// Keep the pending "edit planet" reference pointing at the same planet
+	if (options.editedPln === plnID)
+		options.editedPln = target;
+	else if (options.editedPln === target)
+		options.editedPln = plnID;
+	prepAllPlanetsTable();
+	updateAllPlnTab();
+}
+
 function deleteRow(plnID) {
 	if (!isPlnEmpty(plnID) && confirm(options.plnDelConfMsg) === false) {
 		return;
@@ -803,6 +829,10 @@ function _onPlanetsTableClick(event) {
 		editRow(plnID);
 	} else if (btn.classList.contains('control-delete')) {
 		deleteRow(plnID);
+	} else if (btn.classList.contains('control-move-up')) {
+		movePlanet(plnID, -1);
+	} else if (btn.classList.contains('control-move-down')) {
+		movePlanet(plnID, 1);
 	}
 }
 

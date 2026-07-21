@@ -635,6 +635,8 @@
     "save-planet-data": "Enregistrer les données",
     "edit-planet-tooltip": "Modifier via le premier onglet",
     "delete-planet-tooltip": "Supprimer",
+    "move-planet-up-tooltip": "Déplacer vers le haut",
+    "move-planet-down-tooltip": "Déplacer vers le bas",
     "del-planet-confirm": "Vous avez entré des données pour cette planète. Êtes-vous sûr de vouloir les supprimer?",
     "clone-planet-data": "Cloner les données",
     "clone-confirm": "Toutes les données saisies sur cette page, à l'exception du nom de la planète,__BR__de sa position et de sa température, seront appliquées à toutes les planètes disponibles.__BR__Poursuivre le clonage?",

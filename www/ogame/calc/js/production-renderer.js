@@ -90,6 +90,8 @@ function prepAllPlanetsTable() {
 		}
 		tr += '<td class="centered">0</td>'; // коэффициент - тоже заготовка
 		tr += '<td><div id="control-' + i + '" class="btn-group">';
+		tr += '<button id="control-' + i + '-u" type="button" class="btn btn-outline-secondary btn-sm control-btn control-move-up" data-pln="' + i + '" data-bs-toggle="tooltip" title="' + options.movePlanetUpTitle + '"' + (i === 0 ? ' disabled' : '') + '><i class="bi bi-arrow-up"></i></button>';
+		tr += '<button id="control-' + i + '-w" type="button" class="btn btn-outline-secondary btn-sm control-btn control-move-down" data-pln="' + i + '" data-bs-toggle="tooltip" title="' + options.movePlanetDownTitle + '"' + (i === options.prm.currPlanetsCount - 1 ? ' disabled' : '') + '><i class="bi bi-arrow-down"></i></button>';
 		tr += '<button id="control-' + i + '-e" type="button" class="btn btn-outline-secondary btn-sm control-btn control-edit" data-pln="' + i + '" data-bs-toggle="tooltip" title="' + options.editPlanetTitle + '"><i class="bi bi-pencil"></i></button>';
 		tr += '<button id="control-' + i + '-d" type="button" class="btn btn-outline-secondary btn-sm control-btn control-delete" data-pln="' + i + '" data-bs-toggle="tooltip" title="' + options.deletePlanetTitle + '"><i class="bi bi-x-lg"></i></button>';
 		tr += '</div></td>';

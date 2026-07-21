@@ -625,6 +625,8 @@
     "save-planet-data": "Save data",
     "edit-planet-tooltip": "Edit using the first tab",
     "delete-planet-tooltip": "Delete",
+    "move-planet-up-tooltip": "Move up",
+    "move-planet-down-tooltip": "Move down",
     "del-planet-confirm": "You entered data for this planet. Are you sure you want to delete it?",
     "clone-planet-data": "Clone data",
     "clone-confirm": "All data entered on this page, except the name of the planet, its position and temperature,__BR__will be applied to all available planets.__BR__Proceed with the cloning?",
