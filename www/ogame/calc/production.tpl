@@ -597,11 +597,11 @@
             <?php if ($i == 5): // life form building rows, shown only for the selected race ?>
               <?php foreach ($lfBuildingKeys as $lfRace => $lfKeys): ?>
                 <?php foreach ($lfKeys as $lfPos => $lfKey): ?>
-                  <tr class="lf-row lf-row-<?= $lfRace ?> <?= ($lfPos % 2) === 1 ? 'odd' : 'even' ?>" style="display: none;">
+                  <tr class="lf-row lf-row-<?= $lfRace ?> <?= ($lfPos % 2) === 0 ? 'odd' : 'even' ?>" style="display: none;">
                     <td align="left"><?= $lfTr[$lfKey] ?></td>
                     <td align="center" style="display: none;"></td>
                     <td align="center">
-                      <input type="text" class="form-control form-control-sm input-3columns lf-level-input" data-lf-id="<?= $lfRace * 1000 + ($lfPos + 1) ?>" value="0" />
+                      <input type="text" class="form-control form-control-sm input-3columns lf-level-input" data-lf-id="<?= $lfRace * 1000 + $lfPos ?>" value="0" />
                     </td>
                     <td align="center"></td><td align="center"></td><td align="center"></td><td align="center"></td>
                     <td align="center" style="display: none;"></td>

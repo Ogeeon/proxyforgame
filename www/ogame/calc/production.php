@@ -12,18 +12,23 @@ $l = Intl::getTranslations($lang, 'production');
 $lfTr = Intl::getTranslations($lang, 'lfcosts');
 
 // Life form tech data, shared with the Costs (LF) calculator. From it we build:
-//  - $lfBuildingKeys: building translation keys per race, in in-game order;
+//  - $lfBuildingKeys: race => position => building translation key, in in-game order;
 //  - $lfBuildingEnergy: id => [base energy, growth coefficient] for the
 //    energy-consumption formula floor(base * level * coeff^level).
 // A building's id is race*1000 + position (e.g. Humans' first building is 1001).
+// The first two buildings of every race (population and food) neither boost
+// production nor draw energy, so this calculator leaves them out entirely.
 require_once(__DIR__.'/lf-techdata.inc.php');
+define('LF_FIRST_PROD_BUILDING', 3);
 $lfBuildingKeys = array(1 => array(), 2 => array(), 3 => array(), 4 => array());
 $lfBuildingEnergy = array();
 foreach ($lfTechData as $lfId => $lfRow) {
 	if ($lfRow[1] !== 1) continue; // buildings only (type 1), skip researches
 	$lfRace = intdiv($lfId, 1000);
 	if ($lfRace < 1 || $lfRace > 4) continue;
-	$lfBuildingKeys[$lfRace][] = $lfRow[0];
+	$lfPos = $lfId % 1000;
+	if ($lfPos < LF_FIRST_PROD_BUILDING) continue;
+	$lfBuildingKeys[$lfRace][$lfPos] = $lfRow[0];
 	$lfBuildingEnergy[$lfId] = array($lfRow[5], $lfRow[10]);
 }
 

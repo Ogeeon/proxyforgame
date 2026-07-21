@@ -8,6 +8,12 @@
 
 'use strict';
 
+// Every life form has the same number of buildings; planet data reserves one
+// level slot per building (aPS indexes 25..36), including the first two
+// buildings, which this calculator hides because they neither boost production
+// nor draw energy.
+const LF_BUILDINGS_PER_RACE = 12;
+
 function convertAllPlanetParams() {
 	let prm = [];
 	options.prm.aPS = [];
@@ -29,7 +35,7 @@ function convertAllPlanetParams() {
 			prm[j * 3 + 2] = 0; // бустер
 		}
 		prm[24] = 0; // форма жизни (раса)
-		for (let k = 0; k < 12; k++) prm[25 + k] = 0; // уровни зданий форм жизни (12 слотов, позиционно для расы)
+		for (let k = 0; k < LF_BUILDINGS_PER_RACE; k++) prm[25 + k] = 0; // уровни зданий форм жизни (позиционно для расы)
 		prm[37] = 0; // уровень формы жизни
 		options.prm.aPS[i] = prm;
 	}
@@ -70,7 +76,7 @@ function createEmptyPlanet() {
 		prm[j * 3 + 2] = 0; // бустер
 	}
 	prm[24] = 0; // форма жизни (раса)
-	for (let k = 0; k < 12; k++) prm[25 + k] = 0; // уровни зданий форм жизни (12 слотов, позиционно для расы)
+	for (let k = 0; k < LF_BUILDINGS_PER_RACE; k++) prm[25 + k] = 0; // уровни зданий форм жизни (позиционно для расы)
 	prm[37] = 0; // уровень формы жизни
 	return prm;
 }

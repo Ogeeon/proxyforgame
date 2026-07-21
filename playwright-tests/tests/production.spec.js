@@ -504,21 +504,23 @@ test.describe('Life Forms plasma technology cost reduction', () => {
 test.describe('Life Forms building energy consumption', () => {
     // Building rows for a race appear between the fusion reactor and the solar
     // satellites; energy consumption = floor(base * level * coeff^level).
-    const lfRow = (page, race, idx) => page.locator(`#one-planet-prod tr.lf-row-${race}`).nth(idx);
+    // Rows are addressed by building id (race*1000 + in-game position) because
+    // the first two buildings of every race are not listed here.
+    const lfRow = (page, id) => page.locator(`#one-planet-prod tr.lf-row:has([data-lf-id="${id}"])`);
 
     test('shows each building energy draw using floor(base*level*coeff^level)', async ({ page }) => {
         await page.locator('#one-pln-race').selectOption('1');
 
-        // Biosphere Farm is the 2nd Human building (base 8, coeff 1.02).
-        // Level 10 -> floor(8 * 10 * 1.02^10) = 97.
-        const biosphere = lfRow(page, 1, 1);
-        await biosphere.locator('input').fill('10');
-        await biosphere.locator('input').press('Tab');
-        await expect(biosphere.locator('td').nth(6)).toHaveText('97');
+        // Research Centre is the 3rd Human building (base 10, coeff 1.08).
+        // Level 10 -> floor(10 * 10 * 1.08^10) = 215.
+        const research = lfRow(page, 1003);
+        await research.locator('input').fill('10');
+        await research.locator('input').press('Tab');
+        await expect(research.locator('td').nth(6)).toHaveText('215');
 
         // Neuro-Calibration Centre is the 5th building (base 30, coeff 1.25).
         // Level 6 -> floor(30 * 6 * 1.25^6) = 686.
-        const neuro = lfRow(page, 1, 4);
+        const neuro = lfRow(page, 1005);
         await neuro.locator('input').fill('6');
         await neuro.locator('input').press('Tab');
         await expect(neuro.locator('td').nth(6)).toHaveText('686');
@@ -530,7 +532,7 @@ test.describe('Life Forms building energy consumption', () => {
         const before = (await coeff.textContent())?.trim() ?? '';
 
         // A heavy building level consumes enough energy to starve the mines.
-        const neuro = lfRow(page, 1, 4);
+        const neuro = lfRow(page, 1005);
         await neuro.locator('input').fill('30');
         await neuro.locator('input').press('Tab');
 
@@ -539,7 +541,7 @@ test.describe('Life Forms building energy consumption', () => {
 
     test('building levels validate as non-negative integers', async ({ page }) => {
         await page.locator('#one-pln-race').selectOption('1');
-        const input = lfRow(page, 1, 0).locator('input');
+        const input = lfRow(page, 1003).locator('input');
 
         await input.fill('-5');
         await input.press('Tab');
@@ -556,7 +558,7 @@ test.describe('Life Forms building energy consumption', () => {
         await page.locator('#all-planets-prod .control-edit').first().click();
 
         await page.locator('#one-pln-race').selectOption('2');
-        const runeTech = lfRow(page, 2, 2); // Rock'tal Rune Technologium
+        const runeTech = lfRow(page, 2003); // Rock'tal Rune Technologium
         await runeTech.locator('input').fill('15');
         await runeTech.locator('input').press('Tab');
         await page.locator('#save-planet-data').click();
@@ -566,12 +568,12 @@ test.describe('Life Forms building energy consumption', () => {
         await page.locator('#tabtag2').click();
         await page.locator('#all-planets-prod .control-edit').first().click();
         await expect(page.locator('#one-pln-race')).toHaveValue('2');
-        await expect(lfRow(page, 2, 2).locator('input')).toHaveValue('15');
+        await expect(lfRow(page, 2003).locator('input')).toHaveValue('15');
     });
 });
 
 test.describe('Life Forms building production bonuses', () => {
-    const lfRow = (page, race, idx) => page.locator(`#one-planet-prod tr.lf-row-${race}`).nth(idx);
+    const lfRow = (page, id) => page.locator(`#one-planet-prod tr.lf-row:has([data-lf-id="${id}"])`);
     const named = (page, label) => page.locator('#one-planet-prod tr').filter({ hasText: label });
     const digits = (s) => parseInt((s ?? '').replace(/\D/g, ''), 10) || 0;
 
@@ -579,7 +581,7 @@ test.describe('Life Forms building production bonuses', () => {
         await page.locator('#one-pln-race').selectOption('1');
 
         // High Energy Smelting is the 6th Human building; level 10 -> +15% metal.
-        const hes = lfRow(page, 1, 5);
+        const hes = lfRow(page, 1006);
         await hes.locator('input').fill('10');
         await hes.locator('input').press('Tab');
 
@@ -608,7 +610,7 @@ test.describe('Life Forms building production bonuses', () => {
 
         // Metropolis (Human building 11) level 20 -> +10% technology bonus,
         // so the research bonus becomes 20% * 1.10 = 22% of the mine output.
-        const metropolis = lfRow(page, 1, 10);
+        const metropolis = lfRow(page, 1011);
         await metropolis.locator('input').fill('20');
         await metropolis.locator('input').press('Tab');
 
@@ -677,7 +679,7 @@ test.describe('Life Forms building production bonuses', () => {
         const coeffBefore = digits(await page.locator('#prod-coeff').textContent());
 
         // Disruption Chamber is the 7th Rock'tal building: +energy prod, -energy use.
-        const disruption = lfRow(page, 2, 6);
+        const disruption = lfRow(page, 2007);
         await disruption.locator('input').fill('20');
         await disruption.locator('input').press('Tab');
 

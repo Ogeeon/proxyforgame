@@ -623,14 +623,21 @@ function updateLifeformRows() {
 	$('#one-pln-race-level').disabled = (race < 1 || race > 4);
 }
 
+// Index of a building row in the positional level array (index 0 is the race's
+// first building). The table skips the first two buildings of every race, so the
+// index comes from the row's building id rather than from its DOM order.
+function lfRowIndex(el) {
+	return Number.parseInt(el.getAttribute('data-lf-id'), 10) % 1000 - 1;
+}
+
 // Read the building levels of the currently selected race from the table into a
 // positional array (index 0 is the race's first building).
 function readOnePlnLfLevels() {
 	let race = Number($('#one-pln-race').value) || 0;
-	let levels = [];
+	let levels = new Array(LF_BUILDINGS_PER_RACE).fill(0);
 	if (race >= 1 && race <= 4) {
 		$$('#one-planet-prod .lf-row-' + race + ' input[type=text]').forEach(function (el) {
-			levels.push(getInputNumber(el));
+			levels[lfRowIndex(el)] = getInputNumber(el);
 		});
 	}
 	return levels;
@@ -640,7 +647,8 @@ function readOnePlnLfLevels() {
 function writeOnePlnLfLevels(race, levels) {
 	if (race < 1 || race > 4) return;
 	let inputs = $$('#one-planet-prod .lf-row-' + race + ' input[type=text]');
-	inputs.forEach(function (el, idx) {
+	inputs.forEach(function (el) {
+		let idx = lfRowIndex(el);
 		el.value = (levels && levels[idx] != null) ? levels[idx] : 0;
 	});
 }
@@ -649,8 +657,8 @@ function writeOnePlnLfLevels(race, levels) {
 function renderOnePlnLfEnergy(race, perBld) {
 	if (race < 1 || race > 4) return;
 	let rows = $$('#one-planet-prod .lf-row-' + race);
-	rows.forEach(function (tr, idx) {
-		let cons = perBld[idx] || 0;
+	rows.forEach(function (tr) {
+		let cons = perBld[lfRowIndex(tr.querySelector('input[type=text]'))] || 0;
 		tr.children[6].innerHTML = cons > 0
 			? '<span style="color: brown;">' + numToOGame(cons) + '</span>'
 			: '';
@@ -730,7 +738,7 @@ function savePlnData() {
 	target[24] = Number($('#one-pln-race').value);
 	target[37] = getInputNumber($('#one-pln-race-level'));
 	let savedLfLevels = readOnePlnLfLevels();
-	for (let k = 0; k < 12; k++) target[25 + k] = savedLfLevels[k] || 0;
+	for (let k = 0; k < LF_BUILDINGS_PER_RACE; k++) target[25 + k] = savedLfLevels[k] || 0;
 	for (let i = 1; i < 8; i++) {
 		target[i * 3] = getInputNumber(rows[i + 1].children[2].children[0]);
 		target[i * 3 + 1] = Number(rows[i + 1].children[7].children[0].value);
@@ -759,7 +767,7 @@ function clonePlnData() {
 		let p = options.prm.aPS[pln];
 		p[24] = cloneRace;
 		p[37] = cloneRaceLevel;
-		for (let k = 0; k < 12; k++) p[25 + k] = lfLevels[k] || 0;
+		for (let k = 0; k < LF_BUILDINGS_PER_RACE; k++) p[25 + k] = lfLevels[k] || 0;
 		for (let i = 1; i < 8; i++) {
 			p[i * 3] = getInputNumber(rows[i + 1].children[2].children[0]);
 			p[i * 3 + 1] = Number(rows[i + 1].children[7].children[0].value);
