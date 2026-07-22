@@ -216,7 +216,8 @@ class LfCostsOrchestrator {
     handleRowChange(inputEl) {
         const row = inputEl.parentNode.parentNode;
         const techID = Number(row.children[0].innerHTML);
-        if (!(techID > 0)) return;
+        // Delegated listener also fires on footer rows (marker cells 'ra', 'gt'), where techID is NaN
+        if (Number.isNaN(techID) || techID <= 0) return;
 
         const tblID = row.parentNode.parentNode.id;
         const parts = tblID.split(/-/);
