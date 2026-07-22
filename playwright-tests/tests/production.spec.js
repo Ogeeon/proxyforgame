@@ -663,9 +663,9 @@ test.describe('Life Forms building production bonuses', () => {
         expect(digits(await named(page, 'Lifeform Tech Bonus').locator('td').nth(3).textContent()))
             .toBe(Math.round(mineMetal * 0.20));
 
-        // Metropolis (Human building 11) level 20 gives a +10% technology bonus, but
-        // OGame already folds that into the percentage shown on its Life Forms panel,
-        // so the row must stay at 20% instead of climbing to 22%.
+        // Metropolis (Human building 11) grants a technology bonus in game, but OGame
+        // already folds it into the percentage shown on its Life Forms panel, so the
+        // calculator does not model it: the row must stay at 20%, not climb to 22%.
         const metropolis = lfRow(page, 1011);
         await metropolis.locator('input').fill('20');
         await metropolis.locator('input').press('Tab');

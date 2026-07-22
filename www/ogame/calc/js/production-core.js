@@ -137,20 +137,18 @@ function lfBuildingEnergy(bldId, level) {
 //   met/cry/deu - resource production increase (%)
 //   enP         - energy production increase (%)
 //   enR         - energy consumption reduction (%)
-//   tech        - technology bonus (%); tracked for reference only, see the note in
-//                 calculateProduction for why it is not applied to anything
 // `perBld` keeps the same numbers per building (index = building position), so
 // that each building can show its own contribution in the one-planet table.
 function lfBuildingEffects(race, levels) {
-	let eff = { energyUsed: 0, perBld: [], met: 0, cry: 0, deu: 0, enP: 0, enR: 0, tech: 0 };
+	let eff = { energyUsed: 0, perBld: [], met: 0, cry: 0, deu: 0, enP: 0, enR: 0 };
 	if (race < 1 || race > 4) return eff;
 	if (!levels) return eff;
 	for (let pos = 0; pos < levels.length; pos++) {
 		let level = Number(levels[pos]) || 0;
 		let bldId = race * 1000 + (pos + 1);
 		let e = lfBuildingEnergy(bldId, level);
-		// enR and tech act on the whole planet, so they stay out of the per-building
-		// numbers - only what a single building adds on its own is listed here.
+		// enR acts on the whole planet, so it stays out of the per-building numbers -
+		// only what a single building adds on its own is listed here.
 		let bld = { id: bldId, level: level, energyUsed: e, met: 0, cry: 0, deu: 0, enP: 0 };
 		eff.energyUsed += e;
 		let bonus = options.lfBonus ? options.lfBonus[bldId] : undefined;
@@ -169,11 +167,11 @@ function lfBuildingEffects(race, levels) {
 }
 
 function calculateProduction(prodParams, plnData, normalized = false, lfEff = null) {
-	if (!lfEff) lfEff = { energyUsed: 0, perBld: [], met: 0, cry: 0, deu: 0, enP: 0, enR: 0, tech: 0 };
-	// NOTE: lfEff.tech (technology bonus from Metropolis, Chip Mass Production and
-	// HP-Transformer) is deliberately NOT applied to the research percentages below.
-	// OGame already folds it into the percentages shown on the life form panel, which
-	// is where the user copies them from - applying it here again double-counted it.
+	if (!lfEff) lfEff = { energyUsed: 0, perBld: [], met: 0, cry: 0, deu: 0, enP: 0, enR: 0 };
+	// NOTE: the life form technology bonus (Metropolis, Chip Mass Production,
+	// HP-Transformer) is not modelled at all. OGame folds it into the research
+	// percentages shown on its life form panel, which is where the user copies them
+	// from, so applying it here would double-count it.
 	// See docs/calculators/production-vs-ogame.md.
 	// What each life form building contributes on its own: [met, crys, deut,
 	// energy produced, energy used]. Reported separately from the results rows so

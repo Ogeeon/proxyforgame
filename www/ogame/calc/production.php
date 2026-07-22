@@ -35,22 +35,23 @@ foreach ($lfTechData as $lfId => $lfRow) {
 // Per-planet production/energy bonuses of life form buildings. Each entry maps a
 // building id to effects keyed by kind:
 //   met/cry/deu - resource production increase, enP - energy production increase,
-//   enR - energy-consumption reduction, tech - technology bonus (amplifies the
-//   life form RESEARCH bonuses entered on the parameters panel).
+//   enR - energy-consumption reduction.
 // Each effect is [base, increaseFactor, maxFraction|null] yielding a percentage:
 //   pct(level) = min(max*100, base * increaseFactor^(level-1) * level)
 // Values from OGame life form building data; every current factor is linear (1.0).
+// The technology bonus (Metropolis, High-Performance Transformer, Chip Mass
+// Production) is not listed: OGame folds it into the research percentages entered
+// on the parameters panel, so the calculator has nothing left to apply it to.
+// See docs/calculators/production-vs-ogame.md.
 $lfBuildingBonus = array(
 	1006 => array('met' => array(1.5, 1.0, null)),                            // High Energy Smelting
 	1008 => array('cry' => array(1.5, 1.0, null), 'deu' => array(1.0, 1.0, null)), // Fusion-Powered Production
-	1011 => array('tech' => array(0.5, 1.0, 1.0)),                            // Metropolis
 	2006 => array('met' => array(2.0, 1.0, null)),                            // Magma Forge
 	2007 => array('enP' => array(1.5, 1.0, null), 'enR' => array(0.5, 1.0, 0.4)),  // Disruption Chamber
 	2009 => array('cry' => array(2.0, 1.0, null)),                            // Crystal Refinery
 	2010 => array('deu' => array(2.0, 1.0, null)),                            // Deuterium Synthesiser (Rock'tal)
-	3007 => array('enP' => array(1.0, 1.0, 1.0), 'tech' => array(0.3, 1.0, null)), // High-Performance Transformer
+	3007 => array('enP' => array(1.0, 1.0, 1.0)),                            // High-Performance Transformer
 	3010 => array('deu' => array(2.0, 1.0, null)),                            // High-Performance Synthesiser
-	3011 => array('tech' => array(0.4, 1.0, 1.0)),                            // Chip Mass Production
 );
 
 // id => (ключ_$l, тип, мет, крис, дейт, коэфф.удорожания}

@@ -95,10 +95,10 @@ it.
 Side effect: the technology bonus no longer changes production at all. The *Lifeform
 level* input existed only to feed it, so the field was removed from the UI along with
 its stored value (planet slot 37 of `aPS`), its validation case and its tests — the
-version had not shipped yet, so no storage migration was needed. Metropolis, Chip Mass
-Production and High-Performance Transformer keep their rows and their energy draw; only
-their `tech` contribution is inert. `lfBuildingEffects` still totals it under `tech` for
-reference, and nothing reads it.
+version had not shipped yet, so no storage migration was needed. The `tech` kind was
+dropped from `$lfBuildingBonus` and from `lfBuildingEffects` as well: Metropolis, Chip
+Mass Production and High-Performance Transformer keep their rows and their energy draw,
+but the technology bonus is no longer modelled anywhere.
 
 Two Playwright tests that asserted the old amplification were inverted to assert the
 bonus stays put; the three tests covering the removed field were dropped.
