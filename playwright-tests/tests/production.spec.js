@@ -526,6 +526,34 @@ test.describe('Life Forms building energy consumption', () => {
         await expect(neuro.locator('td').nth(6)).toHaveText('686');
     });
 
+    test('Disruption Chamber lowers the energy draw shown in every consumer row', async ({ page }) => {
+        await page.locator('#one-pln-race').selectOption('2');
+
+        const rows = page.locator('#one-planet-prod tr:not(.lf-row)');
+        // Oversized solar plant so the planet stays at 100% throughout.
+        await rows.nth(5).locator('input').fill('45');
+        // Metal Mine 26 -> floor(10 * 26 * 1.1^26) = 3098 energy.
+        await rows.nth(2).locator('input').fill('26');
+        await rows.nth(2).locator('input').press('Tab');
+        await expect(rows.nth(2).locator('td').nth(6)).toHaveText('3.098/3.098');
+
+        // Rune Forge is the 4th Rock'tal building (base 20, coeff 1.35).
+        // Level 12 -> floor(20 * 12 * 1.35^12) = 8794.
+        const runeForge = lfRow(page, 2004);
+        await runeForge.locator('input').fill('12');
+        await runeForge.locator('input').press('Tab');
+        await expect(runeForge.locator('td').nth(6)).toHaveText('8.794');
+
+        // Disruption Chamber level 8 -> -0.5 %/level = -4 % energy consumption. OGame
+        // shows that reduction in every consumer row, floored row by row.
+        const disruption = lfRow(page, 2007);
+        await disruption.locator('input').fill('8');
+        await disruption.locator('input').press('Tab');
+
+        await expect(rows.nth(2).locator('td').nth(6)).toHaveText('2.974/2.974'); // floor(3098 * 0.96)
+        await expect(runeForge.locator('td').nth(6)).toHaveText('8.442');         // floor(8794 * 0.96)
+    });
+
     test('drains the planet energy pool and lowers the production coefficient', async ({ page }) => {
         await page.locator('#one-pln-race').selectOption('1');
         const coeff = page.locator('#prod-coeff');
@@ -617,13 +645,13 @@ test.describe('Life Forms building production bonuses', () => {
         await expect(cell.locator('span')).toHaveAttribute('style', /brown/);
     });
 
-    test('Metropolis technology bonus amplifies the research production bonus', async ({ page }) => {
+    test('Metropolis technology bonus does not re-amplify the research production bonus', async ({ page }) => {
         // Oversized solar plant so the planet stays at 100% even with Metropolis
         // drawing energy, isolating the technology-bonus effect from starvation.
         await page.locator('#one-planet-prod tr:not(.lf-row)').nth(5).locator('input').fill('45');
         await page.locator('#one-planet-prod tr:not(.lf-row)').nth(5).locator('input').press('Tab');
 
-        // Enter a raw research metal bonus on the Life Forms parameter tab.
+        // Enter the research metal bonus as OGame shows it on the Life Forms panel.
         await page.locator('#param-lifeforms-tab').click();
         await page.locator('#lf-metal-prod-bonus').fill('20');
         await page.locator('#lf-metal-prod-bonus').press('Tab');
@@ -631,65 +659,19 @@ test.describe('Life Forms building production bonuses', () => {
         await page.locator('#one-pln-race').selectOption('1');
         const mineMetal = digits(await named(page, 'Metal Mine').locator('td').nth(3).textContent());
 
-        // Without Metropolis the Lifeform bonus row is exactly 20% of the mine output.
+        // The Lifeform bonus row is exactly 20% of the mine output.
         expect(digits(await named(page, 'Lifeform Tech Bonus').locator('td').nth(3).textContent()))
             .toBe(Math.round(mineMetal * 0.20));
 
-        // Metropolis (Human building 11) level 20 -> +10% technology bonus,
-        // so the research bonus becomes 20% * 1.10 = 22% of the mine output.
+        // Metropolis (Human building 11) level 20 gives a +10% technology bonus, but
+        // OGame already folds that into the percentage shown on its Life Forms panel,
+        // so the row must stay at 20% instead of climbing to 22%.
         const metropolis = lfRow(page, 1011);
         await metropolis.locator('input').fill('20');
         await metropolis.locator('input').press('Tab');
 
         expect(digits(await named(page, 'Lifeform Tech Bonus').locator('td').nth(3).textContent()))
-            .toBe(Math.round(mineMetal * 0.22));
-    });
-
-    test('lifeform level amplifies the research production bonus by 1% per level', async ({ page }) => {
-        // Oversized solar plant so the planet stays at 100%.
-        await page.locator('#one-planet-prod tr:not(.lf-row)').nth(5).locator('input').fill('45');
-        await page.locator('#one-planet-prod tr:not(.lf-row)').nth(5).locator('input').press('Tab');
-
-        await page.locator('#param-lifeforms-tab').click();
-        await page.locator('#lf-metal-prod-bonus').fill('20');
-        await page.locator('#lf-metal-prod-bonus').press('Tab');
-
-        await page.locator('#one-pln-race').selectOption('1');
-        const mineMetal = digits(await named(page, 'Metal Mine').locator('td').nth(3).textContent());
-        expect(digits(await named(page, 'Lifeform Tech Bonus').locator('td').nth(3).textContent()))
             .toBe(Math.round(mineMetal * 0.20));
-
-        // Lifeform level 10 -> +10% technology bonus -> 20% * 1.10 = 22%.
-        await page.locator('#one-pln-race-level').fill('10');
-        await page.locator('#one-pln-race-level').press('Tab');
-        expect(digits(await named(page, 'Lifeform Tech Bonus').locator('td').nth(3).textContent()))
-            .toBe(Math.round(mineMetal * 0.22));
-    });
-
-    test('lifeform level field is disabled when no form is selected', async ({ page }) => {
-        // Default race is "none" -> the level field is disabled.
-        await expect(page.locator('#one-pln-race-level')).toBeDisabled();
-
-        await page.locator('#one-pln-race').selectOption('1');
-        await expect(page.locator('#one-pln-race-level')).toBeEnabled();
-
-        await page.locator('#one-pln-race').selectOption('0');
-        await expect(page.locator('#one-pln-race-level')).toBeDisabled();
-    });
-
-    test('lifeform level persists per planet and restores on reload', async ({ page }) => {
-        await page.locator('#tabtag2').click();
-        await page.locator('#all-planets-prod .control-edit').first().click();
-        await page.locator('#one-pln-race').selectOption('3');
-        await page.locator('#one-pln-race-level').fill('25');
-        await page.locator('#one-pln-race-level').press('Tab');
-        await page.locator('#save-planet-data').click();
-
-        await page.reload();
-
-        await page.locator('#tabtag2').click();
-        await page.locator('#all-planets-prod .control-edit').first().click();
-        await expect(page.locator('#one-pln-race-level')).toHaveValue('25');
     });
 
     test('Disruption Chamber raises the production coefficient (more energy, less drain)', async ({ page }) => {

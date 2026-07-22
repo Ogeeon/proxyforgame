@@ -73,7 +73,6 @@
         maxPlanetTemp: 0,
         onePlnExtView: false,
         onePlnRace: 0,
-        onePlnRaceLevel: 0,
         onePlnLfLevels: [],
         oPPP: [[0, 100, 0], [0, 100, 0], [0, 100, 0], [0, 100, 0], [0, 100, 0], [0, 100, 0], [0, 100, 0]],
         metStorageLvl: 0,
@@ -127,8 +126,6 @@
               return value === 'true';
             case 'onePlnRace':
               return validateNumber(Number.parseInt(value), 0, 4, 0);
-            case 'onePlnRaceLevel':
-              return validateNumber(Number.parseInt(value), 0, Infinity, 0);
             case 'oPPP':
               return validateNumber(parseFloat(value), -272, Infinity, 0);
             case 'currPlanetsCount':
@@ -518,8 +515,6 @@
               <option value="<?=$r?>"><?= $l['race-'.$r] ?></option>
               <?php endfor; ?>
             </select>
-            <label for="one-pln-race-level"><?= $l['lifeform-level'] ?></label>
-            <input id="one-pln-race-level" type="text" name="one-pln-race-level" class="form-control form-control-sm input-3columns" value="0" disabled/>
           </div>
           <div class="d-flex align-items-center gap-1 ms-auto">
             <input id="one-pln-extended-view" name="one-pln-extended-view" type="checkbox" class="form-check-input"/>
