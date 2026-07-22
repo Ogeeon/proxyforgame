@@ -521,5 +521,58 @@ test.describe('Lifeforms costs Calculator Page', () => {
         await expect(page.locator('#research-time-reduction')).toHaveValue('80');
     });
 
+    test('[research reduction caps] effective reduction stays within 50% cost / 99% time', async ({ page }) => {
+        // Reads the totals row of the researches table
+        async function readTotals() {
+            const row = page.locator('#table-0-2 tr:nth-child(20)');
+            return {
+                metal: (await row.locator('td:nth-child(4)').textContent()).trim(),
+                crystal: (await row.locator('td:nth-child(5)').textContent()).trim(),
+                deut: (await row.locator('td:nth-child(6)').textContent()).trim(),
+                time: (await row.locator('td:nth-child(8)').textContent()).trim(),
+            };
+        }
+
+        async function setParam(id, value) {
+            await page.locator(id).fill(value);
+            await page.locator(id).press('Enter');
+        }
+
+        await page.locator('#tabtag-0').click();
+        await page.locator('#tabtag-0-2').click();
+        await addAllResearchesForRace(page, 0, '1');
+        await fillTableRows(page, '#table-0-2', 2, 19, 2);
+        const baseline = await readTotals();
+
+        // Research centre 100 alone: cost -25% (0.25/lvl), raw time reduction 200% (2/lvl)
+        await page.locator('#param-lifeforms-tab').click();
+        await setParam('#research-centre-level', '100');
+        const centreOnly = await readTotals();
+
+        // Raw 200% would make the duration negative, which getBuildTimeLF floors to 1s.
+        // Clamping to 99% keeps 1/100 of the baseline instead.
+        expect(centreOnly.time).toBe('1h 13m 8s');
+        expect(centreOnly.metal).toBe('5.922M');
+        expect(baseline.time).toBe('5d 2h 8m');
+
+        // Adding the manual time reduction on top changes nothing - already at the 99% cap
+        await setParam('#research-time-reduction', '99');
+        const centrePlusTime = await readTotals();
+        expect(centrePlusTime.time).toBe(centreOnly.time);
+
+        // Manual cost reduction on top: 50 + 25 raw, clamped to 50%
+        await setParam('#research-cost-reduction', '50');
+        const centrePlusBoth = await readTotals();
+        expect(centrePlusBoth.metal).not.toBe(centreOnly.metal);
+
+        // Same 50% cap without the research centre - both configurations must match
+        await setParam('#research-centre-level', '0');
+        const manualOnly = await readTotals();
+        expect(manualOnly.metal).toBe(centrePlusBoth.metal);
+        expect(manualOnly.crystal).toBe(centrePlusBoth.crystal);
+        expect(manualOnly.deut).toBe(centrePlusBoth.deut);
+        expect(manualOnly.time).toBe(centrePlusBoth.time);
+    });
+
     // todo: hyperspace, class bonus and lf bonuses to cargo cap
 });
