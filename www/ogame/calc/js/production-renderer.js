@@ -14,7 +14,6 @@ function populateParams() {
 	setVal('#max-planet-temp', options.prm.maxPlanetTemp);
 	setChecked('#one-pln-extended-view', options.prm.onePlnExtView);
 	setVal('#one-pln-race', options.prm.onePlnRace);
-	setVal('#one-pln-race-level', options.prm.onePlnRaceLevel);
 	if (typeof updateLifeformRows === 'function') updateLifeformRows();
 	if (typeof writeOnePlnLfLevels === 'function') writeOnePlnLfLevels(options.prm.onePlnRace, options.prm.onePlnLfLevels);
 	setVal('#planet-pos', options.prm.planetPos);
@@ -26,17 +25,17 @@ function populateParams() {
 	setChecked('#class-' + options.prm.playerClass, true);
 	setVal('#energy-boost', options.prm.energyBoost);
 	setChecked('#all-pln-addtnl-info', options.prm.showAddInf);
-	setVal('#exchange-rates-m', String(options.prm.rates[0]).replace('.', options.decimalSeparator));
-	setVal('#exchange-rates-c', String(options.prm.rates[1]).replace('.', options.decimalSeparator));
-	setVal('#exchange-rates-d', String(options.prm.rates[2]).replace('.', options.decimalSeparator));
+	setNumVal('#exchange-rates-m', options.prm.rates[0]);
+	setNumVal('#exchange-rates-c', options.prm.rates[1]);
+	setNumVal('#exchange-rates-d', options.prm.rates[2]);
 	setChecked('#include-SS-' + (options.prm.inclSats ? 'y' : 'n'), true);
 	setChecked('#is-trader', options.prm.isTrader);
-	setVal('#lf-metal-prod-bonus', options.prm.lfMetProdBonus);
-	setVal('#lf-crystal-prod-bonus', options.prm.lfCrysProdBonus);
-	setVal('#lf-deut-prod-bonus', options.prm.lfDeutProdBonus);
-	setVal('#lf-energy-prod-bonus', options.prm.lfEnergyProdBonus);
-	setVal('#lf-crawler-bonus', options.prm.lfCrawlerBonus);
-	setVal('#lf-plasma-cost-reduction', options.prm.lfPlasmaCostReduction);
+	setNumVal('#lf-metal-prod-bonus', options.prm.lfMetProdBonus);
+	setNumVal('#lf-crystal-prod-bonus', options.prm.lfCrysProdBonus);
+	setNumVal('#lf-deut-prod-bonus', options.prm.lfDeutProdBonus);
+	setNumVal('#lf-energy-prod-bonus', options.prm.lfEnergyProdBonus);
+	setNumVal('#lf-crawler-bonus', options.prm.lfCrawlerBonus);
+	setNumVal('#lf-plasma-cost-reduction', options.prm.lfPlasmaCostReduction);
 }
 
 function setOnePlanetProdData() {

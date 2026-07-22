@@ -49,6 +49,18 @@ const setVal = (selector, value) => {
 };
 
 /**
+ * Set the value of a numeric input, converting the decimal point of the stored
+ * number to the separator the locale expects. Without it the numeric input
+ * validator strips the "." as an illegal character (e.g. "2.5" becomes "25"
+ * in locales that use a comma).
+ * @param {string} selector - CSS selector
+ * @param {string|number} value - Value to set
+ */
+const setNumVal = (selector, value) => {
+  setVal(selector, String(value).replace('.', getOptionValue('decimalSeparator', '.')));
+};
+
+/**
  * Get the checked state of a checkbox/radio
  * @param {string} selector - CSS selector
  * @returns {boolean}
