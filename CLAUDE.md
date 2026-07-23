@@ -38,6 +38,7 @@ npx playwright show-report      # View HTML report
 - Browse to `http://pfg.wmp` for full-site testing
 
 ## Git & Shell
+- Commit subjects follow **Conventional Commits**: `<type>(<scope>): <subject>` in English, imperative mood, lowercase after the colon, no trailing period. Types: `feat`, `fix`, `refactor`, `style`, `test`, `docs`, `chore`. Scope is the calculator or area (`flight`, `moon`, `lfcosts`, `production`, `claude`). Commits before 2026-07-22 use the older plain-sentence style — ignore them and follow this rule.
 - Commit messages: write to a temp file and use `git commit -F`, or avoid quotes/backticks entirely. Do not use here-strings in PowerShell for commit bodies.
 - Keep unrelated pre-existing changes in a separate commit.
 - Run the Playwright suite before committing; new tests go in the existing spec file for that calculator, not a new file.
