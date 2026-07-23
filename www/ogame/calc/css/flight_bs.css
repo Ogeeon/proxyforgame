@@ -98,6 +98,22 @@
   position: relative;
 }
 
+/* --- Warning banner: a themed highlight box (shown via fadeIn from the renderer) --- */
+#warning {
+  background-color: var(--bs-warning-bg-subtle);
+  border: 1px solid var(--bs-warning-border-subtle);
+  color: var(--bs-warning-text-emphasis);
+  border-radius: var(--bs-border-radius);
+  padding: 6px 12px;
+}
+
+/* --- Hint box: a quiet info panel under the tables --- */
+#hint {
+  background-color: var(--bs-tertiary-bg);
+  border: 1px solid var(--bs-border-color);
+  border-radius: var(--bs-border-radius);
+}
+
 /* --- Tooltip skin, matching the costs/production calculators --- */
 .tooltip-inner {
   background-color: var(--bs-secondary-bg);
