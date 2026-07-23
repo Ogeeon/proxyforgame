@@ -205,18 +205,19 @@ class FlightCalculator {
     }
 
     _systemDistance(departure, destination, params) {
-        let systems = Math.abs(departure[1] - destination[1]);
+        const directSystems = Math.abs(departure[1] - destination[1]);
+
+        // In a circular universe the fleet takes the shorter of the two arcs.
+        const wraps = params.circularSystems
+            && params.numberOfSystems - directSystems < directSystems;
+        const systems = wraps ? params.numberOfSystems - directSystems : directSystems;
 
         if (!params.fleetIgnoreEmptySystems) {
-            if (params.circularSystems) {
-                systems = Math.min(systems, params.numberOfSystems - systems);
-            }
             return { distance: systems * 95 + 2700, emptySystems: 0 };
         }
 
-        // NOTE: the manual override returns before the circular-systems check, so
-        // switching it on disables wrap-around. Preserved from the pre-Bootstrap
-        // implementation; see the "known defects" tests in flight.spec.js.
+        // The manual override wins over the computed count, but it is still applied
+        // to the (possibly wrapped) travelled arc, not the long way round.
         if (params.emptySystemsOverrideEnabled) {
             const empty = params.emptySystemsOverride;
             return { distance: (systems - empty) * 95 + 2700, emptySystems: empty };
@@ -225,15 +226,14 @@ class FlightCalculator {
         const populated = params.populatedSystems?.[departure[0]] ?? null;
         let empty;
 
-        if (params.circularSystems && params.numberOfSystems - systems < systems) {
-            // NOTE: this only describes the travelled arc when the departure system
-            // is the higher of the two; with departure < destination it counts the
-            // complementary arc instead. Preserved from the pre-Bootstrap
-            // implementation; see the "known defects" tests in flight.spec.js.
-            systems = params.numberOfSystems - systems;
-            const toEnd = this.countEmptySystems(departure[1], params.numberOfSystems + 1, populated);
-            const fromStart = this.countEmptySystems(0, destination[1], populated);
-            empty = toEnd + fromStart;
+        if (wraps) {
+            // The wrap arc runs from the higher endpoint up to the last system and
+            // on from the first up to the lower endpoint — independent of which end
+            // is the departure, so use max/min rather than departure/destination.
+            const high = Math.max(departure[1], destination[1]);
+            const low = Math.min(departure[1], destination[1]);
+            empty = this.countEmptySystems(high, params.numberOfSystems + 1, populated)
+                + this.countEmptySystems(0, low, populated);
         } else {
             empty = this.countEmptySystems(departure[1], destination[1], populated);
         }

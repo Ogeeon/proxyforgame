@@ -361,7 +361,7 @@ test.describe('Flight Calculator - Distance', () => {
     });
 });
 
-test.describe('Flight Calculator - Distance (known defects)', () => {
+test.describe('Flight Calculator - Distance (circular wrap-around)', () => {
     test.beforeEach(async ({ context, page }) => {
         await context.addInitScript(() => {
             localStorage.setItem('lastChange', 'key-value;true,value;99999');
@@ -370,12 +370,11 @@ test.describe('Flight Calculator - Distance (known defects)', () => {
         await installCompat(page);
     });
 
-    // getDistance() flight.js:217-225 — on the wrap-around branch the empty-system
-    // count is taken as [departure..end] + [start..destination], which only describes
-    // the travelled arc when the departure system is the higher of the two. With
-    // departure < destination it counts the complementary arc instead, inflating the
-    // count far beyond the trip length and driving the distance negative.
-    test.fail('wrap-around distance is the same in both directions', async ({ page }) => {
+    // The wrap arc runs from the higher endpoint to the last system and on from
+    // the first to the lower endpoint, so the empty-system count must be the same
+    // whichever end the fleet starts from — it used to count the complementary arc
+    // when departure < destination, inflating the count and driving distance negative.
+    test('wrap-around distance is the same in both directions', async ({ page }) => {
         const populated = { 1: [1, 490, 495, 497] };
         const prm = { circularSystems: true, fleetIgnoreEmptySystems: true };
 
@@ -387,9 +386,9 @@ test.describe('Flight Calculator - Distance (known defects)', () => {
         expect(backward.dst).toBe(forward.dst);
     });
 
-    // Same root cause, stated as the invariant that actually matters: you can never
-    // skip more systems than the trip is long, so distance cannot fall below the 2700 floor.
-    test.fail('distance never drops below the base cost', async ({ page }) => {
+    // The invariant behind the fix: you can never skip more systems than the trip
+    // is long, so the distance cannot fall below the 2700 floor.
+    test('distance never drops below the base cost', async ({ page }) => {
         const { dst } = await distance(page, {
             dep: [1, 1, 1], dest: [1, 490, 1],
             prm: { circularSystems: true, fleetIgnoreEmptySystems: true },
@@ -398,10 +397,9 @@ test.describe('Flight Calculator - Distance (known defects)', () => {
         expect(dst).toBeGreaterThanOrEqual(2700 - 10 * 95);
     });
 
-    // getDistance() flight.js:204-207 — the override branch returns before the
-    // circular-systems check, so turning on the manual empty-system count silently
-    // disables wrap-around and charges the long way round.
-    test.fail('manual override still respects circular systems', async ({ page }) => {
+    // The manual empty-system override is applied to the wrapped arc, not the long
+    // way round: the circular-systems shortest path is resolved before the override.
+    test('manual override still respects circular systems', async ({ page }) => {
         const { dst } = await distance(page, {
             dep: [1, 1, 1], dest: [1, 490, 1],
             prm: { circularSystems: true, fleetIgnoreEmptySystems: true },
