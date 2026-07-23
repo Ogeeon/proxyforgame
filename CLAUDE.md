@@ -6,6 +6,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ProxyForGame (pfg.wmp) is a PHP-based calculator website for the OGame space strategy game. The application follows a WAMP-style architecture where each page is a minimal PHP controller that loads translations and includes a template for rendering.
 
+## Which Calculator?
+
+This repo contains multiple calculators (production, cost, lifeform cost, flight, trade, queue). Before exploring or editing, confirm which calculator the request targets if the file path is ambiguous — do not assume the cost calculator by default.
+
 ## Development Commands
 
 ### Running PHP Scripts (PowerShell)
@@ -32,6 +36,11 @@ npx playwright show-report      # View HTML report
 - Configure WAMP virtual host pointing to `www/` directory (see README.md)
 - Add `127.0.0.1 pfg.wmp` to hosts file
 - Browse to `http://pfg.wmp` for full-site testing
+
+## Git & Shell
+- Commit messages: write to a temp file and use `git commit -F`, or avoid quotes/backticks entirely. Do not use here-strings in PowerShell for commit bodies.
+- Keep unrelated pre-existing changes in a separate commit.
+- Run the Playwright suite before committing; new tests go in the existing spec file for that calculator, not a new file.
 
 ## Architecture
 
@@ -93,6 +102,20 @@ When adding UI text:
 
 ### Adding AJAX Services
 Add a `case` block in `www/ajax.php` and return responses in the format `"<code>\n<payload>"`. Always check the numeric code first on the client side.
+
+## Localization
+
+Any new user-visible string (labels, tooltips, warnings, modal text) must be added to **all 13 locale files** in the same commit. Reuse an existing localization key if one already covers the string before creating a new one.
+
+## Validation & Input Conventions
+- All numeric inputs use the **blur-validation pattern** (validate/clamp on blur, never live-clamp while typing). Follow the existing helpers rather than inventing new behavior.
+- Always use the locale-aware decimal helper for user-entered fractional values (RU uses `,`). **Never** apply locale separators to imported OGame API data — that data always uses `.`.
+- Never persist a locale decimal separator into comma-delimited cookies; serialize with a canonical dot format.
+
+## CSS / Bootstrap Gotchas
+- Bootstrap `input-group` overrides non-id-scoped width classes — scope width rules or they will blow up to ~177px.
+- Accordions and tables inside calculator panels use `max-content` intrinsic width and will widen the panel; apply `width: 0; min-width: 100%` to contain them.
+- Prefer `bootstrap.Tooltip.getOrCreateInstance()` over `new bootstrap.Tooltip()` (SonarQube S1848).
 
 ## Important Notes
 
