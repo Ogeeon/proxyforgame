@@ -17,22 +17,13 @@ class MoonDataCollector {
       dsCount: getInputNumber($('#ds-count')),
       debrisPercent: Number.parseInt(getVal('#debris-percent'), 10) || 0,
       hyperTechLevel: getInputNumber($('#hypertech-lvl')),
-      playerClass: MoonDataCollector.readPlayerClass(),
+      isGeneral: getChecked('#general-class'),
       rcCapacityIncrease: getInputNumber($('#rc-capacity-increase')),
       defenseToDebris: getChecked('#defense-to-debris'),
       deutToDebris: getChecked('#deut-to-debris'),
       promoMoon: getChecked('#promo-moon'),
       counts: MoonDataCollector.readCounts(),
     };
-  }
-
-  /**
-   * Read the selected player class radio (0 = none, 1 = collector, 2 = general).
-   * Falls back to 0 (none) when nothing is checked.
-   */
-  static readPlayerClass() {
-    const checked = document.querySelector('input[name="player-class"]:checked');
-    return checked ? (Number.parseInt(checked.value, 10) || 0) : 0;
   }
 
   /**
