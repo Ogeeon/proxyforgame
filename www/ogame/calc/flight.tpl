@@ -7,45 +7,37 @@
   <meta name="keywords" content="<?= $l['keywords'] ?>"/>
   <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon"/>
   <link rel="icon" href="/favicon.ico" type="image/x-icon"/>
-<?php 
+<?php
   if ($_SERVER['HTTP_HOST'] == 'proxyforgame.com') {
     $pfgPath = $_SERVER['DOCUMENT_ROOT'];
   } else {
     $pfgPath = "D:\Programming\JS\pfg.wmp\www";
   };
 ?>
-  <link id="light-theme" type="text/css" href="/css/redmond/jquery.ui.all.css" rel="stylesheet"/>
-  <link id="dark-theme" type="text/css" href="/css/dark-hive/jquery.ui.all.css" rel="stylesheet" disabled="disabled"/>
-  <link type="text/css" href="/css/langs.css?v=<?php echo filemtime($pfgPath.'/css/langs.css'); ?>" rel="stylesheet" />
-  <link type="text/css" href="/css/common.css?v=<?php echo filemtime($pfgPath.'/css/common.css'); ?>" rel="stylesheet"/>
-  <link type="text/css" href="/ogame/calc/css/flight.css?v=<?php echo filemtime($pfgPath.'/ogame/calc/css/flight.css'); ?>" rel="stylesheet"/>
-  
-<?php if ( $_SERVER['SERVER_NAME'] == 'proxyforgame.com'): ?>
-  <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.min.js"></script>
-  <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jqueryui/1.8.11/jquery-ui.min.js"></script>
-<?php elseif ( $_SERVER['SERVER_NAME'] == 'pfg.wmp'): ?>
-  <script type="text/javascript" src="/js/jquery.min.js"></script>
-  <script type="text/javascript" src="/js/jquery-ui.min.js"></script>
-<?php else: ?>
-  <script type="text/javascript" src="/js/jquery-1.5.1.min.js"></script>
-  <script type="text/javascript" src="/js/jquery-ui-1.8.11.min.js"></script>
-<?php endif; ?>
-  <script type="text/javascript" src="/js/jquery.inputmask.js"></script>
-  <script type="text/javascript" src="/js/jquery.cookie.js"></script>
+  <!-- Bootstrap 5 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet"/>
+
+  <!-- Custom styles -->
+  <link type="text/css" href="/css/langs_bs.css?v=<?php echo filemtime($pfgPath.'/css/langs_bs.css'); ?>" rel="stylesheet" />
+  <link type="text/css" href="/css/common_bs.css?v=<?php echo filemtime($pfgPath.'/css/common_bs.css'); ?>" rel="stylesheet"/>
+  <link type="text/css" href="/ogame/calc/css/flight_bs.css?v=<?php echo filemtime($pfgPath.'/ogame/calc/css/flight_bs.css'); ?>" rel="stylesheet"/>
+
+  <!-- Bootstrap 5 JS Bundle -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+
+  <!-- Utility libraries and calculator modules -->
   <script type="text/javascript" src="/js/utils.js?v=<?php echo filemtime($pfgPath.'/js/utils.js'); ?>"></script>
-  <script type="text/javascript" src="/ogame/calc/js/flight.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/flight.js'); ?>"></script>
+  <script type="text/javascript" src="/ogame/calc/js/dom-utils.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/dom-utils.js'); ?>"></script>
+  <script type="text/javascript" src="/ogame/calc/js/flight-core.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/flight-core.js'); ?>"></script>
+  <script type="text/javascript" src="/ogame/calc/js/flight-data-collector.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/flight-data-collector.js'); ?>"></script>
+  <script type="text/javascript" src="/ogame/calc/js/flight-renderer.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/flight-renderer.js'); ?>"></script>
+  <script type="text/javascript" src="/ogame/calc/js/flight-orchestration.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/flight-orchestration.js'); ?>"></script>
 
   <script type="text/javascript">
-    $(function() {
-      $("button").button();
-      $("#start-datetime").inputmask("<?= $l['datetime-format'] ?>");
-      $("#flight-time").inputmask("<?= $l['flight-time-format'] ?>");
-      $("#save-start-datetime").inputmask("<?= $l['datetime-format'] ?>", { "oncomplete": function(){ $("#save-return-datetime")[0].focus(); } });
-      $("#save-return-datetime").inputmask("<?= $l['datetime-format'] ?>", { "oncomplete": function(){ $("#save-tolerance-time")[0].focus(); } });
-      $("#save-tolerance-time").inputmask("<?= $l['tolerance-time-format'] ?>", { "oncomplete": function(){ $("#calculate-savepoints")[0].focus(); } });
-    });
-    // десятичный разделитель будет использоваться в функциях, проверяющих валидность чисел в input-ах
-    options.decimalSeparator='<?= $l['decimal-separator'] ?>';
+    // `options` is defined in flight-orchestration.js; here we only fill in the
+    // translation strings the renderer and orchestrator read.
+    options.decimalSeparator = '<?= $l['decimal-separator'] ?>';
     options.datetimeW = '<?= $l['datetime-w'] ?>';
     options.datetimeD = '<?= $l['datetime-d'] ?>';
     options.datetimeH = '<?= $l['datetime-h'] ?>';
@@ -82,16 +74,13 @@
     options.fleetDelConfMsg = "<?= $l['del-fleet-confirm'] ?>";
     options.fleetOwrConfMsg = "<?= $l['owr-fleet-confirm'] ?>";
     options.fleetLoadConfMsg = "<?= $l['load-fleet-confirm'] ?>";
-    options.readTitle = "<?= $l['read'] ?>";
-    options.cancelTitle = "<?= $l['cancel'] ?>";
     options.smallCargoName = "<?= $l['small-cargo'] ?>";
     options.missingSCName = "<?= $l['no-sc-message'] ?>";
     options.badSRCode = "<?= $l['import-bad-code-msg'] ?>";
     options.dataFetchMsg = "<?= $l['fetchig-data'] ?>";
-    options.ownApiImportTitle = "<?= $l['own-api-import-title'] ?>";
     options.ownApiBadJsonMsg = "<?= $l['own-api-bad-json-msg'] ?>";
 
-    unis = {
+    var unis = {
 <?php
   $f1 = true;
   foreach ($universes as $ul => $uc) {
@@ -110,484 +99,349 @@
 <?php require_once('../../cookies.tpl'); ?>
 </head>
 
-<body class="ui-widget">
+<body>
 
-<table id="vtable" cellspacing="2" cellpadding="0" border="0"><tr>
-<td id="vtablesb"><?php require_once('../../sidebar.tpl'); ?></td>
-<td id="vtablec">
-<?php require_once('../../topbar.tpl'); ?>
-
-<div id="lf-bonuses-reader" title="<?= $l['lf-bonuses-reader-hdr'] ?>">
-  <div class="ui-widget-content ui-corner-all width: auto; ">
-    <div class="irn-calc-info">
-      <?= $l['lf-bonuses-reader-info'] ?>
-    </div>
-    <div id="lab-levels-div">
-      <textarea id="lf-bonuses-txtarea" rows="8" cols="45"></textarea>
-    </div>
-  </div>
-</div>
-
-<div id="own-api-reader" title="<?= $l['own-api-reader-hdr'] ?>">
-  <div class="ui-widget-content ui-corner-all width: auto; ">
-    <div class="irn-calc-info">
-      <?= $l['own-api-reader-info'] ?>
-    </div>
-    <div id="own-api-div">
-      <textarea id="own-api-txtarea" rows="6" cols="50"></textarea>
-      <div class="irn-calc-info">
-        <?= $l['own-api-reader-note'] ?>
-      </div>
-    </div>
-  </div>
-</div>
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-md-2"><?php require_once('../../sidebar_bs.tpl'); ?></div>
+    <div class="col-md-10">
+    <?php require_once('../../topbar_bs.tpl'); ?>
 
 <div id="flight">
-  <div class="ui-widget-content ui-corner-all">
-    <div id="reset" class="ui-state-error ui-corner-all" title="<?= $l['reset'] ?>"><span class="ui-icon ui-icon-arrowrefresh-1-w"></span></div>
-    <div class="ui-widget-header ui-corner-all c-ui-main-header"><?= $l['title'] ?></div>		
-    <div id="general-settings-panel" class="c-ui-widget-content ui-corner-all ui-panel">
-      <div id="params-accordion" >
-        <h3><a href="#"><?= $l['parameters'] ?></a></h3>
-        <div id="accordion-prm">
-          <div id="universes-panel" class="ui-widget-content ui-corner-all">
-            <table cellpadding="2" cellspacing="0" border="0" align="center">
-              <tr>
-                <td><label for="universe-name-select"><?= $l['universe'] ?></label></td>
-                <td>
-                  <select id="universe-name-select" name="universe-name-select" class="ui-state-default ui-corner-all ui-input ui-input-margin">
-                    <option value="0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</option>
-                  </select>
-                </td>
-                <td>
-                  <div id="universe-control">
-                    <button id="universe-load" title="<?= $l['universe-load'] ?>" class="uni-control-btn"></button>
-                    <button id="universe-save" title="<?= $l['universe-save'] ?>" class="uni-control-btn"></button>
-                    <button id="universe-delete" title="<?= $l['universe-delete'] ?>" class="uni-control-btn"></button>
-                  </div>
-                </td>
-                <td width="20px">&nbsp;</td>
-                <td><input id="universe-name" type="text" name="universe-name" class="ui-state-default ui-corner-all ui-input ui-input-margin input-20columns"/></td>
-                <td><button id="universe-add" title="<?= $l['universe-add'] ?>" class="uni-control-btn"></button></td>
-                <td>&nbsp;</td>
-              </tr>
-              <tr>
-                <td>SR_KEY:</td>
-                <td colspan="4">
-                  <div style="display: flex; align-items: center; gap: 3px; width: 100%;">
-                    <input id="api-code" placeholder="API OGame / API LogServer.net" type="text" style="flex: 1 1 auto; width: auto; text-align: center;" class="ui-state-default ui-corner-all ui-input ui-input-margin"/>
-                    <span class="ui-icon ui-icon-help" title="<?= $l['import-hint'] ?>" style="flex: 0 0 auto;"></span>
-                    <button id="api-get" title="<?= $l['import-sr'] ?>" class="uni-control-btn" style="margin-right: 14px;"></button>
-                  </div>
-                </td>
-                <td>
-                  <button id="import-own-api" title="<?= $l['own-api-import-btn'] ?>" class="uni-control-btn"></button>
-                </td>
-              </tr>
-            </table>
-          </div>
-          <table cellpadding="2" cellspacing="0" border="0" align="center">
-            <tr>
-              <td><label><?= $l['class'] ?>:</label></td>
-              <td><input id="class-0" type="radio" name="class" value="0"/><label for="class-0"><?= $l['class-collector'] ?></label></td>
-              <td><input id="class-1" type="radio" name="class" value="1"/><label for="class-1"><?= $l['class-general'] ?></label></td>
-              <td><input id="class-2" type="radio" name="class" value="2"/><label for="class-2"><?= $l['class-discoverer'] ?></label></td>
-              <td colspan="3">
-                &nbsp;<input id="trader-bonus" type="checkbox" name="trader-bonus" class="ui-state-default ui-corner-all ui-input" /><label for="trader-bonus"><?= $l['trader-bonus'] ?></label>
-              </td>
-            </tr>
-            <tr>
-              <td><label for="cmb-drive"><?= $l['cmb-drive'] ?></label></td>
-              <td><input id="cmb-drive" type="text" name="cmb-drive" class="ui-state-default ui-corner-all ui-input level-input ui-input-margin" value="0" /></td>
-              <td><label for="imp-drive"><?= $l['imp-drive'] ?></label></td>
-              <td><input id="imp-drive" type="text" name="imp-drive" class="ui-state-default ui-corner-all ui-input level-input ui-input-margin" value="0" /></td>
-              <td><label for="hyp-drive"><?= $l['hyp-drive'] ?></label></td>
-              <td><input id="hyp-drive" type="text" name="hyp-drive" class="ui-state-default ui-corner-all ui-input level-input ui-input-margin" value="0" /></td>
-              <td><label for="hypertech-lvl"><?= $l['hyper-tech'] ?>&nbsp;</label></td>
-              <td><input id="hypertech-lvl" type="text" name="hypertech-lvl" class="ui-state-default ui-corner-all ui-input coord-input-small ui-input-margin" value="0" /></td>
-            </tr>
-          </table>
-          <table cellpadding="0" cellspacing="0" border="0" align="center">
-            <tr>
-              <td><label for="departure-g"><?= $l['departure-point'] ?>&nbsp;</label></td>
-              <td>
-                <input id="departure-g" type="text" name="departure-g" class="ui-state-default ui-corner-all ui-input coord-input-small ui-input-margin" value="1" alt="<?= $l['departure-point'] ?>-<?= $l['galaxy'] ?>" />:
-                <input id="departure-s" type="text" name="departure-s" class="ui-state-default ui-corner-all ui-input coord-input ui-input-margin" value="1" alt="<?= $l['departure-point'] ?>-<?= $l['system'] ?>" />:
-                <input id="departure-p" type="text" name="departure-p" class="ui-state-default ui-corner-all ui-input coord-input-small ui-input-margin" value="1" alt="<?= $l['departure-point'] ?>-<?= $l['planet'] ?>" />
-              </td>
-              <td style="width: 30px;">&nbsp;</td>
-              <td><label for="country"><?= $l['country'] ?>&nbsp;</label></td>
-              <td>
-                <select id="country" class="ui-state-default ui-corner-all ui-input ui-input-margin mrg-right-5">
-                  <option value="--"></option>
-                  <?php if ($countries): ?>
-                  <?php foreach ($countries as $row): ?>
-                    <option value="<?= $row['lang'] ?>"><?= $row['name'] ?></option>
-                  <?php endforeach; ?>
-                  <?php endif; ?>
-                </select>
-              </td>
-              <td><label for="universe"><?= $l['universe'] ?>&nbsp;</label></td>
-              <td>
-                <select id="universe" class="ui-state-default ui-corner-all ui-input ui-input-margin mrg-right-5" style="width: 15ch;">
-              </td>
-            </tr>
-          </table>
-          <table cellpadding="0" cellspacing="0" border="0" align="center">
-            <tr>
-              <td><?= $l['circular'] ?></td>
-              <td><input id="circular-systems" type="checkbox" name="circular-systems" class="ui-state-default ui-corner-all ui-input" /><label for="circular-systems"><abbr title="<?= $l['circ-systems-explain'] ?>"><?= $l['circ-systems'] ?></abbr></label></td>
-              <td><input id="circular-galaxies" type="checkbox" name="circular-galaxies" class="ui-state-default ui-corner-all ui-input" /><label for="circular-galaxies"><abbr title="<?= $l['circ-galaxies-explain'] ?>"><?= $l['circ-galaxies'] ?></abbr></label></td>
-              <td style="width: 20px;">&nbsp</td>
-              <td><label for="systems-num"><?= $l['systems-num'] ?></label></td>
-              <td><input id="systems-num" type="text" name="systems-num" class="ui-state-default ui-corner-all ui-input level-input-small ui-input-margin" value="499" /></td>
-              <td><label for="galaxies-num"><?= $l['galaxies-num'] ?></label></td>
-              <td><input id="galaxies-num" type="text" name="galaxies-num" class="ui-state-default ui-corner-all ui-input level-input-small ui-input-margin" value="9" /></td>
-            </tr>
-          </table>
-          <table cellpadding="0" cellspacing="0" border="0" align="center">
-            <tr>
-              <td><label for="speed-fleet-title"><?= $l['speed-fleet-title'] ?></label></td>
-              <td style="width: 10px;">&nbsp;</td>
-              <td><label for="speed-fleet-war"><?= $l['speed-fleet-war'] ?></label></td>
-              <td>
-                <select id="speed-fleet-war" name="speed-fleet-war" class="ui-state-default ui-corner-all ui-input ui-input-margin" >
-                  <option value="1" selected="selected">1</option>
-                  <option value="2">2</option>
-                  <option value="3">3</option>
-                  <option value="4">4</option>
-                  <option value="5">5</option>
-                  <option value="6">6</option>
-                  <option value="7">7</option>
-                  <option value="8">8</option>
-                  <option value="9">9</option>
-                  <option value="10">10</option>
-                </select>
-              </td>
-              <td style="width: 10px;">&nbsp;</td>
-              <td><label for="speed-fleet-peaceful"><?= $l['speed-fleet-peaceful'] ?></label></td>
-              <td>
-                <select id="speed-fleet-peaceful" name="speed-fleet-peaceful" class="ui-state-default ui-corner-all ui-input ui-input-margin" >
-                  <option value="1" selected="selected">1</option>
-                  <option value="2">2</option>
-                  <option value="3">3</option>
-                  <option value="4">4</option>
-                  <option value="5">5</option>
-                  <option value="6">6</option>
-                  <option value="7">7</option>
-                  <option value="8">8</option>
-                  <option value="9">9</option>
-                  <option value="10">10</option>
-                </select>
-              </td>
-              <td style="width: 10px;">&nbsp;</td>
-              <td><label for="speed-fleet-holding"><?= $l['speed-fleet-holding'] ?></label></td>
-              <td>
-                <select id="speed-fleet-holding" name="speed-fleet-holding" class="ui-state-default ui-corner-all ui-input ui-input-margin" >
-                  <option value="1" selected="selected">1</option>
-                  <option value="2">2</option>
-                  <option value="3">3</option>
-                  <option value="4">4</option>
-                  <option value="5">5</option>
-                  <option value="6">6</option>
-                  <option value="7">7</option>
-                  <option value="8">8</option>
-                  <option value="9">9</option>
-                  <option value="10">10</option>
-                </select>
-              </td>
-              <td style="width: 30px;">&nbsp;</td>
-              <td><label for="sp-cargohold"><?= $l['sp-cargohold'] ?>&nbsp;</label></td>
-              <td><input id="sp-cargohold" type="text" name="p-cargohold" class="ui-state-default ui-corner-all ui-input coord-input-small ui-input-margin" value="0" /></td>
-            </tr>
-          </table>
-          <table cellpadding="0" cellspacing="0" border="0" align="center">
-            <tr>
-              <td>
-                <label for="deut-factor"><?= $l['lf-bonus-deut-consum'] ?></label>
-              </td>
-              <td>
-                <select id="deut-factor" name="deut-factor" class="ui-state-default ui-corner-all ui-input ui-input-margin mrg-right-5" >
-                  <option value="5">50%</option>
-                  <option value="6">60%</option>
-                  <option value="7">70%</option>
-                  <option value="8">80%</option>
-                  <option value="9">90%</option>
-                  <option value="10">100%</option>
-                </select>							
-              </td>
-              <td style="width: 30px;">&nbsp;</td>
-              <td><?= $l['deut-cons-reduction'] ?>&nbsp;</label></td>
-              <td>
-                <select id="deut-generals-bonus" name="deut-generals-bonus" class="ui-state-default ui-corner-all ui-input ui-input-margin" >
-                  <option value="25">25%</option>
-                  <option value="36">36%</option>
-                  <option value="50">50%</option>
-                </select>							
-              </td>
-            </tr>
-          </table>
-          <hr>
-          <table id="lf-blanket-ehn-tbl" cellpadding="2" cellspacing="0" border="0" align="center">
-            <tr>
-              <td><label for="lf-mechan-general-enh"><?= $l['generals-character-bonus'] ?></label></td>
-              <td><input id="lf-mechan-general-enh" type="text" name="lf-mechan-general-enh" class="ui-state-default ui-corner-all ui-input count-input ui-input-margin" value="0" /></td>
-              <td><label for="lf-rocktal-collector-enh"><?= $l['collectors-character-bonus'] ?></label></td>
-              <td><input id="lf-rocktal-collector-enh" type="text" name="lf-rocktal-collector-enh" class="ui-state-default ui-corner-all ui-input count-input ui-input-margin" value="0" /></td>
-              <td><span class="ui-icon ui-icon-help" title="<?= $l['character-bonus-hint'] ?>"></span></td>
-            </tr>
-          </table>
-          <div id="lf-bonuses-accordion">
-            <h3><a href="#"><?= $l['lf-bonuses-ships'] ?></a></h3>
-            <div id="accordion-lf-prm">
-            <table width="80%" cellpadding="0" cellspacing="1" border="0" align="center">
-              <tr><td><button id="open-lfbr" style="float: right;"><?= $l['open-lfbr'] ?></button></td></tr> 
-            </table>
-            <table id="lf-ships-bonuses" class="lined" width="80%" cellpadding="0" cellspacing="1" border="0" align="center">
-              <tr>
-                <th><?= $l['ship-name'] ?></th>
-                <th><?= $l['speed-increase'] ?></th>
-                <th><?= $l['cargo-increase'] ?></th>
-                <th><?= $l['fuel-decrease'] ?></th>
-              </tr>
-              <tr class="odd">
-                <td><?= $l['small-cargo'] ?></td>
-                <td class="centered"><input type="text" class="ui-state-default ui-corner-all ui-input no-mp input-7columns centered 202-speed"/></td>
-                <td class="centered"><input type="text" class="ui-state-default ui-corner-all ui-input no-mp input-7columns centered 202-cargo"/></td>
-                <td class="centered"><input type="text" class="ui-state-default ui-corner-all ui-input no-mp input-7columns centered 202-fuel"/></td>
-              </tr>
-              <tr class="even">
-                <td><?= $l['large-cargo'] ?></td>
-                <td class="centered"><input type="text" class="ui-state-default ui-corner-all ui-input no-mp input-7columns centered 203-speed"/></td>
-                <td class="centered"><input type="text" class="ui-state-default ui-corner-all ui-input no-mp input-7columns centered 203-cargo"/></td>
-                <td class="centered"><input type="text" class="ui-state-default ui-corner-all ui-input no-mp input-7columns centered 203-fuel"/></td>
-              </tr>
-              <tr class="odd">
-                <td><?= $l['light-fighter'] ?></td>
-                <td class="centered"><input type="text" class="ui-state-default ui-corner-all ui-input no-mp input-7columns centered 204-speed"/></td>
-                <td class="centered"><input type="text" class="ui-state-default ui-corner-all ui-input no-mp input-7columns centered 204-cargo"/></td>
-                <td class="centered"><input type="text" class="ui-state-default ui-corner-all ui-input no-mp input-7columns centered 204-fuel"/></td>
-              </tr>
-              <tr class="even">
-                <td><?= $l['heavy-fighter'] ?></td>
-                <td class="centered"><input type="text" class="ui-state-default ui-corner-all ui-input no-mp input-7columns centered 205-speed"/></td>
-                <td class="centered"><input type="text" class="ui-state-default ui-corner-all ui-input no-mp input-7columns centered 205-cargo"/></td>
-                <td class="centered"><input type="text" class="ui-state-default ui-corner-all ui-input no-mp input-7columns centered 205-fuel"/></td>
-              </tr>
-              <tr class="odd">
-                <td><?= $l['cruiser'] ?></td>
-                <td class="centered"><input type="text" class="ui-state-default ui-corner-all ui-input no-mp input-7columns centered 206-speed"/></td>
-                <td class="centered"><input type="text" class="ui-state-default ui-corner-all ui-input no-mp input-7columns centered 206-cargo"/></td>
-                <td class="centered"><input type="text" class="ui-state-default ui-corner-all ui-input no-mp input-7columns centered 206-fuel"/></td>
-              </tr>
-              <tr class="even">
-                <td><?= $l['battleship'] ?></td>
-                <td class="centered"><input type="text" class="ui-state-default ui-corner-all ui-input no-mp input-7columns centered 207-speed"/></td>
-                <td class="centered"><input type="text" class="ui-state-default ui-corner-all ui-input no-mp input-7columns centered 207-cargo"/></td>
-                <td class="centered"><input type="text" class="ui-state-default ui-corner-all ui-input no-mp input-7columns centered 207-fuel"/></td>
-              </tr>
-              <tr class="odd">
-                <td><?= $l['colony-ship'] ?></td>
-                <td class="centered"><input type="text" class="ui-state-default ui-corner-all ui-input no-mp input-7columns centered 208-speed"/></td>
-                <td class="centered"><input type="text" class="ui-state-default ui-corner-all ui-input no-mp input-7columns centered 208-cargo"/></td>
-                <td class="centered"><input type="text" class="ui-state-default ui-corner-all ui-input no-mp input-7columns centered 208-fuel"/></td>
-              </tr>
-              <tr class="even">
-                <td><?= $l['recycler'] ?></td>
-                <td class="centered"><input type="text" class="ui-state-default ui-corner-all ui-input no-mp input-7columns centered 209-speed"/></td>
-                <td class="centered"><input type="text" class="ui-state-default ui-corner-all ui-input no-mp input-7columns centered 209-cargo"/></td>
-                <td class="centered"><input type="text" class="ui-state-default ui-corner-all ui-input no-mp input-7columns centered 209-fuel"/></td>
-              </tr>
-              <tr class="odd">
-                <td><?= $l['esp-probe'] ?></td>
-                <td class="centered"><input type="text" class="ui-state-default ui-corner-all ui-input no-mp input-7columns centered 210-speed"/></td>
-                <td class="centered"><input type="text" class="ui-state-default ui-corner-all ui-input no-mp input-7columns centered 210-cargo"/></td>
-                <td class="centered"><input type="text" class="ui-state-default ui-corner-all ui-input no-mp input-7columns centered 210-fuel"/></td>
-              </tr>
-              <tr class="even">
-                <td><?= $l['bomber'] ?></td>
-                <td class="centered"><input type="text" class="ui-state-default ui-corner-all ui-input no-mp input-7columns centered 211-speed"/></td>
-                <td class="centered"><input type="text" class="ui-state-default ui-corner-all ui-input no-mp input-7columns centered 211-cargo"/></td>
-                <td class="centered"><input type="text" class="ui-state-default ui-corner-all ui-input no-mp input-7columns centered 211-fuel"/></td>
-              </tr>
-              <tr class="odd">
-                <td><?= $l['destroyer'] ?></td>
-                <td class="centered"><input type="text" class="ui-state-default ui-corner-all ui-input no-mp input-7columns centered 213-speed"/></td>
-                <td class="centered"><input type="text" class="ui-state-default ui-corner-all ui-input no-mp input-7columns centered 213-cargo"/></td>
-                <td class="centered"><input type="text" class="ui-state-default ui-corner-all ui-input no-mp input-7columns centered 213-fuel"/></td>
-              </tr>
-              <tr class="even">
-                <td><?= $l['death-star'] ?></td>
-                <td class="centered"><input type="text" class="ui-state-default ui-corner-all ui-input no-mp input-7columns centered 214-speed"/></td>
-                <td class="centered"><input type="text" class="ui-state-default ui-corner-all ui-input no-mp input-7columns centered 214-cargo"/></td>
-                <td class="centered"><input type="text" class="ui-state-default ui-corner-all ui-input no-mp input-7columns centered 214-fuel"/></td>
-              </tr>
-              <tr class="odd">
-                <td><?= $l['battlecruiser'] ?></td>
-                <td class="centered"><input type="text" class="ui-state-default ui-corner-all ui-input no-mp input-7columns centered 215-speed"/></td>
-                <td class="centered"><input type="text" class="ui-state-default ui-corner-all ui-input no-mp input-7columns centered 215-cargo"/></td>
-                <td class="centered"><input type="text" class="ui-state-default ui-corner-all ui-input no-mp input-7columns centered 215-fuel"/></td>
-              </tr>
-              <tr class="even">
-                <td><?= $l['reaper'] ?></td>
-                <td class="centered"><input type="text" class="ui-state-default ui-corner-all ui-input no-mp input-7columns centered 218-speed"/></td>
-                <td class="centered"><input type="text" class="ui-state-default ui-corner-all ui-input no-mp input-7columns centered 218-cargo"/></td>
-                <td class="centered"><input type="text" class="ui-state-default ui-corner-all ui-input no-mp input-7columns centered 218-fuel"/></td>
-              </tr>
-              <tr class="odd">
-                <td><?= $l['pathfinder'] ?></td>
-                <td class="centered"><input type="text" class="ui-state-default ui-corner-all ui-input no-mp input-7columns centered 219-speed"/></td>
-                <td class="centered"><input type="text" class="ui-state-default ui-corner-all ui-input no-mp input-7columns centered 219-cargo"/></td>
-                <td class="centered"><input type="text" class="ui-state-default ui-corner-all ui-input no-mp input-7columns centered 219-fuel"/></td>
-              </tr>
-            </table>
-            </div>	
-          </div>
-          <hr>
-          <table id="override-speed-tbl" cellpadding="2" cellspacing="0" border="0" align="center">
-            <tr>
-              <td>
-                <input id="ovr-speed-cb" type="checkbox" name="override-speed" class="ui-state-default ui-corner-all ui-input"/>
-                <label for="ovr-speed-cb"><abbr title="<?= $l['ovr-fleet-speed-explain'] ?>"><?= $l['ovr-fleet-speed'] ?></abbr></label>
-                <input id="ovr-speed-t" type="text" name="" class="ui-state-default ui-corner-all ui-input input-7columns ui-input-margin" value="10000" />
-              </td>
-              <td>
-            </tr>
-          </table>
-        </div>
-        <h3><a href="#"><?= $l['ships'] ?></a></h3>
-        <div id="accordion-ships">
-          <div id="fleets-panel" class="ui-widget-content ui-corner-all">
-            <table cellpadding="2" cellspacing="0" border="0" align="center">
-              <tr>
-                <td><label for="fleet-name-select"><?= $l['fleet'] ?></label></td>
-                <td>
-                  <select id="fleet-name-select" name="fleet-name-select" class="ui-state-default ui-corner-all ui-input ui-input-margin">
-                    <option value="0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</option>
-                  </select>
-                </td>
-                <td>
-                  <div id="fleet-control">
-                    <button id="fleet-load" title="<?= $l['universe-load'] ?>" class="uni-control-btn"></button>
-                    <button id="fleet-save" title="<?= $l['universe-save'] ?>" class="uni-control-btn"></button>
-                    <button id="fleet-delete" title="<?= $l['universe-delete'] ?>" class="uni-control-btn"></button>
-                  </div>
-                </td>
-                <td width="20px">&nbsp;</td>
-                <td><input id="fleet-name" type="text" name="fleet-name" class="ui-state-default ui-corner-all ui-input ui-input-margin input-20columns"/></td>
-                <td><button id="fleet-add" title="<?= $l['universe-add'] ?>" class="uni-control-btn"></button></td>
-              </tr>
-            </table>
-          </div>
-          <table cellpadding="0" cellspacing="0" border="0" align="center">
-            <tr>
-              <td><label for="small-cargo"><?= $l['small-cargo'] ?></label></td>
-              <td><label id="small-cargo-speed" class="speed-label">0</label></td>
-              <td><input id="small-cargo" type="text" name="small-cargo" class="ui-state-default ui-corner-all ui-input count-input ui-input-margin" value="0" /></td>
-
-              <td><label for="cruiser"><?= $l['cruiser'] ?></label></td>
-              <td><label id="cruiser-speed" class="speed-label">0</label></td>
-              <td><input id="cruiser" type="text" name="cruiser" class="ui-state-default ui-corner-all ui-input count-input ui-input-margin" value="0" /></td>
-
-              <td><label for="battlecruiser"><?= $l['battlecruiser'] ?></label></td>
-              <td><label id="battlecruiser-speed" class="speed-label">0</label></td>
-              <td><input id="battlecruiser" type="text" name="battlecruiser" class="ui-state-default ui-corner-all ui-input count-input ui-input-margin" value="0" /></td>
-            </tr>
-            <tr>
-              <td><label for="large-cargo"><?= $l['large-cargo'] ?></label></td>
-              <td><label id="large-cargo-speed" class="speed-label">0</label></td>
-              <td><input id="large-cargo" type="text" name="large-cargo" class="ui-state-default ui-corner-all ui-input count-input ui-input-margin" value="0" /></td>
-
-              <td><label for="battleship"><?= $l['battleship'] ?></label></td>
-              <td><label id="battleship-speed" class="speed-label">0</label></td>
-              <td><input id="battleship" type="text" name="battleship" class="ui-state-default ui-corner-all ui-input count-input ui-input-margin" value="0" /></td>
-              <td><label for="death-star"><?= $l['death-star'] ?></label></td>
-              <td><label id="death-star-speed" class="speed-label">0</label></td>
-              <td><input id="death-star" type="text" name="death-star" class="ui-state-default ui-corner-all ui-input count-input ui-input-margin" value="0" /></td>
-            </tr>
-            <tr>
-              <td><label for="light-fighter"><?= $l['light-fighter'] ?></label></td>
-              <td><label id="light-fighter-speed" class="speed-label">0</label></td>
-              <td><input id="light-fighter" type="text" name="light-fighter" class="ui-state-default ui-corner-all ui-input count-input ui-input-margin" value="0" /></td>
-
-              <td><label for="destroyer"><?= $l['destroyer'] ?></label></td>
-              <td><label id="destroyer-speed" class="speed-label">0</label></td>
-              <td><input id="destroyer" type="text" name="destroyer" class="ui-state-default ui-corner-all ui-input count-input ui-input-margin" value="0" /></td>
-              <td><label for="colony-ship"><?= $l['colony-ship'] ?></label></td>
-              <td><label id="colony-ship-speed" class="speed-label">0</label></td>
-              <td><input id="colony-ship" type="text" name="colony-ship" class="ui-state-default ui-corner-all ui-input count-input ui-input-margin" value="0" /></td>
-            </tr>
-            <tr>
-              <td><label for="heavy-fighter"><?= $l['heavy-fighter'] ?></label></td>
-              <td><label id="heavy-fighter-speed" class="speed-label">0</label></td>
-              <td><input id="heavy-fighter" type="text" name="heavy-fighter" class="ui-state-default ui-corner-all ui-input count-input ui-input-margin" value="0" /></td>
-
-              <td><label for="bomber"><?= $l['bomber'] ?></label></td>
-              <td><label id="bomber-speed" class="speed-label">0</label></td>
-              <td><input id="bomber" type="text" name="bomber" class="ui-state-default ui-corner-all ui-input count-input ui-input-margin" value="0" /></td>
-              <td><label for="recycler"><?= $l['recycler'] ?></label></td>
-              <td><label id="recycler-speed" class="speed-label">0</label></td>
-              <td><input id="recycler" type="text" name="recycler" class="ui-state-default ui-corner-all ui-input count-input ui-input-margin" value="0" /></td>
-            </tr>
-            <tr>
-              <td><label for="reaper"><?= $l['reaper'] ?></label></td>
-              <td><label id="reaper-speed" class="speed-label">0</label></td>
-              <td><input id="reaper" type="text" name="reaper" class="ui-state-default ui-corner-all ui-input count-input ui-input-margin" value="0" /></td>
-
-              <td><label for="pathfinder"><?= $l['pathfinder'] ?></label></td>
-              <td><label id="pathfinder-speed" class="speed-label">0</label></td>
-              <td><input id="pathfinder" type="text" name="pathfinder" class="ui-state-default ui-corner-all ui-input count-input ui-input-margin" value="0" /></td>
-              
-              <td><label for="esp-probe"><?= $l['esp-probe'] ?></label></td>
-              <td><label id="esp-probe-speed" class="speed-label">0</label></td>
-              <td><input id="esp-probe" type="text" name="esp-probe" class="ui-state-default ui-corner-all ui-input count-input ui-input-margin" value="0" /></td>
-            </tr>
-          </table>
-        </div>
+  <div class="border rounded position-relative">
+    <div class="d-flex align-items-center">
+      <div class="bg-body-secondary text-primary-emphasis rounded main-header text-center flex-grow-1"><?= $l['title'] ?></div>
+      <div id="reset" class="d-flex align-items-center justify-content-center bg-danger-subtle" title="<?= $l['reset'] ?>">
+        <i class="bi bi-arrow-counterclockwise" style="color: #dc3545; font-size: 1.25rem;"></i>
       </div>
     </div>
-    <div id="tabs">
-      <ul>
-        <li><a id="tabtag1" href="#flight-times-panel" ><?= $l['flight-time'] ?></a></li>
-        <li><a id="tabtag2" href="#save-points-panel" ><?= $l['save-points'] ?></a></li>
-      </ul>
-      <div id="flight-times-panel" class="ui-panel">
+
+    <div id="general-settings-panel" class="border rounded m-1 position-relative">
+      <div class="accordion" id="params-accordion">
+
+        <!-- Parameters -->
+        <div class="accordion-item">
+          <h2 class="accordion-header">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#accordion-prm"><?= $l['parameters'] ?></button>
+          </h2>
+          <div id="accordion-prm" class="accordion-collapse collapse" data-bs-parent="#params-accordion">
+            <div class="accordion-body">
+
+              <div id="universes-panel" class="border rounded p-2 mb-2">
+                <table class="mx-auto">
+                  <tr>
+                    <td><label for="universe-name-select"><?= $l['universe'] ?></label></td>
+                    <td>
+                      <select id="universe-name-select" name="universe-name-select" class="form-select form-select-sm d-inline-block w-auto ui-input-margin">
+                        <option value="0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</option>
+                      </select>
+                    </td>
+                    <td>
+                      <div id="universe-control" class="btn-group" role="group">
+                        <button id="universe-load" type="button" title="<?= $l['universe-load'] ?>" class="btn btn-sm btn-outline-secondary uni-control-btn"><i class="bi bi-box-arrow-in-down"></i></button>
+                        <button id="universe-save" type="button" title="<?= $l['universe-save'] ?>" class="btn btn-sm btn-outline-secondary uni-control-btn"><i class="bi bi-save"></i></button>
+                        <button id="universe-delete" type="button" title="<?= $l['universe-delete'] ?>" class="btn btn-sm btn-outline-secondary uni-control-btn"><i class="bi bi-x-lg"></i></button>
+                      </div>
+                    </td>
+                    <td style="width: 20px;">&nbsp;</td>
+                    <td><input id="universe-name" type="text" name="universe-name" class="form-control form-control-sm d-inline-block input-20columns ui-input-margin"/></td>
+                    <td><button id="universe-add" type="button" title="<?= $l['universe-add'] ?>" class="btn btn-sm btn-outline-secondary uni-control-btn"><i class="bi bi-plus-lg"></i></button></td>
+                  </tr>
+                  <tr>
+                    <td>SR_KEY:</td>
+                    <td colspan="4">
+                      <div class="d-flex align-items-center gap-1">
+                        <input id="api-code" placeholder="API OGame / API LogServer.net" type="text" class="form-control form-control-sm flex-grow-1 text-center ui-input-margin"/>
+                        <i class="bi bi-question-circle" data-bs-toggle="tooltip" title="<?= $l['import-hint'] ?>"></i>
+                        <button id="api-get" type="button" title="<?= $l['import-sr'] ?>" class="btn btn-sm btn-outline-secondary uni-control-btn"><i class="bi bi-box-arrow-in-down"></i></button>
+                      </div>
+                    </td>
+                    <td>
+                      <button id="import-own-api" type="button" title="<?= $l['own-api-import-btn'] ?>" class="btn btn-sm btn-outline-secondary uni-control-btn"><i class="bi bi-clipboard"></i></button>
+                    </td>
+                  </tr>
+                </table>
+              </div>
+
+              <table class="mx-auto">
+                <tr>
+                  <td><label><?= $l['class'] ?>:</label></td>
+                  <td class="px-2"><input id="class-0" type="radio" name="class" value="0" class="form-check-input"/> <label for="class-0"><?= $l['class-collector'] ?></label></td>
+                  <td class="px-2"><input id="class-1" type="radio" name="class" value="1" class="form-check-input"/> <label for="class-1"><?= $l['class-general'] ?></label></td>
+                  <td class="px-2"><input id="class-2" type="radio" name="class" value="2" class="form-check-input"/> <label for="class-2"><?= $l['class-discoverer'] ?></label></td>
+                  <td colspan="3">
+                    <input id="trader-bonus" type="checkbox" name="trader-bonus" class="form-check-input"/> <label for="trader-bonus"><?= $l['trader-bonus'] ?></label>
+                  </td>
+                </tr>
+                <tr>
+                  <td><label for="cmb-drive"><?= $l['cmb-drive'] ?></label></td>
+                  <td><input id="cmb-drive" type="text" name="cmb-drive" class="form-control form-control-sm d-inline-block level-input ui-input-margin" value="0" /></td>
+                  <td><label for="imp-drive"><?= $l['imp-drive'] ?></label></td>
+                  <td><input id="imp-drive" type="text" name="imp-drive" class="form-control form-control-sm d-inline-block level-input ui-input-margin" value="0" /></td>
+                  <td><label for="hyp-drive"><?= $l['hyp-drive'] ?></label></td>
+                  <td><input id="hyp-drive" type="text" name="hyp-drive" class="form-control form-control-sm d-inline-block level-input ui-input-margin" value="0" /></td>
+                  <td><label for="hypertech-lvl"><?= $l['hyper-tech'] ?>&nbsp;</label></td>
+                  <td><input id="hypertech-lvl" type="text" name="hypertech-lvl" class="form-control form-control-sm d-inline-block coord-input-small ui-input-margin" value="0" /></td>
+                </tr>
+              </table>
+
+              <table class="mx-auto">
+                <tr>
+                  <td><label for="departure-g"><?= $l['departure-point'] ?>&nbsp;</label></td>
+                  <td class="text-nowrap">
+                    <input id="departure-g" type="text" name="departure-g" class="form-control form-control-sm d-inline-block coord-input-small ui-input-margin" value="1" alt="<?= $l['departure-point'] ?>-<?= $l['galaxy'] ?>" />:
+                    <input id="departure-s" type="text" name="departure-s" class="form-control form-control-sm d-inline-block coord-input ui-input-margin" value="1" alt="<?= $l['departure-point'] ?>-<?= $l['system'] ?>" />:
+                    <input id="departure-p" type="text" name="departure-p" class="form-control form-control-sm d-inline-block coord-input-small ui-input-margin" value="1" alt="<?= $l['departure-point'] ?>-<?= $l['planet'] ?>" />
+                  </td>
+                  <td style="width: 30px;">&nbsp;</td>
+                  <td><label for="country"><?= $l['country'] ?>&nbsp;</label></td>
+                  <td>
+                    <select id="country" class="form-select form-select-sm d-inline-block w-auto ui-input-margin">
+                      <option value="--"></option>
+                      <?php if ($countries): ?>
+                      <?php foreach ($countries as $row): ?>
+                        <option value="<?= $row['lang'] ?>"><?= $row['name'] ?></option>
+                      <?php endforeach; ?>
+                      <?php endif; ?>
+                    </select>
+                  </td>
+                  <td><label for="universe"><?= $l['universe'] ?>&nbsp;</label></td>
+                  <td><select id="universe" class="form-select form-select-sm d-inline-block w-auto ui-input-margin"></select></td>
+                </tr>
+              </table>
+
+              <table class="mx-auto">
+                <tr>
+                  <td><?= $l['circular'] ?></td>
+                  <td class="px-2"><input id="circular-systems" type="checkbox" name="circular-systems" class="form-check-input"/> <label for="circular-systems"><abbr data-bs-toggle="tooltip" title="<?= $l['circ-systems-explain'] ?>"><?= $l['circ-systems'] ?></abbr></label></td>
+                  <td class="px-2"><input id="circular-galaxies" type="checkbox" name="circular-galaxies" class="form-check-input"/> <label for="circular-galaxies"><abbr data-bs-toggle="tooltip" title="<?= $l['circ-galaxies-explain'] ?>"><?= $l['circ-galaxies'] ?></abbr></label></td>
+                  <td style="width: 20px;">&nbsp;</td>
+                  <td><label for="systems-num"><?= $l['systems-num'] ?></label></td>
+                  <td><input id="systems-num" type="text" name="systems-num" class="form-control form-control-sm d-inline-block level-input-small ui-input-margin" value="499" /></td>
+                  <td><label for="galaxies-num"><?= $l['galaxies-num'] ?></label></td>
+                  <td><input id="galaxies-num" type="text" name="galaxies-num" class="form-control form-control-sm d-inline-block level-input-small ui-input-margin" value="9" /></td>
+                </tr>
+              </table>
+
+              <table class="mx-auto">
+                <tr>
+                  <td><label><?= $l['speed-fleet-title'] ?></label></td>
+                  <td style="width: 10px;">&nbsp;</td>
+                  <td><label for="speed-fleet-war"><?= $l['speed-fleet-war'] ?></label></td>
+                  <td>
+                    <select id="speed-fleet-war" name="speed-fleet-war" class="form-select form-select-sm d-inline-block w-auto ui-input-margin">
+                      <?php for($s=1;$s<=10;$s++): ?><option value="<?= $s ?>"<?= $s===1?' selected':'' ?>><?= $s ?></option><?php endfor; ?>
+                    </select>
+                  </td>
+                  <td style="width: 10px;">&nbsp;</td>
+                  <td><label for="speed-fleet-peaceful"><?= $l['speed-fleet-peaceful'] ?></label></td>
+                  <td>
+                    <select id="speed-fleet-peaceful" name="speed-fleet-peaceful" class="form-select form-select-sm d-inline-block w-auto ui-input-margin">
+                      <?php for($s=1;$s<=10;$s++): ?><option value="<?= $s ?>"<?= $s===1?' selected':'' ?>><?= $s ?></option><?php endfor; ?>
+                    </select>
+                  </td>
+                  <td style="width: 10px;">&nbsp;</td>
+                  <td><label for="speed-fleet-holding"><?= $l['speed-fleet-holding'] ?></label></td>
+                  <td>
+                    <select id="speed-fleet-holding" name="speed-fleet-holding" class="form-select form-select-sm d-inline-block w-auto ui-input-margin">
+                      <?php for($s=1;$s<=10;$s++): ?><option value="<?= $s ?>"<?= $s===1?' selected':'' ?>><?= $s ?></option><?php endfor; ?>
+                    </select>
+                  </td>
+                  <td style="width: 30px;">&nbsp;</td>
+                  <td><label for="sp-cargohold"><?= $l['sp-cargohold'] ?>&nbsp;</label></td>
+                  <td><input id="sp-cargohold" type="text" name="sp-cargohold" class="form-control form-control-sm d-inline-block coord-input-small ui-input-margin" value="0" /></td>
+                </tr>
+              </table>
+
+              <table class="mx-auto">
+                <tr>
+                  <td><label for="deut-factor"><?= $l['lf-bonus-deut-consum'] ?></label></td>
+                  <td>
+                    <select id="deut-factor" name="deut-factor" class="form-select form-select-sm d-inline-block w-auto ui-input-margin">
+                      <option value="5">50%</option>
+                      <option value="6">60%</option>
+                      <option value="7">70%</option>
+                      <option value="8">80%</option>
+                      <option value="9">90%</option>
+                      <option value="10" selected>100%</option>
+                    </select>
+                  </td>
+                  <td style="width: 30px;">&nbsp;</td>
+                  <td><?= $l['deut-cons-reduction'] ?>&nbsp;</td>
+                  <td>
+                    <select id="deut-generals-bonus" name="deut-generals-bonus" class="form-select form-select-sm d-inline-block w-auto ui-input-margin">
+                      <option value="25">25%</option>
+                      <option value="36">36%</option>
+                      <option value="50">50%</option>
+                    </select>
+                  </td>
+                </tr>
+              </table>
+
+              <hr>
+              <table id="lf-blanket-ehn-tbl" class="mx-auto">
+                <tr>
+                  <td><label for="lf-mechan-general-enh"><?= $l['generals-character-bonus'] ?></label></td>
+                  <td><input id="lf-mechan-general-enh" type="text" name="lf-mechan-general-enh" class="form-control form-control-sm d-inline-block count-input ui-input-margin" value="0" /></td>
+                  <td><label for="lf-rocktal-collector-enh"><?= $l['collectors-character-bonus'] ?></label></td>
+                  <td><input id="lf-rocktal-collector-enh" type="text" name="lf-rocktal-collector-enh" class="form-control form-control-sm d-inline-block count-input ui-input-margin" value="0" /></td>
+                  <td><i class="bi bi-question-circle" data-bs-toggle="tooltip" title="<?= $l['character-bonus-hint'] ?>"></i></td>
+                </tr>
+              </table>
+
+              <div class="accordion mt-2" id="lf-bonuses-accordion">
+                <div class="accordion-item">
+                  <h2 class="accordion-header">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#accordion-lf-prm"><?= $l['lf-bonuses-ships'] ?></button>
+                  </h2>
+                  <div id="accordion-lf-prm" class="accordion-collapse collapse" data-bs-parent="#lf-bonuses-accordion">
+                    <div class="accordion-body">
+                      <div class="text-end mb-1">
+                        <button id="open-lfbr" type="button" class="btn btn-sm btn-outline-primary"><?= $l['open-lfbr'] ?></button>
+                      </div>
+                      <table id="lf-ships-bonuses" class="lined mx-auto" cellpadding="0" cellspacing="1" border="0" style="width: 80%;">
+                        <tr>
+                          <th><?= $l['ship-name'] ?></th>
+                          <th><?= $l['speed-increase'] ?></th>
+                          <th><?= $l['cargo-increase'] ?></th>
+                          <th><?= $l['fuel-decrease'] ?></th>
+                        </tr>
+                        <?php
+                          $lfRows = [
+                            ['small-cargo', 202], ['large-cargo', 203], ['light-fighter', 204],
+                            ['heavy-fighter', 205], ['cruiser', 206], ['battleship', 207],
+                            ['colony-ship', 208], ['recycler', 209], ['esp-probe', 210],
+                            ['bomber', 211], ['destroyer', 213], ['death-star', 214],
+                            ['battlecruiser', 215], ['reaper', 218], ['pathfinder', 219],
+                          ];
+                          foreach ($lfRows as $idx => $r):
+                            $name = $r[0]; $tech = $r[1];
+                            $cls = ($idx % 2) === 0 ? 'odd' : 'even';
+                        ?>
+                        <tr class="<?= $cls ?>">
+                          <td><?= $l[$name] ?></td>
+                          <td class="centered"><input type="text" class="form-control form-control-sm d-inline-block no-mp input-7columns centered <?= $tech ?>-speed"/></td>
+                          <td class="centered"><input type="text" class="form-control form-control-sm d-inline-block no-mp input-7columns centered <?= $tech ?>-cargo"/></td>
+                          <td class="centered"><input type="text" class="form-control form-control-sm d-inline-block no-mp input-7columns centered <?= $tech ?>-fuel"/></td>
+                        </tr>
+                        <?php endforeach; ?>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <hr>
+              <table id="override-speed-tbl" class="mx-auto">
+                <tr>
+                  <td>
+                    <input id="ovr-speed-cb" type="checkbox" name="override-speed" class="form-check-input"/>
+                    <label for="ovr-speed-cb"><abbr data-bs-toggle="tooltip" title="<?= $l['ovr-fleet-speed-explain'] ?>"><?= $l['ovr-fleet-speed'] ?></abbr></label>
+                    <input id="ovr-speed-t" type="text" class="form-control form-control-sm d-inline-block input-7columns ui-input-margin" value="10000" />
+                  </td>
+                </tr>
+              </table>
+
+            </div>
+          </div>
+        </div>
+
+        <!-- Ships -->
+        <div class="accordion-item">
+          <h2 class="accordion-header">
+            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#accordion-ships"><?= $l['ships'] ?></button>
+          </h2>
+          <div id="accordion-ships" class="accordion-collapse collapse show" data-bs-parent="#params-accordion">
+            <div class="accordion-body">
+
+              <div id="fleets-panel" class="border rounded p-2 mb-2">
+                <table class="mx-auto">
+                  <tr>
+                    <td><label for="fleet-name-select"><?= $l['fleet'] ?></label></td>
+                    <td>
+                      <select id="fleet-name-select" name="fleet-name-select" class="form-select form-select-sm d-inline-block w-auto ui-input-margin">
+                        <option value="0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</option>
+                      </select>
+                    </td>
+                    <td>
+                      <div id="fleet-control" class="btn-group" role="group">
+                        <button id="fleet-load" type="button" title="<?= $l['universe-load'] ?>" class="btn btn-sm btn-outline-secondary uni-control-btn"><i class="bi bi-box-arrow-in-down"></i></button>
+                        <button id="fleet-save" type="button" title="<?= $l['universe-save'] ?>" class="btn btn-sm btn-outline-secondary uni-control-btn"><i class="bi bi-save"></i></button>
+                        <button id="fleet-delete" type="button" title="<?= $l['universe-delete'] ?>" class="btn btn-sm btn-outline-secondary uni-control-btn"><i class="bi bi-x-lg"></i></button>
+                      </div>
+                    </td>
+                    <td style="width: 20px;">&nbsp;</td>
+                    <td><input id="fleet-name" type="text" name="fleet-name" class="form-control form-control-sm d-inline-block input-20columns ui-input-margin"/></td>
+                    <td><button id="fleet-add" type="button" title="<?= $l['universe-add'] ?>" class="btn btn-sm btn-outline-secondary uni-control-btn"><i class="bi bi-plus-lg"></i></button></td>
+                  </tr>
+                </table>
+              </div>
+
+              <table class="mx-auto">
+                <?php
+                  $shipRows = [
+                    [['small-cargo'], ['cruiser'], ['battlecruiser']],
+                    [['large-cargo'], ['battleship'], ['death-star']],
+                    [['light-fighter'], ['destroyer'], ['colony-ship']],
+                    [['heavy-fighter'], ['bomber'], ['recycler']],
+                    [['reaper'], ['pathfinder'], ['esp-probe']],
+                  ];
+                  foreach ($shipRows as $row):
+                ?>
+                <tr>
+                  <?php foreach ($row as $ship): $s = $ship[0]; ?>
+                  <td><label for="<?= $s ?>"><?= $l[$s] ?></label></td>
+                  <td><label id="<?= $s ?>-speed" class="speed-label">0</label></td>
+                  <td><input id="<?= $s ?>" type="text" name="<?= $s ?>" class="form-control form-control-sm d-inline-block count-input ui-input-margin" value="0" /></td>
+                  <?php endforeach; ?>
+                </tr>
+                <?php endforeach; ?>
+              </table>
+
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Result tabs -->
+    <ul class="nav nav-tabs mt-2" id="tabs" role="tablist">
+      <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="tabtag1" data-bs-toggle="tab" data-bs-target="#flight-times-panel" type="button" role="tab"><?= $l['flight-time'] ?></button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" id="tabtag2" data-bs-toggle="tab" data-bs-target="#save-points-panel" type="button" role="tab"><?= $l['save-points'] ?></button>
+      </li>
+    </ul>
+    <div class="tab-content border border-top-0 rounded-bottom p-2">
+
+      <div class="tab-pane fade show active" id="flight-times-panel" role="tabpanel">
         <table cellpadding="0" cellspacing="0" border="0" width="100%">
           <tr>
             <td valign="top">
-              <table cellpadding="0" cellspacing="0" border="0" style="margin-left: 10px;">
-                <tr>
-                  <td colspan="20">
-                    <input id="warrior-bonus" type="checkbox" name="warrior-bonus" class="ui-state-default ui-corner-all ui-input" /><label for="warrior-bonus"><?= $l['warrior-bonus'] ?></label>
-                    <td style="width: 30px;">&nbsp;</td>
-                    <!-- <input id="war-flight" type="checkbox" name="war-flight" class="ui-state-default ui-corner-all ui-input" /><label for="war-flight"></label> -->                    
-                    <td><span><?= $l['mission-type-title'] ?></span></td>
-                    <td><input id="mission-type-0" type="radio" name="mission-type" value="0"/><label for="mission-type-0"><?= $l['mission-type-war'] ?></label></td>
-                    <td><input id="mission-type-1" type="radio" name="mission-type" value="1"/><label for="mission-type-1"><?= $l['mission-type-peaceful'] ?></label></td>
-                    <td><input id="mission-type-2" type="radio" name="mission-type" value="2"/><label for="mission-type-2"><?= $l['mission-type-holding'] ?></label></td>
-                  </td>
-                </tr>
-              </table>
-              <table cellpadding="0" cellspacing="0" border="0" style="margin-left: 10px;">
-                <tr>
-                  <td><label for="destination-g"><?= $l['destination-point'] ?>&nbsp;</label></td>
-                  <td>
-                    <input id="destination-g" type="text" name="destination-g" class="ui-state-default ui-corner-all ui-input coord-input-small ui-input-margin" value="1" alt="<?= $l['destination-point'] ?>-<?= $l['galaxy'] ?>" />:
-                    <input id="destination-s" type="text" name="destination-s" class="ui-state-default ui-corner-all ui-input coord-input ui-input-margin" value="1" alt="<?= $l['destination-point'] ?>-<?= $l['system'] ?>" />:
-                    <input id="destination-p" type="text" name="destination-p" class="ui-state-default ui-corner-all ui-input coord-input-small ui-input-margin" value="1" alt="<?= $l['destination-point'] ?>-<?= $l['planet'] ?>" />
-                  </td>
-                  <td style="width: 30px;">&nbsp;</td>
-                  <td><label><?= $l['distance'] ?></label></td>
-                  <td style="width: 10px;">&nbsp;</td>
-                  <td><label id="distance"></label></td>
-                  <td style="width: 10px;">&nbsp;</td>
-                  <td>
-                    <label id="empty-systems-label" style="display: none;">(<?= $l['empty-systems'] ?>&nbsp;
-                      <input type="number" id="empty-systems-count-spin" class="ui-state-default ui-corner-all ui-input input-5columns" step="1" min="0" />)
-                    </label>
-                  </td>
-                </tr>
-              </table>
+              <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
+                <div><input id="warrior-bonus" type="checkbox" name="warrior-bonus" class="form-check-input"/> <label for="warrior-bonus"><?= $l['warrior-bonus'] ?></label></div>
+                <div class="ms-3"><span><?= $l['mission-type-title'] ?></span></div>
+                <div><input id="mission-type-0" type="radio" name="mission-type" value="0" class="form-check-input"/> <label for="mission-type-0"><?= $l['mission-type-war'] ?></label></div>
+                <div><input id="mission-type-1" type="radio" name="mission-type" value="1" class="form-check-input"/> <label for="mission-type-1"><?= $l['mission-type-peaceful'] ?></label></div>
+                <div><input id="mission-type-2" type="radio" name="mission-type" value="2" class="form-check-input"/> <label for="mission-type-2"><?= $l['mission-type-holding'] ?></label></div>
+              </div>
+
+              <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
+                <label for="destination-g"><?= $l['destination-point'] ?>&nbsp;</label>
+                <span class="text-nowrap">
+                  <input id="destination-g" type="text" name="destination-g" class="form-control form-control-sm d-inline-block coord-input-small ui-input-margin" value="1" alt="<?= $l['destination-point'] ?>-<?= $l['galaxy'] ?>" />:
+                  <input id="destination-s" type="text" name="destination-s" class="form-control form-control-sm d-inline-block coord-input ui-input-margin" value="1" alt="<?= $l['destination-point'] ?>-<?= $l['system'] ?>" />:
+                  <input id="destination-p" type="text" name="destination-p" class="form-control form-control-sm d-inline-block coord-input-small ui-input-margin" value="1" alt="<?= $l['destination-point'] ?>-<?= $l['planet'] ?>" />
+                </span>
+                <span class="ms-3"><label><?= $l['distance'] ?></label></span>
+                <label id="distance"></label>
+                <label id="empty-systems-label" style="display: none;">(<?= $l['empty-systems'] ?>&nbsp;
+                  <input type="number" id="empty-systems-count-spin" class="form-control form-control-sm d-inline-block" step="1" min="0" />)
+                </label>
+              </div>
+
               <table id="flight-times" class="lined" cellpadding="0" cellspacing="1" border="0" width="100%">
                 <tr>
                   <th><?= $l['speed'] ?></th>
@@ -597,192 +451,165 @@
                   <th style="width: 32px;">&nbsp;</th>
                 </tr>
                 <?php for($i=100; $i>0; $i-=5): ?>
-                <tr class="<?= ($i % 10) === 5 ? 'odd' : 'even' ?>" style="height: 18px;">
+                <tr class="<?= ($i % 10) === 5 ? 'odd' : 'even' ?>">
                   <td align="center"><?= $i ?>%</td>
                   <td align="center"></td>
                   <td align="center"></td>
                   <td align="center"></td>
-                  <td>
-                    <div id="take-to-calc-<?= $i ?>" class="ui-state-default ui-corner-all button-taketocalc" title="<?= $l['take-to-calc'] ?>">
-                      <span style="margin: auto;" class="ui-icon ui-icon-arrowthick-1-e"></span>
+                  <td align="center">
+                    <div class="btn btn-sm btn-outline-secondary button-taketocalc" title="<?= $l['take-to-calc'] ?>">
+                      <i class="bi bi-arrow-right"></i>
                     </div>
                   </td>
                 </tr>
                 <?php endfor; ?>
               </table>
             </td>
-            <td valign="top" width="10%">
-              <div class="ui-widget-content c-ui-widget-content ui-corner-all ui-panel">
-                <div id="toggle-mode" class="ui-state-default ui-corner-all" style="float:right; padding: 0px; cursor: pointer; margin: 0px; margin-left: 2px;" title="<?= $l['toggle-mode'] ?>"><span class="ui-icon ui-icon-transferthick-e-w"></span></div>
-                <div style="text-align: center; height: 18px; margin-left: 14px;">
-                    <span id="flight-title-1" style="font-weight: bold;"><?= $l['departure'] ?></span>
+            <td valign="top" width="220px" class="ps-2">
+              <div class="border rounded p-2">
+                <div class="d-flex align-items-center justify-content-between">
+                  <span id="flight-title-1" class="fw-bold"><?= $l['departure'] ?></span>
+                  <div id="toggle-mode" class="btn btn-sm btn-outline-secondary" title="<?= $l['toggle-mode'] ?>"><i class="bi bi-arrow-left-right"></i></div>
                 </div>
-                <table align="center"  cellpadding="0" cellspacing="0" border="0">
-                  <tr>
-                    <td>
-                      <div id="set-departure-now" class="ui-state-default ui-corner-all" style="cursor: pointer; " title="<?= $l['departure-now-hint'] ?>">
-                        <span style="font-size: xx-small; "><?= $l['departure-now'] ?></span>
-                      </div>
-                    </td>
-                    <td>
-                      <div id="set-departure-zero" class="ui-state-default ui-corner-all" style="cursor: pointer;" title="<?= $l['departure-zero-hint'] ?>">
-                        <span style="font-size: xx-small; ">&nbsp;(00:00:00)&nbsp;</span>
-                      </div>
-                    </td>
-                  </tr>
-                </table>
-                <div style="margin: 0px;">
-                  <input type="text" id="start-datetime" class="ui-state-default ui-corner-all ui-input startdate-input"  title="<?= $l['datetime-format-hint'] ?>"/>
+                <div class="d-flex gap-1 my-1">
+                  <button id="set-departure-now" type="button" class="btn btn-sm btn-outline-secondary flex-fill" title="<?= $l['departure-now-hint'] ?>"><?= $l['departure-now'] ?></button>
+                  <button id="set-departure-zero" type="button" class="btn btn-sm btn-outline-secondary" title="<?= $l['departure-zero-hint'] ?>">(00:00:00)</button>
                 </div>
-                <div>
-                  <table align="center">
-                    <tr>
-                      <td>
-                        <span><b><?= $l['flight'] ?></b></span>
-                      </td>
-                      <td>
-                        <div id="add-flight-time" class="ui-state-default ui-corner-all" style="padding: 0px; cursor: pointer; margin: 0px;" title="<?= $l['add-row'] ?>"><span class="ui-icon ui-icon-plus"></span></div>
-                      </td>
-                    </tr>
-                  </table>
+                <input type="text" id="start-datetime" class="form-control form-control-sm startdate-input" placeholder="dd.mm.yyyy hh:mm:ss" title="<?= $l['datetime-format-hint'] ?>"/>
+                <div class="d-flex align-items-center gap-1 my-1">
+                  <span class="fw-bold"><?= $l['flight'] ?></span>
+                  <div id="add-flight-time" class="btn btn-sm btn-outline-secondary" title="<?= $l['add-row'] ?>"><i class="bi bi-plus-lg"></i></div>
                 </div>
-                <div>
-                  <table id="flight-data">
-                    <tr>
-                      <td>
-                        <div class="ui-state-default ui-corner-all button-toggle" title="<?= $l['toggle-sign'] ?>"><span class="ui-icon ui-icon-plus"></span></div>
-                      </td>
-                      <td>
-                        <div style="margin: 0px;">
-                          <input id="flight-time" type="text" class="ui-state-default ui-corner-all ui-input flight-time-input"  title="<?= $l['flight-time-format-hint'] ?>"/>
-                        </div>
-                      </td>
-                      <td>
-                        <div class="ui-state-default ui-corner-all button-remove" title="<?= $l['remove-row'] ?>"><span class="ui-icon ui-icon-close"></span></div>
-                      </td>
-                    </tr>
-                  </table>
+                <div id="flight-data">
+                  <div class="d-flex align-items-center gap-1 mb-1 flight-leg">
+                    <button type="button" class="btn btn-sm btn-outline-secondary button-toggle flight-leg-sign" data-sign="+" title="<?= $l['toggle-sign'] ?>"><i class="bi bi-plus-lg"></i></button>
+                    <input id="flight-time" type="text" class="form-control form-control-sm flight-time-input" placeholder="dd hh:mm:ss" title="<?= $l['flight-time-format-hint'] ?>"/>
+                    <button type="button" class="btn btn-sm btn-outline-danger button-remove" title="<?= $l['remove-row'] ?>"><i class="bi bi-x-lg"></i></button>
+                  </div>
                 </div>
-                <div style="text-align: center; ">
-                  <span id="flight-title-2"style="font-weight: bold;"><?= $l['arrival'] ?></span>
-                </div>
-                <div id="arrival-moment" class="ui-state-default ui-corner-all ui-input startdate-input">?</div>
+                <div class="text-center fw-bold mt-1"><span id="flight-title-2"><?= $l['arrival'] ?></span></div>
+                <div id="arrival-moment" class="form-control form-control-sm startdate-input text-center">?</div>
               </div>
             </td>
           </tr>
         </table>
       </div>
-      <div id="save-points-panel" class="ui-panel">
-        <div style="float: right;">
-          <button id="calculate-savepoints" ><?= $l['search'] ?></button>
+
+      <div class="tab-pane fade" id="save-points-panel" role="tabpanel">
+        <div class="text-end mb-1">
+          <button id="calculate-savepoints" type="button" class="btn btn-sm btn-primary"><?= $l['search'] ?></button>
         </div>
         <div id="save-points-params">
-          <table cellpadding="0" cellspacing="0" border="0">
-            <tr>
-              <td>
-                <span><?= $l['departure'] ?></span>
-              </td>
-              <td>
-                <div style="margin: 0px;">
-                  <input type="text" id="save-start-datetime" class="ui-state-default ui-corner-all ui-input startdate-input"  title="<?= $l['datetime-format-hint'] ?>" />
-                </div>
-              </td>
-              <td>
-                <button id="set-save-departure-now"  title="<?= $l['departure-now-hint'] ?>"><?= $l['departure-now'] ?></button>
-              </td>
-              <td width=10px;>
-                &nbsp;
-              </td>
-              <td>
-                <span><?= $l['return'] ?></span>
-              </td>
-              <td>
-                <div style="margin: 0px;">
-                  <input type="text" id="save-return-datetime" class="ui-state-default ui-corner-all ui-input startdate-input"  title="<?= $l['datetime-format-hint'] ?>" />
-                </div>
-              </td>
-              <td width=10px;>
-                &nbsp;
-              </td>
-              <td>
-                <span><?= $l['save-tolerance'] ?></span>
-              </td>
-              <td>
-                <input type="text" id="save-tolerance-time" class="ui-state-default ui-corner-all ui-input tolerance-time-input"  title="<?= $l['tolerance-time-format-hint'] ?>" />
-              </td>
-              <td>
-                <span class="ui-icon ui-icon-help" title="<?= $l['savepoints-hint'] ?>"></span>
-              </td>
-            </tr>
-          </table>
+          <div class="d-flex flex-wrap align-items-center gap-2">
+            <span><?= $l['departure'] ?></span>
+            <input type="text" id="save-start-datetime" class="form-control form-control-sm startdate-input" placeholder="dd.mm.yyyy hh:mm:ss" title="<?= $l['datetime-format-hint'] ?>" />
+            <button id="set-save-departure-now" type="button" class="btn btn-sm btn-outline-secondary" title="<?= $l['departure-now-hint'] ?>"><?= $l['departure-now'] ?></button>
+            <span class="ms-2"><?= $l['return'] ?></span>
+            <input type="text" id="save-return-datetime" class="form-control form-control-sm startdate-input" placeholder="dd.mm.yyyy hh:mm:ss" title="<?= $l['datetime-format-hint'] ?>" />
+            <span class="ms-2"><?= $l['save-tolerance'] ?></span>
+            <input type="text" id="save-tolerance-time" class="form-control form-control-sm tolerance-time-input" placeholder="hh:mm" title="<?= $l['tolerance-time-format-hint'] ?>" />
+            <i class="bi bi-question-circle" data-bs-toggle="tooltip" title="<?= $l['savepoints-hint'] ?>"></i>
+          </div>
         </div>
-        <div id="save-points-tables" style="margin-top: 5px;">
-          <table cellpadding="0" cellspacing="0" border="0" width="100%">
-            <tr>
-              <td valign="top">
-                <div class="ui-widget-content ui-corner-all ui-panel" style="text-align: center;">
-                  <span><?= $l['galaxies'] ?></span>
-                  <table id="savepoints-galaxies" class="lined" cellpadding="0" cellspacing="1" border="0" width="100%">
-                    <tr>
-                      <th><?= $l['speed'] ?></th>
-                      <th><?= $l['coords'] ?></th>
-                      <th><?= $l['deuterium-short'] ?></th>
-                    </tr>
-                  </table>
-                </div>
-              </td>
-              <td valign="top">
-                <div class="ui-widget-content ui-corner-all ui-panel" style="text-align: center;">
-                  <span><?= $l['systems'] ?></span>
-                  <table id="savepoints-systems" class="lined" cellpadding="0" cellspacing="1" border="0" width="100%">
-                    <tr>
-                      <th><?= $l['speed'] ?></th>
-                      <th><?= $l['coords'] ?></th>
-                      <th><?= $l['deuterium-short'] ?></th>
-                    </tr>
-                  </table>
-                </div>
-              </td>
-              <td valign="top">
-                <div class="ui-widget-content ui-corner-all ui-panel" style="text-align: center;">
-                  <span><?= $l['planets'] ?></span>
-                  <table id="savepoints-planets" class="lined" cellpadding="0" cellspacing="1" border="0" width="100%">
-                    <tr>
-                      <th><?= $l['speed'] ?></th>
-                      <th><?= $l['coords'] ?></th>
-                      <th><?= $l['deuterium-short'] ?></th>
-                    </tr>
-                  </table>
-                </div>
-              </td>
-            </tr>
-          </table>
+        <div id="save-points-tables" class="mt-2">
+          <div class="row">
+            <?php
+              $spTables = [
+                ['galaxies', 'savepoints-galaxies'],
+                ['systems', 'savepoints-systems'],
+                ['planets', 'savepoints-planets'],
+              ];
+              foreach ($spTables as $spt):
+            ?>
+            <div class="col-4">
+              <div class="border rounded p-2 text-center">
+                <span><?= $l[$spt[0]] ?></span>
+                <table id="<?= $spt[1] ?>" class="lined" cellpadding="0" cellspacing="1" border="0" width="100%">
+                  <tr>
+                    <th><?= $l['speed'] ?></th>
+                    <th><?= $l['coords'] ?></th>
+                    <th><?= $l['deuterium-short'] ?></th>
+                  </tr>
+                </table>
+              </div>
+            </div>
+            <?php endforeach; ?>
+          </div>
         </div>
       </div>
+
     </div>
-    </div>
-  <div id="warning" class="ui-state-highlight ui-corner-all">
-    <div id="warning-message">msg</div>
   </div>
-  <div id="hint" class="ui-corner-all">
-      <table >
-        <tr>
-          <td valign="top">
-            <span class="ui-icon ui-icon-info"></span>
-          </td>
-          <td>
-            <span id= "hint-message"><?= $l['flightmodes-note'] ?></span>
-          </td>
-        </tr>
-      </table>
+
+  <div id="warning">
+    <div id="warning-message"></div>
+  </div>
+  <div id="hint">
+    <table>
+      <tr>
+        <td valign="top"><i class="bi bi-info-circle"></i></td>
+        <td><span id="hint-message"><?= $l['flightmodes-note'] ?></span></td>
+      </tr>
+    </table>
   </div>
 </div>
 
-</td>
-</tr></table>
+<!-- Lifeform bonuses reader modal -->
+<div class="modal fade" id="lf-bonuses-reader" tabindex="-1" aria-labelledby="lf-bonuses-reader-label" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="lf-bonuses-reader-label"><?= $l['lf-bonuses-reader-hdr'] ?></h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="mb-2"><?= $l['lf-bonuses-reader-info'] ?></div>
+        <textarea id="lf-bonuses-txtarea" class="form-control" rows="8"></textarea>
+      </div>
+      <div class="modal-footer">
+        <button id="lf-bonuses-read-btn" type="button" class="btn btn-primary"><?= $l['read'] ?></button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><?= $l['cancel'] ?></button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- OGame own-api import modal -->
+<div class="modal fade" id="own-api-reader" tabindex="-1" aria-labelledby="own-api-reader-label" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="own-api-reader-label"><?= $l['own-api-reader-hdr'] ?></h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="mb-2"><?= $l['own-api-reader-info'] ?></div>
+        <textarea id="own-api-txtarea" class="form-control" rows="6"></textarea>
+        <div class="mt-2 small text-muted"><?= $l['own-api-reader-note'] ?></div>
+      </div>
+      <div class="modal-footer">
+        <button id="own-api-read-btn" type="button" class="btn btn-primary"><?= $l['own-api-import-title'] ?></button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><?= $l['cancel'] ?></button>
+      </div>
+    </div>
+  </div>
+</div>
+
+    </div> <!-- End col-md-10 -->
+  </div> <!-- End row -->
+</div> <!-- End container-fluid -->
 <?php
   require_once('../../analitics.tpl');
 ?>
+
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded', function() {
+  document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(function(el) {
+    bootstrap.Tooltip.getOrCreateInstance(el);
+  });
+  initializeFlightCalculator();
+});
+</script>
 
 </body>
 </html>
