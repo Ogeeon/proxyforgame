@@ -76,78 +76,105 @@
     <div id="general-settings-panel" class="border rounded m-1 p-2 pb-1">
       <ul class="nav nav-tabs" id="paramTabs" role="tablist">
         <li class="nav-item" role="presentation">
-          <button class="nav-link active" id="param-general-tab" data-bs-toggle="tab" data-bs-target="#param-general" type="button" role="tab"><?= $l['parameters'] ?></button>
+          <button class="nav-link active" id="param-common-tab" data-bs-toggle="tab" data-bs-target="#param-common" type="button" role="tab"><?= $l['param-tab-common'] ?></button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button class="nav-link" id="param-buildings-tab" data-bs-toggle="tab" data-bs-target="#param-buildings" type="button" role="tab"><?= $l['buildings'] ?></button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button class="nav-link" id="param-researches-tab" data-bs-toggle="tab" data-bs-target="#param-researches" type="button" role="tab"><?= $l['researches'] ?></button>
         </li>
         <li class="nav-item" role="presentation">
           <button class="nav-link" id="param-lifeforms-tab" data-bs-toggle="tab" data-bs-target="#param-lifeforms" type="button" role="tab"><?= $l['lifeforms'] ?></button>
         </li>
       </ul>
       <div class="tab-content" id="paramTabContent">
-        <div id="param-general" class="tab-pane fade show active p-2 pb-0" role="tabpanel">
-        <table class="mx-auto">
-          <tr>
-            <td><label for="robots-factory-level"><?= $l['robots-factory-level'] ?></label></td>
-            <td><input id="robots-factory-level" type="text" name="robots-factory-level" class="form-control form-control-sm d-inline-block level-input ui-input-margin" value="0" /></td>
-            <td><label for="shipyard-level"><?= $l['shipyard-level'] ?></label></td>
-            <td><input id="shipyard-level" type="text" name="shipyard-level" class="form-control form-control-sm d-inline-block level-input ui-input-margin" value="1" alt="<?= $l['shipyard-level'] ?>"/></td>
-            <td><label for="nanites-factory-level"><?= $l['nanites-factory-level'] ?></label></td>
-            <td><input id="nanites-factory-level" type="text" name="nanites-factory-level" class="form-control form-control-sm d-inline-block level-input ui-input-margin" value="0" /></td>
-          </tr>
-          <tr>
-            <td><label for="energy-tech-level"><?= $l['energy-tech-level'] ?></label></td>
-            <td><input id="energy-tech-level" type="text" name="energy-tech-level" class="form-control form-control-sm d-inline-block level-input ui-input-margin" value="0"/></td>
-            <td><label for="max-planet-temp"><?= $l['max-planet-temp'] ?></label></td>
-            <td><input id="max-planet-temp" type="text" name="max-planet-temp" class="form-control form-control-sm d-inline-block level-input ui-input-margin" value="0" alt="<?= $l['max-planet-temp'] ?>"/></td>
-            <td><label for="universe-speed"><?= $l['economy-speed'] ?></label></td>
-            <td>
-              <select id="universe-speed" name="universe-speed" class="form-select form-select-sm d-inline-block w-auto ui-input-margin">
+        <!-- Common tab -->
+        <div id="param-common" class="tab-pane fade show active p-2 pb-0" role="tabpanel">
+          <div class="d-flex flex-wrap gap-2 align-items-center justify-content-center mb-1">
+            <div class="d-flex align-items-center gap-1">
+              <label for="max-planet-temp"><?= $l['max-planet-temp'] ?></label>
+              <input id="max-planet-temp" type="text" name="max-planet-temp" class="form-control form-control-sm level-input" value="0" alt="<?= $l['max-planet-temp'] ?>"/>
+            </div>
+            <div class="d-flex align-items-center gap-1">
+              <label for="universe-speed"><?= $l['economy-speed'] ?></label>
+              <select id="universe-speed" name="universe-speed" class="form-select form-select-sm w-auto">
                 <?php for ($s = 1; $s <= 10; $s++): ?>
                 <option value="<?= $s ?>"<?= $s === 1 ? ' selected="selected"' : '' ?>><?= $s ?></option>
                 <?php endfor; ?>
               </select>
-            </td>
-          </tr>
-          <tr>
-            <td><label for="hyper-tech-level"><?= $l['hyper-tech'] ?></label></td>
-            <td><input id="hyper-tech-level" type="text" name="hyper-tech-level" class="form-control form-control-sm d-inline-block level-input ui-input-margin" value="0" /></td>
-            <td><label for="disr-chamber-level"><?= $l['disr-chamber'] ?></label></td>
-            <td><input id="disr-chamber-level" type="text" name="disr-chamber-level" class="form-control form-control-sm d-inline-block level-input ui-input-margin" value="0" /></td>
-            <td><label for="energy-boost"><?= $l['energy-boost'] ?></label></td>
-            <td>
-              <select id="energy-boost" name="energy-boost" class="form-select form-select-sm d-inline-block w-auto ui-input-margin">
+            </div>
+            <div class="d-flex align-items-center gap-1">
+              <label for="energy-boost"><?= $l['energy-boost'] ?></label>
+              <select id="energy-boost" name="energy-boost" class="form-select form-select-sm w-auto">
                 <option value="0" selected="selected">0%</option>
                 <option value="2">20%</option>
                 <option value="4">40%</option>
                 <option value="6">60%</option>
                 <option value="8">80%</option>
               </select>
-            </td>
-          </tr>
-        </table>
-
-        <table class="mx-auto">
-          <tr>
-            <td><label><?= $l['energy-bonus'] ?>:</label></td>
-            <td class="text-nowrap">
+            </div>
+          </div>
+          <div class="d-flex flex-wrap gap-2 align-items-center justify-content-center mb-1">
+            <div class="d-flex align-items-center gap-1 flex-nowrap">
+              <label><?= $l['energy-bonus'] ?>:</label>
               <input id="energy-bonus-0" type="radio" name="energy-bonus" value="0" class="form-check-input"/> <label for="energy-bonus-0"><?= $l['none'] ?></label>
               <input id="energy-bonus-1" type="radio" name="energy-bonus" value="1" class="form-check-input ms-2"/> <label for="energy-bonus-1"><?= $l['engineer'] ?></label>
               <input id="energy-bonus-2" type="radio" name="energy-bonus" value="2" class="form-check-input ms-2"/> <label for="energy-bonus-2"><?= $l['all-officers'] ?></label>
-            </td>
-          </tr>
-          <tr>
-            <td class="text-nowrap"><label><?= $l['class'] ?>:</label></td>
-            <td class="text-nowrap">
+            </div>
+          </div>
+          <div class="d-flex flex-wrap gap-2 align-items-center justify-content-center">
+            <div class="d-flex align-items-center gap-1 flex-nowrap">
+              <label><?= $l['class'] ?>:</label>
               <input id="player-class-0" type="radio" name="player-class" value="0" class="form-check-input" checked="checked"/> <label for="player-class-0"><?= $l['none'] ?></label>
               <input id="player-class-1" type="radio" name="player-class" value="1" class="form-check-input ms-2"/> <label for="player-class-1"><?= $l['class-collector'] ?></label>
               <input id="player-class-2" type="radio" name="player-class" value="2" class="form-check-input ms-2"/> <label for="player-class-2"><?= $l['class-general'] ?></label>
-              <span class="ms-3"><input id="trader-bonus" type="checkbox" name="trader-bonus" class="form-check-input"/> <label for="trader-bonus"><?= $l['trader-bonus'] ?></label></span>
-            </td>
-          </tr>
-        </table>
-        </div><!-- /param-general -->
+            </div>
+            <div class="d-flex align-items-center gap-1">
+              <input id="trader-bonus" type="checkbox" name="trader-bonus" class="form-check-input"/>
+              <label for="trader-bonus"><?= $l['trader-bonus'] ?></label>
+            </div>
+          </div>
+        </div><!-- /param-common -->
+
+        <!-- Buildings tab -->
+        <div id="param-buildings" class="tab-pane fade p-2 pb-0" role="tabpanel">
+          <div class="d-flex flex-wrap gap-2 align-items-center justify-content-center">
+            <div class="d-flex align-items-center gap-1">
+              <label for="robots-factory-level"><?= $l['robots-factory-level'] ?></label>
+              <input id="robots-factory-level" type="text" name="robots-factory-level" class="form-control form-control-sm level-input" value="0"/>
+            </div>
+            <div class="d-flex align-items-center gap-1">
+              <label for="shipyard-level"><?= $l['shipyard-level'] ?></label>
+              <input id="shipyard-level" type="text" name="shipyard-level" class="form-control form-control-sm level-input" value="1" alt="<?= $l['shipyard-level'] ?>"/>
+            </div>
+            <div class="d-flex align-items-center gap-1">
+              <label for="nanites-factory-level"><?= $l['nanites-factory-level'] ?></label>
+              <input id="nanites-factory-level" type="text" name="nanites-factory-level" class="form-control form-control-sm level-input" value="0"/>
+            </div>
+          </div>
+        </div><!-- /param-buildings -->
+
+        <!-- Researches tab -->
+        <div id="param-researches" class="tab-pane fade p-2 pb-0" role="tabpanel">
+          <div class="d-flex flex-wrap gap-2 align-items-center justify-content-center">
+            <div class="d-flex align-items-center gap-1">
+              <label for="energy-tech-level"><?= $l['energy-tech-level'] ?></label>
+              <input id="energy-tech-level" type="text" name="energy-tech-level" class="form-control form-control-sm level-input" value="0"/>
+            </div>
+            <div class="d-flex align-items-center gap-1">
+              <label for="hyper-tech-level"><?= $l['hyper-tech'] ?></label>
+              <input id="hyper-tech-level" type="text" name="hyper-tech-level" class="form-control form-control-sm level-input" value="0"/>
+            </div>
+          </div>
+        </div><!-- /param-researches -->
 
         <div id="param-lifeforms" class="tab-pane fade p-2 pb-0" role="tabpanel">
           <div class="d-flex flex-wrap column-gap-3 row-gap-2 align-items-center justify-content-center">
+            <div class="d-flex align-items-center gap-1">
+              <label for="disr-chamber-level"><?= $l['disr-chamber'] ?></label>
+              <input id="disr-chamber-level" type="text" name="disr-chamber-level" class="form-control form-control-sm level-input" value="0"/>
+            </div>
             <div class="d-flex align-items-center gap-1">
               <label for="total-lf-energy-bonus"><?= $l['total-lf-energy-bonus'] ?></label>
               <div class="input-group input-group-sm w-auto">

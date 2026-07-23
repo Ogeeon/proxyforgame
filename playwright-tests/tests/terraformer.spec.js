@@ -265,16 +265,32 @@ test.describe('Terraformer Calculator - DOM integration', () => {
         await page.goto('/ogame/calc/terraformer.php');
     });
 
-    test('parameters are organized into General and LifeForms tabs', async ({ page }) => {
-        // The General tab is active by default; the LF capacity fields are hidden.
-        await expect(page.locator('#disr-chamber-level')).toBeVisible();
+    test('parameters are organized into Common, Buildings, Researches and LifeForms tabs', async ({ page }) => {
+        // The Common tab is active by default; fields on the other tabs are hidden.
+        await expect(page.locator('#max-planet-temp')).toBeVisible();
+        await expect(page.locator('#robots-factory-level')).toBeHidden();
+        await expect(page.locator('#energy-tech-level')).toBeHidden();
+        await expect(page.locator('#disr-chamber-level')).toBeHidden();
         await expect(page.locator('#sc-capacity-increase')).toBeHidden();
 
+        // Buildings tab.
+        await page.locator('#param-buildings-tab').click();
+        await expect(page.locator('#robots-factory-level')).toBeVisible();
+        await expect(page.locator('#shipyard-level')).toBeVisible();
+        await expect(page.locator('#nanites-factory-level')).toBeVisible();
+
+        // Researches tab.
+        await page.locator('#param-researches-tab').click();
+        await expect(page.locator('#energy-tech-level')).toBeVisible();
+        await expect(page.locator('#hyper-tech-level')).toBeVisible();
+
+        // The Disruption Chamber is a life-form building and lives on the LifeForms tab.
         await openLifeformsTab(page);
+        await expect(page.locator('#disr-chamber-level')).toBeVisible();
         await expect(page.locator('#lc-capacity-increase')).toBeVisible();
         await expect(page.locator('#total-lf-energy-bonus')).toBeVisible();
-        // Switching to LifeForms hides the General tab controls.
-        await expect(page.locator('#disr-chamber-level')).toBeHidden();
+        // Switching away from Common hides its controls.
+        await expect(page.locator('#max-planet-temp')).toBeHidden();
     });
 
     test('editing the solar plant level updates its energy readout', async ({ page }) => {
