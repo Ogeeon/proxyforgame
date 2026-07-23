@@ -2,6 +2,64 @@ import { test, expect } from '@playwright/test';
 import { readFileSync } from 'fs';
 import { join } from 'path';
 
+/**
+ * Installs a thin compatibility layer on the page so the DOM-free maths tests can
+ * keep calling the pre-Bootstrap globals (updateNumbers, getDistance, ...). Each
+ * one now delegates to the migrated FlightCalculator / FlightDataCollector held
+ * by window.flightOrchestrator, so the tests still exercise the real engine and
+ * the real rendering — only the glue is recreated.
+ */
+async function installCompat(page) {
+    await page.evaluate(() => {
+        const orch = window.flightOrchestrator;
+        const calc = orch.calc;
+        const collector = orch.collector;
+
+        const params = () => {
+            const p = Object.assign({}, options.prm);
+            const wb = document.getElementById('warrior-bonus');
+            p.warriorBonus = !!(wb && wb.checked);
+            p.populatedSystems = options.populatedSystems ?? null;
+            p.emptySystemsOverrideEnabled = options.emptySystemsOverrideEnabled ?? false;
+            p.emptySystemsOverride = options.emptySystemsOverride ?? 0;
+            if (!Array.isArray(p.lfShipsBonuses) || p.lfShipsBonuses.length !== 15 || !Array.isArray(p.lfShipsBonuses[0])) {
+                p.lfShipsBonuses = Array.from({ length: 15 }, () => [0, 0, 0]);
+            }
+            return p;
+        };
+        const ships = () => options.shipsData
+            || calc.buildShipsData(options.prm.driveLevels || [0, 0, 0], options.prm.spCargohold || 0);
+
+        window.updateNumbers = () => {
+            orch.recalc();
+            options.shipsData = calc.buildShipsData(options.prm.driveLevels, options.prm.spCargohold);
+        };
+        window.getDistance = (dep, dest) => {
+            const r = calc.getDistance(dep, dest, params());
+            window.getDistance.lastEmptyCount = r.emptySystems;
+            return r.distance;
+        };
+        window.getFlightDuration = (s, d, p, u) => calc.getFlightDuration(s, d, p, u);
+        window.getShipSpeed = (i) => calc.getShipSpeed(ships(), i, params());
+        window.getMinSpeed = () => calc.getMinSpeed(ships(), collector.collectShipCounts(), params());
+        window.getDeutConsumption = (minSpeed, distance, duration, pct, uni) =>
+            calc.getDeutConsumption(ships(), collector.collectShipCounts(), distance, duration, uni, params());
+        window.getCargoCapacity = (hyperTechLvl) => {
+            const p = params();
+            p.hyperTechLvl = hyperTechLvl;
+            return calc.getCargoCapacity(ships(), collector.collectShipCounts(), p);
+        };
+        window.getSecondsFromTimeField = (t) => orch._legSeconds(t);
+        window.compareSavePoints = (a, b) => calc.compareSavePoints(a, b);
+        window.validateSPParams = () => orch._validateSavePointForm();
+
+        if (!Object.getOwnPropertyDescriptor(options, 'isSpeedOvr')?.get) {
+            Object.defineProperty(options, 'isSpeedOvr', { configurable: true, get: () => orch.speedOverride.enabled });
+            Object.defineProperty(options, 'ovrSpeed', { configurable: true, get: () => orch.speedOverride.speed });
+        }
+    });
+}
+
 test.describe('Flight Calculator Page', () => {
     test.beforeEach(async ({ context, page }) => {
         // Avoid changelog popup
@@ -9,9 +67,7 @@ test.describe('Flight Calculator Page', () => {
             localStorage.setItem('lastChange', 'key-value;true,value;99999');
         });
         await page.goto('/ogame/calc/flight.php');
-        // jQuery UI animates the accordion and tabs; without this a click can land
-        // while a previous panel is still sliding and toggle the wrong way.
-        await page.evaluate(() => { jQuery.fx.off = true; });
+        await installCompat(page);
     });
 
     test('page loads successfully', async ({ page }) => {
@@ -55,14 +111,12 @@ test.describe('Flight Calculator - Spy Report Import', () => {
         });
 
         await page.goto('/ogame/calc/flight.php');
-        // jQuery UI animates the accordion and tabs; without this a click can land
-        // while a previous panel is still sliding and toggle the wrong way.
-        await page.evaluate(() => { jQuery.fx.off = true; });
+        await installCompat(page);
     });
 
     test('imports spy report and populates form fields', async ({ page }) => {
         // The parameters panel is collapsed by default — open it first
-        await page.getByRole('tab', { name: 'Parameters' }).click();
+        await openParams(page);
         await page.locator('#api-code').fill(SR_CODE);
         await page.locator('#api-get').click();
 
@@ -90,7 +144,7 @@ const OWN_API_FIXTURE = readFileSync(
     'utf-8'
 );
 
-const OWN_API_IMPORT_BUTTON = 'div[aria-labelledby="ui-dialog-title-own-api-reader"] .ui-dialog-buttonpane button';
+const OWN_API_IMPORT_BUTTON = '#own-api-read-btn';
 
 test.describe('Flight Calculator - OGame Object Import', () => {
     test.beforeEach(async ({ context, page }) => {
@@ -99,11 +153,9 @@ test.describe('Flight Calculator - OGame Object Import', () => {
             localStorage.setItem('lastChange', 'key-value;true,value;99999');
         });
         await page.goto('/ogame/calc/flight.php');
-        // jQuery UI animates the accordion and tabs; without this a click can land
-        // while a previous panel is still sliding and toggle the wrong way.
-        await page.evaluate(() => { jQuery.fx.off = true; });
+        await installCompat(page);
         // The parameters panel is collapsed by default — open it first
-        await page.getByRole('tab', { name: 'Parameters' }).click();
+        await openParams(page);
     });
 
     test('imports own_api.json and populates form fields', async ({ page }) => {
@@ -114,7 +166,7 @@ test.describe('Flight Calculator - OGame Object Import', () => {
         await expect(page.locator('#own-api-reader')).toBeVisible();
 
         await page.locator('#own-api-txtarea').fill(OWN_API_FIXTURE);
-        await page.locator(OWN_API_IMPORT_BUTTON).first().click(); // "Import" button
+        await page.locator(OWN_API_IMPORT_BUTTON).click(); // "Import" button
 
         // Departure coordinates
         await expect(page.locator('#departure-g')).toHaveValue('5');
@@ -166,7 +218,7 @@ test.describe('Flight Calculator - OGame Object Import', () => {
         for (const bad of ['{not valid json', '111']) {
             alertMsg = '';
             await page.locator('#own-api-txtarea').fill(bad);
-            await page.locator(OWN_API_IMPORT_BUTTON).first().click();
+            await page.locator(OWN_API_IMPORT_BUTTON).click();
 
             expect(alertMsg.length, `alert shown for input ${JSON.stringify(bad)}`).toBeGreaterThan(0);
             await expect(page.locator('#departure-g')).toHaveValue(before);
@@ -211,9 +263,7 @@ test.describe('Flight Calculator - Distance', () => {
             localStorage.setItem('lastChange', 'key-value;true,value;99999');
         });
         await page.goto('/ogame/calc/flight.php');
-        // jQuery UI animates the accordion and tabs; without this a click can land
-        // while a previous panel is still sliding and toggle the wrong way.
-        await page.evaluate(() => { jQuery.fx.off = true; });
+        await installCompat(page);
     });
 
     test('same planet is a fixed short hop', async ({ page }) => {
@@ -317,9 +367,7 @@ test.describe('Flight Calculator - Distance (known defects)', () => {
             localStorage.setItem('lastChange', 'key-value;true,value;99999');
         });
         await page.goto('/ogame/calc/flight.php');
-        // jQuery UI animates the accordion and tabs; without this a click can land
-        // while a previous panel is still sliding and toggle the wrong way.
-        await page.evaluate(() => { jQuery.fx.off = true; });
+        await installCompat(page);
     });
 
     // getDistance() flight.js:217-225 — on the wrap-around branch the empty-system
@@ -369,9 +417,7 @@ test.describe('Flight Calculator - Flight Duration', () => {
             localStorage.setItem('lastChange', 'key-value;true,value;99999');
         });
         await page.goto('/ogame/calc/flight.php');
-        // jQuery UI animates the accordion and tabs; without this a click can land
-        // while a previous panel is still sliding and toggle the wrong way.
-        await page.evaluate(() => { jQuery.fx.off = true; });
+        await installCompat(page);
     });
 
     const duration = (page, args) =>
@@ -433,28 +479,32 @@ const SHIP = {
 
 const CLASS = { collector: 0, general: 1, discoverer: 2 };
 
-// #params-accordion holds two sections — parameters and ships — and jQuery UI
-// keeps only one of them expanded, so tests have to open the one they need.
-const SECTION = { params: 0, ships: 1 };
-
-/** Expands an accordion section unless the given probe element is already visible. */
-async function openSection(page, index, probe) {
+// #params-accordion holds two Bootstrap accordion sections — parameters and
+// ships — and only one stays expanded, so tests open the one they need.
+/**
+ * Expands a Bootstrap accordion section unless its probe element is visible.
+ * Drives Bootstrap's Collapse API and waits for shown.bs.collapse so the panel
+ * is fully open (height:auto) before the caller interacts — a plain click would
+ * return mid-animation, leaving lower controls overlapped by the next header.
+ */
+async function openCollapse(page, target, probe) {
     if (!await page.locator(probe).isVisible()) {
-        await page.locator('#params-accordion > h3').nth(index).click();
+        await page.evaluate((t) => new Promise((resolve) => {
+            const el = document.querySelector(t);
+            el.addEventListener('shown.bs.collapse', resolve, { once: true });
+            bootstrap.Collapse.getOrCreateInstance(el).show();
+        }), target);
     }
     await expect(page.locator(probe)).toBeVisible();
 }
 
-const openParams = (page) => openSection(page, SECTION.params, '#cmb-drive');
-const openShips = (page) => openSection(page, SECTION.ships, '#light-fighter');
+const openParams = (page) => openCollapse(page, '#accordion-prm', '#cmb-drive');
+const openShips = (page) => openCollapse(page, '#accordion-ships', '#light-fighter');
 
 /** Opens the nested life-form bonuses accordion (lives inside the parameters section). */
 async function openLfBonuses(page) {
     await openParams(page);
-    if (!await page.locator('[class~="202-speed"]').isVisible()) {
-        await page.locator('#lf-bonuses-accordion > h3').click();
-    }
-    await expect(page.locator('[class~="202-speed"]')).toBeVisible();
+    await openCollapse(page, '#accordion-lf-prm', '[class~="202-speed"]');
 }
 
 /** Activates the flight-times tab, which the tab strip may have left hidden. */
@@ -497,9 +547,7 @@ test.describe('Flight Calculator - Ship Speeds', () => {
             localStorage.setItem('lastChange', 'key-value;true,value;99999');
         });
         await page.goto('/ogame/calc/flight.php');
-        // jQuery UI animates the accordion and tabs; without this a click can land
-        // while a previous panel is still sliding and toggle the wrong way.
-        await page.evaluate(() => { jQuery.fx.off = true; });
+        await installCompat(page);
         await openParams(page);
         await openFlightTimesTab(page);
     });
@@ -680,9 +728,7 @@ test.describe('Flight Calculator - Slowest Ship', () => {
             localStorage.setItem('lastChange', 'key-value;true,value;99999');
         });
         await page.goto('/ogame/calc/flight.php');
-        // jQuery UI animates the accordion and tabs; without this a click can land
-        // while a previous panel is still sliding and toggle the wrong way.
-        await page.evaluate(() => { jQuery.fx.off = true; });
+        await installCompat(page);
         await openParams(page);
         await page.locator('#class-2').check(); // discoverer: no speed doubling
         await openShips(page);
@@ -768,9 +814,7 @@ test.describe('Flight Calculator - Deuterium Consumption', () => {
             localStorage.setItem('lastChange', 'key-value;true,value;99999');
         });
         await page.goto('/ogame/calc/flight.php');
-        // jQuery UI animates the accordion and tabs; without this a click can land
-        // while a previous panel is still sliding and toggle the wrong way.
-        await page.evaluate(() => { jQuery.fx.off = true; });
+        await installCompat(page);
         await openParams(page);
         await page.locator('#class-2').check(); // discoverer: no speed or fuel perks
     });
@@ -883,9 +927,7 @@ test.describe('Flight Calculator - Cargo Capacity', () => {
             localStorage.setItem('lastChange', 'key-value;true,value;99999');
         });
         await page.goto('/ogame/calc/flight.php');
-        // jQuery UI animates the accordion and tabs; without this a click can land
-        // while a previous panel is still sliding and toggle the wrong way.
-        await page.evaluate(() => { jQuery.fx.off = true; });
+        await installCompat(page);
         await openParams(page);
         await page.locator('#class-2').check(); // discoverer: no cargo perks
     });
@@ -983,9 +1025,7 @@ test.describe('Flight Calculator - Results Table', () => {
             localStorage.setItem('lastChange', 'key-value;true,value;99999');
         });
         await page.goto('/ogame/calc/flight.php');
-        // jQuery UI animates the accordion and tabs; without this a click can land
-        // while a previous panel is still sliding and toggle the wrong way.
-        await page.evaluate(() => { jQuery.fx.off = true; });
+        await installCompat(page);
         await openParams(page);
         await page.locator('#class-2').check();
         await openFlightTimesTab(page);
@@ -1163,7 +1203,7 @@ test.describe('Flight Calculator - Time Field Parsing', () => {
             localStorage.setItem('lastChange', 'key-value;true,value;99999');
         });
         await page.goto('/ogame/calc/flight.php');
-        await page.evaluate(() => { jQuery.fx.off = true; });
+        await installCompat(page);
     });
 
     const parse = (page, text) =>
@@ -1220,12 +1260,12 @@ test.describe('Flight Calculator - Arrival Time', () => {
             localStorage.setItem('lastChange', 'key-value;true,value;99999');
         });
         await page.goto('/ogame/calc/flight.php');
-        await page.evaluate(() => { jQuery.fx.off = true; });
+        await installCompat(page);
         await page.locator('#tabtag1').click();
         await page.locator('#set-departure-zero').click(); // midnight today, a stable base
     });
 
-    const flightRows = (page) => page.locator('#flight-data tr');
+    const flightRows = (page) => page.locator('#flight-data .flight-leg');
     const arrival = (page) => page.locator('#arrival-moment').innerText();
 
     test('a departure time alone already yields an arrival', async ({ page }) => {
@@ -1299,18 +1339,18 @@ test.describe('Flight Calculator - Arrival Time', () => {
         await field.fill('00 99:00:00'); // hours out of range
         await field.press('End');
 
-        await expect(field).toHaveClass(/ui-state-error/);
+        await expect(field).toHaveClass(/is-invalid/);
     });
 
     test('a valid flight time clears the error state', async ({ page }) => {
         const field = page.locator('#flight-time');
         await field.fill('00 99:00:00');
         await field.press('End');
-        await expect(field).toHaveClass(/ui-state-error/);
+        await expect(field).toHaveClass(/is-invalid/);
 
         await field.fill('00 02:00:00');
         await field.press('End');
-        await expect(field).not.toHaveClass(/ui-state-error/);
+        await expect(field).not.toHaveClass(/is-invalid/);
     });
 
     test('the departure shortcut fills in the current moment', async ({ page }) => {
@@ -1363,7 +1403,7 @@ test.describe('Flight Calculator - Save Points', () => {
             localStorage.setItem('lastChange', 'key-value;true,value;99999');
         });
         await page.goto('/ogame/calc/flight.php');
-        await page.evaluate(() => { jQuery.fx.off = true; });
+        await installCompat(page);
         await page.locator('#tabtag2').click();
     });
 
@@ -1466,7 +1506,7 @@ test.describe('Flight Calculator - Save Points', () => {
         await expect(page.locator('#destination-s')).toHaveValue(system);
 
         // Two legs are queued: there and back
-        await expect(page.locator('#flight-data tr')).toHaveCount(2);
+        await expect(page.locator('#flight-data .flight-leg')).toHaveCount(2);
         const legs = await page.evaluate(() => options.prm.flightData);
         expect(legs).toHaveLength(2);
         expect(legs[0]).toBe(legs[1]);
@@ -1483,7 +1523,7 @@ test.describe('Flight Calculator - Persistence', () => {
             localStorage.setItem('lastChange', 'key-value;true,value;99999');
         });
         await page.goto('/ogame/calc/flight.php');
-        await page.evaluate(() => { jQuery.fx.off = true; });
+        await installCompat(page);
         await openParams(page);
     });
 
@@ -1505,7 +1545,7 @@ test.describe('Flight Calculator - Persistence', () => {
         await page.evaluate(() => updateNumbers());
 
         await page.reload();
-        await page.evaluate(() => { jQuery.fx.off = true; });
+        await installCompat(page);
         await openParams(page);
 
         await expect(page.locator('#cmb-drive')).toHaveValue('12');
@@ -1523,30 +1563,28 @@ test.describe('Flight Calculator - Persistence', () => {
         expect(stored).toContain('ships|7;17');
     });
 
-    // Init order in flight.js is options.load() (1709) -> populateParams() (1797)
-    // -> updateNumbers() (1975). The ship inputs are restored by the loop at
-    // populateParams():1093-1095, which iterates options.shipsData — still empty at
-    // that point, because only updateNumbers() fills it. So the inputs stay at zero,
-    // and the updateNumbers() call right after reads those zeros back into
-    // options.prm.ships and saves them, wiping the stored fleet.
-    test.fail('ship counts survive a reload', async ({ page }) => {
+    // The Bootstrap migration fixed the old reload-wipes-fleet defect:
+    // FlightOrchestrator.populateParams() restores the ship inputs straight from
+    // prm.ships (over the fixed SHIPS_BASE list) instead of the still-empty
+    // options.shipsData the legacy populateParams() iterated.
+    test('ship counts survive a reload', async ({ page }) => {
         await setFleet(page, { 'large-cargo': 250, 'recycler': 17 });
         await page.evaluate(() => updateNumbers());
 
         await page.reload();
-        await page.evaluate(() => { jQuery.fx.off = true; });
+        await installCompat(page);
         await openShips(page);
 
         await expect(page.locator('#large-cargo')).toHaveValue('250');
         await expect(page.locator('#recycler')).toHaveValue('17');
     });
 
-    test.fail('a reload does not wipe the stored fleet', async ({ page }) => {
+    test('a reload does not wipe the stored fleet', async ({ page }) => {
         await setFleet(page, { 'large-cargo': 250 });
         await page.evaluate(() => updateNumbers());
 
         await page.reload();
-        await page.evaluate(() => { jQuery.fx.off = true; });
+        await installCompat(page);
 
         expect(await page.evaluate(() => options.prm.ships[1])).toBe(250);
     });
@@ -1558,7 +1596,7 @@ test.describe('Flight Calculator - Persistence', () => {
         await page.evaluate(() => updateNumbers());
 
         await page.reload();
-        await page.evaluate(() => { jQuery.fx.off = true; });
+        await installCompat(page);
         await openParams(page);
 
         await expect(page.locator('#galaxies-num')).toHaveValue('12');

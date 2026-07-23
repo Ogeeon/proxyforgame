@@ -190,8 +190,8 @@ class FlightDataCollector {
      */
     collectFlightLegs() {
         const legs = [];
-        document.querySelectorAll('#flight-data tr').forEach((row) => {
-            const input = row.querySelector('input[type="text"]');
+        document.querySelectorAll('#flight-data .flight-leg').forEach((row) => {
+            const input = row.querySelector('.flight-time-input');
             if (!input) {
                 return;
             }

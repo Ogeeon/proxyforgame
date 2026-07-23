@@ -613,11 +613,15 @@ class FlightOrchestrator {
     // Arrival calculator — the dynamic list of flight legs
     // ------------------------------------------------------------------
 
-    /** Markup for one flight-leg row: sign toggle, time field, remove button. */
-    _legRowHtml() {
+    /**
+     * Markup for one flight-leg row: sign toggle, time field, remove button.
+     * The first row keeps the id="flight-time" the template shipped with.
+     * @param {boolean} first whether this is the leading row
+     */
+    _legRowHtml(first = false) {
         return '<div class="d-flex align-items-center gap-1 mb-1 flight-leg">'
             + `<button type="button" class="btn btn-sm btn-outline-secondary button-toggle flight-leg-sign" data-sign="+" title="${this.opts.toggleSignHint}"><i class="bi bi-plus-lg"></i></button>`
-            + `<input type="text" class="form-control form-control-sm flight-time-input" placeholder="dd hh:mm:ss" title="${this.opts.flightTimeFormatHint}"/>`
+            + `<input type="text"${first ? ' id="flight-time"' : ''} class="form-control form-control-sm flight-time-input" placeholder="dd hh:mm:ss" title="${this.opts.flightTimeFormatHint}"/>`
             + `<button type="button" class="btn btn-sm btn-outline-danger button-remove" title="${this.opts.removeRowHint}"><i class="bi bi-x-lg"></i></button>`
             + '</div>';
     }
@@ -681,7 +685,7 @@ class FlightOrchestrator {
     /** Rebuild the leg list from the stored flightData array. */
     restoreFlightLegs() {
         const container = document.getElementById('flight-data');
-        container.innerHTML = this._legRowHtml();
+        container.innerHTML = this._legRowHtml(true);
         this._wireLegRow(container.querySelector('.flight-leg'));
         const legs = this.opts.prm.flightData.slice();
         legs.forEach((seconds) => this.addFlightLeg(seconds));
@@ -727,7 +731,7 @@ class FlightOrchestrator {
         const fleetSpeed = this.calc.fleetSpeedFor(params.missionType, params);
         const duration = this.calc.getFlightDuration(minSpeed, distance, speed, fleetSpeed);
 
-        document.getElementById('flight-data').innerHTML = this._legRowHtml();
+        document.getElementById('flight-data').innerHTML = this._legRowHtml(true);
         this._wireLegRow(document.getElementById('flight-data').querySelector('.flight-leg'));
         this.addFlightLeg(duration);
         this.addFlightLeg(duration);
@@ -1009,7 +1013,9 @@ class FlightOrchestrator {
     }
 
     _setClassVal(className, value) {
-        document.querySelectorAll(`.${className}`).forEach((el) => { el.value = value; });
+        // Attribute selector, not `.${className}` — these classes start with a
+        // digit (e.g. "202-speed"), which is an invalid CSS class selector.
+        document.querySelectorAll(`[class~="${className}"]`).forEach((el) => { el.value = value; });
     }
 
     importOwnApi(jsonText) {
@@ -1182,7 +1188,9 @@ class FlightOrchestrator {
         this.speedOverride = { enabled: false, speed: 10000 };
         const field = document.getElementById('ovr-speed-t');
         field.disabled = true;
-        field._constrains = { min: 1, def: 10000, max: 1000000000 };
+        // min 0, not 1: a 0 must reach the toggle so it can fall back to 10000,
+        // instead of the blur validator clamping it up to 1 first.
+        field._constrains = { min: 0, def: 10000, max: 1000000000 };
         document.getElementById('ovr-speed-cb').addEventListener('click', (e) => this.toggleSpeedOverride(e));
     }
 
@@ -1235,6 +1243,22 @@ class FlightOrchestrator {
         document.querySelectorAll('.button-taketocalc').forEach((btn) =>
             btn.addEventListener('click', (e) => this.takeToCalc(e.currentTarget)));
         this._wireLegRow(document.getElementById('flight-data').querySelector('.flight-leg'));
+
+        // Save-point coordinate links are rendered dynamically; delegate their clicks.
+        const spTables = document.getElementById('save-points-tables');
+        if (spTables) {
+            spTables.addEventListener('click', (e) => {
+                const link = e.target.closest('.save-point-link');
+                if (!link) {
+                    return;
+                }
+                e.preventDefault();
+                this.showFlightTime(
+                    link.dataset.point.split(',').map(Number),
+                    link.dataset.start,
+                    Number(link.dataset.speed));
+            });
+        }
     }
 
     _bindInputs() {
