@@ -1,0 +1,175 @@
+/*
+ * Moon Calculator - Bootstrap 5 Styles
+ * Migrated from jQuery UI to Bootstrap 5.3.8
+ * Shared pieces (.main-header, .subheader, warning banner, tooltip skin)
+ * follow the same conventions as the graviton / terraformer calculators.
+ */
+
+#moon {
+  width: max-content;
+  max-width: 100%;
+  margin: 0 auto;
+  position: relative;
+  overflow-x: auto;
+}
+
+/* The unit tables live inside the creation panel and are the widest content on
+   the page, so the panel has to keep contributing to #moon's max-content width
+   (the usual width:0 / min-width:100% containment trick would clip them). */
+#destroy-settings-panel,
+#create-settings-panel {
+  box-sizing: border-box;
+}
+
+/* Stack every parameter tab in the same grid cell so the widest and tallest
+   one sizes the panel once and for all. Bootstrap hides inactive panes with
+   display:none, which would drop them out of that intrinsic sizing and make
+   the whole (max-content, centred) calculator jump on every tab switch, so
+   they are hidden with visibility instead. */
+#paramTabContent {
+  display: grid;
+}
+
+#paramTabContent > .tab-pane {
+  display: block;
+  grid-area: 1 / 1;
+}
+
+/* Collapsed to zero height so only the active pane drives the panel height,
+   while the grid column still sizes to the widest pane. */
+#paramTabContent > .tab-pane:not(.active) {
+  visibility: hidden;
+  height: 0;
+  overflow: hidden;
+}
+
+.main-header {
+  width: auto;
+  font-size: 0.95rem;
+  font-weight: 600;
+  padding: 4px;
+  margin: 2px;
+}
+
+.subheader {
+  text-align: center;
+  font-weight: 600;
+  margin: 0 0 6px 0 !important;
+  padding: 2px 6px;
+}
+
+#reset-ds,
+#reset-cr {
+  cursor: pointer;
+  z-index: 10;
+  width: 30px;
+  height: 30px;
+  border: 1px solid #dc3545;
+  border-radius: 8px;
+  margin-right: 0.2rem;
+}
+
+/* Layout tables: tighten the default cell padding and align vertically. */
+#moon table td {
+  padding: 2px 4px;
+  vertical-align: middle;
+}
+
+/* The unit tables hold three name/max/count triplets per row. Separate the
+   triplets and right-align the "max" column so the numbers hug their input. */
+.unit-table td:nth-child(3n + 1) {
+  padding-left: 12px;
+}
+
+.unit-table td:nth-child(3n + 2) {
+  text-align: right;
+  padding-right: 0;
+}
+
+/* Inputs */
+.level-input {
+  width: 60px;
+  text-align: center;
+}
+
+.count-input {
+  width: 80px;
+  text-align: center;
+}
+
+/* Number of units that would reach the maximum moon creation chance. */
+.max-label {
+  font-size: 0.75rem;
+  color: var(--bs-secondary-color);
+  white-space: nowrap;
+}
+
+/* Read-only result fields (rendered as form-control divs) */
+.chance-show {
+  width: 80px;
+  text-align: center;
+}
+
+.resource-show {
+  width: 110px;
+  text-align: center;
+}
+
+/* Warning banner (shared look with the graviton / queue calculators) */
+#warning {
+  position: absolute;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 9999;
+  padding: 10px 20px;
+  text-align: center;
+  background-color: var(--bs-warning-bg-subtle);
+  border: 1px solid var(--bs-warning-border-subtle);
+  border-radius: var(--bs-border-radius);
+  color: var(--bs-body-color);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  min-width: 300px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.4s ease-in-out;
+}
+
+#warning.visible {
+  opacity: 1;
+  pointer-events: auto;
+  display: block;
+}
+
+/* Tooltips (shared look with the graviton / costs calculators) */
+.tooltip-inner {
+  background-color: var(--bs-secondary-bg);
+  color: var(--bs-body-color);
+  border: 1px solid var(--bs-border-color);
+  max-width: 250px;
+  text-align: left;
+}
+
+.tooltip.bs-tooltip-top .tooltip-arrow::before {
+  border-top-color: var(--bs-border-color);
+}
+
+.tooltip.bs-tooltip-bottom .tooltip-arrow::before {
+  border-bottom-color: var(--bs-border-color);
+}
+
+.tooltip.bs-tooltip-start .tooltip-arrow::before {
+  border-left-color: var(--bs-border-color);
+}
+
+.tooltip.bs-tooltip-end .tooltip-arrow::before {
+  border-right-color: var(--bs-border-color);
+}
+
+/* Responsive */
+@media (max-width: 992px) {
+  #moon {
+    max-width: 100%;
+    padding: 0 10px;
+  }
+}

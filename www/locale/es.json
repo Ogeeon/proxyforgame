@@ -92,6 +92,7 @@
     "plasma-turret": "Cañón de Plasma",
     "small-shield": "Cúpula de Protección Pequeña",
     "large-shield": "Cúpula de Protección Grande",
+    "defenses": "Defensas",
     "abm": "Misiles Antibalísticos",
     "ipm": "Misiles Interplanetarios",
     "researches": "Investigaciones",
@@ -299,7 +300,6 @@
     "colony-ship": "Nave Colonizadora",
     "buildings-planet": "Edificios (planeta)",
     "buildings-moon": "Edificios (luna)",
-    "defenses": "Defensas",
     "quantity": "Cantidad",
     "hourly-prod": "Producción por hora",
     "hourly-cons": "Consumo por hora",
@@ -559,7 +559,11 @@
     "ds-count": "Número de Estrellas de la Muerte",
     "moon-destroy-chance": "Posibilidad de destrucción de la Luna",
     "ds-blow-chance": "Posibilidad de perder Estrellas de la Muerte",
-    "moon-create-chance": "Posibilidad de creación de la Luna"
+    "moon-create-chance": "Posibilidad de creación de la Luna",
+    "defense-to-debris": "Defensas al campo de escombros",
+    "deut-to-debris": "Deuterio al campo de escombros",
+    "promo-moon": "Evento: probabilidad hasta el 40%",
+    "max-count-hint": "Número de unidades para la máxima probabilidad de creación de luna"
   },
   "production": {
     "param-tab-general": "General",

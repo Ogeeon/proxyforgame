@@ -118,6 +118,7 @@
     "plasma-turret": "Плазменное орудие",
     "small-shield": "Малый щитовой купол",
     "large-shield": "Большой щитовой купол",
+    "defenses": "Оборона",
     "abm": "Ракета-перехватчик",
     "ipm": "Межпланетная ракета",
     "researches": "Исследования",
@@ -302,7 +303,6 @@
     "graviton": "Гравитационная технология",
     "buildings-planet": "Постройки (планета)",
     "buildings-moon": "Постройки (луна)",
-    "defenses": "Оборона",
     "quantity": "Количество",
     "total": "Итого",
     "hourly-prod": "Произв. в час",
@@ -557,7 +557,11 @@
     "ds-count": "Кол-во Звёзд смерти",
     "moon-destroy-chance": "Шанс уничтожения луны",
     "ds-blow-chance": "Шанс взрыва Звёзд смерти",
-    "moon-create-chance": "Шанс создания луны"
+    "moon-create-chance": "Шанс создания луны",
+    "defense-to-debris": "Оборона в обломки",
+    "deut-to-debris": "Дейтерий в обломки",
+    "promo-moon": "Акция: шанс до 40%",
+    "max-count-hint": "Кол-во юнитов для максимального шанса создания луны"
   },
   "production": {
     "param-tab-general": "Общие",

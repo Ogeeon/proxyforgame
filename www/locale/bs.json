@@ -92,6 +92,7 @@
     "plasma-turret": "Plazma top",
     "small-shield": "Mala štitna kupola",
     "large-shield": "Velika štitna kupola",
+    "defenses": "Odbrana",
     "abm": "Anti-Balističke rakete",
     "ipm": "Interplanetarne rakete",
     "researches": "Istraživanja",
@@ -299,7 +300,6 @@
     "graviton": "Tehnologija za gravitone",
     "buildings-planet": "Zgrade (planet)",
     "buildings-moon": "Zgrade (mjesec)",
-    "defenses": "Odbrana",
     "quantity": "Količina",
     "hourly-prod": "Proizv. po satu",
     "hourly-cons": "Potrošnja po satu",
@@ -566,7 +566,11 @@
     "ds-count": "Broj zvijezdi smrti",
     "moon-destroy-chance": "Šansa za uništenje mjeseca",
     "ds-blow-chance": "Šansa za uništenje zvijezdi smrti",
-    "moon-create-chance": "Šansa za stvaranje mjeseca"
+    "moon-create-chance": "Šansa za stvaranje mjeseca",
+    "defense-to-debris": "Odbrana u ruševine",
+    "deut-to-debris": "Deuterij u ruševine",
+    "promo-moon": "Događaj: šansa do 40%",
+    "max-count-hint": "Broj jedinica za maksimalnu šansu stvaranja mjeseca"
   },
   "production": {
     "param-tab-general": "Opšte",

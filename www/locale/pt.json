@@ -92,6 +92,7 @@
     "plasma-turret": "Canhão Plasma",
     "small-shield": "Pequeno Escudo Planetário",
     "large-shield": "Grande Escudo Planetário",
+    "defenses": "Defesas",
     "abm": "Misseis de Intercepção",
     "ipm": "Míssil Interplanetário",
     "researches": "Pesquisas",
@@ -297,7 +298,6 @@
     "graviton": "Tecnologia de Gravitação",
     "buildings-planet": "Edifícios (planeta)",
     "buildings-moon": "Edifícios (lua)",
-    "defenses": "Defesas",
     "quantity": "Quantidade",
     "hourly-prod": "Produção por hora",
     "hourly-cons": "Consumo por hora",
@@ -561,7 +561,11 @@
     "ds-count": "Número de Estrelas da Morte",
     "moon-destroy-chance": "Probabilidade de destruição da Lua",
     "ds-blow-chance": "Estrelas da Morte a explosão acaso",
-    "moon-create-chance": "Lua criação acaso"
+    "moon-create-chance": "Lua criação acaso",
+    "defense-to-debris": "Defesas para os destroços",
+    "deut-to-debris": "Deutério para os destroços",
+    "promo-moon": "Evento: probabilidade até 40%",
+    "max-count-hint": "Número de unidades para a probabilidade máxima de criação de lua"
   },
   "production": {
     "param-tab-general": "Geral",

@@ -92,6 +92,7 @@
     "plasma-turret": "Plasma turret",
     "small-shield": "Small shield dome",
     "large-shield": "Large shield dome",
+    "defenses": "Defenses",
     "abm": "Anti-ballistic missile",
     "ipm": "Interplanetary missile",
     "researches": "Researches",
@@ -299,7 +300,6 @@
     "graviton": "Graviton technology",
     "buildings-planet": "Buildings (planet)",
     "buildings-moon": "Buildings (moon)",
-    "defenses": "Defenses",
     "quantity": "Quantity",
     "hourly-prod": "Prod. per hour",
     "hourly-cons": "Consum. per hour",
@@ -558,7 +558,11 @@
     "ds-count": "Number of Death Stars",
     "moon-destroy-chance": "Moon destruction chance",
     "ds-blow-chance": "Death Stars blow chance",
-    "moon-create-chance": "Moon creation chance"
+    "moon-create-chance": "Moon creation chance",
+    "defense-to-debris": "Defenses to debris",
+    "deut-to-debris": "Deuterium to debris",
+    "promo-moon": "Event: chance up to 40%",
+    "max-count-hint": "Number of units that reach the maximum moon creation chance"
   },
   "production": {
     "param-tab-general": "General",

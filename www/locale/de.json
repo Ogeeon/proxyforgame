@@ -92,6 +92,8 @@
     "plasma-turret": "Plasmawerfer",
     "small-shield": "Kleine Schildkuppel",
     "large-shield": "Große Schildkuppel",
+    "defenses": "Verteidigung",
+    "fleet": "Flotte",
     "abm": "Abfangrakete",
     "ipm": "Interplanetarrakete",
     "researches": "Forschung",
@@ -298,7 +300,6 @@
     "buildings-planet": "Konstruktion-Planeten",
     "buildings-moon": "Konstruktion-Mond",
     "fleet": "Schiffe",
-    "defenses": "Verteidigung",
     "quantity": "Quantität",
     "hourly-prod": "Prod. pro Stunde",
     "hourly-cons": "Verb. pro Stunde",
@@ -560,7 +561,11 @@
     "ds-count": "Anzahl der Todessterne",
     "moon-destroy-chance": "Mondzerstörung Chance",
     "ds-blow-chance": "Chance Zerstörung der Todessterne",
-    "moon-create-chance": "Chance Mond Erstellung"
+    "moon-create-chance": "Chance Mond Erstellung",
+    "defense-to-debris": "Verteidigung ins Trümmerfeld",
+    "deut-to-debris": "Deuterium ins Trümmerfeld",
+    "promo-moon": "Aktion: Chance bis 40%",
+    "max-count-hint": "Anzahl der Einheiten für die maximale Mondchance"
   },
   "production": {
     "param-tab-general": "Allgemein",

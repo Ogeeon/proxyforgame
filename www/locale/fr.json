@@ -91,6 +91,7 @@
     "plasma-turret": "Lanceur de plasma",
     "small-shield": "Petit bouclier",
     "large-shield": "Grand bouclier",
+    "defenses": "Défenses",
     "abm": "Missile d`interception",
     "researches": "Recherches",
     "fleet": "Flotte",
@@ -296,7 +297,6 @@
     "ipm": "Missile Interplanétaire ",
     "buildings-planet": "Bâtiments (planète)",
     "buildings-moon": "Bâtiments (lune)",
-    "defenses": "Défenses",
     "quantity": "Quantité",
     "hourly-prod": "Prod. par Heure",
     "hourly-cons": "Consom. par Heure",
@@ -566,7 +566,11 @@
     "ds-count": "Nombre d'Étoiles de la mort",
     "moon-destroy-chance": "Chance de la destruction de la lune",
     "ds-blow-chance": "Chance de destruction des Etoiles de la mort",
-    "moon-create-chance": "Chances de création de la lune"
+    "moon-create-chance": "Chances de création de la lune",
+    "defense-to-debris": "Défenses dans le champ de débris",
+    "deut-to-debris": "Deutérium dans le champ de débris",
+    "promo-moon": "Événement : chance jusqu’à 40%",
+    "max-count-hint": "Nombre d’unités pour la chance maximale de création de lune"
   },
   "production": {
     "param-tab-general": "Général",

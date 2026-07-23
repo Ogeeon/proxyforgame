@@ -90,6 +90,7 @@
     "plasma-turret": "Cannone al Plasma",
     "small-shield": "Cupola Scudo",
     "large-shield": "Cupola Scudo Potenziata",
+    "defenses": "Difese",
     "abm": "Missili Anti Balistici",
     "ipm": "Missili Interplanetari",
     "researches": "Ricerche",
@@ -299,7 +300,6 @@
     "graviton": "Tecnologia Gravitonica",
     "buildings-planet": "Edifici (pianeta)",
     "buildings-moon": "Edifici (luna)",
-    "defenses": "Difese",
     "quantity": "Quantita",
     "hourly-prod": "Prod. per ora",
     "hourly-cons": "Cons. per ora",
@@ -565,7 +565,11 @@
     "ds-count": "Numero di Morti Nere",
     "moon-destroy-chance": "Possibilità di distruzione Luna",
     "ds-blow-chance": "Probabilità che esplodano le Morti Nere",
-    "moon-create-chance": "Possibilità di creazione Luna"
+    "moon-create-chance": "Possibilità di creazione Luna",
+    "defense-to-debris": "Difese nei detriti",
+    "deut-to-debris": "Deuterio nei detriti",
+    "promo-moon": "Evento: probabilità fino al 40%",
+    "max-count-hint": "Numero di unità per la massima possibilità di creazione della Luna"
   },
   "production": {
     "param-tab-general": "Generale",

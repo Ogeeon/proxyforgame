@@ -88,6 +88,7 @@
     "plasma-turret": "Plasmakanon",
     "small-shield": "Kleine planetaire schildkoepel",
     "large-shield": "Grote planetaire schildkoepel",
+    "defenses": "Verdediging",
     "abm": "Anti-ballistische raketten",
     "ipm": "Interplanetaire raketten",
     "researches": "Onderzoeken",
@@ -290,7 +291,6 @@
     "graviton": "Gravitontechniek",
     "buildings-planet": "Gebouwen (planeet)",
     "buildings-moon": "Gebouwen (maan)",
-    "defenses": "Verdediging",
     "quantity": "Hoeveelheid",
     "hourly-prod": "Productie per uur",
     "hourly-cons": "Verbruik per uur",
@@ -562,7 +562,11 @@
     "ds-count": "Aantal Sterren des Doods",
     "moon-destroy-chance": "Maandestructiekans",
     "ds-blow-chance": "Ster des Doods opblazingskans",
-    "moon-create-chance": "Maanvormingskans"
+    "moon-create-chance": "Maanvormingskans",
+    "defense-to-debris": "Verdediging in puinveld",
+    "deut-to-debris": "Deuterium in puinveld",
+    "promo-moon": "Evenement: kans tot 40%",
+    "max-count-hint": "Aantal eenheden voor de maximale maanvormingskans"
   },
   "production": {
     "param-tab-general": "Algemeen",

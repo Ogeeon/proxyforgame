@@ -91,6 +91,7 @@
     "plasma-turret": "Wyrzutnia plazmy",
     "small-shield": "Mała powłoka ochronna",
     "large-shield": "Duża powłoka ochronna",
+    "defenses": "Obrona",
     "abm": "Przeciwrakieta",
     "ipm": "Rakieta międzyplanetarna",
     "researches": "Badanie",
@@ -296,7 +297,6 @@
     "graviton": "Rozwój grawitonów",
     "buildings-planet": "Budynki (planeta)",
     "buildings-moon": "Budynki (ksiezyc)",
-    "defenses": "Obrona",
     "quantity": "Ilosc",
     "hourly-prod": "Prod. na godzinę",
     "hourly-cons": "Zużycie na godzinę",
@@ -568,7 +568,11 @@
     "ds-count": "Liczba Gwiazdy Śmierci",
     "moon-destroy-chance": "Szansa na zniszczenie księżyca",
     "ds-blow-chance": "Szansa na zniszczenie gwiazd śmierci",
-    "moon-create-chance": "Szansa stworzenia księżyca"
+    "moon-create-chance": "Szansa stworzenia księżyca",
+    "defense-to-debris": "Obrona do pola zniszczeń",
+    "deut-to-debris": "Deuter do pola zniszczeń",
+    "promo-moon": "Wydarzenie: szansa do 40%",
+    "max-count-hint": "Liczba jednostek dla maksymalnej szansy na stworzenie księżyca"
   },
   "production": {
     "param-tab-general": "Ogólne",

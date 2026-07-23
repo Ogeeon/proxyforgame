@@ -91,6 +91,8 @@
     "plasma-turret": "Plazmová veža",
     "small-shield": "Malý planetárny štít",
     "large-shield": "Veľký planetárny štít",
+    "defenses": "Obrana",
+    "fleet": "Flotila",
     "abm": "Protiraketové strely",
     "ipm": "Medziplanetárne rakety",
     "researches": "Výskumy",
@@ -296,7 +298,6 @@
     "buildings-planet": "Budovy (planéta)",
     "buildings-moon": "Budovy (Mesiac)",
     "fleet": "Flotily",
-    "defenses": "Obrana",
     "quantity": "Množstvo",
     "hourly-prod": "Prod. za hodinu",
     "hourly-cons": "Spotr. za hodinu",
@@ -554,7 +555,11 @@
     "ds-count": "Počet Hviezd smrti",
     "moon-destroy-chance": "Šanca na zničenie Mesiaca",
     "ds-blow-chance": "Šanca zničenia Hviezdy smrti",
-    "moon-create-chance": "Šanca na vznik Mesiaca"
+    "moon-create-chance": "Šanca na vznik Mesiaca",
+    "defense-to-debris": "Obrana do trosiek",
+    "deut-to-debris": "Deutérium do trosiek",
+    "promo-moon": "Akcia: šanca až 40%",
+    "max-count-hint": "Počet jednotiek pre maximálnu šancu vzniku Mesiaca"
   },
   "production": {
     "param-tab-general": "Všeobecné",
