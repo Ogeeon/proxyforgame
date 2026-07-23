@@ -97,6 +97,13 @@
   text-align: center;
 }
 
+/* Bootstrap's input-group overrides width utilities that are not id-scoped,
+   so the percentage field inside it gets its own rule. */
+#rc-capacity-increase {
+  width: 60px;
+  text-align: center;
+}
+
 /* Number of units that would reach the maximum moon creation chance. */
 .max-label {
   font-size: 0.75rem;

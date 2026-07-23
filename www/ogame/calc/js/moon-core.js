@@ -51,7 +51,33 @@ const MOON_CHANCE_CAP_PROMO = 0.40;
 // Base recycler hold; hyperspace technology adds 5% per level.
 const MOON_RECYCLER_CAPACITY = 20000;
 
+// Player classes relevant to the moon calculator. Only the General touches the
+// recycler hold; the others are listed so the selector matches the rest of the
+// site and a saved class carries over between calculators.
+const MOON_CLASS = { NONE: 0, COLLECTOR: 1, GENERAL: 2 };
+// Recycler cargo bonus granted by the General class.
+const MOON_GENERAL_CARGO_BONUS = 0.20;
+
 class MoonCalculator {
+  /**
+   * Cargo capacity, matching the costs / graviton calculators:
+   *   base * (1 + 0.05 * hyperTech)  +  base * classBonus  +  floor(base * cap%/100)
+   * where the class bonus and the life-form capacity increase are additive,
+   * never multiplied onto the hyperspace-boosted value.
+   *
+   * @param {number} base Base cargo capacity (20000 for a recycler).
+   * @param {number} hyperTechLevel Hyperspace technology level.
+   * @param {number} classBonus Additive class fraction: 0.20 for a General's
+   *   recyclers, 0 otherwise.
+   * @param {number} capacityIncrease Life-form cargo capacity increase, %.
+   */
+  static cargoCapacity(base, hyperTechLevel, classBonus, capacityIncrease) {
+    let cap = base * (1 + 0.05 * hyperTechLevel);
+    cap += base * classBonus;
+    cap += Math.floor(base * 0.01 * capacityIncrease);
+    return cap;
+  }
+
   /**
    * Destruction sub-calculator: the chance to blow up the target moon and the
    * chance the Death Stars are destroyed in the process.
@@ -76,6 +102,8 @@ class MoonCalculator {
    *   counts: {unitId: number} for every entry of MOON_UNITS,
    *   debrisPercent: share of a destroyed unit that goes into the field, %,
    *   hyperTechLevel: hyperspace technology level (recycler hold),
+   *   playerClass: 0 none / 1 collector / 2 general (recycler hold),
+   *   rcCapacityIncrease: life-form recycler capacity increase, %,
    *   defenseToDebris: whether destroyed defenses feed the field,
    *   deutToDebris: whether deuterium is part of the field,
    *   promoMoon: whether the 40% event cap is active.
@@ -111,8 +139,11 @@ class MoonCalculator {
     const chanceCap = p.promoMoon ? MOON_CHANCE_CAP_PROMO : MOON_CHANCE_CAP;
     const createChance = clampNumber(debrisTotal / MOON_DF_PER_FULL_CHANCE, 0, chanceCap);
 
-    const cargoSpace = Math.round(MOON_RECYCLER_CAPACITY * (1 + 0.05 * p.hyperTechLevel));
-    const recyclers = cargoSpace > 0 ? Math.ceil(debrisTotal / cargoSpace) : 0;
+    const classBonus = p.playerClass === MOON_CLASS.GENERAL ? MOON_GENERAL_CARGO_BONUS : 0;
+    const recyclerCapacity = MoonCalculator.cargoCapacity(
+      MOON_RECYCLER_CAPACITY, p.hyperTechLevel, classBonus, p.rcCapacityIncrease
+    );
+    const recyclers = recyclerCapacity > 0 ? Math.ceil(debrisTotal / recyclerCapacity) : 0;
 
     return {
       metalRequired: cost.metal,
@@ -124,6 +155,7 @@ class MoonCalculator {
       debrisTotal,
       createChance,
       chanceCap,
+      recyclerCapacity,
       recyclers,
       maxCounts: MoonCalculator.maxCounts(dfShare, deutFactor, chanceCap, p.defenseToDebris),
     };
@@ -175,5 +207,7 @@ if (typeof window !== 'undefined') {
     MOON_CHANCE_CAP,
     MOON_CHANCE_CAP_PROMO,
     MOON_RECYCLER_CAPACITY,
+    MOON_CLASS,
+    MOON_GENERAL_CARGO_BONUS,
   });
 }

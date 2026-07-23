@@ -47,6 +47,8 @@ const BASE_PRM = {
     dsCount: 1,
     debrisPercent: 30,
     hyperTechLevel: 0,
+    playerClass: 0,
+    rcCapacityIncrease: 0,
     defenseToDebris: false,
     deutToDebris: false,
     promoMoon: false,
@@ -170,6 +172,47 @@ test.describe('Moon Calculator - Creation', () => {
         // Hyperspace technology adds 5% per level: 20000 * 1.5 = 30000.
         const teched = await compute(page, { counts, hyperTechLevel: 10 });
         expect(teched.recyclers).toBe(Math.ceil(120000 / 30000));
+    });
+
+    test('the recycler hold grows with the general class and the LF increase', async ({ page }) => {
+        const counts = { 'light-fighter': 100 }; // 120000 debris at 30%
+        const plain = await compute(page, { counts });
+        expect(plain.recyclerCapacity).toBe(20000);
+
+        // The General adds 20% of the base hold.
+        const general = await compute(page, { counts, playerClass: 2 });
+        expect(general.recyclerCapacity).toBe(20000 * 1.2);
+        expect(general.recyclers).toBe(Math.ceil(120000 / 24000));
+
+        // The life-form increase adds floor(base * increase%).
+        const lf = await compute(page, { counts, rcCapacityIncrease: 50 });
+        expect(lf.recyclerCapacity).toBe(20000 + 10000);
+        expect(lf.recyclers).toBe(Math.ceil(120000 / 30000));
+    });
+
+    test('the class and LF bonuses are additive, not scaled by hyperspace tech', async ({ page }) => {
+        // 20000*1.5 + 20000*0.2 + floor(20000*0.5) = 30000 + 4000 + 10000,
+        // NOT 20000 * 1.5 * 1.2 * 1.5.
+        const r = await compute(page, {
+            hyperTechLevel: 10, playerClass: 2, rcCapacityIncrease: 50,
+        });
+        expect(r.recyclerCapacity).toBe(44000);
+    });
+
+    test('only the general class boosts the recycler hold', async ({ page }) => {
+        // The Collector's +25% applies to transports, never to recyclers.
+        const none = await compute(page, { playerClass: 0 });
+        const collector = await compute(page, { playerClass: 1 });
+        expect(collector.recyclerCapacity).toBe(none.recyclerCapacity);
+    });
+
+    test('a bigger recycler hold lowers the recyclers needed', async ({ page }) => {
+        const counts = { 'light-fighter': 100 };
+        const plain = await compute(page, { counts });
+        const boosted = await compute(page, { counts, playerClass: 2, rcCapacityIncrease: 100 });
+        // The debris field is unchanged; only the hold grows.
+        expect(boosted.debrisTotal).toBe(plain.debrisTotal);
+        expect(boosted.recyclers).toBeLessThan(plain.recyclers);
     });
 
     test('deuterium in the field raises the recyclers needed', async ({ page }) => {
@@ -328,6 +371,37 @@ test.describe('Moon Calculator - DOM integration', () => {
         await expect(page.locator('#deuterium-recyclable')).toHaveText('150.000');
     });
 
+    test('the general class lowers the recyclers needed', async ({ page }) => {
+        await openFleetTab(page);
+        await page.locator('#light-fighter').fill('100');
+        await page.locator('#light-fighter').blur();
+        await page.locator('#param-common-tab').click();
+        await expect(page.locator('#recyclers')).toHaveText('6');
+
+        await page.locator('#player-class-2').check(); // General -> hold 24000
+        await expect(page.locator('#recyclers')).toHaveText('5');
+    });
+
+    test('the recycler capacity increase lowers the recyclers needed', async ({ page }) => {
+        await openFleetTab(page);
+        await page.locator('#light-fighter').fill('100');
+        await page.locator('#light-fighter').blur();
+        await page.locator('#param-common-tab').click();
+
+        await page.locator('#rc-capacity-increase').fill('50'); // hold 30000
+        await page.locator('#rc-capacity-increase').blur();
+        await expect(page.locator('#recyclers')).toHaveText('4');
+    });
+
+    test('the class radios are mutually exclusive', async ({ page }) => {
+        await page.locator('#player-class-1').check(); // Collector
+        await expect(page.locator('#player-class-1')).toBeChecked();
+        await page.locator('#player-class-2').check(); // General
+        await expect(page.locator('#player-class-2')).toBeChecked();
+        await expect(page.locator('#player-class-1')).not.toBeChecked();
+        await expect(page.locator('#player-class-0')).not.toBeChecked();
+    });
+
     test('the promo checkbox lifts the chance above 20%', async ({ page }) => {
         await openFleetTab(page);
         await page.locator('#death-star').fill('1');
@@ -356,6 +430,9 @@ test.describe('Moon Calculator - DOM integration', () => {
     test('the creation reset clears the units, selects and checkboxes', async ({ page }) => {
         await page.locator('#hypertech-lvl').fill('12');
         await page.locator('#debris-percent').selectOption('60');
+        await page.locator('#player-class-2').check();
+        await page.locator('#rc-capacity-increase').fill('80');
+        await page.locator('#rc-capacity-increase').blur();
         await page.locator('#defense-to-debris').check();
         await page.locator('#deut-to-debris').check();
         await page.locator('#promo-moon').check();
@@ -369,6 +446,8 @@ test.describe('Moon Calculator - DOM integration', () => {
         await page.locator('#param-common-tab').click();
         await expect(page.locator('#hypertech-lvl')).toHaveValue('0');
         await expect(page.locator('#debris-percent')).toHaveValue('30');
+        await expect(page.locator('#player-class-0')).toBeChecked();
+        await expect(page.locator('#rc-capacity-increase')).toHaveValue('0');
         await expect(page.locator('#defense-to-debris')).not.toBeChecked();
         await expect(page.locator('#deut-to-debris')).not.toBeChecked();
         await expect(page.locator('#promo-moon')).not.toBeChecked();

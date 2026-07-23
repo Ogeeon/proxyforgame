@@ -152,6 +152,21 @@
               </select>
             </div>
           </div>
+          <div class="d-flex flex-wrap gap-3 align-items-center justify-content-center mb-2">
+            <div class="d-flex align-items-center gap-1 flex-nowrap">
+              <label><?= $l['class'] ?>:</label>
+              <input id="player-class-0" type="radio" name="player-class" value="0" class="form-check-input" checked="checked"/> <label for="player-class-0"><?= $l['none'] ?></label>
+              <input id="player-class-1" type="radio" name="player-class" value="1" class="form-check-input ms-2"/> <label for="player-class-1"><?= $l['class-collector'] ?></label>
+              <input id="player-class-2" type="radio" name="player-class" value="2" class="form-check-input ms-2"/> <label for="player-class-2"><?= $l['class-general'] ?></label>
+            </div>
+            <div class="d-flex align-items-center gap-1">
+              <label for="rc-capacity-increase"><?= $l['cargo-cap-increase'] ?><?= $l['recycler'] ?></label>
+              <div class="input-group input-group-sm w-auto">
+                <input id="rc-capacity-increase" type="text" name="rc-capacity-increase" class="form-control m-0" value="0" alt="<?= $l['cargo-cap-increase'] ?><?= $l['recycler'] ?>"/>
+                <span class="input-group-text">%</span>
+              </div>
+            </div>
+          </div>
           <div class="d-flex flex-wrap gap-3 align-items-center justify-content-center">
             <div class="d-flex align-items-center gap-1">
               <input id="defense-to-debris" type="checkbox" name="defense-to-debris" class="form-check-input"/>

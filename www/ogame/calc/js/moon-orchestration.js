@@ -18,6 +18,8 @@ var options = {
     dsCount: 1,
     debrisPercent: 30,
     hyperTechLevel: 0,
+    playerClass: 0,
+    rcCapacityIncrease: 0,
     defenseToDebris: false,
     deutToDebris: false,
     promoMoon: false,
@@ -28,6 +30,8 @@ var options = {
         case 'dsCount': return validateNumber(Number.parseFloat(value), 1, Infinity, 1);
         case 'debrisPercent': return validateNumber(Number.parseFloat(value), 0, 100, 30);
         case 'hyperTechLevel': return validateNumber(Number.parseFloat(value), 0, 50, 0);
+        case 'playerClass': return validateNumber(Number.parseInt(value), 0, 2, 0);
+        case 'rcCapacityIncrease': return validateNumber(Number.parseFloat(value), 0, 999, 0);
         case 'defenseToDebris': return value === 'true';
         case 'deutToDebris': return value === 'true';
         case 'promoMoon': return value === 'true';
@@ -46,6 +50,7 @@ var options = {
 // The unit counts are deliberately absent - see the note at the top.
 const MOON_PERSISTED_PARAMS = [
   'moonSize', 'dsCount', 'debrisPercent', 'hyperTechLevel',
+  'playerClass', 'rcCapacityIncrease',
   'defenseToDebris', 'deutToDebris', 'promoMoon',
 ];
 
@@ -54,7 +59,7 @@ class MoonApp {
     this.calc = new MoonCalculator();
     // Text inputs that carry numeric values and share the blur-validation flow:
     // the two destruction fields, the hyperspace level and every unit count.
-    this.numericInputs = ['#moon-size', '#ds-count', '#hypertech-lvl']
+    this.numericInputs = ['#moon-size', '#ds-count', '#hypertech-lvl', '#rc-capacity-increase']
       .concat(MOON_UNITS.map((unit) => '#' + unit.id));
     this.checkboxes = ['#defense-to-debris', '#deut-to-debris', '#promo-moon'];
   }
@@ -73,6 +78,9 @@ class MoonApp {
     setVal('#ds-count', options.prm.dsCount);
     setVal('#debris-percent', options.prm.debrisPercent);
     setVal('#hypertech-lvl', options.prm.hyperTechLevel);
+    const classRadio = $(`#player-class-${options.prm.playerClass}`);
+    if (classRadio) classRadio.checked = true;
+    setNumVal('#rc-capacity-increase', options.prm.rcCapacityIncrease);
     setChecked('#defense-to-debris', options.prm.defenseToDebris);
     setChecked('#deut-to-debris', options.prm.deutToDebris);
     setChecked('#promo-moon', options.prm.promoMoon);
@@ -85,6 +93,8 @@ class MoonApp {
     if (dsCount) dsCount._constrains = { min: 1, def: 1 };
     const hyperTech = document.getElementById('hypertech-lvl');
     if (hyperTech) hyperTech._constrains = { min: 0, max: 50, def: 0 };
+    const rcCap = document.getElementById('rc-capacity-increase');
+    if (rcCap) rcCap._constrains = { min: 0, max: 999, def: 0, allowNegative: false, allowFloat: true };
     MOON_UNITS.forEach((unit) => {
       const el = document.getElementById(unit.id);
       if (el) el._constrains = { min: 0, def: 0 };
@@ -101,6 +111,11 @@ class MoonApp {
     });
 
     addEvent('#debris-percent', 'change', () => this.recalc());
+
+    // Player class radios (only the General changes the recycler hold).
+    document.querySelectorAll('input[name="player-class"]').forEach((radio) => {
+      radio.addEventListener('change', () => this.recalc());
+    });
 
     this.checkboxes.forEach((sel) => {
       addEvent(sel, 'change', () => this.recalc());
@@ -150,12 +165,16 @@ class MoonApp {
   _resetCreateParams() {
     options.prm.debrisPercent = 30;
     options.prm.hyperTechLevel = 0;
+    options.prm.playerClass = 0;
+    options.prm.rcCapacityIncrease = 0;
     options.prm.defenseToDebris = false;
     options.prm.deutToDebris = false;
     options.prm.promoMoon = false;
 
     setVal('#debris-percent', options.prm.debrisPercent);
     setVal('#hypertech-lvl', options.prm.hyperTechLevel);
+    setChecked('#player-class-0', true);
+    setNumVal('#rc-capacity-increase', 0);
     setChecked('#defense-to-debris', false);
     setChecked('#deut-to-debris', false);
     setChecked('#promo-moon', false);
