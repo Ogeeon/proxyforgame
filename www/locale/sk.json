@@ -18,7 +18,7 @@
     "energy": "Energia",
     "points": "Body",
     "time": "Čas",
-    "keywords": "proxyforgame,proxy,online,kalkulátor,ogame",
+    "keywords": "proxyforgame,ogame,ogame kalkulačka,ogame nástroje,online kalkulačka,prehliadačová hra",
     "reset": "Vynulovať",
     "calculate": "Vypočítať",
     "llc-dialog-title": "Výpočet úrovne výskumných laboratórií",
@@ -49,7 +49,7 @@
     "one-item-mult-levels": "Jedna položka - viacero úrovní",
     "metal-mine": "Ťažobný komplex - kovy",
     "crystal-mine": "Ťažobný komplex - kryštály",
-    "deut-synth": "Syntetizéry deutéria",
+    "deut-synth": "Syntetizér deutéria",
     "solar-plant": "Solárne elektrárne",
     "fusion-reactor": "Fúzne elektrárne",
     "robot-factory": "Robotické továrne",
@@ -96,7 +96,7 @@
     "abm": "Protiraketové strely",
     "ipm": "Medziplanetárne rakety",
     "researches": "Výskumy",
-    "building": "budova",
+    "building": "Budova",
     "buildings": "Budovy",
     "research": "Výskum",
     "ship": "Loď",
@@ -111,7 +111,7 @@
     "msg-max-constraint-violated": "Hodnota {0} {1} je väčšia ako maximum {2}. Hodnota poľa nastavená na maximum.",
     "field-hint": "pre pole [{0}]",
     "class": "Class",
-    "class-collector": "Class - Collector",
+    "class-collector": "Collector",
     "class-general": "General",
     "class-discoverer": "Discoverer",
     "reaper": "Reaper",
@@ -123,7 +123,7 @@
     "datetime-format": "d.m.y H:s:s",
     "datetime-format-hint": "dd.mm.rrrr hh:mm:ss",
     "coords": "Súradnice",
-    "deuterium-short": "deut",
+    "deuterium-short": "Deut.",
     "trader-bonus": "Trieda aliancie je \"Obchodníci\"",
     "parameters": "Parametre",
     "lf-bonuses-ships": "Bonusy k štatistikám lodí (%)",
@@ -185,11 +185,15 @@
     "exchange-rates": "Výmenné kurzy",
     "cookie-consent-message": "Táto stránka používa cookies na prispôsobenie obsahu a ukladanie hodnôt, ktoré zadáte do kalkulačiek.",
     "cookie-consent-accept": "Rozumiem",
-    "cookie-consent-policy": "Zásady ochrany osobných údajov"
+    "cookie-consent-policy": "Zásady ochrany osobných údajov",
+    "plasma-tech": "Plazmové technológie",
+    "planet-pos": "Pozícia",
+    "cargo-increase": "Kapacita nákladu",
+    "all-officers": "Všetkých 5 veliteľov"
   },
   "index": {
     "title": "ProxyForGame - software pre online hry v prehliadači OGame",
-    "keywords": "proxyforgame,proxy,online,game,browser,calc,calculator,tool,program,ogame,trading calculator,trade calculator,cost calculator,costs calculator,resource exchange,build calculator,building calculator"
+    "keywords": "proxyforgame,ogame,ogame kalkulačka,ogame nástroje,online kalkulačka,prehliadačová hra,kalkulačka nákladov,kalkulačka času letu,kalkulačka obchodovania,kalkulačka produkcie,kalkulačka gravitónu,kalkulačka mesiacov,kalkulačka terraformera,kalkulačka expedícií,fronta výstavby"
   },
   "sidebar": {
     "ogameMenuItems": {
@@ -291,32 +295,28 @@
     "comb-drive": "Spaľovací pohon",
     "hyper-drive": "Hyperpriestorový pohon",
     "laser-tech": "Laserové technológie",
-    "plasma-tech": "Plazmové technológie",
     "irn": "Intergalaktická výskumná sieť",
     "astrophysics": "Astrofyzika",
     "graviton": "Gravitonové technológie",
     "buildings-planet": "Budovy (planéta)",
     "buildings-moon": "Budovy (Mesiac)",
-    "fleet": "Flotily",
     "quantity": "Množstvo",
     "hourly-prod": "Prod. za hodinu",
     "hourly-cons": "Spotr. za hodinu",
     "times-note": "Ak počítate trvanie výstavby/výskumu, nástroj používa iba hodnoty úrovní lodeníc, tovární a laboratórií vložených v hornom paneli. Ak máte IVS a potrebujete vypočítať výslednú úroveň laboratórií, prosím kliknite na tlačítko \"Vypočítať\" vedľa poľa s úrovňou výskumného laboratória",
     "robot-nanite-hint": "Nástroj nedokáže zohľadniť poradie výstavby. Bonus rýchlosti výstavby od Továrne robotov a Nanorobotickej továrne používa úroveň zadanú v hornom paneli — nie úroveň, ktorá sa zvyšuje v rovnakom balíku.<br>Príklad: ak upgradujete Továreň robotov z úrovne 1 na 5 a Baňu na kovy z úrovne 1 na 5 — ak najprv upgradujete továreň, výstavba bane trvá ~2m25s na úroveň; ak najprv upgradujete baňu (s továreňou stále na úrovni 1), trvá to ~7m16s na úroveň.<br>Aby sa predišlo tejto nejednoznačnosti, nástroj vždy používa úroveň továrne zadanú v hornej časti tabuľky.",
     "msg-cant-research": "Na danej úrovní výskumného laboratória je výskum \"{0}\" nemožný.",
-    "class-collector": "Collector",
-    "planet-pos": "Pozícia",
     "mineral-res-cntr-lvl": "Výskumné centrum minerálov",
     "lf-terraformer-rdc": "Zníženie nákladov na terraformer",
     "disclaimer-robot-nanite": "Pri čítaní časov výstavby zohľadnite poznámku v prvom riadku tabuľky. Ak staviate Robotické továrne alebo Nanotechnologické továrne, použite <a href=\"{0}\">Kalkulačku frontu výstavby</a> pre presné výpočty času výstavby.",
     "disclaimer-title": "Upozornenie",
     "discoverer-class-bonus": "Bonus triedy Discoverer",
-    "discoverer-class-bonus-hint": "Použije sa iba vtedy, ak je na karte 'Všeobecné' vybraná trieda 'Discoverer'"
+    "discoverer-class-bonus-hint": "Použije sa iba vtedy, ak je na karte 'Všeobecné' vybraná trieda 'Discoverer'",
+    "keywords": "proxyforgame,ogame,kalkulačka nákladov,náklady budov,náklady výskumu,náklady flotily,náklady obrany,výpočet nákladov,náklady na suroviny"
   },
   "lfcosts": {
     "title": "OGame - Kalkulátor pre ceny pre formy života",
     "times-note": "Konečný bonus na rýchlosť a náklady výskumu sa skladá z bonusu tretej budovy na konkrétnej planéte a globálneho bonusu Foriem života.",
-    "class-collector": "Collector",
     "times-hint": "Prečítajte si prosím poznámku v dolnej časti stránky",
     "resid-sector": "Rezidenčný sektor",
     "biosph-farm": "Biosférická farma",
@@ -354,10 +354,8 @@
     "rune-forge": "Vyhňa rún",
     "oriktorium": "Oriktorium",
     "magma-forge": "Magmatická vyhňa",
-    "disr-chamber": "Komora zlomov",
     "megalith": "Megalit",
     "crystal-refinery": "Rafinéria kryštálov",
-    "deut-synth": "Syntetizér deutéria",
     "mineral-res-centre": "Výskumné centrum minerálov",
     "adv-recycling-plant": "Závod vylepšenej recyklácie",
     "volc-batteries": "Vulkanické batérie",
@@ -438,7 +436,8 @@
     "ovrc-battleship": "Pretaktovanie (Bojová loď)",
     "psy-sh-matrix": "Psionický matricový štít",
     "kaelesh-disc-enh": "Objaviteľský rozlet kaelešov",
-    "energy-cost-to-build": "Energia potrebná na výstavbu"
+    "energy-cost-to-build": "Energia potrebná na výstavbu",
+    "keywords": "proxyforgame,ogame,formy života,kalkulačka foriem života,budovy foriem života,výskumy foriem života,náklady foriem života,kalkulačka nákladov"
   },
   "flight": {
     "flight-time-format": "99 H:s:s",
@@ -494,7 +493,6 @@
     "msg-wrong-departure-coordinates": "Chybné súradnice miesta odletu.",
     "msg-no-savepoints-found": "Neboli nájdené žiadne možné miesta úkrytu.",
     "deut-factor": "Deut cons. factor",
-    "class-collector": "Collector",
     "warrior-bonus": "Bonus aliančnej triedy \"Bojovníci\"",
     "savepoints-hint": "Maximálny povolený rozdiel medzi vypočítaným a zadaným časom návratu",
     "sp-cargohold": "Kapacita nákladu Špionážnych sonda",
@@ -506,7 +504,6 @@
     "lf-bonus-deut-consum": "Spotreba deutéria",
     "lf-bonus-civ-cargo": "Nákladná kapacita civilných lodí",
     "generals-enhancement-lvl": "Úroveň 'Všeobecného vylepšenia Mecha'",
-    "fleet": "Flotila",
     "no-fleet-name-msg": "Uveďte názov flotily.",
     "no-fleet-selected-msg": "Nie je vybraná žiadna flotila.",
     "del-fleet-confirm": "Ste si istí, že chcete vymazať údaje pre túto flotilu?",
@@ -516,7 +513,6 @@
     "ovr-fleet-speed-explain": "Namiesto vypočítanej rýchlosti flotily použite zadanú hodnotu",
     "collectors-enhancement-lvl": "Úroveň „Kameňácke vylepšenie zberača“",
     "speed-increase": "Rýchlosť",
-    "cargo-increase": "Kapacita nákladu",
     "fuel-decrease": "Spotreba paliva",
     "import-sr": "Import",
     "import-hint": "Do tohto poľa vložte kód API špionážnej správy z OGame\nalebo kód správy uloženej na Logserver.net",
@@ -538,13 +534,14 @@
     "own-api-reader-note": "Upozorňujeme, že kód API 2 neobsahuje informácie o vesmíre vrátane troch variantov rýchlosti flotily. Ak chcete tieto údaje načítať automaticky, použite výberové polia „Krajina“ a „Vesmír“ na paneli parametrov.",
     "own-api-import-btn": "Import z OGame",
     "own-api-import-title": "Importovať",
-    "own-api-bad-json-msg": "Údaje sa nepodarilo načítať.\\nUistite sa, že ste vložili text z poľa API 2 na stránke „Flotila“."
+    "own-api-bad-json-msg": "Údaje sa nepodarilo načítať.\\nUistite sa, že ste vložili text z poľa API 2 na stránke „Flotila“.",
+    "keywords": "proxyforgame,ogame,kalkulačka času letu,čas letu,body uloženia,save,rýchlosť flotily,spotreba deutéria,spotreba paliva"
   },
   "graviton": {
     "title": "OGame - Kalkulátor pre Graviton",
-    "all-officers": "Všetkých 5 veliteľov",
     "recycling": "Dismantling SS debris",
-    "graviton-level": "Úroveň Gravitónu"
+    "graviton-level": "Úroveň Gravitónu",
+    "keywords": "proxyforgame,ogame,kalkulačka gravitónu,gravitónová technológia,gravitačná technológia,solárne satelity,energia pre gravitón,hviezda smrti"
   },
   "moon": {
     "title": "OGame - Kalkulatorji za lune",
@@ -559,7 +556,8 @@
     "defense-to-debris": "Obrana do trosiek",
     "deut-to-debris": "Deutérium do trosiek",
     "promo-moon": "Akcia: šanca až 40%",
-    "max-count-hint": "Počet jednotiek pre maximálnu šancu vzniku Mesiaca"
+    "max-count-hint": "Počet jednotiek pre maximálnu šancu vzniku Mesiaca",
+    "keywords": "proxyforgame,ogame,kalkulačka mesiacov,šanca na mesiac,pole trosiek,zničenie mesiaca,mesačná základňa,recyklátory,hviezda smrti"
   },
   "production": {
     "param-tab-general": "Všeobecné",
@@ -567,11 +565,8 @@
     "lf-crawlers-boost": "Bonus crawlerov",
     "lf-plasma-cost-reduction": "Zníženie nákladov plazmovej technológie",
     "title": "OGame - Kalkulátor rýchlosti produkcie",
-    "keywords": "proxyforgame,proxy,online,kalkulátor,ogame,amortizácia,návratnosť,využitie zdrojov",
-    "plasma-tech-level": "Plazma tech level",
-    "plasma-tech": "Plazma technology",
+    "keywords": "proxyforgame,ogame,kalkulačka produkcie,produkcia surovín,rýchlosť produkcie,energetická bilancia,produkcia energie,návratnosť baní,amortizácia,pásovce",
     "max-planet-temp": "Max. t°",
-    "technocrat": "Technocrat",
     "one-planet": "Jedna planéta",
     "all-planets": "Všetky planéty",
     "prod-coeff": "Efektivita produkcie",
@@ -613,11 +608,9 @@
     "per-hour": "Za hodinu",
     "per-day": "Za deň",
     "per-week": "Za týždeň",
-    "class-collector": "Collector",
     "crawler-short": "Cr.",
     "crawler-limit-hint": "Max. Crawlerov: {0} (8 × súčet úrovní baňí, ×8,8 s Geológom)",
     "commanding-staff": "Commanding staff",
-    "planet-pos": "Position",
     "planet-pos-short": "Pos.",
     "planet-name": "Názov planéty",
     "save-planet-data": "Uložiť dáta",
@@ -658,24 +651,23 @@
     "queue": "Stavba front",
     "build": "Pridať do frontu",
     "destroy": "Add deconstruction to queue",
-    "building": "Budova",
     "start-level": "Počiat. úroveň",
     "next-level": "Ďalší úroveň",
     "title": "OGame - Stavba front",
-    "clear": "Odstrániť"
+    "clear": "Odstrániť",
+    "keywords": "proxyforgame,ogame,fronta výstavby,poradie výstavby,čas výstavby,kalkulačka fronty,náklady budov"
   },
   "terraformer": {
     "title": "OGame - Kalkulátor pre Terraformer",
-    "all-officers": "Všetkých 5 špecialistov",
     "robots-factory-level": "Úroveň robot. továrni",
     "tf-level": "Úroveň Terraformera",
     "single-level": "Jeden úroveň",
     "added-fields": "Polia pridaný",
-    "satellites": "Solárne satelity"
+    "satellites": "Solárne satelity",
+    "keywords": "proxyforgame,ogame,kalkulačka terraformera,terraformer,polia planéty,solárne satelity,potrebná energia,nanotechnologická továreň"
   },
   "expeditions": {
-    "keywords": "kalkulačka, zdroje, flotila, expedícia",
-    "reset": "Obnoviť",
+    "keywords": "proxyforgame,ogame,kalkulačka expedícií,expedície,suroviny z expedícií,flotila na expedície,temná hmota,nálezy z expedícií",
     "LOCA_TITLE": "OGame Kalkulačka Expedícií",
     "LOCA_LANG": "Jazyk:",
     "LOCA_STRONGEST_CAP": "Najsilnejší hráč má ",
@@ -730,7 +722,6 @@
     "title": "OGame Kalkulačka Expedícií",
     "api_bc": "Bonus triedy \"Zberateľ\", %",
     "api_bd": "Bonus triedy \"Bádateľ\", %",
-    "cargo-increase": "Nákladová kapacita",
     "class-bonus-collector": "Bonus triedy \"Zberateľ\"",
     "class-bonus-discoverer": "Bonus triedy \"Bádateľ\"",
     "resources-discovery-booster": "Zvýšenie objavu zdrojov",
@@ -749,6 +740,7 @@
     "title": "OGame - Kalkulátor pre obchody - Výmena surovín",
     "link": "Odkaz",
     "text": "Text",
-    "and": "a"
+    "and": "a",
+    "keywords": "proxyforgame,ogame,kalkulačka obchodovania,výmena surovín,výmenný kurz,kov kryštál deutérium,obchodník"
   }
 }

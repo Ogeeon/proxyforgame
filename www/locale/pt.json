@@ -7,8 +7,8 @@
     "datetime-s": "s",
     "unit-suffix": "KMG",
     "full-numbers": "Números completos",
-    "sc-short": "SC",
-    "lc-short": "LC",
+    "sc-short": "CP",
+    "lc-short": "CG",
     "cargo-cap-increase": "Aumento da capacidade de carga: ",
     "decimal-separator": ",",
     "metal": "Metal",
@@ -18,7 +18,7 @@
     "energy": "Energia",
     "points": "Pontos",
     "time": "Tempo",
-    "keywords": "proxyforgame,proxy,online,browser,game,calc,calculator,ogame,grav,graviton calculator,graviton,gravitation technology calculator,satellites for graviton",
+    "keywords": "proxyforgame,ogame,calculadora ogame,ferramentas ogame,calculadora online,jogo de navegador",
     "reset": "Limpar",
     "calculate": "Calcular",
     "llc-dialog-title": "Calculo do nível de laboratório de pesquisas",
@@ -36,12 +36,12 @@
     "research-speed": "Velocidade de Pesquisa",
     "energy-tech-level": "Nível tecnologia de energia",
     "max-planet-temp": "Temperatura Max do Planeta",
-    "plasma-tech-level": "Plasma tech level",
+    "plasma-tech-level": "Nível tecnologia de plasma",
     "booster": "Booster",
     "research-event": "Evento: pesquisa 25% mais rápida",
     "technocrat": "Cientista",
     "engineer": "Engenheiro",
-    "geologist": "Geologo",
+    "geologist": "Geólogo",
     "admiral": "Admiral",
     "commander": "Commander",
     "all-items-one-level": "Todos items - um nível",
@@ -112,7 +112,7 @@
     "msg-max-constraint-violated": "O valor {0} {1} é maior que o máximo {2}. Valor do campo ajustado ao máximo.",
     "field-hint": "por campo [{0}]",
     "class": "Classe",
-    "class-collector": "Classe - Colecionado",
+    "class-collector": "Colecionador",
     "class-general": "General",
     "class-discoverer": "Descobridor",
     "reaper": "Reaper",
@@ -125,7 +125,7 @@
     "datetime-format": "d.m.y H:s:s",
     "datetime-format-hint": "dd.mm.yyyy hh:mm:ss",
     "coords": "Coordenadas",
-    "deuterium-short": "deut",
+    "deuterium-short": "Deut.",
     "trader-bonus": "A classe Alliance é \"Traders\"",
     "parameters": "Parâmetros",
     "lf-bonuses-ships": "Bónus de estatísticas de navios (%)",
@@ -163,7 +163,6 @@
     "expences": "Recursos precisos",
     "cargoes": "Cargueiros",
     "recyclers": "Recicladores",
-    "recycling": "Detritos colheita",
     "crawlers-count": "Quantidade de Rastejadores",
     "class-bonus": "Bônus de classe",
     "officers-bonus": "Bônus de oficiais",
@@ -183,11 +182,18 @@
     "exchange-rates": "Taxas de câmbio",
     "cookie-consent-message": "Este site usa cookies para personalizar o conteúdo e armazenar os valores que você insere nas calculadoras.",
     "cookie-consent-accept": "Entendi",
-    "cookie-consent-policy": "Política de Privacidade"
+    "cookie-consent-policy": "Política de Privacidade",
+    "planet-pos": "Posição",
+    "ship-name": "Nave",
+    "cargo-increase": "Capacidade de carga",
+    "sc": "Cargueiro Pequeno",
+    "lc": "Cargueiro Grande",
+    "energy-needed": "mais de",
+    "debris-percent": "Percentagem para Destroços"
   },
   "index": {
     "title": "ProxyForGame - Calculadoras para OGame",
-    "keywords": "proxyforgame,proxy,online,game,browser,calc,calculator,tool,program,ogame,trading calculator,trade calculator,cost calculator,costs calculator,resource exchange,build calculator,building calculator"
+    "keywords": "proxyforgame,ogame,calculadora ogame,ferramentas ogame,calculadora online,jogo de navegador,calculadora de custos,calculadora de tempo de voo,calculadora de comércio,calculadora de produção,calculadora de gráviton,calculadora de luas,calculadora de terraformador,calculadora de expedições,fila de construção"
   },
   "sidebar": {
     "ogameMenuItems": {
@@ -265,11 +271,8 @@
     }
   },
   "costs": {
-    "sc-short": "CP",
-    "lc-short": "CG",
     "title": "OGame - Calculadora de Custos",
-    "keywords": "proxyforgame,proxy,online,calc,calculator,ogame,price calculation,cost calculation,buildings costs,research costs,fleet costs,defence costs,costs calculator,prices calculator",
-    "max-planet-temp": "Planeta temperatura max",
+    "keywords": "proxyforgame,ogame,calculadora de custos,custos de edifícios,custos de pesquisa,custos de frota,custos de defesa,cálculo de custos,custo em recursos",
     "lf-full-table": "Tabela completa",
     "lf-full-table-hint": "Insira a redução de custo e tempo para cada pesquisa",
     "lf-research-table-title": "Bónus de pesquisa",
@@ -304,8 +307,6 @@
     "times-note": "Para os cálculos da duração das construções/pesquisas, a ferramenta apenas usa os valores dos níveis do Hangar, Fábricas e Laboratorio introduzidos no painel superior. Se precisas de calcular o total dos níveis do laboratório quando tens a RIP, por favor clica no botão Calcular ao lado do Nível do Laboratório de Pesquisas .",
     "robot-nanite-hint": "A ferramenta não consegue ter em conta a ordem de construção. O bónus de velocidade de construção da Fábrica de Robots e da Fábrica de Nanobots usa o nível introduzido no painel superior — não o nível que está a ser melhorado no mesmo lote.<br>Exemplo: se melhorares a Fábrica de Robots do nível 1 para 5 e a Mina de Metal do nível 1 para 5 — melhorando primeiro a fábrica, a construção da mina demora ~2m25s por nível; melhorando primeiro a mina (com a fábrica ainda no nível 1), demora ~7m16s por nível.<br>Para evitar esta ambiguidade, a ferramenta usa sempre o nível de fábrica especificado no topo da tabela.",
     "msg-cant-research": "A este nível de laboratório de pesquisas a tecnologia \"{0}\" está indisponível.",
-    "class-collector": "Colecionador",
-    "planet-pos": "Posição",
     "mineral-res-cntr-lvl": "Centro de Pesquisa de Minerais",
     "lf-terraformer-rdc": "Redução dos custos do terraformador",
     "disclaimer-robot-nanite": "Por favor, tenha em conta a nota na primeira linha da tabela ao ler os tempos de construção. Se estiver a construir uma Fábrica de Robôs ou uma Fábrica de Nanites, utilize a <a href=\"{0}\">Calculadora de fila de construção</a> para cálculos precisos do tempo de construção.",
@@ -314,12 +315,9 @@
     "discoverer-class-bonus-hint": "Aplica-se apenas se na aba 'Geral' estiver selecionada a classe 'Descobridor'"
   },
   "lfcosts": {
-    "sc-short": "CP",
-    "lc-short": "CG",
     "title": "OGame - Calculadora de Custos para Formas de vida",
-    "keywords": "proxyforgame,proxy,online,calc,calculator,ogame,price calculation,cost calculation,buildings costs,research costs,fleet costs,defence costs,costs calculator,prices calculator",
+    "keywords": "proxyforgame,ogame,formas de vida,calculadora de formas de vida,edifícios de formas de vida,pesquisas de formas de vida,custos de formas de vida,calculadora de custos",
     "times-note": "O bónus final à velocidade e custo de pesquisas consiste no bónus do terceiro edifício num planeta específico e no bónus global das Formas de Vida.",
-    "class-collector": "Colecionador",
     "times-hint": "Por favor leia a nota no final da página",
     "resid-sector": "Setor Residencial",
     "biosph-farm": "Quinta de Biosfera",
@@ -439,7 +437,6 @@
     "ovrc-battleship": "Overclocking (Nave de Batalha)",
     "psy-sh-matrix": "Matriz de Escudo Psiónico",
     "kaelesh-disc-enh": "Melhoramento de Descobridor dos Kaelesh",
-    "max-planet-temp": "Planeta temperatura max",
     "energy-cost-to-build": "Energia necessária para a construção"
   },
   "flight": {
@@ -448,7 +445,7 @@
     "tolerance-time-format": "H:s",
     "tolerance-time-format-hint": "hh:mm",
     "title": "OGame - Calculadora de tempos de voos e pontos seguros",
-    "keywords": "proxyforgame,proxy,online,calc,calculator,ogame,save,flight,flight time calculator,savepoints,fuel comsumption,deuterium comsumption",
+    "keywords": "proxyforgame,ogame,calculadora de tempo de voo,tempo de voo,pontos de save,save,velocidade da frota,consumo de deutério,consumo de combustível",
     "cmb-drive": "Motor de Combustão",
     "hyp-drive": "Motor Propulsor de Hiperespaço",
     "circular": "Circular universe:",
@@ -497,7 +494,6 @@
     "msg-wrong-departure-coordinates": "Coordenadas de Partida erradas.",
     "msg-no-savepoints-found": "Não foram encontradas coordenadas.",
     "deut-factor": "Deut cons. factor",
-    "class-collector": "Colecionador",
     "warrior-bonus": "Bónus da classe de aliança \"Guerreiros\"",
     "savepoints-hint": "Diferença máxima permitida entre o tempo de retorno calculado e o tempo de retorno especificado",
     "sp-cargohold": "Capacidade de carga das Sondas de Espionagem",
@@ -517,9 +513,7 @@
     "ovr-fleet-speed": "Ultrapassar a velocidade da frota:",
     "ovr-fleet-speed-explain": "Utilizar o valor especificado em vez da velocidade da frota calculada",
     "collectors-enhancement-lvl": "Nível de 'Melhoramento de Colecionador dos Rock’tal'",
-    "ship-name": "Navio",
     "speed-increase": "Velocidade",
-    "cargo-increase": "Capacidade de carga",
     "fuel-decrease": "Consumo de combustível",
     "import-sr": "Importar",
     "import-hint": "Cola neste campo o código API do relatório espião do OGame\nou o código do relatório guardado no Logserver.net",
@@ -544,17 +538,13 @@
     "own-api-bad-json-msg": "Não foi possível ler os dados.\\nVerifique se você colou o texto do campo API 2 da página «Frota»."
   },
   "graviton": {
-    "sc": "Cargueiro Pequeno",
-    "lc": "Cargueiro Grande",
     "title": "OGame - Calculadora de Gravitação",
-    "energy-needed": "mais de",
-    "debris-percent": "Porcentagem para Destroços",
-    "graviton-level": "Nível do Gráviton"
+    "graviton-level": "Nível do Gráviton",
+    "recycling": "Detritos colheita",
+    "keywords": "proxyforgame,ogame,calculadora de gráviton,tecnologia de gráviton,tecnologia de gravitação,satélites solares,energia para gráviton,estrela da morte"
   },
   "moon": {
-    "decimal-separator": ".",
     "title": "OGame - Moons calculator",
-    "debris-percent": "Percentagem para Destroços",
     "destroy-title": "OGame - Calculadora de Lua destruição",
     "create-title": "OGame - Calculadora de Lua criação",
     "moon-size": "Diâmetro da Lua",
@@ -565,7 +555,9 @@
     "defense-to-debris": "Defesas para os destroços",
     "deut-to-debris": "Deutério para os destroços",
     "promo-moon": "Evento: probabilidade até 40%",
-    "max-count-hint": "Número de unidades para a probabilidade máxima de criação de lua"
+    "max-count-hint": "Número de unidades para a probabilidade máxima de criação de lua",
+    "recycling": "Detritos colheita",
+    "keywords": "proxyforgame,ogame,calculadora de luas,probabilidade de lua,campo de destroços,destruição de lua,base lunar,recicladores,estrela da morte"
   },
   "production": {
     "param-tab-general": "Geral",
@@ -573,10 +565,8 @@
     "lf-crawlers-boost": "Bônus de crawlers",
     "lf-plasma-cost-reduction": "Redução de custo da tecnologia de plasma",
     "title": "OGame - Calculadora da velocidade de produção",
-    "keywords": "proxyforgame,proxy,online,browser,game,tool,calc,calculator,ogame,production speed,resource production,resource accumulation,energy balance,energy production,amortização,reembolso,recuperação de recursos",
-    "plasma-tech-level": "Nível tecnologia de plasma",
+    "keywords": "proxyforgame,ogame,calculadora de produção,produção de recursos,velocidade de produção,balanço de energia,produção de energia,rentabilidade das minas,amortização,rastejantes",
     "max-planet-temp": "t° max",
-    "geologist": "Geólogo",
     "one-planet": "Um planeta",
     "all-planets": "Todos os planetas",
     "prod-coeff": "Factor de produção",
@@ -618,11 +608,9 @@
     "per-hour": "Por hora",
     "per-day": "Por dia",
     "per-week": "Por semana",
-    "class-collector": "Colecionador",
     "crawler-short": "Cr.",
     "crawler-limit-hint": "Máx. Crawlers: {0} (8 × soma dos níveis das minas, ×8,8 com Geólogo)",
     "commanding-staff": "Commanding staff",
-    "planet-pos": "Position",
     "planet-pos-short": "Pos.",
     "planet-name": "Nome do planeta",
     "save-planet-data": "Guardar dados",
@@ -666,23 +654,20 @@
     "start-level": "Comece nível",
     "next-level": "Próximo nível",
     "title": "OGame - Fila de construção",
-    "keywords": "proxyforgame,proxy,online,calc,calculator,ogame,price calculation,cost calculation,buildings costs,research costs,fleet costs,defence costs,costs calculator,prices calculator",
+    "keywords": "proxyforgame,ogame,fila de construção,ordem de construção,tempo de construção,calculadora de fila,custos de edifícios",
     "clear": "Remover"
   },
   "terraformer": {
-    "sc": "Small cargo",
-    "lc": "Large cargo",
     "title": "OGame - Calculadora de Terra-formador",
-    "energy-needed": "mais de 300.000",
     "robots-factory-level": "ível Fábrica de Robos",
     "tf-level": "Nível Terra-formador",
     "single-level": "Um nível",
     "added-fields": "Campos a serem adicionados",
-    "satellites": "Satélites Solar"
+    "satellites": "Satélites Solar",
+    "keywords": "proxyforgame,ogame,calculadora de terraformador,terraformador,campos do planeta,satélites solares,energia necessária,fábrica de nanites"
   },
   "expeditions": {
-    "keywords": "calculadora,recursos,frota,expedição",
-    "reset": "Redefinir",
+    "keywords": "proxyforgame,ogame,calculadora de expedições,expedições,recursos de expedição,frota de expedição,matéria negra,achados de expedição",
     "LOCA_TITLE": "Calculadora de Expedições OGame",
     "LOCA_LANG": "Idioma:",
     "LOCA_STRONGEST_CAP": "O jogador mais forte tem ",
@@ -737,8 +722,6 @@
     "title": "Calculadora de Expedições OGame",
     "api_bc": "Bônus da classe \"Coletor\", %",
     "api_bd": "Bônus da classe \"Explorador\", %",
-    "ship-name": "Nave",
-    "cargo-increase": "Capacidade de Carga",
     "class-bonus-collector": "Bônus da classe \"Coletor\"",
     "class-bonus-discoverer": "Bônus da classe \"Explorador\"",
     "resources-discovery-booster": "Impulso de descoberta de recursos",
@@ -758,6 +741,6 @@
     "link": "Laço",
     "text": "Texto",
     "and": "e",
-    "keywords": "proxyforgame,proxy,online,kalkulátor,ogame"
+    "keywords": "proxyforgame,ogame,calculadora de comércio,troca de recursos,taxa de troca,metal cristal deutério,mercador"
   }
 }

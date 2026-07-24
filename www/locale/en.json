@@ -15,10 +15,10 @@
     "crystal": "Crystal",
     "deuterium": "Deuterium",
     "msu": "MSU",
-    "energy": "energy",
+    "energy": "Energy",
     "points": "Points",
     "time": "Time",
-    "keywords": "proxyforgame,proxy,online,browser,game,calc,calculator,ogame,grav,graviton calculator,graviton,gravitation technology calculator,satellites for graviton",
+    "keywords": "proxyforgame,ogame,ogame calculator,ogame tools,online calculator,browser game",
     "reset": "Reset",
     "calculate": "Calculate",
     "llc-dialog-title": "Research lab level calculation",
@@ -112,7 +112,7 @@
     "msg-max-constraint-violated": "Value {0} {1} is greater than maximum {2}. Field value set to maximum.",
     "field-hint": "for field [{0}]",
     "class": "Class",
-    "class-collector": "Class - Collector",
+    "class-collector": "Collector",
     "class-general": "General",
     "class-discoverer": "Discoverer",
     "reaper": "Reaper",
@@ -187,11 +187,13 @@
     "exchange-rates": "Exchange rates",
     "cookie-consent-message": "This site uses cookies to personalize content and to store values you enter in its calculators.",
     "cookie-consent-accept": "Got it",
-    "cookie-consent-policy": "Privacy Policy"
+    "cookie-consent-policy": "Privacy Policy",
+    "nanites-factory-level": "Nanite factory level",
+    "deuterium-short": "Deut."
   },
   "index": {
     "title": "ProxyForGame - tools for online browser game OGame",
-    "keywords": "proxyforgame,proxy,online,game,browser,calc,calculator,tool,program,ogame,trading calculator,trade calculator,cost calculator,costs calculator,resource exchange,build calculator,building calculator"
+    "keywords": "proxyforgame,ogame,ogame calculator,ogame tools,online calculator,browser game,cost calculator,flight time calculator,trade calculator,production calculator,graviton calculator,moon calculator,terraformer calculator,expedition calculator,construction queue"
   },
   "sidebar": {
     "ogameMenuItems": {
@@ -269,9 +271,8 @@
     }
   },
   "costs": {
-    "energy": "Energy",
     "title": "OGame - Costs calculator",
-    "keywords": "proxyforgame,proxy,online,calc,calculator,ogame,price calculation,cost calculation,buildings costs,research costs,fleet costs,defence costs,costs calculator,prices calculator",
+    "keywords": "proxyforgame,ogame,ogame cost calculator,price calculator,building costs,research costs,fleet costs,defence costs,construction costs,resource costs",
     "lf-full-table": "Full table",
     "lf-full-table-hint": "Enter cost and time reduction for each research",
     "lf-research-table-title": "Research bonuses",
@@ -306,7 +307,6 @@
     "times-note": "When calculating durations of construction/research, the tool uses only the values for levels of the Shipyard, Factories and Laboratory entered in the upper panel. If you need to calculate the resulting Lab level when you have IRN, please click the \"Calculate\" button next to the Research lab level field.",
     "robot-nanite-hint": "The tool cannot account for build order. The construction speed bonus from the Robotics Factory and Nanite Factory uses the level entered in the upper panel — not a level being upgraded in the same batch.<br>Example: if you upgrade the Robotics Factory from level 1 to 5 and the Metal Mine from level 1 to 5 — upgrading the factory first means the mine construction takes ~2m25s per level; upgrading the mine first (with factory still at level 1) takes ~7m16s per level.<br>To avoid this ambiguity, the tool always uses the factory level specified at the top of the table.",
     "msg-cant-research": "At the given level of Research laboratory research \"{0}\" is unavailable.",
-    "class-collector": "Collector",
     "mineral-res-cntr-lvl": "Mineral Research Centre",
     "lf-terraformer-rdc": "Terraformer cost/build time reduction",
     "disclaimer-robot-nanite": "Please take into account the note in the first row of the table when reading build times. If you are building a Robotics factory or a Nanite factory, use the <a href=\"{0}\">Construction queue calculator</a> for accurate build time calculations.",
@@ -315,11 +315,9 @@
     "discoverer-class-bonus-hint": "Applies only if the 'Discoverer' class is selected on the 'Common' tab"
   },
   "lfcosts": {
-    "energy": "Energy",
     "title": "OGame - Costs calculator for LifeForms",
-    "keywords": "proxyforgame,proxy,online,calc,calculator,ogame,price calculation,cost calculation,buildings costs,research costs,fleet costs,defence costs,costs calculator,prices calculator,lifeforms",
+    "keywords": "proxyforgame,ogame,lifeforms,lifeform calculator,lifeform buildings,lifeform research,lifeform costs,building costs,research costs,cost calculator",
     "times-note": "The final bonus to research speed and cost consists of the bonus provided by the third building on a specific planet and the global Life Forms bonus.",
-    "class-collector": "Collector",
     "times-hint": "Please read the note at the bottom of the page",
     "resid-sector": "Residential Sector",
     "biosph-farm": "Biosphere Farm",
@@ -359,7 +357,6 @@
     "magma-forge": "Magma Forge",
     "megalith": "Megalith",
     "crystal-refinery": "Crystal Refinery",
-    "deut-synth": "Deuterium Synthesiser",
     "mineral-res-centre": "Mineral Research Centre",
     "adv-recycling-plant": "Advanced Recycling Plant",
     "volc-batteries": "Volcanic Batteries",
@@ -448,8 +445,7 @@
     "tolerance-time-format": "H:s",
     "tolerance-time-format-hint": "hh:mm",
     "title": "OGame - Flight time and savepoints calculator",
-    "keywords": "proxyforgame,proxy,online,calc,calculator,ogame,save,flight,flight time calculator,savepoints,fuel comsumption,deuterium comsumption",
-    "death-star": "Death star",
+    "keywords": "proxyforgame,ogame,flight time calculator,flight duration,savepoints,save,fleet speed,deuterium consumption,fuel consumption",
     "cmb-drive": "Combustion drive",
     "hyp-drive": "Hyperspace drive",
     "circular": "Circular universe:",
@@ -487,7 +483,6 @@
     "galaxies": "Galaxies",
     "systems": "Systems",
     "planets": "Planets",
-    "deuterium-short": "Deut",
     "search": "Search",
     "flightmodes-note": "For convenient selecting departure moment while knowing arrival moment, toggle time calculator mode. In the Arrival-Flight-Departure mode new rows added to it will automatically receive - sign.",
     "savepoints-note": "After finding suitable savepoints, click on a link in any of table rows. The tab `Flight times´ will open with desired flight parameters entered for you.",
@@ -499,7 +494,6 @@
     "msg-wrong-departure-coordinates": "Wrong departure points coordinates.",
     "msg-no-savepoints-found": "No possible save points found.",
     "deut-factor": "Deut cons. factor",
-    "class-collector": "Collector",
     "warrior-bonus": "Bonus of alliance class \"Warriors\"",
     "savepoints-hint": "Maximum allowed difference between calculated and specified return time",
     "sp-cargohold": "Espionage Probes cargo capacity",
@@ -545,9 +539,9 @@
   },
   "graviton": {
     "title": "OGame - Graviton calculator",
-    "nanites-factory-level": "Nanite factory level",
     "recycling": "Dismantling SS debris",
-    "graviton-level": "Graviton level"
+    "graviton-level": "Graviton level",
+    "keywords": "proxyforgame,ogame,graviton calculator,graviton technology,gravitation technology,solar satellites,energy for graviton,deathstar research"
   },
   "moon": {
     "title": "OGame - Moons calculator",
@@ -562,16 +556,16 @@
     "defense-to-debris": "Defenses to debris",
     "deut-to-debris": "Deuterium to debris",
     "promo-moon": "Event: chance up to 40%",
-    "max-count-hint": "Number of units that reach the maximum moon creation chance"
+    "max-count-hint": "Number of units that reach the maximum moon creation chance",
+    "keywords": "proxyforgame,ogame,moon calculator,moon chance,debris field,moon destruction,lunar base,recyclers,deathstar"
   },
   "production": {
     "param-tab-general": "General",
     "lf-prod-increase": "Production increase",
     "lf-crawlers-boost": "Crawlers boost",
     "lf-plasma-cost-reduction": "Plasma technology cost reduction",
-    "energy": "Energy",
     "title": "OGame - Production speed calculator",
-    "keywords": "proxyforgame,proxy,online,browser,game,tool,calc,calculator,ogame,production speed,resource production,resource accumulation,energy balance,energy production,amortization,payback,resource recovery",
+    "keywords": "proxyforgame,ogame,production calculator,resource production,production speed,energy balance,energy production,mine profitability,amortization,payback,crawlers",
     "max-planet-temp": "Max t°",
     "one-planet": "One planet",
     "all-planets": "All planets",
@@ -579,11 +573,6 @@
     "natural-production": "Basic income",
     "boosted": "Enchanced",
     "qty-header": "Lvl/Qty",
-    "metal-mine": "Metal Mine",
-    "crystal-mine": "Crystal Mine",
-    "deut-synth": "Deuterium Synthesizer",
-    "solar-plant": "Solar Plant",
-    "fusion-reactor": "Fusion Reactor",
     "prod-per-hour": "Total per hour",
     "prod-per-day": "Total per day",
     "prod-per-week": "Total per week",
@@ -608,7 +597,6 @@
     "crystal-mine-short": "CM",
     "crystal-short": "Crystal",
     "deuterium-synth-short": "DS",
-    "deuterium-short": "Deut.",
     "solar-short": "SP",
     "fusion-short": "FR",
     "sats-short": "SS",
@@ -620,7 +608,6 @@
     "per-hour": "Per hour",
     "per-day": "Per day",
     "per-week": "Per week",
-    "class-collector": "Collector",
     "crawler-short": "Cr.",
     "crawler-limit-hint": "Max crawlers: {0} (8 × sum of mine levels, ×8.8 with a Geologist)",
     "commanding-staff": "Commanding staff",
@@ -667,21 +654,21 @@
     "start-level": "Start lvl",
     "next-level": "Next lvl",
     "title": "OGame - Construction queue",
-    "keywords": "proxyforgame,proxy,online,calc,calculator,ogame,price calculation,cost calculation,buildings costs,research costs,fleet costs,defence costs,costs calculator,prices calculator",
+    "keywords": "proxyforgame,ogame,construction queue,build queue,build order,building time,queue calculator,buildings costs",
     "clear": "Clear"
   },
   "terraformer": {
     "title": "OGame - Terraformer calculator",
-    "nanites-factory-level": "Nanites factory level",
     "robots-factory-level": "Robots factory level",
     "tf-level": "Terraformer level",
     "single-level": "One level",
     "added-fields": "Fields to be added",
-    "satellites": "Solar satellites"
+    "satellites": "Solar satellites",
+    "keywords": "proxyforgame,ogame,terraformer calculator,terraformer,planet fields,solar satellites,energy requirement,nanite factory"
   },
   "expeditions": {
-    "keywords": "calculator,resourses,fleet,expedition",
-    "title": "Калькулятор Экспедиции OGame",
+    "keywords": "proxyforgame,ogame,expedition calculator,expeditions,expedition resources,expedition ships,dark matter,expedition finds",
+    "title": "OGame Expeditions Calculator",
     "LOCA_TITLE": "OGame Expeditions Calculator",
     "LOCA_LANG": "Language:",
     "LOCA_STRONGEST_CAP": "The strongest player has ",
@@ -754,6 +741,6 @@
     "link": "Link",
     "text": "Text",
     "and": "and",
-    "keywords": "proxyforgame,proxy,online,calc,calculator,ogame,trading calculator,trade calculator,resource exchange"
+    "keywords": "proxyforgame,ogame,trade calculator,resource exchange,trade ratio,metal crystal deuterium,merchant,resource trade"
   }
 }
