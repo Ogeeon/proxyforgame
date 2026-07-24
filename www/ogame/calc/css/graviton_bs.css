@@ -60,6 +60,11 @@
   text-align: center;
 }
 
+/* Fits a three-digit negative temperature (e.g. -140). */
+#max-planet-temp {
+  width: 56px;
+}
+
 .energy-input {
   width: 54px;
   text-align: center;
