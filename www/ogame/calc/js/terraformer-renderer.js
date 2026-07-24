@@ -61,7 +61,8 @@ class TerraformerRenderer {
       const dashes = [
         '#crystal-required-tf', '#deuterium-required-tf', '#time-required-tf',
         '#crystal-required-ss', '#deuterium-required-ss', '#time-required-ss',
-        '#crystal-required-total', '#deuterium-required-total', '#cargoes',
+        '#crystal-required-total', '#deuterium-required-total',
+        '#crystal-to-deliver', '#deuterium-to-deliver', '#cargoes',
       ];
       dashes.forEach((sel) => setTextContent(sel, '-'));
       return;
@@ -79,6 +80,9 @@ class TerraformerRenderer {
 
     setTextContent('#crystal-required-total', TerraformerRenderer.formatNumber(r.crysTotal));
     setTextContent('#deuterium-required-total', TerraformerRenderer.formatNumber(r.deutTotal));
+
+    setTextContent('#crystal-to-deliver', TerraformerRenderer.formatNumber(r.crysToDeliver));
+    setTextContent('#deuterium-to-deliver', TerraformerRenderer.formatNumber(r.deutToDeliver));
 
     setTextContent('#cargoes', TerraformerRenderer.transportsText(r.scNeeded, r.lcNeeded));
   }

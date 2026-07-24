@@ -52,7 +52,8 @@ class TerraformerCalculator {
    *   solarPlantLevel, solarPlantPercent, fusionPlantLevel, fusionPlantPercent,
    *   solarSatellitesCount, solarSatellitesPercent, playerClass (0/1/2),
    *   isTrader, energyBoost, disChLevel, totalLFEnrgBonus, scCapacityIncrease,
-   *   lcCapacityIncrease, tfSingleLevel, tfLevelFrom, tfLevelTo
+   *   lcCapacityIncrease, tfSingleLevel, tfLevelFrom, tfLevelTo,
+   *   crysAvailable, deutAvailable
    * @returns {Object} Result with the per-source energy breakdown, the
    *   available/required energy, the added fields, and — when the satellites can
    *   cover the shortfall — the terraformer/satellite/total resource, transport
@@ -149,6 +150,8 @@ class TerraformerCalculator {
       secsSS: 0,
       crysTotal: 0,
       deutTotal: 0,
+      crysToDeliver: 0,
+      deutToDeliver: 0,
       scNeeded: 0,
       lcNeeded: 0,
     };
@@ -190,7 +193,13 @@ class TerraformerCalculator {
     const capSC = TerraformerCalculator.cargoCapacity(5000, p.hyperTechLevel, collectorCargoBonus, p.scCapacityIncrease);
     const capLC = TerraformerCalculator.cargoCapacity(25000, p.hyperTechLevel, collectorCargoBonus, p.lcCapacityIncrease);
 
-    const sumResources = result.crysTotal + result.deutTotal;
+    // Resources already sitting on the planet cut down what has to be shipped
+    // in. Each resource is offset on its own: a crystal surplus never covers a
+    // deuterium shortage, so the two are clamped separately before summing.
+    result.crysToDeliver = Math.max(0, result.crysTotal - (p.crysAvailable || 0));
+    result.deutToDeliver = Math.max(0, result.deutTotal - (p.deutAvailable || 0));
+
+    const sumResources = result.crysToDeliver + result.deutToDeliver;
     result.scNeeded = Math.ceil(sumResources / capSC);
     result.lcNeeded = Math.ceil(sumResources / capLC);
 

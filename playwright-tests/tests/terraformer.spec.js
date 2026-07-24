@@ -66,6 +66,8 @@ const BASE_PRM = {
     tfSingleLevel: false,
     tfLevelFrom: 0,
     tfLevelTo: 0,
+    crysAvailable: 0,
+    deutAvailable: 0,
 };
 
 function compute(page, overrides = {}) {
@@ -244,6 +246,69 @@ test.describe('Terraformer Calculator - Cargo capacity', () => {
 });
 
 // ---------------------------------------------------------------------------
+// Resources already on the planet. They reduce what has to be flown in, but
+// never the build cost itself.
+// ---------------------------------------------------------------------------
+
+test.describe('Terraformer Calculator - Resources on hand', () => {
+    test.beforeEach(async ({ context, page }) => {
+        await context.addInitScript(() => {
+            localStorage.setItem('lastChange', 'key-value;true,value;99999');
+        });
+        await page.goto('/ogame/calc/terraformer.php');
+    });
+
+    test('with nothing on hand everything has to be delivered', async ({ page }) => {
+        const r = await compute(page, { tfLevelTo: 1 });
+        expect(r.crysToDeliver).toBe(r.crysTotal);
+        expect(r.deutToDeliver).toBe(r.deutTotal);
+    });
+
+    test('stock on the planet reduces the delivery, not the cost', async ({ page }) => {
+        const plain = await compute(page, { tfLevelTo: 1 });
+        const r = await compute(page, {
+            tfLevelTo: 1, crysAvailable: 20000, deutAvailable: 30000,
+        });
+        expect(r.crysToDeliver).toBe(plain.crysTotal - 20000);
+        expect(r.deutToDeliver).toBe(plain.deutTotal - 30000);
+        // The build itself still costs the full amount.
+        expect(r.crysTotal).toBe(plain.crysTotal);
+        expect(r.deutTotal).toBe(plain.deutTotal);
+    });
+
+    test('a crystal surplus never covers a deuterium shortage', async ({ page }) => {
+        const r = await compute(page, { tfLevelTo: 1, crysAvailable: 999999999 });
+        expect(r.crysToDeliver).toBe(0);
+        expect(r.deutToDeliver).toBe(r.deutTotal);
+        expect(r.lcNeeded).toBe(Math.ceil(r.deutTotal / 25000));
+    });
+
+    test('transports are sized by the delivery, not the total cost', async ({ page }) => {
+        const plain = await compute(page, { tfLevelTo: 1 });
+        const stocked = await compute(page, {
+            tfLevelTo: 1, crysAvailable: 40000, deutAvailable: 60000,
+        });
+        const toDeliver = stocked.crysToDeliver + stocked.deutToDeliver;
+        expect(stocked.scNeeded).toBe(Math.ceil(toDeliver / 5000));
+        expect(stocked.lcNeeded).toBe(Math.ceil(toDeliver / 25000));
+        expect(stocked.scNeeded).toBeLessThan(plain.scNeeded);
+    });
+
+    test('a full stock leaves nothing to deliver', async ({ page }) => {
+        const plain = await compute(page, { tfLevelTo: 1 });
+        const r = await compute(page, {
+            tfLevelTo: 1,
+            crysAvailable: plain.crysTotal,
+            deutAvailable: plain.deutTotal,
+        });
+        expect(r.crysToDeliver).toBe(0);
+        expect(r.deutToDeliver).toBe(0);
+        expect(r.scNeeded).toBe(0);
+        expect(r.lcNeeded).toBe(0);
+    });
+});
+
+// ---------------------------------------------------------------------------
 // DOM integration: form inputs drive the rendered breakdown and results.
 // ---------------------------------------------------------------------------
 
@@ -336,11 +401,50 @@ test.describe('Terraformer Calculator - DOM integration', () => {
         await expect(page.locator('#player-class-0')).not.toBeChecked();
     });
 
+    test('the resources-on-hand fields are on the page', async ({ page }) => {
+        await expect(page.locator('#crystal-available')).toBeVisible();
+        await expect(page.locator('#deuterium-available')).toBeVisible();
+        await expect(page.locator('#crystal-to-deliver')).toBeVisible();
+        await expect(page.locator('#deuterium-to-deliver')).toBeVisible();
+    });
+
+    test('with an empty stock the delivery equals the total cost', async ({ page }) => {
+        await page.locator('#tf-level-to').fill('1');
+        await page.locator('#tf-level-to').blur();
+        const total = await page.locator('#crystal-required-total').textContent();
+        await expect(page.locator('#crystal-to-deliver')).toHaveText(total);
+    });
+
+    test('entering crystal on hand lowers the crystal to deliver', async ({ page }) => {
+        await page.locator('#tf-level-to').fill('1');
+        await page.locator('#tf-level-to').blur();
+        const before = await page.locator('#crystal-to-deliver').textContent();
+        await page.locator('#crystal-available').fill('20000');
+        await page.locator('#crystal-available').blur();
+        const after = await page.locator('#crystal-to-deliver').textContent();
+        expect(after).not.toBe(before);
+        // The build cost itself is untouched.
+        await expect(page.locator('#crystal-required-total')).not.toHaveText(after);
+    });
+
+    test('stock on hand lowers the transports needed', async ({ page }) => {
+        await page.locator('#tf-level-to').fill('1');
+        await page.locator('#tf-level-to').blur();
+        const before = await page.locator('#cargoes').textContent();
+        await page.locator('#crystal-available').fill('50000');
+        await page.locator('#crystal-available').blur();
+        const after = await page.locator('#cargoes').textContent();
+        expect(after).not.toBe(before);
+    });
+
     test('reset restores the default field values', async ({ page }) => {
         await page.locator('#player-class-2').check(); // General
         await page.locator('#solar-plant-level').fill('25');
         await page.locator('#tf-level-to').fill('5');
         await page.locator('#single-level').check();
+        await page.locator('#crystal-available').fill('123456');
+        await page.locator('#deuterium-available').fill('7890');
+        await page.locator('#deuterium-available').blur();
         // The capacity fields live on the LifeForms tab
         await openLifeformsTab(page);
         await page.locator('#sc-capacity-increase').fill('40');
@@ -356,6 +460,8 @@ test.describe('Terraformer Calculator - DOM integration', () => {
         await expect(page.locator('#single-level')).not.toBeChecked();
         await expect(page.locator('#sc-capacity-increase')).toHaveValue('0');
         await expect(page.locator('#lc-capacity-increase')).toHaveValue('0');
+        await expect(page.locator('#crystal-available')).toHaveValue('0');
+        await expect(page.locator('#deuterium-available')).toHaveValue('0');
         // Un-checking single-level on reset re-shows the "from" field.
         await expect(page.locator('#tf-level-from')).toBeVisible();
     });

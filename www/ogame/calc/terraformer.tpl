@@ -347,12 +347,23 @@
           <td>&nbsp;</td>
           <td>&nbsp;</td>
         </tr>
-      </table>
-      <table class="mx-auto">
+        <tr>
+          <td><label for="crystal-available"><?= $l['res-available'] ?></label></td>
+          <td><input id="crystal-available" type="text" name="crystal-available" class="form-control form-control-sm d-inline-block resource-show ui-input-margin" value="0" alt="<?= $l['res-available'] ?> <?= $l['crystal'] ?>"/></td>
+          <td>&nbsp;</td>
+          <td><input id="deuterium-available" type="text" name="deuterium-available" class="form-control form-control-sm d-inline-block resource-show ui-input-margin" value="0" alt="<?= $l['res-available'] ?> <?= $l['deuterium'] ?>"/></td>
+          <td colspan="2">&nbsp;</td>
+        </tr>
+        <tr>
+          <td><label><?= $l['res-needed'] ?></label></td>
+          <td><div id="crystal-to-deliver" class="form-control form-control-sm d-inline-block resource-show ui-input-margin">0</div></td>
+          <td>&nbsp;</td>
+          <td><div id="deuterium-to-deliver" class="form-control form-control-sm d-inline-block resource-show ui-input-margin">0</div></td>
+          <td colspan="2">&nbsp;</td>
+        </tr>
         <tr>
           <td><label><?= $l['cargoes'] ?></label></td>
-          <td><div id="cargoes" class="form-control form-control-sm d-inline-block transport-show ui-input-margin">0</div></td>
-          <td><i class="bi bi-question-circle" data-bs-toggle="tooltip" title="<?= $l['sc'] ?> / <?= $l['lc'] ?>"></i></td>
+          <td colspan="5"><div id="cargoes" class="form-control form-control-sm d-inline-block transport-show ui-input-margin">0</div><i class="bi bi-question-circle" data-bs-toggle="tooltip" title="<?= $l['sc'] ?> / <?= $l['lc'] ?>"></i></td>
         </tr>
       </table>
     </div>

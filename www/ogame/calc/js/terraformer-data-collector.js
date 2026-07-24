@@ -38,6 +38,8 @@ class TerraformerDataCollector {
       tfSingleLevel: getChecked('#single-level'),
       tfLevelFrom: getInputNumber($('#tf-level-from')),
       tfLevelTo: getInputNumber($('#tf-level-to')),
+      crysAvailable: getInputNumber($('#crystal-available')),
+      deutAvailable: getInputNumber($('#deuterium-available')),
     };
   }
 

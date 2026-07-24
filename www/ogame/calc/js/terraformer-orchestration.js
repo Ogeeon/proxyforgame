@@ -35,6 +35,8 @@ var options = {
     tfSingleLevel: false,
     tfLevelFrom: 0,
     tfLevelTo: 0,
+    crysAvailable: 0,
+    deutAvailable: 0,
 
     validate: function (field, value) {
       switch (field) {
@@ -62,6 +64,8 @@ var options = {
         case 'tfSingleLevel': return value === 'true';
         case 'tfLevelFrom': return validateNumber(Number.parseFloat(value), 0, 100, 0);
         case 'tfLevelTo': return validateNumber(Number.parseFloat(value), 0, 100, 0);
+        case 'crysAvailable': return validateNumber(Number.parseFloat(value), 0, Infinity, 0);
+        case 'deutAvailable': return validateNumber(Number.parseFloat(value), 0, Infinity, 0);
         default: return value;
       }
     }
@@ -83,7 +87,8 @@ class TerraformerApp {
       '#solar-plant-level', '#fusion-plant-level', '#solar-satellites-count',
       '#disr-chamber-level', '#total-lf-energy-bonus',
       '#sc-capacity-increase', '#lc-capacity-increase',
-      '#tf-level-from', '#tf-level-to'
+      '#tf-level-from', '#tf-level-to',
+      '#crystal-available', '#deuterium-available'
     ];
     this.selects = [
       '#universe-speed', '#solar-plant-percent', '#fusion-plant-percent',
@@ -128,6 +133,8 @@ class TerraformerApp {
     setChecked('#single-level', options.prm.tfSingleLevel);
     setVal('#tf-level-from', options.prm.tfLevelFrom);
     setVal('#tf-level-to', options.prm.tfLevelTo);
+    setVal('#crystal-available', options.prm.crysAvailable);
+    setVal('#deuterium-available', options.prm.deutAvailable);
   }
 
   _applyConstraints() {
@@ -252,6 +259,8 @@ class TerraformerApp {
     options.prm.tfSingleLevel = false;
     options.prm.tfLevelFrom = 0;
     options.prm.tfLevelTo = 0;
+    options.prm.crysAvailable = 0;
+    options.prm.deutAvailable = 0;
 
     this._restoreFromState();
     // _restoreFromState only checks the radios matching the restored params;
