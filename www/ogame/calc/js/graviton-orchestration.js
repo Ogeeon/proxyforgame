@@ -52,7 +52,7 @@ var options = {
         case 'fusionPlantLevel': return validateNumber(Number.parseFloat(value), 0, 100, 0);
         case 'fusionPlantPercent': return validateNumber(Number.parseFloat(value), 0, 100, 100);
         case 'solarSatellitesCount': return validateNumber(Number.parseFloat(value), 0, Infinity, 0);
-        case 'debrisPercent': return validateNumber(Number.parseFloat(value), 0, 40, 100);
+        case 'debrisPercent': return validateNumber(Number.parseFloat(value), 0, 100, 30);
         case 'playerClass': return validateNumber(Number.parseInt(value), 0, 2, 0);
         case 'isTrader': return value === 'true';
         case 'energyBoost': return validateNumber(Number.parseInt(value), 0, 8, 0);

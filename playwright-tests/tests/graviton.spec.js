@@ -608,6 +608,17 @@ test.describe('Graviton Calculator - Delivery and debris DOM', () => {
         expect(netDeut).not.toBe(grossDeut);
     });
 
+    test('a debris percentage above 40 survives the save/load round trip', async ({ page }) => {
+        // The validator used to clamp at 40 and fall back to a non-existent
+        // 100 option, so any choice above 40 came back blank after a reload.
+        await page.selectOption('#debris-percent', '70');
+        const restored = await page.evaluate(() => {
+            options.load(); // re-reads the saved state through validate()
+            return options.prm.debrisPercent;
+        });
+        expect(restored).toBe(70);
+    });
+
     test('reset clears the stock fields and the debris checkbox', async ({ page }) => {
         await page.locator('#crystal-available').fill('123456');
         await page.locator('#deuterium-available').fill('7890');
