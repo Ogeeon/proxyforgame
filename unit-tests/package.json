@@ -1,0 +1,8 @@
+{
+  "name": "pfg-unit-tests",
+  "private": true,
+  "description": "Node-based unit tests for the DOM-free calculator logic. No dependencies: node:test only.",
+  "scripts": {
+    "test": "node --test \"*.test.js\""
+  }
+}

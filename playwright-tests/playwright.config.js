@@ -13,7 +13,11 @@ export default defineConfig({
     headless: true,
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
-    video: 'retain-on-failure',
+
+    // Video is recorded for every test and thrown away when it passes, which costs
+    // ~25% of the local run time. Keep it in CI, where a failure is not reproducible
+    // on demand; locally set PFG_VIDEO=1 when a failure needs one.
+    video: process.env.CI || process.env.PFG_VIDEO ? 'retain-on-failure' : 'off',
   },
 
   // Enable retries in CI for stability
@@ -21,6 +25,9 @@ export default defineConfig({
 
   // Run tests in parallel
   fullyParallel: true,
+
+  // Default is half the cores; the tests wait on a local server more than they burn CPU.
+  workers: process.env.CI ? undefined : '100%',
 
   // Configure reporter(s)
   reporter: 'html',

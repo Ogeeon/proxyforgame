@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from './base';
 import { readFileSync } from 'fs';
 import { join } from 'path';
 
@@ -228,241 +228,7 @@ test.describe('Flight Calculator - OGame Object Import', () => {
 });
 
 // ---------------------------------------------------------------------------
-// Block 1. Distance and flight duration.
-//
-// getDistance() and getFlightDuration() are DOM-free, so they are driven
-// directly through page.evaluate() with options.prm stubbed per case.
-// ---------------------------------------------------------------------------
-
-const UNI_DEFAULTS = {
-    circularGalaxies: false,
-    circularSystems: false,
-    numberOfGalaxies: 9,
-    numberOfSystems: 499,
-    fleetIgnoreEmptySystems: false,
-};
-
-/**
- * Calls getDistance() with a known universe configuration.
- * @param ovr manual empty-systems count, or null to leave the override disabled
- * @returns {Promise<{dst: number, empty: number}>} distance and getDistance.lastEmptyCount
- */
-function distance(page, { dep, dest, prm = {}, populated = null, ovr = null }) {
-    return page.evaluate(({ dep, dest, prm, populated, ovr, defaults }) => {
-        Object.assign(options.prm, defaults, prm);
-        options.populatedSystems = populated;
-        options.emptySystemsOverrideEnabled = ovr !== null;
-        options.emptySystemsOverride = ovr ?? 0;
-        return { dst: getDistance(dep, dest), empty: getDistance.lastEmptyCount };
-    }, { dep, dest, prm, populated, ovr, defaults: UNI_DEFAULTS });
-}
-
-test.describe('Flight Calculator - Distance', () => {
-    test.beforeEach(async ({ context, page }) => {
-        await context.addInitScript(() => {
-            localStorage.setItem('lastChange', 'key-value;true,value;99999');
-        });
-        await page.goto('/ogame/calc/flight.php');
-        await installCompat(page);
-    });
-
-    test('same planet is a fixed short hop', async ({ page }) => {
-        const { dst } = await distance(page, { dep: [1, 1, 1], dest: [1, 1, 1] });
-        expect(dst).toBe(5);
-    });
-
-    test('planet difference: 5 per slot + 1000', async ({ page }) => {
-        const { dst } = await distance(page, { dep: [1, 1, 1], dest: [1, 1, 5] });
-        expect(dst).toBe(4 * 5 + 1000);
-    });
-
-    test('system difference: 95 per system + 2700', async ({ page }) => {
-        const { dst } = await distance(page, { dep: [1, 1, 1], dest: [1, 10, 1] });
-        expect(dst).toBe(9 * 95 + 2700);
-    });
-
-    test('galaxy difference: 20000 per galaxy', async ({ page }) => {
-        const { dst } = await distance(page, { dep: [1, 1, 1], dest: [4, 1, 1] });
-        expect(dst).toBe(3 * 20000);
-    });
-
-    test('coordinate precedence: galaxy beats system beats planet', async ({ page }) => {
-        // Different on all three axes -> only the galaxy delta is used
-        const both = await distance(page, { dep: [2, 3, 4], dest: [5, 6, 7] });
-        expect(both.dst).toBe(3 * 20000);
-
-        // Same galaxy, different system and planet -> only the system delta is used
-        const sys = await distance(page, { dep: [1, 1, 1], dest: [1, 10, 9] });
-        expect(sys.dst).toBe(9 * 95 + 2700);
-    });
-
-    test('circular galaxies take the short way around', async ({ page }) => {
-        // 9 galaxies, 1 -> 8: direct 7, wrapped 2
-        const on = await distance(page, {
-            dep: [1, 1, 1], dest: [8, 1, 1], prm: { circularGalaxies: true },
-        });
-        expect(on.dst).toBe(2 * 20000);
-
-        const off = await distance(page, { dep: [1, 1, 1], dest: [8, 1, 1] });
-        expect(off.dst).toBe(7 * 20000);
-    });
-
-    test('circular systems take the short way around', async ({ page }) => {
-        // 499 systems, 1 -> 490: direct 489, wrapped 10
-        const on = await distance(page, {
-            dep: [1, 1, 1], dest: [1, 490, 1], prm: { circularSystems: true },
-        });
-        expect(on.dst).toBe(10 * 95 + 2700);
-
-        const off = await distance(page, { dep: [1, 1, 1], dest: [1, 490, 1] });
-        expect(off.dst).toBe(489 * 95 + 2700);
-    });
-
-    test('empty systems are skipped when the universe ignores them', async ({ page }) => {
-        // Systems 1..10, populated: 1, 3, 5, 10. Endpoints are excluded, so the
-        // systems strictly between are 2..9 (8 of them), of which 3 and 5 are populated.
-        const { dst, empty } = await distance(page, {
-            dep: [1, 1, 1], dest: [1, 10, 1],
-            prm: { fleetIgnoreEmptySystems: true },
-            populated: { 1: [1, 3, 5, 10] },
-        });
-        expect(empty).toBe(6);
-        expect(dst).toBe((9 - 6) * 95 + 2700);
-    });
-
-    test('endpoints are never counted as empty', async ({ page }) => {
-        // Nothing populated between 1 and 3 -> exactly one empty system (2)
-        const { empty } = await distance(page, {
-            dep: [1, 1, 1], dest: [1, 3, 1],
-            prm: { fleetIgnoreEmptySystems: true },
-            populated: { 1: [1, 3] },
-        });
-        expect(empty).toBe(1);
-    });
-
-    test('missing populated-systems map disables the skip', async ({ page }) => {
-        const { dst, empty } = await distance(page, {
-            dep: [1, 1, 1], dest: [1, 10, 1],
-            prm: { fleetIgnoreEmptySystems: true },
-            populated: null,
-        });
-        expect(empty).toBe(0);
-        expect(dst).toBe(9 * 95 + 2700);
-    });
-
-    test('manual empty-systems override replaces the computed count', async ({ page }) => {
-        const { dst } = await distance(page, {
-            dep: [1, 1, 1], dest: [1, 10, 1],
-            prm: { fleetIgnoreEmptySystems: true },
-            populated: { 1: [1, 3, 5, 10] }, // would compute 6
-            ovr: 4,
-        });
-        expect(dst).toBe((9 - 4) * 95 + 2700);
-    });
-});
-
-test.describe('Flight Calculator - Distance (circular wrap-around)', () => {
-    test.beforeEach(async ({ context, page }) => {
-        await context.addInitScript(() => {
-            localStorage.setItem('lastChange', 'key-value;true,value;99999');
-        });
-        await page.goto('/ogame/calc/flight.php');
-        await installCompat(page);
-    });
-
-    // The wrap arc runs from the higher endpoint to the last system and on from
-    // the first to the lower endpoint, so the empty-system count must be the same
-    // whichever end the fleet starts from — it used to count the complementary arc
-    // when departure < destination, inflating the count and driving distance negative.
-    test('wrap-around distance is the same in both directions', async ({ page }) => {
-        const populated = { 1: [1, 490, 495, 497] };
-        const prm = { circularSystems: true, fleetIgnoreEmptySystems: true };
-
-        const forward = await distance(page, { dep: [1, 490, 1], dest: [1, 1, 1], prm, populated });
-        const backward = await distance(page, { dep: [1, 1, 1], dest: [1, 490, 1], prm, populated });
-
-        expect(forward.dst).toBeGreaterThan(0);
-        expect(backward.dst).toBeGreaterThan(0);
-        expect(backward.dst).toBe(forward.dst);
-    });
-
-    // The invariant behind the fix: you can never skip more systems than the trip
-    // is long, so the distance cannot fall below the 2700 floor.
-    test('distance never drops below the base cost', async ({ page }) => {
-        const { dst } = await distance(page, {
-            dep: [1, 1, 1], dest: [1, 490, 1],
-            prm: { circularSystems: true, fleetIgnoreEmptySystems: true },
-            populated: { 1: [1, 490, 495, 497] },
-        });
-        expect(dst).toBeGreaterThanOrEqual(2700 - 10 * 95);
-    });
-
-    // The manual empty-system override is applied to the wrapped arc, not the long
-    // way round: the circular-systems shortest path is resolved before the override.
-    test('manual override still respects circular systems', async ({ page }) => {
-        const { dst } = await distance(page, {
-            dep: [1, 1, 1], dest: [1, 490, 1],
-            prm: { circularSystems: true, fleetIgnoreEmptySystems: true },
-            ovr: 0,
-        });
-        expect(dst).toBe(10 * 95 + 2700); // wrapped, not 489 systems the long way
-    });
-});
-
-test.describe('Flight Calculator - Flight Duration', () => {
-    test.beforeEach(async ({ context, page }) => {
-        await context.addInitScript(() => {
-            localStorage.setItem('lastChange', 'key-value;true,value;99999');
-        });
-        await page.goto('/ogame/calc/flight.php');
-        await installCompat(page);
-    });
-
-    const duration = (page, args) =>
-        page.evaluate(([s, d, p, u]) => getFlightDuration(s, d, p, u), args);
-
-    test('matches the OGame duration formula', async ({ page }) => {
-        // round((35000 / (speed% / 10) * sqrt(distance * 10 / minSpeed) + 10) / uniFactor)
-        const expected = (minSpeed, dist, pct, uni) =>
-            Math.round((35000 / (pct / 10) * Math.sqrt(dist * 10 / minSpeed) + 10) / uni);
-
-        for (const args of [
-            [5000, 60000, 100, 1],
-            [12500, 3555, 100, 1],
-            [5000, 5, 100, 1],
-            [10000, 49155, 70, 1],
-        ]) {
-            expect(await duration(page, args)).toBe(expected(...args));
-        }
-    });
-
-    test('lower speed percentage scales the duration up', async ({ page }) => {
-        const full = await duration(page, [5000, 60000, 100, 1]);
-        const half = await duration(page, [5000, 60000, 50, 1]);
-        const tenth = await duration(page, [5000, 60000, 10, 1]);
-
-        // The +10s constant keeps this off an exact multiple, hence the tolerance
-        expect(half / full).toBeCloseTo(2, 3);
-        expect(tenth / full).toBeCloseTo(10, 2);
-    });
-
-    test('universe fleet speed divides the duration', async ({ page }) => {
-        const x1 = await duration(page, [5000, 60000, 100, 1]);
-        const x10 = await duration(page, [5000, 60000, 100, 10]);
-        expect(x10).toBe(Math.round(x1 / 10));
-    });
-
-    test('faster ships arrive sooner', async ({ page }) => {
-        const slow = await duration(page, [2000, 60000, 100, 1]);
-        const fast = await duration(page, [12500, 60000, 100, 1]);
-        expect(fast).toBeLessThan(slow);
-        // Duration scales with 1/sqrt(speed)
-        expect(slow / fast).toBeCloseTo(Math.sqrt(12500 / 2000), 2);
-    });
-});
-
-// ---------------------------------------------------------------------------
-// Block 2. Ship speeds.
+// Block 1. Ship speeds.
 //
 // getShipSpeed()/getMinSpeed() read the form, so these drive the real inputs
 // and then call the functions through page.evaluate().
@@ -773,7 +539,7 @@ test.describe('Flight Calculator - Slowest Ship', () => {
 });
 
 // ---------------------------------------------------------------------------
-// Block 3. Deuterium consumption and cargo capacity.
+// Block 2. Deuterium consumption and cargo capacity.
 // ---------------------------------------------------------------------------
 
 /** Sets ship counts by input id, leaving every other ship at zero. */
@@ -1010,7 +776,7 @@ test.describe('Flight Calculator - Cargo Capacity', () => {
 });
 
 // ---------------------------------------------------------------------------
-// Block 4. The results table.
+// Block 3. The results table.
 // ---------------------------------------------------------------------------
 
 /** Data rows of #flight-times, i.e. everything below the header. */
@@ -1191,67 +957,6 @@ test.describe('Flight Calculator - Results Table', () => {
     });
 });
 
-// ---------------------------------------------------------------------------
-// Block 5. Arrival time.
-// ---------------------------------------------------------------------------
-
-test.describe('Flight Calculator - Time Field Parsing', () => {
-    test.beforeEach(async ({ context, page }) => {
-        await context.addInitScript(() => {
-            localStorage.setItem('lastChange', 'key-value;true,value;99999');
-        });
-        await page.goto('/ogame/calc/flight.php');
-        await installCompat(page);
-    });
-
-    const parse = (page, text) =>
-        page.evaluate((t) => getSecondsFromTimeField(t), text);
-
-    test('a full "DD HH:MM:SS" value is converted to seconds', async ({ page }) => {
-        expect(await parse(page, '00 00:00:01')).toBe(1);
-        expect(await parse(page, '00 00:01:00')).toBe(60);
-        expect(await parse(page, '00 01:00:00')).toBe(3600);
-        expect(await parse(page, '01 00:00:00')).toBe(86400);
-        expect(await parse(page, '02 03:04:05')).toBe(2 * 86400 + 3 * 3600 + 4 * 60 + 5);
-    });
-
-    test('an empty field or an untouched mask counts as zero', async ({ page }) => {
-        expect(await parse(page, '')).toBe(0);
-        expect(await parse(page, '__ __:__:__')).toBe(0);
-    });
-
-    test('out-of-range components are rejected', async ({ page }) => {
-        expect(await parse(page, '00 24:00:00')).toBe(-1); // hours must be <= 23
-        expect(await parse(page, '00 00:60:00')).toBe(-1); // minutes must be <= 59
-        expect(await parse(page, '00 00:00:60')).toBe(-1); // seconds must be <= 59
-    });
-
-    test('the largest valid components are accepted', async ({ page }) => {
-        expect(await parse(page, '00 23:59:59')).toBe(23 * 3600 + 59 * 60 + 59);
-    });
-
-    test('malformed input is rejected', async ({ page }) => {
-        expect(await parse(page, 'not a time')).toBe(-1);
-        expect(await parse(page, '00 1:00:00')).toBe(-1); // single-digit hour
-        expect(await parse(page, '__ 12:00:00')).toBe(-1); // partial mask
-    });
-
-    test('seconds are formatted back into "DD HH:MM:SS"', async ({ page }) => {
-        const format = (s) => page.evaluate((n) => getFlightTimeStr(n), s);
-        expect(await format(0)).toBe('00 00:00:00');
-        expect(await format(1)).toBe('00 00:00:01');
-        expect(await format(2 * 86400 + 3 * 3600 + 4 * 60 + 5)).toBe('02 03:04:05');
-        expect(await format(-1)).toBe(''); // negative durations render as empty
-    });
-
-    test('formatting round-trips through parsing', async ({ page }) => {
-        for (const seconds of [0, 1, 59, 60, 3599, 3600, 86399, 86400, 123456]) {
-            const text = await page.evaluate((n) => getFlightTimeStr(n), seconds);
-            expect(await parse(page, text)).toBe(seconds);
-        }
-    });
-});
-
 test.describe('Flight Calculator - Arrival Time', () => {
     test.beforeEach(async ({ context, page }) => {
         await context.addInitScript(() => {
@@ -1370,7 +1075,7 @@ test.describe('Flight Calculator - Arrival Time', () => {
 });
 
 // ---------------------------------------------------------------------------
-// Block 6. Save points.
+// Block 4. Save points.
 // ---------------------------------------------------------------------------
 
 /**
@@ -1512,7 +1217,7 @@ test.describe('Flight Calculator - Save Points', () => {
 });
 
 // ---------------------------------------------------------------------------
-// Block 7. Persistence and reset.
+// Block 5. Persistence and reset.
 // ---------------------------------------------------------------------------
 
 test.describe('Flight Calculator - Persistence', () => {
