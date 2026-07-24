@@ -338,8 +338,7 @@
         </tr>
         <tr>
           <td><label><?= $l['cargoes'] ?></label></td>
-          <td colspan="4"><div id="cargoes" class="form-control form-control-sm d-inline-block transport-show ui-input-margin">0</div></td>
-          <td><i class="bi bi-question-circle" data-bs-toggle="tooltip" title="<?= $l['sc'] ?> / <?= $l['lc'] ?>"></i></td>
+          <td colspan="5"><div id="cargoes" class="form-control form-control-sm d-inline-block transport-show ui-input-margin">0</div><i class="bi bi-question-circle" data-bs-toggle="tooltip" title="<?= $l['sc'] ?> / <?= $l['lc'] ?>"></i></td>
         </tr>
       </table>
     </div>
