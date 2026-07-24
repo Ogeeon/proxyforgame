@@ -323,6 +323,20 @@
           <td><div id="time-required" class="form-control form-control-sm d-inline-block time-show ui-input-margin">0</div></td>
         </tr>
         <tr>
+          <td><label for="crystal-available"><?= $l['res-available'] ?></label></td>
+          <td><input id="crystal-available" type="text" name="crystal-available" class="form-control form-control-sm d-inline-block resource-show ui-input-margin" value="0" alt="<?= $l['res-available'] ?> <?= $l['crystal'] ?>"/></td>
+          <td>&nbsp;</td>
+          <td><input id="deuterium-available" type="text" name="deuterium-available" class="form-control form-control-sm d-inline-block resource-show ui-input-margin" value="0" alt="<?= $l['res-available'] ?> <?= $l['deuterium'] ?>"/></td>
+          <td colspan="2">&nbsp;</td>
+        </tr>
+        <tr>
+          <td><label><?= $l['res-needed'] ?></label></td>
+          <td><div id="crystal-to-deliver" class="form-control form-control-sm d-inline-block resource-show ui-input-margin">0</div></td>
+          <td>&nbsp;</td>
+          <td><div id="deuterium-to-deliver" class="form-control form-control-sm d-inline-block resource-show ui-input-margin">0</div></td>
+          <td colspan="2">&nbsp;</td>
+        </tr>
+        <tr>
           <td><label><?= $l['cargoes'] ?></label></td>
           <td colspan="4"><div id="cargoes" class="form-control form-control-sm d-inline-block transport-show ui-input-margin">0</div></td>
           <td><i class="bi bi-question-circle" data-bs-toggle="tooltip" title="<?= $l['sc'] ?> / <?= $l['lc'] ?>"></i></td>
@@ -347,14 +361,31 @@
               <option value="80">80%</option>
             </select>
           </td>
+          <td colspan="2">
+            <input id="deut-in-debris" type="checkbox" name="deut-in-debris" class="form-check-input"/>
+            <label for="deut-in-debris"><?= $l['deut-in-debris'] ?></label>
+          </td>
+        </tr>
+        <tr>
           <td><label><?= $l['crystal'] ?></label></td>
           <td><div id="crystal-recyclable" class="form-control form-control-sm d-inline-block resource-show ui-input-margin">0</div></td>
+          <td><label><?= $l['deuterium'] ?></label></td>
+          <td><div id="deuterium-recyclable" class="form-control form-control-sm d-inline-block resource-show ui-input-margin">0</div></td>
         </tr>
         <tr>
           <td><label><?= $l['recyclers'] ?></label></td>
           <td><div id="recyclers" class="form-control form-control-sm d-inline-block energy-show ui-input-margin">0</div></td>
           <td><label><?= $l['cargoes'] ?></label></td>
           <td><div id="cargoes-for-df" class="form-control form-control-sm d-inline-block transport-show ui-input-margin">0</div></td>
+        </tr>
+        <tr>
+          <td>
+            <label><?= $l['net-cost'] ?></label>
+            <i class="bi bi-question-circle" data-bs-toggle="tooltip" title="<?= $l['net-cost-hint'] ?>"></i>
+          </td>
+          <td><div id="net-crystal-required" class="form-control form-control-sm d-inline-block resource-show ui-input-margin">0</div></td>
+          <td>&nbsp;</td>
+          <td><div id="net-deuterium-required" class="form-control form-control-sm d-inline-block resource-show ui-input-margin">0</div></td>
         </tr>
       </table>
     </div>

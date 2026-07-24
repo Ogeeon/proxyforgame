@@ -56,10 +56,15 @@ class GravitonRenderer {
       setTextContent('#solar-satellites-needed', 'Infinity');
       setTextContent('#crystal-required', '-');
       setTextContent('#deuterium-required', '-');
+      setTextContent('#crystal-to-deliver', '-');
+      setTextContent('#deuterium-to-deliver', '-');
       setTextContent('#cargoes', '-');
       setTextContent('#recyclers', '-');
       setTextContent('#time-required', '-');
       setTextContent('#crystal-recyclable', '-');
+      setTextContent('#deuterium-recyclable', '-');
+      setTextContent('#net-crystal-required', '-');
+      setTextContent('#net-deuterium-required', '-');
       setTextContent('#cargoes-for-df', '-');
       return;
     }
@@ -67,10 +72,15 @@ class GravitonRenderer {
     setTextContent('#solar-satellites-needed', GravitonRenderer.formatNumber(r.neededSats));
     setTextContent('#crystal-required', GravitonRenderer.formatNumber(r.crysNeeded));
     setTextContent('#deuterium-required', GravitonRenderer.formatNumber(r.deutNeeded));
+    setTextContent('#crystal-to-deliver', GravitonRenderer.formatNumber(r.crysToDeliver));
+    setTextContent('#deuterium-to-deliver', GravitonRenderer.formatNumber(r.deutToDeliver));
     setTextContent('#cargoes', GravitonRenderer.transportsText(r.scNeeded, r.lcNeeded));
     setTextContent('#time-required', GravitonRenderer.formatTime(r.secsTotal));
 
-    setTextContent('#crystal-recyclable', GravitonRenderer.formatNumber(r.dfAmount));
+    setTextContent('#crystal-recyclable', GravitonRenderer.formatNumber(r.dfCrystal));
+    setTextContent('#deuterium-recyclable', GravitonRenderer.formatNumber(r.dfDeuterium));
+    setTextContent('#net-crystal-required', GravitonRenderer.formatNumber(r.netCrysNeeded));
+    setTextContent('#net-deuterium-required', GravitonRenderer.formatNumber(r.netDeutNeeded));
     setTextContent('#recyclers', GravitonRenderer.formatNumber(r.rcNeeded));
     setTextContent('#cargoes-for-df', GravitonRenderer.transportsText(r.scNeededForDF, r.lcNeededForDF));
   }

@@ -65,6 +65,9 @@ const BASE_PRM = {
     scCapacityIncrease: 0,
     lcCapacityIncrease: 0,
     rcCapacityIncrease: 0,
+    crysAvailable: 0,
+    deutAvailable: 0,
+    deutInDebris: false,
 };
 
 function compute(page, overrides = {}) {
@@ -396,5 +399,225 @@ test.describe('Graviton Calculator - DOM integration', () => {
         await expect(page.locator('#lc-capacity-increase')).toHaveValue('0');
         await expect(page.locator('#rc-capacity-increase')).toHaveValue('0');
         await expect(page.locator('#player-class-0')).toBeChecked();
+    });
+});
+
+// ---------------------------------------------------------------------------
+// Resources already on the planet. They never change the build cost — only how
+// much still has to be shipped in, and therefore the transports needed.
+// ---------------------------------------------------------------------------
+
+test.describe('Graviton Calculator - Resources on hand', () => {
+    test.beforeEach(async ({ context, page }) => {
+        await context.addInitScript(() => {
+            localStorage.setItem('lastChange', 'key-value;true,value;99999');
+        });
+        await page.goto('/ogame/calc/graviton.php');
+    });
+
+    test('with nothing on hand everything has to be delivered', async ({ page }) => {
+        const r = await compute(page, { gravitonLevel: 1 });
+        expect(r.crysToDeliver).toBe(r.crysNeeded);
+        expect(r.deutToDeliver).toBe(r.deutNeeded);
+    });
+
+    test('stock on the planet reduces the delivery, not the cost', async ({ page }) => {
+        const r = await compute(page, {
+            gravitonLevel: 1, crysAvailable: 5000000, deutAvailable: 1000000,
+        });
+        expect(r.crysToDeliver).toBe(r.crysNeeded - 5000000);
+        expect(r.deutToDeliver).toBe(r.deutNeeded - 1000000);
+        // The build itself still costs the full amount.
+        const plain = await compute(page, { gravitonLevel: 1 });
+        expect(r.crysNeeded).toBe(plain.crysNeeded);
+        expect(r.deutNeeded).toBe(plain.deutNeeded);
+    });
+
+    test('a crystal surplus never covers a deuterium shortage', async ({ page }) => {
+        // Far more crystal than needed, no deuterium: the whole deuterium bill
+        // still has to be shipped in, and the crystal leftover is clamped at 0.
+        const r = await compute(page, { gravitonLevel: 1, crysAvailable: 999999999 });
+        expect(r.crysToDeliver).toBe(0);
+        expect(r.deutToDeliver).toBe(r.deutNeeded);
+        expect(r.lcNeeded).toBe(Math.ceil(r.deutNeeded / 25000));
+    });
+
+    test('transports are sized by the delivery, not the total cost', async ({ page }) => {
+        const plain = await compute(page, { gravitonLevel: 1 });
+        const stocked = await compute(page, {
+            gravitonLevel: 1, crysAvailable: 10000000, deutAvailable: 2000000,
+        });
+        const toDeliver = stocked.crysToDeliver + stocked.deutToDeliver;
+        expect(stocked.scNeeded).toBe(Math.ceil(toDeliver / 5000));
+        expect(stocked.lcNeeded).toBe(Math.ceil(toDeliver / 25000));
+        expect(stocked.scNeeded).toBeLessThan(plain.scNeeded);
+    });
+
+    test('a full stock leaves nothing to deliver', async ({ page }) => {
+        const plain = await compute(page, { gravitonLevel: 1 });
+        const r = await compute(page, {
+            gravitonLevel: 1,
+            crysAvailable: plain.crysNeeded,
+            deutAvailable: plain.deutNeeded,
+        });
+        expect(r.crysToDeliver).toBe(0);
+        expect(r.deutToDeliver).toBe(0);
+        expect(r.scNeeded).toBe(0);
+        expect(r.lcNeeded).toBe(0);
+    });
+});
+
+// ---------------------------------------------------------------------------
+// Debris field and net cost. Some universes drop deuterium into the debris
+// field as well, which is what the deutInDebris flag switches on.
+// ---------------------------------------------------------------------------
+
+test.describe('Graviton Calculator - Debris and net cost', () => {
+    test.beforeEach(async ({ context, page }) => {
+        await context.addInitScript(() => {
+            localStorage.setItem('lastChange', 'key-value;true,value;99999');
+        });
+        await page.goto('/ogame/calc/graviton.php');
+    });
+
+    test('by default only crystal lands in the debris field', async ({ page }) => {
+        const r = await compute(page, { gravitonLevel: 1, debrisPercent: 30 });
+        expect(r.dfCrystal).toBe(Math.floor(r.crysNeeded * 0.3));
+        expect(r.dfDeuterium).toBe(0);
+        expect(r.dfAmount).toBe(r.dfCrystal);
+    });
+
+    test('deutInDebris adds the deuterium share to the debris field', async ({ page }) => {
+        const r = await compute(page, {
+            gravitonLevel: 1, debrisPercent: 30, deutInDebris: true,
+        });
+        expect(r.dfDeuterium).toBe(Math.floor(r.deutNeeded * 0.3));
+        expect(r.dfAmount).toBe(r.dfCrystal + r.dfDeuterium);
+    });
+
+    test('the debris field counts satellites already in orbit', async ({ page }) => {
+        // 1000 existing satellites contribute 1000*2000 crystal and, with the
+        // flag on, 1000*500 deuterium on top of the ones being built.
+        const r = await compute(page, {
+            gravitonLevel: 1, debrisPercent: 30, deutInDebris: true,
+            solarSatellitesCount: 1000, maxPlanetTemp: 0,
+        });
+        expect(r.dfCrystal).toBe(Math.floor((r.crysNeeded + 1000 * 2000) * 0.3));
+        expect(r.dfDeuterium).toBe(Math.floor((r.deutNeeded + 1000 * 500) * 0.3));
+    });
+
+    test('recyclers are sized by the combined debris volume', async ({ page }) => {
+        const r = await compute(page, {
+            gravitonLevel: 1, debrisPercent: 30, deutInDebris: true,
+        });
+        expect(r.rcNeeded).toBe(Math.ceil(r.dfAmount / 20000));
+        // Turning the flag on raises the debris and therefore the recyclers.
+        const crystalOnly = await compute(page, { gravitonLevel: 1, debrisPercent: 30 });
+        expect(r.rcNeeded).toBeGreaterThan(crystalOnly.rcNeeded);
+    });
+
+    test('net cost subtracts the recycled share of this build', async ({ page }) => {
+        const r = await compute(page, { gravitonLevel: 1, debrisPercent: 30 });
+        expect(r.netCrysNeeded).toBe(r.crysNeeded - Math.floor(r.crysNeeded * 0.3));
+        // Deuterium is not recoverable unless the universe drops it.
+        expect(r.netDeutNeeded).toBe(r.deutNeeded);
+    });
+
+    test('net deuterium drops once the universe puts it in the debris', async ({ page }) => {
+        const r = await compute(page, {
+            gravitonLevel: 1, debrisPercent: 30, deutInDebris: true,
+        });
+        expect(r.netDeutNeeded).toBe(r.deutNeeded - Math.floor(r.deutNeeded * 0.3));
+    });
+
+    test('a higher debris percentage lowers the net cost', async ({ page }) => {
+        const low = await compute(page, { gravitonLevel: 1, debrisPercent: 30 });
+        const high = await compute(page, { gravitonLevel: 1, debrisPercent: 70 });
+        expect(high.netCrysNeeded).toBeLessThan(low.netCrysNeeded);
+        expect(high.netCrysNeeded).toBe(low.crysNeeded - Math.floor(low.crysNeeded * 0.7));
+    });
+
+    test('satellites already in orbit are not a rebate on the new build', async ({ page }) => {
+        // Existing satellites feed the debris field (which sizes the recyclers)
+        // but must not discount the satellites being built now.
+        const r = await compute(page, {
+            gravitonLevel: 1, debrisPercent: 30, maxPlanetTemp: 0, solarSatellitesCount: 1000,
+        });
+        // The debris covers all 1000 existing satellites on top of the new ones...
+        expect(r.dfCrystal).toBe(Math.floor((r.crysNeeded + 1000 * 2000) * 0.3));
+        expect(r.dfCrystal).toBeGreaterThan(Math.floor(r.crysNeeded * 0.3));
+        // ...while the net cost only ever discounts this build's own crystal.
+        expect(r.netCrysNeeded).toBe(r.crysNeeded - Math.floor(r.crysNeeded * 0.3));
+    });
+});
+
+// ---------------------------------------------------------------------------
+// DOM integration for the new fields.
+// ---------------------------------------------------------------------------
+
+test.describe('Graviton Calculator - Delivery and debris DOM', () => {
+    test.beforeEach(async ({ context, page }) => {
+        await context.addInitScript(() => {
+            localStorage.setItem('lastChange', 'key-value;true,value;99999');
+            localStorage.removeItem('options_graviton');
+        });
+        await page.goto('/ogame/calc/graviton.php');
+    });
+
+    test('the new fields are on the page', async ({ page }) => {
+        await expect(page.locator('#crystal-available')).toBeVisible();
+        await expect(page.locator('#deuterium-available')).toBeVisible();
+        await expect(page.locator('#crystal-to-deliver')).toBeVisible();
+        await expect(page.locator('#deuterium-to-deliver')).toBeVisible();
+        await expect(page.locator('#deut-in-debris')).toBeVisible();
+        await expect(page.locator('#deuterium-recyclable')).toBeVisible();
+        await expect(page.locator('#net-crystal-required')).toBeVisible();
+        await expect(page.locator('#net-deuterium-required')).toBeVisible();
+    });
+
+    test('with an empty stock the delivery equals the cost', async ({ page }) => {
+        const required = await page.locator('#crystal-required').textContent();
+        await expect(page.locator('#crystal-to-deliver')).toHaveText(required);
+    });
+
+    test('entering crystal on hand lowers the crystal to deliver', async ({ page }) => {
+        const before = await page.locator('#crystal-to-deliver').textContent();
+        await page.locator('#crystal-available').fill('5000000');
+        await page.locator('#crystal-available').blur();
+        const after = await page.locator('#crystal-to-deliver').textContent();
+        expect(after).not.toBe(before);
+        // The build cost itself is untouched.
+        await expect(page.locator('#crystal-required')).not.toHaveText(after);
+    });
+
+    test('stock on hand lowers the transports needed', async ({ page }) => {
+        const before = await page.locator('#cargoes').textContent();
+        await page.locator('#crystal-available').fill('10000000');
+        await page.locator('#crystal-available').blur();
+        const after = await page.locator('#cargoes').textContent();
+        expect(after).not.toBe(before);
+    });
+
+    test('the deuterium-in-debris checkbox fills the deuterium debris readout', async ({ page }) => {
+        await expect(page.locator('#deuterium-recyclable')).toHaveText('0');
+        await page.locator('#deut-in-debris').check();
+        await expect(page.locator('#deuterium-recyclable')).not.toHaveText('0');
+        // ...and it lowers the net deuterium cost.
+        const netDeut = await page.locator('#net-deuterium-required').textContent();
+        const grossDeut = await page.locator('#deuterium-required').textContent();
+        expect(netDeut).not.toBe(grossDeut);
+    });
+
+    test('reset clears the stock fields and the debris checkbox', async ({ page }) => {
+        await page.locator('#crystal-available').fill('123456');
+        await page.locator('#deuterium-available').fill('7890');
+        await page.locator('#crystal-available').blur();
+        await page.locator('#deut-in-debris').check();
+
+        await page.locator('#reset').click();
+
+        await expect(page.locator('#crystal-available')).toHaveValue('0');
+        await expect(page.locator('#deuterium-available')).toHaveValue('0');
+        await expect(page.locator('#deut-in-debris')).not.toBeChecked();
     });
 });

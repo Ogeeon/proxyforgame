@@ -189,7 +189,10 @@
     "sc": "Cargueiro Pequeno",
     "lc": "Cargueiro Grande",
     "energy-needed": "mais de",
-    "debris-percent": "Percentagem para Destroços"
+    "debris-percent": "Percentagem para Destroços",
+    "deut-in-debris": "Deutério no campo de destroços",
+    "net-cost": "Custo líquido",
+    "net-cost-hint": "Custo de construção menos os recursos recuperados ao reciclar os destroços dos satélites destruídos"
   },
   "index": {
     "title": "ProxyForGame - Calculadoras para OGame",

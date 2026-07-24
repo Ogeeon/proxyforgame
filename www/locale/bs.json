@@ -189,6 +189,9 @@
     "deuterium-short": "Deut.",
     "energy-produced": "Proizvedeno energije",
     "debris-percent": "Postotak koji ide u ruševinu",
+    "deut-in-debris": "Deuterium in the debris field",
+    "net-cost": "Net cost",
+    "net-cost-hint": "Build cost minus the resources recovered by recycling the debris of the destroyed satellites",
     "recyclers": "Recikleri"
   },
   "index": {

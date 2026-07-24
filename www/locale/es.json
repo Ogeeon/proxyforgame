@@ -189,7 +189,10 @@
     "planet-pos": "Posición",
     "deuterium-short": "Deut.",
     "cargo-increase": "Capacidad de carga",
-    "debris-percent": "Estructura al campo de escombros"
+    "debris-percent": "Estructura al campo de escombros",
+    "deut-in-debris": "Deuterio en el campo de escombros",
+    "net-cost": "Coste neto",
+    "net-cost-hint": "Coste de construcción menos los recursos recuperados al reciclar los escombros de los satélites destruidos"
   },
   "index": {
     "title": "ProxyForGame - herramientas para los juegos de navegador en línea OGame",

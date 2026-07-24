@@ -37,6 +37,9 @@ class GravitonDataCollector {
       scCapacityIncrease: getInputNumber($('#sc-capacity-increase')),
       lcCapacityIncrease: getInputNumber($('#lc-capacity-increase')),
       rcCapacityIncrease: getInputNumber($('#rc-capacity-increase')),
+      crysAvailable: getInputNumber($('#crystal-available')),
+      deutAvailable: getInputNumber($('#deuterium-available')),
+      deutInDebris: getChecked('#deut-in-debris'),
     };
   }
 

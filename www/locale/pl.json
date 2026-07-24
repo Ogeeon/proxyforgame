@@ -189,7 +189,10 @@
     "cargo-increase": "Pojemność ładunkowa",
     "solar-satellites-count": "Liczba satelitów słonecznych",
     "solar-satellites-needed": "Musisz zbudować satelitów słonecznych",
-    "debris-percent": "Struktury wchodzące w PZ"
+    "debris-percent": "Struktury wchodzące w PZ",
+    "deut-in-debris": "Deuter w polu zniszczeń",
+    "net-cost": "Koszt netto",
+    "net-cost-hint": "Koszt budowy pomniejszony o surowce odzyskane z recyklingu pola zniszczeń zniszczonych satelitów"
   },
   "index": {
     "title": "Narzedzia do gier przegladarkowych OGame",

@@ -34,6 +34,9 @@ var options = {
     scCapacityIncrease: 0,
     lcCapacityIncrease: 0,
     rcCapacityIncrease: 0,
+    crysAvailable: 0,
+    deutAvailable: 0,
+    deutInDebris: false,
 
     validate: function (field, value) {
       switch (field) {
@@ -59,6 +62,9 @@ var options = {
         case 'scCapacityIncrease': return validateNumber(Number.parseFloat(value), 0, 999, 0);
         case 'lcCapacityIncrease': return validateNumber(Number.parseFloat(value), 0, 999, 0);
         case 'rcCapacityIncrease': return validateNumber(Number.parseFloat(value), 0, 999, 0);
+        case 'crysAvailable': return validateNumber(Number.parseFloat(value), 0, Infinity, 0);
+        case 'deutAvailable': return validateNumber(Number.parseFloat(value), 0, Infinity, 0);
+        case 'deutInDebris': return value === 'true';
         default: return value;
       }
     }
@@ -79,7 +85,8 @@ class GravitonApp {
       '#hyper-tech-level', '#max-planet-temp', '#solar-plant-level',
       '#fusion-plant-level', '#solar-satellites-count', '#disr-chamber-level',
       '#graviton-level', '#total-lf-energy-bonus',
-      '#sc-capacity-increase', '#lc-capacity-increase', '#rc-capacity-increase'
+      '#sc-capacity-increase', '#lc-capacity-increase', '#rc-capacity-increase',
+      '#crystal-available', '#deuterium-available'
     ];
     this.selects = [
       '#universe-speed', '#solar-plant-percent', '#fusion-plant-percent',
@@ -122,6 +129,9 @@ class GravitonApp {
     setNumVal('#sc-capacity-increase', options.prm.scCapacityIncrease);
     setNumVal('#lc-capacity-increase', options.prm.lcCapacityIncrease);
     setNumVal('#rc-capacity-increase', options.prm.rcCapacityIncrease);
+    setVal('#crystal-available', options.prm.crysAvailable);
+    setVal('#deuterium-available', options.prm.deutAvailable);
+    setChecked('#deut-in-debris', options.prm.deutInDebris);
   }
 
   _applyConstraints() {
@@ -164,6 +174,7 @@ class GravitonApp {
       radio.addEventListener('change', () => this.recalc());
     });
     addEvent('#trader-bonus', 'change', () => this.recalc());
+    addEvent('#deut-in-debris', 'change', () => this.recalc());
 
     // Reset button.
     addEvent('#reset', 'click', () => this._resetParams());
@@ -222,6 +233,9 @@ class GravitonApp {
     options.prm.scCapacityIncrease = 0;
     options.prm.lcCapacityIncrease = 0;
     options.prm.rcCapacityIncrease = 0;
+    options.prm.crysAvailable = 0;
+    options.prm.deutAvailable = 0;
+    options.prm.deutInDebris = false;
 
     this._restoreFromState();
     // _restoreFromState only checks the radios matching the restored params;

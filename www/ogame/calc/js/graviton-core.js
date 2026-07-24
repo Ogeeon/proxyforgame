@@ -40,7 +40,8 @@ class GravitonCalculator {
    *   solarSatellitesCount, solarSatellitesPercent, debrisPercent,
    *   playerClass (0 none / 1 collector / 2 general), isTrader, energyBoost,
    *   disChLevel, gravitonLevel, totalLFEnrgBonus, scCapacityIncrease,
-   *   lcCapacityIncrease, rcCapacityIncrease
+   *   lcCapacityIncrease, rcCapacityIncrease, crysAvailable, deutAvailable,
+   *   deutInDebris
    * @returns {Object} Result with the per-source energy breakdown, the
    *   available/required energy, and — when the satellites can cover the
    *   shortfall — the resource, transport, recycling and time figures.
@@ -118,9 +119,15 @@ class GravitonCalculator {
       neededSats: Infinity,
       crysNeeded: 0,
       deutNeeded: 0,
+      crysToDeliver: 0,
+      deutToDeliver: 0,
       scNeeded: 0,
       lcNeeded: 0,
       dfAmount: 0,
+      dfCrystal: 0,
+      dfDeuterium: 0,
+      netCrysNeeded: 0,
+      netDeutNeeded: 0,
       rcNeeded: 0,
       scNeededForDF: 0,
       lcNeededForDF: 0,
@@ -149,14 +156,39 @@ class GravitonCalculator {
     const capSC = GravitonCalculator.cargoCapacity(5000, p.hyperTechLevel, collectorCargoBonus, p.scCapacityIncrease);
     const capLC = GravitonCalculator.cargoCapacity(25000, p.hyperTechLevel, collectorCargoBonus, p.lcCapacityIncrease);
 
-    const sumResources = crysNeeded + deutNeeded;
+    // Resources already sitting on the planet cut down what has to be shipped
+    // in. Each resource is offset on its own: a crystal surplus never covers a
+    // deuterium shortage, so the two are clamped separately before summing.
+    const crysToDeliver = Math.max(0, crysNeeded - (p.crysAvailable || 0));
+    const deutToDeliver = Math.max(0, deutNeeded - (p.deutAvailable || 0));
+    result.crysToDeliver = crysToDeliver;
+    result.deutToDeliver = deutToDeliver;
+
+    const sumResources = crysToDeliver + deutToDeliver;
     result.lcNeeded = Math.ceil(sumResources / capLC);
     result.scNeeded = Math.ceil(sumResources / capSC);
 
     // Round to 2 decimals so the debris percentage doesn't grow a long tail.
     const dfPercent = dropFraction(0.01 * p.debrisPercent, 2);
-    const dfAmount = Math.floor((crysNeeded + p.solarSatellitesCount * 2000) * dfPercent);
+
+    // The debris field covers every satellite in orbit — the ones being built
+    // plus the ones already there — because a raid shoots down all of them.
+    // Some universes drop deuterium into the debris field as well.
+    const dfCrystal = Math.floor((crysNeeded + p.solarSatellitesCount * 2000) * dfPercent);
+    const dfDeuterium = p.deutInDebris
+      ? Math.floor((deutNeeded + p.solarSatellitesCount * 500) * dfPercent)
+      : 0;
+    const dfAmount = dfCrystal + dfDeuterium;
+    result.dfCrystal = dfCrystal;
+    result.dfDeuterium = dfDeuterium;
     result.dfAmount = dfAmount;
+
+    // Net cost of this build alone: what recycling the new satellites gives
+    // back. Satellites already in orbit are excluded here — their debris shows
+    // up in dfAmount for the recycler figures, but it is not a rebate on the
+    // satellites being built now.
+    result.netCrysNeeded = crysNeeded - Math.floor(crysNeeded * dfPercent);
+    result.netDeutNeeded = deutNeeded - (p.deutInDebris ? Math.floor(deutNeeded * dfPercent) : 0);
 
     // Recyclers get the General +20% bonus (never the Collector one), plus the
     // hyperspace tech and the life-form recycler capacity increase.
