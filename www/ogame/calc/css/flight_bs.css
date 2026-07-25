@@ -37,6 +37,14 @@
   vertical-align: middle;
 }
 
+/* The two-column layout table holding the flight times and the arrival
+   calculator beside them. It is not a parameter table, so the centring above
+   must not apply: the general class shows twice as many speed rows, and the
+   arrival panel would then drift down along with the taller left column. */
+#flight table.flight-layout > tbody > tr > td {
+  vertical-align: top;
+}
+
 /* ==========================================================================
    RESULT TABLES (.lined) — highlighted header row and rules between cells.
    Shared look with the costs / queue / expeditions calculators.

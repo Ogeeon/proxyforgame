@@ -421,7 +421,7 @@
     <div class="tab-content border border-top-0 rounded-bottom p-2">
 
       <div class="tab-pane fade show active" id="flight-times-panel" role="tabpanel">
-        <table cellpadding="0" cellspacing="0" border="0" width="100%">
+        <table class="flight-layout" cellpadding="0" cellspacing="0" border="0" width="100%">
           <tr>
             <td valign="top">
               <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
