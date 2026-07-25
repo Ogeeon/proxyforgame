@@ -35,6 +35,7 @@ var options = {
         saveStartDT: 0,
         saveReturnDT: 0,
         saveTolerance: 0,
+        saveOneWay: false,
         mode: 0,
         missionType: 1,
         hyperTechLvl: 0,
@@ -59,6 +60,7 @@ var options = {
                 case 'circularGalaxies':
                 case 'circularSystems':
                 case 'traderBonus':
+                case 'saveOneWay':
                 case 'fleetIgnoreEmptySystems':
                 case 'fleetIgnoreInactiveSystems': return value === 'true';
                 case 'numberOfSystems': return validateNumber(parseFloat(value), 1, 550, 499);
@@ -332,11 +334,17 @@ class FlightOrchestrator {
         const returnDTValue = parseDate(form.returnDT, this.opts.datetimeFormat);
         this.opts.prm.saveStartDT = startDTValue;
         this.opts.prm.saveReturnDT = returnDTValue;
-        const target = Math.round(Math.ceil((returnDTValue - startDTValue) / 1000) / 2);
+        this.opts.prm.saveOneWay = form.oneWay;
+        // The window the user gave covers the whole trip: one leg when the fleet
+        // only flies out, two when it comes back. Both the target duration and
+        // the tolerance are per leg, so they are split the same way.
+        const legs = form.oneWay ? 1 : 2;
+        const target = Math.round(Math.ceil((returnDTValue - startDTValue) / 1000) / legs);
 
         const tol = form.tolerance.match(/(\d\d):(\d\d)/);
-        const tolerance = Math.round((Number(tol[1]) * 3600 + Number(tol[2]) * 60) / 2);
-        this.opts.prm.saveTolerance = tolerance * 2;
+        const toleranceSeconds = Number(tol[1]) * 3600 + Number(tol[2]) * 60;
+        const tolerance = Math.round(toleranceSeconds / legs);
+        this.opts.prm.saveTolerance = toleranceSeconds;
 
         const params = this.collector.collectParams(this._state());
         const ships = this.calc.buildShipsData(params.driveLevels, params.spCargohold);
@@ -345,7 +353,7 @@ class FlightOrchestrator {
         const departure = this.opts.prm.departure;
 
         const found = this._searchSavePoints(
-            { params, ships, counts, minSpeed, departure, target, tolerance, startAt: startDTValue },
+            { params, ships, counts, minSpeed, departure, target, tolerance, legs, startAt: startDTValue },
             form.startDT);
         if (!found) {
             this.renderer.renderWarning(this.opts.msgNoSavepointsFound);
@@ -355,7 +363,7 @@ class FlightOrchestrator {
 
     /** Sweep galaxies, systems and planets for arrival times within tolerance. */
     _searchSavePoints(ctx, startDT) {
-        const { params, ships, counts, minSpeed, departure, target, tolerance, startAt } = ctx;
+        const { params, ships, counts, minSpeed, departure, target, tolerance, legs, startAt } = ctx;
         const coordAxes = [
             { limit: params.numberOfGalaxies, table: 'savepoints-galaxies', fmt: (v) => `${v}:xxx:xx`, circular: params.circularGalaxies },
             { limit: params.numberOfSystems, table: 'savepoints-systems', fmt: (v) => `${departure[0]}:${v}:xx`, circular: params.circularSystems },
@@ -386,10 +394,11 @@ class FlightOrchestrator {
                         continue;
                     }
                     const cost = this.calc.getDeutConsumption(ships, counts, distance, duration, params.fleetSpeedPeaceful, params);
-                    // There and back again: the fleet is home after twice the one-way flight.
-                    const returnAt = startAt + duration * 2000;
+                    // A one-way fleet is done on landing; a returning one is home
+                    // after twice the same flight.
+                    const arriveAt = startAt + duration * 1000 * legs;
                     this._collectSavePointRows(rows, axisIndex, delta, departure, axis,
-                        { percent, cost, returnAt });
+                        { percent, cost, arriveAt });
                 }
             }
             if (rows.length > 0) {
@@ -397,7 +406,7 @@ class FlightOrchestrator {
             }
             rows.sort((a, b) => this.calc.compareSavePoints(
                 [a.speedPercent, 0, a.cost], [b.speedPercent, 0, b.cost]));
-            this.renderer.renderSavePoints(axis.table, rows, startDT);
+            this.renderer.renderSavePoints(axis.table, rows, startDT, legs);
         });
 
         return haveResults;
@@ -418,12 +427,13 @@ class FlightOrchestrator {
 
     /**
      * Build the one or two save-point rows a matching delta produces.
-     * @param {{percent: number, cost: number, returnAt: number}} match the speed
+     * @param {{percent: number, cost: number, arriveAt: number}} match the speed
      *        step that fits the tolerance, its fuel bill and the moment the
-     *        fleet lands back home (epoch ms).
+     *        fleet lands — at the target on a one-way flight, back home
+     *        otherwise (epoch ms).
      */
     _collectSavePointRows(rows, axisIndex, delta, departure, axis, match) {
-        const { percent, cost, returnAt } = match;
+        const { percent, cost, arriveAt } = match;
         const point = [...departure];
         const below = departure[axisIndex] - delta;
         const above = departure[axisIndex] + delta;
@@ -433,7 +443,7 @@ class FlightOrchestrator {
                 speedPercent: percent,
                 coordLabel: axis.fmt(coord),
                 cost,
-                returnAt,
+                arriveAt,
                 point: [...point],
             });
         };
@@ -488,13 +498,16 @@ class FlightOrchestrator {
     }
 
     _warnSavePointField(wrong) {
+        // The second moment is an arrival at the target on a one-way search, so
+        // the complaints about it have to name the same thing as the label.
+        const oneWay = this.collector.checked('save-one-way');
         const messages = {
             'departure-g': this.opts.msgWrongDepartureCoordinates,
             'esp-probe': this.opts.msgNoShips,
             'save-start-datetime': this.opts.msgWrongDepartureTime,
-            'save-return-datetime': this.opts.msgWrongReturnTime,
+            'save-return-datetime': oneWay ? this.opts.msgWrongArrivalTime : this.opts.msgWrongReturnTime,
             'save-tolerance-time': this.opts.msgWrongTolerance,
-            'return-start': this.opts.msgDepartureAfterReturn,
+            'return-start': oneWay ? this.opts.msgDepartureAfterArrival : this.opts.msgDepartureAfterReturn,
         };
         this.renderer.renderWarning(messages[wrong]);
         const focusId = wrong === 'return-start' ? 'save-start-datetime' : wrong;
@@ -571,6 +584,8 @@ class FlightOrchestrator {
         setVal('#save-start-datetime', getDateStr(prm.saveStartDT, this.opts.datetimeFormat));
         setVal('#save-return-datetime', getDateStr(prm.saveReturnDT, this.opts.datetimeFormat));
         setVal('#save-tolerance-time', getTimeStr(prm.saveTolerance));
+        setChecked('#save-one-way', prm.saveOneWay);
+        this.renderer.renderSavePointMode(prm.saveOneWay);
         setChecked(`#class-${prm.playerClass}`, true);
         setChecked('#trader-bonus', prm.traderBonus);
         setChecked(`#mission-type-${prm.missionType}`, true);
@@ -626,6 +641,17 @@ class FlightOrchestrator {
     toggleMode() {
         this.opts.prm.mode = this.opts.prm.mode === 1 ? 0 : 1;
         this.renderer.renderFlightTitles(this.opts.prm.mode);
+        this.opts.save();
+    }
+
+    /**
+     * Switch the save-point search between a one-way flight and a round trip.
+     * Rows already on screen were found for the other mode, so they go.
+     */
+    toggleSaveOneWay() {
+        this.opts.prm.saveOneWay = this.collector.checked('save-one-way');
+        this.renderer.renderSavePointMode(this.opts.prm.saveOneWay);
+        this.renderer.clearSavePoints();
         this.opts.save();
     }
 
@@ -754,8 +780,12 @@ class FlightOrchestrator {
     // Save-point navigation
     // ------------------------------------------------------------------
 
-    /** Jump to a save point: fill the destination, recalc and seed the legs. */
-    showFlightTime(point, depTime, speed) {
+    /**
+     * Jump to a save point: fill the destination, recalc and seed the legs.
+     * @param {number} legs how many flights the point was found for — one for a
+     *        one-way search, two for a round trip.
+     */
+    showFlightTime(point, depTime, speed, legs) {
         bootstrap.Tab.getOrCreateInstance(document.getElementById('tabtag1')).show();
         setVal('#destination-g', point[0]);
         setVal('#destination-s', point[1]);
@@ -776,8 +806,9 @@ class FlightOrchestrator {
 
         document.getElementById('flight-data').innerHTML = this._legRowHtml(true);
         this._wireLegRow(document.getElementById('flight-data').querySelector('.flight-leg'));
-        this.addFlightLeg(duration);
-        this.addFlightLeg(duration);
+        for (let i = 0; i < legs; i++) {
+            this.addFlightLeg(duration);
+        }
         this.updateArrival();
     }
 
@@ -807,7 +838,7 @@ class FlightOrchestrator {
             deutFactor: 10, missionType: 1, deutConsReduction: 25,
             departure: [1, 1, 1], destination: [1, 1, 1],
             ships: new Array(15).fill(0),
-            startDT: 0, saveStartDT: 0, saveReturnDT: 0, saveTolerance: 0,
+            startDT: 0, saveStartDT: 0, saveReturnDT: 0, saveTolerance: 0, saveOneWay: false,
             hyperTechLvl: 0, playerClass: 0, traderBonus: false, spCargohold: 0,
             lfMechanGE: 0, lfRocktalCE: 0,
             lfShipsBonuses: Array.from({ length: 15 }, () => [0, 0, 0]),
@@ -1359,6 +1390,7 @@ class FlightOrchestrator {
         on('warrior-bonus', 'click', (e) => this.toggleAllianceBonus(e));
         on('trader-bonus', 'click', (e) => this.toggleAllianceBonus(e));
         on('calculate-savepoints', 'click', () => this.updateSavePoints());
+        on('save-one-way', 'change', () => this.toggleSaveOneWay());
         on('start-datetime', 'keyup', () => this.updateArrival());
         ['save-start-datetime', 'save-return-datetime', 'save-tolerance-time'].forEach((id) => {
             on(id, 'keyup', () => this._validateSavePointForm());
@@ -1384,7 +1416,8 @@ class FlightOrchestrator {
                 this.showFlightTime(
                     link.dataset.point.split(',').map(Number),
                     link.dataset.start,
-                    Number(link.dataset.speed));
+                    Number(link.dataset.speed),
+                    Number(link.dataset.legs));
             });
         }
     }

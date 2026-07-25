@@ -50,6 +50,7 @@
     options.removeRowHint = '<?= $l['remove-row'] ?>';
     options.departureTitle = '<?= $l['departure'] ?>';
     options.arrivalTitle = '<?= $l['arrival'] ?>';
+    options.returnTitle = '<?= $l['return'] ?>';
     options.warnindDivId = 'warning';
     options.warnindMsgDivId = 'warning-message';
     options.fieldHint = '<?= $l['field-hint'] ?>';
@@ -58,7 +59,9 @@
     options.msgNoShips = "<?= $l['msg-no-ships'] ?>";
     options.msgWrongDepartureTime = "<?= $l['msg-wrong-departure-time'] ?>";
     options.msgWrongReturnTime = "<?= $l['msg-wrong-return-time'] ?>";
+    options.msgWrongArrivalTime = "<?= $l['msg-wrong-arrival-time'] ?>";
     options.msgDepartureAfterReturn = "<?= $l['msg-departure-after-return'] ?>";
+    options.msgDepartureAfterArrival = "<?= $l['msg-departure-after-arrival'] ?>";
     options.msgWrongTolerance = "<?= $l['msg-wrong-tolerance'] ?>";
     options.msgWrongDepartureCoordinates = "<?= $l['msg-wrong-departure-coordinates'] ?>";
     options.msgNoSavepointsFound = "<?= $l['msg-no-savepoints-found'] ?>";
@@ -542,11 +545,14 @@
             <span><?= $l['departure'] ?></span>
             <input type="text" id="save-start-datetime" class="form-control form-control-sm startdate-input" placeholder="dd.mm.yyyy hh:mm:ss" title="<?= $l['datetime-format-hint'] ?>" />
             <button id="set-save-departure-now" type="button" class="btn btn-sm btn-outline-secondary" title="<?= $l['departure-now-hint'] ?>"><?= $l['departure-now'] ?></button>
-            <span class="ms-2"><?= $l['return'] ?></span>
+            <span id="save-return-label" class="ms-2"><?= $l['return'] ?></span>
             <input type="text" id="save-return-datetime" class="form-control form-control-sm startdate-input" placeholder="dd.mm.yyyy hh:mm:ss" title="<?= $l['datetime-format-hint'] ?>" />
             <span class="ms-2"><?= $l['save-tolerance'] ?></span>
             <input type="text" id="save-tolerance-time" class="form-control form-control-sm tolerance-time-input" placeholder="hh:mm" title="<?= $l['tolerance-time-format-hint'] ?>" />
             <i class="bi bi-question-circle" data-bs-toggle="tooltip" title="<?= $l['savepoints-hint'] ?>"></i>
+            <div class="ms-2">
+              <input id="save-one-way" type="checkbox" name="save-one-way" class="form-check-input mt-0"/> <label for="save-one-way"><?= $l['save-one-way'] ?></label>
+            </div>
           </div>
         </div>
         <div id="save-points-tables" class="mt-2">
@@ -569,7 +575,8 @@
                     <th><?= $l['speed-short'] ?></th>
                     <th><?= $l['coords-short'] ?></th>
                     <th><?= $l['deuterium-short'] ?></th>
-                    <th><?= $l['return'] ?></th>
+                    <!-- Renamed to `arrival´ by the renderer while one-way search is on. -->
+                    <th class="savepoint-return-header"><?= $l['return'] ?></th>
                   </tr>
                 </table>
               </div>

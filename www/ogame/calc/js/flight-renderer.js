@@ -159,16 +159,28 @@ class FlightRenderer {
         });
     }
 
+    /** Name the last result column after what the second moment means. */
+    renderSavePointMode(oneWay) {
+        const title = oneWay ? this.opts.arrivalTitle : this.opts.returnTitle;
+        this._setText('save-return-label', title);
+        document.querySelectorAll('.savepoint-return-header').forEach((th) => {
+            th.textContent = title;
+        });
+    }
+
     /**
      * Append the found save points to one coordinate table. Each coordinate is a
      * link the orchestrator wires up (delegated on `.save-point-link`); the
      * target and departure time ride along as data attributes.
      *
      * @param {string} tableId one of the savepoints-* tables
-     * @param {Array<{speedPercent: number, coordLabel: string, cost: number, returnAt: number, point: number[]}>} rows
+     * @param {Array<{speedPercent: number, coordLabel: string, cost: number, arriveAt: number, point: number[]}>} rows
      * @param {string} startDT departure moment, passed through to the link
+     * @param {number} legs flights the point was found for (1 one-way, 2 round
+     *        trip) — carried on the link so a later toggle cannot change what an
+     *        already listed point seeds
      */
-    renderSavePoints(tableId, rows, startDT) {
+    renderSavePoints(tableId, rows, startDT, legs) {
         const table = document.getElementById(tableId);
         if (!table) {
             return;
@@ -179,9 +191,10 @@ class FlightRenderer {
                 `<tr class="${stripe}">` +
                 `<td>${row.speedPercent}%</td>` +
                 `<td><a href="#" class="save-point-link" data-point="${row.point.join(',')}"` +
-                ` data-start="${this._escapeAttr(startDT)}" data-speed="${row.speedPercent}">${row.coordLabel}</a></td>` +
+                ` data-start="${this._escapeAttr(startDT)}" data-speed="${row.speedPercent}"` +
+                ` data-legs="${legs}">${row.coordLabel}</a></td>` +
                 `<td>${numToOGame(row.cost)}</td>` +
-                `<td class="savepoint-return">${getDateStr(row.returnAt, this.opts.datetimeFormat)}</td>` +
+                `<td class="savepoint-return">${getDateStr(row.arriveAt, this.opts.datetimeFormat)}</td>` +
                 '</tr>');
         });
     }

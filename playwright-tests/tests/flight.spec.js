@@ -1460,6 +1460,84 @@ test.describe('Flight Calculator - Save Points', () => {
         expect(legs).toHaveLength(2);
         expect(legs[0]).toBe(legs[1]);
     });
+
+    test('the one-way checkbox renames the second moment', async ({ page }) => {
+        await expect(page.locator('#save-return-label')).toHaveText('Return');
+        await expect(page.locator('#savepoints-systems th.savepoint-return-header')).toHaveText('Return');
+
+        await page.locator('#save-one-way').check();
+        await expect(page.locator('#save-return-label')).toHaveText('Arrival');
+        await expect(page.locator('#savepoints-systems th.savepoint-return-header')).toHaveText('Arrival');
+    });
+
+    test('toggling the one-way search drops the results of the other mode', async ({ page }) => {
+        await fillSavePoints(page);
+        await page.locator('#calculate-savepoints').click();
+        await expect(page.locator('#savepoints-systems tr')).not.toHaveCount(1);
+
+        await page.locator('#save-one-way').check();
+        await expect(page.locator('#savepoints-systems tr')).toHaveCount(1); // header only
+    });
+
+    test('a one-way save point seeds a single leg for the whole window', async ({ page }) => {
+        await page.locator('#save-one-way').check();
+        await fillSavePoints(page);
+        await page.locator('#calculate-savepoints').click();
+
+        await page.locator('#savepoints-systems tr').nth(1).locator('a').click();
+
+        // The fleet does not come back, so the 4h window is one flight, and the
+        // 2h tolerance applies to it undivided
+        await expect(page.locator('#flight-data .flight-leg')).toHaveCount(1);
+        const legs = await page.evaluate(() => options.prm.flightData);
+        expect(legs).toHaveLength(1);
+        expect(legs[0]).toBeGreaterThan(2 * 3600);
+        expect(legs[0]).toBeLessThan(6 * 3600);
+    });
+
+    test('the one-way arrival moment matches the leg the point seeds', async ({ page }) => {
+        await page.locator('#save-one-way').check();
+        await fillSavePoints(page);
+        await page.locator('#calculate-savepoints').click();
+
+        const row = page.locator('#savepoints-systems tr').nth(1);
+        const shown = await row.locator('.savepoint-return').innerText();
+        await row.locator('a').click();
+
+        const expected = await page.evaluate(() => {
+            const start = parseDate(document.getElementById('save-start-datetime').value, options.datetimeFormat);
+            const flight = options.prm.flightData.reduce((sum, leg) => sum + leg, 0);
+            return getDateStr(start + flight * 1000, options.datetimeFormat);
+        });
+        expect(shown).toBe(expected);
+    });
+
+    test('a one-way search reaches farther than a round trip', async ({ page }) => {
+        const farthestSystem = async () => {
+            const labels = await page.locator('#savepoints-systems tr td:nth-child(2)').allInnerTexts();
+            return Math.max(...labels.map((label) => Number(label.split(':')[1])));
+        };
+
+        await fillSavePoints(page);
+        await page.locator('#calculate-savepoints').click();
+        const roundTrip = await farthestSystem();
+
+        await page.locator('#save-one-way').check();
+        await fillSavePoints(page);
+        await page.locator('#calculate-savepoints').click();
+
+        // The same window buys twice the flight when the fleet stays there
+        expect(await farthestSystem()).toBeGreaterThan(roundTrip);
+    });
+
+    test('a one-way departure later than the arrival names the arrival', async ({ page }) => {
+        await page.locator('#save-one-way').check();
+        await fillSavePoints(page, { roundTripHours: -4 });
+        expect(await validateSP(page)).toBe('return-start');
+
+        await page.locator('#calculate-savepoints').click();
+        expect(await warningText(page)).toBe('Departure date/time cannot be after arrival date/time.');
+    });
 });
 
 // ---------------------------------------------------------------------------
@@ -1552,6 +1630,18 @@ test.describe('Flight Calculator - Persistence', () => {
         await expect(page.locator('#galaxies-num')).toHaveValue('12');
         await expect(page.locator('#systems-num')).toHaveValue('200');
         await expect(page.locator('#circular-systems')).toBeChecked();
+    });
+
+    test('the one-way save-point search survives a reload', async ({ page }) => {
+        await page.locator('#tabtag2').click();
+        await page.locator('#save-one-way').check();
+
+        await page.reload();
+        await installCompat(page);
+        await page.locator('#tabtag2').click();
+
+        await expect(page.locator('#save-one-way')).toBeChecked();
+        await expect(page.locator('#save-return-label')).toHaveText('Arrival');
     });
 
     test('reset restores the default parameters', async ({ page }) => {

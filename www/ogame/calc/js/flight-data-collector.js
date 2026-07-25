@@ -205,12 +205,17 @@ class FlightDataCollector {
         return legs;
     }
 
-    /** Raw contents of the save point search fields; parsing belongs to core. */
+    /**
+     * Raw contents of the save point search fields; parsing belongs to core.
+     * `returnDT` is the moment the fleet is back home, or — with `oneWay` on —
+     * the moment it lands on the target.
+     */
     collectSavePointForm() {
         return {
             startDT: this.text('save-start-datetime'),
             returnDT: this.text('save-return-datetime'),
             tolerance: this.text('save-tolerance-time'),
+            oneWay: this.checked('save-one-way'),
         };
     }
 
