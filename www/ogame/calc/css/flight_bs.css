@@ -1,8 +1,9 @@
 /* ============================================================================
    Flight calculator — Bootstrap 5 skin
-   Common pieces (.lined, .odd/.even, .main-header, #reset, #warning, #hint,
-   .tooltip-inner, .ui-input-margin, .no-mp) come from common_bs.css; this file
-   only carries the flight-specific field sizes and small widgets.
+   Common pieces (.main-header, #reset, #warning, #hint, .ui-input-margin,
+   .no-mp) come from common_bs.css; this file carries the flight-specific field
+   sizes, small widgets and the result-table skin (.lined, .odd/.even), which
+   follows the costs / queue / expeditions calculators.
    ========================================================================== */
 
 #flight {
@@ -27,11 +28,72 @@
   white-space: nowrap;
 }
 
-/* --- Fleet / parameter tables: tighten the default table cell padding --- */
-#flight table td,
-#flight table th {
+/* --- Fleet / parameter tables: tighten the default table cell padding.
+       The .lined result tables are excluded: they set their own roomier
+       padding below and the #flight id would otherwise win over it. --- */
+#flight table:not(.lined) td,
+#flight table:not(.lined) th {
   padding: 2px 4px;
   vertical-align: middle;
+}
+
+/* ==========================================================================
+   RESULT TABLES (.lined) — highlighted header row and rules between cells.
+   Shared look with the costs / queue / expeditions calculators.
+   ========================================================================== */
+
+.lined {
+  border-collapse: collapse;
+}
+
+.lined th {
+  background-color: var(--bs-tertiary-bg);
+  font-weight: 600;
+  text-align: center;
+  vertical-align: middle;
+  padding: 3px 8px;
+  border: 1px solid var(--bs-border-color);
+  border-bottom-width: 2px;
+  white-space: nowrap;
+}
+
+.lined td {
+  padding: 2px 8px;
+  vertical-align: middle;
+  border: 1px solid var(--bs-border-color);
+}
+
+/* Bootstrap scopes --bs-table-striped-bg to .table, so it resolves to nothing
+   here; mix the stripe off the body colour instead, which flips with the theme. */
+.lined tr.odd {
+  background-color: color-mix(in srgb, var(--bs-body-color) 7%, transparent);
+}
+
+.lined tr.even {
+  background-color: transparent;
+}
+
+/* Highlight the hovered row: the tables are wide, so it helps to keep the eye
+   on one speed step while reading across the columns. The stripe sits on the
+   <tr>, hence the highlight goes on the cells to win over it. */
+.lined tr:hover td {
+  background-color: var(--bs-tertiary-bg);
+}
+
+/* Compact controls placed inside .lined tables (the LF ship bonus inputs) */
+.lined .form-control-sm {
+  height: 1.5rem;
+  min-height: unset;
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+/* Save-point results are short numbers/coordinates: centre them under the
+   centred headers instead of leaving them ragged against the new rules. */
+#savepoints-galaxies td,
+#savepoints-systems td,
+#savepoints-planets td {
+  text-align: center;
 }
 
 /* --- Small round icon buttons for the universe / fleet / api controls --- */
