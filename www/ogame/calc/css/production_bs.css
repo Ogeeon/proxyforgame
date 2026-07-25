@@ -99,8 +99,10 @@
   white-space: nowrap;
 }
 
+/* Bootstrap scopes --bs-table-striped-bg to .table, so it resolves to nothing
+   here; mix the stripe off the body colour instead, which flips with the theme. */
 .lined tr.odd {
-  background-color: var(--bs-table-striped-bg);
+  background-color: color-mix(in srgb, var(--bs-body-color) 7%, transparent);
 }
 
 .lined tr.even {
