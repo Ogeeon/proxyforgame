@@ -542,7 +542,8 @@
     "own-api-reader-note": "Please note that the API 2 code contains no universe data, including the three fleet speed options. To load this data automatically, use the «Country» and «Universe» selectors on the parameters panel.",
     "own-api-import-btn": "Import from OGame",
     "own-api-import-title": "Import",
-    "own-api-bad-json-msg": "Failed to read the data.\\nMake sure you pasted the text from the API 2 field on the 'Fleet' page."
+    "own-api-bad-json-msg": "Failed to read the data.\\nMake sure you pasted the text from the API 2 field on the 'Fleet' page.",
+    "import-failed-msg": "Failed to load the data.\\nThe server returned an invalid response. Please try again later."
   },
   "graviton": {
     "title": "OGame - Graviton calculator",

@@ -134,6 +134,41 @@ test.describe('Flight Calculator - Spy Report Import', () => {
         await expect(page.locator('#speed-fleet-peaceful')).toHaveValue('1');
         await expect(page.locator('#speed-fleet-holding')).toHaveValue('1');
     });
+
+    test('shows an error when the server answer is not usable', async ({ page }) => {
+        let alertMsg = '';
+        page.on('dialog', d => { alertMsg = d.message(); d.accept(); });
+
+        await openParams(page);
+        const before = await page.locator('#departure-g').inputValue();
+
+        // ajax.php answers 5 when neither source could serve the report. The two
+        // success-looking payloads cover what reaches the client anyway when
+        // something between it and ajax.php answers instead (a 502 page, a proxy).
+        const badResponses = [
+            '5\nbad answer',
+            '0\n<br /><b>Warning</b>: gzuncompress(): data error\n{"RESULT_CODE":1000,"RESULT_DATA":false}',
+            '0\n{"RESULT_CODE":1000,"RESULT_DATA":false}',
+        ];
+        for (const body of badResponses) {
+            alertMsg = '';
+            // Routes registered later win, so this overrides the fixture route above
+            await page.route('/ajax.php', async (route, request) => {
+                if ((request.postData() ?? '').includes('service=ogameAPI')) {
+                    await route.fulfill({ status: 200, contentType: 'text/plain', body });
+                } else {
+                    await route.continue();
+                }
+            });
+
+            await page.locator('#api-code').fill(SR_CODE);
+            await page.locator('#api-get').click();
+            await page.waitForFunction(() => !document.querySelector('.panel-overlay'), { timeout: 5000 });
+
+            expect(alertMsg.length, `alert shown for ${JSON.stringify(body)}`).toBeGreaterThan(0);
+            await expect(page.locator('#departure-g')).toHaveValue(before);
+        }
+    });
 });
 
 // Fixture: object exported from the OGame client (API 2 field on the 'Fleet' page).

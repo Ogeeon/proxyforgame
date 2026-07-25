@@ -542,7 +542,8 @@
     "own-api-reader-note": "API 2 kodunun, üç filo hızı seçeneği dahil olmak üzere evren hakkında bilgi içermediğini lütfen unutmayın. Bu verileri otomatik olarak yüklemek için parametreler panelindeki 'Ülke' ve 'Evren' seçicilerini kullanın.",
     "own-api-import-btn": "OGame'den içe aktar",
     "own-api-import-title": "İçe Aktar",
-    "own-api-bad-json-msg": "Veriler okunamadı.\\n'Filo' sayfasındaki API 2 alanındaki metni yapıştırdığınızdan emin olun."
+    "own-api-bad-json-msg": "Veriler okunamadı.\\n'Filo' sayfasındaki API 2 alanındaki metni yapıştırdığınızdan emin olun.",
+    "import-failed-msg": "Veriler yüklenemedi.\\nSunucu geçersiz bir yanıt döndürdü. Lütfen daha sonra tekrar deneyin."
   },
   "graviton": {
     "title": "OGame - Gravitasyon Hesaplayıcı",

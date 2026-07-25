@@ -136,71 +136,95 @@ function GetVar($var, $type)
       curl_setopt($ch, CURLOPT_TIMEOUT, 30);
       $h = curl_exec($ch);
       if (curl_errno($ch)) {
-        curl_close($ch);
+        // Read the message before closing the handle, or it comes back empty
         $err = curl_error($ch);
+        curl_close($ch);
         // Maybe Logserver isn't accessible. Let's try fallback method
-        // It will use die() if something is wrong
         $data = GetSpyReportByFallbackMethod($strCode);
-        if (strpos($data, "RESULT_DATA") > 0) {
+        if ($data !== NULL) {
           die("0\n$data");
         }
         die("3\n$err");
       }
       curl_close($ch);
-      if (strpos($h, "code not found") > 0 || strpos($h, "wrong code") > 0) {
-        // Maybe Logserver can't process this SR. Let's try fallback method
-        // It will use die() if something is wrong
-        $data = GetSpyReportByFallbackMethod($strCode);
-        if (strpos($data, "RESULT_DATA") > 0) {
-          die("0\n$data");
-        }
-        die("4\nbad code");
-      } else {
+      if (IsUsableSpyReport($h)) {
         die("0\n$h");
       }
+      // Logserver couldn't process this SR: an unknown code, or a payload it
+      // failed to decompress, in which case it answers with PHP notices glued
+      // in front of a {"RESULT_CODE":1000,"RESULT_DATA":false} envelope.
+      // Let's try fallback method
+      $data = GetSpyReportByFallbackMethod($strCode);
+      if ($data !== NULL) {
+        die("0\n$data");
+      }
+      // Tell a code the user should double-check apart from a broken answer
+      if (strpos($h, "code not found") > 0 || strpos($h, "wrong code") > 0) {
+        die("4\nbad code");
+      }
+      die("5\nbad answer");
     }
     die("3\nempty");
   }
 
+  /**
+   * A usable answer decodes to {"RESULT_CODE":1000,"RESULT_DATA":{...}} with the
+   * two sections the flight calculator reads. Anything else - a false
+   * RESULT_DATA, an error envelope, HTML - is not worth handing to the client.
+   */
+  function IsUsableSpyReport($body) {
+    $json = json_decode($body, true);
+    return is_array($json)
+      && isset($json['RESULT_CODE']) && $json['RESULT_CODE'] == 1000
+      && isset($json['RESULT_DATA']) && is_array($json['RESULT_DATA'])
+      && isset($json['RESULT_DATA']['generic'], $json['RESULT_DATA']['universes']);
+  }
+
+  /**
+   * Second source for a spy report, used when Logserver is down or returns
+   * something unusable. Returns NULL when this source cannot serve the report
+   * either - the caller decides which error the client gets, so that a rejected
+   * code stays distinguishable from a broken answer.
+   */
   function GetSpyReportByFallbackMethod($srId) {
       // Extract language code and universe number from SR_ID
       // Format: sr-en-1-c781a3232869009dbe97d7cdd46a8c3822a75bb5
       $parts = explode('-', $srId);
-      
+
       if (count($parts) < 4) {
-          die("4\nbad code");
+          return NULL;
       }
-      
+
       $language = $parts[1];  // 'en'
       $universe = $parts[2];  // '1'
-      
+
       // Query faw-kes API for spy report
       $reportUrl = "https://ogapi.faw-kes.de/v1/report/" . $srId;
       $reportData = @file_get_contents($reportUrl);
-      
+
       if ($reportData === false) {
-          die("3\n" . 'Failed to fetch spy report from ogapi.faw-kes.de');
+          return NULL;
       }
-      
+
       $reportJson = json_decode($reportData, true);
-      
-      if ($reportJson === null) {
-          die("3\n" . 'Invalid JSON response from ogapi.faw-kes.de');
+
+      if (!is_array($reportJson) || empty($reportJson['RESULT_DATA'])) {
+          return NULL;
       }
-      
+
       // Query OGame API for server data
       $serverDataUrl = "https://s{$universe}-{$language}.ogame.gameforge.com/api/serverData.xml";
       $serverDataXml = @file_get_contents($serverDataUrl);
-      
+
       if ($serverDataXml === false) {
-          die("3\n" . 'Failed to fetch server data from OGame API');
+          return NULL;
       }
-      
+
       // Parse XML
       $xml = simplexml_load_string($serverDataXml);
-      
+
       if ($xml === false) {
-          die("3\n" . 'Failed to parse server data XML');
+          return NULL;
       }
       
       // Build universe data JSON structure

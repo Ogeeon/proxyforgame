@@ -79,6 +79,7 @@
     options.badSRCode = "<?= $l['import-bad-code-msg'] ?>";
     options.dataFetchMsg = "<?= $l['fetchig-data'] ?>";
     options.ownApiBadJsonMsg = "<?= $l['own-api-bad-json-msg'] ?>";
+    options.importFailedMsg = "<?= $l['import-failed-msg'] ?>";
 
     var unis = {
 <?php

@@ -542,6 +542,7 @@
     "own-api-import-btn": "Import z OGame",
     "own-api-import-title": "Importovať",
     "own-api-bad-json-msg": "Údaje sa nepodarilo načítať.\\nUistite sa, že ste vložili text z poľa API 2 na stránke „Flotila“.",
+    "import-failed-msg": "Údaje sa nepodarilo načítať.\\nServer vrátil neplatnú odpoveď. Skúste to znova neskôr.",
     "keywords": "proxyforgame,ogame,kalkulačka času letu,čas letu,body uloženia,save,rýchlosť flotily,spotreba deutéria,spotreba paliva"
   },
   "graviton": {

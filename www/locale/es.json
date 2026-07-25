@@ -542,7 +542,8 @@
     "own-api-reader-note": "Ten en cuenta que el código API 2 no contiene información sobre el universo, incluidas las tres variantes de velocidad de la flota. Para cargar estos datos automáticamente, usa los selectores «País» y «Universo» en el panel de parámetros.",
     "own-api-import-btn": "Importar desde OGame",
     "own-api-import-title": "Importar",
-    "own-api-bad-json-msg": "No se pudieron leer los datos.\\nAsegúrate de haber pegado el texto del campo API 2 de la página «Flota»."
+    "own-api-bad-json-msg": "No se pudieron leer los datos.\\nAsegúrate de haber pegado el texto del campo API 2 de la página «Flota».",
+    "import-failed-msg": "No se pudieron cargar los datos.\\nEl servidor devolvió una respuesta no válida. Inténtalo de nuevo más tarde."
   },
   "graviton": {
     "title": "OGame - Calculadora de Gravitón",

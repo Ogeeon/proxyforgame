@@ -947,8 +947,9 @@ class FlightOrchestrator {
         }).then((r) => r.text()).then((data) => {
             try {
                 const rcode = Number.parseInt(data.substr(0, data.indexOf('\n')), 10);
+                const payload = data.substr(data.indexOf('\n') + 1);
                 if (rcode === 3) {
-                    alert(data.substr(data.indexOf('\n') + 1));
+                    alert(payload);
                     return;
                 }
                 if (rcode === 4) {
@@ -956,22 +957,52 @@ class FlightOrchestrator {
                     return;
                 }
                 if (rcode !== 0) {
+                    alert(this.opts.importFailedMsg);
                     return;
                 }
-                const result = JSON.parse(data.substr(data.indexOf('\n') + 1));
-                if (result.RESULT_CODE === 1000) {
-                    this._applySRResult(code, result.RESULT_DATA);
-                    this.recalc();
+                const rd = this._parseSRPayload(payload);
+                if (rd === null) {
+                    alert(this.opts.importFailedMsg);
+                    return;
                 }
+                this._applySRResult(code, rd);
+                this.recalc();
             } catch (e) {
                 consoleLog('exception: ' + e);
+                alert(this.opts.importFailedMsg);
             } finally {
                 this._hideOverlay('general-settings-panel');
             }
         }).catch((e) => {
             consoleLog('exception: ' + e);
+            alert(this.opts.importFailedMsg);
             this._hideOverlay('general-settings-panel');
         });
+    }
+
+    /**
+     * Extract RESULT_DATA from an SR import payload.
+     * Returns null when the answer is not usable — the upstream log server can
+     * reply with PHP warnings glued in front of the JSON, or with a well-formed
+     * envelope whose RESULT_DATA is `false`.
+     */
+    _parseSRPayload(payload) {
+        let result;
+        try {
+            result = JSON.parse(payload);
+        } catch (e) {
+            consoleLog('SR parse exception: ' + e);
+            return null;
+        }
+        const rd = result?.RESULT_DATA;
+        if (result?.RESULT_CODE !== 1000 || rd === null || typeof rd !== 'object' || Array.isArray(rd)) {
+            return null;
+        }
+        if (typeof rd.generic !== 'object' || rd.generic === null ||
+            typeof rd.universes !== 'object' || rd.universes === null) {
+            return null;
+        }
+        return rd;
     }
 
     _applySRResult(code, rd) {

@@ -542,7 +542,8 @@
     "own-api-reader-note": "Bitte beachten Sie, dass der API-2-Code keine Universumsdaten enthält, einschließlich der drei Flottengeschwindigkeitsvarianten. Um diese Daten automatisch zu laden, verwenden Sie die Auswahlfelder „Land“ und „Universum“ auf der Parameterleiste.",
     "own-api-import-btn": "Import aus OGame",
     "own-api-import-title": "Importieren",
-    "own-api-bad-json-msg": "Die Daten konnten nicht gelesen werden.\\nStellen Sie sicher, dass Sie den Text aus dem Feld API 2 auf der Seite „Flotte“ eingefügt haben."
+    "own-api-bad-json-msg": "Die Daten konnten nicht gelesen werden.\\nStellen Sie sicher, dass Sie den Text aus dem Feld API 2 auf der Seite „Flotte“ eingefügt haben.",
+    "import-failed-msg": "Die Daten konnten nicht geladen werden.\\nDer Server hat eine ungültige Antwort zurückgegeben. Bitte versuchen Sie es später erneut."
   },
   "graviton": {
     "title": "OGame - Gravitonforschung Rechner",
