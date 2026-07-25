@@ -37,29 +37,44 @@ function buildInactivePlayers($playersXml) {
     return $inactivePlayers;
 }
 
+/** Turns the galaxy => system => true sets into galaxy => sorted system list. */
+function finalizePopulatedSystems($sets) {
+    ksort($sets);
+    $result = [];
+    foreach ($sets as $galaxy => $systems) {
+        $list = array_keys($systems);
+        sort($list);
+        $result[$galaxy] = $list;
+    }
+    return $result;
+}
+
+/**
+ * Systems holding at least one planet, in two flavours: `active` leaves out the
+ * planets of inactive players, `all` counts every planet.
+ *
+ * The universe has two independent settings for this — one skips systems nobody
+ * lives in, the other skips systems where every player is inactive — so neither
+ * set alone answers the question. Both are stored, and the calculator combines
+ * them according to the flags the universe actually has switched on.
+ */
 function buildPopulatedSystems($xml, $inactivePlayers) {
-    $populatedSystems = [];
+    $active = [];
+    $all = [];
     foreach ($xml->planet as $planet) {
-        $playerId = (int)$planet['player'];
-        if (isset($inactivePlayers[$playerId])) {
-            continue;
-        }
         $coords = (string)$planet['coords'];
         [$galaxy, $system] = explode(':', $coords);
         $galaxy = (int)$galaxy;
         $system = (int)$system;
-        if (!isset($populatedSystems[$galaxy])) {
-            $populatedSystems[$galaxy] = [];
-        }
-        if (!in_array($system, $populatedSystems[$galaxy])) {
-            $populatedSystems[$galaxy][] = $system;
+        $all[$galaxy][$system] = true;
+        if (!isset($inactivePlayers[(int)$planet['player']])) {
+            $active[$galaxy][$system] = true;
         }
     }
-    foreach ($populatedSystems as &$systems) {
-        sort($systems);
-    }
-    unset($systems);
-    return $populatedSystems;
+    return [
+        'active' => finalizePopulatedSystems($active),
+        'all' => finalizePopulatedSystems($all)
+    ];
 }
 
 function getPopulation($universe, $country, $pdo) {
@@ -78,13 +93,18 @@ function getPopulation($universe, $country, $pdo) {
         throw new ServerDataParseException('Failed to parse server data XML');
     }
 
-    if ((int)$serverDataXml->fleetIgnoreEmptySystems !== 1) {
+    // The two settings are independent. An empty tag counts as 0, and when both
+    // are off the fleet crosses every system, so there is nothing to store.
+    $ignoreEmpty = (int)$serverDataXml->fleetIgnoreEmptySystems === 1;
+    $ignoreInactive = (int)$serverDataXml->fleetIgnoreInactiveSystems === 1;
+
+    if (!$ignoreEmpty && !$ignoreInactive) {
         return [
             'timestamp' => 0,
             'population' => 0
         ];
     }
-    
+
     // Fetch players data to determine inactive players
     $playersUrl = "https://s{$universe}-{$country}.ogame.gameforge.com/api/players.xml";
     
@@ -120,28 +140,36 @@ function getPopulation($universe, $country, $pdo) {
     
     $timestamp = (int)$xml['timestamp'];
     $populatedSystems = buildPopulatedSystems($xml, $inactivePlayers);
-    
-    // Store in database
+
+    // Store in database. updated_at is assigned explicitly rather than left to
+    // ON UPDATE CURRENT_TIMESTAMP, which does not fire when the new row happens to
+    // be identical to the old one — the run that changed nothing is exactly the
+    // run whose freshness we still need to record.
     $stmt = $pdo->prepare("
-        INSERT INTO population_data (country, universe, timestamp, population)
-        VALUES (:country, :universe, :timestamp, :population)
+        INSERT INTO population_data (country, universe, timestamp, population, population_all, updated_at)
+        VALUES (:country, :universe, :timestamp, :population, :population_all, CURRENT_TIMESTAMP)
         ON DUPLICATE KEY UPDATE
             timestamp = :timestamp,
-            population = :population
+            population = :population,
+            population_all = :population_all,
+            updated_at = CURRENT_TIMESTAMP
     ");
-    
-    $populatedSystemsJson = json_encode($populatedSystems);
-    
+
+    $populatedSystemsJson = json_encode($populatedSystems['active']);
+    $populatedSystemsAllJson = json_encode($populatedSystems['all']);
+
     $stmt->execute([
         ':country' => $country,
         ':universe' => $universe,
         ':timestamp' => $timestamp,
-        ':population' => $populatedSystemsJson
+        ':population' => $populatedSystemsJson,
+        ':population_all' => $populatedSystemsAllJson
     ]);
 
     return [
         'timestamp' => $timestamp,
-        'population' => $populatedSystemsJson
+        'population' => $populatedSystemsJson,
+        'populationAll' => $populatedSystemsAllJson
     ];
 }
 

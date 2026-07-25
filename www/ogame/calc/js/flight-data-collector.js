@@ -45,8 +45,10 @@ class FlightDataCollector {
      * Every parameter the calculation engine needs.
      *
      * @param {object} state values the form does not hold:
-     *   `populatedSystems` (galaxy → array of inhabited systems, or null),
-     *   `fleetIgnoreEmptySystems` (universe setting),
+     *   `populatedSystems` (galaxy → array of systems with an active player, or
+     *   null) and `populatedSystemsAll` (the same for systems with any planet),
+     *   `fleetIgnoreEmptySystems` / `fleetIgnoreInactiveSystems` (the two
+     *   independent universe settings that decide which of the two sets counts),
      *   `emptySystemsOverrideEnabled` / `emptySystemsOverride` (the override is
      *   only active while the user is editing the field — the same field is
      *   also written back with the computed count, so its content alone cannot
@@ -74,7 +76,9 @@ class FlightDataCollector {
             lfRocktalCE: this.num('lf-rocktal-collector-enh'),
             lfShipsBonuses: this.collectLfShipsBonuses(),
             fleetIgnoreEmptySystems: state.fleetIgnoreEmptySystems ?? false,
+            fleetIgnoreInactiveSystems: state.fleetIgnoreInactiveSystems ?? false,
             populatedSystems: state.populatedSystems ?? null,
+            populatedSystemsAll: state.populatedSystemsAll ?? null,
             emptySystemsOverrideEnabled: state.emptySystemsOverrideEnabled ?? false,
             emptySystemsOverride: state.emptySystemsOverride ?? 0,
         };

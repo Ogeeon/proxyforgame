@@ -20,6 +20,7 @@ async function installCompat(page) {
             const wb = document.getElementById('warrior-bonus');
             p.warriorBonus = !!(wb && wb.checked);
             p.populatedSystems = options.populatedSystems ?? null;
+            p.populatedSystemsAll = options.populatedSystemsAll ?? null;
             p.emptySystemsOverrideEnabled = options.emptySystemsOverrideEnabled ?? false;
             p.emptySystemsOverride = options.emptySystemsOverride ?? 0;
             if (!Array.isArray(p.lfShipsBonuses) || p.lfShipsBonuses.length !== 15 || !Array.isArray(p.lfShipsBonuses[0])) {

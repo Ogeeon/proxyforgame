@@ -2,6 +2,10 @@
 // ORCHESTRATION — wires collector → core → renderer and owns the events
 // ============================================================================
 
+// How long a cached populated-systems map stays usable. The server job that
+// builds it runs daily, so anything longer only serves stale coordinates.
+const POPULATED_SYSTEMS_TTL_MS = 24 * 60 * 60 * 1000;
+
 // The persisted state object. The TPL inline script fills in the translation
 // strings; the orchestrator reads/writes prm and calls load/save (cookie I/O in
 // utils.js). Transient bits (populated systems, manual overrides) live on the
@@ -42,6 +46,7 @@ var options = {
         lfRocktalCE: 0,
         lfShipsBonuses: [],
         fleetIgnoreEmptySystems: false,
+        fleetIgnoreInactiveSystems: false,
         validate: function (field, value) {
             switch (field) {
                 case 'country': return value;
@@ -54,7 +59,8 @@ var options = {
                 case 'circularGalaxies':
                 case 'circularSystems':
                 case 'traderBonus':
-                case 'fleetIgnoreEmptySystems': return value === 'true';
+                case 'fleetIgnoreEmptySystems':
+                case 'fleetIgnoreInactiveSystems': return value === 'true';
                 case 'numberOfSystems': return validateNumber(parseFloat(value), 1, 550, 499);
                 case 'numberOfGalaxies': return validateNumber(parseFloat(value), 1, 12, 9);
                 case 'deutFactor': return validateNumber(parseFloat(value), 5, 10, 10);
@@ -115,8 +121,12 @@ class FlightOrchestrator {
         this.collector = new FlightDataCollector();
         this.renderer = new FlightRenderer(opts);
 
-        // Transient state — never persisted, mirrors the old `options.*` fields
+        // Transient state — never persisted, mirrors the old `options.*` fields.
+        // Two maps: the systems with an active player and the systems with any
+        // planet at all, because the universe decides independently whether it
+        // skips empty systems, inactive ones, both or neither.
         this.populatedSystems = null;
+        this.populatedSystemsAll = null;
         this.speedOverride = { enabled: false, speed: 10000 };
         this.emptyOverride = { enabled: false, count: 0 };
     }
@@ -129,7 +139,9 @@ class FlightOrchestrator {
     _state() {
         return {
             populatedSystems: this.populatedSystems,
+            populatedSystemsAll: this.populatedSystemsAll,
             fleetIgnoreEmptySystems: this.opts.prm.fleetIgnoreEmptySystems,
+            fleetIgnoreInactiveSystems: this.opts.prm.fleetIgnoreInactiveSystems,
             emptySystemsOverrideEnabled: this.emptyOverride.enabled,
             emptySystemsOverride: this.emptyOverride.count,
             missionType: this.opts.prm.missionType,
@@ -192,7 +204,10 @@ class FlightOrchestrator {
         const emptyCount = this.emptyOverride.enabled && this.emptyOverride.count >= 0
             ? this.emptyOverride.count
             : emptySystems;
-        this.renderer.renderEmptySystems({ count: emptyCount, visible: params.fleetIgnoreEmptySystems });
+        this.renderer.renderEmptySystems({
+            count: emptyCount,
+            visible: params.fleetIgnoreEmptySystems || params.fleetIgnoreInactiveSystems,
+        });
 
         // An empty fleet has nothing to fly, so there is no duration, fuel or
         // cargo to show — not even when the manual speed override is on.
@@ -796,7 +811,7 @@ class FlightOrchestrator {
             hyperTechLvl: 0, playerClass: 0, traderBonus: false, spCargohold: 0,
             lfMechanGE: 0, lfRocktalCE: 0,
             lfShipsBonuses: Array.from({ length: 15 }, () => [0, 0, 0]),
-            fleetIgnoreEmptySystems: false, flightData: [0],
+            fleetIgnoreEmptySystems: false, fleetIgnoreInactiveSystems: false, flightData: [0],
         });
         setVal('#country', prm.country);
         this.setUniList(prm.country, prm.universe);
@@ -874,18 +889,10 @@ class FlightOrchestrator {
             this._selectOption('deut-factor', frac(json.globalDeuteriumSaveFactor * 10, 0));
             this._selectOption('deut-generals-bonus', frac(json.warriorBonusFuelConsumption * 100, 0));
             this.opts.prm.fleetIgnoreEmptySystems = json.fleetIgnoreEmptySystems === '1';
-            const label = document.getElementById('empty-systems-label');
-            if (this.opts.prm.fleetIgnoreEmptySystems) {
-                this.getPopulatedSystemsInfo();
+            this.opts.prm.fleetIgnoreInactiveSystems = json.fleetIgnoreInactiveSystems === '1';
+            this._applySystemSkipState();
+            if (this._skipsSystems()) {
                 setVal('#empty-systems-count-spin', 0);
-                if (label) {
-                    label.style.display = '';
-                }
-            } else {
-                this.emptyOverride.enabled = false;
-                if (label) {
-                    label.style.display = 'none';
-                }
             }
             this.recalc();
         } catch (error) {
@@ -895,8 +902,37 @@ class FlightOrchestrator {
         }
     }
 
+    /**
+     * True when the universe lets the fleet skip some systems, by either setting.
+     * As soon as one of them is on the calculator needs the populated-systems
+     * data and shows the count field.
+     */
+    _skipsSystems() {
+        return this.opts.prm.fleetIgnoreEmptySystems || this.opts.prm.fleetIgnoreInactiveSystems;
+    }
+
+    /**
+     * Reveals or hides the skipped-systems field to match the universe settings,
+     * and loads the map the count is computed from. The manual override only
+     * makes sense while the field is visible, so it is dropped on the way out.
+     */
+    _applySystemSkipState() {
+        const label = document.getElementById('empty-systems-label');
+        if (this._skipsSystems()) {
+            this.getPopulatedSystemsInfo();
+            if (label) {
+                label.style.display = '';
+            }
+        } else {
+            this.emptyOverride.enabled = false;
+            if (label) {
+                label.style.display = 'none';
+            }
+        }
+    }
+
     async getPopulatedSystemsInfo() {
-        if (!this.opts.prm.fleetIgnoreEmptySystems) {
+        if (!this._skipsSystems()) {
             return;
         }
         const { country, universe } = this.collector.collectServer();
@@ -908,8 +944,15 @@ class FlightOrchestrator {
         if (stored !== null) {
             try {
                 const json = JSON.parse(stored);
-                if ((Date.now() - json.timestamp * 1000) <= 604800000) {
+                // Age is counted from the moment the answer was cached, not from
+                // the timestamp inside it: that one belongs to Gameforge's
+                // universe.xml, which is already days old by the time the server
+                // job reads it, so a short TTL measured against it would expire
+                // every entry immediately. Entries cached before this field
+                // existed have no cachedAt and are refetched once.
+                if (json.cachedAt && (Date.now() - json.cachedAt) <= POPULATED_SYSTEMS_TTL_MS) {
                     this.populatedSystems = json.populatedSystems;
+                    this.populatedSystemsAll = json.populatedSystemsAll ?? null;
                     return;
                 }
             } catch (e) {
@@ -924,8 +967,9 @@ class FlightOrchestrator {
             }
             const data = await response.text();
             const json = JSON.parse(data);
-            localStorage.setItem(key, data);
+            localStorage.setItem(key, JSON.stringify({ ...json, cachedAt: Date.now() }));
             this.populatedSystems = json.populatedSystems;
+            this.populatedSystemsAll = json.populatedSystemsAll ?? null;
         } catch (error) {
             consoleLog('fetch error: ' + error);
         } finally {
@@ -1039,6 +1083,11 @@ class FlightOrchestrator {
         this._selectOption('deut-factor', rd.universes.globalDeuteriumSaveFactor * 10);
         this._selectOption('deut-generals-bonus', rd.universes.warriorBonusFuelConsumption * 10);
         this.opts.prm.fleetIgnoreEmptySystems = rd.universes.fleetIgnoreEmptySystems === '1';
+        this.opts.prm.fleetIgnoreInactiveSystems = rd.universes.fleetIgnoreInactiveSystems === '1';
+        // The import can move the fleet to a universe with different settings, so
+        // the count field and the map behind it follow the same rules as a manual
+        // universe change.
+        this._applySystemSkipState();
 
         (rd.details.research || []).forEach((v) => {
             if (v.research_type == 115) setVal('#cmb-drive', v.level);
@@ -1253,7 +1302,7 @@ class FlightOrchestrator {
 
         this._restoreActiveTab();
 
-        if (this.opts.prm.fleetIgnoreEmptySystems) {
+        if (this._skipsSystems()) {
             const label = document.getElementById('empty-systems-label');
             if (label) {
                 label.style.display = '';
@@ -1422,6 +1471,7 @@ class FlightOrchestrator {
             const self = window.flightOrchestrator;
             self.opts.prm.country = this.value;
             self.opts.prm.fleetIgnoreEmptySystems = false;
+            self.opts.prm.fleetIgnoreInactiveSystems = false;
             self.setUniList(this.value, self.opts.prm.universe);
             self.recalc();
             self.opts.save();

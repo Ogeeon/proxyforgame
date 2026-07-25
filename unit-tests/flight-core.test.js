@@ -25,18 +25,26 @@ const UNI_DEFAULTS = {
     numberOfGalaxies: 9,
     numberOfSystems: 499,
     fleetIgnoreEmptySystems: false,
+    fleetIgnoreInactiveSystems: false,
 };
+
+// Both settings on is the common case (183 of the 401 live universes), so the
+// blocks that are not about the settings themselves use this shorthand.
+const SKIP_ALL = { fleetIgnoreEmptySystems: true, fleetIgnoreInactiveSystems: true };
 
 /**
  * Calls getDistance() with a known universe configuration.
+ * @param populated systems holding an active player, per galaxy
+ * @param populatedAll systems holding any planet at all, per galaxy
  * @param ovr manual empty-systems count, or null to leave the override disabled
- * @returns {{dst: number, empty: number}} distance and the empty-system count
+ * @returns {{dst: number, empty: number}} distance and the skipped-system count
  */
-function distance({ dep, dest, prm = {}, populated = null, ovr = null }) {
+function distance({ dep, dest, prm = {}, populated = null, populatedAll = null, ovr = null }) {
     const r = calc.getDistance(dep, dest, {
         ...UNI_DEFAULTS,
         ...prm,
         populatedSystems: populated,
+        populatedSystemsAll: populatedAll,
         emptySystemsOverrideEnabled: ovr !== null,
         emptySystemsOverride: ovr ?? 0,
     });
@@ -106,7 +114,7 @@ describe('Flight Calculator - Distance', () => {
         // systems strictly between are 2..9 (8 of them), of which 3 and 5 are populated.
         const { dst, empty } = distance({
             dep: [1, 1, 1], dest: [1, 10, 1],
-            prm: { fleetIgnoreEmptySystems: true },
+            prm: SKIP_ALL,
             populated: { 1: [1, 3, 5, 10] },
         });
         expect(empty).toBe(6);
@@ -117,7 +125,7 @@ describe('Flight Calculator - Distance', () => {
         // Nothing populated between 1 and 3 -> exactly one empty system (2)
         const { empty } = distance({
             dep: [1, 1, 1], dest: [1, 3, 1],
-            prm: { fleetIgnoreEmptySystems: true },
+            prm: SKIP_ALL,
             populated: { 1: [1, 3] },
         });
         expect(empty).toBe(1);
@@ -126,7 +134,7 @@ describe('Flight Calculator - Distance', () => {
     it('missing populated-systems map disables the skip', () => {
         const { dst, empty } = distance({
             dep: [1, 1, 1], dest: [1, 10, 1],
-            prm: { fleetIgnoreEmptySystems: true },
+            prm: SKIP_ALL,
             populated: null,
         });
         expect(empty).toBe(0);
@@ -136,11 +144,73 @@ describe('Flight Calculator - Distance', () => {
     it('manual empty-systems override replaces the computed count', () => {
         const { dst } = distance({
             dep: [1, 1, 1], dest: [1, 10, 1],
-            prm: { fleetIgnoreEmptySystems: true },
+            prm: SKIP_ALL,
             populated: { 1: [1, 3, 5, 10] }, // would compute 6
             ovr: 4,
         });
         expect(dst).toBe((9 - 4) * 95 + 2700);
+    });
+});
+
+describe('Flight Calculator - Distance (the two universe settings)', () => {
+    // Systems 1..10 with the endpoints excluded leaves 2..9 to judge.
+    //   active (a player who still plays): 3, 5
+    //   all (any planet at all):           3, 5, 6, 7
+    // so 6 and 7 hold nothing but inactive players, and 2, 4, 8, 9 are empty.
+    const ACTIVE = { 1: [1, 3, 5, 10] };
+    const ALL = { 1: [1, 3, 5, 6, 7, 10] };
+    const hop = (prm, sets = {}) => distance({
+        dep: [1, 1, 1], dest: [1, 10, 1], prm, populated: ACTIVE, populatedAll: ALL, ...sets,
+    });
+
+    it('both settings on: empty and inactive-only systems are skipped', () => {
+        const { dst, empty } = hop(SKIP_ALL);
+        expect(empty).toBe(6); // 2, 4, 6, 7, 8, 9
+        expect(dst).toBe((9 - 6) * 95 + 2700);
+    });
+
+    it('only empty ignored: systems held by inactive players still count', () => {
+        const { dst, empty } = hop({ fleetIgnoreEmptySystems: true });
+        expect(empty).toBe(4); // 2, 4, 8, 9 — 6 and 7 are inhabited, if barely
+        expect(dst).toBe((9 - 4) * 95 + 2700);
+    });
+
+    it('only inactive ignored: empty systems still count', () => {
+        const { dst, empty } = hop({ fleetIgnoreInactiveSystems: true });
+        expect(empty).toBe(2); // 6 and 7 only
+        expect(dst).toBe((9 - 2) * 95 + 2700);
+    });
+
+    it('neither setting on: the fleet crosses every system', () => {
+        const { dst, empty } = hop({});
+        expect(empty).toBe(0);
+        expect(dst).toBe(9 * 95 + 2700);
+    });
+
+    it('the two counts always add up to the count with both settings on', () => {
+        const both = hop(SKIP_ALL).empty;
+        const emptyOnly = hop({ fleetIgnoreEmptySystems: true }).empty;
+        const inactiveOnly = hop({ fleetIgnoreInactiveSystems: true }).empty;
+        expect(emptyOnly + inactiveOnly).toBe(both);
+    });
+
+    it('without the full set, only-empty skips nothing rather than over-skipping', () => {
+        // The unfiltered set is what says which systems are truly empty. Without it
+        // the honest answer is "no shortcut", not "treat every inactive as empty".
+        const { empty } = hop({ fleetIgnoreEmptySystems: true }, { populatedAll: null });
+        expect(empty).toBe(0);
+    });
+
+    it('without the full set, only-inactive skips nothing either', () => {
+        const { empty } = hop({ fleetIgnoreInactiveSystems: true }, { populatedAll: null });
+        expect(empty).toBe(0);
+    });
+
+    it('with both settings on the full set is not needed at all', () => {
+        // Everything missing from the active set is skipped either way, so this
+        // case keeps working on rows written before the split.
+        const { empty } = hop(SKIP_ALL, { populatedAll: null });
+        expect(empty).toBe(6);
     });
 });
 
@@ -151,7 +221,7 @@ describe('Flight Calculator - Distance (circular wrap-around)', () => {
     // when departure < destination, inflating the count and driving distance negative.
     it('wrap-around distance is the same in both directions', () => {
         const populated = { 1: [1, 490, 495, 497] };
-        const prm = { circularSystems: true, fleetIgnoreEmptySystems: true };
+        const prm = { circularSystems: true, ...SKIP_ALL };
 
         const forward = distance({ dep: [1, 490, 1], dest: [1, 1, 1], prm, populated });
         const backward = distance({ dep: [1, 1, 1], dest: [1, 490, 1], prm, populated });
@@ -166,10 +236,24 @@ describe('Flight Calculator - Distance (circular wrap-around)', () => {
     it('distance never drops below the base cost', () => {
         const { dst } = distance({
             dep: [1, 1, 1], dest: [1, 490, 1],
-            prm: { circularSystems: true, fleetIgnoreEmptySystems: true },
+            prm: { circularSystems: true, ...SKIP_ALL },
             populated: { 1: [1, 490, 495, 497] },
         });
         expect(dst).toBeGreaterThanOrEqual(2700 - 10 * 95);
+    });
+
+    // Only-inactive counts a difference of two ranges per arc, so the wrap has to
+    // hold up on both halves at once.
+    it('inactive-only skipping survives the wrap', () => {
+        // Wrapped arc from 490 up to 499 and on from 1 to 1 -> systems 491..498.
+        // 495 and 497 have an active player; 492 and 496 hold only inactives.
+        const { empty } = distance({
+            dep: [1, 1, 1], dest: [1, 490, 1],
+            prm: { circularSystems: true, fleetIgnoreInactiveSystems: true },
+            populated: { 1: [1, 490, 495, 497] },
+            populatedAll: { 1: [1, 490, 492, 495, 496, 497] },
+        });
+        expect(empty).toBe(2);
     });
 
     // The manual empty-system override is applied to the wrapped arc, not the long
@@ -177,7 +261,7 @@ describe('Flight Calculator - Distance (circular wrap-around)', () => {
     it('manual override still respects circular systems', () => {
         const { dst } = distance({
             dep: [1, 1, 1], dest: [1, 490, 1],
-            prm: { circularSystems: true, fleetIgnoreEmptySystems: true },
+            prm: { circularSystems: true, ...SKIP_ALL },
             ovr: 0,
         });
         expect(dst).toBe(10 * 95 + 2700); // wrapped, not 489 systems the long way

@@ -166,8 +166,8 @@ class FlightCalculator {
     // ------------------------------------------------------------------
 
     /**
-     * Counts systems strictly between the two endpoints that nobody lives in.
-     * Both endpoints are excluded.
+     * Counts systems strictly between the two endpoints that are missing from the
+     * given set. Both endpoints are excluded.
      */
     countEmptySystems(system1, system2, populatedSystems) {
         if (populatedSystems == null) {
@@ -178,6 +178,39 @@ class FlightCalculator {
         const totalInRange = end - start - 1;
         const populatedInRange = populatedSystems.filter((s) => s > start && s < end).length;
         return totalInRange - populatedInRange;
+    }
+
+    /**
+     * Counts systems strictly between the two endpoints that the fleet flies past
+     * without paying for them.
+     *
+     * The universe exposes two independent settings — one skips systems nobody
+     * lives in, the other skips systems where every player is inactive — so all
+     * four combinations occur and each needs a different count. Two sets make
+     * that possible: `active` holds the systems with at least one active player,
+     * `all` holds those with at least one planet of any kind. Systems missing
+     * from `active` are the empty ones plus the inactive-only ones; systems
+     * missing from `all` are exactly the empty ones, so the difference isolates
+     * the inactive-only systems.
+     *
+     * A missing set means the data never arrived; skipping nothing keeps the
+     * flight time on the safe (longer) side rather than inventing a shortcut.
+     */
+    countSkippedSystems(system1, system2, active, all, params) {
+        if (params.fleetIgnoreEmptySystems && params.fleetIgnoreInactiveSystems) {
+            return this.countEmptySystems(system1, system2, active);
+        }
+        if (params.fleetIgnoreEmptySystems) {
+            return this.countEmptySystems(system1, system2, all);
+        }
+        if (params.fleetIgnoreInactiveSystems) {
+            if (all == null) {
+                return 0;
+            }
+            return this.countEmptySystems(system1, system2, active)
+                - this.countEmptySystems(system1, system2, all);
+        }
+        return 0;
     }
 
     /**
@@ -212,7 +245,7 @@ class FlightCalculator {
             && params.numberOfSystems - directSystems < directSystems;
         const systems = wraps ? params.numberOfSystems - directSystems : directSystems;
 
-        if (!params.fleetIgnoreEmptySystems) {
+        if (!params.fleetIgnoreEmptySystems && !params.fleetIgnoreInactiveSystems) {
             return { distance: systems * 95 + 2700, emptySystems: 0 };
         }
 
@@ -223,7 +256,8 @@ class FlightCalculator {
             return { distance: (systems - empty) * 95 + 2700, emptySystems: empty };
         }
 
-        const populated = params.populatedSystems?.[departure[0]] ?? null;
+        const active = params.populatedSystems?.[departure[0]] ?? null;
+        const all = params.populatedSystemsAll?.[departure[0]] ?? null;
         let empty;
 
         if (wraps) {
@@ -232,10 +266,10 @@ class FlightCalculator {
             // is the departure, so use max/min rather than departure/destination.
             const high = Math.max(departure[1], destination[1]);
             const low = Math.min(departure[1], destination[1]);
-            empty = this.countEmptySystems(high, params.numberOfSystems + 1, populated)
-                + this.countEmptySystems(0, low, populated);
+            empty = this.countSkippedSystems(high, params.numberOfSystems + 1, active, all, params)
+                + this.countSkippedSystems(0, low, active, all, params);
         } else {
-            empty = this.countEmptySystems(departure[1], destination[1], populated);
+            empty = this.countSkippedSystems(departure[1], destination[1], active, all, params);
         }
 
         return { distance: (systems - empty) * 95 + 2700, emptySystems: empty };

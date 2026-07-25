@@ -254,7 +254,11 @@ function GetVar($var, $type)
               'donutGalaxy' => (string)$xml->donutGalaxy ?? '',
               'donutSystem' => (string)$xml->donutSystem ?? '',
               'globalDeuteriumSaveFactor' => (string)$xml->globalDeuteriumSaveFactor ?? '',
-              'probeCargo' => (string)$xml->probeCargo ?? ''
+              'probeCargo' => (string)$xml->probeCargo ?? '',
+              // The flight calculator reads both of these off an imported report;
+              // without them an import used to silently switch the system skip off.
+              'fleetIgnoreEmptySystems' => (string)$xml->fleetIgnoreEmptySystems ?? '',
+              'fleetIgnoreInactiveSystems' => (string)$xml->fleetIgnoreInactiveSystems ?? ''
           ]
       ];
       
@@ -297,7 +301,10 @@ function GetVar($var, $type)
       'globalDeuteriumSaveFactor' => (string)$xml->globalDeuteriumSaveFactor ?? '',
       'warriorBonusFuelConsumption' => (string)$xml->warriorBonusFuelConsumption ?? '',
       'probeCargo' => (string)$xml->probeCargo ?? '',
-      'fleetIgnoreEmptySystems' => (string)$xml->fleetIgnoreEmptySystems ?? ''
+      'fleetIgnoreEmptySystems' => (string)$xml->fleetIgnoreEmptySystems ?? '',
+      // Independent of the one above: it skips systems where every player is
+      // inactive, and a universe can have either, both or neither switched on.
+      'fleetIgnoreInactiveSystems' => (string)$xml->fleetIgnoreInactiveSystems ?? ''
     ];
         
     echo json_encode($universeData);
@@ -307,15 +314,21 @@ function GetVar($var, $type)
       $country = GetVar('country', 'str');
       $universe = GetVar('universe', 'int');
       $result = SqlQuery("
-          SELECT timestamp, population
+          SELECT timestamp, population, population_all, UNIX_TIMESTAMP(updated_at) AS updated_at
           FROM population_data
           WHERE universe = ? AND country = ?
       ", array($universe, $country));
 
+      // population_all is null for rows written before the two settings were told
+      // apart; the client falls back to skipping nothing rather than guessing.
       header('Content-Type: application/json');
       echo json_encode([
         'timestamp' => (int)$result[0]['timestamp'],
-        'populatedSystems' => json_decode($result[0]['population'], true)
+        'updatedAt' => (int)$result[0]['updated_at'],
+        'populatedSystems' => json_decode($result[0]['population'], true),
+        'populatedSystemsAll' => $result[0]['population_all'] === null
+            ? null
+            : json_decode($result[0]['population_all'], true)
     ]);
   }
 
