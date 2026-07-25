@@ -171,6 +171,44 @@ test.describe('Flight Calculator - Spy Report Import', () => {
     });
 });
 
+test.describe('Flight Calculator - Server data fetch', () => {
+    // A universe answer takes a round trip to the OGame API, so the panel has to
+    // say it is busy — the same overlay the spy report import puts up.
+    const SERVER_DATA = JSON.stringify({
+        speedFleetPeaceful: '1', speedFleetWar: '1', speedFleetHolding: '1',
+        galaxies: '9', systems: '499', donutGalaxy: '1', donutSystem: '1',
+        globalDeuteriumSaveFactor: '1', warriorBonusFuelConsumption: '0.25',
+        probeCargo: '0', fleetIgnoreEmptySystems: '0',
+    });
+
+    test.beforeEach(async ({ context, page }) => {
+        await context.addInitScript(() => {
+            localStorage.setItem('lastChange', 'key-value;true,value;99999');
+        });
+        await page.route(/\/ajax\.php\?.*service=serverdata/, async (route) => {
+            await new Promise((resolve) => setTimeout(resolve, 1000));
+            await route.fulfill({ status: 200, contentType: 'application/json', body: SERVER_DATA });
+        });
+        await page.goto('/ogame/calc/flight.php');
+    });
+
+    test('covers the parameters panel while the universe data is on the wire', async ({ page }) => {
+        await openParams(page, '#country');
+        await page.locator('#country').selectOption('en');
+
+        // The list is filled from the `unis` global; take whatever it offers first
+        const universe = page.locator('#universe');
+        await universe.selectOption({ index: 0 });
+
+        await expect(page.locator('#general-settings-panel .panel-overlay')).toBeVisible();
+        await expect(page.locator('.panel-overlay-content')).not.toBeEmpty();
+
+        // ...and uncovers it once the answer lands
+        await expect(page.locator('.panel-overlay')).toHaveCount(0, { timeout: 5000 });
+        await expect(page.locator('#galaxies-num')).toHaveValue('9');
+    });
+});
+
 // Fixture: object exported from the OGame client (API 2 field on the 'Fleet' page).
 // Coordinates 5:254:14, discoverer class, trader alliance, drives 14/10/8, hypertech 9,
 // fleetspeed x10 (universe data, intentionally ignored on import).

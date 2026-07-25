@@ -856,6 +856,7 @@ class FlightOrchestrator {
         if (universe === null || universe === '') {
             return;
         }
+        this._showOverlay('general-settings-panel', this.opts.dataFetchMsg);
         try {
             const response = await fetch('/ajax.php?' + new URLSearchParams({ service: 'serverdata', country, universe }));
             if (!response.ok) {
@@ -889,6 +890,8 @@ class FlightOrchestrator {
             this.recalc();
         } catch (error) {
             consoleLog('fetch error: ' + error);
+        } finally {
+            this._hideOverlay('general-settings-panel');
         }
     }
 
@@ -913,6 +916,7 @@ class FlightOrchestrator {
                 consoleLog('parse exception: ' + e);
             }
         }
+        this._showOverlay('general-settings-panel', this.opts.dataFetchMsg);
         try {
             const response = await fetch('/ajax.php?' + new URLSearchParams({ service: 'populatedSystems', country, universe }));
             if (!response.ok) {
@@ -924,6 +928,8 @@ class FlightOrchestrator {
             this.populatedSystems = json.populatedSystems;
         } catch (error) {
             consoleLog('fetch error: ' + error);
+        } finally {
+            this._hideOverlay('general-settings-panel');
         }
     }
 
@@ -1186,9 +1192,17 @@ class FlightOrchestrator {
     // Loading overlay
     // ------------------------------------------------------------------
 
+    // Overlays are reference-counted: several requests can be in flight over the
+    // same panel (an SR import re-fills the universe list, which refetches the
+    // server data), and the first one to finish must not uncover the panel.
     _showOverlay(elementId, text) {
         const panel = document.getElementById(elementId);
         if (!panel) {
+            return;
+        }
+        this._overlayCount ??= {};
+        this._overlayCount[elementId] = (this._overlayCount[elementId] || 0) + 1;
+        if (this._overlayCount[elementId] > 1) {
             return;
         }
         panel.classList.add('loading');
@@ -1199,6 +1213,11 @@ class FlightOrchestrator {
     _hideOverlay(elementId) {
         const panel = document.getElementById(elementId);
         if (!panel) {
+            return;
+        }
+        this._overlayCount ??= {};
+        this._overlayCount[elementId] = Math.max(0, (this._overlayCount[elementId] || 0) - 1);
+        if (this._overlayCount[elementId] > 0) {
             return;
         }
         panel.classList.remove('loading');
