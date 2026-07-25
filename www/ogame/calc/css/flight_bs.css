@@ -1,14 +1,27 @@
 /* ============================================================================
    Flight calculator — Bootstrap 5 skin
-   Common pieces (.main-header, #reset, #warning, #hint, .ui-input-margin,
-   .no-mp) come from common_bs.css; this file carries the flight-specific field
-   sizes, small widgets and the result-table skin (.lined, .odd/.even), which
-   follows the costs / queue / expeditions calculators.
+   Common pieces (.main-header, #warning, #hint, .ui-input-margin, .no-mp) come
+   from common_bs.css; this file carries the flight-specific field sizes, small
+   widgets and the result-table skin (.lined, .odd/.even), which follows the
+   costs / queue / expeditions calculators.
    ========================================================================== */
 
 #flight {
   margin: auto;
   max-width: 1000px;
+}
+
+/* Reset button in the title header: the common_bs.css rule is the pre-Bootstrap
+   floated icon, so restate the square outlined skin used by every other
+   BS5 calculator. */
+#reset {
+  cursor: pointer;
+  z-index: 10;
+  width: 30px;
+  height: 30px;
+  border: 1px solid #dc3545;
+  border-radius: 8px;
+  margin-right: 0.2rem;
 }
 
 /* --- Narrow numeric fields keep their compact footprint under form-control --- */
