@@ -406,6 +406,9 @@ function parseDate(str, template) {
 	if (pts == null){
 		return 0;
 	}
+	var h = parseInt(pts[4], 10), m = parseInt(pts[5], 10), s = parseInt(pts[6], 10);
+	if (h > 23 || m > 59 || s > 59)
+		return 0;
 	var t;
 	// Распарсим дату/время, расположив элементы на нужных позициях. Если сочетание день+месяц неадекватное, считаем, что дата не распарсилась.
 	if (template == 'm.d.y H:s:s') {
