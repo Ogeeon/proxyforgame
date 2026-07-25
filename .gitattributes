@@ -1,0 +1,4 @@
+# GNU Make on Linux passes a trailing CR straight to the shell and the recipe
+# breaks, so the Makefile must stay LF no matter what core.autocrlf a given
+# clone happens to use. The native Windows make build reads LF without help.
+Makefile text eol=lf

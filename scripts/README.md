@@ -2,6 +2,27 @@
 
 This directory contains automation scripts for ProxyForGame development workflows.
 
+Most of them are also exposed as `make` targets from the repo root — see `make help`.
+
+---
+
+## make-help.js
+
+Renders the target list for `make help` by scraping `##` comments out of the `Makefile`.
+
+**Usage:** invoked by the `help` target; not meant to be run directly.
+
+It exists as a script rather than the usual inline `awk` one-liner because the Makefile runs
+under `cmd.exe` on Windows, where `awk` and `sed` do not exist and quoting an inline snippet
+portably is not worth the trouble. Node is already required by every other target.
+
+**Syntax it recognises:**
+- `##@ Section name` — starts a new group
+- `target: deps ## description` — a documented target
+
+Targets without a `##` comment are hidden from the listing, which is the intended way to keep
+internal helpers out of it.
+
 ## Translation Management Scripts
 
 ### validate-translations.js

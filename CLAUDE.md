@@ -12,6 +12,32 @@ This repo contains multiple calculators (production, cost, lifeform cost, flight
 
 ## Development Commands
 
+### Task Runner (`make`)
+
+`make` from the repo root is the entry point for everything below — `make help` lists the
+targets. **Requires GNU Make 4.x**; the GnuWin32 3.81 build that is still on many Windows
+boxes is too old (`choco install make`).
+
+| Target | What it does |
+|--------|--------------|
+| `make test` | Both suites — the ritual required before a commit |
+| `make test-unit` / `make test-e2e` | One suite each |
+| `make test-one spec=flight` | A single Playwright spec |
+| `make check` | `i18n-validate` + both suites — the green gate |
+| `make audit` | Code quality, test coverage, DB schema reports (advisory) |
+| `make serve` | `php -S localhost:8000 -t www`, no WAMP needed |
+| `make i18n-fix` / `make i18n-report` | Translation sync and completion |
+| `make install` | `npm ci` + Playwright browsers |
+
+Variables override on the command line: `make test-e2e PFG_BASE_URL=http://pfg.wmp`,
+`make serve PORT=8080`, `make serve PHP=...`.
+
+Recipes run under the **platform default shell** — `cmd.exe` on Windows, `/bin/sh` in CI.
+Do not pin `SHELL` to a Git-for-Windows `sh.exe`: MSYS rewrites absolute Windows paths and
+the Git coreutils are not on `PATH`. Keep every recipe to one command per line, using
+`cd <dir> && <cmd>` where a target must run inside a sub-project. CI calls the same targets,
+so a change here must keep working on Ubuntu.
+
 ### Running PHP Scripts (PowerShell)
 ```powershell
 & 'd:\wamp64\bin\php\php7.4.9\php.exe' .\ogame\calc\flight.php
@@ -19,8 +45,7 @@ This repo contains multiple calculators (production, cost, lifeform cost, flight
 
 ### Unit Tests (node:test, no dependencies)
 ```powershell
-cd unit-tests
-npm test
+make test-unit          # or: cd unit-tests; npm test
 ```
 `*-core.js` modules are DOM-free, so their formulas are tested in Node instead of a browser
 (~0.1 ms per test against ~360 ms through Playwright). `load.js` runs the classic browser
@@ -36,19 +61,15 @@ keep tests whose assertions are plain arithmetic.
 
 ### Playwright E2E Tests
 ```powershell
-cd playwright-tests
-npm install
-npx playwright install
+make install                          # npm ci + browsers, first run only
+make test-e2e                         # whole suite
+make test-one spec=graviton           # single calculator
+make test-e2e-ui                      # interactive mode
+make report                           # view the HTML report
 
-# Set base URL (defaults to http://localhost:8000)
-set PFG_BASE_URL=http://pfg.wmp
-
-# Run tests
-npx playwright test --reporter=list
-npx playwright test graviton    # Single calculator
-npx playwright test --ui        # Interactive mode
-npx playwright show-report      # View HTML report
+make test-e2e PFG_BASE_URL=http://pfg.wmp   # defaults to http://localhost:8000
 ```
+`PFG_BASE_URL` is the name `playwright.config.js` reads — not `PLAYWRIGHT_BASE_URL`.
 
 Specs import `test`/`expect` from `./base`, not from `@playwright/test` — the fixture there
 caches the jsdelivr Bootstrap assets in `.cdn-cache/`, without which every test re-downloads
@@ -59,12 +80,14 @@ them over the network. New spec files must use the same import. Video recording 
 - Configure WAMP virtual host pointing to `www/` directory (see README.md)
 - Add `127.0.0.1 pfg.wmp` to hosts file
 - Browse to `http://pfg.wmp` for full-site testing
+- Or skip WAMP entirely: `make serve` runs the built-in PHP server on `http://localhost:8000`,
+  which is the default the tests expect
 
 ## Git & Shell
 - Commit subjects follow **Conventional Commits**: `<type>(<scope>): <subject>` in English, imperative mood, lowercase after the colon, no trailing period. Types: `feat`, `fix`, `refactor`, `style`, `test`, `docs`, `chore`. Scope is the calculator or area (`flight`, `moon`, `lfcosts`, `production`, `claude`). Commits before 2026-07-22 use the older plain-sentence style — ignore them and follow this rule.
 - Commit messages: write to a temp file and use `git commit -F`, or avoid quotes/backticks entirely. Do not use here-strings in PowerShell for commit bodies.
 - Keep unrelated pre-existing changes in a separate commit.
-- Run both suites before committing (`unit-tests` then Playwright); new tests go in the existing file for that calculator, not a new file.
+- Run both suites before committing — `make test`, or `make check` to include translation validation; new tests go in the existing file for that calculator, not a new file.
 
 ## Architecture
 

@@ -9,7 +9,8 @@ jobs:
   test:
     runs-on: ubuntu-latest
     env:
-      PLAYWRIGHT_BASE_URL: 'http://localhost:8000'
+      # Must be PFG_BASE_URL - that is the name playwright.config.js reads.
+      PFG_BASE_URL: 'http://localhost:8000'
       DB_HOST: '127.0.0.1'
       DB_USER: 'pfg_usr'
       DB_PASS: 'secret'
@@ -70,7 +71,7 @@ jobs:
           done
 
           echo "Importing schema.sql"
-          mysql -h "$DB_HOST" -u "$DB_USER" -p"$DB_PASS" "$DB_NAME" < schema.sql
+          make db-seed
 
       # -------------------------------------------------------------
       # Start PHP built-in server (no router needed)
@@ -110,24 +111,18 @@ jobs:
         with:
           node-version: 24
 
-      - name: Install dependencies
-        working-directory: playwright-tests
-        run: |
-          npm ci
-
-      - name: Install browsers
-        working-directory: playwright-tests
-        run: |
-          npx playwright install --with-deps
+      - name: Install dependencies and browsers
+        run: make install PW_DEPS=--with-deps
 
       # -------------------------------------------------------------
-      # Run Playwright tests
+      # Run tests - same make targets developers run locally
       # -------------------------------------------------------------
-      - name: Run tests
-        working-directory: playwright-tests
-        run: |
-          echo "Running tests..."
-          npx playwright test
+      - name: Run unit tests
+        run: make test-unit
+
+      # list for readable logs, html so the upload step below has an artifact
+      - name: Run Playwright tests
+        run: make test-e2e PW_REPORTER=list,html
 
       # -------------------------------------------------------------
       # Upload Playwright report (always)

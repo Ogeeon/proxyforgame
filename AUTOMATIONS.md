@@ -12,6 +12,16 @@ The automation system provides:
 
 ## Available Scripts
 
+Everything here is also reachable through `make` from the repo root, which additionally
+covers the test suites, the local PHP server and the database seed. Run `make help` for the
+full list; the npm scripts below remain valid and are what the make targets call.
+
+```bash
+make help          # list all targets
+make check         # translation validation + both test suites
+make audit         # code quality + test coverage + DB schema reports
+```
+
 ```bash
 # Translation Management
 npm run validate-translations       # Validate all locale files
