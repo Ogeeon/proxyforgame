@@ -326,7 +326,7 @@ class FlightOrchestrator {
         const params = this.collector.collectParams(this._state());
         const ships = this.calc.buildShipsData(params.driveLevels, params.spCargohold);
         const counts = this.collector.collectShipCounts();
-        const minSpeed = this.calc.getMinSpeed(ships, counts, params);
+        const minSpeed = this._effectiveMinSpeed(ships, counts, params);
         const departure = this.opts.prm.departure;
 
         const found = this._searchSavePoints(
@@ -709,7 +709,9 @@ class FlightOrchestrator {
         const counts = this.collector.collectShipCounts();
         const route = this.collector.collectRoute();
         const distance = this.calc.getDistance(route.departure.coords, route.destination.coords, params).distance;
-        const minSpeed = this.calc.getMinSpeed(ships, counts, params);
+        // Must match the row the user clicked, so it has to honour the manual
+        // speed override exactly like the flight-times table does.
+        const minSpeed = this._effectiveMinSpeed(ships, counts, params);
         const percentText = button.closest('tr').children[0].textContent;
         const percent = parseInt(percentText, 10);
         const fleetSpeed = this.calc.fleetSpeedFor(params.missionType, params);
@@ -737,7 +739,9 @@ class FlightOrchestrator {
         const ships = this.calc.buildShipsData(params.driveLevels, params.spCargohold);
         const counts = this.collector.collectShipCounts();
         const distance = this.calc.getDistance(this.opts.prm.departure, point, params).distance;
-        const minSpeed = this.calc.getMinSpeed(ships, counts, params);
+        // The save point was found with the overridden speed, so the leg it seeds
+        // has to be built the same way.
+        const minSpeed = this._effectiveMinSpeed(ships, counts, params);
         const fleetSpeed = this.calc.fleetSpeedFor(params.missionType, params);
         const duration = this.calc.getFlightDuration(minSpeed, distance, speed, fleetSpeed);
 

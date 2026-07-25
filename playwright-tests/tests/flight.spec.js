@@ -965,6 +965,30 @@ test.describe('Flight Calculator - Results Table', () => {
         expect(await page.evaluate(() => options.isSpeedOvr)).toBe(true);
     });
 
+    test('the take-to-calc button carries over the overridden speed', async ({ page }) => {
+        await openParams(page);
+        await page.locator('#ovr-speed-cb').check();
+        await page.locator('#ovr-speed-t').fill('100000'); // far above the large cargo
+        await openFlightTimesTab(page);
+        await page.evaluate(() => updateNumbers());
+
+        await speedRows(page).nth(0).locator('.button-taketocalc').click();
+
+        const seconds = await page.evaluate(() => {
+            const orch = window.flightOrchestrator;
+            const prm = orch.collector.collectParams(orch._state());
+            const uni = orch.calc.fleetSpeedFor(prm.missionType, prm);
+            const dist = getDistance(options.prm.departure, options.prm.destination);
+            return {
+                taken: options.prm.flightData[0],
+                overridden: getFlightDuration(100000, dist, 100, uni),
+                bySlowestShip: getFlightDuration(getMinSpeed(), dist, 100, uni),
+            };
+        });
+        expect(seconds.taken).toBe(seconds.overridden);
+        expect(seconds.taken).not.toBe(seconds.bySlowestShip);
+    });
+
     test('an override of zero falls back to 10000', async ({ page }) => {
         await openParams(page);
         // The field starts disabled, so enable it before clearing the value
@@ -1134,6 +1158,15 @@ function fillSavePoints(page, { roundTripHours = 4, tolerance = '02:00', fleet =
 const validateSP = (page) => page.evaluate(() => validateSPParams());
 const warningText = (page) => page.locator('#warning-message').innerText();
 
+/** Turns the manual speed override on; the field lives on the flight-times tab. */
+async function enableSpeedOverride(page, speed) {
+    await openFlightTimesTab(page);
+    await openParams(page);
+    await page.locator('#ovr-speed-cb').check();
+    await page.locator('#ovr-speed-t').fill(String(speed));
+    await page.locator('#tabtag2').click();
+}
+
 test.describe('Flight Calculator - Save Points', () => {
     test.beforeEach(async ({ context, page }) => {
         await context.addInitScript(() => {
@@ -1227,6 +1260,35 @@ test.describe('Flight Calculator - Save Points', () => {
 
         await page.locator('#calculate-savepoints').click();
         expect(await page.locator('#savepoints-systems tr').count()).toBe(first);
+    });
+
+    test('the search is run at the overridden speed', async ({ page }) => {
+        await fillSavePoints(page);
+        await page.locator('#calculate-savepoints').click();
+        const bySlowestShip = await page.locator('#savepoints-systems tr td:first-child').allInnerTexts();
+
+        await enableSpeedOverride(page, 100000); // far above the large cargo
+        await fillSavePoints(page);
+        await page.locator('#calculate-savepoints').click();
+        const overridden = await page.locator('#savepoints-systems tr td:first-child').allInnerTexts();
+
+        // A much faster fleet reaches other systems in the same round trip
+        expect(overridden.length).toBeGreaterThan(0);
+        expect(overridden).not.toEqual(bySlowestShip);
+    });
+
+    test('a save point picked at the overridden speed seeds matching legs', async ({ page }) => {
+        await enableSpeedOverride(page, 100000);
+        await fillSavePoints(page, { roundTripHours: 4, tolerance: '02:00' });
+        await page.locator('#calculate-savepoints').click();
+
+        await page.locator('#savepoints-systems tr').nth(1).locator('a').click();
+
+        // The point was found because there and back fits the 4h round trip within
+        // the 2h tolerance, so each leg must land in the same window
+        const legs = await page.evaluate(() => options.prm.flightData);
+        expect(legs[0]).toBeGreaterThan(4 * 3600 / 2 - 3600);
+        expect(legs[0]).toBeLessThan(4 * 3600 / 2 + 3600);
     });
 
     test('picking a save point sends it to the flight tab', async ({ page }) => {
