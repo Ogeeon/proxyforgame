@@ -374,12 +374,14 @@ function strPad(input, pad_length, pad_string, pad_type) {
 
 function dayOfMonth(day, month, year) {
 	var days = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
-	if (year % 4 == 0)
-		days[1] = 29;
-	if (day > days[month-1])
+	if (month < 1 || month > 12)
 		return false;
-	else
-		return true;
+	var isLeap = (year % 400 === 0) || (year % 4 === 0 && year % 100 !== 0);
+	if (isLeap)
+		days[1] = 29;
+	if (day < 1 || day > days[month-1])
+		return false;
+	return true;
 }
 
 /**
@@ -392,8 +394,8 @@ function parseDate(str, template) {
 	// Поскольку у нас в inputmask используются только два определения даты - 'm.d.y H:s:s' и 'd.m.y H:s:s',
 	// достаточно сравнить переданный шаблон с эталоном и определиться, как парсить дату
 	// Метод inputmask('unmaskedvalue') возвращает содержимое то в виде "ddmmyyyyhhmmss", то "dd.mm.yyyy hh:mm:ss". Регекспы надо использовать соответствующие
-	var rgx1 = /(\d{2})(\d{2})(\d{4})(\d{2})(\d{2})(\d{2})/;
-	var rgx2 = /(\d{2})\.(\d{2})\.(\d{4})\s(\d{2}):(\d{2}):(\d{2})/;
+	var rgx1 = /^(\d{2})(\d{2})(\d{4})(\d{2})(\d{2})(\d{2})$/;
+	var rgx2 = /^(\d{2})\.(\d{2})\.(\d{4})\s(\d{2}):(\d{2}):(\d{2})$/;
 	var pts;
 	if (str.search(/\./)>0) {
 		pts = str.match(rgx2);
