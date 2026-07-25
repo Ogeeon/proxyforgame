@@ -104,6 +104,32 @@
   text-align: center;
 }
 
+/* Four columns — the last one a full return date — have to fit in a third of
+   the 1000px panel, so these tables get a smaller face and tighter cells than
+   the other .lined tables. The headers are the abbreviated locale strings for
+   the same reason (see flight.tpl). */
+#savepoints-galaxies,
+#savepoints-systems,
+#savepoints-planets {
+  font-size: 0.85em;
+}
+
+#savepoints-galaxies th,
+#savepoints-systems th,
+#savepoints-planets th,
+#savepoints-galaxies td,
+#savepoints-systems td,
+#savepoints-planets td {
+  padding: 2px 3px;
+}
+
+/* The return moment is the widest cell, so it is also the one that gives way:
+   a seven-digit fuel bill or a wordy locale pushes the date onto its own line
+   instead of pushing the whole table out of the panel. */
+.savepoint-return {
+  white-space: normal;
+}
+
 /* --- Small round icon buttons for the universe / fleet / api controls --- */
 .uni-control-btn {
   width: 30px;

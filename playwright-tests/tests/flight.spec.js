@@ -1246,6 +1246,46 @@ test.describe('Flight Calculator - Save Points', () => {
         await expect(firstCell).toHaveText(/^\d+%$/);
     });
 
+    test('every candidate shows the forecast return moment', async ({ page }) => {
+        await fillSavePoints(page);
+        await page.locator('#calculate-savepoints').click();
+
+        // Read the cells through parseDate so the check survives both date formats
+        const offsets = await page.evaluate(() => {
+            const start = parseDate(document.getElementById('save-start-datetime').value, options.datetimeFormat);
+            const seconds = [];
+            ['savepoints-galaxies', 'savepoints-systems', 'savepoints-planets'].forEach((id) => {
+                document.querySelectorAll(`#${id} .savepoint-return`).forEach((td) => {
+                    seconds.push((parseDate(td.textContent, options.datetimeFormat) - start) / 1000);
+                });
+            });
+            return seconds;
+        });
+
+        expect(offsets.length).toBeGreaterThan(0);
+        // A 4h round trip searched with a 2h tolerance: home between 14:00 and 18:00
+        for (const offset of offsets) {
+            expect(offset).toBeGreaterThan(2 * 3600);
+            expect(offset).toBeLessThan(6 * 3600);
+        }
+    });
+
+    test('the shown return moment matches the legs the point seeds', async ({ page }) => {
+        await fillSavePoints(page);
+        await page.locator('#calculate-savepoints').click();
+
+        const row = page.locator('#savepoints-systems tr').nth(1);
+        const shown = await row.locator('.savepoint-return').innerText();
+        await row.locator('a').click();
+
+        const expected = await page.evaluate(() => {
+            const start = parseDate(document.getElementById('save-start-datetime').value, options.datetimeFormat);
+            const roundTrip = options.prm.flightData.reduce((sum, leg) => sum + leg, 0);
+            return getDateStr(start + roundTrip * 1000, options.datetimeFormat);
+        });
+        expect(shown).toBe(expected);
+    });
+
     test('results are listed slowest first', async ({ page }) => {
         await fillSavePoints(page);
         await page.locator('#calculate-savepoints').click();

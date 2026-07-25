@@ -529,10 +529,13 @@
               <div class="border rounded p-2 text-center">
                 <span><?= $l[$spt[0]] ?></span>
                 <table id="<?= $spt[1] ?>" class="lined" cellpadding="0" cellspacing="1" border="0" width="100%">
+                  <!-- Four columns share a third of the panel, so the headers
+                       are the abbreviated ones. -->
                   <tr>
-                    <th><?= $l['speed'] ?></th>
-                    <th><?= $l['coords'] ?></th>
+                    <th><?= $l['speed-short'] ?></th>
+                    <th><?= $l['coords-short'] ?></th>
                     <th><?= $l['deuterium-short'] ?></th>
+                    <th><?= $l['return'] ?></th>
                   </tr>
                 </table>
               </div>

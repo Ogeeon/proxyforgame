@@ -8,7 +8,7 @@
  * the renderer only paints them.
  *
  * Relies on the global formatting helpers from utils.js (numToOGame,
- * timespanToShortenedString) and on the dom-utils fade helpers, exactly as the
+ * timespanToShortenedString, getDateStr) and on the dom-utils fade helpers, exactly as the
  * other Bootstrap-migrated calculators do.
  */
 class FlightRenderer {
@@ -165,7 +165,7 @@ class FlightRenderer {
      * target and departure time ride along as data attributes.
      *
      * @param {string} tableId one of the savepoints-* tables
-     * @param {Array<{speedPercent: number, coordLabel: string, cost: number, point: number[]}>} rows
+     * @param {Array<{speedPercent: number, coordLabel: string, cost: number, returnAt: number, point: number[]}>} rows
      * @param {string} startDT departure moment, passed through to the link
      */
     renderSavePoints(tableId, rows, startDT) {
@@ -181,6 +181,7 @@ class FlightRenderer {
                 `<td><a href="#" class="save-point-link" data-point="${row.point.join(',')}"` +
                 ` data-start="${this._escapeAttr(startDT)}" data-speed="${row.speedPercent}">${row.coordLabel}</a></td>` +
                 `<td>${numToOGame(row.cost)}</td>` +
+                `<td class="savepoint-return">${getDateStr(row.returnAt, this.opts.datetimeFormat)}</td>` +
                 '</tr>');
         });
     }

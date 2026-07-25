@@ -330,7 +330,8 @@ class FlightOrchestrator {
         const departure = this.opts.prm.departure;
 
         const found = this._searchSavePoints(
-            { params, ships, counts, minSpeed, departure, target, tolerance }, form.startDT);
+            { params, ships, counts, minSpeed, departure, target, tolerance, startAt: startDTValue },
+            form.startDT);
         if (!found) {
             this.renderer.renderWarning(this.opts.msgNoSavepointsFound);
         }
@@ -339,7 +340,7 @@ class FlightOrchestrator {
 
     /** Sweep galaxies, systems and planets for arrival times within tolerance. */
     _searchSavePoints(ctx, startDT) {
-        const { params, ships, counts, minSpeed, departure, target, tolerance } = ctx;
+        const { params, ships, counts, minSpeed, departure, target, tolerance, startAt } = ctx;
         const coordAxes = [
             { limit: params.numberOfGalaxies, table: 'savepoints-galaxies', fmt: (v) => `${v}:xxx:xx`, circular: params.circularGalaxies },
             { limit: params.numberOfSystems, table: 'savepoints-systems', fmt: (v) => `${departure[0]}:${v}:xx`, circular: params.circularSystems },
@@ -370,7 +371,10 @@ class FlightOrchestrator {
                         continue;
                     }
                     const cost = this.calc.getDeutConsumption(ships, counts, distance, duration, params.fleetSpeedPeaceful, params);
-                    this._collectSavePointRows(rows, axisIndex, delta, departure, params, axis, percent, cost);
+                    // There and back again: the fleet is home after twice the one-way flight.
+                    const returnAt = startAt + duration * 2000;
+                    this._collectSavePointRows(rows, axisIndex, delta, departure, axis,
+                        { percent, cost, returnAt });
                 }
             }
             if (rows.length > 0) {
@@ -397,28 +401,38 @@ class FlightOrchestrator {
         return this.calc.getDistance(departure, destination, params).distance;
     }
 
-    /** Build the one or two save-point rows a matching delta produces. */
-    _collectSavePointRows(rows, axisIndex, delta, departure, params, axis, percent, cost) {
+    /**
+     * Build the one or two save-point rows a matching delta produces.
+     * @param {{percent: number, cost: number, returnAt: number}} match the speed
+     *        step that fits the tolerance, its fuel bill and the moment the
+     *        fleet lands back home (epoch ms).
+     */
+    _collectSavePointRows(rows, axisIndex, delta, departure, axis, match) {
+        const { percent, cost, returnAt } = match;
         const point = [...departure];
         const below = departure[axisIndex] - delta;
         const above = departure[axisIndex] + delta;
+        const addRow = (coord) => {
+            point[axisIndex] = coord;
+            rows.push({
+                speedPercent: percent,
+                coordLabel: axis.fmt(coord),
+                cost,
+                returnAt,
+                point: [...point],
+            });
+        };
 
         if (below > 0) {
-            point[axisIndex] = below;
-            rows.push({ speedPercent: percent, coordLabel: axis.fmt(below), cost, point: [...point] });
+            addRow(below);
         } else if (axis.circular) {
-            const wrapped = axis.limit + 1 - delta;
-            point[axisIndex] = wrapped;
-            rows.push({ speedPercent: percent, coordLabel: axis.fmt(wrapped), cost, point: [...point] });
+            addRow(axis.limit + 1 - delta);
         }
 
         if (above <= axis.limit) {
-            point[axisIndex] = above;
-            rows.push({ speedPercent: percent, coordLabel: axis.fmt(above), cost, point: [...point] });
+            addRow(above);
         } else if (axis.circular) {
-            const wrapped = delta - 1;
-            point[axisIndex] = wrapped;
-            rows.push({ speedPercent: percent, coordLabel: axis.fmt(wrapped), cost, point: [...point] });
+            addRow(delta - 1);
         }
     }
 
