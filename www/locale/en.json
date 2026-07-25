@@ -502,6 +502,8 @@
     "sp-cargohold": "Espionage Probes cargo capacity",
     "deut-cons-reduction": "General's reduction of deuterium consumption",
     "ships": "Ships",
+    "clear-ships": "Clear",
+    "clear-ships-hint": "Reset all ship counts to zero",
     "lf-bonuses": "Lifeforms general bonuses (%)",
     "lf-bonus-speed-all": "Speed of all ships",
     "lf-bonus-speed-civil": "Speed of civilian ships",

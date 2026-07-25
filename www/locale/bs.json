@@ -502,6 +502,8 @@
     "sp-cargohold": "Kapacitet tereta za Sonda za špijunažu",
     "deut-cons-reduction": "Generalno smanjenje potrošnje deuterija",
     "ships": "Brodovi",
+    "clear-ships": "Očisti",
+    "clear-ships-hint": "Postavi broj svih brodova na nulu",
     "lf-bonuses": "Opći bonusi oblika života (%)",
     "lf-bonus-speed-all": "Brzina svih brodova",
     "lf-bonus-speed-civil": "Brzina civilnih brodova",

@@ -502,6 +502,8 @@
     "sp-cargohold": "Capacidade de carga das Sondas de Espionagem",
     "deut-cons-reduction": "Redução do consumo de deutério por parte do General",
     "ships": "Navios",
+    "clear-ships": "Limpar",
+    "clear-ships-hint": "Zerar a quantidade de todas as naves",
     "lf-bonuses": "Prémios gerais de vida (%)",
     "lf-bonus-speed-all": "Velocidade de todos os navios",
     "lf-bonus-speed-civil": "Velocidade dos navios civis",

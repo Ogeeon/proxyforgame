@@ -502,6 +502,8 @@
     "sp-cargohold": "Spionagesonde Ladekapazität",
     "deut-cons-reduction": "Reduzierung des Deuterium durch den General",
     "ships": "Schiffe",
+    "clear-ships": "Leeren",
+    "clear-ships-hint": "Alle Schiffsanzahlen auf null setzen",
     "lf-bonuses": "Allgemeine Boni der Lebensformen (%)",
     "lf-bonus-speed-all": "Geschwindigkeit aller Schiffe",
     "lf-bonus-speed-civil": "Geschwindigkeit von zivilen Schiffen",

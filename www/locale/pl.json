@@ -502,6 +502,8 @@
     "sp-cargohold": "Pojemność ładunkowa Sonda szpiegowska",
     "deut-cons-reduction": "Zmniejszenie zużycia deuteru przez generała",
     "ships": "Statki",
+    "clear-ships": "Wyczyść",
+    "clear-ships-hint": "Wyzeruj liczbę wszystkich statków",
     "lf-bonuses": "Formy życia ogólne premie (%)",
     "lf-bonus-speed-all": "Prędkość wszystkich statków",
     "lf-bonus-speed-civil": "Prędkość statków cywilnych",

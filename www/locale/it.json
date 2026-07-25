@@ -502,6 +502,8 @@
     "sp-cargohold": "Capacità di carico delle Sonda spia",
     "deut-cons-reduction": "Riduzione del consumo di deuterio da parte del Generale",
     "ships": "Navi",
+    "clear-ships": "Cancella",
+    "clear-ships-hint": "Azzera il numero di tutte le navi",
     "lf-bonuses": "Bonus generali delle forme di vita (%)",
     "lf-bonus-speed-all": "Velocità di tutte le navi",
     "lf-bonus-speed-civil": "Velocità delle navi civili",

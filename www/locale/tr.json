@@ -502,6 +502,8 @@
     "sp-cargohold": "Casusluk Araştırması kargo kapasitesi",
     "deut-cons-reduction": "General'in döteryum tüketimini azaltması",
     "ships": "Gemiler",
+    "clear-ships": "Temizle",
+    "clear-ships-hint": "Tüm gemi sayılarını sıfırla",
     "lf-bonuses": "Yaşam formları genel bonusları (%)",
     "lf-bonus-speed-all": "Tüm gemilerin hızı",
     "lf-bonus-speed-civil": "Sivil gemilerin hızı",

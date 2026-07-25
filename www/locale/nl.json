@@ -502,6 +502,8 @@
     "sp-cargohold": "Spionagesondes laadcapaciteit",
     "deut-cons-reduction": "Algemene vermindering van deuteriumverbruik",
     "ships": "Schepen",
+    "clear-ships": "Wissen",
+    "clear-ships-hint": "Zet het aantal van alle schepen op nul",
     "lf-bonuses": "Levensvormen algemene bonussen (%)",
     "lf-bonus-speed-all": "Snelheid van alle schepen",
     "lf-bonus-speed-civil": "Snelheid van civiele schepen",

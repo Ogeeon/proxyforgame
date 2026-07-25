@@ -501,6 +501,8 @@
     "sp-cargohold": "Kapacita nákladu Špionážnych sonda",
     "deut-cons-reduction": "Zníženie spotreby deutéria generálom",
     "ships": "Lode",
+    "clear-ships": "Vymazať",
+    "clear-ships-hint": "Vynulovať počet všetkých lodí",
     "lf-bonuses": "Všeobecné bonusy foriem života (%)",
     "lf-bonus-speed-all": "Rýchlosť všetkých lodí",
     "lf-bonus-speed-civil": "Rýchlosť civilných lodí",

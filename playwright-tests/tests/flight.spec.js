@@ -918,6 +918,40 @@ test.describe('Flight Calculator - Results Table', () => {
         await expect(cells.nth(2)).toBeEmpty();
     });
 
+    test('the clear button zeroes every ship count', async ({ page }) => {
+        await setFleet(page, { 'large-cargo': 100, 'light-fighter': 7, 'esp-probe': 3 });
+        await page.locator('#clear-ships').click();
+
+        for (const id of ['large-cargo', 'light-fighter', 'esp-probe']) {
+            await expect(page.locator(`#${id}`)).toHaveValue('0');
+        }
+    });
+
+    test('clearing the ships blanks the table and hides the take-to-calc buttons', async ({ page }) => {
+        await openShips(page);
+        await page.locator('#clear-ships').click();
+
+        const row = speedRows(page).nth(0);
+        const cells = row.locator('td');
+        await expect(cells.nth(1)).toBeEmpty();
+        await expect(cells.nth(2)).toBeEmpty();
+        await expect(cells.nth(3)).toBeEmpty();
+        await expect(row.locator('.button-taketocalc')).toBeHidden();
+    });
+
+    test('a speed override does not fill the table for an empty fleet', async ({ page }) => {
+        await openParams(page);
+        await page.locator('#ovr-speed-cb').check();
+        await page.locator('#ovr-speed-t').fill('100000');
+        await openShips(page);
+        await page.locator('#clear-ships').click();
+
+        const cells = speedRows(page).nth(0).locator('td');
+        await expect(cells.nth(1)).toBeEmpty();
+        await expect(cells.nth(2)).toBeEmpty();
+        await expect(cells.nth(3)).toBeEmpty();
+    });
+
     test('speed override replaces the slowest ship speed', async ({ page }) => {
         await openParams(page);
         const before = await speedRows(page).nth(0).locator('td').nth(1).innerText();

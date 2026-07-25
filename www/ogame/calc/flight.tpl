@@ -377,6 +377,10 @@
                 </table>
               </div>
 
+              <div class="text-end mb-1">
+                <button id="clear-ships" type="button" class="btn btn-sm btn-outline-secondary" title="<?= $l['clear-ships-hint'] ?>"><i class="bi bi-eraser"></i> <?= $l['clear-ships'] ?></button>
+              </div>
+
               <table class="mx-auto">
                 <?php
                   $shipRows = [

@@ -194,7 +194,11 @@ class FlightOrchestrator {
             : emptySystems;
         this.renderer.renderEmptySystems({ count: emptyCount, visible: params.fleetIgnoreEmptySystems });
 
-        const minSpeed = this._effectiveMinSpeed(ships, counts, params);
+        // An empty fleet has nothing to fly, so there is no duration, fuel or
+        // cargo to show — not even when the manual speed override is on.
+        const minSpeed = counts.some((count) => count > 0)
+            ? this._effectiveMinSpeed(ships, counts, params)
+            : Infinity;
         if (minSpeed === Infinity) {
             this.renderer.clearFlightTimes(params.playerClass);
             this.opts.save();
@@ -488,6 +492,12 @@ class FlightOrchestrator {
 
     saveFleet(key) {
         saveToCookie(key, { savedShips: this.collector.collectShipCounts() });
+    }
+
+    /** Zero every ship count; recalc then empties the flight-times table. */
+    clearShips() {
+        SHIPS_BASE.forEach((ship) => setVal(`#${ship[0]}`, 0));
+        this.recalc();
     }
 
     loadUniverse(key) {
@@ -1223,6 +1233,7 @@ class FlightOrchestrator {
             }
         };
         on('reset', 'click', () => this.resetParams());
+        on('clear-ships', 'click', () => this.clearShips());
         on('set-departure-now', 'click', () => this.setDepartureNow());
         on('set-departure-zero', 'click', () => this.setDepartureZero());
         on('set-save-departure-now', 'click', () => this.setSaveDepartureNow());
