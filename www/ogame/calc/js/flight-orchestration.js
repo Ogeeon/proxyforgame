@@ -1223,7 +1223,7 @@ class FlightOrchestrator {
     }
 
     _setInputConstraints() {
-        document.querySelectorAll('#lf-bonuses-accordion input[type=text]').forEach((el) => {
+        document.querySelectorAll('#lf-ships-bonuses input[type=text]').forEach((el) => {
             el._constrains = { min: 0, max: Infinity, def: 0, allowFloat: true, allowNegative: false };
         });
         ['lf-mechan-general-enh', 'lf-rocktal-collector-enh'].forEach((id) => {

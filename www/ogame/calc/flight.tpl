@@ -163,184 +163,219 @@
                 </table>
               </div>
 
-              <table class="mx-auto">
-                <tr>
-                  <td><label><?= $l['class'] ?>:</label></td>
-                  <td class="px-2"><input id="class-0" type="radio" name="class" value="0" class="form-check-input"/> <label for="class-0"><?= $l['class-collector'] ?></label></td>
-                  <td class="px-2"><input id="class-1" type="radio" name="class" value="1" class="form-check-input"/> <label for="class-1"><?= $l['class-general'] ?></label></td>
-                  <td class="px-2"><input id="class-2" type="radio" name="class" value="2" class="form-check-input"/> <label for="class-2"><?= $l['class-discoverer'] ?></label></td>
-                  <td colspan="3">
-                    <input id="trader-bonus" type="checkbox" name="trader-bonus" class="form-check-input"/> <label for="trader-bonus"><?= $l['trader-bonus'] ?></label>
-                  </td>
-                </tr>
-                <tr>
-                  <td><label for="cmb-drive"><?= $l['cmb-drive'] ?></label></td>
-                  <td><input id="cmb-drive" type="text" name="cmb-drive" class="form-control form-control-sm d-inline-block level-input ui-input-margin" value="0" /></td>
-                  <td><label for="imp-drive"><?= $l['imp-drive'] ?></label></td>
-                  <td><input id="imp-drive" type="text" name="imp-drive" class="form-control form-control-sm d-inline-block level-input ui-input-margin" value="0" /></td>
-                  <td><label for="hyp-drive"><?= $l['hyp-drive'] ?></label></td>
-                  <td><input id="hyp-drive" type="text" name="hyp-drive" class="form-control form-control-sm d-inline-block level-input ui-input-margin" value="0" /></td>
-                  <td><label for="hypertech-lvl"><?= $l['hyper-tech'] ?>&nbsp;</label></td>
-                  <td><input id="hypertech-lvl" type="text" name="hypertech-lvl" class="form-control form-control-sm d-inline-block coord-input-small ui-input-margin" value="0" /></td>
-                </tr>
-              </table>
+              <ul class="nav nav-tabs nav-tabs-sm" id="paramTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                  <button class="nav-link active" id="param-common-tab" data-bs-toggle="tab" data-bs-target="#param-common" type="button" role="tab"><?= $l['param-tab-common'] ?></button>
+                </li>
+                <li class="nav-item" role="presentation">
+                  <button class="nav-link" id="param-universe-tab" data-bs-toggle="tab" data-bs-target="#param-universe" type="button" role="tab"><?= $l['universe'] ?></button>
+                </li>
+                <li class="nav-item" role="presentation">
+                  <button class="nav-link" id="param-lifeforms-tab" data-bs-toggle="tab" data-bs-target="#param-lifeforms" type="button" role="tab"><?= $l['lifeforms'] ?></button>
+                </li>
+              </ul>
 
-              <table class="mx-auto">
-                <tr>
-                  <td><label for="departure-g"><?= $l['departure-point'] ?>&nbsp;</label></td>
-                  <td class="text-nowrap">
-                    <input id="departure-g" type="text" name="departure-g" class="form-control form-control-sm d-inline-block coord-input-small ui-input-margin" value="1" alt="<?= $l['departure-point'] ?>-<?= $l['galaxy'] ?>" />:
-                    <input id="departure-s" type="text" name="departure-s" class="form-control form-control-sm d-inline-block coord-input ui-input-margin" value="1" alt="<?= $l['departure-point'] ?>-<?= $l['system'] ?>" />:
-                    <input id="departure-p" type="text" name="departure-p" class="form-control form-control-sm d-inline-block coord-input-small ui-input-margin" value="1" alt="<?= $l['departure-point'] ?>-<?= $l['planet'] ?>" />
-                  </td>
-                  <td style="width: 30px;">&nbsp;</td>
-                  <td><label for="country"><?= $l['country'] ?>&nbsp;</label></td>
-                  <td>
-                    <select id="country" class="form-select form-select-sm d-inline-block w-auto ui-input-margin">
-                      <option value="--"></option>
-                      <?php if ($countries): ?>
-                      <?php foreach ($countries as $row): ?>
-                        <option value="<?= $row['lang'] ?>"><?= $row['name'] ?></option>
-                      <?php endforeach; ?>
-                      <?php endif; ?>
-                    </select>
-                  </td>
-                  <td><label for="universe"><?= $l['universe'] ?>&nbsp;</label></td>
-                  <td><select id="universe" class="form-select form-select-sm d-inline-block w-auto ui-input-margin"></select></td>
-                </tr>
-              </table>
+              <div class="tab-content" id="paramTabContent">
 
-              <table class="mx-auto">
-                <tr>
-                  <td><?= $l['circular'] ?></td>
-                  <td class="px-2"><input id="circular-systems" type="checkbox" name="circular-systems" class="form-check-input"/> <label for="circular-systems"><abbr data-bs-toggle="tooltip" title="<?= $l['circ-systems-explain'] ?>"><?= $l['circ-systems'] ?></abbr></label></td>
-                  <td class="px-2"><input id="circular-galaxies" type="checkbox" name="circular-galaxies" class="form-check-input"/> <label for="circular-galaxies"><abbr data-bs-toggle="tooltip" title="<?= $l['circ-galaxies-explain'] ?>"><?= $l['circ-galaxies'] ?></abbr></label></td>
-                  <td style="width: 20px;">&nbsp;</td>
-                  <td><label for="systems-num"><?= $l['systems-num'] ?></label></td>
-                  <td><input id="systems-num" type="text" name="systems-num" class="form-control form-control-sm d-inline-block level-input-small ui-input-margin" value="499" /></td>
-                  <td><label for="galaxies-num"><?= $l['galaxies-num'] ?></label></td>
-                  <td><input id="galaxies-num" type="text" name="galaxies-num" class="form-control form-control-sm d-inline-block level-input-small ui-input-margin" value="9" /></td>
-                </tr>
-              </table>
+                <!-- Common: where the fleet departs from and who commands it -->
+                <div id="param-common" class="tab-pane fade show active p-2 pb-0" role="tabpanel">
 
-              <table class="mx-auto">
-                <tr>
-                  <td><label><?= $l['speed-fleet-title'] ?></label></td>
-                  <td style="width: 10px;">&nbsp;</td>
-                  <td><label for="speed-fleet-war"><?= $l['speed-fleet-war'] ?></label></td>
-                  <td>
-                    <select id="speed-fleet-war" name="speed-fleet-war" class="form-select form-select-sm d-inline-block w-auto ui-input-margin">
-                      <?php for($s=1;$s<=10;$s++): ?><option value="<?= $s ?>"<?= $s===1?' selected':'' ?>><?= $s ?></option><?php endfor; ?>
-                    </select>
-                  </td>
-                  <td style="width: 10px;">&nbsp;</td>
-                  <td><label for="speed-fleet-peaceful"><?= $l['speed-fleet-peaceful'] ?></label></td>
-                  <td>
-                    <select id="speed-fleet-peaceful" name="speed-fleet-peaceful" class="form-select form-select-sm d-inline-block w-auto ui-input-margin">
-                      <?php for($s=1;$s<=10;$s++): ?><option value="<?= $s ?>"<?= $s===1?' selected':'' ?>><?= $s ?></option><?php endfor; ?>
-                    </select>
-                  </td>
-                  <td style="width: 10px;">&nbsp;</td>
-                  <td><label for="speed-fleet-holding"><?= $l['speed-fleet-holding'] ?></label></td>
-                  <td>
-                    <select id="speed-fleet-holding" name="speed-fleet-holding" class="form-select form-select-sm d-inline-block w-auto ui-input-margin">
-                      <?php for($s=1;$s<=10;$s++): ?><option value="<?= $s ?>"<?= $s===1?' selected':'' ?>><?= $s ?></option><?php endfor; ?>
-                    </select>
-                  </td>
-                  <td style="width: 30px;">&nbsp;</td>
-                  <td><label for="sp-cargohold"><?= $l['sp-cargohold'] ?>&nbsp;</label></td>
-                  <td><input id="sp-cargohold" type="text" name="sp-cargohold" class="form-control form-control-sm d-inline-block coord-input-small ui-input-margin" value="0" /></td>
-                </tr>
-              </table>
-
-              <table class="mx-auto">
-                <tr>
-                  <td><label for="deut-factor"><?= $l['lf-bonus-deut-consum'] ?></label></td>
-                  <td>
-                    <select id="deut-factor" name="deut-factor" class="form-select form-select-sm d-inline-block w-auto ui-input-margin">
-                      <option value="5">50%</option>
-                      <option value="6">60%</option>
-                      <option value="7">70%</option>
-                      <option value="8">80%</option>
-                      <option value="9">90%</option>
-                      <option value="10" selected>100%</option>
-                    </select>
-                  </td>
-                  <td style="width: 30px;">&nbsp;</td>
-                  <td><?= $l['deut-cons-reduction'] ?>&nbsp;</td>
-                  <td>
-                    <select id="deut-generals-bonus" name="deut-generals-bonus" class="form-select form-select-sm d-inline-block w-auto ui-input-margin">
-                      <option value="25">25%</option>
-                      <option value="36">36%</option>
-                      <option value="50">50%</option>
-                    </select>
-                  </td>
-                </tr>
-              </table>
-
-              <hr>
-              <table id="lf-blanket-ehn-tbl" class="mx-auto">
-                <tr>
-                  <td><label for="lf-mechan-general-enh"><?= $l['generals-character-bonus'] ?></label></td>
-                  <td><input id="lf-mechan-general-enh" type="text" name="lf-mechan-general-enh" class="form-control form-control-sm d-inline-block count-input ui-input-margin" value="0" /></td>
-                  <td><label for="lf-rocktal-collector-enh"><?= $l['collectors-character-bonus'] ?></label></td>
-                  <td><input id="lf-rocktal-collector-enh" type="text" name="lf-rocktal-collector-enh" class="form-control form-control-sm d-inline-block count-input ui-input-margin" value="0" /></td>
-                  <td><i class="bi bi-question-circle" data-bs-toggle="tooltip" title="<?= $l['character-bonus-hint'] ?>"></i></td>
-                </tr>
-              </table>
-
-              <div class="accordion mt-2" id="lf-bonuses-accordion">
-                <div class="accordion-item">
-                  <h2 class="accordion-header">
-                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#accordion-lf-prm"><?= $l['lf-bonuses-ships'] ?></button>
-                  </h2>
-                  <div id="accordion-lf-prm" class="accordion-collapse collapse" data-bs-parent="#lf-bonuses-accordion">
-                    <div class="accordion-body">
-                      <div class="text-end mb-1">
-                        <button id="open-lfbr" type="button" class="btn btn-sm btn-outline-primary"><?= $l['open-lfbr'] ?></button>
+                  <div class="d-flex flex-wrap align-items-center justify-content-center gap-3 mb-2">
+                    <div class="d-flex align-items-center gap-1 text-nowrap">
+                      <label for="departure-g"><?= $l['departure-point'] ?></label>
+                      <span class="text-nowrap">
+                        <input id="departure-g" type="text" name="departure-g" class="form-control form-control-sm d-inline-block coord-input-small" value="1" alt="<?= $l['departure-point'] ?>-<?= $l['galaxy'] ?>" />:<input id="departure-s" type="text" name="departure-s" class="form-control form-control-sm d-inline-block coord-input" value="1" alt="<?= $l['departure-point'] ?>-<?= $l['system'] ?>" />:<input id="departure-p" type="text" name="departure-p" class="form-control form-control-sm d-inline-block coord-input-small" value="1" alt="<?= $l['departure-point'] ?>-<?= $l['planet'] ?>" />
+                      </span>
+                    </div>
+                    <div class="d-flex flex-wrap align-items-center gap-2">
+                      <label class="text-nowrap"><?= $l['class'] ?>:</label>
+                      <div class="d-flex align-items-center gap-1 text-nowrap">
+                        <input id="class-0" type="radio" name="class" value="0" class="form-check-input mt-0"/> <label for="class-0"><?= $l['class-collector'] ?></label>
                       </div>
-                      <table id="lf-ships-bonuses" class="lined mx-auto" cellpadding="0" cellspacing="1" border="0" style="width: 80%;">
-                        <tr>
-                          <th><?= $l['ship-name'] ?></th>
-                          <th><?= $l['speed-increase'] ?></th>
-                          <th><?= $l['cargo-increase'] ?></th>
-                          <th><?= $l['fuel-decrease'] ?></th>
-                        </tr>
-                        <?php
-                          $lfRows = [
-                            ['small-cargo', 202], ['large-cargo', 203], ['light-fighter', 204],
-                            ['heavy-fighter', 205], ['cruiser', 206], ['battleship', 207],
-                            ['colony-ship', 208], ['recycler', 209], ['esp-probe', 210],
-                            ['bomber', 211], ['destroyer', 213], ['death-star', 214],
-                            ['battlecruiser', 215], ['reaper', 218], ['pathfinder', 219],
-                          ];
-                          foreach ($lfRows as $idx => $r):
-                            $name = $r[0]; $tech = $r[1];
-                            $cls = ($idx % 2) === 0 ? 'odd' : 'even';
-                        ?>
-                        <tr class="<?= $cls ?>">
-                          <td><?= $l[$name] ?></td>
-                          <td class="centered"><input type="text" class="form-control form-control-sm d-inline-block no-mp input-7columns centered <?= $tech ?>-speed"/></td>
-                          <td class="centered"><input type="text" class="form-control form-control-sm d-inline-block no-mp input-7columns centered <?= $tech ?>-cargo"/></td>
-                          <td class="centered"><input type="text" class="form-control form-control-sm d-inline-block no-mp input-7columns centered <?= $tech ?>-fuel"/></td>
-                        </tr>
-                        <?php endforeach; ?>
-                      </table>
+                      <div class="d-flex align-items-center gap-1 text-nowrap">
+                        <input id="class-1" type="radio" name="class" value="1" class="form-check-input mt-0"/> <label for="class-1"><?= $l['class-general'] ?></label>
+                      </div>
+                      <div class="d-flex align-items-center gap-1 text-nowrap">
+                        <input id="class-2" type="radio" name="class" value="2" class="form-check-input mt-0"/> <label for="class-2"><?= $l['class-discoverer'] ?></label>
+                      </div>
+                    </div>
+                    <div class="d-flex align-items-center gap-1 text-nowrap">
+                      <input id="trader-bonus" type="checkbox" name="trader-bonus" class="form-check-input mt-0"/> <label for="trader-bonus"><?= $l['trader-bonus'] ?></label>
                     </div>
                   </div>
-                </div>
-              </div>
 
-              <hr>
-              <table id="override-speed-tbl" class="mx-auto">
-                <tr>
-                  <td>
-                    <input id="ovr-speed-cb" type="checkbox" name="override-speed" class="form-check-input"/>
+                  <div class="d-flex flex-wrap align-items-center justify-content-center gap-3 mb-2">
+                    <div class="d-flex align-items-center gap-1 text-nowrap">
+                      <label for="cmb-drive"><?= $l['cmb-drive'] ?></label>
+                      <input id="cmb-drive" type="text" name="cmb-drive" class="form-control form-control-sm d-inline-block level-input" value="0" />
+                    </div>
+                    <div class="d-flex align-items-center gap-1 text-nowrap">
+                      <label for="imp-drive"><?= $l['imp-drive'] ?></label>
+                      <input id="imp-drive" type="text" name="imp-drive" class="form-control form-control-sm d-inline-block level-input" value="0" />
+                    </div>
+                    <div class="d-flex align-items-center gap-1 text-nowrap">
+                      <label for="hyp-drive"><?= $l['hyp-drive'] ?></label>
+                      <input id="hyp-drive" type="text" name="hyp-drive" class="form-control form-control-sm d-inline-block level-input" value="0" />
+                    </div>
+                    <div class="d-flex align-items-center gap-1 text-nowrap">
+                      <label for="hypertech-lvl"><?= $l['hyper-tech'] ?></label>
+                      <input id="hypertech-lvl" type="text" name="hypertech-lvl" class="form-control form-control-sm d-inline-block coord-input-small" value="0" />
+                    </div>
+                  </div>
+
+                  <div class="d-flex flex-wrap align-items-center justify-content-center gap-3 mb-1">
+                    <div class="d-flex align-items-center gap-1 text-nowrap">
+                      <label for="deut-factor"><?= $l['lf-bonus-deut-consum'] ?></label>
+                      <select id="deut-factor" name="deut-factor" class="form-select form-select-sm d-inline-block w-auto">
+                        <option value="5">50%</option>
+                        <option value="6">60%</option>
+                        <option value="7">70%</option>
+                        <option value="8">80%</option>
+                        <option value="9">90%</option>
+                        <option value="10" selected>100%</option>
+                      </select>
+                    </div>
+                    <div class="d-flex align-items-center gap-1 text-nowrap">
+                      <label for="deut-generals-bonus"><?= $l['deut-cons-reduction'] ?></label>
+                      <select id="deut-generals-bonus" name="deut-generals-bonus" class="form-select form-select-sm d-inline-block w-auto">
+                        <option value="25">25%</option>
+                        <option value="36">36%</option>
+                        <option value="50">50%</option>
+                      </select>
+                    </div>
+                  </div>
+
+                </div><!-- /param-common -->
+
+                <!-- Universe: server, topology and the fleet speeds it runs at -->
+                <div id="param-universe" class="tab-pane fade p-2 pb-0" role="tabpanel">
+
+                  <div class="d-flex flex-wrap align-items-center justify-content-center gap-3 mb-2">
+                    <div class="d-flex align-items-center gap-1 text-nowrap">
+                      <label for="country"><?= $l['country'] ?></label>
+                      <select id="country" class="form-select form-select-sm d-inline-block w-auto">
+                        <option value="--"></option>
+                        <?php if ($countries): ?>
+                        <?php foreach ($countries as $row): ?>
+                          <option value="<?= $row['lang'] ?>"><?= $row['name'] ?></option>
+                        <?php endforeach; ?>
+                        <?php endif; ?>
+                      </select>
+                    </div>
+                    <div class="d-flex align-items-center gap-1 text-nowrap">
+                      <label for="universe"><?= $l['universe'] ?></label>
+                      <select id="universe" class="form-select form-select-sm d-inline-block w-auto"></select>
+                    </div>
+                  </div>
+
+                  <div class="d-flex flex-wrap align-items-center justify-content-center gap-3 mb-2">
+                    <div class="d-flex flex-wrap align-items-center gap-2">
+                      <label class="text-nowrap"><?= $l['circular'] ?></label>
+                      <div class="d-flex align-items-center gap-1 text-nowrap">
+                        <input id="circular-systems" type="checkbox" name="circular-systems" class="form-check-input mt-0"/> <label for="circular-systems"><abbr data-bs-toggle="tooltip" title="<?= $l['circ-systems-explain'] ?>"><?= $l['circ-systems'] ?></abbr></label>
+                      </div>
+                      <div class="d-flex align-items-center gap-1 text-nowrap">
+                        <input id="circular-galaxies" type="checkbox" name="circular-galaxies" class="form-check-input mt-0"/> <label for="circular-galaxies"><abbr data-bs-toggle="tooltip" title="<?= $l['circ-galaxies-explain'] ?>"><?= $l['circ-galaxies'] ?></abbr></label>
+                      </div>
+                    </div>
+                    <div class="d-flex align-items-center gap-1 text-nowrap">
+                      <label for="systems-num"><?= $l['systems-num'] ?></label>
+                      <input id="systems-num" type="text" name="systems-num" class="form-control form-control-sm d-inline-block level-input" value="499" />
+                    </div>
+                    <div class="d-flex align-items-center gap-1 text-nowrap">
+                      <label for="galaxies-num"><?= $l['galaxies-num'] ?></label>
+                      <input id="galaxies-num" type="text" name="galaxies-num" class="form-control form-control-sm d-inline-block level-input-small" value="9" />
+                    </div>
+                  </div>
+
+                  <div class="d-flex flex-wrap align-items-center justify-content-center gap-3 mb-2">
+                    <div class="d-flex flex-wrap align-items-center gap-2">
+                      <label class="text-nowrap"><?= $l['speed-fleet-title'] ?></label>
+                      <div class="d-flex align-items-center gap-1 text-nowrap">
+                        <label for="speed-fleet-war"><?= $l['speed-fleet-war'] ?></label>
+                        <select id="speed-fleet-war" name="speed-fleet-war" class="form-select form-select-sm d-inline-block w-auto">
+                          <?php for($s=1;$s<=10;$s++): ?><option value="<?= $s ?>"<?= $s===1?' selected':'' ?>><?= $s ?></option><?php endfor; ?>
+                        </select>
+                      </div>
+                      <div class="d-flex align-items-center gap-1 text-nowrap">
+                        <label for="speed-fleet-peaceful"><?= $l['speed-fleet-peaceful'] ?></label>
+                        <select id="speed-fleet-peaceful" name="speed-fleet-peaceful" class="form-select form-select-sm d-inline-block w-auto">
+                          <?php for($s=1;$s<=10;$s++): ?><option value="<?= $s ?>"<?= $s===1?' selected':'' ?>><?= $s ?></option><?php endfor; ?>
+                        </select>
+                      </div>
+                      <div class="d-flex align-items-center gap-1 text-nowrap">
+                        <label for="speed-fleet-holding"><?= $l['speed-fleet-holding'] ?></label>
+                        <select id="speed-fleet-holding" name="speed-fleet-holding" class="form-select form-select-sm d-inline-block w-auto">
+                          <?php for($s=1;$s<=10;$s++): ?><option value="<?= $s ?>"<?= $s===1?' selected':'' ?>><?= $s ?></option><?php endfor; ?>
+                        </select>
+                      </div>
+                    </div>
+                    <div class="d-flex align-items-center gap-1 text-nowrap">
+                      <label for="sp-cargohold"><?= $l['sp-cargohold'] ?></label>
+                      <input id="sp-cargohold" type="text" name="sp-cargohold" class="form-control form-control-sm d-inline-block coord-input-small" value="0" />
+                    </div>
+                  </div>
+
+                  <hr>
+                  <div class="d-flex flex-wrap align-items-center justify-content-center gap-1 mb-1 text-nowrap">
+                    <input id="ovr-speed-cb" type="checkbox" name="override-speed" class="form-check-input mt-0"/>
                     <label for="ovr-speed-cb"><abbr data-bs-toggle="tooltip" title="<?= $l['ovr-fleet-speed-explain'] ?>"><?= $l['ovr-fleet-speed'] ?></abbr></label>
-                    <input id="ovr-speed-t" type="text" class="form-control form-control-sm d-inline-block input-7columns ui-input-margin" value="10000" />
-                  </td>
-                </tr>
-              </table>
+                    <input id="ovr-speed-t" type="text" class="form-control form-control-sm d-inline-block input-7columns" value="10000" />
+                  </div>
+
+                </div><!-- /param-universe -->
+
+                <!-- Life forms: blanket bonuses and the per-ship bonus table -->
+                <div id="param-lifeforms" class="tab-pane fade p-2 pb-0" role="tabpanel">
+
+                  <div class="d-flex flex-wrap align-items-center justify-content-center gap-3 mb-1">
+                    <div class="d-flex align-items-center gap-1 text-nowrap">
+                      <label for="lf-mechan-general-enh"><?= $l['generals-character-bonus'] ?></label>
+                      <input id="lf-mechan-general-enh" type="text" name="lf-mechan-general-enh" class="form-control form-control-sm d-inline-block count-input" value="0" />
+                    </div>
+                    <div class="d-flex align-items-center gap-1 text-nowrap">
+                      <label for="lf-rocktal-collector-enh"><?= $l['collectors-character-bonus'] ?></label>
+                      <input id="lf-rocktal-collector-enh" type="text" name="lf-rocktal-collector-enh" class="form-control form-control-sm d-inline-block count-input" value="0" />
+                      <i class="bi bi-question-circle" data-bs-toggle="tooltip" title="<?= $l['character-bonus-hint'] ?>"></i>
+                    </div>
+                  </div>
+
+                  <hr>
+                  <div class="d-flex align-items-center justify-content-between mb-1">
+                    <span class="fw-semibold"><?= $l['lf-bonuses-ships'] ?></span>
+                    <button id="open-lfbr" type="button" class="btn btn-sm btn-outline-primary"><?= $l['open-lfbr'] ?></button>
+                  </div>
+                  <table id="lf-ships-bonuses" class="lined mx-auto" cellpadding="0" cellspacing="1" border="0" style="width: 80%;">
+                    <tr>
+                      <th><?= $l['ship-name'] ?></th>
+                      <th><?= $l['speed-increase'] ?></th>
+                      <th><?= $l['cargo-increase'] ?></th>
+                      <th><?= $l['fuel-decrease'] ?></th>
+                    </tr>
+                    <?php
+                      $lfRows = [
+                        ['small-cargo', 202], ['large-cargo', 203], ['light-fighter', 204],
+                        ['heavy-fighter', 205], ['cruiser', 206], ['battleship', 207],
+                        ['colony-ship', 208], ['recycler', 209], ['esp-probe', 210],
+                        ['bomber', 211], ['destroyer', 213], ['death-star', 214],
+                        ['battlecruiser', 215], ['reaper', 218], ['pathfinder', 219],
+                      ];
+                      foreach ($lfRows as $idx => $r):
+                        $name = $r[0]; $tech = $r[1];
+                        $cls = ($idx % 2) === 0 ? 'odd' : 'even';
+                    ?>
+                    <tr class="<?= $cls ?>">
+                      <td><?= $l[$name] ?></td>
+                      <td class="centered"><input type="text" class="form-control form-control-sm d-inline-block no-mp input-7columns centered <?= $tech ?>-speed"/></td>
+                      <td class="centered"><input type="text" class="form-control form-control-sm d-inline-block no-mp input-7columns centered <?= $tech ?>-cargo"/></td>
+                      <td class="centered"><input type="text" class="form-control form-control-sm d-inline-block no-mp input-7columns centered <?= $tech ?>-fuel"/></td>
+                    </tr>
+                    <?php endforeach; ?>
+                  </table>
+
+                </div><!-- /param-lifeforms -->
+
+              </div><!-- /paramTabContent -->
 
             </div>
           </div>
@@ -433,11 +468,9 @@
               </div>
 
               <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
-                <label for="destination-g"><?= $l['destination-point'] ?>&nbsp;</label>
+                <label for="destination-g"><?= $l['destination-point'] ?></label>
                 <span class="text-nowrap">
-                  <input id="destination-g" type="text" name="destination-g" class="form-control form-control-sm d-inline-block coord-input-small ui-input-margin" value="1" alt="<?= $l['destination-point'] ?>-<?= $l['galaxy'] ?>" />:
-                  <input id="destination-s" type="text" name="destination-s" class="form-control form-control-sm d-inline-block coord-input ui-input-margin" value="1" alt="<?= $l['destination-point'] ?>-<?= $l['system'] ?>" />:
-                  <input id="destination-p" type="text" name="destination-p" class="form-control form-control-sm d-inline-block coord-input-small ui-input-margin" value="1" alt="<?= $l['destination-point'] ?>-<?= $l['planet'] ?>" />
+                  <input id="destination-g" type="text" name="destination-g" class="form-control form-control-sm d-inline-block coord-input-small" value="1" alt="<?= $l['destination-point'] ?>-<?= $l['galaxy'] ?>" />:<input id="destination-s" type="text" name="destination-s" class="form-control form-control-sm d-inline-block coord-input" value="1" alt="<?= $l['destination-point'] ?>-<?= $l['system'] ?>" />:<input id="destination-p" type="text" name="destination-p" class="form-control form-control-sm d-inline-block coord-input-small" value="1" alt="<?= $l['destination-point'] ?>-<?= $l['planet'] ?>" />
                 </span>
                 <span class="ms-3"><label><?= $l['distance'] ?></label></span>
                 <label id="distance"></label>

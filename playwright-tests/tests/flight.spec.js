@@ -262,14 +262,35 @@ async function openCollapse(page, target, probe) {
     await expect(page.locator(probe)).toBeVisible();
 }
 
-const openParams = (page) => openCollapse(page, '#accordion-prm', '#cmb-drive');
+/**
+ * Activates the #paramTabs pane that holds `probe`. The three panes hide each
+ * other, so a control is only actionable once its own tab is on top.
+ */
+async function showParamTab(page, probe) {
+    await page.evaluate((sel) => {
+        const pane = document.querySelector(sel).closest('.tab-pane');
+        const btn = document.querySelector(`#paramTabs [data-bs-target="#${pane.id}"]`);
+        bootstrap.Tab.getOrCreateInstance(btn).show();
+    }, probe);
+    await expect(page.locator(probe)).toBeVisible();
+}
+
+/**
+ * Expands the parameters section and brings the tab owning `probe` to the front.
+ * The collapse itself is probed through #universe-name-select, which sits above
+ * the tab strip and is therefore visible whichever tab is active — probing a
+ * tabbed control instead would ask Bootstrap to re-show an already open panel,
+ * and shown.bs.collapse would never fire.
+ */
+async function openParams(page, probe = '#cmb-drive') {
+    await openCollapse(page, '#accordion-prm', '#universe-name-select');
+    await showParamTab(page, probe);
+}
+
 const openShips = (page) => openCollapse(page, '#accordion-ships', '#light-fighter');
 
-/** Opens the nested life-form bonuses accordion (lives inside the parameters section). */
-async function openLfBonuses(page) {
-    await openParams(page);
-    await openCollapse(page, '#accordion-lf-prm', '[class~="202-speed"]');
-}
+/** Opens the life-form tab, which carries the per-ship bonus table. */
+const openLfBonuses = (page) => openParams(page, '[class~="202-speed"]');
 
 /** Activates the flight-times tab, which the tab strip may have left hidden. */
 async function openFlightTimesTab(page) {
@@ -285,12 +306,14 @@ async function shipSpeeds(page, {
     cmb = 0, imp = 0, hyp = 0, playerClass = CLASS.discoverer,
     warrior = false, trader = false, lfMechanGE = 0, lfRocktalCE = 0,
 } = {}) {
+    await openParams(page, '#lf-mechan-general-enh');
+    await page.locator('#lf-mechan-general-enh').fill(String(lfMechanGE));
+    await page.locator('#lf-rocktal-collector-enh').fill(String(lfRocktalCE));
+
     await openParams(page);
     await page.locator('#cmb-drive').fill(String(cmb));
     await page.locator('#imp-drive').fill(String(imp));
     await page.locator('#hyp-drive').fill(String(hyp));
-    await page.locator('#lf-mechan-general-enh').fill(String(lfMechanGE));
-    await page.locator('#lf-rocktal-collector-enh').fill(String(lfRocktalCE));
     await page.locator(`#class-${playerClass}`).check();
 
     // Warrior and trader are mutually exclusive, so clear before setting
@@ -620,7 +643,7 @@ test.describe('Flight Calculator - Deuterium Consumption', () => {
         await setFleet(page, { 'small-cargo': 100 });
         const full = (await fuelFor(page)).cons;
 
-        await openParams(page);
+        await openParams(page, '#deut-factor');
         await page.locator('#deut-factor').selectOption('5'); // 50%
         const half = (await fuelFor(page)).cons;
 
@@ -651,7 +674,7 @@ test.describe('Flight Calculator - Deuterium Consumption', () => {
         await setFleet(page, { 'large-cargo': 100 });
         const plain = (await fuelFor(page)).cons;
 
-        await openParams(page);
+        await openParams(page, '#lf-mechan-general-enh');
         await page.locator('#lf-mechan-general-enh').fill('100');
         const enhanced = (await fuelFor(page)).cons;
 
@@ -732,6 +755,7 @@ test.describe('Flight Calculator - Cargo Capacity', () => {
     test("Rock'tal Collector Enhancement scales the transport bonus", async ({ page }) => {
         await openParams(page);
         await page.locator('#class-0').check();
+        await openParams(page, '#lf-rocktal-collector-enh');
         await page.locator('#lf-rocktal-collector-enh').fill('100'); // doubles the 25%
         await setFleet(page, { 'small-cargo': 1 });
         expect(await cargoFor(page)).toBe(5000 + 2500);
@@ -761,6 +785,7 @@ test.describe('Flight Calculator - Cargo Capacity', () => {
     test('Mechan General Enhancement scales the recycler and pathfinder bonus', async ({ page }) => {
         await openParams(page);
         await page.locator('#class-1').check();
+        await openParams(page, '#lf-mechan-general-enh');
         await page.locator('#lf-mechan-general-enh').fill('100'); // doubles the 20%
         await setFleet(page, { 'recycler': 1 });
         expect(await cargoFor(page)).toBe(20000 + 8000);
@@ -780,7 +805,7 @@ test.describe('Flight Calculator - Cargo Capacity', () => {
         await setFleet(page, { 'esp-probe': 100 });
         expect(await cargoFor(page)).toBe(0);
 
-        await openParams(page);
+        await openParams(page, '#sp-cargohold');
         await page.locator('#sp-cargohold').fill('5');
         expect(await cargoFor(page)).toBe(500);
     });
@@ -859,7 +884,7 @@ test.describe('Flight Calculator - Results Table', () => {
     });
 
     test('mission type picks the matching universe fleet speed', async ({ page }) => {
-        await openParams(page);
+        await openParams(page, '#speed-fleet-war');
         await page.locator('#speed-fleet-war').selectOption('1');
         await page.locator('#speed-fleet-peaceful').selectOption('5');
         await page.locator('#speed-fleet-holding').selectOption('10');
@@ -901,7 +926,7 @@ test.describe('Flight Calculator - Results Table', () => {
     });
 
     test('an out-of-range coordinate blanks the distance and clears the table', async ({ page }) => {
-        await openParams(page);
+        await openParams(page, '#galaxies-num');
         await page.locator('#galaxies-num').fill('9');
         await page.locator('#destination-g').fill('99'); // beyond the galaxy count
         await page.evaluate(() => updateNumbers());
@@ -951,7 +976,7 @@ test.describe('Flight Calculator - Results Table', () => {
     });
 
     test('a speed override does not fill the table for an empty fleet', async ({ page }) => {
-        await openParams(page);
+        await openParams(page, '#ovr-speed-cb');
         await page.locator('#ovr-speed-cb').check();
         await page.locator('#ovr-speed-t').fill('100000');
         await openShips(page);
@@ -964,7 +989,7 @@ test.describe('Flight Calculator - Results Table', () => {
     });
 
     test('speed override replaces the slowest ship speed', async ({ page }) => {
-        await openParams(page);
+        await openParams(page, '#ovr-speed-cb');
         const before = await speedRows(page).nth(0).locator('td').nth(1).innerText();
 
         await page.locator('#ovr-speed-cb').check(); // enables the input
@@ -977,7 +1002,7 @@ test.describe('Flight Calculator - Results Table', () => {
     });
 
     test('the take-to-calc button carries over the overridden speed', async ({ page }) => {
-        await openParams(page);
+        await openParams(page, '#ovr-speed-cb');
         await page.locator('#ovr-speed-cb').check();
         await page.locator('#ovr-speed-t').fill('100000'); // far above the large cargo
         await openFlightTimesTab(page);
@@ -1001,7 +1026,7 @@ test.describe('Flight Calculator - Results Table', () => {
     });
 
     test('an override of zero falls back to 10000', async ({ page }) => {
-        await openParams(page);
+        await openParams(page, '#ovr-speed-cb');
         // The field starts disabled, so enable it before clearing the value
         await page.locator('#ovr-speed-cb').check();
         await page.locator('#ovr-speed-t').fill('0');
@@ -1013,7 +1038,7 @@ test.describe('Flight Calculator - Results Table', () => {
     });
 
     test('the override field is only editable while the override is on', async ({ page }) => {
-        await openParams(page);
+        await openParams(page, '#ovr-speed-cb');
         await expect(page.locator('#ovr-speed-t')).toBeDisabled();
 
         await page.locator('#ovr-speed-cb').check();
@@ -1169,10 +1194,10 @@ function fillSavePoints(page, { roundTripHours = 4, tolerance = '02:00', fleet =
 const validateSP = (page) => page.evaluate(() => validateSPParams());
 const warningText = (page) => page.locator('#warning-message').innerText();
 
-/** Turns the manual speed override on; the field lives on the flight-times tab. */
+/** Turns the manual speed override on; the field lives on the universe parameter tab. */
 async function enableSpeedOverride(page, speed) {
     await openFlightTimesTab(page);
-    await openParams(page);
+    await openParams(page, '#ovr-speed-cb');
     await page.locator('#ovr-speed-cb').check();
     await page.locator('#ovr-speed-t').fill(String(speed));
     await page.locator('#tabtag2').click();
@@ -1440,6 +1465,7 @@ test.describe('Flight Calculator - Persistence', () => {
     });
 
     test('universe settings survive a reload', async ({ page }) => {
+        await openParams(page, '#galaxies-num');
         await page.locator('#galaxies-num').fill('12');
         await page.locator('#systems-num').fill('200');
         await page.locator('#circular-systems').check();
@@ -1457,8 +1483,9 @@ test.describe('Flight Calculator - Persistence', () => {
     test('reset restores the default parameters', async ({ page }) => {
         await page.locator('#cmb-drive').fill('12');
         await page.locator('#hypertech-lvl').fill('9');
-        await page.locator('#galaxies-num').fill('12');
         await page.locator('#class-1').check();
+        await openParams(page, '#galaxies-num');
+        await page.locator('#galaxies-num').fill('12');
         await page.evaluate(() => updateNumbers());
 
         await page.locator('#reset').click();
