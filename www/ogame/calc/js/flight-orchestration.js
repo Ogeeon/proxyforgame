@@ -1406,7 +1406,9 @@ class FlightOrchestrator {
                     keys.push(key);
                 }
             }
-            keys.sort();
+            // The names are user typed, so order them the way the reader's
+            // language does rather than by code point.
+            keys.sort((a, b) => a.replace(prefix, '').localeCompare(b.replace(prefix, '')));
             const select = document.getElementById(selectId);
             keys.forEach((key) => select.appendChild(new Option(key.replace(prefix, ''), key)));
         };
