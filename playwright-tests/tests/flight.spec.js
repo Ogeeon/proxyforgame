@@ -758,6 +758,17 @@ test.describe('Flight Calculator - Cargo Capacity', () => {
         expect(await cargoFor(page)).toBe(25000);
     });
 
+    test('Mechan General Enhancement scales the recycler and pathfinder bonus', async ({ page }) => {
+        await openParams(page);
+        await page.locator('#class-1').check();
+        await page.locator('#lf-mechan-general-enh').fill('100'); // doubles the 20%
+        await setFleet(page, { 'recycler': 1 });
+        expect(await cargoFor(page)).toBe(20000 + 8000);
+
+        await setFleet(page, { 'recycler': 0, 'pathfinder': 1 });
+        expect(await cargoFor(page)).toBe(10000 + 4000);
+    });
+
     test('per-ship life form cargo bonus is applied', async ({ page }) => {
         await openLfBonuses(page);
         await page.locator('[class~="202-cargo"]').fill('10'); // +10% of the base 5000

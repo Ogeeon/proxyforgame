@@ -300,13 +300,14 @@ class FlightCalculator {
             const baseCargo = shipsData[i][4];
             let increment = count * (baseCargo * (1 + 0.05 * params.hyperTechLvl));
 
-            // The collector hauls more in transports, the general in recyclers and pathfinders
+            // The collector hauls more in transports, the general in recyclers and
+            // pathfinders; both extras are scaled by their life form enhancement
             if (params.playerClass === PLAYER_CLASS.COLLECTOR && i < 2) {
                 increment += Math.floor(count * baseCargo * 0.25 * (1 + params.lfRocktalCE * 0.01));
             }
             if (params.playerClass === PLAYER_CLASS.GENERAL
                 && (i === SHIP.RECYCLER || i === SHIP.PATHFINDER)) {
-                increment += count * baseCargo * 0.2;
+                increment += Math.floor(count * baseCargo * 0.2 * (1 + params.lfMechanGE * 0.01));
             }
 
             const lfBonus = baseCargo * params.lfShipsBonuses[i][1] * 0.01;
