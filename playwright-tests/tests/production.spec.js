@@ -260,7 +260,9 @@ test.describe('crawler count capped by mine levels', () => {
     test('exposes the maximum through the field tooltip', async ({ page }) => {
         await setMines(page);
         await oneCrawler(page).press('Tab');
-        await expect(oneCrawler(page)).toHaveAttribute('title', /Max crawlers: 1\.040/);
+        // The hint is a Bootstrap tooltip, so its text lives in
+        // data-bs-original-title; Bootstrap empties `title´ when it adopts the field.
+        await expect(oneCrawler(page)).toHaveAttribute('data-bs-original-title', /Max crawlers: 1\.040/);
     });
 
     test('caps each planet on the All planets tab on blur', async ({ page }) => {

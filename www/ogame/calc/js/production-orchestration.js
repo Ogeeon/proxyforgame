@@ -49,8 +49,21 @@ function updateCrawlerLimit(input, metalMineLvl, crystalMineLvl, deutSynthLvl, g
 	input._constrains = { min: 0, max: max, def: 0, allowFloat: false, allowNegative: false };
 	// alt feeds the field name into the blur validator's warning message
 	if (options.crawlerName) input.alt = options.crawlerName;
-	if (options.crawlerLimitHint)
-		input.title = options.crawlerLimitHint.replace('{0}', numToOGame(max));
+	if (!options.crawlerLimitHint) return;
+
+	const hint = options.crawlerLimitHint.replace('{0}', numToOGame(max));
+	if (bootstrap.Tooltip.getInstance(input)) {
+		// Bootstrap moves `title´ into `data-bs-original-title´ when it adopts an
+		// element and re-reads the bubble text from there on every show, so that
+		// attribute — not `title´ — is what keeps a recomputed hint in sync.
+		// Writing `title´ back would leave the element with a native tooltip and
+		// a Bootstrap one at the same time.
+		input.setAttribute('data-bs-original-title', hint);
+	} else {
+		input.setAttribute('data-bs-toggle', 'tooltip');
+		input.title = hint;
+		bootstrap.Tooltip.getOrCreateInstance(input);
+	}
 }
 
 function showMainTab(target) {
