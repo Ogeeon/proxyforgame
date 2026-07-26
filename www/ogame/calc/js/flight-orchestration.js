@@ -378,7 +378,10 @@ class FlightOrchestrator {
             let delta = 0;
             while (true) {
                 delta++;
-                if ((params.circularGalaxies || params.circularSystems) && delta > halve) {
+                // Past half a ring the fleet would take the short way round, so
+                // every farther delta only repeats a trip already listed. A
+                // straight axis has no such repeat and runs to its own ends.
+                if (axis.circular && delta > halve) {
                     break;
                 }
                 const distance = this._distanceForDelta(axisIndex, delta, departure, params, axis.limit);
@@ -427,6 +430,13 @@ class FlightOrchestrator {
 
     /**
      * Build the one or two save-point rows a matching delta produces.
+     *
+     * Both rows have to sit exactly `delta` steps from the departure, or the
+     * arrival time shown here is not the one the first tab computes for that
+     * coordinate. On a ring axis the step off the end wraps to the other end —
+     * `below + limit` going down, `above - limit` going up — which is `delta`
+     * steps the long way round and therefore the same trip.
+     *
      * @param {{percent: number, cost: number, arriveAt: number}} match the speed
      *        step that fits the tolerance, its fuel bill and the moment the
      *        fleet lands — at the target on a one-way flight, back home
@@ -435,9 +445,14 @@ class FlightOrchestrator {
     _collectSavePointRows(rows, axisIndex, delta, departure, axis, match) {
         const { percent, cost, arriveAt } = match;
         const point = [...departure];
-        const below = departure[axisIndex] - delta;
-        const above = departure[axisIndex] + delta;
+        const added = [];
         const addRow = (coord) => {
+            // A wrap can land on the coordinate the other direction already used
+            // (an even-sized ring, delta at half of it) — one row is enough.
+            if (added.includes(coord)) {
+                return;
+            }
+            added.push(coord);
             point[axisIndex] = coord;
             rows.push({
                 speedPercent: percent,
@@ -447,17 +462,19 @@ class FlightOrchestrator {
                 point: [...point],
             });
         };
+        const below = departure[axisIndex] - delta;
+        const above = departure[axisIndex] + delta;
 
         if (below > 0) {
             addRow(below);
         } else if (axis.circular) {
-            addRow(axis.limit + 1 - delta);
+            addRow(below + axis.limit);
         }
 
         if (above <= axis.limit) {
             addRow(above);
         } else if (axis.circular) {
-            addRow(delta - 1);
+            addRow(above - axis.limit);
         }
     }
 

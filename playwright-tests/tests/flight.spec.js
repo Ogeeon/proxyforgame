@@ -1385,6 +1385,44 @@ test.describe('Flight Calculator - Save Points', () => {
         expect(shown).toBe(expected);
     });
 
+    /**
+     * A ring universe with the departure in galaxy 4 of 9: stepping four
+     * galaxies down runs off the end of the ring and comes back onto galaxy 9,
+     * which is those same four galaxies away the other way round. Listing any
+     * other galaxy there promises a flight time the first tab will not honour.
+     */
+    test('a save point past the end of the galaxy ring is as far away as its row promises', async ({ page }) => {
+        await openParams(page, '#departure-g');
+        await page.locator('#departure-g').fill('4');
+        await openParams(page, '#galaxies-num');
+        await page.locator('#galaxies-num').fill('9');
+        await page.locator('#circular-galaxies').check();
+        await page.evaluate(() => updateNumbers());
+        await enableSpeedOverride(page, 100000); // fast enough to cross galaxies
+
+        await fillSavePoints(page, { roundTripHours: 5.5, tolerance: '01:00' });
+        await page.locator('#calculate-savepoints').click();
+
+        const rows = page.locator('#savepoints-galaxies tr');
+        const count = await rows.count();
+        expect(count, 'the search lists galaxies').toBeGreaterThan(1);
+
+        for (let i = 1; i < count; i++) {
+            const row = rows.nth(i);
+            const shown = await row.locator('.savepoint-return').innerText();
+            const label = await row.locator('a').innerText();
+            await row.locator('a').click();
+
+            const expected = await page.evaluate(() => {
+                const start = parseDate(document.getElementById('save-start-datetime').value, options.datetimeFormat);
+                const roundTrip = options.prm.flightData.reduce((sum, leg) => sum + leg, 0);
+                return getDateStr(start + roundTrip * 1000, options.datetimeFormat);
+            });
+            expect(shown, `save point ${label}`).toBe(expected);
+            await page.locator('#tabtag2').click();
+        }
+    });
+
     test('results are listed slowest first', async ({ page }) => {
         await fillSavePoints(page);
         await page.locator('#calculate-savepoints').click();
