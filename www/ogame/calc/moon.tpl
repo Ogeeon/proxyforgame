@@ -98,11 +98,11 @@
       <table class="mx-auto">
         <tr>
           <td><label><?= $l['moon-destroy-chance'] ?></label></td>
-          <td><div id="moon-destroy-chance" class="form-control form-control-sm d-inline-block chance-show">0%</div></td>
+          <td><div id="moon-destroy-chance" class="form-control form-control-sm d-inline-block chance-show ui-state-disabled">0%</div></td>
         </tr>
         <tr>
           <td><label><?= $l['ds-blow-chance'] ?></label></td>
-          <td><div id="ds-blow-chance" class="form-control form-control-sm d-inline-block chance-show">0%</div></td>
+          <td><div id="ds-blow-chance" class="form-control form-control-sm d-inline-block chance-show ui-state-disabled">0%</div></td>
         </tr>
       </table>
     </div>
@@ -222,7 +222,7 @@
       <table class="mx-auto">
         <tr>
           <td><label><?= $l['moon-create-chance'] ?></label></td>
-          <td><div id="moon-create-chance" class="form-control form-control-sm d-inline-block chance-show">0%</div></td>
+          <td><div id="moon-create-chance" class="form-control form-control-sm d-inline-block chance-show ui-state-disabled">0%</div></td>
         </tr>
       </table>
     </div>
@@ -233,11 +233,11 @@
       <table class="mx-auto">
         <tr>
           <td><label><?= $l['metal'] ?></label></td>
-          <td><div id="metal-required" class="form-control form-control-sm d-inline-block resource-show">0</div></td>
+          <td><div id="metal-required" class="form-control form-control-sm d-inline-block resource-show ui-state-disabled">0</div></td>
           <td><label><?= $l['crystal'] ?></label></td>
-          <td><div id="crystal-required" class="form-control form-control-sm d-inline-block resource-show">0</div></td>
+          <td><div id="crystal-required" class="form-control form-control-sm d-inline-block resource-show ui-state-disabled">0</div></td>
           <td><label><?= $l['deuterium'] ?></label></td>
-          <td><div id="deuterium-required" class="form-control form-control-sm d-inline-block resource-show">0</div></td>
+          <td><div id="deuterium-required" class="form-control form-control-sm d-inline-block resource-show ui-state-disabled">0</div></td>
         </tr>
       </table>
     </div>
@@ -248,17 +248,17 @@
       <table class="mx-auto">
         <tr>
           <td><label><?= $l['metal'] ?></label></td>
-          <td><div id="metal-recyclable" class="form-control form-control-sm d-inline-block resource-show">0</div></td>
+          <td><div id="metal-recyclable" class="form-control form-control-sm d-inline-block resource-show ui-state-disabled">0</div></td>
           <td><label><?= $l['crystal'] ?></label></td>
-          <td><div id="crystal-recyclable" class="form-control form-control-sm d-inline-block resource-show">0</div></td>
+          <td><div id="crystal-recyclable" class="form-control form-control-sm d-inline-block resource-show ui-state-disabled">0</div></td>
           <td><label><?= $l['deuterium'] ?></label></td>
-          <td><div id="deuterium-recyclable" class="form-control form-control-sm d-inline-block resource-show">0</div></td>
+          <td><div id="deuterium-recyclable" class="form-control form-control-sm d-inline-block resource-show ui-state-disabled">0</div></td>
         </tr>
         <tr>
           <td><label><?= $l['total'] ?></label></td>
-          <td><div id="debris-total" class="form-control form-control-sm d-inline-block resource-show">0</div></td>
+          <td><div id="debris-total" class="form-control form-control-sm d-inline-block resource-show ui-state-disabled">0</div></td>
           <td><label><?= $l['recyclers'] ?></label></td>
-          <td><div id="recyclers" class="form-control form-control-sm d-inline-block resource-show">0</div></td>
+          <td><div id="recyclers" class="form-control form-control-sm d-inline-block resource-show ui-state-disabled">0</div></td>
           <td colspan="2">&nbsp;</td>
         </tr>
       </table>
