@@ -44,7 +44,7 @@ class QueueCalculatorApp {
     options.load();
     this._restoreParamsFromState();
     this._restoreStartLevelsFromState();
-    this._initInputmask();
+    this._initMasks();
     this._bindEvents();
     this._restoreActiveTab();
     this.refreshBoth();
@@ -82,7 +82,11 @@ class QueueCalculatorApp {
     }
   }
 
-  _initInputmask() {}
+  /** Give both start-datetime fields the overtype mask from dom-utils. */
+  _initMasks() {
+    [PLANET_TAB, MOON_TAB].forEach((tabNum) =>
+      attachInputMask($(`#start-${tabNum}`), options.datetimeFormat));
+  }
 
   _restoreActiveTab() {
     const cookie = { value: '2', validate: (k, v) => v };
@@ -180,7 +184,9 @@ class QueueCalculatorApp {
     [PLANET_TAB, MOON_TAB].forEach((tabNum) => {
       const el = $(`#start-${tabNum}`);
       if (!el) return;
-      el.addEventListener('keyup', () => this._updateCompletion(tabNum));
+      // The mask cancels the native edit and re-fires `input´ itself, so that is
+      // the event to listen on rather than keyup.
+      el.addEventListener('input', () => this._updateCompletion(tabNum));
       el.addEventListener('blur', () => this._updateCompletion(tabNum));
     });
 

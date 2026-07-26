@@ -308,4 +308,32 @@ test.describe('Construction Queue Calculator Page', () => {
         const finalLevelText = await moonTotalsRow.locator('td:nth-child(2)').textContent();
         expect(finalLevelText.trim()).toBe('5/7');
     });
+
+    test('[start datetime] the field is masked and typing overwrites in place', async ({ page }) => {
+        const field = page.locator('#start-2');
+        await expect(field).toHaveValue('');
+
+        await field.focus();
+        await expect(field).toHaveValue('__.__.____ __:__:__');
+
+        await field.pressSequentially('26072026120530');
+        await expect(field).toHaveValue('26.07.2026 12:05:30');
+
+        // A digit written into the hours replaces the one there instead of
+        // pushing the rest of the value right.
+        await field.evaluate((el) => el.setSelectionRange(11, 11));
+        await field.pressSequentially('09');
+        await expect(field).toHaveValue('26.07.2026 09:05:30');
+    });
+
+    test('[start datetime] a completion moment follows the masked departure', async ({ page }) => {
+        await addToQueue(page, 1, 0); // anything with a build time
+
+        const field = page.locator('#start-2');
+        await field.focus();
+        await field.pressSequentially('26072026120000');
+
+        await expect(page.locator('#finish-moment-2')).not.toHaveText('?');
+        await expect(field).not.toHaveClass(/is-invalid/);
+    });
 });

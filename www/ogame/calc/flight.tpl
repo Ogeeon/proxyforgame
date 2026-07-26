@@ -46,6 +46,7 @@
     options.datetimeFormat = '<?= $l['datetime-format'] ?>';
     options.flightTimeFormat = '<?= $l['flight-time-format'] ?>';
     options.flightTimeFormatHint = '<?= $l['flight-time-format-hint'] ?>';
+    options.toleranceTimeFormat = '<?= $l['tolerance-time-format'] ?>';
     options.toggleSignHint = '<?= $l['toggle-sign'] ?>';
     options.removeRowHint = '<?= $l['remove-row'] ?>';
     options.departureTitle = '<?= $l['departure'] ?>';

@@ -502,6 +502,169 @@ const validateInputNumberOnBlurNative = (event) => {
 };
 
 // ==========================================================================
+// INPUT MASKS
+// ==========================================================================
+
+/** The character an unfilled digit slot shows. Kept in sync with the
+ *  '__.__.____ __:__:__' literals the flight calculator compares against. */
+const MASK_BLANK = '_';
+
+/** How many digit slots each token of a locale date/time format stands for. */
+const MASK_TOKEN_WIDTHS = { d: 2, m: 2, y: 4, H: 2, s: 2, 9: 1 };
+
+/**
+ * Expand a locale format ('d.m.y H:s:s', '99 H:s:s', 'H:s') into a per-character
+ * pattern where '9' marks a digit slot and every other character is a literal
+ * the caret jumps over.
+ * @param {string} format - Format from the locale files
+ * @returns {string} e.g. '99.99.9999 99:99:99'
+ */
+const maskPatternFromFormat = (format) => format.split('')
+  .map((ch) => (MASK_TOKEN_WIDTHS[ch] ? '9'.repeat(MASK_TOKEN_WIDTHS[ch]) : ch))
+  .join('');
+
+/**
+ * Turn a text input into an overtype mask: the field always holds the full
+ * skeleton, a typed digit replaces the one under the caret instead of pushing
+ * the rest of the text right, and the caret hops over the separators.
+ *
+ * The field is left genuinely empty while untouched, so its placeholder still
+ * shows and the callers' "no value" checks keep working; the skeleton appears
+ * on focus and is taken back on blur when nothing was typed.
+ *
+ * Only the skeleton is enforced — ranges are not, so an out-of-range 99 hours
+ * still reaches the calculator's own validation.
+ *
+ * @param {HTMLInputElement} input - The field to mask
+ * @param {string} format - Format from the locale files, e.g. 'd.m.y H:s:s'
+ */
+const attachInputMask = (input, format) => {
+  if (!input || !format || input._inputMask) {
+    return;
+  }
+  const pattern = maskPatternFromFormat(format);
+  const blank = pattern.replace(/9/g, MASK_BLANK);
+  const isSlot = (i) => pattern[i] === '9';
+
+  /** First digit slot at or after `from`, or the end of the pattern. */
+  const nextSlot = (from) => {
+    let i = Math.max(0, from);
+    while (i < pattern.length && !isSlot(i)) i += 1;
+    return i;
+  };
+
+  /** Last digit slot before `from`, or -1 when there is none. */
+  const prevSlot = (from) => {
+    let i = Math.min(from, pattern.length) - 1;
+    while (i >= 0 && !isSlot(i)) i -= 1;
+    return i;
+  };
+
+  /** The current text, padded to the skeleton so slicing is always in range. */
+  const current = () => (input.value.length === pattern.length ? input.value : blank);
+
+  const write = (value, pos, ch) => value.slice(0, pos) + ch + value.slice(pos + 1);
+
+  /** Replace every digit slot of [from, to) with the blank character. */
+  const erase = (value, from, to) => {
+    let out = value;
+    for (let i = from; i < to; i += 1) {
+      if (isSlot(i)) {
+        out = write(out, i, MASK_BLANK);
+      }
+    }
+    return out;
+  };
+
+  /** Write `digits` into the slots from `pos` on, skipping the literals. */
+  const fill = (value, pos, digits) => {
+    let out = value;
+    let i = pos;
+    for (const digit of digits) {
+      i = nextSlot(i);
+      if (i >= pattern.length) {
+        break;
+      }
+      out = write(out, i, digit);
+      i += 1;
+    }
+    return { value: out, caret: nextSlot(i) };
+  };
+
+  const apply = (value, caret) => {
+    input.value = value;
+    input.setSelectionRange(caret, caret);
+    // The native edit was cancelled, so the listeners the calculator hangs on
+    // the field have to be woken up by hand.
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+  };
+
+  input.addEventListener('focus', () => {
+    if (input.value === '') {
+      input.value = blank;
+      input.setSelectionRange(0, 0);
+    }
+  });
+
+  input.addEventListener('blur', () => {
+    if (input.value === blank) {
+      input.value = '';
+    }
+  });
+
+  input.addEventListener('beforeinput', (event) => {
+    const type = event.inputType;
+    const value = current();
+    const start = input.selectionStart ?? 0;
+    const end = input.selectionEnd ?? start;
+    event.preventDefault();
+
+    if (type === 'insertText' || type === 'insertFromPaste' || type === 'insertCompositionText') {
+      const text = type === 'insertFromPaste'
+        ? (event.dataTransfer ? event.dataTransfer.getData('text') : '')
+        : (event.data || '');
+      const digits = text.replace(/\D/g, '');
+      if (digits === '') {
+        return;
+      }
+      const cleared = end > start ? erase(value, start, end) : value;
+      const result = fill(cleared, start, digits);
+      apply(result.value, result.caret);
+      return;
+    }
+
+    if (!type.startsWith('delete')) {
+      return;
+    }
+    if (end > start) {
+      apply(erase(value, start, end), start);
+      return;
+    }
+    if (type.endsWith('Forward')) {
+      const slot = nextSlot(start);
+      if (slot < pattern.length) {
+        apply(write(value, slot, MASK_BLANK), slot);
+      }
+      return;
+    }
+    const slot = prevSlot(start);
+    if (slot >= 0) {
+      apply(write(value, slot, MASK_BLANK), slot);
+    }
+  });
+
+  input._inputMask = { pattern, blank };
+};
+
+/**
+ * Whether a masked field carries no digits yet — either untouched or wiped back
+ * to the bare skeleton. Unmasked fields count as blank when empty.
+ * @param {HTMLInputElement} input - The field to test
+ * @returns {boolean}
+ */
+const isMaskBlank = (input) => !input || input.value === '' || !/\d/.test(input.value);
+
+// ==========================================================================
 // EXPORT TO WINDOW
 // ==========================================================================
 
@@ -557,6 +720,11 @@ if (typeof window !== 'undefined') {
     removeAttr,
 
     // Validation
-    validateInputNumberOnBlurNative
+    validateInputNumberOnBlurNative,
+
+    // Input masks
+    maskPatternFromFormat,
+    attachInputMask,
+    isMaskBlank
   });
 }

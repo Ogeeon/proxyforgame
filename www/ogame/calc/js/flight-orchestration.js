@@ -716,7 +716,9 @@ class FlightOrchestrator {
         const container = document.getElementById('flight-data');
         let last = container.querySelector('.flight-leg:last-child .flight-time-input');
 
-        if (last && last.value !== '' && last.value !== '00 00:00:00') {
+        // A row that only holds the bare mask skeleton counts as free: clicking
+        // the add button leaves the field focused, so it never blurs back to ''.
+        if (last && !isMaskBlank(last) && last.value !== '00 00:00:00') {
             container.insertAdjacentHTML('beforeend', this._legRowHtml());
             const row = container.querySelector('.flight-leg:last-child');
             this._wireLegRow(row);
@@ -761,7 +763,12 @@ class FlightOrchestrator {
     _wireLegRow(row) {
         row.querySelector('.flight-leg-sign').addEventListener('click', (e) => this.toggleLegSign(e.currentTarget));
         row.querySelector('.button-remove').addEventListener('click', (e) => this.removeFlightLeg(e.currentTarget.closest('.flight-leg')));
-        row.querySelector('.flight-time-input').addEventListener('keyup', () => this.updateArrival());
+        const field = row.querySelector('.flight-time-input');
+        attachInputMask(field, this.opts.flightTimeFormat);
+        // The mask cancels the native edit and re-fires `input´ itself, so that
+        // is the event to listen on rather than keyup.
+        field.addEventListener('input', () => this.updateArrival());
+        field.addEventListener('blur', () => this.updateArrival());
     }
 
     /** Rebuild the leg list from the stored flightData array. */
@@ -1335,6 +1342,7 @@ class FlightOrchestrator {
 
         this.opts.load('options_flight');
         this.populateParams();
+        this._initMasks();
         this._initSpeedOverride();
         this._setInputConstraints();
         this._populateStorageSelects();
@@ -1359,6 +1367,18 @@ class FlightOrchestrator {
             }
         }
         this.recalc();
+    }
+
+    /**
+     * Give every date, duration and tolerance field its overtype mask. The leg
+     * rows are built at run time, so _wireLegRow masks each new one as well.
+     */
+    _initMasks() {
+        ['start-datetime', 'save-start-datetime', 'save-return-datetime'].forEach((id) =>
+            attachInputMask(document.getElementById(id), this.opts.datetimeFormat));
+        attachInputMask(document.getElementById('save-tolerance-time'), this.opts.toleranceTimeFormat);
+        document.querySelectorAll('input.flight-time-input').forEach((el) =>
+            attachInputMask(el, this.opts.flightTimeFormat));
     }
 
     _initSpeedOverride() {
@@ -1410,9 +1430,12 @@ class FlightOrchestrator {
         on('trader-bonus', 'click', (e) => this.toggleAllianceBonus(e));
         on('calculate-savepoints', 'click', () => this.updateSavePoints());
         on('save-one-way', 'change', () => this.toggleSaveOneWay());
-        on('start-datetime', 'keyup', () => this.updateArrival());
+        // The masked fields cancel the native edit and re-fire `input´ themselves,
+        // so that is the event to listen on rather than keyup.
+        on('start-datetime', 'input', () => this.updateArrival());
+        on('start-datetime', 'blur', () => this.updateArrival());
         ['save-start-datetime', 'save-return-datetime', 'save-tolerance-time'].forEach((id) => {
-            on(id, 'keyup', () => this._validateSavePointForm());
+            on(id, 'input', () => this._validateSavePointForm());
             on(id, 'blur', () => this._validateSavePointForm());
         });
         on('empty-systems-count-spin', 'input', (e) => this.onEmptySystemsInput(e.currentTarget));

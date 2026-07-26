@@ -1291,6 +1291,181 @@ test.describe('Flight Calculator - Arrival Time', () => {
     });
 });
 
+test.describe('Flight Calculator - Input Masks', () => {
+    test.beforeEach(async ({ context, page }) => {
+        await context.addInitScript(() => {
+            localStorage.setItem('lastChange', 'key-value;true,value;99999');
+        });
+        await page.goto('/ogame/calc/flight.php');
+        await page.locator('#tabtag1').click();
+    });
+
+    /** Puts the caret at a character offset, the way a click into the field would. */
+    const caretTo = (page, selector, pos) => page.locator(selector).evaluate(
+        (el, at) => el.setSelectionRange(at, at), pos);
+
+    test('an untouched date field is empty and shows its skeleton on focus', async ({ page }) => {
+        const field = page.locator('#start-datetime');
+        await expect(field).toHaveValue('');
+
+        await field.focus();
+        await expect(field).toHaveValue('__.__.____ __:__:__');
+    });
+
+    test('a skeleton nobody typed into is taken back on blur', async ({ page }) => {
+        const field = page.locator('#start-datetime');
+        await field.focus();
+        await field.blur();
+
+        await expect(field).toHaveValue('');
+    });
+
+    test('typed digits skip over the separators', async ({ page }) => {
+        const field = page.locator('#start-datetime');
+        await field.focus();
+        await field.pressSequentially('26072026120530');
+
+        await expect(field).toHaveValue('26.07.2026 12:05:30');
+    });
+
+    test('a digit replaces the one under the caret instead of widening the field', async ({ page }) => {
+        const field = page.locator('#start-datetime');
+        await field.focus();
+        await field.pressSequentially('26072026120530');
+
+        await caretTo(page, '#start-datetime', 11); // the hours
+        await field.pressSequentially('09');
+
+        await expect(field).toHaveValue('26.07.2026 09:05:30');
+    });
+
+    test('typing past a separator lands in the next group', async ({ page }) => {
+        const field = page.locator('#start-datetime');
+        await field.focus();
+        await field.pressSequentially('26072026120530');
+
+        await caretTo(page, '#start-datetime', 9); // the last digit of the year
+        await field.pressSequentially('712');
+
+        await expect(field).toHaveValue('26.07.2027 12:05:30');
+    });
+
+    test('non-digits are ignored', async ({ page }) => {
+        const field = page.locator('#start-datetime');
+        await field.focus();
+        await field.pressSequentially('26ab07');
+
+        await expect(field).toHaveValue('26.07.____ __:__:__');
+    });
+
+    test('backspace blanks the previous slot without shifting the rest', async ({ page }) => {
+        const field = page.locator('#start-datetime');
+        await field.focus();
+        await field.pressSequentially('26072026120530');
+        await field.press('Backspace');
+
+        await expect(field).toHaveValue('26.07.2026 12:05:3_');
+    });
+
+    test('backspace steps over a separator', async ({ page }) => {
+        const field = page.locator('#start-datetime');
+        await field.focus();
+        await field.pressSequentially('2607');
+        await field.press('Backspace');
+        await field.press('Backspace');
+
+        await expect(field).toHaveValue('26.__.____ __:__:__');
+    });
+
+    test('delete blanks the slot the caret sits on', async ({ page }) => {
+        const field = page.locator('#start-datetime');
+        await field.focus();
+        await field.pressSequentially('26072026120530');
+
+        await caretTo(page, '#start-datetime', 0);
+        await field.press('Delete');
+
+        await expect(field).toHaveValue('_6.07.2026 12:05:30');
+    });
+
+    test('a selection is blanked rather than removed', async ({ page }) => {
+        const field = page.locator('#start-datetime');
+        await field.focus();
+        await field.pressSequentially('26072026120530');
+
+        await field.evaluate((el) => el.setSelectionRange(0, 10));
+        await field.press('Backspace');
+
+        await expect(field).toHaveValue('__.__.____ 12:05:30');
+    });
+
+    test('the flight time field carries the duration mask', async ({ page }) => {
+        // The leading leg starts out at the stored 00 00:00:00 rather than empty,
+        // so this is the overtype case straight away.
+        const field = page.locator('#flight-time');
+        await field.focus();
+        await caretTo(page, '#flight-time', 3); // the hours
+
+        await field.pressSequentially('01');
+
+        await expect(field).toHaveValue('00 01:00:00');
+        expect(await page.evaluate(() => options.prm.flightData[0])).toBe(3600);
+    });
+
+    test('an emptied flight time field shows the duration skeleton', async ({ page }) => {
+        const field = page.locator('#flight-time');
+        await field.fill('');
+        await field.focus();
+
+        await expect(field).toHaveValue('__ __:__:__');
+    });
+
+    test('a leg row added at run time is masked too', async ({ page }) => {
+        await page.locator('#flight-time').fill('00 01:00:00');
+        await page.locator('#add-flight-time').click();
+
+        const second = page.locator('#flight-data .flight-leg').nth(1).locator('input.flight-time-input');
+        await second.focus();
+        await second.pressSequentially('00003000');
+
+        await expect(second).toHaveValue('00 00:30:00');
+        expect(await page.evaluate(() => options.prm.flightData)).toEqual([3600, 1800]);
+    });
+
+    test('the add button does not consume a row that only holds the skeleton', async ({ page }) => {
+        await page.locator('#flight-time').focus();
+        await page.locator('#add-flight-time').click();
+
+        await expect(page.locator('#flight-data .flight-leg')).toHaveCount(1);
+    });
+
+    test('the tolerance field carries the hh:mm mask', async ({ page }) => {
+        await page.locator('#tabtag2').click();
+        const field = page.locator('#save-tolerance-time');
+        await field.focus();
+        await caretTo(page, '#save-tolerance-time', 0);
+
+        await field.pressSequentially('0130');
+
+        await expect(field).toHaveValue('01:30');
+    });
+
+    test('a departure written by the shortcut stays editable in place', async ({ page }) => {
+        await page.locator('#set-departure-zero').click();
+        const field = page.locator('#start-datetime');
+        const before = await field.inputValue();
+
+        await field.focus();
+        await caretTo(page, '#start-datetime', 11);
+        await field.pressSequentially('07');
+
+        const after = await field.inputValue();
+        expect(after).toHaveLength(before.length);
+        expect(after.slice(0, 10)).toBe(before.slice(0, 10));
+        expect(after.slice(11, 13)).toBe('07');
+    });
+});
+
 // ---------------------------------------------------------------------------
 // Block 4. Save points.
 // ---------------------------------------------------------------------------
