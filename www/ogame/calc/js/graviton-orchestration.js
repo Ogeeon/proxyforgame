@@ -58,7 +58,9 @@ var options = {
         case 'energyBoost': return validateNumber(Number.parseInt(value), 0, 8, 0);
         case 'disChLevel': return validateNumber(Number.parseFloat(value), 0, 100, 0);
         case 'gravitonLevel': return validateNumber(Number.parseFloat(value), 0, 100, 0);
-        case 'totalLFEnrgBonus': return validateNumber(Number.parseFloat(value), 0, 100, 0);
+        // Same 0..999 range the field's own _constrains enforce on blur: a
+        // narrower range here would silently cut back a value the form accepted.
+        case 'totalLFEnrgBonus': return validateNumber(Number.parseFloat(value), 0, 999, 0);
         case 'scCapacityIncrease': return validateNumber(Number.parseFloat(value), 0, 999, 0);
         case 'lcCapacityIncrease': return validateNumber(Number.parseFloat(value), 0, 999, 0);
         case 'rcCapacityIncrease': return validateNumber(Number.parseFloat(value), 0, 999, 0);
@@ -134,19 +136,40 @@ class GravitonApp {
     setChecked('#deut-in-debris', options.prm.deutInDebris);
   }
 
+  /**
+   * Declare the blur-time constraints for every numeric field. The ranges
+   * deliberately mirror options.prm.validate(): without a `_constrains` object a
+   * field falls back to options.defConstraints, whose min/max are infinite, so
+   * the form would accept a value the cookie validator then silently clamps on
+   * the next page load.
+   */
   _applyConstraints() {
-    const shipyard = document.getElementById('shipyard-level');
-    if (shipyard) shipyard._constrains = { min: 1, def: 1 };
-    const temp = document.getElementById('max-planet-temp');
-    if (temp) temp._constrains = { min: -134, def: 0, allowNegative: true };
-    const lfBonus = document.getElementById('total-lf-energy-bonus');
-    if (lfBonus) lfBonus._constrains = { min: 0, max: 999, def: 0, allowNegative: false, allowFloat: true };
-    const scCap = document.getElementById('sc-capacity-increase');
-    if (scCap) scCap._constrains = { min: 0, max: 999, def: 0, allowNegative: false, allowFloat: true };
-    const lcCap = document.getElementById('lc-capacity-increase');
-    if (lcCap) lcCap._constrains = { min: 0, max: 999, def: 0, allowNegative: false, allowFloat: true };
-    const rcCap = document.getElementById('rc-capacity-increase');
-    if (rcCap) rcCap._constrains = { min: 0, max: 999, def: 0, allowNegative: false, allowFloat: true };
+    // The life-form percentages are the only fractional fields on the page.
+    const percent = () => ({ min: 0, max: 999, def: 0, allowNegative: false, allowFloat: true });
+    const constraints = {
+      'shipyard-level': { min: 1, max: 100, def: 1 },
+      'nanites-factory-level': { min: 0, max: 100, def: 0 },
+      'energy-tech-level': { min: 0, max: 50, def: 0 },
+      'hyper-tech-level': { min: 0, max: 50, def: 0 },
+      // The coldest planet in the game sits at -134 degrees; there is no upper
+      // bound worth enforcing, so the field is only clamped from below.
+      'max-planet-temp': { min: -134, def: 0, allowNegative: true },
+      'solar-plant-level': { min: 0, max: 100, def: 0 },
+      'fusion-plant-level': { min: 0, max: 100, def: 0 },
+      'solar-satellites-count': { min: 0, max: Infinity, def: 0 },
+      'disr-chamber-level': { min: 0, max: 100, def: 0 },
+      'graviton-level': { min: 0, max: 100, def: 0 },
+      'crystal-available': { min: 0, max: Infinity, def: 0 },
+      'deuterium-available': { min: 0, max: Infinity, def: 0 },
+      'total-lf-energy-bonus': percent(),
+      'sc-capacity-increase': percent(),
+      'lc-capacity-increase': percent(),
+      'rc-capacity-increase': percent()
+    };
+    Object.entries(constraints).forEach(([id, constrains]) => {
+      const el = document.getElementById(id);
+      if (el) el._constrains = constrains;
+    });
   }
 
   _bindEvents() {

@@ -67,7 +67,7 @@
   <div class="border rounded position-relative">
     <div class="d-flex align-items-center">
       <div class="bg-body-secondary text-primary-emphasis rounded main-header text-center flex-grow-1"><?= $l['title'] ?></div>
-      <div id="reset" class="d-flex align-items-center justify-content-center bg-danger-subtle" title="<?= $l['reset'] ?>">
+      <div id="reset" class="d-flex align-items-center justify-content-center bg-danger-subtle" data-bs-toggle="tooltip" title="<?= $l['reset'] ?>">
         <i class="bi bi-arrow-counterclockwise" style="color: #dc3545; font-size: 1.25rem;"></i>
       </div>
     </div>
@@ -146,7 +146,7 @@
             </div>
             <div class="d-flex align-items-center gap-1">
               <label for="nanites-factory-level"><?= $l['nanites-factory-level'] ?></label>
-              <input id="nanites-factory-level" type="text" name="nanites-factory-level" class="form-control form-control-sm level-input" value="0"/>
+              <input id="nanites-factory-level" type="text" name="nanites-factory-level" class="form-control form-control-sm level-input" value="0" alt="<?= $l['nanites-factory-level'] ?>"/>
             </div>
           </div>
         </div><!-- /param-buildings -->
@@ -156,11 +156,11 @@
           <div class="d-flex flex-wrap gap-2 align-items-center justify-content-center">
             <div class="d-flex align-items-center gap-1">
               <label for="energy-tech-level"><?= $l['energy-tech-level'] ?></label>
-              <input id="energy-tech-level" type="text" name="energy-tech-level" class="form-control form-control-sm level-input" value="0"/>
+              <input id="energy-tech-level" type="text" name="energy-tech-level" class="form-control form-control-sm level-input" value="0" alt="<?= $l['energy-tech-level'] ?>"/>
             </div>
             <div class="d-flex align-items-center gap-1">
               <label for="hyper-tech-level"><?= $l['hyper-tech'] ?></label>
-              <input id="hyper-tech-level" type="text" name="hyper-tech-level" class="form-control form-control-sm level-input" value="0"/>
+              <input id="hyper-tech-level" type="text" name="hyper-tech-level" class="form-control form-control-sm level-input" value="0" alt="<?= $l['hyper-tech'] ?>"/>
             </div>
           </div>
         </div><!-- /param-researches -->
@@ -169,7 +169,7 @@
           <div class="d-flex flex-wrap column-gap-3 row-gap-2 align-items-center justify-content-center">
             <div class="d-flex align-items-center gap-1">
               <label for="disr-chamber-level"><?= $l['disr-chamber'] ?></label>
-              <input id="disr-chamber-level" type="text" name="disr-chamber-level" class="form-control form-control-sm level-input" value="0"/>
+              <input id="disr-chamber-level" type="text" name="disr-chamber-level" class="form-control form-control-sm level-input" value="0" alt="<?= $l['disr-chamber'] ?>"/>
             </div>
             <div class="d-flex align-items-center gap-1">
               <label for="total-lf-energy-bonus"><?= $l['total-lf-energy-bonus'] ?></label>
@@ -212,7 +212,7 @@
         <table class="mx-auto">
           <tr>
             <td><label for="solar-plant-level"><?= $l['solar-plant-level'] ?></label></td>
-            <td><input id="solar-plant-level" type="text" name="solar-plant-level" class="form-control form-control-sm d-inline-block energy-input ui-input-margin" value="0"/></td>
+            <td><input id="solar-plant-level" type="text" name="solar-plant-level" class="form-control form-control-sm d-inline-block energy-input ui-input-margin" value="0" alt="<?= $l['solar-plant-level'] ?>"/></td>
             <td>
               <select id="solar-plant-percent" name="solar-plant-percent" class="form-select form-select-sm d-inline-block w-auto ui-input-margin">
                 <option value="100" selected="selected">100%</option><option value="90">90%</option><option value="80">80%</option><option value="70">70%</option><option value="60">60%</option>
@@ -223,7 +223,7 @@
           </tr>
           <tr>
             <td><label for="fusion-plant-level"><?= $l['fusion-plant-level'] ?></label></td>
-            <td><input id="fusion-plant-level" type="text" name="fusion-plant-level" class="form-control form-control-sm d-inline-block energy-input ui-input-margin" value="0"/></td>
+            <td><input id="fusion-plant-level" type="text" name="fusion-plant-level" class="form-control form-control-sm d-inline-block energy-input ui-input-margin" value="0" alt="<?= $l['fusion-plant-level'] ?>"/></td>
             <td>
               <select id="fusion-plant-percent" name="fusion-plant-percent" class="form-select form-select-sm d-inline-block w-auto ui-input-margin">
                 <option value="100" selected="selected">100%</option><option value="90">90%</option><option value="80">80%</option><option value="70">70%</option><option value="60">60%</option>
@@ -234,7 +234,7 @@
           </tr>
           <tr>
             <td><label for="solar-satellites-count"><?= $l['solar-satellites-count'] ?></label></td>
-            <td><input id="solar-satellites-count" type="text" name="solar-satellites-count" class="form-control form-control-sm d-inline-block energy-input ui-input-margin" value="0"/></td>
+            <td><input id="solar-satellites-count" type="text" name="solar-satellites-count" class="form-control form-control-sm d-inline-block energy-input ui-input-margin" value="0" alt="<?= $l['solar-satellites-count'] ?>"/></td>
             <td>
               <select id="solar-satellites-percent" name="solar-satellites-percent" class="form-select form-select-sm d-inline-block w-auto ui-input-margin">
                 <option value="100" selected="selected">100%</option><option value="90">90%</option><option value="80">80%</option><option value="70">70%</option><option value="60">60%</option>
@@ -288,7 +288,7 @@
         <table class="mx-auto">
           <tr>
             <td><label for="graviton-level"><?= $l['graviton-level'] ?></label></td>
-            <td><input id="graviton-level" type="text" name="graviton-level" class="form-control form-control-sm d-inline-block energy-input ui-input-margin" value="0"/></td>
+            <td><input id="graviton-level" type="text" name="graviton-level" class="form-control form-control-sm d-inline-block energy-input ui-input-margin" value="0" alt="<?= $l['graviton-level'] ?>"/></td>
           </tr>
         </table>
       </div>
@@ -300,12 +300,12 @@
       <table class="mx-auto">
         <tr>
           <td><label><?= $l['energy-produced'] ?></label></td>
-          <td><div id="energy-produced" class="form-control form-control-sm d-inline-block energy-show ui-input-margin">0</div></td>
+          <td><div id="energy-produced" class="form-control form-control-sm d-inline-block energy-show ui-input-margin ui-state-disabled">0</div></td>
           <td><label id="energy-requirement"></label></td>
         </tr>
         <tr>
           <td colspan="2"><label><?= $l['solar-satellites-needed'] ?></label></td>
-          <td><div id="solar-satellites-needed" class="form-control form-control-sm d-inline-block energy-show ui-input-margin">0</div></td>
+          <td><div id="solar-satellites-needed" class="form-control form-control-sm d-inline-block energy-show ui-input-margin ui-state-disabled">0</div></td>
         </tr>
       </table>
     </div>
@@ -316,11 +316,11 @@
       <table class="mx-auto">
         <tr>
           <td><label><?= $l['crystal'] ?></label></td>
-          <td><div id="crystal-required" class="form-control form-control-sm d-inline-block resource-show ui-input-margin">0</div></td>
+          <td><div id="crystal-required" class="form-control form-control-sm d-inline-block resource-show ui-input-margin ui-state-disabled">0</div></td>
           <td><label><?= $l['deuterium'] ?></label></td>
-          <td><div id="deuterium-required" class="form-control form-control-sm d-inline-block resource-show ui-input-margin">0</div></td>
+          <td><div id="deuterium-required" class="form-control form-control-sm d-inline-block resource-show ui-input-margin ui-state-disabled">0</div></td>
           <td><label><?= $l['time'] ?></label></td>
-          <td><div id="time-required" class="form-control form-control-sm d-inline-block time-show ui-input-margin">0</div></td>
+          <td><div id="time-required" class="form-control form-control-sm d-inline-block time-show ui-input-margin ui-state-disabled">0</div></td>
         </tr>
         <tr>
           <td><label for="crystal-available"><?= $l['res-available'] ?></label></td>
@@ -331,14 +331,14 @@
         </tr>
         <tr>
           <td><label><?= $l['res-needed'] ?></label></td>
-          <td><div id="crystal-to-deliver" class="form-control form-control-sm d-inline-block resource-show ui-input-margin">0</div></td>
+          <td><div id="crystal-to-deliver" class="form-control form-control-sm d-inline-block resource-show ui-input-margin ui-state-disabled">0</div></td>
           <td>&nbsp;</td>
-          <td><div id="deuterium-to-deliver" class="form-control form-control-sm d-inline-block resource-show ui-input-margin">0</div></td>
+          <td><div id="deuterium-to-deliver" class="form-control form-control-sm d-inline-block resource-show ui-input-margin ui-state-disabled">0</div></td>
           <td colspan="2">&nbsp;</td>
         </tr>
         <tr>
           <td><label><?= $l['cargoes'] ?></label></td>
-          <td colspan="5"><div id="cargoes" class="form-control form-control-sm d-inline-block transport-show ui-input-margin">0</div><i class="bi bi-question-circle" data-bs-toggle="tooltip" title="<?= $l['sc'] ?> / <?= $l['lc'] ?>"></i></td>
+          <td colspan="5"><div id="cargoes" class="form-control form-control-sm d-inline-block transport-show ui-input-margin ui-state-disabled">0</div><i class="bi bi-question-circle" data-bs-toggle="tooltip" title="<?= $l['sc'] ?> / <?= $l['lc'] ?>"></i></td>
         </tr>
       </table>
     </div>
@@ -367,24 +367,24 @@
         </tr>
         <tr>
           <td><label><?= $l['crystal'] ?></label></td>
-          <td><div id="crystal-recyclable" class="form-control form-control-sm d-inline-block resource-show ui-input-margin">0</div></td>
+          <td><div id="crystal-recyclable" class="form-control form-control-sm d-inline-block resource-show ui-input-margin ui-state-disabled">0</div></td>
           <td><label><?= $l['deuterium'] ?></label></td>
-          <td><div id="deuterium-recyclable" class="form-control form-control-sm d-inline-block resource-show ui-input-margin">0</div></td>
+          <td><div id="deuterium-recyclable" class="form-control form-control-sm d-inline-block resource-show ui-input-margin ui-state-disabled">0</div></td>
         </tr>
         <tr>
           <td><label><?= $l['recyclers'] ?></label></td>
-          <td><div id="recyclers" class="form-control form-control-sm d-inline-block energy-show ui-input-margin">0</div></td>
+          <td><div id="recyclers" class="form-control form-control-sm d-inline-block energy-show ui-input-margin ui-state-disabled">0</div></td>
           <td><label><?= $l['cargoes'] ?></label></td>
-          <td><div id="cargoes-for-df" class="form-control form-control-sm d-inline-block transport-show ui-input-margin">0</div></td>
+          <td><div id="cargoes-for-df" class="form-control form-control-sm d-inline-block transport-show ui-input-margin ui-state-disabled">0</div></td>
         </tr>
         <tr>
           <td>
             <label><?= $l['net-cost'] ?></label>
             <i class="bi bi-question-circle" data-bs-toggle="tooltip" title="<?= $l['net-cost-hint'] ?>"></i>
           </td>
-          <td><div id="net-crystal-required" class="form-control form-control-sm d-inline-block resource-show ui-input-margin">0</div></td>
+          <td><div id="net-crystal-required" class="form-control form-control-sm d-inline-block resource-show ui-input-margin ui-state-disabled">0</div></td>
           <td>&nbsp;</td>
-          <td><div id="net-deuterium-required" class="form-control form-control-sm d-inline-block resource-show ui-input-margin">0</div></td>
+          <td><div id="net-deuterium-required" class="form-control form-control-sm d-inline-block resource-show ui-input-margin ui-state-disabled">0</div></td>
         </tr>
       </table>
     </div>

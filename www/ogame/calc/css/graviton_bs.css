@@ -70,6 +70,19 @@
   text-align: center;
 }
 
+/* Every computed readout on this page is a <div class="form-control">, which can
+   carry neither `readonly´ nor `disabled´, so it wears the `ui-state-disabled´
+   marker instead — the same marker the flight and trade calculators use. It gets
+   the Bootstrap disabled-field fill rather than the legacy jQuery-UI fade: the
+   numbers are the answer the panel exists to give, so they have to stay fully
+   readable while still reading as not-editable. common_bs.css excludes the class
+   from the light-theme "lift editable controls" rule, which is what keeps these
+   divs on the panel tone instead of the editable one. */
+.ui-state-disabled {
+  background-color: var(--bs-secondary-bg);
+  cursor: default;
+}
+
 /* Read-only result fields (rendered as form-control divs) */
 .energy-show {
   width: 64px;
@@ -115,31 +128,6 @@
   opacity: 1;
   pointer-events: auto;
   display: block;
-}
-
-/* Tooltips (shared look with the costs / queue calculators) */
-.tooltip-inner {
-  background-color: var(--bs-secondary-bg);
-  color: var(--bs-body-color);
-  border: 1px solid var(--bs-border-color);
-  max-width: 250px;
-  text-align: left;
-}
-
-.tooltip.bs-tooltip-top .tooltip-arrow::before {
-  border-top-color: var(--bs-border-color);
-}
-
-.tooltip.bs-tooltip-bottom .tooltip-arrow::before {
-  border-bottom-color: var(--bs-border-color);
-}
-
-.tooltip.bs-tooltip-start .tooltip-arrow::before {
-  border-left-color: var(--bs-border-color);
-}
-
-.tooltip.bs-tooltip-end .tooltip-arrow::before {
-  border-right-color: var(--bs-border-color);
 }
 
 /* Responsive */
