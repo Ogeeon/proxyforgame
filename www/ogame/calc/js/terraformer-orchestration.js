@@ -58,7 +58,10 @@ var options = {
         case 'isTrader': return value === 'true';
         case 'energyBoost': return validateNumber(Number.parseInt(value), 0, 8, 0);
         case 'disChLevel': return validateNumber(Number.parseFloat(value), 0, 100, 0);
-        case 'totalLFEnrgBonus': return validateNumber(Number.parseFloat(value), 0, 100, 0);
+        // 999 matches the field's own _constrains: the blur validator already
+        // accepts anything up to 999, so a narrower bound here would only make a
+        // legitimately entered value vanish on the next page load.
+        case 'totalLFEnrgBonus': return validateNumber(Number.parseFloat(value), 0, 999, 0);
         case 'scCapacityIncrease': return validateNumber(Number.parseFloat(value), 0, 999, 0);
         case 'lcCapacityIncrease': return validateNumber(Number.parseFloat(value), 0, 999, 0);
         case 'tfSingleLevel': return value === 'true';
@@ -137,17 +140,47 @@ class TerraformerApp {
     setVal('#deuterium-available', options.prm.deutAvailable);
   }
 
+  /**
+   * Declare the min/max/def constraints the blur validator clamps against.
+   *
+   * Every numeric field needs one: without `_constrains` the validator falls
+   * back to `options.defConstraints`, whose -Infinity/Infinity bounds clamp
+   * nothing, so an out-of-range entry was accepted on blur, written to the
+   * cookie, and then silently snapped back to its default by
+   * `options.prm.validate` on the next page load. The ranges below therefore
+   * mirror `options.prm.validate`, and the clamp now happens where the user can
+   * see it (warning banner + corrected value).
+   */
   _applyConstraints() {
-    const shipyard = document.getElementById('shipyard-level');
-    if (shipyard) shipyard._constrains = { min: 1, def: 1 };
-    const temp = document.getElementById('max-planet-temp');
-    if (temp) temp._constrains = { min: -134, def: 0, allowNegative: true };
-    const lfBonus = document.getElementById('total-lf-energy-bonus');
-    if (lfBonus) lfBonus._constrains = { min: 0, max: 999, def: 0, allowNegative: false, allowFloat: true };
-    const scCap = document.getElementById('sc-capacity-increase');
-    if (scCap) scCap._constrains = { min: 0, max: 999, def: 0, allowNegative: false, allowFloat: true };
-    const lcCap = document.getElementById('lc-capacity-increase');
-    if (lcCap) lcCap._constrains = { min: 0, max: 999, def: 0, allowNegative: false, allowFloat: true };
+    const set = (id, constraints) => {
+      const el = document.getElementById(id);
+      if (el) el._constrains = constraints;
+    };
+    // Whole-number building/research level, 0..max.
+    const level = (max) => ({ min: 0, max, def: 0, allowNegative: false, allowFloat: false });
+    // Unbounded whole-number amount (satellites, resources on hand).
+    const amount = () => ({ min: 0, max: Infinity, def: 0, allowNegative: false, allowFloat: false });
+    // Fractional percentage bonus.
+    const percent = (max) => ({ min: 0, max, def: 0, allowNegative: false, allowFloat: true });
+
+    set('robots-factory-level', level(100));
+    set('shipyard-level', { min: 1, max: 100, def: 1, allowNegative: false, allowFloat: false });
+    set('nanites-factory-level', level(100));
+    set('energy-tech-level', level(50));
+    set('hyper-tech-level', level(50));
+    // The coldest planet in the game sits at -134 C; there is no upper bound.
+    set('max-planet-temp', { min: -134, max: Infinity, def: 0, allowNegative: true, allowFloat: false });
+    set('solar-plant-level', level(100));
+    set('fusion-plant-level', level(100));
+    set('solar-satellites-count', amount());
+    set('disr-chamber-level', level(100));
+    set('total-lf-energy-bonus', percent(999));
+    set('sc-capacity-increase', percent(999));
+    set('lc-capacity-increase', percent(999));
+    set('tf-level-from', level(100));
+    set('tf-level-to', level(100));
+    set('crystal-available', amount());
+    set('deuterium-available', amount());
   }
 
   _bindEvents() {
