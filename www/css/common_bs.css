@@ -249,3 +249,31 @@ abbr {
   flex: 0 0 auto;
   width: 3.5rem;
 }
+
+/* Tooltip skin shared by every calculator: the Bootstrap default is an opaque
+   black bubble that ignores the theme, so repaint it off the theme variables.
+   Kept here rather than restated in each `*_bs.css´ — the eight copies this
+   replaces were byte-identical.
+
+   The fill is set through --bs-tooltip-bg rather than on .tooltip-inner: that is
+   the variable Bootstrap's own arrow rules read, so the arrow follows the bubble
+   for free. The copies this replaces instead tried to colour the arrow with
+   `.tooltip.bs-tooltip-top .tooltip-arrow::before` and friends, which never
+   matched anything — BS5 marks placement with a `bs-tooltip-auto` class plus a
+   `data-popper-placement` attribute, so every calculator was drawing the themed
+   bubble with a black default arrow. */
+.tooltip {
+  --bs-tooltip-bg: var(--bs-secondary-bg);
+  --bs-tooltip-color: var(--bs-body-color);
+  /* A tooltip is informational and must never swallow a click. Without this, the
+     bubble of one control can cover its neighbour in a tight button row — the
+     flight departure shortcuts, `(now)´ and `(00:00:00)´, sit close enough that
+     auto-placement puts one bubble straight over the other button. */
+  pointer-events: none;
+}
+
+.tooltip-inner {
+  border: 1px solid var(--bs-border-color);
+  max-width: 250px;
+  text-align: left;
+}
