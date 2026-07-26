@@ -678,6 +678,7 @@ if (typeof window !== 'undefined') {
     // Values
     getVal,
     setVal,
+    setNumVal,
     getChecked,
     setChecked,
 
