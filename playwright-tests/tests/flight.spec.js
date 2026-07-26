@@ -136,6 +136,37 @@ test.describe('Flight Calculator - Spy Report Import', () => {
         await expect(page.locator('#speed-fleet-holding')).toHaveValue('1');
     });
 
+    // The imported universe can be a ring along one axis only, so each donut
+    // flag has to reach the checkbox of its own axis.
+    test('imports each donut setting onto the checkbox of its own axis', async ({ page }) => {
+        // Selecting the imported universe also asks the OGame API for its live
+        // settings, and that answer would land on the same two checkboxes; keep
+        // it away so only the import writes them.
+        await page.route(/\/ajax\.php\?.*service=serverdata/, (route) => route.fulfill({ status: 503 }));
+
+        // Routes registered later win, so this overrides the fixture route above
+        await page.route('/ajax.php', async (route, request) => {
+            if ((request.postData() ?? '').includes('service=ogameAPI')) {
+                await route.fulfill({
+                    status: 200,
+                    contentType: 'text/plain',
+                    body: SR_FIXTURE.replace('donutGalaxy":"1"', 'donutGalaxy":"0"'),
+                });
+            } else {
+                await route.continue();
+            }
+        });
+
+        await openParams(page);
+        await page.locator('#api-code').fill(SR_CODE);
+        await page.locator('#api-get').click();
+        await page.waitForFunction(() => !document.querySelector('.panel-overlay'), { timeout: 5000 });
+
+        await showParamTab(page, '#circular-galaxies');
+        await expect(page.locator('#circular-galaxies')).not.toBeChecked();
+        await expect(page.locator('#circular-systems')).toBeChecked();
+    });
+
     test('shows an error when the server answer is not usable', async ({ page }) => {
         let alertMsg = '';
         page.on('dialog', d => { alertMsg = d.message(); d.accept(); });
@@ -207,6 +238,24 @@ test.describe('Flight Calculator - Server data fetch', () => {
         // ...and uncovers it once the answer lands
         await expect(page.locator('.panel-overlay')).toHaveCount(0, { timeout: 5000 });
         await expect(page.locator('#galaxies-num')).toHaveValue('9');
+    });
+
+    // A universe can be a ring along one axis and a straight line along the
+    // other, so each donut flag has to reach the checkbox of its own axis.
+    test('each donut setting lands on the checkbox of its own axis', async ({ page }) => {
+        const ringedGalaxies = SERVER_DATA.replace('"donutSystem":"1"', '"donutSystem":"0"');
+        await page.route(/\/ajax\.php\?.*service=serverdata/, async (route) => {
+            await route.fulfill({ status: 200, contentType: 'application/json', body: ringedGalaxies });
+        });
+
+        await openParams(page, '#country');
+        await page.locator('#country').selectOption('en');
+        await page.locator('#universe').selectOption({ index: 0 });
+        await expect(page.locator('.panel-overlay')).toHaveCount(0, { timeout: 5000 });
+
+        await showParamTab(page, '#circular-galaxies');
+        await expect(page.locator('#circular-galaxies')).toBeChecked();
+        await expect(page.locator('#circular-systems')).not.toBeChecked();
     });
 });
 

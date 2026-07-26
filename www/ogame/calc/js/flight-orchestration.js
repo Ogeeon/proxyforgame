@@ -929,8 +929,10 @@ class FlightOrchestrator {
             this._selectOption('speed-fleet-war', json.speedFleetWar);
             this._selectOption('speed-fleet-peaceful', json.speedFleetPeaceful);
             this._selectOption('speed-fleet-holding', json.speedFleetHolding);
-            setChecked('#circular-systems', json.donutGalaxy == 1);
-            setChecked('#circular-galaxies', json.donutSystem == 1);
+            // donutGalaxy is the ring over the galaxy axis, donutSystem the one
+            // over the systems — each drives the checkbox of its own axis.
+            setChecked('#circular-galaxies', json.donutGalaxy == 1);
+            setChecked('#circular-systems', json.donutSystem == 1);
             setVal('#systems-num', json.systems);
             setVal('#galaxies-num', json.galaxies);
             setVal('#sp-cargohold', json.probeCargo);
@@ -1123,8 +1125,8 @@ class FlightOrchestrator {
         if (rd.generic.defender_alliance_class_id == 2) {
             setChecked('#trader-bonus', true);
         }
-        setChecked('#circular-systems', rd.universes.donutGalaxy == 1);
-        setChecked('#circular-galaxies', rd.universes.donutSystem == 1);
+        setChecked('#circular-galaxies', rd.universes.donutGalaxy == 1);
+        setChecked('#circular-systems', rd.universes.donutSystem == 1);
         setVal('#systems-num', rd.universes.systems);
         setVal('#galaxies-num', rd.universes.galaxies);
         setVal('#sp-cargohold', rd.universes.probeCargo);
