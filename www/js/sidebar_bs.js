@@ -260,6 +260,27 @@ function fillChangelogTable(changes) {
     }
 }
 
+// Bootstrap tooltips default to trigger "hover focus", so after a click the button keeps
+// focus and its tooltip stays pinned over it until focus moves elsewhere. Hide it in the
+// capture phase, before the page handler runs and possibly re-renders or removes the row.
+// Form fields are skipped: there the focus-driven tooltip is the intended behaviour
+// (e.g. the crawler-limit hint attached in production-orchestration.js).
+document.addEventListener('click', function (event) {
+    if (typeof bootstrap === 'undefined' || !bootstrap.Tooltip) return;
+    const target = event.target;
+    if (!target || typeof target.closest !== 'function') return;
+    const el = target.closest('[data-bs-toggle="tooltip"]');
+    if (!el || el.matches('input, select, textarea')) return;
+    const instance = bootstrap.Tooltip.getInstance(el);
+    if (!instance) return;
+    instance.hide();
+    // The mouseenter right before the click queues the show through a timeout, so on a
+    // fast click the tooltip is not on screen yet and hide() above is a no-op. Repeat it
+    // on the next task: hide() is harmless when nothing is shown, and it is what clears
+    // the focus trigger that would otherwise keep the bubble pinned to the button.
+    setTimeout(() => instance.hide(), 0);
+}, true);
+
 document.addEventListener('DOMContentLoaded', function() {
     reportModal = new bootstrap.Modal(document.getElementById('reportModal'));
     emailModal = new bootstrap.Modal(document.getElementById('emailModal'));

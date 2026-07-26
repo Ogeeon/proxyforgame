@@ -374,7 +374,6 @@ class QueueCalculatorApp {
 
   _onBuildClick(event, state) {
     const btn = event.currentTarget;
-    this._hideTooltip(btn);
     const techId = Number.parseInt(btn.getAttribute('data-tech'), 10);
     if (!techId) return;
     state.queue.push([techId, 1]);
@@ -383,7 +382,6 @@ class QueueCalculatorApp {
 
   _onDestroyClick(event, state) {
     const btn = event.currentTarget;
-    this._hideTooltip(btn);
     const techId = Number.parseInt(btn.getAttribute('data-tech'), 10);
     if (!techId || NON_DESTROYABLE_TECHS.has(techId)) return;
     // Don't enqueue a destroy that would push the building below 0
@@ -391,15 +389,6 @@ class QueueCalculatorApp {
     if (projectedLevel <= 0) return;
     state.queue.push([techId, 0]);
     this._refreshTab(state.tabNum);
-  }
-
-  // Hide the Bootstrap tooltip on a freshly clicked button. Without this the
-  // button keeps focus after the click and the tooltip (trigger "hover focus")
-  // stays visible on top of the button.
-  _hideTooltip(el) {
-    if (typeof bootstrap === 'undefined' || !bootstrap.Tooltip) return;
-    const inst = bootstrap.Tooltip.getInstance(el);
-    if (inst) inst.hide();
   }
 
   _projectedLevel(state, techId) {

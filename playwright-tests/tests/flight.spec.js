@@ -1304,6 +1304,19 @@ test.describe('Flight Calculator - Arrival Time', () => {
         expect(await page.evaluate(() => options.prm.startDT)).toBeGreaterThan(0);
     });
 
+    test('clicking the departure shortcut dismisses its tooltip', async ({ page }) => {
+        const button = page.locator('#set-departure-now');
+        await button.hover();
+        // Bootstrap points the trigger at the live bubble through aria-describedby
+        await expect(button).toHaveAttribute('aria-describedby', /tooltip/);
+
+        await button.click();
+
+        await expect(button).not.toHaveAttribute('aria-describedby', /tooltip/);
+        // The midnight shortcut clicked in beforeEach must not have left one behind either
+        await expect(page.locator('.tooltip')).toHaveCount(0);
+    });
+
     test('swapping the mode relabels departure and arrival', async ({ page }) => {
         const first = await page.locator('#flight-title-1').innerText();
         const second = await page.locator('#flight-title-2').innerText();
