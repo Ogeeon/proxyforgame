@@ -204,13 +204,38 @@
   width: max-content;
 }
 
+/* The regular and the recall pane hold different controls, and the panel is
+   sized to its content — left alone, it would jump width on every tab switch
+   and hand the slack back and forth with the results table. Stacking both panes
+   in one grid cell lets the wider one size the panel for good; the inactive one
+   keeps its box and is swapped out by visibility rather than display. */
+.arrival-panel .tab-content {
+  display: grid;
+}
+
+.arrival-panel .tab-content > .tab-pane {
+  display: block;
+  grid-area: 1 / 1;
+  visibility: hidden;
+}
+
+.arrival-panel .tab-content > .tab-pane.active {
+  visibility: visible;
+}
+
 /* The rest of the arrival panel is centred as one column: the date fields are
    narrower than the panel, so they need the auto margins, and the leg rows are
    flex. Done here rather than with utility classes because the leg row markup
    also lives in flight-orchestration.js, which builds added rows.
    Only the two head buttons stay pinned right, via the grid above. */
-.arrival-panel > .form-control {
+.arrival-panel .tab-pane > .form-control {
   margin-inline: auto;
+}
+
+/* Each recall mode is a radio with the field it drives directly beneath it, so
+   the two stay visibly paired once they sit one above the other. */
+.recall-modes > div + div {
+  margin-top: 0.25rem;
 }
 
 .arrival-panel .flight-leg {

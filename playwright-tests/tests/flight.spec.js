@@ -1959,3 +1959,241 @@ test.describe('Flight Calculator - Persistence', () => {
         await expect(page.locator('#large-cargo')).toHaveValue('0');
     });
 });
+
+test.describe('Flight Calculator - Fleet Recall', () => {
+    test.beforeEach(async ({ context, page }) => {
+        await context.addInitScript(() => {
+            localStorage.setItem('lastChange', 'key-value;true,value;99999');
+        });
+        await page.goto('/ogame/calc/flight.php');
+        await installCompat(page);
+        await page.locator('#tabtag1').click();
+    });
+
+    /** Switches the departure panel to its Recall tab and waits for the pane. */
+    async function openRecallTab(page) {
+        await page.locator('#recall-tabtag-recall').click();
+        await expect(page.locator('#recall-start-datetime')).toBeVisible();
+    }
+
+    /**
+     * Writes the read-only "Full flight" field the way take-to-calc does. The
+     * field is disabled, so a test cannot type into it.
+     */
+    const setFullFlight = (page, text) => page.evaluate((t) => {
+        const el = document.getElementById('recall-full-flight');
+        el.value = t;
+        el.dispatchEvent(new Event('input', { bubbles: true }));
+    }, text);
+
+    /** The day portion of the recall departure, so tests can build sibling moments. */
+    async function departureDay(page) {
+        const value = await page.locator('#recall-start-datetime').inputValue();
+        return value.slice(0, 10);
+    }
+
+    const fillMasked = async (page, selector, text) => {
+        await page.locator(selector).fill(text);
+        await page.locator(selector).press('End');
+    };
+
+    const returnMoment = (page) => page.locator('#recall-return-moment').innerText();
+
+    // ---- structure -------------------------------------------------------
+
+    test('the departure panel is split into Regular and Recall tabs', async ({ page }) => {
+        await expect(page.locator('#recall-tabtag-regular')).toBeVisible();
+        await expect(page.locator('#recall-tabtag-recall')).toBeVisible();
+        await expect(page.locator('#recall-tabtag-regular')).toHaveClass(/active/);
+
+        // The Regular tab still holds the untouched arrival calculator
+        await expect(page.locator('#start-datetime')).toBeVisible();
+        await expect(page.locator('#flight-time')).toBeVisible();
+        await expect(page.locator('#arrival-moment')).toBeVisible();
+        await expect(page.locator('#recall-start-datetime')).toBeHidden();
+    });
+
+    test('the Recall tab carries its own departure, full flight and return fields', async ({ page }) => {
+        await openRecallTab(page);
+
+        await expect(page.locator('#set-recall-departure-now')).toBeVisible();
+        await expect(page.locator('#set-recall-departure-zero')).toBeVisible();
+        await expect(page.locator('#recall-full-flight')).toBeDisabled();
+        await expect(page.locator('#recall-full-flight')).toHaveValue('00 00:00:00');
+        await expect(page.locator('#recall-return-moment')).toHaveText('?');
+    });
+
+    test('the recall mode defaults to the exact moment with both fields disabled', async ({ page }) => {
+        await openRecallTab(page);
+
+        await expect(page.locator('#recall-mode-0')).toBeChecked();
+        await expect(page.locator('#recall-mode-1')).not.toBeChecked();
+        // Neither departure nor full flight is known yet
+        await expect(page.locator('#recall-moment')).toBeDisabled();
+        await expect(page.locator('#recall-after')).toBeDisabled();
+        await expect(page.locator('#recall-after')).toHaveValue('00 00:00:00');
+    });
+
+    // ---- full flight from the results table -------------------------------
+
+    test('the take-to-calc button fills the full flight field', async ({ page }) => {
+        await setFleet(page, { 'large-cargo': 5 });
+        await page.locator('#destination-s').fill('50');
+        await page.evaluate(() => updateNumbers());
+
+        await speedRows(page).nth(0).locator('.button-taketocalc').click();
+        await openRecallTab(page);
+
+        const full = await page.locator('#recall-full-flight').inputValue();
+        expect(full).not.toBe('00 00:00:00');
+        expect(await page.evaluate(() => options.prm.recallFullFlight))
+            .toBe(await page.evaluate(() => options.prm.flightData[0]));
+    });
+
+    test('a second take-to-calc replaces the full flight instead of adding to it', async ({ page }) => {
+        await setFleet(page, { 'large-cargo': 5 });
+        await page.locator('#destination-s').fill('50');
+        await page.evaluate(() => updateNumbers());
+
+        await speedRows(page).nth(0).locator('.button-taketocalc').click(); // 100%
+        await openRecallTab(page);
+        const first = await page.locator('#recall-full-flight').inputValue();
+
+        await page.locator('#recall-tabtag-regular').click();
+        await speedRows(page).nth(4).locator('.button-taketocalc').click(); // a slower row
+        await openRecallTab(page);
+        const second = await page.locator('#recall-full-flight').inputValue();
+
+        expect(second).not.toBe(first);
+        // The leg list accumulates both rows, so it pins down what each one was
+        const legs = await page.evaluate(() => options.prm.flightData);
+        expect(legs).toHaveLength(2);
+        const full = await page.evaluate(() => options.prm.recallFullFlight);
+        // Replaced: the latest row on its own, not the two of them added up
+        expect(full).toBe(legs[1]);
+        expect(full).not.toBe(legs[0] + legs[1]);
+        expect(await page.evaluate((t) => getSecondsFromTimeField(t), second)).toBe(legs[1]);
+    });
+
+    // ---- enabling the recall inputs ---------------------------------------
+
+    test('the recall inputs stay disabled until departure and full flight are both known', async ({ page }) => {
+        await openRecallTab(page);
+        await page.locator('#set-recall-departure-zero').click();
+
+        // Departure alone is not enough
+        await expect(page.locator('#recall-moment')).toBeDisabled();
+
+        await setFullFlight(page, '00 05:00:00');
+        await expect(page.locator('#recall-moment')).toBeEnabled();
+        // The unselected mode keeps its field locked
+        await expect(page.locator('#recall-after')).toBeDisabled();
+    });
+
+    test('picking a recall mode moves the enabled field', async ({ page }) => {
+        await openRecallTab(page);
+        await page.locator('#set-recall-departure-zero').click();
+        await setFullFlight(page, '00 05:00:00');
+
+        await page.locator('#recall-mode-1').check();
+        await expect(page.locator('#recall-after')).toBeEnabled();
+        await expect(page.locator('#recall-moment')).toBeDisabled();
+
+        await page.locator('#recall-mode-0').check();
+        await expect(page.locator('#recall-moment')).toBeEnabled();
+        await expect(page.locator('#recall-after')).toBeDisabled();
+    });
+
+    // ---- the exact-moment mode --------------------------------------------
+
+    test('a recall moment before the departure is flagged and blocks the result', async ({ page }) => {
+        await openRecallTab(page);
+        await page.locator('#set-recall-departure-zero').click();
+        await setFullFlight(page, '00 05:00:00');
+
+        const day = await departureDay(page);
+        const [d, m, y] = day.split('.').map(Number);
+        const previous = new Date(y, m - 1, d - 1);
+        const pad = (n) => String(n).padStart(2, '0');
+        await fillMasked(page, '#recall-moment',
+            `${pad(previous.getDate())}.${pad(previous.getMonth() + 1)}.${previous.getFullYear()} 12:00:00`);
+
+        await expect(page.locator('#recall-moment')).toHaveClass(/is-invalid/);
+        expect(await returnMoment(page)).toBe('?');
+    });
+
+    test('a valid recall moment fills in the elapsed time and the return', async ({ page }) => {
+        await openRecallTab(page);
+        await page.locator('#set-recall-departure-zero').click();
+        await setFullFlight(page, '00 05:00:00');
+
+        const day = await departureDay(page);
+        await fillMasked(page, '#recall-moment', `${day} 02:00:00`);
+
+        await expect(page.locator('#recall-moment')).not.toHaveClass(/is-invalid/);
+        // Two hours after a midnight departure
+        await expect(page.locator('#recall-after')).toHaveValue('00 02:00:00');
+        // ...and two more hours to fly home
+        expect(await returnMoment(page)).toBe(`${day} 04:00:00`);
+    });
+
+    test('the way home is never longer than the full flight', async ({ page }) => {
+        await openRecallTab(page);
+        await page.locator('#set-recall-departure-zero').click();
+        await setFullFlight(page, '00 01:00:00');
+
+        const day = await departureDay(page);
+        // Recalled three hours in, but the whole trip only lasts one hour
+        await fillMasked(page, '#recall-moment', `${day} 03:00:00`);
+
+        expect(await returnMoment(page)).toBe(`${day} 04:00:00`);
+    });
+
+    // ---- the after-given-time mode ----------------------------------------
+
+    test('an elapsed time fills in the recall moment and the return', async ({ page }) => {
+        await openRecallTab(page);
+        await page.locator('#set-recall-departure-zero').click();
+        await setFullFlight(page, '00 05:00:00');
+        await page.locator('#recall-mode-1').check();
+
+        const day = await departureDay(page);
+        await fillMasked(page, '#recall-after', '00 02:00:00');
+
+        await expect(page.locator('#recall-moment')).toHaveValue(`${day} 02:00:00`);
+        expect(await returnMoment(page)).toBe(`${day} 04:00:00`);
+    });
+
+    test('an elapsed time longer than the full flight still caps the way home', async ({ page }) => {
+        await openRecallTab(page);
+        await page.locator('#set-recall-departure-zero').click();
+        await setFullFlight(page, '00 01:00:00');
+        await page.locator('#recall-mode-1').check();
+
+        const day = await departureDay(page);
+        await fillMasked(page, '#recall-after', '00 03:00:00');
+
+        await expect(page.locator('#recall-moment')).toHaveValue(`${day} 03:00:00`);
+        expect(await returnMoment(page)).toBe(`${day} 04:00:00`);
+    });
+
+    // ---- reset -------------------------------------------------------------
+
+    test('reset restores the recall defaults', async ({ page }) => {
+        await openRecallTab(page);
+        await page.locator('#set-recall-departure-zero').click();
+        await setFullFlight(page, '00 05:00:00');
+        await page.locator('#recall-mode-1').check();
+        await fillMasked(page, '#recall-after', '00 02:00:00');
+
+        await page.locator('#reset').click();
+        await openRecallTab(page);
+
+        await expect(page.locator('#recall-start-datetime')).toHaveValue('');
+        await expect(page.locator('#recall-full-flight')).toHaveValue('00 00:00:00');
+        await expect(page.locator('#recall-after')).toHaveValue('00 00:00:00');
+        await expect(page.locator('#recall-mode-0')).toBeChecked();
+        await expect(page.locator('#recall-moment')).toBeDisabled();
+        expect(await returnMoment(page)).toBe('?');
+    });
+});

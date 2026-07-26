@@ -123,6 +123,11 @@ class FlightRenderer {
         this._setText('arrival-moment', text ?? '?');
     }
 
+    /** The moment a recalled fleet is back home, or `?` while it is unknown. */
+    renderRecallReturn(text) {
+        this._setText('recall-return-moment', text ?? '?');
+    }
+
     /** Toggle the departure/arrival column titles for the reversed mode. */
     renderFlightTitles(mode) {
         const departureFirst = mode !== 1;

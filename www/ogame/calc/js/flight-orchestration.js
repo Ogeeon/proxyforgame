@@ -36,6 +36,13 @@ var options = {
         saveReturnDT: 0,
         saveTolerance: 0,
         saveOneWay: false,
+        // Fleet recall: the outbound flight being interrupted, plus whichever of
+        // the two recall fields the picked mode drives.
+        recallStartDT: 0,
+        recallFullFlight: 0,
+        recallMode: 0,
+        recallMomentDT: 0,
+        recallElapsed: 0,
         mode: 0,
         missionType: 1,
         hyperTechLvl: 0,
@@ -74,11 +81,16 @@ var options = {
                 case 'saveStartDT':
                 case 'saveReturnDT':
                 case 'saveTolerance':
+                case 'recallStartDT':
+                case 'recallFullFlight':
+                case 'recallMomentDT':
+                case 'recallElapsed':
                 case 'hyperTechLvl':
                 case 'lfMechanGE':
                 case 'lfRocktalCE':
                 case 'lfShipsBonuses': return validateNumber(parseFloat(value), 0, Infinity, 0);
-                case 'mode': return validateNumber(parseFloat(value), 0, 1, 0);
+                case 'mode':
+                case 'recallMode': return validateNumber(parseFloat(value), 0, 1, 0);
                 case 'flightData': return validateNumber(parseFloat(value), -Infinity, Infinity, 0);
                 case 'spCargohold': return validateNumber(parseFloat(value), 0, 5, 0);
                 default: return value;
@@ -306,6 +318,113 @@ class FlightOrchestrator {
             return -1;
         }
         return days * 86400 + hours * 3600 + minutes * 60 + seconds;
+    }
+
+    // ------------------------------------------------------------------
+    // Fleet recall — the second departure-panel tab
+    // ------------------------------------------------------------------
+
+    /**
+     * Recompute the recall tab from its three inputs.
+     *
+     * A recall needs both halves of the picture: when the fleet left, and how
+     * long the whole outbound flight would have taken. Until both are known the
+     * two recall fields stay locked. Once they are, the mode radio decides which
+     * field the user drives and which one this fills in from it — they always
+     * describe the same recall, only in different units.
+     */
+    updateRecall() {
+        const prm = this.opts.prm;
+        const moment = document.getElementById('recall-moment');
+        const after = document.getElementById('recall-after');
+        if (!moment || !after) {
+            return;
+        }
+
+        const startText = this.collector.text('recall-start-datetime');
+        const startValid = this._markDate('recall-start-datetime', startText);
+        prm.recallStartDT = startValid ? parseDate(startText, this.opts.datetimeFormat) : 0;
+
+        const fullSeconds = this._legSeconds(this.collector.text('recall-full-flight'));
+        prm.recallFullFlight = fullSeconds > 0 ? fullSeconds : 0;
+        prm.recallMode = getChecked('#recall-mode-1') ? 1 : 0;
+
+        const ready = prm.recallStartDT > 0 && prm.recallFullFlight > 0;
+        moment.disabled = !(ready && prm.recallMode === 0);
+        after.disabled = !(ready && prm.recallMode === 1);
+
+        if (!ready) {
+            this.renderer.markField(moment, true);
+            this.renderer.markField(after, true);
+            this.renderer.renderRecallReturn(null);
+            this.opts.save();
+            return;
+        }
+
+        const elapsed = prm.recallMode === 0
+            ? this._recallElapsedFromMoment(prm.recallStartDT, moment)
+            : this._recallElapsedFromDuration(prm.recallStartDT, after);
+        if (elapsed < 0) {
+            this.renderer.renderRecallReturn(null);
+            this.opts.save();
+            return;
+        }
+
+        prm.recallElapsed = elapsed;
+        prm.recallMomentDT = prm.recallStartDT + elapsed * 1000;
+        // Turning back cannot take longer than the outbound flight it cuts
+        // short: past the arrival there is nothing left to recall from.
+        const wayHome = Math.min(elapsed, prm.recallFullFlight);
+        this.renderer.renderRecallReturn(
+            getDateStr(prm.recallMomentDT + wayHome * 1000, this.opts.datetimeFormat));
+        this.opts.save();
+    }
+
+    /**
+     * Seconds between departure and the typed recall moment, mirroring them into
+     * the elapsed field. Returns -1 when the moment is unusable — blank, badly
+     * formed, or, the one case the panel calls out as an error, before take-off.
+     */
+    _recallElapsedFromMoment(departure, field) {
+        if (!this._markDate('recall-moment', field.value)) {
+            return -1;
+        }
+        const parsed = parseDate(field.value, this.opts.datetimeFormat);
+        if (parsed === 0) {
+            return -1;
+        }
+        const elapsed = Math.round((parsed - departure) / 1000);
+        if (elapsed < 0) {
+            this.renderer.markField(field, false);
+            return -1;
+        }
+        setVal('#recall-after', getFlightTimeStr(elapsed));
+        return elapsed;
+    }
+
+    /** The mirror image: a typed elapsed time fills the recall moment in. */
+    _recallElapsedFromDuration(departure, field) {
+        const elapsed = this._legSeconds(field.value);
+        this.renderer.markField(field, elapsed >= 0);
+        if (elapsed < 0) {
+            return -1;
+        }
+        setVal('#recall-moment', getDateStr(departure + elapsed * 1000, this.opts.datetimeFormat));
+        return elapsed;
+    }
+
+    setRecallDepartureNow() {
+        this.opts.prm.recallStartDT = Date.now();
+        setVal('#recall-start-datetime', getDateStr(this.opts.prm.recallStartDT, this.opts.datetimeFormat));
+        this.updateRecall();
+    }
+
+    setRecallDepartureZero() {
+        const d = new Date();
+        d.setHours(0, 0, 0, 0);
+        this.opts.prm.recallStartDT = d.getTime();
+        setVal('#recall-start-datetime', getDateStr(this.opts.prm.recallStartDT, this.opts.datetimeFormat));
+        this.updateRecall();
     }
 
     /** Mark a date field valid/invalid, leaving an empty field unmarked. */
@@ -601,6 +720,11 @@ class FlightOrchestrator {
         setVal('#save-start-datetime', getDateStr(prm.saveStartDT, this.opts.datetimeFormat));
         setVal('#save-return-datetime', getDateStr(prm.saveReturnDT, this.opts.datetimeFormat));
         setVal('#save-tolerance-time', getTimeStr(prm.saveTolerance));
+        setVal('#recall-start-datetime', getDateStr(prm.recallStartDT, this.opts.datetimeFormat));
+        setVal('#recall-full-flight', getFlightTimeStr(prm.recallFullFlight));
+        setVal('#recall-moment', getDateStr(prm.recallMomentDT, this.opts.datetimeFormat));
+        setVal('#recall-after', getFlightTimeStr(prm.recallElapsed));
+        setChecked(`#recall-mode-${prm.recallMode}`, true);
         setChecked('#save-one-way', prm.saveOneWay);
         this.renderer.renderSavePointMode(prm.saveOneWay);
         setChecked(`#class-${prm.playerClass}`, true);
@@ -821,6 +945,10 @@ class FlightOrchestrator {
         const duration = this.calc.getFlightDuration(minSpeed, distance, percent, fleetSpeed);
         const sign = this.opts.prm.mode === 1 ? -1 : 1;
         this.addFlightLeg(sign * duration);
+        // The recall tab tracks a single outbound flight rather than a list of
+        // legs, so a row picked later replaces the one picked before.
+        setVal('#recall-full-flight', getFlightTimeStr(duration));
+        this.updateRecall();
         this.opts.save();
     }
 
@@ -888,6 +1016,7 @@ class FlightOrchestrator {
             departure: [1, 1, 1], destination: [1, 1, 1],
             ships: new Array(15).fill(0),
             startDT: 0, saveStartDT: 0, saveReturnDT: 0, saveTolerance: 0, saveOneWay: false,
+            recallStartDT: 0, recallFullFlight: 0, recallMode: 0, recallMomentDT: 0, recallElapsed: 0,
             hyperTechLvl: 0, playerClass: 0, traderBonus: false, spCargohold: 0,
             lfMechanGE: 0, lfRocktalCE: 0,
             lfShipsBonuses: Array.from({ length: 15 }, () => [0, 0, 0]),
@@ -914,6 +1043,7 @@ class FlightOrchestrator {
         this.restoreFlightLegs();
         this.recalc();
         this.updateArrival();
+        this.updateRecall();
     }
 
     // ------------------------------------------------------------------
@@ -1396,6 +1526,8 @@ class FlightOrchestrator {
         this.opts.prm.mode = this.opts.prm.mode === 0 ? 1 : 0;
         this.toggleMode();
         this.restoreFlightLegs();
+        // Settles which recall fields are reachable for the restored state.
+        this.updateRecall();
 
         this._restoreActiveTab();
 
@@ -1413,7 +1545,8 @@ class FlightOrchestrator {
      * rows are built at run time, so _wireLegRow masks each new one as well.
      */
     _initMasks() {
-        ['start-datetime', 'save-start-datetime', 'save-return-datetime'].forEach((id) =>
+        ['start-datetime', 'save-start-datetime', 'save-return-datetime',
+            'recall-start-datetime', 'recall-moment'].forEach((id) =>
             attachInputMask(document.getElementById(id), this.opts.datetimeFormat));
         attachInputMask(document.getElementById('save-tolerance-time'), this.opts.toleranceTimeFormat);
         document.querySelectorAll('input.flight-time-input').forEach((el) =>
@@ -1463,6 +1596,8 @@ class FlightOrchestrator {
         on('set-departure-now', 'click', () => this.setDepartureNow());
         on('set-departure-zero', 'click', () => this.setDepartureZero());
         on('set-save-departure-now', 'click', () => this.setSaveDepartureNow());
+        on('set-recall-departure-now', 'click', () => this.setRecallDepartureNow());
+        on('set-recall-departure-zero', 'click', () => this.setRecallDepartureZero());
         on('add-flight-time', 'click', () => this.addFlightLeg({}));
         on('toggle-mode', 'click', () => this.toggleMode());
         on('warrior-bonus', 'click', (e) => this.toggleAllianceBonus(e));
@@ -1473,6 +1608,14 @@ class FlightOrchestrator {
         // so that is the event to listen on rather than keyup.
         on('start-datetime', 'input', () => this.updateArrival());
         on('start-datetime', 'blur', () => this.updateArrival());
+        // `recall-full-flight´ is disabled, so it only ever sees the `input´
+        // event take-to-calc dispatches on it by hand.
+        ['recall-start-datetime', 'recall-moment', 'recall-after', 'recall-full-flight'].forEach((id) => {
+            on(id, 'input', () => this.updateRecall());
+            on(id, 'blur', () => this.updateRecall());
+        });
+        document.querySelectorAll('input[name="recall-mode"]').forEach((el) =>
+            el.addEventListener('change', () => this.updateRecall()));
         ['save-start-datetime', 'save-return-datetime', 'save-tolerance-time'].forEach((id) => {
             on(id, 'input', () => this._validateSavePointForm());
             on(id, 'blur', () => this._validateSavePointForm());

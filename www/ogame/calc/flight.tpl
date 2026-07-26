@@ -65,6 +65,7 @@
     options.msgDepartureAfterArrival = "<?= $l['msg-departure-after-arrival'] ?>";
     options.msgWrongTolerance = "<?= $l['msg-wrong-tolerance'] ?>";
     options.msgWrongDepartureCoordinates = "<?= $l['msg-wrong-departure-coordinates'] ?>";
+    options.msgRecallBeforeDeparture = "<?= $l['msg-recall-before-departure'] ?>";
     options.msgNoSavepointsFound = "<?= $l['msg-no-savepoints-found'] ?>";
     options.flightmodesNote = "<?= $l['flightmodes-note'] ?>";
     options.savepointsNote = "<?= $l['savepoints-note'] ?>";
@@ -508,31 +509,85 @@
               </table>
             </td>
             <td valign="top" class="ps-2 arrival-cell">
-              <div class="border rounded p-2 arrival-panel">
-                <div class="flight-panel-head">
-                  <span id="flight-title-1" class="fw-bold flight-panel-title"><?= $l['departure'] ?></span>
-                  <div id="toggle-mode" class="btn btn-sm btn-outline-secondary" data-bs-toggle="tooltip" title="<?= $l['toggle-mode'] ?>"><i class="bi bi-arrow-left-right"></i></div>
-                </div>
-                <div class="d-flex justify-content-center gap-1 my-1">
-                  <button id="set-departure-now" type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="tooltip" title="<?= $l['departure-now-hint'] ?>"><?= $l['departure-now'] ?></button>
-                  <button id="set-departure-zero" type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="tooltip" title="<?= $l['departure-zero-hint'] ?>">(00:00:00)</button>
-                </div>
-                <input type="text" id="start-datetime" class="form-control form-control-sm startdate-input" placeholder="dd.mm.yyyy hh:mm:ss" title="<?= $l['datetime-format-hint'] ?>"/>
-                <div class="flight-panel-head my-1">
-                  <span class="fw-bold flight-panel-title"><?= $l['flight'] ?></span>
-                  <div id="add-flight-time" class="btn btn-sm btn-outline-secondary" data-bs-toggle="tooltip" title="<?= $l['add-row'] ?>"><i class="bi bi-plus-lg"></i></div>
-                </div>
-                <div id="flight-data">
-                  <div class="d-flex align-items-center gap-1 mb-1 flight-leg">
-                    <button type="button" class="btn btn-sm btn-outline-secondary button-toggle flight-leg-sign" data-sign="+" data-bs-toggle="tooltip" title="<?= $l['toggle-sign'] ?>"><i class="bi bi-plus-lg"></i></button>
-                    <input id="flight-time" type="text" class="form-control form-control-sm flight-time-input" placeholder="dd hh:mm:ss" title="<?= $l['flight-time-format-hint'] ?>"/>
-                    <button type="button" class="btn btn-sm btn-outline-danger button-remove" data-bs-toggle="tooltip" title="<?= $l['remove-row'] ?>"><i class="bi bi-x-lg"></i></button>
+              <div class="arrival-panel">
+                <!-- The two departure modes: the plain leg-by-leg arrival
+                     calculator, and the recall of a fleet already under way. -->
+                <ul class="nav nav-tabs" id="recall-tabs" role="tablist">
+                  <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="recall-tabtag-regular" data-bs-toggle="tab" data-bs-target="#departure-regular-panel" type="button" role="tab"><?= $l['recall-tab-regular'] ?></button>
+                  </li>
+                  <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="recall-tabtag-recall" data-bs-toggle="tab" data-bs-target="#departure-recall-panel" type="button" role="tab"><?= $l['recall'] ?></button>
+                  </li>
+                </ul>
+                <!-- No `fade´: the panes are grid-stacked and swapped by
+                     visibility, so an opacity transition has nothing to do. -->
+                <div class="tab-content border border-top-0 rounded-bottom p-2">
+
+                  <div class="tab-pane show active" id="departure-regular-panel" role="tabpanel">
+                    <div class="flight-panel-head">
+                      <span id="flight-title-1" class="fw-bold flight-panel-title"><?= $l['departure'] ?></span>
+                      <div id="toggle-mode" class="btn btn-sm btn-outline-secondary" data-bs-toggle="tooltip" title="<?= $l['toggle-mode'] ?>"><i class="bi bi-arrow-left-right"></i></div>
+                    </div>
+                    <div class="d-flex justify-content-center gap-1 my-1">
+                      <button id="set-departure-now" type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="tooltip" title="<?= $l['departure-now-hint'] ?>"><?= $l['departure-now'] ?></button>
+                      <button id="set-departure-zero" type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="tooltip" title="<?= $l['departure-zero-hint'] ?>">(00:00:00)</button>
+                    </div>
+                    <input type="text" id="start-datetime" class="form-control form-control-sm startdate-input" placeholder="dd.mm.yyyy hh:mm:ss" title="<?= $l['datetime-format-hint'] ?>"/>
+                    <div class="flight-panel-head my-1">
+                      <span class="fw-bold flight-panel-title"><?= $l['flight'] ?></span>
+                      <div id="add-flight-time" class="btn btn-sm btn-outline-secondary" data-bs-toggle="tooltip" title="<?= $l['add-row'] ?>"><i class="bi bi-plus-lg"></i></div>
+                    </div>
+                    <div id="flight-data">
+                      <div class="d-flex align-items-center gap-1 mb-1 flight-leg">
+                        <button type="button" class="btn btn-sm btn-outline-secondary button-toggle flight-leg-sign" data-sign="+" data-bs-toggle="tooltip" title="<?= $l['toggle-sign'] ?>"><i class="bi bi-plus-lg"></i></button>
+                        <input id="flight-time" type="text" class="form-control form-control-sm flight-time-input" placeholder="dd hh:mm:ss" title="<?= $l['flight-time-format-hint'] ?>"/>
+                        <button type="button" class="btn btn-sm btn-outline-danger button-remove" data-bs-toggle="tooltip" title="<?= $l['remove-row'] ?>"><i class="bi bi-x-lg"></i></button>
+                      </div>
+                    </div>
+                    <div class="text-center fw-bold mt-1"><span id="flight-title-2"><?= $l['arrival'] ?></span></div>
+                    <!-- Computed, never typed into: `ui-state-disabled´ is the same
+                         marker the trade calculator puts on its derived rate field. -->
+                    <div id="arrival-moment" class="form-control form-control-sm startdate-input text-center ui-state-disabled">?</div>
                   </div>
+
+                  <div class="tab-pane" id="departure-recall-panel" role="tabpanel">
+                    <div class="text-center fw-bold"><?= $l['departure'] ?></div>
+                    <div class="d-flex justify-content-center gap-1 my-1">
+                      <button id="set-recall-departure-now" type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="tooltip" title="<?= $l['departure-now-hint'] ?>"><?= $l['departure-now'] ?></button>
+                      <button id="set-recall-departure-zero" type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="tooltip" title="<?= $l['departure-zero-hint'] ?>">(00:00:00)</button>
+                    </div>
+                    <input type="text" id="recall-start-datetime" class="form-control form-control-sm startdate-input" placeholder="dd.mm.yyyy hh:mm:ss" title="<?= $l['datetime-format-hint'] ?>"/>
+                    <div class="text-center fw-bold mt-1"><?= $l['recall-full-flight'] ?></div>
+                    <!-- Taken from the results table, never typed into: it is the
+                         outbound leg the recall interrupts. -->
+                    <input type="text" id="recall-full-flight" class="form-control form-control-sm flight-time-input ui-state-disabled" value="00 00:00:00" title="<?= $l['recall-full-flight-hint'] ?>" disabled/>
+                    <div class="text-center fw-bold mt-1"><?= $l['recall'] ?></div>
+                    <!-- Stacked rather than side by side: the two labels next to
+                         each other are the widest thing in the panel, and the
+                         panel is sized to its content — the extra width would
+                         come straight out of the results table beside it. -->
+                    <div class="d-flex flex-column align-items-center recall-modes">
+                      <div class="text-center">
+                        <div class="form-check d-inline-block">
+                          <input id="recall-mode-0" type="radio" name="recall-mode" value="0" class="form-check-input"/>
+                          <label class="form-check-label" for="recall-mode-0"><?= $l['recall-at-moment'] ?></label>
+                        </div>
+                        <input type="text" id="recall-moment" class="form-control form-control-sm startdate-input" placeholder="dd.mm.yyyy hh:mm:ss" title="<?= $l['datetime-format-hint'] ?>" disabled/>
+                      </div>
+                      <div class="text-center">
+                        <div class="form-check d-inline-block">
+                          <input id="recall-mode-1" type="radio" name="recall-mode" value="1" class="form-check-input"/>
+                          <label class="form-check-label" for="recall-mode-1"><?= $l['recall-after-time'] ?></label>
+                        </div>
+                        <input type="text" id="recall-after" class="form-control form-control-sm flight-time-input" placeholder="dd hh:mm:ss" title="<?= $l['flight-time-format-hint'] ?>" value="00 00:00:00" disabled/>
+                      </div>
+                    </div>
+                    <div class="text-center fw-bold mt-1"><?= $l['return'] ?></div>
+                    <div id="recall-return-moment" class="form-control form-control-sm startdate-input text-center ui-state-disabled">?</div>
+                  </div>
+
                 </div>
-                <div class="text-center fw-bold mt-1"><span id="flight-title-2"><?= $l['arrival'] ?></span></div>
-                <!-- Computed, never typed into: `ui-state-disabled´ is the same
-                     marker the trade calculator puts on its derived rate field. -->
-                <div id="arrival-moment" class="form-control form-control-sm startdate-input text-center ui-state-disabled">?</div>
               </div>
             </td>
           </tr>
