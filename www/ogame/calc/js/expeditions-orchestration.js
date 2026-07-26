@@ -178,7 +178,9 @@ class ExpeditionsApp {
     const fleet = {};
     EXPEDITION_SHIPS.forEach((ship) => {
       const el = $('#num' + ship.abbrev);
-      fleet[ship.techId] = el ? (Number.parseInt(el.value, 10) || 0) : 0;
+      // getInputNumber, not parseInt: the field is user-entered, so its value
+      // has to be read through the locale-aware helper the collector uses too.
+      fleet[ship.techId] = el ? getInputNumber(el) : 0;
     });
     return fleet;
   }

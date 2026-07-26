@@ -58,6 +58,21 @@
     array('dd', $l['dark-matter-discovery-bonus'], 'float', '(ex.: 0-100)')
   );
   $baseUrl = expeditionsBaseUrl();
+
+  /**
+   * Render a URL API parameter as a JavaScript number literal. Anything that
+   * is not numeric - a locale decimal comma, a stray word, an expression -
+   * becomes `null` instead of being echoed verbatim: the raw echo let a URL
+   * inject arbitrary JavaScript into this block, and a malformed value broke
+   * the same block that defines the calculator's translation strings.
+   * json_encode keeps the decimal point locale independent.
+   *
+   * @param mixed $value Raw parameter value, or false when it was not passed.
+   * @return string A JavaScript literal.
+   */
+  function expeditionsJsNumber($value) {
+    return is_numeric($value) ? json_encode($value + 0) : 'null';
+  }
 ?>
   <!-- Bootstrap 5 CSS -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"/>
@@ -83,16 +98,16 @@
     // Parameters passed through the URL API. A null means "not passed", so the
     // calculator falls back to the options saved in the browser.
     var apiParams = {
-      highTopIdx: <?= is_null($highTopIdx) ? 'null' : $highTopIdx ?>,
-      universeSpeed: <?= $universeSpeed ? $universeSpeed : 'null' ?>,
-      playerClass: <?= $strClass ? $strClass : 'null' ?>,
-      hyperTechLevel: <?= $strHyper ? $strHyper : 'null' ?>,
-      percentRes: <?= $percentResources ? $percentResources : 'null' ?>,
-      percentShips: <?= $percentShip ? $percentShip : 'null' ?>,
-      classBonusCollector: <?= $bonusCollector ? $bonusCollector : 'null' ?>,
-      classBonusDiscoverer: <?= $bonusDiscoverer ? $bonusDiscoverer : 'null' ?>,
-      resourceDiscoveryBooster: <?= $resourceDiscoveryBooster ? $resourceDiscoveryBooster : 'null' ?>,
-      darkMatterDiscoveryBonus: <?= $darkMatterDiscoveryBonus ? $darkMatterDiscoveryBonus : 'null' ?>,
+      highTopIdx: <?= expeditionsJsNumber($highTopIdx) ?>,
+      universeSpeed: <?= expeditionsJsNumber($universeSpeed) ?>,
+      playerClass: <?= expeditionsJsNumber($strClass) ?>,
+      hyperTechLevel: <?= expeditionsJsNumber($strHyper) ?>,
+      percentRes: <?= expeditionsJsNumber($percentResources) ?>,
+      percentShips: <?= expeditionsJsNumber($percentShip) ?>,
+      classBonusCollector: <?= expeditionsJsNumber($bonusCollector) ?>,
+      classBonusDiscoverer: <?= expeditionsJsNumber($bonusDiscoverer) ?>,
+      resourceDiscoveryBooster: <?= expeditionsJsNumber($resourceDiscoveryBooster) ?>,
+      darkMatterDiscoveryBonus: <?= expeditionsJsNumber($darkMatterDiscoveryBonus) ?>,
       fleet: <?= $jsonFleet ? json_encode($jsonFleet) : 'null' ?>
     };
 
