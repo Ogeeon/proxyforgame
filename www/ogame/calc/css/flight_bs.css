@@ -143,6 +143,69 @@
   white-space: normal;
 }
 
+/* The `departure´ / `flight´ headings of the arrival calculator each carry a
+   trailing icon button. A plain flex row would centre the title against the
+   space left of that button, so the three headings would not line up with each
+   other or with the `arrival´ one below. A three-column grid with equal outer
+   tracks centres the title on the panel while the button keeps setting the row
+   height. */
+.flight-panel-head {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  /* Now that the panel is only as wide as it needs to be, the wordier locales
+     would otherwise run the heading straight into the button. The gap applies
+     to both sides, so the heading stays centred. */
+  column-gap: 0.5rem;
+}
+
+.flight-panel-head .flight-panel-title {
+  grid-column: 2;
+  text-align: center;
+}
+
+.flight-panel-head .btn {
+  grid-column: 3;
+  justify-self: end;
+}
+
+/* The panel hugs its content rather than sitting in a fixed 220px cell: the
+   spare width collected to the left of the centred heading, since the matching
+   track on the right is the one holding the button. max-content keeps the
+   headings off two lines, and squeezing the cell hands the slack back to the
+   results table. */
+.flight-layout > tbody > tr > td.arrival-cell {
+  width: 1px;
+}
+
+.arrival-panel {
+  width: max-content;
+}
+
+/* The rest of the arrival panel is centred as one column: the date fields are
+   narrower than the panel, so they need the auto margins, and the leg rows are
+   flex. Done here rather than with utility classes because the leg row markup
+   also lives in flight-orchestration.js, which builds added rows.
+   Only the two head buttons stay pinned right, via the grid above. */
+.arrival-panel > .form-control {
+  margin-inline: auto;
+}
+
+.arrival-panel .flight-leg {
+  justify-content: center;
+}
+
+/* Read-only fields carry `ui-state-disabled´ — the marker the trade calculator
+   uses — but here it wears the Bootstrap disabled-field skin instead of the
+   legacy 50% fade: the arrival moment is the answer the panel exists to give,
+   so it has to stay fully readable while still reading as not-editable. This is
+   the same fill :disabled paints, so the computed <div>, which can carry no such
+   attribute, ends up matching the switched-off speed override exactly. */
+.ui-state-disabled {
+  background-color: var(--bs-secondary-bg);
+  cursor: default;
+}
+
 /* --- Small round icon buttons for the universe / fleet / api controls --- */
 .uni-control-btn {
   width: 30px;

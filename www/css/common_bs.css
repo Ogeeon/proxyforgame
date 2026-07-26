@@ -42,10 +42,13 @@
 /* Mirror the dark theme, where editable inputs sit at the base --bs-body-bg and
    thus read lighter than the darkened surround. Here the surround/panels are
    toned down, so lift editable fields one step above the panels instead.
-   readonly/disabled fields keep the panel tone. The :not()s also raise
-   specificity above the .border.rounded rule so a .form-control.border still lifts. */
-[data-bs-theme="light"] .form-control:not([readonly]):not(:disabled),
-[data-bs-theme="light"] .form-select:not([readonly]):not(:disabled) {
+   readonly/disabled fields keep the panel tone. `ui-state-disabled´ is excluded
+   for the same reason: a computed readout rendered as a <div> cannot carry the
+   readonly or disabled attribute, so the marker class is its only signal.
+   The :not()s also raise specificity above the .border.rounded rule so a
+   .form-control.border still lifts. */
+[data-bs-theme="light"] .form-control:not([readonly]):not(:disabled):not(.ui-state-disabled),
+[data-bs-theme="light"] .form-select:not([readonly]):not(:disabled):not(.ui-state-disabled) {
   background-color: color-mix(in srgb, #fff 100%, black);
 }
 

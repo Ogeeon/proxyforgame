@@ -506,19 +506,19 @@
                 <?php endfor; ?>
               </table>
             </td>
-            <td valign="top" width="220px" class="ps-2">
-              <div class="border rounded p-2">
-                <div class="d-flex align-items-center justify-content-between">
-                  <span id="flight-title-1" class="fw-bold"><?= $l['departure'] ?></span>
+            <td valign="top" class="ps-2 arrival-cell">
+              <div class="border rounded p-2 arrival-panel">
+                <div class="flight-panel-head">
+                  <span id="flight-title-1" class="fw-bold flight-panel-title"><?= $l['departure'] ?></span>
                   <div id="toggle-mode" class="btn btn-sm btn-outline-secondary" title="<?= $l['toggle-mode'] ?>"><i class="bi bi-arrow-left-right"></i></div>
                 </div>
-                <div class="d-flex gap-1 my-1">
-                  <button id="set-departure-now" type="button" class="btn btn-sm btn-outline-secondary flex-fill" title="<?= $l['departure-now-hint'] ?>"><?= $l['departure-now'] ?></button>
+                <div class="d-flex justify-content-center gap-1 my-1">
+                  <button id="set-departure-now" type="button" class="btn btn-sm btn-outline-secondary" title="<?= $l['departure-now-hint'] ?>"><?= $l['departure-now'] ?></button>
                   <button id="set-departure-zero" type="button" class="btn btn-sm btn-outline-secondary" title="<?= $l['departure-zero-hint'] ?>">(00:00:00)</button>
                 </div>
                 <input type="text" id="start-datetime" class="form-control form-control-sm startdate-input" placeholder="dd.mm.yyyy hh:mm:ss" title="<?= $l['datetime-format-hint'] ?>"/>
-                <div class="d-flex align-items-center gap-1 my-1">
-                  <span class="fw-bold"><?= $l['flight'] ?></span>
+                <div class="flight-panel-head my-1">
+                  <span class="fw-bold flight-panel-title"><?= $l['flight'] ?></span>
                   <div id="add-flight-time" class="btn btn-sm btn-outline-secondary" title="<?= $l['add-row'] ?>"><i class="bi bi-plus-lg"></i></div>
                 </div>
                 <div id="flight-data">
@@ -529,7 +529,9 @@
                   </div>
                 </div>
                 <div class="text-center fw-bold mt-1"><span id="flight-title-2"><?= $l['arrival'] ?></span></div>
-                <div id="arrival-moment" class="form-control form-control-sm startdate-input text-center">?</div>
+                <!-- Computed, never typed into: `ui-state-disabled´ is the same
+                     marker the trade calculator puts on its derived rate field. -->
+                <div id="arrival-moment" class="form-control form-control-sm startdate-input text-center ui-state-disabled">?</div>
               </div>
             </td>
           </tr>
@@ -537,23 +539,24 @@
       </div>
 
       <div class="tab-pane fade" id="save-points-panel" role="tabpanel">
-        <div class="text-end mb-1">
-          <button id="calculate-savepoints" type="button" class="btn btn-sm btn-primary"><?= $l['search'] ?></button>
-        </div>
-        <div id="save-points-params">
-          <div class="d-flex flex-wrap align-items-center gap-2">
+        <!-- The search button is a column of its own rather than an item of the
+             wrapping parameter row: a long locale would otherwise push it onto a
+             line where it sits alone. -->
+        <div id="save-points-params" class="d-flex align-items-center gap-2">
+          <div class="d-flex flex-wrap align-items-center gap-2 flex-grow-1">
             <span><?= $l['departure'] ?></span>
             <input type="text" id="save-start-datetime" class="form-control form-control-sm startdate-input" placeholder="dd.mm.yyyy hh:mm:ss" title="<?= $l['datetime-format-hint'] ?>" />
             <button id="set-save-departure-now" type="button" class="btn btn-sm btn-outline-secondary" title="<?= $l['departure-now-hint'] ?>"><?= $l['departure-now'] ?></button>
-            <span id="save-return-label" class="ms-2"><?= $l['return'] ?></span>
+            <span id="save-return-label"><?= $l['return'] ?></span>
             <input type="text" id="save-return-datetime" class="form-control form-control-sm startdate-input" placeholder="dd.mm.yyyy hh:mm:ss" title="<?= $l['datetime-format-hint'] ?>" />
-            <span class="ms-2"><?= $l['save-tolerance'] ?></span>
+            <span><?= $l['save-tolerance'] ?></span>
             <input type="text" id="save-tolerance-time" class="form-control form-control-sm tolerance-time-input" placeholder="hh:mm" title="<?= $l['tolerance-time-format-hint'] ?>" />
             <i class="bi bi-question-circle" data-bs-toggle="tooltip" title="<?= $l['savepoints-hint'] ?>"></i>
-            <div class="ms-2">
+            <div>
               <input id="save-one-way" type="checkbox" name="save-one-way" class="form-check-input mt-0"/> <label for="save-one-way"><?= $l['save-one-way'] ?></label>
             </div>
           </div>
+          <button id="calculate-savepoints" type="button" class="btn btn-sm btn-primary flex-shrink-0"><?= $l['search'] ?></button>
         </div>
         <div id="save-points-tables" class="mt-2">
           <div class="row">
