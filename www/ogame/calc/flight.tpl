@@ -567,7 +567,7 @@
                          each other are the widest thing in the panel, and the
                          panel is sized to its content — the extra width would
                          come straight out of the results table beside it. -->
-                    <div class="d-flex flex-column align-items-center recall-modes">
+                    <div class="d-flex flex-column recall-modes">
                       <div class="text-center">
                         <div class="form-check d-inline-block">
                           <input id="recall-mode-0" type="radio" name="recall-mode" value="0" class="form-check-input"/>

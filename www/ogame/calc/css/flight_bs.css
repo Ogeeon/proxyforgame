@@ -238,6 +238,16 @@
   margin-top: 0.25rem;
 }
 
+/* All four boxes — the two radios and the two fields — are of four different
+   widths, and each row is centred on the panel rather than on its own mode, so
+   the block reads as one stack down the middle. The rows stretch to the panel
+   for that; the radios ride along on `text-center´, the fields are blocks of a
+   fixed width and need the auto margins. The rule above cannot reach them: it
+   only matches a direct child of the pane, and these sit a level deeper. */
+.recall-modes .form-control {
+  margin-inline: auto;
+}
+
 .arrival-panel .flight-leg {
   justify-content: center;
 }
