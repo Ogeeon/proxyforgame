@@ -11,6 +11,14 @@
   max-width: 1000px;
 }
 
+/* Bootstrap's .accordion-item forces color: var(--bs-accordion-color)
+   (#dee2e6 in dark mode), which reads as white against the calculator's
+   cyan default text. Inherit so panel content matches the rest of the page. */
+#params-accordion {
+  --bs-accordion-color: inherit;
+  --bs-accordion-active-color: inherit;
+}
+
 /* Reset button in the title header: the common_bs.css rule is the pre-Bootstrap
    floated icon, so restate the square outlined skin used by every other
    BS5 calculator. */
