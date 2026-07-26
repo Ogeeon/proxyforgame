@@ -341,13 +341,13 @@
                     <div class="d-flex align-items-center gap-1 text-nowrap">
                       <label for="lf-rocktal-collector-enh"><?= $l['collectors-character-bonus'] ?></label>
                       <input id="lf-rocktal-collector-enh" type="text" name="lf-rocktal-collector-enh" class="form-control form-control-sm d-inline-block count-input" value="0" />
-                      <i class="bi bi-question-circle" data-bs-toggle="tooltip" title="<?= $l['character-bonus-hint'] ?>"></i>
+                      <i class="bi bi-question-circle" data-bs-toggle="tooltip" title="<?= $l['character-bonus-hint'] . "\n\n" . $l['lf-bonuses-api-import-hint'] ?>"></i>
                     </div>
                   </div>
 
                   <hr>
                   <div class="d-flex align-items-center justify-content-between mb-1">
-                    <span class="fw-semibold"><?= $l['lf-bonuses-ships'] ?></span>
+                    <span class="fw-semibold"><?= $l['lf-bonuses-ships'] ?> <i class="bi bi-question-circle" data-bs-toggle="tooltip" title="<?= $l['lf-bonuses-api-import-hint'] ?>"></i></span>
                     <button id="open-lfbr" type="button" class="btn btn-sm btn-outline-primary"><?= $l['open-lfbr'] ?></button>
                   </div>
                   <table id="lf-ships-bonuses" class="lined mx-auto" cellpadding="0" cellspacing="1" border="0" style="width: 80%;">
