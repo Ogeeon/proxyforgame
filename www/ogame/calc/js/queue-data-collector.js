@@ -11,15 +11,20 @@ class QueueDataCollector {
    * Read top-level globals (universe speed, ion/hyper tech, total-fields per tab).
    */
   static readGlobalParams() {
+    // Every user-entered number goes through getInputNumber: it honours the
+    // locale decimal separator, which a bare parseFloat would swallow (RU "5,4"
+    // would read as 5). The universe speed is a <select> whose option values are
+    // authored with a canonical dot, so it is read straight off the element.
+    const num = (selector) => getInputNumber($(selector));
     const universeSpeed = Number.parseFloat(getVal('#universe-speed')) || 1;
-    const ionTechLevel = Number.parseFloat(getVal('#ion-tech-level')) || 0;
-    const hyperTechLevel = Number.parseFloat(getVal('#hyper-tech-level')) || 0;
-    const totFldPln = Number.parseInt(getVal('#total-fields-2'), 10) || 0;
-    const totFldMn = Number.parseInt(getVal('#total-fields-3'), 10) || 0;
+    const ionTechLevel = Math.trunc(num('#ion-tech-level'));
+    const hyperTechLevel = Math.trunc(num('#hyper-tech-level'));
+    const totFldPln = Math.trunc(num('#total-fields-2'));
+    const totFldMn = Math.trunc(num('#total-fields-3'));
     const checkedClass = document.querySelector('input[name="player-class"]:checked');
     const playerClass = checkedClass ? Number.parseInt(checkedClass.value, 10) : 0;
-    const scCapacityIncrease = Number.parseFloat(getVal('#sc-capacity-increase')) || 0;
-    const lcCapacityIncrease = Number.parseFloat(getVal('#lc-capacity-increase')) || 0;
+    const scCapacityIncrease = num('#sc-capacity-increase');
+    const lcCapacityIncrease = num('#lc-capacity-increase');
     return { universeSpeed, ionTechLevel, hyperTechLevel, totFldPln, totFldMn, playerClass, scCapacityIncrease, lcCapacityIncrease };
   }
 
@@ -38,7 +43,9 @@ class QueueDataCollector {
       if (!idCell || !inputCell) continue;
       const techId = Number.parseInt(idCell.textContent, 10);
       const input = inputCell.querySelector('input');
-      const level = input ? (Number.parseInt(input.value, 10) || 0) : 0;
+      // Levels are whole numbers, but the value still passes through the
+      // locale-aware reader so a pasted "1,5" cannot be read as 15.
+      const level = input ? Math.trunc(getInputNumber(input)) : 0;
       list.push([techId, level]);
       byTech[techId] = level;
     }

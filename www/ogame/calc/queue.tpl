@@ -65,8 +65,11 @@
             case 'ionTechLevel':   return validateNumber(Number.parseFloat(value), 0, 50, 0);
             case 'hyperTechLevel': return validateNumber(Number.parseFloat(value), 0, 50, 0);
             case 'playerClass':    return validateNumber(Number.parseInt(value), 0, 2, 0);
-            case 'scCapacityIncrease': return validateNumber(Number.parseInt(value), 0, Infinity, 0);
-            case 'lcCapacityIncrease': return validateNumber(Number.parseInt(value), 0, Infinity, 0);
+            // Capacity increases are percentages and may be fractional, so they
+            // are parsed as floats and clamped to the same range the field's
+            // _constrains use.
+            case 'scCapacityIncrease': return validateNumber(Number.parseFloat(value), 0, 1000, 0);
+            case 'lcCapacityIncrease': return validateNumber(Number.parseFloat(value), 0, 1000, 0);
             case 'totFldPln':      return validateNumber(Number.parseFloat(value), 1, Infinity, 163);
             case 'totFldMn':       return validateNumber(Number.parseFloat(value), 1, Infinity, 1);
             case 'sDTP':           return validateNumber(Number.parseFloat(value), 0, Infinity, 0);
@@ -132,7 +135,7 @@
       <div class="bg-body-secondary text-primary-emphasis rounded main-header text-center flex-grow-1">
         <?= $l['title'] ?>
       </div>
-      <div id="reset" class="top-0 end-0 d-flex align-items-center justify-content-center bg-danger-subtle" title="<?= $l['reset'] ?>">
+      <div id="reset" class="top-0 end-0 d-flex align-items-center justify-content-center bg-danger-subtle" data-bs-toggle="tooltip" title="<?= $l['reset'] ?>">
         <i class="bi bi-arrow-counterclockwise" style="color: #dc3545; font-size: 1.25rem;"></i>
       </div>
     </div>
@@ -149,11 +152,11 @@
         </div>
         <div class="d-flex align-items-center gap-1">
           <label for="ion-tech-level"><?= $l['ion-tech'] ?></label>
-          <input id="ion-tech-level" type="text" name="ion-tech-level" class="form-control form-control-sm level-input" value="0" />
+          <input id="ion-tech-level" type="text" name="ion-tech-level" class="form-control form-control-sm level-input" value="0" alt="<?= $l['ion-tech'] ?>" />
         </div>
         <div class="d-flex align-items-center gap-1">
           <label for="hyper-tech-level"><?= $l['hyper-tech'] ?></label>
-          <input id="hyper-tech-level" type="text" name="hyper-tech-level" class="form-control form-control-sm level-input" value="0" />
+          <input id="hyper-tech-level" type="text" name="hyper-tech-level" class="form-control form-control-sm level-input" value="0" alt="<?= $l['hyper-tech'] ?>" />
         </div>
         <div class="d-flex align-items-center gap-1">
           <label><?= $l['class'] ?>:</label>
@@ -167,12 +170,12 @@
         <div class="d-flex align-items-center gap-1">
           <label for="sc-capacity-increase"><?= $l['cargo-cap-increase'] ?><?= $l['sc-short'] ?></label>
           <div class="input-group input-group-sm w-auto">
-            <input id="sc-capacity-increase" type="text" name="sc-capacity-increase" class="form-control level-input m-0" value="0"/>
+            <input id="sc-capacity-increase" type="text" name="sc-capacity-increase" class="form-control level-input m-0" value="0" alt="<?= $l['cargo-cap-increase'] ?><?= $l['sc-short'] ?>"/>
             <span class="input-group-text">%</span>
           </div>
           <label for="lc-capacity-increase"><?= $l['lc-short'] ?></label>
           <div class="input-group input-group-sm w-auto">
-            <input id="lc-capacity-increase" type="text" name="lc-capacity-increase" class="form-control level-input m-0" value="0"/>
+            <input id="lc-capacity-increase" type="text" name="lc-capacity-increase" class="form-control level-input m-0" value="0" alt="<?= $l['cargo-cap-increase'] ?><?= $l['lc-short'] ?>"/>
             <span class="input-group-text">%</span>
           </div>
         </div>
@@ -199,7 +202,7 @@
               <p class="border rounded subheader bg-primary-subtle mb-2"><b><?= $l['buildings'] ?></b></p>
               <div class="d-flex align-items-center gap-2 mb-2">
                 <label for="total-fields-<?=$i?>"><?= $l['total-fields'] ?></label>
-                <input id="total-fields-<?=$i?>" type="text" name="total-fields-<?=$i?>" class="form-control form-control-sm level-input total-fld-input" value="0" />
+                <input id="total-fields-<?=$i?>" type="text" name="total-fields-<?=$i?>" class="form-control form-control-sm level-input total-fld-input" value="0" alt="<?= $l['total-fields'] ?>" />
               </div>
               <table id="table-src-<?=$i?>" class="lined" cellpadding="0" cellspacing="1" border="0">
                 <tr>
@@ -248,7 +251,10 @@
                 </button>
                 <div class="d-flex align-items-center gap-2 flex-nowrap">
                   <label><?= $l['finish-time'] ?></label>
-                  <span id="finish-moment-<?=$i?>" class="form-control form-control-sm startdate-input d-inline-block bg-body-tertiary">?</span>
+                  <!-- Computed, never typed into: `ui-state-disabled´ is the marker
+                       every calculator puts on a non-editable readout, so it wears
+                       the same fill as a disabled input. -->
+                  <span id="finish-moment-<?=$i?>" class="form-control form-control-sm startdate-input d-inline-block ui-state-disabled">?</span>
                 </div>
               </div>
 
@@ -296,7 +302,7 @@
 <script type="text/javascript">
   document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(function(el) {
-      new bootstrap.Tooltip(el);
+      bootstrap.Tooltip.getOrCreateInstance(el);
     });
     initializeQueueCalculator();
   });

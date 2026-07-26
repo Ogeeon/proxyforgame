@@ -33,7 +33,6 @@ class QueueCalculatorApp {
     this.calc = new QueueCalculator(options.techCosts);
     this.planet = new TabState(PLANET_TAB, 'qp');
     this.moon = new TabState(MOON_TAB, 'qm');
-    this._validationAttached = new WeakSet();
   }
 
   // -------------------------------------------------------------------------
@@ -45,6 +44,7 @@ class QueueCalculatorApp {
     this._restoreParamsFromState();
     this._restoreStartLevelsFromState();
     this._initMasks();
+    this._setInputConstraints();
     this._bindEvents();
     this._restoreActiveTab();
     this.refreshBoth();
@@ -59,8 +59,11 @@ class QueueCalculatorApp {
     setVal('#total-fields-3', options.prm.totFldMn);
     const classRadio = $(`#player-class-${options.prm.playerClass}`);
     if (classRadio) classRadio.checked = true;
-    setVal('#sc-capacity-increase', options.prm.scCapacityIncrease);
-    setVal('#lc-capacity-increase', options.prm.lcCapacityIncrease);
+    // The capacity increases may be fractional, so they are written through
+    // setNumVal: the stored number carries a canonical dot, the field must show
+    // the locale separator or the numeric validator would strip it.
+    setNumVal('#sc-capacity-increase', options.prm.scCapacityIncrease);
+    setNumVal('#lc-capacity-increase', options.prm.lcCapacityIncrease);
     if (options.prm.sDTP) {
       setVal('#start-2', getDateStr(options.prm.sDTP, options.datetimeFormat));
     }
@@ -112,6 +115,31 @@ class QueueCalculatorApp {
   // Event binding
   // -------------------------------------------------------------------------
 
+  /**
+   * Declare the min/max/def constraints the blur validator clamps against.
+   * The ranges mirror options.prm.validate in queue.tpl, so a value typed into
+   * a field and the same value restored from the cookie survive identically.
+   */
+  _setInputConstraints() {
+    const set = (id, constrains) => {
+      const el = document.getElementById(id);
+      if (el) el._constrains = constrains;
+    };
+    set('ion-tech-level', { min: 0, max: 50, def: 0, allowFloat: false, allowNegative: false });
+    set('hyper-tech-level', { min: 0, max: 50, def: 0, allowFloat: false, allowNegative: false });
+    // Percentages: fractional values are the norm, matching the costs calculator.
+    set('sc-capacity-increase', { min: 0, max: 1000, def: 0, allowFloat: true, allowNegative: false });
+    set('lc-capacity-increase', { min: 0, max: 1000, def: 0, allowFloat: true, allowNegative: false });
+    set(`total-fields-${PLANET_TAB}`, { min: 1, def: options.defPlfFlds, allowFloat: false, allowNegative: false });
+    set(`total-fields-${MOON_TAB}`, { min: 1, def: options.defMnFlds, allowFloat: false, allowNegative: false });
+    // Start levels: whole numbers, no upper bound (OGame caps none of them).
+    [PLANET_TAB, MOON_TAB].forEach((tabNum) => {
+      document.querySelectorAll(`#table-src-${tabNum} input[type=text]`).forEach((el) => {
+        el._constrains = { min: 0, def: 0, allowFloat: false, allowNegative: false };
+      });
+    });
+  }
+
   _bindEvents() {
     // Tab persistence
     document.querySelectorAll('#mainTabs button[data-bs-toggle="tab"]').forEach((btn) => {
@@ -127,7 +155,6 @@ class QueueCalculatorApp {
 
     // Build / destroy buttons in src tables
     document.querySelectorAll(`#tab-${PLANET_TAB} .button-build`).forEach((btn) => {
-      this._attachConstrainsFromInput(btn);
       btn.addEventListener('click', (e) => this._onBuildClick(e, this.planet));
     });
     document.querySelectorAll(`#tab-${PLANET_TAB} .button-destroy`).forEach((btn) => {
@@ -154,14 +181,20 @@ class QueueCalculatorApp {
     // Reset button
     addEvent('#reset', 'click', () => this._resetParams());
 
-    // Inputs that affect all queues
-    ['#universe-speed', '#ion-tech-level', '#hyper-tech-level', '#sc-capacity-increase', '#lc-capacity-increase'].forEach((sel) => {
+    // Universe speed is a <select>: it only needs the change hook. The numeric
+    // validators must never see it — they rewrite `value´ character by character.
+    addEvent('#universe-speed', 'change', () => this.refreshBoth());
+
+    // Numeric inputs that affect both queues
+    ['#ion-tech-level', '#hyper-tech-level', '#sc-capacity-increase', '#lc-capacity-increase'].forEach((sel) => {
       const el = $(sel);
       if (!el) return;
-      this._attachConstrains(el);
       addEvent(el, 'change', () => this.refreshBoth());
       addEvent(el, 'keyup', (e) => { validateInputNumber(e); this.refreshBoth(); });
+      // Clamping happens on blur only, so the recalculation has to follow it —
+      // otherwise the totals keep showing the unclamped value.
       addEvent(el, 'blur', validateInputNumberOnBlurNative);
+      addEvent(el, 'blur', () => this.refreshBoth());
     });
 
     // Player class radios
@@ -173,10 +206,14 @@ class QueueCalculatorApp {
     [PLANET_TAB, MOON_TAB].forEach((tabNum) => {
       const refresh = () => this._refreshTab(tabNum);
       document.querySelectorAll(`#tab-${tabNum} input[type=text]`).forEach((input) => {
+        // Skip the masked start-datetime field (start-2 / start-3, not the
+        // startlvl-* level fields): the numeric validator would strip the date
+        // separators out of it.
         if (input.id && input.id.startsWith('start-')) return;
-        this._attachConstrains(input);
         input.addEventListener('keyup', (e) => { validateInputNumber(e); refresh(); });
         input.addEventListener('blur', validateInputNumberOnBlurNative);
+        // The blur validator clamps; refresh afterwards so the totals follow.
+        input.addEventListener('blur', refresh);
       });
     });
 
@@ -203,14 +240,6 @@ class QueueCalculatorApp {
       });
     }
   }
-
-  _attachConstrains(input) {
-    if (!input || this._validationAttached.has(input)) return;
-    if (!input._constrains) input._constrains = { min: 0 };
-    this._validationAttached.add(input);
-  }
-
-  _attachConstrainsFromInput() { /* placeholder for future use */ }
 
   // -------------------------------------------------------------------------
   // Queue operations
@@ -436,8 +465,8 @@ class QueueCalculatorApp {
     setVal('#hyper-tech-level', 0);
     const classRadio0 = $('#player-class-0');
     if (classRadio0) classRadio0.checked = true;
-    setVal('#sc-capacity-increase', 0);
-    setVal('#lc-capacity-increase', 0);
+    setNumVal('#sc-capacity-increase', 0);
+    setNumVal('#lc-capacity-increase', 0);
     setVal('#total-fields-2', options.defPlfFlds);
     setVal('#total-fields-3', options.defMnFlds);
     setVal('#start-2', '');

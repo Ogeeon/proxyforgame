@@ -8,6 +8,33 @@
 
 class QueueRenderer {
   /**
+   * Dispose every Bootstrap tooltip inside `root´. Must be called before the
+   * anchors are detached (row deleted, innerHTML replaced): a bubble whose
+   * anchor is gone stays on screen and its instance is never released.
+   * @param {Element} root
+   */
+  static disposeTooltips(root) {
+    if (!root || typeof bootstrap === 'undefined' || !bootstrap.Tooltip) return;
+    root.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(function (el) {
+      const inst = bootstrap.Tooltip.getInstance(el);
+      if (inst) inst.dispose();
+    });
+  }
+
+  /**
+   * Attach a Bootstrap tooltip to every hinted element inside `root´.
+   * getOrCreateInstance (not `new´) so a re-initialised element is not
+   * double-bound — SonarQube S1848.
+   * @param {Element} root
+   */
+  static initTooltips(root) {
+    if (!root || typeof bootstrap === 'undefined' || !bootstrap.Tooltip) return;
+    root.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(function (el) {
+      bootstrap.Tooltip.getOrCreateInstance(el);
+    });
+  }
+
+  /**
    * Format a duration in seconds using locale-aware suffixes from `options`.
    */
   static formatTime(seconds) {
@@ -52,10 +79,7 @@ class QueueRenderer {
     while (tbl.rows.length > 3) {
       // Dispose Bootstrap tooltips before dropping the row so no orphaned
       // instances or lingering tips are left behind.
-      tbl.rows[1].querySelectorAll('[data-bs-toggle="tooltip"]').forEach(function (el) {
-        const inst = bootstrap.Tooltip.getInstance(el);
-        if (inst) inst.dispose();
-      });
+      QueueRenderer.disposeTooltips(tbl.rows[1]);
       tbl.deleteRow(1);
     }
   }
@@ -93,9 +117,7 @@ class QueueRenderer {
       `</td>`;
 
     // Skin the freshly created row control buttons with Bootstrap tooltips.
-    tr.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(function (el) {
-      bootstrap.Tooltip.getOrCreateInstance(el);
-    });
+    QueueRenderer.initTooltips(tr);
     return tr;
   }
 
@@ -136,14 +158,14 @@ class QueueRenderer {
     const needSC = Math.ceil(totalRes / capSC) || 0;
     const needLC = Math.ceil(totalRes / capLC) || 0;
     const cells = transportsRow.cells;
+    // Dispose first: the innerHTML assignments below detach the current <abbr>
+    // anchors, and a tooltip disposed after that would leave its bubble on
+    // screen with nothing to point at (this row is rewritten on every keystroke).
+    QueueRenderer.disposeTooltips(transportsRow);
     cells[1].innerHTML = `${numToOGame(needSC)} <abbr data-bs-toggle="tooltip" title="${options.scFull}">${options.scShort}</abbr>`;
     cells[2].innerHTML = `${numToOGame(needLC)} <abbr data-bs-toggle="tooltip" title="${options.lcFull}">${options.lcShort}</abbr>`;
     // Skin the transport abbreviations with Bootstrap tooltips.
-    transportsRow.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(function (el) {
-      const existing = bootstrap.Tooltip.getInstance(el);
-      if (existing) existing.dispose();
-      bootstrap.Tooltip.getOrCreateInstance(el);
-    });
+    QueueRenderer.initTooltips(transportsRow);
   }
 
   /**
