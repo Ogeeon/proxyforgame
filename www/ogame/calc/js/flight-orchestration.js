@@ -1227,24 +1227,31 @@ class FlightOrchestrator {
             alert(this.opts.ownApiBadJsonMsg);
             return false;
         }
+        const importCoords = getChecked('#own-api-import-coords');
+        const importClass = getChecked('#own-api-import-class');
+        const importResearch = getChecked('#own-api-import-research');
+        const importShips = getChecked('#own-api-import-ships');
+        const importLifeforms = getChecked('#own-api-import-lifeforms');
         try {
-            if (typeof data.coords === 'string') {
+            if (importCoords && typeof data.coords === 'string') {
                 const coords = data.coords.split(':');
                 setVal('#departure-g', coords[0]);
                 setVal('#departure-s', coords[1]);
                 setVal('#departure-p', coords[2]);
             }
-            const classMap = { 1: 'class-0', 2: 'class-1', 3: 'class-2' };
-            if (classMap[data.characterClassId]) {
-                document.querySelectorAll('input[name="class"]').forEach((r) => { r.checked = false; });
-                setChecked(`#${classMap[data.characterClassId]}`, true);
+            if (importClass) {
+                const classMap = { 1: 'class-0', 2: 'class-1', 3: 'class-2' };
+                if (classMap[data.characterClassId]) {
+                    document.querySelectorAll('input[name="class"]').forEach((r) => { r.checked = false; });
+                    setChecked(`#${classMap[data.characterClassId]}`, true);
+                }
+                const isTrader = data.allianceClassId == 2;
+                setChecked('#trader-bonus', isTrader);
+                if (isTrader) {
+                    setChecked('#warrior-bonus', false);
+                }
             }
-            const isTrader = data.allianceClassId == 2;
-            setChecked('#trader-bonus', isTrader);
-            if (isTrader) {
-                setChecked('#warrior-bonus', false);
-            }
-            if (data.researches) {
+            if (importResearch && data.researches) {
                 Object.entries(data.researches).forEach(([id, level]) => {
                     if (id == 115) setVal('#cmb-drive', level);
                     if (id == 117) setVal('#imp-drive', level);
@@ -1252,7 +1259,7 @@ class FlightOrchestrator {
                     if (id == 114) setVal('#hypertech-lvl', level);
                 });
             }
-            if (data.bonuses && data.bonuses.characterClassBooster) {
+            if (importLifeforms && data.bonuses && data.bonuses.characterClassBooster) {
                 setVal('#lf-rocktal-collector-enh', 0);
                 setVal('#lf-mechan-general-enh', 0);
                 Object.entries(data.bonuses.characterClassBooster).forEach(([i, v]) => {
@@ -1261,19 +1268,23 @@ class FlightOrchestrator {
                 });
             }
             FLIGHT_TECH_MAPPING.forEach(([techId, name]) => {
-                setVal(`#${name}`, 0);
-                this._setClassVal(`${techId}-speed`, 0);
-                this._setClassVal(`${techId}-cargo`, 0);
-                this._setClassVal(`${techId}-fuel`, 0);
+                if (importShips) setVal(`#${name}`, 0);
+                if (importLifeforms) {
+                    this._setClassVal(`${techId}-speed`, 0);
+                    this._setClassVal(`${techId}-cargo`, 0);
+                    this._setClassVal(`${techId}-fuel`, 0);
+                }
             });
-            if (data.ships) {
+            if (data.ships && (importShips || importLifeforms)) {
                 Object.entries(data.ships).forEach(([id, v]) => {
                     const mapped = FLIGHT_TECH_MAPPING.find((m) => m[0] == id);
                     if (mapped) {
-                        setVal(`#${mapped[1]}`, v.amount ? v.amount : 0);
-                        if (v.speed) this._setClassVal(`${id}-speed`, localizeFloat(frac(v.speed, 6) * 100, 4));
-                        if (v.cargo) this._setClassVal(`${id}-cargo`, localizeFloat(frac(v.cargo, 6) * 100, 4));
-                        if (v.fuel) this._setClassVal(`${id}-fuel`, localizeFloat(frac(v.fuel, 7) * 100, 5));
+                        if (importShips) setVal(`#${mapped[1]}`, v.amount ? v.amount : 0);
+                        if (importLifeforms) {
+                            if (v.speed) this._setClassVal(`${id}-speed`, localizeFloat(frac(v.speed, 6) * 100, 4));
+                            if (v.cargo) this._setClassVal(`${id}-cargo`, localizeFloat(frac(v.cargo, 6) * 100, 4));
+                            if (v.fuel) this._setClassVal(`${id}-fuel`, localizeFloat(frac(v.fuel, 7) * 100, 5));
+                        }
                     }
                 });
             }

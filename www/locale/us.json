@@ -542,6 +542,8 @@
     "mission-type-holding": "Holding",
     "fetchig-data": "Fetching data...",
     "own-api-reader-hdr": "Import from OGame",
+    "own-api-import-select-hdr": "What to import",
+    "own-api-import-lf-bonuses": "Lifeform bonuses",
     "own-api-reader-info": "Paste here the text from the API 2 field on the 'Fleet' page in OGame. Ship counts, technologies, bonuses and start coordinates will be filled in automatically.",
     "own-api-reader-note": "Please note that the API 2 code contains no universe data, including the three fleet speed options. To load this data automatically, use the «Country» and «Universe» selectors on the parameters panel.",
     "own-api-import-btn": "Import from OGame",

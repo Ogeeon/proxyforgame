@@ -542,6 +542,8 @@
     "mission-type-holding": "Espera",
     "fetchig-data": "Obtendo dados...",
     "own-api-reader-hdr": "Importar do OGame",
+    "own-api-import-select-hdr": "O que importar",
+    "own-api-import-lf-bonuses": "Bônus das formas de vida",
     "own-api-reader-info": "Cole aqui o texto do campo API 2 da página «Frota» no OGame. O número de naves, tecnologias, bônus e coordenadas de partida serão preenchidos automaticamente.",
     "own-api-reader-note": "Observe que o código API 2 não contém informações sobre o universo, incluindo as três variantes de velocidade da frota. Para carregar esses dados automaticamente, use os seletores «País» e «Universo» no painel de parâmetros.",
     "own-api-import-btn": "Importar do OGame",

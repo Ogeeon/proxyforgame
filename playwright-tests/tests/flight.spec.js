@@ -327,6 +327,30 @@ test.describe('Flight Calculator - OGame Object Import', () => {
         expect(errors, 'no page JS errors').toEqual([]);
     });
 
+    test('unchecking an import category leaves its fields untouched', async ({ page }) => {
+        await page.locator('#import-own-api').click();
+        await expect(page.locator('#own-api-reader')).toBeVisible();
+
+        await page.locator('#own-api-import-coords').uncheck();
+        await page.locator('#own-api-import-ships').uncheck();
+
+        const beforeCoord = await page.locator('#departure-g').inputValue();
+        const beforeShip = await page.locator('#small-cargo').inputValue();
+
+        await page.locator('#own-api-txtarea').fill(OWN_API_FIXTURE);
+        await page.locator(OWN_API_IMPORT_BUTTON).click();
+
+        // Unchecked categories: fields keep their pre-import value
+        await expect(page.locator('#departure-g')).toHaveValue(beforeCoord);
+        await expect(page.locator('#small-cargo')).toHaveValue(beforeShip);
+
+        // Categories left checked still import normally
+        await expect(page.locator('#cmb-drive')).toHaveValue('14');
+        await expect(page.locator('#class-2')).toBeChecked();
+
+        await expect(page.locator('#own-api-reader')).toBeHidden();
+    });
+
     test('invalid input shows an error and does not change fields', async ({ page }) => {
         let alertMsg = '';
         page.on('dialog', d => { alertMsg = d.message(); d.accept(); });

@@ -636,6 +636,29 @@
       </div>
       <div class="modal-body">
         <div class="mb-2"><?= $l['own-api-reader-info'] ?></div>
+        <div class="mb-2 d-flex flex-wrap align-items-center gap-3">
+          <span class="fw-semibold"><?= $l['own-api-import-select-hdr'] ?>:</span>
+          <div class="form-check form-check-inline mb-0">
+            <input id="own-api-import-coords" type="checkbox" class="form-check-input" checked/>
+            <label class="form-check-label" for="own-api-import-coords"><?= $l['coords'] ?></label>
+          </div>
+          <div class="form-check form-check-inline mb-0">
+            <input id="own-api-import-class" type="checkbox" class="form-check-input" checked/>
+            <label class="form-check-label" for="own-api-import-class"><?= $l['class'] ?></label>
+          </div>
+          <div class="form-check form-check-inline mb-0">
+            <input id="own-api-import-research" type="checkbox" class="form-check-input" checked/>
+            <label class="form-check-label" for="own-api-import-research"><?= $l['researches'] ?></label>
+          </div>
+          <div class="form-check form-check-inline mb-0">
+            <input id="own-api-import-ships" type="checkbox" class="form-check-input" checked/>
+            <label class="form-check-label" for="own-api-import-ships"><?= $l['ships'] ?></label>
+          </div>
+          <div class="form-check form-check-inline mb-0">
+            <input id="own-api-import-lifeforms" type="checkbox" class="form-check-input" checked/>
+            <label class="form-check-label" for="own-api-import-lifeforms"><?= $l['own-api-import-lf-bonuses'] ?></label>
+          </div>
+        </div>
         <textarea id="own-api-txtarea" class="form-control" rows="6"></textarea>
         <div class="mt-2 small text-muted"><?= $l['own-api-reader-note'] ?></div>
       </div>
