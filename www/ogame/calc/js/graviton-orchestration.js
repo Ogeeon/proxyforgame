@@ -60,7 +60,8 @@ var options = {
         case 'gravitonLevel': return validateNumber(Number.parseFloat(value), 0, 100, 0);
         // Same 0..999 range the field's own _constrains enforce on blur: a
         // narrower range here would silently cut back a value the form accepted.
-        case 'totalLFEnrgBonus': return validateNumber(Number.parseFloat(value), 0, 999, 0);
+        // The life-form energy bonus has no ceiling in the game.
+        case 'totalLFEnrgBonus': return validateNumber(Number.parseFloat(value), 0, Infinity, 0);
         case 'scCapacityIncrease': return validateNumber(Number.parseFloat(value), 0, 999, 0);
         case 'lcCapacityIncrease': return validateNumber(Number.parseFloat(value), 0, 999, 0);
         case 'rcCapacityIncrease': return validateNumber(Number.parseFloat(value), 0, 999, 0);
@@ -161,7 +162,8 @@ class GravitonApp {
       'graviton-level': { min: 0, max: 100, def: 0 },
       'crystal-available': { min: 0, max: Infinity, def: 0 },
       'deuterium-available': { min: 0, max: Infinity, def: 0 },
-      'total-lf-energy-bonus': percent(),
+      // Unlike the capacity bonuses, this one is uncapped.
+      'total-lf-energy-bonus': { ...percent(), max: Infinity },
       'sc-capacity-increase': percent(),
       'lc-capacity-increase': percent(),
       'rc-capacity-increase': percent()
