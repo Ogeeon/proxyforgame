@@ -606,7 +606,7 @@ class FlightOrchestrator {
         setChecked(`#class-${prm.playerClass}`, true);
         setChecked('#trader-bonus', prm.traderBonus);
         setChecked(`#mission-type-${prm.missionType}`, true);
-        setVal('#sp-cargohold', localizeFloat(prm.spCargohold));
+        setNumVal('#sp-cargohold', prm.spCargohold);
         setVal('#lf-mechan-general-enh', prm.lfMechanGE);
         setVal('#lf-rocktal-collector-enh', prm.lfRocktalCE);
 
@@ -702,9 +702,11 @@ class FlightOrchestrator {
      */
     _legRowHtml(first = false) {
         return '<div class="d-flex align-items-center gap-1 mb-1 flight-leg">'
-            + `<button type="button" class="btn btn-sm btn-outline-secondary button-toggle flight-leg-sign" data-sign="+" title="${this.opts.toggleSignHint}"><i class="bi bi-plus-lg"></i></button>`
+            + `<button type="button" class="btn btn-sm btn-outline-secondary button-toggle flight-leg-sign" data-sign="+" data-bs-toggle="tooltip" title="${this.opts.toggleSignHint}"><i class="bi bi-plus-lg"></i></button>`
+            // The field keeps a native title: it is masked, so a bubble anchored
+            // to it would sit over the digits being overtyped.
             + `<input type="text"${first ? ' id="flight-time"' : ''} class="form-control form-control-sm flight-time-input" placeholder="dd hh:mm:ss" title="${this.opts.flightTimeFormatHint}"/>`
-            + `<button type="button" class="btn btn-sm btn-outline-danger button-remove" title="${this.opts.removeRowHint}"><i class="bi bi-x-lg"></i></button>`
+            + `<button type="button" class="btn btn-sm btn-outline-danger button-remove" data-bs-toggle="tooltip" title="${this.opts.removeRowHint}"><i class="bi bi-x-lg"></i></button>`
             + '</div>';
     }
 
@@ -745,6 +747,7 @@ class FlightOrchestrator {
             input.value = '';
             this._setLegSign(row.querySelector('.flight-leg-sign'), '+');
         } else {
+            FlightOrchestrator._disposeRowTooltips(row);
             row.remove();
         }
         this.updateArrival();
@@ -760,9 +763,29 @@ class FlightOrchestrator {
         button.innerHTML = sign === '-' ? '<i class="bi bi-dash-lg"></i>' : '<i class="bi bi-plus-lg"></i>';
     }
 
+    /**
+     * Give every tooltip anchor inside a run-time built row its instance, and
+     * take them back before the row is thrown away — a disposed anchor would
+     * otherwise leave its bubble on screen pointing at nothing.
+     */
+    static _initRowTooltips(root) {
+        root.querySelectorAll('[data-bs-toggle="tooltip"]').forEach((el) =>
+            bootstrap.Tooltip.getOrCreateInstance(el));
+    }
+
+    static _disposeRowTooltips(root) {
+        root.querySelectorAll('[data-bs-toggle="tooltip"]').forEach((el) => {
+            const tip = bootstrap.Tooltip.getInstance(el);
+            if (tip) {
+                tip.dispose();
+            }
+        });
+    }
+
     _wireLegRow(row) {
         row.querySelector('.flight-leg-sign').addEventListener('click', (e) => this.toggleLegSign(e.currentTarget));
         row.querySelector('.button-remove').addEventListener('click', (e) => this.removeFlightLeg(e.currentTarget.closest('.flight-leg')));
+        FlightOrchestrator._initRowTooltips(row);
         const field = row.querySelector('.flight-time-input');
         attachInputMask(field, this.opts.flightTimeFormat);
         // The mask cancels the native edit and re-fires `input´ itself, so that
@@ -774,6 +797,7 @@ class FlightOrchestrator {
     /** Rebuild the leg list from the stored flightData array. */
     restoreFlightLegs() {
         const container = document.getElementById('flight-data');
+        FlightOrchestrator._disposeRowTooltips(container);
         container.innerHTML = this._legRowHtml(true);
         this._wireLegRow(container.querySelector('.flight-leg'));
         const legs = this.opts.prm.flightData.slice();
@@ -828,6 +852,7 @@ class FlightOrchestrator {
         const fleetSpeed = this.calc.fleetSpeedFor(params.missionType, params);
         const duration = this.calc.getFlightDuration(minSpeed, distance, speed, fleetSpeed);
 
+        FlightOrchestrator._disposeRowTooltips(document.getElementById('flight-data'));
         document.getElementById('flight-data').innerHTML = this._legRowHtml(true);
         this._wireLegRow(document.getElementById('flight-data').querySelector('.flight-leg'));
         for (let i = 0; i < legs; i++) {
@@ -1158,8 +1183,8 @@ class FlightOrchestrator {
         setVal('#lf-mechan-general-enh', 0);
         if (booster) {
             Object.entries(booster).forEach(([i, v]) => {
-                if (i == 1) setVal('#lf-rocktal-collector-enh', localizeFloat(frac(v, 6) * 100));
-                if (i == 2) setVal('#lf-mechan-general-enh', localizeFloat(frac(v, 6) * 100));
+                if (i == 1) setNumVal('#lf-rocktal-collector-enh', frac(v, 6) * 100);
+                if (i == 2) setNumVal('#lf-mechan-general-enh', frac(v, 6) * 100);
             });
         }
 
@@ -1231,8 +1256,8 @@ class FlightOrchestrator {
                 setVal('#lf-rocktal-collector-enh', 0);
                 setVal('#lf-mechan-general-enh', 0);
                 Object.entries(data.bonuses.characterClassBooster).forEach(([i, v]) => {
-                    if (i == 1) setVal('#lf-rocktal-collector-enh', localizeFloat(frac(v, 6) * 100));
-                    if (i == 2) setVal('#lf-mechan-general-enh', localizeFloat(frac(v, 6) * 100));
+                    if (i == 1) setNumVal('#lf-rocktal-collector-enh', frac(v, 6) * 100);
+                    if (i == 2) setNumVal('#lf-mechan-general-enh', frac(v, 6) * 100);
                 });
             }
             FLIGHT_TECH_MAPPING.forEach(([techId, name]) => {
@@ -1284,7 +1309,10 @@ class FlightOrchestrator {
             bonuses.forEach((bonus, i) => {
                 const row = rows[i + 1];
                 if (row) {
-                    [0, 1, 2].forEach((k) => { row.children[k + 1].children[0].value = bonus[k]; });
+                    // Same cells populateParams fills, so they take the same
+                    // locale-aware write: a raw "1.5" would lose its separator
+                    // to the numeric blur validator in a comma locale.
+                    [0, 1, 2].forEach((k) => { row.children[k + 1].children[0].value = localizeFloat(bonus[k]); });
                 }
             });
         } catch (e) {

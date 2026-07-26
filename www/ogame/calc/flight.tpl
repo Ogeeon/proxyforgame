@@ -116,7 +116,7 @@
   <div class="border rounded position-relative">
     <div class="d-flex align-items-center">
       <div class="bg-body-secondary text-primary-emphasis rounded main-header text-center flex-grow-1"><?= $l['title'] ?></div>
-      <div id="reset" class="d-flex align-items-center justify-content-center bg-danger-subtle" title="<?= $l['reset'] ?>">
+      <div id="reset" class="d-flex align-items-center justify-content-center bg-danger-subtle" data-bs-toggle="tooltip" title="<?= $l['reset'] ?>">
         <i class="bi bi-arrow-counterclockwise" style="color: #dc3545; font-size: 1.25rem;"></i>
       </div>
     </div>
@@ -143,14 +143,14 @@
                     </td>
                     <td>
                       <div id="universe-control" class="btn-group" role="group">
-                        <button id="universe-load" type="button" title="<?= $l['universe-load'] ?>" class="btn btn-sm btn-outline-secondary uni-control-btn"><i class="bi bi-box-arrow-in-down"></i></button>
-                        <button id="universe-save" type="button" title="<?= $l['universe-save'] ?>" class="btn btn-sm btn-outline-secondary uni-control-btn"><i class="bi bi-save"></i></button>
-                        <button id="universe-delete" type="button" title="<?= $l['universe-delete'] ?>" class="btn btn-sm btn-outline-secondary uni-control-btn"><i class="bi bi-x-lg"></i></button>
+                        <button id="universe-load" type="button" data-bs-toggle="tooltip" title="<?= $l['universe-load'] ?>" class="btn btn-sm btn-outline-secondary uni-control-btn"><i class="bi bi-box-arrow-in-down"></i></button>
+                        <button id="universe-save" type="button" data-bs-toggle="tooltip" title="<?= $l['universe-save'] ?>" class="btn btn-sm btn-outline-secondary uni-control-btn"><i class="bi bi-save"></i></button>
+                        <button id="universe-delete" type="button" data-bs-toggle="tooltip" title="<?= $l['universe-delete'] ?>" class="btn btn-sm btn-outline-secondary uni-control-btn"><i class="bi bi-x-lg"></i></button>
                       </div>
                     </td>
                     <td style="width: 20px;">&nbsp;</td>
                     <td><input id="universe-name" type="text" name="universe-name" class="form-control form-control-sm d-inline-block input-20columns ui-input-margin"/></td>
-                    <td><button id="universe-add" type="button" title="<?= $l['universe-add'] ?>" class="btn btn-sm btn-outline-secondary uni-control-btn"><i class="bi bi-plus-lg"></i></button></td>
+                    <td><button id="universe-add" type="button" data-bs-toggle="tooltip" title="<?= $l['universe-add'] ?>" class="btn btn-sm btn-outline-secondary uni-control-btn"><i class="bi bi-plus-lg"></i></button></td>
                   </tr>
                   <tr>
                     <td>SR_KEY:</td>
@@ -158,11 +158,11 @@
                       <div class="d-flex align-items-center gap-1">
                         <input id="api-code" placeholder="API OGame / API LogServer.net" type="text" class="form-control form-control-sm flex-grow-1 text-center ui-input-margin"/>
                         <i class="bi bi-question-circle" data-bs-toggle="tooltip" title="<?= $l['import-hint'] ?>"></i>
-                        <button id="api-get" type="button" title="<?= $l['import-sr'] ?>" class="btn btn-sm btn-outline-secondary uni-control-btn"><i class="bi bi-box-arrow-in-down"></i></button>
+                        <button id="api-get" type="button" data-bs-toggle="tooltip" title="<?= $l['import-sr'] ?>" class="btn btn-sm btn-outline-secondary uni-control-btn"><i class="bi bi-box-arrow-in-down"></i></button>
                       </div>
                     </td>
                     <td>
-                      <button id="import-own-api" type="button" title="<?= $l['own-api-import-btn'] ?>" class="btn btn-sm btn-outline-secondary uni-control-btn"><i class="bi bi-clipboard"></i></button>
+                      <button id="import-own-api" type="button" data-bs-toggle="tooltip" title="<?= $l['own-api-import-btn'] ?>" class="btn btn-sm btn-outline-secondary uni-control-btn"><i class="bi bi-clipboard"></i></button>
                     </td>
                   </tr>
                 </table>
@@ -405,20 +405,20 @@
                     </td>
                     <td>
                       <div id="fleet-control" class="btn-group" role="group">
-                        <button id="fleet-load" type="button" title="<?= $l['universe-load'] ?>" class="btn btn-sm btn-outline-secondary uni-control-btn"><i class="bi bi-box-arrow-in-down"></i></button>
-                        <button id="fleet-save" type="button" title="<?= $l['universe-save'] ?>" class="btn btn-sm btn-outline-secondary uni-control-btn"><i class="bi bi-save"></i></button>
-                        <button id="fleet-delete" type="button" title="<?= $l['universe-delete'] ?>" class="btn btn-sm btn-outline-secondary uni-control-btn"><i class="bi bi-x-lg"></i></button>
+                        <button id="fleet-load" type="button" data-bs-toggle="tooltip" title="<?= $l['universe-load'] ?>" class="btn btn-sm btn-outline-secondary uni-control-btn"><i class="bi bi-box-arrow-in-down"></i></button>
+                        <button id="fleet-save" type="button" data-bs-toggle="tooltip" title="<?= $l['universe-save'] ?>" class="btn btn-sm btn-outline-secondary uni-control-btn"><i class="bi bi-save"></i></button>
+                        <button id="fleet-delete" type="button" data-bs-toggle="tooltip" title="<?= $l['universe-delete'] ?>" class="btn btn-sm btn-outline-secondary uni-control-btn"><i class="bi bi-x-lg"></i></button>
                       </div>
                     </td>
                     <td style="width: 20px;">&nbsp;</td>
                     <td><input id="fleet-name" type="text" name="fleet-name" class="form-control form-control-sm d-inline-block input-20columns ui-input-margin"/></td>
-                    <td><button id="fleet-add" type="button" title="<?= $l['universe-add'] ?>" class="btn btn-sm btn-outline-secondary uni-control-btn"><i class="bi bi-plus-lg"></i></button></td>
+                    <td><button id="fleet-add" type="button" data-bs-toggle="tooltip" title="<?= $l['universe-add'] ?>" class="btn btn-sm btn-outline-secondary uni-control-btn"><i class="bi bi-plus-lg"></i></button></td>
                   </tr>
                 </table>
               </div>
 
               <div class="text-end mb-1">
-                <button id="clear-ships" type="button" class="btn btn-sm btn-outline-secondary" title="<?= $l['clear-ships-hint'] ?>"><i class="bi bi-eraser"></i> <?= $l['clear-ships'] ?></button>
+                <button id="clear-ships" type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="tooltip" title="<?= $l['clear-ships-hint'] ?>"><i class="bi bi-eraser"></i> <?= $l['clear-ships'] ?></button>
               </div>
 
               <table class="mx-auto">
@@ -499,7 +499,7 @@
                   <td align="center"></td>
                   <td align="center"></td>
                   <td align="center">
-                    <div class="btn btn-sm btn-outline-secondary button-taketocalc" title="<?= $l['take-to-calc'] ?>">
+                    <div class="btn btn-sm btn-outline-secondary button-taketocalc" data-bs-toggle="tooltip" title="<?= $l['take-to-calc'] ?>">
                       <i class="bi bi-arrow-right"></i>
                     </div>
                   </td>
@@ -511,22 +511,22 @@
               <div class="border rounded p-2 arrival-panel">
                 <div class="flight-panel-head">
                   <span id="flight-title-1" class="fw-bold flight-panel-title"><?= $l['departure'] ?></span>
-                  <div id="toggle-mode" class="btn btn-sm btn-outline-secondary" title="<?= $l['toggle-mode'] ?>"><i class="bi bi-arrow-left-right"></i></div>
+                  <div id="toggle-mode" class="btn btn-sm btn-outline-secondary" data-bs-toggle="tooltip" title="<?= $l['toggle-mode'] ?>"><i class="bi bi-arrow-left-right"></i></div>
                 </div>
                 <div class="d-flex justify-content-center gap-1 my-1">
-                  <button id="set-departure-now" type="button" class="btn btn-sm btn-outline-secondary" title="<?= $l['departure-now-hint'] ?>"><?= $l['departure-now'] ?></button>
-                  <button id="set-departure-zero" type="button" class="btn btn-sm btn-outline-secondary" title="<?= $l['departure-zero-hint'] ?>">(00:00:00)</button>
+                  <button id="set-departure-now" type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="tooltip" title="<?= $l['departure-now-hint'] ?>"><?= $l['departure-now'] ?></button>
+                  <button id="set-departure-zero" type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="tooltip" title="<?= $l['departure-zero-hint'] ?>">(00:00:00)</button>
                 </div>
                 <input type="text" id="start-datetime" class="form-control form-control-sm startdate-input" placeholder="dd.mm.yyyy hh:mm:ss" title="<?= $l['datetime-format-hint'] ?>"/>
                 <div class="flight-panel-head my-1">
                   <span class="fw-bold flight-panel-title"><?= $l['flight'] ?></span>
-                  <div id="add-flight-time" class="btn btn-sm btn-outline-secondary" title="<?= $l['add-row'] ?>"><i class="bi bi-plus-lg"></i></div>
+                  <div id="add-flight-time" class="btn btn-sm btn-outline-secondary" data-bs-toggle="tooltip" title="<?= $l['add-row'] ?>"><i class="bi bi-plus-lg"></i></div>
                 </div>
                 <div id="flight-data">
                   <div class="d-flex align-items-center gap-1 mb-1 flight-leg">
-                    <button type="button" class="btn btn-sm btn-outline-secondary button-toggle flight-leg-sign" data-sign="+" title="<?= $l['toggle-sign'] ?>"><i class="bi bi-plus-lg"></i></button>
+                    <button type="button" class="btn btn-sm btn-outline-secondary button-toggle flight-leg-sign" data-sign="+" data-bs-toggle="tooltip" title="<?= $l['toggle-sign'] ?>"><i class="bi bi-plus-lg"></i></button>
                     <input id="flight-time" type="text" class="form-control form-control-sm flight-time-input" placeholder="dd hh:mm:ss" title="<?= $l['flight-time-format-hint'] ?>"/>
-                    <button type="button" class="btn btn-sm btn-outline-danger button-remove" title="<?= $l['remove-row'] ?>"><i class="bi bi-x-lg"></i></button>
+                    <button type="button" class="btn btn-sm btn-outline-danger button-remove" data-bs-toggle="tooltip" title="<?= $l['remove-row'] ?>"><i class="bi bi-x-lg"></i></button>
                   </div>
                 </div>
                 <div class="text-center fw-bold mt-1"><span id="flight-title-2"><?= $l['arrival'] ?></span></div>
@@ -547,7 +547,7 @@
           <div class="d-flex flex-wrap align-items-center gap-2 flex-grow-1">
             <span><?= $l['departure'] ?></span>
             <input type="text" id="save-start-datetime" class="form-control form-control-sm startdate-input" placeholder="dd.mm.yyyy hh:mm:ss" title="<?= $l['datetime-format-hint'] ?>" />
-            <button id="set-save-departure-now" type="button" class="btn btn-sm btn-outline-secondary" title="<?= $l['departure-now-hint'] ?>"><?= $l['departure-now'] ?></button>
+            <button id="set-save-departure-now" type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="tooltip" title="<?= $l['departure-now-hint'] ?>"><?= $l['departure-now'] ?></button>
             <span id="save-return-label"><?= $l['return'] ?></span>
             <input type="text" id="save-return-datetime" class="form-control form-control-sm startdate-input" placeholder="dd.mm.yyyy hh:mm:ss" title="<?= $l['datetime-format-hint'] ?>" />
             <span><?= $l['save-tolerance'] ?></span>
