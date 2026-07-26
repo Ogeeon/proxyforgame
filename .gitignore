@@ -8,3 +8,4 @@ setup-statusline.ps1
 changelog.sql
 /docs/vps-deploy-notes.md
 .env
+feature-description.txt 
