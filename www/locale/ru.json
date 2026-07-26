@@ -481,6 +481,7 @@
     "recall-at-moment": "В точный момент",
     "recall-after-time": "Через заданное время",
     "msg-recall-before-departure": "Момент отзыва не может быть раньше отправления",
+    "msg-recall-after-arrival": "Момент отзыва не может быть позже прибытия флота",
     "departure": "Отправление",
     "flight": "Полёт",
     "arrival": "Прибытие",

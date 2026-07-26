@@ -481,6 +481,7 @@
     "recall-at-moment": "U tačnom trenutku",
     "recall-after-time": "Nakon zadanog vremena",
     "msg-recall-before-departure": "Trenutak opoziva ne može biti prije polaska",
+    "msg-recall-after-arrival": "Trenutak opoziva ne može biti nakon dolaska flote",
     "departure": "Polazak",
     "flight": "Let",
     "arrival": "Dolazak",

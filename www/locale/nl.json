@@ -481,6 +481,7 @@
     "recall-at-moment": "Op exact moment",
     "recall-after-time": "Na opgegeven tijd",
     "msg-recall-before-departure": "Het moment van terugroepen kan niet vóór het vertrek liggen",
+    "msg-recall-after-arrival": "Het moment van terugroepen kan niet ná de aankomst van de vloot liggen",
     "departure": "Vertrek",
     "flight": "Vlucht",
     "arrival": "Aankomst",

@@ -481,6 +481,7 @@
     "recall-at-moment": "W dokładnym momencie",
     "recall-after-time": "Po zadanym czasie",
     "msg-recall-before-departure": "Moment odwołania nie może być wcześniejszy niż odlot",
+    "msg-recall-after-arrival": "Moment odwołania nie może być późniejszy niż przybycie floty",
     "departure": "Odlot",
     "flight": "Lot",
     "arrival": "Przybycie",

@@ -480,6 +480,7 @@
     "recall-at-moment": "V presnom okamihu",
     "recall-after-time": "Po zadanom čase",
     "msg-recall-before-departure": "Okamih odvolania nemôže byť skôr ako odlet",
+    "msg-recall-after-arrival": "Okamih odvolania nemôže byť neskôr ako prílet flotily",
     "departure": "Odlet",
     "flight": "Let",
     "arrival": "Prílet",

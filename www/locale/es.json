@@ -481,6 +481,7 @@
     "recall-at-moment": "En el momento exacto",
     "recall-after-time": "Tras el tiempo indicado",
     "msg-recall-before-departure": "El momento de la retirada no puede ser anterior a la salida",
+    "msg-recall-after-arrival": "El momento de la retirada no puede ser posterior a la llegada de la flota",
     "departure": "Salida",
     "flight": "Vuelo",
     "arrival": "Llegada",

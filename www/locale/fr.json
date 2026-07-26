@@ -481,6 +481,7 @@
     "recall-at-moment": "À l'instant exact",
     "recall-after-time": "Après un délai donné",
     "msg-recall-before-departure": "L'instant du rappel ne peut pas précéder le départ",
+    "msg-recall-after-arrival": "L'instant du rappel ne peut pas suivre l'arrivée de la flotte",
     "departure": "Départ",
     "flight": "Vol",
     "arrival": "Arrivée",

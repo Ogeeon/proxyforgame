@@ -481,6 +481,7 @@
     "recall-at-moment": "At exact moment",
     "recall-after-time": "After given time",
     "msg-recall-before-departure": "The recall moment cannot be earlier than the departure",
+    "msg-recall-after-arrival": "The recall moment cannot be later than the fleet's arrival",
     "departure": "Departure",
     "flight": "Flight",
     "arrival": "Arrival",

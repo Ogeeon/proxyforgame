@@ -332,8 +332,12 @@ class FlightOrchestrator {
      * two recall fields stay locked. Once they are, the mode radio decides which
      * field the user drives and which one this fills in from it — they always
      * describe the same recall, only in different units.
+     *
+     * @param {boolean} warn name an out-of-window recall in the warning banner.
+     *        Only the blur handler asks for it: typing is not the moment to
+     *        shout, and the field colour already says as much.
      */
-    updateRecall() {
+    updateRecall(warn = false) {
         const prm = this.opts.prm;
         const moment = document.getElementById('recall-moment');
         const after = document.getElementById('recall-after');
@@ -361,56 +365,77 @@ class FlightOrchestrator {
             return;
         }
 
+        const field = prm.recallMode === 0 ? moment : after;
         const elapsed = prm.recallMode === 0
             ? this._recallElapsedFromMoment(prm.recallStartDT, moment)
-            : this._recallElapsedFromDuration(prm.recallStartDT, after);
-        if (elapsed < 0) {
+            : this._recallElapsedFromDuration(after);
+        if (elapsed === null || !this._markRecallWindow(field, elapsed, prm.recallFullFlight, warn)) {
             this.renderer.renderRecallReturn(null);
             this.opts.save();
             return;
         }
 
+        // Mirror only a recall that really exists, so the paired field never
+        // shows a moment the panel has just rejected.
+        if (prm.recallMode === 0) {
+            setVal('#recall-after', getFlightTimeStr(elapsed));
+        } else {
+            setVal('#recall-moment', getDateStr(prm.recallStartDT + elapsed * 1000, this.opts.datetimeFormat));
+        }
+
         prm.recallElapsed = elapsed;
         prm.recallMomentDT = prm.recallStartDT + elapsed * 1000;
-        // Turning back cannot take longer than the outbound flight it cuts
-        // short: past the arrival there is nothing left to recall from.
-        const wayHome = Math.min(elapsed, prm.recallFullFlight);
+        // Turning back retraces exactly the distance already flown, and the
+        // window check above has ruled out anything past the arrival.
         this.renderer.renderRecallReturn(
-            getDateStr(prm.recallMomentDT + wayHome * 1000, this.opts.datetimeFormat));
+            getDateStr(prm.recallMomentDT + elapsed * 1000, this.opts.datetimeFormat));
         this.opts.save();
     }
 
     /**
-     * Seconds between departure and the typed recall moment, mirroring them into
-     * the elapsed field. Returns -1 when the moment is unusable — blank, badly
-     * formed, or, the one case the panel calls out as an error, before take-off.
+     * Seconds between departure and the typed recall moment, or null when the
+     * moment is unusable — blank or badly formed. A moment before take-off comes
+     * back as a negative number: unparseable and out of window are different
+     * answers, and only the caller knows what to do about the second one.
      */
     _recallElapsedFromMoment(departure, field) {
         if (!this._markDate('recall-moment', field.value)) {
-            return -1;
+            return null;
         }
         const parsed = parseDate(field.value, this.opts.datetimeFormat);
         if (parsed === 0) {
-            return -1;
+            return null;
         }
-        const elapsed = Math.round((parsed - departure) / 1000);
+        return Math.round((parsed - departure) / 1000);
+    }
+
+    /** The mirror image: the seconds a typed elapsed time spells out. */
+    _recallElapsedFromDuration(field) {
+        const elapsed = this._legSeconds(field.value);
         if (elapsed < 0) {
             this.renderer.markField(field, false);
-            return -1;
+            return null;
         }
-        setVal('#recall-after', getFlightTimeStr(elapsed));
         return elapsed;
     }
 
-    /** The mirror image: a typed elapsed time fills the recall moment in. */
-    _recallElapsedFromDuration(departure, field) {
-        const elapsed = this._legSeconds(field.value);
-        this.renderer.markField(field, elapsed >= 0);
+    /**
+     * A recall only exists between take-off and arrival: past the arrival there
+     * is nothing left to turn back. Marks the field and, when asked, names in
+     * the warning banner which end of the window was overshot.
+     */
+    _markRecallWindow(field, elapsed, full, warn) {
+        let message = null;
         if (elapsed < 0) {
-            return -1;
+            message = this.opts.msgRecallBeforeDeparture;
+        } else if (elapsed > full) {
+            message = this.opts.msgRecallAfterArrival;
         }
-        setVal('#recall-moment', getDateStr(departure + elapsed * 1000, this.opts.datetimeFormat));
-        return elapsed;
+        this.renderer.markField(field, message === null);
+        if (message !== null && warn) {
+            this.renderer.renderWarning(message);
+        }
+        return message === null;
     }
 
     setRecallDepartureNow() {
@@ -1612,7 +1637,7 @@ class FlightOrchestrator {
         // event take-to-calc dispatches on it by hand.
         ['recall-start-datetime', 'recall-moment', 'recall-after', 'recall-full-flight'].forEach((id) => {
             on(id, 'input', () => this.updateRecall());
-            on(id, 'blur', () => this.updateRecall());
+            on(id, 'blur', () => this.updateRecall(true));
         });
         document.querySelectorAll('input[name="recall-mode"]').forEach((el) =>
             el.addEventListener('change', () => this.updateRecall()));

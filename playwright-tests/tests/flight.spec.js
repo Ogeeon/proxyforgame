@@ -2133,6 +2133,11 @@ test.describe('Flight Calculator - Fleet Recall', () => {
 
         await expect(page.locator('#recall-moment')).toHaveClass(/is-invalid/);
         expect(await returnMoment(page)).toBe('?');
+
+        // The banner waits for the field to be left rather than shouting mid-edit
+        await page.locator('#recall-moment').blur();
+        expect(await warningText(page))
+            .toBe(await page.evaluate(() => options.msgRecallBeforeDeparture));
     });
 
     test('a valid recall moment fills in the elapsed time and the return', async ({ page }) => {
@@ -2150,16 +2155,53 @@ test.describe('Flight Calculator - Fleet Recall', () => {
         expect(await returnMoment(page)).toBe(`${day} 04:00:00`);
     });
 
-    test('the way home is never longer than the full flight', async ({ page }) => {
+    test('a recall moment after the arrival is flagged and blocks the result', async ({ page }) => {
         await openRecallTab(page);
         await page.locator('#set-recall-departure-zero').click();
         await setFullFlight(page, '00 01:00:00');
 
         const day = await departureDay(page);
-        // Recalled three hours in, but the whole trip only lasts one hour
+        // Recalled three hours in, but the whole trip only lasts one hour: by
+        // then the fleet has landed and there is nothing left to turn back
         await fillMasked(page, '#recall-moment', `${day} 03:00:00`);
 
-        expect(await returnMoment(page)).toBe(`${day} 04:00:00`);
+        await expect(page.locator('#recall-moment')).toHaveClass(/is-invalid/);
+        expect(await returnMoment(page)).toBe('?');
+        // A rejected moment is not mirrored into the elapsed field
+        await expect(page.locator('#recall-after')).toHaveValue('00 00:00:00');
+
+        await page.locator('#recall-moment').blur();
+        expect(await warningText(page))
+            .toBe(await page.evaluate(() => options.msgRecallAfterArrival));
+    });
+
+    test('a recall exactly at the arrival is still accepted', async ({ page }) => {
+        await openRecallTab(page);
+        await page.locator('#set-recall-departure-zero').click();
+        await setFullFlight(page, '00 01:00:00');
+
+        const day = await departureDay(page);
+        await fillMasked(page, '#recall-moment', `${day} 01:00:00`);
+
+        await expect(page.locator('#recall-moment')).not.toHaveClass(/is-invalid/);
+        // The whole outbound flight, then the whole way back
+        expect(await returnMoment(page)).toBe(`${day} 02:00:00`);
+    });
+
+    test('coming back inside the window clears the flag and the result', async ({ page }) => {
+        await openRecallTab(page);
+        await page.locator('#set-recall-departure-zero').click();
+        await setFullFlight(page, '00 01:00:00');
+
+        const day = await departureDay(page);
+        await fillMasked(page, '#recall-moment', `${day} 03:00:00`);
+        await expect(page.locator('#recall-moment')).toHaveClass(/is-invalid/);
+
+        await fillMasked(page, '#recall-moment', `${day} 00:30:00`);
+
+        await expect(page.locator('#recall-moment')).not.toHaveClass(/is-invalid/);
+        await expect(page.locator('#recall-after')).toHaveValue('00 00:30:00');
+        expect(await returnMoment(page)).toBe(`${day} 01:00:00`);
     });
 
     // ---- the after-given-time mode ----------------------------------------
@@ -2177,7 +2219,7 @@ test.describe('Flight Calculator - Fleet Recall', () => {
         expect(await returnMoment(page)).toBe(`${day} 04:00:00`);
     });
 
-    test('an elapsed time longer than the full flight still caps the way home', async ({ page }) => {
+    test('an elapsed time longer than the full flight is flagged and blocks the result', async ({ page }) => {
         await openRecallTab(page);
         await page.locator('#set-recall-departure-zero').click();
         await setFullFlight(page, '00 01:00:00');
@@ -2186,8 +2228,15 @@ test.describe('Flight Calculator - Fleet Recall', () => {
         const day = await departureDay(page);
         await fillMasked(page, '#recall-after', '00 03:00:00');
 
-        await expect(page.locator('#recall-moment')).toHaveValue(`${day} 03:00:00`);
-        expect(await returnMoment(page)).toBe(`${day} 04:00:00`);
+        await expect(page.locator('#recall-after')).toHaveClass(/is-invalid/);
+        expect(await returnMoment(page)).toBe('?');
+        // The paired field keeps the last accepted recall — the zero elapsed the
+        // mode switch mirrored — rather than the rejected three hours
+        await expect(page.locator('#recall-moment')).toHaveValue(`${day} 00:00:00`);
+
+        await page.locator('#recall-after').blur();
+        expect(await warningText(page))
+            .toBe(await page.evaluate(() => options.msgRecallAfterArrival));
     });
 
     // ---- reset -------------------------------------------------------------

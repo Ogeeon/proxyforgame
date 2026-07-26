@@ -481,6 +481,7 @@
     "recall-at-moment": "Zum genauen Zeitpunkt",
     "recall-after-time": "Nach Ablauf der Zeit",
     "msg-recall-before-departure": "Der Rückrufzeitpunkt darf nicht vor dem Abflug liegen",
+    "msg-recall-after-arrival": "Der Rückrufzeitpunkt darf nicht nach der Ankunft der Flotte liegen",
     "departure": "Abflugszeit",
     "flight": "Flug",
     "arrival": "Ankunftszeit",

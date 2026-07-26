@@ -66,6 +66,7 @@
     options.msgWrongTolerance = "<?= $l['msg-wrong-tolerance'] ?>";
     options.msgWrongDepartureCoordinates = "<?= $l['msg-wrong-departure-coordinates'] ?>";
     options.msgRecallBeforeDeparture = "<?= $l['msg-recall-before-departure'] ?>";
+    options.msgRecallAfterArrival = "<?= $l['msg-recall-after-arrival'] ?>";
     options.msgNoSavepointsFound = "<?= $l['msg-no-savepoints-found'] ?>";
     options.flightmodesNote = "<?= $l['flightmodes-note'] ?>";
     options.savepointsNote = "<?= $l['savepoints-note'] ?>";
