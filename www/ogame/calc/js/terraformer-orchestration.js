@@ -61,7 +61,8 @@ var options = {
         // 999 matches the field's own _constrains: the blur validator already
         // accepts anything up to 999, so a narrower bound here would only make a
         // legitimately entered value vanish on the next page load.
-        case 'totalLFEnrgBonus': return validateNumber(Number.parseFloat(value), 0, 999, 0);
+        // The life-form energy bonus has no ceiling in the game.
+        case 'totalLFEnrgBonus': return validateNumber(Number.parseFloat(value), 0, Infinity, 0);
         case 'scCapacityIncrease': return validateNumber(Number.parseFloat(value), 0, 999, 0);
         case 'lcCapacityIncrease': return validateNumber(Number.parseFloat(value), 0, 999, 0);
         case 'tfSingleLevel': return value === 'true';
@@ -174,7 +175,8 @@ class TerraformerApp {
     set('fusion-plant-level', level(100));
     set('solar-satellites-count', amount());
     set('disr-chamber-level', level(100));
-    set('total-lf-energy-bonus', percent(999));
+    // Unlike the capacity bonuses, this one is uncapped.
+    set('total-lf-energy-bonus', percent(Infinity));
     set('sc-capacity-increase', percent(999));
     set('lc-capacity-increase', percent(999));
     set('tf-level-from', level(100));
