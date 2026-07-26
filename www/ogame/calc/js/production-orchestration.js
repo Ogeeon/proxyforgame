@@ -737,8 +737,8 @@ function savePlnData() {
 	options.prm.aPNames[options.editedPln] = stripHTMLTags($('#planet-name').value);
 	let target = options.prm.aPS[options.editedPln];
 	let rows = $$('#one-planet-prod tr:not(.lf-row)');
-	target[0] = Number($('#max-planet-temp').value);
-	target[1] = Number($('#planet-pos').value);
+	target[0] = getInputNumber($('#max-planet-temp'));
+	target[1] = getInputNumber($('#planet-pos'));
 	target[2] = Number($('#energy-boost').value);
 	target[24] = Number($('#one-pln-race').value);
 	let savedLfLevels = readOnePlnLfLevels();
@@ -865,7 +865,7 @@ function setupPlanetsSpin() {
 	input._constrains = { 'min': options.minPlanetsCount, 'max': options.maxPlanetsCount, 'def': options.defPlanetsCount, 'allowNegative': false };
 
 	addEvent(up, 'click', function () {
-		const oldVal = Number.parseInt(input.value) || 0;
+		const oldVal = getInputNumber(input);
 		const newVal = oldVal + 1;
 		if (newVal <= options.maxPlanetsCount) {
 			input.value = newVal;
@@ -873,7 +873,7 @@ function setupPlanetsSpin() {
 		}
 	});
 	addEvent(down, 'click', function () {
-		const oldVal = Number.parseInt(input.value) || 0;
+		const oldVal = getInputNumber(input);
 		const newVal = oldVal - 1;
 		if (newVal >= options.minPlanetsCount) {
 			input.value = newVal;
@@ -957,6 +957,11 @@ function initializeProductionCalculator() {
 		_restoreActiveTab();
 
 		// Input constraints
+		// Research levels: the same 0..50 range options.prm.validate applies to the
+		// stored values, so an out-of-range entry is clamped on blur (with the
+		// standard warning) instead of silently reverting to 0 on the next load.
+		document.getElementById('energy-tech-level')._constrains = { 'min': 0, 'max': 50, 'def': 0, 'allowNegative': false };
+		document.getElementById('plasma-tech-level')._constrains = { 'min': 0, 'max': 50, 'def': 0, 'allowNegative': false };
 		document.getElementById('max-planet-temp')._constrains = { 'min': -134, 'def': 0, 'allowNegative': true };
 		document.getElementById('planet-pos')._constrains = { 'min': 1, 'max': 16, 'def': 8, 'allowNegative': false };
 		document.getElementById('exchange-rates-m')._constrains = { 'min': 0.1, 'max': 100, 'def': 1,   'allowFloat': true, 'allowNegative': false };

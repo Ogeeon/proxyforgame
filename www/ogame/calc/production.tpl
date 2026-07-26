@@ -302,7 +302,7 @@
       <div class="bg-body-secondary text-primary-emphasis rounded main-header text-center flex-grow-1">
         <?= $l['title'] ?>
       </div>
-      <div id="reset" class="top-0 end-0 d-flex align-items-center justify-content-center bg-danger-subtle" title="<?= $l['reset'] ?>">
+      <div id="reset" class="top-0 end-0 d-flex align-items-center justify-content-center bg-danger-subtle" data-bs-toggle="tooltip" title="<?= $l['reset'] ?>">
         <i class="bi bi-arrow-counterclockwise" style="color: #dc3545; font-size: 1.25rem;"></i>
       </div>
     </div>
@@ -410,11 +410,11 @@
           <div class="d-flex flex-wrap gap-2 align-items-center justify-content-center">
             <div class="d-flex align-items-center gap-1">
               <label for="energy-tech-level"><?= $l['energy-tech-level'] ?></label>
-              <input id="energy-tech-level" type="text" name="energy-tech-level" class="form-control form-control-sm level-input" value="0"/>
+              <input id="energy-tech-level" type="text" name="energy-tech-level" class="form-control form-control-sm level-input" value="0" alt="<?= $l['energy-tech-level'] ?>"/>
             </div>
             <div class="d-flex align-items-center gap-1">
               <label for="plasma-tech-level"><?= $l['plasma-tech-level'] ?></label>
-              <input id="plasma-tech-level" type="text" name="plasma-tech-level" class="form-control form-control-sm level-input" value="0"/>
+              <input id="plasma-tech-level" type="text" name="plasma-tech-level" class="form-control form-control-sm level-input" value="0" alt="<?= $l['plasma-tech-level'] ?>"/>
             </div>
           </div>
         </div>
@@ -1013,7 +1013,7 @@
 <script type="text/javascript">
   document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(function(el) {
-      new bootstrap.Tooltip(el);
+      bootstrap.Tooltip.getOrCreateInstance(el);
     });
     initializeProductionCalculator();
   });
