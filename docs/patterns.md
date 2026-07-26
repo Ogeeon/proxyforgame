@@ -335,3 +335,39 @@ rule repaints `.form-control` unconditionally; `ui-state-disabled` defined per c
 with a *different* fill than the one above; a computed readout given a one-off utility
 fill (`bg-body-tertiary`) instead of the marker — it lands on a different colour from every
 other non-editable field.
+
+### Choosing between `readonly`, `disabled`, and div + `ui-state-disabled`
+
+All three render with the same `--bs-secondary-bg` fill and must be treated consistently,
+but they differ in semantic meaning and interaction model:
+
+| Type | Markup | Use when | Interactions |
+|------|--------|----------|--------------|
+| `disabled="disabled"` | `<input type="text" disabled />` | Input is functionally off (speed override toggle, conditional feature). Must not submit in a form. | Read-only; no text selection. |
+| `readonly` | `<input type="text" readonly />` | Input's value is derived from other controls (spinner buttons drive it). May submit in a form if needed. | Selectable text; can be copied; scroll gestures may focus it. |
+| `<div class="ui-state-disabled">` | `<div id="arrival-moment" class="form-control form-control-sm ui-state-disabled">?</div>` | Value is computed, never typed. Not a form control — no name attribute. Output-only readout. | Read-only; no text selection by default. |
+
+**Common mistake**: a `readonly` input that reads as editable (e.g., `production.tpl:788`'s
+`planetsSpin` and `costs.tpl:695`'s `planetsSpin`). The field has `form-control` styling
+but no visual distinction from an editable input. **Remedies:**
+
+1. **If the field has spin buttons**: Consider replacing it with a `<div class="ui-state-disabled">`
+   and updating the buttons to write to it instead. The `<div>` is already styled correctly
+   and never tempts users to type into it.
+
+2. **If it must stay as `<input readonly>`**: Add the class `text-muted` to the input for
+   additional visual cue:
+   ```html
+   <input id="planetsSpin" type="text" class="form-control text-center text-muted" value="8" readonly />
+   ```
+   Alternatively, add a read-only badge or icon next to it:
+   ```html
+   <div class="input-group input-group-sm" style="width: 120px;">
+     <input id="planetsSpin" type="text" class="form-control centered" value="8" readonly />
+     <span class="input-group-text"><i class="bi bi-lock-fill" style="font-size: 0.75rem;"></i></span>
+   </div>
+   ```
+
+3. **For maximum clarity across all read-only fields**: Ensure they all use the same `ui-state-disabled`
+   class and `.ui-state-disabled` CSS rule — computed divs, disabled inputs, and readonly inputs
+   should all render identically. This makes the read-only state obvious at a glance.

@@ -258,6 +258,13 @@ td.min {
   background-color: transparent;
 }
 
+/* Dark theme: make readonly planetsSpin field visually distinct from editable irn-level.
+   Editable inputs are darker (more recessed), readonly inputs appear lighter/raised.
+   !important overrides Bootstrap's transparent default. */
+[data-bs-theme="dark"] #irn-calc .form-control:not([readonly]):not(:disabled) {
+  background-color: rgb(15, 17, 21) !important;
+}
+
 .irn-calc-info {
   padding: 3px;
   text-align: center;

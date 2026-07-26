@@ -65,6 +65,16 @@
   background-color: color-mix(in srgb, var(--bs-secondary-bg) 92%, black) !important;
 }
 
+/* Dark theme: sink editable form controls below the readonly/disabled tone so they are visually
+   distinct. Editable inputs appear darker (more recessed), while readonly/disabled fields
+   keep the panel tone (--bs-secondary-bg) and appear lighter/raised. This makes readonly
+   inputs in modals visually distinguishable from editable ones. !important overrides
+   Bootstrap's default transparent background. */
+[data-bs-theme="dark"] .form-control:not([readonly]):not(:disabled):not(.ui-state-disabled),
+[data-bs-theme="dark"] .form-select:not([readonly]):not(:disabled):not(.ui-state-disabled) {
+  background-color: rgb(20, 23, 27) !important;
+}
+
 [data-bs-theme="dark"] .nav-tabs .nav-link.active {
   color: var(--bs-primary);
   /* background-color: var(--bs-primary-bg-subtle); */
@@ -238,6 +248,15 @@ button {
 abbr {
   border-bottom: .1em dotted;
   cursor: help;
+}
+
+/* Read-only and disabled inputs should show the default arrow cursor, not a text caret.
+   This applies to readonly attributes and :disabled pseudo-class on inputs and textareas. */
+input[readonly],
+textarea[readonly],
+input:disabled,
+textarea:disabled {
+  cursor: default;
 }
 /* Keep value inputs compact when wrapped in a Bootstrap input-group with a unit
    addon: Bootstrap forces `.input-group > .form-control { flex: 1 1 auto; width: 1% }`,
