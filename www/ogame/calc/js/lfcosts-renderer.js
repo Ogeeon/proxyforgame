@@ -119,8 +119,8 @@ class LfRenderer {
         needRow.children[4].innerHTML = '<b>' + this._fmt(needDeut) + '</b>';
 
         const tRow = rows[rows.length - 1];
-        tRow.children[2].innerHTML = numToOGame(needSC) + ' <abbr data-bs-toggle="tooltip" title="' + this.opts.scFull + '">' + this.opts.scShort + '</abbr>';
-        tRow.children[3].innerHTML = numToOGame(needLC) + ' <abbr data-bs-toggle="tooltip" title="' + this.opts.lcFull + '">' + this.opts.lcShort + '</abbr>';
+        this._setCellHtml(tRow.children[2], numToOGame(needSC) + ' <abbr data-bs-toggle="tooltip" title="' + this.opts.scFull + '">' + this.opts.scShort + '</abbr>');
+        this._setCellHtml(tRow.children[3], numToOGame(needLC) + ' <abbr data-bs-toggle="tooltip" title="' + this.opts.lcFull + '">' + this.opts.lcShort + '</abbr>');
     }
 
     // -------------------------------------------------------------------------
@@ -228,8 +228,8 @@ class LfRenderer {
         rows[totalsRow + 2].children[2].innerHTML = '<b>' + this._fmt(needCrys) + '</b>';
         rows[totalsRow + 2].children[3].innerHTML = '<b>' + this._fmt(needDeut) + '</b>';
 
-        rows[totalsRow + 3].children[1].innerHTML = numToOGame(needSC) + ' <abbr data-bs-toggle="tooltip" title="' + this.opts.scFull + '">' + this.opts.scShort + '</abbr>';
-        rows[totalsRow + 3].children[2].innerHTML = numToOGame(needLC) + ' <abbr data-bs-toggle="tooltip" title="' + this.opts.lcFull + '">' + this.opts.lcShort + '</abbr>';
+        this._setCellHtml(rows[totalsRow + 3].children[1], numToOGame(needSC) + ' <abbr data-bs-toggle="tooltip" title="' + this.opts.scFull + '">' + this.opts.scShort + '</abbr>');
+        this._setCellHtml(rows[totalsRow + 3].children[2], numToOGame(needLC) + ' <abbr data-bs-toggle="tooltip" title="' + this.opts.lcFull + '">' + this.opts.lcShort + '</abbr>');
     }
 
     /** Zero out Tab 3 when techID = 0. */
@@ -251,13 +251,25 @@ class LfRenderer {
         rows[totalsRow + 2].children[1].innerHTML = '<b>0</b>';
         rows[totalsRow + 2].children[2].innerHTML = '<b>0</b>';
         rows[totalsRow + 2].children[3].innerHTML = '<b>0</b>';
-        rows[totalsRow + 3].children[1].innerHTML = '0 <abbr data-bs-toggle="tooltip" title="' + this.opts.scFull + '">' + this.opts.scShort + '</abbr>';
-        rows[totalsRow + 3].children[2].innerHTML = '0 <abbr data-bs-toggle="tooltip" title="' + this.opts.lcFull + '">' + this.opts.lcShort + '</abbr>';
+        this._setCellHtml(rows[totalsRow + 3].children[1], '0 <abbr data-bs-toggle="tooltip" title="' + this.opts.scFull + '">' + this.opts.scShort + '</abbr>');
+        this._setCellHtml(rows[totalsRow + 3].children[2], '0 <abbr data-bs-toggle="tooltip" title="' + this.opts.lcFull + '">' + this.opts.lcShort + '</abbr>');
     }
 
     // -------------------------------------------------------------------------
     // Private helpers
     // -------------------------------------------------------------------------
+
+    /**
+     * Replace a cell's markup, disposing the Bootstrap tooltips it holds first:
+     * an instance whose anchor has been thrown away keeps its bubble on screen.
+     */
+    _setCellHtml(cell, html) {
+        cell.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(function (el) {
+            const existing = bootstrap.Tooltip.getInstance(el);
+            if (existing) existing.dispose();
+        });
+        cell.innerHTML = html;
+    }
 
     _fmt(num) {
         return ogamizeNum(num, this.opts.unitSuffix);

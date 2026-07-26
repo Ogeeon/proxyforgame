@@ -36,7 +36,7 @@
   <script type="text/javascript" src="/ogame/calc/js/lfcosts-orchestration.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/lfcosts-orchestration.js'); ?>"></script>
 
   <script type="text/javascript">
-    // десятичный разделитель будет использоваться в функциях, проверяющих валидность чисел в input-ах
+    // The decimal separator is used by the functions that validate the numbers typed into the inputs
     options.decimalSeparator='<?= $l['decimal-separator'] ?>';
     options.datetimeW = '<?= $l['datetime-w'] ?>';
     options.datetimeD = '<?= $l['datetime-d'] ?>';
@@ -88,7 +88,7 @@
       <div class="bg-body-secondary text-primary-emphasis rounded main-header text-center flex-grow-1">
         <?= $l['title'] ?>
       </div>
-      <div id="reset" class="top-0 end-0 d-flex align-items-center justify-content-center bg-danger-subtle" title="<?= $l['reset'] ?>">
+      <div id="reset" class="top-0 end-0 d-flex align-items-center justify-content-center bg-danger-subtle" data-bs-toggle="tooltip" title="<?= $l['reset'] ?>">
         <i class="bi bi-arrow-counterclockwise" style="color: #dc3545; font-size: 1.25rem;"></i>
       </div>
     </div>

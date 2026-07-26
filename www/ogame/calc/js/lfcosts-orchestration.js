@@ -97,22 +97,36 @@ class LfCostsOrchestrator {
         this.opts.load();
         this._restoreInputsFromPrm();
 
-        // Table inputs for buildings (outer tabs 0 and 1, inner tab 1 only)
+        // Level inputs of the building tables (outer tabs 0 and 1, inner tab 1 only).
+        // The available-resource fields of the same tables are bound further down.
         [0, 1].forEach(outer => {
-            document.querySelectorAll(`#table-${outer}-1 input[type=text]`).forEach(inp => {
+            document.querySelectorAll(`#table-${outer}-1 input[type=text].level-input`).forEach(inp => {
                 inp.addEventListener('input', function (e) {
                     validateInputNumber({ currentTarget: this });
+                    orchestrator.handleRowChange(this);
+                });
+                // Min/max clamping belongs on blur only — never while the value is being typed
+                inp.addEventListener('blur', function (e) {
+                    validateInputNumberOnBlurNative({ currentTarget: this });
                     orchestrator.handleRowChange(this);
                 });
             });
             // Delegated listeners for dynamically added research rows
             const resTbl = document.getElementById(`table-${outer}-2`);
             if (resTbl) {
+                const isLevelInput = (el) => el.tagName === 'INPUT' && el.type === 'text'
+                    && el.classList.contains('level-input');
                 resTbl.addEventListener('input', function (e) {
-                    const inp = e.target;
-                    if (inp.tagName === 'INPUT' && inp.type === 'text') {
-                        validateInputNumber({ currentTarget: inp });
-                        orchestrator.handleRowChange(inp);
+                    if (isLevelInput(e.target)) {
+                        validateInputNumber({ currentTarget: e.target });
+                        orchestrator.handleRowChange(e.target);
+                    }
+                });
+                // 'blur' does not bubble, so the delegated clamping hangs on 'focusout'
+                resTbl.addEventListener('focusout', function (e) {
+                    if (isLevelInput(e.target)) {
+                        validateInputNumberOnBlurNative({ currentTarget: e.target });
+                        orchestrator.handleRowChange(e.target);
                     }
                 });
                 resTbl.addEventListener('click', function (e) {
@@ -179,21 +193,16 @@ class LfCostsOrchestrator {
                             validateInputNumber({ currentTarget: this });
                             orchestrator.handleResourceInput(this);
                         });
+                        el.addEventListener('blur', function (e) {
+                            validateInputNumberOnBlurNative({ currentTarget: this });
+                            orchestrator.handleResourceInput(this);
+                        });
                     }
                 });
             }
         }
 
-        // Input constraints
-        document.getElementById('sc-capacity-increase')._constrains  = { min: 0, max: 1000, def: 0, allowFloat: true,  allowNegative: false };
-        document.getElementById('lc-capacity-increase')._constrains  = { min: 0, max: 1000, def: 0, allowFloat: true,  allowNegative: false };
-        document.getElementById('megalith-level')._constrains        = { min: 0, max: 100,  def: 0, allowFloat: false, allowNegative: false };
-        document.getElementById('mrc-level')._constrains             = { min: 0, max: 100,  def: 0, allowFloat: false, allowNegative: false };
-        document.getElementById('research-cost-reduction')._constrains = { min: 0, max: 50, def: 0, allowFloat: true,  allowNegative: false };
-        document.getElementById('research-time-reduction')._constrains = { min: 0, max: 99, def: 0, allowFloat: true,  allowNegative: false };
-        document.getElementById('exchange-rates-m')._constrains        = { min: 0.1, max: 100, def: 1,   allowFloat: true, allowNegative: false };
-        document.getElementById('exchange-rates-c')._constrains        = { min: 0.1, max: 100, def: 1.5, allowFloat: true, allowNegative: false };
-        document.getElementById('exchange-rates-d')._constrains        = { min: 0.1, max: 100, def: 3,   allowFloat: true, allowNegative: false };
+        this._setInputConstraints();
 
         let theme = { value: 'light', validate: function (key, val) { return val; } };
         loadFromCookie('theme', theme);
@@ -229,10 +238,10 @@ class LfCostsOrchestrator {
 
         let levelFrom, levelTo;
         if (outerTab === 1) {
-            levelFrom = 1 * row.children[2].children[0].value;
-            levelTo   = 1 * row.children[3].children[0].value;
+            levelFrom = getInputNumber(row.children[2].children[0]);
+            levelTo   = getInputNumber(row.children[3].children[0]);
         } else {
-            levelTo   = 1 * row.children[2].children[0].value;
+            levelTo   = getInputNumber(row.children[2].children[0]);
             levelFrom = levelTo === 0 ? 0 : levelTo - 1;
         }
 
@@ -241,7 +250,7 @@ class LfCostsOrchestrator {
         const ionTechLevel = (levelTo > levelFrom) ? 0 : params.ionTechLevel;
         const bldCostRdc  = this.calculator.computeBldCostRdc(techID, params.race, params.megalithLvl, params.mineralResCntrLvl);
 
-        // Для зданий возможен снос, по остальным техам — новый уровень должен быть строго больше старого
+        // Buildings can be demolished; for every other tech the new level must be strictly above the old one
         const isBuilding = techID % 1000 < 100;
         if ((levelTo > levelFrom || isBuilding) && levelTo >= 0) {
             const result = this.calculator.calculate(techID, levelFrom, levelTo, ionTechLevel, rsrCostRdc, bldCostRdc, params);
@@ -296,10 +305,10 @@ class LfCostsOrchestrator {
 
                 let levelFrom, levelTo;
                 if (outerTab === 1) {
-                    levelFrom = 1 * rows[idx].children[2].children[0].value;
-                    levelTo   = 1 * rows[idx].children[3].children[0].value;
+                    levelFrom = getInputNumber(rows[idx].children[2].children[0]);
+                    levelTo   = getInputNumber(rows[idx].children[3].children[0]);
                 } else {
-                    levelTo   = 1 * rows[idx].children[2].children[0].value;
+                    levelTo   = getInputNumber(rows[idx].children[2].children[0]);
                     levelFrom = levelTo === 0 ? 0 : levelTo - 1;
                 }
 
@@ -452,11 +461,10 @@ class LfCostsOrchestrator {
 
     handleResourceInput(inputEl) {
         const type  = inputEl.id.match(/metal|crystal|deut/)[0];
-        const value = getInputNumber(document.getElementById(inputEl.id));
+        const value = getInputNumber(inputEl);
         for (let outer = 0; outer < 3; outer++) {
             for (let inner = 1; inner < 3; inner++) {
-                const el = document.getElementById(`${type}-available-${outer}-${inner}`);
-                if (el) el.value = value;
+                setNumVal(`#${type}-available-${outer}-${inner}`, value);
             }
         }
         this.handleParamChange();
@@ -470,7 +478,9 @@ class LfCostsOrchestrator {
         const prm = this.opts.prm;
         prm.robotFactoryLevel    = 0;
         prm.naniteFactoryLevel   = 0;
-        prm.universeSpeed        = 0;
+        // 1 is the lowest value the universe-speed dropdown offers; 0 would leave
+        // the select with no matching option and no speed to calculate with
+        prm.universeSpeed        = 1;
         prm.ionTechLevel         = 0;
         prm.hyperTechLevel       = 0;
         prm.playerClass          = 0;
@@ -494,19 +504,19 @@ class LfCostsOrchestrator {
         setVal('#universe-speed', prm.universeSpeed);
         setVal('#ion-tech-level', prm.ionTechLevel);
         setVal('#hyper-tech-level', prm.hyperTechLevel);
-        setVal('#sc-capacity-increase', this._formatDecimal(prm.capIncrSC));
-        setVal('#lc-capacity-increase', this._formatDecimal(prm.capIncrLC));
+        setNumVal('#sc-capacity-increase', prm.capIncrSC);
+        setNumVal('#lc-capacity-increase', prm.capIncrLC);
         setVal('#megalith-level', prm.megalithLvl);
         setVal('#mrc-level', prm.mineralResCntrLvl);
         setVal('#research-centre-level', prm.resCentreLvl);
         setVal('#rune-tech-level', prm.runeTechLvl);
         setVal('#rbt-res-centre-level', prm.rbtResCentreLvl);
         setVal('#vortex-chamber-level', prm.vortexChamberLvl);
-        setVal('#research-cost-reduction', this._formatDecimal(prm.researchCostReduction));
-        setVal('#research-time-reduction', this._formatDecimal(prm.researchTimeReduction));
-        setVal('#exchange-rates-m', this._formatDecimal(prm.rates[0]));
-        setVal('#exchange-rates-c', this._formatDecimal(prm.rates[1]));
-        setVal('#exchange-rates-d', this._formatDecimal(prm.rates[2]));
+        setNumVal('#research-cost-reduction', prm.researchCostReduction);
+        setNumVal('#research-time-reduction', prm.researchTimeReduction);
+        setNumVal('#exchange-rates-m', prm.rates[0]);
+        setNumVal('#exchange-rates-c', prm.rates[1]);
+        setNumVal('#exchange-rates-d', prm.rates[2]);
 
         for (let outer = 0; outer < 2; outer++) {
             const rows = getTableRows(`#table-${outer}-1`);
@@ -567,22 +577,70 @@ class LfCostsOrchestrator {
     // -------------------------------------------------------------------------
 
     /**
-     * The decimal separator for the current language (falls back to '.').
+     * Declare the constraints every numeric field is clamped to on blur. A field
+     * with no _constrains falls back to options.defConstraints, which has no
+     * bounds at all, so it would never be clamped. The bounds mirror the ranges
+     * options.prm.validate() applies to the values restored from the cookie.
      * @private
      */
-    _decimalSeparator() {
-        return (typeof options !== 'undefined' && options.decimalSeparator) || '.';
+    _setInputConstraints() {
+        const set = (id, constrains) => {
+            const el = document.getElementById(id);
+            if (el) el._constrains = constrains;
+        };
+        const level   = (max) => ({ min: 0, max, def: 0, allowFloat: false, allowNegative: false });
+        const percent = (max) => ({ min: 0, max, def: 0, allowFloat: true,  allowNegative: false });
+
+        // Buildings and researches tabs
+        set('robot-factory-level',  level(100));
+        set('nanite-factory-level', level(100));
+        set('ion-tech-level',       level(50));
+        set('hyper-tech-level',     level(50));
+
+        // Lifeforms tab
+        set('megalith-level',          level(100));
+        set('mrc-level',               level(100));
+        set('research-centre-level',   level(100));
+        set('rune-tech-level',         level(100));
+        set('rbt-res-centre-level',    level(100));
+        set('vortex-chamber-level',    level(100));
+        set('sc-capacity-increase',    percent(1000));
+        set('lc-capacity-increase',    percent(1000));
+        set('research-cost-reduction', percent(50));
+        set('research-time-reduction', percent(99));
+
+        // Exchange rates
+        set('exchange-rates-m', { min: 0.1, max: 100, def: 1,   allowFloat: true, allowNegative: false });
+        set('exchange-rates-c', { min: 0.1, max: 100, def: 1.5, allowFloat: true, allowNegative: false });
+        set('exchange-rates-d', { min: 0.1, max: 100, def: 3,   allowFloat: true, allowNegative: false });
+
+        // Tab 3 level range: no upper bound is defined for tech levels, so only
+        // the lower one is declared
+        set('tab2-from-level', { min: 0, def: 0, allowFloat: false, allowNegative: false });
+        set('tab2-to-level',   { min: 0, def: 0, allowFloat: false, allowNegative: false });
+
+        // Available-resource inputs, spread across all tabs
+        for (let outer = 0; outer < 3; outer++) {
+            for (let inner = 1; inner < 3; inner++) {
+                ['metal', 'crystal', 'deut'].forEach(res => set(`${res}-available-${outer}-${inner}`,
+                    { min: 0, def: 0, allowFloat: false, allowNegative: false }));
+            }
+        }
+
+        // Level inputs of the statically rendered building rows
+        [0, 1].forEach(outer => this._setLevelInputConstraints(document.getElementById(`table-${outer}-1`)));
     }
 
     /**
-     * Format a number for display using the current language's decimal
-     * separator. Fractional fields must be written this way, otherwise a
-     * restored value like 1.5 shows a dot the input's validator would reject
-     * in locales that use a comma (e.g. ru).
+     * Apply the level-input constraints to every level field inside `root`.
+     * Research rows are built at run time, so they need this after insertion.
      * @private
      */
-    _formatDecimal(num) {
-        return String(num).replace('.', this._decimalSeparator());
+    _setLevelInputConstraints(root) {
+        if (!root) return;
+        root.querySelectorAll('input[type=text].level-input').forEach(el => {
+            el._constrains = { min: 0, def: 0, allowFloat: false, allowNegative: false };
+        });
     }
 
     _restoreInputsFromPrm() {
@@ -597,19 +655,19 @@ class LfCostsOrchestrator {
         setVal('#tab2-to-level', 0);
         setChecked(`#class-${prm.playerClass}`, true);
         setChecked('#full-numbers', prm.fullNumbers);
-        setVal('#sc-capacity-increase', this._formatDecimal(prm.capIncrSC));
-        setVal('#lc-capacity-increase', this._formatDecimal(prm.capIncrLC));
+        setNumVal('#sc-capacity-increase', prm.capIncrSC);
+        setNumVal('#lc-capacity-increase', prm.capIncrLC);
         setVal('#megalith-level', prm.megalithLvl);
         setVal('#mrc-level', prm.mineralResCntrLvl);
         setVal('#research-centre-level', prm.resCentreLvl);
         setVal('#rune-tech-level', prm.runeTechLvl);
         setVal('#rbt-res-centre-level', prm.rbtResCentreLvl);
         setVal('#vortex-chamber-level', prm.vortexChamberLvl);
-        setVal('#research-cost-reduction', this._formatDecimal(prm.researchCostReduction));
-        setVal('#research-time-reduction', this._formatDecimal(prm.researchTimeReduction));
-        setVal('#exchange-rates-m', this._formatDecimal(prm.rates[0]));
-        setVal('#exchange-rates-c', this._formatDecimal(prm.rates[1]));
-        setVal('#exchange-rates-d', this._formatDecimal(prm.rates[2]));
+        setNumVal('#research-cost-reduction', prm.researchCostReduction);
+        setNumVal('#research-time-reduction', prm.researchTimeReduction);
+        setNumVal('#exchange-rates-m', prm.rates[0]);
+        setNumVal('#exchange-rates-c', prm.rates[1]);
+        setNumVal('#exchange-rates-d', prm.rates[2]);
     }
 
     _clearAvailableResourceInputs() {
@@ -668,6 +726,7 @@ class LfCostsOrchestrator {
         rowHtml += '</tr>';
 
         rows[rows.length - FOOTER_ROWS].insertAdjacentHTML('beforebegin', rowHtml);
+        this._setLevelInputConstraints(document.getElementById(`table-${outerTab}-2`));
         this.updateTotals();
     }
 
