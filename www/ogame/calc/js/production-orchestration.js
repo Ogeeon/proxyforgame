@@ -862,7 +862,6 @@ function setupPlanetsSpin() {
 	const up = $('#planetsSpin-up');
 	const down = $('#planetsSpin-down');
 	if (!input || !up || !down) return;
-	input._constrains = { 'min': options.minPlanetsCount, 'max': options.maxPlanetsCount, 'def': options.defPlanetsCount, 'allowNegative': false };
 
 	addEvent(up, 'click', function () {
 		const oldVal = getInputNumber(input);
@@ -880,23 +879,10 @@ function setupPlanetsSpin() {
 			changePlanetsCount(newVal, oldVal);
 		}
 	});
-	addEvent(input, 'keyup', function (e) { validateInputNumber(e); });
-	addEvent(input, 'change', function () {
-		let target = getInputNumber(input);
-		if (target < options.minPlanetsCount || target > options.maxPlanetsCount) {
-			input.value = options.prm.currPlanetsCount;
-			return;
-		}
-		// Add/remove planets one at a time so the per-planet delete
-		// confirmation still fires; stop if the user cancels one.
-		while (options.prm.currPlanetsCount !== target) {
-			const curr = options.prm.currPlanetsCount;
-			const next = curr < target ? curr + 1 : curr - 1;
-			changePlanetsCount(next, curr);
-			if (options.prm.currPlanetsCount === curr) break;
-		}
-		input.value = options.prm.currPlanetsCount;
-	});
+	// The field itself is readonly: typing a target count would have to add or
+	// remove several planets at once, each one able to raise its own delete
+	// confirmation, and a mistyped 150 would silently mean "delete 142 planets".
+	// The buttons are the only way in, one planet per click, like costs.
 }
 
 function _onPlanetsTableClick(event) {

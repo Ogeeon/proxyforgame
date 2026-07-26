@@ -785,7 +785,7 @@
           <div class="d-flex align-items-center gap-1 mx-auto">
             <span><?= $l['planets-count'] ?></span>
             <div class="input-group input-group-sm" style="width: 100px;">
-              <input id="planetsSpin" type="text" class="form-control centered" value="8" />
+              <input id="planetsSpin" type="text" class="form-control centered" value="8" readonly />
               <button class="btn btn-outline-secondary" type="button" id="planetsSpin-up">
                 <i class="bi bi-caret-up-fill"></i>
               </button>
