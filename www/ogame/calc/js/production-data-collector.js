@@ -87,7 +87,7 @@ function collectAllPlanetsInputs(rows) {
 		options.prm.aPS[i][0] = getInputNumber(rows[i * 2 + 1].children[2].children[0]);
 		options.prm.aPS[i][1] = getInputNumber(rows[i * 2 + 1].children[3].children[0]);
 		for (let j = 1; j < 8; j++) {
-			options.prm.aPS[i][j * 3] = rows[i * 2 + 1].children[LEVEL_COLUMNS[j - 1]].children[0].value;
+			options.prm.aPS[i][j * 3] = getInputNumber(rows[i * 2 + 1].children[LEVEL_COLUMNS[j - 1]].children[0]);
 		}
 	}
 }

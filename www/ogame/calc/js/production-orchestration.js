@@ -527,6 +527,8 @@ function changePlanetsCount(newVal, oldVal) {
 	if (newVal < options.minPlanetsCount || newVal > options.maxPlanetsCount)
 		return;
 	if (newVal < oldVal) {
+		// Pick up any direct edits made in the table before judging the planet empty
+		collectAllPlanetsInputs($$('#all-planets-prod tr'));
 		if (!isPlnEmpty(oldVal - 1) && confirm(options.plnDelConfMsg) === false) {
 			setVal('#planetsSpin', oldVal);
 			return;
@@ -735,6 +737,8 @@ function movePlanet(plnID, delta) {
 }
 
 function deleteRow(plnID) {
+	// Pick up any direct edits made in the table before judging the planet empty
+	collectAllPlanetsInputs($$('#all-planets-prod tr'));
 	if (!isPlnEmpty(plnID) && confirm(options.plnDelConfMsg) === false) {
 		return;
 	}

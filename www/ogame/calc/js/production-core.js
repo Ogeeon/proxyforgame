@@ -79,14 +79,22 @@ function createEmptyPlanet() {
 	return prm;
 }
 
+/**
+ * A planet counts as untouched while every field still equals the
+ * createEmptyPlanet() default, so deleting it needs no confirmation. Values are
+ * compared numerically: the table inputs and the stored cookie may hold numeric
+ * strings. The planet name is deliberately left out — names are not renumbered
+ * after a planet is deleted or moved, so a default name may well differ from
+ * the one the position would suggest.
+ */
 function isPlnEmpty(plnID) {
 	let plnData = options.prm.aPS[plnID];
-	// в первой тройке индекс 1 это позиция, в остальных - фактор производства, он по умолчанию 100
-	// NOTE: after updateAllPlnTab the levels are strings ("0" !== 0), so this
-	// reports untouched planets as non-empty and the delete confirmation always
-	// fires — same as the legacy jQuery version (verified against the live site).
-	for (let i = 0; i < 8; i++) {
-		if (plnData[3 * i] !== 0 || plnData[3 * i + 2] !== 0)
+	let empty = createEmptyPlanet();
+	for (let i = 0; i < empty.length; i++) {
+		// A planet saved before a field existed simply keeps that field's default
+		if (plnData[i] === undefined || plnData[i] === null || plnData[i] === '')
+			continue;
+		if (Number(plnData[i]) !== empty[i])
 			return false;
 	}
 	return true;

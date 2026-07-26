@@ -281,6 +281,57 @@ test.describe('crawler count capped by mine levels', () => {
     });
 });
 
+test.describe('All planets - delete confirmation', () => {
+    // Rows come in pairs (planet row + additional info row), the first row being
+    // the header, so planet i sits at row i * 2 + 1.
+    function planetRow(page, i) {
+        return page.locator('#all-planets-prod tr').nth(i * 2 + 1);
+    }
+
+    test('adding and removing a planet asks nothing', async ({ page }) => {
+        await page.locator('#tabtag2').click();
+
+        let dialogMessage = null;
+        page.on('dialog', (dialog) => {
+            dialogMessage = dialog.message();
+            dialog.dismiss();
+        });
+
+        await page.locator('#planetsSpin-up').click();
+        await expect(page.locator('#planetsSpin')).toHaveValue('9');
+        await page.locator('#planetsSpin-down').click();
+
+        // An untouched planet goes away silently, so the table really shrinks back
+        expect(dialogMessage).toBeNull();
+        await expect(page.locator('#planetsSpin')).toHaveValue('8');
+        await expect(page.locator('#all-planets-prod .control-delete')).toHaveCount(8);
+    });
+
+    test('removing a planet with entered data asks for confirmation', async ({ page }) => {
+        await page.locator('#tabtag2').click();
+        await page.locator('#planetsSpin-up').click();
+
+        // Text inputs of a planet row: temp(0) pos(1) metal(2) crystal(3) ...
+        const newPlanet = planetRow(page, 8).locator('input[type=text]');
+        await newPlanet.nth(2).fill('20');
+        await newPlanet.nth(2).press('Tab');
+
+        let dialogMessage = null;
+        page.on('dialog', (dialog) => {
+            dialogMessage = dialog.message();
+            dialog.dismiss();
+        });
+
+        await page.locator('#planetsSpin-down').click();
+
+        await expect.poll(() => dialogMessage).not.toBeNull();
+        expect(dialogMessage).toContain('You entered data for this planet');
+        // Dismissing keeps the planet and rolls the counter back
+        await expect(page.locator('#planetsSpin')).toHaveValue('9');
+        await expect(planetRow(page, 8).locator('input[type=text]').nth(2)).toHaveValue('20');
+    });
+});
+
 test('amortization calculations are correct', async ({ page }) => {
     // Click on the amortization accordion to expand it
     await page.locator('text=Amortisation of mines').click();
