@@ -369,7 +369,18 @@ class FlightOrchestrator {
         const elapsed = prm.recallMode === 0
             ? this._recallElapsedFromMoment(prm.recallStartDT, moment)
             : this._recallElapsedFromDuration(after);
-        if (elapsed === null || !this._markRecallWindow(field, elapsed, prm.recallFullFlight, warn)) {
+        if (elapsed === null) {
+            this.renderer.renderRecallReturn(null);
+            this.opts.save();
+            return;
+        }
+        if (!this._markRecallWindow(field, elapsed, prm.recallFullFlight, warn)) {
+            // A recall the window rules out must not outlive it in the cookie.
+            // Taking a shorter row to the calculator narrows the window under a
+            // stored recall, and a reload would otherwise hand the panel back a
+            // moment it rejects on sight — one the user never typed.
+            prm.recallElapsed = 0;
+            prm.recallMomentDT = 0;
             this.renderer.renderRecallReturn(null);
             this.opts.save();
             return;

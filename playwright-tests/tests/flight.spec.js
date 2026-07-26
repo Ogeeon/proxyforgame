@@ -2188,6 +2188,35 @@ test.describe('Flight Calculator - Fleet Recall', () => {
         expect(await returnMoment(page)).toBe(`${day} 02:00:00`);
     });
 
+    test('a shorter full flight drops a stored recall that no longer fits', async ({ page }) => {
+        await openRecallTab(page);
+        await page.locator('#set-recall-departure-zero').click();
+        await setFullFlight(page, '00 05:00:00');
+
+        const day = await departureDay(page);
+        await fillMasked(page, '#recall-moment', `${day} 03:00:00`);
+        expect(await page.evaluate(() => options.prm.recallElapsed)).toBe(3 * 3600);
+
+        // Taking a shorter row to the calculator narrows the window under the
+        // recall already stored, leaving three hours into a one-hour flight
+        await setFullFlight(page, '00 01:00:00');
+
+        await expect(page.locator('#recall-moment')).toHaveClass(/is-invalid/);
+        expect(await page.evaluate(() => options.prm.recallElapsed)).toBe(0);
+        expect(await page.evaluate(() => options.prm.recallMomentDT)).toBe(0);
+
+        // ...so the reload comes back empty rather than flagged
+        await page.reload();
+        await installCompat(page);
+        await page.locator('#tabtag1').click();
+        await openRecallTab(page);
+
+        await expect(page.locator('#recall-moment')).toHaveValue('');
+        await expect(page.locator('#recall-moment')).not.toHaveClass(/is-invalid/);
+        await expect(page.locator('#recall-after')).toHaveValue('00 00:00:00');
+        expect(await returnMoment(page)).toBe('?');
+    });
+
     test('coming back inside the window clears the flag and the result', async ({ page }) => {
         await openRecallTab(page);
         await page.locator('#set-recall-departure-zero').click();
