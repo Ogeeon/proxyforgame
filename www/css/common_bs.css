@@ -296,3 +296,85 @@ textarea:disabled {
   max-width: 250px;
   text-align: left;
 }
+
+/* The arrow is a single ::before triangle with no border of its own — giving the
+   box a themed outline (above) still left the beak a flat, borderless fill in
+   both themes. Bootstrap's popover arrow solves this with a second, inset
+   ::after triangle (see .popover-arrow in bootstrap.min.css): ::before is the
+   full-size triangle in the outline colour, ::after is the same triangle in the
+   fill colour nudged *towards the bubble*, so the part of ::before it no longer
+   covers — the tip and a sliver along both diagonal sides — is left showing as
+   the outline. Reproduced here per placement since tooltips don't ship that
+   second layer.
+
+   The nudge direction is the whole trick: shifting ::after away from the bubble
+   instead slides the fill triangle past the outline one and draws two separate
+   triangles, one above the other. Bootstrap already offsets ::before by 1px
+   into the bubble, so --tooltip-arrow-offset is that 1px plus the 2px of ring
+   we want to see, applied on whichever side faces the bubble. 2px rather than
+   the popover's 1px because these sides run at 45°, where a 1px shift leaves
+   only ~0.7px of ring perpendicular to the edge — thinner than the 1px border
+   it has to line up with. Verified against 1x screenshots in both themes.
+
+   Overlapping the bubble is safe even though .tooltip-inner is a later sibling:
+   the arrow is absolutely positioned and so paints above it, letting the fill
+   hide the bubble's own border where the two meet.
+
+   Selectors repeat the real BS5 selector (`bs-tooltip-auto[data-popper-placement]`)
+   and the legacy fixed-placement one (`bs-tooltip-top` and friends) so this
+   keeps working if a caller ever pins a placement instead of leaving it auto. */
+.tooltip {
+  --tooltip-arrow-outline: var(--bs-border-color);
+  --tooltip-arrow-offset: calc(-1px - 2px);
+}
+
+.tooltip .tooltip-arrow::after {
+  position: absolute;
+  content: "";
+  border-color: transparent;
+  border-style: solid;
+}
+
+.tooltip.bs-tooltip-auto[data-popper-placement^="top"] .tooltip-arrow::before,
+.tooltip.bs-tooltip-top .tooltip-arrow::before {
+  border-top-color: var(--tooltip-arrow-outline);
+}
+.tooltip.bs-tooltip-auto[data-popper-placement^="top"] .tooltip-arrow::after,
+.tooltip.bs-tooltip-top .tooltip-arrow::after {
+  top: var(--tooltip-arrow-offset);
+  border-width: var(--bs-tooltip-arrow-height) calc(var(--bs-tooltip-arrow-width) * .5) 0;
+  border-top-color: var(--bs-tooltip-bg);
+}
+
+.tooltip.bs-tooltip-auto[data-popper-placement^="right"] .tooltip-arrow::before,
+.tooltip.bs-tooltip-end .tooltip-arrow::before {
+  border-right-color: var(--tooltip-arrow-outline);
+}
+.tooltip.bs-tooltip-auto[data-popper-placement^="right"] .tooltip-arrow::after,
+.tooltip.bs-tooltip-end .tooltip-arrow::after {
+  right: var(--tooltip-arrow-offset);
+  border-width: calc(var(--bs-tooltip-arrow-width) * .5) var(--bs-tooltip-arrow-height) calc(var(--bs-tooltip-arrow-width) * .5) 0;
+  border-right-color: var(--bs-tooltip-bg);
+}
+
+.tooltip.bs-tooltip-auto[data-popper-placement^="bottom"] .tooltip-arrow::before,
+.tooltip.bs-tooltip-bottom .tooltip-arrow::before {
+  border-bottom-color: var(--tooltip-arrow-outline);
+}
+.tooltip.bs-tooltip-auto[data-popper-placement^="bottom"] .tooltip-arrow::after,
+.tooltip.bs-tooltip-bottom .tooltip-arrow::after {
+  bottom: var(--tooltip-arrow-offset);
+  border-width: 0 calc(var(--bs-tooltip-arrow-width) * .5) var(--bs-tooltip-arrow-height);
+  border-bottom-color: var(--bs-tooltip-bg);
+}
+
+.tooltip.bs-tooltip-auto[data-popper-placement^="left"] .tooltip-arrow::before,
+.tooltip.bs-tooltip-start .tooltip-arrow::before {
+  border-left-color: var(--tooltip-arrow-outline);
+}
+.tooltip.bs-tooltip-auto[data-popper-placement^="left"] .tooltip-arrow::after,
+.tooltip.bs-tooltip-start .tooltip-arrow::after {
+  left: var(--tooltip-arrow-offset);
+  border-width: calc(var(--bs-tooltip-arrow-width) * .5) 0 calc(var(--bs-tooltip-arrow-width) * .5) var(--bs-tooltip-arrow-height);
+  border-left-color: var(--bs-tooltip-bg);
+}

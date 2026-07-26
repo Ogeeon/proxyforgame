@@ -20,19 +20,63 @@ Do **not** restate it in a per-calculator `*_bs.css`.
 
 ```css
 /* Tooltip skin shared by every calculator: the Bootstrap default is an opaque
-   black bubble that ignores the theme, so repaint it off the theme variables. */
+   black bubble that ignores the theme, so repaint it off the theme variables.
+   The fill goes through --bs-tooltip-bg (the variable Bootstrap's own arrow
+   rules read), not a background-color on .tooltip-inner — that way the arrow
+   follows the bubble for free. */
+.tooltip {
+  --bs-tooltip-bg: var(--bs-secondary-bg);
+  --bs-tooltip-color: var(--bs-body-color);
+  pointer-events: none; /* a bubble must never swallow the click of a neighbour */
+}
+
 .tooltip-inner {
-  background-color: var(--bs-secondary-bg);
-  color: var(--bs-body-color);
   border: 1px solid var(--bs-border-color);
   max-width: 250px;
   text-align: left;
 }
 
-.tooltip.bs-tooltip-top .tooltip-arrow::before    { border-top-color: var(--bs-border-color); }
-.tooltip.bs-tooltip-bottom .tooltip-arrow::before { border-bottom-color: var(--bs-border-color); }
-.tooltip.bs-tooltip-start .tooltip-arrow::before  { border-left-color: var(--bs-border-color); }
-.tooltip.bs-tooltip-end .tooltip-arrow::before    { border-right-color: var(--bs-border-color); }
+/* Bootstrap's tooltip arrow is a single ::before triangle with no border of its
+   own, so giving the box an outline above still left the arrow a flat, unbordered
+   fill. Add the same second-layer ::after trick Bootstrap's own popover arrow
+   uses: ::before is the full-size triangle in the outline colour, ::after sits
+   inside it in the fill colour. Selectors target the real BS5 marker
+   (`bs-tooltip-auto[data-popper-placement^=...]`) — `bs-tooltip-top` and friends
+   never match an auto-placed tooltip, which is what every one of these is.
+
+   ::after has to be nudged *towards the bubble*: that is what uncovers the tip
+   and both diagonal sides of ::before as the outline. Nudge it the other way and
+   the fill triangle slides past the outline one, drawing two stacked triangles
+   in different colours instead of one bordered arrow. Bootstrap already offsets
+   ::before 1px into the bubble, so the offset is that 1px plus the 2px of ring
+   to show, on whichever side faces the bubble — 2px rather than the popover's
+   1px because these sides run at 45°, where 1px leaves only ~0.7px of ring
+   perpendicular to the edge. Check the result on a screenshot, not in devtools.
+
+   The arrow may overlap the bubble even though .tooltip-inner is a later
+   sibling: absolute positioning puts the arrow on top, so the fill hides the
+   bubble's own border where they meet. */
+.tooltip {
+  --tooltip-arrow-outline: var(--bs-border-color);
+  --tooltip-arrow-offset: calc(-1px - 2px);
+}
+
+.tooltip .tooltip-arrow::after {
+  position: absolute;
+  content: "";
+  border-color: transparent;
+  border-style: solid;
+}
+
+.tooltip.bs-tooltip-auto[data-popper-placement^="top"] .tooltip-arrow::before,
+.tooltip.bs-tooltip-top .tooltip-arrow::before { border-top-color: var(--tooltip-arrow-outline); }
+.tooltip.bs-tooltip-auto[data-popper-placement^="top"] .tooltip-arrow::after,
+.tooltip.bs-tooltip-top .tooltip-arrow::after {
+  top: var(--tooltip-arrow-offset);
+  border-width: var(--bs-tooltip-arrow-height) calc(var(--bs-tooltip-arrow-width) * .5) 0;
+  border-top-color: var(--bs-tooltip-bg);
+}
+/* ...and the same pair for right/bottom/left — see common_bs.css. */
 ```
 
 **Initialisation** — in the template's `DOMContentLoaded` block, always via
@@ -69,7 +113,8 @@ rather than left to taste:
 | A button whose `title` merely repeats its own visible label | leave it; a bubble that echoes the button is noise (`production.tpl:616-617`) |
 
 **Deviation to look for**: a `.tooltip-inner` block still sitting in a per-calculator CSS
-file; `new bootstrap.Tooltip(...)`; an icon-only button still on a bare native `title=`;
+file (or in `www/css/sidebar_bs.css`, which still carries its own stale, non-matching copy);
+`new bootstrap.Tooltip(...)`; an icon-only button still on a bare native `title=`;
 a dynamically built row that inits tooltips but never disposes them.
 
 ---
