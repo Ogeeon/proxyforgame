@@ -84,6 +84,17 @@
   text-align: center;
 }
 
+/* Bootstrap's .is-invalid reserves padding-right for a warning icon, sized for
+   left-aligned text. This field is centred, so that reserved space shifts the
+   centred value left of where it'd otherwise sit, and the trailing part of the
+   date/time string (typically the seconds) ends up sitting right under the
+   icon instead of clear of it. The red border already signals the error, so
+   drop the icon and restore the plain form-control-sm padding. */
+.startdate-input.is-invalid {
+  background-image: none;
+  padding-right: 0.5rem;
+}
+
 #finish-moment-2,
 #finish-moment-3 {
   display: inline-block;

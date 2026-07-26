@@ -43,6 +43,20 @@
 .flight-time-input  { width: 96px;  text-align: center; }
 .tolerance-time-input { width: 64px; text-align: center; }
 
+/* Bootstrap's .is-invalid reserves padding-right for a warning icon, sized for
+   left-aligned text. These fields are centred, so that reserved space shifts
+   the centred value left of where it'd otherwise sit — on the narrow ones the
+   trailing part of a date/time string (typically the seconds) ends up sitting
+   right under the icon instead of clear of it. The red border already signals
+   the error and the title attribute carries the format hint, so the icon adds
+   nothing here; drop it and restore the plain form-control-sm padding. */
+.startdate-input.is-invalid,
+.flight-time-input.is-invalid,
+.tolerance-time-input.is-invalid {
+  background-image: none;
+  padding-right: 0.5rem;
+}
+
 .speed-label {
   font-size: 0.8em;
   margin: 0 8px;
