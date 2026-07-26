@@ -491,7 +491,7 @@
     "planets": "Planeten",
     "search": "Suche",
     "flightmodes-note": "Wechsle zwischen den Zeitrechnungsmodi, um die Abreise bei bekannter Ankunft zu errechnen. Im Ankunftzeit-Modus hinzugefügte Zeilen werden automatisch mit dem Zeichen ''-'' markiert.",
-    "savepoints-note": "Wenn es sinnvoll ist, die Koordinaten zu speichern, klicken Sie auf den Link in jeder Zeile. In der Registerkarte `Reisezeit´ werden die Daten über Hin- und Rückflug gespeichert.",
+    "savepoints-note": "Wenn es sinnvoll ist, die Koordinaten zu speichern, klicken Sie auf den Link in jeder Zeile. In der Registerkarte `Reisezeit´ werden die Daten über den Flug gespeichert.",
     "msg-no-ships": "Keine Schiffe der Marine in einer Nachricht.",
     "msg-wrong-departure-time": "Falsche Uhrzeit der Abfahrt.",
     "msg-wrong-return-time": "Falsche Zeit, zurückzukehren.",
