@@ -212,7 +212,8 @@ class Renderer {
     for (let i = 1; i < rows.length - 6; i++) {
       const levelInput = rows[i].cells[targetColIdx].querySelector('input');
       if (levelInput) {
-        const level = Number.parseFloat(levelInput.value) || 0;
+        // Locale-aware read: the field may hold a comma decimal separator
+        const level = getInputNumber(levelInput);
         if (level > 0) {
           totalLevels += level;
         }
@@ -280,6 +281,7 @@ class Renderer {
       rows[resNeededRow].cells[3].innerHTML = this._formatNumber(needCrystal, params);
       rows[resNeededRow].cells[4].innerHTML = this._formatNumber(needDeut, params);
       const delivery = this._calculateTransport(needMetal + needCrystal + needDeut, params);
+      this.disposeTooltips(rows[deliveryTransportRow]);
       rows[deliveryTransportRow].cells[2].innerHTML =
         `${delivery.small} <abbr data-bs-toggle="tooltip" title="${this.scFull}">${this.scShort}</abbr>`;
       rows[deliveryTransportRow].cells[3].innerHTML =
@@ -465,6 +467,7 @@ class Renderer {
 
     // Transport row (based on needed resources, not total)
     const transport = this._calculateTransport(needMetal + needCrystal + needDeut, params);
+    this.disposeTooltips(rows[transportRow]);
     rows[transportRow].cells[1].innerHTML =
       `${transport.small} <abbr data-bs-toggle="tooltip" title="${this.scFull}">${this.scShort}</abbr>`;
     rows[transportRow].cells[2].innerHTML =
@@ -477,6 +480,21 @@ class Renderer {
       const existing = bootstrap.Tooltip.getInstance(el);
       if (existing) existing.dispose();
       bootstrap.Tooltip.getOrCreateInstance(el);
+    });
+  }
+
+  /**
+   * Dispose the Bootstrap tooltips anchored inside `root` before its markup is
+   * replaced. Without this the bubble of a removed <abbr> outlives its anchor.
+   * @param {Element} root
+   */
+  disposeTooltips(root) {
+    if (!root || typeof bootstrap === 'undefined' || !bootstrap.Tooltip) {
+      return;
+    }
+    root.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(function (el) {
+      const existing = bootstrap.Tooltip.getInstance(el);
+      if (existing) existing.dispose();
     });
   }
 

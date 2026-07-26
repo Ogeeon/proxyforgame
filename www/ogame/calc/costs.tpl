@@ -110,7 +110,7 @@
       <div class="bg-body-secondary text-primary-emphasis rounded main-header text-center flex-grow-1">
         <?= $l['title'] ?>
       </div>
-      <div id="reset" class="top-0 end-0 d-flex align-items-center justify-content-center bg-danger-subtle" title="<?= $l['reset'] ?>">
+      <div id="reset" class="top-0 end-0 d-flex align-items-center justify-content-center bg-danger-subtle" data-bs-toggle="tooltip" title="<?= $l['reset'] ?>">
         <i class="bi bi-arrow-counterclockwise" style="color: #dc3545; font-size: 1.25rem;"></i>
       </div>
     </div>
@@ -157,7 +157,7 @@
               <label for="research-lab-level"><?= $l['research-lab'] ?></label>
               <div class="d-flex gap-1">
                 <input id="research-lab-level" type="text" name="research-lab-level" class="form-control form-control-sm level-input" value="0"/>
-                <button id="open-llc-dialog" class="btn btn-outline-primary btn-sm" type="button" title="<?= $l['calculate'] ?>">
+                <button id="open-llc-dialog" class="btn btn-outline-primary btn-sm" type="button" data-bs-toggle="tooltip" title="<?= $l['calculate'] ?>">
                   <i class="bi bi-calculator"></i>
                 </button>
               </div>
@@ -643,12 +643,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // Initialize Bootstrap tooltips
   document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(function(el) {
-    new bootstrap.Tooltip(el);
+    bootstrap.Tooltip.getOrCreateInstance(el);
   });
 
   // Initialize Bootstrap popovers for hint icons
   document.querySelectorAll('[data-bs-toggle="popover"]').forEach(function(el) {
-    new bootstrap.Popover(el);
+    bootstrap.Popover.getOrCreateInstance(el);
   });
 
   // Initialize the calculator app

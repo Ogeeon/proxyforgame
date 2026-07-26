@@ -278,6 +278,20 @@ class CostsCalculator {
   }
 
   /**
+   * Give a plain level/quantity field the default numeric constraints the blur
+   * validator falls back on: a non-negative integer defaulting to `def`. Fields
+   * that already declare their own constraints are left untouched.
+   * @param {string|Element} target - selector or element
+   * @param {number} [def=0] - value an emptied field falls back to
+   * @private
+   */
+  _setLevelConstraints(target, def = 0) {
+    const el = typeof target === 'string' ? document.querySelector(target) : target;
+    if (!el || el._constrains) return;
+    el._constrains = { min: def, def, allowFloat: false, allowNegative: false };
+  }
+
+  /**
    * Bind global parameter events
    * @private
    */
@@ -291,12 +305,19 @@ class CostsCalculator {
     ];
 
     buildingInputs.forEach(selector => {
+      this._setLevelConstraints(selector);
       removeAllEvents(selector, 'keyup');
       addEvent(selector, 'keyup', (event) => {
-        // Validate input first (if function exists from utils.js)
+        // Character filtering only while typing (utils.js)
         if (typeof validateInputNumber === 'function') {
           validateInputNumber.call(event.target, event);
         }
+        this._handleParamChange(selector.substring(1));
+      });
+      removeAllEvents(selector, 'blur');
+      addEvent(selector, 'blur', (event) => {
+        // Filtering plus min/max clamping on blur, never while typing
+        validateInputNumberOnBlurNative(event);
         this._handleParamChange(selector.substring(1));
       });
     });
@@ -316,12 +337,19 @@ class CostsCalculator {
     document.getElementById('planet-pos')._constrains = { 'min': 1, 'max': 16, 'def': 8, 'allowNegative': false };
 
     techInputs.forEach(selector => {
+      // The two fields above already carry their own constraints
+      this._setLevelConstraints(selector);
       removeAllEvents(selector, 'keyup');
       addEvent(selector, 'keyup', (event) => {
-        // Validate input first (if function exists from utils.js)
+        // Character filtering only while typing (utils.js)
         if (typeof validateInputNumber === 'function') {
           validateInputNumber.call(event.target, event);
         }
+        this._handleParamChange(selector.substring(1));
+      });
+      removeAllEvents(selector, 'blur');
+      addEvent(selector, 'blur', (event) => {
+        validateInputNumberOnBlurNative(event);
         this._handleParamChange(selector.substring(1));
       });
     });
@@ -429,22 +457,28 @@ class CostsCalculator {
    * @private
    */
   _bindTableEvents() {
-    // Clear any existing keyup handlers
-    $$('#tab-0 input[type="text"]').forEach(el => removeAllEvents(el, 'keyup'));
-    $$('#tab-1 input[type="text"]').forEach(el => removeAllEvents(el, 'keyup'));
-
-    // Single-level and multi-level tab inputs - new handlers with validation
+    // Clear any existing handlers
     $$('#tab-0 input[type="text"], #tab-1 input[type="text"]').forEach(el => {
+      removeAllEvents(el, 'keyup');
+      removeAllEvents(el, 'blur');
+    });
+
+    // Single-level and multi-level tab inputs - new handlers with validation.
+    // Quantities are integers >= 1, every other field a level/amount >= 0; the
+    // clamp itself runs on blur only, so a value is never cut off mid-typing.
+    $$('#tab-0 input[type="text"], #tab-1 input[type="text"]').forEach(el => {
+      this._setLevelConstraints(el, el.classList.contains('qty-input') ? 1 : 0);
+
       addEvent(el, 'keyup', (event) => {
-        // Validate input first (if function exists from utils.js)
+        // Character filtering only while typing (utils.js)
         if (typeof validateInputNumber === 'function') {
           validateInputNumber.call(event.target, event);
         }
-        // Enforce integer >= 1 for qty inputs
-        if (event.target.classList.contains('qty-input')) {
-          const val = Math.floor(Number.parseFloat(event.target.value) || 1);
-          event.target.value = Math.max(1, val);
-        }
+        this._handleTableInputChange(event);
+      });
+
+      addEvent(el, 'blur', (event) => {
+        validateInputNumberOnBlurNative(event);
         this._handleTableInputChange(event);
       });
     });
@@ -468,8 +502,9 @@ class CostsCalculator {
     });
 
     ['#tab2-from-level', '#tab2-to-level'].forEach(selector => {
+      this._setLevelConstraints(selector);
       addEvent(selector, 'keyup', (event) => {
-        // Validate input first (if function exists from utils.js)
+        // Character filtering only while typing (utils.js)
         if (typeof validateInputNumber === 'function') {
           validateInputNumber.call(event.target, event);
         }
@@ -477,10 +512,8 @@ class CostsCalculator {
       });
 
       addEvent(selector, 'blur', (event) => {
-        // Validate on blur (if function exists from utils.js)
-        if (typeof validateInputNumberOnBlur === 'function') {
-          validateInputNumberOnBlur.call(event.target, event);
-        }
+        // Native (jQuery-free) blur validator: filtering plus min/max clamping
+        validateInputNumberOnBlurNative(event);
         this.recalculateRangeTab();
       });
     });
@@ -491,11 +524,17 @@ class CostsCalculator {
       '#commons-metal-available', '#commons-crystal-available', '#commons-deut-available'
     ];
     availableInputs.forEach(selector => {
+      this._setLevelConstraints(selector);
       removeAllEvents(selector, 'keyup');
       addEvent(selector, 'keyup', (event) => {
         if (typeof validateInputNumber === 'function') {
           validateInputNumber.call(event.target, event);
         }
+        this.recalculateRangeTab();
+      });
+      removeAllEvents(selector, 'blur');
+      addEvent(selector, 'blur', (event) => {
+        validateInputNumberOnBlurNative(event);
         this.recalculateRangeTab();
       });
     });
@@ -607,7 +646,7 @@ class CostsCalculator {
     removeAllEvents('#lf-research-table-clear', 'click');
     addEvent('#lf-research-table-clear', 'click', () => {
       $$('#lf-research-bonuses-tbody input[type="text"]').forEach(input => {
-        input.value = this._formatDecimal(0);
+        input.value = localizeFloat(0);
       });
     });
 
@@ -661,47 +700,21 @@ class CostsCalculator {
       if (!entry) return;
       const costInput = row.querySelector('.lf-research-cost-input');
       const timeInput = row.querySelector('.lf-research-time-input');
-      if (costInput) costInput.value = this._formatDecimal(entry.cost);
-      if (timeInput) timeInput.value = this._formatDecimal(entry.time);
+      if (costInput) costInput.value = localizeFloat(entry.cost);
+      if (timeInput) timeInput.value = localizeFloat(entry.time);
     });
   }
 
   /**
-   * The decimal separator for the current language (falls back to '.').
-   * @private
-   */
-  _decimalSeparator() {
-    return (typeof options !== 'undefined' && options.decimalSeparator) || '.';
-  }
-
-  /**
-   * Parse a number written with the current language's decimal separator.
-   * The "other" separator is treated as grouping and dropped.
-   * @private
-   */
-  _parseLocaleFloat(str) {
-    const ds = this._decimalSeparator();
-    const grouping = ds === '.' ? ',' : '.';
-    const normalized = String(str).split(grouping).join('').replace(ds, '.');
-    return parseFloat(normalized);
-  }
-
-  /**
-   * Format a number for display using the current language's decimal separator.
-   * @private
-   */
-  _formatDecimal(num) {
-    return String(num).replace('.', this._decimalSeparator());
-  }
-
-  /**
    * Parse a percentage input's value into a non-negative float (0 on failure).
+   * Reads through getInputNumber (utils.js) so the locale's decimal separator
+   * is honoured instead of being re-implemented here.
    * @private
    */
   _parsePercent(input) {
     if (!input) return 0;
-    const val = this._parseLocaleFloat(input.value);
-    return isNaN(val) || val < 0 ? 0 : val;
+    const val = getInputNumber(input);
+    return val < 0 ? 0 : val;
   }
 
   /**
@@ -754,8 +767,8 @@ class CostsCalculator {
       if (!Array.isArray(entry)) return;
       const costInput = row.querySelector('.lf-research-cost-input');
       const timeInput = row.querySelector('.lf-research-time-input');
-      if (costInput) costInput.value = this._formatDecimal(entry[0]);
-      if (timeInput) timeInput.value = this._formatDecimal(entry[1]);
+      if (costInput) costInput.value = localizeFloat(entry[0]);
+      if (timeInput) timeInput.value = localizeFloat(entry[1]);
     });
   }
 
@@ -840,8 +853,8 @@ class CostsCalculator {
     rows.forEach((row, i) => {
       const costInput = row.querySelector('.lf-research-cost-input');
       const timeInput = row.querySelector('.lf-research-time-input');
-      if (costInput) costInput.value = this._formatDecimal(parsedRows[i][0]);
-      if (timeInput) timeInput.value = this._formatDecimal(parsedRows[i][1]);
+      if (costInput) costInput.value = localizeFloat(parsedRows[i][0]);
+      if (timeInput) timeInput.value = localizeFloat(parsedRows[i][1]);
     });
 
     return true;
@@ -927,8 +940,8 @@ class CostsCalculator {
         const input = cell && cell.children[0];
         if (!input) continue;
 
-        const value = parseFloat(String(input.value).replace(',', '.'));
-        if (!isNaN(value) && value > 0) return true;
+        // Locale-aware read: the field may hold a comma decimal separator
+        if (getInputNumber(input) > 0) return true;
       }
     }
 
@@ -1138,15 +1151,19 @@ class CostsCalculator {
 
     for (const [key, selector] of Object.entries(fieldMap)) {
       if (state[key] !== undefined) {
-        setVal(selector, floatFields.has(key) ? this._formatDecimal(state[key]) : state[key]);
+        if (floatFields.has(key)) {
+          setNumVal(selector, state[key]);
+        } else {
+          setVal(selector, state[key]);
+        }
       }
     }
 
     // Exchange rates (stored as array) — also fractional, so localize them too
     if (Array.isArray(state.rates) && state.rates.length === 3) {
-      setVal('#exchange-rates-m', this._formatDecimal(state.rates[0]));
-      setVal('#exchange-rates-c', this._formatDecimal(state.rates[1]));
-      setVal('#exchange-rates-d', this._formatDecimal(state.rates[2]));
+      setNumVal('#exchange-rates-m', state.rates[0]);
+      setNumVal('#exchange-rates-c', state.rates[1]);
+      setNumVal('#exchange-rates-d', state.rates[2]);
     }
 
     // Officers/bonuses
@@ -1270,9 +1287,9 @@ class CostsCalculator {
     setVal('#booster', 0);
 
     // Exchange rates (localized: the decimal separator may be a comma)
-    setVal('#exchange-rates-m', this._formatDecimal(1));
-    setVal('#exchange-rates-c', this._formatDecimal(1.5));
-    setVal('#exchange-rates-d', this._formatDecimal(3));
+    setNumVal('#exchange-rates-m', 1);
+    setNumVal('#exchange-rates-c', 1.5);
+    setNumVal('#exchange-rates-d', 3);
 
     // Discoverer class bonus and cargo capacity increase
     setVal('#discoverer-class-bonus', 0);
@@ -1391,9 +1408,15 @@ class CostsCalculator {
     rows[resNeededRow].cells[3].innerHTML = '0';
     rows[resNeededRow].cells[4].innerHTML = '0';
 
-    // Clear delivery transport row
-    rows[deliveryTransportRow].cells[2].innerHTML = '0 <abbr title="' + scFull + '">' + scShort + '</abbr>';
-    rows[deliveryTransportRow].cells[3].innerHTML = '0 <abbr title="' + lcFull + '">' + lcShort + '</abbr>';
+    // Clear delivery transport row. The cargo abbreviations are Bootstrap
+    // tooltips, exactly as the renderer builds them, so the old bubbles have to
+    // be disposed before the markup is replaced and the new ones initialised.
+    this.renderer.disposeTooltips(rows[deliveryTransportRow]);
+    rows[deliveryTransportRow].cells[2].innerHTML =
+      '0 <abbr data-bs-toggle="tooltip" title="' + scFull + '">' + scShort + '</abbr>';
+    rows[deliveryTransportRow].cells[3].innerHTML =
+      '0 <abbr data-bs-toggle="tooltip" title="' + lcFull + '">' + lcShort + '</abbr>';
+    this.renderer.initTooltips(rows[deliveryTransportRow]);
   }
 
   /**
@@ -1448,8 +1471,12 @@ class CostsCalculator {
     const scFull = options.scFull || 'Small Cargo';
     const lcFull = options.lcFull || 'Large Cargo';
 
-    remainingRows[transportRow].cells[1].innerHTML = '0 <abbr title="' + scFull + '">' + scShort + '</abbr>';
-    remainingRows[transportRow].cells[2].innerHTML = '0 <abbr title="' + lcFull + '">' + lcShort + '</abbr>';
+    this.renderer.disposeTooltips(remainingRows[transportRow]);
+    remainingRows[transportRow].cells[1].innerHTML =
+      '0 <abbr data-bs-toggle="tooltip" title="' + scFull + '">' + scShort + '</abbr>';
+    remainingRows[transportRow].cells[2].innerHTML =
+      '0 <abbr data-bs-toggle="tooltip" title="' + lcFull + '">' + lcShort + '</abbr>';
+    this.renderer.initTooltips(remainingRows[transportRow]);
   }
 
   /**
@@ -1485,8 +1512,7 @@ class CostsCalculator {
         );
 
         // Re-bind event handlers for new elements
-        removeAllEvents('#lablevel_' + i, 'keyup');
-        addEvent('#lablevel_' + i, 'keyup', validateAndChangeLabLevel);
+        bindLabLevelInput('#lablevel_' + i);
 
         removeAllEvents('#labchoice_' + i, 'click');
         addEvent('#labchoice_' + i, 'click', () => {
@@ -1636,8 +1662,7 @@ class CostsCalculator {
     modalEl._irnExecute = false; // Reset execute flag
 
     // Open the Bootstrap modal
-    const modal = new bootstrap.Modal(modalEl);
-    modal.show();
+    bootstrap.Modal.getOrCreateInstance(modalEl).show();
 
     // Update resulting level display after dialog opens
     this._updateResultingLevel();
@@ -1751,12 +1776,12 @@ function setupPlanetsSpin(planetsSpinInput, planetsSpinUp, planetsSpinDown) {
         '<tr class="' + ((newVal % 2) === 1 ? 'odd' : 'even') + '">' +
         '<td align="center">' + options.planetNumStr + newVal + '</td>' +
         '<td align="center" width="20%;"><input type="text" id="lablevel_' + newVal +
-        '" name="lablevel_' + newVal + '" class="form-control input-3columns input-in-table" value="0" /></td>' +
+        '" name="lablevel_' + newVal + '" class="form-control form-control-sm input-3columns input-in-table" value="0" /></td>' +
         '<td align="center" width="20%;"><input type="radio" id="labchoice_' + newVal +
         '" class="form-check-input" name="start-pln" value="0" disabled="disabled"/></td>' +
         '</tr>'
       );
-      addEvent('#lablevel_' + newVal, 'keyup', validateAndChangeLabLevel);
+      bindLabLevelInput('#lablevel_' + newVal);
       addEvent('#labchoice_' + newVal, 'click', () => calculatorApp._updateResultingLevel());
       options.prm.labLevels.push(0);
     }
@@ -1790,10 +1815,17 @@ function setupPlanetsSpin(planetsSpinInput, planetsSpinUp, planetsSpinDown) {
  * Bind keyup/click handlers for the IRN dialog inputs.
  */
 function setupIrnInputHandlers() {
+  // Every editable IRN field is a non-negative integer; #irn-level gets its own
+  // handlers further down, so only the per-planet lab levels are wired here.
   const labInputs = document.querySelectorAll('#irn-calc input[type="text"]:not(#planetsSpin)');
   labInputs.forEach(input => {
-    removeAllEvents(input, 'keyup');
-    addEvent(input, 'keyup', validateAndChangeLabLevel);
+    if (input.id === 'irn-level') {
+      setIrnFieldConstraints(input);
+      removeAllEvents(input, 'keyup');
+      addEvent(input, 'keyup', validateAndChangeLabLevel);
+      return;
+    }
+    bindLabLevelInput(input);
   });
 
   const radioInputs = document.querySelectorAll('#irn-calc input[type="radio"]');
@@ -1809,13 +1841,21 @@ function setupIrnInputHandlers() {
 
   const irnLevelInput = document.getElementById('irn-level');
   if (irnLevelInput) {
-    removeAllEvents(irnLevelInput, 'keyup');
-    addEvent(irnLevelInput, 'keyup', (e) => {
-      validateInputNumber.call(irnLevelInput, e);
+    const refreshIrn = () => {
       if (calculatorApp) {
         calculatorApp._updateResultingLevel();
         calculatorApp.recalculateAll();
       }
+    };
+    removeAllEvents(irnLevelInput, 'keyup');
+    addEvent(irnLevelInput, 'keyup', (e) => {
+      validateInputNumber.call(irnLevelInput, e);
+      refreshIrn();
+    });
+    removeAllEvents(irnLevelInput, 'blur');
+    addEvent(irnLevelInput, 'blur', (e) => {
+      validateInputNumberOnBlurNative(e);
+      refreshIrn();
     });
   }
 
@@ -1913,7 +1953,7 @@ function rebuildLabTable(backup) {
       '<tr class="' + ((i % 2) === 1 ? 'odd' : 'even') + '">' +
       '<td align="center">' + options.planetNumStr + i + '</td>' +
       '<td align="center" width="20%;"><input type="text" id="lablevel_' + i +
-      '" name="lablevel_' + i + '" class="form-control input-3columns input-in-table" value="' +
+      '" name="lablevel_' + i + '" class="form-control form-control-sm input-3columns input-in-table" value="' +
       backup.labLevels[i - 1] + '" /></td>' +
       '<td align="center" width="20%;"><input type="radio" id="labchoice_' + i +
       '" class="form-check-input" name="start-pln" disabled="disabled"/></td>' +
@@ -1930,7 +1970,7 @@ function rebuildLabTable(backup) {
       }
     }
 
-    addEvent('#lablevel_' + i, 'keyup', validateAndChangeLabLevel);
+    bindLabLevelInput('#lablevel_' + i);
     addEvent('#labchoice_' + i, 'click', () => {
       if (calculatorApp) {
         calculatorApp._updateResultingLevel();
@@ -1970,6 +2010,35 @@ function changeLabLevel() {
   if (calculatorApp) {
     calculatorApp._updateResultingLevel();
   }
+}
+
+/**
+ * Numeric constraints for the IRN dialog fields: non-negative integers that
+ * fall back to 0 when the field is emptied. A field that already declares its
+ * own constraints is left alone.
+ * @param {Element|string} target - selector or element
+ */
+function setIrnFieldConstraints(target) {
+  const el = typeof target === 'string' ? document.querySelector(target) : target;
+  if (!el || el._constrains) return;
+  el._constrains = { min: 0, def: 0, allowFloat: false, allowNegative: false };
+}
+
+/**
+ * Wire a per-planet lab level input: character filtering while typing, and
+ * filtering plus min/max clamping on blur. Used for the rows rendered by the
+ * template as well as for the rows the planet spinner adds at run time.
+ * @param {string|Element} target - selector or element
+ */
+function bindLabLevelInput(target) {
+  setIrnFieldConstraints(target);
+  removeAllEvents(target, 'keyup');
+  addEvent(target, 'keyup', validateAndChangeLabLevel);
+  removeAllEvents(target, 'blur');
+  addEvent(target, 'blur', function (event) {
+    validateInputNumberOnBlurNative(event);
+    changeLabLevel.call(this, event);
+  });
 }
 
 /**
