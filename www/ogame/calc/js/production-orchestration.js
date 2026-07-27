@@ -316,7 +316,6 @@ function updateOnePlnTab() {
 	options.prm.rates = rates;
 	let msuMult = collectResourceMultipliers();
 	let totalCost;
-	let amortTime;
 	let satsCost = [];
 	let resMult;
 	options.prm.inclSats = getChecked('#include-SS-y');
@@ -338,8 +337,7 @@ function updateOnePlnTab() {
 		resMult = msuMult[i - 1] || 1;
 		increase = newProd[1][i - 1] - currProd[1][i - 1];
 		rows[i].children[2].innerHTML = numberToShortenedString(increase, options.unitSuffix);
-		amortTime = totalCost / (increase * resMult);
-		rows[i].children[3].innerHTML = timespanToShortenedString(Math.ceil(amortTime * 3600), options.datetimeW, options.datetimeD, options.datetimeH, options.datetimeM, options.datetimeS, true);
+		rows[i].children[3].innerHTML = paybackToString(totalCost, increase * resMult);
 	}
 
 	options.prm.metStorageLvl = getInputNumber($('#storage-met'));
@@ -439,15 +437,13 @@ function updateAllPlnTab() {
 	increase[1] = newProd[1] - totalProd[1];
 	increase[2] = newProd[2] - totalProd[2];
 	let normIncrease = increase[0] + msuMult[1] * increase[1] + msuMult[2] * increase[2];
-	let amortTime = normCost / normIncrease;
 	options.prm.plasmaTechLevel -= 1;
 	rows = $$('#plasma-amort-tbl tr');
 	for (let i = 0; i < 3; i++) {
 		rows[1].children[i + 1].innerHTML = numToOGame(costs[i]);
 		rows[2].children[i + 1].innerHTML = numToOGame(increase[i]);
 	}
-	if (normIncrease > 0)
-		rows[3].children[1].innerHTML = timespanToShortenedString(Math.ceil(amortTime * 3600), options.datetimeW, options.datetimeD, options.datetimeH, options.datetimeM, options.datetimeS, true);
+	rows[3].children[1].innerHTML = paybackToString(normCost, normIncrease);
 
 	updateMinesPriority();
 }
@@ -467,6 +463,17 @@ function resourcesToString(res) {
 		parts.push(numberToShortenedString(res[i], options.unitSuffix) + ' ' + names[i]);
 	}
 	return parts.length > 0 ? parts.join(', ') : '0';
+}
+
+/**
+ * Payback time for a cell: an em dash when the upgrade brings no gain, so the
+ * cell never keeps a stale value from an earlier recalculation.
+ */
+function paybackToString(normCost, normIncrease) {
+	if (!(normIncrease > 0))
+		return '&mdash;';
+	return timespanToShortenedString(Math.ceil(normCost / normIncrease * 3600),
+		options.datetimeW, options.datetimeD, options.datetimeH, options.datetimeM, options.datetimeS, true);
 }
 
 /**

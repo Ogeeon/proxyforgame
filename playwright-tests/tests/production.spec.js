@@ -506,6 +506,35 @@ test.describe('Life Forms plasma technology cost reduction', () => {
         await expect(timeValue(page)).toHaveText(baseline);
     });
 
+    test('drops the payback time once the empire mines nothing', async ({ page }) => {
+        const increaseRow = page.locator('#plasma-amort-tbl tbody tr:nth-child(2)');
+
+        // Start from a productive planet so a payback time is actually shown.
+        await page.locator('#tabtag2').click();
+        const planetInputs = page.locator('#all-planets-prod tr').nth(1).locator('input[type=text]');
+        await planetInputs.nth(2).fill('30'); // metal mine
+        await planetInputs.nth(3).fill('26'); // crystal mine
+        await planetInputs.nth(4).fill('22'); // deuterium synthesizer
+        await planetInputs.nth(5).fill('40'); // solar plant
+        await planetInputs.nth(5).press('Tab');
+
+        await page.locator('text=Amortisation of Plasma Technology').click();
+        const baseline = (await timeValue(page).textContent())?.trim() ?? '';
+        expect(baseline).not.toBe('');
+
+        // Plasma only boosts what the mines dig up, so without them a level adds
+        // nothing - and the payback of the productive empire must not linger.
+        await planetInputs.nth(2).fill('0');
+        await planetInputs.nth(3).fill('0');
+        await planetInputs.nth(4).fill('0');
+        await planetInputs.nth(4).press('Tab');
+
+        await expect(increaseRow.locator('td').nth(1)).toHaveText('0');
+        await expect(increaseRow.locator('td').nth(2)).toHaveText('0');
+        await expect(increaseRow.locator('td').nth(3)).toHaveText('0');
+        await expect(timeValue(page)).toHaveText('—');
+    });
+
     test('energy production increase is a non-negative float and persists', async ({ page }) => {
         const lfEnergy = page.locator('#lf-energy-prod-bonus');
 
