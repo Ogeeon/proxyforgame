@@ -222,6 +222,27 @@ class LfCostsOrchestrator {
     // handleRowChange — replaces updateRow (called via eval with this=input)
     // -------------------------------------------------------------------------
 
+    /** [levelFrom, levelTo] for a row: buildings give both fields; other techs infer levelFrom = levelTo - 1. */
+    _readLevelRange(row, outerTab) {
+        if (outerTab === 1) {
+            return [getInputNumber(row.children[2].children[0]), getInputNumber(row.children[3].children[0])];
+        }
+        const levelTo = getInputNumber(row.children[2].children[0]);
+        return [levelTo === 0 ? 0 : levelTo - 1, levelTo];
+    }
+
+    /** Zeroes out a row's cost/time columns when the requested change is a no-op or invalid. */
+    _clearRowDisplay(row, outerTab) {
+        const fdc = outerTab === 1 ? 4 : 3;
+        row.children[fdc    ].innerHTML = '0';
+        row.children[fdc + 1].innerHTML = '0';
+        row.children[fdc + 2].innerHTML = '0';
+        row.children[fdc + 3].innerHTML = '0';
+        row.children[fdc + 4].innerHTML = '0' + this.opts.datetimeS;
+        row.children[fdc + 5].innerHTML = '0';
+        if (outerTab === 0) row.children[fdc + 6].innerHTML = '0';
+    }
+
     handleRowChange(inputEl) {
         const row = inputEl.parentNode.parentNode;
         const techID = Number(row.children[0].innerHTML);
@@ -236,14 +257,7 @@ class LfCostsOrchestrator {
         const innerTab = Number(parts[2]);
         const rowKey   = techID + '-' + outerTab + '-' + innerTab;
 
-        let levelFrom, levelTo;
-        if (outerTab === 1) {
-            levelFrom = getInputNumber(row.children[2].children[0]);
-            levelTo   = getInputNumber(row.children[3].children[0]);
-        } else {
-            levelTo   = getInputNumber(row.children[2].children[0]);
-            levelFrom = levelTo === 0 ? 0 : levelTo - 1;
-        }
+        const [levelFrom, levelTo] = this._readLevelRange(row, outerTab);
 
         const params      = this.collector.collectParams();
         const rsrCostRdc  = this.calculator.computeRsrCostRdc(params);
@@ -252,24 +266,19 @@ class LfCostsOrchestrator {
 
         // Buildings can be demolished; for every other tech the new level must be strictly above the old one
         const isBuilding = techID % 1000 < 100;
-        if ((levelTo > levelFrom || isBuilding) && levelTo >= 0) {
-            const result = this.calculator.calculate(techID, levelFrom, levelTo, ionTechLevel, rsrCostRdc, bldCostRdc, params);
-            if (result.time > 0) {
-                this.renderer.renderRow(row, outerTab, techID, result);
-                this.techData[rowKey] = [result.metal, result.crystal, result.deut, result.energy, result.time, result.points];
-            } else {
-                this.renderer.clearRow(row, outerTab);
-                this.techData[rowKey] = null;
-            }
+        if (!(levelTo > levelFrom || isBuilding) || levelTo < 0) {
+            this._clearRowDisplay(row, outerTab);
+            this.techData[rowKey] = null;
+            this.updateTotals();
+            return;
+        }
+
+        const result = this.calculator.calculate(techID, levelFrom, levelTo, ionTechLevel, rsrCostRdc, bldCostRdc, params);
+        if (result.time > 0) {
+            this.renderer.renderRow(row, outerTab, techID, result);
+            this.techData[rowKey] = [result.metal, result.crystal, result.deut, result.energy, result.time, result.points];
         } else {
-            const fdc = outerTab === 1 ? 4 : 3;
-            row.children[fdc    ].innerHTML = '0';
-            row.children[fdc + 1].innerHTML = '0';
-            row.children[fdc + 2].innerHTML = '0';
-            row.children[fdc + 3].innerHTML = '0';
-            row.children[fdc + 4].innerHTML = '0' + this.opts.datetimeS;
-            row.children[fdc + 5].innerHTML = '0';
-            if (outerTab === 0) row.children[fdc + 6].innerHTML = '0';
+            this.renderer.clearRow(row, outerTab);
             this.techData[rowKey] = null;
         }
 
