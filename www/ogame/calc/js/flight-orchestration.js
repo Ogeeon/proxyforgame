@@ -90,7 +90,7 @@ var options = {
                 case 'lfRocktalCE':
                 case 'lfShipsBonuses': return validateNumber(parseFloat(value), 0, Infinity, 0);
                 case 'mode':
-                case 'recallMode': return validateNumber(parseFloat(value), 0, 1, 0);
+                case 'recallMode': return validateNumber(Number.parseFloat(value), 0, 1, 0);
                 case 'flightData': return validateNumber(parseFloat(value), -Infinity, Infinity, 0);
                 case 'spCargohold': return validateNumber(parseFloat(value), 0, 5, 0);
                 default: return value;
