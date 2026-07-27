@@ -685,25 +685,25 @@ document.addEventListener('DOMContentLoaded', function() {
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
-        <table class="table table-sm mb-2">
-          <tr>
-            <td><label for="irn-level"><?= $l['irn-level'] ?></label></td>
-            <td><input id="irn-level" type="text" name="irn-level" class="form-control form-control-sm level-input" value="0" /></td>
-            <td><label for="planetsSpin"><?= $l['planets-count'] ?></label></td>
-            <td>
-              <div class="input-group input-group-sm" style="width: 100px;">
-                <input id="planetsSpin" type="text" class="form-control text-center" value="8" readonly />
-                <button class="btn btn-outline-secondary" type="button" id="planetsSpin-up">
-                  <i class="bi bi-caret-up-fill"></i>
-                </button>
-                <button class="btn btn-outline-secondary" type="button" id="planetsSpin-down">
-                  <i class="bi bi-caret-down-fill"></i>
-                </button>
-              </div>
-            </td>
-          </tr>
-        </table>
-        <div class="irn-calc-info">
+        <div id="irn-fields" class="mb-2">
+          <div class="irn-field">
+            <label for="irn-level"><?= $l['irn-level'] ?></label>
+            <input id="irn-level" type="text" name="irn-level" class="form-control form-control-sm level-input" value="0" />
+          </div>
+          <div class="irn-field">
+            <label for="planetsSpin"><?= $l['planets-count'] ?></label>
+            <div class="input-group input-group-sm" style="width: 100px;">
+              <input id="planetsSpin" type="text" class="form-control text-center" value="8" readonly />
+              <button class="btn btn-outline-secondary" type="button" id="planetsSpin-up">
+                <i class="bi bi-caret-up-fill"></i>
+              </button>
+              <button class="btn btn-outline-secondary" type="button" id="planetsSpin-down">
+                <i class="bi bi-caret-down-fill"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+        <div class="irn-calc-info text-start">
           <?= $l['llc-dialog-info'] ?>
         </div>
         <div id="lab-levels-div">

@@ -207,8 +207,11 @@ td.min {
    IRN DIALOG (MODAL)
    ========================================================================== */
 
+/* 450px left the field row (see #irn-fields) 19px short of holding the Russian
+   labels on one line. 480px clears it with room to spare and is still narrower
+   than the planet table plus its scrollbar needs. */
 #irn-calc .modal-dialog {
-  max-width: 450px;
+  max-width: 480px;
 }
 
 /* ==========================================================================
@@ -236,9 +239,37 @@ td.min {
   width: 6.5em;
 }
 
-#irn-calc .table td,
-#irn-calc .table th {
-  padding: 2px 8px;
+/* The two labelled fields on one centred row. This was a four-cell `.table´ row,
+   which cost width twice over: its 8px cell padding spent 64px on gaps, and a table
+   distributes width by its own column measure rather than giving each label exactly
+   the text it needs. Russian (`Уровень М.И.С.´ + `Количество планет´) came out 19px
+   short and broke both labels onto two lines. A flex row spends only the gaps
+   declared here, and `text-wrap: nowrap´ on the labels keeps a tight locale on one
+   line. The row also drops the table's borders, which drew a rule across the dialog
+   under a field.
+
+   Wrapping is allowed on the outer row, not inside a pair: the longest locales
+   (Spanish `Nivel de Red de Investigación´, Portuguese `Nivel da Rede de
+   Pesquisas´) need ~530px and cannot share a row at any sane dialog width, so they
+   drop the second pair to a second line with its label still intact. Everything up
+   to Russian fits on the single row the layout is built for. */
+#irn-fields {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  column-gap: 1rem;
+  row-gap: 0.25rem;
+}
+
+.irn-field {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.irn-field label {
+  text-wrap: nowrap;
 }
 
 /* Start-planet radios: make the selectable ones (planets with a lab level) stand
