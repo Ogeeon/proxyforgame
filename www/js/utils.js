@@ -15,11 +15,8 @@ function getCorrectedValue (s, allowNeg, sepCode) {
 	let nextCharCode = 0;
 	for (let i = 0; i < sx.length; i++) {
 		nextCharCode = (i === sx.length-1) ? 0 : sx.charCodeAt(i+1);
-		if (sx.charCodeAt (i) >= 49 && sx.charCodeAt (i) <= 57) {
-			sxx += sx.charAt (i);
-			firstDigit = false;
-		}
-		else if (sx.charCodeAt (i) === 48 && (sx.length === 1 || !firstDigit || nextCharCode === sepCode )) {
+		if ((sx.charCodeAt (i) >= 49 && sx.charCodeAt (i) <= 57) ||
+			(sx.charCodeAt (i) === 48 && (sx.length === 1 || !firstDigit || nextCharCode === sepCode))) {
 			sxx += sx.charAt (i);
 			firstDigit = false;
 		}
@@ -133,11 +130,10 @@ function getInputNumber(input) {
 /**
  * Заменяет в строке вхождения вида {n} на элементы массива аргументов функции.
  */
-String.prototype.format = function(){
+function formatString(str, ...args) {
     const pattern = /\{\d+\}/g;
-    const args = arguments;
-    return this.replace(pattern, function(capture){ return args[capture.match(/\d+/)]; });
-};
+    return str.replace(pattern, function(capture){ return args[capture.match(/\d+/)]; });
+}
 
 /**
  * Возвращает значение из массива options или значение по умолчанию, если элемент options.opt не найден.
@@ -264,17 +260,18 @@ function dropFraction(number, positions) {
  * @param pad_type Направление - справа, слева, с обеих сторон. Одна из констант 'STR_PAD_LEFT', 'STR_PAD_RIGHT', 'STR_PAD_BOTH'
  * @returns Изменённая строка
  */
+function str_pad_repeater(s, len) {
+	let collect = '';
+
+	while (collect.length < len) collect += s;
+	collect = collect.substr(0, len);
+
+	return collect;
+}
+
 function strPad(input, pad_length, pad_string, pad_type) {
 	let half = '', pad_to_go;
 	input += '';
-	const str_pad_repeater = function(s, len){
-			let collect = '', i;
-
-			while(collect.length < len) collect += s;
-			collect = collect.substr(0,len);
-
-			return collect;
-		};
 	if (pad_type != 'STR_PAD_LEFT' && pad_type != 'STR_PAD_RIGHT' && pad_type != 'STR_PAD_BOTH') { pad_type = 'STR_PAD_RIGHT'; }
 	if ((pad_length - input.length) > 0) {
 		pad_to_go = pad_length - input.length;
@@ -531,7 +528,7 @@ function getCookie(name) {
 	const cookies = document.cookie.split(';');
 	for (let i = 0; i < cookies.length; i++) {
 		const cookie = cookies[i].trim();
-		if (cookie.indexOf(prefix) === 0) {
+		if (cookie.startsWith(prefix)) {
 			return decodeURIComponent(cookie.substring(prefix.length));
 		}
 	}

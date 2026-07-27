@@ -83,14 +83,13 @@ function getFirefoxHeaders()
     ];
 }
 
-function httpGet($uri, $headers = [])
+function httpGet($uri)
 {
     try {
         if ($curl = curl_init()) {
             curl_setopt($curl, CURLOPT_URL, $uri);
             curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
             curl_setopt($curl, CURLOPT_POST, false);
-//           curl_setopt($curl, CURLOPT_HTTPHEADER, array_merge(getFirefoxHeaders(), $headers));
             curl_setopt($curl, CURLOPT_FOLLOWLOCATION, true);
             curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, true);
             curl_setopt($curl, CURLOPT_CONNECTTIMEOUT, 10);
@@ -98,7 +97,6 @@ function httpGet($uri, $headers = [])
             $out = curl_exec($curl);
             if(curl_errno($curl)){
                 logDie("Curl error: " . curl_error($curl).", ".curl_getinfo($curl));
-                //$inf = curl_getinfo($curl);
             }
             curl_close($curl);
             return $out;

@@ -282,7 +282,7 @@ const hide = (selector) => {
  * @param {number} duration - Duration in ms
  * @param {Function} callback - Optional callback
  */
-const fadeIn = (selector, duration = 400, callback) => {
+const fadeIn = (selector, duration = 400, callback = null) => {
   const el = $(selector);
   if (!el) return;
 
@@ -305,7 +305,7 @@ const fadeIn = (selector, duration = 400, callback) => {
  * @param {number} duration - Duration in ms
  * @param {Function} callback - Optional callback
  */
-const fadeOut = (selector, duration = 400, callback) => {
+const fadeOut = (selector, duration = 400, callback = null) => {
   const el = $(selector);
   if (!el) return;
 
@@ -476,13 +476,13 @@ const validateInputNumberOnBlurNative = (event) => {
 
   const fieldTitle = input.alt || '';
   const fieldHint = fieldTitle && getOptionValue('fieldHint', null)
-    ? getOptionValue('fieldHint', null).format(fieldTitle)
+    ? formatString(getOptionValue('fieldHint', null), fieldTitle)
     : '';
 
   const minConstr = getConstraint(input, 'min', null);
   if (minConstr !== null && value < minConstr) {
     const msgTpl = getOptionValue('msgMinConstraintViolated', null);
-    showWarning(msgTpl ? msgTpl.format(fieldHint, input.value, minConstr) : null);
+    showWarning(msgTpl ? formatString(msgTpl, fieldHint, input.value, minConstr) : null);
     input.value = (minConstr + '').replace('.', decimalSeparator);
     needRecalc = true;
   }
@@ -490,7 +490,7 @@ const validateInputNumberOnBlurNative = (event) => {
   const maxConstr = getConstraint(input, 'max', null);
   if (maxConstr !== null && value > maxConstr) {
     const msgTpl = getOptionValue('msgMaxConstraintViolated', null);
-    showWarning(msgTpl ? msgTpl.format(fieldHint, input.value, maxConstr) : null);
+    showWarning(msgTpl ? formatString(msgTpl, fieldHint, input.value, maxConstr) : null);
     input.value = (maxConstr + '').replace('.', decimalSeparator);
     needRecalc = true;
   }

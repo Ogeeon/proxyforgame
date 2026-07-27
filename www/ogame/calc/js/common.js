@@ -72,7 +72,6 @@ function getProductionRateSplit(techID, techLevel, energyTechLevel, plasmaTechLe
 				case 6: case 10: positionFactor = 1.17; break;
 				case 7: case 9: positionFactor = 1.23; break;
 				case 8: positionFactor = 1.35; break;
-				default: positionFactor = 1; 
 			}
 			rows[0] = Math.floor(30 * universeSpeedFactor * positionFactor);
 			basePR = 30.0 * techLevel * Math.pow(1.1, techLevel) * productionFactor * powerFactor * positionFactor;
@@ -90,7 +89,6 @@ function getProductionRateSplit(techID, techLevel, energyTechLevel, plasmaTechLe
 				case 1: positionFactor = 1.4; break;
 				case 2: positionFactor = 1.296; break;
 				case 3: positionFactor = 1.2; break;
-				default: positionFactor = 1; 
 			}
 			rows[0] = Math.floor(15 * universeSpeedFactor * positionFactor);
 			basePR = 20.0 * techLevel * Math.pow(1.1, techLevel) * productionFactor * powerFactor * positionFactor;
@@ -207,8 +205,6 @@ function getBuildEnergyCost_C(techID, techLevel, techData) {
 		case 199:
 			buildCost = 300000 * Math.pow(data[3], techLevel - 1);
 			break;
-		default:
-			buildCost = 0;
 	}
 	return buildCost;
 }

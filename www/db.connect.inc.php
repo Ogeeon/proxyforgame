@@ -39,17 +39,15 @@ function sqlQuery($query, $params) {
         $finalQuery = preg_replace('/\?/', $value, $finalQuery, 1);
     }
 
-    if ($result = mysqli_query($connection, $finalQuery)) {
-        if ($result === true) {
-            return false; // If the query is not a select, return FALSE because there is no result
-        }
-        while ($row = mysqli_fetch_assoc($result)) {
-            array_push($res, $row);
-        }
-        mysqli_free_result($result);
-    } else {
+    $result = mysqli_query($connection, $finalQuery);
+    if ($result === false || $result === true) {
+        // Query failed, or succeeded without a result set (not a SELECT); either way, no rows to return
         return false;
     }
+    while ($row = mysqli_fetch_assoc($result)) {
+        array_push($res, $row);
+    }
+    mysqli_free_result($result);
 
     return count($res) > 0 ? $res : false;
 }

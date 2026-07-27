@@ -110,7 +110,6 @@
 
 [data-bs-theme="dark"] .nav-tabs .nav-link.active {
   color: var(--bs-primary);
-  /* background-color: var(--bs-primary-bg-subtle); */
 }
 
 /* `:not(.btn)´ keeps these away from Bootstrap buttons, which carry their own

@@ -244,7 +244,6 @@ try {
     );
 
     $results = updateAllUniverses($pdo);
-    // $results = getPopulation(178, 'ru', $pdo);
     echo json_encode($results, JSON_PRETTY_PRINT);
 } catch (Exception $e) {
     echo $e->getMessage();

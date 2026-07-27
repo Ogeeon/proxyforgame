@@ -41,8 +41,6 @@ if ($uriLang != '' && $uriLang != $lang) {
   die();
 }
 
-//echo $acceptLang.' | '.$_SERVER['REQUEST_URI'].' | ';
-
 function getLang() {
   global $lang;
   return $lang;
