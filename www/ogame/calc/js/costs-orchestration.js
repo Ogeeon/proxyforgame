@@ -827,7 +827,7 @@ class CostsCalculator {
       p++;
       if (m) {
         if (p < lines.length) p++; // skip the trailing "Max. Y%" line
-        const val = parseFloat(m[0]);
+        const val = Number.parseFloat(m[0]);
         return isNaN(val) || val < 0 ? 0 : val;
       }
       return 0;
