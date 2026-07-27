@@ -248,14 +248,14 @@ function generateReport(sourceData, localeFiles, showMissingKeys = false) {
   }
 
   // Sort by completion percentage
-  results.sort((a, b) => parseFloat(a.percentage) - parseFloat(b.percentage));
+  results.sort((a, b) => Number.parseFloat(a.percentage) - Number.parseFloat(b.percentage));
 
   console.log('\nCompletion by language:');
   console.log(colorize('──────────────────────────────────────────────────────────', colors.gray));
 
   for (const result of results) {
-    const percentageColor = parseFloat(result.percentage) === 100 ? colors.green :
-                           parseFloat(result.percentage) > 90 ? colors.yellow : colors.red;
+    const percentageColor = Number.parseFloat(result.percentage) === 100 ? colors.green :
+                           Number.parseFloat(result.percentage) > 90 ? colors.yellow : colors.red;
 
     console.log(
       `${result.statusIcon} ${colorize(result.lang.padEnd(4), result.status)} ` +
