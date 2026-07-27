@@ -24,19 +24,22 @@ function getVar($var, $type)
 
     switch ($type) {
         case 'str':
-            return htmlspecialchars(trim($value), ENT_QUOTES, 'UTF-8');
+            $result = htmlspecialchars(trim($value), ENT_QUOTES, 'UTF-8');
+            break;
 
         case 'int':
-            $int = filter_var($value, FILTER_VALIDATE_INT);
-            return ($int !== false) ? $int : false;
+            $result = filter_var($value, FILTER_VALIDATE_INT);
+            break;
 
         case 'float':
-            $float = filter_var($value, FILTER_VALIDATE_FLOAT);
-            return ($float !== false) ? $float : false;
+            $result = filter_var($value, FILTER_VALIDATE_FLOAT);
+            break;
 
         default:
-            return false;
+            $result = false;
     }
+
+    return $result;
 }
 
 
@@ -216,12 +219,7 @@ function getVar($var, $type)
 
       $reportUrl = "https://ogapi.faw-kes.de/v1/report/" . $srId;
       $reportData = @file_get_contents($reportUrl);
-
-      if ($reportData === false) {
-          return null;
-      }
-
-      $reportJson = json_decode($reportData, true);
+      $reportJson = ($reportData === false) ? null : json_decode($reportData, true);
 
       if (!is_array($reportJson) || empty($reportJson['RESULT_DATA'])) {
           return null;
