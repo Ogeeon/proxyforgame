@@ -543,7 +543,7 @@ const attachInputMask = (input, format) => {
     return;
   }
   const pattern = maskPatternFromFormat(format);
-  const blank = pattern.replace(/9/g, MASK_BLANK);
+  const blank = pattern.replaceAll('9', MASK_BLANK);
   const isSlot = (i) => pattern[i] === '9';
 
   /** First digit slot at or after `from`, or the end of the pattern. */
