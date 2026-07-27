@@ -13,8 +13,9 @@ $universes = array();
 if ($countries) {
 	foreach ($countries as $row) {
 		$r = SqlQuery("SELECT server, name FROM universes WHERE lang = ? ORDER BY name", array($row['lang']));
-		if ($r === false)
+		if ($r === false) {
 			continue;
+		}
 		$universes[$row['lang']] = $r;
 	}
 }
