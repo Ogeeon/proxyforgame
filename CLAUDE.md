@@ -139,6 +139,11 @@ Calculators in `www/ogame/calc/` consist of three files:
 ### Code Comments
 Write all comments in code files in English only.
 
+### JavaScript Style
+Prefer `const`/`let` over `var`, and `Number.parseInt`/`Number.parseFloat` over the bare global
+forms — in new code and whenever you're already touching a line. Don't do a drive-by rewrite of
+an entire legacy file just to convert unrelated `var` declarations.
+
 ### Cookie Storage
 Calculator options persist via cookies (e.g., `options_expeditions`). Note that `options.prm.fleet` uses `~` as a comma placeholder for encoded values.
 
