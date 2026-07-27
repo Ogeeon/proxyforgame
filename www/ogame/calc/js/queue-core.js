@@ -68,6 +68,24 @@ class QueueCalculator {
   }
 
   /**
+   * Index of the first demolition step for techId that would push its level
+   * below 0 when simulated from startLevel, or -1 if the queue is valid.
+   */
+  static _firstInvalidDemolitionIndex(queue, techId, startLevel) {
+    let lvl = startLevel;
+    for (let i = 0; i < queue.length; i++) {
+      if (Number(queue[i][0]) !== Number(techId)) continue;
+      if (queue[i][1] === 1) {
+        lvl += 1;
+        continue;
+      }
+      lvl -= 1;
+      if (lvl < 0) return i;
+    }
+    return -1;
+  }
+
+  /**
    * Validate a queue against its starting levels: any demolition that would
    * push a building below level 0 is removed. Mutates the queue in place.
    */
@@ -77,23 +95,11 @@ class QueueCalculator {
       if (op[1] === 0) techsWithDemolition.add(op[0]);
     }
     for (const techId of techsWithDemolition) {
-      let changed = true;
-      while (changed) {
-        changed = false;
-        let lvl = startLevelsByTechId[techId] || 0;
-        for (let i = 0; i < queue.length; i++) {
-          if (Number(queue[i][0]) !== Number(techId)) continue;
-          if (queue[i][1] === 1) {
-            lvl += 1;
-          } else {
-            lvl -= 1;
-            if (lvl < 0) {
-              queue.splice(i, 1);
-              changed = true;
-              break;
-            }
-          }
-        }
+      const startLevel = startLevelsByTechId[techId] || 0;
+      let invalidIndex = QueueCalculator._firstInvalidDemolitionIndex(queue, techId, startLevel);
+      while (invalidIndex !== -1) {
+        queue.splice(invalidIndex, 1);
+        invalidIndex = QueueCalculator._firstInvalidDemolitionIndex(queue, techId, startLevel);
       }
     }
   }
