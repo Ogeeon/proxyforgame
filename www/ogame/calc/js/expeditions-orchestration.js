@@ -11,7 +11,7 @@
 const EXPEDITIONS_EMPTY_FLEET =
   '{"202":0,"203":0,"204":0,"205":0,"206":0,"207":0,"208":0,"209":0,"210":0,"211":0,"213":0,"214":0,"215":0,"218":0,"219":0}';
 
-var options = {
+const options = {
   defConstraints: { min: -Infinity, max: Infinity, def: 0, allowFloat: false, allowNegative: false },
 
   prm: {
@@ -69,7 +69,7 @@ function isValidExpeditionFleet(value) {
   try {
     const parsed = JSON.parse(value.replaceAll('~', ',').replace(/\\(.)/mg, '$1'));
     return !!parsed && typeof parsed === 'object';
-  } catch (e) {
+  } catch {
     return false;
   }
 }
