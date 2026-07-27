@@ -1413,7 +1413,7 @@ class FlightOrchestrator {
             if (importCoords && typeof data.coords === 'string') this._importOwnApiCoords(data);
             if (importClass) this._importOwnApiClass(data);
             if (importResearch && data.researches) this._importOwnApiResearch(data);
-            if (importLifeforms && data.bonuses && data.bonuses.characterClassBooster) this._importOwnApiLifeformBoosters(data);
+            if (importLifeforms && data.bonuses?.characterClassBooster) this._importOwnApiLifeformBoosters(data);
             this._resetOwnApiShipFields(importShips, importLifeforms);
             if (data.ships && (importShips || importLifeforms)) this._importOwnApiShips(data, importShips, importLifeforms);
             this.recalc();
