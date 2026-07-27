@@ -697,7 +697,7 @@ class LfCostsOrchestrator {
 
     addResearchRow(outerTab) {
         const resDD = document.getElementById(`research-select-${outerTab}`);
-        if (!resDD || !resDD.value) return;
+        if (!resDD?.value) return;
         const techID   = Number(resDD.value);
         const techName = resDD.options[resDD.selectedIndex].text;
 

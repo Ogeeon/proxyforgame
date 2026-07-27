@@ -203,7 +203,7 @@ const addEvent = (selector, event, handler) => {
  */
 const removeEvent = (selector, event, handler) => {
   const el = typeof selector === 'string' ? $(selector) : selector;
-  if (!el || !el._eventHandlers) return;
+  if (!el?._eventHandlers) return;
 
   const handlers = el._eventHandlers[event];
   if (handlers) {
@@ -223,7 +223,7 @@ const removeEvent = (selector, event, handler) => {
  */
 const removeAllEvents = (selector, event) => {
   const el = typeof selector === 'string' ? $(selector) : selector;
-  if (!el || !el._eventHandlers) return;
+  if (!el?._eventHandlers) return;
 
   const handlers = el._eventHandlers[event];
   if (handlers) {

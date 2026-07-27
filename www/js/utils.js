@@ -57,7 +57,7 @@ function validateInputNumber (event) {
 		input.select();
 	}
 	// После проверки надо вызвать функцию, имя которой передано в свойствах события. На всякий случай вызовем её в контексте обрабатываемого поля ввода
-	if (event != null && event.data != null)
+	if (event?.data != null)
 		eval(event.data).apply(input);
 }
 
@@ -122,7 +122,7 @@ function validateInputNumberOnBlur (event) {
 		needRecalc = true;
 	}
 	// Если что-то изменили - надо вызвать функцию, имя которой передано в свойствах события. На всякий случай вызовем её в контексте обрабатываемого поля ввода
-	if (needRecalc && event != null && event.data != null)
+	if (needRecalc && event?.data != null)
 		eval(event.data).apply(input);
 }
 
@@ -571,7 +571,7 @@ function loadFromCookie(name, params) {
 			else {
 				if (parts[0] in params) {
 					// Check if value is a JSON-encoded object
-					if (parts[1] && parts[1].indexOf('__JSON__') === 0) {
+					if (parts[1]?.indexOf('__JSON__') === 0) {
 						try {
 							const jsonStr = parts.slice(1).join(';').substring(8); // Remove __JSON__ prefix and rejoin in case semicolons were in the JSON
 							params[parts[0]] = JSON.parse(jsonStr);

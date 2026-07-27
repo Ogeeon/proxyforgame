@@ -667,7 +667,7 @@ function writeOnePlnLfLevels(race, levels) {
 	let inputs = $$('#one-planet-prod .lf-row-' + race + ' input[type=text]');
 	inputs.forEach(function (el) {
 		let idx = lfRowIndex(el);
-		el.value = (levels && levels[idx] != null) ? levels[idx] : 0;
+		el.value = (levels?.[idx] != null) ? levels[idx] : 0;
 	});
 }
 

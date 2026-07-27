@@ -937,7 +937,7 @@ class CostsCalculator {
 
         // Single-level row: level input at children[2]; multi-level: to-level at children[3]
         const cell = row.children[spec.multi ? 3 : 2];
-        const input = cell && cell.children[0];
+        const input = cell?.children[0];
         if (!input) continue;
 
         // Locale-aware read: the field may hold a comma decimal separator
@@ -2002,7 +2002,7 @@ function changeLabLevel() {
   }
 
   // Update the lab levels array (array is 0-indexed, rows are 1-indexed)
-  if (options.prm && options.prm.labLevels) {
+  if (options.prm?.labLevels) {
     options.prm.labLevels[num - 1] = Number.parseInt(this.value, 10) || 0;
   }
 

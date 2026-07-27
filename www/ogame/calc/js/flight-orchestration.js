@@ -310,7 +310,7 @@ class FlightOrchestrator {
             return 0;
         }
         const parts = text.match(/(\d\d) (\d\d):(\d\d):(\d\d)/);
-        if (parts == null || parts.length !== 5) {
+        if (parts?.length !== 5) {
             return -1;
         }
         const [, days, hours, minutes, seconds] = parts.map(Number);

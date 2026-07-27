@@ -209,7 +209,7 @@ class QueueCalculatorApp {
         // Skip the masked start-datetime field (start-2 / start-3, not the
         // startlvl-* level fields): the numeric validator would strip the date
         // separators out of it.
-        if (input.id && input.id.startsWith('start-')) return;
+        if (input.id?.startsWith('start-')) return;
         input.addEventListener('keyup', (e) => { validateInputNumber(e); refresh(); });
         input.addEventListener('blur', validateInputNumberOnBlurNative);
         // The blur validator clamps; refresh afterwards so the totals follow.
@@ -523,7 +523,7 @@ class QueueCalculatorApp {
 let queueApp = null;
 
 function initializeQueueCalculator() {
-  if (!options || !options.techCosts) {
+  if (!options?.techCosts) {
     console.error('initializeQueueCalculator: options.techCosts missing');
     return;
   }

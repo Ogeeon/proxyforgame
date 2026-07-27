@@ -282,7 +282,7 @@ class LfRenderer {
     }
 
     _msu(cost) {
-        const rates = (this.opts.prm && this.opts.prm.rates) || [1, 1.5, 3];
+        const rates = this.opts.prm?.rates || [1, 1.5, 3];
         const m = rates[0] || 1;
         const cMult = (rates[1] || 1.5) / m;
         const dMult = (rates[2] || 3)   / m;
