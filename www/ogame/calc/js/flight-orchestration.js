@@ -1256,8 +1256,8 @@ class FlightOrchestrator {
             body: new URLSearchParams({ service: 'ogameAPI', code }),
         }).then((r) => r.text()).then((data) => {
             try {
-                const rcode = Number.parseInt(data.substr(0, data.indexOf('\n')), 10);
-                const payload = data.substr(data.indexOf('\n') + 1);
+                const rcode = Number.parseInt(data.slice(0, data.indexOf('\n')), 10);
+                const payload = data.slice(data.indexOf('\n') + 1);
                 if (rcode === 3) {
                     alert(payload);
                     return;
