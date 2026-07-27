@@ -350,7 +350,7 @@
                   <hr>
                   <div class="d-flex align-items-center justify-content-between mb-1">
                     <span class="fw-semibold"><?= $l['lf-bonuses-ships'] ?> <i class="bi bi-question-circle" data-bs-toggle="tooltip" title="<?= $l['lf-bonuses-api-import-hint'] ?>"></i></span>
-                    <button id="open-lfbr" type="button" class="btn btn-sm btn-outline-primary"><?= $l['open-lfbr'] ?></button>
+                    <button id="open-lfbr" type="button" class="btn btn-sm btn-outline-secondary"><?= $l['open-lfbr'] ?></button>
                   </div>
                   <table id="lf-ships-bonuses" class="lined mx-auto" cellpadding="0" cellspacing="1" border="0" style="width: 80%;">
                     <tr>
@@ -613,7 +613,7 @@
               <input id="save-one-way" type="checkbox" name="save-one-way" class="form-check-input mt-0"/> <label for="save-one-way"><?= $l['save-one-way'] ?></label>
             </div>
           </div>
-          <button id="calculate-savepoints" type="button" class="btn btn-sm btn-primary flex-shrink-0"><?= $l['search'] ?></button>
+          <button id="calculate-savepoints" type="button" class="btn btn-sm btn-outline-secondary flex-shrink-0"><?= $l['search'] ?></button>
         </div>
         <div id="save-points-tables" class="mt-2">
           <div class="row">

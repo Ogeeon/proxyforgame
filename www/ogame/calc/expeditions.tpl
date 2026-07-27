@@ -257,7 +257,7 @@
         <!-- LifeForms tab -->
         <div id="param-lf" class="tab-pane fade p-2 pb-0" role="tabpanel">
           <div class="text-end mb-1">
-            <button id="open-lfbr" type="button" class="btn btn-sm btn-outline-primary"><?= $l['open-lfbr'] ?></button>
+            <button id="open-lfbr" type="button" class="btn btn-sm btn-outline-secondary"><?= $l['open-lfbr'] ?></button>
           </div>
           <table id="lf-ships-bonuses" class="lined mx-auto">
             <tr>

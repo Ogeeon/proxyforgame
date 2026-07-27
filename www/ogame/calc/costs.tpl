@@ -157,7 +157,7 @@
               <label for="research-lab-level"><?= $l['research-lab'] ?></label>
               <div class="d-flex gap-1">
                 <input id="research-lab-level" type="text" name="research-lab-level" class="form-control form-control-sm level-input" value="0"/>
-                <button id="open-llc-dialog" class="btn btn-outline-primary btn-sm" type="button" data-bs-toggle="tooltip" title="<?= $l['calculate'] ?>">
+                <button id="open-llc-dialog" class="btn btn-outline-secondary btn-sm" type="button" data-bs-toggle="tooltip" title="<?= $l['calculate'] ?>">
                   <i class="bi bi-calculator"></i>
                 </button>
               </div>

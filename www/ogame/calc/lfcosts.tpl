@@ -299,7 +299,7 @@
                   <?php endfor; ?>
                 </select>
                 <select id="research-select-<?=$i?>" class="form-select form-select-sm w-auto"></select>
-                <button id="research-add-btn-<?=$i?>" class="btn btn-sm btn-primary research-add-btn" data-tab="<?=$i?>"><?= $l['universe-add'] ?></button>
+                <button id="research-add-btn-<?=$i?>" class="btn btn-sm btn-outline-secondary research-add-btn" data-tab="<?=$i?>"><?= $l['universe-add'] ?></button>
               </div>
               <?php endif; ?>
               <table id="table-<?=$i?>-<?=$j?>" class="lined" cellpadding="0" cellspacing="1" border="0">

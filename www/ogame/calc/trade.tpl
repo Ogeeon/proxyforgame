@@ -289,12 +289,12 @@
 
               <!-- Rate Buttons Group -->
               <div class="rate-buttons-group">
-                <button id="rate-btn-1" class="btn btn-sm bg-primary-subtle">4 : 2 : 1</button>
-                <button id="rate-btn-4" class="btn btn-sm bg-primary-subtle">2.5 : 1.5 : 1</button>
-                <button id="rate-btn-2" class="btn btn-sm bg-primary-subtle">3 : 2 : 1</button>
-                <button id="rate-btn-5" class="btn btn-sm bg-primary-subtle">2 : 1.5 : 1</button>
-                <button id="rate-btn-3" class="btn btn-sm bg-primary-subtle">3 : 1.5 : 1</button>
-                <button id="rate-btn-6" class="btn btn-sm bg-primary-subtle">2.4 : 1.5 : 1</button>
+                <button id="rate-btn-1" class="btn btn-sm btn-outline-secondary">4 : 2 : 1</button>
+                <button id="rate-btn-4" class="btn btn-sm btn-outline-secondary">2.5 : 1.5 : 1</button>
+                <button id="rate-btn-2" class="btn btn-sm btn-outline-secondary">3 : 2 : 1</button>
+                <button id="rate-btn-5" class="btn btn-sm btn-outline-secondary">2 : 1.5 : 1</button>
+                <button id="rate-btn-3" class="btn btn-sm btn-outline-secondary">3 : 1.5 : 1</button>
+                <button id="rate-btn-6" class="btn btn-sm btn-outline-secondary">2.4 : 1.5 : 1</button>
               </div>
             </div>
           </div>

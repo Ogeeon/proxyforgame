@@ -708,7 +708,7 @@ class LfCostsOrchestrator {
 
         const dataRowCount = rows.length - FOOTER_ROWS - 1;
         const rowClass = dataRowCount % 2 === 0 ? 'odd' : 'even';
-        const removeBtn = `<button class="btn btn-sm btn-danger research-remove-btn ms-1" style="padding:1px 5px;line-height:1;">&times;</button>`;
+        const removeBtn = `<button class="btn btn-sm btn-outline-danger research-remove-btn ms-1" style="padding:1px 5px;line-height:1;">&times;</button>`;
 
         let rowHtml = `<tr class="${rowClass}"><td style="display:none;">${techID}</td>`;
         rowHtml += `<td class="min">${techName}${removeBtn}</td>`;

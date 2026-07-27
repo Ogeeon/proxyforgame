@@ -613,8 +613,8 @@
               <label for="planet-name"><?= $l['planet-name'] ?></label>
               <input id="planet-name" type="text" name="planet-name" class="form-control form-control-sm input-20columns"/>
             </div>
-            <button id="save-planet-data" type="button" class="btn btn-outline-primary btn-sm" title="<?= $l['save-planet-data'] ?>"><?= $l['save-planet-data'] ?></button>
-            <button id="clone-planet-data" type="button" class="btn btn-outline-primary btn-sm" title="<?= $l['clone-planet-data'] ?>"><?= $l['clone-planet-data'] ?></button>
+            <button id="save-planet-data" type="button" class="btn btn-outline-secondary btn-sm" title="<?= $l['save-planet-data'] ?>"><?= $l['save-planet-data'] ?></button>
+            <button id="clone-planet-data" type="button" class="btn btn-outline-secondary btn-sm" title="<?= $l['clone-planet-data'] ?>"><?= $l['clone-planet-data'] ?></button>
           </div>
         </div>
         <div class="accordion mt-1" id="one-planet-accordion">
