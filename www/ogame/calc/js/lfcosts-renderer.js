@@ -100,7 +100,7 @@ class LfRenderer {
      */
     renderGrandTotals(outerTab, innerTab, grandTotals, availRes, needSC, needLC) {
         const rows = getTableRows(`#table-${outerTab}-${innerTab}`);
-        const gtRow = rows[rows.length - 4];
+        const gtRow = rows.at(-4);
 
         gtRow.children[2].innerHTML = '<b>' + this._fmt(grandTotals.metal)   + '</b>';
         gtRow.children[3].innerHTML = '<b>' + this._fmt(grandTotals.crystal) + '</b>';
@@ -113,12 +113,12 @@ class LfRenderer {
         const needMet  = Math.max(0, grandTotals.metal   - availRes.metal);
         const needCrys = Math.max(0, grandTotals.crystal - availRes.crystal);
         const needDeut = Math.max(0, grandTotals.deut    - availRes.deut);
-        const needRow  = rows[rows.length - 2];
+        const needRow  = rows.at(-2);
         needRow.children[2].innerHTML = '<b>' + this._fmt(needMet)  + '</b>';
         needRow.children[3].innerHTML = '<b>' + this._fmt(needCrys) + '</b>';
         needRow.children[4].innerHTML = '<b>' + this._fmt(needDeut) + '</b>';
 
-        const tRow = rows[rows.length - 1];
+        const tRow = rows.at(-1);
         this._setCellHtml(tRow.children[2], numToOGame(needSC) + ' <abbr data-bs-toggle="tooltip" title="' + this.opts.scFull + '">' + this.opts.scShort + '</abbr>');
         this._setCellHtml(tRow.children[3], numToOGame(needLC) + ' <abbr data-bs-toggle="tooltip" title="' + this.opts.lcFull + '">' + this.opts.lcShort + '</abbr>');
     }

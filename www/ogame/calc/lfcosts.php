@@ -18,18 +18,18 @@ $colHeadersAllMult = array('building', 'from-level', 'to-level', 'metal', 'cryst
 $colHeadersOneCommon = array('level', 'metal', 'crystal', 'deuterium', 'msu', 'time', 'points');
 
 function getTechsByType($type) {
-	global $techData;
-	$filteredTechs = array();
-	for ($i = 1; $i < 5000; $i++) {
-		if (!isset($techData[$i])) {
-			continue;
-		}
-		// добавляем элемент, если нужно отдать весь список или если тип текущего элемента совпадает с запрошенным типом
-		if ($type == 0 || $techData[$i][1] == $type) {
-			array_push($filteredTechs, $i);
-		}
-	}
-	return $filteredTechs;
+    global $techData;
+    $filteredTechs = array();
+    for ($i = 1; $i < 5000; $i++) {
+        if (!isset($techData[$i])) {
+            continue;
+        }
+        // добавляем элемент, если нужно отдать весь список или если тип текущего элемента совпадает с запрошенным типом
+        if ($type == 0 || $techData[$i][1] == $type) {
+            array_push($filteredTechs, $i);
+        }
+    }
+    return $filteredTechs;
 }
 
 require_once 'lfcosts.tpl';
