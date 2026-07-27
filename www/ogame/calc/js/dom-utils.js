@@ -612,30 +612,22 @@ const attachInputMask = (input, format) => {
     }
   });
 
-  input.addEventListener('beforeinput', (event) => {
-    const type = event.inputType;
-    const value = current();
-    const start = input.selectionStart ?? 0;
-    const end = input.selectionEnd ?? start;
-    event.preventDefault();
-
-    if (type === 'insertText' || type === 'insertFromPaste' || type === 'insertCompositionText') {
-      const text = type === 'insertFromPaste'
-        ? (event.dataTransfer ? event.dataTransfer.getData('text') : '')
-        : (event.data || '');
-      const digits = text.replace(/\D/g, '');
-      if (digits === '') {
-        return;
-      }
-      const cleared = end > start ? erase(value, start, end) : value;
-      const result = fill(cleared, start, digits);
-      apply(result.value, result.caret);
+  /** Handle a pasted/typed/composed insertion of new text into the field. */
+  const handleInsertion = (type, event, value, start, end) => {
+    const text = type === 'insertFromPaste'
+      ? (event.dataTransfer ? event.dataTransfer.getData('text') : '')
+      : (event.data || '');
+    const digits = text.replace(/\D/g, '');
+    if (digits === '') {
       return;
     }
+    const cleared = end > start ? erase(value, start, end) : value;
+    const result = fill(cleared, start, digits);
+    apply(result.value, result.caret);
+  };
 
-    if (!type.startsWith('delete')) {
-      return;
-    }
+  /** Handle a selection erase or a forward/backward single-slot delete. */
+  const handleDeletion = (type, value, start, end) => {
     if (end > start) {
       apply(erase(value, start, end), start);
       return;
@@ -650,6 +642,22 @@ const attachInputMask = (input, format) => {
     const slot = prevSlot(start);
     if (slot >= 0) {
       apply(write(value, slot, MASK_BLANK), slot);
+    }
+  };
+
+  input.addEventListener('beforeinput', (event) => {
+    const type = event.inputType;
+    const value = current();
+    const start = input.selectionStart ?? 0;
+    const end = input.selectionEnd ?? start;
+    event.preventDefault();
+
+    if (type === 'insertText' || type === 'insertFromPaste' || type === 'insertCompositionText') {
+      handleInsertion(type, event, value, start, end);
+      return;
+    }
+    if (type.startsWith('delete')) {
+      handleDeletion(type, value, start, end);
     }
   });
 
