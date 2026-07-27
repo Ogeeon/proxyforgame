@@ -123,6 +123,35 @@ function validateTranslations(sourceData, localeData, localeName) {
 }
 
 /**
+ * Prints up to `limit` keys under a colored label, with an "...and N more" tail when there are more
+ */
+function printKeyList(label, keys, limit, color) {
+  console.log(colorize(`  ${label} (${keys.length}):`, color));
+  keys.slice(0, limit).forEach(key => {
+    console.log(colorize(`    - ${key}`, colors.gray));
+  });
+  if (keys.length > limit) {
+    console.log(colorize(`    ... and ${keys.length - limit} more`, colors.gray));
+  }
+}
+
+/**
+ * Prints one locale's issue block (missing/empty/extra key lists); returns true if it had any issues
+ */
+function printLocaleIssues(localeName, issues) {
+  if (issues.missing.length === 0 && issues.empty.length === 0 && issues.extra.length === 0) {
+    console.log(`\n${colorize('✓', colors.green)} ${colorize(localeName, colors.green)}: All translations present`);
+    return false;
+  }
+
+  console.log(`\n${colorize('✗', colors.red)} ${colorize(localeName, colors.red)}:`);
+  if (issues.missing.length > 0) printKeyList('Missing keys', issues.missing, 10, colors.red);
+  if (issues.empty.length > 0) printKeyList('Empty values', issues.empty, 5, colors.yellow);
+  if (issues.extra.length > 0) printKeyList('Extra keys', issues.extra, 5, colors.blue);
+  return true;
+}
+
+/**
  * Print validation results
  */
 function printResults(results) {
@@ -136,45 +165,10 @@ function printResults(results) {
 
   for (const [locale, issues] of Object.entries(results)) {
     const localeName = locale === 'source' ? 'English (Source)' : locale.toUpperCase();
-
-    if (issues.missing.length === 0 && issues.empty.length === 0 && issues.extra.length === 0) {
-      console.log(`\n${colorize('✓', colors.green)} ${colorize(localeName, colors.green)}: All translations present`);
-    } else {
+    totalMissing += issues.missing.length;
+    totalEmpty += issues.empty.length;
+    if (printLocaleIssues(localeName, issues)) {
       hasErrors = true;
-
-      console.log(`\n${colorize('✗', colors.red)} ${colorize(localeName, colors.red)}:`);
-
-      if (issues.missing.length > 0) {
-        totalMissing += issues.missing.length;
-        console.log(colorize(`  Missing keys (${issues.missing.length}):`, colors.red));
-        issues.missing.slice(0, 10).forEach(key => {
-          console.log(colorize(`    - ${key}`, colors.gray));
-        });
-        if (issues.missing.length > 10) {
-          console.log(colorize(`    ... and ${issues.missing.length - 10} more`, colors.gray));
-        }
-      }
-
-      if (issues.empty.length > 0) {
-        totalEmpty += issues.empty.length;
-        console.log(colorize(`  Empty values (${issues.empty.length}):`, colors.yellow));
-        issues.empty.slice(0, 5).forEach(key => {
-          console.log(colorize(`    - ${key}`, colors.gray));
-        });
-        if (issues.empty.length > 5) {
-          console.log(colorize(`    ... and ${issues.empty.length - 5} more`, colors.gray));
-        }
-      }
-
-      if (issues.extra.length > 0) {
-        console.log(colorize(`  Extra keys (${issues.extra.length}):`, colors.blue));
-        issues.extra.slice(0, 5).forEach(key => {
-          console.log(colorize(`    - ${key}`, colors.gray));
-        });
-        if (issues.extra.length > 5) {
-          console.log(colorize(`    ... and ${issues.extra.length - 5} more`, colors.gray));
-        }
-      }
     }
   }
 

@@ -30,6 +30,40 @@ function colorize(text, color) {
 }
 
 /**
+ * Extracts table names referenced by a query into usage.tables
+ */
+function extractTablesFromQuery(query, usage) {
+  const tableMatches = query.matchAll(/\b(FROM|INTO|UPDATE|JOIN)\s+(\w+)/gi);
+  for (const tableMatch of tableMatches) {
+    if (tableMatch[2]) {
+      usage.tables.add(tableMatch[2].toLowerCase());
+    }
+  }
+}
+
+/**
+ * Scans a single PHP file for SqlQuery() calls and records them (and their tables) into usage
+ */
+function scanPhpFileForDbUsage(fullPath, usage) {
+  const content = fs.readFileSync(fullPath, 'utf8');
+  const relFile = path.relative(WWW_DIR, fullPath);
+
+  // Find SqlQuery calls
+  const queryMatches = content.matchAll(/SqlQuery\s*\(\s*["']([^"']+)["']/g);
+  for (const match of queryMatches) {
+    const query = match[1];
+    usage.queries.push({ file: relFile, query: query });
+    extractTablesFromQuery(query, usage);
+  }
+
+  // Find SqlQuery calls with variables
+  const varMatches = content.matchAll(/SqlQuery\s*\(\s*\$?\w+\s*\.\s*["']([^"']+)["']/g);
+  for (const match of varMatches) {
+    usage.queries.push({ file: relFile, query: match[1] });
+  }
+}
+
+/**
  * Find all SQL queries in PHP files
  */
 function findDatabaseUsage() {
@@ -47,35 +81,7 @@ function findDatabaseUsage() {
       if (stat.isDirectory() && !item.includes('node_modules') && !item.includes('.git')) {
         scanDir(fullPath);
       } else if (item.endsWith('.php')) {
-        const content = fs.readFileSync(fullPath, 'utf8');
-
-        // Find SqlQuery calls
-        const queryMatches = content.matchAll(/SqlQuery\s*\(\s*["']([^"']+)["']/g);
-        for (const match of queryMatches) {
-          const query = match[1];
-          usage.queries.push({
-            file: path.relative(WWW_DIR, fullPath),
-            query: query
-          });
-
-          // Extract table names (basic pattern matching)
-          const tableMatches = query.matchAll(/\b(FROM|INTO|UPDATE|JOIN)\s+(\w+)/gi);
-          for (const tableMatch of tableMatches) {
-            if (tableMatch[2]) {
-              usage.tables.add(tableMatch[2].toLowerCase());
-            }
-          }
-        }
-
-        // Find SqlQuery calls with variables
-        const varMatches = content.matchAll(/SqlQuery\s*\(\s*\$?\w+\s*\.\s*["']([^"']+)["']/g);
-        for (const match of varMatches) {
-          const query = match[1];
-          usage.queries.push({
-            file: path.relative(WWW_DIR, fullPath),
-            query: query
-          });
-        }
+        scanPhpFileForDbUsage(fullPath, usage);
       }
     }
   }

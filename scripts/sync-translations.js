@@ -210,18 +210,23 @@ function syncLocaleFile(sourceData, localeFile, dryRun = false) {
 }
 
 /**
- * Generate completion report
+ * Status color/icon for a locale's completion percentage (a toFixed(1) string,
+ * compared the same way the caller has always compared it)
  */
-function generateReport(sourceData, localeFiles, showMissingKeys = false) {
-  console.log('\n' + colorize('═════════════════════════════════════════════════════════', colors.cyan));
-  console.log(colorize('              Translation Completion Report', colors.cyan));
-  console.log(colorize('═════════════════════════════════════════════════════════', colors.cyan));
+function getCompletionStatus(percentage) {
+  if (percentage === '100.0') {
+    return { status: colors.green, statusIcon: '✓' };
+  }
+  if (percentage > '90') {
+    return { status: colors.yellow, statusIcon: '○' };
+  }
+  return { status: colors.red, statusIcon: '✗' };
+}
 
-  const sourceKeys = getKeyPaths(sourceData);
-  const totalKeys = sourceKeys.length;
-
-  console.log(`\nTotal keys in source (en.json): ${colorize(totalKeys.toString(), colors.blue)}`);
-
+/**
+ * Builds one completion-report row per locale file, sorted by completion percentage
+ */
+function buildCompletionResults(sourceData, localeFiles, totalKeys) {
   const results = [];
 
   for (const { name, fullPath, langCode } of localeFiles) {
@@ -231,9 +236,7 @@ function generateReport(sourceData, localeFiles, showMissingKeys = false) {
     const missingKeys = findMissingKeys(sourceData, localeData);
     const presentKeys = totalKeys - missingKeys.length;
     const percentage = ((presentKeys / totalKeys) * 100).toFixed(1);
-
-    const status = percentage === '100.0' ? colors.green : (percentage > '90' ? colors.yellow : colors.red);
-    const statusIcon = percentage === '100.0' ? '✓' : (percentage > '90' ? '○' : '✗');
+    const { status, statusIcon } = getCompletionStatus(percentage);
 
     results.push({
       lang: langCode.toUpperCase(),
@@ -247,40 +250,69 @@ function generateReport(sourceData, localeFiles, showMissingKeys = false) {
     });
   }
 
-  // Sort by completion percentage
   results.sort((a, b) => Number.parseFloat(a.percentage) - Number.parseFloat(b.percentage));
+  return results;
+}
+
+/**
+ * Prints one locale's completion summary line
+ */
+function printCompletionLine(result, totalKeys) {
+  const percentageColor = Number.parseFloat(result.percentage) === 100 ? colors.green :
+                         Number.parseFloat(result.percentage) > 90 ? colors.yellow : colors.red;
+
+  console.log(
+    `${result.statusIcon} ${colorize(result.lang.padEnd(4), result.status)} ` +
+    `${colorize(result.percentage + '%', percentageColor)} ` +
+    colorize(`(${result.present}/${totalKeys})`, colors.gray) +
+    (result.missing > 0 ? colorize(` [${result.missing} missing]`, colors.gray) : '')
+  );
+}
+
+/**
+ * Prints the full missing-key list (with value preview) for locales that have any
+ */
+function printMissingKeyDetails(results) {
+  for (const result of results) {
+    if (result.missing === 0) continue;
+
+    console.log(`\n${colorize(result.lang, result.status)} missing keys:`);
+    for (const { key, sourceValue } of result.missingKeys) {
+      const valuePreview = typeof sourceValue === 'string'
+        ? `"${sourceValue.substring(0, 50)}${sourceValue.length > 50 ? '...' : ''}"`
+        : JSON.stringify(sourceValue);
+      console.log(`  ${colorize('•', colors.gray)} ${key}`);
+      console.log(`    ${colorize(valuePreview, colors.gray)}`);
+    }
+  }
+}
+
+/**
+ * Generate completion report
+ */
+function generateReport(sourceData, localeFiles, showMissingKeys = false) {
+  console.log('\n' + colorize('═════════════════════════════════════════════════════════', colors.cyan));
+  console.log(colorize('              Translation Completion Report', colors.cyan));
+  console.log(colorize('═════════════════════════════════════════════════════════', colors.cyan));
+
+  const sourceKeys = getKeyPaths(sourceData);
+  const totalKeys = sourceKeys.length;
+
+  console.log(`\nTotal keys in source (en.json): ${colorize(totalKeys.toString(), colors.blue)}`);
+
+  const results = buildCompletionResults(sourceData, localeFiles, totalKeys);
 
   console.log('\nCompletion by language:');
   console.log(colorize('──────────────────────────────────────────────────────────', colors.gray));
 
   for (const result of results) {
-    const percentageColor = Number.parseFloat(result.percentage) === 100 ? colors.green :
-                           Number.parseFloat(result.percentage) > 90 ? colors.yellow : colors.red;
-
-    console.log(
-      `${result.statusIcon} ${colorize(result.lang.padEnd(4), result.status)} ` +
-      `${colorize(result.percentage + '%', percentageColor)} ` +
-      colorize(`(${result.present}/${totalKeys})`, colors.gray) +
-      (result.missing > 0 ? colorize(` [${result.missing} missing]`, colors.gray) : '')
-    );
+    printCompletionLine(result, totalKeys);
   }
 
   console.log(colorize('──────────────────────────────────────────────────────────', colors.gray));
 
-  // Show missing keys if requested
   if (showMissingKeys) {
-    for (const result of results) {
-      if (result.missing > 0) {
-        console.log(`\n${colorize(result.lang, result.status)} missing keys:`);
-        for (const { key, sourceValue } of result.missingKeys) {
-          const valuePreview = typeof sourceValue === 'string'
-            ? `"${sourceValue.substring(0, 50)}${sourceValue.length > 50 ? '...' : ''}"`
-            : JSON.stringify(sourceValue);
-          console.log(`  ${colorize('•', colors.gray)} ${key}`);
-          console.log(`    ${colorize(valuePreview, colors.gray)}`);
-        }
-      }
-    }
+    printMissingKeyDetails(results);
   }
 }
 

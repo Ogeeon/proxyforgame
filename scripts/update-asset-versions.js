@@ -158,6 +158,45 @@ function analyzeTemplate(filePath) {
 }
 
 /**
+ * Prints the unversioned/missing asset details for one template that has issues
+ */
+function printTemplateIssues(result) {
+  console.log(colorize(`\n📄 ${result.filePath}`, colors.blue));
+
+  if (result.unversioned.length > 0) {
+    console.log(colorize(`  ⚠️  Unversioned assets (${result.unversioned.length}):`, colors.yellow));
+    result.unversioned.slice(0, 5).forEach(asset => {
+      console.log(colorize(`     - ${asset.path}`, colors.gray));
+    });
+    if (result.unversioned.length > 5) {
+      console.log(colorize(`     ... and ${result.unversioned.length - 5} more`, colors.gray));
+    }
+  }
+
+  if (result.missing.length > 0) {
+    console.log(colorize(`  ❌ Missing assets (${result.missing.length}):`, colors.red));
+    result.missing.forEach(asset => {
+      console.log(colorize(`     - ${asset.path}`, colors.gray));
+    });
+  }
+}
+
+/**
+ * Prints the final pass/fail summary block
+ */
+function printVersioningSummary(filesWithIssues, totalUnversioned, totalMissing) {
+  if (filesWithIssues === 0) {
+    console.log(colorize('\n✅ All assets are properly versioned!', colors.green));
+    return;
+  }
+  console.log('\n' + colorize('──────────────────────────────────────────────────────────', colors.gray));
+  console.log(colorize(`\nTemplates with issues: ${filesWithIssues}`, colors.yellow));
+  console.log(colorize(`Total unversioned assets: ${totalUnversioned}`, totalUnversioned > 0 ? colors.yellow : colors.green));
+  console.log(colorize(`Total missing assets: ${totalMissing}`, totalMissing > 0 ? colors.red : colors.green));
+  console.log(colorize('\nRun with --apply to add versioning to unversioned assets.', colors.gray));
+}
+
+/**
  * Print analysis report
  */
 function printAnalysisReport(results) {
@@ -170,41 +209,16 @@ function printAnalysisReport(results) {
   let filesWithIssues = 0;
 
   for (const result of results) {
-    if (result.unversioned.length > 0 || result.missing.length > 0) {
-      filesWithIssues++;
-      console.log(colorize(`\n📄 ${result.filePath}`, colors.blue));
-
-      if (result.unversioned.length > 0) {
-        totalUnversioned += result.unversioned.length;
-        console.log(colorize(`  ⚠️  Unversioned assets (${result.unversioned.length}):`, colors.yellow));
-        result.unversioned.slice(0, 5).forEach(asset => {
-          console.log(colorize(`     - ${asset.path}`, colors.gray));
-        });
-        if (result.unversioned.length > 5) {
-          console.log(colorize(`     ... and ${result.unversioned.length - 5} more`, colors.gray));
-        }
-      }
-
-      if (result.missing.length > 0) {
-        totalMissing += result.missing.length;
-        console.log(colorize(`  ❌ Missing assets (${result.missing.length}):`, colors.red));
-        result.missing.forEach(asset => {
-          console.log(colorize(`     - ${asset.path}`, colors.gray));
-        });
-      }
+    if (result.unversioned.length === 0 && result.missing.length === 0) {
+      continue;
     }
+    filesWithIssues++;
+    totalUnversioned += result.unversioned.length;
+    totalMissing += result.missing.length;
+    printTemplateIssues(result);
   }
 
-  if (filesWithIssues === 0) {
-    console.log(colorize('\n✅ All assets are properly versioned!', colors.green));
-  } else {
-    console.log('\n' + colorize('──────────────────────────────────────────────────────────', colors.gray));
-    console.log(colorize(`\nTemplates with issues: ${filesWithIssues}`, colors.yellow));
-    console.log(colorize(`Total unversioned assets: ${totalUnversioned}`, totalUnversioned > 0 ? colors.yellow : colors.green));
-    console.log(colorize(`Total missing assets: ${totalMissing}`, totalMissing > 0 ? colors.red : colors.green));
-
-    console.log(colorize('\nRun with --apply to add versioning to unversioned assets.', colors.gray));
-  }
+  printVersioningSummary(filesWithIssues, totalUnversioned, totalMissing);
 
   console.log('\n' + colorize('──────────────────────────────────────────────────────────', colors.gray));
 
