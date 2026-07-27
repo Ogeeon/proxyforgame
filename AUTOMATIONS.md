@@ -8,7 +8,7 @@ The automation system provides:
 - **Translation management** - Synchronize and validate translations across 13 languages
 - **Test management** - Generate test templates and track coverage
 - **Calculator management** - Create and refactor calculators
-- **Code quality & documentation** - Check code quality, manage assets, generate documentation
+- **Documentation & maintenance** - Manage assets, generate documentation (code-quality checks now go through SonarQube via `/sonar-fix`)
 
 ## Available Scripts
 
@@ -19,7 +19,7 @@ full list; the npm scripts below remain valid and are what the make targets call
 ```bash
 make help          # list all targets
 make check         # translation validation + both test suites
-make audit         # code quality + test coverage + DB schema reports
+make audit         # test coverage + DB schema reports
 ```
 
 ```bash
@@ -38,8 +38,7 @@ npm run generate-test <calc>        # Generate test template
 npm run new-calculator <name>       # Create new calculator
 npm run refactor-calculator <calc>  # Analyze/refactor calculator
 
-# Code Quality & Documentation
-npm run check-code-quality          # Check code quality
+# Documentation
 npm run update-asset-versions      # Add asset versioning
 npm run validate-database          # Validate database schema
 npm run generate-docs               # Generate documentation
@@ -157,19 +156,11 @@ npm run refactor-calculator flight --apply    # Create modules
 
 ---
 
-## Code Quality & Documentation
+## Documentation
 
-### /check-code-quality Skill
-
-**Implementation:** `scripts/check-code-quality.js`
-
-Analyzes calculator JavaScript files for quality issues, jQuery 1.5.1 compatibility problems, debug code, and structural issues.
-
-**Usage:**
-```bash
-npm run check-code-quality          # Check all calculators
-npm run check-code-quality graviton # Check specific calculator
-```
+Code-quality checks are no longer a standalone script here — they go through SonarQube via the
+`/sonar-fix` command in Claude Code, which queries the project's live SonarQube findings instead
+of a hand-maintained regex checker.
 
 ### /update-asset-versions Skill
 
@@ -257,18 +248,6 @@ npm run generate-docs graviton      # Generate specific calculator docs
    npm run validate-translations
    ```
 
-### Checking Code Quality
-
-1. Run quality checker:
-   ```bash
-   npm run check-code-quality
-   ```
-
-2. Address issues:
-   - Replace `alert()` with UI dialogs
-   - Add input validation
-   - Extract magic numbers to constants
-
 ### Refactoring a Calculator
 
 1. Analyze:
@@ -329,7 +308,6 @@ pfg.wmp/
 │   ├── generate-test.js               # Test generator
 │   ├── new-calculator.js              # Calculator generator
 │   ├── refactor-calculator.js         # Refactoring tool
-│   ├── check-code-quality.js          # Code quality checker
 │   ├── update-asset-versions.js       # Asset version manager
 │   ├── validate-database-schema.js    # Database validator
 │   └── generate-docs.js                # Documentation generator

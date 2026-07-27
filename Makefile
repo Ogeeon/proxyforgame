@@ -89,12 +89,8 @@ report: ## Open the last Playwright HTML report
 check: i18n-validate test ## Green gate - what must pass before a commit
 
 audit: ## Advisory reports; these flag pre-existing issues and do not gate
-	-node scripts/check-code-quality.js
 	-node scripts/check-test-coverage.js
 	-node scripts/validate-database-schema.js
-
-quality: ## Code quality report, narrow it with calc=<name>
-	node scripts/check-code-quality.js $(calc)
 
 coverage: ## Report which calculators have no spec
 	node scripts/check-test-coverage.js

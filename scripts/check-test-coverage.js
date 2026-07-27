@@ -34,7 +34,7 @@ function colorize(text, color) {
  */
 function getCalculators() {
   const files = fs.readdirSync(CALC_DIR)
-    .filter(file => file.endsWith('.php') && !file.startsWith('h_'));
+    .filter(file => file.endsWith('.php') && !file.endsWith('.inc.php') && !file.startsWith('h_'));
 
   return files.map(file => file.replace('.php', ''));
 }

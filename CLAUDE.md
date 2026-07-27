@@ -24,7 +24,7 @@ boxes is too old (`choco install make`).
 | `make test-unit` / `make test-e2e` | One suite each |
 | `make test-one spec=flight` | A single Playwright spec |
 | `make check` | `i18n-validate` + both suites — the green gate |
-| `make audit` | Code quality, test coverage, DB schema reports (advisory) |
+| `make audit` | Test coverage, DB schema reports (advisory) |
 | `make serve` | `php -S localhost:8000 -t www`, no WAMP needed |
 | `make i18n-fix` / `make i18n-report` | Translation sync and completion |
 | `make install` | `npm ci` + Playwright browsers |

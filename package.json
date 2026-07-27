@@ -14,7 +14,6 @@
     "generate-test": "node scripts/generate-test.js",
     "new-calculator": "node scripts/new-calculator.js",
     "refactor-calculator": "node scripts/refactor-calculator.js",
-    "check-code-quality": "node scripts/check-code-quality.js",
     "update-asset-versions": "node scripts/update-asset-versions.js",
     "validate-database": "node scripts/validate-database-schema.js",
     "generate-docs": "node scripts/generate-docs.js"

@@ -377,39 +377,14 @@ Recommended Modular Structure:
 
 ---
 
-## Code Quality & Documentation Scripts
+## Documentation Scripts
 
-### check-code-quality.js
-
-Analyzes calculator JavaScript files for code quality issues.
-
-**Usage:**
-```bash
-node scripts/check-code-quality.js [calculator-name]
-```
-
-**What it checks:**
-- jQuery 1.5.1 compatibility issues (.prop(), .on() vs older methods)
-- Debug code (console.log, alert() statements)
-- Calculator structure (options object, validation, persistence)
-- File metrics (lines, functions, comment ratio)
-- Common code quality issues (TODOs, magic numbers)
-
-**Report categories:**
-- Errors: Critical issues (alert() usage, missing options)
-- Warnings: Important issues (debug code, large files)
-- Info: Suggestions (TODOs, magic numbers, improvements)
-
-**Example:**
-```bash
-# Check all calculators
-npm run check-code-quality
-
-# Check specific calculator
-npm run check-code-quality graviton
-```
-
----
+Code-quality checks (jQuery compatibility, debug code, structural conventions) used to live in
+`check-code-quality.js`, but it went stale after the split-module JS migration (its calculator
+file discovery only matched the old monolithic `<name>.js` layout) and its generic checks
+(console.log, alert(), magic numbers, TODOs) duplicated what SonarQube already does with real
+AST-based rules. It was removed; use `/sonar-fix` in Claude Code instead, which queries the
+project's live SonarQube findings.
 
 ### update-asset-versions.js
 
@@ -511,32 +486,27 @@ npm run generate-docs graviton
 
 Before releasing a new version:
 
-1. **Check code quality:**
-   ```bash
-   npm run check-code-quality
-   ```
-
-2. **Update asset versioning:**
+1. **Update asset versioning:**
    ```bash
    npm run update-asset-versions --apply
    ```
 
-3. **Validate translations:**
+2. **Validate translations:**
    ```bash
    npm run validate-translations
    ```
 
-4. **Check test coverage:**
+3. **Check test coverage:**
    ```bash
    npm run check-test-coverage
    ```
 
-5. **Generate documentation:**
+4. **Generate documentation:**
    ```bash
    npm run generate-docs
    ```
 
-6. **Run tests:**
+5. **Run tests:**
    ```bash
    cd playwright-tests
    npx playwright test
