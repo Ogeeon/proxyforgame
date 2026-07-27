@@ -278,7 +278,7 @@ function calcBuildCost_C(techID, techLevel, techData) {
 function getBuildCost_C(techID, techLevelFrom, techLevelTo, techData, ionTechLevel) {
 	let cost;
 	let i;
-	if (typeof ionTechLevel == "undefined" )
+	if (ionTechLevel === undefined)
 		ionTechLevel = 0;
 	let totalCost = [0, 0, 0];
 	// После techID==200 идут корабли и оборона, у них прироста стоимости от количества нет - их будем считать не так, как постройки
@@ -491,7 +491,7 @@ function calcBuildCostLF(techID, techLevel, techData, costRdc) {
 function getBuildCostLF(techID, techLevelFrom, techLevelTo, techData, ionTechLevel, rsrCostRdc, bldCostRdc=0) {
 	let cost;
 	let i;
-	if (typeof ionTechLevel == "undefined" )
+	if (ionTechLevel === undefined)
 		ionTechLevel = 0;
 	let totalCost = [0, 0, 0];
 	// Мегалит снижает стоимость только зданий

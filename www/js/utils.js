@@ -195,7 +195,7 @@ function consoleLog(str) {
  * Проверяет, что значение существует.
  */
 function isset(e) {
-	return typeof(e) != 'undefined';
+	return e !== undefined;
 }
 
 /**
@@ -228,7 +228,7 @@ String.prototype.format = function(){
  * @param def значение по умолчанию
  */
 function getOptionValue(opt, def) {
-	if (typeof(options[opt]) === 'undefined')
+	if (options[opt] === undefined)
 		return def;
 	else
 		return options[opt];
@@ -244,13 +244,13 @@ function getConstraint(element, constr, def) {
 	const el = (typeof element === 'string') ? document.getElementById(element) : element;
 	const constraints = el ? el._constrains : undefined;
 	// Если не найдём ограничения в свойствах самого поля, поробуем вязть из options - если и там нет, вернём значение по умолчанию
-	if (typeof(constraints) === 'undefined') {
-		if (typeof(options.defConstraints) === 'undefined')
+	if (constraints === undefined) {
+		if (options.defConstraints === undefined)
 			return def;
 		else
 			return options.defConstraints[constr];
 	} else {
-		return (typeof(constraints[constr]) === 'undefined') ? def : constraints[constr];
+		return (constraints[constr] === undefined) ? def : constraints[constr];
 	}
 }
 

@@ -807,7 +807,7 @@ class Validator {
 // export { GlobalParams, BuildRequest, BuildCost, Calculator, Validator };
 
 // For browser globals (current setup):
-if (typeof globalThis.window !== 'undefined') {
+if (globalThis.window !== undefined) {
   globalThis.GlobalParams = GlobalParams;
   globalThis.BuildRequest = BuildRequest;
   globalThis.BuildCost = BuildCost;

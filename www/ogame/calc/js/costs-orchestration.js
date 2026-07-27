@@ -2053,7 +2053,7 @@ function validateAndChangeLabLevel(event) {
 }
 
 // Expose to globalThis for direct access
-if (typeof globalThis.window !== 'undefined') {
+if (globalThis.window !== undefined) {
   globalThis.CostsCalculator = CostsCalculator;
   globalThis.initializeCostsCalculator = initializeCostsCalculator;
 }
