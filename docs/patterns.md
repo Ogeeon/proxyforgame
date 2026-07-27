@@ -416,3 +416,84 @@ but no visual distinction from an editable input. **Remedies:**
 3. **For maximum clarity across all read-only fields**: Ensure they all use the same `ui-state-disabled`
    class and `.ui-state-disabled` CSS rule — computed divs, disabled inputs, and readonly inputs
    should all render identically. This makes the read-only state obvious at a glance.
+
+---
+
+## (f) Buttons read as raised keys
+
+Section (e) lifts editable inputs above the panel. Left alone, that inverts the surface
+hierarchy: Bootstrap's outline variants never set `--bs-btn-bg`, so they inherit the base
+`transparent` and render at *exactly* the panel colour. The input then looks like the raised
+chip and the button like a hole punched in the panel — and `btn-outline-secondary` is roughly
+forty of the fifty-odd calculator buttons, so that is nearly every control on the page.
+
+The three surfaces must stay ordered, in both themes:
+
+| | light | dark |
+|---|---|---|
+| editable input | `#ffffff` (lifted) | `#14171b` (sunken) |
+| panel `.border.rounded` | `#f5f5f5` | `#1a1e21` |
+| **button** | `#e3e8ef` + shadow | `#272d34` + shadow |
+
+`common_bs.css` owns all of it, through knobs declared next to the theme blocks:
+
+```css
+[data-bs-theme="light"] {
+  --pfg-btn-bg: #e3e8ef;
+  --pfg-btn-shadow: 0 1px 2px rgba(0, 0, 0, 0.18);
+  --pfg-btn-shadow-active: inset 0 1px 2px rgba(0, 0, 0, 0.18);
+}
+```
+
+Two rules, deliberately split by selector:
+
+```css
+/* Fill: outline variants only. */
+.btn-outline-secondary,
+.btn-outline-primary,
+.btn-outline-danger {
+  --bs-btn-bg: var(--pfg-btn-bg);
+}
+
+/* Relief: safe on every .btn. */
+.btn { box-shadow: var(--pfg-btn-shadow); }
+.btn:active,
+.btn.active { transform: translateY(1px); box-shadow: var(--pfg-btn-shadow-active); }
+.btn:disabled,
+.btn.disabled,
+.btn.ui-state-disabled { box-shadow: none; transform: none; }
+```
+
+**Never set `--bs-btn-bg` on a bare `.btn`.** It has the same (0,1,0) specificity as
+Bootstrap's `.btn-primary`, and `common_bs.css` loads later, so it would strip the fill off
+every solid variant. `box-shadow` and `transform` carry no such risk, which is why relief and
+fill use different selectors. Bootstrap's own `.btn:focus-visible` ring is (0,2,0) and still
+beats the shadow rule, so focus keeps working without a further override.
+
+Write the fill against `.btn`, not `button.btn`: flight uses `<div class="btn …">` in three
+places (`flight.tpl:504, 531, 540`).
+
+**Solid variants are reserved for modal footers.** `btn-primary` on the confirm and
+`btn-secondary` on the cancel is the one place the filled treatment carries meaning — it marks
+the dialog's committing action. Everywhere else, including a calculator's main action button
+(flight's `#calculate-savepoints`) and inline add/save controls, the outline variants are the
+house style: `btn-outline-secondary` by default, `btn-outline-danger` for destructive.
+`btn-outline-primary` is no longer used anywhere.
+
+Unlike section (e), this pattern **does** cover `trade`: its rate presets were carrying
+`btn btn-sm bg-primary-subtle` and were switched to `btn-outline-secondary` so they inherit
+the shared surface. Nothing in `trade.css` competes — its rules there are geometry only.
+
+Only one calculator overrides `--bs-btn-*` today — `queue_bs.css:191` dims the dark-theme
+`.btn-outline-danger.queue-row-del`. It sets colour and border but not `bg`, so it composes
+with the rule above rather than fighting it.
+
+Related trap in the same file: `[data-bs-theme="dark"] button` is (0,1,1) and beats `.btn` at
+(0,1,0). Unscoped, it painted the label of a solid `.btn-primary` cyan in every modal footer.
+Both the light and dark colour rules are therefore written `button:not(.btn)` — `.nav-link`
+tabs, the only bare `<button>`s that matter, still match.
+
+**Deviation to look for**: a button carrying a `bg-*` utility instead of a `btn-*` variant
+(`bg-primary-subtle` is `!important` and beats `--bs-btn-bg`); a solid `btn-primary` or
+`btn-danger` outside a modal footer; a per-calculator sheet that sets `background-color` on a
+button directly instead of retuning `--pfg-btn-bg`.

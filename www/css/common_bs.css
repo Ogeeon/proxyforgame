@@ -17,6 +17,14 @@
   color: var(--bs-info-text-emphasis);
 }
 
+/* Button surface knobs, see the .btn block further down. Kept next to the theme
+   definitions so both tones are tuned in one place. */
+[data-bs-theme="dark"] {
+  --pfg-btn-bg: #272d34;
+  --pfg-btn-shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
+  --pfg-btn-shadow-active: inset 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
 /* Soften the pure-white light theme evenly across the whole UI (tune the 94% knob).
    Overriding --bs-body-bg cascades to cards, form controls, etc. that inherit it.
    --bs-tertiary-bg is set a step darker so table headers (.lined th) and the
@@ -26,6 +34,9 @@
   --bs-tertiary-bg: color-mix(in srgb, #fff 82%, black);
   --bs-border-color: color-mix(in srgb, #fff 70%, black);
   --bs-body-color: color-mix(in srgb, #000 85%, white);
+  --pfg-btn-bg: #e3e8ef;
+  --pfg-btn-shadow: 0 1px 2px rgba(0, 0, 0, 0.18);
+  --pfg-btn-shadow-active: inset 0 1px 2px rgba(0, 0, 0, 0.18);
 }
 
 /* Darken the page surround around the calculator (tune the 88% knob). The panels
@@ -80,16 +91,56 @@
   /* background-color: var(--bs-primary-bg-subtle); */
 }
 
+/* `:not(.btn)´ keeps these away from Bootstrap buttons, which carry their own
+   --bs-btn-color per variant. Without it the dark rule below, at (0,1,1), beats
+   `.btn´ at (0,1,0) and paints the label of a solid .btn-primary cyan. */
 .subheader,
-button {
+button:not(.btn) {
   color: #0a58ca;
 }
 
 [data-bs-theme="dark"] .form-control,
 [data-bs-theme="dark"] .form-select,
 [data-bs-theme="dark"] .subheader,
-[data-bs-theme="dark"] button {
+[data-bs-theme="dark"] button:not(.btn) {
   color: var(--bs-info-text-emphasis);
+}
+
+/* Buttons read as raised keys. Bootstrap's outline variants leave --bs-btn-bg at
+   the base `transparent´, so they render exactly the panel colour while editable
+   inputs get a lifted fill — the button ends up looking like a hole in the panel.
+   Give the outline variants their own surface; the variant's accent stays in the
+   text and the border.
+
+   Do not fold this into a bare `.btn´ selector: that has the same (0,1,0)
+   specificity as Bootstrap's .btn-primary and, loading later, would strip the
+   fill off the solid variants too. */
+.btn-outline-secondary,
+.btn-outline-primary,
+.btn-outline-danger {
+  --bs-btn-bg: var(--pfg-btn-bg);
+}
+
+/* Relief and press feedback are safe on every .btn — box-shadow and transform do
+   not collide with the --bs-btn-* variables, and the class also covers the
+   <div class="btn"> controls in the flight calculator. Bootstrap's own
+   .btn:focus-visible ring is (0,2,0) and still wins. */
+.btn {
+  box-shadow: var(--pfg-btn-shadow);
+}
+
+.btn:active,
+.btn.active {
+  transform: translateY(1px);
+  box-shadow: var(--pfg-btn-shadow-active);
+}
+
+/* A key that cannot be pressed must not look raised. */
+.btn:disabled,
+.btn.disabled,
+.btn.ui-state-disabled {
+  box-shadow: none;
+  transform: none;
 }
 
 .ui-input-margin {
