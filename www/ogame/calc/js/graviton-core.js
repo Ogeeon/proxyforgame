@@ -56,9 +56,7 @@ class GravitonCalculator {
       Math.floor(30 * p.fusionPlantLevel * Math.pow(1.05 + p.energyTechLevel * 0.01, p.fusionPlantLevel))
     );
     const baseEnergyPerSat = 0.01 * p.solarSatellitesPercent * Math.floor((p.maxPlanetTemp + 140) / 6);
-    const solarSatsEnergy = (p.solarSatellitesCount * baseEnergyPerSat) >= 0
-      ? p.solarSatellitesCount * baseEnergyPerSat
-      : 0;
+    const solarSatsEnergy = Math.max(p.solarSatellitesCount * baseEnergyPerSat, 0);
     const totalEnergy = solarPlantEnergy + fusionPlantEnergy + solarSatsEnergy;
 
     // The per-satellite yield accumulates every bonus at the same rate the
