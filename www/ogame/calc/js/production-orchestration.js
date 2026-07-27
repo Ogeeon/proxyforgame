@@ -470,7 +470,7 @@ function resourcesToString(res) {
  * cell never keeps a stale value from an earlier recalculation.
  */
 function paybackToString(normCost, normIncrease) {
-	if (!(normIncrease > 0))
+	if (normIncrease <= 0)
 		return '&mdash;';
 	return timespanToShortenedString(Math.ceil(normCost / normIncrease * 3600),
 		options.datetimeW, options.datetimeD, options.datetimeH, options.datetimeM, options.datetimeS, true);
