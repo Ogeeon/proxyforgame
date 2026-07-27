@@ -23,11 +23,11 @@ define('LF_FIRST_PROD_BUILDING', 3);
 $lfBuildingKeys = array(1 => array(), 2 => array(), 3 => array(), 4 => array());
 $lfBuildingEnergy = array();
 foreach ($lfTechData as $lfId => $lfRow) {
-	if ($lfRow[1] !== 1) continue; // buildings only (type 1), skip researches
+	if ($lfRow[1] !== 1) { continue; } // buildings only (type 1), skip researches
 	$lfRace = intdiv($lfId, 1000);
-	if ($lfRace < 1 || $lfRace > 4) continue;
+	if ($lfRace < 1 || $lfRace > 4) { continue; }
 	$lfPos = $lfId % 1000;
-	if ($lfPos < LF_FIRST_PROD_BUILDING) continue;
+	if ($lfPos < LF_FIRST_PROD_BUILDING) { continue; }
 	$lfBuildingKeys[$lfRace][$lfPos] = $lfRow[0];
 	$lfBuildingEnergy[$lfId] = array($lfRow[5], $lfRow[10]);
 }
@@ -97,8 +97,9 @@ function getTechsByType($type) {
 	global $techData;
 	$filteredTechs = array();
 	for ($i = 1; $i < 600; $i++) {
-		if (!isset($techData[$i]))
+		if (!isset($techData[$i])) {
 			continue;
+		}
 		// добавляем элемент, если нужно отдать весь список или если тип текущего элемента совпадает с запрошенным типом
 		if ($type == 0 || $techData[$i][1] == $type) {
 			array_push($filteredTechs, $i);
