@@ -263,17 +263,18 @@ class FlightOrchestrator {
         return speed;
     }
 
+    _setCoordConstraint(id, max) {
+        const el = document.getElementById(id);
+        if (el) {
+            el._constrains = { min: 1, def: 0, max };
+        }
+    }
+
     _applyCoordinateLimits(galaxies, systems) {
-        const setMax = (id, max) => {
-            const el = document.getElementById(id);
-            if (el) {
-                el._constrains = { min: 1, def: 0, max };
-            }
-        };
-        setMax('departure-g', galaxies);
-        setMax('destination-g', galaxies);
-        setMax('departure-s', systems);
-        setMax('destination-s', systems);
+        this._setCoordConstraint('departure-g', galaxies);
+        this._setCoordConstraint('destination-g', galaxies);
+        this._setCoordConstraint('departure-s', systems);
+        this._setCoordConstraint('destination-s', systems);
     }
 
     // ------------------------------------------------------------------
@@ -518,7 +519,7 @@ class FlightOrchestrator {
 
     /** Sweep galaxies, systems and planets for arrival times within tolerance. */
     _searchSavePoints(ctx, startDT) {
-        const { params, ships, counts, minSpeed, departure, target, tolerance, legs, startAt } = ctx;
+        const { params, departure } = ctx;
         const coordAxes = [
             { limit: params.numberOfGalaxies, table: 'savepoints-galaxies', fmt: (v) => `${v}:xxx:xx`, circular: params.circularGalaxies },
             { limit: params.numberOfSystems, table: 'savepoints-systems', fmt: (v) => `${departure[0]}:${v}:xx`, circular: params.circularSystems },
@@ -1646,15 +1647,9 @@ class FlightOrchestrator {
                 el._constrains = { min: 0, max: Infinity, def: 0, allowFloat: true, allowNegative: false };
             }
         });
-        const coord = (id, max) => {
-            const el = document.getElementById(id);
-            if (el) {
-                el._constrains = { min: 1, def: 0, max };
-            }
-        };
-        coord('departure-g', 12); coord('destination-g', 12);
-        coord('departure-s', 550); coord('destination-s', 550);
-        coord('departure-p', 16); coord('destination-p', 16);
+        this._setCoordConstraint('departure-g', 12); this._setCoordConstraint('destination-g', 12);
+        this._setCoordConstraint('departure-s', 550); this._setCoordConstraint('destination-s', 550);
+        this._setCoordConstraint('departure-p', 16); this._setCoordConstraint('destination-p', 16);
     }
 
     _bindControls() {
@@ -1962,7 +1957,7 @@ function getFlightTimeStr(seconds) {
 
 /** Strip any HTML tags from a user-entered universe/fleet name. */
 function stripHTMLTags(input) {
-    return input.replace(/(<([^>]+)>)/gi, '');
+    return input.replace(/<[^>]+>/g, '');
 }
 
 // Maps OGame shipyard numeric IDs to the ship count input ids. Shared by the SR
