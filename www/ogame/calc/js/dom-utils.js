@@ -614,9 +614,8 @@ const attachInputMask = (input, format) => {
 
   /** Handle a pasted/typed/composed insertion of new text into the field. */
   const handleInsertion = (type, event, value, start, end) => {
-    const text = type === 'insertFromPaste'
-      ? (event.dataTransfer ? event.dataTransfer.getData('text') : '')
-      : (event.data || '');
+    const pastedText = event.dataTransfer ? event.dataTransfer.getData('text') : '';
+    const text = type === 'insertFromPaste' ? pastedText : (event.data || '');
     const digits = text.replace(/\D/g, '');
     if (digits === '') {
       return;
