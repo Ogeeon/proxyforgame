@@ -350,7 +350,7 @@ class FlightOrchestrator {
         prm.recallStartDT = startValid ? parseDate(startText, this.opts.datetimeFormat) : 0;
 
         const fullSeconds = this._legSeconds(this.collector.text('recall-full-flight'));
-        prm.recallFullFlight = fullSeconds > 0 ? fullSeconds : 0;
+        prm.recallFullFlight = Math.max(fullSeconds, 0);
         prm.recallMode = getChecked('#recall-mode-1') ? 1 : 0;
 
         const ready = prm.recallStartDT > 0 && prm.recallFullFlight > 0;
