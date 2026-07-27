@@ -6,14 +6,14 @@
  * @param sepCode код символа, выступающего десятичным разделителем
  */
 function getCorrectedValue (s, allowNeg, sepCode) {
-	var sxx = "";
+	let sxx = "";
 	s += "";
-	var sx = s.toUpperCase ();
-	var firstDigit = true;
-	var firstSeparator = true;
-	var signFound = false;
-	var nextCharCode = 0;
-	for (var i = 0; i < sx.length; i++) {
+	const sx = s.toUpperCase ();
+	let firstDigit = true;
+	let firstSeparator = true;
+	let signFound = false;
+	let nextCharCode = 0;
+	for (let i = 0; i < sx.length; i++) {
 		nextCharCode = (i === sx.length-1) ? 0 : sx.charCodeAt(i+1);
 		if (sx.charCodeAt (i) >= 49 && sx.charCodeAt (i) <= 57) {
 			sxx += sx.charAt (i);
@@ -41,11 +41,11 @@ function getCorrectedValue (s, allowNeg, sepCode) {
  * @param event Данные о событии. Поле event.data может содержать имя функции, которую нужно вызвать по завершению проверки.
  */
 function validateInputNumber (event) {
-	var input = event.currentTarget;
-	var allowNeg = getConstraint(input, 'allowNegative', false);
-	var decimalSeparator = getOptionValue('decimalSeparator', '.');
+	const input = event.currentTarget;
+	const allowNeg = getConstraint(input, 'allowNegative', false);
+	const decimalSeparator = getOptionValue('decimalSeparator', '.');
 	// Если в поле можно вводить значения с плавающей точкой, то код десятичного разделителя берём из настроек, иначе примем его равным -1, чтобы посимвольное сравнение не приняло его за допустимый символ.
-	var sepCode = getConstraint(input, 'allowFloat', false) ? decimalSeparator.charCodeAt(0) : -1;
+	const sepCode = getConstraint(input, 'allowFloat', false) ? decimalSeparator.charCodeAt(0) : -1;
 	if (input.value.charAt(0) === decimalSeparator) {
 		input.value = '0' + input.value;
 	}
@@ -70,26 +70,26 @@ function validateInputNumber (event) {
  */
 function validateInputNumberOnBlur (event) {
 	validateInputNumber(event);
-	var needRecalc = false;
-	var input = event.currentTarget;
+	let needRecalc = false;
+	const input = event.currentTarget;
 	if (input.value == '-') {
 		input.value = '0';
 		needRecalc = true;
 	}
-	var decimalSeparator = getOptionValue('decimalSeparator', '.');
+	const decimalSeparator = getOptionValue('decimalSeparator', '.');
 	if (input.value.charAt(input.value.length - 1) == decimalSeparator) {
 		input.value += '0';
 		needRecalc = true;
 	}
-	var value = input.value.replace(decimalSeparator, '.');
+	let value = input.value.replace(decimalSeparator, '.');
 	value = Number.parseFloat(value);
-	var minConstr = getConstraint(input, 'min', null);
+	const minConstr = getConstraint(input, 'min', null);
 	if (minConstr != null && value < minConstr) {
 		// Если известны div-ы и текст для сообщения об ошибке, выведем туда это сообщение, а потом исправим значение
 		if (getOptionValue('warnindDivId', null) != null && getOptionValue('msgMinConstraintViolated', null) != null) {
 			// В атрибуте alt ожидаем увидеть локализованное название поля. Если его там нет, то в сообщении об ошибке указанаия на поле не будет.
-			var fieldTitle = input.alt;
-			var fieldHint = '';
+			const fieldTitle = input.alt;
+			let fieldHint = '';
 			if (fieldTitle != '' && (getOptionValue('fieldHint', null) != null))
 				fieldHint = getOptionValue('fieldHint', null).format(fieldTitle);
 			$('#'+options.warnindMsgDivId).text(options.msgMinConstraintViolated.format(fieldHint, this.value, minConstr));
@@ -103,12 +103,12 @@ function validateInputNumberOnBlur (event) {
 		input.value = (minConstr+'').replace('.', decimalSeparator);
 		needRecalc = true;
 	}
-	var maxConstr = getConstraint(input, 'max', null);
+	const maxConstr = getConstraint(input, 'max', null);
 	if (maxConstr != null && value > maxConstr) {
 		// Если известны div-ы и текст для сообщения об ошибке, выведем туда это сообщение, а потом исправим значение
 		if (getOptionValue('warnindDivId', null) != null && getOptionValue('msgMaxConstraintViolated', null) != null) {
-			var fieldTitle = input.alt;
-			var fieldHint = '';
+			const fieldTitle = input.alt;
+			let fieldHint = '';
 			if (fieldTitle != '' && (getOptionValue('fieldHint', null) != null))
 				fieldHint = getOptionValue('fieldHint', null).format(fieldTitle);
 			$('#'+options.warnindMsgDivId).text(options.msgMaxConstraintViolated.format(fieldHint, this.value, maxConstr));
@@ -144,7 +144,7 @@ function validateNumber(num, min, max, def) {
 function numToOGame(n) {
 	n = dropFraction(n, 3);
 	n += '';
-	var rgx = /(\d+)(\d{3})/;
+	const rgx = /(\d+)(\d{3})/;
 	while (rgx.test(n)) {
 		n = n.replace(rgx, '$1' + '.' + '$2');
 	}
@@ -170,7 +170,7 @@ function clampNumber(n, min, max) {
  * Возвращает div со списком элементов, принадлежащих переданному.
  */
 function debugElement(el) {
-	var dbg = $('<div></div>');
+	const dbg = $('<div></div>');
 	$.each(el, function(index, value) {
 		dbg.append($('<div></div>').append($('<span></span>').css('color', 'blue').text(index)).append(': ' + value));
 	});
@@ -217,8 +217,8 @@ function getInputNumber(input) {
  * Заменяет в строке вхождения вида {n} на элементы массива аргументов функции.
  */
 String.prototype.format = function(){
-    var pattern = /\{\d+\}/g;
-    var args = arguments;
+    const pattern = /\{\d+\}/g;
+    const args = arguments;
     return this.replace(pattern, function(capture){ return args[capture.match(/\d+/)]; });
 };
 
@@ -268,8 +268,8 @@ function getConstraint(element, constr, def) {
 function timespanToShortenedString(seconds, w, d, h, m, s, minimize) {
 	if (seconds == 0)
 		return '0'+s;
-	var timeStr = '';
-	var haveWeeks = false, haveDays = false;
+	let timeStr = '';
+	let haveWeeks = false, haveDays = false;
 	if (seconds >= 604800) {
 		timeStr += dropFraction(Math.floor(seconds / 604800), 3);
 		timeStr += w+' ';
@@ -312,7 +312,7 @@ function timespanToShortenedString(seconds, w, d, h, m, s, minimize) {
 }
 
 function numberToShortenedString(number, suffixes) {
-	var value = 0, suff = '';
+	let value = 0, suff = '';
 	value = number;
 	if (number >= 1000000000) {
 		value = 0.001 * Math.floor(value / 1000000.0);
@@ -326,13 +326,13 @@ function numberToShortenedString(number, suffixes) {
 }
 
 function dropFraction(number, positions) {
-	var value = number;
-	var parts = (number+'').split(/\./);
+	let value = number;
+	const parts = (number+'').split(/\./);
 	if (parts.length > 1 && parts[1].length > positions) {
-		var frac = parts[1].substr(0, positions);
+		const frac = parts[1].substr(0, positions);
 		value = parts[0] + '.' + frac;
 		if (parts[1].indexOf('e') > 0){
-			var fracParts = parts[1].split(/e/);
+			const fracParts = parts[1].split(/e/);
 			value += 'e'+fracParts[1];
 		}
 	}
@@ -348,10 +348,10 @@ function dropFraction(number, positions) {
  * @returns Изменённая строка
  */
 function strPad(input, pad_length, pad_string, pad_type) {
-	var half = '', pad_to_go;
+	let half = '', pad_to_go;
 	input += '';
-	var str_pad_repeater = function(s, len){
-			var collect = '', i;
+	const str_pad_repeater = function(s, len){
+			let collect = '', i;
 
 			while(collect.length < len) collect += s;
 			collect = collect.substr(0,len);
@@ -373,7 +373,7 @@ function strPad(input, pad_length, pad_string, pad_type) {
 }
 
 function dayOfMonth(day, month, year) {
-	var days = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+	const days = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
 	if (month < 1 || month > 12)
 		return false;
 	const isLeap = (year % 400 === 0) || (year % 4 === 0 && year % 100 !== 0);
@@ -396,7 +396,7 @@ function parseDate(str, template) {
 	// Метод inputmask('unmaskedvalue') возвращает содержимое то в виде "ddmmyyyyhhmmss", то "dd.mm.yyyy hh:mm:ss". Регекспы надо использовать соответствующие
 	const rgx1 = /^(\d{2})(\d{2})(\d{4})(\d{2})(\d{2})(\d{2})$/;
 	const rgx2 = /^(\d{2})\.(\d{2})\.(\d{4})\s(\d{2}):(\d{2}):(\d{2})$/;
-	var pts;
+	let pts;
 	if (str.search(/\./)>0) {
 		pts = str.match(rgx2);
 	}
@@ -409,7 +409,7 @@ function parseDate(str, template) {
 	const h = Number.parseInt(pts[4], 10), m = Number.parseInt(pts[5], 10), s = Number.parseInt(pts[6], 10);
 	if (h > 23 || m > 59 || s > 59)
 		return 0;
-	var t;
+	let t;
 	// Распарсим дату/время, расположив элементы на нужных позициях. Если сочетание день+месяц неадекватное, считаем, что дата не распарсилась.
 	if (template == 'm.d.y H:s:s') {
 		t = Date.parse(pts[1] + "/" + pts[2] + "/" + pts[3] + " " + pts[4] + ":" + pts[5]  + ":" + pts[6]);
@@ -435,14 +435,14 @@ function getDateStr(time, template) {
 		return '';
 	// Поскольку у нас в inputmask используются только два определения даты - 'm.d.y H:s:s' и 'd.m.y H:s:s',
 	// достаточно сравнить переданный шаблон с эталоном и определиться, как формировать дату
-	var date = new Date();
+	const date = new Date();
 	date.setTime(time);
-	var year = date.getFullYear();
-	var month = strPad(date.getMonth() + 1, 2, '0', 'STR_PAD_LEFT');
-	var day = strPad(date.getDate(), 2, '0', 'STR_PAD_LEFT');
-	var hours = strPad(date.getHours(), 2, '0', 'STR_PAD_LEFT');
-	var minutes = strPad(date.getMinutes(), 2, '0', 'STR_PAD_LEFT');
-	var seconds = strPad(date.getSeconds(), 2, '0', 'STR_PAD_LEFT');
+	const year = date.getFullYear();
+	const month = strPad(date.getMonth() + 1, 2, '0', 'STR_PAD_LEFT');
+	const day = strPad(date.getDate(), 2, '0', 'STR_PAD_LEFT');
+	const hours = strPad(date.getHours(), 2, '0', 'STR_PAD_LEFT');
+	const minutes = strPad(date.getMinutes(), 2, '0', 'STR_PAD_LEFT');
+	const seconds = strPad(date.getSeconds(), 2, '0', 'STR_PAD_LEFT');
 	if (template == 'm.d.y H:s:s')
 		return month+'.'+day+'.'+year+' '+hours+':'+minutes+':'+seconds;
 	else
@@ -455,11 +455,11 @@ function getDateStr(time, template) {
  * @returns Строковое представление времени по формату H:s 
  */
 function getTimeStr(time) {
-	var date = new Date();
+	const date = new Date();
 	date.setTime(0);
 	date.setSeconds(time, 0);
-	var hours = strPad(date.getUTCHours(), 2, '0', 'STR_PAD_LEFT');
-	var minutes = strPad(date.getUTCMinutes(), 2, '0', 'STR_PAD_LEFT');
+	const hours = strPad(date.getUTCHours(), 2, '0', 'STR_PAD_LEFT');
+	const minutes = strPad(date.getUTCMinutes(), 2, '0', 'STR_PAD_LEFT');
 	return hours+':'+minutes;
 }
 
@@ -478,7 +478,7 @@ function supports_html5_storage() {
  * @param data - объект, свойства (поля) которого требуется сохранить в куку
  */
 function saveToCookie(name, data) {
-	var saveStr = 'key-value;true,';
+	let saveStr = 'key-value;true,';
 	Object.keys(data).forEach(function(key) {
 			if (typeof data[key] === 'function') {
 				return;
@@ -489,11 +489,11 @@ function saveToCookie(name, data) {
 				return;
 			}
 			if (Array.isArray(data[key])) {
-				var arr = data[key];
-				for (var i = 0; i < arr.length; i++) {
+				const arr = data[key];
+				for (let i = 0; i < arr.length; i++) {
 					if (Array.isArray(arr[i])) {
-						var row = arr[i];
-						for (var j = 0; j < row.length; j++) {
+						const row = arr[i];
+						for (let j = 0; j < row.length; j++) {
 							saveStr += key+'|'+i+'|'+j+';'+row[j]+',';
 						}
 					}
@@ -535,7 +535,7 @@ function saveToCookie(name, data) {
  * @param params объект, свойства (поля) которого требуется загрузить из куки
  */
 function loadFromCookie(name, params) {
-	var data;
+	let data;
 	data = loadFromStorage(name);
 	if (data === null) {
 		// Fallback to reading cookie if localStorage is empty
@@ -550,11 +550,11 @@ function loadFromCookie(name, params) {
 	}
 	if (!data || data.indexOf('key-value') == -1)
 		return;
-	var strings = data.split(',');
+	const strings = data.split(',');
 	strings.forEach(function(value, key) {
-			var parts = value.split(';');
+			const parts = value.split(';');
 			if (parts[0].indexOf('|') > 0) {
-				var arrparts = parts[0].split('|');
+				const arrparts = parts[0].split('|');
 				if (!arrparts[0] in params)
 					return;
 				if (arrparts.length == 2) {

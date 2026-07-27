@@ -14,7 +14,7 @@ function getText(e) {
 	if ((e.ctrlKey) && ((e.key === 'Enter')||(e.keyCode==10)||(e.keyCode==13))) {
 		if(navigator.appName == 'Microsoft Internet Explorer') {
 			if (document.selection.createRange()) {
-				var range = document.selection.createRange();
+				const range = document.selection.createRange();
 				mis = range.text;
 				showReportWindow(mis);
 			}
@@ -30,14 +30,14 @@ function getText(e) {
 			}
 		}
 		return true;
-	} 
+	}
 	return true;
 }
 
 function findSelection() { 
 	if(navigator.appName == 'Microsoft Internet Explorer') {
 		if (document.selection.createRange()) {
-			var range = document.selection.createRange();
+			const range = document.selection.createRange();
 			mis = range.text;
 			showReportWindow(mis);
 		}
@@ -55,8 +55,8 @@ function findSelection() {
 }
 
 function showSendDiv(dialog, id) {
-	var ids = ['data', 'progress', 'err-0', 'err-1', 'err-2', 'err-3', 'err-4', 'err-5', 'err-6', 'err-7'];
-	for (var i = 0; i < ids.length; i++) {
+	const ids = ['data', 'progress', 'err-0', 'err-1', 'err-2', 'err-3', 'err-4', 'err-5', 'err-6', 'err-7'];
+	for (let i = 0; i < ids.length; i++) {
 		if (id == ids[i])
 			$('#'+dialog+'-'+ids[i]).css('display', 'block');
 		else
@@ -167,14 +167,14 @@ function requestAndShowChangelog(fromChange) {
 }
 
 function clearChangelogTable() {
-	var tbl = $('#changelog-tbl')[0];
-	for (var i = tbl.rows.length-1; i > 0; i--) {
+	const tbl = $('#changelog-tbl')[0];
+	for (let i = tbl.rows.length-1; i > 0; i--) {
 		$(tbl.rows[i]).remove();
 	}
 }
 
 function fillChangelogTable(changes) {
-	for (var chng = 0; chng < changes.length; chng++) {
+	for (let chng = 0; chng < changes.length; chng++) {
 		$('#changelog-tbl').append('<tr class='+((chng % 2) === 1 ? 'odd' : 'even')+'><td width="20%" align="center">'+changes[chng].ts+'</td><td>'+changes[chng].description+'</td></tr>');
 	}	
 }

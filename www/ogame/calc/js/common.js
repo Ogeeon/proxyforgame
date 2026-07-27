@@ -62,15 +62,15 @@ function getProductionRate(techID, techLevel, energyTechLevel, plasmaTechLevel, 
  */
 function getProductionRateSplit(techID, techLevel, energyTechLevel, plasmaTechLevel, maxTemp, pos, universeSpeedFactor, geologist, engineer, productionFactor, powerFactor, boosterType, allOfficers, playerClass, isTrader) {
 	// Инженер и геолог увеличивают производство на 10%. Если есть все 5 офицеров, к производству ресурсов и энергии добавляется ещё 2%.
-	var geologistFactor = geologist === true ? 0.1 : 0;
-	var allStaffFactor = allOfficers === true ? 0.02 : 0;
-	var engineerFactor = (engineer === true) ? 0.1 : 0;
-	var boostFactor = boosterType * 0.1;
-	var classFactor = playerClass === 0 ? 0.25 : 0;
+	const geologistFactor = geologist === true ? 0.1 : 0;
+	const allStaffFactor = allOfficers === true ? 0.02 : 0;
+	const engineerFactor = (engineer === true) ? 0.1 : 0;
+	const boostFactor = boosterType * 0.1;
+	const classFactor = playerClass === 0 ? 0.25 : 0;
 	let allianceClassFactor = isTrader ? 0.05 : 0;
-	var positionFactor = 1;
-	var basePR;
-	var rows = [0, 0, 0, 0, 0, 0, 0, 0, 0]; // нат., шахта, геолог, все офицеры, плазма, ускоритель, класс, класс альянса
+	let positionFactor = 1;
+	let basePR;
+	const rows = [0, 0, 0, 0, 0, 0, 0, 0, 0]; // нат., шахта, геолог, все офицеры, плазма, ускоритель, класс, класс альянса
 	switch (techID*1) {
 		case 1:
 			switch (pos*1) {
@@ -155,7 +155,7 @@ function getProductionRateSplit(techID, techLevel, energyTechLevel, plasmaTechLe
 function getHourlyConsumption(techID, techLevel, universeSpeedFactor, powerFactor) {
 	if (techLevel < 1)
 		return 0;
-	var consump;
+	let consump;
 	switch (techID*1) {
 		case 1: // рудник металла. потребляет энергию
 		case 2: // рудник кристалла. потребляет энергию
@@ -197,10 +197,10 @@ function getBuildEnergyCost_C(techID, techLevel, techData) {
 	// Технологии "Терраформер", "Космический док" и "Гравитационная технология" - особенные. Они требуют энергии для изучения/постройки.
 	if (techLevel < 1)
 		return 0;
-	var data = techData[techID];
+	const data = techData[techID];
 	if (data === undefined)
 		return [0, 0, 0];
-	var buildCost = 0;
+	let buildCost = 0;
 	switch (techID*1) {
 		case 33:
 			buildCost = 1000 * Math.pow(data[3], techLevel - 1);
@@ -226,7 +226,7 @@ function getBuildEnergyCost_C(techID, techLevel, techData) {
  * @returns Стоимость сноса постройки
  */
 function calcDeconstrCost(techID, techLevel, techData, ionTechLevel) {
-	var cost = [0, 0, 0];
+	const cost = [0, 0, 0];
 	if (techLevel < 0) {
 		return cost;
 	}
@@ -237,8 +237,8 @@ function calcDeconstrCost(techID, techLevel, techData, ionTechLevel) {
 	// https://github.com/jstar88/Ogame-algorithms/blob/master/Cost.php
 	// http://calc.antigame.de/
 
-	var data = techData[techID];
-	for (var i = 0; i < 3; i++)
+	const data = techData[techID];
+	for (let i = 0; i < 3; i++)
 		cost[i] = Math.floor(Math.floor(data[i] * Math.pow(data[3], techLevel - 1)) * (1 - 0.04 * ionTechLevel));
 	return cost;
 }
@@ -253,19 +253,19 @@ function calcDeconstrCost(techID, techLevel, techData, ionTechLevel) {
 function calcBuildCost_C(techID, techLevel, techData) {
 	if (techLevel < 1)
 		return [0, 0, 0];
-	var data = techData[techID];
+	const data = techData[techID];
 	if (data === undefined)
 		return [0, 0, 0];
-	var cost = [0, 0, 0];
-	var price = 0;
+	const cost = [0, 0, 0];
+	let price = 0;
 	// В редизайне астрофизика дорожает с коэффициентом 1.75, и стоимость округляется до сотен
 	if (techID == 124) {
-		for (var i = 0; i < 3; i++) {
+		for (let i = 0; i < 3; i++) {
 			price = data[i] * Math.pow(1.75, (techLevel - 1));
 			cost[i] = 100 * Math.round(0.01 * price);
 		}
 	} else {
-		for (var i = 0; i < 3; i++)
+		for (let i = 0; i < 3; i++)
 			cost[i] = Math.floor(data[i] * Math.pow(data[3], (techLevel - 1)));
 	}
 	return cost;
@@ -333,20 +333,20 @@ function getBuildCost_C(techID, techLevelFrom, techLevelTo, techData, ionTechLev
 function getBuildTime_C(techID, techLevelFrom, techLevelTo, techData, robotsLevel, nanitesLevel, researchLabLevel, technocratFactor, shipyardLevel, uniSpeed, techReqs) {
 	if (techLevelFrom < 0)
 		return 0;
-	var data = techData[techID];
+	const data = techData[techID];
 	if (data === undefined)
 		return 0;
 	if (techLevelFrom >= techLevelTo && techID > 100)
 		return 0;
-	var timeSpan = 0;
-	var reduction = 1;
+	let timeSpan = 0;
+	let reduction = 1;
 	// Узнаем стоимость постройки - она участвует в формулах расчёта времени строительства
-	var cost = [0, 0, 0];
+	let cost = [0, 0, 0];
 	// Техи с ID до 100 - это здания. Скорость их строительства зависит от наличия и уровня фабрик роботов и нанитов
 	if (techID <= 100) {
 		if (techLevelFrom < techLevelTo) {
-			var curr = 1*techLevelFrom;
-			for (var next = 1*techLevelFrom + 1; next <= techLevelTo; next++) {
+			let curr = 1*techLevelFrom;
+			for (let next = 1*techLevelFrom + 1; next <= techLevelTo; next++) {
 				cost = getBuildCost_C(techID, curr, next, techData);
 				// Время постройки всех зданий, кроме Фабрики нанитов, Лунной базы, Фаланги и Ворот, снижается (вплоть до 8го уровня)
 				reduction = 1;
@@ -360,8 +360,8 @@ function getBuildTime_C(techID, techLevelFrom, techLevelTo, techData, robotsLeve
 			// Терраформер и лунную базу сносить нельзя
 			if (techID == 33 || techID == 41)
 				return 0;
-			var curr = 1*techLevelFrom;
-			for (var next = 1*techLevelFrom - 1; next >= techLevelTo; next--) {
+			let curr = 1*techLevelFrom;
+			for (let next = 1*techLevelFrom - 1; next >= techLevelTo; next--) {
 				cost = getBuildCost_C(techID, curr, next, techData);
 				reduction = 1;
 				if (techID != 15 && techID != 41 && techID != 42 && techID != 43) 
@@ -447,7 +447,7 @@ function getHalvingCost(techID, timeSpan) {
  * @returns Стоимость сноса постройки
  */
 function calcDeconstrCostLF(techID, techLevel, techData, ionTechLevel) {
-	var cost = [0, 0, 0];
+	const cost = [0, 0, 0];
 	if (techLevel < 0) {
 		return cost;
 	}
@@ -455,8 +455,8 @@ function calcDeconstrCostLF(techID, techLevel, techData, ionTechLevel) {
 	if (Number(techID) % 1000 > 100) {
 		return cost;
 	}
-	var data = techData[techID];
-	for (var i = 0; i < 3; i++)
+	const data = techData[techID];
+	for (let i = 0; i < 3; i++)
 		cost[i] = Math.floor(Math.floor(data[i] * techLevel * Math.pow(data[5 + i], techLevel - 1)) * (1 - 0.04 * ionTechLevel));
 	return cost;
 }
@@ -472,12 +472,12 @@ function calcDeconstrCostLF(techID, techLevel, techData, ionTechLevel) {
 function calcBuildCostLF(techID, techLevel, techData, costRdc) {
 	if (techLevel < 1)
 		return [0, 0, 0];
-	var data = techData[techID];
+	const data = techData[techID];
 	if (data === undefined)
 		return [0, 0, 0];
-	var cost = [0, 0, 0];
+	const cost = [0, 0, 0];
 	costRdc = Math.min(0.99, costRdc);
-	for (var i = 0; i < 3; i++)
+	for (let i = 0; i < 3; i++)
 		cost[i] = Math.floor((1 - costRdc) * Math.floor(data[i] * techLevel * Math.pow(data[5 + i], (techLevel - 1))));
 	return cost;
 }
@@ -541,20 +541,20 @@ function getBuildCostLF(techID, techLevelFrom, techLevelTo, techData, ionTechLev
 function getBuildTimeLF(techID, techLevelFrom, techLevelTo, techData, robotsLevel, nanitesLevel, uniSpeed, rsrTimeRdc, megalithRdc=0) {
 	if (techLevelFrom < 0)
 		return 0;
-	var data = techData[techID];
+	const data = techData[techID];
 	if (data === undefined)
 		return 0;
 	if (techLevelFrom >= techLevelTo && Number(techID) % 1000 > 100)
 		return 0;
-	var timeSpan = 0;
+	let timeSpan = 0;
 	// Техи с ID до 100 - это здания. Скорость их строительства зависит от наличия и уровня фабрик роботов и нанитов
 	if (Number(techID) % 1000 <= 100) {
 		if (techLevelFrom < techLevelTo) {
-			for (var next = Number(techLevelFrom) + 1; next <= Number(techLevelTo); next++) {
+			for (let next = Number(techLevelFrom) + 1; next <= Number(techLevelTo); next++) {
 				timeSpan += Math.floor((next * data[4] * Math.pow(data[9], next)) / ((robotsLevel + 1.0) * Math.pow(2.0, nanitesLevel)));
 			}
 		} else {
-			for (var next = Number(techLevelFrom) - 1; next >= Math.max(Number(techLevelTo), 0); next--) {
+			for (let next = Number(techLevelFrom) - 1; next >= Math.max(Number(techLevelTo), 0); next--) {
 				if (next == 0) {
 					timeSpan += Math.floor((data[4] * Math.pow(data[9], 1)) / ((robotsLevel + 1.0) * Math.pow(2.0, nanitesLevel)));
 				} else {
@@ -567,7 +567,7 @@ function getBuildTimeLF(techID, techLevelFrom, techLevelTo, techData, robotsLeve
 	} else {
 		// Техи с ID больше 100 - это технологии. Скорость их исследования зависит от уровня исследовательской лаборатории и наличия технократа
 		if (techLevelFrom < techLevelTo) {
-			for (var next = Number(techLevelFrom) + 1; next <= Number(techLevelTo); next++) {
+			for (let next = Number(techLevelFrom) + 1; next <= Number(techLevelTo); next++) {
 				let duration = Math.floor(next * data[4] * Math.pow(data[9], next));
 				duration = Math.floor(duration * (1 - 0.01 * rsrTimeRdc));
 				timeSpan += Math.floor(duration / uniSpeed);
@@ -594,7 +594,7 @@ function getBuildTimeLF(techID, techLevelFrom, techLevelTo, techData, robotsLeve
 function getBuildEnergyCostLF(techID, techLevel, techData, ionTechLevel, bldCostRdc=0) {
 	if (techLevel < 1)
 		return 0;
-	var data = techData[techID];
+	const data = techData[techID];
 	if (data === undefined)
 		return 0;
 	buildCost = Math.floor(Math.floor(data[3] * techLevel * Math.pow(data[8], techLevel)) * (1 - 0.04 * ionTechLevel));
