@@ -65,7 +65,6 @@ function formatDisplayName(calcName) {
  */
 function generateTestTemplate(calcInfo) {
   const displayName = formatDisplayName(calcInfo.name);
-  const translationKey = calcInfo.translationKey;
 
   return `import { test, expect } from '@playwright/test';
 
@@ -138,7 +137,8 @@ function main() {
   // Check if test already exists
   if (testFileExists(calcName)) {
     console.error(colorize(`Error: Test file '${calcName}.spec.js' already exists!`, colors.yellow));
-    console.error(colorize(`Location: ${path.join(TESTS_DIR, `${calcName}.spec.js`)}`, colors.gray));
+    const existingTestPath = path.join(TESTS_DIR, `${calcName}.spec.js`);
+    console.error(colorize(`Location: ${existingTestPath}`, colors.gray));
     process.exit(1);
   }
 
@@ -169,7 +169,8 @@ function main() {
   console.log(`  1. Review the generated test file`);
   console.log(`  2. Replace placeholder tests with actual test scenarios`);
   console.log(`  3. Run tests: ${colorize('npm test', colors.blue)}`);
-  console.log(`  4. Run specific test: ${colorize(`npx playwright test ${calcName}`, colors.blue)}`);
+  const runSpecificTestCmd = `npx playwright test ${calcName}`;
+  console.log(`  4. Run specific test: ${colorize(runSpecificTestCmd, colors.blue)}`);
 
   console.log('\n' + colorize('──────────────────────────────────────────────────────────', colors.gray));
 }

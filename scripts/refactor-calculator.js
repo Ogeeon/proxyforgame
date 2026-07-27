@@ -179,16 +179,22 @@ function printAnalysisReport(calcName, analysis, modules) {
   if (analysis.suggestions.length > 0) {
     console.log(`\n${colorize('Suggestions:', colors.yellow)}`);
     analysis.suggestions.forEach((suggestion, index) => {
-      const priorityIcon = suggestion.priority === 'high' ? colorize('⚠', colors.red) :
-                           suggestion.priority === 'medium' ? colorize('○', colors.yellow) :
-                           colorize('○', colors.gray);
+      let priorityIcon;
+      if (suggestion.priority === 'high') {
+        priorityIcon = colorize('⚠', colors.red);
+      } else if (suggestion.priority === 'medium') {
+        priorityIcon = colorize('○', colors.yellow);
+      } else {
+        priorityIcon = colorize('○', colors.gray);
+      }
       console.log(`  ${priorityIcon} ${suggestion.message}`);
     });
   }
 
   console.log(`\n${colorize('Recommended Modular Structure:', colors.green)}`);
   modules.forEach((module, index) => {
-    console.log(`\n  ${colorize(`${index + 1}. ${module.name}`, colors.blue)}`);
+    const moduleHeading = `${index + 1}. ${module.name}`;
+    console.log(`\n  ${colorize(moduleHeading, colors.blue)}`);
     console.log(`     Purpose: ${module.purpose}`);
     console.log(`     Est. lines: ~${module.estimatedLines}`);
   });
@@ -523,7 +529,6 @@ function main() {
   }
 
   const calcName = args[0].toLowerCase().replace('.js', '');
-  const analyzeMode = args.includes('--analyze');
   const applyMode = args.includes('--apply');
 
   const jsPath = path.join(JS_DIR, `${calcName}.js`);
@@ -554,9 +559,12 @@ function main() {
 
       console.log(colorize('\n✓ Modularization complete!', colors.green));
       console.log(colorize(`\nNext steps:`, colors.yellow));
-      console.log(`  1. Review the migration guide: ${colorize(`ogame/calc/js/${calcName}-MIGRATION.md`, colors.blue)}`);
-      console.log(`  2. Migrate code from ${colorize(`${calcName}.js`, colors.blue)} to the new modules`);
-      console.log(`  3. Update ${colorize(`${calcName}.tpl`, colors.blue)} to load the new modules`);
+      const migrationGuidePath = `ogame/calc/js/${calcName}-MIGRATION.md`;
+      const originalJsPath = `${calcName}.js`;
+      const tplPath = `${calcName}.tpl`;
+      console.log(`  1. Review the migration guide: ${colorize(migrationGuidePath, colors.blue)}`);
+      console.log(`  2. Migrate code from ${colorize(originalJsPath, colors.blue)} to the new modules`);
+      console.log(`  3. Update ${colorize(tplPath, colors.blue)} to load the new modules`);
       console.log(`  4. Test the calculator`);
     } else {
       console.log(colorize('\n○ Modularization cancelled.', colors.yellow));

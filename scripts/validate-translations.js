@@ -200,7 +200,7 @@ function main() {
   const results = {};
 
   // Validate each locale file
-  for (const { name, fullPath, langCode } of localeFiles) {
+  for (const { fullPath, langCode } of localeFiles) {
     const localeData = loadJsonFile(fullPath);
     if (!localeData) continue;
 

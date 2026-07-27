@@ -229,7 +229,7 @@ function getCompletionStatus(percentage) {
 function buildCompletionResults(sourceData, localeFiles, totalKeys) {
   const results = [];
 
-  for (const { name, fullPath, langCode } of localeFiles) {
+  for (const { fullPath, langCode } of localeFiles) {
     const localeData = loadJsonFile(fullPath);
     if (!localeData) continue;
 
@@ -258,8 +258,13 @@ function buildCompletionResults(sourceData, localeFiles, totalKeys) {
  * Prints one locale's completion summary line
  */
 function printCompletionLine(result, totalKeys) {
-  const percentageColor = Number.parseFloat(result.percentage) === 100 ? colors.green :
-                         Number.parseFloat(result.percentage) > 90 ? colors.yellow : colors.red;
+  const percentageValue = Number.parseFloat(result.percentage);
+  let percentageColor = colors.red;
+  if (percentageValue === 100) {
+    percentageColor = colors.green;
+  } else if (percentageValue > 90) {
+    percentageColor = colors.yellow;
+  }
 
   console.log(
     `${result.statusIcon} ${colorize(result.lang.padEnd(4), result.status)} ` +

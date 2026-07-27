@@ -290,7 +290,6 @@ function addVersioning(filePath, dryRun = false) {
  */
 function main() {
   const args = process.argv.slice(2);
-  const checkMode = args.includes('--check');
   const applyMode = args.includes('--apply');
 
   console.log('\n' + colorize('═════════════════════════════════════════════════════════', colors.cyan));
