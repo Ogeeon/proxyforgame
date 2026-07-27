@@ -98,10 +98,69 @@ function updateParams() {
 	updateAllPlnTab();
 }
 
+// Панелька "Сколько накопится"
+function renderAccumWhat(tab, currMet, currCrys, currDeut, totalHours, production, deutAccum) {
+	if (tab === 'one') {
+		$('#' + tab + 'pln-accumwhat-met').innerHTML = numToOGame(Math.min(options.metStorageCap, Math.round(currMet + totalHours * production[0])));
+		$('#' + tab + 'pln-accumwhat-crys').innerHTML = numToOGame(Math.min(options.crysStorageCap, Math.round(currCrys + totalHours * production[1])));
+		$('#' + tab + 'pln-accumwhat-deut').innerHTML = numToOGame(Math.min(options.deutStorageCap, deutAccum));
+	} else {
+		$('#' + tab + 'pln-accumwhat-met').innerHTML = numToOGame(Math.round(currMet + totalHours * production[0]));
+		$('#' + tab + 'pln-accumwhat-crys').innerHTML = numToOGame(Math.round(currCrys + totalHours * production[1]));
+		$('#' + tab + 'pln-accumwhat-deut').innerHTML = numToOGame(deutAccum);
+	}
+}
+
+// Если что-то превышено, отметим, что надо поморгать максимальным объёмом конкретного хранилища, и сбросим счётчик морганий, чтобы процесс начался снова
+function updateStorageBlinkFlags(currMet, currCrys, totalHours, production, deutAccum, needMet, needCrys, needDeut) {
+	options.storagesToBlink[0] = options.metStorageCap < Math.round(currMet + totalHours * production[0]) || needMet > options.metStorageCap ? 1 : 0;
+	options.storagesToBlink[1] = options.crysStorageCap < Math.round(currCrys + totalHours * production[1]) || needCrys > options.crysStorageCap ? 1 : 0;
+	options.storagesToBlink[2] = options.deutStorageCap < deutAccum || needDeut > options.deutStorageCap ? 1 : 0;
+	if (options.storagesToBlink[0] === 1 || options.storagesToBlink[1] === 1 || options.storagesToBlink[2] === 1) {
+		options.storageBlinkCount = 0;
+		if (!options.storagesBlinking) {
+			options.storagesBlinking = true;
+			blinkMaxStorage(options.storagesToBlink);
+		}
+	}
+}
+
+// вычислим время в часах, за которое накопится требуемое кол-во каждого из ресурсов и возьмём максимум из этих интервалов
+function timeUntilResourcesAccumulate(currMet, currCrys, currDeut, production, needMet, needCrys, needDeut) {
+	let t = 0;
+	if (needMet > currMet) {
+		t = (needMet - currMet) / production[0];
+	}
+	if (needCrys > currCrys) {
+		t = Math.max(t, (needCrys - currCrys) / production[1]);
+	}
+	if (needDeut > currDeut) {
+		if (production[2] <= 0) { // есть два варианта, почему производство отрицательное или нулевое:
+			t = options.prm.oPPP[2][0] === 0 // вообще нет синтезатора
+				? Number.POSITIVE_INFINITY
+				: Number.NEGATIVE_INFINITY; // ...или термояд забирает больше, чем производится
+		} else {
+			t = Math.max(t, (needDeut - currDeut) / production[2]);
+		}
+	}
+	return t;
+}
+
+// Панелька "Когда накопится"
+function renderAccumWhen(tab, t) {
+	const msgEl = $('#' + tab + 'pln-accumwhen-msg');
+	if (!Number.isFinite(t)) {
+		msgEl.innerHTML = t === Number.POSITIVE_INFINITY ? options.resWillNotAccumMsg : options.resWillNotAccumMsg1;
+	} else if (t > 0) {
+		msgEl.innerHTML = options.resReadyInMsg + timespanToShortenedString(t * 3600, options.datetimeW, options.datetimeD, options.datetimeH, options.datetimeM, options.datetimeS, true);
+	} else {
+		msgEl.innerHTML = options.enoughResAlreadyMsg;
+	}
+}
+
 function updateAccumulation(tab, production) {
 	if (tab !== 'one' && tab !== 'all')
 		return;
-	// Панелька "Сколько накопится"
 	let currMet = getInputNumber($('#' + tab + 'pln-curr-met'));
 	let currCrys = getInputNumber($('#' + tab + 'pln-curr-crys'));
 	let currDeut = getInputNumber($('#' + tab + 'pln-curr-deut'));
@@ -114,77 +173,45 @@ function updateAccumulation(tab, production) {
 	if (deutAccum < 0)
 		deutAccum = 0;
 
-	if (tab === 'one') {
-		$('#' + tab + 'pln-accumwhat-met').innerHTML = numToOGame(Math.min(options.metStorageCap, Math.round(currMet + totalHours * production[0])));
-		$('#' + tab + 'pln-accumwhat-crys').innerHTML = numToOGame(Math.min(options.crysStorageCap, Math.round(currCrys + totalHours * production[1])));
-		$('#' + tab + 'pln-accumwhat-deut').innerHTML = numToOGame(Math.min(options.deutStorageCap, deutAccum));
-	} else {
-		$('#' + tab + 'pln-accumwhat-met').innerHTML = numToOGame(Math.round(currMet + totalHours * production[0]));
-		$('#' + tab + 'pln-accumwhat-crys').innerHTML = numToOGame(Math.round(currCrys + totalHours * production[1]));
-		$('#' + tab + 'pln-accumwhat-deut').innerHTML = numToOGame(deutAccum);
-	}
+	renderAccumWhat(tab, currMet, currCrys, currDeut, totalHours, production, deutAccum);
 
-	// Панелька "Когда накопится"
 	let needMet = getInputNumber($('#' + tab + 'pln-accumwhen-met'));
 	let needCrys = getInputNumber($('#' + tab + 'pln-accumwhen-crys'));
 	let needDeut = getInputNumber($('#' + tab + 'pln-accumwhen-deut'));
 
-	// Если что-то превышено, отметим, что надо поморгать максимальным объёмом конкретного хранилища, и сбросим счётчик морганий, чтобы процесс начался снова
-	if (options.metStorageCap < Math.round(currMet + totalHours * production[0]) || needMet > options.metStorageCap) {
-		options.storagesToBlink[0] = 1;
-		options.storageBlinkCount = 0;
-	} else {
-		options.storagesToBlink[0] = 0;
-	}
-	if (options.crysStorageCap < Math.round(currCrys + totalHours * production[1]) || needCrys > options.crysStorageCap) {
-		options.storagesToBlink[1] = 1;
-		options.storageBlinkCount = 0;
-	} else {
-		options.storagesToBlink[1] = 0;
-	}
-	if (options.deutStorageCap < deutAccum || needDeut > options.deutStorageCap) {
-		options.storagesToBlink[2] = 1;
-		options.storageBlinkCount = 0;
-	} else {
-		options.storagesToBlink[2] = 0;
-	}
-	if ((options.storagesToBlink[0] === 1 || options.storagesToBlink[1] === 1 || options.storagesToBlink[2] === 1) && !options.storagesBlinking) {
-		options.storagesBlinking = true;
-		blinkMaxStorage(options.storagesToBlink);
-	}
+	updateStorageBlinkFlags(currMet, currCrys, totalHours, production, deutAccum, needMet, needCrys, needDeut);
 
-	let t = 0;
-	// вычислим время в часах, за которое накопится требуемое кол-во каждого из ресурсов и возьмём максимум из этих интервалов
-	if (needMet > currMet) {
-		t = (needMet - currMet) / production[0];
-	}
-	if (needCrys > currCrys) {
-		t = Math.max(t, (needCrys - currCrys) / production[1]);
-	}
-	if (needDeut > currDeut) {
-		if (production[2] <= 0) { // есть два варианта, почему производство отрицательное или нулевое:
-			if (options.prm.oPPP[2][0] === 0) // вообще нет синтезатора
-				t = Number.POSITIVE_INFINITY
-			else // ...или термояд забирает больше, чем производится
-				t = Number.NEGATIVE_INFINITY;
-		} else {
-			t = Math.max(t, (needDeut - currDeut) / production[2]);
-		}
-	}
+	let t = timeUntilResourcesAccumulate(currMet, currCrys, currDeut, production, needMet, needCrys, needDeut);
+	renderAccumWhen(tab, t);
+}
 
-	if (!Number.isFinite(t)) {
-		if (t === Number.POSITIVE_INFINITY) {
-			$('#' + tab + 'pln-accumwhen-msg').innerHTML = options.resWillNotAccumMsg;
-		} else {
-			$('#' + tab + 'pln-accumwhen-msg').innerHTML = options.resWillNotAccumMsg1;
-		}
-	} else {
-		if (t > 0) {
-			$('#' + tab + 'pln-accumwhen-msg').innerHTML = options.resReadyInMsg + timespanToShortenedString(t * 3600, options.datetimeW, options.datetimeD, options.datetimeH, options.datetimeM, options.datetimeS, true);
-		} else {
-			$('#' + tab + 'pln-accumwhen-msg').innerHTML = options.enoughResAlreadyMsg;
-		}
+// How many units of one fleet/defense item the accumulated production affords
+// over `duration` hours, given its [metal, crystal, deuterium] cost.
+function affordableUnitCount(duration, production, costs) {
+	let minCount = Number.POSITIVE_INFINITY;
+	for (let res = 0; res < 3; res++) {
+		let producedRes = duration * production[res];
+		if (producedRes < 0)
+			producedRes = 0;
+		if (costs[res] > 0)
+			minCount = Math.min(minCount, Math.floor(producedRes / costs[res]));
 	}
+	return minCount;
+}
+
+function renderAffordableCounts(rows, itemCosts, duration, production, column, adjust) {
+	let idx = 0;
+	for (let i in itemCosts) {
+		let minCount = affordableUnitCount(duration, production, itemCosts[i]);
+		if (adjust) minCount = adjust(i, minCount);
+		rows[idx++].children[column].innerHTML = minCount;
+	}
+}
+
+// Куполов больше одного всё равно не построишь
+function capMoonShields(itemId, minCount) {
+	// Индексы свойств объекта - строковые
+	return (itemId === '407' || itemId === '408') ? Math.min(minCount, 1) : minCount;
 }
 
 function updateProduction(tab, production) {
@@ -193,41 +220,112 @@ function updateProduction(tab, production) {
 	let durations = [1, 24, 168];	// продолжительность накопления ресов: час, день, неделя
 	let fleetRows = Array.from($$('#' + tab + '-pln-fleet-prod tr')).slice(1);
 	let defenseRows = Array.from($$('#' + tab + '-pln-defense-prod tr')).slice(1);
-	let minCount;
 	for (let d = 0; d < 3; d++) {
 		let duration = durations[d];
-		let idx = 0;
-		for (let i in options.fleetCosts) {
-			minCount = Number.POSITIVE_INFINITY;
-			for (let res = 0; res < 3; res++) {
-				let producedRes = duration * production[res];
-				if (producedRes < 0)
-					producedRes = 0;
-				if (options.fleetCosts[i][res] > 0)
-					minCount = Math.min(minCount, Math.floor(producedRes / options.fleetCosts[i][res]));
+		renderAffordableCounts(fleetRows, options.fleetCosts, duration, production, d + 1, null);
+		renderAffordableCounts(defenseRows, options.defenseCosts, duration, production, d + 1, capMoonShields);
+	}
+}
+
+// Fills the per-row production/consumption cells (rows 0-15, columns 0-3),
+// with column 3 of rows 1-3 showing the energy a mine draws (used/required).
+function renderOnePlnProductionRows(rows, results, koeff) {
+	for (let row = 0; row < 16; row++) {
+		for (let col = 0; col < 4; col++) {
+			if (row > 0 && row < 4 && col === 3) {
+				let cons = results[row][4];
+				rows[row + 1].children[6].innerHTML = cons > 0
+					? numToOGame(Math.round(koeff * cons)) + '/' + numToOGame(cons)
+					: '';
+				continue;
 			}
-			fleetRows[idx++].children[d + 1].innerHTML = minCount;
-		}
-		idx = 0;
-		for (let i in options.defenseCosts) {
-			minCount = Number.POSITIVE_INFINITY;
-			for (let res = 0; res < 3; res++) {
-				let producedRes = duration * production[res];
-				if (producedRes < 0)
-					producedRes = 0;
-				if (options.defenseCosts[i][res] > 0)
-					minCount = Math.min(minCount, Math.floor(producedRes / options.defenseCosts[i][res]));
-			}
-			// Куполов больше одного всё равно не построишь
-			if (i === '407' || i === '408') // Индексы свойств объекта - строковые
-				minCount = Math.min(minCount, 1);
-			defenseRows[idx++].children[d + 1].innerHTML = minCount;
+			let val = results[row][col] >= 0 ? numToOGame(results[row][col]) : '<span style="color: brown;">' + numToOGame(-1 * results[row][col]) + '</span>';
+			if (results[row][col] === 0)
+				val = '';
+			rows[row + 1].children[col + 3].innerHTML = val;
 		}
 	}
 }
 
+// Выведем данные о текущем производстве и подведем итоги: hourly/daily/weekly
+// totals per resource plus the energy balance, all in the summary rows below
+// the per-building table.
+function renderOnePlnProductionSummary(rows, resultRow, production, totalEnergyProduced, totalEnergyUsed) {
+	for (let i = 1; i < 4; i++) {
+		let lb = '', rb = '', s = 1;
+		if (production[i - 1] < 0) {
+			lb = '<span style="color: brown;">';
+			rb = '</span>';
+			s = -1;
+		}
+		rows[resultRow].children[2 + i].innerHTML = lb + numberToShortenedString(s * production[i - 1], options.unitSuffix) + rb;
+		rows[resultRow + 1].children[2 + i].innerHTML = lb + numberToShortenedString(24 * s * production[i - 1], options.unitSuffix) + rb;
+		rows[resultRow + 2].children[2 + i].innerHTML = lb + numberToShortenedString(7 * 24 * s * production[i - 1], options.unitSuffix) + rb;
+	}
+	let energyLeft = Math.round(totalEnergyProduced - totalEnergyUsed);
+	let spanColor = energyLeft < 0 ? 'brown' : 'inherit';
+	let energyLeftStr = numberToShortenedString(Math.abs(energyLeft), options.unitSuffix);
+	rows[resultRow].children[6].innerHTML = '<span style="color: ' + spanColor + ';">' + energyLeftStr + '</span>';
+	rows[resultRow + 1].children[6].innerHTML = '<span style="color: ' + spanColor + ';">' + energyLeftStr + '</span>';
+	rows[resultRow + 2].children[6].innerHTML = '<span style="color: ' + spanColor + ';">' + energyLeftStr + '</span>';
+}
+
+// One row of the mine amortization table: the cost of the next level (with
+// solar satellites priced in when included), the resulting production
+// increase and its payback time.
+function renderMineUpgradeRow(rows, i, plnData, msuMult, currProd, newProd) {
+	let costs = getBuildCost_C(i, options.prm.oPPP[i - 1][0], options.prm.oPPP[i - 1][0] + 1, options.bldCosts, 0);
+	let totalCost;
+	if (options.prm.inclSats) {
+		let satsCost = getSSCost(i, options.prm.oPPP[i - 1][0], plnData);
+		costs[1] += satsCost[1];
+		costs[2] += satsCost[2];
+		rows[i].children[1].innerHTML = numberToShortenedString(costs[0], options.unitSuffix) + ' ' + options.metal + ', ' +
+			numberToShortenedString(costs[1], options.unitSuffix) + ' ' + options.crystal + ', ' +
+			numberToShortenedString(costs[2], options.unitSuffix) + ' ' + options.deuterium;
+		totalCost = costs[0] + msuMult[1] * costs[1] + msuMult[2] * costs[2];
+	} else {
+		rows[i].children[1].innerHTML = numberToShortenedString(costs[0], options.unitSuffix) + ' ' + options.metal + ', ' +
+			numberToShortenedString(costs[1], options.unitSuffix) + ' ' + options.crystal;
+		totalCost = costs[0] + msuMult[1] * costs[1];
+	}
+	let resMult = msuMult[i - 1] || 1;
+	let increase = newProd[1][i - 1] - currProd[1][i - 1];
+	rows[i].children[2].innerHTML = numberToShortenedString(increase, options.unitSuffix);
+	rows[i].children[3].innerHTML = paybackToString(totalCost, increase * resMult);
+}
+
+// Mine amortization table: for each of metal/crystal/deuterium, the cost of the
+// next level, the resulting production increase and its payback time.
+function renderMinesAmortizationTable(rows, params, plnData, lfEff) {
+	let currProd = calculateProduction(params, plnData, true, lfEff);
+	let paramsCopy = params.map(function (arr) {
+		return arr.slice();
+	});
+	paramsCopy[0][0] = paramsCopy[0][0] + 1; paramsCopy[1][0] = paramsCopy[1][0] + 1; paramsCopy[2][0] = paramsCopy[2][0] + 1;
+	let newProd = calculateProduction(paramsCopy, plnData, true, lfEff);
+	let msuMult = collectResourceMultipliers();
+	options.prm.inclSats = getChecked('#include-SS-y');
+	for (let i = 1; i < 4; i++) {
+		renderMineUpgradeRow(rows, i, plnData, msuMult, currProd, newProd);
+	}
+}
+
+function updateOnePlnStorageCapacities() {
+	options.prm.metStorageLvl = getInputNumber($('#storage-met'));
+	options.metStorageCap = getStorageCapacity(options.prm.metStorageLvl);
+	$('#storage-cap-met').innerHTML = numToOGame(options.metStorageCap);
+
+	options.prm.crysStorageLvl = getInputNumber($('#storage-crys'));
+	options.crysStorageCap = getStorageCapacity(options.prm.crysStorageLvl);
+	$('#storage-cap-crys').innerHTML = numToOGame(options.crysStorageCap);
+
+	options.prm.deutStorageLvl = getInputNumber($('#storage-deut'));
+	options.deutStorageCap = getStorageCapacity(options.prm.deutStorageLvl);
+	$('#storage-cap-deut').innerHTML = numToOGame(options.deutStorageCap);
+}
+
 function updateOnePlnTab() {
-	let i;
 	options.prm.maxPlanetTemp = getInputNumber($('#max-planet-temp'));
 	options.prm.planetPos = getInputNumber($('#planet-pos'));
 	options.prm.energyBoost = $('#energy-boost').value;
@@ -260,97 +358,17 @@ function updateOnePlnTab() {
 	// brown when energy-starved, otherwise inherit the theme body color
 	coeffSpan.style.color = koeff < 1 ? 'brown' : '';
 
-	// Выведем данные о текущем производстве и подведем итоги.
 	// +4 = заголовок + разделитель + строка "Техн. бонус форм жизни" сверх rowsToTechs.
 	let resultRow = options.rowsToTechs.length + 4;
-	let val, cons = 0;
-	for (let row = 0; row < 16; row++) {
-		for (let col = 0; col < 4; col++) {
-			if (row > 0 && row < 4 && col === 3) {
-				cons = results[row][4];
-				if (cons > 0)
-					rows[row + 1].children[6].innerHTML = numToOGame(Math.round(koeff * cons)) + '/' + numToOGame(cons);
-				else
-					rows[row + 1].children[6].innerHTML = '';
-				continue;
-			}
-			val = results[row][col] >= 0 ? numToOGame(results[row][col]) : '<span style="color: brown;">' + numToOGame(-1 * results[row][col]) + '</span>';
-			if (results[row][col] === 0)
-				val = '';
-			rows[row + 1].children[col + 3].innerHTML = val;
-		}
-	}
-
-	let lb, rb, s;
-	for (i = 1; i < 4; i++) {
-		if (production[i - 1] < 0) {
-			lb = '<span style="color: brown;">';
-			rb = '</span>';
-			s = -1;
-		} else {
-			lb = '';
-			rb = '';
-			s = 1;
-		}
-		rows[resultRow].children[2 + i].innerHTML = lb + numberToShortenedString(s * production[i - 1], options.unitSuffix) + rb;
-		rows[resultRow + 1].children[2 + i].innerHTML = lb + numberToShortenedString(24 * s * production[i - 1], options.unitSuffix) + rb;
-		rows[resultRow + 2].children[2 + i].innerHTML = lb + numberToShortenedString(7 * 24 * s * production[i - 1], options.unitSuffix) + rb;
-	}
-	let energyLeft = Math.round(totalEnergyProduced - totalEnergyUsed);
-	let spanColor = energyLeft < 0 ? 'brown' : 'inherit';
-	energyLeft = numberToShortenedString(Math.abs(energyLeft), options.unitSuffix);
-	rows[resultRow].children[6].innerHTML = '<span style="color: ' + spanColor + ';">' + energyLeft + '</span>';
-	rows[resultRow + 1].children[6].innerHTML = '<span style="color: ' + spanColor + ';">' + energyLeft + '</span>';
-	rows[resultRow + 2].children[6].innerHTML = '<span style="color: ' + spanColor + ';">' + energyLeft + '</span>';
+	renderOnePlnProductionRows(rows, results, koeff);
+	renderOnePlnProductionSummary(rows, resultRow, production, totalEnergyProduced, totalEnergyUsed);
 	options.prm.oPPP = params;
 
-	rows = $$('#mines-amort-tbl tr');
-	let currProd = calculateProduction(params, plnData, true, lfEff);
-	let paramsCopy = params.map(function (arr) {
-		return arr.slice();
-	});
-	paramsCopy[0][0] = paramsCopy[0][0] + 1; paramsCopy[1][0] = paramsCopy[1][0] + 1; paramsCopy[2][0] = paramsCopy[2][0] + 1;
-	let newProd = calculateProduction(paramsCopy, plnData, true, lfEff);
-	let increase;
 	let rates = collectExchangeRates();
 	options.prm.rates = rates;
-	let msuMult = collectResourceMultipliers();
-	let totalCost;
-	let satsCost = [];
-	let resMult;
-	options.prm.inclSats = getChecked('#include-SS-y');
-	for (let i = 1; i < 4; i++) {
-		let costs = getBuildCost_C(i, options.prm.oPPP[i - 1][0], options.prm.oPPP[i - 1][0] + 1, options.bldCosts, 0);
-		if (options.prm.inclSats) {
-			satsCost = getSSCost(i, options.prm.oPPP[i - 1][0], plnData);
-			costs[1] += satsCost[1];
-			costs[2] += satsCost[2];
-			rows[i].children[1].innerHTML = numberToShortenedString(costs[0], options.unitSuffix) + ' ' + options.metal + ', ' +
-				numberToShortenedString(costs[1], options.unitSuffix) + ' ' + options.crystal + ', ' +
-				numberToShortenedString(costs[2], options.unitSuffix) + ' ' + options.deuterium;
-			totalCost = costs[0] + msuMult[1] * costs[1] + msuMult[2] * costs[2];
-		} else {
-			rows[i].children[1].innerHTML = numberToShortenedString(costs[0], options.unitSuffix) + ' ' + options.metal + ', ' +
-				numberToShortenedString(costs[1], options.unitSuffix) + ' ' + options.crystal;
-			totalCost = costs[0] + msuMult[1] * costs[1];
-		}
-		resMult = msuMult[i - 1] || 1;
-		increase = newProd[1][i - 1] - currProd[1][i - 1];
-		rows[i].children[2].innerHTML = numberToShortenedString(increase, options.unitSuffix);
-		rows[i].children[3].innerHTML = paybackToString(totalCost, increase * resMult);
-	}
+	renderMinesAmortizationTable($$('#mines-amort-tbl tr'), params, plnData, lfEff);
 
-	options.prm.metStorageLvl = getInputNumber($('#storage-met'));
-	options.metStorageCap = getStorageCapacity(options.prm.metStorageLvl);
-	$('#storage-cap-met').innerHTML = numToOGame(options.metStorageCap);
-
-	options.prm.crysStorageLvl = getInputNumber($('#storage-crys'));
-	options.crysStorageCap = getStorageCapacity(options.prm.crysStorageLvl);
-	$('#storage-cap-crys').innerHTML = numToOGame(options.crysStorageCap);
-
-	options.prm.deutStorageLvl = getInputNumber($('#storage-deut'));
-	options.deutStorageCap = getStorageCapacity(options.prm.deutStorageLvl);
-	$('#storage-cap-deut').innerHTML = numToOGame(options.deutStorageCap);
+	updateOnePlnStorageCapacities();
 
 	updateAccumulation('one', production);
 	updateProduction('one', production);

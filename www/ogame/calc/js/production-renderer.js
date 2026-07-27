@@ -55,57 +55,84 @@ function setOnePlanetProdData() {
 	setVal('#storage-deut', options.prm.deutStorageLvl);
 }
 
-function prepAllPlanetsTable() {
-	let allRows = Array.from($$('#all-planets-prod tr'));
-	// Keep the header (first row) and the footer (2px line, 3 totals rows,
-	// 3px line); drop previously rendered planet rows in between.
-	let footerStart = allRows.length - 5;
+// Dispose Bootstrap tooltips before dropping a row so no orphaned instances or
+// lingering tips are left behind.
+function disposeRowTooltips(row) {
+	row.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(function (el) {
+		const inst = bootstrap.Tooltip.getInstance(el);
+		if (inst) inst.dispose();
+	});
+}
+
+// Keep the header (first row) and the footer (2px line, 3 totals rows, 3px
+// line); drop previously rendered planet rows in between.
+function clearOldPlanetRows(allRows, footerStart) {
 	for (let r = 1; r < footerStart; r++) {
-		// Dispose Bootstrap tooltips before dropping the row so no orphaned
-		// instances or lingering tips are left behind.
-		allRows[r].querySelectorAll('[data-bs-toggle="tooltip"]').forEach(function (el) {
-			const inst = bootstrap.Tooltip.getInstance(el);
-			if (inst) inst.dispose();
-		});
+		disposeRowTooltips(allRows[r]);
 		allRows[r].remove();
 	}
+}
+
+// Planet row: name, temperature/position, one input per building level (plus
+// a zeroed production placeholder for the mines) and the row control buttons.
+function buildPlanetRowHtml(i) {
+	let tr = '<tr class="' + ((i % 2) === 0 ? 'odd' : 'even') + '">';
+	tr += '<td>&nbsp;' + (i + 1) + '&nbsp;</td>';
+	tr += '<td>' + options.prm.aPNames[i] + '</td>';
+	// температура и позиция
+	tr += '<td><input type="text" class="form-control form-control-sm no-mp input-3columns temperature-input centered" value="' + options.prm.aPS[i][0] + '" alt="' + options.maxTempAlt + '"/></td>';
+	tr += '<td><input type="text" class="form-control form-control-sm no-mp input-2columns position-input centered" value="' + options.prm.aPS[i][1] + '" alt="' + options.positionAlt + '"/></td>';
+	for (let j = 1; j < 8; j++) {
+		// заготовка: уровень и нулевое производство
+		let inputClass = 'form-control form-control-sm no-mp input-' + (j < 6 ? '2columns centered' : '4columns centered');
+		tr += '<td class="centered"><input type="text" class="' + inputClass + '" value="' + options.prm.aPS[i][j * 3] + '"/></td>';
+		if (j < 4) {
+			tr += '<td class="centered">0</td>';
+		}
+	}
+	tr += '<td class="centered">0</td>'; // коэффициент - тоже заготовка
+	tr += '<td><div id="control-' + i + '" class="btn-group">';
+	tr += '<button id="control-' + i + '-u" type="button" class="btn btn-outline-secondary btn-sm control-btn control-move-up" data-pln="' + i + '" data-bs-toggle="tooltip" title="' + options.movePlanetUpTitle + '"' + (i === 0 ? ' disabled' : '') + '><i class="bi bi-arrow-up"></i></button>';
+	tr += '<button id="control-' + i + '-w" type="button" class="btn btn-outline-secondary btn-sm control-btn control-move-down" data-pln="' + i + '" data-bs-toggle="tooltip" title="' + options.movePlanetDownTitle + '"' + (i === options.prm.currPlanetsCount - 1 ? ' disabled' : '') + '><i class="bi bi-arrow-down"></i></button>';
+	tr += '<button id="control-' + i + '-e" type="button" class="btn btn-outline-secondary btn-sm control-btn control-edit" data-pln="' + i + '" data-bs-toggle="tooltip" title="' + options.editPlanetTitle + '"><i class="bi bi-pencil"></i></button>';
+	tr += '<button id="control-' + i + '-d" type="button" class="btn btn-outline-secondary btn-sm control-btn control-delete" data-pln="' + i + '" data-bs-toggle="tooltip" title="' + options.deletePlanetTitle + '"><i class="bi bi-x-lg"></i></button>';
+	tr += '</div></td>';
+	tr += '</tr>';
+	return tr;
+}
+
+// Дополнительная информационная строка planet's LEVEL_COLUMNS boosters/factors.
+function buildPlanetInfoRowHtml(i) {
+	let spanType = options.prm.showAddInf ? 'visible-span' : 'hidden-span';
+	let tr = '<tr class="' + ((i % 2) === 0 ? 'odd' : 'even') + '">';
+	tr += '<td></td><td><span class="' + spanType + '">' + options.addtnlRowHeader + '</span></td><td colspan="2"><span class="' + spanType + '"></span></td>';
+	for (let k = 0; k < 10; k++)
+		tr += '<td><span class="' + spanType + '"></span></td>';
+	tr += '<td colspan="2"></td>';
+	tr += '</tr>';
+	return tr;
+}
+
+// Wire validation + recalc on one planet row's freshly created inputs.
+function bindPlanetRowInputs(rows, i) {
+	let newInputs = rows[i * 2 + 1].querySelectorAll('input[type=text]');
+	newInputs.forEach(function (input) {
+		bindNumericInput(input, updateAllPlnTab);
+	});
+	newInputs[0]._constrains = { 'min': -134, 'def': 0, 'allowNegative': true };
+	newInputs[1]._constrains = { 'min': 1, 'max': 16, 'def': 8, 'allowNegative': false };
+}
+
+function prepAllPlanetsTable() {
+	let allRows = Array.from($$('#all-planets-prod tr'));
+	let footerStart = allRows.length - 5;
+	clearOldPlanetRows(allRows, footerStart);
 	let footerFirst = allRows[footerStart];
 
 	let html = '';
 	for (let i = 0; i < options.prm.currPlanetsCount; i++) {
-		let tr = '<tr class="' + ((i % 2) === 0 ? 'odd' : 'even') + '">';
-		tr += '<td>&nbsp;' + (i + 1) + '&nbsp;</td>';
-		tr += '<td>' + options.prm.aPNames[i] + '</td>';
-		// температура и позиция
-		tr += '<td><input type="text" class="form-control form-control-sm no-mp input-3columns temperature-input centered" value="' + options.prm.aPS[i][0] + '" alt="' + options.maxTempAlt + '"/></td>';
-		tr += '<td><input type="text" class="form-control form-control-sm no-mp input-2columns position-input centered" value="' + options.prm.aPS[i][1] + '" alt="' + options.positionAlt + '"/></td>';
-		for (let j = 1; j < 8; j++) {
-			// заготовка: уровень и нулевое производство
-			let inputClass = 'form-control form-control-sm no-mp input-' + (j < 6 ? '2columns centered' : '4columns centered');
-			tr += '<td class="centered"><input type="text" class="' + inputClass + '" value="' + options.prm.aPS[i][j * 3] + '"/></td>';
-			if (j < 4) {
-				tr += '<td class="centered">0</td>';
-			}
-		}
-		tr += '<td class="centered">0</td>'; // коэффициент - тоже заготовка
-		tr += '<td><div id="control-' + i + '" class="btn-group">';
-		tr += '<button id="control-' + i + '-u" type="button" class="btn btn-outline-secondary btn-sm control-btn control-move-up" data-pln="' + i + '" data-bs-toggle="tooltip" title="' + options.movePlanetUpTitle + '"' + (i === 0 ? ' disabled' : '') + '><i class="bi bi-arrow-up"></i></button>';
-		tr += '<button id="control-' + i + '-w" type="button" class="btn btn-outline-secondary btn-sm control-btn control-move-down" data-pln="' + i + '" data-bs-toggle="tooltip" title="' + options.movePlanetDownTitle + '"' + (i === options.prm.currPlanetsCount - 1 ? ' disabled' : '') + '><i class="bi bi-arrow-down"></i></button>';
-		tr += '<button id="control-' + i + '-e" type="button" class="btn btn-outline-secondary btn-sm control-btn control-edit" data-pln="' + i + '" data-bs-toggle="tooltip" title="' + options.editPlanetTitle + '"><i class="bi bi-pencil"></i></button>';
-		tr += '<button id="control-' + i + '-d" type="button" class="btn btn-outline-secondary btn-sm control-btn control-delete" data-pln="' + i + '" data-bs-toggle="tooltip" title="' + options.deletePlanetTitle + '"><i class="bi bi-x-lg"></i></button>';
-		tr += '</div></td>';
-		tr += '</tr>';
-		html += tr;
-
-		// дополнительная информационная строка
-		let spanType = options.prm.showAddInf ? 'visible-span' : 'hidden-span';
-		tr = '<tr class="' + ((i % 2) === 0 ? 'odd' : 'even') + '">';
-		tr += '<td></td><td><span class="' + spanType + '">' + options.addtnlRowHeader + '</span></td><td colspan="2"><span class="' + spanType + '"></span></td>';
-		for (let k = 0; k < 10; k++)
-			tr += '<td><span class="' + spanType + '"></span></td>';
-		tr += '<td colspan="2"></td>';
-		tr += '</tr>';
-		html += tr;
+		html += buildPlanetRowHtml(i);
+		html += buildPlanetInfoRowHtml(i);
 	}
 	footerFirst.insertAdjacentHTML('beforebegin', html);
 
@@ -114,15 +141,9 @@ function prepAllPlanetsTable() {
 		bootstrap.Tooltip.getOrCreateInstance(el);
 	});
 
-	// Wire validation + recalc on the freshly created inputs
 	let rows = $$('#all-planets-prod tr');
 	for (let i = 0; i < options.prm.currPlanetsCount; i++) {
-		let newInputs = rows[i * 2 + 1].querySelectorAll('input[type=text]');
-		newInputs.forEach(function (input) {
-			bindNumericInput(input, updateAllPlnTab);
-		});
-		newInputs[0]._constrains = { 'min': -134, 'def': 0, 'allowNegative': true };
-		newInputs[1]._constrains = { 'min': 1, 'max': 16, 'def': 8, 'allowNegative': false };
+		bindPlanetRowInputs(rows, i);
 	}
 }
 
