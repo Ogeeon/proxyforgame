@@ -92,7 +92,7 @@ function httpGet($uri, $headers = [])
             curl_setopt($curl, CURLOPT_POST, false);
 //           curl_setopt($curl, CURLOPT_HTTPHEADER, array_merge(getFirefoxHeaders(), $headers));
             curl_setopt($curl, CURLOPT_FOLLOWLOCATION, true);
-            curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
+            curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, true);
             curl_setopt($curl, CURLOPT_CONNECTTIMEOUT, 10);
             curl_setopt($curl, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
             $out = curl_exec($curl);

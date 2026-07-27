@@ -1,73 +1,96 @@
 <?php
-function getServerData($strUni, $strDomain, $strTime) {
-    if (!isset($strTime)) { $strTime = 1; }
-    $varReturn = false;
-    $upDBUni = false;
-    $xmlFile = 'https://logserver.net/xml/' . $strDomain . '/serverData/' . $strUni . '.xml';
 
-    if (!file_exists($xmlFile) || ((time() - filemtime ($xmlFile)) >= $strTime (24 * 60 * 60) || !file_get_contents($xmlFile))) {
-        $upDBUni = true;
-        $url = 'https://s' . $strUni . '-' . $strDomain . '.ogame.gameforge.com/api/serverData.xml';
+// Maps a serverData.xml child tag name to the PHP type its value should be cast to
+// when copied into the array returned by getServerData().
+const SERVER_DATA_FIELD_CASTS = [
+    'name' => 'string',
+    'speed' => 'string',
+    'speedFleet' => 'string',
+    'galaxies' => 'string',
+    'systems' => 'string',
+    'acs' => 'string',
+    'rapidFire' => 'string',
+    'defToTF' => 'string',
+    'debrisFactor' => 'string',
+    'debrisFactorDef' => 'string',
+    'repairFactor' => 'string',
+    'newbieProtectionLimit' => 'string',
+    'newbieProtectionHigh' => 'string',
+    'topScore' => 'string',
+    'bonusFields' => 'string',
+    'donutGalaxy' => 'string',
+    'donutSystem' => 'string',
+    'wfEnabled' => 'string',
+    'wfMinimumRessLost' => 'string',
+    'wfMinimumLossPercentage' => 'string',
+    'wfBasicPercentageRepairable' => 'string',
+    'globalDeuteriumSaveFactor' => 'string',
+    'bashlimit' => 'string',
+    'probeCargo' => 'string',
+    'researchDurationDivisor' => 'int',
+    'marketplaceBasicTradeRatioMetal' => 'float',
+    'marketplaceBasicTradeRatioCrystal' => 'float',
+    'marketplaceBasicTradeRatioDeuterium' => 'float',
+    'marketplaceTaxNotSold' => 'float',
+    'speedFleetPeaceful' => 'int',
+    'speedFleetWar' => 'int',
+    'speedFleetHolding' => 'int',
+    'deuteriumInDebris' => 'int',
+    'fleetIgnoreEmptySystems' => 'int',
+];
 
-        if (urExists($url)) {
-            $flashRAW = file_get_contents($url);
-            $flashXML = simplexml_load_string($flashRAW);
+/** Casts a serverData.xml node value to the type declared for it in SERVER_DATA_FIELD_CASTS. */
+function castServerDataValue($value, $type) {
+    switch ($type) {
+        case 'int':
+            return (int) $value;
+        case 'float':
+            return (float) $value;
+        default:
+            return (string) $value;
+    }
+}
 
-            $xmlHandle = fopen($xmlFile, "r");
-            $xmlString = $flashXML->asXML();
-            fwrite($xmlHandle, $xmlString);
-            fclose($xmlHandle);
-        } else {
-            return false;
-        }
+/** Refreshes the local xmlFile cache from the OGame API when it is missing, stale, or empty. */
+function refreshServerDataCache($xmlFile, $strUni, $strDomain, $strTime) {
+    if (file_exists($xmlFile) && (time() - filemtime($xmlFile)) < $strTime (24 * 60 * 60) && file_get_contents($xmlFile)) {
+        return true;
     }
 
-    $xml = simplexml_load_file($xmlFile);
-
-    if ($xml != false) {
-        foreach ($xml->children() as $key => $serverData) {
-            if ($key == "name") { $varReturn["name"] = (string) $serverData; }
-            if ($key == "speed") { $varReturn["speed"] = (string) $serverData; }
-            if ($key == "speedFleet") { $varReturn["speedFleet"] = (string) $serverData; }
-            if ($key == "galaxies") { $varReturn["galaxies"] = (string) $serverData; }
-            if ($key == "systems") { $varReturn["systems"] = (string) $serverData; }
-            if ($key == "acs") { $varReturn["acs"] = (string) $serverData; }
-            if ($key == "rapidFire") { $varReturn["rapidFire"] = (string) $serverData; }
-            if ($key == "defToTF") { $varReturn["defToTF"] = (string) $serverData; }
-            if ($key == "debrisFactor") { $varReturn["debrisFactor"] = (string) $serverData; }
-            if ($key == "debrisFactorDef") { $varReturn["debrisFactorDef"] = (string) $serverData; }
-            if ($key == "repairFactor") { $varReturn["repairFactor"] = (string) $serverData; }
-            if ($key == "newbieProtectionLimit") { $varReturn["newbieProtectionLimit"] = (string) $serverData; }
-            if ($key == "newbieProtectionHigh") { $varReturn["newbieProtectionHigh"] = (string) $serverData; }
-            if ($key == "topScore") { $varReturn["topScore"] = (string) $serverData; }
-            if ($key == "bonusFields") { $varReturn["bonusFields"] = (string) $serverData; }
-            if ($key == "donutGalaxy") { $varReturn["donutGalaxy"] = (string) $serverData; }
-            if ($key == "donutSystem") { $varReturn["donutSystem"] = (string) $serverData; }
-            if ($key == "wfEnabled") { $varReturn["wfEnabled"] = (string) $serverData; }
-            if ($key == "wfMinimumRessLost") { $varReturn["wfMinimumRessLost"] = (string) $serverData; }
-            if ($key == "wfMinimumLossPercentage") { $varReturn["wfMinimumLossPercentage"] = (string) $serverData; }
-            if ($key == "wfBasicPercentageRepairable") { $varReturn["wfBasicPercentageRepairable"] = (string) $serverData; }
-            if ($key == "globalDeuteriumSaveFactor") { $varReturn["globalDeuteriumSaveFactor"] = (string) $serverData; }
-            if ($key == "bashlimit") { $varReturn["bashlimit"] = (string) $serverData; }
-            if ($key == "probeCargo") { $varReturn["probeCargo"] = (string) $serverData; }
-            if ($key == "researchDurationDivisor") { $varReturn["researchDurationDivisor"] = (int) $serverData; }
-            if ($key == "marketplaceBasicTradeRatioMetal") { $varReturn["marketplaceBasicTradeRatioMetal"] = (float) $serverData; }
-            if ($key == "marketplaceBasicTradeRatioCrystal") { $varReturn["marketplaceBasicTradeRatioCrystal"] = (float) $serverData; }
-            if ($key == "marketplaceBasicTradeRatioDeuterium") { $varReturn["marketplaceBasicTradeRatioDeuterium"] = (float) $serverData; }
-            if ($key == "marketplaceTaxNotSold") { $varReturn["marketplaceTaxNotSold"] = (float) $serverData; }
-
-            if ($key == "speedFleetPeaceful") { $varReturn["speedFleetPeaceful"] = (int) $serverData; }
-            if ($key == "speedFleetWar") { $varReturn["speedFleetWar"] = (int) $serverData; }
-            if ($key == "speedFleetHolding") { $varReturn["speedFleetHolding"] = (int) $serverData; }
-
-            if ($key == "deuteriumInDebris") { $varReturn["deuteriumInDebris"] = (int) $serverData; }
-            if ($key == "fleetIgnoreEmptySystems") { $varReturn["fleetIgnoreEmptySystems"] = (int) $serverData; }
-        }
-    } else {
+    $url = 'https://s' . $strUni . '-' . $strDomain . '.ogame.gameforge.com/api/serverData.xml';
+    if (!urExists($url)) {
         return false;
     }
 
-    //if ($upDBUni) cDB::saveUniverses($strUni, $strDomain, $varReturn);
-    return $varReturn;
+    $flashRAW = file_get_contents($url);
+    $flashXML = simplexml_load_string($flashRAW);
 
+    $xmlHandle = fopen($xmlFile, "r");
+    $xmlString = $flashXML->asXML();
+    fwrite($xmlHandle, $xmlString);
+    fclose($xmlHandle);
+    return true;
+}
+
+function getServerData($strUni, $strDomain, $strTime) {
+    if (!isset($strTime)) { $strTime = 1; }
+    $xmlFile = 'https://logserver.net/xml/' . $strDomain . '/serverData/' . $strUni . '.xml';
+
+    if (!refreshServerDataCache($xmlFile, $strUni, $strDomain, $strTime)) {
+        return false;
+    }
+
+    $xml = simplexml_load_file($xmlFile);
+    if ($xml == false) {
+        return false;
+    }
+
+    $varReturn = false;
+    foreach ($xml->children() as $key => $serverData) {
+        if (array_key_exists($key, SERVER_DATA_FIELD_CASTS)) {
+            $varReturn[$key] = castServerDataValue($serverData, SERVER_DATA_FIELD_CASTS[$key]);
+        }
+    }
+
+    return $varReturn;
 }
