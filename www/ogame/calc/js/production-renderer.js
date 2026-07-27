@@ -144,10 +144,10 @@ function blinkMaxTemp() {
 }
 
 function blinkMaxStorage(storages) {
-	var spans = ['#storage-cap-met', '#storage-cap-crys', '#storage-cap-deut'];
+	const spans = ['#storage-cap-met', '#storage-cap-crys', '#storage-cap-deut'];
 	if (options.storageBlinkCount++ < 10) {
 		setTimeout(function () {
-			for (var i = 0; i < 3; i++) {
+			for (let i = 0; i < 3; i++) {
 				if (storages[i] == 1) {
 					$(spans[i]).classList.toggle('red-border');
 				} else {
@@ -160,15 +160,15 @@ function blinkMaxStorage(storages) {
 	} else {
 		options.storageBlinkCount = 0;
 		options.storagesBlinking = false;
-		for (var i = 0; i < 3; i++)
+		for (let i = 0; i < 3; i++)
 			$(spans[i]).classList.remove('red-border');
 	}
 }
 
 function setOnePlanetView(extended) {
-	var rows = $$('#one-planet-prod tr');
-	var newMode = extended ? 'table-cell' : 'none';
-	for (var row = 0; row < rows.length; row++) {
+	const rows = $$('#one-planet-prod tr');
+	const newMode = extended ? 'table-cell' : 'none';
+	for (let row = 0; row < rows.length; row++) {
 		if (rows[row].children.length < 8)
 			continue;
 		rows[row].children[1].style.display = newMode;

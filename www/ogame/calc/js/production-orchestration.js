@@ -193,14 +193,14 @@ function updateProduction(tab, production) {
 	let durations = [1, 24, 168];	// продолжительность накопления ресов: час, день, неделя
 	let fleetRows = Array.from($$('#' + tab + '-pln-fleet-prod tr')).slice(1);
 	let defenseRows = Array.from($$('#' + tab + '-pln-defense-prod tr')).slice(1);
-	let minCount = Number.POSITIVE_INFINITY;
+	let minCount;
 	for (let d = 0; d < 3; d++) {
 		let duration = durations[d];
 		let idx = 0;
 		for (let i in options.fleetCosts) {
 			minCount = Number.POSITIVE_INFINITY;
-			for (var res = 0; res < 3; res++) {
-				var producedRes = duration * production[res];
+			for (let res = 0; res < 3; res++) {
+				let producedRes = duration * production[res];
 				if (producedRes < 0)
 					producedRes = 0;
 				if (options.fleetCosts[i][res] > 0)

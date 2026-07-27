@@ -191,11 +191,11 @@ function calculateProduction(prodParams, plnData, normalized = false, lfEff = nu
 	// 5--термояд.эл/ст., 6-сол.спут., 7-гусен., 8-плазм.тех., 9-предметы,
 	// 10-геолог, 11-инженер, 12-ком.состав, 13-класс, 14-класс альянса,
 	// 15-техн. бонус форм жизни
-	for (var i = 0; i < 16; i++) { results.push([0, 0, 0, 0, 0]); } // мет, крис, дейт, энергии производится, энергии требуется
-	var energy = 0, level = 0, perCent = 0, deutCons = 0, totalEnergyProduced = 0, totalEnergyUsed = 0, booster = 0;
-	var fullCrew = options.prm.geologist && options.prm.engineer && options.prm.admiral && options.prm.commander && options.prm.technocrat;
+	for (let i = 0; i < 16; i++) { results.push([0, 0, 0, 0, 0]); } // мет, крис, дейт, энергии производится, энергии требуется
+	let energy = 0, level = 0, perCent = 0, deutCons = 0, totalEnergyProduced = 0, totalEnergyUsed = 0;
+	const fullCrew = options.prm.geologist && options.prm.engineer && options.prm.admiral && options.prm.commander && options.prm.technocrat;
 	let energyArray;
-	for (var i = 3; i < 6; i++) {
+	for (let i = 3; i < 6; i++) {
 		// Сначала вычислим произоводимую энергию
 		// Возьмём из таблицы данные об уровне постройки и проценте мощности, на который она работает
 		level = prodParams[i][0];
@@ -223,12 +223,12 @@ function calculateProduction(prodParams, plnData, normalized = false, lfEff = nu
 		}
 	}
 
-	var energyBalance = totalEnergyProduced; // базу для расчёта бонусов энергии нужно считать до Гусеничников
+	let energyBalance = totalEnergyProduced; // базу для расчёта бонусов энергии нужно считать до Гусеничников
 	if (energyBalance < 0) energyBalance = 0;
-	var boosterFactor = 0.1 * plnData[2];
-	var engineerFactor = (options.prm.engineer === true) ? 0.1 : 0;
-	var allStaffFactor = fullCrew === true ? 0.02 : 0;
-	var classFactor = options.prm.playerClass === 0 ? 0.1 : 0;
+	const boosterFactor = 0.1 * plnData[2];
+	const engineerFactor = (options.prm.engineer === true) ? 0.1 : 0;
+	const allStaffFactor = fullCrew === true ? 0.02 : 0;
+	const classFactor = options.prm.playerClass === 0 ? 0.1 : 0;
 	let allianceClassFactor = options.prm.isTrader ? 0.05 : 0;
 	let lfEnergyFactor = (options.prm.lfEnergyProdBonus || 0) / 100;
 	results[9][3] = Math.round(energyBalance * boosterFactor);
@@ -246,7 +246,7 @@ function calculateProduction(prodParams, plnData, normalized = false, lfEff = nu
 	}
 
 	// Мы знаем, сколько всего производится энергии на планете - теперь нужно узнать, сколько её потребляется
-	for (var i = 0; i < 3; i++) {
+	for (let i = 0; i < 3; i++) {
 		level = prodParams[i][0];
 		perCent = prodParams[i][1];
 		if (level > 0) {
@@ -258,8 +258,8 @@ function calculateProduction(prodParams, plnData, normalized = false, lfEff = nu
 		totalEnergyUsed += energy;
 	}
 	// Гусеничники в 6й строке
-	var cralwersPwrPcnt = prodParams[6][1] / 100.0;
-	var crawlersOlPcnt = 0;
+	let cralwersPwrPcnt = prodParams[6][1] / 100.0;
+	let crawlersOlPcnt = 0;
 	if (cralwersPwrPcnt > 1) {
 		crawlersOlPcnt = cralwersPwrPcnt - 1;
 		cralwersPwrPcnt = 1;
@@ -286,17 +286,17 @@ function calculateProduction(prodParams, plnData, normalized = false, lfEff = nu
 			lfBld[b][4] = Math.floor(lfBld[b][4] * enRFactor);
 	}
 
-	var koeff = 1.0;
+	let koeff = 1.0;
 	if (totalEnergyUsed > 0)
 		koeff = totalEnergyProduced / (totalEnergyUsed);
 	if (koeff > 1) {
 		koeff = 1;
 	}
 
-	var prod = 0;
+	let prod = 0;
 	let prodFactor = normalized ? 1 : koeff;
 
-	for (var i = 0; i < 3; i++) {
+	for (let i = 0; i < 3; i++) {
 		let pwrFactor = normalized ? 1 : prodParams[i][1] / 100.0;
 		prod = getProductionRateSplit(options.rowsToTechs[i], prodParams[i][0], options.prm.energyTechLevel, options.prm.plasmaTechLevel, plnData[0], plnData[1],
 			options.prm.universeSpeed, options.prm.geologist, options.prm.engineer, prodFactor, pwrFactor, prodParams[i][2], fullCrew, options.prm.playerClass, options.prm.isTrader);
@@ -305,7 +305,7 @@ function calculateProduction(prodParams, plnData, normalized = false, lfEff = nu
 		production[i] += prod[0];
 		results[i + 1][i] += prod[1];  // производство на руднике
 		production[i] += prod[1];
-		for (var line = 8; line < 15; line++) {
+		for (let line = 8; line < 15; line++) {
 			results[line][i] += prod[line - 6];
 			production[i] += prod[line - 6];
 		}
