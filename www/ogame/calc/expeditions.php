@@ -1,7 +1,7 @@
 <?php
 
-require 'h_abox.php';
-require 'h_functions.php';
+require_once 'h_abox.php';
+require_once 'h_functions.php';
 
 require_once '../../langs.php';
 $lang = getLang();
