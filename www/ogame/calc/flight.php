@@ -11,13 +11,13 @@ $l = Intl::getTranslations($lang, 'flight');
 $countries = sqlQuery("SELECT c.lang2 as lang, c.name as name, s.server as server FROM countries AS c INNER JOIN servers as s ON c.lang2 = s.lang WHERE c.lang=?", array($lang));
 $universes = array();
 if ($countries) {
-	foreach ($countries as $row) {
-		$r = sqlQuery("SELECT SUBSTRING_INDEX(SUBSTRING_INDEX(server, '-', 1), 's', -1) AS server_number, name FROM universes WHERE lang = ? ORDER BY 2", array($row['lang']));
-		if ($r === false) {
-			continue;
-		}
-		$universes[$row['lang']] = $r;
-	}
+    foreach ($countries as $row) {
+        $r = sqlQuery("SELECT SUBSTRING_INDEX(SUBSTRING_INDEX(server, '-', 1), 's', -1) AS server_number, name FROM universes WHERE lang = ? ORDER BY 2", array($row['lang']));
+        if ($r === false) {
+            continue;
+        }
+        $universes[$row['lang']] = $r;
+    }
 }
 
 require_once 'flight.tpl';

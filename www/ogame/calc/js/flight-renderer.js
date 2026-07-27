@@ -240,6 +240,6 @@ class FlightRenderer {
     }
 
     _escapeAttr(value) {
-        return String(value).replace(/"/g, '&quot;');
+        return String(value).replaceAll('"', '&quot;');
     }
 }
