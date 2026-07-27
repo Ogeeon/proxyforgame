@@ -271,6 +271,15 @@ function GetVar($var, $type)
   function GetServerData() {
     $country = GetVar('country', 'str');
     $universe = GetVar('universe', 'int');
+
+    // Restrict to the safe alphabet before splicing into the request URL below,
+    // or a crafted value could redirect the fetch to an attacker-controlled host.
+    if ($universe === false || !preg_match('/^[a-zA-Z]{2,3}$/', $country)) {
+        http_response_code(400);
+        echo json_encode(['error' => 'Invalid country or universe']);
+        return;
+    }
+
     $serverDataUrl = "https://s{$universe}-{$country}.ogame.gameforge.com/api/serverData.xml";
     $serverDataXml = @file_get_contents($serverDataUrl);
     
