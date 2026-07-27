@@ -1,11 +1,11 @@
 <?php
 
-require_once('../../langs.php');
-require_once('../../db.connect.inc.php');
+require_once '../../langs.php';
+require_once '../../db.connect.inc.php';
 $lang = get_lang();
 $currUrl = '/ogame/calc/flight.php';
 
-require_once('../../Intl.php');
+require_once '../../Intl.php';
 $l = Intl::getTranslations($lang, 'flight');
 
 $countries = SqlQuery("SELECT c.lang2 as lang, c.name as name, s.server as server FROM countries AS c INNER JOIN servers as s ON c.lang2 = s.lang WHERE c.lang=?", array($lang));
@@ -20,5 +20,5 @@ if ($countries) {
 	}
 }
 
-require_once('flight.tpl');
+require_once 'flight.tpl';
 ?>

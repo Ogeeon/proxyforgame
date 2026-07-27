@@ -1,10 +1,10 @@
 <?php
 
-require_once('../../langs.php');
+require_once '../../langs.php';
 $lang = get_lang();
 $currUrl = '/ogame/calc/costs.php';
 
-require_once('../../Intl.php');
+require_once '../../Intl.php';
 $l = Intl::getTranslations($lang, 'costs');
 
 // id => (ключ_$l, тип, мет, крис, дейт, коэфф.удорожания}
@@ -121,6 +121,6 @@ function getTechsByType($type) {
 	return $filteredTechs;
 }
 
-require_once('costs.tpl');
+require_once 'costs.tpl';
 
 ?>

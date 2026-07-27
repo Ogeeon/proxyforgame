@@ -1,10 +1,10 @@
 <?php
 
-require_once('../../langs.php');
+require_once '../../langs.php';
 $lang = get_lang();
 $currUrl = '/ogame/calc/queue.php';
 
-require_once('../../Intl.php');
+require_once '../../Intl.php';
 $l = Intl::getTranslations($lang, 'queue');
 
 // id => (ключ_$l, тип, мет, крис, дейт, коэфф.удорожания}
@@ -53,6 +53,6 @@ function getTechsByType($type) {
 	return $filteredTechs;
 }
 
-require_once('queue.tpl');
+require_once 'queue.tpl';
 
 ?>

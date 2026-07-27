@@ -1,14 +1,14 @@
 <?php
 
-require_once('../../langs.php');
+require_once '../../langs.php';
 $lang = get_lang();
 $currUrl = '/ogame/calc/lfcosts.php';
 
-require_once('../../Intl.php');
+require_once '../../Intl.php';
 $l = Intl::getTranslations($lang, 'lfcosts');
 
 // Life Form tech data (shared with the Production calculator).
-require_once(__DIR__.'/lf-techdata.inc.php');
+require_once __DIR__.'/lf-techdata.inc.php';
 $techData = $lfTechData;
 
 $techTypes = array(1 => 'buildings', 2 => 'researches');
@@ -32,6 +32,6 @@ function getTechsByType($type) {
 	return $filteredTechs;
 }
 
-require_once('lfcosts.tpl');
+require_once 'lfcosts.tpl';
 
 ?>

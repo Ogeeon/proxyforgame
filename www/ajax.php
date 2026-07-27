@@ -374,7 +374,7 @@ function GetVar($var, $type)
 
   // --------- обработка запроса ---------
   header('Content-Type: text/html; charset=utf-8');
-  require_once('db.connect.inc.php');
+  require_once 'db.connect.inc.php';
 
   // если непонятно, что за запрос, ничего не делаем и выходим с ошибкой
   if (!isset($_REQUEST['service'])) {

@@ -1,10 +1,10 @@
 <?php
 
-require_once('../../langs.php');
+require_once '../../langs.php';
 $lang = get_lang();
 $currUrl = '/ogame/calc/production.php';
 
-require_once('../../Intl.php');
+require_once '../../Intl.php';
 $l = Intl::getTranslations($lang, 'production');
 
 // Life form building names live in the 'lfcosts' section; pull them so the
@@ -18,7 +18,7 @@ $lfTr = Intl::getTranslations($lang, 'lfcosts');
 // A building's id is race*1000 + position (e.g. Humans' first building is 1001).
 // The first two buildings of every race (population and food) neither boost
 // production nor draw energy, so this calculator leaves them out entirely.
-require_once(__DIR__.'/lf-techdata.inc.php');
+require_once __DIR__.'/lf-techdata.inc.php';
 define('LF_FIRST_PROD_BUILDING', 3);
 $lfBuildingKeys = array(1 => array(), 2 => array(), 3 => array(), 4 => array());
 $lfBuildingEnergy = array();
@@ -111,6 +111,6 @@ function getTechsByType($type) {
 	return $filteredTechs;
 }
 
-require_once('production.tpl');
+require_once 'production.tpl';
 
 ?>
