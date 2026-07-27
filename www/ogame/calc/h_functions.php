@@ -81,7 +81,7 @@ function getServerData($strUni, $strDomain, $strTime) {
     }
 
     $xml = simplexml_load_file($xmlFile);
-    if ($xml == false) {
+    if (!$xml) {
         return false;
     }
 

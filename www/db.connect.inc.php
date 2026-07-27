@@ -51,7 +51,7 @@ function sqlQuery($query, $params) {
 
     return count($res) > 0 ? $res : false;
 }
-	
+
 
 loadEnv(dirname(__DIR__) . DIRECTORY_SEPARATOR . '.env');
 

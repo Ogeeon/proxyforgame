@@ -16,7 +16,7 @@ define('OGAME_HOST', 'https://lobby.ogame.gameforge.com/api/servers');
 
 function loadEnv($path) {
     if (!file_exists($path)) {
-		echo ".env file not found at $path";
+        echo ".env file not found at $path";
         return;
     }
     $lines = file($path, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
@@ -38,25 +38,25 @@ function loadEnv($path) {
 // ********************************************************************************************
 function sqlQuery($db, $sql)
 {
-	$res = array();
+    $res = array();
 
-	if ($result = mysqli_query($db, $sql))
-	{
-		if ($result === true) {
-			return false; // для не-select'ов возвращаем FALSE, потому что нет результата
-		}
-		while ($row = mysqli_fetch_assoc($result)) {
-		    array_push($res, $row);
-		}
-		mysqli_free_result($result);
-	}
-	else {
+    if ($result = mysqli_query($db, $sql))
+    {
+        if ($result === true) {
+            return false; // для не-select'ов возвращаем FALSE, потому что нет результата
+        }
+        while ($row = mysqli_fetch_assoc($result)) {
+            array_push($res, $row);
+        }
+        mysqli_free_result($result);
+    }
+    else {
         echo "\n sql=$sql, err=".mysqli_errno($db)."\n";
         echo mysqli_error($db)."\n";
         return false;
-    };
+    }
 
-	return count($res) > 0 ? $res : false;
+    return count($res) > 0 ? $res : false;
 }
 
 // ********************************************************************************************

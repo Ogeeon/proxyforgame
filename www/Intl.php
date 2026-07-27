@@ -16,7 +16,7 @@ class Intl
      */
     public static function getLocales()
     {
-		$locale_dir = __DIR__.'/locale';
+        $locale_dir = __DIR__.'/locale';
         if(empty(self::$locales))
         {
             foreach(glob($locale_dir.'/*.json') as $localeFilePath)
@@ -48,12 +48,12 @@ class Intl
      */
     public static function getTranslations($locale, $section)
     {
-		$locale_dir = __DIR__.'/locale';
+        $locale_dir = __DIR__.'/locale';
         if(!self::hasLocale($locale))
         {
             throw new \InvalidArgumentException('Locale "'.$locale.'" does not exist.');
         }
-        else if(!isset(self::$translations[$locale]))
+        elseif(!isset(self::$translations[$locale]))
         {
             self::$translations[$locale] = json_decode(file_get_contents($locale_dir.'/'.$locale.'.json'), true);
         }
