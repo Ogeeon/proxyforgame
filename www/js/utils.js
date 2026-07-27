@@ -172,6 +172,16 @@ function getConstraint(element, constr, def) {
 }
 
 /**
+ * Appends "<wholeUnits><label> " to timeStr when the tier holds at least one whole unit;
+ * returns timeStr unchanged otherwise (a zero-value middle tier is left out, not shown as "0x").
+ */
+function appendTimespanUnit(timeStr, seconds, divisor, label) {
+	if (seconds / divisor < 1)
+		return timeStr;
+	return timeStr + dropFraction(Math.floor(seconds / divisor), 3) + label + ' ';
+}
+
+/**
  * Формирует строковое представление для промежутка времени. Если какого-то элемента (нед, д, ч, м, с) нет, он не включается в возвращаемую строку.
  * @param seconds Кол-во секунд в промежутке времени
  * @param w Обозначение недель
@@ -188,34 +198,24 @@ function timespanToShortenedString(seconds, w, d, h, m, s, minimize) {
 	let timeStr = '';
 	let haveWeeks = false, haveDays = false;
 	if (seconds >= 604800) {
-		timeStr += dropFraction(Math.floor(seconds / 604800), 3);
-		timeStr += w+' ';
+		timeStr = appendTimespanUnit(timeStr, seconds, 604800, w);
 		seconds = seconds % 604800;
 		haveWeeks = true;
 	}
 	if (seconds >= 86400 || timeStr.length > 0) {
-		if (seconds / 86400 >= 1) {
-			timeStr += dropFraction(Math.floor(seconds / 86400), 3);
-			timeStr += d+' ';
-		}
+		timeStr = appendTimespanUnit(timeStr, seconds, 86400, d);
 		seconds = seconds % 86400;
 		haveDays = true;
 	}
 	if (seconds >= 3600 || timeStr.length > 0) {
-		if (seconds / 3600 >= 1) {
-			timeStr += dropFraction(Math.floor(seconds / 3600), 3);
-			timeStr += h+' ';
-		}
+		timeStr = appendTimespanUnit(timeStr, seconds, 3600, h);
 		seconds = seconds % 3600;
 	}
 	// Если есть недели, и запрошена минимизация - минуты отбрасываем
 	if (minimize && haveWeeks)
 		return timeStr;
 	if (seconds >= 60 || timeStr.length > 0) {
-		if (seconds / 60 >= 1) {
-			timeStr += dropFraction(Math.floor(seconds / 60), 3);
-			timeStr += m+' ';
-		}
+		timeStr = appendTimespanUnit(timeStr, seconds, 60, m);
 		seconds = seconds % 60;
 	}
 	// Если есть дни, и запрошена минимизация - секунды отбрасываем
@@ -451,65 +451,72 @@ function saveToCookie(name, data) {
  * @param name имя куки, из которой будут загружены данные
  * @param params объект, свойства (поля) которого требуется загрузить из куки
  */
-function loadFromCookie(name, params) {
-	let data;
-	data = loadFromStorage(name);
-	if (data === null) {
-		// Fallback to reading cookie if localStorage is empty
-		const cookies = document.cookie.split(';');
-		for (let i = 0; i < cookies.length; i++) {
-			const cookie = cookies[i].trim();
-			if (cookie.startsWith(name + '=')) {
-				data = decodeURIComponent(cookie.substring(name.length + 1));
-				break;
-			}
+/** Reads a value previously written by saveToCookie: localStorage first, legacy cookie as fallback. */
+function readSavedData(name) {
+	const stored = loadFromStorage(name);
+	if (stored !== null)
+		return stored;
+	const cookies = document.cookie.split(';');
+	for (let i = 0; i < cookies.length; i++) {
+		const cookie = cookies[i].trim();
+		if (cookie.startsWith(name + '=')) {
+			return decodeURIComponent(cookie.substring(name.length + 1));
 		}
 	}
+	return null;
+}
+
+/** Applies a "property|index1|index2;value" entry (array/matrix field) onto params. */
+function applyCookieArrayEntry(params, parts) {
+	const arrparts = parts[0].split('|');
+	if (!(arrparts[0] in params))
+		return;
+	if (arrparts.length == 2) {
+		params[arrparts[0]][arrparts[1]] = params.validate(arrparts[0], parts[1]);
+	}
+	if (arrparts.length == 3) {
+		if (params[arrparts[0]][arrparts[1]] === undefined)
+			params[arrparts[0]].push([]);
+		params[arrparts[0]][arrparts[1]][arrparts[2]] = params.validate(arrparts[0], parts[1]);
+	}
+}
+
+/** Applies one "key;value" entry from a loadFromCookie payload onto params. */
+function applyCookieEntry(params, entry) {
+	const parts = entry.split(';');
+	if (parts[0].indexOf('|') > 0) {
+		applyCookieArrayEntry(params, parts);
+		return;
+	}
+	if (!(parts[0] in params))
+		return;
+	if (parts[1]?.indexOf('__JSON__') === 0) {
+		try {
+			// Remove __JSON__ prefix and rejoin in case semicolons were in the JSON
+			const jsonStr = parts.slice(1).join(';').substring(8);
+			params[parts[0]] = JSON.parse(jsonStr);
+			return;
+		} catch (e) {
+			// If JSON parsing fails, fall through to validate below
+		}
+	}
+	params[parts[0]] = params.validate(parts[0], parts[1]);
+}
+
+function loadFromCookie(name, params) {
+	const data = readSavedData(name);
 	if (!data || data.indexOf('key-value') == -1)
 		return;
-	const strings = data.split(',');
-	strings.forEach(function(value, key) {
-			const parts = value.split(';');
-			if (parts[0].indexOf('|') > 0) {
-				const arrparts = parts[0].split('|');
-				if (!arrparts[0] in params)
-					return;
-				if (arrparts.length == 2) {
-					params[arrparts[0]][arrparts[1]] = params.validate(arrparts[0], parts[1]);
-				}
-				if (arrparts.length == 3) {
-					// consoleLog(arrparts);
-					if (params[arrparts[0]][arrparts[1]] === undefined)
-						params[arrparts[0]].push([]);
-					params[arrparts[0]][arrparts[1]][arrparts[2]] = params.validate(arrparts[0], parts[1]);
-				}
-				return;
-			}
-			else {
-				if (parts[0] in params) {
-					// Check if value is a JSON-encoded object
-					if (parts[1]?.indexOf('__JSON__') === 0) {
-						try {
-							const jsonStr = parts.slice(1).join(';').substring(8); // Remove __JSON__ prefix and rejoin in case semicolons were in the JSON
-							params[parts[0]] = JSON.parse(jsonStr);
-						} catch (e) {
-							// If JSON parsing fails, fall back to validate
-							params[parts[0]] = params.validate(parts[0], parts[1]);
-						}
-					} else {
-						params[parts[0]] = params.validate(parts[0], parts[1]);
-					}
-				}
-			}
-		}
-	);
+	data.split(',').forEach(function(entry) {
+		applyCookieEntry(params, entry);
+	});
 }
 
 /**
 * Пытается считать запрошенные данные из локального HTML5 хранилища.
 */
 function loadFromStorage(name) {
-	data = null;
+	let data = null;
 	if (supports_html5_storage())
 		data = localStorage.getItem(name);
 	return data;

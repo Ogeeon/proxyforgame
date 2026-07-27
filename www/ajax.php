@@ -2,6 +2,8 @@
   // все аякс-сервисы обрабатываются здесь
   // в запросе обязательно должен присутствовать параметр service
 
+  const EMPTY_PARAMS_RESPONSE = "3\nempty";
+
   // аналог js unescape
   function convertUnicode($t)
   {
@@ -63,7 +65,7 @@ function getVar($var, $type)
         die("99\nfailed");
       }
     }
-    die("3\nempty");
+    die(EMPTY_PARAMS_RESPONSE);
   }
 
   function sendEmail() {
@@ -82,7 +84,7 @@ function getVar($var, $type)
         die("99\nfailed");
       }
     }
-    die("3\nempty");
+    die(EMPTY_PARAMS_RESPONSE);
   }
 
   function socketmail($to, $subject, $message) {
@@ -174,7 +176,7 @@ function getVar($var, $type)
       }
       die("5\nbad answer");
     }
-    die("3\nempty");
+    die(EMPTY_PARAMS_RESPONSE);
   }
 
   /**
@@ -205,6 +207,13 @@ function getVar($var, $type)
 
   /** Queries the faw-kes API for the spy report; NULL when unusable. */
   function fetchSpyReportFromFallback($srId) {
+      // Restrict to the safe alphabet before splicing into the request URL below,
+      // regardless of what the caller already checked - this function must not
+      // trust an unvalidated $srId to reach file_get_contents().
+      if (!preg_match('/^sr-[a-zA-Z]{2,3}-\d+-[0-9a-fA-F]+$/', $srId)) {
+          return null;
+      }
+
       $reportUrl = "https://ogapi.faw-kes.de/v1/report/" . $srId;
       $reportData = @file_get_contents($reportUrl);
 
@@ -303,9 +312,15 @@ function getVar($var, $type)
     $country = getVar('country', 'str');
     $universe = getVar('universe', 'int');
 
+    if ($universe === false) {
+        http_response_code(400);
+        echo json_encode(['error' => 'Invalid country or universe']);
+        return;
+    }
+
     // Restrict to the safe alphabet before splicing into the request URL below,
     // or a crafted value could redirect the fetch to an attacker-controlled host.
-    if ($universe === false || !preg_match('/^[a-zA-Z]{2,3}$/', $country)) {
+    if (!preg_match('/^[a-zA-Z]{2,3}$/', $country)) {
         http_response_code(400);
         echo json_encode(['error' => 'Invalid country or universe']);
         return;

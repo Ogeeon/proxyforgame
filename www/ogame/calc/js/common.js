@@ -325,6 +325,62 @@ function getBuildCost_C(techID, techLevelFrom, techLevelTo, techData, ionTechLev
  * @param techReqs Требования для исследований в формате {id: req_level}
  * @returns Общая длительность апгрейда постройки/исследования, строительства кораблей 
  */
+/**
+ * Время постройки/сноса здания (techID <= 100) между двумя уровнями.
+ * Вызывающая сторона уже отфильтровала запрещённый снос Терраформера/Лунной базы.
+ */
+function getBuildingTime_C(techID, techLevelFrom, techLevelTo, robotsLevel, nanitesLevel, techData) {
+	// Время постройки всех зданий, кроме Фабрики нанитов, Лунной базы, Фаланги и Ворот, снижается (вплоть до 8го уровня)
+	const noReduction = techID == 15 || techID == 41 || techID == 42 || techID == 43;
+	let timeSpan = 0;
+	if (techLevelFrom < techLevelTo) {
+		let curr = 1*techLevelFrom;
+		for (let next = 1*techLevelFrom + 1; next <= techLevelTo; next++) {
+			const cost = getBuildCost_C(techID, curr, next, techData);
+			const reduction = noReduction ? 1 : Math.max(4 - next / 2.0, 1);
+			// Формула ОГейма даёт время в часах - переведём в секунды
+			timeSpan += Math.floor(3600 * (cost[0] + cost[1]) / (2500.0 * reduction * (robotsLevel + 1.0) * Math.pow(2.0, nanitesLevel)));
+			curr = next;
+		}
+		return timeSpan;
+	}
+	let curr = 1*techLevelFrom;
+	for (let next = 1*techLevelFrom - 1; next >= techLevelTo; next--) {
+		const cost = getBuildCost_C(techID, curr, next, techData);
+		const reduction = noReduction ? 1 : Math.max(4 - next / 2.0, 1);
+		// Формула ОГейма даёт время в часах - переведём в секунды
+		timeSpan += Math.ceil(3600 * (cost[0] + cost[1]) / (2500.0 * reduction * (robotsLevel + 1.0) * Math.pow(2.0, nanitesLevel)));
+		curr = next;
+	}
+	return timeSpan;
+}
+
+/**
+ * Время исследования (100 < techID <= 200); -1, если не хватает уровня исследовательской лаборатории.
+ */
+function getResearchTime_C(techID, techLevelFrom, techLevelTo, researchLabLevel, technocratFactor, techReqs, techData) {
+	if (researchLabLevel < techReqs[techID])
+		return -1;
+	const cost = getBuildCost_C(techID, techLevelFrom, techLevelTo, techData);
+	// Формула ОГейма даёт время в часах - переведём в секунды; технократ умножает результат на свой поправочный коэффициент
+	return 3600 * (cost[0] + cost[1]) / (1000 * (1.0 + researchLabLevel)) * technocratFactor;
+}
+
+/**
+ * Время постройки одного корабля/единицы обороны (techID > 200), не умноженное на кол-во.
+ */
+function getShipBuildTime_C(techID, nanitesLevel, shipyardLevel, techData) {
+	// Для кораблей и обороны нельзя считать время, исходя из полного кол-ва ресурсов - нужно считать по одному.
+	const cost = calcBuildCost_C(techID, 1, techData);
+	//((metal + crystal) / 5'000) * (2 / ((level shipyard) + 1)) * (0.5 ^ (level nanite factory))
+	let timeSpan = 3600 * (cost[0] + cost[1]) / 5000.0 * 2.0 / (shipyardLevel + 1.0) * Math.pow(0.5, nanitesLevel);
+	// При слишком высоких уровнях нанитки скорость постройки СС может стать 0 - надо это учесть
+	if (timeSpan == 0) {
+		timeSpan = 1;
+	}
+	return timeSpan;
+}
+
 function getBuildTime_C(techID, techLevelFrom, techLevelTo, techData, robotsLevel, nanitesLevel, researchLabLevel, technocratFactor, shipyardLevel, uniSpeed, techReqs) {
 	if (techLevelFrom < 0)
 		return 0;
@@ -333,64 +389,24 @@ function getBuildTime_C(techID, techLevelFrom, techLevelTo, techData, robotsLeve
 		return 0;
 	if (techLevelFrom >= techLevelTo && techID > 100)
 		return 0;
-	let timeSpan = 0;
-	let reduction = 1;
-	// Узнаем стоимость постройки - она участвует в формулах расчёта времени строительства
-	let cost = [0, 0, 0];
+	// Терраформер и лунную базу сносить нельзя
+	if (techID <= 100 && techLevelFrom >= techLevelTo && (techID == 33 || techID == 41))
+		return 0;
+
+	let timeSpan;
 	// Техи с ID до 100 - это здания. Скорость их строительства зависит от наличия и уровня фабрик роботов и нанитов
 	if (techID <= 100) {
-		if (techLevelFrom < techLevelTo) {
-			let curr = 1*techLevelFrom;
-			for (let next = 1*techLevelFrom + 1; next <= techLevelTo; next++) {
-				cost = getBuildCost_C(techID, curr, next, techData);
-				// Время постройки всех зданий, кроме Фабрики нанитов, Лунной базы, Фаланги и Ворот, снижается (вплоть до 8го уровня)
-				reduction = 1;
-				if (techID != 15 && techID != 41 && techID != 42 && techID != 43) 
-					reduction = Math.max(4 - next / 2.0, 1);
-				// Формула ОГейма даёт время в часах - переведём в секунды
-				timeSpan += Math.floor(3600 * (cost[0] + cost[1]) / (2500.0 * reduction * (robotsLevel + 1.0) * Math.pow(2.0, nanitesLevel)));
-				curr = next;
-			}
-		} else {
-			// Терраформер и лунную базу сносить нельзя
-			if (techID == 33 || techID == 41)
-				return 0;
-			let curr = 1*techLevelFrom;
-			for (let next = 1*techLevelFrom - 1; next >= techLevelTo; next--) {
-				cost = getBuildCost_C(techID, curr, next, techData);
-				reduction = 1;
-				if (techID != 15 && techID != 41 && techID != 42 && techID != 43) 
-					reduction = Math.max(4 - next / 2.0, 1);
-				// Формула ОГейма даёт время в часах - переведём в секунды
-				timeSpan += Math.ceil(3600 * (cost[0] + cost[1]) / (2500.0 * reduction * (robotsLevel + 1.0) * Math.pow(2.0, nanitesLevel)));
-				curr = next;
-			}
-		}
-	}
-
+		timeSpan = getBuildingTime_C(techID, techLevelFrom, techLevelTo, robotsLevel, nanitesLevel, techData);
 	// Техи с ID от 100 до 200 - это технологии. Скорость их исследования зависит от уровня исследовательской лаборатории и наличия технократа
-	if (100 < techID && techID <= 200) {
-		if (researchLabLevel < techReqs[techID])
+	} else if (techID <= 200) {
+		timeSpan = getResearchTime_C(techID, techLevelFrom, techLevelTo, researchLabLevel, technocratFactor, techReqs, techData);
+		if (timeSpan === -1)
 			return -1;
-		cost = getBuildCost_C(techID, techLevelFrom, techLevelTo, techData);
-		// Формула ОГейма даёт время в часах - переведём в секунды
-		timeSpan = 3600 * (cost[0] + cost[1]) / (1000 * (1.0 + researchLabLevel));
-		// Если есть технократ, время на исследование нужно умножить на его поправочный коэффициент
-		timeSpan *= technocratFactor;
+	// Техи с ID больше 200 - это корабли и оборона. Скорость их строительства зависит от наличия и уровня верфи и фабрики нанитов
+	} else {
+		timeSpan = getShipBuildTime_C(techID, nanitesLevel, shipyardLevel, techData);
 	}
 
-	// Техи с ID больше 200 - это корабли и оборона. Скорость их строительства зависит от наличия и уровня верфи и фабрики нанитов
-	if (techID > 200) {
-		// Для кораблей и обороны нельзя считать время, исходя из полного кол-ва ресурсов - нужно считать по одному.
-		cost = calcBuildCost_C(techID, 1,  techData);
-		//((metal + crystal) / 5'000) * (2 / ((level shipyard) + 1)) * (0.5 ^ (level nanite factory))
-		// Формула ОГейма даёт время в часах - переведём в секунды, округлим и умножим на кол-во единиц, которые нужно построить
-		timeSpan = 3600 * (cost[0] + cost[1]) / 5000.0 * 2.0 / (shipyardLevel + 1.0) * Math.pow(0.5, nanitesLevel);
-		// При слишком высоких уровнях нанитки скорость постройки СС может стать 0 - надо это учесть
-		if (timeSpan == 0) {
-			timeSpan = 1;
-		}
-	}
 	// Если расчёт заказан для ускоренной вселенной, разделим вычисленное время на поправочный коэффициент
 	if (uniSpeed > 1) {
 		timeSpan /= uniSpeed;
@@ -533,6 +549,44 @@ function getBuildCostLF(techID, techLevelFrom, techLevelTo, techData, ionTechLev
  * @param megalithRdc бонус от Мегалита
  * @returns Общая длительность апгрейда постройки/исследования, строительства кораблей 
  */
+/**
+ * Вклад одного уровня в длительность постройки/сноса LF-здания.
+ * Уровень 0 не имеет собственной стоимости - при сносе до него берутся значения уровня 1.
+ */
+function getBuildingTimeStepLF(next, data, robotsLevel, nanitesLevel) {
+	const n = next == 0 ? 1 : next;
+	return Math.floor((n * data[4] * Math.pow(data[9], n)) / ((robotsLevel + 1.0) * Math.pow(2.0, nanitesLevel)));
+}
+
+/** Время постройки/сноса LF-здания (techID % 1000 <= 100) между двумя уровнями. */
+function getBuildingTimeLF(techLevelFrom, techLevelTo, data, robotsLevel, nanitesLevel, uniSpeed, megalithRdc) {
+	let timeSpan = 0;
+	if (techLevelFrom < techLevelTo) {
+		for (let next = Number(techLevelFrom) + 1; next <= Number(techLevelTo); next++) {
+			timeSpan += getBuildingTimeStepLF(next, data, robotsLevel, nanitesLevel);
+		}
+	} else {
+		for (let next = Number(techLevelFrom) - 1; next >= Math.max(Number(techLevelTo), 0); next--) {
+			timeSpan += getBuildingTimeStepLF(next, data, robotsLevel, nanitesLevel);
+		}
+	}
+	timeSpan = Math.floor(timeSpan * (1 - megalithRdc));
+	return Math.floor(timeSpan / uniSpeed);
+}
+
+/** Время исследования LF-технологии (techID % 1000 > 100); LF-исследования нельзя "разучить", поэтому снос не считается. */
+function getResearchTimeLF(techLevelFrom, techLevelTo, data, uniSpeed, rsrTimeRdc) {
+	let timeSpan = 0;
+	if (techLevelFrom >= techLevelTo)
+		return timeSpan;
+	for (let next = Number(techLevelFrom) + 1; next <= Number(techLevelTo); next++) {
+		let duration = Math.floor(next * data[4] * Math.pow(data[9], next));
+		duration = Math.floor(duration * (1 - 0.01 * rsrTimeRdc));
+		timeSpan += Math.floor(duration / uniSpeed);
+	}
+	return timeSpan;
+}
+
 function getBuildTimeLF(techID, techLevelFrom, techLevelTo, techData, robotsLevel, nanitesLevel, uniSpeed, rsrTimeRdc, megalithRdc=0) {
 	if (techLevelFrom < 0)
 		return 0;
@@ -541,33 +595,14 @@ function getBuildTimeLF(techID, techLevelFrom, techLevelTo, techData, robotsLeve
 		return 0;
 	if (techLevelFrom >= techLevelTo && Number(techID) % 1000 > 100)
 		return 0;
-	let timeSpan = 0;
+
+	let timeSpan;
 	// Техи с ID до 100 - это здания. Скорость их строительства зависит от наличия и уровня фабрик роботов и нанитов
 	if (Number(techID) % 1000 <= 100) {
-		if (techLevelFrom < techLevelTo) {
-			for (let next = Number(techLevelFrom) + 1; next <= Number(techLevelTo); next++) {
-				timeSpan += Math.floor((next * data[4] * Math.pow(data[9], next)) / ((robotsLevel + 1.0) * Math.pow(2.0, nanitesLevel)));
-			}
-		} else {
-			for (let next = Number(techLevelFrom) - 1; next >= Math.max(Number(techLevelTo), 0); next--) {
-				if (next == 0) {
-					timeSpan += Math.floor((data[4] * Math.pow(data[9], 1)) / ((robotsLevel + 1.0) * Math.pow(2.0, nanitesLevel)));
-				} else {
-					timeSpan += Math.floor((next * data[4] * Math.pow(data[9], next)) / ((robotsLevel + 1.0) * Math.pow(2.0, nanitesLevel)));
-				}
-			}
-		}
-		timeSpan = Math.floor(timeSpan * (1 - megalithRdc));
-		timeSpan = Math.floor(timeSpan / uniSpeed);
+		timeSpan = getBuildingTimeLF(techLevelFrom, techLevelTo, data, robotsLevel, nanitesLevel, uniSpeed, megalithRdc);
 	} else {
 		// Техи с ID больше 100 - это технологии. Скорость их исследования зависит от уровня исследовательской лаборатории и наличия технократа
-		if (techLevelFrom < techLevelTo) {
-			for (let next = Number(techLevelFrom) + 1; next <= Number(techLevelTo); next++) {
-				let duration = Math.floor(next * data[4] * Math.pow(data[9], next));
-				duration = Math.floor(duration * (1 - 0.01 * rsrTimeRdc));
-				timeSpan += Math.floor(duration / uniSpeed);
-			}
-		}
+		timeSpan = getResearchTimeLF(techLevelFrom, techLevelTo, data, uniSpeed, rsrTimeRdc);
 	}
 
 	if (timeSpan < 1) {
@@ -592,7 +627,7 @@ function getBuildEnergyCostLF(techID, techLevel, techData, ionTechLevel, bldCost
 	const data = techData[techID];
 	if (data === undefined)
 		return 0;
-	buildCost = Math.floor(Math.floor(data[3] * techLevel * Math.pow(data[8], techLevel)) * (1 - 0.04 * ionTechLevel));
+	let buildCost = Math.floor(Math.floor(data[3] * techLevel * Math.pow(data[8], techLevel)) * (1 - 0.04 * ionTechLevel));
 	if (bldCostRdc > 0)
 		buildCost = Math.floor(buildCost * (1 - bldCostRdc));
 	return buildCost;
