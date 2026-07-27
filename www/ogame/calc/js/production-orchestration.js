@@ -645,7 +645,7 @@ function updateLifeformRows() {
 // first building). The table skips the first two buildings of every race, so the
 // index comes from the row's building id rather than from its DOM order.
 function lfRowIndex(el) {
-	return Number.parseInt(el.getAttribute('data-lf-id'), 10) % 1000 - 1;
+	return Number.parseInt(el.dataset.lfId, 10) % 1000 - 1;
 }
 
 // Read the building levels of the currently selected race from the table into a
@@ -911,8 +911,8 @@ function setupPlanetsSpin() {
 
 function _onPlanetsTableClick(event) {
 	const btn = event.target.closest('button');
-	if (!btn || !btn.hasAttribute('data-pln')) return;
-	const plnID = Number.parseInt(btn.getAttribute('data-pln'), 10);
+	if (!btn || !('pln' in btn.dataset)) return;
+	const plnID = Number.parseInt(btn.dataset.pln, 10);
 	if (Number.isNaN(plnID)) return;
 	btn.blur();
 	if (btn.classList.contains('control-edit')) {
@@ -929,7 +929,7 @@ function _onPlanetsTableClick(event) {
 function _bindTabPersistence() {
 	$$('#mainTabs button[data-bs-toggle="tab"]').forEach(function (btn) {
 		btn.addEventListener('shown.bs.tab', function () {
-			const target = btn.getAttribute('data-bs-target') || '';
+			const target = btn.dataset.bsTarget || '';
 			const cookie = { value: target === '#all-planets-panel' ? 'all' : 'one', validate: function (k, v) { return v; } };
 			saveToCookie(PRODUCTION_ACTIVE_TAB_COOKIE, cookie);
 		});

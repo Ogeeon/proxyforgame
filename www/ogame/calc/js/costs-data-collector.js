@@ -120,7 +120,7 @@ class DataCollector {
     params.lfResTimeRdcMap = {};
     const rows = document.querySelectorAll('#lf-research-bonuses-tbody tr');
     rows.forEach(row => {
-      const techId = Number.parseInt(row.getAttribute('data-tech-id'));
+      const techId = Number.parseInt(row.dataset.techId);
       if (!techId) return;
       params.lfResCostRdcMap[techId] = this._getInputNumberFromElement(row.querySelector('.lf-research-cost-input'));
       params.lfResTimeRdcMap[techId] = this._getInputNumberFromElement(row.querySelector('.lf-research-time-input'));

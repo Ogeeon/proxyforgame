@@ -144,7 +144,7 @@ class QueueCalculatorApp {
     // Tab persistence
     document.querySelectorAll('#mainTabs button[data-bs-toggle="tab"]').forEach((btn) => {
       btn.addEventListener('shown.bs.tab', () => {
-        const target = btn.getAttribute('data-bs-target') || '';
+        const target = btn.dataset.bsTarget || '';
         const m = target.match(/tab-(\d+)/);
         if (m) {
           const cookie = { value: m[1], validate: (k, v) => v };
@@ -374,7 +374,7 @@ class QueueCalculatorApp {
 
   _onBuildClick(event, state) {
     const btn = event.currentTarget;
-    const techId = Number.parseInt(btn.getAttribute('data-tech'), 10);
+    const techId = Number.parseInt(btn.dataset.tech, 10);
     if (!techId) return;
     state.queue.push([techId, 1]);
     this._refreshTab(state.tabNum);
@@ -382,7 +382,7 @@ class QueueCalculatorApp {
 
   _onDestroyClick(event, state) {
     const btn = event.currentTarget;
-    const techId = Number.parseInt(btn.getAttribute('data-tech'), 10);
+    const techId = Number.parseInt(btn.dataset.tech, 10);
     if (!techId || NON_DESTROYABLE_TECHS.has(techId)) return;
     // Don't enqueue a destroy that would push the building below 0
     const projectedLevel = this._projectedLevel(state, techId);
@@ -403,7 +403,7 @@ class QueueCalculatorApp {
   _onDstTableClick(event, tabNum) {
     const btn = event.target.closest('button');
     if (!btn) return;
-    const rowIdx = Number.parseInt(btn.getAttribute('data-row'), 10);
+    const rowIdx = Number.parseInt(btn.dataset.row, 10);
     if (Number.isNaN(rowIdx)) return;
     const state = this._stateFor(tabNum);
     if (btn.classList.contains('queue-row-up')) {
