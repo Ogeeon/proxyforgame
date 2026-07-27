@@ -714,7 +714,7 @@ class CostsCalculator {
   _parsePercent(input) {
     if (!input) return 0;
     const val = getInputNumber(input);
-    return val < 0 ? 0 : val;
+    return Math.max(val, 0);
   }
 
   /**
