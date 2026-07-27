@@ -39,7 +39,7 @@ function GetVar($var, $type)
 
 
   function SendReport() {
-    if (($wrong = GetVar('wrong', 'str')) !== FALSE && ($right = GetVar('right', 'str')) !== FALSE) {
+    if (($wrong = GetVar('wrong', 'str')) !== false && ($right = GetVar('right', 'str')) !== false) {
       if ($wrong == '' && $right == '')
         die("4\nempty");
       if ($wrong === $right)
@@ -62,7 +62,7 @@ function GetVar($var, $type)
   }
 
   function SendEmail() {
-    if (($emailSubject = GetVar('subject', 'str')) !== FALSE && ($emailBody = GetVar('body', 'str')) !== FALSE) {
+    if (($emailSubject = GetVar('subject', 'str')) !== false && ($emailBody = GetVar('body', 'str')) !== false) {
       if ($emailSubject == '' && $emailBody == '')
         die("4\nempty");
       $to  = 'proxyforgame@gmail.com';
@@ -109,7 +109,7 @@ function GetVar($var, $type)
   }
     
   function GetChangelog() {
-    if (($lastSeen = GetVar('lastSeen', 'int')) !== FALSE && ($lang = GetVar('lang', 'str')) !== FALSE) {
+    if (($lastSeen = GetVar('lastSeen', 'int')) !== false && ($lang = GetVar('lang', 'str')) !== false) {
       $langs = array('ru', 'de', 'es', 'pl', 'fr', 'it', 'nl', 'sk', 'tr', 'pt', 'en', 'us');
       if (!in_array($lang, $langs))
         die("1\nmalformed");
@@ -124,7 +124,7 @@ function GetVar($var, $type)
   }
 
   function GetDataCode() {
-    if (($strCode = GetVar('code', 'str')) !== FALSE) {
+    if (($strCode = GetVar('code', 'str')) !== false) {
 
       //flight.php?SR_KEY=fs008d2cbfee933ddbb85e2e20d8872ce34d
       //flight.php?SR_KEY=sr-ru-1-360e215d03d5115e828c70bba761b361dd8b4c0c

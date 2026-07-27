@@ -24,7 +24,7 @@ function SqlQuery($query, $params) {
     $res = array();
 
     if (!isset($connection) || $connection === false || $connection === null) {
-        return FALSE;
+        return false;
     }
 
     // Escape all parameters
@@ -40,16 +40,16 @@ function SqlQuery($query, $params) {
     }
 
     if ($result = mysqli_query($connection, $finalQuery)) {
-        if ($result === TRUE) return FALSE; // If the query is not a select, return FALSE because there is no result
+        if ($result === true) return false; // If the query is not a select, return FALSE because there is no result
         while ($row = mysqli_fetch_assoc($result)) {
             array_push($res, $row);
         }
         mysqli_free_result($result);
     } else {
-        return FALSE;
+        return false;
     }
 
-    return count($res) > 0 ? $res : FALSE;
+    return count($res) > 0 ? $res : false;
 }
 	
 

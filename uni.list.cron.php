@@ -42,7 +42,7 @@ function sqlQuery($db, $sql)
 
 	if ($result = mysqli_query($db, $sql))
 	{
-		if ($result === TRUE) return FALSE; // для не-select'ов возвращаем FALSE, потому что нет результата
+		if ($result === true) return false; // для не-select'ов возвращаем FALSE, потому что нет результата
 		while ($row = mysqli_fetch_assoc($result))
 		    array_push($res, $row);
 		mysqli_free_result($result);
@@ -50,10 +50,10 @@ function sqlQuery($db, $sql)
 	else {
         echo "\n sql=$sql, err=".mysqli_errno($db)."\n";
         echo mysqli_error($db)."\n";
-        return FALSE;
+        return false;
     };
 
-	return count($res) > 0 ? $res : FALSE;
+	return count($res) > 0 ? $res : false;
 }
 
 // ********************************************************************************************
