@@ -136,6 +136,7 @@ function findDatabaseFiles() {
       }
     } catch (e) {
       // Skip directories we can't read
+      console.error(colorize(`  Skipped ${dir}: ${e.message}`, colors.gray));
     }
   }
 

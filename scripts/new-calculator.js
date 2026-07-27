@@ -53,13 +53,13 @@ function parseArgs() {
     skipExisting: false
   };
 
-  for (let i = 0; i < args.length; i++) {
-    if (args[i].startsWith('--title=')) {
-      result.title = args[i].split('=')[1];
-    } else if (args[i] === '--skip-existing') {
+  for (const arg of args) {
+    if (arg.startsWith('--title=')) {
+      result.title = arg.split('=')[1];
+    } else if (arg === '--skip-existing') {
       result.skipExisting = true;
-    } else if (!args[i].startsWith('--')) {
-      result.name = args[i];
+    } else if (!arg.startsWith('--')) {
+      result.name = arg;
     }
   }
 

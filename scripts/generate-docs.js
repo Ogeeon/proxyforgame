@@ -129,40 +129,32 @@ function generateCalculatorDocs(calcName) {
   const displayName = translations.title || calcName;
   const docs = [];
 
-  docs.push(`# ${displayName}`);
-  docs.push('');
-  docs.push(`**URL:** \`http://pfg.wmp${info.url}\``);
-  docs.push('');
+  docs.push(`# ${displayName}`, '', `**URL:** \`http://pfg.wmp${info.url}\``, '');
 
   if (translations.description) {
-    docs.push(`## Description`);
-    docs.push('');
-    docs.push(translations.description);
-    docs.push('');
+    docs.push(`## Description`, '', translations.description, '');
   }
 
   if (translations.keywords) {
-    docs.push(`**Keywords:** ${translations.keywords}`);
-    docs.push('');
+    docs.push(`**Keywords:** ${translations.keywords}`, '');
   }
 
   // Technical details
-  docs.push(`## Technical Details`);
-  docs.push('');
-  docs.push(`| Property | Value |`);
-  docs.push(`|----------|-------|`);
-  docs.push(`| PHP Controller | \`www/ogame/calc/${calcName}.php\` |`);
-  docs.push(`| Template | \`www/ogame/calc/${calcName}.tpl\` |`);
-  docs.push(`| JavaScript | \`www/ogame/calc/js/${calcName}.js\` |`);
-  docs.push(`| CSS | \`www/ogame/calc/css/${calcName}.css\` |`);
-  docs.push(`| Tests | ${info.hasTest ? '✅' : '❌'} \`playwright-tests/tests/${calcName}.spec.js\` |`);
-  docs.push('');
+  docs.push(
+    `## Technical Details`,
+    '',
+    `| Property | Value |`,
+    `|----------|-------|`,
+    `| PHP Controller | \`www/ogame/calc/${calcName}.php\` |`,
+    `| Template | \`www/ogame/calc/${calcName}.tpl\` |`,
+    `| JavaScript | \`www/ogame/calc/js/${calcName}.js\` |`,
+    `| CSS | \`www/ogame/calc/css/${calcName}.css\` |`,
+    `| Tests | ${info.hasTest ? '✅' : '❌'} \`playwright-tests/tests/${calcName}.spec.js\` |`,
+    '',
+  );
 
   if (info.options.length > 0) {
-    docs.push(`## Configuration Options`);
-    docs.push('');
-    docs.push('The calculator supports the following options (stored in cookies):');
-    docs.push('');
+    docs.push(`## Configuration Options`, '', 'The calculator supports the following options (stored in cookies):', '');
     info.options.forEach(opt => {
       docs.push(`- \`${opt}\``);
     });
@@ -170,56 +162,46 @@ function generateCalculatorDocs(calcName) {
   }
 
   if (info.functions) {
-    docs.push(`## Code Statistics`);
-    docs.push('');
-    docs.push(`- JavaScript functions: ${info.functions}`);
-    docs.push('');
+    docs.push(`## Code Statistics`, '', `- JavaScript functions: ${info.functions}`, '');
   }
 
   // Usage
-  docs.push(`## Usage`);
-  docs.push('');
-  docs.push(`1. Navigate to [${displayName}](http://pfg.wmp${info.url})`);
-  docs.push(`2. Configure input parameters`);
-  docs.push(`3. View calculated results`);
-  docs.push('');
+  docs.push(
+    `## Usage`,
+    '',
+    `1. Navigate to [${displayName}](http://pfg.wmp${info.url})`,
+    `2. Configure input parameters`,
+    `3. View calculated results`,
+    '',
+  );
 
   // Development notes
-  docs.push(`## Development Notes`);
-  docs.push('');
-  docs.push(`### File Structure`);
-  docs.push('');
-  docs.push('```');
-  docs.push(`www/ogame/calc/`);
-  docs.push(`├── ${calcName}.php      # Controller`);
-  docs.push(`├── ${calcName}.tpl      # Template`);
-  docs.push(`├── js/${calcName}.js    # Logic`);
-  docs.push(`└── css/${calcName}.css  # Styles`);
-  docs.push('```');
-  docs.push('');
+  docs.push(
+    `## Development Notes`,
+    '',
+    `### File Structure`,
+    '',
+    '```',
+    `www/ogame/calc/`,
+    `├── ${calcName}.php      # Controller`,
+    `├── ${calcName}.tpl      # Template`,
+    `├── js/${calcName}.js    # Logic`,
+    `└── css/${calcName}.css  # Styles`,
+    '```',
+    '',
+  );
 
-  docs.push(`### Testing`);
-  docs.push('');
+  docs.push(`### Testing`, '');
   if (info.hasTest) {
-    docs.push(`Run tests:`);
-    docs.push('```bash');
-    docs.push(`npx playwright test ${calcName}`);
-    docs.push('```');
+    docs.push(`Run tests:`, '```bash', `npx playwright test ${calcName}`, '```');
   } else {
     docs.push(colorize('⚠️ No tests available', colors.yellow));
   }
   docs.push('');
 
-  docs.push(`### Translation`);
-  docs.push('');
-  docs.push(`Translation key: \`${info.translationKey || calcName}\``);
-  docs.push(`Translation files: \`www/locale/*.json\``);
-  docs.push('');
+  docs.push(`### Translation`, '', `Translation key: \`${info.translationKey || calcName}\``, `Translation files: \`www/locale/*.json\``, '');
 
-  docs.push('---');
-  docs.push('');
-  docs.push(`*Documentation generated automatically by scripts/generate-docs.js*`);
-  docs.push('');
+  docs.push('---', '', `*Documentation generated automatically by scripts/generate-docs.js*`, '');
 
   return docs.join('\n');
 }
@@ -230,23 +212,22 @@ function generateCalculatorDocs(calcName) {
 function generateIndex(calculators) {
   const lines = [];
 
-  lines.push('# ProxyForGame Calculators');
-  lines.push('');
-  lines.push('This directory contains documentation for all OGame calculators.');
-  lines.push('');
-  lines.push('## Available Calculators');
-  lines.push('');
+  lines.push(
+    '# ProxyForGame Calculators',
+    '',
+    'This directory contains documentation for all OGame calculators.',
+    '',
+    '## Available Calculators',
+    '',
+  );
 
   calculators.forEach(calc => {
     const translations = getTranslations(calc);
-    lines.push(`### [${translations.title || calc}](${calc}.md)`);
-    lines.push('');
+    lines.push(`### [${translations.title || calc}](${calc}.md)`, '');
     if (translations.description) {
-      lines.push(`${translations.description}`);
-      lines.push('');
+      lines.push(`${translations.description}`, '');
     }
-    lines.push(`**View:** [${translations.title || calc}](http://pfg.wmp/ogame/calc/${calc}.php)`);
-    lines.push('');
+    lines.push(`**View:** [${translations.title || calc}](http://pfg.wmp/ogame/calc/${calc}.php)`, '');
   });
 
   return lines.join('\n');
