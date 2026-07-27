@@ -10,7 +10,7 @@ const POPULATED_SYSTEMS_TTL_MS = 24 * 60 * 60 * 1000;
 // strings; the orchestrator reads/writes prm and calls load/save (cookie I/O in
 // utils.js). Transient bits (populated systems, manual overrides) live on the
 // orchestrator instance, not here.
-var options = {
+const options = {
     defConstraints: {
         min: -Infinity, max: Infinity, def: 0, allowFloat: false, allowNegative: false,
     },
