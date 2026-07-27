@@ -1,8 +1,3 @@
-// Заглушка для вызова функции без учёта наличия всех 5 офицеров и класса игрока
-function getProductionRate(techID, techLevel, energyTechLevel, plasmaTechLevel, maxTemp, pos, universeSpeedFactor, geologist, engineer, productionFactor, powerFactor, boosterType) {
-	return getProductionRate(techID, techLevel, energyTechLevel, plasmaTechLevel, maxTemp, pos, universeSpeedFactor, geologist, engineer, productionFactor, powerFactor, boosterType, false, 1, false); // По умолчанию класс Генерал, чтобы не было бонуса
-}
-
 /**
  * Вычисляет скорость производства ресурсов (ед/час) и энергии.
  * @param techID ID постройки - рудника/синтезатора, электростанции или солн.спутника.
