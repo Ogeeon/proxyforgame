@@ -449,7 +449,6 @@ test.describe('Costs Calculator Page', () => {
         await page.locator(`#irn-level`).press('Enter');
         await expect(page.locator('#resulting-level')).toContainText('36');
         await page.getByRole('button', { name: 'Done' }).click();
-        await page.waitForTimeout(100);
         await expect(page.locator('#research-lab-level')).toHaveValue('36');
     });
 
@@ -587,7 +586,6 @@ test.describe('Costs Calculator - Robot/Nanite factory disclaimer', () => {
 
         await robotLevel.fill('8');
         await robotLevel.press('Enter');
-        await page.waitForTimeout(200);
         await expect(modal).toBeHidden();
     });
 
@@ -613,7 +611,6 @@ test.describe('Costs Calculator - Robot/Nanite factory disclaimer', () => {
         await metalLevel.fill('10');
         await metalLevel.press('Enter');
 
-        await page.waitForTimeout(200);
         await expect(modal).toBeHidden();
     });
 });
