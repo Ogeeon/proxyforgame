@@ -44,6 +44,30 @@ class TerraformerCalculator {
   }
 
   /**
+   * Officer energy bonus: 10% with one relevant officer, 12% with all five,
+   * plus its contribution to the per-satellite yield.
+   */
+  static officerEnergyBonus(energyBonus, totalEnergy, baseEnergyPerSat) {
+    if (energyBonus === 1) {
+      return { bonus: Math.floor(0.1 * totalEnergy), perSatDelta: 0.1 * baseEnergyPerSat };
+    }
+    if (energyBonus === 2) {
+      return { bonus: Math.floor(0.12 * totalEnergy), perSatDelta: 0.12 * baseEnergyPerSat };
+    }
+    return { bonus: 0, perSatDelta: 0 };
+  }
+
+  /** Planet fields added by upgrading the terraformer: 5 on even levels, 4 on odd. */
+  static addedFields(tfLevelFrom, tfLevelTo) {
+    if (tfLevelTo <= 0) return 0;
+    let fields = 0;
+    for (let i = tfLevelFrom + 1; i <= tfLevelTo; i++) {
+      fields += (i % 2 === 0) ? 5 : 4;
+    }
+    return fields;
+  }
+
+  /**
    * Run the full computation for a set of parameters.
    *
    * @param {Object} p Parameters collected from the form:
@@ -91,14 +115,9 @@ class TerraformerCalculator {
     const lfTechBonus = Math.round(p.totalLFEnrgBonus * 0.01 * totalEnergy);
     energyPerSat += 0.01 * p.totalLFEnrgBonus * baseEnergyPerSat;
 
-    let officerBonus = 0;
-    if (p.energyBonus === 1) {
-      officerBonus = Math.floor(0.1 * totalEnergy);
-      energyPerSat += 0.1 * baseEnergyPerSat;
-    } else if (p.energyBonus === 2) {
-      officerBonus = Math.floor(0.12 * totalEnergy);
-      energyPerSat += 0.12 * baseEnergyPerSat;
-    }
+    const { bonus: officerBonus, perSatDelta: officerPerSatDelta } =
+      TerraformerCalculator.officerEnergyBonus(p.energyBonus, totalEnergy, baseEnergyPerSat);
+    energyPerSat += officerPerSatDelta;
 
     const boostEnergyBonus = Math.floor(0.1 * p.energyBoost * totalEnergy);
     energyPerSat += 0.1 * p.energyBoost * baseEnergyPerSat;
@@ -114,12 +133,7 @@ class TerraformerCalculator {
     const tfLevelTo = p.tfLevelTo;
 
     // Each new terraformer level adds planet fields: 5 on even levels, 4 on odd.
-    let addedFields = 0;
-    if (tfLevelTo > 0) {
-      for (let i = tfLevelFrom + 1; i <= tfLevelTo; i++) {
-        addedFields += (i % 2 === 0) ? 5 : 4;
-      }
-    }
+    const addedFields = TerraformerCalculator.addedFields(tfLevelFrom, tfLevelTo);
 
     const energyRequirement = getBuildEnergyCost_C(TF_TECH_ID, tfLevelTo, TF_TECH_DATA);
     let missingEnergy = energyRequirement - availableEnergy;
