@@ -18,13 +18,13 @@ class Intl
     {
 		$locale_dir = __DIR__.'/locale';
         if(empty(self::$locales))
-        {   
+        {
             foreach(glob($locale_dir.'/*.json') as $localeFilePath)
             {
                 self::$locales[] = pathinfo($localeFilePath, PATHINFO_FILENAME);
             }
         }
-    
+
         return self::$locales;
     }
 
@@ -37,12 +37,12 @@ class Intl
         {
             self::getTranslations($locale);
         }
-    
+
         return self::$translations;
     }
 
     /**
-     * Get translations for a given locale. 
+     * Get translations for a given locale.
      * Merges 'common' translations with section-specific translations.
      * Section-specific translations take precedence in case of conflicts.
      */
@@ -54,23 +54,23 @@ class Intl
             throw new \InvalidArgumentException('Locale "'.$locale.'" does not exist.');
         }
         else if(!isset(self::$translations[$locale]))
-        {   
+        {
             self::$translations[$locale] = json_decode(file_get_contents($locale_dir.'/'.$locale.'.json'), true);
         }
-        
+
         // Start with common translations (if section is not 'common')
         $result = [];
         if($section !== 'common' && isset(self::$translations[$locale]['common']))
         {
             $result = self::$translations[$locale]['common'];
         }
-        
+
         // Merge with section-specific translations (these override common ones)
         if(isset(self::$translations[$locale][$section]))
         {
             $result = array_merge($result, self::$translations[$locale][$section]);
         }
-        
+
         return $result;
     }
 

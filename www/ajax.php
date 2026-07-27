@@ -3,11 +3,11 @@
   // в запросе обязательно должен присутствовать параметр service
 
   // аналог js unescape
-  function convert_unicode($t) 
-  { 
-    return preg_replace( '#%u([0-9A-F]{4})#se','iconv("UTF-16BE","UTF-8",pack("H4","$1"))', $t ); 
+  function convert_unicode($t)
+  {
+    return preg_replace( '#%u([0-9A-F]{4})#se','iconv("UTF-16BE","UTF-8",pack("H4","$1"))', $t );
   }
-  
+
   // функция выбирает из запроса значение указанного параметра
 function GetVar($var, $type)
 {
@@ -84,7 +84,7 @@ function GetVar($var, $type)
     }
     die("3\nempty");
   }
-  
+
   function socketmail($to, $subject, $message) {
     $smtpUser = getenv('SMTP_USER');
     $smtpPass = getenv('SMTP_PASS');
@@ -104,7 +104,7 @@ function GetVar($var, $type)
     fputs($socket, "MAIL FROM: <$smtpUser>\r\n"); fgets($socket, 256);
     fputs($socket, "RCPT TO: <$to>\r\n"); fgets($socket, 256);
     fputs($socket, "DATA\r\n"); fgets($socket, 256);
-  
+
     fputs($socket, "Content-Type: text/plain; charset=UTF-8\r\n");
     fputs($socket, "To: <$to>\r\n");
     fputs($socket, "Subject: $subject\r\n");
@@ -115,7 +115,7 @@ function GetVar($var, $type)
     fclose($socket);
     return true;
   }
-    
+
   function GetChangelog() {
     if (($lastSeen = GetVar('lastSeen', 'int')) !== false && ($lang = GetVar('lang', 'str')) !== false) {
       $langs = array('ru', 'de', 'es', 'pl', 'fr', 'it', 'nl', 'sk', 'tr', 'pt', 'en', 'us');
@@ -125,12 +125,12 @@ function GetVar($var, $type)
       if ($lang == 'us') {
         $lang = 'en';
       }
-      $result = SqlQuery("select ch.ts, cd.description from change_headers ch join change_descriptions cd on (ch.id = cd.id) 
+      $result = SqlQuery("select ch.ts, cd.description from change_headers ch join change_descriptions cd on (ch.id = cd.id)
         where lang like ? and ch.id > ? order by ch.id desc", array($lang, $lastSeen));
       $repsonse = json_encode($result);
       die('0\n'.$repsonse);
     }
-    die("1\nmalformed");		
+    die("1\nmalformed");
   }
 
   function GetDataCode() {
@@ -313,23 +313,23 @@ function GetVar($var, $type)
 
     $serverDataUrl = "https://s{$universe}-{$country}.ogame.gameforge.com/api/serverData.xml";
     $serverDataXml = @file_get_contents($serverDataUrl);
-    
+
     if ($serverDataXml === false) {
         http_response_code(503);
         echo json_encode([
             'error' => 'Failed to fetch server data from OGame API'
         ]);
     }
-    
+
     $xml = simplexml_load_string($serverDataXml);
-    
+
     if ($xml === false) {
         http_response_code(422);
         echo json_encode([
             'error' => 'Failed to parse server data XML'
         ]);
     }
-    
+
     $universeData = [
       'speedFleetPeaceful' => (string)$xml->speedFleetPeaceful ?? '',
       'speedFleetWar' => (string)$xml->speedFleetWar ?? '',
@@ -346,7 +346,7 @@ function GetVar($var, $type)
       // inactive, and a universe can have either, both or neither switched on.
       'fleetIgnoreInactiveSystems' => (string)$xml->fleetIgnoreInactiveSystems ?? ''
     ];
-        
+
     echo json_encode($universeData);
   }
 
@@ -381,7 +381,7 @@ function GetVar($var, $type)
     die("1\nno service");
   }
   $service = $_REQUEST['service'];
-  
+
   switch ($service)
   {
     case 'report': SendReport(); break;

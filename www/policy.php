@@ -3,7 +3,7 @@
 	<meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
 	<title>Privacy Policy</title>
 </head>
-<body class="ui-widget">	
+<body class="ui-widget">
 
 <h1>Privacy Policy</h1>
 
@@ -92,7 +92,7 @@
     <li>To detect, prevent and address technical issues</li>
     </ul>
 
-  
+
 <h2>Legal Basis for Processing Personal Data under the General Data Protection Regulation (GDPR)</h2>
 <p>If you are from the European Economic Area (EEA), ProxyForGame legal basis for collecting and using the personal information described in this Privacy Policy depends on the Personal Data we collect and the specific context in which we collect it.</p>
 <p>ProxyForGame may process your Personal Data because:</p>
@@ -173,7 +173,7 @@
     </li>
                                     </ul>
 
-  
+
 
 
 
