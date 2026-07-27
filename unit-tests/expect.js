@@ -5,7 +5,7 @@
 // find-and-replace instead of a rewrite. Only value matchers live here — anything
 // asserting on a locator belongs in the Playwright suite by definition.
 
-const assert = require('assert');
+const assert = require('node:assert');
 
 function build(actual, negated) {
     const check = (pass, message) => {

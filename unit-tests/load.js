@@ -9,9 +9,9 @@
 //   const { GravitonCalculator } = load(['ogame/calc/js/graviton-core.js'],
 //                                       ['GravitonCalculator']);
 
-const { readFileSync } = require('fs');
-const { join } = require('path');
-const vm = require('vm');
+const { readFileSync } = require('node:fs');
+const { join } = require('node:path');
+const vm = require('node:vm');
 
 const WWW = join(__dirname, '..', 'www');
 
