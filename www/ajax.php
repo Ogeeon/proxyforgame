@@ -141,7 +141,7 @@ function GetVar($var, $type)
         curl_close($ch);
         // Maybe Logserver isn't accessible. Let's try fallback method
         $data = GetSpyReportByFallbackMethod($strCode);
-        if ($data !== NULL) {
+        if ($data !== null) {
           die("0\n$data");
         }
         die("3\n$err");
@@ -155,7 +155,7 @@ function GetVar($var, $type)
       // in front of a {"RESULT_CODE":1000,"RESULT_DATA":false} envelope.
       // Let's try fallback method
       $data = GetSpyReportByFallbackMethod($strCode);
-      if ($data !== NULL) {
+      if ($data !== null) {
         die("0\n$data");
       }
       // Tell a code the user should double-check apart from a broken answer
@@ -192,7 +192,7 @@ function GetVar($var, $type)
       // Anchored match keeps $language/$universe restricted to safe characters
       // before they get spliced into request URLs below.
       if (!preg_match('/^sr-([a-zA-Z]{2,3})-(\d+)-[0-9a-fA-F]+$/', $srId, $m)) {
-          return NULL;
+          return null;
       }
 
       $language = $m[1];  // 'en'
@@ -203,13 +203,13 @@ function GetVar($var, $type)
       $reportData = @file_get_contents($reportUrl);
 
       if ($reportData === false) {
-          return NULL;
+          return null;
       }
 
       $reportJson = json_decode($reportData, true);
 
       if (!is_array($reportJson) || empty($reportJson['RESULT_DATA'])) {
-          return NULL;
+          return null;
       }
 
       // Query OGame API for server data
@@ -217,14 +217,14 @@ function GetVar($var, $type)
       $serverDataXml = @file_get_contents($serverDataUrl);
 
       if ($serverDataXml === false) {
-          return NULL;
+          return null;
       }
 
       // Parse XML
       $xml = simplexml_load_string($serverDataXml);
 
       if ($xml === false) {
-          return NULL;
+          return null;
       }
       
       // Build universe data JSON structure
