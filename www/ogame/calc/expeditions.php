@@ -63,5 +63,3 @@ if ($arrServerData) {
 }
 
 require_once('expeditions.tpl');
-
-?>
