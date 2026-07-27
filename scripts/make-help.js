@@ -12,8 +12,8 @@
  *   `target: deps ## text`  - a documented target
  */
 
-const fs = require('fs');
-const path = require('path');
+const fs = require('node:fs');
+const path = require('node:path');
 
 const makefile = path.join(__dirname, '..', 'Makefile');
 
@@ -27,12 +27,12 @@ try {
 
 const entries = [];
 for (const line of source.split(/\r?\n/)) {
-    const section = /^##@\s*(.*)$/.exec(line);
+    const section = /^##@(.*)$/.exec(line);
     if (section) {
         entries.push({ type: 'section', text: section[1].trim() });
         continue;
     }
-    const target = /^([a-zA-Z0-9_.-]+):[^=]*?##\s*(.*)$/.exec(line);
+    const target = /^([a-zA-Z0-9_.-]+):[^=]*?##(.*)$/.exec(line);
     if (target) {
         entries.push({ type: 'target', name: target[1], text: target[2].trim() });
     }
