@@ -194,7 +194,7 @@ class MoonCalculator {
    * Run both sub-calculators for a single params object.
    */
   compute(p) {
-    return Object.assign({}, this.computeDestroy(p), this.computeCreate(p));
+    return { ...this.computeDestroy(p), ...this.computeCreate(p) };
   }
 }
 
