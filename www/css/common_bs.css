@@ -86,6 +86,28 @@
   background-color: rgb(20, 23, 27) !important;
 }
 
+/* Modals: Bootstrap paints .modal-content with --bs-modal-color (#dee2e6 in dark
+   mode), which reads as white against the calculators' cyan default text. Inherit
+   from the page instead — the same fix the accordions carry in flight_bs.css and
+   production_bs.css. Set on .modal because that is where Bootstrap declares the
+   variable, so this also feeds the `color´ on .modal-content.
+
+   A .table nested in a modal needs its own line: Bootstrap re-colours every cell
+   with --bs-table-color (var(--bs-emphasis-color) — plain white in dark mode), so
+   the inherited modal colour would stop at the table element. The striped/active/
+   hover state variables default to the same emphasis colour and are listed too,
+   otherwise the changelog's .table-striped rows alternate cyan and white. */
+.modal {
+  --bs-modal-color: inherit;
+}
+
+.modal .table {
+  --bs-table-color: inherit;
+  --bs-table-striped-color: inherit;
+  --bs-table-active-color: inherit;
+  --bs-table-hover-color: inherit;
+}
+
 [data-bs-theme="dark"] .nav-tabs .nav-link.active {
   color: var(--bs-primary);
   /* background-color: var(--bs-primary-bg-subtle); */
