@@ -87,7 +87,11 @@ them over the network. New spec files must use the same import. Video recording 
 - Commit subjects follow **Conventional Commits**: `<type>(<scope>): <subject>` in English, imperative mood, lowercase after the colon, no trailing period. Types: `feat`, `fix`, `refactor`, `style`, `test`, `docs`, `chore`. Scope is the calculator or area (`flight`, `moon`, `lfcosts`, `production`, `claude`). Commits before 2026-07-22 use the older plain-sentence style — ignore them and follow this rule.
 - Commit messages: write to a temp file and use `git commit -F`, or avoid quotes/backticks entirely. Do not use here-strings in PowerShell for commit bodies.
 - Keep unrelated pre-existing changes in a separate commit.
-- Run both suites before committing — `make test`, or `make check` to include translation validation; new tests go in the existing file for that calculator, not a new file.
+- Before committing, scope tests to what changed:
+  - If every changed file belongs to a single calculator (its `<name>.php`, `<name>.tpl`, `js/<name>.js`, `unit-tests/<name>-core.test.js`, `playwright-tests/tests/<name>.spec.js`), only run that calculator's tests: `make test-one spec=<name>` for e2e, and `node --test <name>-core.test.js` from `unit-tests/` for the unit test if one exists for that calculator.
+  - If any changed file is shared across calculators — `www/ogame/common.js`, `www/ajax.php`, `www/Intl.php`, `www/langs.php`, `www/db.connect.inc.php`, `locale/*.json`, `playwright-tests/base.js`, files under `unit-tests/` other than a single `*-core.test.js`, or the `Makefile`/config itself — run the full suite with `make test` (or `make check` to include translation validation).
+  - Always run the full `make test` before `git push`, regardless of how narrow the commits being pushed were.
+  - New tests go in the existing file for that calculator, not a new file.
 
 ## Architecture
 
