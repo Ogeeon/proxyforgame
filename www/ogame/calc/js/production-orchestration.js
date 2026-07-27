@@ -58,9 +58,9 @@ function updateCrawlerLimit(input, metalMineLvl, crystalMineLvl, deutSynthLvl, g
 		// attribute — not `title´ — is what keeps a recomputed hint in sync.
 		// Writing `title´ back would leave the element with a native tooltip and
 		// a Bootstrap one at the same time.
-		input.setAttribute('data-bs-original-title', hint);
+		input.dataset.bsOriginalTitle = hint;
 	} else {
-		input.setAttribute('data-bs-toggle', 'tooltip');
+		input.dataset.bsToggle = 'tooltip';
 		input.title = hint;
 		bootstrap.Tooltip.getOrCreateInstance(input);
 	}
