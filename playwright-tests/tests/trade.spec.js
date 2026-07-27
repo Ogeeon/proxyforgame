@@ -232,8 +232,7 @@ test.describe('Trade Calculator Page', () => {
         await page.locator('#coord-p').click();
         await page.locator('#coord-p').fill('');
         await page.locator('#coord-p').pressSequentially('2');
-        // Small wait to ensure keyup events are processed
-        await page.waitForTimeout(100);
+        // toContainText retries until the keyup-triggered recalculation lands
         await expect(page.locator('#alink')).toContainText('trade.php#rmd=2.4&rcd=1.5&st=0&dt=2&dmt=3&fix2=10000&m=100000&l=en:1&lc=4:3:2&lm=0');
         await expect(page.locator('#atext')).toContainText('Selling 100.000 met. Buying 47.500 crys and 10.000 deut. Exchange rates 2.4:1.5:1. Coordinates [4:3:2] (Universe 1, en.ogame.gameforge.com)');
         await expect(page.locator('#abbcode')).toContainText('trade.php#rmd=2.4&rcd=1.5&st=0&dt=2&dmt=3&fix2=10000&m=100000&l=en:1&lc=4:3:2&lm=0]Selling 100.000 met. Buying 47.500 crys and 10.000 deut. Exchange rates 2.4:1.5:1. Coordinates [4:3:2] (Universe 1, en.ogame.gameforge.com)[/url]');
