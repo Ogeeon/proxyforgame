@@ -32,7 +32,7 @@ for (const line of source.split(/\r?\n/)) {
         entries.push({ type: 'section', text: section[1].trim() });
         continue;
     }
-    const target = /^([a-zA-Z0-9_.-]+):[^=]*?##(.*)$/.exec(line);
+    const target = /^([a-zA-Z0-9_.-]+):[^=#]*##(.*)$/.exec(line);
     if (target) {
         entries.push({ type: 'target', name: target[1], text: target[2].trim() });
     }

@@ -486,7 +486,7 @@ function updateSidebar(calcName) {
   // Find the expeditions line and add after it
   const newEntry = `    array('/ogame/calc/${calcName}.php', '${calcName}-title'),\n`;
   const updatedContent = content.replace(
-    /(    array\('\/ogame\/calc\/expeditions\.php', 'expeditions-title'\)\n)/,
+    /( {4}array\('\/ogame\/calc\/expeditions\.php', 'expeditions-title'\)\n)/,
     `${newEntry}$1`
   );
 
@@ -635,15 +635,23 @@ function main() {
   }
 
   console.log(colorize(`\nNext steps:`, colors.yellow));
-  console.log(`  1. Customize the calculation logic in ${colorize(`www/ogame/calc/js/${calcName}-core.js`, colors.blue)}`);
-  console.log(`  2. Customize input reading in ${colorize(`www/ogame/calc/js/${calcName}-data-collector.js`, colors.blue)}`);
-  console.log(`  3. Customize result rendering in ${colorize(`www/ogame/calc/js/${calcName}-renderer.js`, colors.blue)}`);
-  console.log(`  4. Add params/fields and event wiring in ${colorize(`www/ogame/calc/js/${calcName}-orchestration.js`, colors.blue)}`);
-  console.log(`  5. Update the HTML structure in ${colorize(`www/ogame/calc/${calcName}.tpl`, colors.blue)}`);
-  console.log(`  6. Adjust styles in ${colorize(`www/ogame/calc/css/${calcName}_bs.css`, colors.blue)}`);
+  const coreJsPath = `www/ogame/calc/js/${calcName}-core.js`;
+  const dataCollectorJsPath = `www/ogame/calc/js/${calcName}-data-collector.js`;
+  const rendererJsPath = `www/ogame/calc/js/${calcName}-renderer.js`;
+  const orchestrationJsPath = `www/ogame/calc/js/${calcName}-orchestration.js`;
+  const tplPath = `www/ogame/calc/${calcName}.tpl`;
+  const cssPath = `www/ogame/calc/css/${calcName}_bs.css`;
+  const specPath = `playwright-tests/tests/${calcName}.spec.js`;
+  const calcUrl = `http://pfg.wmp/ogame/calc/${calcName}.php`;
+  console.log(`  1. Customize the calculation logic in ${colorize(coreJsPath, colors.blue)}`);
+  console.log(`  2. Customize input reading in ${colorize(dataCollectorJsPath, colors.blue)}`);
+  console.log(`  3. Customize result rendering in ${colorize(rendererJsPath, colors.blue)}`);
+  console.log(`  4. Add params/fields and event wiring in ${colorize(orchestrationJsPath, colors.blue)}`);
+  console.log(`  5. Update the HTML structure in ${colorize(tplPath, colors.blue)}`);
+  console.log(`  6. Adjust styles in ${colorize(cssPath, colors.blue)}`);
   console.log(`  7. Translate placeholder keys in all locale files`);
-  console.log(`  8. Implement test scenarios in ${colorize(`playwright-tests/tests/${calcName}.spec.js`, colors.blue)}`);
-  console.log(`  9. Test the calculator at ${colorize(`http://pfg.wmp/ogame/calc/${calcName}.php`, colors.blue)}`);
+  console.log(`  8. Implement test scenarios in ${colorize(specPath, colors.blue)}`);
+  console.log(`  9. Test the calculator at ${colorize(calcUrl, colors.blue)}`);
 
   console.log('\n' + colorize('──────────────────────────────────────────────────────────', colors.gray));
 }

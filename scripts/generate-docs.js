@@ -76,7 +76,7 @@ function extractCalculatorInfo(calcName) {
     const optionsMatch = jsContent.match(/prm:\s*{([^}]+)}/s);
     if (optionsMatch) {
       const optionsContent = optionsMatch[1];
-      const propertyMatches = optionsContent.matchAll(/(\w+)\s*:/g);
+      const propertyMatches = optionsContent.matchAll(/(\w{1,64})\s*:/g);
       for (const match of propertyMatches) {
         info.options.push(match[1]);
       }
