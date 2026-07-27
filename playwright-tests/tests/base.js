@@ -1,7 +1,7 @@
-import { test as base, expect } from '@playwright/test';
-import { createHash } from 'crypto';
-import { existsSync, mkdirSync, readFileSync, renameSync, writeFileSync } from 'fs';
-import { join } from 'path';
+import { test as base } from '@playwright/test';
+import { createHash } from 'node:crypto';
+import { existsSync, mkdirSync, readFileSync, renameSync, writeFileSync } from 'node:fs';
+import { join } from 'node:path';
 
 // Every test gets a fresh browser context, so the browser cache never kicks in and
 // each page load re-downloads Bootstrap from the CDN (~1.2s of the ~1.5s load time).
@@ -14,7 +14,7 @@ const CACHE_DIR = join(__dirname, '..', '.cdn-cache');
 const memoryCache = new Map();
 
 function cachePath(url) {
-    return join(CACHE_DIR, createHash('sha1').update(url).digest('hex'));
+    return join(CACHE_DIR, createHash('sha256').update(url).digest('hex'));
 }
 
 function readCache(url) {
@@ -76,4 +76,4 @@ export const test = base.extend({
     },
 });
 
-export { expect };
+export { expect } from '@playwright/test';
