@@ -1400,8 +1400,7 @@ class FlightOrchestrator {
             alert(this.opts.ownApiBadJsonMsg);
             return false;
         }
-        if (data === null || typeof data !== 'object' || Array.isArray(data) ||
-            !('coords' in data || 'ships' in data || 'researches' in data || 'characterClassId' in data)) {
+        if (!this._isUsableOwnApiPayload(data)) {
             alert(this.opts.ownApiBadJsonMsg);
             return false;
         }
@@ -1411,61 +1410,12 @@ class FlightOrchestrator {
         const importShips = getChecked('#own-api-import-ships');
         const importLifeforms = getChecked('#own-api-import-lifeforms');
         try {
-            if (importCoords && typeof data.coords === 'string') {
-                const coords = data.coords.split(':');
-                setVal('#departure-g', coords[0]);
-                setVal('#departure-s', coords[1]);
-                setVal('#departure-p', coords[2]);
-            }
-            if (importClass) {
-                const classMap = { 1: 'class-0', 2: 'class-1', 3: 'class-2' };
-                if (classMap[data.characterClassId]) {
-                    document.querySelectorAll('input[name="class"]').forEach((r) => { r.checked = false; });
-                    setChecked(`#${classMap[data.characterClassId]}`, true);
-                }
-                const isTrader = data.allianceClassId == 2;
-                setChecked('#trader-bonus', isTrader);
-                if (isTrader) {
-                    setChecked('#warrior-bonus', false);
-                }
-            }
-            if (importResearch && data.researches) {
-                Object.entries(data.researches).forEach(([id, level]) => {
-                    if (id == 115) setVal('#cmb-drive', level);
-                    if (id == 117) setVal('#imp-drive', level);
-                    if (id == 118) setVal('#hyp-drive', level);
-                    if (id == 114) setVal('#hypertech-lvl', level);
-                });
-            }
-            if (importLifeforms && data.bonuses && data.bonuses.characterClassBooster) {
-                setVal('#lf-rocktal-collector-enh', 0);
-                setVal('#lf-mechan-general-enh', 0);
-                Object.entries(data.bonuses.characterClassBooster).forEach(([i, v]) => {
-                    if (i == 1) setNumVal('#lf-rocktal-collector-enh', frac(v, 6) * 100);
-                    if (i == 2) setNumVal('#lf-mechan-general-enh', frac(v, 6) * 100);
-                });
-            }
-            FLIGHT_TECH_MAPPING.forEach(([techId, name]) => {
-                if (importShips) setVal(`#${name}`, 0);
-                if (importLifeforms) {
-                    this._setClassVal(`${techId}-speed`, 0);
-                    this._setClassVal(`${techId}-cargo`, 0);
-                    this._setClassVal(`${techId}-fuel`, 0);
-                }
-            });
-            if (data.ships && (importShips || importLifeforms)) {
-                Object.entries(data.ships).forEach(([id, v]) => {
-                    const mapped = FLIGHT_TECH_MAPPING.find((m) => m[0] == id);
-                    if (mapped) {
-                        if (importShips) setVal(`#${mapped[1]}`, v.amount ? v.amount : 0);
-                        if (importLifeforms) {
-                            if (v.speed) this._setClassVal(`${id}-speed`, localizeFloat(frac(v.speed, 6) * 100, 4));
-                            if (v.cargo) this._setClassVal(`${id}-cargo`, localizeFloat(frac(v.cargo, 6) * 100, 4));
-                            if (v.fuel) this._setClassVal(`${id}-fuel`, localizeFloat(frac(v.fuel, 7) * 100, 5));
-                        }
-                    }
-                });
-            }
+            if (importCoords && typeof data.coords === 'string') this._importOwnApiCoords(data);
+            if (importClass) this._importOwnApiClass(data);
+            if (importResearch && data.researches) this._importOwnApiResearch(data);
+            if (importLifeforms && data.bonuses && data.bonuses.characterClassBooster) this._importOwnApiLifeformBoosters(data);
+            this._resetOwnApiShipFields(importShips, importLifeforms);
+            if (data.ships && (importShips || importLifeforms)) this._importOwnApiShips(data, importShips, importLifeforms);
             this.recalc();
         } catch (e) {
             consoleLog('own api import exception: ' + e);
@@ -1473,6 +1423,75 @@ class FlightOrchestrator {
             return false;
         }
         return true;
+    }
+
+    _isUsableOwnApiPayload(data) {
+        return data !== null && typeof data === 'object' && !Array.isArray(data) &&
+            ('coords' in data || 'ships' in data || 'researches' in data || 'characterClassId' in data);
+    }
+
+    _importOwnApiCoords(data) {
+        const coords = data.coords.split(':');
+        setVal('#departure-g', coords[0]);
+        setVal('#departure-s', coords[1]);
+        setVal('#departure-p', coords[2]);
+    }
+
+    _importOwnApiClass(data) {
+        const classMap = { 1: 'class-0', 2: 'class-1', 3: 'class-2' };
+        if (classMap[data.characterClassId]) {
+            document.querySelectorAll('input[name="class"]').forEach((r) => { r.checked = false; });
+            setChecked(`#${classMap[data.characterClassId]}`, true);
+        }
+        const isTrader = data.allianceClassId == 2;
+        setChecked('#trader-bonus', isTrader);
+        if (isTrader) {
+            setChecked('#warrior-bonus', false);
+        }
+    }
+
+    _importOwnApiResearch(data) {
+        Object.entries(data.researches).forEach(([id, level]) => {
+            if (id == 115) setVal('#cmb-drive', level);
+            if (id == 117) setVal('#imp-drive', level);
+            if (id == 118) setVal('#hyp-drive', level);
+            if (id == 114) setVal('#hypertech-lvl', level);
+        });
+    }
+
+    _importOwnApiLifeformBoosters(data) {
+        setVal('#lf-rocktal-collector-enh', 0);
+        setVal('#lf-mechan-general-enh', 0);
+        Object.entries(data.bonuses.characterClassBooster).forEach(([i, v]) => {
+            if (i == 1) setNumVal('#lf-rocktal-collector-enh', frac(v, 6) * 100);
+            if (i == 2) setNumVal('#lf-mechan-general-enh', frac(v, 6) * 100);
+        });
+    }
+
+    _resetOwnApiShipFields(importShips, importLifeforms) {
+        FLIGHT_TECH_MAPPING.forEach(([techId, name]) => {
+            if (importShips) setVal(`#${name}`, 0);
+            if (importLifeforms) {
+                this._setClassVal(`${techId}-speed`, 0);
+                this._setClassVal(`${techId}-cargo`, 0);
+                this._setClassVal(`${techId}-fuel`, 0);
+            }
+        });
+    }
+
+    _importOwnApiShips(data, importShips, importLifeforms) {
+        Object.entries(data.ships).forEach(([id, v]) => {
+            const mapped = FLIGHT_TECH_MAPPING.find((m) => m[0] == id);
+            if (!mapped) return;
+            if (importShips) setVal(`#${mapped[1]}`, v.amount ? v.amount : 0);
+            if (importLifeforms) this._applyOwnApiShipLifeformBonuses(id, v);
+        });
+    }
+
+    _applyOwnApiShipLifeformBonuses(id, v) {
+        if (v.speed) this._setClassVal(`${id}-speed`, localizeFloat(frac(v.speed, 6) * 100, 4));
+        if (v.cargo) this._setClassVal(`${id}-cargo`, localizeFloat(frac(v.cargo, 6) * 100, 4));
+        if (v.fuel) this._setClassVal(`${id}-fuel`, localizeFloat(frac(v.fuel, 7) * 100, 5));
     }
 
     /** Parse the pasted lifeform-bonuses report into the per-ship bonus table. */
