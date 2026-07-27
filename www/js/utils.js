@@ -241,8 +241,8 @@ function getOptionValue(opt, def) {
  * @param def значение по умолчанию
  */
 function getConstraint(element, constr, def) {
-	var el = (typeof element === 'string') ? document.getElementById(element) : element;
-	var constraints = el ? el._constrains : undefined;
+	const el = (typeof element === 'string') ? document.getElementById(element) : element;
+	const constraints = el ? el._constrains : undefined;
 	// Если не найдём ограничения в свойствах самого поля, поробуем вязть из options - если и там нет, вернём значение по умолчанию
 	if (typeof(constraints) === 'undefined') {
 		if (typeof(options.defConstraints) === 'undefined')
@@ -514,12 +514,12 @@ function saveToCookie(name, data) {
 			document.cookie = name + '=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/';
 		} catch (e) {
 			// Quota exceeded - fallback to cookie
-			var d = new Date();
+			const d = new Date();
 			d.setTime(d.getTime() + (365*24*60*60*1000));
 			document.cookie = name + '=' + encodeURIComponent(saveStr) + '; expires=' + d.toUTCString() + '; path=/';
 		}
 	} else {
-		var d = new Date();
+		const d = new Date();
 		d.setTime(d.getTime() + (365*24*60*60*1000));
 		document.cookie = name + '=' + encodeURIComponent(saveStr) + '; expires=' + d.toUTCString() + '; path=/';
 	}
@@ -573,7 +573,7 @@ function loadFromCookie(name, params) {
 					// Check if value is a JSON-encoded object
 					if (parts[1] && parts[1].indexOf('__JSON__') === 0) {
 						try {
-							var jsonStr = parts.slice(1).join(';').substring(8); // Remove __JSON__ prefix and rejoin in case semicolons were in the JSON
+							const jsonStr = parts.slice(1).join(';').substring(8); // Remove __JSON__ prefix and rejoin in case semicolons were in the JSON
 							params[parts[0]] = JSON.parse(jsonStr);
 						} catch (e) {
 							// If JSON parsing fails, fall back to validate
@@ -603,10 +603,10 @@ function loadFromStorage(name) {
  * @param name - cookie name
  */
 function getCookie(name) {
-	var prefix = name + '=';
-	var cookies = document.cookie.split(';');
-	for (var i = 0; i < cookies.length; i++) {
-		var cookie = cookies[i].trim();
+	const prefix = name + '=';
+	const cookies = document.cookie.split(';');
+	for (let i = 0; i < cookies.length; i++) {
+		const cookie = cookies[i].trim();
 		if (cookie.indexOf(prefix) === 0) {
 			return decodeURIComponent(cookie.substring(prefix.length));
 		}
@@ -621,13 +621,13 @@ function getCookie(name) {
  * @param days - lifetime in days
  */
 function setCookie(name, value, days) {
-	var d = new Date();
+	const d = new Date();
 	d.setTime(d.getTime() + days * 24 * 60 * 60 * 1000);
 	document.cookie = name + '=' + encodeURIComponent(value) + '; expires=' + d.toUTCString() + '; path=/';
 }
 
 function toggleLight(on) {
-	var theme = { value: 'light' };
+	const theme = { value: 'light' };
 	if (on) {
 		document.getElementById('cb-light-theme').checked = true;		
 		document.getElementById('dark-theme').disabled = true;
@@ -667,7 +667,7 @@ function localizeFloat(input, decimalDigits) {
 }
 
 function toggleLightBS(on) {
-	var theme = { value: 'light' };
+	const theme = { value: 'light' };
 	const html = document.documentElement;
 	if (on) {
 		document.getElementById('cb-light-theme').checked = true;		
