@@ -45,7 +45,6 @@ test.describe('Construction Queue Calculator Page', () => {
         // Select build button from the correct source table
         const buildButton = page.locator(`#table-src-${type} #build-${techId}`);
         await buildButton.click();
-        await page.waitForTimeout(200);
     }
 
     test('page loads successfully', async ({ page }) => {
@@ -149,7 +148,6 @@ test.describe('Construction Queue Calculator Page', () => {
         // Set robotics factory to level 10
         await page.locator('#startlvl-2-14').fill('10');
         await page.locator('#startlvl-2-14').press('Enter');
-        await page.waitForTimeout(500);
 
         const timeAfterRobo10 = (await getQueueTotals(page)).time;
         expect(timeAfterRobo10).toBe('51m 56s');
@@ -164,7 +162,6 @@ test.describe('Construction Queue Calculator Page', () => {
         // The robotics factory gets rowId = 1 (added after fusion reactor at index 0)
         // Move from position 1 to 0
         await page.locator('#control-2-1-a').click();
-        await page.waitForTimeout(200);
 
         const timeAfterMoving = (await getQueueTotals(page)).time;
         // When robo factory builds first, fusion reactor benefits from level 11 during its construction
@@ -182,14 +179,12 @@ test.describe('Construction Queue Calculator Page', () => {
 
         // Change to universe speed 2
         await page.locator('#universe-speed').selectOption('2');
-        await page.waitForTimeout(500);
 
         const timeSpeed2 = (await getQueueTotals(page)).time;
         expect(timeSpeed2).toBe('15s');
 
         // Change to universe speed 5
         await page.locator('#universe-speed').selectOption('5');
-        await page.waitForTimeout(500);
 
         const timeSpeed5 = (await getQueueTotals(page)).time;
         expect(timeSpeed5).toBe('6s');
@@ -209,7 +204,6 @@ test.describe('Construction Queue Calculator Page', () => {
         // Set hyperspace to level 10
         await page.locator('#hyper-tech-level').fill('10');
         await page.locator('#hyper-tech-level').press('Enter');
-        await page.waitForTimeout(500);
 
         const transportsAfterHyper = await getQueueTotals(page);
         expect(transportsAfterHyper.sc).toBe(1);
@@ -225,8 +219,7 @@ test.describe('Construction Queue Calculator Page', () => {
         await addToQueue(page, 1, 0);
 
         // Now demolish from level 2 to level 1
-        await page.locator('#table-src-2 #destroy-1').click({ force: true });
-        await page.waitForTimeout(500);
+        await page.locator('#table-src-2 #destroy-1').click();
 
         // Get the totals and verify demolition cost is shown
         const totals = await getQueueTotals(page);
@@ -242,14 +235,12 @@ test.describe('Construction Queue Calculator Page', () => {
     test('[moon queue / lunar base + robotics factories] handles field limits correctly', async ({ page }) => {
         // Click on Moon tab
         await page.locator('#tabtag-3').click();
-        await page.waitForTimeout(300);
 
         // Set total fields to 1 (lunar base will add 3, making 4 total fields available)
         // With lunar base (1 field) + 4 robotics factories (4 fields) = 5/5, still within limits
         // Adding 5th robotics factory = 6/5, which exceeds limits and shows brown
         await page.locator('#total-fields-3').fill('1');
         await page.locator('#total-fields-3').press('Enter');
-        await page.waitForTimeout(500);
 
         // Add lunar base (tech ID 41) from level 0 to 1
         await addToQueue(page, 41, 0, 3);
@@ -293,9 +284,7 @@ test.describe('Construction Queue Calculator Page', () => {
         // Remove the last 2 added robotics factories by clicking delete button on row 3 twice
         // After deleting one, the queue shifts, so we click #control-3-3-c twice
         await page.locator('#control-3-3-c').click();
-        await page.waitForTimeout(200);
         await page.locator('#control-3-3-c').click();
-        await page.waitForTimeout(200);
 
         // Add another lunar base (upgrade existing from level 1 to 2, adds 3 more fields) and robotics factory
         await addToQueue(page, 41, 0, 3); // lunar base from level 1 to 2 (now provides 6 fields total)
