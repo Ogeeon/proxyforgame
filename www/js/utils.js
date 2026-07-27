@@ -62,71 +62,6 @@ function validateInputNumber (event) {
 }
 
 /**
- * Проверяет содержащееся в input-e число на соответствие заданным ограничениям (допустимость отрицательных значений, значений с плавающей точкой,
- *  минимум/максимум) при потере полем фокуса.
- * Input, для которого вызывается функция, берётся из контекста через this.
- * При изменении значений, нарушающих ограничения мин/макс, показывается сообщение. id элементов для этого берутся из options.
- * @param event Данные о событии. Поле event.data может содержать имя функции, которую нужно вызвать по завершению проверки.
- */
-function validateInputNumberOnBlur (event) {
-	validateInputNumber(event);
-	let needRecalc = false;
-	const input = event.currentTarget;
-	if (input.value == '-') {
-		input.value = '0';
-		needRecalc = true;
-	}
-	const decimalSeparator = getOptionValue('decimalSeparator', '.');
-	if (input.value.charAt(input.value.length - 1) == decimalSeparator) {
-		input.value += '0';
-		needRecalc = true;
-	}
-	let value = input.value.replace(decimalSeparator, '.');
-	value = Number.parseFloat(value);
-	const minConstr = getConstraint(input, 'min', null);
-	if (minConstr != null && value < minConstr) {
-		// Если известны div-ы и текст для сообщения об ошибке, выведем туда это сообщение, а потом исправим значение
-		if (getOptionValue('warnindDivId', null) != null && getOptionValue('msgMinConstraintViolated', null) != null) {
-			// В атрибуте alt ожидаем увидеть локализованное название поля. Если его там нет, то в сообщении об ошибке указанаия на поле не будет.
-			const fieldTitle = input.alt;
-			let fieldHint = '';
-			if (fieldTitle != '' && (getOptionValue('fieldHint', null) != null))
-				fieldHint = getOptionValue('fieldHint', null).format(fieldTitle);
-			$('#'+options.warnindMsgDivId).text(options.msgMinConstraintViolated.format(fieldHint, this.value, minConstr));
-			$('#'+options.warnindDivId).fadeIn(800, function () {
-				setTimeout(function() {
-					$('#'+options.warnindDivId).fadeOut(800);
-				}, 5000);
-			  });
-		}
-		// Устанавливая изменённое значение, на всякий случай удостоверимся, что десятичный разделитель будет правильный
-		input.value = (minConstr+'').replace('.', decimalSeparator);
-		needRecalc = true;
-	}
-	const maxConstr = getConstraint(input, 'max', null);
-	if (maxConstr != null && value > maxConstr) {
-		// Если известны div-ы и текст для сообщения об ошибке, выведем туда это сообщение, а потом исправим значение
-		if (getOptionValue('warnindDivId', null) != null && getOptionValue('msgMaxConstraintViolated', null) != null) {
-			const fieldTitle = input.alt;
-			let fieldHint = '';
-			if (fieldTitle != '' && (getOptionValue('fieldHint', null) != null))
-				fieldHint = getOptionValue('fieldHint', null).format(fieldTitle);
-			$('#'+options.warnindMsgDivId).text(options.msgMaxConstraintViolated.format(fieldHint, this.value, maxConstr));
-			$('#'+options.warnindDivId).fadeIn(800, function () {
-				setTimeout(function() {
-					$('#'+options.warnindDivId).fadeOut(800);
-				}, 5000);
-			  });
-		}
-		input.value = (maxConstr+'').replace('.', decimalSeparator);;
-		needRecalc = true;
-	}
-	// Если что-то изменили - надо вызвать функцию, имя которой передано в свойствах события. На всякий случай вызовем её в контексте обрабатываемого поля ввода
-	if (needRecalc && event?.data != null)
-		eval(event.data).apply(input);
-}
-
-/**
  * Проверяет, что num является числом и попадает в заданый диапазон. Если все ок, возвращается само число, иначе значение по умолчанию.
  * @param num проверяемое число
  * @param min минимальное допустимое значение
@@ -164,24 +99,6 @@ function clampNumber(n, min, max) {
 	else if (n < min)
 		n = min;
 	return n;
-}
-
-/**
- * Возвращает div со списком элементов, принадлежащих переданному.
- */
-function debugElement(el) {
-	const dbg = $('<div></div>');
-	$.each(el, function(index, value) {
-		dbg.append($('<div></div>').append($('<span></span>').css('color', 'blue').text(index)).append(': ' + value));
-	});
-	return dbg;
-}
-
-/**
- * Добавляет строку str к содержимому элемента #debug.
- */
-function debugOutput(str) {
-	$('#debug').append($('<div>' + str + '</div>'));
 }
 
 /**
