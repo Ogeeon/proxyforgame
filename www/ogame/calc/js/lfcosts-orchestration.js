@@ -2,7 +2,7 @@
 // ORCHESTRATOR — owns all state, wires events, delegates to layers
 // ============================================================================
 
-var options = {
+const options = {
     defConstraints: {
         min: -Infinity,
         max: Infinity,
