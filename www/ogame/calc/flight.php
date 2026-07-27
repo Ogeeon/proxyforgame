@@ -13,8 +13,9 @@ $universes = array();
 if ($countries) {
 	foreach ($countries as $row) {
 		$r = SqlQuery("SELECT SUBSTRING_INDEX(SUBSTRING_INDEX(server, '-', 1), 's', -1) AS server_number, name FROM universes WHERE lang = ? ORDER BY 2", array($row['lang']));
-		if ($r === false)
+		if ($r === false) {
 			continue;
+		}
 		$universes[$row['lang']] = $r;
 	}
 }
