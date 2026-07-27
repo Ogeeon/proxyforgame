@@ -518,7 +518,7 @@ class QueueCalculatorApp {
     const val = el.value;
     const empty = val === '' || /^[\s_./:-]*$/.test(val);
     const parsed = parseDate(val, options.datetimeFormat);
-    if (val.indexOf('_') >= 0 || parsed === 0) {
+    if (val.includes('_') || parsed === 0) {
       if (empty) {
         el.classList.remove('is-invalid');
       } else {
