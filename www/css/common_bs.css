@@ -362,6 +362,8 @@ textarea:disabled {
      flight departure shortcuts, `(now)´ and `(00:00:00)´, sit close enough that
      auto-placement puts one bubble straight over the other button. */
   pointer-events: none;
+  --tooltip-arrow-outline: var(--bs-border-color);
+  --tooltip-arrow-offset: calc(-1px - 2px);
 }
 
 .tooltip-inner {
@@ -396,11 +398,6 @@ textarea:disabled {
    Selectors repeat the real BS5 selector (`bs-tooltip-auto[data-popper-placement]`)
    and the legacy fixed-placement one (`bs-tooltip-top` and friends) so this
    keeps working if a caller ever pins a placement instead of leaving it auto. */
-.tooltip {
-  --tooltip-arrow-outline: var(--bs-border-color);
-  --tooltip-arrow-offset: calc(-1px - 2px);
-}
-
 .tooltip .tooltip-arrow::after {
   position: absolute;
   content: "";
