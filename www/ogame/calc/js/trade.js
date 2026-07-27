@@ -293,7 +293,7 @@ let options = {
         
         const serverText = document.querySelector('#country option:checked').textContent;
         const uniText = document.querySelector('#universe option:checked').textContent;
-        const server = /\(([^)]+)\)/.exec(serverText)[1];
+        const server = /\(([^)]{1,64})\)/.exec(serverText)[1];
         const uni = /^(.+) \(/.exec(uniText)[1];
         
         const coords = '[' + this.coordg + ':' + this.coords + ':' + this.coordp + ']';

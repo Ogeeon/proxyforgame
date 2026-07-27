@@ -17,10 +17,6 @@
     margin-right: 0.2rem;
 }
 
-#res-src, #res-dst {
-    min-height: 12em;
-}
-
 #res-type-dst-2 {
     margin-bottom: 0.3em;
 }
@@ -164,6 +160,7 @@
     font-size: 0.75rem;
     padding: 0.25rem 0.5rem;
     white-space: nowrap;
+    font-weight: bold;
 }
 
 /* Responsive: horizontal layout on larger screens */
@@ -380,8 +377,4 @@ input.ui-state-disabled {
 
 #res-dst-m, #res-dst-c, #res-dst-d {
     height: 1.5rem;
-}
-
-.rate-buttons-group button {
-  font-weight: bold;
 }
