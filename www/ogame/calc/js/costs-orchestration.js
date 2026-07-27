@@ -909,6 +909,36 @@ class CostsCalculator {
   }
 
   /**
+   * techId for a table row, normalized for the moon-building offset.
+   * Null when the row isn't a tech row (header/footer row, or unparsable cell).
+   * @private
+   */
+  _rowTechId(row) {
+    if (!row.cells || row.cells.length === 0) return null;
+    let techId = Number.parseInt(row.cells[0].innerHTML);
+    if (!techId) return null;
+    if (techId > 10000) techId -= 10000; // moon buildings are offset by 10000
+    return techId;
+  }
+
+  /**
+   * Whether a row is one of factoryIds and shows a non-zero level/to-level input.
+   * @private
+   */
+  _rowBuildsFactory(row, factoryIds, multi) {
+    const techId = this._rowTechId(row);
+    if (techId === null || !factoryIds.has(techId)) return false;
+
+    // Single-level row: level input at children[2]; multi-level: to-level at children[3]
+    const cell = row.children[multi ? 3 : 2];
+    const input = cell?.children[0];
+    if (!input) return false;
+
+    // Locale-aware read: the field may hold a comma decimal separator
+    return getInputNumber(input) > 0;
+  }
+
+  /**
    * Scan the Robotics/Nanite factory rows and report whether any of them is
    * being built: a non-zero level on tab 0 or a non-zero "to-level" on tab 1.
    * @private
@@ -928,20 +958,7 @@ class CostsCalculator {
       if (!table) continue;
 
       for (const row of table.querySelectorAll('tr')) {
-        if (!row.cells || row.cells.length === 0) continue;
-
-        let techId = Number.parseInt(row.cells[0].innerHTML);
-        if (!techId) continue;
-        if (techId > 10000) techId -= 10000; // moon buildings are offset by 10000
-        if (!factoryIds.has(techId)) continue;
-
-        // Single-level row: level input at children[2]; multi-level: to-level at children[3]
-        const cell = row.children[spec.multi ? 3 : 2];
-        const input = cell?.children[0];
-        if (!input) continue;
-
-        // Locale-aware read: the field may hold a comma decimal separator
-        if (getInputNumber(input) > 0) return true;
+        if (this._rowBuildsFactory(row, factoryIds, spec.multi)) return true;
       }
     }
 
