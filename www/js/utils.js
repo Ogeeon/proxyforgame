@@ -14,15 +14,15 @@ function getCorrectedValue (s, allowNeg, sepCode) {
 	let signFound = false;
 	let nextCharCode = 0;
 	for (let i = 0; i < sx.length; i++) {
-		nextCharCode = (i === sx.length-1) ? 0 : sx.charCodeAt(i+1);
-		if ((sx.charCodeAt (i) >= 49 && sx.charCodeAt (i) <= 57) ||
-			(sx.charCodeAt (i) === 48 && (sx.length === 1 || !firstDigit || nextCharCode === sepCode))) {
+		nextCharCode = (i === sx.length-1) ? 0 : sx.codePointAt(i+1);
+		if ((sx.codePointAt (i) >= 49 && sx.codePointAt (i) <= 57) ||
+			(sx.codePointAt (i) === 48 && (sx.length === 1 || !firstDigit || nextCharCode === sepCode))) {
 			sxx += sx.charAt (i);
 			firstDigit = false;
 		}
-		else if (sx.charCodeAt (i) === 45 && firstDigit && ! signFound)
+		else if (sx.codePointAt (i) === 45 && firstDigit && ! signFound)
 			signFound = true;
-		else if (sx.charCodeAt (i) === sepCode && firstSeparator) {
+		else if (sx.codePointAt (i) === sepCode && firstSeparator) {
 			sxx += sx.charAt (i);
 			firstSeparator = false;
 		}
@@ -42,7 +42,7 @@ function validateInputNumber (event) {
 	const allowNeg = getConstraint(input, 'allowNegative', false);
 	const decimalSeparator = getOptionValue('decimalSeparator', '.');
 	// Если в поле можно вводить значения с плавающей точкой, то код десятичного разделителя берём из настроек, иначе примем его равным -1, чтобы посимвольное сравнение не приняло его за допустимый символ.
-	const sepCode = getConstraint(input, 'allowFloat', false) ? decimalSeparator.charCodeAt(0) : -1;
+	const sepCode = getConstraint(input, 'allowFloat', false) ? decimalSeparator.codePointAt(0) : -1;
 	if (input.value.charAt(0) === decimalSeparator) {
 		input.value = '0' + input.value;
 	}
@@ -66,7 +66,7 @@ function validateInputNumber (event) {
  * @param def значение по умолчанию
  */
 function validateNumber(num, min, max, def) {
-	return (!isNaN(num) && num >= min && num <= max) ? num : def;
+	return (!Number.isNaN(num) && num >= min && num <= max) ? num : def;
 }
 
 /**
@@ -124,7 +124,7 @@ function getInputNumber(input) {
 	} catch (e) {
 		consoleLog(e);
 	}
-	return isNaN(n) ? 0 : n;
+	return Number.isNaN(n) ? 0 : n;
 }
 
 /**
@@ -132,7 +132,7 @@ function getInputNumber(input) {
  */
 function formatString(str, ...args) {
     const pattern = /\{\d+\}/g;
-    return str.replace(pattern, function(capture){ return args[capture.match(/\d+/)]; });
+    return str.replace(pattern, function(capture){ return args[/\d+/.exec(capture)]; });
 }
 
 /**
@@ -229,10 +229,10 @@ function numberToShortenedString(number, suffixes) {
 	value = number;
 	if (number >= 1000000000) {
 		value = 0.001 * Math.floor(value / 1000000.0);
-		suff = suffixes.substr(2, 1);
+		suff = suffixes.substring(2, 3);
 	} else if (number >= 1000000) {
 		value = 0.001 * Math.floor(value / 1000.0);
-		suff = suffixes.substr(1, 1);
+		suff = suffixes.substring(1, 2);
 	}
 	value = dropFraction(value, 3);
 	return numToOGame(value)+suff;
@@ -242,7 +242,7 @@ function dropFraction(number, positions) {
 	let value = number;
 	const parts = (number+'').split(/\./);
 	if (parts.length > 1 && parts[1].length > positions) {
-		const frac = parts[1].substr(0, positions);
+		const frac = parts[1].substring(0, positions);
 		value = parts[0] + '.' + frac;
 		if (parts[1].indexOf('e') > 0){
 			const fracParts = parts[1].split(/e/);
@@ -264,7 +264,7 @@ function str_pad_repeater(s, len) {
 	let collect = '';
 
 	while (collect.length < len) collect += s;
-	collect = collect.substr(0, len);
+	collect = collect.substring(0, len);
 
 	return collect;
 }
@@ -280,7 +280,7 @@ function strPad(input, pad_length, pad_string, pad_type) {
 		else if (pad_type == 'STR_PAD_BOTH') {
 			half = str_pad_repeater(pad_string, Math.ceil(pad_to_go/2));
 			input = half + input + half;
-			input = input.substr(0, pad_length);
+			input = input.substring(0, pad_length);
 		}
 	}
 	return input;
@@ -312,10 +312,10 @@ function parseDate(str, template) {
 	const rgx2 = /^(\d{2})\.(\d{2})\.(\d{4})\s(\d{2}):(\d{2}):(\d{2})$/;
 	let pts;
 	if (str.search(/\./)>0) {
-		pts = str.match(rgx2);
+		pts = rgx2.exec(str);
 	}
 	else {
-		pts = str.match(rgx1);
+		pts = rgx1.exec(str);
 	}
 	if (pts == null){
 		return 0;
@@ -428,6 +428,7 @@ function saveToCookie(name, data) {
 			document.cookie = name + '=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/';
 		} catch (e) {
 			// Quota exceeded - fallback to cookie
+			consoleLog(e);
 			const d = new Date();
 			d.setTime(d.getTime() + (365*24*60*60*1000));
 			document.cookie = name + '=' + encodeURIComponent(saveStr) + '; expires=' + d.toUTCString() + '; path=/';
@@ -454,8 +455,8 @@ function readSavedData(name) {
 	if (stored !== null)
 		return stored;
 	const cookies = document.cookie.split(';');
-	for (let i = 0; i < cookies.length; i++) {
-		const cookie = cookies[i].trim();
+	for (const rawCookie of cookies) {
+		const cookie = rawCookie.trim();
 		if (cookie.startsWith(name + '=')) {
 			return decodeURIComponent(cookie.substring(name.length + 1));
 		}
@@ -495,6 +496,7 @@ function applyCookieEntry(params, entry) {
 			return;
 		} catch (e) {
 			// If JSON parsing fails, fall through to validate below
+			consoleLog(e);
 		}
 	}
 	params[parts[0]] = params.validate(parts[0], parts[1]);
@@ -502,7 +504,7 @@ function applyCookieEntry(params, entry) {
 
 function loadFromCookie(name, params) {
 	const data = readSavedData(name);
-	if (!data || data.indexOf('key-value') == -1)
+	if (!data || !data.includes('key-value'))
 		return;
 	data.split(',').forEach(function(entry) {
 		applyCookieEntry(params, entry);
@@ -526,8 +528,8 @@ function loadFromStorage(name) {
 function getCookie(name) {
 	const prefix = name + '=';
 	const cookies = document.cookie.split(';');
-	for (let i = 0; i < cookies.length; i++) {
-		const cookie = cookies[i].trim();
+	for (const rawCookie of cookies) {
+		const cookie = rawCookie.trim();
 		if (cookie.startsWith(prefix)) {
 			return decodeURIComponent(cookie.substring(prefix.length));
 		}
