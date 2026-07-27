@@ -59,23 +59,23 @@ const options = {
             switch (field) {
                 case 'country': return value;
                 case 'universe': return validateNumber(Number.parseInt(value, 10), 0, Infinity, 101);
-                case 'driveLevels': return validateNumber(parseFloat(value), 0, 50, 0);
+                case 'driveLevels': return validateNumber(Number.parseFloat(value), 0, 50, 0);
                 case 'fleetSpeedWar':
                 case 'fleetSpeedPeaceful':
-                case 'fleetSpeedHolding': return validateNumber(parseFloat(value), 1, 10, 1);
-                case 'missionType': return validateNumber(parseFloat(value), 0, 2, 1);
+                case 'fleetSpeedHolding': return validateNumber(Number.parseFloat(value), 1, 10, 1);
+                case 'missionType': return validateNumber(Number.parseFloat(value), 0, 2, 1);
                 case 'circularGalaxies':
                 case 'circularSystems':
                 case 'traderBonus':
                 case 'saveOneWay':
                 case 'fleetIgnoreEmptySystems':
                 case 'fleetIgnoreInactiveSystems': return value === 'true';
-                case 'numberOfSystems': return validateNumber(parseFloat(value), 1, 550, 499);
-                case 'numberOfGalaxies': return validateNumber(parseFloat(value), 1, 12, 9);
-                case 'deutFactor': return validateNumber(parseFloat(value), 5, 10, 10);
-                case 'deutConsReduction': return validateNumber(parseFloat(value), 25, 50, 25);
+                case 'numberOfSystems': return validateNumber(Number.parseFloat(value), 1, 550, 499);
+                case 'numberOfGalaxies': return validateNumber(Number.parseFloat(value), 1, 12, 9);
+                case 'deutFactor': return validateNumber(Number.parseFloat(value), 5, 10, 10);
+                case 'deutConsReduction': return validateNumber(Number.parseFloat(value), 25, 50, 25);
                 case 'departure':
-                case 'destination': return validateNumber(parseFloat(value), 1, 1000, 1);
+                case 'destination': return validateNumber(Number.parseFloat(value), 1, 1000, 1);
                 case 'ships':
                 case 'startDT':
                 case 'saveStartDT':
@@ -88,11 +88,11 @@ const options = {
                 case 'hyperTechLvl':
                 case 'lfMechanGE':
                 case 'lfRocktalCE':
-                case 'lfShipsBonuses': return validateNumber(parseFloat(value), 0, Infinity, 0);
+                case 'lfShipsBonuses': return validateNumber(Number.parseFloat(value), 0, Infinity, 0);
                 case 'mode':
                 case 'recallMode': return validateNumber(Number.parseFloat(value), 0, 1, 0);
-                case 'flightData': return validateNumber(parseFloat(value), -Infinity, Infinity, 0);
-                case 'spCargohold': return validateNumber(parseFloat(value), 0, 5, 0);
+                case 'flightData': return validateNumber(Number.parseFloat(value), -Infinity, Infinity, 0);
+                case 'spCargohold': return validateNumber(Number.parseFloat(value), 0, 5, 0);
                 default: return value;
             }
         },
@@ -696,7 +696,7 @@ class FlightOrchestrator {
     loadFleet(key) {
         const stored = {
             savedShips: [],
-            validate: (field, value) => validateNumber(parseFloat(value), 0, Infinity, 0),
+            validate: (field, value) => validateNumber(Number.parseFloat(value), 0, Infinity, 0),
         };
         loadFromCookie(key, stored);
         this.opts.prm.ships = Array.from(stored.savedShips);
@@ -976,7 +976,7 @@ class FlightOrchestrator {
         // speed override exactly like the flight-times table does.
         const minSpeed = this._effectiveMinSpeed(ships, counts, params);
         const percentText = button.closest('tr').children[0].textContent;
-        const percent = parseInt(percentText, 10);
+        const percent = Number.parseInt(percentText, 10);
         const fleetSpeed = this.calc.fleetSpeedFor(params.missionType, params);
         const duration = this.calc.getFlightDuration(minSpeed, distance, percent, fleetSpeed);
         // The picked row belongs to the departure tab on screen, and to that one
