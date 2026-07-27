@@ -823,19 +823,19 @@ class CostsCalculator {
       const line = lines[p];
       if (line === '-') { p++; return 0; }
       // OGame always exports numbers with a dot decimal separator
-      const m = line.match(/-?\d+(?:\.\d+)?/);
+      const m = /-?\d+(?:\.\d+)?/.exec(line);
       p++;
       if (m) {
         if (p < lines.length) p++; // skip the trailing "Max. Y%" line
         const val = Number.parseFloat(m[0]);
-        return isNaN(val) || val < 0 ? 0 : val;
+        return Number.isNaN(val) || val < 0 ? 0 : val;
       }
       return 0;
     };
 
     // Parse into a buffer first; only apply once every research is complete
     const parsedRows = [];
-    for (let i = 0; i < rows.length; i++) {
+    for (const _ of rows) {
       if (p >= lines.length) break; // no name line left => incomplete
       p++; // research name line
       const cost = readColumn();
@@ -1779,7 +1779,7 @@ function onPlanetsChange(newVal, oldVal) {
   if (newVal < oldVal) {
     if (oldVal >= 2) {
       const rows = getTableRows('#lab-levels-table');
-      rows[rows.length - 1]?.remove();
+      rows.at(-1)?.remove();
       options.prm.labLevels.pop();
     }
   } else {

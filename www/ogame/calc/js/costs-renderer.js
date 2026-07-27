@@ -422,7 +422,7 @@ class Renderer {
 
     // Insert before the totals row (4th from the end)
     const rows = getTableRows(`#${tableId}`);
-    const insertBefore = rows[rows.length - 4];
+    const insertBefore = rows.at(-4);
     insertBefore.insertAdjacentHTML('beforebegin', html);
   }
 
