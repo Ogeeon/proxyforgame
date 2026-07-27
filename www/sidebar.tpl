@@ -1,5 +1,5 @@
 <?php
-$lang = get_lang();
+$lang = getLang();
 require_once('Intl.php');
 $loc = Intl::getTranslations($lang, 'sidebar');
 
@@ -17,7 +17,7 @@ $ogamePages = array(
 );
 
 require_once('db.connect.inc.php');
-$result = SqlQuery("SELECT MAX(id) as m FROM change_headers", array());
+$result = sqlQuery("SELECT MAX(id) as m FROM change_headers", array());
 $currChange = 0;
 if ($result !== FALSE && isset($result[0]['m'])) {
 	$currChange = $result[0]['m'];

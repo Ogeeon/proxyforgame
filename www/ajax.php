@@ -3,13 +3,13 @@
   // в запросе обязательно должен присутствовать параметр service
 
   // аналог js unescape
-  function convert_unicode($t)
+  function convertUnicode($t)
   {
     return preg_replace( '#%u([0-9A-F]{4})#se','iconv("UTF-16BE","UTF-8",pack("H4","$1"))', $t );
   }
 
   // функция выбирает из запроса значение указанного параметра
-function GetVar($var, $type)
+function getVar($var, $type)
 {
     $value = filter_input(INPUT_GET, $var);
     if ($value === null) {
@@ -38,8 +38,8 @@ function GetVar($var, $type)
 }
 
 
-  function SendReport() {
-    if (($wrong = GetVar('wrong', 'str')) !== false && ($right = GetVar('right', 'str')) !== false) {
+  function sendReport() {
+    if (($wrong = getVar('wrong', 'str')) !== false && ($right = getVar('right', 'str')) !== false) {
       if ($wrong == '' && $right == '') {
         die("4\nempty");
       }
@@ -54,9 +54,9 @@ function GetVar($var, $type)
       }
       $to  = 'proxyforgame@gmail.com';
       $subject = 'New feedback from ProxyForGame site';
-      $message = "Script: \"". GetVar('url', 'str')."\"\n";
-      $message .= "Wrong text: \"".GetVar('wrong', 'str')."\"\n";
-      $message .= "Right text: \"".GetVar('right', 'str')."\"\n";
+      $message = "Script: \"". getVar('url', 'str')."\"\n";
+      $message .= "Wrong text: \"".getVar('wrong', 'str')."\"\n";
+      $message .= "Right text: \"".getVar('right', 'str')."\"\n";
       if (socketmail($to, $subject, $message)) {
         die("0\ngood");
       } else {
@@ -66,14 +66,14 @@ function GetVar($var, $type)
     die("3\nempty");
   }
 
-  function SendEmail() {
-    if (($emailSubject = GetVar('subject', 'str')) !== false && ($emailBody = GetVar('body', 'str')) !== false) {
+  function sendEmail() {
+    if (($emailSubject = getVar('subject', 'str')) !== false && ($emailBody = getVar('body', 'str')) !== false) {
       if ($emailSubject == '' && $emailBody == '') {
         die("4\nempty");
       }
       $to  = 'proxyforgame@gmail.com';
       $subject = 'New email from ProxyForGame site';
-      $message = "Sender: \"".(GetVar('address', 'str')==''?'(unspecified)':GetVar('address', 'str'))."\"\n";
+      $message = "Sender: \"".(getVar('address', 'str')==''?'(unspecified)':getVar('address', 'str'))."\"\n";
       $message .= "Subject: \"".$emailSubject."\"\n";
       $message .= "Body: \"".$emailBody."\"\n";
       if (socketmail($to, $subject, $message)) {
@@ -116,8 +116,8 @@ function GetVar($var, $type)
     return true;
   }
 
-  function GetChangelog() {
-    if (($lastSeen = GetVar('lastSeen', 'int')) !== false && ($lang = GetVar('lang', 'str')) !== false) {
+  function getChangelog() {
+    if (($lastSeen = getVar('lastSeen', 'int')) !== false && ($lang = getVar('lang', 'str')) !== false) {
       $langs = array('ru', 'de', 'es', 'pl', 'fr', 'it', 'nl', 'sk', 'tr', 'pt', 'en', 'us');
       if (!in_array($lang, $langs)) {
         die("1\nmalformed");
@@ -125,7 +125,7 @@ function GetVar($var, $type)
       if ($lang == 'us') {
         $lang = 'en';
       }
-      $result = SqlQuery("select ch.ts, cd.description from change_headers ch join change_descriptions cd on (ch.id = cd.id)
+      $result = sqlQuery("select ch.ts, cd.description from change_headers ch join change_descriptions cd on (ch.id = cd.id)
         where lang like ? and ch.id > ? order by ch.id desc", array($lang, $lastSeen));
       $repsonse = json_encode($result);
       die('0\n'.$repsonse);
@@ -133,8 +133,8 @@ function GetVar($var, $type)
     die("1\nmalformed");
   }
 
-  function GetDataCode() {
-    if (($strCode = GetVar('code', 'str')) !== false) {
+  function getDataCode() {
+    if (($strCode = getVar('code', 'str')) !== false) {
 
       //flight.php?SR_KEY=fs008d2cbfee933ddbb85e2e20d8872ce34d
       //flight.php?SR_KEY=sr-ru-1-360e215d03d5115e828c70bba761b361dd8b4c0c
@@ -150,7 +150,7 @@ function GetVar($var, $type)
         $err = curl_error($ch);
         curl_close($ch);
         // Maybe Logserver isn't accessible. Let's try fallback method
-        $data = GetSpyReportByFallbackMethod($strCode);
+        $data = getSpyReportByFallbackMethod($strCode);
         if ($data !== null) {
           die("0\n$data");
         }
@@ -164,7 +164,7 @@ function GetVar($var, $type)
       // failed to decompress, in which case it answers with PHP notices glued
       // in front of a {"RESULT_CODE":1000,"RESULT_DATA":false} envelope.
       // Let's try fallback method
-      $data = GetSpyReportByFallbackMethod($strCode);
+      $data = getSpyReportByFallbackMethod($strCode);
       if ($data !== null) {
         die("0\n$data");
       }
@@ -280,7 +280,7 @@ function GetVar($var, $type)
    * either - the caller decides which error the client gets, so that a rejected
    * code stays distinguishable from a broken answer.
    */
-  function GetSpyReportByFallbackMethod($srId) {
+  function getSpyReportByFallbackMethod($srId) {
       $ids = parseSpyReportId($srId);
       if ($ids === null) {
           return null;
@@ -299,9 +299,9 @@ function GetVar($var, $type)
       return json_encode($reportJson);
   }
 
-  function GetServerData() {
-    $country = GetVar('country', 'str');
-    $universe = GetVar('universe', 'int');
+  function getServerData() {
+    $country = getVar('country', 'str');
+    $universe = getVar('universe', 'int');
 
     // Restrict to the safe alphabet before splicing into the request URL below,
     // or a crafted value could redirect the fetch to an attacker-controlled host.
@@ -350,10 +350,10 @@ function GetVar($var, $type)
     echo json_encode($universeData);
   }
 
-  function GetPopulatedSystems() {
-      $country = GetVar('country', 'str');
-      $universe = GetVar('universe', 'int');
-      $result = SqlQuery("
+  function getPopulatedSystems() {
+      $country = getVar('country', 'str');
+      $universe = getVar('universe', 'int');
+      $result = sqlQuery("
           SELECT timestamp, population, population_all, UNIX_TIMESTAMP(updated_at) AS updated_at
           FROM population_data
           WHERE universe = ? AND country = ?
@@ -384,12 +384,12 @@ function GetVar($var, $type)
 
   switch ($service)
   {
-    case 'report': SendReport(); break;
-    case 'email': SendEmail(); break;
-    case 'changelog': GetChangelog(); break;
-    case 'ogameAPI': GetDataCode(); break;
-    case 'serverdata': GetServerData(); break;
-    case 'populatedSystems': GetPopulatedSystems(); break;
+    case 'report': sendReport(); break;
+    case 'email': sendEmail(); break;
+    case 'changelog': getChangelog(); break;
+    case 'ogameAPI': getDataCode(); break;
+    case 'serverdata': getServerData(); break;
+    case 'populatedSystems': getPopulatedSystems(); break;
 
     // для всех остальных "неизвестных" сервисов выходим с кодом 2
     default: die("2\nunknown");

@@ -1,5 +1,5 @@
 <?php
-function GetServerData($strUni, $strDomain, $strTime) {
+function getServerData($strUni, $strDomain, $strTime) {
     if (!isset($strTime)) { $strTime = 1; }
     $varReturn = false;
     $upDBUni = false;
@@ -9,7 +9,7 @@ function GetServerData($strUni, $strDomain, $strTime) {
         $upDBUni = true;
         $url = 'https://s' . $strUni . '-' . $strDomain . '.ogame.gameforge.com/api/serverData.xml';
 
-        if (UR_exists($url)) {
+        if (urExists($url)) {
             $flashRAW = file_get_contents($url);
             $flashXML = simplexml_load_string($flashRAW);
 

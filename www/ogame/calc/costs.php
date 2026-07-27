@@ -1,7 +1,7 @@
 <?php
 
 require_once '../../langs.php';
-$lang = get_lang();
+$lang = getLang();
 $currUrl = '/ogame/calc/costs.php';
 
 require_once '../../Intl.php';

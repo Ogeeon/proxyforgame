@@ -1,5 +1,5 @@
 <?php
-  $lang = get_lang();
+  $lang = getLang();
   // Legacy project, doesn't use autoload here
   require_once 'Intl.php'; // NOSONAR
   $loc = Intl::getTranslations($lang, 'sidebar');
@@ -18,7 +18,7 @@
   );
   
   require_once 'db.connect.inc.php'; // NOSONAR
-  $result = SqlQuery("SELECT MAX(id) as m FROM change_headers", array());
+  $result = sqlQuery("SELECT MAX(id) as m FROM change_headers", array());
   $currChange = 0;
   if ($result !== false && isset($result[0]['m'])) {
     $currChange = $result[0]['m'];

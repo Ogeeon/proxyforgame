@@ -19,7 +19,7 @@ function loadEnv($path) {
     }
 }
 
-function SqlQuery($query, $params) {
+function sqlQuery($query, $params) {
     global $connection;
     $res = array();
 

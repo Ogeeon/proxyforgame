@@ -4,7 +4,7 @@ require 'h_abox.php';
 require 'h_functions.php';
 
 require_once '../../langs.php';
-$lang = get_lang();
+$lang = getLang();
 $currUrl = '/ogame/calc/expeditions.php';
 
 require_once '../../Intl.php';
@@ -16,7 +16,7 @@ $l = Intl::getTranslations($lang, 'expeditions');
  * passed stays false so the client falls back to the saved options.
  */
 function expeditionsApiParam($name) {
-    return isset($_GET[$name]) ? KillInjection($_GET[$name]) : false;
+    return isset($_GET[$name]) ? killInjection($_GET[$name]) : false;
 }
 
 function expeditionsIsJson($string) {
@@ -44,7 +44,7 @@ $darkMatterDiscoveryBonus = expeditionsApiParam('dd');
 $jsonFleet = (isset($_GET['f']) && expeditionsIsJson($_GET['f'])) ? json_decode($_GET['f'], true) : false;
 
 // When a universe is named, its speed and top score come from the server data.
-$arrServerData = ($strUni && $strDomain) ? GetServerData($strUni, $strDomain, 90) : [];
+$arrServerData = ($strUni && $strDomain) ? getServerData($strUni, $strDomain, 90) : [];
 
 // Index of the matching entry in the "strongest player" select.
 $highTopIdx = null;

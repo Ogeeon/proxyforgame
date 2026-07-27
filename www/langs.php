@@ -7,7 +7,7 @@
  * 4. если язык в uri не указан, либо не совпадает с окончательным, то делаем редирект на новый uri с правильным языком
  */
 
-function first_non_empty($s1, $s2) {
+function firstNonEmpty($s1, $s2) {
   return strlen($s1) > 0 ? $s1 : $s2;
 }
 
@@ -23,7 +23,7 @@ $uriLang = preg_match('@^/(\w\w)((/.*)|$)@', $up['path'], $r) ? strtolower($r[1]
 $acceptLang = isset($_SERVER['HTTP_ACCEPT_LANGUAGE']) ? strtolower(substr(locale_accept_from_http($_SERVER['HTTP_ACCEPT_LANGUAGE']), 0, 2)) : '';
 
 // 3. окончательный язык
-$lang = first_non_empty(first_non_empty($uriLang, $acceptLang), 'en');
+$lang = firstNonEmpty(firstNonEmpty($uriLang, $acceptLang), 'en');
 if (!preg_match($availLangs, $lang)) {
   $lang = (strlen($acceptLang) > 0 && preg_match($availLangs, $acceptLang)) ? $acceptLang : 'en';
 }
@@ -43,7 +43,7 @@ if ($uriLang != '' && $uriLang != $lang) {
 
 //echo $acceptLang.' | '.$_SERVER['REQUEST_URI'].' | ';
 
-function get_lang() {
+function getLang() {
   global $lang;
   return $lang;
 }

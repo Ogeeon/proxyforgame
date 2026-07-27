@@ -1,5 +1,5 @@
 <?php
-function KillInjection ($str)
+function killInjection ($str)
     {
         $search = array ( "'<script[^>]*?>.*?</script>'si",  // Вырезает javaScript
                             "'<[\/\!]*?[^<>]*?>'si",         // Вырезает HTML-теги
@@ -12,7 +12,7 @@ function KillInjection ($str)
         $str = str_replace ('"', "", $str);
         return $str;
     }
-    function UR_exists($url) {
+    function urExists($url) {
        $headers = get_headers($url);
        return stripos($headers[0],"200 OK") ? true : false;
     }
