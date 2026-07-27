@@ -147,7 +147,7 @@ function GetVar($var, $type)
         die("3\n$err");
       }
       curl_close($ch);
-      if (IsUsableSpyReport($h)) {
+      if (isUsableSpyReport($h)) {
         die("0\n$h");
       }
       // Logserver couldn't process this SR: an unknown code, or a payload it
@@ -172,7 +172,7 @@ function GetVar($var, $type)
    * two sections the flight calculator reads. Anything else - a false
    * RESULT_DATA, an error envelope, HTML - is not worth handing to the client.
    */
-  function IsUsableSpyReport($body) {
+  function isUsableSpyReport($body) {
     $json = json_decode($body, true);
     return is_array($json)
       && isset($json['RESULT_CODE']) && $json['RESULT_CODE'] == 1000
