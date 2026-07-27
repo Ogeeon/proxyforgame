@@ -5,11 +5,11 @@ error_reporting(E_ALL);
 
 mb_internal_encoding("utf-8");
 
-// нужны ли отладочные сообщения
+// whether debug messages are needed
 define('DEBUG', false);
-// нужны ли подробные ошибки от HttpRequest
+// whether detailed errors from HttpRequest are needed
 define('HTTPREQ_DEBUG', true);
-// нужны ли информативные сообщения для лога
+// whether informational messages for the log are needed
 define('LOG_ECHO', true);
 
 define('OGAME_HOST', 'https://lobby.ogame.gameforge.com/api/servers');
@@ -34,7 +34,7 @@ function loadEnv($path) {
 
 
 // ********************************************************************************************
-// обёртка для вывода ошибок в лог
+// wrapper that logs errors
 // ********************************************************************************************
 function sqlQuery($db, $sql)
 {
@@ -43,7 +43,7 @@ function sqlQuery($db, $sql)
     if ($result = mysqli_query($db, $sql))
     {
         if ($result === true) {
-            return false; // для не-select'ов возвращаем FALSE, потому что нет результата
+            return false; // for non-select queries we return FALSE because there is no result
         }
         while ($row = mysqli_fetch_assoc($result)) {
             array_push($res, $row);
@@ -60,7 +60,7 @@ function sqlQuery($db, $sql)
 }
 
 // ********************************************************************************************
-// выводит сообщение в лог и останавливает программу
+// prints a message to the log and stops the program
 // ********************************************************************************************
 function logDie($mes)
 {
@@ -71,7 +71,7 @@ function logDie($mes)
 }
 
 // ********************************************************************************************
-// возвращает массив заголовков как у лисы
+// returns a header array mimicking Firefox
 // ********************************************************************************************
 function getFirefoxHeaders()
 {
@@ -109,14 +109,14 @@ function httpGet($uri)
 }
 
 // ********************************************************************************************
-// сохраняет данные результата в базу
+// saves the result data to the database
 // ********************************************************************************************
 function saveData($db, $allData)
 {
     sqlQuery($db, "TRUNCATE TABLE universes");
 
-    // добавляем вселенные в `universes`
-    $sid = 1; // для сортировки
+    // add the universes to `universes`
+    $sid = 1; // for sorting
     foreach ($allData as $ulang => $uni) {
         foreach ($uni as $userver => $uname) {
             sqlQuery($db, "INSERT INTO universes (lang, sid, server, name) VALUES ('$ulang', $sid, '$userver', '$uname')");
@@ -128,8 +128,8 @@ function saveData($db, $allData)
 
 
 // ********************************************************************************************
-// парсит список вселенных
-// возвращает массив вселенных с записями вида ['ru'][['s127-ru.ogame.gameforge.com' => name='Andromeda'], ...]
+// parses the list of universes
+// returns an array of universes with entries like ['ru'][['s127-ru.ogame.gameforge.com' => name='Andromeda'], ...]
 // ********************************************************************************************
 function parseUniverses($data)
 {

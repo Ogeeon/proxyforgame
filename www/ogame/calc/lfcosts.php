@@ -24,7 +24,7 @@ function getTechsByType($type) {
         if (!isset($techData[$i])) {
             continue;
         }
-        // добавляем элемент, если нужно отдать весь список или если тип текущего элемента совпадает с запрошенным типом
+        // add the element if the whole list is requested or if the current element's type matches the requested type
         if ($type == 0 || $techData[$i][1] == $type) {
             array_push($filteredTechs, $i);
         }

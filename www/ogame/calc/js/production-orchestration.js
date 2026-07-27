@@ -73,7 +73,7 @@ function showMainTab(target) {
 	}
 }
 
-// Учитывает изменения в параметрах: энерготеха, скорость вселенной, офицеры и класс.
+// Accounts for changes in the parameters: energy tech, universe speed, officers and class.
 function updateParams() {
 	const g = collectGeneralSettings();
 	options.prm.universeSpeed = g.universeSpeed;
@@ -98,7 +98,7 @@ function updateParams() {
 	updateAllPlnTab();
 }
 
-// Панелька "Сколько накопится"
+// "How much will accumulate" panel
 function renderAccumWhat(tab, currMet, currCrys, currDeut, totalHours, production, deutAccum) {
 	if (tab === 'one') {
 		$('#' + tab + 'pln-accumwhat-met').innerHTML = numToOGame(Math.min(options.metStorageCap, Math.round(currMet + totalHours * production[0])));
@@ -111,7 +111,7 @@ function renderAccumWhat(tab, currMet, currCrys, currDeut, totalHours, productio
 	}
 }
 
-// Если что-то превышено, отметим, что надо поморгать максимальным объёмом конкретного хранилища, и сбросим счётчик морганий, чтобы процесс начался снова
+// If something is exceeded, mark that the specific storage's max capacity needs to blink, and reset the blink counter so the process starts over
 function updateStorageBlinkFlags(currMet, currCrys, totalHours, production, deutAccum, needMet, needCrys, needDeut) {
 	options.storagesToBlink[0] = options.metStorageCap < Math.round(currMet + totalHours * production[0]) || needMet > options.metStorageCap ? 1 : 0;
 	options.storagesToBlink[1] = options.crysStorageCap < Math.round(currCrys + totalHours * production[1]) || needCrys > options.crysStorageCap ? 1 : 0;
@@ -125,7 +125,7 @@ function updateStorageBlinkFlags(currMet, currCrys, totalHours, production, deut
 	}
 }
 
-// вычислим время в часах, за которое накопится требуемое кол-во каждого из ресурсов и возьмём максимум из этих интервалов
+// calculate the time in hours it takes to accumulate the required amount of each resource and take the maximum of these intervals
 function timeUntilResourcesAccumulate(currMet, currCrys, currDeut, production, needMet, needCrys, needDeut) {
 	let t = 0;
 	if (needMet > currMet) {
@@ -135,10 +135,10 @@ function timeUntilResourcesAccumulate(currMet, currCrys, currDeut, production, n
 		t = Math.max(t, (needCrys - currCrys) / production[1]);
 	}
 	if (needDeut > currDeut) {
-		if (production[2] <= 0) { // есть два варианта, почему производство отрицательное или нулевое:
-			t = options.prm.oPPP[2][0] === 0 // вообще нет синтезатора
+		if (production[2] <= 0) { // there are two possible reasons production is negative or zero:
+			t = options.prm.oPPP[2][0] === 0 // there is no synthesizer at all
 				? Number.POSITIVE_INFINITY
-				: Number.NEGATIVE_INFINITY; // ...или термояд забирает больше, чем производится
+				: Number.NEGATIVE_INFINITY; // ...or the fusion reactor takes more than is produced
 		} else {
 			t = Math.max(t, (needDeut - currDeut) / production[2]);
 		}
@@ -146,7 +146,7 @@ function timeUntilResourcesAccumulate(currMet, currCrys, currDeut, production, n
 	return t;
 }
 
-// Панелька "Когда накопится"
+// "When it will accumulate" panel
 function renderAccumWhen(tab, t) {
 	const msgEl = $('#' + tab + 'pln-accumwhen-msg');
 	if (!Number.isFinite(t)) {
@@ -208,16 +208,16 @@ function renderAffordableCounts(rows, itemCosts, duration, production, column, a
 	}
 }
 
-// Куполов больше одного всё равно не построишь
+// You can't build more than one shield dome anyway
 function capMoonShields(itemId, minCount) {
-	// Индексы свойств объекта - строковые
+	// Object property indexes are strings
 	return (itemId === '407' || itemId === '408') ? Math.min(minCount, 1) : minCount;
 }
 
 function updateProduction(tab, production) {
 	if (tab !== 'one' && tab !== 'all')
 		return;
-	let durations = [1, 24, 168];	// продолжительность накопления ресов: час, день, неделя
+	let durations = [1, 24, 168];	// resource accumulation duration: hour, day, week
 	let fleetRows = Array.from($$('#' + tab + '-pln-fleet-prod tr')).slice(1);
 	let defenseRows = Array.from($$('#' + tab + '-pln-defense-prod tr')).slice(1);
 	for (let d = 0; d < 3; d++) {
@@ -247,7 +247,7 @@ function renderOnePlnProductionRows(rows, results, koeff) {
 	}
 }
 
-// Выведем данные о текущем производстве и подведем итоги: hourly/daily/weekly
+// Display the current production data and sum up the totals: hourly/daily/weekly
 // totals per resource plus the energy balance, all in the summary rows below
 // the per-building table.
 function renderOnePlnProductionSummary(rows, resultRow, production, totalEnergyProduced, totalEnergyUsed) {
@@ -358,7 +358,7 @@ function updateOnePlnTab() {
 	// brown when energy-starved, otherwise inherit the theme body color
 	coeffSpan.style.color = koeff < 1 ? 'brown' : '';
 
-	// +4 = заголовок + разделитель + строка "Техн. бонус форм жизни" сверх rowsToTechs.
+	// +4 = header + separator + "Life form tech bonus" row on top of rowsToTechs.
 	let resultRow = options.rowsToTechs.length + 4;
 	renderOnePlnProductionRows(rows, results, koeff);
 	renderOnePlnProductionSummary(rows, resultRow, production, totalEnergyProduced, totalEnergyUsed);
@@ -393,42 +393,42 @@ function updateAllPlnTab() {
 			geologist
 		);
 	}
-	// считаем в массив данные из input-ов таблицы на случай, если имело место прямое редактирование
+	// collect the table inputs' data into the array in case there was a direct edit
 	collectAllPlanetsInputs(rows);
 	for (let i = 0; i < planetsCount; i++) {
 		let planet = buildPlanetProdParams(i);
 		let prodData = calculateProduction(planet.prodParams, planet.plnData, false, planet.lfEff);
 		let production = prodData[1];
 		let koeff = prodData[4];
-		rows[i * 2 + 1].children[14].innerHTML = Math.floor(koeff * 100) + '%'; // в последний столбец таблицы запишем коэффициент производства
+		rows[i * 2 + 1].children[14].innerHTML = Math.floor(koeff * 100) + '%'; // write the production coefficient into the table's last column
 
-		// Покажем бустер энергии планеты
+		// Show the planet's energy booster
 		rows[i * 2 + 2].children[2].children[0].innerHTML = options.energyShort + 10 * options.prm.aPS[i][2] + '%';
 		for (let j = 0; j < 3; j++) {
-			// Покажем производство ресурсов с учётом выбранных процентов мощности работы рудников
+			// Show resource production taking into account the selected mine power percentages
 			rows[i * 2 + 1].children[LEVEL_COLUMNS[j] + 1].innerHTML = numToOGame(production[j]);
-			// ...а также бустеры и факторы производства
-			rows[i * 2 + 2].children[LEVEL_COLUMNS[j] - 1].children[0].innerHTML = // поправка на colspan=2
+			// ...as well as the production boosters and factors
+			rows[i * 2 + 2].children[LEVEL_COLUMNS[j] - 1].children[0].innerHTML = // adjustment for colspan=2
 				10 * options.prm.aPS[i][(j + 1) * 3 + 2] + '% / ' + options.prm.aPS[i][(j + 1) * 3 + 1] + '%';
 		}
 		for (let j = 3; j < 7; j++) {
-			// Для электростанций, лампочек и Гусеничников - только факторы производства
+			// For power plants, satellites and Crawlers - production factors only
 			rows[i * 2 + 2].children[LEVEL_COLUMNS[j] - 1].children[0].innerHTML = options.prm.aPS[i][(j + 1) * 3 + 1] + '%';
 		}
-		// Расчёты по текущей планете закончили, надо добавить полученные значения производства ресурсов к итогу
+		// Done with the calculations for the current planet, need to add the obtained resource production values to the total
 		totalProd[0] += production[0];
 		totalProd[1] += production[1];
 		totalProd[2] += production[2];
 	}
 
-	// Закончен расчёт производства ресурсов на планетах, можно подводить итоги
+	// The resource production calculation for the planets is done, the totals can be summed up
 	for (let i = 0; i < 3; i++) {
 		rows[planetsCount * 2 + 2].children[LEVEL_COLUMNS[i + 1] - 1].innerHTML = numberToShortenedString(totalProd[i], options.unitSuffix);
 		rows[planetsCount * 2 + 3].children[LEVEL_COLUMNS[i + 1] - 1].innerHTML = numberToShortenedString(24 * totalProd[i], options.unitSuffix);
 		rows[planetsCount * 2 + 4].children[LEVEL_COLUMNS[i + 1] - 1].innerHTML = numberToShortenedString(7 * 24 * totalProd[i], options.unitSuffix);
 	}
 
-	// Обновим данные в нижних панельках
+	// Update the data in the bottom panels
 	updateAccumulation('all', totalProd);
 	updateProduction('all', totalProd);
 	options.save();
@@ -788,7 +788,7 @@ function savePlnData() {
 	for (let i = 1; i < 8; i++) {
 		target[i * 3] = getInputNumber(rows[i + 1].children[2].children[0]);
 		target[i * 3 + 1] = Number(rows[i + 1].children[7].children[0].value);
-		if (i > 3) { // У электростанций, лампочек и Гусеничников нет бустеров
+		if (i > 3) { // Power plants, satellites and Crawlers have no boosters
 			target[i * 3 + 2] = 0;
 		} else {
 			target[i * 3 + 2] = Number(rows[i + 1].children[1].children[0].value);
@@ -815,7 +815,7 @@ function clonePlnData() {
 		for (let i = 1; i < 8; i++) {
 			p[i * 3] = getInputNumber(rows[i + 1].children[2].children[0]);
 			p[i * 3 + 1] = Number(rows[i + 1].children[7].children[0].value);
-			if (i > 3) { // У электростанций, лампочек и Гусеничников нет бустеров
+			if (i > 3) { // Power plants, satellites and Crawlers have no boosters
 				p[i * 3 + 2] = 0;
 			} else {
 				p[i * 3 + 2] = Number(rows[i + 1].children[1].children[0].value);
@@ -1059,7 +1059,7 @@ function initializeProductionCalculator() {
 
 		setupPlanetsSpin();
 
-		// Производство синтезатора (стр. 4) и спутников (стр. 7) зависит от температуры - напомним о ней
+		// Synthesizer (row 4) and satellite (row 7) production depends on temperature - remind about it
 		let rows = $$('#one-planet-prod tr:not(.lf-row)');
 		addEvent(rows[4].children[2].children[0], 'keyup', blinkMaxTemp);
 		addEvent(rows[7].children[2].children[0], 'keyup', blinkMaxTemp);

@@ -43,7 +43,7 @@
     // Global options object
     var options = {};
 
-    // десятичный разделитель будет использоваться в функциях, проверяющих валидность чисел в input-ах
+    // the decimal separator will be used by the functions that validate numbers in inputs
     options.decimalSeparator='<?= $l['decimal-separator'] ?>';
     options.datetimeW = '<?= $l['datetime-w'] ?>';
     options.datetimeD = '<?= $l['datetime-d'] ?>';
@@ -372,7 +372,7 @@
                   <?php $techs = getTechsByType($j); $row = 1;?>
                   <?php foreach ($techs as $tech) :?>
                   <?php
-                    $techID = $j == 3 ? $tech + 10000 : $tech; // зданиям на луне присвоим id на 1000 больше, чтобы их можно было отличить при чтении id строк
+                    $techID = $j == 3 ? $tech + 10000 : $tech; // give moon buildings an id 1000 higher, so they can be told apart when reading row ids
                   ?>
                   <tr class="<?= ($row++ % 2) === 1 ? 'odd' : 'even' ?>">
                     <td style="display: none;"><?=$techID?></td>
@@ -604,7 +604,7 @@
           <?php endif;?>
           </div>
           <?php
-            // на вкладке "все элементы - несколько уровней" не должно быть вкладок с кораблями и обороной
+            // the "all items - multiple levels" tab must not have tabs for ships and defense
             unset($techTypes[5]);
             unset($techTypes[6]);
           ?>

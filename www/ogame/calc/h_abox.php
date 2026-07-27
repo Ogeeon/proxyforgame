@@ -1,9 +1,9 @@
 <?php
 function killInjection ($str)
     {
-        $search = array ( "'<script[^>]*?>.*?</script>'si",  // Вырезает javaScript
-                            "'<[\/\!]*?[^<>]*?>'si",         // Вырезает HTML-теги
-                            "'([\r\n])[\s]+'" );             // Вырезает пробельные символы
+        $search = array ( "'<script[^>]*?>.*?</script>'si",  // Strips javaScript
+                            "'<[\/\!]*?[^<>]*?>'si",         // Strips HTML tags
+                            "'([\r\n])[\s]+'" );             // Strips whitespace characters
         $replace = array ("", "", "\\1", "\\1" );
         $str = preg_replace($search, $replace, $str);
         $str = str_replace ("'", "", $str);

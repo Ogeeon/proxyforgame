@@ -303,16 +303,16 @@ let options = {
 };
 
 /**
- * Заполняет select#universe списоком вселенных для указанной страны и устанавливает текущий элемент в нем.
- * @param lang язык страны: 'ru', 'en', ...
- * @param uni текущая вселенная: 1,2,3,..101,102,...
+ * Fills select#universe with the list of universes for the given country and sets the current item in it.
+ * @param lang country language: 'ru', 'en', ...
+ * @param uni current universe: 1,2,3,..101,102,...
  */
 function setUniList(lang, uni) {
     const universeEl = document.getElementById('universe');
     universeEl.innerHTML = '';
     let ulist = unis[lang] || [];
 
-    // проверяем, имеется ли такая вселенная в указанной стране. если нет, сбрасываем на начало списка
+    // check whether such a universe exists in the given country. if not, reset to the start of the list
     let fu = false;
     for (const item of ulist) {
         if (item[0] == uni) {
@@ -335,7 +335,7 @@ function setUniList(lang, uni) {
 }
 
 /**
- * Возвращает язык, указанный в url. Если не удается распознать язык из урла, возвращается дефолтный.
+ * Returns the language specified in the url. If the language cannot be recognized from the url, the default is returned.
  */
 function getUrlLang() {
     let um = /^\/(\w\w)\//.exec(globalThis.location.pathname);
@@ -343,7 +343,7 @@ function getUrlLang() {
 }
 
 /**
- * Проверяет на валидность язык страны из списка #country. Если такого языка не встречается, то ставим дефолтный.
+ * Validates the country language against the #country list. If such a language is not found, the default is used.
  */
 function checkCountryLang(lang) {
     let f = false;
@@ -355,7 +355,7 @@ function checkCountryLang(lang) {
 }
 
 /**
- * Возвращает массив доступности типа ресурсов назначения в зависимости от состояния переключателей srcType и dstType.
+ * Returns the availability array for the destination resource type depending on the state of the srcType and dstType switches.
  */
 function getDstInputState(srcType, dstType) {
     let dstEnable = resTypes[srcType].slice(0);
@@ -374,7 +374,7 @@ function getDstInputState(srcType, dstType) {
 }
 
 /**
- * Обрабатывает смену переключателя srcType.
+ * Handles a change of the srcType switch.
  */
 function onUpdateSrcType() {
     let input = document.getElementById('res-src-' + options.srcType);
@@ -387,10 +387,10 @@ function onUpdateSrcType() {
 }
 
 /**
- * Обрабатывает смену переключателя dstType.
+ * Handles a change of the dstType switch.
  */
 function onUpdateDstType() {
-    // доп.контроль
+    // additional guard
     if (options.srcType > 2) {
         options.dstType = 0;
     }
@@ -403,7 +403,7 @@ function onUpdateDstType() {
 }
 
 /**
- * Обрабатывает смену переключателя dstMixType c учетом состояния переключателя dstType.
+ * Handles a change of the dstMixType switch, taking the dstType switch state into account.
  */
 function onUpdateDstMixType() {
     if (options.dstType == 2) {
@@ -422,8 +422,8 @@ function onUpdateDstMixType() {
 }
 
 /**
- * Принудительно устанавливает тип dstType в положение 2 (mix).
- * @return true, если произошла смена состояний и нужно обновить зависимые данные
+ * Forcibly sets dstType to position 2 (mix).
+ * @return true if a state change occurred and dependent data needs to be updated
  */
 function forceDstMix() {
     if (options.dstType == 2) {
@@ -435,7 +435,7 @@ function forceDstMix() {
 }
 
 /**
- * Активизирует определенный тип микса в зависимости от активного поля ввода obj.
+ * Activates a specific mix type depending on the active input field obj.
  */
 function activateDstMixType(obj) {
     let ids = [
@@ -466,10 +466,10 @@ function activateDstMixType(obj) {
 }
 
 /**
- * Устанавливает состояние доступности для одного класса ресурса.
- * @param className имя класса элемента
- * @param panelSelector селектор панели
- * @param enabled флаг доступности
+ * Sets the availability state for a single resource class.
+ * @param className element class name
+ * @param panelSelector panel selector
+ * @param enabled availability flag
  */
 function updateResourceState(className, panelSelector, enabled) {
     const elems = document.querySelectorAll(panelSelector + ' .' + className);
@@ -484,8 +484,8 @@ function updateResourceState(className, panelSelector, enabled) {
 }
 
 /**
- * Устанавливает доступность полей ресурсов источника.
- * @param resEnable массив доступности полей с input'ами ресурсов: e.g. [1,0,0]
+ * Sets the availability of the source resource fields.
+ * @param resEnable availability array for the resource input fields: e.g. [1,0,0]
  */
 function updateSrcInputState(resEnable) {
     const classNames = ['res-src-m', 'res-src-c', 'res-src-d'];
@@ -495,15 +495,15 @@ function updateSrcInputState(resEnable) {
 }
 
 /**
- * Обновляет доступность и подписи переключателей типа ресурсов назначения в зависимости от состояния переключателя типа ресурсов источника.
- * Для единичных ресурсов источника доступны все три варианта назначения, для микса - только одно назначение.
+ * Updates the availability and labels of the destination resource type switches depending on the source resource type switch state.
+ * For a single source resource all three destination options are available; for a mix, only one destination is available.
  */
 function updateDstFromSrc() {
-    // ограничиваем возможные значения dstType
+    // limit the possible dstType values
     if (options.srcType > 2) {
         options.dstType = 0;
     }
-    // обновляем подписи к типу ресурсов
+    // update the resource type labels
     switch (options.srcType) {
         case 0:
             document.getElementById('res-type-dst-lbl-0').textContent = l.crystal;
@@ -546,8 +546,8 @@ function updateDstFromSrc() {
 }
 
 /**
- * Устанавливает доступность полей ресурсов назначения.
- * @param resEnable массив доступности полей с input'ами ресурсов: e.g. [1,0,0]
+ * Sets the availability of the destination resource fields.
+ * @param resEnable availability array for the resource input fields: e.g. [1,0,0]
  */
 function updateDstInputState(resEnable) {
     let classNames = ['res-dst-m', 'res-dst-c', 'res-dst-d'];
@@ -605,7 +605,7 @@ function resetParams() {
 }
 
 /**
- * Проверяет, находятся ли курсы в допустимых пределах, и если это не так - подкрашивает input красным.
+ * Checks whether the exchange rates are within the allowed limits, and if not - highlights the input in red.
  */
 function validateRateLimits() {
     const rateMd = document.getElementById('rate-md');
@@ -630,7 +630,7 @@ function validateRateLimits() {
 }
 
 /**
- * Вычисляет целевые ресурсы из металла
+ * Calculates the destination resources from metal
  */
 function calculateFromMetal(dst, p, fix1, fix2, sm) {
     let dm = 0, dc = 0, dd = 0;
@@ -659,7 +659,7 @@ function calculateFromMetal(dst, p, fix1, fix2, sm) {
 }
 
 /**
- * Вычисляет целевые ресурсы из кристалла
+ * Calculates the destination resources from crystal
  */
 function calculateFromCrystal(dst, p, fix1, fix2, sc) {
     let dm = 0, dc = 0, dd = 0;
@@ -688,7 +688,7 @@ function calculateFromCrystal(dst, p, fix1, fix2, sc) {
 }
 
 /**
- * Вычисляет целевые ресурсы из дейтерия
+ * Calculates the destination resources from deuterium
  */
 function calculateFromDeuterium(dst, p, fix1, fix2, sd) {
     let dm = 0, dc = 0, dd = 0;
@@ -717,10 +717,10 @@ function calculateFromDeuterium(dst, p, fix1, fix2, sd) {
 }
 
 /**
- * Пересчитывает значения ресурсов в соответствии с настройками в модели.
+ * Recalculates the resource values according to the settings in the model.
  */
 function updateNumbers() {
-    // исходные ресурсы
+    // source resources
     let sm = clampNumber(getInputNumber(document.getElementById('res-src-m')), 0, Infinity);
     let sc = clampNumber(getInputNumber(document.getElementById('res-src-c')), 0, Infinity);
     let sd = clampNumber(getInputNumber(document.getElementById('res-src-d')), 0, Infinity);
@@ -729,22 +729,22 @@ function updateNumbers() {
     options.crystal = sc;
     options.deuterium = sd;
 
-    // расчеты
+    // calculations
     let dst = {
-        mc: sm / options.rates.mc,	// металл в пересчете на кристалл
-        md: sm / options.rates.md,	// металл в пересчете на дейтерий
-        cm: sc * options.rates.mc,	// кристалл в пересчете на металл
-        cd: sc / options.rates.cd,	// кристалл в пересчете на дейтерий
-        dm: sd * options.rates.md,	// дейтерий в пересчете на металл
-        dc: sd * options.rates.cd	// дейтерий в пересчете на кристалл
+        mc: sm / options.rates.mc,	// metal converted to crystal
+        md: sm / options.rates.md,	// metal converted to deuterium
+        cm: sc * options.rates.mc,	// crystal converted to metal
+        cd: sc / options.rates.cd,	// crystal converted to deuterium
+        dm: sd * options.rates.md,	// deuterium converted to metal
+        dc: sd * options.rates.cd	// deuterium converted to crystal
     };
 
-    // целевые ресурсы
+    // destination resources
     let dm = 0;
     let dc = 0;
     let dd = 0;
 
-    // фиксированные ресурсы из микса
+    // fixed resources from the mix
     let fix1 = getInputNumber(document.getElementById('mix-fix1'));
     let fix2 = getInputNumber(document.getElementById('mix-fix2'));
     options.fix1 = fix1;

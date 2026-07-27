@@ -1,10 +1,10 @@
 <?php
 
 /*
- * 1. берем язык из uri
- * 2. берем язык из accept
- * 3. окончательный язык = uri; если пусто, то accept; если пусто, то en; если не в списке допустимых; то en
- * 4. если язык в uri не указан, либо не совпадает с окончательным, то делаем редирект на новый uri с правильным языком
+ * 1. take the language from the uri
+ * 2. take the language from accept
+ * 3. final language = uri; if empty, then accept; if empty, then en; if not in the allowed list, then en
+ * 4. if the language is not specified in the uri, or does not match the final language, redirect to a new uri with the correct language
  */
 
 function firstNonEmpty($s1, $s2) {
@@ -19,16 +19,16 @@ $uri = isset($_SERVER['ORIG_REQUEST_URI']) ? $_SERVER['ORIG_REQUEST_URI'] : $_SE
 $up = parse_url($uri);
 $uriLang = preg_match('@^/(\w\w)((/.*)|$)@', $up['path'], $r) ? strtolower($r[1]) : '';
 
-// 2. язык из заголовка Accept-Language
+// 2. language from the Accept-Language header
 $acceptLang = isset($_SERVER['HTTP_ACCEPT_LANGUAGE']) ? strtolower(substr(locale_accept_from_http($_SERVER['HTTP_ACCEPT_LANGUAGE']), 0, 2)) : '';
 
-// 3. окончательный язык
+// 3. final language
 $lang = firstNonEmpty(firstNonEmpty($uriLang, $acceptLang), 'en');
 if (!preg_match($availLangs, $lang)) {
   $lang = (strlen($acceptLang) > 0 && preg_match($availLangs, $acceptLang)) ? $acceptLang : 'en';
 }
 
-// 4. редирект на скорректированный язык, если требуется
+// 4. redirect to the corrected language, if needed
 // BUT: only redirect if user explicitly used a WRONG language prefix (e.g., /xx/path where xx is invalid)
 // If no language prefix was used at all, accept the default language without redirecting
 if ($uriLang != '' && $uriLang != $lang) {

@@ -1,21 +1,21 @@
 /**
- * Вычисляет скорость производства ресурсов (ед/час) и энергии.
- * @param techID ID постройки - рудника/синтезатора, электростанции или солн.спутника.
- * @param techLevel уровень постройки или кол-во спутников
- * @param energyTechLevel уровень энерг. технологии
- * @param plasmaTechLevel уровень плазменной технологии
- * @param maxTemp макс. температура на планете
- * @param pos номер позиции планеты
- * @param universeSpeedFactor множитель скорости вселенной
- * @param geologist флаг наличия Геолога
- * @param engineer флаг наличия Инженера
- * @param productionFactor коэффициент производства (0..1, меньше 1, если энергии не хватает)
- * @param powerFactor процент мощности (0..1, устанавливается пользователем)
- * @param boosterType тип ускорителя: 0-отсутствует, 1-бронза (10%), 2-серебро (20%), 3-золото (30%)
- * @param allOfficers флаг наличия всех 5 офицеров  
- * @param playerClass класс игрока: 0-Коллекционер, 1-Генерал, 2-Исследователь
- * @param isTrader принадлежит ли игрок а альянсу с классом "Скупщики"
- * @returns Кол-во производимых ресурсов или энергии
+ * Calculates the resource (units/hour) and energy production rate.
+ * @param techID ID of the building - mine/synthesizer, power plant or solar satellite.
+ * @param techLevel building level or number of satellites
+ * @param energyTechLevel energy technology level
+ * @param plasmaTechLevel plasma technology level
+ * @param maxTemp max temperature on the planet
+ * @param pos planet's position number
+ * @param universeSpeedFactor universe speed multiplier
+ * @param geologist flag - whether the Geologist is present
+ * @param engineer flag - whether the Engineer is present
+ * @param productionFactor production coefficient (0..1, less than 1 if there is not enough energy)
+ * @param powerFactor power percentage (0..1, set by the user)
+ * @param boosterType booster type: 0-none, 1-bronze (10%), 2-silver (20%), 3-gold (30%)
+ * @param allOfficers flag - whether all 5 officers are present
+ * @param playerClass player class: 0-Collector, 1-General, 2-Discoverer
+ * @param isTrader whether the player belongs to an alliance with the "Traders" class
+ * @returns Number of resource units or energy produced
  */
 function getProductionRate(techID, techLevel, energyTechLevel, plasmaTechLevel, maxTemp, pos, universeSpeedFactor, geologist, engineer, productionFactor, powerFactor, boosterType, allOfficers, playerClass, isTrader) {
 	let prod;
@@ -29,7 +29,7 @@ function getProductionRate(techID, techLevel, energyTechLevel, plasmaTechLevel, 
 		case 12:
 		case 212:
 			prod = getProductionRateSplit(techID, techLevel, energyTechLevel, plasmaTechLevel, maxTemp, pos, universeSpeedFactor, geologist, engineer, productionFactor, powerFactor, boosterType, allOfficers, playerClass, isTrader);
-			return(prod[1]); // powerFactor учтётся, а бонусы инженера, командного состава и класса нужно накладывать на сумму оставшейся энергии
+			return(prod[1]); // powerFactor is accounted for, while the engineer, officers and class bonuses need to be applied to the sum of remaining energy
 		default: {
 			return(0);
 		}
@@ -37,26 +37,26 @@ function getProductionRate(techID, techLevel, energyTechLevel, plasmaTechLevel, 
 }
 
 /**
- * Вычисляет скорость производства ресурсов (ед/час) и энергии. При обсчёте рудников металла и кристалла нулевой строкой отдаст естественное производство
- * @param techID ID постройки - рудника/синтезатора, электростанции или солн.спутника.
- * @param techLevel уровень постройки или кол-во спутников
- * @param energyTechLevel уровень энерг. технологии
- * @param plasmaTechLevel уровень плазменной технологии
- * @param maxTemp макс. температура на планете
- * @param pos позиция планеты в солнечной системе
- * @param universeSpeedFactor множитель скорости вселенной
- * @param geologist флаг наличия Геолога
- * @param engineer флаг наличия Инженера
- * @param productionFactor коэффициент производства (0..1, меньше 1, если энергии не хватает)
- * @param powerFactor процент мощности (0..1, устанавливается пользователем)
- * @param boosterType тип ускорителя: 0-отсутствует, 1-бронза (10%), 2-серебро (20%), 3-золото (30%)
- * @param allOfficers флаг наличия всех 5 офицеров  
- * @param playerClass класс игрока: 0-Коллекционер, 1-Генерал, 2-Исследователь
- * @param isTrader принадлежит ли игрок а альянсу с классом "Скупщики"
- * @returns Кол-во производимых ресурсов или энергии
+ * Calculates the resource (units/hour) and energy production rate. When calculating metal and crystal mines, returns the natural production in row zero
+ * @param techID ID of the building - mine/synthesizer, power plant or solar satellite.
+ * @param techLevel building level or number of satellites
+ * @param energyTechLevel energy technology level
+ * @param plasmaTechLevel plasma technology level
+ * @param maxTemp max temperature on the planet
+ * @param pos planet's position in the solar system
+ * @param universeSpeedFactor universe speed multiplier
+ * @param geologist flag - whether the Geologist is present
+ * @param engineer flag - whether the Engineer is present
+ * @param productionFactor production coefficient (0..1, less than 1 if there is not enough energy)
+ * @param powerFactor power percentage (0..1, set by the user)
+ * @param boosterType booster type: 0-none, 1-bronze (10%), 2-silver (20%), 3-gold (30%)
+ * @param allOfficers flag - whether all 5 officers are present
+ * @param playerClass player class: 0-Collector, 1-General, 2-Discoverer
+ * @param isTrader whether the player belongs to an alliance with the "Traders" class
+ * @returns Number of resource units or energy produced
  */
 function getProductionRateSplit(techID, techLevel, energyTechLevel, plasmaTechLevel, maxTemp, pos, universeSpeedFactor, geologist, engineer, productionFactor, powerFactor, boosterType, allOfficers, playerClass, isTrader) {
-	// Инженер и геолог увеличивают производство на 10%. Если есть все 5 офицеров, к производству ресурсов и энергии добавляется ещё 2%.
+	// The Engineer and Geologist increase production by 10%. If all 5 officers are present, another 2% is added to resource and energy production.
 	const geologistFactor = geologist === true ? 0.1 : 0;
 	const allStaffFactor = allOfficers === true ? 0.02 : 0;
 	const engineerFactor = (engineer === true) ? 0.1 : 0;
@@ -65,7 +65,7 @@ function getProductionRateSplit(techID, techLevel, energyTechLevel, plasmaTechLe
 	let allianceClassFactor = isTrader ? 0.05 : 0;
 	let positionFactor = 1;
 	let basePR;
-	const rows = [0, 0, 0, 0, 0, 0, 0, 0, 0]; // нат., шахта, геолог, все офицеры, плазма, ускоритель, класс, класс альянса
+	const rows = [0, 0, 0, 0, 0, 0, 0, 0, 0]; // natural, mine, geologist, all officers, plasma, booster, class, alliance class
 	switch (techID*1) {
 		case 1:
 			switch (pos*1) {
@@ -79,7 +79,7 @@ function getProductionRateSplit(techID, techLevel, energyTechLevel, plasmaTechLe
 			rows[2] = Math.round(basePR * 0.01 * plasmaTechLevel * universeSpeedFactor);
 			rows[3] = Math.round(basePR * boostFactor * universeSpeedFactor);
 			rows[4] = Math.round(basePR * geologistFactor * universeSpeedFactor);
-			rows[5] = 0; // тут в таблице Инженер
+			rows[5] = 0; // this is the Engineer's slot in the table
 			rows[6] = Math.round(basePR * allStaffFactor * universeSpeedFactor);
 			rows[7] = Math.round(basePR * classFactor * universeSpeedFactor);
 			rows[8] = Math.round(basePR * allianceClassFactor * universeSpeedFactor);
@@ -128,7 +128,7 @@ function getProductionRateSplit(techID, techLevel, energyTechLevel, plasmaTechLe
 		case 212:
 			//productionRate = techLevel * Math.floor((maxTemp + 140) / 6) * engineerFactor * powerFactor;
 			basePR = techLevel * Math.floor((maxTemp + 140) / 6) * powerFactor;
-			// Если в калькуляторе ввести температуру планеты меньше -140, он будет показывать, что солнечные спутники производят отрицательное кол-во энергии. Нехорошо это.
+			// If a planet temperature below -140 is entered in the calculator, it would show solar satellites producing a negative amount of energy. Not good.
 			if (basePR < 0) {
 				basePR = 0;
 			}
@@ -138,26 +138,26 @@ function getProductionRateSplit(techID, techLevel, energyTechLevel, plasmaTechLe
 }
 
 /**
- * Вычисляет потребление энергиии рудниками и дейтерия термоядерной электростанцией
- * @param techID ID рудника или электростанции
- * @param techLevel уровень постройки
- * @param universeSpeedFactor множитель скорости вселенной 
- * @param powerFactor процент мощности (0..1, устанавливается пользователем)
- * @returns Кол-во потребляемых постройкой единиц энергии/дейтерия
+ * Calculates energy consumption by mines and deuterium consumption by the fusion reactor
+ * @param techID ID of the mine or power plant
+ * @param techLevel building level
+ * @param universeSpeedFactor universe speed multiplier
+ * @param powerFactor power percentage (0..1, set by the user)
+ * @returns Number of energy/deuterium units consumed by the building
  */
 function getHourlyConsumption(techID, techLevel, universeSpeedFactor, powerFactor) {
 	if (techLevel < 1)
 		return 0;
 	let consump;
 	switch (techID*1) {
-		case 1: // рудник металла. потребляет энергию
-		case 2: // рудник кристалла. потребляет энергию
+		case 1: // metal mine. consumes energy
+		case 2: // crystal mine. consumes energy
 			consump = Math.floor(10.0 * techLevel * Math.pow(1.1, techLevel) * powerFactor);
 			break;
-		case 12: // термоядерная электростанция. потребляет дейтерий
+		case 12: // fusion reactor. consumes deuterium
 			consump = Math.floor(Math.floor(10.0 * techLevel * Math.pow(1.1, techLevel) * universeSpeedFactor) * powerFactor);
 			break;
-		case 3: // синтезатор дейтерия. потребляет энергию
+		case 3: // deuterium synthesizer. consumes energy
 			consump = Math.floor(20.0 * techLevel * Math.pow(1.1, techLevel) * powerFactor);
 			break;
 		default:
@@ -167,9 +167,9 @@ function getHourlyConsumption(techID, techLevel, universeSpeedFactor, powerFacto
 }
 
 /**
- * Вычисляет ёмкость хранилища ресурсов
- * @param techLevel уровень постройки
- * @returns Кол-во ресурсов, которое может хранить постройка
+ * Calculates the resource storage capacity
+ * @param techLevel building level
+ * @returns Amount of resources the building can store
  */
 function getStorageCapacity(level) {
 	if (level < 0)
@@ -180,14 +180,14 @@ function getStorageCapacity(level) {
 }
 
 /**
- * Вычисляет кол-во энергии, требуемое для изучения/постройки
- * @param techID ID постройки или исследования
- * @param techLevel уровень постройки/исследования
- * @param techData массив данных о технологиях формата {id:[cost_met, cost_crys, cost_deut, grow_koeff]}
- * @returns Требуемая энергия
+ * Calculates the amount of energy required to research/build
+ * @param techID ID of the building or research
+ * @param techLevel building/research level
+ * @param techData technology data array in the format {id:[cost_met, cost_crys, cost_deut, grow_koeff]}
+ * @returns Required energy
  */
 function getBuildEnergyCost_C(techID, techLevel, techData) {
-	// Технологии "Терраформер", "Космический док" и "Гравитационная технология" - особенные. Они требуют энергии для изучения/постройки.
+	// The "Terraformer", "Space Dock" and "Gravitational Technology" technologies are special. They require energy to research/build.
 	if (techLevel < 1)
 		return 0;
 	const data = techData[techID];
@@ -199,7 +199,7 @@ function getBuildEnergyCost_C(techID, techLevel, techData) {
 			buildCost = 1000 * Math.pow(data[3], techLevel - 1);
 			break;
 		case 36:
-			// Цена космического дока в металле и кристалле растёт не так, как требования к энергии
+			// The Space Dock's metal and crystal price grows differently than its energy requirement
 			buildCost = Math.floor(50 * Math.pow(data[3]/2, techLevel - 1)); 
 			break;
 		case 199:
@@ -210,18 +210,18 @@ function getBuildEnergyCost_C(techID, techLevel, techData) {
 }
 
 /**
- * Вычисляет стоимость сноса постройки
- * @param techID ID постройки
- * @param techLevel Результирующий уровень постройки
- * @param techData массив данных о технологиях формата {id:[cost_met, cost_crys, cost_deut, grow_koeff]}
- * @returns Стоимость сноса постройки
+ * Calculates the cost of demolishing a building
+ * @param techID ID of the building
+ * @param techLevel Resulting building level
+ * @param techData technology data array in the format {id:[cost_met, cost_crys, cost_deut, grow_koeff]}
+ * @returns Cost of demolishing the building
  */
 function calcDeconstrCost(techID, techLevel, techData, ionTechLevel) {
 	const cost = [0, 0, 0];
 	if (techLevel < 0) {
 		return cost;
 	}
-	// Сносить можно только здания; терраформер и лунную базу снести нельзя
+	// Only buildings can be demolished; the terraformer and lunar base cannot be demolished
 	if (techID > 100 || techID == 33 || techID == 41) {
 		return cost;
 	}
@@ -235,11 +235,11 @@ function calcDeconstrCost(techID, techLevel, techData, ionTechLevel) {
 }
 
 /**
- * Вычисляет стоимость изучения/постройки
- * @param techID ID постройки или исследования
- * @param techLevel уровень постройки/исследования
- * @param techData массив данных о технологиях формата {id:[cost_met, cost_crys, cost_deut, grow_koeff]}
- * @returns Стоимость постройки/изучения указанного уровня технологии
+ * Calculates the cost of researching/building
+ * @param techID ID of the building or research
+ * @param techLevel building/research level
+ * @param techData technology data array in the format {id:[cost_met, cost_crys, cost_deut, grow_koeff]}
+ * @returns Cost of building/researching the given technology level
  */
 function calcBuildCost_C(techID, techLevel, techData) {
 	if (techLevel < 1)
@@ -249,7 +249,7 @@ function calcBuildCost_C(techID, techLevel, techData) {
 		return [0, 0, 0];
 	const cost = [0, 0, 0];
 	let price = 0;
-	// В редизайне астрофизика дорожает с коэффициентом 1.75, и стоимость округляется до сотен
+	// In the redesign, astrophysics grows more expensive with a coefficient of 1.75, and the cost is rounded to hundreds
 	if (techID == 124) {
 		for (let i = 0; i < 3; i++) {
 			price = data[i] * Math.pow(1.75, (techLevel - 1));
@@ -263,13 +263,13 @@ function calcBuildCost_C(techID, techLevel, techData) {
 }
 
 /**
- * Вычисляет стоимость изучения/постройки нескольких уровней техи
- * @param techID ID постройки или исследования
- * @param techLevelFrom стартовый уровень постройки/исследования (не включается в расчёт)
- * @param techLevelTo конечный уровень постройки/исследования
- * @param techData массив данных о технологиях формата {id:[cost_met, cost_crys, cost_deut, grow_koeff]}
- * @param ionTechLevel уровень ионной технологии
- * @returns Общая стоимость апгрейда постройки/исследования 
+ * Calculates the cost of researching/building several tech levels
+ * @param techID ID of the building or research
+ * @param techLevelFrom starting building/research level (not included in the calculation)
+ * @param techLevelTo final building/research level
+ * @param techData technology data array in the format {id:[cost_met, cost_crys, cost_deut, grow_koeff]}
+ * @param ionTechLevel ion technology level
+ * @returns Total cost of the building/research upgrade
  */
 function getBuildCost_C(techID, techLevelFrom, techLevelTo, techData, ionTechLevel) {
 	let cost;
@@ -277,9 +277,9 @@ function getBuildCost_C(techID, techLevelFrom, techLevelTo, techData, ionTechLev
 	if (ionTechLevel === undefined)
 		ionTechLevel = 0;
 	let totalCost = [0, 0, 0];
-	// После techID==200 идут корабли и оборона, у них прироста стоимости от количества нет - их будем считать не так, как постройки
+	// After techID==200 come ships and defense, they have no cost growth with count - we'll calculate them differently than buildings
 	if (techID < 200) {
-		// Если целевой уровень меньше исходного, посчитаем стоимость сноса. Функция вернёт 0 там, где снос невозможен (исследования, терраформер, лунная база).
+		// If the target level is less than the starting one, calculate the demolition cost. The function returns 0 where demolition is impossible (research, terraformer, lunar base).
 		if (1*techLevelFrom > techLevelTo) {
 			for (i = 1*techLevelFrom - 1; i >= techLevelTo; i--) {
 				cost = calcDeconstrCost(techID, i, techData, ionTechLevel);
@@ -288,7 +288,7 @@ function getBuildCost_C(techID, techLevelFrom, techLevelTo, techData, ionTechLev
 				totalCost[2] += cost[2];
 			}
 		} else {
-			// Получим стоимость строительства всех уровней техи от стартового до конечного и просто сложим результаты
+			// Get the build cost of every tech level from the start to the end and simply sum up the results
 			for (i = 1*techLevelFrom + 1; i <= techLevelTo; i++) {
 				cost = calcBuildCost_C(techID, i, techData);
 				totalCost[0] += cost[0];
@@ -297,7 +297,7 @@ function getBuildCost_C(techID, techLevelFrom, techLevelTo, techData, ionTechLev
 			}
 		}
 	} else {
-		// Получим стоимость строительства одной единицы и умножим на количество
+		// Get the cost of building a single unit and multiply by the count
 		cost = calcBuildCost_C(techID, 1, techData);
 		totalCost[0] = techLevelTo * cost[0];
 		totalCost[1] = techLevelTo * cost[1];
@@ -307,26 +307,26 @@ function getBuildCost_C(techID, techLevelFrom, techLevelTo, techData, ionTechLev
 }
 
 /**
- * Вычисляет длительность изучения/постройки нескольких уровней или нескольких кораблей
- * @param techID ID Постройки или исследования
- * @param techLevelFrom Стартовый уровень постройки/исследования (не включается в расчёт)
- * @param techLevelTo Конечный уровень постройки/исследования
- * @param techData Массив данных о технологиях формата {id:[cost_met, cost_crys, cost_deut, grow_koeff]}
- * @param robotsLevel Уровень Фабрики роботов
- * @param nanitesLevel Уровень Фабрики нанитов
- * @param researchLabLevel Уровень исследовательской лаборатории
- * @param technocratFactor Множитель технократа - 1, если отутствует
- * @param shipyardLevel Уровень Верфи
- * @param uniSpeed Скорость вселенной
- * @param techReqs Требования для исследований в формате {id: req_level}
- * @returns Общая длительность апгрейда постройки/исследования, строительства кораблей 
+ * Calculates the duration of researching/building several levels or several ships
+ * @param techID ID of the Building or research
+ * @param techLevelFrom Starting building/research level (not included in the calculation)
+ * @param techLevelTo Final building/research level
+ * @param techData Technology data array in the format {id:[cost_met, cost_crys, cost_deut, grow_koeff]}
+ * @param robotsLevel Robot Factory level
+ * @param nanitesLevel Nanite Factory level
+ * @param researchLabLevel Research Lab level
+ * @param technocratFactor Technocrat multiplier - 1 if absent
+ * @param shipyardLevel Shipyard level
+ * @param uniSpeed Universe speed
+ * @param techReqs Research requirements in the format {id: req_level}
+ * @returns Total duration of the building/research upgrade, ship construction
  */
 /**
- * Время постройки/сноса здания (techID <= 100) между двумя уровнями.
- * Вызывающая сторона уже отфильтровала запрещённый снос Терраформера/Лунной базы.
+ * Time to build/demolish a building (techID <= 100) between two levels.
+ * The caller has already filtered out the forbidden demolition of the Terraformer/Lunar Base.
  */
 function getBuildingTime_C(techID, techLevelFrom, techLevelTo, robotsLevel, nanitesLevel, techData) {
-	// Время постройки всех зданий, кроме Фабрики нанитов, Лунной базы, Фаланги и Ворот, снижается (вплоть до 8го уровня)
+	// The build time of all buildings except the Nanite Factory, Lunar Base, Sensor Phalanx and Jump Gate is reduced (up to level 8)
 	const noReduction = techID == 15 || techID == 41 || techID == 42 || techID == 43;
 	let timeSpan = 0;
 	if (techLevelFrom < techLevelTo) {
@@ -334,7 +334,7 @@ function getBuildingTime_C(techID, techLevelFrom, techLevelTo, robotsLevel, nani
 		for (let next = 1*techLevelFrom + 1; next <= techLevelTo; next++) {
 			const cost = getBuildCost_C(techID, curr, next, techData);
 			const reduction = noReduction ? 1 : Math.max(4 - next / 2.0, 1);
-			// Формула ОГейма даёт время в часах - переведём в секунды
+			// OGame's formula gives the time in hours - convert to seconds
 			timeSpan += Math.floor(3600 * (cost[0] + cost[1]) / (2500.0 * reduction * (robotsLevel + 1.0) * Math.pow(2.0, nanitesLevel)));
 			curr = next;
 		}
@@ -344,7 +344,7 @@ function getBuildingTime_C(techID, techLevelFrom, techLevelTo, robotsLevel, nani
 	for (let next = 1*techLevelFrom - 1; next >= techLevelTo; next--) {
 		const cost = getBuildCost_C(techID, curr, next, techData);
 		const reduction = noReduction ? 1 : Math.max(4 - next / 2.0, 1);
-		// Формула ОГейма даёт время в часах - переведём в секунды
+		// OGame's formula gives the time in hours - convert to seconds
 		timeSpan += Math.ceil(3600 * (cost[0] + cost[1]) / (2500.0 * reduction * (robotsLevel + 1.0) * Math.pow(2.0, nanitesLevel)));
 		curr = next;
 	}
@@ -352,25 +352,25 @@ function getBuildingTime_C(techID, techLevelFrom, techLevelTo, robotsLevel, nani
 }
 
 /**
- * Время исследования (100 < techID <= 200); -1, если не хватает уровня исследовательской лаборатории.
+ * Research time (100 < techID <= 200); -1 if the Research Lab level is insufficient.
  */
 function getResearchTime_C(techID, techLevelFrom, techLevelTo, researchLabLevel, technocratFactor, techReqs, techData) {
 	if (researchLabLevel < techReqs[techID])
 		return -1;
 	const cost = getBuildCost_C(techID, techLevelFrom, techLevelTo, techData);
-	// Формула ОГейма даёт время в часах - переведём в секунды; технократ умножает результат на свой поправочный коэффициент
+	// OGame's formula gives the time in hours - convert to seconds; the technocrat multiplies the result by its own correction factor
 	return 3600 * (cost[0] + cost[1]) / (1000 * (1.0 + researchLabLevel)) * technocratFactor;
 }
 
 /**
- * Время постройки одного корабля/единицы обороны (techID > 200), не умноженное на кол-во.
+ * Time to build a single ship/defense unit (techID > 200), not multiplied by count.
  */
 function getShipBuildTime_C(techID, nanitesLevel, shipyardLevel, techData) {
-	// Для кораблей и обороны нельзя считать время, исходя из полного кол-ва ресурсов - нужно считать по одному.
+	// For ships and defense the time cannot be calculated from the full resource count - it must be calculated per unit.
 	const cost = calcBuildCost_C(techID, 1, techData);
 	//((metal + crystal) / 5'000) * (2 / ((level shipyard) + 1)) * (0.5 ^ (level nanite factory))
 	let timeSpan = 3600 * (cost[0] + cost[1]) / 5000.0 * 2.0 / (shipyardLevel + 1.0) * Math.pow(0.5, nanitesLevel);
-	// При слишком высоких уровнях нанитки скорость постройки СС может стать 0 - надо это учесть
+	// At too high nanite levels the ship build speed can become 0 - this must be accounted for
 	if (timeSpan == 0) {
 		timeSpan = 1;
 	}
@@ -385,25 +385,25 @@ function getBuildTime_C(techID, techLevelFrom, techLevelTo, techData, robotsLeve
 		return 0;
 	if (techLevelFrom >= techLevelTo && techID > 100)
 		return 0;
-	// Терраформер и лунную базу сносить нельзя
+	// The Terraformer and lunar base cannot be demolished
 	if (techID <= 100 && techLevelFrom >= techLevelTo && (techID == 33 || techID == 41))
 		return 0;
 
 	let timeSpan;
-	// Техи с ID до 100 - это здания. Скорость их строительства зависит от наличия и уровня фабрик роботов и нанитов
+	// Techs with ID up to 100 are buildings. Their build speed depends on the presence and level of the robot and nanite factories
 	if (techID <= 100) {
 		timeSpan = getBuildingTime_C(techID, techLevelFrom, techLevelTo, robotsLevel, nanitesLevel, techData);
-	// Техи с ID от 100 до 200 - это технологии. Скорость их исследования зависит от уровня исследовательской лаборатории и наличия технократа
+	// Techs with ID from 100 to 200 are technologies. Their research speed depends on the Research Lab level and the presence of a technocrat
 	} else if (techID <= 200) {
 		timeSpan = getResearchTime_C(techID, techLevelFrom, techLevelTo, researchLabLevel, technocratFactor, techReqs, techData);
 		if (timeSpan === -1)
 			return -1;
-	// Техи с ID больше 200 - это корабли и оборона. Скорость их строительства зависит от наличия и уровня верфи и фабрики нанитов
+	// Techs with ID above 200 are ships and defense. Their build speed depends on the presence and level of the shipyard and nanite factory
 	} else {
 		timeSpan = getShipBuildTime_C(techID, nanitesLevel, shipyardLevel, techData);
 	}
 
-	// Если расчёт заказан для ускоренной вселенной, разделим вычисленное время на поправочный коэффициент
+	// If the calculation is requested for a sped-up universe, divide the computed time by the correction factor
 	if (uniSpeed > 1) {
 		timeSpan /= uniSpeed;
 	}
@@ -418,10 +418,10 @@ function getBuildTime_C(techID, techLevelFrom, techLevelTo, techData, robotsLeve
 }
 
 /**
- * Вычисляет стоимость одного ускорения постройки/исследования за ТМ
- * @param techID ID Постройки, корабля или исследования
- * @param timeSpan Изначальные затраты времени на строительство/исследование
- * @returns Сумма необходимой ТМ
+ * Calculates the cost of a single build/research speedup in Dark Matter
+ * @param techID ID of the Building, ship or research
+ * @param timeSpan Original time cost of the construction/research
+ * @returns Amount of Dark Matter required
  */
 function getHalvingCost(techID, timeSpan) {
 	if (Number(timeSpan) === 0)
@@ -447,18 +447,18 @@ function getHalvingCost(techID, timeSpan) {
 }
 
 /**
- * Вычисляет стоимость сноса постройки для Форм Жизни
- * @param techID ID постройки
- * @param techLevel Результирующий уровень постройки
- * @param techData массив данных о технологиях формата {id:[cost_met, cost_crys, cost_deut, cost_energy, grow_koeff]}
- * @returns Стоимость сноса постройки
+ * Calculates the cost of demolishing a Life Form building
+ * @param techID ID of the building
+ * @param techLevel Resulting building level
+ * @param techData technology data array in the format {id:[cost_met, cost_crys, cost_deut, cost_energy, grow_koeff]}
+ * @returns Cost of demolishing the building
  */
 function calcDeconstrCostLF(techID, techLevel, techData, ionTechLevel) {
 	const cost = [0, 0, 0];
 	if (techLevel < 0) {
 		return cost;
 	}
-	// Сносить можно только здания
+	// Only buildings can be demolished
 	if (Number(techID) % 1000 > 100) {
 		return cost;
 	}
@@ -469,12 +469,12 @@ function calcDeconstrCostLF(techID, techLevel, techData, ionTechLevel) {
 }
 
 /**
- * Вычисляет стоимость изучения/постройки для Форм Жизни
- * @param techID ID постройки или исследования
- * @param techLevel уровень постройки/исследования
- * @param techData массив данных о технологиях формата {id:[cost_met, cost_crys, cost_deut, cost_energy, grow_koeff]}
- * @param costRdc бонус, снижающий стоимость  (в %)
- * @returns Стоимость постройки/изучения указанного уровня технологии
+ * Calculates the cost of researching/building for Life Forms
+ * @param techID ID of the building or research
+ * @param techLevel building/research level
+ * @param techData technology data array in the format {id:[cost_met, cost_crys, cost_deut, cost_energy, grow_koeff]}
+ * @param costRdc bonus reducing the cost (in %)
+ * @returns Cost of building/researching the given technology level
  */
 function calcBuildCostLF(techID, techLevel, techData, costRdc) {
 	if (techLevel < 1)
@@ -490,15 +490,15 @@ function calcBuildCostLF(techID, techLevel, techData, costRdc) {
 }
 
 /**
- * Вычисляет стоимость изучения/постройки нескольких уровней техи для Форм Жизни
- * @param techID ID постройки или исследования
- * @param techLevelFrom стартовый уровень постройки/исследования (не включается в расчёт)
- * @param techLevelTo конечный уровень постройки/исследования
- * @param techData массив данных о технологиях формата {id:[cost_met, cost_crys, cost_deut, cost_energy, grow_koeff]}
- * @param ionTechLevel уровень ионной технологии
- * @param rsrCostRdc бонус, снижающий стоимость исследований (в %)
- * @param bldCostRdc бонус от зданий
- * @returns Общая стоимость апгрейда постройки/исследования 
+ * Calculates the cost of researching/building several tech levels for Life Forms
+ * @param techID ID of the building or research
+ * @param techLevelFrom starting building/research level (not included in the calculation)
+ * @param techLevelTo final building/research level
+ * @param techData technology data array in the format {id:[cost_met, cost_crys, cost_deut, cost_energy, grow_koeff]}
+ * @param ionTechLevel ion technology level
+ * @param rsrCostRdc bonus reducing research cost (in %)
+ * @param bldCostRdc bonus from buildings
+ * @returns Total cost of the building/research upgrade
  */
 function getBuildCostLF(techID, techLevelFrom, techLevelTo, techData, ionTechLevel, rsrCostRdc, bldCostRdc=0) {
 	let cost;
@@ -506,9 +506,9 @@ function getBuildCostLF(techID, techLevelFrom, techLevelTo, techData, ionTechLev
 	if (ionTechLevel === undefined)
 		ionTechLevel = 0;
 	let totalCost = [0, 0, 0];
-	// Мегалит снижает стоимость только зданий
+	// The Megalith only reduces the cost of buildings
 	const costReduction = Number(techID) % 1000 < 100 ? bldCostRdc : 0.01 * rsrCostRdc;
-	// Если целевой уровень меньше исходного, посчитаем стоимость сноса. Функция вернёт 0 там, где снос невозможен (исследования, терраформер, лунная база).
+	// If the target level is less than the starting one, calculate the demolition cost. The function returns 0 where demolition is impossible (research, terraformer, lunar base).
 	if (Number(techLevelFrom) > Number(techLevelTo)) {
 		for (i = Number(techLevelFrom) - 1; i >= Math.max(Number(techLevelTo), 0); i--) {
 			if (i == 0) {
@@ -521,7 +521,7 @@ function getBuildCostLF(techID, techLevelFrom, techLevelTo, techData, ionTechLev
 			totalCost[2] += cost[2];
 		}
 	} else {
-		// Получим стоимость строительства всех уровней техи от стартового до конечного и просто сложим результаты
+		// Get the build cost of every tech level from the start to the end and simply sum up the results
 		for (i = Number(techLevelFrom) + 1; i <= Number(techLevelTo); i++) {
 			cost = calcBuildCostLF(techID, i, techData, costReduction);
 			totalCost[0] += cost[0];
@@ -533,28 +533,28 @@ function getBuildCostLF(techID, techLevelFrom, techLevelTo, techData, ionTechLev
 }
 
 /**
- * Вычисляет длительность изучения/постройки нескольких уровней для Форм Жизни
- * @param techID ID Постройки или исследования
- * @param techLevelFrom Стартовый уровень постройки/исследования (не включается в расчёт)
- * @param techLevelTo Конечный уровень постройки/исследования
- * @param techData Массив данных о технологиях формата {id:[cost_met, cost_crys, cost_deut, cost_energy, grow_koeff]}
- * @param robotsLevel Уровень Фабрики роботов
- * @param nanitesLevel Уровень Фабрики нанитов
- * @param uniSpeed Скорость вселенной
- * @param rsrTimeRdc Сокращение времени исследований (в %)
- * @param megalithRdc бонус от Мегалита
- * @returns Общая длительность апгрейда постройки/исследования, строительства кораблей 
+ * Calculates the duration of researching/building several levels for Life Forms
+ * @param techID ID of the Building or research
+ * @param techLevelFrom Starting building/research level (not included in the calculation)
+ * @param techLevelTo Final building/research level
+ * @param techData Technology data array in the format {id:[cost_met, cost_crys, cost_deut, cost_energy, grow_koeff]}
+ * @param robotsLevel Robot Factory level
+ * @param nanitesLevel Nanite Factory level
+ * @param uniSpeed Universe speed
+ * @param rsrTimeRdc Research time reduction (in %)
+ * @param megalithRdc bonus from the Megalith
+ * @returns Total duration of the building/research upgrade, ship construction
  */
 /**
- * Вклад одного уровня в длительность постройки/сноса LF-здания.
- * Уровень 0 не имеет собственной стоимости - при сносе до него берутся значения уровня 1.
+ * Contribution of a single level to the build/demolish time of an LF building.
+ * Level 0 has no cost of its own - when demolishing down to it, level 1's values are used.
  */
 function getBuildingTimeStepLF(next, data, robotsLevel, nanitesLevel) {
 	const n = next == 0 ? 1 : next;
 	return Math.floor((n * data[4] * Math.pow(data[9], n)) / ((robotsLevel + 1.0) * Math.pow(2.0, nanitesLevel)));
 }
 
-/** Время постройки/сноса LF-здания (techID % 1000 <= 100) между двумя уровнями. */
+/** Time to build/demolish an LF building (techID % 1000 <= 100) between two levels. */
 function getBuildingTimeLF(techLevelFrom, techLevelTo, data, robotsLevel, nanitesLevel, uniSpeed, megalithRdc) {
 	let timeSpan = 0;
 	if (techLevelFrom < techLevelTo) {
@@ -570,7 +570,7 @@ function getBuildingTimeLF(techLevelFrom, techLevelTo, data, robotsLevel, nanite
 	return Math.floor(timeSpan / uniSpeed);
 }
 
-/** Время исследования LF-технологии (techID % 1000 > 100); LF-исследования нельзя "разучить", поэтому снос не считается. */
+/** Time to research an LF technology (techID % 1000 > 100); LF research cannot be "unlearned", so demolition is not applicable. */
 function getResearchTimeLF(techLevelFrom, techLevelTo, data, uniSpeed, rsrTimeRdc) {
 	let timeSpan = 0;
 	if (techLevelFrom >= techLevelTo)
@@ -593,11 +593,11 @@ function getBuildTimeLF(techID, techLevelFrom, techLevelTo, techData, robotsLeve
 		return 0;
 
 	let timeSpan;
-	// Техи с ID до 100 - это здания. Скорость их строительства зависит от наличия и уровня фабрик роботов и нанитов
+	// Techs with ID up to 100 are buildings. Their build speed depends on the presence and level of the robot and nanite factories
 	if (Number(techID) % 1000 <= 100) {
 		timeSpan = getBuildingTimeLF(techLevelFrom, techLevelTo, data, robotsLevel, nanitesLevel, uniSpeed, megalithRdc);
 	} else {
-		// Техи с ID больше 100 - это технологии. Скорость их исследования зависит от уровня исследовательской лаборатории и наличия технократа
+		// Techs with ID above 100 are technologies. Their research speed depends on the Research Lab level and the presence of a technocrat
 		timeSpan = getResearchTimeLF(techLevelFrom, techLevelTo, data, uniSpeed, rsrTimeRdc);
 	}
 
@@ -609,13 +609,13 @@ function getBuildTimeLF(techID, techLevelFrom, techLevelTo, techData, robotsLeve
 }
 
 /**
- * Вычисляет кол-во энергии, требуемое для изучения/постройки для Форм Жизни
- * @param techID ID постройки или исследования
- * @param techLevel уровень постройки/исследования
- * @param techData массив данных о технологиях формата {id:[cost_met, cost_crys, cost_deut, cost_energy, grow_koeff]}
- * @param ionTechLevel уровень ионной технологии
- * @param bldCostRdc снижающий затраты бонус от зданий
- * @returns Требуемая энергия
+ * Calculates the amount of energy required to research/build for Life Forms
+ * @param techID ID of the building or research
+ * @param techLevel building/research level
+ * @param techData technology data array in the format {id:[cost_met, cost_crys, cost_deut, cost_energy, grow_koeff]}
+ * @param ionTechLevel ion technology level
+ * @param bldCostRdc cost-reducing bonus from buildings
+ * @returns Required energy
  */
 function getBuildEnergyCostLF(techID, techLevel, techData, ionTechLevel, bldCostRdc=0) {
 	if (techLevel < 1)

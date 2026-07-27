@@ -21,21 +21,21 @@ function convertAllPlanetParams() {
 	for (let i = 0; i < options.prm.currPlanetsCount; i++) {
 		prm = [];
 		names[i] = options.planetNumStr + (i + 1);
-		// 0 - температура, 1-6 - шахты, электростанции и лампочки, 7 - гусеничники, 8 - позиция
-		prm[0] = options.prm.aPPP[i][0]; // температура
-		prm[1] = options.prm.aPPP[i][8]; // позиция
-		prm[2] = 0; // бустер энергии
+		// 0 - temperature, 1-6 - mines, power plants and satellites, 7 - crawlers, 8 - position
+		prm[0] = options.prm.aPPP[i][0]; // temperature
+		prm[1] = options.prm.aPPP[i][8]; // position
+		prm[2] = 0; // energy booster
 		for (let j = 1; j < 8; j++) {
 			if (options.prm.aPPP[i][j] === undefined) {
 				prm[j * 3] = 0;
 			} else {
-				prm[j * 3] = options.prm.aPPP[i][j]; // уровень (исторически сложившийся порядок)
+				prm[j * 3] = options.prm.aPPP[i][j]; // level (in the historically established order)
 			}
-			prm[j * 3 + 1] = 100; // коэффициент производства
-			prm[j * 3 + 2] = 0; // бустер
+			prm[j * 3 + 1] = 100; // production coefficient
+			prm[j * 3 + 2] = 0; // booster
 		}
-		prm[24] = 0; // форма жизни (раса)
-		for (let k = 0; k < LF_BUILDINGS_PER_RACE; k++) prm[25 + k] = 0; // уровни зданий форм жизни (позиционно для расы)
+		prm[24] = 0; // life form (race)
+		for (let k = 0; k < LF_BUILDINGS_PER_RACE; k++) prm[25 + k] = 0; // life form building levels (positional per race)
 		options.prm.aPS[i] = prm;
 	}
 	options.prm.aPNames = names;
@@ -65,17 +65,17 @@ function convertExchangeRates() {
 
 function createEmptyPlanet() {
 	let prm = [];
-	// 0 - температура, 1-6 - шахты, электростанции и лампочки, 7 - гусеничники, 8 - позиция
-	prm[0] = 0; // температура
-	prm[1] = 8; // позиция
-	prm[2] = 0; // бустер энергии
+	// 0 - temperature, 1-6 - mines, power plants and satellites, 7 - crawlers, 8 - position
+	prm[0] = 0; // temperature
+	prm[1] = 8; // position
+	prm[2] = 0; // energy booster
 	for (let j = 1; j < 8; j++) {
 		prm[j * 3] = 0;
-		prm[j * 3 + 1] = 100; // коэффициент производства
-		prm[j * 3 + 2] = 0; // бустер
+		prm[j * 3 + 1] = 100; // production coefficient
+		prm[j * 3 + 2] = 0; // booster
 	}
-	prm[24] = 0; // форма жизни (раса)
-	for (let k = 0; k < LF_BUILDINGS_PER_RACE; k++) prm[25 + k] = 0; // уровни зданий форм жизни (позиционно для расы)
+	prm[24] = 0; // life form (race)
+	for (let k = 0; k < LF_BUILDINGS_PER_RACE; k++) prm[25 + k] = 0; // life form building levels (positional per race)
 	return prm;
 }
 
@@ -109,7 +109,7 @@ function getSSCost(techID, currLvl, plnData) {
 	let newCons = getHourlyConsumption(techID, currLvl + 1, options.prm.universeSpeed, 1);
 	let energyReq = newCons - currCons;
 	let fullCrew = options.prm.geologist && options.prm.engineer && options.prm.admiral && options.prm.commander && options.prm.technocrat;
-	// plnData = [темп., поз., бустер]
+	// plnData = [temp., pos., booster]
 	let oneSSProd = getProductionRate(212, 1, options.prm.energyTechLevel, options.prm.plasmaTechLevel, plnData[0], plnData[1],
 		options.prm.universeSpeed, options.prm.geologist, options.prm.engineer, 1, 1, fullCrew, options.prm.playerClass);
 	let boosterFactor = 0.1 * plnData[2];
@@ -185,7 +185,7 @@ function lfBuildingEffects(race, levels) {
 function computeBaseEnergyProduction(prodParams, plnData, fullCrew, results, production) {
 	let totalEnergyProduced = 0;
 	for (let i = 3; i < 6; i++) {
-		// Возьмём из таблицы данные об уровне постройки и проценте мощности, на который она работает
+		// Take the building's level and the power percentage it runs at from the table
 		let level = prodParams[i][0];
 		let perCent = prodParams[i][1];
 		let energy = 0;
@@ -194,11 +194,11 @@ function computeBaseEnergyProduction(prodParams, plnData, fullCrew, results, pro
 			let energyArray = getProductionRateSplit(options.rowsToTechs[i], level, options.prm.energyTechLevel, 0, plnData[0], plnData[1], options.prm.universeSpeed, options.prm.geologist,
 				options.prm.engineer, 1, perCent / 100.0, 0, fullCrew, options.prm.playerClass, options.prm.isTrader);
 			energy = energyArray[1];
-			// базовую производимую энергию запишем в строку для эл.станции/спутника
+			// write the base energy produced into the power plant's/satellite's row
 			results[i + 1][3] = energyArray[1];
 		}
 		totalEnergyProduced += energy;
-		// Для термоядерной электростанции надо показать, сколько дейтерия она потребляет
+		// For the fusion reactor we need to show how much deuterium it consumes
 		if (options.rowsToTechs[i] === 12) {
 			let deutCons = level > 0 ? getHourlyConsumption(12, level, options.prm.universeSpeed, perCent / 100.0) : 0;
 			results[i + 1][2] = -deutCons;
@@ -211,7 +211,7 @@ function computeBaseEnergyProduction(prodParams, plnData, fullCrew, results, pro
 // Adds the booster/officer/class/life-form energy bonuses on top of the base
 // production, plus what each life form building contributes to its own row.
 function applyEnergyBonuses(totalEnergyProduced, plnData, fullCrew, lfEff, results, lfBld) {
-	let energyBalance = totalEnergyProduced; // базу для расчёта бонусов энергии нужно считать до Гусеничников
+	let energyBalance = totalEnergyProduced; // the base for calculating energy bonuses must be taken before Crawlers
 	if (energyBalance < 0) energyBalance = 0;
 	const boosterFactor = 0.1 * plnData[2];
 	const engineerFactor = (options.prm.engineer === true) ? 0.1 : 0;
@@ -224,10 +224,10 @@ function applyEnergyBonuses(totalEnergyProduced, plnData, fullCrew, lfEff, resul
 	results[12][3] = Math.round(energyBalance * allStaffFactor);
 	results[13][3] = Math.round(energyBalance * classFactor);
 	results[14][3] = Math.round(energyBalance * allianceClassFactor);
-	// Техн. бонус форм жизни: прирост производства энергии от базовой выработки
+	// Life form tech bonus: energy production increase from the base output
 	results[15][3] = Math.round(energyBalance * lfEnergyFactor);
 	let total = totalEnergyProduced + results[9][3] + results[11][3] + results[12][3] + results[13][3] + results[14][3] + results[15][3];
-	// Прирост производства энергии от зданий - в строку самого здания
+	// Energy production increase from buildings - into the building's own row
 	for (let b = 0; b < lfBld.length; b++) {
 		lfBld[b][3] = Math.round(energyBalance * lfEff.perBld[b].enP / 100);
 		total += lfBld[b][3];
@@ -235,7 +235,7 @@ function applyEnergyBonuses(totalEnergyProduced, plnData, fullCrew, lfEff, resul
 	return total;
 }
 
-// Мы знаем, сколько всего производится энергии на планете - теперь нужно узнать, сколько её потребляется
+// We know how much energy the planet produces in total - now we need to find out how much of it is consumed
 function computeEnergyConsumption(prodParams, results) {
 	let totalEnergyUsed = 0;
 	for (let i = 0; i < 3; i++) {
@@ -248,7 +248,7 @@ function computeEnergyConsumption(prodParams, results) {
 	return totalEnergyUsed;
 }
 
-// Гусеничники в 6й строке
+// Crawlers are in row 6
 function computeCrawlersEnergyConsumption(prodParams, results) {
 	let cralwersPwrPcnt = prodParams[6][1] / 100.0;
 	let crawlersOlPcnt = 0;
@@ -286,10 +286,10 @@ function computeResourceProduction(prodParams, plnData, fullCrew, koeff, normali
 		let pwrFactor = normalized ? 1 : prodParams[i][1] / 100.0;
 		let prod = getProductionRateSplit(options.rowsToTechs[i], prodParams[i][0], options.prm.energyTechLevel, options.prm.plasmaTechLevel, plnData[0], plnData[1],
 			options.prm.universeSpeed, options.prm.geologist, options.prm.engineer, prodFactor, pwrFactor, prodParams[i][2], fullCrew, options.prm.playerClass, options.prm.isTrader);
-		// Сохраним данные о производстве ресурсов
-		results[0][i] += prod[0];  // естественное производство
+		// Save the resource production data
+		results[0][i] += prod[0];  // base production
 		production[i] += prod[0];
-		results[i + 1][i] += prod[1];  // производство на руднике
+		results[i + 1][i] += prod[1];  // production at the mine
 		production[i] += prod[1];
 		for (let line = 8; line < 15; line++) {
 			results[line][i] += prod[line - 6];
@@ -308,10 +308,10 @@ function applyCrawlerProductionBonus(prodParams, results, production) {
 	production[2] += results[7][2];
 }
 
-// Техн. бонус форм жизни: доп. производство ресурсов от ИССЛЕДОВАНИЙ (проценты
-// с панели параметров - они уже включают технологический бонус, см. выше).
-// Прирост по каждому ресурсу применяется к базовой выработке рудника, а буст
-// гусеничников - к их производству. При нулевых бонусах строка не даёт вклада.
+// Life form tech bonus: extra resource production from RESEARCH (percentages
+// from the parameters panel - they already include the tech bonus, see above).
+// The increase for each resource is applied to the mine's base output, and the
+// crawler boost - to their production. With zero bonuses the row contributes nothing.
 function applyLfTechProductionBonus(results, production) {
 	let lfMetFactor = (options.prm.lfMetProdBonus || 0) / 100;
 	let lfCrysFactor = (options.prm.lfCrysProdBonus || 0) / 100;
@@ -325,7 +325,7 @@ function applyLfTechProductionBonus(results, production) {
 	production[2] += results[15][2];
 }
 
-// Прирост добычи от зданий форм жизни - в строку каждого здания
+// Extraction increase from life form buildings - into each building's own row
 function applyLfBuildingProduction(lfEff, results, lfBld, production) {
 	let mineProd = [results[1][0], results[2][1], results[3][2]];
 	for (let b = 0; b < lfBld.length; b++) {
@@ -351,11 +351,11 @@ function calculateProduction(prodParams, plnData, normalized = false, lfEff = nu
 	let lfBld = (lfEff.perBld || []).map(function (bld) { return [0, 0, 0, 0, bld.energyUsed]; });
 	let results = [];
 	let production = [0, 0, 0];
-	// 0-нат.пр-во, 1-шахта мет., 2-шахта крис., 3-синт.дейт., 4-сол.эл/ст,
-	// 5--термояд.эл/ст., 6-сол.спут., 7-гусен., 8-плазм.тех., 9-предметы,
-	// 10-геолог, 11-инженер, 12-ком.состав, 13-класс, 14-класс альянса,
-	// 15-техн. бонус форм жизни
-	for (let i = 0; i < 16; i++) { results.push([0, 0, 0, 0, 0]); } // мет, крис, дейт, энергии производится, энергии требуется
+	// 0-base production, 1-metal mine, 2-crystal mine, 3-deut synthesizer, 4-solar plant,
+	// 5-fusion reactor, 6-solar satellite, 7-crawlers, 8-plasma tech, 9-items,
+	// 10-geologist, 11-engineer, 12-officers, 13-class, 14-alliance class,
+	// 15-life form tech bonus
+	for (let i = 0; i < 16; i++) { results.push([0, 0, 0, 0, 0]); } // metal, crystal, deuterium, energy produced, energy required
 	const fullCrew = options.prm.geologist && options.prm.engineer && options.prm.admiral && options.prm.commander && options.prm.technocrat;
 
 	let totalEnergyProduced = computeBaseEnergyProduction(prodParams, plnData, fullCrew, results, production);

@@ -54,7 +54,7 @@ $lfBuildingBonus = array(
     3010 => array('deu' => array(2.0, 1.0, null)),                            // High-Performance Synthesiser
 );
 
-// id => (ключ_$l, тип, мет, крис, дейт, коэфф.удорожания}
+// id => (translation key, type, metal, crystal, deuterium, cost-growth factor}
 $techData = array(
     1 => array('metal-mine', 2, 60, 15, 0, 1.5),
     2 => array('crystal-mine', 2, 48, 24, 0, 1.6),
@@ -100,8 +100,8 @@ function getTechsByType($type) {
         if (!isset($techData[$i])) {
             continue;
         }
-        // добавляем элемент, если нужно отдать весь список, если тип текущего элемента совпадает с запрошенным типом,
-        // или если текущая теха - "универсальное" здание, а запрошены здания для луны или планеты
+        // add the element if the whole list is requested, if the current element's type matches the requested type,
+        // or if the current tech is a "universal" building and buildings for a moon or planet were requested
         if ($type == 0 || $techData[$i][1] == $type || ($techData[$i][1] == 1 && ($type == 2 || $type == 3))) {
             array_push($filteredTechs, $i);
         }

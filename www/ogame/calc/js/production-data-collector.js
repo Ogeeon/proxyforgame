@@ -53,7 +53,7 @@ function collectOnePlanetParams(rows) {
 	for (let i = 2; i < 9; i++) {
 		params[i - 2][0] = getInputNumber(rows[i].children[2].children[0]);
 		params[i - 2][1] = rows[i].children[7].children[0].value;
-		if (i > 4) { // У электростанций, лампочек и Гусеничников нет бустеров
+		if (i > 4) { // Power plants, satellites and Crawlers have no boosters
 			params[i - 2][2] = 0.0;
 		} else {
 			params[i - 2][2] = rows[i].children[1].children[0].value;

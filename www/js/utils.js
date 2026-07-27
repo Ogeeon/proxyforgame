@@ -1,9 +1,9 @@
 /**
- * Возвращает содержащееся в переданной строке число, вырезая всё, кроме цифр, знака "-" и десятичного разделителя.
- * Если в переданной строке нет ни одного допустимого символа, возвращает пустую строку.
- * @param s строка, содержащая число
- * @param allowNeg флаг - допустимы ли отрицательные значения
- * @param sepCode код символа, выступающего десятичным разделителем
+ * Returns the number contained in the passed string, stripping everything except digits, the "-" sign and the decimal separator.
+ * If the passed string has no valid characters at all, returns an empty string.
+ * @param s string containing the number
+ * @param allowNeg flag - whether negative values are allowed
+ * @param sepCode character code acting as the decimal separator
  */
 function getCorrectedValue (s, allowNeg, sepCode) {
 	let sxx = "";
@@ -33,15 +33,15 @@ function getCorrectedValue (s, allowNeg, sepCode) {
 }
 
 /**
- * Проверяет содержащееся в input-e число на соответствие заданным ограничениям (допустимость отрицательных значений, значений с плавающей точкой).
- * Input, для которого вызывается функция, берётся из контекста через this.
- * @param event Данные о событии. Поле event.data может содержать имя функции, которую нужно вызвать по завершению проверки.
+ * Validates the number contained in the input against the given constraints (whether negative values and floating-point values are allowed).
+ * The input the function is called for is taken from the context via this.
+ * @param event Event data. event.data may contain the name of a function to call once validation is done.
  */
 function validateInputNumber (event) {
 	const input = event.currentTarget;
 	const allowNeg = getConstraint(input, 'allowNegative', false);
 	const decimalSeparator = getOptionValue('decimalSeparator', '.');
-	// Если в поле можно вводить значения с плавающей точкой, то код десятичного разделителя берём из настроек, иначе примем его равным -1, чтобы посимвольное сравнение не приняло его за допустимый символ.
+	// If the field allows floating-point values, take the decimal separator code from the settings; otherwise use -1 so the character-by-character comparison never treats it as a valid character.
 	const sepCode = getConstraint(input, 'allowFloat', false) ? decimalSeparator.codePointAt(0) : -1;
 	if (input.value.charAt(0) === decimalSeparator) {
 		input.value = '0' + input.value;
@@ -53,25 +53,25 @@ function validateInputNumber (event) {
 		input.value = getConstraint(input, 'def', 0);
 		input.select();
 	}
-	// После проверки надо вызвать функцию, имя которой передано в свойствах события. На всякий случай вызовем её в контексте обрабатываемого поля ввода
+	// After validation, the function named in the event's properties must be called. Call it in the context of the input field being processed, just in case.
 	if (event?.data != null)
 		eval(event.data).apply(input);
 }
 
 /**
- * Проверяет, что num является числом и попадает в заданый диапазон. Если все ок, возвращается само число, иначе значение по умолчанию.
- * @param num проверяемое число
- * @param min минимальное допустимое значение
- * @param max макисимальное допустимое значение
- * @param def значение по умолчанию
+ * Checks that num is a number and falls within the given range. If everything is fine, returns the number itself, otherwise the default value.
+ * @param num the number being checked
+ * @param min minimum allowed value
+ * @param max maximum allowed value
+ * @param def default value
  */
 function validateNumber(num, min, max, def) {
 	return (!Number.isNaN(num) && num >= min && num <= max) ? num : def;
 }
 
 /**
- * Форматирует число в стиле ОГейма - проставляя точку в качестве разделителя тысяч.
- * Если пришло число со значащими цифрами в дробной части, они отбрасываются.
+ * Formats a number OGame-style, inserting a dot as the thousands separator.
+ * If the number has significant digits in the fractional part, they are dropped.
  */
 function numToOGame(n) {
 	n = dropFraction(n, 3);
@@ -84,11 +84,11 @@ function numToOGame(n) {
 }
 
 /**
- * Обрезает число до диапазона [min, max]. Если число выходит за одну из границ диапазона, то оно обрезается по этой границе.
- * @param n исходное число
- * @param min минимальное допустимое значение числа
- * @param max максимальное допустимое значение числа
- * @return вписанное в указанный диапазон значение
+ * Clamps a number to the [min, max] range. If the number is outside either bound of the range, it is clamped to that bound.
+ * @param n the original number
+ * @param min minimum allowed value of the number
+ * @param max maximum allowed value of the number
+ * @return the value fitted into the given range
  */
 function clampNumber(n, min, max) {
 	if (n > max)
@@ -99,21 +99,21 @@ function clampNumber(n, min, max) {
 }
 
 /**
- * Выводит строку str в отладочную консоль.
+ * Prints the string str to the debug console.
  */
 function consoleLog(str) {
 	if (typeof console != 'undefined') console.log(str);
 }
 
 /**
- * Проверяет, что значение существует.
+ * Checks that the value exists.
  */
 function isset(e) {
 	return e !== undefined;
 }
 
 /**
- * Парсит значение числа из указанного элемента input
+ * Parses the number value from the given input element
  * @param input
  */
 function getInputNumber(input) {
@@ -128,7 +128,7 @@ function getInputNumber(input) {
 }
 
 /**
- * Заменяет в строке вхождения вида {n} на элементы массива аргументов функции.
+ * Replaces occurrences of the form {n} in a string with elements from the function's argument array.
  */
 function formatString(str, ...args) {
     const pattern = /\{\d+\}/g;
@@ -136,9 +136,9 @@ function formatString(str, ...args) {
 }
 
 /**
- * Возвращает значение из массива options или значение по умолчанию, если элемент options.opt не найден.
- * @param opt ключ для массива options
- * @param def значение по умолчанию
+ * Returns a value from the options array, or the default value if options.opt is not found.
+ * @param opt key into the options array
+ * @param def default value
  */
 function getOptionValue(opt, def) {
 	if (options[opt] === undefined)
@@ -148,15 +148,15 @@ function getOptionValue(opt, def) {
 }
 
 /**
- * Возвращает ограничение, установленное для поля, или значение по умолчанию, если на самом поле и в массиве options такого ограничения нет.
- * @param element id поля, для которого запрашивается ограничение
- * @param constr название ограничения
- * @param def значение по умолчанию
+ * Returns the constraint set on the field, or the default value if neither the field itself nor the options array has such a constraint.
+ * @param element id of the field the constraint is requested for
+ * @param constr name of the constraint
+ * @param def default value
  */
 function getConstraint(element, constr, def) {
 	const el = (typeof element === 'string') ? document.getElementById(element) : element;
 	const constraints = el ? el._constrains : undefined;
-	// Если не найдём ограничения в свойствах самого поля, поробуем вязть из options - если и там нет, вернём значение по умолчанию
+	// If the constraint isn't found on the field's own properties, try to take it from options - if it's not there either, return the default value
 	if (constraints === undefined) {
 		if (options.defConstraints === undefined)
 			return def;
@@ -178,15 +178,15 @@ function appendTimespanUnit(timeStr, seconds, divisor, label) {
 }
 
 /**
- * Формирует строковое представление для промежутка времени. Если какого-то элемента (нед, д, ч, м, с) нет, он не включается в возвращаемую строку.
- * @param seconds Кол-во секунд в промежутке времени
- * @param w Обозначение недель
- * @param d Обозначение дней
- * @param h Обозначение часов
- * @param m Обозначение минут
- * @param s Обозначение секунд
- * @param minimize Признак того, что нужно отбрасывать минуты и секунды, если промежуток времени больше недели
- * @returns Строка вида [Xw] [Xd] [Xh] [Xm] [Xs]
+ * Builds a string representation of a time span. If some unit (weeks, days, hours, minutes, seconds) is zero, it is omitted from the returned string.
+ * @param seconds Number of seconds in the time span
+ * @param w Label for weeks
+ * @param d Label for days
+ * @param h Label for hours
+ * @param m Label for minutes
+ * @param s Label for seconds
+ * @param minimize Flag indicating that minutes and seconds should be dropped if the time span is longer than a week
+ * @returns String of the form [Xw] [Xd] [Xh] [Xm] [Xs]
  */
 function timespanToShortenedString(seconds, w, d, h, m, s, minimize) {
 	if (seconds == 0)
@@ -207,14 +207,14 @@ function timespanToShortenedString(seconds, w, d, h, m, s, minimize) {
 		timeStr = appendTimespanUnit(timeStr, seconds, 3600, h);
 		seconds = seconds % 3600;
 	}
-	// Если есть недели, и запрошена минимизация - минуты отбрасываем
+	// If there are weeks and minimization was requested - drop the minutes
 	if (minimize && haveWeeks)
 		return timeStr;
 	if (seconds >= 60 || timeStr.length > 0) {
 		timeStr = appendTimespanUnit(timeStr, seconds, 60, m);
 		seconds = seconds % 60;
 	}
-	// Если есть дни, и запрошена минимизация - секунды отбрасываем
+	// If there are days and minimization was requested - drop the seconds
 	if (minimize && haveDays)
 		return timeStr;
 	if (seconds > 0) {
@@ -253,12 +253,12 @@ function dropFraction(number, positions) {
 }
 
 /**
- * Дополняет строку до указанной длины
- * @param input Входная строка
- * @param pad_length Требуемая длина строки
- * @param pad_string Строка, используемая для дополнения
- * @param pad_type Направление - справа, слева, с обеих сторон. Одна из констант 'STR_PAD_LEFT', 'STR_PAD_RIGHT', 'STR_PAD_BOTH'
- * @returns Изменённая строка
+ * Pads a string to the given length
+ * @param input Input string
+ * @param pad_length Required string length
+ * @param pad_string String used for padding
+ * @param pad_type Direction - right, left, both sides. One of the constants 'STR_PAD_LEFT', 'STR_PAD_RIGHT', 'STR_PAD_BOTH'
+ * @returns The padded string
  */
 function str_pad_repeater(s, len) {
 	let collect = '';
@@ -299,15 +299,15 @@ function dayOfMonth(day, month, year) {
 }
 
 /**
- * Парсит дату/время из строки. Заточено для поля inputmask с определениями 'm.d.y H:s:s' и 'd.m.y H:s:s'
- * @param str Содержимое поля, полученное методом inputmask('unmaskedvalue')
- * @param template Определение даты
- * @returns Кол-во миллисекунд с начала эпохи (результат работы Date.parse() на обработанной строке)
+ * Parses a date/time from a string. Tailored for an inputmask field with definitions 'm.d.y H:s:s' and 'd.m.y H:s:s'
+ * @param str Field content obtained via the inputmask('unmaskedvalue') method
+ * @param template Date definition
+ * @returns Number of milliseconds since the epoch (result of Date.parse() on the processed string)
  */
 function parseDate(str, template) {
-	// Поскольку у нас в inputmask используются только два определения даты - 'm.d.y H:s:s' и 'd.m.y H:s:s',
-	// достаточно сравнить переданный шаблон с эталоном и определиться, как парсить дату
-	// Метод inputmask('unmaskedvalue') возвращает содержимое то в виде "ddmmyyyyhhmmss", то "dd.mm.yyyy hh:mm:ss". Регекспы надо использовать соответствующие
+	// Since only two date definitions are used with inputmask here - 'm.d.y H:s:s' and 'd.m.y H:s:s' -
+	// it is enough to compare the passed template against the reference and decide how to parse the date
+	// The inputmask('unmaskedvalue') method returns the content either as "ddmmyyyyhhmmss" or "dd.mm.yyyy hh:mm:ss". The regexes must match accordingly
 	const rgx1 = /^(\d{2})(\d{2})(\d{4})(\d{2})(\d{2})(\d{2})$/;
 	const rgx2 = /^(\d{2})\.(\d{2})\.(\d{4})\s(\d{2}):(\d{2}):(\d{2})$/;
 	let pts;
@@ -324,7 +324,7 @@ function parseDate(str, template) {
 	if (h > 23 || m > 59 || s > 59)
 		return 0;
 	let t;
-	// Распарсим дату/время, расположив элементы на нужных позициях. Если сочетание день+месяц неадекватное, считаем, что дата не распарсилась.
+	// Parse the date/time, placing the elements in the required positions. If the day+month combination is invalid, consider the date unparsed.
 	if (template == 'm.d.y H:s:s') {
 		t = Date.parse(pts[1] + "/" + pts[2] + "/" + pts[3] + " " + pts[4] + ":" + pts[5]  + ":" + pts[6]);
 		if (!dayOfMonth(pts[2], pts[1], pts[3]))
@@ -339,16 +339,16 @@ function parseDate(str, template) {
 }
 
 /**
- * Формирует строку с датой/временем
- * @param time Кол-во миллисекунд с начала эпохи
- * @param template Определение даты для поля inputmask ('m.d.y H:s:s' или 'd.m.y H:s:s')
- * @returns Строковое представление даты с нужным порядком элементов
+ * Builds a date/time string
+ * @param time Number of milliseconds since the epoch
+ * @param template Date definition for the inputmask field ('m.d.y H:s:s' or 'd.m.y H:s:s')
+ * @returns String representation of the date with the elements in the required order
  */
 function getDateStr(time, template) {
 	if (time == 0)
 		return '';
-	// Поскольку у нас в inputmask используются только два определения даты - 'm.d.y H:s:s' и 'd.m.y H:s:s',
-	// достаточно сравнить переданный шаблон с эталоном и определиться, как формировать дату
+	// Since only two date definitions are used with inputmask here - 'm.d.y H:s:s' and 'd.m.y H:s:s' -
+	// it is enough to compare the passed template against the reference and decide how to build the date
 	const date = new Date();
 	date.setTime(time);
 	const year = date.getFullYear();
@@ -364,9 +364,9 @@ function getDateStr(time, template) {
 }
 
 /**
- * Формирует строку с временем в формате ЧЧ:ММ
- * @param time Кол-во секунд
- * @returns Строковое представление времени по формату H:s 
+ * Builds a time string in HH:MM format
+ * @param time Number of seconds
+ * @returns String representation of the time in H:s format
  */
 function getTimeStr(time) {
 	const date = new Date();
@@ -386,10 +386,10 @@ function supports_html5_storage() {
 }
 
 /**
- * Сохраняет поля переданного объекта в куке с именем name.
- * Сохраняются пары "ключ;значение", разделённые запятыми. Если поле объекта - массив, ключ имеет вид "property|index1|index2". Функции игнорируютя. 
- * @param name - имя куки, в которую будут сохранены данные
- * @param data - объект, свойства (поля) которого требуется сохранить в куку
+ * Saves the fields of the passed object into a cookie named name.
+ * "key;value" pairs are saved, separated by commas. If an object field is an array, the key takes the form "property|index1|index2". Functions are ignored.
+ * @param name - name of the cookie the data will be saved into
+ * @param data - object whose properties (fields) need to be saved into the cookie
  */
 function saveToCookie(name, data) {
 	let saveStr = 'key-value;true,';
@@ -420,7 +420,7 @@ function saveToCookie(name, data) {
 			saveStr += key+';'+data[key]+',';
 		}
 	);
-	saveStr = saveStr.substring(0, saveStr.length-1); // последний символ - запятая, она не нужна
+	saveStr = saveStr.substring(0, saveStr.length-1); // the last character is a comma and is not needed
 	if (supports_html5_storage()) {
 		try {
 			localStorage.setItem(name, saveStr);
@@ -441,14 +441,6 @@ function saveToCookie(name, data) {
 }
 
 
-/**
- * Загружает из куки с именем name данные и складывает их в объект params.
- * В куке ожидаются пары "ключ;значение", разделённые запятыми. Если целевое поле объекта - массив, ключ должен иметь вид "property|index1|index2". Максимальная размерность массива - 2.
- * Целевой объект должен содержать функцию validate, принимающую имя целевого поля объекта и значение-кандидат, и возвращающую проверенное значение, которое можно записывать в поле.
- * Если в куке отстутствует подстрока "key-value", загрузка не производится. 
- * @param name имя куки, из которой будут загружены данные
- * @param params объект, свойства (поля) которого требуется загрузить из куки
- */
 /** Reads a value previously written by saveToCookie: localStorage first, legacy cookie as fallback. */
 function readSavedData(name) {
 	const stored = loadFromStorage(name);
@@ -512,7 +504,7 @@ function loadFromCookie(name, params) {
 }
 
 /**
-* Пытается считать запрошенные данные из локального HTML5 хранилища.
+* Tries to read the requested data from local HTML5 storage.
 */
 function loadFromStorage(name) {
 	let data = null;
@@ -567,7 +559,7 @@ function toggleLight(on) {
 }
 
 /**
- * Заменяет десятичный разделитель в строковом представлении полученного числа на указанный в настройках
+ * Replaces the decimal separator in the string representation of the given number with the one set in the settings
  */
 function localizeFloat(input, decimalDigits) {
 	let result = String(input);

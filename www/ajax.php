@@ -1,16 +1,16 @@
 <?php
-  // все аякс-сервисы обрабатываются здесь
-  // в запросе обязательно должен присутствовать параметр service
+  // all ajax services are handled here
+  // the request must always contain the service parameter
 
   const EMPTY_PARAMS_RESPONSE = "3\nempty";
 
-  // аналог js unescape
+  // equivalent of js unescape
   function convertUnicode($t)
   {
     return preg_replace( '#%u([0-9A-F]{4})#se','iconv("UTF-16BE","UTF-8",pack("H4","$1"))', $t );
   }
 
-  // функция выбирает из запроса значение указанного параметра
+  // function that picks the given parameter's value from the request
 function getVar($var, $type)
 {
     $value = filter_input(INPUT_GET, $var);
@@ -385,11 +385,11 @@ function getVar($var, $type)
     ]);
   }
 
-  // --------- обработка запроса ---------
+  // --------- request handling ---------
   header('Content-Type: text/html; charset=utf-8');
   require_once 'db.connect.inc.php';
 
-  // если непонятно, что за запрос, ничего не делаем и выходим с ошибкой
+  // if it's unclear what kind of request this is, do nothing and exit with an error
   if (!isset($_REQUEST['service'])) {
     die("1\nno service");
   }
@@ -404,6 +404,6 @@ function getVar($var, $type)
     case 'serverdata': getServerData(); break;
     case 'populatedSystems': getPopulatedSystems(); break;
 
-    // для всех остальных "неизвестных" сервисов выходим с кодом 2
+    // for all other "unknown" services exit with code 2
     default: die("2\nunknown");
   }

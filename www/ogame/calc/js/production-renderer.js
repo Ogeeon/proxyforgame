@@ -79,18 +79,18 @@ function buildPlanetRowHtml(i) {
 	let tr = '<tr class="' + ((i % 2) === 0 ? 'odd' : 'even') + '">';
 	tr += '<td>&nbsp;' + (i + 1) + '&nbsp;</td>';
 	tr += '<td>' + options.prm.aPNames[i] + '</td>';
-	// температура и позиция
+	// temperature and position
 	tr += '<td><input type="text" class="form-control form-control-sm no-mp input-3columns temperature-input centered" value="' + options.prm.aPS[i][0] + '" alt="' + options.maxTempAlt + '"/></td>';
 	tr += '<td><input type="text" class="form-control form-control-sm no-mp input-2columns position-input centered" value="' + options.prm.aPS[i][1] + '" alt="' + options.positionAlt + '"/></td>';
 	for (let j = 1; j < 8; j++) {
-		// заготовка: уровень и нулевое производство
+		// placeholder: level and zero production
 		let inputClass = 'form-control form-control-sm no-mp input-' + (j < 6 ? '2columns centered' : '4columns centered');
 		tr += '<td class="centered"><input type="text" class="' + inputClass + '" value="' + options.prm.aPS[i][j * 3] + '"/></td>';
 		if (j < 4) {
 			tr += '<td class="centered">0</td>';
 		}
 	}
-	tr += '<td class="centered">0</td>'; // коэффициент - тоже заготовка
+	tr += '<td class="centered">0</td>'; // coefficient - also a placeholder
 	tr += '<td><div id="control-' + i + '" class="btn-group">';
 	tr += '<button id="control-' + i + '-u" type="button" class="btn btn-outline-secondary btn-sm control-btn control-move-up" data-pln="' + i + '" data-bs-toggle="tooltip" title="' + options.movePlanetUpTitle + '"' + (i === 0 ? ' disabled' : '') + '><i class="bi bi-arrow-up"></i></button>';
 	tr += '<button id="control-' + i + '-w" type="button" class="btn btn-outline-secondary btn-sm control-btn control-move-down" data-pln="' + i + '" data-bs-toggle="tooltip" title="' + options.movePlanetDownTitle + '"' + (i === options.prm.currPlanetsCount - 1 ? ' disabled' : '') + '><i class="bi bi-arrow-down"></i></button>';
@@ -101,7 +101,7 @@ function buildPlanetRowHtml(i) {
 	return tr;
 }
 
-// Дополнительная информационная строка planet's LEVEL_COLUMNS boosters/factors.
+// Additional info row for the planet's LEVEL_COLUMNS boosters/factors.
 function buildPlanetInfoRowHtml(i) {
 	let spanType = options.prm.showAddInf ? 'visible-span' : 'hidden-span';
 	let tr = '<tr class="' + ((i % 2) === 0 ? 'odd' : 'even') + '">';
