@@ -997,7 +997,7 @@ class FlightOrchestrator {
     /** Is the departure panel showing its Recall tab rather than the plain one? */
     static _recallTabActive() {
         const tab = document.getElementById('recall-tabtag-recall');
-        return tab !== null && tab.classList.contains('active');
+        return tab?.classList.contains('active') ?? false;
     }
 
     // ------------------------------------------------------------------
