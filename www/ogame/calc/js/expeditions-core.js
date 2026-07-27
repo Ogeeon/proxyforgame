@@ -34,8 +34,8 @@ const EXPEDITION_SHIPS = [
 ];
 
 // Ship indices carrying a player-class cargo bonus.
-const EXPEDITION_TRANSPORTS = [0, 1];       // Collector: +25% on small/large cargo
-const EXPEDITION_GENERAL_SHIPS = [7, 14];   // General: +20% on recyclers/pathfinders
+const EXPEDITION_TRANSPORTS = new Set([0, 1]);       // Collector: +25% on small/large cargo
+const EXPEDITION_GENERAL_SHIPS = new Set([7, 14]);   // General: +20% on recyclers/pathfinders
 
 // Ships an expedition may bring home, ordered by their expedition value (the
 // second field is the structural integrity the find is paid for with). The
@@ -88,11 +88,11 @@ class ExpeditionsCalculator {
     let capacity = count * base * (1 + 0.05 * p.hyperTechLevel);
 
     // A Collector's transports carry 25% more, itself raised by the class bonus.
-    if (p.playerClass === EXPEDITION_CLASS.COLLECTOR && EXPEDITION_TRANSPORTS.includes(index)) {
+    if (p.playerClass === EXPEDITION_CLASS.COLLECTOR && EXPEDITION_TRANSPORTS.has(index)) {
       capacity += Math.floor(count * base * 0.25 * (1 + p.classBonusCollector * 0.01));
     }
     // A General's recyclers and pathfinders carry 20% more.
-    if (p.playerClass === EXPEDITION_CLASS.OTHER && EXPEDITION_GENERAL_SHIPS.includes(index)) {
+    if (p.playerClass === EXPEDITION_CLASS.OTHER && EXPEDITION_GENERAL_SHIPS.has(index)) {
       capacity += count * base * 0.2;
     }
 
