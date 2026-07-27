@@ -14,6 +14,13 @@ const LEVEL_COLUMNS = [4, 6, 8, 10, 11, 12, 13];
  * Read the general settings panel (techs, speed, officers, class, trader).
  */
 function collectGeneralSettings() {
+	let playerClass = 0;
+	if (getChecked('#class-2')) {
+		playerClass = 2;
+	} else if (getChecked('#class-1')) {
+		playerClass = 1;
+	}
+
 	return {
 		universeSpeed: $('#universe-speed').value,
 		energyTechLevel: getInputNumber($('#energy-tech-level')),
@@ -23,7 +30,7 @@ function collectGeneralSettings() {
 		technocrat: getChecked('#technocrat'),
 		admiral: getChecked('#admiral'),
 		commander: getChecked('#commander'),
-		playerClass: getChecked('#class-2') ? 2 : (getChecked('#class-1') ? 1 : 0),
+		playerClass: playerClass,
 		isTrader: getChecked('#is-trader'),
 		energyBoost: $('#energy-boost').value,
 		lfMetProdBonus: getInputNumber($('#lf-metal-prod-bonus')),

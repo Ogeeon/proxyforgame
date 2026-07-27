@@ -101,7 +101,7 @@ function isPlnEmpty(plnID) {
 }
 
 function stripHTMLTags(input) {
-	return input.replace(/(<([^>]+)>)/gi, "");
+	return input.replace(/<[^>]+>/g, "");
 }
 
 function getSSCost(techID, currLvl, plnData) {
@@ -189,7 +189,7 @@ function computeBaseEnergyProduction(prodParams, plnData, fullCrew, results, pro
 		let level = prodParams[i][0];
 		let perCent = prodParams[i][1];
 		let energy = 0;
-		// Для расчёта коэффициента производства нам нужны неокруглённые значения производимой энергии, поэтому на процент мощности умножаем после - FIXME? это действительно нужно?
+		// Power percentage is passed straight into getProductionRateSplit so the officer/plasma/booster bonus rows stay proportional to it.
 		if (level > 0) {
 			let energyArray = getProductionRateSplit(options.rowsToTechs[i], level, options.prm.energyTechLevel, 0, plnData[0], plnData[1], options.prm.universeSpeed, options.prm.geologist,
 				options.prm.engineer, 1, perCent / 100.0, 0, fullCrew, options.prm.playerClass, options.prm.isTrader);
