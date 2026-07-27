@@ -1768,6 +1768,42 @@ function initializeCostsCalculator() {
 }
 
 /**
+ * Add or remove a lab-levels-table row for the IRN dialog's planet count spinner.
+ */
+function onPlanetsChange(newVal, oldVal) {
+  if (newVal < 1 || newVal > 99) return;
+
+  options.prm.planetsSpin = newVal;
+  options.currPlanetsCount = newVal;
+
+  if (newVal < oldVal) {
+    if (oldVal >= 2) {
+      const rows = getTableRows('#lab-levels-table');
+      rows[rows.length - 1]?.remove();
+      options.prm.labLevels.pop();
+    }
+  } else {
+    append('#lab-levels-table tbody',
+      '<tr class="' + ((newVal % 2) === 1 ? 'odd' : 'even') + '">' +
+      '<td align="center">' + options.planetNumStr + newVal + '</td>' +
+      '<td align="center" width="20%;"><input type="text" id="lablevel_' + newVal +
+      '" name="lablevel_' + newVal + '" class="form-control form-control-sm input-3columns input-in-table" value="0" /></td>' +
+      '<td align="center" width="20%;"><input type="radio" id="labchoice_' + newVal +
+      '" class="form-check-input" name="start-pln" value="0" disabled="disabled"/></td>' +
+      '</tr>'
+    );
+    bindLabLevelInput('#lablevel_' + newVal);
+    addEvent('#labchoice_' + newVal, 'click', () => calculatorApp._updateResultingLevel());
+    options.prm.labLevels.push(0);
+  }
+
+  calculatorApp._updateResultingLevel();
+  if (calculatorApp) {
+    calculatorApp.recalculateAll();
+  }
+}
+
+/**
  * Set up the planet count spin buttons for the IRN dialog.
  * @param {HTMLElement} planetsSpinInput
  * @param {HTMLElement} planetsSpinUp
@@ -1775,39 +1811,6 @@ function initializeCostsCalculator() {
  */
 function setupPlanetsSpin(planetsSpinInput, planetsSpinUp, planetsSpinDown) {
   planetsSpinInput.value = options.currPlanetsCount || options.prm.planetsSpin || 8;
-
-  const onPlanetsChange = function (newVal, oldVal) {
-    if (newVal < 1 || newVal > 99) return;
-
-    options.prm.planetsSpin = newVal;
-    options.currPlanetsCount = newVal;
-
-    if (newVal < oldVal) {
-      if (oldVal >= 2) {
-        const rows = getTableRows('#lab-levels-table');
-        rows[rows.length - 1]?.remove();
-        options.prm.labLevels.pop();
-      }
-    } else {
-      append('#lab-levels-table tbody',
-        '<tr class="' + ((newVal % 2) === 1 ? 'odd' : 'even') + '">' +
-        '<td align="center">' + options.planetNumStr + newVal + '</td>' +
-        '<td align="center" width="20%;"><input type="text" id="lablevel_' + newVal +
-        '" name="lablevel_' + newVal + '" class="form-control form-control-sm input-3columns input-in-table" value="0" /></td>' +
-        '<td align="center" width="20%;"><input type="radio" id="labchoice_' + newVal +
-        '" class="form-check-input" name="start-pln" value="0" disabled="disabled"/></td>' +
-        '</tr>'
-      );
-      bindLabLevelInput('#lablevel_' + newVal);
-      addEvent('#labchoice_' + newVal, 'click', () => calculatorApp._updateResultingLevel());
-      options.prm.labLevels.push(0);
-    }
-
-    calculatorApp._updateResultingLevel();
-    if (calculatorApp) {
-      calculatorApp.recalculateAll();
-    }
-  };
 
   addEvent(planetsSpinUp, 'click', () => {
     const oldVal = Number.parseInt(planetsSpinInput.value) || 0;

@@ -169,21 +169,17 @@ class DataCollector {
    * @private
    */
   _collectRowRequests(rowRequests, requests) {
-    if (!rowRequests) return;
-    if (Array.isArray(rowRequests)) {
-      for (const req of rowRequests) {
-        if (req?.isValid) {
-          requests.push(req);
-        }
+    for (const req of rowRequests) {
+      if (req?.isValid) {
+        requests.push(req);
       }
-    } else if (rowRequests.isValid) {
-      requests.push(rowRequests);
     }
   }
 
   /**
-   * Parse a single table row into one or more BuildRequests
+   * Parse a single table row into zero or more BuildRequests
    * For multi-level, creates one request per level (e.g., 10→15 = 5 requests)
+   * @returns {BuildRequest[]}
    * @private
    */
   _parseTableRow(row, isMultiLevel, defaultIsMoon, hasQtyCol = false) {
@@ -192,7 +188,7 @@ class DataCollector {
     let techId = Number.parseInt(techIdCell);
 
     if (!techId || techId === 0) {
-      return null; // Empty or invalid row
+      return []; // Empty or invalid row
     }
 
     // Moon buildings have +10000 in table
@@ -223,7 +219,7 @@ class DataCollector {
     }
 
     // Single-level or single-step change: return one request
-    return new BuildRequest(techId, fromLevel, toLevel, isMoon, quantity);
+    return [new BuildRequest(techId, fromLevel, toLevel, isMoon, quantity)];
   }
 
   /**
