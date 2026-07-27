@@ -40,40 +40,47 @@ function GetVar($var, $type)
 
   function SendReport() {
     if (($wrong = GetVar('wrong', 'str')) !== false && ($right = GetVar('right', 'str')) !== false) {
-      if ($wrong == '' && $right == '')
+      if ($wrong == '' && $right == '') {
         die("4\nempty");
-      if ($wrong === $right)
+      }
+      if ($wrong === $right) {
         die("5\nequal");
-      if ($wrong == '')
+      }
+      if ($wrong == '') {
         die("6\nempty");
-      if ($right == '')
+      }
+      if ($right == '') {
         die("7\nempty");
+      }
       $to  = 'proxyforgame@gmail.com';
       $subject = 'New feedback from ProxyForGame site';
       $message = "Script: \"". GetVar('url', 'str')."\"\n";
-      $message .= "Wrong text: \"".GetVar('wrong', 'str')."\"\n"; 
-      $message .= "Right text: \"".GetVar('right', 'str')."\"\n"; 
-      if (socketmail($to, $subject, $message))
+      $message .= "Wrong text: \"".GetVar('wrong', 'str')."\"\n";
+      $message .= "Right text: \"".GetVar('right', 'str')."\"\n";
+      if (socketmail($to, $subject, $message)) {
         die("0\ngood");
-      else
+      } else {
         die("99\nfailed");
+      }
     }
     die("3\nempty");
   }
 
   function SendEmail() {
     if (($emailSubject = GetVar('subject', 'str')) !== false && ($emailBody = GetVar('body', 'str')) !== false) {
-      if ($emailSubject == '' && $emailBody == '')
+      if ($emailSubject == '' && $emailBody == '') {
         die("4\nempty");
+      }
       $to  = 'proxyforgame@gmail.com';
       $subject = 'New email from ProxyForGame site';
       $message = "Sender: \"".(GetVar('address', 'str')==''?'(unspecified)':GetVar('address', 'str'))."\"\n";
-      $message .= "Subject: \"".$emailSubject."\"\n"; 
-      $message .= "Body: \"".$emailBody."\"\n"; 
-      if (socketmail($to, $subject, $message))
+      $message .= "Subject: \"".$emailSubject."\"\n";
+      $message .= "Body: \"".$emailBody."\"\n";
+      if (socketmail($to, $subject, $message)) {
         die("0\ngood");
-      else
+      } else {
         die("99\nfailed");
+      }
     }
     die("3\nempty");
   }
@@ -87,8 +94,9 @@ function GetVar($var, $type)
     }
     $server = "ssl://smtp.gmail.com";
     $socket = fsockopen($server, 465, $errno, $errstr, 30);
-    if (!$socket)
+    if (!$socket) {
       die("99\Server $server. Connection failed: $errno, $errstr");
+    }
     fputs($socket, "HELO proxyforgame.com\r\n"); fgets($socket, 256);
     fputs($socket, 'AUTH LOGIN'."\r\n"); fgets($socket, 256);
     fputs($socket, base64_encode($smtpUser)."\r\n"); fgets($socket, 256);
@@ -111,10 +119,12 @@ function GetVar($var, $type)
   function GetChangelog() {
     if (($lastSeen = GetVar('lastSeen', 'int')) !== false && ($lang = GetVar('lang', 'str')) !== false) {
       $langs = array('ru', 'de', 'es', 'pl', 'fr', 'it', 'nl', 'sk', 'tr', 'pt', 'en', 'us');
-      if (!in_array($lang, $langs))
+      if (!in_array($lang, $langs)) {
         die("1\nmalformed");
-      if ($lang == 'us')
+      }
+      if ($lang == 'us') {
         $lang = 'en';
+      }
       $result = SqlQuery("select ch.ts, cd.description from change_headers ch join change_descriptions cd on (ch.id = cd.id) 
         where lang like ? and ch.id > ? order by ch.id desc", array($lang, $lastSeen));
       $repsonse = json_encode($result);
@@ -367,7 +377,9 @@ function GetVar($var, $type)
   require_once('db.connect.inc.php');
 
   // если непонятно, что за запрос, ничего не делаем и выходим с ошибкой
-  if (!isset($_REQUEST['service'])) die("1\nno service");
+  if (!isset($_REQUEST['service'])) {
+    die("1\nno service");
+  }
   $service = $_REQUEST['service'];
   
   switch ($service)

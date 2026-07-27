@@ -42,9 +42,12 @@ function sqlQuery($db, $sql)
 
 	if ($result = mysqli_query($db, $sql))
 	{
-		if ($result === true) return false; // для не-select'ов возвращаем FALSE, потому что нет результата
-		while ($row = mysqli_fetch_assoc($result))
+		if ($result === true) {
+			return false; // для не-select'ов возвращаем FALSE, потому что нет результата
+		}
+		while ($row = mysqli_fetch_assoc($result)) {
 		    array_push($res, $row);
+		}
 		mysqli_free_result($result);
 	}
 	else {
@@ -61,7 +64,9 @@ function sqlQuery($db, $sql)
 // ********************************************************************************************
 function logDie($mes)
 {
-    if (DEBUG || LOG_ECHO) echo '[' . date('Y-m-d H:i:s') . '] ' . "$mes\n";
+    if (DEBUG || LOG_ECHO) {
+        echo '[' . date('Y-m-d H:i:s') . '] ' . "$mes\n";
+    }
     die();
 }
 

@@ -40,7 +40,9 @@ function SqlQuery($query, $params) {
     }
 
     if ($result = mysqli_query($connection, $finalQuery)) {
-        if ($result === true) return false; // If the query is not a select, return FALSE because there is no result
+        if ($result === true) {
+            return false; // If the query is not a select, return FALSE because there is no result
+        }
         while ($row = mysqli_fetch_assoc($result)) {
             array_push($res, $row);
         }
