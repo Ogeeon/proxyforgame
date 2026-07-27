@@ -21,8 +21,9 @@ function getTechsByType($type) {
 	global $techData;
 	$filteredTechs = array();
 	for ($i = 1; $i < 5000; $i++) {
-		if (!isset($techData[$i]))
+		if (!isset($techData[$i])) {
 			continue;
+		}
 		// добавляем элемент, если нужно отдать весь список или если тип текущего элемента совпадает с запрошенным типом
 		if ($type == 0 || $techData[$i][1] == $type) {
 			array_push($filteredTechs, $i);
