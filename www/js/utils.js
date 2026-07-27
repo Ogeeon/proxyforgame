@@ -376,7 +376,7 @@ function dayOfMonth(day, month, year) {
 	var days = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
 	if (month < 1 || month > 12)
 		return false;
-	var isLeap = (year % 400 === 0) || (year % 4 === 0 && year % 100 !== 0);
+	const isLeap = (year % 400 === 0) || (year % 4 === 0 && year % 100 !== 0);
 	if (isLeap)
 		days[1] = 29;
 	if (day < 1 || day > days[month-1])
@@ -394,8 +394,8 @@ function parseDate(str, template) {
 	// Поскольку у нас в inputmask используются только два определения даты - 'm.d.y H:s:s' и 'd.m.y H:s:s',
 	// достаточно сравнить переданный шаблон с эталоном и определиться, как парсить дату
 	// Метод inputmask('unmaskedvalue') возвращает содержимое то в виде "ddmmyyyyhhmmss", то "dd.mm.yyyy hh:mm:ss". Регекспы надо использовать соответствующие
-	var rgx1 = /^(\d{2})(\d{2})(\d{4})(\d{2})(\d{2})(\d{2})$/;
-	var rgx2 = /^(\d{2})\.(\d{2})\.(\d{4})\s(\d{2}):(\d{2}):(\d{2})$/;
+	const rgx1 = /^(\d{2})(\d{2})(\d{4})(\d{2})(\d{2})(\d{2})$/;
+	const rgx2 = /^(\d{2})\.(\d{2})\.(\d{4})\s(\d{2}):(\d{2}):(\d{2})$/;
 	var pts;
 	if (str.search(/\./)>0) {
 		pts = str.match(rgx2);
@@ -406,7 +406,7 @@ function parseDate(str, template) {
 	if (pts == null){
 		return 0;
 	}
-	var h = parseInt(pts[4], 10), m = parseInt(pts[5], 10), s = parseInt(pts[6], 10);
+	const h = Number.parseInt(pts[4], 10), m = Number.parseInt(pts[5], 10), s = Number.parseInt(pts[6], 10);
 	if (h > 23 || m > 59 || s > 59)
 		return 0;
 	var t;
