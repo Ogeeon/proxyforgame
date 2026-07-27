@@ -2054,8 +2054,11 @@ test.describe('Flight Calculator - Fleet Recall', () => {
         await page.locator('#destination-s').fill('50');
         await page.evaluate(() => updateNumbers());
 
+        // The same row through each tab: a leg on the regular one, the full
+        // flight on the recall one, and both have to read it as the same flight
         await speedRows(page).nth(0).locator('.button-taketocalc').click();
         await openRecallTab(page);
+        await speedRows(page).nth(0).locator('.button-taketocalc').click();
 
         const full = await page.locator('#recall-full-flight').inputValue();
         expect(full).not.toBe('00 00:00:00');
@@ -2063,29 +2066,64 @@ test.describe('Flight Calculator - Fleet Recall', () => {
             .toBe(await page.evaluate(() => options.prm.flightData[0]));
     });
 
+    test('a row taken to the recall tab adds no leg to the regular one', async ({ page }) => {
+        await setFleet(page, { 'large-cargo': 5 });
+        await page.locator('#destination-s').fill('50');
+        await page.evaluate(() => updateNumbers());
+
+        await openRecallTab(page);
+        await speedRows(page).nth(0).locator('.button-taketocalc').click();
+        await expect(page.locator('#recall-full-flight')).not.toHaveValue('00 00:00:00');
+
+        await page.locator('#recall-tabtag-regular').click();
+        // Still the single zero leg the panel starts with
+        await expect(page.locator('#flight-data .flight-leg')).toHaveCount(1);
+        await expect(page.locator('#flight-time')).toHaveValue('00 00:00:00');
+        expect(await page.evaluate(() => options.prm.flightData)).toEqual([0]);
+    });
+
+    test('a row taken to the regular tab leaves the full flight alone', async ({ page }) => {
+        await setFleet(page, { 'large-cargo': 5 });
+        await page.locator('#destination-s').fill('50');
+        await page.evaluate(() => updateNumbers());
+
+        await speedRows(page).nth(0).locator('.button-taketocalc').click();
+        const legs = await page.evaluate(() => options.prm.flightData);
+        expect(legs).toHaveLength(1);
+        expect(legs[0]).toBeGreaterThan(0);
+
+        await openRecallTab(page);
+        await expect(page.locator('#recall-full-flight')).toHaveValue('00 00:00:00');
+        // With no outbound flight picked the recall fields stay locked
+        await expect(page.locator('#recall-moment')).toBeDisabled();
+    });
+
     test('a second take-to-calc replaces the full flight instead of adding to it', async ({ page }) => {
         await setFleet(page, { 'large-cargo': 5 });
         await page.locator('#destination-s').fill('50');
         await page.evaluate(() => updateNumbers());
 
+        await openRecallTab(page);
         await speedRows(page).nth(0).locator('.button-taketocalc').click(); // 100%
-        await openRecallTab(page);
         const first = await page.locator('#recall-full-flight').inputValue();
+        const firstSeconds = await page.evaluate(() => options.prm.recallFullFlight);
 
-        await page.locator('#recall-tabtag-regular').click();
         await speedRows(page).nth(4).locator('.button-taketocalc').click(); // a slower row
-        await openRecallTab(page);
         const second = await page.locator('#recall-full-flight').inputValue();
+        const full = await page.evaluate(() => options.prm.recallFullFlight);
 
         expect(second).not.toBe(first);
-        // The leg list accumulates both rows, so it pins down what each one was
-        const legs = await page.evaluate(() => options.prm.flightData);
-        expect(legs).toHaveLength(2);
-        const full = await page.evaluate(() => options.prm.recallFullFlight);
+        expect(await page.evaluate((t) => getSecondsFromTimeField(t), second)).toBe(full);
+
+        // The regular tab turns the same row into a leg, which pins down what
+        // that row on its own is worth
+        await page.locator('#recall-tabtag-regular').click();
+        await speedRows(page).nth(4).locator('.button-taketocalc').click();
+        const [leg] = await page.evaluate(() => options.prm.flightData);
+
         // Replaced: the latest row on its own, not the two of them added up
-        expect(full).toBe(legs[1]);
-        expect(full).not.toBe(legs[0] + legs[1]);
-        expect(await page.evaluate((t) => getSecondsFromTimeField(t), second)).toBe(legs[1]);
+        expect(full).toBe(leg);
+        expect(full).not.toBe(firstSeconds + leg);
     });
 
     // ---- enabling the recall inputs ---------------------------------------

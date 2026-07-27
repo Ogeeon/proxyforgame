@@ -979,13 +979,25 @@ class FlightOrchestrator {
         const percent = parseInt(percentText, 10);
         const fleetSpeed = this.calc.fleetSpeedFor(params.missionType, params);
         const duration = this.calc.getFlightDuration(minSpeed, distance, percent, fleetSpeed);
-        const sign = this.opts.prm.mode === 1 ? -1 : 1;
-        this.addFlightLeg(sign * duration);
-        // The recall tab tracks a single outbound flight rather than a list of
-        // legs, so a row picked later replaces the one picked before.
-        setVal('#recall-full-flight', getFlightTimeStr(duration));
-        this.updateRecall();
+        // The picked row belongs to the departure tab on screen, and to that one
+        // only: filling the recall panel used to grow a leg row behind the user's
+        // back on the tab they were not looking at.
+        if (FlightOrchestrator._recallTabActive()) {
+            // The recall tab tracks a single outbound flight rather than a list
+            // of legs, so a row picked later replaces the one picked before.
+            setVal('#recall-full-flight', getFlightTimeStr(duration));
+            this.updateRecall();
+        } else {
+            const sign = this.opts.prm.mode === 1 ? -1 : 1;
+            this.addFlightLeg(sign * duration);
+        }
         this.opts.save();
+    }
+
+    /** Is the departure panel showing its Recall tab rather than the plain one? */
+    static _recallTabActive() {
+        const tab = document.getElementById('recall-tabtag-recall');
+        return tab !== null && tab.classList.contains('active');
     }
 
     // ------------------------------------------------------------------
