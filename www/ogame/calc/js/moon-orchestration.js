@@ -10,7 +10,7 @@
 
 'use strict';
 
-var options = {
+const options = {
   defConstraints: { min: -Infinity, max: Infinity, def: 0, allowFloat: false, allowNegative: false },
 
   prm: {
