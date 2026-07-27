@@ -528,46 +528,52 @@ class FlightOrchestrator {
         let haveResults = false;
 
         coordAxes.forEach((axis, axisIndex) => {
-            const rows = [];
-            const halve = Math.floor(axis.limit / 2);
-            let delta = 0;
-            while (true) {
-                delta++;
-                // Past half a ring the fleet would take the short way round, so
-                // every farther delta only repeats a trip already listed. A
-                // straight axis has no such repeat and runs to its own ends.
-                if (axis.circular && delta > halve) {
-                    break;
-                }
-                const distance = this._distanceForDelta(axisIndex, delta, departure, params, axis.limit);
-                if (distance === 0) {
-                    break;
-                }
-                for (let percent = 100; percent > 0; percent -= increment) {
-                    const duration = this.calc.getFlightDuration(minSpeed, distance, percent, params.fleetSpeedPeaceful);
-                    if (percent === 100 && duration > target + tolerance) {
-                        break;
-                    }
-                    if (duration <= target - tolerance || duration >= target + tolerance) {
-                        continue;
-                    }
-                    const cost = this.calc.getDeutConsumption(ships, counts, distance, duration, params.fleetSpeedPeaceful, params);
-                    // A one-way fleet is done on landing; a returning one is home
-                    // after twice the same flight.
-                    const arriveAt = startAt + duration * 1000 * legs;
-                    this._collectSavePointRows(rows, axisIndex, delta, departure, axis,
-                        { percent, cost, arriveAt });
-                }
-            }
-            if (rows.length > 0) {
+            if (this._searchAxisSavePoints(axis, axisIndex, ctx, increment, startDT)) {
                 haveResults = true;
             }
-            rows.sort((a, b) => this.calc.compareSavePoints(
-                [a.speedPercent, 0, a.cost], [b.speedPercent, 0, b.cost]));
-            this.renderer.renderSavePoints(axis.table, rows, startDT, legs);
         });
 
         return haveResults;
+    }
+
+    /** Sweeps one coordinate axis (galaxy/system/planet) for save points within tolerance; returns true if any were found. */
+    _searchAxisSavePoints(axis, axisIndex, ctx, increment, startDT) {
+        const { params, ships, counts, minSpeed, departure, target, tolerance, legs, startAt } = ctx;
+        const rows = [];
+        const halve = Math.floor(axis.limit / 2);
+        let delta = 0;
+        while (true) {
+            delta++;
+            // Past half a ring the fleet would take the short way round, so
+            // every farther delta only repeats a trip already listed. A
+            // straight axis has no such repeat and runs to its own ends.
+            if (axis.circular && delta > halve) {
+                break;
+            }
+            const distance = this._distanceForDelta(axisIndex, delta, departure, params, axis.limit);
+            if (distance === 0) {
+                break;
+            }
+            for (let percent = 100; percent > 0; percent -= increment) {
+                const duration = this.calc.getFlightDuration(minSpeed, distance, percent, params.fleetSpeedPeaceful);
+                if (percent === 100 && duration > target + tolerance) {
+                    break;
+                }
+                if (duration <= target - tolerance || duration >= target + tolerance) {
+                    continue;
+                }
+                const cost = this.calc.getDeutConsumption(ships, counts, distance, duration, params.fleetSpeedPeaceful, params);
+                // A one-way fleet is done on landing; a returning one is home
+                // after twice the same flight.
+                const arriveAt = startAt + duration * 1000 * legs;
+                this._collectSavePointRows(rows, axisIndex, delta, departure, axis,
+                    { percent, cost, arriveAt });
+            }
+        }
+        rows.sort((a, b) => this.calc.compareSavePoints(
+            [a.speedPercent, 0, a.cost], [b.speedPercent, 0, b.cost]));
+        this.renderer.renderSavePoints(axis.table, rows, startDT, legs);
+        return rows.length > 0;
     }
 
     /** Distance to the point `delta` steps from departure along one axis, or 0 if out of range. */
