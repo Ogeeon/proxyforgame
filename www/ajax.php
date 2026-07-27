@@ -189,14 +189,14 @@ function GetVar($var, $type)
   function GetSpyReportByFallbackMethod($srId) {
       // Extract language code and universe number from SR_ID
       // Format: sr-en-1-c781a3232869009dbe97d7cdd46a8c3822a75bb5
-      $parts = explode('-', $srId);
-
-      if (count($parts) < 4) {
+      // Anchored match keeps $language/$universe restricted to safe characters
+      // before they get spliced into request URLs below.
+      if (!preg_match('/^sr-([a-zA-Z]{2,3})-(\d+)-[0-9a-fA-F]+$/', $srId, $m)) {
           return NULL;
       }
 
-      $language = $parts[1];  // 'en'
-      $universe = $parts[2];  // '1'
+      $language = $m[1];  // 'en'
+      $universe = $m[2];  // '1'
 
       // Query faw-kes API for spy report
       $reportUrl = "https://ogapi.faw-kes.de/v1/report/" . $srId;
