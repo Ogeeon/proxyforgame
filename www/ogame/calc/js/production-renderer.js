@@ -168,7 +168,7 @@ function blinkMaxStorage(storages) {
 	const spans = ['#storage-cap-met', '#storage-cap-crys', '#storage-cap-deut'];
 	if (options.storageBlinkCount++ < 10) {
 		setTimeout(function () {
-			for (let i = 0; i < 3; i++) {
+			for (const i of storages.keys()) {
 				if (storages[i] == 1) {
 					$(spans[i]).classList.toggle('red-border');
 				} else {

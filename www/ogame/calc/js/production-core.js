@@ -282,7 +282,7 @@ function applyLfEnergyReduction(lfEff, totalEnergyUsed, crawlersEenergyCons, res
 // bonus rows 8-14), scaled by the energy coefficient unless normalized.
 function computeResourceProduction(prodParams, plnData, fullCrew, koeff, normalized, results, production) {
 	let prodFactor = normalized ? 1 : koeff;
-	for (let i = 0; i < 3; i++) {
+	for (const i of [0, 1, 2]) {
 		let pwrFactor = normalized ? 1 : prodParams[i][1] / 100.0;
 		let prod = getProductionRateSplit(options.rowsToTechs[i], prodParams[i][0], options.prm.energyTechLevel, options.prm.plasmaTechLevel, plnData[0], plnData[1],
 			options.prm.universeSpeed, options.prm.geologist, options.prm.engineer, prodFactor, pwrFactor, prodParams[i][2], fullCrew, options.prm.playerClass, options.prm.isTrader);
