@@ -10,8 +10,8 @@
  * Example: node scripts/refactor-calculator.js expeditions --analyze
  */
 
-const fs = require('fs');
-const path = require('path');
+const fs = require('node:fs');
+const path = require('node:path');
 
 const JS_DIR = path.join(__dirname, '..', 'www', 'ogame', 'calc', 'js');
 

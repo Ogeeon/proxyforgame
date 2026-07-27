@@ -10,8 +10,8 @@
  * Example: node scripts/update-asset-versions.js --check
  */
 
-const fs = require('fs');
-const path = require('path');
+const fs = require('node:fs');
+const path = require('node:path');
 
 const WWW_DIR = path.join(__dirname, '..', 'www');
 

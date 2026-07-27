@@ -8,8 +8,8 @@
  * Or via pre-commit hook when adding new calculators
  */
 
-const fs = require('fs');
-const path = require('path');
+const fs = require('node:fs');
+const path = require('node:path');
 
 const CALC_DIR = path.join(__dirname, '..', 'www', 'ogame', 'calc');
 const TESTS_DIR = path.join(__dirname, '..', 'playwright-tests', 'tests');

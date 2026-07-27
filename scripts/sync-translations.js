@@ -11,8 +11,8 @@
  * Run: node scripts/sync-translations.js [--fix] [--report]
  */
 
-const fs = require('fs');
-const path = require('path');
+const fs = require('node:fs');
+const path = require('node:path');
 
 const LOCALE_DIR = path.join(__dirname, '..', 'www', 'locale');
 const SOURCE_FILE = path.join(LOCALE_DIR, 'en.json');
