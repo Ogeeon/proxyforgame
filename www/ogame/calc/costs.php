@@ -123,4 +123,3 @@ function getTechsByType($type) {
 
 require_once 'costs.tpl';
 
-?>

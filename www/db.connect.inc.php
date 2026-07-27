@@ -79,4 +79,3 @@ if ($dbHost && $dbName && $dbUser && $dbPass) {
         $connection = false;
     }
 }
-?>

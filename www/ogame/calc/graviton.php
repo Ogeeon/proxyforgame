@@ -9,4 +9,3 @@ $l = Intl::getTranslations($lang, 'graviton');
 
 require_once 'graviton.tpl';
 
-?>

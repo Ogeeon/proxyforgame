@@ -21,4 +21,3 @@ if ($countries) {
 }
 
 require_once 'flight.tpl';
-?>

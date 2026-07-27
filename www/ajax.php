@@ -394,4 +394,3 @@ function GetVar($var, $type)
     // для всех остальных "неизвестных" сервисов выходим с кодом 2
     default: die("2\nunknown");
   }
-?>

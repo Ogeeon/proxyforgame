@@ -113,4 +113,3 @@ function getTechsByType($type) {
 
 require_once 'production.tpl';
 
-?>

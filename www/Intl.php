@@ -82,4 +82,3 @@ class Intl
         return in_array($locale, self::getLocales());
     }
 }
-?>

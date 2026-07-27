@@ -9,4 +9,3 @@ $l = Intl::getTranslations($lang, 'moon');
 
 require_once 'moon.tpl';
 
-?>

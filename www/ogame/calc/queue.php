@@ -55,4 +55,3 @@ function getTechsByType($type) {
 
 require_once 'queue.tpl';
 
-?>

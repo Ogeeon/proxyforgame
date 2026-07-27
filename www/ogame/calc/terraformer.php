@@ -9,4 +9,3 @@ $l = Intl::getTranslations($lang, 'terraformer');
 
 require_once 'terraformer.tpl';
 
-?>

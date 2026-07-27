@@ -34,4 +34,3 @@ function getTechsByType($type) {
 
 require_once 'lfcosts.tpl';
 
-?>
