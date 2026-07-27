@@ -237,7 +237,6 @@ test.describe('Lifeforms costs Calculator Page', () => {
     async function testSecondOuterTab(page, lifeformValue, lifeformName, expectedData) {
         // Reset page to clean state
         await page.locator('#reset').click();
-        await page.waitForTimeout(500);
 
         // Reset settings
         await page.locator('#param-researches-tab').click();
@@ -248,11 +247,9 @@ test.describe('Lifeforms costs Calculator Page', () => {
         await page.locator('#sc-capacity-increase').press('Enter');
         await page.locator('#lc-capacity-increase').fill('0');
         await page.locator('#lc-capacity-increase').press('Enter');
-        await page.waitForTimeout(300);
 
         // Select lifeform BEFORE navigating to tabs (important for row visibility)
         await page.locator('#race-selector').selectOption(lifeformValue);
-        await page.waitForTimeout(500);
 
         // Helper function to get transport counts
         async function getTransportCounts(tableId) {
@@ -268,7 +265,6 @@ test.describe('Lifeforms costs Calculator Page', () => {
         // Test Buildings (outer tab 1, inner tab 1) - table-1-1
         await page.locator('#tabtag-1').click();
         await page.locator('#tab-1').waitFor({ state: 'visible' });
-        await page.waitForTimeout(300);
 
         // Fill from=1, to=2 for all visible rows
         const fromInputsLoc = page.locator('#table-1-1 tr td:nth-child(3) input');
@@ -281,14 +277,11 @@ test.describe('Lifeforms costs Calculator Page', () => {
             if (await fromInput.isVisible()) {
                 await fromInput.fill('1');
                 await fromInput.press('Enter');
-                await page.waitForTimeout(50);
                 await toInput.fill('2');
                 await toInput.press('Enter');
-                await page.waitForTimeout(50);
             }
         }
 
-        await page.waitForTimeout(500);
 
         // Get initial counts
         const buildingsInitial = await getTransportCounts('#table-1-1');
@@ -297,17 +290,14 @@ test.describe('Lifeforms costs Calculator Page', () => {
         await page.locator('#param-researches-tab').click();
         await page.locator('#hyper-tech-level').fill('10');
         await page.locator('#hyper-tech-level').press('Enter');
-        await page.waitForTimeout(500);
         const buildingsAfterHyper = await getTransportCounts('#table-1-1');
 
         // Set capacity increase to 10
         await page.locator('#param-lifeforms-tab').click();
         await page.locator('#sc-capacity-increase').fill('10');
         await page.locator('#sc-capacity-increase').press('Enter');
-        await page.waitForTimeout(200);
         await page.locator('#lc-capacity-increase').fill('10');
         await page.locator('#lc-capacity-increase').press('Enter');
-        await page.waitForTimeout(500);
         const buildingsAfterCapIncr = await getTransportCounts('#table-1-1');
 
         // Verify Buildings transport counts
@@ -327,13 +317,11 @@ test.describe('Lifeforms costs Calculator Page', () => {
         await page.locator('#sc-capacity-increase').press('Enter');
         await page.locator('#lc-capacity-increase').fill('0');
         await page.locator('#lc-capacity-increase').press('Enter');
-        await page.waitForTimeout(300);
 
         // Test Researches (outer tab 1, inner tab 2) - table-1-2
         await page.locator('#tabtag-1-2').click();
         await page.locator('#tab-1-2').waitFor({ state: 'visible' });
         await addAllResearchesForRace(page, 1, lifeformValue);
-        await page.waitForTimeout(300);
 
         // Fill from=1, to=2 for all visible rows
         const resFromInputsLoc = page.locator('#table-1-2 tr td:nth-child(3) input');
@@ -346,14 +334,11 @@ test.describe('Lifeforms costs Calculator Page', () => {
             if (await fromInput.isVisible()) {
                 await fromInput.fill('1');
                 await fromInput.press('Enter');
-                await page.waitForTimeout(50);
                 await toInput.fill('2');
                 await toInput.press('Enter');
-                await page.waitForTimeout(50);
             }
         }
 
-        await page.waitForTimeout(500);
 
         // Get initial counts
         const researchesInitial = await getTransportCounts('#table-1-2');
@@ -362,17 +347,14 @@ test.describe('Lifeforms costs Calculator Page', () => {
         await page.locator('#param-researches-tab').click();
         await page.locator('#hyper-tech-level').fill('10');
         await page.locator('#hyper-tech-level').press('Enter');
-        await page.waitForTimeout(500);
         const researchesAfterHyper = await getTransportCounts('#table-1-2');
 
         // Set capacity increase to 10
         await page.locator('#param-lifeforms-tab').click();
         await page.locator('#sc-capacity-increase').fill('10');
         await page.locator('#sc-capacity-increase').press('Enter');
-        await page.waitForTimeout(200);
         await page.locator('#lc-capacity-increase').fill('10');
         await page.locator('#lc-capacity-increase').press('Enter');
-        await page.waitForTimeout(500);
         const researchesAfterCapIncr = await getTransportCounts('#table-1-2');
 
         // Verify Researches transport counts
