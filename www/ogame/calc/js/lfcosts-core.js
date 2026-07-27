@@ -59,21 +59,27 @@ class LfCalculator {
         return bldCostRdc;
     }
 
+    // Level of the race's research-cost/time-reduction building (research centre,
+    // rune tech lab, robotics research centre or vortex chamber).
+    _researchReductionBuildingLevel(params) {
+        switch (params.race) {
+            case 1: return params.resCentreLvl;
+            case 2: return params.runeTechLvl;
+            case 3: return params.rbtResCentreLvl;
+            case 4: return params.vortexChamberLvl;
+            default: return 0;
+        }
+    }
+
     computeRsrCostRdc(params) {
-        const lvl = params.race === 1 ? params.resCentreLvl :
-                    params.race === 2 ? params.runeTechLvl :
-                    params.race === 3 ? params.rbtResCentreLvl :
-                    params.race === 4 ? params.vortexChamberLvl : 0;
+        const lvl = this._researchReductionBuildingLevel(params);
         return Math.min(50, params.researchCostReduction + 0.25 * lvl);
     }
 
     _getAdjustedTime(techID, levelFrom, levelTo, params) {
         if (levelFrom == 0 && levelTo == 0) return 0;
         const megalithRdc = Math.min(0.99, params.race === 2 ? 0.01 * params.megalithLvl : 0);
-        const lvl = params.race === 1 ? params.resCentreLvl :
-                    params.race === 2 ? params.runeTechLvl :
-                    params.race === 3 ? params.rbtResCentreLvl :
-                    params.race === 4 ? params.vortexChamberLvl : 0;
+        const lvl = this._researchReductionBuildingLevel(params);
         const effectiveTimeRdc = Math.min(99, params.researchTimeReduction + 2 * lvl);
         return getBuildTimeLF(techID, levelFrom, levelTo, this.techCosts,
             params.robotFactoryLevel, params.naniteFactoryLevel, params.universeSpeed,

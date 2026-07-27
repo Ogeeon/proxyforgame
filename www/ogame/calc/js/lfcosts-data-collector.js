@@ -8,8 +8,12 @@ class LfDataCollector {
      * Returns a plain params object; also resolves playerClass from radio buttons.
      */
     collectParams() {
-        const playerClass = document.getElementById('class-2').checked ? 2 :
-                            document.getElementById('class-1').checked ? 1 : 0;
+        let playerClass = 0;
+        if (document.getElementById('class-2').checked) {
+            playerClass = 2;
+        } else if (document.getElementById('class-1').checked) {
+            playerClass = 1;
+        }
         return {
             robotFactoryLevel:    getInputNumber(document.getElementById('robot-factory-level')),
             naniteFactoryLevel:   getInputNumber(document.getElementById('nanite-factory-level')),
