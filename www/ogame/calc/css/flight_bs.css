@@ -39,7 +39,10 @@
 .coord-input-small  { width: 32px;  text-align: center; }
 .count-input        { width: 64px;  text-align: center; }
 .input-7columns     { width: 60px;  text-align: center; }
-.startdate-input    { width: 150px; text-align: center; }
+/* 160px, as in the queue calculator: at 150px the content box is 132px and the
+   `dd.mm.yyyy hh:mm:ss´ placeholder needs ~136px, so its last character was
+   clipped on every empty date field. */
+.startdate-input    { width: 160px; text-align: center; }
 .flight-time-input  { width: 96px;  text-align: center; }
 .tolerance-time-input { width: 64px; text-align: center; }
 
