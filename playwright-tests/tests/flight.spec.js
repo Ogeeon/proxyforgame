@@ -1943,6 +1943,28 @@ test.describe('Flight Calculator - Persistence', () => {
         await expect(page.locator('#save-return-label')).toHaveText('Arrival');
     });
 
+    // The save-point date fields only fed options.prm from the search button, so
+    // an emptied field kept the last searched moment in storage and got it back
+    // on the next load.
+    test('cleared save-point moments stay cleared after a reload', async ({ page }) => {
+        await page.locator('#tabtag2').click();
+        const stamp = await page.evaluate(
+            () => getDateStr(new Date(2026, 0, 15, 12, 0, 0).getTime(), options.datetimeFormat));
+        await page.locator('#set-save-departure-now').click();
+        await page.locator('#save-return-datetime').fill(stamp);
+        await expect(page.locator('#save-start-datetime')).not.toHaveValue('');
+
+        await page.locator('#save-start-datetime').fill('');
+        await page.locator('#save-return-datetime').fill('');
+
+        await page.reload();
+        await installCompat(page);
+        await page.locator('#tabtag2').click();
+
+        await expect(page.locator('#save-start-datetime')).toHaveValue('');
+        await expect(page.locator('#save-return-datetime')).toHaveValue('');
+    });
+
     test('reset restores the default parameters', async ({ page }) => {
         await page.locator('#cmb-drive').fill('12');
         await page.locator('#hypertech-lvl').fill('9');

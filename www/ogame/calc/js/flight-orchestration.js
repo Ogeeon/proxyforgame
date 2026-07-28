@@ -676,6 +676,22 @@ class FlightOrchestrator {
         return '';
     }
 
+    /**
+     * Mirror the save point fields into options.prm and persist them, so an
+     * emptied field is still empty after a reload. `_validateSavePointForm´ only
+     * paints the fields; the cookie is written from prm, and without this the
+     * last searched moment would outlive the field the user has just cleared.
+     */
+    _syncSavePointFields() {
+        const prm = this.opts.prm;
+        const form = this.collector.collectSavePointForm();
+        prm.saveStartDT = parseDate(form.startDT, this.opts.datetimeFormat);
+        prm.saveReturnDT = parseDate(form.returnDT, this.opts.datetimeFormat);
+        const tol = form.tolerance.match(/(\d\d):(\d\d)/);
+        prm.saveTolerance = tol ? Number(tol[1]) * 3600 + Number(tol[2]) * 60 : 0;
+        this.opts.save();
+    }
+
     _warnSavePointField(wrong) {
         // The second moment is an arrival at the target on a one-way search, so
         // the complaints about it have to name the same thing as the label.
@@ -1685,8 +1701,12 @@ class FlightOrchestrator {
         document.querySelectorAll('input[name="recall-mode"]').forEach((el) =>
             el.addEventListener('change', () => this.updateRecall()));
         ['save-start-datetime', 'save-return-datetime', 'save-tolerance-time'].forEach((id) => {
-            on(id, 'input', () => this._validateSavePointForm());
-            on(id, 'blur', () => this._validateSavePointForm());
+            const onEdit = () => {
+                this._validateSavePointForm();
+                this._syncSavePointFields();
+            };
+            on(id, 'input', onEdit);
+            on(id, 'blur', onEdit);
         });
         on('empty-systems-count-spin', 'input', (e) => this.onEmptySystemsInput(e.currentTarget));
         ['destination-g', 'destination-s', 'destination-p'].forEach((id) =>
