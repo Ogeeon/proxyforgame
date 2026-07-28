@@ -1,4 +1,21 @@
+# Normalize all text files to LF in the repository; core.autocrlf converts to
+# CRLF on checkout for contributors who have it enabled.
+* text=auto eol=lf
+
 # GNU Make on Linux passes a trailing CR straight to the shell and the recipe
 # breaks, so the Makefile must stay LF no matter what core.autocrlf a given
 # clone happens to use. The native Windows make build reads LF without help.
+# (Redundant with the blanket rule above, but kept explicit so this invariant
+# survives even if the general LF policy ever changes.)
 Makefile text eol=lf
+
+# Known binary assets - never touch their line endings.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.eot binary
