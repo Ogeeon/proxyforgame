@@ -1895,14 +1895,14 @@ class FlightOrchestrator {
         const importBtn = document.getElementById('import-own-api');
         if (importBtn) {
             importBtn.addEventListener('click', () => {
-                setVal('#own-api-txtarea', '');
+                setVal('#own-api-input', '');
                 bootstrap.Modal.getOrCreateInstance(document.getElementById('own-api-reader')).show();
             });
         }
         const ownApiRead = document.getElementById('own-api-read-btn');
         if (ownApiRead) {
             ownApiRead.addEventListener('click', () => {
-                if (this.importOwnApi(getVal('#own-api-txtarea'))) {
+                if (this.importOwnApi(getVal('#own-api-input'))) {
                     bootstrap.Modal.getInstance(document.getElementById('own-api-reader')).hide();
                 }
             });

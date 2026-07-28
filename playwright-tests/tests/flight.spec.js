@@ -288,7 +288,7 @@ test.describe('Flight Calculator - OGame Object Import', () => {
         await page.locator('#import-own-api').click();
         await expect(page.locator('#own-api-reader')).toBeVisible();
 
-        await page.locator('#own-api-txtarea').fill(OWN_API_FIXTURE);
+        await page.locator('#own-api-input').fill(OWN_API_FIXTURE);
         await page.locator(OWN_API_IMPORT_BUTTON).click(); // "Import" button
 
         // Departure coordinates
@@ -337,7 +337,7 @@ test.describe('Flight Calculator - OGame Object Import', () => {
         const beforeCoord = await page.locator('#departure-g').inputValue();
         const beforeShip = await page.locator('#small-cargo').inputValue();
 
-        await page.locator('#own-api-txtarea').fill(OWN_API_FIXTURE);
+        await page.locator('#own-api-input').fill(OWN_API_FIXTURE);
         await page.locator(OWN_API_IMPORT_BUTTON).click();
 
         // Unchecked categories: fields keep their pre-import value
@@ -364,7 +364,7 @@ test.describe('Flight Calculator - OGame Object Import', () => {
         // Malformed JSON, and a bare primitive that JSON.parse would otherwise accept ("111" -> 111).
         for (const bad of ['{not valid json', '111']) {
             alertMsg = '';
-            await page.locator('#own-api-txtarea').fill(bad);
+            await page.locator('#own-api-input').fill(bad);
             await page.locator(OWN_API_IMPORT_BUTTON).click();
 
             expect(alertMsg.length, `alert shown for input ${JSON.stringify(bad)}`).toBeGreaterThan(0);
