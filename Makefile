@@ -39,7 +39,7 @@ PW_REPORTER ?= list
 
 .PHONY: help install serve db-seed \
         test test-unit test-e2e test-e2e-ui test-one report \
-        check audit quality coverage db-validate lint typecheck tsconfigs \
+        check audit quality coverage db-validate lint typecheck tsconfigs tsconfigs-check \
         i18n-validate i18n-report i18n-show i18n-fix \
         new-calc gen-test refactor assets docs
 
@@ -84,25 +84,28 @@ report: ## Open the last Playwright HTML report
 ##@ Quality gates
 
 # `check` only chains things that are green on the current tree, so that a red
-# `make check` always means "you broke something". The three reporters below
-# all exit non-zero on pre-existing issues, so they live in `audit` instead and
-# are prefixed with `-` there to keep one failure from hiding the other two.
-check: i18n-validate lint test ## Green gate - what must pass before a commit
+# `make check` always means "you broke something". The two reporters below
+# both exit non-zero on pre-existing issues, so they live in `audit` instead and
+# are prefixed with `-` there to keep one failure from hiding the other.
+check: i18n-validate lint typecheck tsconfigs-check test ## Green gate - what must pass before a commit
 
 audit: ## Advisory reports; these flag pre-existing issues and do not gate
 	-node scripts/check-test-coverage.js
 	-node scripts/validate-database-schema.js
-	-npm run typecheck --silent
-	-npm run check-tsconfigs --silent
 
 lint: ## Run ESLint over every JS file
 	npm run lint --silent
 
-typecheck: ## Type-check the JS files that opt in with `// @ts-check`
+typecheck: ## Type-check every JS file in the browser and Node projects
 	npm run typecheck --silent
 
 tsconfigs: ## Regenerate the per-calculator TypeScript projects from the templates
 	node scripts/generate-tsconfigs.js
+
+# Guards `typecheck`: a project that no longer matches its template checks the
+# wrong file set, and a dropped <script> tag would go unnoticed otherwise.
+tsconfigs-check: ## Fail if a generated TypeScript project is out of date
+	npm run check-tsconfigs --silent
 
 coverage: ## Report which calculators have no spec
 	node scripts/check-test-coverage.js

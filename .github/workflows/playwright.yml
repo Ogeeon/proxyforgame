@@ -123,12 +123,18 @@ jobs:
       - name: Validate translations
         run: make i18n-validate
 
-      # ESLint gates now - it is at zero findings. Type-checking is still
-      # advisory inside `make audit` until the orchestrators opt in; that
-      # target prefixes every reporter with `-`, so findings are printed
-      # without failing the job. See .claude/plans/js-static-analysis.md.
+      # Both static-analysis gates are at zero findings, so both fail the job.
+      # `make audit` keeps the reporters that still flag pre-existing issues;
+      # it prefixes each with `-`, so those are printed without failing.
+      # See .claude/plans/js-static-analysis.md.
       - name: Lint
         run: make lint
+
+      - name: Type-check
+        run: make typecheck
+
+      - name: Check generated TypeScript projects
+        run: make tsconfigs-check
 
       - name: Static analysis (advisory)
         run: make audit
