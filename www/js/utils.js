@@ -136,8 +136,10 @@ function getInputNumber(input) {
 function formatString(str, ...args) {
     const pattern = /\{\d+\}/g;
     // The index used to be the RegExp match array itself, which worked only
-    // because ["3"].toString() is "3". Same result, said out loud.
-    return str.replace(pattern, function(capture){ return args[Number(/\d+/.exec(capture)[0])]; });
+    // because ["3"].toString() is "3". The capture is always "{<digits>}", so
+    // stripping the braces gets the same number without a second regex whose
+    // result would have to be null-checked.
+    return str.replace(pattern, (capture) => args[Number(capture.slice(1, -1))]);
 }
 
 /**

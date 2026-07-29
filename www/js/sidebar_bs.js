@@ -3,12 +3,31 @@ let reportStep = 0;
 let emailStep = 0;
 
 /**
+ * An element sidebar_bs.tpl is required to contain.
+ *
+ * Every id passed here is written in that template, so a miss means the two
+ * have drifted apart. Saying so by name beats the "cannot read properties of
+ * null" that surfaces a few frames later, usually inside a fetch handler whose
+ * catch swallows it.
+ *
+ * @param {string} id - element id
+ * @returns {HTMLElement}
+ */
+function requireEl(id) {
+    const el = document.getElementById(id);
+    if (!el) {
+        throw new Error(`sidebar: the page has no #${id}`);
+    }
+    return el;
+}
+
+/**
  * A text field of the report or e-mail dialog.
  * @param {string} id - element id
  * @returns {HTMLInputElement}
  */
 function formField(id) {
-    return /** @type {HTMLInputElement} */ (document.getElementById(id));
+    return /** @type {HTMLInputElement} */ (requireEl(id));
 }
 
 function showReportWindow(text) {
@@ -16,7 +35,7 @@ function showReportWindow(text) {
     formField('corrected-text').value = text;
     reportModal.show();
     showSendDiv('report', 'data');
-    setTimeout(() => document.getElementById('corrected-text').focus(), 300);
+    setTimeout(() => requireEl('corrected-text').focus(), 300);
     reportStep = 0;
     updateButtonsState('report');
 }
@@ -33,7 +52,7 @@ function getText(e) {
 
 function getSelectedText() {
     if (globalThis.getSelection) {
-        return globalThis.getSelection().toString();
+        return globalThis.getSelection()?.toString() ?? '';
     }
     return /** @type {any} */ (document).selection?.createRange()?.text ?? '';
 }
@@ -63,8 +82,8 @@ function showSendDiv(dialog, id) {
 }
 
 function updateButtonsState(dlg) {
-    const btnOk = document.getElementById(`${dlg}-btn-ok`);
-    const btnCancel = document.getElementById(`${dlg}-btn-cancel`);
+    const btnOk = requireEl(`${dlg}-btn-ok`);
+    const btnCancel = requireEl(`${dlg}-btn-cancel`);
     const step = dlg === 'report' ? reportStep : emailStep;
     
     switch (step) {
@@ -114,16 +133,19 @@ function sendReport() {
     .then(data => {
         try {
             const rcode = Number.parseInt(data.substring(0, data.indexOf('\n')));
+            // Only the codes showSendDiv() knows have a div of their own. An
+            // unexpected one used to throw here, into a catch that swallows it,
+            // so the step never advanced and the dialog sat on its progress
+            // spinner with both buttons hidden. Advance first, skin second.
             const errDiv = document.getElementById(`report-err-${rcode}`);
             showSendDiv('report', `err-${rcode}`);
-            
-            if (rcode === 0) {
-                reportStep = 3;
+
+            reportStep = rcode === 0 ? 3 : 2;
+            if (errDiv) {
                 errDiv.classList.remove('alert-info');
-            } else {
-                reportStep = 2;
-                errDiv.classList.remove('alert-info');
-                errDiv.classList.add('alert-warning');
+                if (rcode !== 0) {
+                    errDiv.classList.add('alert-warning');
+                }
             }
             updateButtonsState('report');
         } catch(e) {
@@ -144,7 +166,7 @@ function showEmailWindow() {
     formField('email-form-body').value = '';
     emailModal.show();
     showSendDiv('email', 'data');
-    setTimeout(() => document.getElementById('email-form-subject').focus(), 300);
+    setTimeout(() => requireEl('email-form-subject').focus(), 300);
     emailStep = 0;
     updateButtonsState('email');
 }
@@ -169,16 +191,17 @@ function sendEmail() {
     .then(data => {
         try {
             const rcode = Number.parseInt(data.substring(0, data.indexOf('\n')));
+            // Same as in sendReport(): an unrecognised code must not strand the
+            // dialog mid-send.
             const errDiv = document.getElementById(`email-err-${rcode}`);
             showSendDiv('email', `err-${rcode}`);
-            
-            if (rcode === 0) {
-                emailStep = 3;
+
+            emailStep = rcode === 0 ? 3 : 2;
+            if (errDiv) {
                 errDiv.classList.remove('alert-info');
-            } else {
-                emailStep = 2;
-                errDiv.classList.remove('alert-info');
-                errDiv.classList.add('alert-warning');
+                if (rcode !== 0) {
+                    errDiv.classList.add('alert-warning');
+                }
             }
             updateButtonsState('email');
         } catch(e) {
@@ -239,7 +262,7 @@ function requestAndShowChangelog(fromChange) {
             fillChangelogTable(changes);
             toggleChangelogHeader(!isManualChangelogRequest(fromChange));
             changelogModal.show();
-            setTimeout(() => document.getElementById('changelog-btn-ok').focus(), 300);
+            setTimeout(() => requireEl('changelog-btn-ok').focus(), 300);
         } catch(e) {
             console.error('exception: ' + e);
         }
@@ -249,16 +272,27 @@ function requestAndShowChangelog(fromChange) {
     });
 }
 
+/**
+ * The changelog table body, which sidebar_bs.tpl always provides.
+ * @returns {HTMLElement}
+ */
+function changelogBody() {
+    const tbody = requireEl('changelog-tbl').querySelector('tbody');
+    if (!tbody) {
+        throw new Error('sidebar: #changelog-tbl has no tbody');
+    }
+    return /** @type {HTMLElement} */ (tbody);
+}
+
 function clearChangelogTable() {
-    const tbody = document.querySelector('#changelog-tbl tbody');
-    tbody.innerHTML = '';
+    changelogBody().innerHTML = '';
 }
 
 function fillChangelogTable(changes) {
     if (!changes || changes.length === 0) {
         return;
     }
-    const tbody = document.querySelector('#changelog-tbl tbody');
+    const tbody = changelogBody();
     for (const change of changes) {
         const tr = document.createElement('tr');
         tr.innerHTML = `
@@ -291,9 +325,9 @@ document.addEventListener('click', function (event) {
 }, true);
 
 document.addEventListener('DOMContentLoaded', function() {
-    reportModal = new bootstrap.Modal(document.getElementById('reportModal'));
-    emailModal = new bootstrap.Modal(document.getElementById('emailModal'));
-    changelogModal = new bootstrap.Modal(document.getElementById('changelogModal'));
+    reportModal = new bootstrap.Modal(requireEl('reportModal'));
+    emailModal = new bootstrap.Modal(requireEl('emailModal'));
+    changelogModal = new bootstrap.Modal(requireEl('changelogModal'));
 
     document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(function(el) {
         bootstrap.Tooltip.getOrCreateInstance(el);
@@ -317,7 +351,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    document.getElementById('report-btn-ok').addEventListener('click', function() {
+    requireEl('report-btn-ok').addEventListener('click', function() {
         switch (reportStep) {
             case 0:
                 sendReport();
@@ -335,7 +369,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
     
-    document.getElementById('email-btn-ok').addEventListener('click', function() {
+    requireEl('email-btn-ok').addEventListener('click', function() {
         switch (emailStep) {
             case 0:
                 sendEmail();
@@ -353,12 +387,12 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
     
-    document.getElementById('reportModal').addEventListener('hidden.bs.modal', function() {
+    requireEl('reportModal').addEventListener('hidden.bs.modal', function() {
         reportStep = 0;
         showSendDiv('report', 'data');
     });
     
-    document.getElementById('emailModal').addEventListener('hidden.bs.modal', function() {
+    requireEl('emailModal').addEventListener('hidden.bs.modal', function() {
         emailStep = 0;
         showSendDiv('email', 'data');
     });

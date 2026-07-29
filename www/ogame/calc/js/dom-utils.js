@@ -345,7 +345,7 @@ const hide = (selector) => {
  * Fade in an element
  * @param {string} selector - CSS selector
  * @param {number} duration - Duration in ms
- * @param {Function} callback - Optional callback
+ * @param {Function|null} [callback] - Optional callback
  */
 const fadeIn = (selector, duration = 400, callback = null) => {
   const el = $(selector);
@@ -368,7 +368,7 @@ const fadeIn = (selector, duration = 400, callback = null) => {
  * Fade out an element
  * @param {string} selector - CSS selector
  * @param {number} duration - Duration in ms
- * @param {Function} callback - Optional callback
+ * @param {Function|null} [callback] - Optional callback
  */
 const fadeOut = (selector, duration = 400, callback = null) => {
   const el = $(selector);
