@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+// @ts-check
 
 /**
  * Calculator Refactoring Tool for ProxyForGame
@@ -439,7 +440,7 @@ ogame/calc/js/
 ├── ${calcName}-core.js               # Core calculation logic
 ├── ${calcName}-data-collector.js     # Data collection and validation
 ├── ${calcName}-renderer.js           # UI rendering
-├── ${calcname}-orchestration.js      # Event handling and coordination
+├── ${calcName}-orchestration.js      # Event handling and coordination
 └── ${calcName}-MIGRATION.md          # This file
 \`\`\`
 
@@ -550,25 +551,21 @@ function main() {
 
   // Apply if requested
   if (applyMode) {
-    const response = require('readline-sync').question(
-      colorize('\nCreate modular files? (yes/no): ', colors.yellow)
-    );
+    // No interactive confirmation: --apply is the confirmation, the same way
+    // update-asset-versions.js and sync-translations.js treat their flags.
+    // This used to call readline-sync, a package the project never depended
+    // on, so --apply threw MODULE_NOT_FOUND before it could write anything.
+    createModularFiles(calcName, modules);
 
-    if (response.toLowerCase() === 'yes') {
-      createModularFiles(calcName, modules);
-
-      console.log(colorize('\n✓ Modularization complete!', colors.green));
-      console.log(colorize(`\nNext steps:`, colors.yellow));
-      const migrationGuidePath = `ogame/calc/js/${calcName}-MIGRATION.md`;
-      const originalJsPath = `${calcName}.js`;
-      const tplPath = `${calcName}.tpl`;
-      console.log(`  1. Review the migration guide: ${colorize(migrationGuidePath, colors.blue)}`);
-      console.log(`  2. Migrate code from ${colorize(originalJsPath, colors.blue)} to the new modules`);
-      console.log(`  3. Update ${colorize(tplPath, colors.blue)} to load the new modules`);
-      console.log(`  4. Test the calculator`);
-    } else {
-      console.log(colorize('\n○ Modularization cancelled.', colors.yellow));
-    }
+    console.log(colorize('\n✓ Modularization complete!', colors.green));
+    console.log(colorize(`\nNext steps:`, colors.yellow));
+    const migrationGuidePath = `ogame/calc/js/${calcName}-MIGRATION.md`;
+    const originalJsPath = `${calcName}.js`;
+    const tplPath = `${calcName}.tpl`;
+    console.log(`  1. Review the migration guide: ${colorize(migrationGuidePath, colors.blue)}`);
+    console.log(`  2. Migrate code from ${colorize(originalJsPath, colors.blue)} to the new modules`);
+    console.log(`  3. Update ${colorize(tplPath, colors.blue)} to load the new modules`);
+    console.log(`  4. Test the calculator`);
   } else {
     console.log(colorize('\nRun with --apply to create the modular files.', colors.gray));
   }
