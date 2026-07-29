@@ -1,0 +1,27 @@
+{
+  // The Node half of the type-check: build scripts and the node:test suite.
+  // Split from tsconfig.json because these are CommonJS modules and need
+  // `module: node16` to resolve require(), while the browser code needs the
+  // absence of that setting to stay global scripts. `npm run typecheck` runs
+  // both projects.
+  "compilerOptions": {
+    "allowJs": true,
+    "checkJs": false,
+    "noEmit": true,
+    "target": "ES2022",
+    "lib": ["ES2022"],
+    "module": "node16",
+    "moduleResolution": "node16",
+    "strict": false,
+    "types": ["node"]
+  },
+  "include": [
+    "scripts/**/*.js",
+    "unit-tests/**/*.js"
+  ],
+  // playwright-tests/ is left out on purpose: it is ESM with its own
+  // node_modules and its own @ts-check on playwright.config.js.
+  "exclude": [
+    "**/node_modules/**"
+  ]
+}

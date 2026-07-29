@@ -11,21 +11,20 @@
     "noEmit": true,
     "target": "ES2022",
     "lib": ["ES2022", "DOM", "DOM.Iterable"],
-    // scripts/ and unit-tests/ are CommonJS; www/ is plain global scripts with
-    // no module syntax at all, so the module setting does not affect them.
-    "module": "node16",
-    "moduleResolution": "node16",
+    // No `module` setting on purpose. The browser code is <script> globals with
+    // no import/export anywhere, and TypeScript only treats such a file as a
+    // shared global script while it is not in a module context. Setting
+    // `module: node16` here makes every .js its own CommonJS module, and the
+    // helpers in utils.js / dom-utils.js / common.js stop resolving across
+    // files - 105 spurious TS2304 reports. The Node-side code needs the
+    // opposite, so it lives in tsconfig.node.json.
     "strict": false,
-    "types": ["node"]
+    "types": []
   },
   "include": [
     "www/**/*.js",
-    "www/**/*.d.ts",
-    "scripts/**/*.js",
-    "unit-tests/**/*.js"
+    "www/**/*.d.ts"
   ],
-  // playwright-tests/ is left out on purpose: it is ESM with its own
-  // node_modules and its own @ts-check on playwright.config.js.
   "exclude": [
     "**/node_modules/**",
     "www/**/vendor/**",
