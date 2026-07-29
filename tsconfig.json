@@ -1,0 +1,34 @@
+{
+  // Type-checking is opted into per file with a `// @ts-check` directive on the
+  // first line - that is what `checkJs: false` means here. Files without the
+  // directive are still parsed (so cross-file globals resolve) but not reported
+  // on, which keeps `make typecheck` green while the codebase is converted one
+  // file at a time. The last step of the rollout flips this to true and drops
+  // the directives.
+  "compilerOptions": {
+    "allowJs": true,
+    "checkJs": false,
+    "noEmit": true,
+    "target": "ES2022",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    // scripts/ and unit-tests/ are CommonJS; www/ is plain global scripts with
+    // no module syntax at all, so the module setting does not affect them.
+    "module": "node16",
+    "moduleResolution": "node16",
+    "strict": false,
+    "types": ["node"]
+  },
+  "include": [
+    "www/**/*.js",
+    "www/**/*.d.ts",
+    "scripts/**/*.js",
+    "unit-tests/**/*.js"
+  ],
+  // playwright-tests/ is left out on purpose: it is ESM with its own
+  // node_modules and its own @ts-check on playwright.config.js.
+  "exclude": [
+    "**/node_modules/**",
+    "www/**/vendor/**",
+    "www/**/*.min.js"
+  ]
+}

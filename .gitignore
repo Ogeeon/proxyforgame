@@ -1,4 +1,5 @@
 .vscode
+/node_modules/
 /www/.github
 /www/tools
 # Everything under .claude is local (plans/, settings.local.json, session state),
