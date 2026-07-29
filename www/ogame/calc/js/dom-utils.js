@@ -12,17 +12,60 @@
 
 /**
  * Query selector - returns first matching element
+ *
+ * Declared as HTMLElement rather than Element: every selector in this project
+ * targets page markup, and Element lacks style/dataset/hidden/children, which
+ * callers use constantly. Callers that need an input, select or table still
+ * cast to the specific interface.
+ *
  * @param {string} selector - CSS selector
- * @returns {Element|null}
+ * @returns {HTMLElement|null}
  */
 const $ = (selector) => document.querySelector(selector);
 
 /**
  * Query selector all - returns all matching elements
  * @param {string} selector - CSS selector
- * @returns {NodeList}
+ * @returns {NodeListOf<HTMLElement>}
  */
 const $$ = (selector) => document.querySelectorAll(selector);
+
+// $ is deliberately typed as HTMLElement, which is what most callers want. The
+// three below are for callers that need a specific interface - value, checked,
+// selectedIndex, rows - and would otherwise cast at every use.
+
+/**
+ * Query selector for an input element
+ * @param {string} selector - CSS selector
+ * @returns {HTMLInputElement}
+ */
+const inputEl = (selector) =>
+  /** @type {HTMLInputElement} */ (document.querySelector(selector));
+
+/**
+ * Query selector for a select element
+ * @param {string} selector - CSS selector
+ * @returns {HTMLSelectElement}
+ */
+const selectEl = (selector) =>
+  /** @type {HTMLSelectElement} */ (document.querySelector(selector));
+
+/**
+ * Query selector for a table element
+ * @param {string} selector - CSS selector
+ * @returns {HTMLTableElement}
+ */
+const tableEl = (selector) =>
+  /** @type {HTMLTableElement} */ (document.querySelector(selector));
+
+/**
+ * The checked radio of a group, or null while none is checked.
+ * @param {string} name - value of the radios' name attribute
+ * @returns {HTMLInputElement|null}
+ */
+const checkedRadio = (name) =>
+  /** @type {HTMLInputElement|null} */ (
+    document.querySelector(`input[name="${name}"]:checked`));
 
 // ==========================================================================
 // VALUE HELPERS
@@ -334,13 +377,45 @@ const getTableRows = (tableId) => {
 
 /**
  * Get a cell from a table row
- * @param {Element} row - TR element
+ * @param {HTMLTableRowElement} row - TR element
  * @param {number} index - Cell index
- * @returns {Element|null}
+ * @returns {HTMLTableCellElement|null}
  */
 const getTableCell = (row, index) => {
   return row.cells[index];
 };
+
+// The calculator tables put exactly one control in each cell, and the callers
+// address it as row.children[n].children[0]. HTMLCollection yields Element,
+// which has no value/selectedIndex/style, so these three name the shape the
+// markup guarantees instead of casting at every call site.
+
+/**
+ * The cell at `column` of a table row.
+ * @param {HTMLElement} row - TR element
+ * @param {number} column - Cell index
+ * @returns {HTMLElement}
+ */
+const cellAt = (row, column) =>
+  /** @type {HTMLElement} */ (row.children[column]);
+
+/**
+ * The <input> inside the cell at `column`.
+ * @param {HTMLElement} row - TR element
+ * @param {number} column - Cell index
+ * @returns {HTMLInputElement}
+ */
+const cellInput = (row, column) =>
+  /** @type {HTMLInputElement} */ (row.children[column].children[0]);
+
+/**
+ * The <select> inside the cell at `column`.
+ * @param {HTMLElement} row - TR element
+ * @param {number} column - Cell index
+ * @returns {HTMLSelectElement}
+ */
+const cellSelect = (row, column) =>
+  /** @type {HTMLSelectElement} */ (row.children[column].children[0]);
 
 // ==========================================================================
 // INSERTION HELPERS
@@ -681,6 +756,10 @@ if (typeof window !== 'undefined') {
     // Selectors
     $,
     $$,
+    inputEl,
+    selectEl,
+    tableEl,
+    checkedRadio,
 
     // Values
     getVal,
@@ -715,6 +794,9 @@ if (typeof window !== 'undefined') {
     // Tables
     getTableRows,
     getTableCell,
+    cellAt,
+    cellInput,
+    cellSelect,
 
     // Insertion
     append,

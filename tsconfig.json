@@ -18,8 +18,16 @@
     // helpers in utils.js / dom-utils.js / common.js stop resolving across
     // files - 105 spurious TS2304 reports. The Node-side code needs the
     // opposite, so it lives in tsconfig.node.json.
+    // Needed only so the @types/bootstrap import of @popperjs/core resolves in
+    // node_modules. Unlike `node16`, these two do not put .js files into a
+    // CommonJS module context, so the browser files stay global scripts.
+    "module": "esnext",
+    "moduleResolution": "bundler",
     "strict": false,
-    "types": []
+    // The Bootstrap bundle every calculator loads from jsdelivr. Its types are
+    // a UMD global, so referencing them here is what makes `bootstrap.Tooltip`
+    // resolve in these script-scoped files.
+    "types": ["bootstrap"]
   },
   "include": [
     "www/**/*.js",
