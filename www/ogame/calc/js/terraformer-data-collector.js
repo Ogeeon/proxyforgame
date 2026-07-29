@@ -1,3 +1,4 @@
+// @ts-check
 // ============================================================================
 // TERRAFORMER CALCULATOR - DATA COLLECTOR
 // ============================================================================
@@ -48,7 +49,7 @@ class TerraformerDataCollector {
    * 2 = all officers). Falls back to 0 when nothing is checked.
    */
   static readEnergyBonus() {
-    const checked = document.querySelector('input[name="energy-bonus"]:checked');
+    const checked = checkedRadio('energy-bonus');
     return checked ? (Number.parseInt(checked.value, 10) || 0) : 0;
   }
 
@@ -57,7 +58,7 @@ class TerraformerDataCollector {
    * Falls back to 0 (none) when nothing is checked.
    */
   static readPlayerClass() {
-    const checked = document.querySelector('input[name="player-class"]:checked');
+    const checked = checkedRadio('player-class');
     return checked ? (Number.parseInt(checked.value, 10) || 0) : 0;
   }
 }
