@@ -1,7 +1,14 @@
 .vscode
 /www/.github
 /www/tools
-.claude
+# Everything under .claude is local (plans/, settings.local.json, session state),
+# except the agent instructions themselves - those are part of the project.
+.claude/*
+!.claude/skills/
+!.claude/commands/
+# A Claude Code session started from inside .claude/commands drops its own
+# settings there; commands/ is versioned now, so keep that out.
+.claude/commands/.claude/
 setup-statusline.ps1
 /.mcp.json
 /run_tests.bat
