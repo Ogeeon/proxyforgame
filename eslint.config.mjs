@@ -28,6 +28,25 @@ export default [
     rules: {
       ...js.configs.recommended.rules,
       'no-undef': 'off',
+      // `vars: local` for the same reason `no-undef` is off: a top-level
+      // function here is a page global, and the file that calls it is a
+      // different <script>. Checked once against every .js, .tpl, .php and
+      // .json in the project - of the 57 names ESLint called unused, 55 are
+      // called from another file and the last two, findSelection and
+      // showEmailWindow, are called from onclick handlers inside the locale
+      // strings. None of them were dead. Locals still get checked.
+      'no-unused-vars': ['error', {
+        vars: 'local',
+        args: 'after-used',
+        caughtErrors: 'none',
+        // `for (const _ of rows)` - iterate the right number of times without
+        // naming the item.
+        varsIgnorePattern: '^_$',
+      }],
+      // eval() in dom-utils.js is the only use in the project and carries an
+      // explicit disable comment; the rule is enabled so that comment means
+      // something and any new use has to be justified the same way.
+      'no-eval': 'error',
     },
   },
 
