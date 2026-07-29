@@ -1,3 +1,4 @@
+// @ts-check
 // ============================================================================
 // EXPEDITIONS CALCULATOR - ORCHESTRATION
 // ============================================================================
@@ -11,6 +12,10 @@
 const EXPEDITIONS_EMPTY_FLEET =
   '{"202":0,"203":0,"204":0,"205":0,"206":0,"207":0,"208":0,"209":0,"210":0,"211":0,"213":0,"214":0,"215":0,"218":0,"219":0}';
 
+// Each calculator page loads exactly one orchestrator, but a single
+// TypeScript project sees every one of them in the same global scope, so
+// they all look like redeclarations of `options`.
+// @ts-expect-error - see above
 const options = {
   defConstraints: { min: -Infinity, max: Infinity, def: 0, allowFloat: false, allowNegative: false },
 
@@ -121,7 +126,7 @@ class ExpeditionsApp {
 
     this._resetParams(false);
 
-    const highTop = $('#highTop');
+    const highTop = selectEl('#highTop');
     if (api.highTopIdx && highTop) highTop.selectedIndex = api.highTopIdx;
     if (api.universeSpeed) setVal('#universe-speed', api.universeSpeed);
     if (api.playerClass) setVal('#player-class', api.playerClass);
@@ -239,7 +244,7 @@ class ExpeditionsApp {
     });
 
     // Theme toggle (rendered inside topbar_bs).
-    const lightCb = $('#cb-light-theme');
+    const lightCb = inputEl('#cb-light-theme');
     if (lightCb) {
       lightCb.addEventListener('click', () => {
         if (typeof toggleLightBS === 'function') toggleLightBS(lightCb.checked);
@@ -339,10 +344,10 @@ function initializeExpeditionsCalculator() {
   expeditionsApp = new ExpeditionsApp();
   expeditionsApp.init();
   // Expose the live instance so E2E tests (and console debugging) can reach it.
-  if (typeof globalThis !== 'undefined') globalThis.expeditionsApp = expeditionsApp;
+  if (typeof globalThis !== 'undefined') globalThisRecord().expeditionsApp = expeditionsApp;
 }
 
 if (typeof globalThis !== 'undefined') {
-  globalThis.initializeExpeditionsCalculator = initializeExpeditionsCalculator;
-  globalThis.ExpeditionsApp = ExpeditionsApp;
+  globalThisRecord().initializeExpeditionsCalculator = initializeExpeditionsCalculator;
+  globalThisRecord().ExpeditionsApp = ExpeditionsApp;
 }

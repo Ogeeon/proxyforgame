@@ -1,3 +1,4 @@
+// @ts-check
 // ============================================================================
 // QUEUE CALCULATOR - ORCHESTRATION
 // ============================================================================
@@ -57,7 +58,7 @@ class QueueCalculatorApp {
     setVal('#hyper-tech-level', options.prm.hyperTechLevel);
     setVal('#total-fields-2', options.prm.totFldPln);
     setVal('#total-fields-3', options.prm.totFldMn);
-    const classRadio = $(`#player-class-${options.prm.playerClass}`);
+    const classRadio = inputEl(`#player-class-${options.prm.playerClass}`);
     if (classRadio) classRadio.checked = true;
     // The capacity increases may be fractional, so they are written through
     // setNumVal: the stored number carries a canonical dot, the field must show
@@ -88,7 +89,7 @@ class QueueCalculatorApp {
   /** Give both start-datetime fields the overtype mask from dom-utils. */
   _initMasks() {
     [PLANET_TAB, MOON_TAB].forEach((tabNum) =>
-      attachInputMask($(`#start-${tabNum}`), options.datetimeFormat));
+      attachInputMask(inputEl(`#start-${tabNum}`), options.datetimeFormat));
   }
 
   _restoreActiveTab() {
@@ -134,7 +135,7 @@ class QueueCalculatorApp {
     set(`total-fields-${MOON_TAB}`, { min: 1, def: options.defMnFlds, allowFloat: false, allowNegative: false });
     // Start levels: whole numbers, no upper bound (OGame caps none of them).
     [PLANET_TAB, MOON_TAB].forEach((tabNum) => {
-      document.querySelectorAll(`#table-src-${tabNum} input[type=text]`).forEach((el) => {
+      $$(`#table-src-${tabNum} input[type=text]`).forEach((el) => {
         el._constrains = { min: 0, def: 0, allowFloat: false, allowNegative: false };
       });
     });
@@ -142,7 +143,7 @@ class QueueCalculatorApp {
 
   _bindEvents() {
     // Tab persistence
-    document.querySelectorAll('#mainTabs button[data-bs-toggle="tab"]').forEach((btn) => {
+    $$('#mainTabs button[data-bs-toggle="tab"]').forEach((btn) => {
       btn.addEventListener('shown.bs.tab', () => {
         const target = btn.dataset.bsTarget || '';
         const m = target.match(/tab-(\d+)/);
@@ -232,7 +233,7 @@ class QueueCalculatorApp {
     addEvent(`#set-start-now-${MOON_TAB}`, 'click', () => this._setStartNow(MOON_TAB));
 
     // Theme toggle hook (toggle is rendered inside topbar_bs)
-    const lightCb = $('#cb-light-theme');
+    const lightCb = inputEl('#cb-light-theme');
     if (lightCb) {
       lightCb.addEventListener('click', () => {
         if (typeof toggleLightBS === 'function') toggleLightBS(lightCb.checked);
@@ -463,7 +464,7 @@ class QueueCalculatorApp {
     setVal('#universe-speed', 1);
     setVal('#ion-tech-level', 0);
     setVal('#hyper-tech-level', 0);
-    const classRadio0 = $('#player-class-0');
+    const classRadio0 = inputEl('#player-class-0');
     if (classRadio0) classRadio0.checked = true;
     setNumVal('#sc-capacity-increase', 0);
     setNumVal('#lc-capacity-increase', 0);
@@ -474,8 +475,8 @@ class QueueCalculatorApp {
 
     // Clear all start-level inputs in both src tables
     [PLANET_TAB, MOON_TAB].forEach((tabNum) => {
-      document.querySelectorAll(`#table-src-${tabNum} input[type=text]`).forEach((inp) => {
-        inp.value = 0;
+      $$(`#table-src-${tabNum} input[type=text]`).forEach((inp) => {
+        /** @type {HTMLInputElement} */ (inp).value = '0';
       });
     });
 
@@ -513,7 +514,7 @@ class QueueCalculatorApp {
   }
 
   _validateDateField(id) {
-    const el = document.getElementById(id);
+    const el = /** @type {HTMLInputElement|null} */ (document.getElementById(id));
     if (!el) return false;
     const val = el.value;
     const empty = val === '' || /^[\s_./:-]*$/.test(val);
@@ -543,6 +544,6 @@ function initializeQueueCalculator() {
 }
 
 if (typeof globalThis !== 'undefined') {
-  globalThis.initializeQueueCalculator = initializeQueueCalculator;
-  globalThis.QueueCalculatorApp = QueueCalculatorApp;
+  globalThisRecord().initializeQueueCalculator = initializeQueueCalculator;
+  globalThisRecord().QueueCalculatorApp = QueueCalculatorApp;
 }

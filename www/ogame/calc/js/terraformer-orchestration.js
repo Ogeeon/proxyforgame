@@ -1,3 +1,4 @@
+// @ts-check
 // ============================================================================
 // TERRAFORMER CALCULATOR - ORCHESTRATION
 // ============================================================================
@@ -7,6 +8,10 @@
 
 'use strict';
 
+// Each calculator page loads exactly one orchestrator, but a single
+// TypeScript project sees every one of them in the same global scope, so
+// they all look like redeclarations of `options`.
+// @ts-expect-error - see above
 const options = {
   defConstraints: { min: -Infinity, max: Infinity, def: 0, allowFloat: false, allowNegative: false },
 
@@ -118,7 +123,7 @@ class TerraformerApp {
     setVal('#energy-tech-level', options.prm.energyTechLevel);
     setVal('#hyper-tech-level', options.prm.hyperTechLevel);
     setNumVal('#max-planet-temp', options.prm.maxPlanetTemp);
-    const bonusRadio = $(`#energy-bonus-${options.prm.energyBonus}`);
+    const bonusRadio = inputEl(`#energy-bonus-${options.prm.energyBonus}`);
     if (bonusRadio) bonusRadio.checked = true;
     setVal('#solar-plant-level', options.prm.solarPlantLevel);
     setVal('#solar-plant-percent', options.prm.solarPlantPercent);
@@ -126,7 +131,7 @@ class TerraformerApp {
     setVal('#fusion-plant-percent', options.prm.fusionPlantPercent);
     setVal('#solar-satellites-count', options.prm.solarSatellitesCount);
     setVal('#solar-satellites-percent', options.prm.solarSatellitesPercent);
-    const classRadio = $(`#player-class-${options.prm.playerClass}`);
+    const classRadio = inputEl(`#player-class-${options.prm.playerClass}`);
     if (classRadio) classRadio.checked = true;
     setChecked('#trader-bonus', options.prm.isTrader);
     setVal('#energy-boost', options.prm.energyBoost);
@@ -221,7 +226,7 @@ class TerraformerApp {
     addEvent('#reset', 'click', () => this._resetParams());
 
     // Theme toggle (rendered inside topbar_bs).
-    const lightCb = $('#cb-light-theme');
+    const lightCb = inputEl('#cb-light-theme');
     if (lightCb) {
       lightCb.addEventListener('click', () => {
         if (typeof toggleLightBS === 'function') toggleLightBS(lightCb.checked);
@@ -313,10 +318,10 @@ function initializeTerraformerCalculator() {
   terraformerApp = new TerraformerApp();
   terraformerApp.init();
   // Expose the live instance so E2E tests (and console debugging) can reach it.
-  if (typeof globalThis !== 'undefined') globalThis.terraformerApp = terraformerApp;
+  if (typeof globalThis !== 'undefined') globalThisRecord().terraformerApp = terraformerApp;
 }
 
 if (typeof globalThis !== 'undefined') {
-  globalThis.initializeTerraformerCalculator = initializeTerraformerCalculator;
-  globalThis.TerraformerApp = TerraformerApp;
+  globalThisRecord().initializeTerraformerCalculator = initializeTerraformerCalculator;
+  globalThisRecord().TerraformerApp = TerraformerApp;
 }

@@ -1,3 +1,4 @@
+// @ts-check
 // ============================================================================
 // MOON CALCULATOR - ORCHESTRATION
 // ============================================================================
@@ -10,6 +11,10 @@
 
 'use strict';
 
+// Each calculator page loads exactly one orchestrator, but a single
+// TypeScript project sees every one of them in the same global scope, so
+// they all look like redeclarations of `options`.
+// @ts-expect-error - see above
 const options = {
   defConstraints: { min: -Infinity, max: Infinity, def: 0, allowFloat: false, allowNegative: false },
 
@@ -119,7 +124,7 @@ class MoonApp {
     addEvent('#reset-cr', 'click', () => this._resetCreateParams());
 
     // Theme toggle (rendered inside topbar_bs).
-    const lightCb = $('#cb-light-theme');
+    const lightCb = inputEl('#cb-light-theme');
     if (lightCb) {
       lightCb.addEventListener('click', () => {
         if (typeof toggleLightBS === 'function') toggleLightBS(lightCb.checked);
@@ -184,10 +189,10 @@ function initializeMoonCalculator() {
   moonApp = new MoonApp();
   moonApp.init();
   // Expose the live instance so E2E tests (and console debugging) can reach it.
-  if (typeof globalThis !== 'undefined') globalThis.moonApp = moonApp;
+  if (typeof globalThis !== 'undefined') globalThisRecord().moonApp = moonApp;
 }
 
 if (typeof globalThis !== 'undefined') {
-  globalThis.initializeMoonCalculator = initializeMoonCalculator;
-  globalThis.MoonApp = MoonApp;
+  globalThisRecord().initializeMoonCalculator = initializeMoonCalculator;
+  globalThisRecord().MoonApp = MoonApp;
 }

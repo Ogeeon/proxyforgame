@@ -44,6 +44,8 @@ declare const currUrl: string;
 declare const currLang: string;
 /** Newest changelog entry, in the shape loadFromCookie/saveToCookie expect. */
 declare const currChange: { value: number, validate: (key: string, val: any) => any };
+/** Fleet/resource values parsed out of a pasted OGame API string. */
+declare const apiParams: Record<string, any>;
 
 /**
  * The pseudo-event the validation helpers are called with. The real listeners

@@ -60,6 +60,19 @@ const tableEl = (selector) =>
   /** @type {HTMLTableElement} */ (document.querySelector(selector));
 
 /**
+ * globalThis as a writable bag of names.
+ *
+ * The calculators publish their classes and app instances as page globals, but
+ * a `class X {}` declaration lives in its script's lexical scope, so TypeScript
+ * does not know it as a globalThis property. This is where that cast lives, so
+ * the assignment sites stay readable.
+ *
+ * @returns {Record<string, unknown>}
+ */
+const globalThisRecord = () =>
+  /** @type {Record<string, unknown>} */ (/** @type {unknown} */ (globalThis));
+
+/**
  * The checked radio of a group, or null while none is checked.
  * @param {string} name - value of the radios' name attribute
  * @returns {HTMLInputElement|null}
