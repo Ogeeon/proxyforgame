@@ -6,7 +6,7 @@
   // both projects.
   "compilerOptions": {
     "allowJs": true,
-    "checkJs": false,
+    "checkJs": true,
     "noEmit": true,
     "target": "ES2022",
     "lib": ["ES2022"],

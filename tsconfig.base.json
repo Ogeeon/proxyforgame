@@ -4,7 +4,7 @@
   // tsconfig.node.json, which needs the opposite module settings.
   "compilerOptions": {
     "allowJs": true,
-    "checkJs": false,
+    "checkJs": true,
     "noEmit": true,
     "target": "ES2022",
     "lib": ["ES2022", "DOM", "DOM.Iterable"],
