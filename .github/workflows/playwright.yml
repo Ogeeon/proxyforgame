@@ -117,6 +117,12 @@ jobs:
       # -------------------------------------------------------------
       # Run tests - same make targets developers run locally
       # -------------------------------------------------------------
+      # Locale drift is what `make check` catches on top of `make test`; run it
+      # first so a translation mistake fails in seconds instead of after the
+      # whole browser suite.
+      - name: Validate translations
+        run: make i18n-validate
+
       - name: Run unit tests
         run: make test-unit
 
