@@ -1,3 +1,4 @@
+// @ts-check
 'use strict';
 
 // Pure computation tests for the expeditions calculator, moved out of the Playwright

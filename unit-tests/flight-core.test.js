@@ -1,3 +1,4 @@
+// @ts-check
 'use strict';
 
 // Pure computation tests for the flight calculator, moved out of the Playwright suite.
@@ -274,12 +275,16 @@ describe('Flight Calculator - Flight Duration', () => {
         const expected = (minSpeed, dist, pct, uni) =>
             Math.round((35000 / (pct / 10) * Math.sqrt(dist * 10 / minSpeed) + 10) / uni);
 
-        for (const args of [
+        // Tuple-typed so the spread into expected() keeps its four arguments;
+        // a plain number[] loses the length and cannot be spread into arity 4.
+        /** @type {[number, number, number, number][]} */
+        const cases = [
             [5000, 60000, 100, 1],
             [12500, 3555, 100, 1],
             [5000, 5, 100, 1],
             [10000, 49155, 70, 1],
-        ]) {
+        ];
+        for (const args of cases) {
             expect(duration(args)).toBe(expected(...args));
         }
     });

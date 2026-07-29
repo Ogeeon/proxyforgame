@@ -1,3 +1,4 @@
+// @ts-check
 'use strict';
 
 // The calculator sources are classic browser scripts, not modules: they declare
@@ -18,7 +19,10 @@ const WWW = join(__dirname, '..', 'www');
 /**
  * @param {string[]} files Paths relative to `www/`, in load order.
  * @param {string[]} names Top-level names to return.
- * @returns {Record<string, unknown>}
+ * @returns {Record<string, any>} The lifted globals. `any` on purpose: the
+ *   values are classes and functions from untyped browser scripts, and
+ *   `unknown` would make every `new Calculator()` and `helper()` in the tests
+ *   an error with nothing gained.
  */
 function load(files, names) {
     const sandbox = { console, setTimeout, clearTimeout };
