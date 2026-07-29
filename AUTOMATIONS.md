@@ -48,13 +48,14 @@ npm run generate-docs               # Generate documentation
 
 ## Translation Management
 
-### Pre-commit Translation Validator
+### When translation validation runs
 
-**Location:** `.claude/hooks.json`
+Checks that all 13 locale files have matching keys with `en.json` and fails on drift.
+There is **no pre-commit hook** — it runs in exactly two places:
 
-Automatically validates translation files before commits. Checks that all 13 locale files have matching keys with `en.json` and warns if missing translations are detected.
-
-**Trigger:** Runs when committing changes to `www/locale/*.json` files
+- **CI**, as the `Validate translations` step of `.github/workflows/playwright.yml`
+- **Locally**, via `make i18n-validate`, or `make check` (which is `i18n-validate` + both suites).
+  Plain `make test` does *not* include it.
 
 ### /sync-translations Skill
 
@@ -82,20 +83,17 @@ npm run sync-translations:dry      # Preview changes without modifying files
 
 Scans locale files for missing translation keys, reports empty/null values, and detects extra keys.
 
-**Current Status:**
-- **Total keys:** 666 across 13 languages
-- **Best coverage:** US (100%), DE (97.7%)
-- **Needs attention:** PT, SK (96.4%)
+**Current status:** all 13 locales validate clean. Run `make i18n-report` for live per-language
+completion rather than trusting a number written down here.
 
 ---
 
 ## Test Management
 
-### Pre-commit Test Coverage Checker
+### Test Coverage Checker
 
-**Location:** `.claude/hooks.json` (updated)
-
-Automatically checks test coverage when calculator PHP files are modified.
+Reports which calculators have no Playwright spec. Advisory only, never gating — run it
+with `make coverage`, or as part of `make audit` alongside the schema report.
 
 ### /add-test Skill
 
@@ -268,10 +266,9 @@ npm run generate-docs graviton      # Generate specific calculator docs
 
 ## Troubleshooting
 
-### Pre-commit hooks not running
-- Check `.claude/hooks.json` exists and is valid
-- Ensure Claude Code is properly configured
-- Try running manually: `npm run validate-translations`
+### Expecting a check to run automatically before a commit
+Nothing does. This repo installs no git hooks and no Claude Code hooks — every check is
+something you invoke: `make check` before a commit, and CI on push.
 
 ### Translation sync fails
 - Manually run: `npm run sync-translations:fix`
@@ -299,8 +296,8 @@ npm run generate-docs graviton      # Generate specific calculator docs
 ```
 pfg.wmp/
 ├── .claude/
-│   ├── hooks.json                     # Pre-commit hooks
-│   └── skills/                        # Claude Code skill definitions
+│   ├── commands/                      # Slash commands (/sonar-fix, /translate-changelog)
+│   └── skills/                        # Claude Code skills
 ├── scripts/                           # Automation scripts
 │   ├── validate-translations.js       # Translation validator
 │   ├── sync-translations.js           # Translation synchronizer
