@@ -1,3 +1,4 @@
+// @ts-check
 // ============================================================================
 // QUEUE CALCULATOR - RENDERER
 // ============================================================================
@@ -74,7 +75,7 @@ class QueueRenderer {
    * footer rows intact (last 2 rows).
    */
   static clearQueueRows(tabNum) {
-    const tbl = $(`#table-dst-${tabNum}`);
+    const tbl = tableEl(`#table-dst-${tabNum}`);
     if (!tbl) return;
     while (tbl.rows.length > 3) {
       // Dispose Bootstrap tooltips before dropping the row so no orphaned
@@ -89,7 +90,7 @@ class QueueRenderer {
    * Returns the inserted <tr> element.
    */
   static appendQueueRow(tabNum, rowIndex, techName, resultLevel, costs, isDestroy, fontColor) {
-    const tbl = $(`#table-dst-${tabNum}`);
+    const tbl = tableEl(`#table-dst-${tabNum}`);
     if (!tbl) return null;
 
     // The last 2 rows are the totals + transports footer; insert before them.
@@ -129,7 +130,7 @@ class QueueRenderer {
    * @param {string} fontColor
    */
   static updateTotals(tabNum, totals, totalFlds, fontColor) {
-    const tbl = $(`#table-dst-${tabNum}`);
+    const tbl = tableEl(`#table-dst-${tabNum}`);
     if (!tbl) return;
     const totalsRow = tbl.rows[tbl.rows.length - 2];
     if (!totalsRow) return;
@@ -148,7 +149,7 @@ class QueueRenderer {
    * Collector class and cargo capacity increase — matches the Trade/Costs calculators).
    */
   static updateTransports(tabNum, totals, hyperTechLevel, playerClass, scCapacityIncrease, lcCapacityIncrease) {
-    const tbl = $(`#table-dst-${tabNum}`);
+    const tbl = tableEl(`#table-dst-${tabNum}`);
     if (!tbl) return;
     const transportsRow = tbl.rows[tbl.rows.length - 1];
     if (!transportsRow) return;

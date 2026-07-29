@@ -1,3 +1,4 @@
+// @ts-check
 // ============================================================================
 // QUEUE CALCULATOR - DATA COLLECTOR
 // ============================================================================
@@ -21,7 +22,7 @@ class QueueDataCollector {
     const hyperTechLevel = Math.trunc(num('#hyper-tech-level'));
     const totFldPln = Math.trunc(num('#total-fields-2'));
     const totFldMn = Math.trunc(num('#total-fields-3'));
-    const checkedClass = document.querySelector('input[name="player-class"]:checked');
+    const checkedClass = checkedRadio('player-class');
     const playerClass = checkedClass ? Number.parseInt(checkedClass.value, 10) : 0;
     const scCapacityIncrease = num('#sc-capacity-increase');
     const lcCapacityIncrease = num('#lc-capacity-increase');
@@ -75,10 +76,15 @@ class QueueDataCollector {
    * Falls back to the raw value when Inputmask isn't attached.
    */
   static readStartDateTime(tabNum) {
-    const el = $(`#start-${tabNum}`);
+    const el = inputEl(`#start-${tabNum}`);
     if (!el) return '';
-    if (el.inputmask && typeof el.inputmask.unmaskedvalue === 'function') {
-      return el.inputmask.unmaskedvalue();
+    // Inputmask is no longer loaded by any template, so this branch never runs
+    // today - see the open questions in .claude/plans/js-static-analysis.md
+    // before deciding whether to drop it.
+    const masked = /** @type {{unmaskedvalue?: () => string}|undefined} */ (
+      /** @type {any} */ (el).inputmask);
+    if (masked && typeof masked.unmaskedvalue === 'function') {
+      return masked.unmaskedvalue();
     }
     return el.value || '';
   }

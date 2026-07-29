@@ -1,3 +1,4 @@
+// @ts-check
 // ============================================================================
 // DATA COLLECTOR — DOM → data models
 // ============================================================================
@@ -9,18 +10,18 @@ class LfDataCollector {
      */
     collectParams() {
         let playerClass = 0;
-        if (document.getElementById('class-2').checked) {
+        if (inputEl('#class-2').checked) {
             playerClass = 2;
-        } else if (document.getElementById('class-1').checked) {
+        } else if (inputEl('#class-1').checked) {
             playerClass = 1;
         }
         return {
             robotFactoryLevel:    getInputNumber(document.getElementById('robot-factory-level')),
             naniteFactoryLevel:   getInputNumber(document.getElementById('nanite-factory-level')),
-            universeSpeed:        document.getElementById('universe-speed').value,
+            universeSpeed:        selectEl('#universe-speed').value,
             ionTechLevel:         getInputNumber(document.getElementById('ion-tech-level')),
             hyperTechLevel:       getInputNumber(document.getElementById('hyper-tech-level')),
-            fullNumbers:          document.getElementById('full-numbers').checked,
+            fullNumbers:          inputEl('#full-numbers').checked,
             capIncrSC:            getInputNumber(document.getElementById('sc-capacity-increase')),
             capIncrLC:            getInputNumber(document.getElementById('lc-capacity-increase')),
             megalithLvl:          getInputNumber(document.getElementById('megalith-level')),
@@ -31,7 +32,7 @@ class LfDataCollector {
             vortexChamberLvl:     getInputNumber(document.getElementById('vortex-chamber-level')),
             researchCostReduction:getInputNumber(document.getElementById('research-cost-reduction')),
             researchTimeReduction:getInputNumber(document.getElementById('research-time-reduction')),
-            race:                 Number(document.getElementById('race-selector').value),
+            race:                 Number(selectEl('#race-selector').value),
             researchRaceOneLevel: this.collectResearchRace(0),
             researchRaceMultLevel:this.collectResearchRace(1),
             playerClass,
@@ -44,7 +45,7 @@ class LfDataCollector {
     }
 
     collectResearchRace(outerTab) {
-        const sel = document.getElementById(`research-race-dd-${outerTab}`);
+        const sel = selectEl(`#research-race-dd-${outerTab}`);
         return sel ? Number(sel.value) : 1;
     }
 
@@ -64,7 +65,7 @@ class LfDataCollector {
      */
     collectTab3Request() {
         return {
-            techID:    Number(document.getElementById('tech-types-select').value),
+            techID:    Number(selectEl('#tech-types-select').value),
             levelFrom: getInputNumber(document.getElementById('tab2-from-level')),
             levelTo:   getInputNumber(document.getElementById('tab2-to-level')),
         };
