@@ -87,12 +87,11 @@ report: ## Open the last Playwright HTML report
 # `make check` always means "you broke something". The three reporters below
 # all exit non-zero on pre-existing issues, so they live in `audit` instead and
 # are prefixed with `-` there to keep one failure from hiding the other two.
-check: i18n-validate test ## Green gate - what must pass before a commit
+check: i18n-validate lint test ## Green gate - what must pass before a commit
 
 audit: ## Advisory reports; these flag pre-existing issues and do not gate
 	-node scripts/check-test-coverage.js
 	-node scripts/validate-database-schema.js
-	-npm run lint --silent
 	-npm run typecheck --silent
 
 lint: ## Run ESLint over every JS file

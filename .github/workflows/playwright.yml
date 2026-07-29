@@ -123,10 +123,13 @@ jobs:
       - name: Validate translations
         run: make i18n-validate
 
-      # Advisory while the ESLint/checkJs rollout is in progress: `make audit`
-      # prefixes every reporter with `-`, so findings are printed without
-      # failing the job. Each check moves into `make check` once its phase is
-      # finished. See .claude/plans/js-static-analysis.md.
+      # ESLint gates now - it is at zero findings. Type-checking is still
+      # advisory inside `make audit` until the orchestrators opt in; that
+      # target prefixes every reporter with `-`, so findings are printed
+      # without failing the job. See .claude/plans/js-static-analysis.md.
+      - name: Lint
+        run: make lint
+
       - name: Static analysis (advisory)
         run: make audit
 
