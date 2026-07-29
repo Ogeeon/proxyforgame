@@ -179,7 +179,7 @@ function printAnalysisReport(calcName, analysis, modules) {
 
   if (analysis.suggestions.length > 0) {
     console.log(`\n${colorize('Suggestions:', colors.yellow)}`);
-    analysis.suggestions.forEach((suggestion, index) => {
+    analysis.suggestions.forEach((suggestion) => {
       let priorityIcon;
       if (suggestion.priority === 'high') {
         priorityIcon = colorize('⚠', colors.red);
@@ -417,7 +417,7 @@ function createModularFiles(calcName, modules) {
   });
 
   // Create migration guide
-  const guideContent = generateMigrationGuide(calcName, modules);
+  const guideContent = generateMigrationGuide(calcName);
   const guidePath = path.join(JS_DIR, `${calcName}-MIGRATION.md`);
   fs.writeFileSync(guidePath, guideContent, 'utf8');
 
@@ -427,7 +427,7 @@ function createModularFiles(calcName, modules) {
 /**
  * Generate migration guide
  */
-function generateMigrationGuide(calcName, modules) {
+function generateMigrationGuide(calcName) {
   return `# ${calcName.toUpperCase()} Calculator - Migration Guide
 
 This guide helps you migrate from the monolithic \`${calcName}.js\` to the modular structure.

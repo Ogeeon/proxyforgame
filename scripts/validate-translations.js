@@ -92,7 +92,7 @@ function getLocaleFiles() {
 /**
  * Validate translations against source
  */
-function validateTranslations(sourceData, localeData, localeName) {
+function validateTranslations(sourceData, localeData) {
   const sourceKeys = getKeyPaths(sourceData);
   const issues = {
     missing: [],      // Keys in source but not in locale
@@ -204,7 +204,7 @@ function main() {
     const localeData = loadJsonFile(fullPath);
     if (!localeData) continue;
 
-    results[langCode] = validateTranslations(sourceData, localeData, langCode);
+    results[langCode] = validateTranslations(sourceData, localeData);
   }
 
   // Print results
