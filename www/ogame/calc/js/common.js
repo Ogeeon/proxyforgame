@@ -14,7 +14,9 @@
  * @param boosterType booster type: 0-none, 1-bronze (10%), 2-silver (20%), 3-gold (30%)
  * @param allOfficers flag - whether all 5 officers are present
  * @param playerClass player class: 0-Collector, 1-General, 2-Discoverer
- * @param isTrader whether the player belongs to an alliance with the "Traders" class
+ * @param [isTrader] whether the player belongs to an alliance with the "Traders" class.
+ *        Optional: the costs calculator has no field for it, so it omits the argument
+ *        and the 5% alliance bonus stays out of its single-building figures.
  * @returns Number of resource units or energy produced
  */
 function getProductionRate(techID, techLevel, energyTechLevel, plasmaTechLevel, maxTemp, pos, universeSpeedFactor, geologist, engineer, productionFactor, powerFactor, boosterType, allOfficers, playerClass, isTrader) {
@@ -52,7 +54,9 @@ function getProductionRate(techID, techLevel, energyTechLevel, plasmaTechLevel, 
  * @param boosterType booster type: 0-none, 1-bronze (10%), 2-silver (20%), 3-gold (30%)
  * @param allOfficers flag - whether all 5 officers are present
  * @param playerClass player class: 0-Collector, 1-General, 2-Discoverer
- * @param isTrader whether the player belongs to an alliance with the "Traders" class
+ * @param [isTrader] whether the player belongs to an alliance with the "Traders" class.
+ *        Optional: the costs calculator has no field for it, so it omits the argument
+ *        and the 5% alliance bonus stays out of its single-building figures.
  * @returns Number of resource units or energy produced
  */
 function getProductionRateSplit(techID, techLevel, energyTechLevel, plasmaTechLevel, maxTemp, pos, universeSpeedFactor, geologist, engineer, productionFactor, powerFactor, boosterType, allOfficers, playerClass, isTrader) {
@@ -271,7 +275,8 @@ function calcBuildCost_C(techID, techLevel, techData) {
  * @param techLevelFrom starting building/research level (not included in the calculation)
  * @param techLevelTo final building/research level
  * @param techData technology data array in the format {id:[cost_met, cost_crys, cost_deut, grow_koeff]}
- * @param ionTechLevel ion technology level
+ * @param [ionTechLevel] ion technology level; defaults to 0. Only the demolition
+ *        branch reads it, so callers that can only build leave it out.
  * @returns Total cost of the building/research upgrade
  */
 function getBuildCost_C(techID, techLevelFrom, techLevelTo, techData, ionTechLevel) {

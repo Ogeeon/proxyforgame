@@ -28,7 +28,11 @@ class LfCalculator {
         if (levelTo > levelFrom) {
             points = Math.floor((resCost[0] + resCost[1] + resCost[2]) / 1000);
         } else {
-            const buildResCost = getBuildCostLF(techID, levelTo, levelFrom, this.techCosts, 0);
+            // Points refunded on demolition follow the undiscounted build cost, so
+            // both reductions are passed as 0. rsrCostRdc has to be spelled out:
+            // omitted, it made `0.01 * undefined` and every research demolition
+            // reported NaN points, while buildings were fine on bldCostRdc's default.
+            const buildResCost = getBuildCostLF(techID, levelTo, levelFrom, this.techCosts, 0, 0);
             points = -1 * Math.floor((buildResCost[0] + buildResCost[1] + buildResCost[2]) / 1000);
         }
         return { metal: resCost[0], crystal: resCost[1], deut: resCost[2], energy: energyCost, time: timeSpan, points };

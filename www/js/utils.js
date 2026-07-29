@@ -190,7 +190,7 @@ function appendTimespanUnit(timeStr, seconds, divisor, label) {
  * @param h Label for hours
  * @param m Label for minutes
  * @param s Label for seconds
- * @param minimize Flag indicating that minutes and seconds should be dropped if the time span is longer than a week
+ * @param [minimize] Flag indicating that minutes and seconds should be dropped if the time span is longer than a week
  * @returns String of the form [Xw] [Xd] [Xh] [Xm] [Xs]
  */
 function timespanToShortenedString(seconds, w, d, h, m, s, minimize) {

@@ -110,8 +110,12 @@ function getSSCost(techID, currLvl, plnData) {
 	let energyReq = newCons - currCons;
 	let fullCrew = options.prm.geologist && options.prm.engineer && options.prm.admiral && options.prm.commander && options.prm.technocrat;
 	// plnData = [temp., pos., booster]
+	// The booster, officer and class bonuses are deliberately not passed in: they
+	// are applied to oneSSProd below, the way production.js applies them to the
+	// whole energy balance. The satellite branch of getProductionRateSplit reads
+	// none of them anyway - only techLevel, maxTemp and powerFactor.
 	let oneSSProd = getProductionRate(212, 1, options.prm.energyTechLevel, options.prm.plasmaTechLevel, plnData[0], plnData[1],
-		options.prm.universeSpeed, options.prm.geologist, options.prm.engineer, 1, 1, fullCrew, options.prm.playerClass);
+		options.prm.universeSpeed, options.prm.geologist, options.prm.engineer, 1, 1, 0, false, options.prm.playerClass);
 	let boosterFactor = 0.1 * plnData[2];
 	let engineerFactor = (options.prm.engineer === true) ? 0.1 : 0;
 	let allStaffFactor = fullCrew === true ? 0.02 : 0;
