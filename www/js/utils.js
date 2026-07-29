@@ -54,7 +54,10 @@ function validateInputNumber (event) {
 		input.select();
 	}
 	// After validation, the function named in the event's properties must be called. Call it in the context of the input field being processed, just in case.
+	// Legacy callback-by-name mechanism; see the open questions in
+	// .claude/plans/js-static-analysis.md
 	if (event?.data != null)
+		// eslint-disable-next-line no-eval
 		eval(event.data).apply(input);
 }
 
