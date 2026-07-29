@@ -39,7 +39,7 @@ PW_REPORTER ?= list
 
 .PHONY: help install serve db-seed \
         test test-unit test-e2e test-e2e-ui test-one report \
-        check audit quality coverage db-validate lint typecheck \
+        check audit quality coverage db-validate lint typecheck tsconfigs \
         i18n-validate i18n-report i18n-show i18n-fix \
         new-calc gen-test refactor assets docs
 
@@ -93,12 +93,16 @@ audit: ## Advisory reports; these flag pre-existing issues and do not gate
 	-node scripts/check-test-coverage.js
 	-node scripts/validate-database-schema.js
 	-npm run typecheck --silent
+	-npm run check-tsconfigs --silent
 
 lint: ## Run ESLint over every JS file
 	npm run lint --silent
 
 typecheck: ## Type-check the JS files that opt in with `// @ts-check`
 	npm run typecheck --silent
+
+tsconfigs: ## Regenerate the per-calculator TypeScript projects from the templates
+	node scripts/generate-tsconfigs.js
 
 coverage: ## Report which calculators have no spec
 	node scripts/check-test-coverage.js

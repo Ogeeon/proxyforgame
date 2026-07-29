@@ -1,0 +1,25 @@
+{
+  // Shared compiler options for the per-calculator projects in tsconfig/.
+  // Nothing extends this for the Node-side code - that lives in
+  // tsconfig.node.json, which needs the opposite module settings.
+  "compilerOptions": {
+    "allowJs": true,
+    "checkJs": false,
+    "noEmit": true,
+    "target": "ES2022",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    // Only so the @types/bootstrap import of @popperjs/core resolves in
+    // node_modules. Unlike `node16`, these two do not put .js files into a
+    // CommonJS module context, so the browser files stay global scripts.
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "strict": false,
+    // The Bootstrap bundle every calculator loads from jsdelivr. Its types are
+    // a UMD global, so referencing them here is what makes `bootstrap.Tooltip`
+    // resolve in these script-scoped files.
+    "types": ["bootstrap"],
+    // These projects re-check the same shared files ten times over; skipping
+    // the node_modules .d.ts files keeps that affordable.
+    "skipLibCheck": true
+  }
+}

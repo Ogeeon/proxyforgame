@@ -1,41 +1,17 @@
 {
-  // Type-checking is opted into per file with a `// @ts-check` directive on the
-  // first line - that is what `checkJs: false` means here. Files without the
-  // directive are still parsed (so cross-file globals resolve) but not reported
-  // on, which keeps `make typecheck` green while the codebase is converted one
-  // file at a time. The last step of the rollout flips this to true and drops
-  // the directives.
-  "compilerOptions": {
-    "allowJs": true,
-    "checkJs": false,
-    "noEmit": true,
-    "target": "ES2022",
-    "lib": ["ES2022", "DOM", "DOM.Iterable"],
-    // No `module` setting on purpose. The browser code is <script> globals with
-    // no import/export anywhere, and TypeScript only treats such a file as a
-    // shared global script while it is not in a module context. Setting
-    // `module: node16` here makes every .js its own CommonJS module, and the
-    // helpers in utils.js / dom-utils.js / common.js stop resolving across
-    // files - 105 spurious TS2304 reports. The Node-side code needs the
-    // opposite, so it lives in tsconfig.node.json.
-    // Needed only so the @types/bootstrap import of @popperjs/core resolves in
-    // node_modules. Unlike `node16`, these two do not put .js files into a
-    // CommonJS module context, so the browser files stay global scripts.
-    "module": "esnext",
-    "moduleResolution": "bundler",
-    "strict": false,
-    // The Bootstrap bundle every calculator loads from jsdelivr. Its types are
-    // a UMD global, so referencing them here is what makes `bootstrap.Tooltip`
-    // resolve in these script-scoped files.
-    "types": ["bootstrap"]
-  },
-  "include": [
-    "www/**/*.js",
-    "www/**/*.d.ts"
-  ],
-  "exclude": [
-    "**/node_modules/**",
-    "www/**/vendor/**",
-    "www/**/*.min.js"
+  // Editor entry point. The real browser-side checking is done by the
+  // per-calculator projects in tsconfig/, one per page - see
+  // scripts/generate-tsconfigs.js for why. This project covers only the files
+  // every page loads, so opening one of them in an editor still gets the right
+  // compiler options; a calculator-specific file is checked by its own project
+  // when `npm run typecheck` runs.
+  "extends": "./tsconfig.base.json",
+  "files": [
+    "www/js/utils.js",
+    "www/js/sidebar_bs.js",
+    "www/ogame/calc/js/common.js",
+    "www/ogame/calc/js/dom-utils.js",
+    "www/ogame/calc/js/globals.d.ts",
+    "www/ogame/calc/js/options-global.d.ts"
   ]
 }
