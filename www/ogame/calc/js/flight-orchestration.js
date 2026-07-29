@@ -10,6 +10,10 @@ const POPULATED_SYSTEMS_TTL_MS = 24 * 60 * 60 * 1000;
 // strings; the orchestrator reads/writes prm and calls load/save (cookie I/O in
 // utils.js). Transient bits (populated systems, manual overrides) live on the
 // orchestrator instance, not here.
+// Each calculator page loads exactly one orchestrator, but a single
+// TypeScript project sees every one of them in the same global scope, so
+// they all look like redeclarations of `options`.
+// @ts-expect-error - see above
 const options = {
     defConstraints: {
         min: -Infinity, max: Infinity, def: 0, allowFloat: false, allowNegative: false,
@@ -1384,8 +1388,8 @@ class FlightOrchestrator {
         setVal('#lf-mechan-general-enh', 0);
         if (booster) {
             Object.entries(booster).forEach(([i, v]) => {
-                if (i == 1) setNumVal('#lf-rocktal-collector-enh', frac(v, 6) * 100);
-                if (i == 2) setNumVal('#lf-mechan-general-enh', frac(v, 6) * 100);
+                if (i === '1') setNumVal('#lf-rocktal-collector-enh', frac(v, 6) * 100);
+                if (i === '2') setNumVal('#lf-mechan-general-enh', frac(v, 6) * 100);
             });
         }
 
@@ -1475,10 +1479,10 @@ class FlightOrchestrator {
 
     _importOwnApiResearch(data) {
         Object.entries(data.researches).forEach(([id, level]) => {
-            if (id == 115) setVal('#cmb-drive', level);
-            if (id == 117) setVal('#imp-drive', level);
-            if (id == 118) setVal('#hyp-drive', level);
-            if (id == 114) setVal('#hypertech-lvl', level);
+            if (id === '115') setVal('#cmb-drive', level);
+            if (id === '117') setVal('#imp-drive', level);
+            if (id === '118') setVal('#hyp-drive', level);
+            if (id === '114') setVal('#hypertech-lvl', level);
         });
     }
 
@@ -1486,8 +1490,8 @@ class FlightOrchestrator {
         setVal('#lf-rocktal-collector-enh', 0);
         setVal('#lf-mechan-general-enh', 0);
         Object.entries(data.bonuses.characterClassBooster).forEach(([i, v]) => {
-            if (i == 1) setNumVal('#lf-rocktal-collector-enh', frac(v, 6) * 100);
-            if (i == 2) setNumVal('#lf-mechan-general-enh', frac(v, 6) * 100);
+            if (i === '1') setNumVal('#lf-rocktal-collector-enh', frac(v, 6) * 100);
+            if (i === '2') setNumVal('#lf-mechan-general-enh', frac(v, 6) * 100);
         });
     }
 

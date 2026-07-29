@@ -328,8 +328,8 @@ function updateOnePlnStorageCapacities() {
 function updateOnePlnTab() {
 	options.prm.maxPlanetTemp = getInputNumber($('#max-planet-temp'));
 	options.prm.planetPos = getInputNumber($('#planet-pos'));
-	options.prm.energyBoost = $('#energy-boost').value;
-	options.prm.onePlnRace = Number($('#one-pln-race').value);
+	options.prm.energyBoost = inputEl('#energy-boost').value;
+	options.prm.onePlnRace = Number(inputEl('#one-pln-race').value);
 	options.prm.onePlnLfLevels = readOnePlnLfLevels();
 	let lfEff = lfBuildingEffects(options.prm.onePlnRace, options.prm.onePlnLfLevels);
 	let plnData = [options.prm.maxPlanetTemp, options.prm.planetPos, options.prm.energyBoost];
@@ -620,7 +620,7 @@ function resetParams() {
 	setVal('#onepln-accumwhen-crys', 0);
 	setVal('#onepln-accumwhen-deut', 0);
 	setChecked('#one-pln-extended-view', options.prm.onePlnExtView);
-	$$('#one-planet-prod .lf-row input[type=text]').forEach(function (el) { el.value = 0; });
+	inputsAll('#one-planet-prod .lf-row input[type=text]').forEach(function (el) { el.value = 0; });
 	setOnePlanetProdData();
 	updateOnePlnTab();
 	setOnePlanetView(options.prm.onePlnExtView);
@@ -648,7 +648,7 @@ function toggleOnePlanetView() {
 // Show the life form building rows for the race picked in #one-pln-race
 // (between the fusion reactor and the solar satellites), hiding the others.
 function updateLifeformRows() {
-	let race = Number($('#one-pln-race').value) || 0;
+	let race = Number(inputEl('#one-pln-race').value) || 0;
 	$$('#one-planet-prod .lf-row').forEach(function (tr) {
 		tr.style.display = 'none';
 	});
@@ -669,7 +669,7 @@ function lfRowIndex(el) {
 // Read the building levels of the currently selected race from the table into a
 // positional array (index 0 is the race's first building).
 function readOnePlnLfLevels() {
-	let race = Number($('#one-pln-race').value) || 0;
+	let race = Number(inputEl('#one-pln-race').value) || 0;
 	let levels = new Array(LF_BUILDINGS_PER_RACE).fill(0);
 	if (race >= 1 && race <= 4) {
 		$$('#one-planet-prod .lf-row-' + race + ' input[type=text]').forEach(function (el) {
@@ -776,13 +776,13 @@ function deleteRow(plnID) {
 }
 
 function savePlnData() {
-	options.prm.aPNames[options.editedPln] = stripHTMLTags($('#planet-name').value);
+	options.prm.aPNames[options.editedPln] = stripHTMLTags(inputEl('#planet-name').value);
 	let target = options.prm.aPS[options.editedPln];
 	let rows = $$('#one-planet-prod tr:not(.lf-row)');
 	target[0] = getInputNumber($('#max-planet-temp'));
 	target[1] = getInputNumber($('#planet-pos'));
-	target[2] = Number($('#energy-boost').value);
-	target[24] = Number($('#one-pln-race').value);
+	target[2] = Number(inputEl('#energy-boost').value);
+	target[24] = Number(inputEl('#one-pln-race').value);
 	let savedLfLevels = readOnePlnLfLevels();
 	for (let k = 0; k < LF_BUILDINGS_PER_RACE; k++) target[25 + k] = savedLfLevels[k] || 0;
 	for (let i = 1; i < 8; i++) {
@@ -807,7 +807,7 @@ function clonePlnData() {
 	}
 	let rows = $$('#one-planet-prod tr:not(.lf-row)');
 	let lfLevels = readOnePlnLfLevels();
-	let cloneRace = Number($('#one-pln-race').value);
+	let cloneRace = Number(inputEl('#one-pln-race').value);
 	for (let pln = 0; pln < options.prm.currPlanetsCount; pln++) {
 		let p = options.prm.aPS[pln];
 		p[24] = cloneRace;
@@ -835,7 +835,7 @@ function clonePlnData() {
 // ---------------------------------------------------------------------------
 
 function saveUniverseData() {
-	let selectedUni = $('#universe-name-select').value;
+	let selectedUni = inputEl('#universe-name-select').value;
 	if (selectedUni === '0') {
 		alert(options.noUniSelectedMsg);
 		return;
@@ -848,7 +848,7 @@ function saveUniverseData() {
 }
 
 function loadUniverseData() {
-	let selectedUni = $('#universe-name-select').value;
+	let selectedUni = inputEl('#universe-name-select').value;
 	if (selectedUni === '0') {
 		alert(options.noUniSelectedMsg);
 		return;
@@ -862,7 +862,7 @@ function loadUniverseData() {
 }
 
 function deleteUniverseData() {
-	let selectedUni = $('#universe-name-select').value;
+	let selectedUni = inputEl('#universe-name-select').value;
 	if (selectedUni === '0') {
 		alert(options.noUniSelectedMsg);
 		return;
@@ -1081,7 +1081,7 @@ function initializeProductionCalculator() {
 
 		// Theme
 		_applyTheme();
-		const lightCb = $('#cb-light-theme');
+		const lightCb = inputEl('#cb-light-theme');
 		if (lightCb) {
 			lightCb.addEventListener('click', function () {
 				if (typeof toggleLightBS === 'function') toggleLightBS(lightCb.checked);
@@ -1096,5 +1096,5 @@ function initializeProductionCalculator() {
 }
 
 if (typeof globalThis !== 'undefined') {
-	globalThis.initializeProductionCalculator = initializeProductionCalculator;
+	globalThisRecord().initializeProductionCalculator = initializeProductionCalculator;
 }

@@ -1,7 +1,12 @@
+// @ts-check
 // ============================================================================
 // ORCHESTRATOR — owns all state, wires events, delegates to layers
 // ============================================================================
 
+// Each calculator page loads exactly one orchestrator, but a single
+// TypeScript project sees every one of them in the same global scope, so
+// they all look like redeclarations of `options`.
+// @ts-expect-error - see above
 const options = {
     defConstraints: {
         min: -Infinity,
@@ -130,7 +135,7 @@ class LfCostsOrchestrator {
                     }
                 });
                 resTbl.addEventListener('click', function (e) {
-                    const btn = e.target.closest('.research-remove-btn');
+                    const btn = /** @type {HTMLElement} */ (e.target).closest('.research-remove-btn');
                     if (btn) {
                         const row = btn.closest('tr');
                         orchestrator.removeResearchRow(row, outer);
@@ -207,13 +212,13 @@ class LfCostsOrchestrator {
         let theme = { value: 'light', validate: function (key, val) { return val; } };
         loadFromCookie('theme', theme);
         toggleLightBS(theme.value === 'light');
-        const cbLight = document.getElementById('cb-light-theme');
-        if (cbLight) cbLight.addEventListener('click', function () { toggleLightBS(this.checked); });
+        const cbLight = inputEl('#cb-light-theme');
+        if (cbLight) cbLight.addEventListener('click', () => { toggleLightBS(cbLight.checked); });
 
         this.restoreTabsState();
         this._populateResearchDropdown(0);
         this._populateResearchDropdown(1);
-        this.renderer.renderHideNShow(Number(document.getElementById('race-selector').value));
+        this.renderer.renderHideNShow(Number(selectEl('#race-selector').value));
         this.updateTotals();
         this.updateTab3();
     }
@@ -302,10 +307,10 @@ class LfCostsOrchestrator {
         Object.entries(this.techData).forEach(([key, value]) => {
             if (value == null) return;
             const keyParts = key.split(/-/);
-            if (!techTypes.has(1 * keyParts[2])) return;
+            if (!techTypes.has(Number.parseInt(keyParts[2], 10))) return;
 
-            const outerTab = keyParts[1] * 1;
-            const innerTab = keyParts[2] * 1;
+            const outerTab = Number.parseInt(keyParts[1], 10);
+            const innerTab = Number.parseInt(keyParts[2], 10);
             const rows     = getTableRows(`#table-${outerTab}-${innerTab}`);
 
             for (let idx = 1; idx < rows.length; idx++) {
@@ -458,7 +463,7 @@ class LfCostsOrchestrator {
     // -------------------------------------------------------------------------
 
     handleRaceChange() {
-        const race = Number(document.getElementById('race-selector').value);
+        const race = Number(selectEl('#race-selector').value);
         this.renderer.renderHideNShow(race);
         this.updateTotals();
         this.updateTab3();
@@ -543,7 +548,7 @@ class LfCostsOrchestrator {
         setChecked('#full-numbers', false);
         this._clearAvailableResourceInputs();
 
-        this.renderer.renderHideNShow(Number(document.getElementById('race-selector').value));
+        this.renderer.renderHideNShow(Number(selectEl('#race-selector').value));
         this.updateTotals();
         this.updateTab3();
     }
@@ -553,9 +558,9 @@ class LfCostsOrchestrator {
     // -------------------------------------------------------------------------
 
     storeTabsState() {
-        const activeMain   = document.querySelector('#mainTabs .nav-link.active');
-        const activeInner0 = document.querySelector('#innerTabs0 .nav-link.active');
-        const activeInner1 = document.querySelector('#innerTabs1 .nav-link.active');
+        const activeMain   = $('#mainTabs .nav-link.active');
+        const activeInner0 = $('#innerTabs0 .nav-link.active');
+        const activeInner1 = $('#innerTabs1 .nav-link.active');
         this.opts.prm.tabsState = [
             activeMain   ? activeMain.dataset.bsTarget   : '',
             activeInner0 ? activeInner0.dataset.bsTarget : '',
@@ -683,16 +688,16 @@ class LfCostsOrchestrator {
         for (let outer = 0; outer < 3; outer++) {
             for (let inner = 1; inner < 3; inner++) {
                 ['metal', 'crystal', 'deut'].forEach(res => {
-                    const el = document.getElementById(`${res}-available-${outer}-${inner}`);
-                    if (el) el.value = 0;
+                    const el = inputEl(`#${res}-available-${outer}-${inner}`);
+                    if (el) el.value = '0';
                 });
             }
         }
     }
 
     _populateResearchDropdown(outerTab) {
-        const raceDD = document.getElementById(`research-race-dd-${outerTab}`);
-        const resDD  = document.getElementById(`research-select-${outerTab}`);
+        const raceDD = selectEl(`#research-race-dd-${outerTab}`);
+        const resDD  = selectEl(`#research-select-${outerTab}`);
         if (!raceDD || !resDD) return;
         const race = Number(raceDD.value);
         resDD.innerHTML = '';
@@ -705,7 +710,7 @@ class LfCostsOrchestrator {
     }
 
     addResearchRow(outerTab) {
-        const resDD = document.getElementById(`research-select-${outerTab}`);
+        const resDD = selectEl(`#research-select-${outerTab}`);
         if (!resDD?.value) return;
         const techID   = Number(resDD.value);
         const techName = resDD.options[resDD.selectedIndex].text;

@@ -18,14 +18,22 @@
 interface Element {
   /** Handlers registered through addEvent(), kept so removeAllEvents() can find them. */
   _eventHandlers?: Record<string, EventListener[]>;
-}
-
-interface HTMLElement {
   /**
    * Per-field validation constraints (min, max, def, allowNegative, allowFloat)
-   * attached by the calculator templates and read by getConstraint().
+   * attached by the calculator templates and read by getConstraint(). Declared
+   * on Element, not HTMLElement: the loops that set it iterate querySelectorAll
+   * results.
    */
   _constrains?: Record<string, any>;
+  /** Saved state for the costs calculator's incremental-render backup/restore. */
+  _irnBackup?: any;
+  /** Deferred incremental-render callback attached by the costs orchestrator. */
+  _irnExecute?: any;
+}
+
+interface Window {
+  /** The live flight orchestrator, exposed for E2E tests and console debugging. */
+  flightOrchestrator?: any;
 }
 
 interface HTMLInputElement {

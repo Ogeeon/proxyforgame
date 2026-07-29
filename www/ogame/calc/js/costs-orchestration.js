@@ -1,3 +1,4 @@
+// @ts-check
 // ============================================================================
 // MAIN APPLICATION CONTROLLER
 // ============================================================================
@@ -558,12 +559,12 @@ class CostsCalculator {
     });
 
     // Theme toggle
-    const cbLightTheme = document.getElementById('cb-light-theme');
+    const cbLightTheme = inputEl('#cb-light-theme');
     if (cbLightTheme) {
       let theme = { value: 'light', validate: function (key, val) { return val; } };
       loadFromCookie('theme', theme);
       toggleLightBS(theme.value === 'light');
-      cbLightTheme.addEventListener('click', function () { toggleLightBS(this.checked); });
+      cbLightTheme.addEventListener('click', () => { toggleLightBS(cbLightTheme.checked); });
     }
   }
 
@@ -645,7 +646,7 @@ class CostsCalculator {
     // Clear: reset every cost/time input in the table to zero
     removeAllEvents('#lf-research-table-clear', 'click');
     addEvent('#lf-research-table-clear', 'click', () => {
-      $$('#lf-research-bonuses-tbody input[type="text"]').forEach(input => {
+      inputsAll('#lf-research-bonuses-tbody input[type="text"]').forEach(input => {
         input.value = localizeFloat(0);
       });
     });
@@ -662,7 +663,7 @@ class CostsCalculator {
     // Import: parse the pasted text into the table, then close the paste modal
     removeAllEvents('#lf-research-paste-import', 'click');
     addEvent('#lf-research-paste-import', 'click', () => {
-      const txtarea = document.getElementById('lf-research-paste-txtarea');
+      const txtarea = /** @type {HTMLTextAreaElement} */ (document.getElementById('lf-research-paste-txtarea'));
       if (!txtarea) return;
       if (this._importLfResearchBonuses(txtarea.value)) {
         txtarea.value = '';
@@ -680,7 +681,7 @@ class CostsCalculator {
    * @private
    */
   _readLfResearchTable() {
-    const rows = Array.from($$('#lf-research-bonuses-tbody tr'));
+    const rows = /** @type {HTMLTableRowElement[]} */ (Array.from($$('#lf-research-bonuses-tbody tr')));
     return rows.map(row => ({
       cost: this._parsePercent(row.querySelector('.lf-research-cost-input')),
       time: this._parsePercent(row.querySelector('.lf-research-time-input'))
@@ -698,8 +699,8 @@ class CostsCalculator {
     rows.forEach((row, i) => {
       const entry = data[i];
       if (!entry) return;
-      const costInput = row.querySelector('.lf-research-cost-input');
-      const timeInput = row.querySelector('.lf-research-time-input');
+      const costInput = /** @type {HTMLInputElement|null} */ (row.querySelector('.lf-research-cost-input'));
+      const timeInput = /** @type {HTMLInputElement|null} */ (row.querySelector('.lf-research-time-input'));
       if (costInput) costInput.value = localizeFloat(entry.cost);
       if (timeInput) timeInput.value = localizeFloat(entry.time);
     });
@@ -765,8 +766,8 @@ class CostsCalculator {
     rows.forEach((row, i) => {
       const entry = payload[i];
       if (!Array.isArray(entry)) return;
-      const costInput = row.querySelector('.lf-research-cost-input');
-      const timeInput = row.querySelector('.lf-research-time-input');
+      const costInput = /** @type {HTMLInputElement|null} */ (row.querySelector('.lf-research-cost-input'));
+      const timeInput = /** @type {HTMLInputElement|null} */ (row.querySelector('.lf-research-time-input'));
       if (costInput) costInput.value = localizeFloat(entry[0]);
       if (timeInput) timeInput.value = localizeFloat(entry[1]);
     });
@@ -795,7 +796,7 @@ class CostsCalculator {
    */
   _importLfResearchBonuses(text) {
     const lines = String(text || '').split('\n').map(s => s.trim()).filter(s => s.length > 0);
-    const rows = Array.from($$('#lf-research-bonuses-tbody tr'));
+    const rows = /** @type {HTMLTableRowElement[]} */ (Array.from($$('#lf-research-bonuses-tbody tr')));
     if (rows.length === 0) return false;
 
     // The first research's localized name, taken from the table itself
@@ -851,8 +852,8 @@ class CostsCalculator {
     }
 
     rows.forEach((row, i) => {
-      const costInput = row.querySelector('.lf-research-cost-input');
-      const timeInput = row.querySelector('.lf-research-time-input');
+      const costInput = /** @type {HTMLInputElement|null} */ (row.querySelector('.lf-research-cost-input'));
+      const timeInput = /** @type {HTMLInputElement|null} */ (row.querySelector('.lf-research-time-input'));
       if (costInput) costInput.value = localizeFloat(parsedRows[i][0]);
       if (timeInput) timeInput.value = localizeFloat(parsedRows[i][1]);
     });
@@ -931,7 +932,7 @@ class CostsCalculator {
 
     // Single-level row: level input at children[2]; multi-level: to-level at children[3]
     const cell = row.children[multi ? 3 : 2];
-    const input = cell?.children[0];
+    const input = /** @type {HTMLInputElement|undefined} */ (cell?.children[0]);
     if (!input) return false;
 
     // Locale-aware read: the field may hold a comma decimal separator
@@ -1224,7 +1225,7 @@ class CostsCalculator {
     }
 
     // Trim table rows to match saved planet count
-    const tbody = document.querySelector('#lab-levels-table tbody');
+    const tbody = /** @type {HTMLTableSectionElement} */ (document.querySelector('#lab-levels-table tbody'));
     if (tbody) {
       while (tbody.rows.length > planetCount) {
         tbody.deleteRow(tbody.rows.length - 1);
@@ -1319,8 +1320,8 @@ class CostsCalculator {
     this._resetIRNDialog();
 
     // Clear all table inputs (except qty inputs which default to 1)
-    $$('#tab-0 input[type="text"], #tab-1 input[type="text"]').forEach(el => {
-      el.value = el.classList.contains('qty-input') ? 1 : 0;
+    inputsAll('#tab-0 input[type="text"], #tab-1 input[type="text"]').forEach(el => {
+      el.value = el.classList.contains('qty-input') ? '1' : '0';
     });
 
     // Clear all table data cells (including totals)
@@ -1608,6 +1609,7 @@ class CostsCalculator {
     }
 
     // Collect lab levels
+    /** @type {Array<[number, boolean]>} */
     const labs = [];
     for (let i = 1; i <= planetCount; i++) {
       const level = this._getInputNumber(`#lablevel_${i}`);
@@ -1734,7 +1736,7 @@ function initializeCostsCalculator() {
   calculatorApp.init();
 
   // Initialize planets spin button for IRN dialog (native implementation)
-  const planetsSpinInput = document.getElementById('planetsSpin');
+  const planetsSpinInput = /** @type {HTMLInputElement} */ (document.getElementById('planetsSpin'));
   const planetsSpinUp = document.getElementById('planetsSpin-up');
   const planetsSpinDown = document.getElementById('planetsSpin-down');
 
@@ -1764,7 +1766,7 @@ function initializeCostsCalculator() {
   }
 
   // Expose to globalThis for debugging
-  globalThis.calculatorApp = calculatorApp;
+  globalThisRecord().calculatorApp = calculatorApp;
 }
 
 /**
@@ -1805,18 +1807,18 @@ function onPlanetsChange(newVal, oldVal) {
 
 /**
  * Set up the planet count spin buttons for the IRN dialog.
- * @param {HTMLElement} planetsSpinInput
+ * @param {HTMLInputElement} planetsSpinInput
  * @param {HTMLElement} planetsSpinUp
  * @param {HTMLElement} planetsSpinDown
  */
 function setupPlanetsSpin(planetsSpinInput, planetsSpinUp, planetsSpinDown) {
-  planetsSpinInput.value = options.currPlanetsCount || options.prm.planetsSpin || 8;
+  planetsSpinInput.value = String(options.currPlanetsCount || options.prm.planetsSpin || 8);
 
   addEvent(planetsSpinUp, 'click', () => {
     const oldVal = Number.parseInt(planetsSpinInput.value) || 0;
     const newVal = oldVal + 1;
     if (newVal <= 99) {
-      planetsSpinInput.value = newVal;
+      planetsSpinInput.value = String(newVal);
       onPlanetsChange(newVal, oldVal);
     }
   });
@@ -1825,7 +1827,7 @@ function setupPlanetsSpin(planetsSpinInput, planetsSpinUp, planetsSpinDown) {
     const oldVal = Number.parseInt(planetsSpinInput.value) || 0;
     const newVal = oldVal - 1;
     if (newVal >= 1) {
-      planetsSpinInput.value = newVal;
+      planetsSpinInput.value = String(newVal);
       onPlanetsChange(newVal, oldVal);
     }
   });
@@ -1895,7 +1897,7 @@ function setupIrnInputHandlers() {
 /**
  * Bind the hidden.bs.modal handler for the IRN dialog.
  * @param {HTMLElement} irnModal
- * @param {HTMLElement|null} planetsSpinInput
+ * @param {HTMLInputElement|null} planetsSpinInput
  */
 function setupIrnModalHandlers(irnModal, planetsSpinInput) {
   addEvent(irnModal, 'hidden.bs.modal', () => {
@@ -1931,7 +1933,7 @@ function applyIrnResult() {
 /**
  * Restore the IRN dialog state when the user cancels.
  * @param {HTMLElement} irnModal
- * @param {HTMLElement|null} planetsSpinInput
+ * @param {HTMLInputElement|null} planetsSpinInput
  */
 function cancelIrnDialog(irnModal, planetsSpinInput) {
   const backup = irnModal._irnBackup;
@@ -1949,7 +1951,7 @@ function cancelIrnDialog(irnModal, planetsSpinInput) {
 
   setVal('#irn-level', backup.irnLevel);
   if (planetsSpinInput) {
-    planetsSpinInput.value = backup.labLevels.length;
+    planetsSpinInput.value = String(backup.labLevels.length);
   }
 
   rebuildLabTable(backup);
@@ -1961,7 +1963,7 @@ function cancelIrnDialog(irnModal, planetsSpinInput) {
  * @param {Object} backup
  */
 function rebuildLabTable(backup) {
-  const table = document.getElementById('lab-levels-table');
+  const table = tableEl('#lab-levels-table');
   if (!table) return;
 
   while (table.rows.length > 1) {
@@ -1980,7 +1982,7 @@ function rebuildLabTable(backup) {
       '</tr>'
     );
 
-    const radioEl = document.getElementById('labchoice_' + i);
+    const radioEl = /** @type {HTMLInputElement} */ (document.getElementById('labchoice_' + i));
     if (radioEl) {
       if (backup.labLevels[i - 1] > 0) {
         radioEl.disabled = false;
@@ -2008,7 +2010,7 @@ function changeLabLevel() {
   // Extract lab number from input id (format: lablevel_N)
   const parts = this.id.split(/_/);
   const num = Number.parseInt(parts[1], 10);
-  const radioEl = document.getElementById('labchoice_' + num);
+  const radioEl = /** @type {HTMLInputElement} */ (document.getElementById('labchoice_' + num));
 
   if (this.value == 0) {
     // Disable and uncheck radio button when level is 0
@@ -2074,6 +2076,6 @@ function validateAndChangeLabLevel(event) {
 
 // Expose to globalThis for direct access
 if (globalThis.window !== undefined) {
-  globalThis.CostsCalculator = CostsCalculator;
-  globalThis.initializeCostsCalculator = initializeCostsCalculator;
+  globalThisRecord().CostsCalculator = CostsCalculator;
+  globalThisRecord().initializeCostsCalculator = initializeCostsCalculator;
 }

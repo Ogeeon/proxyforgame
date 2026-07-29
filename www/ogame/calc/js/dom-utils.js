@@ -60,6 +60,15 @@ const tableEl = (selector) =>
   /** @type {HTMLTableElement} */ (document.querySelector(selector));
 
 /**
+ * Query selector all, for selectors that pick out inputs. Saves a cast inside
+ * every `.forEach(el => el.value = ...)` loop.
+ * @param {string} selector - CSS selector
+ * @returns {NodeListOf<HTMLInputElement>}
+ */
+const inputsAll = (selector) =>
+  /** @type {NodeListOf<HTMLInputElement>} */ (document.querySelectorAll(selector));
+
+/**
  * globalThis as a writable bag of names.
  *
  * The calculators publish their classes and app instances as page globals, but
@@ -773,7 +782,9 @@ if (typeof window !== 'undefined') {
     inputEl,
     selectEl,
     tableEl,
+    inputsAll,
     checkedRadio,
+    globalThisRecord,
 
     // Values
     getVal,
