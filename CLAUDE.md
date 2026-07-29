@@ -100,8 +100,10 @@ Calculators in `www/ogame/calc/` consist of:
 - `js/<name>-core.js` - DOM-free formulas (what the node:test suite exercises)
 - `js/<name>-data-collector.js`, `-renderer.js`, `-orchestration.js` - form reading, output, wiring
 
-`trade` is the exception: one monolithic `js/trade.js`, no module split. To create a new
-calculator use the **`new-calculator` skill**.
+`trade` is half-way there: it has `js/trade-core.js` and a type-checked `js/trade.js`, but the
+rest of the page — form reading, output and wiring — still lives in that one file rather than in
+a collector/renderer/orchestration trio. To create a new calculator use the
+**`new-calculator` skill**.
 
 ### Internationalization
 - `www/langs.php` - Maps URL prefixes to languages (`/en/` → English, `us` → `en`)
@@ -130,6 +132,12 @@ an entire legacy file just to convert unrelated `var` declarations.
 
 ### Cookie Storage
 Calculator options persist via cookies (e.g., `options_expeditions`). Note that `options.prm.fleet` uses `~` as a comma placeholder for encoded values.
+
+That placeholder is a workaround, not a convention: `saveToCookie`/`loadFromCookie` in
+`www/js/utils.js` join records with `,`, and never escape it, so **any stored value containing a
+comma is destroyed on read** — including a nested object, which is written as JSON. Settings then
+fall back to their defaults with no error. If a calculator appears not to remember something,
+check this before looking for a bug in the calculator itself.
 
 ### Fleet Mapping
 `EXPEDITION_SHIPS` in `www/ogame/calc/js/expeditions-core.js` maps short ship codes to indices,
@@ -167,8 +175,10 @@ implementation for every pattern.
 ## Important Notes
 
 - **Frontend**: vanilla JS on Bootstrap 5.3, no jQuery — `www/ogame/calc/js/dom-utils.js` provides the
-  DOM helpers that replaced it. Nine calculators went through the BS5 migration; **`trade` did not** —
-  it runs on BS5 but keeps a monolithic `trade.js`, its own `trade.css` with no BS custom properties,
-  and does not load `dom-utils.js`. Do not assume a migrated pattern applies there.
+  DOM helpers that replaced it. Nine calculators went through the full BS5 migration;
+  **`trade` is only part-way**. Its JS is migrated — `dom-utils.js`, `trade-core.js`,
+  type-checked — but its UI is not: `trade.css` has no BS custom properties, the numeric fields
+  validate on `keyup` instead of on blur, and it carries one Bootstrap tooltip against flight's
+  thirty. Do not assume a `docs/patterns.md` UI rule already holds there.
 - **External services**: `https://logserver.net/api/proxyforgame/` (used by `GetDataCode`)
 - **Database**: Optional MySQL/MariaDB for changelog and trade calculator features
