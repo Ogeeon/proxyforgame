@@ -1,3 +1,4 @@
+// @ts-check
 // ============================================================================
 // PRODUCTION CALCULATOR - DATA COLLECTOR
 // ============================================================================
@@ -11,6 +12,15 @@
 const LEVEL_COLUMNS = [4, 6, 8, 10, 11, 12, 13];
 
 /**
+ * Read a <select> value by selector.
+ * @param {string} selector
+ * @returns {string}
+ */
+function selectValue(selector) {
+	return /** @type {HTMLSelectElement} */ ($(selector)).value;
+}
+
+/**
  * Read the general settings panel (techs, speed, officers, class, trader).
  */
 function collectGeneralSettings() {
@@ -22,7 +32,7 @@ function collectGeneralSettings() {
 	}
 
 	return {
-		universeSpeed: $('#universe-speed').value,
+		universeSpeed: selectValue('#universe-speed'),
 		energyTechLevel: getInputNumber($('#energy-tech-level')),
 		plasmaTechLevel: getInputNumber($('#plasma-tech-level')),
 		engineer: getChecked('#engineer'),
@@ -32,7 +42,7 @@ function collectGeneralSettings() {
 		commander: getChecked('#commander'),
 		playerClass: playerClass,
 		isTrader: getChecked('#is-trader'),
-		energyBoost: $('#energy-boost').value,
+		energyBoost: selectValue('#energy-boost'),
 		lfMetProdBonus: getInputNumber($('#lf-metal-prod-bonus')),
 		lfCrysProdBonus: getInputNumber($('#lf-crystal-prod-bonus')),
 		lfDeutProdBonus: getInputNumber($('#lf-deut-prod-bonus')),
@@ -45,18 +55,23 @@ function collectGeneralSettings() {
 /**
  * Read the one-planet production table into a params array:
  * [Level/Count, PowerFactor, Booster] per building row.
- * @param {NodeList} rows - all tr of #one-planet-prod
+ * @param {ArrayLike<HTMLElement>} rows - all tr of #one-planet-prod
  */
 function collectOnePlanetParams(rows) {
 	//            Met. mine Crys. mine  Deut. syn  Sol.plant  Fus.plant  Sol.sat.   Crawler
+	/** @type {number[][]} */
 	let params = [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]];
 	for (let i = 2; i < 9; i++) {
 		params[i - 2][0] = getInputNumber(rows[i].children[2].children[0]);
-		params[i - 2][1] = rows[i].children[7].children[0].value;
+		// These two used to stay strings. production-core only ever divides or
+		// multiplies them, so the arithmetic was identical - but the array is
+		// declared as numbers and the values are select options that always
+		// carry a numeric value, so parse them here.
+		params[i - 2][1] = Number.parseFloat(cellSelect(rows[i], 7).value);
 		if (i > 4) { // Power plants, satellites and Crawlers have no boosters
 			params[i - 2][2] = 0.0;
 		} else {
-			params[i - 2][2] = rows[i].children[1].children[0].value;
+			params[i - 2][2] = Number.parseFloat(cellSelect(rows[i], 1).value);
 		}
 	}
 	return params;
@@ -87,7 +102,7 @@ function collectResourceMultipliers() {
 /**
  * Sync options.prm.aPS with the all-planets table inputs (in case of direct
  * editing of a row).
- * @param {NodeList} rows - all tr of #all-planets-prod
+ * @param {ArrayLike<HTMLElement>} rows - all tr of #all-planets-prod
  */
 function collectAllPlanetsInputs(rows) {
 	for (let i = 0; i < options.prm.currPlanetsCount; i++) {

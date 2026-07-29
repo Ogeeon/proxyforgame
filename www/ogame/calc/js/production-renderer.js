@@ -1,3 +1,4 @@
+// @ts-check
 // ============================================================================
 // PRODUCTION CALCULATOR - RENDERER
 // ============================================================================
@@ -41,13 +42,13 @@ function populateParams() {
 function setOnePlanetProdData() {
 	let rows = $$('#one-planet-prod tr:not(.lf-row)');
 	for (let i = 0; i < options.prm.oPPP.length; i++) {
-		rows[i + 2].children[2].children[0].value = options.prm.oPPP[i][0];
+		cellInput(rows[i + 2], 2).value = options.prm.oPPP[i][0];
 		if (i < 6)
-			rows[i + 2].children[7].children[0].selectedIndex = (100 - options.prm.oPPP[i][1]) / 10;
+			cellSelect(rows[i + 2], 7).selectedIndex = (100 - options.prm.oPPP[i][1]) / 10;
 		if (i === 6)
-			rows[i + 2].children[7].children[0].selectedIndex = (150 - options.prm.oPPP[i][1]) / 10;
+			cellSelect(rows[i + 2], 7).selectedIndex = (150 - options.prm.oPPP[i][1]) / 10;
 		if (i < 3)
-			rows[i + 2].children[1].children[0].selectedIndex = options.prm.oPPP[i][2];
+			cellSelect(rows[i + 2], 1).selectedIndex = options.prm.oPPP[i][2];
 	}
 
 	setVal('#storage-met', options.prm.metStorageLvl);
@@ -192,8 +193,8 @@ function setOnePlanetView(extended) {
 	for (let row = 0; row < rows.length; row++) {
 		if (rows[row].children.length < 8)
 			continue;
-		rows[row].children[1].style.display = newMode;
-		rows[row].children[7].style.display = newMode;
+		cellAt(rows[row], 1).style.display = newMode;
+		cellAt(rows[row], 7).style.display = newMode;
 	}
 }
 
