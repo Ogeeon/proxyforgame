@@ -3,10 +3,6 @@
 // ORCHESTRATOR — owns all state, wires events, delegates to layers
 // ============================================================================
 
-// Each calculator page loads exactly one orchestrator, but a single
-// TypeScript project sees every one of them in the same global scope, so
-// they all look like redeclarations of `options`.
-// @ts-expect-error - see above
 const options = {
     defConstraints: {
         min: -Infinity,
