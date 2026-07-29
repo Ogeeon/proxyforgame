@@ -89,7 +89,4 @@ Short, practical guidance to help AI coding agents work productively in this rep
 - Translations: search `Intl::getTranslations` and page keys like `'flight'`.
 - Ajax consumers: search JS for `$.post(..., {service:` and `ajax.php` for `case` lines.
 
-## When in doubt
-- Run pages in a browser under WAMP to see runtime interactions. Make small incremental changes and test calculators manually; there are no automated tests in the repo.
 
-If you'd like, I can: (A) expand with direct code snippets from `ogame/calc/`, (B) add a short PR checklist (secrets, language redirects, changelog), or (C) produce example edits for a specific page. Which do you prefer?
