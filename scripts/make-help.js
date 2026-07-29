@@ -25,6 +25,12 @@ try {
     process.exit(1);
 }
 
+/**
+ * @typedef {{type: 'section', text: string}} HelpSection
+ * @typedef {{type: 'target', name: string, text: string}} HelpTarget
+ */
+
+/** @type {(HelpSection|HelpTarget)[]} */
 const entries = [];
 for (const line of source.split(/\r?\n/)) {
     const section = /^##@(.*)$/.exec(line);
@@ -38,9 +44,11 @@ for (const line of source.split(/\r?\n/)) {
     }
 }
 
-const width = entries
-    .filter((e) => e.type === 'target')
-    .reduce((max, e) => Math.max(max, e.name.length), 0);
+// Narrowed inside the reduce rather than by a preceding .filter(): a filter
+// callback does not narrow the element type, so `e.name` would still be
+// possibly-undefined afterwards.
+const width = entries.reduce(
+    (max, e) => (e.type === 'target' ? Math.max(max, e.name.length) : max), 0);
 
 console.log('\nProxyForGame - available make targets\n');
 for (const entry of entries) {

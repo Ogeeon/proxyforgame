@@ -125,6 +125,7 @@ function analyzeTemplate(filePath) {
   const content = fs.readFileSync(filePath, 'utf8');
   const references = extractAssetReferences(content);
 
+  /** @type {{filePath: string, total: number, versioned: number, unversioned: {type: string, path: string|undefined, mtime: number|undefined}[], missing: {type: string, path: string|undefined}[], issues: string[]}} */
   const analysis = {
     filePath: path.relative(WWW_DIR, filePath),
     total: references.length,

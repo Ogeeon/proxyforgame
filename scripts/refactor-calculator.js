@@ -37,6 +37,7 @@ function analyzeJSFile(filePath) {
   const content = fs.readFileSync(filePath, 'utf8');
   const lines = content.split('\n');
 
+  /** @type {{totalLines: number, hasOptions: boolean, hasCalculations: boolean, hasUIHandlers: boolean, hasHelperFunctions: boolean, hasDataStructures: boolean, functionCount: number, optionsObjectSize: number, suggestions: {type: string, priority: string, message: string}[]}} */
   const analysis = {
     totalLines: lines.length,
     hasOptions: false,

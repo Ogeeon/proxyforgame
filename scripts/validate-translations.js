@@ -94,6 +94,7 @@ function getLocaleFiles() {
  */
 function validateTranslations(sourceData, localeData) {
   const sourceKeys = getKeyPaths(sourceData);
+  /** @type {{missing: string[], extra: string[], empty: string[]}} */
   const issues = {
     missing: [],      // Keys in source but not in locale
     extra: [],        // Keys in locale but not in source

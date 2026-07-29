@@ -34,9 +34,18 @@ const SKIP_ALL = { fleetIgnoreEmptySystems: true, fleetIgnoreInactiveSystems: tr
 
 /**
  * Calls getDistance() with a known universe configuration.
- * @param populated systems holding an active player, per galaxy
- * @param populatedAll systems holding any planet at all, per galaxy
- * @param ovr manual empty-systems count, or null to leave the override disabled
+ *
+ * The defaults are spelled out as nullable in JSDoc rather than left to
+ * inference: `populated = null` on its own infers the type `null`, so every
+ * call that passes a real map is then an error.
+ *
+ * @param {object} args
+ * @param {number[]} args.dep departure coordinates
+ * @param {number[]} args.dest destination coordinates
+ * @param {Partial<typeof UNI_DEFAULTS>} [args.prm] universe settings to override
+ * @param {Record<number, number[]>|null} [args.populated] systems holding an active player, per galaxy
+ * @param {Record<number, number[]>|null} [args.populatedAll] systems holding any planet at all, per galaxy
+ * @param {number|null} [args.ovr] manual empty-systems count, or null to leave the override disabled
  * @returns {{dst: number, empty: number}} distance and the skipped-system count
  */
 function distance({ dep, dest, prm = {}, populated = null, populatedAll = null, ovr = null }) {

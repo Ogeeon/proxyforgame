@@ -56,6 +56,7 @@ function checkCoverage() {
   const calculators = getCalculators();
   const tests = getTests();
 
+  /** @type {{covered: string[], missing: string[], extra: string[]}} */
   const results = {
     covered: [],
     missing: [],

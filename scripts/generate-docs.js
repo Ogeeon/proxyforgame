@@ -46,6 +46,7 @@ function getCalculators() {
  * Extract information from calculator files
  */
 function extractCalculatorInfo(calcName) {
+  /** @type {{name: string, title: string, description: string, url: string, hasTest: boolean, translationKey?: string, functions?: number, features: string[], options: string[], outputs: string[]}} */
   const info = {
     name: calcName,
     title: '',

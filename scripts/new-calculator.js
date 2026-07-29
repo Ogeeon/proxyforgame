@@ -47,6 +47,7 @@ function colorize(text, color) {
  */
 function parseArgs() {
   const args = process.argv.slice(2);
+  /** @type {{name: string|null, title: string|null, skipExisting: boolean}} */
   const result = {
     name: null,
     title: null,
