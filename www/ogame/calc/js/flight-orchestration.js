@@ -1,3 +1,4 @@
+// @ts-check
 // ============================================================================
 // ORCHESTRATION — wires collector → core → renderer and owns the events
 // ============================================================================
@@ -10,10 +11,6 @@ const POPULATED_SYSTEMS_TTL_MS = 24 * 60 * 60 * 1000;
 // strings; the orchestrator reads/writes prm and calls load/save (cookie I/O in
 // utils.js). Transient bits (populated systems, manual overrides) live on the
 // orchestrator instance, not here.
-// Each calculator page loads exactly one orchestrator, but a single
-// TypeScript project sees every one of them in the same global scope, so
-// they all look like redeclarations of `options`.
-// @ts-expect-error - see above
 const options = {
     defConstraints: {
         min: -Infinity, max: Infinity, def: 0, allowFloat: false, allowNegative: false,
@@ -145,6 +142,12 @@ class FlightOrchestrator {
         // skips empty systems, inactive ones, both or neither.
         this.populatedSystems = null;
         this.populatedSystemsAll = null;
+        /**
+         * Nesting depth per panel id, so overlapping show/hide calls cannot
+         * uncover a panel early. Created on first use.
+         * @type {Record<string, number>}
+         */
+        this._overlayCount = {};
         this.speedOverride = { enabled: false, speed: 10000 };
         this.emptyOverride = { enabled: false, count: 0 };
     }
@@ -344,8 +347,8 @@ class FlightOrchestrator {
      */
     updateRecall(warn = false) {
         const prm = this.opts.prm;
-        const moment = document.getElementById('recall-moment');
-        const after = document.getElementById('recall-after');
+        const moment = inputEl('#recall-moment');
+        const after = inputEl('#recall-after');
         if (!moment || !after) {
             return;
         }
@@ -797,11 +800,11 @@ class FlightOrchestrator {
         setVal('#lf-mechan-general-enh', prm.lfMechanGE);
         setVal('#lf-rocktal-collector-enh', prm.lfRocktalCE);
 
-        const rows = document.querySelectorAll('#lf-ships-bonuses tr');
+        const rows = $$('#lf-ships-bonuses tr');
         prm.lfShipsBonuses.forEach((bonus, i) => {
             const row = rows[i + 1];
             if (row) {
-                [0, 1, 2].forEach((j) => { row.children[j + 1].children[0].value = localizeFloat(bonus[j]); });
+                [0, 1, 2].forEach((j) => { cellInput(row, j + 1).value = localizeFloat(bonus[j]); });
             }
         });
     }
@@ -823,7 +826,7 @@ class FlightOrchestrator {
     }
 
     toggleSpeedOverride(event) {
-        const field = document.getElementById('ovr-speed-t');
+        const field = inputEl('#ovr-speed-t');
         if (event.currentTarget.checked) {
             field.disabled = false;
             field.classList.remove('ui-state-disabled');
@@ -831,7 +834,7 @@ class FlightOrchestrator {
             let speed = getInputNumber(field);
             if (speed === 0) {
                 speed = 10000;
-                field.value = 10000;
+                field.value = '10000';
             }
             this.speedOverride.speed = speed;
         } else {
@@ -903,7 +906,8 @@ class FlightOrchestrator {
      */
     addFlightLeg(arg) {
         const container = document.getElementById('flight-data');
-        let last = container.querySelector('.flight-leg:last-child .flight-time-input');
+        let last = /** @type {HTMLInputElement|null} */ (
+            container.querySelector('.flight-leg:last-child .flight-time-input'));
 
         // A row that only holds the bare mask skeleton counts as free: clicking
         // the add button leaves the field focused, so it never blurs back to ''.
@@ -911,7 +915,7 @@ class FlightOrchestrator {
             container.insertAdjacentHTML('beforeend', this._legRowHtml());
             const row = container.querySelector('.flight-leg:last-child');
             this._wireLegRow(row);
-            last = row.querySelector('.flight-time-input');
+            last = /** @type {HTMLInputElement|null} */ (row.querySelector('.flight-time-input'));
         }
 
         if (typeof arg !== 'object') {
@@ -1071,7 +1075,7 @@ class FlightOrchestrator {
     showTabsHint(activeTabId) {
         const isFlightTimes = activeTabId !== 'tabtag2';
         try {
-            localStorage.setItem('flight-tab-num', isFlightTimes ? 0 : 1);
+            localStorage.setItem('flight-tab-num', isFlightTimes ? '0' : '1');
         } catch (e) { /* storage disabled */ }
         this.renderer.renderHint(isFlightTimes ? this.opts.flightmodesNote : this.opts.savepointsNote);
     }
@@ -1100,7 +1104,7 @@ class FlightOrchestrator {
         setVal('#country', prm.country);
         this.setUniList(prm.country, prm.universe);
         this.populateParams();
-        document.querySelectorAll('#lf-ships-bonuses input[type=text]').forEach((i) => { i.value = 0; });
+        inputsAll('#lf-ships-bonuses input[type=text]').forEach((i) => { i.value = '0'; });
         setVal('#lf-mechan-general-enh', 0);
         setVal('#lf-rocktal-collector-enh', 0);
         setVal('#api-code', '');
@@ -1126,7 +1130,7 @@ class FlightOrchestrator {
     // ------------------------------------------------------------------
 
     setUniList(lang, uni) {
-        const universeEl = document.getElementById('universe');
+        const universeEl = selectEl('#universe');
         universeEl.innerHTML = '';
         const list = (typeof unis !== 'undefined' && unis[lang]) || [];
 
@@ -1265,7 +1269,7 @@ class FlightOrchestrator {
     }
 
     _selectOption(id, value) {
-        const el = document.getElementById(id);
+        const el = selectEl(`#${id}`);
         if (el) {
             el.value = String(value);
         }
@@ -1416,7 +1420,7 @@ class FlightOrchestrator {
     _setClassVal(className, value) {
         // Attribute selector, not `.${className}` — these classes start with a
         // digit (e.g. "202-speed"), which is an invalid CSS class selector.
-        document.querySelectorAll(`[class~="${className}"]`).forEach((el) => { el.value = value; });
+        inputsAll(`[class~="${className}"]`).forEach((el) => { el.value = value; });
     }
 
     importOwnApi(jsonText) {
@@ -1467,7 +1471,7 @@ class FlightOrchestrator {
     _importOwnApiClass(data) {
         const classMap = { 1: 'class-0', 2: 'class-1', 3: 'class-2' };
         if (classMap[data.characterClassId]) {
-            document.querySelectorAll('input[name="class"]').forEach((r) => { r.checked = false; });
+            inputsAll('input[name="class"]').forEach((r) => { r.checked = false; });
             setChecked(`#${classMap[data.characterClassId]}`, true);
         }
         const isTrader = data.allianceClassId == 2;
@@ -1523,7 +1527,7 @@ class FlightOrchestrator {
 
     /** Parse the pasted lifeform-bonuses report into the per-ship bonus table. */
     readShipsBonuses() {
-        const lines = document.getElementById('lf-bonuses-txtarea').value.split('\n');
+        const lines = /** @type {HTMLTextAreaElement} */ (document.getElementById('lf-bonuses-txtarea')).value.split('\n');
         const scName = this.opts.smallCargoName.toLowerCase();
         const scLine = lines.findIndex((line) => line.toLowerCase().includes(scName));
         if (scLine === -1) {
@@ -1540,14 +1544,14 @@ class FlightOrchestrator {
                 if (i === 9 || i === 13) i++; // skip the crawler and the lamp
                 j++;
             }
-            const rows = document.querySelectorAll('#lf-ships-bonuses tr');
+            const rows = $$('#lf-ships-bonuses tr');
             bonuses.forEach((bonus, i) => {
                 const row = rows[i + 1];
                 if (row) {
                     // Same cells populateParams fills, so they take the same
                     // locale-aware write: a raw "1.5" would lose its separator
                     // to the numeric blur validator in a comma locale.
-                    [0, 1, 2].forEach((k) => { row.children[k + 1].children[0].value = localizeFloat(bonus[k]); });
+                    [0, 1, 2].forEach((k) => { cellInput(row, k + 1).value = localizeFloat(bonus[k]); });
                 }
             });
         } catch (e) {
@@ -1641,15 +1645,15 @@ class FlightOrchestrator {
     _initMasks() {
         ['start-datetime', 'save-start-datetime', 'save-return-datetime',
             'recall-start-datetime', 'recall-moment'].forEach((id) =>
-            attachInputMask(document.getElementById(id), this.opts.datetimeFormat));
-        attachInputMask(document.getElementById('save-tolerance-time'), this.opts.toleranceTimeFormat);
-        document.querySelectorAll('input.flight-time-input').forEach((el) =>
+            attachInputMask(/** @type {HTMLInputElement} */ (document.getElementById(id)), this.opts.datetimeFormat));
+        attachInputMask(inputEl('#save-tolerance-time'), this.opts.toleranceTimeFormat);
+        inputsAll('input.flight-time-input').forEach((el) =>
             attachInputMask(el, this.opts.flightTimeFormat));
     }
 
     _initSpeedOverride() {
         this.speedOverride = { enabled: false, speed: 10000 };
-        const field = document.getElementById('ovr-speed-t');
+        const field = inputEl('#ovr-speed-t');
         field.disabled = true;
         // min 0, not 1: a 0 must reach the toggle so it can fall back to 10000,
         // instead of the blur validator clamping it up to 1 first.
@@ -1724,7 +1728,8 @@ class FlightOrchestrator {
         const spTables = document.getElementById('save-points-tables');
         if (spTables) {
             spTables.addEventListener('click', (e) => {
-                const link = e.target.closest('.save-point-link');
+                const link = /** @type {HTMLElement|null} */ (
+                    /** @type {HTMLElement} */ (e.target).closest('.save-point-link'));
                 if (!link) {
                     return;
                 }
@@ -1816,16 +1821,16 @@ class FlightOrchestrator {
 
         on('api-get', () => this.importSR(getVal('#api-code')));
 
-        document.getElementById('country')?.addEventListener('change', function () {
+        selectEl('#country')?.addEventListener('change', function () {
             const self = window.flightOrchestrator;
-            self.opts.prm.country = this.value;
+            self.opts.prm.country = /** @type {HTMLSelectElement} */ (this).value;
             self.opts.prm.fleetIgnoreEmptySystems = false;
             self.opts.prm.fleetIgnoreInactiveSystems = false;
             self.setUniList(this.value, self.opts.prm.universe);
             self.recalc();
             self.opts.save();
         });
-        document.getElementById('universe')?.addEventListener('change', function () {
+        selectEl('#universe')?.addEventListener('change', function () {
             const self = window.flightOrchestrator;
             self.opts.prm.universe = this.value;
             self.fetchServerData();
@@ -1835,7 +1840,7 @@ class FlightOrchestrator {
     }
 
     _addStorageEntry(inputId, selectId, prefix, emptyMsg, saver) {
-        const input = document.getElementById(inputId);
+        const input = inputEl(`#${inputId}`);
         const name = input.value.trim();
         if (name.length === 0) {
             alert(emptyMsg);
@@ -1845,7 +1850,7 @@ class FlightOrchestrator {
         const clean = stripHTMLTags(name);
         const key = prefix + clean;
         saver(key);
-        const select = document.getElementById(selectId);
+        const select = selectEl(`#${selectId}`);
         select.appendChild(new Option(clean, key));
         select.value = key;
         input.value = '';
@@ -1857,7 +1862,7 @@ class FlightOrchestrator {
         if (option) {
             option.remove();
         }
-        document.getElementById(selectId).value = '0';
+        selectEl(`#${selectId}`).value = '0';
     }
 
     _populateStorageSelects() {
@@ -1872,7 +1877,7 @@ class FlightOrchestrator {
             // The names are user typed, so order them the way the reader's
             // language does rather than by code point.
             keys.sort((a, b) => a.replace(prefix, '').localeCompare(b.replace(prefix, '')));
-            const select = document.getElementById(selectId);
+            const select = selectEl(`#${selectId}`);
             keys.forEach((key) => select.appendChild(new Option(key.replace(prefix, ''), key)));
         };
         fill('flight_uni_', 'universe-name-select');
@@ -1915,7 +1920,7 @@ class FlightOrchestrator {
 
     _bindTabs() {
         document.querySelectorAll('#tabs button[data-bs-toggle="tab"]').forEach((btn) => {
-            btn.addEventListener('shown.bs.tab', (e) => this.showTabsHint(e.target.id));
+            btn.addEventListener('shown.bs.tab', (e) => this.showTabsHint(/** @type {HTMLElement} */ (e.target).id));
         });
     }
 
@@ -1933,9 +1938,9 @@ class FlightOrchestrator {
         const theme = { value: 'light', validate: (key, val) => val };
         loadFromCookie('theme', theme);
         toggleLightBS(theme.value === 'light');
-        const cb = document.getElementById('cb-light-theme');
+        const cb = inputEl('#cb-light-theme');
         if (cb) {
-            cb.addEventListener('click', function () { toggleLightBS(this.checked); });
+            cb.addEventListener('click', () => { toggleLightBS(cb.checked); });
         }
     }
 
