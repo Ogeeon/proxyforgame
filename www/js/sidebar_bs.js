@@ -1,10 +1,20 @@
+// @ts-check
 let reportModal, emailModal, changelogModal;
 let reportStep = 0;
 let emailStep = 0;
 
+/**
+ * A text field of the report or e-mail dialog.
+ * @param {string} id - element id
+ * @returns {HTMLInputElement}
+ */
+function formField(id) {
+    return /** @type {HTMLInputElement} */ (document.getElementById(id));
+}
+
 function showReportWindow(text) {
-    document.getElementById('misspelled-text').value = text;
-    document.getElementById('corrected-text').value = text;
+    formField('misspelled-text').value = text;
+    formField('corrected-text').value = text;
     reportModal.show();
     showSendDiv('report', 'data');
     setTimeout(() => document.getElementById('corrected-text').focus(), 300);
@@ -26,7 +36,7 @@ function getSelectedText() {
     if (globalThis.getSelection) {
         return globalThis.getSelection().toString();
     }
-    return document.selection?.createRange()?.text ?? '';
+    return /** @type {any} */ (document).selection?.createRange()?.text ?? '';
 }
 
 function findSelection() { 
@@ -91,8 +101,8 @@ function sendReport() {
     const formData = new URLSearchParams();
     formData.append('service', 'report');
     formData.append('url', currUrl);
-    formData.append('wrong', document.getElementById('misspelled-text').value);
-    formData.append('right', document.getElementById('corrected-text').value);
+    formData.append('wrong', formField('misspelled-text').value);
+    formData.append('right', formField('corrected-text').value);
     
     fetch('/ajax.php', {
         method: 'POST',
@@ -130,9 +140,9 @@ function sendReport() {
 }
 
 function showEmailWindow() {
-    document.getElementById('email-form-address').value = '';
-    document.getElementById('email-form-subject').value = '';
-    document.getElementById('email-form-body').value = '';
+    formField('email-form-address').value = '';
+    formField('email-form-subject').value = '';
+    formField('email-form-body').value = '';
     emailModal.show();
     showSendDiv('email', 'data');
     setTimeout(() => document.getElementById('email-form-subject').focus(), 300);
@@ -145,9 +155,9 @@ function sendEmail() {
     
     const formData = new URLSearchParams();
     formData.append('service', 'email');
-    formData.append('address', document.getElementById('email-form-address').value);
-    formData.append('subject', document.getElementById('email-form-subject').value);
-    formData.append('body', document.getElementById('email-form-body').value);
+    formData.append('address', formField('email-form-address').value);
+    formData.append('subject', formField('email-form-subject').value);
+    formData.append('body', formField('email-form-body').value);
     
     fetch('/ajax.php', {
         method: 'POST',
@@ -267,7 +277,7 @@ function fillChangelogTable(changes) {
 // (e.g. the crawler-limit hint attached in production-orchestration.js).
 document.addEventListener('click', function (event) {
     if (typeof bootstrap === 'undefined' || !bootstrap.Tooltip) return;
-    const target = event.target;
+    const target = /** @type {HTMLElement|null} */ (event.target);
     if (!target || typeof target.closest !== 'function') return;
     const el = target.closest('[data-bs-toggle="tooltip"]');
     if (!el || el.matches('input, select, textarea')) return;
@@ -357,7 +367,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 document.addEventListener('keydown', getText);
 
-let lastChange = { value: '42', validate: function(key, val) { return val; } };
+let lastChange = { value: 42, validate: function(key, val) { return val; } };
 loadFromCookie('lastChange', lastChange);
 if (lastChange && lastChange.value < currChange.value) {
     requestAndShowChangelog(lastChange);

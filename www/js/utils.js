@@ -1,3 +1,4 @@
+// @ts-check
 /**
  * Returns the number contained in the passed string, stripping everything except digits, the "-" sign and the decimal separator.
  * If the passed string has no valid characters at all, returns an empty string.
@@ -135,7 +136,9 @@ function getInputNumber(input) {
  */
 function formatString(str, ...args) {
     const pattern = /\{\d+\}/g;
-    return str.replace(pattern, function(capture){ return args[/\d+/.exec(capture)]; });
+    // The index used to be the RegExp match array itself, which worked only
+    // because ["3"].toString() is "3". Same result, said out loud.
+    return str.replace(pattern, function(capture){ return args[Number(/\d+/.exec(capture)[0])]; });
 }
 
 /**
@@ -544,18 +547,35 @@ function setCookie(name, value, days) {
 	document.cookie = name + '=' + encodeURIComponent(value) + '; expires=' + d.toUTCString() + '; path=/';
 }
 
+/**
+ * The light/dark theme checkbox in the sidebar.
+ * @returns {HTMLInputElement}
+ */
+function themeCheckbox() {
+	return /** @type {HTMLInputElement} */ (document.getElementById('cb-light-theme'));
+}
+
+/**
+ * One of the two theme <link> stylesheets, toggled through its disabled flag.
+ * @param {string} id - 'light-theme' or 'dark-theme'
+ * @returns {HTMLLinkElement}
+ */
+function themeStylesheet(id) {
+	return /** @type {HTMLLinkElement} */ (document.getElementById(id));
+}
+
 function toggleLight(on) {
 	const theme = { value: 'light' };
 	if (on) {
-		document.getElementById('cb-light-theme').checked = true;		
-		document.getElementById('dark-theme').disabled = true;
-		document.getElementById('light-theme').disabled = false;
+		themeCheckbox().checked = true;		
+		themeStylesheet('dark-theme').disabled = true;
+		themeStylesheet('light-theme').disabled = false;
 		theme.value = 'light';
 		saveToCookie("theme", theme);
 	} else {
-		document.getElementById('cb-light-theme').checked = false;
-		document.getElementById('dark-theme').disabled = false;		
-		document.getElementById('light-theme').disabled = true;
+		themeCheckbox().checked = false;
+		themeStylesheet('dark-theme').disabled = false;		
+		themeStylesheet('light-theme').disabled = true;
 		theme.value = 'dark';
 		saveToCookie("theme", theme);
 	}	
@@ -588,12 +608,12 @@ function toggleLightBS(on) {
 	const theme = { value: 'light' };
 	const html = document.documentElement;
 	if (on) {
-		document.getElementById('cb-light-theme').checked = true;
+		themeCheckbox().checked = true;
 		html.dataset.bsTheme = 'light';
 		theme.value = 'light';
 		saveToCookie("theme", theme);
 	} else {
-		document.getElementById('cb-light-theme').checked = false;
+		themeCheckbox().checked = false;
 		html.dataset.bsTheme = 'dark';
 		theme.value = 'dark';
 		saveToCookie("theme", theme);

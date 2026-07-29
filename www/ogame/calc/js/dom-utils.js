@@ -1,3 +1,4 @@
+// @ts-check
 // ============================================================================
 // DOM UTILITIES - jQuery Replacement Library
 // ============================================================================
@@ -77,7 +78,7 @@ const checkedRadio = (name) =>
  * @returns {string}
  */
 const getVal = (selector) => {
-  const el = $(selector);
+  const el = inputEl(selector);
   return el ? (el.value || '') : '';
 };
 
@@ -87,8 +88,8 @@ const getVal = (selector) => {
  * @param {string|number} value - Value to set
  */
 const setVal = (selector, value) => {
-  const el = $(selector);
-  if (el) el.value = value;
+  const el = inputEl(selector);
+  if (el) el.value = String(value);
 };
 
 /**
@@ -109,7 +110,7 @@ const setNumVal = (selector, value) => {
  * @returns {boolean}
  */
 const getChecked = (selector) => {
-  const el = $(selector);
+  const el = inputEl(selector);
   return el ? el.checked : false;
 };
 
@@ -119,7 +120,7 @@ const getChecked = (selector) => {
  * @param {boolean} checked - Checked state
  */
 const setChecked = (selector, checked) => {
-  const el = $(selector);
+  const el = inputEl(selector);
   if (el) el.checked = checked;
 };
 
@@ -221,8 +222,8 @@ const hasClass = (selector, className) => {
  * Add an event listener with tracking for removal
  * @param {string|Element} selector - CSS selector or element
  * @param {string} event - Event name
- * @param {Function} handler - Event handler
- * @returns {Function} The handler function for later removal
+ * @param {EventListener} handler - Event handler
+ * @returns {EventListener|undefined} The handler function for later removal
  */
 const addEvent = (selector, event, handler) => {
   const el = typeof selector === 'string' ? $(selector) : selector;
@@ -242,7 +243,7 @@ const addEvent = (selector, event, handler) => {
  * Remove a specific event listener
  * @param {string|Element} selector - CSS selector or element
  * @param {string} event - Event name
- * @param {Function} handler - Event handler to remove
+ * @param {EventListener} handler - Event handler to remove
  */
 const removeEvent = (selector, event, handler) => {
   const el = typeof selector === 'string' ? $(selector) : selector;
@@ -509,12 +510,12 @@ const removeAttr = (selector, attr) => {
  * Relies on validateInputNumber, getConstraint, getOptionValue (utils.js)
  * and the dom-utils fadeIn/fadeOut/setTextContent helpers.
  *
- * @param {Event} event - The blur event
+ * @param {ValidationEvent} event - The blur event, or a synthesised stand-in
  */
 const validateInputNumberOnBlurNative = (event) => {
   validateInputNumber(event);
   let needRecalc = false;
-  const input = event.currentTarget;
+  const input = /** @type {HTMLInputElement} */ (event.currentTarget);
   const decimalSeparator = getOptionValue('decimalSeparator', '.');
 
   if (input.value === '-') {
