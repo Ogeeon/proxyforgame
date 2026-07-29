@@ -1,3 +1,4 @@
+// @ts-check
 // ============================================================================
 // RENDERING LAYER
 // ============================================================================
@@ -291,8 +292,9 @@ class Renderer {
   }
 
   /**
-   * Get all table IDs for a tab group
-   * @private
+   * Get all table IDs for a tab group.
+   * Protected rather than private: BatchRenderer calls it from a subclass.
+   * @protected
    */
   _getTableIdsForTab(outerTab) {
     if (outerTab === 0) {
@@ -677,7 +679,10 @@ class IncrementalRenderer extends Renderer {
 // ============================================================================
 
 if (globalThis.window !== undefined) {
-  globalThis.Renderer = Renderer;
-  globalThis.BatchRenderer = BatchRenderer;
-  globalThis.IncrementalRenderer = IncrementalRenderer;
+  // Cast for the same reason as in costs-core.js: class declarations live in
+  // the script's lexical scope, not as globalThis properties.
+  const g = /** @type {Record<string, unknown>} */ (/** @type {unknown} */ (globalThis));
+  g.Renderer = Renderer;
+  g.BatchRenderer = BatchRenderer;
+  g.IncrementalRenderer = IncrementalRenderer;
 }

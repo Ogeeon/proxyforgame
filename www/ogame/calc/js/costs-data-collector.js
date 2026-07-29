@@ -1,3 +1,4 @@
+// @ts-check
 // ============================================================================
 // DATA COLLECTION LAYER
 // ============================================================================
@@ -118,7 +119,7 @@ class DataCollector {
   _collectLfResearchReductions(params) {
     params.lfResCostRdcMap = {};
     params.lfResTimeRdcMap = {};
-    const rows = document.querySelectorAll('#lf-research-bonuses-tbody tr');
+    const rows = $$('#lf-research-bonuses-tbody tr');
     rows.forEach(row => {
       const techId = Number.parseInt(row.dataset.techId);
       if (!techId) return;
@@ -302,7 +303,7 @@ class DataCollector {
    * @private
    */
   _getSelectedTechName() {
-    const select = $('#tech-types-select');
+    const select = selectEl('#tech-types-select');
     if (!select) return '';
     return select.options[select.selectedIndex]?.text || '';
   }
@@ -748,8 +749,11 @@ class ChangeDetector {
 // ============================================================================
 
 if (globalThis.window !== undefined) {
-  globalThis.DataCollector = DataCollector;
-  globalThis.ValidationDataCollector = ValidationDataCollector;
-  globalThis.ExportDataCollector = ExportDataCollector;
-  globalThis.ChangeDetector = ChangeDetector;
+  // Cast for the same reason as in costs-core.js: class declarations live in
+  // the script's lexical scope, not as globalThis properties.
+  const g = /** @type {Record<string, unknown>} */ (/** @type {unknown} */ (globalThis));
+  g.DataCollector = DataCollector;
+  g.ValidationDataCollector = ValidationDataCollector;
+  g.ExportDataCollector = ExportDataCollector;
+  g.ChangeDetector = ChangeDetector;
 }
