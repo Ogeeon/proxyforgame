@@ -201,7 +201,7 @@ class CostsCalculator {
     const consumptions = {};
 
     if (isProducer || isConsumer) {
-      requests.forEach((req, index) => {
+      requests.forEach((req) => {
         const level = req.toLevel;
 
         if (isProducer) {

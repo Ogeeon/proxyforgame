@@ -101,12 +101,12 @@ class LfCostsOrchestrator {
         // The available-resource fields of the same tables are bound further down.
         [0, 1].forEach(outer => {
             document.querySelectorAll(`#table-${outer}-1 input[type=text].level-input`).forEach(inp => {
-                inp.addEventListener('input', function (e) {
+                inp.addEventListener('input', function () {
                     validateInputNumber({ currentTarget: this });
                     orchestrator.handleRowChange(this);
                 });
                 // Min/max clamping belongs on blur only — never while the value is being typed
-                inp.addEventListener('blur', function (e) {
+                inp.addEventListener('blur', function () {
                     validateInputNumberOnBlurNative({ currentTarget: this });
                     orchestrator.handleRowChange(this);
                 });
@@ -141,11 +141,11 @@ class LfCostsOrchestrator {
 
         // Tab 3 inputs
         document.querySelectorAll('#tab-2 input[type=text]').forEach(inp => {
-            inp.addEventListener('input', function (e) {
+            inp.addEventListener('input', function () {
                 validateInputNumber({ currentTarget: this });
                 orchestrator.updateTab3();
             });
-            inp.addEventListener('blur', function (e) {
+            inp.addEventListener('blur', function () {
                 validateInputNumberOnBlurNative({ currentTarget: this });
                 orchestrator.updateTab3();
             });
@@ -153,11 +153,11 @@ class LfCostsOrchestrator {
 
         // General settings
         document.querySelectorAll('#general-settings input[type=text]').forEach(inp => {
-            inp.addEventListener('input', function (e) {
+            inp.addEventListener('input', function () {
                 validateInputNumber({ currentTarget: this });
                 orchestrator.handleParamChange();
             });
-            inp.addEventListener('blur', function (e) {
+            inp.addEventListener('blur', function () {
                 validateInputNumberOnBlurNative({ currentTarget: this });
                 orchestrator.handleParamChange();
             });
@@ -189,11 +189,11 @@ class LfCostsOrchestrator {
                 ['metal', 'crystal', 'deut'].forEach(res => {
                     const el = document.getElementById(`${res}-available-${outer}-${inner}`);
                     if (el) {
-                        el.addEventListener('input', function (e) {
+                        el.addEventListener('input', function () {
                             validateInputNumber({ currentTarget: this });
                             orchestrator.handleResourceInput(this);
                         });
-                        el.addEventListener('blur', function (e) {
+                        el.addEventListener('blur', function () {
                             validateInputNumberOnBlurNative({ currentTarget: this });
                             orchestrator.handleResourceInput(this);
                         });

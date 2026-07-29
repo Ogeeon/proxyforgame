@@ -1745,11 +1745,11 @@ class FlightOrchestrator {
             if (!isNumeric(el)) {
                 return;
             }
-            el.addEventListener('keyup', function (e) {
+            el.addEventListener('keyup', function () {
                 validateInputNumber({ currentTarget: this });
             });
             el.addEventListener('keyup', () => this.recalc());
-            el.addEventListener('blur', function (e) {
+            el.addEventListener('blur', function () {
                 validateInputNumberOnBlurNative({ currentTarget: this });
             });
             el.addEventListener('blur', () => this.recalc());
