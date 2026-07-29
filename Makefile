@@ -39,7 +39,8 @@ PW_REPORTER ?= list
 
 .PHONY: help install serve db-seed \
         test test-unit test-e2e test-e2e-ui test-one report \
-        check audit quality coverage db-validate lint typecheck tsconfigs tsconfigs-check \
+        check audit quality coverage db-validate lint typecheck typecheck-strictnull \
+        tsconfigs tsconfigs-check \
         i18n-validate i18n-report i18n-show i18n-fix \
         new-calc gen-test refactor assets docs
 
@@ -92,12 +93,18 @@ check: i18n-validate lint typecheck tsconfigs-check test ## Green gate - what mu
 audit: ## Advisory reports; these flag pre-existing issues and do not gate
 	-node scripts/check-test-coverage.js
 	-node scripts/validate-database-schema.js
+	-npm run typecheck:strictnull --silent
 
 lint: ## Run ESLint over every JS file
 	npm run lint --silent
 
 typecheck: ## Type-check every JS file in the browser and Node projects
 	npm run typecheck --silent
+
+# Advisory while .claude/plans/strict-null-checks.md runs. A CLI flag overrides
+# the tsconfig, so this needs no second set of project files.
+typecheck-strictnull: ## Preview the type-check with strictNullChecks on
+	npm run typecheck:strictnull --silent
 
 tsconfigs: ## Regenerate the per-calculator TypeScript projects from the templates
 	node scripts/generate-tsconfigs.js
