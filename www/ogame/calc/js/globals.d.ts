@@ -34,6 +34,12 @@ interface Element {
 interface Window {
   /** The live flight orchestrator, exposed for E2E tests and console debugging. */
   flightOrchestrator?: any;
+  /**
+   * The orchestrator class itself. Declared here rather than assigned through
+   * globalThisRecord() because unit-tests/load.js runs flight-orchestration.js
+   * without dom-utils.js, where that helper lives.
+   */
+  FlightOrchestrator?: any;
 }
 
 interface HTMLInputElement {
@@ -54,6 +60,11 @@ declare const currLang: string;
 declare const currChange: { value: number, validate: (key: string, val: any) => any };
 /** Fleet/resource values parsed out of a pasted OGame API string. */
 declare const apiParams: Record<string, any>;
+/**
+ * Universe lists per language, inlined by the flight template.
+ * Not declared for trade: trade.js declares its own `let unis`.
+ */
+declare const unis: Record<string, any[]>;
 
 /**
  * The pseudo-event the validation helpers are called with. The real listeners

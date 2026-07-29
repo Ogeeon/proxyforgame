@@ -1,3 +1,4 @@
+// @ts-check
 // ============================================================================
 // PRODUCTION CALCULATOR - ORCHESTRATION
 // ============================================================================
@@ -620,7 +621,7 @@ function resetParams() {
 	setVal('#onepln-accumwhen-crys', 0);
 	setVal('#onepln-accumwhen-deut', 0);
 	setChecked('#one-pln-extended-view', options.prm.onePlnExtView);
-	inputsAll('#one-planet-prod .lf-row input[type=text]').forEach(function (el) { el.value = 0; });
+	inputsAll('#one-planet-prod .lf-row input[type=text]').forEach(function (el) { el.value = '0'; });
 	setOnePlanetProdData();
 	updateOnePlnTab();
 	setOnePlanetView(options.prm.onePlnExtView);
@@ -682,10 +683,10 @@ function readOnePlnLfLevels() {
 // Fill the given race's building-level inputs from a positional array.
 function writeOnePlnLfLevels(race, levels) {
 	if (race < 1 || race > 4) return;
-	let inputs = $$('#one-planet-prod .lf-row-' + race + ' input[type=text]');
+	let inputs = inputsAll('#one-planet-prod .lf-row-' + race + ' input[type=text]');
 	inputs.forEach(function (el) {
 		let idx = lfRowIndex(el);
-		el.value = (levels?.[idx] != null) ? levels[idx] : 0;
+		el.value = String((levels?.[idx] != null) ? levels[idx] : 0);
 	});
 }
 
@@ -722,13 +723,13 @@ function editRow(plnID) {
 	writeOnePlnLfLevels(options.prm.aPS[plnID][24] || 0, options.prm.aPS[plnID].slice(25, 37));
 	let rows = $$('#one-planet-prod tr:not(.lf-row)');
 	for (let i = 1; i < 8; i++) {
-		rows[i + 1].children[2].children[0].value = options.prm.aPS[plnID][i * 3];
+		cellInput(rows[i + 1], 2).value = options.prm.aPS[plnID][i * 3];
 		if (i < 7)
-			rows[i + 1].children[7].children[0].selectedIndex = (100 - options.prm.aPS[plnID][i * 3 + 1]) / 10;
+			cellSelect(rows[i + 1], 7).selectedIndex = (100 - options.prm.aPS[plnID][i * 3 + 1]) / 10;
 		if (i === 7)
-			rows[i + 1].children[7].children[0].selectedIndex = (150 - options.prm.aPS[plnID][i * 3 + 1]) / 10;
+			cellSelect(rows[i + 1], 7).selectedIndex = (150 - options.prm.aPS[plnID][i * 3 + 1]) / 10;
 		if (i < 4)
-			rows[i + 1].children[1].children[0].selectedIndex = options.prm.aPS[plnID][i * 3 + 2];
+			cellSelect(rows[i + 1], 1).selectedIndex = options.prm.aPS[plnID][i * 3 + 2];
 	}
 	showMainTab('#one-planet-panel');
 	$('#planet-save-div').style.display = '';
@@ -787,11 +788,11 @@ function savePlnData() {
 	for (let k = 0; k < LF_BUILDINGS_PER_RACE; k++) target[25 + k] = savedLfLevels[k] || 0;
 	for (let i = 1; i < 8; i++) {
 		target[i * 3] = getInputNumber(rows[i + 1].children[2].children[0]);
-		target[i * 3 + 1] = Number(rows[i + 1].children[7].children[0].value);
+		target[i * 3 + 1] = Number(cellSelect(rows[i + 1], 7).value);
 		if (i > 3) { // Power plants, satellites and Crawlers have no boosters
 			target[i * 3 + 2] = 0;
 		} else {
-			target[i * 3 + 2] = Number(rows[i + 1].children[1].children[0].value);
+			target[i * 3 + 2] = Number(cellSelect(rows[i + 1], 1).value);
 		}
 	}
 	prepAllPlanetsTable();
@@ -814,11 +815,11 @@ function clonePlnData() {
 		for (let k = 0; k < LF_BUILDINGS_PER_RACE; k++) p[25 + k] = lfLevels[k] || 0;
 		for (let i = 1; i < 8; i++) {
 			p[i * 3] = getInputNumber(rows[i + 1].children[2].children[0]);
-			p[i * 3 + 1] = Number(rows[i + 1].children[7].children[0].value);
+			p[i * 3 + 1] = Number(cellSelect(rows[i + 1], 7).value);
 			if (i > 3) { // Power plants, satellites and Crawlers have no boosters
 				p[i * 3 + 2] = 0;
 			} else {
-				p[i * 3 + 2] = Number(rows[i + 1].children[1].children[0].value);
+				p[i * 3 + 2] = Number(cellSelect(rows[i + 1], 1).value);
 			}
 		}
 	}
@@ -871,7 +872,7 @@ function deleteUniverseData() {
 		return;
 	}
 	localStorage.removeItem(selectedUni);
-	let uniNameSelect = $('#universe-name-select');
+	let uniNameSelect = selectEl('#universe-name-select');
 	let opt = Array.from(uniNameSelect.options).find(function (o) { return o.value === selectedUni; });
 	if (opt) opt.remove();
 	uniNameSelect.value = "0";
@@ -879,7 +880,7 @@ function deleteUniverseData() {
 }
 
 function addUniverseData() {
-	let uniNameInput = $('#universe-name');
+	let uniNameInput = inputEl('#universe-name');
 	if (uniNameInput.value.length === 0) {
 		alert(options.noUniNameMsg);
 		uniNameInput.focus();
@@ -888,7 +889,7 @@ function addUniverseData() {
 	let name = stripHTMLTags(uniNameInput.value);
 	let key = "prod_uni_" + name;
 	saveToCookie(key, options.prm);
-	let uniNameSelect = $('#universe-name-select');
+	let uniNameSelect = selectEl('#universe-name-select');
 	uniNameSelect.append(new Option(name, key));
 	uniNameSelect.value = key;
 	uniNameInput.value = "";
@@ -900,7 +901,7 @@ function addUniverseData() {
 // ---------------------------------------------------------------------------
 
 function setupPlanetsSpin() {
-	const input = $('#planetsSpin');
+	const input = inputEl('#planetsSpin');
 	const up = $('#planetsSpin-up');
 	const down = $('#planetsSpin-down');
 	if (!input || !up || !down) return;
@@ -909,7 +910,7 @@ function setupPlanetsSpin() {
 		const oldVal = getInputNumber(input);
 		const newVal = oldVal + 1;
 		if (newVal <= options.maxPlanetsCount) {
-			input.value = newVal;
+			input.value = String(newVal);
 			changePlanetsCount(newVal, oldVal);
 		}
 	});
@@ -917,7 +918,7 @@ function setupPlanetsSpin() {
 		const oldVal = getInputNumber(input);
 		const newVal = oldVal - 1;
 		if (newVal >= options.minPlanetsCount) {
-			input.value = newVal;
+			input.value = String(newVal);
 			changePlanetsCount(newVal, oldVal);
 		}
 	});
