@@ -1,4 +1,3 @@
-// @ts-check
 'use strict';
 
 // Pure computation tests for the trade calculator. The expected numbers are the

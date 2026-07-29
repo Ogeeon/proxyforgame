@@ -1,4 +1,3 @@
-// @ts-check
 'use strict';
 
 // Pure computation tests for the flight calculator, moved out of the Playwright suite.

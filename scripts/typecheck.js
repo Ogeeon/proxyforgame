@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-// @ts-check
 
 /**
  * Runs tsc over every TypeScript project: the shared browser files, one project

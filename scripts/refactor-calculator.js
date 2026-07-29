@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-// @ts-check
 
 /**
  * Calculator Refactoring Tool for ProxyForGame

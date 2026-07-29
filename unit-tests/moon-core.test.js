@@ -1,4 +1,3 @@
-// @ts-check
 'use strict';
 
 // Pure computation tests for the moon calculator, moved out of the Playwright suite:

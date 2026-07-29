@@ -1,4 +1,3 @@
-// @ts-check
 'use strict';
 
 // isPlnEmpty() decides whether deleting a planet on the All planets tab needs a

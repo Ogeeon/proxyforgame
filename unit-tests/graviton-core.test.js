@@ -1,4 +1,3 @@
-// @ts-check
 'use strict';
 
 // Pure computation tests for the graviton calculator, moved out of the Playwright

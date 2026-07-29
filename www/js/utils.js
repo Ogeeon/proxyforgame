@@ -1,4 +1,3 @@
-// @ts-check
 /**
  * Returns the number contained in the passed string, stripping everything except digits, the "-" sign and the decimal separator.
  * If the passed string has no valid characters at all, returns an empty string.

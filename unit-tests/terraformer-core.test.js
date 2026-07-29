@@ -1,4 +1,3 @@
-// @ts-check
 'use strict';
 
 // Pure computation tests for the terraformer calculator, moved out of the Playwright

@@ -1,4 +1,3 @@
-// @ts-check
 'use strict';
 
 // The calculator sources are classic browser scripts, not modules: they declare

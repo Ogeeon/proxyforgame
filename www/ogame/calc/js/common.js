@@ -1,4 +1,3 @@
-// @ts-check
 /**
  * Calculates the resource (units/hour) and energy production rate.
  * @param techID ID of the building - mine/synthesizer, power plant or solar satellite.

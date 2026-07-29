@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-// @ts-check
 
 /**
  * Generates one TypeScript project per calculator into tsconfig/.

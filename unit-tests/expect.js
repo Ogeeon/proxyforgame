@@ -1,4 +1,3 @@
-// @ts-check
 'use strict';
 
 // A minimal stand-in for Playwright's `expect` over plain values, so that logic

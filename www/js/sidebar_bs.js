@@ -1,4 +1,3 @@
-// @ts-check
 let reportModal, emailModal, changelogModal;
 let reportStep = 0;
 let emailStep = 0;

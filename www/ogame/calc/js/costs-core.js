@@ -1,4 +1,3 @@
-// @ts-check
 // ============================================================================
 // DATA MODELS
 // ============================================================================
@@ -808,7 +807,7 @@ class Validator {
 // export { GlobalParams, BuildRequest, BuildCost, Calculator, Validator };
 
 // For browser globals (current setup). The cast is what lets these land on
-// globalThis under `// @ts-check`: class declarations live in the script's
+// globalThis under the type-check: class declarations live in the script's
 // lexical scope, so TypeScript does not know them as globalThis properties.
 if (globalThis.window !== undefined) {
   const g = /** @type {Record<string, unknown>} */ (/** @type {unknown} */ (globalThis));
