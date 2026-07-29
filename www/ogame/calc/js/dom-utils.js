@@ -217,7 +217,7 @@ const removeClass = (selector, className) => {
  * Toggle a CSS class on an element
  * @param {string} selector - CSS selector
  * @param {string} className - Class name to toggle
- * @param {boolean} force - Optional force state
+ * @param {boolean} [force] - Force state; omit to flip the class
  */
 const toggleClass = (selector, className, force) => {
   const el = $(selector);
@@ -521,6 +521,22 @@ const removeAttr = (selector, attr) => {
 // ==========================================================================
 // VALIDATION HELPERS
 // ==========================================================================
+
+/**
+ * Attach numeric constraints to an input, by id.
+ *
+ * The blur validator reads them back off the element as `_constrains`. Setting
+ * them through this helper keeps the setup blocks - a dozen fields in a row in
+ * some calculators - free of a null check per line, and skips a field the
+ * template does not render instead of throwing halfway through the block.
+ *
+ * @param {string} id - element id
+ * @param {Record<string, any>} constrains - min/max/def/allowFloat/allowNegative
+ */
+const setConstrains = (id, constrains) => {
+  const el = document.getElementById(id);
+  if (el) el._constrains = constrains;
+};
 
 /**
  * Native-DOM equivalent of validateInputNumberOnBlur from utils.js.
@@ -834,6 +850,7 @@ if (typeof window !== 'undefined') {
     removeAttr,
 
     // Validation
+    setConstrains,
     validateInputNumberOnBlurNative,
 
     // Input masks
