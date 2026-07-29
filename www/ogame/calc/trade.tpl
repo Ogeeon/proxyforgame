@@ -24,6 +24,8 @@
   <link type="text/css" href="/ogame/calc/css/trade.css?v=<?php echo filemtime($pfgPath.'/ogame/calc/css/trade.css'); ?>" rel="stylesheet"/>
 
   <script type="text/javascript" src="/js/utils.js?v=<?php echo filemtime($pfgPath.'/js/utils.js'); ?>"></script>
+  <script type="text/javascript" src="/ogame/calc/js/dom-utils.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/dom-utils.js'); ?>"></script>
+  <script type="text/javascript" src="/ogame/calc/js/trade-core.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/trade-core.js'); ?>"></script>
   <script type="text/javascript" src="/ogame/calc/js/trade.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/trade.js'); ?>"></script>
 
   <script type="text/javascript">
@@ -44,7 +46,7 @@
     l.moonstr = '<?= $l['moon'] ?>';
     options.decimalSeparator = '<?= $l['decimal-separator'] ?>';
 
-    unis = {
+    var unis = {
 <?php
   $f1 = true;
   foreach ($universes as $ul => $uc) {
