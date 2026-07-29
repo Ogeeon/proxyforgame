@@ -1,3 +1,4 @@
+// @ts-check
 // ============================================================================
 // DATA COLLECTOR — DOM → data models
 // ============================================================================
@@ -23,17 +24,17 @@ class FlightDataCollector {
 
     /** Numeric value of a select. */
     selectNum(id) {
-        const el = document.getElementById(id);
+        const el = /** @type {HTMLSelectElement|null} */ (document.getElementById(id));
         return el ? Number(el.value) : 0;
     }
 
     checked(id) {
-        const el = document.getElementById(id);
+        const el = /** @type {HTMLInputElement|null} */ (document.getElementById(id));
         return el ? el.checked : false;
     }
 
     text(id) {
-        const el = document.getElementById(id);
+        const el = /** @type {HTMLInputElement|null} */ (document.getElementById(id));
         return el ? el.value : '';
     }
 
@@ -105,7 +106,7 @@ class FlightDataCollector {
      * @param {number} fallback used while no radio is checked yet (page load)
      */
     collectMissionType(fallback = MISSION.PEACEFUL) {
-        const checked = document.querySelector('input[name="mission-type"]:checked');
+        const checked = checkedRadio('mission-type');
         return checked ? Number(checked.value) : fallback;
     }
 
@@ -195,11 +196,13 @@ class FlightDataCollector {
     collectFlightLegs() {
         const legs = [];
         document.querySelectorAll('#flight-data .flight-leg').forEach((row) => {
-            const input = row.querySelector('.flight-time-input');
+            const input = /** @type {HTMLInputElement|null} */ (
+                row.querySelector('.flight-time-input'));
             if (!input) {
                 return;
             }
-            const toggle = row.querySelector('.flight-leg-sign');
+            const toggle = /** @type {HTMLElement|null} */ (
+                row.querySelector('.flight-leg-sign'));
             legs.push({ input, value: input.value, sign: toggle?.dataset.sign === '-' ? -1 : 1 });
         });
         return legs;

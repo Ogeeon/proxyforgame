@@ -1,3 +1,4 @@
+// @ts-check
 // ============================================================================
 // RENDERER — DOM writes only
 // ============================================================================
@@ -11,6 +12,15 @@
  * timespanToShortenedString, getDateStr) and on the dom-utils fade helpers, exactly as the
  * other Bootstrap-migrated calculators do.
  */
+/**
+ * The take-to-calc button of a flight-times row: column 4 holds exactly one.
+ * @param {Element} row - a tr of #flight-times
+ * @returns {HTMLElement}
+ */
+function takeToCalcButton(row) {
+    return /** @type {HTMLElement} */ (row.children[4].children[0]);
+}
+
 class FlightRenderer {
     constructor(opts) {
         this.opts = opts;
@@ -47,9 +57,10 @@ class FlightRenderer {
      * @param {{count: number, visible: boolean}} state
      */
     renderEmptySystems({ count, visible }) {
-        const field = document.getElementById('empty-systems-count-spin');
+        const field = /** @type {HTMLInputElement|null} */ (
+            document.getElementById('empty-systems-count-spin'));
         if (field) {
-            field.value = count;
+            field.value = String(count);
         }
         const label = document.getElementById('empty-systems-label');
         if (label) {
@@ -77,7 +88,7 @@ class FlightRenderer {
             row.children[1].innerHTML = this._fmtTime(entry.duration);
             row.children[2].innerHTML = numToOGame(entry.deut);
             row.children[3].innerHTML = numToOGame(entry.cargo);
-            row.children[4].children[0].hidden = false;
+            takeToCalcButton(row).hidden = false;
             this._stripeRow(row, i + 1, playerClass);
         });
     }
@@ -93,7 +104,7 @@ class FlightRenderer {
             row.children[1].innerHTML = '';
             row.children[2].innerHTML = '';
             row.children[3].innerHTML = '';
-            row.children[4].children[0].hidden = true;
+            takeToCalcButton(row).hidden = true;
             this._stripeRow(row, i, playerClass);
         }
     }
@@ -154,7 +165,8 @@ class FlightRenderer {
     /** Drop every result row from the three save-point tables, keeping headers. */
     clearSavePoints() {
         ['savepoints-galaxies', 'savepoints-systems', 'savepoints-planets'].forEach((id) => {
-            const table = document.getElementById(id);
+            const table = /** @type {HTMLTableElement|null} */ (
+                document.getElementById(id));
             if (!table) {
                 return;
             }
