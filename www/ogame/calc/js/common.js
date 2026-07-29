@@ -192,7 +192,10 @@ function getBuildEnergyCost_C(techID, techLevel, techData) {
 		return 0;
 	const data = techData[techID];
 	if (data === undefined)
-		return [0, 0, 0];
+		// Energy is a scalar here; the [0, 0, 0] resource triple this used to
+		// return came from getBuildCost_C and made every caller do arithmetic
+		// on an array - terraformer-core got NaN out of it.
+		return 0;
 	let buildCost = 0;
 	switch (techID*1) {
 		case 33:

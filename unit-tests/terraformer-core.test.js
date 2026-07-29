@@ -1,3 +1,4 @@
+// @ts-check
 'use strict';
 
 // Pure computation tests for the terraformer calculator, moved out of the Playwright
@@ -9,9 +10,9 @@ const { load } = require('./load');
 const { expect } = require('./expect');
 
 // utils.js supplies dropFraction(); common.js supplies getBuildCost_C/getBuildTime_C.
-const { TerraformerCalculator } = load(
+const { TerraformerCalculator, getBuildEnergyCost_C } = load(
     ['js/utils.js', 'ogame/calc/js/common.js', 'ogame/calc/js/terraformer-core.js'],
-    ['TerraformerCalculator'],
+    ['TerraformerCalculator', 'getBuildEnergyCost_C'],
 );
 
 const BASE_PRM = {
@@ -244,5 +245,26 @@ describe('Terraformer Calculator - Resources on hand', () => {
         expect(r.deutToDeliver).toBe(0);
         expect(r.scNeeded).toBe(0);
         expect(r.lcNeeded).toBe(0);
+    });
+});
+
+// getBuildEnergyCost_C returns a scalar, and the terraformer subtracts the
+// available energy from it. An unknown tech id used to return the [0, 0, 0]
+// resource triple instead, which turned that subtraction into NaN.
+describe('getBuildEnergyCost_C - return shape', () => {
+    it('returns a number for a known tech', () => {
+        const energy = getBuildEnergyCost_C(33, 1, { 33: [0, 0, 0, 2] });
+        expect(typeof energy).toBe('number');
+    });
+
+    it('returns zero, not a resource triple, for an unknown tech', () => {
+        const energy = getBuildEnergyCost_C(999, 1, { 33: [0, 0, 0, 2] });
+        expect(energy).toBe(0);
+        expect(typeof energy).toBe('number');
+    });
+
+    it('stays subtractable so missing energy never becomes NaN', () => {
+        const missing = getBuildEnergyCost_C(999, 1, {}) - 500;
+        expect(missing).toBe(-500);
     });
 });
