@@ -132,6 +132,36 @@ function getSSCost(techID, currLvl, plnData) {
 	return getBuildCost_C(212, 0, satsCount, techData);
 }
 
+/**
+ * What one life form building contributes on its own. Percentages, except
+ * `energyUsed`, which is an absolute amount.
+ * @typedef {object} LfBuildingEffect
+ * @property {number} id - building id, race * 1000 + position
+ * @property {number} level
+ * @property {number} energyUsed - energy this building draws
+ * @property {number} met - metal production increase, percent
+ * @property {number} cry - crystal production increase, percent
+ * @property {number} deu - deuterium production increase, percent
+ * @property {number} enP - energy production increase, percent
+ */
+
+/**
+ * All life form building effects of one planet, aggregated per race.
+ * @typedef {object} LfEffects
+ * @property {number} energyUsed - energy drawn by every building together
+ * @property {LfBuildingEffect[]} perBld - the same numbers per building, index = position
+ * @property {number} met - metal production increase, percent
+ * @property {number} cry - crystal production increase, percent
+ * @property {number} deu - deuterium production increase, percent
+ * @property {number} enP - energy production increase, percent
+ * @property {number} enR - energy consumption reduction, percent
+ */
+
+/** @returns {LfEffects} an all-zero effect set, the shape every consumer expects */
+function emptyLfEffects() {
+	return { energyUsed: 0, perBld: [], met: 0, cry: 0, deu: 0, enP: 0, enR: 0 };
+}
+
 // Energy consumed by a single life form building at a given level.
 // Mirrors OGame's mine-style formula: floor(base * level * coeff^level),
 // where base and coeff come from options.lfEnergy (see lf-techdata.inc.php).
@@ -163,8 +193,9 @@ function applyLfBuildingBonus(bonus, level, bld, eff) {
 //   enR         - energy consumption reduction (%)
 // `perBld` keeps the same numbers per building (index = building position), so
 // that each building can show its own contribution in the one-planet table.
+/** @returns {LfEffects} */
 function lfBuildingEffects(race, levels) {
-	let eff = { energyUsed: 0, perBld: [], met: 0, cry: 0, deu: 0, enP: 0, enR: 0 };
+	let eff = emptyLfEffects();
 	if (race < 1 || race > 4) return eff;
 	if (!levels) return eff;
 	for (let pos = 0; pos < levels.length; pos++) {
@@ -342,8 +373,14 @@ function applyLfBuildingProduction(lfEff, results, lfBld, production) {
 	}
 }
 
-function calculateProduction(prodParams, plnData, normalized = false, lfEff = null) {
-	if (!lfEff) lfEff = { energyUsed: 0, perBld: [], met: 0, cry: 0, deu: 0, enP: 0, enR: 0 };
+/**
+ * @param {LfEffects} [lfEff] - omitted where the planet has no life form data
+ * @returns {[number[][], number[], number, number, number, number[][]]} the 16
+ *   result rows, the planet totals, energy produced, energy used, the energy
+ *   coefficient and one row per life form building
+ */
+function calculateProduction(prodParams, plnData, normalized = false, lfEff = undefined) {
+	if (!lfEff) lfEff = emptyLfEffects();
 	// NOTE: the life form technology bonus (Metropolis, Chip Mass Production,
 	// HP-Transformer) is not modelled at all. OGame folds it into the research
 	// percentages shown on its life form panel, which is where the user copies them

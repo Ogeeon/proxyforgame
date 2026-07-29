@@ -151,7 +151,8 @@ let maxTempBlinkCount = 0;
 function blinkMaxTemp() {
 	if (options.prm.maxTempEntered)
 		return;
-	let maxTempInput = $('#max-planet-temp');
+	const maxTempInput = $('#max-planet-temp');
+	if (!maxTempInput) return;
 	if (maxTempBlinkCount++ < 10) {
 		setTimeout(function () {
 			maxTempInput.classList.toggle('red-border');
@@ -170,9 +171,9 @@ function blinkMaxStorage(storages) {
 		setTimeout(function () {
 			for (const i of storages.keys()) {
 				if (storages[i] == 1) {
-					$(spans[i]).classList.toggle('red-border');
+					toggleClass(spans[i], 'red-border');
 				} else {
-					$(spans[i]).classList.remove('red-border');
+					removeClass(spans[i], 'red-border');
 				}
 			}
 			blinkMaxStorage(storages);
@@ -182,7 +183,7 @@ function blinkMaxStorage(storages) {
 		options.storageBlinkCount = 0;
 		options.storagesBlinking = false;
 		for (let i = 0; i < 3; i++)
-			$(spans[i]).classList.remove('red-border');
+			removeClass(spans[i], 'red-border');
 	}
 }
 

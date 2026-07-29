@@ -101,13 +101,13 @@ function updateParams() {
 // "How much will accumulate" panel
 function renderAccumWhat(tab, currMet, currCrys, currDeut, totalHours, production, deutAccum) {
 	if (tab === 'one') {
-		$('#' + tab + 'pln-accumwhat-met').innerHTML = numToOGame(Math.min(options.metStorageCap, Math.round(currMet + totalHours * production[0])));
-		$('#' + tab + 'pln-accumwhat-crys').innerHTML = numToOGame(Math.min(options.crysStorageCap, Math.round(currCrys + totalHours * production[1])));
-		$('#' + tab + 'pln-accumwhat-deut').innerHTML = numToOGame(Math.min(options.deutStorageCap, deutAccum));
+		setHtml('#' + tab + 'pln-accumwhat-met', numToOGame(Math.min(options.metStorageCap, Math.round(currMet + totalHours * production[0]))));
+		setHtml('#' + tab + 'pln-accumwhat-crys', numToOGame(Math.min(options.crysStorageCap, Math.round(currCrys + totalHours * production[1]))));
+		setHtml('#' + tab + 'pln-accumwhat-deut', numToOGame(Math.min(options.deutStorageCap, deutAccum)));
 	} else {
-		$('#' + tab + 'pln-accumwhat-met').innerHTML = numToOGame(Math.round(currMet + totalHours * production[0]));
-		$('#' + tab + 'pln-accumwhat-crys').innerHTML = numToOGame(Math.round(currCrys + totalHours * production[1]));
-		$('#' + tab + 'pln-accumwhat-deut').innerHTML = numToOGame(deutAccum);
+		setHtml('#' + tab + 'pln-accumwhat-met', numToOGame(Math.round(currMet + totalHours * production[0])));
+		setHtml('#' + tab + 'pln-accumwhat-crys', numToOGame(Math.round(currCrys + totalHours * production[1])));
+		setHtml('#' + tab + 'pln-accumwhat-deut', numToOGame(deutAccum));
 	}
 }
 
@@ -148,13 +148,13 @@ function timeUntilResourcesAccumulate(currMet, currCrys, currDeut, production, n
 
 // "When it will accumulate" panel
 function renderAccumWhen(tab, t) {
-	const msgEl = $('#' + tab + 'pln-accumwhen-msg');
+	const msgSelector = '#' + tab + 'pln-accumwhen-msg';
 	if (!Number.isFinite(t)) {
-		msgEl.innerHTML = t === Number.POSITIVE_INFINITY ? options.resWillNotAccumMsg : options.resWillNotAccumMsg1;
+		setHtml(msgSelector, t === Number.POSITIVE_INFINITY ? options.resWillNotAccumMsg : options.resWillNotAccumMsg1);
 	} else if (t > 0) {
-		msgEl.innerHTML = options.resReadyInMsg + timespanToShortenedString(t * 3600, options.datetimeW, options.datetimeD, options.datetimeH, options.datetimeM, options.datetimeS, true);
+		setHtml(msgSelector, options.resReadyInMsg + timespanToShortenedString(t * 3600, options.datetimeW, options.datetimeD, options.datetimeH, options.datetimeM, options.datetimeS, true));
 	} else {
-		msgEl.innerHTML = options.enoughResAlreadyMsg;
+		setHtml(msgSelector, options.enoughResAlreadyMsg);
 	}
 }
 
@@ -314,15 +314,15 @@ function renderMinesAmortizationTable(rows, params, plnData, lfEff) {
 function updateOnePlnStorageCapacities() {
 	options.prm.metStorageLvl = getInputNumber($('#storage-met'));
 	options.metStorageCap = getStorageCapacity(options.prm.metStorageLvl);
-	$('#storage-cap-met').innerHTML = numToOGame(options.metStorageCap);
+	setHtml('#storage-cap-met', numToOGame(options.metStorageCap));
 
 	options.prm.crysStorageLvl = getInputNumber($('#storage-crys'));
 	options.crysStorageCap = getStorageCapacity(options.prm.crysStorageLvl);
-	$('#storage-cap-crys').innerHTML = numToOGame(options.crysStorageCap);
+	setHtml('#storage-cap-crys', numToOGame(options.crysStorageCap));
 
 	options.prm.deutStorageLvl = getInputNumber($('#storage-deut'));
 	options.deutStorageCap = getStorageCapacity(options.prm.deutStorageLvl);
-	$('#storage-cap-deut').innerHTML = numToOGame(options.deutStorageCap);
+	setHtml('#storage-cap-deut', numToOGame(options.deutStorageCap));
 }
 
 function updateOnePlnTab() {
@@ -354,9 +354,11 @@ function updateOnePlnTab() {
 	renderOnePlnLfRows(options.prm.onePlnRace, prodData[5]);
 
 	let coeffSpan = $('#prod-coeff');
-	coeffSpan.innerHTML = '<b>' + Math.floor(koeff * 100) + '%</b>';
-	// brown when energy-starved, otherwise inherit the theme body color
-	coeffSpan.style.color = koeff < 1 ? 'brown' : '';
+	if (coeffSpan) {
+		coeffSpan.innerHTML = '<b>' + Math.floor(koeff * 100) + '%</b>';
+		// brown when energy-starved, otherwise inherit the theme body color
+		coeffSpan.style.color = koeff < 1 ? 'brown' : '';
+	}
 
 	// +4 = header + separator + "Life form tech bonus" row on top of rowsToTechs.
 	let resultRow = options.rowsToTechs.length + 4;
@@ -731,7 +733,7 @@ function editRow(plnID) {
 			cellSelect(rows[i + 1], 1).selectedIndex = options.prm.aPS[plnID][i * 3 + 2];
 	}
 	showMainTab('#one-planet-panel');
-	$('#planet-save-div').style.display = '';
+	show('#planet-save-div');
 	updateOnePlnTab();
 }
 
@@ -797,7 +799,7 @@ function savePlnData() {
 	prepAllPlanetsTable();
 	options.editedPln = 0;
 	showMainTab('#all-planets-panel');
-	$('#planet-save-div').style.display = 'none';
+	hide('#planet-save-div');
 	updateAllPlnTab();
 }
 
@@ -826,7 +828,7 @@ function clonePlnData() {
 	prepAllPlanetsTable();
 	options.editedPln = 0;
 	showMainTab('#all-planets-panel');
-	$('#planet-save-div').style.display = 'none';
+	hide('#planet-save-div');
 	updateAllPlnTab();
 }
 
@@ -844,7 +846,7 @@ function saveUniverseData() {
 		return;
 	}
 	saveToCookie(selectedUni, options.prm);
-	$('#universe-save').blur();
+	$('#universe-save')?.blur();
 }
 
 function loadUniverseData() {
@@ -857,7 +859,7 @@ function loadUniverseData() {
 		return;
 	}
 	options.load(selectedUni);
-	$('#universe-load').blur();
+	$('#universe-load')?.blur();
 	updateParams();
 }
 
@@ -875,7 +877,7 @@ function deleteUniverseData() {
 	let opt = Array.from(uniNameSelect.options).find(function (o) { return o.value === selectedUni; });
 	if (opt) opt.remove();
 	uniNameSelect.value = "0";
-	$('#universe-delete').blur();
+	$('#universe-delete')?.blur();
 }
 
 function addUniverseData() {
@@ -892,7 +894,7 @@ function addUniverseData() {
 	uniNameSelect.append(new Option(name, key));
 	uniNameSelect.value = key;
 	uniNameInput.value = "";
-	$('#universe-add').blur();
+	$('#universe-add')?.blur();
 }
 
 // ---------------------------------------------------------------------------
@@ -988,20 +990,20 @@ function initializeProductionCalculator() {
 		// Research levels: the same 0..50 range options.prm.validate applies to the
 		// stored values, so an out-of-range entry is clamped on blur (with the
 		// standard warning) instead of silently reverting to 0 on the next load.
-		document.getElementById('energy-tech-level')._constrains = { 'min': 0, 'max': 50, 'def': 0, 'allowNegative': false };
-		document.getElementById('plasma-tech-level')._constrains = { 'min': 0, 'max': 50, 'def': 0, 'allowNegative': false };
-		document.getElementById('max-planet-temp')._constrains = { 'min': -134, 'def': 0, 'allowNegative': true };
-		document.getElementById('planet-pos')._constrains = { 'min': 1, 'max': 16, 'def': 8, 'allowNegative': false };
-		document.getElementById('exchange-rates-m')._constrains = { 'min': 0.1, 'max': 100, 'def': 1,   'allowFloat': true, 'allowNegative': false };
-		document.getElementById('exchange-rates-c')._constrains = { 'min': 0.1, 'max': 100, 'def': 1.5, 'allowFloat': true, 'allowNegative': false };
-		document.getElementById('exchange-rates-d')._constrains = { 'min': 0.1, 'max': 100, 'def': 3,   'allowFloat': true, 'allowNegative': false };
+		setConstrains('energy-tech-level', { 'min': 0, 'max': 50, 'def': 0, 'allowNegative': false });
+		setConstrains('plasma-tech-level', { 'min': 0, 'max': 50, 'def': 0, 'allowNegative': false });
+		setConstrains('max-planet-temp', { 'min': -134, 'def': 0, 'allowNegative': true });
+		setConstrains('planet-pos', { 'min': 1, 'max': 16, 'def': 8, 'allowNegative': false });
+		setConstrains('exchange-rates-m', { 'min': 0.1, 'max': 100, 'def': 1,   'allowFloat': true, 'allowNegative': false });
+		setConstrains('exchange-rates-c', { 'min': 0.1, 'max': 100, 'def': 1.5, 'allowFloat': true, 'allowNegative': false });
+		setConstrains('exchange-rates-d', { 'min': 0.1, 'max': 100, 'def': 3,   'allowFloat': true, 'allowNegative': false });
 
 		// Life Forms bonuses: non-negative floating-point percentages
 		['lf-metal-prod-bonus', 'lf-crystal-prod-bonus', 'lf-deut-prod-bonus', 'lf-energy-prod-bonus', 'lf-crawler-bonus'].forEach(function (id) {
-			document.getElementById(id)._constrains = { 'min': 0, 'max': Infinity, 'def': 0, 'allowFloat': true, 'allowNegative': false };
+			setConstrains(id, { 'min': 0, 'max': Infinity, 'def': 0, 'allowFloat': true, 'allowNegative': false });
 		});
 		// Plasma technology cost reduction is capped at 99%
-		document.getElementById('lf-plasma-cost-reduction')._constrains = { 'min': 0, 'max': 99, 'def': 0, 'allowFloat': true, 'allowNegative': false };
+		setConstrains('lf-plasma-cost-reduction', { 'min': 0, 'max': 99, 'def': 0, 'allowFloat': true, 'allowNegative': false });
 
 		// Life form building levels: non-negative integers
 		$$('#one-planet-prod .lf-row input[type=text]').forEach(function (el) {
@@ -1069,14 +1071,14 @@ function initializeProductionCalculator() {
 		let keys = [];
 		for (let i = 0, len = localStorage.length; i < len; i++) {
 			let key = localStorage.key(i);
-			if (key.includes("prod_uni_")) {
+			if (key?.includes("prod_uni_")) {
 				keys.push(key);
 			}
 		}
 		keys.sort((a, b) => a.localeCompare(b));
-		for (let i = 0; i < keys.length; i++) {
-			let key = keys[i];
-			$('#universe-name-select').append(new Option(key.replace("prod_uni_", ""), key));
+		const uniNameSelect = selectEl('#universe-name-select');
+		for (const key of keys) {
+			uniNameSelect.append(new Option(key.replace("prod_uni_", ""), key));
 		}
 
 		// Theme
