@@ -25,7 +25,9 @@ boxes is too old (`choco install make`).
 | `make test` | Both suites — the ritual required before a commit |
 | `make test-unit` / `make test-e2e` | One suite each |
 | `make test-one spec=flight` | A single Playwright spec |
-| `make check` | `i18n-validate` + both suites — the green gate |
+| `make check` | `i18n-validate` + `lint` + `typecheck` + both suites — the green gate |
+| `make lint` / `make typecheck` | ESLint and the TypeScript `checkJs` pass; both gate `check` |
+| `make tsconfigs` | Regenerate `tsconfig/<calc>.json` after editing a template's `<script>` tags |
 | `make audit` | Test coverage, DB schema reports (advisory) |
 | `make serve` | `php -S localhost:8000 -t www`, no WAMP needed |
 | `make i18n-fix` / `make i18n-report` | Translation sync and completion |
@@ -129,6 +131,18 @@ Write all comments in code files in English only.
 Prefer `const`/`let` over `var`, and `Number.parseInt`/`Number.parseFloat` over the bare global
 forms — in new code and whenever you're already touching a line. Don't do a drive-by rewrite of
 an entire legacy file just to convert unrelated `var` declarations.
+
+**Every JS file is type-checked** — `checkJs: true`, types expressed in JSDoc, no `.ts` sources
+and no per-file `// @ts-check` opt-in. `make typecheck` gates `make check`, so a change that
+breaks types cannot be committed green. Two consequences worth knowing:
+
+- The browser code is checked **one project per calculator** (`tsconfig/<calc>.json`), because
+  a page loads exactly one calculator and the files share a global scope. Those projects are
+  generated from the `<script>` tags of the matching `.tpl` — after adding, removing or
+  reordering a tag, run `make tsconfigs`, otherwise `make check` fails on a stale project.
+- Ambient declarations for page globals, expando properties and `bootstrap` live in
+  `www/ogame/calc/js/globals.d.ts`; `options-global.d.ts` covers the calculators that declare
+  `options` in an inline template script.
 
 ### Cookie Storage
 Calculator options persist via cookies (e.g., `options_expeditions`). Note that `options.prm.fleet` uses `~` as a comma placeholder for encoded values.

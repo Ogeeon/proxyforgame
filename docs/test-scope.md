@@ -57,5 +57,9 @@ Anything not in a calculator's file set, notably:
 
 - **Before `git push`: full `make test`**, however narrow the commits were.
 - New tests go in the existing file for that calculator, never a new file.
-- `make check` = `i18n-validate` + both suites. Prefer it over `make test` whenever locale
-  files are in the change; plain `make test` does not validate translations.
+- `make check` = `i18n-validate` + `lint` + `typecheck` + `tsconfigs-check` + both suites.
+  Prefer it over `make test` whenever locale files are in the change; plain `make test`
+  validates neither translations nor types.
+- The static gates are not scoped per calculator — they cover the whole tree and take about
+  20 s together, so run `make lint typecheck` on any JS change even when the test scope is one
+  calculator. If the change touched a template's `<script>` tags, run `make tsconfigs` first.
