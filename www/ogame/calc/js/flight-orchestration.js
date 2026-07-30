@@ -1391,8 +1391,8 @@ class FlightOrchestrator {
         setVal('#lf-mechan-general-enh', 0);
         if (booster) {
             Object.entries(booster).forEach(([i, v]) => {
-                if (i === '1') setNumVal('#lf-rocktal-collector-enh', frac(v, 6) * 100);
-                if (i === '2') setNumVal('#lf-mechan-general-enh', frac(v, 6) * 100);
+                if (i === '1') setNumVal('#lf-rocktal-collector-enh', bonusPercent(v, OWN_API_BONUS_DIGITS.cargo));
+                if (i === '2') setNumVal('#lf-mechan-general-enh', bonusPercent(v, OWN_API_BONUS_DIGITS.cargo));
             });
         }
 
@@ -1408,11 +1408,15 @@ class FlightOrchestrator {
         });
     }
 
+    /**
+     * Write the per-ship bonuses a spy report carries. The report states them as
+     * the same fractions the API 2 export uses, so the conversion is shared.
+     */
     _applyPerShipBonuses(ships) {
         Object.entries(ships || {}).forEach(([id, v]) => {
-            this._setClassVal(`${id}-speed`, v.speed ? localizeFloat(frac(v.speed, 6) * 100, 4) : 0);
-            this._setClassVal(`${id}-cargo`, v.cargo ? localizeFloat(frac(v.cargo, 6) * 100, 4) : 0);
-            this._setClassVal(`${id}-fuel`, v.fuel ? localizeFloat(frac(v.fuel, 7) * 100, 5) : 0);
+            this._setClassVal(`${id}-speed`, localizeFloat(bonusPercent(v.speed, OWN_API_BONUS_DIGITS.speed)));
+            this._setClassVal(`${id}-cargo`, localizeFloat(bonusPercent(v.cargo, OWN_API_BONUS_DIGITS.cargo)));
+            this._setClassVal(`${id}-fuel`, localizeFloat(bonusPercent(v.fuel, OWN_API_BONUS_DIGITS.fuel)));
         });
     }
 
@@ -1423,14 +1427,8 @@ class FlightOrchestrator {
     }
 
     importOwnApi(jsonText) {
-        let data;
-        try {
-            data = JSON.parse(jsonText);
-        } catch (e) {
-            alert(this.opts.ownApiBadJsonMsg);
-            return false;
-        }
-        if (!this._isUsableOwnApiPayload(data)) {
+        const data = parseOwnApi(jsonText);
+        if (!data || !this._isUsableOwnApiPayload(data)) {
             alert(this.opts.ownApiBadJsonMsg);
             return false;
         }
@@ -1440,12 +1438,14 @@ class FlightOrchestrator {
         const importShips = getChecked('#own-api-import-ships');
         const importLifeforms = getChecked('#own-api-import-lifeforms');
         try {
-            if (importCoords && typeof data.coords === 'string') this._importOwnApiCoords(data);
+            if (importCoords && data.coords) this._importOwnApiCoords(data);
             if (importClass) this._importOwnApiClass(data);
-            if (importResearch && data.researches) this._importOwnApiResearch(data);
-            if (importLifeforms && data.bonuses?.characterClassBooster) this._importOwnApiLifeformBoosters(data);
+            if (importResearch) this._importOwnApiResearch(data);
+            // Guarded, not unconditional: the method zeroes both fields before it
+            // writes, so an export without boosters must not reach it.
+            if (importLifeforms && Object.keys(data.classBoosters).length) this._importOwnApiLifeformBoosters(data);
             this._resetOwnApiShipFields(importShips, importLifeforms);
-            if (data.ships && (importShips || importLifeforms)) this._importOwnApiShips(data, importShips, importLifeforms);
+            if (importShips || importLifeforms) this._importOwnApiShips(data, importShips, importLifeforms);
             this.recalc();
         } catch (e) {
             consoleLog('own api import exception: ' + e);
@@ -1455,31 +1455,39 @@ class FlightOrchestrator {
         return true;
     }
 
+    /**
+     * True when the export carries at least one thing this calculator imports.
+     * A JSON object that holds none of them parses fine yet has nothing to give.
+     *
+     * @param {OwnApiPayload} data
+     */
     _isUsableOwnApiPayload(data) {
-        return data !== null && typeof data === 'object' && !Array.isArray(data) &&
-            ('coords' in data || 'ships' in data || 'researches' in data || 'characterClassId' in data);
+        return !!data.coords || data.characterClassId > 0 ||
+            Object.keys(data.researches).length > 0 || Object.keys(data.ships).length > 0;
     }
 
+    /** @param {OwnApiPayload} data */
     _importOwnApiCoords(data) {
-        const coords = data.coords.split(':');
-        setVal('#departure-g', coords[0]);
-        setVal('#departure-s', coords[1]);
-        setVal('#departure-p', coords[2]);
+        setVal('#departure-g', data.coords.galaxy);
+        setVal('#departure-s', data.coords.system);
+        setVal('#departure-p', data.coords.position);
     }
 
+    /** @param {OwnApiPayload} data */
     _importOwnApiClass(data) {
         const classMap = { 1: 'class-0', 2: 'class-1', 3: 'class-2' };
         if (classMap[data.characterClassId]) {
             inputsAll('input[name="class"]').forEach((r) => { r.checked = false; });
             setChecked(`#${classMap[data.characterClassId]}`, true);
         }
-        const isTrader = data.allianceClassId == 2;
+        const isTrader = data.allianceClassId === 2;
         setChecked('#trader-bonus', isTrader);
         if (isTrader) {
             setChecked('#warrior-bonus', false);
         }
     }
 
+    /** @param {OwnApiPayload} data */
     _importOwnApiResearch(data) {
         Object.entries(data.researches).forEach(([id, level]) => {
             if (id === '115') setVal('#cmb-drive', level);
@@ -1489,12 +1497,13 @@ class FlightOrchestrator {
         });
     }
 
+    /** @param {OwnApiPayload} data */
     _importOwnApiLifeformBoosters(data) {
         setVal('#lf-rocktal-collector-enh', 0);
         setVal('#lf-mechan-general-enh', 0);
-        Object.entries(data.bonuses.characterClassBooster).forEach(([i, v]) => {
-            if (i === '1') setNumVal('#lf-rocktal-collector-enh', frac(v, 6) * 100);
-            if (i === '2') setNumVal('#lf-mechan-general-enh', frac(v, 6) * 100);
+        Object.entries(data.classBoosters).forEach(([i, percent]) => {
+            if (i === '1') setNumVal('#lf-rocktal-collector-enh', percent);
+            if (i === '2') setNumVal('#lf-mechan-general-enh', percent);
         });
     }
 
@@ -1509,19 +1518,31 @@ class FlightOrchestrator {
         });
     }
 
+    /**
+     * @param {OwnApiPayload} data
+     * @param {boolean} importShips
+     * @param {boolean} importLifeforms
+     */
     _importOwnApiShips(data, importShips, importLifeforms) {
-        Object.entries(data.ships).forEach(([id, v]) => {
+        Object.entries(data.ships).forEach(([id, ship]) => {
             const mapped = FLIGHT_TECH_MAPPING.find((m) => m[0] == id);
             if (!mapped) return;
-            if (importShips) setVal(`#${mapped[1]}`, v.amount ? v.amount : 0);
-            if (importLifeforms) this._applyOwnApiShipLifeformBonuses(id, v);
+            if (importShips) setVal(`#${mapped[1]}`, ship.amount);
+            if (importLifeforms) this._applyOwnApiShipLifeformBonuses(id, ship);
         });
     }
 
-    _applyOwnApiShipLifeformBonuses(id, v) {
-        if (v.speed) this._setClassVal(`${id}-speed`, localizeFloat(frac(v.speed, 6) * 100, 4));
-        if (v.cargo) this._setClassVal(`${id}-cargo`, localizeFloat(frac(v.cargo, 6) * 100, 4));
-        if (v.fuel) this._setClassVal(`${id}-fuel`, localizeFloat(frac(v.fuel, 7) * 100, 5));
+    /**
+     * The percentages arrive rounded from parseOwnApi(), so the only thing left
+     * to do here is swap in the decimal separator the locale expects.
+     *
+     * @param {string} id Ship tech id.
+     * @param {OwnApiShip} ship
+     */
+    _applyOwnApiShipLifeformBonuses(id, ship) {
+        this._setClassVal(`${id}-speed`, localizeFloat(ship.speed));
+        this._setClassVal(`${id}-cargo`, localizeFloat(ship.cargo));
+        this._setClassVal(`${id}-fuel`, localizeFloat(ship.fuel));
     }
 
     /** Parse the pasted lifeform-bonuses report into the per-ship bonus table. */

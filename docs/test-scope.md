@@ -45,18 +45,22 @@ Anything not in a calculator's file set, notably:
 
 - `www/ogame/calc/js/common.js` — **note the path**; there is no `www/ogame/common.js`
 - `www/ogame/calc/js/dom-utils.js`
+- `www/ogame/calc/js/own-api.js` — the API 2 import, read by `flight` and `expeditions`
 - `www/ogame/calc/h_functions.php`, `www/ogame/calc/h_abox.php`
 - `www/ajax.php`, `www/Intl.php`, `www/langs.php`, `www/db.connect.inc.php`
 - `www/locale/*.json` — use `make check`, so the locale validator runs too
 - `playwright-tests/tests/base.js` — **note the path**, it sits in `tests/`, not the root
 - `playwright-tests/playwright.config.js`
-- anything under `unit-tests/` other than a single `<name>-core.test.js` (`load.js`, `expect.js`)
+- anything under `unit-tests/` other than a single `<name>-core.test.js` (`load.js`, `expect.js`,
+  `own-api.test.js`)
 - the `Makefile` itself
 
 ## Always
 
 - **Before `git push`: full `make test`**, however narrow the commits were.
-- New tests go in the existing file for that calculator, never a new file.
+- New tests go in the existing file for that calculator, never a new file. A shared module is
+  the exception: `own-api.js` has its own `unit-tests/own-api.test.js`, since it belongs to no
+  single calculator.
 - `make check` = `i18n-validate` + `lint` + `typecheck` + `tsconfigs-check` + both suites.
   Prefer it over `make test` whenever locale files are in the change; plain `make test`
   validates neither translations nor types.

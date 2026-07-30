@@ -121,6 +121,7 @@ a collector/renderer/orchestration trio. To create a new calculator use the
 | `www/db.connect.inc.php` | Database connection helpers |
 | `www/ogame/calc/js/common.js` | Shared calculator JS logic |
 | `www/ogame/calc/js/dom-utils.js` | Native DOM helpers (the jQuery replacement) |
+| `www/ogame/calc/js/own-api.js` | Normalizes OGame's API 2 export (`flight`, `expeditions`) |
 
 ## Project Conventions
 
