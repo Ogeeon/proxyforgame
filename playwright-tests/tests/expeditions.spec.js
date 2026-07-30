@@ -1,4 +1,6 @@
 import { test, expect } from './base';
+import { readFileSync } from 'fs';
+import { join } from 'path';
 
 const PAGE_URL = '/ogame/calc/expeditions.php';
 
@@ -183,6 +185,122 @@ test.describe('Expeditions Calculator - DOM integration', () => {
         await expect(page.locator('#api-table')).toBeHidden();
         await page.locator('#api-accordion .accordion-button').click();
         await expect(page.locator('#api-table')).toBeVisible();
+    });
+});
+
+// ---------------------------------------------------------------------------
+// Reading the cargo bonuses: the pasted bonus report or the API 2 export.
+// ---------------------------------------------------------------------------
+
+// The same fixture the flight importer is tested against: an object exported
+// from the OGame client. The light fighter (204) is the only ship in it with a
+// life-form cargo bonus, 0.003066 -> 0.3066%.
+const OWN_API_FIXTURE = readFileSync(join(__dirname, '../fixtures/own_api.json'), 'utf-8');
+
+/**
+ * Build a bonus report the way the game lays it out: the parser anchors on the
+ * line naming the small cargo and then reads the fifth line of every following
+ * eight-line block.
+ *
+ * @param {Object<number, number>} bonusByBlock Block index to percentage.
+ */
+function buildBonusReport(bonusByBlock) {
+    const lines = ['Small cargo'];
+    for (let block = 0; block < 17; block++) {
+        for (let line = 1; line <= 8; line++) {
+            lines.push(line === 4 ? `${bonusByBlock[block] ?? 0}%` : `filler ${block}-${line}`);
+        }
+    }
+    return lines.join('\n');
+}
+
+test.describe('Expeditions Calculator - cargo bonus import', () => {
+    test.beforeEach(async ({ context, page }) => {
+        await openDom(context, page);
+        await page.locator('#param-lf-tab').click();
+        await page.locator('#open-lfbr').click();
+        await expect(page.locator('#lf-bonuses-reader')).toBeVisible();
+    });
+
+    test('the dialog offers both the report box and the API 2 field', async ({ page }) => {
+        await expect(page.locator('#lf-bonuses-txtarea')).toBeVisible();
+        await expect(page.locator('#own-api-input')).toBeVisible();
+    });
+
+    test('the API 2 export fills the bonus table', async ({ page }) => {
+        await page.locator('#own-api-input').fill(OWN_API_FIXTURE);
+        await page.locator('#lf-bonuses-read-btn').click();
+
+        await expect(page.locator('#lf-bonuses-reader')).toBeHidden();
+        await expect(page.locator('#lf-cargo-204')).toHaveValue('0.3066');
+        await expect(page.locator('#lf-cargo-203')).toHaveValue('0');
+    });
+
+    test('the bonus report fills the bonus table', async ({ page }) => {
+        // Block 1 is the large cargo: the second ship of the table.
+        await page.locator('#lf-bonuses-txtarea').fill(buildBonusReport({ 1: 12 }));
+        await page.locator('#lf-bonuses-read-btn').click();
+
+        await expect(page.locator('#lf-bonuses-reader')).toBeHidden();
+        await expect(page.locator('#lf-cargo-203')).toHaveValue('12');
+    });
+
+    test('an imported bonus reaches the capacity readout', async ({ page }) => {
+        await page.locator('#own-api-input').fill(OWN_API_FIXTURE);
+        await page.locator('#lf-bonuses-read-btn').click();
+        await expect(page.locator('#lf-cargo-204')).toHaveValue('0.3066');
+
+        // 1000 light fighters: 1000 * 50 * 1.003066, rounded for display.
+        await page.locator('#param-common-tab').click();
+        await fillNumber(page, '#numLF', 1000);
+        await expect(page.locator('#storage-capacity')).toHaveText('50.153');
+    });
+
+    test('the API 2 export wins over a report pasted alongside it', async ({ page }) => {
+        await page.locator('#lf-bonuses-txtarea').fill(buildBonusReport({ 1: 12 }));
+        await page.locator('#own-api-input').fill(OWN_API_FIXTURE);
+        await page.locator('#lf-bonuses-read-btn').click();
+
+        await expect(page.locator('#lf-bonuses-reader')).toBeHidden();
+        // The export carries no bonus for the large cargo, so the report's 12 is gone.
+        await expect(page.locator('#lf-cargo-203')).toHaveValue('0');
+        await expect(page.locator('#lf-cargo-204')).toHaveValue('0.3066');
+    });
+
+    test('a bonus absent from the export clears the field it used to fill', async ({ page }) => {
+        await page.locator('#lf-bonuses-txtarea').fill(buildBonusReport({ 1: 12 }));
+        await page.locator('#lf-bonuses-read-btn').click();
+        await expect(page.locator('#lf-cargo-203')).toHaveValue('12');
+
+        await page.locator('#open-lfbr').click();
+        await page.locator('#own-api-input').fill(OWN_API_FIXTURE);
+        await page.locator('#lf-bonuses-read-btn').click();
+        await expect(page.locator('#lf-cargo-203')).toHaveValue('0');
+    });
+
+    test('two empty fields warn and keep the dialog open', async ({ page }) => {
+        let alertMsg = '';
+        page.on('dialog', d => { alertMsg = d.message(); d.accept(); });
+
+        await page.locator('#lf-bonuses-read-btn').click();
+
+        expect(alertMsg).toContain('API 2');
+        await expect(page.locator('#lf-bonuses-reader')).toBeVisible();
+    });
+
+    test('unusable input warns once and changes nothing', async ({ page }) => {
+        let alerts = 0;
+        page.on('dialog', d => { alerts++; d.accept(); });
+
+        // Neither a report (no small cargo line) nor an export (not an object).
+        await page.locator('#lf-bonuses-txtarea').fill('nothing useful here');
+        await page.locator('#own-api-input').fill('111');
+        await page.locator('#lf-bonuses-read-btn').click();
+
+        expect(alerts).toBe(1);
+        await expect(page.locator('#lf-bonuses-reader')).toBeVisible();
+        await expect(page.locator('#lf-cargo-203')).toHaveValue('0');
+        await expect(page.locator('#lf-cargo-204')).toHaveValue('0');
     });
 });
 

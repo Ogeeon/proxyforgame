@@ -226,13 +226,14 @@ class ExpeditionsApp {
     addEvent('#reset', 'click', () => this._resetParams(true));
     addEvent('#clear-fleet', 'click', () => this._clearFleet());
 
-    // Life-form bonuses reader modal.
+    // Cargo bonuses reader modal: the pasted bonus report or the API 2 export.
     addEvent('#open-lfbr', 'click', () => {
       setVal('#lf-bonuses-txtarea', '');
+      setVal('#own-api-input', '');
       bootstrap.Modal.getOrCreateInstance(document.getElementById('lf-bonuses-reader')).show();
     });
     addEvent('#lf-bonuses-read-btn', 'click', () => {
-      if (this.readShipsBonuses()) {
+      if (this.readBonuses()) {
         bootstrap.Modal.getInstance(document.getElementById('lf-bonuses-reader')).hide();
         this.recalc();
       }
@@ -258,6 +259,40 @@ class ExpeditionsApp {
   }
 
   /**
+   * Read the cargo bonuses from whichever of the two modal fields carries them.
+   * The sources are mutually exclusive and the API 2 export wins: it is machine
+   * data, with no dependence on the line order or the ship names of a report.
+   * Whichever source loses says nothing about why - a single message covers
+   * every way of ending up with no bonuses at all.
+   *
+   * @returns {boolean} True when one of the sources could be read.
+   */
+  readBonuses() {
+    if (this.readOwnApiBonuses() || this.readShipsBonuses()) return true;
+    alert(getOptionValue('noBonusDataMsg', ''));
+    return false;
+  }
+
+  /**
+   * Read the cargo bonuses out of the API 2 export from the game's Fleet page.
+   * The export states every ship the player can build, so the whole table is
+   * cleared first: a ship missing from it has no bonus rather than the one left
+   * over from an earlier read.
+   *
+   * @returns {boolean} True when the field held a usable export.
+   */
+  readOwnApiBonuses() {
+    const data = parseOwnApi(getVal('#own-api-input'));
+    if (!data || Object.keys(data.ships).length === 0) return false;
+    options.prm.lfShipsBonuses = EXPEDITION_SHIPS.map((ship) => {
+      const imported = data.ships[ship.techId];
+      return imported ? imported.cargo : 0;
+    });
+    this._renderShipsBonuses();
+    return true;
+  }
+
+  /**
    * Parse the life-form bonus report pasted into the modal. The report lists
    * every unit as an eight-line block; the cargo bonus is the fifth line of a
    * block, counted from the small cargo the search anchors on.
@@ -268,10 +303,7 @@ class ExpeditionsApp {
     const lines = getVal('#lf-bonuses-txtarea').split('\n');
     const scName = getOptionValue('smallCargoName', 'small cargo').toLowerCase();
     const scLine = lines.findIndex((line) => line.toLowerCase().includes(scName));
-    if (scLine === -1) {
-      alert(getOptionValue('missingSCName', '').replace('sc_name', getOptionValue('smallCargoName', '')));
-      return false;
-    }
+    if (scLine === -1) return false;
     try {
       const bonuses = options.prm.lfShipsBonuses;
       let ship = 0;
@@ -282,7 +314,8 @@ class ExpeditionsApp {
       }
       this._renderShipsBonuses();
     } catch (e) {
-      alert(e);
+      // A truncated report runs off the end of the lines. The caller reports it.
+      console.error(e);
       return false;
     }
     return true;

@@ -89,6 +89,7 @@
   <!-- Utility libraries and calculator modules -->
   <script type="text/javascript" src="/js/utils.js?v=<?php echo filemtime($pfgPath.'/js/utils.js'); ?>"></script>
   <script type="text/javascript" src="/ogame/calc/js/dom-utils.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/dom-utils.js'); ?>"></script>
+  <script type="text/javascript" src="/ogame/calc/js/own-api.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/own-api.js'); ?>"></script>
   <script type="text/javascript" src="/ogame/calc/js/expeditions-core.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/expeditions-core.js'); ?>"></script>
   <script type="text/javascript" src="/ogame/calc/js/expeditions-data-collector.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/expeditions-data-collector.js'); ?>"></script>
   <script type="text/javascript" src="/ogame/calc/js/expeditions-renderer.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/expeditions-renderer.js'); ?>"></script>
@@ -118,7 +119,7 @@
     options.locaYes = <?= json_encode($l['LOCA_YES'], JSON_UNESCAPED_UNICODE) ?>;
     options.locaNo = <?= json_encode($l['LOCA_NO'], JSON_UNESCAPED_UNICODE) ?>;
     options.smallCargoName = <?= json_encode($l['small-cargo'], JSON_UNESCAPED_UNICODE) ?>;
-    options.missingSCName = <?= json_encode($l['no-sc-message'], JSON_UNESCAPED_UNICODE) ?>;
+    options.noBonusDataMsg = <?= json_encode($l['no-bonus-data-msg'], JSON_UNESCAPED_UNICODE) ?>;
     options.largeCargoAbbrev = <?= json_encode($l['large-cargo-abbrev'], JSON_UNESCAPED_UNICODE) ?>;
     options.warnindDivId = 'warning';
     options.warnindMsgDivId = 'warning-message';
@@ -382,7 +383,10 @@
       </div>
       <div class="modal-body">
         <div class="mb-2"><?= $l['lf-bonuses-reader-info'] ?></div>
-        <textarea id="lf-bonuses-txtarea" class="form-control" rows="8"></textarea>
+        <textarea id="lf-bonuses-txtarea" class="form-control" rows="3"></textarea>
+        <div class="text-center fw-semibold my-2"><?= $l['or'] ?></div>
+        <div class="mb-2"><?= $l['own-api-cargo-info'] ?></div>
+        <input id="own-api-input" type="text" class="form-control" autocomplete="off" spellcheck="false"/>
       </div>
       <div class="modal-footer">
         <button id="lf-bonuses-read-btn" type="button" class="btn btn-primary"><?= $l['read'] ?></button>

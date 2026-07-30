@@ -143,6 +143,7 @@
     "open-lfbr": "Čítať hodnoty",
     "lf-bonuses-reader-hdr": "Čítanie bonusov",
     "lf-bonuses-reader-info": "Skopírujte text tabuľky s bonusmi lodí z OGame, vložte ho do poľa nižšie a kliknite na tlačidlo „Čítať“.",
+    "or": "alebo",
     "read": "Čítať",
     "no-sc-message": "Vo vašom texte som nenašiel 'sc_name'. Skopírujte celý obsah tabuľky s bonusmi za lode",
     "ship-name": "Loď",
@@ -706,6 +707,8 @@
   "expeditions": {
     "keywords": "proxyforgame,ogame,kalkulačka expedícií,expedície,suroviny z expedícií,flotila na expedície,temná hmota,nálezy z expedícií",
     "param-tab-cargo-bonuses": "Bonusy ku kapacite nákladu",
+    "own-api-cargo-info": "Vložte text z poľa API 2 na stránke „Flotila“ v OGame",
+    "no-bonus-data-msg": "Bonusy sa nepodarilo načítať. Vložte text tabuľky s bonusmi lodí alebo text z poľa API 2 na stránke „Flotila“.",
     "LOCA_LANG": "Jazyk:",
     "LOCA_STRONGEST_CAP": "Najsilnejší hráč má ",
     "LOCA_STRONGEST_CAP2": " bodov",

@@ -141,6 +141,7 @@
     "open-lfbr": "Odczytane wartości",
     "lf-bonuses-reader-hdr": "Premie za czytanie",
     "lf-bonuses-reader-info": "Y Skopiuj tekst tabeli z bonusami statków z OGame, wklej do poniższego pola i kliknij 'Odczytaj'",
+    "or": "lub",
     "read": "Odczytaj",
     "no-sc-message": "Nie można znaleźć 'sc_name' w tekście. Skopiuj całą zawartość tabeli z bonusami dla statków Bonusy dla form życia w Kalkulatorze lotów",
     "ship-name": "Statek",
@@ -706,6 +707,8 @@
   "expeditions": {
     "keywords": "proxyforgame,ogame,kalkulator ekspedycji,ekspedycje,surowce z ekspedycji,flota na ekspedycje,ciemna materia,znaleziska z ekspedycji",
     "param-tab-cargo-bonuses": "Bonusy do pojemności ładunkowej",
+    "own-api-cargo-info": "Wklej tekst z pola API 2 na stronie „Flota” w OGame",
+    "no-bonus-data-msg": "Nie udało się odczytać bonusów. Wklej tekst tabeli z bonusami statków albo tekst z pola API 2 na stronie „Flota”.",
     "LOCA_LANG": "Język:",
     "LOCA_STRONGEST_CAP": "Najsilniejszy gracz ma ",
     "LOCA_STRONGEST_CAP2": " punktów",

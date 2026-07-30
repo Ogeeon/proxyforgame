@@ -143,6 +143,7 @@
     "open-lfbr": "Değerleri okuyun",
     "lf-bonuses-reader-hdr": "İkramiyelerin okunması",
     "lf-bonuses-reader-info": "Gemi bonuslarını içeren tablonun metnini OGame'den kopyalayın, aşağıdaki kutuya yapıştırın ve 'Okuyun' tıklayın",
+    "or": "veya",
     "read": "Okuyun",
     "no-sc-message": "Metninizde 'sc_name' bulunamadı. Lütfen tablonun tüm içeriğini gemi bonusları ile kopyalayın",
     "ship-name": "Gemi",
@@ -706,6 +707,8 @@
   "expeditions": {
     "keywords": "proxyforgame,ogame,keşif seferi hesaplayıcı,keşif seferleri,keşif seferi kaynakları,keşif seferi filosu,kara madde,keşif seferi bulguları",
     "param-tab-cargo-bonuses": "Kargo kapasitesi bonusları",
+    "own-api-cargo-info": "OGame'deki 'Filo' sayfasındaki API 2 alanındaki metni yapıştırın",
+    "no-bonus-data-msg": "Bonuslar okunamadı. Gemi bonuslarını içeren tablonun metnini veya 'Filo' sayfasındaki API 2 alanındaki metni yapıştırın.",
     "LOCA_LANG": "Dil:",
     "LOCA_STRONGEST_CAP": "En güçlü oyuncunun ",
     "LOCA_STRONGEST_CAP2": " puanı var",

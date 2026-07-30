@@ -140,6 +140,7 @@
     "open-lfbr": "Leggere i valori",
     "lf-bonuses-reader-hdr": "Leggere i bonus",
     "lf-bonuses-reader-info": "Copiare il testo della tabella con i bonus nave da OGame, incollarlo nel riquadro sottostante e fare clic su 'Leggi'",
+    "or": "o",
     "read": "Leggi",
     "no-sc-message": "Non ho trovato 'sc_name' nel testo. Copiare tutto il contenuto della tabella con i bonus nave",
     "ship-name": "Nave",
@@ -706,6 +707,8 @@
   "expeditions": {
     "keywords": "proxyforgame,ogame,calcolatore spedizioni,spedizioni,risorse dalle spedizioni,flotta per spedizioni,materia oscura,ritrovamenti spedizioni",
     "param-tab-cargo-bonuses": "Bonus alla capacità di carico",
+    "own-api-cargo-info": "Incolla il testo dal campo API 2 della pagina «Flotta» in OGame",
+    "no-bonus-data-msg": "Impossibile leggere i bonus. Incolla il testo della tabella con i bonus nave oppure il testo dal campo API 2 della pagina «Flotta».",
     "LOCA_LANG": "Lingua:",
     "LOCA_STRONGEST_CAP": "Il giocatore più forte ha ",
     "LOCA_STRONGEST_CAP2": " punti",

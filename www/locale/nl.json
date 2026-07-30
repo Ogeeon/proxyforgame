@@ -139,6 +139,7 @@
     "open-lfbr": "Lees waarden",
     "lf-bonuses-reader-hdr": "Bonussen lezen",
     "lf-bonuses-reader-info": "Kopieer de tekst van de tabel met scheepsbonussen van OGame, plak in het vak hieronder en klik op 'Lezen'.",
+    "or": "of",
     "read": "Lezen",
     "no-sc-message": "Ik kon 'sc_name' niet vinden in uw tekst. Kopieer de volledige inhoud van de tabel met scheepsbonussen",
     "ship-name": "Schip",
@@ -706,6 +707,8 @@
   "expeditions": {
     "keywords": "proxyforgame,ogame,expeditiecalculator,expedities,expeditiegrondstoffen,expeditievloot,donkere materie,expeditievondsten",
     "param-tab-cargo-bonuses": "Bonussen op laadvermogen",
+    "own-api-cargo-info": "Plak de tekst uit het veld API 2 op de pagina 'Vloot' in OGame",
+    "no-bonus-data-msg": "Kan de bonussen niet lezen. Plak de tekst van de tabel met scheepsbonussen of de tekst uit het veld API 2 op de pagina 'Vloot'.",
     "LOCA_LANG": "Taal:",
     "LOCA_STRONGEST_CAP": "De sterkste speler heeft ",
     "LOCA_STRONGEST_CAP2": " punten",

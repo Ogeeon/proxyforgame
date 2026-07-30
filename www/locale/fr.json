@@ -141,6 +141,7 @@
     "open-lfbr": "Lire les valeurs",
     "lf-bonuses-reader-hdr": "Lire les bonus",
     "lf-bonuses-reader-info": "Copier le texte du tableau des bonus de vaisseau dans OGame, le coller dans la case ci-dessous et cliquer sur 'Lire'",
+    "or": "ou",
     "read": "Lire",
     "no-sc-message": "Impossible de trouver 'sc_name' dans votre texte. Veuillez copier tout le contenu du tableau des primes de vaisseau",
     "cargo-increase": "Capacité de chargement",
@@ -706,6 +707,8 @@
   "expeditions": {
     "keywords": "proxyforgame,ogame,calculatrice d'expédition,expéditions,ressources d'expédition,flotte d'expédition,matière noire,trouvailles d'expédition",
     "param-tab-cargo-bonuses": "Bonus de capacité de chargement",
+    "own-api-cargo-info": "Collez le texte du champ API 2 de la page « Flotte » dans OGame",
+    "no-bonus-data-msg": "Impossible de lire les bonus. Collez soit le texte du tableau des bonus de vaisseau, soit le texte du champ API 2 de la page « Flotte ».",
     "LOCA_LANG": "Langue:",
     "LOCA_STRONGEST_CAP": "Le joueur le plus fort a ",
     "LOCA_STRONGEST_CAP2": " points",

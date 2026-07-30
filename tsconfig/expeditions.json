@@ -5,6 +5,7 @@
   "files": [
     "../www/js/utils.js",
     "../www/ogame/calc/js/dom-utils.js",
+    "../www/ogame/calc/js/own-api.js",
     "../www/ogame/calc/js/expeditions-core.js",
     "../www/ogame/calc/js/expeditions-data-collector.js",
     "../www/ogame/calc/js/expeditions-renderer.js",

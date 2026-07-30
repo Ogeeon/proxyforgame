@@ -141,6 +141,7 @@
     "open-lfbr": "Pročitajte vrijednosti",
     "lf-bonuses-reader-hdr": "Čitanje bonusa",
     "lf-bonuses-reader-info": "Kopirajte tekst tabele sa OGame bonusima, zalijepite u polje ispod i kliknite na 'Čitaj'",
+    "or": "ili",
     "read": "Čitaj",
     "no-sc-message": "Nije moguće pronaći 'sc_name' u vašem tekstu. Molimo kopirajte sav sadržaj tabele sa bonusima za brod",
     "ship-name": "Brod",
@@ -706,6 +707,8 @@
   "expeditions": {
     "keywords": "proxyforgame,ogame,kalkulator ekspedicija,ekspedicije,resursi sa ekspedicija,flota za ekspedicije,tamna materija,nalazi sa ekspedicija",
     "param-tab-cargo-bonuses": "Bonusi na kapacitet tereta",
+    "own-api-cargo-info": "Zalijepite tekst iz polja API 2 na stranici 'Flota' u OGame",
+    "no-bonus-data-msg": "Nije moguće očitati bonuse. Zalijepite tekst tabele sa bonusima brodova ili tekst iz polja API 2 na stranici 'Flota'.",
     "LOCA_LANG": "Jezik:",
     "LOCA_STRONGEST_CAP": "Najjači igrač ima ",
     "LOCA_STRONGEST_CAP2": " poena",

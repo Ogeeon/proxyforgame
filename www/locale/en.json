@@ -145,6 +145,7 @@
     "open-lfbr": "Read values",
     "lf-bonuses-reader-hdr": "Reading bonuses",
     "lf-bonuses-reader-info": "Copy the text of the table with ship bonuses from OGame, paste into the box below and click 'Read'",
+    "or": "or",
     "read": "Read",
     "no-sc-message": "Couln't find sc_name in your text. Please copy all contents of the table with ship bonuses",
     "ship-name": "Ship",
@@ -706,6 +707,8 @@
   "expeditions": {
     "keywords": "proxyforgame,ogame,expedition calculator,expeditions,expedition resources,expedition ships,dark matter,expedition finds",
     "param-tab-cargo-bonuses": "Cargo capacity bonuses",
+    "own-api-cargo-info": "Paste the text from the API 2 field on the 'Fleet' page in OGame",
+    "no-bonus-data-msg": "Failed to read the bonuses. Paste either the text of the table with ship bonuses or the text from the API 2 field on the 'Fleet' page.",
     "title": "OGame - Expeditions calculator",
     "LOCA_LANG": "Language:",
     "LOCA_STRONGEST_CAP": "The strongest player has ",

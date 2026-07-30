@@ -145,6 +145,7 @@
     "open-lfbr": "Ler valores",
     "lf-bonuses-reader-hdr": "Ler bónus",
     "lf-bonuses-reader-info": "Copiar o texto da tabela com os bónus das naves do OGame, colar na caixa abaixo e clicar em 'Ler'",
+    "or": "ou",
     "read": "Ler",
     "no-sc-message": "Não encontrou 'sc_name' no seu texto. Por favor, copie todo o conteúdo da tabela com os",
     "nanites-factory-level": "Nível Fábrica de Nanites",
@@ -706,6 +707,8 @@
   "expeditions": {
     "keywords": "proxyforgame,ogame,calculadora de expedições,expedições,recursos de expedição,frota de expedição,matéria negra,achados de expedição",
     "param-tab-cargo-bonuses": "Bónus de capacidade de carga",
+    "own-api-cargo-info": "Cole o texto do campo API 2 da página «Frota» no OGame",
+    "no-bonus-data-msg": "Não foi possível ler os bónus. Cole o texto da tabela com os bónus das naves ou o texto do campo API 2 da página «Frota».",
     "LOCA_LANG": "Idioma:",
     "LOCA_STRONGEST_CAP": "O jogador mais forte tem ",
     "LOCA_STRONGEST_CAP2": " pontos",

@@ -123,6 +123,10 @@ a collector/renderer/orchestration trio. To create a new calculator use the
 | `www/ogame/calc/js/dom-utils.js` | Native DOM helpers (the jQuery replacement) |
 | `www/ogame/calc/js/own-api.js` | Normalizes OGame's API 2 export (`flight`, `expeditions`) |
 
+Importing data the player copies out of the game — the API 2 export and the spy report, what each
+calculator takes from them — is documented in `docs/ogame-api-import.md`. Note that
+`docs/calculators/*.md` is generated (`make docs` overwrites it), so nothing hand-written goes there.
+
 ## Project Conventions
 
 ### Code Comments

@@ -55,21 +55,6 @@ The calculator supports the following options (stored in cookies):
 2. Configure input parameters
 3. View calculated results
 
-## Importing game data
-
-Two importers fill the form from the game:
-
-- **Spy report** — the `sr-...` API code goes into the field next to the universe selects
-  (`#api-code`), and `ajax.php` fetches the report.
-- **Import from OGame** (`#import-own-api`) — the contents of the **API 2** field on the game's
-  *Fleet* page. It is one line of JSON describing the player's own planet: coordinates, character
-  and alliance class, researches, ship counts, per-ship life-form bonuses and the class boosters.
-  The checkboxes in the dialog pick which of those categories to apply. The universe data in the
-  export (`fleetspeed` and friends) is ignored on purpose — use the country/universe selects for it.
-
-Both are parsed by the shared normalizer in `www/ogame/calc/js/own-api.js`, so the bonus
-fractions the game sends become percentages in exactly one place.
-
 ## Development Notes
 
 ### File Structure

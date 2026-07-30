@@ -145,6 +145,7 @@
     "open-lfbr": "Werte lesen",
     "lf-bonuses-reader-hdr": "Boni lesen",
     "lf-bonuses-reader-info": "Kopieren Sie den Text der Tabelle mit den Schiffsboni aus OGame, fügen Sie ihn in das Feld unten ein und klicken Sie auf 'Lesen'",
+    "or": "oder",
     "read": "Lesen",
     "no-sc-message": "Konnte 'sc_name' nicht in Ihrem Text finden. Bitte kopieren Sie den gesamten Inhalt der Tabelle mit den Schiffsboni",
     "ship-name": "Schiff",
@@ -706,6 +707,8 @@
   "expeditions": {
     "keywords": "proxyforgame,ogame,expeditionsrechner,expeditionen,expeditionsrohstoffe,expeditionsflotte,dunkle materie,expeditionsfunde",
     "param-tab-cargo-bonuses": "Boni für Frachtkapazität",
+    "own-api-cargo-info": "Fügen Sie den Text aus dem Feld API 2 auf der Seite „Flotte“ in OGame ein",
+    "no-bonus-data-msg": "Die Boni konnten nicht gelesen werden. Fügen Sie entweder den Text der Tabelle mit den Schiffsboni oder den Text aus dem Feld API 2 auf der Seite „Flotte“ ein.",
     "LOCA_LANG": "Sprache:",
     "LOCA_STRONGEST_CAP": "Der stärkste Spieler hat ",
     "LOCA_STRONGEST_CAP2": " Punkte",

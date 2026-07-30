@@ -144,6 +144,7 @@
     "open-lfbr": "Leer valores",
     "lf-bonuses-reader-hdr": "Leer bonificaciones",
     "lf-bonuses-reader-info": "Copia el texto de la tabla con bonificaciones de naves de OGame, pégalo en la casilla de abajo y haz clic en 'Leer'",
+    "or": "o",
     "read": "Leer",
     "no-sc-message": "No encuentro 'sc_name' en tu texto. Por favor, copia todo el contenido de la tabla con los bonus",
     "ship-name": "Nave",
@@ -706,6 +707,8 @@
   "expeditions": {
     "keywords": "proxyforgame,ogame,calculadora de expediciones,expediciones,recursos de expedición,flota de expedición,materia oscura,hallazgos de expedición",
     "param-tab-cargo-bonuses": "Bonificaciones de capacidad de carga",
+    "own-api-cargo-info": "Pega el texto del campo API 2 de la página «Flota» en OGame",
+    "no-bonus-data-msg": "No se pudieron leer las bonificaciones. Pega el texto de la tabla con bonificaciones de naves o el texto del campo API 2 de la página «Flota».",
     "LOCA_LANG": "Idioma:",
     "LOCA_STRONGEST_CAP": "El jugador más fuerte tiene ",
     "LOCA_STRONGEST_CAP2": " puntos",
