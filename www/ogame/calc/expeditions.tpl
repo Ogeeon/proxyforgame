@@ -2,8 +2,8 @@
 <head>
   <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
   <meta http-equiv="Cache-Control" content="no-cache" />
-  <title><?= $l['LOCA_TITLE'] ?></title>
-  <meta name="description" content="<?= $l['LOCA_TITLE'] ?>"/>
+  <title><?= $l['title'] ?></title>
+  <meta name="description" content="<?= $l['title'] ?>"/>
   <meta name="keywords" content="<?= $l['keywords'] ?>"/>
   <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon"/>
   <link rel="icon" href="/favicon.ico" type="image/x-icon"/>
@@ -140,7 +140,7 @@
 <div id="expeditions">
   <div class="border rounded">
     <div class="d-flex align-items-center">
-      <div class="bg-body-secondary text-primary-emphasis rounded main-header text-center flex-grow-1"><?= $l['LOCA_TITLE'] ?></div>
+      <div class="bg-body-secondary text-primary-emphasis rounded main-header text-center flex-grow-1"><?= $l['title'] ?></div>
       <div id="reset" class="d-flex align-items-center justify-content-center bg-danger-subtle" data-bs-toggle="tooltip" title="<?= $l['reset'] ?>">
         <i class="bi bi-arrow-counterclockwise" style="color: #dc3545; font-size: 1.25rem;"></i>
       </div>
@@ -153,7 +153,7 @@
           <button class="nav-link active" id="param-common-tab" data-bs-toggle="tab" data-bs-target="#param-common" type="button" role="tab"><?= $l['param-tab-common'] ?></button>
         </li>
         <li class="nav-item" role="presentation">
-          <button class="nav-link" id="param-lf-tab" data-bs-toggle="tab" data-bs-target="#param-lf" type="button" role="tab"><?= $l['lifeforms'] ?></button>
+          <button class="nav-link" id="param-lf-tab" data-bs-toggle="tab" data-bs-target="#param-lf" type="button" role="tab"><?= $l['param-tab-cargo-bonuses'] ?></button>
         </li>
       </ul>
       <div class="tab-content" id="paramTabContent">

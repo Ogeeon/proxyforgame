@@ -705,7 +705,7 @@
   },
   "expeditions": {
     "keywords": "proxyforgame,ogame,calculadora de expediciones,expediciones,recursos de expedición,flota de expedición,materia oscura,hallazgos de expedición",
-    "LOCA_TITLE": "Calculadora de Expediciones OGame",
+    "param-tab-cargo-bonuses": "Bonificaciones de capacidad de carga",
     "LOCA_LANG": "Idioma:",
     "LOCA_STRONGEST_CAP": "El jugador más fuerte tiene ",
     "LOCA_STRONGEST_CAP2": " puntos",
@@ -756,7 +756,7 @@
     "auto_select": "Seleccionar automáticamente puntos del mejor jugador y velocidad del universo",
     "all_options": "Usar todos los parámetros",
     "classes": "0 - Descubridor, 1 - Recolector, 2 - Otro",
-    "title": "Calculadora de Expediciones OGame",
+    "title": "OGame - Calculadora de Expediciones",
     "api_bc": "Bonificación de clase \"Recolector\", %",
     "api_bd": "Bonificación de clase \"Descubridor\", %",
     "class-bonus-collector": "Bonificación de clase \"Recolector\"",

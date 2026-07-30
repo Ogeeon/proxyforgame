@@ -705,7 +705,7 @@
   },
   "expeditions": {
     "keywords": "proxyforgame,ogame,calculadora de expedições,expedições,recursos de expedição,frota de expedição,matéria negra,achados de expedição",
-    "LOCA_TITLE": "Calculadora de Expedições OGame",
+    "param-tab-cargo-bonuses": "Bónus de capacidade de carga",
     "LOCA_LANG": "Idioma:",
     "LOCA_STRONGEST_CAP": "O jogador mais forte tem ",
     "LOCA_STRONGEST_CAP2": " pontos",
@@ -756,7 +756,7 @@
     "auto_select": "Selecionar automaticamente pontos do melhor jogador e velocidade do universo",
     "all_options": "Usar todos os parâmetros",
     "classes": "0 - Explorador, 1 - Coletor, 2 - Outro",
-    "title": "Calculadora de Expedições OGame",
+    "title": "OGame - Calculadora de Expedições",
     "api_bc": "Bônus da classe \"Coletor\", %",
     "api_bd": "Bônus da classe \"Explorador\", %",
     "class-bonus-collector": "Bônus da classe \"Coletor\"",

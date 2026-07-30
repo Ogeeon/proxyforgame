@@ -705,7 +705,7 @@
   },
   "expeditions": {
     "keywords": "proxyforgame,ogame,expedition calculator,expeditions,expedition resources,expedition ships,dark matter,expedition finds",
-    "LOCA_TITLE": "OGame Expeditions Calculator",
+    "param-tab-cargo-bonuses": "Cargo capacity bonuses",
     "LOCA_LANG": "Language:",
     "LOCA_STRONGEST_CAP": "The strongest player has ",
     "LOCA_STRONGEST_CAP2": " points",
@@ -756,7 +756,7 @@
     "auto_select": "Auto select top player points and universe speed",
     "all_options": "Use all parameters",
     "classes": "0 - Discoverer, 1 - Collector, 2 - Other",
-    "title": "OGame Expeditions Calculator",
+    "title": "OGame - Expeditions calculator",
     "api_bc": "Collector class bonus, %",
     "api_bd": "Discoverer class bonus, %",
     "class-bonus-collector": "Collector class bonus",

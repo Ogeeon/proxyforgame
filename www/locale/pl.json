@@ -705,7 +705,7 @@
   },
   "expeditions": {
     "keywords": "proxyforgame,ogame,kalkulator ekspedycji,ekspedycje,surowce z ekspedycji,flota na ekspedycje,ciemna materia,znaleziska z ekspedycji",
-    "LOCA_TITLE": "Kalkulator Ekspedycji OGame",
+    "param-tab-cargo-bonuses": "Bonusy do pojemności ładunkowej",
     "LOCA_LANG": "Język:",
     "LOCA_STRONGEST_CAP": "Najsilniejszy gracz ma ",
     "LOCA_STRONGEST_CAP2": " punktów",
@@ -756,7 +756,7 @@
     "auto_select": "Automatycznie wybierz punkty najlepszego gracza i prędkość wszechświata",
     "all_options": "Użyj wszystkich parametrów",
     "classes": "0 - Odkrywca, 1 - Kolekcjoner, 2 - Inna",
-    "title": "Kalkulator Ekspedycji OGame",
+    "title": "OGame - Kalkulator Ekspedycji",
     "api_bc": "Bonus klasy \"Kolekcjoner\", %",
     "api_bd": "Bonus klasy \"Odkrywca\", %",
     "class-bonus-collector": "Bonus klasy \"Kolekcjoner\"",

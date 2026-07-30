@@ -8,9 +8,9 @@ This directory contains documentation for all OGame calculators.
 
 **View:** [OGame - Costs calculator](http://pfg.wmp/ogame/calc/costs.php)
 
-### [Калькулятор Экспедиции OGame](expeditions.md)
+### [OGame - Expeditions calculator](expeditions.md)
 
-**View:** [Калькулятор Экспедиции OGame](http://pfg.wmp/ogame/calc/expeditions.php)
+**View:** [OGame - Expeditions calculator](http://pfg.wmp/ogame/calc/expeditions.php)
 
 ### [OGame - Flight time and savepoints calculator](flight.md)
 

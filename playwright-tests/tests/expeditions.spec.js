@@ -79,7 +79,7 @@ test.describe('Expeditions Calculator - DOM integration', () => {
         await openDom(context, page);
     });
 
-    test('parameters are organized into Common and LifeForms tabs', async ({ page }) => {
+    test('parameters are organized into Common and cargo-bonus tabs', async ({ page }) => {
         await expect(page.locator('#highTop')).toBeVisible();
         await expect(page.locator('#percent-resources')).toBeVisible();
         await expect(page.locator('#lf-cargo-203')).toBeHidden();

@@ -705,7 +705,7 @@
   },
   "expeditions": {
     "keywords": "proxyforgame,ogame,kalkulator ekspedicija,ekspedicije,resursi sa ekspedicija,flota za ekspedicije,tamna materija,nalazi sa ekspedicija",
-    "LOCA_TITLE": "OGame Kalkulator za Ekspedicije",
+    "param-tab-cargo-bonuses": "Bonusi na kapacitet tereta",
     "LOCA_LANG": "Jezik:",
     "LOCA_STRONGEST_CAP": "Najjači igrač ima ",
     "LOCA_STRONGEST_CAP2": " poena",
@@ -756,7 +756,7 @@
     "auto_select": "Automatski odaberi poene najboljeg igrača i brzinu univerzuma",
     "all_options": "Koristi sve parametre",
     "classes": "0 - Istraživač, 1 - Kolektor, 2 - Ostalo",
-    "title": "OGame Kalkulator za Ekspedicije",
+    "title": "OGame - Kalkulator za ekspedicije",
     "api_bc": "Bonus klase \"Kolektor\", %",
     "api_bd": "Bonus klase \"Istraživač\", %",
     "class-bonus-collector": "Bonus klase \"Kolektor\"",

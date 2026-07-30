@@ -705,7 +705,7 @@
   },
   "expeditions": {
     "keywords": "proxyforgame,ogame,kalkulačka expedícií,expedície,suroviny z expedícií,flotila na expedície,temná hmota,nálezy z expedícií",
-    "LOCA_TITLE": "OGame Kalkulačka Expedícií",
+    "param-tab-cargo-bonuses": "Bonusy ku kapacite nákladu",
     "LOCA_LANG": "Jazyk:",
     "LOCA_STRONGEST_CAP": "Najsilnejší hráč má ",
     "LOCA_STRONGEST_CAP2": " bodov",
@@ -756,7 +756,7 @@
     "auto_select": "Automaticky vybrať body najlepšieho hráča a rýchlosť vesmíru",
     "all_options": "Použiť všetky parametre",
     "classes": "0 - Bádateľ, 1 - Zberateľ, 2 - Iný",
-    "title": "OGame Kalkulačka Expedícií",
+    "title": "OGame - Kalkulačka expedícií",
     "api_bc": "Bonus triedy \"Zberateľ\", %",
     "api_bd": "Bonus triedy \"Bádateľ\", %",
     "class-bonus-collector": "Bonus triedy \"Zberateľ\"",

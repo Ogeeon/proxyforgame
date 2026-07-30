@@ -705,7 +705,7 @@
   },
   "expeditions": {
     "keywords": "proxyforgame,ogame,calculatrice d'expédition,expéditions,ressources d'expédition,flotte d'expédition,matière noire,trouvailles d'expédition",
-    "LOCA_TITLE": "Calculateur d'Expéditions OGame",
+    "param-tab-cargo-bonuses": "Bonus de capacité de chargement",
     "LOCA_LANG": "Langue:",
     "LOCA_STRONGEST_CAP": "Le joueur le plus fort a ",
     "LOCA_STRONGEST_CAP2": " points",
@@ -756,7 +756,7 @@
     "auto_select": "Sélection automatique des points du meilleur joueur et de la vitesse de l'univers",
     "all_options": "Utiliser tous les paramètres",
     "classes": "0 - Découvreur, 1 - Collecteur, 2 - Autre",
-    "title": "Calculateur d'Expéditions OGame",
+    "title": "OGame - Calculateur d'Expéditions",
     "api_bc": "Bonus de classe \"Collecteur\", %",
     "api_bd": "Bonus de classe \"Découvreur\", %",
     "class-bonus-collector": "Bonus de classe \"Collecteur\"",

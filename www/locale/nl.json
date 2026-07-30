@@ -705,7 +705,7 @@
   },
   "expeditions": {
     "keywords": "proxyforgame,ogame,expeditiecalculator,expedities,expeditiegrondstoffen,expeditievloot,donkere materie,expeditievondsten",
-    "LOCA_TITLE": "OGame Expeditierekening",
+    "param-tab-cargo-bonuses": "Bonussen op laadvermogen",
     "LOCA_LANG": "Taal:",
     "LOCA_STRONGEST_CAP": "De sterkste speler heeft ",
     "LOCA_STRONGEST_CAP2": " punten",
@@ -756,7 +756,7 @@
     "auto_select": "Automatisch top spelerpunten en universumsnelheid selecteren",
     "all_options": "Alle parameters gebruiken",
     "classes": "0 - Ontdekker, 1 - Verzamelaar, 2 - Andere",
-    "title": "OGame Expeditierekening",
+    "title": "OGame - Expeditierekening",
     "api_bc": "\"Verzamelaar\"-klassebonus, %",
     "api_bd": "\"Ontdekker\"-klassebonus, %",
     "class-bonus-collector": "\"Verzamelaar\"-klassebonus",

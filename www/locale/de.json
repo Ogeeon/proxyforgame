@@ -705,7 +705,7 @@
   },
   "expeditions": {
     "keywords": "proxyforgame,ogame,expeditionsrechner,expeditionen,expeditionsrohstoffe,expeditionsflotte,dunkle materie,expeditionsfunde",
-    "LOCA_TITLE": "OGame Expeditionsrechner",
+    "param-tab-cargo-bonuses": "Boni für Frachtkapazität",
     "LOCA_LANG": "Sprache:",
     "LOCA_STRONGEST_CAP": "Der stärkste Spieler hat ",
     "LOCA_STRONGEST_CAP2": " Punkte",
@@ -756,7 +756,7 @@
     "auto_select": "Automatisch Top-Spielerpunkte und Universumsgeschwindigkeit auswählen",
     "all_options": "Alle Parameter verwenden",
     "classes": "0 - Entdecker, 1 - Kollektor, 2 - Andere",
-    "title": "OGame Expeditionsrechner",
+    "title": "OGame - Expeditionsrechner",
     "api_bc": "\"Kollektor\"-Klassenbonus, %",
     "api_bd": "\"Entdecker\"-Klassenbonus, %",
     "class-bonus-collector": "\"Kollektor\"-Klassenbonus",

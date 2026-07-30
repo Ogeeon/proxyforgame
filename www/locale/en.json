@@ -705,8 +705,8 @@
   },
   "expeditions": {
     "keywords": "proxyforgame,ogame,expedition calculator,expeditions,expedition resources,expedition ships,dark matter,expedition finds",
-    "title": "OGame Expeditions Calculator",
-    "LOCA_TITLE": "OGame Expeditions Calculator",
+    "param-tab-cargo-bonuses": "Cargo capacity bonuses",
+    "title": "OGame - Expeditions calculator",
     "LOCA_LANG": "Language:",
     "LOCA_STRONGEST_CAP": "The strongest player has ",
     "LOCA_STRONGEST_CAP2": " points",

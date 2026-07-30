@@ -705,7 +705,7 @@
   },
   "expeditions": {
     "keywords": "proxyforgame,ogame,keşif seferi hesaplayıcı,keşif seferleri,keşif seferi kaynakları,keşif seferi filosu,kara madde,keşif seferi bulguları",
-    "LOCA_TITLE": "OGame Keşif Hesap Makinesi",
+    "param-tab-cargo-bonuses": "Kargo kapasitesi bonusları",
     "LOCA_LANG": "Dil:",
     "LOCA_STRONGEST_CAP": "En güçlü oyuncunun ",
     "LOCA_STRONGEST_CAP2": " puanı var",
@@ -756,7 +756,7 @@
     "auto_select": "En iyi oyuncu puanlarını ve evren hızını otomatik seç",
     "all_options": "Tüm parametreleri kullan",
     "classes": "0 - Kâşif, 1 - Koleksiyoncu, 2 - Diğer",
-    "title": "OGame Keşif Hesap Makinesi",
+    "title": "OGame - Keşif Hesap Makinesi",
     "api_bc": "\"Koleksiyoncu\" sınıf bonusu, %",
     "api_bd": "\"Kâşif\" sınıf bonusu, %",
     "class-bonus-collector": "\"Koleksiyoncu\" sınıf bonusu",

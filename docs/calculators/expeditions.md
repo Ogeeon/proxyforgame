@@ -1,4 +1,4 @@
-# Калькулятор Экспедиции OGame
+# OGame - Expeditions calculator
 
 **URL:** `http://pfg.wmp/ogame/calc/expeditions.php`
 
@@ -36,7 +36,7 @@ The calculator supports the following options (stored in cookies):
 
 ## Usage
 
-1. Navigate to [Калькулятор Экспедиции OGame](http://pfg.wmp/ogame/calc/expeditions.php)
+1. Navigate to [OGame - Expeditions calculator](http://pfg.wmp/ogame/calc/expeditions.php)
 2. Configure input parameters
 3. View calculated results
 
