@@ -196,3 +196,20 @@ implementation for every pattern.
   thirty. Do not assume a `docs/patterns.md` UI rule already holds there.
 - **External services**: `https://logserver.net/api/proxyforgame/` (used by `GetDataCode`)
 - **Database**: Optional MySQL/MariaDB for changelog and trade calculator features
+
+## Agent skills
+
+### Issue tracker
+
+Issues live in GitHub Issues on `Ogeeon/proxyforgame`, driven through the `gh` CLI.
+See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+The five canonical triage roles, each label string equal to its name.
+See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+Single-context — one `CONTEXT.md` plus `docs/adr/` at the repo root; neither exists yet
+and both get created lazily. See `docs/agents/domain.md`.
