@@ -583,7 +583,7 @@
     "defense-to-debris": "Verteidigung ins Trümmerfeld",
     "deut-to-debris": "Deuterium ins Trümmerfeld",
     "promo-moon": "Aktion: Chance bis 40%",
-    "max-count-hint": "Anzahl der Einheiten für die maximale Mondchance"
+    "max-count-hint": "Anzahl der Einheiten für die maximale Mondchance. Klicke auf eine Zahl neben einem Eingabefeld, um sie dort einzutragen."
   },
   "production": {
     "param-tab-general": "Allgemein",

@@ -581,7 +581,7 @@
     "defense-to-debris": "Difese nei detriti",
     "deut-to-debris": "Deuterio nei detriti",
     "promo-moon": "Evento: probabilità fino al 40%",
-    "max-count-hint": "Numero di unità per la massima possibilità di creazione della Luna",
+    "max-count-hint": "Numero di unità per la massima possibilità di creazione della Luna. Clicca su un numero accanto a un campo per inserirlo nel campo.",
     "recycling": "Riciclare il campo di detriti",
     "keywords": "proxyforgame,ogame,calcolatore lune,probabilità luna,campo detriti,distruzione luna,base lunare,riciclatori,morte nera"
   },

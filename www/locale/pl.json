@@ -581,7 +581,7 @@
     "defense-to-debris": "Obrona do pola zniszczeń",
     "deut-to-debris": "Deuter do pola zniszczeń",
     "promo-moon": "Wydarzenie: szansa do 40%",
-    "max-count-hint": "Liczba jednostek dla maksymalnej szansy na stworzenie księżyca",
+    "max-count-hint": "Liczba jednostek dla maksymalnej szansy na stworzenie księżyca. Kliknij liczbę obok pola, aby wstawić ją do tego pola.",
     "recycling": "Zbieranie odpadków",
     "keywords": "proxyforgame,ogame,kalkulator księżyca,szansa na księżyc,pole zniszczeń,niszczenie księżyca,baza księżycowa,recyklery,gwiazda śmierci"
   },

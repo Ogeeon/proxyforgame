@@ -582,7 +582,7 @@
     "defense-to-debris": "Savunma enkaza",
     "deut-to-debris": "Deuterium enkaza",
     "promo-moon": "Etkinlik: şans %40’a kadar",
-    "max-count-hint": "Maksimum ay oluşturma şansı için birim sayısı",
+    "max-count-hint": "Maksimum ay oluşturma şansı için birim sayısı. Bir giriş alanının yanındaki sayıya tıklayarak onu alana yazabilirsiniz.",
     "keywords": "proxyforgame,ogame,ay hesaplayıcı,ay şansı,enkaz alanı,ay yok etme,ay üssü,geri dönüşümcüler,ölüm yıldızı"
   },
   "production": {

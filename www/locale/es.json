@@ -581,7 +581,7 @@
     "defense-to-debris": "Defensas al campo de escombros",
     "deut-to-debris": "Deuterio al campo de escombros",
     "promo-moon": "Evento: probabilidad hasta el 40%",
-    "max-count-hint": "Número de unidades para la máxima probabilidad de creación de luna",
+    "max-count-hint": "Número de unidades para la máxima probabilidad de creación de luna. Haz clic en un número junto a un campo para introducirlo en él.",
     "recycling": "Recolectar los escombros",
     "keywords": "proxyforgame,ogame,calculadora de luna,probabilidad de luna,campo de escombros,destrucción de luna,base lunar,recicladores,estrella de la muerte"
   },

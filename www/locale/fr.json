@@ -582,7 +582,7 @@
     "defense-to-debris": "Défenses dans le champ de débris",
     "deut-to-debris": "Deutérium dans le champ de débris",
     "promo-moon": "Événement : chance jusqu’à 40%",
-    "max-count-hint": "Nombre d’unités pour la chance maximale de création de lune",
+    "max-count-hint": "Nombre d’unités pour la chance maximale de création de lune. Cliquez sur un nombre à côté d’un champ pour le reporter dans ce champ.",
     "recycling": "Démantèlement de débris"
   },
   "production": {

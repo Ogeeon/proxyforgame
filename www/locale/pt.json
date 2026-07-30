@@ -581,7 +581,7 @@
     "defense-to-debris": "Defesas para os destroços",
     "deut-to-debris": "Deutério para os destroços",
     "promo-moon": "Evento: probabilidade até 40%",
-    "max-count-hint": "Número de unidades para a probabilidade máxima de criação de lua",
+    "max-count-hint": "Número de unidades para a probabilidade máxima de criação de lua. Clique num número ao lado de um campo para o inserir nesse campo.",
     "recycling": "Detritos colheita",
     "keywords": "proxyforgame,ogame,calculadora de luas,probabilidade de lua,campo de destroços,destruição de lua,base lunar,recicladores,estrela da morte"
   },

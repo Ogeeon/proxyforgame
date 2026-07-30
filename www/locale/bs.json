@@ -582,7 +582,7 @@
     "defense-to-debris": "Odbrana u ruševine",
     "deut-to-debris": "Deuterij u ruševine",
     "promo-moon": "Događaj: šansa do 40%",
-    "max-count-hint": "Broj jedinica za maksimalnu šansu stvaranja mjeseca",
+    "max-count-hint": "Broj jedinica za maksimalnu šansu stvaranja mjeseca. Kliknite na broj pored polja za unos da ga upišete u polje.",
     "keywords": "proxyforgame,ogame,kalkulator mjeseca,šansa za mjesec,polje ruševina,uništavanje mjeseca,mjesečeva baza,recikleri,zvijezda smrti"
   },
   "production": {

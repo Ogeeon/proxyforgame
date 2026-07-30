@@ -582,7 +582,7 @@
     "defense-to-debris": "Obrana do trosiek",
     "deut-to-debris": "Deutérium do trosiek",
     "promo-moon": "Akcia: šanca až 40%",
-    "max-count-hint": "Počet jednotiek pre maximálnu šancu vzniku Mesiaca",
+    "max-count-hint": "Počet jednotiek pre maximálnu šancu vzniku Mesiaca. Kliknutím na číslo vedľa vstupného poľa ho vložíte do tohto poľa.",
     "keywords": "proxyforgame,ogame,kalkulačka mesiacov,šanca na mesiac,pole trosiek,zničenie mesiaca,mesačná základňa,recyklátory,hviezda smrti"
   },
   "production": {
