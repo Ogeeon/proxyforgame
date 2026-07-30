@@ -79,6 +79,18 @@ const MOON_RECYCLER_CAPACITY = 20000;
 // General checkbox instead of the usual class selector.
 const MOON_GENERAL_CARGO_BONUS = 0.20;
 
+// Sensor phalanx range bonus granted by the Discoverer class. The class
+// checkbox of the phalanx panel is independent of the General checkbox above:
+// the three panels are three separate tools (someone else's moon, your own
+// fleet, your own phalanx) rather than one model of one player, so they are
+// deliberately not tied together even though a player has a single class.
+const PHALANX_DISCOVERER_BONUS = 0.20;
+
+// Levels above this are unreachable in practice: at level 24 the range already
+// spans 575 systems, more than the largest universe the flight calculator
+// admits (550).
+const PHALANX_MAX_LEVEL = 50;
+
 class MoonCalculator {
   /**
    * Cargo capacity, matching the costs / graviton calculators:
@@ -260,10 +272,153 @@ class MoonCalculator {
   }
 
   /**
-   * Run both sub-calculators for a single params object.
+   * Sensor phalanx sub-calculator: how far the phalanx sees, which systems
+   * that covers, and what level it would take to reach a given target.
+   *
+   * @param {Object} p Parameters:
+   *   phalanxLevel: sensor phalanx level,
+   *   phalanxRangeBonus: range bonus from the Interplanetary Analysis
+   *     Network, already in percent (see phalanxBonus),
+   *   isDiscoverer: whether the player has the Discoverer class,
+   *   discovererBonus: Discoverer class bonus increase, %,
+   *   ownSystem: the system the phalanx sits in,
+   *   targetSystem: the system to reach,
+   *   circularSystems: whether the galaxy wraps around,
+   *   numberOfSystems: systems per galaxy.
+   */
+  computePhalanx(p) {
+    const bonus = MoonCalculator.phalanxBonus(p);
+    const range = MoonCalculator.phalanxRange(p.phalanxLevel, bonus);
+    const coverage = MoonCalculator.phalanxCoverage(
+      p.ownSystem, range, p.circularSystems, p.numberOfSystems
+    );
+    const distance = MoonCalculator.systemDistance(
+      p.ownSystem, p.targetSystem, p.circularSystems, p.numberOfSystems
+    );
+    return {
+      phalanxRange: range,
+      phalanxSegments: coverage.segments,
+      phalanxSystemsInRange: coverage.count,
+      phalanxDistance: distance,
+      phalanxLevelRequired: MoonCalculator.phalanxLevelFor(distance, bonus),
+    };
+  }
+
+  /**
+   * The two range bonuses, summed into the single fraction phalanxRange
+   * multiplies by.
+   *
+   * Both arrive as ready percentages rather than as building levels, unlike
+   * the Supra Refractor of the creation panel. That is not an inconsistency:
+   * the Supra Refractor is a building, and building bonuses are used as-is,
+   * while both bonuses here come from researches, whose bonuses the game
+   * further multiplies by the life form technology bonus. That amplifier is
+   * modelled nowhere in this project - the production calculator also asks for
+   * the finished percentage - so deriving either bonus from a level here would
+   * silently understate the range for anyone who has one.
+   *
+   *   phalanxRangeBonus - Interplanetary Analysis Network, +0.6% per level,
+   *     uncapped;
+   *   discovererBonus   - Kaelesh Discoverer Enhancement, +0.2% per level,
+   *     uncapped, which raises the Discoverer class bonus rather than the
+   *     range directly.
+   */
+  static phalanxBonus(p) {
+    const analysisNetwork = Math.max(0, p.phalanxRangeBonus || 0) / 100;
+    if (!p.isDiscoverer) return analysisNetwork;
+    const amplifier = 1 + Math.max(0, p.discovererBonus || 0) / 100;
+    return analysisNetwork + PHALANX_DISCOVERER_BONUS * amplifier;
+  }
+
+  /**
+   * How many systems in each direction a phalanx of this level covers.
+   *
+   * The base is the level squared minus one, so a level 1 phalanx reaches 0
+   * systems - it sees its own system and nothing else.
+   *
+   * Three things about the bonus are assumptions, not established facts: that
+   * it multiplies the base range at all, that the two sources add into one
+   * multiplier instead of compounding, and that the product is truncated
+   * exactly once, here at the end. None of it is stated by the life form data
+   * the percentages come from, which only gives the per-level values.
+   *
+   * @param {number} level Sensor phalanx level.
+   * @param {number} bonus Combined bonus fraction from phalanxBonus.
+   */
+  static phalanxRange(level, bonus) {
+    const lvl = Math.max(1, Math.floor(level || 1));
+    return Math.floor((lvl * lvl - 1) * (1 + bonus));
+  }
+
+  /**
+   * The systems the phalanx covers, as ascending [from, to] pairs.
+   *
+   * A circular galaxy wraps, so the reach around system 5 comes back as two
+   * segments at the far end and the near end; once the reach closes the ring
+   * (2 * range + 1 systems or more) the whole galaxy is covered and collapses
+   * back to a single segment. A galaxy that does not wrap simply clips at
+   * either end, and `count` then reports the clipped total rather than the
+   * nominal width.
+   *
+   * @returns {{segments: number[][], count: number}}
+   */
+  static phalanxCoverage(ownSystem, range, circularSystems, numberOfSystems) {
+    const total = Math.max(1, Math.floor(numberOfSystems || 1));
+    const own = clampNumber(Math.floor(ownSystem || 1), 1, total);
+    const reach = Math.max(0, range);
+
+    if (!circularSystems) {
+      const from = Math.max(1, own - reach);
+      const to = Math.min(total, own + reach);
+      return { segments: [[from, to]], count: to - from + 1 };
+    }
+
+    if (2 * reach + 1 >= total) {
+      return { segments: [[1, total]], count: total };
+    }
+
+    const width = 2 * reach + 1;
+    const low = own - reach;
+    const high = own + reach;
+    if (low < 1) return { segments: [[total + low, total], [1, high]], count: width };
+    if (high > total) return { segments: [[low, total], [1, high - total]], count: width };
+    return { segments: [[low, high]], count: width };
+  }
+
+  /**
+   * Distance between two systems of the same galaxy, in systems. A circular
+   * galaxy is reached the short way round, matching countSystems() of the
+   * flight calculator.
+   */
+  static systemDistance(from, to, circularSystems, numberOfSystems) {
+    const total = Math.max(1, Math.floor(numberOfSystems || 1));
+    const start = clampNumber(Math.floor(from || 1), 1, total);
+    const end = clampNumber(Math.floor(to || 1), 1, total);
+    const direct = Math.abs(start - end);
+    return circularSystems ? Math.min(direct, total - direct) : direct;
+  }
+
+  /**
+   * Lowest phalanx level whose range covers `distance`, or null when even
+   * PHALANX_MAX_LEVEL falls short - which no universe this calculator accepts
+   * can actually produce.
+   *
+   * Found by trying levels rather than by inverting the formula: the bonus and
+   * its truncation would have to be inverted too, and the two expressions
+   * would then be free to disagree on the boundaries.
+   */
+  static phalanxLevelFor(distance, bonus) {
+    for (let level = 1; level <= PHALANX_MAX_LEVEL; level++) {
+      if (MoonCalculator.phalanxRange(level, bonus) >= distance) return level;
+    }
+    return null;
+  }
+
+  /**
+   * Run every sub-calculator for a single params object.
    */
   compute(p) {
-    return { ...this.computeDestroy(p), ...this.computeCreate(p) };
+    return { ...this.computeDestroy(p), ...this.computeCreate(p), ...this.computePhalanx(p) };
   }
 }
 
@@ -279,5 +434,7 @@ if (typeof window !== 'undefined') {
     MOON_SUPRA_BONUS_PER_LEVEL,
     MOON_RECYCLER_CAPACITY,
     MOON_GENERAL_CARGO_BONUS,
+    PHALANX_DISCOVERER_BONUS,
+    PHALANX_MAX_LEVEL,
   });
 }

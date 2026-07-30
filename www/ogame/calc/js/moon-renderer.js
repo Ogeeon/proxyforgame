@@ -107,10 +107,42 @@ class MoonRenderer {
     });
   }
 
+  /**
+   * Render the sensor phalanx panel: how far the phalanx reaches, which systems
+   * that covers, and what it would take to reach the target system.
+   *
+   * The system numbers are written out raw instead of through formatNumber:
+   * that helper groups thousands with a dot, which would read as a decimal
+   * point in the languages that group with a comma.
+   */
+  static renderPhalanx(r) {
+    setTextContent('#phalanx-range', String(r.phalanxRange));
+    setTextContent('#systems-in-range', String(r.phalanxSystemsInRange));
+    setTextContent('#visible-systems', MoonRenderer.formatSegments(r.phalanxSegments));
+    setTextContent('#phalanx-distance', String(r.phalanxDistance));
+    setTextContent('#phalanx-lvl-required',
+      r.phalanxLevelRequired === null ? '-' : String(r.phalanxLevelRequired));
+  }
+
+  /**
+   * The covered systems as "480 – 499, 1 – 29": one entry per contiguous run,
+   * with a run of a single system written as the bare number.
+   *
+   * @param {number[][]} segments Ascending [from, to] pairs.
+   * @returns {string}
+   */
+  static formatSegments(segments) {
+    if (!segments || segments.length === 0) return '-';
+    return segments
+      .map((pair) => (pair[0] === pair[1] ? String(pair[0]) : pair[0] + ' – ' + pair[1]))
+      .join(', ');
+  }
+
   static render(r) {
     MoonRenderer.renderDestroy(r);
     MoonRenderer.renderCreate(r);
     MoonRenderer.renderMaxCounts(r);
+    MoonRenderer.renderPhalanx(r);
   }
 }
 

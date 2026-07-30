@@ -24,6 +24,14 @@ class MoonDataCollector {
       promoMoon: getChecked('#promo-moon'),
       supraRefractorLevel: getInputNumber($('#supra-refractor')),
       counts: MoonDataCollector.readCounts(),
+      phalanxLevel: getInputNumber($('#phalanx-lvl')),
+      phalanxRangeBonus: getInputNumber($('#phalanx-range-bonus')),
+      isDiscoverer: getChecked('#discoverer-class'),
+      discovererBonus: getInputNumber($('#discoverer-bonus')),
+      ownSystem: getInputNumber($('#own-system')),
+      targetSystem: getInputNumber($('#target-system')),
+      circularSystems: getChecked('#circular-systems'),
+      numberOfSystems: getInputNumber($('#systems-num')),
     };
   }
 

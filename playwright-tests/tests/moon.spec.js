@@ -303,3 +303,191 @@ test.describe('Moon Calculator - DOM integration', () => {
         await expect(page.locator('#supra-refractor')).toHaveValue('8');
     });
 });
+
+// ---------------------------------------------------------------------------
+// Sensor phalanx panel.
+// ---------------------------------------------------------------------------
+
+test.describe('Moon Calculator - Sensor phalanx', () => {
+    test.beforeEach(async ({ context, page }) => {
+        await context.addInitScript(() => {
+            localStorage.setItem('lastChange', 'key-value;true,value;99999');
+            if (!localStorage.getItem('pfg-phalanx-cleared')) {
+                localStorage.removeItem('options_moon');
+                localStorage.setItem('pfg-phalanx-cleared', '1');
+            }
+        });
+        await page.goto('/ogame/calc/moon.php');
+    });
+
+    test('the panel starts on a level 1 phalanx that sees its own system only', async ({ page }) => {
+        await expect(page.locator('#phalanx-lvl')).toHaveValue('1');
+        await expect(page.locator('#circular-systems')).toBeChecked();
+        await expect(page.locator('#systems-num')).toHaveValue('499');
+        await expect(page.locator('#phalanx-range')).toHaveText('0');
+        await expect(page.locator('#visible-systems')).toHaveText('1');
+        await expect(page.locator('#systems-in-range')).toHaveText('1');
+    });
+
+    test('the level drives the range and the covered systems', async ({ page }) => {
+        await page.locator('#own-system').fill('100');
+        await page.locator('#own-system').blur();
+        await page.locator('#phalanx-lvl').fill('5');
+        await page.locator('#phalanx-lvl').blur();
+
+        await expect(page.locator('#phalanx-range')).toHaveText('24');
+        await expect(page.locator('#visible-systems')).toHaveText('76 – 124');
+        await expect(page.locator('#systems-in-range')).toHaveText('49');
+    });
+
+    test('a circular galaxy wraps the covered systems into two segments', async ({ page }) => {
+        await page.locator('#own-system').fill('5');
+        await page.locator('#own-system').blur();
+        await page.locator('#phalanx-lvl').fill('5');
+        await page.locator('#phalanx-lvl').blur();
+
+        await expect(page.locator('#visible-systems')).toHaveText('480 – 499, 1 – 29');
+        await expect(page.locator('#systems-in-range')).toHaveText('49');
+    });
+
+    test('unchecking the circular setting clips the coverage at the galaxy edge', async ({ page }) => {
+        await page.locator('#own-system').fill('5');
+        await page.locator('#own-system').blur();
+        await page.locator('#phalanx-lvl').fill('5');
+        await page.locator('#phalanx-lvl').blur();
+        await page.locator('#circular-systems').uncheck();
+
+        await expect(page.locator('#visible-systems')).toHaveText('1 – 29');
+        await expect(page.locator('#systems-in-range')).toHaveText('29');
+    });
+
+    test('the Discoverer class and its bonus widen the range', async ({ page }) => {
+        await page.locator('#phalanx-lvl').fill('5');
+        await page.locator('#phalanx-lvl').blur();
+        await expect(page.locator('#phalanx-range')).toHaveText('24');
+
+        await page.locator('#discoverer-class').check();
+        await expect(page.locator('#phalanx-range')).toHaveText('28');
+
+        // 0.20 * (1 + 0.50) = 0.30, so 24 * 1.30 = 31.2
+        await page.locator('#discoverer-bonus').fill('50');
+        await page.locator('#discoverer-bonus').blur();
+        await expect(page.locator('#phalanx-range')).toHaveText('31');
+    });
+
+    test('the class bonus is inert while the class is unchecked', async ({ page }) => {
+        await page.locator('#phalanx-lvl').fill('5');
+        await page.locator('#phalanx-lvl').blur();
+        await page.locator('#discoverer-bonus').fill('500');
+        await page.locator('#discoverer-bonus').blur();
+        await expect(page.locator('#phalanx-range')).toHaveText('24');
+    });
+
+    test('the target system yields a distance and the level it takes', async ({ page }) => {
+        await page.locator('#own-system').fill('5');
+        await page.locator('#own-system').blur();
+        await page.locator('#target-system').fill('495');
+        await page.locator('#target-system').blur();
+
+        // The short way round a circular galaxy is 9 systems, which level 4 covers.
+        await expect(page.locator('#phalanx-distance')).toHaveText('9');
+        await expect(page.locator('#phalanx-lvl-required')).toHaveText('4');
+
+        await page.locator('#circular-systems').uncheck();
+        await expect(page.locator('#phalanx-distance')).toHaveText('490');
+        await expect(page.locator('#phalanx-lvl-required')).toHaveText('23');
+    });
+
+    test('a range bonus can bring the required level down', async ({ page }) => {
+        await page.locator('#own-system').fill('5');
+        await page.locator('#own-system').blur();
+        await page.locator('#target-system').fill('495');
+        await page.locator('#target-system').blur();
+        await expect(page.locator('#phalanx-lvl-required')).toHaveText('4');
+
+        // Level 3 spans 8 systems; 8 * 1.20 = 9.6 -> 9, enough for a distance of 9.
+        await page.locator('#phalanx-range-bonus').fill('20');
+        await page.locator('#phalanx-range-bonus').blur();
+        await expect(page.locator('#phalanx-lvl-required')).toHaveText('3');
+    });
+
+    test('the coordinate fields are clamped to the galaxy size on blur', async ({ page }) => {
+        await page.locator('#systems-num').fill('100');
+        await page.locator('#systems-num').blur();
+
+        await page.locator('#own-system').fill('900');
+        await page.locator('#own-system').blur();
+        await expect(page.locator('#own-system')).toHaveValue('100');
+
+        await page.locator('#target-system').fill('900');
+        await page.locator('#target-system').blur();
+        await expect(page.locator('#target-system')).toHaveValue('100');
+    });
+
+    test('a reach that closes the ring collapses to the whole galaxy', async ({ page }) => {
+        await page.locator('#systems-num').fill('100');
+        await page.locator('#systems-num').blur();
+        await page.locator('#own-system').fill('5');
+        await page.locator('#own-system').blur();
+        await page.locator('#phalanx-lvl').fill('10');
+        await page.locator('#phalanx-lvl').blur();
+
+        await expect(page.locator('#visible-systems')).toHaveText('1 – 100');
+        await expect(page.locator('#systems-in-range')).toHaveText('100');
+    });
+
+    test('the phalanx settings survive a reload', async ({ page }) => {
+        await page.locator('#phalanx-lvl').fill('7');
+        await page.locator('#phalanx-lvl').blur();
+        await page.locator('#discoverer-class').check();
+        await page.locator('#discoverer-bonus').fill('12');
+        await page.locator('#discoverer-bonus').blur();
+        await page.locator('#own-system').fill('42');
+        await page.locator('#own-system').blur();
+        await page.locator('#target-system').fill('64');
+        await page.locator('#target-system').blur();
+        await page.locator('#circular-systems').uncheck();
+        await page.locator('#systems-num').fill('400');
+        await page.locator('#systems-num').blur();
+
+        await page.reload();
+
+        await expect(page.locator('#phalanx-lvl')).toHaveValue('7');
+        await expect(page.locator('#discoverer-class')).toBeChecked();
+        await expect(page.locator('#discoverer-bonus')).toHaveValue('12');
+        await expect(page.locator('#own-system')).toHaveValue('42');
+        await expect(page.locator('#target-system')).toHaveValue('64');
+        await expect(page.locator('#circular-systems')).not.toBeChecked();
+        await expect(page.locator('#systems-num')).toHaveValue('400');
+    });
+
+    test('reset restores every phalanx field', async ({ page }) => {
+        await page.locator('#phalanx-lvl').fill('7');
+        await page.locator('#phalanx-lvl').blur();
+        await page.locator('#phalanx-range-bonus').fill('15');
+        await page.locator('#phalanx-range-bonus').blur();
+        await page.locator('#discoverer-class').check();
+        await page.locator('#discoverer-bonus').fill('12');
+        await page.locator('#discoverer-bonus').blur();
+        await page.locator('#own-system').fill('42');
+        await page.locator('#own-system').blur();
+        await page.locator('#target-system').fill('64');
+        await page.locator('#target-system').blur();
+        await page.locator('#circular-systems').uncheck();
+        await page.locator('#systems-num').fill('400');
+        await page.locator('#systems-num').blur();
+
+        await page.locator('#reset-ph').click();
+
+        await expect(page.locator('#phalanx-lvl')).toHaveValue('1');
+        await expect(page.locator('#phalanx-range-bonus')).toHaveValue('0');
+        await expect(page.locator('#discoverer-class')).not.toBeChecked();
+        await expect(page.locator('#discoverer-bonus')).toHaveValue('0');
+        await expect(page.locator('#own-system')).toHaveValue('1');
+        await expect(page.locator('#target-system')).toHaveValue('1');
+        await expect(page.locator('#circular-systems')).toBeChecked();
+        await expect(page.locator('#systems-num')).toHaveValue('499');
+        await expect(page.locator('#phalanx-range')).toHaveText('0');
+        await expect(page.locator('#visible-systems')).toHaveText('1');
+    });
+});

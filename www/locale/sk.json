@@ -583,7 +583,18 @@
     "deut-to-debris": "Deutérium do trosiek",
     "promo-moon": "Akcia: šanca až 40%",
     "max-count-hint": "Počet jednotiek pre maximálnu šancu vzniku Mesiaca. Kliknutím na číslo vedľa vstupného poľa ho vložíte do tohto poľa.",
-    "keywords": "proxyforgame,ogame,kalkulačka mesiacov,šanca na mesiac,pole trosiek,zničenie mesiaca,mesačná základňa,recyklátory,hviezda smrti"
+    "keywords": "proxyforgame,ogame,kalkulačka mesiacov,šanca na mesiac,pole trosiek,zničenie mesiaca,mesačná základňa,recyklátory,hviezda smrti,Parabolické teleskopy",
+    "phalanx-title": "OGame - Kalkulátor parabolických teleskopov",
+    "phalanx-coverage-title": "Dosah teleskopov",
+    "phalanx-range": "Dosah",
+    "visible-systems": "Pokryté systémy",
+    "systems-in-range": "Systémov v dosahu",
+    "phalanx-reach-title": "Dosiahnuť cieľ",
+    "target-system": "Cieľový systém",
+    "own-system": "Vlastný systém",
+    "phalanx-lvl-required": "Potrebná úroveň",
+    "phalanx-range-bonus": "Bonus k dosahu teleskopov",
+    "class-bonus": "Bonus triedy"
   },
   "production": {
     "param-tab-general": "Všeobecné",

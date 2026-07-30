@@ -583,7 +583,18 @@
     "deut-to-debris": "Deuterium enkaza",
     "promo-moon": "Etkinlik: şans %40’a kadar",
     "max-count-hint": "Maksimum ay oluşturma şansı için birim sayısı. Bir giriş alanının yanındaki sayıya tıklayarak onu alana yazabilirsiniz.",
-    "keywords": "proxyforgame,ogame,ay hesaplayıcı,ay şansı,enkaz alanı,ay yok etme,ay üssü,geri dönüşümcüler,ölüm yıldızı"
+    "keywords": "proxyforgame,ogame,ay hesaplayıcı,ay şansı,enkaz alanı,ay yok etme,ay üssü,geri dönüşümcüler,ölüm yıldızı,Radar İstasyonu",
+    "phalanx-title": "OGame - Radar İstasyonu hesaplayıcı",
+    "phalanx-coverage-title": "Radar kapsama alanı",
+    "phalanx-range": "Menzil",
+    "visible-systems": "Kapsanan sistemler",
+    "systems-in-range": "Menzildeki sistemler",
+    "phalanx-reach-title": "Bir hedefe ulaşmak",
+    "target-system": "Hedef sistem",
+    "own-system": "Kendi sisteminiz",
+    "phalanx-lvl-required": "Gerekli seviye",
+    "phalanx-range-bonus": "Radar menzil bonusu",
+    "class-bonus": "Sınıf bonusu"
   },
   "production": {
     "param-tab-general": "Genel",

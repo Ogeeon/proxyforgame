@@ -583,7 +583,18 @@
     "deut-to-debris": "Deuterium to debris",
     "promo-moon": "Event: chance up to 40%",
     "max-count-hint": "Number of units that reach the maximum moon creation chance. Click a number next to an input to fill it in.",
-    "keywords": "proxyforgame,ogame,moon calculator,moon chance,debris field,moon destruction,lunar base,recyclers,deathstar"
+    "keywords": "proxyforgame,ogame,moon calculator,moon chance,debris field,moon destruction,lunar base,recyclers,deathstar,Sensor phalanx",
+    "phalanx-title": "OGame - Sensor phalanx calculator",
+    "phalanx-coverage-title": "Phalanx coverage",
+    "phalanx-range": "Range",
+    "visible-systems": "Systems covered",
+    "systems-in-range": "Systems in range",
+    "phalanx-reach-title": "Reaching a target",
+    "target-system": "Target system",
+    "own-system": "Your system",
+    "phalanx-lvl-required": "Required level",
+    "phalanx-range-bonus": "Phalanx range bonus",
+    "class-bonus": "Class bonus"
   },
   "production": {
     "param-tab-general": "General",

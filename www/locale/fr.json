@@ -567,7 +567,7 @@
   },
   "moon": {
     "title": "OGame - Calculatrices pour Lunes",
-    "keywords": "proxyforgame,ogame,calculatrice de lune,chance de lune,champ de débris,destruction de lune,base lunaire,recycleurs,étoile de la mort",
+    "keywords": "proxyforgame,ogame,calculatrice de lune,chance de lune,champ de débris,destruction de lune,base lunaire,recycleurs,étoile de la mort,Phalange de capteur",
     "destroy-title": "OGame - Calculatrice de la destruction de la lune",
     "create-title": "OGame - Calculatrice de la création de la lune",
     "moon-size": "Diamètre de la lune",
@@ -583,7 +583,18 @@
     "deut-to-debris": "Deutérium dans le champ de débris",
     "promo-moon": "Événement : chance jusqu’à 40%",
     "max-count-hint": "Nombre d’unités pour la chance maximale de création de lune. Cliquez sur un nombre à côté d’un champ pour le reporter dans ce champ.",
-    "recycling": "Démantèlement de débris"
+    "recycling": "Démantèlement de débris",
+    "phalanx-title": "OGame - Calculatrice de la phalange de capteur",
+    "phalanx-coverage-title": "Portée de la phalange",
+    "phalanx-range": "Portée",
+    "visible-systems": "Systèmes couverts",
+    "systems-in-range": "Systèmes à portée",
+    "phalanx-reach-title": "Atteindre une cible",
+    "target-system": "Système cible",
+    "own-system": "Votre système",
+    "phalanx-lvl-required": "Niveau requis",
+    "phalanx-range-bonus": "Bonus de portée de la phalange",
+    "class-bonus": "Bonus de classe"
   },
   "production": {
     "param-tab-general": "Général",

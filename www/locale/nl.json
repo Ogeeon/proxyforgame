@@ -567,7 +567,7 @@
   },
   "moon": {
     "title": "OGame – Maan calculator",
-    "keywords": "proxyforgame,ogame,maancalculator,maankans,puinveld,maan vernietigen,maanbasis,recyclers,ster des doods",
+    "keywords": "proxyforgame,ogame,maancalculator,maankans,puinveld,maan vernietigen,maanbasis,recyclers,ster des doods,Sensorphalanx",
     "recycling": "Voor vernietigen van energie sats",
     "destroy-title": "OGame - Maanvernietingscalculator",
     "create-title": "OGame - Maanvormingscalculator",
@@ -583,7 +583,18 @@
     "defense-to-debris": "Verdediging in puinveld",
     "deut-to-debris": "Deuterium in puinveld",
     "promo-moon": "Evenement: kans tot 40%",
-    "max-count-hint": "Aantal eenheden voor de maximale maanvormingskans. Klik op een getal naast een invoerveld om het in dat veld te zetten."
+    "max-count-hint": "Aantal eenheden voor de maximale maanvormingskans. Klik op een getal naast een invoerveld om het in dat veld te zetten.",
+    "phalanx-title": "OGame - Sensorphalanxcalculator",
+    "phalanx-coverage-title": "Bereik van de phalanx",
+    "phalanx-range": "Bereik",
+    "visible-systems": "Bestreken systemen",
+    "systems-in-range": "Systemen binnen bereik",
+    "phalanx-reach-title": "Een doel bereiken",
+    "target-system": "Doelsysteem",
+    "own-system": "Eigen systeem",
+    "phalanx-lvl-required": "Vereist niveau",
+    "phalanx-range-bonus": "Bonus op phalanxbereik",
+    "class-bonus": "Klassebonus"
   },
   "production": {
     "param-tab-general": "Algemeen",

@@ -10,6 +10,10 @@
 
 'use strict';
 
+// Widest galaxy the calculator accepts, matching the flight calculator's own
+// ceiling for the same setting.
+const MOON_MAX_SYSTEMS = 550;
+
 const options = {
   defConstraints: { min: -Infinity, max: Infinity, def: 0, allowFloat: false, allowNegative: false },
 
@@ -24,6 +28,18 @@ const options = {
     deutToDebris: false,
     promoMoon: false,
     supraRefractorLevel: 0,
+    phalanxLevel: 1,
+    phalanxRangeBonus: 0,
+    isDiscoverer: false,
+    discovererBonus: 0,
+    ownSystem: 1,
+    targetSystem: 1,
+    // Unlike the flight calculator, which defaults to a galaxy that does not
+    // wrap, the phalanx panel assumes it does: nearly every current universe is
+    // circular, and the wrong assumption here silently hands the player a range
+    // of systems they cannot actually see.
+    circularSystems: true,
+    numberOfSystems: 499,
 
     validate: function (field, value) {
       switch (field) {
@@ -37,6 +53,17 @@ const options = {
         case 'deutToDebris': return value === 'true';
         case 'promoMoon': return value === 'true';
         case 'supraRefractorLevel': return validateNumber(Number.parseFloat(value), 0, 100, 0);
+        case 'phalanxLevel': return validateNumber(Number.parseFloat(value), 1, PHALANX_MAX_LEVEL, 1);
+        case 'phalanxRangeBonus': return validateNumber(Number.parseFloat(value), 0, Infinity, 0);
+        case 'isDiscoverer': return value === 'true';
+        case 'discovererBonus': return validateNumber(Number.parseFloat(value), 0, Infinity, 0);
+        // The real ceiling is whatever `numberOfSystems` currently holds, which
+        // is not known here; _applySystemLimits keeps the fields themselves in
+        // step, and the core clamps anything that slips through either way.
+        case 'ownSystem': return validateNumber(Number.parseFloat(value), 1, MOON_MAX_SYSTEMS, 1);
+        case 'targetSystem': return validateNumber(Number.parseFloat(value), 1, MOON_MAX_SYSTEMS, 1);
+        case 'circularSystems': return value === 'true';
+        case 'numberOfSystems': return validateNumber(Number.parseFloat(value), 1, MOON_MAX_SYSTEMS, 499);
         default: return value;
       }
     }
@@ -54,6 +81,8 @@ const MOON_PERSISTED_PARAMS = [
   'moonSize', 'dsCount', 'debrisPercent', 'hyperTechLevel',
   'isGeneral', 'rcCapacityIncrease',
   'defenseToDebris', 'deutToDebris', 'promoMoon', 'supraRefractorLevel',
+  'phalanxLevel', 'phalanxRangeBonus', 'isDiscoverer', 'discovererBonus',
+  'ownSystem', 'targetSystem', 'circularSystems', 'numberOfSystems',
 ];
 
 class MoonApp {
@@ -63,8 +92,13 @@ class MoonApp {
     // the two destruction fields, the hyperspace level and every unit count.
     this.numericInputs = [
       '#moon-size', '#ds-count', '#hypertech-lvl', '#rc-capacity-increase', '#supra-refractor',
+      '#phalanx-lvl', '#phalanx-range-bonus', '#discoverer-bonus',
+      '#own-system', '#target-system', '#systems-num',
     ].concat(MOON_UNITS.map((unit) => '#' + unit.id));
-    this.checkboxes = ['#general-class', '#defense-to-debris', '#deut-to-debris', '#promo-moon'];
+    this.checkboxes = [
+      '#general-class', '#defense-to-debris', '#deut-to-debris', '#promo-moon',
+      '#discoverer-class', '#circular-systems',
+    ];
   }
 
   init() {
@@ -87,6 +121,15 @@ class MoonApp {
     setChecked('#deut-to-debris', options.prm.deutToDebris);
     setChecked('#promo-moon', options.prm.promoMoon);
     setVal('#supra-refractor', options.prm.supraRefractorLevel);
+
+    setVal('#phalanx-lvl', options.prm.phalanxLevel);
+    setNumVal('#phalanx-range-bonus', options.prm.phalanxRangeBonus);
+    setChecked('#discoverer-class', options.prm.isDiscoverer);
+    setNumVal('#discoverer-bonus', options.prm.discovererBonus);
+    setVal('#own-system', options.prm.ownSystem);
+    setVal('#target-system', options.prm.targetSystem);
+    setChecked('#circular-systems', options.prm.circularSystems);
+    setVal('#systems-num', options.prm.numberOfSystems);
   }
 
   _applyConstraints() {
@@ -104,6 +147,25 @@ class MoonApp {
       const el = document.getElementById(unit.id);
       if (el) el._constrains = { min: 0, def: 0 };
     });
+
+    setConstrains('phalanx-lvl', { min: 1, max: PHALANX_MAX_LEVEL, def: 1 });
+    // Both range bonuses are open-ended: the life form researches behind them
+    // have no level cap and no bonus cap.
+    setConstrains('phalanx-range-bonus', { min: 0, def: 0, allowNegative: false, allowFloat: true });
+    setConstrains('discoverer-bonus', { min: 0, def: 0, allowNegative: false, allowFloat: true });
+    setConstrains('systems-num', { min: 1, max: MOON_MAX_SYSTEMS, def: 499 });
+    this._applySystemLimits(options.prm.numberOfSystems);
+  }
+
+  /**
+   * Keep the two coordinate fields inside the galaxy the player described. The
+   * ceiling moves with the "number of systems" field, so it cannot live in the
+   * static constraints above.
+   */
+  _applySystemLimits(numberOfSystems) {
+    const max = clampNumber(Math.floor(numberOfSystems || 1), 1, MOON_MAX_SYSTEMS);
+    setConstrains('own-system', { min: 1, max: max, def: 1 });
+    setConstrains('target-system', { min: 1, max: max, def: 1 });
   }
 
   _bindEvents() {
@@ -123,6 +185,7 @@ class MoonApp {
 
     addEvent('#reset-ds', 'click', () => this._resetDestroyParams());
     addEvent('#reset-cr', 'click', () => this._resetCreateParams());
+    addEvent('#reset-ph', 'click', () => this._resetPhalanxParams());
 
     // Click a per-unit "max" label to copy that count into the adjacent input.
     // The renderer stashes the raw integer in data-max-count; a dash (no
@@ -163,6 +226,7 @@ class MoonApp {
    */
   recalc() {
     const p = MoonDataCollector.readParams();
+    this._applySystemLimits(p.numberOfSystems);
     MOON_PERSISTED_PARAMS.forEach((key) => { options.prm[key] = p[key]; });
     MoonRenderer.render(this.calc.compute(p));
     options.save();
@@ -195,6 +259,28 @@ class MoonApp {
     setChecked('#promo-moon', false);
     setVal('#supra-refractor', 0);
     MOON_UNITS.forEach((unit) => setVal('#' + unit.id, 0));
+
+    this.recalc();
+  }
+
+  _resetPhalanxParams() {
+    options.prm.phalanxLevel = 1;
+    options.prm.phalanxRangeBonus = 0;
+    options.prm.isDiscoverer = false;
+    options.prm.discovererBonus = 0;
+    options.prm.ownSystem = 1;
+    options.prm.targetSystem = 1;
+    options.prm.circularSystems = true;
+    options.prm.numberOfSystems = 499;
+
+    setVal('#phalanx-lvl', options.prm.phalanxLevel);
+    setNumVal('#phalanx-range-bonus', 0);
+    setChecked('#discoverer-class', false);
+    setNumVal('#discoverer-bonus', 0);
+    setVal('#own-system', options.prm.ownSystem);
+    setVal('#target-system', options.prm.targetSystem);
+    setChecked('#circular-systems', true);
+    setVal('#systems-num', options.prm.numberOfSystems);
 
     this.recalc();
   }

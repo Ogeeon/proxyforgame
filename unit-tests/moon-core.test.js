@@ -22,10 +22,24 @@ const BASE_PRM = {
     promoMoon: false,
     supraRefractorLevel: 0,
     counts: {},
+    phalanxLevel: 1,
+    phalanxRangeBonus: 0,
+    isDiscoverer: false,
+    discovererBonus: 0,
+    ownSystem: 1,
+    targetSystem: 1,
+    circularSystems: true,
+    numberOfSystems: 499,
 };
 
 function compute(overrides = {}) {
     return new MoonCalculator().compute({ ...BASE_PRM, ...overrides });
+}
+
+// Arrays built inside the vm context carry that realm's Array prototype, which
+// deepStrictEqual rejects out of hand. Rebuild both levels in this realm first.
+function segments(result) {
+    return Array.from(result.phalanxSegments, (pair) => Array.from(pair));
 }
 
 describe('Moon Calculator - Destruction', () => {
@@ -316,5 +330,127 @@ describe('Moon Calculator - Units for the maximum chance', () => {
     it('a rocket launcher with no deuterium value still has a maximum', () => {
         const r = compute({ defenseToDebris: true });
         expect(r.maxCounts['rocket-launcher']).toBe(Math.ceil(2000000 / (2000 * 0.3)));
+    });
+});
+
+describe('Moon Calculator - Sensor phalanx range', () => {
+    it('the bare range is the level squared minus one', () => {
+        expect(compute({ phalanxLevel: 5 }).phalanxRange).toBe(24);
+        expect(compute({ phalanxLevel: 8 }).phalanxRange).toBe(63);
+    });
+
+    it('a level 1 phalanx reaches no further than its own system', () => {
+        const r = compute({ phalanxLevel: 1, ownSystem: 5 });
+        expect(r.phalanxRange).toBe(0);
+        expect(segments(r)).toEqual([[5, 5]]);
+        expect(r.phalanxSystemsInRange).toBe(1);
+    });
+
+    it('the Analysis Network percentage widens the range', () => {
+        // 24 * 1.10 = 26.4
+        expect(compute({ phalanxLevel: 5, phalanxRangeBonus: 10 }).phalanxRange).toBe(26);
+    });
+
+    it('the Discoverer class adds a flat 20%', () => {
+        // 24 * 1.20 = 28.8
+        expect(compute({ phalanxLevel: 5, isDiscoverer: true }).phalanxRange).toBe(28);
+    });
+
+    it('the class bonus amplifies the Discoverer contribution, not the range', () => {
+        // 0.20 * (1 + 0.50) = 0.30, so 24 * 1.30 = 31.2
+        const r = compute({ phalanxLevel: 5, isDiscoverer: true, discovererBonus: 50 });
+        expect(r.phalanxRange).toBe(31);
+    });
+
+    it('the class bonus does nothing while the class is unchecked', () => {
+        const r = compute({ phalanxLevel: 5, discovererBonus: 500 });
+        expect(r.phalanxRange).toBe(24);
+    });
+
+    it('the two bonuses add into one multiplier rather than compounding', () => {
+        // Level 10 spans 99 systems. Added: 99 * 1.30 = 128.7 -> 128.
+        // Compounded it would be 99 * 1.10 * 1.20 = 130.68 -> 130.
+        const r = compute({ phalanxLevel: 10, phalanxRangeBonus: 10, isDiscoverer: true });
+        expect(r.phalanxRange).toBe(128);
+    });
+
+    it('the boosted range is truncated, not rounded', () => {
+        // Level 3 spans 8 systems; 8 * 1.10 = 8.8
+        expect(compute({ phalanxLevel: 3, phalanxRangeBonus: 10 }).phalanxRange).toBe(8);
+    });
+});
+
+describe('Moon Calculator - Systems the phalanx covers', () => {
+    it('a reach that clears both ends is a single segment', () => {
+        const r = compute({ phalanxLevel: 5, ownSystem: 100 });
+        expect(segments(r)).toEqual([[76, 124]]);
+        expect(r.phalanxSystemsInRange).toBe(49);
+    });
+
+    it('a circular galaxy wraps around the low end', () => {
+        const r = compute({ phalanxLevel: 5, ownSystem: 5 });
+        expect(segments(r)).toEqual([[480, 499], [1, 29]]);
+        expect(r.phalanxSystemsInRange).toBe(49);
+    });
+
+    it('a circular galaxy wraps around the high end', () => {
+        const r = compute({ phalanxLevel: 5, ownSystem: 495 });
+        expect(segments(r)).toEqual([[471, 499], [1, 20]]);
+        expect(r.phalanxSystemsInRange).toBe(49);
+    });
+
+    it('a galaxy that does not wrap clips at the edge and counts the remainder', () => {
+        const r = compute({ phalanxLevel: 5, ownSystem: 5, circularSystems: false });
+        expect(segments(r)).toEqual([[1, 29]]);
+        expect(r.phalanxSystemsInRange).toBe(29);
+    });
+
+    it('a reach that closes the ring collapses to the whole galaxy', () => {
+        // Level 10 spans 99 systems, so 199 of a 100-system galaxy.
+        const r = compute({ phalanxLevel: 10, ownSystem: 5, numberOfSystems: 100 });
+        expect(segments(r)).toEqual([[1, 100]]);
+        expect(r.phalanxSystemsInRange).toBe(100);
+    });
+
+    it('an own system past the end of the galaxy is pulled back inside it', () => {
+        const r = compute({ phalanxLevel: 1, ownSystem: 900, numberOfSystems: 499 });
+        expect(segments(r)).toEqual([[499, 499]]);
+    });
+});
+
+describe('Moon Calculator - Reaching a target system', () => {
+    it('the distance is the plain gap when the galaxy does not wrap', () => {
+        const r = compute({ ownSystem: 5, targetSystem: 495, circularSystems: false });
+        expect(r.phalanxDistance).toBe(490);
+    });
+
+    it('a circular galaxy is crossed the short way round', () => {
+        const r = compute({ ownSystem: 5, targetSystem: 495 });
+        expect(r.phalanxDistance).toBe(9);
+    });
+
+    it('the required level is the lowest one that covers the distance', () => {
+        // Level 3 spans 8 systems, level 4 spans 15.
+        const r = compute({ ownSystem: 5, targetSystem: 495 });
+        expect(r.phalanxDistance).toBe(9);
+        expect(r.phalanxLevelRequired).toBe(4);
+    });
+
+    it('a bonus can bring the required level down', () => {
+        // 8 * 1.20 = 9.6 -> 9, which now covers a distance of 9.
+        const r = compute({ ownSystem: 5, targetSystem: 495, phalanxRangeBonus: 20 });
+        expect(r.phalanxLevelRequired).toBe(3);
+    });
+
+    it('reaching your own system takes the lowest level there is', () => {
+        const r = compute({ ownSystem: 42, targetSystem: 42 });
+        expect(r.phalanxDistance).toBe(0);
+        expect(r.phalanxLevelRequired).toBe(1);
+    });
+
+    it('the far side of the widest universe stays within the level cap', () => {
+        const r = compute({ ownSystem: 1, targetSystem: 550, numberOfSystems: 550, circularSystems: false });
+        expect(r.phalanxDistance).toBe(549);
+        expect(r.phalanxLevelRequired).toBe(24);
     });
 });

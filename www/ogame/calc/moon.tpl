@@ -313,6 +313,103 @@
     </div>
   </div>
 
+  <!-- ================= Sensor phalanx ================= -->
+  <div class="border rounded mt-2">
+    <div class="d-flex align-items-center">
+      <div class="bg-body-secondary text-primary-emphasis rounded main-header text-center flex-grow-1"><?= $l['phalanx-title'] ?></div>
+      <div id="reset-ph" class="d-flex align-items-center justify-content-center bg-danger-subtle" data-bs-toggle="tooltip" title="<?= $l['reset'] ?>">
+        <i class="bi bi-arrow-counterclockwise" style="color: #dc3545; font-size: 1.25rem;"></i>
+      </div>
+    </div>
+
+    <!-- Parameters, shared by both sub-blocks below -->
+    <div class="border rounded m-1 p-2">
+      <p class="border rounded subheader bg-primary-subtle"><b><?= $l['parameters'] ?></b></p>
+      <div class="d-flex flex-wrap gap-3 align-items-center justify-content-center mb-2">
+        <div class="d-flex align-items-center gap-1">
+          <label for="phalanx-range-bonus"><?= $l['phalanx-range-bonus'] ?></label>
+          <div class="input-group input-group-sm w-auto">
+            <input id="phalanx-range-bonus" type="text" name="phalanx-range-bonus" class="form-control m-0" value="0" alt="<?= $l['phalanx-range-bonus'] ?>"/>
+            <span class="input-group-text">%</span>
+          </div>
+        </div>
+        <div class="d-flex align-items-center gap-1">
+          <input id="discoverer-class" type="checkbox" name="discoverer-class" class="form-check-input"/>
+          <label for="discoverer-class"><?= $l['class'] ?>: <?= $l['class-discoverer'] ?></label>
+        </div>
+        <div class="d-flex align-items-center gap-1">
+          <label for="discoverer-bonus"><?= $l['class-bonus'] ?></label>
+          <div class="input-group input-group-sm w-auto">
+            <input id="discoverer-bonus" type="text" name="discoverer-bonus" class="form-control m-0" value="0" alt="<?= $l['class-bonus'] ?>"/>
+            <span class="input-group-text">%</span>
+          </div>
+        </div>
+      </div>
+      <div class="d-flex flex-wrap gap-3 align-items-center justify-content-center">
+        <div class="d-flex align-items-center gap-1">
+          <label for="own-system"><?= $l['own-system'] ?></label>
+          <input id="own-system" type="text" name="own-system" class="form-control form-control-sm level-input" value="1" alt="<?= $l['own-system'] ?>"/>
+        </div>
+        <div class="d-flex align-items-center gap-1">
+          <input id="circular-systems" type="checkbox" name="circular-systems" class="form-check-input" checked="checked" data-bs-toggle="tooltip" title="<?= $l['circ-systems-explain'] ?>"/>
+          <label for="circular-systems"><?= $l['circular'] ?> <?= $l['circ-systems'] ?></label>
+        </div>
+        <div class="d-flex align-items-center gap-1">
+          <label for="systems-num"><?= $l['systems-num'] ?></label>
+          <input id="systems-num" type="text" name="systems-num" class="form-control form-control-sm level-input" value="499" alt="<?= $l['systems-num'] ?>"/>
+        </div>
+      </div>
+    </div>
+
+    <!-- What the phalanx covers from the player's own system -->
+    <div class="border rounded m-1 p-2">
+      <p class="border rounded subheader bg-primary-subtle"><b><?= $l['phalanx-coverage-title'] ?></b></p>
+      <div class="d-flex flex-wrap gap-3 align-items-center justify-content-center">
+        <div class="d-flex align-items-center gap-1">
+          <label for="phalanx-lvl"><?= $l['sensor-phalanx'] ?></label>
+          <input id="phalanx-lvl" type="text" name="phalanx-lvl" class="form-control form-control-sm level-input" value="1" alt="<?= $l['sensor-phalanx'] ?>"/>
+        </div>
+        <div class="d-flex align-items-center gap-1">
+          <label><?= $l['phalanx-range'] ?></label>
+          <div class="input-group input-group-sm w-auto">
+            <div id="phalanx-range" class="form-control systems-show ui-state-disabled m-0">0</div>
+            <span class="input-group-text"><?= $l['systems'] ?></span>
+          </div>
+        </div>
+        <div class="d-flex align-items-center gap-1">
+          <label><?= $l['systems-in-range'] ?></label>
+          <div id="systems-in-range" class="form-control form-control-sm d-inline-block systems-show ui-state-disabled">1</div>
+        </div>
+      </div>
+      <div class="d-flex flex-wrap gap-2 align-items-center justify-content-center mt-2">
+        <label><?= $l['visible-systems'] ?></label>
+        <div id="visible-systems" class="form-control form-control-sm d-inline-block segments-show ui-state-disabled">-</div>
+      </div>
+    </div>
+
+    <!-- What it would take to reach a given system -->
+    <div class="border rounded m-1 p-2">
+      <p class="border rounded subheader bg-primary-subtle"><b><?= $l['phalanx-reach-title'] ?></b></p>
+      <div class="d-flex flex-wrap gap-3 align-items-center justify-content-center">
+        <div class="d-flex align-items-center gap-1">
+          <label for="target-system"><?= $l['target-system'] ?></label>
+          <input id="target-system" type="text" name="target-system" class="form-control form-control-sm level-input" value="1" alt="<?= $l['target-system'] ?>"/>
+        </div>
+        <div class="d-flex align-items-center gap-1">
+          <label><?= $l['distance'] ?></label>
+          <div class="input-group input-group-sm w-auto">
+            <div id="phalanx-distance" class="form-control systems-show ui-state-disabled m-0">0</div>
+            <span class="input-group-text"><?= $l['systems'] ?></span>
+          </div>
+        </div>
+        <div class="d-flex align-items-center gap-1">
+          <label><?= $l['phalanx-lvl-required'] ?></label>
+          <div id="phalanx-lvl-required" class="form-control form-control-sm d-inline-block systems-show ui-state-disabled">1</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <div id="warning">
     <div id="warning-message"></div>
   </div>

@@ -583,7 +583,18 @@
     "promo-moon": "Wydarzenie: szansa do 40%",
     "max-count-hint": "Liczba jednostek dla maksymalnej szansy na stworzenie księżyca. Kliknij liczbę obok pola, aby wstawić ją do tego pola.",
     "recycling": "Zbieranie odpadków",
-    "keywords": "proxyforgame,ogame,kalkulator księżyca,szansa na księżyc,pole zniszczeń,niszczenie księżyca,baza księżycowa,recyklery,gwiazda śmierci"
+    "keywords": "proxyforgame,ogame,kalkulator księżyca,szansa na księżyc,pole zniszczeń,niszczenie księżyca,baza księżycowa,recyklery,gwiazda śmierci,Falanga czujników",
+    "phalanx-title": "OGame - Kalkulator falangi czujników",
+    "phalanx-coverage-title": "Zasięg falangi",
+    "phalanx-range": "Zasięg",
+    "visible-systems": "Objęte systemy",
+    "systems-in-range": "Systemów w zasięgu",
+    "phalanx-reach-title": "Zasięg do celu",
+    "target-system": "System celu",
+    "own-system": "Twój system",
+    "phalanx-lvl-required": "Wymagany poziom",
+    "phalanx-range-bonus": "Premia do zasięgu falangi",
+    "class-bonus": "Premia klasy"
   },
   "production": {
     "param-tab-general": "Ogólne",

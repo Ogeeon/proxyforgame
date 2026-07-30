@@ -567,7 +567,7 @@
   },
   "moon": {
     "title": "OGame - Moons Rechner",
-    "keywords": "proxyforgame,ogame,mondrechner,mondchance,trümmerfeld,mond zerstören,mondbasis,recycler,todesstern",
+    "keywords": "proxyforgame,ogame,mondrechner,mondchance,trümmerfeld,mond zerstören,mondbasis,recycler,todesstern,Sensorphalanx",
     "recycling": "Schrott sammeln",
     "destroy-title": "OGame - Mondzerstörung Rechner",
     "create-title": "OGame - Mond-Erschaffungs-Rechner",
@@ -583,7 +583,18 @@
     "defense-to-debris": "Verteidigung ins Trümmerfeld",
     "deut-to-debris": "Deuterium ins Trümmerfeld",
     "promo-moon": "Aktion: Chance bis 40%",
-    "max-count-hint": "Anzahl der Einheiten für die maximale Mondchance. Klicke auf eine Zahl neben einem Eingabefeld, um sie dort einzutragen."
+    "max-count-hint": "Anzahl der Einheiten für die maximale Mondchance. Klicke auf eine Zahl neben einem Eingabefeld, um sie dort einzutragen.",
+    "phalanx-title": "OGame - Sensorphalanx-Rechner",
+    "phalanx-coverage-title": "Phalanx-Reichweite",
+    "phalanx-range": "Reichweite",
+    "visible-systems": "Erfasste Systeme",
+    "systems-in-range": "Systeme in Reichweite",
+    "phalanx-reach-title": "Ein Ziel erreichen",
+    "target-system": "Zielsystem",
+    "own-system": "Eigenes System",
+    "phalanx-lvl-required": "Benötigte Stufe",
+    "phalanx-range-bonus": "Bonus auf die Phalanx-Reichweite",
+    "class-bonus": "Klassenbonus"
   },
   "production": {
     "param-tab-general": "Allgemein",

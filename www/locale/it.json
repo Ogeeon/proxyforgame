@@ -583,7 +583,18 @@
     "promo-moon": "Evento: probabilità fino al 40%",
     "max-count-hint": "Numero di unità per la massima possibilità di creazione della Luna. Clicca su un numero accanto a un campo per inserirlo nel campo.",
     "recycling": "Riciclare il campo di detriti",
-    "keywords": "proxyforgame,ogame,calcolatore lune,probabilità luna,campo detriti,distruzione luna,base lunare,riciclatori,morte nera"
+    "keywords": "proxyforgame,ogame,calcolatore lune,probabilità luna,campo detriti,distruzione luna,base lunare,riciclatori,morte nera,Falange di Sensori",
+    "phalanx-title": "OGame - Calcolatrice della Falange di Sensori",
+    "phalanx-coverage-title": "Portata della falange",
+    "phalanx-range": "Portata",
+    "visible-systems": "Sistemi coperti",
+    "systems-in-range": "Sistemi a portata",
+    "phalanx-reach-title": "Raggiungere un obiettivo",
+    "target-system": "Sistema obiettivo",
+    "own-system": "Il tuo sistema",
+    "phalanx-lvl-required": "Livello richiesto",
+    "phalanx-range-bonus": "Bonus alla portata della falange",
+    "class-bonus": "Bonus di classe"
   },
   "production": {
     "param-tab-general": "Generale",

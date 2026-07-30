@@ -59,7 +59,8 @@
 }
 
 #reset-ds,
-#reset-cr {
+#reset-cr,
+#reset-ph {
   cursor: pointer;
   z-index: 10;
   width: 30px;
@@ -111,7 +112,9 @@
    much as the width: Bootstrap forces `.input-group > .form-control
    { flex: 1 1 auto; width: 1% }`, and leaving the grow/shrink in place lets the
    field stretch or collapse away from its fixed 60px. */
-#rc-capacity-increase {
+#rc-capacity-increase,
+#phalanx-range-bonus,
+#discoverer-bonus {
   flex: 0 0 auto;
   width: 60px;
   text-align: center;
@@ -177,6 +180,27 @@
 .input-group>.form-control.size-show {
   flex: 0 0 auto;
   width: 140px;
+}
+
+/* Phalanx readouts that hold a single small integer: a range, a distance, a
+   count of systems and a level all stay well inside three digits. The range and
+   the distance carry a `systems´ addon, hence the same input-group escape the
+   readouts above need. */
+.systems-show {
+  width: 60px;
+  text-align: center;
+}
+
+.input-group>.form-control.systems-show {
+  flex: 0 0 auto;
+  width: 60px;
+}
+
+/* The covered systems, one segment per contiguous run. A circular galaxy wraps
+   into the widest case there is - "480 – 499, 1 – 29". */
+.segments-show {
+  width: 190px;
+  text-align: center;
 }
 
 /* One badge per equally likely diameter roll. These are a supporting readout,

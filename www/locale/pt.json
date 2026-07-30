@@ -583,7 +583,18 @@
     "promo-moon": "Evento: probabilidade até 40%",
     "max-count-hint": "Número de unidades para a probabilidade máxima de criação de lua. Clique num número ao lado de um campo para o inserir nesse campo.",
     "recycling": "Detritos colheita",
-    "keywords": "proxyforgame,ogame,calculadora de luas,probabilidade de lua,campo de destroços,destruição de lua,base lunar,recicladores,estrela da morte"
+    "keywords": "proxyforgame,ogame,calculadora de luas,probabilidade de lua,campo de destroços,destruição de lua,base lunar,recicladores,estrela da morte,Sensor phalanx",
+    "phalanx-title": "OGame - Calculadora do Sensor phalanx",
+    "phalanx-coverage-title": "Alcance da falange",
+    "phalanx-range": "Alcance",
+    "visible-systems": "Sistemas abrangidos",
+    "systems-in-range": "Sistemas ao alcance",
+    "phalanx-reach-title": "Alcançar um alvo",
+    "target-system": "Sistema alvo",
+    "own-system": "O seu sistema",
+    "phalanx-lvl-required": "Nível necessário",
+    "phalanx-range-bonus": "Bónus ao alcance da falange",
+    "class-bonus": "Bónus de classe"
   },
   "production": {
     "param-tab-general": "Geral",

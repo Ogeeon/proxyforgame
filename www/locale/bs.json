@@ -583,7 +583,18 @@
     "deut-to-debris": "Deuterij u ruševine",
     "promo-moon": "Događaj: šansa do 40%",
     "max-count-hint": "Broj jedinica za maksimalnu šansu stvaranja mjeseca. Kliknite na broj pored polja za unos da ga upišete u polje.",
-    "keywords": "proxyforgame,ogame,kalkulator mjeseca,šansa za mjesec,polje ruševina,uništavanje mjeseca,mjesečeva baza,recikleri,zvijezda smrti"
+    "keywords": "proxyforgame,ogame,kalkulator mjeseca,šansa za mjesec,polje ruševina,uništavanje mjeseca,mjesečeva baza,recikleri,zvijezda smrti,Senzorfalanga",
+    "phalanx-title": "OGame - Kalkulator senzorfalange",
+    "phalanx-coverage-title": "Domet falange",
+    "phalanx-range": "Domet",
+    "visible-systems": "Obuhvaćeni sistemi",
+    "systems-in-range": "Sistema u dometu",
+    "phalanx-reach-title": "Dosezanje cilja",
+    "target-system": "Ciljni sistem",
+    "own-system": "Vaš sistem",
+    "phalanx-lvl-required": "Potreban nivo",
+    "phalanx-range-bonus": "Bonus na domet falange",
+    "class-bonus": "Bonus klase"
   },
   "production": {
     "param-tab-general": "Opšte",

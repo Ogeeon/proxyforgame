@@ -583,7 +583,18 @@
     "promo-moon": "Evento: probabilidad hasta el 40%",
     "max-count-hint": "Número de unidades para la máxima probabilidad de creación de luna. Haz clic en un número junto a un campo para introducirlo en él.",
     "recycling": "Recolectar los escombros",
-    "keywords": "proxyforgame,ogame,calculadora de luna,probabilidad de luna,campo de escombros,destrucción de luna,base lunar,recicladores,estrella de la muerte"
+    "keywords": "proxyforgame,ogame,calculadora de luna,probabilidad de luna,campo de escombros,destrucción de luna,base lunar,recicladores,estrella de la muerte,Sensor phalanx",
+    "phalanx-title": "OGame - Calculadora del Sensor phalanx",
+    "phalanx-coverage-title": "Alcance de la falange",
+    "phalanx-range": "Alcance",
+    "visible-systems": "Sistemas cubiertos",
+    "systems-in-range": "Sistemas al alcance",
+    "phalanx-reach-title": "Alcanzar un objetivo",
+    "target-system": "Sistema objetivo",
+    "own-system": "Tu sistema",
+    "phalanx-lvl-required": "Nivel necesario",
+    "phalanx-range-bonus": "Bonificación al alcance de la falange",
+    "class-bonus": "Bonificación de clase"
   },
   "production": {
     "param-tab-general": "General",
