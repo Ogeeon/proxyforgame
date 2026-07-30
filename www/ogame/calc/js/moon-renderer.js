@@ -50,11 +50,24 @@ class MoonRenderer {
   /**
    * Render the "how many of this unit reach the maximum chance" label next to
    * every count input. A dash means the unit cannot contribute at all.
+   *
+   * The raw integer is also stashed in `data-max-count` so the click-to-fill
+   * handler in the orchestrator can copy it straight into the count input
+   * without re-parsing the locale-formatted display text (whose thousands
+   * separator would otherwise be misread as a decimal point in some locales).
    */
   static renderMaxCounts(r) {
     MOON_UNITS.forEach((unit) => {
       const max = r.maxCounts[unit.id];
-      setTextContent('#' + unit.id + '-max', max === null ? '-' : MoonRenderer.formatNumber(max));
+      const label = $('#' + unit.id + '-max');
+      if (!label) return;
+      if (max === null) {
+        label.textContent = '-';
+        delete label.dataset.maxCount;
+      } else {
+        label.textContent = MoonRenderer.formatNumber(max);
+        label.dataset.maxCount = String(max);
+      }
     });
   }
 

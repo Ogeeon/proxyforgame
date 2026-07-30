@@ -118,6 +118,20 @@ class MoonApp {
     addEvent('#reset-ds', 'click', () => this._resetDestroyParams());
     addEvent('#reset-cr', 'click', () => this._resetCreateParams());
 
+    // Click a per-unit "max" label to copy that count into the adjacent input.
+    // The renderer stashes the raw integer in data-max-count; a dash (no
+    // dataset) means the unit cannot contribute, so those clicks are ignored.
+    MOON_UNITS.forEach((unit) => {
+      const maxLabel = document.getElementById(unit.id + '-max');
+      if (!maxLabel) return;
+      addEvent(maxLabel, 'click', () => {
+        const raw = maxLabel.dataset.maxCount;
+        if (raw === undefined) return;
+        setVal('#' + unit.id, raw);
+        this.recalc();
+      });
+    });
+
     // Theme toggle (rendered inside topbar_bs).
     const lightCb = inputEl('#cb-light-theme');
     if (lightCb) {

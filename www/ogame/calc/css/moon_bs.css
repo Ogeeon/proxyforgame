@@ -30,14 +30,14 @@
   display: grid;
 }
 
-#paramTabContent > .tab-pane {
+#paramTabContent>.tab-pane {
   display: block;
   grid-area: 1 / 1;
 }
 
 /* Collapsed to zero height so only the active pane drives the panel height,
    while the grid column still sizes to the widest pane. */
-#paramTabContent > .tab-pane:not(.active) {
+#paramTabContent>.tab-pane:not(.active) {
   visibility: hidden;
   height: 0;
   overflow: hidden;
@@ -113,6 +113,18 @@
   font-size: 0.75rem;
   color: var(--bs-secondary-color);
   white-space: nowrap;
+}
+
+/* A label that carries a real count is clickable: it fills the adjacent input.
+   The renderer sets data-max-count only for units that can contribute; a dash
+   (no dataset) stays non-interactive. */
+.max-label[data-max-count] {
+  cursor: pointer;
+}
+
+.max-label[data-max-count]:hover {
+  color: var(--bs-primary);
+  text-decoration: underline;
 }
 
 /* The computed readouts are rendered as <div class="form-control">, which can

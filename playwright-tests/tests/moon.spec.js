@@ -103,6 +103,31 @@ test.describe('Moon Calculator - DOM integration', () => {
         await expect(page.locator('#recyclers')).toHaveText('6');
     });
 
+    test('clicking a max-count label fills the adjacent count input', async ({ page }) => {
+        await openFleetTab(page);
+        // The light-fighter max label shows how many reach the 20% cap at 30% DF.
+        const maxLabel = page.locator('#light-fighter-max');
+        await expect(maxLabel).not.toHaveText('-');
+        const expected = await maxLabel.getAttribute('data-max-count');
+
+        await maxLabel.click();
+
+        await expect(page.locator('#light-fighter')).toHaveValue(expected);
+        // 100% of the cap -> the maximum chance.
+        await expect(page.locator('#moon-create-chance')).toHaveText('20%');
+    });
+
+    test('clicking a dash max-count label does nothing', async ({ page }) => {
+        await openDefensesTab(page);
+        // Defenses do not feed the debris field by default, so their max is '-'.
+        await expect(page.locator('#plasma-turret-max')).toHaveText('-');
+        await expect(page.locator('#plasma-turret-max')).not.toHaveAttribute('data-max-count');
+
+        await page.locator('#plasma-turret-max').click();
+
+        await expect(page.locator('#plasma-turret')).toHaveValue('0');
+    });
+
     test('the defenses checkbox switches the defense contribution on', async ({ page }) => {
         await openDefensesTab(page);
         await page.locator('#plasma-turret').fill('10');

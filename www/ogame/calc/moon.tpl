@@ -95,16 +95,16 @@
 
     <div class="border rounded m-1 p-2">
       <p class="border rounded subheader bg-primary-subtle"><b><?= $l['calc-results'] ?></b></p>
-      <table class="mx-auto">
-        <tr>
-          <td><label><?= $l['moon-destroy-chance'] ?></label></td>
-          <td><div id="moon-destroy-chance" class="form-control form-control-sm d-inline-block chance-show ui-state-disabled">0%</div></td>
-        </tr>
-        <tr>
-          <td><label><?= $l['ds-blow-chance'] ?></label></td>
-          <td><div id="ds-blow-chance" class="form-control form-control-sm d-inline-block chance-show ui-state-disabled">0%</div></td>
-        </tr>
-      </table>
+      <div class="d-flex flex-wrap gap-3 align-items-center justify-content-center">
+        <div class="d-flex align-items-center gap-1">
+          <label><?= $l['moon-destroy-chance'] ?></label>
+          <div id="moon-destroy-chance" class="form-control form-control-sm d-inline-block chance-show ui-state-disabled">0%</div>
+        </div>
+        <div class="d-flex align-items-center gap-1">
+          <label><?= $l['ds-blow-chance'] ?></label>
+          <div id="ds-blow-chance" class="form-control form-control-sm d-inline-block chance-show ui-state-disabled">0%</div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -219,49 +219,60 @@
     <!-- Results -->
     <div class="border rounded m-1 p-2">
       <p class="border rounded subheader bg-primary-subtle"><b><?= $l['calc-results'] ?></b></p>
-      <table class="mx-auto">
-        <tr>
-          <td><label><?= $l['moon-create-chance'] ?></label></td>
-          <td><div id="moon-create-chance" class="form-control form-control-sm d-inline-block chance-show ui-state-disabled">0%</div></td>
-        </tr>
-      </table>
+      <div class="d-flex flex-wrap gap-3 align-items-center justify-content-center">
+        <div class="d-flex align-items-center gap-1">
+          <label><?= $l['moon-create-chance'] ?></label>
+          <div id="moon-create-chance" class="form-control form-control-sm d-inline-block chance-show ui-state-disabled">0%</div>
+        </div>
+      </div>
     </div>
 
     <!-- Expenses -->
     <div class="border rounded m-1 p-2">
       <p class="border rounded subheader bg-primary-subtle"><b><?= $l['expences'] ?></b></p>
-      <table class="mx-auto">
-        <tr>
-          <td><label><?= $l['metal'] ?></label></td>
-          <td><div id="metal-required" class="form-control form-control-sm d-inline-block resource-show ui-state-disabled">0</div></td>
-          <td><label><?= $l['crystal'] ?></label></td>
-          <td><div id="crystal-required" class="form-control form-control-sm d-inline-block resource-show ui-state-disabled">0</div></td>
-          <td><label><?= $l['deuterium'] ?></label></td>
-          <td><div id="deuterium-required" class="form-control form-control-sm d-inline-block resource-show ui-state-disabled">0</div></td>
-        </tr>
-      </table>
+      <div class="d-flex flex-wrap gap-3 align-items-center justify-content-center">
+        <div class="d-flex align-items-center gap-1">
+          <label><?= $l['metal'] ?></label>
+          <div id="metal-required" class="form-control form-control-sm d-inline-block resource-show ui-state-disabled">0</div>
+        </div>
+        <div class="d-flex align-items-center gap-1">
+          <label><?= $l['crystal'] ?></label>
+          <div id="crystal-required" class="form-control form-control-sm d-inline-block resource-show ui-state-disabled">0</div>
+        </div>
+        <div class="d-flex align-items-center gap-1">
+          <label><?= $l['deuterium'] ?></label>
+          <div id="deuterium-required" class="form-control form-control-sm d-inline-block resource-show ui-state-disabled">0</div>
+        </div>
+      </div>
     </div>
 
     <!-- Recycling -->
     <div class="border rounded m-1 p-2">
       <p class="border rounded subheader bg-primary-subtle"><b><?= $l['recycling'] ?></b></p>
-      <table class="mx-auto">
-        <tr>
-          <td><label><?= $l['metal'] ?></label></td>
-          <td><div id="metal-recyclable" class="form-control form-control-sm d-inline-block resource-show ui-state-disabled">0</div></td>
-          <td><label><?= $l['crystal'] ?></label></td>
-          <td><div id="crystal-recyclable" class="form-control form-control-sm d-inline-block resource-show ui-state-disabled">0</div></td>
-          <td><label><?= $l['deuterium'] ?></label></td>
-          <td><div id="deuterium-recyclable" class="form-control form-control-sm d-inline-block resource-show ui-state-disabled">0</div></td>
-        </tr>
-        <tr>
-          <td><label><?= $l['total'] ?></label></td>
-          <td><div id="debris-total" class="form-control form-control-sm d-inline-block resource-show ui-state-disabled">0</div></td>
-          <td><label><?= $l['recyclers'] ?></label></td>
-          <td><div id="recyclers" class="form-control form-control-sm d-inline-block resource-show ui-state-disabled">0</div></td>
-          <td colspan="2">&nbsp;</td>
-        </tr>
-      </table>
+      <div class="d-flex flex-wrap gap-3 align-items-center justify-content-center">
+        <div class="d-flex align-items-center gap-1">
+          <label><?= $l['metal'] ?></label>
+          <div id="metal-recyclable" class="form-control form-control-sm d-inline-block resource-show ui-state-disabled">0</div>
+        </div>
+        <div class="d-flex align-items-center gap-1">
+          <label><?= $l['crystal'] ?></label>
+          <div id="crystal-recyclable" class="form-control form-control-sm d-inline-block resource-show ui-state-disabled">0</div>
+        </div>
+        <div class="d-flex align-items-center gap-1">
+          <label><?= $l['deuterium'] ?></label>
+          <div id="deuterium-recyclable" class="form-control form-control-sm d-inline-block resource-show ui-state-disabled">0</div>
+        </div>
+      </div>
+      <div class="d-flex flex-wrap gap-3 align-items-center justify-content-center mt-2">
+        <div class="d-flex align-items-center gap-1">
+          <label><?= $l['total'] ?></label>
+          <div id="debris-total" class="form-control form-control-sm d-inline-block resource-show ui-state-disabled">0</div>
+        </div>
+        <div class="d-flex align-items-center gap-1">
+          <label><?= $l['recyclers'] ?></label>
+          <div id="recyclers" class="form-control form-control-sm d-inline-block resource-show ui-state-disabled">0</div>
+        </div>
+      </div>
     </div>
   </div>
 
