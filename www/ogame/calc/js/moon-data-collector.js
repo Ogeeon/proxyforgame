@@ -22,6 +22,7 @@ class MoonDataCollector {
       defenseToDebris: getChecked('#defense-to-debris'),
       deutToDebris: getChecked('#deut-to-debris'),
       promoMoon: getChecked('#promo-moon'),
+      supraRefractorLevel: getInputNumber($('#supra-refractor')),
       counts: MoonDataCollector.readCounts(),
     };
   }

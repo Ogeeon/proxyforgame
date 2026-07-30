@@ -14,10 +14,16 @@ class MoonRenderer {
 
   /**
    * Format a percentage that is already expressed in whole percent (0..100),
-   * keeping at most 2 decimals.
+   * keeping at most 2 decimals. The '%' itself is not part of the value: every
+   * percentage readout wears it as an input-group addon, the way the editable
+   * percentage fields do.
+   *
+   * The fraction is localized, because numToOGame groups thousands with a dot in
+   * every language - a raw "9.09" would read as nine thousand next to the
+   * "8.366" diameters right below it.
    */
   static formatPercent(value) {
-    return dropFraction(0.01 * Math.round(100 * value), 2) + '%';
+    return localizeFloat(dropFraction(0.01 * Math.round(100 * value), 2));
   }
 
   /**
@@ -45,6 +51,36 @@ class MoonRenderer {
     setTextContent('#deuterium-recyclable', MoonRenderer.formatNumber(r.recyclableDeut));
     setTextContent('#debris-total', MoonRenderer.formatNumber(r.debrisTotal));
     setTextContent('#recyclers', MoonRenderer.formatNumber(r.recyclers));
+
+    MoonRenderer.renderMoonSizes(r);
+  }
+
+  /**
+   * Render the diameter the debris field can produce: the range, and every
+   * single one of the equally likely rolls as its own badge. An empty result
+   * (no debris at all, hence no moon) shows a dash and no badges.
+   */
+  static renderMoonSizes(r) {
+    const sizes = r.moonSizes || [];
+    setTextContent('#moon-size-range', sizes.length > 0
+      ? MoonRenderer.formatNumber(r.moonSizeMin) + ' – ' + MoonRenderer.formatNumber(r.moonSizeMax)
+      : '-');
+
+    // Every roll is equally likely, so a single percentage covers them all and
+    // is shown once next to the list instead of on each badge.
+    setTextContent('#moon-size-roll-chance', sizes.length > 0
+      ? MoonRenderer.formatPercent(100 / sizes.length)
+      : '-');
+
+    const list = $('#moon-size-variants');
+    if (!list) return;
+    list.replaceChildren();
+    sizes.forEach((size) => {
+      const badge = document.createElement('span');
+      badge.className = 'badge size-badge';
+      badge.textContent = MoonRenderer.formatNumber(size);
+      list.append(badge);
+    });
   }
 
   /**

@@ -20,6 +20,7 @@ const BASE_PRM = {
     defenseToDebris: false,
     deutToDebris: false,
     promoMoon: false,
+    supraRefractorLevel: 0,
     counts: {},
 };
 
@@ -176,6 +177,107 @@ describe('Moon Calculator - Creation', () => {
         expect(high.debrisTotal).toBe(low.debrisTotal * 2);
         expect(high.createChance).toBeCloseTo(low.createChance * 2, 10);
         expect(high.recyclers).toBeGreaterThan(low.recyclers);
+    });
+});
+
+describe('Moon Calculator - Moon size', () => {
+    it('a full debris field yields the eleven known maximum-moon diameters', () => {
+        expect(Array.from(MoonCalculator.moonSizes(2000000, 0))).toEqual([
+            8366, 8426, 8485, 8544, 8602, 8660, 8717, 8774, 8831, 8888, 8944,
+        ]);
+    });
+
+    it('the smallest field the game gives a moon for starts at 3605 km', () => {
+        // 100k of debris is the 1% minimum chance, and X = 0 is the worst roll.
+        const sizes = MoonCalculator.moonSizes(100000, 0);
+        expect(sizes[0]).toBe(3605);
+        expect(sizes[sizes.length - 1]).toBe(4795);
+    });
+
+    it('a bigger field shifts the whole range up', () => {
+        const small = MoonCalculator.moonSizes(1000000, 0);
+        const big = MoonCalculator.moonSizes(2000000, 0);
+        expect(small[0]).toBe(6324);
+        expect(big[0]).toBeGreaterThan(small[small.length - 1]);
+    });
+
+    it('debris past the 20% cap no longer grows the moon', () => {
+        // 2M is the cap; 4M rolls exactly the same diameters.
+        expect(Array.from(MoonCalculator.moonSizes(4000000, 0))).toEqual(
+            Array.from(MoonCalculator.moonSizes(2000000, 0))
+        );
+    });
+
+    it('no debris means no moon at all', () => {
+        expect(Array.from(MoonCalculator.moonSizes(0, 0))).toEqual([]);
+    });
+
+    it('the Supra Refractor scales every diameter by 0.5% per level', () => {
+        const plain = MoonCalculator.moonSizes(2000000, 0);
+        const boosted = MoonCalculator.moonSizes(2000000, 10);
+        expect(boosted[0]).toBe(Math.floor(1000 * Math.sqrt(70) * 1.05));
+        expect(boosted[10]).toBe(9391);
+        expect(boosted[0]).toBeGreaterThan(plain[0]);
+    });
+
+    it('the Supra Refractor cannot push the diameter past 9400 km', () => {
+        const sizes = MoonCalculator.moonSizes(2000000, 20);
+        expect(sizes[sizes.length - 1]).toBe(9400);
+        // The lower rolls are still below the cap, so they keep the bonus.
+        expect(sizes[0]).toBe(9203);
+    });
+
+    it('the event chance raises the chance but never the moon', () => {
+        const counts = { 'death-star': 1 }; // 2.7M of debris
+        const plain = compute({ counts });
+        const promo = compute({ counts, promoMoon: true });
+        expect(promo.createChance).toBeGreaterThan(plain.createChance);
+        expect(Array.from(promo.moonSizes)).toEqual(Array.from(plain.moonSizes));
+    });
+
+    it('the size range is exposed alongside the full roll list', () => {
+        const r = compute({ counts: { 'death-star': 1 } });
+        expect(r.moonSizes.length).toBe(11);
+        expect(r.moonSizeMin).toBe(8366);
+        expect(r.moonSizeMax).toBe(8944);
+    });
+
+    it('an empty battle has no size range at all', () => {
+        const r = compute();
+        expect(Array.from(r.moonSizes)).toEqual([]);
+        expect(r.moonSizeMin).toBeNull();
+        expect(r.moonSizeMax).toBeNull();
+    });
+
+    it('the diameter follows the debris field, not the fleet composition', () => {
+        // 500 light fighters and 200 heavy fighters both leave 600k of debris
+        // at 30%: (3000 + 1000) * 500 == (6000 + 4000) * 200.
+        const light = compute({ counts: { 'light-fighter': 500 } });
+        const heavy = compute({ counts: { 'heavy-fighter': 200 } });
+        expect(heavy.debrisTotal).toBe(light.debrisTotal);
+        expect(Array.from(heavy.moonSizes)).toEqual(Array.from(light.moonSizes));
+    });
+});
+
+describe('Moon Calculator - Supra Refractor', () => {
+    it('every level adds 0.5% to the creation chance and to its cap', () => {
+        const counts = { 'light-fighter': 100 }; // 120000 debris -> 1.2%
+        const r = compute({ counts, supraRefractorLevel: 10 });
+        expect(r.createChance).toBeCloseTo(0.012 * 1.05, 10);
+        expect(r.chanceCap).toBeCloseTo(0.21, 10);
+    });
+
+    it('the boosted cap lets the chance pass the bare 20%', () => {
+        const r = compute({ counts: { 'death-star': 1 }, supraRefractorLevel: 20 });
+        expect(r.createChance).toBeCloseTo(0.22, 10);
+    });
+
+    it('the debris needed for the maximum chance is unchanged', () => {
+        // The building lifts the chance and the cap by the same factor, so the
+        // per-unit counts that max the chance out must not move.
+        const plain = compute();
+        const boosted = compute({ supraRefractorLevel: 20 });
+        expect(boosted.maxCounts['light-fighter']).toBe(plain.maxCounts['light-fighter']);
     });
 });
 

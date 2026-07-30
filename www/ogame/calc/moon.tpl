@@ -19,12 +19,15 @@
   $moonFleet = array(
     'small-cargo', 'large-cargo', 'light-fighter', 'heavy-fighter', 'cruiser',
     'battleship', 'colony-ship', 'recycler', 'esp-probe', 'bomber',
-    'destroyer', 'death-star', 'battlecruiser', 'reaper', 'pathfinder',
-    'solar-sat'
+    'destroyer', 'death-star', 'battlecruiser', 'reaper', 'pathfinder'
   );
+  // The solar satellite sits on the defense tab, the way the game lists it.
+  // Its debris contribution still follows the 'satellite' group of MOON_UNITS,
+  // so it feeds the field regardless of the "defenses to debris" setting.
   $moonDefenses = array(
     'rocket-launcher', 'light-laser', 'heavy-laser', 'gauss-cannon',
-    'ion-cannon', 'plasma-turret', 'small-shield', 'large-shield'
+    'ion-cannon', 'plasma-turret', 'small-shield', 'large-shield',
+    'solar-sat'
   );
 ?>
   <!-- Bootstrap 5 CSS -->
@@ -84,7 +87,10 @@
       <div class="d-flex flex-wrap gap-3 align-items-center justify-content-center">
         <div class="d-flex align-items-center gap-1">
           <label for="moon-size"><?= $l['moon-size'] ?></label>
-          <input id="moon-size" type="text" name="moon-size" class="form-control form-control-sm level-input" value="1" alt="<?= $l['moon-size'] ?>"/>
+          <div class="input-group input-group-sm w-auto">
+            <input id="moon-size" type="text" name="moon-size" class="form-control level-input m-0" value="1" alt="<?= $l['moon-size'] ?>"/>
+            <span class="input-group-text"><?= $l['km'] ?></span>
+          </div>
         </div>
         <div class="d-flex align-items-center gap-1">
           <label for="ds-count"><?= $l['ds-count'] ?></label>
@@ -98,11 +104,17 @@
       <div class="d-flex flex-wrap gap-3 align-items-center justify-content-center">
         <div class="d-flex align-items-center gap-1">
           <label><?= $l['moon-destroy-chance'] ?></label>
-          <div id="moon-destroy-chance" class="form-control form-control-sm d-inline-block chance-show ui-state-disabled">0%</div>
+          <div class="input-group input-group-sm w-auto">
+            <div id="moon-destroy-chance" class="form-control chance-show ui-state-disabled m-0">0</div>
+            <span class="input-group-text">%</span>
+          </div>
         </div>
         <div class="d-flex align-items-center gap-1">
           <label><?= $l['ds-blow-chance'] ?></label>
-          <div id="ds-blow-chance" class="form-control form-control-sm d-inline-block chance-show ui-state-disabled">0%</div>
+          <div class="input-group input-group-sm w-auto">
+            <div id="ds-blow-chance" class="form-control chance-show ui-state-disabled m-0">0</div>
+            <span class="input-group-text">%</span>
+          </div>
         </div>
       </div>
     </div>
@@ -137,6 +149,10 @@
             <div class="d-flex align-items-center gap-1">
               <label for="hypertech-lvl"><?= $l['hyper-tech'] ?></label>
               <input id="hypertech-lvl" type="text" name="hypertech-lvl" class="form-control form-control-sm level-input" value="0" alt="<?= $l['hyper-tech'] ?>"/>
+            </div>
+            <div class="d-flex align-items-center gap-1">
+              <label for="supra-refractor"><?= $l['supra-refractor'] ?></label>
+              <input id="supra-refractor" type="text" name="supra-refractor" class="form-control form-control-sm level-input" value="0" alt="<?= $l['supra-refractor'] ?>"/>
             </div>
             <div class="d-flex align-items-center gap-1">
               <label for="debris-percent"><?= $l['debris-percent'] ?></label>
@@ -222,8 +238,29 @@
       <div class="d-flex flex-wrap gap-3 align-items-center justify-content-center">
         <div class="d-flex align-items-center gap-1">
           <label><?= $l['moon-create-chance'] ?></label>
-          <div id="moon-create-chance" class="form-control form-control-sm d-inline-block chance-show ui-state-disabled">0%</div>
+          <div class="input-group input-group-sm w-auto">
+            <div id="moon-create-chance" class="form-control chance-show ui-state-disabled m-0">0</div>
+            <span class="input-group-text">%</span>
+          </div>
         </div>
+        <div class="d-flex align-items-center gap-1">
+          <label><?= $l['moon-size-range'] ?></label>
+          <div class="input-group input-group-sm w-auto">
+            <div id="moon-size-range" class="form-control size-show ui-state-disabled m-0">-</div>
+            <span class="input-group-text"><?= $l['km'] ?></span>
+          </div>
+        </div>
+      </div>
+      <div class="mt-2">
+        <p class="text-center small text-body-secondary mb-1"><?= $l['moon-size-hint'] ?></p>
+        <div class="d-flex flex-wrap gap-2 align-items-center justify-content-center">
+          <label><?= $l['moon-size-roll-chance'] ?></label>
+          <div class="input-group input-group-sm w-auto">
+            <div id="moon-size-roll-chance" class="form-control chance-show ui-state-disabled m-0">-</div>
+            <span class="input-group-text">%</span>
+          </div>
+        </div>
+        <div id="moon-size-variants" class="d-flex flex-wrap gap-1 justify-content-center mt-1"></div>
       </div>
     </div>
 

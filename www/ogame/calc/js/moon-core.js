@@ -48,6 +48,28 @@ const MOON_UNITS = [
 const MOON_DF_PER_FULL_CHANCE = 10000000;
 const MOON_CHANCE_CAP = 0.20;
 const MOON_CHANCE_CAP_PROMO = 0.40;
+
+// Moon diameter, per the formula the community derived from observed moons
+// (board.en.ogame.gameforge.com thread 850762, owiki.de/index.php/Mond):
+//   D = floor(1000 * sqrt(10 + X + 300 * p0) * (1 + 0.005 * supraLevel))
+// where p0 is the debris share of a full chance capped at 20% (unrounded,
+// unlike the displayed chance) and X is a uniformly distributed integer in
+// [0, 10]. So a given debris field yields eleven equally likely diameters:
+// 2M of debris always gives 8366..8944 km, and the smallest moon the game can
+// produce is 3605 km (the 1% minimum chance, X = 0).
+//
+// Two consequences worth keeping in mind:
+//   * the diameter follows the debris field alone - the fleet composition that
+//     produced it makes no difference;
+//   * the event chance is added on top of the debris share, so it raises the
+//     creation chance without ever growing the moon.
+const MOON_SIZE_BASE = 10;
+const MOON_SIZE_ROLLS = 11;
+const MOON_SIZE_CHANCE_FACTOR = 300;
+// Kaelesh Supra Refractor: every level adds 0.5% to both the creation chance
+// and the diameter, and the diameter cannot pass 9400 km.
+const MOON_SUPRA_BONUS_PER_LEVEL = 0.005;
+const MOON_SIZE_CAP = 9400;
 // Base recycler hold; hyperspace technology adds 5% per level.
 const MOON_RECYCLER_CAPACITY = 20000;
 
@@ -105,7 +127,8 @@ class MoonCalculator {
    *   rcCapacityIncrease: life-form recycler capacity increase, %,
    *   defenseToDebris: whether destroyed defenses feed the field,
    *   deutToDebris: whether deuterium is part of the field,
-   *   promoMoon: whether the 40% event cap is active.
+   *   promoMoon: whether the 40% event cap is active,
+   *   supraRefractorLevel: Kaelesh Supra Refractor level.
    */
   computeCreate(p) {
     // Round the share to 2 decimals so e.g. 55% does not grow a float tail.
@@ -135,8 +158,16 @@ class MoonCalculator {
     const recyclableDeut = Math.floor(deutFactor * source.deuterium * dfShare);
     const debrisTotal = recyclableMetal + recyclableCrystal + recyclableDeut;
 
-    const chanceCap = p.promoMoon ? MOON_CHANCE_CAP_PROMO : MOON_CHANCE_CAP;
-    const createChance = clampNumber(debrisTotal / MOON_DF_PER_FULL_CHANCE, 0, chanceCap);
+    // The Supra Refractor lifts both the chance and its cap, so the debris
+    // field needed to max out the chance stays the same - `maxCounts` below
+    // therefore keeps working off the unboosted cap.
+    const supraFactor = MoonCalculator.supraFactor(p.supraRefractorLevel);
+    const baseChanceCap = p.promoMoon ? MOON_CHANCE_CAP_PROMO : MOON_CHANCE_CAP;
+    const chanceCap = baseChanceCap * supraFactor;
+    const createChance = clampNumber(
+      supraFactor * debrisTotal / MOON_DF_PER_FULL_CHANCE, 0, chanceCap
+    );
+    const moonSizes = MoonCalculator.moonSizes(debrisTotal, p.supraRefractorLevel);
 
     const classBonus = p.isGeneral ? MOON_GENERAL_CARGO_BONUS : 0;
     const recyclerCapacity = MoonCalculator.cargoCapacity(
@@ -154,10 +185,48 @@ class MoonCalculator {
       debrisTotal,
       createChance,
       chanceCap,
+      moonSizes,
+      moonSizeMin: moonSizes.length > 0 ? moonSizes[0] : null,
+      moonSizeMax: moonSizes.length > 0 ? moonSizes[moonSizes.length - 1] : null,
       recyclerCapacity,
       recyclers,
-      maxCounts: MoonCalculator.maxCounts(dfShare, deutFactor, chanceCap, p.defenseToDebris),
+      maxCounts: MoonCalculator.maxCounts(dfShare, deutFactor, baseChanceCap, p.defenseToDebris),
     };
+  }
+
+  /**
+   * Supra Refractor multiplier applied to both the creation chance and the
+   * diameter: 1 + 0.005 per level.
+   */
+  static supraFactor(supraRefractorLevel) {
+    return 1 + MOON_SUPRA_BONUS_PER_LEVEL * Math.max(0, supraRefractorLevel || 0);
+  }
+
+  /**
+   * Every diameter a moon born from this debris field can have, ascending.
+   * All eleven entries are equally likely; an empty array means no moon is
+   * possible at all because nothing was destroyed over the planet.
+   *
+   * The debris share is capped at 20% here (see MOON_SIZE_BASE above): past
+   * 2M of debris the field no longer grows the moon.
+   *
+   * @param {number} debrisTotal Debris field size, resource units.
+   * @param {number} supraRefractorLevel Kaelesh Supra Refractor level.
+   * @returns {number[]} Diameters in km, or [] when there is no debris.
+   */
+  static moonSizes(debrisTotal, supraRefractorLevel) {
+    if (!(debrisTotal > 0)) return [];
+    const chanceShare = clampNumber(
+      debrisTotal / MOON_DF_PER_FULL_CHANCE, 0, MOON_CHANCE_CAP
+    );
+    const supraFactor = MoonCalculator.supraFactor(supraRefractorLevel);
+    const sizes = [];
+    for (let roll = 0; roll < MOON_SIZE_ROLLS; roll++) {
+      const squared = MOON_SIZE_BASE + roll + MOON_SIZE_CHANCE_FACTOR * chanceShare;
+      const diameter = Math.floor(1000 * Math.sqrt(squared) * supraFactor);
+      sizes.push(Math.min(diameter, MOON_SIZE_CAP));
+    }
+    return sizes;
   }
 
   /**
@@ -205,6 +274,9 @@ if (typeof window !== 'undefined') {
     MOON_DF_PER_FULL_CHANCE,
     MOON_CHANCE_CAP,
     MOON_CHANCE_CAP_PROMO,
+    MOON_SIZE_ROLLS,
+    MOON_SIZE_CAP,
+    MOON_SUPRA_BONUS_PER_LEVEL,
     MOON_RECYCLER_CAPACITY,
     MOON_GENERAL_CARGO_BONUS,
   });

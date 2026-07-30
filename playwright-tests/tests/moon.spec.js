@@ -74,12 +74,14 @@ test.describe('Moon Calculator - DOM integration', () => {
         await expect(page.locator('#plasma-turret')).toBeHidden();
 
         await openFleetTab(page);
-        await expect(page.locator('#solar-sat')).toBeVisible();
         await expect(page.locator('#death-star')).toBeVisible();
+        await expect(page.locator('#solar-sat')).toBeHidden();
 
         await openDefensesTab(page);
         await expect(page.locator('#rocket-launcher')).toBeVisible();
         await expect(page.locator('#large-shield')).toBeVisible();
+        // The solar satellite is listed with the defenses, as in the game.
+        await expect(page.locator('#solar-sat')).toBeVisible();
         // Switching away from Common hides its controls.
         await expect(page.locator('#debris-percent')).toBeHidden();
     });
@@ -87,8 +89,8 @@ test.describe('Moon Calculator - DOM integration', () => {
     test('the destruction chances react to the moon diameter', async ({ page }) => {
         await page.locator('#moon-size').fill('2500');
         await page.locator('#moon-size').blur();
-        await expect(page.locator('#moon-destroy-chance')).toHaveText('50%');
-        await expect(page.locator('#ds-blow-chance')).toHaveText('25%');
+        await expect(page.locator('#moon-destroy-chance')).toHaveText('50');
+        await expect(page.locator('#ds-blow-chance')).toHaveText('25');
     });
 
     test('entering a fleet updates the chance, cost and recycling readouts', async ({ page }) => {
@@ -96,7 +98,7 @@ test.describe('Moon Calculator - DOM integration', () => {
         await page.locator('#light-fighter').fill('100');
         await page.locator('#light-fighter').blur();
 
-        await expect(page.locator('#moon-create-chance')).toHaveText('1.2%');
+        await expect(page.locator('#moon-create-chance')).toHaveText('1.2');
         await expect(page.locator('#metal-required')).toHaveText('300.000');
         await expect(page.locator('#metal-recyclable')).toHaveText('90.000');
         await expect(page.locator('#debris-total')).toHaveText('120.000');
@@ -114,7 +116,7 @@ test.describe('Moon Calculator - DOM integration', () => {
 
         await expect(page.locator('#light-fighter')).toHaveValue(expected);
         // 100% of the cap -> the maximum chance.
-        await expect(page.locator('#moon-create-chance')).toHaveText('20%');
+        await expect(page.locator('#moon-create-chance')).toHaveText('20');
     });
 
     test('clicking a dash max-count label does nothing', async ({ page }) => {
@@ -141,11 +143,11 @@ test.describe('Moon Calculator - DOM integration', () => {
         await page.locator('#param-common-tab').click();
         await page.locator('#defense-to-debris').check();
         await expect(page.locator('#debris-total')).toHaveText('300.000');
-        await expect(page.locator('#moon-create-chance')).toHaveText('3%');
+        await expect(page.locator('#moon-create-chance')).toHaveText('3');
     });
 
     test('the deuterium checkbox adds deuterium to the recycling block', async ({ page }) => {
-        await openFleetTab(page);
+        await openDefensesTab(page);
         await page.locator('#solar-sat').fill('1000');
         await page.locator('#solar-sat').blur();
         await expect(page.locator('#deuterium-recyclable')).toHaveText('0');
@@ -181,11 +183,44 @@ test.describe('Moon Calculator - DOM integration', () => {
         await openFleetTab(page);
         await page.locator('#death-star').fill('1');
         await page.locator('#death-star').blur();
-        await expect(page.locator('#moon-create-chance')).toHaveText('20%');
+        await expect(page.locator('#moon-create-chance')).toHaveText('20');
 
         await page.locator('#param-common-tab').click();
         await page.locator('#promo-moon').check();
-        await expect(page.locator('#moon-create-chance')).toHaveText('27%');
+        await expect(page.locator('#moon-create-chance')).toHaveText('27');
+    });
+
+    test('the debris field drives the diameter range and its variants', async ({ page }) => {
+        // With no battle entered there is no moon, hence no size at all.
+        await expect(page.locator('#moon-size-range')).toHaveText('-');
+        await expect(page.locator('#moon-size-variants .size-badge')).toHaveCount(0);
+
+        await openFleetTab(page);
+        await page.locator('#death-star').fill('1'); // 2.7M of debris, past the cap
+        await page.locator('#death-star').blur();
+
+        await expect(page.locator('#moon-size-range')).toHaveText('8.366 – 8.944');
+        const badges = page.locator('#moon-size-variants .size-badge');
+        await expect(badges).toHaveCount(11);
+        await expect(badges.first()).toHaveText('8.366');
+        await expect(badges.last()).toHaveText('8.944');
+        // Eleven equally likely rolls.
+        await expect(page.locator('#moon-size-roll-chance')).toHaveText('9.09');
+    });
+
+    test('the Supra Refractor level lifts both the chance and the diameter', async ({ page }) => {
+        await openFleetTab(page);
+        await page.locator('#death-star').fill('1');
+        await page.locator('#death-star').blur();
+        await page.locator('#param-common-tab').click();
+
+        await page.locator('#supra-refractor').fill('20');
+        await page.locator('#supra-refractor').blur();
+
+        // 20 levels add 10%: the chance cap becomes 22% and the diameter is
+        // scaled until it hits the 9400 km hard cap.
+        await expect(page.locator('#moon-create-chance')).toHaveText('22');
+        await expect(page.locator('#moon-size-range')).toHaveText('9.203 – 9.400');
     });
 
     test('the destruction reset restores its own fields only', async ({ page }) => {
@@ -211,6 +246,8 @@ test.describe('Moon Calculator - DOM integration', () => {
         await page.locator('#defense-to-debris').check();
         await page.locator('#deut-to-debris').check();
         await page.locator('#promo-moon').check();
+        await page.locator('#supra-refractor').fill('15');
+        await page.locator('#supra-refractor').blur();
         await openFleetTab(page);
         await page.locator('#light-fighter').fill('100');
         await page.locator('#light-fighter').blur();
@@ -226,14 +263,43 @@ test.describe('Moon Calculator - DOM integration', () => {
         await expect(page.locator('#defense-to-debris')).not.toBeChecked();
         await expect(page.locator('#deut-to-debris')).not.toBeChecked();
         await expect(page.locator('#promo-moon')).not.toBeChecked();
-        await expect(page.locator('#moon-create-chance')).toHaveText('0%');
+        await expect(page.locator('#supra-refractor')).toHaveValue('0');
+        await expect(page.locator('#moon-create-chance')).toHaveText('0');
+        await expect(page.locator('#moon-size-range')).toHaveText('-');
+    });
+
+    // Russian uses a comma as the decimal separator (options.decimalSeparator).
+    // Select the language via the context locale rather than a "/ru/" URL prefix:
+    // the prefix relies on an Apache rewrite that is absent under the PHP
+    // built-in server used in CI, and the outer beforeEach already loaded the page.
+    test.describe('Russian locale', () => {
+        test.use({ locale: 'ru-RU' });
+
+        test('the percentage readouts use the language decimal separator', async ({ page }) => {
+            await openFleetTab(page);
+            await page.locator('#light-fighter').fill('100');
+            await page.locator('#light-fighter').blur();
+            await expect(page.locator('#moon-create-chance')).toHaveText('1,2');
+
+            await page.locator('#light-fighter').fill('0');
+            await page.locator('#death-star').fill('1'); // eleven equally likely rolls
+            await page.locator('#death-star').blur();
+            await expect(page.locator('#moon-size-roll-chance')).toHaveText('9,09');
+        });
+
+        test('the diameter unit addon is translated', async ({ page }) => {
+            await expect(page.locator('#moon-size-range + .input-group-text')).toHaveText('км');
+        });
     });
 
     test('the checkbox settings survive a reload', async ({ page }) => {
         await page.locator('#promo-moon').check();
         await page.locator('#debris-percent').selectOption('70');
+        await page.locator('#supra-refractor').fill('8');
+        await page.locator('#supra-refractor').blur();
         await page.reload();
         await expect(page.locator('#promo-moon')).toBeChecked();
         await expect(page.locator('#debris-percent')).toHaveValue('70');
+        await expect(page.locator('#supra-refractor')).toHaveValue('8');
     });
 });

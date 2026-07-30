@@ -23,6 +23,7 @@ const options = {
     defenseToDebris: false,
     deutToDebris: false,
     promoMoon: false,
+    supraRefractorLevel: 0,
 
     validate: function (field, value) {
       switch (field) {
@@ -35,6 +36,7 @@ const options = {
         case 'defenseToDebris': return value === 'true';
         case 'deutToDebris': return value === 'true';
         case 'promoMoon': return value === 'true';
+        case 'supraRefractorLevel': return validateNumber(Number.parseFloat(value), 0, 100, 0);
         default: return value;
       }
     }
@@ -51,7 +53,7 @@ const options = {
 const MOON_PERSISTED_PARAMS = [
   'moonSize', 'dsCount', 'debrisPercent', 'hyperTechLevel',
   'isGeneral', 'rcCapacityIncrease',
-  'defenseToDebris', 'deutToDebris', 'promoMoon',
+  'defenseToDebris', 'deutToDebris', 'promoMoon', 'supraRefractorLevel',
 ];
 
 class MoonApp {
@@ -59,8 +61,9 @@ class MoonApp {
     this.calc = new MoonCalculator();
     // Text inputs that carry numeric values and share the blur-validation flow:
     // the two destruction fields, the hyperspace level and every unit count.
-    this.numericInputs = ['#moon-size', '#ds-count', '#hypertech-lvl', '#rc-capacity-increase']
-      .concat(MOON_UNITS.map((unit) => '#' + unit.id));
+    this.numericInputs = [
+      '#moon-size', '#ds-count', '#hypertech-lvl', '#rc-capacity-increase', '#supra-refractor',
+    ].concat(MOON_UNITS.map((unit) => '#' + unit.id));
     this.checkboxes = ['#general-class', '#defense-to-debris', '#deut-to-debris', '#promo-moon'];
   }
 
@@ -83,6 +86,7 @@ class MoonApp {
     setChecked('#defense-to-debris', options.prm.defenseToDebris);
     setChecked('#deut-to-debris', options.prm.deutToDebris);
     setChecked('#promo-moon', options.prm.promoMoon);
+    setVal('#supra-refractor', options.prm.supraRefractorLevel);
   }
 
   _applyConstraints() {
@@ -94,6 +98,8 @@ class MoonApp {
     if (hyperTech) hyperTech._constrains = { min: 0, max: 50, def: 0 };
     const rcCap = document.getElementById('rc-capacity-increase');
     if (rcCap) rcCap._constrains = { min: 0, max: 999, def: 0, allowNegative: false, allowFloat: true };
+    const supra = document.getElementById('supra-refractor');
+    if (supra) supra._constrains = { min: 0, max: 100, def: 0 };
     MOON_UNITS.forEach((unit) => {
       const el = document.getElementById(unit.id);
       if (el) el._constrains = { min: 0, def: 0 };
@@ -178,6 +184,7 @@ class MoonApp {
     options.prm.defenseToDebris = false;
     options.prm.deutToDebris = false;
     options.prm.promoMoon = false;
+    options.prm.supraRefractorLevel = 0;
 
     setVal('#debris-percent', options.prm.debrisPercent);
     setVal('#hypertech-lvl', options.prm.hyperTechLevel);
@@ -186,6 +193,7 @@ class MoonApp {
     setChecked('#defense-to-debris', false);
     setChecked('#deut-to-debris', false);
     setChecked('#promo-moon', false);
+    setVal('#supra-refractor', 0);
     MOON_UNITS.forEach((unit) => setVal('#' + unit.id, 0));
 
     this.recalc();

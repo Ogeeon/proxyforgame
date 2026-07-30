@@ -92,6 +92,15 @@
   text-align: center;
 }
 
+/* The moon diameter carries a `km´ addon, so it needs the input-group escape.
+   common_bs.css already supplies one for .level-input, but at 3.5rem - repeating
+   it here (same specificity, loaded later) keeps the field at the 60px of the
+   plain level inputs it sits next to. */
+.input-group>.form-control.level-input {
+  flex: 0 0 auto;
+  width: 60px;
+}
+
 .count-input {
   width: 80px;
   text-align: center;
@@ -139,13 +148,47 @@
 
 /* Read-only result fields (rendered as form-control divs) */
 .chance-show {
-  width: 80px;
+  width: 60px;
   text-align: center;
+}
+
+/* Every chance readout carries its `%´ as an input-group addon, the same way the
+   editable percentage field above does, so it needs the same escape rule:
+   Bootstrap's `.input-group > .form-control { flex: 1 1 auto; width: 1% }`
+   outranks the plain class width and would stretch the readout. */
+.input-group>.form-control.chance-show {
+  flex: 0 0 auto;
+  width: 60px;
 }
 
 .resource-show {
   width: 110px;
   text-align: center;
+}
+
+/* The "8.366 – 8.944" diameter range needs room for two grouped numbers. It
+   carries its `km´ as an input-group addon, so it needs the same flex/width
+   escape as the chance readouts above. */
+.size-show {
+  width: 140px;
+  text-align: center;
+}
+
+.input-group>.form-control.size-show {
+  flex: 0 0 auto;
+  width: 140px;
+}
+
+/* One badge per equally likely diameter roll. These are a supporting readout,
+   not a call to action, so they are outlined rather than filled - Bootstrap's
+   solid `text-bg-secondary´ shouted over the results block. All three custom
+   properties flip with the theme. */
+.size-badge {
+  font-variant-numeric: tabular-nums;
+  font-weight: 400;
+  color: var(--bs-secondary-color);
+  background-color: transparent;
+  border: 1px solid var(--bs-border-color);
 }
 
 /* Warning banner (shared look with the graviton / queue calculators) */
