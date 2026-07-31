@@ -202,7 +202,9 @@
     "circ-systems-explain": "Afstand tussen 1:1:1 en 1:499:1 is dezelfde afstand als tussen 1:1:1 en 1:2:1",
     "systems-num": "Aantal zonnestelsels",
     "systems": "Systemen",
-    "distance": "afstand"
+    "distance": "afstand",
+    "character-bonus-hint": "Om deze bonussen te krijgen, ga naar Grondstofinstellingen - Life Forms spelerbonussen,\nscroll dan naar beneden naar 'Karakterklasse bonussen'.",
+    "collectors-character-bonus": "Karakterklasse bonus van de Verzamelaar"
   },
   "index": {
     "title": "ProxyForGame - instrumenten het browser spel OGame",
@@ -538,9 +540,7 @@
     "import-sr": "Importeren",
     "import-hint": "Plak in dit veld de API-code van het spionagerapport van OGame\nof de code van het rapport dat is opgeslagen op Logserver.net.",
     "import-bad-code-msg": "Geen gegevens gevonden.\\nWeet u zeker dat u de juiste spy report code hebt ingevoerd?",
-    "character-bonus-hint": "Om deze bonussen te krijgen, ga naar Grondstofinstellingen - Life Forms spelerbonussen,\nscroll dan naar beneden naar 'Karakterklasse bonussen'.",
-    "generals-character-bonus": "Karakterklasse bonus van de Generaal (%)",
-    "collectors-character-bonus": "Karakterklasse bonus van de Verzamelaar (%)",
+    "generals-character-bonus": "Karakterklasse bonus van de Generaal",
     "speed-fleet-title": "Missiesnelheden:",
     "speed-fleet-war": "Oorlog",
     "speed-fleet-peaceful": "Vredig",

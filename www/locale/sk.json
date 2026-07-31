@@ -202,7 +202,9 @@
     "circ-systems-explain": "Razdalja med 1:1:1 in 1:499:1, je enaka kot razdalja med 1:1:1 in 1:2:1",
     "systems-num": "Počet systémov",
     "systems": "Systémy",
-    "distance": "Vzdialenosť"
+    "distance": "Vzdialenosť",
+    "character-bonus-hint": "Ak chcete získať tieto bonusy, prejdite do Nastavenia zdrojov - Bonusy hráča Foriem života,\npotom prejdite nadol k 'Bonusom triedy postavy'.",
+    "collectors-character-bonus": "Bonus triedy postavy Zberateľa"
   },
   "index": {
     "title": "ProxyForGame - software pre online hry v prehliadači OGame",
@@ -537,9 +539,7 @@
     "import-sr": "Import",
     "import-hint": "Do tohto poľa vložte kód API špionážnej správy z OGame\nalebo kód správy uloženej na Logserver.net",
     "import-bad-code-msg": "Nenašli sa žiadne údaje.\\nSte si istí, že ste zadali správny kód špionážnej správy?",
-    "character-bonus-hint": "Ak chcete získať tieto bonusy, prejdite do Nastavenia zdrojov - Bonusy hráča Foriem života,\npotom prejdite nadol k 'Bonusom triedy postavy'.",
-    "generals-character-bonus": "Bonus triedy postavy Generála (%)",
-    "collectors-character-bonus": "Bonus triedy postavy Zberateľa (%)",
+    "generals-character-bonus": "Bonus triedy postavy Generála",
     "speed-fleet-title": "Rýchlosti misie:",
     "speed-fleet-war": "Vojna",
     "speed-fleet-peaceful": "Mierový",

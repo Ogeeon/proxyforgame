@@ -45,6 +45,11 @@
 .startdate-input    { width: 160px; text-align: center; }
 .flight-time-input  { width: 96px;  text-align: center; }
 .tolerance-time-input { width: 64px; text-align: center; }
+/* `.input-group > .form-control` outweighs the plain width classes above and
+   stretches the field to 177px, so the two fields that carry a percent suffix
+   need id-scoped rules of their own. */
+#lf-mechan-general-enh,
+#lf-rocktal-collector-enh { width: 64px; flex: 0 0 auto; }
 
 /* Bootstrap's .is-invalid reserves padding-right for a warning icon, sized for
    left-aligned text. These fields are centred, so that reserved space shifts

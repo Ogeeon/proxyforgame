@@ -202,7 +202,9 @@
     "circ-systems-explain": "Razdaljina između 1:1:1 i 1:499:1 je ista kao razdaljina izmežu 1:1:1 i 1:2:1",
     "systems-num": "Broj sistema",
     "systems": "Sistemi",
-    "distance": "Razdaljina"
+    "distance": "Razdaljina",
+    "character-bonus-hint": "Da biste dobili ove bonuse, idite na Postavke resursa - Bonusi igrača Oblika života,\nzatim se spustite do 'Bonusi klase lika'.",
+    "collectors-character-bonus": "Bonus klase lika Kolektora"
   },
   "index": {
     "title": "ProxyForGame - alati za online igru Ogame",
@@ -538,9 +540,7 @@
     "import-sr": "Uvoz",
     "import-hint": "Zalijepite u ovo polje API kod špijunskog izvještaja iz OGame-a\nili kod izvještaja sačuvanog na Logserver.net",
     "import-bad-code-msg": "Podaci nisu pronađeni.\\nJeste li sigurni da ste unijeli ispravan špijunski izvještaj?",
-    "character-bonus-hint": "Da biste dobili ove bonuse, idite na Postavke resursa - Bonusi igrača Oblika života,\nzatim se spustite do 'Bonusi klase lika'.",
-    "generals-character-bonus": "Bonus klase lika Generala (%)",
-    "collectors-character-bonus": "Bonus klase lika Kolektora (%)",
+    "generals-character-bonus": "Bonus klase lika Generala",
     "speed-fleet-title": "Brzine misija:",
     "speed-fleet-war": "Rat",
     "speed-fleet-peaceful": "Miran",

@@ -202,7 +202,9 @@
     "circ-systems-explain": "Distance between 1:1:1 and 1:499:1 is the same as distance between 1:1:1 and 1:2:1",
     "systems-num": "Number of Systems",
     "systems": "Sistemas",
-    "distance": "Distancia"
+    "distance": "Distancia",
+    "character-bonus-hint": "Para obter esses bônus, vá para Configurações de recursos - Bônus de jogador de Formas de Vida,\nem seguida, role para baixo até 'Bônus de classe de personagem'.",
+    "collectors-character-bonus": "Bônus de classe de personagem do Coletor"
   },
   "index": {
     "title": "ProxyForGame - Calculadoras para OGame",
@@ -538,9 +540,7 @@
     "import-sr": "Importar",
     "import-hint": "Cola neste campo o código API do relatório espião do OGame\nou o código do relatório guardado no Logserver.net",
     "import-bad-code-msg": "Não foram encontrados dados.\\nTens a certeza que introduziste o código correto do relatório de espionagem?",
-    "character-bonus-hint": "Para obter esses bônus, vá para Configurações de recursos - Bônus de jogador de Formas de Vida,\nem seguida, role para baixo até 'Bônus de classe de personagem'.",
-    "generals-character-bonus": "Bônus de classe de personagem do General (%)",
-    "collectors-character-bonus": "Bônus de classe de personagem do Coletor (%)",
+    "generals-character-bonus": "Bônus de classe de personagem do General",
     "speed-fleet-title": "Velocidades da missão:",
     "speed-fleet-war": "Guerra",
     "speed-fleet-peaceful": "Pacífico",

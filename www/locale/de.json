@@ -202,7 +202,9 @@
     "circ-systems-explain": "Abstand zwischen 1:1:1 und 1:499:1 ist die gleiche wie Abstand zwischen 1:1:1 und 1:2:1",
     "systems-num": "Anzahl der Sonnensysteme",
     "systems": "System",
-    "distance": "Abstand"
+    "distance": "Abstand",
+    "character-bonus-hint": "Um diese Boni zu erhalten, gehen Sie zu Ressourcen-Einstellungen - Lebensformen-Spieler-Boni,\ndann scrollen Sie nach unten zu 'Charakterklassen-Boni'.",
+    "collectors-character-bonus": "Charakterklassenbonus des Kollektors"
   },
   "index": {
     "title": "ProxyForGame - Hilfsprogramme für das Online-Browsergame OGame",
@@ -538,9 +540,7 @@
     "import-sr": "Importieren",
     "import-hint": "Fügen Sie in dieses Feld den API-Code des Spionageberichts von OGame\noder den Code des auf Logserver.net gespeicherten Berichts ein",
     "import-bad-code-msg": "Keine Daten gefunden.\\nSind Sie sicher, dass Sie den richtigen Spionagebericht-Code eingegeben haben?",
-    "character-bonus-hint": "Um diese Boni zu erhalten, gehen Sie zu Ressourcen-Einstellungen - Lebensformen-Spieler-Boni,\ndann scrollen Sie nach unten zu 'Charakterklassen-Boni'.",
-    "generals-character-bonus": "Charakterklassenbonus des Generals (%)",
-    "collectors-character-bonus": "Charakterklassenbonus des Kollektors (%)",
+    "generals-character-bonus": "Charakterklassenbonus des Generals",
     "speed-fleet-title": "Missionsgeschwindigkeiten:",
     "speed-fleet-war": "Krieg",
     "speed-fleet-peaceful": "Friedlich",

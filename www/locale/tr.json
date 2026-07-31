@@ -202,7 +202,9 @@
     "circ-systems-explain": "Distance between 1:1:1 and 1:499:1 is the same as distance between 1:1:1 and 1:2:1",
     "systems-num": "Number of Systems",
     "systems": "Sistemler",
-    "distance": "Uzaklık"
+    "distance": "Uzaklık",
+    "character-bonus-hint": "Bu bonusları almak için, Kaynak ayarları - Yaşam Formları oyuncu bonusları'na gidin,\nsonra 'Karakter sınıfı bonusları'na aşağı kaydırın.",
+    "collectors-character-bonus": "Koleksiyoncunun karakter sınıfı bonusu"
   },
   "index": {
     "title": "ProxyForGame - OGame için hesaplamalar",
@@ -538,9 +540,7 @@
     "import-sr": "İthalat",
     "import-hint": "Bu alana OGame'den alınan casus raporunun API kodunu\nveya Logserver.net'te kaydedilen raporun kodunu yapıştırın",
     "import-bad-code-msg": "Veri bulunamadı.\\nDoğru casus rapor kodunu girdiğinizden emin misiniz?",
-    "character-bonus-hint": "Bu bonusları almak için, Kaynak ayarları - Yaşam Formları oyuncu bonusları'na gidin,\nsonra 'Karakter sınıfı bonusları'na aşağı kaydırın.",
-    "generals-character-bonus": "General'in karakter sınıfı bonusu (%)",
-    "collectors-character-bonus": "Koleksiyoncunun karakter sınıfı bonusu (%)",
+    "generals-character-bonus": "General'in karakter sınıfı bonusu",
     "speed-fleet-title": "Görev hızları:",
     "speed-fleet-war": "Savaş",
     "speed-fleet-peaceful": "Barışçıl",

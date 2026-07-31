@@ -202,7 +202,9 @@
     "circ-systems-explain": "Distance between 1:1:1 and 1:499:1 is the same as distance between 1:1:1 and 1:2:1",
     "systems-num": "Number of Systems",
     "systems": "Systems",
-    "distance": "Distance"
+    "distance": "Distance",
+    "character-bonus-hint": "To get these bonuses, go to Resource settings - Lifeform player bonuses,\nthen scroll down to 'Character class bonuses'.",
+    "collectors-character-bonus": "Collector's character class bonus"
   },
   "index": {
     "title": "ProxyForGame - tools for online browser game OGame",
@@ -538,9 +540,7 @@
     "import-sr": "Import",
     "import-hint": "Paste into this field the API code of the spy report from OGame\nor the code of the report saved on Logserver.net",
     "import-bad-code-msg": "No data found.\\nAre you sure you entered the correct spy report code?",
-    "character-bonus-hint": "To get these bonuses, go to Resource settings - Lifeform player bonuses,\nthen scroll down to 'Character class bonuses'.",
-    "generals-character-bonus": "General's character class bonus (%)",
-    "collectors-character-bonus": "Collector's character class bonus (%)",
+    "generals-character-bonus": "General's character class bonus",
     "speed-fleet-title": "Mission speeds:",
     "speed-fleet-war": "War",
     "speed-fleet-peaceful": "Peaceful",

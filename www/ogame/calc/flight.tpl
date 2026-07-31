@@ -339,11 +339,17 @@
                   <div class="d-flex flex-wrap align-items-center justify-content-center gap-3 mb-1">
                     <div class="d-flex align-items-center gap-1 text-nowrap">
                       <label for="lf-mechan-general-enh"><?= $l['generals-character-bonus'] ?></label>
-                      <input id="lf-mechan-general-enh" type="text" name="lf-mechan-general-enh" class="form-control form-control-sm d-inline-block count-input" value="0" />
+                      <div class="input-group input-group-sm w-auto">
+                        <input id="lf-mechan-general-enh" type="text" name="lf-mechan-general-enh" class="form-control count-input" value="0" />
+                        <span class="input-group-text">%</span>
+                      </div>
                     </div>
                     <div class="d-flex align-items-center gap-1 text-nowrap">
                       <label for="lf-rocktal-collector-enh"><?= $l['collectors-character-bonus'] ?></label>
-                      <input id="lf-rocktal-collector-enh" type="text" name="lf-rocktal-collector-enh" class="form-control form-control-sm d-inline-block count-input" value="0" />
+                      <div class="input-group input-group-sm w-auto">
+                        <input id="lf-rocktal-collector-enh" type="text" name="lf-rocktal-collector-enh" class="form-control count-input" value="0" />
+                        <span class="input-group-text">%</span>
+                      </div>
                       <i class="bi bi-question-circle" data-bs-toggle="tooltip" title="<?= $l['character-bonus-hint'] . "\n\n" . $l['lf-bonuses-api-import-hint'] ?>"></i>
                     </div>
                   </div>

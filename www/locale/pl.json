@@ -202,7 +202,9 @@
     "circ-systems-explain": "Odległość między 1:1:1 do 1:499:1, jest taka sama jak odległość między 1:1:1 do 1:2:1",
     "systems-num": "Liczba ukł. słon.",
     "systems": "System",
-    "distance": "Odległość"
+    "distance": "Odległość",
+    "character-bonus-hint": "Aby uzyskać te premie, przejdź do Ustawień zasobów - Premie gracza Form Życia,\na następnie przewiń w dół do 'Premie klasy postaci'.",
+    "collectors-character-bonus": "Premia klasy postaci Kolekcjonera"
   },
   "index": {
     "title": "Narzedzia do gier przegladarkowych OGame",
@@ -538,9 +540,7 @@
     "import-sr": "Import",
     "import-hint": "Wklej w to pole kod API raportu szpiegowskiego z OGame\nlub kod raportu zapisanego na Logserver.net.",
     "import-bad-code-msg": "Nie znaleziono danych.\\nCzy na pewno wprowadziłeś poprawny kod raportu szpiegowskiego?",
-    "character-bonus-hint": "Aby uzyskać te premie, przejdź do Ustawień zasobów - Premie gracza Form Życia,\na następnie przewiń w dół do 'Premie klasy postaci'.",
-    "generals-character-bonus": "Premia klasy postaci Generała (%)",
-    "collectors-character-bonus": "Premia klasy postaci Kolekcjonera (%)",
+    "generals-character-bonus": "Premia klasy postaci Generała",
     "speed-fleet-title": "Prędkości misji:",
     "speed-fleet-war": "Wojna",
     "speed-fleet-peaceful": "Pokojowa",
