@@ -91,6 +91,7 @@ function updateParams() {
 	options.prm.lfCrysProdBonus = g.lfCrysProdBonus;
 	options.prm.lfDeutProdBonus = g.lfDeutProdBonus;
 	options.prm.lfEnergyProdBonus = g.lfEnergyProdBonus;
+	options.prm.lfCollectorBonus = g.lfCollectorBonus;
 	options.prm.lfCrawlerBonus = g.lfCrawlerBonus;
 	options.prm.lfPlasmaCostReduction = g.lfPlasmaCostReduction;
 
@@ -605,6 +606,7 @@ function resetParams() {
 	options.prm.lfCrysProdBonus = 0;
 	options.prm.lfDeutProdBonus = 0;
 	options.prm.lfEnergyProdBonus = 0;
+	options.prm.lfCollectorBonus = 0;
 	options.prm.lfCrawlerBonus = 0;
 	options.prm.lfPlasmaCostReduction = 0;
 
@@ -999,7 +1001,7 @@ function initializeProductionCalculator() {
 		setConstrains('exchange-rates-d', { 'min': 0.1, 'max': 100, 'def': 3,   'allowFloat': true, 'allowNegative': false });
 
 		// Life Forms bonuses: non-negative floating-point percentages
-		['lf-metal-prod-bonus', 'lf-crystal-prod-bonus', 'lf-deut-prod-bonus', 'lf-energy-prod-bonus', 'lf-crawler-bonus'].forEach(function (id) {
+		['lf-metal-prod-bonus', 'lf-crystal-prod-bonus', 'lf-deut-prod-bonus', 'lf-energy-prod-bonus', 'lf-collector-bonus', 'lf-crawler-bonus'].forEach(function (id) {
 			setConstrains(id, { 'min': 0, 'max': Infinity, 'def': 0, 'allowFloat': true, 'allowNegative': false });
 		});
 		// Plasma technology cost reduction is capped at 99%

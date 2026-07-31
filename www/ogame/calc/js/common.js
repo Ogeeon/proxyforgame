@@ -17,20 +17,24 @@
  * @param [isTrader] whether the player belongs to an alliance with the "Traders" class.
  *        Optional: the costs calculator has no field for it, so it omits the argument
  *        and the 5% alliance bonus stays out of its single-building figures.
+ * @param [collectorClassBonusPct] percentage by which the Collector class bonus is
+ *        amplified (Rock'tal Collector Enhancement, +0.2 per research level).
+ *        Optional: the costs calculator has no field for it, so it omits the argument
+ *        and the class bonus stays at its base 25%.
  * @returns Number of resource units or energy produced
  */
-function getProductionRate(techID, techLevel, energyTechLevel, plasmaTechLevel, maxTemp, pos, universeSpeedFactor, geologist, engineer, productionFactor, powerFactor, boosterType, allOfficers, playerClass, isTrader) {
+function getProductionRate(techID, techLevel, energyTechLevel, plasmaTechLevel, maxTemp, pos, universeSpeedFactor, geologist, engineer, productionFactor, powerFactor, boosterType, allOfficers, playerClass, isTrader, collectorClassBonusPct) {
 	let prod;
 	switch (techID*1) {
 		case 1:
 		case 2:
 		case 3:
-			prod = getProductionRateSplit(techID, techLevel, energyTechLevel, plasmaTechLevel, maxTemp, pos, universeSpeedFactor, geologist, engineer, productionFactor, powerFactor, boosterType, allOfficers, playerClass, isTrader);
+			prod = getProductionRateSplit(techID, techLevel, energyTechLevel, plasmaTechLevel, maxTemp, pos, universeSpeedFactor, geologist, engineer, productionFactor, powerFactor, boosterType, allOfficers, playerClass, isTrader, collectorClassBonusPct);
 			return(prod[0] + prod[1] + prod[2] + prod[3] + prod[4] + prod[5] + prod[6] + prod[7]);
 		case 4:
 		case 12:
 		case 212:
-			prod = getProductionRateSplit(techID, techLevel, energyTechLevel, plasmaTechLevel, maxTemp, pos, universeSpeedFactor, geologist, engineer, productionFactor, powerFactor, boosterType, allOfficers, playerClass, isTrader);
+			prod = getProductionRateSplit(techID, techLevel, energyTechLevel, plasmaTechLevel, maxTemp, pos, universeSpeedFactor, geologist, engineer, productionFactor, powerFactor, boosterType, allOfficers, playerClass, isTrader, collectorClassBonusPct);
 			return(prod[1]); // powerFactor is accounted for, while the engineer, officers and class bonuses need to be applied to the sum of remaining energy
 		default: {
 			return(0);
@@ -57,15 +61,19 @@ function getProductionRate(techID, techLevel, energyTechLevel, plasmaTechLevel, 
  * @param [isTrader] whether the player belongs to an alliance with the "Traders" class.
  *        Optional: the costs calculator has no field for it, so it omits the argument
  *        and the 5% alliance bonus stays out of its single-building figures.
+ * @param [collectorClassBonusPct] percentage by which the Collector class bonus is
+ *        amplified (Rock'tal Collector Enhancement, +0.2 per research level).
+ *        Optional: the costs calculator has no field for it, so it omits the argument
+ *        and the class bonus stays at its base 25%.
  * @returns Number of resource units or energy produced
  */
-function getProductionRateSplit(techID, techLevel, energyTechLevel, plasmaTechLevel, maxTemp, pos, universeSpeedFactor, geologist, engineer, productionFactor, powerFactor, boosterType, allOfficers, playerClass, isTrader) {
+function getProductionRateSplit(techID, techLevel, energyTechLevel, plasmaTechLevel, maxTemp, pos, universeSpeedFactor, geologist, engineer, productionFactor, powerFactor, boosterType, allOfficers, playerClass, isTrader, collectorClassBonusPct) {
 	// The Engineer and Geologist increase production by 10%. If all 5 officers are present, another 2% is added to resource and energy production.
 	const geologistFactor = geologist === true ? 0.1 : 0;
 	const allStaffFactor = allOfficers === true ? 0.02 : 0;
 	const engineerFactor = (engineer === true) ? 0.1 : 0;
 	const boostFactor = boosterType * 0.1;
-	const classFactor = playerClass === 0 ? 0.25 : 0;
+	const classFactor = playerClass === 0 ? 0.25 * (1 + 0.01 * (collectorClassBonusPct || 0)) : 0;
 	let allianceClassFactor = isTrader ? 0.05 : 0;
 	let positionFactor = 1;
 	let basePR;

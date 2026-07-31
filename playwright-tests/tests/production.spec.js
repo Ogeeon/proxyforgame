@@ -436,6 +436,146 @@ test.describe('Lifeform Tech Bonus row', () => {
     });
 });
 
+test.describe('Collector character class bonus', () => {
+    // The Class row is #one-planet-prod row 14 (0 = header); td[3]=metal,
+    // [4]=crystal, [5]=deut, [6]=energy. With the standard setup (levels 10,
+    // temp 100, pos 8, Collector) the unamplified bonus is 263/130/67/141.
+    const classCell = (page, col) => page.locator('#one-planet-prod tr:not(.lf-row)').nth(14).locator('td').nth(col);
+    // The Crawler row is row 8 of the same table - crawlers carry the Collector's
+    // +50% production bonus in their own row rather than in the Class row.
+    const crawlerCell = (page, col) => page.locator('#one-planet-prod tr:not(.lf-row)').nth(8).locator('td').nth(col);
+
+    test('amplifies the Collector bonus on mines and solar satellites', async ({ page }) => {
+        // Blur the last table input so the typed levels are fully committed and
+        // the baseline (and totals) are deterministic.
+        await page.locator('#one-planet-prod input.input-in-table').last().press('Tab');
+
+        const totalRow = page.locator('#one-planet-prod tr').filter({ hasText: 'Total per hour' });
+
+        // Baseline: the plain +25% mine / +10% satellite Collector bonuses.
+        await expect(classCell(page, 3)).toHaveText('263');
+        await expect(classCell(page, 4)).toHaveText('130');
+        await expect(classCell(page, 5)).toHaveText('67');
+        await expect(classCell(page, 6)).toHaveText('141');
+        await expect(totalRow.locator('td').nth(6)).toHaveText('11');
+
+        // A 10% enhancement scales the bonus by 1.1: 27.5% on mines, 11% on satellites.
+        await page.locator('#param-lifeforms-tab').click();
+        await page.locator('#lf-collector-bonus').fill('10');
+        await page.locator('#lf-collector-bonus').press('Tab');
+
+        await expect(classCell(page, 3)).toHaveText('289');
+        await expect(classCell(page, 4)).toHaveText('143');
+        await expect(classCell(page, 5)).toHaveText('74');
+        await expect(classCell(page, 6)).toHaveText('155');
+
+        // The hourly totals move by exactly the amplified class bonus.
+        await expect(totalRow.locator('td').nth(3)).toHaveText('1.382');
+        await expect(totalRow.locator('td').nth(4)).toHaveText('678');
+        await expect(totalRow.locator('td').nth(5)).toHaveText('85');
+        await expect(totalRow.locator('td').nth(6)).toHaveText('25');
+
+        // A 100% enhancement doubles the bonus (2.0 factor); removing it restores the base.
+        await page.locator('#lf-collector-bonus').fill('100');
+        await page.locator('#lf-collector-bonus').press('Tab');
+        await expect(classCell(page, 3)).toHaveText('525');
+        await expect(classCell(page, 6)).toHaveText('281');
+
+        await page.locator('#lf-collector-bonus').fill('0');
+        await page.locator('#lf-collector-bonus').press('Tab');
+        await expect(classCell(page, 3)).toHaveText('263');
+        await expect(classCell(page, 6)).toHaveText('141');
+    });
+
+    test('amplifies the Collector bonus on crawlers', async ({ page }) => {
+        // Crawler output is a share of the mine output, so the mines have to stay
+        // put: a level-25 solar plant keeps the production coefficient at 100% even
+        // with 50 crawlers drawing energy, and the mine rows then hold at
+        // 1.050/518/269 whatever the class bonus does to the energy balance.
+        const levels = page.locator('#one-planet-prod input.input-in-table');
+        await levels.nth(3).fill('25');  // solar plant
+        await levels.nth(6).fill('50');  // crawlers
+        await levels.nth(6).press('Tab');
+        await expect(page.locator('#prod-coeff')).toHaveText('100%');
+
+        // 50 crawlers at 100% power: mine output * 50 * 0.02% * 1.5 for a Collector.
+        await expect(crawlerCell(page, 3)).toHaveText('16');
+        await expect(crawlerCell(page, 4)).toHaveText('8');
+        await expect(crawlerCell(page, 5)).toHaveText('4');
+
+        // A 100% enhancement doubles the class bonus, so the multiplier goes 1.5 -> 2.0.
+        await page.locator('#param-lifeforms-tab').click();
+        await page.locator('#lf-collector-bonus').fill('100');
+        await page.locator('#lf-collector-bonus').press('Tab');
+
+        await expect(page.locator('#prod-coeff')).toHaveText('100%');
+        await expect(crawlerCell(page, 3)).toHaveText('21');
+        await expect(crawlerCell(page, 4)).toHaveText('10');
+        await expect(crawlerCell(page, 5)).toHaveText('5');
+
+        // Removing the enhancement restores the plain 1.5 multiplier.
+        await page.locator('#lf-collector-bonus').fill('0');
+        await page.locator('#lf-collector-bonus').press('Tab');
+        await expect(crawlerCell(page, 3)).toHaveText('16');
+        await expect(crawlerCell(page, 4)).toHaveText('8');
+        await expect(crawlerCell(page, 5)).toHaveText('4');
+    });
+
+    test('leaves General and Discoverer classes untouched', async ({ page }) => {
+        // General: no class bonus row, and the enhancement must not create one.
+        await page.locator('#class-1').click();
+        // Wait for the class switch to land before sampling the crawler output.
+        await expect(classCell(page, 3)).toHaveText('');
+        const crawlerMetal = (await crawlerCell(page, 3).textContent())?.trim() ?? '';
+        expect(crawlerMetal).not.toBe('');
+        await page.locator('#param-lifeforms-tab').click();
+        await page.locator('#lf-collector-bonus').fill('100');
+        await page.locator('#lf-collector-bonus').press('Tab');
+        await expect(classCell(page, 3)).toHaveText('');
+        await expect(classCell(page, 4)).toHaveText('');
+        await expect(classCell(page, 5)).toHaveText('');
+        await expect(classCell(page, 6)).toHaveText('');
+        // Crawlers keep their plain, unamplified output for a non-Collector.
+        await expect(crawlerCell(page, 3)).toHaveText(crawlerMetal);
+
+        // Discoverer likewise gets nothing from a Collector-only research.
+        await page.locator('#param-general-tab').click();
+        await page.locator('#class-2').click();
+        await expect(classCell(page, 3)).toHaveText('');
+        await expect(classCell(page, 4)).toHaveText('');
+        await expect(classCell(page, 5)).toHaveText('');
+        await expect(classCell(page, 6)).toHaveText('');
+    });
+
+    test('validates as a non-negative percentage and persists', async ({ page }) => {
+        const lfBonus = page.locator('#lf-collector-bonus');
+        await page.locator('#param-lifeforms-tab').click();
+
+        // Accepts fractional values - the in-game bonus grows by 0.2% per level.
+        await lfBonus.fill('0.4');
+        await lfBonus.press('Tab');
+        await expect(lfBonus).toHaveValue('0.4');
+
+        // No upper cap, unlike the plasma cost reduction.
+        await lfBonus.fill('150');
+        await lfBonus.press('Tab');
+        await expect(lfBonus).toHaveValue('150');
+
+        // Negative input never yields a negative value.
+        await lfBonus.fill('-5');
+        await lfBonus.press('Tab');
+        const negValue = await lfBonus.inputValue();
+        expect(parseFloat(negValue.replace(',', '.'))).toBeGreaterThanOrEqual(0);
+
+        // Survives a reload.
+        await lfBonus.fill('12.5');
+        await lfBonus.press('Tab');
+        await page.reload();
+        await page.locator('#param-lifeforms-tab').click();
+        await expect(page.locator('#lf-collector-bonus')).toHaveValue('12.5');
+    });
+});
+
 test.describe('Life Forms plasma technology cost reduction', () => {
     // #plasma-amort-tbl rows: (1) upgrade cost, (2) production increase, (3) payback time.
     const costRow = (page) => page.locator('#plasma-amort-tbl tbody tr:nth-child(1)');

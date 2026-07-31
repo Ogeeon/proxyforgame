@@ -46,6 +46,7 @@ function collectGeneralSettings() {
 		lfCrysProdBonus: getInputNumber($('#lf-crystal-prod-bonus')),
 		lfDeutProdBonus: getInputNumber($('#lf-deut-prod-bonus')),
 		lfEnergyProdBonus: getInputNumber($('#lf-energy-prod-bonus')),
+		lfCollectorBonus: getInputNumber($('#lf-collector-bonus')),
 		lfCrawlerBonus: getInputNumber($('#lf-crawler-bonus')),
 		lfPlasmaCostReduction: getInputNumber($('#lf-plasma-cost-reduction'))
 	};

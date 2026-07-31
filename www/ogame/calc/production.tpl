@@ -97,6 +97,7 @@
         lfCrysProdBonus: 0,
         lfDeutProdBonus: 0,
         lfEnergyProdBonus: 0,
+        lfCollectorBonus: 0,
         lfCrawlerBonus: 0,
         lfPlasmaCostReduction: 0,
 
@@ -156,6 +157,7 @@
             case 'lfCrysProdBonus':
             case 'lfDeutProdBonus':
             case 'lfEnergyProdBonus':
+            case 'lfCollectorBonus':
             case 'lfCrawlerBonus':
               return validateNumber(parseFloat(value), 0, Infinity, 0);
             case 'lfPlasmaCostReduction':
@@ -450,6 +452,13 @@
                   <input id="lf-energy-prod-bonus" type="text" name="lf-energy-prod-bonus" class="form-control level-input m-0" value="0"/>
                   <span class="input-group-text">%</span>
                 </div>
+              </div>
+            </div>
+            <div class="d-flex align-items-center gap-1">
+              <label for="lf-collector-bonus"><?= $l['collectors-character-bonus'] ?></label>
+              <div class="input-group input-group-sm w-auto">
+                <input id="lf-collector-bonus" type="text" name="lf-collector-bonus" class="form-control level-input m-0" value="0" alt="<?= $l['collectors-character-bonus'] ?>"/>
+                <span class="input-group-text">%</span>
               </div>
             </div>
             <div class="d-flex align-items-center gap-1">

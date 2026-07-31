@@ -119,7 +119,7 @@ function getSSCost(techID, currLvl, plnData) {
 	let boosterFactor = 0.1 * plnData[2];
 	let engineerFactor = (options.prm.engineer === true) ? 0.1 : 0;
 	let allStaffFactor = fullCrew === true ? 0.02 : 0;
-	let classFactor = options.prm.playerClass === 0 ? 0.1 : 0;
+	let classFactor = options.prm.playerClass === 0 ? 0.1 * (1 + 0.01 * (options.prm.lfCollectorBonus || 0)) : 0;
 	let allianceClassFactor = options.prm.isTrader ? 0.05 : 0;
 	let totalEnergyProd = oneSSProd;
 	totalEnergyProd += Math.round(oneSSProd * boosterFactor);
@@ -251,7 +251,7 @@ function applyEnergyBonuses(totalEnergyProduced, plnData, fullCrew, lfEff, resul
 	const boosterFactor = 0.1 * plnData[2];
 	const engineerFactor = (options.prm.engineer === true) ? 0.1 : 0;
 	const allStaffFactor = fullCrew === true ? 0.02 : 0;
-	const classFactor = options.prm.playerClass === 0 ? 0.1 : 0;
+	const classFactor = options.prm.playerClass === 0 ? 0.1 * (1 + 0.01 * (options.prm.lfCollectorBonus || 0)) : 0;
 	const allianceClassFactor = options.prm.isTrader ? 0.05 : 0;
 	const lfEnergyFactor = (options.prm.lfEnergyProdBonus || 0) / 100;
 	results[9][3] = Math.round(energyBalance * boosterFactor);
@@ -320,7 +320,7 @@ function computeResourceProduction(prodParams, plnData, fullCrew, koeff, normali
 	for (const i of [0, 1, 2]) {
 		let pwrFactor = normalized ? 1 : prodParams[i][1] / 100.0;
 		let prod = getProductionRateSplit(options.rowsToTechs[i], prodParams[i][0], options.prm.energyTechLevel, options.prm.plasmaTechLevel, plnData[0], plnData[1],
-			options.prm.universeSpeed, options.prm.geologist, options.prm.engineer, prodFactor, pwrFactor, prodParams[i][2], fullCrew, options.prm.playerClass, options.prm.isTrader);
+			options.prm.universeSpeed, options.prm.geologist, options.prm.engineer, prodFactor, pwrFactor, prodParams[i][2], fullCrew, options.prm.playerClass, options.prm.isTrader, options.prm.lfCollectorBonus || 0);
 		// Save the resource production data
 		results[0][i] += prod[0];  // base production
 		production[i] += prod[0];
@@ -334,7 +334,9 @@ function computeResourceProduction(prodParams, plnData, fullCrew, koeff, normali
 }
 
 function applyCrawlerProductionBonus(prodParams, results, production) {
-	let crMult = options.prm.playerClass === 0 ? 1.5 : 1;
+	// The Collector's +50% crawler bonus is amplified by the same character class
+	// bonus as the +25% mine and +10% energy bonuses (see getProductionRateSplit).
+	let crMult = options.prm.playerClass === 0 ? 1 + 0.5 * (1 + 0.01 * (options.prm.lfCollectorBonus || 0)) : 1;
 	results[7][0] = Math.round(results[1][0] * prodParams[6][0] * 0.0002 * crMult * prodParams[6][1] / 100.0);
 	production[0] += results[7][0];
 	results[7][1] = Math.round(results[2][1] * prodParams[6][0] * 0.0002 * crMult * prodParams[6][1] / 100.0);
