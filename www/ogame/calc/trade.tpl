@@ -1,14 +1,13 @@
 <!DOCTYPE html>
+<html lang="<?= getLangAttr() ?>">
 <head>
-  <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
-  <meta http-equiv="Cache-Control" content="no-cache" />
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
   <title><?= $l['title'] ?></title>
-  <meta name="description" content="<?= $l['title'] ?>"/>
-  <meta name="keywords" content="<?= $l['keywords'] ?>"/>
-  <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon"/>
-  <link rel="icon" href="/favicon.ico" type="image/x-icon"/>
+  <meta name="description" content="<?= $l['title'] ?>">
+  <meta name="keywords" content="<?= $l['keywords'] ?>">
+  <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+  <link rel="icon" href="/favicon.ico" type="image/x-icon">
 <?php
   if ($_SERVER['HTTP_HOST'] == 'proxyforgame.com') {
     $pfgPath = $_SERVER['DOCUMENT_ROOT'];
@@ -19,16 +18,16 @@
 
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
-  <link type="text/css" href="/css/langs_bs.css?v=<?php echo filemtime($pfgPath.'/css/langs_bs.css'); ?>" rel="stylesheet" />
-  <link type="text/css" href="/css/common_bs.css?v=<?php echo filemtime($pfgPath.'/css/common_bs.css'); ?>" rel="stylesheet"/>
-  <link type="text/css" href="/ogame/calc/css/trade.css?v=<?php echo filemtime($pfgPath.'/ogame/calc/css/trade.css'); ?>" rel="stylesheet"/>
+  <link type="text/css" href="/css/langs_bs.css?v=<?php echo filemtime($pfgPath.'/css/langs_bs.css'); ?>" rel="stylesheet">
+  <link type="text/css" href="/css/common_bs.css?v=<?php echo filemtime($pfgPath.'/css/common_bs.css'); ?>" rel="stylesheet">
+  <link type="text/css" href="/ogame/calc/css/trade.css?v=<?php echo filemtime($pfgPath.'/ogame/calc/css/trade.css'); ?>" rel="stylesheet">
 
-  <script type="text/javascript" src="/js/utils.js?v=<?php echo filemtime($pfgPath.'/js/utils.js'); ?>"></script>
-  <script type="text/javascript" src="/ogame/calc/js/dom-utils.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/dom-utils.js'); ?>"></script>
-  <script type="text/javascript" src="/ogame/calc/js/trade-core.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/trade-core.js'); ?>"></script>
-  <script type="text/javascript" src="/ogame/calc/js/trade.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/trade.js'); ?>"></script>
+  <script src="/js/utils.js?v=<?php echo filemtime($pfgPath.'/js/utils.js'); ?>"></script>
+  <script src="/ogame/calc/js/dom-utils.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/dom-utils.js'); ?>"></script>
+  <script src="/ogame/calc/js/trade-core.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/trade-core.js'); ?>"></script>
+  <script src="/ogame/calc/js/trade.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/trade.js'); ?>"></script>
 
-  <script type="text/javascript">
+  <script>
     l.sc = '<?= $l['sc-short'] ?>';
     l.lc = '<?= $l['lc-short'] ?>';
     l.metal = '<?= $l['metal'] ?>';
@@ -67,6 +66,8 @@
 </head>
 <body>
 
+<h1 class="visually-hidden"><?= $l['title'] ?></h1>
+
 <div class="container-fluid">
   <div class="row">
     <div class="col-2">
@@ -95,7 +96,7 @@
                   <label for="hypertech-lvl"><?= $l['hyper-tech'] ?></label>
                 </div>
                 <div class="col-auto">
-                  <input id="hypertech-lvl" type="text" name="hypertech-lvl" class="form-control form-control-sm rate-input trade-editable" value="0"/>
+                  <input id="hypertech-lvl" type="text" name="hypertech-lvl" class="form-control form-control-sm rate-input trade-editable" value="0">
                 </div>
               </div>
               <div class="row align-items-center justify-content-center py-1">
@@ -103,15 +104,15 @@
                   <label><?= $l['class'] ?>:</label>
                 </div>
                 <div class="col-auto d-flex align-items-center gap-1">
-                  <input id="player-class-0" type="radio" name="player-class" value="0" class="form-check-input trade-editable"/>
+                  <input id="player-class-0" type="radio" name="player-class" value="0" class="form-check-input trade-editable">
                   <label for="player-class-0"><?= $l['class-collector'] ?></label>
                 </div>
                 <div class="col-auto d-flex align-items-center gap-1">
-                  <input id="player-class-1" type="radio" name="player-class" value="1" class="form-check-input trade-editable"/>
+                  <input id="player-class-1" type="radio" name="player-class" value="1" class="form-check-input trade-editable">
                   <label for="player-class-1"><?= $l['class-general'] ?></label>
                 </div>
                 <div class="col-auto d-flex align-items-center gap-1">
-                  <input id="player-class-2" type="radio" name="player-class" value="2" class="form-check-input trade-editable"/>
+                  <input id="player-class-2" type="radio" name="player-class" value="2" class="form-check-input trade-editable">
                   <label for="player-class-2"><?= $l['class-discoverer'] ?></label>
                 </div>
               </div>
@@ -122,14 +123,14 @@
                 <div class="col-auto d-flex align-items-center gap-1">
                   <label for="sc-capacity-increase"><?= $l['sc-short'] ?></label>
                   <div class="input-group input-group-sm w-auto">
-                    <input id="sc-capacity-increase" type="text" name="sc-capacity-increase" class="form-control rate-input trade-editable m-0" value="0"/>
+                    <input id="sc-capacity-increase" type="text" name="sc-capacity-increase" class="form-control rate-input trade-editable m-0" value="0">
                     <span class="input-group-text">%</span>
                   </div>
                 </div>
                 <div class="col-auto d-flex align-items-center gap-1">
                   <label for="lc-capacity-increase"><?= $l['lc-short'] ?></label>
                   <div class="input-group input-group-sm w-auto">
-                    <input id="lc-capacity-increase" type="text" name="lc-capacity-increase" class="form-control rate-input trade-editable m-0" value="0"/>
+                    <input id="lc-capacity-increase" type="text" name="lc-capacity-increase" class="form-control rate-input trade-editable m-0" value="0">
                     <span class="input-group-text">%</span>
                   </div>
                 </div>
@@ -146,25 +147,25 @@
                   <p class="border rounded subheader bg-primary-subtle mb-1"><?= $l['src'] ?></p>
                   <div class="pe-2 pb-1">
                     <div id="res-src" class="mb-2">
-                      <div class="res-type"><input id="res-src-0" class="form-check-input" type="radio" name="src" value="0" tabindex="1"/><label for="res-src-0"><?= $l['metal'] ?></label></div>
-                      <div class="res-type"><input id="res-src-1" class="form-check-input" type="radio" name="src" value="1" tabindex="2"/><label for="res-src-1"><?= $l['crystal'] ?></label></div>
-                      <div class="res-type"><input id="res-src-2" class="form-check-input" type="radio" name="src" value="2" tabindex="3"/><label for="res-src-2"><?= $l['deuterium'] ?></label></div>
-                      <div class="res-type"><input id="res-src-3" class="form-check-input" type="radio" name="src" value="3" tabindex="4"/><label for="res-src-3"><?= $l['metal'] ?> + <?= $l['crystal'] ?></label></div>
-                      <div class="res-type"><input id="res-src-4" class="form-check-input" type="radio" name="src" value="4" tabindex="5"/><label for="res-src-4"><?= $l['metal'] ?> + <?= $l['deuterium'] ?></label></div>
-                      <div class="res-type"><input id="res-src-5" class="form-check-input" type="radio" name="src" value="5" tabindex="6"/><label for="res-src-5"><?= $l['crystal'] ?> + <?= $l['deuterium'] ?></label></div>
+                      <div class="res-type"><input id="res-src-0" class="form-check-input" type="radio" name="src" value="0" tabindex="1"><label for="res-src-0"><?= $l['metal'] ?></label></div>
+                      <div class="res-type"><input id="res-src-1" class="form-check-input" type="radio" name="src" value="1" tabindex="2"><label for="res-src-1"><?= $l['crystal'] ?></label></div>
+                      <div class="res-type"><input id="res-src-2" class="form-check-input" type="radio" name="src" value="2" tabindex="3"><label for="res-src-2"><?= $l['deuterium'] ?></label></div>
+                      <div class="res-type"><input id="res-src-3" class="form-check-input" type="radio" name="src" value="3" tabindex="4"><label for="res-src-3"><?= $l['metal'] ?> + <?= $l['crystal'] ?></label></div>
+                      <div class="res-type"><input id="res-src-4" class="form-check-input" type="radio" name="src" value="4" tabindex="5"><label for="res-src-4"><?= $l['metal'] ?> + <?= $l['deuterium'] ?></label></div>
+                      <div class="res-type"><input id="res-src-5" class="form-check-input" type="radio" name="src" value="5" tabindex="6"><label for="res-src-5"><?= $l['crystal'] ?> + <?= $l['deuterium'] ?></label></div>
                     </div>
                     <div class="hr mb-1"></div>
                     <div class="row mb-1 align-items-center">
                       <div class="col-5 text-end res-src-m"><?= $l['metal'] ?>:</div>
-                      <div class="col-7"><input id="res-src-m" type="text" name="res-src-m" class="form-control form-control-sm  res-src-m res-input trade-editable" tabindex="7"/></div>
+                      <div class="col-7"><input id="res-src-m" type="text" name="res-src-m" class="form-control form-control-sm  res-src-m res-input trade-editable" tabindex="7"></div>
                     </div>
                     <div class="row mb-1 align-items-center">
                       <div class="col-5 text-end res-src-c"><?= $l['crystal'] ?>:</div>
-                      <div class="col-7"><input id="res-src-c" type="text" name="res-src-c" class="form-control form-control-sm res-src-c res-input trade-editable" tabindex="8"/></div>
+                      <div class="col-7"><input id="res-src-c" type="text" name="res-src-c" class="form-control form-control-sm res-src-c res-input trade-editable" tabindex="8"></div>
                     </div>
                     <div class="row mb-1 align-items-center">
                       <div class="col-5 text-end res-src-d"><?= $l['deuterium'] ?>:</div>
-                      <div class="col-7"><input id="res-src-d" type="text" name="res-src-d" class="form-control form-control-sm res-src-d res-input trade-editable" tabindex="9"/></div>
+                      <div class="col-7"><input id="res-src-d" type="text" name="res-src-d" class="form-control form-control-sm res-src-d res-input trade-editable" tabindex="9"></div>
                     </div>
                     <div class="hr mb-1"></div>
                     <div class="row mb-1 align-items-center">
@@ -186,35 +187,35 @@
                   <p class="border rounded subheader bg-primary-subtle mb-1"><?= $l['dst'] ?></p>
                   <div class="pe-2 pb-1">
                     <div id="res-dst" class="mb-2">
-                      <div class="res-type" id="res-type-dst-0"><input id="res-dst-0" class="form-check-input" type="radio" name="dst" value="0" tabindex="10"/><label for="res-dst-0" id="res-type-dst-lbl-0"></label></div>
+                      <div class="res-type" id="res-type-dst-0"><input id="res-dst-0" class="form-check-input" type="radio" name="dst" value="0" tabindex="10"><label for="res-dst-0" id="res-type-dst-lbl-0"></label></div>
                       <div id="dst-block">
-                        <div class="res-type" id="res-type-dst-1"><input id="res-dst-1" class="form-check-input" type="radio" name="dst" value="1" tabindex="11"/><label for="res-dst-1" id="res-type-dst-lbl-1"></label></div>
+                        <div class="res-type" id="res-type-dst-1"><input id="res-dst-1" class="form-check-input" type="radio" name="dst" value="1" tabindex="11"><label for="res-dst-1" id="res-type-dst-lbl-1"></label></div>
                         <div class="hrs"></div>
-                        <div class="res-type" id="res-type-dst-2"><input id="res-dst-2" class="form-check-input" type="radio" name="dst" value="2" tabindex="12"/><label for="res-dst-2" id="res-type-dst-lbl-2"></label></div>
+                        <div class="res-type" id="res-type-dst-2"><input id="res-dst-2" class="form-check-input" type="radio" name="dst" value="2" tabindex="12"><label for="res-dst-2" id="res-type-dst-lbl-2"></label></div>
                         <div id="dst-mix-block">
                           <div class="res-subtype d-flex align-items-center gap-1" id="res-subtype-dst-0">
                             <input id="res-dst-mix-0" class="form-check-input" type="radio" name="sub-dst" value="0">
-                            <input id="mix-balance-proc" type="text" name="mix-balance-proc" class="form-control form-control-sm rate-input trade-editable" tabindex="13" style="width: 50px;"/>
+                            <input id="mix-balance-proc" type="text" name="mix-balance-proc" class="form-control form-control-sm rate-input trade-editable" tabindex="13" style="width: 50px;">
                             <span>%</span>
                             <span id="mix-lbl"></span>
-                            <input id="mix-balance" type="range" class="range-slider form-range res-mix-balance flex-grow-1" />
+                            <input id="mix-balance" type="range" class="range-slider form-range res-mix-balance flex-grow-1">
                           </div>
                           <div class="res-subtype d-inline-block" id="res-subtype-dst-1">
                             <input id="res-dst-mix-1" class="form-check-input" type="radio" name="sub-dst" value="1">
                             <div class="d-inline-block">
-                              <input id="mix-balance-prop1" type="text" name="mix-balance-prop1" class="form-control form-control-sm rate-input trade-editable d-inline-block" tabindex="14" style="width: 50px;"/> /
-                              <input id="mix-balance-prop2" type="text" name="mix-balance-prop2" class="form-control form-control-sm rate-input trade-editable d-inline-block" tabindex="15" style="width: 50px;"/>
+                              <input id="mix-balance-prop1" type="text" name="mix-balance-prop1" class="form-control form-control-sm rate-input trade-editable d-inline-block" tabindex="14" style="width: 50px;"> /
+                              <input id="mix-balance-prop2" type="text" name="mix-balance-prop2" class="form-control form-control-sm rate-input trade-editable d-inline-block" tabindex="15" style="width: 50px;">
                               <span id="mix-prop-lbl"></span>
                             </div>
                           </div>
                           <div class="res-subtype d-inline-block" id="res-subtype-dst-2">
                             <input id="res-dst-mix-2" class="form-check-input" type="radio" name="sub-dst" value="2">
-                            <input id="mix-fix1" type="text" name="mix-fix1" class="form-control form-control-sm trade-editable d-inline-block" tabindex="16" style="width: 150px;"/>
+                            <input id="mix-fix1" type="text" name="mix-fix1" class="form-control form-control-sm trade-editable d-inline-block" tabindex="16" style="width: 150px;">
                             <span id="mix-fix1-lbl"></span>
                           </div>
                           <div class="res-subtype d-inline-block" id="res-subtype-dst-3">
                             <input id="res-dst-mix-3" class="form-check-input" type="radio" name="sub-dst" value="3">
-                            <input id="mix-fix2" type="text" name="mix-fix2" class="form-control form-control-sm trade-editable d-inline-block" tabindex="17" style="width: 150px;"/>
+                            <input id="mix-fix2" type="text" name="mix-fix2" class="form-control form-control-sm trade-editable d-inline-block" tabindex="17" style="width: 150px;">
                             <span id="mix-fix2-lbl"></span>
                           </div>
                         </div>
@@ -259,7 +260,7 @@
                 <div class="rate-label-input-row">
                   <div class="rate-label"><?= $l['crystal'] ?> : <?= $l['deuterium'] ?></div>
                   <div class="rate-input-group">
-                    <input id="rate-cd" type="text" name="rate-cd" class="form-control form-control-sm trade-editable rate-input" tabindex="19"/>
+                    <input id="rate-cd" type="text" name="rate-cd" class="form-control form-control-sm trade-editable rate-input" tabindex="19">
                   </div>
                 </div>
                 <div class="rate-label-input-row">
@@ -274,17 +275,17 @@
               <div class="rate-sliders-group mb-2">
                 <div class="rate-slider-row mb-2">
                   <span id="rate-md-min"></span>
-                  <input id="md-slider" type="range" class="range-slider form-range" />
+                  <input id="md-slider" type="range" class="range-slider form-range">
                   <span id="rate-md-max"></span>
                 </div>
                 <div class="rate-slider-row mb-2">
                   <span id="rate-cd-min"></span>
-                  <input id="cd-slider" type="range" class="range-slider form-range" />
+                  <input id="cd-slider" type="range" class="range-slider form-range">
                   <span id="rate-cd-max"></span>
                 </div>
                 <div class="rate-slider-row">
                   <span id="rate-mc-min"></span>
-                  <input id="mc-slider" type="range" class="range-slider form-range" disabled />
+                  <input id="mc-slider" type="range" class="range-slider form-range" disabled>
                   <span id="rate-mc-max"></span>
                 </div>
               </div>
@@ -327,12 +328,12 @@
                 <div class="col-12 col-md-3 text-md-end tdr"><?= $l['coords'] ?>:</div>
                 <div class="col-12 col-md-9">
                   <div class="d-flex align-items-center gap-1">
-                    <input id="coord-g" type="text" class="form-control form-control-sm rate-input" style="width: 60px;" tabindex="23"/>
+                    <input id="coord-g" type="text" class="form-control form-control-sm rate-input" style="width: 60px;" tabindex="23">
                     <span>:</span>
-                    <input id="coord-s" type="text" class="form-control form-control-sm rate-input" style="width: 60px;" tabindex="24"/>
+                    <input id="coord-s" type="text" class="form-control form-control-sm rate-input" style="width: 60px;" tabindex="24">
                     <span>:</span>
-                    <input id="coord-p" type="text" class="form-control form-control-sm rate-input" style="width: 60px;" tabindex="25"/>
-                    <input id="moon" type="checkbox" name="moon" class="form-check-input ms-2"/>
+                    <input id="coord-p" type="text" class="form-control form-control-sm rate-input" style="width: 60px;" tabindex="25">
+                    <input id="moon" type="checkbox" name="moon" class="form-check-input ms-2">
                     <label for="moon" class="form-check-label"><?= $l['moon'] ?></label>
                   </div>
                 </div>

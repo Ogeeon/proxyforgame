@@ -212,7 +212,7 @@
   },
   "sidebar": {
     "ogameMenuItems": {
-      "header": "Calculators<br/>for OGame",
+      "header": "Calculators<br>for OGame",
       "main-title": "Main page",
       "trade-title": "Trade calculator",
       "costs-title": "Costs calculator",
@@ -227,10 +227,10 @@
     },
     "feedbackItems": {
       "header": "Feedback",
-      "misspelling": "Found an error?<br/>Select the text and press<br/><a href=\"#\" onclick=\"findSelection();\" style=\"display: inline\">Ctrl+Enter</a><br/>to tell us about it.",
-      "mail": "If you have any requests<br/>or comments, please<br/><a href=\"#\" onclick=\"showEmailWindow();\" style=\"display: inline\">click here</a><br/>to send us an e-mail.",
-      "board": "If you can help us<br/>with site translation,<br/>please visit<br/><a href=\"http://board.origin.ogame.de/board6-origin/board24-localization-area/board153-fan-project-s-translations/1936-online-tools-collection-translation\" style=\"display: inline\" target=\"_blank\">OGame Origin Board</a>",
-      "discord": "Join our<br/><a href=\"https://discord.gg/H8xPdA9FbE\" style=\"display: inline\" target=\"_blank\">Discord server</a>,<br/>to discuss the site,<br/>report a bug,<br/>or make a suggestion.<br/>"
+      "misspelling": "Found an error?<br>Select the text and press<br><a href=\"#\" onclick=\"findSelection();\" style=\"display: inline\">Ctrl+Enter</a><br>to tell us about it.",
+      "mail": "If you have any requests<br>or comments, please<br><a href=\"#\" onclick=\"showEmailWindow();\" style=\"display: inline\">click here</a><br>to send us an e-mail.",
+      "board": "If you can help us<br>with site translation,<br>please visit<br><a href=\"http://board.origin.ogame.de/board6-origin/board24-localization-area/board153-fan-project-s-translations/1936-online-tools-collection-translation\" style=\"display: inline\" target=\"_blank\">OGame Origin Board</a>",
+      "discord": "Join our<br><a href=\"https://discord.gg/H8xPdA9FbE\" style=\"display: inline\" target=\"_blank\">Discord server</a>,<br>to discuss the site,<br>report a bug,<br>or make a suggestion.<br>"
     },
     "reportStrings": {
       "title": "Sending a misspelling report",
@@ -270,7 +270,7 @@
     "donateStrings": {
       "header": "Support this project",
       "why_caption": "Why donate?",
-      "why_text": "There are no ads on these pages, and never will be. However, I spend money to keep this site available, and I spend my time to keep it updated. I would appreciate if you could donate any amount of money to support me.<br/>Thank you.",
+      "why_text": "There are no ads on these pages, and never will be. However, I spend money to keep this site available, and I spend my time to keep it updated. I would appreciate if you could donate any amount of money to support me.<br>Thank you.",
       "alternatives": "Alternatives"
     },
     "changelogStrings": {

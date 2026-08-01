@@ -212,7 +212,7 @@
   },
   "sidebar": {
     "ogameMenuItems": {
-      "header": "OGame İçin Hesaplayıcı<br/>",
+      "header": "OGame İçin Hesaplayıcı<br>",
       "main-title": "Ana Sayfa",
       "trade-title": "Ticaret Hesaplayıcı",
       "costs-title": "Maliyet Hesaplayıcı",
@@ -227,10 +227,10 @@
     },
     "feedbackItems": {
       "header": "Geri Bildirim",
-      "misspelling": "Hata mı buldunuz?<br/>Yazıyı seçin ve<br/><a href=\"#\" onclick=\"findSelection();\" style=\"display: inline\">ve Ctrl+Enter</a><br/>‘a basarak bize ne olması gerektiğini söyleyin.",
-      "mail": "Eğer herhangi bir istek<br/>veya yorumunuz varsa,<br/>bize e-posta göndermek<br/><a href=\"#\" onclick=\"showEmailWindow();\" style=\"display: inline\">için lütfen burayı tıklayın</a>.",
-      "board": "Eğer site çevirisinde bize<br/>yardım etmek isterseniz lütfen<br/><a href=\"http://board.origin.ogame.de/board6-origin/board24-localization-area/board153-fan-project-s-translations/1936-online-tools-collection-translation\" style = \"display: inline\" target = \"blank\";>OGame Origin Board</a><br/>\"ıziyaret ediniz.",
-      "discord": "Sitemizi tartışmak,<br/>bir hata bildirmek<br/>veya öneride bulunmak için<br/><a href=\"https://discord.gg/H8xPdA9FbE\" style=\"display: inline\" target=\"_blank\">Discord sunucumuza</a><br/>katılın.<br/>"
+      "misspelling": "Hata mı buldunuz?<br>Yazıyı seçin ve<br><a href=\"#\" onclick=\"findSelection();\" style=\"display: inline\">ve Ctrl+Enter</a><br>‘a basarak bize ne olması gerektiğini söyleyin.",
+      "mail": "Eğer herhangi bir istek<br>veya yorumunuz varsa,<br>bize e-posta göndermek<br><a href=\"#\" onclick=\"showEmailWindow();\" style=\"display: inline\">için lütfen burayı tıklayın</a>.",
+      "board": "Eğer site çevirisinde bize<br>yardım etmek isterseniz lütfen<br><a href=\"http://board.origin.ogame.de/board6-origin/board24-localization-area/board153-fan-project-s-translations/1936-online-tools-collection-translation\" style=\"display: inline\" target=\"_blank\">OGame Origin Board</a><br>ziyaret ediniz.",
+      "discord": "Sitemizi tartışmak,<br>bir hata bildirmek<br>veya öneride bulunmak için<br><a href=\"https://discord.gg/H8xPdA9FbE\" style=\"display: inline\" target=\"_blank\">Discord sunucumuza</a><br>katılın.<br>"
     },
     "reportStrings": {
       "title": "Yazım yanlışı gönder",
@@ -270,7 +270,7 @@
     "donateStrings": {
       "header": "Bu projeye destek verin",
       "why_caption": "Neden bağış?",
-      "why_text": "Bu sayfalarda hiç reklam yok ve asla olmayacak. Ancak, bu siteyi kullanılabilir tutmak için para harcıyorum ve güncel tutmak için zamanımı harcıyorum. Bana destek olmak için herhangi bir miktarda para bağışlayabilirseniz sevinirim.<br/>Teşekkürler.",
+      "why_text": "Bu sayfalarda hiç reklam yok ve asla olmayacak. Ancak, bu siteyi kullanılabilir tutmak için para harcıyorum ve güncel tutmak için zamanımı harcıyorum. Bana destek olmak için herhangi bir miktarda para bağışlayabilirseniz sevinirim.<br>Teşekkürler.",
       "alternatives": "Alternatifler"
     },
     "changelogStrings": {

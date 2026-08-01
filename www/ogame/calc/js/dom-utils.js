@@ -587,7 +587,10 @@ const validateInputNumberOnBlurNative = (event) => {
     }
   };
 
-  const fieldTitle = input.alt || '';
+  // Field title for the constraint-warning message. `data-field-title`
+  // replaced the invalid `alt` attribute on inputs; keep `alt` as a fallback
+  // for inputs that never had the attribute renamed.
+  const fieldTitle = input.dataset.fieldTitle || input.alt || '';
   const fieldHint = fieldTitle && getOptionValue('fieldHint', null)
     ? formatString(getOptionValue('fieldHint', null), fieldTitle)
     : '';

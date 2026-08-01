@@ -10,6 +10,7 @@
     "generate-tsconfigs": "node scripts/generate-tsconfigs.js",
     "check-tsconfigs": "node scripts/generate-tsconfigs.js --check",
     "validate-translations": "node scripts/validate-translations.js",
+    "validate-html": "node scripts/validate-html.js",
     "sync-translations": "node scripts/sync-translations.js",
     "sync-translations:report": "node scripts/sync-translations.js --report",
     "sync-translations:show": "node scripts/sync-translations.js --report --show-keys",
@@ -37,6 +38,7 @@
     "@types/node": "^24.0.0",
     "eslint": "^9.39.0",
     "globals": "^16.0.0",
-    "typescript": "^5.9.0"
+    "typescript": "^5.9.0",
+    "vnu-jar": "^26.7.25"
   }
 }

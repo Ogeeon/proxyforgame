@@ -212,7 +212,7 @@
   },
   "sidebar": {
     "ogameMenuItems": {
-      "header": "Калькуляторы<br/>для OGame",
+      "header": "Калькуляторы<br>для OGame",
       "main-title": "Главная",
       "trade-title": "Торговый калькулятор",
       "costs-title": "Расчёт стоимости",
@@ -227,10 +227,10 @@
     },
     "feedbackItems": {
       "header": "Обратная связь",
-      "misspelling": "Нашли ошибку?<br/>Выделите текст и нажмите<br/><a href=\"#\" onclick=\"findSelection();\" style=\"display: inline\">Ctrl+Enter</a><br/>чтобы сообщить нам о ней.",
-      "mail": "Если у вас есть замечания<br/>или предложения,<br/><a href=\"#\" onclick=\"showEmailWindow();\" style=\"display: inline\">нажмите здесь</a><br/>чтобы отправить нам письмо.",
-      "board": "Если вы можете помочь<br/>с переводом сайта,<br/>пожалуйста посетите<br/><a href=\"http://board.origin.ogame.de/board6-origin/board24-localization-area/board153-fan-project-s-translations/1936-online-tools-collection-translation\" style=\"display: inline\" target=\"_blank\">форум OGame Origin</a>",
-      "discord": "Присоединяйтесь к нашему<br/><a href=\"https://discord.gg/H8xPdA9FbE\" style=\"display: inline\" target=\"_blank\">Discord-серверу</a>,<br/>чтобы обсудить сайт,<br/>сообщить об ошибке<br/>или внести предложение.<br/>"
+      "misspelling": "Нашли ошибку?<br>Выделите текст и нажмите<br><a href=\"#\" onclick=\"findSelection();\" style=\"display: inline\">Ctrl+Enter</a><br>чтобы сообщить нам о ней.",
+      "mail": "Если у вас есть замечания<br>или предложения,<br><a href=\"#\" onclick=\"showEmailWindow();\" style=\"display: inline\">нажмите здесь</a><br>чтобы отправить нам письмо.",
+      "board": "Если вы можете помочь<br>с переводом сайта,<br>пожалуйста посетите<br><a href=\"http://board.origin.ogame.de/board6-origin/board24-localization-area/board153-fan-project-s-translations/1936-online-tools-collection-translation\" style=\"display: inline\" target=\"_blank\">форум OGame Origin</a>",
+      "discord": "Присоединяйтесь к нашему<br><a href=\"https://discord.gg/H8xPdA9FbE\" style=\"display: inline\" target=\"_blank\">Discord-серверу</a>,<br>чтобы обсудить сайт,<br>сообщить об ошибке<br>или внести предложение.<br>"
     },
     "reportStrings": {
       "title": "Отправка сообщения об ошибке в тексте",
@@ -270,7 +270,7 @@
     "donateStrings": {
       "header": "Поддержка проекта",
       "why_caption": "Зачем жертвовать деньги?",
-      "why_text": "На страницах этого сайта нет и никогда не будет рекламы. При этом я трачу свои деньги на его содержание и своё время на дорабоки. Я буду признателен, если вы пожертвуете любую сумму на поддержку проекта.<br/>Спасибо.",
+      "why_text": "На страницах этого сайта нет и никогда не будет рекламы. При этом я трачу свои деньги на его содержание и своё время на дорабоки. Я буду признателен, если вы пожертвуете любую сумму на поддержку проекта.<br>Спасибо.",
       "alternatives": "Альтернативы"
     },
     "changelogStrings": {

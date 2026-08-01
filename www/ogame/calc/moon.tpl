@@ -1,12 +1,12 @@
 <!DOCTYPE html>
+<html lang="<?= getLangAttr() ?>">
 <head>
-  <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
-  <meta http-equiv="Cache-Control" content="no-cache" />
+  <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
   <title><?= $l['title'] ?></title>
-  <meta name="description" content="<?= $l['title'] ?>"/>
-  <meta name="keywords" content="<?= $l['keywords'] ?>"/>
-  <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon"/>
-  <link rel="icon" href="/favicon.ico" type="image/x-icon"/>
+  <meta name="description" content="<?= $l['title'] ?>">
+  <meta name="keywords" content="<?= $l['keywords'] ?>">
+  <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+  <link rel="icon" href="/favicon.ico" type="image/x-icon">
 <?php
   if ($_SERVER['HTTP_HOST'] == 'proxyforgame.com') {
     $pfgPath = $_SERVER['DOCUMENT_ROOT'];
@@ -31,26 +31,26 @@
   );
 ?>
   <!-- Bootstrap 5 CSS -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"/>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet"/>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
 
   <!-- Custom styles -->
-  <link type="text/css" href="/css/langs_bs.css?v=<?php echo filemtime($pfgPath.'/css/langs_bs.css'); ?>" rel="stylesheet" />
-  <link type="text/css" href="/css/common_bs.css?v=<?php echo filemtime($pfgPath.'/css/common_bs.css'); ?>" rel="stylesheet"/>
-  <link type="text/css" href="/ogame/calc/css/moon_bs.css?v=<?php echo filemtime($pfgPath.'/ogame/calc/css/moon_bs.css'); ?>" rel="stylesheet"/>
+  <link type="text/css" href="/css/langs_bs.css?v=<?php echo filemtime($pfgPath.'/css/langs_bs.css'); ?>" rel="stylesheet">
+  <link type="text/css" href="/css/common_bs.css?v=<?php echo filemtime($pfgPath.'/css/common_bs.css'); ?>" rel="stylesheet">
+  <link type="text/css" href="/ogame/calc/css/moon_bs.css?v=<?php echo filemtime($pfgPath.'/ogame/calc/css/moon_bs.css'); ?>" rel="stylesheet">
 
   <!-- Bootstrap 5 JS Bundle -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
 
   <!-- Utility libraries and calculator modules -->
-  <script type="text/javascript" src="/js/utils.js?v=<?php echo filemtime($pfgPath.'/js/utils.js'); ?>"></script>
-  <script type="text/javascript" src="/ogame/calc/js/dom-utils.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/dom-utils.js'); ?>"></script>
-  <script type="text/javascript" src="/ogame/calc/js/moon-core.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/moon-core.js'); ?>"></script>
-  <script type="text/javascript" src="/ogame/calc/js/moon-data-collector.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/moon-data-collector.js'); ?>"></script>
-  <script type="text/javascript" src="/ogame/calc/js/moon-renderer.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/moon-renderer.js'); ?>"></script>
-  <script type="text/javascript" src="/ogame/calc/js/moon-orchestration.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/moon-orchestration.js'); ?>"></script>
+  <script src="/js/utils.js?v=<?php echo filemtime($pfgPath.'/js/utils.js'); ?>"></script>
+  <script src="/ogame/calc/js/dom-utils.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/dom-utils.js'); ?>"></script>
+  <script src="/ogame/calc/js/moon-core.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/moon-core.js'); ?>"></script>
+  <script src="/ogame/calc/js/moon-data-collector.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/moon-data-collector.js'); ?>"></script>
+  <script src="/ogame/calc/js/moon-renderer.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/moon-renderer.js'); ?>"></script>
+  <script src="/ogame/calc/js/moon-orchestration.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/moon-orchestration.js'); ?>"></script>
 
-  <script type="text/javascript">
+  <script>
     // `options` is defined in moon-orchestration.js; here we only fill in the
     // translation strings the renderer and validators read.
     options.decimalSeparator = '<?= $l['decimal-separator'] ?>';
@@ -64,6 +64,8 @@
 </head>
 
 <body>
+
+<h1 class="visually-hidden"><?= $l['title'] ?></h1>
 
 <div class="container-fluid">
   <div class="row">
@@ -88,13 +90,13 @@
         <div class="d-flex align-items-center gap-1">
           <label for="moon-size"><?= $l['moon-size'] ?></label>
           <div class="input-group input-group-sm w-auto">
-            <input id="moon-size" type="text" name="moon-size" class="form-control level-input m-0" value="1" alt="<?= $l['moon-size'] ?>"/>
+            <input id="moon-size" type="text" name="moon-size" class="form-control level-input m-0" value="1" data-field-title="<?= $l['moon-size'] ?>">
             <span class="input-group-text"><?= $l['km'] ?></span>
           </div>
         </div>
         <div class="d-flex align-items-center gap-1">
           <label for="ds-count"><?= $l['ds-count'] ?></label>
-          <input id="ds-count" type="text" name="ds-count" class="form-control form-control-sm level-input" value="1" alt="<?= $l['ds-count'] ?>"/>
+          <input id="ds-count" type="text" name="ds-count" class="form-control form-control-sm level-input" value="1" data-field-title="<?= $l['ds-count'] ?>">
         </div>
       </div>
     </div>
@@ -148,11 +150,11 @@
           <div class="d-flex flex-wrap gap-3 align-items-center justify-content-center mb-2">
             <div class="d-flex align-items-center gap-1">
               <label for="hypertech-lvl"><?= $l['hyper-tech'] ?></label>
-              <input id="hypertech-lvl" type="text" name="hypertech-lvl" class="form-control form-control-sm level-input" value="0" alt="<?= $l['hyper-tech'] ?>"/>
+              <input id="hypertech-lvl" type="text" name="hypertech-lvl" class="form-control form-control-sm level-input" value="0" data-field-title="<?= $l['hyper-tech'] ?>">
             </div>
             <div class="d-flex align-items-center gap-1">
               <label for="supra-refractor"><?= $l['supra-refractor'] ?></label>
-              <input id="supra-refractor" type="text" name="supra-refractor" class="form-control form-control-sm level-input" value="0" alt="<?= $l['supra-refractor'] ?>"/>
+              <input id="supra-refractor" type="text" name="supra-refractor" class="form-control form-control-sm level-input" value="0" data-field-title="<?= $l['supra-refractor'] ?>">
             </div>
             <div class="d-flex align-items-center gap-1">
               <label for="debris-percent"><?= $l['debris-percent'] ?></label>
@@ -170,28 +172,28 @@
           </div>
           <div class="d-flex flex-wrap gap-3 align-items-center justify-content-center mb-2">
             <div class="d-flex align-items-center gap-1">
-              <input id="general-class" type="checkbox" name="general-class" class="form-check-input"/>
+              <input id="general-class" type="checkbox" name="general-class" class="form-check-input">
               <label for="general-class"><?= $l['class'] ?>: <?= $l['class-general'] ?></label>
             </div>
             <div class="d-flex align-items-center gap-1">
               <label for="rc-capacity-increase"><?= $l['cargo-cap-increase'] ?><?= $l['recycler'] ?></label>
               <div class="input-group input-group-sm w-auto">
-                <input id="rc-capacity-increase" type="text" name="rc-capacity-increase" class="form-control m-0" value="0" alt="<?= $l['cargo-cap-increase'] ?><?= $l['recycler'] ?>"/>
+                <input id="rc-capacity-increase" type="text" name="rc-capacity-increase" class="form-control m-0" value="0" data-field-title="<?= $l['cargo-cap-increase'] ?><?= $l['recycler'] ?>">
                 <span class="input-group-text">%</span>
               </div>
             </div>
           </div>
           <div class="d-flex flex-wrap gap-3 align-items-center justify-content-center">
             <div class="d-flex align-items-center gap-1">
-              <input id="defense-to-debris" type="checkbox" name="defense-to-debris" class="form-check-input"/>
+              <input id="defense-to-debris" type="checkbox" name="defense-to-debris" class="form-check-input">
               <label for="defense-to-debris"><?= $l['defense-to-debris'] ?></label>
             </div>
             <div class="d-flex align-items-center gap-1">
-              <input id="deut-to-debris" type="checkbox" name="deut-to-debris" class="form-check-input"/>
+              <input id="deut-to-debris" type="checkbox" name="deut-to-debris" class="form-check-input">
               <label for="deut-to-debris"><?= $l['deut-to-debris'] ?></label>
             </div>
             <div class="d-flex align-items-center gap-1">
-              <input id="promo-moon" type="checkbox" name="promo-moon" class="form-check-input"/>
+              <input id="promo-moon" type="checkbox" name="promo-moon" class="form-check-input">
               <label for="promo-moon"><?= $l['promo-moon'] ?></label>
             </div>
           </div>
@@ -206,7 +208,7 @@
 <?php foreach ($row as $unit): ?>
               <td><label for="<?= $unit ?>"><?= $l[$unit] ?></label></td>
               <td><label id="<?= $unit ?>-max" class="max-label">0</label></td>
-              <td><input id="<?= $unit ?>" type="text" name="<?= $unit ?>" class="form-control form-control-sm d-inline-block count-input" value="0" alt="<?= $l[$unit] ?>"/></td>
+              <td><input id="<?= $unit ?>" type="text" name="<?= $unit ?>" class="form-control form-control-sm d-inline-block count-input" value="0" data-field-title="<?= $l[$unit] ?>"></td>
 <?php endforeach; ?>
             </tr>
 <?php endforeach; ?>
@@ -222,7 +224,7 @@
 <?php foreach ($row as $unit): ?>
               <td><label for="<?= $unit ?>"><?= $l[$unit] ?></label></td>
               <td><label id="<?= $unit ?>-max" class="max-label">0</label></td>
-              <td><input id="<?= $unit ?>" type="text" name="<?= $unit ?>" class="form-control form-control-sm d-inline-block count-input" value="0" alt="<?= $l[$unit] ?>"/></td>
+              <td><input id="<?= $unit ?>" type="text" name="<?= $unit ?>" class="form-control form-control-sm d-inline-block count-input" value="0" data-field-title="<?= $l[$unit] ?>"></td>
 <?php endforeach; ?>
             </tr>
 <?php endforeach; ?>
@@ -329,18 +331,18 @@
         <div class="d-flex align-items-center gap-1">
           <label for="phalanx-range-bonus"><?= $l['phalanx-range-bonus'] ?></label>
           <div class="input-group input-group-sm w-auto">
-            <input id="phalanx-range-bonus" type="text" name="phalanx-range-bonus" class="form-control m-0" value="0" alt="<?= $l['phalanx-range-bonus'] ?>"/>
+            <input id="phalanx-range-bonus" type="text" name="phalanx-range-bonus" class="form-control m-0" value="0" data-field-title="<?= $l['phalanx-range-bonus'] ?>">
             <span class="input-group-text">%</span>
           </div>
         </div>
         <div class="d-flex align-items-center gap-1">
-          <input id="discoverer-class" type="checkbox" name="discoverer-class" class="form-check-input"/>
+          <input id="discoverer-class" type="checkbox" name="discoverer-class" class="form-check-input">
           <label for="discoverer-class"><?= $l['class'] ?>: <?= $l['class-discoverer'] ?></label>
         </div>
         <div class="d-flex align-items-center gap-1">
           <label for="discoverer-bonus"><?= $l['class-bonus'] ?></label>
           <div class="input-group input-group-sm w-auto">
-            <input id="discoverer-bonus" type="text" name="discoverer-bonus" class="form-control m-0" value="0" alt="<?= $l['class-bonus'] ?>"/>
+            <input id="discoverer-bonus" type="text" name="discoverer-bonus" class="form-control m-0" value="0" data-field-title="<?= $l['class-bonus'] ?>">
             <span class="input-group-text">%</span>
           </div>
         </div>
@@ -348,15 +350,15 @@
       <div class="d-flex flex-wrap gap-3 align-items-center justify-content-center">
         <div class="d-flex align-items-center gap-1">
           <label for="own-system"><?= $l['own-system'] ?></label>
-          <input id="own-system" type="text" name="own-system" class="form-control form-control-sm level-input" value="1" alt="<?= $l['own-system'] ?>"/>
+          <input id="own-system" type="text" name="own-system" class="form-control form-control-sm level-input" value="1" data-field-title="<?= $l['own-system'] ?>">
         </div>
         <div class="d-flex align-items-center gap-1">
-          <input id="circular-systems" type="checkbox" name="circular-systems" class="form-check-input" checked="checked" data-bs-toggle="tooltip" title="<?= $l['circ-systems-explain'] ?>"/>
+          <input id="circular-systems" type="checkbox" name="circular-systems" class="form-check-input" checked="checked" data-bs-toggle="tooltip" title="<?= $l['circ-systems-explain'] ?>">
           <label for="circular-systems"><?= $l['circular'] ?> <?= $l['circ-systems'] ?></label>
         </div>
         <div class="d-flex align-items-center gap-1">
           <label for="systems-num"><?= $l['systems-num'] ?></label>
-          <input id="systems-num" type="text" name="systems-num" class="form-control form-control-sm level-input" value="499" alt="<?= $l['systems-num'] ?>"/>
+          <input id="systems-num" type="text" name="systems-num" class="form-control form-control-sm level-input" value="499" data-field-title="<?= $l['systems-num'] ?>">
         </div>
       </div>
     </div>
@@ -367,7 +369,7 @@
       <div class="d-flex flex-wrap gap-3 align-items-center justify-content-center">
         <div class="d-flex align-items-center gap-1">
           <label for="phalanx-lvl"><?= $l['sensor-phalanx'] ?></label>
-          <input id="phalanx-lvl" type="text" name="phalanx-lvl" class="form-control form-control-sm level-input" value="1" alt="<?= $l['sensor-phalanx'] ?>"/>
+          <input id="phalanx-lvl" type="text" name="phalanx-lvl" class="form-control form-control-sm level-input" value="1" data-field-title="<?= $l['sensor-phalanx'] ?>">
         </div>
         <div class="d-flex align-items-center gap-1">
           <label><?= $l['phalanx-range'] ?></label>
@@ -393,7 +395,7 @@
       <div class="d-flex flex-wrap gap-3 align-items-center justify-content-center">
         <div class="d-flex align-items-center gap-1">
           <label for="target-system"><?= $l['target-system'] ?></label>
-          <input id="target-system" type="text" name="target-system" class="form-control form-control-sm level-input" value="1" alt="<?= $l['target-system'] ?>"/>
+          <input id="target-system" type="text" name="target-system" class="form-control form-control-sm level-input" value="1" data-field-title="<?= $l['target-system'] ?>">
         </div>
         <div class="d-flex align-items-center gap-1">
           <label><?= $l['distance'] ?></label>
@@ -422,7 +424,7 @@
   require_once('../../analitics.tpl');
 ?>
 
-<script type="text/javascript">
+<script>
 document.addEventListener('DOMContentLoaded', function() {
   document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(function(el) {
     bootstrap.Tooltip.getOrCreateInstance(el);

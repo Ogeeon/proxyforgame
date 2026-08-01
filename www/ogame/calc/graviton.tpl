@@ -1,12 +1,12 @@
 <!DOCTYPE html>
+<html lang="<?= getLangAttr() ?>">
 <head>
-  <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
-  <meta http-equiv="Cache-Control" content="no-cache" />
+  <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
   <title><?= $l['title'] ?></title>
-  <meta name="description" content="<?= $l['title'] ?>"/>
-  <meta name="keywords" content="<?= $l['keywords'] ?>"/>
-  <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon"/>
-  <link rel="icon" href="/favicon.ico" type="image/x-icon"/>
+  <meta name="description" content="<?= $l['title'] ?>">
+  <meta name="keywords" content="<?= $l['keywords'] ?>">
+  <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+  <link rel="icon" href="/favicon.ico" type="image/x-icon">
 <?php
   if ($_SERVER['HTTP_HOST'] == 'proxyforgame.com') {
     $pfgPath = $_SERVER['DOCUMENT_ROOT'];
@@ -15,26 +15,26 @@
   };
 ?>
   <!-- Bootstrap 5 CSS -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"/>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet"/>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
 
   <!-- Custom styles -->
-  <link type="text/css" href="/css/langs_bs.css?v=<?php echo filemtime($pfgPath.'/css/langs_bs.css'); ?>" rel="stylesheet" />
-  <link type="text/css" href="/css/common_bs.css?v=<?php echo filemtime($pfgPath.'/css/common_bs.css'); ?>" rel="stylesheet"/>
-  <link type="text/css" href="/ogame/calc/css/graviton_bs.css?v=<?php echo filemtime($pfgPath.'/ogame/calc/css/graviton_bs.css'); ?>" rel="stylesheet"/>
+  <link type="text/css" href="/css/langs_bs.css?v=<?php echo filemtime($pfgPath.'/css/langs_bs.css'); ?>" rel="stylesheet">
+  <link type="text/css" href="/css/common_bs.css?v=<?php echo filemtime($pfgPath.'/css/common_bs.css'); ?>" rel="stylesheet">
+  <link type="text/css" href="/ogame/calc/css/graviton_bs.css?v=<?php echo filemtime($pfgPath.'/ogame/calc/css/graviton_bs.css'); ?>" rel="stylesheet">
 
   <!-- Bootstrap 5 JS Bundle -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
 
   <!-- Utility libraries and calculator modules -->
-  <script type="text/javascript" src="/js/utils.js?v=<?php echo filemtime($pfgPath.'/js/utils.js'); ?>"></script>
-  <script type="text/javascript" src="/ogame/calc/js/dom-utils.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/dom-utils.js'); ?>"></script>
-  <script type="text/javascript" src="/ogame/calc/js/graviton-core.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/graviton-core.js'); ?>"></script>
-  <script type="text/javascript" src="/ogame/calc/js/graviton-data-collector.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/graviton-data-collector.js'); ?>"></script>
-  <script type="text/javascript" src="/ogame/calc/js/graviton-renderer.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/graviton-renderer.js'); ?>"></script>
-  <script type="text/javascript" src="/ogame/calc/js/graviton-orchestration.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/graviton-orchestration.js'); ?>"></script>
+  <script src="/js/utils.js?v=<?php echo filemtime($pfgPath.'/js/utils.js'); ?>"></script>
+  <script src="/ogame/calc/js/dom-utils.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/dom-utils.js'); ?>"></script>
+  <script src="/ogame/calc/js/graviton-core.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/graviton-core.js'); ?>"></script>
+  <script src="/ogame/calc/js/graviton-data-collector.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/graviton-data-collector.js'); ?>"></script>
+  <script src="/ogame/calc/js/graviton-renderer.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/graviton-renderer.js'); ?>"></script>
+  <script src="/ogame/calc/js/graviton-orchestration.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/graviton-orchestration.js'); ?>"></script>
 
-  <script type="text/javascript">
+  <script>
     // `options` is defined in graviton-orchestration.js; here we only fill in
     // the translation strings the renderer and validators read.
     options.decimalSeparator = '<?= $l['decimal-separator'] ?>';
@@ -56,6 +56,8 @@
 </head>
 
 <body>
+
+<h1 class="visually-hidden"><?= $l['title'] ?></h1>
 
 <div class="container-fluid">
   <div class="row">
@@ -102,7 +104,7 @@
             </div>
             <div class="d-flex align-items-center gap-1">
               <label for="max-planet-temp"><?= $l['max-planet-temp'] ?></label>
-              <input id="max-planet-temp" type="text" name="max-planet-temp" class="form-control form-control-sm level-input" value="0" alt="<?= $l['max-planet-temp'] ?>"/>
+              <input id="max-planet-temp" type="text" name="max-planet-temp" class="form-control form-control-sm level-input" value="0" data-field-title="<?= $l['max-planet-temp'] ?>">
             </div>
             <div class="d-flex align-items-center gap-1">
               <label for="energy-boost"><?= $l['energy-boost'] ?></label>
@@ -118,20 +120,20 @@
           <div class="d-flex flex-wrap gap-2 align-items-center justify-content-center mb-1">
             <div class="d-flex align-items-center gap-1 flex-nowrap">
               <label><?= $l['energy-bonus'] ?>:</label>
-              <input id="energy-bonus-0" type="radio" name="energy-bonus" value="0" class="form-check-input"/> <label for="energy-bonus-0"><?= $l['none'] ?></label>
-              <input id="energy-bonus-1" type="radio" name="energy-bonus" value="1" class="form-check-input ms-2"/> <label for="energy-bonus-1"><?= $l['engineer'] ?></label>
-              <input id="energy-bonus-2" type="radio" name="energy-bonus" value="2" class="form-check-input ms-2"/> <label for="energy-bonus-2"><?= $l['all-officers'] ?></label>
+              <input id="energy-bonus-0" type="radio" name="energy-bonus" value="0" class="form-check-input"> <label for="energy-bonus-0"><?= $l['none'] ?></label>
+              <input id="energy-bonus-1" type="radio" name="energy-bonus" value="1" class="form-check-input ms-2"> <label for="energy-bonus-1"><?= $l['engineer'] ?></label>
+              <input id="energy-bonus-2" type="radio" name="energy-bonus" value="2" class="form-check-input ms-2"> <label for="energy-bonus-2"><?= $l['all-officers'] ?></label>
             </div>
           </div>
           <div class="d-flex flex-wrap gap-2 align-items-center justify-content-center">
             <div class="d-flex align-items-center gap-1 flex-nowrap">
               <label><?= $l['class'] ?>:</label>
-              <input id="player-class-0" type="radio" name="player-class" value="0" class="form-check-input" checked="checked"/> <label for="player-class-0"><?= $l['none'] ?></label>
-              <input id="player-class-1" type="radio" name="player-class" value="1" class="form-check-input ms-2"/> <label for="player-class-1"><?= $l['class-collector'] ?></label>
-              <input id="player-class-2" type="radio" name="player-class" value="2" class="form-check-input ms-2"/> <label for="player-class-2"><?= $l['class-general'] ?></label>
+              <input id="player-class-0" type="radio" name="player-class" value="0" class="form-check-input" checked="checked"> <label for="player-class-0"><?= $l['none'] ?></label>
+              <input id="player-class-1" type="radio" name="player-class" value="1" class="form-check-input ms-2"> <label for="player-class-1"><?= $l['class-collector'] ?></label>
+              <input id="player-class-2" type="radio" name="player-class" value="2" class="form-check-input ms-2"> <label for="player-class-2"><?= $l['class-general'] ?></label>
             </div>
             <div class="d-flex align-items-center gap-1">
-              <input id="trader-bonus" type="checkbox" name="trader-bonus" class="form-check-input"/>
+              <input id="trader-bonus" type="checkbox" name="trader-bonus" class="form-check-input">
               <label for="trader-bonus"><?= $l['trader-bonus'] ?></label>
             </div>
           </div>
@@ -142,11 +144,11 @@
           <div class="d-flex flex-wrap gap-2 align-items-center justify-content-center">
             <div class="d-flex align-items-center gap-1">
               <label for="shipyard-level"><?= $l['shipyard-level'] ?></label>
-              <input id="shipyard-level" type="text" name="shipyard-level" class="form-control form-control-sm level-input" value="1" alt="<?= $l['shipyard-level'] ?>"/>
+              <input id="shipyard-level" type="text" name="shipyard-level" class="form-control form-control-sm level-input" value="1" data-field-title="<?= $l['shipyard-level'] ?>">
             </div>
             <div class="d-flex align-items-center gap-1">
               <label for="nanites-factory-level"><?= $l['nanites-factory-level'] ?></label>
-              <input id="nanites-factory-level" type="text" name="nanites-factory-level" class="form-control form-control-sm level-input" value="0" alt="<?= $l['nanites-factory-level'] ?>"/>
+              <input id="nanites-factory-level" type="text" name="nanites-factory-level" class="form-control form-control-sm level-input" value="0" data-field-title="<?= $l['nanites-factory-level'] ?>">
             </div>
           </div>
         </div><!-- /param-buildings -->
@@ -156,11 +158,11 @@
           <div class="d-flex flex-wrap gap-2 align-items-center justify-content-center">
             <div class="d-flex align-items-center gap-1">
               <label for="energy-tech-level"><?= $l['energy-tech-level'] ?></label>
-              <input id="energy-tech-level" type="text" name="energy-tech-level" class="form-control form-control-sm level-input" value="0" alt="<?= $l['energy-tech-level'] ?>"/>
+              <input id="energy-tech-level" type="text" name="energy-tech-level" class="form-control form-control-sm level-input" value="0" data-field-title="<?= $l['energy-tech-level'] ?>">
             </div>
             <div class="d-flex align-items-center gap-1">
               <label for="hyper-tech-level"><?= $l['hyper-tech'] ?></label>
-              <input id="hyper-tech-level" type="text" name="hyper-tech-level" class="form-control form-control-sm level-input" value="0" alt="<?= $l['hyper-tech'] ?>"/>
+              <input id="hyper-tech-level" type="text" name="hyper-tech-level" class="form-control form-control-sm level-input" value="0" data-field-title="<?= $l['hyper-tech'] ?>">
             </div>
           </div>
         </div><!-- /param-researches -->
@@ -169,12 +171,12 @@
           <div class="d-flex flex-wrap column-gap-3 row-gap-2 align-items-center justify-content-center">
             <div class="d-flex align-items-center gap-1">
               <label for="disr-chamber-level"><?= $l['disr-chamber'] ?></label>
-              <input id="disr-chamber-level" type="text" name="disr-chamber-level" class="form-control form-control-sm level-input" value="0" alt="<?= $l['disr-chamber'] ?>"/>
+              <input id="disr-chamber-level" type="text" name="disr-chamber-level" class="form-control form-control-sm level-input" value="0" data-field-title="<?= $l['disr-chamber'] ?>">
             </div>
             <div class="d-flex align-items-center gap-1">
               <label for="total-lf-energy-bonus"><?= $l['total-lf-energy-bonus'] ?></label>
               <div class="input-group input-group-sm w-auto">
-                <input id="total-lf-energy-bonus" type="text" name="total-lf-energy-bonus" class="form-control level-input m-0" value="0" alt="<?= $l['total-lf-energy-bonus'] ?>"/>
+                <input id="total-lf-energy-bonus" type="text" name="total-lf-energy-bonus" class="form-control level-input m-0" value="0" data-field-title="<?= $l['total-lf-energy-bonus'] ?>">
                 <span class="input-group-text">%</span>
               </div>
             </div>
@@ -183,21 +185,21 @@
               <div class="d-flex align-items-center gap-1">
                 <label for="sc-capacity-increase"><?= $l['sc-short'] ?></label>
                 <div class="input-group input-group-sm w-auto">
-                  <input id="sc-capacity-increase" type="text" name="sc-capacity-increase" class="form-control level-input m-0" value="0" alt="<?= $l['cargo-cap-increase'] ?><?= $l['sc-short'] ?>"/>
+                  <input id="sc-capacity-increase" type="text" name="sc-capacity-increase" class="form-control level-input m-0" value="0" data-field-title="<?= $l['cargo-cap-increase'] ?><?= $l['sc-short'] ?>">
                   <span class="input-group-text">%</span>
                 </div>
               </div>
               <div class="d-flex align-items-center gap-1">
                 <label for="lc-capacity-increase"><?= $l['lc-short'] ?></label>
                 <div class="input-group input-group-sm w-auto">
-                  <input id="lc-capacity-increase" type="text" name="lc-capacity-increase" class="form-control level-input m-0" value="0" alt="<?= $l['cargo-cap-increase'] ?><?= $l['lc-short'] ?>"/>
+                  <input id="lc-capacity-increase" type="text" name="lc-capacity-increase" class="form-control level-input m-0" value="0" data-field-title="<?= $l['cargo-cap-increase'] ?><?= $l['lc-short'] ?>">
                   <span class="input-group-text">%</span>
                 </div>
               </div>
               <div class="d-flex align-items-center gap-1">
                 <label for="rc-capacity-increase"><?= $l['recycler'] ?></label>
                 <div class="input-group input-group-sm w-auto">
-                  <input id="rc-capacity-increase" type="text" name="rc-capacity-increase" class="form-control level-input m-0" value="0" alt="<?= $l['cargo-cap-increase'] ?><?= $l['recycler'] ?>"/>
+                  <input id="rc-capacity-increase" type="text" name="rc-capacity-increase" class="form-control level-input m-0" value="0" data-field-title="<?= $l['cargo-cap-increase'] ?><?= $l['recycler'] ?>">
                   <span class="input-group-text">%</span>
                 </div>
               </div>
@@ -212,7 +214,7 @@
         <table class="mx-auto">
           <tr>
             <td><label for="solar-plant-level"><?= $l['solar-plant-level'] ?></label></td>
-            <td><input id="solar-plant-level" type="text" name="solar-plant-level" class="form-control form-control-sm d-inline-block energy-input ui-input-margin" value="0" alt="<?= $l['solar-plant-level'] ?>"/></td>
+            <td><input id="solar-plant-level" type="text" name="solar-plant-level" class="form-control form-control-sm d-inline-block energy-input ui-input-margin" value="0" data-field-title="<?= $l['solar-plant-level'] ?>"></td>
             <td>
               <select id="solar-plant-percent" name="solar-plant-percent" class="form-select form-select-sm d-inline-block w-auto ui-input-margin">
                 <option value="100" selected="selected">100%</option><option value="90">90%</option><option value="80">80%</option><option value="70">70%</option><option value="60">60%</option>
@@ -223,7 +225,7 @@
           </tr>
           <tr>
             <td><label for="fusion-plant-level"><?= $l['fusion-plant-level'] ?></label></td>
-            <td><input id="fusion-plant-level" type="text" name="fusion-plant-level" class="form-control form-control-sm d-inline-block energy-input ui-input-margin" value="0" alt="<?= $l['fusion-plant-level'] ?>"/></td>
+            <td><input id="fusion-plant-level" type="text" name="fusion-plant-level" class="form-control form-control-sm d-inline-block energy-input ui-input-margin" value="0" data-field-title="<?= $l['fusion-plant-level'] ?>"></td>
             <td>
               <select id="fusion-plant-percent" name="fusion-plant-percent" class="form-select form-select-sm d-inline-block w-auto ui-input-margin">
                 <option value="100" selected="selected">100%</option><option value="90">90%</option><option value="80">80%</option><option value="70">70%</option><option value="60">60%</option>
@@ -234,7 +236,7 @@
           </tr>
           <tr>
             <td><label for="solar-satellites-count"><?= $l['solar-satellites-count'] ?></label></td>
-            <td><input id="solar-satellites-count" type="text" name="solar-satellites-count" class="form-control form-control-sm d-inline-block energy-input ui-input-margin" value="0" alt="<?= $l['solar-satellites-count'] ?>"/></td>
+            <td><input id="solar-satellites-count" type="text" name="solar-satellites-count" class="form-control form-control-sm d-inline-block energy-input ui-input-margin" value="0" data-field-title="<?= $l['solar-satellites-count'] ?>"></td>
             <td>
               <select id="solar-satellites-percent" name="solar-satellites-percent" class="form-select form-select-sm d-inline-block w-auto ui-input-margin">
                 <option value="100" selected="selected">100%</option><option value="90">90%</option><option value="80">80%</option><option value="70">70%</option><option value="60">60%</option>
@@ -288,7 +290,7 @@
         <table class="mx-auto">
           <tr>
             <td><label for="graviton-level"><?= $l['graviton-level'] ?></label></td>
-            <td><input id="graviton-level" type="text" name="graviton-level" class="form-control form-control-sm d-inline-block energy-input ui-input-margin" value="0" alt="<?= $l['graviton-level'] ?>"/></td>
+            <td><input id="graviton-level" type="text" name="graviton-level" class="form-control form-control-sm d-inline-block energy-input ui-input-margin" value="0" data-field-title="<?= $l['graviton-level'] ?>"></td>
           </tr>
         </table>
       </div>
@@ -324,9 +326,9 @@
         </tr>
         <tr>
           <td><label for="crystal-available"><?= $l['res-available'] ?></label></td>
-          <td><input id="crystal-available" type="text" name="crystal-available" class="form-control form-control-sm d-inline-block resource-show ui-input-margin" value="0" alt="<?= $l['res-available'] ?> <?= $l['crystal'] ?>"/></td>
+          <td><input id="crystal-available" type="text" name="crystal-available" class="form-control form-control-sm d-inline-block resource-show ui-input-margin" value="0" data-field-title="<?= $l['res-available'] ?> <?= $l['crystal'] ?>"></td>
           <td>&nbsp;</td>
-          <td><input id="deuterium-available" type="text" name="deuterium-available" class="form-control form-control-sm d-inline-block resource-show ui-input-margin" value="0" alt="<?= $l['res-available'] ?> <?= $l['deuterium'] ?>"/></td>
+          <td><input id="deuterium-available" type="text" name="deuterium-available" class="form-control form-control-sm d-inline-block resource-show ui-input-margin" value="0" data-field-title="<?= $l['res-available'] ?> <?= $l['deuterium'] ?>"></td>
           <td colspan="2">&nbsp;</td>
         </tr>
         <tr>
@@ -361,7 +363,7 @@
             </select>
           </td>
           <td colspan="2">
-            <input id="deut-in-debris" type="checkbox" name="deut-in-debris" class="form-check-input"/>
+            <input id="deut-in-debris" type="checkbox" name="deut-in-debris" class="form-check-input">
             <label for="deut-in-debris"><?= $l['deut-in-debris'] ?></label>
           </td>
         </tr>
@@ -402,7 +404,7 @@
   require_once('../../analitics.tpl');
 ?>
 
-<script type="text/javascript">
+<script>
 document.addEventListener('DOMContentLoaded', function() {
   document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(function(el) {
     bootstrap.Tooltip.getOrCreateInstance(el);

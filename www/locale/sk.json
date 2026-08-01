@@ -212,7 +212,7 @@
   },
   "sidebar": {
     "ogameMenuItems": {
-      "header": "Kalkulátory<br/>pre OGame",
+      "header": "Kalkulátory<br>pre OGame",
       "main-title": "Hlavná stránka",
       "trade-title": "Kalkulátor pre obchody",
       "costs-title": "Kalkulátor cien",
@@ -227,10 +227,10 @@
     },
     "feedbackItems": {
       "header": "Odozva",
-      "misspelling": "Našli ste chybu?<br/>Povedzte nám o tom<br/><a href=\"#\" onclick=\"findSelection();\" style=\"display: inline\">stlačením Ctrl+Enter</a>.<br/>",
-      "mail": "Ak máte nejaké požiadavky<br/>alebo komentáre,<br/><a href=\"#\" onclick=\"showEmailWindow();\" style=\"display: inline\">prosím kliknite sem</a><br/>a pošlite nám e-mail.",
-      "board": "Ak nám môžete pomôcť s<br/>prekladom stránky, prosím navštívte<br/><a href=\"http://board.origin.ogame.de/board6-origin/board24-localization-area/board153-fan-project-s-translations/1936-online-tools-collection-translation\" style = \"display: inline\" target = \"blank\";>OGame Origin Fórum</a>",
-      "discord": "Pridajte sa na náš<br/><a href=\"https://discord.gg/H8xPdA9FbE\" style=\"display: inline\" target=\"_blank\">Discord server</a>,<br/>pre diskusiu o stránke,<br/>nahlásenie chyby<br/>alebo návrh na zlepšenie.<br/>"
+      "misspelling": "Našli ste chybu?<br>Povedzte nám o tom<br><a href=\"#\" onclick=\"findSelection();\" style=\"display: inline\">stlačením Ctrl+Enter</a>.<br>",
+      "mail": "Ak máte nejaké požiadavky<br>alebo komentáre,<br><a href=\"#\" onclick=\"showEmailWindow();\" style=\"display: inline\">prosím kliknite sem</a><br>a pošlite nám e-mail.",
+      "board": "Ak nám môžete pomôcť s<br>prekladom stránky, prosím navštívte<br><a href=\"http://board.origin.ogame.de/board6-origin/board24-localization-area/board153-fan-project-s-translations/1936-online-tools-collection-translation\" style=\"display: inline\" target=\"_blank\">OGame Origin Fórum</a>",
+      "discord": "Pridajte sa na náš<br><a href=\"https://discord.gg/H8xPdA9FbE\" style=\"display: inline\" target=\"_blank\">Discord server</a>,<br>pre diskusiu o stránke,<br>nahlásenie chyby<br>alebo návrh na zlepšenie.<br>"
     },
     "reportStrings": {
       "title": "Nahlásenie gramatickej chyby",
@@ -270,7 +270,7 @@
     "donateStrings": {
       "header": "Podporte tento projekt",
       "why_caption": "Prečo darovať?",
-      "why_text": "Na týchto stránkach nie sú žiadne reklamy a nikdy nebudú. Trávim však peniaze na to, aby som tieto stránky zostal k dispozícii, a trávim svoj čas aktualizáciou. Ocenil by som, keby ste mohli darovať akékoľvek množstvo peňazí na podporu mňa.<br/>Ďakujem.",
+      "why_text": "Na týchto stránkach nie sú žiadne reklamy a nikdy nebudú. Trávim však peniaze na to, aby som tieto stránky zostal k dispozícii, a trávim svoj čas aktualizáciou. Ocenil by som, keby ste mohli darovať akékoľvek množstvo peňazí na podporu mňa.<br>Ďakujem.",
       "alternatives": "Alternatívy"
     },
     "changelogStrings": {

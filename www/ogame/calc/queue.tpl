@@ -1,12 +1,12 @@
 <!DOCTYPE html>
+<html lang="<?= getLangAttr() ?>">
 <head>
-  <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
-  <meta http-equiv="Cache-Control" content="no-cache" />
+  <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
   <title><?= $l['title'] ?></title>
-  <meta name="description" content="<?= $l['title'] ?>"/>
-  <meta name="keywords" content="<?= $l['keywords'] ?>"/>
-  <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon"/>
-  <link rel="icon" href="/favicon.ico" type="image/x-icon"/>
+  <meta name="description" content="<?= $l['title'] ?>">
+  <meta name="keywords" content="<?= $l['keywords'] ?>">
+  <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+  <link rel="icon" href="/favicon.ico" type="image/x-icon">
 <?php
   if ($_SERVER['HTTP_HOST'] == 'proxyforgame.com') {
     $pfgPath = $_SERVER['DOCUMENT_ROOT'];
@@ -15,31 +15,31 @@
   };
 ?>
   <!-- Bootstrap 5 CSS -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"/>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet"/>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
 
   <!-- Custom styles -->
-  <link type="text/css" href="/css/langs_bs.css?v=<?php echo filemtime($pfgPath.'/css/langs_bs.css'); ?>" rel="stylesheet" />
-  <link type="text/css" href="/css/common_bs.css?v=<?php echo filemtime($pfgPath.'/css/common_bs.css'); ?>" rel="stylesheet"/>
-  <link type="text/css" href="/ogame/calc/css/queue_bs.css?v=<?php echo filemtime($pfgPath.'/ogame/calc/css/queue_bs.css'); ?>" rel="stylesheet"/>
+  <link type="text/css" href="/css/langs_bs.css?v=<?php echo filemtime($pfgPath.'/css/langs_bs.css'); ?>" rel="stylesheet">
+  <link type="text/css" href="/css/common_bs.css?v=<?php echo filemtime($pfgPath.'/css/common_bs.css'); ?>" rel="stylesheet">
+  <link type="text/css" href="/ogame/calc/css/queue_bs.css?v=<?php echo filemtime($pfgPath.'/ogame/calc/css/queue_bs.css'); ?>" rel="stylesheet">
 
   <!-- Bootstrap 5 JS Bundle -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
 
   <!-- Utility libraries -->
-  <script type="text/javascript" src="/js/utils.js?v=<?php echo filemtime($pfgPath.'/js/utils.js'); ?>"></script>
-  <script type="text/javascript" src="/ogame/calc/js/common.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/common.js'); ?>"></script>
+  <script src="/js/utils.js?v=<?php echo filemtime($pfgPath.'/js/utils.js'); ?>"></script>
+  <script src="/ogame/calc/js/common.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/common.js'); ?>"></script>
 
   <!-- DOM utilities (jQuery replacement) -->
-  <script type="text/javascript" src="/ogame/calc/js/dom-utils.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/dom-utils.js'); ?>"></script>
+  <script src="/ogame/calc/js/dom-utils.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/dom-utils.js'); ?>"></script>
 
   <!-- Queue calculator modules -->
-  <script type="text/javascript" src="/ogame/calc/js/queue-core.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/queue-core.js'); ?>"></script>
-  <script type="text/javascript" src="/ogame/calc/js/queue-data-collector.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/queue-data-collector.js'); ?>"></script>
-  <script type="text/javascript" src="/ogame/calc/js/queue-renderer.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/queue-renderer.js'); ?>"></script>
-  <script type="text/javascript" src="/ogame/calc/js/queue-orchestration.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/queue-orchestration.js'); ?>"></script>
+  <script src="/ogame/calc/js/queue-core.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/queue-core.js'); ?>"></script>
+  <script src="/ogame/calc/js/queue-data-collector.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/queue-data-collector.js'); ?>"></script>
+  <script src="/ogame/calc/js/queue-renderer.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/queue-renderer.js'); ?>"></script>
+  <script src="/ogame/calc/js/queue-orchestration.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/queue-orchestration.js'); ?>"></script>
 
-  <script type="text/javascript">
+  <script>
     var options = {
       defConstraints: { min: -Infinity, max: Infinity, def: 0, allowFloat: false, allowNegative: false },
 
@@ -123,6 +123,8 @@
 
 <body>
 
+<h1 class="visually-hidden"><?= $l['title'] ?></h1>
+
 <div class="container-fluid">
   <div class="row">
     <div class="col-md-2"><?php require_once('../../sidebar_bs.tpl'); ?></div>
@@ -152,30 +154,30 @@
         </div>
         <div class="d-flex align-items-center gap-1">
           <label for="ion-tech-level"><?= $l['ion-tech'] ?></label>
-          <input id="ion-tech-level" type="text" name="ion-tech-level" class="form-control form-control-sm level-input" value="0" alt="<?= $l['ion-tech'] ?>" />
+          <input id="ion-tech-level" type="text" name="ion-tech-level" class="form-control form-control-sm level-input" value="0" data-field-title="<?= $l['ion-tech'] ?>">
         </div>
         <div class="d-flex align-items-center gap-1">
           <label for="hyper-tech-level"><?= $l['hyper-tech'] ?></label>
-          <input id="hyper-tech-level" type="text" name="hyper-tech-level" class="form-control form-control-sm level-input" value="0" alt="<?= $l['hyper-tech'] ?>" />
+          <input id="hyper-tech-level" type="text" name="hyper-tech-level" class="form-control form-control-sm level-input" value="0" data-field-title="<?= $l['hyper-tech'] ?>">
         </div>
         <div class="d-flex align-items-center gap-1">
           <label><?= $l['class'] ?>:</label>
-          <input id="player-class-0" type="radio" name="player-class" value="0" class="form-check-input"/>
+          <input id="player-class-0" type="radio" name="player-class" value="0" class="form-check-input">
           <label for="player-class-0"><?= $l['class-collector'] ?></label>
-          <input id="player-class-1" type="radio" name="player-class" value="1" class="form-check-input"/>
+          <input id="player-class-1" type="radio" name="player-class" value="1" class="form-check-input">
           <label for="player-class-1"><?= $l['class-general'] ?></label>
-          <input id="player-class-2" type="radio" name="player-class" value="2" class="form-check-input"/>
+          <input id="player-class-2" type="radio" name="player-class" value="2" class="form-check-input">
           <label for="player-class-2"><?= $l['class-discoverer'] ?></label>
         </div>
         <div class="d-flex align-items-center gap-1">
           <label for="sc-capacity-increase"><?= $l['cargo-cap-increase'] ?><?= $l['sc-short'] ?></label>
           <div class="input-group input-group-sm w-auto">
-            <input id="sc-capacity-increase" type="text" name="sc-capacity-increase" class="form-control level-input m-0" value="0" alt="<?= $l['cargo-cap-increase'] ?><?= $l['sc-short'] ?>"/>
+            <input id="sc-capacity-increase" type="text" name="sc-capacity-increase" class="form-control level-input m-0" value="0" data-field-title="<?= $l['cargo-cap-increase'] ?><?= $l['sc-short'] ?>">
             <span class="input-group-text">%</span>
           </div>
           <label for="lc-capacity-increase"><?= $l['lc-short'] ?></label>
           <div class="input-group input-group-sm w-auto">
-            <input id="lc-capacity-increase" type="text" name="lc-capacity-increase" class="form-control level-input m-0" value="0" alt="<?= $l['cargo-cap-increase'] ?><?= $l['lc-short'] ?>"/>
+            <input id="lc-capacity-increase" type="text" name="lc-capacity-increase" class="form-control level-input m-0" value="0" data-field-title="<?= $l['cargo-cap-increase'] ?><?= $l['lc-short'] ?>">
             <span class="input-group-text">%</span>
           </div>
         </div>
@@ -202,13 +204,13 @@
               <p class="border rounded subheader bg-primary-subtle mb-2"><b><?= $l['buildings'] ?></b></p>
               <div class="d-flex align-items-center gap-2 mb-2">
                 <label for="total-fields-<?=$i?>"><?= $l['total-fields'] ?></label>
-                <input id="total-fields-<?=$i?>" type="text" name="total-fields-<?=$i?>" class="form-control form-control-sm level-input total-fld-input" value="0" alt="<?= $l['total-fields'] ?>" />
+                <input id="total-fields-<?=$i?>" type="text" name="total-fields-<?=$i?>" class="form-control form-control-sm level-input total-fld-input" value="0" data-field-title="<?= $l['total-fields'] ?>">
               </div>
-              <table id="table-src-<?=$i?>" class="lined" cellpadding="0" cellspacing="1" border="0">
+              <table id="table-src-<?=$i?>" class="lined">
                 <tr>
                   <th style="display: none;">ID</th>
                   <?php foreach ($colHeadersSrc as $idx => $header): ?>
-                  <th <?=($idx > 0)?'align="center"':''?>><?= $l[$header] ?></th>
+                  <th <?=($idx > 0)?'class="text-center"':''?>><?= $l[$header] ?></th>
                   <?php endforeach; ?>
                 </tr>
                 <?php $techs = getTechsByType($i); $row = 1; ?>
@@ -216,14 +218,14 @@
                 <tr class="<?= ($row++ % 2) === 1 ? 'odd' : 'even' ?>">
                   <td style="display: none;"><?=$tech?></td>
                   <td><?= $l[$techData[$tech][0]] ?></td>
-                  <td align="center"><input id="startlvl-<?=$i?>-<?=$tech?>" type="text" class="form-control form-control-sm level-input" value="0"/></td>
-                  <td align="center" style="white-space: nowrap;">
+                  <td class="text-center"><input id="startlvl-<?=$i?>-<?=$tech?>" type="text" class="form-control form-control-sm level-input" value="0"></td>
+                  <td class="text-center" style="white-space: nowrap;">
                     <span id="nextlvl-<?=$i?>-<?=$tech?>">0</span>
-                    <button id="build-<?=$tech?>" type="button" data-tech="<?=$tech?>" class="btn btn-outline-secondary btn-sm button-build" data-bs-toggle="tooltip" title="<?= $l['build'] ?>">
+                    <button id="build-<?=$i?>-<?=$tech?>" type="button" data-tech="<?=$tech?>" class="btn btn-outline-secondary btn-sm button-build" data-bs-toggle="tooltip" title="<?= $l['build'] ?>">
                       <i class="bi bi-arrow-right"></i>
                     </button>
                     <?php if (!in_array($tech, [33, 36, 41])): ?>
-                    <button id="destroy-<?=$tech?>" type="button" data-tech="<?=$tech?>" class="btn btn-outline-secondary btn-sm button-destroy" data-bs-toggle="tooltip" title="<?= $l['destroy'] ?>">
+                    <button id="destroy-<?=$i?>-<?=$tech?>" type="button" data-tech="<?=$tech?>" class="btn btn-outline-secondary btn-sm button-destroy" data-bs-toggle="tooltip" title="<?= $l['destroy'] ?>">
                       <i class="bi bi-arrow-left"></i>
                     </button>
                     <?php endif; ?>
@@ -245,7 +247,7 @@
               </div>
               <div id="times-<?=$i?>" class="d-flex flex-wrap align-items-center gap-2 mb-2">
                 <label for="start-<?=$i?>"><?= $l['start-time'] ?></label>
-                <input type="text" id="start-<?=$i?>" class="form-control form-control-sm startdate-input" title="<?= $l['datetime-format-hint'] ?>" placeholder="<?= $l['datetime-format-hint'] ?>"/>
+                <input type="text" id="start-<?=$i?>" class="form-control form-control-sm startdate-input" title="<?= $l['datetime-format-hint'] ?>" placeholder="<?= $l['datetime-format-hint'] ?>">
                 <button type="button" id="set-start-now-<?=$i?>" class="btn btn-outline-secondary btn-sm" data-bs-toggle="tooltip" title="<?= $l['start-now-hint'] ?>">
                   <?= $l['start-now'] ?>
                 </button>
@@ -258,25 +260,25 @@
                 </div>
               </div>
 
-              <table id="table-dst-<?=$i?>" class="lined" cellpadding="0" cellspacing="1" border="0">
+              <table id="table-dst-<?=$i?>" class="lined">
                 <tr>
                   <?php foreach ($colHeadersDst as $idx => $header): ?>
-                  <th <?=($idx > 0)?'align="center"':''?>><?= $header == '-' ? '' : $l[$header] ?></th>
+                  <th <?=($idx > 0)?'class="text-center"':''?>><?= $header == '-' ? '' : $l[$header] ?></th>
                   <?php endforeach; ?>
                 </tr>
                 <tr class="even">
                   <td class="border-n"><?= $l['total'] ?></td>
-                  <td align="center" class="border-n"><b>0</b></td>
-                  <td align="center" class="border-n border-s border-w"><b>0</b></td>
-                  <td align="center" class="border-n border-s"><b>0</b></td>
-                  <td align="center" class="border-n border-s"><b>0</b></td>
-                  <td align="center" class="border-n border-s border-e"><b>0</b></td>
+                  <td class="border-n text-center"><b>0</b></td>
+                  <td class="border-n border-s border-w text-center"><b>0</b></td>
+                  <td class="border-n border-s text-center"><b>0</b></td>
+                  <td class="border-n border-s text-center"><b>0</b></td>
+                  <td class="border-n border-s border-e text-center"><b>0</b></td>
                   <td></td>
                 </tr>
                 <tr class="even">
                   <td><?= $l['transports-needed'] ?></td>
-                  <td colspan="2" align="center">0 <?= $l['sc-short'] ?></td>
-                  <td colspan="2" align="center">0 <?= $l['lc-short'] ?></td>
+                  <td class="text-center" colspan="2">0 <?= $l['sc-short'] ?></td>
+                  <td class="text-center" colspan="2">0 <?= $l['lc-short'] ?></td>
                   <td colspan="2"></td>
                 </tr>
               </table>
@@ -299,7 +301,7 @@
 
 <?php require_once('../../analitics.tpl'); ?>
 
-<script type="text/javascript">
+<script>
   document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(function(el) {
       bootstrap.Tooltip.getOrCreateInstance(el);

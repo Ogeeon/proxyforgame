@@ -25,10 +25,11 @@ boxes is too old (`choco install make`).
 | `make test` | Both suites — the ritual required before a commit |
 | `make test-unit` / `make test-e2e` | One suite each |
 | `make test-one spec=flight` | A single Playwright spec |
-| `make check` | `i18n-validate` + `lint` + `typecheck` + both suites — the green gate |
+| `make check` | `i18n-validate` + `lint` + `typecheck` + `html-validate` + both suites — the green gate |
 | `make lint` / `make typecheck` | ESLint and the TypeScript `checkJs` pass; both gate `check` |
+| `make html-validate` | Render every page in all 13 locales and check with the Nu Html Checker (strict zero errors/warnings/info); needs Java 17+ and `vnu-jar` from `make install`. Gates `check` |
 | `make tsconfigs` | Regenerate `tsconfig/<calc>.json` after editing a template's `<script>` tags |
-| `make audit` | Test coverage, DB schema reports (advisory) |
+| `make audit` | Test coverage, DB schema, HTML reports (advisory) |
 | `make serve` | `php -S localhost:8000 -t www`, no WAMP needed |
 | `make i18n-fix` / `make i18n-report` | Translation sync and completion |
 | `make install` | `npm ci` + Playwright browsers |

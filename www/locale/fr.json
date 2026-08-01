@@ -212,7 +212,7 @@
   },
   "sidebar": {
     "ogameMenuItems": {
-      "header": "Calculatrices<br/>pour OGame",
+      "header": "Calculatrices<br>pour OGame",
       "main-title": "Page d'accueil",
       "trade-title": "Calculateur de commerce",
       "costs-title": "Calculateur de coûts",
@@ -227,10 +227,10 @@
     },
     "feedbackItems": {
       "header": "Réaction",
-      "misspelling": "Si vous voyez une erreur<br/>sélectionnez le texte et appuyez sur<br/><a href=\"#\" onclick=\"findSelection();\" style=\"display: inline\">Ctrl+Entrée</a><br/>pour nous aider dans nos corrections.",
-      "mail": "Si vous avez<br/>des demandes ou commentaires,<br/><a href=\"#\" onclick=\"showEmailWindow();\" style=\"display: inline\">cliquer ici</a><br/>pour nous envoyer un e-mail.",
-      "board": "Si vous pouvez aider<br/>avec le site de traduction,<br/>visitez s&#39;il vous plaît le<br/><a href=\"http://board.origin.ogame.de/board6-origin/board24-localization-area/board153-fan-project-s-translations/1936-online-tools-collection-translation\" style = \"display: inline\" target = \"blank\";>Forum OGame Origin</a>",
-      "discord": "Rejoignez notre<br/><a href=\"https://discord.gg/H8xPdA9FbE\" style=\"display: inline\" target=\"_blank\">serveur Discord</a>,<br/>pour discuter du site,<br/>signaler un bug<br/>ou faire une suggestion.<br/>"
+      "misspelling": "Si vous voyez une erreur<br>sélectionnez le texte et appuyez sur<br><a href=\"#\" onclick=\"findSelection();\" style=\"display: inline\">Ctrl+Entrée</a><br>pour nous aider dans nos corrections.",
+      "mail": "Si vous avez<br>des demandes ou commentaires,<br><a href=\"#\" onclick=\"showEmailWindow();\" style=\"display: inline\">cliquer ici</a><br>pour nous envoyer un e-mail.",
+      "board": "Si vous pouvez aider<br>avec le site de traduction,<br>visitez s&#39;il vous plaît le<br><a href=\"http://board.origin.ogame.de/board6-origin/board24-localization-area/board153-fan-project-s-translations/1936-online-tools-collection-translation\" style=\"display: inline\" target=\"_blank\">Forum OGame Origin</a>",
+      "discord": "Rejoignez notre<br><a href=\"https://discord.gg/H8xPdA9FbE\" style=\"display: inline\" target=\"_blank\">serveur Discord</a>,<br>pour discuter du site,<br>signaler un bug<br>ou faire une suggestion.<br>"
     },
     "reportStrings": {
       "title": "L'envoi d'un rapport de faute d'orthographe",
@@ -270,7 +270,7 @@
     "donateStrings": {
       "header": "Soutenir ce projet",
       "why_caption": "Pourquoi faire un don?",
-      "why_text": "Il n'y a pas d'annonces sur ces pages, et ne le seront jamais. Cependant, je dépense de l'argent pour garder ce site disponible et je passe mon temps à le tenir à jour. J'apprécierais si vous pouviez donner n'importe quelle somme d'argent pour me soutenir.<br/>Merci.",
+      "why_text": "Il n'y a pas d'annonces sur ces pages, et ne le seront jamais. Cependant, je dépense de l'argent pour garder ce site disponible et je passe mon temps à le tenir à jour. J'apprécierais si vous pouviez donner n'importe quelle somme d'argent pour me soutenir.<br>Merci.",
       "alternatives": "Des alternatives"
     },
     "changelogStrings": {

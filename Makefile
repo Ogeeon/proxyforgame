@@ -20,6 +20,10 @@ endif
 PFG_BASE_URL ?= http://localhost:8000
 export PFG_BASE_URL
 
+# Read by scripts/validate-html.js. Exported so every recipe sees it.
+PFG_PHP ?= $(PHP)
+export PFG_PHP
+
 PORT ?= 8000
 
 DB_HOST ?= 127.0.0.1
@@ -41,6 +45,7 @@ PW_REPORTER ?= list
         test test-unit test-e2e test-e2e-ui test-one report \
         check audit quality coverage db-validate lint typecheck typecheck-strictnull \
         tsconfigs tsconfigs-check \
+        html-render html-validate html-audit \
         i18n-validate i18n-report i18n-show i18n-fix \
         new-calc gen-test refactor assets docs
 
@@ -88,12 +93,13 @@ report: ## Open the last Playwright HTML report
 # `make check` always means "you broke something". The two reporters below
 # both exit non-zero on pre-existing issues, so they live in `audit` instead and
 # are prefixed with `-` there to keep one failure from hiding the other.
-check: i18n-validate lint typecheck tsconfigs-check test ## Green gate - what must pass before a commit
+check: i18n-validate lint typecheck tsconfigs-check html-validate test ## Green gate - what must pass before a commit
 
 audit: ## Advisory reports; these flag pre-existing issues and do not gate
 	-node scripts/check-test-coverage.js
 	-node scripts/validate-database-schema.js
 	-npm run typecheck:strictnull --silent
+	-$(MAKE) html-validate
 
 lint: ## Run ESLint over every JS file
 	npm run lint --silent
@@ -119,6 +125,17 @@ coverage: ## Report which calculators have no spec
 
 db-validate: ## Compare schema.sql against the SqlQuery calls in PHP
 	node scripts/validate-database-schema.js
+
+##@ HTML validation
+
+html-render: ## Render every page in every locale into .html-check/ without validating
+	node scripts/validate-html.js --render-only
+
+html-validate: ## Validate rendered HTML with the Nu Html Checker; strict zero errors/warnings/info
+	node scripts/validate-html.js
+
+html-audit: ## Advisory HTML report; same run as html-validate, used by `audit` non-gating
+	node scripts/validate-html.js
 
 ##@ Translations
 

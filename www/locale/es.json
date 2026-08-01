@@ -212,7 +212,7 @@
   },
   "sidebar": {
     "ogameMenuItems": {
-      "header": "Calculadoras<br/>para OGame",
+      "header": "Calculadoras<br>para OGame",
       "main-title": "Página Principal",
       "trade-title": "Calculadora de Comercio",
       "costs-title": "Calculadora de Costes",
@@ -227,10 +227,10 @@
     },
     "feedbackItems": {
       "header": "Feedback",
-      "misspelling": "¿Has encontrado algún error?<br/>Selecciona el texto y presiona<br/><a href=\"#\" onclick=\"findSelection(},\" style=\"display: inline\">Ctrl+Enter</a><br/>para avisarnos.",
-      "mail": "Si tienes alguna<br/>petición o comentario, por favor,<br/><a href=\"#\" onclick=\"showEmailWindow(},\" style=\"display: inline\">clicka aquí</a><br/>y envíanoslo por e-mail.",
-      "board": "Si usted puede ayudar con<br/>la traducción del sitio, visite <br/><a href=\"http://board.origin.ogame.de/board6-origin/board24-localization-area/board153-fan-project-s-translations/1936-online-tools-collection-translation\" style = \"display: inline\" target = \"blank\";>Foro OGame Origin</a>",
-      "discord": "Únase a nuestro<br/><a href=\"https://discord.gg/H8xPdA9FbE\" style=\"display: inline\" target=\"_blank\">servidor de Discord</a>,<br/>para discutir el sitio,<br/>reportar un error<br/>o hacer una sugerencia.<br/>"
+      "misspelling": "¿Has encontrado algún error?<br>Selecciona el texto y presiona<br><a href=\"#\" onclick=\"findSelection();\" style=\"display: inline\">Ctrl+Enter</a><br>para avisarnos.",
+      "mail": "Si tienes alguna<br>petición o comentario, por favor,<br><a href=\"#\" onclick=\"showEmailWindow();\" style=\"display: inline\">clicka aquí</a><br>y envíanoslo por e-mail.",
+      "board": "Si usted puede ayudar con<br>la traducción del sitio, visite <br><a href=\"http://board.origin.ogame.de/board6-origin/board24-localization-area/board153-fan-project-s-translations/1936-online-tools-collection-translation\" style=\"display: inline\" target=\"_blank\">Foro OGame Origin</a>",
+      "discord": "Únase a nuestro<br><a href=\"https://discord.gg/H8xPdA9FbE\" style=\"display: inline\" target=\"_blank\">servidor de Discord</a>,<br>para discutir el sitio,<br>reportar un error<br>o hacer una sugerencia.<br>"
     },
     "reportStrings": {
       "title": "Enviando un informe de error de traducción",
@@ -270,7 +270,7 @@
     "donateStrings": {
       "header": "Apoya este proyecto",
       "why_caption": "¿Por qué donar?",
-      "why_text": "No hay anuncios en estas páginas, y nunca lo habrá. Sin embargo, gasto dinero para mantener este sitio disponible, y paso mi tiempo para mantenerlo actualizado. Le agradecería si pudiera donar cualquier cantidad de dinero para apoyarme.<br/>Gracias.",
+      "why_text": "No hay anuncios en estas páginas, y nunca lo habrá. Sin embargo, gasto dinero para mantener este sitio disponible, y paso mi tiempo para mantenerlo actualizado. Le agradecería si pudiera donar cualquier cantidad de dinero para apoyarme.<br>Gracias.",
       "alternatives": "Alternativas"
     },
     "changelogStrings": {

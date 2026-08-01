@@ -43,7 +43,7 @@ test.describe('Construction Queue Calculator Page', () => {
             await startLevelInput.fill(startLevel.toString());
         }
         // Select build button from the correct source table
-        const buildButton = page.locator(`#table-src-${type} #build-${techId}`);
+        const buildButton = page.locator(`#table-src-${type} #build-${type}-${techId}`);
         await buildButton.click();
     }
 
@@ -219,7 +219,7 @@ test.describe('Construction Queue Calculator Page', () => {
         await addToQueue(page, 1, 0);
 
         // Now demolish from level 2 to level 1
-        await page.locator('#table-src-2 #destroy-1').click();
+        await page.locator('#table-src-2 #destroy-2-1').click();
 
         // Get the totals and verify demolition cost is shown
         const totals = await getQueueTotals(page);

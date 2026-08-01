@@ -1,12 +1,12 @@
 <!DOCTYPE html>
+<html lang="<?= getLangAttr() ?>">
 <head>
-  <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
-  <meta http-equiv="Cache-Control" content="no-cache" />
+  <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
   <title><?= $l['title'] ?></title>
-  <meta name="description" content="<?= $l['title'] ?>"/>
-  <meta name="keywords" content="<?= $l['keywords'] ?>"/>
-  <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon"/>
-  <link rel="icon" href="/favicon.ico" type="image/x-icon"/>
+  <meta name="description" content="<?= $l['title'] ?>">
+  <meta name="keywords" content="<?= $l['keywords'] ?>">
+  <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+  <link rel="icon" href="/favicon.ico" type="image/x-icon">
 <?php 
   if ($_SERVER['HTTP_HOST'] == 'proxyforgame.com') {
     $pfgPath = $_SERVER['DOCUMENT_ROOT'];
@@ -15,31 +15,31 @@
   };
 ?>
   <!-- Bootstrap 5 CSS -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"/>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet"/>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
 
   <!-- Custom styles -->
-  <link type="text/css" href="/css/langs_bs.css?v=<?php echo filemtime($pfgPath.'/css/langs_bs.css'); ?>" rel="stylesheet" />
-  <link type="text/css" href="/css/common_bs.css?v=<?php echo filemtime($pfgPath.'/css/common_bs.css'); ?>" rel="stylesheet"/>
-  <link type="text/css" href="/ogame/calc/css/costs_bs.css?v=<?php echo filemtime($pfgPath.'/ogame/calc/css/costs_bs.css'); ?>" rel="stylesheet"/>
+  <link type="text/css" href="/css/langs_bs.css?v=<?php echo filemtime($pfgPath.'/css/langs_bs.css'); ?>" rel="stylesheet">
+  <link type="text/css" href="/css/common_bs.css?v=<?php echo filemtime($pfgPath.'/css/common_bs.css'); ?>" rel="stylesheet">
+  <link type="text/css" href="/ogame/calc/css/costs_bs.css?v=<?php echo filemtime($pfgPath.'/ogame/calc/css/costs_bs.css'); ?>" rel="stylesheet">
 
   <!-- Bootstrap 5 JS Bundle -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
 
   <!-- Utility libraries -->
-  <script type="text/javascript" src="/js/utils.js?v=<?php echo filemtime($pfgPath.'/js/utils.js'); ?>"></script>
-  <script type="text/javascript" src="/ogame/calc/js/common.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/common.js'); ?>"></script>
+  <script src="/js/utils.js?v=<?php echo filemtime($pfgPath.'/js/utils.js'); ?>"></script>
+  <script src="/ogame/calc/js/common.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/common.js'); ?>"></script>
 
   <!-- DOM Utilities (jQuery replacement) -->
-  <script type="text/javascript" src="/ogame/calc/js/dom-utils.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/dom-utils.js'); ?>"></script>
+  <script src="/ogame/calc/js/dom-utils.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/dom-utils.js'); ?>"></script>
 
   <!-- New modular calculator architecture -->
-  <script type="text/javascript" src="/ogame/calc/js/costs-core.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/costs-core.js'); ?>"></script>
-  <script type="text/javascript" src="/ogame/calc/js/costs-data-collector.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/costs-data-collector.js'); ?>"></script>
-  <script type="text/javascript" src="/ogame/calc/js/costs-renderer.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/costs-renderer.js'); ?>"></script>
-  <script type="text/javascript" src="/ogame/calc/js/costs-orchestration.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/costs-orchestration.js'); ?>"></script>
+  <script src="/ogame/calc/js/costs-core.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/costs-core.js'); ?>"></script>
+  <script src="/ogame/calc/js/costs-data-collector.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/costs-data-collector.js'); ?>"></script>
+  <script src="/ogame/calc/js/costs-renderer.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/costs-renderer.js'); ?>"></script>
+  <script src="/ogame/calc/js/costs-orchestration.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/costs-orchestration.js'); ?>"></script>
 
-  <script type="text/javascript">
+  <script>
     // Global options object
     var options = {};
 
@@ -98,6 +98,8 @@
 
 <body>
 
+<h1 class="visually-hidden"><?= $l['title'] ?></h1>
+
 <div class="container-fluid">
   <div class="row">
     <div class="col-md-2"><?php require_once('../../sidebar_bs.tpl'); ?></div>
@@ -139,24 +141,24 @@
           <div class="d-flex flex-wrap gap-2 align-items-center">
             <div class="d-flex align-items-center gap-1">
               <label for="robot-factory-level"><?= $l['robot-factory'] ?> (<?= $l['planet'] ?>)</label>
-              <input id="robot-factory-level" type="text" name="robot-factory-level" class="form-control form-control-sm level-input" value="0" />
+              <input id="robot-factory-level" type="text" name="robot-factory-level" class="form-control form-control-sm level-input" value="0">
             </div>
             <div class="d-flex align-items-center gap-1">
               <label for="robot-factory-level-moon"><?= $l['robot-factory'] ?> (<?= $l['moon'] ?>)</label>
-              <input id="robot-factory-level-moon" type="text" name="robot-factory-level-moon" class="form-control form-control-sm level-input" value="0" />
+              <input id="robot-factory-level-moon" type="text" name="robot-factory-level-moon" class="form-control form-control-sm level-input" value="0">
             </div>
             <div class="d-flex align-items-center gap-1">
               <label for="nanite-factory-level"><?= $l['nanite-factory'] ?></label>
-              <input id="nanite-factory-level" type="text" name="nanite-factory-level" class="form-control form-control-sm level-input" value="0" />
+              <input id="nanite-factory-level" type="text" name="nanite-factory-level" class="form-control form-control-sm level-input" value="0">
             </div>
             <div class="d-flex align-items-center gap-1">
               <label for="shipyard-level"><?= $l['shipyard'] ?></label>
-              <input id="shipyard-level" type="text" name="shipyard-level" class="form-control form-control-sm level-input" value="0" />
+              <input id="shipyard-level" type="text" name="shipyard-level" class="form-control form-control-sm level-input" value="0">
             </div>
             <div class="d-flex align-items-center gap-1">
               <label for="research-lab-level"><?= $l['research-lab'] ?></label>
               <div class="d-flex gap-1">
-                <input id="research-lab-level" type="text" name="research-lab-level" class="form-control form-control-sm level-input" value="0"/>
+                <input id="research-lab-level" type="text" name="research-lab-level" class="form-control form-control-sm level-input" value="0">
                 <button id="open-llc-dialog" class="btn btn-outline-secondary btn-sm" type="button" data-bs-toggle="tooltip" title="<?= $l['calculate'] ?>">
                   <i class="bi bi-calculator"></i>
                 </button>
@@ -169,11 +171,11 @@
           <div class="d-flex flex-wrap gap-2 align-items-center">
             <div class="d-flex align-items-center gap-1">
               <label for="ion-tech-level"><?= $l['ion-tech'] ?></label>
-              <input id="ion-tech-level" type="text" name="ion-tech-level" class="form-control form-control-sm level-input" value="0" />
+              <input id="ion-tech-level" type="text" name="ion-tech-level" class="form-control form-control-sm level-input" value="0">
             </div>
             <div class="d-flex align-items-center gap-1">
               <label for="hyper-tech-level"><?= $l['hyper-tech'] ?></label>
-              <input id="hyper-tech-level" type="text" name="hyper-tech-level" class="form-control form-control-sm level-input" value="0" />
+              <input id="hyper-tech-level" type="text" name="hyper-tech-level" class="form-control form-control-sm level-input" value="0">
             </div>
           </div>
         </div>
@@ -221,37 +223,37 @@
               </select>
             </div>
             <div class="d-flex align-items-center gap-1">
-              <input id="research-bonus" type="checkbox" name="research-bonus" class="form-check-input"/>
+              <input id="research-bonus" type="checkbox" name="research-bonus" class="form-check-input">
               <label for="research-bonus"><?= $l['research-event'] ?></label>
             </div>
             <div class="d-flex align-items-center gap-1">
-              <input id="technocrat" type="checkbox" name="technocrat" class="form-check-input"/>
+              <input id="technocrat" type="checkbox" name="technocrat" class="form-check-input">
               <label for="technocrat"><?= $l['technocrat'] ?></label>
             </div>
           </div>
           <div class="d-flex flex-wrap gap-2 align-items-center">
             <label><?= $l['class'] ?>:</label>
             <div class="d-flex align-items-center gap-1">
-              <input id="class-0" type="radio" name="class" value="0" tabindex="1" class="form-check-input"/>
+              <input id="class-0" type="radio" name="class" value="0" tabindex="1" class="form-check-input">
               <label for="class-0"><?= $l['class-collector'] ?></label>
             </div>
             <div class="d-flex align-items-center gap-1">
-              <input id="class-1" type="radio" name="class" value="1" tabindex="2" class="form-check-input"/>
+              <input id="class-1" type="radio" name="class" value="1" tabindex="2" class="form-check-input">
               <label for="class-1"><?= $l['class-general'] ?></label>
             </div>
             <div class="d-flex align-items-center gap-1">
-              <input id="class-2" type="radio" name="class" value="2" tabindex="3" class="form-check-input"/>
+              <input id="class-2" type="radio" name="class" value="2" tabindex="3" class="form-check-input">
               <label for="class-2"><?= $l['class-discoverer'] ?></label>
             </div>
             <div class="d-flex align-items-center gap-1">
-              <input id="full-numbers" type="checkbox" name="full-numbers" class="form-check-input"/>
+              <input id="full-numbers" type="checkbox" name="full-numbers" class="form-check-input">
               <label for="full-numbers"><?= $l['full-numbers'] ?></label>
             </div>
             <div class="d-flex align-items-center">
               <label for="exchange-rates-m" class="me-1"><?= $l['exchange-rates'] ?>:</label>
-              <input id="exchange-rates-m" type="text" name="exchange-rates-m" class="form-control form-control-sm level-input" value="1"/>:
-              <input id="exchange-rates-c" type="text" name="exchange-rates-c" class="form-control form-control-sm level-input" value="1.5"/>:
-              <input id="exchange-rates-d" type="text" name="exchange-rates-d" class="form-control form-control-sm level-input" value="3"/>
+              <input id="exchange-rates-m" type="text" name="exchange-rates-m" class="form-control form-control-sm level-input" value="1">:
+              <input id="exchange-rates-c" type="text" name="exchange-rates-c" class="form-control form-control-sm level-input" value="1.5">:
+              <input id="exchange-rates-d" type="text" name="exchange-rates-d" class="form-control form-control-sm level-input" value="3">
             </div>
           </div>
         </div>
@@ -261,7 +263,7 @@
             <div class="d-flex align-items-center gap-1">
               <label for="discoverer-class-bonus"><?= $l['discoverer-class-bonus'] ?></label>
               <div class="input-group input-group-sm w-auto">
-                <input id="discoverer-class-bonus" type="text" name="discoverer-class-bonus" class="form-control level-input m-0" value="0" />
+                <input id="discoverer-class-bonus" type="text" name="discoverer-class-bonus" class="form-control level-input m-0" value="0">
                 <span class="input-group-text">%</span>
               </div>
               <i class="bi bi-question-circle" data-bs-toggle="tooltip" title="<?= $l['discoverer-class-bonus-hint'] ?>"></i>
@@ -274,12 +276,12 @@
             </div>
             <div class="d-flex align-items-center gap-1">
               <label for="mineral-res-cntr-lvl"><?= $l['mineral-res-cntr-lvl'] ?></label>
-              <input id="mineral-res-cntr-lvl" type="text" name="mineral-res-cntr-lvl" class="form-control form-control-sm level-input" value="0" />
+              <input id="mineral-res-cntr-lvl" type="text" name="mineral-res-cntr-lvl" class="form-control form-control-sm level-input" value="0">
             </div>
             <div class="d-flex align-items-center gap-1">
               <label for="lf-terraformer-rdc"><?= $l['lf-terraformer-rdc'] ?></label>
               <div class="input-group input-group-sm w-auto">
-                <input id="lf-terraformer-rdc" type="text" name="lf-terraformer-rdc" class="form-control level-input m-0" value="0" />
+                <input id="lf-terraformer-rdc" type="text" name="lf-terraformer-rdc" class="form-control level-input m-0" value="0">
                 <span class="input-group-text">%</span>
               </div>
             </div>
@@ -288,14 +290,14 @@
               <div class="d-flex align-items-center gap-1">
                 <label for="sc-capacity-increase"><?= $l['sc-short'] ?></label>
                 <div class="input-group input-group-sm w-auto">
-                  <input id="sc-capacity-increase" type="text" name="sc-capacity-increase" class="form-control level-input m-0" value="0" />
+                  <input id="sc-capacity-increase" type="text" name="sc-capacity-increase" class="form-control level-input m-0" value="0">
                   <span class="input-group-text">%</span>
                 </div>
               </div>
               <div class="d-flex align-items-center gap-1">
                 <label for="lc-capacity-increase"><?= $l['lc-short'] ?></label>
                 <div class="input-group input-group-sm w-auto">
-                  <input id="lc-capacity-increase" type="text" name="lc-capacity-increase" class="form-control level-input m-0" value="0" />
+                  <input id="lc-capacity-increase" type="text" name="lc-capacity-increase" class="form-control level-input m-0" value="0">
                   <span class="input-group-text">%</span>
                 </div>
               </div>
@@ -353,11 +355,11 @@
                  $qtyAfterIdx = ($i == 1) ? 2 : 1; // insert qty header after to-level (multi) or level (single)
               ?>
               <div class="tab-pane fade <?= $j === $firstInnerTab ? 'show active' : '' ?> no-mp" id="tab-<?=$i?>-<?=$j?>" role="tabpanel">
-                <table id="table-<?=$i?>-<?=$j?>" class="lined" cellpadding="0" cellspacing="1" border="0">
+                <table id="table-<?=$i?>-<?=$j?>" class="lined">
                   <tr>
                     <th style="display: none;"></th>
                     <?php foreach ($colHeaders as $idx => $header) :?>
-                    <th <?=($idx > 0)?'align="center"':''?> style="white-space:nowrap">
+                    <th <?=($idx > 0)?'class="text-center"':''?> style="white-space:nowrap">
                       <?php if ($header == 'dm-abbr'): ?>
                         <abbr data-bs-toggle="tooltip" title="<?= $l['dm-explanation'] ?>"><?=$l[$header] ?></abbr>
                       <?php else: ?>
@@ -365,7 +367,7 @@
                       <?php endif; ?>
                     </th>
                      <?php if ($hasQtyCol && $idx == $qtyAfterIdx): ?>
-                    <th align="center" style="white-space:nowrap"><?=$l['quantity'] ?></th>
+                    <th class="text-center" style="white-space:nowrap"><?=$l['quantity'] ?></th>
                     <?php endif; ?>
                     <?php endforeach; ?>
                   </tr>
@@ -378,65 +380,65 @@
                     <td style="display: none;"><?=$techID?></td>
                     <td style="white-space: nowrap"><?=$l[$techData[$tech][0]]?><?php if ($tech == 14 || $tech == 15): ?> <i class="bi bi-info-circle text-primary" data-bs-toggle="popover" data-bs-trigger="hover focus" data-bs-html="true" data-bs-content="<?= htmlspecialchars($l['robot-nanite-hint'], ENT_QUOTES) ?>" style="cursor: pointer;"></i><?php endif; ?></td>
                     <?php if ($i == 1): ?>
-                    <td align="center"><input type="text" class="form-control form-control-sm level-input ui-input-margin" value="0"/></td>
+                    <td class="text-center"><input type="text" class="form-control form-control-sm level-input ui-input-margin" value="0"></td>
                     <?php endif;?>
                     <?php if ($j == 5 || $j == 6): ?>
-                      <td align="center"><input type="text" class="form-control form-control-sm fleet-input ui-input-margin" value="0"/></td>
+                      <td class="text-center"><input type="text" class="form-control form-control-sm fleet-input ui-input-margin" value="0"></td>
                     <?php else: ?>
-                      <td align="center"><input type="text" class="form-control form-control-sm level-input ui-input-margin" value="0"/></td>
+                      <td class="text-center"><input type="text" class="form-control form-control-sm level-input ui-input-margin" value="0"></td>
                     <?php endif; ?>
                      <?php if ($hasQtyCol): ?>
-                      <td align="center"><input type="text" class="form-control form-control-sm qty-input ui-input-margin" value="1" min="1" style="text-align:center"/></td>
+                      <td class="text-center"><input type="text" class="form-control form-control-sm qty-input ui-input-margin" value="1" style="text-align:center"></td>
                      <?php endif; ?>
-                    <td align="center">0</td>
-                    <td align="center">0</td>
-                    <td align="center">0</td>
-                    <td align="center">0</td>
-                    <td align="center">0</td>
-                    <td align="center">0<?=$l['datetime-s']?></td>
-                    <td align="center">0</td>
+                    <td class="text-center">0</td>
+                    <td class="text-center">0</td>
+                    <td class="text-center">0</td>
+                    <td class="text-center">0</td>
+                    <td class="text-center">0</td>
+                    <td class="text-center">0<?=$l['datetime-s']?></td>
+                    <td class="text-center">0</td>
                     <?php if ($i == 0):?>
-                      <td align="center">0</td>
+                      <td class="text-center">0</td>
                     <?php endif; ?>
                   </tr>
                   <?php endforeach; ?>
                   <tr>
                     <td style="display: none;"></td>
                     <td colspan="<?= $levelCols ?>" class="border-n" ><?=$l['total']?></td>
-                    <td align="center" class="border-n" >0</td>
+                    <td class="border-n text-center" >0</td>
                     <?php if ($hasQtyCol): ?><td class="border-n"></td><?php endif; ?>
-                    <td align="center" class="border-n border-s border-w" ><b>0</b></td>
-                    <td align="center" class="border-n border-s" ><b>0</b></td>
-                    <td align="center" class="border-n border-s" ><b>0</b></td>
-                    <td align="center" class="border-n border-s" ><b>0</b></td>
-                    <td align="center" class="border-n border-s" ><b>0</b></td>
-                    <td align="center" class="border-n border-s" ><b>0</b></td>
+                    <td class="border-n border-s border-w text-center" ><b>0</b></td>
+                    <td class="border-n border-s text-center" ><b>0</b></td>
+                    <td class="border-n border-s text-center" ><b>0</b></td>
+                    <td class="border-n border-s text-center" ><b>0</b></td>
+                    <td class="border-n border-s text-center" ><b>0</b></td>
+                    <td class="border-n border-s text-center" ><b>0</b></td>
                     <?php if ($i == 0):?>
-                    <td align="center" class="border-n border-s" ><b>0</b></td>
+                    <td class="border-n border-s text-center" ><b>0</b></td>
                     <?php endif; ?>
-                    <td align="center" class="border-n border-s border-e" ><b>0</b></td>
+                    <td class="border-n border-s border-e text-center" ><b>0</b></td>
                   </tr>
-                  <tr><td colspan="<?= (($i == 1)?11:10) + $qtyOffset ?>" height=5px;>&nbsp;</td></tr>
+                  <tr><td colspan="<?= 11 + $qtyOffset ?>" style="height: 5px">&nbsp;</td></tr>
                   <tr>
                     <td style="display: none;"></td>
                     <td colspan="<?= 1 + $levelCols + $qtyOffset ?>" class="border-n border-w" ><?=$l['grand-total']?></td>
-                    <td align="center" class="border-n" >0</td>
-                    <td align="center" class="border-n" >0</td>
-                    <td align="center" class="border-n" >0</td>
-                    <td align="center" class="border-n" >0</td>
-                    <td align="center" class="border-n" >0</td>
-                    <td align="center" class="border-n" >0</td>
+                    <td class="border-n text-center" >0</td>
+                    <td class="border-n text-center" >0</td>
+                    <td class="border-n text-center" >0</td>
+                    <td class="border-n text-center" >0</td>
+                    <td class="border-n text-center" >0</td>
+                    <td class="border-n text-center" >0</td>
                     <?php if ($i == 0):?>
-                    <td align="center" class="border-n" ><b>0</b></td>
+                    <td class="border-n text-center" ><b>0</b></td>
                     <?php endif; ?>
-                    <td align="center" class="border-n border-e" >0</td>
+                    <td class="border-n border-e text-center" >0</td>
                   </tr>
                   <tr>
                     <td style="display: none;"></td>
                     <td colspan="<?= 1 + $levelCols + $qtyOffset ?>" class="border-w"><?=$l['res-available']?></td>
-                    <td align="center"><input id="metal-available-<?=$i?>-<?=$j?>" type="text" name="metal-available" class="form-control form-control-sm" style="text-align:center" value="0" /></td>
-                    <td align="center"><input id="crystal-available-<?=$i?>-<?=$j?>" type="text" name="crystal-available" class="form-control form-control-sm" style="text-align:center" value="0" /></td>
-                    <td align="center"><input id="deut-available-<?=$i?>-<?=$j?>" type="text" name="deut-available" class="form-control form-control-sm" style="text-align:center" value="0" /></td>
+                    <td class="text-center"><input id="metal-available-<?=$i?>-<?=$j?>" type="text" name="metal-available" class="form-control form-control-sm" style="text-align:center" value="0"></td>
+                    <td class="text-center"><input id="crystal-available-<?=$i?>-<?=$j?>" type="text" name="crystal-available" class="form-control form-control-sm" style="text-align:center" value="0"></td>
+                    <td class="text-center"><input id="deut-available-<?=$i?>-<?=$j?>" type="text" name="deut-available" class="form-control form-control-sm" style="text-align:center" value="0"></td>
                     <td></td>
                     <td colspan="<?= ($i == 1)?'2':'3' ?>"></td>
                     <td class="border-e"></td>
@@ -444,9 +446,9 @@
                   <tr>
                     <td style="display: none;"></td>
                     <td colspan="<?= 1 + $levelCols + $qtyOffset ?>" class="border-w"><?=$l['res-needed']?></td>
-                    <td align="center">0</td>
-                    <td align="center">0</td>
-                    <td align="center">0</td>
+                    <td class="text-center">0</td>
+                    <td class="text-center">0</td>
+                    <td class="text-center">0</td>
                     <td></td>
                     <td colspan="<?= ($i == 1)?'2':'3' ?>"></td>
                     <td class="border-e"></td>
@@ -454,10 +456,10 @@
                   <tr>
                     <td style="display: none;"></td>
                     <td class="border-s border-w"><?=$l['transports-needed']?></td>
-                    <td align="center" class="border-s">0 <?=$l['sc-short']?></td>
-                    <td align="center" class="border-s">0 <?=$l['lc-short']?></td>
-                    <td colspan="<?= 6 + $qtyOffset ?>" align="center" class="border-s">&nbsp;</td>
-                    <td align="center" class="border-s border-e">&nbsp;</td>
+                    <td class="border-s text-center">0 <?=$l['sc-short']?></td>
+                    <td class="border-s text-center">0 <?=$l['lc-short']?></td>
+                    <td colspan="<?= 6 + $qtyOffset ?>" class="border-s text-center">&nbsp;</td>
+                    <td class="border-s border-e text-center">&nbsp;</td>
                   </tr>
                 </table>
               </div>
@@ -479,9 +481,9 @@
                   <?php endforeach; ?>
                   </select>
                   <label for="tab2-from-level"><?= $l['from-level'] ?></label>
-                  <input id="tab2-from-level" type="text" name="tab2-from-level" class="form-control form-control-sm level-input" value="0"/>
+                  <input id="tab2-from-level" type="text" name="tab2-from-level" class="form-control form-control-sm level-input" value="0">
                   <label for="tab2-to-level"><?= $l['to-level'] ?></label>
-                  <input id="tab2-to-level" type="text" name="tab2-to-level" class="form-control form-control-sm level-input" value="0"/>
+                  <input id="tab2-to-level" type="text" name="tab2-to-level" class="form-control form-control-sm level-input" value="0">
                   <span id="range-booster-wrap" class="d-flex align-items-center gap-2">
                     <label for="booster"><?= $l['booster'] ?></label>
                     <select id="booster" name="booster" class="form-select form-select-sm w-auto">
@@ -495,24 +497,24 @@
                 </div>
                 <div id="range-producer-row" class="d-flex align-items-center flex-wrap gap-2">
                   <label for="energy-tech-level"><?= $l['energy-tech-level'] ?></label>
-                  <input id="energy-tech-level" type="text" name="energy-tech-level" class="form-control form-control-sm level-input" value="0"/>
+                  <input id="energy-tech-level" type="text" name="energy-tech-level" class="form-control form-control-sm level-input" value="0">
                   <label for="plasma-tech-level"><?= $l['plasma-tech-level'] ?></label>
-                  <input id="plasma-tech-level" type="text" name="plasma-tech-level" class="form-control form-control-sm level-input" value="0"/>
+                  <input id="plasma-tech-level" type="text" name="plasma-tech-level" class="form-control form-control-sm level-input" value="0">
                   <label for="max-planet-temp"><?= $l['max-planet-temp'] ?></label>
-                  <input id="max-planet-temp" type="text" name="max-planet-temp" class="form-control form-control-sm level-input" value="0" alt="<?= $l['max-planet-temp'] ?>"/>
+                  <input id="max-planet-temp" type="text" name="max-planet-temp" class="form-control form-control-sm level-input" value="0" data-field-title="<?= $l['max-planet-temp'] ?>">
                   <label for="planet-pos"><?= $l['planet-pos'] ?></label>
-                  <input id="planet-pos" type="text" name="planet-pos" class="form-control form-control-sm level-input" value="0" alt="<?= $l['planet-pos'] ?>"/>
+                  <input id="planet-pos" type="text" name="planet-pos" class="form-control form-control-sm level-input" value="0" data-field-title="<?= $l['planet-pos'] ?>">
                 </div>
                 <div id="range-officers-row" class="d-flex align-items-center flex-wrap gap-3">
-                  <div class="d-flex align-items-center gap-1"><input id="engineer" type="checkbox" name="engineer" class="form-check-input"/><label for="engineer"><?= $l['engineer'] ?></label></div>
-                  <div class="d-flex align-items-center gap-1"><input id="admiral" type="checkbox" name="admiral" class="form-check-input"/><label for="admiral"><?= $l['admiral'] ?></label></div>
-                  <div class="d-flex align-items-center gap-1"><input id="geologist" type="checkbox" name="geologist" class="form-check-input"/><label for="geologist"><?= $l['geologist'] ?></label></div>
-                  <div class="d-flex align-items-center gap-1"><input id="commander" type="checkbox" name="commander" class="form-check-input"/><label for="commander"><?= $l['commander'] ?></label></div>
+                  <div class="d-flex align-items-center gap-1"><input id="engineer" type="checkbox" name="engineer" class="form-check-input"><label for="engineer"><?= $l['engineer'] ?></label></div>
+                  <div class="d-flex align-items-center gap-1"><input id="admiral" type="checkbox" name="admiral" class="form-check-input"><label for="admiral"><?= $l['admiral'] ?></label></div>
+                  <div class="d-flex align-items-center gap-1"><input id="geologist" type="checkbox" name="geologist" class="form-check-input"><label for="geologist"><?= $l['geologist'] ?></label></div>
+                  <div class="d-flex align-items-center gap-1"><input id="commander" type="checkbox" name="commander" class="form-check-input"><label for="commander"><?= $l['commander'] ?></label></div>
                 </div>
               </div>
             </div>
             <div id="prods-table-div">
-              <table id="prods-table" class="lined" cellpadding="0" cellspacing="1" border="0" width="100%">
+              <table id="prods-table" class="lined w-100">
                 <tr>
                 <?php foreach ($colHeadersOneProd as $colName): ?>
                   <th><?=$l[$colName]?></th>
@@ -522,43 +524,43 @@
                   <td colspan="10">&nbsp;</td>
                 </tr>
                 <tr class="<?= ($row % 2) === 1 ? 'odd' : 'even' ?>">
-                  <td align="center" class="border-n" ><?=$l['total']?></td>
-                  <td align="center" class="border-n border-s border-w" ><b>0</b></td>
-                  <td align="center" class="border-n border-s" ><b>0</b></td>
-                  <td align="center" class="border-n border-s" ><b>0</b></td>
-                  <td align="center" class="border-n border-s" ><b>0</b></td>
-                  <td align="center" class="border-n border-s" ><b>0</b></td>
-                  <td align="center" class="border-n border-s" ><b>0</b></td>
-                  <td align="center" class="border-n border-s" ><b>0</b></td>
-                  <td align="center" class="border-n border-s" ><b>0</b></td>
-                  <td align="center" class="border-n border-s border-e" ><b>0</b></td>
+                  <td class="border-n text-center" ><?=$l['total']?></td>
+                  <td class="border-n border-s border-w text-center" ><b>0</b></td>
+                  <td class="border-n border-s text-center" ><b>0</b></td>
+                  <td class="border-n border-s text-center" ><b>0</b></td>
+                  <td class="border-n border-s text-center" ><b>0</b></td>
+                  <td class="border-n border-s text-center" ><b>0</b></td>
+                  <td class="border-n border-s text-center" ><b>0</b></td>
+                  <td class="border-n border-s text-center" ><b>0</b></td>
+                  <td class="border-n border-s text-center" ><b>0</b></td>
+                  <td class="border-n border-s border-e text-center" ><b>0</b></td>
                 </tr>
                 <tr>
-                  <td align="center"><?=$l['res-available']?></td>
-                  <td align="center"><input id="prods-metal-available" type="text" class="form-control form-control-sm" style="text-align:center" value="0" /></td>
-                  <td align="center"><input id="prods-crystal-available" type="text" class="form-control form-control-sm" style="text-align:center" value="0" /></td>
-                  <td align="center"><input id="prods-deut-available" type="text" class="form-control form-control-sm" style="text-align:center" value="0" /></td>
+                  <td class="text-center"><?=$l['res-available']?></td>
+                  <td class="text-center"><input id="prods-metal-available" type="text" class="form-control form-control-sm" style="text-align:center" value="0"></td>
+                  <td class="text-center"><input id="prods-crystal-available" type="text" class="form-control form-control-sm" style="text-align:center" value="0"></td>
+                  <td class="text-center"><input id="prods-deut-available" type="text" class="form-control form-control-sm" style="text-align:center" value="0"></td>
                   <td></td>
                   <td colspan="5"></td>
                 </tr>
                 <tr>
-                  <td align="center"><?=$l['res-needed']?></td>
-                  <td align="center">0</td>
-                  <td align="center">0</td>
-                  <td align="center">0</td>
+                  <td class="text-center"><?=$l['res-needed']?></td>
+                  <td class="text-center">0</td>
+                  <td class="text-center">0</td>
+                  <td class="text-center">0</td>
                   <td></td>
                   <td colspan="5"></td>
                 </tr>
                 <tr class="<?= ($row % 2) === 1 ? 'odd' : 'even' ?>">
-                  <td align="center" ><?=$l['transports-needed-short']?></td>
-                  <td align="center" >0 <?=$l['sc-short']?></td>
-                  <td align="center" >0 <?=$l['lc-short']?></td>
+                  <td class="text-center" ><?=$l['transports-needed-short']?></td>
+                  <td class="text-center" >0 <?=$l['sc-short']?></td>
+                  <td class="text-center" >0 <?=$l['lc-short']?></td>
                   <td colspan="7" ></td>
                 </tr>
               </table>
             </div>
             <div id="commons-table-div" style="display: none;">
-              <table id="commons-table" class="lined" cellpadding="0" cellspacing="1" border="0" width="100%">
+              <table id="commons-table" class="lined w-100">
                 <tr>
                 <?php foreach ($colHeadersOneCommon as $colName): ?>
                   <th><?=$l[$colName]?></th>
@@ -568,35 +570,35 @@
                   <td colspan="8">&nbsp;</td>
                 </tr>
                 <tr class="<?= ($row % 2) === 1 ? 'odd' : 'even' ?>">
-                  <td align="center" class="border-n" ><?=$l['total']?></td>
-                  <td align="center" class="border-n border-s border-w" ><b>0</b></td>
-                  <td align="center" class="border-n border-s" ><b>0</b></td>
-                  <td align="center" class="border-n border-s" ><b>0</b></td>
-                  <td align="center" class="border-n border-s" ><b>0</b></td>
-                  <td align="center" class="border-n border-s" ><b>0</b></td>
-                  <td align="center" class="border-n border-s" ><b>0</b></td>
-                  <td align="center" class="border-n border-s border-e" ><b>0</b></td>
+                  <td class="border-n text-center" ><?=$l['total']?></td>
+                  <td class="border-n border-s border-w text-center" ><b>0</b></td>
+                  <td class="border-n border-s text-center" ><b>0</b></td>
+                  <td class="border-n border-s text-center" ><b>0</b></td>
+                  <td class="border-n border-s text-center" ><b>0</b></td>
+                  <td class="border-n border-s text-center" ><b>0</b></td>
+                  <td class="border-n border-s text-center" ><b>0</b></td>
+                  <td class="border-n border-s border-e text-center" ><b>0</b></td>
                 </tr>
                 <tr>
-                  <td align="center"><?=$l['res-available']?></td>
-                  <td align="center"><input id="commons-metal-available" type="text" class="form-control form-control-sm" style="text-align:center" value="0" /></td>
-                  <td align="center"><input id="commons-crystal-available" type="text" class="form-control form-control-sm" style="text-align:center" value="0" /></td>
-                  <td align="center"><input id="commons-deut-available" type="text" class="form-control form-control-sm" style="text-align:center" value="0" /></td>
+                  <td class="text-center"><?=$l['res-available']?></td>
+                  <td class="text-center"><input id="commons-metal-available" type="text" class="form-control form-control-sm" style="text-align:center" value="0"></td>
+                  <td class="text-center"><input id="commons-crystal-available" type="text" class="form-control form-control-sm" style="text-align:center" value="0"></td>
+                  <td class="text-center"><input id="commons-deut-available" type="text" class="form-control form-control-sm" style="text-align:center" value="0"></td>
                   <td></td>
                   <td colspan="3"></td>
                 </tr>
                 <tr>
-                  <td align="center"><?=$l['res-needed']?></td>
-                  <td align="center">0</td>
-                  <td align="center">0</td>
-                  <td align="center">0</td>
+                  <td class="text-center"><?=$l['res-needed']?></td>
+                  <td class="text-center">0</td>
+                  <td class="text-center">0</td>
+                  <td class="text-center">0</td>
                   <td></td>
                   <td colspan="3"></td>
                 </tr>
                 <tr class="<?= ($row % 2) === 1 ? 'odd' : 'even' ?>">
-                  <td align="center" ><?=$l['transports-needed-short']?></td>
-                  <td align="center" >0 <?=$l['sc-short']?></td>
-                  <td align="center" >0 <?=$l['lc-short']?></td>
+                  <td class="text-center" ><?=$l['transports-needed-short']?></td>
+                  <td class="text-center" >0 <?=$l['sc-short']?></td>
+                  <td class="text-center" >0 <?=$l['lc-short']?></td>
                   <td colspan="5" ></td>
                 </tr>
               </table>
@@ -617,7 +619,7 @@
   <div id="hint">
     <table>
       <tr>
-        <td valign="top">
+        <td class="align-top">
           <i class="bi bi-info-circle"></i>
         </td>
         <td>
@@ -635,7 +637,7 @@
   require_once('../../analitics.tpl');
 ?>
 
-<script type="text/javascript">
+<script>
 // Initialize the calculator app
 document.addEventListener('DOMContentLoaded', function() {
   // Bootstrap tabs are auto-initialized from markup
@@ -657,13 +659,13 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 
 <!-- Robot/Nanite factory build-time disclaimer Modal -->
-<div class="modal fade" id="robot-nanite-disclaimer" tabindex="-1" aria-labelledby="robot-nanite-disclaimer-label" aria-hidden="true">
+<div class="modal fade" role="dialog" id="robot-nanite-disclaimer" tabindex="-1" aria-labelledby="robot-nanite-disclaimer-label" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title d-flex align-items-center gap-2" id="robot-nanite-disclaimer-label">
+        <h3 class="modal-title d-flex align-items-center gap-2" id="robot-nanite-disclaimer-label">
           <i class="bi bi-exclamation-triangle-fill text-warning"></i> <?= $l['disclaimer-title'] ?>
-        </h5>
+        </h3>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
@@ -677,23 +679,23 @@ document.addEventListener('DOMContentLoaded', function() {
 </div>
 
 <!-- IRN Calculator Modal -->
-<div class="modal fade" id="irn-calc" tabindex="-1" aria-labelledby="irn-calc-label" aria-hidden="true">
+<div class="modal fade" role="dialog" id="irn-calc" tabindex="-1" aria-labelledby="irn-calc-label" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="irn-calc-label"><?= $l['llc-dialog-title'] ?></h5>
+        <h3 class="modal-title" id="irn-calc-label"><?= $l['llc-dialog-title'] ?></h3>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
         <div id="irn-fields" class="mb-2">
           <div class="irn-field">
             <label for="irn-level"><?= $l['irn-level'] ?></label>
-            <input id="irn-level" type="text" name="irn-level" class="form-control form-control-sm level-input" value="0" />
+            <input id="irn-level" type="text" name="irn-level" class="form-control form-control-sm level-input" value="0">
           </div>
           <div class="irn-field">
             <label for="planetsSpin"><?= $l['planets-count'] ?></label>
             <div class="input-group input-group-sm" style="width: 100px;">
-              <input id="planetsSpin" type="text" class="form-control text-center" value="8" readonly />
+              <input id="planetsSpin" type="text" class="form-control text-center" value="8" readonly>
               <button class="btn btn-outline-secondary" type="button" id="planetsSpin-up">
                 <i class="bi bi-caret-up-fill"></i>
               </button>
@@ -718,9 +720,9 @@ document.addEventListener('DOMContentLoaded', function() {
             <tbody>
               <?php for ($i = 1; $i <= 8; $i++): ?>
               <tr class="<?= ($i % 2) === 1 ? 'odd' : 'even' ?>">
-                <td align="center"><?= $l['planet-num'] ?><?=$i?></td>
-                <td align="center"><input type="text" id="lablevel_<?=$i?>" name="lablevel_<?=$i?>" class="form-control form-control-sm input-3columns input-in-table" value="0" /></td>
-                <td align="center"><input type="radio" id="labchoice_<?=$i?>" name="start-pln" class="form-check-input" disabled/></td>
+                <td class="text-center"><?= $l['planet-num'] ?><?=$i?></td>
+                <td class="text-center"><input type="text" id="lablevel_<?=$i?>" name="lablevel_<?=$i?>" class="form-control form-control-sm input-3columns input-in-table" value="0"></td>
+                <td class="text-center"><input type="radio" id="labchoice_<?=$i?>" name="start-pln" class="form-check-input" disabled></td>
               </tr>
               <?php endfor; ?>
             </tbody>
@@ -739,11 +741,11 @@ document.addEventListener('DOMContentLoaded', function() {
 </div>
 
 <!-- LifeForm research bonuses full table Modal -->
-<div class="modal fade" id="lf-research-table" tabindex="-1" aria-labelledby="lf-research-table-label" aria-hidden="true">
+<div class="modal fade" role="dialog" id="lf-research-table" tabindex="-1" aria-labelledby="lf-research-table-label" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="lf-research-table-label"><?= $l['lf-research-table-title'] ?></h5>
+        <h3 class="modal-title" id="lf-research-table-label"><?= $l['lf-research-table-title'] ?></h3>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
@@ -751,7 +753,7 @@ document.addEventListener('DOMContentLoaded', function() {
           <button type="button" class="btn btn-outline-secondary btn-sm" id="lf-research-table-get"><i class="bi bi-clipboard"></i> <?= $l['lf-get-from-ogame'] ?></button>
           <button type="button" class="btn btn-outline-danger btn-sm" id="lf-research-table-clear" data-bs-toggle="tooltip" title="<?= $l['lf-clear-table'] ?>"><i class="bi bi-trash"></i></button>
         </div>
-        <table id="lf-research-bonuses-table" class="lined" cellpadding="0" cellspacing="1" border="0">
+        <table id="lf-research-bonuses-table" class="lined">
           <thead>
             <tr>
               <th><?= $l['lf-research-col'] ?></th>
@@ -764,9 +766,9 @@ document.addEventListener('DOMContentLoaded', function() {
             <?php $row = 0; ?>
             <?php foreach ($lfResearchTechs as $tech): ?>
             <tr class="<?= ($row++ % 2) === 1 ? 'odd' : 'even' ?>" data-tech-id="<?= $tech ?>">
-              <td align="left"><?= $l[$techData[$tech][0]] ?></td>
-              <td align="center"><input type="text" class="form-control form-control-sm input-3columns input-in-table lf-research-cost-input" value="0" /></td>
-              <td align="center"><input type="text" class="form-control form-control-sm input-3columns input-in-table lf-research-time-input" value="0" /></td>
+              <td class="text-start"><?= $l[$techData[$tech][0]] ?></td>
+              <td class="text-center"><input type="text" class="form-control form-control-sm input-3columns input-in-table lf-research-cost-input" value="0"></td>
+              <td class="text-center"><input type="text" class="form-control form-control-sm input-3columns input-in-table lf-research-time-input" value="0"></td>
             </tr>
             <?php endforeach; ?>
           </tbody>
@@ -781,11 +783,11 @@ document.addEventListener('DOMContentLoaded', function() {
 </div>
 
 <!-- LifeForm research bonuses paste-from-OGame Modal -->
-<div class="modal fade" id="lf-research-paste" tabindex="-1" aria-labelledby="lf-research-paste-label" aria-hidden="true">
+<div class="modal fade" role="dialog" id="lf-research-paste" tabindex="-1" aria-labelledby="lf-research-paste-label" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="lf-research-paste-label"><?= $l['lf-paste-title'] ?></h5>
+        <h3 class="modal-title" id="lf-research-paste-label"><?= $l['lf-paste-title'] ?></h3>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">

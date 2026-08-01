@@ -212,7 +212,7 @@
   },
   "sidebar": {
     "ogameMenuItems": {
-      "header": "Kalkulatori<br/>za Ogame",
+      "header": "Kalkulatori<br>za Ogame",
       "main-title": "Početna stranica",
       "trade-title": "Kalkulator trgovine",
       "costs-title": "Kalkulator troškova",
@@ -227,10 +227,10 @@
     },
     "feedbackItems": {
       "header": "Povratne informacije",
-      "misspelling": "Našli ste grešku?<br/>Označite grešku i pritisnite <br/><a href=\"#\" onclick=\"findSelection();\" style=\"display: inline\">Ctrl+Enter</a><br/>da nam prijavite.",
-      "mail": "Ako imate bilo kakve zahtjeve<br/>ili komentare, molimo vas da<br/><a href=\"#\" onclick=\"showEmailWindow();\" style=\"display: inline\">kliknete ovdje</a><br/>da bi nam poslali e-mail.",
-      "board": "Ako nam možete pomoći sa<br/>prevodom stranice, molimo<br/>posjetite post na <a href=\"http://board.origin.ogame.de/board6-origin/board24-localization-area/board153-fan-project-s-translations/1936-online-tools-collection-translation\" style=\"display: inline\" target=\"_blank\">Ogame forumu</a>.",
-      "discord": "Pridružite se našem<br/><a href=\"https://discord.gg/H8xPdA9FbE\" style=\"display: inline\" target=\"_blank\">Discord serveru</a>,<br/>da razgovarate o stranici,<br/>prijavite grešku<br/>ili date prijedlog.<br/>"
+      "misspelling": "Našli ste grešku?<br>Označite grešku i pritisnite <br><a href=\"#\" onclick=\"findSelection();\" style=\"display: inline\">Ctrl+Enter</a><br>da nam prijavite.",
+      "mail": "Ako imate bilo kakve zahtjeve<br>ili komentare, molimo vas da<br><a href=\"#\" onclick=\"showEmailWindow();\" style=\"display: inline\">kliknete ovdje</a><br>da bi nam poslali e-mail.",
+      "board": "Ako nam možete pomoći sa<br>prevodom stranice, molimo<br>posjetite post na <a href=\"http://board.origin.ogame.de/board6-origin/board24-localization-area/board153-fan-project-s-translations/1936-online-tools-collection-translation\" style=\"display: inline\" target=\"_blank\">Ogame forumu</a>.",
+      "discord": "Pridružite se našem<br><a href=\"https://discord.gg/H8xPdA9FbE\" style=\"display: inline\" target=\"_blank\">Discord serveru</a>,<br>da razgovarate o stranici,<br>prijavite grešku<br>ili date prijedlog.<br>"
     },
     "reportStrings": {
       "title": "Pošalji ispravku teksta sa pravopisnom greškom",
@@ -270,7 +270,7 @@
     "donateStrings": {
       "header": "Podržite ovaj projekat",
       "why_caption": "Zašto donirati?",
-      "why_text": "Na ovim stranicama nema oglasa i nikada ih neće biti. Međutim, ja trošim novac da bi ova stranica bila dostupna svima, kao i svoje vrijeme na ažuriranje. Bio bih vam jako zahvalan ako biste moglo donirati bilo koji iznos novca da podržite moj rad.<br/>Hvala ti.",
+      "why_text": "Na ovim stranicama nema oglasa i nikada ih neće biti. Međutim, ja trošim novac da bi ova stranica bila dostupna svima, kao i svoje vrijeme na ažuriranje. Bio bih vam jako zahvalan ako biste moglo donirati bilo koji iznos novca da podržite moj rad.<br>Hvala ti.",
       "alternatives": "Alternatives"
     },
     "changelogStrings": {

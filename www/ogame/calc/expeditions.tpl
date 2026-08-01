@@ -1,12 +1,12 @@
 <!DOCTYPE html>
+<html lang="<?= getLangAttr() ?>">
 <head>
-  <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
-  <meta http-equiv="Cache-Control" content="no-cache" />
+  <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
   <title><?= $l['title'] ?></title>
-  <meta name="description" content="<?= $l['title'] ?>"/>
-  <meta name="keywords" content="<?= $l['keywords'] ?>"/>
-  <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon"/>
-  <link rel="icon" href="/favicon.ico" type="image/x-icon"/>
+  <meta name="description" content="<?= $l['title'] ?>">
+  <meta name="keywords" content="<?= $l['keywords'] ?>">
+  <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+  <link rel="icon" href="/favicon.ico" type="image/x-icon">
 <?php
   if ($_SERVER['HTTP_HOST'] == 'proxyforgame.com') {
     $pfgPath = $_SERVER['DOCUMENT_ROOT'];
@@ -75,27 +75,27 @@
   }
 ?>
   <!-- Bootstrap 5 CSS -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"/>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet"/>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
 
   <!-- Custom styles -->
-  <link type="text/css" href="/css/langs_bs.css?v=<?php echo filemtime($pfgPath.'/css/langs_bs.css'); ?>" rel="stylesheet" />
-  <link type="text/css" href="/css/common_bs.css?v=<?php echo filemtime($pfgPath.'/css/common_bs.css'); ?>" rel="stylesheet"/>
-  <link type="text/css" href="/ogame/calc/css/expeditions_bs.css?v=<?php echo filemtime($pfgPath.'/ogame/calc/css/expeditions_bs.css'); ?>" rel="stylesheet"/>
+  <link type="text/css" href="/css/langs_bs.css?v=<?php echo filemtime($pfgPath.'/css/langs_bs.css'); ?>" rel="stylesheet">
+  <link type="text/css" href="/css/common_bs.css?v=<?php echo filemtime($pfgPath.'/css/common_bs.css'); ?>" rel="stylesheet">
+  <link type="text/css" href="/ogame/calc/css/expeditions_bs.css?v=<?php echo filemtime($pfgPath.'/ogame/calc/css/expeditions_bs.css'); ?>" rel="stylesheet">
 
   <!-- Bootstrap 5 JS Bundle -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
 
   <!-- Utility libraries and calculator modules -->
-  <script type="text/javascript" src="/js/utils.js?v=<?php echo filemtime($pfgPath.'/js/utils.js'); ?>"></script>
-  <script type="text/javascript" src="/ogame/calc/js/dom-utils.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/dom-utils.js'); ?>"></script>
-  <script type="text/javascript" src="/ogame/calc/js/own-api.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/own-api.js'); ?>"></script>
-  <script type="text/javascript" src="/ogame/calc/js/expeditions-core.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/expeditions-core.js'); ?>"></script>
-  <script type="text/javascript" src="/ogame/calc/js/expeditions-data-collector.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/expeditions-data-collector.js'); ?>"></script>
-  <script type="text/javascript" src="/ogame/calc/js/expeditions-renderer.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/expeditions-renderer.js'); ?>"></script>
-  <script type="text/javascript" src="/ogame/calc/js/expeditions-orchestration.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/expeditions-orchestration.js'); ?>"></script>
+  <script src="/js/utils.js?v=<?php echo filemtime($pfgPath.'/js/utils.js'); ?>"></script>
+  <script src="/ogame/calc/js/dom-utils.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/dom-utils.js'); ?>"></script>
+  <script src="/ogame/calc/js/own-api.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/own-api.js'); ?>"></script>
+  <script src="/ogame/calc/js/expeditions-core.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/expeditions-core.js'); ?>"></script>
+  <script src="/ogame/calc/js/expeditions-data-collector.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/expeditions-data-collector.js'); ?>"></script>
+  <script src="/ogame/calc/js/expeditions-renderer.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/expeditions-renderer.js'); ?>"></script>
+  <script src="/ogame/calc/js/expeditions-orchestration.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/expeditions-orchestration.js'); ?>"></script>
 
-  <script type="text/javascript">
+  <script>
     // Parameters passed through the URL API. A null means "not passed", so the
     // calculator falls back to the options saved in the browser.
     var apiParams = {
@@ -131,6 +131,8 @@
 </head>
 
 <body>
+
+<h1 class="visually-hidden"><?= $l['title'] ?></h1>
 
 <div class="container-fluid">
   <div class="row">
@@ -198,7 +200,7 @@
             </div>
             <div class="d-flex align-items-center gap-1">
               <label for="tech-hyper-level"><?= $l['LOCA_TECH_HYPER'] ?></label>
-              <input id="tech-hyper-level" type="text" name="tech-hyper-level" class="form-control form-control-sm level-input" value="0" alt="<?= $l['LOCA_TECH_HYPER'] ?>"/>
+              <input id="tech-hyper-level" type="text" name="tech-hyper-level" class="form-control form-control-sm level-input" value="0" data-field-title="<?= $l['LOCA_TECH_HYPER'] ?>">
             </div>
           </div>
 
@@ -206,14 +208,14 @@
             <div class="d-flex align-items-center gap-1">
               <label for="percent-resources"><?= $l['LOCA_PERCENT_RESOURCES'] ?></label>
               <div class="input-group input-group-sm w-auto">
-                <input id="percent-resources" type="text" class="form-control m-0 percent-input" value="0" alt="<?= $l['LOCA_PERCENT_RESOURCES'] ?>"/>
+                <input id="percent-resources" type="text" class="form-control m-0 percent-input" value="0" data-field-title="<?= $l['LOCA_PERCENT_RESOURCES'] ?>">
                 <span class="input-group-text">%</span>
               </div>
             </div>
             <div class="d-flex align-items-center gap-1">
               <label for="percent-ships"><?= $l['LOCA_PERCENT_SHIP'] ?></label>
               <div class="input-group input-group-sm w-auto">
-                <input id="percent-ships" type="text" class="form-control m-0 percent-input" value="0" alt="<?= $l['LOCA_PERCENT_SHIP'] ?>"/>
+                <input id="percent-ships" type="text" class="form-control m-0 percent-input" value="0" data-field-title="<?= $l['LOCA_PERCENT_SHIP'] ?>">
                 <span class="input-group-text">%</span>
               </div>
             </div>
@@ -223,14 +225,14 @@
             <div class="d-flex align-items-center gap-1">
               <label for="class-bonus-collector"><?= $l['class-bonus-collector'] ?></label>
               <div class="input-group input-group-sm w-auto">
-                <input id="class-bonus-collector" type="text" class="form-control m-0 percent-input" value="0" alt="<?= $l['class-bonus-collector'] ?>"/>
+                <input id="class-bonus-collector" type="text" class="form-control m-0 percent-input" value="0" data-field-title="<?= htmlspecialchars($l['class-bonus-collector'], ENT_QUOTES) ?>">
                 <span class="input-group-text">%</span>
               </div>
             </div>
             <div class="d-flex align-items-center gap-1">
               <label for="class-bonus-discoverer"><?= $l['class-bonus-discoverer'] ?></label>
               <div class="input-group input-group-sm w-auto">
-                <input id="class-bonus-discoverer" type="text" class="form-control m-0 percent-input" value="0" alt="<?= $l['class-bonus-discoverer'] ?>"/>
+                <input id="class-bonus-discoverer" type="text" class="form-control m-0 percent-input" value="0" data-field-title="<?= htmlspecialchars($l['class-bonus-discoverer'], ENT_QUOTES) ?>">
                 <span class="input-group-text">%</span>
               </div>
             </div>
@@ -240,7 +242,7 @@
             <div class="d-flex align-items-center gap-1">
               <label for="dark-matter-discovery-bonus"><?= $l['dark-matter-discovery-bonus'] ?></label>
               <div class="input-group input-group-sm w-auto">
-                <input id="dark-matter-discovery-bonus" type="text" class="form-control m-0 percent-input" value="0" alt="<?= $l['dark-matter-discovery-bonus'] ?>"/>
+                <input id="dark-matter-discovery-bonus" type="text" class="form-control m-0 percent-input" value="0" data-field-title="<?= $l['dark-matter-discovery-bonus'] ?>">
                 <span class="input-group-text">%</span>
               </div>
             </div>
@@ -268,7 +270,7 @@
 <?php foreach ($expeditionShips as $idx => $ship): ?>
             <tr class="<?= ($idx % 2) === 0 ? 'odd' : 'even' ?>">
               <td><label for="lf-cargo-<?= $ship[2] ?>"><?= $l[$ship[0]] ?></label></td>
-              <td class="centered"><input id="lf-cargo-<?= $ship[2] ?>" type="text" class="form-control form-control-sm d-inline-block no-mp input-5columns centered" value="0" alt="<?= $l[$ship[0]] ?>"/></td>
+              <td class="centered"><input id="lf-cargo-<?= $ship[2] ?>" type="text" class="form-control form-control-sm d-inline-block no-mp input-5columns centered" value="0" data-field-title="<?= $l[$ship[0]] ?>"></td>
             </tr>
 <?php endforeach; ?>
           </table>
@@ -294,7 +296,7 @@
 <?php foreach ($fleetRows as $idx => $ship): ?>
         <tr class="<?= ($idx % 2) === 0 ? 'odd' : 'even' ?>">
           <td><label for="num<?= $ship[1] ?>"><?= $l[$ship[0]] ?></label></td>
-          <td class="centered"><input id="num<?= $ship[1] ?>" type="text" class="form-control form-control-sm d-inline-block count-input" value="0" alt="<?= $l[$ship[0]] ?>"/></td>
+          <td class="centered"><input id="num<?= $ship[1] ?>" type="text" class="form-control form-control-sm d-inline-block count-input" value="0" data-field-title="<?= $l[$ship[0]] ?>"></td>
           <td class="centered"><span id="can<?= $ship[1] ?>">-</span></td>
           <td class="centered"><?= in_array($ship[1], $neverFound) ? '0' : '<span id="find'.$ship[1].'">0</span>' ?></td>
         </tr>
@@ -358,7 +360,7 @@
                 <td><?= $l['auto_select'] ?></td>
               </tr>
               <tr class="even">
-                <td colspan="3"><a href='<?= $baseUrl ?>?u=1&d=ru&h=8&c=0&f={"203":2140,"219":1,"210":1,"218":1}&pr=10.9&ps=9.89&bc=10.5&bd=60.7&rd=20&dd=50'><?= $baseUrl ?>?u=1&amp;d=ru<br>&amp;h=8&amp;c=0<br>&amp;f={"203":2140,"219":1,"210":1,"218":1}<br>&amp;pr=10.9&amp;ps=9.89&amp;bc=10.5&amp;bd=60.7&amp;rd=20&amp;dd=50</a></td>
+                <td colspan="3"><a href='<?= $baseUrl ?>?u=1&amp;d=ru&amp;h=8&amp;c=0&amp;f=%7B%22203%22:2140,%22219%22:1,%22210%22:1,%22218%22:1%7D&amp;pr=10.9&amp;ps=9.89&amp;bc=10.5&amp;bd=60.7&amp;rd=20&amp;dd=50'><?= $baseUrl ?>?u=1&amp;d=ru<br>&amp;h=8&amp;c=0<br>&amp;f={"203":2140,"219":1,"210":1,"218":1}<br>&amp;pr=10.9&amp;ps=9.89&amp;bc=10.5&amp;bd=60.7&amp;rd=20&amp;dd=50</a></td>
                 <td><?= $l['all_options'] ?></td>
               </tr>
             </table>
@@ -374,11 +376,11 @@
 </div>
 
 <!-- Lifeform bonuses reader modal -->
-<div class="modal fade" id="lf-bonuses-reader" tabindex="-1" aria-labelledby="lf-bonuses-reader-label" aria-hidden="true">
+<div class="modal fade" role="dialog" id="lf-bonuses-reader" tabindex="-1" aria-labelledby="lf-bonuses-reader-label" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="lf-bonuses-reader-label"><?= $l['lf-bonuses-reader-hdr'] ?></h5>
+        <h3 class="modal-title" id="lf-bonuses-reader-label"><?= $l['lf-bonuses-reader-hdr'] ?></h3>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
@@ -386,7 +388,7 @@
         <textarea id="lf-bonuses-txtarea" class="form-control" rows="3"></textarea>
         <div class="text-center fw-semibold my-2"><?= $l['or'] ?></div>
         <div class="mb-2"><?= $l['own-api-cargo-info'] ?></div>
-        <input id="own-api-input" type="text" class="form-control" autocomplete="off" spellcheck="false"/>
+        <input id="own-api-input" type="text" class="form-control" autocomplete="off" spellcheck="false">
       </div>
       <div class="modal-footer">
         <button id="lf-bonuses-read-btn" type="button" class="btn btn-primary"><?= $l['read'] ?></button>
@@ -403,7 +405,7 @@
   require_once('../../analitics.tpl');
 ?>
 
-<script type="text/javascript">
+<script>
 document.addEventListener('DOMContentLoaded', function() {
   document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(function(el) {
     bootstrap.Tooltip.getOrCreateInstance(el);

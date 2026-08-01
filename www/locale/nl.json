@@ -212,7 +212,7 @@
   },
   "sidebar": {
     "ogameMenuItems": {
-      "header": "Berekeningen<br/>voor OGame",
+      "header": "Berekeningen<br>voor OGame",
       "main-title": "Startpagina",
       "trade-title": "Handelberekening",
       "costs-title": "Kostenberekening",
@@ -227,10 +227,10 @@
     },
     "feedbackItems": {
       "header": "Feedback",
-      "misspelling": "Een taalfoutje gevonden?<br/>Selecteer de tekst en<br/><a href=\"#\" onclick=\"findSelection();\" style=\"display: inline\">druk Ctrl+Enter</a><br/>om ons hierover te informeren.",
-      "mail": "Heb je vragen of opmerkingen,<br/><a href=\"#\" onclick=\"showEmailWindow();\" style=\"display: inline\">klik dan hier</a><br/>om ons een e-mail te sturen.",
-      "board": "Als je ons kan helpen<br/>met de vertaling, ga dan naar het <br/><a href=\"http://board.origin.ogame.de/board6-origin/board24-localization-area/board153-fan-project-s-translations/1936-online-tools-collection-translation\" style = \"display: inline\" target = \"blank\";>OGame Origin Board</a>",
-      "discord": "Word lid van onze<br/><a href=\"https://discord.gg/H8xPdA9FbE\" style=\"display: inline\" target=\"_blank\">Discord-server</a>,<br/>om de site te bespreken,<br/>een bug te melden<br/>of een suggestie te doen.<br/>"
+      "misspelling": "Een taalfoutje gevonden?<br>Selecteer de tekst en<br><a href=\"#\" onclick=\"findSelection();\" style=\"display: inline\">druk Ctrl+Enter</a><br>om ons hierover te informeren.",
+      "mail": "Heb je vragen of opmerkingen,<br><a href=\"#\" onclick=\"showEmailWindow();\" style=\"display: inline\">klik dan hier</a><br>om ons een e-mail te sturen.",
+      "board": "Als je ons kan helpen<br>met de vertaling, ga dan naar het <br><a href=\"http://board.origin.ogame.de/board6-origin/board24-localization-area/board153-fan-project-s-translations/1936-online-tools-collection-translation\" style=\"display: inline\" target=\"_blank\">OGame Origin Board</a>",
+      "discord": "Word lid van onze<br><a href=\"https://discord.gg/H8xPdA9FbE\" style=\"display: inline\" target=\"_blank\">Discord-server</a>,<br>om de site te bespreken,<br>een bug te melden<br>of een suggestie te doen.<br>"
     },
     "reportStrings": {
       "title": "Verzend een verkeerde vertaling",
@@ -270,7 +270,7 @@
     "donateStrings": {
       "header": "Steun dit project",
       "why_caption": "Waarom doneren?",
-      "why_text": "Er zijn geen advertenties op deze pagina's en zullen dat ook nooit zijn. Ik geef echter geld uit om deze site beschikbaar te houden en ik besteed mijn tijd om hem bijgewerkt te houden. Ik zou het op prijs stellen als je een bedrag kunt doneren om mij te steunen.<br/>Bedankt.",
+      "why_text": "Er zijn geen advertenties op deze pagina's en zullen dat ook nooit zijn. Ik geef echter geld uit om deze site beschikbaar te houden en ik besteed mijn tijd om hem bijgewerkt te houden. Ik zou het op prijs stellen als je een bedrag kunt doneren om mij te steunen.<br>Bedankt.",
       "alternatives": "Alternatieven"
     },
     "changelogStrings": {

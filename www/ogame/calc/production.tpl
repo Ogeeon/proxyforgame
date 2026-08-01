@@ -1,12 +1,12 @@
 <!DOCTYPE html>
+<html lang="<?= getLangAttr() ?>">
 <head>
-  <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
-  <meta http-equiv="Cache-Control" content="no-cache" />
+  <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
   <title><?= $l['title'] ?></title>
-  <meta name="description" content="<?= $l['title'] ?>"/>
-  <meta name="keywords" content="<?= $l['keywords'] ?>"/>
-  <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon"/>
-  <link rel="icon" href="/favicon.ico" type="image/x-icon"/>
+  <meta name="description" content="<?= $l['title'] ?>">
+  <meta name="keywords" content="<?= $l['keywords'] ?>">
+  <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+  <link rel="icon" href="/favicon.ico" type="image/x-icon">
 <?php
   if ($_SERVER['HTTP_HOST'] == 'proxyforgame.com') {
     $pfgPath = $_SERVER['DOCUMENT_ROOT'];
@@ -15,31 +15,31 @@
   };
 ?>
   <!-- Bootstrap 5 CSS -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"/>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet"/>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
 
   <!-- Custom styles -->
-  <link type="text/css" href="/css/langs_bs.css?v=<?php echo filemtime($pfgPath.'/css/langs_bs.css'); ?>" rel="stylesheet" />
-  <link type="text/css" href="/css/common_bs.css?v=<?php echo filemtime($pfgPath.'/css/common_bs.css'); ?>" rel="stylesheet"/>
-  <link type="text/css" href="/ogame/calc/css/production_bs.css?v=<?php echo filemtime($pfgPath.'/ogame/calc/css/production_bs.css'); ?>" rel="stylesheet"/>
+  <link type="text/css" href="/css/langs_bs.css?v=<?php echo filemtime($pfgPath.'/css/langs_bs.css'); ?>" rel="stylesheet">
+  <link type="text/css" href="/css/common_bs.css?v=<?php echo filemtime($pfgPath.'/css/common_bs.css'); ?>" rel="stylesheet">
+  <link type="text/css" href="/ogame/calc/css/production_bs.css?v=<?php echo filemtime($pfgPath.'/ogame/calc/css/production_bs.css'); ?>" rel="stylesheet">
 
   <!-- Bootstrap 5 JS Bundle -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
 
   <!-- Utility libraries -->
-  <script type="text/javascript" src="/js/utils.js?v=<?php echo filemtime($pfgPath.'/js/utils.js'); ?>"></script>
-  <script type="text/javascript" src="/ogame/calc/js/common.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/common.js'); ?>"></script>
+  <script src="/js/utils.js?v=<?php echo filemtime($pfgPath.'/js/utils.js'); ?>"></script>
+  <script src="/ogame/calc/js/common.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/common.js'); ?>"></script>
 
   <!-- DOM utilities (jQuery replacement) -->
-  <script type="text/javascript" src="/ogame/calc/js/dom-utils.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/dom-utils.js'); ?>"></script>
+  <script src="/ogame/calc/js/dom-utils.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/dom-utils.js'); ?>"></script>
 
   <!-- Production calculator modules -->
-  <script type="text/javascript" src="/ogame/calc/js/production-core.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/production-core.js'); ?>"></script>
-  <script type="text/javascript" src="/ogame/calc/js/production-data-collector.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/production-data-collector.js'); ?>"></script>
-  <script type="text/javascript" src="/ogame/calc/js/production-renderer.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/production-renderer.js'); ?>"></script>
-  <script type="text/javascript" src="/ogame/calc/js/production-orchestration.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/production-orchestration.js'); ?>"></script>
+  <script src="/ogame/calc/js/production-core.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/production-core.js'); ?>"></script>
+  <script src="/ogame/calc/js/production-data-collector.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/production-data-collector.js'); ?>"></script>
+  <script src="/ogame/calc/js/production-renderer.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/production-renderer.js'); ?>"></script>
+  <script src="/ogame/calc/js/production-orchestration.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/production-orchestration.js'); ?>"></script>
 
-  <script type="text/javascript">
+  <script>
     var options = {
       defConstraints: {
         min: -Infinity,
@@ -292,6 +292,8 @@
 
 <body>
 
+<h1 class="visually-hidden"><?= $l['title'] ?></h1>
+
 <div class="container-fluid">
   <div class="row">
     <div class="col-md-2"><?php require_once('../../sidebar_bs.tpl'); ?></div>
@@ -329,7 +331,7 @@
           </button>
         </div>
         <div class="d-flex align-items-center gap-1">
-          <input id="universe-name" type="text" name="universe-name" class="form-control form-control-sm input-20columns"/>
+          <input id="universe-name" type="text" name="universe-name" class="form-control form-control-sm input-20columns">
           <button id="universe-add" type="button" data-bs-toggle="tooltip" title="<?= $l['universe-add'] ?>" class="btn btn-outline-secondary btn-sm uni-control-btn">
             <i class="bi bi-plus-lg"></i>
           </button>
@@ -355,38 +357,38 @@
         <div class="tab-pane fade show active p-2 pb-0" id="param-general" role="tabpanel">
           <div class="d-flex flex-wrap gap-2 align-items-center justify-content-center mb-1">
             <div class="d-flex align-items-center gap-1">
-              <input id="engineer" type="checkbox" name="engineer" class="form-check-input"/>
+              <input id="engineer" type="checkbox" name="engineer" class="form-check-input">
               <label for="engineer"><?= $l['engineer'] ?></label>
             </div>
             <div class="d-flex align-items-center gap-1">
-              <input id="geologist" type="checkbox" name="geologist" class="form-check-input"/>
+              <input id="geologist" type="checkbox" name="geologist" class="form-check-input">
               <label for="geologist"><?= $l['geologist'] ?></label>
             </div>
             <div class="d-flex align-items-center gap-1">
-              <input id="technocrat" type="checkbox" name="technocrat" class="form-check-input"/>
+              <input id="technocrat" type="checkbox" name="technocrat" class="form-check-input">
               <label for="technocrat"><?= $l['technocrat'] ?></label>
             </div>
             <div class="d-flex align-items-center gap-1">
-              <input id="admiral" type="checkbox" name="admiral" class="form-check-input"/>
+              <input id="admiral" type="checkbox" name="admiral" class="form-check-input">
               <label for="admiral"><?= $l['admiral'] ?></label>
             </div>
             <div class="d-flex align-items-center gap-1">
-              <input id="commander" type="checkbox" name="commander" class="form-check-input"/>
+              <input id="commander" type="checkbox" name="commander" class="form-check-input">
               <label for="commander"><?= $l['commander'] ?></label>
             </div>
           </div>
           <div class="d-flex flex-wrap gap-2 align-items-center justify-content-center mb-1">
             <div class="d-flex align-items-center gap-1 flex-nowrap">
               <label><?= $l['class'] ?>:</label>
-              <input id="class-0" type="radio" name="class" value="0" class="form-check-input"/>
+              <input id="class-0" type="radio" name="class" value="0" class="form-check-input">
               <label for="class-0"><?= $l['class-collector'] ?></label>
-              <input id="class-1" type="radio" name="class" value="1" class="form-check-input"/>
+              <input id="class-1" type="radio" name="class" value="1" class="form-check-input">
               <label for="class-1"><?= $l['class-general'] ?></label>
-              <input id="class-2" type="radio" name="class" value="2" class="form-check-input"/>
+              <input id="class-2" type="radio" name="class" value="2" class="form-check-input">
               <label for="class-2"><?= $l['class-discoverer'] ?></label>
             </div>
             <div class="d-flex align-items-center gap-1">
-              <input id="is-trader" type="checkbox" name="is-trader" class="form-check-input"/>
+              <input id="is-trader" type="checkbox" name="is-trader" class="form-check-input">
               <label for="is-trader"><?= $l['is-trader'] ?></label>
             </div>
           </div>
@@ -401,9 +403,9 @@
             </div>
             <div class="d-flex align-items-center gap-1">
               <label for="exchange-rates-m"><?= $l['exchange-rates'] ?></label>
-              <input id="exchange-rates-m" type="text" name="exchange-rates-m" class="form-control form-control-sm level-input" value="1"/>:
-              <input id="exchange-rates-c" type="text" name="exchange-rates-c" class="form-control form-control-sm level-input" value="1.5"/>:
-              <input id="exchange-rates-d" type="text" name="exchange-rates-d" class="form-control form-control-sm level-input" value="3"/>
+              <input id="exchange-rates-m" type="text" name="exchange-rates-m" class="form-control form-control-sm level-input" value="1">:
+              <input id="exchange-rates-c" type="text" name="exchange-rates-c" class="form-control form-control-sm level-input" value="1.5">:
+              <input id="exchange-rates-d" type="text" name="exchange-rates-d" class="form-control form-control-sm level-input" value="3">
             </div>
           </div>
         </div>
@@ -412,11 +414,11 @@
           <div class="d-flex flex-wrap gap-2 align-items-center justify-content-center">
             <div class="d-flex align-items-center gap-1">
               <label for="energy-tech-level"><?= $l['energy-tech-level'] ?></label>
-              <input id="energy-tech-level" type="text" name="energy-tech-level" class="form-control form-control-sm level-input" value="0" alt="<?= $l['energy-tech-level'] ?>"/>
+              <input id="energy-tech-level" type="text" name="energy-tech-level" class="form-control form-control-sm level-input" value="0" data-field-title="<?= $l['energy-tech-level'] ?>">
             </div>
             <div class="d-flex align-items-center gap-1">
               <label for="plasma-tech-level"><?= $l['plasma-tech-level'] ?></label>
-              <input id="plasma-tech-level" type="text" name="plasma-tech-level" class="form-control form-control-sm level-input" value="0" alt="<?= $l['plasma-tech-level'] ?>"/>
+              <input id="plasma-tech-level" type="text" name="plasma-tech-level" class="form-control form-control-sm level-input" value="0" data-field-title="<?= $l['plasma-tech-level'] ?>">
             </div>
           </div>
         </div>
@@ -428,28 +430,28 @@
               <div class="d-flex align-items-center gap-1">
                 <label for="lf-metal-prod-bonus" class="text-capitalize"><?= $l['metal'] ?></label>
                 <div class="input-group input-group-sm w-auto">
-                  <input id="lf-metal-prod-bonus" type="text" name="lf-metal-prod-bonus" class="form-control level-input m-0" value="0"/>
+                  <input id="lf-metal-prod-bonus" type="text" name="lf-metal-prod-bonus" class="form-control level-input m-0" value="0">
                   <span class="input-group-text">%</span>
                 </div>
               </div>
               <div class="d-flex align-items-center gap-1">
                 <label for="lf-crystal-prod-bonus" class="text-capitalize"><?= $l['crystal'] ?></label>
                 <div class="input-group input-group-sm w-auto">
-                  <input id="lf-crystal-prod-bonus" type="text" name="lf-crystal-prod-bonus" class="form-control level-input m-0" value="0"/>
+                  <input id="lf-crystal-prod-bonus" type="text" name="lf-crystal-prod-bonus" class="form-control level-input m-0" value="0">
                   <span class="input-group-text">%</span>
                 </div>
               </div>
               <div class="d-flex align-items-center gap-1">
                 <label for="lf-deut-prod-bonus" class="text-capitalize"><?= $l['deuterium'] ?></label>
                 <div class="input-group input-group-sm w-auto">
-                  <input id="lf-deut-prod-bonus" type="text" name="lf-deut-prod-bonus" class="form-control level-input m-0" value="0"/>
+                  <input id="lf-deut-prod-bonus" type="text" name="lf-deut-prod-bonus" class="form-control level-input m-0" value="0">
                   <span class="input-group-text">%</span>
                 </div>
               </div>
               <div class="d-flex align-items-center gap-1">
                 <label for="lf-energy-prod-bonus" class="text-capitalize"><?= $l['energy'] ?></label>
                 <div class="input-group input-group-sm w-auto">
-                  <input id="lf-energy-prod-bonus" type="text" name="lf-energy-prod-bonus" class="form-control level-input m-0" value="0"/>
+                  <input id="lf-energy-prod-bonus" type="text" name="lf-energy-prod-bonus" class="form-control level-input m-0" value="0">
                   <span class="input-group-text">%</span>
                 </div>
               </div>
@@ -457,21 +459,21 @@
             <div class="d-flex align-items-center gap-1">
               <label for="lf-collector-bonus"><?= $l['collectors-character-bonus'] ?></label>
               <div class="input-group input-group-sm w-auto">
-                <input id="lf-collector-bonus" type="text" name="lf-collector-bonus" class="form-control level-input m-0" value="0" alt="<?= $l['collectors-character-bonus'] ?>"/>
+                <input id="lf-collector-bonus" type="text" name="lf-collector-bonus" class="form-control level-input m-0" value="0" data-field-title="<?= $l['collectors-character-bonus'] ?>">
                 <span class="input-group-text">%</span>
               </div>
             </div>
             <div class="d-flex align-items-center gap-1">
               <label for="lf-crawler-bonus"><?= $l['lf-crawlers-boost'] ?></label>
               <div class="input-group input-group-sm w-auto">
-                <input id="lf-crawler-bonus" type="text" name="lf-crawler-bonus" class="form-control level-input m-0" value="0"/>
+                <input id="lf-crawler-bonus" type="text" name="lf-crawler-bonus" class="form-control level-input m-0" value="0">
                 <span class="input-group-text">%</span>
               </div>
             </div>
             <div class="d-flex align-items-center gap-1">
               <label for="lf-plasma-cost-reduction"><?= $l['lf-plasma-cost-reduction'] ?></label>
               <div class="input-group input-group-sm w-auto">
-                <input id="lf-plasma-cost-reduction" type="text" name="lf-plasma-cost-reduction" class="form-control level-input m-0" value="0"/>
+                <input id="lf-plasma-cost-reduction" type="text" name="lf-plasma-cost-reduction" class="form-control level-input m-0" value="0">
                 <span class="input-group-text">%</span>
               </div>
             </div>
@@ -495,11 +497,11 @@
         <div class="d-flex flex-wrap gap-2 align-items-center mb-1">
           <div class="d-flex align-items-center gap-1">
             <label for="max-planet-temp"><?= $l['max-planet-temp'] ?></label>
-            <input id="max-planet-temp" type="text" name="max-planet-temp" class="form-control form-control-sm input-4columns" value="0" alt="<?= $l['max-planet-temp'] ?>"/>
+            <input id="max-planet-temp" type="text" name="max-planet-temp" class="form-control form-control-sm input-4columns" value="0" data-field-title="<?= $l['max-planet-temp'] ?>">
           </div>
           <div class="d-flex align-items-center gap-1">
             <label for="planet-pos"><?= $l['planet-pos'] ?></label>
-            <input id="planet-pos" type="text" name="planet-pos" class="form-control form-control-sm input-2columns" value="0" alt="<?= $l['planet-pos'] ?>"/>
+            <input id="planet-pos" type="text" name="planet-pos" class="form-control form-control-sm input-2columns" value="0" data-field-title="<?= $l['planet-pos'] ?>">
           </div>
           <div class="d-flex align-items-center gap-1">
             <label for="energy-boost"><?= $l['energy-boost'] ?></label>
@@ -526,12 +528,12 @@
             </select>
           </div>
           <div class="d-flex align-items-center gap-1 ms-auto">
-            <input id="one-pln-extended-view" name="one-pln-extended-view" type="checkbox" class="form-check-input"/>
+            <input id="one-pln-extended-view" name="one-pln-extended-view" type="checkbox" class="form-check-input">
             <label for="one-pln-extended-view"><?= $l['extended-view'] ?></label>
           </div>
         </div>
 
-        <table id="one-planet-prod" class="lined" cellpadding="0" cellspacing="1" border="0" width="100%">
+        <table id="one-planet-prod" class="lined w-100">
           <tr>
             <th>&nbsp;</th>
             <th style="display: none;"><?= $l['boosted'] ?></th>
@@ -547,10 +549,10 @@
               <tr><td colspan="8" class="table-line-2px"></td></tr>
             <?php endif; ?>
             <tr class="<?= ($i % 2) === 1 ? 'odd' : 'even' ?>" >
-                <td align="left" ><?= $l[$oneTblProdRows[$i]] ?></td>
+                <td class="text-start" ><?= $l[$oneTblProdRows[$i]] ?></td>
                 <?php if ($i > 0 && $i < 8): ?>
                   <?php if ($i < 4): ?>
-                    <td align="center" style="display: none;">
+                    <td class="text-center" style="display: none;">
                       <select id="boosted-prod<?= $i ?>" name="boosted-prod" class="form-select form-select-sm input-in-table">
                         <option value="0" selected="selected">0%</option>
                         <option value="1">10%</option>
@@ -562,11 +564,11 @@
                   <?php else: ?>
                     <td style="display: none;"></td>
                   <?php endif; ?>
-                  <td align="center">
-                    <input type="text" class="form-control form-control-sm <?=($i==6 || $i==7)?'input-4columns':'input-3columns' ?> input-in-table" value="0" />
+                  <td class="text-center">
+                    <input type="text" class="form-control form-control-sm <?=($i==6 || $i==7)?'input-4columns':'input-3columns' ?> input-in-table" value="0">
                   </td>
-                  <td align="center"></td><td align="center"></td><td align="center"></td><td align="center"></td>
-                  <td align="center" style="display: none;">
+                  <td class="text-center"></td><td class="text-center"></td><td class="text-center"></td><td class="text-center"></td>
+                  <td class="text-center" style="display: none;">
                     <select class="form-select form-select-sm input-in-table">
                     <?php if ($i == 7): ?>
                       <option value="150">150</option>
@@ -591,9 +593,9 @@
                 <?php else: ?>
                   <?php for ($j = 0; $j < 7; $j++): ?>
                     <?php if ($j == 0 || $j == 6): ?>
-                      <td align="center" style="display: none;"></td>
+                      <td class="text-center" style="display: none;"></td>
                     <?php else: ?>
-                      <td align="center"></td>
+                      <td class="text-center"></td>
                     <?php endif; ?>
                   <?php endfor; ?>
                 <?php endif; ?>
@@ -602,13 +604,13 @@
               <?php foreach ($lfBuildingKeys as $lfRace => $lfKeys): ?>
                 <?php foreach ($lfKeys as $lfPos => $lfKey): ?>
                   <tr class="lf-row lf-row-<?= $lfRace ?> <?= ($lfPos % 2) === 0 ? 'odd' : 'even' ?>" style="display: none;">
-                    <td align="left"><?= $lfTr[$lfKey] ?></td>
-                    <td align="center" style="display: none;"></td>
-                    <td align="center">
-                      <input type="text" class="form-control form-control-sm input-3columns lf-level-input" data-lf-id="<?= $lfRace * 1000 + $lfPos ?>" value="0" />
+                    <td class="text-start"><?= $lfTr[$lfKey] ?></td>
+                    <td class="text-center" style="display: none;"></td>
+                    <td class="text-center">
+                      <input type="text" class="form-control form-control-sm input-3columns lf-level-input" data-lf-id="<?= $lfRace * 1000 + $lfPos ?>" value="0">
                     </td>
-                    <td align="center"></td><td align="center"></td><td align="center"></td><td align="center"></td>
-                    <td align="center" style="display: none;"></td>
+                    <td class="text-center"></td><td class="text-center"></td><td class="text-center"></td><td class="text-center"></td>
+                    <td class="text-center" style="display: none;"></td>
                   </tr>
                 <?php endforeach; ?>
               <?php endforeach; ?>
@@ -620,7 +622,7 @@
           <div class="d-flex flex-wrap gap-2 align-items-center justify-content-center">
             <div class="d-flex align-items-center gap-1">
               <label for="planet-name"><?= $l['planet-name'] ?></label>
-              <input id="planet-name" type="text" name="planet-name" class="form-control form-control-sm input-20columns"/>
+              <input id="planet-name" type="text" name="planet-name" class="form-control form-control-sm input-20columns">
             </div>
             <button id="save-planet-data" type="button" class="btn btn-outline-secondary btn-sm" title="<?= $l['save-planet-data'] ?>"><?= $l['save-planet-data'] ?></button>
             <button id="clone-planet-data" type="button" class="btn btn-outline-secondary btn-sm" title="<?= $l['clone-planet-data'] ?>"><?= $l['clone-planet-data'] ?></button>
@@ -636,13 +638,13 @@
                 <div class="d-flex flex-wrap gap-2 align-items-center mb-1">
                   <div class="flex-grow-1"><?= $l['incl-explain'] ?></div>
                   <div class="d-flex align-items-center gap-1 flex-nowrap">
-                    <input id="include-SS-y" type="radio" name="include-SS" value="0" class="form-check-input"/>
+                    <input id="include-SS-y" type="radio" name="include-SS" value="0" class="form-check-input">
                     <label for="include-SS-y"><?= $l['incl-yes'] ?></label>
-                    <input id="include-SS-n" type="radio" name="include-SS" value="1" class="form-check-input"/>
+                    <input id="include-SS-n" type="radio" name="include-SS" value="1" class="form-check-input">
                     <label for="include-SS-n"><?= $l['incl-no'] ?></label>
                   </div>
                 </div>
-                <table id="mines-amort-tbl" class="lined" cellpadding="0" cellspacing="1" border="0" width="100%">
+                <table id="mines-amort-tbl" class="lined w-100">
                   <thead>
                     <tr>
                       <th><?= $l['mine'] ?></th>
@@ -675,7 +677,7 @@
               <div class="accordion-body">
                 <div class="border rounded p-2 mb-2">
                   <div class="fw-semibold mb-1"><?= $l['current-resources'] ?></div>
-                  <table id="one-pln-accum" class="lined" width="100%" cellpadding="0" cellspacing="1" border="0" >
+                  <table id="one-pln-accum" class="lined w-100" >
                     <tr>
                       <th><?= $l['resource'] ?></th>
                       <th><?= $l['amount'] ?></th>
@@ -684,21 +686,21 @@
                     </tr>
                     <tr>
                       <td><?= $l['metal'] ?></td>
-                      <td align="center"><input id="onepln-curr-met" type="text" name="onepln-curr-met" class="form-control form-control-sm input-10columns" value="0"/></td>
-                      <td align="center"><input id="storage-met" type="text" name="storage-met" class="form-control form-control-sm input-3columns" value="0"/></td>
-                      <td align="center"><span id="storage-cap-met">0</span></td>
+                      <td class="text-center"><input id="onepln-curr-met" type="text" name="onepln-curr-met" class="form-control form-control-sm input-10columns" value="0"></td>
+                      <td class="text-center"><input id="storage-met" type="text" name="storage-met" class="form-control form-control-sm input-3columns" value="0"></td>
+                      <td class="text-center"><span id="storage-cap-met">0</span></td>
                     </tr>
                     <tr>
                       <td><?= $l['crystal'] ?></td>
-                      <td align="center"><input id="onepln-curr-crys" type="text" name="onepln-curr-crys" class="form-control form-control-sm input-10columns" value="0"/></td>
-                      <td align="center"><input id="storage-crys" type="text" name="storage-crys" class="form-control form-control-sm input-3columns" value="0"/></td>
-                      <td align="center"><span id="storage-cap-crys">0</span></td>
+                      <td class="text-center"><input id="onepln-curr-crys" type="text" name="onepln-curr-crys" class="form-control form-control-sm input-10columns" value="0"></td>
+                      <td class="text-center"><input id="storage-crys" type="text" name="storage-crys" class="form-control form-control-sm input-3columns" value="0"></td>
+                      <td class="text-center"><span id="storage-cap-crys">0</span></td>
                     </tr>
                     <tr>
                       <td><?= $l['deuterium'] ?></td>
-                      <td align="center"><input id="onepln-curr-deut" type="text" name="onepln-curr-deut" class="form-control form-control-sm input-10columns" value="0"/></td>
-                      <td align="center"><input id="storage-deut" type="text" name="storage-deut" class="form-control form-control-sm input-3columns" value="0"/></td>
-                      <td align="center"><span id="storage-cap-deut">0</span></td>
+                      <td class="text-center"><input id="onepln-curr-deut" type="text" name="onepln-curr-deut" class="form-control form-control-sm input-10columns" value="0"></td>
+                      <td class="text-center"><input id="storage-deut" type="text" name="storage-deut" class="form-control form-control-sm input-3columns" value="0"></td>
+                      <td class="text-center"><span id="storage-cap-deut">0</span></td>
                     </tr>
                   </table>
                 </div>
@@ -707,35 +709,35 @@
                     <div class="fw-semibold mb-1"><?= $l['accumulate-what'] ?></div>
                     <div class="d-flex align-items-center gap-1 mb-1">
                       <span><?= $l['after'] ?></span>
-                      <input id="onepln-accumwhat-d" type="text" name="onepln-accumwhat-d" class="form-control form-control-sm input-2columns" value="0"/>
+                      <input id="onepln-accumwhat-d" type="text" name="onepln-accumwhat-d" class="form-control form-control-sm input-2columns" value="0">
                       <label for="onepln-accumwhat-d"><?= $l['datetime-d'] ?></label>
-                      <input id="onepln-accumwhat-h" type="text" name="onepln-accumwhat-h" class="form-control form-control-sm input-2columns" value="0"/>
+                      <input id="onepln-accumwhat-h" type="text" name="onepln-accumwhat-h" class="form-control form-control-sm input-2columns" value="0">
                       <label for="onepln-accumwhat-h"><?= $l['datetime-h'] ?></label>
-                      <input id="onepln-accumwhat-m" type="text" name="onepln-accumwhat-m" class="form-control form-control-sm input-2columns" value="0"/>
+                      <input id="onepln-accumwhat-m" type="text" name="onepln-accumwhat-m" class="form-control form-control-sm input-2columns" value="0">
                       <label for="onepln-accumwhat-m"><?= $l['datetime-m'] ?></label>
                     </div>
                     <div class="mb-1"><?= $l['resources-will-be'] ?></div>
-                    <table width="100%" cellpadding="0" cellspacing="1" border="0">
-                      <tr><td width="50%"><?= $l['metal'] ?></td><td align="left"><span id="onepln-accumwhat-met">0</span></td></tr>
-                      <tr><td><?= $l['crystal'] ?></td><td align="left"><span id="onepln-accumwhat-crys">0</span></td></tr>
-                      <tr><td><?= $l['deuterium'] ?></td><td align="left"><span id="onepln-accumwhat-deut">0</span></td></tr>
+                    <table class="w-100">
+                      <tr><td style="width: 50%"><?= $l['metal'] ?></td><td class="text-start"><span id="onepln-accumwhat-met">0</span></td></tr>
+                      <tr><td><?= $l['crystal'] ?></td><td class="text-start"><span id="onepln-accumwhat-crys">0</span></td></tr>
+                      <tr><td><?= $l['deuterium'] ?></td><td class="text-start"><span id="onepln-accumwhat-deut">0</span></td></tr>
                     </table>
                   </div>
                   <div class="border rounded p-2 flex-grow-1">
                     <div class="fw-semibold mb-1"><?= $l['accumulate-when'] ?></div>
                     <div class="mb-1"><?= $l['specify-res-quant'] ?></div>
-                    <table cellpadding="0" cellspacing="1" border="0">
+                    <table>
                       <tr>
                         <td><label for="onepln-accumwhen-met"><?= $l['metal'] ?></label></td>
-                        <td><input id="onepln-accumwhen-met" type="text" name="onepln-accumwhen-met" class="form-control form-control-sm input-10columns" value="0"/></td>
+                        <td><input id="onepln-accumwhen-met" type="text" name="onepln-accumwhen-met" class="form-control form-control-sm input-10columns" value="0"></td>
                       </tr>
                       <tr>
                         <td><label for="onepln-accumwhen-crys"><?= $l['crystal'] ?></label></td>
-                        <td><input id="onepln-accumwhen-crys" type="text" name="onepln-accumwhen-crys" class="form-control form-control-sm input-10columns" value="0"/></td>
+                        <td><input id="onepln-accumwhen-crys" type="text" name="onepln-accumwhen-crys" class="form-control form-control-sm input-10columns" value="0"></td>
                       </tr>
                       <tr>
                         <td><label for="onepln-accumwhen-deut"><?= $l['deuterium'] ?></label></td>
-                        <td><input id="onepln-accumwhen-deut" type="text" name="onepln-accumwhen-deut" class="form-control form-control-sm input-10columns" value="0"/></td>
+                        <td><input id="onepln-accumwhen-deut" type="text" name="onepln-accumwhen-deut" class="form-control form-control-sm input-10columns" value="0"></td>
                       </tr>
                     </table>
                     <div class="mt-1"><span id="onepln-accumwhen-msg"></span></div>
@@ -751,14 +753,14 @@
             <div id="one-pln-acc-fleet" class="accordion-collapse collapse" data-bs-parent="#one-planet-accordion">
               <div class="accordion-body">
                 <?php $techs = getTechsByType(5);?>
-                <table id="one-pln-fleet-prod" class="lined" cellpadding="0" cellspacing="1" border="0" width="100%">
+                <table id="one-pln-fleet-prod" class="lined w-100">
                   <tr>
                     <th><?= $l['ship'] ?></th><th><?= $l['per-hour'] ?></th><th><?= $l['per-day'] ?></th><th><?= $l['per-week'] ?></th>
                   </tr>
                   <?php $row = 0;?>
                   <?php foreach ($techs as $tech) :?>
                   <tr class="<?= ($row++ % 2) === 1 ? 'odd' : 'even' ?>">
-                    <td align="left"><?=$l[$techData[$tech][0]]?></td><td align="center">0</td><td align="center">0</td><td align="center">0</td>
+                    <td class="text-start"><?=$l[$techData[$tech][0]]?></td><td class="text-center">0</td><td class="text-center">0</td><td class="text-center">0</td>
                   </tr>
                   <?php endforeach; ?>
                 </table>
@@ -772,14 +774,14 @@
             <div id="one-pln-acc-defense" class="accordion-collapse collapse" data-bs-parent="#one-planet-accordion">
               <div class="accordion-body">
                 <?php $techs = getTechsByType(6);?>
-                <table id="one-pln-defense-prod" class="lined" cellpadding="0" cellspacing="1" border="0" width="100%">
+                <table id="one-pln-defense-prod" class="lined w-100">
                   <tr>
                     <th><?= $l['building'] ?></th><th><?= $l['per-hour'] ?></th><th><?= $l['per-day'] ?></th><th><?= $l['per-week'] ?></th>
                   </tr>
                   <?php $row = 0;?>
                   <?php foreach ($techs as $tech) :?>
                   <tr class="<?= ($row++ % 2) === 1 ? 'odd' : 'even' ?>">
-                    <td align="left"><?=$l[$techData[$tech][0]]?></td><td align="center">0</td><td align="center">0</td><td align="center">0</td>
+                    <td class="text-start"><?=$l[$techData[$tech][0]]?></td><td class="text-center">0</td><td class="text-center">0</td><td class="text-center">0</td>
                   </tr>
                   <?php endforeach; ?>
                 </table>
@@ -794,7 +796,7 @@
           <div class="d-flex align-items-center gap-1 mx-auto">
             <span><?= $l['planets-count'] ?></span>
             <div class="input-group input-group-sm" style="width: 100px;">
-              <input id="planetsSpin" type="text" class="form-control centered" value="8" readonly />
+              <input id="planetsSpin" type="text" class="form-control centered" value="8" readonly>
               <button class="btn btn-outline-secondary" type="button" id="planetsSpin-up">
                 <i class="bi bi-caret-up-fill"></i>
               </button>
@@ -804,11 +806,11 @@
             </div>
           </div>
           <div class="d-flex align-items-center gap-1">
-            <input id="all-pln-addtnl-info" name="all-pln-addtnl-info" type="checkbox" class="form-check-input"/>
+            <input id="all-pln-addtnl-info" name="all-pln-addtnl-info" type="checkbox" class="form-check-input">
             <label for="all-pln-addtnl-info"><?= $l['show-addtnl-info'] ?></label>
           </div>
         </div>
-        <table id="all-planets-prod" class="lined" width="100%" cellpadding="0" cellspacing="1" border="0" >
+        <table id="all-planets-prod" class="lined w-100" >
           <tr>
             <th>&nbsp;</th>
             <th>&nbsp;</th>
@@ -833,7 +835,7 @@
               <td></td>
               <td><?= $l[$allTblTotalRows[$i]] ?></td>
               <?php for ($j = 1; $j < 15; $j++): ?>
-                <td align="center"></td>
+                <td class="text-center"></td>
               <?php endfor; ?>
             </tr>
           <?php endfor; ?>
@@ -847,7 +849,7 @@
             <div id="all-pln-acc-priority" class="accordion-collapse collapse" data-bs-parent="#all-planets-accordion">
               <div class="accordion-body">
                 <div class="table-responsive">
-                  <table id="mines-priority-tbl" class="lined" cellpadding="0" cellspacing="1" border="0" width="100%">
+                  <table id="mines-priority-tbl" class="lined w-100">
                     <thead>
                       <tr>
                         <th>#</th>
@@ -872,7 +874,7 @@
             </h2>
             <div id="all-pln-acc-amort" class="accordion-collapse collapse" data-bs-parent="#all-planets-accordion">
               <div class="accordion-body">
-                <table id="plasma-amort-tbl" class="lined" cellpadding="0" cellspacing="1" border="0" width="100%">
+                <table id="plasma-amort-tbl" class="lined w-100">
                   <thead>
                     <tr>
                       <th style="width: 55%"></th>
@@ -907,15 +909,15 @@
                   <div class="d-flex flex-wrap gap-2 align-items-center">
                     <div class="d-flex align-items-center gap-1">
                       <label for="allpln-curr-met"><?= $l['metal'] ?></label>
-                      <input id="allpln-curr-met" type="text" name="allpln-curr-met" class="form-control form-control-sm input-10columns" value="0"/>
+                      <input id="allpln-curr-met" type="text" name="allpln-curr-met" class="form-control form-control-sm input-10columns" value="0">
                     </div>
                     <div class="d-flex align-items-center gap-1">
                       <label for="allpln-curr-crys"><?= $l['crystal'] ?></label>
-                      <input id="allpln-curr-crys" type="text" name="allpln-curr-crys" class="form-control form-control-sm input-10columns" value="0"/>
+                      <input id="allpln-curr-crys" type="text" name="allpln-curr-crys" class="form-control form-control-sm input-10columns" value="0">
                     </div>
                     <div class="d-flex align-items-center gap-1">
                       <label for="allpln-curr-deut"><?= $l['deuterium'] ?></label>
-                      <input id="allpln-curr-deut" type="text" name="allpln-curr-deut" class="form-control form-control-sm input-10columns" value="0"/>
+                      <input id="allpln-curr-deut" type="text" name="allpln-curr-deut" class="form-control form-control-sm input-10columns" value="0">
                     </div>
                   </div>
                 </div>
@@ -924,35 +926,35 @@
                     <div class="fw-semibold mb-1"><?= $l['accumulate-what'] ?></div>
                     <div class="d-flex align-items-center gap-1 mb-1">
                       <span><?= $l['after'] ?></span>
-                      <input id="allpln-accumwhat-d" type="text" name="allpln-accumwhat-d" class="form-control form-control-sm input-2columns" value="0"/>
+                      <input id="allpln-accumwhat-d" type="text" name="allpln-accumwhat-d" class="form-control form-control-sm input-2columns" value="0">
                       <label for="allpln-accumwhat-d"><?= $l['datetime-d'] ?></label>
-                      <input id="allpln-accumwhat-h" type="text" name="allpln-accumwhat-h" class="form-control form-control-sm input-2columns" value="0"/>
+                      <input id="allpln-accumwhat-h" type="text" name="allpln-accumwhat-h" class="form-control form-control-sm input-2columns" value="0">
                       <label for="allpln-accumwhat-h"><?= $l['datetime-h'] ?></label>
-                      <input id="allpln-accumwhat-m" type="text" name="allpln-accumwhat-m" class="form-control form-control-sm input-2columns" value="0"/>
+                      <input id="allpln-accumwhat-m" type="text" name="allpln-accumwhat-m" class="form-control form-control-sm input-2columns" value="0">
                       <label for="allpln-accumwhat-m"><?= $l['datetime-m'] ?></label>
                     </div>
                     <div class="mb-1"><?= $l['resources-will-be'] ?></div>
-                    <table width="100%" cellpadding="0" cellspacing="1" border="0">
-                      <tr><td width="50%"><?= $l['metal'] ?></td><td align="left"><span id="allpln-accumwhat-met">0</span></td></tr>
-                      <tr><td><?= $l['crystal'] ?></td><td align="left"><span id="allpln-accumwhat-crys">0</span></td></tr>
-                      <tr><td><?= $l['deuterium'] ?></td><td align="left"><span id="allpln-accumwhat-deut">0</span></td></tr>
+                    <table class="w-100">
+                      <tr><td style="width: 50%"><?= $l['metal'] ?></td><td class="text-start"><span id="allpln-accumwhat-met">0</span></td></tr>
+                      <tr><td><?= $l['crystal'] ?></td><td class="text-start"><span id="allpln-accumwhat-crys">0</span></td></tr>
+                      <tr><td><?= $l['deuterium'] ?></td><td class="text-start"><span id="allpln-accumwhat-deut">0</span></td></tr>
                     </table>
                   </div>
                   <div class="border rounded p-2 flex-grow-1">
                     <div class="fw-semibold mb-1"><?= $l['accumulate-when'] ?></div>
                     <div class="mb-1"><?= $l['specify-res-quant'] ?></div>
-                    <table cellpadding="0" cellspacing="1" border="0">
+                    <table>
                       <tr>
                         <td><label for="allpln-accumwhen-met"><?= $l['metal'] ?></label></td>
-                        <td><input id="allpln-accumwhen-met" type="text" name="allpln-accumwhen-met" class="form-control form-control-sm input-10columns" value="0"/></td>
+                        <td><input id="allpln-accumwhen-met" type="text" name="allpln-accumwhen-met" class="form-control form-control-sm input-10columns" value="0"></td>
                       </tr>
                       <tr>
                         <td><label for="allpln-accumwhen-crys"><?= $l['crystal'] ?></label></td>
-                        <td><input id="allpln-accumwhen-crys" type="text" name="allpln-accumwhen-crys" class="form-control form-control-sm input-10columns" value="0"/></td>
+                        <td><input id="allpln-accumwhen-crys" type="text" name="allpln-accumwhen-crys" class="form-control form-control-sm input-10columns" value="0"></td>
                       </tr>
                       <tr>
                         <td><label for="allpln-accumwhen-deut"><?= $l['deuterium'] ?></label></td>
-                        <td><input id="allpln-accumwhen-deut" type="text" name="allpln-accumwhen-deut" class="form-control form-control-sm input-10columns" value="0"/></td>
+                        <td><input id="allpln-accumwhen-deut" type="text" name="allpln-accumwhen-deut" class="form-control form-control-sm input-10columns" value="0"></td>
                       </tr>
                     </table>
                     <div class="mt-1"><span id="allpln-accumwhen-msg"></span></div>
@@ -968,14 +970,14 @@
             <div id="all-pln-acc-fleet" class="accordion-collapse collapse" data-bs-parent="#all-planets-accordion">
               <div class="accordion-body">
                 <?php $techs = getTechsByType(5);?>
-                <table id="all-pln-fleet-prod" class="lined" cellpadding="0" cellspacing="1" border="0" width="100%">
+                <table id="all-pln-fleet-prod" class="lined w-100">
                   <tr>
                     <th><?= $l['ship'] ?></th><th><?= $l['per-hour'] ?></th><th><?= $l['per-day'] ?></th><th><?= $l['per-week'] ?></th>
                   </tr>
                   <?php $row = 0;?>
                   <?php foreach ($techs as $tech) :?>
                   <tr class="<?= ($row++ % 2) === 1 ? 'odd' : 'even' ?>">
-                    <td align="left"><?=$l[$techData[$tech][0]]?></td><td align="center">0</td><td align="center">0</td><td align="center">0</td>
+                    <td class="text-start"><?=$l[$techData[$tech][0]]?></td><td class="text-center">0</td><td class="text-center">0</td><td class="text-center">0</td>
                   </tr>
                   <?php endforeach; ?>
                 </table>
@@ -989,14 +991,14 @@
             <div id="all-pln-acc-defense" class="accordion-collapse collapse" data-bs-parent="#all-planets-accordion">
               <div class="accordion-body">
                 <?php $techs = getTechsByType(6);?>
-                <table id="all-pln-defense-prod" class="lined" cellpadding="0" cellspacing="1" border="0" width="100%">
+                <table id="all-pln-defense-prod" class="lined w-100">
                   <tr>
                     <th><?= $l['building'] ?></th><th><?= $l['per-hour'] ?></th><th><?= $l['per-day'] ?></th><th><?= $l['per-week'] ?></th>
                   </tr>
                   <?php $row = 0;?>
                   <?php foreach ($techs as $tech) :?>
                   <tr class="<?= ($row++ % 2) === 1 ? 'odd' : 'even' ?>">
-                    <td align="left"><?=$l[$techData[$tech][0]]?></td><td align="center">0</td><td align="center">0</td><td align="center">0</td>
+                    <td class="text-start"><?=$l[$techData[$tech][0]]?></td><td class="text-center">0</td><td class="text-center">0</td><td class="text-center">0</td>
                   </tr>
                   <?php endforeach; ?>
                 </table>
@@ -1019,7 +1021,7 @@
 
 <?php require_once('../../analitics.tpl'); ?>
 
-<script type="text/javascript">
+<script>
   document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(function(el) {
       bootstrap.Tooltip.getOrCreateInstance(el);

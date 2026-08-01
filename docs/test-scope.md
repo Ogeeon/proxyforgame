@@ -61,9 +61,14 @@ Anything not in a calculator's file set, notably:
 - New tests go in the existing file for that calculator, never a new file. A shared module is
   the exception: `own-api.js` has its own `unit-tests/own-api.test.js`, since it belongs to no
   single calculator.
-- `make check` = `i18n-validate` + `lint` + `typecheck` + `tsconfigs-check` + both suites.
-  Prefer it over `make test` whenever locale files are in the change; plain `make test`
-  validates neither translations nor types.
-- The static gates are not scoped per calculator — they cover the whole tree and take about
-  20 s together, so run `make lint typecheck` on any JS change even when the test scope is one
-  calculator. If the change touched a template's `<script>` tags, run `make tsconfigs` first.
+- `make check` = `i18n-validate` + `lint` + `typecheck` + `tsconfigs-check` + `html-validate`
+  + both suites. Prefer it over `make test` whenever locale files or templates are in the
+  change; plain `make test` validates neither translations, nor types, nor rendered HTML.
+- The static gates are not scoped per calculator — they cover the whole tree. The Node-side
+  ones (lint/typecheck/i18n-validate/tsconfigs-check) take about 20 s together, so run
+  `make lint typecheck` on any JS change even when the test scope is one calculator.
+  `html-validate` renders every page in all 13 locales and runs the Nu Html Checker over the
+  result; it is slow (a few minutes) and needs Java 17+ plus `vnu-jar` (installed by
+  `make install`). The gate is strict zero — errors, warnings and info messages alike all
+  fail the run. If the change touched a template's `<script>` tags, run `make tsconfigs`
+  first.

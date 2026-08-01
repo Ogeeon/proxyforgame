@@ -31,8 +31,8 @@
 ?>
 
 <?php $sidebarCss = $pfgPath . '/css/sidebar_bs.css'; ?>
-<link type="text/css" href="/css/sidebar_bs.css?v=<?php echo file_exists($sidebarCss) ? filemtime($sidebarCss) : 0; ?>" rel="stylesheet" />
-<script type="text/javascript">
+<link type="text/css" href="/css/sidebar_bs.css?v=<?php echo file_exists($sidebarCss) ? filemtime($sidebarCss) : 0; ?>" rel="stylesheet">
+<script>
   var buttonsText = {};
   buttonsText.send = '<?=$loc['reportStrings']['send']?>';
   buttonsText.cancel = '<?=$loc['reportStrings']['cancel']?>';
@@ -43,7 +43,7 @@
   var currLang = '<?=$lang ?>';
 </script>
 <?php $sidebarJs = $pfgPath . '/js/sidebar_bs.js'; ?>
-<script type="text/javascript" src="/js/sidebar_bs.js?v=<?php echo file_exists($sidebarJs) ? filemtime($sidebarJs) : 0; ?>"></script>
+<script src="/js/sidebar_bs.js?v=<?php echo file_exists($sidebarJs) ? filemtime($sidebarJs) : 0; ?>"></script>
 
 <!-- Sidebar Toggle Button (visible when sidebar is hidden) -->
 <button class="btn btn-primary d-lg-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebarOffcanvas" aria-controls="sidebarOffcanvas">
@@ -102,7 +102,7 @@
 </div>
 
 <!-- Offcanvas Sidebar for mobile/tablet -->
-<div class="offcanvas offcanvas-start d-lg-none" tabindex="-1" id="sidebarOffcanvas" aria-labelledby="sidebarOffcanvasLabel">
+<div class="offcanvas offcanvas-start d-lg-none" role="dialog" tabindex="-1" id="sidebarOffcanvas" aria-labelledby="sidebarOffcanvasLabel">
   <div class="offcanvas-header">
     <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
   </div>
@@ -156,11 +156,11 @@
 </div>
 
 <!-- Report Modal -->
-<div class="modal fade" id="reportModal" tabindex="-1" aria-labelledby="reportModalLabel" aria-hidden="true">
+<div class="modal fade" role="dialog" id="reportModal" tabindex="-1" aria-labelledby="reportModalLabel" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title text-info-emphasis" id="reportModalLabel"><?=$loc['reportStrings']['title']?></h5>
+        <h2 class="modal-title text-info-emphasis" id="reportModalLabel"><?=$loc['reportStrings']['title']?></h2>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
@@ -170,11 +170,11 @@
           </div>
           <div class="mb-3">
             <label for="misspelled-text" class="form-label text-info-emphasis"><?=$loc['reportStrings']['input1']?></label>
-            <input type="text" class="form-control" id="misspelled-text" />
+            <input type="text" class="form-control" id="misspelled-text">
           </div>
           <div class="mb-3">
             <label for="corrected-text" class="form-label text-info-emphasis"><?=$loc['reportStrings']['input2']?></label>
-            <input type="text" class="form-control" id="corrected-text" />
+            <input type="text" class="form-control" id="corrected-text">
           </div>
         </div>
         <div id="report-progress" class="d-none text-center">
@@ -197,22 +197,22 @@
 </div>
 
 <!-- Email Modal -->
-<div class="modal fade" id="emailModal" tabindex="-1" aria-labelledby="emailModalLabel" aria-hidden="true">
+<div class="modal fade" role="dialog" id="emailModal" tabindex="-1" aria-labelledby="emailModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title text-info-emphasis" id="emailModalLabel"><?=$loc['emailStrings']['title']?></h5>
+        <h2 class="modal-title text-info-emphasis" id="emailModalLabel"><?=$loc['emailStrings']['title']?></h2>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
         <div id="email-data">
           <div class="mb-3">
             <label for="email-form-address" class="form-label text-info-emphasis"><?=$loc['emailStrings']['address']?></label>
-            <input type="email" class="form-control" id="email-form-address" />
+            <input type="email" class="form-control" id="email-form-address">
           </div>
           <div class="mb-3">
             <label for="email-form-subject" class="form-label text-info-emphasis"><?=$loc['emailStrings']['subject']?></label>
-            <input type="text" class="form-control" id="email-form-subject" />
+            <input type="text" class="form-control" id="email-form-subject">
           </div>
           <div class="mb-3">
             <label for="email-form-body" class="form-label text-info-emphasis"><?=$loc['emailStrings']['body']?></label>
@@ -239,11 +239,11 @@
 </div>
 
 <!-- Changelog Modal -->
-<div class="modal fade" id="changelogModal" tabindex="-1" aria-labelledby="changelogModalLabel" aria-hidden="true">
+<div class="modal fade" role="dialog" id="changelogModal" tabindex="-1" aria-labelledby="changelogModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title text-info-emphasis" id="changelogModalLabel"><?=$loc['changelogStrings']['changelog']?></h5>
+        <h2 class="modal-title text-info-emphasis" id="changelogModalLabel"><?=$loc['changelogStrings']['changelog']?></h2>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">

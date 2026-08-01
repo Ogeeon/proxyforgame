@@ -6,6 +6,15 @@
   margin: 2px;
 }
 
+/* Modal titles are h2/h3 in the markup so the heading outline stays flat below
+   the visually-hidden h1, but Bootstrap's .modal-title sets no font-size, so
+   pin the size the old h5 gave them. Accordion headers are already 1rem via
+   .accordion-button, so those need no extra rule. */
+h2.modal-title,
+h3.modal-title {
+  font-size: 1.25rem;
+}
+
 .subheader {
   text-align: center;
   font-weight: 600;

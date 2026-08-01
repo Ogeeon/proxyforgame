@@ -45,3 +45,10 @@ function getLang() {
   global $lang;
   return $lang;
 }
+
+// BCP 47 tag for the <html lang> attribute. The URL prefix codes 'en' and 'us'
+// are not valid language tags, so map them to the proper variant subtags.
+function getLangAttr() {
+  global $lang;
+  return $lang === 'us' ? 'en-US' : ($lang === 'en' ? 'en-GB' : $lang);
+}
