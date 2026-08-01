@@ -97,6 +97,7 @@
         lfCrysProdBonus: 0,
         lfDeutProdBonus: 0,
         lfEnergyProdBonus: 0,
+        lfExpLevel: 0,
         lfCollectorBonus: 0,
         lfCrawlerBonus: 0,
         lfPlasmaCostReduction: 0,
@@ -162,6 +163,8 @@
               return validateNumber(parseFloat(value), 0, Infinity, 0);
             case 'lfPlasmaCostReduction':
               return validateNumber(parseFloat(value), 0, 99, 0);
+            case 'lfExpLevel':
+              return validateNumber(Number.parseInt(value), 0, 100, 0);
             default:
               return value;
           }
@@ -456,11 +459,20 @@
                 </div>
               </div>
             </div>
-            <div class="d-flex align-items-center gap-1">
-              <label for="lf-collector-bonus"><?= $l['collectors-character-bonus'] ?></label>
-              <div class="input-group input-group-sm w-auto">
-                <input id="lf-collector-bonus" type="text" name="lf-collector-bonus" class="form-control level-input m-0" value="0" data-field-title="<?= $l['collectors-character-bonus'] ?>">
-                <span class="input-group-text">%</span>
+            <div class="d-flex flex-wrap align-items-center gap-2 border rounded p-2">
+              <span class="fw-semibold"><?= $l['lf-collector-class'] ?>:</span>
+              <div class="d-flex align-items-center gap-1">
+                <label for="lf-experience-level"><?= $l['lf-experience-level'] ?></label>
+                <input id="lf-experience-level" type="text" name="lf-experience-level" class="form-control form-control-sm level-input" value="0" data-field-title="<?= $l['lf-experience-level'] ?>">
+                <i class="bi bi-question-circle" data-bs-toggle="tooltip" title="<?= htmlspecialchars($l['lf-experience-level-hint'], ENT_QUOTES) ?>"></i>
+              </div>
+              <div class="d-flex align-items-center gap-1">
+                <label for="lf-collector-bonus"><?= $l['lf-class-bonus'] ?></label>
+                <div class="input-group input-group-sm w-auto">
+                  <input id="lf-collector-bonus" type="text" name="lf-collector-bonus" class="form-control level-input m-0" value="0" data-field-title="<?= $l['collectors-character-bonus'] ?>">
+                  <span class="input-group-text">%</span>
+                </div>
+                <i class="bi bi-question-circle" data-bs-toggle="tooltip" title="<?= htmlspecialchars($l['lf-class-bonus-hint'], ENT_QUOTES) ?>"></i>
               </div>
             </div>
             <div class="d-flex align-items-center gap-1">

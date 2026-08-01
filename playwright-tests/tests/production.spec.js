@@ -574,6 +574,88 @@ test.describe('Collector character class bonus', () => {
         await page.locator('#param-lifeforms-tab').click();
         await expect(page.locator('#lf-collector-bonus')).toHaveValue('12.5');
     });
+
+    test('the lifeform level amplifies the class bonus', async ({ page }) => {
+        await page.locator('#one-planet-prod input.input-in-table').last().press('Tab');
+        await page.locator('#param-lifeforms-tab').click();
+
+        // The level on its own changes nothing - it scales the research bonus,
+        // which is still zero.
+        await page.locator('#lf-experience-level').fill('100');
+        await page.locator('#lf-experience-level').press('Tab');
+        await expect(classCell(page, 3)).toHaveText('263');
+        await expect(classCell(page, 6)).toHaveText('141');
+
+        // Level 100 is a +10% technology bonus, so a 10% research reads as 11%.
+        await page.locator('#lf-collector-bonus').fill('10');
+        await page.locator('#lf-collector-bonus').press('Tab');
+        await expect(classCell(page, 3)).toHaveText('292');
+        const amplified = [];
+        for (const col of [3, 4, 5, 6])
+            amplified.push((await classCell(page, col).textContent())?.trim() ?? '');
+
+        // Entering the same effective percentage directly must give the same rows.
+        await page.locator('#lf-experience-level').fill('0');
+        await page.locator('#lf-experience-level').press('Tab');
+        await page.locator('#lf-collector-bonus').fill('11');
+        await page.locator('#lf-collector-bonus').press('Tab');
+        for (const [i, col] of [3, 4, 5, 6].entries())
+            await expect(classCell(page, col)).toHaveText(amplified[i]);
+
+        // Without the level, 10% stays the unamplified 10%.
+        await page.locator('#lf-collector-bonus').fill('10');
+        await page.locator('#lf-collector-bonus').press('Tab');
+        await expect(classCell(page, 3)).toHaveText('289');
+    });
+
+    test('the lifeform level also amplifies the crawler bonus', async ({ page }) => {
+        // Same setup as the crawler test above: the mines have to stay put.
+        const levels = page.locator('#one-planet-prod input.input-in-table');
+        await levels.nth(3).fill('25');  // solar plant
+        await levels.nth(6).fill('50');  // crawlers
+        await levels.nth(6).press('Tab');
+        await expect(crawlerCell(page, 3)).toHaveText('16');
+
+        // 100% research amplified by a level-100 technology bonus is 110%, so the
+        // crawler multiplier goes 1.5 -> 1 + 0.5 * 2.1 = 2.05.
+        await page.locator('#param-lifeforms-tab').click();
+        await page.locator('#lf-collector-bonus').fill('100');
+        await page.locator('#lf-collector-bonus').press('Tab');
+        await page.locator('#lf-experience-level').fill('100');
+        await page.locator('#lf-experience-level').press('Tab');
+
+        await expect(page.locator('#prod-coeff')).toHaveText('100%');
+        await expect(crawlerCell(page, 3)).toHaveText('22');
+        await expect(crawlerCell(page, 4)).toHaveText('11');
+        await expect(crawlerCell(page, 5)).toHaveText('6');
+    });
+
+    test('the lifeform level validates as a whole level and persists', async ({ page }) => {
+        const level = page.locator('#lf-experience-level');
+        await page.locator('#param-lifeforms-tab').click();
+
+        // Whole levels only - the decimal separator is dropped, not rounded.
+        await level.fill('4.3');
+        await level.press('Tab');
+        await expect(level).toHaveValue('43');
+
+        // The technology bonus stops growing at level 100.
+        await level.fill('150');
+        await level.press('Tab');
+        await expect(level).toHaveValue('100');
+
+        // Negative input never yields a negative level.
+        await level.fill('-5');
+        await level.press('Tab');
+        expect(Number.parseInt(await level.inputValue(), 10)).toBeGreaterThanOrEqual(0);
+
+        // Survives a reload.
+        await level.fill('43');
+        await level.press('Tab');
+        await page.reload();
+        await page.locator('#param-lifeforms-tab').click();
+        await expect(page.locator('#lf-experience-level')).toHaveValue('43');
+    });
 });
 
 test.describe('Life Forms plasma technology cost reduction', () => {

@@ -104,6 +104,20 @@ function stripHTMLTags(input) {
 	return input.replace(/<[^>]+>/g, "");
 }
 
+/**
+ * The Collector class bonus increase, in percent, as the game actually applies it.
+ *
+ * The increase comes from a life form RESEARCH (Rock'tal Collector Enhancement),
+ * and OGame amplifies every research effect by the life form technology bonus.
+ * The experience level is one of that bonus' sources: +0.1% per level, capped at
+ * level 100. The character class panel in the game shows the raw research total,
+ * which is what `lfCollectorBonus` holds, so the amplifier is applied here.
+ * @returns {number} percent by which every Collector bonus is increased
+ */
+function collectorClassBonusPct() {
+	return (options.prm.lfCollectorBonus || 0) * (1 + (options.prm.lfExpLevel || 0) * 0.001);
+}
+
 function getSSCost(techID, currLvl, plnData) {
 	let currCons = getHourlyConsumption(techID, currLvl, options.prm.universeSpeed, 1);
 	let newCons = getHourlyConsumption(techID, currLvl + 1, options.prm.universeSpeed, 1);
@@ -119,7 +133,7 @@ function getSSCost(techID, currLvl, plnData) {
 	let boosterFactor = 0.1 * plnData[2];
 	let engineerFactor = (options.prm.engineer === true) ? 0.1 : 0;
 	let allStaffFactor = fullCrew === true ? 0.02 : 0;
-	let classFactor = options.prm.playerClass === 0 ? 0.1 * (1 + 0.01 * (options.prm.lfCollectorBonus || 0)) : 0;
+	let classFactor = options.prm.playerClass === 0 ? 0.1 * (1 + 0.01 * collectorClassBonusPct()) : 0;
 	let allianceClassFactor = options.prm.isTrader ? 0.05 : 0;
 	let totalEnergyProd = oneSSProd;
 	totalEnergyProd += Math.round(oneSSProd * boosterFactor);
@@ -251,7 +265,7 @@ function applyEnergyBonuses(totalEnergyProduced, plnData, fullCrew, lfEff, resul
 	const boosterFactor = 0.1 * plnData[2];
 	const engineerFactor = (options.prm.engineer === true) ? 0.1 : 0;
 	const allStaffFactor = fullCrew === true ? 0.02 : 0;
-	const classFactor = options.prm.playerClass === 0 ? 0.1 * (1 + 0.01 * (options.prm.lfCollectorBonus || 0)) : 0;
+	const classFactor = options.prm.playerClass === 0 ? 0.1 * (1 + 0.01 * collectorClassBonusPct()) : 0;
 	const allianceClassFactor = options.prm.isTrader ? 0.05 : 0;
 	const lfEnergyFactor = (options.prm.lfEnergyProdBonus || 0) / 100;
 	results[9][3] = Math.round(energyBalance * boosterFactor);
@@ -320,7 +334,7 @@ function computeResourceProduction(prodParams, plnData, fullCrew, koeff, normali
 	for (const i of [0, 1, 2]) {
 		let pwrFactor = normalized ? 1 : prodParams[i][1] / 100.0;
 		let prod = getProductionRateSplit(options.rowsToTechs[i], prodParams[i][0], options.prm.energyTechLevel, options.prm.plasmaTechLevel, plnData[0], plnData[1],
-			options.prm.universeSpeed, options.prm.geologist, options.prm.engineer, prodFactor, pwrFactor, prodParams[i][2], fullCrew, options.prm.playerClass, options.prm.isTrader, options.prm.lfCollectorBonus || 0);
+			options.prm.universeSpeed, options.prm.geologist, options.prm.engineer, prodFactor, pwrFactor, prodParams[i][2], fullCrew, options.prm.playerClass, options.prm.isTrader, collectorClassBonusPct());
 		// Save the resource production data
 		results[0][i] += prod[0];  // base production
 		production[i] += prod[0];
@@ -336,7 +350,7 @@ function computeResourceProduction(prodParams, plnData, fullCrew, koeff, normali
 function applyCrawlerProductionBonus(prodParams, results, production) {
 	// The Collector's +50% crawler bonus is amplified by the same character class
 	// bonus as the +25% mine and +10% energy bonuses (see getProductionRateSplit).
-	let crMult = options.prm.playerClass === 0 ? 1 + 0.5 * (1 + 0.01 * (options.prm.lfCollectorBonus || 0)) : 1;
+	let crMult = options.prm.playerClass === 0 ? 1 + 0.5 * (1 + 0.01 * collectorClassBonusPct()) : 1;
 	results[7][0] = Math.round(results[1][0] * prodParams[6][0] * 0.0002 * crMult * prodParams[6][1] / 100.0);
 	production[0] += results[7][0];
 	results[7][1] = Math.round(results[2][1] * prodParams[6][0] * 0.0002 * crMult * prodParams[6][1] / 100.0);
@@ -384,9 +398,11 @@ function applyLfBuildingProduction(lfEff, results, lfBld, production) {
 function calculateProduction(prodParams, plnData, normalized = false, lfEff = undefined) {
 	if (!lfEff) lfEff = emptyLfEffects();
 	// NOTE: the life form technology bonus (Metropolis, Chip Mass Production,
-	// HP-Transformer) is not modelled at all. OGame folds it into the research
+	// HP-Transformer) is not modelled here. OGame folds it into the research
 	// percentages shown on its life form panel, which is where the user copies them
-	// from, so applying it here would double-count it.
+	// from, so applying it here would double-count it. The one exception is the
+	// Collector class bonus - the class panel shows it raw, so collectorClassBonusPct()
+	// amplifies it by the experience level part of that tech bonus.
 	// See docs/calculators/production-vs-ogame.md.
 	// What each life form building contributes on its own: [met, crys, deut,
 	// energy produced, energy used]. Reported separately from the results rows so

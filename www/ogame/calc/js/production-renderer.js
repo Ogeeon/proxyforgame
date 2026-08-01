@@ -34,6 +34,7 @@ function populateParams() {
 	setNumVal('#lf-crystal-prod-bonus', options.prm.lfCrysProdBonus);
 	setNumVal('#lf-deut-prod-bonus', options.prm.lfDeutProdBonus);
 	setNumVal('#lf-energy-prod-bonus', options.prm.lfEnergyProdBonus);
+	setNumVal('#lf-experience-level', options.prm.lfExpLevel);
 	setNumVal('#lf-collector-bonus', options.prm.lfCollectorBonus);
 	setNumVal('#lf-crawler-bonus', options.prm.lfCrawlerBonus);
 	setNumVal('#lf-plasma-cost-reduction', options.prm.lfPlasmaCostReduction);

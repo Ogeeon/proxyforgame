@@ -91,6 +91,7 @@ function updateParams() {
 	options.prm.lfCrysProdBonus = g.lfCrysProdBonus;
 	options.prm.lfDeutProdBonus = g.lfDeutProdBonus;
 	options.prm.lfEnergyProdBonus = g.lfEnergyProdBonus;
+	options.prm.lfExpLevel = g.lfExpLevel;
 	options.prm.lfCollectorBonus = g.lfCollectorBonus;
 	options.prm.lfCrawlerBonus = g.lfCrawlerBonus;
 	options.prm.lfPlasmaCostReduction = g.lfPlasmaCostReduction;
@@ -606,6 +607,7 @@ function resetParams() {
 	options.prm.lfCrysProdBonus = 0;
 	options.prm.lfDeutProdBonus = 0;
 	options.prm.lfEnergyProdBonus = 0;
+	options.prm.lfExpLevel = 0;
 	options.prm.lfCollectorBonus = 0;
 	options.prm.lfCrawlerBonus = 0;
 	options.prm.lfPlasmaCostReduction = 0;
@@ -1006,6 +1008,8 @@ function initializeProductionCalculator() {
 		});
 		// Plasma technology cost reduction is capped at 99%
 		setConstrains('lf-plasma-cost-reduction', { 'min': 0, 'max': 99, 'def': 0, 'allowFloat': true, 'allowNegative': false });
+		// Life form experience level: whole levels, the technology bonus stops growing at 100
+		setConstrains('lf-experience-level', { 'min': 0, 'max': 100, 'def': 0, 'allowFloat': false, 'allowNegative': false });
 
 		// Life form building levels: non-negative integers
 		$$('#one-planet-prod .lf-row input[type=text]').forEach(function (el) {

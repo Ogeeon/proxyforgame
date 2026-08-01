@@ -301,6 +301,46 @@ pins the research percentage independently.
 
 Totals are unaffected — this is purely which row the number lands in.
 
+## 6. The Collector class bonus is shown raw, not amplified — FIXED
+
+Section 1 removed the technology-bonus multiplier because the percentages on OGame's
+life form research panel already include it. The character-class panel is the
+exception: it shows the *raw* research value.
+
+Reference case E — Rock'tal, universe speed 8, plasma 16, all officers, Collector +
+Traders, max temperature −17, position 11, Metal Mine 42 / Crystal Mine 34 /
+Deuterium Synthesizer 36 / Solar Plant 25, 6 567 satellites, 985 crawlers at 150 %.
+Rock'tal Collector Enhancement level 1 → 0.2 % on the class panel. Entering 0.2 left
+the Class and Crawler rows below OGame's by more than the ±1 of section 2:
+
+| Row | OGame | 0.2 % entered | 0.2086 % entered |
+|---|---|---|---|
+| Class (metal) | 138 292 | 138 281 | 138 292 |
+| Class (crystal) | 34 817 | 34 814 | 34 817 |
+| Class (deuterium) | 33 633 | 33 631 | 33 634 |
+| Class (energy) | 13 704 | 13 703 | 13 704 |
+| Crawler (metal) | 244 852 | 244 845 | 244 852 |
+| Crawler (crystal) | 61 645 | 61 644 | 61 645 |
+| Crawler (deuterium) | 59 549 | 59 548 | 59 550 |
+
+The two deuterium rows keep their +1 for the reason in section 2 — OGame floors, the
+calculator rounds — but every other row lands exactly on OGame's number.
+
+0.2086 = 0.2 × 1.043, and 4.3 % is this account's life form technology bonus. It is
+the only value in [0, 12 %] that makes every floored cell match *and* leaves the three
+research percentages (54.6115 / 44.6821 / 55.1123 entered, i.e. 52.36 / 42.84 / 52.84
+raw) decomposable into the 0.02 %-per-level steps the researches actually grow by.
+4.3 % is also exactly life form experience level 43 at the 0.1 %/level rate that
+replaced the original 1 %/level in the December 2022 Artefacts Update.
+
+**Fix:** the *Lifeform level* input is back — as a plain experience level (0–100),
+next to the class bonus on the LifeForms tab. `collectorClassBonusPct()` in
+`production-core.js` multiplies the entered class bonus by `1 + level × 0.001` and
+feeds the result to the four places that consume it (mines, satellites, the energy
+balance and crawlers). Nothing else is amplified: the research and building
+percentages stay exactly as entered, so section 1 still holds. A saved cookie without
+`lfExpLevel` reads back as level 0, which leaves the old behaviour untouched.
+
 ## Note on OGame's own totals
 
 OGame floors every displayed row but sums the *unrounded* values, so its total can
