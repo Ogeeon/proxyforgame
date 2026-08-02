@@ -80,12 +80,18 @@ function render(calc, files) {
   ].join('\n');
 }
 
-function main() {
-  const checkOnly = process.argv.includes('--check');
-  fs.mkdirSync(OUT_DIR, { recursive: true });
-
+/**
+ * Renders a project per page template, writing the ones that drifted - or, in
+ * check mode, only collecting them.
+ *
+ * @param {boolean} checkOnly
+ * @returns {{ stale: string[], written: string[] }}
+ */
+function generate(checkOnly) {
   const templates = fs.readdirSync(CALC_DIR).filter((f) => f.endsWith('.tpl'));
+  /** @type {string[]} */
   const stale = [];
+  /** @type {string[]} */
   const written = [];
 
   for (const tpl of templates) {
@@ -106,6 +112,15 @@ function main() {
     fs.writeFileSync(target, content);
     written.push(`${calc} (${files.length} files)`);
   }
+
+  return { stale, written };
+}
+
+function main() {
+  const checkOnly = process.argv.includes('--check');
+  fs.mkdirSync(OUT_DIR, { recursive: true });
+
+  const { stale, written } = generate(checkOnly);
 
   if (checkOnly) {
     if (stale.length) {
