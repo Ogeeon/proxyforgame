@@ -503,7 +503,7 @@ function applyCookieEntry(params, entry) {
 
 function loadFromCookie(name, params) {
 	const data = readSavedData(name);
-	if (!data || !data.includes('key-value'))
+	if (!data?.includes('key-value'))
 		return;
 	data.split(',').forEach(function(entry) {
 		applyCookieEntry(params, entry);

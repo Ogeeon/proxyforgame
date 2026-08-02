@@ -559,7 +559,7 @@ const validateInputNumberOnBlurNative = (event) => {
     input.value = '0';
     needRecalc = true;
   }
-  if (input.value.charAt(input.value.length - 1) === decimalSeparator) {
+  if (input.value.at(-1) === decimalSeparator) {
     input.value += '0';
     needRecalc = true;
   }
