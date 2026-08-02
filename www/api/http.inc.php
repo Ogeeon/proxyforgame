@@ -64,19 +64,24 @@
 
       switch ($type) {
           case 'str':
-              return $value;
+              // A string is whatever came in; only the two numeric types can
+              // fail validation, and both say so with the FALSE below.
+              $result = $value;
+              break;
 
           case 'int':
               $result = filter_var($value, FILTER_VALIDATE_INT);
-              return $result === false ? null : $result;
+              break;
 
           case 'float':
               $result = filter_var($value, FILTER_VALIDATE_FLOAT);
-              return $result === false ? null : $result;
+              break;
 
           default:
-              return null;
+              $result = false;
       }
+
+      return $result === false ? null : $result;
   }
 
   /** getParam() for a parameter the handler cannot work without. */

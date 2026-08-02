@@ -67,11 +67,11 @@ async function readApiResponse(response) {
         return body;
     }
 
-    const error = body && body.error ? body.error : null;
+    const error = body?.error ?? null;
     throw new ApiError(
         response.status,
-        error && error.code ? error.code : `http_${response.status}`,
-        error && error.message ? error.message : `Request failed with status ${response.status}`
+        error?.code || `http_${response.status}`,
+        error?.message || `Request failed with status ${response.status}`
     );
 }
 

@@ -429,7 +429,7 @@ const showToast = (message, level = 'info') => {
   const close = document.createElement('button');
   close.type = 'button';
   close.className = `btn-close${closeSkin} me-2 m-auto`;
-  close.setAttribute('data-bs-dismiss', 'toast');
+  close.dataset.bsDismiss = 'toast';
   close.setAttribute('aria-label', 'Close');
 
   row.appendChild(body);

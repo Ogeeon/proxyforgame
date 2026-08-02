@@ -33,7 +33,6 @@ function loadEnv($path) {
  */
 function sqlQuery($query, $params) {
     global $connection;
-    $res = array();
 
     if (!isset($connection) || $connection === false || $connection === null) {
         return false;
@@ -42,34 +41,40 @@ function sqlQuery($query, $params) {
     // From PHP 8.1 on, mysqli throws instead of returning false. Catch it here
     // so this function keeps one contract across every version we run on.
     try {
-        $stmt = mysqli_prepare($connection, $query);
-        if ($stmt === false) {
-            error_log("sqlQuery: prepare failed: " . mysqli_error($connection));
-            return false;
-        }
-
-        if (count($params) > 0) {
-            mysqli_stmt_bind_param($stmt, str_repeat('s', count($params)), ...$params);
-        }
-
-        mysqli_stmt_execute($stmt);
-        $result = mysqli_stmt_get_result($stmt);
-
-        // Not a SELECT, so there is no result set to hand back
-        if ($result === false) {
-            mysqli_stmt_close($stmt);
-            return false;
-        }
-
-        while ($row = mysqli_fetch_assoc($result)) {
-            array_push($res, $row);
-        }
-        mysqli_free_result($result);
-        mysqli_stmt_close($stmt);
+        return runPreparedSelect($connection, $query, $params);
     } catch (\mysqli_sql_exception $e) {
         error_log("sqlQuery: " . $e->getMessage());
         return false;
     }
+}
+
+/** The statement half of sqlQuery(); throws on the versions where mysqli does. */
+function runPreparedSelect($connection, $query, $params) {
+    $stmt = mysqli_prepare($connection, $query);
+    if ($stmt === false) {
+        error_log("sqlQuery: prepare failed: " . mysqli_error($connection));
+        return false;
+    }
+
+    if (count($params) > 0) {
+        mysqli_stmt_bind_param($stmt, str_repeat('s', count($params)), ...$params);
+    }
+
+    mysqli_stmt_execute($stmt);
+    $result = mysqli_stmt_get_result($stmt);
+
+    // Not a SELECT, so there is no result set to hand back
+    if ($result === false) {
+        mysqli_stmt_close($stmt);
+        return false;
+    }
+
+    $res = array();
+    while ($row = mysqli_fetch_assoc($result)) {
+        array_push($res, $row);
+    }
+    mysqli_free_result($result);
+    mysqli_stmt_close($stmt);
 
     return $res;
 }

@@ -18,7 +18,7 @@
       if ($result === false) {
           throw new ApiError(500, 'internal_error', 'The population_data query could not be run');
       }
-      if (count($result) === 0) {
+      if (empty($result)) {
           throw new ApiError(404, 'not_found', "No population data for {$country}-{$universe}");
       }
 

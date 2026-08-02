@@ -147,16 +147,14 @@
    * code stays distinguishable from a broken answer.
    */
   function getSpyReportByFallbackMethod($srId) {
+      // Short-circuits on purpose: an id this source cannot address is not
+      // worth a request to it.
       $ids = parseSpyReportId($srId);
-      if ($ids === null) {
-          return null;
-      }
-      [$language, $universe] = $ids;
-
-      $reportJson = fetchSpyReportFromFallback($srId);
+      $reportJson = $ids === null ? null : fetchSpyReportFromFallback($srId);
       if ($reportJson === null) {
           return null;
       }
+      [$language, $universe] = $ids;
 
       // The same fetch the serverdata service does; here a failure only means
       // this source cannot serve the report, so the error is swallowed.
