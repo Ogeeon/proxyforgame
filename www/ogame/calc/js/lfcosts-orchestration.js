@@ -87,12 +87,12 @@ class LfCostsOrchestrator {
     init() {
         const orchestrator = this;
 
-        // Tab-state persistence
-        document.getElementById('mainTabs').addEventListener('shown.bs.tab', () => this.storeTabsState());
-        const innerTabs0 = document.getElementById('innerTabs0');
-        const innerTabs1 = document.getElementById('innerTabs1');
-        if (innerTabs0) innerTabs0.addEventListener('shown.bs.tab', () => this.storeTabsState());
-        if (innerTabs1) innerTabs1.addEventListener('shown.bs.tab', () => this.storeTabsState());
+        // Tab-state persistence. addEvent skips a strip the template did not
+        // render instead of throwing, so the inner strips need no check of
+        // their own.
+        addEvent('#mainTabs', 'shown.bs.tab', () => this.storeTabsState());
+        addEvent('#innerTabs0', 'shown.bs.tab', () => this.storeTabsState());
+        addEvent('#innerTabs1', 'shown.bs.tab', () => this.storeTabsState());
 
         this.opts.load();
         this._restoreInputsFromPrm();
@@ -178,10 +178,10 @@ class LfCostsOrchestrator {
                 orchestrator.addResearchRow(Number(this.dataset.tab));
             });
         });
-        document.getElementById('full-numbers').addEventListener('click', () => orchestrator.handleParamChange());
-        document.getElementById('reset').addEventListener('click', () => orchestrator.resetParams());
-        document.getElementById('tech-types-select').addEventListener('change', () => orchestrator.updateTab3());
-        document.getElementById('race-selector').addEventListener('change', () => this.handleRaceChange());
+        addEvent('#full-numbers', 'click', () => orchestrator.handleParamChange());
+        addEvent('#reset', 'click', () => orchestrator.resetParams());
+        addEvent('#tech-types-select', 'change', () => orchestrator.updateTab3());
+        addEvent('#race-selector', 'change', () => this.handleRaceChange());
 
         // Available-resource inputs — spread across all tabs
         for (let outer = 0; outer < 3; outer++) {
