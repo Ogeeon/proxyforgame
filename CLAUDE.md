@@ -25,7 +25,9 @@ boxes is too old (`choco install make`).
 | `make test` | Both suites — the ritual required before a commit |
 | `make test-unit` / `make test-e2e` | One suite each |
 | `make test-one spec=flight` | A single Playwright spec |
-| `make check` | `i18n-validate` + `lint` + `typecheck` + `html-validate` + both suites — the green gate |
+| `make check` | `changelog-validate` + `i18n-validate` + `lint` + `typecheck` + `html-validate` + both suites — the green gate |
+| `make changelog-validate` | Check the structure of `CHANGELOG.md`. Gates `check` |
+| `make changelog-release` | Cut `[Unreleased]` into a dated release and regenerate `changelog.sql` |
 | `make lint` / `make typecheck` | ESLint and the TypeScript `checkJs` pass; both gate `check` |
 | `make html-validate` | Render every page in all 13 locales and check with the Nu Html Checker (strict zero errors/warnings/info); needs Java 17+ and `vnu-jar` from `make install`. Gates `check` |
 | `make tsconfigs` | Regenerate `tsconfig/<calc>.json` after editing a template's `<script>` tags |
@@ -70,9 +72,35 @@ scoping, message mechanics. Two rules that must hold even if the skill is not in
 
 - **When asked to commit, first ask whether the changed files should be run through SonarQube**
   (`analyze_code_snippet` on the sonarqube MCP server, one call per changed file). Wait for the
-  answer before committing. Work driven by `/sonar-fix` is exempt — its Sonar pass already happened.
+  answer before committing. Two exemptions: work driven by `/sonar-fix`, whose Sonar pass already
+  happened, and a commit that touches nothing Sonar analyzes — docs, `Makefile`, `.claude/**`,
+  locale JSON, `*.sql`. One analyzable file (`.js`, `.php`, `.tpl`, `.css`, `.html`) in the change
+  means the question applies. The table is in the `commit` skill.
 - **Never commit an unverified change.** Scope the run per `docs/test-scope.md`; full `make test`
   before any `git push`. Keep unrelated pre-existing changes in a separate commit.
+
+## Changelog
+
+`CHANGELOG.md` (Keep a Changelog 1.1.0, English) is the single source of truth for the project's
+history. Releases have no version numbers — the site deploys continuously — so a section is
+identified by its date and by the id of the entry users see in the sidebar.
+
+Bullets marked `<!-- site -->` are the subset published to that in-app changelog, and the exact
+Russian text that was published is quoted at the end of the release section. That makes the file
+the archive neither the database nor git provides: `changelog.sql` is git-ignored and rewritten
+for every entry.
+
+- A `feat` or `fix` commit adds its bullet under `## [Unreleased]` **in the same commit**;
+  `refactor`, `chore`, `docs`, `style` and `test` do not touch the file.
+- Whether a bullet is user-visible — and how to cut a release — is the **`changelog` skill**.
+- `make changelog-validate` gates `make check`, so a malformed file blocks every commit.
+- **A drafted announcement needs the user's explicit approval before the release is cut.** The
+  `> **RU:**` text reaches every visitor in twelve languages and cannot be edited afterwards
+  without a manual `update` against production. Never publish one the user has not seen.
+
+Publishing stays manual: `make changelog-release` writes `changelog.sql`, `/translate-changelog`
+fills in the eleven non-Russian rows, and the file is applied to the production database by hand.
+Nothing in the deploy carries it.
 
 ## Architecture
 

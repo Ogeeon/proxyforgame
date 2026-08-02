@@ -61,9 +61,12 @@ Anything not in a calculator's file set, notably:
 - New tests go in the existing file for that calculator, never a new file. A shared module is
   the exception: `own-api.js` has its own `unit-tests/own-api.test.js`, since it belongs to no
   single calculator.
-- `make check` = `i18n-validate` + `lint` + `typecheck` + `tsconfigs-check` + `html-validate`
-  + both suites. Prefer it over `make test` whenever locale files or templates are in the
-  change; plain `make test` validates neither translations, nor types, nor rendered HTML.
+- `make check` = `changelog-validate` + `i18n-validate` + `lint` + `typecheck` +
+  `tsconfigs-check` + `html-validate` + both suites. Prefer it over `make test` whenever locale
+  files or templates are in the change; plain `make test` validates neither translations, nor
+  types, nor rendered HTML.
+- `CHANGELOG.md` on its own needs only `make changelog-validate` — it ships no code. A change to
+  `scripts/changelog.js` needs `make changelog-validate` plus `npm --prefix unit-tests test`.
 - The static gates are not scoped per calculator — they cover the whole tree. The Node-side
   ones (lint/typecheck/i18n-validate/tsconfigs-check) take about 20 s together, so run
   `make lint typecheck` on any JS change even when the test scope is one calculator.

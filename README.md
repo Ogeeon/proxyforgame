@@ -57,6 +57,8 @@ npx playwright test --reporter=list
 ```
 
 ## Notes
+- `CHANGELOG.md` records every change; the bullets marked `<!-- site -->` are the ones published
+  to the changelog users see in the sidebar. `make changelog-validate` checks its structure.
 - Translations live in `www/locale/*.json` and are loaded per page via `Intl::getTranslations`.
 - AJAX calls use `www/ajax.php` with two-line responses (`<code>\n<payload>`, where `0` = success).
 - Calculators live under `www/ogame/calc/` (PHP controllers + `.tpl` templates + JS in `www/ogame/calc/js`).
