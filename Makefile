@@ -65,8 +65,9 @@ install: ## Install test dependencies and Playwright browsers
 serve: ## Serve www/ with the built-in PHP server on PORT, default 8000
 	"$(PHP)" -S localhost:$(PORT) -t www
 
-db-seed: ## Import schema.sql into the configured database
+db-seed: ## Import schema.sql and the test fixtures into the configured database
 	mysql -h$(DB_HOST) -u$(DB_USER) -p$(DB_PASS) $(DB_NAME) < schema.sql
+	mysql -h$(DB_HOST) -u$(DB_USER) -p$(DB_PASS) $(DB_NAME) < playwright-tests/fixtures/changelog-seed.sql
 
 ##@ Tests
 

@@ -50,7 +50,9 @@ Anything not in a calculator's file set, notably:
 - `www/ogame/calc/h_functions.php`, `www/ogame/calc/h_abox.php`
 - `www/ajax.php` and `www/api/*.inc.php` — the endpoint and its services; their own HTTP
   contract is covered by `playwright-tests/tests/api.spec.js`, which still does not narrow the
-  scope: every calculator talks to them
+  scope: every calculator talks to them. One of its tests wants a non-empty changelog, so the
+  database needs the rows `make db-seed` imports from `playwright-tests/fixtures/changelog-seed.sql` —
+  a database holding only `schema.sql` has those tables empty and the test fails
 - `www/Intl.php`, `www/langs.php`, `www/db.connect.inc.php`
 - `www/locale/*.json` — use `make check`, so the locale validator runs too
 - `playwright-tests/tests/base.js` — **note the path**, it sits in `tests/`, not the root
