@@ -1145,6 +1145,10 @@ CREATE TABLE population_data (
     universe SMALLINT(6) NOT NULL,
     timestamp BIGINT UNSIGNED NOT NULL,
     population JSON NOT NULL,
+    -- NULL on rows written before the active-only and all-players lists were
+    -- told apart; get_population.php has filled both since.
+    population_all JSON NULL DEFAULT NULL,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (country, universe)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
