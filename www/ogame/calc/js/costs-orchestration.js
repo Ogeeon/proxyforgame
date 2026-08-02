@@ -835,7 +835,7 @@ class CostsCalculator {
 
     // Parse into a buffer first; only apply once every research is complete
     const parsedRows = [];
-    for (const _ of rows) {
+    for (let row = 0; row < rows.length; row++) {
       if (p >= lines.length) break; // no name line left => incomplete
       p++; // research name line
       const cost = readColumn();
