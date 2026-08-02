@@ -55,7 +55,9 @@ function scriptsOf(tplPath) {
     const full = path.join(ROOT, f);
     return f.endsWith('.js')
       && fs.existsSync(full)
-      && /^\s*(?:const|let|var) options\b/m.test(fs.readFileSync(full, 'utf8'));
+      // `[ \t]` rather than `\s`: with the /m flag `\s*` also eats newlines and
+      // overlaps with the `^` anchor, which backtracks quadratically (S8786).
+      && /^[ \t]*(?:const|let|var) options\b/m.test(fs.readFileSync(full, 'utf8'));
   });
   if (!declaresOptions) files.push(OPTIONS_AMBIENT);
 
