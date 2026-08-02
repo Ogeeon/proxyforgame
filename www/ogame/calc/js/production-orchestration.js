@@ -1005,8 +1005,6 @@ function _applyTheme() {
 	loadFromCookie('theme', theme);
 	if (typeof toggleLightBS === 'function') {
 		toggleLightBS(theme.value === 'light');
-	} else if (typeof toggleLight === 'function') {
-		toggleLight(theme.value === 'light');
 	}
 }
 

@@ -551,32 +551,6 @@ function themeCheckbox() {
 }
 
 /**
- * One of the two theme <link> stylesheets, toggled through its disabled flag.
- * @param {string} id - 'light-theme' or 'dark-theme'
- * @returns {HTMLLinkElement}
- */
-function themeStylesheet(id) {
-	return /** @type {HTMLLinkElement} */ (document.getElementById(id));
-}
-
-function toggleLight(on) {
-	const theme = { value: 'light' };
-	if (on) {
-		themeCheckbox().checked = true;		
-		themeStylesheet('dark-theme').disabled = true;
-		themeStylesheet('light-theme').disabled = false;
-		theme.value = 'light';
-		saveToCookie("theme", theme);
-	} else {
-		themeCheckbox().checked = false;
-		themeStylesheet('dark-theme').disabled = false;		
-		themeStylesheet('light-theme').disabled = true;
-		theme.value = 'dark';
-		saveToCookie("theme", theme);
-	}	
-}
-
-/**
  * Replaces the decimal separator in the string representation of the given number with the one set in the settings
  */
 function localizeFloat(input, decimalDigits) {
