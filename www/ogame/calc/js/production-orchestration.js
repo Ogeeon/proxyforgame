@@ -100,25 +100,41 @@ function updateParams() {
 	updateAllPlnTab();
 }
 
+// The three panels below take `curr` (what is on the planet now) and `need`
+// (what the user is saving up for) as [metal, crystal, deuterium] triples, the
+// shape `production` already had. Naming the six resources one parameter each
+// is what pushed updateStorageBlinkFlags past the parameter limit (S107).
+
 // "How much will accumulate" panel
-function renderAccumWhat(tab, currMet, currCrys, currDeut, totalHours, production, deutAccum) {
+function renderAccumWhat(tab, curr, totalHours, production, deutAccum) {
+	const met = Math.round(curr[0] + totalHours * production[0]);
+	const crys = Math.round(curr[1] + totalHours * production[1]);
 	if (tab === 'one') {
-		setHtml('#' + tab + 'pln-accumwhat-met', numToOGame(Math.min(options.metStorageCap, Math.round(currMet + totalHours * production[0]))));
-		setHtml('#' + tab + 'pln-accumwhat-crys', numToOGame(Math.min(options.crysStorageCap, Math.round(currCrys + totalHours * production[1]))));
+		setHtml('#' + tab + 'pln-accumwhat-met', numToOGame(Math.min(options.metStorageCap, met)));
+		setHtml('#' + tab + 'pln-accumwhat-crys', numToOGame(Math.min(options.crysStorageCap, crys)));
 		setHtml('#' + tab + 'pln-accumwhat-deut', numToOGame(Math.min(options.deutStorageCap, deutAccum)));
 	} else {
-		setHtml('#' + tab + 'pln-accumwhat-met', numToOGame(Math.round(currMet + totalHours * production[0])));
-		setHtml('#' + tab + 'pln-accumwhat-crys', numToOGame(Math.round(currCrys + totalHours * production[1])));
+		setHtml('#' + tab + 'pln-accumwhat-met', numToOGame(met));
+		setHtml('#' + tab + 'pln-accumwhat-crys', numToOGame(crys));
 		setHtml('#' + tab + 'pln-accumwhat-deut', numToOGame(deutAccum));
 	}
 }
 
 // If something is exceeded, mark that the specific storage's max capacity needs to blink, and reset the blink counter so the process starts over
-function updateStorageBlinkFlags(currMet, currCrys, totalHours, production, deutAccum, needMet, needCrys, needDeut) {
-	options.storagesToBlink[0] = options.metStorageCap < Math.round(currMet + totalHours * production[0]) || needMet > options.metStorageCap ? 1 : 0;
-	options.storagesToBlink[1] = options.crysStorageCap < Math.round(currCrys + totalHours * production[1]) || needCrys > options.crysStorageCap ? 1 : 0;
-	options.storagesToBlink[2] = options.deutStorageCap < deutAccum || needDeut > options.deutStorageCap ? 1 : 0;
-	if (options.storagesToBlink[0] === 1 || options.storagesToBlink[1] === 1 || options.storagesToBlink[2] === 1) {
+function updateStorageBlinkFlags(curr, totalHours, production, deutAccum, need) {
+	const accum = [
+		Math.round(curr[0] + totalHours * production[0]),
+		Math.round(curr[1] + totalHours * production[1]),
+		deutAccum
+	];
+	const caps = [options.metStorageCap, options.crysStorageCap, options.deutStorageCap];
+	let anyExceeded = false;
+	for (let res = 0; res < 3; res++) {
+		const exceeded = caps[res] < accum[res] || need[res] > caps[res];
+		options.storagesToBlink[res] = exceeded ? 1 : 0;
+		anyExceeded = anyExceeded || exceeded;
+	}
+	if (anyExceeded) {
 		options.storageBlinkCount = 0;
 		if (!options.storagesBlinking) {
 			options.storagesBlinking = true;
@@ -128,21 +144,21 @@ function updateStorageBlinkFlags(currMet, currCrys, totalHours, production, deut
 }
 
 // calculate the time in hours it takes to accumulate the required amount of each resource and take the maximum of these intervals
-function timeUntilResourcesAccumulate(currMet, currCrys, currDeut, production, needMet, needCrys, needDeut) {
+function timeUntilResourcesAccumulate(curr, production, need) {
 	let t = 0;
-	if (needMet > currMet) {
-		t = (needMet - currMet) / production[0];
+	if (need[0] > curr[0]) {
+		t = (need[0] - curr[0]) / production[0];
 	}
-	if (needCrys > currCrys) {
-		t = Math.max(t, (needCrys - currCrys) / production[1]);
+	if (need[1] > curr[1]) {
+		t = Math.max(t, (need[1] - curr[1]) / production[1]);
 	}
-	if (needDeut > currDeut) {
+	if (need[2] > curr[2]) {
 		if (production[2] <= 0) { // there are two possible reasons production is negative or zero:
 			t = options.prm.oPPP[2][0] === 0 // there is no synthesizer at all
 				? Number.POSITIVE_INFINITY
 				: Number.NEGATIVE_INFINITY; // ...or the fusion reactor takes more than is produced
 		} else {
-			t = Math.max(t, (needDeut - currDeut) / production[2]);
+			t = Math.max(t, (need[2] - curr[2]) / production[2]);
 		}
 	}
 	return t;
@@ -163,27 +179,31 @@ function renderAccumWhen(tab, t) {
 function updateAccumulation(tab, production) {
 	if (tab !== 'one' && tab !== 'all')
 		return;
-	let currMet = getInputNumber($('#' + tab + 'pln-curr-met'));
-	let currCrys = getInputNumber($('#' + tab + 'pln-curr-crys'));
-	let currDeut = getInputNumber($('#' + tab + 'pln-curr-deut'));
+	const curr = [
+		getInputNumber($('#' + tab + 'pln-curr-met')),
+		getInputNumber($('#' + tab + 'pln-curr-crys')),
+		getInputNumber($('#' + tab + 'pln-curr-deut'))
+	];
 	let days = getInputNumber($('#' + tab + 'pln-accumwhat-d'));
 	let hours = getInputNumber($('#' + tab + 'pln-accumwhat-h'));
 	let minutes = getInputNumber($('#' + tab + 'pln-accumwhat-m'));
 	let totalHours = days * 24 + hours + minutes / 60.0;
 
-	let deutAccum = Math.round(currDeut + totalHours * production[2]);
+	let deutAccum = Math.round(curr[2] + totalHours * production[2]);
 	if (deutAccum < 0)
 		deutAccum = 0;
 
-	renderAccumWhat(tab, currMet, currCrys, currDeut, totalHours, production, deutAccum);
+	renderAccumWhat(tab, curr, totalHours, production, deutAccum);
 
-	let needMet = getInputNumber($('#' + tab + 'pln-accumwhen-met'));
-	let needCrys = getInputNumber($('#' + tab + 'pln-accumwhen-crys'));
-	let needDeut = getInputNumber($('#' + tab + 'pln-accumwhen-deut'));
+	const need = [
+		getInputNumber($('#' + tab + 'pln-accumwhen-met')),
+		getInputNumber($('#' + tab + 'pln-accumwhen-crys')),
+		getInputNumber($('#' + tab + 'pln-accumwhen-deut'))
+	];
 
-	updateStorageBlinkFlags(currMet, currCrys, totalHours, production, deutAccum, needMet, needCrys, needDeut);
+	updateStorageBlinkFlags(curr, totalHours, production, deutAccum, need);
 
-	let t = timeUntilResourcesAccumulate(currMet, currCrys, currDeut, production, needMet, needCrys, needDeut);
+	let t = timeUntilResourcesAccumulate(curr, production, need);
 	renderAccumWhen(tab, t);
 }
 
