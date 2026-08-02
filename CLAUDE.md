@@ -148,7 +148,9 @@ a collector/renderer/orchestration trio. To create a new calculator use the
 | `www/langs.php` | Language detection from URL |
 | `www/Intl.php` | Translation loader |
 | `www/db.connect.inc.php` | Database connection helpers |
-| `www/ogame/calc/js/common.js` | Shared calculator JS logic |
+| `www/ogame/calc/js/ogame-production.js` | Production rates, consumption, storage capacity (costs, production) |
+| `www/ogame/calc/js/ogame-costs.js` | Classic build cost/time, demolition, halving cost (costs, production, queue, terraformer, lfcosts) |
+| `www/ogame/calc/js/ogame-lifeform.js` | Life Form cost/time (lfcosts only) |
 | `www/ogame/calc/js/dom-utils.js` | Native DOM helpers (the jQuery replacement) |
 | `www/ogame/calc/js/own-api.js` | Normalizes OGame's API 2 export (`flight`, `expeditions`) |
 

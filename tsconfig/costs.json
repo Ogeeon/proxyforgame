@@ -4,7 +4,8 @@
   "extends": "../tsconfig.base.json",
   "files": [
     "../www/js/utils.js",
-    "../www/ogame/calc/js/common.js",
+    "../www/ogame/calc/js/ogame-production.js",
+    "../www/ogame/calc/js/ogame-costs.js",
     "../www/ogame/calc/js/dom-utils.js",
     "../www/ogame/calc/js/costs-core.js",
     "../www/ogame/calc/js/costs-data-collector.js",

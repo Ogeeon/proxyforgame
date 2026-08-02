@@ -28,7 +28,7 @@
 
   <!-- Utility libraries -->
   <script src="/js/utils.js?v=<?php echo filemtime($pfgPath.'/js/utils.js'); ?>"></script>
-  <script src="/ogame/calc/js/common.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/common.js'); ?>"></script>
+  <script src="/ogame/calc/js/ogame-costs.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/ogame-costs.js'); ?>"></script>
 
   <!-- DOM utilities (jQuery replacement) -->
   <script src="/ogame/calc/js/dom-utils.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/dom-utils.js'); ?>"></script>

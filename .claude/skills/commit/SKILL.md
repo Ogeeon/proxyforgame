@@ -56,8 +56,8 @@ no trailing period.
 
 - **Types**: `feat`, `fix`, `refactor`, `style`, `test`, `docs`, `chore`
 - **Scope**: the calculator (`flight`, `moon`, `lfcosts`, `production`, `queue`, …), or the
-  area for cross-cutting files. Use `shared` for `ajax.php`, `common.js`, `dom-utils.js`,
-  `Intl.php` and friends. Reserve `claude` for CLAUDE.md and agent tooling.
+  area for cross-cutting files. Use `shared` for `ajax.php`, `ogame-costs.js` and the other
+  `ogame-*.js` formula files, `dom-utils.js`, `Intl.php` and friends. Reserve `claude` for CLAUDE.md and agent tooling.
 
 Commits before 2026-07-22 use an older plain-sentence style — ignore them, follow this rule.
 

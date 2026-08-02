@@ -7,9 +7,9 @@ const { describe, it } = require('node:test');
 const { load } = require('./load');
 const { expect } = require('./expect');
 
-// common.js supplies getBuildCostLF/getBuildEnergyCostLF; utils.js supplies dropFraction().
+// ogame-lifeform.js supplies getBuildCostLF/getBuildEnergyCostLF; utils.js supplies dropFraction().
 const { LfCalculator } = load(
-    ['js/utils.js', 'ogame/calc/js/common.js', 'ogame/calc/js/lfcosts-core.js'],
+    ['js/utils.js', 'ogame/calc/js/ogame-lifeform.js', 'ogame/calc/js/lfcosts-core.js'],
     ['LfCalculator'],
 );
 

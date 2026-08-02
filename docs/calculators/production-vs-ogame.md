@@ -136,14 +136,14 @@ values where `floor` and `round` disagree, and OGame matched `floor` in all eigh
 
 Sources of the rounding:
 
-* `js/common.js` — `getProductionRateSplit`, rows 2/3/4/6/7/8 (plasma, booster,
+* `js/ogame-production.js` — `getProductionRateSplit`, rows 2/3/4/6/7/8 (plasma, booster,
   geologist, all officers, player class, alliance class) use `Math.round`.
 * `js/production-core.js` — life form tech bonus and per-building bonus rows use
   `Math.round`.
 
-Not changed yet: `common.js` is shared by every calculator and the Playwright
-expectations encode the current numbers, so switching to `Math.floor` needs a
-coordinated pass over the tests.
+Not changed yet: `ogame-production.js` is shared by the costs and production calculators
+and the Playwright expectations encode the current numbers, so switching to `Math.floor`
+needs a coordinated pass over the tests.
 
 ## 3. Level-1 buildings draw base energy, without the growth coefficient — OPEN
 

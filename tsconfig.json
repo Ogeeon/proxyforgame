@@ -1,15 +1,18 @@
 {
   // Editor entry point. The real browser-side checking is done by the
   // per-calculator projects in tsconfig/, one per page - see
-  // scripts/generate-tsconfigs.js for why. This project covers only the files
-  // every page loads, so opening one of them in an editor still gets the right
-  // compiler options; a calculator-specific file is checked by its own project
-  // when `npm run typecheck` runs.
+  // scripts/generate-tsconfigs.js for why. This project covers the cross-page
+  // files - the site-wide helpers and the OGame formula layer - so opening one
+  // of them in an editor still gets the right compiler options; a
+  // calculator-specific file is checked by its own project when
+  // `npm run typecheck` runs.
   "extends": "./tsconfig.base.json",
   "files": [
     "www/js/utils.js",
     "www/js/sidebar_bs.js",
-    "www/ogame/calc/js/common.js",
+    "www/ogame/calc/js/ogame-production.js",
+    "www/ogame/calc/js/ogame-costs.js",
+    "www/ogame/calc/js/ogame-lifeform.js",
     "www/ogame/calc/js/dom-utils.js",
     "www/ogame/calc/js/globals.d.ts",
     "www/ogame/calc/js/options-global.d.ts"

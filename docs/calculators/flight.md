@@ -22,7 +22,7 @@
 | `www/ogame/calc/js/flight-core.js` | 380 |
 | `www/ogame/calc/js/flight-data-collector.js` | 233 |
 | `www/ogame/calc/js/flight-renderer.js` | 257 |
-| `www/ogame/calc/js/flight-orchestration.js` | 2043 |
+| `www/ogame/calc/js/flight-orchestration.js` | 2077 |
 
 The page also loads these shared scripts:
 

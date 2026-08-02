@@ -43,7 +43,8 @@ skip that step. Check for the file rather than trusting this list.
 
 Anything not in a calculator's file set, notably:
 
-- `www/ogame/calc/js/common.js` — **note the path**; there is no `www/ogame/common.js`
+- `www/ogame/calc/js/ogame-production.js`, `ogame-costs.js`, `ogame-lifeform.js` — the game
+  formulas; **note the path**, they sit in `www/ogame/calc/js/`, not in `www/ogame/`
 - `www/ogame/calc/js/dom-utils.js`
 - `www/ogame/calc/js/own-api.js` — the API 2 import, read by `flight` and `expeditions`
 - `www/ogame/calc/h_functions.php`, `www/ogame/calc/h_abox.php`

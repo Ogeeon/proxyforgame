@@ -22,7 +22,7 @@
 | `www/ogame/calc/js/graviton-core.js` | 211 |
 | `www/ogame/calc/js/graviton-data-collector.js` | 68 |
 | `www/ogame/calc/js/graviton-renderer.js` | 105 |
-| `www/ogame/calc/js/graviton-orchestration.js` | 287 |
+| `www/ogame/calc/js/graviton-orchestration.js` | 285 |
 
 The page also loads these shared scripts:
 

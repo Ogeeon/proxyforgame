@@ -19,15 +19,15 @@
 
 | File | Lines |
 |------|-------|
-| `www/ogame/calc/js/queue-core.js` | 120 |
-| `www/ogame/calc/js/queue-data-collector.js` | 95 |
+| `www/ogame/calc/js/queue-core.js` | 128 |
+| `www/ogame/calc/js/queue-data-collector.js` | 87 |
 | `www/ogame/calc/js/queue-renderer.js` | 182 |
-| `www/ogame/calc/js/queue-orchestration.js` | 549 |
+| `www/ogame/calc/js/queue-orchestration.js` | 547 |
 
 The page also loads these shared scripts:
 
 - `www/js/utils.js`
-- `www/ogame/calc/js/common.js`
+- `www/ogame/calc/js/ogame-costs.js`
 - `www/ogame/calc/js/dom-utils.js`
 
 ## Configuration Options

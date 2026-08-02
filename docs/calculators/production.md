@@ -19,15 +19,16 @@
 
 | File | Lines |
 |------|-------|
-| `www/ogame/calc/js/production-core.js` | 453 |
+| `www/ogame/calc/js/production-core.js` | 473 |
 | `www/ogame/calc/js/production-data-collector.js` | 133 |
 | `www/ogame/calc/js/production-renderer.js` | 215 |
-| `www/ogame/calc/js/production-orchestration.js` | 1123 |
+| `www/ogame/calc/js/production-orchestration.js` | 1141 |
 
 The page also loads these shared scripts:
 
 - `www/js/utils.js`
-- `www/ogame/calc/js/common.js`
+- `www/ogame/calc/js/ogame-production.js`
+- `www/ogame/calc/js/ogame-costs.js`
 - `www/ogame/calc/js/dom-utils.js`
 
 ## Configuration Options

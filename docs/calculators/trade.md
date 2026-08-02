@@ -20,7 +20,7 @@
 | File | Lines |
 |------|-------|
 | `www/ogame/calc/js/trade-core.js` | 410 |
-| `www/ogame/calc/js/trade.js` | 953 |
+| `www/ogame/calc/js/trade.js` | 963 |
 
 The page also loads these shared scripts:
 

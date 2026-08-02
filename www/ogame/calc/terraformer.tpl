@@ -28,7 +28,7 @@
 
   <!-- Utility libraries and calculator modules -->
   <script src="/js/utils.js?v=<?php echo filemtime($pfgPath.'/js/utils.js'); ?>"></script>
-  <script src="/ogame/calc/js/common.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/common.js'); ?>"></script>
+  <script src="/ogame/calc/js/ogame-costs.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/ogame-costs.js'); ?>"></script>
   <script src="/ogame/calc/js/dom-utils.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/dom-utils.js'); ?>"></script>
   <script src="/ogame/calc/js/terraformer-core.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/terraformer-core.js'); ?>"></script>
   <script src="/ogame/calc/js/terraformer-data-collector.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/terraformer-data-collector.js'); ?>"></script>

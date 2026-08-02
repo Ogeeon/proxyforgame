@@ -22,7 +22,7 @@
 | `www/ogame/calc/js/expeditions-core.js` | 223 |
 | `www/ogame/calc/js/expeditions-data-collector.js` | 59 |
 | `www/ogame/calc/js/expeditions-renderer.js` | 75 |
-| `www/ogame/calc/js/expeditions-orchestration.js` | 382 |
+| `www/ogame/calc/js/expeditions-orchestration.js` | 381 |
 
 The page also loads these shared scripts:
 

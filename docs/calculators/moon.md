@@ -22,7 +22,7 @@
 | `www/ogame/calc/js/moon-core.js` | 443 |
 | `www/ogame/calc/js/moon-data-collector.js` | 57 |
 | `www/ogame/calc/js/moon-renderer.js` | 152 |
-| `www/ogame/calc/js/moon-orchestration.js` | 302 |
+| `www/ogame/calc/js/moon-orchestration.js` | 300 |
 
 The page also loads these shared scripts:
 

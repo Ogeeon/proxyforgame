@@ -8,9 +8,9 @@ const { describe, it } = require('node:test');
 const { load } = require('./load');
 const { expect } = require('./expect');
 
-// utils.js supplies dropFraction(); common.js supplies getBuildCost_C/getBuildTime_C.
+// utils.js supplies dropFraction(); ogame-costs.js supplies getBuildCost_C/getBuildTime_C.
 const { TerraformerCalculator, getBuildEnergyCost_C } = load(
-    ['js/utils.js', 'ogame/calc/js/common.js', 'ogame/calc/js/terraformer-core.js'],
+    ['js/utils.js', 'ogame/calc/js/ogame-costs.js', 'ogame/calc/js/terraformer-core.js'],
     ['TerraformerCalculator', 'getBuildEnergyCost_C'],
 );
 

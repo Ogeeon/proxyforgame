@@ -20,14 +20,15 @@
 | File | Lines |
 |------|-------|
 | `www/ogame/calc/js/costs-core.js` | 821 |
-| `www/ogame/calc/js/costs-data-collector.js` | 759 |
-| `www/ogame/calc/js/costs-renderer.js` | 688 |
-| `www/ogame/calc/js/costs-orchestration.js` | 2081 |
+| `www/ogame/calc/js/costs-data-collector.js` | 760 |
+| `www/ogame/calc/js/costs-renderer.js` | 691 |
+| `www/ogame/calc/js/costs-orchestration.js` | 2089 |
 
 The page also loads these shared scripts:
 
 - `www/js/utils.js`
-- `www/ogame/calc/js/common.js`
+- `www/ogame/calc/js/ogame-production.js`
+- `www/ogame/calc/js/ogame-costs.js`
 - `www/ogame/calc/js/dom-utils.js`
 
 ## Usage

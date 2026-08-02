@@ -19,15 +19,15 @@
 
 | File | Lines |
 |------|-------|
-| `www/ogame/calc/js/terraformer-core.js` | 225 |
+| `www/ogame/calc/js/terraformer-core.js` | 231 |
 | `www/ogame/calc/js/terraformer-data-collector.js` | 68 |
 | `www/ogame/calc/js/terraformer-renderer.js` | 107 |
-| `www/ogame/calc/js/terraformer-orchestration.js` | 323 |
+| `www/ogame/calc/js/terraformer-orchestration.js` | 321 |
 
 The page also loads these shared scripts:
 
 - `www/js/utils.js`
-- `www/ogame/calc/js/common.js`
+- `www/ogame/calc/js/ogame-costs.js`
 - `www/ogame/calc/js/dom-utils.js`
 
 ## Configuration Options
