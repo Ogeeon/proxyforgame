@@ -311,10 +311,10 @@ const show = (selector) => {
   const el = $(selector);
   if (!el) return;
 
-  // For Bootstrap modals
+  // For Bootstrap modals. getOrCreateInstance, not `new´: a second instance
+  // would take the element over while the first one keeps its listeners.
   if (el.classList.contains('modal')) {
-    const modal = new bootstrap.Modal(el);
-    modal.show();
+    bootstrap.Modal.getOrCreateInstance(el).show();
   } else {
     el.style.display = '';
   }

@@ -85,7 +85,13 @@ function parseOwnApi(text) {
   };
 }
 
-/** True for a plain object: the export never uses arrays where we read it. */
+/**
+ * True for a plain object: the export never uses arrays where we read it.
+ *
+ * @param {unknown} value
+ * @returns {value is Record<string, unknown>} Narrowed for the callers, which
+ *   walk the block with Object.entries right after the check.
+ */
 function isOwnApiObject(value) {
   return value !== null && typeof value === 'object' && !Array.isArray(value);
 }
