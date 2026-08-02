@@ -2004,9 +2004,17 @@ function getFlightTimeStr(seconds) {
     return `${d} ${h}:${m}:${s}`;
 }
 
-/** Strip any HTML tags from a user-entered universe/fleet name. */
+/**
+ * Strip any HTML tags from a user-entered universe/fleet name.
+ *
+ * Two passes: whole tags first, then any `<` left over. The name is
+ * concatenated into innerHTML, and an unterminated `<img src=x onerror=...`
+ * used to pass through the single pass untouched, to be completed by whatever
+ * markup followed it. Dropping the bare `<` keeps the rest of a benign name
+ * such as `Fleet <3` instead of truncating it there.
+ */
 function stripHTMLTags(input) {
-    return input.replace(/<[^>]+>/g, '');
+    return input.replace(/<[^<>]*>/g, '').replaceAll('<', '');
 }
 
 // Maps OGame shipyard numeric IDs to the ship count input ids. Shared by the SR
