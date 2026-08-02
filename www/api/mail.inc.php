@@ -3,51 +3,57 @@
 
   require_once __DIR__ . '/http.inc.php';
 
-  function sendReport() {
-    if (($wrong = getVar('wrong', 'str')) !== false && ($right = getVar('right', 'str')) !== false) {
-      if ($wrong == '' && $right == '') {
-        die("4\nempty");
-      }
-      if ($wrong === $right) {
-        die("5\nequal");
-      }
-      if ($wrong == '') {
-        die("6\nempty");
-      }
-      if ($right == '') {
-        die("7\nempty");
-      }
-      $to  = 'proxyforgame@gmail.com';
-      $subject = 'New feedback from ProxyForGame site';
-      $message = "Script: \"". getVar('url', 'str')."\"\n";
-      $message .= "Wrong text: \"".getVar('wrong', 'str')."\"\n";
-      $message .= "Right text: \"".getVar('right', 'str')."\"\n";
-      if (socketmail($to, $subject, $message)) {
-        die("0\ngood");
-      } else {
-        die("99\nfailed");
-      }
+  const MAIL_RECIPIENT = 'proxyforgame@gmail.com';
+
+  function apiReport($in) {
+    $wrong = requireParam($in, 'wrong', 'str');
+    $right = requireParam($in, 'right', 'str');
+
+    // Four ways of getting the form wrong, each with its own explanation on
+    // the client - hence four codes rather than one validation_failed.
+    if ($wrong === '' && $right === '') {
+      throw new ApiError(422, 'both_empty', 'Both fields are empty');
     }
-    die(EMPTY_PARAMS_RESPONSE);
+    if ($wrong === $right) {
+      throw new ApiError(422, 'texts_equal', 'wrong and right are identical');
+    }
+    if ($wrong === '') {
+      throw new ApiError(422, 'wrong_empty', 'The misspelled text is empty');
+    }
+    if ($right === '') {
+      throw new ApiError(422, 'right_empty', 'The corrected text is empty');
+    }
+
+    $url = getParam($in, 'url', 'str');
+    $message = "Script: \"" . ($url === null ? '' : $url) . "\"\n";
+    $message .= "Wrong text: \"$wrong\"\n";
+    $message .= "Right text: \"$right\"\n";
+
+    sendOrFail('New feedback from ProxyForGame site', $message);
+    return array('sent' => true);
   }
 
-  function sendEmail() {
-    if (($emailSubject = getVar('subject', 'str')) !== false && ($emailBody = getVar('body', 'str')) !== false) {
-      if ($emailSubject == '' && $emailBody == '') {
-        die("4\nempty");
-      }
-      $to  = 'proxyforgame@gmail.com';
-      $subject = 'New email from ProxyForGame site';
-      $message = "Sender: \"".(getVar('address', 'str')==''?'(unspecified)':getVar('address', 'str'))."\"\n";
-      $message .= "Subject: \"".$emailSubject."\"\n";
-      $message .= "Body: \"".$emailBody."\"\n";
-      if (socketmail($to, $subject, $message)) {
-        die("0\ngood");
-      } else {
-        die("99\nfailed");
-      }
+  function apiEmail($in) {
+    $emailSubject = requireParam($in, 'subject', 'str');
+    $emailBody = requireParam($in, 'body', 'str');
+
+    if ($emailSubject === '' && $emailBody === '') {
+      throw new ApiError(422, 'nothing_to_send', 'Both subject and body are empty');
     }
-    die(EMPTY_PARAMS_RESPONSE);
+
+    $address = getParam($in, 'address', 'str');
+    $message = "Sender: \"" . ($address === null || $address === '' ? '(unspecified)' : $address) . "\"\n";
+    $message .= "Subject: \"$emailSubject\"\n";
+    $message .= "Body: \"$emailBody\"\n";
+
+    sendOrFail('New email from ProxyForGame site', $message);
+    return array('sent' => true);
+  }
+
+  function sendOrFail($subject, $message) {
+    if (!socketmail(MAIL_RECIPIENT, $subject, $message)) {
+      throw new ApiError(502, 'mail_failed', 'Could not hand the message to the SMTP server');
+    }
   }
 
   function socketmail($to, $subject, $message) {
@@ -60,7 +66,10 @@
     $server = "ssl://smtp.gmail.com";
     $socket = fsockopen($server, 465, $errno, $errstr, 30);
     if (!$socket) {
-      die("99\Server $server. Connection failed: $errno, $errstr");
+      // This used to die() with a hand-rolled status line, and a broken one at
+      // that, which left the dialog on the client stuck with every div hidden.
+      error_log("socketmail: $server connection failed: $errno, $errstr");
+      return false;
     }
     fputs($socket, "HELO proxyforgame.com\r\n"); fgets($socket, 256);
     fputs($socket, 'AUTH LOGIN'."\r\n"); fgets($socket, 256);

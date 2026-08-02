@@ -23,6 +23,7 @@
   <link type="text/css" href="/ogame/calc/css/trade.css?v=<?php echo filemtime($pfgPath.'/ogame/calc/css/trade.css'); ?>" rel="stylesheet">
 
   <script src="/js/utils.js?v=<?php echo filemtime($pfgPath.'/js/utils.js'); ?>"></script>
+  <script src="/js/api-client.js?v=<?php echo filemtime($pfgPath.'/js/api-client.js'); ?>"></script>
   <script src="/ogame/calc/js/dom-utils.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/dom-utils.js'); ?>"></script>
   <script src="/ogame/calc/js/trade-core.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/trade-core.js'); ?>"></script>
   <script src="/ogame/calc/js/trade.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/trade.js'); ?>"></script>

@@ -241,15 +241,13 @@
       "cancel": "Annulla",
       "correct": "Risolvere",
       "sending-progress": "L'invio del rapporto...",
-      "msg-0": "Il tuo rapporto è stato inviato. Grazie.",
-      "msg-1": "Error in request: no service.",
-      "msg-2": "Error in request: unknown service.",
-      "msg-3": "Error in request: obligatory params missing.",
-      "msg-4": "Entrambi i campi sono vuoti. Si prega di specificare il testo scritto male e la tua versione di esso.",
-      "msg-5": "Il contenuto del campo [Parole giuste] è identico al contenuto del campo [Parole sbagliate]. Si prega di specificare la versione del testo scritto male.",
-      "msg-6": "Il campo [Parole sbagliate] è vuoto. Si prega di specificare il parole sbagliate.",
-      "msg-7": "Il campo [Parole giuste] è vuoto. Si prega di specificare la versione del testo scritto male.",
-      "msg-99": "Email sending failed."
+      "msg-sent": "Il tuo rapporto è stato inviato. Grazie.",
+      "msg-request_error": "Error in request. Please try again later.",
+      "msg-both_empty": "Entrambi i campi sono vuoti. Si prega di specificare il testo scritto male e la tua versione di esso.",
+      "msg-texts_equal": "Il contenuto del campo [Parole giuste] è identico al contenuto del campo [Parole sbagliate]. Si prega di specificare la versione del testo scritto male.",
+      "msg-wrong_empty": "Il campo [Parole sbagliate] è vuoto. Si prega di specificare il parole sbagliate.",
+      "msg-right_empty": "Il campo [Parole giuste] è vuoto. Si prega di specificare la versione del testo scritto male.",
+      "msg-mail_failed": "Email sending failed."
     },
     "emailStrings": {
       "title": "Invio di una e-mail",
@@ -260,12 +258,10 @@
       "cancel": "Annulla",
       "correct": "Risolvere",
       "sending-progress": "Trasmissione del messaggio...",
-      "msg-0": "Il tuo messaggio è stato inviato. Grazie.",
-      "msg-1": "Error in request: no service.",
-      "msg-2": "Error in request: unknown service.",
-      "msg-3": "Error in request: obligatory params missing.",
-      "msg-4": "Non c'è nulla da inviare ... Si prega di compilare almeno uno dei campi [Soggetto] o [Corpo del messaggio].",
-      "msg-99": "Email sending failed."
+      "msg-sent": "Il tuo messaggio è stato inviato. Grazie.",
+      "msg-request_error": "Error in request. Please try again later.",
+      "msg-nothing_to_send": "Non c'è nulla da inviare ... Si prega di compilare almeno uno dei campi [Soggetto] o [Corpo del messaggio].",
+      "msg-mail_failed": "Email sending failed."
     },
     "donateStrings": {
       "header": "Sostieni questo progetto",

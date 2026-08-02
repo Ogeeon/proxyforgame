@@ -241,15 +241,13 @@
       "cancel": "Zrušiť",
       "correct": "Opravím to",
       "sending-progress": "Odosielanie Vašej správy...",
-      "msg-0": "Vaša správa bola odoslaná. Ďakujeme.",
-      "msg-1": "Error in request: no service.",
-      "msg-2": "Error in request: unknown service.",
-      "msg-3": "Error in request: obligatory params missing.",
-      "msg-4": "Obe polia sú prázdne. Prosím uveďte nesprávny text a vašu opravenú verziu.",
-      "msg-5": "Obsah poľa [Opravený text] je zhodný s obsahom poľa [Nesprávny text]. Prosím uveďte vašu verziu nesprávneho textu.",
-      "msg-6": "Pole [Nesprávny text] je prázdne. Prosím uveďte nesprávny text.",
-      "msg-7": "Pole [Opravený text] je prázdne. Prosím uveďte vašu verziu opraveného textu.",
-      "msg-99": "Report sending failed."
+      "msg-sent": "Vaša správa bola odoslaná. Ďakujeme.",
+      "msg-request_error": "Error in request. Please try again later.",
+      "msg-both_empty": "Obe polia sú prázdne. Prosím uveďte nesprávny text a vašu opravenú verziu.",
+      "msg-texts_equal": "Obsah poľa [Opravený text] je zhodný s obsahom poľa [Nesprávny text]. Prosím uveďte vašu verziu nesprávneho textu.",
+      "msg-wrong_empty": "Pole [Nesprávny text] je prázdne. Prosím uveďte nesprávny text.",
+      "msg-right_empty": "Pole [Opravený text] je prázdne. Prosím uveďte vašu verziu opraveného textu.",
+      "msg-mail_failed": "Report sending failed."
     },
     "emailStrings": {
       "title": "Odosielanie e-mailu",
@@ -260,12 +258,10 @@
       "cancel": "Zrušiť",
       "correct": "Opravím to",
       "sending-progress": "Odosielanie Vašej správy...",
-      "msg-0": "Vaša správa bola odoslaná. Ďakujeme.",
-      "msg-1": "Error in request: no service.",
-      "msg-2": "Error in request: unknown service.",
-      "msg-3": "Error in request: obligatory params missing.",
-      "msg-4": "Nie je tu čo odoslať... Prosím vyplňte aspoň jedno z polí [Predmet] or [Telo správy].",
-      "msg-99": "Email sending failed."
+      "msg-sent": "Vaša správa bola odoslaná. Ďakujeme.",
+      "msg-request_error": "Error in request. Please try again later.",
+      "msg-nothing_to_send": "Nie je tu čo odoslať... Prosím vyplňte aspoň jedno z polí [Predmet] or [Telo správy].",
+      "msg-mail_failed": "Email sending failed."
     },
     "donateStrings": {
       "header": "Podporte tento projekt",

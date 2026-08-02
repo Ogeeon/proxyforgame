@@ -25,6 +25,7 @@ release section; it is the source of truth for the other eleven translations.
 
 - Sidebar: the changelog now loads for Bosnian, which the language whitelist rejected outright.
 - `schema.sql`: `population_data` was missing `population_all` and `updated_at`, the two columns `get_population.php` has been writing and `ajax.php` reading, so on any database built from the schema the populated-systems query failed outright.
+- Sidebar: when a message could not be sent, the dialog went blank with both buttons hidden and no way to tell whether it had gone out; the misspelling and e-mail forms now say that sending failed and let you try again.
 - `schema.sql`: `change_descriptions.description` is `varchar(1024)`, the width production has.
 - Flight, Production: an unterminated `<` in a saved universe or planet name passed the tag stripper untouched and reached the page as markup; the name now keeps its text and loses the `<`.
 

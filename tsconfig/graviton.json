@@ -4,6 +4,7 @@
   "extends": "../tsconfig.base.json",
   "files": [
     "../www/js/utils.js",
+    "../www/js/api-client.js",
     "../www/ogame/calc/js/dom-utils.js",
     "../www/ogame/calc/js/graviton-core.js",
     "../www/ogame/calc/js/graviton-data-collector.js",

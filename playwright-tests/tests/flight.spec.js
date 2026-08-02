@@ -86,10 +86,14 @@ test.describe('Flight Calculator Page', () => {
 // Fixture: spy report code fs003df9447df01744296d867509e0ae7e60
 // Universe 1-en, coordinates 4:123:7, all fleet speeds x1
 const SR_CODE = 'fs003df9447df01744296d867509e0ae7e60';
+// What ajax.php hands the client: the report itself. The log server's
+// {"RESULT_CODE":1000,"RESULT_DATA":{...}} envelope is checked and dropped
+// server-side, so it never appears on this side of the wire.
 const SR_FIXTURE = readFileSync(
-    join(__dirname, '../fixtures/sr_fs003df9447df01744296d867509e0ae7e60.txt'),
+    join(__dirname, '../fixtures/sr_fs003df9447df01744296d867509e0ae7e60.json'),
     'utf-8'
 );
+const OGAME_API_ROUTE = /\/ajax\.php\?.*service=ogameAPI/;
 
 test.describe('Flight Calculator - Spy Report Import', () => {
     test.beforeEach(async ({ context, page }) => {
@@ -98,18 +102,11 @@ test.describe('Flight Calculator - Spy Report Import', () => {
         });
 
         // Intercept the ogameAPI ajax call and return the pre-recorded fixture
-        await page.route('/ajax.php', async (route, request) => {
-            const body = request.postData() ?? '';
-            if (body.includes('service=ogameAPI')) {
-                await route.fulfill({
-                    status: 200,
-                    contentType: 'text/plain',
-                    body: SR_FIXTURE,
-                });
-            } else {
-                await route.continue();
-            }
-        });
+        await page.route(OGAME_API_ROUTE, (route) => route.fulfill({
+            status: 200,
+            contentType: 'application/json',
+            body: SR_FIXTURE,
+        }));
 
         await page.goto('/ogame/calc/flight.php');
         await installCompat(page);
@@ -145,17 +142,11 @@ test.describe('Flight Calculator - Spy Report Import', () => {
         await page.route(/\/ajax\.php\?.*service=serverdata/, (route) => route.fulfill({ status: 503 }));
 
         // Routes registered later win, so this overrides the fixture route above
-        await page.route('/ajax.php', async (route, request) => {
-            if ((request.postData() ?? '').includes('service=ogameAPI')) {
-                await route.fulfill({
-                    status: 200,
-                    contentType: 'text/plain',
-                    body: SR_FIXTURE.replace('donutGalaxy":"1"', 'donutGalaxy":"0"'),
-                });
-            } else {
-                await route.continue();
-            }
-        });
+        await page.route(OGAME_API_ROUTE, (route) => route.fulfill({
+            status: 200,
+            contentType: 'application/json',
+            body: SR_FIXTURE.replace('donutGalaxy":"1"', 'donutGalaxy":"0"'),
+        }));
 
         await openParams(page);
         await page.locator('#api-code').fill(SR_CODE);
@@ -174,24 +165,20 @@ test.describe('Flight Calculator - Spy Report Import', () => {
         await openParams(page);
         const before = await page.locator('#departure-g').inputValue();
 
-        // ajax.php answers 5 when neither source could serve the report. The two
-        // success-looking payloads cover what reaches the client anyway when
-        // something between it and ajax.php answers instead (a 502 page, a proxy).
+        // The first two are what ajax.php itself answers when neither source
+        // could serve the report; the last two are what reaches the client when
+        // something between it and ajax.php answers instead - a proxy page, a
+        // gateway error, an upstream warning glued in front of the body.
         const badResponses = [
-            '5\nbad answer',
-            '0\n<br /><b>Warning</b>: gzuncompress(): data error\n{"RESULT_CODE":1000,"RESULT_DATA":false}',
-            '0\n{"RESULT_CODE":1000,"RESULT_DATA":false}',
+            { status: 502, body: JSON.stringify({ error: { code: 'sr_unusable', message: 'bad answer' } }) },
+            { status: 404, body: JSON.stringify({ error: { code: 'sr_not_found', message: 'code not found' } }) },
+            { status: 502, body: '<html><body>Bad Gateway</body></html>' },
+            { status: 200, body: '<br /><b>Warning</b>: gzuncompress(): data error' },
         ];
-        for (const body of badResponses) {
+        for (const { status, body } of badResponses) {
             alertMsg = '';
             // Routes registered later win, so this overrides the fixture route above
-            await page.route('/ajax.php', async (route, request) => {
-                if ((request.postData() ?? '').includes('service=ogameAPI')) {
-                    await route.fulfill({ status: 200, contentType: 'text/plain', body });
-                } else {
-                    await route.continue();
-                }
-            });
+            await page.route(OGAME_API_ROUTE, (route) => route.fulfill({ status, body }));
 
             await page.locator('#api-code').fill(SR_CODE);
             await page.locator('#api-get').click();

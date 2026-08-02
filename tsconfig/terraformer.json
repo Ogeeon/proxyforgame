@@ -4,6 +4,7 @@
   "extends": "../tsconfig.base.json",
   "files": [
     "../www/js/utils.js",
+    "../www/js/api-client.js",
     "../www/ogame/calc/js/ogame-costs.js",
     "../www/ogame/calc/js/dom-utils.js",
     "../www/ogame/calc/js/terraformer-core.js",

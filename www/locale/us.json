@@ -241,15 +241,13 @@
       "cancel": "Cancel",
       "correct": "Lets correct it",
       "sending-progress": "Sending your report...",
-      "msg-0": "Your report has been sent. Thank you.",
-      "msg-1": "Error in request: no service.",
-      "msg-2": "Error in request: unknown service.",
-      "msg-3": "Error in request: obligatory params missing.",
-      "msg-4": "Both fields are empty. Please specify the misspelled text and your version of it.",
-      "msg-5": "The content of field [Corrected text] is identical to the content of field [Misspelled text]. Please specify your version of the misspelled text.",
-      "msg-6": "The field [Misspelled text] is empty. Please specify the misspelled text.",
-      "msg-7": "The field [Corrected text] is empty. Please specify your version of the misspelled text.",
-      "msg-99": "Email sending failed."
+      "msg-sent": "Your report has been sent. Thank you.",
+      "msg-request_error": "Error in request. Please try again later.",
+      "msg-both_empty": "Both fields are empty. Please specify the misspelled text and your version of it.",
+      "msg-texts_equal": "The content of field [Corrected text] is identical to the content of field [Misspelled text]. Please specify your version of the misspelled text.",
+      "msg-wrong_empty": "The field [Misspelled text] is empty. Please specify the misspelled text.",
+      "msg-right_empty": "The field [Corrected text] is empty. Please specify your version of the misspelled text.",
+      "msg-mail_failed": "Email sending failed."
     },
     "emailStrings": {
       "title": "Sending an e-mail",
@@ -260,12 +258,10 @@
       "cancel": "Cancel",
       "correct": "Lets correct it",
       "sending-progress": "Sending your message...",
-      "msg-0": "Your message has been sent. Thank you.",
-      "msg-1": "Error in request: no service.",
-      "msg-2": "Error in request: unknown service.",
-      "msg-3": "Error in request: obligatory params missing.",
-      "msg-4": "There is nothing to send... Please fill in at least one on the fields [Subject] or [Message body].",
-      "msg-99": "Email sending failed."
+      "msg-sent": "Your message has been sent. Thank you.",
+      "msg-request_error": "Error in request. Please try again later.",
+      "msg-nothing_to_send": "There is nothing to send... Please fill in at least one on the fields [Subject] or [Message body].",
+      "msg-mail_failed": "Email sending failed."
     },
     "donateStrings": {
       "header": "Support this project",

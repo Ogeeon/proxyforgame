@@ -183,10 +183,9 @@
             <span class="visually-hidden">Loading...</span>
           </div>
         </div>
-        <?php for($i = 0; $i <= 7; $i++): ?>
-        <div id="report-err-<?=$i?>" class="alert d-none"><p><?=$loc['reportStrings']['msg-'.$i]?></p></div>
-        <?php endfor; ?>
-        <div id="report-err-99" class="alert d-none"></div>
+        <?php foreach(array('sent', 'both_empty', 'texts_equal', 'wrong_empty', 'right_empty', 'mail_failed', 'request_error') as $code): ?>
+        <div id="report-err-<?=$code?>" class="alert d-none"><p><?=$loc['reportStrings']['msg-'.$code]?></p></div>
+        <?php endforeach; ?>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" id="report-btn-cancel" data-bs-dismiss="modal"><?=$loc['reportStrings']['cancel']?></button>
@@ -225,10 +224,9 @@
             <span class="visually-hidden">Sending...</span>
           </div>
         </div>
-        <?php for($i = 0; $i <= 4; $i++): ?>
-        <div id="email-err-<?=$i?>" class="alert d-none"><p><?=$loc['emailStrings']['msg-'.$i]?></p></div>
-        <?php endfor; ?>
-        <div id="email-err-99" class="alert d-none"></div>
+        <?php foreach(array('sent', 'nothing_to_send', 'mail_failed', 'request_error') as $code): ?>
+        <div id="email-err-<?=$code?>" class="alert d-none"><p><?=$loc['emailStrings']['msg-'.$code]?></p></div>
+        <?php endforeach; ?>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" id="email-btn-cancel" data-bs-dismiss="modal"><?=$loc['emailStrings']['cancel']?></button>

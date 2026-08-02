@@ -2,6 +2,14 @@ let reportModal, emailModal, changelogModal;
 let reportStep = 0;
 let emailStep = 0;
 
+// The answers each dialog has a div - and a locale string - of its own for.
+// Anything else, an unexpected status or a dropped connection, falls back to
+// `request_error`: the user gets "something went wrong with the request", which
+// is all the three separate "error in request" messages ever said anyway.
+const REPORT_CODES = ['sent', 'both_empty', 'texts_equal', 'wrong_empty', 'right_empty', 'mail_failed', 'request_error'];
+const EMAIL_CODES = ['sent', 'nothing_to_send', 'mail_failed', 'request_error'];
+const SEND_DIV_IDS = ['data', 'progress', ...new Set([...REPORT_CODES, ...EMAIL_CODES].map((code) => `err-${code}`))];
+
 /**
  * An element sidebar_bs.tpl is required to contain.
  *
@@ -65,8 +73,7 @@ function findSelection() {
 }
 
 function showSendDiv(dialog, id) {
-    const ids = ['data', 'progress', 'err-0', 'err-1', 'err-2', 'err-3', 'err-4', 'err-5', 'err-6', 'err-7', 'err-99'];
-    for (const itemId of ids) {
+    for (const itemId of SEND_DIV_IDS) {
         const el = document.getElementById(`${dialog}-${itemId}`);
         if (el) {
             if (id === itemId) {
@@ -113,51 +120,51 @@ function updateButtonsState(dlg) {
     }
 }
 
-function sendReport() {
-    showSendDiv('report', 'progress');
-    
-    const formData = new URLSearchParams();
-    formData.append('service', 'report');
-    formData.append('url', currUrl);
-    formData.append('wrong', formField('misspelled-text').value);
-    formData.append('right', formField('corrected-text').value);
-    
-    fetch('/ajax.php', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: formData.toString()
-    })
-    .then(response => response.text())
-    .then(data => {
-        try {
-            const rcode = Number.parseInt(data.substring(0, data.indexOf('\n')));
-            // Only the codes showSendDiv() knows have a div of their own. An
-            // unexpected one used to throw here, into a catch that swallows it,
-            // so the step never advanced and the dialog sat on its progress
-            // spinner with both buttons hidden. Advance first, skin second.
-            const errDiv = document.getElementById(`report-err-${rcode}`);
-            showSendDiv('report', `err-${rcode}`);
+/**
+ * Shows the outcome of a send and moves the dialog onto the step that outcome
+ * calls for. Skinning comes after the step is set: an unexpected code used to
+ * throw on the way here, into a catch that swallowed it, leaving the dialog on
+ * its progress spinner with both buttons hidden.
+ *
+ * @param {string} dialog - 'report' or 'email'
+ * @param {string} code - an ApiError code, or 'sent'
+ */
+function finishSend(dialog, code) {
+    const known = dialog === 'report' ? REPORT_CODES : EMAIL_CODES;
+    const shown = known.includes(code) ? code : 'request_error';
+    const errDiv = document.getElementById(`${dialog}-err-${shown}`);
+    showSendDiv(dialog, `err-${shown}`);
 
-            reportStep = rcode === 0 ? 3 : 2;
-            if (errDiv) {
-                errDiv.classList.remove('alert-info');
-                if (rcode !== 0) {
-                    errDiv.classList.add('alert-warning');
-                }
-            }
-            updateButtonsState('report');
-        } catch(e) {
-            console.error('exception: ' + e);
+    const step = shown === 'sent' ? 3 : 2;
+    if (dialog === 'report') {
+        reportStep = step;
+    } else {
+        emailStep = step;
+    }
+
+    if (errDiv) {
+        errDiv.classList.remove('alert-info');
+        if (shown !== 'sent') {
+            errDiv.classList.add('alert-warning');
         }
-    })
-    .catch(err => {
-        console.error('Fetch error:', err);
-        showSendDiv('report', 'err-99');
-        reportStep = 2;
-        updateButtonsState('report');
-    });
+    }
+    updateButtonsState(dialog);
+}
+
+async function sendReport() {
+    showSendDiv('report', 'progress');
+
+    try {
+        await apiPost('report', {
+            url: currUrl,
+            wrong: formField('misspelled-text').value,
+            right: formField('corrected-text').value,
+        });
+        finishSend('report', 'sent');
+    } catch (e) {
+        console.error('report send failed:', e);
+        finishSend('report', e instanceof ApiError ? e.code : 'request_error');
+    }
 }
 
 function showEmailWindow() {
@@ -171,49 +178,20 @@ function showEmailWindow() {
     updateButtonsState('email');
 }
 
-function sendEmail() {
+async function sendEmail() {
     showSendDiv('email', 'progress');
-    
-    const formData = new URLSearchParams();
-    formData.append('service', 'email');
-    formData.append('address', formField('email-form-address').value);
-    formData.append('subject', formField('email-form-subject').value);
-    formData.append('body', formField('email-form-body').value);
-    
-    fetch('/ajax.php', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: formData.toString()
-    })
-    .then(response => response.text())
-    .then(data => {
-        try {
-            const rcode = Number.parseInt(data.substring(0, data.indexOf('\n')));
-            // Same as in sendReport(): an unrecognised code must not strand the
-            // dialog mid-send.
-            const errDiv = document.getElementById(`email-err-${rcode}`);
-            showSendDiv('email', `err-${rcode}`);
 
-            emailStep = rcode === 0 ? 3 : 2;
-            if (errDiv) {
-                errDiv.classList.remove('alert-info');
-                if (rcode !== 0) {
-                    errDiv.classList.add('alert-warning');
-                }
-            }
-            updateButtonsState('email');
-        } catch(e) {
-            console.error('exception: ' + e);
-        }
-    })
-    .catch(err => {
-        console.error('Fetch error:', err);
-        showSendDiv('email', 'err-99');
-        emailStep = 2;
-        updateButtonsState('email');
-    });
+    try {
+        await apiPost('email', {
+            address: formField('email-form-address').value,
+            subject: formField('email-form-subject').value,
+            body: formField('email-form-body').value,
+        });
+        finishSend('email', 'sent');
+    } catch (e) {
+        console.error('email send failed:', e);
+        finishSend('email', e instanceof ApiError ? e.code : 'request_error');
+    }
 }
 
 function isManualChangelogRequest(fromChange) {
@@ -240,36 +218,22 @@ function toggleChangelogHeader(showHeader) {
     }
 }
 
-function requestAndShowChangelog(fromChange) {
-    const formData = new URLSearchParams();
-    formData.append('service', 'changelog');
-    formData.append('lastSeen', fromChange.value || -1);
-    formData.append('lang', currLang);
-    
-    fetch('/ajax.php', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: formData.toString()
-    })
-    .then(response => response.text())
-    .then(data => {
-        try {
-            const payload = data.substring(3);
-            const changes = JSON.parse(payload);
-            clearChangelogTable();
-            fillChangelogTable(changes);
-            toggleChangelogHeader(!isManualChangelogRequest(fromChange));
-            changelogModal.show();
-            setTimeout(() => requireEl('changelog-btn-ok').focus(), 300);
-        } catch(e) {
-            console.error('exception: ' + e);
-        }
-    })
-    .catch(err => {
-        console.error('Fetch error:', err);
-    });
+async function requestAndShowChangelog(fromChange) {
+    try {
+        const changes = await apiGet('changelog', {
+            lastSeen: fromChange.value || -1,
+            lang: currLang,
+        });
+        clearChangelogTable();
+        fillChangelogTable(changes);
+        toggleChangelogHeader(!isManualChangelogRequest(fromChange));
+        changelogModal.show();
+        setTimeout(() => requireEl('changelog-btn-ok').focus(), 300);
+    } catch (e) {
+        // Nothing to show the user: the changelog opens on its own after a
+        // release, so a failure here means one dialog fewer, not a broken page.
+        console.error('changelog request failed:', e);
+    }
 }
 
 /**

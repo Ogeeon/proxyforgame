@@ -241,15 +241,13 @@
       "cancel": "Otkaži",
       "correct": "Ispravimo!",
       "sending-progress": "Sending your report...",
-      "msg-0": "Vaša ispravka je poslana. Hvala vam!",
-      "msg-1": "Error in request: no service.",
-      "msg-2": "Error in request: unknown service.",
-      "msg-3": "Error in request: obligatory params missing.",
-      "msg-4": "Oba polja su prazna. Molimo unesite stavku u polje za netacan tekst i vasu verziju istog.",
-      "msg-5": "Sadrzaj polja [Ispravljen tekst] je identican kao onom u polju [Netacan tekst]. Molimo unesite vasu verziju netacnog teksta.",
-      "msg-6": "Polje [Netacan tekst] je prazno. Molimo unesite sadrzaj u polje netacan tekst.",
-      "msg-7": "Polje [Ispravljen tekst] je prazno. Molimo unesite sadrzaj u polje ispravljen tekst.",
-      "msg-99": "Email sending failed."
+      "msg-sent": "Vaša ispravka je poslana. Hvala vam!",
+      "msg-request_error": "Error in request. Please try again later.",
+      "msg-both_empty": "Oba polja su prazna. Molimo unesite stavku u polje za netacan tekst i vasu verziju istog.",
+      "msg-texts_equal": "Sadrzaj polja [Ispravljen tekst] je identican kao onom u polju [Netacan tekst]. Molimo unesite vasu verziju netacnog teksta.",
+      "msg-wrong_empty": "Polje [Netacan tekst] je prazno. Molimo unesite sadrzaj u polje netacan tekst.",
+      "msg-right_empty": "Polje [Ispravljen tekst] je prazno. Molimo unesite sadrzaj u polje ispravljen tekst.",
+      "msg-mail_failed": "Email sending failed."
     },
     "emailStrings": {
       "title": "Slanje e-maila",
@@ -260,12 +258,10 @@
       "cancel": "Otkaži",
       "correct": "Lets correct it",
       "sending-progress": "Sending your message...",
-      "msg-0": "Vaša poruka je poslana. Hvala!",
-      "msg-1": "Error in request: no service.",
-      "msg-2": "Error in request: unknown service.",
-      "msg-3": "Error in request: obligatory params missing.",
-      "msg-4": "There is nothing to send... Please fill in at least one on the fields [Subject] or [Message body].",
-      "msg-99": "Email sending failed."
+      "msg-sent": "Vaša poruka je poslana. Hvala!",
+      "msg-request_error": "Error in request. Please try again later.",
+      "msg-nothing_to_send": "There is nothing to send... Please fill in at least one on the fields [Subject] or [Message body].",
+      "msg-mail_failed": "Email sending failed."
     },
     "donateStrings": {
       "header": "Podržite ovaj projekat",

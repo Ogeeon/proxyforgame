@@ -241,15 +241,13 @@
       "cancel": "Cancelar",
       "correct": "Corregir",
       "sending-progress": "Enviando tu informe...",
-      "msg-0": "Tu informe ha sido enviado. Gracias.",
-      "msg-1": "Error in request: no service.",
-      "msg-2": "Error in request: unknown service.",
-      "msg-3": "Error in request: obligatory params missing.",
-      "msg-4": "Ambos campos están vacíos. Por favor especifica el texto mal traducido y tu versión del mismo.",
-      "msg-5": "El contenido del campo [Texto Corregido] es idéntico al contenido del campo [Texto mal Traducido]. Por favor especifica tu versión de dicho texto.",
-      "msg-6": "El campo [Texto mal Traducido] está vacío. Por favor especifica el texto.",
-      "msg-7": "El campo [Texto Corregido] está vacío. Por favor especifica tu versión del texto mal traducido.",
-      "msg-99": "Email sending failed."
+      "msg-sent": "Tu informe ha sido enviado. Gracias.",
+      "msg-request_error": "Error in request. Please try again later.",
+      "msg-both_empty": "Ambos campos están vacíos. Por favor especifica el texto mal traducido y tu versión del mismo.",
+      "msg-texts_equal": "El contenido del campo [Texto Corregido] es idéntico al contenido del campo [Texto mal Traducido]. Por favor especifica tu versión de dicho texto.",
+      "msg-wrong_empty": "El campo [Texto mal Traducido] está vacío. Por favor especifica el texto.",
+      "msg-right_empty": "El campo [Texto Corregido] está vacío. Por favor especifica tu versión del texto mal traducido.",
+      "msg-mail_failed": "Email sending failed."
     },
     "emailStrings": {
       "title": "Enviando e-mail",
@@ -260,12 +258,10 @@
       "cancel": "Cancelar",
       "correct": "Corregir",
       "sending-progress": "Enviando tu mensaje...",
-      "msg-0": "Tu mensaje ha sido enviado. Gracias.",
-      "msg-1": "Error in request: no service.",
-      "msg-2": "Error in request: unknown service.",
-      "msg-3": "Error in request: obligatory params missing.",
-      "msg-4": "No hay nada que enviar... Por favor rellena al menos uno de los campos [Asunto] o [Contenido del Mensaje].",
-      "msg-99": "Email sending failed."
+      "msg-sent": "Tu mensaje ha sido enviado. Gracias.",
+      "msg-request_error": "Error in request. Please try again later.",
+      "msg-nothing_to_send": "No hay nada que enviar... Por favor rellena al menos uno de los campos [Asunto] o [Contenido del Mensaje].",
+      "msg-mail_failed": "Email sending failed."
     },
     "donateStrings": {
       "header": "Apoya este proyecto",

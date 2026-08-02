@@ -28,6 +28,7 @@
 
   <!-- Utility libraries and calculator modules -->
   <script src="/js/utils.js?v=<?php echo filemtime($pfgPath.'/js/utils.js'); ?>"></script>
+  <script src="/js/api-client.js?v=<?php echo filemtime($pfgPath.'/js/api-client.js'); ?>"></script>
   <script src="/ogame/calc/js/dom-utils.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/dom-utils.js'); ?>"></script>
   <script src="/ogame/calc/js/own-api.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/own-api.js'); ?>"></script>
   <script src="/ogame/calc/js/flight-core.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/flight-core.js'); ?>"></script>

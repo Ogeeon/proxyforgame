@@ -1,64 +1,75 @@
 <?php
   // Fetching a spy report the player copied out of the game, with a second
   // source for when Logserver is down. See docs/ogame-api-import.md.
+  //
+  // The vendor's {"RESULT_CODE":1000,"RESULT_DATA":{...}} envelope is checked
+  // here and then dropped: the client gets the report itself, and the shape of
+  // Logserver's answer stays out of our contract.
 
   require_once __DIR__ . '/http.inc.php';
+  require_once __DIR__ . '/server-data.inc.php';
 
-  function getDataCode() {
-    if (($strCode = getVar('code', 'str')) !== false) {
+  function apiSpyReport($in) {
+    $strCode = requireParam($in, 'code', 'str');
+    if ($strCode === '') {
+      throw new ApiError(400, 'missing_params', 'Empty code');
+    }
 
-      //flight.php?SR_KEY=fs008d2cbfee933ddbb85e2e20d8872ce34d
-      //flight.php?SR_KEY=sr-ru-1-360e215d03d5115e828c70bba761b361dd8b4c0c
+    //flight.php?SR_KEY=fs008d2cbfee933ddbb85e2e20d8872ce34d
+    //flight.php?SR_KEY=sr-ru-1-360e215d03d5115e828c70bba761b361dd8b4c0c
 
-      $ch = curl_init('https://logserver.net/api/proxyforgame/?code=' . $strCode);
+    $ch = curl_init('https://logserver.net/api/proxyforgame/?code=' . rawurlencode($strCode));
 
-      curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-      curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 10);
-      curl_setopt($ch, CURLOPT_TIMEOUT, 30);
-      $h = curl_exec($ch);
-      if (curl_errno($ch)) {
-        // Read the message before closing the handle, or it comes back empty
-        $err = curl_error($ch);
-        curl_close($ch);
-        // Maybe Logserver isn't accessible. Let's try fallback method
-        $data = getSpyReportByFallbackMethod($strCode);
-        if ($data !== null) {
-          die("0\n$data");
-        }
-        die("3\n$err");
-      }
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 10);
+    curl_setopt($ch, CURLOPT_TIMEOUT, 30);
+    $h = curl_exec($ch);
+    if (curl_errno($ch)) {
+      // Read the message before closing the handle, or it comes back empty
+      $err = curl_error($ch);
       curl_close($ch);
-      if (isUsableSpyReport($h)) {
-        die("0\n$h");
-      }
-      // Logserver couldn't process this SR: an unknown code, or a payload it
-      // failed to decompress, in which case it answers with PHP notices glued
-      // in front of a {"RESULT_CODE":1000,"RESULT_DATA":false} envelope.
-      // Let's try fallback method
+      // Maybe Logserver isn't accessible. Let's try fallback method
       $data = getSpyReportByFallbackMethod($strCode);
       if ($data !== null) {
-        die("0\n$data");
+        return $data;
       }
-      // Tell a code the user should double-check apart from a broken answer
-      if (strpos($h, "code not found") > 0 || strpos($h, "wrong code") > 0) {
-        die("4\nbad code");
-      }
-      die("5\nbad answer");
+      throw new ApiError(502, 'upstream_unavailable', $err);
     }
-    die(EMPTY_PARAMS_RESPONSE);
+    curl_close($ch);
+
+    $data = readUsableSpyReport($h);
+    if ($data !== null) {
+      return $data;
+    }
+    // Logserver couldn't process this SR: an unknown code, or a payload it
+    // failed to decompress, in which case it answers with PHP notices glued
+    // in front of a {"RESULT_CODE":1000,"RESULT_DATA":false} envelope.
+    // Let's try fallback method
+    $data = getSpyReportByFallbackMethod($strCode);
+    if ($data !== null) {
+      return $data;
+    }
+    // Tell a code the user should double-check apart from a broken answer
+    if (strpos($h, "code not found") > 0 || strpos($h, "wrong code") > 0) {
+      throw new ApiError(404, 'sr_not_found', 'Logserver does not know this code');
+    }
+    throw new ApiError(502, 'sr_unusable', 'Logserver returned an answer we cannot read');
   }
 
   /**
    * A usable answer decodes to {"RESULT_CODE":1000,"RESULT_DATA":{...}} with the
    * two sections the flight calculator reads. Anything else - a false
    * RESULT_DATA, an error envelope, HTML - is not worth handing to the client.
+   * Returns the RESULT_DATA payload, or NULL when the answer is not usable.
    */
-  function isUsableSpyReport($body) {
+  function readUsableSpyReport($body) {
     $json = json_decode($body, true);
-    return is_array($json)
+    $usable = is_array($json)
       && isset($json['RESULT_CODE']) && $json['RESULT_CODE'] == 1000
       && isset($json['RESULT_DATA']) && is_array($json['RESULT_DATA'])
       && isset($json['RESULT_DATA']['generic'], $json['RESULT_DATA']['universes']);
+
+    return $usable ? $json['RESULT_DATA'] : null;
   }
 
   /**
@@ -94,56 +105,38 @@
       return $reportJson;
   }
 
-  /** Queries and parses the OGame server data XML for a universe; NULL when unusable. */
-  function fetchServerDataXml($language, $universe) {
-      $serverDataUrl = "https://s{$universe}-{$language}.ogame.gameforge.com/api/serverData.xml";
-      $serverDataXml = @file_get_contents($serverDataUrl);
-
-      if ($serverDataXml === false) {
-          return null;
-      }
-
-      $xml = simplexml_load_string($serverDataXml);
-
-      if ($xml === false) {
-          return null;
-      }
-
-      return $xml;
-  }
-
   /** Builds the 'universes' JSON structure spliced into the spy report. */
   function buildUniverseDataFromXml($xml, $language, $universe) {
       return [
-          'id' => (string)$xml->id ?? '',
-          'date' => (string)$xml->timestamp ?? '',
+          'id' => (string)$xml->id,
+          'date' => (string)$xml->timestamp,
           'universe' => $universe,
           'domain' => $language,
-          'name' => (string)$xml->name ?? '',
-          'speed' => (string)$xml->speed ?? '',
-          'speedFleetPeaceful' => (string)$xml->speedFleetPeaceful ?? '',
-          'speedFleetWar' => (string)$xml->speedFleetWar ?? '',
-          'speedFleetHolding' => (string)$xml->speedFleetHolding ?? '',
-          'galaxies' => (string)$xml->galaxies ?? '',
-          'systems' => (string)$xml->systems ?? '',
-          'acs' => (string)$xml->acs ?? '',
-          'rapidFire' => (string)$xml->rapidFire ?? '',
-          'defToTF' => (string)$xml->defToTF ?? '',
-          'debrisFactor' => (string)$xml->debrisFactor ?? '',
-          'debrisFactorDef' => (string)$xml->debrisFactorDef ?? '',
-          'repairFactor' => (string)$xml->repairFactor ?? '',
-          'newbieProtectionLimit' => (string)$xml->newbieProtectionLimit ?? '',
-          'newbieProtectionHigh' => (string)$xml->newbieProtectionHigh ?? '',
-          'topScore' => (string)$xml->topScore ?? '',
-          'bonusFields' => (string)$xml->bonusFields ?? '',
-          'donutGalaxy' => (string)$xml->donutGalaxy ?? '',
-          'donutSystem' => (string)$xml->donutSystem ?? '',
-          'globalDeuteriumSaveFactor' => (string)$xml->globalDeuteriumSaveFactor ?? '',
-          'probeCargo' => (string)$xml->probeCargo ?? '',
+          'name' => (string)$xml->name,
+          'speed' => (string)$xml->speed,
+          'speedFleetPeaceful' => (string)$xml->speedFleetPeaceful,
+          'speedFleetWar' => (string)$xml->speedFleetWar,
+          'speedFleetHolding' => (string)$xml->speedFleetHolding,
+          'galaxies' => (string)$xml->galaxies,
+          'systems' => (string)$xml->systems,
+          'acs' => (string)$xml->acs,
+          'rapidFire' => (string)$xml->rapidFire,
+          'defToTF' => (string)$xml->defToTF,
+          'debrisFactor' => (string)$xml->debrisFactor,
+          'debrisFactorDef' => (string)$xml->debrisFactorDef,
+          'repairFactor' => (string)$xml->repairFactor,
+          'newbieProtectionLimit' => (string)$xml->newbieProtectionLimit,
+          'newbieProtectionHigh' => (string)$xml->newbieProtectionHigh,
+          'topScore' => (string)$xml->topScore,
+          'bonusFields' => (string)$xml->bonusFields,
+          'donutGalaxy' => (string)$xml->donutGalaxy,
+          'donutSystem' => (string)$xml->donutSystem,
+          'globalDeuteriumSaveFactor' => (string)$xml->globalDeuteriumSaveFactor,
+          'probeCargo' => (string)$xml->probeCargo,
           // The flight calculator reads both of these off an imported report;
           // without them an import used to silently switch the system skip off.
-          'fleetIgnoreEmptySystems' => (string)$xml->fleetIgnoreEmptySystems ?? '',
-          'fleetIgnoreInactiveSystems' => (string)$xml->fleetIgnoreInactiveSystems ?? ''
+          'fleetIgnoreEmptySystems' => (string)$xml->fleetIgnoreEmptySystems,
+          'fleetIgnoreInactiveSystems' => (string)$xml->fleetIgnoreInactiveSystems
       ];
   }
 
@@ -161,13 +154,19 @@
       [$language, $universe] = $ids;
 
       $reportJson = fetchSpyReportFromFallback($srId);
-      $xml = $reportJson !== null ? fetchServerDataXml($language, $universe) : null;
+      if ($reportJson === null) {
+          return null;
+      }
 
-      if ($reportJson === null || $xml === null) {
+      // The same fetch the serverdata service does; here a failure only means
+      // this source cannot serve the report, so the error is swallowed.
+      try {
+          $xml = loadServerDataXml($language, $universe);
+      } catch (ApiError $e) {
           return null;
       }
 
       $reportJson['RESULT_DATA']['universes'] = buildUniverseDataFromXml($xml, $language, $universe);
 
-      return json_encode($reportJson);
+      return $reportJson['RESULT_DATA'];
   }

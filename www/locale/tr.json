@@ -241,15 +241,13 @@
       "cancel": "İptal Et",
       "correct": "Düzelt",
       "sending-progress": "Raporlarınız gönderiliyor...",
-      "msg-0": "Raporunuz gönderilmiştir. Teşekkür ederiz.",
-      "msg-1": "Error in request: no service.",
-      "msg-2": "Error in request: unknown service.",
-      "msg-3": "Error in request: obligatory params missing.",
-      "msg-4": "Her iki alan boş. Yanlış yazılmış metni ve bunun sürümünü belirtin.",
-      "msg-5": "Düzeltilmiş metin içeriği yanlış metin içeriğiyle aynıdır. Yanlış yazılmış metin sürümünü belirtin.",
-      "msg-6": "Yanlış yazılmış metin alanı boş. Yanlış yazılmış metni belirtiniz.",
-      "msg-7": "Düzeltilmiş metin alanı boş. Yanlış yazılmış metin sürümünü belirtin.",
-      "msg-99": "Report sending failed."
+      "msg-sent": "Raporunuz gönderilmiştir. Teşekkür ederiz.",
+      "msg-request_error": "Error in request. Please try again later.",
+      "msg-both_empty": "Her iki alan boş. Yanlış yazılmış metni ve bunun sürümünü belirtin.",
+      "msg-texts_equal": "Düzeltilmiş metin içeriği yanlış metin içeriğiyle aynıdır. Yanlış yazılmış metin sürümünü belirtin.",
+      "msg-wrong_empty": "Yanlış yazılmış metin alanı boş. Yanlış yazılmış metni belirtiniz.",
+      "msg-right_empty": "Düzeltilmiş metin alanı boş. Yanlış yazılmış metin sürümünü belirtin.",
+      "msg-mail_failed": "Report sending failed."
     },
     "emailStrings": {
       "title": "E-Posta Gönderme",
@@ -260,12 +258,10 @@
       "cancel": "İptal Et",
       "correct": "Düzelt",
       "sending-progress": "Raporlarınız gönderiliyor...",
-      "msg-0": "Mesajınız gönderilmiştir. Teşekkürler.",
-      "msg-1": "Error in request: no service.",
-      "msg-2": "Error in request: unknown service.",
-      "msg-3": "Error in request: obligatory params missing.",
-      "msg-4": "Göndermek için bir şey yok. Lütfen Konu veya Mesaj içeriği alanlarından en az birini doldurunuz",
-      "msg-99": "Email sending failed."
+      "msg-sent": "Mesajınız gönderilmiştir. Teşekkürler.",
+      "msg-request_error": "Error in request. Please try again later.",
+      "msg-nothing_to_send": "Göndermek için bir şey yok. Lütfen Konu veya Mesaj içeriği alanlarından en az birini doldurunuz",
+      "msg-mail_failed": "Email sending failed."
     },
     "donateStrings": {
       "header": "Bu projeye destek verin",

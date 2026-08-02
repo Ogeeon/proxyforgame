@@ -241,15 +241,13 @@
       "cancel": "Annuleer",
       "correct": "Wijzig",
       "sending-progress": "Versturen van rapport...",
-      "msg-0": "Je rapport is verstuurd. Bedankt.",
-      "msg-1": "Error in request: no service.",
-      "msg-2": "Error in request: unknown service.",
-      "msg-3": "Error in request: obligatory params missing.",
-      "msg-4": "Beide velden zijn leeg. Specificeer de verkeerde vertaling en jouw verbetering er van.",
-      "msg-5": "De inhoud van het veld [Gecorrigeerde tekst] is gelijk aan de inhoud van het veld [Verkeerd vertaalde tekst]. Specificeer jouw versie van de verkeerd vertaalde tekst.",
-      "msg-6": "Het veld [Verkeerd vertaalde tekst] is leeg. Specificeer de verkeerd vertaalde tekst.",
-      "msg-7": "Het veld [Gecorrigeerde tekst] is leeg. Specificeer jouw versie van de gecorrigeerde tekst.",
-      "msg-99": "Email sending failed."
+      "msg-sent": "Je rapport is verstuurd. Bedankt.",
+      "msg-request_error": "Error in request. Please try again later.",
+      "msg-both_empty": "Beide velden zijn leeg. Specificeer de verkeerde vertaling en jouw verbetering er van.",
+      "msg-texts_equal": "De inhoud van het veld [Gecorrigeerde tekst] is gelijk aan de inhoud van het veld [Verkeerd vertaalde tekst]. Specificeer jouw versie van de verkeerd vertaalde tekst.",
+      "msg-wrong_empty": "Het veld [Verkeerd vertaalde tekst] is leeg. Specificeer de verkeerd vertaalde tekst.",
+      "msg-right_empty": "Het veld [Gecorrigeerde tekst] is leeg. Specificeer jouw versie van de gecorrigeerde tekst.",
+      "msg-mail_failed": "Email sending failed."
     },
     "emailStrings": {
       "title": "Verstuur een e-mail",
@@ -260,12 +258,10 @@
       "cancel": "Annuleer",
       "correct": "Risolvere",
       "sending-progress": "Je bericht wordt verstuurd...",
-      "msg-0": "Je bericht is verstuurd. Bedankt.",
-      "msg-1": "Error in request: no service.",
-      "msg-2": "Error in request: unknown service.",
-      "msg-3": "Error in request: obligatory params missing.",
-      "msg-4": "Er is niets om te versturen... Vul ten minste 1 van de velden in [Onderwerp] of [Bericht].",
-      "msg-99": "Email sending failed."
+      "msg-sent": "Je bericht is verstuurd. Bedankt.",
+      "msg-request_error": "Error in request. Please try again later.",
+      "msg-nothing_to_send": "Er is niets om te versturen... Vul ten minste 1 van de velden in [Onderwerp] of [Bericht].",
+      "msg-mail_failed": "Email sending failed."
     },
     "donateStrings": {
       "header": "Steun dit project",

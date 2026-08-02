@@ -1191,11 +1191,7 @@ class FlightOrchestrator {
         }
         this._showOverlay('general-settings-panel', this.opts.dataFetchMsg);
         try {
-            const response = await fetch('/ajax.php?' + new URLSearchParams({ service: 'serverdata', country, universe }));
-            if (!response.ok) {
-                throw new Error(`HTTP ${response.status}`);
-            }
-            const json = JSON.parse(await response.text());
+            const json = await apiGet('serverdata', { country, universe });
             this._selectOption('speed-fleet-war', json.speedFleetWar);
             this._selectOption('speed-fleet-peaceful', json.speedFleetPeaceful);
             this._selectOption('speed-fleet-holding', json.speedFleetHolding);
@@ -1281,12 +1277,7 @@ class FlightOrchestrator {
         }
         this._showOverlay('general-settings-panel', this.opts.dataFetchMsg);
         try {
-            const response = await fetch('/ajax.php?' + new URLSearchParams({ service: 'populatedSystems', country, universe }));
-            if (!response.ok) {
-                throw new Error(`HTTP ${response.status}`);
-            }
-            const data = await response.text();
-            const json = JSON.parse(data);
+            const json = await apiGet('populatedSystems', { country, universe });
             localStorage.setItem(key, JSON.stringify({ ...json, cachedAt: Date.now() }));
             this.populatedSystems = json.populatedSystems;
             this.populatedSystemsAll = json.populatedSystemsAll ?? null;
@@ -1308,71 +1299,25 @@ class FlightOrchestrator {
     // API import — SR code and OGame own-api export
     // ------------------------------------------------------------------
 
-    importSR(code) {
-        this._showOverlay('general-settings-panel', this.opts.dataFetchMsg);
-        fetch('/ajax.php', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: new URLSearchParams({ service: 'ogameAPI', code }),
-        }).then((r) => r.text()).then((data) => {
-            try {
-                const rcode = Number.parseInt(data.slice(0, data.indexOf('\n')), 10);
-                const payload = data.slice(data.indexOf('\n') + 1);
-                if (rcode === 3) {
-                    alert(payload);
-                    return;
-                }
-                if (rcode === 4) {
-                    alert(this.opts.badSRCode);
-                    return;
-                }
-                if (rcode !== 0) {
-                    alert(this.opts.importFailedMsg);
-                    return;
-                }
-                const rd = this._parseSRPayload(payload);
-                if (rd === null) {
-                    alert(this.opts.importFailedMsg);
-                    return;
-                }
-                this._applySRResult(code, rd);
-                this.recalc();
-            } catch (e) {
-                consoleLog('exception: ' + e);
-                alert(this.opts.importFailedMsg);
-            } finally {
-                this._hideOverlay('general-settings-panel');
-            }
-        }).catch((e) => {
-            consoleLog('exception: ' + e);
-            alert(this.opts.importFailedMsg);
-            this._hideOverlay('general-settings-panel');
-        });
-    }
-
     /**
-     * Extract RESULT_DATA from an SR import payload.
-     * Returns null when the answer is not usable — the upstream log server can
-     * reply with PHP warnings glued in front of the JSON, or with a well-formed
-     * envelope whose RESULT_DATA is `false`.
+     * The answer is the report itself: the server checks the log server's
+     * envelope and hands over its RESULT_DATA, so there is nothing left to
+     * validate here - an unusable answer never reaches this point.
      */
-    _parseSRPayload(payload) {
-        let result;
+    async importSR(code) {
+        this._showOverlay('general-settings-panel', this.opts.dataFetchMsg);
         try {
-            result = JSON.parse(payload);
+            const rd = await apiGet('ogameAPI', { code });
+            this._applySRResult(code, rd);
+            this.recalc();
         } catch (e) {
-            consoleLog('SR parse exception: ' + e);
-            return null;
+            consoleLog('SR import failed: ' + e);
+            alert(e instanceof ApiError && e.code === 'sr_not_found'
+                ? this.opts.badSRCode
+                : this.opts.importFailedMsg);
+        } finally {
+            this._hideOverlay('general-settings-panel');
         }
-        const rd = result?.RESULT_DATA;
-        if (result?.RESULT_CODE !== 1000 || rd === null || typeof rd !== 'object' || Array.isArray(rd)) {
-            return null;
-        }
-        if (typeof rd.generic !== 'object' || rd.generic === null ||
-            typeof rd.universes !== 'object' || rd.universes === null) {
-            return null;
-        }
-        return rd;
     }
 
     _applySRResult(code, rd) {
