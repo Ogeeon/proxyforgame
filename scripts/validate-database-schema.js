@@ -6,13 +6,25 @@
  * Validates database schema against actual usage in the codebase.
  * Checks for missing tables, unused tables, and inconsistencies.
  *
- * Run: node scripts/validate-database-schema.js
+ * When a database is configured in .env it also compares the column
+ * definitions in schema.sql against the live ones, which is the only check
+ * that catches a schema.sql that has drifted: `change_descriptions.description`
+ * sat at varchar(255) in the file while production had grown to varchar(1024).
+ * The live read goes through scripts/dump-db-columns.php - Node has no MySQL
+ * driver here, and the credentials already live behind db.connect.inc.php.
+ *
+ * Run: node scripts/validate-database-schema.js [--no-db]
  */
 
 const fs = require('node:fs');
 const path = require('node:path');
+const { spawnSync } = require('node:child_process');
 
-const WWW_DIR = path.join(__dirname, '..', 'www');
+const ROOT = path.join(__dirname, '..');
+const WWW_DIR = path.join(ROOT, 'www');
+const SCHEMA_PATH = path.join(ROOT, 'schema.sql');
+const DUMP_SCRIPT = path.join(__dirname, 'dump-db-columns.php');
+const PHP = process.env.PFG_PHP || 'php';
 
 // ANSI color codes
 const colors = {
@@ -48,16 +60,17 @@ function scanPhpFileForDbUsage(fullPath, usage) {
   const content = fs.readFileSync(fullPath, 'utf8');
   const relFile = path.relative(WWW_DIR, fullPath);
 
-  // Find SqlQuery calls
-  const queryMatches = content.matchAll(/SqlQuery\s*\(\s*["']([^"']+)["']/g);
+  // Find sqlQuery calls. Case-insensitive: the helper in db.connect.inc.php is
+  // `sqlQuery`, and matching only `SqlQuery` found nothing at all.
+  const queryMatches = content.matchAll(/sqlQuery\s*\(\s*["']([^"']+)["']/gi);
   for (const match of queryMatches) {
     const query = match[1];
     usage.queries.push({ file: relFile, query: query });
     extractTablesFromQuery(query, usage);
   }
 
-  // Find SqlQuery calls with variables
-  const varMatches = content.matchAll(/SqlQuery\s*\(\s*\$?\w+\s*\.\s*["']([^"']+)["']/g);
+  // Find sqlQuery calls with variables
+  const varMatches = content.matchAll(/sqlQuery\s*\(\s*\$?\w+\s*\.\s*["']([^"']+)["']/gi);
   for (const match of varMatches) {
     usage.queries.push({ file: relFile, query: match[1] });
   }
@@ -90,29 +103,206 @@ function findDatabaseUsage() {
   return usage;
 }
 
+// Lines inside a CREATE TABLE body that define an index rather than a column.
+const KEY_LINE_RE = /^\s*(PRIMARY\s+KEY|UNIQUE\s+KEY|UNIQUE|KEY|INDEX|FULLTEXT|SPATIAL|CONSTRAINT|FOREIGN\s+KEY)\b/i;
+
+// `name type[(width)] [unsigned] [rest]`, backticked or not.
+const COLUMN_LINE_RE = /^\s*`?(\w+)`?\s+(\w+(?:\s*\(\s*[^)]*\))?(?:\s+unsigned)?(?:\s+zerofill)?)\s*(.*?),?\s*$/i;
+
 /**
- * Parse schema.sql file to extract table definitions
+ * Normalizes a column type for comparison. The display width of an integer is
+ * cosmetic - MySQL reports `bigint(20) unsigned` for a column declared
+ * `BIGINT UNSIGNED`, and dropped the width entirely in 8.0 - so it is stripped.
+ * The width of a varchar is the actual constraint and is kept.
+ *
+ * @param {string} type
+ * @returns {string}
+ */
+function normalizeType(type) {
+  return type
+    .toLowerCase()
+    .replace(/\s+/g, ' ')
+    .replace(/\s*\(\s*/g, '(')
+    // Only the space before `)`; the one after it separates `unsigned`.
+    .replace(/\s*\)/g, ')')
+    .replace(/^(tinyint|smallint|mediumint|int|integer|bigint|year)\(\d+\)/, '$1')
+    .trim();
+}
+
+/**
+ * @typedef {object} SchemaColumn
+ * @property {string} name
+ * @property {string} type      Normalized type, e.g. `varchar(1024)`.
+ * @property {boolean} nullable
+ * @property {number} line      1-based line number in schema.sql.
+ */
+
+/**
+ * @typedef {object} SchemaTable
+ * @property {string} name
+ * @property {string} definedIn
+ * @property {SchemaColumn[]} columns
+ */
+
+/**
+ * Parse schema.sql file to extract table definitions and their columns
+ *
+ * @returns {SchemaTable[]|null}
  */
 function parseSchemaFile() {
-  const schemaPath = path.join(WWW_DIR, 'schema.sql');
-
-  if (!fs.existsSync(schemaPath)) {
+  if (!fs.existsSync(SCHEMA_PATH)) {
     return null;
   }
 
-  const content = fs.readFileSync(schemaPath, 'utf8');
+  const lines = fs.readFileSync(SCHEMA_PATH, 'utf8').split(/\r?\n/);
+  /** @type {SchemaTable[]} */
   const tables = [];
+  /** @type {SchemaTable|null} */
+  let current = null;
 
-  // Match CREATE TABLE statements
-  const createTableMatches = content.matchAll(/CREATE\s+TABLE\s+(?:IF\s+NOT\s+EXISTS\s+)?`?(\w+)`?/gi);
-  for (const match of createTableMatches) {
-    tables.push({
-      name: match[1].toLowerCase(),
-      definedIn: 'schema.sql'
-    });
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+
+    const createMatch = /CREATE\s+TABLE\s+(?:IF\s+NOT\s+EXISTS\s+)?`?(\w+)`?/i.exec(line);
+    if (createMatch) {
+      current = { name: createMatch[1].toLowerCase(), definedIn: 'schema.sql', columns: [] };
+      tables.push(current);
+      continue;
+    }
+
+    if (!current) {
+      continue;
+    }
+
+    // `) ENGINE=...` closes the body.
+    if (/^\s*\)/.test(line)) {
+      current = null;
+      continue;
+    }
+
+    if (KEY_LINE_RE.test(line)) {
+      continue;
+    }
+
+    const columnMatch = COLUMN_LINE_RE.exec(line);
+    if (columnMatch) {
+      current.columns.push({
+        name: columnMatch[1].toLowerCase(),
+        type: normalizeType(columnMatch[2]),
+        nullable: !/\bNOT\s+NULL\b/i.test(columnMatch[3]),
+        line: i + 1
+      });
+    }
   }
 
   return tables;
+}
+
+/**
+ * Reads the live column definitions through the PHP helper.
+ *
+ * @returns {{ available: boolean, reason?: string, columns?: Map<string, Map<string, { type: string, nullable: boolean }>> }}
+ */
+function readLiveColumns() {
+  const result = spawnSync(PHP, [DUMP_SCRIPT], { encoding: 'utf8' });
+
+  if (result.error) {
+    return { available: false, reason: `could not run ${PHP}: ${result.error.message}` };
+  }
+  if (result.status === 2) {
+    return { available: false, reason: 'no database configured in .env, or it is unreachable' };
+  }
+  if (result.status !== 0) {
+    return { available: false, reason: `dump-db-columns.php exited ${result.status}: ${(result.stderr || '').trim()}` };
+  }
+
+  let rows;
+  try {
+    // The PHP files in www/ are saved with a BOM, which php echoes before any
+    // output of its own; JSON.parse chokes on it.
+    const body = result.stdout.charCodeAt(0) === 0xFEFF ? result.stdout.slice(1) : result.stdout;
+    rows = JSON.parse(body);
+  } catch (e) {
+    return { available: false, reason: `could not parse the column dump: ${e instanceof Error ? e.message : String(e)}` };
+  }
+
+  /** @type {Map<string, Map<string, { type: string, nullable: boolean }>>} */
+  const columns = new Map();
+  for (const row of rows) {
+    // Key case varies between MySQL builds for information_schema.
+    /** @type {Record<string, string>} */
+    const lower = {};
+    for (const [key, value] of Object.entries(row)) {
+      lower[key.toLowerCase()] = String(value);
+    }
+
+    const table = lower.table_name.toLowerCase();
+    if (!columns.has(table)) {
+      columns.set(table, new Map());
+    }
+    const map = columns.get(table);
+    if (map) {
+      map.set(lower.column_name.toLowerCase(), {
+        type: normalizeType(lower.column_type),
+        nullable: lower.is_nullable.toUpperCase() === 'YES'
+      });
+    }
+  }
+
+  return { available: true, columns };
+}
+
+/**
+ * Compares the columns declared in schema.sql against the live ones.
+ *
+ * @param {SchemaTable[]} schemaTables
+ * @returns {{ skipped: boolean, reason?: string, problems: string[], checked: number }}
+ */
+function validateColumnTypes(schemaTables) {
+  const live = readLiveColumns();
+  if (!live.available || !live.columns) {
+    return { skipped: true, reason: live.reason, problems: [], checked: 0 };
+  }
+
+  /** @type {string[]} */
+  const problems = [];
+  let checked = 0;
+
+  for (const table of schemaTables) {
+    const liveTable = live.columns.get(table.name);
+    if (!liveTable) {
+      // Not a drift in the definitions: the table simply is not in this
+      // database. `db-seed` creates them all, a partial local copy does not.
+      continue;
+    }
+
+    for (const column of table.columns) {
+      const liveColumn = liveTable.get(column.name);
+      if (!liveColumn) {
+        problems.push(`schema.sql:${column.line} ${table.name}.${column.name} is not in the database`);
+        continue;
+      }
+
+      checked++;
+
+      if (liveColumn.type !== column.type) {
+        problems.push(`schema.sql:${column.line} ${table.name}.${column.name} is ${column.type} in the file but ${liveColumn.type} in the database`);
+      }
+      if (liveColumn.nullable !== column.nullable) {
+        const declared = column.nullable ? 'nullable' : 'NOT NULL';
+        const actual = liveColumn.nullable ? 'nullable' : 'NOT NULL';
+        problems.push(`schema.sql:${column.line} ${table.name}.${column.name} is ${declared} in the file but ${actual} in the database`);
+      }
+    }
+
+    for (const name of liveTable.keys()) {
+      if (!table.columns.some((c) => c.name === name)) {
+        problems.push(`${table.name}.${name} exists in the database but not in schema.sql`);
+      }
+    }
+  }
+
+  return { skipped: false, problems, checked };
 }
 
 /**
@@ -159,11 +349,12 @@ function validateDatabaseSchema() {
     console.log(colorize('Database schema validation requires a schema.sql file', colors.gray));
     console.log(colorize('\nTo create one:', colors.cyan));
     console.log(colorize('  1. Export your database schema', colors.gray));
-    console.log(colorize('  2. Save it as www/schema.sql', colors.gray));
+    console.log(colorize(`  2. Save it as ${path.relative(ROOT, SCHEMA_PATH)}`, colors.gray));
     return false;
   }
 
-  console.log(colorize(`\n✓ Found schema.sql with ${schemaTables.length} tables`, colors.green));
+  const columnCount = schemaTables.reduce((sum, t) => sum + t.columns.length, 0);
+  console.log(colorize(`\n✓ Found schema.sql with ${schemaTables.length} tables and ${columnCount} columns`, colors.green));
 
   // Find database usage in code
   console.log(colorize('\nScanning for database usage...', colors.gray));
@@ -200,6 +391,26 @@ function validateDatabaseSchema() {
     console.log(colorize('\n✅ Schema is consistent with code usage!', colors.green));
   }
 
+  // Column types, against the live database
+  let columnProblems = 0;
+  if (process.argv.includes('--no-db')) {
+    console.log(colorize('\nℹ️  Column types not checked (--no-db)', colors.blue));
+  } else {
+    const types = validateColumnTypes(schemaTables);
+    if (types.skipped) {
+      console.log(colorize(`\nℹ️  Column types not checked: ${types.reason}`, colors.blue));
+      console.log(colorize('   Only a live database can catch a schema.sql that has drifted.', colors.gray));
+    } else if (types.problems.length > 0) {
+      columnProblems = types.problems.length;
+      console.log(colorize(`\n⚠️  Column definitions that differ from the database (${types.problems.length}):`, colors.yellow));
+      types.problems.forEach((problem) => {
+        console.log(colorize(`  - ${problem}`, colors.gray));
+      });
+    } else {
+      console.log(colorize(`\n✅ All ${types.checked} columns match the database!`, colors.green));
+    }
+  }
+
   // Check for db.connect.inc.php
   const dbFiles = findDatabaseFiles();
   console.log(colorize(`\n📄 Database-related files: ${dbFiles.length}`, colors.blue));
@@ -209,7 +420,7 @@ function validateDatabaseSchema() {
 
   console.log('\n' + colorize('──────────────────────────────────────────────────────────', colors.gray));
 
-  return missingInSchema.length === 0;
+  return missingInSchema.length === 0 && columnProblems === 0;
 }
 
 /**
@@ -225,4 +436,4 @@ if (require.main === module) {
   main();
 }
 
-module.exports = { validateDatabaseSchema };
+module.exports = { validateDatabaseSchema, parseSchemaFile, normalizeType, validateColumnTypes };

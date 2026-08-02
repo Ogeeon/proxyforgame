@@ -15,7 +15,13 @@ release section; it is the source of truth for the other eleven translations.
 
 ## [Unreleased]
 
+### Added
+
+- Build: the database schema validator compares the column types and nullability in `schema.sql` against the live database.
+
 ### Fixed
+
+- Build: the database schema validator looked for `schema.sql` under `www/` and matched `SqlQuery` where the helper is `sqlQuery`, so it found neither the schema nor a single query and never validated anything.
 
 - Sidebar: the changelog now loads for Bosnian, which the language whitelist rejected outright.
 - `schema.sql`: `change_descriptions.description` is `varchar(1024)`, the width production has.

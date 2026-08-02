@@ -124,7 +124,9 @@ tsconfigs-check: ## Fail if a generated TypeScript project is out of date
 coverage: ## Report which calculators have no spec
 	node scripts/check-test-coverage.js
 
-db-validate: ## Compare schema.sql against the SqlQuery calls in PHP
+# The column comparison needs a database; without one it reports that it skipped
+# and the table half of the check still runs. Pass --no-db to skip it explicitly.
+db-validate: ## Compare schema.sql against the sqlQuery calls in PHP and against the live column types
 	node scripts/validate-database-schema.js
 
 # First in `check` because it is the cheapest gate in the list: a structural
