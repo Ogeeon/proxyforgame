@@ -106,10 +106,13 @@ function findDatabaseUsage() {
 // Lines inside a CREATE TABLE body that define an index rather than a column.
 const KEY_LINE_RE = /^\s*(PRIMARY\s+KEY|UNIQUE\s+KEY|UNIQUE|KEY|INDEX|FULLTEXT|SPATIAL|CONSTRAINT|FOREIGN\s+KEY)\b/i;
 
-// `name type[(width)] [unsigned] [rest]`, backticked or not. The rest is taken
-// greedily to the end of the line - it is only ever tested for `NOT NULL`, and a
-// lazy group between two `\s*` runs backtracks quadratically (javascript:S8786).
-const COLUMN_LINE_RE = /^\s*`?(\w+)`?\s+(\w+(?:\s*\(\s*[^)]*\))?(?:\s+unsigned)?(?:\s+zerofill)?)(.*)$/i;
+// `name type[(width)] [unsigned] [zerofill] [rest]`, backticked or not, read in
+// two steps: the column name and the remainder of the line, then the type at the
+// head of that remainder. One pattern for the whole shape ran past the regex
+// complexity SonarQube allows (javascript:S5843), and its lazy tail between two
+// `\s*` runs backtracked quadratically on top of that (javascript:S8786).
+const COLUMN_NAME_RE = /^\s*`?(\w+)`?\s+(.*)$/;
+const COLUMN_TYPE_RE = /^\w+(?:\s*\(\s*[^)]*\))?(?:\s+unsigned)?(?:\s+zerofill)?/i;
 
 /**
  * Normalizes a column type for comparison. The display width of an integer is
@@ -188,12 +191,19 @@ function parseSchemaFile() {
       continue;
     }
 
-    const columnMatch = COLUMN_LINE_RE.exec(line);
-    if (columnMatch) {
+    const nameMatch = COLUMN_NAME_RE.exec(line);
+    if (!nameMatch) {
+      continue;
+    }
+
+    const typeMatch = COLUMN_TYPE_RE.exec(nameMatch[2]);
+    if (typeMatch) {
       current.columns.push({
-        name: columnMatch[1].toLowerCase(),
-        type: normalizeType(columnMatch[2]),
-        nullable: !/\bNOT\s+NULL\b/i.test(columnMatch[3]),
+        name: nameMatch[1].toLowerCase(),
+        type: normalizeType(typeMatch[0]),
+        // A type holds neither `NOT` nor `NULL`, so testing the whole remainder
+        // of the line is the same test as testing only what follows the type.
+        nullable: !/\bNOT\s+NULL\b/i.test(nameMatch[2]),
         line: i + 1
       });
     }
@@ -222,9 +232,10 @@ function readLiveColumns() {
 
   let rows;
   try {
-    // The PHP files in www/ are saved with a BOM, which php echoes before any
-    // output of its own; JSON.parse chokes on it.
-    const body = result.stdout.charCodeAt(0) === 0xFEFF ? result.stdout.slice(1) : result.stdout;
+    // No PHP file in the repository carries a BOM any more, but an editor can
+    // put one back, and php echoes it ahead of any output of its own - where
+    // JSON.parse chokes on it.
+    const body = result.stdout.codePointAt(0) === 0xFEFF ? result.stdout.slice(1) : result.stdout;
     rows = JSON.parse(body);
   } catch (e) {
     return { available: false, reason: `could not parse the column dump: ${e instanceof Error ? e.message : String(e)}` };
