@@ -71,21 +71,13 @@ class QueueDataCollector {
   }
 
   /**
-   * Read the unmasked datetime string from a start-N input (Inputmask v5).
-   * Falls back to the raw value when Inputmask isn't attached.
+   * Read the datetime string from a start-N input. The field is masked by
+   * attachInputMask (dom-utils), which keeps the value in the display format,
+   * so the raw value is what parseDate expects.
    */
   static readStartDateTime(tabNum) {
     const el = inputEl(`#start-${tabNum}`);
-    if (!el) return '';
-    // Inputmask is no longer loaded by any template, so this branch never runs
-    // today - see the open questions in .claude/plans/js-static-analysis.md
-    // before deciding whether to drop it.
-    const masked = /** @type {{unmaskedvalue?: () => string}|undefined} */ (
-      /** @type {any} */ (el).inputmask);
-    if (masked && typeof masked.unmaskedvalue === 'function') {
-      return masked.unmaskedvalue();
-    }
-    return el.value || '';
+    return el ? el.value : '';
   }
 }
 
