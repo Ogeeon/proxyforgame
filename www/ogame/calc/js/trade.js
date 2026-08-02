@@ -113,7 +113,15 @@ let options = {
             // The cookie carries `rates` as JSON, so a corrupted entry can leave
             // anything at all here. Re-derive mc either way: an old cookie holds
             // it as the toFixed string it used to be.
-            if (typeof this.rates !== 'object' || this.rates === null) {
+            //
+            // Widen to unknown before testing: the declared type comes from
+            // defaultRates() and says "always an object", which would make the
+            // null arm dead code to a reader and to the analyzer alike. It is
+            // not — loadFromCookie just overwrote the property, and `typeof
+            // null` is 'object', so null is exactly the case the typeof test
+            // lets through.
+            const loaded = /** @type {unknown} */ (this.rates);
+            if (typeof loaded !== 'object' || loaded === null) {
                 this.rates = defaultRates();
             }
             syncMcRate();
