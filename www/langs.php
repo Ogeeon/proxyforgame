@@ -50,7 +50,11 @@ function getLang() {
 // are not valid language tags, so map them to the proper variant subtags.
 function getLangAttr() {
   global $lang;
-  if ($lang === 'us') return 'en-US';
-  if ($lang === 'en') return 'en-GB';
+  if ($lang === 'us') {
+    return 'en-US';
+  }
+  if ($lang === 'en') {
+    return 'en-GB';
+  }
   return $lang;
 }
