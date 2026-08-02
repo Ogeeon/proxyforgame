@@ -109,10 +109,19 @@ const KEY_LINE_RE = /^\s*(PRIMARY\s+KEY|UNIQUE\s+KEY|UNIQUE|KEY|INDEX|FULLTEXT|S
 // `name type[(width)] [unsigned] [zerofill] [rest]`, backticked or not, read in
 // two steps: the column name and the remainder of the line, then the type at the
 // head of that remainder. One pattern for the whole shape ran past the regex
-// complexity SonarQube allows (javascript:S5843), and its lazy tail between two
-// `\s*` runs backtracked quadratically on top of that (javascript:S8786).
-const COLUMN_NAME_RE = /^\s*`?(\w+)`?\s+(.*)$/;
-const COLUMN_TYPE_RE = /^\w+(?:\s*\(\s*[^)]*\))?(?:\s+unsigned)?(?:\s+zerofill)?/i;
+// complexity SonarQube allows (javascript:S5843).
+//
+// Both are written to keep their quantifiers from overlapping (javascript:S8786),
+// which is why neither reads quite the way you would write it by hand:
+//   - no `$` after `(.*)`. `\s+` matches a newline and `.` does not, so an end
+//     that never arrives makes the two grind against each other. Greedy `.*`
+//     already runs to the end of the line, which is the whole input here.
+//   - no `\s*` after `\(`. `[^)]*` matches whitespace too, so the two split the
+//     same run between them once the closing paren is missing.
+// Measured before the change: 16k characters of the shapes above took ~200 ms
+// each, quadrupling for every doubling. Both are flat now.
+const COLUMN_NAME_RE = /^\s*`?(\w+)`?\s+(.*)/;
+const COLUMN_TYPE_RE = /^\w+(?:\s*\([^)]*\))?(?:\s+unsigned)?(?:\s+zerofill)?/i;
 
 /**
  * Normalizes a column type for comparison. The display width of an integer is
