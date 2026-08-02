@@ -123,11 +123,14 @@ let options = {
     },
 
     save: function() {
-        // Keep the locale separator out of the comma-delimited cookie (see load()).
-        const ds = this.decimalSeparator;
-        delete this.decimalSeparator;
-        saveToCookie('options_trade', options);
-        this.decimalSeparator = ds;
+        // Keep the locale separator out of the comma-delimited cookie (see
+        // load()). Written from a copy rather than by deleting the property and
+        // putting it back: a throw in between would leave the page without its
+        // separator.
+        /** @type {Record<string, unknown>} */
+        const saved = { ...this };
+        delete saved.decimalSeparator;
+        saveToCookie('options_trade', saved);
     },
 
     _parseUrlParams: function() {
@@ -318,10 +321,13 @@ let options = {
     _formatCoordinates: function() {
         if (!this.coordg || !this.coords || !this.coordp) return '';
 
-        const serverText = $('#country option:checked').textContent;
-        const uniText = $('#universe option:checked').textContent;
-        const server = /\(([^)]{1,64})\)/.exec(serverText)[1];
-        const uni = /^(.+) \(/.exec(uniText)[1];
+        // Both options read "<name> (<server>)". A row that does not follow the
+        // pattern - a universe whose name carries no parentheses - is quoted
+        // whole rather than dropping the coordinates from the message.
+        const serverText = getTextContent('#country option:checked');
+        const uniText = getTextContent('#universe option:checked');
+        const server = /\(([^)]{1,64})\)/.exec(serverText)?.[1] ?? serverText;
+        const uni = /^(.+) \(/.exec(uniText)?.[1] ?? uniText;
 
         const coords = '[' + this.coordg + ':' + this.coords + ':' + this.coordp + ']';
         const moonPart = this.moon ? ', ' + l.moonstr : '';
@@ -559,7 +565,10 @@ function updateDstFromSrc() {
         setTextContent('#mix-fix1-lbl', l.fix + '. ' + shortFirst);
         setTextContent('#mix-fix2-lbl', l.fix + '. ' + shortSecond);
     }
-    $('#dst-block').style.visibility = options.srcType < 3 ? 'visible' : 'hidden';
+    const dstBlock = $('#dst-block');
+    if (dstBlock) {
+        dstBlock.style.visibility = options.srcType < 3 ? 'visible' : 'hidden';
+    }
 }
 
 /**
