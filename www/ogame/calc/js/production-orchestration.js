@@ -229,22 +229,36 @@ function updateProduction(tab, production) {
 	}
 }
 
+// Column 3 of rows 1-3: the energy a mine draws, as used/required.
+function mineEnergyCell(results, row, koeff) {
+	let cons = results[row][4];
+	if (cons > 0) {
+		return numToOGame(Math.round(koeff * cons)) + '/' + numToOGame(cons);
+	}
+	return '';
+}
+
+// A production/consumption cell: blank at zero, brown when negative.
+function productionCell(value) {
+	if (value === 0) {
+		return '';
+	}
+	if (value >= 0) {
+		return numToOGame(value);
+	}
+	return '<span style="color: brown;">' + numToOGame(-1 * value) + '</span>';
+}
+
 // Fills the per-row production/consumption cells (rows 0-15, columns 0-3),
 // with column 3 of rows 1-3 showing the energy a mine draws (used/required).
 function renderOnePlnProductionRows(rows, results, koeff) {
 	for (let row = 0; row < 16; row++) {
 		for (let col = 0; col < 4; col++) {
 			if (row > 0 && row < 4 && col === 3) {
-				let cons = results[row][4];
-				rows[row + 1].children[6].innerHTML = cons > 0
-					? numToOGame(Math.round(koeff * cons)) + '/' + numToOGame(cons)
-					: '';
+				rows[row + 1].children[6].innerHTML = mineEnergyCell(results, row, koeff);
 				continue;
 			}
-			let val = results[row][col] >= 0 ? numToOGame(results[row][col]) : '<span style="color: brown;">' + numToOGame(-1 * results[row][col]) + '</span>';
-			if (results[row][col] === 0)
-				val = '';
-			rows[row + 1].children[col + 3].innerHTML = val;
+			rows[row + 1].children[col + 3].innerHTML = productionCell(results[row][col]);
 		}
 	}
 }
