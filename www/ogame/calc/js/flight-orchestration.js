@@ -6,6 +6,9 @@
 // builds it runs daily, so anything longer only serves stale coordinates.
 const POPULATED_SYSTEMS_TTL_MS = 24 * 60 * 60 * 1000;
 
+// The hh:mm the save-point tolerance field holds.
+const TOLERANCE_RE = /(\d\d):(\d\d)/;
+
 // The persisted state object. The TPL inline script fills in the translation
 // strings; the orchestrator reads/writes prm and calls load/save (cookie I/O in
 // utils.js). Transient bits (populated systems, manual overrides) live on the
@@ -503,7 +506,7 @@ class FlightOrchestrator {
         const legs = form.oneWay ? 1 : 2;
         const target = Math.round(Math.ceil((returnDTValue - startDTValue) / 1000) / legs);
 
-        const tol = form.tolerance.match(/(\d\d):(\d\d)/);
+        const tol = TOLERANCE_RE.exec(form.tolerance);
         const toleranceSeconds = Number(tol[1]) * 3600 + Number(tol[2]) * 60;
         const tolerance = Math.round(toleranceSeconds / legs);
         this.opts.prm.saveTolerance = toleranceSeconds;
@@ -693,7 +696,7 @@ class FlightOrchestrator {
         const form = this.collector.collectSavePointForm();
         prm.saveStartDT = parseDate(form.startDT, this.opts.datetimeFormat);
         prm.saveReturnDT = parseDate(form.returnDT, this.opts.datetimeFormat);
-        const tol = form.tolerance.match(/(\d\d):(\d\d)/);
+        const tol = TOLERANCE_RE.exec(form.tolerance);
         prm.saveTolerance = tol ? Number(tol[1]) * 3600 + Number(tol[2]) * 60 : 0;
         this.opts.save();
     }
