@@ -55,6 +55,7 @@ const options = {
         spCargohold: 0,
         lfMechanGE: 0,
         lfRocktalCE: 0,
+        /** @type {number[][]} Per ship: [speed, cargo, fuel] bonus in percent. */
         lfShipsBonuses: [],
         fleetIgnoreEmptySystems: false,
         fleetIgnoreInactiveSystems: false,
@@ -104,7 +105,7 @@ const options = {
     load: function (key) {
         try {
             loadFromCookie(key, options.prm);
-            if (options.prm.lfShipsBonuses.length !== 15 || options.prm.lfShipsBonuses[0].length === undefined) {
+            if (options.prm.lfShipsBonuses.length !== 15 || !Array.isArray(options.prm.lfShipsBonuses[0])) {
                 options.prm.lfShipsBonuses = Array.from({ length: 15 }, () => [0, 0, 0]);
             }
         } catch (e) {
@@ -506,8 +507,10 @@ class FlightOrchestrator {
         const legs = form.oneWay ? 1 : 2;
         const target = Math.round(Math.ceil((returnDTValue - startDTValue) / 1000) / legs);
 
+        // An unfilled tolerance field leaves the regexp without a match, which
+        // is the same as asking for an exact hit.
         const tol = TOLERANCE_RE.exec(form.tolerance);
-        const toleranceSeconds = Number(tol[1]) * 3600 + Number(tol[2]) * 60;
+        const toleranceSeconds = tol ? Number(tol[1]) * 3600 + Number(tol[2]) * 60 : 0;
         const tolerance = Math.round(toleranceSeconds / legs);
         this.opts.prm.saveTolerance = toleranceSeconds;
 
@@ -908,6 +911,9 @@ class FlightOrchestrator {
      */
     addFlightLeg(arg) {
         const container = document.getElementById('flight-data');
+        if (!container) {
+            return;
+        }
         let last = /** @type {HTMLInputElement|null} */ (
             container.querySelector('.flight-leg:last-child .flight-time-input'));
 
@@ -916,25 +922,29 @@ class FlightOrchestrator {
         if (last && !isMaskBlank(last) && last.value !== '00 00:00:00') {
             container.insertAdjacentHTML('beforeend', this._legRowHtml());
             const row = container.querySelector('.flight-leg:last-child');
-            this._wireLegRow(row);
-            last = /** @type {HTMLInputElement|null} */ (row.querySelector('.flight-time-input'));
+            if (row) {
+                this._wireLegRow(row);
+                last = /** @type {HTMLInputElement|null} */ (row.querySelector('.flight-time-input'));
+            }
         }
 
-        if (typeof arg !== 'object') {
-            const seconds = Number(arg);
-            last.value = getFlightTimeStr(Math.abs(seconds));
-            if (seconds < 0) {
-                this._setLegSign(last.closest('.flight-leg').querySelector('.flight-leg-sign'), '-');
+        if (last) {
+            if (typeof arg !== 'object') {
+                const seconds = Number(arg);
+                last.value = getFlightTimeStr(Math.abs(seconds));
+                const sign = seconds < 0 && last.closest('.flight-leg')?.querySelector('.flight-leg-sign');
+                if (sign) {
+                    this._setLegSign(sign, '-');
+                }
+            } else {
+                last.focus();
             }
-        } else if (last) {
-            last.focus();
         }
         this.updateArrival();
     }
 
     removeFlightLeg(row) {
-        const container = document.getElementById('flight-data');
-        const rows = container.querySelectorAll('.flight-leg');
+        const rows = $$('#flight-data .flight-leg');
         if (rows.length === 1) {
             const input = row.querySelector('.flight-time-input');
             input.value = '';
@@ -987,12 +997,23 @@ class FlightOrchestrator {
         field.addEventListener('blur', () => this.updateArrival());
     }
 
-    /** Rebuild the leg list from the stored flightData array. */
-    restoreFlightLegs() {
+    /** Throw the leg list away and leave a single empty row behind. */
+    _resetLegRows() {
         const container = document.getElementById('flight-data');
+        if (!container) {
+            return;
+        }
         FlightOrchestrator._disposeRowTooltips(container);
         container.innerHTML = this._legRowHtml(true);
-        this._wireLegRow(container.querySelector('.flight-leg'));
+        const row = container.querySelector('.flight-leg');
+        if (row) {
+            this._wireLegRow(row);
+        }
+    }
+
+    /** Rebuild the leg list from the stored flightData array. */
+    restoreFlightLegs() {
+        this._resetLegRows();
         const legs = this.opts.prm.flightData.slice();
         legs.forEach((seconds) => this.addFlightLeg(seconds));
         this.updateArrival();
@@ -1027,6 +1048,14 @@ class FlightOrchestrator {
         this.opts.save();
     }
 
+    /** Activate a tab of the main tab strip by its id. */
+    static _showTab(id) {
+        const tab = document.getElementById(id);
+        if (tab) {
+            bootstrap.Tab.getOrCreateInstance(tab).show();
+        }
+    }
+
     /** Is the departure panel showing its Recall tab rather than the plain one? */
     static _recallTabActive() {
         const tab = document.getElementById('recall-tabtag-recall');
@@ -1043,7 +1072,7 @@ class FlightOrchestrator {
      *        one-way search, two for a round trip.
      */
     showFlightTime(point, depTime, speed, legs) {
-        bootstrap.Tab.getOrCreateInstance(document.getElementById('tabtag1')).show();
+        FlightOrchestrator._showTab('tabtag1');
         setVal('#destination-g', point[0]);
         setVal('#destination-s', point[1]);
         setVal('#destination-p', point[2]);
@@ -1061,9 +1090,7 @@ class FlightOrchestrator {
         const fleetSpeed = this.calc.fleetSpeedFor(params.missionType, params);
         const duration = this.calc.getFlightDuration(minSpeed, distance, speed, fleetSpeed);
 
-        FlightOrchestrator._disposeRowTooltips(document.getElementById('flight-data'));
-        document.getElementById('flight-data').innerHTML = this._legRowHtml(true);
-        this._wireLegRow(document.getElementById('flight-data').querySelector('.flight-leg'));
+        this._resetLegRows();
         for (let i = 0; i < legs; i++) {
             this.addFlightLeg(duration);
         }
@@ -1441,7 +1468,7 @@ class FlightOrchestrator {
         const importShips = getChecked('#own-api-import-ships');
         const importLifeforms = getChecked('#own-api-import-lifeforms');
         try {
-            if (importCoords && data.coords) this._importOwnApiCoords(data);
+            if (importCoords && data.coords) this._importOwnApiCoords(data.coords);
             if (importClass) this._importOwnApiClass(data);
             if (importResearch) this._importOwnApiResearch(data);
             // Guarded, not unconditional: the method zeroes both fields before it
@@ -1469,11 +1496,11 @@ class FlightOrchestrator {
             Object.keys(data.researches).length > 0 || Object.keys(data.ships).length > 0;
     }
 
-    /** @param {OwnApiPayload} data */
-    _importOwnApiCoords(data) {
-        setVal('#departure-g', data.coords.galaxy);
-        setVal('#departure-s', data.coords.system);
-        setVal('#departure-p', data.coords.position);
+    /** @param {OwnApiCoords} coords */
+    _importOwnApiCoords(coords) {
+        setVal('#departure-g', coords.galaxy);
+        setVal('#departure-s', coords.system);
+        setVal('#departure-p', coords.position);
     }
 
     /** @param {OwnApiPayload} data */
@@ -1681,7 +1708,10 @@ class FlightOrchestrator {
         // min 0, not 1: a 0 must reach the toggle so it can fall back to 10000,
         // instead of the blur validator clamping it up to 1 first.
         field._constrains = { min: 0, def: 10000, max: 1000000000 };
-        document.getElementById('ovr-speed-cb').addEventListener('click', (e) => this.toggleSpeedOverride(e));
+        const toggle = document.getElementById('ovr-speed-cb');
+        if (toggle) {
+            toggle.addEventListener('click', (e) => this.toggleSpeedOverride(e));
+        }
     }
 
     _setInputConstraints() {
@@ -1745,7 +1775,10 @@ class FlightOrchestrator {
 
         document.querySelectorAll('.button-taketocalc').forEach((btn) =>
             btn.addEventListener('click', (e) => this.takeToCalc(e.currentTarget)));
-        this._wireLegRow(document.getElementById('flight-data').querySelector('.flight-leg'));
+        const firstLeg = $('#flight-data .flight-leg');
+        if (firstLeg) {
+            this._wireLegRow(firstLeg);
+        }
 
         // Save-point coordinate links are rendered dynamically; delegate their clicks.
         const spTables = document.getElementById('save-points-tables');
@@ -1758,7 +1791,7 @@ class FlightOrchestrator {
                 }
                 e.preventDefault();
                 this.showFlightTime(
-                    link.dataset.point.split(',').map(Number),
+                    (link.dataset.point ?? '').split(',').map(Number),
                     link.dataset.start,
                     Number(link.dataset.speed),
                     Number(link.dataset.legs));
@@ -1890,10 +1923,11 @@ class FlightOrchestrator {
 
     _populateStorageSelects() {
         const fill = (prefix, selectId) => {
+            /** @type {string[]} */
             const keys = [];
             for (let i = 0; i < localStorage.length; i++) {
                 const key = localStorage.key(i);
-                if (key.includes(prefix)) {
+                if (key?.includes(prefix)) {
                     keys.push(key);
                 }
             }
@@ -1912,14 +1946,14 @@ class FlightOrchestrator {
         if (openLfbr) {
             openLfbr.addEventListener('click', () => {
                 setVal('#lf-bonuses-txtarea', '');
-                bootstrap.Modal.getOrCreateInstance(document.getElementById('lf-bonuses-reader')).show();
+                show('#lf-bonuses-reader');
             });
         }
         const lfRead = document.getElementById('lf-bonuses-read-btn');
         if (lfRead) {
             lfRead.addEventListener('click', () => {
                 if (this.readShipsBonuses()) {
-                    bootstrap.Modal.getInstance(document.getElementById('lf-bonuses-reader')).hide();
+                    hide('#lf-bonuses-reader');
                     this.recalc();
                 }
             });
@@ -1928,14 +1962,14 @@ class FlightOrchestrator {
         if (importBtn) {
             importBtn.addEventListener('click', () => {
                 setVal('#own-api-input', '');
-                bootstrap.Modal.getOrCreateInstance(document.getElementById('own-api-reader')).show();
+                show('#own-api-reader');
             });
         }
         const ownApiRead = document.getElementById('own-api-read-btn');
         if (ownApiRead) {
             ownApiRead.addEventListener('click', () => {
                 if (this.importOwnApi(getVal('#own-api-input'))) {
-                    bootstrap.Modal.getInstance(document.getElementById('own-api-reader')).hide();
+                    hide('#own-api-reader');
                 }
             });
         }
@@ -1953,7 +1987,7 @@ class FlightOrchestrator {
             tabNum = localStorage.getItem('flight-tab-num') ?? '0';
         } catch (e) { /* storage disabled */ }
         const tabId = String(tabNum) === '1' ? 'tabtag2' : 'tabtag1';
-        bootstrap.Tab.getOrCreateInstance(document.getElementById(tabId)).show();
+        FlightOrchestrator._showTab(tabId);
         this.showTabsHint(tabId);
     }
 
