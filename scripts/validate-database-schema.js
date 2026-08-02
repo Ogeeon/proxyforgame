@@ -106,8 +106,10 @@ function findDatabaseUsage() {
 // Lines inside a CREATE TABLE body that define an index rather than a column.
 const KEY_LINE_RE = /^\s*(PRIMARY\s+KEY|UNIQUE\s+KEY|UNIQUE|KEY|INDEX|FULLTEXT|SPATIAL|CONSTRAINT|FOREIGN\s+KEY)\b/i;
 
-// `name type[(width)] [unsigned] [rest]`, backticked or not.
-const COLUMN_LINE_RE = /^\s*`?(\w+)`?\s+(\w+(?:\s*\(\s*[^)]*\))?(?:\s+unsigned)?(?:\s+zerofill)?)\s*(.*?),?\s*$/i;
+// `name type[(width)] [unsigned] [rest]`, backticked or not. The rest is taken
+// greedily to the end of the line - it is only ever tested for `NOT NULL`, and a
+// lazy group between two `\s*` runs backtracks quadratically (javascript:S8786).
+const COLUMN_LINE_RE = /^\s*`?(\w+)`?\s+(\w+(?:\s*\(\s*[^)]*\))?(?:\s+unsigned)?(?:\s+zerofill)?)(.*)$/i;
 
 /**
  * Normalizes a column type for comparison. The display width of an integer is
@@ -121,10 +123,12 @@ const COLUMN_LINE_RE = /^\s*`?(\w+)`?\s+(\w+(?:\s*\(\s*[^)]*\))?(?:\s+unsigned)?
 function normalizeType(type) {
   return type
     .toLowerCase()
+    // Every whitespace run is a single space from here on, so the patterns below
+    // can bound their quantifiers instead of backtracking over `\s*`.
     .replace(/\s+/g, ' ')
-    .replace(/\s*\(\s*/g, '(')
+    .replace(/ ?\( ?/g, '(')
     // Only the space before `)`; the one after it separates `unsigned`.
-    .replace(/\s*\)/g, ')')
+    .replace(/ ?\)/g, ')')
     .replace(/^(tinyint|smallint|mediumint|int|integer|bigint|year)\(\d+\)/, '$1')
     .trim();
 }
