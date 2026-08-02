@@ -100,6 +100,131 @@ const HEADING_RE = /^#{1,6} /;
  */
 
 /**
+ * @typedef {object} ParseState
+ * @property {Release|null} release  The release heading currently being filled.
+ * @property {Section|null} section  The group bullets currently attach to.
+ */
+
+/**
+ * Opens the release named by a "## " heading. A malformed heading leaves the
+ * state without a release, so that whatever follows it is reported rather than
+ * quietly appended to the section above.
+ *
+ * @param {string} line
+ * @param {number} no
+ * @param {ParseState} state
+ * @param {Release[]} releases
+ * @param {string[]} errors
+ */
+function openRelease(line, no, state, releases, errors) {
+  state.section = null;
+
+  const unreleased = UNRELEASED_RE.exec(line);
+  const dated = RELEASE_RE.exec(line);
+
+  if (!unreleased && !dated) {
+    errors.push(`line ${no}: malformed release heading "${line}" - expected "## [Unreleased]" or "## [YYYY-MM-DD] - site entry N"`);
+    state.release = null;
+    return;
+  }
+
+  state.release = {
+    date: dated ? dated[1] : null,
+    id: dated && dated[2] !== undefined ? Number.parseInt(dated[2], 10) : null,
+    sections: [],
+    quote: null,
+    quoteLine: 0,
+    line: no,
+    endLine: no
+  };
+  releases.push(state.release);
+}
+
+/**
+ * @param {string} line
+ * @param {number} no
+ * @param {ParseState} state
+ * @param {string[]} errors
+ * @returns {boolean} whether the line was a "###" group heading
+ */
+function readSection(line, no, state, errors) {
+  const match = SECTION_RE.exec(line);
+  if (!match) {
+    return false;
+  }
+  if (!state.release) {
+    errors.push(`line ${no}: "### ${match[1]}" appears before any release heading`);
+    return true;
+  }
+
+  /** @type {Section} */
+  const section = { name: match[1], bullets: [], line: no };
+  state.release.sections.push(section);
+  state.section = section;
+  return true;
+}
+
+/**
+ * @param {string} line
+ * @param {number} no
+ * @param {ParseState} state
+ * @param {string[]} errors
+ * @returns {boolean} whether the line was a "> **RU:**" quote
+ */
+function readQuote(line, no, state, errors) {
+  const match = QUOTE_RE.exec(line);
+  if (!match) {
+    return false;
+  }
+  if (!state.release) {
+    errors.push(`line ${no}: a "> **RU:**" quote appears before any release heading`);
+    return true;
+  }
+  if (state.release.quote !== null) {
+    errors.push(`line ${no}: a second "> **RU:**" quote in the same release`);
+    return true;
+  }
+
+  state.release.quote = match[1];
+  state.release.quoteLine = no;
+  return true;
+}
+
+/**
+ * @param {string} line
+ * @param {number} no
+ * @param {ParseState} state
+ * @param {string[]} errors
+ * @returns {boolean} whether the line was a bullet
+ */
+function readBullet(line, no, state, errors) {
+  const match = BULLET_RE.exec(line);
+  if (!match) {
+    return false;
+  }
+  if (!state.section) {
+    errors.push(`line ${no}: bullet "${match[1]}" is not under a "###" group`);
+    return true;
+  }
+
+  const raw = match[1];
+  state.section.bullets.push({
+    text: raw.replace(SITE_MARK, '').trim(),
+    site: raw.includes(SITE_MARK),
+    line: no
+  });
+  return true;
+}
+
+/**
+ * The readers that consume a line below a release heading, in the order parse()
+ * tries them. The first one to claim the line wins.
+ *
+ * @type {Array<(line: string, no: number, state: ParseState, errors: string[]) => boolean>}
+ */
+const LINE_READERS = [readSection, readQuote, readBullet];
+
+/**
  * Parses CHANGELOG.md into releases. Structural problems are collected rather
  * than thrown so that validate() can report all of them at once.
  *
@@ -112,89 +237,28 @@ function parse(content) {
   const releases = [];
   /** @type {string[]} */
   const errors = [];
+  /** @type {ParseState} */
+  const state = { release: null, section: null };
 
-  /** @type {Release|null} */
-  let release = null;
-  /** @type {Section|null} */
-  let section = null;
+  for (const [index, line] of lines.entries()) {
+    const no = index + 1;
 
-  for (let i = 0; i < lines.length; i++) {
-    const line = lines[i];
-    const no = i + 1;
-
-    if (release) {
-      release.endLine = no;
+    if (state.release) {
+      state.release.endLine = no;
     }
 
     if (line.startsWith('## ')) {
-      section = null;
-      const unreleased = UNRELEASED_RE.exec(line);
-      const dated = RELEASE_RE.exec(line);
-
-      if (!unreleased && !dated) {
-        errors.push(`line ${no}: malformed release heading "${line}" - expected "## [Unreleased]" or "## [YYYY-MM-DD] - site entry N"`);
-        release = null;
-        continue;
-      }
-
-      release = {
-        date: dated ? dated[1] : null,
-        id: dated && dated[2] !== undefined ? Number.parseInt(dated[2], 10) : null,
-        sections: [],
-        quote: null,
-        quoteLine: 0,
-        line: no,
-        endLine: no
-      };
-      releases.push(release);
+      openRelease(line, no, state, releases, errors);
       continue;
     }
 
-    const sectionMatch = SECTION_RE.exec(line);
-    if (sectionMatch) {
-      if (!release) {
-        errors.push(`line ${no}: "### ${sectionMatch[1]}" appears before any release heading`);
-        continue;
-      }
-      section = { name: sectionMatch[1], bullets: [], line: no };
-      release.sections.push(section);
-      continue;
-    }
-
-    const quoteMatch = QUOTE_RE.exec(line);
-    if (quoteMatch) {
-      if (!release) {
-        errors.push(`line ${no}: a "> **RU:**" quote appears before any release heading`);
-        continue;
-      }
-      if (release.quote !== null) {
-        errors.push(`line ${no}: a second "> **RU:**" quote in the same release`);
-        continue;
-      }
-      release.quote = quoteMatch[1];
-      release.quoteLine = no;
-      continue;
-    }
-
-    const bulletMatch = BULLET_RE.exec(line);
-    if (bulletMatch) {
-      if (!section) {
-        errors.push(`line ${no}: bullet "${bulletMatch[1]}" is not under a "###" group`);
-        continue;
-      }
-      const raw = bulletMatch[1];
-      const site = raw.includes(SITE_MARK);
-      section.bullets.push({
-        text: raw.replace(SITE_MARK, '').trim(),
-        site,
-        line: no
-      });
+    if (LINE_READERS.some((read) => read(line, no, state, errors))) {
       continue;
     }
 
     // Anything else must be blank or belong to the file header. A stray heading
     // level inside a release would silently swallow bullets, so reject it.
-    if (release && HEADING_RE.test(line)) {
+    if (state.release && HEADING_RE.test(line)) {
       errors.push(`line ${no}: unexpected heading "${line}" inside a release section`);
     }
   }
@@ -219,16 +283,13 @@ function describe(release) {
 }
 
 /**
- * Applies every structural rule to a parsed file.
+ * The rules that hold for the file as a whole rather than for one release.
  *
  * @param {string} content
- * @returns {{ errors: string[], warnings: string[], releases: Release[] }}
+ * @param {Release[]} releases
+ * @param {string[]} errors
  */
-function validate(content) {
-  const { releases, errors } = parse(content);
-  /** @type {string[]} */
-  const warnings = [];
-
+function validateHeader(content, releases, errors) {
   // Split rather than startsWith: .gitattributes normalizes to LF in the
   // repository, but a clone with core.autocrlf on has CRLF in the working tree.
   if (content.split(/\r?\n/, 1)[0] !== '# Changelog') {
@@ -241,13 +302,130 @@ function validate(content) {
   } else if (releases.length > 0 && releases[0].date !== null) {
     errors.push(`line ${releases[0].line}: "## [Unreleased]" must be the first release section`);
   }
+}
+
+/**
+ * The "###" groups must carry Keep a Changelog names, appear at most once each,
+ * stay in the canonical order and hold at least one bullet.
+ *
+ * @param {Release} release
+ * @param {string} where
+ * @param {string[]} errors
+ */
+function validateSections(release, where, errors) {
+  /** @type {string[]} */
+  const seen = [];
+  let lastIndex = -1;
+
+  for (const section of release.sections) {
+    const index = SECTION_ORDER.indexOf(section.name);
+    if (index === -1) {
+      errors.push(`line ${section.line}: "${section.name}" is not a Keep a Changelog group (${SECTION_ORDER.join(', ')})`);
+    } else if (seen.includes(section.name)) {
+      errors.push(`line ${section.line}: "${section.name}" appears twice in ${where}`);
+    } else if (index < lastIndex) {
+      errors.push(`line ${section.line}: "${section.name}" is out of order in ${where} - keep the groups in the order ${SECTION_ORDER.join(', ')}`);
+    } else {
+      lastIndex = index;
+    }
+    seen.push(section.name);
+
+    if (section.bullets.length === 0) {
+      errors.push(`line ${section.line}: "${section.name}" in ${where} has no bullets`);
+    }
+  }
+}
+
+/**
+ * A dated release has to agree with itself: bullets marked for the site, the
+ * "- site entry N" id and the "> **RU:**" quote are present together or not at
+ * all. [Unreleased] is exempt - it carries the quote before it carries an id.
+ *
+ * @param {Release} release
+ * @param {string} where
+ * @param {string[]} errors
+ */
+function validateSiteEntry(release, where, errors) {
+  if (release.date === null) {
+    return;
+  }
+
+  const site = hasSiteBullets(release);
+
+  if (site && release.id === null) {
+    errors.push(`line ${release.line}: ${where} publishes bullets to the site but its heading carries no "- site entry N"`);
+  }
+  if (!site && release.id !== null) {
+    errors.push(`line ${release.line}: ${where} carries "- site entry ${release.id}" but no bullet is marked "${SITE_MARK}"`);
+  }
+  if (site && release.quote === null) {
+    errors.push(`line ${release.line}: ${where} publishes bullets to the site but has no "> **RU:**" quote`);
+  }
+  if (!site && release.quote !== null) {
+    errors.push(`line ${release.quoteLine}: ${where} has a "> **RU:**" quote but no bullet marked "${SITE_MARK}"`);
+  }
+}
+
+/**
+ * @param {Release} release
+ * @param {string} where
+ * @param {string[]} errors
+ * @param {string[]} warnings
+ */
+function validateQuoteLength(release, where, errors, warnings) {
+  if (release.quote === null) {
+    return;
+  }
+
+  const length = release.quote.length;
+  if (length > MAX_DESCRIPTION) {
+    errors.push(`line ${release.quoteLine}: the quote of ${where} is ${length} characters, over the ${MAX_DESCRIPTION} the database column holds`);
+  } else if (length > WARN_DESCRIPTION) {
+    warnings.push(`line ${release.quoteLine}: the quote of ${where} is ${length} characters - translations run longer than the Russian source and the column holds ${MAX_DESCRIPTION}`);
+  }
+}
+
+/**
+ * @param {Release|null} previous  The nearest dated release above this one.
+ * @param {Release} release
+ * @param {string} where
+ * @param {string[]} errors
+ * @param {string[]} warnings
+ */
+function validateAgainstPrevious(previous, release, where, errors, warnings) {
+  if (!previous || release.date === null) {
+    return;
+  }
+
+  if (previous.id !== null && release.id !== null && release.id >= previous.id) {
+    errors.push(`line ${release.line}: site entry ${release.id} must be smaller than ${previous.id} above it - the sidebar orders entries by id`);
+  }
+  // Dates are not enforced: the published history has real inversions, such
+  // as entry 32 dated 2023-04-26 sitting below entries 33 and 34 dated
+  // February 2023. Worth a look, not worth failing a build over.
+  if (previous.date !== null && release.date > previous.date) {
+    warnings.push(`line ${release.line}: ${where} is dated after ${describe(previous)} above it`);
+  }
+}
+
+/**
+ * Applies every structural rule to a parsed file.
+ *
+ * @param {string} content
+ * @returns {{ errors: string[], warnings: string[], releases: Release[] }}
+ */
+function validate(content) {
+  const { releases, errors } = parse(content);
+  /** @type {string[]} */
+  const warnings = [];
+
+  validateHeader(content, releases, errors);
 
   /** @type {Release|null} */
   let previous = null;
 
   for (const release of releases) {
     const where = describe(release);
-    const site = hasSiteBullets(release);
 
     // A release with no groups at all is fine only for [Unreleased], which sits
     // empty between releases.
@@ -255,62 +433,10 @@ function validate(content) {
       errors.push(`line ${release.line}: ${where} has no "###" group`);
     }
 
-    /** @type {string[]} */
-    const seen = [];
-    let lastIndex = -1;
-    for (const section of release.sections) {
-      const index = SECTION_ORDER.indexOf(section.name);
-      if (index === -1) {
-        errors.push(`line ${section.line}: "${section.name}" is not a Keep a Changelog group (${SECTION_ORDER.join(', ')})`);
-      } else if (seen.includes(section.name)) {
-        errors.push(`line ${section.line}: "${section.name}" appears twice in ${where}`);
-      } else if (index < lastIndex) {
-        errors.push(`line ${section.line}: "${section.name}" is out of order in ${where} - keep the groups in the order ${SECTION_ORDER.join(', ')}`);
-      } else {
-        lastIndex = index;
-      }
-      seen.push(section.name);
-
-      if (section.bullets.length === 0) {
-        errors.push(`line ${section.line}: "${section.name}" in ${where} has no bullets`);
-      }
-    }
-
-    if (release.date !== null) {
-      if (site && release.id === null) {
-        errors.push(`line ${release.line}: ${where} publishes bullets to the site but its heading carries no "- site entry N"`);
-      }
-      if (!site && release.id !== null) {
-        errors.push(`line ${release.line}: ${where} carries "- site entry ${release.id}" but no bullet is marked "${SITE_MARK}"`);
-      }
-      if (site && release.quote === null) {
-        errors.push(`line ${release.line}: ${where} publishes bullets to the site but has no "> **RU:**" quote`);
-      }
-      if (!site && release.quote !== null) {
-        errors.push(`line ${release.quoteLine}: ${where} has a "> **RU:**" quote but no bullet marked "${SITE_MARK}"`);
-      }
-    }
-
-    if (release.quote !== null) {
-      const length = release.quote.length;
-      if (length > MAX_DESCRIPTION) {
-        errors.push(`line ${release.quoteLine}: the quote of ${where} is ${length} characters, over the ${MAX_DESCRIPTION} the database column holds`);
-      } else if (length > WARN_DESCRIPTION) {
-        warnings.push(`line ${release.quoteLine}: the quote of ${where} is ${length} characters - translations run longer than the Russian source and the column holds ${MAX_DESCRIPTION}`);
-      }
-    }
-
-    if (previous && release.date !== null) {
-      if (previous.id !== null && release.id !== null && release.id >= previous.id) {
-        errors.push(`line ${release.line}: site entry ${release.id} must be smaller than ${previous.id} above it - the sidebar orders entries by id`);
-      }
-      // Dates are not enforced: the published history has real inversions, such
-      // as entry 32 dated 2023-04-26 sitting below entries 33 and 34 dated
-      // February 2023. Worth a look, not worth failing a build over.
-      if (previous.date !== null && release.date > previous.date) {
-        warnings.push(`line ${release.line}: ${where} is dated after ${describe(previous)} above it`);
-      }
-    }
+    validateSections(release, where, errors);
+    validateSiteEntry(release, where, errors);
+    validateQuoteLength(release, where, errors, warnings);
+    validateAgainstPrevious(previous, release, where, errors, warnings);
 
     if (release.date !== null) {
       previous = release;
