@@ -1186,7 +1186,10 @@ class FlightOrchestrator {
 
     async fetchServerData() {
         const { country, universe } = this.collector.collectServer();
-        if (universe === null || universe === '') {
+        // collectServer reads the select through the collector's text(), which
+        // substitutes '' for a missing element - the empty string is the only
+        // "nothing selected" value that can arrive here.
+        if (universe === '') {
             return;
         }
         this._showOverlay('general-settings-panel', this.opts.dataFetchMsg);
@@ -1255,7 +1258,10 @@ class FlightOrchestrator {
             return;
         }
         const { country, universe } = this.collector.collectServer();
-        if (universe === null || universe === '') {
+        // collectServer reads the select through the collector's text(), which
+        // substitutes '' for a missing element - the empty string is the only
+        // "nothing selected" value that can arrive here.
+        if (universe === '') {
             return;
         }
         const key = `populated_systems_data_${country}_${universe}`;
