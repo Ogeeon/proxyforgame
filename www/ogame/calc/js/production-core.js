@@ -331,8 +331,8 @@ function applyLfEnergyReduction(lfEff, totalEnergyUsed, crawlersEenergyCons, res
 	for (let i = 1; i < 4; i++)
 		results[i][4] = Math.floor(results[i][4] * enRFactor);
 	results[7][3] = -Math.floor(crawlersEenergyCons * enRFactor);
-	for (let b = 0; b < lfBld.length; b++)
-		lfBld[b][4] = Math.floor(lfBld[b][4] * enRFactor);
+	for (const bld of lfBld)
+		bld[4] = Math.floor(bld[4] * enRFactor);
 	return Math.floor(totalEnergyUsed * enRFactor);
 }
 

@@ -192,11 +192,11 @@ function blinkMaxStorage(storages) {
 function setOnePlanetView(extended) {
 	const rows = $$('#one-planet-prod tr');
 	const newMode = extended ? 'table-cell' : 'none';
-	for (let row = 0; row < rows.length; row++) {
-		if (rows[row].children.length < 8)
+	for (const row of rows) {
+		if (row.children.length < 8)
 			continue;
-		cellAt(rows[row], 1).style.display = newMode;
-		cellAt(rows[row], 7).style.display = newMode;
+		cellAt(row, 1).style.display = newMode;
+		cellAt(row, 7).style.display = newMode;
 	}
 }
 
