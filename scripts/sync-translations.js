@@ -275,6 +275,19 @@ function printCompletionLine(result, totalKeys) {
 }
 
 /**
+ * One line standing in for a value: a string is quoted and cut at 50
+ * characters, anything else is shown as JSON.
+ *
+ * @param {unknown} value
+ * @returns {string}
+ */
+function previewValue(value) {
+  if (typeof value !== 'string') return JSON.stringify(value);
+  const ellipsis = value.length > 50 ? '...' : '';
+  return `"${value.substring(0, 50)}${ellipsis}"`;
+}
+
+/**
  * Prints the full missing-key list (with value preview) for locales that have any
  */
 function printMissingKeyDetails(results) {
@@ -283,11 +296,8 @@ function printMissingKeyDetails(results) {
 
     console.log(`\n${colorize(result.lang, result.status)} missing keys:`);
     for (const { key, sourceValue } of result.missingKeys) {
-      const valuePreview = typeof sourceValue === 'string'
-        ? `"${sourceValue.substring(0, 50)}${sourceValue.length > 50 ? '...' : ''}"`
-        : JSON.stringify(sourceValue);
       console.log(`  ${colorize('•', colors.gray)} ${key}`);
-      console.log(`    ${colorize(valuePreview, colors.gray)}`);
+      console.log(`    ${colorize(previewValue(sourceValue), colors.gray)}`);
     }
   }
 }
@@ -325,11 +335,11 @@ function generateReport(sourceData, localeFiles, showMissingKeys = false) {
  * Main function
  */
 function main() {
-  const args = process.argv.slice(2);
-  const dryRun = args.includes('--dry-run');
-  const reportOnly = args.includes('--report');
-  const fix = args.includes('--fix');
-  const showKeys = args.includes('--show-keys');
+  const args = new Set(process.argv.slice(2));
+  const dryRun = args.has('--dry-run');
+  const reportOnly = args.has('--report');
+  const fix = args.has('--fix');
+  const showKeys = args.has('--show-keys');
 
   // Load source file
   const sourceData = loadJsonFile(SOURCE_FILE);
