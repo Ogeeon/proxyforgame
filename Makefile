@@ -44,6 +44,7 @@ PW_REPORTER ?= list
 .PHONY: help install serve db-seed \
         test test-unit test-e2e test-e2e-ui test-one report \
         check audit quality coverage db-validate lint typecheck typecheck-strictnull \
+        changelog-validate changelog-release \
         tsconfigs tsconfigs-check \
         html-render html-validate html-audit \
         i18n-validate i18n-report i18n-show i18n-fix \
@@ -93,7 +94,7 @@ report: ## Open the last Playwright HTML report
 # `make check` always means "you broke something". The two reporters below
 # both exit non-zero on pre-existing issues, so they live in `audit` instead and
 # are prefixed with `-` there to keep one failure from hiding the other.
-check: i18n-validate lint typecheck tsconfigs-check html-validate test ## Green gate - what must pass before a commit
+check: changelog-validate i18n-validate lint typecheck tsconfigs-check html-validate test ## Green gate - what must pass before a commit
 
 audit: ## Advisory reports; these flag pre-existing issues and do not gate
 	-node scripts/check-test-coverage.js
@@ -125,6 +126,11 @@ coverage: ## Report which calculators have no spec
 
 db-validate: ## Compare schema.sql against the SqlQuery calls in PHP
 	node scripts/validate-database-schema.js
+
+# First in `check` because it is the cheapest gate in the list: a structural
+# mistake in CHANGELOG.md surfaces before anything spawns tsc or a browser.
+changelog-validate: ## Check the structure of CHANGELOG.md
+	node scripts/changelog.js --validate
 
 ##@ HTML validation
 
@@ -170,3 +176,8 @@ assets: ## Add filemtime versioning to unversioned assets
 
 docs: ## Regenerate docs/calculators
 	node scripts/generate-docs.js
+
+# Writes changelog.sql with the Russian text in all twelve rows; run
+# /translate-changelog next, then apply the file to the database.
+changelog-release: ## Cut [Unreleased] into a dated release, e.g. make changelog-release date=2026-08-05
+	node scripts/changelog.js --release $(if $(date),--date=$(date),)
