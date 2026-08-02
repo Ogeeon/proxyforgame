@@ -554,7 +554,9 @@
     "own-api-import-btn": "Import aus OGame",
     "own-api-import-title": "Importieren",
     "own-api-bad-json-msg": "Die Daten konnten nicht gelesen werden.\\nStellen Sie sicher, dass Sie den Text aus dem Feld API 2 auf der Seite „Flotte“ eingefügt haben.",
-    "import-failed-msg": "Die Daten konnten nicht geladen werden.\\nDer Server hat eine ungültige Antwort zurückgegeben. Bitte versuchen Sie es später erneut."
+    "import-failed-msg": "Die Daten konnten nicht geladen werden.\\nDer Server hat eine ungültige Antwort zurückgegeben. Bitte versuchen Sie es später erneut.",
+    "server-data-failed-msg": "Die Universums-Einstellungen konnten nicht geladen werden. Prüfen Sie die Werte unten und korrigieren Sie sie von Hand.",
+    "populated-systems-failed-msg": "Die Karte der besiedelten Systeme ist nicht verfügbar, daher wird kein System als übersprungen gezählt. Sie können ihre Anzahl von Hand eingeben."
   },
   "graviton": {
     "title": "OGame - Gravitonforschung Rechner",

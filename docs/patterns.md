@@ -472,6 +472,44 @@ beats the shadow rule, so focus keeps working without a further override.
 Write the fill against `.btn`, not `button.btn`: flight uses `<div class="btn …">` in three
 places (`flight.tpl:504, 531, 540`).
 
+---
+
+## (g) Reporting a failure: toast vs `alert()`
+
+Which one is right follows from who started the thing that failed, not from how bad the
+failure is.
+
+| | the user pressed something | the page went off on its own |
+|---|---|---|
+| example | «Import from OGame» on a malformed API code | the universe settings loaded on page open |
+| channel | `alert()` | `showToast()` |
+| why | the user is waiting for an answer and a modal *is* the answer | a modal would interrupt work the user never asked about |
+
+`showToast(message, level)` lives in `www/ogame/calc/js/dom-utils.js` — the file every
+calculator already loads, so using it adds no `<script>` tag. It builds its own
+`.toast-container` on first call, which is why no template carries one.
+
+```js
+} catch (error) {
+    consoleLog('fetch error: ' + error);
+    showToast(this.opts.serverDataFailedMsg, 'danger');
+}
+```
+
+- `level` is a Bootstrap contextual name and drives `text-bg-*`. Two are in use:
+  **`danger`** when the page is now showing numbers that are silently wrong, **`warning`**
+  when the feature degraded in a way the result survives.
+- A `danger` toast does not autohide: it stays until dismissed, because the user has to know
+  the figures on screen are not the ones they think. Every other level clears after 7s.
+- The instance goes through `bootstrap.Toast.getOrCreateInstance()`, not `new` (SonarQube
+  S1848), and is disposed on `hidden.bs.toast` along with its element — toasts are created per
+  failure and must not pile up in the DOM.
+- The message is a locale key passed in from the template, like every other string; the
+  `ApiError.message` that came from the server is English and belongs in `consoleLog` only.
+
+The roughly thirty existing `alert()` calls are **not** to be migrated. They all sit on the
+left column of the table, which is where `alert()` is the correct choice.
+
 **Solid variants are reserved for modal footers.** `btn-primary` on the confirm and
 `btn-secondary` on the cancel is the one place the filled treatment carries meaning — it marks
 the dialog's committing action. Everywhere else, including a calculator's main action button

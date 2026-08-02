@@ -88,6 +88,8 @@
     options.dataFetchMsg = "<?= $l['fetchig-data'] ?>";
     options.ownApiBadJsonMsg = "<?= $l['own-api-bad-json-msg'] ?>";
     options.importFailedMsg = "<?= $l['import-failed-msg'] ?>";
+    options.serverDataFailedMsg = <?= json_encode($l['server-data-failed-msg']) ?>;
+    options.populatedSystemsFailedMsg = <?= json_encode($l['populated-systems-failed-msg']) ?>;
 
     var unis = {
 <?php

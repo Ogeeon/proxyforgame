@@ -554,7 +554,9 @@
     "own-api-import-btn": "Import from OGame",
     "own-api-import-title": "Import",
     "own-api-bad-json-msg": "Failed to read the data.\\nMake sure you pasted the text from the API 2 field on the 'Fleet' page.",
-    "import-failed-msg": "Failed to load the data.\\nThe server returned an invalid response. Please try again later."
+    "import-failed-msg": "Failed to load the data.\\nThe server returned an invalid response. Please try again later.",
+    "server-data-failed-msg": "Failed to load the universe settings. Check the values below and correct them by hand.",
+    "populated-systems-failed-msg": "The map of populated systems is unavailable, so no systems are counted as skipped. You can enter their number by hand."
   },
   "graviton": {
     "title": "OGame - Graviton calculator",

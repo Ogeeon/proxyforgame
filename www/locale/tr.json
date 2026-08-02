@@ -554,7 +554,9 @@
     "own-api-import-btn": "OGame'den içe aktar",
     "own-api-import-title": "İçe Aktar",
     "own-api-bad-json-msg": "Veriler okunamadı.\\n'Filo' sayfasındaki API 2 alanındaki metni yapıştırdığınızdan emin olun.",
-    "import-failed-msg": "Veriler yüklenemedi.\\nSunucu geçersiz bir yanıt döndürdü. Lütfen daha sonra tekrar deneyin."
+    "import-failed-msg": "Veriler yüklenemedi.\\nSunucu geçersiz bir yanıt döndürdü. Lütfen daha sonra tekrar deneyin.",
+    "server-data-failed-msg": "Evren ayarları yüklenemedi. Aşağıdaki değerleri kontrol edip elle düzeltin.",
+    "populated-systems-failed-msg": "Yerleşim bulunan sistemlerin haritası kullanılamıyor, bu yüzden hiçbir sistem atlanmış sayılmıyor. Sayılarını elle girebilirsiniz."
   },
   "graviton": {
     "title": "OGame - Gravitasyon Hesaplayıcı",

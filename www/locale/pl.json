@@ -554,7 +554,9 @@
     "own-api-import-btn": "Import z OGame",
     "own-api-import-title": "Importuj",
     "own-api-bad-json-msg": "Nie udało się odczytać danych.\\nUpewnij się, że wkleiłeś tekst z pola API 2 na stronie „Flota”.",
-    "import-failed-msg": "Nie udało się wczytać danych.\\nSerwer zwrócił nieprawidłową odpowiedź. Spróbuj ponownie później."
+    "import-failed-msg": "Nie udało się wczytać danych.\\nSerwer zwrócił nieprawidłową odpowiedź. Spróbuj ponownie później.",
+    "server-data-failed-msg": "Nie udało się wczytać ustawień uniwersum. Sprawdź poniższe wartości i popraw je ręcznie.",
+    "populated-systems-failed-msg": "Mapa zamieszkanych układów jest niedostępna, więc żaden układ nie jest liczony jako pominięty. Ich liczbę możesz wpisać ręcznie."
   },
   "graviton": {
     "title": "OGame - Kalkulator Rozwoju grawitonow",

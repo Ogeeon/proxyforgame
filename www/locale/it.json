@@ -554,7 +554,9 @@
     "own-api-import-btn": "Importa da OGame",
     "own-api-import-title": "Importa",
     "own-api-bad-json-msg": "Impossibile leggere i dati.\\nAssicurati di aver incollato il testo dal campo API 2 della pagina «Flotta».",
-    "import-failed-msg": "Impossibile caricare i dati.\\nIl server ha restituito una risposta non valida. Riprova più tardi."
+    "import-failed-msg": "Impossibile caricare i dati.\\nIl server ha restituito una risposta non valida. Riprova più tardi.",
+    "server-data-failed-msg": "Impossibile caricare le impostazioni dell'universo. Controlla i valori qui sotto e correggili a mano.",
+    "populated-systems-failed-msg": "La mappa dei sistemi abitati non è disponibile, quindi nessun sistema viene contato come saltato. Puoi inserire il loro numero a mano."
   },
   "graviton": {
     "title": "OGame - Calcolatore per Gravitonica",

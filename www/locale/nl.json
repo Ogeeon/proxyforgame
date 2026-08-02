@@ -554,7 +554,9 @@
     "own-api-import-btn": "Importeren uit OGame",
     "own-api-import-title": "Importeren",
     "own-api-bad-json-msg": "Kan de gegevens niet lezen.\\nControleer of je de tekst uit het veld API 2 op de pagina 'Vloot' hebt geplakt.",
-    "import-failed-msg": "Kan de gegevens niet laden.\\nDe server gaf een ongeldig antwoord. Probeer het later opnieuw."
+    "import-failed-msg": "Kan de gegevens niet laden.\\nDe server gaf een ongeldig antwoord. Probeer het later opnieuw.",
+    "server-data-failed-msg": "Het laden van de universuminstellingen is mislukt. Controleer de waarden hieronder en corrigeer ze handmatig.",
+    "populated-systems-failed-msg": "De kaart met bewoonde systemen is niet beschikbaar, daarom worden er geen systemen als overgeslagen geteld. Je kunt het aantal handmatig invoeren."
   },
   "graviton": {
     "title": "OGame - Graviton berekening",

@@ -384,6 +384,73 @@ const fadeOut = (selector, duration = 400, callback = null) => {
 };
 
 // ==========================================================================
+// TOASTS
+// ==========================================================================
+
+/**
+ * The stack every toast is dropped into, created on the first call so that no
+ * template needs a container of its own.
+ * @returns {HTMLElement}
+ */
+const toastContainer = () => {
+  const existing = $('.toast-container');
+  if (existing) return existing;
+
+  const container = document.createElement('div');
+  container.className = 'toast-container position-fixed bottom-0 end-0 p-3';
+  document.body.appendChild(container);
+  return container;
+};
+
+/**
+ * Reports a failure the user did not ask for - a background request that came
+ * back empty or broken. An explicit action the user started keeps using
+ * alert(): see docs/patterns.md (g).
+ * @param {string} message - Localised prose, already translated by the caller
+ * @param {string} [level] - Bootstrap contextual name: danger, warning, info, success
+ */
+const showToast = (message, level = 'info') => {
+  const el = document.createElement('div');
+  el.className = `toast align-items-center text-bg-${level} border-0`;
+  el.setAttribute('role', 'alert');
+  el.setAttribute('aria-live', 'assertive');
+  el.setAttribute('aria-atomic', 'true');
+
+  const row = document.createElement('div');
+  row.className = 'd-flex';
+
+  const body = document.createElement('div');
+  body.className = 'toast-body';
+  body.textContent = message;
+
+  // text-bg-warning and text-bg-info are light fills carrying dark text, so the
+  // white cross Bootstrap ships for dark toasts would be invisible on them.
+  const closeSkin = level === 'warning' || level === 'info' ? '' : ' btn-close-white';
+  const close = document.createElement('button');
+  close.type = 'button';
+  close.className = `btn-close${closeSkin} me-2 m-auto`;
+  close.setAttribute('data-bs-dismiss', 'toast');
+  close.setAttribute('aria-label', 'Close');
+
+  row.appendChild(body);
+  row.appendChild(close);
+  el.appendChild(row);
+  toastContainer().appendChild(el);
+
+  // A failure leaves the page holding wrong numbers, so it waits for the user
+  // to acknowledge it; anything milder clears itself.
+  const toast = bootstrap.Toast.getOrCreateInstance(el, {
+    autohide: level !== 'danger',
+    delay: 7000
+  });
+  el.addEventListener('hidden.bs.toast', () => {
+    toast.dispose();
+    el.remove();
+  });
+  toast.show();
+};
+
+// ==========================================================================
 // TABLE HELPERS
 // ==========================================================================
 
@@ -823,6 +890,9 @@ if (typeof window !== 'undefined') {
     hide,
     fadeIn,
     fadeOut,
+
+    // Toasts
+    showToast,
 
     // Tables
     getTableRows,

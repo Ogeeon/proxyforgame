@@ -1213,6 +1213,9 @@ class FlightOrchestrator {
             this.recalc();
         } catch (error) {
             consoleLog('fetch error: ' + error);
+            // Nobody asked for this request, so it fails without an alert - but
+            // silence would leave the panel showing defaults that look loaded.
+            showToast(this.opts.serverDataFailedMsg, 'danger');
         } finally {
             this._hideOverlay('general-settings-panel');
         }
@@ -1283,6 +1286,9 @@ class FlightOrchestrator {
             this.populatedSystemsAll = json.populatedSystemsAll ?? null;
         } catch (error) {
             consoleLog('fetch error: ' + error);
+            // A universe with no row of its own is normal, and the flight is
+            // still computed - just without any system counted as skipped.
+            showToast(this.opts.populatedSystemsFailedMsg, 'warning');
         } finally {
             this._hideOverlay('general-settings-panel');
         }

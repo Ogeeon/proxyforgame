@@ -554,7 +554,9 @@
     "own-api-import-btn": "Importer depuis OGame",
     "own-api-import-title": "Importer",
     "own-api-bad-json-msg": "Impossible de lire les données.\\nAssurez-vous d'avoir collé le texte du champ API 2 de la page « Flotte ».",
-    "import-failed-msg": "Impossible de charger les données.\\nLe serveur a renvoyé une réponse invalide. Veuillez réessayer plus tard."
+    "import-failed-msg": "Impossible de charger les données.\\nLe serveur a renvoyé une réponse invalide. Veuillez réessayer plus tard.",
+    "server-data-failed-msg": "Impossible de charger les paramètres de l'univers. Vérifiez les valeurs ci-dessous et corrigez-les à la main.",
+    "populated-systems-failed-msg": "La carte des systèmes peuplés est indisponible, aucun système n'est donc compté comme ignoré. Vous pouvez saisir leur nombre à la main."
   },
   "graviton": {
     "title": "OGame - Calculateur de Graviton",

@@ -18,6 +18,7 @@ release section; it is the source of truth for the other eleven translations.
 ### Added
 
 - Build: the database schema validator compares the column types and nullability in `schema.sql` against the live database.
+- Flight: when the universe settings or the map of populated systems cannot be loaded, a notification now says so; until now the panel silently kept its default values and the flight was computed from them. <!-- site -->
 
 ### Fixed
 

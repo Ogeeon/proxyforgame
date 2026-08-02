@@ -153,6 +153,12 @@ test.describe('Flight Calculator - Spy Report Import', () => {
         await page.locator('#api-get').click();
         await page.waitForFunction(() => !document.querySelector('.panel-overlay'), { timeout: 5000 });
 
+        // The stubbed 503 raises a toast of its own, and a danger toast waits for
+        // the user instead of fading — get it off the corner it shares with the
+        // controls this test is about to click.
+        await page.locator('.toast .btn-close').click();
+        await expect(page.locator('.toast')).toHaveCount(0);
+
         await showParamTab(page, '#circular-galaxies');
         await expect(page.locator('#circular-galaxies')).not.toBeChecked();
         await expect(page.locator('#circular-systems')).toBeChecked();
@@ -243,6 +249,51 @@ test.describe('Flight Calculator - Server data fetch', () => {
         await showParamTab(page, '#circular-galaxies');
         await expect(page.locator('#circular-galaxies')).toBeChecked();
         await expect(page.locator('#circular-systems')).not.toBeChecked();
+    });
+
+    // Nobody asked for this request, so it cannot answer with an alert - but
+    // staying silent would leave the panel showing its defaults as if they had
+    // been loaded, and every figure computed from them would be wrong.
+    test('reports a failed universe fetch in a dismissible toast', async ({ page }) => {
+        await page.route(/\/ajax\.php\?.*service=serverdata/, (route) => route.fulfill({
+            status: 502,
+            contentType: 'application/json',
+            body: JSON.stringify({ error: { code: 'upstream_unavailable', message: 'no answer' } }),
+        }));
+
+        await openParams(page, '#country');
+        await page.locator('#country').selectOption('en');
+        await page.locator('#universe').selectOption({ index: 0 });
+
+        const toast = page.locator('.toast');
+        await expect(toast).toBeVisible();
+        await expect(toast).toHaveClass(/text-bg-danger/);
+        await expect(toast.locator('.toast-body')).not.toBeEmpty();
+
+        await toast.locator('.btn-close').click();
+        await expect(toast).toHaveCount(0);
+    });
+
+    // The populated-systems map only degrades the flight - the fleet is then
+    // charged for every system it passes - so it warns rather than alarms.
+    test('warns at a lower level when only the populated systems are missing', async ({ page }) => {
+        const skippingUniverse = SERVER_DATA.replace('"fleetIgnoreEmptySystems":"0"', '"fleetIgnoreEmptySystems":"1"');
+        await page.route(/\/ajax\.php\?.*service=serverdata/, (route) => route.fulfill({
+            status: 200, contentType: 'application/json', body: skippingUniverse,
+        }));
+        await page.route(/\/ajax\.php\?.*service=populatedSystems/, (route) => route.fulfill({
+            status: 404,
+            contentType: 'application/json',
+            body: JSON.stringify({ error: { code: 'not_found', message: 'no such universe' } }),
+        }));
+
+        await openParams(page, '#country');
+        await page.locator('#country').selectOption('en');
+        await page.locator('#universe').selectOption({ index: 0 });
+
+        const toast = page.locator('.toast');
+        await expect(toast).toBeVisible();
+        await expect(toast).toHaveClass(/text-bg-warning/);
     });
 });
 

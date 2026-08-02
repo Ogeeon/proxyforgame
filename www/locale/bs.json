@@ -554,7 +554,9 @@
     "own-api-import-btn": "Uvoz iz OGame",
     "own-api-import-title": "Uvezi",
     "own-api-bad-json-msg": "Nije moguće očitati podatke.\\nProvjerite da ste zalijepili tekst iz polja API 2 na stranici 'Flota'.",
-    "import-failed-msg": "Nije moguće učitati podatke.\\nServer je vratio neispravan odgovor. Molimo pokušajte ponovo kasnije."
+    "import-failed-msg": "Nije moguće učitati podatke.\\nServer je vratio neispravan odgovor. Molimo pokušajte ponovo kasnije.",
+    "server-data-failed-msg": "Učitavanje postavki univerzuma nije uspjelo. Provjerite vrijednosti ispod i ispravite ih ručno.",
+    "populated-systems-failed-msg": "Karta naseljenih sistema nije dostupna, pa se nijedan sistem ne broji kao preskočen. Njihov broj možete unijeti ručno."
   },
   "graviton": {
     "title": "Ogame - Kalkulator gravitona",
