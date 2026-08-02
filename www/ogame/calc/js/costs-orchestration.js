@@ -15,6 +15,7 @@ class CostsCalculator {
     this.changeDetector = new ChangeDetector();
 
     // State
+    /** @type {?GlobalParams} Filled on the first collection; read via _params(). */
     this.currentParams = null;
     this.isInitialized = false;
 
@@ -53,6 +54,19 @@ class CostsCalculator {
   // ==========================================================================
   // MAIN CALCULATION METHODS
   // ==========================================================================
+
+  /**
+   * The parameters of the last collection, collecting them first when nothing
+   * has been collected yet. Every reader goes through here: an event can fire
+   * before the first recalculateAll(), and the calculator and the renderer
+   * both need a real object.
+   * @returns {GlobalParams}
+   * @private
+   */
+  _params() {
+    this.currentParams ??= this.collector.collectGlobalParams();
+    return this.currentParams;
+  }
 
   /**
    * Recalculate everything from scratch
@@ -107,7 +121,7 @@ class CostsCalculator {
     });
 
     // Render all tables in one batch
-    batchRenderer.renderAllTables(outerTab, allRequests, allResults, this.currentParams);
+    batchRenderer.renderAllTables(outerTab, allRequests, allResults, this._params());
 
     this.stats.calculations++;
     this.stats.renders++;
@@ -122,16 +136,13 @@ class CostsCalculator {
 
     // console.log(`Recalculating tables: ${tableIds.join(', ')}`);
 
-    // Ensure we have current params
-    if (!this.currentParams) {
-      this.currentParams = this.collector.collectGlobalParams();
-    }
+    const params = this._params();
 
     tableIds.forEach(tableId => {
       const requests = this.collector.collectTableRequests(tableId);
       const results = this._calculateRequests(requests);
 
-      this.renderer.renderTable(tableId, requests, results, this.currentParams);
+      this.renderer.renderTable(tableId, requests, results, params);
     });
 
     // Update grand totals for affected tab groups
@@ -172,7 +183,7 @@ class CostsCalculator {
     });
 
     grandTotal.energy = maxEnergy;
-    this.renderer.renderGrandTotals(outerTab, grandTotal, this.currentParams);
+    this.renderer.renderGrandTotals(outerTab, grandTotal, this._params());
   }
 
   /**
@@ -206,13 +217,13 @@ class CostsCalculator {
 
         if (isProducer) {
           productions[level] = this.calculator.calculateProduction(
-            techId, level, this.currentParams
+            techId, level, this._params()
           );
         }
 
         if (isConsumer) {
           consumptions[level] = this.calculator.calculateConsumption(
-            techId, level, this.currentParams
+            techId, level, this._params()
           );
         }
       });
@@ -224,7 +235,7 @@ class CostsCalculator {
       results,
       isProducer ? productions : null,
       isConsumer ? consumptions : null,
-      this.currentParams
+      this._params()
     );
   }
 
@@ -233,8 +244,9 @@ class CostsCalculator {
    * @private
    */
   _calculateRequests(requests) {
+    const params = this._params();
     return requests.map(req => {
-      const result = this.calculator.calculate(req, this.currentParams);
+      const result = this.calculator.calculate(req, params);
 
       // Check if research is impossible
       if (result.isZero && req.isValid && req.techType === 'research') {
@@ -333,8 +345,8 @@ class CostsCalculator {
       '#planet-pos'
     ];
 
-    document.getElementById('max-planet-temp')._constrains = { 'min': -134, 'def': 0, 'allowNegative': true };
-    document.getElementById('planet-pos')._constrains = { 'min': 1, 'max': 16, 'def': 8, 'allowNegative': false };
+    setConstrains('max-planet-temp', { 'min': -134, 'def': 0, 'allowNegative': true });
+    setConstrains('planet-pos', { 'min': 1, 'max': 16, 'def': 8, 'allowNegative': false });
 
     techInputs.forEach(selector => {
       // The two fields above already carry their own constraints
@@ -375,10 +387,10 @@ class CostsCalculator {
       '#lc-capacity-increase'
     ];
 
-    document.getElementById('discoverer-class-bonus')._constrains = { min: 0, max: 100, def: 0, allowFloat: true, allowNegative: false };
-    document.getElementById('lf-terraformer-rdc')._constrains = { min: 0, max: 50, def: 0, allowFloat: true, allowNegative: false };
-    document.getElementById('sc-capacity-increase')._constrains = { min: 0, max: 1000, def: 0, allowFloat: true, allowNegative: false };
-    document.getElementById('lc-capacity-increase')._constrains = { min: 0, max: 1000, def: 0, allowFloat: true, allowNegative: false };
+    setConstrains('discoverer-class-bonus', { min: 0, max: 100, def: 0, allowFloat: true, allowNegative: false });
+    setConstrains('lf-terraformer-rdc', { min: 0, max: 50, def: 0, allowFloat: true, allowNegative: false });
+    setConstrains('sc-capacity-increase', { min: 0, max: 1000, def: 0, allowFloat: true, allowNegative: false });
+    setConstrains('lc-capacity-increase', { min: 0, max: 1000, def: 0, allowFloat: true, allowNegative: false });
 
     lfInputs.forEach(selector => {
       removeAllEvents(selector, 'keyup');
@@ -399,9 +411,9 @@ class CostsCalculator {
 
     // Exchange rate inputs
     const rateInputs = ['#exchange-rates-m', '#exchange-rates-c', '#exchange-rates-d'];
-    document.getElementById('exchange-rates-m')._constrains = { min: 0.1, max: 100, def: 1,   allowFloat: true, allowNegative: false };
-    document.getElementById('exchange-rates-c')._constrains = { min: 0.1, max: 100, def: 1.5, allowFloat: true, allowNegative: false };
-    document.getElementById('exchange-rates-d')._constrains = { min: 0.1, max: 100, def: 3,   allowFloat: true, allowNegative: false };
+    setConstrains('exchange-rates-m', { min: 0.1, max: 100, def: 1,   allowFloat: true, allowNegative: false });
+    setConstrains('exchange-rates-c', { min: 0.1, max: 100, def: 1.5, allowFloat: true, allowNegative: false });
+    setConstrains('exchange-rates-d', { min: 0.1, max: 100, def: 3,   allowFloat: true, allowNegative: false });
     rateInputs.forEach(selector => {
       removeAllEvents(selector, 'keyup');
       addEvent(selector, 'keyup', (event) => {
@@ -1026,43 +1038,41 @@ class CostsCalculator {
    * Uses native JSON serialization
    */
   saveState() {
-    if (!this.currentParams) {
-      this.currentParams = this.collector.collectGlobalParams();
-    }
+    const params = this._params();
 
     // Convert params to plain object for JSON serialization
     const state = {
-      shipyardLevel: this.currentParams.shipyardLevel,
-      robotFactoryLevelPlanet: this.currentParams.robotFactoryLevelPlanet,
-      robotFactoryLevelMoon: this.currentParams.robotFactoryLevelMoon,
-      naniteFactoryLevel: this.currentParams.naniteFactoryLevel,
-      universeSpeed: this.currentParams.universeSpeed,
-      researchSpeed: this.currentParams.researchSpeed,
-      researchLabLevel: this.currentParams.researchLabLevel,
-      energyTechLevel: this.currentParams.energyTechLevel,
-      plasmaTechLevel: this.currentParams.plasmaTechLevel,
-      ionTechLevel: this.currentParams.ionTechLevel,
-      hyperTechLevel: this.currentParams.hyperTechLevel,
-      maxPlanetTemp: this.currentParams.maxPlanetTemp,
-      planetPos: this.currentParams.planetPos,
-      geologist: this.currentParams.geologist,
-      engineer: this.currentParams.engineer,
-      technocrat: this.currentParams.technocrat,
-      admiral: this.currentParams.admiral,
-      commander: this.currentParams.commander,
-      researchBonus: this.currentParams.researchBonus,
-      playerClass: this.currentParams.playerClass,
-      booster: this.currentParams.booster,
-      irnLevel: this.currentParams.irnLevel,
-      labLevels: this.currentParams.labLevels,
-      labChoice: this.currentParams.labChoice,
-      fullNumbers: this.currentParams.fullNumbers,
-      mineralResCntrLvl: this.currentParams.mineralResCntrLvl,
-      lfTerraformerRdc: this.currentParams.lfTerraformerRdc,
-      discovererClassBonus: this.currentParams.discovererClassBonus,
-      scCapacityIncrease: this.currentParams.scCapacityIncrease,
-      lcCapacityIncrease: this.currentParams.lcCapacityIncrease,
-      rates: this.currentParams.rates
+      shipyardLevel: params.shipyardLevel,
+      robotFactoryLevelPlanet: params.robotFactoryLevelPlanet,
+      robotFactoryLevelMoon: params.robotFactoryLevelMoon,
+      naniteFactoryLevel: params.naniteFactoryLevel,
+      universeSpeed: params.universeSpeed,
+      researchSpeed: params.researchSpeed,
+      researchLabLevel: params.researchLabLevel,
+      energyTechLevel: params.energyTechLevel,
+      plasmaTechLevel: params.plasmaTechLevel,
+      ionTechLevel: params.ionTechLevel,
+      hyperTechLevel: params.hyperTechLevel,
+      maxPlanetTemp: params.maxPlanetTemp,
+      planetPos: params.planetPos,
+      geologist: params.geologist,
+      engineer: params.engineer,
+      technocrat: params.technocrat,
+      admiral: params.admiral,
+      commander: params.commander,
+      researchBonus: params.researchBonus,
+      playerClass: params.playerClass,
+      booster: params.booster,
+      irnLevel: params.irnLevel,
+      labLevels: params.labLevels,
+      labChoice: params.labChoice,
+      fullNumbers: params.fullNumbers,
+      mineralResCntrLvl: params.mineralResCntrLvl,
+      lfTerraformerRdc: params.lfTerraformerRdc,
+      discovererClassBonus: params.discovererClassBonus,
+      scCapacityIncrease: params.scCapacityIncrease,
+      lcCapacityIncrease: params.lcCapacityIncrease,
+      rates: params.rates
     };
 
     try {
@@ -1662,21 +1672,19 @@ class CostsCalculator {
    * @private
    */
   _openIRNDialog() {
-    // Ensure current params are up to date
-    if (!this.currentParams) {
-      this.currentParams = this.collector.collectGlobalParams();
-    }
-
-    // Create backup of IRN-related state from new system
-    const irnBackup = {
-      irnLevel: this.currentParams.irnLevel,
-      labLevels: [...this.currentParams.labLevels], // Clone array
-      labChoice: this.currentParams.labChoice
-    };
+    const params = this._params();
 
     // Store backup on the dialog element for Bootstrap modal
     const modalEl = document.getElementById('irn-calc');
-    modalEl._irnBackup = irnBackup;
+    if (!modalEl) {
+      return;
+    }
+    // Create backup of IRN-related state from new system
+    modalEl._irnBackup = {
+      irnLevel: params.irnLevel,
+      labLevels: [...params.labLevels], // Clone array
+      labChoice: params.labChoice
+    };
     modalEl._irnExecute = false; // Reset execute flag
 
     // Open the Bootstrap modal

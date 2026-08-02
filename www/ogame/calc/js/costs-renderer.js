@@ -539,6 +539,9 @@ class Renderer {
 
   /**
    * Format a number for display
+   * @param {number} value
+   * @param {?GlobalParams} [params] - omitted where the caller has none; the
+   *        page options then decide the format
    * @private
    */
   _formatNumber(value, params = null) {

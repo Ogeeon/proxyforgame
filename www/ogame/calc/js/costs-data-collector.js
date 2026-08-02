@@ -120,7 +120,7 @@ class DataCollector {
     params.lfResTimeRdcMap = {};
     const rows = $$('#lf-research-bonuses-tbody tr');
     rows.forEach(row => {
-      const techId = Number.parseInt(row.dataset.techId);
+      const techId = Number.parseInt(row.dataset.techId ?? '', 10);
       if (!techId) return;
       params.lfResCostRdcMap[techId] = this._getInputNumberFromElement(row.querySelector('.lf-research-cost-input'));
       params.lfResTimeRdcMap[techId] = this._getInputNumberFromElement(row.querySelector('.lf-research-time-input'));
@@ -655,6 +655,7 @@ class ExportDataCollector extends DataCollector {
  * Tracks what changed to optimize recalculation
  */
 class ChangeDetector {
+  /** @type {?GlobalParams} */
   lastParams = null;
   lastRequests = {};
 
