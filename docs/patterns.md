@@ -192,8 +192,8 @@ _setInputConstraints() {
 ```
 
 **Wire the events** — `validateInputNumberOnBlurNative` (`dom-utils.js`) is the
-jQuery-free variant and the one every migrated calculator must use;
-`validateInputNumberOnBlur` (`utils.js`) still needs jQuery and is legacy:
+validator every calculator uses; the jQuery-era `validateInputNumberOnBlur` it
+replaced is gone:
 
 ```js
 _bindInputs() {
@@ -240,9 +240,7 @@ lfcosts (~30), costs (dozens) and production (2). When you fix one, mirror the r
 `options.prm.validate` so the two agree.
 
 **Deviation to look for**: clamping inside a `keyup`/`input` handler; a bounded field left
-on the unbounded default while `options.prm.validate` knows its real range;
-`validateInputNumberOnBlur` (the jQuery one) in a migrated calculator — it calls `$(…)` and
-throws the moment a constraint fires, since none of these pages load jQuery; a date/time
+on the unbounded default while `options.prm.validate` knows its real range; a date/time
 field caught by the numeric selector; a field that clamps but has no `alt`, so the warning
 banner cannot name it.
 
@@ -371,8 +369,9 @@ Bootstrap's higher-specificity `.form-control:disabled`, so they would not move 
 are **transparent layout wrapper `<div>`s**, and a hoisted fill would paint grey blocks into
 a calculator nobody is auditing. Keep the rule per calculator until trade is migrated.
 
-Note the legacy jQuery-UI stylesheets also define `.ui-state-disabled` (a 35% opacity
-fade). The BS5 pages do not load them, but do not reuse the class name for anything else.
+The class name comes from jQuery UI, whose stylesheets defined it as a 35% opacity fade.
+Those files are gone from the repo, but the name is now load-bearing as the read-only
+marker — do not reuse it for anything else.
 
 **Deviation to look for**: a computed `<div class="form-control">` with no
 `ui-state-disabled`; a `readonly` field that reads as editable because a calculator-local

@@ -2,7 +2,7 @@
 // QUEUE CALCULATOR - CORE
 // ============================================================================
 // Pure data structures and cost/time computations for the build queue.
-// Wraps getBuildCost_C / getBuildTime_C (common.js) so callers don't need to
+// Wraps getBuildCost_C / getBuildTime_C (ogame-costs.js) so callers don't need to
 // remember the parameter order for queued single-level steps.
 
 'use strict';

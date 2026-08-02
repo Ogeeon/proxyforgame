@@ -17,7 +17,7 @@
 // no terraformer-specific bonus (no recyclers here), so it also behaves as NONE.
 const TERRAFORMER_CLASS = { NONE: 0, COLLECTOR: 1, GENERAL: 2 };
 
-// Tech id / cost table shared by the cost helpers in common.js:
+// Tech id / cost table shared by the cost helpers in ogame-costs.js:
 //   id => [cost_met, cost_crys, cost_deut, growth_coeff].
 // 33 = Terraformer building, 212 = Solar satellite.
 const TF_TECH_DATA = { 33: [0, 50000, 100000, 2], 212: [0, 2000, 500, 1] };
