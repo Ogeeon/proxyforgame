@@ -1,40 +1,51 @@
 /**
+ * Everything the production formula reads, in one object. It used to be sixteen
+ * positional parameters, which is over the limit SonarQube allows
+ * (javascript:S107) and, worse, put four booleans and nine numbers in a row
+ * where transposing two of them produced wrong figures rather than an error.
+ * Named properties are checked by name at every call site.
+ *
+ * @typedef {object} ProductionParams
+ * @property {number} techID ID of the building - mine/synthesizer, power plant or solar satellite.
+ * @property {number} techLevel building level or number of satellites
+ * @property {number} energyTechLevel energy technology level
+ * @property {number} plasmaTechLevel plasma technology level
+ * @property {number} maxTemp max temperature on the planet
+ * @property {number} pos planet's position in the solar system
+ * @property {number} universeSpeedFactor universe speed multiplier
+ * @property {boolean} geologist whether the Geologist is present
+ * @property {boolean} engineer whether the Engineer is present
+ * @property {number} productionFactor production coefficient (0..1, less than 1 if there is not enough energy)
+ * @property {number} powerFactor power percentage (0..1, set by the user)
+ * @property {number} boosterType booster type: 0-none, 1-bronze (10%), 2-silver (20%), 3-gold (30%)
+ * @property {boolean} allOfficers whether all 5 officers are present
+ * @property {number} playerClass player class: 0-Collector, 1-General, 2-Discoverer
+ * @property {boolean} [isTrader] whether the player belongs to an alliance with the "Traders" class.
+ *           Optional: the costs calculator has no field for it, so it leaves the property
+ *           out and the 5% alliance bonus stays out of its single-building figures.
+ * @property {number} [collectorClassBonusPct] percentage by which the Collector class bonus is
+ *           amplified (Rock'tal Collector Enhancement, +0.2 per research level).
+ *           Optional: the costs calculator has no field for it, so it leaves the property
+ *           out and the class bonus stays at its base 25%.
+ */
+
+/**
  * Calculates the resource (units/hour) and energy production rate.
- * @param techID ID of the building - mine/synthesizer, power plant or solar satellite.
- * @param techLevel building level or number of satellites
- * @param energyTechLevel energy technology level
- * @param plasmaTechLevel plasma technology level
- * @param maxTemp max temperature on the planet
- * @param pos planet's position number
- * @param universeSpeedFactor universe speed multiplier
- * @param geologist flag - whether the Geologist is present
- * @param engineer flag - whether the Engineer is present
- * @param productionFactor production coefficient (0..1, less than 1 if there is not enough energy)
- * @param powerFactor power percentage (0..1, set by the user)
- * @param boosterType booster type: 0-none, 1-bronze (10%), 2-silver (20%), 3-gold (30%)
- * @param allOfficers flag - whether all 5 officers are present
- * @param playerClass player class: 0-Collector, 1-General, 2-Discoverer
- * @param [isTrader] whether the player belongs to an alliance with the "Traders" class.
- *        Optional: the costs calculator has no field for it, so it omits the argument
- *        and the 5% alliance bonus stays out of its single-building figures.
- * @param [collectorClassBonusPct] percentage by which the Collector class bonus is
- *        amplified (Rock'tal Collector Enhancement, +0.2 per research level).
- *        Optional: the costs calculator has no field for it, so it omits the argument
- *        and the class bonus stays at its base 25%.
+ * @param {ProductionParams} params
  * @returns Number of resource units or energy produced
  */
-function getProductionRate(techID, techLevel, energyTechLevel, plasmaTechLevel, maxTemp, pos, universeSpeedFactor, geologist, engineer, productionFactor, powerFactor, boosterType, allOfficers, playerClass, isTrader, collectorClassBonusPct) {
+function getProductionRate(params) {
 	let prod;
-	switch (techID*1) {
+	switch (params.techID*1) {
 		case 1:
 		case 2:
 		case 3:
-			prod = getProductionRateSplit(techID, techLevel, energyTechLevel, plasmaTechLevel, maxTemp, pos, universeSpeedFactor, geologist, engineer, productionFactor, powerFactor, boosterType, allOfficers, playerClass, isTrader, collectorClassBonusPct);
+			prod = getProductionRateSplit(params);
 			return(prod[0] + prod[1] + prod[2] + prod[3] + prod[4] + prod[5] + prod[6] + prod[7]);
 		case 4:
 		case 12:
 		case 212:
-			prod = getProductionRateSplit(techID, techLevel, energyTechLevel, plasmaTechLevel, maxTemp, pos, universeSpeedFactor, geologist, engineer, productionFactor, powerFactor, boosterType, allOfficers, playerClass, isTrader, collectorClassBonusPct);
+			prod = getProductionRateSplit(params);
 			return(prod[1]); // powerFactor is accounted for, while the engineer, officers and class bonuses need to be applied to the sum of remaining energy
 		default: {
 			return(0);
@@ -44,30 +55,15 @@ function getProductionRate(techID, techLevel, energyTechLevel, plasmaTechLevel, 
 
 /**
  * Calculates the resource (units/hour) and energy production rate. When calculating metal and crystal mines, returns the natural production in row zero
- * @param techID ID of the building - mine/synthesizer, power plant or solar satellite.
- * @param techLevel building level or number of satellites
- * @param energyTechLevel energy technology level
- * @param plasmaTechLevel plasma technology level
- * @param maxTemp max temperature on the planet
- * @param pos planet's position in the solar system
- * @param universeSpeedFactor universe speed multiplier
- * @param geologist flag - whether the Geologist is present
- * @param engineer flag - whether the Engineer is present
- * @param productionFactor production coefficient (0..1, less than 1 if there is not enough energy)
- * @param powerFactor power percentage (0..1, set by the user)
- * @param boosterType booster type: 0-none, 1-bronze (10%), 2-silver (20%), 3-gold (30%)
- * @param allOfficers flag - whether all 5 officers are present
- * @param playerClass player class: 0-Collector, 1-General, 2-Discoverer
- * @param [isTrader] whether the player belongs to an alliance with the "Traders" class.
- *        Optional: the costs calculator has no field for it, so it omits the argument
- *        and the 5% alliance bonus stays out of its single-building figures.
- * @param [collectorClassBonusPct] percentage by which the Collector class bonus is
- *        amplified (Rock'tal Collector Enhancement, +0.2 per research level).
- *        Optional: the costs calculator has no field for it, so it omits the argument
- *        and the class bonus stays at its base 25%.
+ * @param {ProductionParams} params
  * @returns Number of resource units or energy produced
  */
-function getProductionRateSplit(techID, techLevel, energyTechLevel, plasmaTechLevel, maxTemp, pos, universeSpeedFactor, geologist, engineer, productionFactor, powerFactor, boosterType, allOfficers, playerClass, isTrader, collectorClassBonusPct) {
+function getProductionRateSplit(params) {
+	const {
+		techID, techLevel, energyTechLevel, plasmaTechLevel, maxTemp, pos,
+		universeSpeedFactor, geologist, engineer, productionFactor, powerFactor,
+		boosterType, allOfficers, playerClass, isTrader, collectorClassBonusPct
+	} = params;
 	// The Engineer and Geologist increase production by 10%. If all 5 officers are present, another 2% is added to resource and energy production.
 	const geologistFactor = geologist === true ? 0.1 : 0;
 	const allStaffFactor = allOfficers === true ? 0.02 : 0;
@@ -393,7 +389,38 @@ function getShipBuildTime_C(techID, nanitesLevel, shipyardLevel, techData) {
 	return timeSpan;
 }
 
-function getBuildTime_C(techID, techLevelFrom, techLevelTo, techData, robotsLevel, nanitesLevel, researchLabLevel, technocratFactor, shipyardLevel, uniSpeed, techReqs) {
+/**
+ * What a build or research time depends on. Eleven positional parameters was
+ * over the limit SonarQube allows (javascript:S107), and the four facility
+ * levels in a row - three of which any given caller passes as zero - were the
+ * kind of argument list where a value in the wrong slot still reads as
+ * plausible. The terraformer calculator passes a technocratFactor of 0 where
+ * the queue passes 1, and nothing but the position said which was which.
+ *
+ * @typedef {object} BuildTimeParams
+ * @property {number} techID ID of the building, research, ship or defense item
+ * @property {number} techLevelFrom level built up from
+ * @property {number} techLevelTo level built up to, or the number of units for ships and defense
+ * @property {any} techData technology data, keyed by tech id
+ * @property {number} robotsLevel Robotics Factory level
+ * @property {number} nanitesLevel Nanite Factory level
+ * @property {number} researchLabLevel Research Lab level; only techs read it
+ * @property {number} technocratFactor Technocrat speed-up; only techs read it
+ * @property {number} shipyardLevel Shipyard level; only ships and defense read it
+ * @property {number} uniSpeed universe speed multiplier
+ * @property {any} [techReqs] technology requirements, to spot one that is not met
+ */
+
+/**
+ * Calculates how long a build or a research takes.
+ * @param {BuildTimeParams} params
+ * @returns Seconds, or -1 when a requirement is not met
+ */
+function getBuildTime_C(params) {
+	const {
+		techID, techLevelFrom, techLevelTo, techData, robotsLevel, nanitesLevel,
+		researchLabLevel, technocratFactor, shipyardLevel, uniSpeed, techReqs
+	} = params;
 	if (techLevelFrom < 0)
 		return 0;
 	const data = techData[techID];
@@ -599,7 +626,32 @@ function getResearchTimeLF(techLevelFrom, techLevelTo, data, uniSpeed, rsrTimeRd
 	return timeSpan;
 }
 
-function getBuildTimeLF(techID, techLevelFrom, techLevelTo, techData, robotsLevel, nanitesLevel, uniSpeed, rsrTimeRdc, megalithRdc=0) {
+/**
+ * The life-form counterpart of BuildTimeParams. Nine positional parameters was
+ * over the limit as well (javascript:S107).
+ *
+ * @typedef {object} BuildTimeLFParams
+ * @property {number} techID ID of the life-form building or research
+ * @property {number} techLevelFrom level built up from
+ * @property {number} techLevelTo level built up to
+ * @property {any} techData technology data, keyed by tech id
+ * @property {number} robotsLevel Robotics Factory level
+ * @property {number} nanitesLevel Nanite Factory level
+ * @property {number} uniSpeed universe speed multiplier
+ * @property {number} rsrTimeRdc research time reduction, per cent
+ * @property {number} [megalithRdc] Megalith build time reduction, 0..0.99
+ */
+
+/**
+ * Calculates how long a life-form build or research takes.
+ * @param {BuildTimeLFParams} params
+ * @returns Seconds
+ */
+function getBuildTimeLF(params) {
+	const {
+		techID, techLevelFrom, techLevelTo, techData, robotsLevel, nanitesLevel,
+		uniSpeed, rsrTimeRdc, megalithRdc = 0
+	} = params;
 	if (techLevelFrom < 0)
 		return 0;
 	const data = techData[techID];

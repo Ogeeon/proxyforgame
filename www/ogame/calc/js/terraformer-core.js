@@ -181,18 +181,24 @@ class TerraformerCalculator {
     const tfCost = getBuildCost_C(TF_TECH_ID, tfLevelFrom, tfLevelTo, TF_TECH_DATA);
     result.crysTF = tfCost[1];
     result.deutTF = tfCost[2];
-    result.secsTF = getBuildTime_C(
-      TF_TECH_ID, tfLevelFrom, tfLevelTo, TF_TECH_DATA,
-      p.robotsFactoryLevel, p.nanitesFactoryLevel, 0, 0, 0, p.universeSpeed
-    );
+    result.secsTF = getBuildTime_C({
+      techID: TF_TECH_ID, techLevelFrom: tfLevelFrom, techLevelTo: tfLevelTo,
+      techData: TF_TECH_DATA,
+      robotsLevel: p.robotsFactoryLevel, nanitesLevel: p.nanitesFactoryLevel,
+      researchLabLevel: 0, technocratFactor: 0, shipyardLevel: 0,
+      uniSpeed: p.universeSpeed
+    });
 
     // Satellite build cost and time (satellites are built at the shipyard).
     result.crysSS = neededSats * 2000;
     result.deutSS = neededSats * 500;
-    result.secsSS = getBuildTime_C(
-      SAT_TECH_ID, 0, neededSats, TF_TECH_DATA,
-      0, p.nanitesFactoryLevel, 0, 0, p.shipyardLevel, p.universeSpeed
-    );
+    result.secsSS = getBuildTime_C({
+      techID: SAT_TECH_ID, techLevelFrom: 0, techLevelTo: neededSats,
+      techData: TF_TECH_DATA,
+      robotsLevel: 0, nanitesLevel: p.nanitesFactoryLevel,
+      researchLabLevel: 0, technocratFactor: 0, shipyardLevel: p.shipyardLevel,
+      uniSpeed: p.universeSpeed
+    });
 
     result.crysTotal = result.crysSS + tfCost[1];
     result.deutTotal = result.deutSS + tfCost[2];

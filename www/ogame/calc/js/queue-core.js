@@ -46,10 +46,18 @@ class QueueCalculator {
     let timeSpan;
     if (!deconstruction) {
       cost = getBuildCost_C(techID, resultLevel - 1, resultLevel, this.techCosts, 0);
-      timeSpan = getBuildTime_C(techID, resultLevel - 1, resultLevel, this.techCosts, robotsLevel, nanitesLevel, 0, 1, 0, uniSpeed);
+      timeSpan = getBuildTime_C({
+        techID, techLevelFrom: resultLevel - 1, techLevelTo: resultLevel,
+        techData: this.techCosts, robotsLevel, nanitesLevel,
+        researchLabLevel: 0, technocratFactor: 1, shipyardLevel: 0, uniSpeed
+      });
     } else {
       cost = getBuildCost_C(techID, resultLevel + 1, resultLevel, this.techCosts, ionTechLevel);
-      timeSpan = getBuildTime_C(techID, resultLevel + 1, resultLevel, this.techCosts, robotsLevel, nanitesLevel, 0, 1, 0, uniSpeed);
+      timeSpan = getBuildTime_C({
+        techID, techLevelFrom: resultLevel + 1, techLevelTo: resultLevel,
+        techData: this.techCosts, robotsLevel, nanitesLevel,
+        researchLabLevel: 0, technocratFactor: 1, shipyardLevel: 0, uniSpeed
+      });
     }
     return [cost[0], cost[1], cost[2], timeSpan];
   }

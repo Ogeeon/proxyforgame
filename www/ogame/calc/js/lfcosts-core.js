@@ -85,8 +85,12 @@ class LfCalculator {
         const megalithRdc = Math.min(0.99, params.race === 2 ? 0.01 * params.megalithLvl : 0);
         const lvl = this._researchReductionBuildingLevel(params);
         const effectiveTimeRdc = Math.min(99, params.researchTimeReduction + 2 * lvl);
-        return getBuildTimeLF(techID, levelFrom, levelTo, this.techCosts,
-            params.robotFactoryLevel, params.naniteFactoryLevel, params.universeSpeed,
-            effectiveTimeRdc, megalithRdc);
+        return getBuildTimeLF({
+            techID, techLevelFrom: levelFrom, techLevelTo: levelTo,
+            techData: this.techCosts,
+            robotsLevel: params.robotFactoryLevel, nanitesLevel: params.naniteFactoryLevel,
+            uniSpeed: params.universeSpeed,
+            rsrTimeRdc: effectiveTimeRdc, megalithRdc
+        });
     }
 }

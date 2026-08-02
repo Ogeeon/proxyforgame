@@ -137,8 +137,14 @@ function getSSCost(techID, currLvl, plnData) {
 	// are applied to oneSSProd below, the way production.js applies them to the
 	// whole energy balance. The satellite branch of getProductionRateSplit reads
 	// none of them anyway - only techLevel, maxTemp and powerFactor.
-	let oneSSProd = getProductionRate(212, 1, options.prm.energyTechLevel, options.prm.plasmaTechLevel, plnData[0], plnData[1],
-		options.prm.universeSpeed, options.prm.geologist, options.prm.engineer, 1, 1, 0, false, options.prm.playerClass);
+	let oneSSProd = getProductionRate({
+		techID: 212, techLevel: 1,
+		energyTechLevel: options.prm.energyTechLevel, plasmaTechLevel: options.prm.plasmaTechLevel,
+		maxTemp: plnData[0], pos: plnData[1], universeSpeedFactor: options.prm.universeSpeed,
+		geologist: options.prm.geologist, engineer: options.prm.engineer,
+		productionFactor: 1, powerFactor: 1, boosterType: 0,
+		allOfficers: false, playerClass: options.prm.playerClass
+	});
 	let boosterFactor = 0.1 * plnData[2];
 	let engineerFactor = (options.prm.engineer === true) ? 0.1 : 0;
 	let allStaffFactor = fullCrew === true ? 0.02 : 0;
@@ -249,8 +255,15 @@ function computeBaseEnergyProduction(prodParams, plnData, fullCrew, results, pro
 		let energy = 0;
 		// Power percentage is passed straight into getProductionRateSplit so the officer/plasma/booster bonus rows stay proportional to it.
 		if (level > 0) {
-			let energyArray = getProductionRateSplit(options.rowsToTechs[i], level, options.prm.energyTechLevel, 0, plnData[0], plnData[1], options.prm.universeSpeed, options.prm.geologist,
-				options.prm.engineer, 1, perCent / 100.0, 0, fullCrew, options.prm.playerClass, options.prm.isTrader);
+			let energyArray = getProductionRateSplit({
+				techID: options.rowsToTechs[i], techLevel: level,
+				energyTechLevel: options.prm.energyTechLevel, plasmaTechLevel: 0,
+				maxTemp: plnData[0], pos: plnData[1], universeSpeedFactor: options.prm.universeSpeed,
+				geologist: options.prm.geologist, engineer: options.prm.engineer,
+				productionFactor: 1, powerFactor: perCent / 100.0, boosterType: 0,
+				allOfficers: fullCrew, playerClass: options.prm.playerClass,
+				isTrader: options.prm.isTrader
+			});
 			energy = energyArray[1];
 			// write the base energy produced into the power plant's/satellite's row
 			results[i + 1][3] = energyArray[1];
@@ -342,8 +355,15 @@ function computeResourceProduction(prodParams, plnData, fullCrew, koeff, normali
 	let prodFactor = normalized ? 1 : koeff;
 	for (const i of [0, 1, 2]) {
 		let pwrFactor = normalized ? 1 : prodParams[i][1] / 100.0;
-		let prod = getProductionRateSplit(options.rowsToTechs[i], prodParams[i][0], options.prm.energyTechLevel, options.prm.plasmaTechLevel, plnData[0], plnData[1],
-			options.prm.universeSpeed, options.prm.geologist, options.prm.engineer, prodFactor, pwrFactor, prodParams[i][2], fullCrew, options.prm.playerClass, options.prm.isTrader, collectorClassBonusPct());
+		let prod = getProductionRateSplit({
+			techID: options.rowsToTechs[i], techLevel: prodParams[i][0],
+			energyTechLevel: options.prm.energyTechLevel, plasmaTechLevel: options.prm.plasmaTechLevel,
+			maxTemp: plnData[0], pos: plnData[1], universeSpeedFactor: options.prm.universeSpeed,
+			geologist: options.prm.geologist, engineer: options.prm.engineer,
+			productionFactor: prodFactor, powerFactor: pwrFactor, boosterType: prodParams[i][2],
+			allOfficers: fullCrew, playerClass: options.prm.playerClass,
+			isTrader: options.prm.isTrader, collectorClassBonusPct: collectorClassBonusPct()
+		});
 		// Save the resource production data
 		results[0][i] += prod[0];  // base production
 		production[i] += prod[0];

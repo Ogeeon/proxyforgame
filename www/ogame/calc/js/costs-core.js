@@ -505,43 +505,43 @@ class Calculator {
     // to the total energy balance as separate rows. In the range calculator we show
     // production for a single building, so we include these bonuses directly.
     if (techId === 4 || techId === 12 || techId === 212) {
-      const prod = getProductionRateSplit(
-        techId,
-        level,
-        params.energyTechLevel,
-        params.plasmaTechLevel,
-        params.maxPlanetTemp,
-        params.planetPos,
-        params.universeSpeed,
-        params.geologist,
-        params.engineer,
-        1, // energyRatio
-        1, // productionRatio
-        params.booster,
-        params.hasFullCrew,
-        params.playerClass
-      );
+      const prod = getProductionRateSplit({
+        techID: techId,
+        techLevel: level,
+        energyTechLevel: params.energyTechLevel,
+        plasmaTechLevel: params.plasmaTechLevel,
+        maxTemp: params.maxPlanetTemp,
+        pos: params.planetPos,
+        universeSpeedFactor: params.universeSpeed,
+        geologist: params.geologist,
+        engineer: params.engineer,
+        productionFactor: 1, // energyRatio
+        powerFactor: 1, // productionRatio
+        boosterType: params.booster,
+        allOfficers: params.hasFullCrew,
+        playerClass: params.playerClass
+      });
       const allStaffBonus = params.hasFullCrew ? Math.round(prod[1] * 0.02) : 0;
       return prod[1] + prod[5] + allStaffBonus; // base + engineer bonus + all-officers bonus
     }
 
     // Calculate production rate
-    return getProductionRate(
-      techId,
-      level,
-      params.energyTechLevel,
-      params.plasmaTechLevel,
-      params.maxPlanetTemp,
-      params.planetPos,
-      params.universeSpeed,
-      params.geologist,
-      params.engineer,
-      1, // energyRatio - always 1 for max production
-      1, // productionRatio - always 1 for calculation
-      params.booster,
-      params.hasFullCrew,
-      params.playerClass
-    );
+    return getProductionRate({
+      techID: techId,
+      techLevel: level,
+      energyTechLevel: params.energyTechLevel,
+      plasmaTechLevel: params.plasmaTechLevel,
+      maxTemp: params.maxPlanetTemp,
+      pos: params.planetPos,
+      universeSpeedFactor: params.universeSpeed,
+      geologist: params.geologist,
+      engineer: params.engineer,
+      productionFactor: 1, // energyRatio - always 1 for max production
+      powerFactor: 1, // productionRatio - always 1 for calculation
+      boosterType: params.booster,
+      allOfficers: params.hasFullCrew,
+      playerClass: params.playerClass
+    });
   }
 
   /**
@@ -645,19 +645,19 @@ class Calculator {
     const naniteLevel = isMoon ? 0 : params.naniteFactoryLevel;
 
     // Calculate time
-    return getBuildTime_C(
-      techId,
-      fromLevel,
-      toLevel,
-      this.techCosts,
-      robotLevel,
-      naniteLevel,
-      labLevel,
-      params.technocratFactor,
-      params.shipyardLevel,
-      speed,
-      this.techReqs
-    );
+    return getBuildTime_C({
+      techID: techId,
+      techLevelFrom: fromLevel,
+      techLevelTo: toLevel,
+      techData: this.techCosts,
+      robotsLevel: robotLevel,
+      nanitesLevel: naniteLevel,
+      researchLabLevel: labLevel,
+      technocratFactor: params.technocratFactor,
+      shipyardLevel: params.shipyardLevel,
+      uniSpeed: speed,
+      techReqs: this.techReqs
+    });
   }
 
   /**
