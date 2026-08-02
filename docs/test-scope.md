@@ -48,7 +48,10 @@ Anything not in a calculator's file set, notably:
 - `www/ogame/calc/js/dom-utils.js`
 - `www/ogame/calc/js/own-api.js` — the API 2 import, read by `flight` and `expeditions`
 - `www/ogame/calc/h_functions.php`, `www/ogame/calc/h_abox.php`
-- `www/ajax.php`, `www/Intl.php`, `www/langs.php`, `www/db.connect.inc.php`
+- `www/ajax.php` and `www/api/*.inc.php` — the endpoint and its services; their own HTTP
+  contract is covered by `playwright-tests/tests/api.spec.js`, which still does not narrow the
+  scope: every calculator talks to them
+- `www/Intl.php`, `www/langs.php`, `www/db.connect.inc.php`
 - `www/locale/*.json` — use `make check`, so the locale validator runs too
 - `playwright-tests/tests/base.js` — **note the path**, it sits in `tests/`, not the root
 - `playwright-tests/playwright.config.js`
@@ -60,8 +63,8 @@ Anything not in a calculator's file set, notably:
 
 - **Before `git push`: full `make test`**, however narrow the commits were.
 - New tests go in the existing file for that calculator, never a new file. A shared module is
-  the exception: `own-api.js` has its own `unit-tests/own-api.test.js`, since it belongs to no
-  single calculator.
+  the exception: `own-api.js` has its own `unit-tests/own-api.test.js` and the AJAX endpoint its
+  own `playwright-tests/tests/api.spec.js`, since neither belongs to a single calculator.
 - `make check` = `changelog-validate` + `i18n-validate` + `lint` + `typecheck` +
   `tsconfigs-check` + `html-validate` + both suites. Prefer it over `make test` whenever locale
   files or templates are in the change; plain `make test` validates neither translations, nor
