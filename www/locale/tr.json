@@ -242,12 +242,12 @@
       "correct": "Düzelt",
       "sending-progress": "Raporlarınız gönderiliyor...",
       "msg-sent": "Raporunuz gönderilmiştir. Teşekkür ederiz.",
-      "msg-request_error": "Error in request. Please try again later.",
+      "msg-request_error": "İstek sırasında hata oluştu. Lütfen daha sonra tekrar deneyin.",
       "msg-both_empty": "Her iki alan boş. Yanlış yazılmış metni ve bunun sürümünü belirtin.",
       "msg-texts_equal": "Düzeltilmiş metin içeriği yanlış metin içeriğiyle aynıdır. Yanlış yazılmış metin sürümünü belirtin.",
       "msg-wrong_empty": "Yanlış yazılmış metin alanı boş. Yanlış yazılmış metni belirtiniz.",
       "msg-right_empty": "Düzeltilmiş metin alanı boş. Yanlış yazılmış metin sürümünü belirtin.",
-      "msg-mail_failed": "Report sending failed."
+      "msg-mail_failed": "Bildirim gönderilemedi. Lütfen daha sonra tekrar deneyin."
     },
     "emailStrings": {
       "title": "E-Posta Gönderme",
@@ -259,9 +259,9 @@
       "correct": "Düzelt",
       "sending-progress": "Raporlarınız gönderiliyor...",
       "msg-sent": "Mesajınız gönderilmiştir. Teşekkürler.",
-      "msg-request_error": "Error in request. Please try again later.",
+      "msg-request_error": "İstek sırasında hata oluştu. Lütfen daha sonra tekrar deneyin.",
       "msg-nothing_to_send": "Göndermek için bir şey yok. Lütfen Konu veya Mesaj içeriği alanlarından en az birini doldurunuz",
-      "msg-mail_failed": "Email sending failed."
+      "msg-mail_failed": "Mesaj gönderilemedi. Lütfen daha sonra tekrar deneyin."
     },
     "donateStrings": {
       "header": "Bu projeye destek verin",

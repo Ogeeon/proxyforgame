@@ -242,12 +242,12 @@
       "correct": "Wijzig",
       "sending-progress": "Versturen van rapport...",
       "msg-sent": "Je rapport is verstuurd. Bedankt.",
-      "msg-request_error": "Error in request. Please try again later.",
+      "msg-request_error": "Fout bij het verzoek. Probeer het later opnieuw.",
       "msg-both_empty": "Beide velden zijn leeg. Specificeer de verkeerde vertaling en jouw verbetering er van.",
       "msg-texts_equal": "De inhoud van het veld [Gecorrigeerde tekst] is gelijk aan de inhoud van het veld [Verkeerd vertaalde tekst]. Specificeer jouw versie van de verkeerd vertaalde tekst.",
       "msg-wrong_empty": "Het veld [Verkeerd vertaalde tekst] is leeg. Specificeer de verkeerd vertaalde tekst.",
       "msg-right_empty": "Het veld [Gecorrigeerde tekst] is leeg. Specificeer jouw versie van de gecorrigeerde tekst.",
-      "msg-mail_failed": "Email sending failed."
+      "msg-mail_failed": "De melding kon niet worden verzonden. Probeer het later opnieuw."
     },
     "emailStrings": {
       "title": "Verstuur een e-mail",
@@ -259,9 +259,9 @@
       "correct": "Risolvere",
       "sending-progress": "Je bericht wordt verstuurd...",
       "msg-sent": "Je bericht is verstuurd. Bedankt.",
-      "msg-request_error": "Error in request. Please try again later.",
+      "msg-request_error": "Fout bij het verzoek. Probeer het later opnieuw.",
       "msg-nothing_to_send": "Er is niets om te versturen... Vul ten minste 1 van de velden in [Onderwerp] of [Bericht].",
-      "msg-mail_failed": "Email sending failed."
+      "msg-mail_failed": "Het bericht kon niet worden verzonden. Probeer het later opnieuw."
     },
     "donateStrings": {
       "header": "Steun dit project",

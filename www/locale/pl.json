@@ -242,12 +242,12 @@
       "correct": "Popraw",
       "sending-progress": "Wysylanie wiadomosci...",
       "msg-sent": "Twoja wiadomosc zostala wyslana. Dziekujemy.",
-      "msg-request_error": "Error in request. Please try again later.",
+      "msg-request_error": "Błąd żądania. Spróbuj ponownie później.",
       "msg-both_empty": "Nie wypelniono zadnego pola. Prosze wpisac bledny tekst i poprawna pisownie.",
       "msg-texts_equal": "Zawartosc pola [Poprawny tekst] nie rozni sie od pola [Bledny tekst]. Prosimy o podanie poprawnej pisowni.",
       "msg-wrong_empty": "Nie wypelniono pola [Bledny tekst]. Prosze podac bledny tekst.",
       "msg-right_empty": "Nie wypelniono pola [Poprawny tekst]. Prosimy o podanie poprawnej pisowni.",
-      "msg-mail_failed": "Email sending failed."
+      "msg-mail_failed": "Nie udało się wysłać zgłoszenia. Spróbuj ponownie później."
     },
     "emailStrings": {
       "title": "Wyslij wiadomosc",
@@ -259,9 +259,9 @@
       "correct": "Poprawny",
       "sending-progress": "Wysylanie wiadomosci...",
       "msg-sent": "Twoja wiadomosc zostala wyslana. Dziekujemy.",
-      "msg-request_error": "Error in request. Please try again later.",
+      "msg-request_error": "Błąd żądania. Spróbuj ponownie później.",
       "msg-nothing_to_send": "Wiadomosc jest pusta... Prosze wypelnic przynajmniej jedno z pol [Temat] lub [Tresc].",
-      "msg-mail_failed": "Email sending failed."
+      "msg-mail_failed": "Nie udało się wysłać wiadomości. Spróbuj ponownie później."
     },
     "donateStrings": {
       "header": "Wesprzyj ten projekt",

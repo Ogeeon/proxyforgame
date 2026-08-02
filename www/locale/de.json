@@ -242,12 +242,12 @@
       "correct": "Richtig",
       "sending-progress": "Das Senden von Nachrichten...",
       "msg-sent": "Ihre Nachricht wurde gesendet. Danke.",
-      "msg-request_error": "Error in request. Please try again later.",
+      "msg-request_error": "Fehler bei der Anfrage. Bitte versuchen Sie es später erneut.",
       "msg-both_empty": "Sie haben keine der Felder gefüllt. Bitte geben Sie den fehlerhaften und den korrekten Text ein.",
       "msg-texts_equal": "Der Inhalt des Feldes [Der korrekte Text] ist identisch mit dem Inhalt des Feldes [Fehlerhafter Text].",
       "msg-wrong_empty": "Das Eingabefeld fur den fehlerhaften Text ist leer. Bitte ausfullen.",
       "msg-right_empty": "Das Eingabefeld fur die korrektur ist leer. Bitte ausfullen.",
-      "msg-mail_failed": "Email sending failed."
+      "msg-mail_failed": "Die Fehlermeldung konnte nicht gesendet werden. Bitte versuchen Sie es später erneut."
     },
     "emailStrings": {
       "title": "Schicken Sie Briefe",
@@ -259,9 +259,9 @@
       "correct": "Richtig",
       "sending-progress": "Das Versenden von Nachrichten ...",
       "msg-sent": "Ihre Nachricht wurde gesendet. Danke.",
-      "msg-request_error": "Error in request. Please try again later.",
+      "msg-request_error": "Fehler bei der Anfrage. Bitte versuchen Sie es später erneut.",
       "msg-nothing_to_send": "Angaben unvollstandig - Bitte Betreff oder Nachrichttext eingeben.",
-      "msg-mail_failed": "Email sending failed."
+      "msg-mail_failed": "Die Nachricht konnte nicht gesendet werden. Bitte versuchen Sie es später erneut."
     },
     "donateStrings": {
       "header": "Unterstütze dieses Projekt",

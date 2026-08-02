@@ -247,7 +247,7 @@
       "msg-texts_equal": "The content of field [Corrected text] is identical to the content of field [Misspelled text]. Please specify your version of the misspelled text.",
       "msg-wrong_empty": "The field [Misspelled text] is empty. Please specify the misspelled text.",
       "msg-right_empty": "The field [Corrected text] is empty. Please specify your version of the misspelled text.",
-      "msg-mail_failed": "Email sending failed."
+      "msg-mail_failed": "The report could not be sent. Please try again later."
     },
     "emailStrings": {
       "title": "Sending an e-mail",
@@ -261,7 +261,7 @@
       "msg-sent": "Your message has been sent. Thank you.",
       "msg-request_error": "Error in request. Please try again later.",
       "msg-nothing_to_send": "There is nothing to send... Please fill in at least one on the fields [Subject] or [Message body].",
-      "msg-mail_failed": "Email sending failed."
+      "msg-mail_failed": "The message could not be sent. Please try again later."
     },
     "donateStrings": {
       "header": "Support this project",

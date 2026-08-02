@@ -242,12 +242,12 @@
       "correct": "Opravím to",
       "sending-progress": "Odosielanie Vašej správy...",
       "msg-sent": "Vaša správa bola odoslaná. Ďakujeme.",
-      "msg-request_error": "Error in request. Please try again later.",
+      "msg-request_error": "Chyba požiadavky. Skúste to znova neskôr.",
       "msg-both_empty": "Obe polia sú prázdne. Prosím uveďte nesprávny text a vašu opravenú verziu.",
       "msg-texts_equal": "Obsah poľa [Opravený text] je zhodný s obsahom poľa [Nesprávny text]. Prosím uveďte vašu verziu nesprávneho textu.",
       "msg-wrong_empty": "Pole [Nesprávny text] je prázdne. Prosím uveďte nesprávny text.",
       "msg-right_empty": "Pole [Opravený text] je prázdne. Prosím uveďte vašu verziu opraveného textu.",
-      "msg-mail_failed": "Report sending failed."
+      "msg-mail_failed": "Hlásenie sa nepodarilo odoslať. Skúste to znova neskôr."
     },
     "emailStrings": {
       "title": "Odosielanie e-mailu",
@@ -259,9 +259,9 @@
       "correct": "Opravím to",
       "sending-progress": "Odosielanie Vašej správy...",
       "msg-sent": "Vaša správa bola odoslaná. Ďakujeme.",
-      "msg-request_error": "Error in request. Please try again later.",
+      "msg-request_error": "Chyba požiadavky. Skúste to znova neskôr.",
       "msg-nothing_to_send": "Nie je tu čo odoslať... Prosím vyplňte aspoň jedno z polí [Predmet] or [Telo správy].",
-      "msg-mail_failed": "Email sending failed."
+      "msg-mail_failed": "Správu sa nepodarilo odoslať. Skúste to znova neskôr."
     },
     "donateStrings": {
       "header": "Podporte tento projekt",

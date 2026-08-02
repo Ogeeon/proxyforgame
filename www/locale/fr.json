@@ -242,12 +242,12 @@
       "correct": "Correcte",
       "sending-progress": "Envoi de votre rapport...",
       "msg-sent": "Votre rapport a été envoyé. Merci.",
-      "msg-request_error": "Error in request. Please try again later.",
+      "msg-request_error": "Erreur lors de la requête. Veuillez réessayer plus tard.",
       "msg-both_empty": "Les deux champs sont vides. Spécifier s'il vous plaît le texte mal orthographié et votre version.",
       "msg-texts_equal": "Le contenu du champ [Texte corrigé] est identique au contenu du champ [Texte mal orthographié]. S'il vous plaît indiquer votre version du texte mal orthographié.",
       "msg-wrong_empty": "Le champ [Texte mal orthographié] est vide. S'il vous plaît spécifier le texte mal orthographié.",
       "msg-right_empty": "Le champ [Texte corrigé] est vide. S'il vous plaît indiquer votre version du texte mal orthographié.",
-      "msg-mail_failed": "Email sending failed."
+      "msg-mail_failed": "Le signalement n'a pas pu être envoyé. Veuillez réessayer plus tard."
     },
     "emailStrings": {
       "title": "L'envoi d'un email",
@@ -259,9 +259,9 @@
       "correct": "Correcte",
       "sending-progress": "Envoi de votre message...",
       "msg-sent": "Votre message a été envoyé. Merci.",
-      "msg-request_error": "Error in request. Please try again later.",
+      "msg-request_error": "Erreur lors de la requête. Veuillez réessayer plus tard.",
       "msg-nothing_to_send": "Il n'ya rien à envoyer... Remplissez s'il vous plaît au moins une des champs [Sujet] ou [Message].",
-      "msg-mail_failed": "Email sending failed."
+      "msg-mail_failed": "Le message n'a pas pu être envoyé. Veuillez réessayer plus tard."
     },
     "donateStrings": {
       "header": "Soutenir ce projet",

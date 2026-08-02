@@ -242,12 +242,12 @@
       "correct": "Risolvere",
       "sending-progress": "L'invio del rapporto...",
       "msg-sent": "Il tuo rapporto è stato inviato. Grazie.",
-      "msg-request_error": "Error in request. Please try again later.",
+      "msg-request_error": "Errore nella richiesta. Riprova più tardi.",
       "msg-both_empty": "Entrambi i campi sono vuoti. Si prega di specificare il testo scritto male e la tua versione di esso.",
       "msg-texts_equal": "Il contenuto del campo [Parole giuste] è identico al contenuto del campo [Parole sbagliate]. Si prega di specificare la versione del testo scritto male.",
       "msg-wrong_empty": "Il campo [Parole sbagliate] è vuoto. Si prega di specificare il parole sbagliate.",
       "msg-right_empty": "Il campo [Parole giuste] è vuoto. Si prega di specificare la versione del testo scritto male.",
-      "msg-mail_failed": "Email sending failed."
+      "msg-mail_failed": "Non è stato possibile inviare la segnalazione. Riprova più tardi."
     },
     "emailStrings": {
       "title": "Invio di una e-mail",
@@ -259,9 +259,9 @@
       "correct": "Risolvere",
       "sending-progress": "Trasmissione del messaggio...",
       "msg-sent": "Il tuo messaggio è stato inviato. Grazie.",
-      "msg-request_error": "Error in request. Please try again later.",
+      "msg-request_error": "Errore nella richiesta. Riprova più tardi.",
       "msg-nothing_to_send": "Non c'è nulla da inviare ... Si prega di compilare almeno uno dei campi [Soggetto] o [Corpo del messaggio].",
-      "msg-mail_failed": "Email sending failed."
+      "msg-mail_failed": "Non è stato possibile inviare il messaggio. Riprova più tardi."
     },
     "donateStrings": {
       "header": "Sostieni questo progetto",
