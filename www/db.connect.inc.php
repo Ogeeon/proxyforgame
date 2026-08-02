@@ -19,6 +19,18 @@ function loadEnv($path) {
     }
 }
 
+/**
+ * Runs a SELECT and returns its rows.
+ *
+ * Returns an array of rows - empty when the query matched nothing - or FALSE
+ * when the query could not be run at all: no connection, a prepare/execute
+ * failure, or a statement that yields no result set. Callers that need to tell
+ * "nothing found" from "could not ask" must compare against FALSE explicitly.
+ *
+ * Parameters are bound, never interpolated. Every one of them is bound as a
+ * string; MySQL coerces on comparison, which is what the previous quote-and-
+ * splice code did too.
+ */
 function sqlQuery($query, $params) {
     global $connection;
     $res = array();
@@ -27,29 +39,39 @@ function sqlQuery($query, $params) {
         return false;
     }
 
-    // Escape all parameters
-    $escaped = array();
-    foreach ($params as $param) {
-        $escaped[] = is_null($param) ? 'NULL' : "'" . mysqli_real_escape_string($connection, $param) . "'";
-    }
+    // From PHP 8.1 on, mysqli throws instead of returning false. Catch it here
+    // so this function keeps one contract across every version we run on.
+    try {
+        $stmt = mysqli_prepare($connection, $query);
+        if ($stmt === false) {
+            error_log("sqlQuery: prepare failed: " . mysqli_error($connection));
+            return false;
+        }
 
-    // Replace ? placeholders with escaped values
-    $finalQuery = $query;
-    foreach ($escaped as $value) {
-        $finalQuery = preg_replace('/\?/', $value, $finalQuery, 1);
-    }
+        if (count($params) > 0) {
+            mysqli_stmt_bind_param($stmt, str_repeat('s', count($params)), ...$params);
+        }
 
-    $result = mysqli_query($connection, $finalQuery);
-    if ($result === false || $result === true) {
-        // Query failed, or succeeded without a result set (not a SELECT); either way, no rows to return
+        mysqli_stmt_execute($stmt);
+        $result = mysqli_stmt_get_result($stmt);
+
+        // Not a SELECT, so there is no result set to hand back
+        if ($result === false) {
+            mysqli_stmt_close($stmt);
+            return false;
+        }
+
+        while ($row = mysqli_fetch_assoc($result)) {
+            array_push($res, $row);
+        }
+        mysqli_free_result($result);
+        mysqli_stmt_close($stmt);
+    } catch (\mysqli_sql_exception $e) {
+        error_log("sqlQuery: " . $e->getMessage());
         return false;
     }
-    while ($row = mysqli_fetch_assoc($result)) {
-        array_push($res, $row);
-    }
-    mysqli_free_result($result);
 
-    return count($res) > 0 ? $res : false;
+    return $res;
 }
 
 
