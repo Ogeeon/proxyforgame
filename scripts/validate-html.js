@@ -94,7 +94,10 @@ function listCombos({ lang, page }) {
     return combos;
 }
 
-/** Renders a single page/lang pair into .html-check/<lang>/<page>.html */
+/**
+ * Renders a single page/lang pair into .html-check/<lang>/<page>.html
+ * @returns {Promise<void>}
+ */
 function render({ page, lang }) {
     return new Promise((resolve, reject) => {
         const dir = path.join(CHECK_DIR, lang);
@@ -105,7 +108,9 @@ function render({ page, lang }) {
             stdio: ['ignore', out, 'pipe']
         });
         let err = '';
-        child.stderr.on('data', (chunk) => { err += chunk; });
+        // Piped by the stdio triple above; the optional call is for the type,
+        // which does not know that.
+        child.stderr?.on('data', (chunk) => { err += chunk; });
         child.on('error', (error) => { fs.closeSync(out); reject(error); });
         child.on('close', (code) => {
             fs.closeSync(out);
@@ -163,8 +168,9 @@ function groupMessages(messages) {
         const url = msg.url || '(unknown)';
         const key = url.startsWith('file:') ? url.replace(/^file:\/\/?/, '') : url;
         const rel = key.startsWith(REPO_ROOT) ? key.slice(REPO_ROOT.length).replace(/^[/\\]/, '') : key;
-        if (!byFile.has(rel)) byFile.set(rel, []);
-        byFile.get(rel).push(msg);
+        const forFile = byFile.get(rel);
+        if (forFile) forFile.push(msg);
+        else byFile.set(rel, [msg]);
     }
     return { byFile };
 }
