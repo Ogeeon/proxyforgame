@@ -58,8 +58,8 @@ if ($page === 'policy') {
     readfile($wwwRoot . DIRECTORY_SEPARATOR . 'policy.php');
 } elseif ($page === 'index') {
     chdir($wwwRoot);
-    require $wwwRoot . DIRECTORY_SEPARATOR . 'index.php';
+    require_once $wwwRoot . DIRECTORY_SEPARATOR . 'index.php';
 } else {
     chdir($wwwRoot . DIRECTORY_SEPARATOR . 'ogame' . DIRECTORY_SEPARATOR . 'calc');
-    require $wwwRoot . DIRECTORY_SEPARATOR . 'ogame' . DIRECTORY_SEPARATOR . 'calc' . DIRECTORY_SEPARATOR . $page . '.php';
+    require_once $wwwRoot . DIRECTORY_SEPARATOR . 'ogame' . DIRECTORY_SEPARATOR . 'calc' . DIRECTORY_SEPARATOR . $page . '.php';
 }

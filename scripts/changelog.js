@@ -133,7 +133,7 @@ function openRelease(line, no, state, releases, errors) {
 
   state.release = {
     date: dated ? dated[1] : null,
-    id: dated && dated[2] !== undefined ? Number.parseInt(dated[2], 10) : null,
+    id: dated?.[2] !== undefined ? Number.parseInt(dated[2], 10) : null,
     sections: [],
     quote: null,
     quoteLine: 0,
@@ -454,7 +454,7 @@ function validate(content) {
  * @returns {string}
  */
 function escapeSql(value) {
-  return value.replace(/'/g, "''");
+  return value.replaceAll("'", "''");
 }
 
 /**

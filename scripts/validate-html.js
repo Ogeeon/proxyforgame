@@ -144,7 +144,7 @@ function runVnu() {
     // vnu writes its JSON report to stdout on some platforms and to stderr on
     // others; parse whichever stream carries it.
     for (const stream of [result.stdout, result.stderr]) {
-        if (!stream || !stream.trim()) continue;
+        if (!stream?.trim()) continue;
         try {
             return JSON.parse(stream);
         } catch {

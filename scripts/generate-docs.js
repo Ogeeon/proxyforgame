@@ -174,10 +174,8 @@ function generateCalculatorDocs(calcName) {
     `2. Configure input parameters`,
     `3. View calculated results`,
     '',
-  );
 
-  // Development notes
-  docs.push(
+    // Development notes
     `## Development Notes`,
     '',
     `### File Structure`,
@@ -192,17 +190,25 @@ function generateCalculatorDocs(calcName) {
     '',
   );
 
-  docs.push(`### Testing`, '');
-  if (info.hasTest) {
-    docs.push(`Run tests:`, '```bash', `npx playwright test ${calcName}`, '```');
-  } else {
-    docs.push(colorize('⚠️ No tests available', colors.yellow));
-  }
-  docs.push('');
+  const testing = info.hasTest
+    ? [`Run tests:`, '```bash', `npx playwright test ${calcName}`, '```']
+    : [colorize('⚠️ No tests available', colors.yellow)];
 
-  docs.push(`### Translation`, '', `Translation key: \`${info.translationKey || calcName}\``, `Translation files: \`www/locale/*.json\``, '');
-
-  docs.push('---', '', `*Documentation generated automatically by scripts/generate-docs.js*`, '');
+  docs.push(
+    `### Testing`,
+    '',
+    ...testing,
+    '',
+    `### Translation`,
+    '',
+    `Translation key: \`${info.translationKey || calcName}\``,
+    `Translation files: \`www/locale/*.json\``,
+    '',
+    '---',
+    '',
+    `*Documentation generated automatically by scripts/generate-docs.js*`,
+    '',
+  );
 
   return docs.join('\n');
 }
