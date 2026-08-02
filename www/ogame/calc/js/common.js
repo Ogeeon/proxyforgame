@@ -696,31 +696,3 @@ function getBuildEnergyCostLF(techID, techLevel, techData, ionTechLevel, bldCost
 		buildCost = Math.floor(buildCost * (1 - bldCostRdc));
 	return buildCost;
 }
-
-/**
- * Format a numeric value either as a full OGame-style number or as a shortened string.
- *
- * The returned format depends on the global flag `options.prm.fullNumbers`:
- * - If truthy, the value is formatted using `numToOGame(num)` (full formatting).
- * - Otherwise, the value is converted using `numberToShortenedString(num, suffix)` (shortened form).
- *
- * @param {number} num - The numeric value to format.
- * @param {string} [suffix] - Optional suffix passed to the shortening helper (e.g. "K", "M").
- *                            Ignored when `options.prm.fullNumbers` is truthy.
- * @returns {string} A formatted string representing the number, either full or shortened.
- * @see options.prm.fullNumbers
- * @see numToOGame
- * @see numberToShortenedString
- * @example
- * // When fullNumbers is true:
- * // shorten(1234567) -> "1.234.567" (format depends on numToOGame implementation)
- *
- * // When fullNumbers is false:
- * // shorten(1500000, "M") -> "1.5M" (format depends on numberToShortenedString implementation)
- */
-function ogamizeNum(num, suffix) {
-	if (options.prm.fullNumbers)
-		return numToOGame(num);
-	else
-		return numberToShortenedString(num, suffix);
-}
