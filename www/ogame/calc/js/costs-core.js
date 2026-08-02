@@ -809,7 +809,7 @@ class Validator {
 // For browser globals (current setup). The cast is what lets these land on
 // globalThis under the type-check: class declarations live in the script's
 // lexical scope, so TypeScript does not know them as globalThis properties.
-if (globalThis.window !== undefined) {
+if (typeof window !== 'undefined') {
   const g = /** @type {Record<string, unknown>} */ (/** @type {unknown} */ (globalThis));
   g.GlobalParams = GlobalParams;
   g.BuildRequest = BuildRequest;

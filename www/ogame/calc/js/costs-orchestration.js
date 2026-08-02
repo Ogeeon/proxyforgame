@@ -847,7 +847,7 @@ class CostsCalculator {
 
     // Parse into a buffer first; only apply once every research is complete
     const parsedRows = [];
-    for (let row = 0; row < rows.length; row++) {
+    for (const _ of rows) {
       if (p >= lines.length) break; // no name line left => incomplete
       p++; // research name line
       const cost = readColumn();
@@ -2082,7 +2082,7 @@ function validateAndChangeLabLevel(event) {
 }
 
 // Expose to globalThis for direct access
-if (globalThis.window !== undefined) {
+if (typeof window !== 'undefined') {
   globalThisRecord().CostsCalculator = CostsCalculator;
   globalThisRecord().initializeCostsCalculator = initializeCostsCalculator;
 }

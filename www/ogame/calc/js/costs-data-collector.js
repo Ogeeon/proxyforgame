@@ -748,7 +748,7 @@ class ChangeDetector {
 // EXPORT FOR USE
 // ============================================================================
 
-if (globalThis.window !== undefined) {
+if (typeof window !== 'undefined') {
   // Cast for the same reason as in costs-core.js: class declarations live in
   // the script's lexical scope, not as globalThis properties.
   const g = /** @type {Record<string, unknown>} */ (/** @type {unknown} */ (globalThis));
