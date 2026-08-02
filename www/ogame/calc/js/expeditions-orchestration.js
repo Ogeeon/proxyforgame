@@ -29,6 +29,7 @@ const options = {
     // The saved cookie is a comma-separated list of key;value pairs, so the
     // fleet JSON keeps its commas encoded as "~" while it is stored.
     fleet: EXPEDITIONS_EMPTY_FLEET,
+    /** @type {number[]} One cargo bonus per EXPEDITION_SHIPS entry, in percent. */
     lfShipsBonuses: [],
 
     validate: function (field, value) {
@@ -230,11 +231,11 @@ class ExpeditionsApp {
     addEvent('#open-lfbr', 'click', () => {
       setVal('#lf-bonuses-txtarea', '');
       setVal('#own-api-input', '');
-      bootstrap.Modal.getOrCreateInstance(document.getElementById('lf-bonuses-reader')).show();
+      show('#lf-bonuses-reader');
     });
     addEvent('#lf-bonuses-read-btn', 'click', () => {
       if (this.readBonuses()) {
-        bootstrap.Modal.getInstance(document.getElementById('lf-bonuses-reader')).hide();
+        hide('#lf-bonuses-reader');
         this.recalc();
       }
     });
