@@ -123,7 +123,7 @@ function getVar($var, $type)
 
   function getChangelog() {
     if (($lastSeen = getVar('lastSeen', 'int')) !== false && ($lang = getVar('lang', 'str')) !== false) {
-      $langs = array('ru', 'de', 'es', 'pl', 'fr', 'it', 'nl', 'sk', 'tr', 'pt', 'en', 'us');
+      $langs = array('ru', 'de', 'es', 'pl', 'fr', 'it', 'nl', 'sk', 'tr', 'pt', 'en', 'us', 'bs');
       if (!in_array($lang, $langs)) {
         die("1\nmalformed");
       }

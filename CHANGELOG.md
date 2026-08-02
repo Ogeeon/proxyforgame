@@ -15,6 +15,10 @@ release section; it is the source of truth for the other eleven translations.
 
 ## [Unreleased]
 
+### Fixed
+
+- Sidebar: the changelog now loads for Bosnian, which the language whitelist rejected outright.
+
 ## [2026-08-02] - site entry 57
 
 ### Added
