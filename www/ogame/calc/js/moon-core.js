@@ -198,8 +198,8 @@ class MoonCalculator {
       createChance,
       chanceCap,
       moonSizes,
-      moonSizeMin: moonSizes.length > 0 ? moonSizes[0] : null,
-      moonSizeMax: moonSizes.length > 0 ? moonSizes[moonSizes.length - 1] : null,
+      moonSizeMin: moonSizes[0] ?? null,
+      moonSizeMax: moonSizes.at(-1) ?? null,
       recyclerCapacity,
       recyclers,
       maxCounts: MoonCalculator.maxCounts(dfShare, deutFactor, baseChanceCap, p.defenseToDebris),
@@ -227,7 +227,9 @@ class MoonCalculator {
    * @returns {number[]} Diameters in km, or [] when there is no debris.
    */
   static moonSizes(debrisTotal, supraRefractorLevel) {
-    if (!(debrisTotal > 0)) return [];
+    // NaN counts as "no debris" here: debrisTotal is a sum of three fields and a
+    // single unparseable one poisons it, which must not reach the diameters.
+    if (Number.isNaN(debrisTotal) || debrisTotal <= 0) return [];
     const chanceShare = clampNumber(
       debrisTotal / MOON_DF_PER_FULL_CHANCE, 0, MOON_CHANCE_CAP
     );
