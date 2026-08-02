@@ -85,8 +85,6 @@ class LfCostsOrchestrator {
     // -------------------------------------------------------------------------
 
     init() {
-        const orchestrator = this;
-
         // Tab-state persistence. addEvent skips a strip the template did not
         // render instead of throwing, so the inner strips need no check of
         // their own.
@@ -101,14 +99,14 @@ class LfCostsOrchestrator {
         // The available-resource fields of the same tables are bound further down.
         [0, 1].forEach(outer => {
             document.querySelectorAll(`#table-${outer}-1 input[type=text].level-input`).forEach(inp => {
-                inp.addEventListener('input', function () {
-                    validateInputNumber({ currentTarget: this });
-                    orchestrator.handleRowChange(this);
+                inp.addEventListener('input', () => {
+                    validateInputNumber({ currentTarget: inp });
+                    this.handleRowChange(inp);
                 });
                 // Min/max clamping belongs on blur only — never while the value is being typed
-                inp.addEventListener('blur', function () {
-                    validateInputNumberOnBlurNative({ currentTarget: this });
-                    orchestrator.handleRowChange(this);
+                inp.addEventListener('blur', () => {
+                    validateInputNumberOnBlurNative({ currentTarget: inp });
+                    this.handleRowChange(inp);
                 });
             });
             // Delegated listeners for dynamically added research rows
@@ -116,24 +114,24 @@ class LfCostsOrchestrator {
             if (resTbl) {
                 const isLevelInput = (el) => el.tagName === 'INPUT' && el.type === 'text'
                     && el.classList.contains('level-input');
-                resTbl.addEventListener('input', function (e) {
+                resTbl.addEventListener('input', (e) => {
                     if (isLevelInput(e.target)) {
                         validateInputNumber({ currentTarget: e.target });
-                        orchestrator.handleRowChange(e.target);
+                        this.handleRowChange(e.target);
                     }
                 });
                 // 'blur' does not bubble, so the delegated clamping hangs on 'focusout'
-                resTbl.addEventListener('focusout', function (e) {
+                resTbl.addEventListener('focusout', (e) => {
                     if (isLevelInput(e.target)) {
                         validateInputNumberOnBlurNative({ currentTarget: e.target });
-                        orchestrator.handleRowChange(e.target);
+                        this.handleRowChange(e.target);
                     }
                 });
-                resTbl.addEventListener('click', function (e) {
+                resTbl.addEventListener('click', (e) => {
                     const btn = /** @type {HTMLElement} */ (e.target).closest('.research-remove-btn');
                     if (btn) {
                         const row = btn.closest('tr');
-                        orchestrator.removeResearchRow(row, outer);
+                        this.removeResearchRow(row, outer);
                     }
                 });
             }
@@ -141,46 +139,52 @@ class LfCostsOrchestrator {
 
         // Tab 3 inputs
         document.querySelectorAll('#tab-2 input[type=text]').forEach(inp => {
-            inp.addEventListener('input', function () {
-                validateInputNumber({ currentTarget: this });
-                orchestrator.updateTab3();
+            inp.addEventListener('input', () => {
+                validateInputNumber({ currentTarget: inp });
+                this.updateTab3();
             });
-            inp.addEventListener('blur', function () {
-                validateInputNumberOnBlurNative({ currentTarget: this });
-                orchestrator.updateTab3();
+            inp.addEventListener('blur', () => {
+                validateInputNumberOnBlurNative({ currentTarget: inp });
+                this.updateTab3();
             });
         });
 
         // General settings
         document.querySelectorAll('#general-settings input[type=text]').forEach(inp => {
-            inp.addEventListener('input', function () {
-                validateInputNumber({ currentTarget: this });
-                orchestrator.handleParamChange();
+            inp.addEventListener('input', () => {
+                validateInputNumber({ currentTarget: inp });
+                this.handleParamChange();
             });
-            inp.addEventListener('blur', function () {
-                validateInputNumberOnBlurNative({ currentTarget: this });
-                orchestrator.handleParamChange();
+            inp.addEventListener('blur', () => {
+                validateInputNumberOnBlurNative({ currentTarget: inp });
+                this.handleParamChange();
             });
         });
         document.querySelectorAll('#general-settings select').forEach(sel => {
-            sel.addEventListener('keyup', () => orchestrator.handleParamChange());
-            sel.addEventListener('change', () => orchestrator.handleParamChange());
+            sel.addEventListener('keyup', () => this.handleParamChange());
+            sel.addEventListener('change', () => this.handleParamChange());
         });
         document.querySelectorAll('#general-settings input[type=radio]').forEach(r =>
-            r.addEventListener('click', () => orchestrator.handleParamChange()));
-        document.querySelectorAll('.research-race-dropdown').forEach(sel => {
-            sel.addEventListener('change', function () {
-                orchestrator._populateResearchDropdown(Number(this.dataset.tab));
+            r.addEventListener('click', () => this.handleParamChange()));
+        // Cast for the dataset lookup: querySelectorAll is typed as Element,
+        // which carries no dataset, and the tab index lives in a data attribute.
+        const raceDropdowns = /** @type {NodeListOf<HTMLElement>} */ (
+            document.querySelectorAll('.research-race-dropdown'));
+        raceDropdowns.forEach(sel => {
+            sel.addEventListener('change', () => {
+                this._populateResearchDropdown(Number(sel.dataset.tab));
             });
         });
-        document.querySelectorAll('.research-add-btn').forEach(btn => {
-            btn.addEventListener('click', function () {
-                orchestrator.addResearchRow(Number(this.dataset.tab));
+        const addResearchButtons = /** @type {NodeListOf<HTMLElement>} */ (
+            document.querySelectorAll('.research-add-btn'));
+        addResearchButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                this.addResearchRow(Number(btn.dataset.tab));
             });
         });
-        addEvent('#full-numbers', 'click', () => orchestrator.handleParamChange());
-        addEvent('#reset', 'click', () => orchestrator.resetParams());
-        addEvent('#tech-types-select', 'change', () => orchestrator.updateTab3());
+        addEvent('#full-numbers', 'click', () => this.handleParamChange());
+        addEvent('#reset', 'click', () => this.resetParams());
+        addEvent('#tech-types-select', 'change', () => this.updateTab3());
         addEvent('#race-selector', 'change', () => this.handleRaceChange());
 
         // Available-resource inputs — spread across all tabs
@@ -189,13 +193,13 @@ class LfCostsOrchestrator {
                 ['metal', 'crystal', 'deut'].forEach(res => {
                     const el = document.getElementById(`${res}-available-${outer}-${inner}`);
                     if (el) {
-                        el.addEventListener('input', function () {
-                            validateInputNumber({ currentTarget: this });
-                            orchestrator.handleResourceInput(this);
+                        el.addEventListener('input', () => {
+                            validateInputNumber({ currentTarget: el });
+                            this.handleResourceInput(el);
                         });
-                        el.addEventListener('blur', function () {
-                            validateInputNumberOnBlurNative({ currentTarget: this });
-                            orchestrator.handleResourceInput(this);
+                        el.addEventListener('blur', () => {
+                            validateInputNumberOnBlurNative({ currentTarget: el });
+                            this.handleResourceInput(el);
                         });
                     }
                 });
