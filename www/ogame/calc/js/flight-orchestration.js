@@ -1769,9 +1769,9 @@ class FlightOrchestrator {
     _bindInputs() {
         // Skip the name/api fields and every date/time field: the numeric
         // validator would strip the separators out of a date or duration.
-        const skipIds = ['universe-name', 'fleet-name', 'api-code'];
+        const skipIds = new Set(['universe-name', 'fleet-name', 'api-code']);
         const skipClasses = ['startdate-input', 'tolerance-time-input', 'flight-time-input'];
-        const isNumeric = (el) => !skipIds.includes(el.id)
+        const isNumeric = (el) => !skipIds.has(el.id)
             && !skipClasses.some((cls) => el.classList.contains(cls));
         document.querySelectorAll('#flight input[type=text]').forEach((el) => {
             if (!isNumeric(el)) {
