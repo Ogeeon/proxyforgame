@@ -253,6 +253,53 @@ function readLiveColumns() {
 }
 
 /**
+ * @param {boolean} nullable
+ * @returns {string} the wording used in the drift messages
+ */
+function nullabilityLabel(nullable) {
+  return nullable ? 'nullable' : 'NOT NULL';
+}
+
+/**
+ * Compares one table's declared columns against the live ones, in both
+ * directions: a column missing from the database and a column the database has
+ * but schema.sql does not are both drift.
+ *
+ * @param {SchemaTable} table
+ * @param {Map<string, { type: string, nullable: boolean }>} liveTable
+ * @param {string[]} problems
+ * @returns {number} how many columns were actually compared
+ */
+function compareTableColumns(table, liveTable, problems) {
+  let checked = 0;
+
+  for (const column of table.columns) {
+    const liveColumn = liveTable.get(column.name);
+    if (!liveColumn) {
+      problems.push(`schema.sql:${column.line} ${table.name}.${column.name} is not in the database`);
+      continue;
+    }
+
+    checked++;
+
+    if (liveColumn.type !== column.type) {
+      problems.push(`schema.sql:${column.line} ${table.name}.${column.name} is ${column.type} in the file but ${liveColumn.type} in the database`);
+    }
+    if (liveColumn.nullable !== column.nullable) {
+      problems.push(`schema.sql:${column.line} ${table.name}.${column.name} is ${nullabilityLabel(column.nullable)} in the file but ${nullabilityLabel(liveColumn.nullable)} in the database`);
+    }
+  }
+
+  for (const name of liveTable.keys()) {
+    if (!table.columns.some((c) => c.name === name)) {
+      problems.push(`${table.name}.${name} exists in the database but not in schema.sql`);
+    }
+  }
+
+  return checked;
+}
+
+/**
  * Compares the columns declared in schema.sql against the live ones.
  *
  * @param {SchemaTable[]} schemaTables
@@ -276,30 +323,7 @@ function validateColumnTypes(schemaTables) {
       continue;
     }
 
-    for (const column of table.columns) {
-      const liveColumn = liveTable.get(column.name);
-      if (!liveColumn) {
-        problems.push(`schema.sql:${column.line} ${table.name}.${column.name} is not in the database`);
-        continue;
-      }
-
-      checked++;
-
-      if (liveColumn.type !== column.type) {
-        problems.push(`schema.sql:${column.line} ${table.name}.${column.name} is ${column.type} in the file but ${liveColumn.type} in the database`);
-      }
-      if (liveColumn.nullable !== column.nullable) {
-        const declared = column.nullable ? 'nullable' : 'NOT NULL';
-        const actual = liveColumn.nullable ? 'nullable' : 'NOT NULL';
-        problems.push(`schema.sql:${column.line} ${table.name}.${column.name} is ${declared} in the file but ${actual} in the database`);
-      }
-    }
-
-    for (const name of liveTable.keys()) {
-      if (!table.columns.some((c) => c.name === name)) {
-        problems.push(`${table.name}.${name} exists in the database but not in schema.sql`);
-      }
-    }
+    checked += compareTableColumns(table, liveTable, problems);
   }
 
   return { skipped: false, problems, checked };
