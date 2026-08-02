@@ -14,6 +14,12 @@
     "module": "esnext",
     "moduleResolution": "bundler",
     "strict": false,
+    // The one `strict` family member that is on. It pays for itself: enabling it
+    // found a NaN in the lifeform demolition costs, a hung error dialog and a
+    // silent argument shift in the production core. `noImplicitAny`, measured at
+    // the same time, is deliberately left off - see
+    // .claude/plans/strict-null-checks.md.
+    "strictNullChecks": true,
     // The Bootstrap bundle every calculator loads from jsdelivr. Its types are
     // a UMD global, so referencing them here is what makes `bootstrap.Tooltip`
     // resolve in these script-scoped files.

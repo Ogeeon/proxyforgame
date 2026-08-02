@@ -6,7 +6,6 @@
   "scripts": {
     "lint": "eslint .",
     "typecheck": "node scripts/typecheck.js",
-    "typecheck:strictnull": "node scripts/typecheck.js --strict-null",
     "generate-tsconfigs": "node scripts/generate-tsconfigs.js",
     "check-tsconfigs": "node scripts/generate-tsconfigs.js --check",
     "validate-translations": "node scripts/validate-translations.js",

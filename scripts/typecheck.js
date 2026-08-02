@@ -9,12 +9,7 @@
  * Prints the diagnostics of whichever projects failed and exits non-zero if any
  * did, rather than stopping at the first one.
  *
- * Run: node scripts/typecheck.js [--strict-null]
- *   --strict-null  add --strictNullChecks on top of every project. A CLI flag
- *                  overrides the tsconfig, so measuring the not-yet-enabled
- *                  setting needs no second set of config files. Advisory while
- *                  .claude/plans/strict-null-checks.md is in progress; the flag
- *                  goes away once the setting moves into tsconfig.base.json.
+ * Run: node scripts/typecheck.js
  */
 
 const { execFileSync } = require('node:child_process');
@@ -32,13 +27,10 @@ const projects = [
   'tsconfig.node.json',
 ];
 
-const strictNull = process.argv.includes('--strict-null');
-const extraFlags = strictNull ? ['--strictNullChecks'] : [];
-
 const failed = [];
 for (const project of projects) {
   try {
-    execFileSync(process.execPath, [TSC, '--noEmit', ...extraFlags, '-p', project], {
+    execFileSync(process.execPath, [TSC, '--noEmit', '-p', project], {
       cwd: ROOT,
       encoding: 'utf8',
       stdio: 'pipe',
@@ -79,7 +71,7 @@ if (failed.length) {
     console.error(`\n=== ${project} ===`);
     console.error(output);
   }
-  if (strictNull) summarise(failed);
+  summarise(failed);
   console.error(`\n${failed.length} of ${projects.length} projects failed.`);
   process.exit(1);
 }

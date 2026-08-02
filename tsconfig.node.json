@@ -13,6 +13,8 @@
     "module": "node16",
     "moduleResolution": "node16",
     "strict": false,
+    // Kept in step with tsconfig.base.json, where the reasoning lives.
+    "strictNullChecks": true,
     "types": ["node"]
   },
   "include": [
