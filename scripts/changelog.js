@@ -69,9 +69,12 @@ function colorize(text, color) {
 
 const UNRELEASED_RE = /^## \[Unreleased\]\s*$/;
 const RELEASE_RE = /^## \[(\d{4}-\d{2}-\d{2})\](?: - site entry (\d+))?\s*$/;
-const SECTION_RE = /^### (.+?)\s*$/;
-const BULLET_RE = /^- (.+?)\s*$/;
-const QUOTE_RE = /^> \*\*RU:\*\* (.+?)\s*$/;
+// The trailing whitespace is trimmed by the readers rather than by the pattern:
+// a lazy group followed by `\s*$` overlaps with itself and backtracks
+// quadratically (SonarQube javascript:S8786).
+const SECTION_RE = /^### (.+)$/;
+const BULLET_RE = /^- (.+)$/;
+const QUOTE_RE = /^> \*\*RU:\*\* (.+)$/;
 const HEADING_RE = /^#{1,6} /;
 
 /**
@@ -158,7 +161,7 @@ function readSection(line, no, state, errors) {
   }
 
   /** @type {Section} */
-  const section = { name: match[1], bullets: [], line: no };
+  const section = { name: match[1].trimEnd(), bullets: [], line: no };
   state.release.sections.push(section);
   state.section = section;
   return true;
@@ -185,7 +188,7 @@ function readQuote(line, no, state, errors) {
     return true;
   }
 
-  state.release.quote = match[1];
+  state.release.quote = match[1].trimEnd();
   state.release.quoteLine = no;
   return true;
 }
