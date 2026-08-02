@@ -18,6 +18,7 @@ release section; it is the source of truth for the other eleven translations.
 ### Fixed
 
 - Sidebar: the changelog now loads for Bosnian, which the language whitelist rejected outright.
+- `schema.sql`: `change_descriptions.description` is `varchar(1024)`, the width production has.
 
 ## [2026-08-02] - site entry 57
 

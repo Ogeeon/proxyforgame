@@ -21,7 +21,7 @@ DROP TABLE IF EXISTS `change_descriptions`;
 CREATE TABLE IF NOT EXISTS `change_descriptions` (
   `id` smallint(6) NOT NULL,
   `lang` varchar(2) NOT NULL,
-  `description` varchar(255) DEFAULT NULL,
+  `description` varchar(1024) DEFAULT NULL,
   PRIMARY KEY (`id`,`lang`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
