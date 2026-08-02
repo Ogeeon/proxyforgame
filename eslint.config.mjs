@@ -43,9 +43,8 @@ export default [
         // naming the item.
         varsIgnorePattern: '^_$',
       }],
-      // eval() in dom-utils.js is the only use in the project and carries an
-      // explicit disable comment; the rule is enabled so that comment means
-      // something and any new use has to be justified the same way.
+      // The project is free of eval(); the rule is enabled so it stays that way
+      // (it is not part of eslint:recommended).
       'no-eval': 'error',
     },
   },

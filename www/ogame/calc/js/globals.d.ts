@@ -65,10 +65,8 @@ declare const unis: Record<string, any[]>;
 
 /**
  * The pseudo-event the validation helpers are called with. The real listeners
- * pass a genuine Event, but most call sites synthesise `{ currentTarget }` and
- * some add `data` - the name of a function to run once validation is done.
+ * pass a genuine Event, but most call sites synthesise `{ currentTarget }`.
  */
 interface ValidationEvent {
   currentTarget: HTMLInputElement | EventTarget | null;
-  data?: string;
 }

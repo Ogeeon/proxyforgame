@@ -551,17 +551,14 @@ const setConstrains = (id, constrains) => {
  */
 const validateInputNumberOnBlurNative = (event) => {
   validateInputNumber(event);
-  let needRecalc = false;
   const input = /** @type {HTMLInputElement} */ (event.currentTarget);
   const decimalSeparator = getOptionValue('decimalSeparator', '.');
 
   if (input.value === '-') {
     input.value = '0';
-    needRecalc = true;
   }
   if (input.value.at(-1) === decimalSeparator) {
     input.value += '0';
-    needRecalc = true;
   }
 
   const rawValue = input.value.replace(decimalSeparator, '.');
@@ -600,7 +597,6 @@ const validateInputNumberOnBlurNative = (event) => {
     const msgTpl = getOptionValue('msgMinConstraintViolated', null);
     showWarning(msgTpl ? formatString(msgTpl, fieldHint, input.value, minConstr) : null);
     input.value = (minConstr + '').replace('.', decimalSeparator);
-    needRecalc = true;
   }
 
   const maxConstr = getConstraint(input, 'max', null);
@@ -608,12 +604,6 @@ const validateInputNumberOnBlurNative = (event) => {
     const msgTpl = getOptionValue('msgMaxConstraintViolated', null);
     showWarning(msgTpl ? formatString(msgTpl, fieldHint, input.value, maxConstr) : null);
     input.value = (maxConstr + '').replace('.', decimalSeparator);
-    needRecalc = true;
-  }
-
-  if (needRecalc && event?.data) {
-    // eslint-disable-next-line no-eval
-    eval(event.data).apply(input);
   }
 };
 

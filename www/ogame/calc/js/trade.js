@@ -880,7 +880,8 @@ function initTextInputs() {
     for (const id of ['#hypertech-lvl', '#sc-capacity-increase', '#lc-capacity-increase']) {
         const input = inputEl(id);
         addEvent(input, 'keyup', function() {
-            validateInputNumber({ currentTarget: input, data: 'updateNumbers' });
+            validateInputNumber({ currentTarget: input });
+            updateNumbers();
         });
     }
 }

@@ -35,7 +35,7 @@ function getCorrectedValue (s, allowNeg, sepCode) {
 /**
  * Validates the number contained in the input against the given constraints (whether negative values and floating-point values are allowed).
  * The input the function is called for is taken from the context via this.
- * @param event Event data. event.data may contain the name of a function to call once validation is done.
+ * @param event Event whose currentTarget is the input being validated. Callers that need to recalculate afterwards do so themselves.
  */
 function validateInputNumber (event) {
 	const input = event.currentTarget;
@@ -53,12 +53,6 @@ function validateInputNumber (event) {
 		input.value = getConstraint(input, 'def', 0);
 		input.select();
 	}
-	// After validation, the function named in the event's properties must be called. Call it in the context of the input field being processed, just in case.
-	// Legacy callback-by-name mechanism; see the open questions in
-	// .claude/plans/js-static-analysis.md
-	if (event?.data != null)
-		// eslint-disable-next-line no-eval
-		eval(event.data).apply(input);
 }
 
 /**
