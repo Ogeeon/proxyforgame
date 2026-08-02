@@ -2,30 +2,56 @@
 
 **URL:** `http://pfg.wmp/ogame/calc/moon.php`
 
+**Keywords:** proxyforgame,ogame,moon calculator,moon chance,debris field,moon destruction,lunar base,recyclers,deathstar,Sensor phalanx
+
 ## Technical Details
 
 | Property | Value |
 |----------|-------|
-| PHP Controller | `www/ogame/calc/moon.php` |
+| PHP controller | `www/ogame/calc/moon.php` |
 | Template | `www/ogame/calc/moon.tpl` |
-| JavaScript | `www/ogame/calc/js/moon.js` |
-| CSS | `www/ogame/calc/css/moon.css` |
-| Tests | ✅ `playwright-tests/tests/moon.spec.js` |
+| Stylesheet | `www/ogame/calc/css/moon_bs.css` |
+| Options cookie | `options_moon` |
+| E2E test | ✅ `playwright-tests/tests/moon.spec.js` |
+| Unit test | ✅ `unit-tests/moon-core.test.js` |
+
+## JavaScript Modules
+
+| File | Lines |
+|------|-------|
+| `www/ogame/calc/js/moon-core.js` | 443 |
+| `www/ogame/calc/js/moon-data-collector.js` | 57 |
+| `www/ogame/calc/js/moon-renderer.js` | 152 |
+| `www/ogame/calc/js/moon-orchestration.js` | 302 |
+
+The page also loads these shared scripts:
+
+- `www/js/utils.js`
+- `www/ogame/calc/js/dom-utils.js`
 
 ## Configuration Options
 
-The calculator supports the following options (stored in cookies):
+The calculator keeps these settings in `options_moon`:
 
 - `moonSize`
 - `dsCount`
 - `debrisPercent`
-- `hyperTechLvl`
+- `hyperTechLevel`
+- `isGeneral`
+- `rcCapacityIncrease`
+- `defenseToDebris`
+- `deutToDebris`
+- `promoMoon`
+- `supraRefractorLevel`
+- `phalanxLevel`
+- `phalanxRangeBonus`
+- `isDiscoverer`
+- `discovererBonus`
+- `ownSystem`
+- `targetSystem`
+- `circularSystems`
+- `numberOfSystems`
 - `validate`
-- `default`
-
-## Code Statistics
-
-- JavaScript functions: 3
 
 ## Usage
 
@@ -35,22 +61,19 @@ The calculator supports the following options (stored in cookies):
 
 ## Development Notes
 
-### File Structure
-
-```
-www/ogame/calc/
-├── moon.php      # Controller
-├── moon.tpl      # Template
-├── js/moon.js    # Logic
-└── css/moon.css  # Styles
-```
-
 ### Testing
 
 Run tests:
 ```bash
-npx playwright test moon
+make test-one spec=moon
 ```
+
+Unit tests:
+```bash
+node --test moon-core.test.js
+```
+
+(from `unit-tests/`)
 
 ### Translation
 

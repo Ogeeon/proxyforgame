@@ -2,25 +2,44 @@
 
 **URL:** `http://pfg.wmp/ogame/calc/queue.php`
 
-**Keywords:** proxyforgame,proxy,online,calc,calculator,ogame,price calculation,cost calculation,buildings costs,research costs,fleet costs,defence costs,costs calculator,prices calculator
+**Keywords:** proxyforgame,ogame,construction queue,build queue,build order,building time,queue calculator,buildings costs
 
 ## Technical Details
 
 | Property | Value |
 |----------|-------|
-| PHP Controller | `www/ogame/calc/queue.php` |
+| PHP controller | `www/ogame/calc/queue.php` |
 | Template | `www/ogame/calc/queue.tpl` |
-| JavaScript | `www/ogame/calc/js/queue.js` |
-| CSS | `www/ogame/calc/css/queue.css` |
-| Tests | ✅ `playwright-tests/tests/queue.spec.js` |
+| Stylesheet | `www/ogame/calc/css/queue_bs.css` |
+| Options cookie | `options_queue` |
+| E2E test | ✅ `playwright-tests/tests/queue.spec.js` |
+| Unit test | ❌ none |
+
+## JavaScript Modules
+
+| File | Lines |
+|------|-------|
+| `www/ogame/calc/js/queue-core.js` | 120 |
+| `www/ogame/calc/js/queue-data-collector.js` | 95 |
+| `www/ogame/calc/js/queue-renderer.js` | 182 |
+| `www/ogame/calc/js/queue-orchestration.js` | 549 |
+
+The page also loads these shared scripts:
+
+- `www/js/utils.js`
+- `www/ogame/calc/js/common.js`
+- `www/ogame/calc/js/dom-utils.js`
 
 ## Configuration Options
 
-The calculator supports the following options (stored in cookies):
+The calculator keeps these settings in `options_queue`:
 
 - `universeSpeed`
 - `ionTechLevel`
 - `hyperTechLevel`
+- `playerClass`
+- `scCapacityIncrease`
+- `lcCapacityIncrease`
 - `totFldPln`
 - `totFldMn`
 - `sDTP`
@@ -30,11 +49,6 @@ The calculator supports the following options (stored in cookies):
 - `qp`
 - `qm`
 - `validate`
-- `default`
-
-## Code Statistics
-
-- JavaScript functions: 16
 
 ## Usage
 
@@ -44,21 +58,11 @@ The calculator supports the following options (stored in cookies):
 
 ## Development Notes
 
-### File Structure
-
-```
-www/ogame/calc/
-├── queue.php      # Controller
-├── queue.tpl      # Template
-├── js/queue.js    # Logic
-└── css/queue.css  # Styles
-```
-
 ### Testing
 
 Run tests:
 ```bash
-npx playwright test queue
+make test-one spec=queue
 ```
 
 ### Translation

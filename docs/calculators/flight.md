@@ -2,24 +2,44 @@
 
 **URL:** `http://pfg.wmp/ogame/calc/flight.php`
 
-**Keywords:** proxyforgame,proxy,online,calc,calculator,ogame,save,flight,flight time calculator,savepoints,fuel comsumption,deuterium comsumption
+**Keywords:** proxyforgame,ogame,flight time calculator,flight duration,savepoints,save,fleet speed,deuterium consumption,fuel consumption
 
 ## Technical Details
 
 | Property | Value |
 |----------|-------|
-| PHP Controller | `www/ogame/calc/flight.php` |
+| PHP controller | `www/ogame/calc/flight.php` |
 | Template | `www/ogame/calc/flight.tpl` |
-| JavaScript | `www/ogame/calc/js/flight.js` |
-| CSS | `www/ogame/calc/css/flight.css` |
-| Tests | ✅ `playwright-tests/tests/flight.spec.js` |
+| Stylesheet | `www/ogame/calc/css/flight_bs.css` |
+| Options cookie | `options_flight` |
+| E2E test | ✅ `playwright-tests/tests/flight.spec.js` |
+| Unit test | ✅ `unit-tests/flight-core.test.js` |
+
+## JavaScript Modules
+
+| File | Lines |
+|------|-------|
+| `www/ogame/calc/js/flight-core.js` | 380 |
+| `www/ogame/calc/js/flight-data-collector.js` | 233 |
+| `www/ogame/calc/js/flight-renderer.js` | 257 |
+| `www/ogame/calc/js/flight-orchestration.js` | 2043 |
+
+The page also loads these shared scripts:
+
+- `www/js/utils.js`
+- `www/ogame/calc/js/dom-utils.js`
+- `www/ogame/calc/js/own-api.js`
 
 ## Configuration Options
 
-The calculator supports the following options (stored in cookies):
+The calculator keeps these settings in `options_flight`:
 
+- `country`
+- `universe`
 - `driveLevels`
-- `uniSpeed`
+- `fleetSpeedWar`
+- `fleetSpeedPeaceful`
+- `fleetSpeedHolding`
 - `circularGalaxies`
 - `circularSystems`
 - `numberOfGalaxies`
@@ -33,7 +53,14 @@ The calculator supports the following options (stored in cookies):
 - `saveStartDT`
 - `saveReturnDT`
 - `saveTolerance`
+- `saveOneWay`
+- `recallStartDT`
+- `recallFullFlight`
+- `recallMode`
+- `recallMomentDT`
+- `recallElapsed`
 - `mode`
+- `missionType`
 - `hyperTechLvl`
 - `flightData`
 - `playerClass`
@@ -42,12 +69,9 @@ The calculator supports the following options (stored in cookies):
 - `lfMechanGE`
 - `lfRocktalCE`
 - `lfShipsBonuses`
+- `fleetIgnoreEmptySystems`
+- `fleetIgnoreInactiveSystems`
 - `validate`
-- `default`
-
-## Code Statistics
-
-- JavaScript functions: 44
 
 ## Usage
 
@@ -57,22 +81,19 @@ The calculator supports the following options (stored in cookies):
 
 ## Development Notes
 
-### File Structure
-
-```
-www/ogame/calc/
-├── flight.php      # Controller
-├── flight.tpl      # Template
-├── js/flight.js    # Logic
-└── css/flight.css  # Styles
-```
-
 ### Testing
 
 Run tests:
 ```bash
-npx playwright test flight
+make test-one spec=flight
 ```
+
+Unit tests:
+```bash
+node --test flight-core.test.js
+```
+
+(from `unit-tests/`)
 
 ### Translation
 

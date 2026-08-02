@@ -2,54 +2,33 @@
 
 **URL:** `http://pfg.wmp/ogame/calc/costs.php`
 
-**Keywords:** proxyforgame,proxy,online,calc,calculator,ogame,price calculation,cost calculation,buildings costs,research costs,fleet costs,defence costs,costs calculator,prices calculator
+**Keywords:** proxyforgame,ogame,ogame cost calculator,price calculator,building costs,research costs,fleet costs,defence costs,construction costs,resource costs
 
 ## Technical Details
 
 | Property | Value |
 |----------|-------|
-| PHP Controller | `www/ogame/calc/costs.php` |
+| PHP controller | `www/ogame/calc/costs.php` |
 | Template | `www/ogame/calc/costs.tpl` |
-| JavaScript | `www/ogame/calc/js/costs.js` |
-| CSS | `www/ogame/calc/css/costs.css` |
-| Tests | ✅ `playwright-tests/tests/costs.spec.js` |
+| Stylesheet | `www/ogame/calc/css/costs_bs.css` |
+| Options cookie | none |
+| E2E test | ✅ `playwright-tests/tests/costs.spec.js` |
+| Unit test | ❌ none |
 
-## Configuration Options
+## JavaScript Modules
 
-The calculator supports the following options (stored in cookies):
+| File | Lines |
+|------|-------|
+| `www/ogame/calc/js/costs-core.js` | 821 |
+| `www/ogame/calc/js/costs-data-collector.js` | 759 |
+| `www/ogame/calc/js/costs-renderer.js` | 688 |
+| `www/ogame/calc/js/costs-orchestration.js` | 2081 |
 
-- `shipyardLevel`
-- `robotFactoryLevelP`
-- `robotFactoryLevelM`
-- `naniteFactoryLevel`
-- `universeSpeed`
-- `researchSpeed`
-- `researchLabLevel`
-- `energyTechLevel`
-- `plasmaTechLevel`
-- `ionTechLevel`
-- `hyperTechLevel`
-- `maxPlanetTemp`
-- `geologist`
-- `engineer`
-- `technocrat`
-- `admiral`
-- `commander`
-- `booster`
-- `researchBonus`
-- `irnLevel`
-- `planetsSpin`
-- `labChoice`
-- `labLevels`
-- `playerClass`
-- `planetPos`
-- `fullNumbers`
-- `validate`
-- `default`
+The page also loads these shared scripts:
 
-## Code Statistics
-
-- JavaScript functions: 15
+- `www/js/utils.js`
+- `www/ogame/calc/js/common.js`
+- `www/ogame/calc/js/dom-utils.js`
 
 ## Usage
 
@@ -59,21 +38,11 @@ The calculator supports the following options (stored in cookies):
 
 ## Development Notes
 
-### File Structure
-
-```
-www/ogame/calc/
-├── costs.php      # Controller
-├── costs.tpl      # Template
-├── js/costs.js    # Logic
-└── css/costs.css  # Styles
-```
-
 ### Testing
 
 Run tests:
 ```bash
-npx playwright test costs
+make test-one spec=costs
 ```
 
 ### Translation

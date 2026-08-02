@@ -22,7 +22,7 @@ A file belongs to calculator `<name>` if it is one of:
 | `www/ogame/calc/js/<name>-*.js` | `-core`, `-data-collector`, `-orchestration`, `-renderer` |
 | `www/ogame/calc/js/trade.js` | `trade` only — its page code is still one file, `-core` aside |
 | `www/ogame/calc/css/<name>_bs.css` | |
-| `unit-tests/<name>-core.test.js` | present for 7 of the 10 |
+| `unit-tests/<name>-core.test.js` | present for 8 of the 10 |
 | `playwright-tests/tests/<name>.spec.js` | |
 
 There is no `www/ogame/calc/js/<name>.js` for any calculator except `trade`.
@@ -35,8 +35,8 @@ node --test <name>-core.test.js    # from unit-tests/, only if that file exists
 make test-one spec=<name>
 ```
 
-Seven of the ten have a unit test: `expeditions`, `flight`, `graviton`, `moon`, `production`,
-`terraformer`, `trade`. For `costs`, `lfcosts` and `queue` there is no `*-core.test.js` —
+Eight of the ten have a unit test: `expeditions`, `flight`, `graviton`, `lfcosts`, `moon`,
+`production`, `terraformer`, `trade`. For `costs` and `queue` there is no `*-core.test.js` —
 skip that step. Check for the file rather than trusting this list.
 
 ## Shared files — these force the full `make test`

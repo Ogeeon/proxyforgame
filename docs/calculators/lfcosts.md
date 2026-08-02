@@ -2,21 +2,37 @@
 
 **URL:** `http://pfg.wmp/ogame/calc/lfcosts.php`
 
-**Keywords:** proxyforgame,proxy,online,calc,calculator,ogame,price calculation,cost calculation,buildings costs,research costs,fleet costs,defence costs,costs calculator,prices calculator,lifeforms
+**Keywords:** proxyforgame,ogame,lifeforms,lifeform calculator,lifeform buildings,lifeform research,lifeform costs,building costs,research costs,cost calculator
 
 ## Technical Details
 
 | Property | Value |
 |----------|-------|
-| PHP Controller | `www/ogame/calc/lfcosts.php` |
+| PHP controller | `www/ogame/calc/lfcosts.php` |
 | Template | `www/ogame/calc/lfcosts.tpl` |
-| JavaScript | `www/ogame/calc/js/lfcosts.js` |
-| CSS | `www/ogame/calc/css/lfcosts.css` |
-| Tests | ✅ `playwright-tests/tests/lfcosts.spec.js` |
+| Stylesheet | `www/ogame/calc/css/costs_bs.css` |
+| Options cookie | `options_lfcosts` |
+| E2E test | ✅ `playwright-tests/tests/lfcosts.spec.js` |
+| Unit test | ✅ `unit-tests/lfcosts-core.test.js` |
+
+## JavaScript Modules
+
+| File | Lines |
+|------|-------|
+| `www/ogame/calc/js/lfcosts-core.js` | 93 |
+| `www/ogame/calc/js/lfcosts-data-collector.js` | 73 |
+| `www/ogame/calc/js/lfcosts-renderer.js` | 298 |
+| `www/ogame/calc/js/lfcosts-orchestration.js` | 763 |
+
+The page also loads these shared scripts:
+
+- `www/js/utils.js`
+- `www/ogame/calc/js/common.js`
+- `www/ogame/calc/js/dom-utils.js`
 
 ## Configuration Options
 
-The calculator supports the following options (stored in cookies):
+The calculator keeps these settings in `options_lfcosts`:
 
 - `robotFactoryLevel`
 - `naniteFactoryLevel`
@@ -30,14 +46,14 @@ The calculator supports the following options (stored in cookies):
 - `capIncrLC`
 - `megalithLvl`
 - `mineralResCntrLvl`
+- `resCentreLvl`
+- `runeTechLvl`
+- `rbtResCentreLvl`
+- `vortexChamberLvl`
 - `researchCostReduction`
 - `researchTimeReduction`
+- `rates`
 - `validate`
-- `default`
-
-## Code Statistics
-
-- JavaScript functions: 10
 
 ## Usage
 
@@ -47,22 +63,19 @@ The calculator supports the following options (stored in cookies):
 
 ## Development Notes
 
-### File Structure
-
-```
-www/ogame/calc/
-├── lfcosts.php      # Controller
-├── lfcosts.tpl      # Template
-├── js/lfcosts.js    # Logic
-└── css/lfcosts.css  # Styles
-```
-
 ### Testing
 
 Run tests:
 ```bash
-npx playwright test lfcosts
+make test-one spec=lfcosts
 ```
+
+Unit tests:
+```bash
+node --test lfcosts-core.test.js
+```
+
+(from `unit-tests/`)
 
 ### Translation
 

@@ -2,22 +2,40 @@
 
 **URL:** `http://pfg.wmp/ogame/calc/terraformer.php`
 
+**Keywords:** proxyforgame,ogame,terraformer calculator,terraformer,planet fields,solar satellites,energy requirement,nanite factory
+
 ## Technical Details
 
 | Property | Value |
 |----------|-------|
-| PHP Controller | `www/ogame/calc/terraformer.php` |
+| PHP controller | `www/ogame/calc/terraformer.php` |
 | Template | `www/ogame/calc/terraformer.tpl` |
-| JavaScript | `www/ogame/calc/js/terraformer.js` |
-| CSS | `www/ogame/calc/css/terraformer.css` |
-| Tests | ✅ `playwright-tests/tests/terraformer.spec.js` |
+| Stylesheet | `www/ogame/calc/css/terraformer_bs.css` |
+| Options cookie | `options_terraformer` |
+| E2E test | ✅ `playwright-tests/tests/terraformer.spec.js` |
+| Unit test | ✅ `unit-tests/terraformer-core.test.js` |
+
+## JavaScript Modules
+
+| File | Lines |
+|------|-------|
+| `www/ogame/calc/js/terraformer-core.js` | 225 |
+| `www/ogame/calc/js/terraformer-data-collector.js` | 68 |
+| `www/ogame/calc/js/terraformer-renderer.js` | 107 |
+| `www/ogame/calc/js/terraformer-orchestration.js` | 323 |
+
+The page also loads these shared scripts:
+
+- `www/js/utils.js`
+- `www/ogame/calc/js/common.js`
+- `www/ogame/calc/js/dom-utils.js`
 
 ## Configuration Options
 
-The calculator supports the following options (stored in cookies):
+The calculator keeps these settings in `options_terraformer`:
 
-- `shipyardLevel`
 - `robotsFactoryLevel`
+- `shipyardLevel`
 - `nanitesFactoryLevel`
 - `universeSpeed`
 - `energyTechLevel`
@@ -30,20 +48,19 @@ The calculator supports the following options (stored in cookies):
 - `fusionPlantPercent`
 - `solarSatellitesCount`
 - `solarSatellitesPercent`
+- `playerClass`
+- `isTrader`
+- `energyBoost`
+- `disChLevel`
+- `totalLFEnrgBonus`
+- `scCapacityIncrease`
+- `lcCapacityIncrease`
 - `tfSingleLevel`
 - `tfLevelFrom`
 - `tfLevelTo`
-- `isCollector`
-- `energyBoost`
-- `isTrader`
-- `disChLevel`
-- `totalLFEnrgBonus`
+- `crysAvailable`
+- `deutAvailable`
 - `validate`
-- `default`
-
-## Code Statistics
-
-- JavaScript functions: 2
 
 ## Usage
 
@@ -53,22 +70,19 @@ The calculator supports the following options (stored in cookies):
 
 ## Development Notes
 
-### File Structure
-
-```
-www/ogame/calc/
-├── terraformer.php      # Controller
-├── terraformer.tpl      # Template
-├── js/terraformer.js    # Logic
-└── css/terraformer.css  # Styles
-```
-
 ### Testing
 
 Run tests:
 ```bash
-npx playwright test terraformer
+make test-one spec=terraformer
 ```
+
+Unit tests:
+```bash
+node --test terraformer-core.test.js
+```
+
+(from `unit-tests/`)
 
 ### Translation
 

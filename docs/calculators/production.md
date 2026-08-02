@@ -2,21 +2,37 @@
 
 **URL:** `http://pfg.wmp/ogame/calc/production.php`
 
-**Keywords:** proxyforgame,proxy,online,browser,game,tool,calc,calculator,ogame,production speed,resource production,resource accumulation,energy balance,energy production,amortization,payback,resource recovery
+**Keywords:** proxyforgame,ogame,production calculator,resource production,production speed,energy balance,energy production,mine profitability,amortization,payback,crawlers
 
 ## Technical Details
 
 | Property | Value |
 |----------|-------|
-| PHP Controller | `www/ogame/calc/production.php` |
+| PHP controller | `www/ogame/calc/production.php` |
 | Template | `www/ogame/calc/production.tpl` |
-| JavaScript | `www/ogame/calc/js/production.js` |
-| CSS | `www/ogame/calc/css/production.css` |
-| Tests | ✅ `playwright-tests/tests/production.spec.js` |
+| Stylesheet | `www/ogame/calc/css/production_bs.css` |
+| Options cookie | `options_production` |
+| E2E test | ✅ `playwright-tests/tests/production.spec.js` |
+| Unit test | ✅ `unit-tests/production-core.test.js` |
+
+## JavaScript Modules
+
+| File | Lines |
+|------|-------|
+| `www/ogame/calc/js/production-core.js` | 453 |
+| `www/ogame/calc/js/production-data-collector.js` | 133 |
+| `www/ogame/calc/js/production-renderer.js` | 215 |
+| `www/ogame/calc/js/production-orchestration.js` | 1123 |
+
+The page also loads these shared scripts:
+
+- `www/js/utils.js`
+- `www/ogame/calc/js/common.js`
+- `www/ogame/calc/js/dom-utils.js`
 
 ## Configuration Options
 
-The calculator supports the following options (stored in cookies):
+The calculator keeps these settings in `options_production`:
 
 - `energyTechLevel`
 - `plasmaTechLevel`
@@ -29,6 +45,8 @@ The calculator supports the following options (stored in cookies):
 - `maxTempEntered`
 - `maxPlanetTemp`
 - `onePlnExtView`
+- `onePlnRace`
+- `onePlnLfLevels`
 - `oPPP`
 - `metStorageLvl`
 - `crysStorageLvl`
@@ -44,13 +62,17 @@ The calculator supports the following options (stored in cookies):
 - `showAddInf`
 - `inclSats`
 - `rates`
+- `ratesFmt`
 - `isTrader`
+- `lfMetProdBonus`
+- `lfCrysProdBonus`
+- `lfDeutProdBonus`
+- `lfEnergyProdBonus`
+- `lfExpLevel`
+- `lfCollectorBonus`
+- `lfCrawlerBonus`
+- `lfPlasmaCostReduction`
 - `validate`
-- `default`
-
-## Code Statistics
-
-- JavaScript functions: 30
 
 ## Usage
 
@@ -60,22 +82,19 @@ The calculator supports the following options (stored in cookies):
 
 ## Development Notes
 
-### File Structure
-
-```
-www/ogame/calc/
-├── production.php      # Controller
-├── production.tpl      # Template
-├── js/production.js    # Logic
-└── css/production.css  # Styles
-```
-
 ### Testing
 
 Run tests:
 ```bash
-npx playwright test production
+make test-one spec=production
 ```
+
+Unit tests:
+```bash
+node --test production-core.test.js
+```
+
+(from `unit-tests/`)
 
 ### Translation
 

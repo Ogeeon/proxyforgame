@@ -2,25 +2,41 @@
 
 **URL:** `http://pfg.wmp/ogame/calc/expeditions.php`
 
-**Keywords:** calculator,resourses,fleet,expedition
+**Keywords:** proxyforgame,ogame,expedition calculator,expeditions,expedition resources,expedition ships,dark matter,expedition finds
 
 ## Technical Details
 
 | Property | Value |
 |----------|-------|
-| PHP Controller | `www/ogame/calc/expeditions.php` |
+| PHP controller | `www/ogame/calc/expeditions.php` |
 | Template | `www/ogame/calc/expeditions.tpl` |
-| JavaScript | `www/ogame/calc/js/expeditions.js` |
-| CSS | `www/ogame/calc/css/expeditions.css` |
-| Tests | ✅ `playwright-tests/tests/expeditions.spec.js` |
+| Stylesheet | `www/ogame/calc/css/expeditions_bs.css` |
+| Options cookie | `options_expeditions` |
+| E2E test | ✅ `playwright-tests/tests/expeditions.spec.js` |
+| Unit test | ✅ `unit-tests/expeditions-core.test.js` |
+
+## JavaScript Modules
+
+| File | Lines |
+|------|-------|
+| `www/ogame/calc/js/expeditions-core.js` | 223 |
+| `www/ogame/calc/js/expeditions-data-collector.js` | 59 |
+| `www/ogame/calc/js/expeditions-renderer.js` | 75 |
+| `www/ogame/calc/js/expeditions-orchestration.js` | 382 |
+
+The page also loads these shared scripts:
+
+- `www/js/utils.js`
+- `www/ogame/calc/js/dom-utils.js`
+- `www/ogame/calc/js/own-api.js`
 
 ## Configuration Options
 
-The calculator supports the following options (stored in cookies):
+The calculator keeps these settings in `options_expeditions`:
 
-- `universeSpeed`
 - `highTop`
 - `playerClass`
+- `universeSpeed`
 - `hyperTechLevel`
 - `percentRes`
 - `percentShips`
@@ -29,10 +45,8 @@ The calculator supports the following options (stored in cookies):
 - `darkMatterDiscoveryBonus`
 - `resourceDiscoveryBooster`
 - `fleet`
-
-## Code Statistics
-
-- JavaScript functions: 8
+- `lfShipsBonuses`
+- `validate`
 
 ## Usage
 
@@ -42,22 +56,19 @@ The calculator supports the following options (stored in cookies):
 
 ## Development Notes
 
-### File Structure
-
-```
-www/ogame/calc/
-├── expeditions.php      # Controller
-├── expeditions.tpl      # Template
-├── js/expeditions.js    # Logic
-└── css/expeditions.css  # Styles
-```
-
 ### Testing
 
 Run tests:
 ```bash
-npx playwright test expeditions
+make test-one spec=expeditions
 ```
+
+Unit tests:
+```bash
+node --test expeditions-core.test.js
+```
+
+(from `unit-tests/`)
 
 ### Translation
 
