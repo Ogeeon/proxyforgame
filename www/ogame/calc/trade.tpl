@@ -45,6 +45,8 @@
     l.rates = '<?= $l['rates'] ?>';
     l.moonstr = '<?= $l['moon'] ?>';
     options.decimalSeparator = '<?= $l['decimal-separator'] ?>';
+    options.dialogOk = <?= json_encode($l['dialog-ok']) ?>;
+    options.dialogAttentionLabel = <?= json_encode($l['dialog-attention']) ?>;
 
     var unis = {
 <?php

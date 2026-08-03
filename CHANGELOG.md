@@ -22,6 +22,7 @@ release section; it is the source of truth for the other eleven translations.
 - Costs: the Life Form research bonuses import error now shows as an in-page dialog instead of the browser's native alert popup.
 - Expeditions: the cargo-bonus import error now shows as an in-page dialog instead of the browser's native alert popup.
 - LF costs: a corrupted settings cookie now reports the error as an in-page dialog instead of the browser's native alert popup.
+- Trade: startup and settings-load exceptions now report as an in-page dialog instead of the browser's native alert popup.
 
 ### Fixed
 

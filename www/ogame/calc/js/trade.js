@@ -126,7 +126,7 @@ let options = {
             }
             syncMcRate();
         } catch(e) {
-            alert(e);
+            showAlertModal(String(e), getOptionValue('dialogOk', 'OK'));
         }
     },
 
@@ -934,7 +934,7 @@ function initLocationInputs() {
     });
 }
 
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', async function() {
 try {
     options.load();
     options.parseFromUri();
@@ -965,6 +965,6 @@ try {
 
     onUpdateSrcType();
 } catch (e) {
-    alert('Exception: ' + e);
+    await showAlertModal('Exception: ' + e, getOptionValue('dialogOk', 'OK'));
 }
 });
