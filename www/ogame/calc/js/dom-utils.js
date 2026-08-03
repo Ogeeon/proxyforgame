@@ -489,6 +489,14 @@ const renderDialogMessage = (body, message) => {
  * @returns {{el: HTMLElement, okBtn: HTMLButtonElement, cancelBtn: HTMLButtonElement|null}}
  */
 const buildDialogModal = (message, withCancel) => {
+  // A plain bar rather than a title bar with text - the message itself already
+  // says what happened, this is only a visual cue that a dialog landed on top
+  // of whatever was already open (e.g. the own-api reader modal), which two
+  // same-size, same-position modals stacked on each other would not make
+  // obvious on their own.
+  const header = document.createElement('div');
+  header.className = 'modal-header py-2 bg-warning-subtle';
+
   const body = document.createElement('div');
   body.className = 'modal-body';
   renderDialogMessage(body, message);
@@ -513,11 +521,15 @@ const buildDialogModal = (message, withCancel) => {
 
   const content = document.createElement('div');
   content.className = 'modal-content';
+  content.appendChild(header);
   content.appendChild(body);
   content.appendChild(footer);
 
   const dialog = document.createElement('div');
-  dialog.className = 'modal-dialog modal-dialog-centered';
+  // modal-sm - deliberately smaller than the reader modals this can land on
+  // top of (own-api-reader, lf-bonuses-reader), so it reads as a popup over
+  // them rather than a continuation of the same dialog.
+  dialog.className = 'modal-dialog modal-dialog-centered modal-sm';
   dialog.appendChild(content);
 
   const el = document.createElement('div');
