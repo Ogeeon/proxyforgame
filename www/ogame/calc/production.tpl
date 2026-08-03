@@ -234,6 +234,9 @@
     options.uniOwrConfMsg = "<?= $l['owr-universe-confirm'] ?>";
     options.uniLoadConfMsg = "<?= $l['load-universe-confirm'] ?>";
     options.cloneConfMsg = "<?= $l['clone-confirm'] ?>";
+    options.dialogOk = <?= json_encode($l['dialog-ok']) ?>;
+    options.dialogConfirm = <?= json_encode($l['dialog-confirm']) ?>;
+    options.cancel = <?= json_encode($l['cancel']) ?>;
     options.addtnlRowHeader = "<?= $l['addtnl-row'] ?>";
     options.energyShort = "<?= $l['energy-short'] ?>";
     options.editPlanetTitle = "<?= $l['edit-planet-tooltip'] ?>";

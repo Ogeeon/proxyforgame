@@ -18,6 +18,7 @@ release section; it is the source of truth for the other eleven translations.
 ### Changed
 
 - Flight: alerts and confirmations (spy report import, own API import, universe and fleet save/load/delete) now show as an in-page dialog instead of the browser's native alert/confirm popup. <!-- site -->
+- Production: alerts and confirmations (planet add/remove, universe save/load/delete, cloning planet data) now show as an in-page dialog instead of the browser's native alert/confirm popup. <!-- site -->
 
 ### Fixed
 

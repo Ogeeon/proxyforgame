@@ -586,13 +586,13 @@ function updateMinesPriority() {
 	body.innerHTML = html;
 }
 
-function changePlanetsCount(newVal, oldVal) {
+async function changePlanetsCount(newVal, oldVal) {
 	if (newVal < options.minPlanetsCount || newVal > options.maxPlanetsCount)
 		return;
 	if (newVal < oldVal) {
 		// Pick up any direct edits made in the table before judging the planet empty
 		collectAllPlanetsInputs($$('#all-planets-prod tr'));
-		if (!isPlnEmpty(oldVal - 1) && confirm(options.plnDelConfMsg) === false) {
+		if (!isPlnEmpty(oldVal - 1) && await showConfirmModal(options.plnDelConfMsg, options.dialogConfirm, options.cancel) === false) {
 			setVal('#planetsSpin', oldVal);
 			return;
 		}
@@ -801,10 +801,10 @@ function movePlanet(plnID, delta) {
 	updateAllPlnTab();
 }
 
-function deleteRow(plnID) {
+async function deleteRow(plnID) {
 	// Pick up any direct edits made in the table before judging the planet empty
 	collectAllPlanetsInputs($$('#all-planets-prod tr'));
-	if (!isPlnEmpty(plnID) && confirm(options.plnDelConfMsg) === false) {
+	if (!isPlnEmpty(plnID) && await showConfirmModal(options.plnDelConfMsg, options.dialogConfirm, options.cancel) === false) {
 		return;
 	}
 	options.prm.aPNames.splice(plnID, 1);
@@ -841,8 +841,8 @@ function savePlnData() {
 	updateAllPlnTab();
 }
 
-function clonePlnData() {
-	if (confirm(options.cloneConfMsg) === false) {
+async function clonePlnData() {
+	if (await showConfirmModal(options.cloneConfMsg, options.dialogConfirm, options.cancel) === false) {
 		return;
 	}
 	let rows = $$('#one-planet-prod tr:not(.lf-row)');
@@ -874,26 +874,26 @@ function clonePlnData() {
 // Universes panel (pure localStorage, no AJAX)
 // ---------------------------------------------------------------------------
 
-function saveUniverseData() {
+async function saveUniverseData() {
 	let selectedUni = inputEl('#universe-name-select').value;
 	if (selectedUni === '0') {
-		alert(options.noUniSelectedMsg);
+		await showAlertModal(options.noUniSelectedMsg, options.dialogOk);
 		return;
 	}
-	if (confirm(options.uniOwrConfMsg) === false) {
+	if (await showConfirmModal(options.uniOwrConfMsg, options.dialogConfirm, options.cancel) === false) {
 		return;
 	}
 	saveToCookie(selectedUni, options.prm);
 	$('#universe-save')?.blur();
 }
 
-function loadUniverseData() {
+async function loadUniverseData() {
 	let selectedUni = inputEl('#universe-name-select').value;
 	if (selectedUni === '0') {
-		alert(options.noUniSelectedMsg);
+		await showAlertModal(options.noUniSelectedMsg, options.dialogOk);
 		return;
 	}
-	if (confirm(options.uniLoadConfMsg) === false) {
+	if (await showConfirmModal(options.uniLoadConfMsg, options.dialogConfirm, options.cancel) === false) {
 		return;
 	}
 	options.load(selectedUni);
@@ -901,13 +901,13 @@ function loadUniverseData() {
 	updateParams();
 }
 
-function deleteUniverseData() {
+async function deleteUniverseData() {
 	let selectedUni = inputEl('#universe-name-select').value;
 	if (selectedUni === '0') {
-		alert(options.noUniSelectedMsg);
+		await showAlertModal(options.noUniSelectedMsg, options.dialogOk);
 		return;
 	}
-	if (confirm(options.uniDelConfMsg) === false) {
+	if (await showConfirmModal(options.uniDelConfMsg, options.dialogConfirm, options.cancel) === false) {
 		return;
 	}
 	localStorage.removeItem(selectedUni);
@@ -918,10 +918,10 @@ function deleteUniverseData() {
 	$('#universe-delete')?.blur();
 }
 
-function addUniverseData() {
+async function addUniverseData() {
 	let uniNameInput = inputEl('#universe-name');
 	if (uniNameInput.value.length === 0) {
-		alert(options.noUniNameMsg);
+		await showAlertModal(options.noUniNameMsg, options.dialogOk);
 		uniNameInput.focus();
 		return;
 	}
@@ -1008,7 +1008,7 @@ function _applyTheme() {
 	}
 }
 
-function initializeProductionCalculator() {
+async function initializeProductionCalculator() {
 	try {
 		options.load('options_production');
 
@@ -1131,7 +1131,7 @@ function initializeProductionCalculator() {
 		updateParams();
 		options.cloneConfMsg = options.cloneConfMsg.replaceAll("__BR__", "\n");
 	} catch (e) {
-		alert('Exception: ' + e);
+		await showAlertModal('Exception: ' + e, options.dialogOk);
 	}
 }
 

@@ -291,18 +291,12 @@ test.describe('All planets - delete confirmation', () => {
     test('adding and removing a planet asks nothing', async ({ page }) => {
         await page.locator('#tabtag2').click();
 
-        let dialogMessage = null;
-        page.on('dialog', (dialog) => {
-            dialogMessage = dialog.message();
-            dialog.dismiss();
-        });
-
         await page.locator('#planetsSpin-up').click();
         await expect(page.locator('#planetsSpin')).toHaveValue('9');
         await page.locator('#planetsSpin-down').click();
 
         // An untouched planet goes away silently, so the table really shrinks back
-        expect(dialogMessage).toBeNull();
+        await expect(page.locator('.dyn-dialog.show')).toHaveCount(0);
         await expect(page.locator('#planetsSpin')).toHaveValue('8');
         await expect(page.locator('#all-planets-prod .control-delete')).toHaveCount(8);
     });
@@ -316,17 +310,15 @@ test.describe('All planets - delete confirmation', () => {
         await newPlanet.nth(2).fill('20');
         await newPlanet.nth(2).press('Tab');
 
-        let dialogMessage = null;
-        page.on('dialog', (dialog) => {
-            dialogMessage = dialog.message();
-            dialog.dismiss();
-        });
-
         await page.locator('#planetsSpin-down').click();
 
-        await expect.poll(() => dialogMessage).not.toBeNull();
+        const dialog = page.locator('.dyn-dialog.show');
+        await expect(dialog).toBeVisible();
+        const dialogMessage = await dialog.locator('.modal-body').innerText();
         expect(dialogMessage).toContain('You entered data for this planet');
-        // Dismissing keeps the planet and rolls the counter back
+        // Cancelling keeps the planet and rolls the counter back
+        await dialog.locator('.btn-secondary').click();
+        await expect(dialog).toHaveCount(0);
         await expect(page.locator('#planetsSpin')).toHaveValue('9');
         await expect(planetRow(page, 8).locator('input[type=text]').nth(2)).toHaveValue('20');
     });
