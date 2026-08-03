@@ -91,6 +91,9 @@
     options.importFailedMsg = "<?= $l['import-failed-msg'] ?>";
     options.serverDataFailedMsg = <?= json_encode($l['server-data-failed-msg']) ?>;
     options.populatedSystemsFailedMsg = <?= json_encode($l['populated-systems-failed-msg']) ?>;
+    options.dialogOk = <?= json_encode($l['dialog-ok']) ?>;
+    options.dialogConfirm = <?= json_encode($l['dialog-confirm']) ?>;
+    options.cancel = <?= json_encode($l['cancel']) ?>;
 
     var unis = {
 <?php

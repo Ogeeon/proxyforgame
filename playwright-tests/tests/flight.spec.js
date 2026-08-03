@@ -165,9 +165,6 @@ test.describe('Flight Calculator - Spy Report Import', () => {
     });
 
     test('shows an error when the server answer is not usable', async ({ page }) => {
-        let alertMsg = '';
-        page.on('dialog', d => { alertMsg = d.message(); d.accept(); });
-
         await openParams(page);
         const before = await page.locator('#departure-g').inputValue();
 
@@ -181,16 +178,24 @@ test.describe('Flight Calculator - Spy Report Import', () => {
             { status: 502, body: '<html><body>Bad Gateway</body></html>' },
             { status: 200, body: '<br /><b>Warning</b>: gzuncompress(): data error' },
         ];
+        const dialog = page.locator('.dyn-dialog.show');
         for (const { status, body } of badResponses) {
-            alertMsg = '';
             // Routes registered later win, so this overrides the fixture route above
             await page.route(OGAME_API_ROUTE, (route) => route.fulfill({ status, body }));
 
             await page.locator('#api-code').fill(SR_CODE);
             await page.locator('#api-get').click();
-            await page.waitForFunction(() => !document.querySelector('.panel-overlay'), { timeout: 5000 });
 
+            // The overlay only clears once the dialog is dismissed - importSR()
+            // awaits showAlertModal() before its `finally` runs - so the dialog
+            // itself is what to wait for here, not the overlay.
+            await expect(dialog, `alert shown for ${JSON.stringify(body)}`).toBeVisible();
+            const alertMsg = await dialog.locator('.modal-body').innerText();
             expect(alertMsg.length, `alert shown for ${JSON.stringify(body)}`).toBeGreaterThan(0);
+            await dialog.locator('.btn-primary').click();
+            await expect(dialog).toHaveCount(0);
+
+            await page.waitForFunction(() => !document.querySelector('.panel-overlay'), { timeout: 5000 });
             await expect(page.locator('#departure-g')).toHaveValue(before);
         }
     });
@@ -390,22 +395,23 @@ test.describe('Flight Calculator - OGame Object Import', () => {
     });
 
     test('invalid input shows an error and does not change fields', async ({ page }) => {
-        let alertMsg = '';
-        page.on('dialog', d => { alertMsg = d.message(); d.accept(); });
-
         const before = await page.locator('#departure-g').inputValue();
 
         // Invalid input keeps the dialog open, so open it once and try both values inside it.
         await page.locator('#import-own-api').click();
         await expect(page.locator('#own-api-reader')).toBeVisible();
 
+        const dialog = page.locator('.dyn-dialog.show');
         // Malformed JSON, and a bare primitive that JSON.parse would otherwise accept ("111" -> 111).
         for (const bad of ['{not valid json', '111']) {
-            alertMsg = '';
             await page.locator('#own-api-input').fill(bad);
             await page.locator(OWN_API_IMPORT_BUTTON).click();
 
+            await expect(dialog, `alert shown for input ${JSON.stringify(bad)}`).toBeVisible();
+            const alertMsg = await dialog.locator('.modal-body').innerText();
             expect(alertMsg.length, `alert shown for input ${JSON.stringify(bad)}`).toBeGreaterThan(0);
+            await dialog.locator('.btn-primary').click();
+            await expect(dialog).toHaveCount(0);
             await expect(page.locator('#departure-g')).toHaveValue(before);
             await expect(page.locator('#own-api-reader')).toBeVisible(); // stays open on error
         }

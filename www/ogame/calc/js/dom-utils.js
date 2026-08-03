@@ -521,7 +521,10 @@ const buildDialogModal = (message, withCancel) => {
   dialog.appendChild(content);
 
   const el = document.createElement('div');
-  el.className = 'modal fade';
+  // dyn-dialog marks this as a dom-utils-built modal, distinct from any
+  // template-authored one that might be open at the same time (e.g. the
+  // own-api reader stays open behind a validation error).
+  el.className = 'modal fade dyn-dialog';
   el.tabIndex = -1;
   el.setAttribute('aria-hidden', 'true');
   el.appendChild(dialog);

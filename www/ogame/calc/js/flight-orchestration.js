@@ -109,7 +109,7 @@ const options = {
                 options.prm.lfShipsBonuses = Array.from({ length: 15 }, () => [0, 0, 0]);
             }
         } catch (e) {
-            alert(e);
+            showAlertModal(String(e), window.flightOrchestrator?.opts.dialogOk);
             if (window.flightOrchestrator) {
                 window.flightOrchestrator.resetParams();
             }
@@ -1318,7 +1318,7 @@ class FlightOrchestrator {
      */
     async importSR(code) {
         if (!code || code.trim() === '') {
-            showToast(this.opts.emptySRCodeMsg, 'warning');
+            await showAlertModal(this.opts.emptySRCodeMsg, this.opts.dialogOk);
             return;
         }
         this._showOverlay('general-settings-panel', this.opts.dataFetchMsg);
@@ -1328,9 +1328,9 @@ class FlightOrchestrator {
             this.recalc();
         } catch (e) {
             consoleLog('SR import failed: ' + e);
-            alert(e instanceof ApiError && e.code === 'sr_not_found'
+            await showAlertModal(e instanceof ApiError && e.code === 'sr_not_found'
                 ? this.opts.badSRCode
-                : this.opts.importFailedMsg);
+                : this.opts.importFailedMsg, this.opts.dialogOk);
         } finally {
             this._hideOverlay('general-settings-panel');
         }
@@ -1417,10 +1417,10 @@ class FlightOrchestrator {
         inputsAll(`[class~="${className}"]`).forEach((el) => { el.value = value; });
     }
 
-    importOwnApi(jsonText) {
+    async importOwnApi(jsonText) {
         const data = parseOwnApi(jsonText);
         if (!data || !this._isUsableOwnApiPayload(data)) {
-            alert(this.opts.ownApiBadJsonMsg);
+            await showAlertModal(this.opts.ownApiBadJsonMsg, this.opts.dialogOk);
             return false;
         }
         const importCoords = getChecked('#own-api-import-coords');
@@ -1440,7 +1440,7 @@ class FlightOrchestrator {
             this.recalc();
         } catch (e) {
             consoleLog('own api import exception: ' + e);
-            alert(this.opts.ownApiBadJsonMsg);
+            await showAlertModal(this.opts.ownApiBadJsonMsg, this.opts.dialogOk);
             return false;
         }
         return true;
@@ -1537,12 +1537,12 @@ class FlightOrchestrator {
     }
 
     /** Parse the pasted lifeform-bonuses report into the per-ship bonus table. */
-    readShipsBonuses() {
+    async readShipsBonuses() {
         const lines = /** @type {HTMLTextAreaElement} */ (document.getElementById('lf-bonuses-txtarea')).value.split('\n');
         const scName = this.opts.smallCargoName.toLowerCase();
         const scLine = lines.findIndex((line) => line.toLowerCase().includes(scName));
         if (scLine === -1) {
-            alert(this.opts.missingSCName.replace('sc_name', this.opts.smallCargoName));
+            await showAlertModal(this.opts.missingSCName.replace('sc_name', this.opts.smallCargoName), this.opts.dialogOk);
             return false;
         }
         try {
@@ -1566,7 +1566,7 @@ class FlightOrchestrator {
                 }
             });
         } catch (e) {
-            alert(e);
+            await showAlertModal(String(e), this.opts.dialogOk);
             return false;
         }
         return true;
@@ -1795,44 +1795,44 @@ class FlightOrchestrator {
     }
 
     _bindStorageButtons() {
-        const confirmed = (msg) => window.confirm(msg);
+        const confirmed = (msg) => showConfirmModal(msg, this.opts.dialogConfirm, this.opts.cancel);
         const on = (id, handler) => {
             const el = document.getElementById(id);
             if (el) {
                 el.addEventListener('click', handler);
             }
         };
-        on('universe-load', () => {
+        on('universe-load', async () => {
             const key = getVal('#universe-name-select');
-            if (key === '0') { alert(this.opts.noUniSelectedMsg); return; }
-            if (confirmed(this.opts.uniLoadConfMsg)) { this.loadUniverse(key); }
+            if (key === '0') { await showAlertModal(this.opts.noUniSelectedMsg, this.opts.dialogOk); return; }
+            if (await confirmed(this.opts.uniLoadConfMsg)) { this.loadUniverse(key); }
         });
-        on('universe-save', () => {
+        on('universe-save', async () => {
             const key = getVal('#universe-name-select');
-            if (key === '0') { alert(this.opts.noUniSelectedMsg); return; }
-            if (confirmed(this.opts.uniOwrConfMsg)) { this.saveUniverse(key); }
+            if (key === '0') { await showAlertModal(this.opts.noUniSelectedMsg, this.opts.dialogOk); return; }
+            if (await confirmed(this.opts.uniOwrConfMsg)) { this.saveUniverse(key); }
         });
-        on('universe-delete', () => {
+        on('universe-delete', async () => {
             const key = getVal('#universe-name-select');
-            if (key === '0') { alert(this.opts.noUniSelectedMsg); return; }
-            if (confirmed(this.opts.uniDelConfMsg)) { this._removeStorageOption('universe-name-select', key); }
+            if (key === '0') { await showAlertModal(this.opts.noUniSelectedMsg, this.opts.dialogOk); return; }
+            if (await confirmed(this.opts.uniDelConfMsg)) { this._removeStorageOption('universe-name-select', key); }
         });
         on('universe-add', () => this._addStorageEntry('universe-name', 'universe-name-select', 'flight_uni_', this.opts.noUniNameMsg, (key) => this.saveUniverse(key)));
 
-        on('fleet-load', () => {
+        on('fleet-load', async () => {
             const key = getVal('#fleet-name-select');
-            if (key === '0') { alert(this.opts.noFleetSelectedMsg); return; }
-            if (confirmed(this.opts.fleetLoadConfMsg)) { this.loadFleet(key); }
+            if (key === '0') { await showAlertModal(this.opts.noFleetSelectedMsg, this.opts.dialogOk); return; }
+            if (await confirmed(this.opts.fleetLoadConfMsg)) { this.loadFleet(key); }
         });
-        on('fleet-save', () => {
+        on('fleet-save', async () => {
             const key = getVal('#fleet-name-select');
-            if (key === '0') { alert(this.opts.noFleetSelectedMsg); return; }
-            if (confirmed(this.opts.fleetOwrConfMsg)) { this.saveFleet(key); }
+            if (key === '0') { await showAlertModal(this.opts.noFleetSelectedMsg, this.opts.dialogOk); return; }
+            if (await confirmed(this.opts.fleetOwrConfMsg)) { this.saveFleet(key); }
         });
-        on('fleet-delete', () => {
+        on('fleet-delete', async () => {
             const key = getVal('#fleet-name-select');
-            if (key === '0') { alert(this.opts.noFleetSelectedMsg); return; }
-            if (confirmed(this.opts.fleetDelConfMsg)) { this._removeStorageOption('fleet-name-select', key); }
+            if (key === '0') { await showAlertModal(this.opts.noFleetSelectedMsg, this.opts.dialogOk); return; }
+            if (await confirmed(this.opts.fleetDelConfMsg)) { this._removeStorageOption('fleet-name-select', key); }
         });
         on('fleet-add', () => this._addStorageEntry('fleet-name', 'fleet-name-select', 'flight_fleet_', this.opts.noFleetNameMsg, (key) => this.saveFleet(key)));
 
@@ -1856,11 +1856,11 @@ class FlightOrchestrator {
         });
     }
 
-    _addStorageEntry(inputId, selectId, prefix, emptyMsg, saver) {
+    async _addStorageEntry(inputId, selectId, prefix, emptyMsg, saver) {
         const input = inputEl(`#${inputId}`);
         const name = input.value.trim();
         if (name.length === 0) {
-            alert(emptyMsg);
+            await showAlertModal(emptyMsg, this.opts.dialogOk);
             input.focus();
             return;
         }
@@ -1912,8 +1912,8 @@ class FlightOrchestrator {
         }
         const lfRead = document.getElementById('lf-bonuses-read-btn');
         if (lfRead) {
-            lfRead.addEventListener('click', () => {
-                if (this.readShipsBonuses()) {
+            lfRead.addEventListener('click', async () => {
+                if (await this.readShipsBonuses()) {
                     hide('#lf-bonuses-reader');
                     this.recalc();
                 }
@@ -1928,8 +1928,8 @@ class FlightOrchestrator {
         }
         const ownApiRead = document.getElementById('own-api-read-btn');
         if (ownApiRead) {
-            ownApiRead.addEventListener('click', () => {
-                if (this.importOwnApi(getVal('#own-api-input'))) {
+            ownApiRead.addEventListener('click', async () => {
+                if (await this.importOwnApi(getVal('#own-api-input'))) {
                     hide('#own-api-reader');
                 }
             });
