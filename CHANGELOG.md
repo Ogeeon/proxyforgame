@@ -20,6 +20,7 @@ release section; it is the source of truth for the other eleven translations.
 - Flight: alerts and confirmations (spy report import, own API import, universe and fleet save/load/delete) now show as an in-page dialog instead of the browser's native alert/confirm popup.
 - Production: alerts and confirmations (planet add/remove, universe save/load/delete, cloning planet data) now show as an in-page dialog instead of the browser's native alert/confirm popup.
 - Costs: the Life Form research bonuses import error now shows as an in-page dialog instead of the browser's native alert popup.
+- Expeditions: the cargo-bonus import error now shows as an in-page dialog instead of the browser's native alert popup.
 
 ### Fixed
 

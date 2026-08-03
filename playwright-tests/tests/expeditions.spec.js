@@ -279,25 +279,27 @@ test.describe('Expeditions Calculator - cargo bonus import', () => {
     });
 
     test('two empty fields warn and keep the dialog open', async ({ page }) => {
-        let alertMsg = '';
-        page.on('dialog', d => { alertMsg = d.message(); d.accept(); });
-
         await page.locator('#lf-bonuses-read-btn').click();
 
+        const dialog = page.locator('.dyn-dialog.show');
+        await expect(dialog).toBeVisible();
+        const alertMsg = await dialog.locator('.modal-body').innerText();
         expect(alertMsg).toContain('API 2');
+        await dialog.locator('.btn-primary').click();
+        await expect(dialog).toHaveCount(0);
         await expect(page.locator('#lf-bonuses-reader')).toBeVisible();
     });
 
     test('unusable input warns once and changes nothing', async ({ page }) => {
-        let alerts = 0;
-        page.on('dialog', d => { alerts++; d.accept(); });
-
         // Neither a report (no small cargo line) nor an export (not an object).
         await page.locator('#lf-bonuses-txtarea').fill('nothing useful here');
         await page.locator('#own-api-input').fill('111');
         await page.locator('#lf-bonuses-read-btn').click();
 
-        expect(alerts).toBe(1);
+        const dialog = page.locator('.dyn-dialog.show');
+        await expect(dialog).toHaveCount(1);
+        await dialog.locator('.btn-primary').click();
+        await expect(dialog).toHaveCount(0);
         await expect(page.locator('#lf-bonuses-reader')).toBeVisible();
         await expect(page.locator('#lf-cargo-203')).toHaveValue('0');
         await expect(page.locator('#lf-cargo-204')).toHaveValue('0');

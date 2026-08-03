@@ -121,6 +121,8 @@
     options.locaNo = <?= json_encode($l['LOCA_NO'], JSON_UNESCAPED_UNICODE) ?>;
     options.smallCargoName = <?= json_encode($l['small-cargo'], JSON_UNESCAPED_UNICODE) ?>;
     options.noBonusDataMsg = <?= json_encode($l['no-bonus-data-msg'], JSON_UNESCAPED_UNICODE) ?>;
+    options.dialogOk = <?= json_encode($l['dialog-ok'], JSON_UNESCAPED_UNICODE) ?>;
+    options.dialogAttentionLabel = <?= json_encode($l['dialog-attention'], JSON_UNESCAPED_UNICODE) ?>;
     options.largeCargoAbbrev = <?= json_encode($l['large-cargo-abbrev'], JSON_UNESCAPED_UNICODE) ?>;
     options.warnindDivId = 'warning';
     options.warnindMsgDivId = 'warning-message';

@@ -233,8 +233,8 @@ class ExpeditionsApp {
       setVal('#own-api-input', '');
       show('#lf-bonuses-reader');
     });
-    addEvent('#lf-bonuses-read-btn', 'click', () => {
-      if (this.readBonuses()) {
+    addEvent('#lf-bonuses-read-btn', 'click', async () => {
+      if (await this.readBonuses()) {
         hide('#lf-bonuses-reader');
         this.recalc();
       }
@@ -264,11 +264,11 @@ class ExpeditionsApp {
    * Whichever source loses says nothing about why - a single message covers
    * every way of ending up with no bonuses at all.
    *
-   * @returns {boolean} True when one of the sources could be read.
+   * @returns {Promise<boolean>} True when one of the sources could be read.
    */
-  readBonuses() {
+  async readBonuses() {
     if (this.readOwnApiBonuses() || this.readShipsBonuses()) return true;
-    alert(getOptionValue('noBonusDataMsg', ''));
+    await showAlertModal(getOptionValue('noBonusDataMsg', ''), getOptionValue('dialogOk', 'OK'));
     return false;
   }
 
