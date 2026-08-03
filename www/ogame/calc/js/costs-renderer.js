@@ -522,17 +522,6 @@ class Renderer {
     });
   }
 
-  /**
-   * Show validation errors
-   * @param {ValidationResult} validation
-   */
-  showValidationErrors(validation) {
-    if (validation.isValid) return;
-
-    const message = validation.errors.join('\n');
-    alert(message); // Simple alert for now
-  }
-
   // ==========================================================================
   // HELPER METHODS
   // ==========================================================================

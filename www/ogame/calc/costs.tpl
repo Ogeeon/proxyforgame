@@ -68,6 +68,9 @@
     options.msgCantResearch = '<?= $l['msg-cant-research'] ?>';
     options.lfImportErrNotFound = '<?= $l['lf-import-err-not-found'] ?>';
     options.lfImportErrIncomplete = '<?= $l['lf-import-err-incomplete'] ?>';
+    options.dialogOk = <?= json_encode($l['dialog-ok']) ?>;
+    options.dialogConfirm = <?= json_encode($l['dialog-confirm']) ?>;
+    options.cancel = <?= json_encode($l['cancel']) ?>;
 
     options.techCosts = {
               <?php $first = true; ?>

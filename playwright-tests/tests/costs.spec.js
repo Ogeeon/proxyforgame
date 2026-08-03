@@ -721,19 +721,17 @@ test.describe('Costs Calculator - LifeForm research bonuses table', () => {
         await page.locator('#lf-research-table-get').click();
         await expect(page.locator('#lf-research-paste')).toBeVisible();
 
-        let dialogMessage = null;
-        page.once('dialog', (dialog) => {
-            dialogMessage = dialog.message();
-            dialog.dismiss();
-        });
-
         // Text without the first research name (Espionage) in the current language
         await page.locator('#lf-research-paste-txtarea').fill('Some header\n5%\nMax. 50%\n-\n');
         await page.locator('#lf-research-paste-import').click();
 
         // A warning is shown, the paste modal stays open and nothing is written
-        await expect.poll(() => dialogMessage).not.toBeNull();
+        const dialog = page.locator('.dyn-dialog.show');
+        await expect(dialog).toBeVisible();
+        const dialogMessage = await dialog.locator('.modal-body').innerText();
         expect(dialogMessage).toContain('Espionage');
+        await dialog.locator('.btn-primary').click();
+        await expect(dialog).toHaveCount(0);
         await expect(page.locator('#lf-research-paste')).toBeVisible();
         await expect(page.locator('#lf-research-bonuses-tbody tr').first().locator('.lf-research-cost-input')).toHaveValue('0');
     });
@@ -745,12 +743,6 @@ test.describe('Costs Calculator - LifeForm research bonuses table', () => {
         await page.locator('#lf-research-table-get').click();
         await expect(page.locator('#lf-research-paste')).toBeVisible();
 
-        let dialogMessage = null;
-        page.once('dialog', (dialog) => {
-            dialogMessage = dialog.message();
-            dialog.dismiss();
-        });
-
         // Only the first two researches — the first name is present but data is incomplete
         const partial = [
             'Espionage technology', '24.04%', 'Max. 50%', '52.5%', 'Max. 99%',
@@ -759,8 +751,12 @@ test.describe('Costs Calculator - LifeForm research bonuses table', () => {
         await page.locator('#lf-research-paste-txtarea').fill(partial);
         await page.locator('#lf-research-paste-import').click();
 
-        await expect.poll(() => dialogMessage).not.toBeNull();
+        const dialog = page.locator('.dyn-dialog.show');
+        await expect(dialog).toBeVisible();
+        const dialogMessage = await dialog.locator('.modal-body').innerText();
         expect(dialogMessage).toContain('16');
+        await dialog.locator('.btn-primary').click();
+        await expect(dialog).toHaveCount(0);
         await expect(page.locator('#lf-research-paste')).toBeVisible();
         // Nothing was written: the first row's inputs remain at their default
         await expect(page.locator('#lf-research-bonuses-tbody tr').first().locator('.lf-research-cost-input')).toHaveValue('0');

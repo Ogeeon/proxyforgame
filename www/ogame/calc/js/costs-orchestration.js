@@ -673,10 +673,10 @@ class CostsCalculator {
 
     // Import: parse the pasted text into the table, then close the paste modal
     removeAllEvents('#lf-research-paste-import', 'click');
-    addEvent('#lf-research-paste-import', 'click', () => {
+    addEvent('#lf-research-paste-import', 'click', async () => {
       const txtarea = /** @type {HTMLTextAreaElement} */ (document.getElementById('lf-research-paste-txtarea'));
       if (!txtarea) return;
-      if (this._importLfResearchBonuses(txtarea.value)) {
+      if (await this._importLfResearchBonuses(txtarea.value)) {
         txtarea.value = '';
         const el = document.getElementById('lf-research-paste');
         if (el && typeof bootstrap !== 'undefined' && bootstrap.Modal) {
@@ -802,10 +802,10 @@ class CostsCalculator {
    * Either failure aborts the import (nothing is written) and warns the user.
    *
    * @param {string} text
-   * @returns {boolean} true when the whole table was parsed and applied
+   * @returns {Promise<boolean>} true when the whole table was parsed and applied
    * @private
    */
-  _importLfResearchBonuses(text) {
+  async _importLfResearchBonuses(text) {
     const lines = String(text || '').split('\n').map(s => s.trim()).filter(s => s.length > 0);
     const rows = /** @type {HTMLTableRowElement[]} */ (Array.from($$('#lf-research-bonuses-tbody tr')));
     if (rows.length === 0) return false;
@@ -823,7 +823,7 @@ class CostsCalculator {
       }
     }
     if (start === -1) {
-      alert((options.lfImportErrNotFound || '').replace('{0}', firstName));
+      await showAlertModal((options.lfImportErrNotFound || '').replace('{0}', firstName), options.dialogOk);
       return false;
     }
 
@@ -858,7 +858,7 @@ class CostsCalculator {
 
     // Check 2: data must be present for every standard research
     if (parsedRows.length < rows.length) {
-      alert(options.lfImportErrIncomplete || '');
+      await showAlertModal(options.lfImportErrIncomplete || '', options.dialogOk);
       return false;
     }
 
