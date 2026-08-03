@@ -15,6 +15,12 @@ release section; it is the source of truth for the other eleven translations.
 
 ## [Unreleased]
 
+### Fixed
+
+- Production: the "Crawlers boost" tooltip named the lifeform research in English regardless of locale; it now uses the translated tech name.
+
+## [2026-08-03] - site entry 58
+
 ### Added
 
 - Build: the database schema validator compares the column types and nullability in `schema.sql` against the live database.
@@ -31,7 +37,8 @@ release section; it is the source of truth for the other eleven translations.
 - `schema.sql`: `change_descriptions.description` is `varchar(1024)`, the width production has.
 - Flight, Production: an unterminated `<` in a saved universe or planet name passed the tag stripper untouched and reached the page as markup; the name now keeps its text and loses the `<`.
 - Sidebar: the two failure messages of the misspelling and e-mail dialogs were English in all thirteen locales and are now translated; the English of "sending failed" also names what could not be sent, which the report dialog got wrong in three locales and vaguely right in the rest.
-- Production: the "Crawlers boost" tooltip named the lifeform research in English regardless of locale; it now uses the translated tech name.
+
+> **RU:** Калькулятор полёта: теперь показывается предупреждение, если не удалось загрузить настройки вселенной или карту заселённых систем — раньше расчёт молча использовал значения по умолчанию.<br>Калькулятор производства: бонус гусеничников (технология «Модули ионизированных кристаллов») теперь снижает их энергопотребление на тот же процент, что и раньше давал только прирост добычи.
 
 ## [2026-08-02] - site entry 57
 
