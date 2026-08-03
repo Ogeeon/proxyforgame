@@ -55,6 +55,8 @@
     options.fieldHint = '<?= $l['field-hint'] ?>';
     options.msgMinConstraintViolated = '<?= $l['msg-min-constraint-violated'] ?>';
     options.msgMaxConstraintViolated = '<?= $l['msg-max-constraint-violated'] ?>';
+    options.dialogOk = <?= json_encode($l['dialog-ok']) ?>;
+    options.dialogAttentionLabel = <?= json_encode($l['dialog-attention']) ?>;
     options.energyCostToBuildLabel = '<?= $l['energy-cost-to-build'] ?>';
 
     options.techCosts = {

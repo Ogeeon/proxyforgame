@@ -21,6 +21,7 @@ release section; it is the source of truth for the other eleven translations.
 - Production: alerts and confirmations (planet add/remove, universe save/load/delete, cloning planet data) now show as an in-page dialog instead of the browser's native alert/confirm popup.
 - Costs: the Life Form research bonuses import error now shows as an in-page dialog instead of the browser's native alert popup.
 - Expeditions: the cargo-bonus import error now shows as an in-page dialog instead of the browser's native alert popup.
+- LF costs: a corrupted settings cookie now reports the error as an in-page dialog instead of the browser's native alert popup.
 
 ### Fixed
 

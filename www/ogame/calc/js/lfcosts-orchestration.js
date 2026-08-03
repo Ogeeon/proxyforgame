@@ -60,7 +60,7 @@ const options = {
         try {
             loadFromCookie('options_lfcosts', options.prm);
         } catch (e) {
-            alert(e);
+            showAlertModal(String(e), getOptionValue('dialogOk', 'OK'));
         }
     },
 
