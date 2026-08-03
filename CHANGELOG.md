@@ -29,6 +29,7 @@ release section; it is the source of truth for the other eleven translations.
 - Production: the "Crawlers boost" tooltip named the lifeform research in English regardless of locale; it now uses the translated tech name.
 - Flight: clicking the spy report import button with an empty code field sent a request to the server anyway; it now shows a notification asking for a code instead.
 - Costs, Flight, Expeditions: modal dialogs (Life Form research bonuses, own API import) now consistently place the Cancel button on the left, matching every other dialog on the site.
+- Flight, Costs: the captions of the Class, Circular universe and Mission speed groups dropped onto a line of their own instead of staying beside the controls they label.
 
 ## [2026-08-03] - site entry 58
 

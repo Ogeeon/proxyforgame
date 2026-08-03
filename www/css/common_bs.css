@@ -466,8 +466,16 @@ textarea:disabled {
   margin: 0;
   min-width: 0;
 }
+/* The float is what puts the legend back in the row. A fieldset lays its
+   children out inside an anonymous box that takes the fieldset's own display,
+   and the *rendered legend* — the first <legend> child whose float computes to
+   `none` — is pulled out of that box and placed above it. So on a `d-flex`
+   fieldset a non-floated legend is never a flex item and always sits on its own
+   line, however it is styled. Any float disqualifies it from being the rendered
+   legend, and it joins the anonymous flex box as an ordinary item, where the
+   float itself is then ignored. */
 .fieldset-reset > legend {
-  float: none;
+  float: left;
   width: auto;
   padding: 0;
   margin: 0;
