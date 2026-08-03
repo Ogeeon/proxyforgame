@@ -146,25 +146,27 @@
             <div class="accordion-body">
 
               <div id="universes-panel" class="border rounded p-2 mb-2">
-                <div class="d-flex flex-wrap align-items-center justify-content-center gap-2 mb-2">
-                  <label for="universe-name-select"><?= $l['universe'] ?></label>
-                  <select id="universe-name-select" name="universe-name-select" class="form-select form-select-sm d-inline-block w-auto ui-input-margin">
-                    <option value="0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</option>
-                  </select>
-                  <div id="universe-control" class="btn-group" role="group">
-                    <button id="universe-load" type="button" data-bs-toggle="tooltip" title="<?= $l['universe-load'] ?>" class="btn btn-sm btn-outline-secondary uni-control-btn"><i class="bi bi-box-arrow-in-down"></i></button>
-                    <button id="universe-save" type="button" data-bs-toggle="tooltip" title="<?= $l['universe-save'] ?>" class="btn btn-sm btn-outline-secondary uni-control-btn"><i class="bi bi-save"></i></button>
-                    <button id="universe-delete" type="button" data-bs-toggle="tooltip" title="<?= $l['universe-delete'] ?>" class="btn btn-sm btn-outline-secondary uni-control-btn"><i class="bi bi-x-lg"></i></button>
+                <div class="universe-panel-rows mx-auto">
+                  <div class="d-flex flex-wrap align-items-center justify-content-center gap-2 mb-1">
+                    <label for="universe-name-select"><?= $l['universe'] ?></label>
+                    <select id="universe-name-select" name="universe-name-select" class="form-select form-select-sm d-inline-block w-auto ui-input-margin">
+                      <option value="0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</option>
+                    </select>
+                    <div id="universe-control" class="btn-group" role="group">
+                      <button id="universe-load" type="button" data-bs-toggle="tooltip" title="<?= $l['universe-load'] ?>" class="btn btn-sm btn-outline-secondary uni-control-btn"><i class="bi bi-box-arrow-in-down"></i></button>
+                      <button id="universe-save" type="button" data-bs-toggle="tooltip" title="<?= $l['universe-save'] ?>" class="btn btn-sm btn-outline-secondary uni-control-btn"><i class="bi bi-save"></i></button>
+                      <button id="universe-delete" type="button" data-bs-toggle="tooltip" title="<?= $l['universe-delete'] ?>" class="btn btn-sm btn-outline-secondary uni-control-btn"><i class="bi bi-x-lg"></i></button>
+                    </div>
+                    <input id="universe-name" type="text" name="universe-name" class="form-control form-control-sm d-inline-block input-20columns ui-input-margin" aria-label="<?= $l['universe'] ?>">
+                    <button id="universe-add" type="button" data-bs-toggle="tooltip" title="<?= $l['universe-add'] ?>" class="btn btn-sm btn-outline-secondary uni-control-btn"><i class="bi bi-plus-lg"></i></button>
                   </div>
-                  <input id="universe-name" type="text" name="universe-name" class="form-control form-control-sm d-inline-block input-20columns ui-input-margin" aria-label="<?= $l['universe'] ?>">
-                  <button id="universe-add" type="button" data-bs-toggle="tooltip" title="<?= $l['universe-add'] ?>" class="btn btn-sm btn-outline-secondary uni-control-btn"><i class="bi bi-plus-lg"></i></button>
-                </div>
-                <div class="d-flex flex-wrap align-items-center justify-content-center gap-1">
-                  <span>SR_KEY:</span>
-                  <input id="api-code" placeholder="API OGame / API LogServer.net" type="text" class="form-control form-control-sm flex-grow-1 text-center ui-input-margin" aria-label="<?= $l['import-hint'] ?>">
-                  <i class="bi bi-question-circle" data-bs-toggle="tooltip" title="<?= $l['import-hint'] ?>"></i>
-                  <button id="api-get" type="button" data-bs-toggle="tooltip" title="<?= $l['import-sr'] ?>" class="btn btn-sm btn-outline-secondary uni-control-btn"><i class="bi bi-box-arrow-in-down"></i></button>
-                  <button id="import-own-api" type="button" data-bs-toggle="tooltip" title="<?= $l['own-api-import-btn'] ?>" class="btn btn-sm btn-outline-secondary uni-control-btn"><i class="bi bi-clipboard"></i></button>
+                  <div class="d-flex flex-wrap align-items-center justify-content-center gap-1">
+                    <span>SR_KEY:</span>
+                    <input id="api-code" placeholder="API OGame / API LogServer.net" type="text" class="form-control form-control-sm flex-grow-1 text-center ui-input-margin" aria-label="<?= $l['import-hint'] ?>">
+                    <i class="bi bi-question-circle" data-bs-toggle="tooltip" title="<?= $l['import-hint'] ?>"></i>
+                    <button id="api-get" type="button" data-bs-toggle="tooltip" title="<?= $l['import-sr'] ?>" class="btn btn-sm btn-outline-secondary uni-control-btn"><i class="bi bi-box-arrow-in-down"></i></button>
+                    <button id="import-own-api" type="button" data-bs-toggle="tooltip" title="<?= $l['own-api-import-btn'] ?>" class="btn btn-sm btn-outline-secondary uni-control-btn ms-2"><i class="bi bi-clipboard"></i></button>
+                  </div>
                 </div>
               </div>
 
@@ -433,11 +435,9 @@
                   foreach ($shipRows as $row):
                     foreach ($row as $ship): $s = $ship[0];
                 ?>
-                <div class="d-flex align-items-center gap-1">
-                  <label for="<?= $s ?>"><?= $l[$s] ?></label>
-                  <span id="<?= $s ?>-speed" class="speed-label">0</span>
-                  <input id="<?= $s ?>" type="text" name="<?= $s ?>" class="form-control form-control-sm d-inline-block count-input ui-input-margin" value="0">
-                </div>
+                <label for="<?= $s ?>"><?= $l[$s] ?></label>
+                <span id="<?= $s ?>-speed" class="speed-label">0</span>
+                <input id="<?= $s ?>" type="text" name="<?= $s ?>" class="form-control form-control-sm d-inline-block count-input ui-input-margin" value="0">
                 <?php endforeach; endforeach; ?>
               </div>
 

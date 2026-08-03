@@ -71,11 +71,24 @@
   white-space: nowrap;
 }
 
-/* Ship count grid: was a <table>, three ships per row. Grid keeps the same
-   3-per-row layout without a data table (SonarQube Web:S5256/S5257). */
+/* Ship count grid: was a <table class="mx-auto">, three ships per row and one
+   cell per part, so nine columns each sized to the widest name / speed / field
+   in it. The grid has to keep those nine tracks rather than three ship-sized
+   ones — with one track per ship the three parts only line up inside their own
+   cell and the columns of names, speeds and inputs no longer share an edge.
+
+   `auto` tracks reproduce the table's automatic column widths, and they only
+   stretch to fill the row while justify-content is normal/stretch, so centring
+   the tracks is also what keeps them shrink-to-fit (the old `mx-auto`). The
+   gaps are the removed `td { padding: 2px 4px }` — 4px on each side of the
+   boundary horizontally, 2px vertically — on top of the margins .speed-label
+   and .ui-input-margin still carry. */
 .ships-grid {
-  grid-template-columns: repeat(3, 1fr);
-  justify-items: center;
+  grid-template-columns: repeat(9, auto);
+  justify-content: center;
+  justify-items: start;
+  align-items: center;
+  column-gap: 8px;
   row-gap: 4px;
 }
 
@@ -273,6 +286,32 @@
 .ui-state-disabled {
   background-color: var(--bs-secondary-bg);
   cursor: default;
+}
+
+/* The universe name row and the SR_KEY row used to be two rows of one
+   <table class="mx-auto">, so the table shrank to the width of its widest
+   row and the SR_KEY input's flex-grow-1 only ever filled the leftover space
+   inside that row. Converting the table to plain flex rows (see the flight
+   refactor above) dropped that shrink-to-fit width, and the SR_KEY input
+   grew to fill the full accordion body instead. width: max-content on this
+   wrapper restores the old bound. */
+.universe-panel-rows {
+  width: max-content;
+  max-width: 100%;
+}
+
+/* Bootstrap's .form-control sets width: 100%, and an auto flex-basis takes
+   that as the item's flex-basis. On the SR_KEY row's flex-wrap line, the
+   wrap test runs against that 100%-of-the-row hypothetical size before
+   flex-grow/shrink ever get to redistribute space, so the input alone
+   "doesn't fit" and the row splits into three lines: the label, the input,
+   then the icon and buttons. flex-basis: 0 discards the width:100% for that
+   test and lets flex-grow-1 size the input purely from the space its
+   siblings leave — min-width: 0 keeps it free to shrink below its own
+   content size too, so all five children share the one line as before. */
+#api-code {
+  flex-basis: 0;
+  min-width: 0;
 }
 
 /* --- Small round icon buttons for the universe / fleet / api controls --- */

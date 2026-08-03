@@ -30,6 +30,7 @@ release section; it is the source of truth for the other eleven translations.
 - Flight: clicking the spy report import button with an empty code field sent a request to the server anyway; it now shows a notification asking for a code instead.
 - Costs, Flight, Expeditions: modal dialogs (Life Form research bonuses, own API import) now consistently place the Cancel button on the left, matching every other dialog on the site.
 - Flight, Costs: the captions of the Class, Circular universe and Mission speed groups dropped onto a line of their own instead of staying beside the controls they label.
+- Flight: in the Ships panel the names, speeds and count fields of the fifteen ships no longer lined up in columns, and in the parameters panel the SR_KEY field stretched across the whole panel instead of ending where the universe row above it does.
 
 ## [2026-08-03] - site entry 58
 
