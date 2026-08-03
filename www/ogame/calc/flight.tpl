@@ -94,6 +94,7 @@
     options.dialogOk = <?= json_encode($l['dialog-ok']) ?>;
     options.dialogConfirm = <?= json_encode($l['dialog-confirm']) ?>;
     options.cancel = <?= json_encode($l['cancel']) ?>;
+    options.dialogAttentionLabel = <?= json_encode($l['dialog-attention']) ?>;
 
     var unis = {
 <?php

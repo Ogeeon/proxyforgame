@@ -489,13 +489,17 @@ const renderDialogMessage = (body, message) => {
  * @returns {{el: HTMLElement, okBtn: HTMLButtonElement, cancelBtn: HTMLButtonElement|null}}
  */
 const buildDialogModal = (message, withCancel) => {
-  // A plain bar rather than a title bar with text - the message itself already
-  // says what happened, this is only a visual cue that a dialog landed on top
-  // of whatever was already open (e.g. the own-api reader modal), which two
-  // same-size, same-position modals stacked on each other would not make
-  // obvious on their own.
+  // A short, translated heading rather than a blank bar - together with the
+  // colour it names what the bar itself only hints at: a separate dialog
+  // landed on top of whatever was already open (e.g. the own-api reader
+  // modal), which two same-size, same-position modals stacked on each other
+  // would not make obvious on their own.
   const header = document.createElement('div');
   header.className = 'modal-header py-2 bg-warning-subtle';
+  const headerText = document.createElement('span');
+  headerText.className = 'fw-semibold';
+  headerText.textContent = getOptionValue('dialogAttentionLabel', 'Attention');
+  header.appendChild(headerText);
 
   const body = document.createElement('div');
   body.className = 'modal-body';
@@ -520,7 +524,10 @@ const buildDialogModal = (message, withCancel) => {
   footer.appendChild(okBtn);
 
   const content = document.createElement('div');
-  content.className = 'modal-content';
+  // border-2 - thicker than the 1px a Bootstrap modal-content carries by
+  // default, so the edge itself reads as a separate surface against whatever
+  // is behind it, not just the backdrop dimming.
+  content.className = 'modal-content border border-2';
   content.appendChild(header);
   content.appendChild(body);
   content.appendChild(footer);

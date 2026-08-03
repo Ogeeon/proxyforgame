@@ -535,6 +535,14 @@ if (await showConfirmModal(this.opts.uniLoadConfMsg, this.opts.dialogConfirm, th
 - The button labels are the caller's job, not a locale lookup baked into `dom-utils.js` — pass
   the calculator's own translated `common.dialog-ok` / `common.dialog-confirm` / `common.cancel`
   strings (already wired onto `options`/`opts` the same way every other message is).
+- The dialog can land on top of a template-authored modal that stays open behind it (the
+  own-api or lf-bonuses reader) — same default `modal-dialog-centered` size and position, so
+  nothing said "a second dialog opened" without a look at the message. `modal-sm`, a thicker
+  `border-2` and a `bg-warning-subtle` header reading `common.dialog-attention` fix that. Unlike
+  the button labels, `dialogAttentionLabel` is not a function argument: it is invariant across
+  every call, so `buildDialogModal()` reads it straight off the page global via
+  `getOptionValue('dialogAttentionLabel', 'Attention')` (the same helper `readBonuses()` uses
+  for its own message) rather than making every call site pass the same string.
 
 **Solid variants are reserved for modal footers.** `btn-primary` on the confirm and
 `btn-secondary` on the cancel is the one place the filled treatment carries meaning — it marks
