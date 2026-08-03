@@ -536,6 +536,7 @@
     "import-sr": "İthalat",
     "import-hint": "Bu alana OGame'den alınan casus raporunun API kodunu\nveya Logserver.net'te kaydedilen raporun kodunu yapıştırın",
     "import-bad-code-msg": "Veri bulunamadı.\\nDoğru casus rapor kodunu girdiğinizden emin misiniz?",
+    "import-empty-code-msg": "Önce bir casus rapor kodu girin.",
     "generals-character-bonus": "General'in karakter sınıfı bonusu",
     "speed-fleet-title": "Görev hızları:",
     "speed-fleet-war": "Savaş",

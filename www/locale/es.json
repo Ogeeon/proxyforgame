@@ -536,6 +536,7 @@
     "import-sr": "Importar",
     "import-hint": "Pega en este campo el código API del informe espía de OGame\no el código del informe guardado en Logserver.net",
     "import-bad-code-msg": "No se han encontrado datos.\\n¿Estás seguro de que has introducido el código correcto del informe espía?",
+    "import-empty-code-msg": "Introduce primero un código de informe espía.",
     "generals-character-bonus": "Bonificación de clase de personaje del General",
     "speed-fleet-title": "Velocidades de misión:",
     "speed-fleet-war": "Guerra",

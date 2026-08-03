@@ -85,6 +85,7 @@
     options.smallCargoName = "<?= $l['small-cargo'] ?>";
     options.missingSCName = "<?= $l['no-sc-message'] ?>";
     options.badSRCode = "<?= $l['import-bad-code-msg'] ?>";
+    options.emptySRCodeMsg = <?= json_encode($l['import-empty-code-msg']) ?>;
     options.dataFetchMsg = "<?= $l['fetchig-data'] ?>";
     options.ownApiBadJsonMsg = "<?= $l['own-api-bad-json-msg'] ?>";
     options.importFailedMsg = "<?= $l['import-failed-msg'] ?>";

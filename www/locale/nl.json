@@ -536,6 +536,7 @@
     "import-sr": "Importeren",
     "import-hint": "Plak in dit veld de API-code van het spionagerapport van OGame\nof de code van het rapport dat is opgeslagen op Logserver.net.",
     "import-bad-code-msg": "Geen gegevens gevonden.\\nWeet u zeker dat u de juiste spy report code hebt ingevoerd?",
+    "import-empty-code-msg": "Voer eerst een spy report code in.",
     "generals-character-bonus": "Karakterklasse bonus van de Generaal",
     "speed-fleet-title": "Missiesnelheden:",
     "speed-fleet-war": "Oorlog",

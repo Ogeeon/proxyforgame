@@ -536,6 +536,7 @@
     "import-sr": "Uvoz",
     "import-hint": "Zalijepite u ovo polje API kod špijunskog izvještaja iz OGame-a\nili kod izvještaja sačuvanog na Logserver.net",
     "import-bad-code-msg": "Podaci nisu pronađeni.\\nJeste li sigurni da ste unijeli ispravan špijunski izvještaj?",
+    "import-empty-code-msg": "Prvo unesite kod špijunskog izvještaja.",
     "generals-character-bonus": "Bonus klase lika Generala",
     "speed-fleet-title": "Brzine misija:",
     "speed-fleet-war": "Rat",

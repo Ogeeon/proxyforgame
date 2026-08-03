@@ -536,6 +536,7 @@
     "import-sr": "Import",
     "import-hint": "Paste into this field the API code of the spy report from OGame\nor the code of the report saved on Logserver.net",
     "import-bad-code-msg": "No data found.\\nAre you sure you entered the correct spy report code?",
+    "import-empty-code-msg": "Enter a spy report code first.",
     "generals-character-bonus": "General's character class bonus",
     "speed-fleet-title": "Mission speeds:",
     "speed-fleet-war": "War",

@@ -535,6 +535,7 @@
     "import-sr": "Import",
     "import-hint": "Do tohto poľa vložte kód API špionážnej správy z OGame\nalebo kód správy uloženej na Logserver.net",
     "import-bad-code-msg": "Nenašli sa žiadne údaje.\\nSte si istí, že ste zadali správny kód špionážnej správy?",
+    "import-empty-code-msg": "Najprv zadajte kód špionážnej správy.",
     "generals-character-bonus": "Bonus triedy postavy Generála",
     "speed-fleet-title": "Rýchlosti misie:",
     "speed-fleet-war": "Vojna",

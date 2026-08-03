@@ -18,6 +18,7 @@ release section; it is the source of truth for the other eleven translations.
 ### Fixed
 
 - Production: the "Crawlers boost" tooltip named the lifeform research in English regardless of locale; it now uses the translated tech name.
+- Flight: clicking the spy report import button with an empty code field sent a request to the server anyway; it now shows a notification asking for a code instead.
 
 ## [2026-08-03] - site entry 58
 

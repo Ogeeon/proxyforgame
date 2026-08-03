@@ -1317,6 +1317,10 @@ class FlightOrchestrator {
      * validate here - an unusable answer never reaches this point.
      */
     async importSR(code) {
+        if (!code || code.trim() === '') {
+            showToast(this.opts.emptySRCodeMsg, 'warning');
+            return;
+        }
         this._showOverlay('general-settings-panel', this.opts.dataFetchMsg);
         try {
             const rd = await apiGet('ogameAPI', { code });

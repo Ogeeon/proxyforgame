@@ -536,6 +536,7 @@
     "import-sr": "Import",
     "import-hint": "Wklej w to pole kod API raportu szpiegowskiego z OGame\nlub kod raportu zapisanego na Logserver.net.",
     "import-bad-code-msg": "Nie znaleziono danych.\\nCzy na pewno wprowadziłeś poprawny kod raportu szpiegowskiego?",
+    "import-empty-code-msg": "Najpierw wprowadź kod raportu szpiegowskiego.",
     "generals-character-bonus": "Premia klasy postaci Generała",
     "speed-fleet-title": "Prędkości misji:",
     "speed-fleet-war": "Wojna",
