@@ -405,7 +405,7 @@ const toastContainer = () => {
 /**
  * Reports a failure the user did not ask for - a background request that came
  * back empty or broken. An explicit action the user started keeps using
- * alert(): see docs/patterns.md (g).
+ * showAlertModal()/showConfirmModal(): see docs/patterns.md (g).
  * @param {string} message - Localised prose, already translated by the caller
  * @param {string} [level] - Bootstrap contextual name: danger, warning, info, success
  */
@@ -449,6 +449,132 @@ const showToast = (message, level = 'info') => {
   });
   toast.show();
 };
+
+// ==========================================================================
+// BLOCKING DIALOGS (alert / confirm replacement)
+// ==========================================================================
+
+/**
+ * Fills a dialog body with one or more localised lines. A single string
+ * renders as a paragraph; an array (e.g. a batch of validation errors)
+ * renders as a bulleted list.
+ * @param {HTMLElement} body
+ * @param {string|string[]} message
+ */
+const renderDialogMessage = (body, message) => {
+  const lines = Array.isArray(message) ? message : [message];
+  if (lines.length > 1) {
+    const ul = document.createElement('ul');
+    ul.className = 'mb-0 ps-3';
+    for (const line of lines) {
+      const li = document.createElement('li');
+      li.textContent = line;
+      ul.appendChild(li);
+    }
+    body.appendChild(ul);
+  } else {
+    const p = document.createElement('p');
+    p.className = 'mb-0';
+    p.textContent = lines[0] ?? '';
+    body.appendChild(p);
+  }
+};
+
+/**
+ * Builds one throwaway modal - the same per-call, dispose-on-hidden idiom
+ * showToast() uses for its elements, so two overlapping calls never share
+ * mutable state. A cancel button is only added in confirm mode.
+ * @param {string|string[]} message
+ * @param {boolean} withCancel
+ * @returns {{el: HTMLElement, okBtn: HTMLButtonElement, cancelBtn: HTMLButtonElement|null}}
+ */
+const buildDialogModal = (message, withCancel) => {
+  const body = document.createElement('div');
+  body.className = 'modal-body';
+  renderDialogMessage(body, message);
+
+  const footer = document.createElement('div');
+  footer.className = 'modal-footer';
+
+  let cancelBtn = null;
+  if (withCancel) {
+    cancelBtn = document.createElement('button');
+    cancelBtn.type = 'button';
+    cancelBtn.className = 'btn btn-secondary';
+    cancelBtn.dataset.bsDismiss = 'modal';
+    footer.appendChild(cancelBtn);
+  }
+
+  const okBtn = document.createElement('button');
+  okBtn.type = 'button';
+  okBtn.className = 'btn btn-primary';
+  okBtn.dataset.bsDismiss = 'modal';
+  footer.appendChild(okBtn);
+
+  const content = document.createElement('div');
+  content.className = 'modal-content';
+  content.appendChild(body);
+  content.appendChild(footer);
+
+  const dialog = document.createElement('div');
+  dialog.className = 'modal-dialog modal-dialog-centered';
+  dialog.appendChild(content);
+
+  const el = document.createElement('div');
+  el.className = 'modal fade';
+  el.tabIndex = -1;
+  el.setAttribute('aria-hidden', 'true');
+  el.appendChild(dialog);
+  document.body.appendChild(el);
+
+  return { el, okBtn, cancelBtn };
+};
+
+/**
+ * Blocking replacement for window.alert() - the user pressed something and
+ * is waiting for the answer, so a modal backdrop keeps the page inert until
+ * it is acknowledged. See docs/patterns.md (g).
+ * @param {string|string[]} message - Localised prose (or several lines), already translated by the caller
+ * @param {string} [okLabel] - Localised label for the acknowledge button
+ * @returns {Promise<void>} resolves once the dialog is dismissed
+ */
+const showAlertModal = (message, okLabel = 'OK') => new Promise((resolve) => {
+  const { el, okBtn } = buildDialogModal(message, false);
+  okBtn.textContent = okLabel;
+
+  const modal = bootstrap.Modal.getOrCreateInstance(el, { backdrop: 'static' });
+  el.addEventListener('hidden.bs.modal', () => {
+    modal.dispose();
+    el.remove();
+    resolve();
+  });
+  modal.show();
+});
+
+/**
+ * Blocking replacement for window.confirm() - see docs/patterns.md (g).
+ * Unlike the native dialog this is asynchronous: callers must await it.
+ * @param {string|string[]} message - Localised prose, already translated by the caller
+ * @param {string} [confirmLabel] - Localised label for the affirmative button
+ * @param {string} [cancelLabel] - Localised label for the cancel button
+ * @returns {Promise<boolean>} true when the user confirmed, false on cancel/dismiss
+ */
+const showConfirmModal = (message, confirmLabel = 'Confirm', cancelLabel = 'Cancel') => new Promise((resolve) => {
+  const { el, okBtn, cancelBtn } = buildDialogModal(message, true);
+  okBtn.textContent = confirmLabel;
+  if (cancelBtn) cancelBtn.textContent = cancelLabel;
+
+  let confirmed = false;
+  okBtn.addEventListener('click', () => { confirmed = true; });
+
+  const modal = bootstrap.Modal.getOrCreateInstance(el, { backdrop: 'static' });
+  el.addEventListener('hidden.bs.modal', () => {
+    modal.dispose();
+    el.remove();
+    resolve(confirmed);
+  });
+  modal.show();
+});
 
 // ==========================================================================
 // TABLE HELPERS
@@ -893,6 +1019,10 @@ if (typeof window !== 'undefined') {
 
     // Toasts
     showToast,
+
+    // Blocking dialogs
+    showAlertModal,
+    showConfirmModal,
 
     // Tables
     getTableRows,

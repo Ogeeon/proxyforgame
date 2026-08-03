@@ -31,6 +31,8 @@
     "resulting-lab-level": "Résultant niveau du laboratoire:",
     "done": "Fait",
     "cancel": "Annuler",
+    "dialog-ok": "OK",
+    "dialog-confirm": "Confirmer",
     "universe-speed": "Vitesse de l'univers",
     "economy-speed": "Vitesse économique",
     "research-speed": "Vitesse de recherche",

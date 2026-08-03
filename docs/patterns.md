@@ -474,7 +474,7 @@ places (`flight.tpl:504, 531, 540`).
 
 ---
 
-## (g) Reporting a failure: toast vs `alert()`
+## (g) Reporting a failure: toast vs blocking dialog
 
 Which one is right follows from who started the thing that failed, not from how bad the
 failure is.
@@ -482,12 +482,12 @@ failure is.
 | | the user pressed something | the page went off on its own |
 |---|---|---|
 | example | «Import from OGame» on a malformed API code | the universe settings loaded on page open |
-| channel | `alert()` | `showToast()` |
+| channel | `showAlertModal()` / `showConfirmModal()` | `showToast()` |
 | why | the user is waiting for an answer and a modal *is* the answer | a modal would interrupt work the user never asked about |
 
-`showToast(message, level)` lives in `www/ogame/calc/js/dom-utils.js` — the file every
-calculator already loads, so using it adds no `<script>` tag. It builds its own
-`.toast-container` on first call, which is why no template carries one.
+Both channels live in `www/ogame/calc/js/dom-utils.js` — the file every calculator already
+loads, so using either adds no `<script>` tag. Each builds its own element on demand, which is
+why no template carries a toast container or a dialog markup block of its own.
 
 ```js
 } catch (error) {
@@ -507,8 +507,34 @@ calculator already loads, so using it adds no `<script>` tag. It builds its own
 - The message is a locale key passed in from the template, like every other string; the
   `ApiError.message` that came from the server is English and belongs in `consoleLog` only.
 
-The roughly thirty existing `alert()` calls are **not** to be migrated. They all sit on the
-left column of the table, which is where `alert()` is the correct choice.
+### `showAlertModal()` / `showConfirmModal()`
+
+Native `alert()`/`confirm()` are not used anywhere in this codebase — their browser chrome
+(“this page says…”, an OK button that visually behaves like a confirmation) doesn't fit prose
+that is only ever asking the user to acknowledge or decide something, not confirm the page
+itself. Both helpers build a real `bootstrap.Modal` (`backdrop: 'static'`, so the page stays
+inert until it is answered) as a throwaway element, the same per-call, dispose-on-`hidden`
+idiom `showToast()` uses — two overlapping calls never share mutable state.
+
+```js
+await showAlertModal(this.opts.badSRCode, this.opts.dialogOk);
+
+if (await showConfirmModal(this.opts.uniLoadConfMsg, this.opts.dialogConfirm, this.opts.cancel)) {
+    this.loadUniverse(key);
+}
+```
+
+- Both are `async`: `showConfirmModal()` resolves `Promise<boolean>` once the user answers,
+  which is the one real behavioural difference from `window.confirm()` — every call site
+  awaits it instead of branching on a synchronous return value.
+- Neither takes a `level`: unlike toast, the native dialogs they replace never carried a
+  severity, so one neutral style covers every call site.
+- `message` accepts a `string[]` as well as a `string` — pass an array when a caller needs to
+  report several validation errors at once; it renders as a bulleted list instead of a single
+  paragraph, which is the only case worth splitting the message this way.
+- The button labels are the caller's job, not a locale lookup baked into `dom-utils.js` — pass
+  the calculator's own translated `common.dialog-ok` / `common.dialog-confirm` / `common.cancel`
+  strings (already wired onto `options`/`opts` the same way every other message is).
 
 **Solid variants are reserved for modal footers.** `btn-primary` on the confirm and
 `btn-secondary` on the cancel is the one place the filled treatment carries meaning — it marks
