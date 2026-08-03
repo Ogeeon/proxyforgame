@@ -455,3 +455,22 @@ textarea:disabled {
   border-width: calc(var(--bs-tooltip-arrow-width) * .5) 0 calc(var(--bs-tooltip-arrow-width) * .5) var(--bs-tooltip-arrow-height);
   border-left-color: var(--bs-tooltip-bg);
 }
+
+/* Flattens <fieldset>/<legend> browser chrome (border, padding, block-level
+   legend) so a semantic form-field group can sit inline in a flex row instead
+   of rendering as a bordered box. Used where a group heading was a bare
+   <label> with no associated control (SonarQube Web:S6853). */
+.fieldset-reset {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  min-width: 0;
+}
+.fieldset-reset > legend {
+  float: none;
+  width: auto;
+  padding: 0;
+  margin: 0;
+  font-size: inherit;
+  line-height: inherit;
+}
