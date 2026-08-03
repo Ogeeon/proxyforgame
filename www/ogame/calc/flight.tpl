@@ -12,11 +12,11 @@
     $pfgPath = $_SERVER['DOCUMENT_ROOT'];
   } else {
     $pfgPath = "D:\Programming\JS\pfg.wmp\www";
-  };
+  }
 ?>
   <!-- Bootstrap 5 CSS -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet" integrity="sha384-QuGBSgV5Im3DzL2z+8Ko9/hqNy/N0O7zwvXAtfd1MvPKWa/UbeLV65cfm4BV5Wgq" crossorigin="anonymous">
 
   <!-- Custom styles -->
   <link type="text/css" href="/css/langs_bs.css?v=<?php echo filemtime($pfgPath.'/css/langs_bs.css'); ?>" rel="stylesheet">
@@ -24,7 +24,7 @@
   <link type="text/css" href="/ogame/calc/css/flight_bs.css?v=<?php echo filemtime($pfgPath.'/ogame/calc/css/flight_bs.css'); ?>" rel="stylesheet">
 
   <!-- Bootstrap 5 JS Bundle -->
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
 
   <!-- Utility libraries and calculator modules -->
   <script src="/js/utils.js?v=<?php echo filemtime($pfgPath.'/js/utils.js'); ?>"></script>
@@ -112,7 +112,7 @@
 ?>
     };
   </script>
-<?php require_once('../../cookies.tpl'); ?>
+<?php require_once '../../cookies.tpl'; ?>
 </head>
 
 <body>
@@ -121,9 +121,9 @@
 
 <div class="container-fluid">
   <div class="row">
-    <div class="col-md-2"><?php require_once('../../sidebar_bs.tpl'); ?></div>
+    <div class="col-md-2"><?php require_once '../../sidebar_bs.tpl'; ?></div>
     <div class="col-md-10">
-    <?php require_once('../../topbar_bs.tpl'); ?>
+    <?php require_once '../../topbar_bs.tpl'; ?>
 
 <div id="flight">
   <div class="border rounded position-relative">
@@ -146,39 +146,26 @@
             <div class="accordion-body">
 
               <div id="universes-panel" class="border rounded p-2 mb-2">
-                <table class="mx-auto">
-                  <tr>
-                    <td><label for="universe-name-select"><?= $l['universe'] ?></label></td>
-                    <td>
-                      <select id="universe-name-select" name="universe-name-select" class="form-select form-select-sm d-inline-block w-auto ui-input-margin">
-                        <option value="0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</option>
-                      </select>
-                    </td>
-                    <td>
-                      <div id="universe-control" class="btn-group" role="group">
-                        <button id="universe-load" type="button" data-bs-toggle="tooltip" title="<?= $l['universe-load'] ?>" class="btn btn-sm btn-outline-secondary uni-control-btn"><i class="bi bi-box-arrow-in-down"></i></button>
-                        <button id="universe-save" type="button" data-bs-toggle="tooltip" title="<?= $l['universe-save'] ?>" class="btn btn-sm btn-outline-secondary uni-control-btn"><i class="bi bi-save"></i></button>
-                        <button id="universe-delete" type="button" data-bs-toggle="tooltip" title="<?= $l['universe-delete'] ?>" class="btn btn-sm btn-outline-secondary uni-control-btn"><i class="bi bi-x-lg"></i></button>
-                      </div>
-                    </td>
-                    <td style="width: 20px;">&nbsp;</td>
-                    <td><input id="universe-name" type="text" name="universe-name" class="form-control form-control-sm d-inline-block input-20columns ui-input-margin"></td>
-                    <td><button id="universe-add" type="button" data-bs-toggle="tooltip" title="<?= $l['universe-add'] ?>" class="btn btn-sm btn-outline-secondary uni-control-btn"><i class="bi bi-plus-lg"></i></button></td>
-                  </tr>
-                  <tr>
-                    <td>SR_KEY:</td>
-                    <td colspan="4">
-                      <div class="d-flex align-items-center gap-1">
-                        <input id="api-code" placeholder="API OGame / API LogServer.net" type="text" class="form-control form-control-sm flex-grow-1 text-center ui-input-margin">
-                        <i class="bi bi-question-circle" data-bs-toggle="tooltip" title="<?= $l['import-hint'] ?>"></i>
-                        <button id="api-get" type="button" data-bs-toggle="tooltip" title="<?= $l['import-sr'] ?>" class="btn btn-sm btn-outline-secondary uni-control-btn"><i class="bi bi-box-arrow-in-down"></i></button>
-                      </div>
-                    </td>
-                    <td>
-                      <button id="import-own-api" type="button" data-bs-toggle="tooltip" title="<?= $l['own-api-import-btn'] ?>" class="btn btn-sm btn-outline-secondary uni-control-btn"><i class="bi bi-clipboard"></i></button>
-                    </td>
-                  </tr>
-                </table>
+                <div class="d-flex flex-wrap align-items-center justify-content-center gap-2 mb-2">
+                  <label for="universe-name-select"><?= $l['universe'] ?></label>
+                  <select id="universe-name-select" name="universe-name-select" class="form-select form-select-sm d-inline-block w-auto ui-input-margin">
+                    <option value="0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</option>
+                  </select>
+                  <div id="universe-control" class="btn-group" role="group">
+                    <button id="universe-load" type="button" data-bs-toggle="tooltip" title="<?= $l['universe-load'] ?>" class="btn btn-sm btn-outline-secondary uni-control-btn"><i class="bi bi-box-arrow-in-down"></i></button>
+                    <button id="universe-save" type="button" data-bs-toggle="tooltip" title="<?= $l['universe-save'] ?>" class="btn btn-sm btn-outline-secondary uni-control-btn"><i class="bi bi-save"></i></button>
+                    <button id="universe-delete" type="button" data-bs-toggle="tooltip" title="<?= $l['universe-delete'] ?>" class="btn btn-sm btn-outline-secondary uni-control-btn"><i class="bi bi-x-lg"></i></button>
+                  </div>
+                  <input id="universe-name" type="text" name="universe-name" class="form-control form-control-sm d-inline-block input-20columns ui-input-margin" aria-label="<?= $l['universe'] ?>">
+                  <button id="universe-add" type="button" data-bs-toggle="tooltip" title="<?= $l['universe-add'] ?>" class="btn btn-sm btn-outline-secondary uni-control-btn"><i class="bi bi-plus-lg"></i></button>
+                </div>
+                <div class="d-flex flex-wrap align-items-center justify-content-center gap-1">
+                  <span>SR_KEY:</span>
+                  <input id="api-code" placeholder="API OGame / API LogServer.net" type="text" class="form-control form-control-sm flex-grow-1 text-center ui-input-margin" aria-label="<?= $l['import-hint'] ?>">
+                  <i class="bi bi-question-circle" data-bs-toggle="tooltip" title="<?= $l['import-hint'] ?>"></i>
+                  <button id="api-get" type="button" data-bs-toggle="tooltip" title="<?= $l['import-sr'] ?>" class="btn btn-sm btn-outline-secondary uni-control-btn"><i class="bi bi-box-arrow-in-down"></i></button>
+                  <button id="import-own-api" type="button" data-bs-toggle="tooltip" title="<?= $l['own-api-import-btn'] ?>" class="btn btn-sm btn-outline-secondary uni-control-btn"><i class="bi bi-clipboard"></i></button>
+                </div>
               </div>
 
               <ul class="nav nav-tabs nav-tabs-sm" id="paramTabs" role="tablist">
@@ -202,11 +189,11 @@
                     <div class="d-flex align-items-center gap-1 text-nowrap">
                       <label for="departure-g"><?= $l['departure-point'] ?></label>
                       <span class="text-nowrap">
-                        <input id="departure-g" type="text" name="departure-g" class="form-control form-control-sm d-inline-block coord-input-small" value="1" data-field-title="<?= $l['departure-point'] ?>-<?= $l['galaxy'] ?>">:<input id="departure-s" type="text" name="departure-s" class="form-control form-control-sm d-inline-block coord-input" value="1" data-field-title="<?= $l['departure-point'] ?>-<?= $l['system'] ?>">:<input id="departure-p" type="text" name="departure-p" class="form-control form-control-sm d-inline-block coord-input-small" value="1" data-field-title="<?= $l['departure-point'] ?>-<?= $l['planet'] ?>">
+                        <input id="departure-g" type="text" name="departure-g" class="form-control form-control-sm d-inline-block coord-input-small" value="1" data-field-title="<?= $l['departure-point'] ?>-<?= $l['galaxy'] ?>">:<input id="departure-s" type="text" name="departure-s" class="form-control form-control-sm d-inline-block coord-input" value="1" data-field-title="<?= $l['departure-point'] ?>-<?= $l['system'] ?>" aria-label="<?= $l['departure-point'] ?>-<?= $l['system'] ?>">:<input id="departure-p" type="text" name="departure-p" class="form-control form-control-sm d-inline-block coord-input-small" value="1" data-field-title="<?= $l['departure-point'] ?>-<?= $l['planet'] ?>" aria-label="<?= $l['departure-point'] ?>-<?= $l['planet'] ?>">
                       </span>
                     </div>
-                    <div class="d-flex flex-wrap align-items-center gap-2">
-                      <label class="text-nowrap"><?= $l['class'] ?>:</label>
+                    <fieldset class="d-flex flex-wrap align-items-center gap-2 fieldset-reset">
+                      <legend class="text-nowrap"><?= $l['class'] ?>:</legend>
                       <div class="d-flex align-items-center gap-1 text-nowrap">
                         <input id="class-0" type="radio" name="class" value="0" class="form-check-input mt-0"> <label for="class-0"><?= $l['class-collector'] ?></label>
                       </div>
@@ -216,7 +203,7 @@
                       <div class="d-flex align-items-center gap-1 text-nowrap">
                         <input id="class-2" type="radio" name="class" value="2" class="form-check-input mt-0"> <label for="class-2"><?= $l['class-discoverer'] ?></label>
                       </div>
-                    </div>
+                    </fieldset>
                     <div class="d-flex align-items-center gap-1 text-nowrap">
                       <input id="trader-bonus" type="checkbox" name="trader-bonus" class="form-check-input mt-0"> <label for="trader-bonus"><?= $l['trader-bonus'] ?></label>
                     </div>
@@ -287,15 +274,15 @@
                   </div>
 
                   <div class="d-flex flex-wrap align-items-center justify-content-center gap-3 mb-2">
-                    <div class="d-flex flex-wrap align-items-center gap-2">
-                      <label class="text-nowrap"><?= $l['circular'] ?></label>
+                    <fieldset class="d-flex flex-wrap align-items-center gap-2 fieldset-reset">
+                      <legend class="text-nowrap"><?= $l['circular'] ?></legend>
                       <div class="d-flex align-items-center gap-1 text-nowrap">
                         <input id="circular-systems" type="checkbox" name="circular-systems" class="form-check-input mt-0"> <label for="circular-systems"><abbr data-bs-toggle="tooltip" title="<?= $l['circ-systems-explain'] ?>"><?= $l['circ-systems'] ?></abbr></label>
                       </div>
                       <div class="d-flex align-items-center gap-1 text-nowrap">
                         <input id="circular-galaxies" type="checkbox" name="circular-galaxies" class="form-check-input mt-0"> <label for="circular-galaxies"><abbr data-bs-toggle="tooltip" title="<?= $l['circ-galaxies-explain'] ?>"><?= $l['circ-galaxies'] ?></abbr></label>
                       </div>
-                    </div>
+                    </fieldset>
                     <div class="d-flex align-items-center gap-1 text-nowrap">
                       <label for="systems-num"><?= $l['systems-num'] ?></label>
                       <input id="systems-num" type="text" name="systems-num" class="form-control form-control-sm d-inline-block level-input" value="499">
@@ -307,27 +294,28 @@
                   </div>
 
                   <div class="d-flex flex-wrap align-items-center justify-content-center gap-3 mb-2">
-                    <div class="d-flex flex-wrap align-items-center gap-2">
-                      <label class="text-nowrap"><?= $l['speed-fleet-title'] ?></label>
+                    <fieldset class="d-flex flex-wrap align-items-center gap-2 fieldset-reset">
+                      <legend class="text-nowrap"><?= $l['speed-fleet-title'] ?></legend>
+                      <?php $selectedAttr = ' selected'; ?>
                       <div class="d-flex align-items-center gap-1 text-nowrap">
                         <label for="speed-fleet-war"><?= $l['speed-fleet-war'] ?></label>
                         <select id="speed-fleet-war" name="speed-fleet-war" class="form-select form-select-sm d-inline-block w-auto">
-                          <?php for($s=1;$s<=10;$s++): ?><option value="<?= $s ?>"<?= $s===1?' selected':'' ?>><?= $s ?></option><?php endfor; ?>
+                          <?php for($s=1;$s<=10;$s++): ?><option value="<?= $s ?>"<?= $s===1?$selectedAttr:'' ?>><?= $s ?></option><?php endfor; ?>
                         </select>
                       </div>
                       <div class="d-flex align-items-center gap-1 text-nowrap">
                         <label for="speed-fleet-peaceful"><?= $l['speed-fleet-peaceful'] ?></label>
                         <select id="speed-fleet-peaceful" name="speed-fleet-peaceful" class="form-select form-select-sm d-inline-block w-auto">
-                          <?php for($s=1;$s<=10;$s++): ?><option value="<?= $s ?>"<?= $s===1?' selected':'' ?>><?= $s ?></option><?php endfor; ?>
+                          <?php for($s=1;$s<=10;$s++): ?><option value="<?= $s ?>"<?= $s===1?$selectedAttr:'' ?>><?= $s ?></option><?php endfor; ?>
                         </select>
                       </div>
                       <div class="d-flex align-items-center gap-1 text-nowrap">
                         <label for="speed-fleet-holding"><?= $l['speed-fleet-holding'] ?></label>
                         <select id="speed-fleet-holding" name="speed-fleet-holding" class="form-select form-select-sm d-inline-block w-auto">
-                          <?php for($s=1;$s<=10;$s++): ?><option value="<?= $s ?>"<?= $s===1?' selected':'' ?>><?= $s ?></option><?php endfor; ?>
+                          <?php for($s=1;$s<=10;$s++): ?><option value="<?= $s ?>"<?= $s===1?$selectedAttr:'' ?>><?= $s ?></option><?php endfor; ?>
                         </select>
                       </div>
-                    </div>
+                    </fieldset>
                     <div class="d-flex align-items-center gap-1 text-nowrap">
                       <label for="sp-cargohold"><?= $l['sp-cargohold'] ?></label>
                       <input id="sp-cargohold" type="text" name="sp-cargohold" class="form-control form-control-sm d-inline-block coord-input-small" value="0">
@@ -338,7 +326,7 @@
                   <div class="d-flex flex-wrap align-items-center justify-content-center gap-1 mb-1 text-nowrap">
                     <input id="ovr-speed-cb" type="checkbox" name="override-speed" class="form-check-input mt-0">
                     <label for="ovr-speed-cb"><abbr data-bs-toggle="tooltip" title="<?= $l['ovr-fleet-speed-explain'] ?>"><?= $l['ovr-fleet-speed'] ?></abbr></label>
-                    <input id="ovr-speed-t" type="text" class="form-control form-control-sm d-inline-block input-7columns" value="10000">
+                    <input id="ovr-speed-t" type="text" class="form-control form-control-sm d-inline-block input-7columns" value="10000" aria-label="<?= $l['ovr-fleet-speed'] ?>">
                   </div>
 
                 </div><!-- /param-universe -->
@@ -390,9 +378,9 @@
                     ?>
                     <tr class="<?= $cls ?>">
                       <td><?= $l[$name] ?></td>
-                      <td class="centered"><input type="text" class="form-control form-control-sm d-inline-block no-mp input-7columns centered <?= $tech ?>-speed"></td>
-                      <td class="centered"><input type="text" class="form-control form-control-sm d-inline-block no-mp input-7columns centered <?= $tech ?>-cargo"></td>
-                      <td class="centered"><input type="text" class="form-control form-control-sm d-inline-block no-mp input-7columns centered <?= $tech ?>-fuel"></td>
+                      <td class="centered"><input type="text" class="form-control form-control-sm d-inline-block no-mp input-7columns centered <?= $tech ?>-speed" aria-label="<?= $l['speed-increase'] ?>"></td>
+                      <td class="centered"><input type="text" class="form-control form-control-sm d-inline-block no-mp input-7columns centered <?= $tech ?>-cargo" aria-label="<?= $l['cargo-increase'] ?>"></td>
+                      <td class="centered"><input type="text" class="form-control form-control-sm d-inline-block no-mp input-7columns centered <?= $tech ?>-fuel" aria-label="<?= $l['fuel-decrease'] ?>"></td>
                     </tr>
                     <?php endforeach; ?>
                   </table>
@@ -414,33 +402,26 @@
             <div class="accordion-body">
 
               <div id="fleets-panel" class="border rounded p-2 mb-2">
-                <table class="mx-auto">
-                  <tr>
-                    <td><label for="fleet-name-select"><?= $l['fleet'] ?></label></td>
-                    <td>
-                      <select id="fleet-name-select" name="fleet-name-select" class="form-select form-select-sm d-inline-block w-auto ui-input-margin">
-                        <option value="0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</option>
-                      </select>
-                    </td>
-                    <td>
-                      <div id="fleet-control" class="btn-group" role="group">
-                        <button id="fleet-load" type="button" data-bs-toggle="tooltip" title="<?= $l['universe-load'] ?>" class="btn btn-sm btn-outline-secondary uni-control-btn"><i class="bi bi-box-arrow-in-down"></i></button>
-                        <button id="fleet-save" type="button" data-bs-toggle="tooltip" title="<?= $l['universe-save'] ?>" class="btn btn-sm btn-outline-secondary uni-control-btn"><i class="bi bi-save"></i></button>
-                        <button id="fleet-delete" type="button" data-bs-toggle="tooltip" title="<?= $l['universe-delete'] ?>" class="btn btn-sm btn-outline-secondary uni-control-btn"><i class="bi bi-x-lg"></i></button>
-                      </div>
-                    </td>
-                    <td style="width: 20px;">&nbsp;</td>
-                    <td><input id="fleet-name" type="text" name="fleet-name" class="form-control form-control-sm d-inline-block input-20columns ui-input-margin"></td>
-                    <td><button id="fleet-add" type="button" data-bs-toggle="tooltip" title="<?= $l['universe-add'] ?>" class="btn btn-sm btn-outline-secondary uni-control-btn"><i class="bi bi-plus-lg"></i></button></td>
-                  </tr>
-                </table>
+                <div class="d-flex flex-wrap align-items-center justify-content-center gap-2">
+                  <label for="fleet-name-select"><?= $l['fleet'] ?></label>
+                  <select id="fleet-name-select" name="fleet-name-select" class="form-select form-select-sm d-inline-block w-auto ui-input-margin">
+                    <option value="0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</option>
+                  </select>
+                  <div id="fleet-control" class="btn-group" role="group">
+                    <button id="fleet-load" type="button" data-bs-toggle="tooltip" title="<?= $l['universe-load'] ?>" class="btn btn-sm btn-outline-secondary uni-control-btn"><i class="bi bi-box-arrow-in-down"></i></button>
+                    <button id="fleet-save" type="button" data-bs-toggle="tooltip" title="<?= $l['universe-save'] ?>" class="btn btn-sm btn-outline-secondary uni-control-btn"><i class="bi bi-save"></i></button>
+                    <button id="fleet-delete" type="button" data-bs-toggle="tooltip" title="<?= $l['universe-delete'] ?>" class="btn btn-sm btn-outline-secondary uni-control-btn"><i class="bi bi-x-lg"></i></button>
+                  </div>
+                  <input id="fleet-name" type="text" name="fleet-name" class="form-control form-control-sm d-inline-block input-20columns ui-input-margin" aria-label="<?= $l['fleet'] ?>">
+                  <button id="fleet-add" type="button" data-bs-toggle="tooltip" title="<?= $l['universe-add'] ?>" class="btn btn-sm btn-outline-secondary uni-control-btn"><i class="bi bi-plus-lg"></i></button>
+                </div>
               </div>
 
               <div class="text-end mb-1">
                 <button id="clear-ships" type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="tooltip" title="<?= $l['clear-ships-hint'] ?>"><i class="bi bi-eraser"></i> <?= $l['clear-ships'] ?></button>
               </div>
 
-              <table class="mx-auto">
+              <div class="d-grid ships-grid">
                 <?php
                   $shipRows = [
                     [['small-cargo'], ['cruiser'], ['battlecruiser']],
@@ -450,16 +431,15 @@
                     [['reaper'], ['pathfinder'], ['esp-probe']],
                   ];
                   foreach ($shipRows as $row):
+                    foreach ($row as $ship): $s = $ship[0];
                 ?>
-                <tr>
-                  <?php foreach ($row as $ship): $s = $ship[0]; ?>
-                  <td><label for="<?= $s ?>"><?= $l[$s] ?></label></td>
-                  <td><label id="<?= $s ?>-speed" class="speed-label">0</label></td>
-                  <td><input id="<?= $s ?>" type="text" name="<?= $s ?>" class="form-control form-control-sm d-inline-block count-input ui-input-margin" value="0"></td>
-                  <?php endforeach; ?>
-                </tr>
-                <?php endforeach; ?>
-              </table>
+                <div class="d-flex align-items-center gap-1">
+                  <label for="<?= $s ?>"><?= $l[$s] ?></label>
+                  <span id="<?= $s ?>-speed" class="speed-label">0</span>
+                  <input id="<?= $s ?>" type="text" name="<?= $s ?>" class="form-control form-control-sm d-inline-block count-input ui-input-margin" value="0">
+                </div>
+                <?php endforeach; endforeach; ?>
+              </div>
 
             </div>
           </div>
@@ -480,9 +460,8 @@
     <div class="tab-content border border-top-0 rounded-bottom p-2">
 
       <div class="tab-pane fade show active" id="flight-times-panel" role="tabpanel">
-        <table class="flight-layout w-100">
-          <tr>
-            <td class="align-top">
+        <div class="flight-layout d-flex w-100">
+          <div class="flight-layout-main">
               <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
                 <div><input id="warrior-bonus" type="checkbox" name="warrior-bonus" class="form-check-input"> <label for="warrior-bonus"><?= $l['warrior-bonus'] ?></label></div>
                 <div class="ms-3"><span><?= $l['mission-type-title'] ?></span></div>
@@ -494,10 +473,10 @@
               <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
                 <label for="destination-g"><?= $l['destination-point'] ?></label>
                 <span class="text-nowrap">
-                  <input id="destination-g" type="text" name="destination-g" class="form-control form-control-sm d-inline-block coord-input-small" value="1" data-field-title="<?= $l['destination-point'] ?>-<?= $l['galaxy'] ?>">:<input id="destination-s" type="text" name="destination-s" class="form-control form-control-sm d-inline-block coord-input" value="1" data-field-title="<?= $l['destination-point'] ?>-<?= $l['system'] ?>">:<input id="destination-p" type="text" name="destination-p" class="form-control form-control-sm d-inline-block coord-input-small" value="1" data-field-title="<?= $l['destination-point'] ?>-<?= $l['planet'] ?>">
+                  <input id="destination-g" type="text" name="destination-g" class="form-control form-control-sm d-inline-block coord-input-small" value="1" data-field-title="<?= $l['destination-point'] ?>-<?= $l['galaxy'] ?>">:<input id="destination-s" type="text" name="destination-s" class="form-control form-control-sm d-inline-block coord-input" value="1" data-field-title="<?= $l['destination-point'] ?>-<?= $l['system'] ?>" aria-label="<?= $l['destination-point'] ?>-<?= $l['system'] ?>">:<input id="destination-p" type="text" name="destination-p" class="form-control form-control-sm d-inline-block coord-input-small" value="1" data-field-title="<?= $l['destination-point'] ?>-<?= $l['planet'] ?>" aria-label="<?= $l['destination-point'] ?>-<?= $l['planet'] ?>">
                 </span>
-                <span class="ms-3"><label><?= $l['distance'] ?></label></span>
-                <label id="distance"></label>
+                <span class="ms-3"><?= $l['distance'] ?></span>
+                <span id="distance"></span>
                 <label id="empty-systems-label" style="display: none;">(<?= $l['empty-systems'] ?>&nbsp;
                   <input type="number" id="empty-systems-count-spin" class="form-control form-control-sm d-inline-block" step="1" min="0">)
                 </label>
@@ -525,8 +504,8 @@
                 </tr>
                 <?php endfor; ?>
               </table>
-            </td>
-            <td class="ps-2 arrival-cell align-top">
+          </div>
+            <div class="ps-2 arrival-cell">
               <div class="arrival-panel">
                 <!-- The two departure modes: the plain leg-by-leg arrival
                      calculator, and the recall of a fleet already under way. -->
@@ -551,7 +530,7 @@
                       <button id="set-departure-now" type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="tooltip" title="<?= $l['departure-now-hint'] ?>"><?= $l['departure-now'] ?></button>
                       <button id="set-departure-zero" type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="tooltip" title="<?= $l['departure-zero-hint'] ?>">(00:00:00)</button>
                     </div>
-                    <input type="text" id="start-datetime" class="form-control form-control-sm startdate-input" placeholder="dd.mm.yyyy hh:mm:ss" title="<?= $l['datetime-format-hint'] ?>">
+                    <input type="text" id="start-datetime" class="form-control form-control-sm startdate-input" placeholder="dd.mm.yyyy hh:mm:ss" title="<?= $l['datetime-format-hint'] ?>" aria-label="<?= $l['departure'] ?>">
                     <div class="flight-panel-head my-1">
                       <span class="fw-bold flight-panel-title"><?= $l['flight'] ?></span>
                       <div id="add-flight-time" class="btn btn-sm btn-outline-secondary" data-bs-toggle="tooltip" title="<?= $l['add-row'] ?>"><i class="bi bi-plus-lg"></i></div>
@@ -559,7 +538,7 @@
                     <div id="flight-data">
                       <div class="d-flex align-items-center gap-1 mb-1 flight-leg">
                         <button type="button" class="btn btn-sm btn-outline-secondary button-toggle flight-leg-sign" data-sign="+" data-bs-toggle="tooltip" title="<?= $l['toggle-sign'] ?>"><i class="bi bi-plus-lg"></i></button>
-                        <input id="flight-time" type="text" class="form-control form-control-sm flight-time-input" placeholder="dd hh:mm:ss" title="<?= $l['flight-time-format-hint'] ?>">
+                        <input id="flight-time" type="text" class="form-control form-control-sm flight-time-input" placeholder="dd hh:mm:ss" title="<?= $l['flight-time-format-hint'] ?>" aria-label="<?= $l['flight'] ?>">
                         <button type="button" class="btn btn-sm btn-outline-danger button-remove" data-bs-toggle="tooltip" title="<?= $l['remove-row'] ?>"><i class="bi bi-x-lg"></i></button>
                       </div>
                     </div>
@@ -575,11 +554,11 @@
                       <button id="set-recall-departure-now" type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="tooltip" title="<?= $l['departure-now-hint'] ?>"><?= $l['departure-now'] ?></button>
                       <button id="set-recall-departure-zero" type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="tooltip" title="<?= $l['departure-zero-hint'] ?>">(00:00:00)</button>
                     </div>
-                    <input type="text" id="recall-start-datetime" class="form-control form-control-sm startdate-input" placeholder="dd.mm.yyyy hh:mm:ss" title="<?= $l['datetime-format-hint'] ?>">
+                    <input type="text" id="recall-start-datetime" class="form-control form-control-sm startdate-input" placeholder="dd.mm.yyyy hh:mm:ss" title="<?= $l['datetime-format-hint'] ?>" aria-label="<?= $l['departure'] ?>">
                     <div class="text-center fw-bold mt-1"><?= $l['recall-full-flight'] ?></div>
                     <!-- Taken from the results table, never typed into: it is the
                          outbound leg the recall interrupts. -->
-                    <input type="text" id="recall-full-flight" class="form-control form-control-sm flight-time-input ui-state-disabled" value="00 00:00:00" title="<?= $l['recall-full-flight-hint'] ?>" disabled>
+                    <input type="text" id="recall-full-flight" class="form-control form-control-sm flight-time-input ui-state-disabled" value="00 00:00:00" title="<?= $l['recall-full-flight-hint'] ?>" aria-label="<?= $l['recall-full-flight'] ?>" disabled>
                     <div class="text-center fw-bold mt-1"><?= $l['recall'] ?></div>
                     <!-- Stacked rather than side by side: the two labels next to
                          each other are the widest thing in the panel, and the
@@ -591,14 +570,14 @@
                           <input id="recall-mode-0" type="radio" name="recall-mode" value="0" class="form-check-input">
                           <label class="form-check-label" for="recall-mode-0"><?= $l['recall-at-moment'] ?></label>
                         </div>
-                        <input type="text" id="recall-moment" class="form-control form-control-sm startdate-input" placeholder="dd.mm.yyyy hh:mm:ss" title="<?= $l['datetime-format-hint'] ?>" disabled>
+                        <input type="text" id="recall-moment" class="form-control form-control-sm startdate-input" placeholder="dd.mm.yyyy hh:mm:ss" title="<?= $l['datetime-format-hint'] ?>" aria-label="<?= $l['recall-at-moment'] ?>" disabled>
                       </div>
                       <div class="text-center">
                         <div class="form-check d-inline-block">
                           <input id="recall-mode-1" type="radio" name="recall-mode" value="1" class="form-check-input">
                           <label class="form-check-label" for="recall-mode-1"><?= $l['recall-after-time'] ?></label>
                         </div>
-                        <input type="text" id="recall-after" class="form-control form-control-sm flight-time-input" placeholder="dd hh:mm:ss" title="<?= $l['flight-time-format-hint'] ?>" value="00 00:00:00" disabled>
+                        <input type="text" id="recall-after" class="form-control form-control-sm flight-time-input" placeholder="dd hh:mm:ss" title="<?= $l['flight-time-format-hint'] ?>" value="00 00:00:00" aria-label="<?= $l['recall-after-time'] ?>" disabled>
                       </div>
                     </div>
                     <div class="text-center fw-bold mt-1"><?= $l['return'] ?></div>
@@ -607,9 +586,8 @@
 
                 </div>
               </div>
-            </td>
-          </tr>
-        </table>
+            </div>
+        </div>
       </div>
 
       <div class="tab-pane fade" id="save-points-panel" role="tabpanel">
@@ -619,12 +597,12 @@
         <div id="save-points-params" class="d-flex align-items-center gap-2">
           <div class="d-flex flex-wrap align-items-center gap-2 flex-grow-1">
             <span><?= $l['departure'] ?></span>
-            <input type="text" id="save-start-datetime" class="form-control form-control-sm startdate-input" placeholder="dd.mm.yyyy hh:mm:ss" title="<?= $l['datetime-format-hint'] ?>">
+            <input type="text" id="save-start-datetime" class="form-control form-control-sm startdate-input" placeholder="dd.mm.yyyy hh:mm:ss" title="<?= $l['datetime-format-hint'] ?>" aria-label="<?= $l['departure'] ?>">
             <button id="set-save-departure-now" type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="tooltip" title="<?= $l['departure-now-hint'] ?>"><?= $l['departure-now'] ?></button>
             <span id="save-return-label"><?= $l['return'] ?></span>
-            <input type="text" id="save-return-datetime" class="form-control form-control-sm startdate-input" placeholder="dd.mm.yyyy hh:mm:ss" title="<?= $l['datetime-format-hint'] ?>">
+            <input type="text" id="save-return-datetime" class="form-control form-control-sm startdate-input" placeholder="dd.mm.yyyy hh:mm:ss" title="<?= $l['datetime-format-hint'] ?>" aria-label="<?= $l['return'] ?>">
             <span><?= $l['save-tolerance'] ?></span>
-            <input type="text" id="save-tolerance-time" class="form-control form-control-sm tolerance-time-input" placeholder="hh:mm" title="<?= $l['tolerance-time-format-hint'] ?>">
+            <input type="text" id="save-tolerance-time" class="form-control form-control-sm tolerance-time-input" placeholder="hh:mm" title="<?= $l['tolerance-time-format-hint'] ?>" aria-label="<?= $l['save-tolerance'] ?>">
             <i class="bi bi-question-circle" data-bs-toggle="tooltip" title="<?= $l['savepoints-hint'] ?>"></i>
             <div>
               <input id="save-one-way" type="checkbox" name="save-one-way" class="form-check-input mt-0"> <label for="save-one-way"><?= $l['save-one-way'] ?></label>
@@ -669,13 +647,9 @@
   <div id="warning">
     <div id="warning-message"></div>
   </div>
-  <div id="hint">
-    <table>
-      <tr>
-        <td class="align-top"><i class="bi bi-info-circle"></i></td>
-        <td><span id="hint-message"><?= $l['flightmodes-note'] ?></span></td>
-      </tr>
-    </table>
+  <div id="hint" class="d-flex align-items-start gap-2">
+    <i class="bi bi-info-circle"></i>
+    <span id="hint-message"><?= $l['flightmodes-note'] ?></span>
   </div>
 </div>
 
@@ -689,7 +663,7 @@
       </div>
       <div class="modal-body">
         <div class="mb-2"><?= $l['lf-bonuses-reader-info'] ?></div>
-        <textarea id="lf-bonuses-txtarea" class="form-control" rows="8"></textarea>
+        <textarea id="lf-bonuses-txtarea" class="form-control" rows="8" aria-label="<?= $l['lf-bonuses-reader-hdr'] ?>"></textarea>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><?= $l['cancel'] ?></button>
@@ -744,7 +718,7 @@
             </div>
           </div>
         </fieldset>
-        <input id="own-api-input" type="text" class="form-control" autocomplete="off" spellcheck="false">
+        <input id="own-api-input" type="text" class="form-control" autocomplete="off" spellcheck="false" aria-label="<?= $l['own-api-reader-hdr'] ?>">
         <div class="mt-2 small text-muted"><?= $l['own-api-reader-note'] ?></div>
       </div>
       <div class="modal-footer">
@@ -759,7 +733,7 @@
   </div> <!-- End row -->
 </div> <!-- End container-fluid -->
 <?php
-  require_once('../../analitics.tpl');
+  require_once '../../analitics.tpl';
 ?>
 
 <script>

@@ -71,21 +71,24 @@
   white-space: nowrap;
 }
 
-/* --- Fleet / parameter tables: tighten the default table cell padding.
-       The .lined result tables are excluded: they set their own roomier
-       padding below and the #flight id would otherwise win over it. --- */
-#flight table:not(.lined) td,
-#flight table:not(.lined) th {
-  padding: 2px 4px;
-  vertical-align: middle;
+/* Ship count grid: was a <table>, three ships per row. Grid keeps the same
+   3-per-row layout without a data table (SonarQube Web:S5256/S5257). */
+.ships-grid {
+  grid-template-columns: repeat(3, 1fr);
+  justify-items: center;
+  row-gap: 4px;
 }
 
-/* The two-column layout table holding the flight times and the arrival
-   calculator beside them. It is not a parameter table, so the centring above
-   must not apply: the general class shows twice as many speed rows, and the
-   arrival panel would then drift down along with the taller left column. */
-#flight table.flight-layout > tbody > tr > td {
-  vertical-align: top;
+/* The two-column layout holding the flight times and the arrival calculator
+   beside them (formerly a <table>; a `<div class="flight-layout d-flex">`
+   now, SonarQube Web:S5256/S5257 — the `<table>` carried no `<th>` and was
+   never tabular data, just a layout split). */
+.flight-layout {
+  align-items: flex-start;
+}
+.flight-layout > .flight-layout-main {
+  flex: 1 1 auto;
+  min-width: 0;
 }
 
 /* ==========================================================================
@@ -203,9 +206,10 @@
    spare width collected to the left of the centred heading, since the matching
    track on the right is the one holding the button. max-content keeps the
    headings off two lines, and squeezing the cell hands the slack back to the
-   results table. */
-.flight-layout > tbody > tr > td.arrival-cell {
-  width: 1px;
+   results table. flex: 0 0 auto is the flex equivalent of the old table
+   cell's `width: 1px` shrink-to-fit trick. */
+.flight-layout > .arrival-cell {
+  flex: 0 0 auto;
 }
 
 .arrival-panel {
