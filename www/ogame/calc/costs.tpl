@@ -739,8 +739,8 @@ document.addEventListener('DOMContentLoaded', function() {
         </div>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-primary" id="irn-done-btn"><?= $l['done'] ?></button>
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><?= $l['cancel'] ?></button>
+        <button type="button" class="btn btn-primary" id="irn-done-btn"><?= $l['done'] ?></button>
       </div>
     </div>
   </div>
@@ -781,8 +781,8 @@ document.addEventListener('DOMContentLoaded', function() {
         </table>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-primary" id="lf-research-table-ok"><?= $l['done'] ?></button>
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><?= $l['cancel'] ?></button>
+        <button type="button" class="btn btn-primary" id="lf-research-table-ok"><?= $l['done'] ?></button>
       </div>
     </div>
   </div>
@@ -801,8 +801,8 @@ document.addEventListener('DOMContentLoaded', function() {
         <textarea id="lf-research-paste-txtarea" class="form-control" rows="8"></textarea>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-primary" id="lf-research-paste-import"><?= $l['import'] ?></button>
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><?= $l['cancel'] ?></button>
+        <button type="button" class="btn btn-primary" id="lf-research-paste-import"><?= $l['import'] ?></button>
       </div>
     </div>
   </div>

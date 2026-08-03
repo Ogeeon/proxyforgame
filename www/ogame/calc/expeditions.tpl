@@ -394,8 +394,8 @@
         <input id="own-api-input" type="text" class="form-control" autocomplete="off" spellcheck="false">
       </div>
       <div class="modal-footer">
-        <button id="lf-bonuses-read-btn" type="button" class="btn btn-primary"><?= $l['read'] ?></button>
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><?= $l['cancel'] ?></button>
+        <button id="lf-bonuses-read-btn" type="button" class="btn btn-primary"><?= $l['read'] ?></button>
       </div>
     </div>
   </div>

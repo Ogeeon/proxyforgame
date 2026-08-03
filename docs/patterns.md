@@ -551,6 +551,12 @@ the dialog's committing action. Everywhere else, including a calculator's main a
 house style: `btn-outline-secondary` by default, `btn-outline-danger` for destructive.
 `btn-outline-primary` is no longer used anywhere.
 
+**Button order in a modal footer is Cancel first, committing action second** — Cancel on the
+left, `btn-primary` on the right, matching `buildDialogModal()` (`showAlertModal`/
+`showConfirmModal`, `dom-utils.js`) and the sidebar's report/email modals. The two buttons are
+plain flow children of `.modal-footer`, so this is markup order, not a `flex-order` override:
+swap the `<button>` tags themselves, not their styling.
+
 Unlike section (e), this pattern **does** cover `trade`: its rate presets were carrying
 `btn btn-sm bg-primary-subtle` and were switched to `btn-outline-secondary` so they inherit
 the shared surface. Nothing in `trade.css` competes — its rules there are geometry only.

@@ -692,8 +692,8 @@
         <textarea id="lf-bonuses-txtarea" class="form-control" rows="8"></textarea>
       </div>
       <div class="modal-footer">
-        <button id="lf-bonuses-read-btn" type="button" class="btn btn-primary"><?= $l['read'] ?></button>
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><?= $l['cancel'] ?></button>
+        <button id="lf-bonuses-read-btn" type="button" class="btn btn-primary"><?= $l['read'] ?></button>
       </div>
     </div>
   </div>
@@ -748,8 +748,8 @@
         <div class="mt-2 small text-muted"><?= $l['own-api-reader-note'] ?></div>
       </div>
       <div class="modal-footer">
-        <button id="own-api-read-btn" type="button" class="btn btn-primary"><?= $l['own-api-import-title'] ?></button>
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><?= $l['cancel'] ?></button>
+        <button id="own-api-read-btn" type="button" class="btn btn-primary"><?= $l['own-api-import-title'] ?></button>
       </div>
     </div>
   </div>
