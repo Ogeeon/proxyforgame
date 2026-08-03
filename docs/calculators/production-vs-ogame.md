@@ -341,6 +341,29 @@ balance and crawlers). Nothing else is amplified: the research and building
 percentages stay exactly as entered, so section 1 still holds. A saved cookie without
 `lfExpLevel` reads back as level 0, which leaves the old behaviour untouched.
 
+## 7. Crawler energy consumption was not reduced by the lf-crawler-bonus research — FIXED
+
+The percentage entered in the "Crawlers boost" field (`lf-crawler-bonus`) comes from the Human
+life form research **Ion Crystal Modules**, which — per its OGame description and forum
+discussion of the technology (players reporting the production side capped at the 50 % crawler
+ceiling while the energy side kept scaling) — gives the *same* percentage on two effects at once:
+extra crawler production **and** reduced crawler energy consumption. The calculator only applied
+the percentage to production (`applyLfTechProductionBonus`); `computeCrawlersEnergyConsumption`
+ignored it entirely.
+
+**Fix:** `computeCrawlersEnergyConsumption` (`production-core.js`) now scales the raw crawler
+energy draw by `1 - lfCrawlerBonus / 100` (capped at 100 %, same pattern as `enR` in section 6)
+before it is added to `totalEnergyUsed` — so, like in OGame, a lower crawler energy draw also
+raises the planet-wide production coefficient, not just the crawler row. It stacks with the
+Disruption Chamber's `enR` reduction (applied afterwards in `applyLfEnergyReduction`), which is
+an independent, building-side source.
+
+Unlike every other section in this file, this one is **not** confirmed against a live-account
+reconciliation: every reference case above (A, B, C, D, E) was captured with a 0 % crawler bonus,
+so the energy side of this mechanic was never exercised in the numbers matched here. Re-verify
+against a live account with a non-zero crawler bonus and non-zero crawlers if one becomes
+available.
+
 ## Note on OGame's own totals
 
 OGame floors every displayed row but sums the *unrounded* values, so its total can

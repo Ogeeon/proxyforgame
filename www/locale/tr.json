@@ -599,6 +599,7 @@
     "param-tab-general": "Genel",
     "lf-prod-increase": "Üretim artışı",
     "lf-crawlers-boost": "Paletli bonusu",
+    "lf-crawlers-boost-hint": "'Ion Crystal Modules' yaşam formu araştırmasından gelen aynı yüzde, hem paletli üretimini artırır hem de paletli enerji tüketimini aynı oranda azaltır.",
     "lf-plasma-cost-reduction": "Plazma teknolojisi maliyet azaltma",
     "lf-collector-class": "Koleksiyoncu sınıfı",
     "lf-experience-level": "Yaşam formu seviyesi",

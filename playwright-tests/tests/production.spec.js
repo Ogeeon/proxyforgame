@@ -521,6 +521,32 @@ test.describe('Collector character class bonus', () => {
         await expect(crawlerCell(page, 5)).toHaveText('4');
     });
 
+    test('lf-crawler-bonus reduces crawler energy consumption by the same percentage', async ({ page }) => {
+        // Oversized solar plant keeps the planet at 100% throughout, so the crawler
+        // row's own energy column isolates the effect of the bonus.
+        const levels = page.locator('#one-planet-prod input.input-in-table');
+        await levels.nth(3).fill('25');  // solar plant
+        await levels.nth(6).fill('50');  // crawlers
+        await levels.nth(6).press('Tab');
+        await expect(page.locator('#prod-coeff')).toHaveText('100%');
+
+        // 50 crawlers at 100% power draw 50 * 50 = 2500 energy with no bonus.
+        await expect(crawlerCell(page, 6)).toHaveText('2.500');
+
+        // A 50% crawler bonus (from Ion Crystal Modules) halves the energy draw
+        // shown in the same row that got the production boost.
+        await page.locator('#param-lifeforms-tab').click();
+        await page.locator('#lf-crawler-bonus').fill('50');
+        await page.locator('#lf-crawler-bonus').press('Tab');
+        await expect(crawlerCell(page, 6)).toHaveText('1.250'); // round(2500 * 0.5)
+
+        // A 100% bonus removes the crawler energy draw entirely - a zero value
+        // renders as an empty cell, like every other zero bonus row.
+        await page.locator('#lf-crawler-bonus').fill('100');
+        await page.locator('#lf-crawler-bonus').press('Tab');
+        await expect(crawlerCell(page, 6)).toHaveText('');
+    });
+
     test('leaves General and Discoverer classes untouched', async ({ page }) => {
         // General: no class bonus row, and the enhancement must not create one.
         await page.locator('#class-1').click();

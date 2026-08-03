@@ -22,6 +22,7 @@ release section; it is the source of truth for the other eleven translations.
 
 ### Fixed
 
+- Production: the "Crawlers boost" field only increased crawler production; in the game the same percentage (from the Ion Crystal Modules lifeform research) also reduces crawler energy consumption, which the calculator now applies as well. <!-- site -->
 - Build: the database schema validator looked for `schema.sql` under `www/` and matched `SqlQuery` where the helper is `sqlQuery`, so it found neither the schema nor a single query and never validated anything.
 
 - Sidebar: the changelog now loads for Bosnian, which the language whitelist rejected outright.

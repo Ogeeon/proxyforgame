@@ -599,6 +599,7 @@
     "param-tab-general": "General",
     "lf-prod-increase": "Production increase",
     "lf-crawlers-boost": "Crawlers boost",
+    "lf-crawlers-boost-hint": "The same percentage, from the 'Ion Crystal Modules' lifeform research, both increases crawler production and reduces crawler energy consumption by the same amount.",
     "lf-plasma-cost-reduction": "Plasma technology cost reduction",
     "lf-collector-class": "Collector class",
     "lf-experience-level": "Lifeform level",

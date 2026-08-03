@@ -599,6 +599,7 @@
     "param-tab-general": "Général",
     "lf-prod-increase": "Augmentation de la production",
     "lf-crawlers-boost": "Bonus des foreuses",
+    "lf-crawlers-boost-hint": "Le même pourcentage, issu de la recherche de forme de vie 'Ion Crystal Modules', augmente la production des foreuses et réduit d'autant leur consommation d'énergie.",
     "lf-plasma-cost-reduction": "Réduction du coût de la technologie plasma",
     "lf-collector-class": "Classe Collecteur",
     "lf-experience-level": "Niveau de forme de vie",

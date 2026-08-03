@@ -327,7 +327,11 @@ function computeCrawlersEnergyConsumption(prodParams, results) {
 		crawlersOlPcnt = cralwersPwrPcnt - 1;
 		cralwersPwrPcnt = 1;
 	}
-	let crawlersEenergyCons = Math.round((prodParams[6][0] * (cralwersPwrPcnt + crawlersOlPcnt * 2)) * 50);
+	// Ion Crystal Modules (lf-crawler-bonus): the same percentage that boosts
+	// crawler production also cuts their energy draw - see
+	// docs/calculators/production-vs-ogame.md.
+	let lfCrawlerFactor = Math.min(options.prm.lfCrawlerBonus || 0, 100) / 100;
+	let crawlersEenergyCons = Math.round((prodParams[6][0] * (cralwersPwrPcnt + crawlersOlPcnt * 2)) * 50 * (1 - lfCrawlerFactor));
 	results[7][3] = -crawlersEenergyCons;
 	return crawlersEenergyCons;
 }
@@ -392,6 +396,8 @@ function applyCrawlerProductionBonus(prodParams, results, production) {
 // from the parameters panel - they already include the tech bonus, see above).
 // The increase for each resource is applied to the mine's base output, and the
 // crawler boost - to their production. With zero bonuses the row contributes nothing.
+// The crawler bonus percentage also reduces crawler energy consumption - that
+// side of it is applied earlier, in computeCrawlersEnergyConsumption().
 function applyLfTechProductionBonus(results, production) {
 	let lfMetFactor = (options.prm.lfMetProdBonus || 0) / 100;
 	let lfCrysFactor = (options.prm.lfCrysProdBonus || 0) / 100;

@@ -483,6 +483,7 @@
                 <input id="lf-crawler-bonus" type="text" name="lf-crawler-bonus" class="form-control level-input m-0" value="0">
                 <span class="input-group-text">%</span>
               </div>
+              <i class="bi bi-question-circle" data-bs-toggle="tooltip" title="<?= htmlspecialchars($l['lf-crawlers-boost-hint'], ENT_QUOTES) ?>"></i>
             </div>
             <div class="d-flex align-items-center gap-1">
               <label for="lf-plasma-cost-reduction"><?= $l['lf-plasma-cost-reduction'] ?></label>
