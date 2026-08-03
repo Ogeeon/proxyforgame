@@ -209,7 +209,7 @@
         </div><!-- /param-lifeforms -->
       </div><!-- /paramTabContent -->
 
-      <hr>
+      <hr class="my-2">
 
       <div id="plants-settings">
         <table class="mx-auto">
@@ -285,7 +285,7 @@
         </table>
       </div>
 
-      <hr>
+      <hr class="my-2">
 
       <div id="tech-settings">
         <table class="mx-auto">
@@ -381,13 +381,18 @@
           <td><div id="cargoes-for-df" class="form-control form-control-sm d-inline-block transport-show ui-input-margin ui-state-disabled">0</div></td>
         </tr>
         <tr>
-          <td>
-            <label><?= $l['net-cost'] ?></label>
-            <i class="bi bi-question-circle" data-bs-toggle="tooltip" title="<?= $l['net-cost-hint'] ?>"></i>
+          <td colspan="4" class="pb-0">
+            <div class="border-top mt-2 pt-2">
+              <span class="fw-semibold"><?= $l['net-cost'] ?></span>
+              <i class="bi bi-question-circle" data-bs-toggle="tooltip" title="<?= $l['net-cost-hint'] ?>"></i>
+            </div>
           </td>
-          <td><div id="net-crystal-required" class="form-control form-control-sm d-inline-block resource-show ui-input-margin ui-state-disabled">0</div></td>
-          <td>&nbsp;</td>
-          <td><div id="net-deuterium-required" class="form-control form-control-sm d-inline-block resource-show ui-input-margin ui-state-disabled">0</div></td>
+        </tr>
+        <tr>
+          <td class="pt-0"><label><?= $l['crystal'] ?></label></td>
+          <td class="pt-0"><div id="net-crystal-required" class="form-control form-control-sm d-inline-block resource-show ui-input-margin ui-state-disabled">0</div></td>
+          <td class="pt-0"><label><?= $l['deuterium'] ?></label></td>
+          <td class="pt-0"><div id="net-deuterium-required" class="form-control form-control-sm d-inline-block resource-show ui-input-margin ui-state-disabled">0</div></td>
         </tr>
       </table>
     </div>
