@@ -160,6 +160,13 @@ calculator takes from them — is documented in `docs/ogame-api-import.md`. Note
 
 ## Project Conventions
 
+### Bug Fixes & Refactoring
+- **Fix the root cause, not the symptom.** When a bug surfaces, trace it back to where the
+  actual defect lives rather than patching the point where it happens to show up.
+- **Suggest best practices, even if they might require refactoring.** Don't withhold a
+  correct-approach suggestion just because it touches more code than a minimal patch would —
+  raise it and let the user decide whether to take the larger change.
+
 ### Code Comments
 Write all comments in code files in English only.
 
