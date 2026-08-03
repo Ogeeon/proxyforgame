@@ -12,7 +12,7 @@
     $pfgPath = $_SERVER['DOCUMENT_ROOT'];
   } else {
     $pfgPath = "D:\Programming\JS\pfg.wmp\www";
-  };
+  }
 
   // Ships that can be sent on an expedition. The order must stay in sync with
   // EXPEDITION_SHIPS in expeditions-core.js, which indexes the life-form cargo
@@ -75,8 +75,8 @@
   }
 ?>
   <!-- Bootstrap 5 CSS -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet" integrity="sha384-QuGBSgV5Im3DzL2z+8Ko9/hqNy/N0O7zwvXAtfd1MvPKWa/UbeLV65cfm4BV5Wgq" crossorigin="anonymous">
 
   <!-- Custom styles -->
   <link type="text/css" href="/css/langs_bs.css?v=<?php echo filemtime($pfgPath.'/css/langs_bs.css'); ?>" rel="stylesheet">
@@ -84,7 +84,7 @@
   <link type="text/css" href="/ogame/calc/css/expeditions_bs.css?v=<?php echo filemtime($pfgPath.'/ogame/calc/css/expeditions_bs.css'); ?>" rel="stylesheet">
 
   <!-- Bootstrap 5 JS Bundle -->
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
 
   <!-- Utility libraries and calculator modules -->
   <script src="/js/utils.js?v=<?php echo filemtime($pfgPath.'/js/utils.js'); ?>"></script>
@@ -130,7 +130,7 @@
     options.msgMinConstraintViolated = <?= json_encode($l['msg-min-constraint-violated'], JSON_UNESCAPED_UNICODE) ?>;
     options.msgMaxConstraintViolated = <?= json_encode($l['msg-max-constraint-violated'], JSON_UNESCAPED_UNICODE) ?>;
   </script>
-<?php require_once('../../cookies.tpl'); ?>
+<?php require_once '../../cookies.tpl'; ?>
 </head>
 
 <body>
@@ -139,9 +139,9 @@
 
 <div class="container-fluid">
   <div class="row">
-    <div class="col-md-2"><?php require_once('../../sidebar_bs.tpl'); ?></div>
+    <div class="col-md-2"><?php require_once '../../sidebar_bs.tpl'; ?></div>
     <div class="col-md-10">
-    <?php require_once('../../topbar_bs.tpl'); ?>
+    <?php require_once '../../topbar_bs.tpl'; ?>
 
 <div id="expeditions">
   <div class="border rounded">
@@ -388,10 +388,10 @@
       </div>
       <div class="modal-body">
         <div class="mb-2"><?= $l['lf-bonuses-reader-info'] ?></div>
-        <textarea id="lf-bonuses-txtarea" class="form-control" rows="3"></textarea>
+        <textarea id="lf-bonuses-txtarea" class="form-control" rows="3" aria-label="<?= $l['lf-bonuses-reader-hdr'] ?>"></textarea>
         <div class="text-center fw-semibold my-2"><?= $l['or'] ?></div>
         <div class="mb-2"><?= $l['own-api-cargo-info'] ?></div>
-        <input id="own-api-input" type="text" class="form-control" autocomplete="off" spellcheck="false">
+        <input id="own-api-input" type="text" class="form-control" autocomplete="off" spellcheck="false" aria-label="<?= $l['lf-bonuses-reader-hdr'] ?>">
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><?= $l['cancel'] ?></button>
@@ -405,7 +405,7 @@
   </div> <!-- End row -->
 </div> <!-- End container-fluid -->
 <?php
-  require_once('../../analitics.tpl');
+  require_once '../../analitics.tpl';
 ?>
 
 <script>
