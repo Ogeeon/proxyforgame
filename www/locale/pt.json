@@ -599,7 +599,7 @@
     "param-tab-general": "Geral",
     "lf-prod-increase": "Aumento da produção",
     "lf-crawlers-boost": "Bônus de crawlers",
-    "lf-crawlers-boost-hint": "A mesma porcentagem da pesquisa de formas de vida 'Ion Crystal Modules' aumenta a produção de crawlers e reduz na mesma medida o consumo de energia deles.",
+    "lf-crawlers-boost-hint": "A mesma porcentagem da pesquisa de formas de vida '{0}' aumenta a produção de crawlers e reduz na mesma medida o consumo de energia deles.",
     "lf-plasma-cost-reduction": "Redução de custo da tecnologia de plasma",
     "lf-collector-class": "Classe Coletor",
     "lf-experience-level": "Nível da forma de vida",

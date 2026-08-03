@@ -599,7 +599,7 @@
     "param-tab-general": "General",
     "lf-prod-increase": "Aumento de producción",
     "lf-crawlers-boost": "Bono de taladradores",
-    "lf-crawlers-boost-hint": "El mismo porcentaje de la investigación de formas de vida 'Ion Crystal Modules' aumenta la producción de taladradores y reduce en la misma medida su consumo de energía.",
+    "lf-crawlers-boost-hint": "El mismo porcentaje de la investigación de formas de vida '{0}' aumenta la producción de taladradores y reduce en la misma medida su consumo de energía.",
     "lf-plasma-cost-reduction": "Reducción de coste de tecnología de plasma",
     "lf-collector-class": "Clase Recolector",
     "lf-experience-level": "Nivel de forma de vida",

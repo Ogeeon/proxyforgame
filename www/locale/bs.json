@@ -599,7 +599,7 @@
     "param-tab-general": "Opšte",
     "lf-prod-increase": "Povećanje proizvodnje",
     "lf-crawlers-boost": "Bonus puzavaca",
-    "lf-crawlers-boost-hint": "Isti procenat iz istraživanja oblika života 'Ion Crystal Modules' povećava proizvodnju puzavaca i za isto toliko smanjuje njihovu potrošnju energije.",
+    "lf-crawlers-boost-hint": "Isti procenat iz istraživanja oblika života '{0}' povećava proizvodnju puzavaca i za isto toliko smanjuje njihovu potrošnju energije.",
     "lf-plasma-cost-reduction": "Smanjenje troška plazma tehnologije",
     "lf-collector-class": "Klasa Kolektor",
     "lf-experience-level": "Nivo oblika života",

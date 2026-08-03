@@ -599,7 +599,7 @@
     "param-tab-general": "Všeobecné",
     "lf-prod-increase": "Zvýšenie produkcie",
     "lf-crawlers-boost": "Bonus crawlerov",
-    "lf-crawlers-boost-hint": "Rovnaké percento z výskumu foriem života 'Ion Crystal Modules' zvyšuje produkciu crawlerov a zároveň o rovnakú hodnotu znižuje ich spotrebu energie.",
+    "lf-crawlers-boost-hint": "Rovnaké percento z výskumu foriem života '{0}' zvyšuje produkciu crawlerov a zároveň o rovnakú hodnotu znižuje ich spotrebu energie.",
     "lf-plasma-cost-reduction": "Zníženie nákladov plazmovej technológie",
     "lf-collector-class": "Trieda Zberač",
     "lf-experience-level": "Úroveň formy života",

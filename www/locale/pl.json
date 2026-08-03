@@ -599,7 +599,7 @@
     "param-tab-general": "Ogólne",
     "lf-prod-increase": "Wzrost produkcji",
     "lf-crawlers-boost": "Premia pełzaczy",
-    "lf-crawlers-boost-hint": "Ten sam procent z badania form życia 'Ion Crystal Modules' zwiększa produkcję pełzaczy i jednocześnie o tyle samo zmniejsza ich zużycie energii.",
+    "lf-crawlers-boost-hint": "Ten sam procent z badania form życia '{0}' zwiększa produkcję pełzaczy i jednocześnie o tyle samo zmniejsza ich zużycie energii.",
     "lf-plasma-cost-reduction": "Redukcja kosztu technologii plazmowej",
     "lf-collector-class": "Klasa Kolekcjoner",
     "lf-experience-level": "Poziom formy życia",
