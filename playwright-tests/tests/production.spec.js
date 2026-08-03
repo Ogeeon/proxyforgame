@@ -513,6 +513,16 @@ test.describe('Collector character class bonus', () => {
         await expect(crawlerCell(page, 5)).toHaveText('4');
     });
 
+    test('the crawler bonus hint names the research it comes from', async ({ page }) => {
+        // The tech name comes from the 'lfcosts' locale section, which the page
+        // pulls in separately; reading it from the page's own section silently
+        // interpolates an empty string and leaves the hint naming nothing.
+        await page.locator('#param-lifeforms-tab').click();
+        const hint = page.locator('#lf-crawler-bonus').locator('xpath=../following-sibling::i[1]');
+        // Bootstrap adopts the icon on load and moves `title´ to data-bs-original-title.
+        await expect(hint).toHaveAttribute('data-bs-original-title', /Ion Crystal Modules/);
+    });
+
     test('lf-crawler-bonus reduces crawler energy consumption by the same percentage', async ({ page }) => {
         // Oversized solar plant keeps the planet at 100% throughout, so the crawler
         // row's own energy column isolates the effect of the bonus.
