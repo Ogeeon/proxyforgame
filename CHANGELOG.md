@@ -15,6 +15,8 @@ release section; it is the source of truth for the other eleven translations.
 
 ## [Unreleased]
 
+## [2026-08-07] - site entry 59
+
 ### Added
 
 - Costs: the Life Forms tab now has a field for the Rock'tal Collector Enhancement and a life form level beside it, so the Collector class bonus is no longer stuck at its base 25%. It feeds both the Small and Large Cargo capacity behind the "Transports needed" row and the hourly production on the "One item, multiple levels" tab. The Discoverer class bonus got its own Kaelesh life form level in the same way. <!-- site -->
@@ -39,6 +41,8 @@ release section; it is the source of truth for the other eleven translations.
 - Costs, Flight, Expeditions: modal dialogs (Life Form research bonuses, own API import) now consistently place the Cancel button on the left, matching every other dialog on the site.
 - Flight, Costs: the captions of the Class, Circular universe and Mission speed groups dropped onto a line of their own instead of staying beside the controls they label.
 - Flight: in the Ships panel the names, speeds and count fields of the fifteen ships no longer lined up in columns, and in the parameters panel the SR_KEY field stretched across the whole panel instead of ending where the universe row above it does.
+
+> **RU:** В калькуляторе стоимости на вкладке «Формы жизни» добавлены поля для исследований, усиливающих классы игрока: «Улучшение Рок’тал для Коллекционера» и «Улучшение Кэлиш для Исследователя», у каждого свой уровень формы жизни. Бонус класса Коллекционер теперь учитывается во вместимости МТ и БТ в строке «Для доставки требуется» и в почасовой добыче на вкладке «Один элемент - неск. уровней».<br>Там же: если для выбранного исследования не хватает указанного уровня Лаборатории, калькулятор теперь сам поднимает её до нужного уровня и сообщает об этом, вместо того чтобы просто отказать в расчёте. Уровень, рассчитанный через Межгалактическую исследовательскую сеть, при этом не меняется.
 
 ## [2026-08-03] - site entry 58
 
