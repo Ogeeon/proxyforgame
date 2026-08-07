@@ -15,6 +15,10 @@ release section; it is the source of truth for the other eleven translations.
 
 ## [Unreleased]
 
+### Added
+
+- Costs: the Life Forms tab now has a field for the Rock'tal Collector Enhancement and a life form level beside it, so the Collector class bonus is no longer stuck at its base 25%. It feeds both the Small and Large Cargo capacity behind the "Transports needed" row and the hourly production on the "One item, multiple levels" tab. The Discoverer class bonus got its own Kaelesh life form level in the same way. <!-- site -->
+
 ### Changed
 
 - Flight: alerts and confirmations (spy report import, own API import, universe and fleet save/load/delete) now show as an in-page dialog instead of the browser's native alert/confirm popup.
@@ -24,6 +28,7 @@ release section; it is the source of truth for the other eleven translations.
 - LF costs: a corrupted settings cookie now reports the error as an in-page dialog instead of the browser's native alert popup.
 - Trade: startup and settings-load exceptions now report as an in-page dialog instead of the browser's native alert popup.
 - Costs: asking for a research the entered Research Lab level is too low for now raises that level to what the research requires and says so in a notification, instead of only reporting that the research is impossible. A lab level computed from the Intergalactic Research Network is left untouched and still reports the requirement. <!-- site -->
+- Costs: the Discoverer class bonus is no longer capped at 100%, matching the production calculator, and its tooltip now names the research it comes from.
 
 
 

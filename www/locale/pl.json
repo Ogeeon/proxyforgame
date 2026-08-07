@@ -207,7 +207,11 @@
     "systems": "System",
     "distance": "Odległość",
     "character-bonus-hint": "Aby uzyskać te premie, przejdź do Ustawień zasobów - Premie gracza Form Życia,\na następnie przewiń w dół do 'Premie klasy postaci'.",
-    "collectors-character-bonus": "Premia klasy postaci Kolekcjonera"
+    "collectors-character-bonus": "Premia klasy postaci Kolekcjonera",
+    "lf-experience-level": "Poziom formy życia",
+    "lf-class-bonus": "Premia klasy",
+    "lf-class-bonus-hint": "Wzrost wszystkich premii klasy Kolekcjoner z badania 'Kolektorowe Wzmocnienie Rock`talów': 0,2 % na poziom badania, bez premii technologicznej form życia — tę dodaje pole 'Poziom formy życia'.",
+    "lf-experience-level-hint": "Poziom doświadczenia formy życia zwiększa premię technologiczną form życia o 0,1 % na poziom, maksymalnie do poziomu 100 (+10 %).\nPremia ta wzmacnia efekty badań form życia, dlatego stosuje się ją do premii klasy."
   },
   "index": {
     "title": "Narzedzia do gier przegladarkowych OGame",
@@ -327,7 +331,7 @@
     "disclaimer-robot-nanite": "Przy odczytywaniu czasów budowy uwzględnij uwagę w pierwszym wierszu tabeli. Jeśli budujesz Fabrykę robotów lub Fabrykę nanitów, użyj <a href=\"{0}\">Kalkulatora kolejki budynków</a>, aby dokładnie obliczyć czas budowy.",
     "disclaimer-title": "Uwaga",
     "discoverer-class-bonus": "Bonus klasy Odkrywca",
-    "discoverer-class-bonus-hint": "Stosowany tylko wtedy, gdy na karcie 'Ogólne' wybrano klasę 'Odkrywca'"
+    "discoverer-class-bonus-hint": "Wzrost premii klasy Odkrywca z badania 'Wzmocnienie Odkrywcy Kaeleshów': 0,2 % na poziom badania, bez premii technologicznej form życia — tę dodaje pole 'Poziom formy życia'. Stosowany tylko wtedy, gdy na karcie 'Ogólne' wybrano klasę 'Odkrywca'."
   },
   "lfcosts": {
     "title": "OGame - Kalkulator kosztow dla form życia",
@@ -607,10 +611,7 @@
     "lf-crawlers-boost-hint": "Ten sam procent z badania form życia '{0}' zwiększa produkcję pełzaczy i jednocześnie o tyle samo zmniejsza ich zużycie energii.",
     "lf-plasma-cost-reduction": "Redukcja kosztu technologii plazmowej",
     "lf-collector-class": "Klasa Kolekcjoner",
-    "lf-experience-level": "Poziom formy życia",
     "lf-experience-level-hint": "Poziom doświadczenia formy życia zwiększa premię technologiczną form życia o 0,1 % na poziom, maksymalnie do poziomu 100 (+10 %).\nPremia ta wzmacnia efekty badań form życia, dlatego stosuje się ją do premii klasy. Wzrosty produkcji powyżej kopiuje się z gry już wzmocnione, więc poziom na nie nie wpływa.",
-    "lf-class-bonus": "Premia klasy",
-    "lf-class-bonus-hint": "Wzrost wszystkich premii klasy Kolekcjoner z badania 'Kolektorowe Wzmocnienie Rock`talów': 0,2 % na poziom badania, bez premii technologicznej form życia — tę dodaje pole 'Poziom formy życia'.",
     "title": "OGame - Kalkulator produkcji",
     "keywords": "proxyforgame,ogame,kalkulator produkcji,produkcja surowców,prędkość produkcji,bilans energii,produkcja energii,opłacalność kopalni,amortyzacja,pełzacze",
     "max-planet-temp": "Max. t°",

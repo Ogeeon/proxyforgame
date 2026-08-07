@@ -207,7 +207,11 @@
     "systems": "Sistemas",
     "distance": "Distancia",
     "character-bonus-hint": "Para obter esses bônus, vá para Configurações de recursos - Bônus de jogador de Formas de Vida,\nem seguida, role para baixo até 'Bônus de classe de personagem'.",
-    "collectors-character-bonus": "Bônus de classe de personagem do Coletor"
+    "collectors-character-bonus": "Bônus de classe de personagem do Coletor",
+    "lf-experience-level": "Nível da forma de vida",
+    "lf-class-bonus": "Bônus de classe",
+    "lf-class-bonus-hint": "Aumento de todos os bônus da classe Coletor pela pesquisa 'Melhoramento de Colecionador dos Rock’tal': 0,2 % por nível de pesquisa, sem o bônus de tecnologia das formas de vida — esse é adicionado pelo campo 'Nível da forma de vida'.",
+    "lf-experience-level-hint": "O nível de experiência da forma de vida aumenta o bônus de tecnologia das formas de vida em 0,1 % por nível, até o nível 100 (+10 %).\nEsse bônus amplifica os efeitos das pesquisas de formas de vida, por isso é aplicado ao bônus de classe."
   },
   "index": {
     "title": "ProxyForGame - Calculadoras para OGame",
@@ -327,7 +331,7 @@
     "disclaimer-robot-nanite": "Por favor, tenha em conta a nota na primeira linha da tabela ao ler os tempos de construção. Se estiver a construir uma Fábrica de Robôs ou uma Fábrica de Nanites, utilize a <a href=\"{0}\">Calculadora de fila de construção</a> para cálculos precisos do tempo de construção.",
     "disclaimer-title": "Atenção",
     "discoverer-class-bonus": "Bônus de classe Descobridor",
-    "discoverer-class-bonus-hint": "Aplica-se apenas se na aba 'Geral' estiver selecionada a classe 'Descobridor'"
+    "discoverer-class-bonus-hint": "Aumento do bônus da classe Descobridor pela pesquisa 'Melhoramento de Descobridor dos Kaelesh': 0,2 % por nível de pesquisa, sem o bônus de tecnologia das formas de vida — esse é adicionado pelo campo 'Nível da forma de vida'. Aplica-se apenas se na aba 'Geral' estiver selecionada a classe 'Descobridor'."
   },
   "lfcosts": {
     "title": "OGame - Calculadora de Custos para Formas de vida",
@@ -607,10 +611,7 @@
     "lf-crawlers-boost-hint": "A mesma porcentagem da pesquisa de formas de vida '{0}' aumenta a produção de crawlers e reduz na mesma medida o consumo de energia deles.",
     "lf-plasma-cost-reduction": "Redução de custo da tecnologia de plasma",
     "lf-collector-class": "Classe Coletor",
-    "lf-experience-level": "Nível da forma de vida",
     "lf-experience-level-hint": "O nível de experiência da forma de vida aumenta o bônus de tecnologia das formas de vida em 0,1 % por nível, até o nível 100 (+10 %).\nEsse bônus amplifica os efeitos das pesquisas de formas de vida, por isso é aplicado ao bônus de classe. Os aumentos de produção acima são copiados do jogo já amplificados, então o nível não os afeta.",
-    "lf-class-bonus": "Bônus de classe",
-    "lf-class-bonus-hint": "Aumento de todos os bônus da classe Coletor pela pesquisa 'Melhoramento de Colecionador dos Rock’tal': 0,2 % por nível de pesquisa, sem o bônus de tecnologia das formas de vida — esse é adicionado pelo campo 'Nível da forma de vida'.",
     "title": "OGame - Calculadora da velocidade de produção",
     "keywords": "proxyforgame,ogame,calculadora de produção,produção de recursos,velocidade de produção,balanço de energia,produção de energia,rentabilidade das minas,amortização,rastejantes",
     "max-planet-temp": "t° max",

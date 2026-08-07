@@ -207,7 +207,11 @@
     "systems": "Systémy",
     "distance": "Vzdialenosť",
     "character-bonus-hint": "Ak chcete získať tieto bonusy, prejdite do Nastavenia zdrojov - Bonusy hráča Foriem života,\npotom prejdite nadol k 'Bonusom triedy postavy'.",
-    "collectors-character-bonus": "Bonus triedy postavy Zberateľa"
+    "collectors-character-bonus": "Bonus triedy postavy Zberateľa",
+    "lf-experience-level": "Úroveň formy života",
+    "lf-class-bonus": "Bonus triedy",
+    "lf-class-bonus-hint": "Zvýšenie všetkých bonusov triedy Zberač z výskumu 'Kameňácke vylepšenie zberača': 0,2 % za úroveň výskumu, bez technologického bonusu foriem života — ten pridáva pole 'Úroveň formy života'.",
+    "lf-experience-level-hint": "Úroveň skúseností formy života zvyšuje technologický bonus foriem života o 0,1 % za úroveň, maximálne po úroveň 100 (+10 %).\nTento bonus zosilňuje účinky výskumov foriem života, preto sa uplatňuje na bonus triedy."
   },
   "index": {
     "title": "ProxyForGame - software pre online hry v prehliadači OGame",
@@ -326,7 +330,7 @@
     "disclaimer-robot-nanite": "Pri čítaní časov výstavby zohľadnite poznámku v prvom riadku tabuľky. Ak staviate Robotické továrne alebo Nanotechnologické továrne, použite <a href=\"{0}\">Kalkulačku frontu výstavby</a> pre presné výpočty času výstavby.",
     "disclaimer-title": "Upozornenie",
     "discoverer-class-bonus": "Bonus triedy Discoverer",
-    "discoverer-class-bonus-hint": "Použije sa iba vtedy, ak je na karte 'Všeobecné' vybraná trieda 'Discoverer'",
+    "discoverer-class-bonus-hint": "Zvýšenie bonusu triedy Objaviteľ z výskumu 'Objaviteľský rozlet kaelešov': 0,2 % za úroveň výskumu, bez technologického bonusu foriem života — ten pridáva pole 'Úroveň formy života'. Použije sa iba vtedy, ak je na karte 'Všeobecné' vybraná trieda 'Discoverer'.",
     "keywords": "proxyforgame,ogame,kalkulačka nákladov,náklady budov,náklady výskumu,náklady flotily,náklady obrany,výpočet nákladov,náklady na suroviny"
   },
   "lfcosts": {
@@ -607,10 +611,7 @@
     "lf-crawlers-boost-hint": "Rovnaké percento z výskumu foriem života '{0}' zvyšuje produkciu crawlerov a zároveň o rovnakú hodnotu znižuje ich spotrebu energie.",
     "lf-plasma-cost-reduction": "Zníženie nákladov plazmovej technológie",
     "lf-collector-class": "Trieda Zberač",
-    "lf-experience-level": "Úroveň formy života",
     "lf-experience-level-hint": "Úroveň skúseností formy života zvyšuje technologický bonus foriem života o 0,1 % za úroveň, maximálne po úroveň 100 (+10 %).\nTento bonus zosilňuje účinky výskumov foriem života, preto sa uplatňuje na bonus triedy. Zvýšenia produkcie vyššie sa kopírujú z hry už zosilnené, takže úroveň ich neovplyvňuje.",
-    "lf-class-bonus": "Bonus triedy",
-    "lf-class-bonus-hint": "Zvýšenie všetkých bonusov triedy Zberač z výskumu 'Kameňácke vylepšenie zberača': 0,2 % za úroveň výskumu, bez technologického bonusu foriem života — ten pridáva pole 'Úroveň formy života'.",
     "title": "OGame - Kalkulátor rýchlosti produkcie",
     "keywords": "proxyforgame,ogame,kalkulačka produkcie,produkcia surovín,rýchlosť produkcie,energetická bilancia,produkcia energie,návratnosť baní,amortizácia,pásovce",
     "max-planet-temp": "Max. t°",

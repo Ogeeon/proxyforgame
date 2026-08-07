@@ -207,7 +207,11 @@
     "systems": "Systems",
     "distance": "Distance",
     "character-bonus-hint": "To get these bonuses, go to Resource settings - Lifeform player bonuses,\nthen scroll down to 'Character class bonuses'.",
-    "collectors-character-bonus": "Collector's character class bonus"
+    "collectors-character-bonus": "Collector's character class bonus",
+    "lf-experience-level": "Lifeform level",
+    "lf-class-bonus": "Class bonus",
+    "lf-class-bonus-hint": "Increase of every Collector class bonus from the 'Rock’tal Collector Enhancement' research: 0.2% per research level, without the lifeform technology bonus — that one is added by the 'Lifeform level' field.",
+    "lf-experience-level-hint": "The lifeform experience level raises the lifeform technology bonus by 0.1% per level, up to level 100 (+10%).\nThat bonus amplifies the effects of lifeform researches, so it is applied to the class bonus."
   },
   "index": {
     "title": "ProxyForGame - tools for online browser game OGame",
@@ -327,7 +331,7 @@
     "disclaimer-robot-nanite": "Please take into account the note in the first row of the table when reading build times. If you are building a Robotics factory or a Nanite factory, use the <a href=\"{0}\">Construction queue calculator</a> for accurate build time calculations.",
     "disclaimer-title": "Please note",
     "discoverer-class-bonus": "Discoverer class bonus",
-    "discoverer-class-bonus-hint": "Applies only if the 'Discoverer' class is selected on the 'Common' tab"
+    "discoverer-class-bonus-hint": "Increase of the Discoverer class bonus from the 'Kaelesh Discoverer Enhancement' research: 0.2% per research level, without the lifeform technology bonus — that one is added by the 'Lifeform level' field. Applies only if the 'Discoverer' class is selected on the 'Common' tab."
   },
   "lfcosts": {
     "title": "OGame - Costs calculator for LifeForms",
@@ -607,10 +611,7 @@
     "lf-crawlers-boost-hint": "The same percentage, from the '{0}' lifeform research, both increases crawler production and reduces crawler energy consumption by the same amount.",
     "lf-plasma-cost-reduction": "Plasma technology cost reduction",
     "lf-collector-class": "Collector class",
-    "lf-experience-level": "Lifeform level",
     "lf-experience-level-hint": "The lifeform experience level raises the lifeform technology bonus by 0.1% per level, up to level 100 (+10%).\nThat bonus amplifies the effects of lifeform researches, so it is applied to the class bonus. The production increases above are copied from the game already amplified, so the level does not affect them.",
-    "lf-class-bonus": "Class bonus",
-    "lf-class-bonus-hint": "Increase of every Collector class bonus from the 'Rock’tal Collector Enhancement' research: 0.2% per research level, without the lifeform technology bonus — that one is added by the 'Lifeform level' field.",
     "title": "OGame - Production speed calculator",
     "keywords": "proxyforgame,ogame,production calculator,resource production,production speed,energy balance,energy production,mine profitability,amortization,payback,crawlers",
     "max-planet-temp": "Max t°",

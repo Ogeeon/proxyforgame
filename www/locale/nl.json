@@ -207,7 +207,11 @@
     "systems": "Systemen",
     "distance": "afstand",
     "character-bonus-hint": "Om deze bonussen te krijgen, ga naar Grondstofinstellingen - Life Forms spelerbonussen,\nscroll dan naar beneden naar 'Karakterklasse bonussen'.",
-    "collectors-character-bonus": "Karakterklasse bonus van de Verzamelaar"
+    "collectors-character-bonus": "Karakterklasse bonus van de Verzamelaar",
+    "lf-experience-level": "Life Form-niveau",
+    "lf-class-bonus": "Klassebonus",
+    "lf-class-bonus-hint": "Toename van alle bonussen van de klasse Verzamelaar door het onderzoek 'Rock’tal Verzamelaar Verbetering': 0,2 % per onderzoeksniveau, zonder de Life Form-technologiebonus — die wordt toegevoegd via het veld 'Life Form-niveau'.",
+    "lf-experience-level-hint": "Het ervaringsniveau van de Life Form verhoogt de Life Form-technologiebonus met 0,1 % per niveau, tot niveau 100 (+10 %).\nDie bonus versterkt de effecten van Life Form-onderzoeken en wordt daarom op de klassebonus toegepast."
   },
   "index": {
     "title": "ProxyForGame - instrumenten het browser spel OGame",
@@ -327,7 +331,7 @@
     "disclaimer-robot-nanite": "Houd bij het aflezen van de bouwtijden rekening met de opmerking in de eerste rij van de tabel. Als je een Robotfabriek of een Nanorobotfabriek bouwt, gebruik dan de <a href=\"{0}\">Bouwlijst-calculator</a> voor nauwkeurige berekeningen van de bouwtijd.",
     "disclaimer-title": "Let op",
     "discoverer-class-bonus": "Klassebonus Discoverer",
-    "discoverer-class-bonus-hint": "Wordt alleen toegepast als op het tabblad 'Algemeen' de klasse 'Discoverer' is geselecteerd"
+    "discoverer-class-bonus-hint": "Toename van de bonus van de klasse Ontdekker door het onderzoek 'Kaelesh Ontdekker Verbetering': 0,2 % per onderzoeksniveau, zonder de Life Form-technologiebonus — die wordt toegevoegd via het veld 'Life Form-niveau'. Wordt alleen toegepast als op het tabblad 'Algemeen' de klasse 'Discoverer' is geselecteerd."
   },
   "lfcosts": {
     "title": "OGame - Kosten berekening voor levensvormen",
@@ -607,10 +611,7 @@
     "lf-crawlers-boost-hint": "Hetzelfde percentage uit het Life Form-onderzoek '{0}' verhoogt de crawlerproductie en verlaagt tegelijk het energieverbruik van crawlers met evenveel.",
     "lf-plasma-cost-reduction": "Kostenreductie plasmatechnologie",
     "lf-collector-class": "Verzamelaar-klasse",
-    "lf-experience-level": "Life Form-niveau",
     "lf-experience-level-hint": "Het ervaringsniveau van de Life Form verhoogt de Life Form-technologiebonus met 0,1 % per niveau, tot niveau 100 (+10 %).\nDie bonus versterkt de effecten van Life Form-onderzoeken en wordt daarom op de klassebonus toegepast. De productietoenames hierboven worden al versterkt uit het spel overgenomen, het niveau heeft daar geen invloed op.",
-    "lf-class-bonus": "Klassebonus",
-    "lf-class-bonus-hint": "Toename van alle bonussen van de klasse Verzamelaar door het onderzoek 'Rock’tal Verzamelaar Verbetering': 0,2 % per onderzoeksniveau, zonder de Life Form-technologiebonus — die wordt toegevoegd via het veld 'Life Form-niveau'.",
     "title": "OGame - Productie snelheid berekening",
     "keywords": "proxyforgame,ogame,productiecalculator,grondstofproductie,productiesnelheid,energiebalans,energieproductie,rendabiliteit van mijnen,afschrijving,crawlers",
     "max-planet-temp": "Max t°",

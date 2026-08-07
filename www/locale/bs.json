@@ -207,7 +207,11 @@
     "systems": "Sistemi",
     "distance": "Razdaljina",
     "character-bonus-hint": "Da biste dobili ove bonuse, idite na Postavke resursa - Bonusi igrača Oblika života,\nzatim se spustite do 'Bonusi klase lika'.",
-    "collectors-character-bonus": "Bonus klase lika Kolektora"
+    "collectors-character-bonus": "Bonus klase lika Kolektora",
+    "lf-experience-level": "Nivo oblika života",
+    "lf-class-bonus": "Bonus klase",
+    "lf-class-bonus-hint": "Povećanje svih bonusa klase Kolektor iz istraživanja 'Rock’tal Collector Enhancement': 0,2 % po nivou istraživanja, bez tehnološkog bonusa oblika života — njega dodaje polje 'Nivo oblika života'.",
+    "lf-experience-level-hint": "Nivo iskustva oblika života povećava tehnološki bonus oblika života za 0,1 % po nivou, najviše do nivoa 100 (+10 %).\nTaj bonus pojačava efekte istraživanja oblika života, pa se primjenjuje na bonus klase."
   },
   "index": {
     "title": "ProxyForGame - alati za online igru Ogame",
@@ -327,7 +331,7 @@
     "disclaimer-robot-nanite": "Molimo uzmite u obzir napomenu u prvom redu tablice pri čitanju vremena gradnje. Ako gradite Tvornicu robota ili Tvornicu nanita, koristite <a href=\"{0}\">Kalkulator reda izgradnje</a> za točan izračun vremena gradnje.",
     "disclaimer-title": "Napomena",
     "discoverer-class-bonus": "Bonus klase Otkrivač",
-    "discoverer-class-bonus-hint": "Primjenjuje se samo ako je na kartici 'Opšte' odabrana klasa 'Otkrivač'"
+    "discoverer-class-bonus-hint": "Povećanje bonusa klase Otkrivač iz istraživanja 'Kaelesh Discoverer Enhancement': 0,2 % po nivou istraživanja, bez tehnološkog bonusa oblika života — njega dodaje polje 'Nivo oblika života'. Primjenjuje se samo ako je na kartici 'Opšte' odabrana klasa 'Otkrivač'."
   },
   "lfcosts": {
     "title": "Ogame - kalkulator troškova (Lifeforms)",
@@ -607,10 +611,7 @@
     "lf-crawlers-boost-hint": "Isti procenat iz istraživanja oblika života '{0}' povećava proizvodnju puzavaca i za isto toliko smanjuje njihovu potrošnju energije.",
     "lf-plasma-cost-reduction": "Smanjenje troška plazma tehnologije",
     "lf-collector-class": "Klasa Kolektor",
-    "lf-experience-level": "Nivo oblika života",
     "lf-experience-level-hint": "Nivo iskustva oblika života povećava tehnološki bonus oblika života za 0,1 % po nivou, najviše do nivoa 100 (+10 %).\nTaj bonus pojačava efekte istraživanja oblika života, pa se primjenjuje na bonus klase. Povećanja proizvodnje iznad kopiraju se iz igre već pojačana, tako da nivo na njih ne utiče.",
-    "lf-class-bonus": "Bonus klase",
-    "lf-class-bonus-hint": "Povećanje svih bonusa klase Kolektor iz istraživanja 'Rock’tal Collector Enhancement': 0,2 % po nivou istraživanja, bez tehnološkog bonusa oblika života — njega dodaje polje 'Nivo oblika života'.",
     "title": "Ogame - Kalkulator proizvodnje resursa",
     "keywords": "proxyforgame,ogame,kalkulator proizvodnje,proizvodnja resursa,brzina proizvodnje,energetski bilans,proizvodnja energije,isplativost rudnika,amortizacija,gusjeničari",
     "max-planet-temp": "Maks. t°",

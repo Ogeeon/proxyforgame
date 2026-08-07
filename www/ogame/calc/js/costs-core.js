@@ -59,8 +59,14 @@ class GlobalParams {
   mineralResCntrLvl = 0; // Mineral Research Centre level (Rock'tal)
   lfTerraformerRdc = 0;  // LF Terraformer reduction, %
 
-  // LF class bonus that boosts the 25% Discoverer research-speed bonus, %
+  // LF researches that boost a player class, in %: the Kaelesh one boosts the
+  // 25% Discoverer research-speed bonus, the Rock'tal one boosts every Collector
+  // bonus. Each is amplified by its own life form's technology bonus, which the
+  // life form level carries (+0.1% per level, stops growing at level 100).
   discovererClassBonus = 0;
+  collectorClassBonus = 0;
+  lfKaeleshLevel = 0;
+  lfRocktalLevel = 0;
 
   // Cargo capacity increase (e.g. from lifeform bonuses), %
   scCapacityIncrease = 0; // Small Cargo capacity increase, %
@@ -68,6 +74,22 @@ class GlobalParams {
 
   // Exchange rates (M:C:D weights, normalized to metal=1)
   rates = [1, 1.5, 3];
+
+  /**
+   * Discoverer class bonus in %, amplified by the Kaelesh life form level.
+   * @returns {number}
+   */
+  get discovererBonusPct() {
+    return this.discovererClassBonus * (1 + this.lfKaeleshLevel * 0.001);
+  }
+
+  /**
+   * Collector class bonus in %, amplified by the Rock'tal life form level.
+   * @returns {number}
+   */
+  get collectorBonusPct() {
+    return this.collectorClassBonus * (1 + this.lfRocktalLevel * 0.001);
+  }
 
   /**
    * Get technocrat time reduction factor
@@ -79,7 +101,7 @@ class GlobalParams {
     if (this.researchBonus) factor *= 0.75;
     if (this.playerClass === 2) {
       // Discoverer: 25% research-speed bonus, boosted by the LF class bonus
-      factor *= 1 - 0.25 * (1 + this.discovererClassBonus / 100);
+      factor *= 1 - 0.25 * (1 + this.discovererBonusPct / 100);
     }
     return factor;
   }
@@ -157,7 +179,10 @@ class GlobalParams {
   get smallCargoCapacity() {
     const baseCapacity = 5000;
     let cap = baseCapacity * (1 + 0.05 * this.hyperTechLevel);
-    if (this.playerClass === 0) cap += baseCapacity * 0.25; // Collector +25%
+    // Collector +25%, itself boosted by the Rock'tal Collector Enhancement
+    if (this.playerClass === 0) {
+      cap += baseCapacity * 0.25 * (1 + 0.01 * this.collectorBonusPct);
+    }
     cap += Math.floor(baseCapacity * 0.01 * this.scCapacityIncrease);
     return cap;
   }
@@ -170,7 +195,10 @@ class GlobalParams {
   get largeCargoCapacity() {
     const baseCapacity = 25000;
     let cap = baseCapacity * (1 + 0.05 * this.hyperTechLevel);
-    if (this.playerClass === 0) cap += baseCapacity * 0.25; // Collector +25%
+    // Collector +25%, itself boosted by the Rock'tal Collector Enhancement
+    if (this.playerClass === 0) {
+      cap += baseCapacity * 0.25 * (1 + 0.01 * this.collectorBonusPct);
+    }
     cap += Math.floor(baseCapacity * 0.01 * this.lcCapacityIncrease);
     return cap;
   }
@@ -217,7 +245,10 @@ class GlobalParams {
       booster: { min: 0, max: 4, default: 0 },
       playerClass: { min: 0, max: 2, default: 0 },
       mineralResCntrLvl: { min: 0, max: 100, default: 0 },
-      lfTerraformerRdc: { min: 0, max: 50, default: 0 }
+      lfTerraformerRdc: { min: 0, max: 50, default: 0 },
+      // The life form technology bonus stops growing at level 100
+      lfKaeleshLevel: { min: 0, max: 100, default: 0 },
+      lfRocktalLevel: { min: 0, max: 100, default: 0 }
     };
 
     const rule = rules[field];
@@ -549,7 +580,8 @@ class Calculator {
         powerFactor: 1, // productionRatio
         boosterType: params.booster,
         allOfficers: params.hasFullCrew,
-        playerClass: params.playerClass
+        playerClass: params.playerClass,
+        collectorClassBonusPct: params.collectorBonusPct
       });
       const allStaffBonus = params.hasFullCrew ? Math.round(prod[1] * 0.02) : 0;
       return prod[1] + prod[5] + allStaffBonus; // base + engineer bonus + all-officers bonus
@@ -570,7 +602,8 @@ class Calculator {
       powerFactor: 1, // productionRatio - always 1 for calculation
       boosterType: params.booster,
       allOfficers: params.hasFullCrew,
-      playerClass: params.playerClass
+      playerClass: params.playerClass,
+      collectorClassBonusPct: params.collectorBonusPct
     });
   }
 

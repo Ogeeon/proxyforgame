@@ -207,7 +207,11 @@
     "systems": "Sistemas",
     "distance": "Distancia",
     "character-bonus-hint": "Para obtener estas bonificaciones, vaya a Configuración de recursos - Bonificaciones de jugador de Formas de Vida,\nluego desplácese hacia abajo hasta 'Bonificaciones de clase de personaje'.",
-    "collectors-character-bonus": "Bonificación de clase de personaje del Recolector"
+    "collectors-character-bonus": "Bonificación de clase de personaje del Recolector",
+    "lf-experience-level": "Nivel de forma de vida",
+    "lf-class-bonus": "Bonificación de clase",
+    "lf-class-bonus-hint": "Aumento de todas las bonificaciones de clase del Recolector por la investigación 'Amplificación de recolector Rock`tal': 0,2 % por nivel de investigación, sin la bonificación de tecnología de formas de vida — esa se añade con el campo 'Nivel de forma de vida'.",
+    "lf-experience-level-hint": "El nivel de experiencia de la forma de vida aumenta la bonificación de tecnología de formas de vida en un 0,1 % por nivel, hasta el nivel 100 (+10 %).\nEsa bonificación amplifica los efectos de las investigaciones de formas de vida, por lo que se aplica a la bonificación de clase."
   },
   "index": {
     "title": "ProxyForGame - herramientas para los juegos de navegador en línea OGame",
@@ -327,7 +331,7 @@
     "disclaimer-robot-nanite": "Por favor, ten en cuenta la nota de la primera fila de la tabla al leer los tiempos de construcción. Si estás construyendo una Fábrica de Robots o una Fábrica de Nanobots, utiliza la <a href=\"{0}\">Calculadora de cola de construcción</a> para calcular con precisión los tiempos de construcción.",
     "disclaimer-title": "Atención",
     "discoverer-class-bonus": "Bonificación de clase Descubridor",
-    "discoverer-class-bonus-hint": "Se aplica solo si en la pestaña 'General' está seleccionada la clase 'Descubridor'"
+    "discoverer-class-bonus-hint": "Aumento de la bonificación de clase del Descubridor por la investigación 'Refuerzo de Descubridor de los Kaelesh': 0,2 % por nivel de investigación, sin la bonificación de tecnología de formas de vida — esa se añade con el campo 'Nivel de forma de vida'. Se aplica solo si en la pestaña 'General' está seleccionada la clase 'Descubridor'."
   },
   "lfcosts": {
     "title": "OGame - Calculadora de Costes para formas de vida",
@@ -607,10 +611,7 @@
     "lf-crawlers-boost-hint": "El mismo porcentaje de la investigación de formas de vida '{0}' aumenta la producción de taladradores y reduce en la misma medida su consumo de energía.",
     "lf-plasma-cost-reduction": "Reducción de coste de tecnología de plasma",
     "lf-collector-class": "Clase Recolector",
-    "lf-experience-level": "Nivel de forma de vida",
     "lf-experience-level-hint": "El nivel de experiencia de la forma de vida aumenta la bonificación de tecnología de formas de vida en un 0,1 % por nivel, hasta el nivel 100 (+10 %).\nEsa bonificación amplifica los efectos de las investigaciones de formas de vida, por lo que se aplica a la bonificación de clase. Los aumentos de producción de arriba se copian del juego ya amplificados, así que el nivel no les afecta.",
-    "lf-class-bonus": "Bonificación de clase",
-    "lf-class-bonus-hint": "Aumento de todas las bonificaciones de clase del Recolector por la investigación 'Amplificación de recolector Rock`tal': 0,2 % por nivel de investigación, sin la bonificación de tecnología de formas de vida — esa se añade con el campo 'Nivel de forma de vida'.",
     "title": "OGame - Calculadora de Velocidad de Producción",
     "keywords": "proxyforgame,ogame,calculadora de producción,producción de recursos,velocidad de producción,balance de energía,producción de energía,rentabilidad de minas,amortización,taladradores",
     "max-planet-temp": "t° máx",

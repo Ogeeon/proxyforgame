@@ -1,15 +1,18 @@
 'use strict';
 
-// Pure computation tests for the costs calculator. This is the calculator's first
-// node:test file — everything else it has is Playwright — so it covers only the
-// lab-level rules that live in costs-core.js and need no DOM.
+// Pure computation tests for the costs calculator: the rules that live in
+// costs-core.js and need no DOM — research lab levels, the life form class
+// bonuses and what they feed (cargo capacity, research speed, mine output).
+// Everything else the calculator has is Playwright.
 
 const { describe, it } = require('node:test');
 const { load } = require('./load');
 const { expect } = require('./expect');
 
+// ogame-production.js first: costs-core.js calls its getProductionRate helpers
+// the way the page does, with both scripts sharing one global scope.
 const { GlobalParams, Calculator } = load(
-    ['ogame/calc/js/costs-core.js'],
+    ['ogame/calc/js/ogame-production.js', 'ogame/calc/js/costs-core.js'],
     ['GlobalParams', 'Calculator'],
 );
 
@@ -102,5 +105,113 @@ describe('Calculator.getLabLevelRaiseTarget', () => {
         irn.irnLevel = 3;
 
         expect(calculator.getLabLevelRaiseTarget(199, irn)).toBe(12);
+    });
+});
+
+// Life form class bonuses. Two researches boost a player class — the Rock'tal one
+// boosts every Collector bonus, the Kaelesh one the Discoverer research speed —
+// and each is amplified by its own life form's technology bonus, which the life
+// form level carries at +0.1% per level.
+
+describe('GlobalParams class bonus amplification', () => {
+    it('amplifies the Collector bonus by the Rock’tal life form level', () => {
+        const params = new GlobalParams();
+        params.collectorClassBonus = 20;
+        params.lfRocktalLevel = 100;
+
+        // 20% * (1 + 100 * 0.001) = 22%
+        expect(params.collectorBonusPct).toBeCloseTo(22, 10);
+    });
+
+    it('amplifies the Discoverer bonus by the Kaelesh life form level', () => {
+        const params = new GlobalParams();
+        params.discovererClassBonus = 20;
+        params.lfKaeleshLevel = 100;
+
+        expect(params.discovererBonusPct).toBeCloseTo(22, 10);
+    });
+
+    it('leaves a bonus untouched when its life form level is zero', () => {
+        const params = new GlobalParams();
+        params.collectorClassBonus = 20;
+        params.discovererClassBonus = 20;
+
+        expect(params.collectorBonusPct).toBe(20);
+        expect(params.discovererBonusPct).toBe(20);
+    });
+});
+
+describe('GlobalParams cargo capacity', () => {
+    /** Collector with no hyperspace tech and no separate capacity increase. */
+    function collector(overrides = {}) {
+        const params = new GlobalParams();
+        params.playerClass = 0;
+        return Object.assign(params, overrides);
+    }
+
+    it('leaves the Collector bonus at 25% without the research', () => {
+        expect(collector().smallCargoCapacity).toBe(6250);
+        expect(collector().largeCargoCapacity).toBe(31250);
+    });
+
+    it('boosts the Collector bonus by the amplified class bonus', () => {
+        // 5000 + 5000 * 0.25 * 1.22, and the same on the 25000 base
+        const params = collector({ collectorClassBonus: 20, lfRocktalLevel: 100 });
+
+        expect(params.smallCargoCapacity).toBe(6525);
+        expect(params.largeCargoCapacity).toBe(32625);
+    });
+
+    it('ignores the class bonus for any class but the Collector', () => {
+        const params = collector({ playerClass: 2, collectorClassBonus: 20, lfRocktalLevel: 100 });
+
+        expect(params.smallCargoCapacity).toBe(5000);
+    });
+});
+
+describe('GlobalParams.technocratFactor', () => {
+    it('boosts the Discoverer research speed by the amplified class bonus', () => {
+        const params = new GlobalParams();
+        params.playerClass = 2;
+        params.discovererClassBonus = 20;
+        params.lfKaeleshLevel = 100;
+
+        // 1 - 0.25 * (1 + 0.22)
+        expect(params.technocratFactor).toBeCloseTo(0.695, 10);
+    });
+
+    it('keeps the bare 25% reduction without the research', () => {
+        const params = new GlobalParams();
+        params.playerClass = 2;
+
+        expect(params.technocratFactor).toBe(0.75);
+    });
+});
+
+describe('Calculator.calculateProduction', () => {
+    /** A metal mine on position 8, the only place the class bonus can show up. */
+    function mineParams(overrides = {}) {
+        const params = new GlobalParams();
+        params.playerClass = 0;
+        params.planetPos = 8;
+        params.universeSpeed = 1;
+        return Object.assign(params, overrides);
+    }
+
+    it('passes the amplified Collector bonus into the production rate', () => {
+        const bare = calculator.calculateProduction(1, 10, mineParams());
+        const boosted = calculator.calculateProduction(
+            1, 10, mineParams({ collectorClassBonus: 20, lfRocktalLevel: 100 })
+        );
+
+        // The class row is round(basePR * 0.25 * k): 263 at k=1, 320 at k=1.22
+        expect(boosted - bare).toBe(57);
+    });
+
+    it('adds nothing for a class other than the Collector', () => {
+        const params = mineParams({ playerClass: 1, collectorClassBonus: 20, lfRocktalLevel: 100 });
+
+        expect(calculator.calculateProduction(1, 10, params))
+            .toBe(calculator.calculateProduction(1, 10, mineParams({ playerClass: 1 })));
     });
 });

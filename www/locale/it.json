@@ -207,7 +207,11 @@
     "systems": "Sistemi",
     "distance": "Distanza",
     "character-bonus-hint": "Per ottenere questi bonus, vai in Impostazioni risorse - Bonus giocatore Forme di Vita,\nquindi scorri verso il basso fino a 'Bonus classe personaggio'.",
-    "collectors-character-bonus": "Bonus classe personaggio del Collezionista"
+    "collectors-character-bonus": "Bonus classe personaggio del Collezionista",
+    "lf-experience-level": "Livello della forma di vita",
+    "lf-class-bonus": "Bonus classe",
+    "lf-class-bonus-hint": "Aumento di tutti i bonus della classe Collezionista dalla ricerca 'Potenziamento Collezionista Rock`tal': 0,2 % per livello di ricerca, senza il bonus tecnologico delle forme di vita — quello si aggiunge con il campo 'Livello della forma di vita'.",
+    "lf-experience-level-hint": "Il livello di esperienza della forma di vita aumenta il bonus tecnologico delle forme di vita dello 0,1 % per livello, fino al livello 100 (+10 %).\nQuesto bonus amplifica gli effetti delle ricerche delle forme di vita, quindi viene applicato al bonus di classe."
   },
   "index": {
     "title": "ProxyForGame - strumenti per i giochi per browser OGame",
@@ -327,7 +331,7 @@
     "disclaimer-robot-nanite": "Si prega di tenere conto della nota nella prima riga della tabella quando si leggono i tempi di costruzione. Se stai costruendo una Fabbrica dei Robots o una Fabbrica dei Naniti, usa il <a href=\"{0}\">Calcolatore della coda di costruzione</a> per calcoli precisi dei tempi di costruzione.",
     "disclaimer-title": "Attenzione",
     "discoverer-class-bonus": "Bonus classe Discoverer",
-    "discoverer-class-bonus-hint": "Si applica solo se nella scheda 'Generale' è selezionata la classe 'Discoverer'"
+    "discoverer-class-bonus-hint": "Aumento del bonus della classe Esploratore dalla ricerca 'Rinforzo Esploratore Kaelesh': 0,2 % per livello di ricerca, senza il bonus tecnologico delle forme di vita — quello si aggiunge con il campo 'Livello della forma di vita'. Si applica solo se nella scheda 'Generale' è selezionata la classe 'Discoverer'."
   },
   "lfcosts": {
     "title": "OGame - Calcolatore di Costi per le forme di vita",
@@ -607,10 +611,7 @@
     "lf-crawlers-boost-hint": "La stessa percentuale, proveniente dalla ricerca delle forme di vita '{0}', aumenta la produzione dei crawler e ne riduce di altrettanto il consumo energetico.",
     "lf-plasma-cost-reduction": "Riduzione costo tecnologia del plasma",
     "lf-collector-class": "Classe Collezionista",
-    "lf-experience-level": "Livello della forma di vita",
     "lf-experience-level-hint": "Il livello di esperienza della forma di vita aumenta il bonus tecnologico delle forme di vita dello 0,1 % per livello, fino al livello 100 (+10 %).\nQuesto bonus amplifica gli effetti delle ricerche delle forme di vita, quindi viene applicato al bonus di classe. Gli aumenti di produzione qui sopra si copiano dal gioco già amplificati, perciò il livello non li influenza.",
-    "lf-class-bonus": "Bonus classe",
-    "lf-class-bonus-hint": "Aumento di tutti i bonus della classe Collezionista dalla ricerca 'Potenziamento Collezionista Rock`tal': 0,2 % per livello di ricerca, senza il bonus tecnologico delle forme di vita — quello si aggiunge con il campo 'Livello della forma di vita'.",
     "title": "OGame - Calcolo della velocità di produzione",
     "keywords": "proxyforgame,ogame,calcolatore produzione,produzione di risorse,velocità di produzione,bilancio energetico,produzione di energia,redditività delle miniere,ammortamento,cingolati",
     "max-planet-temp": "t° massima",

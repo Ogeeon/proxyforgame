@@ -269,13 +269,37 @@
         <!-- LifeForms tab -->
         <div class="tab-pane fade p-2" id="param-lifeforms" role="tabpanel">
           <div class="d-flex flex-wrap gap-3 align-items-center">
-            <div class="d-flex align-items-center gap-1">
-              <label for="discoverer-class-bonus"><?= $l['discoverer-class-bonus'] ?></label>
-              <div class="input-group input-group-sm w-auto">
-                <input id="discoverer-class-bonus" type="text" name="discoverer-class-bonus" class="form-control level-input m-0" value="0">
-                <span class="input-group-text">%</span>
+            <div class="d-flex flex-wrap align-items-center gap-2 border rounded p-2">
+              <span class="fw-semibold"><?= $l['class-collector'] ?> (<?= $l['race-2'] ?>):</span>
+              <div class="d-flex align-items-center gap-1">
+                <label for="lf-rocktal-level"><?= $l['lf-experience-level'] ?></label>
+                <input id="lf-rocktal-level" type="text" name="lf-rocktal-level" class="form-control form-control-sm level-input" value="0" data-field-title="<?= $l['lf-experience-level'] ?>">
+                <i class="bi bi-question-circle" data-bs-toggle="tooltip" title="<?= htmlspecialchars($l['lf-experience-level-hint'], ENT_QUOTES) ?>"></i>
               </div>
-              <i class="bi bi-question-circle" data-bs-toggle="tooltip" title="<?= $l['discoverer-class-bonus-hint'] ?>"></i>
+              <div class="d-flex align-items-center gap-1">
+                <label for="lf-collector-class-bonus"><?= $l['lf-class-bonus'] ?></label>
+                <div class="input-group input-group-sm w-auto">
+                  <input id="lf-collector-class-bonus" type="text" name="lf-collector-class-bonus" class="form-control level-input m-0" value="0" data-field-title="<?= $l['collectors-character-bonus'] ?>">
+                  <span class="input-group-text">%</span>
+                </div>
+                <i class="bi bi-question-circle" data-bs-toggle="tooltip" title="<?= htmlspecialchars($l['lf-class-bonus-hint'], ENT_QUOTES) ?>"></i>
+              </div>
+            </div>
+            <div class="d-flex flex-wrap align-items-center gap-2 border rounded p-2">
+              <span class="fw-semibold"><?= $l['class-discoverer'] ?> (<?= $l['race-4'] ?>):</span>
+              <div class="d-flex align-items-center gap-1">
+                <label for="lf-kaelesh-level"><?= $l['lf-experience-level'] ?></label>
+                <input id="lf-kaelesh-level" type="text" name="lf-kaelesh-level" class="form-control form-control-sm level-input" value="0" data-field-title="<?= $l['lf-experience-level'] ?>">
+                <i class="bi bi-question-circle" data-bs-toggle="tooltip" title="<?= htmlspecialchars($l['lf-experience-level-hint'], ENT_QUOTES) ?>"></i>
+              </div>
+              <div class="d-flex align-items-center gap-1">
+                <label for="discoverer-class-bonus"><?= $l['lf-class-bonus'] ?></label>
+                <div class="input-group input-group-sm w-auto">
+                  <input id="discoverer-class-bonus" type="text" name="discoverer-class-bonus" class="form-control level-input m-0" value="0" data-field-title="<?= $l['discoverer-class-bonus'] ?>">
+                  <span class="input-group-text">%</span>
+                </div>
+                <i class="bi bi-question-circle" data-bs-toggle="tooltip" title="<?= htmlspecialchars($l['discoverer-class-bonus-hint'], ENT_QUOTES) ?>"></i>
+              </div>
             </div>
             <div class="d-flex align-items-center gap-1">
               <span><?= $l['lf-research-table-title'] ?></span>

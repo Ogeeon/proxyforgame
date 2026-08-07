@@ -207,7 +207,11 @@
     "systems": "Sistemler",
     "distance": "Uzaklık",
     "character-bonus-hint": "Bu bonusları almak için, Kaynak ayarları - Yaşam Formları oyuncu bonusları'na gidin,\nsonra 'Karakter sınıfı bonusları'na aşağı kaydırın.",
-    "collectors-character-bonus": "Koleksiyoncunun karakter sınıfı bonusu"
+    "collectors-character-bonus": "Koleksiyoncunun karakter sınıfı bonusu",
+    "lf-experience-level": "Yaşam formu seviyesi",
+    "lf-class-bonus": "Sınıf bonusu",
+    "lf-class-bonus-hint": "'Rock’tal Kolektör Güçlendiricisi' araştırmasından gelen tüm Koleksiyoncu sınıf bonuslarının artışı: araştırma seviyesi başına %0,2, yaşam formu teknoloji bonusu hariç — o, 'Yaşam formu seviyesi' alanıyla eklenir.",
+    "lf-experience-level-hint": "Yaşam formu deneyim seviyesi, yaşam formu teknoloji bonusunu seviye başına %0,1 artırır; en fazla 100. seviye (+%10).\nBu bonus yaşam formu araştırmalarının etkilerini güçlendirir, bu yüzden sınıf bonusuna uygulanır."
   },
   "index": {
     "title": "ProxyForGame - OGame için hesaplamalar",
@@ -327,7 +331,7 @@
     "disclaimer-robot-nanite": "İnşa sürelerini okurken tablonun ilk satırındaki notu dikkate alın. Robot Fabrikası veya Nanit Fabrikası inşa ediyorsanız, doğru inşa süresi hesaplamaları için <a href=\"{0}\">İnşaat kuyruğu hesaplayıcısını</a> kullanın.",
     "disclaimer-title": "Dikkat",
     "discoverer-class-bonus": "Kaşif sınıfı bonusu",
-    "discoverer-class-bonus-hint": "Yalnızca 'Genel' sekmesinde 'Kaşif' sınıfı seçiliyse uygulanır"
+    "discoverer-class-bonus-hint": "'Kaelesh Kaşif Takviyesi' araştırmasından gelen Kaşif sınıf bonusunun artışı: araştırma seviyesi başına %0,2, yaşam formu teknoloji bonusu hariç — o, 'Yaşam formu seviyesi' alanıyla eklenir. Yalnızca 'Genel' sekmesinde 'Kaşif' sınıfı seçiliyse uygulanır."
   },
   "lfcosts": {
     "title": "OGame – Yaşam formları için maliyet hesaplayıcı",
@@ -607,10 +611,7 @@
     "lf-crawlers-boost-hint": "'{0}' yaşam formu araştırmasından gelen aynı yüzde, hem paletli üretimini artırır hem de paletli enerji tüketimini aynı oranda azaltır.",
     "lf-plasma-cost-reduction": "Plazma teknolojisi maliyet azaltma",
     "lf-collector-class": "Koleksiyoncu sınıfı",
-    "lf-experience-level": "Yaşam formu seviyesi",
     "lf-experience-level-hint": "Yaşam formu deneyim seviyesi, yaşam formu teknoloji bonusunu seviye başına %0,1 artırır; en fazla 100. seviye (+%10).\nBu bonus yaşam formu araştırmalarının etkilerini güçlendirir, bu yüzden sınıf bonusuna uygulanır. Yukarıdaki üretim artışları oyundan zaten güçlendirilmiş olarak kopyalanır, seviye onları etkilemez.",
-    "lf-class-bonus": "Sınıf bonusu",
-    "lf-class-bonus-hint": "'Rock’tal Kolektör Güçlendiricisi' araştırmasından gelen tüm Koleksiyoncu sınıf bonuslarının artışı: araştırma seviyesi başına %0,2, yaşam formu teknoloji bonusu hariç — o, 'Yaşam formu seviyesi' alanıyla eklenir.",
     "title": "OGame – Üretim Hesaplayıcı",
     "keywords": "proxyforgame,ogame,üretim hesaplayıcı,kaynak üretimi,üretim hızı,enerji dengesi,enerji üretimi,maden kârlılığı,amortisman,paletliler",
     "max-planet-temp": "Max. t°",

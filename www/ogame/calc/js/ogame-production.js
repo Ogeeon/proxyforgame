@@ -28,8 +28,7 @@
  *           out and the 5% alliance bonus stays out of its single-building figures.
  * @property {number} [collectorClassBonusPct] percentage by which the Collector class bonus is
  *           amplified (Rock'tal Collector Enhancement, +0.2 per research level).
- *           Optional: the costs calculator has no field for it, so it leaves the property
- *           out and the class bonus stays at its base 25%.
+ *           Optional: left out, the class bonus stays at its base 25%.
  */
 
 /**
