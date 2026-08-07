@@ -320,6 +320,7 @@
     "times-note": "Ak počítate trvanie výstavby/výskumu, nástroj používa iba hodnoty úrovní lodeníc, tovární a laboratórií vložených v hornom paneli. Ak máte IVS a potrebujete vypočítať výslednú úroveň laboratórií, prosím kliknite na tlačítko \"Vypočítať\" vedľa poľa s úrovňou výskumného laboratória",
     "robot-nanite-hint": "Nástroj nedokáže zohľadniť poradie výstavby. Bonus rýchlosti výstavby od Továrne robotov a Nanorobotickej továrne používa úroveň zadanú v hornom paneli — nie úroveň, ktorá sa zvyšuje v rovnakom balíku.<br>Príklad: ak upgradujete Továreň robotov z úrovne 1 na 5 a Baňu na kovy z úrovne 1 na 5 — ak najprv upgradujete továreň, výstavba bane trvá ~2m25s na úroveň; ak najprv upgradujete baňu (s továreňou stále na úrovni 1), trvá to ~7m16s na úroveň.<br>Aby sa predišlo tejto nejednoznačnosti, nástroj vždy používa úroveň továrne zadanú v hornej časti tabuľky.",
     "msg-cant-research": "Na danej úrovní výskumného laboratória je výskum \"{0}\" nemožný.",
+    "msg-lab-level-raised": "Úroveň výskumného laboratória zvýšená na {0} — to vyžaduje výskum \"{1}\".",
     "mineral-res-cntr-lvl": "Výskumné centrum minerálov",
     "lf-terraformer-rdc": "Zníženie nákladov na terraformer",
     "disclaimer-robot-nanite": "Pri čítaní časov výstavby zohľadnite poznámku v prvom riadku tabuľky. Ak staviate Robotické továrne alebo Nanotechnologické továrne, použite <a href=\"{0}\">Kalkulačku frontu výstavby</a> pre presné výpočty času výstavby.",

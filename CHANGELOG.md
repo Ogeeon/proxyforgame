@@ -23,6 +23,9 @@ release section; it is the source of truth for the other eleven translations.
 - Expeditions: the cargo-bonus import error now shows as an in-page dialog instead of the browser's native alert popup.
 - LF costs: a corrupted settings cookie now reports the error as an in-page dialog instead of the browser's native alert popup.
 - Trade: startup and settings-load exceptions now report as an in-page dialog instead of the browser's native alert popup.
+- Costs: asking for a research the entered Research Lab level is too low for now raises that level to what the research requires and says so in a notification, instead of only reporting that the research is impossible. A lab level computed from the Intergalactic Research Network is left untouched and still reports the requirement. <!-- site -->
+
+
 
 ### Fixed
 

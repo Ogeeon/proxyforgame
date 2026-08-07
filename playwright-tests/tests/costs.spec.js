@@ -105,6 +105,34 @@ test.describe('Costs Calculator Page', () => {
         await expect(page.locator('#table-0-4 tr:nth-child(18) td:nth-child(9)')).toContainText('2h 27m 32s');
     });
 
+    test('[researches] an insufficient lab level is raised to what the research needs', async ({ page }) => {
+        await page.getByRole('tab', { name: 'All items - one level' }).click();
+        await page.locator('#tabtag-0-4').click();
+        await expect(page.locator('#research-lab-level')).toHaveValue('0');
+
+        // Graviton technology, the last research row, needs a Research Lab of 12.
+        const graviton = page.locator('#table-0-4 tr:nth-child(17) td:nth-child(3) input');
+        await graviton.fill('1');
+        await graviton.blur();
+
+        await expect(page.locator('#research-lab-level')).toHaveValue('12');
+        await expect(page.locator('.toast-body')).toContainText('12');
+        await expect(page.locator('.toast-body')).toContainText('Graviton technology');
+        // The research is now possible, so the row carries a build time.
+        await expect(page.locator('#table-0-4 tr:nth-child(17) td:nth-child(9)')).not.toContainText('0s');
+    });
+
+    test('[range] picking a research raises an insufficient lab level', async ({ page }) => {
+        await page.getByRole('tab', { name: 'One item - multiple levels' }).click();
+        await page.locator('#tab2-to-level').fill('1');
+        await expect(page.locator('#research-lab-level')).toHaveValue('0');
+
+        await page.locator('#tech-types-select').selectOption('199');
+
+        await expect(page.locator('#research-lab-level')).toHaveValue('12');
+        await expect(page.locator('.toast-body')).toContainText('Graviton technology');
+    });
+
     test('[researches] Discoverer class bonus boosts the Discoverer research-speed bonus', async ({ page }) => {
         await page.getByRole('tab', { name: 'All items - one level' }).click();
         await page.locator('#tabtag-0-4').click();

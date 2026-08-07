@@ -321,6 +321,7 @@
     "times-note": "Podczas obliczania czasu budowy/badania wykorzystywane są tylko poziomy Fabryki, Stoczni i Laboratoriow wpisanych w górnym panelu. Aby obliczyć calkowity poziom Laboratorium, jesli masz MSBN, kliknij przycisk \"Oblicz\" obok poziomu Laboratorium.",
     "robot-nanite-hint": "Narzędzie nie może uwzględnić kolejności budowy. Bonus do szybkości budowy Fabryki Robotów i Fabryki Nanobotów używa poziomu wprowadzonego w górnym panelu — nie poziomu, który jest ulepszany w tej samej partii.<br>Przykład: jeśli ulepszasz Fabrykę Robotów z poziomu 1 do 5 i Kopalnię Metalu z poziomu 1 do 5 — ulepszając najpierw fabrykę, budowa kopalni zajmuje ~2m25s na poziom; ulepszając najpierw kopalnię (przy fabryce na poziomie 1) zajmuje ~7m16s na poziom.<br>Aby uniknąć tej niejednoznaczności, narzędzie zawsze używa poziomu fabryki podanego na górze tabeli.",
     "msg-cant-research": "Na tym poziomie Laboratorium badawczego badanie \"{0}\" jest niemozliwe.",
+    "msg-lab-level-raised": "Poziom Laboratorium badawczego podniesiony do {0} — tego wymaga badanie \"{1}\".",
     "mineral-res-cntr-lvl": "Centrum Badań Minerałów",
     "lf-terraformer-rdc": "Redukcja kosztów terraformera",
     "disclaimer-robot-nanite": "Przy odczytywaniu czasów budowy uwzględnij uwagę w pierwszym wierszu tabeli. Jeśli budujesz Fabrykę robotów lub Fabrykę nanitów, użyj <a href=\"{0}\">Kalkulatora kolejki budynków</a>, aby dokładnie obliczyć czas budowy.",

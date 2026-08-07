@@ -393,6 +393,36 @@ class Calculator {
   }
 
   /**
+   * Research Lab level a technology has to have before it can be researched.
+   * Anything that is not a research carries no requirement.
+   * @param {number} techId
+   * @returns {number}
+   */
+  getRequiredLabLevel(techId) {
+    return this.techReqs[techId] || 0;
+  }
+
+  /**
+   * The Research Lab level the parameters have to be raised to before `techId`
+   * can be researched, or 0 when the current settings already allow it.
+   *
+   * The comparison goes through getResultingLabLevel() rather than reading
+   * params.researchLabLevel directly: with an empty lab field and a filled IRN
+   * table the two disagree, and the IRN sum is what the calculation itself uses.
+   * The result never drops below the level already entered.
+   * @param {number} techId
+   * @param {GlobalParams} params - Global settings
+   * @returns {number} The level to raise the lab to, or 0 to leave it alone
+   */
+  getLabLevelRaiseTarget(techId, params) {
+    const required = this.getRequiredLabLevel(techId);
+    if (required === 0 || params.getResultingLabLevel(required) >= required) {
+      return 0;
+    }
+    return Math.max(required, params.researchLabLevel);
+  }
+
+  /**
    * Calculate cost for a single build request
    * @param {BuildRequest} request - What to build
    * @param {GlobalParams} params - Global settings

@@ -252,13 +252,123 @@ class CostsCalculator {
       if (result.isZero && req.isValid && req.techType === 'research') {
         // Research requirements not met
         const techName = this._getTechName(req.techId);
-        if (techName) {
+        if (techName && !this._isLevelFieldFocused(req.techId)) {
           this.renderer.showResearchImpossibleError(techName);
         }
       }
 
       return result;
     });
+  }
+
+  // ==========================================================================
+  // RESEARCH LAB LEVEL AUTO-CORRECTION
+  // ==========================================================================
+
+  /**
+   * Raise the Research Lab level to what `techId` requires, when the current
+   * settings fall short, and tell the user the parameter was changed.
+   *
+   * Only the directly entered lab level is corrected. An IRN result is a
+   * per-planet configuration the user built by hand, and there is no single
+   * planet whose lab we could raise without guessing at their intent, so that
+   * mode keeps the "cannot research" message instead.
+   * @param {number} techId - The research the user has just asked for
+   * @private
+   */
+  _maybeRaiseLabLevel(techId) {
+    if (options.resultingLabLevelComputed) {
+      return;
+    }
+
+    const target = this.calculator.getLabLevelRaiseTarget(techId, this._params());
+    if (target === 0) {
+      return;
+    }
+
+    setVal('#research-lab-level', target);
+    // Goes through the parameter-change path, not just setVal: that is what
+    // recalculates the affected tables and persists the new level.
+    this._handleParamChange('research-lab-level');
+
+    const techName = this._getTechName(techId);
+    if (techName && options.msgLabLevelRaised) {
+      showToast(
+        options.msgLabLevelRaised.replace('{0}', String(target)).replace('{1}', techName),
+        'warning'
+      );
+    }
+  }
+
+  /**
+   * Raise the lab level for the research row `input` sits in, if that row is
+   * asking for levels at all — a research left at 0 produces no request and so
+   * has nothing to enable.
+   * @param {EventTarget?} input
+   * @private
+   */
+  _raiseLabLevelForInput(input) {
+    if (!(input instanceof HTMLInputElement)) {
+      return;
+    }
+
+    const row = /** @type {HTMLTableRowElement?} */ (input.closest('tr'));
+    const table = /** @type {HTMLTableElement?} */ (input.closest('table'));
+    if (!row || !table || row.cells.length === 0) {
+      return;
+    }
+
+    const techId = Number.parseInt(row.cells[0].innerHTML);
+    // Buildings, ships and defence carry no requirement, so their rows leave the
+    // lab alone without the cost of re-reading the whole table on every blur.
+    if (Number.isNaN(techId) || this.calculator.getRequiredLabLevel(techId) === 0) {
+      return;
+    }
+
+    const isRequested = this.collector.collectTableRequests(table.id)
+      .some(req => req.techId === techId);
+    if (isRequested) {
+      this._maybeRaiseLabLevel(techId);
+    }
+  }
+
+  /**
+   * Raise the lab level for the research selected on the range tab, once that
+   * tab asks for a non-empty range.
+   * @private
+   */
+  _raiseLabLevelForRange() {
+    const rangeData = this.collector.collectRangeData();
+    if (rangeData.requests.length > 0) {
+      this._maybeRaiseLabLevel(rangeData.techId);
+    }
+  }
+
+  /**
+   * Is the user typing the level of `techId` right now? Leaving the field
+   * raises the lab level for that research, so the "cannot research" banner
+   * would only flash for a moment before the calculator fixes the parameters
+   * itself — which is exactly the noise the auto-correction is meant to remove.
+   * @param {number} techId
+   * @returns {boolean}
+   * @private
+   */
+  _isLevelFieldFocused(techId) {
+    const active = document.activeElement;
+    if (!(active instanceof HTMLInputElement)) {
+      return false;
+    }
+
+    if (active.id === 'tab2-from-level' || active.id === 'tab2-to-level') {
+      return this.collector.collectRangeData().techId === techId;
+    }
+
+    const row = /** @type {HTMLTableRowElement?} */ (active.closest('tr'));
+    if (!row || row.cells.length === 0) {
+      return false;
+    }
+
+    return Number.parseInt(row.cells[0].innerHTML) === techId;
   }
 
   // ==========================================================================
@@ -491,6 +601,9 @@ class CostsCalculator {
 
       addEvent(el, 'blur', (event) => {
         validateInputNumberOnBlurNative(event);
+        // Correct the parameters before recalculating, so the row is rendered
+        // with the lab level it needs rather than as an impossible research.
+        this._raiseLabLevelForInput(event.target);
         this._handleTableInputChange(event);
       });
     });
@@ -510,6 +623,7 @@ class CostsCalculator {
     removeAllEvents('#tab2-to-level', 'blur');
 
     addEvent('#tech-types-select', 'change', () => {
+      this._raiseLabLevelForRange();
       this.recalculateRangeTab();
     });
 
@@ -526,6 +640,7 @@ class CostsCalculator {
       addEvent(selector, 'blur', (event) => {
         // Native (jQuery-free) blur validator: filtering plus min/max clamping
         validateInputNumberOnBlurNative(event);
+        this._raiseLabLevelForRange();
         this.recalculateRangeTab();
       });
     });

@@ -66,6 +66,7 @@
     options.msgMinConstraintViolated = '<?= $l['msg-min-constraint-violated'] ?>';
     options.msgMaxConstraintViolated = '<?= $l['msg-max-constraint-violated'] ?>';
     options.msgCantResearch = '<?= $l['msg-cant-research'] ?>';
+    options.msgLabLevelRaised = <?= json_encode($l['msg-lab-level-raised']) ?>;
     options.lfImportErrNotFound = '<?= $l['lf-import-err-not-found'] ?>';
     options.lfImportErrIncomplete = '<?= $l['lf-import-err-incomplete'] ?>';
     options.dialogOk = <?= json_encode($l['dialog-ok']) ?>;
