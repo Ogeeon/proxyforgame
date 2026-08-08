@@ -1,0 +1,22 @@
+# Every `uses:` in .github/workflows is pinned to a full commit SHA (SonarQube
+# githubactions:S7637). Pinning stops updates from arriving on their own, so Dependabot
+# takes over: it reads the `# vX.Y.Z` comment next to each hash to learn the current
+# version, and its PRs rewrite both the hash and the comment. Keep that comment on a
+# full semver tag - a bare `# v4` gives Dependabot nothing to compare against and the
+# action silently stops being updated.
+version: 2
+updates:
+  - package-ecosystem: "github-actions"
+    # "/" is the whole repository for this ecosystem - Dependabot scans
+    # .github/workflows itself and does not want the subdirectory.
+    directory: "/"
+    schedule:
+      interval: "monthly"
+    commit-message:
+      prefix: "chore(ci)"
+    # One PR for all actions instead of one per patch release. Security updates still
+    # arrive outside this schedule.
+    groups:
+      github-actions:
+        patterns:
+          - "*"

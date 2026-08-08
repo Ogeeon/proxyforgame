@@ -37,13 +37,13 @@ jobs:
       # Checkout repository
       # -------------------------------------------------------------
       - name: Checkout code
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       # -------------------------------------------------------------
       # Install PHP (with Apache-like extensions)
       # -------------------------------------------------------------
       - name: Install PHP
-        uses: shivammathur/setup-php@v2
+        uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # 2.37.2
         with:
           php-version: '8.2'
           extensions: mbstring, intl, mysqli
@@ -107,7 +107,7 @@ jobs:
       # Set up Node + Playwright
       # -------------------------------------------------------------
       - name: Set up Node
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
         with:
           node-version: 24
 
@@ -151,7 +151,7 @@ jobs:
       # -------------------------------------------------------------
       - name: Upload Playwright HTML Report
         if: always()
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: playwright-report
           path: playwright-tests/playwright-report/
