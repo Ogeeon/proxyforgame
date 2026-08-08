@@ -12,11 +12,36 @@ on:
 
 jobs:
   claude:
+    # Only the repository owner and collaborators can summon Claude. The action itself
+    # already refuses actors without write access, but that check happens after the job
+    # has started - a stranger commenting `@claude` would still spin up a runner and
+    # leave a dead entry in the Actions tab. Blocking here costs nothing and keeps
+    # working if the action's internal check ever changes.
+    #
+    # author_association has to be read off the object that carries the text being
+    # matched, per event: a comment payload also embeds `issue`, whose association is
+    # the *issue author's*. One shared clause would let anyone trigger a run by
+    # commenting under an issue the owner opened.
+    #
+    # MEMBER is deliberately absent - it only ever appears on organization repositories
+    # and this one belongs to a user. Add it if the repository is ever transferred.
     if: |
-      (github.event_name == 'issue_comment' && contains(github.event.comment.body, '@claude')) ||
-      (github.event_name == 'pull_request_review_comment' && contains(github.event.comment.body, '@claude')) ||
-      (github.event_name == 'pull_request_review' && contains(github.event.review.body, '@claude')) ||
-      (github.event_name == 'issues' && (contains(github.event.issue.body, '@claude') || contains(github.event.issue.title, '@claude')))
+      (github.event_name == 'issue_comment' &&
+        contains(github.event.comment.body, '@claude') &&
+        (github.event.comment.author_association == 'OWNER' ||
+         github.event.comment.author_association == 'COLLABORATOR')) ||
+      (github.event_name == 'pull_request_review_comment' &&
+        contains(github.event.comment.body, '@claude') &&
+        (github.event.comment.author_association == 'OWNER' ||
+         github.event.comment.author_association == 'COLLABORATOR')) ||
+      (github.event_name == 'pull_request_review' &&
+        contains(github.event.review.body, '@claude') &&
+        (github.event.review.author_association == 'OWNER' ||
+         github.event.review.author_association == 'COLLABORATOR')) ||
+      (github.event_name == 'issues' &&
+        (contains(github.event.issue.body, '@claude') || contains(github.event.issue.title, '@claude')) &&
+        (github.event.issue.author_association == 'OWNER' ||
+         github.event.issue.author_association == 'COLLABORATOR'))
     runs-on: ubuntu-latest
     permissions:
       contents: read
