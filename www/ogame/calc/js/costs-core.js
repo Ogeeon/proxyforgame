@@ -786,93 +786,11 @@ class Calculator {
 }
 
 // ============================================================================
-// VALIDATION AND ERROR HANDLING
-// ============================================================================
-
-/**
- * Validation result
- */
-class ValidationResult {
-  constructor(isValid, errors = []) {
-    this.isValid = isValid;
-    this.errors = errors;
-  }
-
-  addError(error) {
-    this.errors.push(error);
-    this.isValid = false;
-  }
-
-  static success() {
-    return new ValidationResult(true, []);
-  }
-
-  static failure(errors) {
-    return new ValidationResult(false, Array.isArray(errors) ? errors : [errors]);
-  }
-}
-
-/**
- * Validator for build requests and parameters
- */
-class Validator {
-  /**
-   * Validate a build request
-   */
-  static validateRequest(request, params, techReqs) {
-    const result = ValidationResult.success();
-
-    if (!request.isValid) {
-      result.addError('Invalid build request');
-      return result;
-    }
-
-    // Validate research requirements
-    if (request.techType === 'research') {
-      const requiredLabLevel = techReqs[request.techId] || 0;
-      const availableLabLevel = params.getResultingLabLevel(requiredLabLevel);
-
-      if (availableLabLevel < requiredLabLevel) {
-        result.addError(
-          `Insufficient research lab level. Required: ${requiredLabLevel}, Available: ${availableLabLevel}`
-        );
-      }
-    }
-
-    return result;
-  }
-
-  /**
-   * Validate global parameters
-   */
-  static validateParams(params) {
-    const result = ValidationResult.success();
-
-    // Validate numeric ranges
-    const validations = [
-      { field: 'universeSpeed', min: 1, max: 10 },
-      { field: 'researchSpeed', min: 1, max: 20 },
-      { field: 'playerClass', min: 0, max: 2 },
-      { field: 'booster', min: 0, max: 4 },
-      { field: 'planetPos', min: 1, max: 16 }
-    ];
-
-    validations.forEach(v => {
-      if (params[v.field] < v.min || params[v.field] > v.max) {
-        result.addError(`${v.field} must be between ${v.min} and ${v.max}`);
-      }
-    });
-
-    return result;
-  }
-}
-
-// ============================================================================
 // EXPORT FOR USE
 // ============================================================================
 
 // If using modules:
-// export { GlobalParams, BuildRequest, BuildCost, Calculator, Validator };
+// export { GlobalParams, BuildRequest, BuildCost, Calculator };
 
 // For browser globals (current setup). The cast is what lets these land on
 // globalThis under the type-check: class declarations live in the script's
@@ -883,6 +801,4 @@ if (typeof window !== 'undefined') {
   g.BuildRequest = BuildRequest;
   g.BuildCost = BuildCost;
   g.Calculator = Calculator;
-  g.Validator = Validator;
-  g.ValidationResult = ValidationResult;
 }
