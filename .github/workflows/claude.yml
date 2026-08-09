@@ -86,8 +86,15 @@ jobs:
         with:
           node-version: 24
 
+      # --ignore-scripts: a dependency's install/postinstall hook is arbitrary code
+      # from the registry, and this job is the juiciest target in the repository -
+      # contents/pull-requests write, the App private key and the Claude OAuth token
+      # all sit in its environment. Nothing here needs the hooks: the only package
+      # carrying one is vnu-jar, whose postinstall downloads a JRE that this job
+      # never uses (`make html-validate` stays with playwright.yml, and it calls the
+      # system `java` against the jar directly).
       - name: Install dependencies
-        run: npm ci
+        run: npm ci --ignore-scripts
 
       - name: Run Claude Code
         id: claude

@@ -67,9 +67,14 @@ PW ?= node node_modules/@playwright/test/cli.js
 help: ## Show this list
 	@node scripts/make-help.js
 
+# --ignore-scripts keeps a dependency's install/postinstall hook - arbitrary code
+# from the registry - from running here. Nothing in either tree needs one: vnu-jar's
+# postinstall downloads a JRE that scripts/validate-html.js never asks for (it runs
+# the system `java` against the jar directly), and fsevents is macOS-only. The
+# Playwright browsers come from the explicit `playwright install` below, not a hook.
 install: ## Install test dependencies and Playwright browsers
-	npm ci
-	cd playwright-tests && npm ci
+	npm ci --ignore-scripts
+	cd playwright-tests && npm ci --ignore-scripts
 	cd playwright-tests && $(PW) install $(PW_DEPS)
 
 ##@ Local server
