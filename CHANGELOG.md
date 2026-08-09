@@ -19,6 +19,10 @@ release section; it is the source of truth for the other eleven translations.
 
 - Costs: the Common tab now has an "Alliance class is 'Traders'" checkbox, so the +5% alliance mine output bonus is included in the hourly production shown on the "One item, multiple levels" tab, matching the production calculator. <!-- site -->
 
+### Fixed
+
+- English locale: four spelling mistakes in the English text, in the ship-bonus reader error ("Couln't"), in the misspelling-report and e-mail dialogs ("Lets correct it") and in the production table header ("Enchanced").
+
 ## [2026-08-07] - site entry 59
 
 ### Added
