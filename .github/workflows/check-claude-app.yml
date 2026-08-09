@@ -1,0 +1,64 @@
+# Manual diagnostic for the GitHub App that claude.yml pushes with.
+#
+# claude.yml mints its App token behind `continue-on-error`, on purpose: a run that cannot
+# get one still has to reach Claude rather than die before it can comment. The cost of that
+# is silence - a broken App ID, a rotated private key or an App uninstalled from this
+# repository all look identical to a normal run, right up to the moment the pull request
+# appears and playwright.yml does not start on it.
+#
+# Run this instead of spending a Claude run to find out. It is read-only: nothing is pushed,
+# no branch is created, and the token is never printed. Actions -> "Check Claude App
+# credentials" -> Run workflow.
+name: Check Claude App credentials
+
+on:
+  workflow_dispatch:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    # The built-in GITHUB_TOKEN is not used at all here - everything runs on the App token.
+    permissions: {}
+    steps:
+      # Fails when CLAUDE_APP_ID and CLAUDE_APP_PRIVATE_KEY do not belong to the same App,
+      # when the key has been revoked, or when the App is not installed on this repository.
+      - name: Mint a token
+        id: mint
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        with:
+          app-id: ${{ secrets.CLAUDE_APP_ID }}
+          private-key: ${{ secrets.CLAUDE_APP_PRIVATE_KEY }}
+
+      # Asking for a permission the installation does not hold is refused, so this step
+      # failing names the exact box left unticked on the App's settings page. These four are
+      # what claude.yml needs: push the branch, open the PR, post the progress comment, read
+      # CI results.
+      - name: Check the four permissions claude.yml needs
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        with:
+          app-id: ${{ secrets.CLAUDE_APP_ID }}
+          private-key: ${{ secrets.CLAUDE_APP_PRIVATE_KEY }}
+          permission-contents: write
+          permission-pull-requests: write
+          permission-issues: write
+          permission-actions: read
+
+      # Installation scope. An App installed account-wide, or on the wrong subset of
+      # repositories, mints a perfectly valid token that cannot see this repository.
+      - name: Report the installation
+        env:
+          GH_TOKEN: ${{ steps.mint.outputs.token }}
+          INSTALLATION_ID: ${{ steps.mint.outputs.installation-id }}
+        run: |
+          echo "Installation id: $INSTALLATION_ID"
+          echo "Repositories this token can reach:"
+          gh api /installation/repositories --jq '.repositories[].full_name' | sed 's/^/  - /'
+
+          if gh api /installation/repositories --jq '.repositories[].full_name' \
+            | grep -qx "$GITHUB_REPOSITORY"; then
+            echo "OK - $GITHUB_REPOSITORY is in scope; claude.yml will push with the App token."
+          else
+            echo "FAIL - $GITHUB_REPOSITORY is not in this installation's scope."
+            echo "Install the App on it: https://github.com/settings/installations"
+            exit 1
+          fi
