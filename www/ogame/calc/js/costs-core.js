@@ -635,13 +635,28 @@ class Calculator {
   }
 
   /**
-   * Calculate dark matter cost to halve build time
+   * Dark matter price of halving a build or a research.
+   *
+   * A research the Research Lab level does not allow produces no build time at
+   * all, and what is not being built cannot be sped up. The Discoverer discount
+   * has a 750 floor, so it has to let that zero through instead of clamping it
+   * up to the minimum price.
    * @param {number} techId - Technology ID
-   * @param {number} time - Build time in seconds
-   * @returns {number} Dark matter cost
+   * @param {number} time - Build time in seconds, 0 when the build is impossible
+   * @param {GlobalParams} params - Global settings
+   * @returns {number} Dark matter cost, 0 when there is nothing to halve
    */
-  calculateDarkMatterCost(techId, time) {
-    return getHalvingCost(techId, time);
+  static halvingCost(techId, time, params) {
+    const cost = getHalvingCost(techId, time);
+    if (cost === 0) {
+      return 0;
+    }
+
+    // Discoverer class gets 10% off finishing a research with Dark Matter (min 750)
+    if (params.playerClass === 2 && techId > 100 && techId < 200) {
+      return Math.max(750, Math.ceil(cost * 0.9));
+    }
+    return cost;
   }
 
   /**

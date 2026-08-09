@@ -122,6 +122,38 @@ test.describe('Costs Calculator Page', () => {
         await expect(page.locator('#table-0-4 tr:nth-child(17) td:nth-child(9)')).not.toContainText('0s');
     });
 
+    test('[researches] an impossible research costs no Dark Matter', async ({ page }) => {
+        await page.getByRole('tab', { name: 'All items - one level' }).click();
+        await page.locator('#tabtag-0-4').click();
+
+        // The Discoverer is the class whose 10% Dark Matter discount has a 750
+        // floor — the floor used to turn the zero of an impossible research into
+        // the minimum halving price.
+        await page.locator('#param-common-tab').click();
+        await page.getByRole('radio', { name: 'Discoverer' }).click();
+
+        // An IRN configuration leaves the lab level alone instead of raising it,
+        // so the research below stays impossible.
+        await page.locator('#param-buildings-tab').click();
+        await page.locator('#open-llc-dialog').click();
+        await page.locator('#lablevel_1').fill('5');
+        await page.locator('#lablevel_1').press('Enter');
+        await page.locator('#labchoice_1').click();
+        await expect(page.locator('#resulting-level')).toHaveText('5');
+        await page.locator('#irn-done-btn').click();
+        await expect(page.locator('#irn-calc')).toBeHidden();
+        await expect(page.locator('#research-lab-level')).toHaveValue('5');
+
+        // Graviton technology, the last research row, needs a Research Lab of 12.
+        const graviton = page.locator('#table-0-4 tr:nth-child(17) td:nth-child(3) input');
+        await graviton.fill('1');
+        await graviton.blur();
+
+        await expect(page.locator('#research-lab-level')).toHaveValue('5');
+        await expect(page.locator('#table-0-4 tr:nth-child(17) td:nth-child(9)')).toContainText('0s');
+        await expect(page.locator('#table-0-4 tr:nth-child(17) td:nth-child(11)')).toHaveText('0');
+    });
+
     test('[range] picking a research raises an insufficient lab level', async ({ page }) => {
         await page.getByRole('tab', { name: 'One item - multiple levels' }).click();
         await page.locator('#tab2-to-level').fill('1');

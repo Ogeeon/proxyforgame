@@ -9,10 +9,15 @@ const { describe, it } = require('node:test');
 const { load } = require('./load');
 const { expect } = require('./expect');
 
-// ogame-production.js first: costs-core.js calls its getProductionRate helpers
-// the way the page does, with both scripts sharing one global scope.
+// ogame-production.js and ogame-costs.js first: costs-core.js calls their
+// getProductionRate and getHalvingCost helpers the way the page does, with all
+// three scripts sharing one global scope.
 const { GlobalParams, Calculator } = load(
-    ['ogame/calc/js/ogame-production.js', 'ogame/calc/js/costs-core.js'],
+    [
+        'ogame/calc/js/ogame-production.js',
+        'ogame/calc/js/ogame-costs.js',
+        'ogame/calc/js/costs-core.js',
+    ],
     ['GlobalParams', 'Calculator'],
 );
 
@@ -105,6 +110,44 @@ describe('Calculator.getLabLevelRaiseTarget', () => {
         irn.irnLevel = 3;
 
         expect(calculator.getLabLevelRaiseTarget(199, irn)).toBe(12);
+    });
+});
+
+describe('Calculator.halvingCost', () => {
+    /** @param {number} playerClass */
+    function withClass(playerClass) {
+        return Object.assign(new GlobalParams(), { playerClass });
+    }
+
+    const collector = withClass(0);
+    const discoverer = withClass(2);
+
+    it('charges nothing when there is no build time', () => {
+        // A research the lab level does not allow is calculated as a zero cost,
+        // and a research that is not running cannot be sped up.
+        expect(Calculator.halvingCost(199, 0, collector)).toBe(0);
+        expect(Calculator.halvingCost(199, 0, discoverer)).toBe(0);
+        expect(Calculator.halvingCost(1, 0, collector)).toBe(0);
+    });
+
+    it('charges the 750 minimum for anything under half an hour', () => {
+        expect(Calculator.halvingCost(1, 1000, collector)).toBe(750);
+        expect(Calculator.halvingCost(199, 1000, collector)).toBe(750);
+    });
+
+    it('charges 750 per half hour above that', () => {
+        expect(Calculator.halvingCost(1, 3600, collector)).toBe(1500);
+        expect(Calculator.halvingCost(199, 3600, collector)).toBe(1500);
+    });
+
+    it('gives the Discoverer 10% off a research, never below the minimum', () => {
+        expect(Calculator.halvingCost(199, 3600, discoverer)).toBe(1350);
+        // 750 * 0.9 = 675, which the floor lifts back to 750
+        expect(Calculator.halvingCost(199, 1000, discoverer)).toBe(750);
+    });
+
+    it('leaves buildings alone for a Discoverer', () => {
+        expect(Calculator.halvingCost(1, 3600, discoverer)).toBe(1500);
     });
 });
 

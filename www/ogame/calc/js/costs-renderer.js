@@ -114,11 +114,7 @@ class Renderer {
 
     // Dark Matter (only for single-level building/research tabs - not fleet/defense)
     if (!isMultiLevel && techId < 200) {
-      let dmCost = getHalvingCost(techId, result.time);
-      // Discoverer class gets 10% discount on finishing research with Dark Matter (min 750)
-      if (params.playerClass === 2 && techId > 100 && techId < 200) {
-        dmCost = Math.max(750, Math.ceil(dmCost * 0.9));
-      }
+      const dmCost = Calculator.halvingCost(techId, result.time, params);
       row.cells[firstDataCol + 7].innerHTML = this._formatNumber(dmCost, params);
     }
   }
@@ -228,7 +224,7 @@ class Renderer {
    */
   _renderSubtotalDmCell(cell, isFleetOrDefenseTable, totals, params) {
     if (isFleetOrDefenseTable) {
-      const dmCost = getHalvingCost(1000, totals.time);
+      const dmCost = Calculator.halvingCost(1000, totals.time, params);
       cell.innerHTML = `<b>${this._formatNumber(dmCost, params)}</b>`;
     } else {
       cell.innerHTML = '';
