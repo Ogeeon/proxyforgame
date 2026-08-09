@@ -39,6 +39,18 @@ PW_DEPS ?=
 # artifact and a bare `list` would leave that upload with nothing to collect.
 PW_REPORTER ?= list
 
+# Playwright's own CLI, run directly instead of through `npx`. Relative to
+# playwright-tests/, so every use below sits after `cd playwright-tests`.
+#
+# `npx` resolves the bin through the canonical casing of the path on disk, while
+# the recipe's working directory keeps whatever casing the caller typed. On
+# Windows both name the same folder, but Node keys its module cache by the exact
+# string, so Playwright's internals get loaded twice - once for the runner and
+# once for the spec files - and every spec dies at collection time with a
+# "Playwright Test did not expect test() to be called here" that blames two
+# installed versions. Invoking the CLI ourselves keeps a single copy.
+PW ?= node node_modules/@playwright/test/cli.js
+
 .DEFAULT_GOAL := help
 
 .PHONY: help install serve db-seed \
@@ -58,7 +70,7 @@ help: ## Show this list
 install: ## Install test dependencies and Playwright browsers
 	npm ci
 	cd playwright-tests && npm ci
-	cd playwright-tests && npx playwright install $(PW_DEPS)
+	cd playwright-tests && $(PW) install $(PW_DEPS)
 
 ##@ Local server
 
@@ -77,17 +89,17 @@ test-unit: ## Run the node:test unit suite
 	npm --prefix unit-tests test
 
 test-e2e: ## Run the Playwright suite against PFG_BASE_URL
-	cd playwright-tests && npx playwright test --reporter=$(PW_REPORTER)
+	cd playwright-tests && $(PW) test --reporter=$(PW_REPORTER)
 
 test-e2e-ui: ## Open the interactive Playwright runner
-	cd playwright-tests && npx playwright test --ui
+	cd playwright-tests && $(PW) test --ui
 
 test-one: ## Run a single spec, e.g. make test-one spec=flight
 	$(if $(spec),,$(error Usage: make test-one spec=<name>))
-	cd playwright-tests && npx playwright test $(spec) --reporter=$(PW_REPORTER)
+	cd playwright-tests && $(PW) test $(spec) --reporter=$(PW_REPORTER)
 
 report: ## Open the last Playwright HTML report
-	cd playwright-tests && npx playwright show-report
+	cd playwright-tests && $(PW) show-report
 
 ##@ Quality gates
 
