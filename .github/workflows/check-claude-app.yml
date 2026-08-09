@@ -20,13 +20,13 @@ jobs:
     # The built-in GITHUB_TOKEN is not used at all here - everything runs on the App token.
     permissions: {}
     steps:
-      # Fails when CLAUDE_APP_ID and CLAUDE_APP_PRIVATE_KEY do not belong to the same App,
+      # Fails when CLAUDE_APP_CLIENT_ID and CLAUDE_APP_PRIVATE_KEY do not belong to the same App,
       # when the key has been revoked, or when the App is not installed on this repository.
       - name: Mint a token
         id: mint
         uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
         with:
-          app-id: ${{ secrets.CLAUDE_APP_ID }}
+          client-id: ${{ secrets.CLAUDE_APP_CLIENT_ID }}
           private-key: ${{ secrets.CLAUDE_APP_PRIVATE_KEY }}
 
       # Asking for a permission the installation does not hold is refused, so this step
@@ -36,7 +36,7 @@ jobs:
       - name: Check the four permissions claude.yml needs
         uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
         with:
-          app-id: ${{ secrets.CLAUDE_APP_ID }}
+          client-id: ${{ secrets.CLAUDE_APP_CLIENT_ID }}
           private-key: ${{ secrets.CLAUDE_APP_PRIVATE_KEY }}
           permission-contents: write
           permission-pull-requests: write

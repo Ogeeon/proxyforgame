@@ -13,7 +13,7 @@ workflows for pushes and pull requests made with it — `playwright.yml` would n
 Claude's PR, so nothing would ever verify the work in the place where it matters. An App
 installation token has no such restriction.
 
-Until `CLAUDE_APP_ID` and `CLAUDE_APP_PRIVATE_KEY` exist, the minting step fails,
+Until `CLAUDE_APP_CLIENT_ID` and `CLAUDE_APP_PRIVATE_KEY` exist, the minting step fails,
 `continue-on-error` swallows it and the run falls back to `GITHUB_TOKEN`. Claude still works and
 still pushes; only the automatic CI trigger is missing.
 
@@ -30,17 +30,20 @@ still pushes; only the automatic CI trigger is missing.
    | Actions       | Read-only      | `additional_permissions: actions: read` — reading CI results on a PR |
 
 3. **Where can this GitHub App be installed?** → *Only on this account*. Create it, note the
-   numeric **App ID**, then **Generate a private key** and keep the `.pem` that downloads.
+   **Client ID** (`Iv23li…`, not the numeric App ID above it — that input is deprecated), then
+   **Generate a private key** and keep the `.pem` that downloads.
 4. Install the App on `Ogeeon/proxyforgame` — *Only select repositories*.
 5. Store both halves as repository secrets:
 
    ```bash
-   gh secret set CLAUDE_APP_ID --body '<the numeric App ID>'
+   gh secret set CLAUDE_APP_CLIENT_ID --body '<the Iv23li… Client ID>'
    gh secret set CLAUDE_APP_PRIVATE_KEY < path/to/key.pem
    ```
 
    The private key must go in whole, `-----BEGIN RSA PRIVATE KEY-----` and
-   `-----END RSA PRIVATE KEY-----` lines included. Delete the local `.pem` afterwards.
+   `-----END RSA PRIVATE KEY-----` lines included. Delete the local `.pem` afterwards. The
+   Client ID is not actually secret — GitHub publishes it in OAuth URLs — and lives in a
+   secret only so both halves sit in one place.
 
 To confirm it took: comment `@claude` on any issue and check that the run's push lands a branch on
 the remote **and** that `playwright.yml` starts by itself on the resulting pull request. If the
