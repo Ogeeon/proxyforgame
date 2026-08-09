@@ -262,3 +262,10 @@ See `docs/agents/triage-labels.md`.
 
 Single-context — one `CONTEXT.md` plus `docs/adr/` at the repo root; neither exists yet
 and both get created lazily. See `docs/agents/domain.md`.
+
+### The `@claude` workflow
+
+What a run summoned from an issue can and cannot do: it gets the non-browser half of
+`make check` and nothing else, so its PR still needs `playwright.yml` to go green before
+merge. Also the GitHub App setup its push depends on, and how to recover a branch from the
+`claude-unpushed-work` artifact when the push fails. See `docs/agents/claude-workflow.md`.

@@ -44,32 +44,91 @@ jobs:
          github.event.issue.author_association == 'COLLABORATOR'))
     runs-on: ubuntu-latest
     permissions:
-      contents: read
-      pull-requests: read
-      issues: read
+      # These govern the built-in GITHUB_TOKEN, which is only the fallback here - the
+      # push and the PR normally go through the App token minted below. Write is kept
+      # so that a run with the App secrets missing still lands the branch somewhere
+      # instead of throwing the work away; the job only ever starts for OWNER and
+      # COLLABORATOR, so nothing untrusted reaches these permissions.
+      contents: write
+      pull-requests: write
+      issues: write
       id-token: write
       actions: read # Required for Claude to read CI results on PRs
     steps:
+      # A push authenticated with the built-in GITHUB_TOKEN deliberately does not
+      # trigger other workflows, so playwright.yml would never run on Claude's PR.
+      # A GitHub App installation token has no such restriction. Setup is manual and
+      # documented in docs/agents/claude-workflow.md; until the two secrets exist this
+      # step fails, `continue-on-error` swallows it, and the run degrades to
+      # GITHUB_TOKEN rather than dying before Claude can even comment.
+      - name: Mint a GitHub App token
+        id: app-token
+        continue-on-error: true
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        with:
+          app-id: ${{ secrets.CLAUDE_APP_ID }}
+          private-key: ${{ secrets.CLAUDE_APP_PRIVATE_KEY }}
+
       - name: Checkout repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          fetch-depth: 1
+          # Full history: Claude commits and rebases here, and the "Preserve unpushed
+          # work" step below cannot bundle commits out of a shallow clone.
+          fetch-depth: 0
+          token: ${{ steps.app-token.outputs.token || github.token }}
+
+      # Everything below the browser suite runs off a plain `npm ci` - no PHP, no
+      # MySQL, no Playwright browsers - so give Claude that much for ~40s of setup.
+      # `make test-e2e` and `make html-validate` stay with playwright.yml, which runs
+      # on the pull request the App token lets Claude open.
+      - name: Set up Node
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24
+
+      - name: Install dependencies
+        run: npm ci
 
       - name: Run Claude Code
         id: claude
         uses: anthropics/claude-code-action@1623c36729ac1cd5895198cded705a287de7db79 # v1.0.187
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          github_token: ${{ steps.app-token.outputs.token || github.token }}
 
           # This is an optional setting that allows Claude to read CI results on PRs
           additional_permissions: |
             actions: read
 
-          # Optional: Give a custom prompt to Claude. If this is not specified, Claude will perform the instructions specified in the comment that tagged it.
-          # prompt: 'Update the pull request description to include a summary of changes.'
+          # Without an allowlist every Bash call waits for an approval that cannot
+          # arrive in a non-interactive run, so Claude silently ships untested work.
+          # These cover the whole non-browser gate: `make changelog-validate
+          # i18n-validate lint typecheck tsconfigs-check test-unit`.
+          claude_args: >-
+            --allowedTools
+            "Bash(make:*),Bash(npm:*),Bash(npx:*),Bash(node:*),Bash(git:*),Bash(gh:*)"
 
-          # Optional: Add claude_args to customize behavior and configuration
-          # See https://github.com/anthropics/claude-code-action/blob/main/docs/usage.md
-          # or https://code.claude.com/docs/en/cli-reference for available options
-          # claude_args: '--allowed-tools Bash(gh pr *)'
+      # Last line of defence for the thing that actually went wrong on issue #5: the
+      # commit existed only inside the runner's checkout. Whatever the push did, any
+      # local commit that is not on origin leaves here as a downloadable bundle
+      # (`git clone claude-work.bundle`). Empty bundle -> `git bundle` exits non-zero
+      # -> nothing to upload, which is the normal case once pushing works.
+      - name: Preserve unpushed work
+        id: bundle
+        if: always()
+        run: |
+          if git bundle create "$RUNNER_TEMP/claude-work.bundle" --branches --not --remotes=origin; then
+            echo "created=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "Every local commit is already on origin - nothing to preserve."
+            echo "created=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Upload unpushed work
+        if: always() && steps.bundle.outputs.created == 'true'
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: claude-unpushed-work
+          path: ${{ runner.temp }}/claude-work.bundle
+          retention-days: 30
 
