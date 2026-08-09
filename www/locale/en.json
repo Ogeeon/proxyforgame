@@ -119,6 +119,7 @@
     "class-collector": "Collector",
     "class-general": "General",
     "class-discoverer": "Discoverer",
+    "is-trader": "Alliance class is \"Traders\"",
     "reaper": "Reaper",
     "pathfinder": "Pathfinder",
     "crawler": "Crawler",
@@ -686,8 +687,7 @@
     "incl-yes": "Yes",
     "incl-no": "No",
     "alliance-class": "Alliance class",
-    "lifeform-tech": "Lifeform Tech Bonus",
-    "is-trader": "Alliance class is \"Traders\""
+    "lifeform-tech": "Lifeform Tech Bonus"
   },
   "queue": {
     "start-time": "Start",

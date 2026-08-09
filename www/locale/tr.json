@@ -119,6 +119,7 @@
     "class-collector": "Koleksiyoncu",
     "class-general": "General",
     "class-discoverer": "Kaşif",
+    "is-trader": "İttifak sınıfı \"Tüccarlar\"",
     "reaper": "Azrail",
     "pathfinder": "Rehber",
     "crawler": "Paletli",
@@ -686,8 +687,7 @@
     "incl-yes": "Evet",
     "incl-no": "Hayır",
     "alliance-class": "Ittifak sınıfı",
-    "lifeform-tech": "Yaşam formu teknoloji bonusu",
-    "is-trader": "İttifak sınıfı \"Tüccarlar\""
+    "lifeform-tech": "Yaşam formu teknoloji bonusu"
   },
   "queue": {
     "start-time": "Başlama zamanı",

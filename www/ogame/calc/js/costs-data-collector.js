@@ -58,6 +58,7 @@ class DataCollector {
 
     // Player class (radio buttons)
     params.playerClass = this._getPlayerClass();
+    params.isTrader = this._getCheckbox('#is-trader');
 
     // Intergalactic Research Network
     params.irnLevel = this._getInputNumber('#irn-level');
@@ -443,7 +444,7 @@ class DataCollector {
       'booster', 'universe-speed', 'research-speed', 'technocrat',
       'research-bonus', 'robot-factory-level', 'nanite-factory-level',
       'shipyard-level', 'ion-tech-level', 'hyper-tech-level',
-      'class-0', 'class-1', 'class-2', 'full-numbers',
+      'class-0', 'class-1', 'class-2', 'is-trader', 'full-numbers',
       'lf-research-table', 'discoverer-class-bonus', 'lf-kaelesh-level',
       'lf-collector-class-bonus', 'lf-rocktal-level',
       'mineral-res-cntr-lvl', 'lf-terraformer-rdc',
@@ -620,6 +621,7 @@ class ExportDataCollector extends DataCollector {
       commander: params.commander,
       researchBonus: params.researchBonus,
       playerClass: params.playerClass,
+      isTrader: params.isTrader,
       booster: params.booster,
       irnLevel: params.irnLevel,
       labLevels: params.labLevels,

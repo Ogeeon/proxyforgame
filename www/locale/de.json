@@ -119,6 +119,7 @@
     "class-collector": "Kollektor",
     "class-general": "General",
     "class-discoverer": "Entdecker",
+    "is-trader": "Allianzklasse ist \"Händler\"",
     "reaper": "Reaper",
     "pathfinder": "Pathfinder",
     "crawler": "Crawler",
@@ -686,8 +687,7 @@
     "incl-yes": "Ja",
     "incl-no": "Nein",
     "alliance-class": "Allianzklasse",
-    "lifeform-tech": "Lebensform-Technologiebonus",
-    "is-trader": "Allianzklasse ist \"Händler\""
+    "lifeform-tech": "Lebensform-Technologiebonus"
   },
   "queue": {
     "start-time": "Start",

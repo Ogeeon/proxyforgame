@@ -118,6 +118,7 @@
     "class-collector": "Collector",
     "class-general": "General",
     "class-discoverer": "Discoverer",
+    "is-trader": "Trieda aliancie je \"Obchodníci\"",
     "reaper": "Reaper",
     "pathfinder": "Pathfinder",
     "crawler": "Crawler",
@@ -686,8 +687,7 @@
     "incl-yes": "Áno",
     "incl-no": "Nie",
     "alliance-class": "Aliančná trieda",
-    "lifeform-tech": "Bonus technológie foriem života",
-    "is-trader": "Trieda aliancie je \"Obchodníci\""
+    "lifeform-tech": "Bonus technológie foriem života"
   },
   "queue": {
     "start-time": "štart",

@@ -38,6 +38,9 @@ class GlobalParams {
   // Player class: 0=collector, 1=general, 2=discoverer
   playerClass = 0;
 
+  // Alliance "Traders" class: +5% mine output
+  isTrader = false;
+
   // Boosters: 0=0%, 1=10%, 2=20%, 3=30%, 4=40%
   booster = 0;
 
@@ -581,6 +584,7 @@ class Calculator {
         boosterType: params.booster,
         allOfficers: params.hasFullCrew,
         playerClass: params.playerClass,
+        isTrader: params.isTrader,
         collectorClassBonusPct: params.collectorBonusPct
       });
       const allStaffBonus = params.hasFullCrew ? Math.round(prod[1] * 0.02) : 0;
@@ -603,6 +607,7 @@ class Calculator {
       boosterType: params.booster,
       allOfficers: params.hasFullCrew,
       playerClass: params.playerClass,
+      isTrader: params.isTrader,
       collectorClassBonusPct: params.collectorBonusPct
     });
   }

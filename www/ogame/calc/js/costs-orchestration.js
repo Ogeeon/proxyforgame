@@ -565,7 +565,8 @@ class CostsCalculator {
       '#geologist',
       '#engineer',
       '#admiral',
-      '#commander'
+      '#commander',
+      '#is-trader'
     ];
 
     // Unbind old click handlers from costs.js to prevent conflicts
@@ -1184,6 +1185,7 @@ class CostsCalculator {
       commander: params.commander,
       researchBonus: params.researchBonus,
       playerClass: params.playerClass,
+      isTrader: params.isTrader,
       booster: params.booster,
       irnLevel: params.irnLevel,
       labLevels: params.labLevels,
@@ -1337,6 +1339,7 @@ class CostsCalculator {
     if (state.playerClass !== undefined) {
       setChecked(`#class-${state.playerClass}`, true);
     }
+    setChecked('#is-trader', state.isTrader === true);
 
     // IRN lab levels
     if (state.labLevels && state.labLevels.length > 0) {
@@ -1440,6 +1443,7 @@ class CostsCalculator {
 
     // Class
     setChecked('#class-0', true);
+    setChecked('#is-trader', false);
 
     // Booster
     setVal('#booster', 0);

@@ -214,4 +214,19 @@ describe('Calculator.calculateProduction', () => {
         expect(calculator.calculateProduction(1, 10, params))
             .toBe(calculator.calculateProduction(1, 10, mineParams({ playerClass: 1 })));
     });
+
+    it('adds the 5% alliance Traders bonus to mine production', () => {
+        const bare = calculator.calculateProduction(1, 10, mineParams());
+        const traded = calculator.calculateProduction(1, 10, mineParams({ isTrader: true }));
+
+        // The alliance class row is round(basePR * 0.05): round(1050.4657... * 0.05) = 53
+        expect(traded - bare).toBe(53);
+    });
+
+    it('leaves energy production untouched by the Traders bonus', () => {
+        const params = mineParams({ isTrader: true });
+
+        expect(calculator.calculateProduction(4, 10, params))
+            .toBe(calculator.calculateProduction(4, 10, mineParams()));
+    });
 });
