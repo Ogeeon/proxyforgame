@@ -269,7 +269,7 @@
 
     <!-- Expenses -->
     <div class="border rounded m-1 p-2">
-      <p class="border rounded subheader bg-primary-subtle"><b><?= $l['expences'] ?></b></p>
+      <p class="border rounded subheader bg-primary-subtle"><b><?= $l['expenses'] ?></b></p>
       <div class="d-flex flex-wrap gap-3 align-items-center justify-content-center">
         <div class="d-flex align-items-center gap-1">
           <label><?= $l['metal'] ?></label>

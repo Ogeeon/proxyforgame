@@ -315,7 +315,7 @@
 
     <!-- Expenses -->
     <div class="border rounded m-1 p-2">
-      <p class="border rounded subheader bg-primary-subtle"><b><?= $l['expences'] ?></b></p>
+      <p class="border rounded subheader bg-primary-subtle"><b><?= $l['expenses'] ?></b></p>
       <table class="mx-auto">
         <tr>
           <td><label><?= $l['crystal'] ?></label></td>
