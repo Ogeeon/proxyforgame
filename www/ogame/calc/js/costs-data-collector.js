@@ -58,6 +58,7 @@ class DataCollector {
 
     // Player class (radio buttons)
     params.playerClass = this._getPlayerClass();
+    params.isTrader = this._getCheckbox('#is-trader');
 
     // Intergalactic Research Network
     params.irnLevel = this._getInputNumber('#irn-level');
@@ -443,7 +444,7 @@ class DataCollector {
       'booster', 'universe-speed', 'research-speed', 'technocrat',
       'research-bonus', 'robot-factory-level', 'nanite-factory-level',
       'shipyard-level', 'ion-tech-level', 'hyper-tech-level',
-      'class-0', 'class-1', 'class-2', 'full-numbers',
+      'class-0', 'class-1', 'class-2', 'is-trader', 'full-numbers',
       'lf-research-table', 'discoverer-class-bonus', 'lf-kaelesh-level',
       'lf-collector-class-bonus', 'lf-rocktal-level',
       'mineral-res-cntr-lvl', 'lf-terraformer-rdc',
@@ -530,132 +531,6 @@ class DataCollector {
    */
   clearCache() {
     this._selectorCache = {};
-  }
-}
-
-// ============================================================================
-// SPECIALIZED COLLECTORS
-// ============================================================================
-
-/**
- * Collects data specifically for validation purposes
- */
-class ValidationDataCollector extends DataCollector {
-  /**
-   * Collect data and validate it
-   * @returns {{params: GlobalParams, validation: ValidationResult}}
-   */
-  collectAndValidate() {
-    const params = this.collectGlobalParams();
-    const validation = Validator.validateParams(params);
-
-    return { params, validation };
-  }
-
-  /**
-   * Collect table requests and validate each one
-   * @param {string} tableId
-   * @param {GlobalParams} params
-   * @returns {{requests: BuildRequest[], validations: ValidationResult[]}}
-   */
-  collectAndValidateTable(tableId, params) {
-    const requests = this.collectTableRequests(tableId);
-    const validations = requests.map(req =>
-      Validator.validateRequest(req, params, options.techReqs)
-    );
-
-    return { requests, validations };
-  }
-}
-
-/**
- * Collects data for export/import functionality
- */
-class ExportDataCollector extends DataCollector {
-  /**
-   * Collect all data for export
-   * @returns {Object} Complete application state
-   */
-  collectForExport() {
-    const globalParams = this.collectGlobalParams();
-    const singleLevel = this.collectAllTabRequests(0);
-    const multiLevel = this.collectAllTabRequests(1);
-    const range = this.collectRangeData();
-
-    return {
-      version: '1.0',
-      timestamp: Date.now(),
-      globalParams: this._paramsToJSON(globalParams),
-      tabs: {
-        singleLevel: this._requestsToJSON(singleLevel),
-        multiLevel: this._requestsToJSON(multiLevel),
-        range: this._rangeToJSON(range)
-      }
-    };
-  }
-
-  /**
-   * Convert params to plain JSON
-   * @private
-   */
-  _paramsToJSON(params) {
-    return {
-      shipyardLevel: params.shipyardLevel,
-      robotFactoryLevelPlanet: params.robotFactoryLevelPlanet,
-      robotFactoryLevelMoon: params.robotFactoryLevelMoon,
-      naniteFactoryLevel: params.naniteFactoryLevel,
-      universeSpeed: params.universeSpeed,
-      researchSpeed: params.researchSpeed,
-      researchLabLevel: params.researchLabLevel,
-      energyTechLevel: params.energyTechLevel,
-      plasmaTechLevel: params.plasmaTechLevel,
-      ionTechLevel: params.ionTechLevel,
-      hyperTechLevel: params.hyperTechLevel,
-      maxPlanetTemp: params.maxPlanetTemp,
-      planetPos: params.planetPos,
-      geologist: params.geologist,
-      engineer: params.engineer,
-      technocrat: params.technocrat,
-      admiral: params.admiral,
-      commander: params.commander,
-      researchBonus: params.researchBonus,
-      playerClass: params.playerClass,
-      booster: params.booster,
-      irnLevel: params.irnLevel,
-      labLevels: params.labLevels,
-      labChoice: params.labChoice,
-      fullNumbers: params.fullNumbers
-    };
-  }
-
-  /**
-   * Convert requests to plain JSON
-   * @private
-   */
-  _requestsToJSON(requestsMap) {
-    const result = {};
-    for (const [key, requests] of Object.entries(requestsMap)) {
-      result[key] = requests.map(req => ({
-        techId: req.techId,
-        fromLevel: req.fromLevel,
-        toLevel: req.toLevel,
-        isMoon: req.isMoon
-      }));
-    }
-    return result;
-  }
-
-  /**
-   * Convert range data to plain JSON
-   * @private
-   */
-  _rangeToJSON(rangeData) {
-    return {
-      techId: rangeData.techId,
-      fromLevel: rangeData.fromLevel,
-      toLevel: rangeData.toLevel,
-      techName: rangeData.techName
-    };
   }
 }
 
@@ -765,7 +640,5 @@ if (typeof window !== 'undefined') {
   // the script's lexical scope, not as globalThis properties.
   const g = /** @type {Record<string, unknown>} */ (/** @type {unknown} */ (globalThis));
   g.DataCollector = DataCollector;
-  g.ValidationDataCollector = ValidationDataCollector;
-  g.ExportDataCollector = ExportDataCollector;
   g.ChangeDetector = ChangeDetector;
 }

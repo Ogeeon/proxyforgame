@@ -24,8 +24,6 @@
  * @property {boolean} allOfficers whether all 5 officers are present
  * @property {number} playerClass player class: 0-Collector, 1-General, 2-Discoverer
  * @property {boolean} [isTrader] whether the player belongs to an alliance with the "Traders" class.
- *           Optional: the costs calculator has no field for it, so it leaves the property
- *           out and the 5% alliance bonus stays out of its single-building figures.
  * @property {number} [collectorClassBonusPct] percentage by which the Collector class bonus is
  *           amplified (Rock'tal Collector Enhancement, +0.2 per research level).
  *           Optional: left out, the class bonus stays at its base 25%.
@@ -43,7 +41,7 @@ function getProductionRate(params) {
 		case 2:
 		case 3:
 			prod = getProductionRateSplit(params);
-			return(prod[0] + prod[1] + prod[2] + prod[3] + prod[4] + prod[5] + prod[6] + prod[7]);
+			return(prod[0] + prod[1] + prod[2] + prod[3] + prod[4] + prod[5] + prod[6] + prod[7] + prod[8]);
 		case 4:
 		case 12:
 		case 212:

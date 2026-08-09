@@ -119,6 +119,7 @@
     "class-collector": "Sakupljač",
     "class-general": "General",
     "class-discoverer": "Otkrivač",
+    "is-trader": "Klasa saveza je \"Trgovci\"",
     "reaper": "Žetelac",
     "pathfinder": "Krčilac",
     "crawler": "Puzavac",
@@ -686,8 +687,7 @@
     "incl-yes": "Da",
     "incl-no": "Ne",
     "alliance-class": "Klasa saveza",
-    "lifeform-tech": "Bonus tehnologije oblika života",
-    "is-trader": "Klasa saveza je \"Trgovci\""
+    "lifeform-tech": "Bonus tehnologije oblika života"
   },
   "queue": {
     "start-time": "Početak",

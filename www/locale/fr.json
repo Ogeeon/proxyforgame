@@ -117,6 +117,7 @@
     "class-collector": "Collecteur",
     "class-general": "Général",
     "class-discoverer": "Explorateur",
+    "is-trader": "La classe d'alliance est \"Traders\"",
     "crawler": "Foreuse",
     "reaper": "Faucheur",
     "pathfinder": "Éclaireur",
@@ -686,8 +687,7 @@
     "incl-yes": "Oui",
     "incl-no": "Non",
     "alliance-class": "Classe d'alliance",
-    "lifeform-tech": "Bonus technologie formes de vie",
-    "is-trader": "La classe d'alliance est \"Traders\""
+    "lifeform-tech": "Bonus technologie formes de vie"
   },
   "queue": {
     "start-time": "Début",

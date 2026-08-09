@@ -414,6 +414,47 @@ class CostsCalculator {
   }
 
   /**
+   * Wire the standard numeric-field pair onto every selector: character
+   * filtering while typing, min/max clamping on blur, and a parameter-change
+   * notification after each. Every numeric input on the page wants exactly
+   * this, so the three knobs below are the only thing that ever differs.
+   * @param {string[]} selectors
+   * @param {object} [opts]
+   * @param {boolean} [opts.defaultConstraints=false] - apply the fallback
+   *        level constraints first; fields that declare their own are skipped
+   * @param {string} [opts.changeKey] - name reported to _handleParamChange;
+   *        defaults to the field's own id, which is what all but the exchange
+   *        rates want
+   * @private
+   */
+  _bindNumericFieldEvents(selectors, { defaultConstraints = false, changeKey } = {}) {
+    selectors.forEach(selector => {
+      if (defaultConstraints) {
+        this._setLevelConstraints(selector);
+      }
+      const key = changeKey || selector.substring(1);
+
+      removeAllEvents(selector, 'keyup');
+      addEvent(selector, 'keyup', (event) => {
+        // Character filtering only while typing (utils.js)
+        if (typeof validateInputNumber === 'function') {
+          validateInputNumber.call(event.target, event);
+        }
+        this._handleParamChange(key);
+      });
+
+      removeAllEvents(selector, 'blur');
+      addEvent(selector, 'blur', (event) => {
+        // Filtering plus min/max clamping on blur, never while typing
+        if (typeof validateInputNumberOnBlurNative === 'function') {
+          validateInputNumberOnBlurNative(event);
+        }
+        this._handleParamChange(key);
+      });
+    });
+  }
+
+  /**
    * Bind global parameter events
    * @private
    */
@@ -426,23 +467,7 @@ class CostsCalculator {
       '#nanite-factory-level'
     ];
 
-    buildingInputs.forEach(selector => {
-      this._setLevelConstraints(selector);
-      removeAllEvents(selector, 'keyup');
-      addEvent(selector, 'keyup', (event) => {
-        // Character filtering only while typing (utils.js)
-        if (typeof validateInputNumber === 'function') {
-          validateInputNumber.call(event.target, event);
-        }
-        this._handleParamChange(selector.substring(1));
-      });
-      removeAllEvents(selector, 'blur');
-      addEvent(selector, 'blur', (event) => {
-        // Filtering plus min/max clamping on blur, never while typing
-        validateInputNumberOnBlurNative(event);
-        this._handleParamChange(selector.substring(1));
-      });
-    });
+    this._bindNumericFieldEvents(buildingInputs, { defaultConstraints: true });
 
     // Technology level inputs
     const techInputs = [
@@ -458,23 +483,9 @@ class CostsCalculator {
     setConstrains('max-planet-temp', { 'min': -134, 'def': 0, 'allowNegative': true });
     setConstrains('planet-pos', { 'min': 1, 'max': 16, 'def': 8, 'allowNegative': false });
 
-    techInputs.forEach(selector => {
-      // The two fields above already carry their own constraints
-      this._setLevelConstraints(selector);
-      removeAllEvents(selector, 'keyup');
-      addEvent(selector, 'keyup', (event) => {
-        // Character filtering only while typing (utils.js)
-        if (typeof validateInputNumber === 'function') {
-          validateInputNumber.call(event.target, event);
-        }
-        this._handleParamChange(selector.substring(1));
-      });
-      removeAllEvents(selector, 'blur');
-      addEvent(selector, 'blur', (event) => {
-        validateInputNumberOnBlurNative(event);
-        this._handleParamChange(selector.substring(1));
-      });
-    });
+    // The two fields above already carry their own constraints, so the
+    // defaults applied here skip them
+    this._bindNumericFieldEvents(techInputs, { defaultConstraints: true });
 
     removeAllEvents('#max-planet-temp', 'blur');
     addEvent('#max-planet-temp', 'blur', (event) => {
@@ -510,44 +521,16 @@ class CostsCalculator {
     setConstrains('sc-capacity-increase', { min: 0, max: 1000, def: 0, allowFloat: true, allowNegative: false });
     setConstrains('lc-capacity-increase', { min: 0, max: 1000, def: 0, allowFloat: true, allowNegative: false });
 
-    lfInputs.forEach(selector => {
-      removeAllEvents(selector, 'keyup');
-      addEvent(selector, 'keyup', (event) => {
-        if (typeof validateInputNumber === 'function') {
-          validateInputNumber.call(event.target, event);
-        }
-        this._handleParamChange(selector.substring(1));
-      });
-      removeAllEvents(selector, 'blur');
-      addEvent(selector, 'blur', (event) => {
-        if (typeof validateInputNumberOnBlurNative === 'function') {
-          validateInputNumberOnBlurNative(event);
-        }
-        this._handleParamChange(selector.substring(1));
-      });
-    });
+    this._bindNumericFieldEvents(lfInputs);
 
     // Exchange rate inputs
     const rateInputs = ['#exchange-rates-m', '#exchange-rates-c', '#exchange-rates-d'];
     setConstrains('exchange-rates-m', { min: 0.1, max: 100, def: 1,   allowFloat: true, allowNegative: false });
     setConstrains('exchange-rates-c', { min: 0.1, max: 100, def: 1.5, allowFloat: true, allowNegative: false });
     setConstrains('exchange-rates-d', { min: 0.1, max: 100, def: 3,   allowFloat: true, allowNegative: false });
-    rateInputs.forEach(selector => {
-      removeAllEvents(selector, 'keyup');
-      addEvent(selector, 'keyup', (event) => {
-        if (typeof validateInputNumber === 'function') {
-          validateInputNumber.call(event.target, event);
-        }
-        this._handleParamChange('exchange-rates');
-      });
-      removeAllEvents(selector, 'blur');
-      addEvent(selector, 'blur', (event) => {
-        if (typeof validateInputNumberOnBlurNative === 'function') {
-          validateInputNumberOnBlurNative(event);
-        }
-        this._handleParamChange('exchange-rates');
-      });
-    });
+    // Any of the three moving retunes the same triplet, so they all report
+    // under one name rather than their own ids
+    this._bindNumericFieldEvents(rateInputs, { changeKey: 'exchange-rates' });
 
     // Selects
     ['#universe-speed', '#research-speed', '#booster'].forEach(selector => {
@@ -565,7 +548,8 @@ class CostsCalculator {
       '#geologist',
       '#engineer',
       '#admiral',
-      '#commander'
+      '#commander',
+      '#is-trader'
     ];
 
     // Unbind old click handlers from costs.js to prevent conflicts
@@ -1184,6 +1168,7 @@ class CostsCalculator {
       commander: params.commander,
       researchBonus: params.researchBonus,
       playerClass: params.playerClass,
+      isTrader: params.isTrader,
       booster: params.booster,
       irnLevel: params.irnLevel,
       labLevels: params.labLevels,
@@ -1337,6 +1322,7 @@ class CostsCalculator {
     if (state.playerClass !== undefined) {
       setChecked(`#class-${state.playerClass}`, true);
     }
+    setChecked('#is-trader', state.isTrader === true);
 
     // IRN lab levels
     if (state.labLevels && state.labLevels.length > 0) {
@@ -1440,6 +1426,7 @@ class CostsCalculator {
 
     // Class
     setChecked('#class-0', true);
+    setChecked('#is-trader', false);
 
     // Booster
     setVal('#booster', 0);

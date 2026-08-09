@@ -255,6 +255,10 @@
               </div>
             </fieldset>
             <div class="d-flex align-items-center gap-1">
+              <input id="is-trader" type="checkbox" name="is-trader" class="form-check-input">
+              <label for="is-trader"><?= $l['is-trader'] ?></label>
+            </div>
+            <div class="d-flex align-items-center gap-1">
               <input id="full-numbers" type="checkbox" name="full-numbers" class="form-check-input">
               <label for="full-numbers"><?= $l['full-numbers'] ?></label>
             </div>

@@ -118,6 +118,7 @@
     "class-collector": "Zbieracz",
     "class-general": "Generał",
     "class-discoverer": "Odkrywca",
+    "is-trader": "Klasa sojuszu to \"Handlarz\"",
     "reaper": "Rozpruwacz",
     "pathfinder": "Pionier",
     "crawler": "Pełzacz",
@@ -686,8 +687,7 @@
     "incl-yes": "Tak",
     "incl-no": "Nie",
     "alliance-class": "Klasa sojuszu",
-    "lifeform-tech": "Premia technologii form życia",
-    "is-trader": "Klasa sojuszu to \"Handlarz\""
+    "lifeform-tech": "Premia technologii form życia"
   },
   "queue": {
     "start-time": "Początek",

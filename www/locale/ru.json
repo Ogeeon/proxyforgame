@@ -49,6 +49,7 @@
     "class-collector": "Коллекционер",
     "class-general": "Генерал",
     "class-discoverer": "Исследователь",
+    "is-trader": "Класс альянса — \"Скупщики\"",
     "engineer": "Инженер",
     "geologist": "Геолог",
     "admiral": "Адмирал",
@@ -686,8 +687,7 @@
     "incl-yes": "Да",
     "incl-no": "Нет",
     "alliance-class": "Класс альянса",
-    "lifeform-tech": "Техн. бонус форм жизни",
-    "is-trader": "Класс альянса — \"Скупщики\""
+    "lifeform-tech": "Техн. бонус форм жизни"
   },
   "queue": {
     "start-time": "Начало",
