@@ -27,7 +27,7 @@ $techData = array(
     41 => array('lunar-base', 3, 20000, 40000, 20000, 2),
     42 => array('sensor-phalanx', 3, 20000, 40000, 20000, 2),
     43 => array('jump-gate', 3, 2000000, 4000000, 2000000, 2),
-    44 => array('missle-silo', 2, 20000, 20000, 1000, 2)
+    44 => array('missile-silo', 2, 20000, 20000, 1000, 2)
 );
 
 

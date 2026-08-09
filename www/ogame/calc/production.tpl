@@ -788,7 +788,7 @@
           </div>
           <div class="accordion-item">
             <h2 class="accordion-header">
-              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#one-pln-acc-defense"><?= $l['defense-producton'] ?></button>
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#one-pln-acc-defense"><?= $l['defense-production'] ?></button>
             </h2>
             <div id="one-pln-acc-defense" class="accordion-collapse collapse" data-bs-parent="#one-planet-accordion">
               <div class="accordion-body">
@@ -1005,7 +1005,7 @@
           </div>
           <div class="accordion-item">
             <h2 class="accordion-header">
-              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#all-pln-acc-defense"><?= $l['defense-producton'] ?></button>
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#all-pln-acc-defense"><?= $l['defense-production'] ?></button>
             </h2>
             <div id="all-pln-acc-defense" class="accordion-collapse collapse" data-bs-parent="#all-planets-accordion">
               <div class="accordion-body">
