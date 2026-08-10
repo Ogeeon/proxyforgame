@@ -15,15 +15,19 @@ release section; it is the source of truth for the other eleven translations.
 
 ## [Unreleased]
 
+## [2026-08-10] - site entry 60
+
 ### Added
 
 - Costs: the Common tab now has an "Alliance class is 'Traders'" checkbox, so the +5% alliance mine output bonus is included in the hourly production shown on the "One item, multiple levels" tab, matching the production calculator. <!-- site -->
 
 ### Fixed
 
-- LF costs: the Humans research "Supercomputer" used a cost growth coefficient of 1.3, while the game grows it by 1.2; every level above the first was overcharged (level 10 alone by more than 25M metal). <!-- site -->
+- LF costs: the Humans research "Supercomputer" used a cost growth coefficient of 1.3, while the game grows it by 1.2; every level above the first was overcharged (level 10 alone by more than 25M metal).
 - Costs: a research the Research Lab level is too low for is reported as impossible, but the Discoverer class still saw the 750 Dark Matter minimum in the DM column of such a row; the column now stays at 0 when there is nothing to speed up.
 - English locale: four spelling mistakes in the English text, in the ship-bonus reader error ("Couln't"), in the misspelling-report and e-mail dialogs ("Lets correct it") and in the production table header ("Enchanced").
+
+> **RU:** В калькуляторе стоимости на вкладке «Общие» появился флажок «Класс альянса — "Скупщики"». Бонус +5% к добыче шахт теперь учитывается в почасовой добыче на вкладке «Один элемент - неск. уровней» — так же, как в калькуляторе добычи.
 
 ## [2026-08-07] - site entry 59
 
