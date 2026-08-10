@@ -21,6 +21,7 @@ release section; it is the source of truth for the other eleven translations.
 
 ### Fixed
 
+- LF costs: the Humans research "Supercomputer" used a cost growth coefficient of 1.3, while the game grows it by 1.2; every level above the first was overcharged (level 10 alone by more than 25M metal). <!-- site -->
 - Costs: a research the Research Lab level is too low for is reported as impossible, but the Discoverer class still saw the 750 Dark Matter minimum in the DM column of such a row; the column now stays at 0 when there is nothing to speed up.
 - English locale: four spelling mistakes in the English text, in the ship-bonus reader error ("Couln't"), in the misspelling-report and e-mail dialogs ("Lets correct it") and in the production table header ("Enchanced").
 

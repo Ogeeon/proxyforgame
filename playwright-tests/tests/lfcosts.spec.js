@@ -107,15 +107,15 @@ test.describe('Lifeforms costs Calculator Page', () => {
         await page.locator('#tabtag-0-2').click();
         await addAllResearchesForRace(page, 0, '1');
         await fillTableRows(page, '#table-0-2', 2, 19, 2);
-        await expect(page.locator('#table-0-2 tr:nth-child(20) td:nth-child(4)')).toContainText('7.897M');
-        await expect(page.locator('#table-0-2 tr:nth-child(20) td:nth-child(5)')).toContainText('5.136M');
-        await expect(page.locator('#table-0-2 tr:nth-child(20) td:nth-child(6)')).toContainText('2.724M');
+        await expect(page.locator('#table-0-2 tr:nth-child(20) td:nth-child(4)')).toContainText('7.797M');
+        await expect(page.locator('#table-0-2 tr:nth-child(20) td:nth-child(5)')).toContainText('5.076M');
+        await expect(page.locator('#table-0-2 tr:nth-child(20) td:nth-child(6)')).toContainText('2.684M');
         await expect(page.locator('#table-0-2 tr:nth-child(20) td:nth-child(8)')).toContainText('5d 2h 8m');
         await page.locator('#research-cost-reduction').fill('10');
         await page.locator('#research-cost-reduction').press('Enter');
-        await expect(page.locator('#table-0-2 tr:nth-child(20) td:nth-child(4)')).toContainText('7.107M');
-        await expect(page.locator('#table-0-2 tr:nth-child(20) td:nth-child(5)')).toContainText('4.622M');
-        await expect(page.locator('#table-0-2 tr:nth-child(20) td:nth-child(6)')).toContainText('2.452M');
+        await expect(page.locator('#table-0-2 tr:nth-child(20) td:nth-child(4)')).toContainText('7.017M');
+        await expect(page.locator('#table-0-2 tr:nth-child(20) td:nth-child(5)')).toContainText('4.568M');
+        await expect(page.locator('#table-0-2 tr:nth-child(20) td:nth-child(6)')).toContainText('2.416M');
         await page.locator('#research-time-reduction').fill('10');
         await page.locator('#research-time-reduction').press('Enter');
         await expect(page.locator('#table-0-2 tr:nth-child(20) td:nth-child(8)')).toContainText('4d 13h 55m');
@@ -221,16 +221,16 @@ test.describe('Lifeforms costs Calculator Page', () => {
         expect(buildingsAfterCapIncr.lc).toBe(460);
 
         // Researches - Initial state (hyperspace=0, capIncrease=0)
-        expect(researchesInitial.sc).toBe(22429);
-        expect(researchesInitial.lc).toBe(4486);
+        expect(researchesInitial.sc).toBe(21803);
+        expect(researchesInitial.lc).toBe(4361);
 
         // Researches - After Hyperspace 10
-        expect(researchesAfterHyper.sc).toBe(16021);
-        expect(researchesAfterHyper.lc).toBe(3205);
+        expect(researchesAfterHyper.sc).toBe(15574);
+        expect(researchesAfterHyper.lc).toBe(3115);
 
         // Researches - After SC/LC capacity increase 10
-        expect(researchesAfterCapIncr.sc).toBe(15155);
-        expect(researchesAfterCapIncr.lc).toBe(3031);
+        expect(researchesAfterCapIncr.sc).toBe(14732);
+        expect(researchesAfterCapIncr.lc).toBe(2947);
     });
 
     // Helper function to test second outer tab for a specific lifeform
@@ -375,9 +375,9 @@ test.describe('Lifeforms costs Calculator Page', () => {
                 afterCapIncr: { sc: 373, lc: 75 }
             },
             researches: {
-                initial: { sc: 3073, lc: 615 },
-                afterHyper: { sc: 2195, lc: 439 },
-                afterCapIncr: { sc: 2077, lc: 416 }
+                initial: { sc: 3041, lc: 609 },
+                afterHyper: { sc: 2173, lc: 435 },
+                afterCapIncr: { sc: 2055, lc: 411 }
             }
         });
     });
@@ -439,17 +439,17 @@ test.describe('Lifeforms costs Calculator Page', () => {
         await page.locator('#param-lifeforms-tab').click();
         await page.locator('#research-centre-level').fill('10');
         await page.locator('#research-centre-level').press('Enter');
-        await expect(page.locator('#table-0-2 tr:nth-child(20) td:nth-child(4)')).toContainText('7.699M');
-        await expect(page.locator('#table-0-2 tr:nth-child(20) td:nth-child(5)')).toContainText('5.008M');
-        await expect(page.locator('#table-0-2 tr:nth-child(20) td:nth-child(6)')).toContainText('2.656M');
+        await expect(page.locator('#table-0-2 tr:nth-child(20) td:nth-child(4)')).toContainText('7.602M');
+        await expect(page.locator('#table-0-2 tr:nth-child(20) td:nth-child(5)')).toContainText('4.949M');
+        await expect(page.locator('#table-0-2 tr:nth-child(20) td:nth-child(6)')).toContainText('2.617M');
         await expect(page.locator('#table-0-2 tr:nth-child(20) td:nth-child(8)')).toContainText('4d 1h 42m');
 
         // Stacks additively with manual research-cost-reduction
         await page.locator('#research-cost-reduction').fill('10');
         await page.locator('#research-cost-reduction').press('Enter');
-        await expect(page.locator('#table-0-2 tr:nth-child(20) td:nth-child(4)')).toContainText('6.909M');
-        await expect(page.locator('#table-0-2 tr:nth-child(20) td:nth-child(5)')).toContainText('4.494M');
-        await expect(page.locator('#table-0-2 tr:nth-child(20) td:nth-child(6)')).toContainText('2.384M');
+        await expect(page.locator('#table-0-2 tr:nth-child(20) td:nth-child(4)')).toContainText('6.822M');
+        await expect(page.locator('#table-0-2 tr:nth-child(20) td:nth-child(5)')).toContainText('4.441M');
+        await expect(page.locator('#table-0-2 tr:nth-child(20) td:nth-child(6)')).toContainText('2.349M');
         await expect(page.locator('#table-0-2 tr:nth-child(20) td:nth-child(8)')).toContainText('4d 1h 42m');
 
         // Stacks with manual research-time-reduction
@@ -534,7 +534,7 @@ test.describe('Lifeforms costs Calculator Page', () => {
         // Raw 200% would make the duration negative, which getBuildTimeLF floors to 1s.
         // Clamping to 99% keeps 1/100 of the baseline instead.
         expect(centreOnly.time).toBe('1h 13m 8s');
-        expect(centreOnly.metal).toBe('5.922M');
+        expect(centreOnly.metal).toBe('5.847M');
         expect(baseline.time).toBe('5d 2h 8m');
 
         // Adding the manual time reduction on top changes nothing - already at the 99% cap
