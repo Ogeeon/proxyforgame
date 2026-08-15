@@ -1,4 +1,7 @@
-name: Playwright Tests
+# Named "CI" rather than after the browser suite: the job runs the whole non-browser gate -
+# i18n-validate, lint, typecheck, tsconfigs-check, the unit tests - before Playwright starts.
+# The file name stays playwright.yml so the README badge URL and any existing links keep working.
+name: CI
 
 on:
   push:
