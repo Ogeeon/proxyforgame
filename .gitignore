@@ -1,6 +1,12 @@
 .vscode
 /node_modules/
 /.html-check/
+# Playwright leaves these behind when the CLI is run from the repo root instead
+# of playwright-tests/, whose own .gitignore covers the normal case.
+/test-results/
+/playwright-report/
+/blob-report/
+/.playwright-mcp/
 /www/.github
 /www/tools
 # Everything under .claude is local (plans/, settings.local.json, session state),
