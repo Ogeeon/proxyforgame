@@ -1621,7 +1621,7 @@ class FlightOrchestrator {
     _importOwnApiShips(data, importShips, importLifeforms) {
         Object.entries(data.ships).forEach(([id, ship]) => {
             const mapped = FLIGHT_TECH_MAPPING.find((m) => m[0] == id);
-            if (!mapped) return;
+            if (!mapped || !ship) return;
             if (importShips) setVal(`#${mapped[1]}`, ship.amount);
             if (importLifeforms) this._applyOwnApiShipLifeformBonuses(id, ship);
         });

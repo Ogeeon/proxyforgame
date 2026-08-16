@@ -37,13 +37,19 @@ const OWN_API_BONUS_DIGITS = { cargo: 4, speed: 4, fuel: 5 };
  */
 
 /**
+ * The three blocks are keyed by whatever the export happened to carry, and a
+ * caller looks up the ids its own page has fields for - so a miss is the normal
+ * case, not an error. Hence the `|undefined` on each value: it is what a lookup
+ * really returns, and it makes the `!== undefined` guards on the reading side
+ * type-correct rather than dead checks.
+ *
  * @typedef {Object} OwnApiPayload
  * @property {?OwnApiCoords} coords Null when the export carries no coordinates.
  * @property {number} characterClassId 0 when the export carries no class.
  * @property {number} allianceClassId 0 when the export carries no class.
- * @property {Object<string, number>} researches Tech id to level.
- * @property {Object<string, OwnApiShip>} ships Tech id to counts and bonuses.
- * @property {Object<string, number>} classBoosters Booster index to percent.
+ * @property {Object<string, (number|undefined)>} researches Tech id to level.
+ * @property {Object<string, (OwnApiShip|undefined)>} ships Tech id to counts and bonuses.
+ * @property {Object<string, (number|undefined)>} classBoosters Booster index to percent.
  */
 
 /**
