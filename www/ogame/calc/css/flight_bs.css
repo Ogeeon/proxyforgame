@@ -351,6 +351,14 @@
   display: none;
 }
 
+/* Empty state: the twenty speed rows step aside for the row that says why the
+   table has nothing to show. Hiding them here rather than through each row's
+   `hidden´ attribute keeps this independent of the per-class striping, which
+   owns that attribute and only ever sets it on the even rows. */
+#flight-times.is-empty tr.speed-row {
+  display: none;
+}
+
 /* The empty-systems override sits inline with the distance readout */
 #empty-systems-count-spin {
   width: 64px;

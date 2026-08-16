@@ -1006,9 +1006,12 @@ test.describe('Flight Calculator - Cargo Capacity', () => {
 // Block 3. The results table.
 // ---------------------------------------------------------------------------
 
-/** Data rows of #flight-times, i.e. everything below the header. */
-const speedRows = (page) => page.locator('#flight-times tr').nth(0).locator('xpath=..')
-    .locator('tr').filter({ hasNot: page.locator('th') });
+/**
+ * The twenty speed steps of #flight-times. Selected by class rather than by
+ * position: the table also carries the empty-state rows, which are not speed
+ * steps and must not be counted as such.
+ */
+const speedRows = (page) => page.locator('#flight-times tr.speed-row');
 
 test.describe('Flight Calculator - Results Table', () => {
     test.beforeEach(async ({ context, page }) => {
@@ -1239,6 +1242,93 @@ test.describe('Flight Calculator - Results Table', () => {
         await page.locator('#ovr-speed-cb').uncheck();
         expect(await page.evaluate(() => options.isSpeedOvr)).toBe(false);
         await expect(page.locator('#ovr-speed-t')).toBeDisabled();
+    });
+});
+
+test.describe('Flight Calculator - Empty State', () => {
+    const noShips = (page) => page.locator('#flight-times-empty-ships');
+    const badCoords = (page) => page.locator('#flight-times-empty-coords');
+
+    test.beforeEach(async ({ context, page }) => {
+        await context.addInitScript(() => {
+            localStorage.setItem('lastChange', 'key-value;true,value;99999');
+        });
+        // No fleet is set up here on purpose: every ship count starts at 0, which
+        // is exactly the state a first-time visitor lands in.
+        await page.goto('/ogame/calc/flight.php');
+        await installCompat(page);
+        await openFlightTimesTab(page);
+    });
+
+    test('a first visit is met by the no-ships message, not by a blank table', async ({ page }) => {
+        await expect(noShips(page)).toBeVisible();
+        await expect(badCoords(page)).toBeHidden();
+        await expect(speedRows(page).nth(0)).toBeHidden();
+    });
+
+    test('entering a ship count puts the speed rows back', async ({ page }) => {
+        await setFleet(page, { 'large-cargo': 100 });
+        await page.evaluate(() => updateNumbers());
+
+        await expect(noShips(page)).toBeHidden();
+        await expect(speedRows(page).nth(0)).toBeVisible();
+        await expect(speedRows(page).nth(0).locator('td').nth(1)).not.toBeEmpty();
+    });
+
+    /**
+     * Leaves a coordinate out of range with the focus elsewhere. Typing an
+     * invalid value directly would not survive: blur validation clamps the field
+     * back into range the moment the user leaves it, so that state only exists
+     * mid-keystroke. Shrinking the universe under an already-entered coordinate
+     * is the way to reach it for real - only the edited field is ever repaired.
+     */
+    async function shrinkUniverseUnder(page, fieldId) {
+        await page.locator(`#${fieldId}`).fill('5');
+        await openParams(page, '#galaxies-num');
+        await page.locator('#galaxies-num').fill('2');
+        await page.locator('#galaxies-num').blur();
+        await page.evaluate(() => updateNumbers());
+    }
+
+    test('a broken route reports the coordinates, not the fleet', async ({ page }) => {
+        // Both causes hold at once: the fleet is still empty. The coordinates win,
+        // because without a route there is nothing to fly along in the first place.
+        await shrinkUniverseUnder(page, 'destination-g');
+
+        await expect(badCoords(page)).toBeVisible();
+        await expect(noShips(page)).toBeHidden();
+    });
+
+    test('the no-ships message leads to the ship counts', async ({ page }) => {
+        // Opening the parameters closes the ships section: they share a parent
+        // accordion, so this is the state where the shortcut has work to do.
+        await openParams(page);
+        await expect(page.locator('#small-cargo')).toBeHidden();
+
+        await page.locator('#flight-times-goto-ships').click();
+
+        await expect(page.locator('#small-cargo')).toBeVisible();
+        await expect(page.locator('#small-cargo')).toBeFocused();
+    });
+
+    test('the coordinates message leads to the field that is wrong', async ({ page }) => {
+        await shrinkUniverseUnder(page, 'destination-g');
+
+        await page.locator('#flight-times-goto-coords').click();
+        await expect(page.locator('#destination-g')).toBeFocused();
+    });
+
+    test('an invalid departure is reached through its collapsed section', async ({ page }) => {
+        await openParams(page, '#departure-g');
+        await shrinkUniverseUnder(page, 'departure-g');
+        // Collapse the parameters again by opening the ships section over them
+        await openShips(page);
+        await expect(page.locator('#departure-g')).toBeHidden();
+
+        await page.locator('#flight-times-goto-coords').click();
+
+        await expect(page.locator('#departure-g')).toBeVisible();
+        await expect(page.locator('#departure-g')).toBeFocused();
     });
 });
 

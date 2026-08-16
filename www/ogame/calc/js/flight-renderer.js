@@ -20,6 +20,16 @@ function takeToCalcButton(row) {
     return /** @type {HTMLElement} */ (row.children[4].children[0]);
 }
 
+/**
+ * The twenty speed steps of #flight-times, fastest first. Addressed by class
+ * rather than by position: the table also carries a header and the empty-state
+ * rows, and a positional index would silently shift the moment one is added.
+ * @returns {NodeListOf<HTMLTableRowElement>}
+ */
+function speedRows() {
+    return document.querySelectorAll('#flight-times tr.speed-row');
+}
+
 class FlightRenderer {
     constructor(opts) {
         this.opts = opts;
@@ -78,9 +88,9 @@ class FlightRenderer {
      * @param {number} playerClass drives which rows are visible and their striping
      */
     renderFlightTimes(entries, playerClass) {
-        const rows = document.querySelectorAll('#flight-times tr');
+        const rows = speedRows();
         entries.forEach((entry, i) => {
-            const row = rows[i + 1];
+            const row = rows[i];
             if (!row) {
                 return;
             }
@@ -90,22 +100,37 @@ class FlightRenderer {
             takeToCalcButton(row).hidden = false;
             this._stripeRow(row, i + 1, playerClass);
         });
+        this._showEmptyState(null);
     }
 
-    /** Blank every flight-times row and hide the take-to-calc buttons. */
-    clearFlightTimes(playerClass) {
-        const rows = document.querySelectorAll('#flight-times tr');
-        for (let i = 1; i <= 20; i++) {
-            const row = rows[i];
-            if (!row) {
-                continue;
-            }
+    /**
+     * There is nothing to show, and the table says why instead of going blank.
+     * Blanks every speed row, hides the take-to-calc buttons and brings forward
+     * the message row for the reason given.
+     *
+     * @param {'ships'|'coords'} reason what is missing: a fleet, or a valid route
+     * @param {number} playerClass drives the striping of the rows left behind
+     */
+    renderEmptyState(reason, playerClass) {
+        speedRows().forEach((row, i) => {
             row.children[1].innerHTML = '';
             row.children[2].innerHTML = '';
             row.children[3].innerHTML = '';
             takeToCalcButton(row).hidden = true;
-            this._stripeRow(row, i, playerClass);
+            this._stripeRow(row, i + 1, playerClass);
+        });
+        this._showEmptyState(reason);
+    }
+
+    /** Show one empty-state row, or none of them when `reason´ is null. */
+    _showEmptyState(reason) {
+        const table = document.getElementById('flight-times');
+        if (table) {
+            table.classList.toggle('is-empty', reason !== null);
         }
+        document.querySelectorAll('#flight-times tr.flight-times-empty').forEach((row) => {
+            row.toggleAttribute('hidden', row.id !== `flight-times-empty-${reason}`);
+        });
     }
 
     /**

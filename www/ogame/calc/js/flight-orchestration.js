@@ -216,7 +216,7 @@ class FlightOrchestrator {
 
         if (!route.departure.valid || !route.destination.valid) {
             this.renderer.renderDistance(null);
-            this.renderer.clearFlightTimes(params.playerClass);
+            this.renderer.renderEmptyState('coords', params.playerClass);
             this.opts.save();
             return;
         }
@@ -239,7 +239,7 @@ class FlightOrchestrator {
             ? this._effectiveMinSpeed(ships, counts, params)
             : Infinity;
         if (minSpeed === Infinity) {
-            this.renderer.clearFlightTimes(params.playerClass);
+            this.renderer.renderEmptyState('ships', params.playerClass);
             this.opts.save();
             return;
         }
@@ -747,6 +747,80 @@ class FlightOrchestrator {
     clearShips() {
         SHIPS_BASE.forEach((ship) => setVal(`#${ship[0]}`, 0));
         this.recalc();
+    }
+
+    // ------------------------------------------------------------------
+    // Empty-state shortcuts — take the user to the field that is missing
+    // ------------------------------------------------------------------
+
+    /** From the "no ships" message to the first ship count. */
+    focusShipCounts() {
+        this._revealField(SHIPS_BASE[0][0]);
+    }
+
+    /**
+     * From the "bad coordinates" message to the offending field. Departure is
+     * checked first because it is the one hidden inside a collapsed section,
+     * so leading with it costs nothing and leading with the other would leave
+     * the real culprit off screen.
+     */
+    focusInvalidCoordinates() {
+        const route = this.collector.collectRoute();
+        this._revealField(route.departure.valid ? 'destination-g' : 'departure-g');
+    }
+
+    /**
+     * Bring a field into view and put the cursor in it, undoing whatever is
+     * hiding it: the tab pane it sits on, and the accordion section around that.
+     * The focus waits for the expansion to finish: Bootstrap animates the panel's
+     * height, and scrolling to a box that is still growing lands in the wrong
+     * place.
+     */
+    _revealField(id) {
+        const el = document.getElementById(id);
+        if (!el) {
+            return;
+        }
+        this._showTabOf(el);
+        const section = el.closest('.accordion-collapse');
+        if (section && !section.classList.contains('show')) {
+            section.addEventListener('shown.bs.collapse', () => this._scrollTo(el), { once: true });
+            // Bootstrap drops show() on a panel that is still animating, and the
+            // sibling sections collapse this one the moment another opens. Asking
+            // again once that has finished is what makes the shortcut reliable
+            // right after the user has opened some other section.
+            if (section.classList.contains('collapsing')) {
+                section.addEventListener('hidden.bs.collapse',
+                    () => bootstrap.Collapse.getOrCreateInstance(section).show(), { once: true });
+            } else {
+                bootstrap.Collapse.getOrCreateInstance(section).show();
+            }
+            return;
+        }
+        this._scrollTo(el);
+    }
+
+    /**
+     * Bring the tab pane holding `el´ to the front. The panes hide each other,
+     * so expanding the section around a field is not enough on its own - a field
+     * on a pane that is not active stays undisplayed, and cannot take focus.
+     */
+    _showTabOf(el) {
+        const pane = el.closest('.tab-pane');
+        if (!pane || pane.classList.contains('active')) {
+            return;
+        }
+        const tab = document.querySelector(`[role="tab"][data-bs-target="#${pane.id}"]`);
+        if (tab) {
+            bootstrap.Tab.getOrCreateInstance(tab).show();
+        }
+    }
+
+    _scrollTo(el) {
+        // focus() scrolls on its own, and its idea of "just visible" is not the
+        // centred view we want, so the scroll is done by hand afterwards.
+        el.focus({ preventScroll: true });
+        el.scrollIntoView({ block: 'center' });
     }
 
     loadUniverse(key) {
@@ -1730,6 +1804,8 @@ class FlightOrchestrator {
             on(id, 'input', onEdit);
             on(id, 'blur', onEdit);
         });
+        on('flight-times-goto-ships', 'click', () => this.focusShipCounts());
+        on('flight-times-goto-coords', 'click', () => this.focusInvalidCoordinates());
         on('empty-systems-count-spin', 'input', (e) => this.onEmptySystemsInput(e.currentTarget));
         ['destination-g', 'destination-s', 'destination-p'].forEach((id) =>
             on(id, 'input', () => this.onDestinationInput()));

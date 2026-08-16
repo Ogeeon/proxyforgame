@@ -491,7 +491,7 @@
                   <th style="width: 32px;">&nbsp;</th>
                 </tr>
                 <?php for($i=100; $i>0; $i-=5): ?>
-                <tr class="<?= ($i % 10) === 5 ? 'odd' : 'even' ?>">
+                <tr class="speed-row <?= ($i % 10) === 5 ? 'odd' : 'even' ?>">
                   <td class="text-center"><?= $i ?>%</td>
                   <td class="text-center"></td>
                   <td class="text-center"></td>
@@ -503,6 +503,24 @@
                   </td>
                 </tr>
                 <?php endfor; ?>
+                <?php
+                  // Why the table is blank. The speed rows step aside for one of
+                  // these (see #flight-times.is-empty in flight_bs.css); the verb
+                  // group is a button that takes the user to the field to fill in.
+                  $emptyStates = [
+                    ['flight-times-empty-ships', 'flight-times-goto-ships', 'flight-times-no-ships'],
+                    ['flight-times-empty-coords', 'flight-times-goto-coords', 'flight-times-bad-coords'],
+                  ];
+                  foreach ($emptyStates as $state):
+                    $action = '<button type="button" id="' . $state[1]
+                      . '" class="btn btn-link p-0 align-baseline">' . $l[$state[2] . '-action'] . '</button>';
+                ?>
+                <tr id="<?= $state[0] ?>" class="flight-times-empty" hidden>
+                  <td colspan="5" class="text-center text-muted py-3">
+                    <i class="bi bi-info-circle"></i> <?= sprintf($l[$state[2]], $action) ?>
+                  </td>
+                </tr>
+                <?php endforeach; ?>
               </table>
           </div>
             <div class="ps-2 arrival-cell">

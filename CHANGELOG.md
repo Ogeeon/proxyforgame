@@ -15,6 +15,10 @@ release section; it is the source of truth for the other eleven translations.
 
 ## [Unreleased]
 
+### Added
+
+- Flight: the flight-times table now says why it has nothing to show instead of standing empty - either that no ships have been entered, or that the coordinates are out of range. The message links to the field to fill in, opening the section it is on when that section is collapsed.
+
 ## [2026-08-10] - site entry 60
 
 ### Added
