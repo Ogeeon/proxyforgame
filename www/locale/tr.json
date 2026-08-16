@@ -559,6 +559,8 @@
     "mission-type-war": "Savaş",
     "mission-type-peaceful": "Barışçıl",
     "mission-type-holding": "Bekleme",
+    "mission-type-destroy": "Yok etme",
+    "mission-type-destroy-explain": "Bu görevde filo 310 sabit hızıyla uçar — 1x evrende Hiperuzay İticisi 7 olan bir Ölüm Yıldızı. İtici seviyeleri, oyuncu sınıfı, gemi bonusları ve evrenin filo hızı uçuş süresini değiştirmez ve hız yüzdesi seçilemez.",
     "fetchig-data": "Veriler alınıyor...",
     "own-api-reader-hdr": "OGame'den içe aktar",
     "own-api-import-select-hdr": "Neyin içe aktarılacağı",

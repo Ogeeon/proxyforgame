@@ -468,6 +468,7 @@
                 <div><input id="mission-type-0" type="radio" name="mission-type" value="0" class="form-check-input"> <label for="mission-type-0"><?= $l['mission-type-war'] ?></label></div>
                 <div><input id="mission-type-1" type="radio" name="mission-type" value="1" class="form-check-input"> <label for="mission-type-1"><?= $l['mission-type-peaceful'] ?></label></div>
                 <div><input id="mission-type-2" type="radio" name="mission-type" value="2" class="form-check-input"> <label for="mission-type-2"><?= $l['mission-type-holding'] ?></label></div>
+                <div><input id="mission-type-3" type="radio" name="mission-type" value="3" class="form-check-input"> <label for="mission-type-3"><abbr data-bs-toggle="tooltip" title="<?= htmlspecialchars($l['mission-type-destroy-explain'], ENT_QUOTES) ?>"><?= $l['mission-type-destroy'] ?></abbr></label></div>
               </div>
 
               <div class="d-flex flex-wrap align-items-center gap-2 mb-1">

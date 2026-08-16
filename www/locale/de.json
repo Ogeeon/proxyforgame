@@ -559,6 +559,8 @@
     "mission-type-war": "Krieg",
     "mission-type-peaceful": "Friedlich",
     "mission-type-holding": "Halten",
+    "mission-type-destroy": "Zerstörung",
+    "mission-type-destroy-explain": "Bei dieser Mission fliegt die Flotte mit einer festen Geschwindigkeit von 310 — ein Todesstern mit Hyperraumantrieb 7 in einem 1x-Universum. Antriebsstufen, die Spielerklasse, Schiffsboni und die Flottengeschwindigkeit des Universums ändern die Flugzeit nicht, und der Geschwindigkeitsprozentsatz kann nicht gewählt werden.",
     "fetchig-data": "Daten werden abgerufen...",
     "own-api-reader-hdr": "Import aus OGame",
     "own-api-import-select-hdr": "Was importieren",

@@ -559,6 +559,8 @@
     "mission-type-war": "Guerre",
     "mission-type-peaceful": "Pacifique",
     "mission-type-holding": "Maintien",
+    "mission-type-destroy": "Destruction",
+    "mission-type-destroy-explain": "Lors de cette mission, la flotte vole à une vitesse fixe de 310 — une Étoile de la mort avec propulsion hyperespace 7 dans un univers x1. Les niveaux de propulsion, la classe du joueur, les bonus des vaisseaux et la vitesse de flotte de l’univers ne modifient pas la durée du vol, et le pourcentage de vitesse ne peut pas être choisi.",
     "fetchig-data": "Récupération des données...",
     "own-api-reader-hdr": "Importer depuis OGame",
     "own-api-import-select-hdr": "Quoi importer",

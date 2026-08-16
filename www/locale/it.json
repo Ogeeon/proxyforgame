@@ -559,6 +559,8 @@
     "mission-type-war": "Guerra",
     "mission-type-peaceful": "Pacifico",
     "mission-type-holding": "Sosta",
+    "mission-type-destroy": "Distruzione",
+    "mission-type-destroy-explain": "In questa missione la flotta viaggia a una velocità fissa di 310 — una Morte Nera con propulsore iperspaziale 7 in un universo x1. I livelli di propulsore, la classe del giocatore, i bonus delle navi e la velocità della flotta dell’universo non cambiano il tempo di volo, e la percentuale di velocità non è selezionabile.",
     "fetchig-data": "Recupero dati...",
     "own-api-reader-hdr": "Importa da OGame",
     "own-api-import-select-hdr": "Cosa importare",

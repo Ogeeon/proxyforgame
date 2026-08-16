@@ -18,6 +18,7 @@ release section; it is the source of truth for the other eleven translations.
 ### Added
 
 - Flight: the flight-times table now says why it has nothing to show instead of standing empty - either that no ships have been entered, or that the coordinates are out of range. The message links to the field to fill in, opening the section it is on when that section is collapsed.
+- Flight: a "Moon destruction" mission type (labelled "Destruction" on the page), flying at the fixed speed of 310 that OGame 12.9.0 introduced for that mission - a Death Star with hyperspace drive 7 in a 1x universe. Drive levels, the player class, the alliance and life form bonuses and the universe fleet speed no longer change the flight time, the deuterium is charged at that same speed, and the speed percentage cannot be picked, so the table holds the single 100% row and the manual speed override is greyed out. <!-- site -->
 
 ### Fixed
 

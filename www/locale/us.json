@@ -559,6 +559,8 @@
     "mission-type-war": "War",
     "mission-type-peaceful": "Peaceful",
     "mission-type-holding": "Holding",
+    "mission-type-destroy": "Destruction",
+    "mission-type-destroy-explain": "On this mission the fleet flies at a fixed speed of 310 — a Death Star with hyperspace drive 7 in a 1x universe. Drive levels, the player class, ship bonuses and the universe fleet speed do not change the flight time, and the speed percentage cannot be chosen.",
     "fetchig-data": "Fetching data...",
     "own-api-reader-hdr": "Import from OGame",
     "own-api-import-select-hdr": "What to import",

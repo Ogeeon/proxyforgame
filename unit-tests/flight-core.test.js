@@ -12,9 +12,9 @@ const { expect } = require('./expect');
 
 // utils.js supplies strPad() for getFlightTimeStr; the orchestration file carries
 // getFlightTimeStr and _legSeconds, both of which are pure.
-const { FlightCalculator, FlightOrchestrator, getFlightTimeStr } = load(
+const { FlightCalculator, FlightOrchestrator, getFlightTimeStr, MISSION, SHIP, PLAYER_CLASS } = load(
     ['js/utils.js', 'ogame/calc/js/flight-core.js', 'ogame/calc/js/flight-orchestration.js'],
-    ['FlightCalculator', 'FlightOrchestrator', 'getFlightTimeStr'],
+    ['FlightCalculator', 'FlightOrchestrator', 'getFlightTimeStr', 'MISSION', 'SHIP', 'PLAYER_CLASS'],
 );
 
 const calc = new FlightCalculator();
@@ -319,6 +319,100 @@ describe('Flight Calculator - Flight Duration', () => {
         expect(fast).toBeLessThan(slow);
         // Duration scales with 1/sqrt(speed)
         expect(slow / fast).toBeCloseTo(Math.sqrt(12500 / 2000), 2);
+    });
+});
+
+describe('Flight Calculator - Moon Destruction Mission', () => {
+    // OGame 12.9.0: the mission flies at 310 whatever the fleet is, and the
+    // universe fleet speed no longer divides the trip.
+    const UNI_X4 = { fleetSpeedWar: 4, fleetSpeedPeaceful: 6, fleetSpeedHolding: 8 };
+
+    /** Ship params for a fleet with the given hyperspace drive level. */
+    const shipParams = (hyperspace, over = {}) => ({
+        driveLevels: [0, 0, hyperspace],
+        playerClass: PLAYER_CLASS.COLLECTOR,
+        warriorBonus: false,
+        traderBonus: false,
+        hyperTechLvl: 0,
+        lfMechanGE: 0,
+        lfRocktalCE: 0,
+        lfShipsBonuses: Array.from({ length: 15 }, () => [0, 0, 0]),
+        deutFactor: 10,
+        deutConsReduction: 25,
+        ...over,
+    });
+
+    const deathStars = (count) => {
+        const counts = new Array(15).fill(0);
+        counts[SHIP.DEATH_STAR] = count;
+        return counts;
+    };
+
+    const minSpeedWith = (hyperspace, over = {}) => {
+        const params = shipParams(hyperspace, over);
+        return calc.getMinSpeed(calc.buildShipsData(params.driveLevels), deathStars(10), params);
+    };
+
+    it('matches the durations published with the change', () => {
+        const trip = (dist) => calc.getFlightDuration(
+            calc.speedForMission(MISSION.DESTROY, minSpeedWith(7)),
+            dist, 100, calc.fleetSpeedFor(MISSION.DESTROY, UNI_X4));
+
+        // 1005 is the in-system hop of the announcement: 5h 32m
+        expect(trip(1005)).toBe(19938);
+        // 3650 is ten systems away: 10h 33m
+        expect(trip(3650)).toBe(37988);
+    });
+
+    it('the speed is fixed, not capped', () => {
+        // Below 310 the fleet is sped up to it, above 310 it is slowed down to it
+        expect(minSpeedWith(0)).toBe(100);
+        expect(calc.speedForMission(MISSION.DESTROY, minSpeedWith(0))).toBe(310);
+        // The drive bonus is a float multiplication, hence the tolerance
+        expect(minSpeedWith(12)).toBeCloseTo(460, 6);
+        expect(calc.speedForMission(MISSION.DESTROY, minSpeedWith(12))).toBe(310);
+    });
+
+    it('neither drive research nor class nor alliance bonus moves it', () => {
+        const boosted = minSpeedWith(12, {
+            playerClass: PLAYER_CLASS.GENERAL, warriorBonus: true,
+        });
+        expect(boosted).toBeGreaterThan(310);
+        expect(calc.speedForMission(MISSION.DESTROY, boosted)).toBe(310);
+    });
+
+    it('the universe fleet speed does not divide the trip', () => {
+        expect(calc.fleetSpeedFor(MISSION.DESTROY, UNI_X4)).toBe(1);
+        // ... while it still does for the three missions that had it
+        expect(calc.fleetSpeedFor(MISSION.WAR, UNI_X4)).toBe(4);
+        expect(calc.fleetSpeedFor(MISSION.PEACEFUL, UNI_X4)).toBe(6);
+        expect(calc.fleetSpeedFor(MISSION.HOLDING, UNI_X4)).toBe(8);
+    });
+
+    it('every other mission keeps flying at the fleet speed', () => {
+        [MISSION.WAR, MISSION.PEACEFUL, MISSION.HOLDING].forEach((mission) => {
+            expect(calc.speedForMission(mission, 5000)).toBe(5000);
+        });
+    });
+
+    it('the fuel bill is charged at the fixed speed too', () => {
+        const counts = deathStars(10);
+        const params = shipParams(12);
+        const ships = calc.buildShipsData(params.driveLevels);
+        const duration = calc.getFlightDuration(310, 3650, 100, 1);
+
+        // A fleet that could fly at 460 pays as if it flew at 310 full speed,
+        // which is what the same fleet with hyperspace 7 pays on its own
+        const fixed = calc.getDeutConsumption(ships, counts, 3650, duration, 1, params, 310);
+        const params7 = shipParams(7);
+        const atSameSpeed = calc.getDeutConsumption(
+            calc.buildShipsData(params7.driveLevels), counts, 3650, duration, 1, params7);
+        expect(fixed).toBe(atSameSpeed);
+
+        // Left on its own speed the same trip reads as a throttled flight and
+        // undercharges, which is exactly the mismatch the fixed speed removes
+        expect(calc.getDeutConsumption(ships, counts, 3650, duration, 1, params))
+            .toBeLessThan(fixed);
     });
 });
 

@@ -84,14 +84,17 @@ class FlightRenderer {
     /**
      * Fill the flight-times table.
      * @param {Array<{duration: number, deut: number, cargo: number}>} entries
-     *   one per speed step, index 0 = 100% down to index 19 = 5%
+     *   one per speed step, index 0 = 100% down to index 19 = 5%. A mission
+     *   flown at a fixed speed hands over the single 100% entry instead, and
+     *   the rows it leaves without an entry are blanked and hidden.
      * @param {number} playerClass drives which rows are visible and their striping
      */
     renderFlightTimes(entries, playerClass) {
-        const rows = speedRows();
-        entries.forEach((entry, i) => {
-            const row = rows[i];
-            if (!row) {
+        speedRows().forEach((row, i) => {
+            const entry = entries[i];
+            if (!entry) {
+                this._blankRow(row);
+                row.hidden = true;
                 return;
             }
             row.children[1].innerHTML = this._fmtTime(entry.duration);
@@ -113,13 +116,18 @@ class FlightRenderer {
      */
     renderEmptyState(reason, playerClass) {
         speedRows().forEach((row, i) => {
-            row.children[1].innerHTML = '';
-            row.children[2].innerHTML = '';
-            row.children[3].innerHTML = '';
-            takeToCalcButton(row).hidden = true;
+            this._blankRow(row);
             this._stripeRow(row, i + 1, playerClass);
         });
         this._showEmptyState(reason);
+    }
+
+    /** Clear one speed row's results and take back its take-to-calc button. */
+    _blankRow(row) {
+        row.children[1].innerHTML = '';
+        row.children[2].innerHTML = '';
+        row.children[3].innerHTML = '';
+        takeToCalcButton(row).hidden = true;
     }
 
     /** Show one empty-state row, or none of them when `reason´ is null. */
@@ -137,11 +145,12 @@ class FlightRenderer {
      * A ship of any class flies at one of 20 speed steps, but only the general
      * uses the in-between steps; for everyone else the odd rows are hidden and
      * the striping counts only the visible rows.
+     *
+     * Visibility is assigned rather than only taken away: a row hidden by a
+     * fixed-speed mission has to come back the moment another one is picked.
      */
     _stripeRow(row, rowIndex, playerClass) {
-        if (rowIndex % 2 === 0) {
-            row.hidden = playerClass !== PLAYER_CLASS.GENERAL;
-        }
+        row.hidden = rowIndex % 2 === 0 && playerClass !== PLAYER_CLASS.GENERAL;
         const stripeIndex = playerClass === PLAYER_CLASS.GENERAL
             ? rowIndex
             : Math.floor(rowIndex / 2) + 1;

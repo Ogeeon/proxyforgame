@@ -1245,6 +1245,93 @@ test.describe('Flight Calculator - Results Table', () => {
     });
 });
 
+test.describe('Flight Calculator - Moon Destruction Mission', () => {
+    /** The numbers of the 100% row's duration cell, e.g. "5h 32m 18s" -> [5, 32, 18]. */
+    async function topDuration(page) {
+        const text = await speedRows(page).nth(0).locator('td').nth(1).innerText();
+        return (text.match(/\d+/g) ?? []).map(Number);
+    }
+
+    test.beforeEach(async ({ context, page }) => {
+        await context.addInitScript(() => {
+            localStorage.setItem('lastChange', 'key-value;true,value;99999');
+        });
+        await page.goto('/ogame/calc/flight.php');
+        await installCompat(page);
+        await openParams(page);
+        await page.locator('#class-2').check();
+        // The neighbouring planet is the 1005 distance the announcement used
+        await page.locator('#departure-g').fill('1');
+        await page.locator('#departure-s').fill('1');
+        await page.locator('#departure-p').fill('1');
+        await page.locator('#destination-g').fill('1');
+        await page.locator('#destination-s').fill('1');
+        await page.locator('#destination-p').fill('2');
+        await openFlightTimesTab(page);
+        await setFleet(page, { 'death-star': 10 });
+        await page.evaluate(() => updateNumbers());
+    });
+
+    test('the trip takes the published 5h 32m whatever the fleet could do', async ({ page }) => {
+        await page.locator('#mission-type-3').check();
+        expect(await topDuration(page)).toEqual([5, 32, 18]);
+
+        // Neither a researched drive nor a faster universe moves it
+        await openParams(page, '#hyp-drive');
+        await page.locator('#hyp-drive').fill('12');
+        // The fleet speeds live on the universe tab, the drives on another one
+        await openParams(page, '#speed-fleet-war');
+        await page.locator('#speed-fleet-war').selectOption('10');
+        await page.locator('#speed-fleet-peaceful').selectOption('10');
+        await page.locator('#speed-fleet-holding').selectOption('10');
+        await openFlightTimesTab(page);
+        expect(await topDuration(page)).toEqual([5, 32, 18]);
+    });
+
+    test('the speed percentage cannot be picked', async ({ page }) => {
+        await page.locator('#mission-type-3').check();
+
+        const rows = speedRows(page);
+        await expect(rows.nth(0)).toBeVisible();
+        await expect(rows.nth(0).locator('td').first()).toHaveText('100%');
+        for (const idx of [1, 2, 10, 19]) {
+            await expect(rows.nth(idx)).toBeHidden();
+        }
+    });
+
+    test('leaving the mission brings the speed steps back', async ({ page }) => {
+        await page.locator('#mission-type-3').check();
+        await expect(speedRows(page).nth(2)).toBeHidden();
+
+        await page.locator('#mission-type-1').check();
+
+        const rows = speedRows(page);
+        // A discoverer sees the ten multiples of 10%, in their usual places
+        for (const idx of [0, 2, 4, 18]) {
+            await expect(rows.nth(idx)).toBeVisible();
+            await expect(rows.nth(idx).locator('td').nth(1)).not.toBeEmpty();
+        }
+        await expect(rows.nth(1)).toBeHidden();
+    });
+
+    test('the manual speed override is greyed out and cannot win', async ({ page }) => {
+        await openParams(page, '#ovr-speed-cb');
+        await page.locator('#ovr-speed-cb').check();
+        await page.locator('#ovr-speed-t').fill('100000');
+        await openFlightTimesTab(page);
+
+        await page.locator('#mission-type-3').check();
+        await expect(page.locator('#ovr-speed-cb')).toBeDisabled();
+        await expect(page.locator('#ovr-speed-t')).toBeDisabled();
+        // 310 all the same, not the 100000 left in the field
+        expect(await topDuration(page)).toEqual([5, 32, 18]);
+
+        await page.locator('#mission-type-1').check();
+        await expect(page.locator('#ovr-speed-cb')).toBeEnabled();
+        await expect(page.locator('#ovr-speed-t')).toBeEnabled();
+    });
+});
+
 test.describe('Flight Calculator - Empty State', () => {
     const noShips = (page) => page.locator('#flight-times-empty-ships');
     const badCoords = (page) => page.locator('#flight-times-empty-coords');

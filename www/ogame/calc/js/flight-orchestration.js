@@ -67,7 +67,7 @@ const options = {
                 case 'fleetSpeedWar':
                 case 'fleetSpeedPeaceful':
                 case 'fleetSpeedHolding': return validateNumber(Number.parseFloat(value), 1, 10, 1);
-                case 'missionType': return validateNumber(Number.parseFloat(value), 0, 2, 1);
+                case 'missionType': return validateNumber(Number.parseFloat(value), 0, 3, 1);
                 case 'circularGalaxies':
                 case 'circularSystems':
                 case 'traderBonus':
@@ -210,6 +210,9 @@ class FlightOrchestrator {
 
         // Coordinate inputs are clamped to the universe size the user set
         this._applyCoordinateLimits(params.numberOfGalaxies, params.numberOfSystems);
+        // Ahead of every early return: a mission with a fixed speed greys the
+        // override out whether or not there is a fleet or a route to compute.
+        this._applyMissionUi(params.missionType);
 
         const ships = this.calc.buildShipsData(params.driveLevels, params.spCargohold);
         this.renderer.renderShipSpeeds(this.calc.getAllShipSpeeds(ships, params));
@@ -245,17 +248,40 @@ class FlightOrchestrator {
         }
 
         const fleetSpeed = this.calc.fleetSpeedFor(params.missionType, params);
-        const entries = [];
-        for (let percent = 100; percent > 0; percent -= 5) {
-            const duration = this.calc.getFlightDuration(minSpeed, distance, percent, fleetSpeed);
-            entries.push({
+        const flightSpeed = this.calc.speedForMission(params.missionType, minSpeed);
+        // Moon destruction is flown at one speed the game does not let the player
+        // pick a percentage of, so its table holds the single step that exists.
+        const fixed = params.missionType === MISSION.DESTROY;
+        const steps = fixed ? [100] : Array.from({ length: 20 }, (_, i) => 100 - i * 5);
+        const entries = steps.map((percent) => {
+            const duration = this.calc.getFlightDuration(flightSpeed, distance, percent, fleetSpeed);
+            return {
                 duration,
-                deut: this.calc.getDeutConsumption(ships, counts, distance, duration, fleetSpeed, params),
+                deut: this.calc.getDeutConsumption(ships, counts, distance, duration, fleetSpeed, params,
+                    fixed ? flightSpeed : 0),
                 cargo: this.calc.getCargoCapacity(ships, counts, params),
-            });
-        }
+            };
+        });
         this.renderer.renderFlightTimes(entries, params.playerClass);
         this.opts.save();
+    }
+
+    /**
+     * Grey out the manual speed override while the mission flies at a fixed
+     * speed: the override cannot win there, and a live control that changes
+     * nothing reads as a bug.
+     */
+    _applyMissionUi(missionType) {
+        const fixed = missionType === MISSION.DESTROY;
+        const toggle = /** @type {HTMLInputElement|null} */ (document.getElementById('ovr-speed-cb'));
+        if (toggle) {
+            toggle.disabled = fixed;
+        }
+        const field = inputEl('#ovr-speed-t');
+        if (field) {
+            field.disabled = fixed || !this.speedOverride.enabled;
+            field.classList.toggle('ui-state-disabled', field.disabled);
+        }
     }
 
     /** Manual speed override wins over the fleet's slowest ship; 0 means "use 10000". */
@@ -1101,8 +1127,10 @@ class FlightOrchestrator {
         const route = this.collector.collectRoute();
         const distance = this.calc.getDistance(route.departure.coords, route.destination.coords, params).distance;
         // Must match the row the user clicked, so it has to honour the manual
-        // speed override exactly like the flight-times table does.
-        const minSpeed = this._effectiveMinSpeed(ships, counts, params);
+        // speed override and the mission's fixed speed exactly like the
+        // flight-times table does.
+        const minSpeed = this.calc.speedForMission(params.missionType,
+            this._effectiveMinSpeed(ships, counts, params));
         const percentText = button.closest('tr').children[0].textContent;
         const percent = Number.parseInt(percentText, 10);
         const fleetSpeed = this.calc.fleetSpeedFor(params.missionType, params);

@@ -45,7 +45,13 @@ const UPGRADES = {
     RECYCLER_IMPULSE: 16,     // above this, the recycler runs on impulse
 };
 
-const MISSION = { WAR: 0, PEACEFUL: 1, HOLDING: 2 };
+const MISSION = { WAR: 0, PEACEFUL: 1, HOLDING: 2, DESTROY: 3 };
+
+// OGame 12.9.0 pinned moon destruction to a single speed: 310, which is a death
+// star with hyperspace drive 7 in a 1x universe. Drive levels, the class bonus,
+// the alliance and life form bonuses and the universe speed factor no longer
+// move it, and the speed percentage cannot be chosen either.
+const DESTROY_MISSION_SPEED = 310;
 
 // ============================================================================
 // CALCULATION ENGINE
@@ -289,8 +295,13 @@ class FlightCalculator {
     /**
      * Deuterium burnt on the trip. Each ship pays at least one unit, and so does
      * the fleet as a whole.
+     *
+     * @param {number} [fixedSpeed] the one speed every ship flies at, for a
+     *   mission that pins it; 0 leaves each ship on its own speed. The duration
+     *   was computed from that same speed, so the fuel has to follow it or the
+     *   two columns describe different flights.
      */
-    getDeutConsumption(shipsData, shipCounts, distance, duration, uniSpeedFactor, params) {
+    getDeutConsumption(shipsData, shipCounts, distance, duration, uniSpeedFactor, params, fixedSpeed = 0) {
         let total = 0;
 
         for (let i = 0; i < shipsData.length; i++) {
@@ -298,7 +309,7 @@ class FlightCalculator {
             if (count <= 0) {
                 continue;
             }
-            const baseSpeed = this.getShipSpeed(shipsData, i, params);
+            const baseSpeed = fixedSpeed || this.getShipSpeed(shipsData, i, params);
             const speedValue = 35000 / (duration * uniSpeedFactor - 10) * Math.sqrt(distance * 10 / baseSpeed);
 
             // The general's fuel discount is itself scaled by the Mechan enhancement
@@ -366,8 +377,26 @@ class FlightCalculator {
         return a[0] === b[0] ? a[2] - b[2] : a[0] - b[0];
     }
 
+    // ------------------------------------------------------------------
+    // Mission type
+    // ------------------------------------------------------------------
+
+    /**
+     * The speed the fleet actually flies at. Every mission but moon destruction
+     * flies at the speed of its slowest ship; destruction is pinned to 310 no
+     * matter what is in the fleet or how far the drives are researched.
+     */
+    speedForMission(missionType, minSpeed) {
+        return missionType === MISSION.DESTROY ? DESTROY_MISSION_SPEED : minSpeed;
+    }
+
     /** Universe fleet speed that applies to the selected mission type. */
     fleetSpeedFor(missionType, params) {
+        if (missionType === MISSION.DESTROY) {
+            // 310 already is the 1x figure, so the universe factor is out: the
+            // trip takes the same time on every server.
+            return 1;
+        }
         if (missionType === MISSION.HOLDING) {
             return params.fleetSpeedHolding;
         }

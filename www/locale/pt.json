@@ -559,6 +559,8 @@
     "mission-type-war": "Guerra",
     "mission-type-peaceful": "Pacífico",
     "mission-type-holding": "Espera",
+    "mission-type-destroy": "Destruição",
+    "mission-type-destroy-explain": "Nesta missão a frota voa a uma velocidade fixa de 310 — uma Estrela da Morte com Motor Propulsor de Hiperespaço 7 num universo x1. Os níveis de motor, a classe do jogador, os bónus das naves e a velocidade de frota do universo não alteram o tempo de voo, e a percentagem de velocidade não pode ser escolhida.",
     "fetchig-data": "Obtendo dados...",
     "own-api-reader-hdr": "Importar do OGame",
     "own-api-import-select-hdr": "O que importar",

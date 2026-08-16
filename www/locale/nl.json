@@ -559,6 +559,8 @@
     "mission-type-war": "Oorlog",
     "mission-type-peaceful": "Vredig",
     "mission-type-holding": "Handhaven",
+    "mission-type-destroy": "Vernietiging",
+    "mission-type-destroy-explain": "Bij deze missie vliegt de vloot met een vaste snelheid van 310 — een Ster des Doods met hyperruimtemotor 7 in een 1x-universum. Motorniveaus, de spelersklasse, scheepsbonussen en de vlootsnelheid van het universum veranderen de vliegtijd niet, en het snelheidspercentage kan niet worden gekozen.",
     "fetchig-data": "Gegevens ophalen...",
     "own-api-reader-hdr": "Importeren uit OGame",
     "own-api-import-select-hdr": "Wat importeren",
