@@ -1,6 +1,6 @@
 ---
 name: commit
-description: Commit changes in this repo — Conventional Commits subject, the SonarQube question, and scoping the test run to what changed. Use whenever the user asks to commit, stage, or push work.
+description: Commit changes in this repo — the Conventional Commits subject and the body below it, the SonarQube question, and scoping the test run to what changed. Use whenever the user asks to commit, stage, or push work.
 ---
 
 # Committing in pfg.wmp
@@ -49,7 +49,9 @@ Never commit an unverified fix. Every commit follows a passing run of its resolv
 
 Before `git push`, the full `make test`, regardless of how narrow the commits were.
 
-## 4. Write the subject
+## 4. Write the message
+
+### The subject
 
 `<type>(<scope>): <subject>` — English, imperative mood, lowercase after the colon,
 no trailing period.
@@ -60,6 +62,22 @@ no trailing period.
   `ogame-*.js` formula files, `dom-utils.js`, `Intl.php` and friends. Reserve `claude` for CLAUDE.md and agent tooling.
 
 Commits before 2026-07-22 use an older plain-sentence style — ignore them, follow this rule.
+
+### The body
+
+A one-line subject is enough for a change that needed no decision. Anything else carries a
+body, and the body is where the history earns its keep — the diff already says what changed,
+so write down what a reader would otherwise have to rediscover: what the code did wrong, what
+the new shape does instead, which constraint forced it, and what deliberately stayed as it was.
+
+- **Leave a blank line after the subject.** Git has no other way to tell the two apart:
+  without it the whole message collapses into the subject line and `git log --oneline` prints
+  the entire explanation.
+- **Prose paragraphs, wrapped near 80 columns** — not a bullet list of the files touched.
+- **Close with the `Co-Authored-By` trailer**, after a blank line, naming the model that wrote
+  the commit: `Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>`. It is the repository's
+  practice, not just the harness default — 238 of the 351 commits since 2026-07-22 carry one,
+  and the history holds Opus 5, Opus 4.8, Sonnet 5 and Haiku 4.5.
 
 ## 5. Commit
 
