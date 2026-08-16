@@ -278,15 +278,27 @@ class ExpeditionsApp {
    * cleared first: a ship missing from it has no bonus rather than the one left
    * over from an earlier read.
    *
+   * That clearing is why the read only counts as successful once at least one
+   * expedition ship has been matched. A payload whose ships block names none of
+   * them - defenses alone, or unrelated JSON that happens to carry the key -
+   * would otherwise wipe the table and, being a success, keep the report field
+   * below from ever being read. The new bonuses are built before anything is
+   * written, so a failed read leaves the table as it was.
+   *
    * @returns {boolean} True when the field held a usable export.
    */
   readOwnApiBonuses() {
     const data = parseOwnApi(getVal('#own-api-input'));
-    if (!data || Object.keys(data.ships).length === 0) return false;
-    options.prm.lfShipsBonuses = EXPEDITION_SHIPS.map((ship) => {
+    if (!data) return false;
+    let matched = 0;
+    const bonuses = EXPEDITION_SHIPS.map((ship) => {
       const imported = data.ships[ship.techId];
-      return imported ? imported.cargo : 0;
+      if (!imported) return 0;
+      matched++;
+      return imported.cargo;
     });
+    if (matched === 0) return false;
+    options.prm.lfShipsBonuses = bonuses;
     this._renderShipsBonuses();
     return true;
   }

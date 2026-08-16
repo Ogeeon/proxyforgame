@@ -119,6 +119,21 @@ describe('parseOwnApi - partial exports', () => {
         expect(plain(parseOwnApi('{"researches":{"114":9,"115":"x"}}').researches)).toEqual({ 114: 9 });
     });
 
+    it('drops entries that are not keyed by a tech id', () => {
+        // Unrelated JSON that happens to carry these keys must not come out
+        // looking like a fleet: the calculators clear their fields before they
+        // import, and an accepted payload silences the other input beside it.
+        expect(plain(parseOwnApi('{"ships":{"whatever":{"amount":10}}}').ships)).toEqual({});
+        expect(plain(parseOwnApi('{"researches":{"drive":9}}').researches)).toEqual({});
+    });
+
+    it('keeps the tech ids that are not ships', () => {
+        // The block holds the solar satellite, the crawler and the defense too.
+        // Sorting them out is the caller's job, not the normalizer's.
+        const ships = parseOwnApi('{"ships":{"212":{"amount":3},"401":{"amount":26100}}}').ships;
+        expect(Object.keys(plain(ships)).sort()).toEqual(['212', '401']);
+    });
+
     it('gives an empty booster map when the bonuses block is absent', () => {
         expect(plain(parseOwnApi('{"bonuses":{}}').classBoosters)).toEqual({});
         expect(plain(parseOwnApi('{"ships":{}}').classBoosters)).toEqual({});

@@ -1445,19 +1445,16 @@ class FlightOrchestrator {
         this._applySystemSkipState();
 
         (rd.details.research || []).forEach((v) => {
-            if (v.research_type == 115) setVal('#cmb-drive', v.level);
-            if (v.research_type == 117) setVal('#imp-drive', v.level);
-            if (v.research_type == 118) setVal('#hyp-drive', v.level);
-            if (v.research_type == 114) setVal('#hypertech-lvl', v.level);
+            const mapped = FLIGHT_RESEARCH_MAPPING.find(([id]) => id == v.research_type);
+            if (mapped) setVal(`#${mapped[1]}`, v.level);
         });
 
         const booster = rd.details?.lifeformBonuses?.CharacterClassBooster;
-        setVal('#lf-rocktal-collector-enh', 0);
-        setVal('#lf-mechan-general-enh', 0);
+        FLIGHT_BOOSTER_MAPPING.forEach(([, name]) => setVal(`#${name}`, 0));
         if (booster) {
             Object.entries(booster).forEach(([i, v]) => {
-                if (i === '1') setNumVal('#lf-rocktal-collector-enh', bonusPercent(v, OWN_API_BONUS_DIGITS.cargo));
-                if (i === '2') setNumVal('#lf-mechan-general-enh', bonusPercent(v, OWN_API_BONUS_DIGITS.cargo));
+                const mapped = FLIGHT_BOOSTER_MAPPING.find(([index]) => index === i);
+                if (mapped) setNumVal(`#${mapped[1]}`, bonusPercent(v, OWN_API_BONUS_DIGITS.cargo));
             });
         }
 
@@ -1524,11 +1521,19 @@ class FlightOrchestrator {
      * True when the export carries at least one thing this calculator imports.
      * A JSON object that holds none of them parses fine yet has nothing to give.
      *
+     * The blocks are matched against the ids this page has fields for, not just
+     * counted: the export lists the solar satellite, the crawler and the whole
+     * defense under `ships`, so a non-empty block is no proof of an importable
+     * fleet. Accepting one would wipe every ship count and bonus field - the
+     * import clears them before it writes - and report that as a success.
+     *
      * @param {OwnApiPayload} data
      */
     _isUsableOwnApiPayload(data) {
         return !!data.coords || data.characterClassId > 0 ||
-            Object.keys(data.researches).length > 0 || Object.keys(data.ships).length > 0;
+            FLIGHT_RESEARCH_MAPPING.some(([id]) => data.researches[id] !== undefined) ||
+            FLIGHT_BOOSTER_MAPPING.some(([index]) => data.classBoosters[index] !== undefined) ||
+            FLIGHT_TECH_MAPPING.some(([id]) => data.ships[id] !== undefined);
     }
 
     /** @param {OwnApiCoords} coords */
@@ -1554,21 +1559,18 @@ class FlightOrchestrator {
 
     /** @param {OwnApiPayload} data */
     _importOwnApiResearch(data) {
-        Object.entries(data.researches).forEach(([id, level]) => {
-            if (id === '115') setVal('#cmb-drive', level);
-            if (id === '117') setVal('#imp-drive', level);
-            if (id === '118') setVal('#hyp-drive', level);
-            if (id === '114') setVal('#hypertech-lvl', level);
+        FLIGHT_RESEARCH_MAPPING.forEach(([id, name]) => {
+            const level = data.researches[id];
+            if (level !== undefined) setVal(`#${name}`, level);
         });
     }
 
     /** @param {OwnApiPayload} data */
     _importOwnApiLifeformBoosters(data) {
-        setVal('#lf-rocktal-collector-enh', 0);
-        setVal('#lf-mechan-general-enh', 0);
-        Object.entries(data.classBoosters).forEach(([i, percent]) => {
-            if (i === '1') setNumVal('#lf-rocktal-collector-enh', percent);
-            if (i === '2') setNumVal('#lf-mechan-general-enh', percent);
+        FLIGHT_BOOSTER_MAPPING.forEach(([index, name]) => {
+            setVal(`#${name}`, 0);
+            const percent = data.classBoosters[index];
+            if (percent !== undefined) setNumVal(`#${name}`, percent);
         });
     }
 
@@ -2099,6 +2101,17 @@ const FLIGHT_TECH_MAPPING = [
     [208, 'colony-ship'], [209, 'recycler'], [210, 'esp-probe'],
     [211, 'bomber'], [213, 'destroyer'], [214, 'death-star'],
     [215, 'battlecruiser'], [218, 'reaper'], [219, 'pathfinder'],
+];
+
+// The researches this page has a field for. Both importers read them, and the
+// API 2 import also decides by this list whether an export has anything to give.
+const FLIGHT_RESEARCH_MAPPING = [
+    [114, 'hypertech-lvl'], [115, 'cmb-drive'], [117, 'imp-drive'], [118, 'hyp-drive'],
+];
+
+// Character class boosters, by the index the game numbers them with.
+const FLIGHT_BOOSTER_MAPPING = [
+    ['1', 'lf-rocktal-collector-enh'], ['2', 'lf-mechan-general-enh'],
 ];
 
 function initializeFlightCalculator() {

@@ -38,6 +38,14 @@ payload (coordinates split into numbers, the class boosters lifted out of `bonus
 already converted to a percentage) or `null` when the text is not a JSON object. It is covered by
 `unit-tests/own-api.test.js` and, being shared, forces a full `make test` — see `docs/test-scope.md`.
 
+- `ships` and `researches` are keyed by **tech id**, and the parser keeps nothing else: a named key
+  belongs to some other JSON, not to an export.
+- A non-empty `ships` block is **no proof of an importable fleet**. The export lists the solar
+  satellite, the crawler and the whole defense (`401`+) there too, so each calculator decides for
+  itself by matching the ids it has a field for. Both clear those fields before they write, so an
+  export that matches nothing has to be refused rather than applied — otherwise it wipes the page
+  and reports success.
+
 ## Who reads what
 
 | Calculator | Entry point | What it takes |
@@ -64,3 +72,7 @@ open. A source that loses says nothing about why.
 
 An accepted export **clears the whole table first**. It lists every ship the player can build, so a
 ship missing from it has no bonus — not the value left over from an earlier read.
+
+That clearing is why an export only counts as accepted once at least one of the fifteen expedition
+ships has been matched. A payload naming none of them — defenses alone, or unrelated JSON with a
+`ships` key — is handed on to the report instead, and the table is left as it was.

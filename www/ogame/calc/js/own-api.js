@@ -97,6 +97,18 @@ function isOwnApiObject(value) {
 }
 
 /**
+ * True for a key the export could have written: every block it sends is keyed
+ * by a numeric tech id. Unrelated JSON that happens to carry a `ships` or
+ * `researches` object is dropped here rather than reaching a caller, which
+ * would otherwise take a named key for a fleet it has to import.
+ *
+ * @param {string} key
+ */
+function isOwnApiTechId(key) {
+  return /^\d+$/.test(key);
+}
+
+/**
  * @param {unknown} raw The "galaxy:system:position" string.
  * @returns {?OwnApiCoords}
  */
@@ -118,6 +130,7 @@ function parseOwnApiLevels(raw) {
   const levels = {};
   if (!isOwnApiObject(raw)) return levels;
   Object.entries(raw).forEach(([techId, value]) => {
+    if (!isOwnApiTechId(techId)) return;
     const level = Number(value);
     if (Number.isFinite(level)) levels[techId] = level;
   });
@@ -125,6 +138,11 @@ function parseOwnApiLevels(raw) {
 }
 
 /**
+ * The block holds more than the ships a calculator can use: the export lists
+ * the solar satellite and the crawler here too. A non-empty result is therefore
+ * no proof that anything is importable - the caller decides that by matching
+ * the tech ids it knows.
+ *
  * @param {unknown} raw Tech id to ship record, as exported.
  * @returns {Object<string, OwnApiShip>}
  */
@@ -133,7 +151,7 @@ function parseOwnApiShips(raw) {
   const ships = {};
   if (!isOwnApiObject(raw)) return ships;
   Object.entries(raw).forEach(([techId, ship]) => {
-    if (!isOwnApiObject(ship)) return;
+    if (!isOwnApiTechId(techId) || !isOwnApiObject(ship)) return;
     ships[techId] = {
       amount: Number(ship.amount) || 0,
       cargo: bonusPercent(ship.cargo, OWN_API_BONUS_DIGITS.cargo),

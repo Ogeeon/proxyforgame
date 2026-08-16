@@ -19,6 +19,10 @@ release section; it is the source of truth for the other eleven translations.
 
 - Flight: the flight-times table now says why it has nothing to show instead of standing empty - either that no ships have been entered, or that the coordinates are out of range. The message links to the field to fill in, opening the section it is on when that section is collapsed.
 
+### Fixed
+
+- Expeditions, Flight: pasting text into the API 2 field that is not an export from the game, but happens to be JSON carrying a "ships" or "researches" block, counted as a successful import. In the expeditions calculator it cleared the whole cargo-bonus table and kept a bonus report pasted alongside it from being read; in the flight calculator it cleared every ship count and bonus field. Both now recognize an export by the ships and researches they have a field for, and report anything else as unreadable without touching what is on the page.
+
 ## [2026-08-10] - site entry 60
 
 ### Added
