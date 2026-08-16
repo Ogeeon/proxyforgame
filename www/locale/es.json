@@ -560,7 +560,7 @@
     "mission-type-peaceful": "Pacífico",
     "mission-type-holding": "Espera",
     "mission-type-destroy": "Destrucción",
-    "mission-type-destroy-explain": "En esta misión la flota vuela a una velocidad fija de 310 — una Estrella de la Muerte con Propulsor Hiperespacial 7 en un universo x1. Los niveles de propulsor, la clase de jugador, las bonificaciones de las naves y la velocidad de flota del universo no cambian el tiempo de vuelo, y no se puede elegir el porcentaje de velocidad.",
+    "mission-type-destroy-explain": "En esta misión la flota vuela a una velocidad fija de 310 al 100% — una Estrella de la Muerte con Propulsor Hiperespacial 7 en un universo x1. Los niveles de propulsor, la clase de jugador, las bonificaciones de las naves y la velocidad de flota del universo no cambian el tiempo de vuelo.",
     "fetchig-data": "Obteniendo datos...",
     "own-api-reader-hdr": "Importar desde OGame",
     "own-api-import-select-hdr": "Qué importar",

@@ -1246,11 +1246,14 @@ test.describe('Flight Calculator - Results Table', () => {
 });
 
 test.describe('Flight Calculator - Moon Destruction Mission', () => {
-    /** The numbers of the 100% row's duration cell, e.g. "5h 32m 18s" -> [5, 32, 18]. */
-    async function topDuration(page) {
-        const text = await speedRows(page).nth(0).locator('td').nth(1).innerText();
+    /** The numbers of a speed row's duration cell, e.g. "5h 32m 18s" -> [5, 32, 18]. */
+    async function rowDuration(page, idx) {
+        const text = await speedRows(page).nth(idx).locator('td').nth(1).innerText();
         return (text.match(/\d+/g) ?? []).map(Number);
     }
+
+    /** The same for the 100% row, which most of these tests are about. */
+    const topDuration = (page) => rowDuration(page, 0);
 
     test.beforeEach(async ({ context, page }) => {
         await context.addInitScript(() => {
@@ -1288,22 +1291,8 @@ test.describe('Flight Calculator - Moon Destruction Mission', () => {
         expect(await topDuration(page)).toEqual([5, 32, 18]);
     });
 
-    test('the speed percentage cannot be picked', async ({ page }) => {
+    test('the speed percentage is still the player\'s to pick', async ({ page }) => {
         await page.locator('#mission-type-3').check();
-
-        const rows = speedRows(page);
-        await expect(rows.nth(0)).toBeVisible();
-        await expect(rows.nth(0).locator('td').first()).toHaveText('100%');
-        for (const idx of [1, 2, 10, 19]) {
-            await expect(rows.nth(idx)).toBeHidden();
-        }
-    });
-
-    test('leaving the mission brings the speed steps back', async ({ page }) => {
-        await page.locator('#mission-type-3').check();
-        await expect(speedRows(page).nth(2)).toBeHidden();
-
-        await page.locator('#mission-type-1').check();
 
         const rows = speedRows(page);
         // A discoverer sees the ten multiples of 10%, in their usual places
@@ -1312,6 +1301,24 @@ test.describe('Flight Calculator - Moon Destruction Mission', () => {
             await expect(rows.nth(idx).locator('td').nth(1)).not.toBeEmpty();
         }
         await expect(rows.nth(1)).toBeHidden();
+
+        // Half the speed, twice the flight: 5h 32m 18s becomes 11h 4m 27s
+        const half = await rowDuration(page, 10);
+        expect(half).toEqual([11, 4, 27]);
+    });
+
+    test('a throttled trip burns less deuterium', async ({ page }) => {
+        // A death star burns one unit per trip, so ten of them pay the fleet
+        // minimum at every percentage - it takes a real fleet to see the bill
+        await setFleet(page, { 'death-star': 10000 });
+        await openFlightTimesTab(page);
+        await page.locator('#mission-type-3').check();
+
+        const deut = async (idx) => Number.parseInt(
+            (await speedRows(page).nth(idx).locator('td').nth(2).innerText()).replace(/\D/g, ''), 10);
+        const full = await deut(0);
+        expect(full).toBeGreaterThan(1);
+        expect(await deut(10)).toBeLessThan(full);
     });
 
     test('the manual speed override is greyed out and cannot win', async ({ page }) => {

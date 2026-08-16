@@ -15,6 +15,10 @@ release section; it is the source of truth for the other eleven translations.
 
 ## [Unreleased]
 
+### Fixed
+
+- Flight: the "Destruction" mission showed the single 100% row of the flight-times table. The fixed speed of 310 that OGame 12.9.0 gave the mission is its speed at 100%, and the fleet can still be sent at a lower percentage, so the table holds all of its speed steps again and the deuterium follows the throttled trip. <!-- site -->
+
 ## [2026-08-16] - site entry 61
 
 ### Added

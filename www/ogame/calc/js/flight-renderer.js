@@ -84,17 +84,14 @@ class FlightRenderer {
     /**
      * Fill the flight-times table.
      * @param {Array<{duration: number, deut: number, cargo: number}>} entries
-     *   one per speed step, index 0 = 100% down to index 19 = 5%. A mission
-     *   flown at a fixed speed hands over the single 100% entry instead, and
-     *   the rows it leaves without an entry are blanked and hidden.
+     *   one per speed step, index 0 = 100% down to index 19 = 5%
      * @param {number} playerClass drives which rows are visible and their striping
      */
     renderFlightTimes(entries, playerClass) {
-        speedRows().forEach((row, i) => {
-            const entry = entries[i];
-            if (!entry) {
-                this._blankRow(row);
-                row.hidden = true;
+        const rows = speedRows();
+        entries.forEach((entry, i) => {
+            const row = rows[i];
+            if (!row) {
                 return;
             }
             row.children[1].innerHTML = this._fmtTime(entry.duration);
@@ -145,9 +142,6 @@ class FlightRenderer {
      * A ship of any class flies at one of 20 speed steps, but only the general
      * uses the in-between steps; for everyone else the odd rows are hidden and
      * the striping counts only the visible rows.
-     *
-     * Visibility is assigned rather than only taken away: a row hidden by a
-     * fixed-speed mission has to come back the moment another one is picked.
      */
     _stripeRow(row, rowIndex, playerClass) {
         row.hidden = rowIndex % 2 === 0 && playerClass !== PLAYER_CLASS.GENERAL;

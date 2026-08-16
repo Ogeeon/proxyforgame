@@ -559,7 +559,7 @@
     "mission-type-peaceful": "Mierový",
     "mission-type-holding": "Zdržanie",
     "mission-type-destroy": "Zničenie",
-    "mission-type-destroy-explain": "V tejto misii letí flotila stálou rýchlosťou 310 — Hviezda smrti s hyperpriestorovým pohonom 7 v 1x vesmíre. Úrovne pohonov, trieda hráča, bonusy lodí a rýchlosť flotíl vo vesmíre nemenia čas letu a percento rýchlosti sa nedá zvoliť.",
+    "mission-type-destroy-explain": "V tejto misii letí flotila stálou rýchlosťou 310 pri 100% — Hviezda smrti s hyperpriestorovým pohonom 7 v 1x vesmíre. Úrovne pohonov, trieda hráča, bonusy lodí a rýchlosť flotíl vo vesmíre nemenia čas letu.",
     "fetchig-data": "Načítavanie údajov...",
     "own-api-reader-hdr": "Import z OGame",
     "own-api-import-select-hdr": "Čo importovať",

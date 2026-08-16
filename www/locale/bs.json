@@ -560,7 +560,7 @@
     "mission-type-peaceful": "Miran",
     "mission-type-holding": "Zadržavanje",
     "mission-type-destroy": "Uništavanje",
-    "mission-type-destroy-explain": "U ovoj misiji flota leti stalnom brzinom od 310 — Zvijezda smrti s hyperspace pogonom 7 u 1x univerzumu. Nivoi pogona, klasa igrača, bonusi brodova i brzina flote univerzuma ne mijenjaju vrijeme leta, a postotak brzine se ne može birati.",
+    "mission-type-destroy-explain": "U ovoj misiji flota leti stalnom brzinom od 310 na 100% — Zvijezda smrti s hyperspace pogonom 7 u 1x univerzumu. Nivoi pogona, klasa igrača, bonusi brodova i brzina flote univerzuma ne mijenjaju vrijeme leta.",
     "fetchig-data": "Preuzimanje podataka...",
     "own-api-reader-hdr": "Uvoz iz OGame",
     "own-api-import-select-hdr": "Šta uvesti",

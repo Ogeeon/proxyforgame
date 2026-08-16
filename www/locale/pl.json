@@ -560,7 +560,7 @@
     "mission-type-peaceful": "Pokojowa",
     "mission-type-holding": "Zatrzymanie",
     "mission-type-destroy": "Zniszczenie",
-    "mission-type-destroy-explain": "W tej misji flota leci ze stałą prędkością 310 — Gwiazda Śmierci z napędem nadprzestrzennym 7 we wszechświecie x1. Poziomy napędów, klasa gracza, bonusy statków i prędkość flot we wszechświecie nie zmieniają czasu lotu, a procent prędkości nie jest do wyboru.",
+    "mission-type-destroy-explain": "W tej misji flota leci ze stałą prędkością 310 przy 100% — Gwiazda Śmierci z napędem nadprzestrzennym 7 we wszechświecie x1. Poziomy napędów, klasa gracza, bonusy statków i prędkość flot we wszechświecie nie zmieniają czasu lotu.",
     "fetchig-data": "Pobieranie danych...",
     "own-api-reader-hdr": "Import z OGame",
     "own-api-import-select-hdr": "Co zaimportować",

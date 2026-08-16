@@ -249,19 +249,21 @@ class FlightOrchestrator {
 
         const fleetSpeed = this.calc.fleetSpeedFor(params.missionType, params);
         const flightSpeed = this.calc.speedForMission(params.missionType, minSpeed);
-        // Moon destruction is flown at one speed the game does not let the player
-        // pick a percentage of, so its table holds the single step that exists.
-        const fixed = params.missionType === MISSION.DESTROY;
-        const steps = fixed ? [100] : Array.from({ length: 20 }, (_, i) => 100 - i * 5);
-        const entries = steps.map((percent) => {
+        // Moon destruction flies at 310 whatever the fleet could do, but the speed
+        // percentage is still picked by the player, so it keeps all twenty steps.
+        // The fuel is read back out of the duration, which carries the percentage,
+        // so handing over the fixed speed is enough for a throttled trip too.
+        const fixedSpeed = params.missionType === MISSION.DESTROY ? flightSpeed : 0;
+        const entries = [];
+        for (let percent = 100; percent > 0; percent -= 5) {
             const duration = this.calc.getFlightDuration(flightSpeed, distance, percent, fleetSpeed);
-            return {
+            entries.push({
                 duration,
                 deut: this.calc.getDeutConsumption(ships, counts, distance, duration, fleetSpeed, params,
-                    fixed ? flightSpeed : 0),
+                    fixedSpeed),
                 cargo: this.calc.getCargoCapacity(ships, counts, params),
-            };
-        });
+            });
+        }
         this.renderer.renderFlightTimes(entries, params.playerClass);
         this.opts.save();
     }

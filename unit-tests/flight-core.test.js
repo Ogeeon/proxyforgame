@@ -324,7 +324,8 @@ describe('Flight Calculator - Flight Duration', () => {
 
 describe('Flight Calculator - Moon Destruction Mission', () => {
     // OGame 12.9.0: the mission flies at 310 whatever the fleet is, and the
-    // universe fleet speed no longer divides the trip.
+    // universe fleet speed no longer divides the trip. 310 is the full-speed
+    // figure though - the speed percentage is still the player's to pick.
     const UNI_X4 = { fleetSpeedWar: 4, fleetSpeedPeaceful: 6, fleetSpeedHolding: 8 };
 
     /** Ship params for a fleet with the given hyperspace drive level. */
@@ -373,6 +374,18 @@ describe('Flight Calculator - Moon Destruction Mission', () => {
         expect(calc.speedForMission(MISSION.DESTROY, minSpeedWith(12))).toBe(310);
     });
 
+    it('the speed percentage still throttles the fixed speed', () => {
+        const trip = (percent) => calc.getFlightDuration(
+            calc.speedForMission(MISSION.DESTROY, minSpeedWith(7)),
+            1005, percent, calc.fleetSpeedFor(MISSION.DESTROY, UNI_X4));
+
+        // Half the speed is twice the flight, a tenth of it ten times the
+        // flight - the fixed 10 seconds of acceleration apart, and rounded
+        const throttled = (times) => times * (trip(100) - 10) + 10;
+        expect(trip(50)).toBeCloseTo(throttled(2), -1);
+        expect(trip(10)).toBeCloseTo(throttled(10), -1);
+    });
+
     it('neither drive research nor class nor alliance bonus moves it', () => {
         const boosted = minSpeedWith(12, {
             playerClass: PLAYER_CLASS.GENERAL, warriorBonus: true,
@@ -413,6 +426,14 @@ describe('Flight Calculator - Moon Destruction Mission', () => {
         // undercharges, which is exactly the mismatch the fixed speed removes
         expect(calc.getDeutConsumption(ships, counts, 3650, duration, 1, params))
             .toBeLessThan(fixed);
+
+        // A percentage the player picked is already in the duration, so the
+        // throttled trip costs less on its own, without a second argument
+        const slowDuration = calc.getFlightDuration(310, 3650, 50, 1);
+        const throttled = calc.getDeutConsumption(ships, counts, 3650, slowDuration, 1, params, 310);
+        expect(throttled).toBeLessThan(fixed);
+        expect(throttled).toBe(calc.getDeutConsumption(
+            calc.buildShipsData(params7.driveLevels), counts, 3650, slowDuration, 1, params7));
     });
 });
 

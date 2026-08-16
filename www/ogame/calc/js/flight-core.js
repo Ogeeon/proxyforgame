@@ -47,10 +47,11 @@ const UPGRADES = {
 
 const MISSION = { WAR: 0, PEACEFUL: 1, HOLDING: 2, DESTROY: 3 };
 
-// OGame 12.9.0 pinned moon destruction to a single speed: 310, which is a death
-// star with hyperspace drive 7 in a 1x universe. Drive levels, the class bonus,
-// the alliance and life form bonuses and the universe speed factor no longer
-// move it, and the speed percentage cannot be chosen either.
+// OGame 12.9.0 pinned moon destruction to a single full-speed figure: 310, which
+// is a death star with hyperspace drive 7 in a 1x universe. Drive levels, the
+// class bonus, the alliance and life form bonuses and the universe speed factor
+// no longer move it. The speed percentage is still the player's to pick, and it
+// throttles this speed the way it throttles any other.
 const DESTROY_MISSION_SPEED = 310;
 
 // ============================================================================
@@ -382,9 +383,10 @@ class FlightCalculator {
     // ------------------------------------------------------------------
 
     /**
-     * The speed the fleet actually flies at. Every mission but moon destruction
-     * flies at the speed of its slowest ship; destruction is pinned to 310 no
-     * matter what is in the fleet or how far the drives are researched.
+     * The speed the fleet flies at at 100%. Every mission but moon destruction
+     * takes the speed of its slowest ship; destruction is pinned to 310 no
+     * matter what is in the fleet or how far the drives are researched. The
+     * speed percentage still divides it, in that mission as in any other.
      */
     speedForMission(missionType, minSpeed) {
         return missionType === MISSION.DESTROY ? DESTROY_MISSION_SPEED : minSpeed;
