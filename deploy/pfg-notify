@@ -1,0 +1,89 @@
+#!/bin/bash
+#
+#   pfg-notify "<subject>" "<body>"
+#
+# Mails a deploy failure to MAIL_TO. Reads the same config file as pfg-sync and
+# takes the SMTP credentials out of the checkout's .env.
+#
+# It does NOT reuse www/api/mail.inc.php from the deployed tree, even though
+# that file does the same thing. This runs precisely when the deployed tree is
+# suspect - borrowing code from it would make the alarm depend on the thing it
+# is alarming about.
+#
+set -euo pipefail
+
+SUBJECT="${1:?usage: pfg-notify <subject> <body>}"
+BODY="${2:-}"
+
+CONF="${PFG_SYNC_CONF:-}"
+[ -z "$CONF" ] && [ -r /etc/pfg-sync.conf ] && CONF=/etc/pfg-sync.conf
+[ -z "$CONF" ] && [ -r "$HOME/.pfg-sync.conf" ] && CONF="$HOME/.pfg-sync.conf"
+[ -n "$CONF" ] || { echo "pfg-notify: no config file" >&2; exit 2; }
+# shellcheck disable=SC1090
+. "$CONF"
+: "${CHECKOUT:?}"
+MAIL_TO="${MAIL_TO:-}"
+[ -n "$MAIL_TO" ] || { echo "pfg-notify: MAIL_TO not set - nothing sent" >&2; exit 0; }
+
+"${PHP:-php}" -- "$CHECKOUT/.env" "$MAIL_TO" "$SUBJECT" "$BODY" <<'PHP'
+<?php
+list(, $envPath, $to, $subject, $body) = $argv;
+
+$user = $pass = null;
+foreach (@file($envPath, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES) ?: [] as $line) {
+    if ($line === '' || $line[0] === '#' || strpos($line, '=') === false) continue;
+    list($k, $v) = explode('=', $line, 2);
+    $k = trim($k); $v = trim($v, " \t\"'");
+    if ($k === 'SMTP_USER') $user = $v;
+    if ($k === 'SMTP_PASS') $pass = $v;
+}
+if (!$user || !$pass) {
+    fwrite(STDERR, "pfg-notify: SMTP_USER/SMTP_PASS missing in $envPath\n");
+    exit(1);
+}
+
+$sock = @fsockopen('ssl://smtp.gmail.com', 465, $errno, $errstr, 20);
+if (!$sock) {
+    fwrite(STDERR, "pfg-notify: cannot reach smtp.gmail.com: $errno $errstr\n");
+    exit(1);
+}
+stream_set_timeout($sock, 20);
+
+// Unlike the site's fire-and-forget version, every step is checked: a deploy
+// alarm that fails silently is worse than no alarm at all.
+function step($sock, $cmd, $expect) {
+    if ($cmd !== null) fwrite($sock, $cmd . "\r\n");
+    // A reply may span several lines: "250-" continues, "250 " ends it. EHLO
+    // always answers that way, and reading only the first line would leave the
+    // rest in the buffer and desynchronise every command after it.
+    do {
+        $line = fgets($sock, 512);
+        if ($line === false) {
+            fwrite(STDERR, "pfg-notify: SMTP connection closed while expecting $expect\n");
+            exit(1);
+        }
+    } while (isset($line[3]) && $line[3] === '-');
+    if (strncmp($line, (string)$expect, strlen((string)$expect)) !== 0) {
+        fwrite(STDERR, "pfg-notify: SMTP expected $expect, got: " . trim($line) . "\n");
+        exit(1);
+    }
+}
+step($sock, null,                       220);
+step($sock, 'EHLO proxyforgame.com',    250);
+step($sock, 'AUTH LOGIN',               334);
+step($sock, base64_encode($user),       334);
+step($sock, base64_encode($pass),       235);
+step($sock, "MAIL FROM: <$user>",       250);
+step($sock, "RCPT TO: <$to>",           250);
+step($sock, 'DATA',                     354);
+
+$headers = "From: <$user>\r\nTo: <$to>\r\n"
+         . 'Subject: =?UTF-8?B?' . base64_encode($subject) . "?=\r\n"
+         . "Content-Type: text/plain; charset=UTF-8\r\n\r\n";
+$text = preg_replace('/^\./m', '..', $body . "\n\nhost: " . php_uname('n') . "\ntime: " . date('c'));
+fwrite($sock, $headers . $text . "\r\n.\r\n");
+step($sock, null, 250);
+fwrite($sock, "QUIT\r\n");
+fclose($sock);
+echo "notified $to\n";
+PHP
