@@ -166,6 +166,12 @@ unix socket.
 - **Cron redirections silently swallowed output for six months.** A line ending
   `>> log 2>&1 >/dev/null 2>&1` re-points both descriptors after the log was
   opened. With `MAILTO=""` on top, nothing was visible anywhere.
+- **The standby answers only over HTTPS, even on loopback.** Port 80 carries
+  certbot's permanent redirect, so a plain `http://` smoke request gets a 301
+  and never reaches the site. Its certificate is valid to 2026-10-07 — but
+  renewal needs an HTTP-01 challenge, and `proxyforgame.com` resolves to
+  production, so **that renewal will fail silently and the standby's smoke check
+  will start failing on certificate validation.** Deal with it before October.
 - **The old deploy checkout carried files that were in no repository** —
   `api.php`, `funct.php`, `lftech.*`, `dev_flight.*`. All were dead: nothing
   referenced them and ten days of access logs showed zero hits. `cutover-prod.sh`
