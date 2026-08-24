@@ -74,12 +74,31 @@ cache flush — new files are picked up within two seconds.
 atomic and its rollback instant, and it is what issue #14 (release directories)
 will build on.
 
+### Why the webhook URL is `http://`, not `https://`
+
+`webhooks.proxyforgame.com` has no certificate of its own: the host answers
+443 with the default vhost's `CN=battlesim.logserver.net`, so TLS to that name
+fails outright. Issuing one needs the ISPmanager panel — there is no root and no
+certbot here. Until that happens the webhook is registered as
+`http://webhooks.proxyforgame.com/webhook.php`; GitHub accepts it with a
+warning.
+
+What that does *not* leak is the secret. GitHub never transmits it — it sends an
+HMAC signature over the body, and `webhook.php` recomputes it. That already makes
+this stricter than the Bitbucket scheme it replaces, which put the key in the
+query string and therefore in every access log. What is in the clear is the
+payload (commit SHAs and branch names of a public repository) and the chance for
+anyone on the path to replay a captured delivery, which can only ever redeploy an
+older commit that CI had already passed.
+
+Switching to `https://` once the certificate exists is a URL edit in the GitHub
+webhook settings. Nothing in this directory changes.
+
 ### Why the standby uses a timer instead of a webhook
 
-It has no public hostname and therefore no certificate, so a GitHub webhook
-would carry the secret and the payload in clear. A timer needs no inbound path
-at all. Five minutes rather than one because the host takes no traffic; being a
-few minutes behind costs it nothing.
+It has no public hostname at all, so there is no address for GitHub to call. A
+timer needs no inbound path. Five minutes rather than one because the host takes
+no traffic; being a few minutes behind costs it nothing.
 
 ### Why production *also* has a timer
 
