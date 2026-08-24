@@ -112,10 +112,12 @@ fi
 systemctl reload apache2
 sleep 3
 FAILED=0
-# The host is not in DNS, so ask it by IP while claiming the vhost name.
+# The host is not in DNS, so ask it by loopback while claiming the vhost name.
+# It must be https: port 80 here carries certbot's permanent redirect, so a
+# plain http request answers 301 and never reaches the site at all.
 for path in "/" "/ru/" "/ogame/calc/flight.php"; do
   code=$(curl -s -o /dev/null -w '%{http_code}' \
-    --resolve "proxyforgame.com:80:127.0.0.1" "http://proxyforgame.com$path" || echo 000)
+    --resolve "proxyforgame.com:443:127.0.0.1" "https://proxyforgame.com$path" || echo 000)
   if [ "$code" = 200 ]; then
     echo "  OK   $code  $path"
   else
@@ -142,8 +144,8 @@ say "7. Installing pfg-sync and the five-minute timer"
 install -m 755 "$NEW/deploy/pfg-sync" "$NEW/deploy/pfg-notify" /usr/local/bin/
 {
   echo "CHECKOUT=$NEW"
-  echo "SMOKE_BASE=http://proxyforgame.com"
-  echo "SMOKE_RESOLVE=proxyforgame.com:80:127.0.0.1"
+  echo "SMOKE_BASE=https://proxyforgame.com"
+  echo "SMOKE_RESOLVE=proxyforgame.com:443:127.0.0.1"
   echo "LOG=/var/log/pfg-cron.log"
   echo "LOCK=/run/lock/pfg-sync.lock"
   echo "MAIL_TO=proxyforgame@gmail.com"
