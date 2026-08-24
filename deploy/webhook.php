@@ -19,17 +19,23 @@
 // deploy/pfg-sync, which the reconcile timer and a human at a shell also use.
 // One code path updates a checkout, not three.
 //
-// Config lives one directory above this file, outside the document root:
+// Config lives two directories above this file - that is <data>/, next to
+// .pfg-sync.conf and well outside every vhost's document root, since <data>/www/
+// is where those roots themselves live. PFG_WEBHOOK_CONF overrides the path for
+// an install that sits somewhere else.
 //
 //   SECRET=<the webhook secret, also set in the GitHub webhook settings>
 //   SYNC=/path/to/pfg-sync
 //   LOG=/path/to/webhook.log
+//   SYNC_CONF=/path/to/.pfg-sync.conf   (optional, see the hand-off below)
 //
 
-$confPath = getenv('PFG_WEBHOOK_CONF') ?: __DIR__ . '/../pfg-webhook.conf';
+$confPath = getenv('PFG_WEBHOOK_CONF') ?: __DIR__ . '/../../pfg-webhook.conf';
 $conf = [];
 foreach (@file($confPath, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES) ?: [] as $line) {
-    if ($line === '' || $line[0] === '#' || strpos($line, '=') === false) continue;
+    if ($line === '' || $line[0] === '#' || strpos($line, '=') === false) {
+        continue;
+    }
     list($k, $v) = explode('=', $line, 2);
     $conf[trim($k)] = trim($v, " \t\"'");
 }
@@ -133,8 +139,17 @@ if (!preg_match('/^[0-9a-f]{7,40}$/', (string)$sha)) {
 // site stops serving. The hourly reconcile run is what catches a delivery that
 // never arrived at all.
 // ---------------------------------------------------------------------------
+// SYNC_CONF is named explicitly because pfg-sync otherwise falls back to
+// $HOME/.pfg-sync.conf, and HOME is whatever the web server happens to export -
+// often nothing. The sync would then exit before doing any work, long after this
+// endpoint had already answered 202, and the miss would surface only as an
+// hourly reconcile quietly doing the deploy an hour late.
+$env = empty($conf['SYNC_CONF'])
+    ? ''
+    : 'PFG_SYNC_CONF=' . escapeshellarg($conf['SYNC_CONF']) . ' ';
 $cmd = sprintf(
-    'nohup %s --sha %s >> %s 2>&1 &',
+    'nohup %s%s --sha %s >> %s 2>&1 &',
+    $env,
     escapeshellarg($conf['SYNC']),
     escapeshellarg($sha),
     escapeshellarg($log)
