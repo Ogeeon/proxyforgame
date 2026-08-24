@@ -1,0 +1,151 @@
+#!/bin/bash
+#
+# Bring a deploy checkout to a commit of GitHub main, then prove the site still
+# serves. This is the ONLY thing that writes to a checkout - the webhook calls
+# it, the reconcile timer calls it, and a human rolling back calls it.
+#
+#   pfg-sync                 sync to the newest commit of main whose CI passed
+#   pfg-sync --sha <sha>     sync to exactly that commit (webhook / rollback)
+#   pfg-sync --check         report drift and exit; change nothing
+#
+# Config comes from PFG_SYNC_CONF, else /etc/pfg-sync.conf, else
+# ~/.pfg-sync.conf. It is written by the cutover script and defines:
+#
+#   CHECKOUT        absolute path of the git checkout
+#   SMOKE_BASE      base URL to smoke-test after updating
+#   SMOKE_RESOLVE   optional curl --resolve entry, for a host that is not in DNS
+#   LOG             file to append to
+#   MAIL_TO         address for failure reports (optional)
+#
+# Deliberately NOT `git pull`: a pull can merge, and merges are how the previous
+# Bitbucket checkout accumulated 26 commits that existed nowhere else. A reset
+# makes the checkout a mirror that cannot drift. `clean -fd` sweeps stray files
+# but MUST NOT gain -x: the gitignored .env lives in the checkout root and is
+# the one thing here that cannot be recreated from git.
+#
+set -euo pipefail
+
+REPO_API=https://api.github.com/repos/Ogeeon/proxyforgame
+CI_WORKFLOW=playwright.yml   # file name, not display name - the workflow is called "CI"
+
+MODE=green
+WANT_SHA=""
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --sha)   MODE=exact; WANT_SHA="${2:-}"; shift 2 ;;
+    --check) MODE=check; shift ;;
+    *) echo "unknown argument: $1" >&2; exit 2 ;;
+  esac
+done
+
+CONF="${PFG_SYNC_CONF:-}"
+[ -z "$CONF" ] && [ -r /etc/pfg-sync.conf ] && CONF=/etc/pfg-sync.conf
+[ -z "$CONF" ] && [ -r "$HOME/.pfg-sync.conf" ] && CONF="$HOME/.pfg-sync.conf"
+[ -n "$CONF" ] || { echo "pfg-sync: no config file found" >&2; exit 2; }
+# shellcheck disable=SC1090
+. "$CONF"
+: "${CHECKOUT:?CHECKOUT not set in $CONF}"
+: "${SMOKE_BASE:?SMOKE_BASE not set in $CONF}"
+LOG="${LOG:-/dev/null}"
+MAIL_TO="${MAIL_TO:-}"
+SMOKE_RESOLVE="${SMOKE_RESOLVE:-}"
+
+log() { printf '%s %s\n' "$(date -Is)" "$*" >> "$LOG"; }
+fail() {
+  log "FAILED: $*"
+  [ -n "$MAIL_TO" ] && [ -x "$(dirname "$0")/pfg-notify" ] && "$(dirname "$0")/pfg-notify" \
+      "ProxyForGame deploy FAILED on $(hostname)" "$*" || true
+  echo "pfg-sync: $*" >&2
+  exit 1
+}
+
+# One deploy at a time. A second delivery arriving mid-reset would otherwise see
+# a half-written tree, and GitHub can deliver two events for one push.
+exec 9>"${LOCK:-/tmp/pfg-sync.lock}"
+flock -w 120 9 || fail "another pfg-sync held the lock for over two minutes"
+
+cd "$CHECKOUT" || fail "checkout $CHECKOUT is not there"
+
+# ---------------------------------------------------------------------------
+# Which commit do we want?
+# ---------------------------------------------------------------------------
+if [ "$MODE" = exact ]; then
+  # A sha reaches this from an HTTP payload; let nothing else through.
+  case "$WANT_SHA" in
+    *[!0-9a-fA-F]* | "") fail "refusing a target that is not a hex sha: '$WANT_SHA'" ;;
+  esac
+  [ ${#WANT_SHA} -ge 7 ] || fail "sha too short: '$WANT_SHA'"
+else
+  # The newest push-run of CI on main that concluded successfully. Asking GitHub
+  # rather than trusting origin/main is what keeps the timer as safe as the
+  # webhook: a red commit sits at the tip of main but never becomes the answer.
+  RUNS="$REPO_API/actions/workflows/$CI_WORKFLOW/runs?branch=main&event=push&status=success&per_page=1"
+  JSON=$(curl -sf -H 'Accept: application/vnd.github+json' "$RUNS") \
+    || fail "GitHub API unreachable - leaving the checkout alone"
+  WANT_SHA=$(printf '%s' "$JSON" | sed -n 's/.*"head_sha"[[:space:]]*:[[:space:]]*"\([0-9a-f]\{40\}\)".*/\1/p' | head -1)
+  [ -n "$WANT_SHA" ] || fail "no successful CI run found for main"
+fi
+
+HAVE_SHA=$(git rev-parse HEAD)
+if [ "$HAVE_SHA" = "$WANT_SHA" ] || [ "${HAVE_SHA:0:${#WANT_SHA}}" = "$WANT_SHA" ]; then
+  [ "$MODE" = check ] && echo "up to date at $HAVE_SHA"
+  exit 0
+fi
+
+if [ "$MODE" = check ]; then
+  echo "DRIFT: checkout is at $HAVE_SHA, wanted $WANT_SHA"
+  log "drift detected: $HAVE_SHA != $WANT_SHA"
+  exit 1
+fi
+
+# ---------------------------------------------------------------------------
+# Update
+# ---------------------------------------------------------------------------
+log "syncing $HAVE_SHA -> $WANT_SHA"
+git fetch --quiet origin main || fail "git fetch failed"
+git cat-file -e "$WANT_SHA^{commit}" 2>/dev/null \
+  || fail "$WANT_SHA is not in the fetched history (a rollback target must be an ancestor of main)"
+git reset --quiet --hard "$WANT_SHA" || fail "git reset failed"
+git clean --quiet -fd            # never -fdx: that would delete .env
+
+# ---------------------------------------------------------------------------
+# Prove it still serves. Opcache revalidates on a 2s timestamp check, so give
+# it a moment before deciding the deploy broke something.
+# ---------------------------------------------------------------------------
+sleep 3
+CURL=(curl -s --max-time 20)
+[ -n "$SMOKE_RESOLVE" ] && CURL+=(--resolve "$SMOKE_RESOLVE")
+
+BAD=""
+for path in "/" "/ru/" "/ogame/calc/flight.php" "/ogame/calc/costs.php"; do
+  body=$(mktemp)
+  code=$("${CURL[@]}" -o "$body" -w '%{http_code}' "$SMOKE_BASE$path" || echo 000)
+  size=$(wc -c < "$body"); rm -f "$body"
+  if [ "$code" != 200 ] || [ "$size" -lt 1000 ]; then
+    BAD="$BAD $path(HTTP $code, ${size}b)"
+  fi
+done
+# One database-backed read. A static page cannot tell us the .env survived the
+# deploy or that MySQL is answering; this can.
+body=$(mktemp)
+code=$("${CURL[@]}" -o "$body" -w '%{http_code}' \
+  "$SMOKE_BASE/ajax.php?service=populatedSystems&country=ru&universe=268" || echo 000)
+grep -q '"populatedSystems"' "$body" || BAD="$BAD ajax/populatedSystems(HTTP $code)"
+rm -f "$body"
+
+if [ -n "$BAD" ]; then
+  fail "deployed $WANT_SHA but the site does not serve correctly:$BAD"
+fi
+
+log "deployed $WANT_SHA - smoke passed"
+echo "deployed $WANT_SHA"
+
+# The copy that runs lives outside the checkout on purpose: resetting the tree
+# under a running bash would let it read the second half of a different file.
+# The cost is that this script does not update itself - say so when it is stale.
+MINE="$(dirname "$0")/$(basename "$0")"
+THEIRS="$CHECKOUT/deploy/$(basename "$0")"
+if [ -r "$THEIRS" ] && ! cmp -s "$MINE" "$THEIRS"; then
+  log "NOTE: $MINE differs from $THEIRS - reinstall it with: cp $THEIRS $MINE"
+  echo "note: $MINE is out of date against the checkout" >&2
+fi

@@ -1,0 +1,74 @@
+# The rollback lever.
+#
+# Normal deploys need nothing from this file: CI finishing green on main emits a
+# workflow_run event, the receiver on the server sees conclusion == success and
+# syncs. This workflow exists for the other direction - putting a specific older
+# commit back on the site without opening a shell.
+#
+# What actually moves the server is the workflow_dispatch *event*, which GitHub
+# sends the moment you press Run workflow. Unlike workflow_run, that event
+# carries the inputs, which is how the commit id reaches the receiver at all.
+#
+# The consequence is that the job below runs alongside the deploy, not before
+# it: it cannot veto anything. It is here to say plainly what was dispatched,
+# and to go red within seconds if the commit was mistyped or is not on main -
+# which is also what deploy/pfg-sync refuses to do on the server itself.
+name: Deploy
+
+on:
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: 'Commit SHA to put on the servers (full 40 characters, must be on main)'
+        required: true
+        type: string
+
+# Two rollbacks racing each other would be worse than either one.
+concurrency:
+  group: deploy
+  cancel-in-progress: false
+
+jobs:
+  announce:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout full history
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+
+      - name: Verify the requested commit
+        env:
+          REF: ${{ inputs.ref }}
+        run: |
+          set -euo pipefail
+
+          if ! printf '%s' "$REF" | grep -qE '^[0-9a-f]{7,40}$'; then
+            echo "::error::'$REF' is not a commit id. The server has already refused it."
+            exit 1
+          fi
+
+          if ! git cat-file -e "$REF^{commit}" 2>/dev/null; then
+            echo "::error::commit $REF does not exist in this repository"
+            exit 1
+          fi
+
+          if ! git merge-base --is-ancestor "$REF" origin/main; then
+            echo "::error::commit $REF is not an ancestor of main - pfg-sync will refuse it"
+            exit 1
+          fi
+
+          {
+            echo "### Dispatched deploy"
+            echo
+            echo '```'
+            git log -1 --format='%H%n%an, %ad%n%n%s%n%n%b' --date=iso "$REF"
+            echo '```'
+            echo
+            echo "Behind main by $(git rev-list --count "$REF"..origin/main) commit(s)."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Where to look next
+        run: |
+          echo "The receiver logs every delivery; the sync logs every reset and smoke result."
+          echo "See deploy/README.md for the log paths on each host."

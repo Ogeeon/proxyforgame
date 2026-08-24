@@ -79,6 +79,26 @@ scoping, message mechanics. Two rules that must hold even if the skill is not in
 - **Never commit an unverified change.** Scope the run per `docs/test-scope.md`; full `make test`
   before any `git push`. Keep unrelated pre-existing changes in a separate commit.
 
+## Deployment
+
+**A push to `main` that passes CI goes live.** There is no second repository, no manual
+copy step and no build: GitHub Actions finishing green emits a `workflow_run` event, a
+receiver on the production host verifies it and resets the checkout to that commit. The
+standby host follows `main` on a five-minute timer. Full mechanics, rollback and host
+layout: **`deploy/README.md`**.
+
+Three consequences for everyday work:
+
+- **`git push` is a release.** The gate is `make check` before the push, not a review step
+  afterwards — once CI is green the commit is on the site within a minute.
+- **Schema changes go first, and must be backward compatible with the code already
+  deployed.** There is no migration mechanism yet (issue #12), and the window between a
+  schema change and the code that needs it is now seconds rather than weeks.
+- **Both hosts run the same commit but not the same environment** — production is on PHP
+  8.2, the standby on 8.5, and each has its own database and its own cron (issue #13).
+
+Publishing the in-app changelog stays manual and is unrelated to this — see below.
+
 ## Changelog
 
 `CHANGELOG.md` (Keep a Changelog 1.1.0, English) is the single source of truth for the project's
@@ -119,9 +139,12 @@ require_once('flight.tpl');
 
 ### AJAX API
 Single endpoint `www/ajax.php` handles all AJAX requests:
-- Request: POST with `service` parameter identifying the action
-- Response: Two-line format `"<code>\n<payload>"` where `0` = success
-- Services are defined as `case` blocks in the switch statement
+- Request: a `service` parameter names the action. Reads take GET, anything with a
+  side effect takes POST; the `$apiRoutes` table in `ajax.php` declares which.
+- Response: **JSON**, with the HTTP status carrying the outcome — `respondJson(200, …)`
+  on success, and an error body of `{"error": {"code": …, "message": …}}` otherwise.
+- Each service is a plain function in its own file under `www/api/`, returning its
+  result or throwing an `ApiError`. Nothing below a handler writes to the output.
 
 ### Calculator Structure
 Calculators in `www/ogame/calc/` consist of:
@@ -208,7 +231,10 @@ and the core addresses that array **by index**. If you change ship order, update
 and `expeditions.tpl` to match.
 
 ### Adding AJAX Services
-Add a `case` block in `www/ajax.php` and return responses in the format `"<code>\n<payload>"`. Always check the numeric code first on the client side.
+Add a row to `$apiRoutes` in `www/ajax.php` naming the method and the handler, and put the
+handler in its own file under `www/api/`. A handler returns the value to serialize or throws
+an `ApiError`; it must not echo anything itself. On the client, check the HTTP status — the
+body is JSON either way.
 
 ## Localization
 

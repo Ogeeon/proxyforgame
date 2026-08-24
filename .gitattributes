@@ -19,3 +19,7 @@ Makefile text eol=lf
 *.woff2 binary
 *.ttf binary
 *.eot binary
+
+# Same reasoning as the Makefile: these run on the Linux hosts, where a trailing
+# CR in a shell script is passed to the interpreter and the script breaks.
+deploy/* text eol=lf
