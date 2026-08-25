@@ -52,6 +52,15 @@ it executes it — a self-update mid-run would make it read the second half of a
 different file. The cost is that they do not update themselves; `pfg-sync` says
 so when its installed copy has drifted from the one in the checkout.
 
+`webhook.php` sits outside the checkout for a different reason — it belongs to
+another vhost's document root — and **nothing warns when it drifts**. A deploy
+updates the copy in `deploy/` and leaves the running one untouched, so a change
+to the receiver has to be reinstalled by hand:
+
+```
+install -m 644 <checkout>/deploy/webhook.php <data>/www/webhooks.proxyforgame.com/
+```
+
 ## The two hosts
 
 | | production | standby |
@@ -119,18 +128,31 @@ updates. This is the default because it leaves the history honest and needs no
 special mechanism.
 
 **Faster — put a specific commit back.** Actions → *Deploy* → Run workflow, and
-give it the full commit SHA.
+give it the full commit SHA. The workflow checks that the commit exists and is
+an ancestor of `main`, and only then tells the server; a bad SHA fails the job
+and nothing is dispatched. A rollback target must be an ancestor of `main` —
+`pfg-sync` checks that again on the host and refuses otherwise.
 
-That works because of a quirk worth knowing: the `workflow_dispatch` **event**
-carries the inputs the run was started with, while `workflow_run` does not. So
-the dispatch event is the only way a chosen commit reaches the server without a
-second endpoint. The consequence is that the deploy starts the moment you press
-the button — the job in `deploy.yml` runs *alongside* it and cannot veto
-anything. It is there to go red within seconds if the SHA was mistyped or is not
-on `main`, which is also what `pfg-sync` refuses to do on the server.
+The route there is worth knowing, because the obvious ones are closed. A
+`workflow_run` payload carries no inputs, so it cannot name a commit of your
+choosing. `workflow_dispatch` and `repository_dispatch` both do — and GitHub
+will not deliver either to a repository webhook:
 
-A rollback target must be an ancestor of `main`; `pfg-sync` checks and refuses
-otherwise.
+```
+422 These events are not allowed for this hook: workflow_dispatch
+422 These events are not allowed for this hook: repository_dispatch
+```
+
+Both are GitHub App events. What a repo hook may receive, and what exists for
+exactly this, is **`deployment`**: `deploy.yml` creates one for the verified SHA
+in the `production` environment, and the receiver takes the commit from
+`deployment.sha`. Deployments from any other environment are logged and ignored.
+
+**A rollback moves production only.** The standby follows the newest *green*
+commit of `main` on its timer, so within five minutes it is back on the tip
+while production sits on the older commit. That is the intended asymmetry —
+production is the host under repair — but the two are genuinely running
+different code until `main` moves again.
 
 **Last resort — at a shell:** `pfg-sync --sha <sha>`.
 

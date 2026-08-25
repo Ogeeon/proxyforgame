@@ -10,10 +10,12 @@
 //                      only what CI proved" true. A plain `push` subscription
 //                      would race the test run instead of waiting for it.
 //
-//   workflow_dispatch  the rollback lever. This event - unlike workflow_run -
-//                      carries the inputs the run was started with, which is
-//                      the only way a chosen commit can reach the server
-//                      without opening a second endpoint.
+//   deployment         the rollback lever. workflow_run carries no inputs, and
+//                      neither workflow_dispatch nor repository_dispatch can be
+//                      subscribed to on a repository webhook (422 for both -
+//                      they are GitHub App events). So the Deploy workflow
+//                      verifies a SHA and creates a deployment for it, and the
+//                      commit travels in the payload GitHub already defines.
 //
 // The receiver does no git work itself: it validates, then hands a commit to
 // deploy/pfg-sync, which the reconcile timer and a human at a shell also use.
@@ -107,15 +109,16 @@ if ($event === 'workflow_run') {
     $sha = $run['head_sha'] ?? '';
     $why = 'CI passed on main';
 
-} elseif ($event === 'workflow_dispatch') {
-    // Any workflow can be dispatched by hand; only the deploy one may move the
-    // server, or a manual run of the Claude workflows would redeploy the site.
-    if (substr($payload['workflow'] ?? '', -strlen('/deploy.yml')) !== '/deploy.yml') {
-        deployLog("[$delivery] workflow_dispatch ignored (not deploy.yml: " . ($payload['workflow'] ?? '?') . ')');
+} elseif ($event === 'deployment') {
+    // Anything at all may create a deployment at this repository; only the
+    // environment this host serves is an instruction to move it.
+    $dep = $payload['deployment'] ?? [];
+    if (($dep['environment'] ?? '') !== 'production') {
+        deployLog("[$delivery] deployment ignored (environment: " . ($dep['environment'] ?? '?') . ')');
         respond(202, 'ignored');
     }
-    $sha = $payload['inputs']['ref'] ?? '';
-    $why = 'manual dispatch';
+    $sha = $dep['sha'] ?? '';
+    $why = 'deployment for ' . ($dep['environment'] ?? '?');
 
 } else {
     deployLog("[$delivery] $event ignored (not subscribed)");

@@ -5,14 +5,16 @@
 # syncs. This workflow exists for the other direction - putting a specific older
 # commit back on the site without opening a shell.
 #
-# What actually moves the server is the workflow_dispatch *event*, which GitHub
-# sends the moment you press Run workflow. Unlike workflow_run, that event
-# carries the inputs, which is how the commit id reaches the receiver at all.
+# The commit id has to reach the server somehow, and workflow_run does not carry
+# inputs. Neither workflow_dispatch nor repository_dispatch can be subscribed to
+# on a repository webhook - GitHub answers 422 for both; they are deliverable to
+# a GitHub App only. What a repo hook may receive, and what exists for precisely
+# this purpose, is `deployment`.
 #
-# The consequence is that the job below runs alongside the deploy, not before
-# it: it cannot veto anything. It is here to say plainly what was dispatched,
-# and to go red within seconds if the commit was mistyped or is not on main -
-# which is also what deploy/pfg-sync refuses to do on the server itself.
+# So this workflow verifies the SHA and then creates a GitHub deployment for it.
+# The useful consequence is that the check now gates the deploy instead of
+# racing it: a SHA that is mistyped, unknown, or not an ancestor of main fails
+# the job and no deployment is ever created.
 name: Deploy
 
 on:
@@ -27,6 +29,10 @@ on:
 concurrency:
   group: deploy
   cancel-in-progress: false
+
+permissions:
+  contents: read
+  deployments: write   # creating the deployment below
 
 jobs:
   announce:
@@ -67,6 +73,30 @@ jobs:
             echo
             echo "Behind main by $(git rev-list --count "$REF"..origin/main) commit(s)."
           } >> "$GITHUB_STEP_SUMMARY"
+
+      # Only now, with the commit proven to exist and to be on main, is the
+      # server told anything.
+      #
+      # auto_merge false: the default would try to merge main into the ref,
+      # which is the opposite of what a rollback wants. required_contexts empty:
+      # the checks were verified above, and an older commit's statuses can have
+      # aged out of the API entirely.
+      - name: Create the deployment
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REF: ${{ inputs.ref }}
+        run: |
+          set -euo pipefail
+          gh api "repos/$GITHUB_REPOSITORY/deployments" --input - <<JSON
+          {
+            "ref": "$REF",
+            "environment": "production",
+            "auto_merge": false,
+            "required_contexts": [],
+            "description": "rollback dispatched from Actions"
+          }
+          JSON
+          echo "deployment created for $REF"
 
       - name: Where to look next
         run: |
