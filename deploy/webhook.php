@@ -103,7 +103,9 @@ if ($event === 'workflow_run') {
     ];
     $failed = array_keys(array_filter($checks, function ($ok) { return !$ok; }));
     if ($failed) {
-        deployLog("[$delivery] workflow_run ignored (" . implode(', ', $failed) . ')');
+        // The names are the conditions that did NOT hold - say so, or the line
+        // reads as if they had.
+        deployLog("[$delivery] workflow_run ignored, not true: " . implode(', ', $failed));
         respond(202, 'ignored');
     }
     $sha = $run['head_sha'] ?? '';
@@ -150,8 +152,10 @@ if (!preg_match('/^[0-9a-f]{7,40}$/', (string)$sha)) {
 $env = empty($conf['SYNC_CONF'])
     ? ''
     : 'PFG_SYNC_CONF=' . escapeshellarg($conf['SYNC_CONF']) . ' ';
+// The assignment goes before nohup, not after it: nohup takes the next word as
+// the command to run, so `nohup VAR=x prog` looks for a program called "VAR=x".
 $cmd = sprintf(
-    'nohup %s%s --sha %s >> %s 2>&1 &',
+    '%snohup %s --sha %s >> %s 2>&1 &',
     $env,
     escapeshellarg($conf['SYNC']),
     escapeshellarg($sha),
