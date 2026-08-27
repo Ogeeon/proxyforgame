@@ -38,6 +38,7 @@ say "1. Preconditions"
 for v in $VHOSTS; do
   [ -f "$v" ] || die "$v missing"
   grep -q "DocumentRoot $OLD/htdocs" "$v" || die "$v does not point at $OLD/htdocs"
+  grep -q "<Directory $OLD/htdocs>" "$v" || die "$v has no <Directory $OLD/htdocs> block"
 done
 echo "OK - old checkout, .env and both vhosts are as expected"
 
@@ -45,16 +46,20 @@ echo "OK - old checkout, .env and both vhosts are as expected"
 say "2. Cloning $REPO"
 git clone --quiet "$REPO" "$NEW"
 chown -R www-data:www-data "$NEW"
-echo "HEAD: $(git -C "$NEW" log --oneline -1)"
+# The checkout belongs to www-data, so root's git refuses to read it until the
+# path is declared safe - the same entry the old checkout already carries.
+git config --global --get-all safe.directory | grep -qx "$NEW" || git config --global --add safe.directory "$NEW"
+HEAD_LINE=$(git -C "$NEW" log --oneline -1) || die "cannot read the clone's HEAD"
+echo "HEAD: $HEAD_LINE"
 install -o www-data -g www-data -m 640 "$OLD/.env" "$NEW/.env"
 echo "Copied .env"
 
 # --- 3. Compare ------------------------------------------------------------
 say "3. Comparing new www/ against live htdocs/"
-git -C "$NEW" ls-tree -r HEAD | awk '$4 ~ /^www\//    {print $3, substr($4,5)}' | sort -k2 > /tmp/new-$STAMP.txt
-git -C "$OLD" ls-tree -r HEAD | awk '$4 ~ /^htdocs\// {print $3, substr($4,8)}' | sort -k2 > /tmp/old-$STAMP.txt
-echo "$(comm -12 /tmp/new-$STAMP.txt /tmp/old-$STAMP.txt | wc -l) of $(wc -l < /tmp/old-$STAMP.txt) live files are byte-identical in the clone"
-DIFFERING=$(comm -3 /tmp/new-$STAMP.txt /tmp/old-$STAMP.txt | awk '{print $2}' | sort -u)
+git -C "$NEW" ls-tree -r HEAD | awk '$4 ~ /^www\//    {print substr($4,5), $3}' | LC_ALL=C sort > /tmp/new-$STAMP.txt
+git -C "$OLD" ls-tree -r HEAD | awk '$4 ~ /^htdocs\// {print substr($4,8), $3}' | LC_ALL=C sort > /tmp/old-$STAMP.txt
+echo "$(LC_ALL=C comm -12 /tmp/new-$STAMP.txt /tmp/old-$STAMP.txt | wc -l) of $(wc -l < /tmp/old-$STAMP.txt) live files are byte-identical in the clone"
+DIFFERING=$(LC_ALL=C comm -3 /tmp/new-$STAMP.txt /tmp/old-$STAMP.txt | awk '{print $1}' | sort -u)
 if [ -n "$DIFFERING" ]; then
   echo "Differing, or present on only one side:"
   # shellcheck disable=SC2086
@@ -102,7 +107,11 @@ say "5. Introducing the document-root symlink"
 ln -sfn "$NEW/www" "$LINK"
 for v in $VHOSTS; do
   cp -p "$v" "$v.bak-$STAMP"
-  sed -i "s#DocumentRoot $OLD/htdocs#DocumentRoot $LINK#" "$v"
+  # The <Directory> block has to move with it. Apache matches that block against
+  # the path as configured, symlink and all, so a block still naming the old
+  # literal path grants AllowOverride to nobody: .htaccess is ignored and every
+  # language prefix answers 404 while / and *.php still look healthy.
+  sed -i "s#DocumentRoot $OLD/htdocs#DocumentRoot $LINK#; s#<Directory $OLD/htdocs>#<Directory $LINK>#" "$v"
 done
 echo "Vhost backups: *.bak-$STAMP"
 if ! apache2ctl configtest; then
@@ -128,7 +137,9 @@ if [ "$FAILED" != 0 ]; then
   echo
   echo "Live check failed - rolling back."
   ln -sfn "$OLD/htdocs" "$LINK"
-  die "document root points back at the Bitbucket checkout"
+  for v in $VHOSTS; do cp -p "$v.bak-$STAMP" "$v"; done
+  apache2ctl configtest && systemctl reload apache2
+  die "vhosts and document root are back on the Bitbucket checkout"
 fi
 echo "DocumentRoot is now $LINK -> $(readlink "$LINK")"
 echo "From here on, switching versions is a single ln -sfn against that link."

@@ -66,10 +66,10 @@ echo "Copied .env ($(stat -c '%a %U:%G' "$NEW/.env"))"
 # --- 4. Compare the new tree with what is live -----------------------------
 # Blob ids are content hashes, so they compare across two unrelated histories.
 say "4. Comparing new www/ against live htdocs/"
-git -C "$NEW" ls-tree -r HEAD | awk '$4 ~ /^www\//    {print $3, substr($4,5)}' | sort -k2 > /tmp/new-$STAMP.txt
-git -C "$OLD" ls-tree -r HEAD | awk '$4 ~ /^htdocs\// {print $3, substr($4,8)}' | sort -k2 > /tmp/old-$STAMP.txt
-echo "$(comm -12 /tmp/new-$STAMP.txt /tmp/old-$STAMP.txt | wc -l) of $(wc -l < /tmp/old-$STAMP.txt) live files are byte-identical in the clone"
-DIFFERING=$(comm -3 /tmp/new-$STAMP.txt /tmp/old-$STAMP.txt | awk '{print $2}' | sort -u)
+git -C "$NEW" ls-tree -r HEAD | awk '$4 ~ /^www\//    {print substr($4,5), $3}' | LC_ALL=C sort > /tmp/new-$STAMP.txt
+git -C "$OLD" ls-tree -r HEAD | awk '$4 ~ /^htdocs\// {print substr($4,8), $3}' | LC_ALL=C sort > /tmp/old-$STAMP.txt
+echo "$(LC_ALL=C comm -12 /tmp/new-$STAMP.txt /tmp/old-$STAMP.txt | wc -l) of $(wc -l < /tmp/old-$STAMP.txt) live files are byte-identical in the clone"
+DIFFERING=$(LC_ALL=C comm -3 /tmp/new-$STAMP.txt /tmp/old-$STAMP.txt | awk '{print $1}' | sort -u)
 if [ -n "$DIFFERING" ]; then
   echo "Differing, or present on only one side:"
   # shellcheck disable=SC2086
