@@ -157,6 +157,11 @@ install -m 755 "$NEW/deploy/pfg-sync" "$NEW/deploy/pfg-notify" /usr/local/bin/
   echo "CHECKOUT=$NEW"
   echo "SMOKE_BASE=https://proxyforgame.com"
   echo "SMOKE_RESOLVE=proxyforgame.com:443:127.0.0.1"
+  # This host's certificate for that name cannot renew itself - the challenge
+  # goes wherever proxyforgame.com resolves, which is production. The smoke test
+  # has to prove this host serves, not who it claims to be; the watchdog reports
+  # the expiry from outside.
+  echo "SMOKE_INSECURE=1"
   echo "LOG=/var/log/pfg-cron.log"
   echo "LOCK=/run/lock/pfg-sync.lock"
   echo "MAIL_TO=proxyforgame@gmail.com"

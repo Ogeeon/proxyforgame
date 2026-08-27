@@ -14,6 +14,12 @@
 #   CHECKOUT        absolute path of the git checkout
 #   SMOKE_BASE      base URL to smoke-test after updating
 #   SMOKE_RESOLVE   optional curl --resolve entry, for a host that is not in DNS
+#   SMOKE_INSECURE  optional; 1 to skip certificate verification in the smoke
+#                   test. Set on the standby, whose certificate for
+#                   proxyforgame.com cannot renew itself - that name resolves to
+#                   production, so the challenge lands there. This host has to
+#                   prove that it serves, not who it claims to be, and the
+#                   watchdog reports the expiry from outside.
 #   LOG             file to append to
 #   MAIL_TO         address for failure reports (optional)
 #
@@ -49,6 +55,7 @@ CONF="${PFG_SYNC_CONF:-}"
 LOG="${LOG:-/dev/null}"
 MAIL_TO="${MAIL_TO:-}"
 SMOKE_RESOLVE="${SMOKE_RESOLVE:-}"
+SMOKE_INSECURE="${SMOKE_INSECURE:-}"
 
 log() { printf '%s %s\n' "$(date -Is)" "$*" >> "$LOG"; }
 fail() {
@@ -115,6 +122,7 @@ git clean --quiet -fd            # never -fdx: that would delete .env
 sleep 3
 CURL=(curl -s --max-time 20)
 [ -n "$SMOKE_RESOLVE" ] && CURL+=(--resolve "$SMOKE_RESOLVE")
+[ "$SMOKE_INSECURE" = 1 ] && CURL+=(--insecure)
 
 BAD=""
 for path in "/" "/ru/" "/ogame/calc/flight.php" "/ogame/calc/costs.php"; do
