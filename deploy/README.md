@@ -213,6 +213,14 @@ unix socket.
   renewal needs an HTTP-01 challenge, and `proxyforgame.com` resolves to
   production, so **that renewal will fail silently and the standby's smoke check
   will start failing on certificate validation.** Deal with it before October.
+- **A document root that moves has to take its `<Directory>` block with it.**
+  Apache matches that block against the path as configured, symlink and all, so
+  pointing `DocumentRoot` at the new link while the block still names the old
+  literal path leaves `AllowOverride` applying to nothing: `.htaccess` is
+  ignored, every language prefix answers 404, and `/` and `*.php` keep answering
+  200 — the failure looks like a routing bug, not a config one. Both standby
+  vhosts now name the link in both places, which is also what makes the rollback
+  a single `ln -sfn`. Worth remembering for issue #14.
 - **The old deploy checkout carried files that were in no repository** —
   `api.php`, `funct.php`, `lftech.*`, `dev_flight.*`. All were dead: nothing
   referenced them and ten days of access logs showed zero hits. `cutover-prod.sh`
