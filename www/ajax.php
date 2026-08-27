@@ -11,6 +11,7 @@
   require_once __DIR__ . '/api/spy-report.inc.php';
   require_once __DIR__ . '/api/server-data.inc.php';
   require_once __DIR__ . '/api/populated-systems.inc.php';
+  require_once __DIR__ . '/api/health.inc.php';
 
   // Services with a side effect take POST; the rest are reads and take GET.
   $apiRoutes = array(
@@ -20,6 +21,7 @@
     'ogameAPI'         => array('GET',  'apiSpyReport'),
     'serverdata'       => array('GET',  'apiServerData'),
     'populatedSystems' => array('GET',  'apiPopulatedSystems'),
+    'health'           => array('GET',  'apiHealth'),
   );
 
   try {

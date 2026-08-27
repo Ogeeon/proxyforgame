@@ -176,3 +176,39 @@ test.describe('AJAX endpoint - ogameAPI', () => {
         await expectApiError(await request.get(`${ENDPOINT}?service=ogameAPI&code=`), 400, 'missing_params');
     });
 });
+
+test.describe('AJAX endpoint - health', () => {
+    // The shape matters more than the values here: this is what the watchdog
+    // workflow parses from outside, and it has no way to complain about a
+    // field that quietly changed name.
+    test('reports the time, the deployed commit and the jobs', async ({ request }) => {
+        const response = await request.get(`${ENDPOINT}?service=health`);
+        expect(response.status()).toBe(200);
+        expect(response.headers()['content-type']).toContain('application/json');
+
+        const body = await response.json();
+        expect(Number.isNaN(Date.parse(body.time))).toBe(false);
+        // Null is the honest answer where there is no readable checkout; a
+        // string is only ever a full SHA.
+        expect(body.commit === null || /^[0-9a-f]{40}$/.test(body.commit)).toBe(true);
+        // An object, never an array - the watchdog indexes it by job name, and
+        // an empty [] would break that without breaking any status code.
+        expect(Array.isArray(body.jobs)).toBe(false);
+        expect(typeof body.jobs).toBe('object');
+        expect(body.jobs).not.toBeNull();
+    });
+
+    // It reads no database, so it must keep answering when the database is the
+    // thing that broke. Nothing here can take MySQL away, but the contract is
+    // worth pinning: no query means no chance of a 500 from one.
+    test('answers without asking the database', async ({ request }) => {
+        const response = await request.get(`${ENDPOINT}?service=health`);
+        expect(response.status()).toBe(200);
+    });
+
+    test('refuses POST and says what it accepts', async ({ request }) => {
+        const response = await request.post(ENDPOINT, { form: { service: 'health' } });
+        await expectApiError(response, 405, 'method_not_allowed');
+        expect(response.headers()['allow']).toBe('GET');
+    });
+});

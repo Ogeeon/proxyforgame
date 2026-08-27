@@ -1,0 +1,36 @@
+name: Watchdog
+
+# Checks both hosts from outside, on a schedule, and fails if one of them is
+# not serving, has fallen behind the newest green commit of main, or has a cron
+# job that stopped running. A failed run is the alarm: GitHub mails it to
+# whoever last touched this file's schedule.
+#
+# This exists because a deploy-time smoke test only ever runs at deploy time.
+# Between two deploys nothing looks at either host - and the standby, which has
+# no public name and so cannot be watched by an uptime service, would otherwise
+# be watched by nobody at all.
+#
+# The schedule is best-effort on GitHub's side and drifts by minutes under
+# load. That is fine here: the thresholds are hours, not minutes.
+
+on:
+  schedule:
+    - cron: '17,47 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    name: Check both hosts
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run the watchdog
+        env:
+          # deploy/watchdog.sh asks the API which commit last went green.
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: bash deploy/watchdog.sh

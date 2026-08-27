@@ -1,0 +1,107 @@
+#!/bin/bash
+#
+#   pfg-cron-run <job> <command> [args...]
+#
+# Runs a cron job and records that it ran: a stamp file naming when the job
+# started, when it finished and with what exit status. What this buys over a
+# bare cron line is the failure nobody sees - a job that stops being run at
+# all, because cron died, the crontab was rewritten, or the host is down. A job
+# that runs and fails writes to its log; a job that never runs writes nothing,
+# and nothing is exactly what a log tells you.
+#
+# The stamps are read back out by `ajax.php?service=health`, which is what the
+# watchdog workflow in .github/workflows/ polls from outside. They therefore
+# live *outside* the checkout: `pfg-sync` runs `git clean -fd` on every deploy,
+# which would delete anything untracked left inside it.
+#
+# The job's own output still goes to stdout, so the `>> log 2>&1` on the
+# crontab line keeps working unchanged.
+#
+# Config: PFG_CRON_CONF, else /etc/pfg-cron.conf, else $HOME/.pfg-cron.conf.
+#
+#   STAMP_DIR=/var/lib/pfg/job-stamps    where to write the stamps
+#   check.<job>=<uuid-or-url>            optional Healthchecks.io ping
+#
+# The ping is unused today - the watchdog reads the stamps instead - and is
+# kept because it costs nothing while it is not configured.
+#
+# Monitoring must never be the reason a job did not run: a missing config, an
+# unwritable stamp directory and an unreachable ping host are all reported on
+# stderr and then ignored. The exit status is always the job's own.
+#
+set -uo pipefail
+
+JOB="${1:?usage: pfg-cron-run <job> <command> [args...]}"
+shift
+[ "$#" -gt 0 ] || { echo "pfg-cron-run: no command given" >&2; exit 2; }
+
+CONF="${PFG_CRON_CONF:-}"
+if [ -n "$CONF" ] && [ ! -r "$CONF" ]; then
+  echo "pfg-cron-run: PFG_CRON_CONF=$CONF is not readable" >&2
+  CONF=""
+fi
+[ -z "$CONF" ] && [ -r /etc/pfg-cron.conf ] && CONF=/etc/pfg-cron.conf
+[ -z "$CONF" ] && [ -r "${HOME:-}/.pfg-cron.conf" ] && CONF="$HOME/.pfg-cron.conf"
+[ -n "$CONF" ] || echo "pfg-cron-run: no config found - no stamp will be written" >&2
+
+# Read values out of the config rather than sourcing it: it holds paths and
+# check identifiers, and a config that can execute is a config that can go
+# wrong in ways a list of values cannot.
+conf_get() {
+  [ -n "$CONF" ] || return 0
+  awk -F= -v k="$1" '
+    $0 ~ /^[[:space:]]*#/ { next }
+    { key = $1; gsub(/[[:space:]]/, "", key)
+      if (key == k) { sub(/^[^=]*=/, ""); gsub(/^[[:space:]]+|[[:space:]]+$/, ""); v = $0 } }
+    END { print v }
+  ' "$CONF"
+}
+
+STAMP_DIR=$(conf_get STAMP_DIR)
+PING_BASE="${PING_BASE:-https://hc-ping.com}"
+CHECK=$(conf_get "check.$JOB")
+URL=""
+case "$CHECK" in
+  '')                 ;;
+  http://*|https://*) URL="$CHECK" ;;
+  *)                  URL="$PING_BASE/$CHECK" ;;
+esac
+
+# --retry covers a blip; -m keeps a hung ping host from delaying the job.
+hc_ping() {
+  [ -n "$URL" ] || return 0
+  curl -fsS -m 10 --retry 3 -o /dev/null "$URL$1" \
+    || echo "pfg-cron-run: ping $1 for '$JOB' failed" >&2
+}
+
+# ISO 8601 in UTC, so a stamp reads the same wherever it is parsed - the two
+# hosts do not agree on a timezone.
+now() { date -u +%Y-%m-%dT%H:%M:%SZ; }
+
+write_stamp() {
+  [ -n "$STAMP_DIR" ] || return 0
+  mkdir -p "$STAMP_DIR" 2>/dev/null
+  tmp="$STAMP_DIR/.$JOB.$$"
+  # Written whole and moved into place: the reader is a web request, and it can
+  # arrive halfway through a write.
+  if printf '{"job":"%s","started":"%s","finished":"%s","status":%s}\n' \
+       "$JOB" "$STARTED" "$(now)" "$1" > "$tmp" 2>/dev/null \
+     && mv -f "$tmp" "$STAMP_DIR/$JOB.json" 2>/dev/null
+  then
+    chmod 644 "$STAMP_DIR/$JOB.json" 2>/dev/null
+  else
+    rm -f "$tmp" 2>/dev/null
+    echo "pfg-cron-run: could not write the stamp in $STAMP_DIR" >&2
+  fi
+}
+
+STARTED=$(now)
+hc_ping /start
+
+"$@"
+STATUS=$?
+
+write_stamp "$STATUS"
+hc_ping "/$STATUS"
+
+exit "$STATUS"

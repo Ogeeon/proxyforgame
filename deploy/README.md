@@ -44,9 +44,11 @@ is only ever updated by one piece of code.
 | `cutover-prod.sh` | production | One-time move from the old Bitbucket checkout. `--dry-run` stops before anything live is touched. |
 | `cutover-standby.sh` | standby | The same, plus introducing a document-root symlink the host did not have. |
 | `rollback-prod.sh` | production | Undoes the cutover. Not the everyday rollback — see below. |
+| `pfg-cron-run` | both hosts | Wraps a cron job and stamps when it last ran. See *Between deploys*. |
+| `watchdog.sh` | nowhere — a runner, or a laptop | Checks both hosts from outside. Driven by `.github/workflows/watchdog.yml`. |
 
-`pfg-sync` and `pfg-notify` are installed **outside** the checkout
-(`$DATA/bin/` on production, `/usr/local/bin/` on the standby). `pfg-sync`
+`pfg-sync`, `pfg-notify` and `pfg-cron-run` are installed **outside** the
+checkout (`$DATA/bin/` on production, `/usr/local/bin/` on the standby). `pfg-sync`
 resets the tree it would otherwise be running from, and bash reads a script as
 it executes it — a self-update mid-run would make it read the second half of a
 different file. The cost is that they do not update themselves; `pfg-sync` says
@@ -179,9 +181,90 @@ if `AllowOverride` ever stops applying, every other page still returns 200 while
 the language routing is silently gone. The `ajax.php` call is there because a
 static page cannot show that `.env` survived or that MySQL is answering.
 
-External monitoring covers what a deploy-time check cannot: a host that falls
-over between deploys. See issue tracker for the UptimeRobot and Healthchecks.io
-setup.
+## Between deploys
+
+A deploy-time smoke test only ever runs at deploy time. Between two deploys
+nothing looks at either host, and the standby - which has no public name, so no
+uptime service can be pointed at it - would be watched by nobody at all.
+
+Three pieces close that:
+
+| | |
+|---|---|
+| `deploy/pfg-cron-run` | Wraps a cron job and writes a stamp: when it started, when it finished, with what exit status |
+| `ajax.php?service=health` | Reports the deployed commit and those stamps, with each job's age worked out server-side |
+| `.github/workflows/watchdog.yml` | Twice an hour, runs `deploy/watchdog.sh`, which checks both hosts from outside and fails the run when something is wrong |
+
+A failed run is the alarm - GitHub mails it to whoever last changed the
+schedule in that workflow file. There is no third-party monitoring account
+involved anywhere in this.
+
+**Why a stamp file and not a log line.** A job that runs and fails writes to its
+log. A job that stops being run - cron died, the crontab was rewritten, the host
+is down - writes nothing at all, and nothing is exactly what a log tells you.
+The stamps make silence measurable.
+
+**Why the stamps live outside the checkout.** `pfg-sync` runs `git clean -fd` on
+every deploy, so anything untracked left inside the checkout is deleted the next
+time `main` moves. `STAMP_DIR` therefore points somewhere else, and the web user
+needs to be able to read it - the health service reads the files directly.
+
+The crontab lines name the job and then the command:
+
+```
+0 0 * * * /usr/local/bin/pfg-cron-run uni-list /usr/bin/php .../uni.list.cron.php >> log 2>&1
+```
+
+The job name is what appears in the health report and in the watchdog's output.
+`pfg-cron-run` never changes a job's exit status and never stops it running: a
+missing config, an unwritable stamp directory or an unreachable ping host are
+reported on stderr and otherwise ignored.
+
+**What the watchdog checks per host**: `/` and `/ru/` answer 200 with a real
+page, `populatedSystems` answers with data (which is `.env` plus MySQL), the
+deployed commit equals the newest commit of `main` whose CI passed - with a
+fifteen-minute grace, since production deploys on a webhook and the standby
+polls every five minutes - and every reported job finished within its window,
+with status 0. Certificate expiry is printed for both hosts but fails neither:
+production renews itself, and the standby's is a known manual procedure.
+
+`bash deploy/watchdog.sh` runs the same checks from a laptop; `production` or
+`standby` as an argument limits it to one host. It needs `curl`, `node` and,
+for the commit comparison, `gh`.
+
+**The standby's certificate.** It expires 2026-10-07 and cannot renew itself:
+the HTTP-01 challenge for `proxyforgame.com` goes wherever that name resolves,
+which is production. The decision on record is to leave it. During a failover
+DNS is pointed at the standby anyway, and `certbot -d proxyforgame.com` then
+works there like it does anywhere. Until that day the standby simply serves an
+expired certificate to the few clients that reach it by IP.
+
+## Failing over to the standby
+
+There is no automatic failover and no shared state. Moving the site to the
+standby is a manual sequence, and it is lossy - read the last point before
+starting.
+
+1. **Point DNS at it.** `proxyforgame.com` and `www.proxyforgame.com` to
+   `89.124.110.192`. Nothing on either host has to change for this: the standby
+   already serves that vhost, which is why its `.com` configuration was left in
+   place after the cutover.
+2. **Reissue the certificate**, once the name actually resolves there:
+   `certbot --apache -d proxyforgame.com -d www.proxyforgame.com`. Until DNS
+   moved, this could not work - the HTTP-01 challenge went to production - which
+   is why the standby's certificate is allowed to lapse (issue #17). With a
+   valid certificate in place, `SMOKE_INSECURE=1` can come out of
+   `/etc/pfg-sync.conf`.
+3. **Expect a slower pipeline.** The GitHub webhook points at production, so
+   while it is down a push reaches the site on the standby's five-minute timer
+   instead of within seconds. Nothing else about deploys changes.
+4. **The databases are separate and nothing replicates between them.** Each host
+   has its own MariaDB. `population_data` and the universe lists rebuild
+   themselves from the daily crons, so those catch up on their own. The in-app
+   changelog does not: it is applied to production by hand, so the standby's
+   copy is whatever it was last given. Anything else written on production since
+   the split is simply not there. This is the real cost of a failover, and the
+   reason it is a decision rather than a reflex.
 
 ## Database changes
 
