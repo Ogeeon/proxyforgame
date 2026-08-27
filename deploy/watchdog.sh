@@ -68,11 +68,11 @@ read_newest_green() {
   node -e '
     const fs = require("fs");
     let d;
-    try { d = JSON.parse(fs.readFileSync(0, "utf8")); } catch (e) { process.exit(1); }
+    try { d = JSON.parse(fs.readFileSync(process.argv[1], "utf8")); } catch (e) { process.exit(1); }
     const run = (d.workflow_runs || [])[0];
     if (!run) process.exit(1);
     console.log(run.head_sha + " " + run.updated_at);
-  '
+  ' "$1"
 }
 
 # ---------------------------------------------------------------------------
@@ -83,7 +83,10 @@ read_newest_green() {
 TARGET=""
 TARGET_AGE=""
 if command -v gh >/dev/null; then
-  NEWEST=$(gh api "repos/$REPO/actions/workflows/$CI_WORKFLOW/runs?branch=main&event=push&status=success&per_page=1" 2>/dev/null | read_newest_green)
+  RUNS_JSON=$(mktemp)
+  gh api "repos/$REPO/actions/workflows/$CI_WORKFLOW/runs?branch=main&event=push&status=success&per_page=1"     > "$RUNS_JSON" 2>/dev/null || true
+  NEWEST=$(read_newest_green "$RUNS_JSON" || true)
+  rm -f "$RUNS_JSON"
   if [ -n "$NEWEST" ]; then
     TARGET=${NEWEST%% *}
     TARGET_AGE=$(( $(date -u +%s) - $(date -u -d "${NEWEST#* }" +%s) ))
@@ -108,7 +111,8 @@ check_host() {
   local body code size
   for path in "/" "/ru/"; do
     body=$(mktemp)
-    code=$(curl -s --max-time 20 "${curl_args[@]}" -o "$body" -w '%{http_code}' "$base$path" || echo 000)
+    code=$(curl -s --max-time 20 "${curl_args[@]}" -o "$body" -w '%{http_code}' "$base$path" || true)
+    code=${code:-000}
     size=$(wc -c < "$body"); rm -f "$body"
     if [ "$code" = 200 ] && [ "$size" -gt 1000 ]; then
       ok "$path ($code, ${size}b)"
@@ -120,7 +124,8 @@ check_host() {
   # The one call that proves .env survived the deploy and MySQL is answering.
   body=$(mktemp)
   code=$(curl -s --max-time 20 "${curl_args[@]}" -o "$body" -w '%{http_code}' \
-    "$base/ajax.php?service=populatedSystems&country=ru&universe=268" || echo 000)
+    "$base/ajax.php?service=populatedSystems&country=ru&universe=268" || true)
+  code=${code:-000}
   if grep -q '"populatedSystems"' "$body"; then
     ok "ajax populatedSystems ($code)"
   else
@@ -131,7 +136,8 @@ check_host() {
   # ---- the health report ----
   body=$(mktemp)
   code=$(curl -s --max-time 20 "${curl_args[@]}" -o "$body" -w '%{http_code}' \
-    "$base/ajax.php?service=health" || echo 000)
+    "$base/ajax.php?service=health" || true)
+  code=${code:-000}
   local health
   health=$(read_health "$body")
   rm -f "$body"
