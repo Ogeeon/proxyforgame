@@ -11,7 +11,7 @@
 # when a target has to run inside a sub-project.
 
 ifeq ($(OS),Windows_NT)
-PHP ?= d:/wamp64/bin/php/php7.4.9/php.exe
+PHP ?= d:/wamp64/bin/php/php8.2.33/php.exe
 else
 PHP ?= php
 endif
@@ -55,7 +55,7 @@ PW ?= node node_modules/@playwright/test/cli.js
 
 .PHONY: help install serve db-seed \
         test test-unit test-e2e test-e2e-ui test-one report \
-        check audit quality coverage db-validate lint typecheck \
+        check audit quality coverage db-validate lint typecheck php-version-check \
         changelog-validate changelog-release \
         tsconfigs tsconfigs-check \
         html-render html-validate html-audit \
@@ -112,7 +112,7 @@ report: ## Open the last Playwright HTML report
 # `make check` always means "you broke something". The two reporters below
 # both exit non-zero on pre-existing issues, so they live in `audit` instead and
 # are prefixed with `-` there to keep one failure from hiding the other.
-check: changelog-validate i18n-validate lint typecheck tsconfigs-check html-validate test ## Green gate - what must pass before a commit
+check: php-version-check changelog-validate i18n-validate lint typecheck tsconfigs-check html-validate test ## Green gate - what must pass before a commit
 
 audit: ## Advisory reports; these flag pre-existing issues and do not gate
 	-node scripts/check-test-coverage.js
@@ -132,6 +132,11 @@ tsconfigs: ## Regenerate the per-calculator TypeScript projects from the templat
 # wrong file set, and a dropped <script> tag would go unnoticed otherwise.
 tsconfigs-check: ## Fail if a generated TypeScript project is out of date
 	npm run check-tsconfigs --silent
+
+# Advisory: warns if the local PHP is not the version .php-version pins, and
+# always exits 0. Real drift is caught on the live hosts by deploy/watchdog.sh.
+php-version-check: ## Warn if the local PHP does not match .php-version
+	@node scripts/check-php-version.js
 
 coverage: ## Report which calculators have no spec
 	node scripts/check-test-coverage.js

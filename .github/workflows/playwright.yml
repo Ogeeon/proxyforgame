@@ -44,11 +44,16 @@ jobs:
 
       # -------------------------------------------------------------
       # Install PHP (with Apache-like extensions)
+      #
+      # The version comes from .php-version, which is the single source of
+      # truth: it must track production's PHP major.minor (see
+      # docs/adr/0001-php-version-alignment.md). CI and production move
+      # together - do not pin a version here.
       # -------------------------------------------------------------
       - name: Install PHP
         uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # 2.37.2
         with:
-          php-version: '8.2'
+          php-version-file: '.php-version'
           extensions: mbstring, intl, mysqli
           ini-values: post_max_size=256M, upload_max_filesize=256M
 
