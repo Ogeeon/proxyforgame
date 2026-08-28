@@ -15,6 +15,9 @@
   function apiHealth() {
       return array(
         'time'   => gmdate('Y-m-d\TH:i:s\Z'),
+        // major.minor only: enough for the watchdog to catch a host drifting
+        // off .php-version, without publishing an exact build to fingerprint.
+        'php'    => PHP_MAJOR_VERSION . '.' . PHP_MINOR_VERSION,
         'commit' => healthDeployedCommit(dirname(__DIR__, 2)),
         // Cast so an empty result encodes as {} and not as [] - the watchdog
         // indexes this by job name.

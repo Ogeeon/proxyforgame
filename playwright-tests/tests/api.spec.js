@@ -181,13 +181,16 @@ test.describe('AJAX endpoint - health', () => {
     // The shape matters more than the values here: this is what the watchdog
     // workflow parses from outside, and it has no way to complain about a
     // field that quietly changed name.
-    test('reports the time, the deployed commit and the jobs', async ({ request }) => {
+    test('reports the time, the PHP version, the deployed commit and the jobs', async ({ request }) => {
         const response = await request.get(`${ENDPOINT}?service=health`);
         expect(response.status()).toBe(200);
         expect(response.headers()['content-type']).toContain('application/json');
 
         const body = await response.json();
         expect(Number.isNaN(Date.parse(body.time))).toBe(false);
+        // major.minor of the PHP that answered - the watchdog compares this to
+        // .php-version to catch a host that drifted off the pinned version.
+        expect(/^\d+\.\d+$/.test(body.php)).toBe(true);
         // Null is the honest answer where there is no readable checkout; a
         // string is only ever a full SHA.
         expect(body.commit === null || /^[0-9a-f]{40}$/.test(body.commit)).toBe(true);
