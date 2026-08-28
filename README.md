@@ -15,7 +15,7 @@ maths runs client-side in vanilla JavaScript on Bootstrap 5, and every string is
 `www/locale/` in 13 locales.
 
 ## Prerequisites
-- PHP 7.4+ with mysqli enabled
+- PHP 8.2 with mysqli enabled — production's version, pinned in `.php-version`
 - Node.js 18+ for running Playwright tests
 - (Recommended) GNU Make 4.x as the task runner — `choco install make` on Windows. A 3.81
   build from GnuWin32 is too old. Everything below also works without it.

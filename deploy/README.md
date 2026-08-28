@@ -72,7 +72,7 @@ install -m 644 <checkout>/deploy/webhook.php <data>/www/webhooks.proxyforgame.co
 | panel | ISPmanager, **no root** (uid 1012) | plain Ubuntu, root |
 | checkout | `/var/www/www-proxyforgame/data/deploy/proxyforgame.com-gh` | `/var/www/proxyforgame-gh` |
 | document root | `~/www/proxyforgame.com` → `<checkout>/www` | `/var/www/proxyforgame-docroot` → `<checkout>/www` |
-| PHP | 8.2 (`/opt/php82/bin/php`) | 8.5 (`/usr/bin/php`) — see issue #13 |
+| PHP | 8.2 (`/opt/php82/bin/php`) — the pin, see [`.php-version`](../.php-version) | 8.5 (`/usr/bin/php`), distribution default — [ADR-0001](../docs/adr/0001-php-version-alignment.md) |
 | cron owner | `www-proxyforgame` | `www-data` |
 | deploy log | `<data>/logs/deploy.log` | `/var/log/pfg-cron.log` |
 | trigger | webhook, plus an hourly reconcile | five-minute timer |
@@ -80,6 +80,19 @@ install -m 644 <checkout>/deploy/webhook.php <data>/www/webhooks.proxyforgame.co
 Both are Apache 2.4 with mod_php and a MariaDB of their own. No Docker. Opcache
 is on with `validate_timestamps` and `revalidate_freq=2`, so a deploy needs no
 cache flush — new files are picked up within two seconds.
+
+### Why the standby runs a different PHP
+
+The pinned version is 8.2 — production's, recorded in [`.php-version`](../.php-version)
+and read from there by CI. The standby runs 8.5 because that is what Ubuntu
+26.04 ships and there is no supported apt path to 8.2 on it (`ondrej/php` has no
+`resolute` suite). **Do not try to downgrade it by hand.**
+
+The consequence, spelled out in [ADR-0001](../docs/adr/0001-php-version-alignment.md):
+the standby is a warm serving spare and a forward-compatibility canary, not a
+version-faithful rehearsal of production. A failover onto it is also a PHP
+upgrade. `deploy/watchdog.sh` enforces this asymmetrically — production must
+equal `.php-version`, the standby must only not be *older* than it.
 
 **The document root is a symlink on both hosts.** That is what makes the cutover
 atomic and its rollback instant, and it is what issue #14 (release directories)
@@ -225,8 +238,11 @@ page, `populatedSystems` answers with data (which is `.env` plus MySQL), the
 deployed commit equals the newest commit of `main` whose CI passed - with a
 fifteen-minute grace, since production deploys on a webhook and the standby
 polls every five minutes - and every reported job finished within its window,
-with status 0. Certificate expiry is printed for both hosts but fails neither:
-production renews itself, and the standby's is a known manual procedure.
+with status 0. The `php` field from the health report is checked against
+`.php-version`: production must match it exactly, the standby must only not be
+older (see ADR-0001). Certificate expiry is printed for both hosts but fails
+neither: production renews itself, and the standby's is a known manual
+procedure.
 
 `bash deploy/watchdog.sh` runs the same checks from a laptop; `production` or
 `standby` as an argument limits it to one host. It needs `curl`, `node` and,

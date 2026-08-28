@@ -55,8 +55,13 @@ Two things worth knowing before writing a test:
 
 ### Running PHP Scripts (PowerShell)
 ```powershell
-& 'd:\wamp64\bin\php\php7.4.9\php.exe' .\ogame\calc\flight.php
+& 'd:\wamp64\bin\php\php8.2.33\php.exe' .\ogame\calc\flight.php
 ```
+Local PHP is pinned to production's version in `.php-version` (see
+`docs/adr/0001-php-version-alignment.md`). Local dev is authoritative only for
+the Node suite, lint and typecheck; anything PHP-shaped is confirmed by CI or by
+`make serve` on a matching build. `make check` warns — but does not fail — on a
+version mismatch.
 
 ### Local Development
 - Configure WAMP virtual host pointing to `www/` directory (see README.md)
@@ -94,8 +99,10 @@ Three consequences for everyday work:
 - **Schema changes go first, and must be backward compatible with the code already
   deployed.** There is no migration mechanism yet (issue #12), and the window between a
   schema change and the code that needs it is now seconds rather than weeks.
-- **Both hosts run the same commit but not the same environment** — production is on PHP
-  8.2, the standby on 8.5, and each has its own database and its own cron (issue #13).
+- **Both hosts run the same commit but not the same environment** — the target PHP version
+  is pinned to production's 8.2 in `.php-version` and CI reads it from there, but the standby
+  still runs 8.5 because its OS ships nothing older (`docs/adr/0001-php-version-alignment.md`).
+  Each host also has its own database and its own cron.
 
 Publishing the in-app changelog stays manual and is unrelated to this — see below.
 
