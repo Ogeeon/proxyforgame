@@ -39,6 +39,12 @@ MAX_AGE=93600
 DEPLOY_GRACE=900
 CERT_WARN_DAYS=14
 
+# The pinned PHP major.minor - production's, and the one CI installs. Production
+# must serve exactly this; the standby only must not be older than it, since it
+# is on whatever its OS ships (ADR-0001). Empty if the file cannot be read, and
+# the check then only warns.
+PINNED_PHP=$(tr -d ' \t\r\n' < "$(dirname "$0")/../.php-version" 2>/dev/null || true)
+
 FAILED=0
 fail() { printf '  FAIL %s\n' "$*"; FAILED=1; }
 ok()   { printf '  ok   %s\n' "$*"; }
@@ -58,6 +64,7 @@ read_health() {
     let d;
     try { d = JSON.parse(fs.readFileSync(process.argv[1], "utf8")); } catch (e) { process.exit(1); }
     console.log("commit " + (d.commit || ""));
+    console.log("php " + (d.php || ""));
     for (const [name, job] of Object.entries(d.jobs || {})) {
       console.log("job " + name + " " + job.ageSeconds + " " + job.status);
     }
@@ -73,6 +80,17 @@ read_newest_green() {
     if (!run) process.exit(1);
     console.log(run.head_sha + " " + run.updated_at);
   ' "$1"
+}
+
+# True when major.minor version $1 is strictly older than $2. Both come from
+# PHP_MAJOR_VERSION / PHP_MINOR_VERSION, so each half is a plain integer.
+php_older_than() {
+  local a_major=${1%%.*} a_minor=${1#*.} b_major=${2%%.*} b_minor=${2#*.}
+  if [ "$a_major" -ne "$b_major" ]; then
+    [ "$a_major" -lt "$b_major" ]
+  else
+    [ "$a_minor" -lt "$b_minor" ]
+  fi
 }
 
 # ---------------------------------------------------------------------------
@@ -158,6 +176,26 @@ check_host() {
     warn "deployed ${deployed:0:7}, target ${TARGET:0:7} went green ${TARGET_AGE}s ago - still within grace"
   else
     fail "deployed ${deployed:0:7} but the newest green commit is ${TARGET:0:7}"
+  fi
+
+  # ---- the PHP version ----
+  # Production is held to .php-version exactly - it is the pin, and CI installs
+  # the same. The standby runs its OS's PHP and is allowed to be ahead, but
+  # never behind: an older spare is the one that breaks on failover.
+  local php_ver
+  php_ver=$(echo "$health" | sed -n 's/^php //p')
+  if [ -z "$PINNED_PHP" ]; then
+    warn "no .php-version to check the PHP against (reported ${php_ver:-none})"
+  elif [ -z "$php_ver" ]; then
+    fail "health reports no PHP version"
+  elif [ "$php_ver" = "$PINNED_PHP" ]; then
+    ok "PHP $php_ver"
+  elif [ "$label" = production ]; then
+    fail "PHP $php_ver, but .php-version pins $PINNED_PHP - CI and production move together"
+  elif php_older_than "$php_ver" "$PINNED_PHP"; then
+    fail "PHP $php_ver is older than the pinned $PINNED_PHP"
+  else
+    warn "PHP $php_ver is ahead of the pinned $PINNED_PHP - expected, it tracks its OS"
   fi
 
   # ---- the cron jobs ----
