@@ -178,9 +178,21 @@ different code until `main` moves again.
   `reset --hard` makes the checkout a mirror that cannot drift.
 - **`git clean -fd` must never gain `-x`.** The gitignored `.env` sits in the
   checkout root and is the one file there that cannot be recreated from git.
-- **It refuses anything that is not a hex commit id.** A SHA arrives from the
+  `pfg-sync` also copies `.env` aside before every reset and puts it back if the
+  reset moved or removed it — `.env` was a *tracked* file until commit `8ac690a`,
+  so a reset onto older history would otherwise overwrite it with the committed
+  placeholder, and the reset back would delete it.
+- **It refuses anything that is not a hex commit id**, and in `--sha` mode also
+  anything that is not an ancestor of `origin/main`. A SHA arrives from the
   public internet and ends up on a command line, however well signed the
   delivery was.
+- **In green mode it never deploys ahead of CI, or behind it.** The target is
+  the tip of `origin/main` if that commit's CI has gone green, else the newest
+  ancestor whose has — resolved by asking GitHub about a specific commit, not by
+  trusting the order of the runs list (which once served a six-month-old run as
+  "newest" and cost an afternoon).
+- **A deploy whose smoke test fails is rolled back** to the commit it came from,
+  then re-smoked. A broken commit left live is worse than a missed update.
 
 ## After every deploy
 
@@ -221,6 +233,12 @@ The stamps make silence measurable.
 every deploy, so anything untracked left inside the checkout is deleted the next
 time `main` moves. `STAMP_DIR` therefore points somewhere else, and the web user
 needs to be able to read it - the health service reads the files directly.
+
+The path is named twice, once per reader: `STAMP_DIR` in `/etc/pfg-cron.conf`
+(what `pfg-cron-run` writes to) and `JOB_STAMP_DIR` in the checkout's `.env`
+(what `ajax.php?service=health` reads back). They must match. If `health`
+reports `"jobs": {}` on a host whose crons are visibly running, `JOB_STAMP_DIR`
+is missing from that host's `.env`.
 
 The crontab lines name the job and then the command:
 
@@ -324,3 +342,14 @@ unix socket.
   `api.php`, `funct.php`, `lftech.*`, `dev_flight.*`. All were dead: nothing
   referenced them and ten days of access logs showed zero hits. `cutover-prod.sh`
   tars them before they disappear.
+- **The runs list is not ordered, and `.env` used to be tracked.** On 2026-08-29
+  the standby's watchdog went red: no database, no cron stamps. `pfg-sync`'s
+  target query (`runs?...&per_page=1`) had intermittently returned an arbitrary
+  old successful run instead of the newest, and the five-minute timer kept
+  resetting the checkout onto it and back. One of those old commits predated
+  `8ac690a` "Stop tracking .env", where `.env` was a committed file — so
+  `reset --hard` onto it wrote the placeholder over the real credentials, and
+  the reset back deleted `.env` outright. Fixed on both sides: `pfg-sync` and
+  `watchdog.sh` now resolve the target by asking GitHub about a specific commit
+  (tip of main, then its ancestors), and `pfg-sync` preserves `.env` across
+  every reset and rolls back a deploy whose smoke test fails.

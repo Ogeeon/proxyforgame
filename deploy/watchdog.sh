@@ -71,15 +71,42 @@ read_health() {
   ' "$1"
 }
 
+# The newest successful push-run in a runs document - by updated_at, not by the
+# order GitHub happens to return, which for this endpoint is not guaranteed and
+# has served a six-month-old run as "newest" before now.
 read_newest_green() {
   node -e '
     const fs = require("fs");
     let d;
     try { d = JSON.parse(fs.readFileSync(process.argv[1], "utf8")); } catch (e) { process.exit(1); }
-    const run = (d.workflow_runs || [])[0];
-    if (!run) process.exit(1);
-    console.log(run.head_sha + " " + run.updated_at);
+    const runs = (d.workflow_runs || [])
+      .filter(r => r.conclusion === "success")
+      .sort((a, b) => Date.parse(b.updated_at) - Date.parse(a.updated_at));
+    if (!runs.length) process.exit(1);
+    console.log(runs[0].head_sha + " " + runs[0].updated_at);
   ' "$1"
+}
+
+# The commit ids of main, newest first, one per line.
+read_commit_list() {
+  node -e '
+    const fs = require("fs");
+    let d;
+    try { d = JSON.parse(fs.readFileSync(process.argv[1], "utf8")); } catch (e) { process.exit(1); }
+    for (const c of (Array.isArray(d) ? d : [])) console.log(c.sha);
+  ' "$1"
+}
+
+# Prints "<sha> <updated_at>" if a push run of CI concluded successfully for
+# exactly $1, nothing otherwise. head_sha is an exact filter - no ordering to
+# trip over.
+green_run_for() {
+  local sha="$1" json
+  json=$(mktemp)
+  gh api "repos/$REPO/actions/workflows/$CI_WORKFLOW/runs?head_sha=$sha&event=push&status=success&per_page=1" \
+    > "$json" 2>/dev/null || { rm -f "$json"; return 1; }
+  read_newest_green "$json" || { rm -f "$json"; return 1; }
+  rm -f "$json"
 }
 
 # True when major.minor version $1 is strictly older than $2. Both come from
@@ -97,14 +124,26 @@ php_older_than() {
 # What both hosts should be running: the newest commit of main whose CI passed.
 # Comparing against the tip of main instead would cry every time a push is
 # still building, and every time main is red.
+#
+# Resolved the same way pfg-sync resolves its deploy target: the tip of main if
+# its CI has gone green, else the newest ancestor that has, walking the commit
+# list and never further than MAX_WALK. Asking the runs endpoint for "the
+# newest successful run" directly is what a stale answer once turned into a
+# false alarm.
 # ---------------------------------------------------------------------------
+MAX_WALK=20
 TARGET=""
 TARGET_AGE=""
 if command -v gh >/dev/null; then
-  RUNS_JSON=$(mktemp)
-  gh api "repos/$REPO/actions/workflows/$CI_WORKFLOW/runs?branch=main&event=push&status=success&per_page=1"     > "$RUNS_JSON" 2>/dev/null || true
-  NEWEST=$(read_newest_green "$RUNS_JSON" || true)
-  rm -f "$RUNS_JSON"
+  LIST_JSON=$(mktemp)
+  gh api "repos/$REPO/commits?sha=main&per_page=$MAX_WALK" > "$LIST_JSON" 2>/dev/null || true
+  NEWEST=""
+  while read -r sha; do
+    [ -n "$sha" ] || continue
+    NEWEST=$(green_run_for "$sha" || true)
+    [ -n "$NEWEST" ] && break
+  done <<< "$(read_commit_list "$LIST_JSON" || true)"
+  rm -f "$LIST_JSON"
   if [ -n "$NEWEST" ]; then
     TARGET=${NEWEST%% *}
     TARGET_AGE=$(( $(date -u +%s) - $(date -u -d "${NEWEST#* }" +%s) ))

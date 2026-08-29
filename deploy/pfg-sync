@@ -22,12 +22,22 @@
 #                   watchdog reports the expiry from outside.
 #   LOG             file to append to
 #   MAIL_TO         address for failure reports (optional)
+#   MAX_WALK        optional; how many commits back from the tip of main to
+#                   consider in green mode before giving up (default 20)
 #
 # Deliberately NOT `git pull`: a pull can merge, and merges are how the previous
 # Bitbucket checkout accumulated 26 commits that existed nowhere else. A reset
 # makes the checkout a mirror that cannot drift. `clean -fd` sweeps stray files
 # but MUST NOT gain -x: the gitignored .env lives in the checkout root and is
 # the one thing here that cannot be recreated from git.
+#
+# The target is always resolved from origin/main after a fetch: the tip if its
+# CI has gone green, else the newest ancestor that has. Older history is never a
+# candidate - a stale answer from the runs API once reset a host six months back,
+# and the reset onto and back off a commit that still tracked .env destroyed the
+# file. Two guards remain against that class of bug: .env is saved across every
+# reset and put back if it moved, and a deploy whose smoke test fails is rolled
+# back to the commit it came from rather than left live.
 #
 set -euo pipefail
 
@@ -56,6 +66,7 @@ LOG="${LOG:-/dev/null}"
 MAIL_TO="${MAIL_TO:-}"
 SMOKE_RESOLVE="${SMOKE_RESOLVE:-}"
 SMOKE_INSECURE="${SMOKE_INSECURE:-}"
+MAX_WALK="${MAX_WALK:-20}"
 
 log() { printf '%s %s\n' "$(date -Is)" "$*" >> "$LOG"; }
 fail() {
@@ -66,12 +77,92 @@ fail() {
   exit 1
 }
 
+# ---------------------------------------------------------------------------
+# Did CI (a push run of $CI_WORKFLOW) conclude successfully for exactly this
+# commit? Filtering by head_sha is an exact match - unlike a bare per_page=1
+# on the runs list, whose order GitHub does not guarantee.
+#
+#   0  yes           1  no run, or none successful           2  API unreachable
+# ---------------------------------------------------------------------------
+ci_passed() {
+  local sha="$1" json count
+  json=$(curl -sf -H 'Accept: application/vnd.github+json' \
+    "$REPO_API/actions/workflows/$CI_WORKFLOW/runs?head_sha=$sha&event=push&status=success&per_page=1") \
+    || return 2
+  count=$(printf '%s' "$json" | grep -oE '"total_count"[[:space:]]*:[[:space:]]*[0-9]+' \
+    | grep -oE '[0-9]+' | head -1) || true
+  [ -n "$count" ] && [ "$count" -gt 0 ]
+}
+
+# ---------------------------------------------------------------------------
+# The smoke test, as a function so a rollback can re-run it. Prints the list of
+# things that are wrong (empty when the site is healthy); never exits.
+# ---------------------------------------------------------------------------
+smoke() {
+  local bad="" path body code size
+  local -a curl_cmd
+  curl_cmd=(curl -s --max-time 20)
+  [ -n "$SMOKE_RESOLVE" ] && curl_cmd+=(--resolve "$SMOKE_RESOLVE")
+  [ "$SMOKE_INSECURE" = 1 ] && curl_cmd+=(--insecure)
+
+  for path in "/" "/ru/" "/ogame/calc/flight.php" "/ogame/calc/costs.php"; do
+    body=$(mktemp)
+    # curl -w prints 000 on a connection failure and also exits non-zero; the
+    # || keeps that from turning into "000000", it does not add a second code.
+    code=$("${curl_cmd[@]}" -o "$body" -w '%{http_code}' "$SMOKE_BASE$path") || code=000
+    size=$(wc -c < "$body"); rm -f "$body"
+    if [ "$code" != 200 ] || [ "$size" -lt 1000 ]; then
+      bad="$bad $path(HTTP $code, ${size}b)"
+    fi
+  done
+  # One database-backed read. A static page cannot tell us the .env survived the
+  # deploy or that MySQL is answering; this can.
+  body=$(mktemp)
+  code=$("${curl_cmd[@]}" -o "$body" -w '%{http_code}' \
+    "$SMOKE_BASE/ajax.php?service=populatedSystems&country=ru&universe=268") || code=000
+  grep -q '"populatedSystems"' "$body" || bad="$bad ajax/populatedSystems(HTTP $code)"
+  rm -f "$body"
+
+  printf '%s' "$bad"
+}
+
+# ---------------------------------------------------------------------------
+# .env is gitignored now, but it was a tracked file until commit 8ac690a. A
+# reset onto anything older overwrites the real credentials with the committed
+# placeholder, and the reset back deletes the file outright. Save it around
+# every reset and put it back whenever it ends up missing or changed.
+# ---------------------------------------------------------------------------
+ENV_BAK=""
+cleanup() { [ -n "$ENV_BAK" ] && rm -f "$ENV_BAK"; return 0; }
+trap cleanup EXIT
+
+save_env() {
+  if [ -f "$CHECKOUT/.env" ]; then
+    ENV_BAK=$(mktemp)
+    cp -p "$CHECKOUT/.env" "$ENV_BAK"
+  fi
+}
+restore_env() {
+  [ -n "$ENV_BAK" ] || return 0
+  if ! cmp -s "$ENV_BAK" "$CHECKOUT/.env" 2>/dev/null; then
+    cp -p "$ENV_BAK" "$CHECKOUT/.env"
+    log "restored .env - the reset had removed or changed it"
+  fi
+}
+
 # One deploy at a time. A second delivery arriving mid-reset would otherwise see
 # a half-written tree, and GitHub can deliver two events for one push.
 exec 9>"${LOCK:-/tmp/pfg-sync.lock}"
 flock -w 120 9 || fail "another pfg-sync held the lock for over two minutes"
 
 cd "$CHECKOUT" || fail "checkout $CHECKOUT is not there"
+
+# ---------------------------------------------------------------------------
+# origin/main is the frame of reference for both modes: every target has to be
+# it or an ancestor of it. Fetch before deciding anything.
+# ---------------------------------------------------------------------------
+git fetch --quiet origin main || fail "git fetch failed - leaving the checkout alone"
+TIP=$(git rev-parse FETCH_HEAD)
 
 # ---------------------------------------------------------------------------
 # Which commit do we want?
@@ -82,19 +173,38 @@ if [ "$MODE" = exact ]; then
     *[!0-9a-fA-F]* | "") fail "refusing a target that is not a hex sha: '$WANT_SHA'" ;;
   esac
   [ ${#WANT_SHA} -ge 7 ] || fail "sha too short: '$WANT_SHA'"
+  git cat-file -e "$WANT_SHA^{commit}" 2>/dev/null \
+    || fail "$WANT_SHA is not in the fetched history"
+  git merge-base --is-ancestor "$WANT_SHA" "$TIP" \
+    || fail "$WANT_SHA is not an ancestor of origin/main - refusing it"
+  WANT_SHA=$(git rev-parse "$WANT_SHA") || fail "cannot resolve $WANT_SHA"
 else
-  # The newest push-run of CI on main that concluded successfully. Asking GitHub
-  # rather than trusting origin/main is what keeps the timer as safe as the
-  # webhook: a red commit sits at the tip of main but never becomes the answer.
-  RUNS="$REPO_API/actions/workflows/$CI_WORKFLOW/runs?branch=main&event=push&status=success&per_page=1"
-  JSON=$(curl -sf -H 'Accept: application/vnd.github+json' "$RUNS") \
-    || fail "GitHub API unreachable - leaving the checkout alone"
-  WANT_SHA=$(printf '%s' "$JSON" | sed -n 's/.*"head_sha"[[:space:]]*:[[:space:]]*"\([0-9a-f]\{40\}\)".*/\1/p' | head -1)
-  [ -n "$WANT_SHA" ] || fail "no successful CI run found for main"
+  # The tip of main if its CI has gone green, otherwise the newest ancestor
+  # whose CI has - walking first-parent, never further than MAX_WALK. A tip
+  # that is still building simply resolves to the commit already deployed, so
+  # the timer waits for CI instead of racing it.
+  #
+  # The walk tolerates gaps: GitHub runs the workflow only for the commit a
+  # push points at, so the intermediate commits of a multi-commit push have no
+  # run of their own and answer "no". MAX_WALK has to comfortably exceed the
+  # largest push anyone realistically lands while CI is mid-flight.
+  sha="$TIP"
+  n=0
+  WANT_SHA=""
+  while [ "$n" -lt "$MAX_WALK" ]; do
+    rc=0
+    ci_passed "$sha" || rc=$?
+    if [ "$rc" -eq 0 ]; then WANT_SHA="$sha"; break; fi
+    [ "$rc" -eq 2 ] && fail "GitHub API unreachable - leaving the checkout alone"
+    sha=$(git rev-parse --verify --quiet "$sha^") || break
+    n=$((n + 1))
+  done
+  [ -n "$WANT_SHA" ] \
+    || fail "no CI-passed commit within $MAX_WALK of origin/main (${TIP:0:8}) - is main red?"
 fi
 
 HAVE_SHA=$(git rev-parse HEAD)
-if [ "$HAVE_SHA" = "$WANT_SHA" ] || [ "${HAVE_SHA:0:${#WANT_SHA}}" = "$WANT_SHA" ]; then
+if [ "$HAVE_SHA" = "$WANT_SHA" ]; then
   [ "$MODE" = check ] && echo "up to date at $HAVE_SHA"
   exit 0
 fi
@@ -109,40 +219,28 @@ fi
 # Update
 # ---------------------------------------------------------------------------
 log "syncing $HAVE_SHA -> $WANT_SHA"
-git fetch --quiet origin main || fail "git fetch failed"
-git cat-file -e "$WANT_SHA^{commit}" 2>/dev/null \
-  || fail "$WANT_SHA is not in the fetched history (a rollback target must be an ancestor of main)"
+save_env
 git reset --quiet --hard "$WANT_SHA" || fail "git reset failed"
 git clean --quiet -fd            # never -fdx: that would delete .env
+restore_env
 
 # ---------------------------------------------------------------------------
 # Prove it still serves. Opcache revalidates on a 2s timestamp check, so give
-# it a moment before deciding the deploy broke something.
+# it a moment before deciding the deploy broke something. A failure is rolled
+# back to HAVE_SHA - a broken commit left live is worse than a missed update.
 # ---------------------------------------------------------------------------
 sleep 3
-CURL=(curl -s --max-time 20)
-[ -n "$SMOKE_RESOLVE" ] && CURL+=(--resolve "$SMOKE_RESOLVE")
-[ "$SMOKE_INSECURE" = 1 ] && CURL+=(--insecure)
-
-BAD=""
-for path in "/" "/ru/" "/ogame/calc/flight.php" "/ogame/calc/costs.php"; do
-  body=$(mktemp)
-  code=$("${CURL[@]}" -o "$body" -w '%{http_code}' "$SMOKE_BASE$path" || echo 000)
-  size=$(wc -c < "$body"); rm -f "$body"
-  if [ "$code" != 200 ] || [ "$size" -lt 1000 ]; then
-    BAD="$BAD $path(HTTP $code, ${size}b)"
-  fi
-done
-# One database-backed read. A static page cannot tell us the .env survived the
-# deploy or that MySQL is answering; this can.
-body=$(mktemp)
-code=$("${CURL[@]}" -o "$body" -w '%{http_code}' \
-  "$SMOKE_BASE/ajax.php?service=populatedSystems&country=ru&universe=268" || echo 000)
-grep -q '"populatedSystems"' "$body" || BAD="$BAD ajax/populatedSystems(HTTP $code)"
-rm -f "$body"
-
+BAD=$(smoke)
 if [ -n "$BAD" ]; then
-  fail "deployed $WANT_SHA but the site does not serve correctly:$BAD"
+  log "smoke failed on ${WANT_SHA:0:8}:$BAD - rolling back to ${HAVE_SHA:0:8}"
+  git reset --quiet --hard "$HAVE_SHA" || true
+  git clean --quiet -fd || true
+  restore_env
+  sleep 3
+  BACK=$(smoke)
+  [ -z "$BACK" ] \
+    || fail "deployed $WANT_SHA, smoke failed ($BAD), and the rollback to $HAVE_SHA is also unhealthy ($BACK)"
+  fail "deployed $WANT_SHA but the site does not serve correctly:$BAD - rolled back to $HAVE_SHA"
 fi
 
 log "deployed $WANT_SHA - smoke passed"
