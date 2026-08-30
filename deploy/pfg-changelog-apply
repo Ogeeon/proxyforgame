@@ -1,0 +1,71 @@
+#!/bin/bash
+#
+#   pfg-changelog-apply <checkout>
+#
+# Pipe <checkout>/changelog.sql into this host's database. `deploy/pfg-sync`
+# calls this after every successful deploy, so a pushed release reaches the
+# in-app changelog on its own - on both hosts, each writing to its own MariaDB,
+# which nothing replicates between. This is the step that used to be a manual
+# `mysql` pipe run against production only.
+#
+# changelog.sql is regenerated for every release (scripts/changelog.js) and
+# every statement in it is an upsert, so re-applying an entry the host already
+# has changes nothing, and re-applying after /translate-changelog overwrites the
+# stale translation rows. That is what makes it safe to run on every deploy.
+#
+# Why a failure here is not fatal to the deploy: the site code is already live
+# and correct when this runs. A failure means the sidebar changelog lags by one
+# release, not that the deploy is broken - pfg-sync logs a warning and moves on.
+#
+# Credentials come from <checkout>/.env, the same file the app reads - DB_HOST,
+# DB_USER, DB_PASS, DB_NAME. The password is handed to mysql through MYSQL_PWD,
+# not on the command line where `ps` would show it.
+#
+# --default-character-set=utf8 is NOT optional: production's mysql client
+# defaults to latin1, and without the flag every Cyrillic row is stored
+# double-encoded, silently. The description column is utf8 (utf8mb3) on both
+# hosts, so the flag is correct on the standby too.
+#
+set -euo pipefail
+
+CHECKOUT="${1:?usage: pfg-changelog-apply <checkout>}"
+SQL="$CHECKOUT/changelog.sql"
+
+[ -f "$SQL" ] || { echo "pfg-changelog-apply: no $SQL - nothing to apply"; exit 0; }
+
+command -v mysql >/dev/null 2>&1 \
+  || { echo "pfg-changelog-apply: no mysql client on PATH - skipping" >&2; exit 1; }
+
+ENV_FILE="$CHECKOUT/.env"
+[ -r "$ENV_FILE" ] \
+  || { echo "pfg-changelog-apply: $ENV_FILE not readable - skipping" >&2; exit 1; }
+
+# Read a KEY=value line the way www/db.connect.inc.php does: the first '='
+# splits, surrounding whitespace (a CRLF checkout's trailing \r included) is
+# trimmed. The file is read, not sourced - a value carrying a shell
+# metacharacter must not run.
+env_get() {
+  local line
+  line=$(grep -m1 "^[[:space:]]*$1[[:space:]]*=" "$ENV_FILE") || return 0
+  line=${line#*=}
+  line=${line%$'\r'}
+  line=${line#"${line%%[![:space:]]*}"}
+  line=${line%"${line##*[![:space:]]}"}
+  printf '%s' "$line"
+}
+
+DB_HOST=$(env_get DB_HOST)
+DB_USER=$(env_get DB_USER)
+DB_PASS=$(env_get DB_PASS)
+DB_NAME=$(env_get DB_NAME)
+
+[ -n "$DB_HOST" ] && [ -n "$DB_USER" ] && [ -n "$DB_NAME" ] \
+  || { echo "pfg-changelog-apply: .env lacks DB_HOST/DB_USER/DB_NAME - skipping" >&2; exit 1; }
+
+export MYSQL_PWD="$DB_PASS"
+if mysql --default-character-set=utf8 -h"$DB_HOST" -u"$DB_USER" "$DB_NAME" < "$SQL"; then
+  echo "pfg-changelog-apply: applied $SQL to $DB_NAME on $(hostname)"
+else
+  echo "pfg-changelog-apply: mysql rejected $SQL" >&2
+  exit 1
+fi

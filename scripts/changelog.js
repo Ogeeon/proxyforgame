@@ -7,7 +7,12 @@
  * bullets marked `<!-- site -->` are the subset users see in the sidebar
  * changelog; the exact Russian text that was published for a release is quoted
  * at the end of its section, which makes the file the archive the database is
- * not (changelog.sql is overwritten for every entry and is git-ignored).
+ * not (changelog.sql is overwritten for every entry).
+ *
+ * changelog.sql is committed and travels with the deploy: after every sync
+ * `deploy/pfg-sync` pipes it into that host's database, so a pushed release
+ * reaches both hosts on its own. Every statement is an upsert, so re-applying an
+ * already-published entry on the next deploy is a no-op.
  *
  * Run: node scripts/changelog.js [--validate]
  *      node scripts/changelog.js --release [--date=YYYY-MM-DD]
@@ -462,6 +467,11 @@ function escapeSql(value) {
  * input /translate-changelog expects, and it rewrites the eleven non-Russian
  * rows in place.
  *
+ * Every statement is an upsert. changelog.sql is committed and re-applied by
+ * `deploy/pfg-sync` after every deploy, so applying an entry that a host already
+ * has must change nothing, and re-running after /translate-changelog must
+ * overwrite the stale rows.
+ *
  * @param {number} id
  * @param {string} date
  * @param {string} text
@@ -470,9 +480,10 @@ function escapeSql(value) {
 function buildSql(id, date, text) {
   const escaped = escapeSql(text);
   const rows = LANGS.map(
-    (lang) => `insert into change_descriptions (id, lang, description) values (${id}, '${lang}', '${escaped}');`
+    (lang) => `insert into change_descriptions (id, lang, description) values (${id}, '${lang}', '${escaped}') on duplicate key update description = values(description);`
   );
-  return `insert into change_headers (id, ts) values (${id}, '${date}');\n\n${rows.join('\n')}\n`;
+  const header = `insert into change_headers (id, ts) values (${id}, '${date}') on duplicate key update ts = values(ts);`;
+  return `${header}\n\n${rows.join('\n')}\n`;
 }
 
 /**
@@ -560,7 +571,8 @@ function main(argv) {
     console.log(colorize(`Released site entry ${result.id} dated ${date}.`, colors.green));
     console.log(`  ${colorize('CHANGELOG.md', colors.blue)}  [Unreleased] cut into a dated section`);
     console.log(`  ${colorize('changelog.sql', colors.blue)} rewritten, all ${LANGS.length} rows holding the Russian text`);
-    console.log(`\nNext: run ${colorize('/translate-changelog', colors.blue)}, then apply changelog.sql to the database.`);
+    console.log(`\nNext: run ${colorize('/translate-changelog', colors.blue)}, then commit CHANGELOG.md and changelog.sql together.`);
+    console.log(`The deploy applies changelog.sql to both hosts - no manual database step.`);
     return;
   }
 

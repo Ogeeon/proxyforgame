@@ -175,9 +175,17 @@ describe('buildSql', () => {
         const lines = buildSql(58, '2026-08-05', "Рок'тал").trim().split('\n').filter(Boolean);
 
         expect(lines).toHaveLength(13);
-        expect(lines[0]).toBe("insert into change_headers (id, ts) values (58, '2026-08-05');");
-        expect(lines[1]).toBe("insert into change_descriptions (id, lang, description) values (58, 'ru', 'Рок''тал');");
+        expect(lines[0]).toBe("insert into change_headers (id, ts) values (58, '2026-08-05') on duplicate key update ts = values(ts);");
+        expect(lines[1]).toBe("insert into change_descriptions (id, lang, description) values (58, 'ru', 'Рок''тал') on duplicate key update description = values(description);");
         expect(lines[12]).toContain("'bs'");
+    });
+
+    it('makes every statement an upsert so a re-applied entry is a no-op', () => {
+        const lines = buildSql(58, '2026-08-05', 'text').trim().split('\n').filter(Boolean);
+
+        for (const line of lines) {
+            expect(line).toContain('on duplicate key update');
+        }
     });
 });
 
@@ -204,7 +212,7 @@ ${ENTRY_57}`;
 
         expect(result.id).toBe(58);
         expect(result.content).toContain('## [2026-08-05] - site entry 58');
-        expect(result.sql).toContain("values (58, '2026-08-05')");
+        expect(result.sql).toContain("insert into change_headers (id, ts) values (58, '2026-08-05')");
         // The released bullets moved under the dated heading, and a fresh empty
         // [Unreleased] sits above them.
         expect(result.content.indexOf('## [Unreleased]')).toBeLessThan(result.content.indexOf('## [2026-08-05]'));

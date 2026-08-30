@@ -1,13 +1,11 @@
 --
 -- Changelog rows for the e2e suite.
 --
--- The real entries live in `changelog.sql`, which is git-ignored and rewritten
--- for every release, so a fresh database - CI's above all - has the two change_*
--- tables empty and `service=changelog` answers with an empty array. The api spec
--- checks the shape of a non-empty answer, so it needs rows of its own.
---
--- The name has to differ from `changelog.sql`: .gitignore matches that one at any
--- depth, so a fixture carrying it would never be committed.
+-- The real entries live in `changelog.sql`, which is rewritten for every release
+-- and applied to the hosts by the deploy, not by `make db-seed`. A fresh
+-- database - CI's above all - therefore has the two change_* tables empty and
+-- `service=changelog` answers with an empty array. The api spec checks the shape
+-- of a non-empty answer, so it needs rows of its own.
 --
 -- Imported by `make db-seed`, right after schema.sql has recreated the tables.
 -- Ids stay small so the "nothing newer than lastSeen" test, which asks with

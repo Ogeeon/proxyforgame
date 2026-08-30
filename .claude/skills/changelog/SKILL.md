@@ -7,8 +7,8 @@ description: Record a change in CHANGELOG.md and publish a release to the in-app
 
 `CHANGELOG.md` is the single source of truth. The database tables `change_headers` and
 `change_descriptions` hold only the subset users see in the sidebar, and `changelog.sql` is a
-git-ignored artifact regenerated for every release — neither is a record you can read history
-out of. The file is.
+committed artifact regenerated for every release that only ever holds the latest one — neither
+is a record you can read history out of. The file is.
 
 ## 1. Add the bullet with the change
 
@@ -63,14 +63,20 @@ make changelog-release date=2026-08-05
 
 This turns `[Unreleased]` into `## [YYYY-MM-DD] - site entry N`, opens a fresh empty
 `[Unreleased]`, and rewrites `changelog.sql` with the next id and twelve rows all holding the
-Russian text.
+Russian text. Every statement is an `insert … on duplicate key update`, so the file is safe to
+re-apply.
 
 ## 4. Translate and publish
 
 1. Run `/translate-changelog`. It rewrites the eleven non-Russian rows in place.
-2. Apply `changelog.sql` to the production database by hand. There is no deploy step for it —
-   `changelog.sql` is git-ignored and never travels over the webhook that pulls the site.
-3. Commit `CHANGELOG.md`. `changelog.sql` is ignored and stays out of the commit.
+2. Commit `CHANGELOG.md` **and `changelog.sql` together** in the same commit.
+3. Push. The deploy applies it — `pfg-sync` pipes `changelog.sql` into each host's database
+   after the sync (`deploy/pfg-changelog-apply`), on production within seconds and the standby
+   on its five-minute timer. There is no manual `mysql` step any more.
+
+A failed apply is logged (`WARNING: changelog apply failed` in the deploy log) and does not
+fail the deploy — the site code is already live; only the sidebar rows lag. Re-running any
+later deploy fixes it, since the SQL is idempotent.
 
 The sidebar shows an entry to a returning visitor when its id is greater than the `lastChange`
 value in their local storage, so the id must keep increasing. `--release` allocates it from the

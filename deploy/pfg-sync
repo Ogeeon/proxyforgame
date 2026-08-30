@@ -246,6 +246,27 @@ fi
 log "deployed $WANT_SHA - smoke passed"
 echo "deployed $WANT_SHA"
 
+# ---------------------------------------------------------------------------
+# Apply the in-app changelog. changelog.sql is committed and every statement in
+# it is an upsert, so this runs on every deploy: a host that already has the
+# entry writes nothing, one that is behind catches up. Each host applies to its
+# own database - nothing replicates between them - which is what keeps the
+# standby's sidebar changelog from going stale.
+#
+# The in-checkout copy is run, not an installed one: it does no git work, the
+# tree is quiescent by the time it runs, and this way it always matches the
+# release just deployed. A failure is logged and swallowed - the site code is
+# already live and correct; only the changelog rows would lag.
+# ---------------------------------------------------------------------------
+APPLY="$CHECKOUT/deploy/pfg-changelog-apply"
+if [ -x "$APPLY" ]; then
+  if "$APPLY" "$CHECKOUT" >> "$LOG" 2>&1; then
+    log "changelog applied"
+  else
+    log "WARNING: changelog apply failed - code is deployed, sidebar rows may lag one release"
+  fi
+fi
+
 # The copy that runs lives outside the checkout on purpose: resetting the tree
 # under a running bash would let it read the second half of a different file.
 # The cost is that this script does not update itself - say so when it is stale.

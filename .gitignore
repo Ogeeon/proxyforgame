@@ -20,7 +20,6 @@
 setup-statusline.ps1
 /.mcp.json
 /run_tests.bat
-changelog.sql
 /docs/vps-deploy-notes.md
 .env
 feature-description.txt 

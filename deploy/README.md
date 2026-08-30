@@ -41,6 +41,7 @@ is only ever updated by one piece of code.
 | `webhook.php` | production only | The GitHub receiver. Lives in the `webhooks.proxyforgame.com` document root, **not** in the site checkout. |
 | `pfg-sync` | both hosts | Brings a checkout to a commit and proves the site still serves. The only writer. |
 | `pfg-notify` | both hosts | Mails a failure. Speaks SMTP itself rather than reusing `www/api/mail.inc.php`, so the alarm does not depend on the tree it is complaining about. |
+| `pfg-changelog-apply` | both hosts | Pipes `changelog.sql` into the host's database after a deploy. `pfg-sync` calls it; a failure is logged, not fatal. |
 | `cutover-prod.sh` | production | One-time move from the old Bitbucket checkout. `--dry-run` stops before anything live is touched. |
 | `cutover-standby.sh` | standby | The same, plus introducing a document-root symlink the host did not have. |
 | `rollback-prod.sh` | production | Undoes the cutover. Not the everyday rollback — see below. |
@@ -53,6 +54,12 @@ resets the tree it would otherwise be running from, and bash reads a script as
 it executes it — a self-update mid-run would make it read the second half of a
 different file. The cost is that they do not update themselves; `pfg-sync` says
 so when its installed copy has drifted from the one in the checkout.
+
+`pfg-changelog-apply` is the exception: `pfg-sync` runs it from **inside** the
+checkout (`<checkout>/deploy/pfg-changelog-apply`). It does no git work and runs
+only once the reset has finished and the tree is quiescent, so the read-half-a-
+file hazard does not apply — and running the in-checkout copy means it always
+matches the release just deployed, with nothing to reinstall.
 
 `webhook.php` sits outside the checkout for a different reason — it belongs to
 another vhost's document root — and **nothing warns when it drifts**. A deploy
@@ -295,10 +302,11 @@ starting.
 4. **The databases are separate and nothing replicates between them.** Each host
    has its own MariaDB. `population_data` and the universe lists rebuild
    themselves from the daily crons, so those catch up on their own. The in-app
-   changelog does not: it is applied to production by hand, so the standby's
-   copy is whatever it was last given. Anything else written on production since
-   the split is simply not there. This is the real cost of a failover, and the
-   reason it is a decision rather than a reflex.
+   changelog catches up too — `pfg-changelog-apply` runs on every deploy on both
+   hosts and its statements are upserts (see *The in-app changelog* below), so
+   the standby holds every release that has been pushed. Anything else written on
+   production since the split is simply not there. This is the real cost of a
+   failover, and the reason it is a decision rather than a reflex.
 
 ## Database changes
 
@@ -312,6 +320,30 @@ longer a comfortable gap in which to catch up.
 Production's app user has ALTER through ISPmanager, so PDO is enough there. The
 standby's `pfg_app` deliberately does not — use the root `mysql` client over its
 unix socket.
+
+## The in-app changelog
+
+The sidebar changelog *is* carried by the deploy, unlike every other database
+change. `changelog.sql` is committed (it used to be git-ignored), so it travels
+with the checkout, and `pfg-sync` pipes it into the host's database through
+`pfg-changelog-apply` after every successful deploy.
+
+- **It runs on every deploy, on both hosts.** Every statement in `changelog.sql`
+  is `insert … on duplicate key update`, so a host that already has the entry
+  writes nothing and a host that is behind catches up. This is what keeps the
+  standby's copy current without a manual step.
+- **A failure is not fatal.** The site code is already live when it runs; a
+  failure means the sidebar rows lag one release, logged as `WARNING: changelog
+  apply failed`, nothing more.
+- **Credentials come from the checkout's `.env`** (`DB_*`), the same file the app
+  reads. The password goes through `MYSQL_PWD`, and `--default-character-set=utf8`
+  is forced because production's mysql client defaults to latin1 and would
+  otherwise double-encode every Cyrillic row.
+- **What still is not automatic:** writing the release. `make changelog-release`
+  and `/translate-changelog` are run locally; the deploy only applies what those
+  produced and committed. `changelog.sql` holds **only the latest release** — a
+  brand-new database has no changelog history, which matches how it worked
+  before.
 
 ## Traps that have already cost time
 

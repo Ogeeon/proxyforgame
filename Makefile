@@ -197,6 +197,7 @@ docs: ## Regenerate docs/calculators
 	node scripts/generate-docs.js
 
 # Writes changelog.sql with the Russian text in all twelve rows; run
-# /translate-changelog next, then apply the file to the database.
+# /translate-changelog next, then commit the file. The deploy applies it to
+# both hosts - see deploy/README.md, "The in-app changelog".
 changelog-release: ## Cut [Unreleased] into a dated release, e.g. make changelog-release date=2026-08-05
 	node scripts/changelog.js --release $(if $(date),--date=$(date),)

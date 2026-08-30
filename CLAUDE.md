@@ -104,7 +104,8 @@ Three consequences for everyday work:
   still runs 8.5 because its OS ships nothing older (`docs/adr/0001-php-version-alignment.md`).
   Each host also has its own database and its own cron.
 
-Publishing the in-app changelog stays manual and is unrelated to this — see below.
+Writing an in-app changelog release stays manual; **applying** it is now part of the deploy —
+`changelog.sql` is committed and `pfg-sync` pipes it into each host's database. See below.
 
 ## Changelog
 
@@ -114,20 +115,23 @@ identified by its date and by the id of the entry users see in the sidebar.
 
 Bullets marked `<!-- site -->` are the subset published to that in-app changelog, and the exact
 Russian text that was published is quoted at the end of the release section. That makes the file
-the archive neither the database nor git provides: `changelog.sql` is git-ignored and rewritten
-for every entry.
+the archive the database does not provide: `changelog.sql` is committed but rewritten for every
+entry, so it only ever holds the latest release.
 
 - A `feat` or `fix` commit adds its bullet under `## [Unreleased]` **in the same commit**;
   `refactor`, `chore`, `docs`, `style` and `test` do not touch the file.
 - Whether a bullet is user-visible — and how to cut a release — is the **`changelog` skill**.
 - `make changelog-validate` gates `make check`, so a malformed file blocks every commit.
 - **A drafted announcement needs the user's explicit approval before the release is cut.** The
-  `> **RU:**` text reaches every visitor in twelve languages and cannot be edited afterwards
-  without a manual `update` against production. Never publish one the user has not seen.
+  `> **RU:**` text reaches every visitor in twelve languages and is hard to change afterwards —
+  once the commit is pushed the deploy applies it, and a later edit needs a fresh release or a
+  manual `update` against both hosts. Never publish one the user has not seen.
 
-Publishing stays manual: `make changelog-release` writes `changelog.sql`, `/translate-changelog`
-fills in the eleven non-Russian rows, and the file is applied to the production database by hand.
-Nothing in the deploy carries it.
+Cutting the release is manual: `make changelog-release` writes `changelog.sql`,
+`/translate-changelog` fills in the eleven non-Russian rows, then **commit `CHANGELOG.md` and
+`changelog.sql` together**. From there the deploy carries it — `pfg-sync` runs
+`deploy/pfg-changelog-apply` on both hosts after every sync, and the SQL is all upserts so
+re-applying an entry is a no-op (`deploy/README.md`, *The in-app changelog*).
 
 ## Architecture
 
