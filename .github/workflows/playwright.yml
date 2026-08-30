@@ -20,13 +20,18 @@ jobs:
       DB_NAME: 'proxyforgame'
 
     services:
-      mysql:
-        image: mysql:8.0
+      # MariaDB, not MySQL: production, the standby and local dev (WAMP 10.4.13)
+      # all run MariaDB, and the engines diverge in SQL this project uses - e.g.
+      # `ALTER TABLE ... ADD COLUMN IF NOT EXISTS` in a migration. 10.4 matches
+      # local dev and is the conservative pick if production runs an older 10.x
+      # than the standby. Bump this in step with the hosts.
+      mariadb:
+        image: mariadb:10.4
         env:
-          MYSQL_ROOT_PASSWORD: root
-          MYSQL_DATABASE: ${{ env.DB_NAME }}
-          MYSQL_USER: ${{ env.DB_USER }}
-          MYSQL_PASSWORD: ${{ env.DB_PASS }}
+          MARIADB_ROOT_PASSWORD: root
+          MARIADB_DATABASE: ${{ env.DB_NAME }}
+          MARIADB_USER: ${{ env.DB_USER }}
+          MARIADB_PASSWORD: ${{ env.DB_PASS }}
         ports:
           - 3306:3306
         options: >-
@@ -58,7 +63,8 @@ jobs:
           ini-values: post_max_size=256M, upload_max_filesize=256M
 
       # -------------------------------------------------------------
-      # Prepare MySQL client and create CI-friendly .env, then seed schema
+      # Prepare the DB client and seed the schema. No .env is written - the
+      # job-level DB_* environment variables are what make and the scripts read.
       # -------------------------------------------------------------
       - name: Prepare DB client
         run: |
@@ -66,15 +72,15 @@ jobs:
           sudo apt-get install -y default-mysql-client
           echo "DB client installed; using job-level DB_* environment variables (no .env will be written)."
 
-      - name: Seed MySQL database
+      - name: Seed the database
         run: |
-          # Wait for the MySQL service to accept connections, retry for up to ~60s
+          # Wait for the MariaDB service to accept connections, retry for up to ~60s
           for i in {1..30}; do
             if mysql -h "$DB_HOST" -u "$DB_USER" -p"$DB_PASS" -e 'SELECT 1' >/dev/null 2>&1; then
-              echo "MySQL is ready"
+              echo "MariaDB is ready"
               break
             fi
-            echo "Waiting for MySQL... ($i)"
+            echo "Waiting for MariaDB... ($i)"
             sleep 2
           done
 
