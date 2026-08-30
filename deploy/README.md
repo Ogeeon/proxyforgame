@@ -324,10 +324,14 @@ columns and tables, never drop or rename something the running code still uses.
 Drop/rename is a separate migration a release later.
 
 `pfg-migrate` connects with `DB_HOST`/`DB_NAME` from the checkout's `.env` and
-the DDL user from `DB_DDL_USER`/`DB_DDL_PASS` when set, else `DB_USER`/`DB_PASS`.
-Production's app user has ALTER through ISPmanager, so it leaves the `DB_DDL_*`
-pair unset. The standby's `pfg_app` deliberately has no ALTER, so its `.env`
-names a privileged user there.
+the migration user from `DB_DDL_USER`/`DB_DDL_PASS` when set, else
+`DB_USER`/`DB_PASS`. That user needs **DDL and DML** on the database (the runner
+writes the `schema_migrations` row, and a migration may backfill data).
+Production's app user already has both, so it leaves the `DB_DDL_*` pair unset.
+The standby's `pfg_app` has neither DDL nor — as it turned out — INSERT on new
+tables, so its `.env` points at `pfg_ddl@localhost`, granted
+`SELECT,INSERT,UPDATE,DELETE,CREATE,ALTER,INDEX,DROP,REFERENCES` on
+`og_proxyforgame`.*.
 
 **Recovery only:** applying a migration by hand — `mysql < db/migrations/NNNN_*.sql`
 then `INSERT INTO schema_migrations …` — is for when the deploy-time apply failed
