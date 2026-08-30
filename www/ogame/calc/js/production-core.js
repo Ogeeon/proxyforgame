@@ -384,11 +384,15 @@ function applyCrawlerProductionBonus(prodParams, results, production) {
 	// The Collector's +50% crawler bonus is amplified by the same character class
 	// bonus as the +25% mine and +10% energy bonuses (see getProductionRateSplit).
 	let crMult = options.prm.playerClass === 0 ? 1 + 0.5 * (1 + 0.01 * collectorClassBonusPct()) : 1;
-	results[7][0] = Math.round(results[1][0] * prodParams[6][0] * 0.0002 * crMult * prodParams[6][1] / 100.0);
+	// OGame caps the total crawler bonus at 50% of each mine's base production. The
+	// ceiling is flat: neither the crawler count nor the 150% overload raises it -
+	// overload only reaches it faster (and doubles the energy draw).
+	const factor = Math.min(prodParams[6][0] * 0.0002 * crMult * prodParams[6][1] / 100.0, 0.5);
+	results[7][0] = Math.round(results[1][0] * factor);
 	production[0] += results[7][0];
-	results[7][1] = Math.round(results[2][1] * prodParams[6][0] * 0.0002 * crMult * prodParams[6][1] / 100.0);
+	results[7][1] = Math.round(results[2][1] * factor);
 	production[1] += results[7][1];
-	results[7][2] = Math.round(results[3][2] * prodParams[6][0] * 0.0002 * crMult * prodParams[6][1] / 100.0);
+	results[7][2] = Math.round(results[3][2] * factor);
 	production[2] += results[7][2];
 }
 

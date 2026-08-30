@@ -364,6 +364,55 @@ so the energy side of this mechanic was never exercised in the numbers matched h
 against a live account with a non-zero crawler bonus and non-zero crawlers if one becomes
 available.
 
+## 8. Crawler production bonus was not capped at 50 % — FIXED
+
+`applyCrawlerProductionBonus` (`production-core.js`) computed the crawler bonus
+purely linearly:
+
+```
+bonus = round(mineProduction × crawlerCount × 0.0002 × crMult × crawlerPercent/100)
+```
+
+OGame caps the total crawler bonus at **50 % of each mine's base production**. The
+ceiling is flat — neither the crawler count nor the 150 % overload raises it;
+overload only reaches it faster (and doubles the energy draw). Sources: the OGame
+Wiki Crawler / Collector pages and the community formula write-ups, e.g. *"the
+collector class limit is obtained with a total of 126 levels of mines, after which
+additional crawlers provide no benefit even at 150 % overload"* — 126 is exactly
+where `floor(8.8 × sum) × 0.0002 × 1.5 × 1.5 = 0.5` for a Collector with a
+Geologist at 150 %.
+
+When the linear bonus exceeds 50 %, the calculator over-stated production. In
+practice this needs either a Collector at 150 % overload with a high mine sum
+(≈ 126 levels with a Geologist, ≈ 208 without), or — without the class — a mine sum
+above ~312.
+
+**Fix:** the per-crawler factor is now `Math.min(rawFactor, 0.5)` before it is
+multiplied by the mine row. The cap tracks `results[i][x]` (mine production already
+scaled by the energy coefficient), matching how OGame scales both the bonus and its
+ceiling. The Ion Crystal Modules production add-on (`applyLfTechProductionBonus`,
+row 15) is unchanged: it is computed from the already-capped crawler row, which
+matches the player reports quoted in section 7 (*"the production side capped at the
+50 % crawler ceiling"*).
+
+Like section 7, this is **not** confirmed against a live-account reconciliation:
+every reference case above (A–E) had a crawler bonus below 50 % (case E ≈ 44 %), so
+the ceiling was never exercised in the numbers matched here.
+
+### Crawler *count* limit (8 / 8.8 per mine level) — no change needed
+
+Checked while fixing the above. `maxCrawlers` (`production-orchestration.js`) uses
+`8` per summed mine level, `8.8` with a Geologist (Geologist = +10 % working
+crawlers). Both match the Wiki and forum worked examples (mine sum 120 → 960, or
+1 056 with a Geologist). The Collector class *"can operate additional crawlers
+beyond the normal class limit"* per Gameforge's own page, but no open source gives
+a number, and once the 50 % ceiling exists any crawlers past the count limit are
+irrelevant anyway. Case E (a Collector account with all officers, mine sum 112,
+exactly `floor(8.8 × 112) = 985` crawlers, rows matching the game) indicates the
+count limit is not doubled for a Collector — or the effect is negligible. Left as
+is; revisit only with a live Collector measurement above `8.8 × sum` crawlers whose
+bonus is still under 50 %.
+
 ## Note on OGame's own totals
 
 OGame floors every displayed row but sums the *unrounded* values, so its total can

@@ -513,6 +513,51 @@ test.describe('Collector character class bonus', () => {
         await expect(crawlerCell(page, 5)).toHaveText('4');
     });
 
+    test('caps the crawler bonus at 50% of each mine row', async ({ page }) => {
+        // OGame clamps the total crawler bonus at 50% of a mine's base production,
+        // regardless of crawler count or the 150% overload. The crawler row and
+        // the cap both track the mine row, so the ratio holds at any energy
+        // coefficient - no need to pin the planet at 100%.
+        const digits = (s) => Number.parseInt((s ?? '').replace(/\D/g, ''), 10) || 0;
+        const mineRow = (label) => page.locator('#one-planet-prod tr').filter({ hasText: label });
+        const resources = [[3, 'Metal Mine'], [4, 'Crystal Mine'], [5, 'Deuterium Synthesizer']];
+
+        const levels = page.locator('#one-planet-prod input.input-in-table');
+        // Mines high enough that the crawler-count cap alone (8.8 per summed mine
+        // level with a Geologist = floor(8.8 * 165) = 1452 crawlers) lets the
+        // linear bonus pass 50% once the Collector enhancement lifts the
+        // multiplier to 2.0.
+        await levels.nth(0).fill('55');
+        await levels.nth(1).fill('55');
+        await levels.nth(2).fill('55');
+        await levels.nth(3).fill('45'); // solar plant, just to keep the numbers healthy
+        await page.locator('#geologist').click();
+        await levels.nth(6).fill('99999');
+        await levels.nth(6).press('Tab');
+        await expect(levels.nth(6)).toHaveValue('1452');
+
+        // 1452 * 0.02% * 1.5 (plain Collector) = 43.56% - under the ceiling, so
+        // the crawler row is still the linear bonus.
+        for (const [col, label] of resources) {
+            const mine = digits(await mineRow(label).locator('td').nth(col).textContent());
+            const crawler = digits(await crawlerCell(page, col).textContent());
+            expect(crawler).toBeGreaterThan(Math.round(mine * 0.43));
+            expect(crawler).toBeLessThan(Math.round(mine * 0.44));
+        }
+
+        // A 100% Collector enhancement lifts the multiplier to 2.0: 1452 * 0.02%
+        // * 2.0 = 58.08%, which is clamped to exactly 50% of each mine row.
+        await page.locator('#param-lifeforms-tab').click();
+        await page.locator('#lf-collector-bonus').fill('100');
+        await page.locator('#lf-collector-bonus').press('Tab');
+
+        for (const [col, label] of resources) {
+            const mine = digits(await mineRow(label).locator('td').nth(col).textContent());
+            const crawler = digits(await crawlerCell(page, col).textContent());
+            expect(crawler).toBe(Math.round(mine * 0.5));
+        }
+    });
+
     test('the crawler bonus hint names the research it comes from', async ({ page }) => {
         // The tech name comes from the 'lfcosts' locale section, which the page
         // pulls in separately; reading it from the page's own section silently

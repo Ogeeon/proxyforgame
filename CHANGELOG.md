@@ -15,13 +15,18 @@ release section; it is the source of truth for the other eleven translations.
 
 ## [Unreleased]
 
+## [2026-08-30] - site entry 62
+
 ### Changed
 
 - Sidebar: the full changelog dialog now shows ten entries per page with a previous/next pager instead of one long scroll. The pager is hidden when everything fits on one page, so the "something changed since your last visit" popup is unaffected.
 
 ### Fixed
 
-- Flight: the "Destruction" mission showed the single 100% row of the flight-times table. The fixed speed of 310 that OGame 12.9.0 gave the mission is its speed at 100%, and the fleet can still be sent at a lower percentage, so the table holds all of its speed steps again and the deuterium follows the throttled trip. <!-- site -->
+- Flight: the "Destruction" mission showed the single 100% row of the flight-times table. The fixed speed of 310 that OGame 12.9.0 gave the mission is its speed at 100%, and the fleet can still be sent at a lower percentage, so the table holds all of its speed steps again and the deuterium follows the throttled trip. 
+- Production: the crawler production bonus grew without limit; in the game it is capped at 50% of a mine's base production, regardless of crawler count or the 150% overload. The calculator now applies that ceiling, so it no longer over-states production for a Collector running crawlers at 150% with high mines. <!-- site -->
+
+> **RU:** Калькулятор производства: бонус Гусеничников к добыче теперь ограничен 50 % производства шахты, как в игре.
 
 ## [2026-08-16] - site entry 61
 
