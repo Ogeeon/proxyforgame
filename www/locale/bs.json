@@ -281,6 +281,9 @@
       "changelog": "Dnevnik promjena",
       "chl-dlg-hdr": "Pozdrav. Nešto smo izmijenili od vaše zadnje posjete.",
       "chl-load": "Učitaj cijelu tabelu izmijena",
+      "chl-next": "Sljedeća",
+      "chl-pager-label": "Stranice tabele izmjena",
+      "chl-prev": "Prethodna",
       "date": "Datum",
       "description": "Izmijeni opis"
     },

@@ -259,6 +259,19 @@
               <tbody></tbody>
             </table>
           </div>
+          <nav id="changelog-pagination" class="d-none" aria-label="<?=$loc['changelogStrings']['chl-pager-label']?>">
+            <ul class="pagination pagination-sm justify-content-center mb-0">
+              <li class="page-item" id="changelog-prev">
+                <button type="button" class="page-link"><?=$loc['changelogStrings']['chl-prev']?></button>
+              </li>
+              <li class="page-item disabled">
+                <span class="page-link" id="changelog-page-indicator">1 / 1</span>
+              </li>
+              <li class="page-item" id="changelog-next">
+                <button type="button" class="page-link"><?=$loc['changelogStrings']['chl-next']?></button>
+              </li>
+            </ul>
+          </nav>
           <div class="small-spacer"></div>
           <div id="changelog-link-div" class="text-end">
             <a id="changelog-link" href="#" class="changelog-link" onclick="requestAndShowChangelog(-1); return false;"><?=$loc['changelogStrings']['chl-load']?></a>

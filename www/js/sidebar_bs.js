@@ -248,16 +248,43 @@ function changelogBody() {
     return /** @type {HTMLElement} */ (tbody);
 }
 
+// How many rows one page of the changelog table holds. The full list can run to
+// dozens of entries, which used to render as one long scroll inside the modal.
+const CHANGELOG_PAGE_SIZE = 10;
+
+let changelogEntries = [];
+let changelogPage = 0;
+
 function clearChangelogTable() {
+    changelogEntries = [];
+    changelogPage = 0;
     changelogBody().innerHTML = '';
+    updateChangelogPager(1);
 }
 
 function fillChangelogTable(changes) {
-    if (!changes || changes.length === 0) {
-        return;
-    }
+    changelogEntries = Array.isArray(changes) ? changes : [];
+    changelogPage = 0;
+    renderChangelogPage();
+}
+
+function changelogPageCount() {
+    return Math.max(1, Math.ceil(changelogEntries.length / CHANGELOG_PAGE_SIZE));
+}
+
+/**
+ * Renders the current changelog page into the table and syncs the pager. Kept
+ * separate from fillChangelogTable so the prev/next buttons can re-render
+ * without re-fetching.
+ */
+function renderChangelogPage() {
+    const pageCount = changelogPageCount();
+    changelogPage = Math.min(Math.max(changelogPage, 0), pageCount - 1);
+
     const tbody = changelogBody();
-    for (const change of changes) {
+    tbody.innerHTML = '';
+    const start = changelogPage * CHANGELOG_PAGE_SIZE;
+    for (const change of changelogEntries.slice(start, start + CHANGELOG_PAGE_SIZE)) {
         const tr = document.createElement('tr');
         tr.innerHTML = `
             <td class="text-center text-info-emphasis">${change.ts}</td>
@@ -265,6 +292,40 @@ function fillChangelogTable(changes) {
         `;
         tbody.appendChild(tr);
     }
+    updateChangelogPager(pageCount);
+}
+
+/**
+ * Shows the pager only when there is more than one page, and reflects the
+ * current position on it.
+ * @param {number} pageCount
+ */
+function updateChangelogPager(pageCount) {
+    const nav = document.getElementById('changelog-pagination');
+    if (!nav) {
+        return;
+    }
+    if (pageCount <= 1) {
+        nav.classList.add('d-none');
+        return;
+    }
+    nav.classList.remove('d-none');
+
+    const indicator = document.getElementById('changelog-page-indicator');
+    if (indicator) {
+        indicator.textContent = `${changelogPage + 1} / ${pageCount}`;
+    }
+    document.getElementById('changelog-prev')?.classList.toggle('disabled', changelogPage === 0);
+    document.getElementById('changelog-next')?.classList.toggle('disabled', changelogPage >= pageCount - 1);
+}
+
+/**
+ * @param {number} delta - -1 for the previous page, +1 for the next
+ */
+function stepChangelogPage(delta) {
+    changelogPage += delta;
+    renderChangelogPage();
+    changelogBody().closest('.modal-body')?.scrollTo({ top: 0 });
 }
 
 // Bootstrap tooltips default to trigger "hover focus", so after a click the button keeps
@@ -351,6 +412,9 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
     
+    requireEl('changelog-prev').querySelector('button')?.addEventListener('click', () => stepChangelogPage(-1));
+    requireEl('changelog-next').querySelector('button')?.addEventListener('click', () => stepChangelogPage(1));
+
     requireEl('reportModal').addEventListener('hidden.bs.modal', function() {
         reportStep = 0;
         showSendDiv('report', 'data');

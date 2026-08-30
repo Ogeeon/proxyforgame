@@ -281,6 +281,9 @@
       "changelog": "Logboek van wijzigingen",
       "chl-dlg-hdr": "Hallo daar. We hebben iets veranderd sinds je laatste bezoek. ",
       "chl-load": "Laad het volledige logboek van wijzigingen",
+      "chl-next": "Volgende",
+      "chl-pager-label": "Changelog-pagina's",
+      "chl-prev": "Vorige",
       "date": "Date",
       "description": "Description wijzigen"
     },

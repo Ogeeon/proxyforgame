@@ -281,6 +281,9 @@
       "changelog": "Denník zmien",
       "chl-dlg-hdr": "Ahoj. Od poslednej návštevy sme niečo zmenili.",
       "chl-load": "Načítať celý protokol zmien",
+      "chl-next": "Ďalšia",
+      "chl-pager-label": "Stránky protokolu zmien",
+      "chl-prev": "Predchádzajúca",
       "date": "Date",
       "description": "Zmeniť popis"
     },

@@ -281,6 +281,9 @@
       "changelog": "Journal des modifications",
       "chl-dlg-hdr": "Bonjour. Nous avons changé quelque chose depuis votre dernière visite. ",
       "chl-load": "Charger le journal complet des modifications",
+      "chl-next": "Suivant",
+      "chl-pager-label": "Pages du journal des modifications",
+      "chl-prev": "Précédent",
       "date": "Date",
       "description": "Change description"
     },

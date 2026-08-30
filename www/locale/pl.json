@@ -281,6 +281,9 @@
       "changelog": "Dziennik zmian",
       "chl-dlg-hdr": "Cześć. Zmieniliśmy coś od twojej ostatniej wizyty.",
       "chl-load": "Załaduj pełny dziennik zmian",
+      "chl-next": "Następna",
+      "chl-pager-label": "Strony dziennika zmian",
+      "chl-prev": "Poprzednia",
       "date": "Data",
       "description": "Zmień opis"
     },

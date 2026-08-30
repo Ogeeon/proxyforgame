@@ -281,6 +281,9 @@
       "changelog": "Changelog",
       "chl-dlg-hdr": "Hallo zusammen. Wir haben seit deinem letzten Besuch etwas geändert. ",
       "chl-load": "Vollständiges Changelog laden",
+      "chl-next": "Weiter",
+      "chl-pager-label": "Changelog-Seiten",
+      "chl-prev": "Zurück",
       "date": "Date",
       "description": "Beschreibung ändern"
     },

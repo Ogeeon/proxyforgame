@@ -281,6 +281,9 @@
       "changelog": "Değişikliklerin Günlüğü",
       "chl-dlg-hdr": "Merhaba. Son ziyaretinizden bu yana bir şey değiştirdik.",
       "chl-load": "Değişikliklerin tüm günlüğünü yükle",
+      "chl-next": "Sonraki",
+      "chl-pager-label": "Değişiklik günlüğü sayfaları",
+      "chl-prev": "Önceki",
       "date": "Tarih",
       "description": "Açıklamayı değiştir"
     },

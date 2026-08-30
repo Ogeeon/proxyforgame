@@ -281,6 +281,9 @@
       "changelog": "Registro de cambios",
       "chl-dlg-hdr": "Hola. Cambiamos algo desde su última visita.",
       "chl-load": "Cargar registro de cambios completo",
+      "chl-next": "Siguiente",
+      "chl-pager-label": "Páginas del registro de cambios",
+      "chl-prev": "Anterior",
       "date": "Fecha",
       "description": "Cambiar descripción"
     },
