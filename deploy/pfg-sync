@@ -101,6 +101,29 @@ apply_changelog() {
 }
 
 # ---------------------------------------------------------------------------
+# Apply db/migrations/*.sql to this host's database before the smoke test runs.
+# Same in-checkout copy, same reasons as apply_changelog. UNLIKE the changelog,
+# a failure here is fatal: the code just deployed may need the schema. The
+# caller rolls the code back and calls fail(). Returns non-zero on failure.
+#
+# Runs on a HEAD move and on a --sha re-assert (mirroring apply_changelog),
+# never on an idle green-mode reconcile.
+# ---------------------------------------------------------------------------
+apply_migrations() {
+  local migrator="$CHECKOUT/deploy/pfg-migrate"
+  [ -x "$migrator" ] || { log "NOTE: $migrator missing - skipping migrations"; return 0; }
+  "$migrator" "$CHECKOUT" >> "$LOG" 2>&1
+}
+
+# Put the checkout back on HAVE_SHA. Shared by the migration-failure and
+# smoke-failure paths.
+rollback_code() {
+  git reset --quiet --hard "$HAVE_SHA" || true
+  git clean --quiet -fd || true
+  restore_env
+}
+
+# ---------------------------------------------------------------------------
 # Did CI (a push run of $CI_WORKFLOW) conclude successfully for exactly this
 # commit? Filtering by head_sha is an exact match - unlike a bare per_page=1
 # on the runs list, whose order GitHub does not guarantee.
@@ -232,7 +255,10 @@ if [ "$HAVE_SHA" = "$WANT_SHA" ]; then
     echo "up to date at $HAVE_SHA"
   elif [ "$MODE" = exact ]; then
     # A webhook redelivery or a rollback re-assertion: the commit is already
-    # here, but "apply the changelog" is still part of that instruction.
+    # here, but "apply the migrations and the changelog" is still part of that
+    # instruction. Nothing moved, so a migration failure only warns here.
+    apply_migrations \
+      || log "WARNING: migration apply failed on --sha re-assert of ${WANT_SHA:0:8}"
     apply_changelog
   fi
   exit 0
@@ -254,6 +280,23 @@ git clean --quiet -fd            # never -fdx: that would delete .env
 restore_env
 
 # ---------------------------------------------------------------------------
+# Schema before code. The reset put the new code and the new migration files in
+# place together; apply the migrations now, before the smoke test exercises the
+# new code's database reads. A failure is fatal - roll the code back to HAVE_SHA
+# (expand-only migrations mean the old code tolerates a half-applied change) and
+# bail loudly.
+# ---------------------------------------------------------------------------
+if ! apply_migrations; then
+  log "migration failed on ${WANT_SHA:0:8} - rolling back to ${HAVE_SHA:0:8}"
+  rollback_code
+  sleep 3
+  BACK=$(smoke)
+  [ -z "$BACK" ] \
+    || fail "migration failed on $WANT_SHA and the rollback to $HAVE_SHA is also unhealthy ($BACK)"
+  fail "migration failed deploying $WANT_SHA - rolled back to $HAVE_SHA (schema may be partially changed; see the log)"
+fi
+
+# ---------------------------------------------------------------------------
 # Prove it still serves. Opcache revalidates on a 2s timestamp check, so give
 # it a moment before deciding the deploy broke something. A failure is rolled
 # back to HAVE_SHA - a broken commit left live is worse than a missed update.
@@ -262,9 +305,7 @@ sleep 3
 BAD=$(smoke)
 if [ -n "$BAD" ]; then
   log "smoke failed on ${WANT_SHA:0:8}:$BAD - rolling back to ${HAVE_SHA:0:8}"
-  git reset --quiet --hard "$HAVE_SHA" || true
-  git clean --quiet -fd || true
-  restore_env
+  rollback_code
   sleep 3
   BACK=$(smoke)
   [ -z "$BACK" ] \

@@ -96,9 +96,11 @@ Three consequences for everyday work:
 
 - **`git push` is a release.** The gate is `make check` before the push, not a review step
   afterwards — once CI is green the commit is on the site within a minute.
-- **Schema changes go first, and must be backward compatible with the code already
-  deployed.** There is no migration mechanism yet (issue #12), and the window between a
-  schema change and the code that needs it is now seconds rather than weeks.
+- **Schema changes are versioned migrations in `db/migrations/`**, applied by the deploy
+  (`pfg-sync` runs `pfg-migrate` on both hosts before the smoke test). They must be
+  **expand-only and backward compatible** with the code already deployed — the migration
+  lands seconds before the code that needs it. Add the migration file and the regenerated
+  `schema.sql` in the schema commit, which goes first. See `db/migrations/README.md`.
 - **Both hosts run the same commit but not the same environment** — the target PHP version
   is pinned to production's 8.2 in `.php-version` and CI reads it from there, but the standby
   still runs 8.5 because its OS ships nothing older (`docs/adr/0001-php-version-alignment.md`).

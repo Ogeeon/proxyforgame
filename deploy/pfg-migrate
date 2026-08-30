@@ -1,0 +1,151 @@
+#!/bin/bash
+#
+#   pfg-migrate <checkout> [--check]
+#
+# Apply every pending file in <checkout>/db/migrations/ to this host's database,
+# in order, and record each in the `schema_migrations` table. `deploy/pfg-sync`
+# calls this after every deploy that moves HEAD (and on a --sha re-assert), so a
+# pushed schema change reaches both hosts on its own - each writing to its own
+# MariaDB, which nothing replicates between.
+#
+#   pfg-migrate <checkout>           apply all pending migrations
+#   pfg-migrate <checkout> --check   list pending migrations, exit 1 if any;
+#                                    change nothing
+#
+# Unlike the changelog step, a failure here IS fatal to the deploy: a schema the
+# newly-deployed code needs is not optional. pfg-sync rolls the code back when
+# this exits non-zero.
+#
+# Migration files are `NNNN_short_description.sql`, NNNN a zero-padded integer
+# that must be contiguous from 0001 - a gap is a merge accident and is refused.
+# One logical change per file; DDL auto-commits, so a multi-statement file that
+# fails half way leaves no clean retry point. Prefer `... IF NOT EXISTS` so a
+# partial apply re-runs cleanly (MariaDB supports it on ADD COLUMN / CREATE
+# TABLE / CREATE INDEX; both hosts are MariaDB).
+#
+# Connection: DB_HOST / DB_NAME come from <checkout>/.env (falling back to the
+# environment when the file is absent, which is how CI runs it). The DDL user is
+# DB_DDL_USER / DB_DDL_PASS when set, else DB_USER / DB_PASS - production's app
+# user has ALTER (ISPmanager grants it) so it needs nothing extra; the standby's
+# does not, so its .env names a privileged user here. The password goes through
+# MYSQL_PWD, never the command line.
+#
+# --default-character-set=utf8 matches pfg-changelog-apply: production's mysql
+# client defaults to latin1 and the DB's text columns are utf8mb3.
+#
+set -euo pipefail
+
+CHECKOUT="${1:?usage: pfg-migrate <checkout> [--check]}"
+MODE=apply
+[ "${2:-}" = "--check" ] && MODE=check
+
+MIG_DIR="$CHECKOUT/db/migrations"
+[ -d "$MIG_DIR" ] || { echo "pfg-migrate: no $MIG_DIR - nothing to apply"; exit 0; }
+
+command -v mysql >/dev/null 2>&1 \
+  || { echo "pfg-migrate: no mysql client on PATH - skipping" >&2; exit 1; }
+
+ENV_FILE="$CHECKOUT/.env"
+
+# A KEY=value lookup that reads .env the way www/db.connect.inc.php does - first
+# '=' splits, surrounding whitespace (a CRLF checkout's trailing \r included) is
+# trimmed - and falls back to the process environment when .env has no such line
+# or no .env exists at all. The file is read, not sourced.
+conf_get() {
+  local key="$1" line=""
+  if [ -r "$ENV_FILE" ]; then
+    line=$(grep -m1 "^[[:space:]]*$key[[:space:]]*=" "$ENV_FILE" 2>/dev/null) || true
+  fi
+  if [ -n "$line" ]; then
+    line=${line#*=}
+    line=${line%$'\r'}
+    line=${line#"${line%%[![:space:]]*}"}
+    line=${line%"${line##*[![:space:]]}"}
+    printf '%s' "$line"
+    return
+  fi
+  printf '%s' "${!key-}"
+}
+
+# Read into fresh names: assigning DB_USER before reading it would clobber a
+# value that came from the environment (the CI path).
+cfg_host=$(conf_get DB_HOST)
+cfg_name=$(conf_get DB_NAME)
+cfg_app_user=$(conf_get DB_USER)
+cfg_app_pass=$(conf_get DB_PASS)
+cfg_ddl_user=$(conf_get DB_DDL_USER)
+cfg_ddl_pass=$(conf_get DB_DDL_PASS)
+
+DB_HOST="$cfg_host"
+DB_NAME="$cfg_name"
+DB_USER="${cfg_ddl_user:-$cfg_app_user}"
+DB_PASS="${cfg_ddl_pass:-$cfg_app_pass}"
+
+[ -n "$DB_HOST" ] && [ -n "$DB_USER" ] && [ -n "$DB_NAME" ] \
+  || { echo "pfg-migrate: need DB_HOST/DB_USER/DB_NAME (from .env or the environment) - skipping" >&2; exit 1; }
+
+export MYSQL_PWD="$DB_PASS"
+MYSQL=(mysql --default-character-set=utf8 -h "$DB_HOST" -u "$DB_USER" "$DB_NAME")
+
+# Connectivity probe: tell "cannot reach the database" apart from "the tracking
+# table does not exist yet", which is the legitimate bootstrap state.
+"${MYSQL[@]}" -N -B -e 'SELECT 1' >/dev/null 2>&1 \
+  || { echo "pfg-migrate: cannot connect to $DB_NAME on $DB_HOST as $DB_USER" >&2; exit 1; }
+
+# Applied versions, one per line. A failure here means the table is absent -
+# every migration is pending.
+APPLIED=$("${MYSQL[@]}" -N -B -e 'SELECT version FROM schema_migrations' 2>/dev/null) || APPLIED=""
+is_applied() { printf '%s\n' "$APPLIED" | grep -qx -- "$1"; }
+
+# Collect the migration files, sorted, and check the sequence is contiguous.
+shopt -s nullglob
+FILES=("$MIG_DIR"/[0-9][0-9][0-9][0-9]_*.sql)
+shopt -u nullglob
+
+if [ ${#FILES[@]} -eq 0 ]; then
+  [ "$MODE" = check ] || echo "pfg-migrate: no migration files"
+  exit 0
+fi
+
+IFS=$'\n' FILES=($(printf '%s\n' "${FILES[@]}" | sort)); unset IFS
+
+expect=1
+for f in "${FILES[@]}"; do
+  base=$(basename "$f")
+  ver=$((10#${base%%_*}))
+  if [ "$ver" -ne "$expect" ]; then
+    echo "pfg-migrate: migration sequence has a gap - expected $(printf '%04d' "$expect"), found $base" >&2
+    exit 1
+  fi
+  expect=$((expect + 1))
+done
+
+PENDING=()
+for f in "${FILES[@]}"; do
+  base=$(basename "$f")
+  ver=$((10#${base%%_*}))
+  is_applied "$ver" || PENDING+=("$f")
+done
+
+[ ${#PENDING[@]} -eq 0 ] && exit 0
+
+if [ "$MODE" = check ]; then
+  echo "pfg-migrate: ${#PENDING[@]} pending migration(s):"
+  for f in "${PENDING[@]}"; do echo "  $(basename "$f")"; done
+  exit 1
+fi
+
+for f in "${PENDING[@]}"; do
+  base=$(basename "$f")
+  ver=$((10#${base%%_*}))
+  echo "pfg-migrate: applying $base"
+  if ! "${MYSQL[@]}" < "$f"; then
+    echo "pfg-migrate: $base failed - schema may be partially changed, not recorded as applied" >&2
+    exit 1
+  fi
+  "${MYSQL[@]}" -e \
+    "INSERT INTO schema_migrations (version, filename) VALUES ($ver, '$base')" \
+    || { echo "pfg-migrate: $base applied but recording it failed" >&2; exit 1; }
+done
+
+echo "pfg-migrate: applied ${#PENDING[@]} migration(s) to $DB_NAME on $(hostname)"

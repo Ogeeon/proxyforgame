@@ -81,6 +81,18 @@ jobs:
           echo "Importing schema.sql"
           make db-seed
 
+      # `make db-seed` already ran the migrations once. Running them again must
+      # be a no-op: anything printed means a migration re-applied, i.e. it does
+      # not check what it already did.
+      - name: Migrations are idempotent
+        run: |
+          out=$(make db-migrate)
+          echo "$out"
+          if echo "$out" | grep -q 'applying'; then
+            echo "::error::db-migrate re-applied a migration on a second run"
+            exit 1
+          fi
+
       # -------------------------------------------------------------
       # Start PHP built-in server (no router needed)
       # -------------------------------------------------------------

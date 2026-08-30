@@ -1152,6 +1152,22 @@ CREATE TABLE population_data (
     PRIMARY KEY (country, universe)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+--
+-- Table structure for table `schema_migrations`
+--
+-- Written by deploy/pfg-migrate; see db/migrations/README.md. Kept in this
+-- snapshot with its rows so a fresh seed knows what is already applied.
+--
+CREATE TABLE IF NOT EXISTS schema_migrations (
+    version     INT UNSIGNED NOT NULL PRIMARY KEY,
+    filename    VARCHAR(255) NOT NULL,
+    applied_at  TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+INSERT INTO schema_migrations (version, filename) VALUES
+    (1, '0001_create_schema_migrations.sql')
+ON DUPLICATE KEY UPDATE filename = VALUES(filename);
+
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
