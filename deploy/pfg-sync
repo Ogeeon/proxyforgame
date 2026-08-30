@@ -78,6 +78,29 @@ fail() {
 }
 
 # ---------------------------------------------------------------------------
+# Pipe the checkout's changelog.sql into this host's database. changelog.sql is
+# committed and every statement in it is an upsert, so this is a no-op on a host
+# that already has the entry and a catch-up on one that is behind. Each host
+# writes to its own database - nothing replicates between them - which is what
+# keeps the standby's sidebar changelog from going stale.
+#
+# The in-checkout copy is run, not an installed one: it does no git work, the
+# tree is quiescent by the time it runs, and this way it always matches the
+# release just synced. A failure is logged and swallowed - the site code is
+# already live and correct; only the changelog rows would lag one release.
+#
+# Called only when HEAD actually moved (or a --sha was re-asserted), never on an
+# idle green-mode reconcile, so the standby's five-minute timer does not write a
+# log line every time it finds nothing to do.
+# ---------------------------------------------------------------------------
+apply_changelog() {
+  local applier="$CHECKOUT/deploy/pfg-changelog-apply"
+  [ -x "$applier" ] || return 0
+  "$applier" "$CHECKOUT" >> "$LOG" 2>&1 \
+    || log "WARNING: changelog apply failed - code is deployed, sidebar rows may lag one release"
+}
+
+# ---------------------------------------------------------------------------
 # Did CI (a push run of $CI_WORKFLOW) conclude successfully for exactly this
 # commit? Filtering by head_sha is an exact match - unlike a bare per_page=1
 # on the runs list, whose order GitHub does not guarantee.
@@ -205,7 +228,13 @@ fi
 
 HAVE_SHA=$(git rev-parse HEAD)
 if [ "$HAVE_SHA" = "$WANT_SHA" ]; then
-  [ "$MODE" = check ] && echo "up to date at $HAVE_SHA"
+  if [ "$MODE" = check ]; then
+    echo "up to date at $HAVE_SHA"
+  elif [ "$MODE" = exact ]; then
+    # A webhook redelivery or a rollback re-assertion: the commit is already
+    # here, but "apply the changelog" is still part of that instruction.
+    apply_changelog
+  fi
   exit 0
 fi
 
@@ -246,26 +275,7 @@ fi
 log "deployed $WANT_SHA - smoke passed"
 echo "deployed $WANT_SHA"
 
-# ---------------------------------------------------------------------------
-# Apply the in-app changelog. changelog.sql is committed and every statement in
-# it is an upsert, so this runs on every deploy: a host that already has the
-# entry writes nothing, one that is behind catches up. Each host applies to its
-# own database - nothing replicates between them - which is what keeps the
-# standby's sidebar changelog from going stale.
-#
-# The in-checkout copy is run, not an installed one: it does no git work, the
-# tree is quiescent by the time it runs, and this way it always matches the
-# release just deployed. A failure is logged and swallowed - the site code is
-# already live and correct; only the changelog rows would lag.
-# ---------------------------------------------------------------------------
-APPLY="$CHECKOUT/deploy/pfg-changelog-apply"
-if [ -x "$APPLY" ]; then
-  if "$APPLY" "$CHECKOUT" >> "$LOG" 2>&1; then
-    log "changelog applied"
-  else
-    log "WARNING: changelog apply failed - code is deployed, sidebar rows may lag one release"
-  fi
-fi
+apply_changelog
 
 # The copy that runs lives outside the checkout on purpose: resetting the tree
 # under a running bash would let it read the second half of a different file.

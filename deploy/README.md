@@ -302,11 +302,11 @@ starting.
 4. **The databases are separate and nothing replicates between them.** Each host
    has its own MariaDB. `population_data` and the universe lists rebuild
    themselves from the daily crons, so those catch up on their own. The in-app
-   changelog catches up too — `pfg-changelog-apply` runs on every deploy on both
-   hosts and its statements are upserts (see *The in-app changelog* below), so
-   the standby holds every release that has been pushed. Anything else written on
-   production since the split is simply not there. This is the real cost of a
-   failover, and the reason it is a decision rather than a reflex.
+   changelog catches up too — `pfg-changelog-apply` runs on both hosts whenever a
+   deploy moves `HEAD` and its statements are upserts (see *The in-app changelog*
+   below), so the standby holds every release that has been pushed. Anything else
+   written on production since the split is simply not there. This is the real
+   cost of a failover, and the reason it is a decision rather than a reflex.
 
 ## Database changes
 
@@ -328,10 +328,13 @@ change. `changelog.sql` is committed (it used to be git-ignored), so it travels
 with the checkout, and `pfg-sync` pipes it into the host's database through
 `pfg-changelog-apply` after every successful deploy.
 
-- **It runs on every deploy, on both hosts.** Every statement in `changelog.sql`
-  is `insert … on duplicate key update`, so a host that already has the entry
-  writes nothing and a host that is behind catches up. This is what keeps the
-  standby's copy current without a manual step.
+- **It runs whenever a deploy actually moves `HEAD`, on both hosts** — and when a
+  `--sha` is re-asserted by the webhook or a rollback. Not on an idle green-mode
+  reconcile, so the standby's five-minute timer stays quiet when nothing changed.
+  Every statement in `changelog.sql` is `insert … on duplicate key update`, so a
+  host that already has the entry writes nothing and one that is behind catches
+  up on its next sync. This is what keeps the standby's copy current without a
+  manual step.
 - **A failure is not fatal.** The site code is already live when it runs; a
   failure means the sidebar rows lag one release, logged as `WARNING: changelog
   apply failed`, nothing more.
