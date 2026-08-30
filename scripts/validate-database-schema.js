@@ -26,6 +26,10 @@ const SCHEMA_PATH = path.join(ROOT, 'schema.sql');
 const DUMP_SCRIPT = path.join(__dirname, 'dump-db-columns.php');
 const PHP = process.env.PFG_PHP || 'php';
 
+// Infrastructure tables with no sqlQuery() caller by design - the deploy tooling
+// owns them, not the app. Kept out of the "in schema but not used in code" list.
+const NON_APP_TABLES = new Set(['schema_migrations']);
+
 // ANSI color codes
 const colors = {
   reset: '\x1b[0m',
@@ -416,7 +420,7 @@ function validateDatabaseSchema() {
   const usedTables = usage.tables;
 
   const missingInSchema = [...usedTables].filter(t => !schemaTableNames.has(t));
-  const unusedInSchema = [...schemaTableNames].filter(t => !usedTables.has(t));
+  const unusedInSchema = [...schemaTableNames].filter(t => !usedTables.has(t) && !NON_APP_TABLES.has(t));
 
   // Print results
   console.log('\n' + colorize('──────────────────────────────────────────────────────────', colors.gray));

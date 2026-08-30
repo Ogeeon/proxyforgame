@@ -30,6 +30,11 @@ DB_HOST ?= 127.0.0.1
 DB_USER ?= pfg_usr
 DB_PASS ?= secret
 DB_NAME ?= proxyforgame
+# Exported so `db-migrate` reaches deploy/pfg-migrate with connection info in the
+# environment. That recipe cannot use an inline `VAR=x cmd` prefix - it has to
+# work under cmd.exe too - so make does the exporting. A local .env, when present,
+# still wins inside the script (it is the real credentials on a dev box).
+export DB_HOST DB_USER DB_PASS DB_NAME
 
 # Extra flags for `playwright install`; CI passes --with-deps.
 PW_DEPS ?=
@@ -53,7 +58,7 @@ PW ?= node node_modules/@playwright/test/cli.js
 
 .DEFAULT_GOAL := help
 
-.PHONY: help install serve db-seed \
+.PHONY: help install serve db-seed db-migrate \
         test test-unit test-e2e test-e2e-ui test-one report \
         check audit quality coverage db-validate lint typecheck php-version-check \
         changelog-validate changelog-release \
@@ -82,9 +87,15 @@ install: ## Install test dependencies and Playwright browsers
 serve: ## Serve www/ with the built-in PHP server on PORT, default 8000
 	"$(PHP)" -S localhost:$(PORT) -t www
 
-db-seed: ## Import schema.sql and the test fixtures into the configured database
+db-seed: ## Import schema.sql and the test fixtures, then apply pending migrations
 	mysql -h$(DB_HOST) -u$(DB_USER) -p$(DB_PASS) $(DB_NAME) < schema.sql
 	mysql -h$(DB_HOST) -u$(DB_USER) -p$(DB_PASS) $(DB_NAME) < playwright-tests/fixtures/changelog-seed.sql
+	$(MAKE) db-migrate
+
+# Needs `bash` on PATH (Git Bash on Windows). A local .env in the repo root is
+# read by the script and takes precedence over the exported DB_* above.
+db-migrate: ## Apply pending db/migrations/*.sql to the configured database
+	bash deploy/pfg-migrate .
 
 ##@ Tests
 

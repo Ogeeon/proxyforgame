@@ -23,7 +23,7 @@ GitHub Actions "CI"  ──── green ────▶  webhook: workflow_run
                                             ▼
                                     pfg-sync --sha <commit>
                                     fetch → reset --hard → clean -fd
-                                    → smoke test → mail on failure
+                                    → migrate → smoke test → mail on failure
 ```
 
 The webhook subscribes to `workflow_run`, not `push`. That is the whole reason
@@ -42,6 +42,7 @@ is only ever updated by one piece of code.
 | `pfg-sync` | both hosts | Brings a checkout to a commit and proves the site still serves. The only writer. |
 | `pfg-notify` | both hosts | Mails a failure. Speaks SMTP itself rather than reusing `www/api/mail.inc.php`, so the alarm does not depend on the tree it is complaining about. |
 | `pfg-changelog-apply` | both hosts | Pipes `changelog.sql` into the host's database after a deploy. `pfg-sync` calls it; a failure is logged, not fatal. |
+| `pfg-migrate` | both hosts | Applies pending `db/migrations/*.sql` and records them in `schema_migrations`. `pfg-sync` calls it before the smoke test; a failure **is** fatal and rolls the deploy back. |
 | `cutover-prod.sh` | production | One-time move from the old Bitbucket checkout. `--dry-run` stops before anything live is touched. |
 | `cutover-standby.sh` | standby | The same, plus introducing a document-root symlink the host did not have. |
 | `rollback-prod.sh` | production | Undoes the cutover. Not the everyday rollback — see below. |
@@ -55,10 +56,10 @@ it executes it — a self-update mid-run would make it read the second half of a
 different file. The cost is that they do not update themselves; `pfg-sync` says
 so when its installed copy has drifted from the one in the checkout.
 
-`pfg-changelog-apply` is the exception: `pfg-sync` runs it from **inside** the
-checkout (`<checkout>/deploy/pfg-changelog-apply`). It does no git work and runs
+`pfg-changelog-apply` and `pfg-migrate` are the exception: `pfg-sync` runs them
+from **inside** the checkout (`<checkout>/deploy/…`). They do no git work and run
 only once the reset has finished and the tree is quiescent, so the read-half-a-
-file hazard does not apply — and running the in-checkout copy means it always
+file hazard does not apply — and running the in-checkout copy means each always
 matches the release just deployed, with nothing to reinstall.
 
 `webhook.php` sits outside the checkout for a different reason — it belongs to
@@ -310,16 +311,28 @@ starting.
 
 ## Database changes
 
-The pipeline does not touch the database, and there is no migration mechanism
-yet (issue #12). Until there is:
+Schema changes are versioned SQL files in `db/migrations/`, applied by the
+deploy: `pfg-sync` runs `deploy/pfg-migrate` after the reset and **before** the
+smoke test, on both hosts, and records each file in `schema_migrations`. A
+failure is fatal — the deploy is rolled back to the previous commit and mailed,
+because the code just deployed may need the schema. Full rules for writing one:
+`db/migrations/README.md`.
 
-**Apply the schema change first, and make it backward compatible with the code
-already deployed.** With deploys landing minutes after a push, there is no
-longer a comfortable gap in which to catch up.
+**A migration lands seconds before the code that needs it, so it must be
+expand-only and backward compatible with the code already deployed** — add
+columns and tables, never drop or rename something the running code still uses.
+Drop/rename is a separate migration a release later.
 
-Production's app user has ALTER through ISPmanager, so PDO is enough there. The
-standby's `pfg_app` deliberately does not — use the root `mysql` client over its
-unix socket.
+`pfg-migrate` connects with `DB_HOST`/`DB_NAME` from the checkout's `.env` and
+the DDL user from `DB_DDL_USER`/`DB_DDL_PASS` when set, else `DB_USER`/`DB_PASS`.
+Production's app user has ALTER through ISPmanager, so it leaves the `DB_DDL_*`
+pair unset. The standby's `pfg_app` deliberately has no ALTER, so its `.env`
+names a privileged user there.
+
+**Recovery only:** applying a migration by hand — `mysql < db/migrations/NNNN_*.sql`
+then `INSERT INTO schema_migrations …` — is for when the deploy-time apply failed
+and you are fixing forward. The standby needs the root `mysql` client over its
+unix socket for this.
 
 ## The in-app changelog
 

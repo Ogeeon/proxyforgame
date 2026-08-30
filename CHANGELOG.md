@@ -15,6 +15,10 @@ release section; it is the source of truth for the other eleven translations.
 
 ## [Unreleased]
 
+### Added
+
+- Deploy: versioned database migrations. SQL files in `db/migrations/` are applied to both hosts by `pfg-sync` before the smoke test and tracked in a `schema_migrations` table; a failed migration rolls the deploy back. Replaces applying every schema change by hand over SSH.
+
 ## [2026-08-30] - site entry 62
 
 ### Changed
