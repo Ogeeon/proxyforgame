@@ -65,9 +65,15 @@ thing — the classic expand/contract split.
 `pfg-sync`, after `git reset` and before the smoke test, calls
 `deploy/pfg-migrate <checkout>`. On failure the deploy is rolled back and mailed —
 unlike the changelog step, a missing schema is fatal. The runner reads
-`DB_HOST`/`DB_NAME` from the checkout's `.env`, and the DDL user from
-`DB_DDL_USER`/`DB_DDL_PASS` when set (the standby, whose app user has no ALTER)
+`DB_HOST`/`DB_NAME` from the checkout's `.env`, and the migration user from
+`DB_DDL_USER`/`DB_DDL_PASS` when set (the standby, whose `pfg_app` has no DDL)
 else `DB_USER`/`DB_PASS` (production).
+
+That user needs **DDL *and* DML** on the migration database — the runner writes
+the `schema_migrations` row itself, and a migration may backfill data. On the
+standby, `pfg_ddl@localhost` is granted `SELECT, INSERT, UPDATE, DELETE, CREATE,
+ALTER, INDEX, DROP, REFERENCES` on `og_proxyforgame`.*; production's app user
+already has all of that.
 
 `deploy/pfg-migrate <checkout> --check` lists what is pending and exits non-zero
 if anything is — handy from a shell, not part of the gate.
