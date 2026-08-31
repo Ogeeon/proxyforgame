@@ -1,5 +1,8 @@
-# Named "CI" rather than after the browser suite: the job runs the whole non-browser gate -
-# i18n-validate, lint, typecheck, tsconfigs-check, the unit tests - before Playwright starts.
+# Named "CI" rather than after the browser suite: the job runs `make check`, the same
+# green gate developers run before a commit, of which Playwright is only the last step.
+# A green run here is what deploys, so the job invokes the `check` target itself rather
+# than listing its parts: a gate added to the Makefile is then picked up here for free,
+# and the two cannot drift (issue #21).
 # The file name stays playwright.yml so the README badge URL and any existing links keep working.
 name: CI
 
@@ -137,40 +140,40 @@ jobs:
         with:
           node-version: 24
 
+      # `make html-validate` runs the Nu Html Checker, a jar, against the rendered
+      # pages. The jar itself arrives with the `vnu-jar` package that `make install`
+      # pulls in; only a JRE has to be provided. Pinned rather than left to whatever
+      # the runner image happens to preinstall.
+      - name: Set up Java for the Nu Html Checker
+        uses: actions/setup-java@dd06d9cba3e5552c54d9f8ea23572deb30010f7c # v6.0.0
+        with:
+          distribution: temurin
+          java-version: '21'
+
       - name: Install dependencies and browsers
         run: make install PW_DEPS=--with-deps
 
       # -------------------------------------------------------------
-      # Run tests - same make targets developers run locally
+      # The gate - the same target developers run before a commit
       # -------------------------------------------------------------
-      # Locale drift is what `make check` catches on top of `make test`; run it
-      # first so a translation mistake fails in seconds instead of after the
-      # whole browser suite.
-      - name: Validate translations
-        run: make i18n-validate
+      # `make check` is changelog-validate, i18n-validate, lint, typecheck,
+      # tsconfigs-check, html-validate and both test suites, in that order: the
+      # cheap gates fail in seconds, the browser suite runs last. Do not unroll
+      # this back into one step per gate - a green run here is what deploys, so
+      # anything the Makefile gates and this job does not is a hole in the
+      # release gate, which is exactly how changelog-validate and html-validate
+      # came to be missing (issue #21).
+      #
+      # PW_REPORTER: list for readable logs, html so the upload step below has
+      # an artifact.
+      - name: Green gate (make check)
+        run: make check PW_REPORTER=list,html
 
-      # Both static-analysis gates are at zero findings, so both fail the job.
-      # `make audit` keeps the reporters that still flag pre-existing issues;
-      # it prefixes each with `-`, so those are printed without failing.
-      # See .claude/plans/js-static-analysis.md.
-      - name: Lint
-        run: make lint
-
-      - name: Type-check
-        run: make typecheck
-
-      - name: Check generated TypeScript projects
-        run: make tsconfigs-check
-
+      # Reporters that still flag pre-existing issues; `audit` prefixes each with
+      # `-` so they are printed without failing the job.
       - name: Static analysis (advisory)
+        if: always()
         run: make audit
-
-      - name: Run unit tests
-        run: make test-unit
-
-      # list for readable logs, html so the upload step below has an artifact
-      - name: Run Playwright tests
-        run: make test-e2e PW_REPORTER=list,html
 
       # -------------------------------------------------------------
       # Upload Playwright report (always)
