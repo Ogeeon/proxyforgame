@@ -19,6 +19,7 @@ release section; it is the source of truth for the other eleven translations.
 
 - Build: `make mail` reads the mailbox the contact forms deliver to, so feedback can be gone through without opening Gmail. Read-only over IMAP - the mailbox is only ever examined, never modified - with filters for the messages the forms send, a date, a Gmail search, or one message by id. Credentials are an app password in `.env`.
 - Deploy: versioned database migrations. SQL files in `db/migrations/` are applied to both hosts by `pfg-sync` before the smoke test and tracked in a `schema_migrations` table; a failed migration rolls the deploy back. Replaces applying every schema change by hand over SSH.
+- Deploy: the watchdog now catches `webhook.php` drifting on production. The GitHub receiver lives outside the checkout, so a deploy never updates the running copy and a change to it had to be reinstalled by hand with nothing warning when that was forgotten. `ajax.php?service=health` publishes the sha256 of the installed receiver - the digest only - and the watchdog compares it against `deploy/webhook.php` at the commit that host reports as deployed, so a rollback does not read as drift.
 
 ### Fixed
 

@@ -181,7 +181,7 @@ test.describe('AJAX endpoint - health', () => {
     // The shape matters more than the values here: this is what the watchdog
     // workflow parses from outside, and it has no way to complain about a
     // field that quietly changed name.
-    test('reports the time, the PHP version, the deployed commit and the jobs', async ({ request }) => {
+    test('reports the time, the PHP version, the deployed commit, the receiver digest and the jobs', async ({ request }) => {
         const response = await request.get(`${ENDPOINT}?service=health`);
         expect(response.status()).toBe(200);
         expect(response.headers()['content-type']).toContain('application/json');
@@ -194,6 +194,10 @@ test.describe('AJAX endpoint - health', () => {
         // Null is the honest answer where there is no readable checkout; a
         // string is only ever a full SHA.
         expect(body.commit === null || /^[0-9a-f]{40}$/.test(body.commit)).toBe(true);
+        // sha256 of the installed GitHub receiver, or null where none is
+        // configured - which is every host but production, this run included.
+        // Never the file itself, and never anything but a digest.
+        expect(body.webhook === null || /^[0-9a-f]{64}$/.test(body.webhook)).toBe(true);
         // An object, never an array - the watchdog indexes it by job name, and
         // an empty [] would break that without breaking any status code.
         expect(Array.isArray(body.jobs)).toBe(false);

@@ -19,10 +19,35 @@
         // off .php-version, without publishing an exact build to fingerprint.
         'php'    => PHP_MAJOR_VERSION . '.' . PHP_MINOR_VERSION,
         'commit' => healthDeployedCommit(dirname(__DIR__, 2)),
+        // sha256 of the GitHub receiver as installed, so the watchdog can spot
+        // it drifting from the copy in the repository. NULL where no receiver
+        // is configured, which is every host but production.
+        'webhook' => healthWebhookHash(getenv('WEBHOOK_FILE')),
         // Cast so an empty result encodes as {} and not as [] - the watchdog
         // indexes this by job name.
         'jobs'   => (object)healthJobStamps(getenv('JOB_STAMP_DIR'))
       );
+  }
+
+  /**
+   * sha256 of the installed deploy/webhook.php, or NULL when none is
+   * configured or the file cannot be read.
+   *
+   * The receiver lives in another vhost's document root, outside the checkout,
+   * so a deploy updates the copy in `deploy/` and leaves the running one alone.
+   * Nothing warned when the two diverged. Publishing the digest - never the
+   * file - lets the watchdog compare it against `deploy/webhook.php` at the
+   * commit this same report says is deployed.
+   *
+   * A digest of a file that is public in the repository gives an outsider
+   * nothing it does not already have.
+   */
+  function healthWebhookHash($path) {
+      if (!is_string($path) || $path === '' || !is_file($path) || !is_readable($path)) {
+          return null;
+      }
+      $hash = @hash_file('sha256', $path);
+      return $hash === false ? null : $hash;
   }
 
   /**

@@ -63,13 +63,26 @@ file hazard does not apply — and running the in-checkout copy means each alway
 matches the release just deployed, with nothing to reinstall.
 
 `webhook.php` sits outside the checkout for a different reason — it belongs to
-another vhost's document root — and **nothing warns when it drifts**. A deploy
-updates the copy in `deploy/` and leaves the running one untouched, so a change
-to the receiver has to be reinstalled by hand:
+another vhost's document root. A deploy updates the copy in `deploy/` and leaves
+the running one untouched, so a change to the receiver has to be reinstalled by
+hand:
 
 ```
 install -m 644 <checkout>/deploy/webhook.php <data>/www/webhooks.proxyforgame.com/
 ```
+
+**Forgetting that step is now an alarm rather than a silence.**
+`ajax.php?service=health` publishes the sha256 of the installed receiver — the
+digest only, never the file, and a digest of something already public in this
+repository tells an outsider nothing. The watchdog compares it against
+`deploy/webhook.php` *at the commit that host reports as deployed*, so a
+rollback does not read as drift, and fails the run when the two differ.
+
+The path comes from `WEBHOOK_FILE` in the checkout's `.env`, the same way
+`JOB_STAMP_DIR` does. Production only: everywhere else the variable is unset,
+health reports `"webhook": null`, and the watchdog does not look. On production
+an unset variable is itself a failure — a receiver nobody can see the version of
+is the state this check exists to end.
 
 ## The two hosts
 

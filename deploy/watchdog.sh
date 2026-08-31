@@ -50,7 +50,7 @@ fail() { printf '  FAIL %s\n' "$*"; FAILED=1; }
 ok()   { printf '  ok   %s\n' "$*"; }
 warn() { printf '  warn %s\n' "$*"; }
 
-for tool in curl node; do
+for tool in curl node sha256sum; do
   command -v "$tool" >/dev/null || { echo "watchdog: $tool is required" >&2; exit 2; }
 done
 
@@ -65,6 +65,7 @@ read_health() {
     try { d = JSON.parse(fs.readFileSync(process.argv[1], "utf8")); } catch (e) { process.exit(1); }
     console.log("commit " + (d.commit || ""));
     console.log("php " + (d.php || ""));
+    console.log("webhook " + (d.webhook || ""));
     for (const [name, job] of Object.entries(d.jobs || {})) {
       console.log("job " + name + " " + job.ageSeconds + " " + job.status);
     }
@@ -235,6 +236,34 @@ check_host() {
     fail "PHP $php_ver is older than the pinned $PINNED_PHP"
   else
     warn "PHP $php_ver is ahead of the pinned $PINNED_PHP - expected, it tracks its OS"
+  fi
+
+  # ---- the GitHub receiver ----
+  # webhook.php is served from the webhooks vhost's document root, outside the
+  # checkout, so a deploy updates deploy/webhook.php and leaves the running copy
+  # untouched. Nothing warned when a change to the receiver was never installed.
+  # Health publishes the digest of what is actually running; compare it against
+  # the repository's copy AT THE COMMIT THAT HOST SAYS IS DEPLOYED, not at the
+  # tip - during a rollback those differ, and comparing against the tip would
+  # report drift on a host that is exactly right.
+  #
+  # Production only. No other host runs a receiver, and one reporting a digest
+  # would be the surprise rather than one that does not.
+  if [ "$label" = production ]; then
+    local live_hash want_hash
+    live_hash=$(echo "$health" | sed -n 's/^webhook //p')
+    if [ -z "$live_hash" ]; then
+      fail "health reports no webhook digest - set WEBHOOK_FILE in the checkout's .env"
+    elif [ -z "$deployed" ]; then
+      warn "webhook digest ${live_hash:0:12}, but no deployed commit to compare it against"
+    elif ! want_hash=$(git show "$deployed:deploy/webhook.php" 2>/dev/null | sha256sum | cut -d' ' -f1) \
+      || [ -z "$want_hash" ]; then
+      warn "cannot read deploy/webhook.php at ${deployed:0:7} - is the checkout shallow?"
+    elif [ "$live_hash" = "$want_hash" ]; then
+      ok "webhook.php matches ${deployed:0:7}"
+    else
+      fail "webhook.php has drifted: serving ${live_hash:0:12}, ${deployed:0:7} has ${want_hash:0:12} - reinstall it (deploy/README.md)"
+    fi
   fi
 
   # ---- the cron jobs ----

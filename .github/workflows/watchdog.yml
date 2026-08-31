@@ -26,8 +26,14 @@ jobs:
     name: Check both hosts
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      # Full history: the receiver-drift check hashes deploy/webhook.php at the
+      # commit each host reports as deployed, which during a rollback is not the
+      # tip. Pinned by digest and on the same version as the other workflows -
+      # this one was still on a floating @v4.
+      - name: Checkout full history
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
 
       - name: Run the watchdog
         env:
