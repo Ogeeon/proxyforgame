@@ -171,11 +171,32 @@ exactly this, is **`deployment`**: `deploy.yml` creates one for the verified SHA
 in the `production` environment, and the receiver takes the commit from
 `deployment.sha`. Deployments from any other environment are logged and ignored.
 
-**A rollback moves production only.** The standby follows the newest *green*
-commit of `main` on its timer, so within five minutes it is back on the tip
-while production sits on the older commit. That is the intended asymmetry —
-production is the host under repair — but the two are genuinely running
-different code until `main` moves again.
+**A rollback holds both hosts, and lapses on its own.** The deployment carries
+the sha of `main`'s tip at dispatch time in `payload.pinned_tip`, and green-mode
+`pfg-sync` treats it as a **pin**: while `main` is still that commit, the walk
+does not climb back to the tip and both hosts stay on the rolled-back code.
+
+That pin is what makes the lever hold at all. Green mode runs on a timer on both
+hosts — hourly on production, every five minutes on the standby — and the walk
+resolves to the newest *green* commit of `main`. Without the pin the standby was
+back on the tip within five minutes, and production undid its own rollback at
+the next hourly reconcile, so the lever was good for at most 59 minutes there.
+
+**Clearing it needs nothing.** The pin only applies while `main` is unchanged, so
+the normal repair — `git revert`, push, CI green — lapses it as a side effect and
+both hosts roll forward again. To resume immediately without a fix, dispatch
+*Deploy* at the current tip: a deployment for the tip is a roll-forward, not a
+rollback, and no pin is derived from it.
+
+Two smaller consequences:
+
+- Production still moves at once, because the `deployment` webhook reaches it and
+  a `--sha` sync is an explicit instruction that ignores pins. The standby moves
+  on its next five-minute run.
+- `pfg-sync --check` honours the pin too, so a correctly pinned host does not
+  read as drifted to the watchdog.
+
+A deployment created before `pinned_tip` existed carries no pin, and is ignored.
 
 **Last resort — at a shell:** `pfg-sync --sha <sha>`.
 

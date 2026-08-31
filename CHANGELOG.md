@@ -20,6 +20,10 @@ release section; it is the source of truth for the other eleven translations.
 - Build: `make mail` reads the mailbox the contact forms deliver to, so feedback can be gone through without opening Gmail. Read-only over IMAP - the mailbox is only ever examined, never modified - with filters for the messages the forms send, a date, a Gmail search, or one message by id. Credentials are an app password in `.env`.
 - Deploy: versioned database migrations. SQL files in `db/migrations/` are applied to both hosts by `pfg-sync` before the smoke test and tracked in a `schema_migrations` table; a failed migration rolls the deploy back. Replaces applying every schema change by hand over SSH.
 
+### Fixed
+
+- Deploy: a dispatched rollback no longer undid itself. Both hosts also reconcile against `main` on a timer, and that walk climbed straight back to the newest green commit - within five minutes on the standby, and on production at the next hourly run, so the rollback lever held for at most 59 minutes there. A rollback now pins both hosts to the commit it names, and the pin lapses by itself once `main` moves, so landing the fix is all it takes to resume rolling forward.
+
 ## [2026-08-30] - site entry 62
 
 ### Changed

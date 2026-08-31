@@ -81,22 +81,33 @@ jobs:
       # which is the opposite of what a rollback wants. required_contexts empty:
       # the checks were verified above, and an older commit's statuses can have
       # aged out of the API entirely.
+      #
+      # payload.pinned_tip is what makes this deployment reach the standby as
+      # well. Neither host would otherwise stay on the rolled-back commit: both
+      # reconcile in green mode on a timer - production hourly, the standby
+      # every five minutes - and that walk climbs straight back to the tip of
+      # main. `pfg-sync` reads this deployment and honours it as a pin, but only
+      # while main is still the commit recorded here, so landing the fix (a
+      # `git revert`, normally) lets both hosts resume rolling forward with
+      # nothing to clear by hand. See deploy/README.md, "Rolling back".
       - name: Create the deployment
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           REF: ${{ inputs.ref }}
         run: |
           set -euo pipefail
+          TIP=$(git rev-parse origin/main)
           gh api "repos/$GITHUB_REPOSITORY/deployments" --input - <<JSON
           {
             "ref": "$REF",
             "environment": "production",
             "auto_merge": false,
             "required_contexts": [],
-            "description": "rollback dispatched from Actions"
+            "description": "rollback dispatched from Actions",
+            "payload": { "pinned_tip": "$TIP" }
           }
           JSON
-          echo "deployment created for $REF"
+          echo "deployment created for $REF (pinned while main is at $TIP)"
 
       - name: Where to look next
         run: |

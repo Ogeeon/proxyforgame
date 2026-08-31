@@ -141,6 +141,51 @@ ci_passed() {
 }
 
 # ---------------------------------------------------------------------------
+# The commit a dispatched rollback pinned this host to, or empty.
+#
+# A rollback is `deploy.yml` creating a deployment for an older commit. That
+# reaches production as a webhook delivery, but the standby has no inbound
+# address and both hosts also reconcile on a timer in green mode - which, left
+# alone, walks back to the newest green commit of main and undoes the rollback.
+# Production's reconcile is hourly, so before this the lever held for at most
+# 59 minutes; the standby's is every five.
+#
+# So green mode asks GitHub for the newest deployment and honours it as a pin.
+# The pin lapses on its own when main moves: `deploy.yml` records the tip it saw
+# at dispatch time in the deployment payload, and the pin only applies while the
+# tip is still that commit. Landing the fix - a `git revert`, normally - is
+# therefore all it takes to resume rolling forward, and a rollback dispatched at
+# the current tip is not a pin at all.
+#
+# CI is deliberately not re-checked for a pinned commit: `deploy.yml` already
+# proved it is an ancestor of main, and an older commit's workflow runs can have
+# aged out of the API entirely.
+#
+# Prints the sha to pin to, or nothing. Never fails the run - an unreachable API
+# here means "no pin", and the green walk below has its own API guard.
+# ---------------------------------------------------------------------------
+pinned_target() {
+  local tip="$1" json sha pinned_tip
+  json=$(curl -sf -H 'Accept: application/vnd.github+json' \
+    "$REPO_API/deployments?environment=production&per_page=1") || return 0
+  # Grep by key name rather than by position: the keys below are unique in the
+  # response, so this does not care that pinned_tip sits inside `payload`.
+  sha=$(printf '%s' "$json" | grep -oE '"sha"[[:space:]]*:[[:space:]]*"[0-9a-f]{40}"' \
+    | grep -oE '[0-9a-f]{40}' | head -1) || true
+  pinned_tip=$(printf '%s' "$json" \
+    | grep -oE '"pinned_tip"[[:space:]]*:[[:space:]]*"[0-9a-f]{40}"' \
+    | grep -oE '[0-9a-f]{40}' | head -1) || true
+  [ -n "$sha" ] || return 0
+  # An old deployment from before this field existed, or one dispatched against
+  # a main that has since moved: the pin has lapsed.
+  [ "$pinned_tip" = "$tip" ] || return 0
+  # A deployment for the tip itself is a roll-forward, not a rollback.
+  [ "$sha" != "$tip" ] || return 0
+  git merge-base --is-ancestor "$sha" "$tip" 2>/dev/null || return 0
+  printf '%s' "$sha"
+}
+
+# ---------------------------------------------------------------------------
 # The smoke test, as a function so a rollback can re-run it. Prints the list of
 # things that are wrong (empty when the site is healthy); never exits.
 # ---------------------------------------------------------------------------
@@ -225,6 +270,18 @@ if [ "$MODE" = exact ]; then
     || fail "$WANT_SHA is not an ancestor of origin/main - refusing it"
   WANT_SHA=$(git rev-parse "$WANT_SHA") || fail "cannot resolve $WANT_SHA"
 else
+  # A dispatched rollback outranks the walk: while it holds, this host stays on
+  # the commit it names instead of climbing back to the tip.
+  PIN=$(pinned_target "$TIP")
+fi
+
+# --check reports what this host should be at, so it honours the pin too -
+# otherwise a correctly pinned host reads as drifted to the watchdog.
+if [ "$MODE" != exact ] && [ -n "${PIN:-}" ]; then
+  WANT_SHA="$PIN"
+  [ "$(git rev-parse HEAD)" = "$WANT_SHA" ] \
+    || log "pinned to ${WANT_SHA:0:8} by a dispatched rollback (main is at ${TIP:0:8})"
+elif [ "$MODE" != exact ]; then
   # The tip of main if its CI has gone green, otherwise the newest ancestor
   # whose CI has - walking first-parent, never further than MAX_WALK. A tip
   # that is still building simply resolves to the commit already deployed, so
