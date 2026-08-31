@@ -248,9 +248,12 @@ class CostsCalculator {
     return requests.map(req => {
       const result = this.calculator.calculate(req, params);
 
-      // Check if research is impossible
-      if (result.isZero && req.isValid && req.techType === 'research') {
-        // Research requirements not met
+      // Ask the calculator whether the research is possible instead of reading
+      // it off a zero result: a zero cost has other causes (an empty range, a
+      // demolition that nets out) and every one of them used to raise the
+      // "cannot research" message.
+      if (req.isValid && req.techType === 'research'
+        && !this.calculator.isResearchable(req.techId, params)) {
         const techName = this._getTechName(req.techId);
         if (techName && !this._isLevelFieldFocused(req.techId)) {
           this.renderer.showResearchImpossibleError(techName);

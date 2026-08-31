@@ -56,6 +56,38 @@ describe('Calculator.getRequiredLabLevel', () => {
     });
 });
 
+describe('Calculator.isResearchable', () => {
+    it('accepts a research whose lab requirement is met', () => {
+        expect(calculator.isResearchable(199, directParams({ researchLabLevel: 12 }))).toBe(true);
+        expect(calculator.isResearchable(199, directParams({ researchLabLevel: 20 }))).toBe(true);
+    });
+
+    it('rejects a research whose lab falls short', () => {
+        expect(calculator.isResearchable(199, directParams({ researchLabLevel: 11 }))).toBe(false);
+        expect(calculator.isResearchable(106, directParams({ researchLabLevel: 0 }))).toBe(false);
+    });
+
+    it('accepts anything that is not a research', () => {
+        // Buildings, ships and defence carry no requirement, so an empty lab
+        // must not make them look impossible.
+        expect(calculator.isResearchable(1, directParams({ researchLabLevel: 0 }))).toBe(true);
+        expect(calculator.isResearchable(204, directParams({ researchLabLevel: 0 }))).toBe(true);
+    });
+
+    it('reads the level through the IRN sum, not off the entered field', () => {
+        // Same case as the getLabLevelRaiseTarget test below: the entered field
+        // is empty and the per-planet table is what the calculation uses.
+        const irn = new GlobalParams();
+        irn.useDirectLabLevel = true;
+        irn.researchLabLevel = 0;
+        irn.labLevels = [12, 10, 0, 0, 0, 0, 0, 0];
+        irn.labChoice = 0;
+        irn.irnLevel = 1;
+
+        expect(calculator.isResearchable(199, irn)).toBe(true);
+    });
+});
+
 describe('Calculator.getLabLevelRaiseTarget', () => {
     it('raises the lab to what the research requires', () => {
         expect(calculator.getLabLevelRaiseTarget(199, directParams({ researchLabLevel: 0 })))

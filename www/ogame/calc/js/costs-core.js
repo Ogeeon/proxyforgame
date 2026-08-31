@@ -384,13 +384,6 @@ class BuildCost {
   }
 
   /**
-   * Check if this is a zero cost
-   */
-  get isZero() {
-    return this.totalResources === 0 && this.time === 0;
-  }
-
-  /**
    * Create a zero cost object
    */
   static zero() {
@@ -437,6 +430,23 @@ class Calculator {
   }
 
   /**
+   * Whether `techId` can be researched under `params` - the Research Lab level
+   * the settings produce reaches what the game requires. Anything that is not a
+   * research is always researchable, since it carries no requirement.
+   *
+   * This is the single place that answers the question. The cost, the build
+   * time and the "cannot research" message all go through it rather than
+   * comparing against techReqs themselves.
+   * @param {number} techId
+   * @param {GlobalParams} params - Global settings
+   * @returns {boolean}
+   */
+  isResearchable(techId, params) {
+    const required = this.getRequiredLabLevel(techId);
+    return params.getResultingLabLevel(required) >= required;
+  }
+
+  /**
    * The Research Lab level the parameters have to be raised to before `techId`
    * can be researched, or 0 when the current settings already allow it.
    *
@@ -450,7 +460,7 @@ class Calculator {
    */
   getLabLevelRaiseTarget(techId, params) {
     const required = this.getRequiredLabLevel(techId);
-    if (required === 0 || params.getResultingLabLevel(required) >= required) {
+    if (required === 0 || this.isResearchable(techId, params)) {
       return 0;
     }
     return Math.max(required, params.researchLabLevel);
@@ -468,15 +478,10 @@ class Calculator {
       return BuildCost.zero();
     }
 
-    // Check research requirements for research techs
-    if (request.techType === 'research') {
-      const requiredLabLevel = this.techReqs[request.techId] || 0;
-      const availableLabLevel = params.getResultingLabLevel(requiredLabLevel);
-
-      if (availableLabLevel < requiredLabLevel) {
-        // Cannot research - insufficient lab level
-        return BuildCost.zero();
-      }
+    // A research whose Research Lab requirement is not met costs nothing,
+    // because it cannot be started at all.
+    if (request.techType === 'research' && !this.isResearchable(request.techId, params)) {
+      return BuildCost.zero();
     }
 
     // Calculate resource costs
@@ -716,8 +721,7 @@ class Calculator {
     // Get research lab level (for research only)
     let labLevel = 0;
     if (100 < techId && techId <= 200) {
-      const requiredLabLevel = this.techReqs[techId] || 0;
-      labLevel = params.getResultingLabLevel(requiredLabLevel);
+      labLevel = params.getResultingLabLevel(this.getRequiredLabLevel(techId));
     }
 
     // Get robot factory level
@@ -738,8 +742,7 @@ class Calculator {
       researchLabLevel: labLevel,
       technocratFactor: params.technocratFactor,
       shipyardLevel: params.shipyardLevel,
-      uniSpeed: speed,
-      techReqs: this.techReqs
+      uniSpeed: speed
     });
   }
 

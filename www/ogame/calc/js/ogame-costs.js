@@ -135,21 +135,6 @@ function getBuildCost_C(techID, techLevelFrom, techLevelTo, techData, ionTechLev
 }
 
 /**
- * Calculates the duration of researching/building several levels or several ships
- * @param techID ID of the Building or research
- * @param techLevelFrom Starting building/research level (not included in the calculation)
- * @param techLevelTo Final building/research level
- * @param techData Technology data array in the format {id:[cost_met, cost_crys, cost_deut, grow_koeff]}
- * @param robotsLevel Robot Factory level
- * @param nanitesLevel Nanite Factory level
- * @param researchLabLevel Research Lab level
- * @param technocratFactor Technocrat multiplier - 1 if absent
- * @param shipyardLevel Shipyard level
- * @param uniSpeed Universe speed
- * @param techReqs Research requirements in the format {id: req_level}
- * @returns Total duration of the building/research upgrade, ship construction
- */
-/**
  * Time to build/demolish a building (techID <= 100) between two levels.
  * The caller has already filtered out the forbidden demolition of the Terraformer/Lunar Base.
  */
@@ -180,11 +165,10 @@ function getBuildingTime_C(techID, techLevelFrom, techLevelTo, robotsLevel, nani
 }
 
 /**
- * Research time (100 < techID <= 200); -1 if the Research Lab level is insufficient.
+ * Research time (100 < techID <= 200). Whether the Research Lab is high enough
+ * to start the research at all is the caller's question, not this one's.
  */
-function getResearchTime_C(techID, techLevelFrom, techLevelTo, researchLabLevel, technocratFactor, techReqs, techData) {
-	if (researchLabLevel < techReqs[techID])
-		return -1;
+function getResearchTime_C(techID, techLevelFrom, techLevelTo, researchLabLevel, technocratFactor, techData) {
 	const cost = getBuildCost_C(techID, techLevelFrom, techLevelTo, techData);
 	// OGame's formula gives the time in hours - convert to seconds; the technocrat multiplies the result by its own correction factor
 	return 3600 * (cost[0] + cost[1]) / (1000 * (1.0 + researchLabLevel)) * technocratFactor;
@@ -224,18 +208,17 @@ function getShipBuildTime_C(techID, nanitesLevel, shipyardLevel, techData) {
  * @property {number} technocratFactor Technocrat speed-up; only techs read it
  * @property {number} shipyardLevel Shipyard level; only ships and defense read it
  * @property {number} uniSpeed universe speed multiplier
- * @property {any} [techReqs] technology requirements, to spot one that is not met
  */
 
 /**
  * Calculates how long a build or a research takes.
  * @param {BuildTimeParams} params
- * @returns Seconds, or -1 when a requirement is not met
+ * @returns Seconds
  */
 function getBuildTime_C(params) {
 	const {
 		techID, techLevelFrom, techLevelTo, techData, robotsLevel, nanitesLevel,
-		researchLabLevel, technocratFactor, shipyardLevel, uniSpeed, techReqs
+		researchLabLevel, technocratFactor, shipyardLevel, uniSpeed
 	} = params;
 	if (techLevelFrom < 0)
 		return 0;
@@ -254,9 +237,7 @@ function getBuildTime_C(params) {
 		timeSpan = getBuildingTime_C(techID, techLevelFrom, techLevelTo, robotsLevel, nanitesLevel, techData);
 	// Techs with ID from 100 to 200 are technologies. Their research speed depends on the Research Lab level and the presence of a technocrat
 	} else if (techID <= 200) {
-		timeSpan = getResearchTime_C(techID, techLevelFrom, techLevelTo, researchLabLevel, technocratFactor, techReqs, techData);
-		if (timeSpan === -1)
-			return -1;
+		timeSpan = getResearchTime_C(techID, techLevelFrom, techLevelTo, researchLabLevel, technocratFactor, techData);
 	// Techs with ID above 200 are ships and defense. Their build speed depends on the presence and level of the shipyard and nanite factory
 	} else {
 		timeSpan = getShipBuildTime_C(techID, nanitesLevel, shipyardLevel, techData);
