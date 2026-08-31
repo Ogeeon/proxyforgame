@@ -794,6 +794,7 @@
     "rates": "Wechselkurs",
     "location": "Position",
     "fix": "fix",
+    "mix-src-hint": "Teilt auf, was du verkaufst: wie viel Prozent davon auf den ersten Rohstoff entfällt.",
     "src": "Verkaufe",
     "dst": "Kaufe",
     "title": "OGame - Handelsrechner - Austausch von Ressourcen",

@@ -794,6 +794,7 @@
     "rates": "Kurs razmjene",
     "location": "Lokacija",
     "fix": "Fiks",
+    "mix-src-hint": "Dijeli ono što prodajete: koliko posto od toga ide na prvi resurs.",
     "src": "Prodaja",
     "dst": "Kupovina",
     "title": "Ogame - Kalkulator trgovine - Razmjena resursa",

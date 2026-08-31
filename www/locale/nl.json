@@ -794,6 +794,7 @@
     "rates": "Wisselkoers",
     "location": "Locatie",
     "fix": "Verbeter",
+    "mix-src-hint": "Verdeelt wat je verkoopt: hoeveel procent daarvan naar de eerste grondstof gaat.",
     "src": "Verkopen",
     "dst": "Kopen",
     "title": "OGame – handel berekening – Goederen verhandelen",

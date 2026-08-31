@@ -32,6 +32,9 @@ const TRADE_DST_RESOURCES = [
  */
 const TRADE_SHORT_LABELS = { metal: 'met', crystal: 'crys', deuterium: 'deut' };
 
+/** The resource each single-resource source type sells. */
+const TRADE_SRC_RESOURCES = ['metal', 'crystal', 'deuterium'];
+
 /**
  * The rates a fresh form starts from: the middle of each fair-trade range.
  * @returns {{md: number, cd: number, mc: number}}
@@ -61,6 +64,7 @@ let options = {
     mixBalance: 50,
     mixProp1: 1,
     mixProp2: 1,
+    mixSrcBalance: 50,
 
     country: 'en',
     universe: 101,
@@ -83,10 +87,11 @@ let options = {
             case 'deuterium': return validateNumber(Number.parseInt(value), 0, Infinity, 0);
             case 'srcType': return validateNumber(Number.parseInt(value), 0, 5, this.srcType);
             case 'dstType': return validateNumber(Number.parseInt(value), 0, 5, this.dstType);
-            case 'dstMixType': return validateNumber(Number.parseInt(value), 0, 3, this.dstMixType);
+            case 'dstMixType': return validateNumber(Number.parseInt(value), 0, 4, this.dstMixType);
             case 'mixBalance': return validateNumber(Number.parseFloat(value), 0, 100, this.mixBalance);
             case 'mixProp1': return validateNumber(Number.parseInt(value), 0, 100, this.mixProp1);
             case 'mixProp2': return validateNumber(Number.parseInt(value), 0, 100, this.mixProp2);
+            case 'mixSrcBalance': return validateNumber(Number.parseFloat(value), 0, 100, this.mixSrcBalance);
             case 'country': return value;
             case 'universe': return validateNumber(Number.parseInt(value), 0, Infinity, 101);
             case 'coordg': return validateNumber(Number.parseInt(value), 0, 12, this.coordg);
@@ -166,11 +171,12 @@ let options = {
     _parseTypesFromParams: function(prm) {
         if (isset(prm['st'])) this.srcType = validateNumber(Number.parseInt(prm['st']), 0, 5, this.srcType);
         if (isset(prm['dt'])) this.dstType = validateNumber(Number.parseInt(prm['dt']), 0, 5, this.dstType);
-        if (isset(prm['dmt'])) this.dstMixType = validateNumber(Number.parseInt(prm['dmt']), 0, 3, this.dstMixType);
+        if (isset(prm['dmt'])) this.dstMixType = validateNumber(Number.parseInt(prm['dmt']), 0, 4, this.dstMixType);
     },
 
     _parseMixFromParams: function(prm) {
         if (isset(prm['mix'])) this.mixBalance = validateNumber(Number.parseFloat(prm['mix']), 0, 100, this.mixBalance);
+        if (isset(prm['msrc'])) this.mixSrcBalance = validateNumber(Number.parseFloat(prm['msrc']), 0, 100, this.mixSrcBalance);
 
         if (isset(prm['mp1'])) {
             this.mixProp1 = validateNumber(Number.parseInt(prm['mp1']), 0, 100, this.mixProp1);
@@ -248,7 +254,8 @@ let options = {
             0: () => '&mix=' + this.mixBalance,
             1: () => '&mp1=' + this.mixProp1 + '&mp2=' + this.mixProp2,
             2: () => this.fix1 ? '&fix1=' + this.fix1 : '',
-            3: () => this.fix2 ? '&fix2=' + this.fix2 : ''
+            3: () => this.fix2 ? '&fix2=' + this.fix2 : '',
+            4: () => '&msrc=' + this.mixSrcBalance
         };
         const builder = mixTypeBuilders[this.dstMixType];
         return builder ? builder() : '';
@@ -502,7 +509,8 @@ function activateDstMixType(obj) {
         ['mix-balance-prop1', 1],
         ['mix-balance-prop2', 1],
         ['mix-fix1', 2],
-        ['mix-fix2', 3]
+        ['mix-fix2', 3],
+        ['mix-src-balance-proc', 4]
     ];
     let type = -1;
     for (const [id, value] of ids) {
@@ -572,6 +580,9 @@ function updateDstFromSrc() {
         setTextContent('#mix-prop-lbl', shortFirst + ' / ' + shortSecond);
         setTextContent('#mix-fix1-lbl', l.fix + '. ' + shortFirst);
         setTextContent('#mix-fix2-lbl', l.fix + '. ' + shortSecond);
+        // Mode 4 splits what is being sold, so its label names the source too.
+        const shortSrc = l[TRADE_SHORT_LABELS[TRADE_SRC_RESOURCES[options.srcType]]];
+        setTextContent('#mix-src-lbl', shortSrc + ' → ' + shortFirst);
     }
     const dstBlock = $('#dst-block');
     if (dstBlock) {
@@ -603,6 +614,7 @@ function resetParams() {
     options.mixBalance = 50;
     options.mixProp1 = 1;
     options.mixProp2 = 1;
+    options.mixSrcBalance = 50;
     options.fix1 = 0;
     options.fix2 = 0;
     options.hyperTech = 0;
@@ -623,6 +635,8 @@ function resetParams() {
     setVal('#mix-balance-prop1', options.mixProp1);
     setVal('#mix-balance-prop2', options.mixProp2);
     setVal('#mix-balance', options.mixBalance);
+    setVal('#mix-src-balance-proc', options.mixSrcBalance);
+    setVal('#mix-src-balance', options.mixSrcBalance);
     setVal('#mix-fix1', '');
     setVal('#mix-fix2', '');
     setVal('#hypertech-lvl', 0);
@@ -748,16 +762,34 @@ function initSliders() {
     mcSlider.value = String(options.rates.mc);
     mcSlider.disabled = true;
 
-    const mixBalanceSlider = inputEl('#mix-balance');
-    mixBalanceSlider.min = '0';
-    mixBalanceSlider.max = '100';
-    mixBalanceSlider.step = '5';
-    mixBalanceSlider.value = String(options.mixBalance);
-    addEvent(mixBalanceSlider, 'input', function() {
-        options.mixBalance = Number.parseFloat(mixBalanceSlider.value);
-        setVal('#mix-balance-proc', options.mixBalance);
-        if (options.dstType != 2 || options.dstMixType != 0) {
-            options.dstMixType = 0;
+    initMixSlider('#mix-balance', '#mix-balance-proc', 0, options.mixBalance,
+        value => { options.mixBalance = value; });
+    initMixSlider('#mix-src-balance', '#mix-src-balance-proc', 4, options.mixSrcBalance,
+        value => { options.mixSrcBalance = value; });
+}
+
+/**
+ * Wires one of the two percentage sliders in the mix block. Moving it echoes
+ * into the text field beside it and makes its own mix mode the active one, the
+ * same way typing in that field does.
+ *
+ * @param {string} sliderId - selector of the range input
+ * @param {string} fieldId - selector of the text field it echoes into
+ * @param {number} mixType - the mix mode this slider drives
+ * @param {number} value - the percentage the slider starts at
+ * @param {(value: number) => void} store - records the new value in the model
+ */
+function initMixSlider(sliderId, fieldId, mixType, value, store) {
+    const slider = inputEl(sliderId);
+    slider.min = '0';
+    slider.max = '100';
+    slider.step = '5';
+    slider.value = String(value);
+    addEvent(slider, 'input', function() {
+        store(Number.parseFloat(slider.value));
+        setVal(fieldId, slider.value);
+        if (options.dstType != 2 || options.dstMixType != mixType) {
+            options.dstMixType = mixType;
             if (forceDstMix()) onUpdateDstType(); else onUpdateDstMixType();
         }
         updateNumbers();
@@ -788,6 +820,7 @@ function renderInitialState() {
     setVal('#mix-balance-proc', options.mixBalance);
     setVal('#mix-balance-prop1', options.mixProp1);
     setVal('#mix-balance-prop2', options.mixProp2);
+    setVal('#mix-src-balance-proc', options.mixSrcBalance);
     setVal('#coord-g', options.coordg ? options.coordg : '');
     setVal('#coord-s', options.coords ? options.coords : '');
     setVal('#coord-p', options.coordp ? options.coordp : '');
@@ -845,6 +878,12 @@ function initMixInputs() {
         const n = clampNumber(getInputNumber(inputEl('#mix-balance-proc')), 0, 100);
         setVal('#mix-balance', n);
         options.mixBalance = n;
+        options.save();
+    });
+    addEvent('#mix-src-balance-proc', 'keyup', function() {
+        const n = clampNumber(getInputNumber(inputEl('#mix-src-balance-proc')), 0, 100);
+        setVal('#mix-src-balance', n);
+        options.mixSrcBalance = n;
         options.save();
     });
     addEvent('#mix-balance-prop1', 'keyup', function() {

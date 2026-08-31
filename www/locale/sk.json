@@ -794,6 +794,7 @@
     "rates": "Výmenné kurzy",
     "location": "Umiestnenie",
     "fix": "presne",
+    "mix-src-hint": "Rozdelí to, čo predávaš: koľko percent ide na prvú surovinu.",
     "src": "Predávam",
     "dst": "Kupujem",
     "title": "OGame - Kalkulátor pre obchody - Výmena surovín",

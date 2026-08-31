@@ -794,6 +794,7 @@
     "rates": "Ratios de intercambio",
     "location": "Lugar",
     "fix": "fijo",
+    "mix-src-hint": "Divide lo que vendes: qué porcentaje se destina al primer recurso.",
     "src": "Vendiendo",
     "dst": "Comprando",
     "title": "OGame - Calculadora de Comercio - Intercambio de Recursos",

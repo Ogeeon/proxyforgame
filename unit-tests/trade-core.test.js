@@ -13,6 +13,8 @@ const {
     tradeMcRate,
     getDstInputState,
     tradeMixPercent,
+    tradeMixRates,
+    tradeSourceSharePercent,
     tradeCargoCapacity,
     tradeCargoCount,
     tradeSourceTotal,
@@ -21,6 +23,8 @@ const {
     'tradeMcRate',
     'getDstInputState',
     'tradeMixPercent',
+    'tradeMixRates',
+    'tradeSourceSharePercent',
     'tradeCargoCapacity',
     'tradeCargoCount',
     'tradeSourceTotal',
@@ -45,6 +49,7 @@ const BASE_PRM = {
     mixBalance: 50,
     mixProp1: 1,
     mixProp2: 1,
+    mixSrcBalance: 50,
     fix1: 0,
     fix2: 0,
     hyperTech: 0,
@@ -93,18 +98,57 @@ describe('Trade Calculator - destination availability', () => {
 });
 
 describe('Trade Calculator - mix split', () => {
+    const mix = (overrides) => tradeMixPercent({ ...BASE_PRM, ...overrides }, RATES);
+
     it('takes the percentage straight from mode 0', () => {
-        expect(tradeMixPercent(0, 60, 1, 1)).toBe(60);
+        expect(mix({ dstMixType: 0, mixBalance: 60 })).toBe(60);
     });
 
     it('turns the proportion of mode 1 into a percentage', () => {
-        expect(tradeMixPercent(1, 50, 2, 1)).toBeCloseTo(66.667, 3);
-        expect(tradeMixPercent(1, 50, 2, 3)).toBe(40);
+        expect(mix({ dstMixType: 1, mixProp1: 2, mixProp2: 1 })).toBeCloseTo(66.667, 3);
+        expect(mix({ dstMixType: 1, mixProp1: 2, mixProp2: 3 })).toBe(40);
     });
 
     it('is unused by the fixed-amount modes', () => {
-        expect(tradeMixPercent(2, 60, 2, 1)).toBe(0);
-        expect(tradeMixPercent(3, 60, 2, 1)).toBe(0);
+        expect(mix({ dstMixType: 2, mixBalance: 60 })).toBe(0);
+        expect(mix({ dstMixType: 3, mixBalance: 60 })).toBe(0);
+    });
+
+    it('converts the source cut of mode 4 into a destination share', () => {
+        // Half the deuterium buys metal at 2.4 and half buys crystal at 1.5,
+        // so the metal is 1.2 / (1.2 + 0.75) of what comes back.
+        expect(mix({ dstMixType: 4, mixSrcBalance: 50, srcType: 2 })).toBeCloseTo(61.538, 3);
+        expect(mix({ dstMixType: 4, mixSrcBalance: 0, srcType: 2 })).toBe(0);
+        expect(mix({ dstMixType: 4, mixSrcBalance: 100, srcType: 2 })).toBe(100);
+    });
+
+    it('clamps a source cut outside 0..100', () => {
+        expect(mix({ dstMixType: 4, mixSrcBalance: 150, srcType: 2 })).toBe(100);
+        expect(mix({ dstMixType: 4, mixSrcBalance: -20, srcType: 2 })).toBe(0);
+    });
+});
+
+describe('Trade Calculator - source conversion rates', () => {
+    it('lists what one unit of the source buys, first destination first', () => {
+        const fromMetal = tradeMixRates(0, RATES);
+        expect(fromMetal.first).toBeCloseTo(1 / 1.6, 10);
+        expect(fromMetal.second).toBeCloseTo(1 / 2.4, 10);
+
+        const fromCrystal = tradeMixRates(1, RATES);
+        expect(fromCrystal.first).toBe(1.6);
+        expect(fromCrystal.second).toBeCloseTo(1 / 1.5, 10);
+
+        const fromDeuterium = tradeMixRates(2, RATES);
+        expect(fromDeuterium.first).toBe(2.4);
+        expect(fromDeuterium.second).toBe(1.5);
+    });
+
+    it('weighs the source cut by what each side buys', () => {
+        // 30 % of the deuterium buys 0.72 metal per unit sold and the other
+        // 70 % buys 1.05 crystal, so the metal is the smaller share of the
+        // units that come back even though it is the dearer resource.
+        expect(tradeSourceSharePercent(30, 2, RATES)).toBeCloseTo(40.678, 3);
+        expect(tradeSourceSharePercent(30, 0, RATES)).toBeCloseTo(39.130, 3);
     });
 });
 
@@ -197,6 +241,13 @@ describe('Trade Calculator - selling metal', () => {
         expect(r.dd).toBe(10000);
     });
 
+    it('splits the metal itself down the middle', () => {
+        const r = compute({ ...SELLING, dstType: 2, dstMixType: 4, mixSrcBalance: 50 });
+        // 50000 metal buys 31250 crystal, the other 50000 buys 20833 deuterium.
+        expect(r.dc).toBe(31250);
+        expect(r.dd).toBe(20833);
+    });
+
     it('caps a fixed amount at what the metal is actually worth', () => {
         const r = compute({ ...SELLING, dstType: 2, dstMixType: 2, fix1: 999999 });
         // 100000 metal buys 62500 crystal and nothing is left for deuterium.
@@ -244,6 +295,12 @@ describe('Trade Calculator - selling crystal', () => {
         expect(r.dm).toBe(136000);
         expect(r.dd).toBe(10000);
     });
+
+    it('spends a quarter of the crystal on metal and the rest on deuterium', () => {
+        const r = compute({ ...SELLING, dstType: 2, dstMixType: 4, mixSrcBalance: 25 });
+        expect(r.dm).toBe(40000);
+        expect(r.dd).toBe(50000);
+    });
 });
 
 describe('Trade Calculator - selling deuterium', () => {
@@ -285,6 +342,24 @@ describe('Trade Calculator - selling deuterium', () => {
         const r = compute({ ...SELLING, dstType: 2, dstMixType: 3, fix2: 10000 });
         expect(r.dm).toBe(224000);
         expect(r.dc).toBe(10000);
+    });
+
+    // The letter of the 2013 request this mode exists for: sell half the
+    // deuterium for metal and half for crystal, in one deal.
+    it('splits the deuterium itself down the middle', () => {
+        const r = compute({ ...SELLING, dstType: 2, dstMixType: 4, mixSrcBalance: 50 });
+        expect(r.dm).toBe(120000);
+        expect(r.dc).toBe(75000);
+    });
+
+    it('puts everything on one resource at the ends of the range', () => {
+        const allMetal = compute({ ...SELLING, dstType: 2, dstMixType: 4, mixSrcBalance: 100 });
+        expect(allMetal.dm).toBe(240000);
+        expect(allMetal.dc).toBe(0);
+
+        const allCrystal = compute({ ...SELLING, dstType: 2, dstMixType: 4, mixSrcBalance: 0 });
+        expect(allCrystal.dm).toBe(0);
+        expect(allCrystal.dc).toBe(150000);
     });
 });
 

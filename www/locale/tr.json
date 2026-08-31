@@ -794,6 +794,7 @@
     "rates": "Takas oranları",
     "location": "Konum",
     "fix": "fix",
+    "mix-src-hint": "Sattığınızı böler: yüzde kaçının ilk kaynağa gideceğini belirtir.",
     "src": "Satıyorum",
     "dst": "Alacağım",
     "title": "OGame – Ticaret Hesaplayıcı – Kaynak Takası",

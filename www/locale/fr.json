@@ -794,6 +794,7 @@
     "rates": "Taux de change",
     "location": "Lieu",
     "fix": "fix",
+    "mix-src-hint": "Répartit ce que vous vendez : quel pourcentage va à la première ressource.",
     "src": "Vendre",
     "dst": "Acheter",
     "title": "OGame - Calculateur pour le commerce - Échange de ressources",

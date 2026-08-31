@@ -794,6 +794,7 @@
     "rates": "Exchange rates",
     "location": "Location",
     "fix": "fix",
+    "mix-src-hint": "Splits what you are selling: how many percent of it goes to the first resource.",
     "src": "Selling",
     "dst": "Buying",
     "title": "OGame - Trade calculator - Resource exchange",

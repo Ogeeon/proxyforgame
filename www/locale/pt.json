@@ -794,6 +794,7 @@
     "rates": "Taxas de troca",
     "location": "Localização",
     "fix": "Reparar",
+    "mix-src-hint": "Divide o que vendes: que percentagem vai para o primeiro recurso.",
     "src": "Vender",
     "dst": "Comprar",
     "title": "OGame - Calculadora de Comércio - Troca de Recursos",

@@ -102,20 +102,67 @@ function getDstInputState(srcType, dstType) {
 // ============================================================================
 
 /**
- * The share of the first destination resource, in percent, for the two mix
- * modes that express the split as one: a direct percentage (0) or a proportion
- * (1). The fixed-amount modes (2, 3) name an amount instead and do not use it.
+ * How much of each destination resource one unit of the source buys, in the
+ * order the mix controls address them - the same order TRADE_DST_RESOURCES in
+ * trade.js spells out. Source pairs have no mix, so they fall in with
+ * deuterium rather than getting a case of their own.
  *
- * @param {number} dstMixType - mix mode, 0..3
- * @param {number} mixBalance - the percentage of mode 0
- * @param {number} mixProp1 - first term of the proportion of mode 1
- * @param {number} mixProp2 - second term of the proportion of mode 1
+ * @param {number} srcType - source resource type, 0..5
+ * @param {{md: number, cd: number, mc: number}} rates - the exchange rates
+ * @returns {{first: number, second: number}}
+ */
+function tradeMixRates(srcType, rates) {
+    switch (srcType) {
+        // metal buys crystal and deuterium
+        case 0: return { first: 1 / rates.mc, second: 1 / rates.md };
+        // crystal buys metal and deuterium
+        case 1: return { first: rates.mc, second: 1 / rates.cd };
+        // deuterium buys metal and crystal
+        default: return { first: rates.md, second: rates.cd };
+    }
+}
+
+/**
+ * Mix mode 4 as a destination share: the player names the cut of what they are
+ * *selling* that goes on the first destination resource ("half the deuterium
+ * for metal, half for crystal"), and this converts it into the share of what
+ * comes back, which is what every destination amount is derived from.
+ *
+ * @param {number} srcShare - percentage of the source spent on the first resource
+ * @param {number} srcType - source resource type, 0..5
+ * @param {{md: number, cd: number, mc: number}} rates - the exchange rates
  * @returns {number}
  */
-function tradeMixPercent(dstMixType, mixBalance, mixProp1, mixProp2) {
-    if (dstMixType == 0) return mixBalance;
-    if (dstMixType == 1) return clampNumber(mixProp1 / (mixProp1 + mixProp2) * 100, 0, 100);
-    return 0;
+function tradeSourceSharePercent(srcShare, srcType, rates) {
+    const share = clampNumber(srcShare, 0, 100) / 100;
+    const mixRates = tradeMixRates(srcType, rates);
+    const first = share * mixRates.first;
+    const second = (1 - share) * mixRates.second;
+    return first + second === 0 ? 0 : first / (first + second) * 100;
+}
+
+/**
+ * The share of the first destination resource, in percent, for the three mix
+ * modes that express the split as one: a direct percentage (0), a proportion
+ * (1), or a cut of the source (4). The fixed-amount modes (2, 3) name an
+ * amount instead and do not use it.
+ *
+ * @param {{dstMixType: number, mixBalance: number, mixProp1: number,
+ *          mixProp2: number, mixSrcBalance: number, srcType: number}} prm
+ * @param {{md: number, cd: number, mc: number}} rates - the exchange rates
+ * @returns {number}
+ */
+function tradeMixPercent(prm, rates) {
+    switch (prm.dstMixType) {
+        case 0:
+            return prm.mixBalance;
+        case 1:
+            return clampNumber(prm.mixProp1 / (prm.mixProp1 + prm.mixProp2) * 100, 0, 100);
+        case 4:
+            return tradeSourceSharePercent(prm.mixSrcBalance, prm.srcType, rates);
+        default:
+            return 0;
+    }
 }
 
 /**
@@ -181,7 +228,7 @@ function tradeSourceTotal(srcType, sm, sc, sd) {
  * How the destination side of the deal is split.
  * @typedef {object} TradeMix
  * @property {number} dstType - destination resource type, 0..2
- * @property {number} dstMixType - mix mode, 0..3, only read when dstType is 2
+ * @property {number} dstMixType - mix mode, 0..4, only read when dstType is 2
  * @property {number} p - share of the first destination resource, in percent
  * @property {number} fix1 - fixed amount of the first destination resource
  * @property {number} fix2 - fixed amount of the second destination resource
@@ -195,12 +242,13 @@ function tradeSourceTotal(srcType, sm, sc, sd) {
  * @property {number} deuterium - deuterium offered
  * @property {number} srcType - source resource type, 0..5
  * @property {number} dstType - destination resource type, 0..2
- * @property {number} dstMixType - mix mode, 0..3
+ * @property {number} dstMixType - mix mode, 0..4
  * @property {number} mixBalance - the percentage of mix mode 0
  * @property {number} mixProp1 - first term of the proportion of mix mode 1
  * @property {number} mixProp2 - second term of the proportion of mix mode 1
  * @property {number} fix1 - fixed amount of mix mode 2
  * @property {number} fix2 - fixed amount of mix mode 3
+ * @property {number} mixSrcBalance - the cut of the source of mix mode 4
  * @property {number} hyperTech - Hyperspace Technology level
  * @property {number} playerClass - player class, Collector is 0
  * @property {number} scCapacityIncrease - Small Cargo capacity increase, percent
@@ -252,6 +300,7 @@ class TradeCalculator {
                 switch (mix.dstMixType) {
                     case 0:
                     case 1:
+                    case 4:
                         dc = dst.md / ((100 - mix.p) / mix.p + r.mc / r.md);
                         dd = dst.mc / (mix.p / (100 - mix.p) + r.md / r.mc);
                         break;
@@ -285,6 +334,7 @@ class TradeCalculator {
                 switch (mix.dstMixType) {
                     case 0:
                     case 1:
+                    case 4:
                         dm = dst.cd / ((100 - mix.p) / mix.p + 1 / (r.cd * r.mc));
                         dd = dst.cm / (mix.p / (100 - mix.p) + r.mc * r.cd);
                         break;
@@ -318,6 +368,7 @@ class TradeCalculator {
                 switch (mix.dstMixType) {
                     case 0:
                     case 1:
+                    case 4:
                         dm = dst.dc / ((100 - mix.p) / mix.p + r.cd / r.md);
                         dc = dst.dm / (mix.p / (100 - mix.p) + r.md / r.cd);
                         break;
@@ -352,7 +403,7 @@ class TradeCalculator {
         const mix = {
             dstType: prm.dstType,
             dstMixType: prm.dstMixType,
-            p: tradeMixPercent(prm.dstMixType, prm.mixBalance, prm.mixProp1, prm.mixProp2),
+            p: tradeMixPercent(prm, this.rates),
             fix1: prm.fix1,
             fix2: prm.fix2
         };
@@ -402,6 +453,8 @@ if (typeof window !== 'undefined') {
         tradeMcRate,
         getDstInputState,
         tradeMixPercent,
+        tradeMixRates,
+        tradeSourceSharePercent,
         tradeCargoCapacity,
         tradeCargoCount,
         tradeSourceTotal

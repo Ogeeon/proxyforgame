@@ -6,7 +6,7 @@ test.describe('Trade Calculator Page', () => {
         await context.addInitScript(() => {
             localStorage.setItem('lastChange', 'key-value;true,value;99999');
         });
-        if (testInfo.title.includes('parsing from link works')) {
+        if (testInfo.title.startsWith('parsing ')) {
             return;
         }
         await page.goto('/ogame/calc/trade.php');
@@ -170,6 +170,27 @@ test.describe('Trade Calculator Page', () => {
         await expect(page.locator('#res-dst-cargo')).toContainText('21 SC / 5 LC');
     });
 
+    test('the source split mode divides what is being sold', async ({ page }) => {
+        await page.locator('#rate-btn-6').click();
+        await page.locator('#res-src-2').click();
+        await page.locator('#res-src-d').dblclick();
+        await page.locator('#res-src-d').fill('100000');
+        await page.locator('#res-src-d').press('Enter');
+        await page.locator('#res-dst-2').click();
+        await page.locator('#mix-src-balance-proc').dblclick();
+        await page.locator('#mix-src-balance-proc').fill('50');
+        await page.locator('#mix-src-balance-proc').press('Enter');
+        // 50.000 deut buys metal at 2.4 and the other 50.000 buys crystal at 1.5
+        await expect(page.locator('#res-dst-mix-4')).toBeChecked();
+        await expect(page.locator('#res-dst-m')).toContainText('120.000');
+        await expect(page.locator('#res-dst-c')).toContainText('75.000');
+        await page.locator('#mix-src-balance-proc').dblclick();
+        await page.locator('#mix-src-balance-proc').fill('25');
+        await page.locator('#mix-src-balance-proc').press('Enter');
+        await expect(page.locator('#res-dst-m')).toContainText('60.000');
+        await expect(page.locator('#res-dst-c')).toContainText('112.500');
+    });
+
     test('Metal+Crystal calculations are correct', async ({ page }) => {
         await page.locator('#rate-btn-6').click();
         await page.locator('#res-src-3').click();
@@ -240,6 +261,15 @@ test.describe('Trade Calculator Page', () => {
         await expect(page.locator('#alink')).toContainText('trade.php#rmd=2.4&rcd=1.5&st=0&dt=2&dmt=3&fix2=10000&m=100000&l=en:1&lc=4:3:2&lm=1');
         await expect(page.locator('#atext')).toContainText('Selling 100.000 met. Buying 47.500 crys and 10.000 deut. Exchange rates 2.4:1.5:1. Coordinates [4:3:2], Moon (Universe 1, en.ogame.gameforge.com)');
         await expect(page.locator('#abbcode')).toContainText('trade.php#rmd=2.4&rcd=1.5&st=0&dt=2&dmt=3&fix2=10000&m=100000&l=en:1&lc=4:3:2&lm=1]Selling 100.000 met. Buying 47.500 crys and 10.000 deut. Exchange rates 2.4:1.5:1. Coordinates [4:3:2], Moon (Universe 1, en.ogame.gameforge.com)[/url]');
+    });
+
+    test('parsing a source split from a link works', async ({ page }) => {
+        await page.goto('/ogame/calc/trade.php#rmd=2.4&rcd=1.5&st=2&dt=2&dmt=4&msrc=50&d=100000&l=en:1');
+        await expect(page.locator('#res-src-2')).toBeChecked();
+        await expect(page.locator('#res-dst-mix-4')).toBeChecked();
+        await expect(page.locator('#mix-src-balance-proc')).toHaveValue('50');
+        await expect(page.locator('#res-dst-m')).toContainText('120.000');
+        await expect(page.locator('#res-dst-c')).toContainText('75.000');
     });
 
     test('parsing from link works', async ({ page }) => {

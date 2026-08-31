@@ -794,6 +794,7 @@
     "rates": "Przelicznik",
     "location": "Lokalizacja",
     "fix": "ustaw",
+    "mix-src-hint": "Dzieli to, co sprzedajesz: ile procent idzie na pierwszy surowiec.",
     "src": "Sprzedawanie",
     "dst": "Kupowanie",
     "title": "OGame - Kalkulator handlu - Barter",

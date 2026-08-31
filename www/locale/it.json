@@ -794,6 +794,7 @@
     "rates": "Tasso di cambio",
     "location": "Ubicazione",
     "fix": "fisso",
+    "mix-src-hint": "Divide ciò che vendi: quale percentuale va alla prima risorsa.",
     "src": "Vendita",
     "dst": "Acquistare",
     "title": "OGame - Calcolatore di Rapporti Commercio - Scambio di risorse",

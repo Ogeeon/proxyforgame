@@ -221,6 +221,13 @@
                             <input id="mix-fix2" type="text" name="mix-fix2" class="form-control form-control-sm trade-editable d-inline-block" tabindex="17" style="width: 150px;">
                             <span id="mix-fix2-lbl"></span>
                           </div>
+                          <div class="res-subtype d-flex align-items-center gap-1" id="res-subtype-dst-4" title="<?= htmlspecialchars($l['mix-src-hint'], ENT_QUOTES) ?>">
+                            <input id="res-dst-mix-4" class="form-check-input" type="radio" name="sub-dst" value="4">
+                            <input id="mix-src-balance-proc" type="text" name="mix-src-balance-proc" class="form-control form-control-sm rate-input trade-editable" tabindex="20" style="width: 50px;">
+                            <span>%</span>
+                            <span id="mix-src-lbl" class="text-nowrap"></span>
+                            <input id="mix-src-balance" type="range" class="range-slider form-range res-mix-balance flex-grow-1">
+                          </div>
                         </div>
                       </div>
                     </div>
