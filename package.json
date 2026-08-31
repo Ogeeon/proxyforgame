@@ -21,7 +21,8 @@
     "refactor-calculator": "node scripts/refactor-calculator.js",
     "update-asset-versions": "node scripts/update-asset-versions.js",
     "validate-database": "node scripts/validate-database-schema.js",
-    "generate-docs": "node scripts/generate-docs.js"
+    "generate-docs": "node scripts/generate-docs.js",
+    "read-mail": "node scripts/read-mail.js"
   },
   "keywords": [
     "ogame",

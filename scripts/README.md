@@ -480,6 +480,40 @@ npm run generate-docs graviton
 
 ---
 
+### read-mail.js
+
+Reads the mailbox the site's contact forms deliver to, so feedback can be answered without
+opening Gmail. It is the receiving end of `www/api/mail.inc.php`, which mails every `report`
+and `email` submission to `MAIL_RECIPIENT`.
+
+**Usage:**
+```bash
+node scripts/read-mail.js                     # 20 newest, one line each
+node scripts/read-mail.js --site --body       # only the contact forms, with an excerpt
+node scripts/read-mail.js --since 2026-08-01
+node scripts/read-mail.js --search "expedition"    # Gmail search syntax (X-GM-RAW)
+node scripts/read-mail.js --uid 1740 --full   # one message, whole body
+node scripts/read-mail.js --json              # machine-readable
+```
+
+Also `make mail args="--site --body"`.
+
+**Requirements:**
+- `IMAP_USER` / `IMAP_PASS` in `.env` - a Gmail **app password**, which the account can only
+  issue with 2-step verification enabled. Nothing on either host needs these; the script is
+  local tooling.
+
+**Notes:**
+- Read-only by construction: the mailbox is opened with `EXAMINE` and every fetch uses
+  `BODY.PEEK`, so reading never marks a message as seen.
+- The IMAP client is hand-rolled on `node:tls` rather than taken from npm - an app password
+  grants full mailbox access, and the protocol surface needed here is four commands.
+- If the system resolver answers with a loopback address (a sandboxed environment that only
+  proxies HTTPS), the host is resolved over DNS-over-HTTPS instead; the certificate is still
+  verified against `imap.gmail.com`. `IMAP_ADDR` overrides the address outright.
+
+---
+
 ## Maintenance Workflow
 
 ### Pre-Release Quality Checklist

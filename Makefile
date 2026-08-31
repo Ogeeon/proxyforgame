@@ -207,6 +207,11 @@ assets: ## Add filemtime versioning to unversioned assets
 docs: ## Regenerate docs/calculators
 	node scripts/generate-docs.js
 
+# Reads the mailbox the contact forms deliver to. Needs IMAP_USER/IMAP_PASS in
+# .env; `make mail args=--help` lists the filters.
+mail: ## Read the feedback mailbox, e.g. make mail args="--site --body"
+	node scripts/read-mail.js $(args)
+
 # Writes changelog.sql with the Russian text in all twelve rows; run
 # /translate-changelog next, then commit the file. The deploy applies it to
 # both hosts - see deploy/README.md, "The in-app changelog".
