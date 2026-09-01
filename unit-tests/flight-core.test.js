@@ -710,8 +710,33 @@ describe('Flight Calculator - Deuterium Consumption', () => {
         const general = { playerClass: PLAYER_CLASS.GENERAL, deutConsReduction: 50 };
         const plain = fuelFor({ [SHIP.LARGE_CARGO]: 100 }, { over: general }).cons;
         const enhanced = fuelFor(
-            { [SHIP.LARGE_CARGO]: 100 }, { over: { ...general, lfMechanGE: 100 } }).cons;
+            { [SHIP.LARGE_CARGO]: 100 }, { over: { ...general, lfMechanGE: 50 } }).cons;
         expect(enhanced).toBeLessThan(plain);
+    });
+
+    // The enhancement scales this discount by 0.01 per point, the same scale the
+    // speed and cargo bonuses use. It used to be a fifth of that here, which left
+    // the fuel column of a general with life forms far too high.
+    it('a 100% enhancement doubles the discount, like it doubles speed and cargo', () => {
+        const enhanced = fuelFor({ [SHIP.LARGE_CARGO]: 100 }, {
+            over: {
+                playerClass: PLAYER_CLASS.GENERAL, deutConsReduction: 25, lfMechanGE: 100,
+            },
+        }).cons;
+        // 25% doubled is the same discount as a flat 50% with no enhancement
+        const flat = fuelFor({ [SHIP.LARGE_CARGO]: 100 }, {
+            over: { playerClass: PLAYER_CLASS.GENERAL, deutConsReduction: 50 },
+        }).cons;
+        expect(enhanced).toBe(flat);
+    });
+
+    it('the discount stops at 100% instead of turning into a surcharge', () => {
+        const atCap = (lfMechanGE) => fuelFor({ [SHIP.LARGE_CARGO]: 100 }, {
+            over: { playerClass: PLAYER_CLASS.GENERAL, deutConsReduction: 50, lfMechanGE },
+        }).cons;
+        // The enhancement has no ceiling, so 50% of it passes 100% at 100 points
+        expect(atCap(200)).toBe(atCap(100));
+        expect(atCap(400)).toBe(atCap(100));
     });
 
     it('per-ship life form fuel reduction lowers consumption', () => {

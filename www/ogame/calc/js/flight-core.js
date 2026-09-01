@@ -313,9 +313,12 @@ class FlightCalculator {
             const baseSpeed = fixedSpeed || this.getShipSpeed(shipsData, i, params);
             const speedValue = 35000 / (duration * uniSpeedFactor - 10) * Math.sqrt(distance * 10 / baseSpeed);
 
-            // The general's fuel discount is itself scaled by the Mechan enhancement
+            // The general's fuel discount is itself scaled by the Mechan enhancement,
+            // on the same 0.01 scale the speed and cargo bonuses above use. Capped at
+            // a full discount: the enhancement has no ceiling, and past 100% the raw
+            // product would turn the discount into a surcharge.
             const classFactor = params.playerClass === PLAYER_CLASS.GENERAL
-                ? 0.01 * params.deutConsReduction * (1 + 0.002 * params.lfMechanGE)
+                ? Math.min(0.01 * params.deutConsReduction * (1 + 0.01 * params.lfMechanGE), 1)
                 : 0;
             const lfFactor = params.lfShipsBonuses[i][2] * 0.01;
 
