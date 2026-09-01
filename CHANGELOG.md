@@ -19,6 +19,7 @@ release section; it is the source of truth for the other eleven translations.
 
 - Trade: the exchange rates now survive a page reload. The settings store in `www/js/utils.js` serialized to a `key;value,` string that never escaped the comma, so the nested `rates` object was split on the commas inside its own JSON, `JSON.parse` threw on load (a `SyntaxError` in the console on every visit), and the rates silently fell back to their defaults. `saveToCookie` now writes a JSON document and `loadFromCookie` reads either format - the pre-JSON payload still in a returning visitor's storage keeps working. Phase 1 of `.claude/plans/settings-serialization.md`; no calculator changed.
 - Build: `scripts/read-mail.js` now validates the host, address and port before opening the IMAP socket - the connection target must be a dotted-quad IPv4, the certificate name a plausible host name, the port in range. Closes an SSRF path SonarCloud flagged from `IMAP_ADDR` / `IMAP_HOST` / `IMAP_PORT` and the DoH response into `tls.connect()`.
+- Deploy: `pfg-sync` retries `git fetch` before giving up. GitHub intermittently answered an unauthenticated fetch with a 401 for about an hour on 2026-08-31, and both hosts mailed a deploy-failure alarm for a blip that fixed itself by the next run. The fetch now gets three attempts with a short backoff, and `GIT_TERMINAL_PROMPT=0` turns the credential prompt a 401 provokes into an immediate error rather than a hang.
 
 ## [2026-09-01] - site entry 63
 

@@ -115,6 +115,27 @@ apply_migrations() {
   "$migrator" "$CHECKOUT" >> "$LOG" 2>&1
 }
 
+# ---------------------------------------------------------------------------
+# git fetch, retried. GitHub now and then answers an unauthenticated fetch with
+# a 401 - "could not read Username for 'https://github.com'" - for a few minutes
+# at a stretch, a transient blip rather than a real outage. Both hosts hit one
+# on 2026-08-31 and each recovered on its own by the next run; retrying here
+# spares the alarm mail for a wobble that fixes itself. GIT_TERMINAL_PROMPT=0
+# turns the credential prompt that 401 provokes into an immediate error instead
+# of a read against cron's dead stdin.
+# ---------------------------------------------------------------------------
+fetch_main() {
+  local attempt=1 delay
+  while :; do
+    GIT_TERMINAL_PROMPT=0 git fetch --quiet origin main && return 0
+    [ "$attempt" -ge 3 ] && return 1
+    delay=$((attempt * 10))
+    log "git fetch failed (attempt $attempt/3) - retrying in ${delay}s"
+    sleep "$delay"
+    attempt=$((attempt + 1))
+  done
+}
+
 # Put the checkout back on HAVE_SHA. Shared by the migration-failure and
 # smoke-failure paths.
 rollback_code() {
@@ -252,7 +273,7 @@ cd "$CHECKOUT" || fail "checkout $CHECKOUT is not there"
 # origin/main is the frame of reference for both modes: every target has to be
 # it or an ancestor of it. Fetch before deciding anything.
 # ---------------------------------------------------------------------------
-git fetch --quiet origin main || fail "git fetch failed - leaving the checkout alone"
+fetch_main || fail "git fetch failed after 3 attempts - leaving the checkout alone"
 TIP=$(git rev-parse FETCH_HEAD)
 
 # ---------------------------------------------------------------------------
