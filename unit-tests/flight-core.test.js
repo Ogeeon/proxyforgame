@@ -730,13 +730,77 @@ describe('Flight Calculator - Deuterium Consumption', () => {
         expect(enhanced).toBe(flat);
     });
 
-    it('the discount stops at 100% instead of turning into a surcharge', () => {
-        const atCap = (lfMechanGE) => fuelFor({ [SHIP.LARGE_CARGO]: 100 }, {
-            over: { playerClass: PLAYER_CLASS.GENERAL, deutConsReduction: 50, lfMechanGE },
+    // The game adds the class discount and the ship's own life form discount as two
+    // percentages rather than compounding two factors, and stops the sum at 90%.
+    it('the class discount and the ship bonus add up rather than compound', () => {
+        const bonuses = Array.from({ length: 15 }, () => [0, 0, 0]);
+        bonuses[SHIP.LARGE_CARGO] = [0, 0, 20]; // -20% fuel on the ship itself
+        // 50% scaled by a 20% enhancement is 60%, and 20% off the ship takes it to
+        // 80% - a compounding model would have stopped at 68%
+        const added = fuelFor({ [SHIP.LARGE_CARGO]: 100 }, {
+            over: {
+                playerClass: PLAYER_CLASS.GENERAL, deutConsReduction: 50,
+                lfMechanGE: 20, lfShipsBonuses: bonuses,
+            },
         }).cons;
-        // The enhancement has no ceiling, so 50% of it passes 100% at 100 points
-        expect(atCap(200)).toBe(atCap(100));
-        expect(atCap(400)).toBe(atCap(100));
+        const flat = fuelFor({ [SHIP.LARGE_CARGO]: 100 }, {
+            over: { playerClass: PLAYER_CLASS.GENERAL, deutConsReduction: 80 },
+        }).cons;
+        expect(added).toBe(flat);
+    });
+
+    it('the reduction stops at 90% however deep the enhancement runs', () => {
+        const atCap = (deutConsReduction, lfMechanGE) => fuelFor({ [SHIP.LARGE_CARGO]: 100 }, {
+            over: { playerClass: PLAYER_CLASS.GENERAL, deutConsReduction, lfMechanGE },
+        }).cons;
+        // 50% is already at the cap once the enhancement reaches 80 points, and the
+        // enhancement has no ceiling of its own
+        expect(atCap(50, 100)).toBe(atCap(50, 80));
+        expect(atCap(50, 400)).toBe(atCap(50, 80));
+        // and what the cap leaves standing is a flat 90% discount, not a free trip
+        expect(atCap(50, 100)).toBe(atCap(90, 0));
+    });
+
+    // Two flights a player measured in the game and sent in, .es universe 256
+    // "Aries" (2026-09-01 and 2026-09-02). The two universe settings behind the
+    // dropdowns come from that server's own config: globalDeuteriumSaveFactor 0.5
+    // and warriorBonusFuelConsumption 0.5. Both flights sit over the reduction cap,
+    // which is what pinned it - the game charged base/20 for every ship type.
+    const ARIES = {
+        driveLevels: [26, 26, 26],
+        playerClass: PLAYER_CLASS.GENERAL,
+        hyperTechLvl: 24,
+        deutFactor: 5,          // deuterium consumption 50%
+        deutConsReduction: 50,  // the general's discount in that universe
+    };
+
+    it('matches the game on the recycler run that was reported', () => {
+        const bonuses = Array.from({ length: 15 }, () => [0, 0, 0]);
+        bonuses[SHIP.RECYCLER] = [834.208, 771.328, 12.13056];
+        const { cons, minSpeed, duration } = fuelFor({ [SHIP.RECYCLER]: 66664 }, {
+            distance: 5,
+            over: { ...ARIES, lfMechanGE: 62.88, lfShipsBonuses: bonuses },
+        });
+        expect(minSpeed).toBe(112625);
+        expect(duration).toBe(84);
+        expect(cons).toBe(1708);
+    });
+
+    it('matches the game on a fleet of two ship types', () => {
+        const bonuses = Array.from({ length: 15 }, () => [0, 0, 0]);
+        bonuses[SHIP.RECYCLER] = [841.6904, 778.2464, 12.24096];
+        bonuses[SHIP.LARGE_CARGO] = [461.0264, 397.5824, 12.24096];
+        const { cons, minSpeed, duration } = fuelFor(
+            { [SHIP.RECYCLER]: 1, [SHIP.LARGE_CARGO]: 1000000 }, {
+                distance: 5,
+                over: { ...ARIES, lfMechanGE: 63.444, lfShipsBonuses: bonuses },
+            });
+        expect(minSpeed).toBe(61577);
+        expect(duration).toBe(110);
+        // The game shows 1.141 for this trip. The odd unit is the duration it feeds
+        // its own formula: 110 s is the rounded figure it displays, 109,74 the real
+        // one, and the two bracket the number above and below.
+        expect(cons).toBe(1140);
     });
 
     it('per-ship life form fuel reduction lowers consumption', () => {

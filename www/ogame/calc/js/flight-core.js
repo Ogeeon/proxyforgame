@@ -45,6 +45,10 @@ const UPGRADES = {
     RECYCLER_IMPULSE: 16,     // above this, the recycler runs on impulse
 };
 
+// The class and life form fuel discounts add up rather than compound, and the game
+// stops the total here however deep the life form enhancement runs.
+const DEUT_REDUCTION_CAP = 90;
+
 const MISSION = { WAR: 0, PEACEFUL: 1, HOLDING: 2, DESTROY: 3 };
 
 // OGame 12.9.0 pinned moon destruction to a single full-speed figure: 310, which
@@ -313,17 +317,20 @@ class FlightCalculator {
             const baseSpeed = fixedSpeed || this.getShipSpeed(shipsData, i, params);
             const speedValue = 35000 / (duration * uniSpeedFactor - 10) * Math.sqrt(distance * 10 / baseSpeed);
 
-            // The general's fuel discount is itself scaled by the Mechan enhancement,
-            // on the same 0.01 scale the speed and cargo bonuses above use. Capped at
-            // a full discount: the enhancement has no ceiling, and past 100% the raw
-            // product would turn the discount into a surcharge.
-            const classFactor = params.playerClass === PLAYER_CLASS.GENERAL
-                ? Math.min(0.01 * params.deutConsReduction * (1 + 0.01 * params.lfMechanGE), 1)
+            // The class discount and the ship's own life form discount are two
+            // percentages the game adds together, not two factors it multiplies, and
+            // the sum stops at DEUT_REDUCTION_CAP. The general's share is scaled by the
+            // Mechan enhancement first, on the same 0.01 scale the speed and cargo
+            // bonuses above use. Both stay in percent until the last step: 1 - 0.9
+            // lands just under 0.1 in binary, which floors a 45 down to a 44.
+            const classPercent = params.playerClass === PLAYER_CLASS.GENERAL
+                ? params.deutConsReduction * (1 + 0.01 * params.lfMechanGE)
                 : 0;
-            const lfFactor = params.lfShipsBonuses[i][2] * 0.01;
+            const reduction = Math.min(
+                classPercent + params.lfShipsBonuses[i][2], DEUT_REDUCTION_CAP);
 
             const perShip = Math.floor(
-                Math.floor(shipsData[i][3] * 0.1 * params.deutFactor) * (1 - classFactor) * (1 - lfFactor)
+                Math.floor(shipsData[i][3] * 0.1 * params.deutFactor) * (100 - reduction) / 100
             );
             const fleetBase = Math.max(Math.round(perShip * count), 1);
 
