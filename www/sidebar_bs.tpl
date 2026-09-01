@@ -34,13 +34,13 @@
 <link type="text/css" href="/css/sidebar_bs.css?v=<?php echo file_exists($sidebarCss) ? filemtime($sidebarCss) : 0; ?>" rel="stylesheet">
 <script>
   var buttonsText = {};
-  buttonsText.send = '<?=$loc['reportStrings']['send']?>';
-  buttonsText.cancel = '<?=$loc['reportStrings']['cancel']?>';
-  buttonsText.correct = '<?=$loc['reportStrings']['correct']?>';
+  buttonsText.send = <?= json_encode($loc['reportStrings']['send']) ?>;
+  buttonsText.cancel = <?= json_encode($loc['reportStrings']['cancel']) ?>;
+  buttonsText.correct = <?= json_encode($loc['reportStrings']['correct']) ?>;
   buttonsText.ok = 'OK';
-  var currUrl = '<?=$_SERVER['REQUEST_URI']?>';
-  let currChange = { value: <?=$currChange ?>, validate: function(key, val) { return val; } };
-  var currLang = '<?=$lang ?>';
+  var currUrl = <?= json_encode($_SERVER['REQUEST_URI'], JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) ?>;
+  let currChange = { value: <?= (int)$currChange ?>, validate: function(key, val) { return val; } };
+  var currLang = <?= json_encode($lang) ?>;
 </script>
 <?php $sidebarJs = $pfgPath . '/js/sidebar_bs.js'; ?>
 <script src="/js/sidebar_bs.js?v=<?php echo file_exists($sidebarJs) ? filemtime($sidebarJs) : 0; ?>"></script>
