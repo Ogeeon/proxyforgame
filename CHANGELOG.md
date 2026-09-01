@@ -17,6 +17,7 @@ release section; it is the source of truth for the other eleven translations.
 
 ### Fixed
 
+- Trade: the exchange rates now survive a page reload. The settings store in `www/js/utils.js` serialized to a `key;value,` string that never escaped the comma, so the nested `rates` object was split on the commas inside its own JSON, `JSON.parse` threw on load (a `SyntaxError` in the console on every visit), and the rates silently fell back to their defaults. `saveToCookie` now writes a JSON document and `loadFromCookie` reads either format - the pre-JSON payload still in a returning visitor's storage keeps working. Phase 1 of `.claude/plans/settings-serialization.md`; no calculator changed.
 - Build: `scripts/read-mail.js` now validates the host, address and port before opening the IMAP socket - the connection target must be a dotted-quad IPv4, the certificate name a plausible host name, the port in range. Closes an SSRF path SonarCloud flagged from `IMAP_ADDR` / `IMAP_HOST` / `IMAP_PORT` and the DoH response into `tls.connect()`.
 
 ## [2026-09-01] - site entry 63

@@ -415,41 +415,21 @@ function supports_html5_storage() {
 }
 
 /**
- * Saves the fields of the passed object into a cookie named name.
- * "key;value" pairs are saved, separated by commas. If an object field is an array, the key takes the form "property|index1|index2". Functions are ignored.
- * @param name - name of the cookie the data will be saved into
- * @param data - object whose properties (fields) need to be saved into the cookie
+ * Serializes the own enumerable fields of `data` into local storage under
+ * `name`, as a single JSON document, with a cookie as the fallback store.
+ *
+ * JSON.stringify already drops functions, so a params object can be handed over
+ * whole - its `validate` method and any helpers are skipped. Nested objects,
+ * arrays and matrices round-trip natively and nothing needs escaping, which the
+ * previous `key;value,` format could not do: a comma anywhere in a value (a
+ * nested JSON object, a locale decimal separator) split the payload on read.
+ * See .claude/plans/settings-serialization.md.
+ *
+ * @param name - storage key to write
+ * @param data - object whose own enumerable properties are stored
  */
 function saveToCookie(name, data) {
-	let saveStr = 'key-value;true,';
-	Object.keys(data).forEach(function(key) {
-			if (typeof data[key] === 'function') {
-				return;
-			}
-			if (typeof data[key] === 'object' && data[key] !== null && !Array.isArray(data[key])) {
-				// Handle plain objects by JSON encoding
-				saveStr += key+';__JSON__'+JSON.stringify(data[key])+',';
-				return;
-			}
-			if (Array.isArray(data[key])) {
-				const arr = data[key];
-				for (let i = 0; i < arr.length; i++) {
-					if (Array.isArray(arr[i])) {
-						const row = arr[i];
-						for (let j = 0; j < row.length; j++) {
-							saveStr += key+'|'+i+'|'+j+';'+row[j]+',';
-						}
-					}
-					else {
-						saveStr += key+'|'+i+';'+arr[i]+',';
-					}
-				}
-				return;
-			}
-			saveStr += key+';'+data[key]+',';
-		}
-	);
-	saveStr = saveStr.substring(0, saveStr.length-1); // the last character is a comma and is not needed
+	const saveStr = JSON.stringify(data);
 	if (supports_html5_storage()) {
 		try {
 			localStorage.setItem(name, saveStr);
@@ -484,6 +464,12 @@ function readSavedData(name) {
 	}
 	return null;
 }
+
+// --- Legacy reader ---------------------------------------------------------
+// The `key-value;true,key;value,...` string format saveToCookie wrote before
+// the JSON switch. Kept only to read payloads still in a returning visitor's
+// storage; the cookie fallback expires after 365 days, so this whole block can
+// go once that window has passed (.claude/plans/settings-serialization.md).
 
 /** Applies a "property|index1|index2;value" entry (array/matrix field) onto params. */
 function applyCookieArrayEntry(params, parts) {
@@ -523,13 +509,60 @@ function applyCookieEntry(params, entry) {
 	params[parts[0]] = params.validate(parts[0], parts[1]);
 }
 
+// --- End legacy reader ----------------------------------------------------
+
+/**
+ * Restores the fields written by saveToCookie onto `params`, running every
+ * value through `params.validate(key, value)` on the way in.
+ *
+ * Two payload shapes are understood: the current JSON document, and - until the
+ * legacy cookies expire - the old `key-value;true,...` string.
+ */
 function loadFromCookie(name, params) {
 	const data = readSavedData(name);
-	if (!data?.includes('key-value'))
+	if (!data)
+		return;
+	if (data.trimStart().startsWith('{')) {
+		loadFromJsonPayload(data, params);
+		return;
+	}
+	if (!data.includes('key-value'))
 		return;
 	data.split(',').forEach(function(entry) {
 		applyCookieEntry(params, entry);
 	});
+}
+
+/** Applies a JSON payload onto params, validating every leaf the way the legacy path did. */
+function loadFromJsonPayload(data, params) {
+	let parsed;
+	try {
+		parsed = JSON.parse(data);
+	} catch (e) {
+		consoleLog(e);
+		return;
+	}
+	if (!parsed || typeof parsed !== 'object')
+		return;
+	Object.keys(parsed).forEach(function(key) {
+		if (key in params)
+			params[key] = assignLoadedValue(params, key, parsed[key]);
+	});
+}
+
+/**
+ * Mirrors the legacy reader's validation: scalar leaves go through
+ * params.validate() as strings - the old format stored everything as text, and
+ * validators such as `value === 'true'` still depend on that - arrays and
+ * matrices are validated element-wise, and a nested plain object is kept as-is,
+ * the one case (trade `rates`) having no per-field validator.
+ */
+function assignLoadedValue(params, key, value) {
+	if (Array.isArray(value))
+		return value.map(function(item) { return assignLoadedValue(params, key, item); });
+	if (value !== null && typeof value === 'object')
+		return value;
+	return params.validate(key, String(value));
 }
 
 /**

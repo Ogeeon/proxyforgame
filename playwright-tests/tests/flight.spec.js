@@ -1735,7 +1735,7 @@ test.describe('Flight Calculator - Persistence', () => {
         // saveToCookie() prefers localStorage and only falls back to a real cookie
         const stored = await page.evaluate(() => localStorage.getItem('options_flight'));
         expect(stored, 'options_flight is persisted').toBeTruthy();
-        expect(stored).toContain('driveLevels|0;12');
+        expect(JSON.parse(stored).driveLevels[0]).toBe(12);
     });
 
     test('settings survive a reload', async ({ page }) => {
@@ -1760,8 +1760,8 @@ test.describe('Flight Calculator - Persistence', () => {
         await page.evaluate(() => updateNumbers());
 
         const stored = await page.evaluate(() => localStorage.getItem('options_flight'));
-        expect(stored).toContain('ships|1;250');
-        expect(stored).toContain('ships|7;17');
+        expect(JSON.parse(stored).ships[1]).toBe(250);
+        expect(JSON.parse(stored).ships[7]).toBe(17);
     });
 
     // The Bootstrap migration fixed the old reload-wipes-fleet defect:

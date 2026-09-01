@@ -292,4 +292,19 @@ test.describe('Trade Calculator Page', () => {
         await expect(page.locator('#coord-p')).toHaveValue('3');
         await expect(page.locator('#moon')).toBeChecked();
     });
+
+    // Regression: options.rates is a nested object, and the old cookie format
+    // split it on the commas inside its JSON, so it never survived a reload
+    // (.claude/plans/settings-serialization.md).
+    test('exchange rates survive a reload', async ({ page }) => {
+        await page.locator('#rate-btn-1').click(); // preset [4, 2]
+        await expect(page.locator('#rate-md')).toHaveValue('4');
+
+        const stored = await page.evaluate(() => localStorage.getItem('options_trade'));
+        expect(JSON.parse(stored).rates).toMatchObject({ md: 4, cd: 2 });
+
+        await page.reload();
+        await expect(page.locator('#rate-md')).toHaveValue('4');
+        await expect(page.locator('#rate-cd')).toHaveValue('2');
+    });
 });
