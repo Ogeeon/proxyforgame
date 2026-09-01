@@ -4,6 +4,13 @@
 # than listing its parts: a gate added to the Makefile is then picked up here for free,
 # and the two cannot drift (issue #21).
 # The file name stays playwright.yml so the README badge URL and any existing links keep working.
+#
+# The job fans out over a shard matrix: each leg runs the full `make check`, but the
+# browser suite - which is ~4 of the ~6 minutes - is sliced by PW_SHARD, so the four
+# legs finish in roughly half the wall-clock of one. The drift guard from issue #21
+# still holds: every leg runs the whole green gate, the cheap parts just run four
+# times over. The deploy watches the workflow-run conclusion, which is success only
+# when every leg is (deploy/pfg-sync `ci_passed`), so a matrix changes nothing there.
 name: CI
 
 on:
@@ -13,6 +20,11 @@ on:
 
 jobs:
   test:
+    strategy:
+      # Report every shard's failures rather than cancelling the rest on the first.
+      fail-fast: false
+      matrix:
+        shard: ['1/4', '2/4', '3/4', '4/4']
     runs-on: ubuntu-latest
     env:
       # Must be PFG_BASE_URL - that is the name playwright.config.js reads.
@@ -167,20 +179,22 @@ jobs:
       # PW_REPORTER: list for readable logs, html so the upload step below has
       # an artifact.
       - name: Green gate (make check)
-        run: make check PW_REPORTER=list,html
+        run: make check PW_REPORTER=list,html PW_SHARD=${{ matrix.shard }}
 
       # Reporters that still flag pre-existing issues; `audit` prefixes each with
-      # `-` so they are printed without failing the job.
+      # `-` so they are printed without failing the job. Whole-tree checks, so one
+      # shard runs them - the others would only print the same thing.
       - name: Static analysis (advisory)
-        if: always()
+        if: ${{ always() && strategy.job-index == 0 }}
         run: make audit
 
       # -------------------------------------------------------------
-      # Upload Playwright report (always)
+      # Upload each shard's Playwright report (always). One name per shard - the
+      # upload action rejects two jobs writing the same artifact.
       # -------------------------------------------------------------
       - name: Upload Playwright HTML Report
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: playwright-report
+          name: playwright-report-${{ strategy.job-index }}
           path: playwright-tests/playwright-report/

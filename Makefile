@@ -44,6 +44,13 @@ PW_DEPS ?=
 # artifact and a bare `list` would leave that upload with nothing to collect.
 PW_REPORTER ?= list
 
+# Splits the Playwright suite into slices, e.g. PW_SHARD=1/4. Empty runs the whole
+# suite. CI sets this from a job matrix so `make check` fans out across runners
+# without any gate dropping off - every shard still runs the full green gate, only
+# the browser suite is sliced (see .github/workflows/playwright.yml).
+PW_SHARD ?=
+PW_SHARD_FLAG := $(if $(PW_SHARD),--shard=$(PW_SHARD),)
+
 # Playwright's own CLI, run directly instead of through `npx`. Relative to
 # playwright-tests/, so every use below sits after `cd playwright-tests`.
 #
@@ -104,8 +111,8 @@ test: test-unit test-e2e ## Run both suites - the ritual required before a commi
 test-unit: ## Run the node:test unit suite
 	npm --prefix unit-tests test
 
-test-e2e: ## Run the Playwright suite against PFG_BASE_URL
-	cd playwright-tests && $(PW) test --reporter=$(PW_REPORTER)
+test-e2e: ## Run the Playwright suite against PFG_BASE_URL (PW_SHARD=1/4 slices it)
+	cd playwright-tests && $(PW) test --reporter=$(PW_REPORTER) $(PW_SHARD_FLAG)
 
 test-e2e-ui: ## Open the interactive Playwright runner
 	cd playwright-tests && $(PW) test --ui
