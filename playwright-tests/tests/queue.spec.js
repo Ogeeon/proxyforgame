@@ -325,4 +325,19 @@ test.describe('Construction Queue Calculator Page', () => {
         await expect(page.locator('#finish-moment-2')).not.toHaveText('?');
         await expect(field).not.toHaveClass(/is-invalid/);
     });
+
+    // options.prm.qp is an array of queue entries; the old cookie format could
+    // not store one intact (.claude/plans/settings-serialization.md).
+    test('the planet queue survives a reload', async ({ page }) => {
+        await addToQueue(page, 1, 0);
+        await addToQueue(page, 2, 0);
+        await addToQueue(page, 3, 0);
+        const before = await getQueueTotals(page);
+        expect(before.level).toBe('3/163');
+
+        await page.reload();
+
+        await expect(page.locator('#table-dst-2 tr').filter({ hasText: 'Total' }).first()).toBeVisible();
+        expect(await getQueueTotals(page)).toEqual(before);
+    });
 });

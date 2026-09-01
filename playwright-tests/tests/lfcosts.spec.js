@@ -42,6 +42,24 @@ test.describe('Lifeforms costs Calculator Page', () => {
         expect(optionsExists).toBe(true);
     });
 
+    // options.prm.rates is an array; it and the scalar params must all come back
+    // after a reload (.claude/plans/settings-serialization.md).
+    test('parameters and exchange rates survive a reload', async ({ page }) => {
+        await page.locator('#param-buildings-tab').click();
+        await page.locator('#robot-factory-level').fill('10');
+        await page.locator('#robot-factory-level').press('Enter');
+        await page.locator('#param-common-tab').click();
+        await page.locator('#exchange-rates-c').fill('2.5');
+        await page.locator('#exchange-rates-c').press('Enter');
+
+        await page.reload();
+
+        await page.locator('#param-common-tab').click();
+        await expect(page.locator('#exchange-rates-c')).toHaveValue('2.5');
+        await page.locator('#param-buildings-tab').click();
+        await expect(page.locator('#robot-factory-level')).toHaveValue('10');
+    });
+
     // By default we end up with Humans selected
     test('[all items - one level / buildings / human] calculations are correct', async ({ page }) => {
         test.setTimeout(60000);
