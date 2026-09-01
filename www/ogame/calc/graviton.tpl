@@ -299,7 +299,7 @@
 
     <!-- Results -->
     <div class="border rounded m-1 p-2">
-      <p class="border rounded subheader bg-primary-subtle"><b><?= $l['calc-results'] ?></b></p>
+      <p class="border rounded subheader bg-primary-subtle"><?= $l['calc-results'] ?></p>
       <table class="mx-auto">
         <tr>
           <td><label><?= $l['energy-produced'] ?></label></td>
@@ -315,7 +315,7 @@
 
     <!-- Expenses -->
     <div class="border rounded m-1 p-2">
-      <p class="border rounded subheader bg-primary-subtle"><b><?= $l['expenses'] ?></b></p>
+      <p class="border rounded subheader bg-primary-subtle"><?= $l['expenses'] ?></p>
       <table class="mx-auto">
         <tr>
           <td><label><?= $l['crystal'] ?></label></td>
@@ -348,7 +348,7 @@
 
     <!-- Recycling -->
     <div class="border rounded m-1 p-2">
-      <p class="border rounded subheader bg-primary-subtle"><b><?= $l['recycling'] ?></b></p>
+      <p class="border rounded subheader bg-primary-subtle"><?= $l['recycling'] ?></p>
       <table class="mx-auto">
         <tr>
           <td><label for="debris-percent"><?= $l['debris-percent'] ?></label></td>

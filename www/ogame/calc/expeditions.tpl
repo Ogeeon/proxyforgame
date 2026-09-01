@@ -284,7 +284,7 @@
 
     <!-- ================= Results ================= -->
     <div id="data-panel" class="border rounded m-1 p-2">
-      <p class="border rounded subheader bg-primary-subtle"><b><?= $l['calc-results'] ?></b></p>
+      <p class="border rounded subheader bg-primary-subtle"><?= $l['calc-results'] ?></p>
 
       <table id="data-table" class="lined mx-auto">
         <tr>

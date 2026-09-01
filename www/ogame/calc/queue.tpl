@@ -202,7 +202,7 @@
           <!-- Available buildings (src) -->
           <div>
             <div id="src-panel-<?=$i?>" class="border rounded p-2">
-              <p class="border rounded subheader bg-primary-subtle mb-2"><b><?= $l['buildings'] ?></b></p>
+              <p class="border rounded subheader bg-primary-subtle mb-2"><?= $l['buildings'] ?></p>
               <div class="d-flex align-items-center gap-2 mb-2">
                 <label for="total-fields-<?=$i?>"><?= $l['total-fields'] ?></label>
                 <input id="total-fields-<?=$i?>" type="text" name="total-fields-<?=$i?>" class="form-control form-control-sm level-input total-fld-input" value="0" data-field-title="<?= $l['total-fields'] ?>">
@@ -241,7 +241,7 @@
           <div>
             <div id="dst-panel-<?=$i?>" class="border rounded p-2">
               <div class="subheader-row d-flex align-items-center gap-1 mb-2">
-                <p class="border rounded subheader bg-primary-subtle mb-0 flex-grow-1"><b><?= $l['queue'] ?></b></p>
+                <p class="border rounded subheader bg-primary-subtle mb-0 flex-grow-1"><?= $l['queue'] ?></p>
                 <button type="button" id="clear-<?=$i?>" class="btn btn-outline-danger btn-sm" data-bs-toggle="tooltip" title="<?= $l['clear'] ?>">
                   <i class="bi bi-trash"></i>
                 </button>

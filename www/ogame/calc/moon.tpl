@@ -86,7 +86,7 @@
     </div>
 
     <div id="destroy-settings-panel" class="border rounded m-1 p-2">
-      <p class="border rounded subheader bg-primary-subtle"><b><?= $l['parameters'] ?></b></p>
+      <p class="border rounded subheader bg-primary-subtle"><?= $l['parameters'] ?></p>
       <div class="d-flex flex-wrap gap-3 align-items-center justify-content-center">
         <div class="d-flex align-items-center gap-1">
           <label for="moon-size"><?= $l['moon-size'] ?></label>
@@ -103,7 +103,7 @@
     </div>
 
     <div class="border rounded m-1 p-2">
-      <p class="border rounded subheader bg-primary-subtle"><b><?= $l['calc-results'] ?></b></p>
+      <p class="border rounded subheader bg-primary-subtle"><?= $l['calc-results'] ?></p>
       <div class="d-flex flex-wrap gap-3 align-items-center justify-content-center">
         <div class="d-flex align-items-center gap-1">
           <label><?= $l['moon-destroy-chance'] ?></label>
@@ -237,7 +237,7 @@
 
     <!-- Results -->
     <div class="border rounded m-1 p-2">
-      <p class="border rounded subheader bg-primary-subtle"><b><?= $l['calc-results'] ?></b></p>
+      <p class="border rounded subheader bg-primary-subtle"><?= $l['calc-results'] ?></p>
       <div class="d-flex flex-wrap gap-3 align-items-center justify-content-center">
         <div class="d-flex align-items-center gap-1">
           <label><?= $l['moon-create-chance'] ?></label>
@@ -269,7 +269,7 @@
 
     <!-- Expenses -->
     <div class="border rounded m-1 p-2">
-      <p class="border rounded subheader bg-primary-subtle"><b><?= $l['expenses'] ?></b></p>
+      <p class="border rounded subheader bg-primary-subtle"><?= $l['expenses'] ?></p>
       <div class="d-flex flex-wrap gap-3 align-items-center justify-content-center">
         <div class="d-flex align-items-center gap-1">
           <label><?= $l['metal'] ?></label>
@@ -288,7 +288,7 @@
 
     <!-- Recycling -->
     <div class="border rounded m-1 p-2">
-      <p class="border rounded subheader bg-primary-subtle"><b><?= $l['recycling'] ?></b></p>
+      <p class="border rounded subheader bg-primary-subtle"><?= $l['recycling'] ?></p>
       <div class="d-flex flex-wrap gap-3 align-items-center justify-content-center">
         <div class="d-flex align-items-center gap-1">
           <label><?= $l['metal'] ?></label>
@@ -327,7 +327,7 @@
 
     <!-- Parameters, shared by both sub-blocks below -->
     <div class="border rounded m-1 p-2">
-      <p class="border rounded subheader bg-primary-subtle"><b><?= $l['parameters'] ?></b></p>
+      <p class="border rounded subheader bg-primary-subtle"><?= $l['parameters'] ?></p>
       <div class="d-flex flex-wrap gap-3 align-items-center justify-content-center mb-2">
         <div class="d-flex align-items-center gap-1">
           <label for="phalanx-range-bonus"><?= $l['phalanx-range-bonus'] ?></label>
@@ -366,7 +366,7 @@
 
     <!-- What the phalanx covers from the player's own system -->
     <div class="border rounded m-1 p-2">
-      <p class="border rounded subheader bg-primary-subtle"><b><?= $l['phalanx-coverage-title'] ?></b></p>
+      <p class="border rounded subheader bg-primary-subtle"><?= $l['phalanx-coverage-title'] ?></p>
       <div class="d-flex flex-wrap gap-3 align-items-center justify-content-center">
         <div class="d-flex align-items-center gap-1">
           <label for="phalanx-lvl"><?= $l['sensor-phalanx'] ?></label>
@@ -392,7 +392,7 @@
 
     <!-- What it would take to reach a given system -->
     <div class="border rounded m-1 p-2">
-      <p class="border rounded subheader bg-primary-subtle"><b><?= $l['phalanx-reach-title'] ?></b></p>
+      <p class="border rounded subheader bg-primary-subtle"><?= $l['phalanx-reach-title'] ?></p>
       <div class="d-flex flex-wrap gap-3 align-items-center justify-content-center">
         <div class="d-flex align-items-center gap-1">
           <label for="target-system"><?= $l['target-system'] ?></label>

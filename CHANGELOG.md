@@ -24,6 +24,7 @@ release section; it is the source of truth for the other eleven translations.
 
 ### Fixed
 
+- Moon, expeditions, graviton, queue and terraformer: the label on a blue sub-panel was wrapped in `<b>` and rendered heavier than the grey section header above it. The wrapper is gone and both now render at the same weight, matching the cost calculators.
 - Deploy: a dispatched rollback no longer undid itself. Both hosts also reconcile against `main` on a timer, and that walk climbed straight back to the newest green commit - within five minutes on the standby, and on production at the next hourly run, so the rollback lever held for at most 59 minutes there. A rollback now pins both hosts to the commit it names, and the pin lapses by itself once `main` moves, so landing the fix is all it takes to resume rolling forward.
 
 ## [2026-08-30] - site entry 62

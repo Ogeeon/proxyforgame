@@ -298,7 +298,7 @@
 
     <!-- Results -->
     <div class="border rounded m-1 p-2">
-      <p class="border rounded subheader bg-primary-subtle"><b><?= $l['calc-results'] ?></b></p>
+      <p class="border rounded subheader bg-primary-subtle"><?= $l['calc-results'] ?></p>
       <table class="mx-auto">
         <tr>
           <td><label><?= $l['added-fields'] ?>:</label></td>
@@ -321,7 +321,7 @@
 
     <!-- Expenses -->
     <div class="border rounded m-1 p-2">
-      <p class="border rounded subheader bg-primary-subtle"><b><?= $l['expenses'] ?></b></p>
+      <p class="border rounded subheader bg-primary-subtle"><?= $l['expenses'] ?></p>
       <table class="mx-auto">
         <tr><td class="text-center" colspan="6"><span class="result-subtitle"><?= $l['terraformer'] ?></span></td></tr>
         <tr>
