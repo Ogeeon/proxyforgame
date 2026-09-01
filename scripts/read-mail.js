@@ -127,6 +127,27 @@ async function resolveHost(host) {
 /* --------------------------------------------------------------- IMAP client */
 
 /**
+ * True for a well-formed dotted-quad IPv4 literal, every octet 0-255. The
+ * socket target must match this: it is the only address shape tls.connect()
+ * should ever get here, and rejecting anything else closes the path from
+ * IMAP_ADDR and the DoH response into the connection target.
+ * @param {string} value
+ */
+function isIpv4(value) {
+  const octet = '(25[0-5]|2[0-4]\\d|1\\d\\d|[1-9]?\\d)';
+  return new RegExp(`^${octet}(\\.${octet}){3}$`).test(value);
+}
+
+/**
+ * True for a plausible DNS host name - letters, digits, dots and hyphens, no
+ * leading or trailing dot. Guards the name the certificate is verified against.
+ * @param {string} value
+ */
+function isHostname(value) {
+  return value.length <= 253 && /^(?!-)[A-Za-z0-9-]{1,63}(?<!-)(\.(?!-)[A-Za-z0-9-]{1,63}(?<!-))*$/.test(value);
+}
+
+/**
  * Splits one logical response line off the front of the buffer, following any
  * literals it announces. Returns null while the line is still incomplete.
  *
@@ -180,6 +201,15 @@ class ImapClient {
    * @returns {Promise<void>}
    */
   connect(host, port, address) {
+    if (!isHostname(host)) {
+      return Promise.reject(new Error(`refusing to connect: ${host} is not a valid host name`));
+    }
+    if (!isIpv4(address)) {
+      return Promise.reject(new Error(`refusing to connect: ${address} is not an IPv4 address`));
+    }
+    if (!Number.isInteger(port) || port < 1 || port > 65535) {
+      return Promise.reject(new Error(`refusing to connect: ${port} is not a valid port`));
+    }
     return new Promise((resolve, reject) => {
       const socket = tls.connect({ host: address, port, servername: host }, () => resolve());
       this.socket = socket;

@@ -15,6 +15,10 @@ release section; it is the source of truth for the other eleven translations.
 
 ## [Unreleased]
 
+### Fixed
+
+- Build: `scripts/read-mail.js` now validates the host, address and port before opening the IMAP socket - the connection target must be a dotted-quad IPv4, the certificate name a plausible host name, the port in range. Closes an SSRF path SonarCloud flagged from `IMAP_ADDR` / `IMAP_HOST` / `IMAP_PORT` and the DoH response into `tls.connect()`.
+
 ## [2026-09-01] - site entry 63
 
 ### Added
