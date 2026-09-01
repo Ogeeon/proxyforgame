@@ -7,7 +7,9 @@
 
 'use strict';
 
-// An empty fleet, in the JSON shape the cookie stores it in.
+// An empty fleet, in the JSON shape prm.fleet holds - a string, serialized
+// again by saveToCookie. The settings store now escapes its own delimiters, so
+// the fleet JSON goes in as-is.
 const EXPEDITIONS_EMPTY_FLEET =
   '{"202":0,"203":0,"204":0,"205":0,"206":0,"207":0,"208":0,"209":0,"210":0,"211":0,"213":0,"214":0,"215":0,"218":0,"219":0}';
 
@@ -26,8 +28,9 @@ const options = {
     classBonusDiscoverer: 0,
     darkMatterDiscoveryBonus: 0,
     resourceDiscoveryBooster: 0,
-    // The saved cookie is a comma-separated list of key;value pairs, so the
-    // fleet JSON keeps its commas encoded as "~" while it is stored.
+    // A JSON string of {techId: count}. Stored verbatim now; a "~" in a value
+    // read back is pre-2026-09 data (the old format encoded the fleet commas
+    // that way) and is decoded in validate() until the legacy reader goes.
     fleet: EXPEDITIONS_EMPTY_FLEET,
     /** @type {number[]} One cargo bonus per EXPEDITION_SHIPS entry, in percent. */
     lfShipsBonuses: [],
@@ -341,7 +344,7 @@ class ExpeditionsApp {
     Object.keys(p).forEach((key) => {
       if (key !== 'counts') options.prm[key] = p[key];
     });
-    options.prm.fleet = JSON.stringify(this._collectFleet()).replaceAll(',', '~');
+    options.prm.fleet = JSON.stringify(this._collectFleet());
 
     ExpeditionsRenderer.render(this.calc.compute(p));
     options.save();
