@@ -15,6 +15,8 @@ release section; it is the source of truth for the other eleven translations.
 
 ## [Unreleased]
 
+## [2026-09-01] - site entry 63
+
 ### Added
 
 - Trade: a fifth way of splitting a mixed purchase - a percentage of the resource being *sold*, rather than of what comes back. Selling 1.000.000 deuterium at 50% now buys what 500.000 deuterium of metal and 500.000 of crystal are worth, which is how the split is usually thought about; the existing percentage and proportion modes divide the resources received. Shares in the link as `msrc`. <!-- site -->
@@ -26,6 +28,8 @@ release section; it is the source of truth for the other eleven translations.
 
 - Moon, expeditions, graviton, queue and terraformer: the label on a blue sub-panel was wrapped in `<b>` and rendered heavier than the grey section header above it. The wrapper is gone and both now render at the same weight, matching the cost calculators.
 - Deploy: a dispatched rollback no longer undid itself. Both hosts also reconcile against `main` on a timer, and that walk climbed straight back to the newest green commit - within five minutes on the standby, and on production at the next hourly run, so the rollback lever held for at most 59 minutes there. A rollback now pins both hosts to the commit it names, and the pin lapses by itself once `main` moves, so landing the fix is all it takes to resume rolling forward.
+
+> **RU:** Калькулятор торговли: покупку теперь можно разделить по проценту от продаваемого ресурса, а не от получаемого. При продаже 1 000 000 дейтерия с долей 50 % металл и кристалл считаются как половины по 500 000 дейтерия.
 
 ## [2026-08-30] - site entry 62
 
