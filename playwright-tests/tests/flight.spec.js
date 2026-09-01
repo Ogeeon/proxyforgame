@@ -419,10 +419,11 @@ test.describe('Flight Calculator - OGame Object Import', () => {
 });
 
 // ---------------------------------------------------------------------------
-// Block 1. Ship speeds.
+// Block 1. Ship speeds, fuel and cargo.
 //
-// getShipSpeed()/getMinSpeed() read the form, so these drive the real inputs
-// and then call the functions through page.evaluate().
+// The formulas live in unit-tests/flight-core.test.js. What stays here drives the
+// real form so the form-to-params wiring is covered: the alliance checkboxes, the
+// life-form bonus table, the class radio, and the drive / hyperspace-tech fields.
 // ---------------------------------------------------------------------------
 
 // Indices into options.shipsData, mirrored by updateNumbers()
@@ -431,8 +432,6 @@ const SHIP = {
     battleship: 5, colonyShip: 6, recycler: 7, espProbe: 8, bomber: 9,
     destroyer: 10, deathStar: 11, battlecruiser: 12, reaper: 13, pathfinder: 14,
 };
-
-const CLASS = { collector: 0, general: 1, discoverer: 2 };
 
 // #params-accordion holds two Bootstrap accordion sections — parameters and
 // ships — and only one stays expanded, so tests open the one they need.
@@ -489,36 +488,9 @@ async function openFlightTimesTab(page) {
     await expect(page.locator('#warrior-bonus')).toBeVisible();
 }
 
-/**
- * Applies drive levels, player class and alliance bonuses, then returns every
- * ship speed keyed by the SHIP index.
- */
-async function shipSpeeds(page, {
-    cmb = 0, imp = 0, hyp = 0, playerClass = CLASS.discoverer,
-    warrior = false, trader = false, lfMechanGE = 0, lfRocktalCE = 0,
-} = {}) {
-    await openParams(page, '#lf-mechan-general-enh');
-    await page.locator('#lf-mechan-general-enh').fill(String(lfMechanGE));
-    await page.locator('#lf-rocktal-collector-enh').fill(String(lfRocktalCE));
-
-    await openParams(page);
-    await page.locator('#cmb-drive').fill(String(cmb));
-    await page.locator('#imp-drive').fill(String(imp));
-    await page.locator('#hyp-drive').fill(String(hyp));
-    await page.locator(`#class-${playerClass}`).check();
-
-    // Warrior and trader are mutually exclusive, so clear before setting
-    if (warrior) await page.locator('#warrior-bonus').check();
-    else await page.locator('#warrior-bonus').uncheck();
-    if (trader) await page.locator('#trader-bonus').check();
-    else await page.locator('#trader-bonus').uncheck();
-
-    return page.evaluate(() => {
-        updateNumbers();
-        return options.shipsData.map((_, i) => getShipSpeed(i));
-    });
-}
-
+// The ship-speed formula - every drive, class, alliance and life form combination -
+// is covered in unit-tests/flight-core.test.js. What stays here needs the real form:
+// the mutually-exclusive alliance checkboxes and the life-form bonus table.
 test.describe('Flight Calculator - Ship Speeds', () => {
     test.beforeEach(async ({ context, page }) => {
         await context.addInitScript(() => {
@@ -528,146 +500,6 @@ test.describe('Flight Calculator - Ship Speeds', () => {
         await installCompat(page);
         await openParams(page);
         await openFlightTimesTab(page);
-    });
-
-    test('base speeds with no drives, class or bonuses', async ({ page }) => {
-        const s = await shipSpeeds(page);
-        expect(s[SHIP.smallCargo]).toBe(5000);
-        expect(s[SHIP.largeCargo]).toBe(7500);
-        expect(s[SHIP.lightFighter]).toBe(12500);
-        expect(s[SHIP.heavyFighter]).toBe(10000);
-        expect(s[SHIP.cruiser]).toBe(15000);
-        expect(s[SHIP.battleship]).toBe(10000);
-        expect(s[SHIP.colonyShip]).toBe(2500);
-        expect(s[SHIP.recycler]).toBe(2000);
-        expect(s[SHIP.bomber]).toBe(4000);
-        expect(s[SHIP.destroyer]).toBe(5000);
-        expect(s[SHIP.deathStar]).toBe(100);
-        expect(s[SHIP.battlecruiser]).toBe(10000);
-        expect(s[SHIP.reaper]).toBe(7000);
-        expect(s[SHIP.pathfinder]).toBe(12000);
-    });
-
-    test('combustion drive adds 10% per level to its ships only', async ({ page }) => {
-        const s = await shipSpeeds(page, { cmb: 5 }); // +50%
-        expect(s[SHIP.smallCargo]).toBe(5000 * 1.5);
-        expect(s[SHIP.largeCargo]).toBe(7500 * 1.5);
-        expect(s[SHIP.lightFighter]).toBe(12500 * 1.5);
-        expect(s[SHIP.recycler]).toBe(2000 * 1.5);
-        // Impulse and hyperspace ships are untouched
-        expect(s[SHIP.cruiser]).toBe(15000);
-        expect(s[SHIP.battleship]).toBe(10000);
-    });
-
-    test('impulse drive adds 20% per level to its ships only', async ({ page }) => {
-        const s = await shipSpeeds(page, { imp: 3 }); // +60%, below the small-cargo threshold
-        expect(s[SHIP.heavyFighter]).toBe(10000 * 1.6);
-        expect(s[SHIP.cruiser]).toBe(15000 * 1.6);
-        expect(s[SHIP.colonyShip]).toBe(2500 * 1.6);
-        expect(s[SHIP.bomber]).toBe(4000 * 1.6);
-        expect(s[SHIP.smallCargo]).toBe(5000);
-        expect(s[SHIP.battleship]).toBe(10000);
-    });
-
-    test('hyperspace drive adds 30% per level to its ships only', async ({ page }) => {
-        const s = await shipSpeeds(page, { hyp: 5 }); // +150%
-        expect(s[SHIP.battleship]).toBe(10000 * 2.5);
-        expect(s[SHIP.destroyer]).toBe(5000 * 2.5);
-        expect(s[SHIP.deathStar]).toBe(100 * 2.5);
-        expect(s[SHIP.battlecruiser]).toBe(10000 * 2.5);
-        expect(s[SHIP.reaper]).toBe(7000 * 2.5);
-        expect(s[SHIP.pathfinder]).toBe(12000 * 2.5);
-        expect(s[SHIP.cruiser]).toBe(15000);
-    });
-
-    test('small cargo switches to impulse drive above level 4', async ({ page }) => {
-        const at4 = await shipSpeeds(page, { imp: 4 });
-        expect(at4[SHIP.smallCargo]).toBe(5000); // still combustion, unaffected by impulse
-
-        const at5 = await shipSpeeds(page, { imp: 5 });
-        expect(at5[SHIP.smallCargo]).toBe(10000 * 2); // base 10000, +100% impulse
-    });
-
-    test('bomber switches to hyperspace drive above level 7', async ({ page }) => {
-        const at7 = await shipSpeeds(page, { hyp: 7 });
-        expect(at7[SHIP.bomber]).toBe(4000); // still impulse, and impulse is at 0
-
-        const at8 = await shipSpeeds(page, { hyp: 8 });
-        expect(at8[SHIP.bomber]).toBe(5000 * 3.4); // base 5000, +240% hyperspace
-    });
-
-    test('recycler upgrades at impulse 17 and hyperspace 15', async ({ page }) => {
-        const below = await shipSpeeds(page, { imp: 16, hyp: 14 });
-        expect(below[SHIP.recycler]).toBe(2000); // combustion, level 0
-
-        const impulse = await shipSpeeds(page, { imp: 17, hyp: 14 });
-        expect(impulse[SHIP.recycler]).toBe(4000 * 4.4); // base 4000, +340% impulse
-
-        const hyper = await shipSpeeds(page, { imp: 0, hyp: 15 });
-        expect(hyper[SHIP.recycler]).toBe(6000 * 5.5); // base 6000, +450% hyperspace
-    });
-
-    test('hyperspace recycler wins over the impulse one', async ({ page }) => {
-        // Both thresholds cleared — the hyperspace variant must be chosen
-        const s = await shipSpeeds(page, { imp: 17, hyp: 15 });
-        expect(s[SHIP.recycler]).toBe(6000 * 5.5);
-    });
-
-    test('collector doubles transports only', async ({ page }) => {
-        const s = await shipSpeeds(page, { playerClass: CLASS.collector });
-        expect(s[SHIP.smallCargo]).toBe(5000 * 2);
-        expect(s[SHIP.largeCargo]).toBe(7500 * 2);
-        expect(s[SHIP.lightFighter]).toBe(12500);
-        expect(s[SHIP.recycler]).toBe(2000);
-    });
-
-    test('general doubles combat ships and recyclers, not transports', async ({ page }) => {
-        const s = await shipSpeeds(page, { playerClass: CLASS.general });
-        expect(s[SHIP.smallCargo]).toBe(5000);
-        expect(s[SHIP.largeCargo]).toBe(7500);
-        expect(s[SHIP.colonyShip]).toBe(2500);  // not in the boosted list
-        expect(s[SHIP.espProbe]).toBe(100000000);
-        expect(s[SHIP.deathStar]).toBe(100);    // not in the boosted list
-        expect(s[SHIP.lightFighter]).toBe(12500 * 2);
-        expect(s[SHIP.cruiser]).toBe(15000 * 2);
-        expect(s[SHIP.recycler]).toBe(2000 * 2);
-        expect(s[SHIP.pathfinder]).toBe(12000 * 2);
-    });
-
-    test('discoverer doubles nothing', async ({ page }) => {
-        const s = await shipSpeeds(page, { playerClass: CLASS.discoverer });
-        expect(s[SHIP.smallCargo]).toBe(5000);
-        expect(s[SHIP.lightFighter]).toBe(12500);
-        expect(s[SHIP.recycler]).toBe(2000);
-    });
-
-    test("Rock'tal Collector Enhancement scales the collector bonus", async ({ page }) => {
-        const s = await shipSpeeds(page, { playerClass: CLASS.collector, lfRocktalCE: 50 });
-        // base + floor(base * (1 + 0.5))
-        expect(s[SHIP.smallCargo]).toBe(5000 + 7500);
-        expect(s[SHIP.lightFighter]).toBe(12500); // not a transport, unaffected
-    });
-
-    test('Mechan General Enhancement scales the general bonus', async ({ page }) => {
-        const s = await shipSpeeds(page, { playerClass: CLASS.general, lfMechanGE: 50 });
-        expect(s[SHIP.lightFighter]).toBe(12500 + 18750);
-        expect(s[SHIP.smallCargo]).toBe(5000); // not boosted for general
-    });
-
-    test('warrior alliance bonus adds 10% to every ship', async ({ page }) => {
-        const s = await shipSpeeds(page, { warrior: true });
-        // Literals, not base * 1.1 — the latter is off by a float ULP for 12500
-        expect(s[SHIP.smallCargo]).toBe(5500);
-        expect(s[SHIP.lightFighter]).toBe(13750);
-        expect(s[SHIP.recycler]).toBe(2200);
-    });
-
-    test('trader alliance bonus adds 10% to transports only', async ({ page }) => {
-        const s = await shipSpeeds(page, { trader: true });
-        expect(s[SHIP.smallCargo]).toBe(5500);
-        expect(s[SHIP.largeCargo]).toBe(8250);
-        expect(s[SHIP.lightFighter]).toBe(12500);
-        expect(s[SHIP.recycler]).toBe(2000);
     });
 
     test('warrior and trader bonuses are mutually exclusive', async ({ page }) => {
@@ -712,36 +544,8 @@ test.describe('Flight Calculator - Slowest Ship', () => {
         await openShips(page);
     });
 
-    const minSpeed = (page) => page.evaluate(() => { updateNumbers(); return getMinSpeed(); });
-
-    test('an empty fleet has no speed', async ({ page }) => {
-        // Infinity does not survive serialisation, so compare inside the page
-        const isInfinite = await page.evaluate(() => {
-            updateNumbers();
-            return getMinSpeed() === Infinity;
-        });
-        expect(isInfinite).toBe(true);
-    });
-
-    test('the slowest ship in the fleet sets the pace', async ({ page }) => {
-        await page.locator('#light-fighter').fill('10');
-        expect(await minSpeed(page)).toBe(12500);
-
-        // Adding a slower ship drags the fleet down
-        await page.locator('#small-cargo').fill('5');
-        expect(await minSpeed(page)).toBe(5000);
-
-        // Adding a faster one changes nothing
-        await page.locator('#cruiser').fill('3');
-        expect(await minSpeed(page)).toBe(5000);
-    });
-
-    test('ships with zero count are ignored', async ({ page }) => {
-        await page.locator('#light-fighter').fill('10');
-        await page.locator('#colony-ship').fill('0'); // speed 2500, but none in the fleet
-        expect(await minSpeed(page)).toBe(12500);
-    });
-
+    // getMinSpeed() over a fleet is covered in unit-tests/flight-core.test.js; this
+    // block keeps the check that the per-ship speeds reach the DOM.
     test('per-ship speeds are rendered next to the counts', async ({ page }) => {
         await openParams(page);
         await page.locator('#cmb-drive').fill('5'); // +50% on combustion ships
@@ -797,51 +601,10 @@ test.describe('Flight Calculator - Deuterium Consumption', () => {
         await page.locator('#class-2').check(); // discoverer: no speed or fuel perks
     });
 
-    test('a single small cargo burns the expected amount', async ({ page }) => {
-        await setFleet(page, { 'small-cargo': 1 });
-        const { cons, minSpeed, duration } = await fuelFor(page);
-
-        // Sanity-check the inputs the fuel formula is fed
-        expect(minSpeed).toBe(5000);
-        expect(duration).toBe(38351);
-        // consumption ~ 10 * (60000/35000) * (1 + speedValue/10)^2, speedValue ~ 10
-        expect(cons).toBe(69);
-    });
-
-    test('consumption scales with the number of ships', async ({ page }) => {
-        await setFleet(page, { 'small-cargo': 1 });
-        const one = (await fuelFor(page)).cons;
-
-        await setFleet(page, { 'small-cargo': 100 });
-        const hundred = (await fuelFor(page)).cons;
-
-        // Rounding happens once on the fleet total, so 100 ships cost slightly less
-        // than 100 rounded single-ship trips (68.57 each, not 69)
-        expect(one).toBe(69);
-        expect(hundred).toBe(6857);
-        expect(hundred / one).toBeGreaterThan(99);
-        expect(hundred / one).toBeLessThan(100);
-    });
-
-    test('consumption grows with distance', async ({ page }) => {
-        await setFleet(page, { 'small-cargo': 10 });
-        const near = (await fuelFor(page, { distance: 3555 })).cons;
-        const far = (await fuelFor(page, { distance: 60000 })).cons;
-        expect(far).toBeGreaterThan(near);
-    });
-
-    test('universe deuterium factor scales the base consumption', async ({ page }) => {
-        await setFleet(page, { 'small-cargo': 100 });
-        const full = (await fuelFor(page)).cons;
-
-        await openParams(page, '#deut-factor');
-        await page.locator('#deut-factor').selectOption('5'); // 50%
-        const half = (await fuelFor(page)).cons;
-
-        // floor(10 * 0.1 * 5) = 5 instead of 10 -> half the fuel, up to the final rounding
-        expect(half).toBe(Math.round(full / 2));
-    });
-
+    // The consumption formula - ship count, distance, the universe factor, the
+    // general discount and its Mechan scaling, the per-ship life form reduction and
+    // the one-deuterium floor - is covered in unit-tests/flight-core.test.js. This
+    // test stays for the form wiring: the class radio and the discount select.
     test('general class reduces consumption by the configured percentage', async ({ page }) => {
         await setFleet(page, { 'large-cargo': 100 });
         const discoverer = (await fuelFor(page)).cons;
@@ -857,46 +620,6 @@ test.describe('Flight Calculator - Deuterium Consumption', () => {
         expect(general25).toBeLessThan(discoverer);
         expect(general50).toBeLessThan(general25);
     });
-
-    test('Mechan General Enhancement deepens the general fuel discount', async ({ page }) => {
-        await openParams(page);
-        await page.locator('#class-1').check();
-        await page.locator('#deut-generals-bonus').selectOption('50');
-        await setFleet(page, { 'large-cargo': 100 });
-        const plain = (await fuelFor(page)).cons;
-
-        await openParams(page, '#lf-mechan-general-enh');
-        await page.locator('#lf-mechan-general-enh').fill('100');
-        const enhanced = (await fuelFor(page)).cons;
-
-        expect(enhanced).toBeLessThan(plain);
-    });
-
-    test('per-ship life form fuel reduction lowers consumption', async ({ page }) => {
-        await setFleet(page, { 'small-cargo': 100 });
-        const plain = (await fuelFor(page)).cons;
-
-        await openLfBonuses(page);
-        await page.locator('[class~="202-fuel"]').fill('50'); // -50% fuel
-        const reduced = (await fuelFor(page)).cons;
-
-        // floor(10 * 0.5) = 5 instead of 10, up to the final rounding
-        expect(reduced).toBe(Math.round(plain / 2));
-    });
-
-    test('consumption never drops below one deuterium', async ({ page }) => {
-        // Death star: cheapest per-unit fuel, shortest possible hop
-        await setFleet(page, { 'death-star': 1 });
-        const { cons } = await fuelFor(page, { distance: 5 });
-        expect(cons).toBeGreaterThanOrEqual(1);
-    });
-
-    test('an empty fleet still reports the floor value', async ({ page }) => {
-        await setFleet(page, {});
-        const cons = await page.evaluate(() =>
-            getDeutConsumption(5000, 60000, 38351, 100, 1));
-        expect(cons).toBe(1);
-    });
 });
 
 test.describe('Flight Calculator - Cargo Capacity', () => {
@@ -910,16 +633,10 @@ test.describe('Flight Calculator - Cargo Capacity', () => {
         await page.locator('#class-2').check(); // discoverer: no cargo perks
     });
 
-    test('base capacities without hyperspace technology', async ({ page }) => {
-        await setFleet(page, { 'small-cargo': 1, 'large-cargo': 1, 'recycler': 1 });
-        expect(await cargoFor(page)).toBe(5000 + 25000 + 20000);
-    });
-
-    test('capacity scales with ship count', async ({ page }) => {
-        await setFleet(page, { 'large-cargo': 37 });
-        expect(await cargoFor(page)).toBe(37 * 25000);
-    });
-
+    // The capacity formula - ship count, the hyperspace-tech multiplier, the
+    // collector and general bonuses with their life form scaling, the per-ship life
+    // form bonus and the spy-probe cargohold - is covered in
+    // unit-tests/flight-core.test.js. This test stays for the #hypertech-lvl wiring.
     test('hyperspace technology adds 5% per level', async ({ page }) => {
         await setFleet(page, { 'large-cargo': 1 });
         await openParams(page);
@@ -929,76 +646,6 @@ test.describe('Flight Calculator - Cargo Capacity', () => {
 
         await page.locator('#hypertech-lvl').fill('20');
         expect(await cargoFor(page)).toBe(25000 * 2);
-    });
-
-    test('an empty fleet carries nothing', async ({ page }) => {
-        await setFleet(page, {});
-        expect(await cargoFor(page)).toBe(0);
-    });
-
-    test('collector transports carry 25% more', async ({ page }) => {
-        await openParams(page);
-        await page.locator('#class-0').check();
-        await setFleet(page, { 'small-cargo': 1, 'large-cargo': 1 });
-        expect(await cargoFor(page)).toBe(5000 * 1.25 + 25000 * 1.25);
-    });
-
-    test("Rock'tal Collector Enhancement scales the transport bonus", async ({ page }) => {
-        await openParams(page);
-        await page.locator('#class-0').check();
-        await openParams(page, '#lf-rocktal-collector-enh');
-        await page.locator('#lf-rocktal-collector-enh').fill('100'); // doubles the 25%
-        await setFleet(page, { 'small-cargo': 1 });
-        expect(await cargoFor(page)).toBe(5000 + 2500);
-    });
-
-    test('collector bonus does not apply to warships', async ({ page }) => {
-        await openParams(page);
-        await page.locator('#class-0').check();
-        await setFleet(page, { 'light-fighter': 10 }); // cargo 50 each
-        expect(await cargoFor(page)).toBe(500);
-    });
-
-    test('general recyclers and pathfinders carry 20% more', async ({ page }) => {
-        await openParams(page);
-        await page.locator('#class-1').check();
-        await setFleet(page, { 'recycler': 1 });
-        expect(await cargoFor(page)).toBe(20000 * 1.2);
-
-        await setFleet(page, { 'recycler': 0, 'pathfinder': 1 });
-        expect(await cargoFor(page)).toBe(10000 * 1.2);
-
-        // Transports get nothing from the general
-        await setFleet(page, { 'pathfinder': 0, 'large-cargo': 1 });
-        expect(await cargoFor(page)).toBe(25000);
-    });
-
-    test('Mechan General Enhancement scales the recycler and pathfinder bonus', async ({ page }) => {
-        await openParams(page);
-        await page.locator('#class-1').check();
-        await openParams(page, '#lf-mechan-general-enh');
-        await page.locator('#lf-mechan-general-enh').fill('100'); // doubles the 20%
-        await setFleet(page, { 'recycler': 1 });
-        expect(await cargoFor(page)).toBe(20000 + 8000);
-
-        await setFleet(page, { 'recycler': 0, 'pathfinder': 1 });
-        expect(await cargoFor(page)).toBe(10000 + 4000);
-    });
-
-    test('per-ship life form cargo bonus is applied', async ({ page }) => {
-        await openLfBonuses(page);
-        await page.locator('[class~="202-cargo"]').fill('10'); // +10% of the base 5000
-        await setFleet(page, { 'small-cargo': 3 });
-        expect(await cargoFor(page)).toBe(3 * (5000 + 500));
-    });
-
-    test('spy probes carry cargo once the universe allows it', async ({ page }) => {
-        await setFleet(page, { 'esp-probe': 100 });
-        expect(await cargoFor(page)).toBe(0);
-
-        await openParams(page, '#sp-cargohold');
-        await page.locator('#sp-cargohold').fill('5');
-        expect(await cargoFor(page)).toBe(500);
     });
 });
 

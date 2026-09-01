@@ -1,9 +1,11 @@
 'use strict';
 
 // Pure computation tests for the flight calculator, moved out of the Playwright suite.
-// Only the blocks whose helpers were already page.evaluate()-only live here: distance,
-// duration and time-field parsing. Ship speeds, fuel and cargo stay in Playwright —
-// their helpers drive the real form, so they test the form-to-params wiring too.
+// Distance, duration and time-field parsing came over first — their helpers were
+// already page.evaluate()-only. Ship speeds, fuel and cargo followed: the Playwright
+// suite keeps a handful of smoke tests that drive the real form (so the form-to-params
+// wiring stays covered), and every drive / class / alliance / life form combination is
+// checked here instead, at a millisecond each rather than a page load.
 // Test bodies are unchanged from playwright-tests/tests/flight.spec.js.
 
 const { describe, it } = require('node:test');
@@ -434,6 +436,377 @@ describe('Flight Calculator - Moon Destruction Mission', () => {
         expect(throttled).toBeLessThan(fixed);
         expect(throttled).toBe(calc.getDeutConsumption(
             calc.buildShipsData(params7.driveLevels), counts, 3650, slowDuration, 1, params7));
+    });
+});
+
+// ---------------------------------------------------------------------------
+// Ship speeds, fuel and cargo. The Playwright suite keeps the smoke tests that
+// drive the form; the formula coverage lives here. Helpers below stand in for
+// the page.evaluate() shims flight.spec.js installs (updateNumbers, getMinSpeed,
+// getShipSpeed, getDeutConsumption, getCargoCapacity).
+// ---------------------------------------------------------------------------
+
+/** A collectParams()-shaped object with every drive, class and bonus at zero. */
+function shipParams(over = {}) {
+    return {
+        driveLevels: [0, 0, 0],
+        playerClass: PLAYER_CLASS.DISCOVERER,
+        warriorBonus: false,
+        traderBonus: false,
+        hyperTechLvl: 0,
+        spCargohold: 0,
+        deutFactor: 10,
+        deutConsReduction: 0,
+        lfMechanGE: 0,
+        lfRocktalCE: 0,
+        lfShipsBonuses: Array.from({ length: 15 }, () => [0, 0, 0]),
+        ...over,
+    };
+}
+
+/** Ship-count array, zero except for the given { shipIndex: count } entries. */
+function fleet(counts) {
+    const arr = new Array(15).fill(0);
+    for (const [i, n] of Object.entries(counts)) {
+        arr[i] = n;
+    }
+    return arr;
+}
+
+describe('Flight Calculator - Ship Speeds', () => {
+    // Mirrors the shipSpeeds() helper in flight.spec.js: apply drives, class and
+    // bonuses, then return every ship speed keyed by the SHIP index.
+    const speeds = ({
+        cmb = 0, imp = 0, hyp = 0, playerClass = PLAYER_CLASS.DISCOVERER,
+        warrior = false, trader = false, lfMechanGE = 0, lfRocktalCE = 0,
+    } = {}) => {
+        const params = shipParams({
+            driveLevels: [cmb, imp, hyp], playerClass,
+            warriorBonus: warrior, traderBonus: trader, lfMechanGE, lfRocktalCE,
+        });
+        return calc.getAllShipSpeeds(calc.buildShipsData(params.driveLevels), params);
+    };
+
+    it('base speeds with no drives, class or bonuses', () => {
+        const s = speeds();
+        expect(s[SHIP.SMALL_CARGO]).toBe(5000);
+        expect(s[SHIP.LARGE_CARGO]).toBe(7500);
+        expect(s[SHIP.LIGHT_FIGHTER]).toBe(12500);
+        expect(s[SHIP.HEAVY_FIGHTER]).toBe(10000);
+        expect(s[SHIP.CRUISER]).toBe(15000);
+        expect(s[SHIP.BATTLESHIP]).toBe(10000);
+        expect(s[SHIP.COLONY_SHIP]).toBe(2500);
+        expect(s[SHIP.RECYCLER]).toBe(2000);
+        expect(s[SHIP.BOMBER]).toBe(4000);
+        expect(s[SHIP.DESTROYER]).toBe(5000);
+        expect(s[SHIP.DEATH_STAR]).toBe(100);
+        expect(s[SHIP.BATTLECRUISER]).toBe(10000);
+        expect(s[SHIP.REAPER]).toBe(7000);
+        expect(s[SHIP.PATHFINDER]).toBe(12000);
+    });
+
+    it('combustion drive adds 10% per level to its ships only', () => {
+        const s = speeds({ cmb: 5 }); // +50%
+        expect(s[SHIP.SMALL_CARGO]).toBe(5000 * 1.5);
+        expect(s[SHIP.LARGE_CARGO]).toBe(7500 * 1.5);
+        expect(s[SHIP.LIGHT_FIGHTER]).toBe(12500 * 1.5);
+        expect(s[SHIP.RECYCLER]).toBe(2000 * 1.5);
+        // Impulse and hyperspace ships are untouched
+        expect(s[SHIP.CRUISER]).toBe(15000);
+        expect(s[SHIP.BATTLESHIP]).toBe(10000);
+    });
+
+    it('impulse drive adds 20% per level to its ships only', () => {
+        const s = speeds({ imp: 3 }); // +60%, below the small-cargo threshold
+        expect(s[SHIP.HEAVY_FIGHTER]).toBe(10000 * 1.6);
+        expect(s[SHIP.CRUISER]).toBe(15000 * 1.6);
+        expect(s[SHIP.COLONY_SHIP]).toBe(2500 * 1.6);
+        expect(s[SHIP.BOMBER]).toBe(4000 * 1.6);
+        expect(s[SHIP.SMALL_CARGO]).toBe(5000);
+        expect(s[SHIP.BATTLESHIP]).toBe(10000);
+    });
+
+    it('hyperspace drive adds 30% per level to its ships only', () => {
+        const s = speeds({ hyp: 5 }); // +150%
+        expect(s[SHIP.BATTLESHIP]).toBe(10000 * 2.5);
+        expect(s[SHIP.DESTROYER]).toBe(5000 * 2.5);
+        expect(s[SHIP.DEATH_STAR]).toBe(100 * 2.5);
+        expect(s[SHIP.BATTLECRUISER]).toBe(10000 * 2.5);
+        expect(s[SHIP.REAPER]).toBe(7000 * 2.5);
+        expect(s[SHIP.PATHFINDER]).toBe(12000 * 2.5);
+        expect(s[SHIP.CRUISER]).toBe(15000);
+    });
+
+    it('small cargo switches to impulse drive above level 4', () => {
+        const at4 = speeds({ imp: 4 });
+        expect(at4[SHIP.SMALL_CARGO]).toBe(5000); // still combustion, unaffected by impulse
+
+        const at5 = speeds({ imp: 5 });
+        expect(at5[SHIP.SMALL_CARGO]).toBe(10000 * 2); // base 10000, +100% impulse
+    });
+
+    it('bomber switches to hyperspace drive above level 7', () => {
+        const at7 = speeds({ hyp: 7 });
+        expect(at7[SHIP.BOMBER]).toBe(4000); // still impulse, and impulse is at 0
+
+        const at8 = speeds({ hyp: 8 });
+        expect(at8[SHIP.BOMBER]).toBe(5000 * 3.4); // base 5000, +240% hyperspace
+    });
+
+    it('recycler upgrades at impulse 17 and hyperspace 15', () => {
+        const below = speeds({ imp: 16, hyp: 14 });
+        expect(below[SHIP.RECYCLER]).toBe(2000); // combustion, level 0
+
+        const impulse = speeds({ imp: 17, hyp: 14 });
+        expect(impulse[SHIP.RECYCLER]).toBe(4000 * 4.4); // base 4000, +340% impulse
+
+        const hyper = speeds({ imp: 0, hyp: 15 });
+        expect(hyper[SHIP.RECYCLER]).toBe(6000 * 5.5); // base 6000, +450% hyperspace
+    });
+
+    it('hyperspace recycler wins over the impulse one', () => {
+        // Both thresholds cleared — the hyperspace variant must be chosen
+        const s = speeds({ imp: 17, hyp: 15 });
+        expect(s[SHIP.RECYCLER]).toBe(6000 * 5.5);
+    });
+
+    it('collector doubles transports only', () => {
+        const s = speeds({ playerClass: PLAYER_CLASS.COLLECTOR });
+        expect(s[SHIP.SMALL_CARGO]).toBe(5000 * 2);
+        expect(s[SHIP.LARGE_CARGO]).toBe(7500 * 2);
+        expect(s[SHIP.LIGHT_FIGHTER]).toBe(12500);
+        expect(s[SHIP.RECYCLER]).toBe(2000);
+    });
+
+    it('general doubles combat ships and recyclers, not transports', () => {
+        const s = speeds({ playerClass: PLAYER_CLASS.GENERAL });
+        expect(s[SHIP.SMALL_CARGO]).toBe(5000);
+        expect(s[SHIP.LARGE_CARGO]).toBe(7500);
+        expect(s[SHIP.COLONY_SHIP]).toBe(2500);  // not in the boosted list
+        expect(s[SHIP.ESP_PROBE]).toBe(100000000);
+        expect(s[SHIP.DEATH_STAR]).toBe(100);    // not in the boosted list
+        expect(s[SHIP.LIGHT_FIGHTER]).toBe(12500 * 2);
+        expect(s[SHIP.CRUISER]).toBe(15000 * 2);
+        expect(s[SHIP.RECYCLER]).toBe(2000 * 2);
+        expect(s[SHIP.PATHFINDER]).toBe(12000 * 2);
+    });
+
+    it('discoverer doubles nothing', () => {
+        const s = speeds({ playerClass: PLAYER_CLASS.DISCOVERER });
+        expect(s[SHIP.SMALL_CARGO]).toBe(5000);
+        expect(s[SHIP.LIGHT_FIGHTER]).toBe(12500);
+        expect(s[SHIP.RECYCLER]).toBe(2000);
+    });
+
+    it("Rock'tal Collector Enhancement scales the collector bonus", () => {
+        const s = speeds({ playerClass: PLAYER_CLASS.COLLECTOR, lfRocktalCE: 50 });
+        // base + floor(base * (1 + 0.5))
+        expect(s[SHIP.SMALL_CARGO]).toBe(5000 + 7500);
+        expect(s[SHIP.LIGHT_FIGHTER]).toBe(12500); // not a transport, unaffected
+    });
+
+    it('Mechan General Enhancement scales the general bonus', () => {
+        const s = speeds({ playerClass: PLAYER_CLASS.GENERAL, lfMechanGE: 50 });
+        expect(s[SHIP.LIGHT_FIGHTER]).toBe(12500 + 18750);
+        expect(s[SHIP.SMALL_CARGO]).toBe(5000); // not boosted for general
+    });
+
+    it('warrior alliance bonus adds 10% to every ship', () => {
+        const s = speeds({ warrior: true });
+        // Literals, not base * 1.1 — the latter is off by a float ULP for 12500
+        expect(s[SHIP.SMALL_CARGO]).toBe(5500);
+        expect(s[SHIP.LIGHT_FIGHTER]).toBe(13750);
+        expect(s[SHIP.RECYCLER]).toBe(2200);
+    });
+
+    it('trader alliance bonus adds 10% to transports only', () => {
+        const s = speeds({ trader: true });
+        expect(s[SHIP.SMALL_CARGO]).toBe(5500);
+        expect(s[SHIP.LARGE_CARGO]).toBe(8250);
+        expect(s[SHIP.LIGHT_FIGHTER]).toBe(12500);
+        expect(s[SHIP.RECYCLER]).toBe(2000);
+    });
+});
+
+describe('Flight Calculator - Slowest Ship', () => {
+    // discoverer: no speed doubling
+    const params = shipParams();
+    const minSpeed = (counts) =>
+        calc.getMinSpeed(calc.buildShipsData(params.driveLevels), fleet(counts), params);
+
+    it('an empty fleet has no speed', () => {
+        expect(minSpeed({})).toBe(Infinity);
+    });
+
+    it('the slowest ship in the fleet sets the pace', () => {
+        expect(minSpeed({ [SHIP.LIGHT_FIGHTER]: 10 })).toBe(12500);
+        // Adding a slower ship drags the fleet down
+        expect(minSpeed({ [SHIP.LIGHT_FIGHTER]: 10, [SHIP.SMALL_CARGO]: 5 })).toBe(5000);
+        // Adding a faster one changes nothing
+        expect(minSpeed({
+            [SHIP.LIGHT_FIGHTER]: 10, [SHIP.SMALL_CARGO]: 5, [SHIP.CRUISER]: 3,
+        })).toBe(5000);
+    });
+
+    it('ships with zero count are ignored', () => {
+        // colony ship speed 2500, but none in the fleet
+        expect(minSpeed({ [SHIP.LIGHT_FIGHTER]: 10, [SHIP.COLONY_SHIP]: 0 })).toBe(12500);
+    });
+});
+
+describe('Flight Calculator - Deuterium Consumption', () => {
+    // discoverer: no speed or fuel perks
+    /**
+     * Runs a trip the way updateNumbers() does: slowest ship -> duration -> fuel.
+     * @returns {{cons: number, minSpeed: number, duration: number}}
+     */
+    const fuelFor = (counts, { distance = 60000, pct = 100, uni = 1, over = {} } = {}) => {
+        const params = shipParams(over);
+        const ships = calc.buildShipsData(params.driveLevels, params.spCargohold);
+        const shipCounts = fleet(counts);
+        const minSpeed = calc.getMinSpeed(ships, shipCounts, params);
+        const duration = calc.getFlightDuration(minSpeed, distance, pct, uni);
+        return {
+            cons: calc.getDeutConsumption(ships, shipCounts, distance, duration, uni, params),
+            minSpeed,
+            duration,
+        };
+    };
+
+    it('a single small cargo burns the expected amount', () => {
+        const { cons, minSpeed, duration } = fuelFor({ [SHIP.SMALL_CARGO]: 1 });
+        // Sanity-check the inputs the fuel formula is fed
+        expect(minSpeed).toBe(5000);
+        expect(duration).toBe(38351);
+        // consumption ~ 10 * (60000/35000) * (1 + speedValue/10)^2, speedValue ~ 10
+        expect(cons).toBe(69);
+    });
+
+    it('consumption scales with the number of ships', () => {
+        const one = fuelFor({ [SHIP.SMALL_CARGO]: 1 }).cons;
+        const hundred = fuelFor({ [SHIP.SMALL_CARGO]: 100 }).cons;
+        // Rounding happens once on the fleet total, so 100 ships cost slightly less
+        // than 100 rounded single-ship trips (68.57 each, not 69)
+        expect(one).toBe(69);
+        expect(hundred).toBe(6857);
+        expect(hundred / one).toBeGreaterThan(99);
+        expect(hundred / one).toBeLessThan(100);
+    });
+
+    it('consumption grows with distance', () => {
+        const near = fuelFor({ [SHIP.SMALL_CARGO]: 10 }, { distance: 3555 }).cons;
+        const far = fuelFor({ [SHIP.SMALL_CARGO]: 10 }, { distance: 60000 }).cons;
+        expect(far).toBeGreaterThan(near);
+    });
+
+    it('universe deuterium factor scales the base consumption', () => {
+        const full = fuelFor({ [SHIP.SMALL_CARGO]: 100 }).cons;
+        const half = fuelFor({ [SHIP.SMALL_CARGO]: 100 }, { over: { deutFactor: 5 } }).cons; // 50%
+        // floor(10 * 0.1 * 5) = 5 instead of 10 -> half the fuel, up to the final rounding
+        expect(half).toBe(Math.round(full / 2));
+    });
+
+    it('Mechan General Enhancement deepens the general fuel discount', () => {
+        const general = { playerClass: PLAYER_CLASS.GENERAL, deutConsReduction: 50 };
+        const plain = fuelFor({ [SHIP.LARGE_CARGO]: 100 }, { over: general }).cons;
+        const enhanced = fuelFor(
+            { [SHIP.LARGE_CARGO]: 100 }, { over: { ...general, lfMechanGE: 100 } }).cons;
+        expect(enhanced).toBeLessThan(plain);
+    });
+
+    it('per-ship life form fuel reduction lowers consumption', () => {
+        const plain = fuelFor({ [SHIP.SMALL_CARGO]: 100 }).cons;
+        const bonuses = Array.from({ length: 15 }, () => [0, 0, 0]);
+        bonuses[SHIP.SMALL_CARGO] = [0, 0, 50]; // -50% fuel
+        const reduced = fuelFor(
+            { [SHIP.SMALL_CARGO]: 100 }, { over: { lfShipsBonuses: bonuses } }).cons;
+        // floor(10 * 0.5) = 5 instead of 10, up to the final rounding
+        expect(reduced).toBe(Math.round(plain / 2));
+    });
+
+    it('consumption never drops below one deuterium', () => {
+        // Death star: cheapest per-unit fuel, shortest possible hop
+        const { cons } = fuelFor({ [SHIP.DEATH_STAR]: 1 }, { distance: 5 });
+        expect(cons).toBeGreaterThanOrEqual(1);
+    });
+
+    it('an empty fleet still reports the floor value', () => {
+        const params = shipParams();
+        const cons = calc.getDeutConsumption(
+            calc.buildShipsData(params.driveLevels), fleet({}), 60000, 38351, 1, params);
+        expect(cons).toBe(1);
+    });
+});
+
+describe('Flight Calculator - Cargo Capacity', () => {
+    // discoverer: no cargo perks
+    const cargoFor = (counts, over = {}) => {
+        const params = shipParams(over);
+        return calc.getCargoCapacity(
+            calc.buildShipsData(params.driveLevels, params.spCargohold), fleet(counts), params);
+    };
+
+    it('base capacities without hyperspace technology', () => {
+        expect(cargoFor({
+            [SHIP.SMALL_CARGO]: 1, [SHIP.LARGE_CARGO]: 1, [SHIP.RECYCLER]: 1,
+        })).toBe(5000 + 25000 + 20000);
+    });
+
+    it('capacity scales with ship count', () => {
+        expect(cargoFor({ [SHIP.LARGE_CARGO]: 37 })).toBe(37 * 25000);
+    });
+
+    it('an empty fleet carries nothing', () => {
+        expect(cargoFor({})).toBe(0);
+    });
+
+    it('collector transports carry 25% more', () => {
+        const cargo = cargoFor(
+            { [SHIP.SMALL_CARGO]: 1, [SHIP.LARGE_CARGO]: 1 },
+            { playerClass: PLAYER_CLASS.COLLECTOR });
+        expect(cargo).toBe(5000 * 1.25 + 25000 * 1.25);
+    });
+
+    it("Rock'tal Collector Enhancement scales the transport bonus", () => {
+        // 100 doubles the 25%
+        const cargo = cargoFor(
+            { [SHIP.SMALL_CARGO]: 1 },
+            { playerClass: PLAYER_CLASS.COLLECTOR, lfRocktalCE: 100 });
+        expect(cargo).toBe(5000 + 2500);
+    });
+
+    it('collector bonus does not apply to warships', () => {
+        // light fighter cargo 50 each
+        const cargo = cargoFor(
+            { [SHIP.LIGHT_FIGHTER]: 10 }, { playerClass: PLAYER_CLASS.COLLECTOR });
+        expect(cargo).toBe(500);
+    });
+
+    it('general recyclers and pathfinders carry 20% more', () => {
+        const general = { playerClass: PLAYER_CLASS.GENERAL };
+        expect(cargoFor({ [SHIP.RECYCLER]: 1 }, general)).toBe(20000 * 1.2);
+        expect(cargoFor({ [SHIP.PATHFINDER]: 1 }, general)).toBe(10000 * 1.2);
+        // Transports get nothing from the general
+        expect(cargoFor({ [SHIP.LARGE_CARGO]: 1 }, general)).toBe(25000);
+    });
+
+    it('Mechan General Enhancement scales the recycler and pathfinder bonus', () => {
+        // 100 doubles the 20%
+        const enh = { playerClass: PLAYER_CLASS.GENERAL, lfMechanGE: 100 };
+        expect(cargoFor({ [SHIP.RECYCLER]: 1 }, enh)).toBe(20000 + 8000);
+        expect(cargoFor({ [SHIP.PATHFINDER]: 1 }, enh)).toBe(10000 + 4000);
+    });
+
+    it('per-ship life form cargo bonus is applied', () => {
+        const bonuses = Array.from({ length: 15 }, () => [0, 0, 0]);
+        bonuses[SHIP.SMALL_CARGO] = [0, 10, 0]; // +10% of the base 5000
+        expect(cargoFor({ [SHIP.SMALL_CARGO]: 3 }, { lfShipsBonuses: bonuses }))
+            .toBe(3 * (5000 + 500));
+    });
+
+    it('spy probes carry cargo once the universe allows it', () => {
+        expect(cargoFor({ [SHIP.ESP_PROBE]: 100 })).toBe(0);
+        expect(cargoFor({ [SHIP.ESP_PROBE]: 100 }, { spCargohold: 5 })).toBe(500);
     });
 });
 
