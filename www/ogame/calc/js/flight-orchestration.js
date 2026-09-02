@@ -1457,16 +1457,14 @@ class FlightOrchestrator {
         if (classMap[rd.generic.defender_character_class_id]) {
             setChecked(`#${classMap[rd.generic.defender_character_class_id]}`, true);
         }
-        if (rd.generic.defender_alliance_class_id == 2) {
-            setChecked('#trader-bonus', true);
-        }
+        this._importAllianceClass(Number(rd.generic.defender_alliance_class_id));
         setChecked('#circular-galaxies', rd.universes.donutGalaxy == 1);
         setChecked('#circular-systems', rd.universes.donutSystem == 1);
         setVal('#systems-num', rd.universes.systems);
         setVal('#galaxies-num', rd.universes.galaxies);
         setVal('#sp-cargohold', rd.universes.probeCargo);
         this._selectOption('deut-factor', rd.universes.globalDeuteriumSaveFactor * 10);
-        this._selectOption('deut-generals-bonus', rd.universes.warriorBonusFuelConsumption * 10);
+        this._selectOption('deut-generals-bonus', rd.universes.warriorBonusFuelConsumption * 100);
         this.opts.prm.fleetIgnoreEmptySystems = rd.universes.fleetIgnoreEmptySystems === '1';
         this.opts.prm.fleetIgnoreInactiveSystems = rd.universes.fleetIgnoreInactiveSystems === '1';
         // The import can move the fleet to a universe with different settings, so
@@ -1580,11 +1578,22 @@ class FlightOrchestrator {
             inputsAll('input[name="class"]').forEach((r) => { r.checked = false; });
             setChecked(`#${classMap[data.characterClassId]}`, true);
         }
-        const isTrader = data.allianceClassId === 2;
-        setChecked('#trader-bonus', isTrader);
-        if (isTrader) {
-            setChecked('#warrior-bonus', false);
-        }
+        this._importAllianceClass(data.allianceClassId);
+    }
+
+    /**
+     * Ticks the box for the alliance class the import names. The ids are the
+     * game's own order - 1 researcher, which brings the fleet nothing and so has
+     * no field here, 2 trader, 3 warrior - and the two boxes are mutually
+     * exclusive, the way toggleAllianceBonus keeps them when they are clicked.
+     * Anything else, an alliance with no class included, clears both: what the
+     * import carries is the answer, not a suggestion on top of what was there.
+     *
+     * @param {number} allianceClassId
+     */
+    _importAllianceClass(allianceClassId) {
+        setChecked('#trader-bonus', allianceClassId === 2);
+        setChecked('#warrior-bonus', allianceClassId === 3);
     }
 
     /** @param {OwnApiPayload} data */

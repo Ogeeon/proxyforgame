@@ -133,6 +133,24 @@ test.describe('Flight Calculator - Spy Report Import', () => {
         await expect(page.locator('#speed-fleet-holding')).toHaveValue('1');
     });
 
+    // Two universe values the report carries and the page has fields for. Picking
+    // the imported universe also asks the OGame API for its live settings, and that
+    // answer lands on the same select, so keep it away and let only the import write.
+    test('imports the alliance class and the general fuel discount', async ({ page }) => {
+        await page.route(/\/ajax\.php\?.*service=serverdata/, (route) => route.fulfill({ status: 503 }));
+        await openParams(page);
+        await page.locator('#api-code').fill(SR_CODE);
+        await page.locator('#api-get').click();
+        await page.waitForFunction(() => !document.querySelector('.panel-overlay'), { timeout: 5000 });
+
+        // defender_alliance_class_id 2 -> trader
+        await expect(page.locator('#trader-bonus')).toBeChecked();
+        await expect(page.locator('#warrior-bonus')).not.toBeChecked();
+        // warriorBonusFuelConsumption 0.25 is the 25% option; it used to be scaled by
+        // ten, and a value no option carries leaves the select showing nothing at all
+        await expect(page.locator('#deut-generals-bonus')).toHaveValue('25');
+    });
+
     // The imported universe can be a ring along one axis only, so each donut
     // flag has to reach the checkbox of its own axis.
     test('imports each donut setting onto the checkbox of its own axis', async ({ page }) => {
@@ -368,6 +386,31 @@ test.describe('Flight Calculator - OGame Object Import', () => {
         // Dialog closes on successful import
         await expect(page.locator('#own-api-reader')).toBeHidden();
         expect(errors, 'no page JS errors').toEqual([]);
+    });
+
+    // The three alliance classes are 1 researcher, 2 trader, 3 warrior. Only the
+    // trader used to be read, so a warrior alliance imported as no alliance at all.
+    test('imports the warrior alliance class onto its own checkbox', async ({ page }) => {
+        await page.locator('#import-own-api').click();
+        await page.locator('#own-api-input')
+            .fill(OWN_API_FIXTURE.replace('"allianceClassId":2', '"allianceClassId":3'));
+        await page.locator(OWN_API_IMPORT_BUTTON).click();
+
+        await expect(page.locator('#warrior-bonus')).toBeChecked();
+        await expect(page.locator('#trader-bonus')).not.toBeChecked();
+    });
+
+    test('an alliance without a class clears both checkboxes', async ({ page }) => {
+        await openParams(page);
+        await page.locator('#trader-bonus').check();
+
+        await page.locator('#import-own-api').click();
+        await page.locator('#own-api-input')
+            .fill(OWN_API_FIXTURE.replace('"allianceClassId":2', '"allianceClassId":0'));
+        await page.locator(OWN_API_IMPORT_BUTTON).click();
+
+        await expect(page.locator('#trader-bonus')).not.toBeChecked();
+        await expect(page.locator('#warrior-bonus')).not.toBeChecked();
     });
 
     test('unchecking an import category leaves its fields untouched', async ({ page }) => {
