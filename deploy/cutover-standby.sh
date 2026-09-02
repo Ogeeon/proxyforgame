@@ -44,7 +44,7 @@ echo "OK - old checkout, .env and both vhosts are as expected"
 
 # --- 2. Clone --------------------------------------------------------------
 say "2. Cloning $REPO"
-git clone --quiet "$REPO" "$NEW"
+git -c protocol.version=0 clone --quiet "$REPO" "$NEW"
 chown -R www-data:www-data "$NEW"
 # The checkout belongs to www-data, so root's git refuses to read it until the
 # path is declared safe - the same entry the old checkout already carries.

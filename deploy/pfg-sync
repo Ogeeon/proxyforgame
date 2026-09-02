@@ -123,11 +123,17 @@ apply_migrations() {
 # spares the alarm mail for a wobble that fixes itself. GIT_TERMINAL_PROMPT=0
 # turns the credential prompt that 401 provokes into an immediate error instead
 # of a read against cron's dead stdin.
+#
+# protocol.version=0 is pinned because from 2026-09-02 GitHub started answering
+# the anonymous wire-protocol-v2 git-upload-pack POST from production's git
+# (2.30.2, no root to upgrade) with a 401 for hours at a stretch - the v0 ref
+# advertisement is served fine, and so is every request from the standby's newer
+# git. A single-branch fetch gets nothing from v2 anyway.
 # ---------------------------------------------------------------------------
 fetch_main() {
   local attempt=1 delay
   while :; do
-    GIT_TERMINAL_PROMPT=0 git fetch --quiet origin main && return 0
+    GIT_TERMINAL_PROMPT=0 git -c protocol.version=0 fetch --quiet origin main && return 0
     [ "$attempt" -ge 3 ] && return 1
     delay=$((attempt * 10))
     log "git fetch failed (attempt $attempt/3) - retrying in ${delay}s"

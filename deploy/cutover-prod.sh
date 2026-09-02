@@ -57,7 +57,7 @@ fi
 # --- 3. Clone --------------------------------------------------------------
 say "3. Cloning $REPO"
 [ -e "$NEW" ] && die "$NEW already exists - remove it or finish the previous attempt"
-git clone --quiet "$REPO" "$NEW"
+git -c protocol.version=0 clone --quiet "$REPO" "$NEW"
 echo "HEAD: $(git -C "$NEW" log --oneline -1)"
 cp -p "$OLD/.env" "$NEW/.env"
 chmod 640 "$NEW/.env"
