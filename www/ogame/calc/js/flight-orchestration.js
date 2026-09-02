@@ -1404,10 +1404,22 @@ class FlightOrchestrator {
         }
     }
 
+    /**
+     * Picks the option that carries the value. A select holds only the values
+     * the page put into it, and assigning anything else silently empties the
+     * field, so a value none of the options carries leaves the current choice
+     * alone: an import that brings nothing usable must not wipe what the user
+     * already had.
+     *
+     * @param {string} id
+     * @param {number|string} value
+     */
     _selectOption(id, value) {
         const el = selectEl(`#${id}`);
-        if (el) {
-            el.value = String(value);
+        if (!el) { return; }
+        const wanted = String(value);
+        if ([...el.options].some((option) => option.value === wanted)) {
+            el.value = wanted;
         }
     }
 
