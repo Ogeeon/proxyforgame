@@ -685,7 +685,7 @@ describe('Flight Calculator - Deuterium Consumption', () => {
     it('consumption scales with the number of ships', () => {
         const one = fuelFor({ [SHIP.SMALL_CARGO]: 1 }).cons;
         const hundred = fuelFor({ [SHIP.SMALL_CARGO]: 100 }).cons;
-        // Rounding happens once on the fleet total, so 100 ships cost slightly less
+        // Rounding happens once per ship type, so 100 ships cost slightly less
         // than 100 rounded single-ship trips (68.57 each, not 69)
         expect(one).toBe(69);
         expect(hundred).toBe(6857);
@@ -761,11 +761,14 @@ describe('Flight Calculator - Deuterium Consumption', () => {
         expect(atCap(50, 100)).toBe(atCap(90, 0));
     });
 
-    // Two flights a player measured in the game and sent in, .es universe 256
+    // Three flights a player measured in the game and sent in, .es universe 256
     // "Aries" (2026-09-01 and 2026-09-02). The two universe settings behind the
     // dropdowns come from that server's own config: globalDeuteriumSaveFactor 0.5
-    // and warriorBonusFuelConsumption 0.5. Both flights sit over the reduction cap,
+    // and warriorBonusFuelConsumption 0.5. All three sit over the reduction cap,
     // which is what pinned it - the game charged base/20 for every ship type.
+    // They also pin the rounding: the game feeds its own formula the whole number
+    // of seconds it displays, not the fraction behind it. Handing it 83,7455
+    // instead of 84 puts the first flight at 1.714 against the 1.708 it charges.
     const ARIES = {
         driveLevels: [26, 26, 26],
         playerClass: PLAYER_CLASS.GENERAL,
@@ -797,10 +800,49 @@ describe('Flight Calculator - Deuterium Consumption', () => {
             });
         expect(minSpeed).toBe(61577);
         expect(duration).toBe(110);
-        // The game shows 1.141 for this trip. The odd unit is the duration it feeds
-        // its own formula: 110 s is the rounded figure it displays, 109,74 the real
-        // one, and the two bracket the number above and below.
-        expect(cons).toBe(1140);
+        // The lone recycler burns 0,0194 of a unit next to the million transports.
+        // The game rounds each ship type up to its own whole number before adding
+        // it in, so that fraction is worth a full deuterium - which is the whole
+        // difference between 1.140 and the 1.141 the game charges.
+        expect(cons).toBe(1141);
+    });
+
+    // The third screen: the same trip with everything on the moon. It is the only
+    // one of the three that carries a hull whose fuel rounds down to nothing - the
+    // probe and the death star both sit on a base consumption of 1 - so it is what
+    // pins the one-deuterium floor a single ship pays.
+    it('matches the game on the whole fleet', () => {
+        // [count, speed %, cargo %, fuel %] per hull, from the player's API 2 export
+        const FLEET = [
+            [4509818, 461.0264, 397.5824, 12.24096],   // small cargo
+            [3876344, 461.0264, 397.5824, 12.24096],   // large cargo
+            [15538918, 245.3168, 101.5104, 12.24096],  // light fighter
+            [91367, 143.8064, 0, 12.24096],            // heavy fighter
+            [95808878, 378.5492, 234.7428, 12.24096],  // cruiser
+            [1020982, 245.3168, 101.5104, 12.24096],   // battleship
+            [8, 461.0264, 397.5824, 12.24096],         // colony ship
+            [23151649, 841.6904, 778.2464, 12.24096],  // recycler
+            [39999, 461.0264, 397.5824, 12.24096],     // espionage probe
+            [102197, 143.8064, 0, 12.24096],           // bomber
+            [9464764, 245.3168, 101.5104, 12.24096],   // destroyer
+            [52728, 0, 0, 12.24096],                   // death star
+            [86725860, 384.1472, 240.3408, 12.24096],  // battlecruiser
+            [358467, 143.8064, 0, 12.24096],           // reaper
+            [3411725, 143.8064, 0, 12.24096],          // pathfinder
+        ];
+        const counts = Object.fromEntries(FLEET.map(([count], i) => [i, count]));
+        const bonuses = FLEET.map(([, speed, cargo, fuel]) => [speed, cargo, fuel]);
+        const over = { ...ARIES, lfMechanGE: 63.444, lfShipsBonuses: bonuses };
+        const { cons, minSpeed, duration } = fuelFor(counts, { distance: 5, over });
+        // The death stars set the pace, and every other hull burns more for it
+        expect(minSpeed).toBe(880.0000000000001);
+        expect(duration).toBe(844);
+        expect(cons).toBe(690814);
+        // The same fleet's hold, which the game reports to the unit
+        const params = shipParams(over);
+        expect(calc.getCargoCapacity(
+            calc.buildShipsData(params.driveLevels, params.spCargohold),
+            fleet(counts), params)).toBe(6437646476159);
     });
 
     it('per-ship life form fuel reduction lowers consumption', () => {

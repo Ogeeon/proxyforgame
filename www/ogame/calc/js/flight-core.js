@@ -302,8 +302,8 @@ class FlightCalculator {
     }
 
     /**
-     * Deuterium burnt on the trip. Each ship pays at least one unit, and so does
-     * the fleet as a whole.
+     * Deuterium burnt on the trip. A single ship pays at least one unit, so does
+     * a ship type's share of the bill, and so does the fleet as a whole.
      *
      * @param {number} [fixedSpeed] the one speed every ship flies at, for a
      *   mission that pins it; 0 leaves each ship on its own speed. The duration
@@ -333,15 +333,24 @@ class FlightCalculator {
             const reduction = Math.min(
                 classPercent + params.lfShipsBonuses[i][2], DEUT_REDUCTION_CAP);
 
-            const perShip = Math.floor(
+            // No hull flies free: a ship whose consumption falls below a unit
+            // once the universe factor and the discounts are applied still pays
+            // that unit. The probe and the death star, both on a base of 1, are
+            // the whole of this case - and a fleet carries them in thousands.
+            const perShip = Math.max(Math.floor(
                 Math.floor(shipsData[i][3] * 0.1 * params.deutFactor) * (100 - reduction) / 100
-            );
+            ), 1);
             const fleetBase = Math.max(Math.round(perShip * count), 1);
 
-            total += fleetBase * distance / 35000 * ((speedValue / 10) + 1) ** 2;
+            // Each ship type is settled on a whole number of its own before it
+            // joins the fleet's bill, and no type is charged less than one, so a
+            // single ship among a million is a unit rather than a rounding error.
+            total += Math.max(Math.round(
+                fleetBase * distance / 35000 * ((speedValue / 10) + 1) ** 2), 1);
         }
 
-        return Math.max(Math.round(total), 1);
+        // Already whole - the floor is for the fleet with nothing in it
+        return Math.max(total, 1);
     }
 
     // ------------------------------------------------------------------
