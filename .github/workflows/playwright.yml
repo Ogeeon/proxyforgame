@@ -147,10 +147,18 @@ jobs:
       # -------------------------------------------------------------
       # Set up Node + Playwright
       # -------------------------------------------------------------
+      # `cache: npm` restores the ~/.npm tarball cache keyed on both lockfiles, so
+      # the two `npm ci` runs in `make install` unpack from disk instead of
+      # re-fetching from the registry. A dependency bump changes a lockfile hash
+      # and busts the cache on its own.
       - name: Set up Node
         uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: 24
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            playwright-tests/package-lock.json
 
       # `make html-validate` runs the Nu Html Checker, a jar, against the rendered
       # pages. The jar itself arrives with the `vnu-jar` package that `make install`
@@ -161,6 +169,17 @@ jobs:
         with:
           distribution: temurin
           java-version: '21'
+
+      # The Chromium bundle Playwright downloads (~150 MB from its CDN) is the slow,
+      # flaky part of the install - keyed on playwright-tests/package-lock.json,
+      # which is what pins the @playwright/test version that decides the browser
+      # build. On a hit `playwright install` inside `make install` is a no-op.
+      # `--with-deps` still runs its apt step; that is fast and not cacheable here.
+      - name: Cache Playwright browsers
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('playwright-tests/package-lock.json') }}
 
       - name: Install dependencies and browsers
         run: make install PW_DEPS=--with-deps
