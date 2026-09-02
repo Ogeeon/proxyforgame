@@ -57,7 +57,8 @@ fi
 # --- 3. Clone --------------------------------------------------------------
 say "3. Cloning $REPO"
 [ -e "$NEW" ] && die "$NEW already exists - remove it or finish the previous attempt"
-git -c protocol.version=0 clone --quiet "$REPO" "$NEW"
+git -c http.version=HTTP/1.1 clone --quiet "$REPO" "$NEW"
+git -C "$NEW" config http.version HTTP/1.1   # see fetch_main() in pfg-sync
 echo "HEAD: $(git -C "$NEW" log --oneline -1)"
 cp -p "$OLD/.env" "$NEW/.env"
 chmod 640 "$NEW/.env"

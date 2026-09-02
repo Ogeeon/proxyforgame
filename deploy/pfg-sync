@@ -124,16 +124,19 @@ apply_migrations() {
 # turns the credential prompt that 401 provokes into an immediate error instead
 # of a read against cron's dead stdin.
 #
-# protocol.version=0 is pinned because from 2026-09-02 GitHub started answering
-# the anonymous wire-protocol-v2 git-upload-pack POST from production's git
-# (2.30.2, no root to upgrade) with a 401 for hours at a stretch - the v0 ref
-# advertisement is served fine, and so is every request from the standby's newer
-# git. A single-branch fetch gets nothing from v2 anyway.
+# http.version=HTTP/1.1 is pinned because from 2026-09-02 the HTTP/2 POST to
+# github.com/.../git-upload-pack started hanging from production - the GET that
+# advertises the refs is served fine over h2, the POST that negotiates the pack
+# resets ("the remote end hung up unexpectedly", or "expected flush after ref
+# listing"), and git then falls through to a credential prompt and reports
+# "could not read Username for 'https://github.com'". Old libcurl (git 2.30.2,
+# no root to upgrade) against GitHub's edge; curl and the standby's newer git
+# are both unaffected. Forcing HTTP/1.1 sidesteps the broken h2 upload entirely.
 # ---------------------------------------------------------------------------
 fetch_main() {
   local attempt=1 delay
   while :; do
-    GIT_TERMINAL_PROMPT=0 git -c protocol.version=0 fetch --quiet origin main && return 0
+    GIT_TERMINAL_PROMPT=0 git -c http.version=HTTP/1.1 fetch --quiet origin main && return 0
     [ "$attempt" -ge 3 ] && return 1
     delay=$((attempt * 10))
     log "git fetch failed (attempt $attempt/3) - retrying in ${delay}s"
