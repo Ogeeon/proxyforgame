@@ -13,6 +13,14 @@ function loadEnv($path) {
             continue;
         }
         list($name, $value) = array_map('trim', explode('=', $line, 2));
+        // A real environment variable wins over the .env file (12-factor): this
+        // lets docker-compose set DB_HOST=db without the bind-mounted repo .env
+        // overriding it, and lets `make serve` honour a developer's customised
+        // .env. On the hosts and in CI nothing sets a conflicting variable, so
+        // .env still applies there.
+        if (getenv($name) !== false) {
+            continue;
+        }
         putenv("$name=$value");
         $_ENV[$name] = $value;
         $_SERVER[$name] = $value;

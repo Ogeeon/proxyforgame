@@ -30,11 +30,13 @@ DB_HOST ?= 127.0.0.1
 DB_USER ?= pfg_usr
 DB_PASS ?= secret
 DB_NAME ?= proxyforgame
-# Exported so `db-migrate` reaches deploy/pfg-migrate with connection info in the
-# environment. That recipe cannot use an inline `VAR=x cmd` prefix - it has to
-# work under cmd.exe too - so make does the exporting. A local .env, when present,
-# still wins inside the script (it is the real credentials on a dev box).
-export DB_HOST DB_USER DB_PASS DB_NAME
+# Exported per-target (below) rather than globally: only db-seed and db-migrate
+# need connection info in the environment, and a global export would let these
+# defaults override a developer's customised .env for `make serve` now that a
+# real env var wins over the file (www/db.connect.inc.php). The recipes cannot
+# use an inline `VAR=x cmd` prefix - they have to work under cmd.exe too - so
+# make does the exporting. A local .env, when present, still wins inside
+# pfg-migrate (it is the real credentials on a dev box).
 
 # Extra flags for `playwright install`; CI passes --with-deps.
 PW_DEPS ?=
@@ -93,6 +95,13 @@ install: ## Install test dependencies and Playwright browsers
 
 serve: ## Serve www/ with the built-in PHP server on PORT, default 8000
 	"$(PHP)" -S localhost:$(PORT) -t www
+
+# Connection info in the environment, for these two recipes only - see the DB_*
+# block near the top. pfg-migrate still lets a repo .env win over these.
+db-seed db-migrate: export DB_HOST := $(DB_HOST)
+db-seed db-migrate: export DB_USER := $(DB_USER)
+db-seed db-migrate: export DB_PASS := $(DB_PASS)
+db-seed db-migrate: export DB_NAME := $(DB_NAME)
 
 db-seed: ## Import schema.sql and the test fixtures, then apply pending migrations
 	mysql -h$(DB_HOST) -u$(DB_USER) -p$(DB_PASS) $(DB_NAME) < schema.sql
