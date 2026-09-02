@@ -480,7 +480,14 @@ function readSavedData(name) {
 // tab switch), and the named slots `prod_uni_*`, `flight_uni_*` and
 // `flight_fleet_*` (the save button). Those can sit in the old format
 // indefinitely, and removing this reader resets them to their defaults,
-// silently. See .claude/plans/settings-serialization.md (phase 4).
+// silently.
+//
+// The costs calculator is in neither list: it keeps its settings outside this
+// store entirely, in `costs_calculator_state` and `costs_lf_research_table`,
+// written to localStorage as JSON by its own saveState/loadState. Nothing of
+// costs has ever been in the legacy format.
+//
+// See .claude/plans/settings-serialization.md (phase 4).
 
 /** Applies a "property|index1|index2;value" entry (array/matrix field) onto params. */
 function applyCookieArrayEntry(params, parts) {
