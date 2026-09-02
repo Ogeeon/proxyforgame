@@ -52,6 +52,7 @@ const options = {
         flightData: [0],
         playerClass: 0,
         traderBonus: false,
+        warriorBonus: false,
         spCargohold: 0,
         lfMechanGE: 0,
         lfRocktalCE: 0,
@@ -71,6 +72,7 @@ const options = {
                 case 'circularGalaxies':
                 case 'circularSystems':
                 case 'traderBonus':
+                case 'warriorBonus':
                 case 'saveOneWay':
                 case 'fleetIgnoreEmptySystems':
                 case 'fleetIgnoreInactiveSystems': return value === 'true';
@@ -189,6 +191,7 @@ class FlightOrchestrator {
         prm.spCargohold = params.spCargohold;
         prm.playerClass = params.playerClass;
         prm.traderBonus = params.traderBonus;
+        prm.warriorBonus = params.warriorBonus;
         prm.lfMechanGE = params.lfMechanGE;
         prm.lfRocktalCE = params.lfRocktalCE;
         prm.lfShipsBonuses = params.lfShipsBonuses;
@@ -902,6 +905,7 @@ class FlightOrchestrator {
         this.renderer.renderSavePointMode(prm.saveOneWay);
         setChecked(`#class-${prm.playerClass}`, true);
         setChecked('#trader-bonus', prm.traderBonus);
+        setChecked('#warrior-bonus', prm.warriorBonus);
         setChecked(`#mission-type-${prm.missionType}`, true);
         setNumVal('#sp-cargohold', prm.spCargohold);
         setVal('#lf-mechan-general-enh', prm.lfMechanGE);
@@ -927,7 +931,6 @@ class FlightOrchestrator {
         }
         if (input.id === 'warrior-bonus' && input.checked) {
             setChecked('#trader-bonus', false);
-            this.opts.prm.traderBonus = false;
         }
         this.recalc();
     }
@@ -1229,7 +1232,8 @@ class FlightOrchestrator {
             ships: new Array(15).fill(0),
             startDT: 0, saveStartDT: 0, saveReturnDT: 0, saveTolerance: 0, saveOneWay: false,
             recallStartDT: 0, recallFullFlight: 0, recallMode: 0, recallMomentDT: 0, recallElapsed: 0,
-            hyperTechLvl: 0, playerClass: 0, traderBonus: false, spCargohold: 0,
+            hyperTechLvl: 0, playerClass: 0, traderBonus: false, warriorBonus: false,
+            spCargohold: 0,
             lfMechanGE: 0, lfRocktalCE: 0,
             lfShipsBonuses: Array.from({ length: 15 }, () => [0, 0, 0]),
             fleetIgnoreEmptySystems: false, fleetIgnoreInactiveSystems: false, flightData: [0],
