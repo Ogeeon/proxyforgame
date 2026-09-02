@@ -897,6 +897,33 @@ describe('Flight Calculator - Cargo Capacity', () => {
         expect(cargoFor({ [SHIP.ESP_PROBE]: 100 })).toBe(0);
         expect(cargoFor({ [SHIP.ESP_PROBE]: 100 }, { spCargohold: 5 })).toBe(500);
     });
+
+    it('the fraction of a hold is dropped once per ship, not once per fleet', () => {
+        const bonuses = Array.from({ length: 15 }, () => [0, 0, 0]);
+        bonuses[SHIP.LARGE_CARGO] = [0, 1.5, 0]; // +375 of the base 25000, a half-unit
+        // 25.375,5 per ship, so a hundred of them carry 2.537.500 and not 2.537.550
+        expect(cargoFor({ [SHIP.LARGE_CARGO]: 100 }, { lfShipsBonuses: bonuses }))
+            .toBe(100 * 25375);
+    });
+
+    // The same two flights the fuel tests above are measured against, .es universe
+    // 256 "Aries". Rounding per fleet put the first of them 53.330 over the game.
+    it('matches the game on the holds the reporter sent in', () => {
+        const general = { driveLevels: [26, 26, 26], playerClass: PLAYER_CLASS.GENERAL };
+
+        const recyclers = Array.from({ length: 15 }, () => [0, 0, 0]);
+        recyclers[SHIP.RECYCLER] = [834.208, 771.328, 12.13056];
+        expect(cargoFor({ [SHIP.RECYCLER]: 66664 }, {
+            ...general, hyperTechLvl: 24, lfMechanGE: 62.88, lfShipsBonuses: recyclers,
+        })).toBe(13651453920);
+
+        const mixed = Array.from({ length: 15 }, () => [0, 0, 0]);
+        mixed[SHIP.RECYCLER] = [841.6904, 778.2464, 12.24096];
+        mixed[SHIP.LARGE_CARGO] = [461.0264, 397.5824, 12.24096];
+        expect(cargoFor({ [SHIP.RECYCLER]: 1, [SHIP.LARGE_CARGO]: 1000000 }, {
+            ...general, hyperTechLvl: 24, lfMechanGE: 63.444, lfShipsBonuses: mixed,
+        })).toBe(154395206187);
+    });
 });
 
 describe('Flight Calculator - Time Field Parsing', () => {

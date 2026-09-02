@@ -45,6 +45,10 @@ const UPGRADES = {
     RECYCLER_IMPULSE: 16,     // above this, the recycler runs on impulse
 };
 
+// How far below a whole unit a ship's hold may land before it is read as that unit.
+// Cargo runs to eight digits at most, so this is far below anything meaningful.
+const CARGO_ROUNDING_TOLERANCE = 1e-6;
+
 // The class and life form fuel discounts add up rather than compound, and the game
 // stops the total here however deep the life form enhancement runs.
 const DEUT_REDUCTION_CAP = 90;
@@ -344,7 +348,11 @@ class FlightCalculator {
     // Cargo
     // ------------------------------------------------------------------
 
-    /** Total cargo the fleet can carry. */
+    /**
+     * Total cargo the fleet can carry. The hold of a single ship is what gets
+     * rounded off - the game drops the fraction once per ship and then multiplies,
+     * so a fleet of a million ships loses a million fractions, not one.
+     */
     getCargoCapacity(shipsData, shipCounts, params) {
         let capacity = 0;
 
@@ -354,26 +362,27 @@ class FlightCalculator {
                 continue;
             }
             const baseCargo = shipsData[i][4];
-            let increment = count * (baseCargo * (1 + 0.05 * params.hyperTechLvl));
+            let perShip = baseCargo * (1 + 0.05 * params.hyperTechLvl);
 
             // The collector hauls more in transports, the general in recyclers and
             // pathfinders; both extras are scaled by their life form enhancement
             if (params.playerClass === PLAYER_CLASS.COLLECTOR && i < 2) {
-                increment += Math.floor(count * baseCargo * 0.25 * (1 + params.lfRocktalCE * 0.01));
+                perShip += baseCargo * 0.25 * (1 + params.lfRocktalCE * 0.01);
             }
             if (params.playerClass === PLAYER_CLASS.GENERAL
                 && (i === SHIP.RECYCLER || i === SHIP.PATHFINDER)) {
-                increment += Math.floor(count * baseCargo * 0.2 * (1 + params.lfMechanGE * 0.01));
+                perShip += baseCargo * 0.2 * (1 + params.lfMechanGE * 0.01);
             }
 
-            const lfBonus = baseCargo * params.lfShipsBonuses[i][1] * 0.01;
-            // EPSILON keeps values like 4.999999 from rounding down a step
-            increment += Math.round((lfBonus + Number.EPSILON) * count);
+            perShip += baseCargo * params.lfShipsBonuses[i][1] * 0.01;
 
-            capacity += increment;
+            // The tolerance keeps a hold that is a whole number on paper, but lands a
+            // hair under it once the bonuses have been summed in binary, from losing
+            // a unit on every ship in the fleet
+            capacity += Math.floor(perShip + CARGO_ROUNDING_TOLERANCE) * count;
         }
 
-        return Math.floor(capacity);
+        return capacity;
     }
 
     // ------------------------------------------------------------------
