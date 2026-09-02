@@ -1,0 +1,80 @@
+# Local development stack: `docker compose up -d`, then http://localhost:8000.
+# WAMP on Windows is unaffected and still supported (README). The two production
+# hosts and CI do not use this file - see docs/adr/0002-docker-local-dev.md.
+#
+# Reset the database: `docker compose down -v && docker compose up -d`.
+# Port overrides: PFG_PORT (web, default 8000), PFG_DB_PORT (db, default 3306 -
+# stop a running WAMP MariaDB or set this to avoid the clash).
+
+services:
+  db:
+    # MariaDB 10.4 matches CI, both hosts and local WAMP. Bump in step with them.
+    image: mariadb:10.4
+    restart: unless-stopped
+    environment:
+      MARIADB_ROOT_PASSWORD: root
+      MARIADB_DATABASE: proxyforgame
+      MARIADB_USER: pfg_usr
+      MARIADB_PASSWORD: secret
+    ports:
+      - "${PFG_DB_PORT:-3306}:3306"
+    volumes:
+      - db-data:/var/lib/mysql
+      # Same files, same order, as `make db-seed` (minus the migrate step, which
+      # the `migrate` service runs). initdb.d only runs on a fresh volume.
+      - ./schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+      - ./playwright-tests/fixtures/changelog-seed.sql:/docker-entrypoint-initdb.d/02-changelog-seed.sql:ro
+    healthcheck:
+      # Passes only once the real server is up on TCP *and* the initdb.d scripts
+      # have run (schema_migrations comes from schema.sql). A bare `mysqladmin
+      # ping` would go green during the socket-only initdb phase and let the
+      # migrate/web services start against a database that is not seeded yet.
+      test: ["CMD-SHELL", "mysql -h127.0.0.1 -upfg_usr -psecret proxyforgame -e 'SELECT 1 FROM schema_migrations LIMIT 1' >/dev/null 2>&1 || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 40s
+
+  migrate:
+    # The mariadb image already has bash + the mysql client, so no build. Only
+    # deploy/ and db/ are mounted, under /mig - there is no /mig/.env, so
+    # deploy/pfg-migrate reads DB_* from the environment below.
+    image: mariadb:10.4
+    environment:
+      DB_HOST: db
+      DB_USER: pfg_usr
+      DB_PASS: secret
+      DB_NAME: proxyforgame
+    entrypoint: ["bash", "/mig/deploy/pfg-migrate", "/mig"]
+    command: []  # drop the image's default CMD, which would arrive as extra args
+    volumes:
+      - ./deploy:/mig/deploy:ro
+      - ./db:/mig/db:ro
+    depends_on:
+      db:
+        condition: service_healthy
+
+  web:
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile
+    restart: unless-stopped
+    environment:
+      DB_HOST: db
+      DB_USER: pfg_usr
+      DB_PASS: secret
+      DB_NAME: proxyforgame
+      # The built-in server is single-request by default; the Playwright suite
+      # hits it from several workers at once. Fork a small pool so one slow
+      # request (a page that talks to the DB, say) does not block the rest.
+      PHP_CLI_SERVER_WORKERS: "8"
+    ports:
+      - "${PFG_PORT:-8000}:8000"
+    volumes:
+      - .:/repo
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+
+volumes:
+  db-data:

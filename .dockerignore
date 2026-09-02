@@ -1,0 +1,14 @@
+# Keeps the `docker build` context small - the image only COPYs
+# docker/php/conf.d/pfg.ini; the app itself is bind-mounted at run time.
+.git
+.env
+node_modules
+playwright-tests/node_modules
+.cdn-cache
+.html-check
+test-results
+playwright-report
+blob-report
+playwright-tests/test-results
+playwright-tests/playwright-report
+playwright-tests/blob-report

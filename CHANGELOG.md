@@ -15,6 +15,10 @@ release section; it is the source of truth for the other eleven translations.
 
 ## [Unreleased]
 
+### Added
+
+- Build: a Docker Compose stack for local development. `docker compose up -d` (or `make docker-up`) serves the site on `http://localhost:8000` with a MariaDB seeded from `schema.sql` and the changelog fixture and migrated by `deploy/pfg-migrate` - the same files the deploy uses. The PHP container runs the built-in server, exactly as `make serve` and CI do. WAMP stays supported and unchanged; the production hosts and CI keep their own setup. See `docs/adr/0002-docker-local-dev.md`.
+
 ### Fixed
 
 - Build: a real environment variable now overrides a value of the same name in `.env` (`www/db.connect.inc.php`), which is the 12-factor order, so `docker compose` can point the app at its `db` service without the bind-mounted `.env` winning. Inert on the hosts and in CI, where nothing sets a conflicting variable. `make serve` also honours a customised `.env` again, because the Makefile no longer exports the `DB_*` defaults globally - only `db-seed` and `db-migrate` do.

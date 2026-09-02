@@ -68,6 +68,7 @@ PW ?= node node_modules/@playwright/test/cli.js
 .DEFAULT_GOAL := help
 
 .PHONY: help install serve db-seed db-migrate \
+        docker-up docker-down docker-logs \
         test test-unit test-e2e test-e2e-ui test-one report \
         check audit quality coverage db-validate lint typecheck php-version-check \
         changelog-validate changelog-release \
@@ -112,6 +113,17 @@ db-seed: ## Import schema.sql and the test fixtures, then apply pending migratio
 # read by the script and takes precedence over the exported DB_* above.
 db-migrate: ## Apply pending db/migrations/*.sql to the configured database
 	bash deploy/pfg-migrate .
+
+##@ Docker (local dev)
+
+docker-up: ## Start the Dockerised dev stack (web on :8000, MariaDB seeded)
+	docker compose up -d
+
+docker-down: ## Stop the stack; ARGS=-v also wipes the database volume
+	docker compose down $(ARGS)
+
+docker-logs: ## Follow the stack logs
+	docker compose logs -f
 
 ##@ Tests
 

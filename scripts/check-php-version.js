@@ -1,13 +1,15 @@
 #!/usr/bin/env node
 
 /**
- * Warns when the local PHP does not match .php-version.
+ * Warns when the local PHP, or the local-dev Docker image, does not match
+ * .php-version.
  *
  * .php-version holds production's PHP major.minor and is the single source of
  * truth (docs/adr/0001-php-version-alignment.md). Local dev is authoritative
  * only for the Node suite, lint and typecheck; anything PHP-shaped - including
  * `make html-validate` inside `make check` - runs against whatever PHP resolves
- * here, so a mismatch is worth surfacing.
+ * here, so a mismatch is worth surfacing. docker/php/Dockerfile pins its own
+ * base image and must track the same version (docs/adr/0002-docker-local-dev.md).
  *
  * This is advisory: it prints a warning and always exits 0. The forcing
  * function against real drift is deploy/watchdog.sh, which checks the live
@@ -30,6 +32,20 @@ try {
     console.warn(`warn: could not read ${VERSION_FILE}`);
     process.exit(0);
 }
+// The local-dev Docker image pins its own PHP in docker/php/Dockerfile. Check it
+// first: it does not depend on a local PHP being installed.
+try {
+    const dockerfile = fs.readFileSync(
+        path.join(REPO_ROOT, 'docker', 'php', 'Dockerfile'), 'utf8');
+    const m = dockerfile.match(/^FROM\s+php:(\d+\.\d+)/m);
+    if (m && m[1] !== want) {
+        console.warn(`warn: docker/php/Dockerfile pins php:${m[1]}, but .php-version pins ${want}.`);
+        console.warn('      Update the FROM line; see docs/adr/0002-docker-local-dev.md.');
+    }
+} catch {
+    // No Dockerfile - nothing to check.
+}
+
 const php = process.env.PFG_PHP || 'php';
 
 const result = spawnSync(
