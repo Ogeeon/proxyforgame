@@ -33,6 +33,7 @@ boxes is too old (`choco install make`).
 | `make tsconfigs` | Regenerate `tsconfig/<calc>.json` after editing a template's `<script>` tags |
 | `make audit` | Test coverage, DB schema, HTML reports (advisory) |
 | `make serve` | `php -S localhost:8000 -t www`, no WAMP needed |
+| `make docker-up` / `make docker-down` | Local Docker stack: PHP built-in server on :8000 + a seeded MariaDB (ADR-0002) |
 | `make i18n-fix` / `make i18n-report` | Translation sync and completion |
 | `make install` | `npm ci` + Playwright browsers |
 
@@ -57,6 +58,7 @@ Two things worth knowing before writing a test:
 ```powershell
 & 'd:\wamp64\bin\php\php8.2.33\php.exe' .\ogame\calc\flight.php
 ```
+With the Docker stack up: `docker compose exec web php ogame/calc/flight.php`.
 Local PHP is pinned to production's version in `.php-version` (see
 `docs/adr/0001-php-version-alignment.md`). Local dev is authoritative only for
 the Node suite, lint and typecheck; anything PHP-shaped is confirmed by CI or by
@@ -64,11 +66,14 @@ the Node suite, lint and typecheck; anything PHP-shaped is confirmed by CI or by
 version mismatch.
 
 ### Local Development
-- Configure WAMP virtual host pointing to `www/` directory (see README.md)
-- Add `127.0.0.1 pfg.wmp` to hosts file
-- Browse to `http://pfg.wmp` for full-site testing
-- Or skip WAMP entirely: `make serve` runs the built-in PHP server on `http://localhost:8000`,
-  which is the default the tests expect
+- `docker compose up -d` (or `make docker-up`) brings up the PHP built-in server on
+  `http://localhost:8000` plus a MariaDB seeded from `schema.sql` + the fixtures and
+  migrated — the quickest path, and what the tests default to. `docker compose down -v`
+  resets the database. See `docs/adr/0002-docker-local-dev.md`.
+- Or configure a WAMP virtual host pointing to `www/` (see README.md), add
+  `127.0.0.1 pfg.wmp` to the hosts file, and browse `http://pfg.wmp` for full-site testing.
+- Or skip both: `make serve` runs the built-in PHP server on `http://localhost:8000`
+  against whatever PHP/MariaDB is on the machine (`.env` for the DB).
 
 ## Git & Commits
 

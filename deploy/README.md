@@ -98,9 +98,10 @@ is the state this check exists to end.
 | deploy log | `<data>/logs/deploy.log` | `/var/log/pfg-cron.log` |
 | trigger | webhook, plus an hourly reconcile | five-minute timer |
 
-Both are Apache 2.4 with mod_php and a MariaDB of their own. No Docker. Opcache
-is on with `validate_timestamps` and `revalidate_freq=2`, so a deploy needs no
-cache flush — new files are picked up within two seconds.
+Both are Apache 2.4 with mod_php and a MariaDB of their own. No Docker — that is
+a local-dev convenience only (`docs/adr/0002-docker-local-dev.md`). Opcache is on
+with `validate_timestamps` and `revalidate_freq=2`, so a deploy needs no cache
+flush — new files are picked up within two seconds.
 
 ### Why the standby runs a different PHP
 

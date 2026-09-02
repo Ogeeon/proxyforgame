@@ -15,13 +15,27 @@ maths runs client-side in vanilla JavaScript on Bootstrap 5, and every string is
 `www/locale/` in 13 locales.
 
 ## Prerequisites
-- PHP 8.2 with mysqli enabled — production's version, pinned in `.php-version`
+- **Either** Docker with Compose v2 (the quickest path — see below) **or** PHP 8.2
+  with `mysqli`/`intl`/`mbstring` plus WAMP or a local MariaDB
+- PHP 8.2 is production's version, pinned in `.php-version`
 - Node.js 18+ for running Playwright tests
 - (Recommended) GNU Make 4.x as the task runner — `choco install make` on Windows. A 3.81
   build from GnuWin32 is too old. Everything below also works without it.
-- (Optional) MySQL/MariaDB if you want changelog functionality and domains/universes in the Trade calculator; import `schema.sql` and configure connection in the .env file
+- (Optional, non-Docker) MySQL/MariaDB if you want changelog functionality and
+  domains/universes in the Trade calculator; import `schema.sql` and configure the
+  connection in `.env`. Docker seeds this for you.
 
-## Quick start (no database)
+## Quick start (Docker)
+1) `docker compose up -d` &nbsp;— or `make docker-up`
+2) Open http://localhost:8000
+
+The `db` service is created, seeded from `schema.sql` + the test fixtures, and
+migrated automatically on the first run. Reset it with
+`docker compose down -v && docker compose up -d`. Port 3306 collides with a
+running WAMP MariaDB — stop one, or set `PFG_DB_PORT`. Details:
+[docs/adr/0002-docker-local-dev.md](docs/adr/0002-docker-local-dev.md).
+
+## Quick start — WAMP (Windows)
 WAMP virtual host (pretty URL `http://pfg.wmp`)
 1) Clone the repo to e.g. `d:/projects/pfg.wmp`.
 2) In WampServer, open Apache → httpd-vhosts.conf and add (adjust paths if needed):
@@ -41,9 +55,10 @@ WAMP virtual host (pretty URL `http://pfg.wmp`)
 ```
 4) Restart WampServer services, then browse http://pfg.wmp.
 
-## Optional: enable database
+### Enable the database (WAMP / bare `make serve` only)
+Docker does this for you; this section is for the non-Docker paths.
 1) Create a database and import `schema.sql`.
-2) Populate the `.env` file in the repo root with your actual values
+2) Populate the `.env` file in the repo root with your actual values.
 3) Restart the PHP server so `www/db.connect.inc.php` can pick up the variables.
 
 ## Run the tests
@@ -52,9 +67,13 @@ WAMP virtual host (pretty URL `http://pfg.wmp`)
 
 ```powershell
 make install       # npm ci + Playwright browsers, first run only
-make serve         # built-in PHP server on http://localhost:8000, if WAMP is not running
-make test          # unit suite + Playwright suite
+make serve         # built-in PHP server on http://localhost:8000 (or: make docker-up, or WAMP)
+make test          # unit suite + Playwright suite, against http://localhost:8000
 ```
+
+The suite runs on the host and points at `http://localhost:8000` by default, so
+any of `make docker-up`, `make serve` or WAMP (`PFG_BASE_URL=http://pfg.wmp`) can
+be the server under test.
 
 Point the suite at a different host with `make test-e2e PFG_BASE_URL=http://pfg.wmp`; it
 defaults to `http://localhost:8000`. Then `make report` opens the HTML report, and
