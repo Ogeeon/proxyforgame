@@ -468,8 +468,19 @@ function readSavedData(name) {
 // --- Legacy reader ---------------------------------------------------------
 // The `key-value;true,key;value,...` string format saveToCookie wrote before
 // the JSON switch. Kept only to read payloads still in a returning visitor's
-// storage; the cookie fallback expires after 365 days, so this whole block can
-// go once that window has passed (.claude/plans/settings-serialization.md).
+// storage.
+//
+// There is no date after which this block is safe to drop. The primary store is
+// localStorage, which never expires - only the cookie fallback does, after 365
+// days - and a key is rewritten as JSON only when something calls saveToCookie
+// on it. A calculator's own settings key migrates on the first page view,
+// because every calculator that has one saves at the end of the recalculation
+// it runs on load. The keys written only by an explicit user action do not:
+// `theme` (the theme toggle), `queue_active_tab` and `production_active_tab` (a
+// tab switch), and the named slots `prod_uni_*`, `flight_uni_*` and
+// `flight_fleet_*` (the save button). Those can sit in the old format
+// indefinitely, and removing this reader resets them to their defaults,
+// silently. See .claude/plans/settings-serialization.md (phase 4).
 
 /** Applies a "property|index1|index2;value" entry (array/matrix field) onto params. */
 function applyCookieArrayEntry(params, parts) {
