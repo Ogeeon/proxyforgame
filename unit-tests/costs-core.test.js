@@ -12,13 +12,13 @@ const { expect } = require('./expect');
 // ogame-production.js and ogame-costs.js first: costs-core.js calls their
 // getProductionRate and getHalvingCost helpers the way the page does, with all
 // three scripts sharing one global scope.
-const { GlobalParams, Calculator, universeSpeeds } = load(
+const { GlobalParams, Calculator, BuildRequest, universeSpeeds } = load(
     [
         'ogame/calc/js/ogame-production.js',
         'ogame/calc/js/ogame-costs.js',
         'ogame/calc/js/costs-core.js',
     ],
-    ['GlobalParams', 'Calculator', 'universeSpeeds'],
+    ['GlobalParams', 'Calculator', 'BuildRequest', 'universeSpeeds'],
 );
 
 // Research Lab levels the game requires, mirrored from $techReqs in costs.php.
@@ -188,34 +188,6 @@ describe('Calculator.halvingCost', () => {
 // and each is amplified by its own life form's technology bonus, which the life
 // form level carries at +0.1% per level.
 
-describe('GlobalParams class bonus amplification', () => {
-    it('amplifies the Collector bonus by the Rock’tal life form level', () => {
-        const params = new GlobalParams();
-        params.collectorClassBonus = 20;
-        params.lfRocktalLevel = 100;
-
-        // 20% * (1 + 100 * 0.001) = 22%
-        expect(params.collectorBonusPct).toBeCloseTo(22, 10);
-    });
-
-    it('amplifies the Discoverer bonus by the Kaelesh life form level', () => {
-        const params = new GlobalParams();
-        params.discovererClassBonus = 20;
-        params.lfKaeleshLevel = 100;
-
-        expect(params.discovererBonusPct).toBeCloseTo(22, 10);
-    });
-
-    it('leaves a bonus untouched when its life form level is zero', () => {
-        const params = new GlobalParams();
-        params.collectorClassBonus = 20;
-        params.discovererClassBonus = 20;
-
-        expect(params.collectorBonusPct).toBe(20);
-        expect(params.discovererBonusPct).toBe(20);
-    });
-});
-
 describe('GlobalParams cargo capacity', () => {
     /** Collector with no hyperspace tech and no separate capacity increase. */
     function collector(overrides = {}) {
@@ -229,27 +201,29 @@ describe('GlobalParams cargo capacity', () => {
         expect(collector().largeCargoCapacity).toBe(31250);
     });
 
-    it('boosts the Collector bonus by the amplified class bonus', () => {
+    it('boosts the Collector bonus by the class bonus as the game shows it', () => {
         // 5000 + 5000 * 0.25 * 1.22, and the same on the 25000 base
-        const params = collector({ collectorClassBonus: 20, lfRocktalLevel: 100 });
+        const params = collector({ collectorClassBonus: 22 });
 
         expect(params.smallCargoCapacity).toBe(6525);
         expect(params.largeCargoCapacity).toBe(32625);
     });
 
     it('ignores the class bonus for any class but the Collector', () => {
-        const params = collector({ playerClass: 2, collectorClassBonus: 20, lfRocktalLevel: 100 });
+        const params = collector({ playerClass: 2, collectorClassBonus: 20 });
 
         expect(params.smallCargoCapacity).toBe(5000);
     });
 });
 
 describe('GlobalParams.technocratFactor', () => {
-    it('boosts the Discoverer research speed by the amplified class bonus', () => {
+    // The game's life form panel prints the class bonus already amplified by the
+    // life form technology bonus ("Discoverer, Total: 57.35%"), so the field is
+    // taken as it stands - nothing is applied to it a second time.
+    it('boosts the Discoverer research speed by the class bonus as the game shows it', () => {
         const params = new GlobalParams();
         params.playerClass = 2;
-        params.discovererClassBonus = 20;
-        params.lfKaeleshLevel = 100;
+        params.discovererClassBonus = 22;
 
         // 1 - 0.25 * (1 + 0.22)
         expect(params.technocratFactor).toBeCloseTo(0.695, 10);
@@ -273,10 +247,10 @@ describe('Calculator.calculateProduction', () => {
         return Object.assign(params, overrides);
     }
 
-    it('passes the amplified Collector bonus into the production rate', () => {
+    it('passes the Collector bonus into the production rate', () => {
         const bare = calculator.calculateProduction(1, 10, mineParams());
         const boosted = calculator.calculateProduction(
-            1, 10, mineParams({ collectorClassBonus: 20, lfRocktalLevel: 100 })
+            1, 10, mineParams({ collectorClassBonus: 22 })
         );
 
         // The class row is round(basePR * 0.25 * k): 263 at k=1, 320 at k=1.22
@@ -284,7 +258,7 @@ describe('Calculator.calculateProduction', () => {
     });
 
     it('adds nothing for a class other than the Collector', () => {
-        const params = mineParams({ playerClass: 1, collectorClassBonus: 20, lfRocktalLevel: 100 });
+        const params = mineParams({ playerClass: 1, collectorClassBonus: 22 });
 
         expect(calculator.calculateProduction(1, 10, params))
             .toBe(calculator.calculateProduction(1, 10, mineParams({ playerClass: 1 })));
@@ -323,5 +297,36 @@ describe('universeSpeeds', () => {
     it('falls back to 1x for a missing or unreadable setting', () => {
         expect(speeds({ speed: '8' })).toEqual([8, 8]);
         expect(speeds({ speed: '', researchDurationDivisor: 'x' })).toEqual([1, 1]);
+    });
+});
+
+// One research measured in-game, kept as the anchor for the whole chain: the
+// class bonus, the technocrat, the life form reduction, the research speed and
+// the total lab level all land on it at once. A German player's account in
+// Undae, 2026-09-23 (feedback/additions): Laser Technology 12 -> 13, 17 planets
+// at Research Lab 20, IRN 17, all officers, Discoverer with "Total: 57.35%" on
+// the life form panel, and the life form research tracker reporting -52.382%.
+// The game showed 2m 20s. Reading the 57.35% as a raw figure to be amplified by
+// the life form level would give 2m 17s instead.
+describe('Calculator.calculate - a research time measured in the game', () => {
+    const LASER_TECH = 120;
+    // [metal, crystal, deuterium, cost growth factor], as costs.tpl emits it
+    const costs = { [LASER_TECH]: [200, 100, 0, 2] };
+
+    it('matches the game to the second on Laser Technology 13', () => {
+        const params = new GlobalParams();
+        params.playerClass = 2;
+        params.discovererClassBonus = 57.35;
+        params.technocrat = true;
+        params.researchSpeed = 20;          // economy 10 x research divisor 2
+        params.useDirectLabLevel = true;
+        params.researchLabLevel = 340;      // 17 planets at lab 20, all in the IRN
+        params.labChoice = -1;
+        params.lfResTimeRdcMap = { [LASER_TECH]: 52.382 };
+
+        const result = new Calculator(costs, { [LASER_TECH]: 1 })
+            .calculate(new BuildRequest(LASER_TECH, 12, 13), params);
+
+        expect(result.time).toBe(140);
     });
 });

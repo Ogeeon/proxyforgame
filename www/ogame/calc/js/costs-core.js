@@ -62,14 +62,14 @@ class GlobalParams {
   mineralResCntrLvl = 0; // Mineral Research Centre level (Rock'tal)
   lfTerraformerRdc = 0;  // LF Terraformer reduction, %
 
-  // LF researches that boost a player class, in %: the Kaelesh one boosts the
-  // 25% Discoverer research-speed bonus, the Rock'tal one boosts every Collector
-  // bonus. Each is amplified by its own life form's technology bonus, which the
-  // life form level carries (+0.1% per level, stops growing at level 100).
-  discovererClassBonus = 0;
-  collectorClassBonus = 0;
-  lfKaeleshLevel = 0;
-  lfRocktalLevel = 0;
+  // By how much a player class' own bonuses are raised, in %. The game's life
+  // form panel prints one figure per class - "Discoverer, Total: 57.35%" - and
+  // every line under it is that class' base bonus times 1.5735: the 25%
+  // research bonus reads 39.33%, the 1500% expedition bonus reads 2360.39%.
+  // The life form technology bonus, experience level included, is already
+  // inside that figure, so both fields take it exactly as the game shows it.
+  discovererClassBonus = 0;  // raised by the Kaelesh Discoverer Enhancement
+  collectorClassBonus = 0;   // raised by the Rock'tal Collector Enhancement
 
   // Cargo capacity increase (e.g. from lifeform bonuses), %
   scCapacityIncrease = 0; // Small Cargo capacity increase, %
@@ -77,22 +77,6 @@ class GlobalParams {
 
   // Exchange rates (M:C:D weights, normalized to metal=1)
   rates = [1, 1.5, 3];
-
-  /**
-   * Discoverer class bonus in %, amplified by the Kaelesh life form level.
-   * @returns {number}
-   */
-  get discovererBonusPct() {
-    return this.discovererClassBonus * (1 + this.lfKaeleshLevel * 0.001);
-  }
-
-  /**
-   * Collector class bonus in %, amplified by the Rock'tal life form level.
-   * @returns {number}
-   */
-  get collectorBonusPct() {
-    return this.collectorClassBonus * (1 + this.lfRocktalLevel * 0.001);
-  }
 
   /**
    * Get technocrat time reduction factor
@@ -104,7 +88,7 @@ class GlobalParams {
     if (this.researchBonus) factor *= 0.75;
     if (this.playerClass === 2) {
       // Discoverer: 25% research-speed bonus, boosted by the LF class bonus
-      factor *= 1 - 0.25 * (1 + this.discovererBonusPct / 100);
+      factor *= 1 - 0.25 * (1 + this.discovererClassBonus / 100);
     }
     return factor;
   }
@@ -184,7 +168,7 @@ class GlobalParams {
     let cap = baseCapacity * (1 + 0.05 * this.hyperTechLevel);
     // Collector +25%, itself boosted by the Rock'tal Collector Enhancement
     if (this.playerClass === 0) {
-      cap += baseCapacity * 0.25 * (1 + 0.01 * this.collectorBonusPct);
+      cap += baseCapacity * 0.25 * (1 + 0.01 * this.collectorClassBonus);
     }
     cap += Math.floor(baseCapacity * 0.01 * this.scCapacityIncrease);
     return cap;
@@ -200,7 +184,7 @@ class GlobalParams {
     let cap = baseCapacity * (1 + 0.05 * this.hyperTechLevel);
     // Collector +25%, itself boosted by the Rock'tal Collector Enhancement
     if (this.playerClass === 0) {
-      cap += baseCapacity * 0.25 * (1 + 0.01 * this.collectorBonusPct);
+      cap += baseCapacity * 0.25 * (1 + 0.01 * this.collectorClassBonus);
     }
     cap += Math.floor(baseCapacity * 0.01 * this.lcCapacityIncrease);
     return cap;
@@ -248,10 +232,7 @@ class GlobalParams {
       booster: { min: 0, max: 4, default: 0 },
       playerClass: { min: 0, max: 2, default: 0 },
       mineralResCntrLvl: { min: 0, max: 100, default: 0 },
-      lfTerraformerRdc: { min: 0, max: 50, default: 0 },
-      // The life form technology bonus stops growing at level 100
-      lfKaeleshLevel: { min: 0, max: 100, default: 0 },
-      lfRocktalLevel: { min: 0, max: 100, default: 0 }
+      lfTerraformerRdc: { min: 0, max: 50, default: 0 }
     };
 
     const rule = rules[field];
@@ -590,7 +571,7 @@ class Calculator {
         allOfficers: params.hasFullCrew,
         playerClass: params.playerClass,
         isTrader: params.isTrader,
-        collectorClassBonusPct: params.collectorBonusPct
+        collectorClassBonusPct: params.collectorClassBonus
       });
       const allStaffBonus = params.hasFullCrew ? Math.round(prod[1] * 0.02) : 0;
       return prod[1] + prod[5] + allStaffBonus; // base + engineer bonus + all-officers bonus
@@ -613,7 +594,7 @@ class Calculator {
       allOfficers: params.hasFullCrew,
       playerClass: params.playerClass,
       isTrader: params.isTrader,
-      collectorClassBonusPct: params.collectorBonusPct
+      collectorClassBonusPct: params.collectorClassBonus
     });
   }
 

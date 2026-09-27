@@ -41,6 +41,8 @@ release section; it is the source of truth for the other eleven translations.
 
 - Costs: the life form research bonuses now import from a German game client. The paste parser accepted only a dot as the decimal separator, but the separator follows the game's language, not the site's, and the German client writes "52,38%" - so every fractional value arrived cut off at the comma, and a 0,2% bonus came in as 0. Both separators are read now; neither can be a thousands separator here, because every value on that panel is a percentage below 1000. <!-- site -->
 
+- Costs, Production: the character class bonus is now entered as the game shows it. Both calculators multiplied the figure by the life form experience level - 57,35% became 63,09% at level 100 - on the premise that the game's class panel printed the raw research total. It does not: "Discoverer, Total: 57.35%" is the amplified figure, and every bonus listed under it is the base bonus times 1,5735, the level included. The reduction was therefore counted twice, and a research came out several percent too fast. Checked against a measured research rather than reasoning: Laser Technology 13 in a German player's account in Undae, 17 labs totalling level 340, research speed 20, -52,382% from the life form researches, technocrat and Discoverer - the game says 2m 20s, the calculator now says 2m 20s, and the old reading said 2m 17s. The "Lifeform level" field existed only to carry that amplification and is gone from both pages; the hint beside the class bonus now says which value from the game belongs there. The flight calculator was always right and is unchanged. <!-- site -->
+
 ## [2026-09-01] - site entry 63
 
 ### Added

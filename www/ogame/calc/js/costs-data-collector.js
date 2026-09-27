@@ -70,9 +70,7 @@ class DataCollector {
     params.mineralResCntrLvl = this._getInputNumber('#mineral-res-cntr-lvl');
     params.lfTerraformerRdc = this._getInputNumber('#lf-terraformer-rdc');
     params.discovererClassBonus = this._getInputNumber('#discoverer-class-bonus');
-    params.lfKaeleshLevel = this._getInputNumber('#lf-kaelesh-level');
     params.collectorClassBonus = this._getInputNumber('#lf-collector-class-bonus');
-    params.lfRocktalLevel = this._getInputNumber('#lf-rocktal-level');
 
     // Cargo capacity increase
     params.scCapacityIncrease = this._getInputNumber('#sc-capacity-increase');
@@ -391,15 +389,12 @@ class DataCollector {
       // The "Research bonuses" table drives all research cost/time reductions
       'lf-research-table': ['table-0-4', 'table-1-4'],
 
-      // Discoverer class bonus boosts the Discoverer research-speed bonus, and
-      // the Kaelesh life form level amplifies that bonus in turn
+      // The Discoverer class bonus raises the Discoverer research-speed bonus
       'discoverer-class-bonus': ['table-0-4', 'table-1-4'],
-      'lf-kaelesh-level': ['table-0-4', 'table-1-4'],
 
-      // The Collector class bonus and its Rock'tal amplifier feed the +25% cargo
-      // capacity, so they move the transports-needed row under every table
+      // The Collector class bonus feeds the +25% cargo capacity, so it moves
+      // the transports-needed row under every table
       'lf-collector-class-bonus': ['*'],
-      'lf-rocktal-level': ['*'],
 
       // Mineral Research Centre affects planet building tables (mines)
       'mineral-res-cntr-lvl': ['table-0-2', 'table-1-2'],
@@ -445,8 +440,7 @@ class DataCollector {
       'research-bonus', 'robot-factory-level', 'nanite-factory-level',
       'shipyard-level', 'ion-tech-level', 'hyper-tech-level',
       'class-0', 'class-1', 'class-2', 'is-trader', 'full-numbers',
-      'lf-research-table', 'discoverer-class-bonus', 'lf-kaelesh-level',
-      'lf-collector-class-bonus', 'lf-rocktal-level',
+      'lf-research-table', 'discoverer-class-bonus', 'lf-collector-class-bonus',
       'mineral-res-cntr-lvl', 'lf-terraformer-rdc',
       'sc-capacity-increase', 'lc-capacity-increase',
       'exchange-rates'

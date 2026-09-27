@@ -118,13 +118,14 @@ function stripHTMLTags(input) {
  *
  * The increase comes from a life form RESEARCH (Rock'tal Collector Enhancement),
  * and OGame amplifies every research effect by the life form technology bonus.
- * The experience level is one of that bonus' sources: +0.1% per level, capped at
- * level 100. The character class panel in the game shows the raw research total,
- * which is what `lfCollectorBonus` holds, so the amplifier is applied here.
+ * The figure the game's life form panel prints beside the class - "Collector,
+ * Total: X%" - is the amplified one: every bonus listed under it is the base
+ * bonus times 1 + X/100. So the field holds the final value and nothing is
+ * applied to it here.
  * @returns {number} percent by which every Collector bonus is increased
  */
 function collectorClassBonusPct() {
-	return (options.prm.lfCollectorBonus || 0) * (1 + (options.prm.lfExpLevel || 0) * 0.001);
+	return options.prm.lfCollectorBonus || 0;
 }
 
 function getSSCost(techID, currLvl, plnData) {
@@ -437,11 +438,10 @@ function applyLfBuildingProduction(lfEff, results, lfBld, production) {
 function calculateProduction(prodParams, plnData, normalized = false, lfEff = undefined) {
 	if (!lfEff) lfEff = emptyLfEffects();
 	// NOTE: the life form technology bonus (Metropolis, Chip Mass Production,
-	// HP-Transformer) is not modelled here. OGame folds it into the research
-	// percentages shown on its life form panel, which is where the user copies them
-	// from, so applying it here would double-count it. The one exception is the
-	// Collector class bonus - the class panel shows it raw, so collectorClassBonusPct()
-	// amplifies it by the experience level part of that tech bonus.
+	// HP-Transformer) is not modelled here. OGame folds it into the percentages
+	// shown on its life form panel, which is where the user copies them from, so
+	// applying it here would double-count it. That holds for the Collector class
+	// bonus too: the panel's "Total" beside the class is the amplified figure.
 	// See docs/calculators/production-vs-ogame.md.
 	// What each life form building contributes on its own: [met, crys, deut,
 	// energy produced, energy used]. Reported separately from the results rows so

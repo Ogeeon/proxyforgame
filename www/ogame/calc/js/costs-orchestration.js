@@ -508,21 +508,16 @@ class CostsCalculator {
     // Lifeform reduction inputs
     const lfInputs = [
       '#discoverer-class-bonus',
-      '#lf-kaelesh-level',
       '#lf-collector-class-bonus',
-      '#lf-rocktal-level',
       '#mineral-res-cntr-lvl',
       '#lf-terraformer-rdc',
       '#sc-capacity-increase',
       '#lc-capacity-increase'
     ];
 
-    // Class bonuses are uncapped percentages; the life form levels are whole
-    // levels and the technology bonus they carry stops growing at 100
+    // Class bonuses are uncapped percentages
     setConstrains('discoverer-class-bonus', { min: 0, max: Infinity, def: 0, allowFloat: true, allowNegative: false });
     setConstrains('lf-collector-class-bonus', { min: 0, max: Infinity, def: 0, allowFloat: true, allowNegative: false });
-    setConstrains('lf-kaelesh-level', { min: 0, max: 100, def: 0, allowFloat: false, allowNegative: false });
-    setConstrains('lf-rocktal-level', { min: 0, max: 100, def: 0, allowFloat: false, allowNegative: false });
     setConstrains('lf-terraformer-rdc', { min: 0, max: 50, def: 0, allowFloat: true, allowNegative: false });
     setConstrains('sc-capacity-increase', { min: 0, max: 1000, def: 0, allowFloat: true, allowNegative: false });
     setConstrains('lc-capacity-increase', { min: 0, max: 1000, def: 0, allowFloat: true, allowNegative: false });
@@ -1264,9 +1259,7 @@ class CostsCalculator {
       mineralResCntrLvl: params.mineralResCntrLvl,
       lfTerraformerRdc: params.lfTerraformerRdc,
       discovererClassBonus: params.discovererClassBonus,
-      lfKaeleshLevel: params.lfKaeleshLevel,
       collectorClassBonus: params.collectorClassBonus,
-      lfRocktalLevel: params.lfRocktalLevel,
       scCapacityIncrease: params.scCapacityIncrease,
       lcCapacityIncrease: params.lcCapacityIncrease,
       rates: params.rates,
@@ -1365,9 +1358,7 @@ class CostsCalculator {
       mineralResCntrLvl: '#mineral-res-cntr-lvl',
       lfTerraformerRdc: '#lf-terraformer-rdc',
       discovererClassBonus: '#discoverer-class-bonus',
-      lfKaeleshLevel: '#lf-kaelesh-level',
       collectorClassBonus: '#lf-collector-class-bonus',
-      lfRocktalLevel: '#lf-rocktal-level',
       scCapacityIncrease: '#sc-capacity-increase',
       lcCapacityIncrease: '#lc-capacity-increase',
       booster: '#booster',
@@ -1535,11 +1526,9 @@ class CostsCalculator {
     setNumVal('#exchange-rates-c', 1.5);
     setNumVal('#exchange-rates-d', 3);
 
-    // LF class bonuses, their life form levels and the cargo capacity increase
+    // LF class bonuses and the cargo capacity increase
     setVal('#discoverer-class-bonus', 0);
-    setVal('#lf-kaelesh-level', 0);
     setVal('#lf-collector-class-bonus', 0);
-    setVal('#lf-rocktal-level', 0);
     setVal('#sc-capacity-increase', 0);
     setVal('#lc-capacity-increase', 0);
 

@@ -295,11 +295,6 @@
             <div class="d-flex flex-wrap align-items-center gap-2 border rounded p-2">
               <span class="fw-semibold"><?= $l['class-collector'] ?> (<?= $l['race-2'] ?>):</span>
               <div class="d-flex align-items-center gap-1">
-                <label for="lf-rocktal-level"><?= $l['lf-experience-level'] ?></label>
-                <input id="lf-rocktal-level" type="text" name="lf-rocktal-level" class="form-control form-control-sm level-input" value="0" data-field-title="<?= $l['lf-experience-level'] ?>">
-                <i class="bi bi-question-circle" data-bs-toggle="tooltip" title="<?= htmlspecialchars($l['lf-experience-level-hint'], ENT_QUOTES) ?>"></i>
-              </div>
-              <div class="d-flex align-items-center gap-1">
                 <label for="lf-collector-class-bonus"><?= $l['lf-class-bonus'] ?></label>
                 <div class="input-group input-group-sm w-auto">
                   <input id="lf-collector-class-bonus" type="text" name="lf-collector-class-bonus" class="form-control level-input m-0" value="0" data-field-title="<?= $l['collectors-character-bonus'] ?>">
@@ -310,11 +305,6 @@
             </div>
             <div class="d-flex flex-wrap align-items-center gap-2 border rounded p-2">
               <span class="fw-semibold"><?= $l['class-discoverer'] ?> (<?= $l['race-4'] ?>):</span>
-              <div class="d-flex align-items-center gap-1">
-                <label for="lf-kaelesh-level"><?= $l['lf-experience-level'] ?></label>
-                <input id="lf-kaelesh-level" type="text" name="lf-kaelesh-level" class="form-control form-control-sm level-input" value="0" data-field-title="<?= $l['lf-experience-level'] ?>">
-                <i class="bi bi-question-circle" data-bs-toggle="tooltip" title="<?= htmlspecialchars($l['lf-experience-level-hint'], ENT_QUOTES) ?>"></i>
-              </div>
               <div class="d-flex align-items-center gap-1">
                 <label for="discoverer-class-bonus"><?= $l['lf-class-bonus'] ?></label>
                 <div class="input-group input-group-sm w-auto">
