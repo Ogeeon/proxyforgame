@@ -10,7 +10,7 @@
     "sc-short": "MT",
     "lc-short": "VT",
     "cargo-cap-increase": "Cargo capacity increase: ",
-    "decimal-separator": ".",
+    "decimal-separator": ",",
     "metal": "Metal",
     "crystal": "Kristal",
     "deuterium": "Deuterij",

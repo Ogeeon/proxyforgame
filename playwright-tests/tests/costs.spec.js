@@ -842,6 +842,26 @@ test.describe('Costs Calculator - LifeForm research bonuses table', () => {
         await expect(secondRow.locator('.lf-research-time-input')).toHaveValue('4.41');
     });
 
+    // German writes fractions with a comma too, and used to be configured with a
+    // dot - so a German player could not type one into any field on the site.
+    test.describe('German locale', () => {
+        test.use({ locale: 'de-DE' });
+
+        test('takes and shows a comma in a fractional field', async ({ page }) => {
+            await page.locator('#param-lifeforms-tab').click();
+            const bonus = page.locator('#discoverer-class-bonus');
+
+            await bonus.fill('57,35');
+            await bonus.press('Tab');
+            await expect(bonus).toHaveValue('57,35');
+
+            // A dot is not the German separator, so it is not a decimal point
+            await bonus.fill('57.35');
+            await bonus.press('Tab');
+            await expect(bonus).not.toHaveValue('57.35');
+        });
+    });
+
     // Russian uses a comma as the decimal separator (options.decimalSeparator).
     // Select the language via the context locale (Accept-Language) rather than a
     // "/ru/" URL prefix: the prefix relies on an Apache rewrite that is absent
