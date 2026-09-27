@@ -137,6 +137,7 @@
     "lf-bonuses-ships": "Bónus de estatísticas de navios (%)",
     "lf-bonuses-api-import-hint": "Todos estes valores também podem ser obtidos automaticamente através do botão «Importar do OGame» (ícone da área de transferência) na parte superior do formulário.",
     "universe": "Universo",
+    "server-data-failed-msg": "Não foi possível carregar as definições do universo. Verifique os valores abaixo e corrija-os manualmente.",
     "universe-load": "Carga",
     "universe-save": "Guardar",
     "universe-delete": "Eliminar",
@@ -335,7 +336,8 @@
     "disclaimer-robot-nanite": "Por favor, tenha em conta a nota na primeira linha da tabela ao ler os tempos de construção. Se estiver a construir uma Fábrica de Robôs ou uma Fábrica de Nanites, utilize a <a href=\"{0}\">Calculadora de fila de construção</a> para cálculos precisos do tempo de construção.",
     "disclaimer-title": "Atenção",
     "discoverer-class-bonus": "Bônus de classe Descobridor",
-    "discoverer-class-bonus-hint": "Aumento do bônus da classe Descobridor pela pesquisa 'Melhoramento de Descobridor dos Kaelesh': 0,2 % por nível de pesquisa, sem o bônus de tecnologia das formas de vida — esse é adicionado pelo campo 'Nível da forma de vida'. Aplica-se apenas se na aba 'Geral' estiver selecionada a classe 'Descobridor'."
+    "discoverer-class-bonus-hint": "Aumento do bônus da classe Descobridor pela pesquisa 'Melhoramento de Descobridor dos Kaelesh': 0,2 % por nível de pesquisa, sem o bônus de tecnologia das formas de vida — esse é adicionado pelo campo 'Nível da forma de vida'. Aplica-se apenas se na aba 'Geral' estiver selecionada a classe 'Descobridor'.",
+    "research-speed-hint": "A velocidade de pesquisa é a velocidade económica multiplicada pelo fator de pesquisa do universo, p. ex. 5 × 3 = 15. Ao escolher o universo acima, ambas as velocidades são preenchidas automaticamente."
   },
   "lfcosts": {
     "title": "OGame - Calculadora de Custos para Formas de vida",
@@ -574,7 +576,6 @@
     "own-api-import-title": "Importar",
     "own-api-bad-json-msg": "Não foi possível ler os dados.\\nVerifique se você colou o texto do campo API 2 da página «Frota».",
     "import-failed-msg": "Não foi possível carregar os dados.\\nO servidor retornou uma resposta inválida. Tente novamente mais tarde.",
-    "server-data-failed-msg": "Não foi possível carregar as definições do universo. Verifique os valores abaixo e corrija-os manualmente.",
     "populated-systems-failed-msg": "O mapa dos sistemas povoados não está disponível, por isso nenhum sistema é contado como ignorado. Pode introduzir o número manualmente."
   },
   "graviton": {

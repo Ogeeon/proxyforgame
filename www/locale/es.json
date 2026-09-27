@@ -136,6 +136,7 @@
     "lf-bonuses-ships": "Bonificaciones a las estadísticas de las naves (%)",
     "lf-bonuses-api-import-hint": "Todos estos valores también se pueden obtener automáticamente mediante el botón «Importar desde OGame» (icono de portapapeles) en la parte superior del formulario.",
     "universe": "Universo",
+    "server-data-failed-msg": "No se han podido cargar los ajustes del universo. Comprueba los valores de abajo y corrígelos a mano.",
     "universe-load": "Cargar",
     "universe-save": "Guardar",
     "universe-delete": "Borrar",
@@ -335,7 +336,8 @@
     "disclaimer-robot-nanite": "Por favor, ten en cuenta la nota de la primera fila de la tabla al leer los tiempos de construcción. Si estás construyendo una Fábrica de Robots o una Fábrica de Nanobots, utiliza la <a href=\"{0}\">Calculadora de cola de construcción</a> para calcular con precisión los tiempos de construcción.",
     "disclaimer-title": "Atención",
     "discoverer-class-bonus": "Bonificación de clase Descubridor",
-    "discoverer-class-bonus-hint": "Aumento de la bonificación de clase del Descubridor por la investigación 'Refuerzo de Descubridor de los Kaelesh': 0,2 % por nivel de investigación, sin la bonificación de tecnología de formas de vida — esa se añade con el campo 'Nivel de forma de vida'. Se aplica solo si en la pestaña 'General' está seleccionada la clase 'Descubridor'."
+    "discoverer-class-bonus-hint": "Aumento de la bonificación de clase del Descubridor por la investigación 'Refuerzo de Descubridor de los Kaelesh': 0,2 % por nivel de investigación, sin la bonificación de tecnología de formas de vida — esa se añade con el campo 'Nivel de forma de vida'. Se aplica solo si en la pestaña 'General' está seleccionada la clase 'Descubridor'.",
+    "research-speed-hint": "La velocidad de investigación es la velocidad económica multiplicada por el factor de investigación del universo, p. ej. 5 × 3 = 15. Al elegir el universo arriba, ambas velocidades se rellenan solas."
   },
   "lfcosts": {
     "title": "OGame - Calculadora de Costes para formas de vida",
@@ -574,7 +576,6 @@
     "own-api-import-title": "Importar",
     "own-api-bad-json-msg": "No se pudieron leer los datos.\\nAsegúrate de haber pegado el texto del campo API 2 de la página «Flota».",
     "import-failed-msg": "No se pudieron cargar los datos.\\nEl servidor devolvió una respuesta no válida. Inténtalo de nuevo más tarde.",
-    "server-data-failed-msg": "No se han podido cargar los ajustes del universo. Comprueba los valores de abajo y corrígelos a mano.",
     "populated-systems-failed-msg": "El mapa de sistemas poblados no está disponible, por lo que no se cuenta ningún sistema como omitido. Puedes introducir su número a mano."
   },
   "graviton": {

@@ -1,11 +1,16 @@
 <?php
 
 require_once '../../langs.php';
+require_once 'universes.inc.php';
 $lang = getLang();
 $currUrl = '/ogame/calc/costs.php';
 
 require_once '../../Intl.php';
 $l = Intl::getTranslations($lang, 'costs');
+
+// The universe picker fills in the economy and research speeds
+$countries = loadUniverseCountries($lang);
+$universes = loadUniverses($countries);
 
 // id => (translation key, type, metal, crystal, deuterium, cost-growth factor}
 $techData = array(

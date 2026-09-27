@@ -399,6 +399,9 @@ class CostsCalculator {
     // LifeForm research bonuses full table modal
     this._bindLfResearchTableEvents();
 
+    // Universe picker - fills in the economy and research speeds
+    this._bindUniverseEvents();
+
     // console.log('Event handlers bound');
   }
 
@@ -797,6 +800,85 @@ class CostsCalculator {
   }
 
   /**
+   * Bind the country/universe picker. Choosing a universe fetches its settings
+   * and fills in both speeds; they stay editable afterwards, the picker only
+   * saves the player from working out the research speed themselves.
+   * @private
+   */
+  _bindUniverseEvents() {
+    removeAllEvents('#country', 'change');
+    addEvent('#country', 'change', () => {
+      this._fillUniverseList(selectEl('#country')?.value ?? '', '');
+      this.saveState();
+    });
+    removeAllEvents('#universe', 'change');
+    addEvent('#universe', 'change', () => {
+      this.saveState();
+      this._fetchUniverseSpeeds();
+    });
+  }
+
+  /**
+   * Fill the universe select with the universes of a country, selecting one
+   * of them - or none, when it is not in the list.
+   * @param {string} country country code, '--' for none
+   * @param {string|number} universe universe number to select
+   * @private
+   */
+  _fillUniverseList(country, universe) {
+    const universeEl = selectEl('#universe');
+    if (!universeEl) return;
+    universeEl.innerHTML = '';
+    const list = (typeof unis !== 'undefined' && unis[country]) || [];
+    list.forEach(([number, name]) => {
+      const option = document.createElement('option');
+      option.value = String(number);
+      option.textContent = name;
+      universeEl.appendChild(option);
+    });
+    // An unknown number leaves the select showing no universe at all
+    universeEl.value = String(universe);
+  }
+
+  /**
+   * Fetch the chosen universe's settings and apply its speeds.
+   * @private
+   */
+  async _fetchUniverseSpeeds() {
+    const country = selectEl('#country')?.value ?? '';
+    const universe = selectEl('#universe')?.value ?? '';
+    if (country === '' || country === '--' || universe === '') return;
+    try {
+      const speeds = universeSpeeds(await apiGet('serverdata', { country, universe }));
+      this._selectSpeed('#universe-speed', speeds.universeSpeed);
+      this._selectSpeed('#research-speed', speeds.researchSpeed);
+      this._handleParamChange('speed');
+    } catch (error) {
+      console.error('Failed to fetch universe settings:', error);
+      // Nobody but the picker asked, so a toast rather than a modal - but not
+      // silence, or the old speeds would pass for the universe's own
+      showToast(options.serverDataFailedMsg, 'danger');
+    }
+  }
+
+  /**
+   * Select a speed if the select offers it. Every live universe fits the
+   * lists today (the fastest research is 10 x 2 = 20); a value beyond them
+   * leaves the current choice alone rather than picking a wrong one.
+   * @param {string} selector
+   * @param {number} value
+   * @private
+   */
+  _selectSpeed(selector, value) {
+    const el = selectEl(selector);
+    if (!el) return;
+    const wanted = String(value);
+    if ([...el.options].some(option => option.value === wanted)) {
+      el.value = wanted;
+    }
+  }
+
+  /**
    * Read the cost/time value pairs currently entered in the table.
    * @returns {{cost: number, time: number}[]}
    * @private
@@ -1187,7 +1269,10 @@ class CostsCalculator {
       lfRocktalLevel: params.lfRocktalLevel,
       scCapacityIncrease: params.scCapacityIncrease,
       lcCapacityIncrease: params.lcCapacityIncrease,
-      rates: params.rates
+      rates: params.rates,
+      // The picker is not a calculation input, so it lives outside GlobalParams
+      country: selectEl('#country')?.value ?? '--',
+      universe: selectEl('#universe')?.value ?? ''
     };
 
     try {
@@ -1329,6 +1414,13 @@ class CostsCalculator {
     }
     setChecked('#is-trader', state.isTrader === true);
 
+    // Universe picker: restore the choice, the speeds it filled in are
+    // already among the fields above - no need to fetch them again
+    if (typeof state.country === 'string') {
+      setVal('#country', state.country);
+      this._fillUniverseList(state.country, state.universe ?? '');
+    }
+
     // IRN lab levels
     if (state.labLevels && state.labLevels.length > 0) {
       this._applyLabLevels(state);
@@ -1407,7 +1499,9 @@ class CostsCalculator {
     setVal('#robot-factory-level-moon', 0);
     setVal('#nanite-factory-level', 0);
 
-    // Speeds
+    // Speeds and the universe picker that fills them in
+    setVal('#country', '--');
+    this._fillUniverseList('--', '');
     setVal('#universe-speed', 1);
     setVal('#research-speed', 1);
 

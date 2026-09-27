@@ -11,6 +11,9 @@
     $xml = loadServerDataXml($country, $universe);
 
     return array(
+      // Economy speed; research runs at speed * researchDurationDivisor
+      'speed' => (string)$xml->speed,
+      'researchDurationDivisor' => (string)$xml->researchDurationDivisor,
       'speedFleetPeaceful' => (string)$xml->speedFleetPeaceful,
       'speedFleetWar' => (string)$xml->speedFleetWar,
       'speedFleetHolding' => (string)$xml->speedFleetHolding,

@@ -880,3 +880,77 @@ test.describe('Costs Calculator - LifeForm research bonuses table', () => {
         });
     });
 });
+
+// The picker fills in both speeds from the universe's serverData. The research
+// speed is not published as such: it is economy speed * researchDurationDivisor,
+// and players who pick it by hand get it wrong (Buzz: 5 * 3 = 15, not 10).
+// The serverdata request leaves from the server, so the page's call is stubbed.
+test.describe('Costs Calculator - universe picker', () => {
+    const BUZZ = JSON.stringify({ speed: '5', researchDurationDivisor: '3' });
+
+    test.beforeEach(async ({ context, page }) => {
+        await context.addInitScript(() => {
+            localStorage.setItem('lastChange', 'key-value;true,value;99999');
+            document.cookie = 'costs_rn_disclaimer_shown=1; path=/';
+        });
+        await page.goto('/ogame/calc/costs.php');
+        await page.locator('#param-common-tab').click();
+    });
+
+    test('choosing a universe fills in the economy and research speeds', async ({ page }) => {
+        await page.route(/\/ajax\.php\?.*service=serverdata/, (route) => route.fulfill({
+            status: 200, contentType: 'application/json', body: BUZZ
+        }));
+        await page.locator('#country').selectOption('en');
+        // The list is filled from the `unis` global; take whatever it offers first
+        await page.locator('#universe').selectOption({ index: 0 });
+
+        await expect(page.locator('#universe-speed')).toHaveValue('5');
+        await expect(page.locator('#research-speed')).toHaveValue('15');
+
+        // Astrophysics 1 at lab 3: (4000 + 8000) / (1000 * 4) h = 3 h at 1x, 12 min at 15x
+        await page.locator('#param-buildings-tab').click();
+        await page.locator('#research-lab-level').fill('3');
+        await page.locator('#research-lab-level').press('Enter');
+        await page.getByRole('tab', { name: 'All items - one level' }).click();
+        await page.locator('#tabtag-0-4').click();
+        const astro = page.locator('#table-0-4 tr', { hasText: 'Astrophysics' });
+        await astro.locator('input').fill('1');
+        await astro.locator('input').press('Enter');
+        // The first cell is the hidden tech id, so Time is the ninth
+        await expect(astro.locator('td:nth-child(9)')).toHaveText('12m');
+    });
+
+    test('the chosen universe survives a reload without being fetched again', async ({ page }) => {
+        await page.route(/\/ajax\.php\?.*service=serverdata/, (route) => route.fulfill({
+            status: 200, contentType: 'application/json', body: BUZZ
+        }));
+        await page.locator('#country').selectOption('en');
+        await page.locator('#universe').selectOption({ index: 0 });
+        await expect(page.locator('#research-speed')).toHaveValue('15');
+        const universe = await page.locator('#universe').inputValue();
+
+        let fetched = false;
+        await page.unroute(/\/ajax\.php\?.*service=serverdata/);
+        await page.route(/\/ajax\.php\?.*service=serverdata/, (route) => {
+            fetched = true;
+            return route.fulfill({ status: 503 });
+        });
+        await page.reload();
+
+        await expect(page.locator('#country')).toHaveValue('en');
+        await expect(page.locator('#universe')).toHaveValue(universe);
+        await expect(page.locator('#research-speed')).toHaveValue('15');
+        expect(fetched).toBe(false);
+    });
+
+    test('a failed fetch keeps the speeds and says so', async ({ page }) => {
+        await page.route(/\/ajax\.php\?.*service=serverdata/, (route) => route.fulfill({ status: 503 }));
+        await page.locator('#research-speed').selectOption('7');
+        await page.locator('#country').selectOption('en');
+        await page.locator('#universe').selectOption({ index: 0 });
+
+        await expect(page.locator('.toast-body')).toContainText('universe settings');
+        await expect(page.locator('#research-speed')).toHaveValue('7');
+    });
+});

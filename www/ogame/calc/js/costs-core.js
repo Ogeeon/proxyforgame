@@ -803,6 +803,23 @@ class Calculator {
   }
 }
 
+/**
+ * The economy and research speeds of a universe, from its serverData.
+ *
+ * OGame does not publish the research speed itself: it runs at the economy
+ * speed times `researchDurationDivisor`, so a 5x universe with a divisor of 3
+ * researches at 15x. Players who read "5x" or guess "10x" get times that are
+ * off by the whole divisor — which is why the picker fills this in for them.
+ *
+ * @param {{speed?: string|number, researchDurationDivisor?: string|number}} serverData
+ * @returns {{universeSpeed: number, researchSpeed: number}}
+ */
+function universeSpeeds(serverData) {
+  const economy = Number.parseInt(String(serverData.speed), 10) || 1;
+  const divisor = Number.parseInt(String(serverData.researchDurationDivisor), 10) || 1;
+  return { universeSpeed: economy, researchSpeed: economy * divisor };
+}
+
 // ============================================================================
 // EXPORT FOR USE
 // ============================================================================

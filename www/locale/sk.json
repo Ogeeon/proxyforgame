@@ -135,6 +135,7 @@
     "lf-bonuses-ships": "Bonusy k štatistikám lodí (%)",
     "lf-bonuses-api-import-hint": "Všetky tieto hodnoty môžete tiež získať automaticky pomocou tlačidla „Import z OGame“ (ikona schránky) v hornej časti formulára.",
     "universe": "Vesmír",
+    "server-data-failed-msg": "Nepodarilo sa načítať nastavenia vesmíru. Skontrolujte hodnoty nižšie a opravte ich ručne.",
     "universe-load": "Naložiť",
     "universe-save": "Uložiť",
     "universe-delete": "Odstrániť",
@@ -335,6 +336,7 @@
     "disclaimer-title": "Upozornenie",
     "discoverer-class-bonus": "Bonus triedy Discoverer",
     "discoverer-class-bonus-hint": "Zvýšenie bonusu triedy Objaviteľ z výskumu 'Objaviteľský rozlet kaelešov': 0,2 % za úroveň výskumu, bez technologického bonusu foriem života — ten pridáva pole 'Úroveň formy života'. Použije sa iba vtedy, ak je na karte 'Všeobecné' vybraná trieda 'Discoverer'.",
+    "research-speed-hint": "Rýchlosť výskumu je rýchlosť ekonomiky vynásobená faktorom výskumu vesmíru, napr. 5 × 3 = 15. Výberom vesmíru vyššie sa obe rýchlosti vyplnia automaticky.",
     "keywords": "proxyforgame,ogame,kalkulačka nákladov,náklady budov,náklady výskumu,náklady flotily,náklady obrany,výpočet nákladov,náklady na suroviny"
   },
   "lfcosts": {
@@ -573,7 +575,6 @@
     "own-api-import-title": "Importovať",
     "own-api-bad-json-msg": "Údaje sa nepodarilo načítať.\\nUistite sa, že ste vložili text z poľa API 2 na stránke „Flotila“.",
     "import-failed-msg": "Údaje sa nepodarilo načítať.\\nServer vrátil neplatnú odpoveď. Skúste to znova neskôr.",
-    "server-data-failed-msg": "Nepodarilo sa načítať nastavenia vesmíru. Skontrolujte hodnoty nižšie a opravte ich ručne.",
     "populated-systems-failed-msg": "Mapa obývaných systémov nie je dostupná, takže žiadny systém sa nepočíta ako preskočený. Ich počet môžete zadať ručne.",
     "keywords": "proxyforgame,ogame,kalkulačka času letu,čas letu,body uloženia,save,rýchlosť flotily,spotreba deutéria,spotreba paliva"
   },

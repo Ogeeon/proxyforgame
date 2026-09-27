@@ -60,7 +60,7 @@ declare const currLang: string;
 declare const currChange: { value: number, validate: (key: string, val: any) => any };
 /** Fleet/resource values parsed out of a pasted OGame API string. */
 declare const apiParams: Record<string, any>;
-/** Universe lists per language, inlined by the flight and trade templates. */
+/** Universe lists per language, inlined by the flight, costs and trade templates. */
 declare const unis: Record<string, any[]>;
 
 /**

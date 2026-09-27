@@ -133,6 +133,7 @@
     "lf-bonuses-ships": "Bonusy do statystyk okrętów (%)",
     "lf-bonuses-api-import-hint": "Wszystkie te wartości można też uzyskać automatycznie za pomocą przycisku „Import z OGame” (ikona schowka) w górnej części formularza.",
     "universe": "Wszechświat",
+    "server-data-failed-msg": "Nie udało się wczytać ustawień uniwersum. Sprawdź poniższe wartości i popraw je ręcznie.",
     "universe-load": "Załaduj",
     "universe-save": "Zapisz",
     "universe-delete": "Usuń",
@@ -335,7 +336,8 @@
     "disclaimer-robot-nanite": "Przy odczytywaniu czasów budowy uwzględnij uwagę w pierwszym wierszu tabeli. Jeśli budujesz Fabrykę robotów lub Fabrykę nanitów, użyj <a href=\"{0}\">Kalkulatora kolejki budynków</a>, aby dokładnie obliczyć czas budowy.",
     "disclaimer-title": "Uwaga",
     "discoverer-class-bonus": "Bonus klasy Odkrywca",
-    "discoverer-class-bonus-hint": "Wzrost premii klasy Odkrywca z badania 'Wzmocnienie Odkrywcy Kaeleshów': 0,2 % na poziom badania, bez premii technologicznej form życia — tę dodaje pole 'Poziom formy życia'. Stosowany tylko wtedy, gdy na karcie 'Ogólne' wybrano klasę 'Odkrywca'."
+    "discoverer-class-bonus-hint": "Wzrost premii klasy Odkrywca z badania 'Wzmocnienie Odkrywcy Kaeleshów': 0,2 % na poziom badania, bez premii technologicznej form życia — tę dodaje pole 'Poziom formy życia'. Stosowany tylko wtedy, gdy na karcie 'Ogólne' wybrano klasę 'Odkrywca'.",
+    "research-speed-hint": "Prędkość badawcza to prędkość ekonomiczna pomnożona przez współczynnik badań uniwersum, np. 5 × 3 = 15. Wybranie uniwersum powyżej wypełnia obie prędkości automatycznie."
   },
   "lfcosts": {
     "title": "OGame - Kalkulator kosztow dla form życia",
@@ -574,7 +576,6 @@
     "own-api-import-title": "Importuj",
     "own-api-bad-json-msg": "Nie udało się odczytać danych.\\nUpewnij się, że wkleiłeś tekst z pola API 2 na stronie „Flota”.",
     "import-failed-msg": "Nie udało się wczytać danych.\\nSerwer zwrócił nieprawidłową odpowiedź. Spróbuj ponownie później.",
-    "server-data-failed-msg": "Nie udało się wczytać ustawień uniwersum. Sprawdź poniższe wartości i popraw je ręcznie.",
     "populated-systems-failed-msg": "Mapa zamieszkanych układów jest niedostępna, więc żaden układ nie jest liczony jako pominięty. Ich liczbę możesz wpisać ręcznie."
   },
   "graviton": {

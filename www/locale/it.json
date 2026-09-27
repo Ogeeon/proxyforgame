@@ -132,6 +132,7 @@
     "lf-bonuses-ships": "Bonus alle statistiche delle navi (%)",
     "lf-bonuses-api-import-hint": "Tutti questi valori possono anche essere ottenuti automaticamente tramite il pulsante \"Importa da OGame\" (icona appunti) nella parte superiore del modulo.",
     "universe": "Universo",
+    "server-data-failed-msg": "Impossibile caricare le impostazioni dell'universo. Controlla i valori qui sotto e correggili a mano.",
     "universe-load": "Carica",
     "universe-save": "Salva",
     "universe-delete": "Cancella",
@@ -335,7 +336,8 @@
     "disclaimer-robot-nanite": "Si prega di tenere conto della nota nella prima riga della tabella quando si leggono i tempi di costruzione. Se stai costruendo una Fabbrica dei Robots o una Fabbrica dei Naniti, usa il <a href=\"{0}\">Calcolatore della coda di costruzione</a> per calcoli precisi dei tempi di costruzione.",
     "disclaimer-title": "Attenzione",
     "discoverer-class-bonus": "Bonus classe Discoverer",
-    "discoverer-class-bonus-hint": "Aumento del bonus della classe Esploratore dalla ricerca 'Rinforzo Esploratore Kaelesh': 0,2 % per livello di ricerca, senza il bonus tecnologico delle forme di vita — quello si aggiunge con il campo 'Livello della forma di vita'. Si applica solo se nella scheda 'Generale' è selezionata la classe 'Discoverer'."
+    "discoverer-class-bonus-hint": "Aumento del bonus della classe Esploratore dalla ricerca 'Rinforzo Esploratore Kaelesh': 0,2 % per livello di ricerca, senza il bonus tecnologico delle forme di vita — quello si aggiunge con il campo 'Livello della forma di vita'. Si applica solo se nella scheda 'Generale' è selezionata la classe 'Discoverer'.",
+    "research-speed-hint": "La velocità di ricerca è la velocità economia moltiplicata per il fattore di ricerca dell'universo, ad es. 5 × 3 = 15. Scegliendo l'universo qui sopra, entrambe le velocità vengono compilate automaticamente."
   },
   "lfcosts": {
     "title": "OGame - Calcolatore di Costi per le forme di vita",
@@ -574,7 +576,6 @@
     "own-api-import-title": "Importa",
     "own-api-bad-json-msg": "Impossibile leggere i dati.\\nAssicurati di aver incollato il testo dal campo API 2 della pagina «Flotta».",
     "import-failed-msg": "Impossibile caricare i dati.\\nIl server ha restituito una risposta non valida. Riprova più tardi.",
-    "server-data-failed-msg": "Impossibile caricare le impostazioni dell'universo. Controlla i valori qui sotto e correggili a mano.",
     "populated-systems-failed-msg": "La mappa dei sistemi abitati non è disponibile, quindi nessun sistema viene contato come saltato. Puoi inserire il loro numero a mano."
   },
   "graviton": {

@@ -137,6 +137,7 @@
     "lf-bonuses-ships": "Ships stats bonuses (%)",
     "lf-bonuses-api-import-hint": "All these values can also be obtained automatically using the \"Import from OGame\" button (clipboard icon) at the top of the form.",
     "universe": "Universe",
+    "server-data-failed-msg": "Failed to load the universe settings. Check the values below and correct them by hand.",
     "universe-load": "Load",
     "universe-save": "Save",
     "universe-delete": "Delete",
@@ -335,7 +336,8 @@
     "disclaimer-robot-nanite": "Please take into account the note in the first row of the table when reading build times. If you are building a Robotics factory or a Nanite factory, use the <a href=\"{0}\">Construction queue calculator</a> for accurate build time calculations.",
     "disclaimer-title": "Please note",
     "discoverer-class-bonus": "Discoverer class bonus",
-    "discoverer-class-bonus-hint": "Increase of the Discoverer class bonus from the 'Kaelesh Discoverer Enhancement' research: 0.2% per research level, without the lifeform technology bonus — that one is added by the 'Lifeform level' field. Applies only if the 'Discoverer' class is selected on the 'Common' tab."
+    "discoverer-class-bonus-hint": "Increase of the Discoverer class bonus from the 'Kaelesh Discoverer Enhancement' research: 0.2% per research level, without the lifeform technology bonus — that one is added by the 'Lifeform level' field. Applies only if the 'Discoverer' class is selected on the 'Common' tab.",
+    "research-speed-hint": "The research speed is the economy speed multiplied by the universe's research factor, e.g. 5 × 3 = 15. Picking the universe above fills in both speeds."
   },
   "lfcosts": {
     "title": "OGame - Costs calculator for LifeForms",
@@ -574,7 +576,6 @@
     "own-api-import-title": "Import",
     "own-api-bad-json-msg": "Failed to read the data.\\nMake sure you pasted the text from the API 2 field on the 'Fleet' page.",
     "import-failed-msg": "Failed to load the data.\\nThe server returned an invalid response. Please try again later.",
-    "server-data-failed-msg": "Failed to load the universe settings. Check the values below and correct them by hand.",
     "populated-systems-failed-msg": "The map of populated systems is unavailable, so no systems are counted as skipped. You can enter their number by hand."
   },
   "graviton": {

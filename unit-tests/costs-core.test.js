@@ -12,13 +12,13 @@ const { expect } = require('./expect');
 // ogame-production.js and ogame-costs.js first: costs-core.js calls their
 // getProductionRate and getHalvingCost helpers the way the page does, with all
 // three scripts sharing one global scope.
-const { GlobalParams, Calculator } = load(
+const { GlobalParams, Calculator, universeSpeeds } = load(
     [
         'ogame/calc/js/ogame-production.js',
         'ogame/calc/js/ogame-costs.js',
         'ogame/calc/js/costs-core.js',
     ],
-    ['GlobalParams', 'Calculator'],
+    ['GlobalParams', 'Calculator', 'universeSpeeds'],
 );
 
 // Research Lab levels the game requires, mirrored from $techReqs in costs.php.
@@ -303,5 +303,25 @@ describe('Calculator.calculateProduction', () => {
 
         expect(calculator.calculateProduction(4, 10, params))
             .toBe(calculator.calculateProduction(4, 10, mineParams()));
+    });
+});
+
+describe('universeSpeeds', () => {
+    // The result comes from the vm realm, so compare fields, not objects
+    const speeds = (serverData) => {
+        const { universeSpeed, researchSpeed } = universeSpeeds(serverData);
+        return [universeSpeed, researchSpeed];
+    };
+
+    it('researches at the economy speed times the research divisor', () => {
+        // Buzz (de 283): economy 5, divisor 3 — 15x, not the 10x players guess
+        expect(speeds({ speed: '5', researchDurationDivisor: '3' })).toEqual([5, 15]);
+        // Undae (de 199): economy 10, divisor 2
+        expect(speeds({ speed: '10', researchDurationDivisor: '2' })).toEqual([10, 20]);
+    });
+
+    it('falls back to 1x for a missing or unreadable setting', () => {
+        expect(speeds({ speed: '8' })).toEqual([8, 8]);
+        expect(speeds({ speed: '', researchDurationDivisor: 'x' })).toEqual([1, 1]);
     });
 });

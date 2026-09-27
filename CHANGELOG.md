@@ -19,6 +19,8 @@ release section; it is the source of truth for the other eleven translations.
 
 - Build: a Docker Compose stack for local development. `docker compose up -d` (or `make docker-up`) serves the site on `http://localhost:8000` with a MariaDB seeded from `schema.sql` and the changelog fixture and migrated by `deploy/pfg-migrate` - the same files the deploy uses. The PHP container runs the built-in server, exactly as `make serve` and CI do. WAMP stays supported and unchanged; the production hosts and CI keep their own setup. See `docs/adr/0002-docker-local-dev.md`.
 
+- Costs: a country and universe picker on the Common tab, which fills in both speeds. A universe's research speed is its economy speed multiplied by the research divisor - Buzz DE runs at 5 x 3 = 15, not 10 - and nothing on the page said so, so a player there was quoted research times half again too long while his building times were right. Both speed fields stay editable; the picker only spares the player working the number out, and a hint beside the research speed now spells the rule out. The settings come from the same service the flight calculator already uses, and the universe lists the two pages build are now one include. <!-- site -->
+
 ### Fixed
 
 - Build: a real environment variable now overrides a value of the same name in `.env` (`www/db.connect.inc.php`), which is the 12-factor order, so `docker compose` can point the app at its `db` service without the bind-mounted `.env` winning. Inert on the hosts and in CI, where nothing sets a conflicting variable. `make serve` also honours a customised `.env` again, because the Makefile no longer exports the `DB_*` defaults globally - only `db-seed` and `db-migrate` do.

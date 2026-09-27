@@ -73,6 +73,9 @@
     options.dialogConfirm = <?= json_encode($l['dialog-confirm']) ?>;
     options.cancel = <?= json_encode($l['cancel']) ?>;
     options.dialogAttentionLabel = <?= json_encode($l['dialog-attention']) ?>;
+    options.serverDataFailedMsg = <?= json_encode($l['server-data-failed-msg']) ?>;
+
+    var unis = <?= universesJs($universes) ?>;
 
     options.techCosts = {
               <?php $first = true; ?>
@@ -190,6 +193,21 @@
         <div class="tab-pane fade p-2" id="param-common" role="tabpanel">
           <div class="d-flex flex-wrap gap-2 align-items-center mb-1">
             <div class="d-flex align-items-center gap-1">
+              <label for="country"><?= $l['country'] ?></label>
+              <select id="country" name="country" class="form-select form-select-sm w-auto">
+                <option value="--">&nbsp;</option>
+                <?php foreach ($countries ?: array() as $row): ?>
+                <option value="<?= htmlspecialchars($row['lang'], ENT_QUOTES) ?>"><?= htmlspecialchars($row['name'], ENT_QUOTES) ?></option>
+                <?php endforeach; ?>
+              </select>
+            </div>
+            <div class="d-flex align-items-center gap-1">
+              <label for="universe"><?= $l['universe'] ?></label>
+              <select id="universe" name="universe" class="form-select form-select-sm w-auto"></select>
+            </div>
+          </div>
+          <div class="d-flex flex-wrap gap-2 align-items-center mb-1">
+            <div class="d-flex align-items-center gap-1">
               <label for="universe-speed"><?= $l['economy-speed'] ?></label>
               <select id="universe-speed" name="universe-speed" class="form-select form-select-sm w-auto">
                 <option value="1" selected="selected">1</option>
@@ -228,6 +246,7 @@
                 <option value="19">19</option>
                 <option value="20">20</option>
               </select>
+              <i class="bi bi-question-circle" data-bs-toggle="tooltip" title="<?= htmlspecialchars($l['research-speed-hint'], ENT_QUOTES) ?>"></i>
             </div>
             <div class="d-flex align-items-center gap-1">
               <input id="research-bonus" type="checkbox" name="research-bonus" class="form-check-input">

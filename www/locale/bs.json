@@ -133,6 +133,7 @@
     "lf-bonuses-ships": "Bonusi za statistiku brodova (%)",
     "lf-bonuses-api-import-hint": "Sve ove vrijednosti također možete automatski dobiti putem dugmeta „Uvoz iz OGame“ (ikona međuspremnika) na vrhu obrasca.",
     "universe": "Univerzum",
+    "server-data-failed-msg": "Učitavanje postavki univerzuma nije uspjelo. Provjerite vrijednosti ispod i ispravite ih ručno.",
     "universe-load": "Učitaj",
     "universe-save": "Spasi",
     "universe-delete": "Obriši",
@@ -335,7 +336,8 @@
     "disclaimer-robot-nanite": "Molimo uzmite u obzir napomenu u prvom redu tablice pri čitanju vremena gradnje. Ako gradite Tvornicu robota ili Tvornicu nanita, koristite <a href=\"{0}\">Kalkulator reda izgradnje</a> za točan izračun vremena gradnje.",
     "disclaimer-title": "Napomena",
     "discoverer-class-bonus": "Bonus klase Otkrivač",
-    "discoverer-class-bonus-hint": "Povećanje bonusa klase Otkrivač iz istraživanja 'Kaelesh Discoverer Enhancement': 0,2 % po nivou istraživanja, bez tehnološkog bonusa oblika života — njega dodaje polje 'Nivo oblika života'. Primjenjuje se samo ako je na kartici 'Opšte' odabrana klasa 'Otkrivač'."
+    "discoverer-class-bonus-hint": "Povećanje bonusa klase Otkrivač iz istraživanja 'Kaelesh Discoverer Enhancement': 0,2 % po nivou istraživanja, bez tehnološkog bonusa oblika života — njega dodaje polje 'Nivo oblika života'. Primjenjuje se samo ako je na kartici 'Opšte' odabrana klasa 'Otkrivač'.",
+    "research-speed-hint": "Brzina istraživanja jednaka je ekonomskoj brzini pomnoženoj s faktorom istraživanja univerzuma, npr. 5 × 3 = 15. Odabirom univerzuma iznad obje brzine se popunjavaju automatski."
   },
   "lfcosts": {
     "title": "Ogame - kalkulator troškova (Lifeforms)",
@@ -574,7 +576,6 @@
     "own-api-import-title": "Uvezi",
     "own-api-bad-json-msg": "Nije moguće očitati podatke.\\nProvjerite da ste zalijepili tekst iz polja API 2 na stranici 'Flota'.",
     "import-failed-msg": "Nije moguće učitati podatke.\\nServer je vratio neispravan odgovor. Molimo pokušajte ponovo kasnije.",
-    "server-data-failed-msg": "Učitavanje postavki univerzuma nije uspjelo. Provjerite vrijednosti ispod i ispravite ih ručno.",
     "populated-systems-failed-msg": "Karta naseljenih sistema nije dostupna, pa se nijedan sistem ne broji kao preskočen. Njihov broj možete unijeti ručno."
   },
   "graviton": {

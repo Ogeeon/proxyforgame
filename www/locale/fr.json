@@ -133,6 +133,7 @@
     "lf-bonuses-ships": "Bonus de statistiques des vaisseaux (%)",
     "lf-bonuses-api-import-hint": "Toutes ces valeurs peuvent également être obtenues automatiquement via le bouton « Importer depuis OGame » (icône presse-papiers) en haut du formulaire.",
     "universe": "Univers",
+    "server-data-failed-msg": "Impossible de charger les paramètres de l'univers. Vérifiez les valeurs ci-dessous et corrigez-les à la main.",
     "universe-load": "Charger",
     "universe-save": "Sauvegarder",
     "universe-delete": "Supprimer",
@@ -335,7 +336,8 @@
     "disclaimer-robot-nanite": "Veuillez tenir compte de la remarque figurant sur la première ligne du tableau lors de la lecture des durées de construction. Si vous construisez une Usine de robots ou une Usine de nanites, utilisez le <a href=\"{0}\">Calculateur de file de construction</a> pour des calculs de durée précis.",
     "disclaimer-title": "Attention",
     "discoverer-class-bonus": "Bonus de classe Explorateur",
-    "discoverer-class-bonus-hint": "Augmentation du bonus de la classe Explorateur par la recherche 'Renforcement d`explorateur kaelesh' : 0,2 % par niveau de recherche, sans le bonus de technologie des formes de vie — celui-ci est ajouté par le champ 'Niveau de forme de vie'. S'applique uniquement si la classe 'Explorateur' est sélectionnée dans l'onglet 'Général'."
+    "discoverer-class-bonus-hint": "Augmentation du bonus de la classe Explorateur par la recherche 'Renforcement d`explorateur kaelesh' : 0,2 % par niveau de recherche, sans le bonus de technologie des formes de vie — celui-ci est ajouté par le champ 'Niveau de forme de vie'. S'applique uniquement si la classe 'Explorateur' est sélectionnée dans l'onglet 'Général'.",
+    "research-speed-hint": "La vitesse de recherche est la vitesse économique multipliée par le facteur de recherche de l'univers, par ex. 5 × 3 = 15. Choisir l'univers ci-dessus remplit les deux vitesses automatiquement."
   },
   "lfcosts": {
     "title": "OGame - Calculateur de coûts pour les formes de vie",
@@ -574,7 +576,6 @@
     "own-api-import-title": "Importer",
     "own-api-bad-json-msg": "Impossible de lire les données.\\nAssurez-vous d'avoir collé le texte du champ API 2 de la page « Flotte ».",
     "import-failed-msg": "Impossible de charger les données.\\nLe serveur a renvoyé une réponse invalide. Veuillez réessayer plus tard.",
-    "server-data-failed-msg": "Impossible de charger les paramètres de l'univers. Vérifiez les valeurs ci-dessous et corrigez-les à la main.",
     "populated-systems-failed-msg": "La carte des systèmes peuplés est indisponible, aucun système n'est donc compté comme ignoré. Vous pouvez saisir leur nombre à la main."
   },
   "graviton": {

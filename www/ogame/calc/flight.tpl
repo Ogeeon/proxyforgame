@@ -96,21 +96,7 @@
     options.cancel = <?= json_encode($l['cancel']) ?>;
     options.dialogAttentionLabel = <?= json_encode($l['dialog-attention']) ?>;
 
-    var unis = {
-<?php
-  $f1 = true;
-  foreach ($universes as $ul => $uc) {
-    echo ($f1 ? '' :",\n").$ul.': [';
-    $f2 = true;
-    foreach ($uc as $row) {
-      echo ($f2 ? '' : ',')."[{$row['server_number']}, '{$row['name']}']";
-      $f2 = false;
-    }
-    echo ']';
-    $f1 = false;
-  }
-?>
-    };
+    var unis = <?= universesJs($universes) ?>;
   </script>
 <?php require_once '../../cookies.tpl'; ?>
 </head>
