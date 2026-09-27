@@ -944,12 +944,14 @@ class CostsCalculator {
       if (p >= lines.length) return null;
       const line = lines[p];
       if (line === '-') { p++; return 0; }
-      // OGame always exports numbers with a dot decimal separator
-      const m = /-?\d+(?:\.\d+)?/.exec(line);
+      // The decimal separator follows the game client's language: "52.38%" on
+      // the English and Russian clients, "52,38%" on the German one. Every value
+      // here is a percentage under 1000, so neither can be a thousands separator.
+      const m = /-?\d+(?:[.,]\d+)?/.exec(line);
       p++;
       if (m) {
         if (p < lines.length) p++; // skip the trailing "Max. Y%" line
-        const val = Number.parseFloat(m[0]);
+        const val = Number.parseFloat(m[0].replace(',', '.'));
         return Number.isNaN(val) || val < 0 ? 0 : val;
       }
       return 0;

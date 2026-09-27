@@ -37,6 +37,8 @@ release section; it is the source of truth for the other eleven translations.
 - Deploy: `pfg-sync` retries `git fetch` before giving up. GitHub intermittently answered an unauthenticated fetch with a 401 for about an hour on 2026-08-31, and both hosts mailed a deploy-failure alarm for a blip that fixed itself by the next run. The fetch now gets three attempts with a short backoff, and `GIT_TERMINAL_PROMPT=0` turns the credential prompt a 401 provokes into an immediate error rather than a hang.
 - Deploy: `pfg-sync` (and `cutover-prod.sh`) force the `git fetch` onto HTTP/1.1. From 2026-09-02 the HTTP/2 `POST .../git-upload-pack` to GitHub started hanging from production - the GET that advertises the refs still succeeds over h2, the POST that negotiates the pack resets, and git falls through to a credential prompt and reports `could not read Username for 'https://github.com'`. So the hourly reconcile mailed a deploy-failure alarm every run even though the site was already on `main`'s tip. It is old libcurl (git 2.30.2, no root to upgrade) against GitHub's current edge; `curl` and the standby's newer git are both unaffected. Pinning HTTP/1.1 sidesteps the broken h2 upload.
 
+- Costs: the life form research bonuses now import from a German game client. The paste parser accepted only a dot as the decimal separator, but the separator follows the game's language, not the site's, and the German client writes "52,38%" - so every fractional value arrived cut off at the comma, and a 0,2% bonus came in as 0. Both separators are read now; neither can be a thousands separator here, because every value on that panel is a percentage below 1000. <!-- site -->
+
 ## [2026-09-01] - site entry 63
 
 ### Added

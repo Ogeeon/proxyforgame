@@ -822,6 +822,26 @@ test.describe('Costs Calculator - LifeForm research bonuses table', () => {
         await expect(page.locator('#lf-research-bonuses-tbody tr').first().locator('.lf-research-cost-input')).toHaveValue('0');
     });
 
+    // The German client prints "52,38%": the separator follows the game's
+    // language, not the site's, so an English page must still read the comma.
+    test('import reads comma decimals from a German game client', async ({ page }) => {
+        await page.locator('#param-lifeforms-tab').click();
+        await page.locator('#lf-research-table-open').click();
+        await expect(page.locator('#lf-research-table')).toBeVisible();
+        await page.locator('#lf-research-table-get').click();
+        await expect(page.locator('#lf-research-paste')).toBeVisible();
+
+        const commaFixture = LF_RESEARCH_FIXTURE.replaceAll(/(\d)\.(\d)/g, '$1,$2');
+        await page.locator('#lf-research-paste-txtarea').fill(commaFixture);
+        await page.locator('#lf-research-paste-import').click();
+
+        const firstRow = page.locator('#lf-research-bonuses-tbody tr').first();
+        await expect(firstRow.locator('.lf-research-cost-input')).toHaveValue('24.04');
+        await expect(firstRow.locator('.lf-research-time-input')).toHaveValue('52.5');
+        const secondRow = page.locator('#lf-research-bonuses-tbody tr').nth(1);
+        await expect(secondRow.locator('.lf-research-time-input')).toHaveValue('4.41');
+    });
+
     // Russian uses a comma as the decimal separator (options.decimalSeparator).
     // Select the language via the context locale (Accept-Language) rather than a
     // "/ru/" URL prefix: the prefix relies on an Apache rewrite that is absent
@@ -837,7 +857,7 @@ test.describe('Costs Calculator - LifeForm research bonuses table', () => {
             await page.locator('#lf-research-table-get').click();
             await expect(page.locator('#lf-research-paste')).toBeVisible();
 
-            // Reuse the English fixture (OGame always exports dot decimals); only the
+            // Reuse the English fixture (dot decimals, as the English client prints them); only the
             // anchor line must match the first research name in the current language
             const firstName = (await page.locator('#lf-research-bonuses-tbody tr').first()
                 .locator('td').first().innerText()).trim();
