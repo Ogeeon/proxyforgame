@@ -550,9 +550,9 @@ test.describe('Costs Calculator Page', () => {
         await page.locator('#full-numbers').click();
         await page.locator('#tabtag-0-4').click();
         await fillTableRows(page, '#table-0-4', 2, 17, 5);
-        await expect(page.locator('#table-0-4 tr:nth-child(18) td:nth-child(4)')).toContainText('4.162.300');
-        await expect(page.locator('#table-0-4 tr:nth-child(18) td:nth-child(5)')).toContainText('7.041.400');
-        await expect(page.locator('#table-0-4 tr:nth-child(18) td:nth-child(6)')).toContainText('2.781.500');
+        await expect(page.locator('#table-0-4 tr:nth-child(18) td:nth-child(4)')).toContainText('4.162.315');
+        await expect(page.locator('#table-0-4 tr:nth-child(18) td:nth-child(5)')).toContainText('7.041.431');
+        await expect(page.locator('#table-0-4 tr:nth-child(18) td:nth-child(6)')).toContainText('2.781.515');
         await expect(page.locator('#table-0-4 tr:nth-child(18) td:nth-child(8)')).toContainText('24.300.000');
         await expect(page.locator('#table-0-4 tr:nth-child(18) td:nth-child(9)')).toContainText('5w 21h');
         await expect(page.locator('#table-0-4 tr:nth-child(18) td:nth-child(10)')).toContainText('13.982');
@@ -571,9 +571,9 @@ test.describe('Costs Calculator Page', () => {
         }
         await page.locator('#lf-research-table-ok').click();
         await expect(page.locator('#lf-research-table')).toBeHidden();
-        await expect(page.locator('#table-0-4 tr:nth-child(18) td:nth-child(4)')).toContainText('3.121.725');
-        await expect(page.locator('#table-0-4 tr:nth-child(18) td:nth-child(5)')).toContainText('5.281.050');
-        await expect(page.locator('#table-0-4 tr:nth-child(18) td:nth-child(6)')).toContainText('2.086.125');
+        await expect(page.locator('#table-0-4 tr:nth-child(18) td:nth-child(4)')).toContainText('3.121.736');
+        await expect(page.locator('#table-0-4 tr:nth-child(18) td:nth-child(5)')).toContainText('5.281.073');
+        await expect(page.locator('#table-0-4 tr:nth-child(18) td:nth-child(6)')).toContainText('2.086.136');
         await expect(page.locator('#table-0-4 tr:nth-child(18) td:nth-child(8)')).toContainText('24.300.000');
         await expect(page.locator('#table-0-4 tr:nth-child(18) td:nth-child(9)')).toContainText('3w 5d 22h');
     });

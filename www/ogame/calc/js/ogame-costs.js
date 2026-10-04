@@ -75,17 +75,8 @@ function calcBuildCost_C(techID, techLevel, techData) {
 	if (data === undefined)
 		return [0, 0, 0];
 	const cost = [0, 0, 0];
-	let price = 0;
-	// In the redesign, astrophysics grows more expensive with a coefficient of 1.75, and the cost is rounded to hundreds
-	if (techID == 124) {
-		for (let i = 0; i < 3; i++) {
-			price = data[i] * Math.pow(1.75, (techLevel - 1));
-			cost[i] = 100 * Math.round(0.01 * price);
-		}
-	} else {
-		for (let i = 0; i < 3; i++)
-			cost[i] = Math.floor(data[i] * Math.pow(data[3], (techLevel - 1)));
-	}
+	for (let i = 0; i < 3; i++)
+		cost[i] = Math.floor(data[i] * Math.pow(data[3], (techLevel - 1)));
 	return cost;
 }
 

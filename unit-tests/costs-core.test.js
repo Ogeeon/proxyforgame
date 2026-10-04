@@ -12,13 +12,13 @@ const { expect } = require('./expect');
 // ogame-production.js and ogame-costs.js first: costs-core.js calls their
 // getProductionRate and getHalvingCost helpers the way the page does, with all
 // three scripts sharing one global scope.
-const { GlobalParams, Calculator, BuildRequest, universeSpeeds } = load(
+const { GlobalParams, Calculator, BuildRequest, universeSpeeds, calcBuildCost_C, getBuildCost_C } = load(
     [
         'ogame/calc/js/ogame-production.js',
         'ogame/calc/js/ogame-costs.js',
         'ogame/calc/js/costs-core.js',
     ],
-    ['GlobalParams', 'Calculator', 'BuildRequest', 'universeSpeeds'],
+    ['GlobalParams', 'Calculator', 'BuildRequest', 'universeSpeeds', 'calcBuildCost_C', 'getBuildCost_C'],
 );
 
 // Research Lab levels the game requires, mirrored from $techReqs in costs.php.
@@ -30,6 +30,24 @@ const TECH_REQS = {
 };
 
 const calculator = new Calculator({}, TECH_REQS);
+
+describe('calcBuildCost_C: astrophysics', () => {
+    // Mirrored from $techData in costs.php: astrophysics grows by 1.75 per level.
+    const TECH_DATA = { 124: [4000, 8000, 4000, 1.75] };
+    // The result comes from the vm realm, so copy it into a local array before comparing
+    const local = (cost) => [...cost];
+
+    it('floors the cost like every other tech, without rounding to hundreds', () => {
+        // Measured in game (en-1): level 5 costs 37515 / 75031 / 37515.
+        // The old rounding to hundreds gave 37500 / 75000 / 37500.
+        expect(local(calcBuildCost_C(124, 5, TECH_DATA))).toEqual([37515, 75031, 37515]);
+    });
+
+    it('sums the floored per-level costs over a range', () => {
+        // Levels 1..5: 4000 + 7000 + 12250 + 21437 + 37515 metal.
+        expect(local(getBuildCost_C(124, 0, 5, TECH_DATA))).toEqual([82202, 164406, 82202]);
+    });
+});
 
 /**
  * Global params with the IRN left unconfigured — the calculator's default state,

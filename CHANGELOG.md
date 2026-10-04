@@ -46,6 +46,8 @@ release section; it is the source of truth for the other eleven translations.
 
 - Site: the German and Bosnian versions take a comma as the decimal separator, the way both languages write numbers. Both were configured with a dot, so a German player could not type a fractional value into any field on any of the ten calculators - a comma was swallowed and 57,35 became 5735 - and every number the site printed back carried the wrong separator. The other nine comma languages were always right, so this only puts the two of them on the path the rest already use. Stored settings are unaffected: they have always been written with a dot, independently of the language. <!-- site -->
 
+- Costs: astrophysics now costs what the game asks for. Its price was rounded to the nearest hundred, a rule from an old version of the game, while the game floors it to the unit like every other research - level 5 on en-1 costs 37.515 metal, 75.031 crystal and 37.515 deuterium, where the calculator said 37.500, 75.000 and 37.500. The error grows with the level and adds up over a range. The special case is gone, and astrophysics goes through the same formula as the rest, with the 1,75 growth factor it already carried. <!-- site -->
+
 ## [2026-09-01] - site entry 63
 
 ### Added
