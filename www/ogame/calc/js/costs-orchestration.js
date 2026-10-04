@@ -764,11 +764,7 @@ class CostsCalculator {
 
     // Clear: reset every cost/time input in the table to zero
     removeAllEvents('#lf-research-table-clear', 'click');
-    addEvent('#lf-research-table-clear', 'click', () => {
-      inputsAll('#lf-research-bonuses-tbody input[type="text"]').forEach(input => {
-        input.value = localizeFloat(0);
-      });
-    });
+    addEvent('#lf-research-table-clear', 'click', () => this._clearLfResearchTable());
 
     // Get: open the paste-from-OGame modal on top of the table modal
     removeAllEvents('#lf-research-table-get', 'click');
@@ -871,6 +867,17 @@ class CostsCalculator {
     if ([...el.options].some(option => option.value === wanted)) {
       el.value = wanted;
     }
+  }
+
+  /**
+   * Set every cost/time input in the research bonuses table to zero.
+   * Only touches the inputs; persisting is up to the caller.
+   * @private
+   */
+  _clearLfResearchTable() {
+    inputsAll('#lf-research-bonuses-tbody input[type="text"]').forEach(input => {
+      input.value = localizeFloat(0);
+    });
   }
 
   /**
@@ -1536,6 +1543,11 @@ class CostsCalculator {
     setVal('#irn-level', 0);
     setVal('#planetsSpin', 8);
     this._resetIRNDialog();
+
+    // LF research bonuses table: it persists in localStorage rather than in
+    // the settings, so save the cleared table or a reload brings it back
+    this._clearLfResearchTable();
+    this._saveLfResearchTable();
 
     // Clear all table inputs (except qty inputs which default to 1)
     inputsAll('#tab-0 input[type="text"], #tab-1 input[type="text"]').forEach(el => {

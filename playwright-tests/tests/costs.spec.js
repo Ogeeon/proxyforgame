@@ -754,6 +754,32 @@ test.describe('Costs Calculator - LifeForm research bonuses table', () => {
         }
     });
 
+    test('the global reset clears the table and its saved copy', async ({ page }) => {
+        await page.locator('#param-lifeforms-tab').click();
+        await page.locator('#lf-research-table-open').click();
+        await expect(page.locator('#lf-research-table')).toBeVisible();
+        await page.locator('#lf-research-table-get').click();
+        await expect(page.locator('#lf-research-paste')).toBeVisible();
+        await page.locator('#lf-research-paste-txtarea').fill(LF_RESEARCH_FIXTURE);
+        await page.locator('#lf-research-paste-import').click();
+        await page.locator('#lf-research-table-ok').click();
+        await expect(page.locator('#lf-research-table')).toBeHidden();
+
+        await page.locator('#reset').click();
+
+        // The saved copy is zeroed, so a reload cannot bring the values back
+        const stored = await page.evaluate(() => localStorage.getItem('costs_lf_research_table'));
+        expect(JSON.parse(stored)[0]).toEqual([0, 0]);
+
+        await page.reload();
+        await page.locator('#param-lifeforms-tab').click();
+        await page.locator('#lf-research-table-open').click();
+        await expect(page.locator('#lf-research-table')).toBeVisible();
+        const firstRow = page.locator('#lf-research-bonuses-tbody tr').first();
+        await expect(firstRow.locator('.lf-research-cost-input')).toHaveValue('0');
+        await expect(firstRow.locator('.lf-research-time-input')).toHaveValue('0');
+    });
+
     test('imported table survives a page reload', async ({ page }) => {
         await page.locator('#param-lifeforms-tab').click();
         await page.locator('#lf-research-table-open').click();
