@@ -21,6 +21,27 @@
   position: relative;
 }
 
+/* Settings panel loading overlay (shown while fetching universe data) */
+.panel-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  border-radius: inherit;
+}
+
+.panel-overlay-content {
+  color: #fff;
+  font-weight: bold;
+}
+
+.loading {
+  position: relative;
+}
+
 /* ==========================================================================
    PANEL STYLING
    ========================================================================== */

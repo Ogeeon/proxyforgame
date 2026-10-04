@@ -18,6 +18,8 @@ class CostsCalculator {
     /** @type {?GlobalParams} Filled on the first collection; read via _params(). */
     this.currentParams = null;
     this.isInitialized = false;
+    /** Requests in flight under the settings panel's loading overlay. */
+    this._overlayCount = 0;
 
     // Performance tracking
     this.stats = {
@@ -839,6 +841,7 @@ class CostsCalculator {
     const country = selectEl('#country')?.value ?? '';
     const universe = selectEl('#universe')?.value ?? '';
     if (country === '' || country === '--' || universe === '') return;
+    this._showOverlay();
     try {
       const speeds = universeSpeeds(await apiGet('serverdata', { country, universe }));
       this._selectSpeed('#universe-speed', speeds.universeSpeed);
@@ -849,7 +852,40 @@ class CostsCalculator {
       // Nobody but the picker asked, so a toast rather than a modal - but not
       // silence, or the old speeds would pass for the universe's own
       showToast(options.serverDataFailedMsg, 'danger');
+    } finally {
+      this._hideOverlay();
     }
+  }
+
+  /**
+   * Cover the settings panel while universe data is being fetched, so the
+   * speeds cannot be edited only to be overwritten by the response. Counted,
+   * because a second pick can start a fetch before the first one ends.
+   * @private
+   */
+  _showOverlay() {
+    const panel = $('#general-settings-panel');
+    if (!panel || ++this._overlayCount > 1) return;
+    const overlay = document.createElement('div');
+    overlay.className = 'panel-overlay';
+    const content = document.createElement('div');
+    content.className = 'panel-overlay-content';
+    content.textContent = options.dataFetchMsg;
+    overlay.appendChild(content);
+    panel.classList.add('loading');
+    panel.appendChild(overlay);
+  }
+
+  /**
+   * Remove the overlay once the last pending fetch has finished.
+   * @private
+   */
+  _hideOverlay() {
+    const panel = $('#general-settings-panel');
+    this._overlayCount = Math.max(0, this._overlayCount - 1);
+    if (!panel || this._overlayCount > 0) return;
+    panel.classList.remove('loading');
+    panel.querySelectorAll('.panel-overlay').forEach(o => o.remove());
   }
 
   /**

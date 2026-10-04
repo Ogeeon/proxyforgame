@@ -967,6 +967,31 @@ test.describe('Costs Calculator - universe picker', () => {
         await expect(astro.locator('td:nth-child(9)')).toHaveText('12m');
     });
 
+    test('covers the settings panel while the universe data is on the wire', async ({ page }) => {
+        await page.route(/\/ajax\.php\?.*service=serverdata/, async (route) => {
+            await new Promise((resolve) => setTimeout(resolve, 1000));
+            await route.fulfill({ status: 200, contentType: 'application/json', body: BUZZ });
+        });
+        await page.locator('#country').selectOption('en');
+        await page.locator('#universe').selectOption({ index: 0 });
+
+        await expect(page.locator('#general-settings-panel .panel-overlay')).toBeVisible();
+        await expect(page.locator('.panel-overlay-content')).toHaveText('Fetching data...');
+
+        // ...and uncovers it once the answer lands
+        await expect(page.locator('.panel-overlay')).toHaveCount(0, { timeout: 5000 });
+        await expect(page.locator('#research-speed')).toHaveValue('15');
+    });
+
+    test('a failed fetch uncovers the settings panel too', async ({ page }) => {
+        await page.route(/\/ajax\.php\?.*service=serverdata/, (route) => route.fulfill({ status: 503 }));
+        await page.locator('#country').selectOption('en');
+        await page.locator('#universe').selectOption({ index: 0 });
+
+        await expect(page.locator('.toast-body')).toContainText('universe settings');
+        await expect(page.locator('.panel-overlay')).toHaveCount(0);
+    });
+
     test('the chosen universe survives a reload without being fetched again', async ({ page }) => {
         await page.route(/\/ajax\.php\?.*service=serverdata/, (route) => route.fulfill({
             status: 200, contentType: 'application/json', body: BUZZ

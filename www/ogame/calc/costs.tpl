@@ -74,6 +74,7 @@
     options.cancel = <?= json_encode($l['cancel']) ?>;
     options.dialogAttentionLabel = <?= json_encode($l['dialog-attention']) ?>;
     options.serverDataFailedMsg = <?= json_encode($l['server-data-failed-msg']) ?>;
+    options.dataFetchMsg = <?= json_encode($l['fetching-data']) ?>;
 
     var unis = <?= universesJs($universes) ?>;
 
