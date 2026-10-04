@@ -89,7 +89,7 @@ is the state this check exists to end.
 | | production | standby |
 |---|---|---|
 | address | `88.218.248.47` | `89.124.110.192` |
-| in DNS | yes — `proxyforgame.com` | no |
+| in DNS | `proxyforgame.com`, `www.proxyforgame.com` | `proxyforgame.net`, `www.proxyforgame.net` (redirects to the bare name) |
 | panel | ISPmanager, **no root** (uid 1012) | plain Ubuntu, root |
 | checkout | `/var/www/www-proxyforgame/data/deploy/proxyforgame.com-gh` | `/var/www/proxyforgame-gh` |
 | document root | `~/www/proxyforgame.com` → `<checkout>/www` | `/var/www/proxyforgame-docroot` → `<checkout>/www` |
@@ -252,8 +252,8 @@ static page cannot show that `.env` survived or that MySQL is answering.
 ## Between deploys
 
 A deploy-time smoke test only ever runs at deploy time. Between two deploys
-nothing looks at either host, and the standby - which has no public name, so no
-uptime service can be pointed at it - would be watched by nobody at all.
+nothing looks at either host, and the standby - which carries no traffic, so no
+visitor would notice it breaking - would be watched by nobody at all.
 
 Three pieces close that:
 
@@ -301,20 +301,23 @@ fifteen-minute grace, since production deploys on a webhook and the standby
 polls every five minutes - and every reported job finished within its window,
 with status 0. The `php` field from the health report is checked against
 `.php-version`: production must match it exactly, the standby must only not be
-older (see ADR-0001). Certificate expiry is printed for both hosts but fails
-neither: production renews itself, and the standby's is a known manual
-procedure.
+older (see ADR-0001). Each host is asked under its own name — production as
+`proxyforgame.com`, the standby as `proxyforgame.net` — with full certificate
+verification, and a certificate with under 14 days left fails the run: both
+renew themselves through certbot 30 days ahead, so that means renewal broke.
 
 `bash deploy/watchdog.sh` runs the same checks from a laptop; `production` or
 `standby` as an argument limits it to one host. It needs `curl`, `node` and,
 for the commit comparison, `gh`.
 
-**The standby's certificate.** It expires 2026-10-07 and cannot renew itself:
-the HTTP-01 challenge for `proxyforgame.com` goes wherever that name resolves,
-which is production. The decision on record is to leave it. During a failover
-DNS is pointed at the standby anyway, and `certbot -d proxyforgame.com` then
-works there like it does anywhere. Until that day the standby simply serves an
-expired certificate to the few clients that reach it by IP.
+**The standby's certificates.** Since 2026-10-04 the standby has a name of its
+own, `proxyforgame.net`, with a Let's Encrypt certificate that renews like any
+other; the watchdog and `pfg-sync`'s smoke test both use it. The standby also
+still holds a `proxyforgame.com` certificate from the last time DNS was pointed
+at it by hand. That one cannot renew while the name resolves to production —
+the HTTP-01 challenge lands there — so certbot's attempts at it will fail
+quietly from early November and it lapses in December. Nothing checks it, and
+nothing needs to: a failover reissues it (below).
 
 ## Failing over to the standby
 
@@ -329,9 +332,9 @@ starting.
 2. **Reissue the certificate**, once the name actually resolves there:
    `certbot --apache -d proxyforgame.com -d www.proxyforgame.com`. Until DNS
    moved, this could not work - the HTTP-01 challenge went to production - which
-   is why the standby's certificate is allowed to lapse (issue #17). With a
-   valid certificate in place, `SMOKE_INSECURE=1` can come out of
-   `/etc/pfg-sync.conf`.
+   is why the standby's `.com` certificate is allowed to lapse (issue #17). The
+   smoke test and the watchdog do not depend on it: both ask the standby as
+   `proxyforgame.net`.
 3. **Expect a slower pipeline.** The GitHub webhook points at production, so
    while it is down a push reaches the site on the standby's five-minute timer
    instead of within seconds. Nothing else about deploys changes.
@@ -413,10 +416,10 @@ with the checkout, and `pfg-sync` pipes it into the host's database through
   opened. With `MAILTO=""` on top, nothing was visible anywhere.
 - **The standby answers only over HTTPS, even on loopback.** Port 80 carries
   certbot's permanent redirect, so a plain `http://` smoke request gets a 301
-  and never reaches the site. Its certificate is valid to 2026-10-07 — but
-  renewal needs an HTTP-01 challenge, and `proxyforgame.com` resolves to
-  production, so **that renewal will fail silently and the standby's smoke check
-  will start failing on certificate validation.** Deal with it before October.
+  and never reaches the site. Its smoke test therefore asks
+  `https://proxyforgame.net` with `--resolve` onto `127.0.0.1`, and verifies the
+  certificate — the `.com` one it used to borrow, with `--insecure`, could not
+  renew there (see *The standby's certificates*).
 - **A document root that moves has to take its `<Directory>` block with it.**
   Apache matches that block against the path as configured, symlink and all, so
   pointing `DocumentRoot` at the new link while the block still names the old

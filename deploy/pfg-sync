@@ -15,11 +15,10 @@
 #   SMOKE_BASE      base URL to smoke-test after updating
 #   SMOKE_RESOLVE   optional curl --resolve entry, for a host that is not in DNS
 #   SMOKE_INSECURE  optional; 1 to skip certificate verification in the smoke
-#                   test. Set on the standby, whose certificate for
-#                   proxyforgame.com cannot renew itself - that name resolves to
-#                   production, so the challenge lands there. This host has to
-#                   prove that it serves, not who it claims to be, and the
-#                   watchdog reports the expiry from outside.
+#                   test, for a host smoke-tested under a name whose certificate
+#                   it cannot renew. Neither host needs it now: the standby is
+#                   tested as proxyforgame.net, a name it holds a certificate
+#                   for.
 #   LOG             file to append to
 #   MAIL_TO         address for failure reports (optional)
 #   MAX_WALK        optional; how many commits back from the tip of main to

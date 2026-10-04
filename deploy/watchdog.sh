@@ -13,20 +13,15 @@
 # which is the point - a watchdog holding root on the machine it watches is a
 # worse problem than the one it solves.
 #
-# What it deliberately does not do is judge the standby's certificate. That one
-# cannot renew itself (its name resolves to production, so the HTTP-01
-# challenge lands there) and the decision on record is to reissue it by hand
-# during a failover. So the standby is asked over TLS without verification and
-# its expiry is reported, not enforced; a warning is printed while it still has
-# time to matter.
+# Each host is asked under its own name with full certificate verification:
+# production as proxyforgame.com, the standby as proxyforgame.net. Both
+# certificates renew themselves, so one that gets close to expiry means renewal
+# broke, and that fails the run while there is still time to fix it.
 #
 set -uo pipefail
 
-# Both addresses are already public in deploy/README.md; the standby has no
-# name of its own, so it is asked by IP while claiming the vhost's name.
-PROD_BASE="https://proxyforgame.com"
-STANDBY_IP="89.124.110.192"
-SITE_HOST="proxyforgame.com"   # the name both hosts answer to
+PROD_HOST="proxyforgame.com"
+STANDBY_HOST="proxyforgame.net"
 
 REPO="${GITHUB_REPOSITORY:-Ogeeon/proxyforgame}"
 CI_WORKFLOW="playwright.yml"   # file name, not display name - the workflow is called "CI"
@@ -37,7 +32,9 @@ MAX_AGE=93600
 # The standby polls every five minutes and production deploys on a webhook, so
 # a target that only just went green is not yet anybody's fault.
 DEPLOY_GRACE=900
-CERT_WARN_DAYS=14
+# Certbot renews 30 days ahead, so a certificate under this has missed two weeks
+# of daily attempts.
+CERT_MIN_DAYS=14
 
 # The pinned PHP major.minor - production's, and the one CI installs. Production
 # must serve exactly this; the standby only must not be older than it, since it
@@ -285,18 +282,20 @@ check_host() {
 }
 
 # ---------------------------------------------------------------------------
-# Certificate expiry - reported for both, enforced for neither.
+# Certificate expiry. An expired or mismatched certificate already fails
+# check_host, which verifies it; this catches a renewal that stopped while the
+# old certificate is still valid.
 # ---------------------------------------------------------------------------
 check_cert() {
-  local label="$1" connect="$2"
+  local label="$1" host="$2"
   command -v openssl >/dev/null || return 0
   local end days
-  end=$(echo | openssl s_client -connect "$connect" -servername "$SITE_HOST" 2>/dev/null \
+  end=$(echo | openssl s_client -connect "$host:443" -servername "$host" 2>/dev/null \
         | openssl x509 -noout -enddate 2>/dev/null | cut -d= -f2)
   [ -n "$end" ] || { warn "$label certificate: could not be read"; return 0; }
   days=$(( ( $(date -u -d "$end" +%s) - $(date -u +%s) ) / 86400 ))
-  if [ "$days" -lt "$CERT_WARN_DAYS" ]; then
-    warn "$label certificate expires in $days days ($end)"
+  if [ "$days" -lt "$CERT_MIN_DAYS" ]; then
+    fail "$label certificate expires in $days days ($end) - is certbot renewing?"
   else
     ok "$label certificate has $days days left"
   fi
@@ -305,16 +304,13 @@ check_cert() {
 WHICH="${1:-both}"
 
 if [ "$WHICH" = both ] || [ "$WHICH" = production ]; then
-  check_host "production" "$PROD_BASE"
-  check_cert "production" "proxyforgame.com:443"
+  check_host "production" "https://$PROD_HOST"
+  check_cert "production" "$PROD_HOST"
 fi
 
 if [ "$WHICH" = both ] || [ "$WHICH" = standby ]; then
-  # --resolve puts the request on the standby while it still asks for the vhost
-  # name; --insecure because that name's certificate is production's business.
-  check_host "standby" "https://$SITE_HOST" \
-    --resolve "$SITE_HOST:443:$STANDBY_IP" --insecure
-  check_cert "standby" "$STANDBY_IP:443"
+  check_host "standby" "https://$STANDBY_HOST"
+  check_cert "standby" "$STANDBY_HOST"
 fi
 
 echo
