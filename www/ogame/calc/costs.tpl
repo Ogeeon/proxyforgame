@@ -294,7 +294,7 @@
         <div class="tab-pane fade p-2" id="param-lifeforms" role="tabpanel">
           <div class="d-flex flex-wrap gap-3 align-items-center">
             <div class="d-flex flex-wrap align-items-center gap-2 border rounded p-2">
-              <span class="fw-semibold"><?= $l['class-collector'] ?> (<?= $l['race-2'] ?>):</span>
+              <span class="fw-semibold"><?= $l['class-collector'] ?>:</span>
               <div class="d-flex align-items-center gap-1">
                 <label for="lf-collector-class-bonus"><?= $l['lf-class-bonus'] ?></label>
                 <div class="input-group input-group-sm w-auto">
@@ -305,7 +305,7 @@
               </div>
             </div>
             <div class="d-flex flex-wrap align-items-center gap-2 border rounded p-2">
-              <span class="fw-semibold"><?= $l['class-discoverer'] ?> (<?= $l['race-4'] ?>):</span>
+              <span class="fw-semibold"><?= $l['class-discoverer'] ?>:</span>
               <div class="d-flex align-items-center gap-1">
                 <label for="discoverer-class-bonus"><?= $l['lf-class-bonus'] ?></label>
                 <div class="input-group input-group-sm w-auto">
