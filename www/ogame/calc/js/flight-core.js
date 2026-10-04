@@ -146,7 +146,8 @@ class FlightCalculator {
                 speed += Math.floor(base * (1 + 0.01 * params.lfMechanGE));
             }
         }
-        if (params.warriorBonus) {
+        // The warrior alliance class speeds the fleet up on a holding mission only
+        if (params.warriorBonus && params.missionType === MISSION.HOLDING) {
             speed += base * 0.1;
         }
         if (params.traderBonus && index < 2) {

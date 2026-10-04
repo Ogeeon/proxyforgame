@@ -48,6 +48,8 @@ release section; it is the source of truth for the other eleven translations.
 
 - Costs: astrophysics now costs what the game asks for. Its price was rounded to the nearest hundred, a rule from an old version of the game, while the game floors it to the unit like every other research - level 5 on en-1 costs 37.515 metal, 75.031 crystal and 37.515 deuterium, where the calculator said 37.500, 75.000 and 37.500. The error grows with the level and adds up over a range. The special case is gone, and astrophysics goes through the same formula as the rest, with the 1,75 growth factor it already carried. <!-- site -->
 
+- Flight: the warrior alliance bonus now speeds the fleet up only on a holding mission, as in the game. With the box ticked, every mission - attack, transport, moon destruction's speed column included - was quoted 10% faster than it flies; the box can stay ticked now and only the holding mission picks it up. <!-- site -->
+
 ## [2026-09-01] - site entry 63
 
 ### Added

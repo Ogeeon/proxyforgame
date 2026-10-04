@@ -479,9 +479,10 @@ describe('Flight Calculator - Ship Speeds', () => {
     const speeds = ({
         cmb = 0, imp = 0, hyp = 0, playerClass = PLAYER_CLASS.DISCOVERER,
         warrior = false, trader = false, lfMechanGE = 0, lfRocktalCE = 0,
+        missionType = MISSION.PEACEFUL,
     } = {}) => {
         const params = shipParams({
-            driveLevels: [cmb, imp, hyp], playerClass,
+            driveLevels: [cmb, imp, hyp], playerClass, missionType,
             warriorBonus: warrior, traderBonus: trader, lfMechanGE, lfRocktalCE,
         });
         return calc.getAllShipSpeeds(calc.buildShipsData(params.driveLevels), params);
@@ -611,12 +612,21 @@ describe('Flight Calculator - Ship Speeds', () => {
         expect(s[SHIP.SMALL_CARGO]).toBe(5000); // not boosted for general
     });
 
-    it('warrior alliance bonus adds 10% to every ship', () => {
-        const s = speeds({ warrior: true });
+    it('warrior alliance bonus adds 10% to every ship on a holding mission', () => {
+        const s = speeds({ warrior: true, missionType: MISSION.HOLDING });
         // Literals, not base * 1.1 — the latter is off by a float ULP for 12500
         expect(s[SHIP.SMALL_CARGO]).toBe(5500);
         expect(s[SHIP.LIGHT_FIGHTER]).toBe(13750);
         expect(s[SHIP.RECYCLER]).toBe(2200);
+    });
+
+    it('warrior alliance bonus does not apply to any other mission', () => {
+        for (const missionType of [MISSION.WAR, MISSION.PEACEFUL, MISSION.DESTROY]) {
+            const s = speeds({ warrior: true, missionType });
+            expect(s[SHIP.SMALL_CARGO]).toBe(5000);
+            expect(s[SHIP.LIGHT_FIGHTER]).toBe(12500);
+            expect(s[SHIP.RECYCLER]).toBe(2000);
+        }
     });
 
     it('trader alliance bonus adds 10% to transports only', () => {
