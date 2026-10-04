@@ -86,7 +86,7 @@
     options.missingSCName = "<?= $l['no-sc-message'] ?>";
     options.badSRCode = "<?= $l['import-bad-code-msg'] ?>";
     options.emptySRCodeMsg = <?= json_encode($l['import-empty-code-msg']) ?>;
-    options.dataFetchMsg = "<?= $l['fetchig-data'] ?>";
+    options.dataFetchMsg = <?= json_encode($l['fetching-data']) ?>;
     options.ownApiBadJsonMsg = "<?= $l['own-api-bad-json-msg'] ?>";
     options.importFailedMsg = "<?= $l['import-failed-msg'] ?>";
     options.serverDataFailedMsg = <?= json_encode($l['server-data-failed-msg']) ?>;
