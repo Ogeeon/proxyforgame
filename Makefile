@@ -16,9 +16,10 @@ else
 PHP ?= php
 endif
 
-# Read by playwright.config.js. Exported so every recipe sees it.
-PFG_BASE_URL ?= http://localhost:8000
-export PFG_BASE_URL
+# Read by playwright.config.js. Deliberately no default here: left unset, the
+# config probes http://pfg.wmp and then http://localhost:8000 and takes the first
+# that answers (playwright-tests/probe-base-url.mjs). A value given on the command
+# line or in the environment reaches the recipes as is.
 
 # Read by scripts/validate-html.js. Exported so every recipe sees it.
 PFG_PHP ?= $(PHP)

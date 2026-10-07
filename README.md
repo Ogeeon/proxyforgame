@@ -68,16 +68,18 @@ Docker does this for you; this section is for the non-Docker paths.
 ```powershell
 make install       # npm ci + Playwright browsers, first run only
 make serve         # built-in PHP server on http://localhost:8000 (or: make docker-up, or WAMP)
-make test          # unit suite + Playwright suite, against http://localhost:8000
+make test          # unit suite + Playwright suite, against whichever server is up
 ```
 
-The suite runs on the host and points at `http://localhost:8000` by default, so
-any of `make docker-up`, `make serve` or WAMP (`PFG_BASE_URL=http://pfg.wmp`) can
-be the server under test.
+The suite runs on the host and finds its server itself: with `PFG_BASE_URL` unset it tries
+`http://pfg.wmp` (WAMP) and then `http://localhost:8000` (`make serve` or `make docker-up`),
+and stops with an error when neither answers. Pin a host with
+`make test-e2e PFG_BASE_URL=http://localhost:8000`. Then `make report` opens the HTML report,
+and `make test-e2e-ui` starts the interactive runner. A single spec: `make test-one spec=graviton`.
 
-Point the suite at a different host with `make test-e2e PFG_BASE_URL=http://pfg.wmp`; it
-defaults to `http://localhost:8000`. Then `make report` opens the HTML report, and
-`make test-e2e-ui` starts the interactive runner. A single spec: `make test-one spec=graviton`.
+WAMP needs only **MariaDB 10.4, on port 3306** — the engine CI and both hosts run. Turn MySQL
+off (*Wamp Settings → Allow MySQL*) and move MariaDB to 3306 (*MariaDB → Use a port other than
+3307*); `.env` names no port, so whatever answers on 3306 is the database the site uses.
 
 Without make:
 ```powershell

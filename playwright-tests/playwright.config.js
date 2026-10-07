@@ -1,14 +1,33 @@
 // @ts-check
 import { defineConfig } from '@playwright/test';
+import { spawnSync } from 'node:child_process';
+import path from 'node:path';
+
+/**
+ * The server the suite runs against. CI sets PFG_BASE_URL in the workflow;
+ * locally an unset variable means "whichever server is up" - WAMP first, then
+ * :8000 (probe-base-url.mjs). The result goes back into the environment, so the
+ * workers Playwright forks inherit it and the probe runs once per run.
+ * @returns {string}
+ */
+function resolveBaseUrl() {
+  if (process.env.PFG_BASE_URL) return process.env.PFG_BASE_URL;
+  const probe = spawnSync(process.execPath, [path.join(__dirname, 'probe-base-url.mjs')], { encoding: 'utf8' });
+  if (probe.status !== 0) {
+    throw new Error('No local server answered on http://pfg.wmp or http://localhost:8000. '
+      + 'Start WAMP, `make serve` or `make docker-up`, or set PFG_BASE_URL.');
+  }
+  process.env.PFG_BASE_URL = probe.stdout;
+  console.error(`PFG_BASE_URL not set - running against ${probe.stdout}`);
+  return probe.stdout;
+}
 
 export default defineConfig({
   testDir: './tests',
 
   use: {
     // Base URL used by page.goto(), e.g. page.goto('/en/');
-    // In CI: http://localhost:8000  (set in workflow)
-    // Locally: http://pfg.wmp       (set manually or fallback to CI-style URL)
-    baseURL: process.env.PFG_BASE_URL || 'http://localhost:8000',
+    baseURL: resolveBaseUrl(),
 
     headless: true,
     trace: 'on-first-retry',
