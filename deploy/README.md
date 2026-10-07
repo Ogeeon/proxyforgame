@@ -235,6 +235,13 @@ A deployment created before `pinned_tip` existed carries no pin, and is ignored.
   ancestor whose has — resolved by asking GitHub about a specific commit, not by
   trusting the order of the runs list (which once served a six-month-old run as
   "newest" and cost an afternoon).
+- **Green mode only rolls forward.** The walk stops at the commit already deployed
+  and takes it without asking: the runs API now and then answers "no successful
+  run" for a commit that has one, and from 2026-09-28 every such answer for the tip
+  reset the host one commit back for a cycle — production for an hour, the standby
+  for five minutes, several times a day. Going back is the pin's job (above). A
+  consequence: a commit put live by hand with `--sha` stays until a newer commit of
+  `main` goes green, even if its own CI is red.
 - **A deploy whose smoke test fails is rolled back** to the commit it came from,
   then re-smoked. A broken commit left live is worse than a missed update.
 

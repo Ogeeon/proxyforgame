@@ -31,8 +31,10 @@
 # the one thing here that cannot be recreated from git.
 #
 # The target is always resolved from origin/main after a fetch: the tip if its
-# CI has gone green, else the newest ancestor that has. Older history is never a
-# candidate - a stale answer from the runs API once reset a host six months back,
+# CI has gone green, else the newest ancestor that has - but never a commit
+# below the one already deployed, so green mode cannot roll back. Older history
+# is never a candidate - a stale answer from the runs API once reset a host six
+# months back,
 # and the reset onto and back off a commit that still tracked .env destroyed the
 # file. Two guards remain against that class of bug: .env is saved across every
 # reset and put back if it moved, and a deploy whose smoke test fails is rolled
@@ -351,10 +353,20 @@ elif [ "$MODE" != exact ]; then
   # push points at, so the intermediate commits of a multi-commit push have no
   # run of their own and answer "no". MAX_WALK has to comfortably exceed the
   # largest push anyone realistically lands while CI is mid-flight.
+  #
+  # The walk stops at the commit already deployed and takes it without asking
+  # the API: it got here green (or by an explicit --sha), and green mode only
+  # ever rolls forward - rolling back is the pin's job. The runs API answers
+  # "no successful run" for a commit that has one now and then; before this,
+  # every such answer for the tip reset the host one commit back for a cycle
+  # (from 2026-09-28: production hourly, the standby every few minutes). It
+  # also means an idle reconcile makes no API call at all.
+  HAVE_SHA=$(git rev-parse HEAD)
   sha="$TIP"
   n=0
   WANT_SHA=""
   while [ "$n" -lt "$MAX_WALK" ]; do
+    if [ "$sha" = "$HAVE_SHA" ]; then WANT_SHA="$sha"; break; fi
     rc=0
     ci_passed "$sha" || rc=$?
     if [ "$rc" -eq 0 ]; then WANT_SHA="$sha"; break; fi

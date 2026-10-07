@@ -138,7 +138,10 @@ if command -v gh >/dev/null; then
   NEWEST=""
   while read -r sha; do
     [ -n "$sha" ] || continue
-    NEWEST=$(green_run_for "$sha" || true)
+    # Asked twice before a "no" counts: the runs endpoint now and then reports
+    # no successful run for a commit that has one, and a single such answer for
+    # the tip once failed the run with both hosts correctly on it (2026-10-05).
+    NEWEST=$(green_run_for "$sha" || green_run_for "$sha" || true)
     [ -n "$NEWEST" ] && break
   done <<< "$(read_commit_list "$LIST_JSON" || true)"
   rm -f "$LIST_JSON"
