@@ -7,6 +7,22 @@
 
 const assert = require('node:assert');
 
+// Values computed by code that load() ran in a vm context are built from that
+// context's Array and Object. deepStrictEqual compares prototypes, so such an
+// array never equals a literal written in the test, and the failure message
+// prints two identical-looking values. Rebuild arrays and plain objects in this
+// realm before comparing; class instances keep their prototype and stay strict.
+function rehome(value) {
+    if (Array.isArray(value)) return Array.from(value, rehome);
+    if (value !== null && typeof value === 'object') {
+        const proto = Object.getPrototypeOf(value);
+        if (proto === null || proto.constructor?.name === 'Object') {
+            return Object.fromEntries(Object.entries(value).map(([k, v]) => [k, rehome(v)]));
+        }
+    }
+    return value;
+}
+
 function build(actual, negated) {
     const check = (pass, message) => {
         if (pass === negated) {
@@ -22,7 +38,7 @@ function build(actual, negated) {
         toEqual: (expected) => {
             let equal = true;
             try {
-                assert.deepStrictEqual(actual, expected);
+                assert.deepStrictEqual(rehome(actual), rehome(expected));
             } catch {
                 equal = false;
             }
