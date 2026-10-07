@@ -16,39 +16,30 @@ one the request targets if the file path is ambiguous — do not assume the cost
 
 ### Task Runner (`make`)
 
-`make` from the repo root is the entry point for everything below — `make help` lists the
-targets. **Requires GNU Make 4.x**; the GnuWin32 3.81 build that is still on many Windows
-boxes is too old (`choco install make`).
+`make` from the repo root is the entry point for everything — **`make help` lists every
+target**. **Requires GNU Make 4.x**; the GnuWin32 3.81 build that is still on many Windows
+boxes is too old (`choco install make`). The ones you reach for most:
 
-| Target | What it does |
-|--------|--------------|
-| `make test` | Both suites — the ritual required before a commit |
-| `make test-unit` / `make test-e2e` | One suite each |
-| `make test-one spec=flight` | A single Playwright spec |
-| `make check` | `changelog-validate` + `i18n-validate` + `lint` + `typecheck` + `html-validate` + both suites — the green gate |
-| `make changelog-validate` | Check the structure of `CHANGELOG.md`. Gates `check` |
-| `make changelog-release` | Cut `[Unreleased]` into a dated release and regenerate `changelog.sql` |
-| `make lint` / `make typecheck` | ESLint and the TypeScript `checkJs` pass; both gate `check` |
-| `make html-validate` | Render every page in all 13 locales and check with the Nu Html Checker (strict zero errors/warnings/info); needs Java 17+ and `vnu-jar` from `make install`. Gates `check` |
-| `make tsconfigs` | Regenerate `tsconfig/<calc>.json` after editing a template's `<script>` tags |
-| `make audit` | Test coverage, DB schema, HTML reports (advisory) |
-| `make serve` | `php -S localhost:8000 -t www`, no WAMP needed |
-| `make docker-up` / `make docker-down` | Local Docker stack: PHP built-in server on :8000 + a seeded MariaDB (ADR-0002) |
-| `make i18n-fix` / `make i18n-report` | Translation sync and completion |
-| `make install` | `npm ci` + Playwright browsers |
+- `make test` — both suites, the ritual before a commit; `make test-one spec=flight` — one spec.
+- `make check` — the green gate: changelog, i18n, lint, typecheck, `html-validate` (needs
+  Java 17+) and both suites.
 
-Variables override on the command line: `make test-e2e PFG_BASE_URL=http://pfg.wmp`,
-`make serve PORT=8080`, `make serve PHP=...`. The constraints on writing recipes (platform
-default shell, one command per line, never pin `SHELL`) are documented in the Makefile header.
+Variables override on the command line: `make serve PORT=8080`, `make serve PHP=...`. The
+constraints on writing recipes (platform default shell, one command per line, never pin
+`SHELL`) are documented in the Makefile header.
 
 ### Which tests to run
 
 `docs/test-scope.md` — the file-set table and the shared-file list. `unit-tests/README.md`
-covers whether a given test belongs in Node or in Playwright.
+covers whether a given test belongs in Node or in Playwright. Tests live in
+`unit-tests/<name>-core.test.js` and `playwright-tests/tests/<name>.spec.js`.
 
-Two things worth knowing before writing a test:
+Things worth knowing before running or writing a test:
 
-- `PFG_BASE_URL` is the name `playwright.config.js` reads — **not** `PLAYWRIGHT_BASE_URL`.
+- **The e2e suite finds its server itself**: with `PFG_BASE_URL` unset,
+  `playwright-tests/playwright.config.js` probes `http://pfg.wmp` (WAMP) and then
+  `http://localhost:8000`, and fails up front when neither answers — start one, don't guess.
+  `PFG_BASE_URL` (**not** `PLAYWRIGHT_BASE_URL`) pins a host explicitly.
 - Specs import `test`/`expect` from `./base`, **not** from `@playwright/test` — the fixture
   there caches the jsdelivr Bootstrap assets in `.cdn-cache/`, without which every test
   re-downloads them over the network. New spec files must use the same import. Video recording
@@ -68,10 +59,13 @@ version mismatch.
 ### Local Development
 - `docker compose up -d` (or `make docker-up`) brings up the PHP built-in server on
   `http://localhost:8000` plus a MariaDB seeded from `schema.sql` + the fixtures and
-  migrated — the quickest path, and what the tests default to. `docker compose down -v`
-  resets the database. See `docs/adr/0002-docker-local-dev.md`.
+  migrated — the quickest path. `docker compose down -v` resets the database. See
+  `docs/adr/0002-docker-local-dev.md`.
 - Or configure a WAMP virtual host pointing to `www/` (see README.md), add
   `127.0.0.1 pfg.wmp` to the hosts file, and browse `http://pfg.wmp` for full-site testing.
+  The database is **MariaDB 10.4 on port 3306** — the engine CI and both hosts run; `.env`
+  carries no port, so whatever answers on 3306 is what the site uses. WAMP's services need
+  admin rights to start.
 - Or skip both: `make serve` runs the built-in PHP server on `http://localhost:8000`
   against whatever PHP/MariaDB is on the machine (`.env` for the DB).
 
@@ -196,7 +190,9 @@ a collector/renderer/orchestration trio. To create a new calculator use the
 | `www/ogame/calc/js/own-api.js` | Normalizes OGame's API 2 export (`flight`, `expeditions`) |
 
 Importing data the player copies out of the game — the API 2 export and the spy report, what each
-calculator takes from them — is documented in `docs/ogame-api-import.md`. Note that
+calculator takes from them — is documented in `docs/ogame-api-import.md`. The country/universe
+picker (flight, costs, trade) — the crons, tables and `serverdata`/`populatedSystems` services
+behind it — is `docs/universe-data.md`. Note that
 `docs/calculators/*.md` is generated (`make docs` overwrites it), so nothing hand-written goes there.
 
 ## Project Conventions
@@ -271,7 +267,8 @@ implementation for every pattern.
 
 ## Validation & Input Conventions
 - All numeric inputs use the **blur-validation pattern** (validate/clamp on blur, never live-clamp while typing). Follow the existing helpers rather than inventing new behavior.
-- Always use the locale-aware decimal helper for user-entered fractional values (RU uses `,`). **Never** apply locale separators to imported OGame API data — that data always uses `.`.
+- Always use the locale-aware decimal helper for user-entered fractional values (RU uses `,`). **Never** apply locale separators to imported OGame API data — the API 2 export and the spy-report JSON always use `.`.
+- **Text the player pastes out of the game UI is different**: its separator follows the game client's language (`.` on EN/RU, `,` on DE), so a paste parser accepts both.
 - Never persist a locale decimal separator into comma-delimited cookies; serialize with a canonical dot format.
 
 ## CSS / Bootstrap Gotchas

@@ -512,6 +512,34 @@ Also `make mail args="--site --body"`.
   proxies HTTPS), the host is resolved over DNS-over-HTTPS instead; the certificate is still
   verified against `imap.gmail.com`. `IMAP_ADDR` overrides the address outright.
 
+### pfg-ssh.sh
+
+Runs a command on one of the two deploy hosts, from the repo root:
+
+```bash
+bash scripts/pfg-ssh.sh prod    'git -C ~/deploy/proxyforgame.com-gh log --oneline -1'
+bash scripts/pfg-ssh.sh standby 'tail -20 /var/log/pfg-cron.log'
+bash scripts/pfg-ssh.sh prod 'bash -s' < local-script.sh
+```
+
+Production is password-only, so it goes through `plink` with the password read from
+`PFG_PROD_PWFILE` (default `D:\tmp\claude\_pfg-prod.txt`, kept outside the repo); the standby
+uses the ed25519 key. Host paths: `deploy/README.md`, *The two hosts*.
+
+### stage-lines.js
+
+Stages only your own lines of a file someone else is editing at the same time — usually
+`CHANGELOG.md`. `git add -p` does the same, but interactively.
+
+```bash
+node scripts/stage-lines.js CHANGELOG.md "Costs: the reset button" --dry-run   # show the patch
+node scripts/stage-lines.js CHANGELOG.md "Costs: the reset button"             # stage it
+```
+
+Stages the added lines that contain any of the given substrings, plus the removed lines of the
+same hunks, so rewording a line you added earlier stages as a replacement. Exits 1 if nothing
+matches.
+
 ---
 
 ## Maintenance Workflow

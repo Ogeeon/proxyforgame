@@ -27,6 +27,12 @@ When it does apply: ask the user whether the changed files should be run through
 (`analyze_code_snippet` on the sonarqube MCP server, one call per changed file).
 **Wait for the answer.**
 
+Running it: pass `projectKey: "Ogeeon_proxyforgame"` — the repo has no
+`sonar-project.properties` or `.sonarlint/`, so there is nothing to look it up in, and a call
+without the key can fail with `Error while analyzing the code: null`. The tool takes the whole
+file as `fileContent`; for a file over ~500 lines, hand the analysis to a subagent so the file
+does not land in your context.
+
 Exception: work driven by `/sonar-fix` has already had its Sonar pass — commit without asking.
 
 ## 2. Update the changelog
@@ -88,4 +94,13 @@ with no quotes or backticks.
 up prepending a literal `@` to the message.
 
 Keep unrelated pre-existing changes in a separate commit. If the working tree mixes your work
-with something that was already dirty when you started, split it.
+with something that was already dirty when you started, split it. The user often edits the
+tree at the same time — `CHANGELOG.md` especially — so re-check `git status` before staging.
+To stage only your lines of a shared file:
+
+```
+node scripts/stage-lines.js CHANGELOG.md "Costs: the reset button" [--dry-run]
+```
+
+It stages the added lines containing a substring (plus the removed lines of their hunks) and
+leaves the rest unstaged; check the result with `git diff --cached`.

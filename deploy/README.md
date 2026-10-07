@@ -97,6 +97,7 @@ is the state this check exists to end.
 | cron owner | `www-proxyforgame` | `www-data` |
 | deploy log | `<data>/logs/deploy.log` | `/var/log/pfg-cron.log` |
 | trigger | webhook, plus an hourly reconcile | five-minute timer |
+| shell from the dev box | `bash scripts/pfg-ssh.sh prod '<cmd>'` | `bash scripts/pfg-ssh.sh standby '<cmd>'` |
 
 Both are Apache 2.4 with mod_php and a MariaDB of their own. No Docker — that is
 a local-dev convenience only (`docs/adr/0002-docker-local-dev.md`). Opcache is on
