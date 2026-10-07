@@ -48,6 +48,12 @@ const MAX_DESCRIPTION = 1024;
 const WARN_DESCRIPTION = 900;
 
 /**
+ * Site entries whose published date is out of order with the entries above them.
+ * @type {Set<number|null>} `null` is a release without an id, which never matches.
+ */
+const KNOWN_DATE_INVERSIONS = new Set([32]);
+
+/**
  * Languages of change_descriptions, in the order changelog.sql lists them.
  * `us` is absent on purpose: ajax.php maps it onto `en` before querying.
  */
@@ -408,10 +414,12 @@ function validateAgainstPrevious(previous, release, where, errors, warnings) {
   if (previous.id !== null && release.id !== null && release.id >= previous.id) {
     errors.push(`line ${release.line}: site entry ${release.id} must be smaller than ${previous.id} above it - the sidebar orders entries by id`);
   }
-  // Dates are not enforced: the published history has real inversions, such
-  // as entry 32 dated 2023-04-26 sitting below entries 33 and 34 dated
-  // February 2023. Worth a look, not worth failing a build over.
-  if (previous.date !== null && release.date > previous.date) {
+  // Dates are not enforced: the published history has a real inversion, entry
+  // 32 dated 2023-04-26 sitting below entries 33 and 34 dated February 2023.
+  // That one is known and stays as published, so it is exempt - a warning
+  // printed on every run only teaches readers to skip the warnings. Any new
+  // inversion is worth a look, not worth failing a build over.
+  if (previous.date !== null && release.date > previous.date && !KNOWN_DATE_INVERSIONS.has(release.id)) {
     warnings.push(`line ${release.line}: ${where} is dated after ${describe(previous)} above it`);
   }
 }
