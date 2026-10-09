@@ -5,7 +5,7 @@ test.beforeEach(async ({ context, page }) => {
     await context.addInitScript(() => {
         localStorage.setItem('lastChange', 'key-value;true,value;99999');
     });
-    await page.goto('/production');
+    await page.goto('/ogame/calc/production.php');
 
     // Reset to defaults, then set up standard test values on the "One planet" tab
     await page.locator('#reset').click();

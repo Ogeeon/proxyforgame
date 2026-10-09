@@ -6,7 +6,7 @@ test.describe('Moon Calculator Page', () => {
         await context.addInitScript(() => {
             localStorage.setItem('lastChange', 'key-value;true,value;99999');
         });
-        await page.goto('/moon');
+        await page.goto('/ogame/calc/moon.php');
     });
 
     test('page loads successfully', async ({ page }) => {
@@ -63,7 +63,7 @@ test.describe('Moon Calculator - DOM integration', () => {
                 localStorage.setItem('pfg-state-cleared', '1');
             }
         });
-        await page.goto('/moon');
+        await page.goto('/ogame/calc/moon.php');
     });
 
     test('creation parameters are organized into Common, Fleet and Defenses tabs', async ({ page }) => {
@@ -317,7 +317,7 @@ test.describe('Moon Calculator - Sensor phalanx', () => {
                 localStorage.setItem('pfg-phalanx-cleared', '1');
             }
         });
-        await page.goto('/moon');
+        await page.goto('/ogame/calc/moon.php');
     });
 
     test('the panel starts on a level 1 phalanx that sees its own system only', async ({ page }) => {

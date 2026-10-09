@@ -6,7 +6,7 @@ test.describe('Construction Queue Calculator Page', () => {
         await context.addInitScript(() => {
             localStorage.setItem('lastChange', 'key-value;true,value;99999');
         });
-        await page.goto('/queue');
+        await page.goto('/ogame/calc/queue.php');
     });
 
     // Helper function to get queue totals

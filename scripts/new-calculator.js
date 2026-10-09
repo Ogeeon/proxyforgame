@@ -25,8 +25,6 @@ const JS_DIR = path.join(CALC_DIR, 'js');
 const CSS_DIR = path.join(CALC_DIR, 'css');
 const LOCALE_DIR = path.join(__dirname, '..', 'www', 'locale');
 const SIDEBAR_FILE = path.join(__dirname, '..', 'www', 'sidebar_bs.tpl');
-const ROUTES_FILE = path.join(__dirname, '..', 'www', 'routes.inc.php');
-const HTACCESS_FILE = path.join(__dirname, '..', 'www', '.htaccess');
 const TESTS_DIR = path.join(__dirname, '..', 'playwright-tests', 'tests');
 
 // ANSI color codes
@@ -114,8 +112,7 @@ function generatePHP(calcName) {
 
 require_once '../../langs.php';
 $lang = getLang();
-require_once '../../routes.inc.php';
-$currUrl = canonicalCalcPath('${calcName}');
+$currUrl = '/ogame/calc/${calcName}.php';
 
 require_once '../../Intl.php';
 $l = Intl::getTranslations($lang, '${calcName}');
@@ -481,35 +478,18 @@ function updateSidebar(calcName) {
   const content = fs.readFileSync(SIDEBAR_FILE, 'utf8');
 
   // Check if already exists
-  if (content.includes(`array('/${calcName}',`)) {
+  if (content.includes(`/${calcName}.php`)) {
     return false; // Already exists
   }
 
   // Find the expeditions line and add after it
-  const newEntry = `    array('/${calcName}', '${calcName}-title'),\n`;
+  const newEntry = `    array('/ogame/calc/${calcName}.php', '${calcName}-title'),\n`;
   const updatedContent = content.replace(
-    /( {4}array\('\/expeditions', 'expeditions-title'\)\n)/,
+    /( {4}array\('\/ogame\/calc\/expeditions\.php', 'expeditions-title'\)\n)/,
     `${newEntry}$1`
   );
 
   fs.writeFileSync(SIDEBAR_FILE, updatedContent, 'utf8');
-  return true;
-}
-
-/**
- * Register the short address /<lang>/<calc>: PFG_CALCULATORS in www/routes.inc.php
- * (read by the controller and the dev router) and the rewrite rule in www/.htaccess
- */
-function updateRoutes(calcName) {
-  const routes = fs.readFileSync(ROUTES_FILE, 'utf8');
-  if (routes.includes(`'${calcName}'`)) {
-    return false; // Already exists
-  }
-  // The list ends in a trailing comma and a newline, so the new entry goes on its own line
-  fs.writeFileSync(ROUTES_FILE, routes.replace(/(const PFG_CALCULATORS = array\([^)]*)\);/, `$1    '${calcName}',\n);`), 'utf8');
-
-  const htaccess = fs.readFileSync(HTACCESS_FILE, 'utf8');
-  fs.writeFileSync(HTACCESS_FILE, htaccess.replace(/(\^\(\?:\\w\\w\/\)\?\([a-z0-9|-]+)\)/, `$1|${calcName})`), 'utf8');
   return true;
 }
 
@@ -635,14 +615,6 @@ function main() {
     console.log(colorize(`  ○ Sidebar already has entry, skipping`, colors.yellow));
   }
 
-  // Register the short address
-  console.log(colorize(`\n  Registering the /<lang>/${calcName} route...`, colors.gray));
-  if (updateRoutes(calcName)) {
-    console.log(colorize(`  ✓ routes.inc.php and .htaccess updated`, colors.green));
-  } else {
-    console.log(colorize(`  ○ Route already registered, skipping`, colors.yellow));
-  }
-
   // Generate test
   console.log(colorize(`\n  Generating test file...`, colors.gray));
   if (!checkFileExists(path.join(TESTS_DIR, `${calcName}.spec.js`))) {
@@ -669,7 +641,7 @@ function main() {
   const tplPath = `www/ogame/calc/${calcName}.tpl`;
   const cssPath = `www/ogame/calc/css/${calcName}_bs.css`;
   const specPath = `playwright-tests/tests/${calcName}.spec.js`;
-  const calcUrl = `http://pfg.wmp/en/${calcName}`;
+  const calcUrl = `http://pfg.wmp/ogame/calc/${calcName}.php`;
   console.log(`  1. Customize the calculation logic in ${colorize(coreJsPath, colors.blue)}`);
   console.log(`  2. Customize input reading in ${colorize(dataCollectorJsPath, colors.blue)}`);
   console.log(`  3. Customize result rendering in ${colorize(rendererJsPath, colors.blue)}`);

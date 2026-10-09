@@ -6,7 +6,7 @@ test.describe('Graviton Calculator Page', () => {
         await context.addInitScript(() => {
             localStorage.setItem('lastChange', 'key-value;true,value;99999');
         });
-        await page.goto('/graviton');
+        await page.goto('/ogame/calc/graviton.php');
     });
 
     test('page loads successfully', async ({ page }) => {
@@ -55,7 +55,7 @@ test.describe('Graviton Calculator - DOM integration', () => {
             // Clear any persisted state so defaults are deterministic.
             localStorage.removeItem('options_graviton');
         });
-        await page.goto('/graviton');
+        await page.goto('/ogame/calc/graviton.php');
     });
 
     test('parameters are organized into Common, Buildings, Researches and LifeForms tabs', async ({ page }) => {
@@ -173,7 +173,7 @@ test.describe('Graviton Calculator - Delivery and debris DOM', () => {
             localStorage.setItem('lastChange', 'key-value;true,value;99999');
             localStorage.removeItem('options_graviton');
         });
-        await page.goto('/graviton');
+        await page.goto('/ogame/calc/graviton.php');
     });
 
     test('the new fields are on the page', async ({ page }) => {

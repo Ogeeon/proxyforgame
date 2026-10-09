@@ -3,8 +3,7 @@
 require_once '../../langs.php';
 require_once '../../db.connect.inc.php';
 $lang = getLang();
-require_once '../../routes.inc.php';
-$currUrl = canonicalCalcPath('trade');
+$currUrl = '/ogame/calc/trade.php';
 
 require_once '../../Intl.php';
 $l = Intl::getTranslations($lang, 'trade');

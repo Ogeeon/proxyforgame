@@ -3,8 +3,7 @@
 require_once '../../langs.php';
 require_once 'universes.inc.php';
 $lang = getLang();
-require_once '../../routes.inc.php';
-$currUrl = canonicalCalcPath('flight');
+$currUrl = '/ogame/calc/flight.php';
 
 require_once '../../Intl.php';
 $l = Intl::getTranslations($lang, 'flight');

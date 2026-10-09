@@ -2,7 +2,7 @@ import { test, expect } from './base';
 import { readFileSync } from 'fs';
 import { join } from 'path';
 
-const PAGE_URL = '/expeditions';
+const PAGE_URL = '/ogame/calc/expeditions.php';
 
 /** Load the page with the changelog popup suppressed. */
 async function openPage(context, page, url = PAGE_URL) {

@@ -2,8 +2,7 @@
 
 require_once '../../langs.php';
 $lang = getLang();
-require_once '../../routes.inc.php';
-$currUrl = canonicalCalcPath('terraformer');
+$currUrl = '/ogame/calc/terraformer.php';
 
 require_once '../../Intl.php';
 $l = Intl::getTranslations($lang, 'terraformer');

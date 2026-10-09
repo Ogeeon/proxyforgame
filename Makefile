@@ -96,7 +96,7 @@ install: ## Install test dependencies and Playwright browsers
 ##@ Local server
 
 serve: ## Serve www/ with the built-in PHP server on PORT, default 8000
-	"$(PHP)" -S localhost:$(PORT) -t www scripts/dev-router.php
+	"$(PHP)" -S localhost:$(PORT) -t www
 
 # Connection info in the environment, for these two recipes only - see the DB_*
 # block near the top. pfg-migrate still lets a repo .env win over these.

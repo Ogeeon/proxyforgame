@@ -6,7 +6,7 @@ test.describe('Lifeforms costs Calculator Page', () => {
         await context.addInitScript(() => {
             localStorage.setItem('lastChange', 'key-value;true,value;99999');
         });
-        await page.goto('/lfcosts');
+        await page.goto('/ogame/calc/lfcosts.php');
     });
 
     // Helper function to fill table rows

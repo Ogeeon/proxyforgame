@@ -74,7 +74,7 @@ test.describe('${displayName} Calculator Page', () => {
         await context.addInitScript(() => {
             localStorage.setItem('lastChange', 'key-value;true,value;99999');
         });
-        await page.goto('/${calcInfo.name}');
+        await page.goto('/ogame/calc/${calcInfo.name}.php');
     });
 
     test('page loads successfully', async ({ page }) => {

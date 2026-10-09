@@ -3,8 +3,7 @@
 require_once '../../langs.php';
 require_once 'universes.inc.php';
 $lang = getLang();
-require_once '../../routes.inc.php';
-$currUrl = canonicalCalcPath('costs');
+$currUrl = '/ogame/calc/costs.php';
 
 require_once '../../Intl.php';
 $l = Intl::getTranslations($lang, 'costs');

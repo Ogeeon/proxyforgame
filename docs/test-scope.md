@@ -54,8 +54,6 @@ Anything not in a calculator's file set, notably:
   database needs the rows `make db-seed` imports from `playwright-tests/fixtures/changelog-seed.sql` —
   a database holding only `schema.sql` has those tables empty and the test fails
 - `www/Intl.php`, `www/langs.php`, `www/db.connect.inc.php`
-- `www/routes.inc.php`, `www/.htaccess`, `scripts/dev-router.php` — the calculator addresses;
-  their redirects have their own `playwright-tests/tests/routes.spec.js`
 - `www/locale/*.json` — use `make check`, so the locale validator runs too
 - `playwright-tests/tests/base.js` — **note the path**, it sits in `tests/`, not the root
 - `playwright-tests/playwright.config.js`
