@@ -67,7 +67,7 @@ test.describe('Flight Calculator Page', () => {
         await context.addInitScript(() => {
             localStorage.setItem('lastChange', 'key-value;true,value;99999');
         });
-        await page.goto('/ogame/calc/flight.php');
+        await page.goto('/flight');
         await installCompat(page);
     });
 
@@ -108,7 +108,7 @@ test.describe('Flight Calculator - Spy Report Import', () => {
             body: SR_FIXTURE,
         }));
 
-        await page.goto('/ogame/calc/flight.php');
+        await page.goto('/flight');
         await installCompat(page);
     });
 
@@ -237,7 +237,7 @@ test.describe('Flight Calculator - Server data fetch', () => {
             await new Promise((resolve) => setTimeout(resolve, 1000));
             await route.fulfill({ status: 200, contentType: 'application/json', body: SERVER_DATA });
         });
-        await page.goto('/ogame/calc/flight.php');
+        await page.goto('/flight');
     });
 
     test('covers the parameters panel while the universe data is on the wire', async ({ page }) => {
@@ -336,7 +336,7 @@ test.describe('Flight Calculator - OGame Object Import', () => {
         await context.addInitScript(() => {
             localStorage.setItem('lastChange', 'key-value;true,value;99999');
         });
-        await page.goto('/ogame/calc/flight.php');
+        await page.goto('/flight');
         await installCompat(page);
         // The parameters panel is collapsed by default — open it first
         await openParams(page);
@@ -539,7 +539,7 @@ test.describe('Flight Calculator - Ship Speeds', () => {
         await context.addInitScript(() => {
             localStorage.setItem('lastChange', 'key-value;true,value;99999');
         });
-        await page.goto('/ogame/calc/flight.php');
+        await page.goto('/flight');
         await installCompat(page);
         await openParams(page);
         await openFlightTimesTab(page);
@@ -580,7 +580,7 @@ test.describe('Flight Calculator - Slowest Ship', () => {
         await context.addInitScript(() => {
             localStorage.setItem('lastChange', 'key-value;true,value;99999');
         });
-        await page.goto('/ogame/calc/flight.php');
+        await page.goto('/flight');
         await installCompat(page);
         await openParams(page);
         await page.locator('#class-2').check(); // discoverer: no speed doubling
@@ -638,7 +638,7 @@ test.describe('Flight Calculator - Deuterium Consumption', () => {
         await context.addInitScript(() => {
             localStorage.setItem('lastChange', 'key-value;true,value;99999');
         });
-        await page.goto('/ogame/calc/flight.php');
+        await page.goto('/flight');
         await installCompat(page);
         await openParams(page);
         await page.locator('#class-2').check(); // discoverer: no speed or fuel perks
@@ -670,7 +670,7 @@ test.describe('Flight Calculator - Cargo Capacity', () => {
         await context.addInitScript(() => {
             localStorage.setItem('lastChange', 'key-value;true,value;99999');
         });
-        await page.goto('/ogame/calc/flight.php');
+        await page.goto('/flight');
         await installCompat(page);
         await openParams(page);
         await page.locator('#class-2').check(); // discoverer: no cargo perks
@@ -708,7 +708,7 @@ test.describe('Flight Calculator - Results Table', () => {
         await context.addInitScript(() => {
             localStorage.setItem('lastChange', 'key-value;true,value;99999');
         });
-        await page.goto('/ogame/calc/flight.php');
+        await page.goto('/flight');
         await installCompat(page);
         await openParams(page);
         await page.locator('#class-2').check();
@@ -949,7 +949,7 @@ test.describe('Flight Calculator - Moon Destruction Mission', () => {
         await context.addInitScript(() => {
             localStorage.setItem('lastChange', 'key-value;true,value;99999');
         });
-        await page.goto('/ogame/calc/flight.php');
+        await page.goto('/flight');
         await installCompat(page);
         await openParams(page);
         await page.locator('#class-2').check();
@@ -1039,7 +1039,7 @@ test.describe('Flight Calculator - Empty State', () => {
         });
         // No fleet is set up here on purpose: every ship count starts at 0, which
         // is exactly the state a first-time visitor lands in.
-        await page.goto('/ogame/calc/flight.php');
+        await page.goto('/flight');
         await installCompat(page);
         await openFlightTimesTab(page);
     });
@@ -1121,7 +1121,7 @@ test.describe('Flight Calculator - Arrival Time', () => {
         await context.addInitScript(() => {
             localStorage.setItem('lastChange', 'key-value;true,value;99999');
         });
-        await page.goto('/ogame/calc/flight.php');
+        await page.goto('/flight');
         await installCompat(page);
         await page.locator('#tabtag1').click();
         await page.locator('#set-departure-zero').click(); // midnight today, a stable base
@@ -1251,7 +1251,7 @@ test.describe('Flight Calculator - Input Masks', () => {
         await context.addInitScript(() => {
             localStorage.setItem('lastChange', 'key-value;true,value;99999');
         });
-        await page.goto('/ogame/calc/flight.php');
+        await page.goto('/flight');
         await page.locator('#tabtag1').click();
     });
 
@@ -1461,7 +1461,7 @@ test.describe('Flight Calculator - Save Points', () => {
         await context.addInitScript(() => {
             localStorage.setItem('lastChange', 'key-value;true,value;99999');
         });
-        await page.goto('/ogame/calc/flight.php');
+        await page.goto('/flight');
         await installCompat(page);
         await page.locator('#tabtag2').click();
     });
@@ -1766,7 +1766,7 @@ test.describe('Flight Calculator - Persistence', () => {
         await context.addInitScript(() => {
             localStorage.setItem('lastChange', 'key-value;true,value;99999');
         });
-        await page.goto('/ogame/calc/flight.php');
+        await page.goto('/flight');
         await installCompat(page);
         await openParams(page);
     });
@@ -1918,7 +1918,7 @@ test.describe('Flight Calculator - Fleet Recall', () => {
         await context.addInitScript(() => {
             localStorage.setItem('lastChange', 'key-value;true,value;99999');
         });
-        await page.goto('/ogame/calc/flight.php');
+        await page.goto('/flight');
         await installCompat(page);
         await page.locator('#tabtag1').click();
     });

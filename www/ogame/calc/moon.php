@@ -2,7 +2,8 @@
 
 require_once '../../langs.php';
 $lang = getLang();
-$currUrl = '/ogame/calc/moon.php';
+require_once '../../routes.inc.php';
+$currUrl = canonicalCalcPath('moon');
 
 require_once '../../Intl.php';
 $l = Intl::getTranslations($lang, 'moon');

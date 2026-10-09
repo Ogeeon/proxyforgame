@@ -5,7 +5,8 @@ require_once 'h_functions.php';
 
 require_once '../../langs.php';
 $lang = getLang();
-$currUrl = '/ogame/calc/expeditions.php';
+require_once '../../routes.inc.php';
+$currUrl = canonicalCalcPath('expeditions');
 
 require_once '../../Intl.php';
 $l = Intl::getTranslations($lang, 'expeditions');

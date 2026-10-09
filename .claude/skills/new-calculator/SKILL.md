@@ -19,6 +19,8 @@ make new-calc name=<calc>
 - `playwright-tests/tests/<calc>.spec.js`
 - adds the translation keys to `en.json` and syncs them to all 13 locales
 - adds the entry to `www/sidebar_bs.tpl`
+- registers the address `/<lang>/<calc>`: `PFG_CALCULATORS` in `www/routes.inc.php` and the
+  rewrite rule in `www/.htaccess`
 
 It skips any file that already exists, so it is safe to re-run.
 

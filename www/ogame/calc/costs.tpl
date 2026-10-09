@@ -707,7 +707,7 @@ document.addEventListener('DOMContentLoaded', function() {
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
-        <?= str_replace('{0}', '/' . $lang . '/ogame/calc/queue.php', $l['disclaimer-robot-nanite']) ?>
+        <?= str_replace('{0}', '/' . $lang . '/queue', $l['disclaimer-robot-nanite']) ?>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-primary" data-bs-dismiss="modal"><?= $l['done'] ?></button>

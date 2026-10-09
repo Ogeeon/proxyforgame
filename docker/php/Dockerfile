@@ -21,7 +21,6 @@ EXPOSE 8000
 # built-in server needs nothing more. See docs/adr/0002-docker-local-dev.md.
 USER www-data
 
-# Byte-identical to `make serve` and to what CI does: the built-in server, no
-# router, document root www/. Pretty /en/ URLs (an .htaccess concern) are not
-# served here - the tests navigate to *.php directly.
-CMD ["php", "-S", "0.0.0.0:8000", "-t", "www"]
+# Byte-identical to `make serve` and to what CI does: the built-in server,
+# document root www/, and the router that stands in for www/.htaccess.
+CMD ["php", "-S", "0.0.0.0:8000", "-t", "www", "scripts/dev-router.php"]

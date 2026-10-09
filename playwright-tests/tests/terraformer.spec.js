@@ -6,7 +6,7 @@ test.describe('Terraformer Calculator Page', () => {
         await context.addInitScript(() => {
             localStorage.setItem('lastChange', 'key-value;true,value;99999');
         });
-        await page.goto('/ogame/calc/terraformer.php');
+        await page.goto('/terraformer');
     });
 
     test('page loads successfully', async ({ page }) => {
@@ -55,7 +55,7 @@ test.describe('Terraformer Calculator - DOM integration', () => {
             // Clear any persisted state so defaults are deterministic.
             localStorage.removeItem('options_terraformer');
         });
-        await page.goto('/ogame/calc/terraformer.php');
+        await page.goto('/terraformer');
     });
 
     test('parameters are organized into Common, Buildings, Researches and LifeForms tabs', async ({ page }) => {

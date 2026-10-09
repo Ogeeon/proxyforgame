@@ -21,15 +21,13 @@ $page = isset($argv[1]) ? $argv[1] : '';
 $lang = isset($argv[2]) ? $argv[2] : 'en';
 
 $wwwRoot = dirname(__DIR__) . DIRECTORY_SEPARATOR . 'www';
-
-$calculators = array('costs', 'expeditions', 'flight', 'graviton', 'lfcosts', 'moon', 'production', 'queue', 'terraformer', 'trade');
-
+require_once $wwwRoot . DIRECTORY_SEPARATOR . 'routes.inc.php';
 if ($page === 'index') {
     $reqUri = '/' . $lang . '/';
 } elseif ($page === 'policy') {
     $reqUri = '/policy.php';
-} elseif (in_array($page, $calculators, true)) {
-    $reqUri = '/' . $lang . '/ogame/calc/' . $page . '.php';
+} elseif (in_array($page, PFG_CALCULATORS, true)) {
+    $reqUri = '/' . $lang . '/' . $page;
 } else {
     fwrite(STDERR, "render-page.php: unknown page \"$page\"\n");
     exit(1);

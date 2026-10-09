@@ -67,3 +67,7 @@ developer's customised `.env`.
 - Pretty `/en/` URLs are still not served locally. If the project moves to
   clean URLs, a small router shared by `php -S` and `.htaccess` is the likely
   shape — a separate change.
+  *Update 2026-10:* that change has landed. The short calculator addresses
+  (`/<lang>/<calc>`) brought `scripts/dev-router.php`, which `make serve`, the
+  `web` service and CI all pass to `php -S`, so the `/en/` URLs are served
+  locally too.

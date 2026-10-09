@@ -10,7 +10,7 @@ test.describe('Costs Calculator Page', () => {
             // Suppress the robot/nanite factory disclaimer so it doesn't block functional tests
             document.cookie = 'costs_rn_disclaimer_shown=1; path=/';
         });
-        await page.goto('/ogame/calc/costs.php');
+        await page.goto('/costs');
     });
 
     // Helper function to fill table rows
@@ -624,7 +624,7 @@ test.describe('Costs Calculator - Robot/Nanite factory disclaimer', () => {
         await context.addInitScript(() => {
             localStorage.setItem('lastChange', 'key-value;true,value;99999');
         });
-        await page.goto('/ogame/calc/costs.php');
+        await page.goto('/costs');
     });
 
     test('modal appears when building the Robotics factory (single-level tab) and only once', async ({ page }) => {
@@ -638,7 +638,7 @@ test.describe('Costs Calculator - Robot/Nanite factory disclaimer', () => {
 
         await expect(modal).toBeVisible();
         // Body links to the construction queue calculator
-        await expect(modal.locator('.modal-body a')).toHaveAttribute('href', /\/ogame\/calc\/queue\.php$/);
+        await expect(modal.locator('.modal-body a')).toHaveAttribute('href', /^\/[a-z]{2}\/queue$/);
 
         // Dismiss; it must not reappear on further input (remembered via cookie)
         await modal.locator('.btn-close').click();
@@ -690,7 +690,7 @@ test.describe('Costs Calculator - LifeForm research bonuses table', () => {
             localStorage.setItem('lastChange', 'key-value;true,value;99999');
             document.cookie = 'costs_rn_disclaimer_shown=1; path=/';
         });
-        await page.goto('/ogame/calc/costs.php');
+        await page.goto('/costs');
     });
 
     test('import fills the table and OK persists it', async ({ page }) => {
@@ -939,7 +939,7 @@ test.describe('Costs Calculator - universe picker', () => {
             localStorage.setItem('lastChange', 'key-value;true,value;99999');
             document.cookie = 'costs_rn_disclaimer_shown=1; path=/';
         });
-        await page.goto('/ogame/calc/costs.php');
+        await page.goto('/costs');
         await page.locator('#param-common-tab').click();
     });
 
