@@ -9,7 +9,7 @@
 <h1>Privacy Policy</h1>
 
 
-<p>Effective date: July 24, 2019</p>
+<p>Effective date: July 24, 2019<br>Last updated: October 9, 2026</p>
 
 
 <p>ProxyForGame ("us", "we", or "our") operates the http://proxyforgame.com website (hereinafter referred to as the "Service").</p>
@@ -173,6 +173,16 @@
         <p>You can opt-out of having made your activity on the Service available to Google Analytics by installing the Google Analytics opt-out browser add-on. The add-on prevents the Google Analytics JavaScript (ga.js, analytics.js and dc.js) from sharing information with Google Analytics about visits activity.</p>                <p>For more information on the privacy practices of Google, please visit the Google Privacy & Terms web page: <a href="https://policies.google.com/privacy?hl=en">https://policies.google.com/privacy?hl=en</a></p>
     </li>
                                     </ul>
+
+<h3>Error Monitoring</h3>
+<p>We use a third-party Service Provider to learn about errors in the Service, so that we can fix them.</p>
+<ul>
+    <li>
+        <p><strong>Hawk</strong></p>
+        <p>Hawk is an error tracking service operated by CodeX. When a script on one of our pages fails, your browser sends Hawk a report describing the error: the error message and the place in our code where it occurred, the address of the page, your browser type and version, the page language, recent actions on the page that led up to the error (such as clicks and requests the page made) and messages the page wrote to the browser console. The report carries no identifier that could link it to you or to your other visits, and nothing is stored in your browser for this purpose. No report is sent while the Service works without errors.</p>
+        <p>For more information about Hawk, please visit: <a href="https://hawk.so/">https://hawk.so/</a></p>
+    </li>
+</ul>
 
 
 

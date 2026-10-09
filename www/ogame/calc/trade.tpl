@@ -2,6 +2,7 @@
 <html lang="<?= getLangAttr() ?>">
 <head>
     <meta charset="utf-8">
+    <?php require_once('../../hawk.tpl'); ?>
     <meta name="viewport" content="width=device-width, initial-scale=1">
   <title><?= $l['title'] ?></title>
   <meta name="description" content="<?= $l['title'] ?>">

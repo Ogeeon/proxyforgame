@@ -15,6 +15,10 @@ release section; it is the source of truth for the other eleven translations.
 
 ## [Unreleased]
 
+### Added
+
+- Monitoring: browser errors on every page are reported to Hawk (hawk.so), so a script failure a visitor hits no longer goes unseen. The tracker loads only where the host's `.env` sets `HAWK_TOKEN` - production and the standby - and reports only errors our own scripts are involved in, tagged with the deployed commit, the host and the page language. Each page load gets a throwaway user id, so Hawk stores nothing in the visitor's browser and needs no cookie consent. The privacy policy describes what a report contains.
+
 ### Fixed
 
 - Deploy: `pfg-sync` no longer rolls a host back when GitHub's runs API misreports the tip. Now and then the API answers "no successful run" for a commit that has one, and since 2026-09-28 every such answer reset the host to the previous commit until the next run put it back - production several times a day for an hour, the standby for five minutes at a time. Green mode now stops its walk at the commit already deployed and takes it without asking, so it only ever rolls forward (going back is the rollback pin's job) and an idle reconcile makes no API call at all. The watchdog asks twice before it counts a commit as not green, after the same false answer failed its run on 2026-10-05.
