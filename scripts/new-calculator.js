@@ -130,6 +130,7 @@ function generateTPL(calcName) {
   return `<!DOCTYPE html>
 <head>
   <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
+  <?php require_once('../../hawk.tpl'); ?>
   <meta http-equiv="Cache-Control" content="no-cache" />
   <title><?= $l['title'] ?></title>
   <meta name="description" content="<?= $l['title'] ?>"/>
@@ -137,11 +138,8 @@ function generateTPL(calcName) {
   <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon"/>
   <link rel="icon" href="/favicon.ico" type="image/x-icon"/>
 <?php
-  if ($_SERVER['HTTP_HOST'] == 'proxyforgame.com') {
-    $pfgPath = $_SERVER['DOCUMENT_ROOT'];
-  } else {
-    $pfgPath = "D:\\Programming\\JS\\pfg.wmp\\www";
-  };
+  // www/ on disk, for the filemtime() cache-busting stamps below.
+  $pfgPath = dirname(__DIR__, 2);
 ?>
   <!-- Bootstrap 5 CSS -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"/>

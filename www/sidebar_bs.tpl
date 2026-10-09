@@ -23,11 +23,8 @@
   if ($result !== false && isset($result[0]['m'])) {
     $currChange = $result[0]['m'];
   }
-  if ( $_SERVER['SERVER_NAME'] == 'proxyforgame.com') {
-    $pfgPath = $_SERVER['DOCUMENT_ROOT'];
-  } else {
-    $pfgPath = "D:\Programming\JS\pfg.wmp\www";
-  }
+  // www/ on disk, for the filemtime() cache-busting stamps below.
+  $pfgPath = __DIR__;
 ?>
 
 <?php $sidebarCss = $pfgPath . '/css/sidebar_bs.css'; ?>
