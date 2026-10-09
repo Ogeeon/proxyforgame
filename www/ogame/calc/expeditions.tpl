@@ -9,11 +9,8 @@
   <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
   <link rel="icon" href="/favicon.ico" type="image/x-icon">
 <?php
-  if ($_SERVER['HTTP_HOST'] == 'proxyforgame.com') {
-    $pfgPath = $_SERVER['DOCUMENT_ROOT'];
-  } else {
-    $pfgPath = "D:\Programming\JS\pfg.wmp\www";
-  }
+  // www/ on disk, for the filemtime() cache-busting stamps below.
+  $pfgPath = dirname(__DIR__, 2);
 
   // Ships that can be sent on an expedition. The order must stay in sync with
   // EXPEDITION_SHIPS in expeditions-core.js, which indexes the life-form cargo

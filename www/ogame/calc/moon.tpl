@@ -9,11 +9,8 @@
   <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
   <link rel="icon" href="/favicon.ico" type="image/x-icon">
 <?php
-  if ($_SERVER['HTTP_HOST'] == 'proxyforgame.com') {
-    $pfgPath = $_SERVER['DOCUMENT_ROOT'];
-  } else {
-    $pfgPath = "D:\Programming\JS\pfg.wmp\www";
-  };
+  // www/ on disk, for the filemtime() cache-busting stamps below.
+  $pfgPath = dirname(__DIR__, 2);
 
   // Unit ids rendered as count inputs. They must stay in sync with MOON_UNITS
   // in moon-core.js, which holds the matching build costs.

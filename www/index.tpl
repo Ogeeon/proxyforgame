@@ -9,11 +9,8 @@
   <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
   <link rel="icon" href="/favicon.ico" type="image/x-icon">
 <?php
-  if ($_SERVER['HTTP_HOST'] == 'proxyforgame.com') {
-    $pfgPath = $_SERVER['DOCUMENT_ROOT'];
-  } else {
-    $pfgPath = "D:\Programming\JS\pfg.wmp\www";
-  };
+  // www/ on disk, for the filemtime() cache-busting stamps below.
+  $pfgPath = __DIR__;
 ?>
   <!-- Bootstrap 5 CSS -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
