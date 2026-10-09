@@ -1,4 +1,5 @@
-<?php if ( $_SERVER['HTTP_HOST'] == 'proxyforgame.com'): ?>
+<?php require_once __DIR__ . '/hosts.inc.php'; ?>
+<?php if (isPublicHost()): ?>
 <!-- Yandex.Metrika counter -->
 <script>
     (function(m,e,t,r,i,k,a){

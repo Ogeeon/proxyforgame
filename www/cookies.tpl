@@ -1,4 +1,5 @@
-<?php if ($_SERVER['HTTP_HOST'] == 'proxyforgame.com'): ?>
+<?php require_once __DIR__ . '/hosts.inc.php'; ?>
+<?php if (isPublicHost()): ?>
 <style>
 	#pfg-cookie-consent {
 		display: none;

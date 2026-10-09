@@ -19,6 +19,10 @@ release section; it is the source of truth for the other eleven translations.
 
 - Monitoring: browser errors on every page are reported to Hawk (hawk.so), so a script failure a visitor hits no longer goes unseen. The tracker loads only where the host's `.env` sets `HAWK_TOKEN` - production and the standby - and reports only errors our own scripts are involved in, tagged with the deployed commit, the host and the page language. Each page load gets a throwaway user id, so Hawk stores nothing in the visitor's browser and needs no cookie consent. The privacy policy describes what a report contains.
 
+### Changed
+
+- Site: the cookie notice and the Yandex Metrica counter now run on `proxyforgame.net` as well as on `proxyforgame.com`; before, the standby showed visitors no cookie notice at all and was missing from the statistics. Both hosts are listed in one place, `www/hosts.inc.php`, and local development, CI and the e2e suite still run without either. The notice now says what the cookies are for - the values entered in the calculators, and Yandex Metrica's visit statistics - instead of a vague "personalize content", and the privacy policy describes Yandex Metrica in place of Google Analytics, which the site no longer runs, and names `https://proxyforgame.net` as the Service.
+
 ### Fixed
 
 - Site: CSS and JS updates now reach visitors of `proxyforgame.net` as soon as they are deployed. Every page stamps its stylesheets and scripts with the file's modification time so the browser fetches a fresh copy after a change, but the templates found the files through a hardcoded Windows path on any host other than `proxyforgame.com` - so on the standby, under `make serve` and in Docker every stamp came out empty or `0`, and a browser could keep running a stale script against a newer page. The path is now taken from where the template itself sits.

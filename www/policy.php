@@ -12,17 +12,17 @@
 <p>Effective date: July 24, 2019<br>Last updated: October 9, 2026</p>
 
 
-<p>ProxyForGame ("us", "we", or "our") operates the http://proxyforgame.com website (hereinafter referred to as the "Service").</p>
+<p>ProxyForGame ("us", "we", or "our") operates the https://proxyforgame.net website (hereinafter referred to as the "Service").</p>
 
 <p>This page informs you of our policies regarding the collection, use and disclosure of personal data when you use our Service and the choices you have associated with that data.</p>
 
-<p>We use your data to provide and improve the Service. By using the Service, you agree to the collection and use of information in accordance with this policy. Unless otherwise defined in this Privacy Policy, the terms used in this Privacy Policy have the same meanings as in our Terms and Conditions, accessible from http://proxyforgame.com</p>
+<p>We use your data to provide and improve the Service. By using the Service, you agree to the collection and use of information in accordance with this policy. Unless otherwise defined in this Privacy Policy, the terms used in this Privacy Policy have the same meanings as in our Terms and Conditions, accessible from https://proxyforgame.net</p>
 
 <h2>Definitions</h2>
 <ul>
 <li>
 <p><strong>Service</strong></p>
-<p>Service is the http://proxyforgame.com website operated by ProxyForGame</p>
+<p>Service is the https://proxyforgame.net website operated by ProxyForGame</p>
 </li>
 <li>
 <p><strong>Personal Data</strong></p>
@@ -168,9 +168,10 @@
 <p>We may use third-party Service Providers to monitor and analyse the use of our Service.</p>
 <ul>
         <li>
-        <p><strong>Google Analytics</strong></p>
-        <p>Google Analytics is a web analytics service offered by Google that tracks and reports website traffic. Google uses the data collected to track and monitor the use of our Service. This data is shared with other Google services. Google may use the collected data to contextualise and personalise the ads of its own advertising network.</p>
-        <p>You can opt-out of having made your activity on the Service available to Google Analytics by installing the Google Analytics opt-out browser add-on. The add-on prevents the Google Analytics JavaScript (ga.js, analytics.js and dc.js) from sharing information with Google Analytics about visits activity.</p>                <p>For more information on the privacy practices of Google, please visit the Google Privacy & Terms web page: <a href="https://policies.google.com/privacy?hl=en">https://policies.google.com/privacy?hl=en</a></p>
+        <p><strong>Yandex Metrica</strong></p>
+        <p>Yandex Metrica is a web analytics service offered by Yandex that tracks and reports website traffic. It sets cookies in your browser to tell visits apart and to measure how the Service is used: the pages you visit, how long you stay on them and where you came from.</p>
+        <p>You can opt out of Yandex Metrica by installing the Yandex Metrica opt-out browser add-on: <a href="https://yandex.com/support/metrica/general/opt-out.html">https://yandex.com/support/metrica/general/opt-out.html</a></p>
+        <p>For more information on the privacy practices of Yandex, please visit the Yandex Privacy Policy: <a href="https://yandex.com/legal/confidential/">https://yandex.com/legal/confidential/</a> and the Yandex Metrica Terms of Use: <a href="https://yandex.com/legal/metrica_termsofuse/">https://yandex.com/legal/metrica_termsofuse/</a></p>
     </li>
                                     </ul>
 
