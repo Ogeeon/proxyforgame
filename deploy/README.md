@@ -252,9 +252,15 @@ A deployment created before `pinned_tip` existed carries no pin, and is ignored.
 - `/`, `/ru/`, `/ogame/calc/flight.php`, `/ogame/calc/costs.php`
 - `ajax.php?service=populatedSystems&country=ru&universe=268`
 
-`/ru/` is in the list because it is the only one that exercises `.htaccess` —
-if `AllowOverride` ever stops applying, every other page still returns 200 while
-the language routing is silently gone. The `ajax.php` call is there because a
+The two calculator paths are the old `.php` addresses, which redirect to the
+short `/<lang>/<calc>` ones; the smoke test follows the redirect, checks the page
+behind it, and fails if the final URL has left `SMOKE_BASE`. Asking the old path
+keeps the check valid for a rollback to a commit from before the short addresses.
+
+`/ru/` is in the list because it exercises `.htaccess` — if `AllowOverride` ever
+stops applying, `/` still returns 200 while the language routing is silently
+gone. Since the short addresses, the calculator paths depend on `.htaccess` too:
+their redirect lands on a URL only the rewrite rules can serve. The `ajax.php` call is there because a
 static page cannot show that `.env` survived or that MySQL is answering.
 
 ## Between deploys

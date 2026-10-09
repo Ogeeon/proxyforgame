@@ -248,14 +248,23 @@ smoke() {
   [ -n "$SMOKE_RESOLVE" ] && curl_cmd+=(--resolve "$SMOKE_RESOLVE")
   [ "$SMOKE_INSECURE" = 1 ] && curl_cmd+=(--insecure)
 
+  # The calculators answer on /<lang>/<calc> and redirect their old .php paths
+  # there, so redirects are followed: the old paths prove the redirect and the
+  # page behind it, and still pass on a rollback to a commit from before the
+  # short addresses. A redirect off $SMOKE_BASE would escape --resolve and test
+  # some other host, so the final URL has to stay on it.
+  local effective
   for path in "/" "/ru/" "/ogame/calc/flight.php" "/ogame/calc/costs.php"; do
     body=$(mktemp)
     # curl -w prints 000 on a connection failure and also exits non-zero; the
     # || keeps that from turning into "000000", it does not add a second code.
-    code=$("${curl_cmd[@]}" -o "$body" -w '%{http_code}' "$SMOKE_BASE$path") || code=000
+    effective=$("${curl_cmd[@]}" -L -o "$body" -w '%{http_code} %{url_effective}' "$SMOKE_BASE$path") || effective="000 "
+    code=${effective%% *}; effective=${effective#* }
     size=$(wc -c < "$body"); rm -f "$body"
     if [ "$code" != 200 ] || [ "$size" -lt 1000 ]; then
       bad="$bad $path(HTTP $code, ${size}b)"
+    elif [ "${effective#"$SMOKE_BASE"/}" = "$effective" ]; then
+      bad="$bad $path(redirected off the host to $effective)"
     fi
   done
   # One database-backed read. A static page cannot tell us the .env survived the
