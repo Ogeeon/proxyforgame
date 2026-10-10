@@ -66,8 +66,8 @@ jobs:
       # Install PHP (with Apache-like extensions)
       #
       # The version comes from .php-version, which is the single source of
-      # truth: it must track production's PHP major.minor (see
-      # docs/adr/0001-php-version-alignment.md). CI and production move
+      # truth: it must track the live host's PHP major.minor (see
+      # docs/adr/0003-single-host-php-8-5.md). CI and the site move
       # together - do not pin a version here.
       # -------------------------------------------------------------
       - name: Install PHP

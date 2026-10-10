@@ -1,9 +1,9 @@
 # Local-development image only - the hosts run Apache + mod_php and CI uses
 # shivammathur/setup-php. See docs/adr/0002-docker-local-dev.md.
 #
-# The base tag must be the same major.minor as .php-version (production's pin,
-# ADR-0001). scripts/check-php-version.js warns if the two drift.
-FROM php:8.2-cli
+# The base tag must be the same major.minor as .php-version (the live host's pin,
+# ADR-0003). scripts/check-php-version.js warns if the two drift.
+FROM php:8.5-cli
 
 RUN set -eux; \
     apt-get update; \
