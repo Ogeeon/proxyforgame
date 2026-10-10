@@ -428,9 +428,15 @@ document.addEventListener('DOMContentLoaded', function() {
 
 document.addEventListener('keydown', getText);
 
-let lastChange = { value: 42, validate: function(key, val) { return val; } };
-loadFromCookie('lastChange', lastChange);
-if (lastChange && lastChange.value < currChange.value) {
-    requestAndShowChangelog(lastChange);
+// The dialog catches a returning visitor up on the releases since their last
+// visit. A first visit has nothing to catch up on - it used to open with every
+// release since entry 42 - so it only records the current release.
+if (readSavedData('lastChange') !== null) {
+    const lastChange = { value: 0, validate: function(key, val) { return val; } };
+    loadFromCookie('lastChange', lastChange);
+    if (lastChange.value < currChange.value) {
+        // It catches its own failures - a missed dialog is not worth an error.
+        void requestAndShowChangelog(lastChange);
+    }
 }
 saveToCookie('lastChange', currChange);
