@@ -11,7 +11,7 @@ tables and two AJAX services. None of it is the player's own data — that is
 |---|---|---|---|
 | Universe list, daily | `uni.list.cron.php` (repo root) | Gameforge lobby `https://lobby.ogame.gameforge.com/api/servers` | `universes` (truncated and refilled); `countries` and `servers` are reference rows from `schema.sql` |
 | Populated systems, daily | `get_population.php` (repo root) | per universe `serverData.xml`, `players.xml`, `universe.xml` from `https://s<uni>-<country>.ogame.gameforge.com/api/` | `population_data` (`population` = systems with an active player, `population_all` = any planet) |
-| Picker lists, on page load | `www/ogame/calc/universes.inc.php` (`flight.php`, `costs.php`); `trade.php` still has its own copy of the query | `countries` ⨝ `servers`, `universes` | inline JS literal in the template |
+| Picker lists, on page load | `www/ogame/calc/universes.inc.php` (`flight.php`, `costs.php`, `trade.php`), cached for an hour in the system temp dir | `countries` ⨝ `servers`, `universes` | inline JS literal in the template |
 | Universe settings, on pick | `serverdata` → `www/api/server-data.inc.php` | that universe's live `serverData.xml`, no DB | JSON: speeds, galaxies, donut flags, `fleetIgnore*Systems`, … |
 | Populated systems, on pick | `populatedSystems` → `www/api/populated-systems.inc.php` | `population_data` | JSON; flight caches it in `localStorage` for 24 h (`POPULATED_SYSTEMS_TTL_MS`, `flight-orchestration.js`) |
 
@@ -23,6 +23,9 @@ costs turns the answer into speeds with `universeSpeeds()` in `costs-core.js`.
 - **Without a database the pickers are empty**, not broken: every setting they would fill in
   stays editable by hand. Locally the lists come from whatever is in `universes` — a fresh
   `schema.sql` import has none until `uni.list.cron.php` runs.
+- **The picker lists lag the cron by up to an hour**: `universes.inc.php` caches them in
+  `pfg-universes-<hash>.json` under `sys_get_temp_dir()`. Delete that file to see a fresh
+  `universes` table at once; a database failure is never cached.
 - **`population_data.timestamp` is Gameforge's file timestamp, not the run time.** For when the
   job last ran use `updated_at`, or the job stamp in `ajax.php?service=health` (`jobs.population`,
   `jobs.uni-list`).
