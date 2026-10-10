@@ -4,7 +4,8 @@ Date: 2026-08-28
 
 ## Status
 
-Accepted. Resolves issue #13.
+Superseded by [ADR-0003](0003-single-host-php-8-5.md) on 2026-10-10, when the
+site moved onto the standby alone. Originally accepted; resolved issue #13.
 
 ## Context
 
