@@ -106,7 +106,16 @@ The receiver's own settings (the secret, the `pfg-sync` path, the log) are in
 | trigger | webhook, plus a five-minute reconcile |
 | shell from the dev box | `bash scripts/pfg-ssh.sh standby '<cmd>'` |
 
-Apache 2.4 with mod_php (prefork) and `mod_rewrite`, so `www/.htaccess` applies.
+Apache 2.4 with `mpm_event` and PHP-FPM (`proxy_fcgi`, the stock
+`php8.5-fpm` pool sized to `pm.max_children = 10` for the 1-CPU / 1 GB box),
+plus `mod_rewrite`, `mod_expires` and `mod_headers`, so `www/.htaccess` applies
+in full - rewrites and the browser-cache rules. `Protocols h2 http/1.1`
+(`conf-available/http2-protocols.conf`) serves HTTP/2; under prefork it would be
+silently off, which is why mod_php was retired on 2026-10-10. PHP settings live
+in `/etc/php/8.5/fpm/php.ini` (`expose_php = Off`, `pcre.jit = 0`); the
+`apache2/php.ini` beside it is no longer read. Rolling back to prefork is
+`a2dismod mpm_event proxy_fcgi http2 && a2disconf php8.5-fpm http2-protocols &&
+a2enmod mpm_prefork php8.5 && systemctl restart apache2`.
 No Docker — that is a local-dev convenience only
 (`docs/adr/0002-docker-local-dev.md`). Opcache is on with `validate_timestamps`
 and `revalidate_freq=2`, so a deploy needs no cache flush — new files are picked
@@ -298,9 +307,10 @@ the changelog from `changelog.sql`, and `schema_migrations` from the
 migrations. The one file that cannot be recreated from git is the checkout's
 `.env` — keep a copy off the host.
 
-1. Ubuntu with Apache 2.4 (`mod_php`, `mod_rewrite`, `mod_ssl`), the PHP named in
-   `.php-version` with `curl intl mbstring mysql xml`, MariaDB, git, certbot with
-   the Apache plugin.
+1. Ubuntu with Apache 2.4 on `mpm_event` (`proxy_fcgi`, `http2`, `mod_rewrite`,
+   `mod_expires`, `mod_headers`, `mod_ssl`, plus `Protocols h2 http/1.1`), the
+   PHP named in `.php-version` as `php<ver>-fpm` (`a2enconf php<ver>-fpm`) with
+   `curl intl mbstring mysql xml`, MariaDB, git, certbot with the Apache plugin.
 2. Clone the repository to `/var/www/proxyforgame-gh`, owned by `www-data`;
    `ln -sfn /var/www/proxyforgame-gh/www /var/www/proxyforgame-docroot`.
 3. Restore `.env` into the checkout. Create the database and its users
