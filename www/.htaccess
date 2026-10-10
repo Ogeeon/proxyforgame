@@ -10,6 +10,10 @@ RewriteEngine On
 RewriteCond %{REQUEST_URI} !^/js$
 RewriteCond %{REQUEST_URI} ^/\w\w$
 RewriteRule ^(\w\w)$ /$1/ [R=permanent]
+# Short calculator addresses: /<lang>/<calc> runs ogame/calc/<calc>.php. The
+# controller redirects the other spellings (no prefix, trailing slash) to the
+# canonical one - see routes.inc.php, whose list this must match.
+RewriteRule ^(?:\w\w/)?(costs|expeditions|flight|graviton|lfcosts|moon|production|queue|terraformer|trade)/?$ ogame/calc/$1.php [L,QSA]
 RewriteCond %{REQUEST_URI} !^/js/.*$
 RewriteCond %{REQUEST_URI} ^/\w\w/.*$
 RewriteRule ^\w\w/(.*)$ $1 [L,QSA]

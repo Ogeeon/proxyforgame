@@ -5,16 +5,16 @@
   $loc = Intl::getTranslations($lang, 'sidebar');
 
   $ogamePages = array(
-    array('/ogame/calc/trade.php', 'trade-title'),
-    array('/ogame/calc/costs.php', 'costs-title'),
-    array('/ogame/calc/lfcosts.php', 'lfcosts-title'),
-    array('/ogame/calc/queue.php', 'queue-title'),
-    array('/ogame/calc/production.php', 'production-title'),
-    array('/ogame/calc/graviton.php', 'graviton-title'),
-    array('/ogame/calc/terraformer.php', 'terraformer-title'),
-    array('/ogame/calc/flight.php', 'flight-title'),
-    array('/ogame/calc/moon.php', 'moon-title'),
-    array('/ogame/calc/expeditions.php', 'expeditions-title')
+    array('/trade', 'trade-title'),
+    array('/costs', 'costs-title'),
+    array('/lfcosts', 'lfcosts-title'),
+    array('/queue', 'queue-title'),
+    array('/production', 'production-title'),
+    array('/graviton', 'graviton-title'),
+    array('/terraformer', 'terraformer-title'),
+    array('/flight', 'flight-title'),
+    array('/moon', 'moon-title'),
+    array('/expeditions', 'expeditions-title')
   );
   
   require_once 'db.connect.inc.php'; // NOSONAR
@@ -54,7 +54,7 @@
     <div class="list-group list-group-flush">
     <a class="list-group-item list-group-item-action ogame-menu-item text-center" href="/<?=$lang?>/"><?=$loc['ogameMenuItems']['main-title']?></a>
     <?php foreach ($ogamePages as $page): ?>
-      <?php if (!strpos($_SERVER['REQUEST_URI'], $page[0])): ?>
+      <?php if ($page[0] !== ($currUrl ?? '')): ?>
         <a class="list-group-item list-group-item-action ogame-menu-item text-center" href="/<?=$lang.$page[0]?>"><?=$loc['ogameMenuItems'][$page[1]]?></a>
       <?php else: ?>
         <div class="list-group-item list-group-item-action ogame-menu-item active text-center"><?=$loc['ogameMenuItems'][$page[1]]?></div>
@@ -108,7 +108,7 @@
     <div class="list-group list-group-flush">
     <a class="list-group-item list-group-item-action ogame-menu-item text-center" href="/<?=$lang?>/"><?=$loc['ogameMenuItems']['main-title']?></a>
     <?php foreach ($ogamePages as $page): ?>
-      <?php if (!strpos($_SERVER['REQUEST_URI'], $page[0])): ?>
+      <?php if ($page[0] !== ($currUrl ?? '')): ?>
         <a class="list-group-item list-group-item-action ogame-menu-item text-center" href="/<?=$lang.$page[0]?>"><?=$loc['ogameMenuItems'][$page[1]]?></a>
       <?php else: ?>
         <div class="list-group-item list-group-item-action ogame-menu-item active text-center"><?=$loc['ogameMenuItems'][$page[1]]?></div>

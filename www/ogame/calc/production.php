@@ -2,7 +2,8 @@
 
 require_once '../../langs.php';
 $lang = getLang();
-$currUrl = '/ogame/calc/production.php';
+require_once '../../routes.inc.php';
+$currUrl = canonicalCalcPath('production');
 
 require_once '../../Intl.php';
 $l = Intl::getTranslations($lang, 'production');

@@ -2,7 +2,8 @@
 
 require_once '../../langs.php';
 $lang = getLang();
-$currUrl = '/ogame/calc/lfcosts.php';
+require_once '../../routes.inc.php';
+$currUrl = canonicalCalcPath('lfcosts');
 
 require_once '../../Intl.php';
 $l = Intl::getTranslations($lang, 'lfcosts');

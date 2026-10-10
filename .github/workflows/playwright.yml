@@ -115,13 +115,13 @@ jobs:
           fi
 
       # -------------------------------------------------------------
-      # Start PHP built-in server (no router needed)
+      # Start PHP built-in server, with the router that stands in for .htaccess
       # -------------------------------------------------------------
       - name: Start PHP server
         working-directory: ${{ github.workspace }}/www
         run: |
           echo "------ Starting PHP server ------"
-          php -S localhost:8000 > server.log 2>&1 &
+          php -S localhost:8000 ../scripts/dev-router.php > server.log 2>&1 &
 
           echo "Server PID: $!"
 

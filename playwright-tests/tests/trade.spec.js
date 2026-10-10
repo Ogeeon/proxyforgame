@@ -9,7 +9,7 @@ test.describe('Trade Calculator Page', () => {
         if (testInfo.title.startsWith('parsing ')) {
             return;
         }
-        await page.goto('/ogame/calc/trade.php');
+        await page.goto('/trade');
     });
 
     test('page loads successfully', async ({ page }) => {
@@ -254,17 +254,17 @@ test.describe('Trade Calculator Page', () => {
         await page.locator('#coord-p').fill('');
         await page.locator('#coord-p').pressSequentially('2');
         // toContainText retries until the keyup-triggered recalculation lands
-        await expect(page.locator('#alink')).toContainText('trade.php#rmd=2.4&rcd=1.5&st=0&dt=2&dmt=3&fix2=10000&m=100000&l=en:1&lc=4:3:2&lm=0');
+        await expect(page.locator('#alink')).toContainText('/trade#rmd=2.4&rcd=1.5&st=0&dt=2&dmt=3&fix2=10000&m=100000&l=en:1&lc=4:3:2&lm=0');
         await expect(page.locator('#atext')).toContainText('Selling 100.000 met. Buying 47.500 crys and 10.000 deut. Exchange rates 2.4:1.5:1. Coordinates [4:3:2] (Universe 1, en.ogame.gameforge.com)');
-        await expect(page.locator('#abbcode')).toContainText('trade.php#rmd=2.4&rcd=1.5&st=0&dt=2&dmt=3&fix2=10000&m=100000&l=en:1&lc=4:3:2&lm=0]Selling 100.000 met. Buying 47.500 crys and 10.000 deut. Exchange rates 2.4:1.5:1. Coordinates [4:3:2] (Universe 1, en.ogame.gameforge.com)[/url]');
+        await expect(page.locator('#abbcode')).toContainText('/trade#rmd=2.4&rcd=1.5&st=0&dt=2&dmt=3&fix2=10000&m=100000&l=en:1&lc=4:3:2&lm=0]Selling 100.000 met. Buying 47.500 crys and 10.000 deut. Exchange rates 2.4:1.5:1. Coordinates [4:3:2] (Universe 1, en.ogame.gameforge.com)[/url]');
         await page.locator('#moon').check();
-        await expect(page.locator('#alink')).toContainText('trade.php#rmd=2.4&rcd=1.5&st=0&dt=2&dmt=3&fix2=10000&m=100000&l=en:1&lc=4:3:2&lm=1');
+        await expect(page.locator('#alink')).toContainText('/trade#rmd=2.4&rcd=1.5&st=0&dt=2&dmt=3&fix2=10000&m=100000&l=en:1&lc=4:3:2&lm=1');
         await expect(page.locator('#atext')).toContainText('Selling 100.000 met. Buying 47.500 crys and 10.000 deut. Exchange rates 2.4:1.5:1. Coordinates [4:3:2], Moon (Universe 1, en.ogame.gameforge.com)');
-        await expect(page.locator('#abbcode')).toContainText('trade.php#rmd=2.4&rcd=1.5&st=0&dt=2&dmt=3&fix2=10000&m=100000&l=en:1&lc=4:3:2&lm=1]Selling 100.000 met. Buying 47.500 crys and 10.000 deut. Exchange rates 2.4:1.5:1. Coordinates [4:3:2], Moon (Universe 1, en.ogame.gameforge.com)[/url]');
+        await expect(page.locator('#abbcode')).toContainText('/trade#rmd=2.4&rcd=1.5&st=0&dt=2&dmt=3&fix2=10000&m=100000&l=en:1&lc=4:3:2&lm=1]Selling 100.000 met. Buying 47.500 crys and 10.000 deut. Exchange rates 2.4:1.5:1. Coordinates [4:3:2], Moon (Universe 1, en.ogame.gameforge.com)[/url]');
     });
 
     test('parsing a source split from a link works', async ({ page }) => {
-        await page.goto('/ogame/calc/trade.php#rmd=2.4&rcd=1.5&st=2&dt=2&dmt=4&msrc=50&d=100000&l=en:1');
+        await page.goto('/trade#rmd=2.4&rcd=1.5&st=2&dt=2&dmt=4&msrc=50&d=100000&l=en:1');
         await expect(page.locator('#res-src-2')).toBeChecked();
         await expect(page.locator('#res-dst-mix-4')).toBeChecked();
         await expect(page.locator('#mix-src-balance-proc')).toHaveValue('50');
@@ -273,7 +273,7 @@ test.describe('Trade Calculator Page', () => {
     });
 
     test('parsing from link works', async ({ page }) => {
-        await page.goto('/ogame/calc/trade.php#rmd=2.4&rcd=1.5&st=1&dt=2&dmt=1&mp1=2&mp2=3&c=100000&l=en:1&lc=1:2:3&lm=1');
+        await page.goto('/trade#rmd=2.4&rcd=1.5&st=1&dt=2&dmt=1&mp1=2&mp2=3&c=100000&l=en:1&lc=1:2:3&lm=1');
         await expect(page.locator('#res-src-1')).toBeChecked();
         await expect(page.locator('#res-dst-2')).toBeChecked();
         await expect(page.locator('#res-dst-mix-1')).toBeChecked();
