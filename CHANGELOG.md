@@ -17,7 +17,7 @@ release section; it is the source of truth for the other eleven translations.
 
 ### Added
 
-- Monitoring: browser errors on every page are reported to Hawk (hawk.so), so a script failure a visitor hits no longer goes unseen. The tracker loads only where the host's `.env` sets `HAWK_TOKEN` - production and the standby - and reports only errors our own scripts are involved in, tagged with the deployed commit, the host and the page language. Each page load gets a throwaway user id, so Hawk stores nothing in the visitor's browser and needs no cookie consent. The privacy policy describes what a report contains.
+- Monitoring: browser errors on every page are reported to Hawk (hawk.so), so a script failure a visitor hits no longer goes unseen. The tracker loads only where the host's `.env` sets `HAWK_TOKEN` - production and the standby - and reports only errors our own scripts are involved in, tagged with the deployed commit, the host and the page language. The tracker script loads `async`, so the CDN never holds up rendering; errors thrown before it arrives are buffered and handed over once it is up. Each page load gets a throwaway user id, so Hawk stores nothing in the visitor's browser and needs no cookie consent. The privacy policy describes what a report contains.
 
 ### Changed
 
