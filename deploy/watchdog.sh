@@ -1,10 +1,10 @@
 #!/bin/bash
 #
-# Checks both hosts from outside and fails if either is not serving, has fallen
+# Checks the site from outside and fails if it is not serving, has fallen
 # behind the newest green commit, or has a cron job that stopped running.
 #
-#   deploy/watchdog.sh              check both hosts
-#   deploy/watchdog.sh production   check one of them
+#   deploy/watchdog.sh                    check every public name
+#   deploy/watchdog.sh proxyforgame.com   check one of them
 #
 # Run on a schedule by .github/workflows/watchdog.yml, and by hand from
 # anywhere with curl, node and gh. Everything it looks at is public: the site
@@ -13,15 +13,16 @@
 # which is the point - a watchdog holding root on the machine it watches is a
 # worse problem than the one it solves.
 #
-# Each host is asked under its own name with full certificate verification:
-# production as proxyforgame.com, the standby as proxyforgame.net. Both
-# certificates renew themselves, so one that gets close to expiry means renewal
-# broke, and that fails the run while there is still time to fix it.
+# One host serves the site under every name in SITE_NAMES, and each name is
+# asked in turn with full certificate verification - a name whose DNS or
+# certificate went wrong fails on its own. The certificates renew themselves,
+# so one that gets close to expiry means renewal broke, and that fails the run
+# while there is still time to fix it.
 #
 set -uo pipefail
 
-PROD_HOST="proxyforgame.com"
-STANDBY_HOST="proxyforgame.net"
+# Keep in step with PFG_PUBLIC_HOSTS in www/hosts.inc.php.
+SITE_NAMES=(proxyforgame.net proxyforgame.com)
 
 REPO="${GITHUB_REPOSITORY:-Ogeeon/proxyforgame}"
 CI_WORKFLOW="playwright.yml"   # file name, not display name - the workflow is called "CI"
@@ -29,17 +30,16 @@ CI_WORKFLOW="playwright.yml"   # file name, not display name - the workflow is c
 # A daily job is late once a day and a bit has passed; the slack absorbs a slow
 # run and a host whose clock drifts.
 MAX_AGE=93600
-# The standby polls every five minutes and production deploys on a webhook, so
-# a target that only just went green is not yet anybody's fault.
+# The host deploys on a webhook and reconciles on a five-minute timer, so a
+# target that only just went green is not yet anybody's fault.
 DEPLOY_GRACE=900
 # Certbot renews 30 days ahead, so a certificate under this has missed two weeks
 # of daily attempts.
 CERT_MIN_DAYS=14
 
-# The pinned PHP major.minor - production's, and the one CI installs. Production
-# must serve exactly this; the standby only must not be older than it, since it
-# is on whatever its OS ships (ADR-0001). Empty if the file cannot be read, and
-# the check then only warns.
+# The pinned PHP major.minor - the host's, and the one CI installs (ADR-0003).
+# The site must serve exactly this. Empty if the file cannot be read, and the
+# check then only warns.
 PINNED_PHP=$(tr -d ' \t\r\n' < "$(dirname "$0")/../.php-version" 2>/dev/null || true)
 
 FAILED=0
@@ -107,19 +107,8 @@ green_run_for() {
   rm -f "$json"
 }
 
-# True when major.minor version $1 is strictly older than $2. Both come from
-# PHP_MAJOR_VERSION / PHP_MINOR_VERSION, so each half is a plain integer.
-php_older_than() {
-  local a_major=${1%%.*} a_minor=${1#*.} b_major=${2%%.*} b_minor=${2#*.}
-  if [ "$a_major" -ne "$b_major" ]; then
-    [ "$a_major" -lt "$b_major" ]
-  else
-    [ "$a_minor" -lt "$b_minor" ]
-  fi
-}
-
 # ---------------------------------------------------------------------------
-# What both hosts should be running: the newest commit of main whose CI passed.
+# What the site should be running: the newest commit of main whose CI passed.
 # Comparing against the tip of main instead would cry every time a push is
 # still building, and every time main is red.
 #
@@ -140,7 +129,7 @@ if command -v gh >/dev/null; then
     [ -n "$sha" ] || continue
     # Asked twice before a "no" counts: the runs endpoint now and then reports
     # no successful run for a commit that has one, and a single such answer for
-    # the tip once failed the run with both hosts correctly on it (2026-10-05).
+    # the tip once failed the run with the site correctly on it (2026-10-05).
     NEWEST=$(green_run_for "$sha" || green_run_for "$sha" || true)
     [ -n "$NEWEST" ] && break
   done <<< "$(read_commit_list "$LIST_JSON" || true)"
@@ -157,7 +146,7 @@ else
 fi
 
 # ---------------------------------------------------------------------------
-# One host.
+# The site under one name.
 #   check_host <label> <base-url> [curl args...]
 # ---------------------------------------------------------------------------
 check_host() {
@@ -219,9 +208,7 @@ check_host() {
   fi
 
   # ---- the PHP version ----
-  # Production is held to .php-version exactly - it is the pin, and CI installs
-  # the same. The standby runs its OS's PHP and is allowed to be ahead, but
-  # never behind: an older spare is the one that breaks on failover.
+  # Held to .php-version exactly - it is the pin, and CI installs the same.
   local php_ver
   php_ver=$(echo "$health" | sed -n 's/^php //p')
   if [ -z "$PINNED_PHP" ]; then
@@ -230,12 +217,8 @@ check_host() {
     fail "health reports no PHP version"
   elif [ "$php_ver" = "$PINNED_PHP" ]; then
     ok "PHP $php_ver"
-  elif [ "$label" = production ]; then
-    fail "PHP $php_ver, but .php-version pins $PINNED_PHP - CI and production move together"
-  elif php_older_than "$php_ver" "$PINNED_PHP"; then
-    fail "PHP $php_ver is older than the pinned $PINNED_PHP"
   else
-    warn "PHP $php_ver is ahead of the pinned $PINNED_PHP - expected, it tracks its OS"
+    fail "PHP $php_ver, but .php-version pins $PINNED_PHP - CI and the site move together"
   fi
 
   # ---- the GitHub receiver ----
@@ -246,24 +229,19 @@ check_host() {
   # the repository's copy AT THE COMMIT THAT HOST SAYS IS DEPLOYED, not at the
   # tip - during a rollback those differ, and comparing against the tip would
   # report drift on a host that is exactly right.
-  #
-  # Production only. No other host runs a receiver, and one reporting a digest
-  # would be the surprise rather than one that does not.
-  if [ "$label" = production ]; then
-    local live_hash want_hash
-    live_hash=$(echo "$health" | sed -n 's/^webhook //p')
-    if [ -z "$live_hash" ]; then
-      fail "health reports no webhook digest - set WEBHOOK_FILE in the checkout's .env"
-    elif [ -z "$deployed" ]; then
-      warn "webhook digest ${live_hash:0:12}, but no deployed commit to compare it against"
-    elif ! want_hash=$(git show "$deployed:deploy/webhook.php" 2>/dev/null | sha256sum | cut -d' ' -f1) \
-      || [ -z "$want_hash" ]; then
-      warn "cannot read deploy/webhook.php at ${deployed:0:7} - is the checkout shallow?"
-    elif [ "$live_hash" = "$want_hash" ]; then
-      ok "webhook.php matches ${deployed:0:7}"
-    else
-      fail "webhook.php has drifted: serving ${live_hash:0:12}, ${deployed:0:7} has ${want_hash:0:12} - reinstall it (deploy/README.md)"
-    fi
+  local live_hash want_hash
+  live_hash=$(echo "$health" | sed -n 's/^webhook //p')
+  if [ -z "$live_hash" ]; then
+    fail "health reports no webhook digest - set WEBHOOK_FILE in the checkout's .env"
+  elif [ -z "$deployed" ]; then
+    warn "webhook digest ${live_hash:0:12}, but no deployed commit to compare it against"
+  elif ! want_hash=$(git show "$deployed:deploy/webhook.php" 2>/dev/null | sha256sum | cut -d' ' -f1) \
+    || [ -z "$want_hash" ]; then
+    warn "cannot read deploy/webhook.php at ${deployed:0:7} - is the checkout shallow?"
+  elif [ "$live_hash" = "$want_hash" ]; then
+    ok "webhook.php matches ${deployed:0:7}"
+  else
+    fail "webhook.php has drifted: serving ${live_hash:0:12}, ${deployed:0:7} has ${want_hash:0:12} - reinstall it (deploy/README.md)"
   fi
 
   # ---- the cron jobs ----
@@ -304,17 +282,14 @@ check_cert() {
   fi
 }
 
-WHICH="${1:-both}"
-
-if [ "$WHICH" = both ] || [ "$WHICH" = production ]; then
-  check_host "production" "https://$PROD_HOST"
-  check_cert "production" "$PROD_HOST"
+if [ "$#" -gt 0 ]; then
+  SITE_NAMES=("$@")
 fi
 
-if [ "$WHICH" = both ] || [ "$WHICH" = standby ]; then
-  check_host "standby" "https://$STANDBY_HOST"
-  check_cert "standby" "$STANDBY_HOST"
-fi
+for name in "${SITE_NAMES[@]}"; do
+  check_host "$name" "https://$name"
+  check_cert "$name" "$name"
+done
 
 echo
 if [ "$FAILED" = 0 ]; then
