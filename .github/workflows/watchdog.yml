@@ -1,15 +1,13 @@
 name: Watchdog
 
-# Checks both hosts from outside, on a schedule, and fails if one of them is
-# not serving, has fallen behind the newest green commit of main, or has a cron
-# job that stopped running. A failed run is the alarm: GitHub mails it to
-# whoever last touched this file's schedule.
+# Checks the site from outside, under each of its public names, and fails if
+# it is not serving, has fallen behind the newest green commit of main, or has
+# a cron job that stopped running. A failed run is the alarm: GitHub mails it
+# to whoever last touched this file's schedule.
 #
 # This exists because a deploy-time smoke test only ever runs at deploy time.
-# Between two deploys nothing looks at either host - and the standby, which
-# carries no traffic and so has no visitor to notice it breaking, would
-# otherwise be watched by nobody at all.
-#
+# Between two deploys nothing else looks at the host.
+
 # The schedule is best-effort on GitHub's side and drifts by minutes under
 # load. That is fine here: the thresholds are hours, not minutes.
 
@@ -23,11 +21,11 @@ permissions:
 
 jobs:
   check:
-    name: Check both hosts
+    name: Check the site
     runs-on: ubuntu-latest
     steps:
       # Full history: the receiver-drift check hashes deploy/webhook.php at the
-      # commit each host reports as deployed, which during a rollback is not the
+      # commit the host reports as deployed, which during a rollback is not the
       # tip. Pinned by digest and on the same version as the other workflows -
       # this one was still on a floating @v4.
       - name: Checkout full history
