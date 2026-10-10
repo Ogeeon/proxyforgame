@@ -512,7 +512,35 @@ Also `make mail args="--site --body"`.
   proxies HTTPS), the host is resolved over DNS-over-HTTPS instead; the certificate is still
   verified against `imap.gmail.com`. `IMAP_ADDR` overrides the address outright.
 
-### pfg-ssh.sh
+### pagespeed.js
+
+Measures the live site with the PageSpeed Insights API - Lighthouse run on Google's servers, as
+a first-time visitor gets the page - and prints the median of several runs per page, plus the
+origin's field data from CrUX (real Chrome users, rolling 28 days).
+
+**Usage:**
+```bash
+node scripts/pagespeed.js                          # home + all ten calculators, mobile + desktop, 3 runs
+node scripts/pagespeed.js --pages flight,costs --strategy mobile --runs 5
+node scripts/pagespeed.js --out before.json        # keep the medians
+node scripts/pagespeed.js --compare before.json    # each median's change against them
+node scripts/pagespeed.js --base https://proxyforgame.net --lang ru
+```
+
+Also `make pagespeed args="--pages flight --out before.json"`.
+
+**Requirements:**
+- `PSI_API_KEY` in `.env` - an API key from the Google Cloud console, restricted to the
+  PageSpeed Insights API. No OAuth client or service account is involved. Without a key the API
+  falls back to a shared quota that answers 429 most of the day.
+
+**Notes:**
+- One run swings by ten points or more (LCP 2.9 s and 4.4 s on the same page minutes apart), so
+  judge a change by the medians, with `--runs 5` when the difference is small.
+- PSI caches its answer per URL for about a minute, so every request carries its own
+  `?_psi=...` parameter; without it the extra runs would be copies of the first.
+- CrUX lags a deploy by up to four weeks; the lab numbers show a change the same day.
+
 
 Runs a command on one of the two deploy hosts, from the repo root:
 
