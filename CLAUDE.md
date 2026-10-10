@@ -50,8 +50,8 @@ Things worth knowing before running or writing a test:
 & 'd:\wamp64\bin\php\php8.2.33\php.exe' .\ogame\calc\flight.php
 ```
 With the Docker stack up: `docker compose exec web php ogame/calc/flight.php`.
-Local PHP is pinned to production's version in `.php-version` (see
-`docs/adr/0001-php-version-alignment.md`). Local dev is authoritative only for
+Local PHP should match the host's version pinned in `.php-version` (see
+`docs/adr/0003-single-host-php-8-5.md`). Local dev is authoritative only for
 the Node suite, lint and typecheck; anything PHP-shaped is confirmed by CI or by
 `make serve` on a matching build. `make check` warns — but does not fail — on a
 version mismatch.
@@ -63,9 +63,9 @@ version mismatch.
   `docs/adr/0002-docker-local-dev.md`.
 - Or configure a WAMP virtual host pointing to `www/` (see README.md), add
   `127.0.0.1 pfg.wmp` to the hosts file, and browse `http://pfg.wmp` for full-site testing.
-  The database is **MariaDB 10.4 on port 3306** — the engine CI and both hosts run; `.env`
-  carries no port, so whatever answers on 3306 is what the site uses. WAMP's services need
-  admin rights to start.
+  The database is **MariaDB 10.4 on port 3306** — the engine CI runs (the site's host has
+  11.8); `.env` carries no port, so whatever answers on 3306 is what the site uses. WAMP's
+  services need admin rights to start.
 - Or skip both: `make serve` runs the built-in PHP server on `http://localhost:8000`
   against whatever PHP/MariaDB is on the machine (`.env` for the DB).
 
@@ -87,26 +87,26 @@ scoping, message mechanics. Two rules that must hold even if the skill is not in
 
 **A push to `main` that passes CI goes live.** There is no second repository, no manual
 copy step and no build: GitHub Actions finishing green emits a `workflow_run` event, a
-receiver on the production host verifies it and resets the checkout to that commit. The
-standby host follows `main` on a five-minute timer. Full mechanics, rollback and host
-layout: **`deploy/README.md`**.
+receiver on the host verifies it and resets the checkout to that commit, and a five-minute
+timer catches any delivery that got lost. One host serves both `proxyforgame.net` and
+`proxyforgame.com`; there is no standby (`docs/adr/0003-single-host-php-8-5.md`). Full
+mechanics, rollback and the rebuild runbook: **`deploy/README.md`**.
 
 Three consequences for everyday work:
 
 - **`git push` is a release.** The gate is `make check` before the push, not a review step
   afterwards — once CI is green the commit is on the site within a minute.
 - **Schema changes are versioned migrations in `db/migrations/`**, applied by the deploy
-  (`pfg-sync` runs `pfg-migrate` on both hosts before the smoke test). They must be
-  **expand-only and backward compatible** with the code already deployed — the migration
-  lands seconds before the code that needs it. Add the migration file and the regenerated
+  (`pfg-sync` runs `pfg-migrate` before the smoke test). They must be **expand-only and
+  backward compatible** with the code already deployed — the migration lands seconds before
+  the code that needs it. Add the migration file and the regenerated
   `schema.sql` in the schema commit, which goes first. See `db/migrations/README.md`.
-- **Both hosts run the same commit but not the same environment** — the target PHP version
-  is pinned to production's 8.2 in `.php-version` and CI reads it from there, but the standby
-  still runs 8.5 because its OS ships nothing older (`docs/adr/0001-php-version-alignment.md`).
-  Each host also has its own database and its own cron.
+- **The host runs PHP 8.5 and MariaDB 11.8.** `.php-version` pins the PHP and CI reads it from
+  there; CI's database is still MariaDB 10.4, so SQL that only newer MariaDB accepts passes
+  on the site and fails in CI, never the other way round.
 
 Writing an in-app changelog release stays manual; **applying** it is now part of the deploy —
-`changelog.sql` is committed and `pfg-sync` pipes it into each host's database. See below.
+`changelog.sql` is committed and `pfg-sync` pipes it into the host's database. See below.
 
 ## Changelog
 
@@ -126,12 +126,12 @@ entry, so it only ever holds the latest release.
 - **A drafted announcement needs the user's explicit approval before the release is cut.** The
   `> **RU:**` text reaches every visitor in twelve languages and is hard to change afterwards —
   once the commit is pushed the deploy applies it, and a later edit needs a fresh release or a
-  manual `update` against both hosts. Never publish one the user has not seen.
+  manual `update` against the host's database. Never publish one the user has not seen.
 
 Cutting the release is manual: `make changelog-release` writes `changelog.sql`,
 `/translate-changelog` fills in the eleven non-Russian rows, then **commit `CHANGELOG.md` and
 `changelog.sql` together**. From there the deploy carries it — `pfg-sync` runs
-`deploy/pfg-changelog-apply` on both hosts after every sync, and the SQL is all upserts so
+`deploy/pfg-changelog-apply` after every sync, and the SQL is all upserts so
 re-applying an entry is a no-op (`deploy/README.md`, *The in-app changelog*).
 
 ## Architecture
