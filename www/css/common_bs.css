@@ -1,3 +1,12 @@
+/* Keep the scrollbar's width reserved whether or not the page scrolls. Page
+   scripts are deferred, so the first paint shows the form before its
+   initialization collapses sections; a page that is a little taller than the
+   window then loses its scrollbar and everything jumps sideways (CLS 0.14 on
+   flight at 1358x1069 with classic scrollbars, 0.02 with this rule). */
+html {
+  scrollbar-gutter: stable;
+}
+
 .main-header {
   width: auto;
   font-size: 0.9rem;
