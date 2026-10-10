@@ -15,6 +15,10 @@ release section; it is the source of truth for the other eleven translations.
 
 ## [Unreleased]
 
+### Changed
+
+- Site: Bootstrap 5.3.8 and Bootstrap Icons 1.11.0 are served from the site itself (`www/vendor/`) instead of cdn.jsdelivr.net. PageSpeed Insights put the render-blocking CSS at 1.2 s of a mobile first visit, half of it the two jsdelivr stylesheets, which each first visit had to open a second origin for - DNS and TLS included; on our own HTTP/2 connection they ride along with the page. The files are committed copies of the versions `package.json` now pins, made by `make vendor` (`scripts/vendor-assets.js`), and `make check` fails when the two disagree; Dependabot proposes new versions monthly. Every page head takes them from one include, `www/vendor_bs.tpl`, instead of four tags repeated in eleven templates, and the e2e fixture that cached the CDN files is gone.
+
 ### Fixed
 
 - Sidebar: a first visit no longer opens the changelog. Without a saved "last seen" release the code assumed entry 42, so every new visitor - and every PageSpeed Insights run, where the dialog came out as the largest paint at 4.8 s on mobile - was greeted with two dozen past releases. Now a first visit only records the current release, and the dialog keeps showing returning visitors what they missed.

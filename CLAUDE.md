@@ -40,10 +40,12 @@ Things worth knowing before running or writing a test:
   `playwright-tests/playwright.config.js` probes `http://pfg.wmp` (WAMP) and then
   `http://localhost:8000`, and fails up front when neither answers — start one, don't guess.
   `PFG_BASE_URL` (**not** `PLAYWRIGHT_BASE_URL`) pins a host explicitly.
-- Specs import `test`/`expect` from `./base`, **not** from `@playwright/test` — the fixture
-  there caches the jsdelivr Bootstrap assets in `.cdn-cache/`, without which every test
-  re-downloads them over the network. New spec files must use the same import. Video recording
-  is off locally (`PFG_VIDEO=1` brings it back for a failing run).
+- Specs import `test`/`expect` from `./base`, **not** from `@playwright/test`, so a fixture
+  every test needs has one place to go. New spec files must use the same import. Video
+  recording is off locally (`PFG_VIDEO=1` brings it back for a failing run).
+- **Bootstrap and Bootstrap Icons are vendored**: `www/vendor/` holds committed copies of the
+  versions `package.json` pins, included by `www/vendor_bs.tpl`. Upgrading is a version bump
+  plus `make vendor`; `make check` fails (`vendor-check`) when the two disagree.
 
 ### Running PHP Scripts (PowerShell)
 ```powershell

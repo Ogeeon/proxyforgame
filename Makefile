@@ -73,7 +73,7 @@ PW ?= node node_modules/@playwright/test/cli.js
         test test-unit test-e2e test-e2e-ui test-one report \
         check audit quality coverage db-validate lint typecheck php-version-check \
         changelog-validate changelog-release \
-        tsconfigs tsconfigs-check \
+        tsconfigs tsconfigs-check vendor vendor-check \
         html-render html-validate html-audit \
         i18n-validate i18n-report i18n-show i18n-fix \
         new-calc gen-test refactor assets docs
@@ -152,7 +152,7 @@ report: ## Open the last Playwright HTML report
 # `make check` always means "you broke something". The two reporters below
 # both exit non-zero on pre-existing issues, so they live in `audit` instead and
 # are prefixed with `-` there to keep one failure from hiding the other.
-check: php-version-check changelog-validate i18n-validate lint typecheck tsconfigs-check html-validate test ## Green gate - what must pass before a commit
+check: php-version-check changelog-validate i18n-validate lint typecheck tsconfigs-check vendor-check html-validate test ## Green gate - what must pass before a commit
 
 audit: ## Advisory reports; these flag pre-existing issues and do not gate
 	-node scripts/check-test-coverage.js
@@ -172,6 +172,14 @@ tsconfigs: ## Regenerate the per-calculator TypeScript projects from the templat
 # wrong file set, and a dropped <script> tag would go unnoticed otherwise.
 tsconfigs-check: ## Fail if a generated TypeScript project is out of date
 	npm run check-tsconfigs --silent
+
+# Bootstrap and Bootstrap Icons are served from www/vendor/, committed copies of
+# the versions package.json pins. After a version bump: make vendor, then commit.
+vendor: ## Copy Bootstrap and Bootstrap Icons from node_modules into www/vendor
+	node scripts/vendor-assets.js
+
+vendor-check: ## Fail if www/vendor does not match the versions in node_modules
+	node scripts/vendor-assets.js --check
 
 # Advisory: warns if the local PHP is not the version .php-version pins, and
 # always exits 0. Real drift is caught on the live hosts by deploy/watchdog.sh.

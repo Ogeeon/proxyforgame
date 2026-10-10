@@ -10,7 +10,7 @@
 // global, which these files pick up because they are scripts rather than
 // modules. It is pulled in through `types` in tsconfig.json, and its
 // @popperjs/core import is why that package sits in devDependencies - the
-// browser gets Popper from the jsdelivr bundle, never from node_modules.
+// browser gets Popper inside the vendored bootstrap.bundle.min.js (www/vendor/).
 
 // Properties the calculators hang directly off DOM elements. They are set in
 // dom-utils.js and utils.js and read all over the place, so they are part of

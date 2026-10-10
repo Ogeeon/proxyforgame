@@ -20,3 +20,24 @@ updates:
       github-actions:
         patterns:
           - "*"
+
+  # Bootstrap and Bootstrap Icons are served from www/vendor/, committed copies of the
+  # versions package.json pins. A Dependabot PR bumps only package.json and the lock
+  # file, so its CI fails on `make vendor-check` by design: check the release notes,
+  # run `make vendor` on the PR branch, commit www/vendor/ and push - then CI goes
+  # green on the new files. Only these two packages are tracked; the dev tooling in
+  # package.json is updated by hand.
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "monthly"
+    commit-message:
+      prefix: "chore(deps)"
+    allow:
+      - dependency-name: "bootstrap"
+      - dependency-name: "bootstrap-icons"
+    groups:
+      bootstrap:
+        patterns:
+          - "bootstrap"
+          - "bootstrap-icons"
