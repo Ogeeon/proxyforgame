@@ -94,7 +94,7 @@ The receiver's own settings (the secret, the `pfg-sync` path, the log) are in
 | | |
 |---|---|
 | address | `89.124.110.192` |
-| in DNS | `proxyforgame.net` (zone at Porkbun) and, until it is retired, `proxyforgame.com` (zone at FirstVDS); `www.` of each, and `webhooks.proxyforgame.com` |
+| in DNS | `proxyforgame.com` (the main name; zone at FirstVDS) and `proxyforgame.net` (zone at Porkbun); `www.` of each, and `webhooks.proxyforgame.com` |
 | OS | Ubuntu 26.04, root |
 | checkout | `/var/www/proxyforgame-gh` |
 | document root | `/var/www/proxyforgame-docroot` → `<checkout>/www` |

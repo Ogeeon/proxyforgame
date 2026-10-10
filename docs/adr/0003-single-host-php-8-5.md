@@ -21,9 +21,9 @@ in front of PHP, which ignores `.htaccess` and cost the short calculator
 addresses (reverted in `4e267f0`).
 
 The decision was to leave that account: both `proxyforgame.com` and
-`proxyforgame.net` now resolve to the former standby, `89.124.110.192`, until
-`.com` is retired, and the two-host arrangement is removed rather than left
-idle.
+`proxyforgame.net` now resolve to the former standby, `89.124.110.192`, and
+the two-host arrangement is removed rather than left idle. `proxyforgame.com`
+stays the main name.
 
 ## Decision
 
