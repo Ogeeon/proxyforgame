@@ -20,3 +20,30 @@ RewriteRule ^\w\w/(.*)$ $1 [L,QSA]
 
 RewriteRule ^(css|js)/(.*)\.[0-9]+\.(.*)$ /$1/$2.$3 [L]
 RewriteRule ^(ogame/calc/css|/ogame/calc/js)/(.*)\.[0-9]+\.(.*)$ /$1/$2.$3 [L]
+
+# Browser caching for static files. Every stylesheet and script the pages load
+# carries a ?v=<filemtime> stamp, so a changed file gets a new URL and these can
+# be kept for a year without ever serving a stale copy. Images and the favicon
+# are referenced without a stamp, so they get a month. PHP output (pages, the
+# ajax.php JSON) is not matched by any of these types and stays uncached.
+# Wrapped in IfModule so a server without the modules (php -S, a fresh WAMP)
+# ignores the block instead of failing with a 500.
+<IfModule mod_expires.c>
+    ExpiresActive On
+    ExpiresByType text/css "access plus 1 year"
+    ExpiresByType text/javascript "access plus 1 year"
+    ExpiresByType application/javascript "access plus 1 year"
+    ExpiresByType image/jpeg "access plus 1 month"
+    ExpiresByType image/png "access plus 1 month"
+    ExpiresByType image/gif "access plus 1 month"
+    ExpiresByType image/svg+xml "access plus 1 month"
+    ExpiresByType image/x-icon "access plus 1 month"
+    ExpiresByType image/vnd.microsoft.icon "access plus 1 month"
+</IfModule>
+<IfModule mod_headers.c>
+    # A stamped URL never changes content: tell the browser not to revalidate
+    # it even on a reload.
+    <If "%{QUERY_STRING} =~ /^v=\d+$/">
+        Header merge Cache-Control "immutable"
+    </If>
+</IfModule>

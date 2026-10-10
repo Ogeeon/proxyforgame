@@ -15,6 +15,9 @@
   <!-- Bootstrap 5 CSS -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+  <!-- The icon font is only discovered once the stylesheet above has loaded; preloading
+       starts it in parallel. The URL must match the one in that stylesheet exactly. -->
+  <link rel="preload" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/fonts/bootstrap-icons.woff2?1bb88866b4085542c8ed5fb61b9393dd" as="font" type="font/woff2" integrity="sha384-KoRugHSRrvj5dWFDXACL3VSSqDjno21U52laTdBeNExt4L5B/6BQG01Q71ZvFzP4" crossorigin="anonymous">
 
   <!-- Custom styles -->
   <link type="text/css" href="/css/langs_bs.css?v=<?php echo filemtime($pfgPath.'/css/langs_bs.css'); ?>" rel="stylesheet">
@@ -22,20 +25,21 @@
   <link type="text/css" href="/ogame/calc/css/costs_bs.css?v=<?php echo filemtime($pfgPath.'/ogame/calc/css/costs_bs.css'); ?>" rel="stylesheet">
 
   <!-- Bootstrap 5 JS Bundle -->
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" defer></script>
 
   <!-- Utility libraries -->
-  <script src="/js/utils.js?v=<?php echo filemtime($pfgPath.'/js/utils.js'); ?>"></script>
-  <script src="/js/api-client.js?v=<?php echo filemtime($pfgPath.'/js/api-client.js'); ?>"></script>
-  <script src="/ogame/calc/js/ogame-costs.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/ogame-costs.js'); ?>"></script>
-  <script src="/ogame/calc/js/ogame-lifeform.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/ogame-lifeform.js'); ?>"></script>
-  <script src="/ogame/calc/js/dom-utils.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/dom-utils.js'); ?>"></script>
-  <script src="/ogame/calc/js/lfcosts-core.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/lfcosts-core.js'); ?>"></script>
-  <script src="/ogame/calc/js/lfcosts-data-collector.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/lfcosts-data-collector.js'); ?>"></script>
-  <script src="/ogame/calc/js/lfcosts-renderer.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/lfcosts-renderer.js'); ?>"></script>
-  <script src="/ogame/calc/js/lfcosts-orchestration.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/lfcosts-orchestration.js'); ?>"></script>
+  <script src="/js/utils.js?v=<?php echo filemtime($pfgPath.'/js/utils.js'); ?>" defer></script>
+  <script src="/js/api-client.js?v=<?php echo filemtime($pfgPath.'/js/api-client.js'); ?>" defer></script>
+  <script src="/ogame/calc/js/ogame-costs.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/ogame-costs.js'); ?>" defer></script>
+  <script src="/ogame/calc/js/ogame-lifeform.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/ogame-lifeform.js'); ?>" defer></script>
+  <script src="/ogame/calc/js/dom-utils.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/dom-utils.js'); ?>" defer></script>
+  <script src="/ogame/calc/js/lfcosts-core.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/lfcosts-core.js'); ?>" defer></script>
+  <script src="/ogame/calc/js/lfcosts-data-collector.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/lfcosts-data-collector.js'); ?>" defer></script>
+  <script src="/ogame/calc/js/lfcosts-renderer.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/lfcosts-renderer.js'); ?>" defer></script>
+  <script src="/ogame/calc/js/lfcosts-orchestration.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/lfcosts-orchestration.js'); ?>" defer></script>
 
-  <script>
+  <script type="module">
+    // A module, so it runs after the deferred scripts above have defined `options`.
     // The decimal separator is used by the functions that validate the numbers typed into the inputs
     options.decimalSeparator='<?= $l['decimal-separator'] ?>';
     options.datetimeW = '<?= $l['datetime-w'] ?>';
@@ -511,7 +515,7 @@
   require_once('../../analitics.tpl');
 ?>
 
-<script>
+<script type="module">
 document.addEventListener('DOMContentLoaded', function() {
   initializeLfCostsCalculator();
 });

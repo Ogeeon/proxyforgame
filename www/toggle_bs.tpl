@@ -1,4 +1,4 @@
-<script>
+<script type="module">
     let theme = { value: 'light', validate: function(key, val) { return val; } };
     loadFromCookie('theme', theme);
     if (!theme) {

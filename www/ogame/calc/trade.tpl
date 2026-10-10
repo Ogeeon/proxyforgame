@@ -16,18 +16,23 @@
 
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+  <!-- The icon font is only discovered once the stylesheet above has loaded; preloading
+       starts it in parallel. The URL must match the one in that stylesheet exactly. -->
+  <link rel="preload" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/fonts/bootstrap-icons.woff2?1bb88866b4085542c8ed5fb61b9393dd" as="font" type="font/woff2" integrity="sha384-KoRugHSRrvj5dWFDXACL3VSSqDjno21U52laTdBeNExt4L5B/6BQG01Q71ZvFzP4" crossorigin="anonymous">
   <link type="text/css" href="/css/langs_bs.css?v=<?php echo filemtime($pfgPath.'/css/langs_bs.css'); ?>" rel="stylesheet">
   <link type="text/css" href="/css/common_bs.css?v=<?php echo filemtime($pfgPath.'/css/common_bs.css'); ?>" rel="stylesheet">
   <link type="text/css" href="/ogame/calc/css/trade.css?v=<?php echo filemtime($pfgPath.'/ogame/calc/css/trade.css'); ?>" rel="stylesheet">
 
-  <script src="/js/utils.js?v=<?php echo filemtime($pfgPath.'/js/utils.js'); ?>"></script>
-  <script src="/js/api-client.js?v=<?php echo filemtime($pfgPath.'/js/api-client.js'); ?>"></script>
-  <script src="/ogame/calc/js/dom-utils.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/dom-utils.js'); ?>"></script>
-  <script src="/ogame/calc/js/trade-core.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/trade-core.js'); ?>"></script>
-  <script src="/ogame/calc/js/trade.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/trade.js'); ?>"></script>
+  <script src="/js/utils.js?v=<?php echo filemtime($pfgPath.'/js/utils.js'); ?>" defer></script>
+  <script src="/js/api-client.js?v=<?php echo filemtime($pfgPath.'/js/api-client.js'); ?>" defer></script>
+  <script src="/ogame/calc/js/dom-utils.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/dom-utils.js'); ?>" defer></script>
+  <script src="/ogame/calc/js/trade-core.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/trade-core.js'); ?>" defer></script>
+  <script src="/ogame/calc/js/trade.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/trade.js'); ?>" defer></script>
 
-  <script>
-    l.sc = '<?= $l['sc-short'] ?>';
+  <script type="module">
+    // A module, so it runs after the deferred trade.js that declares `l` and
+    // `options`.
+    l.sc ='<?= $l['sc-short'] ?>';
     l.lc = '<?= $l['lc-short'] ?>';
     l.metal = '<?= $l['metal'] ?>';
     l.crystal = '<?= $l['crystal'] ?>';
@@ -45,7 +50,9 @@
     options.decimalSeparator = '<?= $l['decimal-separator'] ?>';
     options.dialogOk = <?= json_encode($l['dialog-ok']) ?>;
     options.dialogAttentionLabel = <?= json_encode($l['dialog-attention']) ?>;
-
+  </script>
+  <script>
+    // A classic script, not a module: trade.js reads `unis` as a global.
     var unis = {
 <?php
   $f1 = true;
@@ -368,6 +375,6 @@
 <?php
   require_once('../../analitics.tpl');
 ?>
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous" defer></script>
 </body>
 </html>

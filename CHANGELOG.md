@@ -15,6 +15,10 @@ release section; it is the source of truth for the other eleven translations.
 
 ## [Unreleased]
 
+### Fixed
+
+- Site: pages render sooner and repeat visits no longer re-request every stylesheet and script. The Apache host that took over both domains on 2026-10-10 sent no `Cache-Control` or `Expires` for static files - the old nginx account had sent a day - so every page view revalidated some 27 files over HTTP/1.1. `www/.htaccess` now has stamped CSS and JS (every one carries `?v=<mtime>`) kept for a year as `immutable` and images for a month, in an `IfModule` block that is a no-op where `mod_expires`/`mod_headers` are not loaded. The page scripts load with `defer`, and the inline blocks that read their globals are `type="module"`, which runs them after those scripts in the same order as before, so a parser-blocking script no longer holds up the first paint - on a throttled mobile profile that delay was 1.1 s of a 1.3 s LCP. The icon font is preloaded instead of being discovered only once its stylesheet has loaded. The new-calculator generator emits the same head.
+
 ## [2026-10-10] - site entry 65
 
 ### Added

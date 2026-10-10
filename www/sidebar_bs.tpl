@@ -40,7 +40,7 @@
   var currLang = <?= json_encode($lang) ?>;
 </script>
 <?php $sidebarJs = $pfgPath . '/js/sidebar_bs.js'; ?>
-<script src="/js/sidebar_bs.js?v=<?php echo file_exists($sidebarJs) ? filemtime($sidebarJs) : 0; ?>"></script>
+<script src="/js/sidebar_bs.js?v=<?php echo file_exists($sidebarJs) ? filemtime($sidebarJs) : 0; ?>" defer></script>
 
 <!-- Sidebar Toggle Button (visible when sidebar is hidden) -->
 <button class="btn btn-primary d-lg-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebarOffcanvas" aria-controls="sidebarOffcanvas">
