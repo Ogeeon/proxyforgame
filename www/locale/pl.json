@@ -135,11 +135,6 @@
     "lf-bonuses-api-import-hint": "Wszystkie te wartości można też uzyskać automatycznie za pomocą przycisku „Import z OGame” (ikona schowka) w górnej części formularza.",
     "universe": "Wszechświat",
     "profile": "Profil",
-    "no-profile-name-msg": "Proszę podać nazwę profilu.",
-    "no-profile-selected-msg": "Nie wybrano żadnego profilu.",
-    "del-profile-confirm": "Czy na pewno chcesz usunąć ten profil?",
-    "owr-profile-confirm": "Czy na pewno chcesz nadpisać ten profil?",
-    "load-profile-confirm": "Czy na pewno chcesz załadować ten profil? Aktualnie wprowadzone dane zostaną utracone.",
     "server-data-failed-msg": "Nie udało się wczytać ustawień uniwersum. Sprawdź poniższe wartości i popraw je ręcznie.",
     "fetching-data": "Pobieranie danych...",
     "universe-load": "Załaduj",
@@ -275,7 +270,11 @@
     "pf-col-current": "Teraz",
     "pf-reset-selected": "Przywróć zaznaczone",
     "pf-in-game": "W grze: {0}",
-    "pf-reset-value": "kliknij, aby przywrócić"
+    "pf-reset-value": "kliknij, aby przywrócić",
+    "pf-departure-body": "Planeta lub księżyc profilu",
+    "pf-take-fleet": "Z miejsca startu",
+    "pf-take-fleet-hint": "Wstaw statki stacjonujące na planecie lub księżycu wybranym jako miejsce startu, według ostatniego importu z OGame.",
+    "pf-universe-from-profile": "Uniwersum jest ustawione przez aktywny profil."
   },
   "index": {
     "title": "Narzedzia do gier przegladarkowych OGame",

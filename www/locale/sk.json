@@ -137,11 +137,6 @@
     "lf-bonuses-api-import-hint": "Všetky tieto hodnoty môžete tiež získať automaticky pomocou tlačidla „Import z OGame“ (ikona schránky) v hornej časti formulára.",
     "universe": "Vesmír",
     "profile": "Profil",
-    "no-profile-name-msg": "Uveďte názov profilu.",
-    "no-profile-selected-msg": "Nie je vybratý žiadny profil.",
-    "del-profile-confirm": "Naozaj chcete odstrániť tento profil?",
-    "owr-profile-confirm": "Naozaj chcete prepísať tento profil?",
-    "load-profile-confirm": "Naozaj chcete načítať tento profil? Aktuálne zadané údaje sa stratia.",
     "server-data-failed-msg": "Nepodarilo sa načítať nastavenia vesmíru. Skontrolujte hodnoty nižšie a opravte ich ručne.",
     "fetching-data": "Načítavanie údajov...",
     "universe-load": "Naložiť",
@@ -275,7 +270,11 @@
     "pf-col-current": "Teraz",
     "pf-reset-selected": "Obnoviť vybrané",
     "pf-in-game": "V hre: {0}",
-    "pf-reset-value": "kliknutím obnovíte"
+    "pf-reset-value": "kliknutím obnovíte",
+    "pf-departure-body": "Planéta alebo mesiac profilu",
+    "pf-take-fleet": "Z miesta odletu",
+    "pf-take-fleet-hint": "Doplniť lode umiestnené na planéte alebo mesiaci zvolenom ako miesto odletu, podľa posledného importu z OGame.",
+    "pf-universe-from-profile": "Vesmír je určený aktívnym profilom."
   },
   "index": {
     "title": "ProxyForGame - software pre online hry v prehliadači OGame",

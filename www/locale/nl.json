@@ -133,11 +133,6 @@
     "lf-bonuses-api-import-hint": "Al deze waarden kun je ook automatisch ophalen via de knop \"Importeren uit OGame\" (klembordpictogram) bovenaan het formulier.",
     "universe": "Universum",
     "profile": "Profiel",
-    "no-profile-name-msg": "Geef een profielnaam op.",
-    "no-profile-selected-msg": "Geen profiel geselecteerd.",
-    "del-profile-confirm": "Weet u zeker dat u dit profiel wilt verwijderen?",
-    "owr-profile-confirm": "Weet u zeker dat u dit profiel wilt overschrijven?",
-    "load-profile-confirm": "Weet u zeker dat u dit profiel wilt laden? De momenteel ingevoerde gegevens gaan verloren.",
     "server-data-failed-msg": "Het laden van de universuminstellingen is mislukt. Controleer de waarden hieronder en corrigeer ze handmatig.",
     "fetching-data": "Gegevens ophalen...",
     "universe-load": "Laden",
@@ -275,7 +270,11 @@
     "pf-col-current": "Nu",
     "pf-reset-selected": "Selectie herstellen",
     "pf-in-game": "In het spel: {0}",
-    "pf-reset-value": "klik om te herstellen"
+    "pf-reset-value": "klik om te herstellen",
+    "pf-departure-body": "Planeet of maan van het profiel",
+    "pf-take-fleet": "Van het vertrekpunt",
+    "pf-take-fleet-hint": "Neem de schepen over die op de als vertrekpunt gekozen planeet of maan staan, volgens de laatste import uit OGame.",
+    "pf-universe-from-profile": "Het universum wordt bepaald door het actieve profiel."
   },
   "index": {
     "title": "ProxyForGame - instrumenten het browser spel OGame",

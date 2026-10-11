@@ -139,11 +139,6 @@
     "lf-bonuses-api-import-hint": "Todos estes valores também podem ser obtidos automaticamente através do botão «Importar do OGame» (ícone da área de transferência) na parte superior do formulário.",
     "universe": "Universo",
     "profile": "Perfil",
-    "no-profile-name-msg": "Por favor especifique o nome do perfil.",
-    "no-profile-selected-msg": "Nenhum perfil selecionado.",
-    "del-profile-confirm": "Tem a certeza de que pretende apagar este perfil?",
-    "owr-profile-confirm": "Tem a certeza de que pretende sobrescrever este perfil?",
-    "load-profile-confirm": "Tem a certeza de que pretende carregar este perfil? Os dados introduzidos atualmente serão perdidos.",
     "server-data-failed-msg": "Não foi possível carregar as definições do universo. Verifique os valores abaixo e corrija-os manualmente.",
     "fetching-data": "Obtendo dados...",
     "universe-load": "Carga",
@@ -275,7 +270,11 @@
     "pf-col-current": "Agora",
     "pf-reset-selected": "Repor selecionados",
     "pf-in-game": "No jogo: {0}",
-    "pf-reset-value": "clique para repor"
+    "pf-reset-value": "clique para repor",
+    "pf-departure-body": "Planeta ou lua do perfil",
+    "pf-take-fleet": "Do ponto de partida",
+    "pf-take-fleet-hint": "Preencher as naves estacionadas no planeta ou na lua escolhidos como ponto de partida, segundo a última importação do OGame.",
+    "pf-universe-from-profile": "O universo é definido pelo perfil ativo."
   },
   "index": {
     "title": "ProxyForGame - Calculadoras para OGame",

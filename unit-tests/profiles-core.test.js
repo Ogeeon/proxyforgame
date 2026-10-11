@@ -75,6 +75,26 @@ describe('parseAccountExport', () => {
         expect(data.account['species.701.level']).toBe(18);
     });
 
+    // Seen on a real export: a member of a warrior alliance, allianceClassId null.
+    it('leaves a null class out instead of reading it as none', () => {
+        const obj = fixture();
+        obj.allianceClassId = null;
+        obj.characterClassId = null;
+        const data = parsed(obj);
+        expect('allianceClass' in data.account).toBe(false);
+        expect('class' in data.account).toBe(false);
+    });
+
+    it('keeps a hand-set alliance class through an import that does not know it', () => {
+        const first = core.importAccountExport(null, parsed(fixture()), { universe: { country: 'en', number: 1 } }).profile;
+        core.setProfileValue(first.account, 'allianceClass', 1);
+        const obj = fixture();
+        obj.allianceClassId = null;
+        const again = core.importAccountExport(first, parsed(obj)).profile;
+        expect(again.account.values.allianceClass).toEqual({ override: 1 });
+        expect(core.differsFromGame(again.account, 'allianceClass')).toBe(false);
+    });
+
     it('turns the life-form fractions into percentages', () => {
         const a = parsed(fixture()).account;
         expect(a['lf.prod.metal']).toBe(3.02);

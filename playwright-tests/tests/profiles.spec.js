@@ -5,8 +5,9 @@ import { join } from 'node:path';
 // Player profiles (ADR-0004) on the production calculator, the first one wired
 // to them: importing an account export, editing a profile-owned field and
 // restoring the game value, falling back to "no profile", converting an old
-// saved set, the backup file and the per-tab active profile. The model itself
-// is covered by unit-tests/profiles-core.test.js.
+// saved set, the backup file and the per-tab active profile; then flight, the
+// second: account fields, the locked universe, the departure body and its fleet.
+// The model itself is covered by unit-tests/profiles-core.test.js.
 
 const EXPORT = readFileSync(join(__dirname, '../fixtures/account-export-v1.json'), 'utf8');
 
@@ -294,4 +295,118 @@ test('each tab keeps its own active profile', async ({ page, context }) => {
     // ...and its own choice does not switch the first tab.
     await page.reload();
     await expect(page.locator('#energy-tech-level')).toHaveValue('14');
+});
+
+// ---------------------------------------------------------------------------
+// Flight
+// ---------------------------------------------------------------------------
+
+async function openFlightParams(page) {
+    const section = page.locator('#accordion-prm');
+    if (!(await section.evaluate((el) => el.classList.contains('show')))) {
+        await page.locator('[data-bs-target="#accordion-prm"]').click();
+    }
+    await expect(page.locator('#cmb-drive')).toBeVisible();
+}
+
+test('flight takes the account from the profile and locks its universe', async ({ page }) => {
+    await page.goto('/flight');
+    await importExport(page);
+    await openFlightParams(page);
+
+    await expect(page.locator('#cmb-drive')).toHaveValue('16');
+    await expect(page.locator('#imp-drive')).toHaveValue('12');
+    await expect(page.locator('#hyp-drive')).toHaveValue('9');
+    await expect(page.locator('#hypertech-lvl')).toHaveValue('8');
+    await expect(page.locator('#class-0')).toBeChecked();
+    await expect(page.locator('#trader-bonus')).toBeChecked();
+    await expect(page.locator('#lf-rocktal-collector-enh')).toHaveValue('2.15');
+    await expect(page.locator('[class~="202-speed"]')).toHaveValue('0.45');
+    await expect(page.locator('[class~="202-cargo"]')).toHaveValue('1.23');
+    await expect(page.locator('#cmb-drive')).toHaveClass(/pf-bound/);
+
+    const profile = await activeProfile(page);
+    await expect(page.locator('#country')).toHaveValue(profile.universe.country);
+    await expect(page.locator('#country')).toBeDisabled();
+    await expect(page.locator('#universe')).toBeDisabled();
+    await expect(page.locator('#reset')).toBeHidden();
+
+    // Three planets and the moon, after the dash; the departure moves to the first planet.
+    await expect(page.locator('#pf-departure option')).toHaveCount(5);
+    await expect(page.locator('#pf-departure')).toHaveValue(profile.planets[0].id);
+    await expect(page.locator('#departure-g')).toHaveValue('2');
+    await expect(page.locator('#departure-s')).toHaveValue('148');
+    await expect(page.locator('#departure-p')).toHaveValue('8');
+    // Loading wrote nothing back.
+    await expect(page.locator('#pf-overrides')).toBeHidden();
+});
+
+test('a flight edit becomes an override that can be restored', async ({ page }) => {
+    await page.goto('/flight');
+    await importExport(page);
+    await openFlightParams(page);
+
+    await page.locator('#cmb-drive').fill('17');
+    await page.locator('#cmb-drive').blur();
+    await expect(page.locator('#cmb-drive')).toHaveClass(/pf-differs/);
+    await expect(page.locator('#pf-overrides')).toHaveText('1');
+    let profile = await activeProfile(page);
+    expect(profile.account.values['research.115']).toEqual({ game: 16, override: 17 });
+
+    await page.locator('#cmb-drive + .pf-reset').click();
+    await expect(page.locator('#cmb-drive')).toHaveValue('16');
+    await expect(page.locator('#pf-overrides')).toBeHidden();
+    profile = await activeProfile(page);
+    expect(profile.account.values['research.115']).toEqual({ game: 16 });
+});
+
+test('flight copies a moon\'s coordinates and its fleet', async ({ page }) => {
+    await page.goto('/flight');
+    await importExport(page);
+    await openFlightParams(page);
+    const profile = await activeProfile(page);
+
+    await page.locator('#pf-departure').selectOption(profile.moons[0].id);
+    await expect(page.locator('#departure-s')).toHaveValue('148');
+    // The ships section is the accordion's other half: opening it closes the parameters.
+    await page.locator('[data-bs-target="#accordion-ships"]').click();
+    await expect(page.locator('#pf-take-fleet')).toBeVisible();
+    await page.locator('#pf-take-fleet').click();
+    await expect(page.locator('#small-cargo')).toHaveValue('1000');
+    await expect(page.locator('#large-cargo')).toHaveValue('2000');
+    await expect(page.locator('#recycler')).toHaveValue('150');
+    await expect(page.locator('#pathfinder')).toHaveValue('3');
+    // Ship counts are the flight's own: nothing went into the profile.
+    await expect(page.locator('#pf-overrides')).toBeHidden();
+
+    // A departure typed by hand that matches no body clears the select.
+    await openFlightParams(page);
+    await page.locator('#departure-p').fill('9');
+    await page.locator('#departure-p').blur();
+    await expect(page.locator('#pf-departure')).toHaveValue('');
+    await expect(page.locator('#pf-take-fleet')).toBeDisabled();
+});
+
+test('"no profile" gives flight its own account values and universe back', async ({ page }) => {
+    await page.goto('/flight');
+    await openFlightParams(page);
+    await page.locator('#cmb-drive').fill('5');
+    await page.locator('#cmb-drive').blur();
+
+    await importExport(page);
+    await expect(page.locator('#cmb-drive')).toHaveValue('16');
+    // The flight's own settings keep the value from before the profile.
+    const stored = await page.evaluate(() => JSON.parse(localStorage.getItem('options_flight') || '{}'));
+    expect(stored.driveLevels[0]).toBe(5);
+
+    await page.reload();
+    await openFlightParams(page);
+    await expect(page.locator('#cmb-drive')).toHaveValue('16');
+
+    await page.locator('#pf-select').selectOption('');
+    await expect(page.locator('#cmb-drive')).toHaveValue('5');
+    await expect(page.locator('#cmb-drive')).not.toHaveClass(/pf-bound/);
+    await expect(page.locator('#country')).toBeEnabled();
+    await expect(page.locator('#pf-departure')).toBeHidden();
+    await expect(page.locator('#reset')).toBeVisible();
 });

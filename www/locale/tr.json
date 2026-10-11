@@ -137,11 +137,6 @@
     "lf-bonuses-api-import-hint": "Bu değerlerin tümünü, formun üst kısmındaki \"OGame'den içe aktar\" düğmesi (pano simgesi) ile otomatik olarak da alabilirsiniz.",
     "universe": "Evren",
     "profile": "Profil",
-    "no-profile-name-msg": "Lütfen profil adını belirtin.",
-    "no-profile-selected-msg": "Profil seçilmedi.",
-    "del-profile-confirm": "Bu profili silmek istediğinizden emin misiniz?",
-    "owr-profile-confirm": "Bu profilin üzerine yazmak istediğinizden emin misiniz?",
-    "load-profile-confirm": "Bu profili yüklemek istediğinizden emin misiniz? Şu anda girilen veriler kaybolacak.",
     "server-data-failed-msg": "Evren ayarları yüklenemedi. Aşağıdaki değerleri kontrol edip elle düzeltin.",
     "fetching-data": "Veriler alınıyor...",
     "universe-load": "Yük",
@@ -275,7 +270,11 @@
     "pf-col-current": "Şimdi",
     "pf-reset-selected": "Seçilenleri geri yükle",
     "pf-in-game": "Oyunda: {0}",
-    "pf-reset-value": "geri yüklemek için tıklayın"
+    "pf-reset-value": "geri yüklemek için tıklayın",
+    "pf-departure-body": "Profilin gezegeni veya ayı",
+    "pf-take-fleet": "Kalkış noktasından",
+    "pf-take-fleet-hint": "Kalkış noktası olarak seçilen gezegende veya ayda bulunan gemileri, OGame’den yapılan son içe aktarmaya göre doldurur.",
+    "pf-universe-from-profile": "Evren etkin profil tarafından belirlenir."
   },
   "index": {
     "title": "ProxyForGame - OGame için hesaplamalar",

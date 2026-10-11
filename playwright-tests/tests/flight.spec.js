@@ -388,16 +388,30 @@ test.describe('Flight Calculator - OGame Object Import', () => {
         expect(errors, 'no page JS errors').toEqual([]);
     });
 
-    // The three alliance classes are 1 researcher, 2 trader, 3 warrior. Only the
-    // trader used to be read, so a warrior alliance imported as no alliance at all.
+    // The three alliance classes are 1 warrior, 2 trader, 3 researcher. Only the
+    // trader used to be read, and then 3 was taken for the warrior.
     test('imports the warrior alliance class onto its own radio', async ({ page }) => {
+        await page.locator('#import-own-api').click();
+        await page.locator('#own-api-input')
+            .fill(OWN_API_FIXTURE.replace('"allianceClassId":2', '"allianceClassId":1'));
+        await page.locator(OWN_API_IMPORT_BUTTON).click();
+
+        await expect(page.locator('#warrior-bonus')).toBeChecked();
+        await expect(page.locator('#trader-bonus')).not.toBeChecked();
+    });
+
+    // The researcher alliance speeds no fleet up, so it has no radio of its own.
+    test('a researcher alliance selects none', async ({ page }) => {
+        await openParams(page);
+        await page.locator('#warrior-bonus').check();
+
         await page.locator('#import-own-api').click();
         await page.locator('#own-api-input')
             .fill(OWN_API_FIXTURE.replace('"allianceClassId":2', '"allianceClassId":3'));
         await page.locator(OWN_API_IMPORT_BUTTON).click();
 
-        await expect(page.locator('#warrior-bonus')).toBeChecked();
-        await expect(page.locator('#trader-bonus')).not.toBeChecked();
+        await expect(page.locator('#alliance-class-none')).toBeChecked();
+        await expect(page.locator('#warrior-bonus')).not.toBeChecked();
     });
 
     test('an alliance without a class selects none', async ({ page }) => {
@@ -511,13 +525,13 @@ async function showParamTab(page, probe) {
 
 /**
  * Expands the parameters section and brings the tab owning `probe` to the front.
- * The collapse itself is probed through #universe-name-select, which sits above
+ * The collapse itself is probed through #api-code, which sits above
  * the tab strip and is therefore visible whichever tab is active — probing a
  * tabbed control instead would ask Bootstrap to re-show an already open panel,
  * and shown.bs.collapse would never fire.
  */
 async function openParams(page, probe = '#cmb-drive') {
-    await openCollapse(page, '#accordion-prm', '#universe-name-select');
+    await openCollapse(page, '#accordion-prm', '#api-code');
     await showParamTab(page, probe);
 }
 

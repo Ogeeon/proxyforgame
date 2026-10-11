@@ -535,8 +535,14 @@ function exportUniverse(raw) {
 function exportAccountValues(raw) {
   /** @type {Object<string, *>} */
   const values = {};
-  values.class = finiteOrNull(raw.characterClassId) ?? PROFILE_CLASS.NONE;
-  values.allianceClass = finiteOrNull(raw.allianceClassId) ?? PROFILE_ALLIANCE_CLASS.NONE;
+  // A class the export leaves null is unknown, not "none": the game's accountInfo
+  // has been seen to send allianceClassId null for a member of a warrior
+  // alliance (2026-10-11). Leaving the key out keeps whatever the player set and
+  // marks nothing as differing from the game.
+  const characterClass = finiteOrNull(raw.characterClassId);
+  if (characterClass !== null) values.class = characterClass;
+  const allianceClass = finiteOrNull(raw.allianceClassId);
+  if (allianceClass !== null) values.allianceClass = allianceClass;
   const officers = isPlainObject(raw.officers) ? raw.officers : {};
   PROFILE_OFFICERS.forEach((name) => { values['officer.' + name] = officers[name] === true; });
   copyLevels(raw.researches, 'research.', values);

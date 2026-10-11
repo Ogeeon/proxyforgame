@@ -20,6 +20,7 @@ const options = {
     universe: null,
     prm: {
         country: '--',
+        /** @type {?(number|string)} */
         universe: null,
         driveLevels: [0, 0, 0],
         fleetSpeedWar: 1,
@@ -756,7 +757,7 @@ class FlightOrchestrator {
     }
 
     // ------------------------------------------------------------------
-    // Fleet and universe storage
+    // Fleet storage
     // ------------------------------------------------------------------
 
     loadFleet(key) {
@@ -852,18 +853,6 @@ class FlightOrchestrator {
         // centred view we want, so the scroll is done by hand afterwards.
         el.focus({ preventScroll: true });
         el.scrollIntoView({ block: 'center' });
-    }
-
-    loadUniverse(key) {
-        const shipsBackup = Array.from(this.opts.prm.ships);
-        this.opts.load(key);
-        this.opts.prm.ships = shipsBackup;
-        this.populateParams();
-        this.recalc();
-    }
-
-    saveUniverse(key) {
-        saveToCookie(key, this.opts.prm);
     }
 
     // ------------------------------------------------------------------
@@ -1605,15 +1594,16 @@ class FlightOrchestrator {
 
     /**
      * Selects the radio for the alliance class the import names. The ids are the
-     * game's own order - 1 researcher, which brings the fleet nothing and so has
-     * no radio of its own here, 2 trader, 3 warrior. Anything else, an alliance
-     * with no class included, selects "none": what the import carries is the
-     * answer, not a suggestion on top of what was there.
+     * game's own - 1 warrior, 2 trader, 3 researcher, as the OValue Exporter
+     * userscript maps the same accountInfo field. The researcher brings the fleet
+     * nothing and has no radio of its own here, so it selects "none", as does an
+     * alliance with no class: what the import carries is the answer, not a
+     * suggestion on top of what was there.
      *
      * @param {number} allianceClassId
      */
     _importAllianceClass(allianceClassId) {
-        this._showAllianceClass(allianceClassId === 2, allianceClassId === 3);
+        this._showAllianceClass(allianceClassId === 2, allianceClassId === 1);
     }
 
     /** @param {OwnApiPayload} data */
@@ -1898,7 +1888,7 @@ class FlightOrchestrator {
     _bindInputs() {
         // Skip the name/api fields and every date/time field: the numeric
         // validator would strip the separators out of a date or duration.
-        const skipIds = new Set(['universe-name', 'fleet-name', 'api-code']);
+        const skipIds = new Set(['fleet-name', 'api-code']);
         const skipClasses = ['startdate-input', 'tolerance-time-input', 'flight-time-input'];
         const isNumeric = (el) => !skipIds.has(el.id)
             && !skipClasses.some((cls) => el.classList.contains(cls));
@@ -1937,23 +1927,6 @@ class FlightOrchestrator {
                 el.addEventListener('click', handler);
             }
         };
-        on('universe-load', async () => {
-            const key = getVal('#universe-name-select');
-            if (key === '0') { await showAlertModal(this.opts.noUniSelectedMsg, this.opts.dialogOk); return; }
-            if (await confirmed(this.opts.uniLoadConfMsg)) { this.loadUniverse(key); }
-        });
-        on('universe-save', async () => {
-            const key = getVal('#universe-name-select');
-            if (key === '0') { await showAlertModal(this.opts.noUniSelectedMsg, this.opts.dialogOk); return; }
-            if (await confirmed(this.opts.uniOwrConfMsg)) { this.saveUniverse(key); }
-        });
-        on('universe-delete', async () => {
-            const key = getVal('#universe-name-select');
-            if (key === '0') { await showAlertModal(this.opts.noUniSelectedMsg, this.opts.dialogOk); return; }
-            if (await confirmed(this.opts.uniDelConfMsg)) { this._removeStorageOption('universe-name-select', key); }
-        });
-        on('universe-add', () => this._addStorageEntry('universe-name', 'universe-name-select', 'flight_uni_', this.opts.noUniNameMsg, (key) => this.saveUniverse(key)));
-
         on('fleet-load', async () => {
             const key = getVal('#fleet-name-select');
             if (key === '0') { await showAlertModal(this.opts.noFleetSelectedMsg, this.opts.dialogOk); return; }
@@ -2033,7 +2006,6 @@ class FlightOrchestrator {
             const select = selectEl(`#${selectId}`);
             keys.forEach((key) => select.appendChild(new Option(key.replace(prefix, ''), key)));
         };
-        fill('flight_uni_', 'universe-name-select');
         fill('flight_fleet_', 'fleet-name-select');
     }
 

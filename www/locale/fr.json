@@ -135,11 +135,6 @@
     "lf-bonuses-api-import-hint": "Toutes ces valeurs peuvent également être obtenues automatiquement via le bouton « Importer depuis OGame » (icône presse-papiers) en haut du formulaire.",
     "universe": "Univers",
     "profile": "Profil",
-    "no-profile-name-msg": "Veuillez préciser le nom du profil.",
-    "no-profile-selected-msg": "Aucun profil sélectionné.",
-    "del-profile-confirm": "Êtes-vous sûr de vouloir supprimer ce profil ?",
-    "owr-profile-confirm": "Êtes-vous sûr de vouloir écraser ce profil ?",
-    "load-profile-confirm": "Êtes-vous sûr de vouloir charger ce profil ? Les données actuellement saisies seront perdues.",
     "server-data-failed-msg": "Impossible de charger les paramètres de l'univers. Vérifiez les valeurs ci-dessous et corrigez-les à la main.",
     "fetching-data": "Récupération des données...",
     "universe-load": "Charger",
@@ -275,7 +270,11 @@
     "pf-col-current": "Actuel",
     "pf-reset-selected": "Restaurer la sélection",
     "pf-in-game": "En jeu : {0}",
-    "pf-reset-value": "cliquez pour restaurer"
+    "pf-reset-value": "cliquez pour restaurer",
+    "pf-departure-body": "Planète ou lune du profil",
+    "pf-take-fleet": "Depuis le départ",
+    "pf-take-fleet-hint": "Reprendre les vaisseaux stationnés sur la planète ou la lune choisie comme point de départ, d’après le dernier import depuis OGame.",
+    "pf-universe-from-profile": "L’univers est défini par le profil actif."
   },
   "index": {
     "title": "ProxyForGame - l'utilité pour les jeux par navigateurs OGame",

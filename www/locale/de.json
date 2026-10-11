@@ -139,11 +139,6 @@
     "lf-bonuses-api-import-hint": "Alle diese Werte können auch automatisch über die Schaltfläche „Import aus OGame“ (Zwischenablage-Symbol) oben im Formular importiert werden.",
     "universe": "Universum",
     "profile": "Profil",
-    "no-profile-name-msg": "Bitte einen Profilnamen angeben.",
-    "no-profile-selected-msg": "Kein Profil ausgewählt.",
-    "del-profile-confirm": "Sind Sie sicher, dass Sie dieses Profil löschen wollen?",
-    "owr-profile-confirm": "Sind Sie sicher, dass Sie dieses Profil überschreiben wollen?",
-    "load-profile-confirm": "Sind Sie sicher, dass Sie dieses Profil laden wollen? Die aktuell eingegebenen Daten gehen verloren.",
     "server-data-failed-msg": "Die Universums-Einstellungen konnten nicht geladen werden. Prüfen Sie die Werte unten und korrigieren Sie sie von Hand.",
     "fetching-data": "Daten werden abgerufen...",
     "universe-load": "Laden",
@@ -275,7 +270,11 @@
     "pf-col-current": "Jetzt",
     "pf-reset-selected": "Auswahl wiederherstellen",
     "pf-in-game": "Im Spiel: {0}",
-    "pf-reset-value": "klicken zum Wiederherstellen"
+    "pf-reset-value": "klicken zum Wiederherstellen",
+    "pf-departure-body": "Planet oder Mond des Profils",
+    "pf-take-fleet": "Vom Startort",
+    "pf-take-fleet-hint": "Die Schiffe übernehmen, die auf dem als Startort gewählten Planeten oder Mond stehen, Stand des letzten Imports aus OGame.",
+    "pf-universe-from-profile": "Das Universum wird durch das aktive Profil festgelegt."
   },
   "index": {
     "title": "ProxyForGame - Hilfsprogramme für das Online-Browsergame OGame",

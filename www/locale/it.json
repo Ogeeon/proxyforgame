@@ -134,11 +134,6 @@
     "lf-bonuses-api-import-hint": "Tutti questi valori possono anche essere ottenuti automaticamente tramite il pulsante \"Importa da OGame\" (icona appunti) nella parte superiore del modulo.",
     "universe": "Universo",
     "profile": "Profilo",
-    "no-profile-name-msg": "Si prega di specificare il nome del profilo.",
-    "no-profile-selected-msg": "Nessun profilo selezionato.",
-    "del-profile-confirm": "Sei sicuro di voler cancellare questo profilo?",
-    "owr-profile-confirm": "Sei sicuro di voler sovrascrivere questo profilo?",
-    "load-profile-confirm": "Sei sicuro di voler caricare questo profilo? I dati attualmente inseriti andranno persi.",
     "server-data-failed-msg": "Impossibile caricare le impostazioni dell'universo. Controlla i valori qui sotto e correggili a mano.",
     "fetching-data": "Recupero dati...",
     "universe-load": "Carica",
@@ -275,7 +270,11 @@
     "pf-col-current": "Ora",
     "pf-reset-selected": "Ripristina selezionati",
     "pf-in-game": "Nel gioco: {0}",
-    "pf-reset-value": "clicca per ripristinare"
+    "pf-reset-value": "clicca per ripristinare",
+    "pf-departure-body": "Pianeta o luna del profilo",
+    "pf-take-fleet": "Dalla partenza",
+    "pf-take-fleet-hint": "Inserisci le navi presenti sul pianeta o sulla luna scelti come punto di partenza, secondo l’ultima importazione da OGame.",
+    "pf-universe-from-profile": "L’universo è impostato dal profilo attivo."
   },
   "index": {
     "title": "ProxyForGame - strumenti per i giochi per browser OGame",
