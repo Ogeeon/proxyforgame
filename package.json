@@ -37,7 +37,7 @@
     "@types/bootstrap": "^5.2.0",
     "@types/node": "^24.0.0",
     "bootstrap": "5.3.8",
-    "bootstrap-icons": "1.11.0",
+    "bootstrap-icons": "1.13.1",
     "eslint": "^9.39.0",
     "globals": "^16.0.0",
     "typescript": "^5.9.0",
