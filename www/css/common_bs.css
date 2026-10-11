@@ -500,9 +500,20 @@ textarea:disabled {
 
 /* Player profiles (profiles-ui.js): a field the active profile owns gets a
    stripe on its left edge; one whose value differs from the game gets it in the
-   warning colour, followed by a button that restores the game value. */
+   warning colour, followed by a button that restores the game value.
+   The "matches the game" colour is per theme: the dark theme already sets its
+   body text in the info colour, so the mark there is green; in the light theme
+   the info colour is kept but faded towards the background. */
+[data-bs-theme="light"] {
+  --pfg-mark-same: color-mix(in srgb, var(--bs-info) 50%, var(--bs-body-bg));
+}
+
+[data-bs-theme="dark"] {
+  --pfg-mark-same: var(--bs-success-text-emphasis);
+}
+
 .pf-bound {
-  box-shadow: inset 3px 0 0 var(--bs-info);
+  box-shadow: inset 3px 0 0 var(--pfg-mark-same);
 }
 
 .pf-bound.pf-differs {
@@ -512,7 +523,7 @@ textarea:disabled {
 input[type="checkbox"].pf-bound,
 input[type="radio"].pf-bound {
   box-shadow: none;
-  outline: 2px solid var(--bs-info);
+  outline: 2px solid var(--pfg-mark-same);
   outline-offset: 1px;
 }
 
@@ -524,7 +535,7 @@ fieldset.pf-bound.pf-differs {
 
 fieldset.pf-bound {
   box-shadow: none;
-  border-left: 3px solid var(--bs-info);
+  border-left: 3px solid var(--pfg-mark-same);
   padding-left: 0.25rem;
 }
 
