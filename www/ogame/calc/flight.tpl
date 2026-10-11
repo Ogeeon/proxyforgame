@@ -2,7 +2,7 @@
 <html lang="<?= getLangAttr() ?>">
 <head>
   <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
-  <?php require_once('../../hawk.tpl'); ?>
+  <?php require_once '../../hawk.tpl'; ?>
   <title><?= $l['title'] ?></title>
   <meta name="description" content="<?= $l['title'] ?>">
   <meta name="keywords" content="<?= $l['keywords'] ?>">
