@@ -2,7 +2,7 @@
 <html lang="<?= getLangAttr() ?>">
 <head>
   <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
-  <?php require_once('../../hawk.tpl'); ?>
+  <?php require_once '../../hawk.tpl'; ?>
   <title><?= $l['title'] ?></title>
   <meta name="description" content="<?= $l['title'] ?>">
   <meta name="keywords" content="<?= $l['keywords'] ?>">
@@ -67,11 +67,11 @@
     options.msgNoSavepointsFound = "<?= $l['msg-no-savepoints-found'] ?>";
     options.flightmodesNote = "<?= $l['flightmodes-note'] ?>";
     options.savepointsNote = "<?= $l['savepoints-note'] ?>";
-    options.noUniNameMsg = "<?= $l['no-uni-name-msg'] ?>";
-    options.noUniSelectedMsg = "<?= $l['no-uni-selected-msg'] ?>";
-    options.uniDelConfMsg = "<?= $l['del-universe-confirm'] ?>";
-    options.uniOwrConfMsg = "<?= $l['owr-universe-confirm'] ?>";
-    options.uniLoadConfMsg = "<?= $l['load-universe-confirm'] ?>";
+    options.noUniNameMsg = <?= json_encode($l['no-profile-name-msg']) ?>;
+    options.noUniSelectedMsg = <?= json_encode($l['no-profile-selected-msg']) ?>;
+    options.uniDelConfMsg = <?= json_encode($l['del-profile-confirm']) ?>;
+    options.uniOwrConfMsg = <?= json_encode($l['owr-profile-confirm']) ?>;
+    options.uniLoadConfMsg = <?= json_encode($l['load-profile-confirm']) ?>;
     options.noFleetNameMsg = "<?= $l['no-fleet-name-msg'] ?>";
     options.noFleetSelectedMsg = "<?= $l['no-fleet-selected-msg'] ?>";
     options.fleetDelConfMsg = "<?= $l['del-fleet-confirm'] ?>";
@@ -131,7 +131,7 @@
               <div id="universes-panel" class="border rounded p-2 mb-2">
                 <div class="universe-panel-rows mx-auto">
                   <div class="d-flex flex-wrap align-items-center justify-content-center gap-2 mb-1">
-                    <label for="universe-name-select"><?= $l['universe'] ?></label>
+                    <label for="universe-name-select"><?= $l['profile'] ?></label>
                     <select id="universe-name-select" name="universe-name-select" class="form-select form-select-sm d-inline-block w-auto ui-input-margin">
                       <option value="0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</option>
                     </select>
@@ -140,7 +140,7 @@
                       <button id="universe-save" type="button" data-bs-toggle="tooltip" title="<?= $l['universe-save'] ?>" class="btn btn-sm btn-outline-secondary uni-control-btn"><i class="bi bi-box-arrow-in-down"></i></button>
                       <button id="universe-delete" type="button" data-bs-toggle="tooltip" title="<?= $l['universe-delete'] ?>" class="btn btn-sm btn-outline-secondary uni-control-btn"><i class="bi bi-x-lg"></i></button>
                     </div>
-                    <input id="universe-name" type="text" name="universe-name" class="form-control form-control-sm d-inline-block input-20columns ui-input-margin" aria-label="<?= $l['universe'] ?>">
+                    <input id="universe-name" type="text" name="universe-name" class="form-control form-control-sm d-inline-block input-20columns ui-input-margin" aria-label="<?= $l['profile'] ?>">
                     <button id="universe-add" type="button" data-bs-toggle="tooltip" title="<?= $l['universe-add'] ?>" class="btn btn-sm btn-outline-secondary uni-control-btn"><i class="bi bi-plus-lg"></i></button>
                   </div>
                   <div class="d-flex flex-wrap align-items-center justify-content-center gap-1">
@@ -189,9 +189,18 @@
                         <input id="class-2" type="radio" name="class" value="2" class="form-check-input mt-0"> <label for="class-2"><?= $l['class-discoverer'] ?></label>
                       </div>
                     </fieldset>
-                    <div class="d-flex align-items-center gap-1 text-nowrap">
-                      <input id="trader-bonus" type="checkbox" name="trader-bonus" class="form-check-input mt-0"> <label for="trader-bonus"><?= $l['trader-bonus'] ?></label>
-                    </div>
+                    <fieldset class="d-flex flex-wrap align-items-center gap-2 fieldset-reset">
+                      <legend class="text-nowrap"><?= $l['alliance-class'] ?>:</legend>
+                      <div class="d-flex align-items-center gap-1 text-nowrap">
+                        <input id="alliance-class-none" type="radio" name="alliance-class" value="0" class="form-check-input mt-0" checked> <label for="alliance-class-none"><?= $l['none'] ?></label>
+                      </div>
+                      <div class="d-flex align-items-center gap-1 text-nowrap">
+                        <input id="trader-bonus" type="radio" name="alliance-class" value="2" class="form-check-input mt-0"> <label for="trader-bonus"><?= $l['alliance-class-trader'] ?></label>
+                      </div>
+                      <div class="d-flex align-items-center gap-1 text-nowrap">
+                        <input id="warrior-bonus" type="radio" name="alliance-class" value="3" class="form-check-input mt-0"> <label for="warrior-bonus"><?= $l['alliance-class-warrior'] ?></label>
+                      </div>
+                    </fieldset>
                   </div>
 
                   <div class="d-flex flex-wrap align-items-center justify-content-center gap-3 mb-2">
@@ -213,31 +222,9 @@
                     </div>
                   </div>
 
-                  <div class="d-flex flex-wrap align-items-center justify-content-center gap-3 mb-1">
-                    <div class="d-flex align-items-center gap-1 text-nowrap">
-                      <label for="deut-factor"><?= $l['lf-bonus-deut-consum'] ?></label>
-                      <select id="deut-factor" name="deut-factor" class="form-select form-select-sm d-inline-block w-auto">
-                        <option value="5">50%</option>
-                        <option value="6">60%</option>
-                        <option value="7">70%</option>
-                        <option value="8">80%</option>
-                        <option value="9">90%</option>
-                        <option value="10" selected>100%</option>
-                      </select>
-                    </div>
-                    <div class="d-flex align-items-center gap-1 text-nowrap">
-                      <label for="deut-generals-bonus"><?= $l['deut-cons-reduction'] ?></label>
-                      <select id="deut-generals-bonus" name="deut-generals-bonus" class="form-select form-select-sm d-inline-block w-auto">
-                        <option value="25">25%</option>
-                        <option value="36">36%</option>
-                        <option value="50">50%</option>
-                      </select>
-                    </div>
-                  </div>
-
                 </div><!-- /param-common -->
 
-                <!-- Universe: server, topology and the fleet speeds it runs at -->
+                <!-- Universe: what the server data fills in - topology, fleet speeds, fuel factors -->
                 <div id="param-universe" class="tab-pane fade p-2 pb-0" role="tabpanel">
 
                   <div class="d-flex flex-wrap align-items-center justify-content-center gap-3 mb-2">
@@ -307,11 +294,26 @@
                     </div>
                   </div>
 
-                  <hr>
-                  <div class="d-flex flex-wrap align-items-center justify-content-center gap-1 mb-1 text-nowrap">
-                    <input id="ovr-speed-cb" type="checkbox" name="override-speed" class="form-check-input mt-0">
-                    <label for="ovr-speed-cb"><abbr data-bs-toggle="tooltip" title="<?= $l['ovr-fleet-speed-explain'] ?>"><?= $l['ovr-fleet-speed'] ?></abbr></label>
-                    <input id="ovr-speed-t" type="text" class="form-control form-control-sm d-inline-block input-7columns" value="10000" aria-label="<?= $l['ovr-fleet-speed'] ?>">
+                  <div class="d-flex flex-wrap align-items-center justify-content-center gap-3 mb-1">
+                    <div class="d-flex align-items-center gap-1 text-nowrap">
+                      <label for="deut-factor"><?= $l['universe-deut-consum'] ?></label>
+                      <select id="deut-factor" name="deut-factor" class="form-select form-select-sm d-inline-block w-auto">
+                        <option value="5">50%</option>
+                        <option value="6">60%</option>
+                        <option value="7">70%</option>
+                        <option value="8">80%</option>
+                        <option value="9">90%</option>
+                        <option value="10" selected>100%</option>
+                      </select>
+                    </div>
+                    <div class="d-flex align-items-center gap-1 text-nowrap">
+                      <label for="deut-generals-bonus"><?= $l['deut-cons-reduction'] ?></label>
+                      <select id="deut-generals-bonus" name="deut-generals-bonus" class="form-select form-select-sm d-inline-block w-auto">
+                        <option value="25">25%</option>
+                        <option value="36">36%</option>
+                        <option value="50">50%</option>
+                      </select>
+                    </div>
                   </div>
 
                 </div><!-- /param-universe -->
@@ -402,7 +404,12 @@
                 </div>
               </div>
 
-              <div class="text-end mb-1">
+              <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-1">
+                <div class="d-flex align-items-center gap-1 text-nowrap">
+                  <input id="ovr-speed-cb" type="checkbox" name="override-speed" class="form-check-input mt-0">
+                  <label for="ovr-speed-cb"><abbr data-bs-toggle="tooltip" title="<?= $l['ovr-fleet-speed-explain'] ?>"><?= $l['ovr-fleet-speed'] ?></abbr></label>
+                  <input id="ovr-speed-t" type="text" class="form-control form-control-sm d-inline-block input-7columns" value="10000" aria-label="<?= $l['ovr-fleet-speed'] ?>">
+                </div>
                 <button id="clear-ships" type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="tooltip" title="<?= $l['clear-ships-hint'] ?>"><i class="bi bi-eraser"></i> <?= $l['clear-ships'] ?></button>
               </div>
 
@@ -446,8 +453,7 @@
         <div class="flight-layout d-flex w-100">
           <div class="flight-layout-main">
               <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
-                <div><input id="warrior-bonus" type="checkbox" name="warrior-bonus" class="form-check-input"> <label for="warrior-bonus"><?= $l['warrior-bonus'] ?></label></div>
-                <div class="ms-3"><span><?= $l['mission-type-title'] ?></span></div>
+                <div><span><?= $l['mission-type-title'] ?></span></div>
                 <div><input id="mission-type-0" type="radio" name="mission-type" value="0" class="form-check-input"> <label for="mission-type-0"><?= $l['mission-type-war'] ?></label></div>
                 <div><input id="mission-type-1" type="radio" name="mission-type" value="1" class="form-check-input"> <label for="mission-type-1"><?= $l['mission-type-peaceful'] ?></label></div>
                 <div><input id="mission-type-2" type="radio" name="mission-type" value="2" class="form-check-input"> <label for="mission-type-2"><?= $l['mission-type-holding'] ?></label></div>

@@ -390,7 +390,7 @@ test.describe('Flight Calculator - OGame Object Import', () => {
 
     // The three alliance classes are 1 researcher, 2 trader, 3 warrior. Only the
     // trader used to be read, so a warrior alliance imported as no alliance at all.
-    test('imports the warrior alliance class onto its own checkbox', async ({ page }) => {
+    test('imports the warrior alliance class onto its own radio', async ({ page }) => {
         await page.locator('#import-own-api').click();
         await page.locator('#own-api-input')
             .fill(OWN_API_FIXTURE.replace('"allianceClassId":2', '"allianceClassId":3'));
@@ -400,7 +400,7 @@ test.describe('Flight Calculator - OGame Object Import', () => {
         await expect(page.locator('#trader-bonus')).not.toBeChecked();
     });
 
-    test('an alliance without a class clears both checkboxes', async ({ page }) => {
+    test('an alliance without a class selects none', async ({ page }) => {
         await openParams(page);
         await page.locator('#trader-bonus').check();
 
@@ -409,6 +409,7 @@ test.describe('Flight Calculator - OGame Object Import', () => {
             .fill(OWN_API_FIXTURE.replace('"allianceClassId":2', '"allianceClassId":0'));
         await page.locator(OWN_API_IMPORT_BUTTON).click();
 
+        await expect(page.locator('#alliance-class-none')).toBeChecked();
         await expect(page.locator('#trader-bonus')).not.toBeChecked();
         await expect(page.locator('#warrior-bonus')).not.toBeChecked();
     });
@@ -528,12 +529,12 @@ const openLfBonuses = (page) => openParams(page, '[class~="202-speed"]');
 /** Activates the flight-times tab, which the tab strip may have left hidden. */
 async function openFlightTimesTab(page) {
     await page.locator('#tabtag1').click();
-    await expect(page.locator('#warrior-bonus')).toBeVisible();
+    await expect(page.locator('#mission-type-0')).toBeVisible();
 }
 
 // The ship-speed formula - every drive, class, alliance and life form combination -
 // is covered in unit-tests/flight-core.test.js. What stays here needs the real form:
-// the mutually-exclusive alliance checkboxes and the life-form bonus table.
+// the alliance-class radio group and the life-form bonus table.
 test.describe('Flight Calculator - Ship Speeds', () => {
     test.beforeEach(async ({ context, page }) => {
         await context.addInitScript(() => {
@@ -545,8 +546,10 @@ test.describe('Flight Calculator - Ship Speeds', () => {
         await openFlightTimesTab(page);
     });
 
-    test('warrior and trader bonuses are mutually exclusive', async ({ page }) => {
+    test('the alliance class is one choice of none, trader and warrior', async ({ page }) => {
+        await expect(page.locator('#alliance-class-none')).toBeChecked();
         await page.locator('#warrior-bonus').check();
+        await expect(page.locator('#alliance-class-none')).not.toBeChecked();
         await expect(page.locator('#warrior-bonus')).toBeChecked();
 
         // Checking trader must clear warrior
@@ -558,6 +561,10 @@ test.describe('Flight Calculator - Ship Speeds', () => {
         await page.locator('#warrior-bonus').check();
         await expect(page.locator('#trader-bonus')).not.toBeChecked();
         await expect(page.locator('#warrior-bonus')).toBeChecked();
+
+        await page.locator('#alliance-class-none').check();
+        await expect(page.locator('#warrior-bonus')).not.toBeChecked();
+        await expect(page.locator('#trader-bonus')).not.toBeChecked();
     });
 
     test('per-ship life form speed bonus is applied', async ({ page }) => {
@@ -654,6 +661,7 @@ test.describe('Flight Calculator - Deuterium Consumption', () => {
 
         await openParams(page);
         await page.locator('#class-1').check();
+        await showParamTab(page, '#deut-generals-bonus');
         await page.locator('#deut-generals-bonus').selectOption('25');
         const general25 = (await fuelFor(page)).cons;
 
@@ -860,10 +868,9 @@ test.describe('Flight Calculator - Results Table', () => {
     });
 
     test('a speed override does not fill the table for an empty fleet', async ({ page }) => {
-        await openParams(page, '#ovr-speed-cb');
+        await openShips(page);
         await page.locator('#ovr-speed-cb').check();
         await page.locator('#ovr-speed-t').fill('100000');
-        await openShips(page);
         await page.locator('#clear-ships').click();
 
         const cells = speedRows(page).nth(0).locator('td');
@@ -873,7 +880,7 @@ test.describe('Flight Calculator - Results Table', () => {
     });
 
     test('speed override replaces the slowest ship speed', async ({ page }) => {
-        await openParams(page, '#ovr-speed-cb');
+        await openShips(page);
         const before = await speedRows(page).nth(0).locator('td').nth(1).innerText();
 
         await page.locator('#ovr-speed-cb').check(); // enables the input
@@ -886,7 +893,7 @@ test.describe('Flight Calculator - Results Table', () => {
     });
 
     test('the take-to-calc button carries over the overridden speed', async ({ page }) => {
-        await openParams(page, '#ovr-speed-cb');
+        await openShips(page);
         await page.locator('#ovr-speed-cb').check();
         await page.locator('#ovr-speed-t').fill('100000'); // far above the large cargo
         await openFlightTimesTab(page);
@@ -910,7 +917,7 @@ test.describe('Flight Calculator - Results Table', () => {
     });
 
     test('an override of zero falls back to 10000', async ({ page }) => {
-        await openParams(page, '#ovr-speed-cb');
+        await openShips(page);
         // The field starts disabled, so enable it before clearing the value
         await page.locator('#ovr-speed-cb').check();
         await page.locator('#ovr-speed-t').fill('0');
@@ -922,7 +929,7 @@ test.describe('Flight Calculator - Results Table', () => {
     });
 
     test('the override field is only editable while the override is on', async ({ page }) => {
-        await openParams(page, '#ovr-speed-cb');
+        await openShips(page);
         await expect(page.locator('#ovr-speed-t')).toBeDisabled();
 
         await page.locator('#ovr-speed-cb').check();
@@ -1012,7 +1019,7 @@ test.describe('Flight Calculator - Moon Destruction Mission', () => {
     });
 
     test('the manual speed override is greyed out and cannot win', async ({ page }) => {
-        await openParams(page, '#ovr-speed-cb');
+        await openShips(page);
         await page.locator('#ovr-speed-cb').check();
         await page.locator('#ovr-speed-t').fill('100000');
         await openFlightTimesTab(page);
@@ -1447,10 +1454,10 @@ function fillSavePoints(page, { roundTripHours = 4, tolerance = '02:00', fleet =
 const validateSP = (page) => page.evaluate(() => validateSPParams());
 const warningText = (page) => page.locator('#warning-message').innerText();
 
-/** Turns the manual speed override on; the field lives on the universe parameter tab. */
+/** Turns the manual speed override on; the field sits above the ship grid. */
 async function enableSpeedOverride(page, speed) {
     await openFlightTimesTab(page);
-    await openParams(page, '#ovr-speed-cb');
+    await openShips(page);
     await page.locator('#ovr-speed-cb').check();
     await page.locator('#ovr-speed-t').fill(String(speed));
     await page.locator('#tabtag2').click();
@@ -1668,7 +1675,7 @@ test.describe('Flight Calculator - Save Points', () => {
         await link.click();
 
         // The flight-times tab is brought forward and the destination is filled in
-        await expect(page.locator('#warrior-bonus')).toBeVisible();
+        await expect(page.locator('#mission-type-0')).toBeVisible();
         await expect(page.locator('#destination-s')).toHaveValue(system);
 
         // Two legs are queued: there and back
@@ -1796,6 +1803,22 @@ test.describe('Flight Calculator - Persistence', () => {
         await expect(page.locator('#imp-drive')).toHaveValue('7');
         await expect(page.locator('#hypertech-lvl')).toHaveValue('3');
         await expect(page.locator('#class-1')).toBeChecked();
+    });
+
+    // The radios share one name, so the stored pair of flags has to come back as
+    // one selection - "none" included, which no flag of its own describes.
+    test('the alliance class survives a reload', async ({ page }) => {
+        await page.locator('#warrior-bonus').check();
+        await page.reload();
+        await installCompat(page);
+        await openParams(page);
+        await expect(page.locator('#warrior-bonus')).toBeChecked();
+
+        await page.locator('#alliance-class-none').check();
+        await page.reload();
+        await installCompat(page);
+        await openParams(page);
+        await expect(page.locator('#alliance-class-none')).toBeChecked();
     });
 
     test('the fleet is persisted on change', async ({ page }) => {

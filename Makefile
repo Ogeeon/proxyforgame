@@ -249,6 +249,12 @@ docs: ## Regenerate docs/calculators
 mail: ## Read the feedback mailbox, e.g. make mail args="--site --body"
 	node scripts/read-mail.js $(args)
 
+# Measures the live site through the PageSpeed Insights API: median of several
+# Lighthouse runs per page plus the origin's CrUX field data. Needs PSI_API_KEY
+# in .env; `make pagespeed args=--help` lists the options.
+pagespeed: ## Measure page speed of the live site, e.g. make pagespeed args="--pages flight --out before.json"
+	node scripts/pagespeed.js $(args)
+
 # Writes changelog.sql with the Russian text in all twelve rows; run
 # /translate-changelog next, then commit the file. The deploy applies it to
 # both hosts - see deploy/README.md, "The in-app changelog".

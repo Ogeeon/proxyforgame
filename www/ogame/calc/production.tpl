@@ -2,7 +2,7 @@
 <html lang="<?= getLangAttr() ?>">
 <head>
   <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
-  <?php require_once('../../hawk.tpl'); ?>
+  <?php require_once '../../hawk.tpl'; ?>
   <title><?= $l['title'] ?></title>
   <meta name="description" content="<?= $l['title'] ?>">
   <meta name="keywords" content="<?= $l['keywords'] ?>">
@@ -219,11 +219,11 @@
     options.resWillNotAccumMsg1 = "<?= $l['res-will-not-accumulate1'] ?>";
     options.enoughResAlreadyMsg = "<?= $l['enough-res-already'] ?>";
     options.plnDelConfMsg = "<?= $l['del-planet-confirm'] ?>";
-    options.noUniNameMsg = "<?= $l['no-uni-name-msg'] ?>";
-    options.noUniSelectedMsg = "<?= $l['no-uni-selected-msg'] ?>";
-    options.uniDelConfMsg = "<?= $l['del-universe-confirm'] ?>";
-    options.uniOwrConfMsg = "<?= $l['owr-universe-confirm'] ?>";
-    options.uniLoadConfMsg = "<?= $l['load-universe-confirm'] ?>";
+    options.noUniNameMsg = <?= json_encode($l['no-profile-name-msg']) ?>;
+    options.noUniSelectedMsg = <?= json_encode($l['no-profile-selected-msg']) ?>;
+    options.uniDelConfMsg = <?= json_encode($l['del-profile-confirm']) ?>;
+    options.uniOwrConfMsg = <?= json_encode($l['owr-profile-confirm']) ?>;
+    options.uniLoadConfMsg = <?= json_encode($l['load-profile-confirm']) ?>;
     options.cloneConfMsg = "<?= $l['clone-confirm'] ?>";
     options.dialogOk = <?= json_encode($l['dialog-ok']) ?>;
     options.dialogConfirm = <?= json_encode($l['dialog-confirm']) ?>;
@@ -287,7 +287,7 @@
       <?php endforeach; ?>
     };
   </script>
-<?php require_once('../../cookies.tpl'); ?>
+<?php require_once '../../cookies.tpl'; ?>
 </head>
 
 <body>
@@ -296,9 +296,9 @@
 
 <div class="container-fluid">
   <div class="row">
-    <div class="col-md-2"><?php require_once('../../sidebar_bs.tpl'); ?></div>
+    <div class="col-md-2"><?php require_once '../../sidebar_bs.tpl'; ?></div>
     <div class="col-md-10">
-    <?php require_once('../../topbar_bs.tpl'); ?>
+    <?php require_once '../../topbar_bs.tpl'; ?>
 
 <div id="production">
   <div class="border rounded position-relative">
@@ -314,7 +314,7 @@
     <div id="universes-panel" class="border rounded m-1 p-2">
       <div class="d-flex flex-wrap gap-2 align-items-center justify-content-center">
         <div class="d-flex align-items-center gap-1">
-          <label for="universe-name-select"><?= $l['universe'] ?></label>
+          <label for="universe-name-select"><?= $l['profile'] ?></label>
           <select id="universe-name-select" name="universe-name-select" class="form-select form-select-sm w-auto">
             <option value="0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</option>
           </select>
@@ -331,7 +331,7 @@
           </button>
         </div>
         <div class="d-flex align-items-center gap-1">
-          <input id="universe-name" type="text" name="universe-name" class="form-control form-control-sm input-20columns">
+          <input id="universe-name" type="text" name="universe-name" class="form-control form-control-sm input-20columns" aria-label="<?= $l['profile'] ?>">
           <button id="universe-add" type="button" data-bs-toggle="tooltip" title="<?= $l['universe-add'] ?>" class="btn btn-outline-secondary btn-sm uni-control-btn">
             <i class="bi bi-plus-lg"></i>
           </button>
@@ -378,15 +378,15 @@
             </div>
           </div>
           <div class="d-flex flex-wrap gap-2 align-items-center justify-content-center mb-1">
-            <div class="d-flex align-items-center gap-1 flex-nowrap">
-              <label><?= $l['class'] ?>:</label>
+            <fieldset class="d-flex align-items-center gap-1 flex-nowrap fieldset-reset">
+              <legend><?= $l['class'] ?>:</legend>
               <input id="class-0" type="radio" name="class" value="0" class="form-check-input">
               <label for="class-0"><?= $l['class-collector'] ?></label>
               <input id="class-1" type="radio" name="class" value="1" class="form-check-input">
               <label for="class-1"><?= $l['class-general'] ?></label>
               <input id="class-2" type="radio" name="class" value="2" class="form-check-input">
               <label for="class-2"><?= $l['class-discoverer'] ?></label>
-            </div>
+            </fieldset>
             <div class="d-flex align-items-center gap-1">
               <input id="is-trader" type="checkbox" name="is-trader" class="form-check-input">
               <label for="is-trader"><?= $l['is-trader'] ?></label>
@@ -404,8 +404,8 @@
             <div class="d-flex align-items-center gap-1">
               <label for="exchange-rates-m"><?= $l['exchange-rates'] ?></label>
               <input id="exchange-rates-m" type="text" name="exchange-rates-m" class="form-control form-control-sm level-input" value="1">:
-              <input id="exchange-rates-c" type="text" name="exchange-rates-c" class="form-control form-control-sm level-input" value="1.5">:
-              <input id="exchange-rates-d" type="text" name="exchange-rates-d" class="form-control form-control-sm level-input" value="3">
+              <input id="exchange-rates-c" type="text" name="exchange-rates-c" class="form-control form-control-sm level-input" value="1.5" aria-label="<?= $l['exchange-rates'] ?>-<?= $l['crystal'] ?>">:
+              <input id="exchange-rates-d" type="text" name="exchange-rates-d" class="form-control form-control-sm level-input" value="3" aria-label="<?= $l['exchange-rates'] ?>-<?= $l['deuterium'] ?>">
             </div>
           </div>
         </div>
@@ -570,11 +570,11 @@
                     <td style="display: none;"></td>
                   <?php endif; ?>
                   <td class="text-center">
-                    <input type="text" class="form-control form-control-sm <?=($i==6 || $i==7)?'input-4columns':'input-3columns' ?> input-in-table" value="0">
+                    <input type="text" class="form-control form-control-sm <?=($i==6 || $i==7)?'input-4columns':'input-3columns' ?> input-in-table" value="0" aria-label="<?= $l[$oneTblProdRows[$i]] ?>-<?= $l['qty-header'] ?>">
                   </td>
                   <td class="text-center"></td><td class="text-center"></td><td class="text-center"></td><td class="text-center"></td>
                   <td class="text-center" style="display: none;">
-                    <select class="form-select form-select-sm input-in-table">
+                    <select class="form-select form-select-sm input-in-table" aria-label="<?= $l[$oneTblProdRows[$i]] ?>-%">
                     <?php if ($i == 7): ?>
                       <option value="150">150</option>
                       <option value="140">140</option>
@@ -612,7 +612,7 @@
                     <td class="text-start"><?= $lfTr[$lfKey] ?></td>
                     <td class="text-center" style="display: none;"></td>
                     <td class="text-center">
-                      <input type="text" class="form-control form-control-sm input-3columns lf-level-input" data-lf-id="<?= $lfRace * 1000 + $lfPos ?>" value="0">
+                      <input type="text" class="form-control form-control-sm input-3columns lf-level-input" data-lf-id="<?= $lfRace * 1000 + $lfPos ?>" value="0" aria-label="<?= $lfTr[$lfKey] ?>">
                     </td>
                     <td class="text-center"></td><td class="text-center"></td><td class="text-center"></td><td class="text-center"></td>
                     <td class="text-center" style="display: none;"></td>
@@ -691,20 +691,20 @@
                     </tr>
                     <tr>
                       <td><?= $l['metal'] ?></td>
-                      <td class="text-center"><input id="onepln-curr-met" type="text" name="onepln-curr-met" class="form-control form-control-sm input-10columns" value="0"></td>
-                      <td class="text-center"><input id="storage-met" type="text" name="storage-met" class="form-control form-control-sm input-3columns" value="0"></td>
+                      <td class="text-center"><input id="onepln-curr-met" type="text" name="onepln-curr-met" class="form-control form-control-sm input-10columns" value="0" aria-label="<?= $l['amount'] ?>-<?= $l['metal'] ?>"></td>
+                      <td class="text-center"><input id="storage-met" type="text" name="storage-met" class="form-control form-control-sm input-3columns" value="0" aria-label="<?= $l['storage-level'] ?>-<?= $l['metal'] ?>"></td>
                       <td class="text-center"><span id="storage-cap-met">0</span></td>
                     </tr>
                     <tr>
                       <td><?= $l['crystal'] ?></td>
-                      <td class="text-center"><input id="onepln-curr-crys" type="text" name="onepln-curr-crys" class="form-control form-control-sm input-10columns" value="0"></td>
-                      <td class="text-center"><input id="storage-crys" type="text" name="storage-crys" class="form-control form-control-sm input-3columns" value="0"></td>
+                      <td class="text-center"><input id="onepln-curr-crys" type="text" name="onepln-curr-crys" class="form-control form-control-sm input-10columns" value="0" aria-label="<?= $l['amount'] ?>-<?= $l['crystal'] ?>"></td>
+                      <td class="text-center"><input id="storage-crys" type="text" name="storage-crys" class="form-control form-control-sm input-3columns" value="0" aria-label="<?= $l['storage-level'] ?>-<?= $l['crystal'] ?>"></td>
                       <td class="text-center"><span id="storage-cap-crys">0</span></td>
                     </tr>
                     <tr>
                       <td><?= $l['deuterium'] ?></td>
-                      <td class="text-center"><input id="onepln-curr-deut" type="text" name="onepln-curr-deut" class="form-control form-control-sm input-10columns" value="0"></td>
-                      <td class="text-center"><input id="storage-deut" type="text" name="storage-deut" class="form-control form-control-sm input-3columns" value="0"></td>
+                      <td class="text-center"><input id="onepln-curr-deut" type="text" name="onepln-curr-deut" class="form-control form-control-sm input-10columns" value="0" aria-label="<?= $l['amount'] ?>-<?= $l['deuterium'] ?>"></td>
+                      <td class="text-center"><input id="storage-deut" type="text" name="storage-deut" class="form-control form-control-sm input-3columns" value="0" aria-label="<?= $l['storage-level'] ?>-<?= $l['deuterium'] ?>"></td>
                       <td class="text-center"><span id="storage-cap-deut">0</span></td>
                     </tr>
                   </table>
@@ -723,9 +723,9 @@
                     </div>
                     <div class="mb-1"><?= $l['resources-will-be'] ?></div>
                     <table class="w-100">
-                      <tr><td style="width: 50%"><?= $l['metal'] ?></td><td class="text-start"><span id="onepln-accumwhat-met">0</span></td></tr>
-                      <tr><td><?= $l['crystal'] ?></td><td class="text-start"><span id="onepln-accumwhat-crys">0</span></td></tr>
-                      <tr><td><?= $l['deuterium'] ?></td><td class="text-start"><span id="onepln-accumwhat-deut">0</span></td></tr>
+                      <tr><th scope="row" class="fw-normal text-start" style="width: 50%"><?= $l['metal'] ?></th><td class="text-start"><span id="onepln-accumwhat-met">0</span></td></tr>
+                      <tr><th scope="row" class="fw-normal text-start"><?= $l['crystal'] ?></th><td class="text-start"><span id="onepln-accumwhat-crys">0</span></td></tr>
+                      <tr><th scope="row" class="fw-normal text-start"><?= $l['deuterium'] ?></th><td class="text-start"><span id="onepln-accumwhat-deut">0</span></td></tr>
                     </table>
                   </div>
                   <div class="border rounded p-2 flex-grow-1">
@@ -733,15 +733,15 @@
                     <div class="mb-1"><?= $l['specify-res-quant'] ?></div>
                     <table>
                       <tr>
-                        <td><label for="onepln-accumwhen-met"><?= $l['metal'] ?></label></td>
+                        <th scope="row" class="fw-normal text-start"><label for="onepln-accumwhen-met"><?= $l['metal'] ?></label></th>
                         <td><input id="onepln-accumwhen-met" type="text" name="onepln-accumwhen-met" class="form-control form-control-sm input-10columns" value="0"></td>
                       </tr>
                       <tr>
-                        <td><label for="onepln-accumwhen-crys"><?= $l['crystal'] ?></label></td>
+                        <th scope="row" class="fw-normal text-start"><label for="onepln-accumwhen-crys"><?= $l['crystal'] ?></label></th>
                         <td><input id="onepln-accumwhen-crys" type="text" name="onepln-accumwhen-crys" class="form-control form-control-sm input-10columns" value="0"></td>
                       </tr>
                       <tr>
-                        <td><label for="onepln-accumwhen-deut"><?= $l['deuterium'] ?></label></td>
+                        <th scope="row" class="fw-normal text-start"><label for="onepln-accumwhen-deut"><?= $l['deuterium'] ?></label></th>
                         <td><input id="onepln-accumwhen-deut" type="text" name="onepln-accumwhen-deut" class="form-control form-control-sm input-10columns" value="0"></td>
                       </tr>
                     </table>
@@ -799,7 +799,7 @@
       <div class="tab-pane fade p-2" id="all-planets-panel" role="tabpanel">
         <div class="d-flex flex-wrap gap-2 align-items-center mb-1">
           <div class="d-flex align-items-center gap-1 mx-auto">
-            <span><?= $l['planets-count'] ?></span>
+            <label for="planetsSpin"><?= $l['planets-count'] ?></label>
             <div class="input-group input-group-sm" style="width: 100px;">
               <input id="planetsSpin" type="text" class="form-control centered" value="8" readonly>
               <button class="btn btn-outline-secondary" type="button" id="planetsSpin-up">
@@ -940,9 +940,9 @@
                     </div>
                     <div class="mb-1"><?= $l['resources-will-be'] ?></div>
                     <table class="w-100">
-                      <tr><td style="width: 50%"><?= $l['metal'] ?></td><td class="text-start"><span id="allpln-accumwhat-met">0</span></td></tr>
-                      <tr><td><?= $l['crystal'] ?></td><td class="text-start"><span id="allpln-accumwhat-crys">0</span></td></tr>
-                      <tr><td><?= $l['deuterium'] ?></td><td class="text-start"><span id="allpln-accumwhat-deut">0</span></td></tr>
+                      <tr><th scope="row" class="fw-normal text-start" style="width: 50%"><?= $l['metal'] ?></th><td class="text-start"><span id="allpln-accumwhat-met">0</span></td></tr>
+                      <tr><th scope="row" class="fw-normal text-start"><?= $l['crystal'] ?></th><td class="text-start"><span id="allpln-accumwhat-crys">0</span></td></tr>
+                      <tr><th scope="row" class="fw-normal text-start"><?= $l['deuterium'] ?></th><td class="text-start"><span id="allpln-accumwhat-deut">0</span></td></tr>
                     </table>
                   </div>
                   <div class="border rounded p-2 flex-grow-1">
@@ -950,15 +950,15 @@
                     <div class="mb-1"><?= $l['specify-res-quant'] ?></div>
                     <table>
                       <tr>
-                        <td><label for="allpln-accumwhen-met"><?= $l['metal'] ?></label></td>
+                        <th scope="row" class="fw-normal text-start"><label for="allpln-accumwhen-met"><?= $l['metal'] ?></label></th>
                         <td><input id="allpln-accumwhen-met" type="text" name="allpln-accumwhen-met" class="form-control form-control-sm input-10columns" value="0"></td>
                       </tr>
                       <tr>
-                        <td><label for="allpln-accumwhen-crys"><?= $l['crystal'] ?></label></td>
+                        <th scope="row" class="fw-normal text-start"><label for="allpln-accumwhen-crys"><?= $l['crystal'] ?></label></th>
                         <td><input id="allpln-accumwhen-crys" type="text" name="allpln-accumwhen-crys" class="form-control form-control-sm input-10columns" value="0"></td>
                       </tr>
                       <tr>
-                        <td><label for="allpln-accumwhen-deut"><?= $l['deuterium'] ?></label></td>
+                        <th scope="row" class="fw-normal text-start"><label for="allpln-accumwhen-deut"><?= $l['deuterium'] ?></label></th>
                         <td><input id="allpln-accumwhen-deut" type="text" name="allpln-accumwhen-deut" class="form-control form-control-sm input-10columns" value="0"></td>
                       </tr>
                     </table>
@@ -1024,7 +1024,7 @@
   </div> <!-- End row -->
 </div> <!-- End container-fluid -->
 
-<?php require_once('../../analitics.tpl'); ?>
+<?php require_once '../../analitics.tpl'; ?>
 
 <script type="module">
   document.addEventListener('DOMContentLoaded', function() {
