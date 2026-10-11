@@ -10,6 +10,23 @@ Use the sonarqube mcp server to find and fix issues, one at a time, choosing sco
   its test scope with the same rule as the whole-project mode.
 
 If a file has no SonarQube index yet, fall back to `analyze_code_snippet` on its contents.
+The `.tpl` templates are never indexed (Automatic Analysis does not pick up the extension), so
+they always take this path.
+
+## Accepted findings — skip, do not re-try
+
+These were investigated and are left on purpose. Skip them without a fix attempt. They cannot be
+silenced in the source: `NOSONAR` works in PHP code, but an HTML comment or `<?php // NOSONAR ?>`
+on the line does not suppress a `Web:*` rule (checked with `analyze_code_snippet`). Because the
+templates are not indexed, they cannot be marked Accepted in SonarCloud either.
+
+| Rule | Where | Why it stays |
+|------|-------|--------------|
+| `Web:S6819` (use `<dialog>`) | `role="dialog"` on Bootstrap `.modal` and `.offcanvas` in any `.tpl` | Removing it fails `make html-validate`: `aria-labelledby` is invalid on a `<div>` with no role, and Bootstrap adds the role only when it opens the modal. A native `<dialog>` breaks Bootstrap's modal JS. See `5825b04`. |
+| `Web:S6819` (use `<fieldset>`) | `role="group"` on a Bootstrap `.btn-group` | Bootstrap's documented markup for a button group, not a defect. |
+
+Add a row here when a later run accepts another finding, with the reason and the commit that
+settled it.
 
 Test-scope resolution for a given file: **see `docs/test-scope.md`** — the file-set table and the
 shared-file list live there, and that is the copy to trust.
