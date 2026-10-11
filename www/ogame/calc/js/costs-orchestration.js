@@ -63,7 +63,7 @@ class CostsCalculator {
    * before the first recalculateAll(), and the calculator and the renderer
    * both need a real object.
    * @returns {GlobalParams}
-   * @private
+   * Also used by costs-profile.js.
    */
   _params() {
     this.currentParams ??= this.collector.collectGlobalParams();
@@ -820,7 +820,7 @@ class CostsCalculator {
    * of them - or none, when it is not in the list.
    * @param {string} country country code, '--' for none
    * @param {string|number} universe universe number to select
-   * @private
+   * Also used by costs-profile.js.
    */
   _fillUniverseList(country, universe) {
     const universeEl = selectEl('#universe');
@@ -839,7 +839,7 @@ class CostsCalculator {
 
   /**
    * Fetch the chosen universe's settings and apply its speeds.
-   * @private
+   * Also used by costs-profile.js.
    */
   async _fetchUniverseSpeeds() {
     const country = selectEl('#country')?.value ?? '';
@@ -923,7 +923,7 @@ class CostsCalculator {
   /**
    * Read the cost/time value pairs currently entered in the table.
    * @returns {{cost: number, time: number}[]}
-   * @private
+   * Also used by costs-profile.js.
    */
   _readLfResearchTable() {
     const rows = /** @type {HTMLTableRowElement[]} */ (Array.from($$('#lf-research-bonuses-tbody tr')));
@@ -937,7 +937,7 @@ class CostsCalculator {
    * Write a snapshot of value pairs back into the table inputs. Used to revert
    * the modal to its pre-edit state when the user cancels.
    * @param {{cost: number, time: number}[]} data
-   * @private
+   * Also used by costs-profile.js.
    */
   _restoreLfResearchTable(data) {
     const rows = $$('#lf-research-bonuses-tbody tr');
@@ -980,7 +980,7 @@ class CostsCalculator {
   /**
    * Persist the research bonuses table to localStorage.
    * @param {{cost: number, time: number}[]} [data]
-   * @private
+   * Also used by costs-profile.js.
    */
   _saveLfResearchTable(data) {
     if (!this._isStorageAvailable()) return;
@@ -1275,10 +1275,18 @@ class CostsCalculator {
    * Uses native JSON serialization
    */
   saveState() {
+    this._writeState(this._buildState());
+  }
+
+  /**
+   * The settings as they are stored: the current parameters as a plain object.
+   * @returns {Record<string, any>}
+   */
+  _buildState() {
     const params = this._params();
 
     // Convert params to plain object for JSON serialization
-    const state = {
+    return {
       shipyardLevel: params.shipyardLevel,
       robotFactoryLevelPlanet: params.robotFactoryLevelPlanet,
       robotFactoryLevelMoon: params.robotFactoryLevelMoon,
@@ -1317,7 +1325,13 @@ class CostsCalculator {
       country: selectEl('#country')?.value ?? '--',
       universe: selectEl('#universe')?.value ?? ''
     };
+  }
 
+  /**
+   * @param {Record<string, any>} state
+   * Also used by costs-profile.js.
+   */
+  _writeState(state) {
     try {
       const json = JSON.stringify(state);
       if (this._isStorageAvailable()) {
@@ -1388,7 +1402,7 @@ class CostsCalculator {
 
   /**
    * Apply saved state to UI elements
-   * @private
+   * Also used by costs-profile.js.
    */
   _applyStateToUI(state) {
     const fieldMap = {
@@ -1871,7 +1885,7 @@ class CostsCalculator {
 
   /**
    * Calculate and display IRN resulting lab level
-   * @private
+   * Also used by costs-profile.js.
    */
   _updateResultingLevel() {
     const irnLevel = this._getInputNumber('#irn-level');
@@ -2229,6 +2243,18 @@ function cancelIrnDialog(irnModal, planetsSpinInput) {
 }
 
 /**
+ * Label lab row `i` (1-based) with its planet's name, when a profile named
+ * the planets (costs-profile.js). A name is the player's text, so it goes in
+ * as text, never as markup.
+ * @param {number} i
+ */
+function nameLabRow(i) {
+  const name = Array.isArray(options.prm.labNames) ? options.prm.labNames[i - 1] : null;
+  const nameCell = document.getElementById('lablevel_' + i)?.closest('tr')?.cells[0];
+  if (name && nameCell) nameCell.textContent = name;
+}
+
+/**
  * Rebuild the lab levels table from a backup snapshot.
  * @param {Object} backup
  */
@@ -2251,6 +2277,8 @@ function rebuildLabTable(backup) {
       '" class="form-check-input" name="start-pln" disabled="disabled"/></td>' +
       '</tr>'
     );
+
+    nameLabRow(i);
 
     const radioEl = /** @type {HTMLInputElement} */ (document.getElementById('labchoice_' + i));
     if (radioEl) {

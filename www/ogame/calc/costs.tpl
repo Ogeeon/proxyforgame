@@ -30,10 +30,14 @@
   <script src="/ogame/calc/js/dom-utils.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/dom-utils.js'); ?>" defer></script>
 
   <!-- New modular calculator architecture -->
+  <script src="/ogame/calc/js/profiles-core.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/profiles-core.js'); ?>" defer></script>
+  <script src="/ogame/calc/js/profiles-store.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/profiles-store.js'); ?>" defer></script>
+  <script src="/ogame/calc/js/profiles-ui.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/profiles-ui.js'); ?>" defer></script>
   <script src="/ogame/calc/js/costs-core.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/costs-core.js'); ?>" defer></script>
   <script src="/ogame/calc/js/costs-data-collector.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/costs-data-collector.js'); ?>" defer></script>
   <script src="/ogame/calc/js/costs-renderer.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/costs-renderer.js'); ?>" defer></script>
   <script src="/ogame/calc/js/costs-orchestration.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/costs-orchestration.js'); ?>" defer></script>
+  <script src="/ogame/calc/js/costs-profile.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/costs-profile.js'); ?>" defer></script>
 
   <script>
     // Global options object
@@ -69,6 +73,7 @@
     options.dialogAttentionLabel = <?= json_encode($l['dialog-attention']) ?>;
     options.serverDataFailedMsg = <?= json_encode($l['server-data-failed-msg']) ?>;
     options.dataFetchMsg = <?= json_encode($l['fetching-data']) ?>;
+    options.universeFromProfile = <?= json_encode($l['pf-universe-from-profile']) ?>;
 
     var unis = <?= universesJs($universes) ?>;
 
@@ -108,7 +113,7 @@
   <div class="row">
     <div class="col-md-2"><?php require_once '../../sidebar_bs.tpl'; ?></div>
     <div class="col-md-10">
-    <?php require_once '../../topbar_bs.tpl'; ?>
+    <?php $profilesCalc = 'costs'; require_once '../../topbar_bs.tpl'; ?>
 
 <div id="costs">
   <div class="border rounded position-relative">
@@ -142,6 +147,16 @@
       <div class="tab-content" id="paramTabContent">
         <!-- Buildings tab -->
         <div class="tab-pane fade show active p-2" id="param-buildings" role="tabpanel">
+          <div id="pf-bodies-row" class="d-flex flex-wrap gap-2 align-items-center mb-2 d-none">
+            <div id="pf-planet-box" class="d-flex align-items-center gap-1">
+              <label for="pf-planet"><?= $l['planet'] ?></label>
+              <select id="pf-planet" class="form-select form-select-sm w-auto"></select>
+            </div>
+            <div id="pf-moon-box" class="d-flex align-items-center gap-1">
+              <label for="pf-moon"><?= $l['moon'] ?></label>
+              <select id="pf-moon" class="form-select form-select-sm w-auto"></select>
+            </div>
+          </div>
           <div class="d-flex flex-wrap gap-2 align-items-center">
             <div class="d-flex align-items-center gap-1">
               <label for="robot-factory-level"><?= $l['robot-factory'] ?> (<?= $l['planet'] ?>)</label>
@@ -693,6 +708,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // Initialize the calculator app
   initializeCostsCalculator();
+  initCostsProfiles();
 });
 </script>
 

@@ -7,7 +7,8 @@ import { join } from 'node:path';
 // restoring the game value, falling back to "no profile", converting an old
 // saved set, the backup file and the per-tab active profile; then flight, the
 // second: account fields, the locked universe, the departure body and its fleet;
-// then the queue: a planet and a moon of the profile as the start levels.
+// then the queue and costs: a planet and a moon of the profile as the start
+// levels, or as the factories, the lab and the temperature.
 // The model itself is covered by unit-tests/profiles-core.test.js.
 
 const EXPORT = readFileSync(join(__dirname, '../fixtures/account-export-v1.json'), 'utf8');
@@ -573,3 +574,243 @@ test('"no profile" gives the queue its own values back', async ({ page }) => {
     await expect(page.locator('#reset')).toBeVisible();
 });
 
+// The cost calculator: the account, the research bonuses table, one planet and
+// one moon of the profile, and the profile's universe in the picker.
+
+/** Answer the universe settings request, so the picker's fetch is predictable. */
+async function mockServerData(page) {
+    await page.route('**/ajax.php?*service=serverdata*', (route) => route.fulfill({
+        status: 200, contentType: 'application/json', body: JSON.stringify({ speed: '4', researchDurationDivisor: '2' }),
+    }));
+}
+
+test('costs takes the account, a planet and its moon from the profile', async ({ page }) => {
+    await mockServerData(page);
+    await page.goto('/costs');
+    await importExport(page);
+
+    await expect(page.locator('#pf-planet option')).toHaveCount(3);
+    await expect(page.locator('#pf-planet option:checked')).toHaveText('Alpha [2:148:8]');
+    await expect(page.locator('#robot-factory-level')).toHaveValue('10');
+    await expect(page.locator('#nanite-factory-level')).toHaveValue('6');
+    await expect(page.locator('#shipyard-level')).toHaveValue('12');
+    await expect(page.locator('#research-lab-level')).toHaveValue('12');
+    await expect(page.locator('#robot-factory-level-moon')).toHaveValue('8');
+    await expect(page.locator('#robot-factory-level')).toHaveClass(/pf-bound/);
+
+    await page.locator('#param-researches-tab').click();
+    await expect(page.locator('#hyper-tech-level')).toHaveValue('8');
+    await page.locator('#param-common-tab').click();
+    await expect(page.locator('#class-0')).toBeChecked();
+    await expect(page.locator('#is-trader')).toBeChecked();
+    const profile = await activeProfile(page);
+    await expect(page.locator('#country')).toHaveValue(profile.universe.country);
+    await expect(page.locator('#country')).toBeDisabled();
+    await expect(page.locator('#universe-speed')).toHaveValue('4');
+    await expect(page.locator('#research-speed')).toHaveValue('8');
+    await page.locator('#param-lifeforms-tab').click();
+    await expect(page.locator('#lf-collector-class-bonus')).toHaveValue('2.15');
+    await expect(page.locator('#sc-capacity-increase')).toHaveValue('1.23');
+
+    // The research bonuses table is the account's too.
+    const plasma = page.locator('#lf-research-bonuses-tbody tr[data-tech-id="122"]');
+    await expect(plasma.locator('.lf-research-cost-input')).toHaveValue('0.4635');
+    await expect(plasma.locator('.lf-research-time-input')).toHaveValue('1.2361');
+
+    await page.locator('#param-common-tab').click();
+    await expect(page.locator('#energy-tech-level')).toHaveValue('14');
+    await expect(page.locator('#reset')).toBeHidden();
+    // Loading wrote nothing back.
+    await expect(page.locator('#pf-overrides')).toBeHidden();
+});
+
+test('a costs edit becomes an override of the planet or the moon', async ({ page }) => {
+    await mockServerData(page);
+    await page.goto('/costs');
+    await importExport(page);
+
+    await page.locator('#robot-factory-level').fill('11');
+    await page.locator('#robot-factory-level').blur();
+    await page.locator('#robot-factory-level-moon').fill('9');
+    await page.locator('#robot-factory-level-moon').blur();
+    await expect(page.locator('#robot-factory-level')).toHaveClass(/pf-differs/);
+    await expect(page.locator('#pf-overrides')).toHaveText('2');
+    let profile = await activeProfile(page);
+    expect(profile.planets[0].values['building.14']).toEqual({ game: 10, override: 11 });
+    expect(profile.moons[0].values['building.14']).toEqual({ game: 8, override: 9 });
+
+    await page.locator('#robot-factory-level + .pf-reset').click();
+    await expect(page.locator('#robot-factory-level')).toHaveValue('10');
+    await expect(page.locator('#robot-factory-level-moon')).toHaveValue('9');
+    profile = await activeProfile(page);
+    expect(profile.planets[0].values['building.14']).toEqual({ game: 10 });
+});
+
+test('another planet is picked in costs and remembered', async ({ page }) => {
+    await mockServerData(page);
+    await page.goto('/costs');
+    await importExport(page);
+    await page.locator('#pf-planet').selectOption({ label: 'Beta [2:150:12]' });
+    await expect(page.locator('#nanite-factory-level')).toHaveValue('5');
+    await expect(page.locator('#shipyard-level')).toHaveValue('10');
+    await expect(page.locator('#pf-overrides')).toBeHidden();
+    await page.reload();
+    await expect(page.locator('#pf-planet option:checked')).toHaveText('Beta [2:150:12]');
+    await expect(page.locator('#nanite-factory-level')).toHaveValue('5');
+});
+
+test('"no profile" gives costs its own values and table back', async ({ page }) => {
+    await mockServerData(page);
+    await page.goto('/costs');
+    await page.locator('#nanite-factory-level').fill('2');
+    await page.locator('#nanite-factory-level').blur();
+    await page.locator('#param-researches-tab').click();
+    await page.locator('#ion-tech-level').fill('3');
+    await page.locator('#ion-tech-level').blur();
+
+    await importExport(page);
+    await expect(page.locator('#nanite-factory-level')).toHaveValue('6');
+    const stored = await page.evaluate(() => JSON.parse(localStorage.getItem('costs_calculator_state') || '{}'));
+    expect(stored.naniteFactoryLevel).toBe(2);
+    expect(stored.ionTechLevel).toBe(3);
+    expect(await page.evaluate(() => localStorage.getItem('costs_lf_research_table'))).toBeNull();
+
+    await page.locator('#pf-select').selectOption('');
+    await expect(page.locator('#nanite-factory-level')).toHaveValue('2');
+    await expect(page.locator('#ion-tech-level')).toHaveValue('3');
+    await expect(page.locator('#lf-research-bonuses-tbody tr[data-tech-id="122"] .lf-research-cost-input')).toHaveValue('0');
+    await expect(page.locator('#country')).toBeEnabled();
+    await expect(page.locator('#pf-bodies-row')).toBeHidden();
+    await expect(page.locator('.pf-bound')).toHaveCount(0);
+    await expect(page.locator('#reset')).toBeVisible();
+});
+
+/** Edit the stored active profile, then reload so the page reads it. */
+async function editProfile(page, edit) {
+    await page.evaluate((body) => {
+        const id = JSON.parse(sessionStorage.getItem('pfg_active_profile'));
+        const profile = JSON.parse(localStorage.getItem('pfg_profile_' + id));
+        new Function('profile', body)(profile);
+        localStorage.setItem('pfg_profile_' + id, JSON.stringify(profile));
+    }, edit);
+    await page.reload();
+}
+
+test('the research network dialog lists the profile\'s planets and their labs', async ({ page }) => {
+    await mockServerData(page);
+    await page.goto('/costs');
+    await importExport(page);
+
+    const rows = page.locator('#lab-levels-table tbody tr');
+    await expect(rows).toHaveCount(3);
+    await expect(page.locator('#planetsSpin')).toHaveValue('3');
+    await expect(page.locator('#planetsSpin-up')).toBeDisabled();
+    await expect(rows.nth(0).locator('td').first()).toHaveText('Alpha [2:148:8]');
+    await expect(page.locator('#lablevel_1')).toHaveValue('12');
+    await expect(page.locator('#lablevel_2')).toHaveValue('10');
+    await expect(page.locator('#lablevel_3')).toHaveValue('0');
+    await expect(page.locator('#lablevel_1')).toHaveClass(/pf-bound/);
+    // The start is the best lab, whatever planet the Buildings tab shows.
+    await expect(page.locator('#labchoice_1')).toBeChecked();
+    await expect(page.locator('#labchoice_3')).toBeDisabled();
+    await page.locator('#pf-planet').selectOption({ label: 'Beta [2:150:12]' });
+    await expect(page.locator('#labchoice_1')).toBeChecked();
+    // The account has not researched the network: it starts switched off.
+    await expect(page.locator('#use-irn')).not.toBeChecked();
+
+    // "No profile" brings the calculator's own table back.
+    await page.locator('#pf-select').selectOption('');
+    await expect(rows).toHaveCount(8);
+    await expect(rows.nth(0).locator('td').first()).not.toHaveText('Alpha [2:148:8]');
+    await expect(page.locator('#planetsSpin-up')).toBeEnabled();
+});
+
+test('the default start is the best lab, the oldest planet on a tie', async ({ page }) => {
+    await mockServerData(page);
+    await page.goto('/costs');
+    await importExport(page);
+    await editProfile(page, "profile.planets[1].values['building.31'] = { game: 14 };");
+    await expect(page.locator('#labchoice_2')).toBeChecked();
+    await editProfile(page, "profile.planets[1].values['building.31'] = { game: 12 }; profile.planets[0].gameId = 900005;");
+    await expect(page.locator('#labchoice_2')).toBeChecked();
+    // A researched network switches itself on.
+    await editProfile(page, "profile.account.values['research.123'] = { game: 2 };");
+    await expect(page.locator('#use-irn')).toBeChecked();
+    await expect(page.locator('#irn-result')).toHaveText('24');
+});
+
+test('labs edited in the research network dialog go to their planets', async ({ page }) => {
+    await mockServerData(page);
+    await page.goto('/costs');
+    await importExport(page);
+
+    await page.locator('#use-irn').check();
+    await page.locator('#open-llc-dialog').click();
+    await page.locator('#lablevel_1').fill('13');
+    await page.locator('#lablevel_1').press('Enter');
+    await page.locator('#lablevel_2').fill('11');
+    await page.locator('#lablevel_2').press('Enter');
+    await page.locator('#labchoice_2').click();
+    await page.locator('#irn-done-btn').click();
+    await expect(page.locator('#irn-calc')).toBeHidden();
+
+    // Done applies on hidden.bs.modal, after the backdrop fades - later than
+    // the dialog itself hides - so wait for its effect on the page first.
+    // Alpha is the planet shown: its lab field follows the dialog.
+    await expect(page.locator('#research-lab-level')).toHaveValue('13');
+    await expect(page.locator('#use-irn')).toBeChecked();
+    let profile = await activeProfile(page);
+    expect(profile.planets[0].values['building.31']).toEqual({ game: 12, override: 13 });
+    expect(profile.planets[1].values['building.31']).toEqual({ game: 10, override: 11 });
+
+    // The start and the switch are remembered for the profile.
+    await page.reload();
+    await expect(page.locator('#labchoice_2')).toBeChecked();
+    await expect(page.locator('#use-irn')).toBeChecked();
+
+    // And the other way: the lab field shows in the dialog.
+    await page.locator('#research-lab-level').fill('15');
+    await page.locator('#research-lab-level').blur();
+    await expect(page.locator('#lablevel_1')).toHaveValue('15');
+    profile = await activeProfile(page);
+    expect(profile.planets[0].values['building.31']).toEqual({ game: 12, override: 15 });
+});
+
+test('cancelling the research network dialog writes nothing', async ({ page }) => {
+    await mockServerData(page);
+    await page.goto('/costs');
+    await importExport(page);
+    await page.locator('#use-irn').check();
+    await page.locator('#open-llc-dialog').click();
+    await page.locator('#lablevel_2').fill('11');
+    await page.locator('#lablevel_2').press('Enter');
+    await page.locator('#labchoice_2').click();
+    await page.locator('#irn-calc .btn-secondary').click();
+    await expect(page.locator('#irn-calc')).toBeHidden();
+    await expect(page.locator('#lablevel_2')).toHaveValue('10');
+    await expect(page.locator('#lab-levels-table tbody tr').nth(1).locator('td').first()).toHaveText('Beta [2:150:12]');
+    const profile = await activeProfile(page);
+    expect(profile.planets[1].values['building.31']).toEqual({ game: 10 });
+    await expect(page.locator('#pf-overrides')).toBeHidden();
+});
+
+test('the Mineral Research Centre follows the planet picked in costs', async ({ page }) => {
+    await mockServerData(page);
+    await page.goto('/costs');
+    await importExport(page);
+    // The fixture has no Rock'tal planet: give Beta a Mineral Research Centre.
+    await page.evaluate(() => {
+        const id = JSON.parse(sessionStorage.getItem('pfg_active_profile'));
+        const profile = JSON.parse(localStorage.getItem('pfg_profile_' + id));
+        profile.planets[1].values['lf.building.12111'] = { game: 5 };
+        localStorage.setItem('pfg_profile_' + id, JSON.stringify(profile));
+    });
+    await page.reload();
+    await expect(page.locator('#mineral-res-cntr-lvl')).toHaveValue('0');
+
+    await page.locator('#pf-planet').selectOption({ label: 'Beta [2:150:12]' });
+    await expect(page.locator('#mineral-res-cntr-lvl')).toHaveValue('5');
+    await expect(page.locator('#mineral-res-cntr-lvl')).toHaveClass(/pf-bound/);
+    await page.locator('#pf-planet').selectOption({ label: 'Alpha [2:148:8]' });
+    await expect(page.locator('#mineral-res-cntr-lvl')).toHaveValue('0');
+});
