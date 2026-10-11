@@ -259,11 +259,12 @@
                   <?= $l['start-now'] ?>
                 </button>
                 <div class="d-flex align-items-center gap-2 flex-nowrap">
-                  <label><?= $l['finish-time'] ?></label>
+                  <label for="finish-moment-<?=$i?>"><?= $l['finish-time'] ?></label>
                   <!-- Computed, never typed into: `ui-state-disabled´ is the marker
                        every calculator puts on a non-editable readout, so it wears
-                       the same fill as a disabled input. -->
-                  <span id="finish-moment-<?=$i?>" class="form-control form-control-sm startdate-input d-inline-block ui-state-disabled">?</span>
+                       the same fill as a disabled input. An <output>, not a <span>,
+                       so the label can name it. -->
+                  <output id="finish-moment-<?=$i?>" class="form-control form-control-sm startdate-input d-inline-block ui-state-disabled">?</output>
                 </div>
               </div>
 
