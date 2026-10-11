@@ -1288,8 +1288,8 @@ class FlightOrchestrator {
             universeEl.appendChild(option);
         });
         universeEl.value = uni;
-        this.fetchServerData();
-        this.getPopulatedSystemsInfo();
+        void this.fetchServerData();
+        void this.getPopulatedSystemsInfo();
     }
 
     async fetchServerData() {
@@ -1349,7 +1349,7 @@ class FlightOrchestrator {
     _applySystemSkipState() {
         const label = document.getElementById('empty-systems-label');
         if (this._skipsSystems()) {
-            this.getPopulatedSystemsInfo();
+            void this.getPopulatedSystemsInfo();
             if (label) {
                 label.style.display = '';
             }
@@ -1746,7 +1746,7 @@ class FlightOrchestrator {
     init() {
         const urlParams = new URLSearchParams(window.location.search);
         if (urlParams.has('SR_KEY')) {
-            this.importSR(urlParams.get('SR_KEY'));
+            void this.importSR(urlParams.get('SR_KEY'));
         }
 
         this.opts.load('options_flight');
