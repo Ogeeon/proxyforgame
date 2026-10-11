@@ -23,9 +23,10 @@ updates:
 
   # Bootstrap and Bootstrap Icons are served from www/vendor/, committed copies of the
   # versions package.json pins. A Dependabot PR bumps only package.json and the lock
-  # file, so its CI fails on `make vendor-check` by design: check the release notes,
-  # run `make vendor` on the PR branch, commit www/vendor/ and push - then CI goes
-  # green on the new files. Only these two packages are tracked; the dev tooling in
+  # file; workflows/dependabot-vendor.yml then runs `make vendor` on the PR branch,
+  # pushes www/vendor/ and re-runs CI. Its first CI run fails on `make vendor-check`
+  # by design - judge the PR by the run on the vendor commit, and still read the
+  # release notes. Only these two packages are tracked; the dev tooling in
   # package.json is updated by hand.
   - package-ecosystem: "npm"
     directory: "/"

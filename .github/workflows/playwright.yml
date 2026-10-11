@@ -17,6 +17,9 @@ on:
   push:
     branches: [ main ]
   pull_request:
+  # dependabot-vendor.yml pushes with GITHUB_TOKEN, which starts no pull_request run,
+  # so it dispatches this workflow on the PR branch instead.
+  workflow_dispatch:
 
 jobs:
   test:

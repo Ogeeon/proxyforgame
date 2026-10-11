@@ -1,0 +1,70 @@
+# Finishes a Dependabot bump of Bootstrap / Bootstrap Icons.
+#
+# The site serves both from www/vendor/, committed copies of the versions package.json
+# pins (scripts/vendor-assets.js). Dependabot rewrites only package.json and the lock
+# file, so its PR fails `make vendor-check` until someone runs `make vendor` on the
+# branch. This job does that step: it regenerates www/vendor/ and pushes the result
+# back to the PR branch.
+#
+# A push made with GITHUB_TOKEN never starts another workflow run, so the CI run on
+# the new head would not happen by itself. workflow_dispatch is the documented
+# exception, and the run it starts reports its checks against the same commit, so
+# the PR shows them. The deploy is not affected: webhook.php acts only on runs whose
+# event is `push` on main.
+name: Dependabot vendor
+
+on:
+  pull_request:
+    paths:
+      - 'package.json'
+      - 'package-lock.json'
+
+permissions:
+  contents: read
+
+jobs:
+  vendor:
+    # Only Dependabot's own pushes. A human push to the branch is left alone, and so is
+    # this job's own commit (it would not trigger a run anyway).
+    if: >-
+      github.actor == 'dependabot[bot]' &&
+      github.event.pull_request.user.login == 'dependabot[bot]' &&
+      startsWith(github.head_ref, 'dependabot/npm_and_yarn/')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write   # pushing the regenerated files
+      actions: write    # dispatching CI on the new head
+    steps:
+      - name: Checkout the PR branch
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.head_ref }}
+
+      - name: Set up Node
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+
+      # --ignore-scripts: the job holds a write token, and an install hook is arbitrary
+      # code from the registry. vendor-assets.js only copies files out of node_modules.
+      - name: Install dependencies
+        run: npm ci --ignore-scripts
+
+      - name: Regenerate www/vendor
+        run: make vendor
+
+      - name: Commit, push and re-run CI
+        env:
+          GH_TOKEN: ${{ github.token }}
+          HEAD_REF: ${{ github.head_ref }}
+        run: |
+          if [ -z "$(git status --porcelain -- www/vendor)" ]; then
+            echo "www/vendor already matches package.json - nothing to do."
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add www/vendor
+          git commit -m "chore(deps): regenerate www/vendor for the Dependabot bump"
+          git push origin "HEAD:$HEAD_REF"
+          gh workflow run playwright.yml --ref "$HEAD_REF"
