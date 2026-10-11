@@ -902,6 +902,136 @@ function readSavedSet(set) {
   return template;
 }
 
+/** How long a universe's economy speed is reused before it is fetched again. */
+const UNIVERSE_SPEED_TTL_MS = 24 * 3600 * 1000;
+
+/**
+ * The economy speed of the active profile's universe, for a calculator that
+ * has a speed select but no universe picker (production, queue). The entry in
+ * the shared universe cache `pfg_universe_<country>_<number>` (ADR-0004) holds
+ * `speed`, the game's economy speed, `at`, when it was fetched, and `override`,
+ * the speed the player picked instead, if any. A universe setting is not part
+ * of a profile, so the player's choice lives in the cache too, shared by every
+ * profile of that universe.
+ */
+class PfUniverseSpeed {
+  /**
+   * @param {ProfilesUi} pf
+   * @param {string} selector The economy speed select.
+   * @param {() => void} recalc Recalculates the page after the speed was set.
+   */
+  constructor(pf, selector, recalc) {
+    this.pf = pf;
+    this.selector = selector;
+    this.recalc = recalc;
+    /** @type {?ProfileUniverse} The universe of the profile shown, if it has one. */
+    this.universe = null;
+    addEvent(selector, 'change', () => this.changed());
+  }
+
+  /** @returns {?string} */
+  cacheKey() {
+    const u = this.universe;
+    return u ? 'pfg_universe_' + u.country + '_' + u.number : null;
+  }
+
+  /**
+   * @param {string} key
+   * @returns {?{at: number, speed: number, override?: number}}
+   */
+  read(key) {
+    let entry = null;
+    try {
+      entry = JSON.parse(localStorage.getItem(key) || 'null');
+    } catch {
+      entry = null;
+    }
+    return entry && typeof entry.speed === 'number' ? entry : null;
+  }
+
+  /**
+   * @param {string} key
+   * @param {{at: number, speed: number, override?: number}} entry
+   */
+  write(key, entry) {
+    try {
+      localStorage.setItem(key, JSON.stringify(entry));
+    } catch {
+      // Without storage the speed is simply fetched again next time.
+    }
+  }
+
+  /**
+   * Take the economy speed from the profile's universe - the player's own
+   * choice if they made one - fetching it again once a day. It handles its own
+   * failures; nothing waits for the network.
+   *
+   * @param {Profile} profile
+   */
+  async attach(profile) {
+    this.universe = profile.universe ? { ...profile.universe } : null;
+    const key = this.cacheKey();
+    this.mark();
+    if (!key || !profile.universe) return;
+    let entry = this.read(key);
+    if (!entry || Date.now() - entry.at >= UNIVERSE_SPEED_TTL_MS) {
+      try {
+        const data = await apiGet('serverdata', { country: profile.universe.country, universe: profile.universe.number });
+        const speed = Number.parseInt(data.speed, 10);
+        if (speed > 0) {
+          entry = { ...entry, at: Date.now(), speed };
+          this.write(key, entry);
+        }
+      } catch {
+        // The universe is unreachable: a stale speed is still the best guess.
+      }
+    }
+    // Another profile may have been shown while the request was out.
+    if (!entry || this.cacheKey() !== key) return;
+    const speed = entry.override ?? entry.speed;
+    if (String(getVal(this.selector)) !== String(speed)) {
+      setVal(this.selector, speed);
+      this.recalc();
+    }
+    this.mark();
+  }
+
+  /** No profile: the speed is the calculator's own again. */
+  detach() {
+    this.universe = null;
+    this.mark();
+  }
+
+  /** The player picked a speed: remember it as theirs, or drop it when it is the game's again. */
+  changed() {
+    const key = this.cacheKey();
+    const entry = key ? this.read(key) : null;
+    if (!key || !entry) return;
+    const chosen = Number(getVal(this.selector));
+    if (chosen === entry.speed) delete entry.override;
+    else entry.override = chosen;
+    this.write(key, entry);
+    this.mark();
+  }
+
+  /** Mark the economy speed as the game's, with a restore button when the player changed it. */
+  mark() {
+    const key = this.cacheKey();
+    const entry = key ? this.read(key) : null;
+    const select = selectEl(this.selector);
+    if (!entry) {
+      this.pf.markInput(select, false, null, () => {});
+      return;
+    }
+    const differs = Number(getVal(this.selector)) !== entry.speed;
+    this.pf.markInput(select, true, differs ? String(entry.speed) : null, () => {
+      setVal(this.selector, entry.speed);
+      this.changed();
+      this.recalc();
+    });
+  }
+}
+
 /**
  * The page's profile controller, or null on a page without the selector.
  * Created when the deferred script runs - the DOM is parsed by then - so a
@@ -919,4 +1049,4 @@ function createProfilesUi() {
 
 const pfgProfiles = createProfilesUi();
 
-Object.assign(window, { pfgProfiles, ProfilesUi, readSavedSet });
+Object.assign(window, { pfgProfiles, ProfilesUi, PfUniverseSpeed, readSavedSet });

@@ -22,9 +22,6 @@ const PRODUCTION_LOCAL_KEYS = ['universeSpeed', 'maxTempEntered', 'onePlnExtView
 /** Where the calculator fields go while a profile is active. */
 const PRODUCTION_PROFILE_OPTIONS_KEY = 'options_production_profile';
 
-/** How long a universe's economy speed is reused before it is fetched again. */
-const UNIVERSE_SPEED_TTL_MS = 24 * 3600 * 1000;
-
 /**
  * @typedef {Object} ProductionAccountField
  * @property {string} prm Key in options.prm.
@@ -141,13 +138,15 @@ class ProductionProfiles {
     /** @type {Record<string, *>} The calculator's own settings, as they were before a profile. */
     this.ownPrm = cloneData(options.prm);
     this.applying = false;
+    /** @type {?PfUniverseSpeed} Set in init(). */
+    this.speed = null;
   }
 
   init() {
     this.insertPlanetSelect();
     this.describeFields();
     options.save = () => this.save();
-    addEvent('#universe-speed', 'change', () => this.speedChanged());
+    this.speed = new PfUniverseSpeed(this.pf, '#universe-speed', () => updateParams());
     this.pf.onChange((profile) => this.apply(profile));
     const active = this.pf.active();
     if (active) this.apply(active);
@@ -207,8 +206,7 @@ class ProductionProfiles {
       this.applying = false;
     }
     updateParams();
-    // It handles its own failures; nothing waits for the network.
-    void this.fetchUniverseSpeed(profile);
+    void this.speed?.attach(profile);
     this.markAll();
   }
 
@@ -220,6 +218,7 @@ class ProductionProfiles {
     pfShow('#pf-planet-row', false);
     pfShow('#reset', true);
     this.pf.clearMarks();
+    this.speed?.detach();
     // The profile's values are still in options.prm, and options.load() only
     // overwrites the keys options_production holds: start from the own copy.
     Object.assign(options.prm, cloneData(this.ownPrm));
@@ -422,7 +421,7 @@ class ProductionProfiles {
   }
 
   // -------------------------------------------------------------------------
-  // The planet select, the marks, the universe speed
+  // The planet select and the marks
   // -------------------------------------------------------------------------
 
   insertPlanetSelect() {
@@ -514,7 +513,7 @@ class ProductionProfiles {
     PRODUCTION_ACCOUNT_FIELDS.forEach((f) => {
       this.pf.markField($(f.input), profile, profile.account, f.key, restoreTo(profile.account, f.key));
     });
-    this.markSpeed();
+    this.speed?.mark();
 
     const planet = profile.planets.find((p) => p.id === this.onePlanetId);
     if (planet) {
@@ -554,100 +553,6 @@ class ProductionProfiles {
         const cell = row.children[LEVEL_COLUMNS[j]];
         this.pf.markField(cell ? cell.querySelector('input') : null, profile, p, key, restoreTo(p, key));
       });
-    });
-  }
-
-  /**
-   * The profile's universe entry in the shared universe cache (ADR-0004):
-   * `speed` is the game's economy speed, `at` when it was fetched, and
-   * `override` the speed the player picked instead, if any. A universe
-   * setting is not part of a profile, so the player's choice lives here too,
-   * shared by every profile of that universe.
-   *
-   * @returns {?{key: string, entry: ?{at: number, speed: number, override?: number}}}
-   */
-  universeCache() {
-    const profile = this.profileId ? this.pf.store.get(this.profileId) : null;
-    if (!profile?.universe) return null;
-    const key = 'pfg_universe_' + profile.universe.country + '_' + profile.universe.number;
-    let entry = null;
-    try {
-      entry = JSON.parse(localStorage.getItem(key) || 'null');
-    } catch {
-      entry = null;
-    }
-    return { key, entry: entry && typeof entry.speed === 'number' ? entry : null };
-  }
-
-  /**
-   * @param {string} key
-   * @param {{at: number, speed: number, override?: number}} entry
-   */
-  writeUniverseCache(key, entry) {
-    try {
-      localStorage.setItem(key, JSON.stringify(entry));
-    } catch {
-      // Without storage the speed is simply fetched again next time.
-    }
-  }
-
-  /**
-   * Take the economy speed from the profile's universe - the player's own
-   * choice if they made one - fetching it again once a day.
-   *
-   * @param {Profile} profile
-   */
-  async fetchUniverseSpeed(profile) {
-    const cache = this.universeCache();
-    if (!cache || !profile.universe) return;
-    let entry = cache.entry;
-    if (!entry || Date.now() - entry.at >= UNIVERSE_SPEED_TTL_MS) {
-      try {
-        const data = await apiGet('serverdata', { country: profile.universe.country, universe: profile.universe.number });
-        const speed = Number.parseInt(data.speed, 10);
-        if (speed > 0) {
-          entry = { ...entry, at: Date.now(), speed };
-          this.writeUniverseCache(cache.key, entry);
-        }
-      } catch {
-        // The universe is unreachable: a stale speed is still the best guess.
-      }
-    }
-    if (!entry || this.profileId !== profile.id) return;
-    const speed = entry.override ?? entry.speed;
-    if (String(options.prm.universeSpeed) !== String(speed)) {
-      setVal('#universe-speed', speed);
-      updateParams();
-    }
-    this.markSpeed();
-  }
-
-  /** The player picked a speed: remember it as theirs, or drop it when it is the game's again. */
-  speedChanged() {
-    const cache = this.universeCache();
-    if (!cache?.entry) return;
-    const chosen = Number(getVal('#universe-speed'));
-    const entry = { ...cache.entry };
-    if (chosen === entry.speed) delete entry.override;
-    else entry.override = chosen;
-    this.writeUniverseCache(cache.key, entry);
-    this.markSpeed();
-  }
-
-  /** Mark the economy speed as the game's, with a restore button when the player changed it. */
-  markSpeed() {
-    const cache = this.universeCache();
-    const entry = cache ? cache.entry : null;
-    const select = selectEl('#universe-speed');
-    if (!cache || !entry) {
-      this.pf.markInput(select, false, null, () => {});
-      return;
-    }
-    const differs = Number(getVal('#universe-speed')) !== entry.speed;
-    this.pf.markInput(select, true, differs ? String(entry.speed) : null, () => {
-      setVal('#universe-speed', entry.speed);
-      this.speedChanged();
-      updateParams();
     });
   }
 }

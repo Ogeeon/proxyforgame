@@ -28,11 +28,17 @@
   <!-- DOM utilities (jQuery replacement) -->
   <script src="/ogame/calc/js/dom-utils.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/dom-utils.js'); ?>" defer></script>
 
+  <!-- Player profiles -->
+  <script src="/ogame/calc/js/profiles-core.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/profiles-core.js'); ?>" defer></script>
+  <script src="/ogame/calc/js/profiles-store.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/profiles-store.js'); ?>" defer></script>
+  <script src="/ogame/calc/js/profiles-ui.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/profiles-ui.js'); ?>" defer></script>
+
   <!-- Queue calculator modules -->
   <script src="/ogame/calc/js/queue-core.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/queue-core.js'); ?>" defer></script>
   <script src="/ogame/calc/js/queue-data-collector.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/queue-data-collector.js'); ?>" defer></script>
   <script src="/ogame/calc/js/queue-renderer.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/queue-renderer.js'); ?>" defer></script>
   <script src="/ogame/calc/js/queue-orchestration.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/queue-orchestration.js'); ?>" defer></script>
+  <script src="/ogame/calc/js/queue-profile.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/queue-profile.js'); ?>" defer></script>
 
   <script>
     var options = {
@@ -124,7 +130,7 @@
   <div class="row">
     <div class="col-md-2"><?php require_once '../../sidebar_bs.tpl'; ?></div>
     <div class="col-md-10">
-    <?php require_once '../../topbar_bs.tpl'; ?>
+    <?php $profilesCalc = 'queue'; require_once '../../topbar_bs.tpl'; ?>
 
 <div id="queue">
   <div class="border rounded position-relative">
@@ -155,15 +161,15 @@
           <label for="hyper-tech-level"><?= $l['hyper-tech'] ?></label>
           <input id="hyper-tech-level" type="text" name="hyper-tech-level" class="form-control form-control-sm level-input" value="0" data-field-title="<?= $l['hyper-tech'] ?>">
         </div>
-        <div class="d-flex align-items-center gap-1">
-          <label><?= $l['class'] ?>:</label>
+        <fieldset class="d-flex align-items-center gap-1 fieldset-reset">
+          <legend><?= $l['class'] ?>:</legend>
           <input id="player-class-0" type="radio" name="player-class" value="0" class="form-check-input">
           <label for="player-class-0"><?= $l['class-collector'] ?></label>
           <input id="player-class-1" type="radio" name="player-class" value="1" class="form-check-input">
           <label for="player-class-1"><?= $l['class-general'] ?></label>
           <input id="player-class-2" type="radio" name="player-class" value="2" class="form-check-input">
           <label for="player-class-2"><?= $l['class-discoverer'] ?></label>
-        </div>
+        </fieldset>
         <div class="d-flex align-items-center gap-1">
           <label for="sc-capacity-increase"><?= $l['cargo-cap-increase'] ?><?= $l['sc-short'] ?></label>
           <div class="input-group input-group-sm w-auto">
@@ -197,9 +203,15 @@
           <div>
             <div id="src-panel-<?=$i?>" class="border rounded p-2">
               <p class="border rounded subheader bg-primary-subtle mb-2"><?= $l['buildings'] ?></p>
-              <div class="d-flex align-items-center gap-2 mb-2">
-                <label for="total-fields-<?=$i?>"><?= $l['total-fields'] ?></label>
-                <input id="total-fields-<?=$i?>" type="text" name="total-fields-<?=$i?>" class="form-control form-control-sm level-input total-fld-input" value="0" data-field-title="<?= $l['total-fields'] ?>">
+              <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
+                <div id="pf-body-box-<?=$i?>" class="d-flex align-items-center gap-2 d-none">
+                  <label for="pf-body-<?=$i?>"><?= $l[$type] ?></label>
+                  <select id="pf-body-<?=$i?>" class="form-select form-select-sm w-auto"></select>
+                </div>
+                <div class="d-flex align-items-center gap-2">
+                  <label for="total-fields-<?=$i?>"><?= $l['total-fields'] ?></label>
+                  <input id="total-fields-<?=$i?>" type="text" name="total-fields-<?=$i?>" class="form-control form-control-sm level-input total-fld-input" value="0" data-field-title="<?= $l['total-fields'] ?>">
+                </div>
               </div>
               <table id="table-src-<?=$i?>" class="lined">
                 <tr>
@@ -302,6 +314,7 @@
       bootstrap.Tooltip.getOrCreateInstance(el);
     });
     initializeQueueCalculator();
+    initQueueProfiles();
   });
 </script>
 
