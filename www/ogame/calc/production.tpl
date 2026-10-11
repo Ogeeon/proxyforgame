@@ -29,11 +29,17 @@
   <!-- DOM utilities (jQuery replacement) -->
   <script src="/ogame/calc/js/dom-utils.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/dom-utils.js'); ?>" defer></script>
 
+  <!-- Player profiles -->
+  <script src="/ogame/calc/js/profiles-core.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/profiles-core.js'); ?>" defer></script>
+  <script src="/ogame/calc/js/profiles-store.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/profiles-store.js'); ?>" defer></script>
+  <script src="/ogame/calc/js/profiles-ui.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/profiles-ui.js'); ?>" defer></script>
+
   <!-- Production calculator modules -->
   <script src="/ogame/calc/js/production-core.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/production-core.js'); ?>" defer></script>
   <script src="/ogame/calc/js/production-data-collector.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/production-data-collector.js'); ?>" defer></script>
   <script src="/ogame/calc/js/production-renderer.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/production-renderer.js'); ?>" defer></script>
   <script src="/ogame/calc/js/production-orchestration.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/production-orchestration.js'); ?>" defer></script>
+  <script src="/ogame/calc/js/production-profile.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/production-profile.js'); ?>" defer></script>
 
   <script>
     var options = {
@@ -212,6 +218,7 @@
     options.msgMinConstraintViolated = "<?= $l['msg-min-constraint-violated'] ?>";
     options.msgMaxConstraintViolated = "<?= $l['msg-max-constraint-violated'] ?>";
     options.planetNumStr = "<?= $l['planet-num'] ?>";
+    options.planetLabel = <?= json_encode($l['planet']) ?>;
     options.maxTempAlt = "<?= $l['max-planet-temp'] ?>";
     options.positionAlt = "<?= $l['planet-pos'] ?>";
     options.resReadyInMsg =  "<?= $l['res-ready-in'] ?>";
@@ -219,11 +226,6 @@
     options.resWillNotAccumMsg1 = "<?= $l['res-will-not-accumulate1'] ?>";
     options.enoughResAlreadyMsg = "<?= $l['enough-res-already'] ?>";
     options.plnDelConfMsg = "<?= $l['del-planet-confirm'] ?>";
-    options.noUniNameMsg = <?= json_encode($l['no-profile-name-msg']) ?>;
-    options.noUniSelectedMsg = <?= json_encode($l['no-profile-selected-msg']) ?>;
-    options.uniDelConfMsg = <?= json_encode($l['del-profile-confirm']) ?>;
-    options.uniOwrConfMsg = <?= json_encode($l['owr-profile-confirm']) ?>;
-    options.uniLoadConfMsg = <?= json_encode($l['load-profile-confirm']) ?>;
     options.cloneConfMsg = "<?= $l['clone-confirm'] ?>";
     options.dialogOk = <?= json_encode($l['dialog-ok']) ?>;
     options.dialogConfirm = <?= json_encode($l['dialog-confirm']) ?>;
@@ -298,7 +300,7 @@
   <div class="row">
     <div class="col-md-2"><?php require_once '../../sidebar_bs.tpl'; ?></div>
     <div class="col-md-10">
-    <?php require_once '../../topbar_bs.tpl'; ?>
+    <?php $profilesCalc = 'production'; require_once '../../topbar_bs.tpl'; ?>
 
 <div id="production">
   <div class="border rounded position-relative">
@@ -308,34 +310,6 @@
       </div>
       <div id="reset" class="top-0 end-0 d-flex align-items-center justify-content-center bg-danger-subtle" data-bs-toggle="tooltip" title="<?= $l['reset'] ?>">
         <i class="bi bi-arrow-counterclockwise" style="color: #dc3545; font-size: 1.25rem;"></i>
-      </div>
-    </div>
-
-    <div id="universes-panel" class="border rounded m-1 p-2">
-      <div class="d-flex flex-wrap gap-2 align-items-center justify-content-center">
-        <div class="d-flex align-items-center gap-1">
-          <label for="universe-name-select"><?= $l['profile'] ?></label>
-          <select id="universe-name-select" name="universe-name-select" class="form-select form-select-sm w-auto">
-            <option value="0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</option>
-          </select>
-        </div>
-        <div id="universe-control" class="btn-group">
-          <button id="universe-load" type="button" data-bs-toggle="tooltip" title="<?= $l['universe-load'] ?>" class="btn btn-outline-secondary btn-sm uni-control-btn">
-            <i class="bi bi-box-arrow-up"></i>
-          </button>
-          <button id="universe-save" type="button" data-bs-toggle="tooltip" title="<?= $l['universe-save'] ?>" class="btn btn-outline-secondary btn-sm uni-control-btn">
-            <i class="bi bi-box-arrow-in-down"></i>
-          </button>
-          <button id="universe-delete" type="button" data-bs-toggle="tooltip" title="<?= $l['universe-delete'] ?>" class="btn btn-outline-secondary btn-sm uni-control-btn">
-            <i class="bi bi-x-lg"></i>
-          </button>
-        </div>
-        <div class="d-flex align-items-center gap-1">
-          <input id="universe-name" type="text" name="universe-name" class="form-control form-control-sm input-20columns" aria-label="<?= $l['profile'] ?>">
-          <button id="universe-add" type="button" data-bs-toggle="tooltip" title="<?= $l['universe-add'] ?>" class="btn btn-outline-secondary btn-sm uni-control-btn">
-            <i class="bi bi-plus-lg"></i>
-          </button>
-        </div>
       </div>
     </div>
 
@@ -1032,6 +1006,7 @@
       bootstrap.Tooltip.getOrCreateInstance(el);
     });
     initializeProductionCalculator();
+    initProductionProfiles();
   });
 </script>
 

@@ -1,0 +1,297 @@
+import { test, expect } from './base';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
+
+// Player profiles (ADR-0004) on the production calculator, the first one wired
+// to them: importing an account export, editing a profile-owned field and
+// restoring the game value, falling back to "no profile", converting an old
+// saved set, the backup file and the per-tab active profile. The model itself
+// is covered by unit-tests/profiles-core.test.js.
+
+const EXPORT = readFileSync(join(__dirname, '../fixtures/account-export-v1.json'), 'utf8');
+
+test.beforeEach(async ({ context }) => {
+    await context.addInitScript(() => {
+        localStorage.setItem('lastChange', 'key-value;true,value;99999');
+    });
+});
+
+/** Pick an action from the profile select (import, create, manage). */
+async function chooseAction(page, value) {
+    await page.locator('#pf-select').selectOption(value);
+}
+
+/** Import the fixture export, picking the first country and universe offered. */
+async function importExport(page) {
+    await chooseAction(page, '__import');
+    await expect(page.locator('#pf-import-modal')).toBeVisible();
+    await page.locator('#pf-import-text').fill(EXPORT);
+    await page.locator('#pf-import-go').click();
+    // Schema 1 carries no universe: the dialog asks for it.
+    const box = page.locator('#pf-import-universe-box');
+    if (await box.isVisible()) {
+        const country = page.locator('#pf-import-country');
+        const codes = await country.locator('option').evaluateAll((o) => o.map((x) => x.value).filter(Boolean));
+        if (codes.length > 0) await country.selectOption(codes[0]);
+        await page.locator('#pf-import-go').click();
+    }
+    await expect(page.locator('#pf-import-modal')).toBeHidden();
+}
+
+/** The stored profile currently active in this tab. */
+async function activeProfile(page) {
+    return page.evaluate(() => {
+        const id = JSON.parse(sessionStorage.getItem('pfg_active_profile') || '""');
+        return id ? JSON.parse(localStorage.getItem('pfg_profile_' + id) || 'null') : null;
+    });
+}
+
+function metalMineInput(page) {
+    return page.locator('#one-planet-prod tr:not(.lf-row)').nth(2).locator('input');
+}
+
+test('the selector starts on "no profile" with the actions listed', async ({ page }) => {
+    await page.goto('/production');
+    await expect(page.locator('#pf-select')).toHaveValue('');
+    await expect(page.locator('#pf-select option[value="__import"]')).toHaveCount(1);
+    await expect(page.locator('#pf-planet-row')).toBeHidden();
+});
+
+test('importing an export fills the calculator from the profile', async ({ page }) => {
+    await page.goto('/production');
+    await importExport(page);
+
+    await expect(page.locator('#energy-tech-level')).toHaveValue('14');
+    await expect(page.locator('#plasma-tech-level')).toHaveValue('15');
+    await expect(page.locator('#geologist')).toBeChecked();
+    await expect(page.locator('#is-trader')).toBeChecked();
+    await expect(page.locator('#pf-planet option')).toHaveCount(3);
+    await expect(page.locator('#max-planet-temp')).toHaveValue('41');
+    await expect(metalMineInput(page)).toHaveValue('30');
+    await expect(page.locator('#planetsSpin')).toHaveValue('3');
+    // Production's own reset would turn every default into an edit of the profile.
+    await expect(page.locator('#reset')).toBeHidden();
+});
+
+test('an edit becomes an override that can be restored', async ({ page }) => {
+    await page.goto('/production');
+    await importExport(page);
+
+    await metalMineInput(page).fill('31');
+    await metalMineInput(page).blur();
+    await expect(metalMineInput(page)).toHaveClass(/pf-differs/);
+    await expect(page.locator('#pf-overrides')).toHaveText('1');
+    let profile = await activeProfile(page);
+    expect(profile.planets[0].values['building.1']).toEqual({ game: 30, override: 31 });
+    // The edit shows in the all-planets table too.
+    await expect(page.locator('#all-planets-prod tr').nth(1).locator('td').nth(4).locator('input')).toHaveValue('31');
+
+    await page.locator('#one-planet-prod .pf-reset').first().click();
+    await expect(metalMineInput(page)).toHaveValue('30');
+    await expect(page.locator('#pf-overrides')).toBeHidden();
+    profile = await activeProfile(page);
+    expect(profile.planets[0].values['building.1']).toEqual({ game: 30 });
+});
+
+test('the overrides badge restores only the ticked values', async ({ page }) => {
+    await page.goto('/production');
+    await importExport(page);
+    await page.locator('#param-researches-tab').click();
+    await page.locator('#plasma-tech-level').fill('20');
+    await page.locator('#plasma-tech-level').blur();
+    await metalMineInput(page).fill('31');
+    await metalMineInput(page).blur();
+    await expect(page.locator('#pf-overrides')).toHaveText('2');
+
+    await page.locator('#pf-overrides').click();
+    const rows = page.locator('#pf-reset-rows tr');
+    await expect(rows).toHaveCount(2);
+    // The account comes first, named and valued as the page shows them.
+    await expect(rows.nth(0)).toContainText('Account');
+    await expect(rows.nth(0).locator('td').nth(3)).toHaveText('15');
+    await expect(rows.nth(0).locator('td').nth(4)).toHaveText('20');
+    await expect(rows.nth(1).locator('td').nth(2)).toHaveText('Metal mine');
+    await rows.nth(0).locator('input').uncheck();
+    await expect(page.locator('#pf-reset-all')).toHaveJSProperty('indeterminate', true);
+    await page.locator('#pf-reset-go').click();
+
+    await expect(page.locator('#pf-reset-modal')).toBeHidden();
+    await expect(metalMineInput(page)).toHaveValue('30');
+    await expect(page.locator('#plasma-tech-level')).toHaveValue('20');
+    await expect(page.locator('#pf-overrides')).toHaveText('1');
+});
+
+test('a select from the game is marked, and a radio group as a whole', async ({ page }) => {
+    await page.goto('/production');
+    await importExport(page);
+    await expect(page.locator('#one-pln-race')).toHaveClass(/pf-bound/);
+    await expect(page.locator('#class-0').locator('xpath=ancestor::fieldset')).toHaveClass(/pf-bound/);
+    // The first radio is not necessarily the chosen one: it carries no mark.
+    await expect(page.locator('#class-0')).not.toHaveClass(/pf-bound/);
+});
+
+test('the economy speed is the game\'s, and a changed one survives a reload', async ({ page }) => {
+    await page.route('**/ajax.php?*service=serverdata*', (route) => route.fulfill({
+        status: 200, contentType: 'application/json', body: JSON.stringify({ speed: '5' }),
+    }));
+    await page.goto('/production');
+    await importExport(page);
+    const speed = page.locator('#universe-speed');
+    await expect(speed).toHaveValue('5');
+    await expect(speed).toHaveClass(/pf-bound/);
+    // Values only the player sets have nothing to differ from: no mark.
+    await expect(page.locator('#exchange-rates-m')).not.toHaveClass(/pf-bound/);
+    await expect(page.locator('#energy-boost')).not.toHaveClass(/pf-bound/);
+
+    await speed.selectOption('7');
+    await expect(speed).toHaveClass(/pf-differs/);
+    await page.reload();
+    await expect(speed).toHaveValue('7');
+    await expect(speed).toHaveClass(/pf-differs/);
+
+    await page.locator('#universe-speed + .pf-reset').click();
+    await expect(speed).toHaveValue('5');
+    await expect(speed).not.toHaveClass(/pf-differs/);
+    await page.reload();
+    await expect(speed).toHaveValue('5');
+});
+
+test('loading a profile writes no override by itself', async ({ page }) => {
+    await page.goto('/production');
+    await importExport(page);
+    await page.reload();
+    await expect(page.locator('#energy-tech-level')).toHaveValue('14');
+    const profile = await activeProfile(page);
+    const overrides = [profile.account, ...profile.planets]
+        .flatMap((e) => Object.values(e.values))
+        .filter((v) => 'override' in v);
+    expect(overrides).toHaveLength(0);
+});
+
+test('"no profile" shows the calculator\'s own settings, untouched', async ({ page }) => {
+    await page.goto('/production');
+    await page.locator('#param-researches-tab').click();
+    await page.locator('#energy-tech-level').fill('3');
+    await page.locator('#energy-tech-level').blur();
+    await importExport(page);
+    await expect(page.locator('#energy-tech-level')).toHaveValue('14');
+
+    await page.locator('#pf-select').selectOption('');
+    await expect(page.locator('#energy-tech-level')).toHaveValue('3');
+    await expect(page.locator('#pf-planet-row')).toBeHidden();
+    await expect(page.locator('.pf-bound')).toHaveCount(0);
+    const own = await page.evaluate(() => JSON.parse(localStorage.getItem('options_production')).energyTechLevel);
+    expect(own).toBe(3);
+});
+
+test('another planet is picked in the one-planet tab and remembered', async ({ page }) => {
+    await page.goto('/production');
+    await importExport(page);
+    await page.locator('#pf-planet').selectOption({ label: 'Beta [2:150:12]' });
+    await expect(page.locator('#max-planet-temp')).toHaveValue('-50');
+    await expect(page.locator('#one-pln-race')).toHaveValue('2');
+    await expect(page.locator('#storage-met')).toHaveValue('12');
+    await page.reload();
+    await expect(page.locator('#pf-planet option:checked')).toHaveText('Beta [2:150:12]');
+});
+
+test('a new empty profile gains a planet only once it is edited', async ({ page }) => {
+    await page.goto('/production');
+    await chooseAction(page, '__create');
+    await page.locator('#pf-props-name').fill('Alt');
+    await page.locator('#pf-props-go').click();
+    await expect(page.locator('#pf-select option:checked')).toHaveText('Alt');
+    expect((await activeProfile(page)).planets).toHaveLength(0);
+
+    await metalMineInput(page).fill('5');
+    await metalMineInput(page).blur();
+    await expect.poll(async () => (await activeProfile(page)).planets.length).toBe(1);
+    // A manual profile has no game layer: no field has a game value to mark.
+    await expect(page.locator('.pf-bound')).toHaveCount(0);
+});
+
+test('an old production saved set is offered for conversion', async ({ page, context }) => {
+    await context.addInitScript(() => {
+        if (localStorage.getItem('prod_uni_main')) return;
+        const planet = [20, 7, 0];
+        for (let j = 1; j < 8; j++) planet.push(j === 1 ? 25 : 0, j === 7 ? 150 : 100, 0);
+        planet.push(0, ...new Array(12).fill(0));
+        localStorage.setItem('prod_uni_main', JSON.stringify({
+            energyTechLevel: 12, plasmaTechLevel: 10, geologist: true, playerClass: 0, rates: [1, 1.5, 3], ratesFmt: 2,
+            currPlanetsCount: 1, aPS: [planet], aPNames: ['Homeworld'],
+        }));
+    });
+    await page.goto('/production');
+    await expect(page.locator('#pf-migrate-modal')).toBeVisible();
+    await expect(page.locator('#pf-migrate-list')).toContainText('main');
+    await page.locator('#pf-migrate-go').click();
+    await expect(page.locator('#pf-migrate-result')).toBeVisible();
+    // Converted: "Not now" has nothing left to postpone, and saving the backup
+    // is the last step, so it closes the dialog.
+    await expect(page.locator('#pf-migrate-later')).toHaveText('Done');
+    const download = page.waitForEvent('download');
+    await page.locator('#pf-migrate-backup').click();
+    await download;
+    await expect(page.locator('#pf-migrate-modal')).toBeHidden();
+
+    await page.locator('#pf-select').selectOption({ label: 'main' });
+    await expect(page.locator('#energy-tech-level')).toHaveValue('12');
+    await expect(page.locator('#pf-planet option')).toHaveText(['Homeworld']);
+    await expect(metalMineInput(page)).toHaveValue('25');
+    // The original set is kept, and the offer does not come back on its own.
+    expect(await page.evaluate(() => localStorage.getItem('prod_uni_main') !== null)).toBe(true);
+    await page.reload();
+    await expect(page.locator('#pf-migrate-modal')).toBeHidden();
+});
+
+test('the backup file restores the profiles', async ({ page }) => {
+    await page.goto('/production');
+    await importExport(page);
+    await chooseAction(page, '__manage');
+    const download = page.waitForEvent('download');
+    await page.locator('#pf-backup-download').click();
+    const file = await (await download).path();
+
+    // Delete the profile, then restore it from the file.
+    await page.locator('#pf-manage-rows tr').first().locator('button').nth(1).click();
+    // The confirm dialog is the one shown modal that is not ours.
+    await page.locator('.modal.show:not([id^="pf-"]) .btn-primary').click();
+    await expect(page.locator('#pf-manage-rows tr')).toHaveCount(0);
+    await page.locator('#pf-backup-restore').setInputFiles(file);
+    await expect(page.locator('#pf-manage-rows tr')).toHaveCount(1);
+    await expect(page.locator('#pf-manage-rows')).toContainText('Tester');
+});
+
+test('editing a profile returns to the manage dialog', async ({ page }) => {
+    await page.goto('/production');
+    await importExport(page);
+    await chooseAction(page, '__manage');
+    const edit = page.locator('#pf-manage-rows tr').first().locator('button').first();
+
+    await edit.click();
+    await expect(page.locator('#pf-props-modal')).toBeVisible();
+    await page.locator('#pf-props-modal .modal-footer .btn-secondary').click();
+    await expect(page.locator('#pf-props-modal')).toBeHidden();
+    await expect(page.locator('#pf-manage-modal')).toBeVisible();
+
+    await edit.click();
+    await expect(page.locator('#pf-props-go')).toHaveText('Save');
+    await page.locator('#pf-props-name').fill('Renamed');
+    await page.locator('#pf-props-go').click();
+    await expect(page.locator('#pf-manage-modal')).toBeVisible();
+    await expect(page.locator('#pf-manage-rows')).toContainText('Renamed');
+});
+
+test('each tab keeps its own active profile', async ({ page, context }) => {
+    await page.goto('/production');
+    await importExport(page);
+    const second = await context.newPage();
+    await second.goto('/production');
+    // A new tab starts on the last choice...
+    await expect(second.locator('#energy-tech-level')).toHaveValue('14');
+    await second.locator('#pf-select').selectOption('');
+    await expect(second.locator('#energy-tech-level')).toHaveValue('0');
+    // ...and its own choice does not switch the first tab.
+    await page.reload();
+    await expect(page.locator('#energy-tech-level')).toHaveValue('14');
+});

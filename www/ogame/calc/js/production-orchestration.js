@@ -750,6 +750,8 @@ function renderOnePlnLfRows(race, lfBld) {
 }
 
 function editRow(plnID) {
+	// With a player profile, the one-planet tab shows profile planets directly.
+	if (productionProfiles?.showPlanetAt(plnID)) return;
 	options.editedPln = plnID;
 	setVal('#planet-name', options.prm.aPNames[plnID]);
 	setVal('#max-planet-temp', options.prm.aPS[plnID][0]);
@@ -869,71 +871,6 @@ async function clonePlnData() {
 }
 
 // ---------------------------------------------------------------------------
-// Universes panel (pure localStorage, no AJAX)
-// ---------------------------------------------------------------------------
-
-async function saveUniverseData() {
-	let selectedUni = inputEl('#universe-name-select').value;
-	if (selectedUni === '0') {
-		await showAlertModal(options.noUniSelectedMsg, options.dialogOk);
-		return;
-	}
-	if (await showConfirmModal(options.uniOwrConfMsg, options.dialogConfirm, options.cancel) === false) {
-		return;
-	}
-	saveToCookie(selectedUni, options.prm);
-	$('#universe-save')?.blur();
-}
-
-async function loadUniverseData() {
-	let selectedUni = inputEl('#universe-name-select').value;
-	if (selectedUni === '0') {
-		await showAlertModal(options.noUniSelectedMsg, options.dialogOk);
-		return;
-	}
-	if (await showConfirmModal(options.uniLoadConfMsg, options.dialogConfirm, options.cancel) === false) {
-		return;
-	}
-	options.load(selectedUni);
-	$('#universe-load')?.blur();
-	updateParams();
-}
-
-async function deleteUniverseData() {
-	let selectedUni = inputEl('#universe-name-select').value;
-	if (selectedUni === '0') {
-		await showAlertModal(options.noUniSelectedMsg, options.dialogOk);
-		return;
-	}
-	if (await showConfirmModal(options.uniDelConfMsg, options.dialogConfirm, options.cancel) === false) {
-		return;
-	}
-	localStorage.removeItem(selectedUni);
-	let uniNameSelect = selectEl('#universe-name-select');
-	let opt = Array.from(uniNameSelect.options).find(function (o) { return o.value === selectedUni; });
-	if (opt) opt.remove();
-	uniNameSelect.value = "0";
-	$('#universe-delete')?.blur();
-}
-
-async function addUniverseData() {
-	let uniNameInput = inputEl('#universe-name');
-	if (uniNameInput.value.length === 0) {
-		await showAlertModal(options.noUniNameMsg, options.dialogOk);
-		uniNameInput.focus();
-		return;
-	}
-	let name = stripHTMLTags(uniNameInput.value);
-	let key = "prod_uni_" + name;
-	saveToCookie(key, options.prm);
-	let uniNameSelect = selectEl('#universe-name-select');
-	uniNameSelect.append(new Option(name, key));
-	uniNameSelect.value = key;
-	uniNameInput.value = "";
-	$('#universe-add')?.blur();
-}
-
-// ---------------------------------------------------------------------------
 // Initialization
 // ---------------------------------------------------------------------------
 
@@ -1009,12 +946,6 @@ function _applyTheme() {
 async function initializeProductionCalculator() {
 	try {
 		options.load('options_production');
-
-		// Universes panel
-		addEvent('#universe-load', 'click', loadUniverseData);
-		addEvent('#universe-save', 'click', saveUniverseData);
-		addEvent('#universe-delete', 'click', deleteUniverseData);
-		addEvent('#universe-add', 'click', addUniverseData);
 
 		// Tabs
 		_bindTabPersistence();
@@ -1099,20 +1030,6 @@ async function initializeProductionCalculator() {
 		addEvent(rows[4].children[2].children[0], 'keyup', blinkMaxTemp);
 		addEvent(rows[7].children[2].children[0], 'keyup', blinkMaxTemp);
 		addEvent('#max-planet-temp', 'keyup', function () { options.prm.maxTempEntered = true; });
-
-		// Universe list from localStorage
-		let keys = [];
-		for (let i = 0, len = localStorage.length; i < len; i++) {
-			let key = localStorage.key(i);
-			if (key?.includes("prod_uni_")) {
-				keys.push(key);
-			}
-		}
-		keys.sort((a, b) => a.localeCompare(b));
-		const uniNameSelect = selectEl('#universe-name-select');
-		for (const key of keys) {
-			uniNameSelect.append(new Option(key.replace("prod_uni_", ""), key));
-		}
 
 		// Theme
 		_applyTheme();

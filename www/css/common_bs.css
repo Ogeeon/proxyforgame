@@ -259,6 +259,12 @@ button:not(.btn) {
   width: 100%
 }
 
+/* A side wider than its half (a phone) grows and pushes the selector off centre
+   rather than overlapping it. */
+.topbar-side {
+  flex: 1 1 0;
+}
+
 #topbar td {
   white-space: nowrap;
   vertical-align: center;
@@ -490,4 +496,58 @@ textarea:disabled {
   margin: 0;
   font-size: inherit;
   line-height: inherit;
+}
+
+/* Player profiles (profiles-ui.js): a field the active profile owns gets a
+   stripe on its left edge; one whose value differs from the game gets it in the
+   warning colour, followed by a button that restores the game value. */
+.pf-bound {
+  box-shadow: inset 3px 0 0 var(--bs-info);
+}
+
+.pf-bound.pf-differs {
+  box-shadow: inset 3px 0 0 var(--bs-warning);
+}
+
+input[type="checkbox"].pf-bound,
+input[type="radio"].pf-bound {
+  box-shadow: none;
+  outline: 2px solid var(--bs-info);
+  outline-offset: 1px;
+}
+
+input[type="checkbox"].pf-bound.pf-differs,
+input[type="radio"].pf-bound.pf-differs,
+fieldset.pf-bound.pf-differs {
+  outline-color: var(--bs-warning);
+}
+
+fieldset.pf-bound {
+  box-shadow: none;
+  border-left: 3px solid var(--bs-info);
+  padding-left: 0.25rem;
+}
+
+fieldset.pf-bound.pf-differs {
+  border-left-color: var(--bs-warning);
+}
+
+.input-group.pf-bound {
+  box-shadow: none;
+}
+
+.pf-reset {
+  line-height: 1;
+  color: var(--bs-warning-text-emphasis);
+}
+
+/* A form control is a block, so the restore button after it would drop to the
+   next line - in a table cell it always does. Inline, the two share the line. */
+:is(.form-control, .form-select).pf-bound:has(+ .pf-reset) {
+  display: inline-block;
+  vertical-align: middle;
+}
+
+:has(> .form-control.pf-bound + .pf-reset, > .form-select.pf-bound + .pf-reset) {
+  white-space: nowrap;
 }

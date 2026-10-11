@@ -53,6 +53,13 @@
   text-align: center;
 }
 
+/* The life-form bonuses come from the game with up to four decimals (0,4635),
+   plus the profile mark's stripe on the left edge. Scoped by id, or the
+   input-group width rule in common_bs.css wins. */
+#param-lifeforms .input-group > .form-control.level-input {
+  width: 4.75rem;
+}
+
 /* Compact controls placed inside .lined tables */
 .input-in-table,
 .lined .form-control-sm {
