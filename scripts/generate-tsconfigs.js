@@ -99,8 +99,9 @@ function generate(checkOnly) {
   for (const tpl of templates) {
     const calc = path.basename(tpl, '.tpl');
     const files = scriptsOf(path.join(CALC_DIR, tpl));
-    // A template with no scripts of its own is a fragment, not a page.
-    if (files.length <= 1) continue;
+    // A template with no scripts of its own is a fragment, not a page. Count the
+    // scripts, not the files: the ambient declarations are added to every list.
+    if (!files.some((f) => f.endsWith('.js'))) continue;
 
     const target = path.join(OUT_DIR, `${calc}.json`);
     const content = render(calc, files);
