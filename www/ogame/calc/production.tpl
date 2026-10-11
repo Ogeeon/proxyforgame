@@ -219,11 +219,11 @@
     options.resWillNotAccumMsg1 = "<?= $l['res-will-not-accumulate1'] ?>";
     options.enoughResAlreadyMsg = "<?= $l['enough-res-already'] ?>";
     options.plnDelConfMsg = "<?= $l['del-planet-confirm'] ?>";
-    options.noUniNameMsg = "<?= $l['no-uni-name-msg'] ?>";
-    options.noUniSelectedMsg = "<?= $l['no-uni-selected-msg'] ?>";
-    options.uniDelConfMsg = "<?= $l['del-universe-confirm'] ?>";
-    options.uniOwrConfMsg = "<?= $l['owr-universe-confirm'] ?>";
-    options.uniLoadConfMsg = "<?= $l['load-universe-confirm'] ?>";
+    options.noUniNameMsg = <?= json_encode($l['no-profile-name-msg']) ?>;
+    options.noUniSelectedMsg = <?= json_encode($l['no-profile-selected-msg']) ?>;
+    options.uniDelConfMsg = <?= json_encode($l['del-profile-confirm']) ?>;
+    options.uniOwrConfMsg = <?= json_encode($l['owr-profile-confirm']) ?>;
+    options.uniLoadConfMsg = <?= json_encode($l['load-profile-confirm']) ?>;
     options.cloneConfMsg = "<?= $l['clone-confirm'] ?>";
     options.dialogOk = <?= json_encode($l['dialog-ok']) ?>;
     options.dialogConfirm = <?= json_encode($l['dialog-confirm']) ?>;
@@ -314,7 +314,7 @@
     <div id="universes-panel" class="border rounded m-1 p-2">
       <div class="d-flex flex-wrap gap-2 align-items-center justify-content-center">
         <div class="d-flex align-items-center gap-1">
-          <label for="universe-name-select"><?= $l['universe'] ?></label>
+          <label for="universe-name-select"><?= $l['profile'] ?></label>
           <select id="universe-name-select" name="universe-name-select" class="form-select form-select-sm w-auto">
             <option value="0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</option>
           </select>
@@ -331,7 +331,7 @@
           </button>
         </div>
         <div class="d-flex align-items-center gap-1">
-          <input id="universe-name" type="text" name="universe-name" class="form-control form-control-sm input-20columns">
+          <input id="universe-name" type="text" name="universe-name" class="form-control form-control-sm input-20columns" aria-label="<?= $l['profile'] ?>">
           <button id="universe-add" type="button" data-bs-toggle="tooltip" title="<?= $l['universe-add'] ?>" class="btn btn-outline-secondary btn-sm uni-control-btn">
             <i class="bi bi-plus-lg"></i>
           </button>

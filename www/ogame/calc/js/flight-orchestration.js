@@ -904,8 +904,7 @@ class FlightOrchestrator {
         setChecked('#save-one-way', prm.saveOneWay);
         this.renderer.renderSavePointMode(prm.saveOneWay);
         setChecked(`#class-${prm.playerClass}`, true);
-        setChecked('#trader-bonus', prm.traderBonus);
-        setChecked('#warrior-bonus', prm.warriorBonus);
+        this._showAllianceClass(prm.traderBonus, prm.warriorBonus);
         setChecked(`#mission-type-${prm.missionType}`, true);
         setNumVal('#sp-cargohold', prm.spCargohold);
         setVal('#lf-mechan-general-enh', prm.lfMechanGE);
@@ -924,15 +923,22 @@ class FlightOrchestrator {
     // Alliance / mode / override toggles
     // ------------------------------------------------------------------
 
-    toggleAllianceBonus(event) {
-        const input = event.currentTarget;
-        if (input.id === 'trader-bonus' && input.checked) {
-            setChecked('#warrior-bonus', false);
+    /**
+     * Selects the alliance-class radio for the two stored flags. The radios
+     * share one name, so ticking one clears the others; the "none" radio has
+     * to be ticked explicitly for the pair of false flags.
+     *
+     * @param {boolean} trader
+     * @param {boolean} warrior
+     */
+    _showAllianceClass(trader, warrior) {
+        let id = 'alliance-class-none';
+        if (trader) {
+            id = 'trader-bonus';
+        } else if (warrior) {
+            id = 'warrior-bonus';
         }
-        if (input.id === 'warrior-bonus' && input.checked) {
-            setChecked('#trader-bonus', false);
-        }
-        this.recalc();
+        setChecked(`#${id}`, true);
     }
 
     toggleSpeedOverride(event) {
@@ -1598,18 +1604,16 @@ class FlightOrchestrator {
     }
 
     /**
-     * Ticks the box for the alliance class the import names. The ids are the
+     * Selects the radio for the alliance class the import names. The ids are the
      * game's own order - 1 researcher, which brings the fleet nothing and so has
-     * no field here, 2 trader, 3 warrior - and the two boxes are mutually
-     * exclusive, the way toggleAllianceBonus keeps them when they are clicked.
-     * Anything else, an alliance with no class included, clears both: what the
-     * import carries is the answer, not a suggestion on top of what was there.
+     * no radio of its own here, 2 trader, 3 warrior. Anything else, an alliance
+     * with no class included, selects "none": what the import carries is the
+     * answer, not a suggestion on top of what was there.
      *
      * @param {number} allianceClassId
      */
     _importAllianceClass(allianceClassId) {
-        setChecked('#trader-bonus', allianceClassId === 2);
-        setChecked('#warrior-bonus', allianceClassId === 3);
+        this._showAllianceClass(allianceClassId === 2, allianceClassId === 3);
     }
 
     /** @param {OwnApiPayload} data */
@@ -1837,8 +1841,6 @@ class FlightOrchestrator {
         on('set-recall-departure-zero', 'click', () => this.setRecallDepartureZero());
         on('add-flight-time', 'click', () => this.addFlightLeg({}));
         on('toggle-mode', 'click', () => this.toggleMode());
-        on('warrior-bonus', 'click', (e) => this.toggleAllianceBonus(e));
-        on('trader-bonus', 'click', (e) => this.toggleAllianceBonus(e));
         on('calculate-savepoints', 'click', () => this.updateSavePoints());
         on('save-one-way', 'change', () => this.toggleSaveOneWay());
         // The masked fields cancel the native edit and re-fire `input´ themselves,
@@ -1916,7 +1918,7 @@ class FlightOrchestrator {
         document.querySelectorAll('#flight select').forEach((el) => {
             el.addEventListener('change', () => this.recalc());
         });
-        document.querySelectorAll('input[name="class"], input[name="mission-type"]').forEach((el) => {
+        document.querySelectorAll('input[name="class"], input[name="alliance-class"], input[name="mission-type"]').forEach((el) => {
             el.addEventListener('change', () => this.recalc());
         });
         ['circular-systems', 'circular-galaxies'].forEach((id) => {

@@ -15,7 +15,11 @@ release section; it is the source of truth for the other eleven translations.
 
 ## [Unreleased]
 
+## [2026-10-11] - site entry 66
+
 ### Changed
+
+- Flight: the parameters are regrouped so each tab holds one kind of setting. The universe's deuterium consumption factor and the General's fuel discount moved from "General" to "Universe", next to the other values the server data fills in; the first is now labelled "Universe deuterium consumption" so it no longer reads like a life-form bonus. The manual fleet-speed override moved from "Universe" to the Ships section, above the ship grid whose speeds it replaces. The two mutually exclusive alliance-class checkboxes - "Traders" under the parameters and "Warriors" above the results table - are one radio group on "General": none, Traders or Warriors. The saved-settings selector above the tabs, in flight and in production, is now labelled "Profile" instead of a third "Universe", and its prompts and confirmations speak of a profile. <!-- site -->
 
 - Site: Bootstrap 5.3.8 and Bootstrap Icons 1.11.0 are served from the site itself (`www/vendor/`) instead of cdn.jsdelivr.net. PageSpeed Insights put the render-blocking CSS at 1.2 s of a mobile first visit, half of it the two jsdelivr stylesheets, which each first visit had to open a second origin for - DNS and TLS included; on our own HTTP/2 connection they ride along with the page. The files are committed copies of the versions `package.json` now pins, made by `make vendor` (`scripts/vendor-assets.js`), and `make check` fails when the two disagree; Dependabot proposes new versions monthly. Every page head takes them from one include, `www/vendor_bs.tpl`, instead of four tags repeated in eleven templates, and the e2e fixture that cached the CDN files is gone.
 
@@ -24,6 +28,8 @@ release section; it is the source of truth for the other eleven translations.
 - Sidebar: a first visit no longer opens the changelog. Without a saved "last seen" release the code assumed entry 42, so every new visitor - and every PageSpeed Insights run, where the dialog came out as the largest paint at 4.8 s on mobile - was greeted with two dozen past releases. Now a first visit only records the current release, and the dialog keeps showing returning visitors what they missed.
 
 - Site: pages render sooner and repeat visits no longer re-request every stylesheet and script. The Apache host that took over both domains on 2026-10-10 sent no `Cache-Control` or `Expires` for static files - the old nginx account had sent a day - so every page view revalidated some 27 files over HTTP/1.1. `www/.htaccess` now has stamped CSS and JS (every one carries `?v=<mtime>`) kept for a year as `immutable` and images for a month, in an `IfModule` block that is a no-op where `mod_expires`/`mod_headers` are not loaded. The page scripts load with `defer`, and the inline blocks that read their globals are `type="module"`, which runs them after those scripts in the same order as before, so a parser-blocking script no longer holds up the first paint - on a throttled mobile profile that delay was 1.1 s of a 1.3 s LCP. The icon font is preloaded instead of being discovered only once its stylesheet has loaded. The new-calculator generator emits the same head. Because the first paint now comes before the scripts initialize the form, a page a little taller than the window could lose its scrollbar when initialization collapsed a section and jump sideways (CLS 0.14 on flight with classic Windows scrollbars); `html { scrollbar-gutter: stable }` in `common_bs.css` keeps the scrollbar width reserved, bringing it back to 0.02.
+
+> **RU:** В Калькуляторе полётов перегруппированы параметры. На вкладку «Вселенная» переехали расход дейтерия во вселенной и бонус Генерала к потреблению дейтерия — это настройки сервера, они заполняются вместе со скоростями флота. Поле «Задать скорость флота» теперь в разделе «Корабли», над списком кораблей. Классы альянса «Скупщики» и «Воины» объединены в одну группу «Класс альянса» на вкладке «Общие».<br>В калькуляторах полётов и производства селектор сохранённых настроек называется «Профиль».
 
 ## [2026-10-10] - site entry 65
 
