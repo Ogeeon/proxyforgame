@@ -2,7 +2,7 @@
 <html lang="<?= getLangAttr() ?>">
 <head>
     <meta charset="utf-8">
-    <?php require_once('../../hawk.tpl'); ?>
+    <?php require_once '../../hawk.tpl'; ?>
     <meta name="viewport" content="width=device-width, initial-scale=1">
   <title><?= $l['title'] ?></title>
   <meta name="description" content="<?= $l['title'] ?>">
@@ -66,7 +66,7 @@
 ?>
     };
   </script>
-<?php require_once('../../cookies.tpl'); ?>
+<?php require_once '../../cookies.tpl'; ?>
 </head>
 <body>
 
@@ -75,10 +75,10 @@
 <div class="container-fluid">
   <div class="row">
     <div class="col-2">
-      <?php require_once('../../sidebar_bs.tpl'); ?>
+      <?php require_once '../../sidebar_bs.tpl'; ?>
     </div>
     <div class="col-10">
-      <?php require_once('../../topbar_bs.tpl'); ?>
+      <?php require_once '../../topbar_bs.tpl'; ?>
 
       <div id="trade" class="mx-auto">
         <div class="border rounded position-relative">
@@ -369,7 +369,7 @@
 </div>
 
 <?php
-  require_once('../../analitics.tpl');
+  require_once '../../analitics.tpl';
 ?>
 </body>
 </html>

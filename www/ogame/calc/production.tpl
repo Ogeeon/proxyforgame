@@ -2,7 +2,7 @@
 <html lang="<?= getLangAttr() ?>">
 <head>
   <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
-  <?php require_once('../../hawk.tpl'); ?>
+  <?php require_once '../../hawk.tpl'; ?>
   <title><?= $l['title'] ?></title>
   <meta name="description" content="<?= $l['title'] ?>">
   <meta name="keywords" content="<?= $l['keywords'] ?>">
@@ -287,7 +287,7 @@
       <?php endforeach; ?>
     };
   </script>
-<?php require_once('../../cookies.tpl'); ?>
+<?php require_once '../../cookies.tpl'; ?>
 </head>
 
 <body>
@@ -296,9 +296,9 @@
 
 <div class="container-fluid">
   <div class="row">
-    <div class="col-md-2"><?php require_once('../../sidebar_bs.tpl'); ?></div>
+    <div class="col-md-2"><?php require_once '../../sidebar_bs.tpl'; ?></div>
     <div class="col-md-10">
-    <?php require_once('../../topbar_bs.tpl'); ?>
+    <?php require_once '../../topbar_bs.tpl'; ?>
 
 <div id="production">
   <div class="border rounded position-relative">
@@ -1024,7 +1024,7 @@
   </div> <!-- End row -->
 </div> <!-- End container-fluid -->
 
-<?php require_once('../../analitics.tpl'); ?>
+<?php require_once '../../analitics.tpl'; ?>
 
 <script type="module">
   document.addEventListener('DOMContentLoaded', function() {
