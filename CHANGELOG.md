@@ -22,6 +22,7 @@ release section; it is the source of truth for the other eleven translations.
 
 ### Fixed
 
+- Flight: a two-digit planet position no longer loses its edges in the coordinate fields, and the three-digit system no longer loses a pixel - the fields keep their width but take a narrower inner padding. <!-- site -->
 - Flight: importing an alliance class from the API 2 export or a spy report now reads the game's ids as 1 warrior, 2 trader, 3 researcher. The importer had the warrior and the researcher swapped, so a warrior alliance arrived as none and a researcher alliance as warriors - quoting holding missions 10% fast. <!-- site -->
 
 ## [2026-10-11] - site entry 66
