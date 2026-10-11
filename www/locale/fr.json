@@ -637,7 +637,11 @@
     "own-api-import-title": "Importer",
     "own-api-bad-json-msg": "Impossible de lire les données.\\nAssurez-vous d'avoir collé le texte du champ API 2 de la page « Flotte ».",
     "import-failed-msg": "Impossible de charger les données.\\nLe serveur a renvoyé une réponse invalide. Veuillez réessayer plus tard.",
-    "populated-systems-failed-msg": "La carte des systèmes peuplés est indisponible, aucun système n'est donc compté comme ignoré. Vous pouvez saisir leur nombre à la main."
+    "populated-systems-failed-msg": "La carte des systèmes peuplés est indisponible, aucun système n'est donc compté comme ignoré. Vous pouvez saisir leur nombre à la main.",
+    "sr-profile-hdr": "Importer le rapport d’espionnage",
+    "sr-profile-text": "Un profil est actif. Le rapport contient les recherches, la classe et les bonus du joueur espionné, qui ne doivent pas écraser votre profil. Comment l’importer ?",
+    "sr-profile-none": "Passer à « Aucun profil » et importer",
+    "sr-profile-new": "Créer un nouveau profil pour le rapport"
   },
   "graviton": {
     "title": "OGame - Calculateur de Graviton",

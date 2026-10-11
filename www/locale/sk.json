@@ -637,7 +637,11 @@
     "own-api-bad-json-msg": "Údaje sa nepodarilo načítať.\\nUistite sa, že ste vložili text z poľa API 2 na stránke „Flotila“.",
     "import-failed-msg": "Údaje sa nepodarilo načítať.\\nServer vrátil neplatnú odpoveď. Skúste to znova neskôr.",
     "populated-systems-failed-msg": "Mapa obývaných systémov nie je dostupná, takže žiadny systém sa nepočíta ako preskočený. Ich počet môžete zadať ručne.",
-    "keywords": "proxyforgame,ogame,kalkulačka času letu,čas letu,body uloženia,save,rýchlosť flotily,spotreba deutéria,spotreba paliva"
+    "keywords": "proxyforgame,ogame,kalkulačka času letu,čas letu,body uloženia,save,rýchlosť flotily,spotreba deutéria,spotreba paliva",
+    "sr-profile-hdr": "Import špionážnej správy",
+    "sr-profile-text": "Je aktívny profil. Správa obsahuje výskumy, triedu a bonusy špehovaného hráča, ktoré nesmú prepísať váš profil. Ako ju importovať?",
+    "sr-profile-none": "Prepnúť na „Bez profilu“ a importovať",
+    "sr-profile-new": "Vytvoriť pre správu nový profil"
   },
   "graviton": {
     "title": "OGame - Kalkulátor pre Graviton",

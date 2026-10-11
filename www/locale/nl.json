@@ -637,7 +637,11 @@
     "own-api-import-title": "Importeren",
     "own-api-bad-json-msg": "Kan de gegevens niet lezen.\\nControleer of je de tekst uit het veld API 2 op de pagina 'Vloot' hebt geplakt.",
     "import-failed-msg": "Kan de gegevens niet laden.\\nDe server gaf een ongeldig antwoord. Probeer het later opnieuw.",
-    "populated-systems-failed-msg": "De kaart met bewoonde systemen is niet beschikbaar, daarom worden er geen systemen als overgeslagen geteld. Je kunt het aantal handmatig invoeren."
+    "populated-systems-failed-msg": "De kaart met bewoonde systemen is niet beschikbaar, daarom worden er geen systemen als overgeslagen geteld. Je kunt het aantal handmatig invoeren.",
+    "sr-profile-hdr": "Spionagerapport importeren",
+    "sr-profile-text": "Er is een profiel actief. Het rapport bevat het onderzoek, de klasse en de bonussen van de bespioneerde speler, en die mogen je profiel niet overschrijven. Hoe wil je het importeren?",
+    "sr-profile-none": "Overschakelen naar ‘Geen profiel’ en importeren",
+    "sr-profile-new": "Een nieuw profiel voor het rapport aanmaken"
   },
   "graviton": {
     "title": "OGame - Graviton berekening",

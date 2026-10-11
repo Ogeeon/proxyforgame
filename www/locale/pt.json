@@ -637,7 +637,11 @@
     "own-api-import-title": "Importar",
     "own-api-bad-json-msg": "Não foi possível ler os dados.\\nVerifique se você colou o texto do campo API 2 da página «Frota».",
     "import-failed-msg": "Não foi possível carregar os dados.\\nO servidor retornou uma resposta inválida. Tente novamente mais tarde.",
-    "populated-systems-failed-msg": "O mapa dos sistemas povoados não está disponível, por isso nenhum sistema é contado como ignorado. Pode introduzir o número manualmente."
+    "populated-systems-failed-msg": "O mapa dos sistemas povoados não está disponível, por isso nenhum sistema é contado como ignorado. Pode introduzir o número manualmente.",
+    "sr-profile-hdr": "Importar relatório de espionagem",
+    "sr-profile-text": "Há um perfil ativo. O relatório contém as pesquisas, a classe e os bónus do jogador espiado, que não devem substituir o teu perfil. Como queres importá-lo?",
+    "sr-profile-none": "Mudar para «Sem perfil» e importar",
+    "sr-profile-new": "Criar um novo perfil para o relatório"
   },
   "graviton": {
     "title": "OGame - Calculadora de Gravitação",

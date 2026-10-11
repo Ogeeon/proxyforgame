@@ -1439,6 +1439,10 @@ class FlightOrchestrator {
         this._showOverlay('general-settings-panel', this.opts.dataFetchMsg);
         try {
             const rd = await apiGet('ogameAPI', { code });
+            // With a profile active the player first says where the report goes.
+            if (flightProfiles && !(await flightProfiles.makeRoomForReport(rd))) {
+                return;
+            }
             this._applySRResult(code, rd);
             this.recalc();
         } catch (e) {

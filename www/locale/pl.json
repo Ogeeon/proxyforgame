@@ -637,7 +637,11 @@
     "own-api-import-title": "Importuj",
     "own-api-bad-json-msg": "Nie udało się odczytać danych.\\nUpewnij się, że wkleiłeś tekst z pola API 2 na stronie „Flota”.",
     "import-failed-msg": "Nie udało się wczytać danych.\\nSerwer zwrócił nieprawidłową odpowiedź. Spróbuj ponownie później.",
-    "populated-systems-failed-msg": "Mapa zamieszkanych układów jest niedostępna, więc żaden układ nie jest liczony jako pominięty. Ich liczbę możesz wpisać ręcznie."
+    "populated-systems-failed-msg": "Mapa zamieszkanych układów jest niedostępna, więc żaden układ nie jest liczony jako pominięty. Ich liczbę możesz wpisać ręcznie.",
+    "sr-profile-hdr": "Import raportu szpiegowskiego",
+    "sr-profile-text": "Aktywny jest profil. Raport zawiera badania, klasę i bonusy szpiegowanego gracza, które nie mogą nadpisać twojego profilu. Jak go zaimportować?",
+    "sr-profile-none": "Przełącz na „Bez profilu” i importuj",
+    "sr-profile-new": "Utwórz nowy profil dla raportu"
   },
   "graviton": {
     "title": "OGame - Kalkulator Rozwoju grawitonow",

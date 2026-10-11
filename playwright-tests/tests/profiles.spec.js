@@ -410,3 +410,75 @@ test('"no profile" gives flight its own account values and universe back', async
     await expect(page.locator('#pf-departure')).toBeHidden();
     await expect(page.locator('#reset')).toBeVisible();
 });
+
+// A spy report describes the spied player, so with a profile active the import
+// asks where it goes instead of writing that player into the profile.
+const SR_FIXTURE = readFileSync(join(__dirname, '../fixtures/sr_fs003df9447df01744296d867509e0ae7e60.json'), 'utf8');
+
+/** Answer the report service with the fixture and start an import. */
+async function startReportImport(page) {
+    await page.route(/\/ajax\.php\?.*service=ogameAPI/, (route) => route.fulfill({
+        status: 200, contentType: 'application/json', body: SR_FIXTURE,
+    }));
+    await openFlightParams(page);
+    await page.locator('#api-code').fill('fs003df9447df01744296d867509e0ae7e60');
+    await page.locator('#api-get').click();
+    await expect(page.locator('#flight-sr-profile-modal')).toBeVisible();
+}
+
+test('a spy report can go to "no profile", leaving the profile alone', async ({ page }) => {
+    await page.goto('/flight');
+    await importExport(page);
+    const before = await activeProfile(page);
+    await startReportImport(page);
+    await expect(page.locator('#flight-sr-profile-name')).toHaveValue('coshoni');
+
+    await page.locator('#flight-sr-profile-go').click();
+    await expect(page.locator('#flight-sr-profile-modal')).toBeHidden();
+    await expect(page.locator('#pf-select')).toHaveValue('');
+    await expect(page.locator('#cmb-drive')).toHaveValue('22');
+    await expect(page.locator('#country')).toBeEnabled();
+    const stored = await page.evaluate((id) => JSON.parse(localStorage.getItem('pfg_profile_' + id) || 'null'), before.id);
+    expect(stored.account).toEqual(before.account);
+});
+
+test('a spy report can go to a new profile of its own', async ({ page }) => {
+    await page.goto('/flight');
+    await importExport(page);
+    const before = await activeProfile(page);
+    await startReportImport(page);
+
+    await page.locator('#flight-sr-profile-name').fill('');
+    await page.locator('#flight-sr-profile-go').click();
+    await expect(page.locator('#flight-sr-profile-error')).toBeVisible();
+    await page.locator('#flight-sr-profile-name').fill('Pirate');
+    await expect(page.locator('#flight-sr-profile-new')).toBeChecked();
+    await page.locator('#flight-sr-profile-go').click();
+    await expect(page.locator('#flight-sr-profile-modal')).toBeHidden();
+
+    await expect(page.locator('#cmb-drive')).toHaveValue('22');
+    await expect(page.locator('#trader-bonus')).toBeChecked();
+    const created = await activeProfile(page);
+    expect(created.id).not.toBe(before.id);
+    expect(created.label).toBe('Pirate');
+    expect(created.universe).toEqual({ country: 'en', number: 1 });
+    expect(created.planets.map((p) => [p.name, p.coords])).toEqual([['swimbo', { galaxy: 4, system: 123, position: 7 }]]);
+    expect(created.account.values['research.115']).toEqual({ override: 22 });
+    await expect(page.locator('#pf-departure')).toHaveValue(created.planets[0].id);
+    // The profile that was active keeps its own account.
+    const old = await page.evaluate((id) => JSON.parse(localStorage.getItem('pfg_profile_' + id) || 'null'), before.id);
+    expect(old.account).toEqual(before.account);
+});
+
+test('cancelling the spy report choice imports nothing', async ({ page }) => {
+    await page.goto('/flight');
+    await importExport(page);
+    const before = await activeProfile(page);
+    await startReportImport(page);
+
+    await page.locator('#flight-sr-profile-modal .btn-secondary').click();
+    await expect(page.locator('#flight-sr-profile-modal')).toBeHidden();
+    await expect(page.locator('#pf-select')).toHaveValue(before.id);
+    await expect(page.locator('#cmb-drive')).toHaveValue('16');
+    await expect(page.locator('#departure-g')).toHaveValue('2');
+});

@@ -731,6 +731,38 @@
   </div>
 </div>
 
+<!-- Where a spy report goes while a profile is active -->
+<div class="modal fade" role="dialog" id="flight-sr-profile-modal" tabindex="-1" aria-labelledby="flight-sr-profile-label" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title fs-5" id="flight-sr-profile-label"><?= $l['sr-profile-hdr'] ?></h3>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="<?= $l['cancel'] ?>"></button>
+      </div>
+      <div class="modal-body">
+        <p class="small mb-2"><?= $l['sr-profile-text'] ?></p>
+        <div class="form-check mb-1">
+          <input id="flight-sr-profile-none" type="radio" name="flight-sr-profile" class="form-check-input" checked>
+          <label class="form-check-label" for="flight-sr-profile-none"><?= $l['sr-profile-none'] ?></label>
+        </div>
+        <div class="form-check mb-1">
+          <input id="flight-sr-profile-new" type="radio" name="flight-sr-profile" class="form-check-input">
+          <label class="form-check-label" for="flight-sr-profile-new"><?= $l['sr-profile-new'] ?></label>
+        </div>
+        <div class="d-flex align-items-center gap-2 ms-4">
+          <label for="flight-sr-profile-name"><?= $l['pf-name'] ?></label>
+          <input id="flight-sr-profile-name" type="text" maxlength="60" class="form-control form-control-sm">
+        </div>
+        <div id="flight-sr-profile-error" class="text-danger small mt-2 d-none" role="alert"></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><?= $l['cancel'] ?></button>
+        <button type="button" id="flight-sr-profile-go" class="btn btn-primary"><?= $l['pf-import-btn'] ?></button>
+      </div>
+    </div>
+  </div>
+</div>
+
     </div> <!-- End col-md-10 -->
   </div> <!-- End row -->
 </div> <!-- End container-fluid -->

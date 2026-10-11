@@ -637,7 +637,11 @@
     "own-api-import-title": "Importa",
     "own-api-bad-json-msg": "Impossibile leggere i dati.\\nAssicurati di aver incollato il testo dal campo API 2 della pagina «Flotta».",
     "import-failed-msg": "Impossibile caricare i dati.\\nIl server ha restituito una risposta non valida. Riprova più tardi.",
-    "populated-systems-failed-msg": "La mappa dei sistemi abitati non è disponibile, quindi nessun sistema viene contato come saltato. Puoi inserire il loro numero a mano."
+    "populated-systems-failed-msg": "La mappa dei sistemi abitati non è disponibile, quindi nessun sistema viene contato come saltato. Puoi inserire il loro numero a mano.",
+    "sr-profile-hdr": "Importa il rapporto di spionaggio",
+    "sr-profile-text": "È attivo un profilo. Il rapporto contiene le ricerche, la classe e i bonus del giocatore spiato, che non devono sovrascrivere il tuo profilo. Come vuoi importarlo?",
+    "sr-profile-none": "Passa a «Nessun profilo» e importa",
+    "sr-profile-new": "Crea un nuovo profilo per il rapporto"
   },
   "graviton": {
     "title": "OGame - Calcolatore per Gravitonica",

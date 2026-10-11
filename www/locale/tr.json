@@ -637,7 +637,11 @@
     "own-api-import-title": "İçe Aktar",
     "own-api-bad-json-msg": "Veriler okunamadı.\\n'Filo' sayfasındaki API 2 alanındaki metni yapıştırdığınızdan emin olun.",
     "import-failed-msg": "Veriler yüklenemedi.\\nSunucu geçersiz bir yanıt döndürdü. Lütfen daha sonra tekrar deneyin.",
-    "populated-systems-failed-msg": "Yerleşim bulunan sistemlerin haritası kullanılamıyor, bu yüzden hiçbir sistem atlanmış sayılmıyor. Sayılarını elle girebilirsiniz."
+    "populated-systems-failed-msg": "Yerleşim bulunan sistemlerin haritası kullanılamıyor, bu yüzden hiçbir sistem atlanmış sayılmıyor. Sayılarını elle girebilirsiniz.",
+    "sr-profile-hdr": "Casusluk raporunu içe aktar",
+    "sr-profile-text": "Bir profil etkin. Rapor, casusluk yapılan oyuncunun araştırmalarını, sınıfını ve bonuslarını içerir; bunlar profilinizin üzerine yazılmamalı. Nasıl içe aktarılsın?",
+    "sr-profile-none": "“Profil yok” seçeneğine geç ve içe aktar",
+    "sr-profile-new": "Rapor için yeni profil oluştur"
   },
   "graviton": {
     "title": "OGame - Gravitasyon Hesaplayıcı",
