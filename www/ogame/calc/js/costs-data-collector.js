@@ -106,9 +106,9 @@ class DataCollector {
       }
     }
 
-    // Determine whether to use direct lab level input or IRN calculation
-    // If resultingLabLevelComputed is false, user manually entered the lab level
-    params.useDirectLabLevel = !options.resultingLabLevelComputed;
+    // The research lab field is one planet's lab; the network counts only
+    // when the player switched it on
+    params.useIrn = this._getCheckbox('#use-irn');
   }
 
   /**
@@ -363,6 +363,9 @@ class DataCollector {
         'table-0-4', 'table-1-4'
       ],
 
+      // The research network decides the lab level research runs at
+      'use-irn': ['table-0-4', 'table-1-4'],
+
       // Research bonus affects research only
       'research-bonus': [
         'table-0-4', 'table-1-4'
@@ -439,7 +442,7 @@ class DataCollector {
       'booster', 'universe-speed', 'research-speed', 'technocrat',
       'research-bonus', 'robot-factory-level', 'nanite-factory-level',
       'shipyard-level', 'ion-tech-level', 'hyper-tech-level',
-      'class-0', 'class-1', 'class-2', 'is-trader', 'full-numbers',
+      'class-0', 'class-1', 'class-2', 'is-trader', 'full-numbers', 'use-irn',
       'lf-research-table', 'discoverer-class-bonus', 'lf-collector-class-bonus',
       'mineral-res-cntr-lvl', 'lf-terraformer-rdc',
       'sc-capacity-increase', 'lc-capacity-increase',

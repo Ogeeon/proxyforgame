@@ -94,7 +94,10 @@ class CostsCalculator {
     // 5. Show the robot/nanite factory disclaimer once if applicable
     this._maybeShowRobotNaniteDisclaimer();
 
-    // 6. Save state
+    // 6. The lab level the research network reaches
+    this._renderIrnResult();
+
+    // 7. Save state
     this.saveState();
 
     const elapsed = performance.now() - startTime;
@@ -282,7 +285,7 @@ class CostsCalculator {
    * @private
    */
   _maybeRaiseLabLevel(techId) {
-    if (options.resultingLabLevelComputed) {
+    if (this._params().useIrn) {
       return;
     }
 
@@ -548,6 +551,7 @@ class CostsCalculator {
       '#technocrat',
       '#research-bonus',
       '#full-numbers',
+      '#use-irn',
       '#geologist',
       '#engineer',
       '#admiral',
@@ -1127,6 +1131,8 @@ class CostsCalculator {
       this.recalculateRangeTab();
     }
 
+    this._renderIrnResult();
+
     // Save state
     this.saveState();
   }
@@ -1299,6 +1305,7 @@ class CostsCalculator {
       labLevels: params.labLevels,
       labChoice: params.labChoice,
       fullNumbers: params.fullNumbers,
+      useIrn: params.useIrn,
       mineralResCntrLvl: params.mineralResCntrLvl,
       lfTerraformerRdc: params.lfTerraformerRdc,
       discovererClassBonus: params.discovererClassBonus,
@@ -1441,6 +1448,7 @@ class CostsCalculator {
     setChecked('#commander', state.commander === true);
     setChecked('#research-bonus', state.researchBonus === true);
     setChecked('#full-numbers', state.fullNumbers === true);
+    setChecked('#use-irn', state.useIrn === true);
 
     // Class
     if (state.playerClass !== undefined) {
@@ -1556,6 +1564,7 @@ class CostsCalculator {
     setChecked('#commander', false);
     setChecked('#research-bonus', false);
     setChecked('#full-numbers', false);
+    setChecked('#use-irn', false);
 
     // Class
     setChecked('#class-0', true);
@@ -1848,6 +1857,19 @@ class CostsCalculator {
   }
 
   /**
+   * Show the lab level the research network reaches, and the button of the
+   * dialog that sets the network up, while the network is switched on.
+   * @private
+   */
+  _renderIrnResult() {
+    const params = this._params();
+    toggleClass('#irn-result', 'd-none', !params.useIrn);
+    toggleClass('#open-llc-dialog', 'd-none', !params.useIrn);
+    const el = $('#irn-result');
+    if (el && params.useIrn) el.textContent = String(params.getResultingLabLevel());
+  }
+
+  /**
    * Calculate and display IRN resulting lab level
    * @private
    */
@@ -1855,23 +1877,15 @@ class CostsCalculator {
     const irnLevel = this._getInputNumber('#irn-level');
     const planetCount = this._getInputNumber('#planetsSpin');
 
-    // First check if any radio button is selected
-    let haveSelection = false;
+    // The checked start planet, if any. With none the sum below starts on
+    // the best lab - the rule GlobalParams.getResultingLabLevel() applies too.
     for (let i = 1; i <= planetCount; i++) {
       if (getChecked(`#labchoice_${i}`)) {
-        haveSelection = true;
-        // Update lab choice in options
         if (options.prm) {
           options.prm.labChoice = i - 1;
         }
         break;
       }
-    }
-
-    // If no lab is selected, display "?" and return
-    if (!haveSelection) {
-      setHtml('#resulting-level', '<b>?</b>');
-      return;
     }
 
     // Collect lab levels
@@ -2150,7 +2164,6 @@ function setupIrnInputHandlers() {
     removeAllEvents(researchLabInput, 'keyup');
     addEvent(researchLabInput, 'keyup', (e) => {
       validateInputNumber.call(researchLabInput, e);
-      options.resultingLabLevelComputed = false;
       if (calculatorApp) {
         calculatorApp._handleParamChange('research-lab-level');
       }
@@ -2177,19 +2190,12 @@ function setupIrnModalHandlers(irnModal, planetsSpinInput) {
 }
 
 /**
- * Apply the IRN dialog result to the research-lab-level input.
+ * Confirming the IRN dialog switches the research network on. The research
+ * lab field keeps its own meaning - one planet's lab - and the level the
+ * network reaches shows next to it.
  */
 function applyIrnResult() {
-  const resultingLevelText = getTextContent('#resulting-level');
-  const resultingLevel = Number.parseInt(resultingLevelText, 10);
-
-  if (!Number.isNaN(resultingLevel)) {
-    setVal('#research-lab-level', resultingLevel);
-    options.resultingLabLevel = resultingLevel;
-    options.resultingLabLevelComputed = true;
-    calculatorApp.currentParams.researchLabLevel = resultingLevel;
-  }
-
+  setChecked('#use-irn', true);
   calculatorApp.currentParams = calculatorApp.collector.collectGlobalParams();
   calculatorApp.recalculateAll();
 }

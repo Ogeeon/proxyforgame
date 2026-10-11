@@ -95,7 +95,6 @@
       labChoice: -1
     };
     options.currPlanetsCount = 8;
-    options.resultingLabLevelComputed = false;
 
   </script>
 <?php require_once '../../cookies.tpl'; ?>
@@ -162,12 +161,17 @@
             </div>
             <div class="d-flex align-items-center gap-1">
               <label for="research-lab-level"><?= $l['research-lab'] ?></label>
-              <div class="d-flex gap-1">
-                <input id="research-lab-level" type="text" name="research-lab-level" class="form-control form-control-sm level-input" value="0">
-                <button id="open-llc-dialog" class="btn btn-outline-secondary btn-sm" type="button" data-bs-toggle="tooltip" title="<?= $l['calculate'] ?>">
-                  <i class="bi bi-calculator"></i>
-                </button>
-              </div>
+              <input id="research-lab-level" type="text" name="research-lab-level" class="form-control form-control-sm level-input" value="0">
+            </div>
+            <div class="d-flex align-items-center gap-1">
+              <input id="use-irn" type="checkbox" name="use-irn" class="form-check-input">
+              <label for="use-irn"><?= $l['irn'] ?></label>
+              <!-- The lab level the network reaches: computed, never typed into.
+                   It and the dialog's button show only while the network is on. -->
+              <span id="irn-result" class="form-control form-control-sm level-input d-inline-block ui-state-disabled d-none">0</span>
+              <button id="open-llc-dialog" class="btn btn-outline-secondary btn-sm d-none" type="button" data-bs-toggle="tooltip" title="<?= $l['calculate'] ?>">
+                <i class="bi bi-calculator"></i>
+              </button>
             </div>
           </div>
         </div>

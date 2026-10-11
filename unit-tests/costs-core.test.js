@@ -50,13 +50,13 @@ describe('calcBuildCost_C: astrophysics', () => {
 });
 
 /**
- * Global params with the IRN left unconfigured — the calculator's default state,
- * where the entered lab level is the only source of the resulting level.
+ * Global params with the research network switched off — the calculator's
+ * default state, where the entered lab level is the only source of the
+ * resulting level.
  * @param {Partial<any>} [overrides]
  */
 function directParams(overrides = {}) {
     const params = new GlobalParams();
-    params.useDirectLabLevel = true;
     params.labLevels = [0, 0, 0, 0, 0, 0, 0, 0];
     params.labChoice = -1;
     return Object.assign(params, overrides);
@@ -93,16 +93,46 @@ describe('Calculator.isResearchable', () => {
     });
 
     it('reads the level through the IRN sum, not off the entered field', () => {
-        // Same case as the getLabLevelRaiseTarget test below: the entered field
-        // is empty and the per-planet table is what the calculation uses.
+        // Same case as the getLabLevelRaiseTarget test below: with the network
+        // switched on the per-planet table is what the calculation uses.
         const irn = new GlobalParams();
-        irn.useDirectLabLevel = true;
+        irn.useIrn = true;
         irn.researchLabLevel = 0;
         irn.labLevels = [12, 10, 0, 0, 0, 0, 0, 0];
         irn.labChoice = 0;
         irn.irnLevel = 1;
 
         expect(calculator.isResearchable(199, irn)).toBe(true);
+    });
+});
+
+describe('GlobalParams.getResultingLabLevel', () => {
+    it('without the network takes the entered lab, 0 included, never the table', () => {
+        const params = directParams({ researchLabLevel: 0, labLevels: [12, 10, 0], labChoice: 0, irnLevel: 1 });
+        expect(params.getResultingLabLevel()).toBe(0);
+        expect(calculator.isResearchable(199, params)).toBe(false);
+    });
+
+    it('with the network takes the table alone, never the entered lab', () => {
+        const params = Object.assign(new GlobalParams(), {
+            useIrn: true, researchLabLevel: 20, labLevels: [0, 0, 0], labChoice: -1, irnLevel: 2,
+        });
+        expect(params.getResultingLabLevel()).toBe(0);
+        expect(calculator.isResearchable(106, params)).toBe(false);
+    });
+
+    it('with the network and no lab meeting the requirement, the research cannot run', () => {
+        const params = Object.assign(new GlobalParams(), {
+            useIrn: true, researchLabLevel: 20, labLevels: [5, 5, 5], labChoice: 0, irnLevel: 2,
+        });
+        expect(params.getResultingLabLevel(12)).toBe(0);
+    });
+
+    it('with no start chosen the network starts on the best lab', () => {
+        const params = Object.assign(new GlobalParams(), {
+            useIrn: true, labLevels: [4, 9, 7, 1], labChoice: -1, irnLevel: 1,
+        });
+        expect(params.getResultingLabLevel()).toBe(16);
     });
 });
 
@@ -135,12 +165,12 @@ describe('Calculator.getLabLevelRaiseTarget', () => {
     });
 
     it('reads the level through the IRN sum, not off the entered field', () => {
-        // The entered field is empty, so getResultingLabLevel() falls through to
-        // the per-planet table, where a lab of 12 already clears what the Graviton
-        // needs. Comparing against researchLabLevel alone would report a shortfall
-        // here and overwrite a configuration that is in fact sufficient.
+        // With the network switched on the per-planet table counts, where a lab
+        // of 12 already clears what the Graviton needs. Comparing against
+        // researchLabLevel alone would report a shortfall here and overwrite a
+        // configuration that is in fact sufficient.
         const irn = new GlobalParams();
-        irn.useDirectLabLevel = true;
+        irn.useIrn = true;
         irn.researchLabLevel = 0;
         irn.labLevels = [12, 10, 0, 0, 0, 0, 0, 0];
         irn.labChoice = 0;
@@ -153,7 +183,7 @@ describe('Calculator.getLabLevelRaiseTarget', () => {
         // Four labs of 5 sum to 20, but a research only starts on a lab that on
         // its own reaches the required level, so the IRN filter drops all four.
         const irn = new GlobalParams();
-        irn.useDirectLabLevel = true;
+        irn.useIrn = true;
         irn.researchLabLevel = 0;
         irn.labLevels = [5, 5, 5, 5, 0, 0, 0, 0];
         irn.labChoice = 0;
@@ -337,7 +367,6 @@ describe('Calculator.calculate - a research time measured in the game', () => {
         params.discovererClassBonus = 57.35;
         params.technocrat = true;
         params.researchSpeed = 20;          // economy 10 x research divisor 2
-        params.useDirectLabLevel = true;
         params.researchLabLevel = 340;      // 17 planets at lab 20, all in the IRN
         params.labChoice = -1;
         params.lfResTimeRdcMap = { [LASER_TECH]: 52.382 };

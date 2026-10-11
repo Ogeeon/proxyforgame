@@ -48,7 +48,7 @@ class GlobalParams {
   irnLevel = 0;
   labLevels = []; // Array of lab levels per planet
   labChoice = -1; // Index of planet that starts research
-  useDirectLabLevel = false; // If true, use researchLabLevel directly instead of IRN calculation
+  useIrn = false; // The research network is switched on: the lab table counts, not researchLabLevel
 
   // Display options
   fullNumbers = false;
@@ -120,13 +120,17 @@ class GlobalParams {
   }
 
   /**
-   * Calculate combined research lab level based on IRN
+   * The lab level research runs at. Without the research network it is the
+   * entered lab - one planet's, 0 included. With it, it is the network's sum,
+   * from the lab table alone: the start planet's lab plus the best others,
+   * IRN level + 1 labs in all, each of them reaching `minLevel` on its own
+   * (a research only runs on a lab that meets its requirement). With no start
+   * chosen the network starts on the best lab.
    * @param {number} minLevel - Minimum lab level required (for research requirements)
    * @returns {number} Total combined lab level
    */
   getResultingLabLevel(minLevel = 0) {
-    // If user manually entered a lab level (not from IRN calculation), use that directly
-    if (this.useDirectLabLevel && this.researchLabLevel > 0) {
+    if (!this.useIrn) {
       return this.researchLabLevel;
     }
 
@@ -138,10 +142,9 @@ class GlobalParams {
       }))
       .filter(lab => lab.level > 0 && (minLevel === 0 || lab.level >= minLevel));
 
-    // If no valid labs (all levels are 0), fall back to research-lab-level
-    // This matches the old system's behavior when IRN is not configured
+    // No lab of the network meets the requirement: the research cannot run
     if (validLabs.length === 0) {
-      return this.researchLabLevel;
+      return 0;
     }
 
     // Sort: selected lab first, then by level descending
