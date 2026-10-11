@@ -303,8 +303,8 @@ See `docs/agents/triage-labels.md`.
 
 ### Domain docs
 
-Single-context — one `CONTEXT.md` plus `docs/adr/` at the repo root; neither exists yet
-and both get created lazily. See `docs/agents/domain.md`.
+Single-context — one `CONTEXT.md` (the glossary) plus `docs/adr/` at the repo root; both
+grow lazily as terms and decisions get resolved. See `docs/agents/domain.md`.
 
 ### The `@claude` workflow
 

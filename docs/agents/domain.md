@@ -11,7 +11,7 @@ This repo is **single-context**: one `CONTEXT.md` and one `docs/adr/` at the roo
 
 If any of these files don't exist, **proceed silently**. Don't flag their absence; don't suggest creating them upfront. The `/domain-modeling` skill (reached via `/grill-with-docs` and `/improve-codebase-architecture`) creates them lazily when terms or decisions actually get resolved.
 
-Neither exists as of setup — that is expected, not a gap to fill.
+Both exist now and grow lazily: add a term or an ADR when one is actually resolved, not upfront.
 
 ## File structure
 
