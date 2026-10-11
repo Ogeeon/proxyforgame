@@ -51,9 +51,19 @@ profile.
 _Avoid_: server, when the settings are meant
 
 **Account export**:
-The JSON document the origin-exporter userscript produces from inside the game. It is the
-source of a profile's game layer.
+The JSON document that describes a whole account, produced from inside the game by the
+origin-exporter userscript or by the collector. It is the source of a profile's game layer.
 _Avoid_: dump, backup
+
+**Collector**:
+Our own code that runs on the game's pages, gathers the account export while the player
+plays, and hands it to the site.
+_Avoid_: exporter (that is origin-exporter), bot, crawler
+
+**Sync**:
+An import the site performs by itself when the collector has delivered an account export
+newer than the profile's game layer.
+_Avoid_: auto-import, refresh
 
 **API 2 export**:
 The one-line JSON the game shows on its Fleet page. It describes one planet's fleet and the
