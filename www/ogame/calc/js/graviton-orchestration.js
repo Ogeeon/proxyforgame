@@ -121,14 +121,14 @@ class GravitonApp {
 
   init() {
     options.load();
-    this._restoreFromState();
+    this.restoreFromState();
     this._applyConstraints();
     this._bindEvents();
     this._applyTheme();
     this.recalc();
   }
 
-  _restoreFromState() {
+  restoreFromState() {
     setVal('#shipyard-level', options.prm.shipyardLevel);
     setVal('#nanites-factory-level', options.prm.nanitesFactoryLevel);
     setVal('#universe-speed', options.prm.universeSpeed);
@@ -280,8 +280,8 @@ class GravitonApp {
     options.prm.deutAvailable = 0;
     options.prm.deutInDebris = false;
 
-    this._restoreFromState();
-    // _restoreFromState only checks the radio matching the restored class;
+    this.restoreFromState();
+    // restoreFromState only checks the radio matching the restored class;
     // make sure "none" is explicitly selected after a reset.
     setChecked('#player-class-0', true);
     this.recalc();

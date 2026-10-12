@@ -219,7 +219,7 @@ class GravitonProfiles {
     GRAVITON_PLANET_FIELDS.forEach((f) => {
       prm[f.prm] = planet ? f.toPrm(getProfileValue(planet, f.key)) : cloneData(this.ownPrm[f.prm]);
     });
-    this.app._restoreFromState();
+    this.app.restoreFromState();
     this.app.recalc();
     this.takeSnapshot();
   }
@@ -236,7 +236,7 @@ class GravitonProfiles {
       pfShow('#reset', true);
       pfShow('#pf-planet-box', false);
       Object.assign(options.prm, cloneData(this.ownPrm));
-      this.app._restoreFromState();
+      this.app.restoreFromState();
     } finally {
       this.applying = false;
     }
