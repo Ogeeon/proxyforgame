@@ -49,16 +49,14 @@ const QUEUE_TABS = [
   { tab: MOON_TAB, bodies: 'moons', levels: 'slm', fields: 'totFldMn', defaultFields: () => options.defMnFlds, lastKey: 'queue-moon' },
 ];
 
-class QueueProfiles {
+/** @extends {ProfileBinder<QueueCalculatorApp>} */
+class QueueProfiles extends ProfileBinder {
   /**
    * @param {ProfilesUi} pf
    * @param {QueueCalculatorApp} app
    */
   constructor(pf, app) {
-    this.pf = pf;
-    this.app = app;
-    /** @type {?string} The active profile's id while one is applied. */
-    this.profileId = null;
+    super(pf, app);
     /** @type {Record<number, ?string>} Per tab, the profile body it shows; null leaves the tab to the calculator. */
     this.bodyIds = { [PLANET_TAB]: null, [MOON_TAB]: null };
     /** @type {Record<string, *>} Account values (by profile key) at the last apply or sync. */
@@ -68,7 +66,6 @@ class QueueProfiles {
     /** @type {Record<string, *>} The profile-owned prm keys as the calculator has them. */
     this.ownPrm = {};
     this.ownSave = options.save;
-    this.applying = false;
     /** @type {?PfUniverseSetting} Set in init(). */
     this.speed = null;
   }
@@ -81,11 +78,6 @@ class QueueProfiles {
     this.pf.onChange((profile) => this.apply(profile));
     const active = this.pf.active();
     if (active) this.apply(active);
-  }
-
-  /** @returns {?Profile} */
-  profile() {
-    return this.profileId ? this.pf.store.get(this.profileId) : null;
   }
 
   /** The options.prm keys the profile may own. */
@@ -186,14 +178,9 @@ class QueueProfiles {
     setVal('#total-fields-' + t.tab, pfNum(this.ownPrm[t.fields]) || t.defaultFields());
   }
 
-  /** Back to the calculator's own settings. */
-  leave() {
-    if (this.profileId === null) return;
-    this.profileId = null;
+  restoreOwn() {
     this.bodyIds = { [PLANET_TAB]: null, [MOON_TAB]: null };
-    this.pf.clearMarks();
     this.speed?.detach();
-    pfShow('#reset', true);
     QUEUE_TABS.forEach((t) => pfShow('#pf-body-box-' + t.tab, false));
     const prm = options.prm;
     Object.assign(prm, cloneData(this.ownPrm));
@@ -207,6 +194,9 @@ class QueueProfiles {
       levels.forEach((/** @type {number[]} */ [techId, level]) => setVal('#startlvl-' + t.tab + '-' + techId, level));
       setVal('#total-fields-' + t.tab, prm[t.fields]);
     });
+  }
+
+  recalc() {
     this.app.refreshBoth();
   }
 
@@ -230,14 +220,8 @@ class QueueProfiles {
   // Calculator -> profile
   // -------------------------------------------------------------------------
 
-  save() {
-    if (this.profileId === null) {
-      this.ownSave();
-      return;
-    }
-    if (this.applying) return;
-    this.sync();
-    this.saveOwn();
+  saveWithoutProfile() {
+    this.ownSave();
   }
 
   /** Write what changed since the last snapshot into the profile. */
@@ -372,9 +356,7 @@ class QueueProfiles {
  * @returns {?QueueProfiles}
  */
 function initQueueProfiles() {
-  if (!pfgProfiles || !queueApp) return null;
-  queueProfiles = new QueueProfiles(pfgProfiles, queueApp);
-  queueProfiles.init();
+  queueProfiles = pfBind(QueueProfiles, queueApp);
   return queueProfiles;
 }
 
