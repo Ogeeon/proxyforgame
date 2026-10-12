@@ -19,16 +19,6 @@
 'use strict';
 
 /**
- * @typedef {Object} QueueAccountField
- * @property {string} key Profile value key.
- * @property {string} prm Key in options.prm.
- * @property {string} input Selector of the field that shows it.
- * @property {(prm: Record<string, any>) => *} get The profile value the prm holds.
- * @property {(value: *) => void} show Put a profile value (or undefined) into the form.
- * @property {(value: *) => string} [display] The game value as shown in the mark.
- */
-
-/**
  * @typedef {Object} QueueTab
  * @property {number} tab PLANET_TAB or MOON_TAB.
  * @property {'planets'|'moons'} bodies Where the profile keeps this kind of body.
@@ -38,14 +28,10 @@
  * @property {string} lastKey Calculator name under which the last choice is remembered.
  */
 
-/** @type {QueueAccountField[]} */
+/** @type {ProfilePrmField[]} */
 const QUEUE_ACCOUNT_FIELDS = [
-  ...[['research.121', 'ionTechLevel', '#ion-tech-level'], ['research.114', 'hyperTechLevel', '#hyper-tech-level']]
-    .map(([key, prm, input]) => ({
-      key, prm, input,
-      get: (/** @type {Record<string, any>} */ p) => pfNum(p[prm]),
-      show: (/** @type {*} */ v) => setVal(input, pfNum(v)),
-    })),
+  pfLevelField('research.121', 'ionTechLevel', '#ion-tech-level'),
+  pfLevelField('research.114', 'hyperTechLevel', '#hyper-tech-level'),
   {
     // The queue has no "no class": a profile without one shows as collector.
     key: 'class', prm: 'playerClass', input: '#player-class-0',
@@ -53,12 +39,8 @@ const QUEUE_ACCOUNT_FIELDS = [
     show: (v) => setChecked('#player-class-' + Math.min(2, Math.max(0, pfNum(v) - 1)), true),
     display: (v) => pfLabelFor('player-class-' + (pfNum(v) - 1)),
   },
-  ...[['lf.ship.202.cargo', 'scCapacityIncrease', '#sc-capacity-increase'], ['lf.ship.203.cargo', 'lcCapacityIncrease', '#lc-capacity-increase']]
-    .map(([key, prm, input]) => ({
-      key, prm, input,
-      get: (/** @type {Record<string, any>} */ p) => pfNum(p[prm]),
-      show: (/** @type {*} */ v) => setNumVal(input, pfNum(v)),
-    })),
+  pfPercentField('lf.ship.202.cargo', 'scCapacityIncrease', '#sc-capacity-increase'),
+  pfPercentField('lf.ship.203.cargo', 'lcCapacityIncrease', '#lc-capacity-increase'),
 ];
 
 /** @type {QueueTab[]} */

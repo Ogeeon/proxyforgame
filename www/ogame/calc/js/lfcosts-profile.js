@@ -22,52 +22,10 @@
 
 'use strict';
 
-/**
- * @typedef {Object} LfCostsField
- * @property {string} key Profile value key.
- * @property {string} prm Key in options.prm.
- * @property {string} input Selector of the field that shows it.
- * @property {(prm: Record<string, any>) => *} get The profile value the prm holds.
- * @property {(value: *) => void} show Put a profile value (or undefined) into the form.
- * @property {(value: *) => string} [display] The game value as shown in the mark.
- */
-
-/**
- * A whole-number field.
- *
- * @param {string} key
- * @param {string} prm
- * @param {string} input
- * @returns {LfCostsField}
- */
-function lfCostsLevelField(key, prm, input) {
-  return {
-    key, prm, input,
-    get: (p) => pfNum(p[prm]),
-    show: (v) => setVal(input, pfNum(v)),
-  };
-}
-
-/**
- * A percentage field, shown with the locale's decimal separator.
- *
- * @param {string} key
- * @param {string} prm
- * @param {string} input
- * @returns {LfCostsField}
- */
-function lfCostsPercentField(key, prm, input) {
-  return {
-    key, prm, input,
-    get: (p) => pfNum(p[prm]),
-    show: (v) => setNumVal(input, pfNum(v)),
-  };
-}
-
-/** @type {LfCostsField[]} */
+/** @type {ProfilePrmField[]} */
 const LFCOSTS_ACCOUNT_FIELDS = [
-  lfCostsLevelField('research.121', 'ionTechLevel', '#ion-tech-level'),
-  lfCostsLevelField('research.114', 'hyperTechLevel', '#hyper-tech-level'),
+  pfLevelField('research.121', 'ionTechLevel', '#ion-tech-level'),
+  pfLevelField('research.114', 'hyperTechLevel', '#hyper-tech-level'),
   {
     // The calculator has no "no class": a profile without one shows as collector.
     key: 'class', prm: 'playerClass', input: '#class-0',
@@ -75,13 +33,13 @@ const LFCOSTS_ACCOUNT_FIELDS = [
     show: (v) => setChecked('#class-' + Math.min(2, Math.max(0, pfNum(v) - 1)), true),
     display: (v) => pfLabelFor('class-' + (pfNum(v) - 1)),
   },
-  lfCostsPercentField('lf.ship.202.cargo', 'capIncrSC', '#sc-capacity-increase'),
-  lfCostsPercentField('lf.ship.203.cargo', 'capIncrLC', '#lc-capacity-increase'),
+  pfPercentField('lf.ship.202.cargo', 'capIncrSC', '#sc-capacity-increase'),
+  pfPercentField('lf.ship.203.cargo', 'capIncrLC', '#lc-capacity-increase'),
   // The game lists the reduction of life-form research under one of them,
   // 11201, and sums only the global bonuses there (Research Speed techs): the
   // planet's third building is not in it, the calculator adds that itself.
-  lfCostsPercentField('lf.cost.11201.cost', 'researchCostReduction', '#research-cost-reduction'),
-  lfCostsPercentField('lf.cost.11201.time', 'researchTimeReduction', '#research-time-reduction'),
+  pfPercentField('lf.cost.11201.cost', 'researchCostReduction', '#research-cost-reduction'),
+  pfPercentField('lf.cost.11201.time', 'researchTimeReduction', '#research-time-reduction'),
   {
     key: 'rates', prm: 'rates', input: '#exchange-rates-m',
     get: (p) => (Array.isArray(p.rates) ? p.rates.map(Number) : DEFAULT_RATES.slice()),
@@ -96,15 +54,15 @@ const LFCOSTS_ACCOUNT_FIELDS = [
 
 /** The fields of the planet picked in #pf-planet, its life form aside. */
 const LFCOSTS_PLANET_FIELDS = [
-  lfCostsLevelField('building.14', 'robotFactoryLevel', '#robot-factory-level'),
-  lfCostsLevelField('building.15', 'naniteFactoryLevel', '#nanite-factory-level'),
-  lfCostsLevelField('lf.building.' + lfBuildingGameId(2, 8), 'megalithLvl', '#megalith-level'),
-  lfCostsLevelField('lf.building.' + lfBuildingGameId(2, 11), 'mineralResCntrLvl', '#mrc-level'),
+  pfLevelField('building.14', 'robotFactoryLevel', '#robot-factory-level'),
+  pfLevelField('building.15', 'naniteFactoryLevel', '#nanite-factory-level'),
+  pfLevelField('lf.building.' + lfBuildingGameId(2, 8), 'megalithLvl', '#megalith-level'),
+  pfLevelField('lf.building.' + lfBuildingGameId(2, 11), 'mineralResCntrLvl', '#mrc-level'),
   // Each race's third building cuts the cost and time of life-form research.
-  lfCostsLevelField('lf.building.' + lfBuildingGameId(1, 3), 'resCentreLvl', '#research-centre-level'),
-  lfCostsLevelField('lf.building.' + lfBuildingGameId(2, 3), 'runeTechLvl', '#rune-tech-level'),
-  lfCostsLevelField('lf.building.' + lfBuildingGameId(3, 3), 'rbtResCentreLvl', '#rbt-res-centre-level'),
-  lfCostsLevelField('lf.building.' + lfBuildingGameId(4, 3), 'vortexChamberLvl', '#vortex-chamber-level'),
+  pfLevelField('lf.building.' + lfBuildingGameId(1, 3), 'resCentreLvl', '#research-centre-level'),
+  pfLevelField('lf.building.' + lfBuildingGameId(2, 3), 'runeTechLvl', '#rune-tech-level'),
+  pfLevelField('lf.building.' + lfBuildingGameId(3, 3), 'rbtResCentreLvl', '#rbt-res-centre-level'),
+  pfLevelField('lf.building.' + lfBuildingGameId(4, 3), 'vortexChamberLvl', '#vortex-chamber-level'),
 ];
 
 /** The planet's life form: a race, or 0 when none lives there. */

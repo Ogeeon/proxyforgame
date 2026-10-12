@@ -20,12 +20,15 @@
 'use strict';
 
 /**
- * @typedef {Object} FlightAccountField
- * @property {string} key Profile value key.
- * @property {() => ?HTMLElement} input The field that shows it.
- * @property {(prm: Record<string, any>) => *} get The profile value the prm holds.
- * @property {(prm: Record<string, any>, value: *) => void} set Put a profile value (or undefined) into the prm.
- * @property {(value: *) => string} [display] The game value as shown in the mark.
+ * A field of the flight calculator: it writes straight into options.prm.
+ *
+ * @typedef {ProfileFieldBase & {
+ *   input: () => ?HTMLElement,
+ *   get: (prm: Record<string, any>) => *,
+ *   set: (prm: Record<string, any>, value: *) => void,
+ * }} FlightAccountField
+ * input: the field that shows it; get: the profile value the prm holds; set: put a profile value (or
+ * undefined) into the prm.
  */
 
 /** Life-form bonus columns of #lf-ships-bonuses, in cell order. */

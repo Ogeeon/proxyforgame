@@ -97,6 +97,38 @@ function pfLockSelect(el, locked, title = '') {
 }
 
 /**
+ * A whole-number field of a calculator that keeps its settings in options.prm.
+ *
+ * @param {string} key Profile value key.
+ * @param {string} prm
+ * @param {string} input Selector.
+ * @returns {ProfilePrmField}
+ */
+function pfLevelField(key, prm, input) {
+  return {
+    key, prm, input,
+    get: (p) => pfNum(p[prm]),
+    show: (v) => setVal(input, pfNum(v)),
+  };
+}
+
+/**
+ * A percentage field, shown with the locale's decimal separator.
+ *
+ * @param {string} key Profile value key.
+ * @param {string} prm
+ * @param {string} input Selector.
+ * @returns {ProfilePrmField}
+ */
+function pfPercentField(key, prm, input) {
+  return {
+    key, prm, input,
+    get: (p) => pfNum(p[prm]),
+    show: (v) => setNumVal(input, pfNum(v)),
+  };
+}
+
+/**
  * A profile value as text, for a key no calculator described: a flag as a
  * tick or a dash, a list (exchange rates) joined with colons.
  *

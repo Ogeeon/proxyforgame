@@ -28,13 +28,16 @@
 'use strict';
 
 /**
- * @typedef {Object} CostsField
- * @property {string} key Profile value key.
- * @property {?string} state Key in the calculator's stored state; null for the research bonuses table.
- * @property {() => ?HTMLElement} input The field that shows it.
- * @property {(p: GlobalParams) => *} get The profile value the parameters hold.
- * @property {(value: *) => void} show Put a profile value (or undefined) into the form.
- * @property {(value: *) => string} [display] The game value as shown in the mark.
+ * A field of the cost calculator: read from its parameters, not from options.prm.
+ *
+ * @typedef {ProfileFieldBase & {
+ *   state: ?string,
+ *   input: () => ?HTMLElement,
+ *   get: (p: GlobalParams) => *,
+ *   show: (value: *) => void,
+ * }} CostsField
+ * state: key in the calculator's stored state, null for the research bonuses table; input: the field that
+ * shows it; get: the profile value the parameters hold; show: put a profile value (or undefined) into the form.
  */
 
 /**

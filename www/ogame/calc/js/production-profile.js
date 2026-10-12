@@ -22,17 +22,7 @@ const PRODUCTION_LOCAL_KEYS = ['universeSpeed', 'maxTempEntered', 'onePlnExtView
 /** Where the calculator fields go while a profile is active. */
 const PRODUCTION_PROFILE_OPTIONS_KEY = 'options_production_profile';
 
-/**
- * @typedef {Object} ProductionAccountField
- * @property {string} prm Key in options.prm.
- * @property {string} key Profile value key.
- * @property {string} input Selector of the field that shows it.
- * @property {(v: *) => *} toPrm Profile value (or undefined) to the prm value.
- * @property {(v: *) => *} fromPrm prm value to the profile value.
- * @property {(v: *) => string} [display] The game value as shown in the mark.
- */
-
-/** @type {ProductionAccountField[]} */
+/** @type {ProfileConvField[]} */
 const PRODUCTION_ACCOUNT_FIELDS = [
   { prm: 'energyTechLevel', key: 'research.113', input: '#energy-tech-level', toPrm: pfNum, fromPrm: pfNum },
   { prm: 'plasmaTechLevel', key: 'research.122', input: '#plasma-tech-level', toPrm: pfNum, fromPrm: pfNum },

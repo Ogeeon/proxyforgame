@@ -25,23 +25,13 @@
 'use strict';
 
 /**
- * @typedef {Object} GravitonField
- * @property {string} key Profile value key.
- * @property {string} prm Key in options.prm.
- * @property {string} input Selector of the field that shows it.
- * @property {(v: *) => *} toPrm Profile value (or undefined) to the prm value.
- * @property {(v: *) => *} fromPrm prm value to the profile value.
- * @property {(v: *) => string} [display] The game value as shown in the mark.
- */
-
-/**
  * A number field: a level, a count, a temperature or a percentage.
  *
  * @param {string} key
  * @param {string} prm
  * @param {string} input
  * @param {number} [def] The value when the profile has none.
- * @returns {GravitonField}
+ * @returns {ProfileConvField}
  */
 function gravitonNumField(key, prm, input, def = 0) {
   return {
@@ -51,7 +41,7 @@ function gravitonNumField(key, prm, input, def = 0) {
   };
 }
 
-/** @type {GravitonField[]} */
+/** @type {ProfileConvField[]} */
 const GRAVITON_ACCOUNT_FIELDS = [
   gravitonNumField('research.113', 'energyTechLevel', '#energy-tech-level'),
   gravitonNumField('research.114', 'hyperTechLevel', '#hyper-tech-level'),
@@ -285,7 +275,7 @@ class GravitonProfiles {
     let changed = false;
     /**
      * @param {{values: LayeredValues}} entity
-     * @param {GravitonField} f
+     * @param {ProfileConvField} f
      * @param {string} snapKey
      */
     const syncValue = (entity, f, snapKey) => {

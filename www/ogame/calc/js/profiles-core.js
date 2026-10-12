@@ -218,6 +218,43 @@ function sameUniverse(a, b) {
 }
 
 /**
+ * What every calculator's profile field has: the profile value key it shows,
+ * and how its game value reads in the "in game" mark (default: the value
+ * as text).
+ *
+ * @typedef {Object} ProfileFieldBase
+ * @property {string} key Profile value key.
+ * @property {(value: *) => string} [display] The game value as shown in the mark.
+ */
+
+/**
+ * A field that reads and writes a calculator's settings object (options.prm)
+ * through its own getter and setter.
+ *
+ * @typedef {ProfileFieldBase & {
+ *   prm: string,
+ *   input: string,
+ *   get: (prm: Record<string, any>) => *,
+ *   show: (value: *) => void,
+ * }} ProfilePrmField
+ * prm: key in options.prm; input: selector of the field that shows it; get: the profile value the prm holds;
+ * show: put a profile value (or undefined) into the form.
+ */
+
+/**
+ * A field that converts between a profile value and a settings value.
+ *
+ * @typedef {ProfileFieldBase & {
+ *   prm: string,
+ *   input: string,
+ *   toPrm: (v: *) => *,
+ *   fromPrm: (v: *) => *,
+ * }} ProfileConvField
+ * prm: key in options.prm; input: selector of the field that shows it; toPrm: profile value (or undefined)
+ * to the prm value; fromPrm: prm value to the profile value.
+ */
+
+/**
  * A stored or typed value as a number; anything that is not one is 0.
  *
  * @param {*} v
