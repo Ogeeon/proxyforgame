@@ -1032,6 +1032,40 @@ test('"no profile" gives the LF costs their own values back', async ({ page }) =
     await expect(page.locator('#reset')).toBeVisible();
 });
 
+test('LF costs fill in the planet levels as the start levels, unbound', async ({ page }) => {
+    await page.goto('/lfcosts');
+    await importExport(page);
+
+    // Alpha is human: 11101 is the Residential Sector, 1001 here.
+    expect(await rowLevels(page, 'table-1-1', 1001)).toEqual(['40', '40']);
+    expect(await rowLevels(page, 'table-1-1', 1003)).toEqual(['10', '10']);
+    await page.locator('#tabtag-2').click();
+    await page.locator('#tech-types-select').selectOption('1001');
+    await expect(page.locator('#tab2-from-level')).toHaveValue('40');
+    await expect(page.locator('#tab2-to-level')).toHaveValue('41');
+
+    // A research added to the multi-level table starts from the planet's level.
+    await page.locator('#tabtag-1').click();
+    await page.locator('#tabtag-1-2').click();
+    await page.locator('#research-race-dd-1').selectOption('1');
+    await page.locator('#research-select-1').selectOption('1101');
+    await page.locator('#research-add-btn-1').click();
+    expect(await rowLevels(page, 'table-1-2', 1101)).toEqual(['8', '8']);
+
+    const from = page.locator('#table-1-1 tr').nth(1).locator('input').first();
+    await page.locator('#tabtag-1-1').click();
+    await from.fill('30');
+    await from.blur();
+    await expect(from).not.toHaveClass(/pf-bound/);
+    await expect(page.locator('#pf-overrides')).toBeHidden();
+    const profile = await activeProfile(page);
+    expect(profile.planets[0].values['lf.building.11101']).toEqual({ game: 40 });
+
+    await page.locator('#tabtag-2').click();
+    await page.locator('#tech-types-select').selectOption('1101');
+    await expect(page.locator('#tab2-from-level')).toHaveValue('8');
+});
+
 test('graviton takes the account and a planet from the profile', async ({ page }) => {
     await page.goto('/graviton');
     await importExport(page);

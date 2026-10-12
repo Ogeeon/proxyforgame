@@ -13,8 +13,11 @@
 //   - sync(): options.prm -> profile, called from options.save(), writing only
 //     what changed since the last apply or sync, so a lossy mapping (a profile
 //     with no class shows as collector here) never becomes an override.
-// A profile with no planet leaves the planet's fields to the calculator, and so
-// does a planet with no life form for the race. The build tables and the
+// The planet's life-form building and research levels are filled in as the
+// "from" levels of the build tables, for convenience only: they are not bound,
+// so an edit there stays the calculator's. A profile with no planet leaves the
+// planet's fields to the calculator, and so does a planet with no life form for
+// the race. The build tables and the
 // available resources are the calculator's own
 // and keep going to options_lfcosts; the profile-owned keys are written there
 // with the values they had before the profile, so "no profile" shows them
@@ -65,6 +68,25 @@ const LFCOSTS_PLANET_FIELDS = [
   pfLevelField('lf.building.' + lfBuildingGameId(4, 3), 'vortexChamberLvl', '#vortex-chamber-level'),
 ];
 
+/**
+ * A technology's game id is its id in this calculator plus this: building
+ * 1001 is 11101, research 1101 is 11201.
+ */
+const LFCOSTS_GAME_ID_OFFSET = 10100;
+
+/**
+ * The profile key of a technology of this calculator: a building below x100,
+ * a research from it.
+ *
+ * @param {number} techId
+ */
+function lfCostsProfileKey(techId) {
+  return (techId % 1000 < 100 ? 'lf.building.' : 'lf.research.') + (techId + LFCOSTS_GAME_ID_OFFSET);
+}
+
+/** The multi-level build tables, buildings and researches, whose "from" levels the planet fills in. */
+const LFCOSTS_START_TABLES = ['#table-1-1', '#table-1-2'];
+
 /** The planet's life form: a race, or 0 when none lives there. */
 const LFCOSTS_RACE_KEY = 'lf.race';
 
@@ -103,6 +125,20 @@ class LfCostsProfiles extends ProfileBinder {
     options.save = () => this.save();
     this.speed = new PfUniverseSetting(this.pf, PF_UNIVERSE_SPEED, '#universe-speed', () => this.app.handleParamChange());
     addEvent('#pf-planet', 'change', () => this.planetChosen());
+    // Runs after the calculator's own handler, which is bound first.
+    addEvent('#tech-types-select', 'change', () => {
+      const planet = this.planet(this.profile());
+      if (!planet) return;
+      this.fillRangeStart(planet);
+      this.app.updateTab3();
+    });
+    // A research added to the multi-level table starts from the planet's level.
+    const addResearchRow = this.app.addResearchRow.bind(this.app);
+    this.app.addResearchRow = (outerTab) => {
+      addResearchRow(outerTab);
+      const planet = this.planet(this.profile());
+      if (planet && outerTab === 1) this.fillStartLevels(planet);
+    };
     this.pf.onChange((profile) => this.apply(profile));
     const active = this.pf.active();
     if (active) this.apply(active);
@@ -149,6 +185,7 @@ class LfCostsProfiles extends ProfileBinder {
       this.renderPlanetSelect(profile);
       this.showPlanet(profile);
       this.recalculate();
+      this.fillPlanetStart(profile);
       this.takeSnapshot();
     } finally {
       this.applying = false;
@@ -188,6 +225,54 @@ class LfCostsProfiles extends ProfileBinder {
     LFCOSTS_PLANET_FIELDS.forEach((f) => f.show(planet ? getProfileValue(planet, f.key, 0) : this.ownPrm[f.prm]));
     const race = planet ? lfCostsPlanetRace(planet) : null;
     setVal('#race-selector', race ?? (pfNum(this.ownPrm.race) || 1));
+  }
+
+  /** @param {Profile} profile */
+  fillPlanetStart(profile) {
+    const planet = this.planet(profile);
+    if (!planet) return;
+    this.fillStartLevels(planet);
+    this.fillRangeStart(planet);
+    this.app.updateTab3();
+  }
+
+  /**
+   * Fill in the planet's levels as the "from" levels of the multi-level
+   * tables. A "to" below the new "from" is raised to it, so the row stays idle
+   * rather than turning into a demolition. A row that changed is recalculated.
+   *
+   * @param {ProfilePlanet} planet
+   */
+  fillStartLevels(planet) {
+    LFCOSTS_START_TABLES.forEach((table) => {
+      getTableRows(table).forEach((row) => {
+        if (!(row instanceof HTMLTableRowElement)) return;
+        const techId = Number.parseInt(row.cells[0]?.textContent ?? '', 10);
+        const from = row.cells[2]?.querySelector('input');
+        const to = row.cells[3]?.querySelector('input');
+        if (!techId || !from || !to) return;
+        const level = pfNum(getProfileValue(planet, lfCostsProfileKey(techId), 0));
+        const toLevel = Math.max(level, Number.parseInt(to.value, 10) || 0);
+        if (String(level) === from.value && String(toLevel) === to.value) return;
+        from.value = String(level);
+        to.value = String(toLevel);
+        this.app.handleRowChange(from);
+      });
+    });
+  }
+
+  /**
+   * Fill in the range tab's "from" with the planet's level of the technology
+   * picked there, and raise "to" to the next level when it is not above it.
+   *
+   * @param {ProfilePlanet} planet
+   */
+  fillRangeStart(planet) {
+    const techId = Number.parseInt(getVal('#tech-types-select'), 10);
+    if (!techId) return;
+    const level = pfNum(getProfileValue(planet, lfCostsProfileKey(techId), 0));
+    setVal('#tab2-from-level', level);
+    if ((Number.parseInt(getVal('#tab2-to-level'), 10) || 0) <= level) setVal('#tab2-to-level', level + 1);
   }
 
   /** Recalculate every table after the form was filled from outside. */
@@ -291,6 +376,7 @@ class LfCostsProfiles extends ProfileBinder {
     try {
       this.showPlanet(profile);
       this.recalculate();
+      this.fillPlanetStart(profile);
       this.takeSnapshot();
     } finally {
       this.applying = false;
