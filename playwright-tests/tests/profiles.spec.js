@@ -98,6 +98,34 @@ test('an edit becomes an override that can be restored', async ({ page }) => {
     expect(profile.planets[0].values['building.1']).toEqual({ game: 30 });
 });
 
+test('the restore button has a Bootstrap tooltip that goes with it', async ({ page }) => {
+    await page.goto('/production');
+    await importExport(page);
+    await metalMineInput(page).fill('31');
+    await metalMineInput(page).blur();
+
+    const reset = page.locator('#one-planet-prod .pf-reset').first();
+    await reset.hover();
+    await expect(page.locator('.tooltip')).toContainText('In game: 30');
+    await reset.click();
+    await expect(page.locator('.tooltip')).toHaveCount(0);
+});
+
+test('the buttons of the manage dialog have a tooltip that goes with the row', async ({ page }) => {
+    await page.goto('/production');
+    await importExport(page);
+    await chooseAction(page, '__manage');
+
+    const del = page.locator('#pf-manage-rows tr').first().locator('button').nth(1);
+    await del.hover();
+    await expect(page.locator('.tooltip')).toContainText('Delete');
+    await del.click();
+    await expect(page.locator('.tooltip')).toHaveCount(0);
+    await page.locator('.modal.show:not([id^="pf-"]) .btn-primary').click();
+    await expect(page.locator('#pf-manage-rows tr')).toHaveCount(0);
+    await expect(page.locator('.tooltip')).toHaveCount(0);
+});
+
 test('the overrides badge restores only the ticked values', async ({ page }) => {
     await page.goto('/production');
     await importExport(page);

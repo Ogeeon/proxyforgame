@@ -45,6 +45,30 @@ function pfShow(selector, visible) {
 }
 
 /**
+ * Give an element a Bootstrap tooltip (and the same text as its accessible
+ * name), or change the text of the one it has.
+ *
+ * @param {HTMLElement} el
+ * @param {string} title
+ */
+function pfTooltip(el, title) {
+  el.setAttribute('aria-label', title);
+  el.dataset.bsTitle = title;
+  bootstrap.Tooltip.getOrCreateInstance(el).setContent({ '.tooltip-inner': title });
+}
+
+/**
+ * Release the tooltips of an element and of everything inside it. Must run
+ * before the element leaves the DOM, or its bubble stays behind in <body>.
+ *
+ * @param {ParentNode & Element} root
+ */
+function pfDropTooltips(root) {
+  bootstrap.Tooltip.getInstance(root)?.dispose();
+  root.querySelectorAll('[data-bs-title]').forEach((el) => bootstrap.Tooltip.getInstance(el)?.dispose());
+}
+
+/**
  * A profile value as text, for a key no calculator described: a flag as a
  * tick or a dash, a list (exchange rates) joined with colons.
  *
@@ -288,7 +312,10 @@ class ProfilesUi {
     const next = anchor.nextElementSibling;
     const existing = next instanceof HTMLButtonElement && next.classList.contains('pf-reset') ? next : null;
     if (!differs) {
-      if (existing) existing.remove();
+      if (existing) {
+        pfDropTooltips(existing);
+        existing.remove();
+      }
       return;
     }
     const title = pfFormat(this.text.inGame, gameText) + ' - ' + this.text.resetValue;
@@ -299,9 +326,12 @@ class ProfilesUi {
       button.innerHTML = '<i class="bi bi-arrow-counterclockwise" aria-hidden="true"></i>';
       anchor.after(button);
     }
-    button.title = title;
-    button.setAttribute('aria-label', title);
-    button.onclick = restore;
+    pfTooltip(button, title);
+    // Restoring redraws the marks and removes this button, so its bubble goes first.
+    button.onclick = () => {
+      pfDropTooltips(button);
+      restore();
+    };
   }
 
   /**
@@ -310,7 +340,10 @@ class ProfilesUi {
    * @param {ParentNode} [root]
    */
   clearMarks(root = document) {
-    root.querySelectorAll('.pf-reset').forEach((b) => b.remove());
+    root.querySelectorAll('.pf-reset').forEach((b) => {
+      pfDropTooltips(b);
+      b.remove();
+    });
     root.querySelectorAll('.pf-bound').forEach((el) => el.classList.remove('pf-bound', 'pf-differs'));
   }
 
@@ -368,8 +401,7 @@ class ProfilesUi {
     badge.classList.toggle('d-none', count === 0);
     badge.textContent = String(count);
     const title = pfFormat(this.text.overrides, count) + ' - ' + this.text.resetAll;
-    badge.setAttribute('title', title);
-    badge.dataset.bsOriginalTitle = title;
+    pfTooltip(badge, title);
     badge.setAttribute('role', 'button');
     badge.onclick = () => this.openReset();
   }
@@ -655,6 +687,7 @@ class ProfilesUi {
   renderManage() {
     const body = document.getElementById('pf-manage-rows');
     if (!body) return;
+    pfDropTooltips(body);
     body.innerHTML = '';
     const profiles = this.store.getAll();
     profiles.forEach((p) => {
@@ -705,10 +738,12 @@ class ProfilesUi {
     const button = document.createElement('button');
     button.type = 'button';
     button.className = 'btn btn-outline-secondary btn-sm ms-1';
-    button.title = title;
-    button.setAttribute('aria-label', title);
     button.innerHTML = '<i class="bi ' + icon + '" aria-hidden="true"></i>';
-    button.addEventListener('click', onClick);
+    pfTooltip(button, title);
+    button.addEventListener('click', () => {
+      pfDropTooltips(button);
+      onClick();
+    });
     return button;
   }
 
