@@ -565,7 +565,9 @@ test('the queue takes the account, a planet and its moon from the profile', asyn
     await expect(page.locator('#startlvl-2-1')).toHaveValue('30');
     await expect(page.locator('#startlvl-2-33')).toHaveValue('5');
     await expect(page.locator('#total-fields-2')).toHaveValue('246');
-    await expect(page.locator('#startlvl-2-1')).toHaveClass(/pf-bound/);
+    await expect(page.locator('#total-fields-2')).toHaveClass(/pf-bound/);
+    // The start levels are filled in, not bound.
+    await expect(page.locator('#startlvl-2-1')).not.toHaveClass(/pf-bound/);
 
     await page.locator('#tabtag-3').click();
     await expect(page.locator('#pf-body-3 option')).toHaveCount(1);
@@ -578,21 +580,27 @@ test('the queue takes the account, a planet and its moon from the profile', asyn
     await expect(page.locator('#pf-overrides')).toBeHidden();
 });
 
-test('a queue start level becomes an override of the planet', async ({ page }) => {
+test('a queue start level is not written back to the profile', async ({ page }) => {
     await page.goto('/queue');
     await importExport(page);
 
     await page.locator('#startlvl-2-1').fill('31');
     await page.locator('#startlvl-2-1').blur();
-    await expect(page.locator('#startlvl-2-1')).toHaveClass(/pf-differs/);
-    await expect(page.locator('#pf-overrides')).toHaveText('1');
-    let profile = await activeProfile(page);
-    expect(profile.planets[0].values['building.1']).toEqual({ game: 30, override: 31 });
-
-    await page.locator('#startlvl-2-1 + .pf-reset').click();
-    await expect(page.locator('#startlvl-2-1')).toHaveValue('30');
-    profile = await activeProfile(page);
+    await expect(page.locator('#startlvl-2-1')).not.toHaveClass(/pf-differs/);
+    await expect(page.locator('#startlvl-2-1 + .pf-reset')).toHaveCount(0);
+    await expect(page.locator('#pf-overrides')).toBeHidden();
+    const profile = await activeProfile(page);
     expect(profile.planets[0].values['building.1']).toEqual({ game: 30 });
+
+    // The fields stay bound.
+    await page.locator('#total-fields-2').fill('250');
+    await page.locator('#total-fields-2').blur();
+    await expect(page.locator('#total-fields-2')).toHaveClass(/pf-differs/);
+    await expect(page.locator('#pf-overrides')).toHaveText('1');
+
+    // A reload fills the start levels in from the planet again.
+    await page.reload();
+    await expect(page.locator('#startlvl-2-1')).toHaveValue('30');
 });
 
 test('another planet is picked in the queue and remembered, the queue kept', async ({ page }) => {
@@ -619,8 +627,11 @@ test('"no profile" gives the queue its own values back', async ({ page }) => {
     await page.locator('#hyper-tech-level').blur();
     await page.locator('#total-fields-2').fill('200');
     await page.locator('#total-fields-2').blur();
+    await page.locator('#startlvl-2-1').fill('4');
+    await page.locator('#startlvl-2-1').blur();
 
     await importExport(page);
+    await expect(page.locator('#startlvl-2-1')).toHaveValue('30');
     await expect(page.locator('#hyper-tech-level')).toHaveValue('8');
     const stored = await page.evaluate(() => JSON.parse(localStorage.getItem('options_queue') || '{}'));
     expect(stored.hyperTechLevel).toBe(3);
@@ -629,7 +640,7 @@ test('"no profile" gives the queue its own values back', async ({ page }) => {
     await page.locator('#pf-select').selectOption('');
     await expect(page.locator('#hyper-tech-level')).toHaveValue('3');
     await expect(page.locator('#total-fields-2')).toHaveValue('200');
-    await expect(page.locator('#startlvl-2-1')).toHaveValue('0');
+    await expect(page.locator('#startlvl-2-1')).toHaveValue('4');
     await expect(page.locator('#pf-body-box-2')).toBeHidden();
     await expect(page.locator('.pf-bound')).toHaveCount(0);
     await expect(page.locator('#reset')).toBeVisible();

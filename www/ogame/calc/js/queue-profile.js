@@ -6,12 +6,16 @@
 // into the form and writes the changes back:
 //   - apply(): profile -> form (ion and hyperspace technology, class, the
 //     cargo bonuses of the transports) and, per tab, one planet or moon of the
-//     profile: its building levels as the start levels and its fields;
+//     profile: its fields, and its building levels filled in as the start
+//     levels;
 //   - sync(): options.prm -> profile, called from options.save(), writing only
 //     what changed since the last apply or sync, so a lossy mapping (a profile
 //     with no class shows as collector here) never becomes an override.
-// A tab whose kind of body the profile does not have (a profile with no moon)
-// stays the calculator's own. The queues and their start times are working
+// The start levels are filled in for convenience only: they are not bound, so
+// an edit there is not written back to the profile - it plans a queue, it does
+// not say what the game has. A tab whose kind of body the profile does not
+// have (a profile with no moon) stays the calculator's own. The queues and
+// their start times are working
 // state and keep going to options_queue; the profile-owned keys are written
 // there with the values they had before the profile, so "no profile" shows
 // them untouched. The economy speed comes from the profile's universe.
@@ -61,7 +65,7 @@ class QueueProfiles extends ProfileBinder {
     this.bodyIds = { [PLANET_TAB]: null, [MOON_TAB]: null };
     /** @type {Record<string, *>} Account values (by profile key) at the last apply or sync. */
     this.snapshot = {};
-    /** @type {Record<number, {levels: Record<string, number>, fields: number}>} Per tab, the body values at the last apply or sync. */
+    /** @type {Record<number, number>} Per tab, the body's fields at the last apply or sync. */
     this.bodySnapshot = {};
     /** @type {Record<string, *>} The profile-owned prm keys as the calculator has them. */
     this.ownPrm = {};
@@ -80,7 +84,7 @@ class QueueProfiles extends ProfileBinder {
     if (active) this.apply(active);
   }
 
-  /** The options.prm keys the profile may own. */
+  /** The options.prm keys the profile may own, the start levels it fills in included. */
   static ownedKeys() {
     return [...QUEUE_ACCOUNT_FIELDS.map((f) => f.prm), ...QUEUE_TABS.flatMap((t) => [t.levels, t.fields])];
   }
@@ -157,8 +161,8 @@ class QueueProfiles extends ProfileBinder {
   }
 
   /**
-   * Show a tab's body in the form: its building levels and fields. A tab with
-   * no body shows the calculator's own values.
+   * Show a tab's body in the form: its fields, and its building levels as the
+   * start levels. A tab with no body shows the calculator's own values.
    *
    * @param {QueueTab} t
    * @param {Profile} profile
@@ -209,11 +213,7 @@ class QueueProfiles extends ProfileBinder {
 
   /** @param {QueueTab} t */
   takeBodySnapshot(t) {
-    const prm = options.prm;
-    /** @type {Record<string, number>} */
-    const levels = {};
-    (Array.isArray(prm[t.levels]) ? prm[t.levels] : []).forEach((/** @type {number[]} */ [techId, level]) => { levels[techId] = level; });
-    this.bodySnapshot[t.tab] = { levels, fields: pfNum(prm[t.fields]) };
+    this.bodySnapshot[t.tab] = pfNum(options.prm[t.fields]);
   }
 
   // -------------------------------------------------------------------------
@@ -240,11 +240,8 @@ class QueueProfiles extends ProfileBinder {
     QUEUE_TABS.forEach((t) => {
       const body = this.body(t, profile);
       const before = this.bodySnapshot[t.tab];
-      if (!body || !before) return;
-      (Array.isArray(prm[t.levels]) ? prm[t.levels] : []).forEach((/** @type {number[]} */ [techId, level]) => {
-        if (level !== before.levels[techId]) changed = setProfileValue(body, 'building.' + techId, level) || changed;
-      });
-      if (pfNum(prm[t.fields]) !== before.fields) changed = setProfileValue(body, 'fields.total', pfNum(prm[t.fields])) || changed;
+      if (!body || before === undefined) return;
+      if (pfNum(prm[t.fields]) !== before) changed = setProfileValue(body, 'fields.total', pfNum(prm[t.fields])) || changed;
       this.takeBodySnapshot(t);
     });
     if (changed) {
@@ -255,7 +252,8 @@ class QueueProfiles extends ProfileBinder {
 
   /**
    * options_queue gets the calculator's own fields as they are, and the
-   * profile-owned ones as they were before the profile. A tab with no body
+   * profile-owned ones and the start levels as they were before the profile,
+   * so a level filled in from a body never replaces the player's. A tab with no body
    * is the calculator's own, so its values are taken as they are.
    */
   saveOwn() {
@@ -310,9 +308,6 @@ class QueueProfiles extends ProfileBinder {
   /** Name every value this page binds, in the page's own words. */
   describeFields() {
     QUEUE_ACCOUNT_FIELDS.forEach((f) => this.pf.describeField(f.key, pfFieldLabel($(f.input)), f.display));
-    QUEUE_TABS.forEach((t) => {
-      Object.entries(QueueDataCollector.readTechNames(t.tab)).forEach(([techId, name]) => this.pf.describeField('building.' + techId, name));
-    });
     this.pf.describeField('fields.total', pfFieldLabel($('#total-fields-' + PLANET_TAB)));
   }
 
@@ -341,10 +336,6 @@ class QueueProfiles extends ProfileBinder {
       const body = this.body(t, profile);
       if (!body) return;
       const where = { t, id: body.id };
-      QueueDataCollector.readStartLevels(t.tab).list.forEach(([techId]) => {
-        const key = 'building.' + techId;
-        this.pf.markField($('#startlvl-' + t.tab + '-' + techId), profile, body, key, restoreTo(where, key));
-      });
       this.pf.markField($('#total-fields-' + t.tab), profile, body, 'fields.total', restoreTo(where, 'fields.total'));
     });
   }
