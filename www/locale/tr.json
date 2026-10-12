@@ -215,7 +215,7 @@
     "pf-create": "Yeni profil…",
     "pf-manage": "Profilleri yönet…",
     "pf-import-hdr": "Hesap verilerini içe aktar",
-    "pf-import-hint": "<a href=\"https://github.com/Rivenscryr/origin-exporter\" target=\"_blank\" rel=\"noopener\">Origin Exporter</a> betiğinin dışa aktardığı verileri yapıştırın (OGame’de: İmparatorluk simgesi → Export account data) veya indirilen dosyayı seçin.",
+    "pf-import-hint": "<a href=\"https://github.com/Rivenscryr/origin-exporter\" target=\"_blank\" rel=\"noopener\">Origin Exporter</a> betiğinin dışa aktardığı verileri yapıştırın (OGame’de: İmparatorluk simgesi → Export account data) veya indirilen dosyayı seçin. Betik, Antigame Reborn’un geliştiricisi tarafından yazılmıştır.",
     "pf-file": "Dosya",
     "pf-import-universe-hint": "Veriler hangi evrenden geldiğini belirtmiyor. Evreni seçin:",
     "pf-import-btn": "İçe aktar",

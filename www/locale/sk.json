@@ -215,7 +215,7 @@
     "pf-create": "Nový profil…",
     "pf-manage": "Spravovať profily…",
     "pf-import-hdr": "Import údajov účtu",
-    "pf-import-hint": "Vložte údaje exportované skriptom <a href=\"https://github.com/Rivenscryr/origin-exporter\" target=\"_blank\" rel=\"noopener\">Origin Exporter</a> (v OGame: ikona Impérium → Export account data) alebo vyberte stiahnutý súbor.",
+    "pf-import-hint": "Vložte údaje exportované skriptom <a href=\"https://github.com/Rivenscryr/origin-exporter\" target=\"_blank\" rel=\"noopener\">Origin Exporter</a> (v OGame: ikona Impérium → Export account data) alebo vyberte stiahnutý súbor. Skript vytvoril autor Antigame Reborn.",
     "pf-file": "Súbor",
     "pf-import-universe-hint": "Údaje neuvádzajú, z ktorého vesmíru pochádzajú. Vyberte ho:",
     "pf-import-btn": "Importovať",

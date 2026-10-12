@@ -215,7 +215,7 @@
     "pf-create": "Новый профиль…",
     "pf-manage": "Управление профилями…",
     "pf-import-hdr": "Импорт данных аккаунта",
-    "pf-import-hint": "Вставьте данные, выгруженные скриптом <a href=\"https://github.com/Rivenscryr/origin-exporter\" target=\"_blank\" rel=\"noopener\">Origin Exporter</a> (в OGame: значок «Империя» → Export account data), или выберите скачанный файл.",
+    "pf-import-hint": "Вставьте данные, выгруженные скриптом <a href=\"https://github.com/Rivenscryr/origin-exporter\" target=\"_blank\" rel=\"noopener\">Origin Exporter</a> (в OGame: значок «Империя» → Export account data), или выберите скачанный файл. Скрипт разработан автором Antigame Reborn.",
     "pf-file": "Файл",
     "pf-import-universe-hint": "В данных не указано, из какой они вселенной. Выберите её:",
     "pf-import-btn": "Импортировать",

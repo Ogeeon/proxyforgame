@@ -215,7 +215,7 @@
     "pf-create": "Nuevo perfil…",
     "pf-manage": "Gestionar perfiles…",
     "pf-import-hdr": "Importar datos de la cuenta",
-    "pf-import-hint": "Pega los datos exportados por el script <a href=\"https://github.com/Rivenscryr/origin-exporter\" target=\"_blank\" rel=\"noopener\">Origin Exporter</a> (en OGame: icono de Imperio → Export account data) o elige el archivo descargado.",
+    "pf-import-hint": "Pega los datos exportados por el script <a href=\"https://github.com/Rivenscryr/origin-exporter\" target=\"_blank\" rel=\"noopener\">Origin Exporter</a> (en OGame: icono de Imperio → Export account data) o elige el archivo descargado. El script lo ha creado el autor de Antigame Reborn.",
     "pf-file": "Archivo",
     "pf-import-universe-hint": "Los datos no indican de qué universo proceden. Elígelo:",
     "pf-import-btn": "Importar",

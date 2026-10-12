@@ -215,7 +215,7 @@
     "pf-create": "Novi profil…",
     "pf-manage": "Upravljaj profilima…",
     "pf-import-hdr": "Uvoz podataka računa",
-    "pf-import-hint": "Zalijepite podatke koje je izvezla skripta <a href=\"https://github.com/Rivenscryr/origin-exporter\" target=\"_blank\" rel=\"noopener\">Origin Exporter</a> (u OGame: ikona Carstvo → Export account data) ili odaberite preuzetu datoteku.",
+    "pf-import-hint": "Zalijepite podatke koje je izvezla skripta <a href=\"https://github.com/Rivenscryr/origin-exporter\" target=\"_blank\" rel=\"noopener\">Origin Exporter</a> (u OGame: ikona Carstvo → Export account data) ili odaberite preuzetu datoteku. Skriptu je razvio autor Antigame Reborn.",
     "pf-file": "Datoteka",
     "pf-import-universe-hint": "Podaci ne navode iz kojeg su univerzuma. Odaberite ga:",
     "pf-import-btn": "Uvezi",
