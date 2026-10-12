@@ -8,7 +8,8 @@ import { join } from 'node:path';
 // saved set, the backup file and the per-tab active profile; then flight, the
 // second: account fields, the locked universe, the departure body and its fleet;
 // then the queue and costs: a planet and a moon of the profile as the start
-// levels, or as the factories, the lab and the temperature.
+// levels, or as the factories, the lab and the temperature; then the LF costs,
+// one planet with its life form and life-form buildings.
 // The model itself is covered by unit-tests/profiles-core.test.js.
 
 const EXPORT = readFileSync(join(__dirname, '../fixtures/account-export-v1.json'), 'utf8');
@@ -826,4 +827,93 @@ test('the Mineral Research Centre follows the planet picked in costs', async ({ 
     await expect(page.locator('#mineral-res-cntr-lvl')).toHaveClass(/pf-bound/);
     await page.locator('#pf-planet').selectOption({ label: 'Alpha [2:148:8]' });
     await expect(page.locator('#mineral-res-cntr-lvl')).toHaveValue('0');
+});
+
+// The LF costs: the account fields, and one planet of the profile whose
+// factories, life form and life-form buildings feed the calculation.
+
+test('LF costs take the account and a planet from the profile', async ({ page }) => {
+    await page.goto('/lfcosts');
+    await importExport(page);
+
+    await page.locator('#param-researches-tab').click();
+    await expect(page.locator('#hyper-tech-level')).toHaveValue('8');
+    await expect(page.locator('#hyper-tech-level')).toHaveClass(/pf-bound/);
+    await page.locator('#param-common-tab').click();
+    await expect(page.locator('#class-0')).toBeChecked();
+    await expect(page.locator('#class-0').locator('xpath=ancestor::fieldset')).toHaveClass(/pf-bound/);
+
+    await expect(page.locator('#pf-planet option')).toHaveCount(3);
+    await expect(page.locator('#pf-planet option:checked')).toHaveText('Alpha [2:148:8]');
+    await page.locator('#param-buildings-tab').click();
+    await expect(page.locator('#robot-factory-level')).toHaveValue('10');
+    await expect(page.locator('#nanite-factory-level')).toHaveValue('6');
+    await page.locator('#param-lifeforms-tab').click();
+    await expect(page.locator('#race-selector')).toHaveValue('1');
+    await expect(page.locator('#research-centre-level')).toHaveValue('10');
+    await expect(page.locator('#research-centre-level')).toBeVisible();
+    await expect(page.locator('#sc-capacity-increase')).toHaveValue('1.23');
+
+    await expect(page.locator('#reset')).toBeHidden();
+    // Loading wrote nothing back.
+    await expect(page.locator('#pf-overrides')).toBeHidden();
+});
+
+test('another planet brings its life form and buildings, and is remembered', async ({ page }) => {
+    await page.goto('/lfcosts');
+    await importExport(page);
+
+    await page.locator('#pf-planet').selectOption({ label: 'Beta [2:150:12]' });
+    await expect(page.locator('#race-selector')).toHaveValue('2');
+    await expect(page.locator('#megalith-level')).toHaveValue('3');
+    await expect(page.locator('#megalith-level')).toBeVisible();
+    await expect(page.locator('#mrc-level')).toHaveValue('2');
+    await expect(page.locator('#rune-tech-level')).toHaveValue('7');
+    await expect(page.locator('#research-centre-level')).toBeHidden();
+    await expect(page.locator('#pf-overrides')).toBeHidden();
+
+    await page.reload();
+    await expect(page.locator('#pf-planet option:checked')).toHaveText('Beta [2:150:12]');
+    await expect(page.locator('#megalith-level')).toHaveValue('3');
+});
+
+test('an LF building level becomes an override of the planet', async ({ page }) => {
+    await page.goto('/lfcosts');
+    await importExport(page);
+
+    await page.locator('#research-centre-level').fill('12');
+    await page.locator('#research-centre-level').blur();
+    await expect(page.locator('#research-centre-level')).toHaveClass(/pf-differs/);
+    await expect(page.locator('#pf-overrides')).toHaveText('1');
+    let profile = await activeProfile(page);
+    expect(profile.planets[0].values['lf.building.11103']).toEqual({ game: 10, override: 12 });
+
+    await page.locator('#research-centre-level + .pf-reset').click();
+    await expect(page.locator('#research-centre-level')).toHaveValue('10');
+    profile = await activeProfile(page);
+    expect(profile.planets[0].values['lf.building.11103']).toEqual({ game: 10 });
+});
+
+test('"no profile" gives the LF costs their own values back', async ({ page }) => {
+    await page.goto('/lfcosts');
+    await page.locator('#param-researches-tab').click();
+    await page.locator('#hyper-tech-level').fill('3');
+    await page.locator('#hyper-tech-level').blur();
+    await page.locator('#param-buildings-tab').click();
+    await page.locator('#robot-factory-level').fill('4');
+    await page.locator('#robot-factory-level').blur();
+
+    await importExport(page);
+    await expect(page.locator('#robot-factory-level')).toHaveValue('10');
+    const stored = await page.evaluate(() => JSON.parse(localStorage.getItem('options_lfcosts') || '{}'));
+    expect(stored.hyperTechLevel).toBe(3);
+    expect(stored.robotFactoryLevel).toBe(4);
+
+    await page.locator('#pf-select').selectOption('');
+    await expect(page.locator('#robot-factory-level')).toHaveValue('4');
+    await page.locator('#param-researches-tab').click();
+    await expect(page.locator('#hyper-tech-level')).toHaveValue('3');
+    await expect(page.locator('#pf-planet-box')).toBeHidden();
+    await expect(page.locator('.pf-bound')).toHaveCount(0);
+    await expect(page.locator('#reset')).toBeVisible();
 });

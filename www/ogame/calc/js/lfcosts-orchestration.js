@@ -759,8 +759,11 @@ class LfCostsOrchestrator {
     }
 }
 
+/** @type {?LfCostsOrchestrator} Set once the page is wired; the profile binding drives it. */
+let lfCostsApp = null;
+
 function initializeLfCostsCalculator() {
-    const orch = new LfCostsOrchestrator(options);
-    orch.init();
+    lfCostsApp = new LfCostsOrchestrator(options);
+    lfCostsApp.init();
 }
 window.initializeLfCostsCalculator = initializeLfCostsCalculator;

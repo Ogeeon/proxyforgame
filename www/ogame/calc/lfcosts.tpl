@@ -26,10 +26,15 @@
   <script src="/ogame/calc/js/ogame-costs.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/ogame-costs.js'); ?>" defer></script>
   <script src="/ogame/calc/js/ogame-lifeform.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/ogame-lifeform.js'); ?>" defer></script>
   <script src="/ogame/calc/js/dom-utils.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/dom-utils.js'); ?>" defer></script>
+  <!-- Player profiles -->
+  <script src="/ogame/calc/js/profiles-core.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/profiles-core.js'); ?>" defer></script>
+  <script src="/ogame/calc/js/profiles-store.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/profiles-store.js'); ?>" defer></script>
+  <script src="/ogame/calc/js/profiles-ui.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/profiles-ui.js'); ?>" defer></script>
   <script src="/ogame/calc/js/lfcosts-core.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/lfcosts-core.js'); ?>" defer></script>
   <script src="/ogame/calc/js/lfcosts-data-collector.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/lfcosts-data-collector.js'); ?>" defer></script>
   <script src="/ogame/calc/js/lfcosts-renderer.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/lfcosts-renderer.js'); ?>" defer></script>
   <script src="/ogame/calc/js/lfcosts-orchestration.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/lfcosts-orchestration.js'); ?>" defer></script>
+  <script src="/ogame/calc/js/lfcosts-profile.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/lfcosts-profile.js'); ?>" defer></script>
 
   <script type="module">
     // A module, so it runs after the deferred scripts above have defined `options`.
@@ -81,7 +86,7 @@
   <div class="row">
     <div class="col-md-2"><?php require_once '../../sidebar_bs.tpl'; ?></div>
     <div class="col-md-10">
-    <?php require_once '../../topbar_bs.tpl'; ?>
+    <?php $profilesCalc = 'lfcosts'; require_once '../../topbar_bs.tpl'; ?>
 
 <div id="lfcosts">
   <div class="border rounded position-relative">
@@ -96,6 +101,10 @@
     <div id="general-settings-panel" class="border rounded m-1">
       <div class="d-flex align-items-center">
         <p class="border rounded subheader bg-primary-subtle mb-0 flex-grow-1"><?= $l['parameters'] ?></p>
+        <div id="pf-planet-box" class="d-flex align-items-center gap-1 ms-2 me-1 d-none">
+          <label for="pf-planet"><?= $l['planet'] ?></label>
+          <select id="pf-planet" class="form-select form-select-sm w-auto"></select>
+        </div>
       </div>
       <!-- Parameter Tabs -->
       <ul class="nav nav-tabs nav-tabs-sm" id="paramTabs" role="tablist">
@@ -148,19 +157,21 @@
               <input id="full-numbers" type="checkbox" name="full-numbers" class="form-check-input">
               <label for="full-numbers"><?= $l['full-numbers'] ?></label>
             </div>
-            <label class="ms-3"><?= $l['class'] ?>:</label>
-            <div class="d-flex align-items-center gap-1">
-              <input id="class-0" type="radio" name="class" value="0" tabindex="1" class="form-check-input">
-              <label for="class-0"><?= $l['class-collector'] ?></label>
-            </div>
-            <div class="d-flex align-items-center gap-1">
-              <input id="class-1" type="radio" name="class" value="1" tabindex="2" class="form-check-input">
-              <label for="class-1"><?= $l['class-general'] ?></label>
-            </div>
-            <div class="d-flex align-items-center gap-1">
-              <input id="class-2" type="radio" name="class" value="2" tabindex="3" class="form-check-input">
-              <label for="class-2"><?= $l['class-discoverer'] ?></label>
-            </div>
+            <fieldset class="d-flex align-items-center gap-2 ms-3 fieldset-reset">
+              <legend><?= $l['class'] ?>:</legend>
+              <div class="d-flex align-items-center gap-1">
+                <input id="class-0" type="radio" name="class" value="0" class="form-check-input">
+                <label for="class-0"><?= $l['class-collector'] ?></label>
+              </div>
+              <div class="d-flex align-items-center gap-1">
+                <input id="class-1" type="radio" name="class" value="1" class="form-check-input">
+                <label for="class-1"><?= $l['class-general'] ?></label>
+              </div>
+              <div class="d-flex align-items-center gap-1">
+                <input id="class-2" type="radio" name="class" value="2" class="form-check-input">
+                <label for="class-2"><?= $l['class-discoverer'] ?></label>
+              </div>
+            </fieldset>
             <div class="d-flex align-items-center">
               <label for="exchange-rates-m" class="me-1"><?= $l['exchange-rates'] ?>:</label>
               <input id="exchange-rates-m" type="text" name="exchange-rates-m" class="form-control form-control-sm level-input" value="1">:
@@ -511,6 +522,7 @@
 <script type="module">
 document.addEventListener('DOMContentLoaded', function() {
   initializeLfCostsCalculator();
+  initLfCostsProfiles();
 });
 </script>
 
