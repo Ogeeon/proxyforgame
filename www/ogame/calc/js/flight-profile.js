@@ -112,16 +112,15 @@ function flightBodyCoords(body) {
   return c && c.galaxy !== null && c.system !== null && c.position !== null ? [c.galaxy, c.system, c.position] : null;
 }
 
-class FlightProfiles {
+/** @extends {ProfileBinder<*>} */
+class FlightProfiles extends ProfileBinder {
   /**
    * @param {ProfilesUi} pf
    * @param {*} orchestrator The FlightOrchestrator of the page.
    */
   constructor(pf, orchestrator) {
-    this.pf = pf;
+    super(pf, orchestrator);
     this.orch = orchestrator;
-    /** @type {?string} The active profile's id while one is applied. */
-    this.profileId = null;
     /** @type {Record<string, *>} Account values (by profile key) at the last apply or sync. */
     this.snapshot = {};
     /** @type {Record<string, *>} The profile-owned prm keys as they were before a profile. */
@@ -129,7 +128,6 @@ class FlightProfiles {
     /** @type {?{country: string, universe: *}} The universe picked before a profile set its own. */
     this.ownUniverse = null;
     this.ownSave = options.save;
-    this.applying = false;
     /** @type {*} The spy report waiting for the player to say where it goes. */
     this.pendingReport = null;
     /** @type {?(ready: boolean) => void} Settles makeRoomForReport(). */
@@ -145,11 +143,6 @@ class FlightProfiles {
     this.pf.onChange((profile) => this.apply(profile));
     const active = this.pf.active();
     if (active) this.apply(active);
-  }
-
-  /** @returns {?Profile} */
-  profile() {
-    return this.profileId ? this.pf.store.get(this.profileId) : null;
   }
 
   // -------------------------------------------------------------------------
@@ -228,17 +221,15 @@ class FlightProfiles {
     this.orch.setUniList(own.country, own.universe);
   }
 
-  /** Back to the calculator's own settings. */
-  leave() {
-    if (this.profileId === null) return;
-    this.profileId = null;
-    this.pf.clearMarks();
-    pfShow('#reset', true);
+  restoreOwn() {
     pfShow('#pf-departure', false);
     pfShow('#pf-take-fleet', false);
     Object.assign(options.prm, cloneData(this.ownPrm));
     this.orch.populateParams();
     this.unlockUniverse();
+  }
+
+  recalc() {
     this.orch.recalc();
   }
 
@@ -251,14 +242,12 @@ class FlightProfiles {
   // Calculator -> profile
   // -------------------------------------------------------------------------
 
-  save() {
-    if (this.profileId === null) {
-      this.ownSave();
-      return;
-    }
-    if (this.applying) return;
-    this.sync();
-    this.saveOwn();
+  saveWithoutProfile() {
+    this.ownSave();
+  }
+
+  saveWithProfile() {
+    super.saveWithProfile();
     this.syncDepartureSelect();
   }
 
@@ -541,9 +530,7 @@ class FlightProfiles {
  * @returns {?FlightProfiles}
  */
 function initFlightProfiles() {
-  if (!pfgProfiles || !window.flightOrchestrator) return null;
-  flightProfiles = new FlightProfiles(pfgProfiles, window.flightOrchestrator);
-  flightProfiles.init();
+  flightProfiles = pfBind(FlightProfiles, window.flightOrchestrator);
   return flightProfiles;
 }
 
