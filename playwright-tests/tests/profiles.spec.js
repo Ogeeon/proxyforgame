@@ -1370,3 +1370,159 @@ test('terraformer takes the economy speed from the universe, and keeps a changed
     await expect(speed).toHaveValue('5');
     await expect(speed).not.toHaveClass(/pf-differs/);
 });
+
+// Trade: the account, the shared exchange rates, the locked universe, and a
+// coordinates select that copies a body's position without binding it.
+
+/** Type into a trade field; the page reads its fields on keyup. */
+async function typeTrade(page, selector, value) {
+    await page.locator(selector).fill(value);
+    await page.locator(selector).press('Enter');
+}
+
+test('trade takes the account from the profile and locks its universe', async ({ page }) => {
+    await page.goto('/trade');
+    await importExport(page);
+
+    await expect(page.locator('#hypertech-lvl')).toHaveValue('8');
+    await expect(page.locator('#player-class-0')).toBeChecked();
+    await expect(page.locator('#sc-capacity-increase')).toHaveValue('1.23');
+    await expect(page.locator('#lc-capacity-increase')).toHaveValue('2.5');
+    await expect(page.locator('#hypertech-lvl')).toHaveClass(/pf-bound/);
+    await expect(page.locator('fieldset:has(#player-class-0)')).toHaveClass(/pf-bound/);
+
+    const profile = await activeProfile(page);
+    await expect(page.locator('#country')).toHaveValue(profile.universe.country);
+    await expect(page.locator('#country')).toBeDisabled();
+    await expect(page.locator('#universe')).toBeDisabled();
+    await expect(page.locator('#reset')).toBeHidden();
+
+    // The dash, three planets and the moon; the coordinates move to the first planet.
+    await expect(page.locator('#pf-body option')).toHaveCount(5);
+    await expect(page.locator('#pf-body')).toHaveValue(profile.planets[0].id);
+    await expect(page.locator('#coord-g')).toHaveValue('2');
+    await expect(page.locator('#coord-s')).toHaveValue('148');
+    await expect(page.locator('#coord-p')).toHaveValue('8');
+    await expect(page.locator('#moon')).not.toBeChecked();
+    // Loading wrote nothing back.
+    await expect(page.locator('#pf-overrides')).toBeHidden();
+});
+
+test('a trade edit becomes an override that can be restored', async ({ page }) => {
+    await page.goto('/trade');
+    await importExport(page);
+
+    await typeTrade(page, '#hypertech-lvl', '9');
+    await expect(page.locator('#hypertech-lvl')).toHaveClass(/pf-differs/);
+    await expect(page.locator('#pf-overrides')).toHaveText('1');
+    let profile = await activeProfile(page);
+    expect(profile.account.values['research.114']).toEqual({ game: 8, override: 9 });
+
+    await page.locator('#hypertech-lvl + .pf-reset').click();
+    await expect(page.locator('#hypertech-lvl')).toHaveValue('8');
+    await expect(page.locator('#pf-overrides')).toBeHidden();
+    profile = await activeProfile(page);
+    expect(profile.account.values['research.114']).toEqual({ game: 8 });
+});
+
+test('trade rates go to the profile and production reads them', async ({ page }) => {
+    await page.goto('/trade');
+    await importExport(page);
+    // The profile has no rates yet: trade shows the defaults, 3 : 2 : 1.
+    await expect(page.locator('#rate-md')).toHaveValue('3');
+    await expect(page.locator('#rate-cd')).toHaveValue('2');
+
+    await page.locator('#rate-btn-1').click();
+    const profile = await activeProfile(page);
+    expect(profile.account.values.rates).toEqual({ override: [1, 2, 4] });
+    // Rates have no game layer: bound, but never marked.
+    await expect(page.locator('#rate-md')).not.toHaveClass(/pf-bound/);
+
+    await page.goto('/production');
+    await expect(page.locator('#exchange-rates-m')).toHaveValue('1');
+    await expect(page.locator('#exchange-rates-c')).toHaveValue('2');
+    await expect(page.locator('#exchange-rates-d')).toHaveValue('4');
+
+    // 2.4 : 1.5 does not come back as 1.4999999999999998.
+    await page.goto('/trade');
+    await page.locator('#rate-btn-6').click();
+    await page.reload();
+    await expect(page.locator('#rate-md')).toHaveValue('2.4');
+    await expect(page.locator('#rate-cd')).toHaveValue('1.5');
+});
+
+test('trade copies a moon\'s coordinates', async ({ page }) => {
+    await page.goto('/trade');
+    await importExport(page);
+    const profile = await activeProfile(page);
+    const moon = profile.moons[0];
+
+    await page.locator('#pf-body').selectOption(moon.id);
+    await expect(page.locator('#coord-g')).toHaveValue(String(moon.coords.galaxy));
+    await expect(page.locator('#coord-s')).toHaveValue(String(moon.coords.system));
+    await expect(page.locator('#coord-p')).toHaveValue(String(moon.coords.position));
+    await expect(page.locator('#moon')).toBeChecked();
+
+    // Coordinates typed by hand that match no body clear the select.
+    await typeTrade(page, '#coord-p', '9');
+    await expect(page.locator('#pf-body')).toHaveValue('');
+    // The coordinates are the calculator's own: nothing went into the profile.
+    await expect(page.locator('#pf-overrides')).toBeHidden();
+});
+
+test('"no profile" gives trade its own values and universe back', async ({ page }) => {
+    await page.goto('/trade');
+    await typeTrade(page, '#hypertech-lvl', '5');
+    await page.locator('#rate-btn-1').click();
+    const ownCountry = await page.locator('#country').inputValue();
+
+    await importExport(page);
+    await expect(page.locator('#hypertech-lvl')).toHaveValue('8');
+    // The trade's own settings keep the values from before the profile.
+    const stored = await page.evaluate(() => JSON.parse(localStorage.getItem('options_trade') || '{}'));
+    expect(stored.hyperTech).toBe(5);
+    expect(stored.rates.md).toBe(4);
+    expect(stored.country).toBe(ownCountry);
+
+    await page.locator('#pf-select').selectOption('');
+    await expect(page.locator('#hypertech-lvl')).toHaveValue('5');
+    await expect(page.locator('#rate-md')).toHaveValue('4');
+    await expect(page.locator('#rate-cd')).toHaveValue('2');
+    await expect(page.locator('#country')).toHaveValue(ownCountry);
+    await expect(page.locator('.pf-bound')).toHaveCount(0);
+    await expect(page.locator('#country')).toBeEnabled();
+    await expect(page.locator('#pf-body-box')).toBeHidden();
+    await expect(page.locator('#reset')).toBeVisible();
+});
+
+test('a trade link wins over the profile on load', async ({ page }) => {
+    await page.goto('/trade');
+    await importExport(page);
+    const profile = await activeProfile(page);
+    const other = await page.evaluate((own) => {
+        const country = Object.keys(unis).find((c) => c !== own && unis[c].length > 0);
+        return { country, uni: unis[country][0][0] };
+    }, profile.universe.country);
+
+    await page.goto('/trade#rmd=2.5&rcd=1.5&st=0&dt=0&m=1000&l=' + other.country + ':' + other.uni + '&lc=3:200:5&lm=0');
+    await page.reload();
+
+    await expect(page.locator('#rate-md')).toHaveValue('2.5');
+    await expect(page.locator('#rate-cd')).toHaveValue('1.5');
+    // The link's universe is not the profile's: the picker stays free for this view.
+    await expect(page.locator('#country')).toHaveValue(other.country);
+    await expect(page.locator('#country')).toBeEnabled();
+    await expect(page.locator('#universe')).toBeEnabled();
+    await expect(page.locator('#coord-g')).toHaveValue('3');
+    await expect(page.locator('#coord-s')).toHaveValue('200');
+    await expect(page.locator('#coord-p')).toHaveValue('5');
+    await expect(page.locator('#pf-body')).toHaveValue('');
+    // The account still comes from the profile, and nothing of the link went into it.
+    await expect(page.locator('#hypertech-lvl')).toHaveValue('8');
+    await expect(page.locator('#pf-overrides')).toBeHidden();
+    expect((await activeProfile(page)).account.values.rates).toBeUndefined();
+
+    // An edit made afterwards does.
+    await page.locator('#rate-btn-1').click();
+    expect((await activeProfile(page)).account.values.rates).toEqual({ override: [1, 2, 4] });
+});

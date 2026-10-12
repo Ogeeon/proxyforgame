@@ -7,14 +7,15 @@
     margin: 2px;
 }
 
-#reset_bs { 
+#reset {
     cursor: pointer;
     z-index: 10;
     width: 30px;
     height: 30px;
     border: 1px solid #dc3545;
     border-radius: 8px;
-    margin-right: 0.2rem;
+    padding: 0;
+    margin: 0 0.2rem 0 0;
 }
 
 #res-type-dst-2 {

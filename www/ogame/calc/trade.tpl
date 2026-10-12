@@ -22,8 +22,13 @@
   <script src="/js/utils.js?v=<?php echo filemtime($pfgPath.'/js/utils.js'); ?>" defer></script>
   <script src="/js/api-client.js?v=<?php echo filemtime($pfgPath.'/js/api-client.js'); ?>" defer></script>
   <script src="/ogame/calc/js/dom-utils.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/dom-utils.js'); ?>" defer></script>
+  <!-- Player profiles -->
+  <script src="/ogame/calc/js/profiles-core.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/profiles-core.js'); ?>" defer></script>
+  <script src="/ogame/calc/js/profiles-store.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/profiles-store.js'); ?>" defer></script>
+  <script src="/ogame/calc/js/profiles-ui.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/profiles-ui.js'); ?>" defer></script>
   <script src="/ogame/calc/js/trade-core.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/trade-core.js'); ?>" defer></script>
   <script src="/ogame/calc/js/trade.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/trade.js'); ?>" defer></script>
+  <script src="/ogame/calc/js/trade-profile.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/trade-profile.js'); ?>" defer></script>
 
   <script type="module">
     // A module, so it runs after the deferred trade.js that declares `l` and
@@ -44,6 +49,8 @@
     l.rates = '<?= $l['rates'] ?>';
     l.moonstr = '<?= $l['moon'] ?>';
     options.decimalSeparator = '<?= $l['decimal-separator'] ?>';
+    options.moonLabel = <?= json_encode($l['moon']) ?>;
+    options.universeFromProfile = <?= json_encode($l['pf-universe-from-profile']) ?>;
     options.dialogOk = <?= json_encode($l['dialog-ok']) ?>;
     options.dialogAttentionLabel = <?= json_encode($l['dialog-attention']) ?>;
   </script>
@@ -78,15 +85,19 @@
       <?php require_once '../../sidebar_bs.tpl'; ?>
     </div>
     <div class="col-10">
-      <?php require_once '../../topbar_bs.tpl'; ?>
+      <?php $profilesCalc = 'trade'; require_once '../../topbar_bs.tpl'; ?>
 
       <div id="trade" class="mx-auto">
         <div class="border rounded position-relative">
-          <div class="d-inline-block d-flex align-items-center">
+          <div class="d-flex flex-wrap align-items-center">
             <div class="bg-body-secondary text-primary-emphasis rounded main-header text-center flex-grow-1">
               <?= $l['title'] ?>
             </div>
-            <div id="reset_bs" class="top-0 end-0 d-flex align-items-center justify-content-center bg-danger-subtle" title="<?= $l['reset'] ?>">
+            <div id="pf-body-box" class="pf-header-bodies d-flex align-items-center gap-1 ms-auto ps-2 me-1 d-none">
+              <label for="pf-body"><?= $l['coords'] ?></label>
+              <select id="pf-body" class="form-select form-select-sm w-auto"></select>
+            </div>
+            <div id="reset" class="top-0 end-0 d-flex align-items-center justify-content-center bg-danger-subtle" title="<?= $l['reset'] ?>">
               <i class="bi bi-arrow-counterclockwise" style="color: #dc3545; font-size: 1.25rem;"></i>
             </div>
           </div>
@@ -103,22 +114,23 @@
                   <input id="hypertech-lvl" type="text" name="hypertech-lvl" class="form-control form-control-sm rate-input trade-editable" value="0">
                 </div>
               </div>
-              <div class="row align-items-center justify-content-center py-1">
-                <div class="col-auto">
-                  <label><?= $l['class'] ?>:</label>
-                </div>
-                <div class="col-auto d-flex align-items-center gap-1">
-                  <input id="player-class-0" type="radio" name="player-class" value="0" class="form-check-input trade-editable">
-                  <label for="player-class-0"><?= $l['class-collector'] ?></label>
-                </div>
-                <div class="col-auto d-flex align-items-center gap-1">
-                  <input id="player-class-1" type="radio" name="player-class" value="1" class="form-check-input trade-editable">
-                  <label for="player-class-1"><?= $l['class-general'] ?></label>
-                </div>
-                <div class="col-auto d-flex align-items-center gap-1">
-                  <input id="player-class-2" type="radio" name="player-class" value="2" class="form-check-input trade-editable">
-                  <label for="player-class-2"><?= $l['class-discoverer'] ?></label>
-                </div>
+              <!-- The fieldset hugs its radios, so the profile mark on its left edge sits next to them. -->
+              <div class="d-flex justify-content-center py-1">
+                <fieldset class="d-flex flex-wrap align-items-center column-gap-4 fieldset-reset">
+                  <legend><?= $l['class'] ?>:</legend>
+                  <div class="d-flex align-items-center gap-1">
+                    <input id="player-class-0" type="radio" name="player-class" value="0" class="form-check-input trade-editable">
+                    <label for="player-class-0"><?= $l['class-collector'] ?></label>
+                  </div>
+                  <div class="d-flex align-items-center gap-1">
+                    <input id="player-class-1" type="radio" name="player-class" value="1" class="form-check-input trade-editable">
+                    <label for="player-class-1"><?= $l['class-general'] ?></label>
+                  </div>
+                  <div class="d-flex align-items-center gap-1">
+                    <input id="player-class-2" type="radio" name="player-class" value="2" class="form-check-input trade-editable">
+                    <label for="player-class-2"><?= $l['class-discoverer'] ?></label>
+                  </div>
+                </fieldset>
               </div>
               <div class="row align-items-center justify-content-center py-1">
                 <div class="col-auto">
