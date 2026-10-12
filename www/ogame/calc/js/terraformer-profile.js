@@ -73,216 +73,42 @@ const TERRAFORMER_PLANET_FIELDS = [
 /** The options.prm keys of the settings that come from the profile's universe. */
 const TERRAFORMER_UNIVERSE_KEYS = ['universeSpeed'];
 
-/** @extends {ProfileBinder<TerraformerApp>} */
-class TerraformerProfiles extends ProfileBinder {
+/** @extends {PlanetPrmBinder<TerraformerApp>} */
+class TerraformerProfiles extends PlanetPrmBinder {
   /**
    * @param {ProfilesUi} pf
    * @param {TerraformerApp} app
    */
   constructor(pf, app) {
-    super(pf, app);
-    /** @type {?string} The planet shown; null leaves its fields to the calculator. */
-    this.planetId = null;
-    this.planetSelect = new PfBodySelect(pf, {
-      select: '#pf-planet', box: '#pf-planet-box', bodies: (p) => p.planets, lastKey: 'terraformer',
+    super(pf, app, {
+      accountFields: TERRAFORMER_ACCOUNT_FIELDS,
+      planetFields: TERRAFORMER_PLANET_FIELDS,
+      cookie: 'options_terraformer',
+      lastKey: 'terraformer',
+      universe: [[PF_UNIVERSE_SPEED, '#universe-speed']],
+      universeKeys: TERRAFORMER_UNIVERSE_KEYS,
+      // The officers' bonus follows the officers, and the "from" level is filled in from the planet.
+      extraOwnedKeys: ['energyBonus', 'tfLevelFrom'],
     });
-    /** @type {Record<string, *>} The profile-owned prm keys as the calculator has them. */
-    this.ownPrm = {};
-    this.ownSave = options.save;
-    /** @type {PfUniverseSetting[]} The universe's settings, set in init(). */
-    this.universeSettings = [];
-  }
-
-  init() {
-    this.describeFields();
-    options.save = () => this.save();
-    this.universeSettings = [
-      new PfUniverseSetting(this.pf, PF_UNIVERSE_SPEED, '#universe-speed', () => this.app.recalc()),
-    ];
-    this.planetSelect.onChange(() => this.planetChosen());
-    this.pf.onChange((profile) => this.apply(profile));
-    const active = this.pf.active();
-    if (active) this.apply(active);
   }
 
   /**
-   * @param {?Profile} profile
-   * @returns {?ProfilePlanet}
+   * The planet's terraformer level goes into "from", and "to" is raised to the
+   * next level when it is not above it.
    */
-  planet(profile) {
-    return profile?.planets.find((p) => p.id === this.planetId) || null;
-  }
-
-  /**
-   * The options.prm keys the profile may own. The officers' bonus follows the
-   * officers, the economy speed comes from the profile's universe, and the
-   * "from" level is filled in from the planet.
-   */
-  static ownedKeys() {
-    return [...TERRAFORMER_ACCOUNT_FIELDS, ...TERRAFORMER_PLANET_FIELDS].map((f) => f.prm).concat('energyBonus', 'tfLevelFrom', ...TERRAFORMER_UNIVERSE_KEYS);
-  }
-
-  // -------------------------------------------------------------------------
-  // Profile -> calculator
-  // -------------------------------------------------------------------------
-
-  /** @param {?Profile} profile */
-  apply(profile) {
-    if (!profile) {
-      this.leave();
-      return;
-    }
-    this.applying = true;
-    try {
-      /** @type {Record<string, any>} */
-      const prm = options.prm;
-      if (this.profileId === null) {
-        this.ownPrm = {};
-        TerraformerProfiles.ownedKeys().forEach((key) => { this.ownPrm[key] = cloneData(prm[key]); });
-      }
-      this.profileId = profile.id;
-      this.pf.clearMarks();
-      TERRAFORMER_ACCOUNT_FIELDS.forEach((f) => { prm[f.prm] = f.toPrm(getProfileValue(profile.account, f.key)); });
-      // The calculator's reset would write every default into the profile as an edit.
-      pfShow('#reset', false);
-      this.planetId = this.planetSelect.render(profile, this.planetId);
-      this.showPlanet(profile);
-    } finally {
-      this.applying = false;
-    }
-    this.universeSettings.forEach((setting) => { void setting.attach(profile); });
-    this.markAll();
-  }
-
-  /**
-   * Put the planet's values - or, with no planet, the calculator's own - into
-   * options.prm, show the whole form and recalculate. The planet's
-   * terraformer level goes into "from", and "to" is raised to the next level
-   * when it is not above it.
-   *
-   * @param {Profile} profile
-   */
-  showPlanet(profile) {
+  afterShowPlanet() {
     /** @type {Record<string, any>} */
     const prm = options.prm;
-    const planet = this.planet(profile);
-    TERRAFORMER_PLANET_FIELDS.forEach((f) => {
-      prm[f.prm] = planet ? f.toPrm(getProfileValue(planet, f.key)) : cloneData(this.ownPrm[f.prm]);
-    });
+    const planet = this.planet(this.profile());
     prm.tfLevelFrom = planet ? pfNum(getProfileValue(planet, 'building.33', 0)) : cloneData(this.ownPrm.tfLevelFrom);
     if (planet && pfNum(prm.tfLevelTo) <= prm.tfLevelFrom) prm.tfLevelTo = prm.tfLevelFrom + 1;
-    this.app.restoreFromState();
-    this.app.recalc();
-    this.takeSnapshot();
-  }
-
-  restoreOwn() {
-    this.planetId = null;
-    this.universeSettings.forEach((setting) => setting.detach());
-    this.planetSelect.hide();
-    Object.assign(options.prm, cloneData(this.ownPrm));
-    this.app.restoreFromState();
-  }
-
-  recalc() {
-    this.app.recalc();
-  }
-
-  takeSnapshot() {
-    /** @type {Record<string, any>} */
-    const prm = options.prm;
-    this.snapshot = {};
-    TERRAFORMER_ACCOUNT_FIELDS.forEach((f) => { this.snapshot[f.key] = f.fromPrm(prm[f.prm]); });
-    TERRAFORMER_PLANET_FIELDS.forEach((f) => { this.snapshot['planet:' + f.key] = f.fromPrm(prm[f.prm]); });
-  }
-
-  // -------------------------------------------------------------------------
-  // Calculator -> profile
-  // -------------------------------------------------------------------------
-
-  saveWithoutProfile() {
-    this.ownSave();
-  }
-
-  /** Write what changed since the last snapshot into the profile. */
-  sync() {
-    const profile = this.profile();
-    if (!profile) return;
-    /** @type {Record<string, any>} */
-    const prm = options.prm;
-    const planet = this.planet(profile);
-    let changed = false;
-    TERRAFORMER_ACCOUNT_FIELDS.forEach((f) => {
-      changed = this.syncValue(profile.account, f.key, f.key, f.fromPrm(prm[f.prm])) || changed;
-    });
-    if (planet) {
-      TERRAFORMER_PLANET_FIELDS.forEach((f) => {
-        changed = this.syncValue(planet, f.key, 'planet:' + f.key, f.fromPrm(prm[f.prm])) || changed;
-      });
-    }
-    if (changed) {
-      this.pf.save(profile);
-      this.markAll();
-    }
   }
 
   /**
-   * options_terraformer gets the calculator's own fields as they are, and the
-   * profile-owned ones as they were before the profile. With no planet the
-   * planet's fields are the calculator's own, so they are taken as they are,
-   * and so are "from" and the economy speed of a profile with no universe.
+   * With no planet "from" is the calculator's own, so it is taken as it is.
    */
-  saveOwn() {
-    /** @type {Record<string, any>} */
-    const prm = options.prm;
-    if (this.planetId === null) {
-      TERRAFORMER_PLANET_FIELDS.forEach((f) => { this.ownPrm[f.prm] = prm[f.prm]; });
-      this.ownPrm.tfLevelFrom = prm.tfLevelFrom;
-    }
-    if (!this.profile()?.universe) {
-      TERRAFORMER_UNIVERSE_KEYS.forEach((key) => { this.ownPrm[key] = prm[key]; });
-    }
-    saveToCookie('options_terraformer', { ...prm, ...cloneData(this.ownPrm) });
-  }
-
-  /** The player picked another planet. */
-  planetChosen() {
-    const profile = this.profile();
-    if (!profile) return;
-    // Whatever was typed for the planet shown so far is saved first.
-    this.save();
-    this.planetId = this.planetSelect.chosen(profile);
-    this.applying = true;
-    try {
-      this.showPlanet(profile);
-    } finally {
-      this.applying = false;
-    }
-    this.markAll();
-  }
-
-  // -------------------------------------------------------------------------
-  // The marks
-  // -------------------------------------------------------------------------
-
-  /** Name every value this page binds, in the page's own words. */
-  describeFields() {
-    this.describeFieldList([...TERRAFORMER_ACCOUNT_FIELDS, ...TERRAFORMER_PLANET_FIELDS]);
-  }
-
-  /** Mark every field the profile owns, and the ones that differ from the game. */
-  markAll() {
-    const profile = this.profile();
-    if (!profile) return;
-    TERRAFORMER_ACCOUNT_FIELDS.forEach((f) => {
-      this.pf.markField($(f.input), profile, profile.account, f.key, this.restoreAccount(f.key));
-    });
-    this.universeSettings.forEach((setting) => setting.mark());
-    const planet = this.planet(profile);
-    if (!planet) return;
-    TERRAFORMER_PLANET_FIELDS.forEach((f) => {
-      this.pf.markField($(f.input), profile, planet, f.key, this.restoreBody('planets', planet.id, f.key));
-    });
+  afterSaveOwn() {
+    if (this.planetId === null) this.ownPrm.tfLevelFrom = options.prm.tfLevelFrom;
   }
 }
 

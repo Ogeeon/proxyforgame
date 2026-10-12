@@ -57,216 +57,26 @@ const GRAVITON_PLANET_FIELDS = [
 /** The options.prm keys of the settings that come from the profile's universe. */
 const GRAVITON_UNIVERSE_KEYS = ['universeSpeed', 'debrisPercent', 'deutInDebris'];
 
-/** @extends {ProfileBinder<GravitonApp>} */
-class GravitonProfiles extends ProfileBinder {
+/** @extends {PlanetPrmBinder<GravitonApp>} */
+class GravitonProfiles extends PlanetPrmBinder {
   /**
    * @param {ProfilesUi} pf
    * @param {GravitonApp} app
    */
   constructor(pf, app) {
-    super(pf, app);
-    /** @type {?string} The planet shown; null leaves its fields to the calculator. */
-    this.planetId = null;
-    this.planetSelect = new PfBodySelect(pf, {
-      select: '#pf-planet', box: '#pf-planet-box', bodies: (p) => p.planets, lastKey: 'graviton',
-    });
-    /** @type {Record<string, *>} The profile-owned prm keys as the calculator has them. */
-    this.ownPrm = {};
-    this.ownSave = options.save;
-    /** @type {PfUniverseSetting[]} The universe's settings, set in init(). */
-    this.universeSettings = [];
-  }
-
-  init() {
-    this.describeFields();
-    options.save = () => this.save();
-    /**
-     * @param {PfUniverseSettingKind} kind
-     * @param {string} selector
-     */
-    const setting = (kind, selector) => new PfUniverseSetting(this.pf, kind, selector, () => this.app.recalc());
-    this.universeSettings = [
-      setting(PF_UNIVERSE_SPEED, '#universe-speed'),
-      setting(PF_UNIVERSE_DEBRIS, '#debris-percent'),
-      setting(PF_UNIVERSE_DEUT_IN_DEBRIS, '#deut-in-debris'),
-    ];
-    this.planetSelect.onChange(() => this.planetChosen());
-    this.pf.onChange((profile) => this.apply(profile));
-    const active = this.pf.active();
-    if (active) this.apply(active);
-  }
-
-  /**
-   * @param {?Profile} profile
-   * @returns {?ProfilePlanet}
-   */
-  planet(profile) {
-    return profile?.planets.find((p) => p.id === this.planetId) || null;
-  }
-
-  /**
-   * The options.prm keys the profile may own. The officers' bonus follows the
-   * officers, and the universe settings come from the profile's universe.
-   */
-  static ownedKeys() {
-    return [...GRAVITON_ACCOUNT_FIELDS, ...GRAVITON_PLANET_FIELDS].map((f) => f.prm).concat('energyBonus', ...GRAVITON_UNIVERSE_KEYS);
-  }
-
-  // -------------------------------------------------------------------------
-  // Profile -> calculator
-  // -------------------------------------------------------------------------
-
-  /** @param {?Profile} profile */
-  apply(profile) {
-    if (!profile) {
-      this.leave();
-      return;
-    }
-    this.applying = true;
-    try {
-      /** @type {Record<string, any>} */
-      const prm = options.prm;
-      if (this.profileId === null) {
-        this.ownPrm = {};
-        GravitonProfiles.ownedKeys().forEach((key) => { this.ownPrm[key] = cloneData(prm[key]); });
-      }
-      this.profileId = profile.id;
-      this.pf.clearMarks();
-      GRAVITON_ACCOUNT_FIELDS.forEach((f) => { prm[f.prm] = f.toPrm(getProfileValue(profile.account, f.key)); });
-      // The calculator's reset would write every default into the profile as an edit.
-      pfShow('#reset', false);
-      this.planetId = this.planetSelect.render(profile, this.planetId);
-      this.showPlanet(profile);
-    } finally {
-      this.applying = false;
-    }
-    this.universeSettings.forEach((setting) => { void setting.attach(profile); });
-    this.markAll();
-  }
-
-  /**
-   * Put the planet's values - or, with no planet, the calculator's own - into
-   * options.prm, show the whole form and recalculate.
-   *
-   * @param {Profile} profile
-   */
-  showPlanet(profile) {
-    /** @type {Record<string, any>} */
-    const prm = options.prm;
-    const planet = this.planet(profile);
-    GRAVITON_PLANET_FIELDS.forEach((f) => {
-      prm[f.prm] = planet ? f.toPrm(getProfileValue(planet, f.key)) : cloneData(this.ownPrm[f.prm]);
-    });
-    this.app.restoreFromState();
-    this.app.recalc();
-    this.takeSnapshot();
-  }
-
-  restoreOwn() {
-    this.planetId = null;
-    this.universeSettings.forEach((setting) => setting.detach());
-    this.planetSelect.hide();
-    Object.assign(options.prm, cloneData(this.ownPrm));
-    this.app.restoreFromState();
-  }
-
-  recalc() {
-    this.app.recalc();
-  }
-
-  takeSnapshot() {
-    /** @type {Record<string, any>} */
-    const prm = options.prm;
-    this.snapshot = {};
-    GRAVITON_ACCOUNT_FIELDS.forEach((f) => { this.snapshot[f.key] = f.fromPrm(prm[f.prm]); });
-    GRAVITON_PLANET_FIELDS.forEach((f) => { this.snapshot['planet:' + f.key] = f.fromPrm(prm[f.prm]); });
-  }
-
-  // -------------------------------------------------------------------------
-  // Calculator -> profile
-  // -------------------------------------------------------------------------
-
-  saveWithoutProfile() {
-    this.ownSave();
-  }
-
-  /** Write what changed since the last snapshot into the profile. */
-  sync() {
-    const profile = this.profile();
-    if (!profile) return;
-    /** @type {Record<string, any>} */
-    const prm = options.prm;
-    const planet = this.planet(profile);
-    let changed = false;
-    GRAVITON_ACCOUNT_FIELDS.forEach((f) => {
-      changed = this.syncValue(profile.account, f.key, f.key, f.fromPrm(prm[f.prm])) || changed;
-    });
-    if (planet) {
-      GRAVITON_PLANET_FIELDS.forEach((f) => {
-        changed = this.syncValue(planet, f.key, 'planet:' + f.key, f.fromPrm(prm[f.prm])) || changed;
-      });
-    }
-    if (changed) {
-      this.pf.save(profile);
-      this.markAll();
-    }
-  }
-
-  /**
-   * options_graviton gets the calculator's own fields as they are, and the
-   * profile-owned ones as they were before the profile. With no planet the
-   * planet's fields are the calculator's own, so they are taken as they are,
-   * and so are the universe settings of a profile with no universe.
-   */
-  saveOwn() {
-    /** @type {Record<string, any>} */
-    const prm = options.prm;
-    if (this.planetId === null) {
-      GRAVITON_PLANET_FIELDS.forEach((f) => { this.ownPrm[f.prm] = prm[f.prm]; });
-    }
-    if (!this.profile()?.universe) {
-      GRAVITON_UNIVERSE_KEYS.forEach((key) => { this.ownPrm[key] = prm[key]; });
-    }
-    saveToCookie('options_graviton', { ...prm, ...cloneData(this.ownPrm) });
-  }
-
-  /** The player picked another planet. */
-  planetChosen() {
-    const profile = this.profile();
-    if (!profile) return;
-    // Whatever was typed for the planet shown so far is saved first.
-    this.save();
-    this.planetId = this.planetSelect.chosen(profile);
-    this.applying = true;
-    try {
-      this.showPlanet(profile);
-    } finally {
-      this.applying = false;
-    }
-    this.markAll();
-  }
-
-  // -------------------------------------------------------------------------
-  // The marks
-  // -------------------------------------------------------------------------
-
-  /** Name every value this page binds, in the page's own words. */
-  describeFields() {
-    this.describeFieldList([...GRAVITON_ACCOUNT_FIELDS, ...GRAVITON_PLANET_FIELDS]);
-  }
-
-  /** Mark every field the profile owns, and the ones that differ from the game. */
-  markAll() {
-    const profile = this.profile();
-    if (!profile) return;
-    GRAVITON_ACCOUNT_FIELDS.forEach((f) => {
-      this.pf.markField($(f.input), profile, profile.account, f.key, this.restoreAccount(f.key));
-    });
-    this.universeSettings.forEach((setting) => setting.mark());
-    const planet = this.planet(profile);
-    if (!planet) return;
-    GRAVITON_PLANET_FIELDS.forEach((f) => {
-      this.pf.markField($(f.input), profile, planet, f.key, this.restoreBody('planets', planet.id, f.key));
+    super(pf, app, {
+      accountFields: GRAVITON_ACCOUNT_FIELDS,
+      planetFields: GRAVITON_PLANET_FIELDS,
+      cookie: 'options_graviton',
+      lastKey: 'graviton',
+      universe: [
+        [PF_UNIVERSE_SPEED, '#universe-speed'],
+        [PF_UNIVERSE_DEBRIS, '#debris-percent'],
+        [PF_UNIVERSE_DEUT_IN_DEBRIS, '#deut-in-debris'],
+      ],
+      universeKeys: GRAVITON_UNIVERSE_KEYS,
+      // The officers' bonus follows the officers.
+      extraOwnedKeys: ['energyBonus'],
     });
   }
 }
