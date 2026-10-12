@@ -2,8 +2,9 @@
 // LF COSTS CALCULATOR - PLAYER PROFILE BINDING
 // ============================================================================
 // Connects the life-form cost calculator to the active player profile
-// (ADR-0004). The calculator keeps working on options.prm; this file projects
-// the profile into the form and writes the changes back:
+// (ADR-0004). The calculator keeps working on options.prm; PlanetPrmBinder
+// projects the profile into it and writes the changes back, this file gives
+// the fields and what is the calculator's own:
 //   - apply(): profile -> form - the account (ion and hyperspace technology,
 //     the class, the cargo bonuses of the transports, the exchange rates, the
 //     global life-form research reductions) and
@@ -21,51 +22,73 @@
 // available resources are the calculator's own
 // and keep going to options_lfcosts; the profile-owned keys are written there
 // with the values they had before the profile, so "no profile" shows them
-// untouched. The economy speed comes from the profile's universe.
+// untouched. The economy speed comes from the profile's universe; a profile
+// with no universe leaves it to the calculator.
 
 'use strict';
 
-/** @type {ProfilePrmField[]} */
+/** @type {ProfileConvField[]} */
 const LFCOSTS_ACCOUNT_FIELDS = [
-  pfLevelField('research.121', 'ionTechLevel', '#ion-tech-level'),
-  pfLevelField('research.114', 'hyperTechLevel', '#hyper-tech-level'),
+  pfConvNumField('research.121', 'ionTechLevel', '#ion-tech-level'),
+  pfConvNumField('research.114', 'hyperTechLevel', '#hyper-tech-level'),
   {
     // The calculator has no "no class": a profile without one shows as collector.
     key: 'class', prm: 'playerClass', input: '#class-0',
-    get: (p) => pfNum(p.playerClass) + 1,
-    show: (v) => setChecked('#class-' + Math.min(2, Math.max(0, pfNum(v) - 1)), true),
+    toPrm: (v) => Math.min(2, Math.max(0, pfNum(v) - 1)),
+    fromPrm: (v) => pfNum(v) + 1,
     display: (v) => pfLabelFor('class-' + (pfNum(v) - 1)),
   },
-  pfPercentField('lf.ship.202.cargo', 'capIncrSC', '#sc-capacity-increase'),
-  pfPercentField('lf.ship.203.cargo', 'capIncrLC', '#lc-capacity-increase'),
+  pfConvNumField('lf.ship.202.cargo', 'capIncrSC', '#sc-capacity-increase'),
+  pfConvNumField('lf.ship.203.cargo', 'capIncrLC', '#lc-capacity-increase'),
   // The game lists the reduction of life-form research under one of them,
   // 11201, and sums only the global bonuses there (Research Speed techs): the
   // planet's third building is not in it, the calculator adds that itself.
-  pfPercentField('lf.cost.11201.cost', 'researchCostReduction', '#research-cost-reduction'),
-  pfPercentField('lf.cost.11201.time', 'researchTimeReduction', '#research-time-reduction'),
+  pfConvNumField('lf.cost.11201.cost', 'researchCostReduction', '#research-cost-reduction'),
+  pfConvNumField('lf.cost.11201.time', 'researchTimeReduction', '#research-time-reduction'),
   {
     key: 'rates', prm: 'rates', input: '#exchange-rates-m',
-    get: (p) => (Array.isArray(p.rates) ? p.rates.map(Number) : DEFAULT_RATES.slice()),
-    show: (v) => {
-      const rates = Array.isArray(v) && v.length === 3 ? v.map(Number) : DEFAULT_RATES;
-      setNumVal('#exchange-rates-m', rates[0]);
-      setNumVal('#exchange-rates-c', rates[1]);
-      setNumVal('#exchange-rates-d', rates[2]);
-    },
+    toPrm: (v) => (Array.isArray(v) && v.length === 3 ? v.map(Number) : DEFAULT_RATES.slice()),
+    fromPrm: (v) => (Array.isArray(v) ? v.map(Number) : DEFAULT_RATES.slice()),
   },
 ];
 
-/** The fields of the planet picked in #pf-planet, its life form aside. */
+/** The planet's life form: a race, or 0 when none lives there. */
+const LFCOSTS_RACE_KEY = 'lf.race';
+
+/**
+ * The race of a profile planet, or null when it has no life form.
+ *
+ * @param {ProfilePlanet} planet
+ * @returns {?number}
+ */
+function lfCostsPlanetRace(planet) {
+  const race = pfNum(getProfileValue(planet, LFCOSTS_RACE_KEY, 0));
+  return race >= 1 && race <= 4 ? race : null;
+}
+
+/**
+ * The fields of the planet picked in #pf-planet.
+ *
+ * @type {ProfileConvField[]}
+ */
 const LFCOSTS_PLANET_FIELDS = [
-  pfLevelField('building.14', 'robotFactoryLevel', '#robot-factory-level'),
-  pfLevelField('building.15', 'naniteFactoryLevel', '#nanite-factory-level'),
-  pfLevelField('lf.building.' + lfBuildingGameId(2, 8), 'megalithLvl', '#megalith-level'),
-  pfLevelField('lf.building.' + lfBuildingGameId(2, 11), 'mineralResCntrLvl', '#mrc-level'),
+  pfConvNumField('building.14', 'robotFactoryLevel', '#robot-factory-level'),
+  pfConvNumField('building.15', 'naniteFactoryLevel', '#nanite-factory-level'),
+  pfConvNumField('lf.building.' + lfBuildingGameId(2, 8), 'megalithLvl', '#megalith-level'),
+  pfConvNumField('lf.building.' + lfBuildingGameId(2, 11), 'mineralResCntrLvl', '#mrc-level'),
   // Each race's third building cuts the cost and time of life-form research.
-  pfLevelField('lf.building.' + lfBuildingGameId(1, 3), 'resCentreLvl', '#research-centre-level'),
-  pfLevelField('lf.building.' + lfBuildingGameId(2, 3), 'runeTechLvl', '#rune-tech-level'),
-  pfLevelField('lf.building.' + lfBuildingGameId(3, 3), 'rbtResCentreLvl', '#rbt-res-centre-level'),
-  pfLevelField('lf.building.' + lfBuildingGameId(4, 3), 'vortexChamberLvl', '#vortex-chamber-level'),
+  pfConvNumField('lf.building.' + lfBuildingGameId(1, 3), 'resCentreLvl', '#research-centre-level'),
+  pfConvNumField('lf.building.' + lfBuildingGameId(2, 3), 'runeTechLvl', '#rune-tech-level'),
+  pfConvNumField('lf.building.' + lfBuildingGameId(3, 3), 'rbtResCentreLvl', '#rbt-res-centre-level'),
+  pfConvNumField('lf.building.' + lfBuildingGameId(4, 3), 'vortexChamberLvl', '#vortex-chamber-level'),
+  {
+    // A planet with no life form leaves the race to the calculator (see afterShowPlanet),
+    // and so has nothing to mark.
+    key: LFCOSTS_RACE_KEY, prm: 'race', input: '#race-selector',
+    toPrm: pfNum,
+    fromPrm: pfNum,
+    markIf: (planet) => lfCostsPlanetRace(planet) !== null,
+  },
 ];
 
 /**
@@ -87,45 +110,25 @@ function lfCostsProfileKey(techId) {
 /** The multi-level build tables, buildings and researches, whose "from" levels the planet fills in. */
 const LFCOSTS_START_TABLES = ['#table-1-1', '#table-1-2'];
 
-/** The planet's life form: a race, or 0 when none lives there. */
-const LFCOSTS_RACE_KEY = 'lf.race';
-
-/**
- * The race of a profile planet, or null when it has no life form.
- *
- * @param {ProfilePlanet} planet
- * @returns {?number}
- */
-function lfCostsPlanetRace(planet) {
-  const race = pfNum(getProfileValue(planet, LFCOSTS_RACE_KEY, 0));
-  return race >= 1 && race <= 4 ? race : null;
-}
-
-/** @extends {ProfileBinder<LfCostsOrchestrator>} */
-class LfCostsProfiles extends ProfileBinder {
+/** @extends {PlanetPrmBinder<LfCostsOrchestrator>} */
+class LfCostsProfiles extends PlanetPrmBinder {
   /**
    * @param {ProfilesUi} pf
    * @param {LfCostsOrchestrator} app
    */
   constructor(pf, app) {
-    super(pf, app);
-    /** @type {?string} The planet shown; null leaves its fields to the calculator. */
-    this.planetId = null;
-    this.planetSelect = new PfBodySelect(pf, {
-      select: '#pf-planet', box: '#pf-planet-box', bodies: (p) => p.planets, lastKey: 'lfcosts',
+    super(pf, app, {
+      accountFields: LFCOSTS_ACCOUNT_FIELDS,
+      planetFields: LFCOSTS_PLANET_FIELDS,
+      cookie: 'options_lfcosts',
+      lastKey: 'lfcosts',
+      universe: [[PF_UNIVERSE_SPEED, '#universe-speed']],
+      universeKeys: ['universeSpeed'],
+      extraOwnedKeys: [],
     });
-    /** @type {Record<string, *>} The profile-owned prm keys as the calculator has them. */
-    this.ownPrm = {};
-    this.ownSave = options.save;
-    /** @type {?PfUniverseSetting} Set in init(). */
-    this.speed = null;
   }
 
   init() {
-    this.describeFields();
-    options.save = () => this.save();
-    this.speed = new PfUniverseSetting(this.pf, PF_UNIVERSE_SPEED, '#universe-speed', () => this.app.handleParamChange());
-    this.planetSelect.onChange(() => this.planetChosen());
     // Runs after the calculator's own handler, which is bound first.
     addEvent('#tech-types-select', 'change', () => {
       const planet = this.planet(this.profile());
@@ -140,72 +143,35 @@ class LfCostsProfiles extends ProfileBinder {
       const planet = this.planet(this.profile());
       if (planet && outerTab === 1) this.fillStartLevels(planet);
     };
-    this.pf.onChange((profile) => this.apply(profile));
-    const active = this.pf.active();
-    if (active) this.apply(active);
+    super.init();
   }
-
-  /**
-   * @param {?Profile} profile
-   * @returns {?ProfilePlanet}
-   */
-  planet(profile) {
-    return profile?.planets.find((p) => p.id === this.planetId) || null;
-  }
-
-  /** The options.prm keys the profile may own. */
-  static ownedKeys() {
-    return [...LFCOSTS_ACCOUNT_FIELDS, ...LFCOSTS_PLANET_FIELDS].map((f) => f.prm).concat('race');
-  }
-
-  // -------------------------------------------------------------------------
-  // Profile -> calculator
-  // -------------------------------------------------------------------------
 
   /** @param {?Profile} profile */
   apply(profile) {
-    if (!profile) {
-      this.leave();
-      return;
+    if (profile && this.profileId === null) {
+      /** @type {Record<string, any>} */
+      const prm = options.prm;
+      // The race is not one of the stored settings: take the form's, before it is kept as the calculator's own.
+      prm.race = Number(getVal('#race-selector')) || 1;
     }
-    this.applying = true;
-    try {
-      if (this.profileId === null) {
-        /** @type {Record<string, any>} */
-        const prm = options.prm;
-        // The race is not one of the stored settings: take the form's.
-        prm.race = Number(getVal('#race-selector')) || 1;
-        this.ownPrm = {};
-        LfCostsProfiles.ownedKeys().forEach((key) => { this.ownPrm[key] = cloneData(prm[key]); });
-      }
-      this.profileId = profile.id;
-      this.pf.clearMarks();
-      LFCOSTS_ACCOUNT_FIELDS.forEach((f) => f.show(getProfileValue(profile.account, f.key)));
-      // The calculator's reset would write every default into the profile as an edit.
-      pfShow('#reset', false);
-      this.planetId = this.planetSelect.render(profile, this.planetId);
-      this.showPlanet(profile);
-      this.recalculate();
-      this.fillPlanetStart(profile);
-      this.takeSnapshot();
-    } finally {
-      this.applying = false;
-    }
-    void this.speed?.attach(profile);
-    this.markAll();
+    super.apply(profile);
+  }
+
+  /** @param {Profile} profile */
+  showPlanet(profile) {
+    super.showPlanet(profile);
+    this.fillPlanetStart(profile);
   }
 
   /**
-   * Show the planet's values. With no planet - or, for the race, a planet with
-   * no life form - the calculator's own values show.
-   *
-   * @param {Profile} profile
+   * With no planet - or a planet with no life form - the race is the
+   * calculator's own.
    */
-  showPlanet(profile) {
-    const planet = this.planet(profile);
-    LFCOSTS_PLANET_FIELDS.forEach((f) => f.show(planet ? getProfileValue(planet, f.key, 0) : this.ownPrm[f.prm]));
-    const race = planet ? lfCostsPlanetRace(planet) : null;
-    setVal('#race-selector', race ?? (pfNum(this.ownPrm.race) || 1));
+  afterShowPlanet() {
+    /** @type {Record<string, any>} */
+    const prm = options.prm;
+    const planet = this.planet(this.profile());
+    if (!planet || lfCostsPlanetRace(planet) === null) prm.race = pfNum(this.ownPrm.race) || 1;
   }
 
   /** @param {Profile} profile */
@@ -254,136 +220,6 @@ class LfCostsProfiles extends ProfileBinder {
     const level = pfNum(getProfileValue(planet, lfCostsProfileKey(techId), 0));
     setVal('#tab2-from-level', level);
     if ((Number.parseInt(getVal('#tab2-to-level'), 10) || 0) <= level) setVal('#tab2-to-level', level + 1);
-  }
-
-  /** Recalculate every table after the form was filled from outside. */
-  recalculate() {
-    this.app.renderer.renderHideNShow(Number(getVal('#race-selector')));
-    this.app.handleParamChange();
-  }
-
-  restoreOwn() {
-    this.planetId = null;
-    this.speed?.detach();
-    this.planetSelect.hide();
-    Object.assign(options.prm, cloneData(this.ownPrm));
-    /** @type {Record<string, any>} */
-    const prm = options.prm;
-    setVal('#ion-tech-level', prm.ionTechLevel);
-    setVal('#hyper-tech-level', prm.hyperTechLevel);
-    setChecked('#class-' + prm.playerClass, true);
-    setNumVal('#sc-capacity-increase', prm.capIncrSC);
-    setNumVal('#lc-capacity-increase', prm.capIncrLC);
-    LFCOSTS_ACCOUNT_FIELDS.find((f) => f.key === 'rates')?.show(prm.rates);
-    LFCOSTS_PLANET_FIELDS.forEach((f) => f.show(prm[f.prm]));
-    setVal('#race-selector', pfNum(prm.race) || 1);
-  }
-
-  recalc() {
-    this.recalculate();
-  }
-
-  takeSnapshot() {
-    /** @type {Record<string, any>} */
-    const prm = options.prm;
-    this.snapshot = {};
-    LFCOSTS_ACCOUNT_FIELDS.forEach((f) => { this.snapshot[f.key] = f.get(prm); });
-    LFCOSTS_PLANET_FIELDS.forEach((f) => { this.snapshot['planet:' + f.key] = f.get(prm); });
-    this.snapshot['planet:' + LFCOSTS_RACE_KEY] = pfNum(prm.race);
-  }
-
-  // -------------------------------------------------------------------------
-  // Calculator -> profile
-  // -------------------------------------------------------------------------
-
-  saveWithoutProfile() {
-    this.ownSave();
-  }
-
-  /** Write what changed since the last snapshot into the profile. */
-  sync() {
-    const profile = this.profile();
-    if (!profile) return;
-    /** @type {Record<string, any>} */
-    const prm = options.prm;
-    const planet = this.planet(profile);
-    let changed = false;
-    LFCOSTS_ACCOUNT_FIELDS.forEach((f) => {
-      changed = this.syncValue(profile.account, f.key, f.key, f.get(prm)) || changed;
-    });
-    if (planet) {
-      LFCOSTS_PLANET_FIELDS.forEach((f) => {
-        changed = this.syncValue(planet, f.key, 'planet:' + f.key, f.get(prm)) || changed;
-      });
-      changed = this.syncValue(planet, LFCOSTS_RACE_KEY, 'planet:' + LFCOSTS_RACE_KEY, pfNum(prm.race)) || changed;
-    }
-    if (changed) {
-      this.pf.save(profile);
-      this.markAll();
-    }
-  }
-
-  /**
-   * options_lfcosts gets the calculator's own fields as they are, and the
-   * profile-owned ones as they were before the profile. With no planet the
-   * planet's fields are the calculator's own, so they are taken as they are.
-   */
-  saveOwn() {
-    /** @type {Record<string, any>} */
-    const prm = options.prm;
-    if (this.planetId === null) {
-      LFCOSTS_PLANET_FIELDS.forEach((f) => { this.ownPrm[f.prm] = prm[f.prm]; });
-      this.ownPrm.race = prm.race;
-    }
-    saveToCookie('options_lfcosts', { ...prm, ...cloneData(this.ownPrm) });
-  }
-
-  /** The player picked another planet. */
-  planetChosen() {
-    const profile = this.profile();
-    if (!profile) return;
-    // Whatever was typed for the planet shown so far is saved first.
-    this.save();
-    this.planetId = this.planetSelect.chosen(profile);
-    this.applying = true;
-    try {
-      this.showPlanet(profile);
-      this.recalculate();
-      this.fillPlanetStart(profile);
-      this.takeSnapshot();
-    } finally {
-      this.applying = false;
-    }
-    this.markAll();
-  }
-
-  // -------------------------------------------------------------------------
-  // The marks
-  // -------------------------------------------------------------------------
-
-  /** Name every value this page binds, in the page's own words. */
-  describeFields() {
-    this.describeFieldList([...LFCOSTS_ACCOUNT_FIELDS, ...LFCOSTS_PLANET_FIELDS]);
-    this.pf.describeField(LFCOSTS_RACE_KEY, pfFieldLabel($('#race-selector')), pfOptionText(selectEl('#race-selector')));
-  }
-
-  /** Mark every field the profile owns, and the ones that differ from the game. */
-  markAll() {
-    const profile = this.profile();
-    if (!profile) return;
-    LFCOSTS_ACCOUNT_FIELDS.forEach((f) => {
-      this.pf.markField($(f.input), profile, profile.account, f.key, this.restoreAccount(f.key));
-    });
-    this.speed?.mark();
-    const planet = this.planet(profile);
-    if (!planet) return;
-    LFCOSTS_PLANET_FIELDS.forEach((f) => {
-      this.pf.markField($(f.input), profile, planet, f.key, this.restoreBody('planets', planet.id, f.key));
-    });
-    // A planet with no life form leaves the race to the calculator: nothing to mark.
-    if (lfCostsPlanetRace(planet) !== null) {
-      this.pf.markField($('#race-selector'), profile, planet, LFCOSTS_RACE_KEY, this.restoreBody('planets', planet.id, LFCOSTS_RACE_KEY));
-    }
   }
 }
 

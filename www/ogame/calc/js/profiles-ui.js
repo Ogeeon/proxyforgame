@@ -1837,6 +1837,7 @@ class PlanetPrmBinder extends ProfileBinder {
     const planet = this.planet(profile);
     if (!planet) return;
     this.config.planetFields.forEach((f) => {
+      if (f.markIf && !f.markIf(planet)) return;
       this.pf.markField($(f.input), profile, planet, f.key, this.restoreBody('planets', planet.id, f.key));
     });
   }

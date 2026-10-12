@@ -683,6 +683,41 @@ class LfCostsOrchestrator {
         setNumVal('#exchange-rates-d', prm.rates[2]);
     }
 
+    /**
+     * Show the settings a player profile can own - the ones kept in opts.prm -
+     * in the form. The tables, the range tab and the full-numbers switch are
+     * the calculator's own and stay as they are.
+     */
+    restoreFromState() {
+        const prm = this.opts.prm;
+        setVal('#robot-factory-level', prm.robotFactoryLevel);
+        setVal('#nanite-factory-level', prm.naniteFactoryLevel);
+        setVal('#universe-speed', prm.universeSpeed);
+        setVal('#ion-tech-level', prm.ionTechLevel);
+        setVal('#hyper-tech-level', prm.hyperTechLevel);
+        setChecked(`#class-${prm.playerClass}`, true);
+        setNumVal('#sc-capacity-increase', prm.capIncrSC);
+        setNumVal('#lc-capacity-increase', prm.capIncrLC);
+        setVal('#megalith-level', prm.megalithLvl);
+        setVal('#mrc-level', prm.mineralResCntrLvl);
+        setVal('#research-centre-level', prm.resCentreLvl);
+        setVal('#rune-tech-level', prm.runeTechLvl);
+        setVal('#rbt-res-centre-level', prm.rbtResCentreLvl);
+        setVal('#vortex-chamber-level', prm.vortexChamberLvl);
+        setNumVal('#research-cost-reduction', prm.researchCostReduction);
+        setNumVal('#research-time-reduction', prm.researchTimeReduction);
+        setNumVal('#exchange-rates-m', prm.rates[0]);
+        setNumVal('#exchange-rates-c', prm.rates[1]);
+        setNumVal('#exchange-rates-d', prm.rates[2]);
+        setVal('#race-selector', Number(prm.race) || 1);
+    }
+
+    /** Recalculate every table after the form was filled from outside. */
+    recalc() {
+        this.renderer.renderHideNShow(Number(getVal('#race-selector')));
+        this.handleParamChange();
+    }
+
     _clearAvailableResourceInputs() {
         for (let outer = 0; outer < 3; outer++) {
             for (let inner = 1; inner < 3; inner++) {

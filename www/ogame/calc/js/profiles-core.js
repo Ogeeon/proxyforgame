@@ -249,9 +249,11 @@ function sameUniverse(a, b) {
  *   input: string,
  *   toPrm: (v: *) => *,
  *   fromPrm: (v: *) => *,
+ *   markIf?: (body: ProfilePlanet) => boolean,
  * }} ProfileConvField
  * prm: key in options.prm; input: selector of the field that shows it; toPrm: profile value (or undefined)
- * to the prm value; fromPrm: prm value to the profile value.
+ * to the prm value; fromPrm: prm value to the profile value; markIf: the field is marked only for a
+ * body it returns true for (default: always).
  */
 
 /**
