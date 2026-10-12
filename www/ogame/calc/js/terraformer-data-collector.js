@@ -35,6 +35,7 @@ class TerraformerDataCollector {
       energyBoost: Number.parseInt(getVal('#energy-boost'), 10) || 0,
       disChLevel: getInputNumber($('#disr-chamber-level')),
       totalLFEnrgBonus: getInputNumber($('#total-lf-energy-bonus')),
+      lfTerraformerRdc: getInputNumber($('#lf-terraformer-rdc')),
       scCapacityIncrease: getInputNumber($('#sc-capacity-increase')),
       lcCapacityIncrease: getInputNumber($('#lc-capacity-increase')),
       tfSingleLevel: getChecked('#single-level'),

@@ -34,6 +34,7 @@ const BASE_PRM = {
     energyBoost: 0,
     disChLevel: 0,
     totalLFEnrgBonus: 0,
+    lfTerraformerRdc: 0,
     scCapacityIncrease: 0,
     lcCapacityIncrease: 0,
     tfSingleLevel: false,
@@ -284,5 +285,44 @@ describe('Terraformer Calculator - Officers', () => {
 
     it('all five officers give the commanding staff bonus', () => {
         expect(TerraformerCalculator.officerBonusLevel(all)).toBe(2);
+    });
+});
+
+describe('Terraformer Calculator - Life-form cost reduction', () => {
+    it('cuts the terraformer cost of a level by the percentage', () => {
+        // Level 1: crystal 50000, deuterium 100000.
+        const r = compute({ tfLevelTo: 1, lfTerraformerRdc: 10 });
+        expect(r.crysTF).toBe(45000);
+        expect(r.deutTF).toBe(90000);
+        expect(r.crysTotal).toBe(r.crysSS + 45000);
+    });
+
+    it('rounds each level down on its own, as the cost calculator does', () => {
+        const plain = [1, 2, 3].map((level) => compute({ tfLevelFrom: level - 1, tfLevelTo: level }));
+        const r = compute({ tfLevelTo: 3, lfTerraformerRdc: 15.5 });
+        const expected = (key) => plain.reduce((sum, p) => sum + Math.floor(p[key] * 0.845), 0);
+        expect(r.crysTF).toBe(expected('crysTF'));
+        expect(r.deutTF).toBe(expected('deutTF'));
+        expect(r.secsTF).toBe(expected('secsTF'));
+    });
+
+    it('shortens the build time as well', () => {
+        const plain = compute({ tfLevelTo: 2, robotsFactoryLevel: 10 });
+        const reduced = compute({ tfLevelTo: 2, robotsFactoryLevel: 10, lfTerraformerRdc: 20 });
+        expect(reduced.secsTF).toBeLessThan(plain.secsTF);
+    });
+
+    it('is capped at 50%', () => {
+        const half = compute({ tfLevelTo: 4, lfTerraformerRdc: 50 });
+        const more = compute({ tfLevelTo: 4, lfTerraformerRdc: 80 });
+        expect(more.crysTF).toBe(half.crysTF);
+        expect(more.secsTF).toBe(half.secsTF);
+    });
+
+    it('leaves the satellites alone', () => {
+        const plain = compute({ tfLevelTo: 2 });
+        const reduced = compute({ tfLevelTo: 2, lfTerraformerRdc: 30 });
+        expect(reduced.crysSS).toBe(plain.crysSS);
+        expect(reduced.secsSS).toBe(plain.secsSS);
     });
 });

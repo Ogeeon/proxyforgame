@@ -1129,6 +1129,8 @@ test('terraformer takes the account and a planet from the profile', async ({ pag
     await expect(page.locator('#total-lf-energy-bonus')).toHaveValue('0.5');
     await expect(page.locator('#sc-capacity-increase')).toHaveValue('1.23');
     await expect(page.locator('#lc-capacity-increase')).toHaveValue('2.5');
+    await expect(page.locator('#lf-terraformer-rdc')).toHaveValue('4');
+    await expect(page.locator('#lf-terraformer-rdc')).toHaveClass(/pf-bound/);
 
     await expect(page.locator('#pf-planet option')).toHaveCount(3);
     await expect(page.locator('#pf-planet option:checked')).toHaveText('Alpha [2:148:8]');
@@ -1196,22 +1198,27 @@ test('terraformer edits become overrides of the account and the planet', async (
     await page.locator('#solar-satellites-count').fill('400');
     await page.locator('#solar-satellites-count').blur();
     await page.locator('#engineer').check();
+    await page.locator('#param-lifeforms-tab').click();
+    await page.locator('#lf-terraformer-rdc').fill('10');
+    await page.locator('#lf-terraformer-rdc').blur();
     await expect(page.locator('#solar-satellites-count')).toHaveClass(/pf-differs/);
-    await expect(page.locator('#pf-overrides')).toHaveText('2');
+    await expect(page.locator('#pf-overrides')).toHaveText('3');
     let profile = await activeProfile(page);
     expect(profile.planets[0].values['ship.212']).toEqual({ game: 250, override: 400 });
     expect(profile.account.values['officer.engineer']).toEqual({ game: false, override: true });
+    expect(profile.account.values['lf.cost.33.cost']).toEqual({ game: 4, override: 10 });
 
     // The "from" level is filled in, not bound: an edit stays the calculator's.
     await page.locator('#tf-level-from').fill('7');
     await page.locator('#tf-level-from').blur();
     await expect(page.locator('#tf-level-from')).not.toHaveClass(/pf-differs/);
-    await expect(page.locator('#pf-overrides')).toHaveText('2');
+    await expect(page.locator('#pf-overrides')).toHaveText('3');
 
-    await page.locator('#solar-satellites-count + .pf-reset').click();
-    await expect(page.locator('#solar-satellites-count')).toHaveValue('250');
+    // In an input group the restore button follows the group.
+    await page.locator('.input-group:has(#lf-terraformer-rdc) + .pf-reset').click();
+    await expect(page.locator('#lf-terraformer-rdc')).toHaveValue('4');
     profile = await activeProfile(page);
-    expect(profile.planets[0].values['ship.212']).toEqual({ game: 250 });
+    expect(profile.account.values['lf.cost.33.cost']).toEqual({ game: 4 });
     expect(profile.planets[0].values['building.33']).toEqual({ game: 5 });
 });
 

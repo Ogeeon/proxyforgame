@@ -68,6 +68,37 @@ class TerraformerCalculator {
     return { bonus: 0, perSatDelta: 0 };
   }
 
+  /**
+   * Crystal, deuterium and build time of the terraformer from one level to
+   * another, with the life-form cost reduction. As in the cost calculator, the
+   * reduction (capped at 50%) applies to each level on its own, rounded down,
+   * and to the time as well as to the resources.
+   *
+   * @param {{robotsFactoryLevel: number, nanitesFactoryLevel: number, universeSpeed: number, lfTerraformerRdc?: number}} p
+   * @param {number} from
+   * @param {number} to
+   * @returns {{crystal: number, deuterium: number, secs: number}}
+   */
+  static terraformerCost(p, from, to) {
+    const factor = 1 - Math.min(0.5, (p.lfTerraformerRdc || 0) / 100);
+    /** @param {number} v */
+    const reduce = (v) => (factor < 1 ? Math.floor(v * factor) : v);
+    const total = { crystal: 0, deuterium: 0, secs: 0 };
+    for (let level = from + 1; level <= to; level++) {
+      const cost = getBuildCost_C(TF_TECH_ID, level - 1, level, TF_TECH_DATA);
+      total.crystal += reduce(cost[1]);
+      total.deuterium += reduce(cost[2]);
+      total.secs += reduce(getBuildTime_C({
+        techID: TF_TECH_ID, techLevelFrom: level - 1, techLevelTo: level,
+        techData: TF_TECH_DATA,
+        robotsLevel: p.robotsFactoryLevel, nanitesLevel: p.nanitesFactoryLevel,
+        researchLabLevel: 0, technocratFactor: 0, shipyardLevel: 0,
+        uniSpeed: p.universeSpeed
+      }));
+    }
+    return total;
+  }
+
   /** Planet fields added by upgrading the terraformer: 5 on even levels, 4 on odd. */
   static addedFields(tfLevelFrom, tfLevelTo) {
     if (tfLevelTo <= 0) return 0;
@@ -86,7 +117,7 @@ class TerraformerCalculator {
    *   energyTechLevel, hyperTechLevel, maxPlanetTemp, energyBonus (0/1/2),
    *   solarPlantLevel, solarPlantPercent, fusionPlantLevel, fusionPlantPercent,
    *   solarSatellitesCount, solarSatellitesPercent, playerClass (0/1/2),
-   *   isTrader, energyBoost, disChLevel, totalLFEnrgBonus, scCapacityIncrease,
+   *   isTrader, energyBoost, disChLevel, totalLFEnrgBonus, lfTerraformerRdc, scCapacityIncrease,
    *   lcCapacityIncrease, tfSingleLevel, tfLevelFrom, tfLevelTo,
    *   crysAvailable, deutAvailable
    * @returns {Object} Result with the per-source energy breakdown, the
@@ -189,16 +220,10 @@ class TerraformerCalculator {
     result.neededSats = neededSats;
 
     // Terraformer building cost and time for the requested level range.
-    const tfCost = getBuildCost_C(TF_TECH_ID, tfLevelFrom, tfLevelTo, TF_TECH_DATA);
-    result.crysTF = tfCost[1];
-    result.deutTF = tfCost[2];
-    result.secsTF = getBuildTime_C({
-      techID: TF_TECH_ID, techLevelFrom: tfLevelFrom, techLevelTo: tfLevelTo,
-      techData: TF_TECH_DATA,
-      robotsLevel: p.robotsFactoryLevel, nanitesLevel: p.nanitesFactoryLevel,
-      researchLabLevel: 0, technocratFactor: 0, shipyardLevel: 0,
-      uniSpeed: p.universeSpeed
-    });
+    const tfCost = TerraformerCalculator.terraformerCost(p, tfLevelFrom, tfLevelTo);
+    result.crysTF = tfCost.crystal;
+    result.deutTF = tfCost.deuterium;
+    result.secsTF = tfCost.secs;
 
     // Satellite build cost and time (satellites are built at the shipyard).
     result.crysSS = neededSats * 2000;
@@ -211,8 +236,8 @@ class TerraformerCalculator {
       uniSpeed: p.universeSpeed
     });
 
-    result.crysTotal = result.crysSS + tfCost[1];
-    result.deutTotal = result.deutSS + tfCost[2];
+    result.crysTotal = result.crysSS + tfCost.crystal;
+    result.deutTotal = result.deutSS + tfCost.deuterium;
 
     // Cargo capacity mirrors the (canonical) costs calculator: the Collector
     // +25% and the life-form capacity increase are added to the base, not

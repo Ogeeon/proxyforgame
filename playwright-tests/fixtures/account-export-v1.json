@@ -203,6 +203,7 @@
     "costreduction": {
       "113": { "maximumBonusCost": 0.5, "maximumBonusTime": 0.99, "totalBonus": { "time": 0.003091, "cost": 0 } },
       "122": { "maximumBonusCost": 0.5, "maximumBonusTime": 0.99, "totalBonus": { "time": 0.012361, "cost": 0.004635 } },
+      "33": { "maximumBonusCost": 0.5, "maximumBonusTime": 0.99, "totalBonus": { "time": 0.04, "cost": 0.04 } },
       "11201": { "maximumBonusCost": null, "maximumBonusTime": 0.99, "totalBonus": { "time": 0.003091, "cost": 0 } }
     },
     "characterclasses": {

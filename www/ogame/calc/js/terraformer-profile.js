@@ -6,11 +6,11 @@
 // into it and writes the changes back:
 //   - apply(): profile -> form - the account (energy and hyperspace
 //     technology, the officers, the character and alliance class, the
-//     life-form energy bonus and the cargo bonuses of the transports) and one
-//     planet of the profile, picked in #pf-planet: its robotics, shipyard and
-//     nanite factories, its temperature, its power plants and solar satellites
-//     with their production percentages, its energy booster and its Disruption
-//     Chamber;
+//     life-form energy bonus, the Terraformer cost reduction and the cargo
+//     bonuses of the transports) and one planet of the profile, picked in
+//     #pf-planet: its robotics, shipyard and nanite factories, its
+//     temperature, its power plants and solar satellites with their production
+//     percentages, its energy booster and its Disruption Chamber;
 //   - sync(): options.prm -> profile, called from options.save(), writing only
 //     what changed since the last apply or sync, so a lossy mapping (a
 //     discoverer shows as no class here) never becomes an override.
@@ -71,6 +71,10 @@ const TERRAFORMER_ACCOUNT_FIELDS = [
     display: (v) => (pfNum(v) === PROFILE_ALLIANCE_CLASS.TRADER ? '✓' : '—'),
   },
   terraformerNumField('lf.prod.energy', 'totalLFEnrgBonus', '#total-lf-energy-bonus'),
+  // The game reports a cost reduction per technology; the calculator applies
+  // one number to the Terraformer's cost and time, so it takes the cost one,
+  // as the cost calculator does.
+  terraformerNumField('lf.cost.33.cost', 'lfTerraformerRdc', '#lf-terraformer-rdc'),
   terraformerNumField('lf.ship.202.cargo', 'scCapacityIncrease', '#sc-capacity-increase'),
   terraformerNumField('lf.ship.203.cargo', 'lcCapacityIncrease', '#lc-capacity-increase'),
 ];
