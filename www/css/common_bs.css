@@ -498,6 +498,13 @@ textarea:disabled {
   line-height: inherit;
 }
 
+/* The profile's planet (and moon) selects next to a calculator's title: a
+   few pixels off the panel's top edge, so the gap above them matches the one
+   below, to the panel underneath - and to the title when they wrap under it. */
+.pf-header-bodies {
+  margin-top: 3px;
+}
+
 /* Player profiles (profiles-ui.js): a field the active profile owns gets a
    stripe on its left edge; one whose value differs from the game gets it in the
    warning colour, followed by a button that restores the game value.

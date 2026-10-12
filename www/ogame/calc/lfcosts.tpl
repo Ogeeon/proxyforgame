@@ -90,9 +90,13 @@
 
 <div id="lfcosts">
   <div class="border rounded position-relative">
-    <div class="d-inline-block d-flex align-items-center">
+    <div class="d-flex flex-wrap align-items-center">
       <div class="bg-body-secondary text-primary-emphasis rounded main-header text-center flex-grow-1">
         <?= $l['title'] ?>
+      </div>
+      <div id="pf-planet-box" class="pf-header-bodies d-flex align-items-center gap-1 ms-auto ps-2 me-1 d-none">
+        <label for="pf-planet"><?= $l['planet'] ?></label>
+        <select id="pf-planet" class="form-select form-select-sm w-auto"></select>
       </div>
       <div id="reset" class="top-0 end-0 d-flex align-items-center justify-content-center bg-danger-subtle" data-bs-toggle="tooltip" title="<?= $l['reset'] ?>">
         <i class="bi bi-arrow-counterclockwise" style="color: #dc3545; font-size: 1.25rem;"></i>
@@ -101,10 +105,6 @@
     <div id="general-settings-panel" class="border rounded m-1">
       <div class="d-flex align-items-center">
         <p class="border rounded subheader bg-primary-subtle mb-0 flex-grow-1"><?= $l['parameters'] ?></p>
-        <div id="pf-planet-box" class="d-flex align-items-center gap-1 ms-2 me-1 d-none">
-          <label for="pf-planet"><?= $l['planet'] ?></label>
-          <select id="pf-planet" class="form-select form-select-sm w-auto"></select>
-        </div>
       </div>
       <!-- Parameter Tabs -->
       <ul class="nav nav-tabs nav-tabs-sm" id="paramTabs" role="tablist">

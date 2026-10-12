@@ -117,9 +117,19 @@
 
 <div id="costs">
   <div class="border rounded position-relative">
-    <div class="d-inline-block d-flex align-items-center">
+    <div class="d-flex flex-wrap align-items-center">
       <div class="bg-body-secondary text-primary-emphasis rounded main-header text-center flex-grow-1">
         <?= $l['title'] ?>
+      </div>
+      <div id="pf-bodies-row" class="pf-header-bodies d-flex flex-wrap gap-2 justify-content-end align-items-center ms-auto ps-2 me-1 d-none">
+        <div id="pf-planet-box" class="d-flex align-items-center gap-1">
+          <label for="pf-planet"><?= $l['planet'] ?></label>
+          <select id="pf-planet" class="form-select form-select-sm w-auto"></select>
+        </div>
+        <div id="pf-moon-box" class="d-flex align-items-center gap-1">
+          <label for="pf-moon"><?= $l['moon'] ?></label>
+          <select id="pf-moon" class="form-select form-select-sm w-auto"></select>
+        </div>
       </div>
       <div id="reset" class="top-0 end-0 d-flex align-items-center justify-content-center bg-danger-subtle" data-bs-toggle="tooltip" title="<?= $l['reset'] ?>">
         <i class="bi bi-arrow-counterclockwise" style="color: #dc3545; font-size: 1.25rem;"></i>
@@ -147,16 +157,6 @@
       <div class="tab-content" id="paramTabContent">
         <!-- Buildings tab -->
         <div class="tab-pane fade show active p-2" id="param-buildings" role="tabpanel">
-          <div id="pf-bodies-row" class="d-flex flex-wrap gap-2 align-items-center mb-2 d-none">
-            <div id="pf-planet-box" class="d-flex align-items-center gap-1">
-              <label for="pf-planet"><?= $l['planet'] ?></label>
-              <select id="pf-planet" class="form-select form-select-sm w-auto"></select>
-            </div>
-            <div id="pf-moon-box" class="d-flex align-items-center gap-1">
-              <label for="pf-moon"><?= $l['moon'] ?></label>
-              <select id="pf-moon" class="form-select form-select-sm w-auto"></select>
-            </div>
-          </div>
           <div class="d-flex flex-wrap gap-2 align-items-center">
             <div class="d-flex align-items-center gap-1">
               <label for="robot-factory-level"><?= $l['robot-factory'] ?> (<?= $l['planet'] ?>)</label>
