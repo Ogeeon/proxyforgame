@@ -164,18 +164,16 @@ function costsResearchTableFields() {
   });
 }
 
-class CostsProfiles {
+/** @extends {ProfileBinder<CostsCalculator>} */
+class CostsProfiles extends ProfileBinder {
   /**
    * @param {ProfilesUi} pf
    * @param {CostsCalculator} app
    */
   constructor(pf, app) {
-    this.pf = pf;
-    this.app = app;
+    super(pf, app);
     /** @type {CostsField[]} The account fields, the research bonuses table included. */
     this.accountFields = [...COSTS_ACCOUNT_FIELDS, ...costsResearchTableFields()];
-    /** @type {?string} The active profile's id while one is applied. */
-    this.profileId = null;
     /** @type {?string} The planet shown; null leaves its fields to the calculator. */
     this.planetId = null;
     /** @type {?string} The moon shown. */
@@ -190,7 +188,6 @@ class CostsProfiles {
     this.ownTable = [];
     this.ownSaveState = app.saveState.bind(app);
     this.ownSaveTable = app.saveLfResearchTable.bind(app);
-    this.applying = false;
   }
 
   init() {
@@ -205,11 +202,6 @@ class CostsProfiles {
     this.pf.onChange((profile) => this.apply(profile));
     const active = this.pf.active();
     if (active) this.apply(active);
-  }
-
-  /** @returns {?Profile} */
-  profile() {
-    return this.profileId ? this.pf.store.get(this.profileId) : null;
   }
 
   /**
@@ -353,25 +345,18 @@ class CostsProfiles {
     setVal('#research-speed', own.researchSpeed ?? 1);
   }
 
-  /** Back to the calculator's own settings. */
-  leave() {
-    if (this.profileId === null) return;
-    this.applying = true;
-    try {
-      this.profileId = null;
-      this.planetId = null;
-      this.moonId = null;
-      this.pf.clearMarks();
-      pfShow('#reset', true);
-      pfShow('#pf-bodies-row', false);
-      this.unlockUniverse();
-      const own = this.ownState;
-      this.lockPlanetCount(false);
-      this.fillLabTable(Array.isArray(own.labLevels) ? own.labLevels : [], pfNum(own.labChoice ?? -1), null);
-      this.app.restoreOwnState({ state: own, table: this.ownTable });
-    } finally {
-      this.applying = false;
-    }
+  restoreOwn() {
+    this.planetId = null;
+    this.moonId = null;
+    pfShow('#pf-bodies-row', false);
+    this.unlockUniverse();
+    const own = this.ownState;
+    this.lockPlanetCount(false);
+    this.fillLabTable(Array.isArray(own.labLevels) ? own.labLevels : [], pfNum(own.labChoice ?? -1), null);
+    this.app.restoreOwnState({ state: own, table: this.ownTable });
+  }
+
+  recalc() {
     this.app.recalculateAll();
   }
 
@@ -391,14 +376,8 @@ class CostsProfiles {
   // Calculator -> profile
   // -------------------------------------------------------------------------
 
-  save() {
-    if (this.profileId === null) {
-      this.ownSaveState();
-      return;
-    }
-    if (this.applying) return;
-    this.sync();
-    this.saveOwn();
+  saveWithoutProfile() {
+    this.ownSaveState();
   }
 
   /** Write what changed since the last snapshot into the profile. */
@@ -673,9 +652,7 @@ class CostsProfiles {
  * @returns {?CostsProfiles}
  */
 function initCostsProfiles() {
-  if (!pfgProfiles || !calculatorApp) return null;
-  costsProfiles = new CostsProfiles(pfgProfiles, calculatorApp);
-  costsProfiles.init();
+  costsProfiles = pfBind(CostsProfiles, calculatorApp);
   return costsProfiles;
 }
 
