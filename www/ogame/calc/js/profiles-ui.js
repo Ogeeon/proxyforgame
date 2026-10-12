@@ -1280,6 +1280,109 @@ class PfUniverseSetting {
 }
 
 /**
+ * What every calculator's profile binder shares: the profile it shows, the
+ * guard that keeps its own writes from coming back as edits, and the two
+ * entry points - save() and leave() - whose sequence is the same everywhere.
+ * A binder fills in the steps that differ: sync() and saveOwn() (or
+ * saveWithProfile()), restoreOwn() and recalc().
+ *
+ * @template [App=*]
+ */
+class ProfileBinder {
+  /**
+   * @param {ProfilesUi} pf
+   * @param {App} app The calculator the binder drives.
+   */
+  constructor(pf, app) {
+    this.pf = pf;
+    this.app = app;
+    /** @type {?string} The active profile's id while one is applied. */
+    this.profileId = null;
+    /** True while the binder writes into the form, so that is not taken for an edit. */
+    this.applying = false;
+  }
+
+  /** Connect to the page; called once, with the calculator ready. */
+  init() {
+    // A binder wires its fields and listeners here.
+  }
+
+  /** @returns {?Profile} */
+  profile() {
+    return this.profileId ? this.pf.store.get(this.profileId) : null;
+  }
+
+  /** The calculator's save hook: with no profile it saves as it always did. */
+  save() {
+    if (this.profileId === null) {
+      this.saveWithoutProfile();
+      return;
+    }
+    if (this.applying) return;
+    this.saveWithProfile();
+  }
+
+  /** The calculator's own save, as before options.save was taken over. */
+  saveWithoutProfile() {
+    // A binder calls the save it took over here.
+  }
+
+  /** Write what the player changed into the profile, and the rest into the calculator's own storage. */
+  saveWithProfile() {
+    this.sync();
+    this.saveOwn();
+  }
+
+  sync() {
+    // A binder copies what changed in the form into the profile here.
+  }
+
+  saveOwn() {
+    // A binder stores the calculator's own values here.
+  }
+
+  /** Back to the calculator's own settings. */
+  leave() {
+    if (this.profileId === null) return;
+    this.applying = true;
+    try {
+      this.profileId = null;
+      this.pf.clearMarks();
+      pfShow('#reset', true);
+      this.restoreOwn();
+    } finally {
+      this.applying = false;
+    }
+    this.recalc();
+  }
+
+  /** Put the calculator's own values back into its form; the profile is already left. */
+  restoreOwn() {
+    // A binder puts the calculator's own values back here.
+  }
+
+  /** Recalculate the page after the form was filled from outside. */
+  recalc() {
+    // A binder recalculates its page here.
+  }
+}
+
+/**
+ * Connect a binder to the page, when it has the profile selector and the calculator.
+ *
+ * @template {ProfileBinder} B
+ * @param {new (pf: ProfilesUi, app: *) => B} Binder
+ * @param {*} app The calculator; nothing is bound until it exists.
+ * @returns {?B}
+ */
+function pfBind(Binder, app) {
+  if (!pfgProfiles || !app) return null;
+  const binder = new Binder(pfgProfiles, app);
+  binder.init();
+  return binder;
+}
+
+/**
  * The page's profile controller, or null on a page without the selector.
  * Created when the deferred script runs - the DOM is parsed by then - so a
  * calculator can use it from its own DOMContentLoaded handler.
@@ -1297,5 +1400,5 @@ function createProfilesUi() {
 const pfgProfiles = createProfilesUi();
 
 Object.assign(window, {
-  pfgProfiles, ProfilesUi, PfUniverseSetting, PF_UNIVERSE_SPEED, PF_UNIVERSE_DEBRIS, PF_UNIVERSE_DEUT_IN_DEBRIS, readSavedSet,
+  pfgProfiles, ProfilesUi, PfUniverseSetting, ProfileBinder, pfBind, PF_UNIVERSE_SPEED, PF_UNIVERSE_DEBRIS, PF_UNIVERSE_DEUT_IN_DEBRIS, readSavedSet,
 });

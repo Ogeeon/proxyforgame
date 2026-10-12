@@ -92,16 +92,14 @@ const GRAVITON_PLANET_FIELDS = [
 /** The options.prm keys of the settings that come from the profile's universe. */
 const GRAVITON_UNIVERSE_KEYS = ['universeSpeed', 'debrisPercent', 'deutInDebris'];
 
-class GravitonProfiles {
+/** @extends {ProfileBinder<GravitonApp>} */
+class GravitonProfiles extends ProfileBinder {
   /**
    * @param {ProfilesUi} pf
    * @param {GravitonApp} app
    */
   constructor(pf, app) {
-    this.pf = pf;
-    this.app = app;
-    /** @type {?string} The active profile's id while one is applied. */
-    this.profileId = null;
+    super(pf, app);
     /** @type {?string} The planet shown; null leaves its fields to the calculator. */
     this.planetId = null;
     /** @type {Record<string, *>} Values (by profile key, planet ones prefixed) at the last apply or sync. */
@@ -109,7 +107,6 @@ class GravitonProfiles {
     /** @type {Record<string, *>} The profile-owned prm keys as the calculator has them. */
     this.ownPrm = {};
     this.ownSave = options.save;
-    this.applying = false;
     /** @type {PfUniverseSetting[]} The universe's settings, set in init(). */
     this.universeSettings = [];
   }
@@ -131,11 +128,6 @@ class GravitonProfiles {
     this.pf.onChange((profile) => this.apply(profile));
     const active = this.pf.active();
     if (active) this.apply(active);
-  }
-
-  /** @returns {?Profile} */
-  profile() {
-    return this.profileId ? this.pf.store.get(this.profileId) : null;
   }
 
   /**
@@ -224,22 +216,15 @@ class GravitonProfiles {
     this.takeSnapshot();
   }
 
-  /** Back to the calculator's own settings. */
-  leave() {
-    if (this.profileId === null) return;
-    this.applying = true;
-    try {
-      this.profileId = null;
-      this.planetId = null;
-      this.pf.clearMarks();
-      this.universeSettings.forEach((setting) => setting.detach());
-      pfShow('#reset', true);
-      pfShow('#pf-planet-box', false);
-      Object.assign(options.prm, cloneData(this.ownPrm));
-      this.app.restoreFromState();
-    } finally {
-      this.applying = false;
-    }
+  restoreOwn() {
+    this.planetId = null;
+    this.universeSettings.forEach((setting) => setting.detach());
+    pfShow('#pf-planet-box', false);
+    Object.assign(options.prm, cloneData(this.ownPrm));
+    this.app.restoreFromState();
+  }
+
+  recalc() {
     this.app.recalc();
   }
 
@@ -255,14 +240,8 @@ class GravitonProfiles {
   // Calculator -> profile
   // -------------------------------------------------------------------------
 
-  save() {
-    if (this.profileId === null) {
-      this.ownSave();
-      return;
-    }
-    if (this.applying) return;
-    this.sync();
-    this.saveOwn();
+  saveWithoutProfile() {
+    this.ownSave();
   }
 
   /** Write what changed since the last snapshot into the profile. */
@@ -375,9 +354,7 @@ class GravitonProfiles {
  * @returns {?GravitonProfiles}
  */
 function initGravitonProfiles() {
-  if (!pfgProfiles || !gravitonApp) return null;
-  gravitonProfiles = new GravitonProfiles(pfgProfiles, gravitonApp);
-  gravitonProfiles.init();
+  gravitonProfiles = pfBind(GravitonProfiles, gravitonApp);
   return gravitonProfiles;
 }
 
