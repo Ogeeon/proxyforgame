@@ -18,8 +18,11 @@
 //     state, writing only what changed since the last apply or sync, so a
 //     lossy mapping (a profile with no class shows as collector here) never
 //     becomes an override.
-// A planet or moon the profile does not have leaves those fields to the
-// calculator. The build tables, the speeds, the boosters and the research
+// The levels the profile knows - the buildings of the planet and the moon, the
+// researches - are filled in as the "from" levels of the build tables, for
+// convenience only: they are not bound, so an edit there stays the
+// calculator's. A planet or moon the profile does not have leaves those fields
+// to the calculator. The build tables, the speeds, the boosters and the research
 // event are the calculator's own and keep going to costs_calculator_state; the
 // profile-owned values are stored there as they were before the profile, and
 // the research bonuses table keeps its own key untouched, so "no profile"
@@ -138,6 +141,33 @@ const COSTS_MAX_LAB_PLANETS = 99;
 const COSTS_UNIVERSE_STATE = ['country', 'universe', 'universeSpeed', 'researchSpeed'];
 
 /**
+ * The multi-level build tables whose "from" levels the profile fills in, and
+ * where each finds a level: on the planet, on the moon or in the account.
+ *
+ * @type {Array<{table: string, where: 'planet'|'moon'|'account', prefix: string}>}
+ */
+const COSTS_START_TABLES = [
+  { table: 'table-1-2', where: 'planet', prefix: 'building.' },
+  { table: 'table-1-3', where: 'moon', prefix: 'building.' },
+  { table: 'table-1-4', where: 'account', prefix: 'research.' },
+];
+
+/**
+ * Where the range tab finds the level of its technology, by the optgroup it
+ * is picked from: planet buildings, moon buildings, researches.
+ *
+ * @type {Array<{where: 'planet'|'moon'|'account', prefix: string}>}
+ */
+const COSTS_RANGE_GROUPS = [
+  { where: 'planet', prefix: 'building.' },
+  { where: 'moon', prefix: 'building.' },
+  { where: 'account', prefix: 'research.' },
+];
+
+/** A moon building's id in the build tables: its game id plus this. */
+const COSTS_MOON_ROW_OFFSET = 10000;
+
+/**
  * The fields of the research bonuses table: a cost and a time reduction per
  * research, read from the rows the page renders.
  *
@@ -199,6 +229,13 @@ class CostsProfiles extends ProfileBinder {
     };
     addEvent('#pf-planet', 'change', () => this.bodyChosen('planet'));
     addEvent('#pf-moon', 'change', () => this.bodyChosen('moon'));
+    // Runs after the calculator's own handler, which is bound first.
+    addEvent('#tech-types-select', 'change', () => {
+      const profile = this.profile();
+      if (!profile) return;
+      this.fillRangeStart(profile);
+      this.app.recalculateRangeTab();
+    });
     this.pf.onChange((profile) => this.apply(profile));
     const active = this.pf.active();
     if (active) this.apply(active);
@@ -248,6 +285,7 @@ class CostsProfiles extends ProfileBinder {
       this.accountFields.forEach((f) => f.show(getProfileValue(profile.account, f.key)));
       this.renderBodySelects(profile);
       this.showBodies(profile);
+      this.fillStartLevels(profile);
       this.showLabs(profile);
       setChecked('#use-irn', this.irnSwitch(profile));
       this.applyUniverse(profile);
@@ -518,12 +556,77 @@ class CostsProfiles extends ProfileBinder {
     this.applying = true;
     try {
       this.showBodies(profile);
+      this.fillStartLevels(profile);
       this.app.recalculateAll();
       this.takeSnapshot();
     } finally {
       this.applying = false;
     }
     this.markAll();
+  }
+
+  // -------------------------------------------------------------------------
+  // The start levels
+  // -------------------------------------------------------------------------
+
+  /**
+   * The level the planet, the moon or the account has of a technology, or null
+   * when the profile has no such body.
+   *
+   * @param {Profile} profile
+   * @param {'planet'|'moon'|'account'} where
+   * @param {string} key
+   * @returns {?number}
+   */
+  knownLevel(profile, where, key) {
+    const { planet, moon } = this.bodies(profile);
+    const bodies = { account: profile.account, planet, moon };
+    const entity = bodies[where];
+    return entity ? pfNum(getProfileValue(entity, key, 0)) : null;
+  }
+
+  /**
+   * Fill in the known levels as the "from" levels of the multi-level tables
+   * and of the range tab. A "to" below the new "from" is raised to it, so the
+   * row stays idle rather than turning into a demolition.
+   *
+   * @param {Profile} profile
+   */
+  fillStartLevels(profile) {
+    COSTS_START_TABLES.forEach((t) => {
+      getTableRows('#' + t.table).forEach((row) => {
+        if (!(row instanceof HTMLTableRowElement)) return;
+        const rowId = Number.parseInt(row.cells[0]?.textContent ?? '', 10);
+        const from = row.cells[2]?.querySelector('input');
+        const to = row.cells[3]?.querySelector('input');
+        if (!rowId || !from || !to) return;
+        const techId = rowId > COSTS_MOON_ROW_OFFSET ? rowId - COSTS_MOON_ROW_OFFSET : rowId;
+        const level = this.knownLevel(profile, t.where, t.prefix + techId);
+        if (level === null) return;
+        from.value = String(level);
+        if ((Number.parseInt(to.value, 10) || 0) < level) to.value = String(level);
+      });
+    });
+    this.fillRangeStart(profile);
+  }
+
+  /**
+   * Fill in the range tab's "from" with the known level of the technology
+   * picked there, and raise "to" to the next level when it is not above it.
+   *
+   * @param {Profile} profile
+   */
+  fillRangeStart(profile) {
+    const select = selectEl('#tech-types-select');
+    const option = select?.selectedOptions[0];
+    const group = option?.parentElement;
+    if (!select || !option || !(group instanceof HTMLOptGroupElement)) return;
+    const source = COSTS_RANGE_GROUPS[Array.from(select.querySelectorAll('optgroup')).indexOf(group)];
+    if (!source) return;
+    const level = this.knownLevel(profile, source.where, source.prefix + option.value);
+    if (level === null) return;
+    setVal('#tab2-from-level', level);
+    if ((Number.parseInt(getVal('#tab2-to-level'), 10) || 0) <= level) setVal('#tab2-to-level', level + 1);
   }
 
   // -------------------------------------------------------------------------

@@ -887,6 +887,58 @@ test('the Mineral Research Centre follows the planet picked in costs', async ({ 
     await expect(page.locator('#mineral-res-cntr-lvl')).toHaveValue('0');
 });
 
+/**
+ * The level inputs of a build table's row: [from, to] on a multi-level table.
+ *
+ * @param {import('@playwright/test').Page} page
+ * @param {string} table
+ * @param {number} techId The row's hidden id.
+ */
+async function rowLevels(page, table, techId) {
+    return page.evaluate(([t, id]) => {
+        const row = Array.from(document.querySelectorAll('#' + t + ' tr')).find((r) => r.cells[0]?.textContent?.trim() === String(id));
+        return row ? Array.from(row.querySelectorAll('input')).slice(0, 2).map((i) => i.value) : [];
+    }, [table, techId]);
+}
+
+test('costs fills in the known levels as the start levels, unbound', async ({ page }) => {
+    await mockServerData(page);
+    await page.goto('/costs');
+    await importExport(page);
+
+    // A "to" below the known level is raised to it, so the row stays idle.
+    expect(await rowLevels(page, 'table-1-2', 1)).toEqual(['30', '30']);
+    expect(await rowLevels(page, 'table-1-3', 10014)).toEqual(['8', '8']);
+    expect(await rowLevels(page, 'table-1-4', 113)).toEqual(['14', '14']);
+
+    await page.locator('#tabtag-1').click();
+    const metalFrom = page.locator('#table-1-2 tr').nth(1).locator('input').first();
+    await metalFrom.fill('20');
+    await metalFrom.blur();
+    await expect(metalFrom).not.toHaveClass(/pf-bound/);
+    await expect(page.locator('#pf-overrides')).toBeHidden();
+    const profile = await activeProfile(page);
+    expect(profile.planets[0].values['building.1']).toEqual({ game: 30 });
+
+    // The range tab starts from the level of the technology picked there.
+    await page.locator('#tabtag-2').click();
+    await expect(page.locator('#tab2-from-level')).toHaveValue('30');
+    await expect(page.locator('#tab2-to-level')).toHaveValue('31');
+    await page.locator('#tech-types-select').selectOption('113');
+    await expect(page.locator('#tab2-from-level')).toHaveValue('14');
+    await expect(page.locator('#tab2-to-level')).toHaveValue('31');
+    // The moon's robotics factory, not the planet's.
+    await page.locator('#tech-types-select').selectOption({ index: await page.evaluate(() => {
+        const select = /** @type {HTMLSelectElement} */ (document.getElementById('tech-types-select'));
+        return Array.from(select.options).findIndex((o) => o.value === '14' && o.parentElement === select.querySelectorAll('optgroup')[1]);
+    }) });
+    await expect(page.locator('#tab2-from-level')).toHaveValue('8');
+
+    // Another planet brings its own levels.
+    await page.locator('#pf-planet').selectOption({ label: 'Beta [2:150:12]' });
+    expect(await rowLevels(page, 'table-1-2', 1)).toEqual(['28', '30']);
+});
+
 // The LF costs: the account fields, and one planet of the profile whose
 // factories, life form and life-form buildings feed the calculation.
 
