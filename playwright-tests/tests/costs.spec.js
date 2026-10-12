@@ -713,6 +713,26 @@ test.describe('Costs Calculator - Robot/Nanite factory disclaimer', () => {
         await expect(modal).toBeVisible();
     });
 
+    test('a multi-level factory row that stays at its level does not trigger the disclaimer', async ({ page }) => {
+        const modal = page.locator('#robot-nanite-disclaimer');
+        await page.getByRole('tab', { name: 'All items - multiple levels' }).click();
+        await page.getByRole('tab', { name: 'Buildings (planet)' }).click();
+
+        const row = page.locator('#table-1-2 tr', { hasText: 'Robotics factory' });
+        await row.locator('td:nth-child(3) input').fill('6');
+        await row.locator('td:nth-child(4) input').fill('6');
+        await row.locator('td:nth-child(4) input').press('Enter');
+        // Showing the modal sets its cookie in the same handler, so this is
+        // settled once the key press is.
+        expect(await page.evaluate(() => document.cookie)).not.toContain('costs_rn_disclaimer_shown');
+        await expect(modal).toBeHidden();
+
+        // Going down changes the build times as much as going up.
+        await row.locator('td:nth-child(4) input').fill('4');
+        await row.locator('td:nth-child(4) input').press('Enter');
+        await expect(modal).toBeVisible();
+    });
+
     test('a non-factory row does not trigger the disclaimer', async ({ page }) => {
         const modal = page.locator('#robot-nanite-disclaimer');
 

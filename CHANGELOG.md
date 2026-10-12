@@ -35,6 +35,7 @@ release section; it is the source of truth for the other eleven translations.
 
 ### Fixed
 
+- Costs: the note on building the Robotics or Nanite Factory no longer opens for a row of the multiple-levels tab whose "from" and "to" levels are the same, since such a row builds nothing. <!-- site -->
 - Construction queue: the finish time readout is named by its label, so a screen reader announces what it shows.
 - LF costs: every input of the page has a name a screen reader announces - the crystal and deuterium exchange rates, the level fields of the build tables, the available resources and the technology selects - and the note at the bottom is no longer laid out as a table.
 - Graviton: the percentage selects of the solar plant, the fusion plant and the solar satellites and the available deuterium field have a name a screen reader announces, the captions and energy readouts are no longer form labels with nothing to label, and the plant, result, expense and recycling grids are marked as layout rather than data tables.

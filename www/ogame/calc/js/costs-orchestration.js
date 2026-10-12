@@ -1179,18 +1179,25 @@ class CostsCalculator {
     const techId = this._rowTechId(row);
     if (techId === null || !factoryIds.has(techId)) return false;
 
-    // Single-level row: level input at children[2]; multi-level: to-level at children[3]
+    // Single-level row: level input at children[2]; multi-level: from-level at
+    // children[2] and to-level at children[3]
     const cell = row.children[multi ? 3 : 2];
     const input = /** @type {HTMLInputElement|undefined} */ (cell?.children[0]);
     if (!input) return false;
+    const fromInput = /** @type {HTMLInputElement|undefined} */ (multi ? row.children[2]?.children[0] : undefined);
 
-    // Locale-aware read: the field may hold a comma decimal separator
-    return getInputNumber(input) > 0;
+    // Locale-aware read: the field may hold a comma decimal separator. A
+    // multi-level row changes the factory only when "to" differs from "from":
+    // the two equal - as a profile fills them in - build nothing. A "to" of 0
+    // is a row not filled in yet, not a demolition to the ground.
+    const to = getInputNumber(input);
+    return to > 0 && (!fromInput || to !== getInputNumber(fromInput));
   }
 
   /**
    * Scan the Robotics/Nanite factory rows and report whether any of them is
-   * being built: a non-zero level on tab 0 or a non-zero "to-level" on tab 1.
+   * being built: a non-zero level on tab 0 or a "to-level" other than the
+   * "from-level" on tab 1.
    * @private
    */
   _isRobotNaniteFactoryBuilt() {
