@@ -216,75 +216,75 @@
       <hr class="my-2">
 
       <div id="plants-settings">
-        <table class="mx-auto">
+        <table class="mx-auto" role="presentation">
           <tr>
             <td><label for="solar-plant-level"><?= $l['solar-plant-level'] ?></label></td>
             <td><input id="solar-plant-level" type="text" name="solar-plant-level" class="form-control form-control-sm d-inline-block energy-input ui-input-margin" value="0" data-field-title="<?= $l['solar-plant-level'] ?>"></td>
             <td>
-              <select id="solar-plant-percent" name="solar-plant-percent" class="form-select form-select-sm d-inline-block w-auto ui-input-margin">
+              <select id="solar-plant-percent" name="solar-plant-percent" class="form-select form-select-sm d-inline-block w-auto ui-input-margin" aria-label="<?= htmlspecialchars($l['solar-plant-level'] . ', %', ENT_QUOTES) ?>">
                 <option value="100" selected="selected">100%</option><option value="90">90%</option><option value="80">80%</option><option value="70">70%</option><option value="60">60%</option>
                 <option value="50">50%</option><option value="40">40%</option><option value="30">30%</option><option value="20">20%</option><option value="10">10%</option><option value="0">0%</option>
               </select>
             </td>
-            <td><label id="solar-plant-energy">0</label>&nbsp;<label><?= $l['energy'] ?></label></td>
+            <td><span id="solar-plant-energy">0</span>&nbsp;<span><?= $l['energy'] ?></span></td>
           </tr>
           <tr>
             <td><label for="fusion-plant-level"><?= $l['fusion-plant-level'] ?></label></td>
             <td><input id="fusion-plant-level" type="text" name="fusion-plant-level" class="form-control form-control-sm d-inline-block energy-input ui-input-margin" value="0" data-field-title="<?= $l['fusion-plant-level'] ?>"></td>
             <td>
-              <select id="fusion-plant-percent" name="fusion-plant-percent" class="form-select form-select-sm d-inline-block w-auto ui-input-margin">
+              <select id="fusion-plant-percent" name="fusion-plant-percent" class="form-select form-select-sm d-inline-block w-auto ui-input-margin" aria-label="<?= htmlspecialchars($l['fusion-plant-level'] . ', %', ENT_QUOTES) ?>">
                 <option value="100" selected="selected">100%</option><option value="90">90%</option><option value="80">80%</option><option value="70">70%</option><option value="60">60%</option>
                 <option value="50">50%</option><option value="40">40%</option><option value="30">30%</option><option value="20">20%</option><option value="10">10%</option><option value="0">0%</option>
               </select>
             </td>
-            <td><label id="fusion-plant-energy">0</label>&nbsp;<label><?= $l['energy'] ?></label></td>
+            <td><span id="fusion-plant-energy">0</span>&nbsp;<span><?= $l['energy'] ?></span></td>
           </tr>
           <tr>
             <td><label for="solar-satellites-count"><?= $l['solar-satellites-count'] ?></label></td>
             <td><input id="solar-satellites-count" type="text" name="solar-satellites-count" class="form-control form-control-sm d-inline-block energy-input ui-input-margin" value="0" data-field-title="<?= $l['solar-satellites-count'] ?>"></td>
             <td>
-              <select id="solar-satellites-percent" name="solar-satellites-percent" class="form-select form-select-sm d-inline-block w-auto ui-input-margin">
+              <select id="solar-satellites-percent" name="solar-satellites-percent" class="form-select form-select-sm d-inline-block w-auto ui-input-margin" aria-label="<?= htmlspecialchars($l['solar-satellites-count'] . ', %', ENT_QUOTES) ?>">
                 <option value="100" selected="selected">100%</option><option value="90">90%</option><option value="80">80%</option><option value="70">70%</option><option value="60">60%</option>
                 <option value="50">50%</option><option value="40">40%</option><option value="30">30%</option><option value="20">20%</option><option value="10">10%</option><option value="0">0%</option>
               </select>
             </td>
-            <td><label id="solar-satellites-energy">0</label>&nbsp;<label><?= $l['energy'] ?></label></td>
+            <td><span id="solar-satellites-energy">0</span>&nbsp;<span><?= $l['energy'] ?></span></td>
           </tr>
           <tr>
-            <td><label><?= $l['officers-bonus'] ?></label></td>
+            <td><span><?= $l['officers-bonus'] ?></span></td>
             <td>&nbsp;</td>
             <td>&nbsp;</td>
-            <td><label id="officers-bonus-energy">0</label>&nbsp;<label><?= $l['energy'] ?></label></td>
+            <td><span id="officers-bonus-energy">0</span>&nbsp;<span><?= $l['energy'] ?></span></td>
           </tr>
           <tr>
-            <td><label><?= $l['class-bonus'] ?></label></td>
+            <td><span><?= $l['class-bonus'] ?></span></td>
             <td>&nbsp;</td>
             <td>&nbsp;</td>
-            <td><label id="class-bonus-energy">0</label>&nbsp;<label><?= $l['energy'] ?></label></td>
+            <td><span id="class-bonus-energy">0</span>&nbsp;<span><?= $l['energy'] ?></span></td>
           </tr>
           <tr>
-            <td><label><?= $l['alliance-bonus'] ?></label></td>
+            <td><span><?= $l['alliance-bonus'] ?></span></td>
             <td>&nbsp;</td>
             <td>&nbsp;</td>
-            <td><label id="alliance-bonus-energy">0</label>&nbsp;<label><?= $l['energy'] ?></label></td>
+            <td><span id="alliance-bonus-energy">0</span>&nbsp;<span><?= $l['energy'] ?></span></td>
           </tr>
           <tr>
-            <td><label><?= $l['boost-bonus'] ?></label></td>
+            <td><span><?= $l['boost-bonus'] ?></span></td>
             <td>&nbsp;</td>
             <td>&nbsp;</td>
-            <td><label id="boost-bonus-energy">0</label>&nbsp;<label><?= $l['energy'] ?></label></td>
+            <td><span id="boost-bonus-energy">0</span>&nbsp;<span><?= $l['energy'] ?></span></td>
           </tr>
           <tr>
-            <td><label><?= $l['disr-chamber-bonus'] ?></label></td>
+            <td><span><?= $l['disr-chamber-bonus'] ?></span></td>
             <td>&nbsp;</td>
             <td>&nbsp;</td>
-            <td><label id="disr-chamber-bonus-energy">0</label>&nbsp;<label><?= $l['energy'] ?></label></td>
+            <td><span id="disr-chamber-bonus-energy">0</span>&nbsp;<span><?= $l['energy'] ?></span></td>
           </tr>
           <tr>
-            <td><label><?= $l['lf-tech-bonus'] ?></label></td>
+            <td><span><?= $l['lf-tech-bonus'] ?></span></td>
             <td>&nbsp;</td>
             <td>&nbsp;</td>
-            <td><label id="lf-tech-bonus-energy">0</label>&nbsp;<label><?= $l['energy'] ?></label></td>
+            <td><span id="lf-tech-bonus-energy">0</span>&nbsp;<span><?= $l['energy'] ?></span></td>
           </tr>
         </table>
       </div>
@@ -292,7 +292,7 @@
       <hr class="my-2">
 
       <div id="tech-settings">
-        <table class="mx-auto">
+        <table class="mx-auto" role="presentation">
           <tr>
             <td><label for="graviton-level"><?= $l['graviton-level'] ?></label></td>
             <td><input id="graviton-level" type="text" name="graviton-level" class="form-control form-control-sm d-inline-block energy-input ui-input-margin" value="0" data-field-title="<?= $l['graviton-level'] ?>"></td>
@@ -304,14 +304,14 @@
     <!-- Results -->
     <div class="border rounded m-1 p-2">
       <p class="border rounded subheader bg-primary-subtle"><?= $l['calc-results'] ?></p>
-      <table class="mx-auto">
+      <table class="mx-auto" role="presentation">
         <tr>
-          <td><label><?= $l['energy-produced'] ?></label></td>
+          <td><span><?= $l['energy-produced'] ?></span></td>
           <td><div id="energy-produced" class="form-control form-control-sm d-inline-block energy-show ui-input-margin ui-state-disabled">0</div></td>
-          <td><label id="energy-requirement"></label></td>
+          <td><span id="energy-requirement"></span></td>
         </tr>
         <tr>
-          <td colspan="2"><label><?= $l['solar-satellites-needed'] ?></label></td>
+          <td colspan="2"><span><?= $l['solar-satellites-needed'] ?></span></td>
           <td><div id="solar-satellites-needed" class="form-control form-control-sm d-inline-block energy-show ui-input-margin ui-state-disabled">0</div></td>
         </tr>
       </table>
@@ -320,31 +320,31 @@
     <!-- Expenses -->
     <div class="border rounded m-1 p-2">
       <p class="border rounded subheader bg-primary-subtle"><?= $l['expenses'] ?></p>
-      <table class="mx-auto">
+      <table class="mx-auto" role="presentation">
         <tr>
-          <td><label><?= $l['crystal'] ?></label></td>
+          <td><span><?= $l['crystal'] ?></span></td>
           <td><div id="crystal-required" class="form-control form-control-sm d-inline-block resource-show ui-input-margin ui-state-disabled">0</div></td>
-          <td><label><?= $l['deuterium'] ?></label></td>
+          <td><span><?= $l['deuterium'] ?></span></td>
           <td><div id="deuterium-required" class="form-control form-control-sm d-inline-block resource-show ui-input-margin ui-state-disabled">0</div></td>
-          <td><label><?= $l['time'] ?></label></td>
+          <td><span><?= $l['time'] ?></span></td>
           <td><div id="time-required" class="form-control form-control-sm d-inline-block time-show ui-input-margin ui-state-disabled">0</div></td>
         </tr>
         <tr>
           <td><label for="crystal-available"><?= $l['res-available'] ?></label></td>
           <td><input id="crystal-available" type="text" name="crystal-available" class="form-control form-control-sm d-inline-block resource-show ui-input-margin" value="0" data-field-title="<?= $l['res-available'] ?> <?= $l['crystal'] ?>"></td>
           <td>&nbsp;</td>
-          <td><input id="deuterium-available" type="text" name="deuterium-available" class="form-control form-control-sm d-inline-block resource-show ui-input-margin" value="0" data-field-title="<?= $l['res-available'] ?> <?= $l['deuterium'] ?>"></td>
+          <td><input id="deuterium-available" type="text" name="deuterium-available" class="form-control form-control-sm d-inline-block resource-show ui-input-margin" value="0" data-field-title="<?= $l['res-available'] ?> <?= $l['deuterium'] ?>" aria-label="<?= htmlspecialchars($l['res-available'] . ': ' . $l['deuterium'], ENT_QUOTES) ?>"></td>
           <td colspan="2">&nbsp;</td>
         </tr>
         <tr>
-          <td><label><?= $l['res-needed'] ?></label></td>
+          <td><span><?= $l['res-needed'] ?></span></td>
           <td><div id="crystal-to-deliver" class="form-control form-control-sm d-inline-block resource-show ui-input-margin ui-state-disabled">0</div></td>
           <td>&nbsp;</td>
           <td><div id="deuterium-to-deliver" class="form-control form-control-sm d-inline-block resource-show ui-input-margin ui-state-disabled">0</div></td>
           <td colspan="2">&nbsp;</td>
         </tr>
         <tr>
-          <td><label><?= $l['cargoes'] ?></label></td>
+          <td><span><?= $l['cargoes'] ?></span></td>
           <td colspan="5"><div id="cargoes" class="form-control form-control-sm d-inline-block transport-show ui-input-margin ui-state-disabled">0</div><i class="bi bi-question-circle" data-bs-toggle="tooltip" title="<?= $l['sc'] ?> / <?= $l['lc'] ?>"></i></td>
         </tr>
       </table>
@@ -353,7 +353,7 @@
     <!-- Recycling -->
     <div class="border rounded m-1 p-2">
       <p class="border rounded subheader bg-primary-subtle"><?= $l['recycling'] ?></p>
-      <table class="mx-auto">
+      <table class="mx-auto" role="presentation">
         <tr>
           <td><label for="debris-percent"><?= $l['debris-percent'] ?></label></td>
           <td>
@@ -373,15 +373,15 @@
           </td>
         </tr>
         <tr>
-          <td><label><?= $l['crystal'] ?></label></td>
+          <td><span><?= $l['crystal'] ?></span></td>
           <td><div id="crystal-recyclable" class="form-control form-control-sm d-inline-block resource-show ui-input-margin ui-state-disabled">0</div></td>
-          <td><label><?= $l['deuterium'] ?></label></td>
+          <td><span><?= $l['deuterium'] ?></span></td>
           <td><div id="deuterium-recyclable" class="form-control form-control-sm d-inline-block resource-show ui-input-margin ui-state-disabled">0</div></td>
         </tr>
         <tr>
-          <td><label><?= $l['recyclers'] ?></label></td>
+          <td><span><?= $l['recyclers'] ?></span></td>
           <td><div id="recyclers" class="form-control form-control-sm d-inline-block energy-show ui-input-margin ui-state-disabled">0</div></td>
-          <td><label><?= $l['cargoes'] ?></label></td>
+          <td><span><?= $l['cargoes'] ?></span></td>
           <td><div id="cargoes-for-df" class="form-control form-control-sm d-inline-block transport-show ui-input-margin ui-state-disabled">0</div></td>
         </tr>
         <tr>
@@ -393,9 +393,9 @@
           </td>
         </tr>
         <tr>
-          <td class="pt-0"><label><?= $l['crystal'] ?></label></td>
+          <td class="pt-0"><span><?= $l['crystal'] ?></span></td>
           <td class="pt-0"><div id="net-crystal-required" class="form-control form-control-sm d-inline-block resource-show ui-input-margin ui-state-disabled">0</div></td>
-          <td class="pt-0"><label><?= $l['deuterium'] ?></label></td>
+          <td class="pt-0"><span><?= $l['deuterium'] ?></span></td>
           <td class="pt-0"><div id="net-deuterium-required" class="form-control form-control-sm d-inline-block resource-show ui-input-margin ui-state-disabled">0</div></td>
         </tr>
       </table>
