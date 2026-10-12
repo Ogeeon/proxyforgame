@@ -153,7 +153,7 @@ const COSTS_UNIVERSE_STATE = ['country', 'universe', 'universeSpeed', 'researchS
  * @returns {CostsField[]}
  */
 function costsResearchTableFields() {
-  return /** @type {HTMLTableRowElement[]} */ (Array.from($$('#lf-research-bonuses-tbody tr'))).flatMap((row) => {
+  return Array.from($$('#lf-research-bonuses-tbody tr')).filter((row) => row instanceof HTMLTableRowElement).flatMap((row) => {
     const techId = Number.parseInt(row.dataset.techId ?? '', 10);
     if (!techId) return [];
     return /** @type {Array<['cost'|'time', string, 'lfResCostRdcMap'|'lfResTimeRdcMap']>} */ ([

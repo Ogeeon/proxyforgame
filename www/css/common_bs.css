@@ -505,6 +505,11 @@ textarea:disabled {
   margin-top: 3px;
 }
 
+/* The profile select in the top bar: never wider than the bar can spare. */
+#pf-select {
+  max-width: 40vw;
+}
+
 /* Player profiles (profiles-ui.js): a field the active profile owns gets a
    stripe on its left edge; one whose value differs from the game gets it in the
    warning colour, followed by a button that restores the game value.

@@ -27,7 +27,7 @@ $pfUniversePicker = function ($prefix) use ($l) {
 ?>
 <div id="pf-selector" class="d-flex align-items-center gap-1" data-calc="<?= htmlspecialchars($profilesCalc, ENT_QUOTES) ?>">
   <label for="pf-select" class="text-nowrap"><i class="bi bi-person-badge" aria-hidden="true"></i><span class="d-none d-sm-inline"> <?= $l['profile'] ?></span></label>
-  <select id="pf-select" class="form-select form-select-sm w-auto" style="max-width: 40vw;"></select>
+  <select id="pf-select" class="form-select form-select-sm w-auto"></select>
   <span id="pf-overrides" class="badge text-bg-warning d-none" data-bs-toggle="tooltip" title=""></span>
 </div>
 

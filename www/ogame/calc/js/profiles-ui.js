@@ -302,7 +302,8 @@ class ProfilesUi {
     // so the restore button lands after the group, not between its parts. A
     // radio is not marked itself: the one passed in is not necessarily the
     // checked one, so its outline would point at the wrong choice.
-    const anchor = /** @type {HTMLElement} */ (input.closest('.input-group, fieldset') || input);
+    const group = input.closest('.input-group, fieldset');
+    const anchor = group instanceof HTMLElement ? group : input;
     const differs = fromGame && gameText !== null;
     [input, anchor].forEach((el) => {
       const marked = fromGame && (el === anchor || anchor.tagName !== 'FIELDSET');
@@ -468,7 +469,7 @@ class ProfilesUi {
 
   /** @returns {HTMLInputElement[]} */
   resetTicks() {
-    return /** @type {HTMLInputElement[]} */ (Array.from(document.querySelectorAll('#pf-reset-rows .pf-reset-tick')));
+    return Array.from(document.querySelectorAll('#pf-reset-rows .pf-reset-tick')).filter((el) => el instanceof HTMLInputElement);
   }
 
   /** Keep the header tick and the restore button in step with the row ticks. */
