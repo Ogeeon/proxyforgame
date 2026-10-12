@@ -94,7 +94,9 @@ calculators read from it and write back to it.
   `main`.
 - **Universe settings are not in the profile.** The profile names its universe. The
   settings (speeds, donut, deuterium factor) come from the existing `serverdata` service
-  and are cached per universe, shared by every profile in it.
+  and are cached per universe, shared by every profile in it. A setting the player picks
+  instead of the game's is kept in that cache too; the backup file carries those choices
+  for the universes of its profiles, and restoring a profile brings its universe's back.
 
 ## Considered options
 

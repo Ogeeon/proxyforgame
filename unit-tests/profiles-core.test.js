@@ -15,7 +15,7 @@ const core = load(['ogame/calc/js/profiles-core.js'], [
     'createProfile', 'createPlanet', 'getProfileValue', 'setProfileValue', 'differsFromGame',
     'resetProfileValue', 'resetProfileToGame', 'countOverrides', 'listOverrides', 'resetOverrides', 'hasGameLayer',
     'parseAccountExport', 'findProfileForExport', 'importAccountExport', 'mergeProfiles',
-    'serializeProfilesFile', 'parseProfilesFile', 'planProfilesRestore',
+    'serializeProfilesFile', 'parseProfilesFile', 'planProfilesRestore', 'universeCacheKey',
     'ratesToTrade', 'ratesFromTrade', 'profileFromProductionSet', 'profileFromFlightSet',
     'lfBuildingGameId',
 ]);
@@ -445,6 +445,37 @@ describe('the profile file', () => {
         const result = core.parseProfilesFile(text);
         expect(result.ok).toBe(true);
         expect(plain(result.profiles)).toEqual(plain([profile]));
+    });
+
+    it('carries the universe settings the player picked', () => {
+        const universes = [{ universe: { country: 'en', number: 270 }, overrides: { speed: 7, deuteriumInDebris: false } }];
+        const text = core.serializeProfilesFile([], '2026-10-12T00:00:00.000Z', universes);
+        expect(plain(core.parseProfilesFile(text).universes)).toEqual(universes);
+    });
+
+    it('reads a file written before the universe settings were kept', () => {
+        const result = core.parseProfilesFile('{"pfgProfiles":1,"profiles":[]}');
+        expect(result.ok).toBe(true);
+        expect(plain(result.universes)).toEqual([]);
+    });
+
+    it('drops a broken universe entry, not the file', () => {
+        const text = JSON.stringify({
+            pfgProfiles: 1, profiles: [], universes: [
+                { universe: { country: 'en.evil', number: 1 }, overrides: { speed: 7 } },
+                { universe: { country: 'de', number: 0 }, overrides: { speed: 7 } },
+                { universe: { country: 'de', number: 1 }, overrides: { speed: 'fast' } },
+                { universe: { country: 'ru', number: 2 }, overrides: { speed: 3, note: 'x' } },
+                'nope',
+            ],
+        });
+        const result = core.parseProfilesFile(text);
+        expect(result.ok).toBe(true);
+        expect(plain(result.universes)).toEqual([{ universe: { country: 'ru', number: 2 }, overrides: { speed: 3 } }]);
+    });
+
+    it('names the universe cache entry', () => {
+        expect(core.universeCacheKey({ country: 'en', number: 270 })).toBe('pfg_universe_en_270');
     });
 
     it('refuses a file of an unknown version', () => {

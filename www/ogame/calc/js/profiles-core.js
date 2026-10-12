@@ -933,20 +933,59 @@ function readProfile(raw) {
 }
 
 /**
- * The backup file: every profile given, in our own format.
+ * The key of a universe's entry in the shared universe cache (ADR-0004): its
+ * settings as the game reports them and the ones the player picked instead.
+ *
+ * @param {ProfileUniverse} universe
+ */
+function universeCacheKey(universe) {
+  return 'pfg_universe_' + universe.country + '_' + universe.number;
+}
+
+/**
+ * The universe settings the player picked instead of the game's, for one
+ * universe. They are not in a profile, so the backup file carries them beside
+ * the profiles; the game's own values are fetched again on any device.
+ *
+ * @typedef {Object} UniverseChoices
+ * @property {ProfileUniverse} universe
+ * @property {Record<string, number|boolean>} overrides
+ */
+
+/**
+ * @param {unknown} raw
+ * @returns {?UniverseChoices} Null for anything but a universe with at least one choice.
+ */
+function readUniverseChoices(raw) {
+  if (!isPlainObject(raw) || !isPlainObject(raw.universe) || !isPlainObject(raw.overrides)) return null;
+  const { country, number } = raw.universe;
+  if (typeof country !== 'string' || !/^[a-z]{2,3}$/i.test(country) || !Number.isInteger(number) || number <= 0) return null;
+  /** @type {Record<string, number|boolean>} */
+  const overrides = {};
+  Object.entries(raw.overrides).forEach(([key, value]) => {
+    if (typeof value === 'boolean' || (typeof value === 'number' && Number.isFinite(value))) overrides[key] = value;
+  });
+  return Object.keys(overrides).length > 0 ? { universe: { country, number }, overrides } : null;
+}
+
+/**
+ * The backup file: every profile given, in our own format, and the universe
+ * settings the player picked for their universes.
  *
  * @param {Profile[]} profiles
  * @param {string} [exportedAt]
+ * @param {UniverseChoices[]} [universes]
  * @returns {string}
  */
-function serializeProfilesFile(profiles, exportedAt = new Date().toISOString()) {
-  return JSON.stringify({ pfgProfiles: PROFILE_FILE_VERSION, exportedAt, profiles }, null, 2);
+function serializeProfilesFile(profiles, exportedAt = new Date().toISOString(), universes = []) {
+  return JSON.stringify({ pfgProfiles: PROFILE_FILE_VERSION, exportedAt, profiles, universes }, null, 2);
 }
 
 /**
  * @typedef {Object} ProfilesFileResult
  * @property {boolean} ok
  * @property {Profile[]} [profiles]
+ * @property {UniverseChoices[]} [universes] Empty for a file written before they were kept.
  * @property {'json'|'shape'|'version'} [reason]
  */
 
@@ -965,7 +1004,9 @@ function parseProfilesFile(text) {
   if (raw.pfgProfiles !== PROFILE_FILE_VERSION) return { ok: false, reason: 'version' };
   const profiles = raw.profiles.map(readProfile);
   if (profiles.some((p) => p === null)) return { ok: false, reason: 'version' };
-  return { ok: true, profiles: /** @type {Profile[]} */ (profiles) };
+  // The universe choices are a bonus: a broken entry is dropped, not the file.
+  const universes = (Array.isArray(raw.universes) ? raw.universes : []).map(readUniverseChoices).filter((u) => u !== null);
+  return { ok: true, profiles: /** @type {Profile[]} */ (profiles), universes: /** @type {UniverseChoices[]} */ (universes) };
 }
 
 /**
@@ -1209,6 +1250,7 @@ if (typeof window !== 'undefined') {
     resetEntityToGame, resetProfileToGame, countOverrides, hasGameLayer,
     parseAccountExport, findProfileForExport, importAccountExport, mergeProfiles,
     readProfile, serializeProfilesFile, parseProfilesFile, planProfilesRestore,
+    universeCacheKey, readUniverseChoices,
     ratesToTrade, ratesFromTrade, lfBuildingGameId,
     productionPlanetValues, profileFromProductionSet, profileFromFlightSet,
   });

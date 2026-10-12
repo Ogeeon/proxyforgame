@@ -747,7 +747,8 @@ class ProfilesUi {
 
   downloadBackup() {
     const stamp = new Date().toISOString().slice(0, 10);
-    pfDownload(serializeProfilesFile(this.store.getAll()), 'pfg-profiles-' + stamp + '.json');
+    const profiles = this.store.getAll();
+    pfDownload(serializeProfilesFile(profiles, undefined, PfUniverseSetting.choicesOf(profiles)), 'pfg-profiles-' + stamp + '.json');
   }
 
   /** @param {string} text */
@@ -758,16 +759,21 @@ class ProfilesUi {
       return;
     }
     const plan = planProfilesRestore(this.store.list().map((e) => e.id), result.profiles);
-    let restored = 0;
-    plan.added.forEach((p) => { if (this.store.save(p)) restored++; });
+    /** @type {Profile[]} */
+    const restored = [];
+    plan.added.forEach((p) => { if (this.store.save(p)) restored.push(p); });
     for (const p of plan.conflicts) {
       if (await showConfirmModal(pfFormat(this.text.restoreConflict, p.label), this.text.replace, this.text.skip, this.text.attention)) {
-        if (this.store.save(p)) restored++;
+        if (this.store.save(p)) restored.push(p);
       }
     }
+    // The universe choices come back with a profile of their universe.
+    (result.universes || [])
+      .filter((u) => restored.some((p) => p.universe && sameUniverse(p.universe, u.universe)))
+      .forEach((u) => PfUniverseSetting.restoreChoices(u));
     this.store.requestPersistence();
     this.renderManage();
-    showToast(pfFormat(this.text.restoreDone, restored), 'success');
+    showToast(pfFormat(this.text.restoreDone, restored.length), 'success');
   }
 
   // -------------------------------------------------------------------------
@@ -1005,8 +1011,7 @@ class PfUniverseSetting {
 
   /** @returns {?string} */
   cacheKey() {
-    const u = this.universe;
-    return u ? 'pfg_universe_' + u.country + '_' + u.number : null;
+    return this.universe ? universeCacheKey(this.universe) : null;
   }
 
   /**
@@ -1039,6 +1044,39 @@ class PfUniverseSetting {
     } catch {
       // Without storage the settings are simply fetched again next time.
     }
+  }
+
+  /**
+   * The settings the player picked for the universes of these profiles, for
+   * the backup file.
+   *
+   * @param {Profile[]} profiles
+   * @returns {UniverseChoices[]}
+   */
+  static choicesOf(profiles) {
+    /** @type {UniverseChoices[]} */
+    const choices = [];
+    profiles.forEach((p) => {
+      const universe = p.universe;
+      if (!universe || choices.some((c) => sameUniverse(c.universe, universe))) return;
+      const overrides = PfUniverseSetting.read(universeCacheKey(universe))?.overrides;
+      if (overrides && Object.keys(overrides).length > 0) choices.push({ universe: { ...universe }, overrides: { ...overrides } });
+    });
+    return choices;
+  }
+
+  /**
+   * Put a backup's choices back into the universe cache, over the ones there.
+   * A universe never fetched on this device gets an entry that is already
+   * stale, so its game values are fetched the first time it is shown.
+   *
+   * @param {UniverseChoices} choices
+   */
+  static restoreChoices(choices) {
+    const key = universeCacheKey(choices.universe);
+    const entry = PfUniverseSetting.read(key) || { at: 0 };
+    entry.overrides = { ...entry.overrides, ...choices.overrides };
+    PfUniverseSetting.write(key, entry);
   }
 
   /**

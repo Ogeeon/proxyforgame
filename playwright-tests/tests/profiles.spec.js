@@ -250,8 +250,16 @@ test('an old production saved set is offered for conversion', async ({ page, con
 });
 
 test('the backup file restores the profiles', async ({ page }) => {
+    await page.route('**/ajax.php?*service=serverdata*', (route) => route.fulfill({
+        status: 200, contentType: 'application/json', body: JSON.stringify({ speed: '5' }),
+    }));
     await page.goto('/production');
     await importExport(page);
+    // A universe setting picked by hand lives beside the profiles, not in them.
+    await expect(page.locator('#universe-speed')).toHaveValue('5');
+    await page.locator('#universe-speed').selectOption('7');
+    const universeKey = await page.evaluate(() => Object.keys(localStorage).find((k) => k.startsWith('pfg_universe_')));
+    expect(universeKey).toBeTruthy();
     await chooseAction(page, '__manage');
     const download = page.waitForEvent('download');
     await page.locator('#pf-backup-download').click();
@@ -262,9 +270,19 @@ test('the backup file restores the profiles', async ({ page }) => {
     // The confirm dialog is the one shown modal that is not ours.
     await page.locator('.modal.show:not([id^="pf-"]) .btn-primary').click();
     await expect(page.locator('#pf-manage-rows tr')).toHaveCount(0);
+    // As on another device: the universe was never seen here.
+    await page.evaluate((key) => localStorage.removeItem(key), universeKey);
     await page.locator('#pf-backup-restore').setInputFiles(file);
     await expect(page.locator('#pf-manage-rows tr')).toHaveCount(1);
     await expect(page.locator('#pf-manage-rows')).toContainText('Tester');
+    const entry = await page.evaluate((key) => JSON.parse(localStorage.getItem(key) || 'null'), universeKey);
+    expect(entry.overrides).toEqual({ speed: 7 });
+    // The game's values are fetched again, the choice stays on top of them.
+    await page.reload();
+    const id = await page.evaluate(() => JSON.parse(localStorage.getItem('pfg_profiles') || '[]')[0].id);
+    await page.locator('#pf-select').selectOption(id);
+    await expect(page.locator('#universe-speed')).toHaveValue('7');
+    await expect(page.locator('#universe-speed')).toHaveClass(/pf-differs/);
 });
 
 test('the delete confirmation is headed in the page language', async ({ page }) => {
