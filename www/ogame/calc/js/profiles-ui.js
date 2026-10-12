@@ -1280,6 +1280,91 @@ class PfUniverseSetting {
 }
 
 /**
+ * @typedef {object} PfBodySelectConfig
+ * @property {string} select Selector of the <select>.
+ * @property {string} box Selector of the element that holds it, hidden while there is nothing to pick.
+ * @property {(profile: Profile) => ProfilePlanet[]} bodies The planets or moons it lists.
+ * @property {string} lastKey Calculator name under which the last choice is remembered.
+ * @property {(profile: Profile, list: ProfilePlanet[]) => (ProfilePlanet|undefined)} [fallback]
+ *   The body to show when neither the current one nor the last pick is there; the first one otherwise.
+ */
+
+/**
+ * The select that picks a planet or a moon of the active profile: its
+ * options, the choice made last time in each profile, and the box around it.
+ * A binder holds one per kind of body and keeps the chosen id itself.
+ */
+class PfBodySelect {
+  /**
+   * @param {ProfilesUi} pf
+   * @param {PfBodySelectConfig} config
+   */
+  constructor(pf, config) {
+    this.pf = pf;
+    this.config = config;
+  }
+
+  /**
+   * Fill the select and choose a body: the current one, else the one picked
+   * last time in this profile, else the fallback, else the first one.
+   *
+   * @param {Profile} profile
+   * @param {?string} currentId
+   * @returns {?string} The id of the body shown.
+   */
+  render(profile, currentId) {
+    const { select: selector, box, bodies, lastKey, fallback } = this.config;
+    const list = bodies(profile);
+    const select = selectEl(selector);
+    if (select) {
+      select.innerHTML = '';
+      list.forEach((b) => select.appendChild(new Option(pfBodyLabel(b), b.id)));
+    }
+    pfShow(box, list.length > 0);
+    const last = this.pf.store.getLastPlanet(lastKey, profile.id);
+    const chosen = list.find((b) => b.id === currentId)
+      || list.find((b) => b.id === last)
+      || fallback?.(profile, list)
+      || list[0];
+    const id = chosen ? chosen.id : null;
+    if (select) select.value = id || '';
+    return id;
+  }
+
+  /**
+   * The player picked a body: remember it.
+   *
+   * @param {Profile} profile
+   * @returns {?string} The id picked.
+   */
+  chosen(profile) {
+    const id = getVal(this.config.select) || null;
+    if (id) this.pf.store.setLastPlanet(this.config.lastKey, profile.id, id);
+    return id;
+  }
+
+  /**
+   * Pick a body from code, and remember it.
+   *
+   * @param {Profile} profile
+   * @param {string} id
+   */
+  choose(profile, id) {
+    setVal(this.config.select, id);
+    this.pf.store.setLastPlanet(this.config.lastKey, profile.id, id);
+  }
+
+  /** Call a handler when the player picks another body. */
+  onChange(/** @type {() => void} */ handler) {
+    addEvent(this.config.select, 'change', handler);
+  }
+
+  hide() {
+    pfShow(this.config.box, false);
+  }
+}
+
+/**
  * What every calculator's profile binder shares: the profile it shows, the
  * guard that keeps its own writes from coming back as edits, and the two
  * entry points - save() and leave() - whose sequence is the same everywhere.
@@ -1470,5 +1555,5 @@ function createProfilesUi() {
 const pfgProfiles = createProfilesUi();
 
 Object.assign(window, {
-  pfgProfiles, ProfilesUi, PfUniverseSetting, ProfileBinder, pfBind, PF_UNIVERSE_SPEED, PF_UNIVERSE_DEBRIS, PF_UNIVERSE_DEUT_IN_DEBRIS, readSavedSet,
+  pfgProfiles, ProfilesUi, PfUniverseSetting, PfBodySelect, ProfileBinder, pfBind, PF_UNIVERSE_SPEED, PF_UNIVERSE_DEBRIS, PF_UNIVERSE_DEUT_IN_DEBRIS, readSavedSet,
 });

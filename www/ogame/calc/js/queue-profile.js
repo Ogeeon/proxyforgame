@@ -63,6 +63,17 @@ class QueueProfiles extends ProfileBinder {
     super(pf, app);
     /** @type {Record<number, ?string>} Per tab, the profile body it shows; null leaves the tab to the calculator. */
     this.bodyIds = { [PLANET_TAB]: null, [MOON_TAB]: null };
+    /** @type {Record<number, PfBodySelect>} Per tab, the select that picks its body. */
+    this.bodySelects = {};
+    QUEUE_TABS.forEach((t) => {
+      this.bodySelects[t.tab] = new PfBodySelect(pf, {
+        select: '#pf-body-' + t.tab, box: '#pf-body-box-' + t.tab, bodies: (p) => p[t.bodies], lastKey: t.lastKey,
+        // A moon not picked yet is the one of the planet shown.
+        fallback: t.tab === MOON_TAB
+          ? (p) => p.moons.find((m) => this.bodyIds[PLANET_TAB] !== null && m.planetId === this.bodyIds[PLANET_TAB])
+          : undefined,
+      });
+    });
     /** @type {Record<number, number>} Per tab, the body's fields at the last apply or sync. */
     this.bodySnapshot = {};
     /** @type {Record<string, *>} The profile-owned prm keys as the calculator has them. */
@@ -76,7 +87,7 @@ class QueueProfiles extends ProfileBinder {
     this.describeFields();
     options.save = () => this.save();
     this.speed = new PfUniverseSetting(this.pf, PF_UNIVERSE_SPEED, '#universe-speed', () => this.app.refreshBoth());
-    QUEUE_TABS.forEach((t) => addEvent('#pf-body-' + t.tab, 'change', () => this.bodyChosen(t)));
+    QUEUE_TABS.forEach((t) => this.bodySelects[t.tab].onChange(() => this.bodyChosen(t)));
     this.pf.onChange((profile) => this.apply(profile));
     const active = this.pf.active();
     if (active) this.apply(active);
@@ -119,7 +130,7 @@ class QueueProfiles extends ProfileBinder {
       // The queue's reset would write every default into the profile as an edit.
       pfShow('#reset', false);
       QUEUE_TABS.forEach((t) => {
-        this.renderBodySelect(t, profile);
+        this.bodyIds[t.tab] = this.bodySelects[t.tab].render(profile, this.bodyIds[t.tab]);
         this.showBody(t, profile);
       });
       this.app.refreshBoth();
@@ -129,33 +140,6 @@ class QueueProfiles extends ProfileBinder {
     }
     void this.speed?.attach(profile);
     this.markAll();
-  }
-
-  /**
-   * Fill a tab's body select and choose the body: the one picked last time in
-   * this profile, else - on the moon tab - the moon of the planet shown, else
-   * the first one.
-   *
-   * @param {QueueTab} t
-   * @param {Profile} profile
-   */
-  renderBodySelect(t, profile) {
-    const bodies = profile[t.bodies];
-    const select = selectEl('#pf-body-' + t.tab);
-    if (select) {
-      select.innerHTML = '';
-      bodies.forEach((b) => select.appendChild(new Option(pfBodyLabel(b), b.id)));
-    }
-    pfShow('#pf-body-box-' + t.tab, bodies.length > 0);
-    const last = this.pf.store.getLastPlanet(t.lastKey, profile.id);
-    const current = this.bodyIds[t.tab];
-    const planetId = this.bodyIds[PLANET_TAB];
-    const chosen = bodies.find((b) => b.id === current)
-      || bodies.find((b) => b.id === last)
-      || (t.tab === MOON_TAB ? profile.moons.find((m) => planetId !== null && m.planetId === planetId) : undefined)
-      || bodies[0];
-    this.bodyIds[t.tab] = chosen ? chosen.id : null;
-    if (select) select.value = this.bodyIds[t.tab] || '';
   }
 
   /**
@@ -183,7 +167,7 @@ class QueueProfiles extends ProfileBinder {
   restoreOwn() {
     this.bodyIds = { [PLANET_TAB]: null, [MOON_TAB]: null };
     this.speed?.detach();
-    QUEUE_TABS.forEach((t) => pfShow('#pf-body-box-' + t.tab, false));
+    QUEUE_TABS.forEach((t) => this.bodySelects[t.tab].hide());
     const prm = options.prm;
     Object.assign(prm, cloneData(this.ownPrm));
     setVal('#ion-tech-level', prm.ionTechLevel);
@@ -271,17 +255,15 @@ class QueueProfiles extends ProfileBinder {
     if (!profile) return;
     // Whatever was typed for the body shown so far is saved first.
     this.save();
-    const id = getVal('#pf-body-' + t.tab) || null;
+    const id = this.bodySelects[t.tab].chosen(profile);
     this.bodyIds[t.tab] = id;
-    if (id) this.pf.store.setLastPlanet(t.lastKey, profile.id, id);
     /** @type {QueueTab[]} */
     const shown = [t];
     const moonTab = QUEUE_TABS[1];
     const moon = t.tab === PLANET_TAB ? profile.moons.find((m) => m.planetId === id) : undefined;
     if (moon && moon.id !== this.bodyIds[MOON_TAB]) {
       this.bodyIds[MOON_TAB] = moon.id;
-      setVal('#pf-body-' + MOON_TAB, moon.id);
-      this.pf.store.setLastPlanet(moonTab.lastKey, profile.id, moon.id);
+      this.bodySelects[MOON_TAB].choose(profile, moon.id);
       shown.push(moonTab);
     }
     this.applying = true;

@@ -208,6 +208,14 @@ class CostsProfiles extends ProfileBinder {
     this.planetId = null;
     /** @type {?string} The moon shown. */
     this.moonId = null;
+    this.planetSelect = new PfBodySelect(pf, {
+      select: '#pf-planet', box: '#pf-planet-box', bodies: (p) => p.planets, lastKey: 'costs',
+    });
+    // A moon not picked yet is the one of the planet shown.
+    this.moonSelect = new PfBodySelect(pf, {
+      select: '#pf-moon', box: '#pf-moon-box', bodies: (p) => p.moons, lastKey: 'costs-moon',
+      fallback: (p) => p.moons.find((m) => this.planetId !== null && m.planetId === this.planetId),
+    });
     /** True while the profile's universe is in the picker. */
     this.universeBound = false;
     /** @type {Record<string, *>} The calculator's stored state as it was before a profile. */
@@ -225,8 +233,8 @@ class CostsProfiles extends ProfileBinder {
     this.app.saveLfResearchTable = (data) => {
       if (this.profileId === null) this.ownSaveTable(data);
     };
-    addEvent('#pf-planet', 'change', () => this.bodyChosen('planet'));
-    addEvent('#pf-moon', 'change', () => this.bodyChosen('moon'));
+    this.planetSelect.onChange(() => this.bodyChosen('planet'));
+    this.moonSelect.onChange(() => this.bodyChosen('moon'));
     // Runs after the calculator's own handler, which is bound first.
     addEvent('#tech-types-select', 'change', () => {
       const profile = this.profile();
@@ -305,31 +313,8 @@ class CostsProfiles extends ProfileBinder {
    * @param {Profile} profile
    */
   renderBodySelects(profile) {
-    /**
-     * @param {string} selector
-     * @param {ProfilePlanet[]} list
-     * @param {?string} current
-     * @param {string} lastKey
-     * @param {ProfilePlanet|undefined} fallback
-     * @returns {?string}
-     */
-    const fill = (selector, list, current, lastKey, fallback) => {
-      const select = selectEl(selector);
-      if (select) {
-        select.innerHTML = '';
-        list.forEach((b) => select.appendChild(new Option(pfBodyLabel(b), b.id)));
-      }
-      const last = this.pf.store.getLastPlanet(lastKey, profile.id);
-      const chosen = list.find((b) => b.id === current) || list.find((b) => b.id === last) || fallback || list[0];
-      const id = chosen ? chosen.id : null;
-      if (select) select.value = id || '';
-      return id;
-    };
-    this.planetId = fill('#pf-planet', profile.planets, this.planetId, 'costs', undefined);
-    const planetMoon = profile.moons.find((m) => this.planetId !== null && m.planetId === this.planetId);
-    this.moonId = fill('#pf-moon', profile.moons, this.moonId, 'costs-moon', planetMoon);
-    pfShow('#pf-planet-box', profile.planets.length > 0);
-    pfShow('#pf-moon-box', profile.moons.length > 0);
+    this.planetId = this.planetSelect.render(profile, this.planetId);
+    this.moonId = this.moonSelect.render(profile, this.moonId);
     pfShow('#pf-bodies-row', profile.planets.length + profile.moons.length > 0);
   }
 
@@ -536,17 +521,14 @@ class CostsProfiles extends ProfileBinder {
     // Whatever was typed for the body shown so far is saved first.
     this.save();
     if (kind === 'planet') {
-      this.planetId = getVal('#pf-planet') || null;
-      if (this.planetId) this.pf.store.setLastPlanet('costs', profile.id, this.planetId);
+      this.planetId = this.planetSelect.chosen(profile);
       const moon = profile.moons.find((m) => m.planetId === this.planetId);
       if (moon) {
         this.moonId = moon.id;
-        setVal('#pf-moon', moon.id);
-        this.pf.store.setLastPlanet('costs-moon', profile.id, moon.id);
+        this.moonSelect.choose(profile, moon.id);
       }
     } else {
-      this.moonId = getVal('#pf-moon') || null;
-      if (this.moonId) this.pf.store.setLastPlanet('costs-moon', profile.id, this.moonId);
+      this.moonId = this.moonSelect.chosen(profile);
     }
     this.applying = true;
     try {

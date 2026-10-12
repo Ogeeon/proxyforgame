@@ -118,6 +118,9 @@ class TerraformerProfiles extends ProfileBinder {
     super(pf, app);
     /** @type {?string} The planet shown; null leaves its fields to the calculator. */
     this.planetId = null;
+    this.planetSelect = new PfBodySelect(pf, {
+      select: '#pf-planet', box: '#pf-planet-box', bodies: (p) => p.planets, lastKey: 'terraformer',
+    });
     /** @type {Record<string, *>} The profile-owned prm keys as the calculator has them. */
     this.ownPrm = {};
     this.ownSave = options.save;
@@ -131,7 +134,7 @@ class TerraformerProfiles extends ProfileBinder {
     this.universeSettings = [
       new PfUniverseSetting(this.pf, PF_UNIVERSE_SPEED, '#universe-speed', () => this.app.recalc()),
     ];
-    addEvent('#pf-planet', 'change', () => this.planetChosen());
+    this.planetSelect.onChange(() => this.planetChosen());
     this.pf.onChange((profile) => this.apply(profile));
     const active = this.pf.active();
     if (active) this.apply(active);
@@ -177,33 +180,13 @@ class TerraformerProfiles extends ProfileBinder {
       TERRAFORMER_ACCOUNT_FIELDS.forEach((f) => { prm[f.prm] = f.toPrm(getProfileValue(profile.account, f.key)); });
       // The calculator's reset would write every default into the profile as an edit.
       pfShow('#reset', false);
-      this.renderPlanetSelect(profile);
+      this.planetId = this.planetSelect.render(profile, this.planetId);
       this.showPlanet(profile);
     } finally {
       this.applying = false;
     }
     this.universeSettings.forEach((setting) => { void setting.attach(profile); });
     this.markAll();
-  }
-
-  /**
-   * Fill the planet select and choose the planet: the one picked last time in
-   * this profile, else the first one.
-   *
-   * @param {Profile} profile
-   */
-  renderPlanetSelect(profile) {
-    const planets = profile.planets;
-    const select = selectEl('#pf-planet');
-    if (select) {
-      select.innerHTML = '';
-      planets.forEach((p) => select.appendChild(new Option(pfBodyLabel(p), p.id)));
-    }
-    pfShow('#pf-planet-box', planets.length > 0);
-    const last = this.pf.store.getLastPlanet('terraformer', profile.id);
-    const chosen = planets.find((p) => p.id === this.planetId) || planets.find((p) => p.id === last) || planets[0];
-    this.planetId = chosen ? chosen.id : null;
-    if (select) select.value = this.planetId || '';
   }
 
   /**
@@ -231,7 +214,7 @@ class TerraformerProfiles extends ProfileBinder {
   restoreOwn() {
     this.planetId = null;
     this.universeSettings.forEach((setting) => setting.detach());
-    pfShow('#pf-planet-box', false);
+    this.planetSelect.hide();
     Object.assign(options.prm, cloneData(this.ownPrm));
     this.app.restoreFromState();
   }
@@ -303,8 +286,7 @@ class TerraformerProfiles extends ProfileBinder {
     if (!profile) return;
     // Whatever was typed for the planet shown so far is saved first.
     this.save();
-    this.planetId = getVal('#pf-planet') || null;
-    if (this.planetId) this.pf.store.setLastPlanet('terraformer', profile.id, this.planetId);
+    this.planetId = this.planetSelect.chosen(profile);
     this.applying = true;
     try {
       this.showPlanet(profile);

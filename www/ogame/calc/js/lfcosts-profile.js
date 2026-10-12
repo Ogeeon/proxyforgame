@@ -111,6 +111,9 @@ class LfCostsProfiles extends ProfileBinder {
     super(pf, app);
     /** @type {?string} The planet shown; null leaves its fields to the calculator. */
     this.planetId = null;
+    this.planetSelect = new PfBodySelect(pf, {
+      select: '#pf-planet', box: '#pf-planet-box', bodies: (p) => p.planets, lastKey: 'lfcosts',
+    });
     /** @type {Record<string, *>} The profile-owned prm keys as the calculator has them. */
     this.ownPrm = {};
     this.ownSave = options.save;
@@ -122,7 +125,7 @@ class LfCostsProfiles extends ProfileBinder {
     this.describeFields();
     options.save = () => this.save();
     this.speed = new PfUniverseSetting(this.pf, PF_UNIVERSE_SPEED, '#universe-speed', () => this.app.handleParamChange());
-    addEvent('#pf-planet', 'change', () => this.planetChosen());
+    this.planetSelect.onChange(() => this.planetChosen());
     // Runs after the calculator's own handler, which is bound first.
     addEvent('#tech-types-select', 'change', () => {
       const planet = this.planet(this.profile());
@@ -180,7 +183,7 @@ class LfCostsProfiles extends ProfileBinder {
       LFCOSTS_ACCOUNT_FIELDS.forEach((f) => f.show(getProfileValue(profile.account, f.key)));
       // The calculator's reset would write every default into the profile as an edit.
       pfShow('#reset', false);
-      this.renderPlanetSelect(profile);
+      this.planetId = this.planetSelect.render(profile, this.planetId);
       this.showPlanet(profile);
       this.recalculate();
       this.fillPlanetStart(profile);
@@ -190,26 +193,6 @@ class LfCostsProfiles extends ProfileBinder {
     }
     void this.speed?.attach(profile);
     this.markAll();
-  }
-
-  /**
-   * Fill the planet select and choose the planet: the one picked last time in
-   * this profile, else the first one.
-   *
-   * @param {Profile} profile
-   */
-  renderPlanetSelect(profile) {
-    const planets = profile.planets;
-    const select = selectEl('#pf-planet');
-    if (select) {
-      select.innerHTML = '';
-      planets.forEach((p) => select.appendChild(new Option(pfBodyLabel(p), p.id)));
-    }
-    pfShow('#pf-planet-box', planets.length > 0);
-    const last = this.pf.store.getLastPlanet('lfcosts', profile.id);
-    const chosen = planets.find((p) => p.id === this.planetId) || planets.find((p) => p.id === last) || planets[0];
-    this.planetId = chosen ? chosen.id : null;
-    if (select) select.value = this.planetId || '';
   }
 
   /**
@@ -282,7 +265,7 @@ class LfCostsProfiles extends ProfileBinder {
   restoreOwn() {
     this.planetId = null;
     this.speed?.detach();
-    pfShow('#pf-planet-box', false);
+    this.planetSelect.hide();
     Object.assign(options.prm, cloneData(this.ownPrm));
     /** @type {Record<string, any>} */
     const prm = options.prm;
@@ -361,8 +344,7 @@ class LfCostsProfiles extends ProfileBinder {
     if (!profile) return;
     // Whatever was typed for the planet shown so far is saved first.
     this.save();
-    this.planetId = getVal('#pf-planet') || null;
-    if (this.planetId) this.pf.store.setLastPlanet('lfcosts', profile.id, this.planetId);
+    this.planetId = this.planetSelect.chosen(profile);
     this.applying = true;
     try {
       this.showPlanet(profile);
