@@ -24,10 +24,15 @@
   <script src="/js/utils.js?v=<?php echo filemtime($pfgPath.'/js/utils.js'); ?>" defer></script>
   <script src="/js/api-client.js?v=<?php echo filemtime($pfgPath.'/js/api-client.js'); ?>" defer></script>
   <script src="/ogame/calc/js/dom-utils.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/dom-utils.js'); ?>" defer></script>
+  <!-- Player profiles -->
+  <script src="/ogame/calc/js/profiles-core.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/profiles-core.js'); ?>" defer></script>
+  <script src="/ogame/calc/js/profiles-store.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/profiles-store.js'); ?>" defer></script>
+  <script src="/ogame/calc/js/profiles-ui.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/profiles-ui.js'); ?>" defer></script>
   <script src="/ogame/calc/js/graviton-core.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/graviton-core.js'); ?>" defer></script>
   <script src="/ogame/calc/js/graviton-data-collector.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/graviton-data-collector.js'); ?>" defer></script>
   <script src="/ogame/calc/js/graviton-renderer.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/graviton-renderer.js'); ?>" defer></script>
   <script src="/ogame/calc/js/graviton-orchestration.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/graviton-orchestration.js'); ?>" defer></script>
+  <script src="/ogame/calc/js/graviton-profile.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/graviton-profile.js'); ?>" defer></script>
 
   <script type="module">
     // A module, so it runs after the deferred scripts above have defined `options`.
@@ -59,12 +64,16 @@
   <div class="row">
     <div class="col-md-2"><?php require_once '../../sidebar_bs.tpl'; ?></div>
     <div class="col-md-10">
-    <?php require_once '../../topbar_bs.tpl'; ?>
+    <?php $profilesCalc = 'graviton'; require_once '../../topbar_bs.tpl'; ?>
 
 <div id="graviton">
   <div class="border rounded position-relative">
     <div class="d-flex align-items-center">
       <div class="bg-body-secondary text-primary-emphasis rounded main-header text-center flex-grow-1"><?= $l['title'] ?></div>
+      <div id="pf-planet-box" class="d-flex align-items-center gap-1 ms-2 me-1 d-none">
+        <label for="pf-planet"><?= $l['planet'] ?></label>
+        <select id="pf-planet" class="form-select form-select-sm w-auto"></select>
+      </div>
       <div id="reset" class="d-flex align-items-center justify-content-center bg-danger-subtle" data-bs-toggle="tooltip" title="<?= $l['reset'] ?>">
         <i class="bi bi-arrow-counterclockwise" style="color: #dc3545; font-size: 1.25rem;"></i>
       </div>
@@ -114,20 +123,20 @@
             </div>
           </div>
           <div class="d-flex flex-wrap gap-2 align-items-center justify-content-center mb-1">
-            <div class="d-flex align-items-center gap-1 flex-nowrap">
-              <label><?= $l['energy-bonus'] ?>:</label>
-              <input id="energy-bonus-0" type="radio" name="energy-bonus" value="0" class="form-check-input"> <label for="energy-bonus-0"><?= $l['none'] ?></label>
-              <input id="energy-bonus-1" type="radio" name="energy-bonus" value="1" class="form-check-input ms-2"> <label for="energy-bonus-1"><?= $l['engineer'] ?></label>
-              <input id="energy-bonus-2" type="radio" name="energy-bonus" value="2" class="form-check-input ms-2"> <label for="energy-bonus-2"><?= $l['all-officers'] ?></label>
+            <?php foreach (['engineer', 'geologist', 'technocrat', 'admiral', 'commander'] as $officer): ?>
+            <div class="d-flex align-items-center gap-1">
+              <input id="<?= $officer ?>" type="checkbox" name="<?= $officer ?>" class="form-check-input">
+              <label for="<?= $officer ?>"><?= $l[$officer] ?></label>
             </div>
+            <?php endforeach; ?>
           </div>
           <div class="d-flex flex-wrap gap-2 align-items-center justify-content-center">
-            <div class="d-flex align-items-center gap-1 flex-nowrap">
-              <label><?= $l['class'] ?>:</label>
+            <fieldset class="d-flex align-items-center gap-1 flex-nowrap fieldset-reset">
+              <legend><?= $l['class'] ?>:</legend>
               <input id="player-class-0" type="radio" name="player-class" value="0" class="form-check-input" checked="checked"> <label for="player-class-0"><?= $l['none'] ?></label>
               <input id="player-class-1" type="radio" name="player-class" value="1" class="form-check-input ms-2"> <label for="player-class-1"><?= $l['class-collector'] ?></label>
               <input id="player-class-2" type="radio" name="player-class" value="2" class="form-check-input ms-2"> <label for="player-class-2"><?= $l['class-general'] ?></label>
-            </div>
+            </fieldset>
             <div class="d-flex align-items-center gap-1">
               <input id="trader-bonus" type="checkbox" name="trader-bonus" class="form-check-input">
               <label for="trader-bonus"><?= $l['trader-bonus'] ?></label>
@@ -214,7 +223,7 @@
             <td>
               <select id="solar-plant-percent" name="solar-plant-percent" class="form-select form-select-sm d-inline-block w-auto ui-input-margin">
                 <option value="100" selected="selected">100%</option><option value="90">90%</option><option value="80">80%</option><option value="70">70%</option><option value="60">60%</option>
-                <option value="50">50%</option><option value="40">40%</option><option value="30">30%</option><option value="20">20%</option><option value="10">10%</option>
+                <option value="50">50%</option><option value="40">40%</option><option value="30">30%</option><option value="20">20%</option><option value="10">10%</option><option value="0">0%</option>
               </select>
             </td>
             <td><label id="solar-plant-energy">0</label>&nbsp;<label><?= $l['energy'] ?></label></td>
@@ -225,7 +234,7 @@
             <td>
               <select id="fusion-plant-percent" name="fusion-plant-percent" class="form-select form-select-sm d-inline-block w-auto ui-input-margin">
                 <option value="100" selected="selected">100%</option><option value="90">90%</option><option value="80">80%</option><option value="70">70%</option><option value="60">60%</option>
-                <option value="50">50%</option><option value="40">40%</option><option value="30">30%</option><option value="20">20%</option><option value="10">10%</option>
+                <option value="50">50%</option><option value="40">40%</option><option value="30">30%</option><option value="20">20%</option><option value="10">10%</option><option value="0">0%</option>
               </select>
             </td>
             <td><label id="fusion-plant-energy">0</label>&nbsp;<label><?= $l['energy'] ?></label></td>
@@ -236,7 +245,7 @@
             <td>
               <select id="solar-satellites-percent" name="solar-satellites-percent" class="form-select form-select-sm d-inline-block w-auto ui-input-margin">
                 <option value="100" selected="selected">100%</option><option value="90">90%</option><option value="80">80%</option><option value="70">70%</option><option value="60">60%</option>
-                <option value="50">50%</option><option value="40">40%</option><option value="30">30%</option><option value="20">20%</option><option value="10">10%</option>
+                <option value="50">50%</option><option value="40">40%</option><option value="30">30%</option><option value="20">20%</option><option value="10">10%</option><option value="0">0%</option>
               </select>
             </td>
             <td><label id="solar-satellites-energy">0</label>&nbsp;<label><?= $l['energy'] ?></label></td>
@@ -411,6 +420,7 @@ document.addEventListener('DOMContentLoaded', function() {
     bootstrap.Tooltip.getOrCreateInstance(el);
   });
   initializeGravitonCalculator();
+  initGravitonProfiles();
 });
 </script>
 

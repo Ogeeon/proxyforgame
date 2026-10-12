@@ -24,6 +24,10 @@
       'globalDeuteriumSaveFactor' => (string)$xml->globalDeuteriumSaveFactor,
       'warriorBonusFuelConsumption' => (string)$xml->warriorBonusFuelConsumption,
       'probeCargo' => (string)$xml->probeCargo,
+      // Share of a destroyed fleet that goes to the debris field (0.3 = 30%),
+      // and '1' when deuterium goes there too - empty otherwise.
+      'debrisFactor' => (string)$xml->debrisFactor,
+      'deuteriumInDebris' => (string)$xml->deuteriumInDebris,
       'fleetIgnoreEmptySystems' => (string)$xml->fleetIgnoreEmptySystems,
       // Independent of the one above: it skips systems where every player is
       // inactive, and a universe can have either, both or neither switched on.

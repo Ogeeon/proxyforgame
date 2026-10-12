@@ -142,6 +142,7 @@ test.describe('Graviton Calculator - DOM integration', () => {
     test('reset restores the default field values', async ({ page }) => {
         // player-class-2 lives on the (default) General tab
         await page.locator('#player-class-2').check(); // General
+        await page.locator('#engineer').check();
         await page.locator('#solar-plant-level').fill('25');
         await page.locator('#graviton-level').fill('5');
         // The capacity fields live on the LifeForms tab
@@ -155,7 +156,7 @@ test.describe('Graviton Calculator - DOM integration', () => {
 
         await expect(page.locator('#solar-plant-level')).toHaveValue('0');
         await expect(page.locator('#graviton-level')).toHaveValue('1');
-        await expect(page.locator('#energy-bonus-0')).toBeChecked();
+        await expect(page.locator('#engineer')).not.toBeChecked();
         await expect(page.locator('#sc-capacity-increase')).toHaveValue('0');
         await expect(page.locator('#lc-capacity-increase')).toHaveValue('0');
         await expect(page.locator('#rc-capacity-increase')).toHaveValue('0');
@@ -242,5 +243,38 @@ test.describe('Graviton Calculator - Delivery and debris DOM', () => {
         await expect(page.locator('#crystal-available')).toHaveValue('0');
         await expect(page.locator('#deuterium-available')).toHaveValue('0');
         await expect(page.locator('#deut-in-debris')).not.toBeChecked();
+    });
+});
+
+test.describe('Graviton Calculator - Officers', () => {
+    test.beforeEach(async ({ page, context }) => {
+        await context.addInitScript(() => {
+            localStorage.setItem('lastChange', 'key-value;true,value;99999');
+        });
+        await page.goto('/graviton');
+    });
+
+    test('the engineer adds 10% of the energy, the whole staff 12%', async ({ page }) => {
+        await page.locator('#solar-plant-level').fill('10');
+        await page.locator('#solar-plant-level').blur();
+        await page.locator('#engineer').check();
+        // floor(0.1 * 518)
+        await expect(page.locator('#officers-bonus-energy')).toHaveText('51');
+        for (const id of ['#geologist', '#technocrat', '#admiral', '#commander']) {
+            await page.locator(id).check();
+        }
+        // floor(0.12 * 518)
+        await expect(page.locator('#officers-bonus-energy')).toHaveText('62');
+    });
+
+    test('a bonus saved before the officers had checkboxes is read as officers', async ({ page }) => {
+        await page.evaluate(() => {
+            localStorage.setItem('options_graviton', JSON.stringify({ energyBonus: 2, solarPlantLevel: 10 }));
+        });
+        await page.reload();
+        for (const id of ['#engineer', '#geologist', '#technocrat', '#admiral', '#commander']) {
+            await expect(page.locator(id)).toBeChecked();
+        }
+        await expect(page.locator('#officers-bonus-energy')).toHaveText('62');
     });
 });

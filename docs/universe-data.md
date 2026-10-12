@@ -12,11 +12,15 @@ tables and two AJAX services. None of it is the player's own data — that is
 | Universe list, daily | `uni.list.cron.php` (repo root) | Gameforge lobby `https://lobby.ogame.gameforge.com/api/servers` | `universes` (truncated and refilled); `countries` and `servers` are reference rows from `schema.sql` |
 | Populated systems, daily | `get_population.php` (repo root) | per universe `serverData.xml`, `players.xml`, `universe.xml` from `https://s<uni>-<country>.ogame.gameforge.com/api/` | `population_data` (`population` = systems with an active player, `population_all` = any planet) |
 | Picker lists, on page load | `www/ogame/calc/universes.inc.php` (`flight.php`, `costs.php`, `trade.php`), cached for an hour in the system temp dir | `countries` ⨝ `servers`, `universes` | inline JS literal in the template |
-| Universe settings, on pick | `serverdata` → `www/api/server-data.inc.php` | that universe's live `serverData.xml`, no DB | JSON: speeds, galaxies, donut flags, `fleetIgnore*Systems`, … |
+| Universe settings, on pick | `serverdata` → `www/api/server-data.inc.php` | that universe's live `serverData.xml`, no DB | JSON: speeds, galaxies, donut flags, `fleetIgnore*Systems`, debris share and deuterium-in-debris, … |
 | Populated systems, on pick | `populatedSystems` → `www/api/populated-systems.inc.php` | `population_data` | JSON; flight caches it in `localStorage` for 24 h (`POPULATED_SYSTEMS_TTL_MS`, `flight-orchestration.js`) |
 
 Client side: `flight-orchestration.js` and `costs-orchestration.js` call `apiGet('serverdata', …)`;
-costs turns the answer into speeds with `universeSpeeds()` in `costs-core.js`.
+costs turns the answer into speeds with `universeSpeeds()` in `costs-core.js`. Pages bound to a
+player profile with no picker of their own (production, queue, LF costs, graviton) take the active
+profile's universe settings through `PfUniverseSetting` in `profiles-ui.js`, which caches the
+answer for a day in `localStorage` (`pfg_universe_<country>_<number>`) with the player's own
+choices beside it.
 
 ## Things that trip people up
 

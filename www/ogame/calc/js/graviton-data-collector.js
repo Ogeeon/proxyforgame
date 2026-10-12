@@ -13,14 +13,16 @@ class GravitonDataCollector {
    * fields (e.g. the LF energy bonus) survive comma locales unchanged.
    */
   static readParams() {
+    const officers = GravitonDataCollector.readOfficers();
     return {
+      ...officers,
+      energyBonus: GravitonCalculator.officerEnergyBonus(officers),
       shipyardLevel: getInputNumber($('#shipyard-level')),
       nanitesFactoryLevel: getInputNumber($('#nanites-factory-level')),
       universeSpeed: Number.parseFloat(getVal('#universe-speed')) || 1,
       energyTechLevel: getInputNumber($('#energy-tech-level')),
       hyperTechLevel: getInputNumber($('#hyper-tech-level')),
       maxPlanetTemp: getInputNumber($('#max-planet-temp')),
-      energyBonus: GravitonDataCollector.readEnergyBonus(),
       solarPlantLevel: getInputNumber($('#solar-plant-level')),
       solarPlantPercent: Number.parseInt(getVal('#solar-plant-percent'), 10) || 0,
       fusionPlantLevel: getInputNumber($('#fusion-plant-level')),
@@ -43,13 +45,15 @@ class GravitonDataCollector {
     };
   }
 
-  /**
-   * Read the selected energy officer bonus radio (0 = none, 1 = engineer,
-   * 2 = all officers). Falls back to 0 when nothing is checked.
-   */
-  static readEnergyBonus() {
-    const checked = checkedRadio('energy-bonus');
-    return checked ? (Number.parseInt(checked.value, 10) || 0) : 0;
+  /** Read the five officer checkboxes. */
+  static readOfficers() {
+    return {
+      engineer: getChecked('#engineer'),
+      geologist: getChecked('#geologist'),
+      technocrat: getChecked('#technocrat'),
+      admiral: getChecked('#admiral'),
+      commander: getChecked('#commander'),
+    };
   }
 
   /**

@@ -9,7 +9,8 @@ import { join } from 'node:path';
 // second: account fields, the locked universe, the departure body and its fleet;
 // then the queue and costs: a planet and a moon of the profile as the start
 // levels, or as the factories, the lab and the temperature; then the LF costs,
-// one planet with its life form and life-form buildings.
+// one planet with its life form and life-form buildings; then graviton, one
+// planet with its power plants and satellites.
 // The model itself is covered by unit-tests/profiles-core.test.js.
 
 const EXPORT = readFileSync(join(__dirname, '../fixtures/account-export-v1.json'), 'utf8');
@@ -920,4 +921,147 @@ test('"no profile" gives the LF costs their own values back', async ({ page }) =
     await expect(page.locator('#pf-planet-box')).toBeHidden();
     await expect(page.locator('.pf-bound')).toHaveCount(0);
     await expect(page.locator('#reset')).toBeVisible();
+});
+
+test('graviton takes the account and a planet from the profile', async ({ page }) => {
+    await page.goto('/graviton');
+    await importExport(page);
+
+    // Commander and geologist only: no engineer, so no officers' energy bonus.
+    await expect(page.locator('#commander')).toBeChecked();
+    await expect(page.locator('#geologist')).toBeChecked();
+    await expect(page.locator('#engineer')).not.toBeChecked();
+    await expect(page.locator('#engineer')).toHaveClass(/pf-bound/);
+    await expect(page.locator('#player-class-1')).toBeChecked();
+    await expect(page.locator('#player-class-1').locator('xpath=ancestor::fieldset')).toHaveClass(/pf-bound/);
+    await expect(page.locator('#trader-bonus')).toBeChecked();
+    await expect(page.locator('#energy-tech-level')).toHaveValue('14');
+    await expect(page.locator('#hyper-tech-level')).toHaveValue('8');
+    await expect(page.locator('#total-lf-energy-bonus')).toHaveValue('0.5');
+    await expect(page.locator('#sc-capacity-increase')).toHaveValue('1.23');
+
+    await expect(page.locator('#pf-planet option')).toHaveCount(3);
+    await expect(page.locator('#pf-planet option:checked')).toHaveText('Alpha [2:148:8]');
+    await expect(page.locator('#shipyard-level')).toHaveValue('12');
+    await expect(page.locator('#nanites-factory-level')).toHaveValue('6');
+    await expect(page.locator('#max-planet-temp')).toHaveValue('41');
+    await expect(page.locator('#solar-plant-level')).toHaveValue('25');
+    await expect(page.locator('#fusion-plant-level')).toHaveValue('12');
+    await expect(page.locator('#solar-satellites-count')).toHaveValue('250');
+    await expect(page.locator('#solar-satellites-count')).toHaveClass(/pf-bound/);
+    // Percentages are the player's alone: bound, but never marked.
+    await expect(page.locator('#solar-plant-percent')).not.toHaveClass(/pf-bound/);
+    await expect(page.locator('#disr-chamber-level')).toHaveValue('0');
+
+    await expect(page.locator('#reset')).toBeHidden();
+    // Loading wrote nothing back.
+    await expect(page.locator('#pf-overrides')).toBeHidden();
+});
+
+test('another planet in graviton brings its plants and Disruption Chamber, and is remembered', async ({ page }) => {
+    await page.goto('/graviton');
+    await importExport(page);
+
+    await page.locator('#pf-planet').selectOption({ label: 'Beta [2:150:12]' });
+    await expect(page.locator('#max-planet-temp')).toHaveValue('-50');
+    await expect(page.locator('#solar-satellites-count')).toHaveValue('300');
+    await expect(page.locator('#disr-chamber-level')).toHaveValue('4');
+    await expect(page.locator('#pf-overrides')).toBeHidden();
+
+    await page.reload();
+    await expect(page.locator('#pf-planet option:checked')).toHaveText('Beta [2:150:12]');
+    await expect(page.locator('#disr-chamber-level')).toHaveValue('4');
+});
+
+test('graviton edits become overrides of the account and the planet', async ({ page }) => {
+    await page.goto('/graviton');
+    await importExport(page);
+
+    await page.locator('#solar-satellites-count').fill('400');
+    await page.locator('#solar-satellites-count').blur();
+    await page.locator('#engineer').check();
+    await expect(page.locator('#solar-satellites-count')).toHaveClass(/pf-differs/);
+    await expect(page.locator('#pf-overrides')).toHaveText('2');
+    let profile = await activeProfile(page);
+    expect(profile.planets[0].values['ship.212']).toEqual({ game: 250, override: 400 });
+    expect(profile.account.values['officer.engineer']).toEqual({ game: false, override: true });
+
+    await page.locator('#solar-satellites-count + .pf-reset').click();
+    await expect(page.locator('#solar-satellites-count')).toHaveValue('250');
+    profile = await activeProfile(page);
+    expect(profile.planets[0].values['ship.212']).toEqual({ game: 250 });
+});
+
+test('"no profile" gives graviton its own values back', async ({ page }) => {
+    await page.goto('/graviton');
+    await page.locator('#solar-plant-level').fill('7');
+    await page.locator('#solar-plant-level').blur();
+    await page.locator('#engineer').check();
+
+    await importExport(page);
+    await expect(page.locator('#solar-plant-level')).toHaveValue('25');
+    const stored = await page.evaluate(() => JSON.parse(localStorage.getItem('options_graviton') || '{}'));
+    expect(stored.solarPlantLevel).toBe(7);
+    expect(stored.engineer).toBe(true);
+    expect(stored.energyBonus).toBe(1);
+
+    await page.locator('#pf-select').selectOption('');
+    await expect(page.locator('#solar-plant-level')).toHaveValue('7');
+    await expect(page.locator('#engineer')).toBeChecked();
+    await expect(page.locator('#commander')).not.toBeChecked();
+    await expect(page.locator('#pf-planet-box')).toBeHidden();
+    await expect(page.locator('.pf-bound')).toHaveCount(0);
+    await expect(page.locator('#reset')).toBeVisible();
+});
+
+test('graviton takes the debris settings from the universe, and keeps a changed one', async ({ page }) => {
+    await page.route('**/ajax.php?*service=serverdata*', (route) => route.fulfill({
+        status: 200, contentType: 'application/json',
+        body: JSON.stringify({ speed: '5', debrisFactor: '0.75', deuteriumInDebris: '1' }),
+    }));
+    await page.goto('/graviton');
+    await importExport(page);
+
+    const debris = page.locator('#debris-percent');
+    const deut = page.locator('#deut-in-debris');
+    await expect(page.locator('#universe-speed')).toHaveValue('5');
+    // A share no preset offers is added to the select.
+    await expect(debris).toHaveValue('75');
+    await expect(debris.locator('option:checked')).toHaveText('75%');
+    await expect(debris).toHaveClass(/pf-bound/);
+    await expect(deut).toBeChecked();
+    await expect(deut).toHaveClass(/pf-bound/);
+    await expect(page.locator('#deuterium-recyclable')).not.toHaveText('0');
+
+    await debris.selectOption('30');
+    await expect(debris).toHaveClass(/pf-differs/);
+    await page.reload();
+    await expect(debris).toHaveValue('30');
+    await expect(debris).toHaveClass(/pf-differs/);
+    // A universe setting is not in the profile.
+    await expect(page.locator('#pf-overrides')).toBeHidden();
+
+    await page.locator('#debris-percent + .pf-reset').click();
+    await expect(debris).toHaveValue('75');
+    await expect(debris).not.toHaveClass(/pf-differs/);
+});
+
+test('"no profile" gives graviton its own debris settings back', async ({ page }) => {
+    await page.route('**/ajax.php?*service=serverdata*', (route) => route.fulfill({
+        status: 200, contentType: 'application/json',
+        body: JSON.stringify({ speed: '5', debrisFactor: '0.5', deuteriumInDebris: '1' }),
+    }));
+    await page.goto('/graviton');
+    await page.locator('#debris-percent').selectOption('40');
+
+    await importExport(page);
+    await expect(page.locator('#debris-percent')).toHaveValue('50');
+    const stored = await page.evaluate(() => JSON.parse(localStorage.getItem('options_graviton') || '{}'));
+    expect(stored.debrisPercent).toBe(40);
+    expect(stored.deutInDebris).toBe(false);
+
+    await page.locator('#pf-select').selectOption('');
+    await expect(page.locator('#debris-percent')).toHaveValue('40');
+    await expect(page.locator('#deut-in-debris')).not.toBeChecked();
+    await expect(page.locator('#universe-speed')).toHaveValue('1');
 });

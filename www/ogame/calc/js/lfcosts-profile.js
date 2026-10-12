@@ -162,14 +162,14 @@ class LfCostsProfiles {
     this.ownPrm = {};
     this.ownSave = options.save;
     this.applying = false;
-    /** @type {?PfUniverseSpeed} Set in init(). */
+    /** @type {?PfUniverseSetting} Set in init(). */
     this.speed = null;
   }
 
   init() {
     this.describeFields();
     options.save = () => this.save();
-    this.speed = new PfUniverseSpeed(this.pf, '#universe-speed', () => this.app.handleParamChange());
+    this.speed = new PfUniverseSetting(this.pf, PF_UNIVERSE_SPEED, '#universe-speed', () => this.app.handleParamChange());
     addEvent('#pf-planet', 'change', () => this.planetChosen());
     this.pf.onChange((profile) => this.apply(profile));
     const active = this.pf.active();

@@ -138,7 +138,7 @@ class ProductionProfiles {
     /** @type {Record<string, *>} The calculator's own settings, as they were before a profile. */
     this.ownPrm = cloneData(options.prm);
     this.applying = false;
-    /** @type {?PfUniverseSpeed} Set in init(). */
+    /** @type {?PfUniverseSetting} Set in init(). */
     this.speed = null;
   }
 
@@ -146,7 +146,7 @@ class ProductionProfiles {
     this.insertPlanetSelect();
     this.describeFields();
     options.save = () => this.save();
-    this.speed = new PfUniverseSpeed(this.pf, '#universe-speed', () => updateParams());
+    this.speed = new PfUniverseSetting(this.pf, PF_UNIVERSE_SPEED, '#universe-speed', () => updateParams());
     this.pf.onChange((profile) => this.apply(profile));
     const active = this.pf.active();
     if (active) this.apply(active);

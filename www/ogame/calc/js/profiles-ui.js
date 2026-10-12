@@ -902,26 +902,100 @@ function readSavedSet(set) {
   return template;
 }
 
-/** How long a universe's economy speed is reused before it is fetched again. */
-const UNIVERSE_SPEED_TTL_MS = 24 * 3600 * 1000;
+/** How long a universe's settings are reused before they are fetched again. */
+const UNIVERSE_SETTINGS_TTL_MS = 24 * 3600 * 1000;
 
 /**
- * The economy speed of the active profile's universe, for a calculator that
- * has a speed select but no universe picker (production, queue). The entry in
- * the shared universe cache `pfg_universe_<country>_<number>` (ADR-0004) holds
- * `speed`, the game's economy speed, `at`, when it was fetched, and `override`,
- * the speed the player picked instead, if any. A universe setting is not part
- * of a profile, so the player's choice lives in the cache too, shared by every
- * profile of that universe.
+ * @typedef {Object} PfUniverseSettingKind
+ * @property {string} key The setting's name in the cache entry.
+ * @property {(data: Record<string, any>) => *} parse The setting from a `serverdata` answer; null when the answer has none.
+ * @property {(selector: string) => *} get The value the field shows.
+ * @property {(selector: string, value: *) => void} set Show a value in the field.
+ * @property {(value: *) => string} display The game value as shown in the mark.
  */
-class PfUniverseSpeed {
+
+/**
+ * A select whose option values are numbers. A value the select does not
+ * offer - a debris share no preset matches - is added as an option first.
+ *
+ * @param {(v: number) => string} label The text of an added option.
+ * @returns {Pick<PfUniverseSettingKind, 'get'|'set'>}
+ */
+function pfNumberSelect(label) {
+  return {
+    get: (selector) => Number(getVal(selector)),
+    set: (selector, value) => {
+      const select = selectEl(selector);
+      if (select && !Array.from(select.options).some((o) => o.value === String(value))) {
+        const after = Array.from(select.options).find((o) => Number(o.value) > value);
+        select.insertBefore(new Option(label(value), String(value)), after || null);
+      }
+      setVal(selector, value);
+    },
+  };
+}
+
+/** @type {PfUniverseSettingKind} The economy speed. */
+const PF_UNIVERSE_SPEED = {
+  key: 'speed',
+  parse: (data) => {
+    const speed = Number.parseInt(data.speed, 10);
+    return speed > 0 ? speed : null;
+  },
+  ...pfNumberSelect(String),
+  display: String,
+};
+
+/** @type {PfUniverseSettingKind} The share of a destroyed fleet that goes to the debris field, in percent. */
+const PF_UNIVERSE_DEBRIS = {
+  key: 'debrisFactor',
+  parse: (data) => {
+    const factor = Number.parseFloat(data.debrisFactor);
+    return Number.isFinite(factor) && factor >= 0 ? Math.round(factor * 100) : null;
+  },
+  ...pfNumberSelect((v) => v + '%'),
+  display: (v) => v + '%',
+};
+
+/** @type {PfUniverseSettingKind} Whether deuterium goes to the debris field too. */
+const PF_UNIVERSE_DEUT_IN_DEBRIS = {
+  key: 'deuteriumInDebris',
+  // The game sends "1" or an empty element, so only a missing key is unknown.
+  parse: (data) => (typeof data.deuteriumInDebris === 'string' ? data.deuteriumInDebris === '1' : null),
+  get: (selector) => getChecked(selector),
+  set: (selector, value) => setChecked(selector, value === true),
+  display: (v) => pfDisplayValue(v === true),
+};
+
+/** Every setting a fetch stores, whichever of them asked for it. */
+const PF_UNIVERSE_SETTINGS = [PF_UNIVERSE_SPEED, PF_UNIVERSE_DEBRIS, PF_UNIVERSE_DEUT_IN_DEBRIS];
+
+/** @typedef {{at: number, overrides?: Record<string, *>, override?: *, [setting: string]: *}} PfUniverseEntry */
+
+/** @type {Map<string, Promise<?Record<string, any>>>} The `serverdata` request of each universe still out. */
+const pfUniverseRequests = new Map();
+
+/**
+ * One setting of the active profile's universe, for a calculator that has
+ * the field but no universe picker: the economy speed of production, queue,
+ * LF costs and graviton, and graviton's debris share. The entry in the shared
+ * universe cache `pfg_universe_<country>_<number>` (ADR-0004) holds `at`, when
+ * the settings were fetched, the game's value of each setting under its key,
+ * and in `overrides` the value the player picked instead, if any. A universe
+ * setting is not part of a profile, so the player's choice lives in the cache
+ * too, shared by every profile of that universe. The settings of a universe
+ * come in one request, whichever field asks first.
+ */
+class PfUniverseSetting {
   /**
    * @param {ProfilesUi} pf
-   * @param {string} selector The economy speed select.
-   * @param {() => void} recalc Recalculates the page after the speed was set.
+   * @param {PfUniverseSettingKind} kind
+   * @param {string} selector The field that shows the setting.
+   * @param {() => void} recalc Recalculates the page after the setting was set.
    */
-  constructor(pf, selector, recalc) {
+  constructor(pf, kind, selector, recalc) {
     this.pf = pf;
+    this.kind = kind;
     this.selector = selector;
     this.recalc = recalc;
     /** @type {?ProfileUniverse} The universe of the profile shown, if it has one. */
@@ -937,34 +1011,70 @@ class PfUniverseSpeed {
 
   /**
    * @param {string} key
-   * @returns {?{at: number, speed: number, override?: number}}
+   * @returns {?PfUniverseEntry}
    */
-  read(key) {
+  static read(key) {
     let entry = null;
     try {
       entry = JSON.parse(localStorage.getItem(key) || 'null');
     } catch {
       entry = null;
     }
-    return entry && typeof entry.speed === 'number' ? entry : null;
+    if (!entry || typeof entry.at !== 'number') return null;
+    // The speed's choice was once kept on its own, before there were others.
+    if ('override' in entry) {
+      entry.overrides = { speed: entry.override, ...entry.overrides };
+      delete entry.override;
+    }
+    return entry;
   }
 
   /**
    * @param {string} key
-   * @param {{at: number, speed: number, override?: number}} entry
+   * @param {PfUniverseEntry} entry
    */
-  write(key, entry) {
+  static write(key, entry) {
     try {
       localStorage.setItem(key, JSON.stringify(entry));
     } catch {
-      // Without storage the speed is simply fetched again next time.
+      // Without storage the settings are simply fetched again next time.
     }
   }
 
   /**
-   * Take the economy speed from the profile's universe - the player's own
-   * choice if they made one - fetching it again once a day. It handles its own
-   * failures; nothing waits for the network.
+   * The game's value in an entry, or null when it is not known.
+   *
+   * @param {?PfUniverseEntry} entry
+   */
+  gameValue(entry) {
+    const value = entry ? entry[this.kind.key] : null;
+    return value ?? null;
+  }
+
+  /**
+   * The universe's settings from `serverdata`, one request per universe at a
+   * time; null when it cannot be reached.
+   *
+   * @param {ProfileUniverse} universe
+   * @param {string} key
+   * @returns {Promise<?Record<string, any>>}
+   */
+  static fetchSettings(universe, key) {
+    let request = pfUniverseRequests.get(key);
+    if (!request) {
+      request = apiGet('serverdata', { country: universe.country, universe: universe.number })
+        .catch(() => null)
+        .finally(() => pfUniverseRequests.delete(key));
+      pfUniverseRequests.set(key, request);
+    }
+    return request;
+  }
+
+  /**
+   * Take the setting from the profile's universe - the player's own choice if
+   * they made one - fetching the settings again once a day, or when this one
+   * was never fetched. It handles its own failures; nothing waits for the
+   * network.
    *
    * @param {Profile} profile
    */
@@ -973,59 +1083,64 @@ class PfUniverseSpeed {
     const key = this.cacheKey();
     this.mark();
     if (!key || !profile.universe) return;
-    let entry = this.read(key);
-    if (!entry || Date.now() - entry.at >= UNIVERSE_SPEED_TTL_MS) {
-      try {
-        const data = await apiGet('serverdata', { country: profile.universe.country, universe: profile.universe.number });
-        const speed = Number.parseInt(data.speed, 10);
-        if (speed > 0) {
-          entry = { ...entry, at: Date.now(), speed };
-          this.write(key, entry);
-        }
-      } catch {
-        // The universe is unreachable: a stale speed is still the best guess.
+    let entry = PfUniverseSetting.read(key);
+    if (!entry || Date.now() - entry.at >= UNIVERSE_SETTINGS_TTL_MS || !(this.kind.key in entry)) {
+      const data = await PfUniverseSetting.fetchSettings(profile.universe, key);
+      // The universe is unreachable: a stale value is still the best guess.
+      if (data) {
+        // Read again: another field of the page may have written the entry meanwhile.
+        /** @type {PfUniverseEntry} */
+        const fresh = { ...PfUniverseSetting.read(key), at: Date.now() };
+        PF_UNIVERSE_SETTINGS.forEach((kind) => { fresh[kind.key] = kind.parse(data); });
+        PfUniverseSetting.write(key, fresh);
+        entry = fresh;
       }
     }
     // Another profile may have been shown while the request was out.
     if (!entry || this.cacheKey() !== key) return;
-    const speed = entry.override ?? entry.speed;
-    if (String(getVal(this.selector)) !== String(speed)) {
-      setVal(this.selector, speed);
+    const overrides = entry.overrides || {};
+    const value = this.kind.key in overrides ? overrides[this.kind.key] : this.gameValue(entry);
+    if (value === null) return;
+    if (!sameValue(this.kind.get(this.selector), value)) {
+      this.kind.set(this.selector, value);
       this.recalc();
     }
     this.mark();
   }
 
-  /** No profile: the speed is the calculator's own again. */
+  /** No profile: the setting is the calculator's own again. */
   detach() {
     this.universe = null;
     this.mark();
   }
 
-  /** The player picked a speed: remember it as theirs, or drop it when it is the game's again. */
+  /** The player changed the field: remember it as theirs, or drop it when it is the game's again. */
   changed() {
     const key = this.cacheKey();
-    const entry = key ? this.read(key) : null;
-    if (!key || !entry) return;
-    const chosen = Number(getVal(this.selector));
-    if (chosen === entry.speed) delete entry.override;
-    else entry.override = chosen;
-    this.write(key, entry);
+    const entry = key ? PfUniverseSetting.read(key) : null;
+    const game = this.gameValue(entry);
+    if (!key || !entry || game === null) return;
+    const overrides = { ...entry.overrides };
+    const chosen = this.kind.get(this.selector);
+    if (sameValue(chosen, game)) delete overrides[this.kind.key];
+    else overrides[this.kind.key] = chosen;
+    entry.overrides = overrides;
+    PfUniverseSetting.write(key, entry);
     this.mark();
   }
 
-  /** Mark the economy speed as the game's, with a restore button when the player changed it. */
+  /** Mark the field as the game's, with a restore button when the player changed it. */
   mark() {
     const key = this.cacheKey();
-    const entry = key ? this.read(key) : null;
-    const select = selectEl(this.selector);
-    if (!entry) {
-      this.pf.markInput(select, false, null, () => {});
+    const game = this.gameValue(key ? PfUniverseSetting.read(key) : null);
+    const input = $(this.selector);
+    if (game === null) {
+      this.pf.markInput(input, false, null, () => {});
       return;
     }
-    const differs = Number(getVal(this.selector)) !== entry.speed;
-    this.pf.markInput(select, true, differs ? String(entry.speed) : null, () => {
-      setVal(this.selector, entry.speed);
+    const differs = !sameValue(this.kind.get(this.selector), game);
+    this.pf.markInput(input, true, differs ? this.kind.display(game) : null, () => {
+      this.kind.set(this.selector, game);
       this.changed();
       this.recalc();
     });
@@ -1049,4 +1164,6 @@ function createProfilesUi() {
 
 const pfgProfiles = createProfilesUi();
 
-Object.assign(window, { pfgProfiles, ProfilesUi, PfUniverseSpeed, readSavedSet });
+Object.assign(window, {
+  pfgProfiles, ProfilesUi, PfUniverseSetting, PF_UNIVERSE_SPEED, PF_UNIVERSE_DEBRIS, PF_UNIVERSE_DEUT_IN_DEBRIS, readSavedSet,
+});

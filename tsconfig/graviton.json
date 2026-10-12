@@ -6,10 +6,14 @@
     "../www/js/utils.js",
     "../www/js/api-client.js",
     "../www/ogame/calc/js/dom-utils.js",
+    "../www/ogame/calc/js/profiles-core.js",
+    "../www/ogame/calc/js/profiles-store.js",
+    "../www/ogame/calc/js/profiles-ui.js",
     "../www/ogame/calc/js/graviton-core.js",
     "../www/ogame/calc/js/graviton-data-collector.js",
     "../www/ogame/calc/js/graviton-renderer.js",
     "../www/ogame/calc/js/graviton-orchestration.js",
+    "../www/ogame/calc/js/graviton-profile.js",
     "../www/js/sidebar_bs.js",
     "../www/ogame/calc/js/globals.d.ts"
   ]
