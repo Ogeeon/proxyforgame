@@ -79,20 +79,20 @@ function planetToProductionState(planet) {
    */
   const get = (key, def) => pfNum(getProfileValue(planet, key, def));
   const s = createEmptyPlanet();
-  s[0] = get('temperature.max', 0);
-  s[1] = planet.coords && planet.coords.position !== null ? planet.coords.position : 8;
-  s[2] = get('energyBooster', 0);
+  s[PLANET_TEMP] = get('temperature.max', 0);
+  s[PLANET_POS] = planet.coords && planet.coords.position !== null ? planet.coords.position : 8;
+  s[PLANET_ENERGY_BOOST] = get('energyBooster', 0);
   PRODUCTION_ROW_TECHS.forEach((tech, i) => {
     const j = i + 1;
     const kind = tech === 212 || tech === 217 ? 'ship.' : 'building.';
-    s[j * 3] = get(kind + tech, 0);
-    s[j * 3 + 1] = get('production.' + tech, 100);
-    s[j * 3 + 2] = j <= 3 ? get('booster.' + tech, 0) : 0;
+    s[mineSlot(j)] = get(kind + tech, 0);
+    s[mineSlot(j) + 1] = get('production.' + tech, 100);
+    s[mineSlot(j) + 2] = j <= 3 ? get('booster.' + tech, 0) : 0;
   });
   const race = get('lf.race', 0);
-  s[24] = race;
+  s[PLANET_RACE] = race;
   for (let k = 0; k < LF_BUILDINGS_PER_RACE; k++) {
-    s[25 + k] = race >= 1 && race <= 4 ? get('lf.building.' + lfBuildingGameId(race, k + 1), 0) : 0;
+    s[PLANET_LF_LEVELS + k] = race >= 1 && race <= 4 ? get('lf.building.' + lfBuildingGameId(race, k + 1), 0) : 0;
   }
   return s;
 }
@@ -244,7 +244,7 @@ class ProductionProfiles {
     const states = /** @type {TaggedState[]} */ (options.prm.aPS);
     const index = Math.max(0, states.findIndex((s) => s.pfId === planetId));
     this.onePlanetId = states[index] ? states[index].pfId || null : null;
-    writeOnePlanetState(states[index]);
+    fillOnePlanetForm(states[index]);
     const planet = profile.planets.find((p) => p.id === this.onePlanetId);
     PRODUCTION_STORAGE_FIELDS.forEach((f) => {
       const level = planet ? pfNum(getProfileValue(planet, f.key, 0)) : 0;
@@ -252,7 +252,7 @@ class ProductionProfiles {
       options.prm[f.prm] = level;
       this.storageSnapshot[f.prm] = level;
     });
-    this.onePlanetSnapshot = readOnePlanetState();
+    this.onePlanetSnapshot = readOnePlanetForm();
     setVal('#pf-planet', this.onePlanetId || '');
   }
 
@@ -293,7 +293,7 @@ class ProductionProfiles {
     const untagged = states.length === 1 && !states[0].pfId ? states[0] : null;
     const target = index >= 0 ? states[index] : untagged;
     if (!target) return;
-    const current = readOnePlanetState();
+    const current = readOnePlanetForm();
     let changed = false;
     current.forEach((v, i) => {
       if (v !== this.onePlanetSnapshot[i]) {
@@ -384,8 +384,8 @@ class ProductionProfiles {
     }
     // An edit in the all-planets table of the planet the one-planet tab shows.
     if (changed && planet.id === this.onePlanetId && state.some((v, i) => v !== before.state[i])) {
-      writeOnePlanetState(state);
-      this.onePlanetSnapshot = readOnePlanetState();
+      fillOnePlanetForm(state);
+      this.onePlanetSnapshot = readOnePlanetForm();
     }
     return changed;
   }
@@ -545,52 +545,6 @@ class ProductionProfiles {
 }
 
 /**
- * The one-planet inputs as a production planet array - savePlnData() without
- * writing anywhere.
- *
- * @returns {number[]}
- */
-function readOnePlanetState() {
-  const s = createEmptyPlanet();
-  const rows = $$('#one-planet-prod tr:not(.lf-row)');
-  s[0] = getInputNumber($('#max-planet-temp'));
-  s[1] = getInputNumber($('#planet-pos'));
-  s[2] = Number(getVal('#energy-boost')) || 0;
-  s[24] = Number(getVal('#one-pln-race')) || 0;
-  const levels = readOnePlnLfLevels();
-  for (let k = 0; k < LF_BUILDINGS_PER_RACE; k++) s[25 + k] = levels[k] || 0;
-  for (let i = 1; i < 8; i++) {
-    s[i * 3] = getInputNumber(cellInput(rows[i + 1], 2));
-    s[i * 3 + 1] = Number(cellSelect(rows[i + 1], 7).value);
-    s[i * 3 + 2] = i > 3 ? 0 : Number(cellSelect(rows[i + 1], 1).value);
-  }
-  return s;
-}
-
-/**
- * Show a production planet array in the one-planet inputs - editRow() without
- * the tab switch and the save panel.
- *
- * @param {?number[]} s
- */
-function writeOnePlanetState(s) {
-  if (!s) return;
-  setVal('#max-planet-temp', s[0]);
-  setVal('#planet-pos', s[1]);
-  setVal('#energy-boost', s[2]);
-  setVal('#one-pln-race', s[24] || 0);
-  updateLifeformRows();
-  writeOnePlnLfLevels(s[24] || 0, s.slice(25, 37));
-  const rows = $$('#one-planet-prod tr:not(.lf-row)');
-  for (let i = 1; i < 8; i++) {
-    cellInput(rows[i + 1], 2).value = String(s[i * 3]);
-    if (i < 7) cellSelect(rows[i + 1], 7).selectedIndex = (100 - s[i * 3 + 1]) / 10;
-    if (i === 7) cellSelect(rows[i + 1], 7).selectedIndex = (150 - s[i * 3 + 1]) / 10;
-    if (i < 4) cellSelect(rows[i + 1], 1).selectedIndex = s[i * 3 + 2];
-  }
-}
-
-/**
  * Write a planet array into its row of the all-planets table.
  *
  * @param {number} index
@@ -606,7 +560,7 @@ function writePlanetRowInputs(index, s) {
   for (let j = 1; j < 8; j++) {
     const cell = row.children[LEVEL_COLUMNS[j - 1]];
     const input = cell ? cell.querySelector('input') : null;
-    if (input) input.value = String(s[j * 3]);
+    if (input) input.value = String(s[mineSlot(j)]);
   }
 }
 

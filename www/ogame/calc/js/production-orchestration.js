@@ -749,27 +749,60 @@ function renderOnePlnLfRows(race, lfBld) {
 	});
 }
 
+/**
+ * Read the one-planet form into a planet array.
+ *
+ * @param {number[]} [target] The array to write into; a fresh one by default.
+ * @returns {number[]}
+ */
+function readOnePlanetForm(target = createEmptyPlanet()) {
+	const rows = $$('#one-planet-prod tr:not(.lf-row)');
+	target[PLANET_TEMP] = getInputNumber($('#max-planet-temp'));
+	target[PLANET_POS] = getInputNumber($('#planet-pos'));
+	target[PLANET_ENERGY_BOOST] = Number(getVal('#energy-boost')) || 0;
+	target[PLANET_RACE] = Number(getVal('#one-pln-race')) || 0;
+	const lfLevels = readOnePlnLfLevels();
+	for (let k = 0; k < LF_BUILDINGS_PER_RACE; k++) target[PLANET_LF_LEVELS + k] = lfLevels[k] || 0;
+	for (let i = 1; i < 8; i++) {
+		const slot = mineSlot(i);
+		target[slot] = getInputNumber(cellInput(rows[i + 1], 2));
+		target[slot + 1] = Number(cellSelect(rows[i + 1], 7).value);
+		// Power plants, satellites and Crawlers have no boosters
+		target[slot + 2] = i > 3 ? 0 : Number(cellSelect(rows[i + 1], 1).value);
+	}
+	return target;
+}
+
+/**
+ * Show a planet array in the one-planet form - editRow() without the tab
+ * switch and the save panel.
+ *
+ * @param {?number[]} s
+ */
+function fillOnePlanetForm(s) {
+	if (!s) return;
+	setVal('#max-planet-temp', s[PLANET_TEMP]);
+	setVal('#planet-pos', s[PLANET_POS]);
+	setVal('#energy-boost', s[PLANET_ENERGY_BOOST]);
+	setVal('#one-pln-race', s[PLANET_RACE] || 0);
+	updateLifeformRows();
+	writeOnePlnLfLevels(s[PLANET_RACE] || 0, s.slice(PLANET_LF_LEVELS, PLANET_LF_LEVELS + LF_BUILDINGS_PER_RACE));
+	const rows = $$('#one-planet-prod tr:not(.lf-row)');
+	for (let i = 1; i < 8; i++) {
+		const slot = mineSlot(i);
+		cellInput(rows[i + 1], 2).value = String(s[slot]);
+		if (i < 7) cellSelect(rows[i + 1], 7).selectedIndex = (100 - s[slot + 1]) / 10;
+		if (i === 7) cellSelect(rows[i + 1], 7).selectedIndex = (150 - s[slot + 1]) / 10;
+		if (i < 4) cellSelect(rows[i + 1], 1).selectedIndex = s[slot + 2];
+	}
+}
+
 function editRow(plnID) {
 	// With a player profile, the one-planet tab shows profile planets directly.
 	if (productionProfiles?.showPlanetAt(plnID)) return;
 	options.editedPln = plnID;
 	setVal('#planet-name', options.prm.aPNames[plnID]);
-	setVal('#max-planet-temp', options.prm.aPS[plnID][0]);
-	setVal('#planet-pos', options.prm.aPS[plnID][1]);
-	setVal('#energy-boost', options.prm.aPS[plnID][2]);
-	setVal('#one-pln-race', options.prm.aPS[plnID][24] || 0);
-	updateLifeformRows();
-	writeOnePlnLfLevels(options.prm.aPS[plnID][24] || 0, options.prm.aPS[plnID].slice(25, 37));
-	let rows = $$('#one-planet-prod tr:not(.lf-row)');
-	for (let i = 1; i < 8; i++) {
-		cellInput(rows[i + 1], 2).value = options.prm.aPS[plnID][i * 3];
-		if (i < 7)
-			cellSelect(rows[i + 1], 7).selectedIndex = (100 - options.prm.aPS[plnID][i * 3 + 1]) / 10;
-		if (i === 7)
-			cellSelect(rows[i + 1], 7).selectedIndex = (150 - options.prm.aPS[plnID][i * 3 + 1]) / 10;
-		if (i < 4)
-			cellSelect(rows[i + 1], 1).selectedIndex = options.prm.aPS[plnID][i * 3 + 2];
-	}
+	fillOnePlanetForm(options.prm.aPS[plnID]);
 	showMainTab('#one-planet-panel');
 	show('#planet-save-div');
 	updateOnePlnTab();
@@ -817,23 +850,7 @@ async function deleteRow(plnID) {
 
 function savePlnData() {
 	options.prm.aPNames[options.editedPln] = stripHTMLTags(inputEl('#planet-name').value);
-	let target = options.prm.aPS[options.editedPln];
-	let rows = $$('#one-planet-prod tr:not(.lf-row)');
-	target[0] = getInputNumber($('#max-planet-temp'));
-	target[1] = getInputNumber($('#planet-pos'));
-	target[2] = Number(inputEl('#energy-boost').value);
-	target[24] = Number(inputEl('#one-pln-race').value);
-	let savedLfLevels = readOnePlnLfLevels();
-	for (let k = 0; k < LF_BUILDINGS_PER_RACE; k++) target[25 + k] = savedLfLevels[k] || 0;
-	for (let i = 1; i < 8; i++) {
-		target[i * 3] = getInputNumber(rows[i + 1].children[2].children[0]);
-		target[i * 3 + 1] = Number(cellSelect(rows[i + 1], 7).value);
-		if (i > 3) { // Power plants, satellites and Crawlers have no boosters
-			target[i * 3 + 2] = 0;
-		} else {
-			target[i * 3 + 2] = Number(cellSelect(rows[i + 1], 1).value);
-		}
-	}
+	readOnePlanetForm(options.prm.aPS[options.editedPln]);
 	prepAllPlanetsTable();
 	options.editedPln = 0;
 	showMainTab('#all-planets-panel');
