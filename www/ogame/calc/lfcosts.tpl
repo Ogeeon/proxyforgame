@@ -175,8 +175,8 @@
             <div class="d-flex align-items-center">
               <label for="exchange-rates-m" class="me-1"><?= $l['exchange-rates'] ?>:</label>
               <input id="exchange-rates-m" type="text" name="exchange-rates-m" class="form-control form-control-sm level-input" value="1">:
-              <input id="exchange-rates-c" type="text" name="exchange-rates-c" class="form-control form-control-sm level-input" value="1.5">:
-              <input id="exchange-rates-d" type="text" name="exchange-rates-d" class="form-control form-control-sm level-input" value="3">
+              <input id="exchange-rates-c" type="text" name="exchange-rates-c" class="form-control form-control-sm level-input" value="1.5" aria-label="<?= htmlspecialchars($l['exchange-rates'] . ': ' . $l['crystal'], ENT_QUOTES) ?>">:
+              <input id="exchange-rates-d" type="text" name="exchange-rates-d" class="form-control form-control-sm level-input" value="3" aria-label="<?= htmlspecialchars($l['exchange-rates'] . ': ' . $l['deuterium'], ENT_QUOTES) ?>">
             </div>
           </div>
         </div>
@@ -295,12 +295,7 @@
           </ul>
           <div class="tab-content">
             <?php foreach ($techTypes as $j => $type):?>
-            <?php
-              if ($j == 2)
-                $colHeaders[0] = 'research';
-              else
-                $colHeaders[0] = 'building';
-            ?>
+            <?php $colHeaders[0] = ($j == 2) ? 'research' : 'building'; ?>
             <div class="tab-pane fade <?= $j === $firstInnerTab ? 'show active' : '' ?> no-mp" id="tab-<?=$i?>-<?=$j?>" role="tabpanel">
               <?php if ($j == 2): ?>
               <div id="research-race-selector-<?=$i?>" class="d-flex flex-wrap gap-2 align-items-center p-2 research-race-selector">
@@ -310,7 +305,7 @@
                   <option value="<?=$r?>"><?= $l['race-'.$r] ?></option>
                   <?php endfor; ?>
                 </select>
-                <select id="research-select-<?=$i?>" class="form-select form-select-sm w-auto"></select>
+                <select id="research-select-<?=$i?>" class="form-select form-select-sm w-auto" aria-label="<?= htmlspecialchars($l['research'], ENT_QUOTES) ?>"></select>
                 <button id="research-add-btn-<?=$i?>" class="btn btn-sm btn-outline-secondary research-add-btn" data-tab="<?=$i?>"><?= $l['universe-add'] ?></button>
               </div>
               <?php endif; ?>
@@ -334,10 +329,11 @@
                 <tr class="<?= ($row++ % 2) === 1 ? 'odd' : 'even' ?>">
                   <td style="display: none;"><?=$tech?></td>
                   <td class="min"><?=$l[$techData[$tech][0]]?><?php if (in_array($tech, $energyHintBuildings)): ?> <i class="bi bi-lightning-charge energy-cost-hint" data-bs-toggle="tooltip" title="<?= $l['energy-cost-to-build'] ?>: 0"></i><?php endif; ?></td>
+                  <?php $techName = $l[$techData[$tech][0]]; ?>
                   <?php if ($i == 1): ?>
-                  <td class="text-center"><input type="text" class="form-control form-control-sm level-input ui-input-margin" value="0"></td>
+                  <td class="text-center"><input type="text" class="form-control form-control-sm level-input ui-input-margin" value="0" aria-label="<?= htmlspecialchars($techName . ': ' . $l['from-level'], ENT_QUOTES) ?>"></td>
                   <?php endif;?>
-                  <td class="text-center"><input type="text" class="form-control form-control-sm level-input ui-input-margin" value="0"></td>
+                  <td class="text-center"><input type="text" class="form-control form-control-sm level-input ui-input-margin" value="0" aria-label="<?= htmlspecialchars($techName . ': ' . $l[$i == 1 ? 'to-level' : 'level'], ENT_QUOTES) ?>"></td>
                   <td class="text-center">0</td>
                   <td class="text-center">0</td>
                   <td class="text-center">0</td>
@@ -381,9 +377,9 @@
                 <tr>
                   <td style="display: none;">ra</td>
                   <td colspan="<?= ($i == 1)?'3':'2' ?>" class="border-w"><?= $l['res-available'] ?></td>
-                  <td class="text-center"><input id="metal-available-<?=$i?>-<?=$j?>" type="text" name="metal-available" class="form-control form-control-sm res-input" value="0"></td>
-                  <td class="text-center"><input id="crystal-available-<?=$i?>-<?=$j?>" type="text" name="crystal-available" class="form-control form-control-sm res-input" value="0"></td>
-                  <td class="text-center"><input id="deut-available-<?=$i?>-<?=$j?>" type="text" name="deut-available" class="form-control form-control-sm res-input" value="0"></td>
+                  <td class="text-center"><input id="metal-available-<?=$i?>-<?=$j?>" type="text" name="metal-available" class="form-control form-control-sm res-input" value="0" aria-label="<?= htmlspecialchars($l['res-available'] . ': ' . $l['metal'], ENT_QUOTES) ?>"></td>
+                  <td class="text-center"><input id="crystal-available-<?=$i?>-<?=$j?>" type="text" name="crystal-available" class="form-control form-control-sm res-input" value="0" aria-label="<?= htmlspecialchars($l['res-available'] . ': ' . $l['crystal'], ENT_QUOTES) ?>"></td>
+                  <td class="text-center"><input id="deut-available-<?=$i?>-<?=$j?>" type="text" name="deut-available" class="form-control form-control-sm res-input" value="0" aria-label="<?= htmlspecialchars($l['res-available'] . ': ' . $l['deuterium'], ENT_QUOTES) ?>"></td>
                   <td></td>
                   <td></td>
                   <?php if ($i == 0):?>
@@ -409,7 +405,7 @@
                   <td class="border-s border-w"><?=$l['transports-needed']?></td>
                   <td class="border-s text-center">0 <?=$l['sc-short']?></td>
                   <td class="border-s text-center">0 <?=$l['lc-short']?></td>
-                  <td colspan="<?= ($i == 1)?'5':(($i == 0)?'5':'4') ?>" class="border-s text-center">&nbsp;</td>
+                  <td colspan="5" class="border-s text-center">&nbsp;</td>
                   <td class="border-s border-e text-center">&nbsp;</td>
                 </tr>
               </table>
@@ -419,7 +415,7 @@
         <?php else: ?>
           <div class="p-2">
             <div class="d-flex align-items-center flex-wrap gap-2 py-1">
-              <select id="tech-types-select" name="tech-types-select" class="form-select form-select-sm w-auto">
+              <select id="tech-types-select" name="tech-types-select" class="form-select form-select-sm w-auto" aria-label="<?= htmlspecialchars($l['building'] . ' / ' . $l['research'], ENT_QUOTES) ?>">
                 <optgroup label="<?=$l['buildings']?>">
                 <?php $techs = getTechsByType(1);?>
                 <?php foreach ($techs as $tech) :?>
@@ -466,9 +462,9 @@
               </tr>
               <tr>
                 <td class="border-w"><?= $l['res-available'] ?></td>
-                <td class="text-center"><input id="metal-available-2-1" type="text" name="metal-available" class="form-control form-control-sm res-input" value="0"></td>
-                <td class="text-center"><input id="crystal-available-2-1" type="text" name="crystal-available" class="form-control form-control-sm res-input" value="0"></td>
-                <td class="text-center"><input id="deut-available-2-1" type="text" name="deut-available" class="form-control form-control-sm res-input" value="0"></td>
+                <td class="text-center"><input id="metal-available-2-1" type="text" name="metal-available" class="form-control form-control-sm res-input" value="0" aria-label="<?= htmlspecialchars($l['res-available'] . ': ' . $l['metal'], ENT_QUOTES) ?>"></td>
+                <td class="text-center"><input id="crystal-available-2-1" type="text" name="crystal-available" class="form-control form-control-sm res-input" value="0" aria-label="<?= htmlspecialchars($l['res-available'] . ': ' . $l['crystal'], ENT_QUOTES) ?>"></td>
+                <td class="text-center"><input id="deut-available-2-1" type="text" name="deut-available" class="form-control form-control-sm res-input" value="0" aria-label="<?= htmlspecialchars($l['res-available'] . ': ' . $l['deuterium'], ENT_QUOTES) ?>"></td>
                 <td></td>
                 <td></td>
                 <td class="border-e"></td>
@@ -498,17 +494,9 @@
   <div id="warning">
     <div id="warning-message"></div>
   </div>
-  <div id="hint">
-    <table>
-      <tr>
-        <td class="align-top">
-          <i class="bi bi-info-circle"></i>
-        </td>
-        <td>
-          <span id="hint-message"><?= $l['times-note'] ?></span>
-        </td>
-      </tr>
-    </table>
+  <div id="hint" class="d-flex align-items-start gap-2">
+    <i class="bi bi-info-circle"></i>
+    <span id="hint-message"><?= $l['times-note'] ?></span>
   </div>
 </div>
 
