@@ -129,6 +129,77 @@ function pfPercentField(key, prm, input) {
 }
 
 /**
+ * A number field of a calculator that keeps its settings in options.prm and
+ * converts the profile's value on the way in: a level, a count, a
+ * temperature or a percentage.
+ *
+ * @param {string} key Profile value key.
+ * @param {string} prm
+ * @param {string} input Selector.
+ * @param {number} [def] The value when the profile has none.
+ * @returns {ProfileConvField}
+ */
+function pfConvNumField(key, prm, input, def = 0) {
+  return {
+    key, prm, input,
+    toPrm: (v) => (v === undefined || v === null ? def : pfNum(v)),
+    fromPrm: pfNum,
+  };
+}
+
+/**
+ * The player class of a calculator with a "no class" radio, which a profile's
+ * discoverer shows as: only the collector and the general are kept.
+ *
+ * @param {string} prm
+ * @param {string} prefix The id of the class radios up to their number, such as `player-class-`.
+ * @param {number} none The calculator's value for no class.
+ * @returns {ProfileConvField}
+ */
+function pfClassField(prm, prefix, none) {
+  return {
+    key: 'class', prm, input: '#' + prefix + '0',
+    toPrm: (v) => {
+      const cls = pfNum(v);
+      return cls === PROFILE_CLASS.COLLECTOR || cls === PROFILE_CLASS.GENERAL ? cls : none;
+    },
+    fromPrm: pfNum,
+    display: (v) => {
+      const label = document.querySelector('label[for="' + prefix + pfNum(v) + '"]');
+      return label ? (label.textContent || '').trim() : '—';
+    },
+  };
+}
+
+/**
+ * The alliance class as a trader switch.
+ *
+ * @param {string} prm
+ * @param {string} input Selector.
+ * @returns {ProfileConvField}
+ */
+function pfTraderField(prm, input) {
+  return {
+    key: 'allianceClass', prm, input,
+    toPrm: (v) => pfNum(v) === PROFILE_ALLIANCE_CLASS.TRADER,
+    fromPrm: (v) => (pfBool(v) ? PROFILE_ALLIANCE_CLASS.TRADER : PROFILE_ALLIANCE_CLASS.NONE),
+    display: (v) => (pfNum(v) === PROFILE_ALLIANCE_CLASS.TRADER ? '✓' : '—'),
+  };
+}
+
+/**
+ * One switch per officer, named alike in the options and in the page's ids.
+ *
+ * @param {string[]} names
+ * @returns {ProfileConvField[]}
+ */
+function pfOfficerFields(names) {
+  return names.map((name) => ({
+    key: 'officer.' + name, prm: name, input: '#' + name, toPrm: pfBool, fromPrm: pfBool,
+  }));
+}
+
+/**
  * A profile value as text, for a key no calculator described: a flag as a
  * tick or a dash, a list (exchange rates) joined with colons.
  *

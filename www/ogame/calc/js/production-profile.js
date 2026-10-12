@@ -24,11 +24,9 @@ const PRODUCTION_PROFILE_OPTIONS_KEY = 'options_production_profile';
 
 /** @type {ProfileConvField[]} */
 const PRODUCTION_ACCOUNT_FIELDS = [
-  { prm: 'energyTechLevel', key: 'research.113', input: '#energy-tech-level', toPrm: pfNum, fromPrm: pfNum },
-  { prm: 'plasmaTechLevel', key: 'research.122', input: '#plasma-tech-level', toPrm: pfNum, fromPrm: pfNum },
-  ...['engineer', 'geologist', 'technocrat', 'admiral', 'commander'].map((name) => ({
-    prm: name, key: 'officer.' + name, input: '#' + name, toPrm: pfBool, fromPrm: pfBool,
-  })),
+  pfConvNumField('research.113', 'energyTechLevel', '#energy-tech-level'),
+  pfConvNumField('research.122', 'plasmaTechLevel', '#plasma-tech-level'),
+  ...pfOfficerFields(['engineer', 'geologist', 'technocrat', 'admiral', 'commander']),
   {
     // Production has no "no class": a profile without one shows as collector.
     prm: 'playerClass', key: 'class', input: '#class-0',
@@ -38,19 +36,14 @@ const PRODUCTION_ACCOUNT_FIELDS = [
       return label ? (label.textContent || '').trim() : '—';
     },
   },
-  {
-    prm: 'isTrader', key: 'allianceClass', input: '#is-trader',
-    toPrm: (v) => pfNum(v) === PROFILE_ALLIANCE_CLASS.TRADER,
-    fromPrm: (v) => (pfBool(v) ? PROFILE_ALLIANCE_CLASS.TRADER : PROFILE_ALLIANCE_CLASS.NONE),
-    display: (v) => (pfNum(v) === PROFILE_ALLIANCE_CLASS.TRADER ? '✓' : '—'),
-  },
-  { prm: 'lfMetProdBonus', key: 'lf.prod.metal', input: '#lf-metal-prod-bonus', toPrm: pfNum, fromPrm: pfNum },
-  { prm: 'lfCrysProdBonus', key: 'lf.prod.crystal', input: '#lf-crystal-prod-bonus', toPrm: pfNum, fromPrm: pfNum },
-  { prm: 'lfDeutProdBonus', key: 'lf.prod.deuterium', input: '#lf-deut-prod-bonus', toPrm: pfNum, fromPrm: pfNum },
-  { prm: 'lfEnergyProdBonus', key: 'lf.prod.energy', input: '#lf-energy-prod-bonus', toPrm: pfNum, fromPrm: pfNum },
-  { prm: 'lfCollectorBonus', key: 'lf.classBooster.1', input: '#lf-collector-bonus', toPrm: pfNum, fromPrm: pfNum },
-  { prm: 'lfCrawlerBonus', key: 'lf.crawler', input: '#lf-crawler-bonus', toPrm: pfNum, fromPrm: pfNum },
-  { prm: 'lfPlasmaCostReduction', key: 'lf.cost.122.cost', input: '#lf-plasma-cost-reduction', toPrm: pfNum, fromPrm: pfNum },
+  pfTraderField('isTrader', '#is-trader'),
+  pfConvNumField('lf.prod.metal', 'lfMetProdBonus', '#lf-metal-prod-bonus'),
+  pfConvNumField('lf.prod.crystal', 'lfCrysProdBonus', '#lf-crystal-prod-bonus'),
+  pfConvNumField('lf.prod.deuterium', 'lfDeutProdBonus', '#lf-deut-prod-bonus'),
+  pfConvNumField('lf.prod.energy', 'lfEnergyProdBonus', '#lf-energy-prod-bonus'),
+  pfConvNumField('lf.classBooster.1', 'lfCollectorBonus', '#lf-collector-bonus'),
+  pfConvNumField('lf.crawler', 'lfCrawlerBonus', '#lf-crawler-bonus'),
+  pfConvNumField('lf.cost.122.cost', 'lfPlasmaCostReduction', '#lf-plasma-cost-reduction'),
   {
     prm: 'rates', key: 'rates', input: '#exchange-rates-m',
     toPrm: (v) => (Array.isArray(v) && v.length === 3 ? v.map(Number) : DEFAULT_RATES.slice()),

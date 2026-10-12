@@ -24,69 +24,34 @@
 
 'use strict';
 
-/**
- * A number field: a level, a count, a temperature or a percentage.
- *
- * @param {string} key
- * @param {string} prm
- * @param {string} input
- * @param {number} [def] The value when the profile has none.
- * @returns {ProfileConvField}
- */
-function gravitonNumField(key, prm, input, def = 0) {
-  return {
-    key, prm, input,
-    toPrm: (v) => (v === undefined || v === null ? def : pfNum(v)),
-    fromPrm: pfNum,
-  };
-}
-
 /** @type {ProfileConvField[]} */
 const GRAVITON_ACCOUNT_FIELDS = [
-  gravitonNumField('research.113', 'energyTechLevel', '#energy-tech-level'),
-  gravitonNumField('research.114', 'hyperTechLevel', '#hyper-tech-level'),
-  ...GRAVITON_OFFICERS.map((name) => ({
-    key: 'officer.' + name, prm: name, input: '#' + name, toPrm: pfBool, fromPrm: pfBool,
-  })),
-  {
-    // The calculator has no discoverer: one shows as no class.
-    key: 'class', prm: 'playerClass', input: '#player-class-0',
-    toPrm: (v) => {
-      const cls = pfNum(v);
-      return cls === PROFILE_CLASS.COLLECTOR || cls === PROFILE_CLASS.GENERAL ? cls : GRAVITON_CLASS.NONE;
-    },
-    fromPrm: pfNum,
-    display: (v) => {
-      const label = document.querySelector('label[for="player-class-' + pfNum(v) + '"]');
-      return label ? (label.textContent || '').trim() : '—';
-    },
-  },
-  {
-    key: 'allianceClass', prm: 'isTrader', input: '#trader-bonus',
-    toPrm: (v) => pfNum(v) === PROFILE_ALLIANCE_CLASS.TRADER,
-    fromPrm: (v) => (pfBool(v) ? PROFILE_ALLIANCE_CLASS.TRADER : PROFILE_ALLIANCE_CLASS.NONE),
-    display: (v) => (pfNum(v) === PROFILE_ALLIANCE_CLASS.TRADER ? '✓' : '—'),
-  },
-  gravitonNumField('lf.prod.energy', 'totalLFEnrgBonus', '#total-lf-energy-bonus'),
-  gravitonNumField('lf.ship.202.cargo', 'scCapacityIncrease', '#sc-capacity-increase'),
-  gravitonNumField('lf.ship.203.cargo', 'lcCapacityIncrease', '#lc-capacity-increase'),
-  gravitonNumField('lf.ship.209.cargo', 'rcCapacityIncrease', '#rc-capacity-increase'),
+  pfConvNumField('research.113', 'energyTechLevel', '#energy-tech-level'),
+  pfConvNumField('research.114', 'hyperTechLevel', '#hyper-tech-level'),
+  ...pfOfficerFields(GRAVITON_OFFICERS),
+  // The calculator has no discoverer: one shows as no class.
+  pfClassField('playerClass', 'player-class-', GRAVITON_CLASS.NONE),
+  pfTraderField('isTrader', '#trader-bonus'),
+  pfConvNumField('lf.prod.energy', 'totalLFEnrgBonus', '#total-lf-energy-bonus'),
+  pfConvNumField('lf.ship.202.cargo', 'scCapacityIncrease', '#sc-capacity-increase'),
+  pfConvNumField('lf.ship.203.cargo', 'lcCapacityIncrease', '#lc-capacity-increase'),
+  pfConvNumField('lf.ship.209.cargo', 'rcCapacityIncrease', '#rc-capacity-increase'),
 ];
 
 /** The fields of the planet picked in #pf-planet. */
 const GRAVITON_PLANET_FIELDS = [
-  gravitonNumField('building.21', 'shipyardLevel', '#shipyard-level'),
-  gravitonNumField('building.15', 'nanitesFactoryLevel', '#nanites-factory-level'),
-  gravitonNumField('temperature.max', 'maxPlanetTemp', '#max-planet-temp'),
-  gravitonNumField('energyBooster', 'energyBoost', '#energy-boost'),
-  gravitonNumField('building.4', 'solarPlantLevel', '#solar-plant-level'),
-  gravitonNumField('production.4', 'solarPlantPercent', '#solar-plant-percent', 100),
-  gravitonNumField('building.12', 'fusionPlantLevel', '#fusion-plant-level'),
-  gravitonNumField('production.12', 'fusionPlantPercent', '#fusion-plant-percent', 100),
-  gravitonNumField('ship.212', 'solarSatellitesCount', '#solar-satellites-count'),
-  gravitonNumField('production.212', 'solarSatellitesPercent', '#solar-satellites-percent', 100),
+  pfConvNumField('building.21', 'shipyardLevel', '#shipyard-level'),
+  pfConvNumField('building.15', 'nanitesFactoryLevel', '#nanites-factory-level'),
+  pfConvNumField('temperature.max', 'maxPlanetTemp', '#max-planet-temp'),
+  pfConvNumField('energyBooster', 'energyBoost', '#energy-boost'),
+  pfConvNumField('building.4', 'solarPlantLevel', '#solar-plant-level'),
+  pfConvNumField('production.4', 'solarPlantPercent', '#solar-plant-percent', 100),
+  pfConvNumField('building.12', 'fusionPlantLevel', '#fusion-plant-level'),
+  pfConvNumField('production.12', 'fusionPlantPercent', '#fusion-plant-percent', 100),
+  pfConvNumField('ship.212', 'solarSatellitesCount', '#solar-satellites-count'),
+  pfConvNumField('production.212', 'solarSatellitesPercent', '#solar-satellites-percent', 100),
   // A Rocktal building: a planet of another life form has none.
-  gravitonNumField('lf.building.' + lfBuildingGameId(2, 7), 'disChLevel', '#disr-chamber-level'),
+  pfConvNumField('lf.building.' + lfBuildingGameId(2, 7), 'disChLevel', '#disr-chamber-level'),
 ];
 
 /** The options.prm keys of the settings that come from the profile's universe. */

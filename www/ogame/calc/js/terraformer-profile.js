@@ -27,56 +27,21 @@
 
 'use strict';
 
-/**
- * A number field: a level, a count, a temperature or a percentage.
- *
- * @param {string} key
- * @param {string} prm
- * @param {string} input
- * @param {number} [def] The value when the profile has none.
- * @returns {ProfileConvField}
- */
-function terraformerNumField(key, prm, input, def = 0) {
-  return {
-    key, prm, input,
-    toPrm: (v) => (v === undefined || v === null ? def : pfNum(v)),
-    fromPrm: pfNum,
-  };
-}
-
 /** @type {ProfileConvField[]} */
 const TERRAFORMER_ACCOUNT_FIELDS = [
-  terraformerNumField('research.113', 'energyTechLevel', '#energy-tech-level'),
-  terraformerNumField('research.114', 'hyperTechLevel', '#hyper-tech-level'),
-  ...TERRAFORMER_OFFICERS.map((name) => ({
-    key: 'officer.' + name, prm: name, input: '#' + name, toPrm: pfBool, fromPrm: pfBool,
-  })),
-  {
-    // The calculator has no discoverer: one shows as no class.
-    key: 'class', prm: 'playerClass', input: '#player-class-0',
-    toPrm: (v) => {
-      const cls = pfNum(v);
-      return cls === PROFILE_CLASS.COLLECTOR || cls === PROFILE_CLASS.GENERAL ? cls : TERRAFORMER_CLASS.NONE;
-    },
-    fromPrm: pfNum,
-    display: (v) => {
-      const label = document.querySelector('label[for="player-class-' + pfNum(v) + '"]');
-      return label ? (label.textContent || '').trim() : '—';
-    },
-  },
-  {
-    key: 'allianceClass', prm: 'isTrader', input: '#trader-bonus',
-    toPrm: (v) => pfNum(v) === PROFILE_ALLIANCE_CLASS.TRADER,
-    fromPrm: (v) => (pfBool(v) ? PROFILE_ALLIANCE_CLASS.TRADER : PROFILE_ALLIANCE_CLASS.NONE),
-    display: (v) => (pfNum(v) === PROFILE_ALLIANCE_CLASS.TRADER ? '✓' : '—'),
-  },
-  terraformerNumField('lf.prod.energy', 'totalLFEnrgBonus', '#total-lf-energy-bonus'),
+  pfConvNumField('research.113', 'energyTechLevel', '#energy-tech-level'),
+  pfConvNumField('research.114', 'hyperTechLevel', '#hyper-tech-level'),
+  ...pfOfficerFields(TERRAFORMER_OFFICERS),
+  // The calculator has no discoverer: one shows as no class.
+  pfClassField('playerClass', 'player-class-', TERRAFORMER_CLASS.NONE),
+  pfTraderField('isTrader', '#trader-bonus'),
+  pfConvNumField('lf.prod.energy', 'totalLFEnrgBonus', '#total-lf-energy-bonus'),
   // The game reports a cost reduction per technology; the calculator applies
   // one number to the Terraformer's cost and time, so it takes the cost one,
   // as the cost calculator does.
-  terraformerNumField('lf.cost.33.cost', 'lfTerraformerRdc', '#lf-terraformer-rdc'),
-  terraformerNumField('lf.ship.202.cargo', 'scCapacityIncrease', '#sc-capacity-increase'),
-  terraformerNumField('lf.ship.203.cargo', 'lcCapacityIncrease', '#lc-capacity-increase'),
+  pfConvNumField('lf.cost.33.cost', 'lfTerraformerRdc', '#lf-terraformer-rdc'),
+  pfConvNumField('lf.ship.202.cargo', 'scCapacityIncrease', '#sc-capacity-increase'),
+  pfConvNumField('lf.ship.203.cargo', 'lcCapacityIncrease', '#lc-capacity-increase'),
 ];
 
 /**
@@ -85,24 +50,24 @@ const TERRAFORMER_ACCOUNT_FIELDS = [
  * @type {ProfileConvField[]}
  */
 const TERRAFORMER_PLANET_FIELDS = [
-  terraformerNumField('building.14', 'robotsFactoryLevel', '#robots-factory-level'),
+  pfConvNumField('building.14', 'robotsFactoryLevel', '#robots-factory-level'),
   {
     // The field takes no level below 1, so a planet with no shipyard shows 1.
     key: 'building.21', prm: 'shipyardLevel', input: '#shipyard-level',
     toPrm: (v) => Math.max(1, v === undefined || v === null ? 1 : pfNum(v)),
     fromPrm: pfNum,
   },
-  terraformerNumField('building.15', 'nanitesFactoryLevel', '#nanites-factory-level'),
-  terraformerNumField('temperature.max', 'maxPlanetTemp', '#max-planet-temp'),
-  terraformerNumField('energyBooster', 'energyBoost', '#energy-boost'),
-  terraformerNumField('building.4', 'solarPlantLevel', '#solar-plant-level'),
-  terraformerNumField('production.4', 'solarPlantPercent', '#solar-plant-percent', 100),
-  terraformerNumField('building.12', 'fusionPlantLevel', '#fusion-plant-level'),
-  terraformerNumField('production.12', 'fusionPlantPercent', '#fusion-plant-percent', 100),
-  terraformerNumField('ship.212', 'solarSatellitesCount', '#solar-satellites-count'),
-  terraformerNumField('production.212', 'solarSatellitesPercent', '#solar-satellites-percent', 100),
+  pfConvNumField('building.15', 'nanitesFactoryLevel', '#nanites-factory-level'),
+  pfConvNumField('temperature.max', 'maxPlanetTemp', '#max-planet-temp'),
+  pfConvNumField('energyBooster', 'energyBoost', '#energy-boost'),
+  pfConvNumField('building.4', 'solarPlantLevel', '#solar-plant-level'),
+  pfConvNumField('production.4', 'solarPlantPercent', '#solar-plant-percent', 100),
+  pfConvNumField('building.12', 'fusionPlantLevel', '#fusion-plant-level'),
+  pfConvNumField('production.12', 'fusionPlantPercent', '#fusion-plant-percent', 100),
+  pfConvNumField('ship.212', 'solarSatellitesCount', '#solar-satellites-count'),
+  pfConvNumField('production.212', 'solarSatellitesPercent', '#solar-satellites-percent', 100),
   // A Rocktal building: a planet of another life form has none.
-  terraformerNumField('lf.building.' + lfBuildingGameId(2, 7), 'disChLevel', '#disr-chamber-level'),
+  pfConvNumField('lf.building.' + lfBuildingGameId(2, 7), 'disChLevel', '#disr-chamber-level'),
 ];
 
 /** The options.prm keys of the settings that come from the profile's universe. */
