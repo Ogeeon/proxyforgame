@@ -267,3 +267,22 @@ describe('getBuildEnergyCost_C - return shape', () => {
         expect(missing).toBe(-500);
     });
 });
+
+describe('Terraformer Calculator - Officers', () => {
+    const none = { engineer: false, geologist: false, technocrat: false, admiral: false, commander: false };
+    const all = { engineer: true, geologist: true, technocrat: true, admiral: true, commander: true };
+
+    it('no engineer gives no bonus, even with the other four', () => {
+        expect(TerraformerCalculator.officerBonusLevel(none)).toBe(0);
+        expect(TerraformerCalculator.officerBonusLevel({ ...all, engineer: false })).toBe(0);
+    });
+
+    it('the engineer short of the whole staff gives the engineer bonus', () => {
+        expect(TerraformerCalculator.officerBonusLevel({ ...none, engineer: true })).toBe(1);
+        expect(TerraformerCalculator.officerBonusLevel({ ...all, commander: false })).toBe(1);
+    });
+
+    it('all five officers give the commanding staff bonus', () => {
+        expect(TerraformerCalculator.officerBonusLevel(all)).toBe(2);
+    });
+});

@@ -44,6 +44,17 @@ class TerraformerCalculator {
   }
 
   /**
+   * The officers' energy bonus level the core expects: 2 for the whole
+   * commanding staff (+12%), 1 for an engineer alone (+10%), 0 otherwise.
+   *
+   * @param {{engineer: boolean, geologist: boolean, technocrat: boolean, admiral: boolean, commander: boolean}} o
+   */
+  static officerBonusLevel(o) {
+    if (o.engineer && o.geologist && o.technocrat && o.admiral && o.commander) return 2;
+    return o.engineer ? 1 : 0;
+  }
+
+  /**
    * Officer energy bonus: 10% with one relevant officer, 12% with all five,
    * plus its contribution to the per-satellite yield.
    */

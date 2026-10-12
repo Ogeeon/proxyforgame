@@ -7,10 +7,14 @@
     "../www/js/api-client.js",
     "../www/ogame/calc/js/ogame-costs.js",
     "../www/ogame/calc/js/dom-utils.js",
+    "../www/ogame/calc/js/profiles-core.js",
+    "../www/ogame/calc/js/profiles-store.js",
+    "../www/ogame/calc/js/profiles-ui.js",
     "../www/ogame/calc/js/terraformer-core.js",
     "../www/ogame/calc/js/terraformer-data-collector.js",
     "../www/ogame/calc/js/terraformer-renderer.js",
     "../www/ogame/calc/js/terraformer-orchestration.js",
+    "../www/ogame/calc/js/terraformer-profile.js",
     "../www/js/sidebar_bs.js",
     "../www/ogame/calc/js/globals.d.ts"
   ]

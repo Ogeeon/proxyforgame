@@ -18,7 +18,13 @@ const options = {
     energyTechLevel: 0,
     hyperTechLevel: 0,
     maxPlanetTemp: 0,
+    // Derived from the officers; kept so an older cookie's value can be read.
     energyBonus: 0,
+    engineer: false,
+    geologist: false,
+    technocrat: false,
+    admiral: false,
+    commander: false,
     solarPlantLevel: 0,
     solarPlantPercent: 100,
     fusionPlantLevel: 0,
@@ -48,6 +54,11 @@ const options = {
         case 'hyperTechLevel': return validateNumber(Number.parseFloat(value), 0, 50, 0);
         case 'maxPlanetTemp': return validateNumber(Number.parseFloat(value), -134, Infinity, 0);
         case 'energyBonus': return validateNumber(Number.parseFloat(value), 0, 2, 0);
+        case 'engineer':
+        case 'geologist':
+        case 'technocrat':
+        case 'admiral':
+        case 'commander': return value === 'true';
         case 'solarPlantLevel': return validateNumber(Number.parseFloat(value), 0, 100, 0);
         case 'solarPlantPercent': return validateNumber(Number.parseFloat(value), 0, 100, 100);
         case 'fusionPlantLevel': return validateNumber(Number.parseFloat(value), 0, 100, 0);
@@ -77,9 +88,20 @@ const options = {
 
   load: function () {
     try { loadFromCookie('options_terraformer', options.prm); } catch (e) { console.error(e); }
+    // Settings saved before the officers had a checkbox each carry only the
+    // bonus (0 none, 1 engineer, 2 all five): a bonus that disagrees with the
+    // officers can only come from there.
+    const prm = options.prm;
+    if (prm.energyBonus !== TerraformerCalculator.officerBonusLevel(prm)) {
+      prm.engineer = prm.energyBonus >= 1;
+      prm.geologist = prm.technocrat = prm.admiral = prm.commander = prm.energyBonus === 2;
+    }
   },
   save: function () { saveToCookie('options_terraformer', options.prm); }
 };
+
+/** The officer checkboxes, by id and options.prm key alike. */
+const TERRAFORMER_OFFICERS = ['engineer', 'geologist', 'technocrat', 'admiral', 'commander'];
 
 class TerraformerApp {
   constructor() {
@@ -102,7 +124,7 @@ class TerraformerApp {
 
   init() {
     options.load();
-    this._restoreFromState();
+    this.restoreFromState();
     this._applyConstraints();
     this._bindEvents();
     this._applySingleLevelVisibility();
@@ -110,7 +132,7 @@ class TerraformerApp {
     this.recalc();
   }
 
-  _restoreFromState() {
+  restoreFromState() {
     setVal('#robots-factory-level', options.prm.robotsFactoryLevel);
     setVal('#shipyard-level', options.prm.shipyardLevel);
     setVal('#nanites-factory-level', options.prm.nanitesFactoryLevel);
@@ -118,8 +140,7 @@ class TerraformerApp {
     setVal('#energy-tech-level', options.prm.energyTechLevel);
     setVal('#hyper-tech-level', options.prm.hyperTechLevel);
     setNumVal('#max-planet-temp', options.prm.maxPlanetTemp);
-    const bonusRadio = inputEl(`#energy-bonus-${options.prm.energyBonus}`);
-    if (bonusRadio) bonusRadio.checked = true;
+    TERRAFORMER_OFFICERS.forEach((name) => setChecked('#' + name, options.prm[name]));
     setVal('#solar-plant-level', options.prm.solarPlantLevel);
     setVal('#solar-plant-percent', options.prm.solarPlantPercent);
     setVal('#fusion-plant-level', options.prm.fusionPlantLevel);
@@ -200,10 +221,8 @@ class TerraformerApp {
       if (el) addEvent(el, 'change', () => this.recalc());
     });
 
-    // Energy officer bonus radios.
-    document.querySelectorAll('input[name="energy-bonus"]').forEach((radio) => {
-      radio.addEventListener('change', () => this.recalc());
-    });
+    // Officer checkboxes.
+    TERRAFORMER_OFFICERS.forEach((name) => addEvent('#' + name, 'change', () => this.recalc()));
 
     // Player class radios and the alliance checkbox.
     document.querySelectorAll('input[name="player-class"]').forEach((radio) => {
@@ -276,6 +295,7 @@ class TerraformerApp {
     options.prm.hyperTechLevel = 0;
     options.prm.maxPlanetTemp = 0;
     options.prm.energyBonus = 0;
+    TERRAFORMER_OFFICERS.forEach((name) => { options.prm[name] = false; });
     options.prm.solarPlantLevel = 0;
     options.prm.solarPlantPercent = 100;
     options.prm.fusionPlantLevel = 0;
@@ -295,10 +315,9 @@ class TerraformerApp {
     options.prm.crysAvailable = 0;
     options.prm.deutAvailable = 0;
 
-    this._restoreFromState();
-    // _restoreFromState only checks the radios matching the restored params;
-    // make sure the "none" options are explicitly selected after a reset.
-    setChecked('#energy-bonus-0', true);
+    this.restoreFromState();
+    // restoreFromState only checks the radio matching the restored class;
+    // make sure "none" is explicitly selected after a reset.
     setChecked('#player-class-0', true);
     this._applySingleLevelVisibility();
     this.recalc();

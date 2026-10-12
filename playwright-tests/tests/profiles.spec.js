@@ -1111,3 +1111,158 @@ test('"no profile" gives graviton its own debris settings back', async ({ page }
     await expect(page.locator('#deut-in-debris')).not.toBeChecked();
     await expect(page.locator('#universe-speed')).toHaveValue('1');
 });
+
+test('terraformer takes the account and a planet from the profile', async ({ page }) => {
+    await page.goto('/terraformer');
+    await importExport(page);
+
+    // Commander and geologist only: no engineer, so no officers' energy bonus.
+    await expect(page.locator('#commander')).toBeChecked();
+    await expect(page.locator('#geologist')).toBeChecked();
+    await expect(page.locator('#engineer')).not.toBeChecked();
+    await expect(page.locator('#engineer')).toHaveClass(/pf-bound/);
+    await expect(page.locator('#player-class-1')).toBeChecked();
+    await expect(page.locator('#player-class-1').locator('xpath=ancestor::fieldset')).toHaveClass(/pf-bound/);
+    await expect(page.locator('#trader-bonus')).toBeChecked();
+    await expect(page.locator('#energy-tech-level')).toHaveValue('14');
+    await expect(page.locator('#hyper-tech-level')).toHaveValue('8');
+    await expect(page.locator('#total-lf-energy-bonus')).toHaveValue('0.5');
+    await expect(page.locator('#sc-capacity-increase')).toHaveValue('1.23');
+    await expect(page.locator('#lc-capacity-increase')).toHaveValue('2.5');
+
+    await expect(page.locator('#pf-planet option')).toHaveCount(3);
+    await expect(page.locator('#pf-planet option:checked')).toHaveText('Alpha [2:148:8]');
+    await expect(page.locator('#robots-factory-level')).toHaveValue('10');
+    await expect(page.locator('#shipyard-level')).toHaveValue('12');
+    await expect(page.locator('#nanites-factory-level')).toHaveValue('6');
+    await expect(page.locator('#max-planet-temp')).toHaveValue('41');
+    await expect(page.locator('#solar-plant-level')).toHaveValue('25');
+    await expect(page.locator('#fusion-plant-level')).toHaveValue('12');
+    await expect(page.locator('#solar-satellites-count')).toHaveValue('250');
+    await expect(page.locator('#solar-satellites-count')).toHaveClass(/pf-bound/);
+    // The terraformer's current level is filled in where the range starts,
+    // not bound, and the range ends at least one level above it.
+    await expect(page.locator('#tf-level-from')).toHaveValue('5');
+    await expect(page.locator('#tf-level-from')).not.toHaveClass(/pf-bound/);
+    await expect(page.locator('#tf-level-to')).toHaveValue('6');
+    await expect(page.locator('#added-fields')).toHaveText('5');
+    await expect(page.locator('#disr-chamber-level')).toHaveValue('0');
+    // Percentages are the player's alone: bound, but never marked.
+    await expect(page.locator('#solar-plant-percent')).not.toHaveClass(/pf-bound/);
+
+    await expect(page.locator('#reset')).toBeHidden();
+    // Loading wrote nothing back.
+    await expect(page.locator('#pf-overrides')).toBeHidden();
+});
+
+test('another planet in terraformer brings its levels and Disruption Chamber, and is remembered', async ({ page }) => {
+    await page.goto('/terraformer');
+    await importExport(page);
+
+    await page.locator('#pf-planet').selectOption({ label: 'Beta [2:150:12]' });
+    await expect(page.locator('#max-planet-temp')).toHaveValue('-50');
+    await expect(page.locator('#solar-satellites-count')).toHaveValue('300');
+    await expect(page.locator('#disr-chamber-level')).toHaveValue('4');
+    await expect(page.locator('#tf-level-from')).toHaveValue('0');
+    // "To" was already above Beta's level, so it is kept.
+    await expect(page.locator('#tf-level-to')).toHaveValue('6');
+    await expect(page.locator('#pf-overrides')).toBeHidden();
+
+    await page.reload();
+    await expect(page.locator('#pf-planet option:checked')).toHaveText('Beta [2:150:12]');
+    await expect(page.locator('#disr-chamber-level')).toHaveValue('4');
+});
+
+test('a planet with no shipyard shows level 1 in terraformer without an override', async ({ page }) => {
+    await page.goto('/terraformer');
+    await importExport(page);
+
+    await page.locator('#pf-planet').selectOption({ label: 'Colony [3:20:4]' });
+    await expect(page.locator('#shipyard-level')).toHaveValue('1');
+    await expect(page.locator('#pf-overrides')).toBeHidden();
+
+    // Leaving the field must not turn the clamped 1 into an edit of the game's 0.
+    await page.locator('#shipyard-level').focus();
+    await page.locator('#shipyard-level').blur();
+    await expect(page.locator('#pf-overrides')).toBeHidden();
+    const profile = await activeProfile(page);
+    expect(profile.planets[2].values['building.21']).toEqual({ game: 0 });
+});
+
+test('terraformer edits become overrides of the account and the planet', async ({ page }) => {
+    await page.goto('/terraformer');
+    await importExport(page);
+
+    await page.locator('#solar-satellites-count').fill('400');
+    await page.locator('#solar-satellites-count').blur();
+    await page.locator('#engineer').check();
+    await expect(page.locator('#solar-satellites-count')).toHaveClass(/pf-differs/);
+    await expect(page.locator('#pf-overrides')).toHaveText('2');
+    let profile = await activeProfile(page);
+    expect(profile.planets[0].values['ship.212']).toEqual({ game: 250, override: 400 });
+    expect(profile.account.values['officer.engineer']).toEqual({ game: false, override: true });
+
+    // The "from" level is filled in, not bound: an edit stays the calculator's.
+    await page.locator('#tf-level-from').fill('7');
+    await page.locator('#tf-level-from').blur();
+    await expect(page.locator('#tf-level-from')).not.toHaveClass(/pf-differs/);
+    await expect(page.locator('#pf-overrides')).toHaveText('2');
+
+    await page.locator('#solar-satellites-count + .pf-reset').click();
+    await expect(page.locator('#solar-satellites-count')).toHaveValue('250');
+    profile = await activeProfile(page);
+    expect(profile.planets[0].values['ship.212']).toEqual({ game: 250 });
+    expect(profile.planets[0].values['building.33']).toEqual({ game: 5 });
+});
+
+test('"no profile" gives terraformer its own values back', async ({ page }) => {
+    await page.goto('/terraformer');
+    await page.locator('#solar-plant-level').fill('7');
+    await page.locator('#solar-plant-level').blur();
+    await page.locator('#tf-level-from').fill('3');
+    await page.locator('#tf-level-from').blur();
+    await page.locator('#engineer').check();
+
+    await importExport(page);
+    await expect(page.locator('#solar-plant-level')).toHaveValue('25');
+    await expect(page.locator('#tf-level-from')).toHaveValue('5');
+    const stored = await page.evaluate(() => JSON.parse(localStorage.getItem('options_terraformer') || '{}'));
+    expect(stored.solarPlantLevel).toBe(7);
+    expect(stored.tfLevelFrom).toBe(3);
+    expect(stored.engineer).toBe(true);
+    expect(stored.energyBonus).toBe(1);
+
+    await page.locator('#pf-select').selectOption('');
+    await expect(page.locator('#solar-plant-level')).toHaveValue('7');
+    await expect(page.locator('#tf-level-from')).toHaveValue('3');
+    await expect(page.locator('#engineer')).toBeChecked();
+    await expect(page.locator('#commander')).not.toBeChecked();
+    await expect(page.locator('#pf-planet-box')).toBeHidden();
+    await expect(page.locator('.pf-bound')).toHaveCount(0);
+    await expect(page.locator('#reset')).toBeVisible();
+});
+
+test('terraformer takes the economy speed from the universe, and keeps a changed one', async ({ page }) => {
+    await page.route('**/ajax.php?*service=serverdata*', (route) => route.fulfill({
+        status: 200, contentType: 'application/json',
+        body: JSON.stringify({ speed: '5', debrisFactor: '0.5', deuteriumInDebris: '0' }),
+    }));
+    await page.goto('/terraformer');
+    await importExport(page);
+
+    const speed = page.locator('#universe-speed');
+    await expect(speed).toHaveValue('5');
+    await expect(speed).toHaveClass(/pf-bound/);
+
+    await speed.selectOption('2');
+    await expect(speed).toHaveClass(/pf-differs/);
+    await page.reload();
+    await expect(speed).toHaveValue('2');
+    await expect(speed).toHaveClass(/pf-differs/);
+    // A universe setting is not in the profile.
+    await expect(page.locator('#pf-overrides')).toBeHidden();
+
+    await page.locator('#universe-speed + .pf-reset').click();
+    await expect(speed).toHaveValue('5');
+    await expect(speed).not.toHaveClass(/pf-differs/);
+});

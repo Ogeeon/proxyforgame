@@ -48,6 +48,8 @@ async function openLifeformsTab(page) {
     await expect(page.locator('#sc-capacity-increase')).toBeVisible();
 }
 
+const OFFICERS = ['#engineer', '#geologist', '#technocrat', '#admiral', '#commander'];
+
 test.describe('Terraformer Calculator - DOM integration', () => {
     test.beforeEach(async ({ context, page }) => {
         await context.addInitScript(() => {
@@ -167,6 +169,8 @@ test.describe('Terraformer Calculator - DOM integration', () => {
 
     test('reset restores the default field values', async ({ page }) => {
         await page.locator('#player-class-2').check(); // General
+        await page.locator('#engineer').check();
+        await page.locator('#commander').check();
         await page.locator('#solar-plant-level').fill('25');
         await page.locator('#tf-level-to').fill('5');
         await page.locator('#single-level').check();
@@ -183,7 +187,9 @@ test.describe('Terraformer Calculator - DOM integration', () => {
 
         await expect(page.locator('#solar-plant-level')).toHaveValue('0');
         await expect(page.locator('#tf-level-to')).toHaveValue('0');
-        await expect(page.locator('#energy-bonus-0')).toBeChecked();
+        for (const id of OFFICERS) {
+            await expect(page.locator(id)).not.toBeChecked();
+        }
         await expect(page.locator('#player-class-0')).toBeChecked();
         await expect(page.locator('#single-level')).not.toBeChecked();
         await expect(page.locator('#sc-capacity-increase')).toHaveValue('0');
@@ -192,5 +198,61 @@ test.describe('Terraformer Calculator - DOM integration', () => {
         await expect(page.locator('#deuterium-available')).toHaveValue('0');
         // Un-checking single-level on reset re-shows the "from" field.
         await expect(page.locator('#tf-level-from')).toBeVisible();
+    });
+});
+
+// ---------------------------------------------------------------------------
+// Officers: a checkbox each, the energy bonus follows them.
+// ---------------------------------------------------------------------------
+
+test.describe('Terraformer Calculator - Officers', () => {
+    test.beforeEach(async ({ context, page }) => {
+        await context.addInitScript(() => {
+            localStorage.setItem('lastChange', 'key-value;true,value;99999');
+        });
+        await page.goto('/terraformer');
+    });
+
+    async function officersBonus(page) {
+        return Number.parseInt((await page.locator('#officers-bonus-energy').textContent()) || '0', 10);
+    }
+
+    test('the engineer adds a bonus, the whole staff a bigger one', async ({ page }) => {
+        await page.locator('#solar-plant-level').fill('10');
+        await page.locator('#solar-plant-level').blur();
+        expect(await officersBonus(page)).toBe(0);
+        // Without the engineer the other four give nothing.
+        for (const id of OFFICERS.slice(1)) {
+            await page.locator(id).check();
+        }
+        expect(await officersBonus(page)).toBe(0);
+        await page.locator('#engineer').check();
+        const staff = await officersBonus(page);
+        await page.locator('#commander').uncheck();
+        const engineer = await officersBonus(page);
+        expect(engineer).toBeGreaterThan(0);
+        expect(staff).toBeGreaterThan(engineer);
+    });
+
+    test('a bonus saved before the officers had checkboxes is read as officers', async ({ page }) => {
+        await page.evaluate(() => {
+            localStorage.setItem('options_terraformer', JSON.stringify({ energyBonus: 2, solarPlantLevel: 10 }));
+        });
+        await page.reload();
+        for (const id of OFFICERS) {
+            await expect(page.locator(id)).toBeChecked();
+        }
+        expect(await officersBonus(page)).toBeGreaterThan(0);
+    });
+
+    test('a saved engineer-only bonus checks the engineer alone', async ({ page }) => {
+        await page.evaluate(() => {
+            localStorage.setItem('options_terraformer', JSON.stringify({ energyBonus: 1, solarPlantLevel: 10 }));
+        });
+        await page.reload();
+        await expect(page.locator('#engineer')).toBeChecked();
+        for (const id of OFFICERS.slice(1)) {
+            await expect(page.locator(id)).not.toBeChecked();
+        }
     });
 });
