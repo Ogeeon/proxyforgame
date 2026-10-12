@@ -210,8 +210,6 @@ class CostsProfiles extends ProfileBinder {
     this.moonId = null;
     /** True while the profile's universe is in the picker. */
     this.universeBound = false;
-    /** @type {Record<string, *>} Values (by profile key, planet and moon ones prefixed) at the last apply or sync. */
-    this.snapshot = {};
     /** @type {Record<string, *>} The calculator's stored state as it was before a profile. */
     this.ownState = {};
     /** @type {Array<{cost: number, time: number}>} The research bonuses table as it was before a profile. */
@@ -431,10 +429,7 @@ class CostsProfiles extends ProfileBinder {
      * @param {string} snapKey
      */
     const syncField = (entity, f, snapKey) => {
-      const value = f.get(p);
-      if (sameValue(value, this.snapshot[snapKey])) return;
-      this.snapshot[snapKey] = value;
-      changed = setProfileValue(entity, f.key, value) || changed;
+      changed = this.syncValue(entity, f.key, snapKey, f.get(p)) || changed;
     };
     this.accountFields.forEach((f) => syncField(profile.account, f, f.key));
     if (planet) {
@@ -709,42 +704,25 @@ class CostsProfiles extends ProfileBinder {
 
   /** Name every value this page binds, in the page's own words. */
   describeFields() {
-    [...this.accountFields, ...COSTS_PLANET_FIELDS].forEach((f) => this.pf.describeField(f.key, pfFieldLabel(f.input()), f.display));
+    this.describeFieldList([...this.accountFields, ...COSTS_PLANET_FIELDS]);
   }
 
   /** Mark every field the profile owns, and the ones that differ from the game. */
   markAll() {
     const profile = this.profile();
     if (!profile) return;
-    /**
-     * Restore one game value on a fresh copy of the profile: the one marked
-     * may be stale by the time the button is clicked.
-     *
-     * @param {'account'|'planet'|'moon'} kind
-     * @param {?string} id
-     * @param {string} key
-     */
-    const restoreTo = (kind, id, key) => () => {
-      const fresh = this.pf.store.get(profile.id);
-      if (!fresh) return;
-      let target = null;
-      if (kind === 'account') target = fresh.account;
-      else if (kind === 'planet') target = fresh.planets.find((b) => b.id === id);
-      else target = fresh.moons.find((b) => b.id === id);
-      if (target && resetProfileValue(target, key)) this.pf.store.save(fresh);
-    };
     this.accountFields.forEach((f) => {
-      this.pf.markField(f.input(), profile, profile.account, f.key, restoreTo('account', null, f.key));
+      this.pf.markField(f.input(), profile, profile.account, f.key, this.restoreAccount(f.key));
     });
     const { planet, moon } = this.bodies(profile);
     if (planet) {
-      COSTS_PLANET_FIELDS.forEach((f) => this.pf.markField(f.input(), profile, planet, f.key, restoreTo('planet', planet.id, f.key)));
+      COSTS_PLANET_FIELDS.forEach((f) => this.pf.markField(f.input(), profile, planet, f.key, this.restoreBody('planets', planet.id, f.key)));
     }
     if (moon) {
-      COSTS_MOON_FIELDS.forEach((f) => this.pf.markField(f.input(), profile, moon, f.key, restoreTo('moon', moon.id, f.key)));
+      COSTS_MOON_FIELDS.forEach((f) => this.pf.markField(f.input(), profile, moon, f.key, this.restoreBody('moons', moon.id, f.key)));
     }
     profile.planets.slice(0, COSTS_MAX_LAB_PLANETS).forEach((p, i) => {
-      this.pf.markField($('#lablevel_' + (i + 1)), profile, p, 'building.31', restoreTo('planet', p.id, 'building.31'));
+      this.pf.markField($('#lablevel_' + (i + 1)), profile, p, 'building.31', this.restoreBody('planets', p.id, 'building.31'));
     });
   }
 }

@@ -111,8 +111,6 @@ class LfCostsProfiles extends ProfileBinder {
     super(pf, app);
     /** @type {?string} The planet shown; null leaves its fields to the calculator. */
     this.planetId = null;
-    /** @type {Record<string, *>} Values (by profile key, planet ones prefixed) at the last apply or sync. */
-    this.snapshot = {};
     /** @type {Record<string, *>} The profile-owned prm keys as the calculator has them. */
     this.ownPrm = {};
     this.ownSave = options.save;
@@ -327,21 +325,14 @@ class LfCostsProfiles extends ProfileBinder {
     const prm = options.prm;
     const planet = this.planet(profile);
     let changed = false;
-    /**
-     * @param {{values: LayeredValues}} entity
-     * @param {string} key
-     * @param {string} snapKey
-     * @param {*} value
-     */
-    const syncValue = (entity, key, snapKey, value) => {
-      if (sameValue(value, this.snapshot[snapKey])) return;
-      this.snapshot[snapKey] = value;
-      changed = setProfileValue(entity, key, value) || changed;
-    };
-    LFCOSTS_ACCOUNT_FIELDS.forEach((f) => syncValue(profile.account, f.key, f.key, f.get(prm)));
+    LFCOSTS_ACCOUNT_FIELDS.forEach((f) => {
+      changed = this.syncValue(profile.account, f.key, f.key, f.get(prm)) || changed;
+    });
     if (planet) {
-      LFCOSTS_PLANET_FIELDS.forEach((f) => syncValue(planet, f.key, 'planet:' + f.key, f.get(prm)));
-      syncValue(planet, LFCOSTS_RACE_KEY, 'planet:' + LFCOSTS_RACE_KEY, pfNum(prm.race));
+      LFCOSTS_PLANET_FIELDS.forEach((f) => {
+        changed = this.syncValue(planet, f.key, 'planet:' + f.key, f.get(prm)) || changed;
+      });
+      changed = this.syncValue(planet, LFCOSTS_RACE_KEY, 'planet:' + LFCOSTS_RACE_KEY, pfNum(prm.race)) || changed;
     }
     if (changed) {
       this.pf.save(profile);
@@ -390,7 +381,7 @@ class LfCostsProfiles extends ProfileBinder {
 
   /** Name every value this page binds, in the page's own words. */
   describeFields() {
-    [...LFCOSTS_ACCOUNT_FIELDS, ...LFCOSTS_PLANET_FIELDS].forEach((f) => this.pf.describeField(f.key, pfFieldLabel($(f.input)), f.display));
+    this.describeFieldList([...LFCOSTS_ACCOUNT_FIELDS, ...LFCOSTS_PLANET_FIELDS]);
     this.pf.describeField(LFCOSTS_RACE_KEY, pfFieldLabel($('#race-selector')), pfOptionText(selectEl('#race-selector')));
   }
 
@@ -398,31 +389,18 @@ class LfCostsProfiles extends ProfileBinder {
   markAll() {
     const profile = this.profile();
     if (!profile) return;
-    /**
-     * Restore one game value on a fresh copy of the profile: the one marked
-     * may be stale by the time the button is clicked.
-     *
-     * @param {?string} planetId Null for the account.
-     * @param {string} key
-     */
-    const restoreTo = (planetId, key) => () => {
-      const fresh = this.pf.store.get(profile.id);
-      if (!fresh) return;
-      const target = planetId ? fresh.planets.find((p) => p.id === planetId) : fresh.account;
-      if (target && resetProfileValue(target, key)) this.pf.store.save(fresh);
-    };
     LFCOSTS_ACCOUNT_FIELDS.forEach((f) => {
-      this.pf.markField($(f.input), profile, profile.account, f.key, restoreTo(null, f.key));
+      this.pf.markField($(f.input), profile, profile.account, f.key, this.restoreAccount(f.key));
     });
     this.speed?.mark();
     const planet = this.planet(profile);
     if (!planet) return;
     LFCOSTS_PLANET_FIELDS.forEach((f) => {
-      this.pf.markField($(f.input), profile, planet, f.key, restoreTo(planet.id, f.key));
+      this.pf.markField($(f.input), profile, planet, f.key, this.restoreBody('planets', planet.id, f.key));
     });
     // A planet with no life form leaves the race to the calculator: nothing to mark.
     if (lfCostsPlanetRace(planet) !== null) {
-      this.pf.markField($('#race-selector'), profile, planet, LFCOSTS_RACE_KEY, restoreTo(planet.id, LFCOSTS_RACE_KEY));
+      this.pf.markField($('#race-selector'), profile, planet, LFCOSTS_RACE_KEY, this.restoreBody('planets', planet.id, LFCOSTS_RACE_KEY));
     }
   }
 }

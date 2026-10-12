@@ -1300,6 +1300,8 @@ class ProfileBinder {
     this.profileId = null;
     /** True while the binder writes into the form, so that is not taken for an edit. */
     this.applying = false;
+    /** @type {Record<string, *>} Values (by profile key, body ones prefixed) at the last apply or sync. */
+    this.snapshot = {};
   }
 
   /** Connect to the page; called once, with the calculator ready. */
@@ -1364,6 +1366,74 @@ class ProfileBinder {
   /** Recalculate the page after the form was filled from outside. */
   recalc() {
     // A binder recalculates its page here.
+  }
+
+  /**
+   * The action of a restore button: put one game value back on a fresh copy
+   * of the profile, as the one marked may be stale by the time the button is
+   * clicked.
+   *
+   * @param {(fresh: Profile) => ?{values: LayeredValues}|undefined} locate The entity of the fresh copy that holds the value.
+   * @param {string} key
+   * @returns {() => void}
+   */
+  restoreValue(locate, key) {
+    const id = this.profileId;
+    return () => {
+      const fresh = id ? this.pf.store.get(id) : null;
+      if (!fresh) return;
+      const target = locate(fresh);
+      if (target && resetProfileValue(target, key)) this.pf.store.save(fresh);
+    };
+  }
+
+  /**
+   * @param {string} key
+   * @returns {() => void}
+   */
+  restoreAccount(key) {
+    return this.restoreValue((fresh) => fresh.account, key);
+  }
+
+  /**
+   * @param {'planets'|'moons'} kind
+   * @param {string} id
+   * @param {string} key
+   * @returns {() => void}
+   */
+  restoreBody(kind, id, key) {
+    return this.restoreValue((fresh) => fresh[kind].find((b) => b.id === id), key);
+  }
+
+  /**
+   * Write a value into the profile when it differs from the snapshot, and
+   * remember it there.
+   *
+   * @param {{values: LayeredValues}} entity
+   * @param {string} key Profile value key.
+   * @param {string} snapKey Where the snapshot keeps the value.
+   * @param {*} value
+   * @returns {boolean} True when the profile changed.
+   */
+  syncValue(entity, key, snapKey, value) {
+    if (sameValue(value, this.snapshot[snapKey])) return false;
+    this.snapshot[snapKey] = value;
+    return setProfileValue(entity, key, value);
+  }
+
+  /**
+   * Name the fields of a list in the page's own words: the label comes from
+   * the markup around the input, the display from the field or, for a select,
+   * from its options.
+   *
+   * @param {{key: string, input: string|(() => ?HTMLElement), display?: (value: *) => string}[]} fields
+   */
+  describeFieldList(fields) {
+    fields.forEach((f) => {
+      const el = typeof f.input === 'function' ? f.input() : $(f.input);
+      const display = f.display || (el instanceof HTMLSelectElement ? pfOptionText(el) : undefined);
+      this.pf.describeField(f.key, pfFieldLabel(el), display);
+    });
   }
 }
 

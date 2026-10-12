@@ -63,8 +63,6 @@ class QueueProfiles extends ProfileBinder {
     super(pf, app);
     /** @type {Record<number, ?string>} Per tab, the profile body it shows; null leaves the tab to the calculator. */
     this.bodyIds = { [PLANET_TAB]: null, [MOON_TAB]: null };
-    /** @type {Record<string, *>} Account values (by profile key) at the last apply or sync. */
-    this.snapshot = {};
     /** @type {Record<number, number>} Per tab, the body's fields at the last apply or sync. */
     this.bodySnapshot = {};
     /** @type {Record<string, *>} The profile-owned prm keys as the calculator has them. */
@@ -231,11 +229,7 @@ class QueueProfiles extends ProfileBinder {
     const prm = options.prm;
     let changed = false;
     QUEUE_ACCOUNT_FIELDS.forEach((f) => {
-      const value = f.get(prm);
-      if (!sameValue(value, this.snapshot[f.key])) {
-        changed = setProfileValue(profile.account, f.key, value) || changed;
-        this.snapshot[f.key] = value;
-      }
+      changed = this.syncValue(profile.account, f.key, f.key, f.get(prm)) || changed;
     });
     QUEUE_TABS.forEach((t) => {
       const body = this.body(t, profile);
@@ -307,7 +301,7 @@ class QueueProfiles extends ProfileBinder {
 
   /** Name every value this page binds, in the page's own words. */
   describeFields() {
-    QUEUE_ACCOUNT_FIELDS.forEach((f) => this.pf.describeField(f.key, pfFieldLabel($(f.input)), f.display));
+    this.describeFieldList(QUEUE_ACCOUNT_FIELDS);
     this.pf.describeField('fields.total', pfFieldLabel($('#total-fields-' + PLANET_TAB)));
   }
 
@@ -315,28 +309,14 @@ class QueueProfiles extends ProfileBinder {
   markAll() {
     const profile = this.profile();
     if (!profile) return;
-    /**
-     * Restore one game value on a fresh copy of the profile: the one marked
-     * may be stale by the time the button is clicked.
-     *
-     * @param {?{t: QueueTab, id: string}} where Null for the account.
-     * @param {string} key
-     */
-    const restoreTo = (where, key) => () => {
-      const fresh = this.pf.store.get(profile.id);
-      if (!fresh) return;
-      const target = where ? fresh[where.t.bodies].find((b) => b.id === where.id) : fresh.account;
-      if (target && resetProfileValue(target, key)) this.pf.store.save(fresh);
-    };
     QUEUE_ACCOUNT_FIELDS.forEach((f) => {
-      this.pf.markField($(f.input), profile, profile.account, f.key, restoreTo(null, f.key));
+      this.pf.markField($(f.input), profile, profile.account, f.key, this.restoreAccount(f.key));
     });
     this.speed?.mark();
     QUEUE_TABS.forEach((t) => {
       const body = this.body(t, profile);
       if (!body) return;
-      const where = { t, id: body.id };
-      this.pf.markField($('#total-fields-' + t.tab), profile, body, 'fields.total', restoreTo(where, 'fields.total'));
+      this.pf.markField($('#total-fields-' + t.tab), profile, body, 'fields.total', this.restoreBody(t.bodies, body.id, 'fields.total'));
     });
   }
 }

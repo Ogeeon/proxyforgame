@@ -448,7 +448,7 @@ class ProductionProfiles extends ProfileBinder {
    * named, not only the shown one: another planet may be of another species.
    */
   describeFields() {
-    PRODUCTION_ACCOUNT_FIELDS.forEach((f) => this.pf.describeField(f.key, pfFieldLabel($(f.input)), f.display));
+    this.describeFieldList(PRODUCTION_ACCOUNT_FIELDS);
     const describeSelect = (/** @type {string} */ key, /** @type {?HTMLSelectElement} */ select) => {
       this.pf.describeField(key, pfFieldLabel(select), pfOptionText(select));
     };
@@ -478,22 +478,8 @@ class ProductionProfiles extends ProfileBinder {
   markAll() {
     const profile = this.profile();
     if (!profile) return;
-    /**
-     * Restore one game value on a fresh copy of the profile: the one marked
-     * may be stale by the time the button is clicked.
-     *
-     * @param {{values: LayeredValues}} entity
-     * @param {string} key
-     */
-    const restoreTo = (entity, key) => () => {
-      const fresh = this.pf.store.get(profile.id);
-      if (!fresh) return;
-      const planetId = entity === profile.account ? null : /** @type {ProfilePlanet} */ (entity).id;
-      const target = planetId === null ? fresh.account : fresh.planets.find((p) => p.id === planetId);
-      if (target && resetProfileValue(target, key)) this.pf.store.save(fresh);
-    };
     PRODUCTION_ACCOUNT_FIELDS.forEach((f) => {
-      this.pf.markField($(f.input), profile, profile.account, f.key, restoreTo(profile.account, f.key));
+      this.pf.markField($(f.input), profile, profile.account, f.key, this.restoreAccount(f.key));
     });
     this.speed?.mark();
 
@@ -504,7 +490,7 @@ class ProductionProfiles extends ProfileBinder {
        * @param {?HTMLElement} el
        * @param {string} key
        */
-      const mark = (el, key) => this.pf.markField(el, profile, planet, key, restoreTo(planet, key));
+      const mark = (el, key) => this.pf.markField(el, profile, planet, key, this.restoreBody('planets', planet.id, key));
       mark($('#max-planet-temp'), 'temperature.max');
       mark(selectEl('#energy-boost'), 'energyBooster');
       mark(selectEl('#one-pln-race'), 'lf.race');
@@ -518,9 +504,9 @@ class ProductionProfiles extends ProfileBinder {
       const race = pfNum(getProfileValue(planet, 'lf.race', 0));
       inputsAll('#one-planet-prod .lf-row-' + race + ' input[type=text]').forEach((el) => {
         const key = 'lf.building.' + lfBuildingGameId(race, lfRowIndex(el) + 1);
-        this.pf.markField(el, profile, planet, key, restoreTo(planet, key));
+        this.pf.markField(el, profile, planet, key, this.restoreBody('planets', planet.id, key));
       });
-      PRODUCTION_STORAGE_FIELDS.forEach((f) => this.pf.markField($(f.input), profile, planet, f.key, restoreTo(planet, f.key)));
+      PRODUCTION_STORAGE_FIELDS.forEach((f) => this.pf.markField($(f.input), profile, planet, f.key, this.restoreBody('planets', planet.id, f.key)));
     }
 
     const tableRows = $$('#all-planets-prod tr');
@@ -529,11 +515,11 @@ class ProductionProfiles extends ProfileBinder {
       const row = tableRows[i * 2 + 1];
       if (!p || !row) return;
       const temperature = row.children[2] ? row.children[2].querySelector('input') : null;
-      this.pf.markField(temperature, profile, p, 'temperature.max', restoreTo(p, 'temperature.max'));
+      this.pf.markField(temperature, profile, p, 'temperature.max', this.restoreBody('planets', p.id, 'temperature.max'));
       PRODUCTION_ROW_TECHS.forEach((tech, j) => {
         const key = (tech === 212 || tech === 217 ? 'ship.' : 'building.') + tech;
         const cell = row.children[LEVEL_COLUMNS[j]];
-        this.pf.markField(cell ? cell.querySelector('input') : null, profile, p, key, restoreTo(p, key));
+        this.pf.markField(cell ? cell.querySelector('input') : null, profile, p, key, this.restoreBody('planets', p.id, key));
       });
     });
   }

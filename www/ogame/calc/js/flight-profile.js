@@ -121,8 +121,6 @@ class FlightProfiles extends ProfileBinder {
   constructor(pf, orchestrator) {
     super(pf, orchestrator);
     this.orch = orchestrator;
-    /** @type {Record<string, *>} Account values (by profile key) at the last apply or sync. */
-    this.snapshot = {};
     /** @type {Record<string, *>} The profile-owned prm keys as they were before a profile. */
     this.ownPrm = {};
     /** @type {?{country: string, universe: *}} The universe picked before a profile set its own. */
@@ -257,11 +255,7 @@ class FlightProfiles extends ProfileBinder {
     if (!profile) return;
     let changed = false;
     FLIGHT_ACCOUNT_FIELDS.forEach((f) => {
-      const value = f.get(options.prm);
-      if (!sameValue(value, this.snapshot[f.key])) {
-        changed = setProfileValue(profile.account, f.key, value) || changed;
-        this.snapshot[f.key] = value;
-      }
+      changed = this.syncValue(profile.account, f.key, f.key, f.get(options.prm)) || changed;
     });
     if (changed) {
       this.pf.save(profile);
@@ -515,11 +509,7 @@ class FlightProfiles extends ProfileBinder {
     const profile = this.profile();
     if (!profile) return;
     FLIGHT_ACCOUNT_FIELDS.forEach((f) => {
-      this.pf.markField(f.input(), profile, profile.account, f.key, () => {
-        // Restore on a fresh copy: the one marked may be stale by now.
-        const fresh = this.pf.store.get(profile.id);
-        if (fresh && resetProfileValue(fresh.account, f.key)) this.pf.store.save(fresh);
-      });
+      this.pf.markField(f.input(), profile, profile.account, f.key, this.restoreAccount(f.key));
     });
   }
 }
