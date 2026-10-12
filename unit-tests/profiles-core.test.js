@@ -17,7 +17,7 @@ const core = load(['ogame/calc/js/profiles-core.js'], [
     'parseAccountExport', 'findProfileForExport', 'importAccountExport', 'mergeProfiles',
     'serializeProfilesFile', 'parseProfilesFile', 'planProfilesRestore', 'universeCacheKey',
     'ratesToTrade', 'ratesFromTrade', 'profileFromProductionSet', 'profileFromFlightSet',
-    'lfBuildingGameId',
+    'lfBuildingGameId', 'pfNum', 'pfBool', 'pfBodyLabel',
 ]);
 
 const plain = (value) => JSON.parse(JSON.stringify(value));
@@ -578,5 +578,28 @@ describe('saved sets', () => {
 
     it('numbers life-form buildings the way the game does', () => {
         expect(core.lfBuildingGameId(4, 12)).toBe(14112);
+    });
+});
+
+describe('the helpers the calculators share', () => {
+    it('reads a stored number, and 0 for anything else', () => {
+        expect(core.pfNum('12')).toBe(12);
+        expect(core.pfNum(3.5)).toBe(3.5);
+        expect(core.pfNum(undefined)).toBe(0);
+        expect(core.pfNum('abc')).toBe(0);
+    });
+
+    it('reads a stored flag, which may be the string "true"', () => {
+        expect(core.pfBool(true)).toBe(true);
+        expect(core.pfBool('true')).toBe(true);
+        expect(core.pfBool('false')).toBe(false);
+        expect(core.pfBool(1)).toBe(false);
+    });
+
+    it('labels a body with its name and known coordinates', () => {
+        expect(core.pfBodyLabel({ name: 'Home', coords: { galaxy: 1, system: 2, position: 3 } })).toBe('Home [1:2:3]');
+        expect(core.pfBodyLabel({ name: 'Home', coords: { galaxy: null, system: null, position: 3 } })).toBe('Home');
+        expect(core.pfBodyLabel({ name: '', coords: null })).toBe('—');
+        expect(core.pfBodyLabel({ name: '', coords: null }, '')).toBe('');
     });
 });

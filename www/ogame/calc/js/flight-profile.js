@@ -28,8 +28,6 @@
  * @property {(value: *) => string} [display] The game value as shown in the mark.
  */
 
-const flightNum = (/** @type {*} */ v) => Number(v) || 0;
-
 /** Life-form bonus columns of #lf-ships-bonuses, in cell order. */
 const FLIGHT_LF_STATS = ['speed', 'cargo', 'fuel'];
 
@@ -45,34 +43,24 @@ function flightLfBonusInput(i, j) {
   return row ? row.querySelectorAll('input')[j] || null : null;
 }
 
-/**
- * The text of the radio label for an id, or a dash.
- *
- * @param {string} id
- */
-function flightRadioLabel(id) {
-  const label = document.querySelector('label[for="' + id + '"]');
-  return label ? (label.textContent || '').trim() : '—';
-}
-
 /** @type {FlightAccountField[]} */
 const FLIGHT_ACCOUNT_FIELDS = [
   ...[['research.115', '#cmb-drive'], ['research.117', '#imp-drive'], ['research.118', '#hyp-drive']].map(([key, input], i) => ({
     key,
     input: () => $(input),
-    get: (/** @type {Record<string, any>} */ prm) => flightNum(prm.driveLevels[i]),
-    set: (/** @type {Record<string, any>} */ prm, /** @type {*} */ v) => { prm.driveLevels[i] = flightNum(v); },
+    get: (/** @type {Record<string, any>} */ prm) => pfNum(prm.driveLevels[i]),
+    set: (/** @type {Record<string, any>} */ prm, /** @type {*} */ v) => { prm.driveLevels[i] = pfNum(v); },
   })),
   {
     key: 'research.114', input: () => $('#hypertech-lvl'),
-    get: (prm) => flightNum(prm.hyperTechLvl), set: (prm, v) => { prm.hyperTechLvl = flightNum(v); },
+    get: (prm) => pfNum(prm.hyperTechLvl), set: (prm, v) => { prm.hyperTechLvl = pfNum(v); },
   },
   {
     // Flight has no "no class": a profile without one shows as collector.
     key: 'class', input: () => $('#class-0'),
-    get: (prm) => flightNum(prm.playerClass) + 1,
-    set: (prm, v) => { prm.playerClass = Math.min(2, Math.max(0, flightNum(v) - 1)); },
-    display: (v) => flightRadioLabel('class-' + (flightNum(v) - 1)),
+    get: (prm) => pfNum(prm.playerClass) + 1,
+    set: (prm, v) => { prm.playerClass = Math.min(2, Math.max(0, pfNum(v) - 1)); },
+    display: (v) => pfLabelFor('class-' + (pfNum(v) - 1)),
   },
   {
     // The researcher alliance brings the fleet nothing and has no radio: it shows as none.
@@ -82,27 +70,27 @@ const FLIGHT_ACCOUNT_FIELDS = [
       return prm.warriorBonus === true ? PROFILE_ALLIANCE_CLASS.WARRIOR : PROFILE_ALLIANCE_CLASS.NONE;
     },
     set: (prm, v) => {
-      prm.traderBonus = flightNum(v) === PROFILE_ALLIANCE_CLASS.TRADER;
-      prm.warriorBonus = flightNum(v) === PROFILE_ALLIANCE_CLASS.WARRIOR;
+      prm.traderBonus = pfNum(v) === PROFILE_ALLIANCE_CLASS.TRADER;
+      prm.warriorBonus = pfNum(v) === PROFILE_ALLIANCE_CLASS.WARRIOR;
     },
     display: (v) => {
-      if (flightNum(v) === PROFILE_ALLIANCE_CLASS.TRADER) return flightRadioLabel('trader-bonus');
-      return flightRadioLabel(flightNum(v) === PROFILE_ALLIANCE_CLASS.WARRIOR ? 'warrior-bonus' : 'alliance-class-none');
+      if (pfNum(v) === PROFILE_ALLIANCE_CLASS.TRADER) return pfLabelFor('trader-bonus');
+      return pfLabelFor(pfNum(v) === PROFILE_ALLIANCE_CLASS.WARRIOR ? 'warrior-bonus' : 'alliance-class-none');
     },
   },
   {
     key: 'lf.classBooster.1', input: () => $('#lf-rocktal-collector-enh'),
-    get: (prm) => flightNum(prm.lfRocktalCE), set: (prm, v) => { prm.lfRocktalCE = flightNum(v); },
+    get: (prm) => pfNum(prm.lfRocktalCE), set: (prm, v) => { prm.lfRocktalCE = pfNum(v); },
   },
   {
     key: 'lf.classBooster.2', input: () => $('#lf-mechan-general-enh'),
-    get: (prm) => flightNum(prm.lfMechanGE), set: (prm, v) => { prm.lfMechanGE = flightNum(v); },
+    get: (prm) => pfNum(prm.lfMechanGE), set: (prm, v) => { prm.lfMechanGE = pfNum(v); },
   },
   ...FLIGHT_SHIP_IDS.flatMap((shipId, i) => FLIGHT_LF_STATS.map((stat, j) => ({
     key: 'lf.ship.' + shipId + '.' + stat,
     input: () => flightLfBonusInput(i, j),
-    get: (/** @type {Record<string, any>} */ prm) => flightNum(prm.lfShipsBonuses[i]?.[j]),
-    set: (/** @type {Record<string, any>} */ prm, /** @type {*} */ v) => { prm.lfShipsBonuses[i][j] = flightNum(v); },
+    get: (/** @type {Record<string, any>} */ prm) => pfNum(prm.lfShipsBonuses[i]?.[j]),
+    set: (/** @type {Record<string, any>} */ prm, /** @type {*} */ v) => { prm.lfShipsBonuses[i][j] = pfNum(v); },
   }))),
 ];
 
@@ -220,20 +208,12 @@ class FlightProfiles {
       setVal('#country', wanted.country);
       this.orch.setUniList(wanted.country, wanted.number);
     }
-    [country, universe].forEach((el) => {
-      if (!el) return;
-      el.disabled = true;
-      el.title = getOptionValue('universeFromProfile', '');
-    });
+    [country, universe].forEach((el) => pfLockSelect(el, true, getOptionValue('universeFromProfile', '')));
   }
 
   /** Give the universe picker back, on the universe it showed before the profile. */
   unlockUniverse() {
-    [selectEl('#country'), selectEl('#universe')].forEach((el) => {
-      if (!el) return;
-      el.disabled = false;
-      el.removeAttribute('title');
-    });
+    [selectEl('#country'), selectEl('#universe')].forEach((el) => pfLockSelect(el, false));
     const own = this.ownUniverse;
     this.ownUniverse = null;
     if (!own) return;
@@ -425,7 +405,7 @@ class FlightProfiles {
   takeFleet() {
     const body = this.departureBodyWithFleet();
     if (!body) return;
-    FLIGHT_TECH_MAPPING.forEach(([shipId, name]) => setVal('#' + name, flightNum(getProfileValue(body, 'ship.' + shipId, 0))));
+    FLIGHT_TECH_MAPPING.forEach(([shipId, name]) => setVal('#' + name, pfNum(getProfileValue(body, 'ship.' + shipId, 0))));
     this.orch.recalc();
   }
 

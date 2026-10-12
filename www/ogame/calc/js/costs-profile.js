@@ -37,8 +37,6 @@
  * @property {(value: *) => string} [display] The game value as shown in the mark.
  */
 
-const costsNum = (/** @type {*} */ v) => Number(v) || 0;
-
 /**
  * A whole-number field.
  *
@@ -50,8 +48,8 @@ const costsNum = (/** @type {*} */ v) => Number(v) || 0;
 function costsLevelField(key, state, selector) {
   return {
     key, state, input: () => $(selector),
-    get: (p) => costsNum(/** @type {Record<string, any>} */ (p)[state]),
-    show: (v) => setVal(selector, costsNum(v)),
+    get: (p) => pfNum(/** @type {Record<string, any>} */ (p)[state]),
+    show: (v) => setVal(selector, pfNum(v)),
   };
 }
 
@@ -66,19 +64,9 @@ function costsLevelField(key, state, selector) {
 function costsPercentField(key, state, selector) {
   return {
     key, state, input: () => $(selector),
-    get: (p) => costsNum(/** @type {Record<string, any>} */ (p)[state]),
-    show: (v) => setNumVal(selector, costsNum(v)),
+    get: (p) => pfNum(/** @type {Record<string, any>} */ (p)[state]),
+    show: (v) => setNumVal(selector, pfNum(v)),
   };
-}
-
-/**
- * The text of the label for an id, or a dash.
- *
- * @param {string} id
- */
-function costsLabelText(id) {
-  const label = document.querySelector('label[for="' + id + '"]');
-  return label ? (label.textContent || '').trim() : '—';
 }
 
 /** @type {CostsField[]} */
@@ -96,15 +84,15 @@ const COSTS_ACCOUNT_FIELDS = [
   {
     // The calculator has no "no class": a profile without one shows as collector.
     key: 'class', state: 'playerClass', input: () => $('#class-0'),
-    get: (p) => costsNum(p.playerClass) + 1,
-    show: (v) => setChecked('#class-' + Math.min(2, Math.max(0, costsNum(v) - 1)), true),
-    display: (v) => costsLabelText('class-' + (costsNum(v) - 1)),
+    get: (p) => pfNum(p.playerClass) + 1,
+    show: (v) => setChecked('#class-' + Math.min(2, Math.max(0, pfNum(v) - 1)), true),
+    display: (v) => pfLabelFor('class-' + (pfNum(v) - 1)),
   },
   {
     key: 'allianceClass', state: 'isTrader', input: () => $('#is-trader'),
     get: (p) => (p.isTrader ? PROFILE_ALLIANCE_CLASS.TRADER : PROFILE_ALLIANCE_CLASS.NONE),
-    show: (v) => setChecked('#is-trader', costsNum(v) === PROFILE_ALLIANCE_CLASS.TRADER),
-    display: (v) => (costsNum(v) === PROFILE_ALLIANCE_CLASS.TRADER ? '✓' : '—'),
+    show: (v) => setChecked('#is-trader', pfNum(v) === PROFILE_ALLIANCE_CLASS.TRADER),
+    display: (v) => (pfNum(v) === PROFILE_ALLIANCE_CLASS.TRADER ? '✓' : '—'),
   },
   costsPercentField('lf.classBooster.1', 'collectorClassBonus', '#lf-collector-class-bonus'),
   costsPercentField('lf.classBooster.3', 'discovererClassBonus', '#discoverer-class-bonus'),
@@ -163,25 +151,14 @@ function costsResearchTableFields() {
       const input = () => /** @type {?HTMLInputElement} */ (row.querySelector(selector));
       return {
         key: 'lf.cost.' + techId + '.' + kind, state: null, input,
-        get: (/** @type {GlobalParams} */ p) => costsNum(p[map][techId]),
+        get: (/** @type {GlobalParams} */ p) => pfNum(p[map][techId]),
         show: (/** @type {*} */ v) => {
           const el = input();
-          if (el) el.value = localizeFloat(costsNum(v));
+          if (el) el.value = localizeFloat(pfNum(v));
         },
       };
     });
   });
-}
-
-/**
- * A body's label in a select: its name and, when known, its coordinates.
- *
- * @param {ProfilePlanet} body
- */
-function costsBodyLabel(body) {
-  const c = body.coords;
-  const where = c && c.galaxy !== null && c.system !== null ? ' [' + c.galaxy + ':' + c.system + ':' + c.position + ']' : '';
-  return (body.name || '—') + where;
 }
 
 class CostsProfiles {
@@ -308,7 +285,7 @@ class CostsProfiles {
       const select = selectEl(selector);
       if (select) {
         select.innerHTML = '';
-        list.forEach((b) => select.appendChild(new Option(costsBodyLabel(b), b.id)));
+        list.forEach((b) => select.appendChild(new Option(pfBodyLabel(b), b.id)));
       }
       const last = this.pf.store.getLastPlanet(lastKey, profile.id);
       const chosen = list.find((b) => b.id === current) || list.find((b) => b.id === last) || fallback || list[0];
@@ -334,7 +311,7 @@ class CostsProfiles {
     const { planet, moon } = this.bodies(profile);
     COSTS_PLANET_FIELDS.forEach((f) => f.show(planet ? getProfileValue(planet, f.key, 0) : this.ownState[/** @type {string} */ (f.state)]));
     const position = planet?.coords?.position;
-    setVal('#planet-pos', planet ? position ?? 8 : costsNum(this.ownState.planetPos) || 8);
+    setVal('#planet-pos', planet ? position ?? 8 : pfNum(this.ownState.planetPos) || 8);
     COSTS_MOON_FIELDS.forEach((f) => f.show(moon ? getProfileValue(moon, f.key, 0) : this.ownState[/** @type {string} */ (f.state)]));
   }
 
@@ -357,20 +334,12 @@ class CostsProfiles {
       this.app._fillUniverseList(wanted.country, wanted.number);
       void this.app._fetchUniverseSpeeds();
     }
-    [selectEl('#country'), selectEl('#universe')].forEach((el) => {
-      if (!el) return;
-      el.disabled = true;
-      el.title = getOptionValue('universeFromProfile', '');
-    });
+    [selectEl('#country'), selectEl('#universe')].forEach((el) => pfLockSelect(el, true, getOptionValue('universeFromProfile', '')));
   }
 
   /** Give the universe picker back, on the universe and speeds it had before the profile. */
   unlockUniverse() {
-    [selectEl('#country'), selectEl('#universe')].forEach((el) => {
-      if (!el) return;
-      el.disabled = false;
-      el.removeAttribute('title');
-    });
+    [selectEl('#country'), selectEl('#universe')].forEach((el) => pfLockSelect(el, false));
     if (!this.universeBound) return;
     this.universeBound = false;
     const own = this.ownState;
@@ -394,7 +363,7 @@ class CostsProfiles {
       this.unlockUniverse();
       const own = this.ownState;
       this.lockPlanetCount(false);
-      this.fillLabTable(Array.isArray(own.labLevels) ? own.labLevels : [], costsNum(own.labChoice ?? -1), null);
+      this.fillLabTable(Array.isArray(own.labLevels) ? own.labLevels : [], pfNum(own.labChoice ?? -1), null);
       this.app._applyStateToUI(cloneData(own));
       this.app._restoreLfResearchTable(this.ownTable);
     } finally {
@@ -408,9 +377,9 @@ class CostsProfiles {
     this.snapshot = {};
     this.accountFields.forEach((f) => { this.snapshot[f.key] = f.get(p); });
     COSTS_PLANET_FIELDS.forEach((f) => { this.snapshot['planet:' + f.key] = f.get(p); });
-    this.snapshot['planet:position'] = costsNum(p.planetPos);
+    this.snapshot['planet:position'] = pfNum(p.planetPos);
     COSTS_MOON_FIELDS.forEach((f) => { this.snapshot['moon:' + f.key] = f.get(p); });
-    this.snapshot.labs = p.labLevels.map(costsNum);
+    this.snapshot.labs = p.labLevels.map(pfNum);
     this.snapshot.labChoice = p.labChoice;
     this.snapshot.useIrn = p.useIrn;
   }
@@ -450,7 +419,7 @@ class CostsProfiles {
     this.accountFields.forEach((f) => syncField(profile.account, f, f.key));
     if (planet) {
       COSTS_PLANET_FIELDS.forEach((f) => syncField(planet, f, 'planet:' + f.key));
-      const position = costsNum(p.planetPos);
+      const position = pfNum(p.planetPos);
       if (position !== this.snapshot['planet:position']) {
         this.snapshot['planet:position'] = position;
         planet.coords = { galaxy: planet.coords?.galaxy ?? null, system: planet.coords?.system ?? null, position };
@@ -504,12 +473,12 @@ class CostsProfiles {
     if (planets.length > 0 && !this.dialogOpen()) {
       const before = Array.isArray(this.snapshot.labs) ? this.snapshot.labs : [];
       planets.forEach((planet, i) => {
-        const level = costsNum(p.labLevels[i]);
+        const level = pfNum(p.labLevels[i]);
         if (level === before[i]) return;
         changed = setProfileValue(planet, 'building.31', level) || changed;
         if (planet.id === this.planetId) shownLab = level;
       });
-      this.snapshot.labs = p.labLevels.map(costsNum);
+      this.snapshot.labs = p.labLevels.map(pfNum);
     }
     // The start planet and the switch are choices, not account data: they go
     // with the other per-calculator choices of the store.
@@ -588,7 +557,7 @@ class CostsProfiles {
   irnSwitch(profile) {
     const chosen = this.pf.store.getLastPlanet('costs-irn', profile.id);
     if (chosen !== null) return chosen === '1';
-    return costsNum(getProfileValue(profile.account, 'research.123', 0)) > 0;
+    return pfNum(getProfileValue(profile.account, 'research.123', 0)) > 0;
   }
 
   /**
@@ -604,7 +573,7 @@ class CostsProfiles {
     const planets = profile.planets.slice(0, COSTS_MAX_LAB_PLANETS);
     this.lockPlanetCount(planets.length > 0);
     if (planets.length === 0) return;
-    const levels = planets.map((p) => costsNum(getProfileValue(p, 'building.31', 0)));
+    const levels = planets.map((p) => pfNum(getProfileValue(p, 'building.31', 0)));
     const last = this.pf.store.getLastPlanet('costs-irn-start', profile.id);
     let start = planets.findIndex((p) => p.id === last);
     if (start < 0 || levels[start] === 0) {
@@ -614,7 +583,7 @@ class CostsProfiles {
         return better ? i : best;
       }, 0);
     }
-    this.fillLabTable(levels, levels[start] > 0 ? start : -1, planets.map(costsBodyLabel));
+    this.fillLabTable(levels, levels[start] > 0 ? start : -1, planets.map((p) => pfBodyLabel(p)));
   }
 
   /**
@@ -638,7 +607,7 @@ class CostsProfiles {
    * @param {?string[]} names Row labels; null keeps the numbered ones.
    */
   fillLabTable(levels, choice, names) {
-    const labLevels = levels.length > 0 ? levels.slice(0, COSTS_MAX_LAB_PLANETS).map(costsNum) : [0];
+    const labLevels = levels.length > 0 ? levels.slice(0, COSTS_MAX_LAB_PLANETS).map(pfNum) : [0];
     options.prm.planetsSpin = labLevels.length;
     options.prm.labLevels = [...labLevels];
     options.prm.labChoice = choice;

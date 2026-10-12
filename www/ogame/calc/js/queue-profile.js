@@ -38,38 +38,26 @@
  * @property {string} lastKey Calculator name under which the last choice is remembered.
  */
 
-const queueNum = (/** @type {*} */ v) => Number(v) || 0;
-
-/**
- * The text of the label for an id, or a dash.
- *
- * @param {string} id
- */
-function queueLabelText(id) {
-  const label = document.querySelector('label[for="' + id + '"]');
-  return label ? (label.textContent || '').trim() : '—';
-}
-
 /** @type {QueueAccountField[]} */
 const QUEUE_ACCOUNT_FIELDS = [
   ...[['research.121', 'ionTechLevel', '#ion-tech-level'], ['research.114', 'hyperTechLevel', '#hyper-tech-level']]
     .map(([key, prm, input]) => ({
       key, prm, input,
-      get: (/** @type {Record<string, any>} */ p) => queueNum(p[prm]),
-      show: (/** @type {*} */ v) => setVal(input, queueNum(v)),
+      get: (/** @type {Record<string, any>} */ p) => pfNum(p[prm]),
+      show: (/** @type {*} */ v) => setVal(input, pfNum(v)),
     })),
   {
     // The queue has no "no class": a profile without one shows as collector.
     key: 'class', prm: 'playerClass', input: '#player-class-0',
-    get: (p) => queueNum(p.playerClass) + 1,
-    show: (v) => setChecked('#player-class-' + Math.min(2, Math.max(0, queueNum(v) - 1)), true),
-    display: (v) => queueLabelText('player-class-' + (queueNum(v) - 1)),
+    get: (p) => pfNum(p.playerClass) + 1,
+    show: (v) => setChecked('#player-class-' + Math.min(2, Math.max(0, pfNum(v) - 1)), true),
+    display: (v) => pfLabelFor('player-class-' + (pfNum(v) - 1)),
   },
   ...[['lf.ship.202.cargo', 'scCapacityIncrease', '#sc-capacity-increase'], ['lf.ship.203.cargo', 'lcCapacityIncrease', '#lc-capacity-increase']]
     .map(([key, prm, input]) => ({
       key, prm, input,
-      get: (/** @type {Record<string, any>} */ p) => queueNum(p[prm]),
-      show: (/** @type {*} */ v) => setNumVal(input, queueNum(v)),
+      get: (/** @type {Record<string, any>} */ p) => pfNum(p[prm]),
+      show: (/** @type {*} */ v) => setNumVal(input, pfNum(v)),
     })),
 ];
 
@@ -78,17 +66,6 @@ const QUEUE_TABS = [
   { tab: PLANET_TAB, bodies: 'planets', levels: 'slp', fields: 'totFldPln', defaultFields: () => options.defPlfFlds, lastKey: 'queue' },
   { tab: MOON_TAB, bodies: 'moons', levels: 'slm', fields: 'totFldMn', defaultFields: () => options.defMnFlds, lastKey: 'queue-moon' },
 ];
-
-/**
- * A body's label in the select: its name and, when known, its coordinates.
- *
- * @param {ProfilePlanet} body
- */
-function queueBodyLabel(body) {
-  const c = body.coords;
-  const where = c && c.galaxy !== null && c.system !== null ? ' [' + c.galaxy + ':' + c.system + ':' + c.position + ']' : '';
-  return (body.name || '—') + where;
-}
 
 class QueueProfiles {
   /**
@@ -191,7 +168,7 @@ class QueueProfiles {
     const select = selectEl('#pf-body-' + t.tab);
     if (select) {
       select.innerHTML = '';
-      bodies.forEach((b) => select.appendChild(new Option(queueBodyLabel(b), b.id)));
+      bodies.forEach((b) => select.appendChild(new Option(pfBodyLabel(b), b.id)));
     }
     pfShow('#pf-body-box-' + t.tab, bodies.length > 0);
     const last = this.pf.store.getLastPlanet(t.lastKey, profile.id);
@@ -216,15 +193,15 @@ class QueueProfiles {
     const body = this.body(t, profile);
     const levels = QueueDataCollector.readStartLevels(t.tab).list;
     if (body) {
-      levels.forEach(([techId]) => setVal('#startlvl-' + t.tab + '-' + techId, queueNum(getProfileValue(body, 'building.' + techId, 0))));
-      setVal('#total-fields-' + t.tab, queueNum(getProfileValue(body, 'fields.total', t.defaultFields())) || t.defaultFields());
+      levels.forEach(([techId]) => setVal('#startlvl-' + t.tab + '-' + techId, pfNum(getProfileValue(body, 'building.' + techId, 0))));
+      setVal('#total-fields-' + t.tab, pfNum(getProfileValue(body, 'fields.total', t.defaultFields())) || t.defaultFields());
       return;
     }
     /** @type {Record<string, number>} */
     const own = {};
     (Array.isArray(this.ownPrm[t.levels]) ? this.ownPrm[t.levels] : []).forEach((/** @type {number[]} */ [techId, level]) => { own[techId] = level; });
-    levels.forEach(([techId]) => setVal('#startlvl-' + t.tab + '-' + techId, queueNum(own[techId])));
-    setVal('#total-fields-' + t.tab, queueNum(this.ownPrm[t.fields]) || t.defaultFields());
+    levels.forEach(([techId]) => setVal('#startlvl-' + t.tab + '-' + techId, pfNum(own[techId])));
+    setVal('#total-fields-' + t.tab, pfNum(this.ownPrm[t.fields]) || t.defaultFields());
   }
 
   /** Back to the calculator's own settings. */
@@ -264,7 +241,7 @@ class QueueProfiles {
     /** @type {Record<string, number>} */
     const levels = {};
     (Array.isArray(prm[t.levels]) ? prm[t.levels] : []).forEach((/** @type {number[]} */ [techId, level]) => { levels[techId] = level; });
-    this.bodySnapshot[t.tab] = { levels, fields: queueNum(prm[t.fields]) };
+    this.bodySnapshot[t.tab] = { levels, fields: pfNum(prm[t.fields]) };
   }
 
   // -------------------------------------------------------------------------
@@ -301,7 +278,7 @@ class QueueProfiles {
       (Array.isArray(prm[t.levels]) ? prm[t.levels] : []).forEach((/** @type {number[]} */ [techId, level]) => {
         if (level !== before.levels[techId]) changed = setProfileValue(body, 'building.' + techId, level) || changed;
       });
-      if (queueNum(prm[t.fields]) !== before.fields) changed = setProfileValue(body, 'fields.total', queueNum(prm[t.fields])) || changed;
+      if (pfNum(prm[t.fields]) !== before.fields) changed = setProfileValue(body, 'fields.total', pfNum(prm[t.fields])) || changed;
       this.takeBodySnapshot(t);
     });
     if (changed) {

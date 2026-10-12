@@ -32,38 +32,35 @@ const PRODUCTION_PROFILE_OPTIONS_KEY = 'options_production_profile';
  * @property {(v: *) => string} [display] The game value as shown in the mark.
  */
 
-const num0 = (/** @type {*} */ v) => Number(v) || 0;
-const asBool = (/** @type {*} */ v) => v === true || v === 'true';
-
 /** @type {ProductionAccountField[]} */
 const PRODUCTION_ACCOUNT_FIELDS = [
-  { prm: 'energyTechLevel', key: 'research.113', input: '#energy-tech-level', toPrm: num0, fromPrm: num0 },
-  { prm: 'plasmaTechLevel', key: 'research.122', input: '#plasma-tech-level', toPrm: num0, fromPrm: num0 },
+  { prm: 'energyTechLevel', key: 'research.113', input: '#energy-tech-level', toPrm: pfNum, fromPrm: pfNum },
+  { prm: 'plasmaTechLevel', key: 'research.122', input: '#plasma-tech-level', toPrm: pfNum, fromPrm: pfNum },
   ...['engineer', 'geologist', 'technocrat', 'admiral', 'commander'].map((name) => ({
-    prm: name, key: 'officer.' + name, input: '#' + name, toPrm: asBool, fromPrm: asBool,
+    prm: name, key: 'officer.' + name, input: '#' + name, toPrm: pfBool, fromPrm: pfBool,
   })),
   {
     // Production has no "no class": a profile without one shows as collector.
     prm: 'playerClass', key: 'class', input: '#class-0',
-    toPrm: (v) => Math.min(2, Math.max(0, num0(v) - 1)), fromPrm: (v) => num0(v) + 1,
+    toPrm: (v) => Math.min(2, Math.max(0, pfNum(v) - 1)), fromPrm: (v) => pfNum(v) + 1,
     display: (v) => {
-      const label = document.querySelector('label[for="class-' + (num0(v) - 1) + '"]');
+      const label = document.querySelector('label[for="class-' + (pfNum(v) - 1) + '"]');
       return label ? (label.textContent || '').trim() : '—';
     },
   },
   {
     prm: 'isTrader', key: 'allianceClass', input: '#is-trader',
-    toPrm: (v) => num0(v) === PROFILE_ALLIANCE_CLASS.TRADER,
-    fromPrm: (v) => (asBool(v) ? PROFILE_ALLIANCE_CLASS.TRADER : PROFILE_ALLIANCE_CLASS.NONE),
-    display: (v) => (num0(v) === PROFILE_ALLIANCE_CLASS.TRADER ? '✓' : '—'),
+    toPrm: (v) => pfNum(v) === PROFILE_ALLIANCE_CLASS.TRADER,
+    fromPrm: (v) => (pfBool(v) ? PROFILE_ALLIANCE_CLASS.TRADER : PROFILE_ALLIANCE_CLASS.NONE),
+    display: (v) => (pfNum(v) === PROFILE_ALLIANCE_CLASS.TRADER ? '✓' : '—'),
   },
-  { prm: 'lfMetProdBonus', key: 'lf.prod.metal', input: '#lf-metal-prod-bonus', toPrm: num0, fromPrm: num0 },
-  { prm: 'lfCrysProdBonus', key: 'lf.prod.crystal', input: '#lf-crystal-prod-bonus', toPrm: num0, fromPrm: num0 },
-  { prm: 'lfDeutProdBonus', key: 'lf.prod.deuterium', input: '#lf-deut-prod-bonus', toPrm: num0, fromPrm: num0 },
-  { prm: 'lfEnergyProdBonus', key: 'lf.prod.energy', input: '#lf-energy-prod-bonus', toPrm: num0, fromPrm: num0 },
-  { prm: 'lfCollectorBonus', key: 'lf.classBooster.1', input: '#lf-collector-bonus', toPrm: num0, fromPrm: num0 },
-  { prm: 'lfCrawlerBonus', key: 'lf.crawler', input: '#lf-crawler-bonus', toPrm: num0, fromPrm: num0 },
-  { prm: 'lfPlasmaCostReduction', key: 'lf.cost.122.cost', input: '#lf-plasma-cost-reduction', toPrm: num0, fromPrm: num0 },
+  { prm: 'lfMetProdBonus', key: 'lf.prod.metal', input: '#lf-metal-prod-bonus', toPrm: pfNum, fromPrm: pfNum },
+  { prm: 'lfCrysProdBonus', key: 'lf.prod.crystal', input: '#lf-crystal-prod-bonus', toPrm: pfNum, fromPrm: pfNum },
+  { prm: 'lfDeutProdBonus', key: 'lf.prod.deuterium', input: '#lf-deut-prod-bonus', toPrm: pfNum, fromPrm: pfNum },
+  { prm: 'lfEnergyProdBonus', key: 'lf.prod.energy', input: '#lf-energy-prod-bonus', toPrm: pfNum, fromPrm: pfNum },
+  { prm: 'lfCollectorBonus', key: 'lf.classBooster.1', input: '#lf-collector-bonus', toPrm: pfNum, fromPrm: pfNum },
+  { prm: 'lfCrawlerBonus', key: 'lf.crawler', input: '#lf-crawler-bonus', toPrm: pfNum, fromPrm: pfNum },
+  { prm: 'lfPlasmaCostReduction', key: 'lf.cost.122.cost', input: '#lf-plasma-cost-reduction', toPrm: pfNum, fromPrm: pfNum },
   {
     prm: 'rates', key: 'rates', input: '#exchange-rates-m',
     toPrm: (v) => (Array.isArray(v) && v.length === 3 ? v.map(Number) : DEFAULT_RATES.slice()),
@@ -90,7 +87,7 @@ function planetToProductionState(planet) {
    * @param {string} key
    * @param {number} def
    */
-  const get = (key, def) => num0(getProfileValue(planet, key, def));
+  const get = (key, def) => pfNum(getProfileValue(planet, key, def));
   const s = createEmptyPlanet();
   s[0] = get('temperature.max', 0);
   s[1] = planet.coords && planet.coords.position !== null ? planet.coords.position : 8;
@@ -260,7 +257,7 @@ class ProductionProfiles {
     writeOnePlanetState(states[index]);
     const planet = profile.planets.find((p) => p.id === this.onePlanetId);
     PRODUCTION_STORAGE_FIELDS.forEach((f) => {
-      const level = planet ? num0(getProfileValue(planet, f.key, 0)) : 0;
+      const level = planet ? pfNum(getProfileValue(planet, f.key, 0)) : 0;
       setVal(f.input, level);
       options.prm[f.prm] = level;
       this.storageSnapshot[f.prm] = level;
@@ -357,7 +354,7 @@ class ProductionProfiles {
     const selected = profile.planets.find((p) => p.id === this.onePlanetId);
     if (selected) {
       PRODUCTION_STORAGE_FIELDS.forEach((f) => {
-        const level = num0(prm[f.prm]);
+        const level = pfNum(prm[f.prm]);
         if (level !== this.storageSnapshot[f.prm]) {
           changed = setProfileValue(selected, f.key, level) || changed;
           this.storageSnapshot[f.prm] = level;
@@ -533,7 +530,7 @@ class ProductionProfiles {
         mark(cellSelect(row, 7), 'production.' + tech);
         if (i < 3) mark(selectEl('#boosted-prod' + (i + 1)), 'booster.' + tech);
       });
-      const race = num0(getProfileValue(planet, 'lf.race', 0));
+      const race = pfNum(getProfileValue(planet, 'lf.race', 0));
       inputsAll('#one-planet-prod .lf-row-' + race + ' input[type=text]').forEach((el) => {
         const key = 'lf.building.' + lfBuildingGameId(race, lfRowIndex(el) + 1);
         this.pf.markField(el, profile, planet, key, restoreTo(planet, key));

@@ -32,8 +32,6 @@
  * @property {(value: *) => string} [display] The game value as shown in the mark.
  */
 
-const lfCostsNum = (/** @type {*} */ v) => Number(v) || 0;
-
 /**
  * A whole-number field.
  *
@@ -45,8 +43,8 @@ const lfCostsNum = (/** @type {*} */ v) => Number(v) || 0;
 function lfCostsLevelField(key, prm, input) {
   return {
     key, prm, input,
-    get: (p) => lfCostsNum(p[prm]),
-    show: (v) => setVal(input, lfCostsNum(v)),
+    get: (p) => pfNum(p[prm]),
+    show: (v) => setVal(input, pfNum(v)),
   };
 }
 
@@ -61,19 +59,9 @@ function lfCostsLevelField(key, prm, input) {
 function lfCostsPercentField(key, prm, input) {
   return {
     key, prm, input,
-    get: (p) => lfCostsNum(p[prm]),
-    show: (v) => setNumVal(input, lfCostsNum(v)),
+    get: (p) => pfNum(p[prm]),
+    show: (v) => setNumVal(input, pfNum(v)),
   };
-}
-
-/**
- * The text of the label for an id, or a dash.
- *
- * @param {string} id
- */
-function lfCostsLabelText(id) {
-  const label = document.querySelector('label[for="' + id + '"]');
-  return label ? (label.textContent || '').trim() : '—';
 }
 
 /** @type {LfCostsField[]} */
@@ -83,9 +71,9 @@ const LFCOSTS_ACCOUNT_FIELDS = [
   {
     // The calculator has no "no class": a profile without one shows as collector.
     key: 'class', prm: 'playerClass', input: '#class-0',
-    get: (p) => lfCostsNum(p.playerClass) + 1,
-    show: (v) => setChecked('#class-' + Math.min(2, Math.max(0, lfCostsNum(v) - 1)), true),
-    display: (v) => lfCostsLabelText('class-' + (lfCostsNum(v) - 1)),
+    get: (p) => pfNum(p.playerClass) + 1,
+    show: (v) => setChecked('#class-' + Math.min(2, Math.max(0, pfNum(v) - 1)), true),
+    display: (v) => pfLabelFor('class-' + (pfNum(v) - 1)),
   },
   lfCostsPercentField('lf.ship.202.cargo', 'capIncrSC', '#sc-capacity-increase'),
   lfCostsPercentField('lf.ship.203.cargo', 'capIncrLC', '#lc-capacity-increase'),
@@ -123,24 +111,13 @@ const LFCOSTS_PLANET_FIELDS = [
 const LFCOSTS_RACE_KEY = 'lf.race';
 
 /**
- * A planet's label in the select: its name and, when known, its coordinates.
- *
- * @param {ProfilePlanet} body
- */
-function lfCostsPlanetLabel(body) {
-  const c = body.coords;
-  const where = c && c.galaxy !== null && c.system !== null ? ' [' + c.galaxy + ':' + c.system + ':' + c.position + ']' : '';
-  return (body.name || '—') + where;
-}
-
-/**
  * The race of a profile planet, or null when it has no life form.
  *
  * @param {ProfilePlanet} planet
  * @returns {?number}
  */
 function lfCostsPlanetRace(planet) {
-  const race = lfCostsNum(getProfileValue(planet, LFCOSTS_RACE_KEY, 0));
+  const race = pfNum(getProfileValue(planet, LFCOSTS_RACE_KEY, 0));
   return race >= 1 && race <= 4 ? race : null;
 }
 
@@ -241,7 +218,7 @@ class LfCostsProfiles {
     const select = selectEl('#pf-planet');
     if (select) {
       select.innerHTML = '';
-      planets.forEach((p) => select.appendChild(new Option(lfCostsPlanetLabel(p), p.id)));
+      planets.forEach((p) => select.appendChild(new Option(pfBodyLabel(p), p.id)));
     }
     pfShow('#pf-planet-box', planets.length > 0);
     const last = this.pf.store.getLastPlanet('lfcosts', profile.id);
@@ -260,7 +237,7 @@ class LfCostsProfiles {
     const planet = this.planet(profile);
     LFCOSTS_PLANET_FIELDS.forEach((f) => f.show(planet ? getProfileValue(planet, f.key, 0) : this.ownPrm[f.prm]));
     const race = planet ? lfCostsPlanetRace(planet) : null;
-    setVal('#race-selector', race ?? (lfCostsNum(this.ownPrm.race) || 1));
+    setVal('#race-selector', race ?? (pfNum(this.ownPrm.race) || 1));
   }
 
   /** Recalculate every table after the form was filled from outside. */
@@ -290,7 +267,7 @@ class LfCostsProfiles {
       setNumVal('#lc-capacity-increase', prm.capIncrLC);
       LFCOSTS_ACCOUNT_FIELDS.find((f) => f.key === 'rates')?.show(prm.rates);
       LFCOSTS_PLANET_FIELDS.forEach((f) => f.show(prm[f.prm]));
-      setVal('#race-selector', lfCostsNum(prm.race) || 1);
+      setVal('#race-selector', pfNum(prm.race) || 1);
     } finally {
       this.applying = false;
     }
@@ -303,7 +280,7 @@ class LfCostsProfiles {
     this.snapshot = {};
     LFCOSTS_ACCOUNT_FIELDS.forEach((f) => { this.snapshot[f.key] = f.get(prm); });
     LFCOSTS_PLANET_FIELDS.forEach((f) => { this.snapshot['planet:' + f.key] = f.get(prm); });
-    this.snapshot['planet:' + LFCOSTS_RACE_KEY] = lfCostsNum(prm.race);
+    this.snapshot['planet:' + LFCOSTS_RACE_KEY] = pfNum(prm.race);
   }
 
   // -------------------------------------------------------------------------
@@ -342,7 +319,7 @@ class LfCostsProfiles {
     LFCOSTS_ACCOUNT_FIELDS.forEach((f) => syncValue(profile.account, f.key, f.key, f.get(prm)));
     if (planet) {
       LFCOSTS_PLANET_FIELDS.forEach((f) => syncValue(planet, f.key, 'planet:' + f.key, f.get(prm)));
-      syncValue(planet, LFCOSTS_RACE_KEY, 'planet:' + LFCOSTS_RACE_KEY, lfCostsNum(prm.race));
+      syncValue(planet, LFCOSTS_RACE_KEY, 'planet:' + LFCOSTS_RACE_KEY, pfNum(prm.race));
     }
     if (changed) {
       this.pf.save(profile);

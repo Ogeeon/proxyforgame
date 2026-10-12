@@ -69,6 +69,34 @@ function pfDropTooltips(root) {
 }
 
 /**
+ * The text of the label for an id, or a dash.
+ *
+ * @param {string} id
+ * @returns {string}
+ */
+function pfLabelFor(id) {
+  const label = document.querySelector('label[for="' + id + '"]');
+  return label ? (label.textContent || '').trim() : '—';
+}
+
+/**
+ * Lock a select the profile decides (its universe), or give it back.
+ *
+ * The reason is a native title, not a Bootstrap tooltip, on purpose: a
+ * disabled <select> gets no mouse events, so a tooltip would never show on it.
+ *
+ * @param {?HTMLSelectElement} el
+ * @param {boolean} locked
+ * @param {string} [title] Why it is locked.
+ */
+function pfLockSelect(el, locked, title = '') {
+  if (!el) return;
+  el.disabled = locked;
+  if (locked) el.title = title;
+  else el.removeAttribute('title');
+}
+
+/**
  * A profile value as text, for a key no calculator described: a flag as a
  * tick or a dash, a list (exchange rates) joined with colons.
  *
@@ -462,9 +490,7 @@ class ProfilesUi {
       ? profile.planets.find((p) => p.id === item.entityId)
       : profile.moons.find((m) => m.id === item.entityId);
     if (!body) return '';
-    const c = body.coords;
-    const where = c && c.galaxy !== null && c.system !== null ? ' [' + c.galaxy + ':' + c.system + ':' + c.position + ']' : '';
-    return (body.name || '') + where;
+    return pfBodyLabel(body, '');
   }
 
   /** @returns {HTMLInputElement[]} */

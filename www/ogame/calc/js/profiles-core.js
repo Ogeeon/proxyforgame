@@ -218,6 +218,40 @@ function sameUniverse(a, b) {
 }
 
 /**
+ * A stored or typed value as a number; anything that is not one is 0.
+ *
+ * @param {*} v
+ * @returns {number}
+ */
+function pfNum(v) {
+  return Number(v) || 0;
+}
+
+/**
+ * A stored flag as a boolean: calculator settings keep one as true or 'true'.
+ *
+ * @param {*} v
+ * @returns {boolean}
+ */
+function pfBool(v) {
+  return v === true || v === 'true';
+}
+
+/**
+ * A planet or moon as a select shows it: its name and, when known, its
+ * coordinates.
+ *
+ * @param {{name?: ?string, coords?: ?ProfileCoords}} body
+ * @param {string} [fallback] The name of a body that has none.
+ * @returns {string}
+ */
+function pfBodyLabel(body, fallback = '—') {
+  const c = body.coords;
+  const where = c && c.galaxy !== null && c.system !== null ? ' [' + c.galaxy + ':' + c.system + ':' + c.position + ']' : '';
+  return (body.name || fallback) + where;
+}
+
+/**
  * Coordinates match when every part both sides know agrees and the position is
  * known on both. A planet carried over from production knows only its position,
  * so a missing galaxy or system is not a mismatch.
@@ -1245,7 +1279,7 @@ if (typeof window !== 'undefined') {
   Object.assign(window, {
     PROFILE_FORMAT_VERSION, PROFILE_CLASS, PROFILE_ALLIANCE_CLASS, DEFAULT_RATES,
     PRODUCTION_ROW_TECHS, FLIGHT_SHIP_IDS,
-    createProfile, createPlanet, newProfileId, sameUniverse,
+    createProfile, createPlanet, newProfileId, sameUniverse, pfNum, pfBool, pfBodyLabel,
     getProfileValue, setProfileValue, differsFromGame, resetProfileValue,
     resetEntityToGame, resetProfileToGame, countOverrides, hasGameLayer,
     parseAccountExport, findProfileForExport, importAccountExport, mergeProfiles,

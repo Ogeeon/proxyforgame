@@ -34,9 +34,6 @@
  * @property {(v: *) => string} [display] The game value as shown in the mark.
  */
 
-const gravitonNum = (/** @type {*} */ v) => Number(v) || 0;
-const gravitonBool = (/** @type {*} */ v) => v === true || v === 'true';
-
 /**
  * A number field: a level, a count, a temperature or a percentage.
  *
@@ -49,8 +46,8 @@ const gravitonBool = (/** @type {*} */ v) => v === true || v === 'true';
 function gravitonNumField(key, prm, input, def = 0) {
   return {
     key, prm, input,
-    toPrm: (v) => (v === undefined || v === null ? def : gravitonNum(v)),
-    fromPrm: gravitonNum,
+    toPrm: (v) => (v === undefined || v === null ? def : pfNum(v)),
+    fromPrm: pfNum,
   };
 }
 
@@ -59,26 +56,26 @@ const GRAVITON_ACCOUNT_FIELDS = [
   gravitonNumField('research.113', 'energyTechLevel', '#energy-tech-level'),
   gravitonNumField('research.114', 'hyperTechLevel', '#hyper-tech-level'),
   ...GRAVITON_OFFICERS.map((name) => ({
-    key: 'officer.' + name, prm: name, input: '#' + name, toPrm: gravitonBool, fromPrm: gravitonBool,
+    key: 'officer.' + name, prm: name, input: '#' + name, toPrm: pfBool, fromPrm: pfBool,
   })),
   {
     // The calculator has no discoverer: one shows as no class.
     key: 'class', prm: 'playerClass', input: '#player-class-0',
     toPrm: (v) => {
-      const cls = gravitonNum(v);
+      const cls = pfNum(v);
       return cls === PROFILE_CLASS.COLLECTOR || cls === PROFILE_CLASS.GENERAL ? cls : GRAVITON_CLASS.NONE;
     },
-    fromPrm: gravitonNum,
+    fromPrm: pfNum,
     display: (v) => {
-      const label = document.querySelector('label[for="player-class-' + gravitonNum(v) + '"]');
+      const label = document.querySelector('label[for="player-class-' + pfNum(v) + '"]');
       return label ? (label.textContent || '').trim() : '—';
     },
   },
   {
     key: 'allianceClass', prm: 'isTrader', input: '#trader-bonus',
-    toPrm: (v) => gravitonNum(v) === PROFILE_ALLIANCE_CLASS.TRADER,
-    fromPrm: (v) => (gravitonBool(v) ? PROFILE_ALLIANCE_CLASS.TRADER : PROFILE_ALLIANCE_CLASS.NONE),
-    display: (v) => (gravitonNum(v) === PROFILE_ALLIANCE_CLASS.TRADER ? '✓' : '—'),
+    toPrm: (v) => pfNum(v) === PROFILE_ALLIANCE_CLASS.TRADER,
+    fromPrm: (v) => (pfBool(v) ? PROFILE_ALLIANCE_CLASS.TRADER : PROFILE_ALLIANCE_CLASS.NONE),
+    display: (v) => (pfNum(v) === PROFILE_ALLIANCE_CLASS.TRADER ? '✓' : '—'),
   },
   gravitonNumField('lf.prod.energy', 'totalLFEnrgBonus', '#total-lf-energy-bonus'),
   gravitonNumField('lf.ship.202.cargo', 'scCapacityIncrease', '#sc-capacity-increase'),
@@ -104,17 +101,6 @@ const GRAVITON_PLANET_FIELDS = [
 
 /** The options.prm keys of the settings that come from the profile's universe. */
 const GRAVITON_UNIVERSE_KEYS = ['universeSpeed', 'debrisPercent', 'deutInDebris'];
-
-/**
- * A planet's label in the select: its name and, when known, its coordinates.
- *
- * @param {ProfilePlanet} body
- */
-function gravitonPlanetLabel(body) {
-  const c = body.coords;
-  const where = c && c.galaxy !== null && c.system !== null ? ' [' + c.galaxy + ':' + c.system + ':' + c.position + ']' : '';
-  return (body.name || '—') + where;
-}
 
 class GravitonProfiles {
   /**
@@ -221,7 +207,7 @@ class GravitonProfiles {
     const select = selectEl('#pf-planet');
     if (select) {
       select.innerHTML = '';
-      planets.forEach((p) => select.appendChild(new Option(gravitonPlanetLabel(p), p.id)));
+      planets.forEach((p) => select.appendChild(new Option(pfBodyLabel(p), p.id)));
     }
     pfShow('#pf-planet-box', planets.length > 0);
     const last = this.pf.store.getLastPlanet('graviton', profile.id);
