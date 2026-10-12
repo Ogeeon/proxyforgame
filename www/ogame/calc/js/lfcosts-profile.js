@@ -5,7 +5,8 @@
 // (ADR-0004). The calculator keeps working on options.prm; this file projects
 // the profile into the form and writes the changes back:
 //   - apply(): profile -> form - the account (ion and hyperspace technology,
-//     the class, the cargo bonuses of the transports, the exchange rates) and
+//     the class, the cargo bonuses of the transports, the exchange rates, the
+//     global life-form research reductions) and
 //     one planet of the profile, picked in #pf-planet: its factories, its
 //     life form and the life-form buildings that cut costs and times (the
 //     Megalith, the Mineral Research Centre and each race's research building);
@@ -13,8 +14,8 @@
 //     what changed since the last apply or sync, so a lossy mapping (a profile
 //     with no class shows as collector here) never becomes an override.
 // A profile with no planet leaves the planet's fields to the calculator, and so
-// does a planet with no life form for the race. The build tables, the research
-// reductions typed by hand and the available resources are the calculator's own
+// does a planet with no life form for the race. The build tables and the
+// available resources are the calculator's own
 // and keep going to options_lfcosts; the profile-owned keys are written there
 // with the values they had before the profile, so "no profile" shows them
 // untouched. The economy speed comes from the profile's universe.
@@ -88,6 +89,11 @@ const LFCOSTS_ACCOUNT_FIELDS = [
   },
   lfCostsPercentField('lf.ship.202.cargo', 'capIncrSC', '#sc-capacity-increase'),
   lfCostsPercentField('lf.ship.203.cargo', 'capIncrLC', '#lc-capacity-increase'),
+  // The game lists the reduction of life-form research under one of them,
+  // 11201, and sums only the global bonuses there (Research Speed techs): the
+  // planet's third building is not in it, the calculator adds that itself.
+  lfCostsPercentField('lf.cost.11201.cost', 'researchCostReduction', '#research-cost-reduction'),
+  lfCostsPercentField('lf.cost.11201.time', 'researchTimeReduction', '#research-time-reduction'),
   {
     key: 'rates', prm: 'rates', input: '#exchange-rates-m',
     get: (p) => (Array.isArray(p.rates) ? p.rates.map(Number) : DEFAULT_RATES.slice()),

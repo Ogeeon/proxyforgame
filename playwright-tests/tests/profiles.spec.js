@@ -853,6 +853,10 @@ test('LF costs take the account and a planet from the profile', async ({ page })
     await expect(page.locator('#research-centre-level')).toHaveValue('10');
     await expect(page.locator('#research-centre-level')).toBeVisible();
     await expect(page.locator('#sc-capacity-increase')).toHaveValue('1.23');
+    // The global life-form research reductions: the game's entry 11201.
+    await expect(page.locator('#research-time-reduction')).toHaveValue('0.3091');
+    await expect(page.locator('#research-cost-reduction')).toHaveValue('0');
+    await expect(page.locator('#research-time-reduction').locator('xpath=ancestor::div[contains(@class,"input-group")]')).toHaveClass(/pf-bound/);
 
     await expect(page.locator('#reset')).toBeHidden();
     // Loading wrote nothing back.
