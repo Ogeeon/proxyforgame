@@ -15,7 +15,7 @@ class CostsCalculator {
     this.changeDetector = new ChangeDetector();
 
     // State
-    /** @type {?GlobalParams} Filled on the first collection; read via _params(). */
+    /** @type {?GlobalParams} Filled on the first collection; read via params(). */
     this.currentParams = null;
     this.isInitialized = false;
     /** Requests in flight under the settings panel's loading overlay. */
@@ -65,7 +65,7 @@ class CostsCalculator {
    * @returns {GlobalParams}
    * Also used by costs-profile.js.
    */
-  _params() {
+  params() {
     this.currentParams ??= this.collector.collectGlobalParams();
     return this.currentParams;
   }
@@ -126,7 +126,7 @@ class CostsCalculator {
     });
 
     // Render all tables in one batch
-    batchRenderer.renderAllTables(outerTab, allRequests, allResults, this._params());
+    batchRenderer.renderAllTables(outerTab, allRequests, allResults, this.params());
 
     this.stats.calculations++;
     this.stats.renders++;
@@ -141,7 +141,7 @@ class CostsCalculator {
 
     // console.log(`Recalculating tables: ${tableIds.join(', ')}`);
 
-    const params = this._params();
+    const params = this.params();
 
     tableIds.forEach(tableId => {
       const requests = this.collector.collectTableRequests(tableId);
@@ -188,7 +188,7 @@ class CostsCalculator {
     });
 
     grandTotal.energy = maxEnergy;
-    this.renderer.renderGrandTotals(outerTab, grandTotal, this._params());
+    this.renderer.renderGrandTotals(outerTab, grandTotal, this.params());
   }
 
   /**
@@ -222,13 +222,13 @@ class CostsCalculator {
 
         if (isProducer) {
           productions[level] = this.calculator.calculateProduction(
-            techId, level, this._params()
+            techId, level, this.params()
           );
         }
 
         if (isConsumer) {
           consumptions[level] = this.calculator.calculateConsumption(
-            techId, level, this._params()
+            techId, level, this.params()
           );
         }
       });
@@ -240,7 +240,7 @@ class CostsCalculator {
       results,
       isProducer ? productions : null,
       isConsumer ? consumptions : null,
-      this._params()
+      this.params()
     );
   }
 
@@ -249,7 +249,7 @@ class CostsCalculator {
    * @private
    */
   _calculateRequests(requests) {
-    const params = this._params();
+    const params = this.params();
     return requests.map(req => {
       const result = this.calculator.calculate(req, params);
 
@@ -285,11 +285,11 @@ class CostsCalculator {
    * @private
    */
   _maybeRaiseLabLevel(techId) {
-    if (this._params().useIrn) {
+    if (this.params().useIrn) {
       return;
     }
 
-    const target = this.calculator.getLabLevelRaiseTarget(techId, this._params());
+    const target = this.calculator.getLabLevelRaiseTarget(techId, this.params());
     if (target === 0) {
       return;
     }
@@ -746,12 +746,12 @@ class CostsCalculator {
       removeAllEvents(tableModalEl, 'show.bs.modal');
       addEvent(tableModalEl, 'show.bs.modal', () => {
         this._lfTableApplied = false;
-        this._lfTableSnapshot = this._readLfResearchTable();
+        this._lfTableSnapshot = this.readLfResearchTable();
       });
       removeAllEvents(tableModalEl, 'hidden.bs.modal');
       addEvent(tableModalEl, 'hidden.bs.modal', () => {
         if (!this._lfTableApplied && this._lfTableSnapshot) {
-          this._restoreLfResearchTable(this._lfTableSnapshot);
+          this.restoreLfResearchTable(this._lfTableSnapshot);
         }
         this._lfTableSnapshot = null;
       });
@@ -805,14 +805,14 @@ class CostsCalculator {
   _bindUniverseEvents() {
     removeAllEvents('#country', 'change');
     addEvent('#country', 'change', () => {
-      this._fillUniverseList(selectEl('#country')?.value ?? '', '');
+      this.fillUniverseList(selectEl('#country')?.value ?? '', '');
       this.saveState();
     });
     removeAllEvents('#universe', 'change');
     addEvent('#universe', 'change', () => {
       this.saveState();
       // It reports its own failures, so nothing is left to catch here.
-      void this._fetchUniverseSpeeds();
+      void this.fetchUniverseSpeeds();
     });
   }
 
@@ -823,7 +823,7 @@ class CostsCalculator {
    * @param {string|number} universe universe number to select
    * Also used by costs-profile.js.
    */
-  _fillUniverseList(country, universe) {
+  fillUniverseList(country, universe) {
     const universeEl = selectEl('#universe');
     if (!universeEl) return;
     universeEl.innerHTML = '';
@@ -842,7 +842,7 @@ class CostsCalculator {
    * Fetch the chosen universe's settings and apply its speeds.
    * Also used by costs-profile.js.
    */
-  async _fetchUniverseSpeeds() {
+  async fetchUniverseSpeeds() {
     const country = selectEl('#country')?.value ?? '';
     const universe = selectEl('#universe')?.value ?? '';
     if (country === '' || country === '--' || universe === '') return;
@@ -926,7 +926,7 @@ class CostsCalculator {
    * @returns {{cost: number, time: number}[]}
    * Also used by costs-profile.js.
    */
-  _readLfResearchTable() {
+  readLfResearchTable() {
     const rows = /** @type {HTMLTableRowElement[]} */ (Array.from($$('#lf-research-bonuses-tbody tr')));
     return rows.map(row => ({
       cost: this._parsePercent(row.querySelector('.lf-research-cost-input')),
@@ -940,7 +940,7 @@ class CostsCalculator {
    * @param {{cost: number, time: number}[]} data
    * Also used by costs-profile.js.
    */
-  _restoreLfResearchTable(data) {
+  restoreLfResearchTable(data) {
     const rows = $$('#lf-research-bonuses-tbody tr');
     rows.forEach((row, i) => {
       const entry = data[i];
@@ -971,10 +971,10 @@ class CostsCalculator {
    * @private
    */
   _applyLfResearchTable() {
-    const data = this._readLfResearchTable();
+    const data = this.readLfResearchTable();
     if (data.length === 0) return;
 
-    this._saveLfResearchTable(data);
+    this.saveLfResearchTable(data);
     this._handleParamChange('lf-research-table');
   }
 
@@ -983,10 +983,10 @@ class CostsCalculator {
    * @param {{cost: number, time: number}[]} [data]
    * Also used by costs-profile.js.
    */
-  _saveLfResearchTable(data) {
+  saveLfResearchTable(data) {
     if (!this._isStorageAvailable()) return;
     try {
-      const payload = (data || this._readLfResearchTable()).map(d => [d.cost, d.time]);
+      const payload = (data || this.readLfResearchTable()).map(d => [d.cost, d.time]);
       localStorage.setItem(CostsCalculator.LF_TABLE_STORAGE_KEY, JSON.stringify(payload));
     } catch (e) {
       console.error('Failed to save LF research table:', e.message);
@@ -1276,15 +1276,37 @@ class CostsCalculator {
    * Uses native JSON serialization
    */
   saveState() {
-    this._writeState(this._buildState());
+    this.writeState(this.buildState());
+  }
+
+  /**
+   * Everything the calculator itself holds, to be put back by restoreOwnState:
+   * the settings and the research bonuses table.
+   * Used by costs-profile.js.
+   *
+   * @returns {{state: Record<string, any>, table: {cost: number, time: number}[]}}
+   */
+  exportState() {
+    return { state: cloneData(this.buildState()), table: this.readLfResearchTable() };
+  }
+
+  /**
+   * Put back what exportState returned.
+   * Used by costs-profile.js.
+   *
+   * @param {{state: Record<string, any>, table: {cost: number, time: number}[]}} own
+   */
+  restoreOwnState(own) {
+    this.applyState(cloneData(own.state));
+    this.restoreLfResearchTable(own.table);
   }
 
   /**
    * The settings as they are stored: the current parameters as a plain object.
    * @returns {Record<string, any>}
    */
-  _buildState() {
-    const params = this._params();
+  buildState() {
+    const params = this.params();
 
     // Convert params to plain object for JSON serialization
     return {
@@ -1332,7 +1354,7 @@ class CostsCalculator {
    * @param {Record<string, any>} state
    * Also used by costs-profile.js.
    */
-  _writeState(state) {
+  writeState(state) {
     try {
       const json = JSON.stringify(state);
       if (this._isStorageAvailable()) {
@@ -1389,7 +1411,7 @@ class CostsCalculator {
         // console.log('Loading state from storage...');
 
         // Apply state to UI elements
-        this._applyStateToUI(state);
+        this.applyState(state);
 
         // Collect params after applying state
         this.currentParams = this.collector.collectGlobalParams();
@@ -1405,7 +1427,7 @@ class CostsCalculator {
    * Apply saved state to UI elements
    * Also used by costs-profile.js.
    */
-  _applyStateToUI(state) {
+  applyState(state) {
     const fieldMap = {
       shipyardLevel: '#shipyard-level',
       robotFactoryLevelPlanet: '#robot-factory-level',
@@ -1475,7 +1497,7 @@ class CostsCalculator {
     // already among the fields above - no need to fetch them again
     if (typeof state.country === 'string') {
       setVal('#country', state.country);
-      this._fillUniverseList(state.country, state.universe ?? '');
+      this.fillUniverseList(state.country, state.universe ?? '');
     }
 
     // IRN lab levels
@@ -1558,7 +1580,7 @@ class CostsCalculator {
 
     // Speeds and the universe picker that fills them in
     setVal('#country', '--');
-    this._fillUniverseList('--', '');
+    this.fillUniverseList('--', '');
     setVal('#universe-speed', 1);
     setVal('#research-speed', 1);
 
@@ -1607,7 +1629,7 @@ class CostsCalculator {
     // LF research bonuses table: it persists in localStorage rather than in
     // the settings, so save the cleared table or a reload brings it back
     this._clearLfResearchTable();
-    this._saveLfResearchTable();
+    this.saveLfResearchTable();
 
     // Clear all table inputs (except qty inputs which default to 1)
     inputsAll('#tab-0 input[type="text"], #tab-1 input[type="text"]').forEach(el => {
@@ -1825,7 +1847,7 @@ class CostsCalculator {
         removeAllEvents('#labchoice_' + i, 'click');
         addEvent('#labchoice_' + i, 'click', () => {
           if (calculatorApp) {
-            calculatorApp._updateResultingLevel();
+            calculatorApp.updateResultingLevel();
             calculatorApp.recalculateAll();
           }
         });
@@ -1842,7 +1864,7 @@ class CostsCalculator {
     }
 
     // Update resulting level display if function exists
-    this._updateResultingLevel();
+    this.updateResultingLevel();
   }
 
   // ==========================================================================
@@ -1877,7 +1899,7 @@ class CostsCalculator {
    * @private
    */
   _renderIrnResult() {
-    const params = this._params();
+    const params = this.params();
     toggleClass('#irn-result', 'd-none', !params.useIrn);
     toggleClass('#open-llc-dialog', 'd-none', !params.useIrn);
     const el = $('#irn-result');
@@ -1888,7 +1910,7 @@ class CostsCalculator {
    * Calculate and display IRN resulting lab level
    * Also used by costs-profile.js.
    */
-  _updateResultingLevel() {
+  updateResultingLevel() {
     const irnLevel = this._getInputNumber('#irn-level');
     const planetCount = this._getInputNumber('#planetsSpin');
 
@@ -1958,7 +1980,7 @@ class CostsCalculator {
    * @private
    */
   _openIRNDialog() {
-    const params = this._params();
+    const params = this.params();
 
     // Store backup on the dialog element for Bootstrap modal
     const modalEl = document.getElementById('irn-calc');
@@ -1977,7 +1999,7 @@ class CostsCalculator {
     bootstrap.Modal.getOrCreateInstance(modalEl).show();
 
     // Update resulting level display after dialog opens
-    this._updateResultingLevel();
+    this.updateResultingLevel();
   }
 
   /**
@@ -2088,11 +2110,11 @@ function onPlanetsChange(newVal, oldVal) {
       '</tr>'
     );
     bindLabLevelInput('#lablevel_' + newVal);
-    addEvent('#labchoice_' + newVal, 'click', () => calculatorApp._updateResultingLevel());
+    addEvent('#labchoice_' + newVal, 'click', () => calculatorApp.updateResultingLevel());
     options.prm.labLevels.push(0);
   }
 
-  calculatorApp._updateResultingLevel();
+  calculatorApp.updateResultingLevel();
   if (calculatorApp) {
     calculatorApp.recalculateAll();
   }
@@ -2148,7 +2170,7 @@ function setupIrnInputHandlers() {
     removeAllEvents(radio, 'click');
     addEvent(radio, 'click', () => {
       if (calculatorApp) {
-        calculatorApp._updateResultingLevel();
+        calculatorApp.updateResultingLevel();
         calculatorApp.recalculateAll();
       }
     });
@@ -2158,7 +2180,7 @@ function setupIrnInputHandlers() {
   if (irnLevelInput) {
     const refreshIrn = () => {
       if (calculatorApp) {
-        calculatorApp._updateResultingLevel();
+        calculatorApp.updateResultingLevel();
         calculatorApp.recalculateAll();
       }
     };
@@ -2240,7 +2262,7 @@ function cancelIrnDialog(irnModal, planetsSpinInput) {
   }
 
   rebuildLabTable(backup);
-  calculatorApp._updateResultingLevel();
+  calculatorApp.updateResultingLevel();
 }
 
 /**
@@ -2294,7 +2316,7 @@ function rebuildLabTable(backup) {
     bindLabLevelInput('#lablevel_' + i);
     addEvent('#labchoice_' + i, 'click', () => {
       if (calculatorApp) {
-        calculatorApp._updateResultingLevel();
+        calculatorApp.updateResultingLevel();
         calculatorApp.recalculateAll();
       }
     });
@@ -2329,7 +2351,7 @@ function changeLabLevel() {
 
   // Update resulting level display
   if (calculatorApp) {
-    calculatorApp._updateResultingLevel();
+    calculatorApp.updateResultingLevel();
   }
 }
 

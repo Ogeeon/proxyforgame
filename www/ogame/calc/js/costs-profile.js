@@ -189,7 +189,7 @@ class CostsProfiles {
     /** @type {Array<{cost: number, time: number}>} The research bonuses table as it was before a profile. */
     this.ownTable = [];
     this.ownSaveState = app.saveState.bind(app);
-    this.ownSaveTable = app._saveLfResearchTable.bind(app);
+    this.ownSaveTable = app.saveLfResearchTable.bind(app);
     this.applying = false;
   }
 
@@ -197,7 +197,7 @@ class CostsProfiles {
     this.describeFields();
     this.app.saveState = () => this.save();
     // The table's own key stays as it was before the profile.
-    this.app._saveLfResearchTable = (data) => {
+    this.app.saveLfResearchTable = (data) => {
       if (this.profileId === null) this.ownSaveTable(data);
     };
     addEvent('#pf-planet', 'change', () => this.bodyChosen('planet'));
@@ -247,8 +247,9 @@ class CostsProfiles {
     this.applying = true;
     try {
       if (this.profileId === null) {
-        this.ownState = cloneData(this.app._buildState());
-        this.ownTable = this.app._readLfResearchTable();
+        const own = this.app.exportState();
+        this.ownState = own.state;
+        this.ownTable = own.table;
       }
       this.profileId = profile.id;
       this.pf.clearMarks();
@@ -334,8 +335,8 @@ class CostsProfiles {
     this.universeBound = true;
     if (getVal('#country') !== wanted.country || getVal('#universe') !== String(wanted.number)) {
       setVal('#country', wanted.country);
-      this.app._fillUniverseList(wanted.country, wanted.number);
-      void this.app._fetchUniverseSpeeds();
+      this.app.fillUniverseList(wanted.country, wanted.number);
+      void this.app.fetchUniverseSpeeds();
     }
     [selectEl('#country'), selectEl('#universe')].forEach((el) => pfLockSelect(el, true, getOptionValue('universeFromProfile', '')));
   }
@@ -347,7 +348,7 @@ class CostsProfiles {
     this.universeBound = false;
     const own = this.ownState;
     setVal('#country', own.country ?? '--');
-    this.app._fillUniverseList(own.country ?? '--', own.universe ?? '');
+    this.app.fillUniverseList(own.country ?? '--', own.universe ?? '');
     setVal('#universe-speed', own.universeSpeed ?? 1);
     setVal('#research-speed', own.researchSpeed ?? 1);
   }
@@ -367,8 +368,7 @@ class CostsProfiles {
       const own = this.ownState;
       this.lockPlanetCount(false);
       this.fillLabTable(Array.isArray(own.labLevels) ? own.labLevels : [], pfNum(own.labChoice ?? -1), null);
-      this.app._applyStateToUI(cloneData(own));
-      this.app._restoreLfResearchTable(this.ownTable);
+      this.app.restoreOwnState({ state: own, table: this.ownTable });
     } finally {
       this.applying = false;
     }
@@ -376,7 +376,7 @@ class CostsProfiles {
   }
 
   takeSnapshot() {
-    const p = this.app._params();
+    const p = this.app.params();
     this.snapshot = {};
     this.accountFields.forEach((f) => { this.snapshot[f.key] = f.get(p); });
     COSTS_PLANET_FIELDS.forEach((f) => { this.snapshot['planet:' + f.key] = f.get(p); });
@@ -405,7 +405,7 @@ class CostsProfiles {
   sync() {
     const profile = this.profile();
     if (!profile) return;
-    const p = this.app._params();
+    const p = this.app.params();
     const { planet, moon } = this.bodies(profile);
     let changed = false;
     /**
@@ -503,13 +503,13 @@ class CostsProfiles {
    * does not have is the calculator's own, so its values are taken as they are.
    */
   saveOwn() {
-    const state = this.app._buildState();
+    const state = this.app.buildState();
     const owned = new Set(this.ownedStateKeys());
     Object.keys(state).forEach((key) => {
       if (owned.has(key)) state[key] = cloneData(this.ownState[key]);
       else this.ownState[key] = cloneData(state[key]);
     });
-    this.app._writeState(state);
+    this.app.writeState(state);
   }
 
   /**
@@ -618,7 +618,7 @@ class CostsProfiles {
     options.currPlanetsCount = labLevels.length;
     setVal('#planetsSpin', labLevels.length);
     rebuildLabTable({ irnLevel: options.prm.irnLevel, labLevels, labChoice: choice });
-    this.app._updateResultingLevel();
+    this.app.updateResultingLevel();
   }
 
   // -------------------------------------------------------------------------
