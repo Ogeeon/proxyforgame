@@ -79,16 +79,14 @@ function lfCostsPlanetRace(planet) {
   return race >= 1 && race <= 4 ? race : null;
 }
 
-class LfCostsProfiles {
+/** @extends {ProfileBinder<LfCostsOrchestrator>} */
+class LfCostsProfiles extends ProfileBinder {
   /**
    * @param {ProfilesUi} pf
    * @param {LfCostsOrchestrator} app
    */
   constructor(pf, app) {
-    this.pf = pf;
-    this.app = app;
-    /** @type {?string} The active profile's id while one is applied. */
-    this.profileId = null;
+    super(pf, app);
     /** @type {?string} The planet shown; null leaves its fields to the calculator. */
     this.planetId = null;
     /** @type {Record<string, *>} Values (by profile key, planet ones prefixed) at the last apply or sync. */
@@ -96,7 +94,6 @@ class LfCostsProfiles {
     /** @type {Record<string, *>} The profile-owned prm keys as the calculator has them. */
     this.ownPrm = {};
     this.ownSave = options.save;
-    this.applying = false;
     /** @type {?PfUniverseSetting} Set in init(). */
     this.speed = null;
   }
@@ -109,11 +106,6 @@ class LfCostsProfiles {
     this.pf.onChange((profile) => this.apply(profile));
     const active = this.pf.active();
     if (active) this.apply(active);
-  }
-
-  /** @returns {?Profile} */
-  profile() {
-    return this.profileId ? this.pf.store.get(this.profileId) : null;
   }
 
   /**
@@ -204,31 +196,24 @@ class LfCostsProfiles {
     this.app.handleParamChange();
   }
 
-  /** Back to the calculator's own settings. */
-  leave() {
-    if (this.profileId === null) return;
-    this.applying = true;
-    try {
-      this.profileId = null;
-      this.planetId = null;
-      this.pf.clearMarks();
-      this.speed?.detach();
-      pfShow('#reset', true);
-      pfShow('#pf-planet-box', false);
-      Object.assign(options.prm, cloneData(this.ownPrm));
-      /** @type {Record<string, any>} */
-      const prm = options.prm;
-      setVal('#ion-tech-level', prm.ionTechLevel);
-      setVal('#hyper-tech-level', prm.hyperTechLevel);
-      setChecked('#class-' + prm.playerClass, true);
-      setNumVal('#sc-capacity-increase', prm.capIncrSC);
-      setNumVal('#lc-capacity-increase', prm.capIncrLC);
-      LFCOSTS_ACCOUNT_FIELDS.find((f) => f.key === 'rates')?.show(prm.rates);
-      LFCOSTS_PLANET_FIELDS.forEach((f) => f.show(prm[f.prm]));
-      setVal('#race-selector', pfNum(prm.race) || 1);
-    } finally {
-      this.applying = false;
-    }
+  restoreOwn() {
+    this.planetId = null;
+    this.speed?.detach();
+    pfShow('#pf-planet-box', false);
+    Object.assign(options.prm, cloneData(this.ownPrm));
+    /** @type {Record<string, any>} */
+    const prm = options.prm;
+    setVal('#ion-tech-level', prm.ionTechLevel);
+    setVal('#hyper-tech-level', prm.hyperTechLevel);
+    setChecked('#class-' + prm.playerClass, true);
+    setNumVal('#sc-capacity-increase', prm.capIncrSC);
+    setNumVal('#lc-capacity-increase', prm.capIncrLC);
+    LFCOSTS_ACCOUNT_FIELDS.find((f) => f.key === 'rates')?.show(prm.rates);
+    LFCOSTS_PLANET_FIELDS.forEach((f) => f.show(prm[f.prm]));
+    setVal('#race-selector', pfNum(prm.race) || 1);
+  }
+
+  recalc() {
     this.recalculate();
   }
 
@@ -245,14 +230,8 @@ class LfCostsProfiles {
   // Calculator -> profile
   // -------------------------------------------------------------------------
 
-  save() {
-    if (this.profileId === null) {
-      this.ownSave();
-      return;
-    }
-    if (this.applying) return;
-    this.sync();
-    this.saveOwn();
+  saveWithoutProfile() {
+    this.ownSave();
   }
 
   /** Write what changed since the last snapshot into the profile. */
@@ -368,9 +347,7 @@ class LfCostsProfiles {
  * @returns {?LfCostsProfiles}
  */
 function initLfCostsProfiles() {
-  if (!pfgProfiles || !lfCostsApp) return null;
-  lfCostsProfiles = new LfCostsProfiles(pfgProfiles, lfCostsApp);
-  lfCostsProfiles.init();
+  lfCostsProfiles = pfBind(LfCostsProfiles, lfCostsApp);
   return lfCostsProfiles;
 }
 
