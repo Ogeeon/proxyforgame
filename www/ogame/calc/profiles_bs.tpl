@@ -63,6 +63,7 @@ $pfUniversePicker = function ($prefix) use ($l) {
     'delete' => $l['universe-delete'],
     'noUniverse' => $l['pf-no-universe'],
     'locked' => $l['pf-universe-locked'],
+    'attention' => $l['dialog-attention'],
     'ok' => $l['dialog-ok'],
     'done' => $l['done'],
     'later' => $l['pf-migrate-later'],

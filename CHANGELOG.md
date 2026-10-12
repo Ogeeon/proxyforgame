@@ -29,6 +29,7 @@ release section; it is the source of truth for the other eleven translations.
 ### Fixed
 
 - Construction queue: the finish time readout is named by its label, so a screen reader announces what it shows.
+- Construction queue: the confirmations and warnings of the profile dialogs are headed in the page language instead of the English "Attention" - the profile dialogs now bring their heading with them rather than relying on the page to set it.
 - Flight: a two-digit planet position no longer loses its edges in the coordinate fields, and the three-digit system no longer loses a pixel - the fields keep their width but take a narrower inner padding. <!-- site -->
 - Flight: importing an alliance class from the API 2 export or a spy report now reads the game's ids as 1 warrior, 2 trader, 3 researcher. The importer had the warrior and the researcher swapped, so a warrior alliance arrived as none and a researcher alliance as warriors - quoting holding missions 10% fast. <!-- site -->
 

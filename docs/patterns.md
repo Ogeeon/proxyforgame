@@ -542,7 +542,10 @@ if (await showConfirmModal(this.opts.uniLoadConfMsg, this.opts.dialogConfirm, th
   the button labels, `dialogAttentionLabel` is not a function argument: it is invariant across
   every call, so `buildDialogModal()` reads it straight off the page global via
   `getOptionValue('dialogAttentionLabel', 'Attention')` (the same helper `readBonuses()` uses
-  for its own message) rather than making every call site pass the same string.
+  for its own message) rather than making every call site pass the same string. A component
+  shared between pages and carrying its own string bundle — the player-profile dialogs in
+  `profiles-ui.js` — passes the heading as the optional last `title` argument instead, so it
+  does not depend on every page that includes it setting `dialogAttentionLabel`.
 
 **Solid variants are reserved for modal footers.** `btn-primary` on the confirm and
 `btn-secondary` on the cancel is the one place the filled treatment carries meaning — it marks

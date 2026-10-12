@@ -265,6 +265,19 @@ test('the backup file restores the profiles', async ({ page }) => {
     await expect(page.locator('#pf-manage-rows')).toContainText('Tester');
 });
 
+test('the delete confirmation is headed in the page language', async ({ page }) => {
+    // The queue sets no dialogAttentionLabel of its own, so the heading has to
+    // come with the profile dialogs.
+    await page.goto('/ru/queue');
+    await importExport(page);
+    await chooseAction(page, '__manage');
+    await page.locator('#pf-manage-rows tr').first().locator('button').nth(1).click();
+    const dialog = page.locator('.dyn-dialog.show');
+    await expect(dialog.locator('.modal-header')).toHaveText('Внимание');
+    await dialog.locator('.btn-secondary').click();
+    await expect(page.locator('#pf-manage-rows tr')).toHaveCount(1);
+});
+
 test('editing a profile returns to the manage dialog', async ({ page }) => {
     await page.goto('/production');
     await importExport(page);

@@ -673,7 +673,7 @@ class ProfilesUi {
         this.openProps(p.id);
       }));
       actions.appendChild(this.iconButton('bi-trash', this.text.delete, async () => {
-        if (!await showConfirmModal(pfFormat(this.text.deleteConfirm, p.label), this.text.confirm, this.text.cancel)) return;
+        if (!await showConfirmModal(pfFormat(this.text.deleteConfirm, p.label), this.text.confirm, this.text.cancel, this.text.attention)) return;
         this.store.remove(p.id);
         this.renderManage();
       }));
@@ -720,10 +720,10 @@ class ProfilesUi {
       const into = this.store.get(intoId);
       if (!from || !into) return;
       if (fromId === intoId) {
-        await showAlertModal(this.text.mergeSame, this.text.ok);
+        await showAlertModal(this.text.mergeSame, this.text.ok, this.text.attention);
         return;
       }
-      if (!await showConfirmModal(pfFormat(this.text.mergeConfirm, from.label, into.label), this.text.confirm, this.text.cancel)) return;
+      if (!await showConfirmModal(pfFormat(this.text.mergeConfirm, from.label, into.label), this.text.confirm, this.text.cancel, this.text.attention)) return;
       if (!this.store.save(mergeProfiles(into, from))) {
         showToast(this.text.saveFailed, 'danger');
         return;
@@ -754,14 +754,14 @@ class ProfilesUi {
   async restoreBackup(text) {
     const result = parseProfilesFile(text);
     if (!result.ok || !result.profiles) {
-      await showAlertModal(this.text.fileErr, this.text.ok);
+      await showAlertModal(this.text.fileErr, this.text.ok, this.text.attention);
       return;
     }
     const plan = planProfilesRestore(this.store.list().map((e) => e.id), result.profiles);
     let restored = 0;
     plan.added.forEach((p) => { if (this.store.save(p)) restored++; });
     for (const p of plan.conflicts) {
-      if (await showConfirmModal(pfFormat(this.text.restoreConflict, p.label), this.text.replace, this.text.skip)) {
+      if (await showConfirmModal(pfFormat(this.text.restoreConflict, p.label), this.text.replace, this.text.skip, this.text.attention)) {
         if (this.store.save(p)) restored++;
       }
     }
