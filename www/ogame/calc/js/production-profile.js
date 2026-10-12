@@ -105,12 +105,11 @@ function planetToProductionState(planet) {
  * @typedef {number[] & {pfId?: string}} TaggedState
  */
 
-class ProductionProfiles {
+/** @extends {ProfileBinder<undefined>} */
+class ProductionProfiles extends ProfileBinder {
   /** @param {ProfilesUi} pf */
   constructor(pf) {
-    this.pf = pf;
-    /** @type {?string} The active profile's id while one is applied. */
-    this.profileId = null;
+    super(pf, undefined);
     /** @type {Record<string, *>} Account prm values at the last apply or sync. */
     this.accountSnapshot = {};
     /** @type {Map<string, {state: number[], name: string}>} Planet values at the last apply or sync. */
@@ -124,7 +123,6 @@ class ProductionProfiles {
     this.ownSave = options.save;
     /** @type {Record<string, *>} The calculator's own settings, as they were before a profile. */
     this.ownPrm = cloneData(options.prm);
-    this.applying = false;
     /** @type {?PfUniverseSetting} Set in init(). */
     this.speed = null;
   }
@@ -197,19 +195,17 @@ class ProductionProfiles {
     this.markAll();
   }
 
-  /** Back to the calculator's own settings. */
-  leave() {
-    if (this.profileId === null) return;
-    this.profileId = null;
+  restoreOwn() {
     this.onePlanetId = null;
     pfShow('#pf-planet-row', false);
-    pfShow('#reset', true);
-    this.pf.clearMarks();
     this.speed?.detach();
     // The profile's values are still in options.prm, and options.load() only
     // overwrites the keys options_production holds: start from the own copy.
     Object.assign(options.prm, cloneData(this.ownPrm));
     options.load('options_production');
+  }
+
+  recalc() {
     updateParams();
   }
 
@@ -221,7 +217,7 @@ class ProductionProfiles {
    * @returns {boolean} True when handled.
    */
   showPlanetAt(index) {
-    const profile = this.profileId ? this.pf.store.get(this.profileId) : null;
+    const profile = this.profile();
     const state = /** @type {TaggedState[]} */ (options.prm.aPS)[index];
     if (!profile || !state) return false;
     this.save();
@@ -270,12 +266,11 @@ class ProductionProfiles {
   // Calculator -> profile
   // -------------------------------------------------------------------------
 
-  save() {
-    if (this.profileId === null) {
-      this.ownSave();
-      return;
-    }
-    if (this.applying) return;
+  saveWithoutProfile() {
+    this.ownSave();
+  }
+
+  saveWithProfile() {
     this.syncOnePlanet();
     this.sync();
     this.saveLocal();
@@ -307,7 +302,7 @@ class ProductionProfiles {
 
   /** Write what changed since the last snapshot into the profile. */
   sync() {
-    const profile = this.profileId ? this.pf.store.get(this.profileId) : null;
+    const profile = this.profile();
     if (!profile) return;
     const prm = options.prm;
     let changed = false;
@@ -420,7 +415,7 @@ class ProductionProfiles {
       + '<select id="pf-planet" class="form-select form-select-sm w-auto"></select></div>');
     pfShow('#pf-planet-row', false);
     addEvent('#pf-planet', 'change', () => {
-      const profile = this.profileId ? this.pf.store.get(this.profileId) : null;
+      const profile = this.profile();
       if (!profile) return;
       // Whatever was typed into the planet shown so far is saved first.
       this.save();
@@ -481,7 +476,7 @@ class ProductionProfiles {
 
   /** Mark every field the profile owns, and the ones that differ from the game. */
   markAll() {
-    const profile = this.profileId ? this.pf.store.get(this.profileId) : null;
+    const profile = this.profile();
     if (!profile) return;
     /**
      * Restore one game value on a fresh copy of the profile: the one marked
