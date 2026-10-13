@@ -59,3 +59,31 @@ describe('LF Costs Calculator - demolition points', () => {
         expect(research.points).toBe(building.points);
     });
 });
+
+// The game counts points from the full cost: the Megalith and the research cost
+// reductions lower what the player pays, not what the build or research awards.
+describe('LF Costs Calculator - build points ignore cost reductions', () => {
+    it('a building under a Megalith-style reduction awards the unreduced points', () => {
+        const full = calc.calculate(11001, 0, 6, 0, 0, 0, PARAMS);
+        const reduced = calc.calculate(11001, 0, 6, 0, 0, 0.5, PARAMS);
+        expect(reduced.metal).toBe(47562);
+        expect(reduced.metal).toBeLessThan(full.metal);
+        expect(full.points).toBe(161);
+        expect(reduced.points).toBe(161);
+    });
+
+    it('a research under a research cost reduction awards the unreduced points', () => {
+        const full = calc.calculate(11101, 0, 6, 0, 0, 0, PARAMS);
+        const reduced = calc.calculate(11101, 0, 6, 0, 50, 0, PARAMS);
+        expect(reduced.metal).toBe(47562);
+        expect(reduced.metal).toBeLessThan(full.metal);
+        expect(full.points).toBe(161);
+        expect(reduced.points).toBe(161);
+    });
+
+    it('a demolition after a reduced build still refunds exactly the points awarded', () => {
+        const up = calc.calculate(11001, 0, 6, 0, 50, 0.5, PARAMS);
+        const down = calc.calculate(11001, 6, 0, 0, 50, 0.5, PARAMS);
+        expect(down.points).toBe(-up.points);
+    });
+});

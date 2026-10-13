@@ -466,12 +466,14 @@ class Calculator {
     }
 
     // Calculate resource costs
-    let resources = this._calculateResources(
+    // Kept apart from the reduced cost below: points follow the undiscounted one.
+    const baseResources = this._calculateResources(
       request.techId,
       request.fromLevel,
       request.toLevel,
       params.ionTechLevel
     );
+    let resources = baseResources;
 
     // Apply LF cost reductions
     const costFactor = this._lfCostFactor(request.techId, params);
@@ -504,12 +506,12 @@ class Calculator {
       time = Math.floor(time * timeFactor);
     }
 
-    // Calculate points gained/lost
+    // Calculate points gained/lost (from the cost before any LF reduction)
     const points = this._calculatePoints(
       request.techId,
       request.fromLevel,
       request.toLevel,
-      resources
+      baseResources
     );
 
     const qty = request.quantity || 1;
@@ -728,7 +730,9 @@ class Calculator {
   }
 
   /**
-   * Calculate points gained/lost
+   * Calculate points gained/lost. Points follow the undiscounted cost: `resources`
+   * must be the cost before any LF reduction, the way the demolition branch already
+   * works from the undiscounted build cost.
    * @private
    */
   _calculatePoints(techId, fromLevel, toLevel, resources) {

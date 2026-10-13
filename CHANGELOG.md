@@ -15,6 +15,10 @@ release section; it is the source of truth for the other eleven translations.
 
 ## [Unreleased]
 
+### Fixed
+
+- Costs and LF costs: the points a build or research awards no longer drop with life-form cost reductions (the Megalith, the Mineral Research Centre and the research cost reductions). The game counts points from the full cost, so the points total now ignores the discount, as the points refunded on a demolition already did. <!-- site -->
+
 ## [2026-10-11] - site entry 66
 
 ### Changed
