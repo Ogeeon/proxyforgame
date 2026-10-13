@@ -36,6 +36,7 @@ release section; it is the source of truth for the other eleven translations.
 
 ### Fixed
 
+- Expeditions: a link naming a universe picks the "strongest player" entry the universe's top score falls into. The limits read from 1.000.000 on were ten times the ones the entries show, so a top score of 5.000.000 picked "< 1.000.000" and anything up to 1.000.000.000 stayed below "> 100.000.000". <!-- site -->
 - Costs: the note on building the Robotics or Nanite Factory no longer opens for a row of the multiple-levels tab whose "from" and "to" levels are the same, since such a row builds nothing. <!-- site -->
 - Construction queue: the finish time readout is named by its label, so a screen reader announces what it shows.
 - LF costs: every input of the page has a name a screen reader announces - the crystal and deuterium exchange rates, the level fields of the build tables, the available resources and the technology selects - and the note at the bottom is no longer laid out as a table.
