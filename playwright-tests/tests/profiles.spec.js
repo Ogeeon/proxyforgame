@@ -1526,3 +1526,194 @@ test('a trade link wins over the profile on load', async ({ page }) => {
     await page.locator('#rate-btn-1').click();
     expect((await activeProfile(page)).account.values.rates).toEqual({ override: [1, 2, 4] });
 });
+
+// Expeditions: the account (class, hyperspace technology, the life-form
+// bonuses, the cargo bonus of every ship in the table) and the universe's
+// economy speed and strongest player. The fleet and the discovery bonuses stay
+// the calculator's own.
+
+/** Answer the universe settings request with a speed and a top score. */
+async function mockExpeditionsUniverse(page, topScore) {
+    await page.route('**/ajax.php?*service=serverdata*', (route) => route.fulfill({
+        status: 200, contentType: 'application/json', body: JSON.stringify({ speed: '5', topScore }),
+    }));
+}
+
+/** Fill a field and leave it: expeditions validates and recalculates on blur. */
+async function blurFill(page, selector, value) {
+    await page.locator(selector).fill(value);
+    await page.locator(selector).blur();
+}
+
+test('expeditions takes the account from the profile', async ({ page }) => {
+    await page.goto('/expeditions');
+    await importExport(page);
+
+    await expect(page.locator('#player-class')).toHaveValue('1');
+    await expect(page.locator('#player-class option:checked')).toHaveText('Collector');
+    await expect(page.locator('#tech-hyper-level')).toHaveValue('8');
+    await expect(page.locator('#percent-resources')).toHaveValue('4');
+    await expect(page.locator('#percent-ships')).toHaveValue('2');
+    await expect(page.locator('#class-bonus-collector')).toHaveValue('2.15');
+    await expect(page.locator('#class-bonus-discoverer')).toHaveValue('0');
+    await expect(page.locator('#lf-cargo-202')).toHaveValue('1.23');
+    await expect(page.locator('#lf-cargo-203')).toHaveValue('2.5');
+    await expect(page.locator('#lf-cargo-219')).toHaveValue('0');
+    await expect(page.locator('#lf-cargo-209')).toHaveValue('0');
+
+    for (const bound of ['#player-class', '#tech-hyper-level', '#percent-resources', '#percent-ships',
+        '#class-bonus-collector', '#class-bonus-discoverer', '#lf-cargo-202', '#lf-cargo-203', '#lf-cargo-219']) {
+        await expect(page.locator(bound)).toHaveClass(/pf-bound/);
+    }
+    // The calculator's own: the discovery bonus, the booster and the fleet.
+    for (const own of ['#dark-matter-discovery-bonus', '#resource-discovery-booster', '#numSC']) {
+        await expect(page.locator(own)).not.toHaveClass(/pf-bound/);
+    }
+
+    await expect(page.locator('#reset')).toBeHidden();
+    // Loading wrote nothing back.
+    await expect(page.locator('#pf-overrides')).toBeHidden();
+});
+
+test('an expeditions edit becomes an override that can be restored', async ({ page }) => {
+    await page.goto('/expeditions');
+    await importExport(page);
+    await blurFill(page, '#numLC', '100');
+    const capacity = await page.locator('#storage-capacity').textContent();
+
+    await blurFill(page, '#tech-hyper-level', '9');
+    await page.locator('#param-lf-tab').click();
+    await blurFill(page, '#lf-cargo-203', '3');
+    await expect(page.locator('#tech-hyper-level')).toHaveClass(/pf-differs/);
+    await expect(page.locator('#lf-cargo-203')).toHaveClass(/pf-differs/);
+    await expect(page.locator('#pf-overrides')).toHaveText('2');
+    let profile = await activeProfile(page);
+    expect(profile.account.values['research.114']).toEqual({ game: 8, override: 9 });
+    expect(profile.account.values['lf.ship.203.cargo']).toEqual({ game: 2.5, override: 3 });
+    await expect(page.locator('#storage-capacity')).not.toHaveText(capacity);
+
+    await page.locator('#lf-cargo-203 + .pf-reset').click();
+    await expect(page.locator('#lf-cargo-203')).toHaveValue('2.5');
+    await page.locator('#param-common-tab').click();
+    await page.locator('#tech-hyper-level + .pf-reset').click();
+    await expect(page.locator('#tech-hyper-level')).toHaveValue('8');
+    await expect(page.locator('#pf-overrides')).toBeHidden();
+    // The restored bonus reached the calculation, not only the field.
+    await expect(page.locator('#storage-capacity')).toHaveText(capacity);
+    profile = await activeProfile(page);
+    expect(profile.account.values['lf.ship.203.cargo']).toEqual({ game: 2.5 });
+    expect(profile.account.values['research.114']).toEqual({ game: 8 });
+});
+
+test('the cargo bonuses reader makes overrides of what it reads', async ({ page }) => {
+    await page.goto('/expeditions');
+    await importExport(page);
+
+    await page.locator('#param-lf-tab').click();
+    await page.locator('#open-lfbr').click();
+    await page.locator('#own-api-input').fill(JSON.stringify({ ships: { 203: { cargo: 0.05 } } }));
+    await page.locator('#lf-bonuses-read-btn').click();
+    await expect(page.locator('#lf-cargo-203')).toHaveValue('5');
+    // The export names a ship the player can build; one it leaves out has no bonus.
+    await expect(page.locator('#lf-cargo-202')).toHaveValue('0');
+    await expect(page.locator('#lf-cargo-203')).toHaveClass(/pf-differs/);
+    const profile = await activeProfile(page);
+    expect(profile.account.values['lf.ship.203.cargo']).toEqual({ game: 2.5, override: 5 });
+    expect(profile.account.values['lf.ship.202.cargo']).toEqual({ game: 1.23, override: 0 });
+});
+
+test('expeditions takes the speed and the top score from the universe, and keeps a changed one', async ({ page }) => {
+    // 20 million points fall into the "< 25.000.000" entry.
+    await mockExpeditionsUniverse(page, '20000000');
+    await page.goto('/expeditions');
+    await importExport(page);
+
+    const speed = page.locator('#universe-speed');
+    const top = page.locator('#highTop');
+    await expect(speed).toHaveValue('5');
+    await expect(top).toHaveValue('2400000');
+    await expect(speed).toHaveClass(/pf-bound/);
+    await expect(top).toHaveClass(/pf-bound/);
+
+    await top.selectOption('1200000');
+    await speed.selectOption('2');
+    await expect(top).toHaveClass(/pf-differs/);
+    await expect(speed).toHaveClass(/pf-differs/);
+    await page.reload();
+    await expect(speed).toHaveValue('2');
+    await expect(top).toHaveValue('1200000');
+    await expect(top).toHaveClass(/pf-differs/);
+    // A universe setting is not in the profile.
+    await expect(page.locator('#pf-overrides')).toBeHidden();
+
+    await page.locator('#highTop + .pf-reset').click();
+    await expect(top).toHaveValue('2400000');
+    await page.locator('#universe-speed + .pf-reset').click();
+    await expect(speed).toHaveValue('5');
+    await expect(top).not.toHaveClass(/pf-differs/);
+});
+
+test('"no profile" gives expeditions its own values back', async ({ page }) => {
+    await mockExpeditionsUniverse(page, '20000000');
+    await page.goto('/expeditions');
+    await blurFill(page, '#tech-hyper-level', '5');
+    await page.locator('#universe-speed').selectOption('3');
+    await page.locator('#highTop').selectOption('3000000');
+    await page.locator('#param-lf-tab').click();
+    await blurFill(page, '#lf-cargo-203', '7');
+    await blurFill(page, '#numLC', '50');
+
+    await importExport(page);
+    await expect(page.locator('#tech-hyper-level')).toHaveValue('8');
+    await expect(page.locator('#lf-cargo-203')).toHaveValue('2.5');
+    await expect(page.locator('#universe-speed')).toHaveValue('5');
+    // The fleet is the calculator's, whoever is active.
+    await expect(page.locator('#numLC')).toHaveValue('50');
+    await blurFill(page, '#numSC', '20');
+    // The calculator's own settings keep the values from before the profile.
+    const stored = await page.evaluate(() => JSON.parse(localStorage.getItem('options_expeditions') || '{}'));
+    expect(stored.hyperTechLevel).toBe(5);
+    expect(stored.lfShipsBonuses[1]).toBe(7);
+    expect(stored.universeSpeed).toBe(3);
+    expect(stored.highTop).toBe(3000000);
+
+    await page.locator('#pf-select').selectOption('');
+    await expect(page.locator('#tech-hyper-level')).toHaveValue('5');
+    await expect(page.locator('#lf-cargo-203')).toHaveValue('7');
+    await expect(page.locator('#universe-speed')).toHaveValue('3');
+    await expect(page.locator('#highTop')).toHaveValue('3000000');
+    await expect(page.locator('#numLC')).toHaveValue('50');
+    await expect(page.locator('#numSC')).toHaveValue('20');
+    await expect(page.locator('.pf-bound')).toHaveCount(0);
+    await expect(page.locator('#reset')).toBeVisible();
+});
+
+test('an expeditions API link wins over the profile on load', async ({ page }) => {
+    await mockExpeditionsUniverse(page, '20000000');
+    await page.goto('/expeditions');
+    await importExport(page);
+
+    await page.goto('/expeditions?h=7&pr=10&us=3');
+    // The top score is not in the link: it comes from the profile's universe.
+    await expect(page.locator('#highTop')).toHaveValue('2400000');
+    await expect(page.locator('#tech-hyper-level')).toHaveValue('7');
+    await expect(page.locator('#percent-resources')).toHaveValue('10');
+    // The speed is, and the universe does not take it back.
+    await expect(page.locator('#universe-speed')).toHaveValue('3');
+    await expect(page.locator('#universe-speed')).not.toHaveClass(/pf-bound/);
+    // What the link did not name comes from the profile.
+    await expect(page.locator('#percent-ships')).toHaveValue('2');
+    await expect(page.locator('#lf-cargo-203')).toHaveValue('2.5');
+    await expect(page.locator('#player-class')).toHaveValue('1');
+    // Nothing of the link went into the profile.
+    await expect(page.locator('#pf-overrides')).toBeHidden();
+    let profile = await activeProfile(page);
+    expect(profile.account.values['research.114']).toEqual({ game: 8 });
+    expect(profile.account.values['lf.expedition.resources']).toEqual({ game: 4 });
+
+    // An edit made afterwards does.
+    await blurFill(page, '#percent-ships', '3');
+    profile = await activeProfile(page);
+    expect(profile.account.values['lf.expedition.ships']).toEqual({ game: 2, override: 3 });
+    expect(profile.account.values['research.114']).toEqual({ game: 8 });
+});

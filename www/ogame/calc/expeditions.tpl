@@ -84,11 +84,16 @@
   <script src="/js/utils.js?v=<?php echo filemtime($pfgPath.'/js/utils.js'); ?>" defer></script>
   <script src="/js/api-client.js?v=<?php echo filemtime($pfgPath.'/js/api-client.js'); ?>" defer></script>
   <script src="/ogame/calc/js/dom-utils.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/dom-utils.js'); ?>" defer></script>
+  <!-- Player profiles -->
+  <script src="/ogame/calc/js/profiles-core.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/profiles-core.js'); ?>" defer></script>
+  <script src="/ogame/calc/js/profiles-store.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/profiles-store.js'); ?>" defer></script>
+  <script src="/ogame/calc/js/profiles-ui.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/profiles-ui.js'); ?>" defer></script>
   <script src="/ogame/calc/js/own-api.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/own-api.js'); ?>" defer></script>
   <script src="/ogame/calc/js/expeditions-core.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/expeditions-core.js'); ?>" defer></script>
   <script src="/ogame/calc/js/expeditions-data-collector.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/expeditions-data-collector.js'); ?>" defer></script>
   <script src="/ogame/calc/js/expeditions-renderer.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/expeditions-renderer.js'); ?>" defer></script>
   <script src="/ogame/calc/js/expeditions-orchestration.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/expeditions-orchestration.js'); ?>" defer></script>
+  <script src="/ogame/calc/js/expeditions-profile.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/expeditions-profile.js'); ?>" defer></script>
 
   <script>
     // Parameters passed through the URL API. A null means "not passed", so the
@@ -137,7 +142,7 @@
   <div class="row">
     <div class="col-md-2"><?php require_once '../../sidebar_bs.tpl'; ?></div>
     <div class="col-md-10">
-    <?php require_once '../../topbar_bs.tpl'; ?>
+    <?php $profilesCalc = 'expeditions'; require_once '../../topbar_bs.tpl'; ?>
 
 <div id="expeditions">
   <div class="border rounded">
@@ -410,6 +415,7 @@ document.addEventListener('DOMContentLoaded', function() {
     bootstrap.Tooltip.getOrCreateInstance(el);
   });
   initializeExpeditionsCalculator();
+  initExpeditionsProfiles();
 });
 </script>
 

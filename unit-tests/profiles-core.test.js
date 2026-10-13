@@ -17,7 +17,7 @@ const core = load(['ogame/calc/js/profiles-core.js'], [
     'parseAccountExport', 'findProfileForExport', 'importAccountExport', 'mergeProfiles',
     'serializeProfilesFile', 'parseProfilesFile', 'planProfilesRestore', 'universeCacheKey',
     'ratesToTrade', 'ratesFromTrade', 'profileFromProductionSet', 'profileFromFlightSet',
-    'lfBuildingGameId', 'pfNum', 'pfBool', 'pfBodyLabel',
+    'lfBuildingGameId', 'pfNum', 'pfBool', 'pfBodyLabel', 'expeditionHighTop',
 ]);
 
 const plain = (value) => JSON.parse(JSON.stringify(value));
@@ -601,5 +601,43 @@ describe('the helpers the calculators share', () => {
         expect(core.pfBodyLabel({ name: 'Home', coords: { galaxy: null, system: null, position: 3 } })).toBe('Home');
         expect(core.pfBodyLabel({ name: '', coords: null })).toBe('—');
         expect(core.pfBodyLabel({ name: '', coords: null }, '')).toBe('');
+    });
+});
+
+// expeditions.php picks the "strongest player" entry with its own $thresholds
+// (10000, 100000, 1000000, ...: the limits the option labels show, the first
+// one the floored score does not exceed); the profile's universe has to pick
+// the same one.
+describe('expeditionHighTop', () => {
+    it('takes the first entry whose limit the score does not exceed', () => {
+        expect(core.expeditionHighTop(0)).toBe(40000);
+        expect(core.expeditionHighTop(10000)).toBe(40000);
+        expect(core.expeditionHighTop(10001)).toBe(500000);
+        expect(core.expeditionHighTop(100000)).toBe(500000);
+        expect(core.expeditionHighTop(100001)).toBe(1200000);
+        expect(core.expeditionHighTop(1000000)).toBe(1200000);
+        expect(core.expeditionHighTop(1000001)).toBe(1800000);
+        expect(core.expeditionHighTop(5000000)).toBe(1800000);
+        expect(core.expeditionHighTop(20000000)).toBe(2400000);
+        expect(core.expeditionHighTop(100000000)).toBe(4200000);
+    });
+
+    it('takes the last entry beyond every limit', () => {
+        expect(core.expeditionHighTop(100000001)).toBe(5000000);
+        expect(core.expeditionHighTop(9e15)).toBe(5000000);
+    });
+
+    it('reads the score as the XML gives it: a string, floored like PHP does', () => {
+        expect(core.expeditionHighTop('10000')).toBe(40000);
+        expect(core.expeditionHighTop('10000.9')).toBe(40000);
+        expect(core.expeditionHighTop('10001.1')).toBe(500000);
+    });
+
+    it('has no entry for what is not a number', () => {
+        expect(core.expeditionHighTop('')).toBe(null);
+        expect(core.expeditionHighTop(null)).toBe(null);
+        expect(core.expeditionHighTop(undefined)).toBe(null);
+        expect(core.expeditionHighTop('abc')).toBe(null);
+        expect(core.expeditionHighTop(Number.POSITIVE_INFINITY)).toBe(null);
     });
 });

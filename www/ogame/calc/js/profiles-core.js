@@ -1314,8 +1314,34 @@ function profileFromFlightSet(prm, init) {
   return profile;
 }
 
+/**
+ * The score limits of expeditions.php's `$thresholds`, one per entry of the
+ * "strongest player" select but the last. The page mirrors them, so a universe
+ * opened through the URL API and one bound to a profile pick the same entry.
+ */
+const EXPEDITION_TOP_SCORE_LIMITS = [10000, 100000, 1000000, 5000000, 25000000, 50000000, 75000000, 100000000];
+
+/** The values of expeditions' #highTop options, in the order of the select. */
+const EXPEDITION_HIGH_TOP_VALUES = [40000, 500000, 1200000, 1800000, 2400000, 3000000, 3600000, 4200000, 5000000];
+
+/**
+ * The #highTop value for the score of a universe's strongest player: the first
+ * entry whose limit the score does not exceed, the last one beyond them all
+ * (expeditions.php does the same with floor()).
+ *
+ * @param {unknown} score The `topScore` of the server data.
+ * @returns {?number} The option value; null when the score is not a number.
+ */
+function expeditionHighTop(score) {
+  const points = Math.floor(Number(score));
+  if (score === null || score === '' || !Number.isFinite(points)) return null;
+  const index = EXPEDITION_TOP_SCORE_LIMITS.findIndex((limit) => points <= limit);
+  return EXPEDITION_HIGH_TOP_VALUES[index === -1 ? EXPEDITION_TOP_SCORE_LIMITS.length : index];
+}
+
 if (typeof window !== 'undefined') {
   Object.assign(window, {
+    expeditionHighTop,
     PROFILE_FORMAT_VERSION, PROFILE_CLASS, PROFILE_ALLIANCE_CLASS, DEFAULT_RATES,
     PRODUCTION_ROW_TECHS, FLIGHT_SHIP_IDS,
     createProfile, createPlanet, newProfileId, sameUniverse, pfNum, pfBool, pfBodyLabel,

@@ -28,6 +28,9 @@
       // and '1' when deuterium goes there too - empty otherwise.
       'debrisFactor' => (string)$xml->debrisFactor,
       'deuteriumInDebris' => (string)$xml->deuteriumInDebris,
+      // Score of the strongest player; expeditions turns it into the "strongest
+      // player" class that caps the expedition's find.
+      'topScore' => (string)$xml->topScore,
       'fleetIgnoreEmptySystems' => (string)$xml->fleetIgnoreEmptySystems,
       // Independent of the one above: it skips systems where every player is
       // inactive, and a universe can have either, both or neither switched on.

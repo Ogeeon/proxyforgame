@@ -1138,8 +1138,21 @@ const PF_UNIVERSE_DEUT_IN_DEBRIS = {
   display: (v) => pfDisplayValue(v === true),
 };
 
+/**
+ * @type {PfUniverseSettingKind} The expeditions' "strongest player" class, kept as the value of the
+ * #highTop option the universe's top score falls into (not as the score itself).
+ */
+const PF_UNIVERSE_TOP_SCORE = {
+  key: 'topScore',
+  parse: (data) => expeditionHighTop(data.topScore),
+  get: (selector) => Number(getVal(selector)),
+  // The value always comes from the select's own list, so no option is added.
+  set: (selector, value) => setVal(selector, value),
+  display: (v) => pfOptionText(selectEl('#highTop'))(v),
+};
+
 /** Every setting a fetch stores, whichever of them asked for it. */
-const PF_UNIVERSE_SETTINGS = [PF_UNIVERSE_SPEED, PF_UNIVERSE_DEBRIS, PF_UNIVERSE_DEUT_IN_DEBRIS];
+const PF_UNIVERSE_SETTINGS = [PF_UNIVERSE_SPEED, PF_UNIVERSE_DEBRIS, PF_UNIVERSE_DEUT_IN_DEBRIS, PF_UNIVERSE_TOP_SCORE];
 
 /** @typedef {{at: number, overrides?: Record<string, *>, override?: *, [setting: string]: *}} PfUniverseEntry */
 
@@ -1876,5 +1889,5 @@ function createProfilesUi() {
 const pfgProfiles = createProfilesUi();
 
 Object.assign(window, {
-  pfgProfiles, ProfilesUi, PfUniverseSetting, PfBodySelect, ProfileBinder, PlanetPrmBinder, pfBind, PF_UNIVERSE_SPEED, PF_UNIVERSE_DEBRIS, PF_UNIVERSE_DEUT_IN_DEBRIS, readSavedSet,
+  pfgProfiles, ProfilesUi, PfUniverseSetting, PfBodySelect, ProfileBinder, PlanetPrmBinder, pfBind, PF_UNIVERSE_SPEED, PF_UNIVERSE_DEBRIS, PF_UNIVERSE_DEUT_IN_DEBRIS, PF_UNIVERSE_TOP_SCORE, readSavedSet,
 });
