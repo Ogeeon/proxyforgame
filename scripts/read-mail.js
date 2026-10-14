@@ -296,7 +296,8 @@ class ImapClient {
 
 /** @param {string} value */
 function quoted(value) {
-  return `"${value.replace(/([\\"])/g, String.raw`\$1`)}"`;
+  const escaped = value.replaceAll(/([\\"])/g, String.raw`\$1`);
+  return `"${escaped}"`;
 }
 
 /* ------------------------------------------------------------- MIME decoding */
