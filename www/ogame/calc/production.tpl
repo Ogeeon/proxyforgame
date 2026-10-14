@@ -99,6 +99,9 @@
         lfPlasmaCostReduction: 0,
         // Levels of the production researches, in the order of options.lfResIds
         lfResLevels: [],
+        // Which of those researches the player can study: a research slot holds
+        // one race's research, so the others in that slot are left out
+        lfResAvail: [],
         lfTechBonus: 0,
         lfResearchCostReduction: 0,
 
@@ -164,6 +167,8 @@
             case 'lfPlasmaCostReduction':
             case 'lfResearchCostReduction':
               return validateNumber(parseFloat(value), 0, 99, 0);
+            case 'lfResAvail':
+              return value === 'true';
             case 'lfResLevels':
               return validateNumber(Number.parseInt(value), 0, 100, 0);
             case 'lfTechBonus':
@@ -525,14 +530,18 @@
               </div>
             </div>
             <div id="lf-research-levels" class="collapse">
+              <div class="small text-body-secondary mt-1"><?= $l['lf-research-avail-hint'] ?></div>
               <?php foreach (array(1, 2, 3, 4) as $lfRace): ?>
               <div class="fw-semibold mt-2 mb-1"><?= $l['race-'.$lfRace] ?></div>
               <div class="lf-res-grid">
                 <?php foreach (array_keys($lfResearchBonus) as $lfId): ?>
                   <?php if (intdiv($lfId, 1000) !== $lfRace) { continue; } ?>
                   <div class="d-flex align-items-center justify-content-between gap-1">
-                    <label for="lf-res-<?= $lfId ?>"><?= $lfAmortNames[$lfId] ?></label>
-                    <input id="lf-res-<?= $lfId ?>" type="text" name="lf-res-<?= $lfId ?>" class="form-control form-control-sm level-input lf-res-level-input" data-lf-id="<?= $lfId ?>" value="0">
+                    <div class="d-flex align-items-center gap-1">
+                      <input id="lf-res-avail-<?= $lfId ?>" type="checkbox" name="lf-res-avail-<?= $lfId ?>" class="form-check-input mt-0 lf-res-avail" title="<?= $l['lf-research-available'] ?>">
+                      <label for="lf-res-avail-<?= $lfId ?>"><?= $lfAmortNames[$lfId] ?></label>
+                    </div>
+                    <input id="lf-res-<?= $lfId ?>" type="text" name="lf-res-<?= $lfId ?>" class="form-control form-control-sm level-input lf-res-level-input" data-lf-id="<?= $lfId ?>" value="0" aria-label="<?= $lfAmortNames[$lfId] ?>" disabled>
                   </div>
                 <?php endforeach; ?>
               </div>

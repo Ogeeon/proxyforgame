@@ -50,6 +50,7 @@ function collectGeneralSettings() {
 		lfCrawlerBonus: getInputNumber($('#lf-crawler-bonus')),
 		lfPlasmaCostReduction: getInputNumber($('#lf-plasma-cost-reduction')),
 		lfResLevels: collectLfResearchLevels(),
+		lfResAvail: options.lfResIds.map(function (id) { return getChecked('#lf-res-avail-' + id); }),
 		lfTechBonus: getInputNumber($('#lf-tech-bonus')),
 		lfResearchCostReduction: getInputNumber($('#lf-research-cost-reduction'))
 	};

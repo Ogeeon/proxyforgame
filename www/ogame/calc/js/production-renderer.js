@@ -41,7 +41,9 @@ function populateParams() {
 	setNumVal('#lf-research-cost-reduction', options.prm.lfResearchCostReduction);
 	options.lfResIds.forEach(function (id, k) {
 		setVal('#lf-res-' + id, options.prm.lfResLevels[k] || 0);
+		setChecked('#lf-res-avail-' + id, options.prm.lfResAvail[k] === true);
 	});
+	if (typeof syncLfResearchInputs === 'function') syncLfResearchInputs();
 }
 
 function setOnePlanetProdData() {

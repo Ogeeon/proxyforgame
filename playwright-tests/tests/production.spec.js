@@ -1054,11 +1054,22 @@ test.describe('Life Forms amortization', () => {
         await expect(page.locator('#all-pln-acc-lf-amort')).toHaveClass(/show/);
     }
 
-    async function fillLf(page, id, value) {
+    async function openResearchLevels(page) {
         await page.locator('#param-lifeforms-tab').click();
-        const input = page.locator('#' + id);
-        if (!(await input.isVisible()))
+        if (!(await page.locator('#lf-research-levels').isVisible()))
             await page.locator('#lf-research-levels-toggle').click();
+        await expect(page.locator('#lf-research-levels')).toHaveClass(/show/);
+    }
+
+    // Mark a research as available to the player, so the table may offer it.
+    async function makeAvailable(page, id) {
+        await openResearchLevels(page);
+        await page.locator('#lf-res-avail-' + id).check();
+    }
+
+    async function fillLf(page, id, value) {
+        await openResearchLevels(page);
+        const input = page.locator('#' + id);
         await input.fill(value);
         await input.press('Tab');
     }
@@ -1079,10 +1090,13 @@ test.describe('Life Forms amortization', () => {
 
     test('ranks buildings of the planet and empire-wide researches by payback', async ({ page }) => {
         await setUpPlanet(page, 2); // Rock'tal
+        await makeAvailable(page, 1102);
+        await makeAvailable(page, 2102);
         await openLfAmort(page);
 
+        // Three Rock'tal production buildings on planet 1, plus the two researches.
         const rows = body(page).locator('tr');
-        await expect(rows).toHaveCount(10);
+        await expect(rows).toHaveCount(5);
         // Magma Forge 0 -> 1 on planet 1: +2% of the metal mine output.
         const forge = rowOf(page, 'Magma Forge');
         await expect(forge.locator('td').nth(1)).toHaveText('Planet #1');
@@ -1093,17 +1107,41 @@ test.describe('Life Forms amortization', () => {
         await expect(rowOf(page, 'High-Performance Extractors').locator('td').nth(1)).toHaveText('All planets');
 
         const times = [];
-        for (let i = 0; i < 10; i++)
+        for (let i = 0; i < 5; i++)
             times.push(seconds(await rows.nth(i).locator('td').nth(6).textContent()));
         expect(times).toEqual([...times].sort((a, b) => a - b));
     });
 
     test('a planet without a life form proposes researches only', async ({ page }) => {
         await setUpPlanet(page, 0);
+        await makeAvailable(page, 1102);
+        await makeAvailable(page, 3101);
         await openLfAmort(page);
         const planets = await body(page).locator('tr td:nth-child(2)').allTextContents();
-        expect(planets.length).toBeGreaterThan(0);
-        expect(new Set(planets)).toEqual(new Set(['All planets']));
+        expect(planets).toEqual(['All planets', 'All planets']);
+    });
+
+    test('offers only the researches marked available', async ({ page }) => {
+        await setUpPlanet(page, 0);
+        await openLfAmort(page);
+        // Nothing marked: a research slot may hold another race's research.
+        await expect(body(page)).toHaveText('No upgrade would increase the production.');
+
+        await makeAvailable(page, 2102);
+        await expect(body(page).locator('tr')).toHaveCount(1);
+        await expect(rowOf(page, 'Acoustic Scanning')).toHaveCount(1);
+
+        await page.locator('#lf-res-avail-2102').uncheck();
+        await expect(body(page)).toHaveText('No upgrade would increase the production.');
+    });
+
+    test('a research level is editable only while the research is available', async ({ page }) => {
+        await openResearchLevels(page);
+        await expect(page.locator('#lf-res-4112')).toBeDisabled();
+        await page.locator('#lf-res-avail-4112').check();
+        await expect(page.locator('#lf-res-4112')).toBeEnabled();
+        await page.locator('#lf-res-avail-4112').uncheck();
+        await expect(page.locator('#lf-res-4112')).toBeDisabled();
     });
 
     test('the Megalith discounts Rock\'tal buildings', async ({ page }) => {
@@ -1119,6 +1157,7 @@ test.describe('Life Forms amortization', () => {
 
     test('research level, technology bonus and cost reduction drive a research row', async ({ page }) => {
         await setUpPlanet(page, 0);
+        await makeAvailable(page, 1102);
         await openLfAmort(page);
         const hpe = rowOf(page, 'High-Performance Extractors');
         await expect(hpe.locator('td').nth(5)).toHaveText('13 Metal, 4 Crystal, 2 Deuterium');
@@ -1138,16 +1177,20 @@ test.describe('Life Forms amortization', () => {
     });
 
     test('the research inputs persist on reload', async ({ page }) => {
+        await makeAvailable(page, 2105);
         await fillLf(page, 'lf-res-2105', '7');
         await fillLf(page, 'lf-tech-bonus', '12.5');
         await fillLf(page, 'lf-research-cost-reduction', '30');
         await page.reload();
+        await expect(page.locator('#lf-res-avail-2105')).toBeChecked();
+        await expect(page.locator('#lf-res-avail-2102')).not.toBeChecked();
         await expect(page.locator('#lf-res-2105')).toHaveValue('7');
         await expect(page.locator('#lf-tech-bonus')).toHaveValue('12.5');
         await expect(page.locator('#lf-research-cost-reduction')).toHaveValue('30');
     });
 
     test('research levels are clamped to 0..100 on blur', async ({ page }) => {
+        await makeAvailable(page, 1108);
         await fillLf(page, 'lf-res-1108', '150');
         await expect(page.locator('#lf-res-1108')).toHaveValue('100');
     });
