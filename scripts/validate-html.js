@@ -124,7 +124,7 @@ async function renderAll(combos) {
     const queue = [...combos];
     const workers = Array.from({ length: Math.min(CONCURRENCY, queue.length) }, async () => {
         while (queue.length > 0) {
-            await render(queue.shift());
+            await render(queue.shift()); // NOSONAR(S9382) - a pool worker runs its renders in turn
         }
     });
     await Promise.all(workers);
