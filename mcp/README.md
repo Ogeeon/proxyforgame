@@ -11,16 +11,37 @@ Why it is built this way - Node, no dependencies, one process behind Apache:
 
 ## Tools
 
-| Tool | What it answers | Computed by |
-|---|---|---|
-| `ogame_flight` | Distance, one-way duration and deuterium at each speed step, cargo capacity | `flight-core.js` |
-| `ogame_build_cost` | Metal, crystal, deuterium, energy, time, points, DM to halve, cargo ships to haul it - for a building or research range, or a number of ships or defences | `costs-core.js`, `ogame-costs.js`, `data/costs-techs.json` |
+| Tool | Calculator | What it answers | Computed by |
+|---|---|---|---|
+| `ogame_flight` | flight | Distance, one-way duration and deuterium at each speed step, cargo capacity | `flight-core.js` |
+| `ogame_build_cost` | costs | Metal, crystal, deuterium, energy, time, points, DM to halve, cargo ships - for a building or research range, or a number of ships or defences | `costs-core.js`, `ogame-costs.js`, `data/costs-techs.json` |
+| `ogame_lifeform_cost` | lfcosts | The same for a life form building or research, with the Megalith, MRC and research-building reductions | `lfcosts-core.js`, `ogame-lifeform.js`, `data/lf-techs.json` |
+| `ogame_build_queue` | queue | Each step of a build/demolish queue on a planet or moon, timed at the factory levels the steps before it reached; fields used | `QueueCalculator.simulate()` in `queue-core.js` |
+| `ogame_production` | production | One planet's hourly and daily output, energy balance and where each part comes from | `production-core.js`, `ogame-production.js`, `data/lf-building-bonuses.json` |
+| `ogame_expedition` | expeditions | Maximum resource, dark matter and ship finds of a fleet, and whether it can carry a top find | `expeditions-core.js`, `data/expedition-top-tiers.json` |
+| `ogame_moon_destruction` | moon | Chance that Death Stars destroy a moon, and that they blow up | `moon-core.js` |
+| `ogame_moon_creation` | moon | Moon chance and possible diameters from what a battle destroyed; debris and recyclers | `moon-core.js` |
+| `ogame_phalanx` | moon | Sensor Phalanx range, the systems it covers, the level a target needs | `moon-core.js` |
+| `ogame_graviton` | graviton | Energy Graviton Technology needs against what the planet makes; satellites, cost, time, debris | `graviton-core.js` |
+| `ogame_terraformer` | terraformer | Terraformer cost, fields and energy, and the satellites that cover the shortfall | `terraformer-core.js`, `ogame-costs.js` |
+| `ogame_trade` | trade | What resources buy at given rates - one for one, one for a mix, two for one - and the cargo ships | `trade-core.js` |
 
-Both take an optional `universe: {country, number}` - `{"country": "en", "number": 152}`
+Most take an optional `universe: {country, number}` - `{"country": "en", "number": 152}`
 for s152-en - and read its speeds and settings through the site's `serverdata` and
 `populatedSystems` services (`docs/universe-data.md`). Anything given by hand
 overrides what is read. The input schemas in `tools/*.js` are the reference: the
 server validates every call against the schema it publishes.
+
+Everything all twelve publish in `tools/list` comes to about 50 KB - every client loads it
+into its model's context, so keep new schemas lean: write a map from ships or buildings to
+a value with `keyedMap()` rather than one property per key, and list an item's keys with
+their names in the description once instead of as an enum (`resolveKey()` then accepts
+either).
+
+`ogame_production` is the one tool whose core reads page-wide state: `production-core.js`
+takes its settings from the `options` object `production.tpl` declares. The tool builds that
+object in the scripts' sandbox right before each call, which is safe because a call never
+yields.
 
 ## Running it
 
@@ -75,3 +96,4 @@ node mcp/server.js --stdio        # one client over stdin/stdout
 | `lib/browser-scripts.js` | Runs `www/` scripts in a `vm` context - shared with the unit tests |
 | `lib/site-api.js` | Reads universe data from the site, with a short cache |
 | `lib/revision.js` | The checkout's commit, for the version string |
+| `tools/common.js` | Shared argument schemas: universe, levels, maps, the planet energy inputs |

@@ -6,6 +6,7 @@
 const { loadBrowserScripts } = require('../lib/browser-scripts');
 const { ToolError } = require('../lib/protocol');
 const { formatDuration } = require('../lib/format');
+const { keyedMap } = require('./common');
 
 const { FlightCalculator, SHIPS_BASE, MISSION, PLAYER_CLASS } = loadBrowserScripts(
     ['ogame/calc/js/flight-core.js'],
@@ -69,12 +70,8 @@ const inputSchema = {
     properties: {
         from: coordinates('Departure'),
         to: coordinates('Destination'),
-        ships: {
-            type: 'object',
-            description: 'How many of each ship fly. At least one ship is needed; the slowest one sets the fleet speed.',
-            properties: Object.fromEntries(SHIP_KEYS.map((key) => [key, { type: 'integer', minimum: 0 }])),
-            additionalProperties: false,
-        },
+        ships: keyedMap(SHIP_KEYS, { type: 'integer', minimum: 0 },
+            'How many of each ship fly. At least one ship is needed; the slowest one sets the fleet speed.'),
         mission: {
             type: 'string',
             enum: Object.keys(MISSIONS),
@@ -120,20 +117,15 @@ const inputSchema = {
                     type: 'number', minimum: 0, default: 0,
                     description: 'Rock\'tal "Collector Enhancement": raises the Collector class ship bonuses.',
                 },
-                shipBonuses: {
+                shipBonuses: keyedMap(SHIP_KEYS, {
                     type: 'object',
-                    description: 'Per-ship life form bonuses in percent, keyed like `ships`.',
-                    properties: Object.fromEntries(SHIP_KEYS.map((key) => [key, {
-                        type: 'object',
-                        properties: {
-                            speed: { type: 'number', minimum: 0, default: 0 },
-                            cargo: { type: 'number', minimum: 0, default: 0 },
-                            fuel: { type: 'number', minimum: 0, maximum: 90, default: 0, description: 'Fuel consumption reduction' },
-                        },
-                        additionalProperties: false,
-                    }])),
+                    properties: {
+                        speed: { type: 'number', minimum: 0, default: 0 },
+                        cargo: { type: 'number', minimum: 0, default: 0 },
+                        fuel: { type: 'number', minimum: 0, maximum: 90, default: 0, description: 'Fuel consumption reduction' },
+                    },
                     additionalProperties: false,
-                },
+                }, 'Per-ship life form bonuses in percent, keyed like `ships`.'),
             },
             additionalProperties: false,
         },

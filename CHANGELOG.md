@@ -17,7 +17,7 @@ release section; it is the source of truth for the other eleven translations.
 
 ### Added
 
-- MCP server: the flight and costs calculators are available to LLM clients - ChatGPT, Claude and other Model Context Protocol clients - as two tools at `https://proxyforgame.com/mcp`, `ogame_flight` (flight time, deuterium and cargo between two coordinates) and `ogame_build_cost` (resources, time, points and dark matter for a building, research, ships or defence). Both can read a live universe's settings. They compute with the calculators' own formulas.
+- MCP server: every calculator is available to LLM clients - ChatGPT, Claude and other Model Context Protocol clients - at `https://proxyforgame.com/mcp`, as twelve tools: flight, build cost, life form cost, build queue, production, expedition, moon destruction, moon creation, sensor phalanx, graviton, terraformer and trade. Most can read a live universe's settings. They compute with the calculators' own formulas.
 - The misspelling report and e-mail forms are protected against spam: a hidden honeypot field and a minimum time the dialog must stay open silently drop automated submissions, and one address can send at most 5 messages per 10 minutes and 20 per day. The privacy policy now says that a hash of the sender's IP is kept for up to 24 hours for this.
 
 ### Fixed

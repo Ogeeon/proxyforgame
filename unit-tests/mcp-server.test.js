@@ -16,6 +16,7 @@ const { createHttpHandler, clientAddress } = require('../mcp/lib/http-transport'
 const { createSiteApi } = require('../mcp/lib/site-api');
 const { validate } = require('../mcp/lib/schema');
 const { formatDuration } = require('../mcp/lib/format');
+const { readWwwJson } = require('../mcp/lib/browser-scripts');
 const { createTools } = require('../mcp/tools');
 
 const { FlightCalculator } = load(['ogame/calc/js/flight-core.js'], ['FlightCalculator']);
@@ -98,9 +99,13 @@ describe('MCP protocol', () => {
         expect((await rpc(protocol, { id: 1, method: 'ping' })).error.code).toBe(-32600);
     });
 
-    it('lists both tools as read-only', async () => {
+    it('lists every tool as read-only', async () => {
         const { tools } = (await rpc(protocol, { jsonrpc: '2.0', id: 3, method: 'tools/list' })).result;
-        expect(tools.map((t) => t.name)).toEqual(['ogame_flight', 'ogame_build_cost']);
+        expect(tools.map((t) => t.name)).toEqual([
+            'ogame_flight', 'ogame_build_cost', 'ogame_lifeform_cost', 'ogame_build_queue', 'ogame_production',
+            'ogame_expedition', 'ogame_moon_destruction', 'ogame_moon_creation', 'ogame_phalanx',
+            'ogame_graviton', 'ogame_terraformer', 'ogame_trade',
+        ]);
         for (const tool of tools) {
             expect(tool.inputSchema.type).toBe('object');
             expect(tool.annotations.readOnlyHint).toBe(true);
@@ -462,5 +467,259 @@ describe('MCP duration format', () => {
         expect(formatDuration(59)).toBe('00:00:59');
         expect(formatDuration(3723)).toBe('01:02:03');
         expect(formatDuration(90061)).toBe('1d 01:01:01');
+    });
+});
+
+describe('MCP input validation of keyed maps', () => {
+    const schema = {
+        type: 'object',
+        properties: {
+            ships: { type: 'object', propertyNames: { enum: ['a', 'b'] }, additionalProperties: { type: 'integer', minimum: 0 } },
+        },
+    };
+
+    it('checks every value against the shared schema', () => {
+        expect(validate(schema, { ships: { a: 1, b: -1 } }).errors).toEqual(['arguments.ships.b must be at least 0']);
+    });
+
+    it('refuses a key outside the list', () => {
+        expect(validate(schema, { ships: { c: 1 } }).errors).toEqual(['arguments.ships.c is not one of: a, b']);
+    });
+});
+
+describe('MCP tool ogame_graviton', () => {
+    const { GravitonCalculator } = load(['js/utils.js', 'ogame/calc/js/graviton-core.js'], ['GravitonCalculator']);
+
+    it('maps its arguments onto the graviton calculator', async () => {
+        const site = fakeSiteApi({ 'en-5': { speed: '4', debrisFactor: '0.5', deuteriumInDebris: '1' } });
+        const out = (await call(protocolWith(site), 'ogame_graviton', {
+            universe: { country: 'en', number: 5 },
+            maxTemperature: 40, solarPlant: { level: 30 }, fusionReactor: { level: 20, percent: 80 },
+            solarSatellites: { count: 100 }, energyTechnology: 20, officers: 'all', playerClass: 'collector',
+            energyBoosterPercent: 40, shipyard: 12, naniteFactory: 5, crystalAvailable: 1000000,
+        })).structuredContent;
+        const direct = new GravitonCalculator().compute({
+            shipyardLevel: 12, nanitesFactoryLevel: 5, universeSpeed: 4, energyTechLevel: 20, hyperTechLevel: 0,
+            maxPlanetTemp: 40, energyBonus: 2, solarPlantLevel: 30, solarPlantPercent: 100, fusionPlantLevel: 20,
+            fusionPlantPercent: 80, solarSatellitesCount: 100, solarSatellitesPercent: 100, debrisPercent: 50,
+            playerClass: 1, isTrader: false, energyBoost: 4, disChLevel: 0, gravitonLevel: 1, totalLFEnrgBonus: 0,
+            scCapacityIncrease: 0, lcCapacityIncrease: 0, rcCapacityIncrease: 0, crysAvailable: 1000000,
+            deutAvailable: 0, deutInDebris: true,
+        });
+        expect(out.energyAvailable.total).toBe(direct.availableEnergy);
+        expect(out.satellitesNeeded).toBe(direct.neededSats);
+        expect(out.buildSeconds).toBe(direct.secsTotal);
+        expect(out.ifShotDown.debris.deuterium).toBe(direct.dfDeuterium);
+        expect(out.ifShotDown.debrisPercent).toBe(50);
+        expect(out.universeSpeed).toBe(4);
+    });
+
+    it('says so when satellites cannot help', async () => {
+        const out = (await call(protocolWith(), 'ogame_graviton', { maxTemperature: -140 })).structuredContent;
+        expect(out.satellitesNeeded).toBe(undefined);
+        expect(out.note).toContain('no number of them');
+    });
+});
+
+describe('MCP tool ogame_terraformer', () => {
+    it('adds 4 fields on an odd level and 5 on an even one', async () => {
+        const out = (await call(protocolWith(), 'ogame_terraformer', {
+            fromLevel: 8, toLevel: 10, solarPlant: { level: 30 }, maxTemperature: 40,
+        })).structuredContent;
+        expect(out.fieldsAdded).toBe(9);
+        // 1000 * 2^(10-1) energy for level 10
+        expect(out.energyRequired).toBe(512000);
+        expect(out.terraformer.crystal).toBe(50000 * (2 ** 8 + 2 ** 9));
+    });
+
+    it('refuses to go down', async () => {
+        const result = await call(protocolWith(), 'ogame_terraformer', { fromLevel: 5, toLevel: 5 });
+        expect(result.isError).toBe(true);
+    });
+});
+
+describe('MCP tool ogame_expedition', () => {
+    it('picks the find tier from the strongest player\'s points', async () => {
+        const args = { ships: { 'large-cargo': 100 } };
+        const top = async (points) => (await call(protocolWith(), 'ogame_expedition', { ...args, topPlayerPoints: points }))
+            .structuredContent.assumptions.topTierValue;
+        expect(await top(9999)).toBe(40000);
+        expect(await top(30000000)).toBe(3000000);
+        expect(await top(500000000)).toBe(5000000);
+    });
+
+    it('reads the top score and speed from a live universe', async () => {
+        const site = fakeSiteApi({ 'de-1': { speed: '8', topScore: '250000.5' } });
+        const out = (await call(protocolWith(site), 'ogame_expedition', {
+            universe: { country: 'de', number: 1 }, ships: { 'small-cargo': 10 }, playerClass: 'discoverer',
+        })).structuredContent;
+        expect(out.assumptions).toEqual({ topPlayerPoints: 250000, topTierValue: 1200000, universeSpeed: 8 });
+        // Discoverer: 1.5 * speed * tier, no pathfinder
+        expect(out.maxExpeditionPoints).toBe(1.5 * 8 * 1200000);
+    });
+
+    it('gives the General\'s recycler bonus to a General only', async () => {
+        const cap = async (cls) => (await call(protocolWith(), 'ogame_expedition', { ships: { recycler: 10 }, playerClass: cls }))
+            .structuredContent.fleetCargoCapacity;
+        expect(await cap('none')).toBe(200000);
+        expect(await cap('general')).toBe(240000);
+    });
+
+    it('lists only the ships the fleet unlocks', async () => {
+        const out = (await call(protocolWith(), 'ogame_expedition', { ships: { 'small-cargo': 100 } })).structuredContent;
+        expect(Object.keys(out.findableShips)).toEqual(['esp-probe', 'small-cargo', 'light-fighter']);
+    });
+});
+
+describe('MCP moon tools', () => {
+    it('ogame_moon_destruction: (100 - sqrt(D)) * sqrt(n) and sqrt(D) / 2', async () => {
+        const out = (await call(protocolWith(), 'ogame_moon_destruction', { moonDiameter: 8100, deathStars: 4 })).structuredContent;
+        expect(out).toEqual({ moonDestroyedPercent: 20, deathStarsLostPercent: 45 });
+    });
+
+    it('ogame_moon_creation: 2M of debris is the 20% cap', async () => {
+        const out = (await call(protocolWith(), 'ogame_moon_creation', { destroyed: { 'light-fighter': 2000 } })).structuredContent;
+        expect(out.debris.total).toBe(2400000);
+        expect(out.moonChancePercent).toBe(20);
+        expect(out.moonDiameterKm.min).toBe(8366);
+        expect(out.unitsForMaxChance['rocket-launcher']).toBe(undefined);
+    });
+
+    it('ogame_moon_creation: counts defence when the universe sends it to debris', async () => {
+        const site = fakeSiteApi({ 'en-9': { debrisFactor: '0.5', debrisFactorDef: '0.3', deuteriumInDebris: '0' } });
+        const out = (await call(protocolWith(site), 'ogame_moon_creation', {
+            universe: { country: 'en', number: 9 }, destroyed: { 'rocket-launcher': 100 },
+        })).structuredContent;
+        expect(out.assumptions.defenceToDebris).toBe(true);
+        expect(out.debris.metal).toBe(100000);
+    });
+
+    it('ogame_phalanx: wraps round a circular galaxy and names the level a target needs', async () => {
+        const out = (await call(protocolWith(), 'ogame_phalanx', {
+            phalanxLevel: 7, moonSystem: 5, targetSystem: 470, circularSystems: true,
+        })).structuredContent;
+        expect(out.rangeSystems).toBe(48);
+        expect(out.covers).toEqual([{ from: 456, to: 499 }, { from: 1, to: 53 }]);
+        expect(out.target).toEqual({ system: 470, distance: 34, inRange: true, levelNeeded: 6 });
+    });
+});
+
+describe('MCP tool ogame_lifeform_cost', () => {
+    const { LfCalculator } = load(
+        ['ogame/calc/js/ogame-costs.js', 'ogame/calc/js/ogame-lifeform.js', 'ogame/calc/js/lfcosts-core.js'],
+        ['LfCalculator'],
+    );
+
+    it('applies the Megalith to a Rock\'tal building the way the page does', async () => {
+        const out = (await call(protocolWith(), 'ogame_lifeform_cost', {
+            item: 'Megalith', fromLevel: 5, toLevel: 6, megalith: 5, roboticsFactory: 10,
+        })).structuredContent;
+        const techs = readWwwJson('ogame/calc/data/lf-techs.json');
+        const costs = Object.fromEntries(Object.entries(techs).map(([id, row]) => [id, row.slice(2)]));
+        const calc = new LfCalculator(costs);
+        const params = { race: 2, megalithLvl: 5, mineralResCntrLvl: 0, robotFactoryLevel: 10, naniteFactoryLevel: 0,
+            universeSpeed: 1, researchCostReduction: 0, researchTimeReduction: 0, runeTechLvl: 0 };
+        const direct = calc.calculate(2008, 5, 6, 0, calc.computeRsrCostRdc(params), calc.computeBldCostRdc(2008, 2, 5, 0), params);
+        expect(out.item.key).toBe('megalith');
+        expect([out.metal, out.crystal, out.deuterium, out.durationSeconds]).toEqual([direct.metal, direct.crystal, direct.deut, direct.time]);
+        expect(out.reductions.buildingCostPercent).toBe(5);
+    });
+
+    it('refuses to lower a research and names an unknown item', async () => {
+        expect((await call(protocolWith(), 'ogame_lifeform_cost', { item: 'kaelesh-disc-enh', fromLevel: 3, toLevel: 2 })).isError).toBe(true);
+        const unknown = await call(protocolWith(), 'ogame_lifeform_cost', { item: 'warp drive', toLevel: 1 });
+        expect(unknown.content[0].text).toContain('Unknown item "warp drive"');
+    });
+});
+
+describe('MCP tool ogame_build_queue', () => {
+    it('times a step with the Robotics Factory the step before it built', async () => {
+        const run = async (queue) => (await call(protocolWith(), 'ogame_build_queue', {
+            levels: { 'robot-factory': 9, 'metal-mine': 30 }, queue,
+        })).structuredContent;
+        const alone = await run([{ building: 'metal-mine' }]);
+        const after = await run([{ building: 'robot-factory' }, { building: 'metal-mine' }]);
+        // Robotics 10 instead of 9: the mine takes 10/11 of the time
+        expect(after.steps[1].durationSeconds).toBe(Math.floor(alone.steps[0].durationSeconds * 10 / 11));
+        expect(after.steps[1].toLevel).toBe(31);
+    });
+
+    it('flags a step with no free field, and counts the Terraformer\'s new ones', async () => {
+        const out = (await call(protocolWith(), 'ogame_build_queue', {
+            levels: { 'metal-mine': 10 }, fields: 11, queue: [{ building: 'terraformer' }, { building: 'crystal-mine', times: 2 }],
+        })).structuredContent;
+        expect(out.steps.map((s) => s.noFreeField ?? false)).toEqual([false, false, false]);
+        expect(out.fields).toEqual({ used: 13, available: 16 });
+    });
+
+    it('refuses impossible queues', async () => {
+        const error = async (args) => (await call(protocolWith(), 'ogame_build_queue', args)).content[0].text;
+        expect(await error({ queue: [{ building: 'metal-mine', action: 'demolish' }] })).toContain('below level 0');
+        expect(await error({ levels: { terraformer: 2 }, queue: [{ building: 'terraformer', action: 'demolish' }] }))
+            .toContain('cannot be demolished');
+        expect(await error({ queue: [{ building: 'sensor-phalanx' }] })).toContain('cannot be built on a planet');
+    });
+});
+
+describe('MCP tool ogame_production', () => {
+    const base = {
+        maxTemperature: 40, metalMine: { level: 30 }, crystalMine: { level: 25 }, deuteriumSynthesizer: { level: 20 },
+        solarPlant: { level: 35 }, energyTechnology: 15, plasmaTechnology: 10,
+    };
+
+    it('produces the same hour as the page\'s own core', async () => {
+        const out = (await call(protocolWith(), 'ogame_production', base)).structuredContent;
+        expect(out.perDay.metal).toBe(out.perHour.metal * 24);
+        expect(out.productionFactor).toBe(1);
+        const parts = Object.values(out.breakdownPerHour).reduce((sum, r) => sum + r.metal, 0);
+        expect(parts).toBe(out.perHour.metal);
+    });
+
+    it('lets a Magma Forge raise the metal output', async () => {
+        const plain = (await call(protocolWith(), 'ogame_production', base)).structuredContent;
+        const forge = (await call(protocolWith(), 'ogame_production', { ...base, lifeformBuildings: { 'magma-forge': 10 } })).structuredContent;
+        // 2% per level of the mine's output
+        expect(forge.breakdownPerHour.lifeformBuildings.metal).toBe(Math.round(plain.breakdownPerHour.mines.metal * 0.2));
+    });
+
+    it('caps crawlers at 8 per mine level and says so', async () => {
+        const out = (await call(protocolWith(), 'ogame_production', { ...base, crawlers: { count: 5000 } })).structuredContent;
+        expect(out.note).toContain('Only 600 crawlers');
+    });
+
+    it('refuses buildings of two races on one planet', async () => {
+        const result = await call(protocolWith(), 'ogame_production', { lifeformBuildings: { 'magma-forge': 1, 'high-en-smelt': 1 } });
+        expect(result.isError).toBe(true);
+    });
+});
+
+describe('MCP tool ogame_trade', () => {
+    it('sells two resources for the third', async () => {
+        const out = (await call(protocolWith(), 'ogame_trade', { sell: { metal: 300000, crystal: 100000 } })).structuredContent;
+        // 300000 / 2.4 + 100000 / 1.5 at the default rates
+        expect(out.receive).toEqual({ deuterium: 191667 });
+        expect(out.rates.withinUsualRanges).toBe(true);
+    });
+
+    it('splits the return by units', async () => {
+        const out = (await call(protocolWith(), 'ogame_trade', {
+            sell: { deuterium: 100000 }, buy: 'both', split: { receivePercent: { crystal: 70 } },
+        })).structuredContent;
+        expect(Math.round(out.receive.crystal / (out.receive.crystal + out.receive.metal) * 100)).toBe(70);
+    });
+
+    it('buys a fixed amount and the rest in the other resource', async () => {
+        const out = (await call(protocolWith(), 'ogame_trade', {
+            sell: { metal: 240000 }, buy: 'both', split: { fixed: { deuterium: 50000 } }, rates: { metalPerDeuterium: 2.4, crystalPerDeuterium: 1.6 },
+        })).structuredContent;
+        // 50000 deuterium cost 120000 metal; the other 120000 buy crystal at 1.5
+        expect(out.receive).toEqual({ crystal: 80000, deuterium: 50000 });
+    });
+
+    it('refuses a trade that makes no sense', async () => {
+        const error = async (args) => (await call(protocolWith(), 'ogame_trade', args)).isError;
+        expect(await error({ sell: { metal: 1, crystal: 1, deuterium: 1 } })).toBe(true);
+        expect(await error({ sell: { metal: 1 }, buy: 'metal' })).toBe(true);
+        expect(await error({ sell: { metal: 1 }, buy: 'crystal', split: { fixed: { crystal: 1 } } })).toBe(true);
     });
 });

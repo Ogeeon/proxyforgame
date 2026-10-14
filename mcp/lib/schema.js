@@ -9,9 +9,14 @@
 // handler sees every optional field with a value.
 //
 // Supported keywords: type (object, array, string, number, integer, boolean),
-// properties, required, additionalProperties: false, items, enum, minimum,
+// properties, required, additionalProperties (false, or a schema for every
+// property not listed), propertyNames (its enum), items, enum, minimum,
 // maximum, minItems, maxItems, default. Anything else in a schema is
 // documentation only.
+//
+// propertyNames with additionalProperties is how a map such as ship -> count
+// is written: the ship keys are listed once instead of once per property, which
+// keeps the schemas every client loads into its context small.
 
 /**
  * @typedef {object} JsonSchema
@@ -19,7 +24,8 @@
  * @property {string} [description]
  * @property {Record<string, JsonSchema>} [properties]
  * @property {string[]} [required]
- * @property {boolean} [additionalProperties]
+ * @property {boolean|JsonSchema} [additionalProperties]
+ * @property {{enum?: string[]}} [propertyNames]
  * @property {JsonSchema} [items]
  * @property {Array<string|number|boolean>} [enum]
  * @property {number} [minimum]
@@ -132,9 +138,15 @@ function checkObject(schema, value, path, errors) {
         }
     }
     for (const [name, item] of Object.entries(value)) {
-        const sub = properties[name];
+        const names = schema.propertyNames?.enum;
+        if (names && !names.includes(name)) {
+            errors.push(`${path}.${name} is not one of: ${names.join(', ')}`);
+            continue;
+        }
+        const extra = schema.additionalProperties;
+        const sub = properties[name] ?? (typeof extra === 'object' ? extra : undefined);
         if (!sub) {
-            if (schema.additionalProperties === false) {
+            if (extra === false) {
                 errors.push(`${path}.${name} is not a known field`);
             } else {
                 out[name] = item;

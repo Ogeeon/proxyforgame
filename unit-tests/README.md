@@ -12,8 +12,8 @@ instead of a browser — about 0.1 ms per test against roughly 360 ms through Pl
 - `expect.js` is a small value-only matcher shim, so a test body here reads the same as the
   equivalent one in a Playwright spec.
 
-Six of the ten calculators have a file here: `expeditions`, `flight`, `graviton`, `moon`,
-`production`, `terraformer`.
+All ten calculators have a `<name>-core.test.js` here. `mcp-server.test.js` covers the MCP
+server in `mcp/` - its protocol, transport and every tool's mapping onto a calculator.
 
 ## Where a test belongs
 

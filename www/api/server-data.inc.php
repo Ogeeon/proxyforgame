@@ -27,7 +27,15 @@
       'fleetIgnoreEmptySystems' => (string)$xml->fleetIgnoreEmptySystems,
       // Independent of the one above: it skips systems where every player is
       // inactive, and a universe can have either, both or neither switched on.
-      'fleetIgnoreInactiveSystems' => (string)$xml->fleetIgnoreInactiveSystems
+      'fleetIgnoreInactiveSystems' => (string)$xml->fleetIgnoreInactiveSystems,
+      // Read by the MCP server's expedition, moon and graviton tools: the top
+      // player's score sets the expedition find tier, the debris factors and
+      // the deuterium flag shape a debris field. An element a universe does
+      // not publish comes back as an empty string.
+      'topScore' => (string)$xml->topScore,
+      'debrisFactor' => (string)$xml->debrisFactor,
+      'debrisFactorDef' => (string)$xml->debrisFactorDef,
+      'deuteriumInDebris' => (string)$xml->deuteriumInDebris
     );
   }
 

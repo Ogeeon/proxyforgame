@@ -7,6 +7,7 @@
 const { loadBrowserScripts, readWwwJson } = require('../lib/browser-scripts');
 const { ToolError } = require('../lib/protocol');
 const { formatDuration } = require('../lib/format');
+const common = require('./common');
 
 const { GlobalParams, BuildRequest, Calculator, universeSpeeds } = loadBrowserScripts(
     ['ogame/calc/js/ogame-production.js', 'ogame/calc/js/ogame-costs.js', 'ogame/calc/js/costs-core.js'],
@@ -49,8 +50,7 @@ const inputSchema = {
     properties: {
         item: {
             type: 'string',
-            enum: [...IDS.keys()],
-            description: `What to build. Buildings, research, ships and defence: ${itemList}.`,
+            description: `What to build, by key or English name. Buildings, research, ships and defence: ${itemList}.`,
         },
         fromLevel: {
             type: 'integer', minimum: 0, maximum: 100, default: 0,
@@ -83,17 +83,7 @@ const inputSchema = {
             },
             additionalProperties: false,
         },
-        universe: {
-            type: 'object',
-            description: 'A live universe, e.g. {"country": "en", "number": 152}. Its economy and research '
-                + 'speeds are read from the game; universeSpeed and researchSpeed override them.',
-            properties: {
-                country: { type: 'string', description: 'Two or three letters: en, de, ru, us, ...' },
-                number: { type: 'integer', minimum: 1 },
-            },
-            required: ['country', 'number'],
-            additionalProperties: false,
-        },
+        universe: common.universeSchema,
         universeSpeed: { type: 'number', minimum: 1, maximum: 10, description: 'Economy speed. Default 1.' },
         researchSpeed: {
             type: 'number', minimum: 1, maximum: 100,
@@ -138,14 +128,9 @@ function createBuildCostTool({ siteApi }) {
      * @param {any} args
      */
     async function speeds(args) {
-        let live = null;
-        if (args.universe) {
-            const country = String(args.universe.country).toLowerCase();
-            if (!/^[a-z]{2,3}$/.test(country)) {
-                throw new ToolError('universe.country must be two or three letters, like "en" or "de".');
-            }
-            live = universeSpeeds(await siteApi.serverData({ country, universe: args.universe.number }));
-        }
+        const live = args.universe
+            ? universeSpeeds(await siteApi.serverData(common.universeRef(args.universe)))
+            : null;
         const universeSpeed = args.universeSpeed ?? live?.universeSpeed ?? 1;
         return { universeSpeed, researchSpeed: args.researchSpeed ?? live?.researchSpeed ?? universeSpeed };
     }
@@ -159,6 +144,7 @@ function createBuildCostTool({ siteApi }) {
         inputSchema,
         openWorld: true,
         async run(args) {
+            args.item = common.resolveKey(args.item, IDS.keys(), NAMES, 'item');
             const id = /** @type {number} */ (IDS.get(args.item));
             const tech = TECHS.techs[id];
             const kind = KIND[/** @type {keyof typeof KIND} */ (tech.type)];

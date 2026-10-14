@@ -35,9 +35,8 @@ node --test <name>-core.test.js    # from unit-tests/, only if that file exists
 make test-one spec=<name>
 ```
 
-Eight of the ten have a unit test: `expeditions`, `flight`, `graviton`, `lfcosts`, `moon`,
-`production`, `terraformer`, `trade`. For `costs` and `queue` there is no `*-core.test.js` —
-skip that step. Check for the file rather than trusting this list.
+All ten have a unit test now - `queue` was the last to get one. Check for the file rather
+than trusting this line, and skip the step for a calculator that has none.
 
 ## Shared files — these force the full `make test`
 
@@ -60,7 +59,9 @@ Anything not in a calculator's file set, notably:
 - `mcp/**` — the MCP server; its own tests are `unit-tests/mcp-server.test.js`
   (`node --test mcp-server.test.js` from `unit-tests/`), but `mcp/lib/browser-scripts.js`
   is also the loader every unit test runs through
-- `www/ogame/calc/data/costs-techs.json` — read by `costs.php` and by the MCP server
+- `www/ogame/calc/data/*.json` — tables a page and the MCP server both read: `costs-techs.json`
+  (`costs.php`, `queue.php`), `lf-techs.json` (`lf-techdata.inc.php`: lfcosts and production),
+  `lf-building-bonuses.json` (`production.php`), `expedition-top-tiers.json` (`expeditions.tpl`)
 - `playwright-tests/tests/base.js` — **note the path**, it sits in `tests/`, not the root
 - `playwright-tests/playwright.config.js`
 - anything under `unit-tests/` other than a single `<name>-core.test.js` (`load.js`, `expect.js`,
