@@ -166,15 +166,20 @@
             <div class="d-flex align-items-center gap-1">
               <label for="highTop"><?= $l['LOCA_STRONGEST_CAP'] ?></label>
               <select id="highTop" name="highTop" class="form-select form-select-sm w-auto">
-                <option value="40000">&lt; 10.000</option>
-                <option value="500000">&lt; 100.000</option>
-                <option value="1200000">&lt; 1.000.000</option>
-                <option value="1800000">&lt; 5.000.000</option>
-                <option value="2400000">&lt; 25.000.000</option>
-                <option value="3000000">&lt; 50.000.000</option>
-                <option value="3600000">&lt; 75.000.000</option>
-                <option value="4200000">&lt; 100.000.000</option>
-                <option value="5000000" selected="selected">&gt; 100.000.000</option>
+<?php
+// The tiers live in data/expedition-top-tiers.json, shared with the MCP server.
+// The last one has no upper bound, is labelled "above" the bound before it,
+// and is the default.
+$expTopTiers = json_decode(file_get_contents(__DIR__ . '/data/expedition-top-tiers.json'), true);
+$expPrevBelow = 0;
+foreach ($expTopTiers as $expTier):
+    if ($expTier['below'] === null): ?>
+                <option value="<?= $expTier['highTop'] ?>" selected="selected">&gt; <?= number_format($expPrevBelow, 0, '', '.') ?></option>
+<?php else: ?>
+                <option value="<?= $expTier['highTop'] ?>">&lt; <?= number_format($expTier['below'], 0, '', '.') ?></option>
+<?php $expPrevBelow = $expTier['below'];
+    endif;
+endforeach; ?>
               </select>
               <span><?= $l['LOCA_STRONGEST_CAP2'] ?></span>
             </div>

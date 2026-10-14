@@ -7,12 +7,13 @@ The `*-core.js` calculator modules are DOM-free, so their formulas can be exerci
 instead of a browser — about 0.1 ms per test against roughly 360 ms through Playwright.
 
 - `load.js` runs the classic (non-module) browser scripts inside a `vm` context and lifts out
-  the globals a test asks for.
+  the globals a test asks for. The loader itself is `mcp/lib/browser-scripts.js`, shared with
+  the MCP server, which computes with the same files.
 - `expect.js` is a small value-only matcher shim, so a test body here reads the same as the
   equivalent one in a Playwright spec.
 
-Six of the ten calculators have a file here: `expeditions`, `flight`, `graviton`, `moon`,
-`production`, `terraformer`.
+All ten calculators have a `<name>-core.test.js` here. `mcp-server.test.js` covers the MCP
+server in `mcp/` - its protocol, transport and every tool's mapping onto a calculator.
 
 ## Where a test belongs
 

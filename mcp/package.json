@@ -1,0 +1,14 @@
+{
+  "name": "pfg-mcp",
+  "version": "1.0.0",
+  "private": true,
+  "description": "MCP server exposing the ProxyForGame calculators to LLM clients. No dependencies: Node built-ins only.",
+  "type": "commonjs",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "start": "node server.js",
+    "stdio": "node server.js --stdio"
+  }
+}

@@ -23,6 +23,9 @@
 #   MAIL_TO         address for failure reports (optional)
 #   MAX_WALK        optional; how many commits back from the tip of main to
 #                   consider in green mode before giving up (default 20)
+#   MCP_RESTART_FILE optional; after a deploy, the commit is written here, and
+#                   pfg-mcp-restart.path restarts the MCP server on that write
+#                   (deploy/README.md, "The MCP server"). Unset: no MCP server.
 #
 # Deliberately NOT `git pull`: a pull can merge, and merges are how the previous
 # Bitbucket checkout accumulated 26 commits that existed nowhere else. A reset
@@ -68,6 +71,7 @@ MAIL_TO="${MAIL_TO:-}"
 SMOKE_RESOLVE="${SMOKE_RESOLVE:-}"
 SMOKE_INSECURE="${SMOKE_INSECURE:-}"
 MAX_WALK="${MAX_WALK:-20}"
+MCP_RESTART_FILE="${MCP_RESTART_FILE:-}"
 
 log() { printf '%s %s\n' "$(date -Is)" "$*" >> "$LOG"; }
 fail() {
@@ -114,6 +118,24 @@ apply_migrations() {
   local migrator="$CHECKOUT/deploy/pfg-migrate"
   [ -x "$migrator" ] || { log "NOTE: $migrator missing - skipping migrations"; return 0; }
   "$migrator" "$CHECKOUT" >> "$LOG" 2>&1
+}
+
+# ---------------------------------------------------------------------------
+# Ask for the MCP server to be restarted onto the code just deployed. It loads
+# the calculator scripts once, at start, so until it restarts it keeps
+# computing with the release before. This script runs as www-data and cannot
+# call systemctl; it writes the commit to a file and a systemd path unit
+# (deploy/pfg-mcp-restart.path) does the restart.
+#
+# Only after a deploy that passed its smoke test: a rolled-back deploy put the
+# old files back, and the running server already has the old code in memory.
+# A failure is logged, not fatal - the site is fine, and the watchdog reports
+# a server whose commit lags the site's.
+# ---------------------------------------------------------------------------
+signal_mcp() {
+  [ -n "$MCP_RESTART_FILE" ] || return 0
+  printf '%s\n' "$1" > "$MCP_RESTART_FILE" 2>/dev/null \
+    || log "WARNING: could not write $MCP_RESTART_FILE - the MCP server keeps the previous release"
 }
 
 # ---------------------------------------------------------------------------
@@ -455,6 +477,7 @@ log "deployed $WANT_SHA - smoke passed"
 echo "deployed $WANT_SHA"
 
 apply_changelog
+signal_mcp "$WANT_SHA"
 
 # The copy that runs lives outside the checkout on purpose: resetting the tree
 # under a running bash would let it read the second half of a different file.

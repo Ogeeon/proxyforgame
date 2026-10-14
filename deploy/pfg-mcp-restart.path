@@ -1,0 +1,18 @@
+# Restarts pfg-mcp when a deploy says so. The server loads the calculator
+# scripts once, at start, so new code only reaches it through a restart, and
+# pfg-sync runs as www-data, which cannot call systemctl. It writes the commit
+# it just deployed to MCP_RESTART_FILE instead (/etc/pfg-sync.conf), and this
+# unit turns that write into a restart - no sudo rule needed.
+#
+#   install -m 644 <checkout>/deploy/pfg-mcp-restart.{path,service} /etc/systemd/system/
+#   install -d -o www-data -g www-data /var/lib/pfg/mcp
+#   systemctl daemon-reload && systemctl enable --now pfg-mcp-restart.path
+
+[Unit]
+Description=Restart the ProxyForGame MCP server after a deploy
+
+[Path]
+PathChanged=/var/lib/pfg/mcp/deployed
+
+[Install]
+WantedBy=multi-user.target

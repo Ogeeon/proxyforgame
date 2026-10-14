@@ -45,6 +45,9 @@ checkout is only ever updated by one piece of code.
 | `pfg-migrate` | Applies pending `db/migrations/*.sql` and records them in `schema_migrations`. `pfg-sync` calls it before the smoke test; a failure **is** fatal and rolls the deploy back. |
 | `pfg-cron-run` | Wraps a cron job and stamps when it last ran. See *Between deploys*. |
 | `watchdog.sh` | Runs nowhere on the host — a runner, or a laptop. Checks the site from outside. Driven by `.github/workflows/watchdog.yml`. |
+| `pfg-mcp.service` | The MCP server (`mcp/server.js`) as a systemd service. See *The MCP server*. |
+| `pfg-mcp-restart.path`, `.service` | Restart that service when `pfg-sync` reports a deploy. |
+| `apache-mcp.conf` | Proxies `/mcp` to the service; included in both site vhosts. |
 
 Until 2026-10 the site ran on two hosts, a production account and a standby;
 the comments in `pfg-sync`, `pfg-migrate` and `pfg-changelog-apply` still name
@@ -105,6 +108,8 @@ The receiver's own settings (the secret, the `pfg-sync` path, the log) are in
 | deploy log | `/var/log/pfg-cron.log` (the webhook logs there too) |
 | trigger | webhook, plus a five-minute reconcile |
 | shell from the dev box | `bash scripts/pfg-ssh.sh standby '<cmd>'` |
+| Node | the distribution's `nodejs`, 20 or newer — only for the MCP server |
+| MCP server | `pfg-mcp.service` on `127.0.0.1:8787`, public as `https://<name>/mcp` |
 
 Apache 2.4 with `mpm_event` and PHP-FPM (`proxy_fcgi`, the stock
 `php8.5-fpm` pool sized to `pm.max_children = 10` for the 1-CPU / 1 GB box),
@@ -326,11 +331,76 @@ migrations. The one file that cannot be recreated from git is the checkout's
    `/etc/pfg-cron.conf` (`STAMP_DIR=/var/lib/pfg/job-stamps`, readable by
    `www-data`) and `/etc/pfg-webhook.conf` (the secret is in the GitHub webhook
    settings — set a new one there if it is lost).
-6. The `www-data` crontab: `uni.list.cron.php` and `get_population.php` under
+6. The MCP server, as in *The MCP server* above.
+7. The `www-data` crontab: `uni.list.cron.php` and `get_population.php` under
    `pfg-cron-run` (see above), and `*/5 * * * * /usr/local/bin/pfg-sync`. Run
    both jobs once by hand so the pickers are not empty until midnight.
-7. Point DNS at the new address, then `certbot --apache` for every name.
+8. Point DNS at the new address, then `certbot --apache` for every name.
    `bash deploy/watchdog.sh` going green is the definition of done.
+
+## The MCP server
+
+`mcp/server.js` serves the calculators to LLM clients over the Model Context
+Protocol (`mcp/README.md`; why it is a Node process: ADR-0005). It is a
+long-running process, unlike everything else the site runs, so three things
+are different from the PHP side.
+
+**It is started by systemd and reached through Apache.** The process listens on
+loopback only; `apache-mcp.conf` proxies the one path `/mcp` to it from both
+site vhosts. Apache appends the client's address to `X-Forwarded-For`, and the
+server's per-address rate limit (120 a minute) reads it from there.
+
+**A deploy restarts it.** The server loads the calculator scripts once, at
+start, and keeps computing with them until it is restarted. `pfg-sync` runs as
+`www-data` and cannot call `systemctl`, so after a deploy that passed its smoke
+test it writes the commit to `MCP_RESTART_FILE` (`/etc/pfg-sync.conf`), and
+`pfg-mcp-restart.path` restarts the service on that write. A deploy that is
+rolled back writes nothing: the files on disk went back to the release the
+server already holds in memory. A failed write is logged as a warning, never
+fails the deploy.
+
+**The watchdog checks it.** It sends `initialize` to `/mcp` under each name. The
+answer's `serverInfo.version` ends in the commit the server loaded
+(`1.0.0+3f2c1ab09d4e`), and a commit that differs from the one health reports
+means the restart never happened. A 404 — Apache not proxying the path — only
+warns, until the repository variable `PFG_MCP_REQUIRED` is set to `1`; from then
+on it fails like anything else.
+
+### Setting it up
+
+```
+apt install nodejs                       # 20 or newer; `node --version`
+install -m 644 /var/www/proxyforgame-gh/deploy/pfg-mcp.service \
+               /var/www/proxyforgame-gh/deploy/pfg-mcp-restart.path \
+               /var/www/proxyforgame-gh/deploy/pfg-mcp-restart.service /etc/systemd/system/
+install -d -o www-data -g www-data /var/lib/pfg/mcp
+systemctl daemon-reload
+systemctl enable --now pfg-mcp pfg-mcp-restart.path
+curl -s -X POST http://127.0.0.1:8787/mcp -H 'Content-Type: application/json' \
+     -d '{"jsonrpc":"2.0","id":1,"method":"ping"}'             # {"jsonrpc":"2.0","id":1,"result":{}}
+
+a2enmod proxy proxy_http
+install -m 644 /var/www/proxyforgame-gh/deploy/apache-mcp.conf /etc/apache2/pfg-mcp.conf
+# add `Include /etc/apache2/pfg-mcp.conf` to the :443 vhost of proxyforgame.net and of proxyforgame.com
+apachectl configtest && systemctl reload apache2
+
+echo 'MCP_RESTART_FILE=/var/lib/pfg/mcp/deployed' >> /etc/pfg-sync.conf
+cp /var/www/proxyforgame-gh/deploy/pfg-sync /usr/local/bin/pfg-sync    # the copy that knows MCP_RESTART_FILE
+```
+
+Then check it from outside with `bash deploy/watchdog.sh` (an `ok   MCP …` line
+under each name), and set `PFG_MCP_REQUIRED=1` under the repository's Actions
+variables.
+
+The units and `apache-mcp.conf` are installed copies, like `webhook.php`: a
+change to them in the repository reaches the host only when it is reinstalled
+(then `systemctl daemon-reload` or `systemctl reload apache2`). The Apache
+snippet is copied rather than included from the checkout on purpose — a rollback
+to a commit from before it existed would otherwise break Apache's next reload.
+
+`journalctl -u pfg-mcp` has the server's log: the start line with its version,
+and a stack for any tool that failed with an internal error. Stopping it
+(`systemctl stop pfg-mcp`) takes `/mcp` down to a 503 and nothing else.
 
 ## Database changes
 
