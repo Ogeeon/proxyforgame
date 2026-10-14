@@ -67,6 +67,16 @@ function tradeMcRate(md, cd) {
     return Number((md / cd).toFixed(TRADE_MC_DECIMALS));
 }
 
+/**
+ * The rates a fresh form starts from: the middle of each fair-trade range.
+ * @returns {{md: number, cd: number, mc: number}}
+ */
+function tradeDefaultRates() {
+    const md = (TRADE_RATE_LIMITS.md.min + TRADE_RATE_LIMITS.md.max) / 2;
+    const cd = (TRADE_RATE_LIMITS.cd.min + TRADE_RATE_LIMITS.cd.max) / 2;
+    return { md, cd, mc: tradeMcRate(md, cd) };
+}
+
 // ============================================================================
 // UI STATE
 // ============================================================================
@@ -451,6 +461,7 @@ if (typeof window !== 'undefined') {
         TRADE_CLASS_COLLECTOR,
         TRADE_MC_DECIMALS,
         tradeMcRate,
+        tradeDefaultRates,
         getDstInputState,
         tradeMixPercent,
         tradeMixRates,
