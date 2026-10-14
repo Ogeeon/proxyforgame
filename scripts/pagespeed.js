@@ -139,10 +139,11 @@ function parseArgs(argv) {
   };
   for (let i = 0; i < argv.length; i++) {
     const arg = argv[i];
+    // Checked by index: argv is typed string[], so an element read past the
+    // end is not undefined as far as the types (and Sonar's S3403) can tell.
     const next = () => {
-      const value = argv[++i];
-      if (value === undefined) fail(`${arg} needs a value`);
-      return value;
+      if (i + 1 >= argv.length) fail(`${arg} needs a value`);
+      return argv[++i];
     };
     switch (arg) {
       case '--pages': {
