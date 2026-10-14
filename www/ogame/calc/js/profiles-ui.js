@@ -1559,6 +1559,138 @@ class PfLockedUniverse {
 }
 
 /**
+ * A planet or moon of a profile that has full coordinates, as PfCoordsSelect lists it.
+ *
+ * @typedef {object} PfCoordsBody
+ * @property {ProfilePlanet} body
+ * @property {number[]} coords Galaxy, system, position.
+ * @property {boolean} isMoon
+ * @property {string} label
+ */
+
+/**
+ * @typedef {object} PfCoordsSelectConfig
+ * @property {string} select Selector of the <select>.
+ * @property {string[]} boxes Selectors of what is shown while there is a body to pick.
+ * @property {string} lastKey Calculator name under which the last choice is remembered.
+ * @property {string} nameFallback The name of a body that has none.
+ * @property {(b: PfCoordsBody) => boolean} isAt Whether the calculator's coordinates are at the body.
+ * @property {(b: PfCoordsBody) => void} move Put the body's coordinates into the calculator.
+ * @property {() => void} recalc Recalculate after the player picked a body.
+ * @property {() => void} [changed] Called when what the select shows may have changed.
+ */
+
+/**
+ * The select that copies the coordinates of a planet or moon of the active
+ * profile into the calculator. The coordinates stay the calculator's own: the
+ * select follows them, and moves them only to give them a body to start from.
+ */
+class PfCoordsSelect {
+  /**
+   * @param {ProfilesUi} pf
+   * @param {PfCoordsSelectConfig} config
+   */
+  constructor(pf, config) {
+    this.pf = pf;
+    this.config = config;
+  }
+
+  /**
+   * Every planet and moon with full coordinates, planets first.
+   *
+   * @param {Profile} profile
+   * @returns {PfCoordsBody[]}
+   */
+  bodies(profile) {
+    /** @type {PfCoordsBody[]} */
+    const list = [];
+    /**
+     * @param {ProfilePlanet} body
+     * @param {boolean} isMoon
+     */
+    const add = (body, isMoon) => {
+      const c = body.coords;
+      if (!c || c.galaxy === null || c.system === null || c.position === null) return;
+      const coords = [c.galaxy, c.system, c.position];
+      const name = (body.name || this.config.nameFallback) + (isMoon ? ' (' + getOptionValue('moonLabel', '') + ')' : '');
+      list.push({ body, coords, isMoon, label: name + ' [' + coords.join(':') + ']' });
+    };
+    profile.planets.forEach((p) => add(p, false));
+    profile.moons.forEach((m) => add(m, true));
+    return list;
+  }
+
+  /**
+   * Fill the select. The coordinates move to a body only when they match none:
+   * to the one picked last time in this profile, else to the first planet -
+   * unless the caller keeps them.
+   *
+   * @param {Profile} profile
+   * @param {boolean} [keepCoords]
+   */
+  render(profile, keepCoords = false) {
+    const { select: selector, boxes, lastKey, isAt, move } = this.config;
+    const select = selectEl(selector);
+    if (!select) return;
+    const bodies = this.bodies(profile);
+    select.innerHTML = '';
+    select.appendChild(new Option('—', ''));
+    bodies.forEach((b) => select.appendChild(new Option(b.label, b.body.id)));
+    boxes.forEach((box) => pfShow(box, bodies.length > 0));
+    const last = this.pf.store.getLastPlanet(lastKey, profile.id);
+    const matching = bodies.filter(isAt);
+    let chosen = matching.find((b) => b.body.id === last) || matching[0];
+    if (!chosen && !keepCoords && bodies.length > 0) {
+      chosen = bodies.find((b) => b.body.id === last) || bodies[0];
+      move(chosen);
+    }
+    select.value = chosen ? chosen.body.id : '';
+    this.config.changed?.();
+  }
+
+  /**
+   * The player picked a body: move the coordinates to it, remember it and
+   * recalculate. The dash leaves the coordinates where they are.
+   *
+   * @param {Profile} profile
+   */
+  chosen(profile) {
+    const id = getVal(this.config.select);
+    const body = this.bodies(profile).find((b) => b.body.id === id);
+    if (body) {
+      this.config.move(body);
+      this.pf.store.setLastPlanet(this.config.lastKey, profile.id, body.body.id);
+      this.config.recalc();
+    }
+    this.config.changed?.();
+  }
+
+  /**
+   * Keep the select on the body the coordinates are at, or on the dash.
+   *
+   * @param {Profile} profile
+   */
+  sync(profile) {
+    const select = selectEl(this.config.select);
+    if (!select) return;
+    const bodies = this.bodies(profile);
+    const current = bodies.find((b) => b.body.id === select.value);
+    if (current && this.config.isAt(current)) return;
+    const match = bodies.find(this.config.isAt);
+    select.value = match ? match.body.id : '';
+    this.config.changed?.();
+  }
+
+  onChange(/** @type {() => void} */ handler) {
+    addEvent(this.config.select, 'change', handler);
+  }
+
+  hide() {
+    this.config.boxes.forEach((box) => pfShow(box, false));
+  }
+}
+
+/**
  * What every calculator's profile binder shares: the profile it shows, the
  * guard that keeps its own writes from coming back as edits, and the two
  * entry points - save() and leave() - whose sequence is the same everywhere.
@@ -1999,6 +2131,6 @@ function createProfilesUi() {
 const pfgProfiles = createProfilesUi();
 
 Object.assign(window, {
-  pfgProfiles, ProfilesUi, PfUniverseSetting, PfBodySelect, PfLockedUniverse, ProfileBinder, PlanetPrmBinder, pfBind, PF_UNIVERSE_SPEED, PF_UNIVERSE_DEBRIS, PF_UNIVERSE_DEUT_IN_DEBRIS, PF_UNIVERSE_TOP_SCORE, readSavedSet,
+  pfgProfiles, ProfilesUi, PfUniverseSetting, PfBodySelect, PfLockedUniverse, PfCoordsSelect, ProfileBinder, PlanetPrmBinder, pfBind, PF_UNIVERSE_SPEED, PF_UNIVERSE_DEBRIS, PF_UNIVERSE_DEUT_IN_DEBRIS, PF_UNIVERSE_TOP_SCORE, readSavedSet,
   PF_UNIVERSE_DEF_DEBRIS, PF_UNIVERSE_SYSTEMS, PF_UNIVERSE_DONUT_SYSTEM,
 });

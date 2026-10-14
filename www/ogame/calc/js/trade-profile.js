@@ -73,14 +73,6 @@ const TRADE_ACCOUNT_FIELDS = [
 /** The options keys the account fields above live in. */
 const TRADE_OWNED_KEYS = TRADE_ACCOUNT_FIELDS.map((f) => f.prm);
 
-/**
- * @typedef {object} TradeBody
- * @property {ProfilePlanet} body
- * @property {number[]} coords
- * @property {boolean} isMoon
- * @property {string} label
- */
-
 /** @typedef {typeof tradeApp} TradeApp */
 
 /** @extends {ProfileBinder<TradeApp>} */
@@ -99,6 +91,12 @@ class TradeProfiles extends ProfileBinder {
         options.country = country;
         options.universe = number;
       },
+    });
+    this.bodySelect = new PfCoordsSelect(pf, {
+      select: '#pf-body', boxes: ['#pf-body-box'], lastKey: 'trade', nameFallback: '—',
+      isAt: (b) => b.isMoon === !!options.moon && sameValue(b.coords, [options.coordg, options.coords, options.coordp].map(Number)),
+      move: (b) => this.setCoords(b),
+      recalc: () => this.app.recalc(),
     });
     // The original save reads `this`: it has to stay bound to options.
     this.ownSave = options.save.bind(options);
@@ -142,7 +140,7 @@ class TradeProfiles extends ProfileBinder {
         state[f.prm] = f.toPrm(getProfileValue(profile.account, f.key));
       });
       this.applyUniverse(profile, link);
-      this.renderBodySelect(profile, link.coords);
+      this.bodySelect.render(profile, link.coords);
       this.app.restoreFromState();
       // Trade's reset would write every default into the profile as an edit.
       pfShow('#reset', false);
@@ -175,7 +173,7 @@ class TradeProfiles extends ProfileBinder {
   }
 
   restoreOwn() {
-    pfShow('#pf-body-box', false);
+    this.bodySelect.hide();
     Object.assign(options, cloneData(this.ownPrm));
     this.universe.release();
     this.app.restoreFromState();
@@ -202,7 +200,8 @@ class TradeProfiles extends ProfileBinder {
 
   saveWithProfile() {
     super.saveWithProfile();
-    this.syncBodySelect();
+    const profile = this.profile();
+    if (profile) this.bodySelect.sync(profile);
   }
 
   /** Write what changed since the last snapshot into the profile. */
@@ -239,67 +238,7 @@ class TradeProfiles extends ProfileBinder {
   // The body select: coordinates
   // -------------------------------------------------------------------------
 
-  /**
-   * Every planet and moon with full coordinates, planets first.
-   *
-   * @param {Profile} profile
-   * @returns {TradeBody[]}
-   */
-  bodies(profile) {
-    /** @type {TradeBody[]} */
-    const list = [];
-    /**
-     * @param {ProfilePlanet} body
-     * @param {boolean} isMoon
-     */
-    const add = (body, isMoon) => {
-      const c = body.coords;
-      if (!c || c.galaxy === null || c.system === null || c.position === null) return;
-      const named = isMoon ? { ...body, name: (body.name || '—') + ' (' + getOptionValue('moonLabel', '') + ')' } : body;
-      list.push({ body, coords: [c.galaxy, c.system, c.position], isMoon, label: pfBodyLabel(named) });
-    };
-    profile.planets.forEach((p) => add(p, false));
-    profile.moons.forEach((m) => add(m, true));
-    return list;
-  }
-
-  /**
-   * Whether the location fields are at a body.
-   *
-   * @param {TradeBody} b
-   * @returns {boolean}
-   */
-  isAt(b) {
-    return b.isMoon === !!options.moon && sameValue(b.coords, [options.coordg, options.coords, options.coordp].map(Number));
-  }
-
-  /**
-   * Fill the body select. The coordinates themselves are the calculator's:
-   * they move to a body only when they match none, to the one picked last time
-   * in this profile or else to the first planet - unless a link brought them.
-   *
-   * @param {Profile} profile
-   * @param {boolean} keepCoords
-   */
-  renderBodySelect(profile, keepCoords) {
-    const select = selectEl('#pf-body');
-    if (!select) return;
-    const bodies = this.bodies(profile);
-    select.innerHTML = '';
-    select.appendChild(new Option('—', ''));
-    bodies.forEach((b) => select.appendChild(new Option(b.label, b.body.id)));
-    pfShow('#pf-body-box', bodies.length > 0);
-    const last = this.pf.store.getLastPlanet('trade', profile.id);
-    const matching = bodies.filter((b) => this.isAt(b));
-    let chosen = matching.find((b) => b.body.id === last) || matching[0];
-    if (!chosen && !keepCoords && bodies.length > 0) {
-      chosen = bodies.find((b) => b.body.id === last) || bodies[0];
-      this.setCoords(chosen);
-    }
-    select.value = chosen ? chosen.body.id : '';
-  }
-
-  /** @param {TradeBody} b */
+  /** @param {PfCoordsBody} b */
   setCoords(b) {
     options.coordg = b.coords[0];
     options.coords = b.coords[1];
@@ -313,26 +252,7 @@ class TradeProfiles extends ProfileBinder {
 
   bodyChosen() {
     const profile = this.profile();
-    if (!profile) return;
-    const id = getVal('#pf-body');
-    const body = this.bodies(profile).find((b) => b.body.id === id);
-    // The dash leaves the coordinates where they are.
-    if (!body) return;
-    this.setCoords(body);
-    this.pf.store.setLastPlanet('trade', profile.id, body.body.id);
-    this.app.recalc();
-  }
-
-  /** Keep the select on the body the location is at, or on the dash. */
-  syncBodySelect() {
-    const profile = this.profile();
-    const select = selectEl('#pf-body');
-    if (!profile || !select) return;
-    const bodies = this.bodies(profile);
-    const current = bodies.find((b) => b.body.id === select.value);
-    if (current && this.isAt(current)) return;
-    const match = bodies.find((b) => this.isAt(b));
-    select.value = match ? match.body.id : '';
+    if (profile) this.bodySelect.chosen(profile);
   }
 
   // -------------------------------------------------------------------------

@@ -101,17 +101,6 @@ const FLIGHT_ACCOUNT_FIELDS = [
 const FLIGHT_ACCOUNT_PRM_KEYS = ['driveLevels', 'hyperTechLvl', 'playerClass', 'traderBonus', 'warriorBonus',
   'lfRocktalCE', 'lfMechanGE', 'lfShipsBonuses'];
 
-/**
- * A planet or moon of a profile, with the coordinates a flight can start from.
- *
- * @param {ProfilePlanet} body
- * @returns {?number[]}
- */
-function flightBodyCoords(body) {
-  const c = body.coords;
-  return c && c.galaxy !== null && c.system !== null && c.position !== null ? [c.galaxy, c.system, c.position] : null;
-}
-
 /** @extends {ProfileBinder<*>} */
 class FlightProfiles extends ProfileBinder {
   /**
@@ -126,6 +115,13 @@ class FlightProfiles extends ProfileBinder {
     this.universe = new PfLockedUniverse({
       read: () => ({ country: options.prm.country, universe: options.prm.universe }),
       write: (country, number) => this.showUniverse(country, number),
+    });
+    this.departure = new PfCoordsSelect(pf, {
+      select: '#pf-departure', boxes: ['#pf-departure', '#pf-take-fleet'], lastKey: 'flight', nameFallback: '',
+      isAt: (b) => sameValue(b.coords, options.prm.departure.map(Number)),
+      move: (b) => this.setDeparture(b.coords),
+      recalc: () => this.orch.recalc(),
+      changed: () => this.syncTakeFleet(),
     });
     this.ownSave = options.save;
     /** @type {*} The spy report waiting for the player to say where it goes. */
@@ -171,7 +167,7 @@ class FlightProfiles extends ProfileBinder {
       this.universe.apply(profile);
       // Flight's reset would write every default into the profile as an edit.
       pfShow('#reset', false);
-      this.renderDepartureSelect(profile);
+      this.departure.render(profile);
       // The recalculation reads the fields back: the snapshot then holds the
       // values exactly as the form gives them, and the next edit compares like with like.
       this.orch.recalc();
@@ -199,8 +195,7 @@ class FlightProfiles extends ProfileBinder {
   }
 
   restoreOwn() {
-    pfShow('#pf-departure', false);
-    pfShow('#pf-take-fleet', false);
+    this.departure.hide();
     Object.assign(options.prm, cloneData(this.ownPrm));
     this.orch.populateParams();
     this.universe.release();
@@ -225,7 +220,8 @@ class FlightProfiles extends ProfileBinder {
 
   saveWithProfile() {
     super.saveWithProfile();
-    this.syncDepartureSelect();
+    const profile = this.profile();
+    if (profile) this.departure.sync(profile);
   }
 
   /** Write what changed since the last snapshot into the profile. */
@@ -258,58 +254,6 @@ class FlightProfiles extends ProfileBinder {
   // Departure body and its fleet
   // -------------------------------------------------------------------------
 
-  /**
-   * Every planet and moon with full coordinates, planets first.
-   *
-   * @param {Profile} profile
-   * @returns {Array<{body: ProfilePlanet, coords: number[], label: string}>}
-   */
-  bodies(profile) {
-    /** @type {Array<{body: ProfilePlanet, coords: number[], label: string}>} */
-    const list = [];
-    /**
-     * @param {ProfilePlanet} body
-     * @param {boolean} isMoon
-     */
-    const add = (body, isMoon) => {
-      const coords = flightBodyCoords(body);
-      if (!coords) return;
-      const name = (body.name || '') + (isMoon ? ' (' + getOptionValue('moonLabel', '') + ')' : '');
-      list.push({ body, coords, label: name + ' [' + coords.join(':') + ']' });
-    };
-    profile.planets.forEach((p) => add(p, false));
-    profile.moons.forEach((m) => add(m, true));
-    return list;
-  }
-
-  /**
-   * Fill the departure select. The departure point itself is the calculator's:
-   * it moves to a body only when it matches none, to the one picked last time
-   * in this profile or else to the first planet.
-   *
-   * @param {Profile} profile
-   */
-  renderDepartureSelect(profile) {
-    const select = selectEl('#pf-departure');
-    if (!select) return;
-    const bodies = this.bodies(profile);
-    select.innerHTML = '';
-    select.appendChild(new Option('—', ''));
-    bodies.forEach((b) => select.appendChild(new Option(b.label, b.body.id)));
-    pfShow('#pf-departure', bodies.length > 0);
-    pfShow('#pf-take-fleet', bodies.length > 0);
-    const departure = options.prm.departure.map(Number);
-    const last = this.pf.store.getLastPlanet('flight', profile.id);
-    const matching = bodies.filter((b) => sameValue(b.coords, departure));
-    let chosen = matching.find((b) => b.body.id === last) || matching[0];
-    if (!chosen && bodies.length > 0) {
-      chosen = bodies.find((b) => b.body.id === last) || bodies[0];
-      this.setDeparture(chosen.coords);
-    }
-    select.value = chosen ? chosen.body.id : '';
-    this.syncTakeFleet();
-  }
-
   /** @param {number[]} coords */
   setDeparture(coords) {
     setVal('#departure-g', coords[0]);
@@ -319,29 +263,7 @@ class FlightProfiles extends ProfileBinder {
 
   departureChosen() {
     const profile = this.profile();
-    const id = getVal('#pf-departure');
-    if (!profile) return;
-    const body = this.bodies(profile).find((b) => b.body.id === id);
-    if (body) {
-      this.setDeparture(body.coords);
-      this.pf.store.setLastPlanet('flight', profile.id, body.body.id);
-      this.orch.recalc();
-    }
-    this.syncTakeFleet();
-  }
-
-  /** Keep the select on the body the departure point is at, or on the dash. */
-  syncDepartureSelect() {
-    const profile = this.profile();
-    const select = selectEl('#pf-departure');
-    if (!profile || !select) return;
-    const departure = options.prm.departure.map(Number);
-    const bodies = this.bodies(profile);
-    const current = bodies.find((b) => b.body.id === select.value);
-    if (current && sameValue(current.coords, departure)) return;
-    const match = bodies.find((b) => sameValue(b.coords, departure));
-    select.value = match ? match.body.id : '';
-    this.syncTakeFleet();
+    if (profile) this.departure.chosen(profile);
   }
 
   /**
