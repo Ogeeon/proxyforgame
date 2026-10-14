@@ -253,7 +253,7 @@ async function runPagespeed(url, strategy, key) {
     if (!retryable || attempt === attempts) {
       throw new Error(`${strategy} ${url}: ${status || 'network'} ${message}`);
     }
-    await sleep(5000 * attempt);
+    await sleep(5000 * attempt); // NOSONAR(S9382) - retries back off one after another
   }
 }
 
@@ -284,7 +284,7 @@ async function pool(tasks, limit) {
   const worker = async () => {
     while (nextIndex < tasks.length) {
       const index = nextIndex++;
-      results[index] = await tasks[index]();
+      results[index] = await tasks[index](); // NOSONAR(S9382) - a pool worker runs its tasks in turn
     }
   };
   await Promise.all(Array.from({ length: Math.min(limit, tasks.length) }, worker));

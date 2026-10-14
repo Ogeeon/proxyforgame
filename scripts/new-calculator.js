@@ -18,7 +18,7 @@
 
 const fs = require('node:fs');
 const path = require('node:path');
-const { execSync } = require('node:child_process');
+const { execFileSync } = require('node:child_process');
 
 const CALC_DIR = path.join(__dirname, '..', 'www', 'ogame', 'calc');
 const JS_DIR = path.join(CALC_DIR, 'js');
@@ -517,7 +517,9 @@ function generateTest(calcName) {
   const testScript = path.join(__dirname, 'generate-test.js');
 
   try {
-    execSync(`node "${testScript}" ${calcName}`, { stdio: 'inherit' });
+    // process.execPath runs the same node binary as this script, with no shell
+    // and no PATH lookup in between.
+    execFileSync(process.execPath, [testScript, calcName], { stdio: 'inherit' });
     return true;
   } catch (error) {
     console.error(colorize(`Warning: Test generation failed: ${error.message}`, colors.yellow));
@@ -617,7 +619,7 @@ function main() {
   // Sync translations to all locales
   console.log(colorize(`\n  Syncing translations to all locale files...`, colors.gray));
   try {
-    execSync('node scripts/sync-translations.js --fix', { stdio: 'pipe' });
+    execFileSync(process.execPath, [path.join(__dirname, 'sync-translations.js'), '--fix'], { stdio: 'pipe' });
     console.log(colorize(`  ✓ Translations synced to all locales`, colors.green));
   } catch (error) {
     console.error(colorize(`  ⚠ Translation sync failed: ${error.message}`, colors.yellow));
