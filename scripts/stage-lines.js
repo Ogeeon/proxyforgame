@@ -21,7 +21,9 @@ if (!file || needles.length === 0) {
     process.exit(2);
 }
 
-const diff = execFileSync('git', ['diff', '-U0', '--no-color', '--', file], { encoding: 'utf8' });
+// `git` is looked up on PATH on purpose: this is a developer tool that runs on
+// Windows and Linux alike, where git lives in different places.
+const diff = execFileSync('git', ['diff', '-U0', '--no-color', '--', file], { encoding: 'utf8' }); // NOSONAR(S4036)
 const lines = diff.split('\n');
 const headerEnd = lines.findIndex(l => l.startsWith('@@'));
 if (headerEnd < 0) {
@@ -77,6 +79,6 @@ const patch = out.join('\n') + '\n';
 if (dryRun) {
     process.stdout.write(patch);
 } else {
-    execFileSync('git', ['apply', '--cached', '--unidiff-zero', '-'], { input: patch, stdio: ['pipe', 'inherit', 'inherit'] });
+    execFileSync('git', ['apply', '--cached', '--unidiff-zero', '-'], { input: patch, stdio: ['pipe', 'inherit', 'inherit'] }); // NOSONAR(S4036)
     console.log(`Staged ${matched} added line(s) of ${file}`);
 }

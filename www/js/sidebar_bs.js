@@ -391,7 +391,7 @@ document.addEventListener('DOMContentLoaded', function() {
     requireEl('report-btn-ok').addEventListener('click', function() {
         switch (reportStep) {
             case 0:
-                sendReport();
+                void sendReport();
                 reportStep = 1;
                 updateButtonsState('report');
                 break;
@@ -409,7 +409,7 @@ document.addEventListener('DOMContentLoaded', function() {
     requireEl('email-btn-ok').addEventListener('click', function() {
         switch (emailStep) {
             case 0:
-                sendEmail();
+                void sendEmail();
                 emailStep = 1;
                 updateButtonsState('email');
                 break;

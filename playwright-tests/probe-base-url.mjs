@@ -3,17 +3,23 @@
 // Apache serves requests in parallel, while `php -S` on :8000 is single-threaded
 // and flakes under a full-width worker pool. Exits 1 when nothing answers.
 
-const CANDIDATES = ['http://pfg.wmp', 'http://localhost:8000'];
+// Plain http on purpose: both are local development servers with no certificate.
+const CANDIDATES = ['http://pfg.wmp', 'http://localhost:8000']; // NOSONAR(S5332)
 
-for (const url of CANDIDATES) {
+// Asked all at once and read back in the order above, so a dead first
+// candidate costs one timeout rather than one per candidate.
+const answers = await Promise.all(CANDIDATES.map(async (url) => {
   try {
     const res = await fetch(`${url}/ajax.php?service=health`, { signal: AbortSignal.timeout(3000) });
-    if (res.ok) {
-      process.stdout.write(url);
-      process.exit(0);
-    }
+    return res.ok;
   } catch {
-    // Not running, or the host name does not resolve - try the next one.
+    // Not running, or the host name does not resolve.
+    return false;
   }
+}));
+const found = CANDIDATES.find((_url, i) => answers[i]);
+if (found) {
+  process.stdout.write(found);
+  process.exit(0);
 }
 process.exit(1);
