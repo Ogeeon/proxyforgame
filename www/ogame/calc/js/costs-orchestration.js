@@ -807,7 +807,8 @@ class CostsCalculator {
     removeAllEvents('#universe', 'change');
     addEvent('#universe', 'change', () => {
       this.saveState();
-      this._fetchUniverseSpeeds();
+      // Fire and forget: the method reports its own failures with a toast.
+      void this._fetchUniverseSpeeds();
     });
   }
 
