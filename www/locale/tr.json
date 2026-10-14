@@ -257,7 +257,8 @@
       "msg-texts_equal": "Düzeltilmiş metin içeriği yanlış metin içeriğiyle aynıdır. Yanlış yazılmış metin sürümünü belirtin.",
       "msg-wrong_empty": "Yanlış yazılmış metin alanı boş. Yanlış yazılmış metni belirtiniz.",
       "msg-right_empty": "Düzeltilmiş metin alanı boş. Yanlış yazılmış metin sürümünü belirtin.",
-      "msg-mail_failed": "Bildirim gönderilemedi. Lütfen daha sonra tekrar deneyin."
+      "msg-mail_failed": "Bildirim gönderilemedi. Lütfen daha sonra tekrar deneyin.",
+      "msg-rate_limited": "Son zamanlarda adresinizden çok fazla bildirim gönderildi. Lütfen daha sonra tekrar deneyin."
     },
     "emailStrings": {
       "title": "E-Posta Gönderme",
@@ -271,7 +272,8 @@
       "msg-sent": "Mesajınız gönderilmiştir. Teşekkürler.",
       "msg-request_error": "İstek sırasında hata oluştu. Lütfen daha sonra tekrar deneyin.",
       "msg-nothing_to_send": "Göndermek için bir şey yok. Lütfen Konu veya Mesaj içeriği alanlarından en az birini doldurunuz",
-      "msg-mail_failed": "Mesaj gönderilemedi. Lütfen daha sonra tekrar deneyin."
+      "msg-mail_failed": "Mesaj gönderilemedi. Lütfen daha sonra tekrar deneyin.",
+      "msg-rate_limited": "Son zamanlarda adresinizden çok fazla mesaj gönderildi. Lütfen daha sonra tekrar deneyin."
     },
     "donateStrings": {
       "header": "Bu projeye destek verin",

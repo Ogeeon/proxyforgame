@@ -257,7 +257,8 @@
       "msg-texts_equal": "Le contenu du champ [Texte corrigé] est identique au contenu du champ [Texte mal orthographié]. S'il vous plaît indiquer votre version du texte mal orthographié.",
       "msg-wrong_empty": "Le champ [Texte mal orthographié] est vide. S'il vous plaît spécifier le texte mal orthographié.",
       "msg-right_empty": "Le champ [Texte corrigé] est vide. S'il vous plaît indiquer votre version du texte mal orthographié.",
-      "msg-mail_failed": "Le signalement n'a pas pu être envoyé. Veuillez réessayer plus tard."
+      "msg-mail_failed": "Le signalement n'a pas pu être envoyé. Veuillez réessayer plus tard.",
+      "msg-rate_limited": "Trop de signalements ont été envoyés depuis votre adresse récemment. Veuillez réessayer plus tard."
     },
     "emailStrings": {
       "title": "L'envoi d'un email",
@@ -271,7 +272,8 @@
       "msg-sent": "Votre message a été envoyé. Merci.",
       "msg-request_error": "Erreur lors de la requête. Veuillez réessayer plus tard.",
       "msg-nothing_to_send": "Il n'ya rien à envoyer... Remplissez s'il vous plaît au moins une des champs [Sujet] ou [Message].",
-      "msg-mail_failed": "Le message n'a pas pu être envoyé. Veuillez réessayer plus tard."
+      "msg-mail_failed": "Le message n'a pas pu être envoyé. Veuillez réessayer plus tard.",
+      "msg-rate_limited": "Trop de messages ont été envoyés depuis votre adresse récemment. Veuillez réessayer plus tard."
     },
     "donateStrings": {
       "header": "Soutenir ce projet",

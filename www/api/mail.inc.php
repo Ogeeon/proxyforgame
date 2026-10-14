@@ -1,7 +1,10 @@
 <?php
-  // The two services that hand a message to the site owner's mailbox.
+  // The two services that hand a message to the site owner's mailbox. Both
+  // validate the form first and only then run the antispam checks, so a person
+  // who filled it in wrong is told why rather than silently dropped.
 
   require_once __DIR__ . '/http.inc.php';
+  require_once __DIR__ . '/antispam.inc.php';
 
   const MAIL_RECIPIENT = 'proxyforgame@gmail.com';
 
@@ -24,6 +27,11 @@
       throw new ApiError(422, 'right_empty', 'The corrected text is empty');
     }
 
+    if (isTrapped($in)) {
+      return array('sent' => true);
+    }
+    enforceMailRateLimit();
+
     $url = getParam($in, 'url', 'str');
     $message = "Script: \"" . ($url === null ? '' : $url) . "\"\n";
     $message .= "Wrong text: \"$wrong\"\n";
@@ -40,6 +48,11 @@
     if ($emailSubject === '' && $emailBody === '') {
       throw new ApiError(422, 'nothing_to_send', 'Both subject and body are empty');
     }
+
+    if (isTrapped($in)) {
+      return array('sent' => true);
+    }
+    enforceMailRateLimit();
 
     $address = getParam($in, 'address', 'str');
     $message = "Sender: \"" . ($address === null || $address === '' ? '(unspecified)' : $address) . "\"\n";

@@ -257,7 +257,8 @@
       "msg-texts_equal": "Sadrzaj polja [Ispravljen tekst] je identican kao onom u polju [Netacan tekst]. Molimo unesite vasu verziju netacnog teksta.",
       "msg-wrong_empty": "Polje [Netacan tekst] je prazno. Molimo unesite sadrzaj u polje netacan tekst.",
       "msg-right_empty": "Polje [Ispravljen tekst] je prazno. Molimo unesite sadrzaj u polje ispravljen tekst.",
-      "msg-mail_failed": "Prijava nije mogla biti poslana. Pokušajte ponovo kasnije."
+      "msg-mail_failed": "Prijava nije mogla biti poslana. Pokušajte ponovo kasnije.",
+      "msg-rate_limited": "S vaše adrese je nedavno poslano previše prijava. Pokušajte ponovo kasnije."
     },
     "emailStrings": {
       "title": "Slanje e-maila",
@@ -271,7 +272,8 @@
       "msg-sent": "Vaša poruka je poslana. Hvala!",
       "msg-request_error": "Greška u zahtjevu. Pokušajte ponovo kasnije.",
       "msg-nothing_to_send": "There is nothing to send... Please fill in at least one on the fields [Subject] or [Message body].",
-      "msg-mail_failed": "Poruka nije mogla biti poslana. Pokušajte ponovo kasnije."
+      "msg-mail_failed": "Poruka nije mogla biti poslana. Pokušajte ponovo kasnije.",
+      "msg-rate_limited": "S vaše adrese je nedavno poslano previše poruka. Pokušajte ponovo kasnije."
     },
     "donateStrings": {
       "header": "Podržite ovaj projekat",

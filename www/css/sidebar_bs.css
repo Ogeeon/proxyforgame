@@ -232,3 +232,13 @@ body.sidebar-offcanvas-open .btn[data-bs-toggle="offcanvas"] {
 .tooltip.bs-tooltip-end .tooltip-arrow::before {
     border-right-color: var(--bs-border-color);
 }
+/* The report and email dialogs' honeypot: off screen rather than display:none,
+   which some bots know to skip. People never see or reach it - it is also
+   aria-hidden and out of the tab order. */
+.pfg-hp {
+    position: absolute;
+    left: -10000px;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+}
