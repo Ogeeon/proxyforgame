@@ -1725,3 +1725,314 @@ test('an expeditions API link wins over the profile on load', async ({ page }) =
     expect(profile.account.values['lf.expedition.ships']).toEqual({ game: 2, override: 3 });
     expect(profile.account.values['research.114']).toEqual({ game: 8 });
 });
+
+// Moon: the account (hyperspace technology, the class, the life-form bonuses),
+// a planet (its Supra Refractor), a moon (its sensor phalanx, and the system it
+// stands in as a convenience) and the universe's debris and galaxy settings.
+// The size of the moon to destroy, the Deathstars, the target system and the
+// unit counts stay the calculator's own.
+
+/** Answer the universe settings request; by default with nothing the moon page takes. */
+async function mockMoonUniverse(page, body = { speed: '1' }) {
+    await page.route('**/ajax.php?*service=serverdata*', (route) => route.fulfill({
+        status: 200, contentType: 'application/json', body: JSON.stringify(body),
+    }));
+}
+
+/**
+ * What the export leaves out for the moon page: the life-form bonuses, the
+ * Supra Refractor of two planets (a Kaelesh building) and a second moon whose
+ * game phalanx is 0. Moon A orbits Alpha at system 148, Moon B orbits Beta at 150.
+ */
+const MOON_PROFILE_EDIT = `
+    profile.account.values['lf.phalanxRange'] = { game: 12.5 };
+    profile.account.values['lf.classBooster.3'] = { game: 7.5 };
+    profile.account.values['lf.ship.209.cargo'] = { game: 3.5 };
+    profile.planets[0].values['lf.building.14112'] = { game: 30 };
+    profile.planets[1].values['lf.building.14112'] = { game: 11 };
+    const second = JSON.parse(JSON.stringify(profile.moons[0]));
+    Object.assign(second, { id: 'moon-b', gameId: 900099, name: 'Moon B', planetId: profile.planets[1].id, coords: { galaxy: 2, system: 150, position: 12 } });
+    second.values['building.42'] = { game: 0 };
+    profile.moons.push(second);
+`;
+
+/** Import the fixture on the moon page and add what MOON_PROFILE_EDIT (and `extra`) say. */
+async function openMoonWithProfile(page, extra = '') {
+    await mockMoonUniverse(page);
+    await page.goto('/moon');
+    await importExport(page);
+    await editProfile(page, MOON_PROFILE_EDIT + extra);
+}
+
+test('moon takes the account, a planet and a moon from the profile', async ({ page }) => {
+    // A general, so the class shows in a checkbox.
+    await openMoonWithProfile(page, "profile.account.values['class'] = { game: 2 };");
+
+    await expect(page.locator('#hypertech-lvl')).toHaveValue('8');
+    await expect(page.locator('#general-class')).toBeChecked();
+    await expect(page.locator('#discoverer-class')).not.toBeChecked();
+    await expect(page.locator('#rc-capacity-increase')).toHaveValue('3.5');
+    await expect(page.locator('#phalanx-range-bonus')).toHaveValue('12.5');
+    await expect(page.locator('#discoverer-bonus')).toHaveValue('7.5');
+
+    await expect(page.locator('#pf-planet option')).toHaveCount(3);
+    await expect(page.locator('#pf-planet option:checked')).toHaveText('Alpha [2:148:8]');
+    await expect(page.locator('#supra-refractor')).toHaveValue('30');
+    await expect(page.locator('#pf-moon option')).toHaveCount(2);
+    await expect(page.locator('#pf-moon option:checked')).toHaveText('Moon [2:148:8]');
+    await expect(page.locator('#phalanx-lvl')).toHaveValue('5');
+    // The moon's system is put into "your system" without being bound.
+    await expect(page.locator('#own-system')).toHaveValue('148');
+
+    for (const bound of ['#hypertech-lvl', '#general-class', '#discoverer-class', '#rc-capacity-increase',
+        '#phalanx-range-bonus', '#discoverer-bonus', '#supra-refractor', '#phalanx-lvl']) {
+        await expect(page.locator(bound)).toHaveClass(/pf-bound/);
+    }
+    // The calculator's own.
+    for (const own of ['#moon-size', '#ds-count', '#promo-moon', '#target-system', '#own-system', '#small-cargo']) {
+        await expect(page.locator(own)).not.toHaveClass(/pf-bound/);
+    }
+
+    // The two resets that would write defaults into the profile are gone; the destruction one stays.
+    await expect(page.locator('#reset-cr')).toBeHidden();
+    await expect(page.locator('#reset-ph')).toBeHidden();
+    await expect(page.locator('#reset-ds')).toBeVisible();
+    // Loading wrote nothing back.
+    await expect(page.locator('#pf-overrides')).toBeHidden();
+});
+
+test('a discoverer shows in its own checkbox in moon', async ({ page }) => {
+    await openMoonWithProfile(page, "profile.account.values['class'] = { game: 3 };");
+    await expect(page.locator('#discoverer-class')).toBeChecked();
+    await expect(page.locator('#general-class')).not.toBeChecked();
+    await expect(page.locator('#pf-overrides')).toBeHidden();
+});
+
+test('another planet in moon brings its Supra Refractor and its moon, and both are remembered', async ({ page }) => {
+    await openMoonWithProfile(page);
+
+    // Choosing a planet also shows its moon.
+    await page.locator('#pf-planet').selectOption({ label: 'Beta [2:150:12]' });
+    await expect(page.locator('#supra-refractor')).toHaveValue('11');
+    await expect(page.locator('#pf-moon option:checked')).toHaveText('Moon B [2:150:12]');
+    await expect(page.locator('#own-system')).toHaveValue('150');
+    await expect(page.locator('#pf-overrides')).toBeHidden();
+
+    // The planet with no life form has no Supra Refractor.
+    await page.locator('#pf-planet').selectOption({ label: 'Colony [3:20:4]' });
+    await expect(page.locator('#supra-refractor')).toHaveValue('0');
+
+    await page.locator('#pf-planet').selectOption({ label: 'Alpha [2:148:8]' });
+    await page.locator('#pf-moon').selectOption({ label: 'Moon B [2:150:12]' });
+    await expect(page.locator('#supra-refractor')).toHaveValue('30');
+    await expect(page.locator('#own-system')).toHaveValue('150');
+
+    await page.reload();
+    await expect(page.locator('#pf-planet option:checked')).toHaveText('Alpha [2:148:8]');
+    await expect(page.locator('#pf-moon option:checked')).toHaveText('Moon B [2:150:12]');
+    await expect(page.locator('#supra-refractor')).toHaveValue('30');
+});
+
+test('a moon with no phalanx shows level 1 in moon without an override', async ({ page }) => {
+    await openMoonWithProfile(page);
+
+    await page.locator('#pf-moon').selectOption({ label: 'Moon B [2:150:12]' });
+    await expect(page.locator('#phalanx-lvl')).toHaveValue('1');
+    await expect(page.locator('#pf-overrides')).toBeHidden();
+
+    // Leaving the field must not turn the clamped 1 into an edit of the game's 0.
+    await page.locator('#phalanx-lvl').focus();
+    await page.locator('#phalanx-lvl').blur();
+    await expect(page.locator('#pf-overrides')).toBeHidden();
+    const profile = await activeProfile(page);
+    expect(profile.moons[1].values['building.42']).toEqual({ game: 0 });
+});
+
+test('moon edits become overrides of the account, the planet and the moon', async ({ page }) => {
+    await openMoonWithProfile(page);
+
+    await blurFill(page, '#hypertech-lvl', '9');
+    await page.locator('#param-lifeforms-tab').click();
+    await blurFill(page, '#supra-refractor', '40');
+    await blurFill(page, '#phalanx-lvl', '9');
+    await expect(page.locator('#hypertech-lvl')).toHaveClass(/pf-differs/);
+    await expect(page.locator('#supra-refractor')).toHaveClass(/pf-differs/);
+    await expect(page.locator('#phalanx-lvl')).toHaveClass(/pf-differs/);
+    await expect(page.locator('#pf-overrides')).toHaveText('3');
+    let profile = await activeProfile(page);
+    expect(profile.account.values['research.114']).toEqual({ game: 8, override: 9 });
+    expect(profile.planets[0].values['lf.building.14112']).toEqual({ game: 30, override: 40 });
+    expect(profile.moons[0].values['building.42']).toEqual({ game: 5, override: 9 });
+
+    // "Your system" is filled in, not bound: an edit stays the calculator's.
+    await blurFill(page, '#own-system', '200');
+    await expect(page.locator('#own-system')).not.toHaveClass(/pf-differs/);
+    await expect(page.locator('#pf-overrides')).toHaveText('3');
+
+    await page.locator('#phalanx-lvl + .pf-reset').click();
+    await expect(page.locator('#phalanx-lvl')).toHaveValue('5');
+    await page.locator('#supra-refractor + .pf-reset').click();
+    await expect(page.locator('#supra-refractor')).toHaveValue('30');
+    profile = await activeProfile(page);
+    expect(profile.moons[0].values['building.42']).toEqual({ game: 5 });
+    expect(profile.planets[0].values['lf.building.14112']).toEqual({ game: 30 });
+    expect(profile.account.values['research.114']).toEqual({ game: 8, override: 9 });
+});
+
+test('the class checkboxes of moon write the class, and a collector is no override', async ({ page }) => {
+    await mockMoonUniverse(page);
+    await page.goto('/moon');
+    await importExport(page);
+
+    // The export's collector shows as neither box, and is not an edit.
+    await expect(page.locator('#general-class')).not.toBeChecked();
+    await expect(page.locator('#discoverer-class')).not.toBeChecked();
+    await expect(page.locator('#general-class')).toHaveClass(/pf-bound/);
+    await blurFill(page, '#hypertech-lvl', '9');
+    await expect(page.locator('#pf-overrides')).toHaveText('1');
+    let profile = await activeProfile(page);
+    expect(profile.account.values.class).toEqual({ game: 1 });
+
+    await page.locator('#general-class').check();
+    await expect(page.locator('#general-class')).toHaveClass(/pf-differs/);
+    // The discoverer box is unticked, as in the game: bound, but not marked as differing.
+    await expect(page.locator('#discoverer-class')).toHaveClass(/pf-bound/);
+    await expect(page.locator('#discoverer-class')).not.toHaveClass(/pf-differs/);
+    await expect(page.locator('#discoverer-class + .pf-reset')).toHaveCount(0);
+    profile = await activeProfile(page);
+    expect(profile.account.values.class).toEqual({ game: 1, override: 2 });
+
+    // A character has one class: the other box is cleared.
+    await page.locator('#discoverer-class').check();
+    await expect(page.locator('#general-class')).not.toBeChecked();
+    await expect(page.locator('#discoverer-class')).toBeChecked();
+    profile = await activeProfile(page);
+    expect(profile.account.values.class).toEqual({ game: 1, override: 3 });
+
+    await page.locator('#discoverer-class + .pf-reset').click();
+    await expect(page.locator('#discoverer-class')).not.toBeChecked();
+    await expect(page.locator('#general-class')).not.toBeChecked();
+    profile = await activeProfile(page);
+    expect(profile.account.values.class).toEqual({ game: 1 });
+    await expect(page.locator('#pf-overrides')).toHaveText('1');
+});
+
+test('unticking the class of a general in moon writes no class', async ({ page }) => {
+    await openMoonWithProfile(page, "profile.account.values['class'] = { game: 2 };");
+    await page.locator('#general-class').uncheck();
+    await expect(page.locator('#general-class')).toHaveClass(/pf-differs/);
+    const profile = await activeProfile(page);
+    expect(profile.account.values.class).toEqual({ game: 2, override: 0 });
+
+    await page.locator('#general-class + .pf-reset').click();
+    await expect(page.locator('#general-class')).toBeChecked();
+    await expect(page.locator('#pf-overrides')).toBeHidden();
+});
+
+test('unticking the class of a discoverer in moon marks the discoverer box alone', async ({ page }) => {
+    await openMoonWithProfile(page, "profile.account.values['class'] = { game: 3 };");
+    await page.locator('#discoverer-class').uncheck();
+    await expect(page.locator('#discoverer-class')).toHaveClass(/pf-differs/);
+    await expect(page.locator('#discoverer-class + .pf-reset')).toHaveAttribute('aria-label', /✓/);
+    await expect(page.locator('#general-class')).toHaveClass(/pf-bound/);
+    await expect(page.locator('#general-class')).not.toHaveClass(/pf-differs/);
+    await expect(page.locator('#general-class + .pf-reset')).toHaveCount(0);
+});
+
+test('moon takes the debris and galaxy settings from the universe, and keeps a changed one', async ({ page }) => {
+    await mockMoonUniverse(page, {
+        speed: '1', debrisFactor: '0.6', deuteriumInDebris: '1', debrisFactorDef: '0.35', systems: '300', donutSystem: '0',
+    });
+    await page.goto('/moon');
+    await importExport(page);
+
+    await expect(page.locator('#debris-percent')).toHaveValue('60');
+    await expect(page.locator('#deut-to-debris')).toBeChecked();
+    // A share no preset offers is added to the select.
+    await expect(page.locator('#defense-debris-percent')).toHaveValue('35');
+    await expect(page.locator('#systems-num')).toHaveValue('300');
+    // The calculator starts on a circular galaxy; this universe is not.
+    await expect(page.locator('#circular-systems')).not.toBeChecked();
+    for (const bound of ['#debris-percent', '#deut-to-debris', '#defense-debris-percent', '#systems-num', '#circular-systems']) {
+        await expect(page.locator(bound)).toHaveClass(/pf-bound/);
+    }
+    // The coordinate fields follow the galaxy's size.
+    expect(await page.evaluate(() => document.getElementById('own-system')._constrains.max)).toBe(300);
+
+    await blurFill(page, '#systems-num', '350');
+    await page.locator('#defense-debris-percent').selectOption('10');
+    await expect(page.locator('#systems-num')).toHaveClass(/pf-differs/);
+    await expect(page.locator('#defense-debris-percent')).toHaveClass(/pf-differs/);
+    await page.reload();
+    await expect(page.locator('#systems-num')).toHaveValue('350');
+    await expect(page.locator('#defense-debris-percent')).toHaveValue('10');
+    await expect(page.locator('#systems-num')).toHaveClass(/pf-differs/);
+    expect(await page.evaluate(() => document.getElementById('own-system')._constrains.max)).toBe(350);
+    // A universe setting is not in the profile.
+    await expect(page.locator('#pf-overrides')).toBeHidden();
+
+    await page.locator('#systems-num + .pf-reset').click();
+    await expect(page.locator('#systems-num')).toHaveValue('300');
+    await page.locator('#defense-debris-percent + .pf-reset').click();
+    await expect(page.locator('#defense-debris-percent')).toHaveValue('35');
+    await expect(page.locator('#systems-num')).not.toHaveClass(/pf-differs/);
+});
+
+test('"no profile" gives moon its own values back', async ({ page }) => {
+    await mockMoonUniverse(page, { speed: '1', debrisFactor: '0.6', systems: '300', donutSystem: '0' });
+    await page.goto('/moon');
+    await blurFill(page, '#moon-size', '2500');
+    await blurFill(page, '#hypertech-lvl', '2');
+    await page.locator('#debris-percent').selectOption('40');
+    await page.locator('#defense-debris-percent').selectOption('20');
+    await page.locator('#param-lifeforms-tab').click();
+    await blurFill(page, '#supra-refractor', '7');
+    await blurFill(page, '#phalanx-lvl', '3');
+    await blurFill(page, '#own-system', '20');
+    await blurFill(page, '#systems-num', '400');
+    await page.locator('#discoverer-class').check();
+
+    await importExport(page);
+    await expect(page.locator('#hypertech-lvl')).toHaveValue('8');
+    await expect(page.locator('#supra-refractor')).toHaveValue('0');
+    await expect(page.locator('#phalanx-lvl')).toHaveValue('5');
+    await expect(page.locator('#own-system')).toHaveValue('148');
+    await expect(page.locator('#discoverer-class')).not.toBeChecked();
+    await expect(page.locator('#systems-num')).toHaveValue('300');
+    await expect(page.locator('#debris-percent')).toHaveValue('60');
+    // The destruction block is the calculator's, whoever is active.
+    await expect(page.locator('#moon-size')).toHaveValue('2500');
+
+    // The calculator's own settings keep the values from before the profile.
+    const stored = await page.evaluate(() => JSON.parse(localStorage.getItem('options_moon') || '{}'));
+    expect(stored.hyperTechLevel).toBe(2);
+    expect(stored.supraRefractorLevel).toBe(7);
+    expect(stored.phalanxLevel).toBe(3);
+    expect(stored.ownSystem).toBe(20);
+    expect(stored.isDiscoverer).toBe(true);
+    expect(stored.isGeneral).toBe(false);
+    expect(stored.numberOfSystems).toBe(400);
+    expect(stored.circularSystems).toBe(true);
+    expect(stored.debrisPercent).toBe(40);
+    expect(stored.defenseDebrisPercent).toBe(20);
+    expect(stored.moonSize).toBe(2500);
+
+    await page.locator('#pf-select').selectOption('');
+    await expect(page.locator('#hypertech-lvl')).toHaveValue('2');
+    await expect(page.locator('#supra-refractor')).toHaveValue('7');
+    await expect(page.locator('#phalanx-lvl')).toHaveValue('3');
+    await expect(page.locator('#own-system')).toHaveValue('20');
+    await expect(page.locator('#discoverer-class')).toBeChecked();
+    await expect(page.locator('#general-class')).not.toBeChecked();
+    await expect(page.locator('#systems-num')).toHaveValue('400');
+    await expect(page.locator('#circular-systems')).toBeChecked();
+    await expect(page.locator('#debris-percent')).toHaveValue('40');
+    await expect(page.locator('#defense-debris-percent')).toHaveValue('20');
+    await expect(page.locator('#moon-size')).toHaveValue('2500');
+    await expect(page.locator('#pf-planet-box')).toBeHidden();
+    await expect(page.locator('#pf-moon-box')).toBeHidden();
+    await expect(page.locator('.pf-bound')).toHaveCount(0);
+    await expect(page.locator('#reset-cr')).toBeVisible();
+    await expect(page.locator('#reset-ph')).toBeVisible();
+    await expect(page.locator('#reset-ds')).toBeVisible();
+});

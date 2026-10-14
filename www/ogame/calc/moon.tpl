@@ -40,10 +40,15 @@
   <script src="/js/utils.js?v=<?php echo filemtime($pfgPath.'/js/utils.js'); ?>" defer></script>
   <script src="/js/api-client.js?v=<?php echo filemtime($pfgPath.'/js/api-client.js'); ?>" defer></script>
   <script src="/ogame/calc/js/dom-utils.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/dom-utils.js'); ?>" defer></script>
+  <!-- Player profiles -->
+  <script src="/ogame/calc/js/profiles-core.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/profiles-core.js'); ?>" defer></script>
+  <script src="/ogame/calc/js/profiles-store.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/profiles-store.js'); ?>" defer></script>
+  <script src="/ogame/calc/js/profiles-ui.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/profiles-ui.js'); ?>" defer></script>
   <script src="/ogame/calc/js/moon-core.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/moon-core.js'); ?>" defer></script>
   <script src="/ogame/calc/js/moon-data-collector.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/moon-data-collector.js'); ?>" defer></script>
   <script src="/ogame/calc/js/moon-renderer.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/moon-renderer.js'); ?>" defer></script>
   <script src="/ogame/calc/js/moon-orchestration.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/moon-orchestration.js'); ?>" defer></script>
+  <script src="/ogame/calc/js/moon-profile.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/moon-profile.js'); ?>" defer></script>
 
   <script type="module">
     // A module, so it runs after the deferred scripts above have defined `options`.
@@ -67,7 +72,7 @@
   <div class="row">
     <div class="col-md-2"><?php require_once '../../sidebar_bs.tpl'; ?></div>
     <div class="col-md-10">
-    <?php require_once '../../topbar_bs.tpl'; ?>
+    <?php $profilesCalc = 'moon'; require_once '../../topbar_bs.tpl'; ?>
 
 <div id="moon">
 
@@ -120,8 +125,12 @@
 
   <!-- ================= Moon creation ================= -->
   <div class="border rounded">
-    <div class="d-flex align-items-center">
+    <div class="d-flex flex-wrap align-items-center">
       <div class="bg-body-secondary text-primary-emphasis rounded main-header text-center flex-grow-1"><?= $l['create-title'] ?></div>
+      <div id="pf-planet-box" class="pf-header-bodies d-flex align-items-center gap-1 ms-auto ps-2 me-1 d-none">
+        <label for="pf-planet"><?= $l['planet'] ?></label>
+        <select id="pf-planet" class="form-select form-select-sm w-auto"></select>
+      </div>
       <div id="reset-cr" class="d-flex align-items-center justify-content-center bg-danger-subtle" data-bs-toggle="tooltip" title="<?= $l['reset'] ?>">
         <i class="bi bi-arrow-counterclockwise" style="color: #dc3545; font-size: 1.25rem;"></i>
       </div>
@@ -131,6 +140,9 @@
       <ul class="nav nav-tabs" id="paramTabs" role="tablist">
         <li class="nav-item" role="presentation">
           <button class="nav-link active" id="param-common-tab" data-bs-toggle="tab" data-bs-target="#param-common" type="button" role="tab"><?= $l['param-tab-common'] ?></button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button class="nav-link" id="param-lifeforms-tab" data-bs-toggle="tab" data-bs-target="#param-lifeforms" type="button" role="tab"><?= $l['lifeforms'] ?></button>
         </li>
         <li class="nav-item" role="presentation">
           <button class="nav-link" id="param-fleet-tab" data-bs-toggle="tab" data-bs-target="#param-fleet" type="button" role="tab"><?= $l['fleet'] ?></button>
@@ -149,9 +161,11 @@
               <input id="hypertech-lvl" type="text" name="hypertech-lvl" class="form-control form-control-sm level-input" value="0" data-field-title="<?= $l['hyper-tech'] ?>">
             </div>
             <div class="d-flex align-items-center gap-1">
-              <label for="supra-refractor"><?= $l['supra-refractor'] ?></label>
-              <input id="supra-refractor" type="text" name="supra-refractor" class="form-control form-control-sm level-input" value="0" data-field-title="<?= $l['supra-refractor'] ?>">
+              <input id="general-class" type="checkbox" name="general-class" class="form-check-input">
+              <label for="general-class"><?= $l['class'] ?>: <?= $l['class-general'] ?></label>
             </div>
+          </div>
+          <div class="d-flex flex-wrap gap-3 align-items-center justify-content-center mb-2">
             <div class="d-flex align-items-center gap-1">
               <label for="debris-percent"><?= $l['debris-percent'] ?></label>
               <select id="debris-percent" name="debris-percent" class="form-select form-select-sm w-auto">
@@ -165,25 +179,23 @@
                 <option value="80">80%</option>
               </select>
             </div>
-          </div>
-          <div class="d-flex flex-wrap gap-3 align-items-center justify-content-center mb-2">
             <div class="d-flex align-items-center gap-1">
-              <input id="general-class" type="checkbox" name="general-class" class="form-check-input">
-              <label for="general-class"><?= $l['class'] ?>: <?= $l['class-general'] ?></label>
-            </div>
-            <div class="d-flex align-items-center gap-1">
-              <label for="rc-capacity-increase"><?= $l['cargo-cap-increase'] ?><?= $l['recycler'] ?></label>
-              <div class="input-group input-group-sm w-auto">
-                <input id="rc-capacity-increase" type="text" name="rc-capacity-increase" class="form-control m-0" value="0" data-field-title="<?= $l['cargo-cap-increase'] ?><?= $l['recycler'] ?>">
-                <span class="input-group-text">%</span>
-              </div>
+              <label for="defense-debris-percent"><?= $l['defense-to-debris'] ?></label>
+              <select id="defense-debris-percent" name="defense-debris-percent" class="form-select form-select-sm w-auto">
+                <option value="0" selected="selected">0%</option>
+                <option value="10">10%</option>
+                <option value="20">20%</option>
+                <option value="30">30%</option>
+                <option value="40">40%</option>
+                <option value="50">50%</option>
+                <option value="55">55%</option>
+                <option value="60">60%</option>
+                <option value="70">70%</option>
+                <option value="80">80%</option>
+              </select>
             </div>
           </div>
           <div class="d-flex flex-wrap gap-3 align-items-center justify-content-center">
-            <div class="d-flex align-items-center gap-1">
-              <input id="defense-to-debris" type="checkbox" name="defense-to-debris" class="form-check-input">
-              <label for="defense-to-debris"><?= $l['defense-to-debris'] ?></label>
-            </div>
             <div class="d-flex align-items-center gap-1">
               <input id="deut-to-debris" type="checkbox" name="deut-to-debris" class="form-check-input">
               <label for="deut-to-debris"><?= $l['deut-to-debris'] ?></label>
@@ -194,6 +206,23 @@
             </div>
           </div>
         </div><!-- /param-common -->
+
+        <!-- Life forms tab -->
+        <div id="param-lifeforms" class="tab-pane fade p-2 pb-0" role="tabpanel">
+          <div class="d-flex flex-wrap gap-3 align-items-center justify-content-center">
+            <div class="d-flex align-items-center gap-1">
+              <label for="supra-refractor"><?= $l['supra-refractor'] ?></label>
+              <input id="supra-refractor" type="text" name="supra-refractor" class="form-control form-control-sm level-input" value="0" data-field-title="<?= $l['supra-refractor'] ?>">
+            </div>
+            <div class="d-flex align-items-center gap-1">
+              <label for="rc-capacity-increase"><?= $l['cargo-cap-increase'] ?><?= $l['recycler'] ?></label>
+              <div class="input-group input-group-sm w-auto">
+                <input id="rc-capacity-increase" type="text" name="rc-capacity-increase" class="form-control m-0" value="0" data-field-title="<?= $l['cargo-cap-increase'] ?><?= $l['recycler'] ?>">
+                <span class="input-group-text">%</span>
+              </div>
+            </div>
+          </div>
+        </div><!-- /param-lifeforms -->
 
         <!-- Fleet tab -->
         <div id="param-fleet" class="tab-pane fade p-2 pb-0" role="tabpanel">
@@ -313,8 +342,12 @@
 
   <!-- ================= Sensor phalanx ================= -->
   <div class="border rounded mt-2">
-    <div class="d-flex align-items-center">
+    <div class="d-flex flex-wrap align-items-center">
       <div class="bg-body-secondary text-primary-emphasis rounded main-header text-center flex-grow-1"><?= $l['phalanx-title'] ?></div>
+      <div id="pf-moon-box" class="pf-header-bodies d-flex align-items-center gap-1 ms-auto ps-2 me-1 d-none">
+        <label for="pf-moon"><?= $l['moon'] ?></label>
+        <select id="pf-moon" class="form-select form-select-sm w-auto"></select>
+      </div>
       <div id="reset-ph" class="d-flex align-items-center justify-content-center bg-danger-subtle" data-bs-toggle="tooltip" title="<?= $l['reset'] ?>">
         <i class="bi bi-arrow-counterclockwise" style="color: #dc3545; font-size: 1.25rem;"></i>
       </div>
@@ -426,6 +459,7 @@ document.addEventListener('DOMContentLoaded', function() {
     bootstrap.Tooltip.getOrCreateInstance(el);
   });
   initializeMoonCalculator();
+  initMoonProfiles();
 });
 </script>
 

@@ -14,8 +14,8 @@
 //   fleet     - always dies in combat, always contributes;
 //   satellite - solar satellites cannot leave the planet, so they always die
 //               and always contribute (no toggle in the UI);
-//   defense   - only contributes when the "defenses to debris" universe
-//               setting is enabled.
+//   defense   - contributes its own share, the universe's "defenses to
+//               debris" setting, which is 0% in most universes.
 const MOON_UNITS = [
   { id: 'small-cargo', metal: 2000, crystal: 2000, deuterium: 0, group: 'fleet' },
   { id: 'large-cargo', metal: 6000, crystal: 6000, deuterium: 0, group: 'fleet' },
@@ -133,25 +133,27 @@ class MoonCalculator {
    *
    * @param {Object} p Parameters:
    *   counts: {unitId: number} for every entry of MOON_UNITS,
-   *   debrisPercent: share of a destroyed unit that goes into the field, %,
+   *   debrisPercent: share of a destroyed ship that goes into the field, %,
+   *   defenseDebrisPercent: share of a destroyed defense that goes there, %,
    *   hyperTechLevel: hyperspace technology level (recycler hold),
    *   isGeneral: whether the player has the General class (recycler hold),
    *   rcCapacityIncrease: life-form recycler capacity increase, %,
-   *   defenseToDebris: whether destroyed defenses feed the field,
    *   deutToDebris: whether deuterium is part of the field,
    *   promoMoon: whether the 40% event cap is active,
    *   supraRefractorLevel: Kaelesh Supra Refractor level.
    */
   computeCreate(p) {
-    // Round the share to 2 decimals so e.g. 55% does not grow a float tail.
-    const dfShare = Number.parseFloat(dropFraction(0.01 * p.debrisPercent, 2));
+    const dfShare = MoonCalculator.debrisShare(p.debrisPercent);
+    const defShare = MoonCalculator.debrisShare(p.defenseDebrisPercent);
     const deutFactor = p.deutToDebris ? 1 : 0;
     const counts = p.counts || {};
 
-    // Full build cost of everything entered, and the subset of it that ends up
-    // in the debris field.
+    // Full build cost of everything entered, and the part of it that ends up
+    // in the debris field - summed per share, so units that share one are
+    // multiplied once, as a single sum.
     const cost = { metal: 0, crystal: 0, deuterium: 0 };
-    const source = { metal: 0, crystal: 0, deuterium: 0 };
+    /** @type {Map<number, {metal: number, crystal: number, deuterium: number}>} */
+    const sources = new Map();
 
     MOON_UNITS.forEach((unit) => {
       const count = Math.max(0, counts[unit.id] || 0);
@@ -159,15 +161,22 @@ class MoonCalculator {
       cost.crystal += count * unit.crystal;
       cost.deuterium += count * unit.deuterium;
 
-      if (!MoonCalculator.feedsDebris(unit, p.defenseToDebris)) return;
+      const share = MoonCalculator.unitShare(unit, dfShare, defShare);
+      if (share <= 0) return;
+      const source = sources.get(share) || { metal: 0, crystal: 0, deuterium: 0 };
       source.metal += count * unit.metal;
       source.crystal += count * unit.crystal;
       source.deuterium += count * unit.deuterium;
+      sources.set(share, source);
     });
 
-    const recyclableMetal = Math.floor(source.metal * dfShare);
-    const recyclableCrystal = Math.floor(source.crystal * dfShare);
-    const recyclableDeut = Math.floor(deutFactor * source.deuterium * dfShare);
+    /** @param {'metal'|'crystal'|'deuterium'} res */
+    const debrisOf = (res) => Math.floor(
+      Array.from(sources).reduce((sum, [share, source]) => sum + source[res] * share, 0)
+    );
+    const recyclableMetal = debrisOf('metal');
+    const recyclableCrystal = debrisOf('crystal');
+    const recyclableDeut = deutFactor * debrisOf('deuterium');
     const debrisTotal = recyclableMetal + recyclableCrystal + recyclableDeut;
 
     // The Supra Refractor lifts both the chance and its cap, so the debris
@@ -202,8 +211,18 @@ class MoonCalculator {
       moonSizeMax: moonSizes.at(-1) ?? null,
       recyclerCapacity,
       recyclers,
-      maxCounts: MoonCalculator.maxCounts(dfShare, deutFactor, baseChanceCap, p.defenseToDebris),
+      maxCounts: MoonCalculator.maxCounts(dfShare, defShare, deutFactor, baseChanceCap),
     };
+  }
+
+  /**
+   * A debris percentage as a fraction, rounded to 2 decimals so e.g. 55% does
+   * not grow a float tail.
+   *
+   * @param {number} percent
+   */
+  static debrisShare(percent) {
+    return Number.parseFloat(dropFraction(0.01 * Math.max(0, percent || 0), 2));
   }
 
   /**
@@ -244,30 +263,31 @@ class MoonCalculator {
   }
 
   /**
-   * Whether a destroyed unit of this kind contributes to the debris field.
-   * Fleet and solar satellites always do; defenses only when the universe
-   * setting is enabled.
+   * The share of a destroyed unit of this kind that goes to the debris field:
+   * the defenses' own share for a defense, the fleet's for a ship or a solar
+   * satellite.
+   *
+   * @param {{group: string}} unit
+   * @param {number} dfShare
+   * @param {number} defShare
    */
-  static feedsDebris(unit, defenseToDebris) {
-    return unit.group !== 'defense' || !!defenseToDebris;
+  static unitShare(unit, dfShare, defShare) {
+    return unit.group === 'defense' ? defShare : dfShare;
   }
 
   /**
    * How many units of each kind it takes to reach the maximum moon chance.
-   * Units that cannot contribute (defenses with the setting off, or a debris
-   * share of 0) get `null`, which the renderer shows as a dash.
+   * Units that cannot contribute (a share of 0, which is where defenses are in
+   * most universes) get `null`, which the renderer shows as a dash.
    *
    * @returns {Object} {unitId: number|null}
    */
-  static maxCounts(dfShare, deutFactor, chanceCap, defenseToDebris) {
+  static maxCounts(dfShare, defShare, deutFactor, chanceCap) {
     const capDF = chanceCap * MOON_DF_PER_FULL_CHANCE;
     const result = {};
     MOON_UNITS.forEach((unit) => {
-      if (!MoonCalculator.feedsDebris(unit, defenseToDebris)) {
-        result[unit.id] = null;
-        return;
-      }
-      const unitDF = (unit.metal + unit.crystal + deutFactor * unit.deuterium) * dfShare;
+      const share = MoonCalculator.unitShare(unit, dfShare, defShare);
+      const unitDF = (unit.metal + unit.crystal + deutFactor * unit.deuterium) * share;
       result[unit.id] = unitDF > 0 ? Math.ceil(capDF / unitDF) : null;
     });
     return result;

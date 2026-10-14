@@ -1151,8 +1151,44 @@ const PF_UNIVERSE_TOP_SCORE = {
   display: (v) => pfOptionText(selectEl('#highTop'))(v),
 };
 
+/** @type {PfUniverseSettingKind} The share of destroyed defenses that goes to the debris field, in percent. */
+const PF_UNIVERSE_DEF_DEBRIS = {
+  key: 'debrisFactorDef',
+  parse: (data) => {
+    const factor = Number.parseFloat(data.debrisFactorDef);
+    return Number.isFinite(factor) && factor >= 0 ? Math.round(factor * 100) : null;
+  },
+  ...pfNumberSelect((v) => v + '%'),
+  display: (v) => v + '%',
+};
+
+/** @type {PfUniverseSettingKind} The number of systems per galaxy. */
+const PF_UNIVERSE_SYSTEMS = {
+  key: 'systems',
+  parse: (data) => {
+    const systems = Number.parseInt(data.systems, 10);
+    return systems > 0 ? systems : null;
+  },
+  get: (selector) => getInputNumber($(selector)),
+  set: (selector, value) => setVal(selector, value),
+  display: String,
+};
+
+/** @type {PfUniverseSettingKind} Whether the systems of a galaxy form a ring (the last one borders the first). */
+const PF_UNIVERSE_DONUT_SYSTEM = {
+  key: 'donutSystem',
+  // The game sends "1" or "0" - flight compares it with 1 the same way.
+  parse: (data) => (typeof data.donutSystem === 'string' ? data.donutSystem === '1' : null),
+  get: (selector) => getChecked(selector),
+  set: (selector, value) => setChecked(selector, value === true),
+  display: (v) => pfDisplayValue(v === true),
+};
+
 /** Every setting a fetch stores, whichever of them asked for it. */
-const PF_UNIVERSE_SETTINGS = [PF_UNIVERSE_SPEED, PF_UNIVERSE_DEBRIS, PF_UNIVERSE_DEUT_IN_DEBRIS, PF_UNIVERSE_TOP_SCORE];
+const PF_UNIVERSE_SETTINGS = [
+  PF_UNIVERSE_SPEED, PF_UNIVERSE_DEBRIS, PF_UNIVERSE_DEUT_IN_DEBRIS, PF_UNIVERSE_TOP_SCORE,
+  PF_UNIVERSE_DEF_DEBRIS, PF_UNIVERSE_SYSTEMS, PF_UNIVERSE_DONUT_SYSTEM,
+];
 
 /** @typedef {{at: number, overrides?: Record<string, *>, override?: *, [setting: string]: *}} PfUniverseEntry */
 
@@ -1890,4 +1926,5 @@ const pfgProfiles = createProfilesUi();
 
 Object.assign(window, {
   pfgProfiles, ProfilesUi, PfUniverseSetting, PfBodySelect, ProfileBinder, PlanetPrmBinder, pfBind, PF_UNIVERSE_SPEED, PF_UNIVERSE_DEBRIS, PF_UNIVERSE_DEUT_IN_DEBRIS, PF_UNIVERSE_TOP_SCORE, readSavedSet,
+  PF_UNIVERSE_DEF_DEBRIS, PF_UNIVERSE_SYSTEMS, PF_UNIVERSE_DONUT_SYSTEM,
 });

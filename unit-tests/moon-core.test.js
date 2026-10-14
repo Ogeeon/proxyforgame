@@ -17,7 +17,7 @@ const BASE_PRM = {
     hyperTechLevel: 0,
     isGeneral: false,
     rcCapacityIncrease: 0,
-    defenseToDebris: false,
+    defenseDebrisPercent: 0,
     deutToDebris: false,
     promoMoon: false,
     supraRefractorLevel: 0,
@@ -87,10 +87,10 @@ describe('Moon Calculator - Creation', () => {
         expect(r.createChance).toBeCloseTo(0.06, 10);
     });
 
-    it('defenses only feed the debris field when the setting is on', () => {
+    it('defenses feed the debris field with their own share, none at 0%', () => {
         const counts = { 'plasma-turret': 10 }; // 500000 metal / 500000 crystal
         const off = compute({ counts });
-        const on = compute({ counts, defenseToDebris: true });
+        const on = compute({ counts, defenseDebrisPercent: 30 });
 
         // The build cost is shown either way — the resources were spent.
         expect(off.metalRequired).toBe(500000);
@@ -99,6 +99,20 @@ describe('Moon Calculator - Creation', () => {
         expect(off.debrisTotal).toBe(0);
         expect(on.debrisTotal).toBe(300000);
         expect(on.createChance).toBeCloseTo(0.03, 10);
+    });
+
+    it('the fleet and the defenses each take their own share', () => {
+        // 1000 light fighters: 3M metal, 1M crystal; 10 plasma turrets: 500k / 500k.
+        const r = compute({ counts: { 'light-fighter': 1000, 'plasma-turret': 10 }, debrisPercent: 40, defenseDebrisPercent: 10 });
+        expect(r.recyclableMetal).toBe(3000000 * 0.4 + 500000 * 0.1);
+        expect(r.recyclableCrystal).toBe(1000000 * 0.4 + 500000 * 0.1);
+        expect(r.maxCounts['light-fighter']).toBe(Math.ceil(2000000 / (4000 * 0.4)));
+        expect(r.maxCounts['plasma-turret']).toBe(Math.ceil(2000000 / (100000 * 0.1)));
+    });
+
+    it('the fleet\'s share does not reach the defenses', () => {
+        const r = compute({ counts: { 'plasma-turret': 10 }, debrisPercent: 80 });
+        expect(r.debrisTotal).toBe(0);
     });
 
     it('deuterium only feeds the debris field when the setting is on', () => {
@@ -322,13 +336,13 @@ describe('Moon Calculator - Units for the maximum chance', () => {
         const off = compute();
         expect(off.maxCounts['plasma-turret']).toBeNull();
 
-        const on = compute({ defenseToDebris: true });
+        const on = compute({ defenseDebrisPercent: 30 });
         // (50000 + 50000) * 30% = 30000 of debris each.
         expect(on.maxCounts['plasma-turret']).toBe(Math.ceil(2000000 / 30000));
     });
 
     it('a rocket launcher with no deuterium value still has a maximum', () => {
-        const r = compute({ defenseToDebris: true });
+        const r = compute({ defenseDebrisPercent: 30 });
         expect(r.maxCounts['rocket-launcher']).toBe(Math.ceil(2000000 / (2000 * 0.3)));
     });
 });

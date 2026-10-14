@@ -28,6 +28,9 @@
       // and '1' when deuterium goes there too - empty otherwise.
       'debrisFactor' => (string)$xml->debrisFactor,
       'deuteriumInDebris' => (string)$xml->deuteriumInDebris,
+      // The same share for destroyed defenses (0 in most universes); moon
+      // shows it in its "defenses to debris" select.
+      'debrisFactorDef' => (string)$xml->debrisFactorDef,
       // Score of the strongest player; expeditions turns it into the "strongest
       // player" class that caps the expedition's find.
       'topScore' => (string)$xml->topScore,

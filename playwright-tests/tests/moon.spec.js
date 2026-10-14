@@ -51,6 +51,11 @@ async function openDefensesTab(page) {
     await expect(page.locator('#plasma-turret')).toBeVisible();
 }
 
+async function openLifeformsTab(page) {
+    await page.locator('#param-lifeforms-tab').click();
+    await expect(page.locator('#supra-refractor')).toBeVisible();
+}
+
 test.describe('Moon Calculator - DOM integration', () => {
     test.beforeEach(async ({ context, page }) => {
         await context.addInitScript(() => {
@@ -66,12 +71,18 @@ test.describe('Moon Calculator - DOM integration', () => {
         await page.goto('/moon');
     });
 
-    test('creation parameters are organized into Common, Fleet and Defenses tabs', async ({ page }) => {
+    test('creation parameters are organized into Common, Life forms, Fleet and Defenses tabs', async ({ page }) => {
         // The Common tab is active by default; fields on the other tabs are hidden.
         await expect(page.locator('#debris-percent')).toBeVisible();
+        await expect(page.locator('#defense-debris-percent')).toBeVisible();
         await expect(page.locator('#promo-moon')).toBeVisible();
+        await expect(page.locator('#supra-refractor')).toBeHidden();
         await expect(page.locator('#light-fighter')).toBeHidden();
         await expect(page.locator('#plasma-turret')).toBeHidden();
+
+        await openLifeformsTab(page);
+        await expect(page.locator('#rc-capacity-increase')).toBeVisible();
+        await expect(page.locator('#debris-percent')).toBeHidden();
 
         await openFleetTab(page);
         await expect(page.locator('#death-star')).toBeVisible();
@@ -130,20 +141,26 @@ test.describe('Moon Calculator - DOM integration', () => {
         await expect(page.locator('#plasma-turret')).toHaveValue('0');
     });
 
-    test('the defenses checkbox switches the defense contribution on', async ({ page }) => {
+    test('the defenses\' share brings the defenses into the field', async ({ page }) => {
         await openDefensesTab(page);
         await page.locator('#plasma-turret').fill('10');
         await page.locator('#plasma-turret').blur();
-        // Defenses stay out of the field by default...
+        // Defenses stay out of the field by default (0%)...
         await expect(page.locator('#debris-total')).toHaveText('0');
         // ...but the resources were still spent.
         await expect(page.locator('#metal-required')).toHaveText('500.000');
         await expect(page.locator('#plasma-turret-max')).toHaveText('-');
 
         await page.locator('#param-common-tab').click();
-        await page.locator('#defense-to-debris').check();
+        await page.locator('#defense-debris-percent').selectOption('30');
         await expect(page.locator('#debris-total')).toHaveText('300.000');
         await expect(page.locator('#moon-create-chance')).toHaveText('3');
+
+        // Their own share, not the fleet's.
+        await page.locator('#debris-percent').selectOption('80');
+        await expect(page.locator('#debris-total')).toHaveText('300.000');
+        await page.locator('#defense-debris-percent').selectOption('10');
+        await expect(page.locator('#debris-total')).toHaveText('100.000');
     });
 
     test('the deuterium checkbox adds deuterium to the recycling block', async ({ page }) => {
@@ -172,7 +189,7 @@ test.describe('Moon Calculator - DOM integration', () => {
         await openFleetTab(page);
         await page.locator('#light-fighter').fill('100');
         await page.locator('#light-fighter').blur();
-        await page.locator('#param-common-tab').click();
+        await openLifeformsTab(page);
 
         await page.locator('#rc-capacity-increase').fill('50'); // hold 30000
         await page.locator('#rc-capacity-increase').blur();
@@ -212,7 +229,7 @@ test.describe('Moon Calculator - DOM integration', () => {
         await openFleetTab(page);
         await page.locator('#death-star').fill('1');
         await page.locator('#death-star').blur();
-        await page.locator('#param-common-tab').click();
+        await openLifeformsTab(page);
 
         await page.locator('#supra-refractor').fill('20');
         await page.locator('#supra-refractor').blur();
@@ -241,11 +258,12 @@ test.describe('Moon Calculator - DOM integration', () => {
         await page.locator('#hypertech-lvl').fill('12');
         await page.locator('#debris-percent').selectOption('60');
         await page.locator('#general-class').check();
-        await page.locator('#rc-capacity-increase').fill('80');
-        await page.locator('#rc-capacity-increase').blur();
-        await page.locator('#defense-to-debris').check();
+        await page.locator('#defense-debris-percent').selectOption('20');
         await page.locator('#deut-to-debris').check();
         await page.locator('#promo-moon').check();
+        await openLifeformsTab(page);
+        await page.locator('#rc-capacity-increase').fill('80');
+        await page.locator('#rc-capacity-increase').blur();
         await page.locator('#supra-refractor').fill('15');
         await page.locator('#supra-refractor').blur();
         await openFleetTab(page);
@@ -259,10 +277,10 @@ test.describe('Moon Calculator - DOM integration', () => {
         await expect(page.locator('#hypertech-lvl')).toHaveValue('0');
         await expect(page.locator('#debris-percent')).toHaveValue('30');
         await expect(page.locator('#general-class')).not.toBeChecked();
-        await expect(page.locator('#rc-capacity-increase')).toHaveValue('0');
-        await expect(page.locator('#defense-to-debris')).not.toBeChecked();
+        await expect(page.locator('#defense-debris-percent')).toHaveValue('0');
         await expect(page.locator('#deut-to-debris')).not.toBeChecked();
         await expect(page.locator('#promo-moon')).not.toBeChecked();
+        await expect(page.locator('#rc-capacity-increase')).toHaveValue('0');
         await expect(page.locator('#supra-refractor')).toHaveValue('0');
         await expect(page.locator('#moon-create-chance')).toHaveText('0');
         await expect(page.locator('#moon-size-range')).toHaveText('-');
@@ -295,12 +313,28 @@ test.describe('Moon Calculator - DOM integration', () => {
     test('the checkbox settings survive a reload', async ({ page }) => {
         await page.locator('#promo-moon').check();
         await page.locator('#debris-percent').selectOption('70');
+        await page.locator('#defense-debris-percent').selectOption('20');
+        await openLifeformsTab(page);
         await page.locator('#supra-refractor').fill('8');
         await page.locator('#supra-refractor').blur();
         await page.reload();
         await expect(page.locator('#promo-moon')).toBeChecked();
         await expect(page.locator('#debris-percent')).toHaveValue('70');
+        await expect(page.locator('#defense-debris-percent')).toHaveValue('20');
         await expect(page.locator('#supra-refractor')).toHaveValue('8');
+    });
+
+    test('a save from the defenses switch gives the defenses the fleet\'s share', async ({ page }) => {
+        await page.evaluate(() => localStorage.setItem('options_moon', JSON.stringify({ debrisPercent: 40, defenseToDebris: true })));
+        await page.reload();
+        await expect(page.locator('#debris-percent')).toHaveValue('40');
+        await expect(page.locator('#defense-debris-percent')).toHaveValue('40');
+    });
+
+    test('a save from the defenses switch, switched off, leaves the defenses out', async ({ page }) => {
+        await page.evaluate(() => localStorage.setItem('options_moon', JSON.stringify({ debrisPercent: 40, defenseToDebris: false })));
+        await page.reload();
+        await expect(page.locator('#defense-debris-percent')).toHaveValue('0');
     });
 });
 
