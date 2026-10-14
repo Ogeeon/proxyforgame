@@ -2103,6 +2103,225 @@ class PlanetPrmBinder extends ProfileBinder {
 }
 
 /**
+ * A field of a calculator bound by FlatSettingsBinder: the profile value key
+ * it shows, and the control that shows it (a selector, or a lookup for a
+ * control that has no stable selector).
+ *
+ * @typedef {ProfileFieldBase & {input: string|(() => ?HTMLElement)}} FlatSettingsField
+ */
+
+/**
+ * @template {FlatSettingsField} F
+ * @typedef {object} FlatSettingsConfig
+ * @property {F[]} fields The fields the account fills.
+ * @property {() => Record<string, any>} settings The object the calculator keeps the fields in.
+ * @property {string[]} ownedKeys The keys of that object the profile may own.
+ * @property {string} cookie Where saveOwn() writes the calculator's own values.
+ * @property {() => void} ownSave The save the calculator had before the binder took options.save over.
+ * @property {(field: F, settings: Record<string, any>) => *} read The profile value a field holds in the settings.
+ * @property {(field: F, settings: Record<string, any>, value: *) => void} write Put a profile value (or undefined) into the settings.
+ */
+
+/**
+ * A binder for a calculator that shows the account of the profile and nothing
+ * else of it, in one settings object: the profile is projected into the
+ * settings and the form is shown again from them, and the changes come back
+ * through options.save(). What the profile owns is stored with the values it
+ * had before the profile, so "no profile" shows the calculator's own again.
+ * A subclass gives the configuration and the steps that differ:
+ * showProfile() and showOwn() (the form from the settings, the universe, the
+ * coordinates select), plus bindControls(), prepareSettings() and
+ * storable() where the page needs them. Set `universe` and `coordsSelect`
+ * in the constructor if the page has them.
+ *
+ * @template {FlatSettingsField} F
+ * @template [App=*]
+ * @extends {ProfileBinder<App>}
+ */
+class FlatSettingsBinder extends ProfileBinder {
+  /**
+   * @param {ProfilesUi} pf
+   * @param {App} app
+   * @param {FlatSettingsConfig<F>} config
+   */
+  constructor(pf, app, config) {
+    super(pf, app);
+    this.config = config;
+    /** @type {Record<string, *>} The profile-owned keys as they were before a profile. */
+    this.ownPrm = {};
+    this.ownSave = config.ownSave;
+    /** @type {?PfLockedUniverse} The universe picker the profile locks, if the page has one. */
+    this.universe = null;
+  }
+
+  init() {
+    this.describeFields();
+    options.save = () => this.save();
+    this.bindControls();
+    this.pf.onChange((profile) => this.apply(profile));
+    this.applyInitial(this.pf.active());
+  }
+
+  /** Wire the page's own controls; called from init(). */
+  bindControls() {
+    // A subclass wires its listeners here.
+  }
+
+  /**
+   * Apply the profile that is active when the page loads.
+   *
+   * @param {?Profile} active
+   */
+  applyInitial(active) {
+    if (active) this.apply(active);
+  }
+
+  // -------------------------------------------------------------------------
+  // Profile -> calculator
+  // -------------------------------------------------------------------------
+
+  /** @param {?Profile} profile */
+  apply(profile) {
+    if (!profile) {
+      this.leave();
+      return;
+    }
+    const { fields, settings, ownedKeys } = this.config;
+    this.applying = true;
+    try {
+      if (this.profileId === null) {
+        this.ownPrm = {};
+        ownedKeys.forEach((key) => { this.ownPrm[key] = cloneData(settings()[key]); });
+      }
+      this.profileId = profile.id;
+      this.pf.clearMarks();
+      this.prepareSettings();
+      fields.forEach((f) => this.writeField(f, getProfileValue(profile.account, f.key)));
+      // The calculator's reset would write every default into the profile as an edit.
+      pfShow('#reset', false);
+      this.showProfile(profile);
+      // The recalculation reads the fields back: the snapshot then holds the
+      // values exactly as the form gives them, and the next edit compares like with like.
+      this.recalc();
+      this.takeSnapshot();
+    } finally {
+      this.applying = false;
+    }
+    this.markAll();
+  }
+
+  /** Called before the profile is written into the settings, to make them ready to take it. */
+  prepareSettings() {
+    // A subclass shapes settings that the fields write into here.
+  }
+
+  /**
+   * Put a profile value into the settings. A subclass may skip a field here
+   * (a link that carries its own value).
+   *
+   * @param {F} field
+   * @param {*} value
+   */
+  writeField(field, value) {
+    this.config.write(field, this.config.settings(), value);
+  }
+
+  /**
+   * Called with the profile in the settings: show the universe and the
+   * coordinates select, and the form again. The page is recalculated after.
+   * A subclass adds the form, and the order it needs.
+   *
+   * @param {Profile} profile
+   */
+  showProfile(profile) {
+    this.universe?.apply(profile);
+    this.coordsSelect?.render(profile);
+  }
+
+  restoreOwn() {
+    this.coordsSelect?.hide();
+    Object.assign(this.config.settings(), cloneData(this.ownPrm));
+    this.showOwn();
+  }
+
+  /** Show the calculator's own values again, and give the universe picker back. */
+  showOwn() {
+    // A subclass shows the restored settings in its form here.
+  }
+
+  takeSnapshot() {
+    const { fields, read, settings } = this.config;
+    this.snapshot = {};
+    fields.forEach((f) => { this.snapshot[f.key] = read(f, settings()); });
+  }
+
+  // -------------------------------------------------------------------------
+  // Calculator -> profile
+  // -------------------------------------------------------------------------
+
+  saveWithoutProfile() {
+    this.ownSave();
+  }
+
+  /** Write what changed since the last snapshot into the profile. */
+  sync() {
+    const profile = this.profile();
+    if (!profile) return;
+    const { fields, read, settings } = this.config;
+    let changed = false;
+    fields.forEach((f) => {
+      changed = this.syncValue(profile.account, f.key, f.key, read(f, settings())) || changed;
+    });
+    if (changed) {
+      this.pf.save(profile);
+      this.markAll();
+    }
+  }
+
+  /**
+   * The calculator's own storage gets its own fields as they are, and the
+   * profile-owned ones - and a universe the profile dictates - as they were
+   * before the profile.
+   */
+  saveOwn() {
+    /** @type {Record<string, any>} */
+    const stored = { ...this.config.settings(), ...cloneData(this.ownPrm) };
+    this.universe?.overlay(stored);
+    saveToCookie(this.config.cookie, this.storable(stored));
+  }
+
+  /**
+   * The values about to be stored as the calculator's own; a subclass drops
+   * what the cookie must not keep.
+   *
+   * @param {Record<string, any>} stored
+   * @returns {Record<string, any>}
+   */
+  storable(stored) {
+    return stored;
+  }
+
+  // -------------------------------------------------------------------------
+  // The marks
+  // -------------------------------------------------------------------------
+
+  /** Name every value this page binds, in the page's own words. */
+  describeFields() {
+    this.describeFieldList(this.config.fields);
+  }
+
+  /** Mark every field the profile owns, and the ones that differ from the game. */
+  markAll() {
+    const profile = this.profile();
+    if (!profile) return;
+    this.config.fields.forEach((f) => {
+      const input = typeof f.input === 'function' ? f.input() : $(f.input);
+      this.pf.markField(input, profile, profile.account, f.key, this.restoreAccount(f.key));
+    });
+  }
+}
+
+/**
  * Connect a binder to the page, when it has the profile selector and the calculator.
  *
  * @template {ProfileBinder} B
@@ -2135,6 +2354,6 @@ function createProfilesUi() {
 const pfgProfiles = createProfilesUi();
 
 Object.assign(window, {
-  pfgProfiles, ProfilesUi, PfUniverseSetting, PfBodySelect, PfLockedUniverse, PfCoordsSelect, ProfileBinder, PlanetPrmBinder, pfBind, PF_UNIVERSE_SPEED, PF_UNIVERSE_DEBRIS, PF_UNIVERSE_DEUT_IN_DEBRIS, PF_UNIVERSE_TOP_SCORE, readSavedSet,
+  pfgProfiles, ProfilesUi, PfUniverseSetting, PfBodySelect, PfLockedUniverse, PfCoordsSelect, ProfileBinder, PlanetPrmBinder, FlatSettingsBinder, pfBind, PF_UNIVERSE_SPEED, PF_UNIVERSE_DEBRIS, PF_UNIVERSE_DEUT_IN_DEBRIS, PF_UNIVERSE_TOP_SCORE, readSavedSet,
   PF_UNIVERSE_DEF_DEBRIS, PF_UNIVERSE_SYSTEMS, PF_UNIVERSE_DONUT_SYSTEM,
 });

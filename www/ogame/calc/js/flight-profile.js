@@ -101,17 +101,23 @@ const FLIGHT_ACCOUNT_FIELDS = [
 const FLIGHT_ACCOUNT_PRM_KEYS = ['driveLevels', 'hyperTechLvl', 'playerClass', 'traderBonus', 'warriorBonus',
   'lfRocktalCE', 'lfMechanGE', 'lfShipsBonuses'];
 
-/** @extends {ProfileBinder<*>} */
-class FlightProfiles extends ProfileBinder {
+/** @extends {FlatSettingsBinder<FlightAccountField>} */
+class FlightProfiles extends FlatSettingsBinder {
   /**
    * @param {ProfilesUi} pf
    * @param {*} orchestrator The FlightOrchestrator of the page.
    */
   constructor(pf, orchestrator) {
-    super(pf, orchestrator);
+    super(pf, orchestrator, {
+      fields: FLIGHT_ACCOUNT_FIELDS,
+      settings: () => options.prm,
+      ownedKeys: FLIGHT_ACCOUNT_PRM_KEYS,
+      cookie: 'options_flight',
+      ownSave: options.save,
+      read: (f, prm) => f.get(prm),
+      write: (f, prm, v) => f.set(prm, v),
+    });
     this.orch = orchestrator;
-    /** @type {Record<string, *>} The profile-owned prm keys as they were before a profile. */
-    this.ownPrm = {};
     this.universe = new PfLockedUniverse({
       read: () => ({ country: options.prm.country, universe: options.prm.universe }),
       write: (country, number) => this.showUniverse(country, number),
@@ -124,59 +130,32 @@ class FlightProfiles extends ProfileBinder {
       changed: () => this.syncTakeFleet(),
     });
     this.coordsSelect = this.departure;
-    this.ownSave = options.save;
     /** @type {*} The spy report waiting for the player to say where it goes. */
     this.pendingReport = null;
     /** @type {?(ready: boolean) => void} Settles makeRoomForReport(). */
     this.reportChoice = null;
   }
 
-  init() {
-    this.describeFields();
-    options.save = () => this.save();
+  bindControls() {
     addEvent('#pf-departure', 'change', () => this.departureChosen());
     addEvent('#pf-take-fleet', 'click', () => this.takeFleet());
     this.bindReportChoice();
-    this.pf.onChange((profile) => this.apply(profile));
-    const active = this.pf.active();
-    if (active) this.apply(active);
   }
 
   // -------------------------------------------------------------------------
   // Profile -> calculator
   // -------------------------------------------------------------------------
 
-  /** @param {?Profile} profile */
-  apply(profile) {
-    if (!profile) {
-      this.leave();
-      return;
-    }
+  prepareSettings() {
     const prm = options.prm;
-    this.applying = true;
-    try {
-      if (this.profileId === null) {
-        this.ownPrm = {};
-        FLIGHT_ACCOUNT_PRM_KEYS.forEach((key) => { this.ownPrm[key] = cloneData(prm[key]); });
-      }
-      this.profileId = profile.id;
-      this.pf.clearMarks();
-      prm.driveLevels = Array.isArray(prm.driveLevels) ? prm.driveLevels.slice() : [0, 0, 0];
-      prm.lfShipsBonuses = FLIGHT_SHIP_IDS.map((_, i) => (Array.isArray(prm.lfShipsBonuses[i]) ? prm.lfShipsBonuses[i].slice() : [0, 0, 0]));
-      FLIGHT_ACCOUNT_FIELDS.forEach((f) => f.set(prm, getProfileValue(profile.account, f.key)));
-      this.orch.populateParams();
-      this.universe.apply(profile);
-      // Flight's reset would write every default into the profile as an edit.
-      pfShow('#reset', false);
-      this.departure.render(profile);
-      // The recalculation reads the fields back: the snapshot then holds the
-      // values exactly as the form gives them, and the next edit compares like with like.
-      this.orch.recalc();
-      this.takeSnapshot();
-    } finally {
-      this.applying = false;
-    }
-    this.markAll();
+    prm.driveLevels = Array.isArray(prm.driveLevels) ? prm.driveLevels.slice() : [0, 0, 0];
+    prm.lfShipsBonuses = FLIGHT_SHIP_IDS.map((_, i) => (Array.isArray(prm.lfShipsBonuses[i]) ? prm.lfShipsBonuses[i].slice() : [0, 0, 0]));
+  }
+
+  /** @param {Profile} profile */
+  showProfile(profile) {
+    this.orch.populateParams();
+    super.showProfile(profile);
   }
 
   /**
@@ -195,54 +174,13 @@ class FlightProfiles extends ProfileBinder {
     this.orch.setUniList(country, number);
   }
 
-  restoreOwn() {
-    this.departure.hide();
-    Object.assign(options.prm, cloneData(this.ownPrm));
+  showOwn() {
     this.orch.populateParams();
     this.universe.release();
   }
 
   recalc() {
     this.orch.recalc();
-  }
-
-  takeSnapshot() {
-    this.snapshot = {};
-    FLIGHT_ACCOUNT_FIELDS.forEach((f) => { this.snapshot[f.key] = f.get(options.prm); });
-  }
-
-  // -------------------------------------------------------------------------
-  // Calculator -> profile
-  // -------------------------------------------------------------------------
-
-  saveWithoutProfile() {
-    this.ownSave();
-  }
-
-  /** Write what changed since the last snapshot into the profile. */
-  sync() {
-    const profile = this.profile();
-    if (!profile) return;
-    let changed = false;
-    FLIGHT_ACCOUNT_FIELDS.forEach((f) => {
-      changed = this.syncValue(profile.account, f.key, f.key, f.get(options.prm)) || changed;
-    });
-    if (changed) {
-      this.pf.save(profile);
-      this.markAll();
-    }
-  }
-
-  /**
-   * options_flight gets the calculator's own fields as they are, and the
-   * profile-owned ones - and a universe the profile dictates - as they were
-   * before the profile.
-   */
-  saveOwn() {
-    /** @type {Record<string, *>} */
-    const stored = { ...options.prm, ...cloneData(this.ownPrm) };
-    this.universe.overlay(stored);
-    saveToCookie('options_flight', stored);
   }
 
   // -------------------------------------------------------------------------
@@ -397,14 +335,6 @@ class FlightProfiles extends ProfileBinder {
     });
   }
 
-  /** Mark every field the profile owns, and the ones that differ from the game. */
-  markAll() {
-    const profile = this.profile();
-    if (!profile) return;
-    FLIGHT_ACCOUNT_FIELDS.forEach((f) => {
-      this.pf.markField(f.input(), profile, profile.account, f.key, this.restoreAccount(f.key));
-    });
-  }
 }
 
 /**

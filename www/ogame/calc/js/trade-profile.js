@@ -75,16 +75,27 @@ const TRADE_OWNED_KEYS = TRADE_ACCOUNT_FIELDS.map((f) => f.prm);
 
 /** @typedef {typeof tradeApp} TradeApp */
 
-/** @extends {ProfileBinder<TradeApp>} */
-class TradeProfiles extends ProfileBinder {
+/** @extends {FlatSettingsBinder<ProfileConvField, TradeApp>} */
+class TradeProfiles extends FlatSettingsBinder {
   /**
    * @param {ProfilesUi} pf
    * @param {TradeApp} app
    */
   constructor(pf, app) {
-    super(pf, app);
-    /** @type {Record<string, *>} The profile-owned options as they were before a profile. */
-    this.ownPrm = {};
+    /** @type {Record<string, any>} */
+    const state = options;
+    super(pf, app, {
+      fields: TRADE_ACCOUNT_FIELDS,
+      settings: () => state,
+      ownedKeys: TRADE_OWNED_KEYS,
+      cookie: 'options_trade',
+      // The original save reads `this`: it has to stay bound to options.
+      ownSave: options.save.bind(options),
+      read: (f, settings) => f.fromPrm(settings[f.prm]),
+      write: (f, settings, v) => { settings[f.prm] = f.toPrm(v); },
+    });
+    /** @type {TradeLinkOverrides} What the page's link carries, for the apply in progress. */
+    this.link = TRADE_NO_LINK;
     this.universe = new PfLockedUniverse({
       read: () => ({ country: options.country, universe: options.universe }),
       write: (country, number) => {
@@ -99,17 +110,15 @@ class TradeProfiles extends ProfileBinder {
       recalc: () => this.app.recalc(),
     });
     this.coordsSelect = this.bodySelect;
-    // The original save reads `this`: it has to stay bound to options.
-    this.ownSave = options.save.bind(options);
   }
 
-  init() {
-    this.describeFields();
-    options.save = () => this.save();
+  bindControls() {
     addEvent('#pf-body', 'change', () => this.bodyChosen());
-    this.pf.onChange((profile) => this.apply(profile));
+  }
+
+  /** @param {?Profile} active */
+  applyInitial(active) {
     const link = this.app.takeLinkOverrides();
-    const active = this.pf.active();
     if (active) this.apply(active, link);
   }
 
@@ -122,60 +131,39 @@ class TradeProfiles extends ProfileBinder {
    * @param {TradeLinkOverrides} [link] What the page's link carries; only the first apply on load has any.
    */
   apply(profile, link = TRADE_NO_LINK) {
-    if (!profile) {
-      this.leave();
-      return;
-    }
-    /** @type {Record<string, any>} */
-    const state = options;
-    this.applying = true;
-    try {
-      if (this.profileId === null) {
-        this.ownPrm = {};
-        TRADE_OWNED_KEYS.forEach((key) => { this.ownPrm[key] = cloneData(state[key]); });
-      }
-      this.profileId = profile.id;
-      this.pf.clearMarks();
-      TRADE_ACCOUNT_FIELDS.forEach((f) => {
-        if (f.prm === 'rates' && link.rates) return;
-        state[f.prm] = f.toPrm(getProfileValue(profile.account, f.key));
-      });
-      this.applyUniverse(profile, link);
-      this.bodySelect.render(profile, link.coords);
-      this.app.restoreFromState();
-      // Trade's reset would write every default into the profile as an edit.
-      pfShow('#reset', false);
-      // The recalculation reads the fields back: the snapshot then holds the
-      // values exactly as the form gives them, and the next edit compares like with like.
-      this.app.recalc();
-      this.takeSnapshot();
-    } finally {
-      this.applying = false;
-    }
-    this.markAll();
+    this.link = link;
+    super.apply(profile);
+  }
+
+  /**
+   * @param {ProfileConvField} field
+   * @param {*} value
+   */
+  writeField(field, value) {
+    // A link's rates win over the profile's, for this view.
+    if (field.prm === 'rates' && this.link.rates) return;
+    super.writeField(field, value);
   }
 
   /**
    * Put the profile's universe into the model, locked: the profile says where
    * it plays. A profile with no universe leaves the picker to the player, and
-   * so does a link to another universe, for this view. The form is shown by
-   * the caller.
+   * so does a link to another universe, for this view. The form is shown below.
    *
    * @param {Profile} profile
-   * @param {TradeLinkOverrides} link
    */
-  applyUniverse(profile, link) {
+  showProfile(profile) {
     const wanted = profile.universe;
-    if (wanted && link.universe && !this.universe.matches(wanted.country, wanted.number)) {
+    if (wanted && this.link.universe && !this.universe.matches(wanted.country, wanted.number)) {
       this.universe.lock(false);
-      return;
+    } else {
+      this.universe.apply(profile);
     }
-    this.universe.apply(profile);
+    this.bodySelect.render(profile, this.link.coords);
+    this.app.restoreFromState();
   }
 
-  restoreOwn() {
-    this.bodySelect.hide();
-    Object.assign(options, cloneData(this.ownPrm));
+  showOwn() {
     this.universe.release();
     this.app.restoreFromState();
   }
@@ -184,49 +172,11 @@ class TradeProfiles extends ProfileBinder {
     this.app.recalc();
   }
 
-  takeSnapshot() {
-    /** @type {Record<string, any>} */
-    const state = options;
-    this.snapshot = {};
-    TRADE_ACCOUNT_FIELDS.forEach((f) => { this.snapshot[f.key] = f.fromPrm(state[f.prm]); });
-  }
-
-  // -------------------------------------------------------------------------
-  // Calculator -> profile
-  // -------------------------------------------------------------------------
-
-  saveWithoutProfile() {
-    this.ownSave();
-  }
-
-  /** Write what changed since the last snapshot into the profile. */
-  sync() {
-    const profile = this.profile();
-    if (!profile) return;
-    /** @type {Record<string, any>} */
-    const state = options;
-    let changed = false;
-    TRADE_ACCOUNT_FIELDS.forEach((f) => {
-      changed = this.syncValue(profile.account, f.key, f.key, f.fromPrm(state[f.prm])) || changed;
-    });
-    if (changed) {
-      this.pf.save(profile);
-      this.markAll();
-    }
-  }
-
-  /**
-   * options_trade gets the calculator's own fields as they are, and the
-   * profile-owned ones - and a universe the profile dictates - as they were
-   * before the profile.
-   */
-  saveOwn() {
-    /** @type {Record<string, any>} */
-    const stored = { ...options, ...cloneData(this.ownPrm) };
-    this.universe.overlay(stored);
+  /** @param {Record<string, any>} stored */
+  storable(stored) {
     // The locale separator is the template's, never the cookie's (see options.load()).
     delete stored.decimalSeparator;
-    saveToCookie('options_trade', stored);
+    return stored;
   }
 
   // -------------------------------------------------------------------------
@@ -259,15 +209,6 @@ class TradeProfiles extends ProfileBinder {
     this.describeFieldList(TRADE_ACCOUNT_FIELDS);
     // The rates sit in three controls; the page's word for them is the panel heading.
     this.pf.describeField('rates', l.rates);
-  }
-
-  /** Mark every field the profile owns, and the ones that differ from the game. */
-  markAll() {
-    const profile = this.profile();
-    if (!profile) return;
-    TRADE_ACCOUNT_FIELDS.forEach((f) => {
-      this.pf.markField($(f.input), profile, profile.account, f.key, this.restoreAccount(f.key));
-    });
   }
 }
 
