@@ -257,7 +257,8 @@
       "msg-texts_equal": "De inhoud van het veld [Gecorrigeerde tekst] is gelijk aan de inhoud van het veld [Verkeerd vertaalde tekst]. Specificeer jouw versie van de verkeerd vertaalde tekst.",
       "msg-wrong_empty": "Het veld [Verkeerd vertaalde tekst] is leeg. Specificeer de verkeerd vertaalde tekst.",
       "msg-right_empty": "Het veld [Gecorrigeerde tekst] is leeg. Specificeer jouw versie van de gecorrigeerde tekst.",
-      "msg-mail_failed": "De melding kon niet worden verzonden. Probeer het later opnieuw."
+      "msg-mail_failed": "De melding kon niet worden verzonden. Probeer het later opnieuw.",
+      "msg-rate_limited": "Er zijn de laatste tijd te veel meldingen vanaf je adres verzonden. Probeer het later opnieuw."
     },
     "emailStrings": {
       "title": "Verstuur een e-mail",
@@ -271,7 +272,8 @@
       "msg-sent": "Je bericht is verstuurd. Bedankt.",
       "msg-request_error": "Fout bij het verzoek. Probeer het later opnieuw.",
       "msg-nothing_to_send": "Er is niets om te versturen... Vul ten minste 1 van de velden in [Onderwerp] of [Bericht].",
-      "msg-mail_failed": "Het bericht kon niet worden verzonden. Probeer het later opnieuw."
+      "msg-mail_failed": "Het bericht kon niet worden verzonden. Probeer het later opnieuw.",
+      "msg-rate_limited": "Er zijn de laatste tijd te veel berichten vanaf je adres verzonden. Probeer het later opnieuw."
     },
     "donateStrings": {
       "header": "Steun dit project",

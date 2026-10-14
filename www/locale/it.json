@@ -257,7 +257,8 @@
       "msg-texts_equal": "Il contenuto del campo [Parole giuste] è identico al contenuto del campo [Parole sbagliate]. Si prega di specificare la versione del testo scritto male.",
       "msg-wrong_empty": "Il campo [Parole sbagliate] è vuoto. Si prega di specificare il parole sbagliate.",
       "msg-right_empty": "Il campo [Parole giuste] è vuoto. Si prega di specificare la versione del testo scritto male.",
-      "msg-mail_failed": "Non è stato possibile inviare la segnalazione. Riprova più tardi."
+      "msg-mail_failed": "Non è stato possibile inviare la segnalazione. Riprova più tardi.",
+      "msg-rate_limited": "Di recente sono state inviate troppe segnalazioni dal tuo indirizzo. Riprova più tardi."
     },
     "emailStrings": {
       "title": "Invio di una e-mail",
@@ -271,7 +272,8 @@
       "msg-sent": "Il tuo messaggio è stato inviato. Grazie.",
       "msg-request_error": "Errore nella richiesta. Riprova più tardi.",
       "msg-nothing_to_send": "Non c'è nulla da inviare ... Si prega di compilare almeno uno dei campi [Soggetto] o [Corpo del messaggio].",
-      "msg-mail_failed": "Non è stato possibile inviare il messaggio. Riprova più tardi."
+      "msg-mail_failed": "Non è stato possibile inviare il messaggio. Riprova più tardi.",
+      "msg-rate_limited": "Di recente sono stati inviati troppi messaggi dal tuo indirizzo. Riprova più tardi."
     },
     "donateStrings": {
       "header": "Sostieni questo progetto",

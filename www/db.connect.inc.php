@@ -61,6 +61,39 @@ function runPreparedSelect($connection, $query, $params) {
     return $res;
 }
 
+/**
+ * Runs a statement that returns no rows - INSERT, UPDATE, DELETE - and says
+ * whether it went through. sqlQuery() cannot tell a write that succeeded from
+ * one that failed: both come back FALSE, for want of a result set.
+ *
+ * Same contract otherwise: bound parameters, all as strings, and FALSE rather
+ * than an exception when there is no connection or the statement fails.
+ */
+function sqlExec($query, $params) {
+    global $connection;
+
+    if (!isset($connection) || $connection === false || $connection === null) {
+        return false;
+    }
+
+    try {
+        $stmt = mysqli_prepare($connection, $query);
+        if ($stmt === false) {
+            error_log("sqlExec: prepare failed: " . mysqli_error($connection));
+            return false;
+        }
+        if (count($params) > 0) {
+            mysqli_stmt_bind_param($stmt, str_repeat('s', count($params)), ...$params);
+        }
+        $ok = mysqli_stmt_execute($stmt);
+        mysqli_stmt_close($stmt);
+        return $ok;
+    } catch (\mysqli_sql_exception $e) {
+        error_log("sqlExec: " . $e->getMessage());
+        return false;
+    }
+}
+
 
 require_once __DIR__ . '/env.inc.php';
 

@@ -1,13 +1,17 @@
 let reportModal, emailModal, changelogModal;
 let reportStep = 0;
 let emailStep = 0;
+// When each dialog was last opened (performance.now()). The server drops a
+// message sent sooner after that than a person could have written it.
+let reportOpenedAt = 0;
+let emailOpenedAt = 0;
 
 // The answers each dialog has a div - and a locale string - of its own for.
 // Anything else, an unexpected status or a dropped connection, falls back to
 // `request_error`: the user gets "something went wrong with the request", which
 // is all the three separate "error in request" messages ever said anyway.
-const REPORT_CODES = ['sent', 'both_empty', 'texts_equal', 'wrong_empty', 'right_empty', 'mail_failed', 'request_error'];
-const EMAIL_CODES = ['sent', 'nothing_to_send', 'mail_failed', 'request_error'];
+const REPORT_CODES = ['sent', 'both_empty', 'texts_equal', 'wrong_empty', 'right_empty', 'mail_failed', 'rate_limited', 'request_error'];
+const EMAIL_CODES = ['sent', 'nothing_to_send', 'mail_failed', 'rate_limited', 'request_error'];
 const SEND_DIV_IDS = ['data', 'progress', ...new Set([...REPORT_CODES, ...EMAIL_CODES].map((code) => `err-${code}`))];
 
 /**
@@ -41,6 +45,8 @@ function formField(id) {
 function showReportWindow(text) {
     formField('misspelled-text').value = text;
     formField('corrected-text').value = text;
+    formField('report-website').value = '';
+    reportOpenedAt = performance.now();
     reportModal.show();
     showSendDiv('report', 'data');
     setTimeout(() => requireEl('corrected-text').focus(), 300);
@@ -159,6 +165,8 @@ async function sendReport() {
             url: currUrl,
             wrong: formField('misspelled-text').value,
             right: formField('corrected-text').value,
+            website: formField('report-website').value,
+            elapsed: Math.round(performance.now() - reportOpenedAt),
         });
         finishSend('report', 'sent');
     } catch (e) {
@@ -171,6 +179,8 @@ function showEmailWindow() {
     formField('email-form-address').value = '';
     formField('email-form-subject').value = '';
     formField('email-form-body').value = '';
+    formField('email-website').value = '';
+    emailOpenedAt = performance.now();
     emailModal.show();
     showSendDiv('email', 'data');
     setTimeout(() => requireEl('email-form-subject').focus(), 300);
@@ -186,6 +196,8 @@ async function sendEmail() {
             address: formField('email-form-address').value,
             subject: formField('email-form-subject').value,
             body: formField('email-form-body').value,
+            website: formField('email-website').value,
+            elapsed: Math.round(performance.now() - emailOpenedAt),
         });
         finishSend('email', 'sent');
     } catch (e) {

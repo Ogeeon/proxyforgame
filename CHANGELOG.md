@@ -15,6 +15,10 @@ release section; it is the source of truth for the other eleven translations.
 
 ## [Unreleased]
 
+### Added
+
+- The misspelling report and e-mail forms are protected against spam: a hidden honeypot field and a minimum time the dialog must stay open silently drop automated submissions, and one address can send at most 5 messages per 10 minutes and 20 per day. The privacy policy now says that a hash of the sender's IP is kept for up to 24 hours for this.
+
 ## [2026-10-13] - site entry 67
 
 ### Fixed

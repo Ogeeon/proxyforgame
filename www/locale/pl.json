@@ -257,7 +257,8 @@
       "msg-texts_equal": "Zawartosc pola [Poprawny tekst] nie rozni sie od pola [Bledny tekst]. Prosimy o podanie poprawnej pisowni.",
       "msg-wrong_empty": "Nie wypelniono pola [Bledny tekst]. Prosze podac bledny tekst.",
       "msg-right_empty": "Nie wypelniono pola [Poprawny tekst]. Prosimy o podanie poprawnej pisowni.",
-      "msg-mail_failed": "Nie udało się wysłać zgłoszenia. Spróbuj ponownie później."
+      "msg-mail_failed": "Nie udało się wysłać zgłoszenia. Spróbuj ponownie później.",
+      "msg-rate_limited": "Z Twojego adresu wysłano ostatnio zbyt wiele zgłoszeń. Spróbuj ponownie później."
     },
     "emailStrings": {
       "title": "Wyslij wiadomosc",
@@ -271,7 +272,8 @@
       "msg-sent": "Twoja wiadomosc zostala wyslana. Dziekujemy.",
       "msg-request_error": "Błąd żądania. Spróbuj ponownie później.",
       "msg-nothing_to_send": "Wiadomosc jest pusta... Prosze wypelnic przynajmniej jedno z pol [Temat] lub [Tresc].",
-      "msg-mail_failed": "Nie udało się wysłać wiadomości. Spróbuj ponownie później."
+      "msg-mail_failed": "Nie udało się wysłać wiadomości. Spróbuj ponownie później.",
+      "msg-rate_limited": "Z Twojego adresu wysłano ostatnio zbyt wiele wiadomości. Spróbuj ponownie później."
     },
     "donateStrings": {
       "header": "Wesprzyj ten projekt",

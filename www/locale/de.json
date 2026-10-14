@@ -257,7 +257,8 @@
       "msg-texts_equal": "Der Inhalt des Feldes [Der korrekte Text] ist identisch mit dem Inhalt des Feldes [Fehlerhafter Text].",
       "msg-wrong_empty": "Das Eingabefeld fur den fehlerhaften Text ist leer. Bitte ausfullen.",
       "msg-right_empty": "Das Eingabefeld fur die korrektur ist leer. Bitte ausfullen.",
-      "msg-mail_failed": "Die Fehlermeldung konnte nicht gesendet werden. Bitte versuchen Sie es später erneut."
+      "msg-mail_failed": "Die Fehlermeldung konnte nicht gesendet werden. Bitte versuchen Sie es später erneut.",
+      "msg-rate_limited": "Von Ihrer Adresse wurden in letzter Zeit zu viele Fehlermeldungen gesendet. Bitte versuchen Sie es später erneut."
     },
     "emailStrings": {
       "title": "Schicken Sie Briefe",
@@ -271,7 +272,8 @@
       "msg-sent": "Ihre Nachricht wurde gesendet. Danke.",
       "msg-request_error": "Fehler bei der Anfrage. Bitte versuchen Sie es später erneut.",
       "msg-nothing_to_send": "Angaben unvollstandig - Bitte Betreff oder Nachrichttext eingeben.",
-      "msg-mail_failed": "Die Nachricht konnte nicht gesendet werden. Bitte versuchen Sie es später erneut."
+      "msg-mail_failed": "Die Nachricht konnte nicht gesendet werden. Bitte versuchen Sie es später erneut.",
+      "msg-rate_limited": "Von Ihrer Adresse wurden in letzter Zeit zu viele Nachrichten gesendet. Bitte versuchen Sie es später erneut."
     },
     "donateStrings": {
       "header": "Unterstütze dieses Projekt",

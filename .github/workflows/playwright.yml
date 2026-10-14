@@ -36,6 +36,11 @@ jobs:
       DB_USER: 'pfg_usr'
       DB_PASS: 'secret'
       DB_NAME: 'proxyforgame'
+      # Lowers the feedback rate limit (www/api/antispam.inc.php) so api.spec.js
+      # can reach it in three requests. Read by the PHP server, which inherits
+      # the job environment, and by the spec, which skips the test without it.
+      # No SMTP credentials exist here, so none of those requests sends mail.
+      MAIL_RATE_LIMIT_SHORT: '2'
 
     services:
       # MariaDB, not MySQL: production, the standby and local dev (WAMP 10.4.13)
