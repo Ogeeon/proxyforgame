@@ -172,6 +172,33 @@ const inputSchema = {
 };
 
 /**
+ * Refuses a request the game would not fly: a coordinate past the edge of
+ * the universe, an empty fleet, or a speed step the class does not have.
+ * @param {any} args
+ * @param {typeof DEFAULT_UNIVERSE} settings
+ * @param {number[]} counts ships in table order
+ */
+function checkRequest(args, settings, counts) {
+    for (const [name, point] of [['from', args.from], ['to', args.to]]) {
+        if (point.galaxy > settings.galaxies) {
+            throw new ToolError(`${name}.galaxy ${point.galaxy} is past the last galaxy (${settings.galaxies}).`);
+        }
+        if (point.system > settings.systems) {
+            throw new ToolError(`${name}.system ${point.system} is past the last system (${settings.systems}).`);
+        }
+    }
+    if (!counts.some((count) => count > 0)) {
+        throw new ToolError('The fleet is empty: give at least one ship in `ships`.');
+    }
+    const isGeneral = args.playerClass === 'general';
+    if (args.speedPercent !== undefined && args.speedPercent % (isGeneral ? 5 : 10) !== 0) {
+        throw new ToolError(isGeneral
+            ? 'speedPercent must be a multiple of 5.'
+            : 'speedPercent must be a multiple of 10; only the General class flies in steps of 5.');
+    }
+}
+
+/**
  * @param {{siteApi: ReturnType<typeof import('../lib/site-api').createSiteApi>}} deps
  * @returns {import('../lib/protocol').Tool}
  */
@@ -221,27 +248,10 @@ function createFlightTool({ siteApi }) {
         openWorld: true,
         async run(args) {
             const { settings, population, source, skippedOverride } = await resolveUniverse(args);
-            for (const [name, point] of [['from', args.from], ['to', args.to]]) {
-                if (point.galaxy > settings.galaxies) {
-                    throw new ToolError(`${name}.galaxy ${point.galaxy} is past the last galaxy (${settings.galaxies}).`);
-                }
-                if (point.system > settings.systems) {
-                    throw new ToolError(`${name}.system ${point.system} is past the last system (${settings.systems}).`);
-                }
-            }
-
             const counts = SHIP_KEYS.map((key) => args.ships[key] ?? 0);
-            if (!counts.some((count) => count > 0)) {
-                throw new ToolError('The fleet is empty: give at least one ship in `ships`.');
-            }
-
+            checkRequest(args, settings, counts);
             const playerClass = CLASSES[/** @type {keyof typeof CLASSES} */ (args.playerClass)];
             const isGeneral = args.playerClass === 'general';
-            if (args.speedPercent !== undefined && args.speedPercent % (isGeneral ? 5 : 10) !== 0) {
-                throw new ToolError(isGeneral
-                    ? 'speedPercent must be a multiple of 5.'
-                    : 'speedPercent must be a multiple of 10; only the General class flies in steps of 5.');
-            }
 
             const shipBonuses = args.lifeforms?.shipBonuses ?? {};
             const params = {
@@ -355,8 +365,10 @@ function fromServerData(data) {
     set('fleetSpeedHolding', num('speedFleetHolding'));
     set('galaxies', num('galaxies'));
     set('systems', num('systems'));
-    set('circularGalaxies', data.donutGalaxy === undefined ? undefined : data.donutGalaxy === '1');
-    set('circularSystems', data.donutSystem === undefined ? undefined : data.donutSystem === '1');
+    // A flag the universe does not publish stays unset, rather than reading as "off".
+    const flag = (/** @type {string} */ key) => (key in data ? data[key] === '1' : undefined);
+    set('circularGalaxies', flag('donutGalaxy'));
+    set('circularSystems', flag('donutSystem'));
     const deut = num('globalDeuteriumSaveFactor');
     set('deuteriumFactor', deut === undefined ? undefined : Math.round(deut * 10) / 10);
     const general = num('warriorBonusFuelConsumption');

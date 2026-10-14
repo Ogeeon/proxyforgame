@@ -62,29 +62,12 @@ function createHttpHandler(protocol, options) {
             return;
         }
 
-        const origin = req.headers.origin;
-        if (origin !== undefined && !options.allowedOrigins.includes(origin)) {
-            sendJson(res, 403, errorResponse(null, INVALID_REQUEST, 'Origin not allowed'));
-            return;
-        }
-        if (req.method !== 'POST') {
-            res.setHeader('Allow', 'POST');
-            sendJson(res, 405, errorResponse(null, INVALID_REQUEST, 'Only POST is supported; this server opens no SSE stream'));
-            return;
-        }
-
-        if (!limiter.allow(clientAddress(req, options.trustProxy))) {
-            res.setHeader('Retry-After', '60');
-            sendJson(res, 429, errorResponse(null, INVALID_REQUEST, 'Too many requests'));
-            return;
-        }
-
-        // Absent means a client from before the header existed, which the spec
-        // says to treat as 2025-03-26 - supported. Present and unknown is refused.
-        const version = req.headers['mcp-protocol-version'];
-        if (typeof version === 'string' && !SUPPORTED_VERSIONS.includes(version)) {
-            sendJson(res, 400, errorResponse(null, INVALID_REQUEST,
-                `Unsupported MCP-Protocol-Version ${version}; supported: ${SUPPORTED_VERSIONS.join(', ')}`));
+        const refused = refusal(req);
+        if (refused) {
+            for (const [name, value] of Object.entries(refused.headers ?? {})) {
+                res.setHeader(name, value);
+            }
+            sendJson(res, refused.status, errorResponse(null, INVALID_REQUEST, refused.message));
             return;
         }
 
@@ -103,23 +86,41 @@ function createHttpHandler(protocol, options) {
 
         // A batch is a 2025-03-26 feature the later versions dropped; answering
         // it costs nothing and keeps the older clients working.
-        if (Array.isArray(message)) {
-            const answers = (await Promise.all(message.map((m) => protocol.handle(m)))).filter((a) => a !== null);
-            if (answers.length === 0) {
-                res.writeHead(202).end();
-            } else {
-                sendJson(res, 200, answers);
-            }
-            return;
-        }
-
-        const answer = await protocol.handle(message);
-        if (answer === null) {
-            // A notification or a response: accepted, nothing to say back.
+        const answers = Array.isArray(message)
+            ? (await Promise.all(message.map((m) => protocol.handle(m)))).filter((a) => a !== null)
+            : await protocol.handle(message);
+        if (answers === null || (Array.isArray(answers) && answers.length === 0)) {
+            // Notifications or responses only: accepted, nothing to say back.
             res.writeHead(202).end();
             return;
         }
-        sendJson(res, 200, answer);
+        sendJson(res, 200, answers);
+    }
+
+    /**
+     * Why a request to the endpoint is turned away before its body is read,
+     * or null when it is not.
+     * @param {import('node:http').IncomingMessage} req
+     * @returns {{status: number, message: string, headers?: Record<string, string>}|null}
+     */
+    function refusal(req) {
+        const origin = req.headers.origin;
+        if (origin !== undefined && !options.allowedOrigins.includes(origin)) {
+            return { status: 403, message: 'Origin not allowed' };
+        }
+        if (req.method !== 'POST') {
+            return { status: 405, message: 'Only POST is supported; this server opens no SSE stream', headers: { Allow: 'POST' } };
+        }
+        if (!limiter.allow(clientAddress(req, options.trustProxy))) {
+            return { status: 429, message: 'Too many requests', headers: { 'Retry-After': '60' } };
+        }
+        // Absent means a client from before the header existed, which the spec
+        // says to treat as 2025-03-26 - supported. Present and unknown is refused.
+        const version = req.headers['mcp-protocol-version'];
+        if (typeof version === 'string' && !SUPPORTED_VERSIONS.includes(version)) {
+            return { status: 400, message: `Unsupported MCP-Protocol-Version ${version}; supported: ${SUPPORTED_VERSIONS.join(', ')}` };
+        }
+        return null;
     }
 }
 

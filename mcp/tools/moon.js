@@ -85,11 +85,18 @@ function createMoonTools({ siteApi }) {
             if (!Object.values(counts).some((n) => n > 0)) {
                 throw new ToolError('Nothing was destroyed: give at least one unit in `destroyed`.');
             }
+            // Only whether defence feeds the field matters here, not its share:
+            // the moon core puts it in at the ships' share.
+            /** @type {number|undefined} */
+            let defenceDebrisPercent;
+            if (args.defenceToDebris !== undefined) {
+                defenceDebrisPercent = args.defenceToDebris ? 1 : 0;
+            }
             const debris = await common.debrisSettings({
                 universe: args.universe,
                 debrisPercent: args.debrisPercent,
                 deuteriumInDebris: args.deuteriumInDebris,
-                defenceDebrisPercent: args.defenceToDebris === undefined ? undefined : (args.defenceToDebris ? 1 : 0),
+                defenceDebrisPercent,
             }, siteApi);
             const defenceToDebris = args.defenceToDebris ?? debris.defenceDebrisPercent > 0;
 

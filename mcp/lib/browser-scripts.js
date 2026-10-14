@@ -39,7 +39,9 @@ function loadBrowserScripts(files, names) {
     const source = files.map((f) => readFileSync(join(WWW, f), 'utf8')).join('\n;\n');
     const capture = `\n;Object.assign(globalThis, { ${names.join(', ')} });\n`;
 
-    vm.runInContext(source + capture, sandbox, { filename: files.join('+') });
+    // The source is files from this repository's own www/, named by the caller
+    // in code - never anything from a request - so there is nothing to inject.
+    vm.runInContext(source + capture, sandbox, { filename: files.join('+') }); // NOSONAR(S1523)
 
     const missing = names.filter((n) => sandbox[n] === undefined);
     if (missing.length) {

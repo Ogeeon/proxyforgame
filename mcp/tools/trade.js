@@ -87,46 +87,83 @@ const inputSchema = {
  * @param {string[]} pair the two resources received, in metal-crystal-deuterium order
  */
 function mixParams(split, pair) {
-    const given = Object.entries(split ?? {}).filter(([, v]) => v && Object.keys(v).length > 0);
-    if (given.length > 1) {
-        throw new ToolError('split takes one of receivePercent, ratio, fixed or sellPercent, not several.');
-    }
-    const [first, second] = pair;
     const none = { dstMixType: 0, mixBalance: 50, mixProp1: 1, mixProp2: 1, fix1: 0, fix2: 0, mixSrcBalance: 50 };
-    if (given.length === 0) {
+    const chosen = chosenSplit(split, pair);
+    if (!chosen) {
         return none;
     }
-    const [mode, value] = /** @type {[string, Record<string, number>]} */ (given[0]);
-    const keys = Object.keys(value);
-    for (const key of keys) {
-        if (!pair.includes(key)) {
-            throw new ToolError(`split.${mode} names ${key}, which is not being bought: the trade returns ${first} and ${second}.`);
-        }
-    }
+    const [first, second] = pair;
+    const { mode, value } = chosen;
     if (mode === 'ratio') {
-        if (keys.length !== 2) {
-            throw new ToolError(`split.ratio needs both ${first} and ${second}.`);
-        }
-        if (value[first] + value[second] === 0) {
-            throw new ToolError('split.ratio cannot be 0 to 0.');
-        }
         return { ...none, dstMixType: 1, mixProp1: value[first], mixProp2: value[second] };
     }
-    if (keys.length !== 1) {
-        throw new ToolError(`split.${mode} names one resource, ${first} or ${second}.`);
-    }
-    const [key] = keys;
+    const [key] = Object.keys(value);
     const amount = value[key];
     if (mode === 'fixed') {
         return key === first ? { ...none, dstMixType: 2, fix1: amount } : { ...none, dstMixType: 3, fix2: amount };
-    }
-    if (amount > 100) {
-        throw new ToolError(`split.${mode} is a percentage: at most 100.`);
     }
     const firstShare = key === first ? amount : 100 - amount;
     return mode === 'receivePercent'
         ? { ...none, dstMixType: 0, mixBalance: firstShare }
         : { ...none, dstMixType: 4, mixSrcBalance: firstShare };
+}
+
+/**
+ * The one way of splitting the split argument names, checked: it names only
+ * the resources bought, both of them for a ratio, one for the others, and a
+ * percentage stays at most 100. Null when none was given.
+ * @param {any} split
+ * @param {string[]} pair
+ * @returns {{mode: string, value: Record<string, number>}|null}
+ */
+function chosenSplit(split, pair) {
+    const given = Object.entries(split ?? {}).filter(([, v]) => v && Object.keys(v).length > 0);
+    if (given.length > 1) {
+        throw new ToolError('split takes one of receivePercent, ratio, fixed or sellPercent, not several.');
+    }
+    if (given.length === 0) {
+        return null;
+    }
+    const [first, second] = pair;
+    const [mode, value] = /** @type {[string, Record<string, number>]} */ (given[0]);
+    const keys = Object.keys(value);
+    const stranger = keys.find((key) => !pair.includes(key));
+    if (stranger) {
+        throw new ToolError(`split.${mode} names ${stranger}, which is not being bought: the trade returns ${first} and ${second}.`);
+    }
+    if (mode === 'ratio') {
+        if (keys.length !== 2 || value[first] + value[second] === 0) {
+            throw new ToolError(`split.ratio needs both ${first} and ${second}, not both 0.`);
+        }
+        return { mode, value };
+    }
+    if (keys.length !== 1) {
+        throw new ToolError(`split.${mode} names one resource, ${first} or ${second}.`);
+    }
+    if (mode !== 'fixed' && value[keys[0]] > 100) {
+        throw new ToolError(`split.${mode} is a percentage: at most 100.`);
+    }
+    return { mode, value };
+}
+
+/**
+ * trade-core's destination type: for one resource sold, 0 or 1 for the first
+ * or second of the other two, 2 for both; for two sold, 0 - the third.
+ * @param {string[]} sold
+ * @param {string[]} pair the resources not sold, in metal-crystal-deuterium order
+ * @param {string|undefined} buy
+ */
+function destinationType(sold, pair, buy) {
+    if (sold.length === 2) {
+        if (buy !== undefined && buy !== pair[0]) {
+            throw new ToolError(`Selling ${sold.join(' and ')} buys ${pair[0]} only.`);
+        }
+        return 0;
+    }
+    if (buy === undefined || buy === sold[0]) {
+        throw new ToolError(`Selling ${sold[0]}, buy ${pair[0]}, ${pair[1]} or both.`);
+    }
+    return buy === 'both' ? 2 : pair.indexOf(buy);
 }
 
 /** @returns {import('../lib/protocol').Tool} */
@@ -146,16 +183,7 @@ function createTradeTool() {
             const srcType = SOURCE_TYPES[/** @type {keyof typeof SOURCE_TYPES} */ (sold.join('+'))];
             const pair = RESOURCES.filter((r) => !sold.includes(r));
 
-            let dstType = 0;
-            if (sold.length === 2) {
-                if (args.buy !== undefined && args.buy !== pair[0]) {
-                    throw new ToolError(`Selling ${sold.join(' and ')} buys ${pair[0]} only.`);
-                }
-            } else if (args.buy === undefined || args.buy === sold[0]) {
-                throw new ToolError(`Selling ${sold[0]}, buy ${pair[0]}, ${pair[1]} or both.`);
-            } else {
-                dstType = args.buy === 'both' ? 2 : pair.indexOf(args.buy);
-            }
+            const dstType = destinationType(sold, pair, args.buy);
             if (args.split && dstType !== 2) {
                 throw new ToolError('split only applies to buy = both.');
             }
@@ -169,7 +197,7 @@ function createTradeTool() {
                 deuterium: args.sell.deuterium ?? 0,
                 srcType,
                 dstType,
-                ...(dstType === 2 ? mixParams(args.split, pair) : mixParams(undefined, pair)),
+                ...mixParams(dstType === 2 ? args.split : undefined, pair),
                 hyperTech: args.hyperspaceTechnology,
                 playerClass: CLASS_IDS[/** @type {keyof typeof CLASS_IDS} */ (args.playerClass)],
                 scCapacityIncrease: args.cargoIncrease.smallCargo,

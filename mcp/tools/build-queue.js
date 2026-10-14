@@ -65,6 +65,105 @@ const inputSchema = {
 };
 
 /**
+ * Starting levels of every building the location offers, refusing a level for
+ * one it does not.
+ * @param {Record<string, number>} levels
+ * @param {{id: number, key: string}[]} offered
+ * @param {string} where "a planet" or "a moon"
+ * @returns {Record<number, number>}
+ */
+function startLevelsFor(levels, offered, where) {
+    const offeredKeys = new Set(offered.map((b) => b.key));
+    for (const [key, level] of Object.entries(levels)) {
+        if (!offeredKeys.has(key) && level > 0) {
+            throw new ToolError(`${NAMES[key] ?? key} cannot stand on ${where}.`);
+        }
+    }
+    return Object.fromEntries(offered.map((b) => [b.id, levels[b.key] ?? 0]));
+}
+
+/**
+ * The queue as the [techId, 1 build | 0 demolish] pairs simulate() takes, one
+ * per level, refusing what the game would not allow.
+ * @param {{building: string, action: string, times: number}[]} steps
+ * @param {Record<number, number>} startLevels the offered buildings only
+ * @param {string} where
+ * @returns {number[][]}
+ */
+function expandQueue(steps, startLevels, where) {
+    /** @type {number[][]} */
+    const queue = [];
+    const projected = { ...startLevels };
+    for (const step of steps) {
+        const b = /** @type {{id: number, key: string}} */ (BY_KEY.get(step.building));
+        const build = step.action === 'build';
+        projected[b.id] = levelAfter(b, build, step.times, projected[b.id], where);
+        for (let i = 0; i < step.times; i++) {
+            queue.push([b.id, build ? 1 : 0]);
+        }
+    }
+    if (queue.length > MAX_STEPS) {
+        throw new ToolError(`The queue has ${queue.length} steps; at most ${MAX_STEPS} are taken.`);
+    }
+    return queue;
+}
+
+/**
+ * A building's level after `times` builds or demolitions, refusing a building
+ * the location does not offer, a demolition the game does not allow, and one
+ * that would go below 0.
+ * @param {{id: number, key: string}} b
+ * @param {boolean} build
+ * @param {number} times
+ * @param {number|undefined} level undefined when the location does not offer it
+ * @param {string} where
+ */
+function levelAfter(b, build, times, level, where) {
+    const name = NAMES[b.key] ?? b.key;
+    if (level === undefined) {
+        throw new ToolError(`${name} cannot be built on ${where}.`);
+    }
+    if (!build && NON_DESTROYABLE_TECHS.has(b.id)) {
+        throw new ToolError(`${name} cannot be demolished.`);
+    }
+    const after = level + (build ? times : -times);
+    if (after < 0) {
+        throw new ToolError(`The queue demolishes ${name} below level 0.`);
+    }
+    return after;
+}
+
+const KEY_OF = Object.fromEntries(BUILDINGS.map((b) => [b.id, b.key]));
+
+/**
+ * One simulated step, for the answer.
+ * @param {any} step a QueueStep
+ * @param {number} elapsed seconds from the start of the queue to the end of this step
+ * @param {boolean} checkFields
+ */
+function describeStep(step, elapsed, checkFields) {
+    const key = KEY_OF[step.techId];
+    /** @type {Record<string, unknown>} */
+    const out = {
+        building: key,
+        name: NAMES[key] ?? key,
+        action: step.isBuild ? 'build' : 'demolish',
+        toLevel: step.resultLevel,
+        metal: step.cost[0],
+        crystal: step.cost[1],
+        deuterium: step.cost[2],
+        durationSeconds: step.cost[3],
+        duration: formatDuration(step.cost[3]),
+        finishesAfter: formatDuration(elapsed),
+    };
+    if (checkFields) {
+        out.fields = `${step.usedFields}/${step.maxFields}`;
+        if (step.overCapacity) out.noFreeField = true;
+    }
+    return out;
+}
+
+/**
  * @param {{siteApi: import('./common').SiteApi}} deps
  * @returns {import('../lib/protocol').Tool}
  */
@@ -80,44 +179,10 @@ function createBuildQueueTool({ siteApi }) {
         openWorld: true,
         async run(args) {
             const isMoon = args.location === 'moon';
-            const offered = BUILDINGS.filter((b) => b.type === 1 || b.type === (isMoon ? 3 : 2));
-            const offeredIds = new Set(offered.map((b) => b.id));
             const where = isMoon ? 'a moon' : 'a planet';
-
-            const levels = args.levels ?? {};
-            for (const key of Object.keys(levels)) {
-                if (!offeredIds.has(/** @type {{id: number}} */ (BY_KEY.get(key)).id) && levels[key] > 0) {
-                    throw new ToolError(`${NAMES[key] ?? key} cannot stand on ${where}.`);
-                }
-            }
-            /** @type {Record<number, number>} */
-            const startLevels = Object.fromEntries(offered.map((b) => [b.id, levels[b.key] ?? 0]));
-
-            /** @type {number[][]} */
-            const queue = [];
-            /** @type {Record<number, number>} */
-            const projected = { ...startLevels };
-            for (const step of args.queue) {
-                const b = /** @type {{id: number, key: string}} */ (BY_KEY.get(step.building));
-                const name = NAMES[b.key] ?? b.key;
-                if (!offeredIds.has(b.id)) {
-                    throw new ToolError(`${name} cannot be built on ${where}.`);
-                }
-                const build = step.action === 'build';
-                if (!build && NON_DESTROYABLE_TECHS.has(b.id)) {
-                    throw new ToolError(`${name} cannot be demolished.`);
-                }
-                for (let i = 0; i < step.times; i++) {
-                    projected[b.id] += build ? 1 : -1;
-                    if (projected[b.id] < 0) {
-                        throw new ToolError(`The queue demolishes ${name} below level 0.`);
-                    }
-                    queue.push([b.id, build ? 1 : 0]);
-                }
-            }
-            if (queue.length > MAX_STEPS) {
-                throw new ToolError(`The queue has ${queue.length} steps; at most ${MAX_STEPS} are taken.`);
-            }
+            const offered = BUILDINGS.filter((b) => b.type === 1 || b.type === (isMoon ? 3 : 2));
+            const startLevels = startLevelsFor(args.levels ?? {}, offered, where);
+            const queue = expandQueue(args.queue, startLevels, where);
 
             const universeSpeed = await common.economySpeed(args, siteApi);
             const checkFields = args.fields !== undefined;
@@ -130,28 +195,10 @@ function createBuildQueueTool({ siteApi }) {
                 ionTechLevel: args.ionTechnology,
             });
 
-            const keyOf = Object.fromEntries(BUILDINGS.map((b) => [b.id, b.key]));
             let elapsed = 0;
-            const steps = run.steps.map((/** @type {any} */ s) => {
-                elapsed += s.cost[3];
-                /** @type {Record<string, unknown>} */
-                const out = {
-                    building: keyOf[s.techId],
-                    name: NAMES[keyOf[s.techId]] ?? keyOf[s.techId],
-                    action: s.isBuild ? 'build' : 'demolish',
-                    toLevel: s.resultLevel,
-                    metal: s.cost[0],
-                    crystal: s.cost[1],
-                    deuterium: s.cost[2],
-                    durationSeconds: s.cost[3],
-                    duration: formatDuration(s.cost[3]),
-                    finishesAfter: formatDuration(elapsed),
-                };
-                if (checkFields) {
-                    out.fields = `${s.usedFields}/${s.maxFields}`;
-                    if (s.overCapacity) out.noFreeField = true;
-                }
-                return out;
+            const steps = run.steps.map((/** @type {any} */ step) => {
+                elapsed += step.cost[3];
+                return describeStep(step, elapsed, checkFields);
             });
 
             /** @type {Record<string, unknown>} */
@@ -169,7 +216,7 @@ function createBuildQueueTool({ siteApi }) {
             };
             if (checkFields) {
                 result.fields = { used: run.totals[0], available: run.maxFields };
-                if (run.steps.some((/** @type {any} */ s) => s.overCapacity)) {
+                if (run.steps.some((/** @type {any} */ step) => step.overCapacity)) {
                     result.note = 'Some steps need a field the planet does not have (marked noFreeField).';
                 }
             }

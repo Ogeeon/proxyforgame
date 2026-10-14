@@ -96,21 +96,11 @@ function check(schema, value, path, errors) {
         return value;
     }
     if (typeof value === 'number') {
-        if (schema.minimum !== undefined && value < schema.minimum) {
-            errors.push(`${path} must be at least ${schema.minimum}`);
-        }
-        if (schema.maximum !== undefined && value > schema.maximum) {
-            errors.push(`${path} must be at most ${schema.maximum}`);
-        }
+        checkBounds(value, schema.minimum, schema.maximum, `${path} must be`, errors);
         return value;
     }
     if (Array.isArray(value)) {
-        if (schema.minItems !== undefined && value.length < schema.minItems) {
-            errors.push(`${path} must have at least ${schema.minItems} items`);
-        }
-        if (schema.maxItems !== undefined && value.length > schema.maxItems) {
-            errors.push(`${path} must have at most ${schema.maxItems} items`);
-        }
+        checkBounds(value.length, schema.minItems, schema.maxItems, `${path} must have`, errors, ' items');
         const items = schema.items;
         return items ? value.map((item, i) => check(items, item, `${path}[${i}]`, errors)) : value;
     }
@@ -121,6 +111,24 @@ function check(schema, value, path, errors) {
 }
 
 /**
+ * A number, or an array's length, against an optional lower and upper bound.
+ * @param {number} n
+ * @param {number|undefined} min
+ * @param {number|undefined} max
+ * @param {string} subject e.g. "arguments.x must be"
+ * @param {string[]} errors
+ * @param {string} [unit] e.g. " items"
+ */
+function checkBounds(n, min, max, subject, errors, unit = '') {
+    if (min !== undefined && n < min) {
+        errors.push(`${subject} at least ${min}${unit}`);
+    }
+    if (max !== undefined && n > max) {
+        errors.push(`${subject} at most ${max}${unit}`);
+    }
+}
+
+/**
  * @param {JsonSchema} schema
  * @param {Record<string, unknown>} value
  * @param {string} path
@@ -128,7 +136,6 @@ function check(schema, value, path, errors) {
  * @returns {Record<string, unknown>}
  */
 function checkObject(schema, value, path, errors) {
-    const properties = schema.properties ?? {};
     /** @type {Record<string, unknown>} */
     const out = {};
 
@@ -138,40 +145,65 @@ function checkObject(schema, value, path, errors) {
         }
     }
     for (const [name, item] of Object.entries(value)) {
-        const names = schema.propertyNames?.enum;
-        if (names && !names.includes(name)) {
-            errors.push(`${path}.${name} is not one of: ${names.join(', ')}`);
-            continue;
-        }
-        const extra = schema.additionalProperties;
-        const sub = properties[name] ?? (typeof extra === 'object' ? extra : undefined);
-        if (!sub) {
-            if (extra === false) {
-                errors.push(`${path}.${name} is not a known field`);
-            } else {
-                out[name] = item;
-            }
-            continue;
-        }
-        out[name] = check(sub, item, `${path}.${name}`, errors);
+        checkProperty(schema, name, item, `${path}.${name}`, errors, out);
     }
-    for (const [name, sub] of Object.entries(properties)) {
+    fillDefaults(schema, path, out);
+    return out;
+}
+
+/**
+ * One property of an object: refused when the schema does not admit its name,
+ * checked against its own schema - or the shared one of a map - when it has
+ * one, passed through otherwise. What passes lands in `out`.
+ * @param {JsonSchema} schema the object's schema
+ * @param {string} name
+ * @param {unknown} item
+ * @param {string} path
+ * @param {string[]} errors
+ * @param {Record<string, unknown>} out
+ */
+function checkProperty(schema, name, item, path, errors, out) {
+    const names = schema.propertyNames?.enum;
+    if (names && !names.includes(name)) {
+        errors.push(`${path} is not one of: ${names.join(', ')}`);
+        return;
+    }
+    const extra = schema.additionalProperties;
+    const sub = schema.properties?.[name] ?? (typeof extra === 'object' ? extra : undefined);
+    if (sub) {
+        out[name] = check(sub, item, path, errors);
+    } else if (extra === false) {
+        errors.push(`${path} is not a known field`);
+    } else {
+        out[name] = item;
+    }
+}
+
+/**
+ * Fills in the defaults of the properties the caller left out. An optional
+ * group left out entirely still gets its members' defaults, so a handler can
+ * read `args.drives.impulse` without checking that `drives` is there first.
+ * @param {JsonSchema} schema
+ * @param {string} path
+ * @param {Record<string, unknown>} out
+ */
+function fillDefaults(schema, path, out) {
+    for (const [name, sub] of Object.entries(schema.properties ?? {})) {
         if (out[name] !== undefined) {
             continue;
         }
         if (sub.default !== undefined) {
             out[name] = structuredClone(sub.default);
-        } else if (sub.type === 'object' && sub.properties) {
-            // An optional group the caller left out entirely still gets its
-            // members' defaults, so a handler can read `args.drives.impulse`
-            // without checking that `drives` is there first.
-            const filled = checkObject(sub, {}, `${path}.${name}`, []);
-            if (Object.keys(filled).length > 0) {
-                out[name] = filled;
-            }
+            continue;
+        }
+        if (sub.type !== 'object' || !sub.properties) {
+            continue;
+        }
+        const filled = checkObject(sub, {}, `${path}.${name}`, []);
+        if (Object.keys(filled).length > 0) {
+            out[name] = filled;
         }
     }
-    return out;
 }
 
 /** @param {string} type */

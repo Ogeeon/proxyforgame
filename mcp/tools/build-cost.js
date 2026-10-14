@@ -117,6 +117,38 @@ const inputSchema = {
 const CLASS_IDS = { none: -1, collector: 0, general: 1, discoverer: 2 };
 
 /**
+ * The level range a request covers - from 0 to the quantity for ships and
+ * defence - refusing what the game would not allow.
+ * @param {any} args
+ * @param {number} id
+ * @param {string} kind
+ * @returns {{from: number, to: number}}
+ */
+function buildRange(args, id, kind) {
+    if (kind === 'ship' || kind === 'defence') {
+        if (args.quantity === undefined) {
+            throw new ToolError(`${args.item} is a ${kind}: give quantity, not levels.`);
+        }
+        return { from: 0, to: args.quantity };
+    }
+    if (args.toLevel === undefined) {
+        throw new ToolError(`${args.item} is a ${kind}: give toLevel (and fromLevel when it is not 0).`);
+    }
+    const from = args.fromLevel;
+    const to = args.toLevel;
+    if (from === to) {
+        throw new ToolError('fromLevel and toLevel are the same: there is nothing to build.');
+    }
+    if (to < from && kind !== 'building') {
+        throw new ToolError('Research cannot be lowered: toLevel must be above fromLevel.');
+    }
+    if (to < from && (id === 33 || id === 41)) {
+        throw new ToolError(`The ${NAMES[args.item]} cannot be demolished.`);
+    }
+    return { from, to };
+}
+
+/**
  * @param {{siteApi: ReturnType<typeof import('../lib/site-api').createSiteApi>}} deps
  * @returns {import('../lib/protocol').Tool}
  */
@@ -149,31 +181,7 @@ function createBuildCostTool({ siteApi }) {
             const tech = TECHS.techs[id];
             const kind = KIND[/** @type {keyof typeof KIND} */ (tech.type)];
             const isUnit = kind === 'ship' || kind === 'defence';
-
-            let from;
-            let to;
-            if (isUnit) {
-                if (args.quantity === undefined) {
-                    throw new ToolError(`${args.item} is a ${kind}: give quantity, not levels.`);
-                }
-                from = 0;
-                to = args.quantity;
-            } else {
-                if (args.toLevel === undefined) {
-                    throw new ToolError(`${args.item} is a ${kind}: give toLevel (and fromLevel when it is not 0).`);
-                }
-                from = args.fromLevel;
-                to = args.toLevel;
-                if (from === to) {
-                    throw new ToolError('fromLevel and toLevel are the same: there is nothing to build.');
-                }
-                if (to < from && kind !== 'building') {
-                    throw new ToolError('Research cannot be lowered: toLevel must be above fromLevel.');
-                }
-                if (to < from && (id === 33 || id === 41)) {
-                    throw new ToolError(`The ${NAMES[args.item]} cannot be demolished.`);
-                }
-            }
+            const { from, to } = buildRange(args, id, kind);
             const onMoon = tech.type === 3 || args.onMoon;
             if (onMoon && tech.type === 2) {
                 throw new ToolError(`The ${NAMES[args.item]} cannot be built on a moon.`);
@@ -221,14 +229,17 @@ function createBuildCostTool({ siteApi }) {
                 durationSeconds: Math.round(cost.time),
                 duration: formatDuration(cost.time),
                 points: cost.points,
-                darkMatterToHalve: isUnit || to < from ? undefined : Calculator.halvingCost(id, cost.time, params),
                 cargoShipsNeeded: { smallCargo: transport.small, largeCargo: transport.large },
                 speeds: { universeSpeed, researchSpeed },
             };
+            // Halving prices a build or a research; a demolition or a shipyard order has none.
+            if (!isUnit && to > from) {
+                result.darkMatterToHalve = Calculator.halvingCost(id, cost.time, params);
+            }
             if (cost.energy > 0) {
                 result.energy = cost.energy;
             }
-            return JSON.parse(JSON.stringify(result));
+            return result;
         },
     };
 }
