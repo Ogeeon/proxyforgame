@@ -1713,6 +1713,8 @@ class ProfileBinder {
     this.applying = false;
     /** @type {Record<string, *>} Values (by profile key, body ones prefixed) at the last apply or sync. */
     this.snapshot = {};
+    /** @type {?PfCoordsSelect} The coordinates select that follows the form after every save, if the page has one. */
+    this.coordsSelect = null;
   }
 
   /** Connect to the page; called once, with the calculator ready. */
@@ -1744,6 +1746,8 @@ class ProfileBinder {
   saveWithProfile() {
     this.sync();
     this.saveOwn();
+    const profile = this.coordsSelect ? this.profile() : null;
+    if (profile) this.coordsSelect?.sync(profile);
   }
 
   sync() {

@@ -98,6 +98,7 @@ class TradeProfiles extends ProfileBinder {
       move: (b) => this.setCoords(b),
       recalc: () => this.app.recalc(),
     });
+    this.coordsSelect = this.bodySelect;
     // The original save reads `this`: it has to stay bound to options.
     this.ownSave = options.save.bind(options);
   }
@@ -196,12 +197,6 @@ class TradeProfiles extends ProfileBinder {
 
   saveWithoutProfile() {
     this.ownSave();
-  }
-
-  saveWithProfile() {
-    super.saveWithProfile();
-    const profile = this.profile();
-    if (profile) this.bodySelect.sync(profile);
   }
 
   /** Write what changed since the last snapshot into the profile. */

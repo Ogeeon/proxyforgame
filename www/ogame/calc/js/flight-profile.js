@@ -123,6 +123,7 @@ class FlightProfiles extends ProfileBinder {
       recalc: () => this.orch.recalc(),
       changed: () => this.syncTakeFleet(),
     });
+    this.coordsSelect = this.departure;
     this.ownSave = options.save;
     /** @type {*} The spy report waiting for the player to say where it goes. */
     this.pendingReport = null;
@@ -216,12 +217,6 @@ class FlightProfiles extends ProfileBinder {
 
   saveWithoutProfile() {
     this.ownSave();
-  }
-
-  saveWithProfile() {
-    super.saveWithProfile();
-    const profile = this.profile();
-    if (profile) this.departure.sync(profile);
   }
 
   /** Write what changed since the last snapshot into the profile. */
