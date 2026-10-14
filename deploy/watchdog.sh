@@ -46,6 +46,9 @@ MCP_REQUIRED="${PFG_MCP_REQUIRED:-0}"
 # check then only warns.
 PINNED_PHP=$(tr -d ' \t\r\n' < "$(dirname "$0")/../.php-version" 2>/dev/null || true)
 
+# The curl write-out that prints just the HTTP status of the answer.
+HTTP_CODE_FORMAT='%{http_code}'
+
 FAILED=0
 fail() { printf '  FAIL %s\n' "$*"; FAILED=1; return 0; }
 ok()   { printf '  ok   %s\n' "$*"; return 0; }
@@ -95,6 +98,7 @@ read_newest_green() {
 
 # The serverInfo.version of an MCP initialize answer, e.g. 1.0.0+3f2c1ab09d4e.
 read_mcp_version() {
+  local file="$1"
   node -e '
     const fs = require("fs");
     let d;
@@ -102,7 +106,8 @@ read_mcp_version() {
     const v = d && d.result && d.result.serverInfo && d.result.serverInfo.version;
     if (!v) process.exit(1);
     console.log(v);
-  ' "$1"
+  ' "$file"
+  return $?
 }
 
 # The commit ids of main, newest first, one per line.
@@ -180,7 +185,7 @@ check_host() {
   local body code size
   for path in "/" "/ru/"; do
     body=$(mktemp)
-    code=$(curl -s --max-time 20 "${curl_args[@]}" -o "$body" -w '%{http_code}' "$base$path" || true)
+    code=$(curl -s --max-time 20 "${curl_args[@]}" -o "$body" -w "$HTTP_CODE_FORMAT" "$base$path" || true)
     code=${code:-000}
     size=$(wc -c < "$body"); rm -f "$body"
     if [[ "$code" = 200 ]] && [[ "$size" -gt 1000 ]]; then
@@ -192,7 +197,7 @@ check_host() {
 
   # The one call that proves .env survived the deploy and MySQL is answering.
   body=$(mktemp)
-  code=$(curl -s --max-time 20 "${curl_args[@]}" -o "$body" -w '%{http_code}' \
+  code=$(curl -s --max-time 20 "${curl_args[@]}" -o "$body" -w "$HTTP_CODE_FORMAT" \
     "$base/ajax.php?service=populatedSystems&country=ru&universe=268" || true)
   code=${code:-000}
   if grep -q '"populatedSystems"' "$body"; then
@@ -204,7 +209,7 @@ check_host() {
 
   # ---- the health report ----
   body=$(mktemp)
-  code=$(curl -s --max-time 20 "${curl_args[@]}" -o "$body" -w '%{http_code}' \
+  code=$(curl -s --max-time 20 "${curl_args[@]}" -o "$body" -w "$HTTP_CODE_FORMAT" \
     "$base/ajax.php?service=health" || true)
   code=${code:-000}
   local health
@@ -271,7 +276,7 @@ check_host() {
   # the commit the server loaded at start, so a server that missed its restart
   # after a deploy shows up as running a different commit from the site.
   body=$(mktemp)
-  code=$(curl -s --max-time 20 "${curl_args[@]}" -o "$body" -w '%{http_code}' \
+  code=$(curl -s --max-time 20 "${curl_args[@]}" -o "$body" -w "$HTTP_CODE_FORMAT" \
     -X POST -H 'Content-Type: application/json' -H 'Accept: application/json, text/event-stream' \
     --data '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-06-18","capabilities":{},"clientInfo":{"name":"pfg-watchdog","version":"1"}}}' \
     "$base/mcp" || true)
@@ -280,16 +285,16 @@ check_host() {
   mcp_ver=$(read_mcp_version "$body" || true)
   rm -f "$body"
   mcp_commit=${mcp_ver#*+}
-  [ "$mcp_commit" = "$mcp_ver" ] && mcp_commit=""
-  if [ -z "$mcp_ver" ]; then
-    if [ "$code" = 404 ] && [ "$MCP_REQUIRED" != 1 ]; then
+  [[ "$mcp_commit" = "$mcp_ver" ]] && mcp_commit=""
+  if [[ -z "$mcp_ver" ]]; then
+    if [[ "$code" = 404 && "$MCP_REQUIRED" != 1 ]]; then
       warn "no MCP endpoint at /mcp (404) - not set up on this host yet"
     else
       fail "MCP /mcp answered $code without an initialize result"
     fi
-  elif [ -z "$deployed" ] || [ -z "$mcp_commit" ]; then
+  elif [[ -z "$deployed" || -z "$mcp_commit" ]]; then
     warn "MCP $mcp_ver, no commit to compare"
-  elif [ "${deployed:0:${#mcp_commit}}" = "$mcp_commit" ]; then
+  elif [[ "${deployed:0:${#mcp_commit}}" = "$mcp_commit" ]]; then
     ok "MCP $mcp_ver"
   else
     fail "MCP runs ${mcp_commit:0:7} but the site is on ${deployed:0:7} - did pfg-mcp-restart.path fire?"
