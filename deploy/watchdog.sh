@@ -43,9 +43,9 @@ CERT_MIN_DAYS=14
 PINNED_PHP=$(tr -d ' \t\r\n' < "$(dirname "$0")/../.php-version" 2>/dev/null || true)
 
 FAILED=0
-fail() { printf '  FAIL %s\n' "$*"; FAILED=1; }
-ok()   { printf '  ok   %s\n' "$*"; }
-warn() { printf '  warn %s\n' "$*"; }
+fail() { printf '  FAIL %s\n' "$*"; FAILED=1; return 0; }
+ok()   { printf '  ok   %s\n' "$*"; return 0; }
+warn() { printf '  warn %s\n' "$*"; return 0; }
 
 for tool in curl node sha256sum; do
   command -v "$tool" >/dev/null || { echo "watchdog: $tool is required" >&2; exit 2; }
@@ -56,6 +56,7 @@ done
 # from, and the runner has both. Each helper prints plain lines for the shell
 # and exits non-zero when the document is not what it should be.
 read_health() {
+  local file="$1"
   node -e '
     const fs = require("fs");
     let d;
@@ -66,13 +67,15 @@ read_health() {
     for (const [name, job] of Object.entries(d.jobs || {})) {
       console.log("job " + name + " " + job.ageSeconds + " " + job.status);
     }
-  ' "$1"
+  ' "$file"
+  return $?
 }
 
 # The newest successful push-run in a runs document - by updated_at, not by the
 # order GitHub happens to return, which for this endpoint is not guaranteed and
 # has served a six-month-old run as "newest" before now.
 read_newest_green() {
+  local file="$1"
   node -e '
     const fs = require("fs");
     let d;
@@ -82,17 +85,20 @@ read_newest_green() {
       .sort((a, b) => Date.parse(b.updated_at) - Date.parse(a.updated_at));
     if (!runs.length) process.exit(1);
     console.log(runs[0].head_sha + " " + runs[0].updated_at);
-  ' "$1"
+  ' "$file"
+  return $?
 }
 
 # The commit ids of main, newest first, one per line.
 read_commit_list() {
+  local file="$1"
   node -e '
     const fs = require("fs");
     let d;
     try { d = JSON.parse(fs.readFileSync(process.argv[1], "utf8")); } catch (e) { process.exit(1); }
     for (const c of (Array.isArray(d) ? d : [])) console.log(c.sha);
-  ' "$1"
+  ' "$file"
+  return $?
 }
 
 # Prints "<sha> <updated_at>" if a push run of CI concluded successfully for
@@ -126,20 +132,20 @@ if command -v gh >/dev/null; then
   gh api "repos/$REPO/commits?sha=main&per_page=$MAX_WALK" > "$LIST_JSON" 2>/dev/null || true
   NEWEST=""
   while read -r sha; do
-    [ -n "$sha" ] || continue
+    [[ -n "$sha" ]] || continue
     # Asked twice before a "no" counts: the runs endpoint now and then reports
     # no successful run for a commit that has one, and a single such answer for
     # the tip once failed the run with the site correctly on it (2026-10-05).
     NEWEST=$(green_run_for "$sha" || green_run_for "$sha" || true)
-    [ -n "$NEWEST" ] && break
+    [[ -n "$NEWEST" ]] && break
   done <<< "$(read_commit_list "$LIST_JSON" || true)"
   rm -f "$LIST_JSON"
-  if [ -n "$NEWEST" ]; then
+  if [[ -n "$NEWEST" ]]; then
     TARGET=${NEWEST%% *}
     TARGET_AGE=$(( $(date -u +%s) - $(date -u -d "${NEWEST#* }" +%s) ))
   fi
 fi
-if [ -n "$TARGET" ]; then
+if [[ -n "$TARGET" ]]; then
   echo "Target commit: ${TARGET:0:7} (green ${TARGET_AGE:-?}s ago)"
 else
   echo "Target commit: unknown - the deployed commit will be reported, not checked"
@@ -161,7 +167,7 @@ check_host() {
     code=$(curl -s --max-time 20 "${curl_args[@]}" -o "$body" -w '%{http_code}' "$base$path" || true)
     code=${code:-000}
     size=$(wc -c < "$body"); rm -f "$body"
-    if [ "$code" = 200 ] && [ "$size" -gt 1000 ]; then
+    if [[ "$code" = 200 ]] && [[ "$size" -gt 1000 ]]; then
       ok "$path ($code, ${size}b)"
     else
       fail "$path answered $code, ${size}b"
@@ -188,20 +194,20 @@ check_host() {
   local health
   health=$(read_health "$body")
   rm -f "$body"
-  if [ "$code" != 200 ] || [ -z "$health" ]; then
+  if [[ "$code" != 200 ]] || [[ -z "$health" ]]; then
     fail "ajax health answered $code and no usable JSON"
     return
   fi
 
   local deployed
   deployed=$(echo "$health" | sed -n 's/^commit //p')
-  if [ -z "$deployed" ]; then
+  if [[ -z "$deployed" ]]; then
     fail "health reports no deployed commit - is .git readable?"
-  elif [ -z "$TARGET" ]; then
+  elif [[ -z "$TARGET" ]]; then
     warn "deployed ${deployed:0:7}, nothing to compare it against"
-  elif [ "$deployed" = "$TARGET" ]; then
+  elif [[ "$deployed" = "$TARGET" ]]; then
     ok "deployed ${deployed:0:7}"
-  elif [ -n "$TARGET_AGE" ] && [ "$TARGET_AGE" -lt "$DEPLOY_GRACE" ]; then
+  elif [[ -n "$TARGET_AGE" ]] && [[ "$TARGET_AGE" -lt "$DEPLOY_GRACE" ]]; then
     warn "deployed ${deployed:0:7}, target ${TARGET:0:7} went green ${TARGET_AGE}s ago - still within grace"
   else
     fail "deployed ${deployed:0:7} but the newest green commit is ${TARGET:0:7}"
@@ -211,11 +217,11 @@ check_host() {
   # Held to .php-version exactly - it is the pin, and CI installs the same.
   local php_ver
   php_ver=$(echo "$health" | sed -n 's/^php //p')
-  if [ -z "$PINNED_PHP" ]; then
+  if [[ -z "$PINNED_PHP" ]]; then
     warn "no .php-version to check the PHP against (reported ${php_ver:-none})"
-  elif [ -z "$php_ver" ]; then
+  elif [[ -z "$php_ver" ]]; then
     fail "health reports no PHP version"
-  elif [ "$php_ver" = "$PINNED_PHP" ]; then
+  elif [[ "$php_ver" = "$PINNED_PHP" ]]; then
     ok "PHP $php_ver"
   else
     fail "PHP $php_ver, but .php-version pins $PINNED_PHP - CI and the site move together"
@@ -231,14 +237,14 @@ check_host() {
   # report drift on a host that is exactly right.
   local live_hash want_hash
   live_hash=$(echo "$health" | sed -n 's/^webhook //p')
-  if [ -z "$live_hash" ]; then
+  if [[ -z "$live_hash" ]]; then
     fail "health reports no webhook digest - set WEBHOOK_FILE in the checkout's .env"
-  elif [ -z "$deployed" ]; then
+  elif [[ -z "$deployed" ]]; then
     warn "webhook digest ${live_hash:0:12}, but no deployed commit to compare it against"
   elif ! want_hash=$(git show "$deployed:deploy/webhook.php" 2>/dev/null | sha256sum | cut -d' ' -f1) \
-    || [ -z "$want_hash" ]; then
+    || [[ -z "$want_hash" ]]; then
     warn "cannot read deploy/webhook.php at ${deployed:0:7} - is the checkout shallow?"
-  elif [ "$live_hash" = "$want_hash" ]; then
+  elif [[ "$live_hash" = "$want_hash" ]]; then
     ok "webhook.php matches ${deployed:0:7}"
   else
     fail "webhook.php has drifted: serving ${live_hash:0:12}, ${deployed:0:7} has ${want_hash:0:12} - reinstall it (deploy/README.md)"
@@ -247,14 +253,18 @@ check_host() {
   # ---- the cron jobs ----
   local jobs
   jobs=$(echo "$health" | sed -n 's/^job //p')
-  if [ -z "$jobs" ]; then
+  if [[ -z "$jobs" ]]; then
     fail "health reports no cron job at all - is pfg-cron-run wired into the crontab?"
   fi
   while read -r job age status; do
-    [ -n "$job" ] || continue
-    if [ "$status" != "0" ]; then
+    [[ -n "$job" ]] || continue
+    if [[ "$status" != "0" ]]; then
       fail "$job last exited $status"
-    elif [ "$age" -gt "$MAX_AGE" ]; then
+    # [[ -gt ]] and $(( )) evaluate their operands as arithmetic, so a value
+    # off the network is checked to be a plain number before either sees it.
+    elif ! [[ "$age" =~ ^[0-9]+$ ]]; then
+      fail "$job reports no usable age ($age)"
+    elif [[ "$age" -gt "$MAX_AGE" ]]; then
       fail "$job last finished $((age / 3600))h ago, over the ${MAX_AGE}s limit"
     else
       ok "$job ran $((age / 3600))h ago"
@@ -273,16 +283,16 @@ check_cert() {
   local end days
   end=$(echo | openssl s_client -connect "$host:443" -servername "$host" 2>/dev/null \
         | openssl x509 -noout -enddate 2>/dev/null | cut -d= -f2)
-  [ -n "$end" ] || { warn "$label certificate: could not be read"; return 0; }
+  [[ -n "$end" ]] || { warn "$label certificate: could not be read"; return 0; }
   days=$(( ( $(date -u -d "$end" +%s) - $(date -u +%s) ) / 86400 ))
-  if [ "$days" -lt "$CERT_MIN_DAYS" ]; then
+  if [[ "$days" -lt "$CERT_MIN_DAYS" ]]; then
     fail "$label certificate expires in $days days ($end) - is certbot renewing?"
   else
     ok "$label certificate has $days days left"
   fi
 }
 
-if [ "$#" -gt 0 ]; then
+if [[ "$#" -gt 0 ]]; then
   SITE_NAMES=("$@")
 fi
 
@@ -292,7 +302,7 @@ for name in "${SITE_NAMES[@]}"; do
 done
 
 echo
-if [ "$FAILED" = 0 ]; then
+if [[ "$FAILED" = 0 ]]; then
   echo "All checks passed."
 else
   echo "Something is wrong above."

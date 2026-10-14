@@ -13,13 +13,13 @@
 set -euo pipefail
 
 host=${1:-}
-[ $# -ge 2 ] || { echo "Usage: bash scripts/pfg-ssh.sh prod|standby '<command>'" >&2; exit 2; }
+[[ $# -ge 2 ]] || { echo "Usage: bash scripts/pfg-ssh.sh prod|standby '<command>'" >&2; exit 2; }
 shift
 
 case "$host" in
     prod)
         pwfile=${PFG_PROD_PWFILE:-/d/tmp/claude/_pfg-prod.txt}
-        [ -s "$pwfile" ] || { echo "No production password at $pwfile - ask the user to put it there." >&2; exit 1; }
+        [[ -s "$pwfile" ]] || { echo "No production password at $pwfile - ask the user to put it there." >&2; exit 1; }
         # Strip NULs and a UTF-8/UTF-16 BOM: Windows editors like to save the file as
         # UTF-16, and plink then gets a mangled password and says "Access denied".
         pw=$(tr -d '\000\r\n' < "$pwfile" | sed $'s/^\xEF\xBB\xBF//; s/^\xFF\xFE//')
