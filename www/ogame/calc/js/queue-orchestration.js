@@ -16,12 +16,8 @@ class TabState {
     this.queueProp = queueProp;      // 'qp' or 'qm' on options.prm
     this.startLevels = [];           // [[techId, level], ...]
     this.startLevelsByTech = {};
-    this.nextLevels = [];            // [[techId, nextLevel], ...]
     this.totals = [0, 0, 0, 0, 0];   // fields, metal, crystal, deut, time
-    this.currFields = 0;
     this.maxFields = 0;
-    this.robots = 0;
-    this.nanites = 0;
   }
 
   get queue() { return options.prm[this.queueProp]; }
@@ -267,32 +263,15 @@ class QueueCalculatorApp {
 
   /**
    * Re-read inputs, validate the queue, recompute totals, and re-render the
-   * dst table for one tab.
+   * dst table for one tab. The arithmetic is QueueCalculator.simulate().
    */
   _refreshTab(tabNum) {
     const g = this._readGlobals();
     const state = this._stateFor(tabNum);
-    state.totals = [0, 0, 0, 0, 0];
-    state.maxFields = (tabNum === PLANET_TAB) ? g.totFldPln : g.totFldMn;
-    state.robots = 0;
-    state.nanites = 0;
 
-    // Read start levels and seed nextLevels with (level+1) so the src table
-    // shows the level the next build would produce.
     const { list, byTech } = QueueDataCollector.readStartLevels(tabNum);
     state.startLevels = list;
     state.startLevelsByTech = byTech;
-    state.nextLevels = list.map(([techId, lvl]) => [techId, lvl + 1]);
-
-    let currFields = 0;
-    for (const [techId, lvl] of list) {
-      QueueRenderer.setNextLevel(tabNum, techId, lvl + 1);
-      currFields += lvl;
-      if (techId === TECH_ROBOT_FACTORY) state.robots = lvl;
-      if (tabNum === PLANET_TAB && techId === TECH_NANITE_FACTORY) state.nanites = lvl;
-    }
-    state.currFields = currFields;
-    state.totals[0] = currFields;
 
     // Persist start levels in cookie state
     if (tabNum === PLANET_TAB) options.prm.slp = list;
@@ -303,82 +282,35 @@ class QueueCalculatorApp {
     QueueCalculator.purgeInvalidDemolitions(queue, byTech);
     state.queue = queue;
 
-    // Re-render queue rows from scratch
-    QueueRenderer.clearQueueRows(tabNum);
+    const run = this.calc.simulate({
+      startLevels: Object.fromEntries(list),
+      queue,
+      isMoon: tabNum === MOON_TAB,
+      maxFields: (tabNum === PLANET_TAB) ? g.totFldPln : g.totFldMn,
+      universeSpeed: g.universeSpeed,
+      ionTechLevel: g.ionTechLevel,
+    });
+    state.totals = run.totals;
+    state.maxFields = run.maxFields;
 
-    const techNames = QueueDataCollector.readTechNames(tabNum);
-    const loopState = {
-      totalFlds: state.maxFields,
-      robots: state.robots,
-      nanites: state.nanites,
-      fontColor: QueueRenderer.rowFontColor(false)
-    };
-
-    for (let qi = 0; qi < queue.length; qi++) {
-      this._processQueueEntry(tabNum, state, g, techNames, queue, qi, loopState);
+    // The src table shows the level the next build would produce.
+    for (const [techId] of list) {
+      QueueRenderer.setNextLevel(tabNum, techId, run.finalLevels[techId] + 1);
     }
 
-    state.robots = loopState.robots;
-    state.nanites = loopState.nanites;
+    // Re-render queue rows from scratch
+    QueueRenderer.clearQueueRows(tabNum);
+    const techNames = QueueDataCollector.readTechNames(tabNum);
+    for (const step of run.steps) {
+      const techName = techNames[step.techId] || String(step.techId);
+      QueueRenderer.appendQueueRow(tabNum, step.index, techName, step.resultLevel, step.cost, !step.isBuild,
+        QueueRenderer.rowFontColor(step.overCapacity));
+    }
 
-    QueueRenderer.updateTotals(tabNum, state.totals, loopState.totalFlds, loopState.fontColor);
+    QueueRenderer.updateTotals(tabNum, state.totals, run.maxFields, QueueRenderer.rowFontColor(run.overCapacity));
     QueueRenderer.updateTransports(tabNum, state.totals, g.hyperTechLevel, g.playerClass, g.scCapacityIncrease, g.lcCapacityIncrease);
     this._updateCompletion(tabNum);
     options.save();
-  }
-
-  /**
-   * Processes one build-queue entry: updates the next-level mirror, computes
-   * its cost/time, folds it into the running totals/capacity/font-color state,
-   * and renders its queue row. Mutates loopState in place.
-   */
-  _processQueueEntry(tabNum, state, g, techNames, queue, qi, loopState) {
-    const [techIdRaw, isBuildRaw] = queue[qi];
-    const techId = Number(techIdRaw);
-    const isBuild = Number(isBuildRaw) === 1;
-    const inc = isBuild ? 1 : -1;
-
-    // Update next-levels mirror
-    const nl = state.nextLevels.find((p) => Number(p[0]) === techId);
-    if (!nl) return;
-    const resultLevel = isBuild ? nl[1] : nl[1] - 2;
-    nl[1] += inc;
-    QueueRenderer.setNextLevel(tabNum, techId, nl[1]);
-
-    const costs = this.calc.getStepCost(
-      techId, resultLevel, loopState.robots, loopState.nanites,
-      g.universeSpeed, !isBuild, g.ionTechLevel
-    );
-
-    if (techId === TECH_ROBOT_FACTORY) loopState.robots += inc;
-    if (techId === TECH_NANITE_FACTORY && tabNum === PLANET_TAB) loopState.nanites += inc;
-
-    // Spacedock (36) doesn't occupy a planet field
-    if (techId !== TECH_SHIPYARD) state.totals[0] += inc;
-
-    // Validate against capacity *before* this row's own field bonus —
-    // OGame requires a free field to queue any building, including
-    // Terraformer/Lunar Base itself.
-    loopState.fontColor = QueueRenderer.rowFontColor(state.totals[0] > loopState.totalFlds);
-
-    // Terraformer (33) increases planet fields capacity
-    if (techId === TECH_TERRAFORMER && tabNum === PLANET_TAB) {
-      loopState.totalFlds += QueueCalculator.terraformerFieldsBonus(resultLevel);
-      state.maxFields = loopState.totalFlds;
-    }
-    // Lunar base (41) increases moon fields capacity
-    if (techId === TECH_LUNAR_BASE && tabNum === MOON_TAB) {
-      loopState.totalFlds += QueueCalculator.lunarBaseFieldsBonus();
-      state.maxFields = loopState.totalFlds;
-    }
-
-    state.totals[1] += costs[0];
-    state.totals[2] += costs[1];
-    state.totals[3] += costs[2];
-    state.totals[4] += costs[3];
-
-    const techName = techNames[techId] || String(techId);
-    QueueRenderer.appendQueueRow(tabNum, qi, techName, resultLevel, costs, !isBuild, loopState.fontColor);
   }
 
   _onBuildClick(event, state) {
