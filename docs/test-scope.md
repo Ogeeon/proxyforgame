@@ -57,6 +57,10 @@ Anything not in a calculator's file set, notably:
 - `www/routes.inc.php`, `www/.htaccess`, `scripts/dev-router.php` — the calculator addresses;
   their redirects have their own `playwright-tests/tests/routes.spec.js`
 - `www/locale/*.json` — use `make check`, so the locale validator runs too
+- `mcp/**` — the MCP server; its own tests are `unit-tests/mcp-server.test.js`
+  (`node --test mcp-server.test.js` from `unit-tests/`), but `mcp/lib/browser-scripts.js`
+  is also the loader every unit test runs through
+- `www/ogame/calc/data/costs-techs.json` — read by `costs.php` and by the MCP server
 - `playwright-tests/tests/base.js` — **note the path**, it sits in `tests/`, not the root
 - `playwright-tests/playwright.config.js`
 - anything under `unit-tests/` other than a single `<name>-core.test.js` (`load.js`, `expect.js`,

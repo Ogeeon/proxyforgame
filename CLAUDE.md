@@ -173,6 +173,15 @@ rest of the page — form reading, output and wiring — still lives in that one
 a collector/renderer/orchestration trio. To create a new calculator use the
 **`new-calculator` skill**.
 
+### MCP server
+`mcp/` is a dependency-free Node service that exposes calculators as MCP tools to LLM clients
+(ChatGPT, Claude), at `https://proxyforgame.com/mcp`. Its tools compute with the same
+`*-core.js` files the pages load — never copy a formula into `mcp/tools/`; if the arithmetic or
+data still lives in PHP or orchestration code, move it into a shared file first (as
+`www/ogame/calc/data/costs-techs.json` was). `make mcp` runs it locally; layout and how to add a
+tool: `mcp/README.md`; host setup: `deploy/README.md`, *The MCP server*; why Node without an
+SDK: `docs/adr/0005-mcp-node-service.md`.
+
 ### Internationalization
 - `www/langs.php` - Maps URL prefixes to languages (`/en/` → English, `us` → `en`)
 - `www/Intl.php` - `Intl::getTranslations($lang, $page)` merges common + page-specific keys

@@ -68,7 +68,7 @@ PW ?= node node_modules/@playwright/test/cli.js
 
 .DEFAULT_GOAL := help
 
-.PHONY: help install serve db-seed db-migrate \
+.PHONY: help install serve mcp db-seed db-migrate \
         docker-up docker-down docker-logs \
         test test-unit test-e2e test-e2e-ui test-one report \
         check audit quality coverage db-validate lint typecheck php-version-check \
@@ -97,6 +97,11 @@ install: ## Install test dependencies and Playwright browsers
 
 serve: ## Serve www/ with the built-in PHP server on PORT, default 8000
 	"$(PHP)" -S localhost:$(PORT) -t www scripts/dev-router.php
+
+# Settings come from the environment (mcp/README.md); PFG_SITE_URL decides
+# where universe data is read from, the live site unless set.
+mcp: ## Run the MCP server on http://127.0.0.1:8787/mcp
+	node mcp/server.js
 
 # Connection info in the environment, for these two recipes only - see the DB_*
 # block near the top. pfg-migrate still lets a repo .env win over these.

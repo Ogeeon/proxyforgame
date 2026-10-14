@@ -1,5 +1,6 @@
 {
-  // The Node half of the type-check: build scripts and the node:test suite.
+  // The Node half of the type-check: build scripts, the node:test suite and
+  // the MCP server.
   // Split from tsconfig.json because these are CommonJS modules and need
   // `module: node16` to resolve require(), while the browser code needs the
   // absence of that setting to stay global scripts. `npm run typecheck` runs
@@ -19,7 +20,8 @@
   },
   "include": [
     "scripts/**/*.js",
-    "unit-tests/**/*.js"
+    "unit-tests/**/*.js",
+    "mcp/**/*.js"
   ],
   // playwright-tests/ is left out on purpose: it is ESM with its own
   // node_modules and its own @ts-check on playwright.config.js.
