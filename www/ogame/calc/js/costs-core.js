@@ -575,8 +575,9 @@ class Calculator {
         isTrader: params.isTrader,
         collectorClassBonusPct: params.collectorClassBonus
       });
-      const allStaffBonus = params.hasFullCrew ? Math.round(prod[1] * 0.02) : 0;
-      return prod[1] + prod[5] + allStaffBonus; // base + engineer bonus + all-officers bonus
+      const base = prod[PRODUCTION_ROW.BUILDING];
+      const allStaffBonus = params.hasFullCrew ? Math.round(base * 0.02) : 0;
+      return base + prod[PRODUCTION_ROW.ENGINEER] + allStaffBonus; // base + engineer bonus + all-officers bonus
     }
 
     // Calculate production rate
