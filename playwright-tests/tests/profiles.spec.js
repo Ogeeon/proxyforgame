@@ -27,10 +27,10 @@ async function chooseAction(page, value) {
 }
 
 /** Import the fixture export, picking the first country and universe offered. */
-async function importExport(page) {
+async function importExport(page, text = EXPORT) {
     await chooseAction(page, '__import');
     await expect(page.locator('#pf-import-modal')).toBeVisible();
-    await page.locator('#pf-import-text').fill(EXPORT);
+    await page.locator('#pf-import-text').fill(text);
     await page.locator('#pf-import-go').click();
     // Schema 1 carries no universe: the dialog asks for it.
     const box = page.locator('#pf-import-universe-box');
@@ -1547,10 +1547,17 @@ async function blurFill(page, selector, value) {
 
 test('expeditions takes the account from the profile', async ({ page }) => {
     await page.goto('/expeditions');
-    await importExport(page);
+    // The 20% Expedition Resource Booster item, as a buff of the first planet.
+    const withItem = JSON.parse(EXPORT);
+    Object.values(withItem.planets)[0].buffs.push({
+        rarity: 'common', itemUuid: '03ece11ef535f5ef49b203ff50a0466fda5a76e2', name: 'Expedition Resource Booster (20%) Bronze',
+        buffStart: 1, buffEnd: null, effectStart: 1, effectEnd: null,
+    });
+    await importExport(page, JSON.stringify(withItem));
 
     await expect(page.locator('#player-class')).toHaveValue('1');
     await expect(page.locator('#player-class option:checked')).toHaveText('Collector');
+    await expect(page.locator('#resource-discovery-booster')).toHaveValue('20');
     await expect(page.locator('#tech-hyper-level')).toHaveValue('8');
     await expect(page.locator('#percent-resources')).toHaveValue('4');
     await expect(page.locator('#percent-ships')).toHaveValue('2');
@@ -1562,11 +1569,12 @@ test('expeditions takes the account from the profile', async ({ page }) => {
     await expect(page.locator('#lf-cargo-209')).toHaveValue('0');
 
     for (const bound of ['#player-class', '#tech-hyper-level', '#percent-resources', '#percent-ships',
-        '#class-bonus-collector', '#class-bonus-discoverer', '#lf-cargo-202', '#lf-cargo-203', '#lf-cargo-219']) {
+        '#class-bonus-collector', '#class-bonus-discoverer', '#resource-discovery-booster',
+        '#lf-cargo-202', '#lf-cargo-203', '#lf-cargo-219']) {
         await expect(page.locator(bound)).toHaveClass(/pf-bound/);
     }
-    // The calculator's own: the discovery bonus, the booster and the fleet.
-    for (const own of ['#dark-matter-discovery-bonus', '#resource-discovery-booster', '#numSC']) {
+    // The calculator's own: the dark matter discovery bonus and the fleet.
+    for (const own of ['#dark-matter-discovery-bonus', '#numSC']) {
         await expect(page.locator(own)).not.toHaveClass(/pf-bound/);
     }
 

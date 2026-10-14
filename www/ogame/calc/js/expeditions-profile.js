@@ -6,16 +6,17 @@
 // into it and writes the changes back:
 //   - apply(): profile -> form - the account (the character class, hyperspace
 //     technology, the life-form expedition bonuses to resources and ships, the
-//     collector and discoverer class boosters, and the cargo bonus of every
-//     ship in the table);
+//     collector and discoverer class boosters, the active Expedition Resource
+//     Booster item, and the cargo bonus of every ship in the table);
 //   - sync(): options.prm -> profile, called from options.save(), writing only
 //     what changed since the last apply or sync, so a lossy mapping (a profile
 //     with no class shows as "other" here) never becomes an override.
 // The cargo bonuses are one array in options.prm (lfShipsBonuses, in the order
 // of EXPEDITION_SHIPS), not a key per ship, so they are handled here rather
 // than by the field list of the base binder.
-// The fleet, the dark matter discovery bonus and the resource discovery booster
-// are the calculator's own and keep going to options_expeditions; the
+// The fleet and the dark matter discovery bonus are the calculator's own and
+// keep going to options_expeditions, and so does the resource discovery booster
+// of a calculator with no profile; the
 // profile-owned keys are written there with the values they had before the
 // profile, so "no profile" shows them untouched. The economy speed and the
 // "strongest player" class come from the profile's universe; a profile with no
@@ -51,6 +52,7 @@ const EXPEDITIONS_ACCOUNT_FIELDS = [
   pfConvNumField('lf.expedition.ships', 'percentShips', '#percent-ships'),
   pfConvNumField('lf.classBooster.1', 'classBonusCollector', '#class-bonus-collector'),
   pfConvNumField('lf.classBooster.3', 'classBonusDiscoverer', '#class-bonus-discoverer'),
+  pfConvNumField('item.expeditionResources', 'resourceDiscoveryBooster', '#resource-discovery-booster'),
 ];
 
 /** The options.prm keys of the settings that come from the profile's universe, in the order of the config. */

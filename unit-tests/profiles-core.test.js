@@ -113,6 +113,44 @@ describe('parseAccountExport', () => {
         expect(a['lf.phalanxRange']).toBe(0);
     });
 
+    describe('the Expedition Resource Booster item', () => {
+        // uuids of the 25% and 40% items of the game's shop
+        const ITEM_25 = '0049d2538081bea1dc5264a2899a194fe79107f1';
+        const ITEM_40 = '3876b353a7f99b28520a82df01cd86c31b4cbfe0';
+        /** @param {string} itemUuid @param {?number} [effectEnd] */
+        const buff = (itemUuid, effectEnd = null) => ({ rarity: 'common', itemUuid, name: 'x', buffStart: 1, buffEnd: effectEnd, effectStart: 1, effectEnd });
+
+        it('is 0 when no body carries it', () => {
+            expect(parsed(fixture()).account['item.expeditionResources']).toBe(0);
+        });
+
+        it('reads the percentage of the item by its uuid, not its name', () => {
+            const obj = fixture();
+            obj.planets['900001'].buffs.push(buff(ITEM_25));
+            expect(parsed(obj).account['item.expeditionResources']).toBe(25);
+        });
+
+        it('finds the item on a moon and takes the highest of several', () => {
+            const obj = fixture();
+            obj.planets['900001'].buffs.push(buff(ITEM_25));
+            Object.values(obj.moons)[0].buffs = [buff(ITEM_40)];
+            expect(parsed(obj).account['item.expeditionResources']).toBe(40);
+        });
+
+        it('ignores an item whose effect ended before the export', () => {
+            const obj = fixture();
+            obj.exportedAt = '2026-10-13T00:00:00.000Z';
+            obj.planets['900001'].buffs.push(buff(ITEM_40, Date.parse('2026-10-12T00:00:00Z') / 1000));
+            expect(parsed(obj).account['item.expeditionResources']).toBe(0);
+        });
+
+        it('ignores items it does not know', () => {
+            const obj = fixture();
+            obj.planets['900001'].buffs.push(buff('9336b9f29d36e3f69b0619c9523d8bec5e09ab8e'));
+            expect(parsed(obj).account['item.expeditionResources']).toBe(0);
+        });
+    });
+
     it('has no universe on schema 1', () => {
         expect(parsed(fixture()).universe).toBeNull();
     });

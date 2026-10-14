@@ -41,6 +41,24 @@ const SPECIES_TO_RACE = { 701: 1, 702: 2, 703: 3, 704: 4 };
 /** Character class booster id in speciesBonuses to the class it boosts. */
 const CLASS_BOOSTER_TO_CLASS = { 601: 1, 602: 2, 603: 3 };
 
+/**
+ * The "Expedition Resource Booster" items of the game's shop, by the percentage
+ * each one adds to the resources found. An item is told apart by its uuid, not
+ * its name: the name follows the player's client language. Three uuids per
+ * step, one for each duration the shop sells.
+ *
+ * @type {Object<string, number>}
+ */
+const EXPEDITION_RESOURCE_BOOSTER_ITEMS = {
+  '586b20cfd60ef85c6670b62435ca2f44f1071bd8': 10, '3fe4fb984a1b2bd29e8c14f9f25bea2389727b5e': 10, 'be998009fff22d7eea987cf974a25cacc06d330c': 10,
+  'e4b33192361f45f4c61691844d0e8ec95fa5a231': 15, '6c482898a61fa9ad20e9ce330975f07aa1f76520': 15, '93eab867affae30157fc660899d9eac7d3b4f971': 15,
+  '03ece11ef535f5ef49b203ff50a0466fda5a76e2': 20, '335efdb763687e956dfe6a330ceddd32f174d753': 20, '01c49a959ed989bd1b86abf0526f91ac0b716bfe': 20,
+  '0049d2538081bea1dc5264a2899a194fe79107f1': 25, '75154767d49fc6867c9d7465a095371993377c88': 25, '4cfd5bef27f891a1608b0d1e595cf8bf8cb144c0': 25,
+  '5e42748915b5cab0ca7fd8e58e842ae9abb12745': 30, 'b9d9a0d57544363a4ac5531fa01f4b0b17256e24': 30, '9c069cb845b9225f9bb191f15d4f6abb0e7e144e': 30,
+  '2466f93d624ef96ffcc9e36f8c953699f525a5eb': 35, 'edd5cb7bfed46a64d4351fa6f4ef2076dc305e10': 35, '1b709fc34003e171528ec345430cbb2e3aa090e5': 35,
+  '3876b353a7f99b28520a82df01cd86c31b4cbfe0': 40, '505fa6275e34b816d5059e26632dcaa8c18bde9a': 40, 'b0f6477d68c9683170cb8d32be2df1177669c5a0': 40,
+};
+
 /** Default exchange rates, [metal, crystal, deuterium] in metal units. */
 const DEFAULT_RATES = [1, 1.5, 3];
 
@@ -627,7 +645,33 @@ function exportAccountValues(raw) {
   });
 
   Object.assign(values, exportLifeformBonuses(raw.speciesBonuses, raw.bonusByType));
+  values['item.expeditionResources'] = activeExpeditionResourceBooster(raw);
   return values;
+}
+
+/**
+ * The percentage the active "Expedition Resource Booster" item adds to the
+ * resources an expedition finds. The item is the account's, but the export lists
+ * it as a buff of every planet and moon, so the bodies are searched; a buff
+ * whose effect ended before the export was made does not count. 0 when none.
+ *
+ * @param {Record<string, any>} raw The whole export.
+ * @returns {number}
+ */
+function activeExpeditionResourceBooster(raw) {
+  const exportedMs = Date.parse(typeof raw.exportedAt === 'string' ? raw.exportedAt : '');
+  const nowSeconds = Number.isFinite(exportedMs) ? exportedMs / 1000 : Number.POSITIVE_INFINITY;
+  let best = 0;
+  [raw.planets, raw.moons].filter(isPlainObject).forEach((bodies) => {
+    Object.values(bodies).filter(isPlainObject).forEach((body) => {
+      (Array.isArray(body.buffs) ? body.buffs : []).filter(isPlainObject).forEach((buff) => {
+        const percent = EXPEDITION_RESOURCE_BOOSTER_ITEMS[String(buff.itemUuid)] ?? 0;
+        const end = finiteOrNull(buff.effectEnd);
+        if (percent > best && (end === null || end > nowSeconds)) best = percent;
+      });
+    });
+  });
+  return best;
 }
 
 /**
