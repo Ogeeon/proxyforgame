@@ -53,6 +53,15 @@
   text-align: center;
 }
 
+/* Life form research levels (Life Forms parameter tab): one grid per race,
+   the name on the left and its level input on the right */
+#lf-research-levels .lf-res-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(18rem, 1fr));
+  column-gap: 1.5rem;
+  row-gap: 0.25rem;
+}
+
 /* Compact controls placed inside .lined tables */
 .input-in-table,
 .lined .form-control-sm {

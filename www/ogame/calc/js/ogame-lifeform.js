@@ -1,5 +1,6 @@
 // Life Form build math: cost, demolition refund, energy requirement and build
-// or research time for LF buildings and technologies. Read by lfcosts alone.
+// or research time for LF buildings and technologies. Read by lfcosts, and by
+// production for the cost of an upgrade in its LF amortization table.
 
 /**
  * Calculates the cost of demolishing a Life Form building

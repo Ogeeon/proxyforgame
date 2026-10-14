@@ -37,6 +37,11 @@ function populateParams() {
 	setNumVal('#lf-collector-bonus', options.prm.lfCollectorBonus);
 	setNumVal('#lf-crawler-bonus', options.prm.lfCrawlerBonus);
 	setNumVal('#lf-plasma-cost-reduction', options.prm.lfPlasmaCostReduction);
+	setNumVal('#lf-tech-bonus', options.prm.lfTechBonus);
+	setNumVal('#lf-research-cost-reduction', options.prm.lfResearchCostReduction);
+	options.lfResIds.forEach(function (id, k) {
+		setVal('#lf-res-' + id, options.prm.lfResLevels[k] || 0);
+	});
 }
 
 function setOnePlanetProdData() {

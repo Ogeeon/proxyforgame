@@ -1027,3 +1027,128 @@ test.describe('Life Forms building production bonuses', () => {
         expect(coeffAfter).toBeGreaterThan(coeffBefore);
     });
 });
+
+test.describe('Life Forms amortization', () => {
+    const body = (page) => page.locator('#lf-amort-body');
+    const rowOf = (page, name) => body(page).locator('tr').filter({ hasText: name });
+
+    // Give planet 1 productive mines and a power plant, then a life form.
+    async function setUpPlanet(page, race) {
+        await page.locator('#tabtag2').click();
+        const planetInputs = page.locator('#all-planets-prod tr').nth(1).locator('input[type=text]');
+        await planetInputs.nth(2).fill('30'); // metal mine
+        await planetInputs.nth(3).fill('26'); // crystal mine
+        await planetInputs.nth(4).fill('22'); // deuterium synthesizer
+        await planetInputs.nth(5).fill('40'); // solar plant
+        await planetInputs.nth(5).press('Tab');
+        if (race) {
+            await page.locator('#all-planets-prod .control-edit').first().click();
+            await page.locator('#one-pln-race').selectOption(String(race));
+            await page.locator('#save-planet-data').click();
+        }
+    }
+
+    async function openLfAmort(page) {
+        await page.locator('#tabtag2').click();
+        await page.locator('text=Amortisation of Life Form buildings and researches').click();
+        await expect(page.locator('#all-pln-acc-lf-amort')).toHaveClass(/show/);
+    }
+
+    async function fillLf(page, id, value) {
+        await page.locator('#param-lifeforms-tab').click();
+        const input = page.locator('#' + id);
+        if (!(await input.isVisible()))
+            await page.locator('#lf-research-levels-toggle').click();
+        await input.fill(value);
+        await input.press('Tab');
+    }
+
+    // Payback cells read like "2d 10h 57m"; turn them into seconds to compare order.
+    function seconds(text) {
+        const units = { w: 604800, d: 86400, h: 3600, m: 60, s: 1 };
+        let total = 0;
+        for (const [, n, u] of (text ?? '').matchAll(/(\d+)\s*([wdhms])/g))
+            total += Number(n) * units[u];
+        return total;
+    }
+
+    test('lists nothing while no planet mines anything', async ({ page }) => {
+        await openLfAmort(page);
+        await expect(body(page)).toHaveText('No upgrade would increase the production.');
+    });
+
+    test('ranks buildings of the planet and empire-wide researches by payback', async ({ page }) => {
+        await setUpPlanet(page, 2); // Rock'tal
+        await openLfAmort(page);
+
+        const rows = body(page).locator('tr');
+        await expect(rows).toHaveCount(10);
+        // Magma Forge 0 -> 1 on planet 1: +2% of the metal mine output.
+        const forge = rowOf(page, 'Magma Forge');
+        await expect(forge.locator('td').nth(1)).toHaveText('Planet #1');
+        await expect(forge.locator('td').nth(3)).toHaveText('0 → 1');
+        await expect(forge.locator('td').nth(4)).toHaveText('10.000 Metal, 8.000 Crystal, 1.000 Deuterium');
+        await expect(forge.locator('td').nth(5)).toHaveText('424 Metal');
+        // A research acts on every planet.
+        await expect(rowOf(page, 'High-Performance Extractors').locator('td').nth(1)).toHaveText('All planets');
+
+        const times = [];
+        for (let i = 0; i < 10; i++)
+            times.push(seconds(await rows.nth(i).locator('td').nth(6).textContent()));
+        expect(times).toEqual([...times].sort((a, b) => a - b));
+    });
+
+    test('a planet without a life form proposes researches only', async ({ page }) => {
+        await setUpPlanet(page, 0);
+        await openLfAmort(page);
+        const planets = await body(page).locator('tr td:nth-child(2)').allTextContents();
+        expect(planets.length).toBeGreaterThan(0);
+        expect(new Set(planets)).toEqual(new Set(['All planets']));
+    });
+
+    test('the Megalith discounts Rock\'tal buildings', async ({ page }) => {
+        await setUpPlanet(page, 2);
+        // Megalith (Rock'tal building 8) at level 10: -10% on every Rock'tal building.
+        await page.locator('#all-planets-prod .control-edit').first().click();
+        await page.locator('#one-planet-prod tr.lf-row:has([data-lf-id="2008"]) input').fill('10');
+        await page.locator('#one-planet-prod tr.lf-row:has([data-lf-id="2008"]) input').press('Tab');
+        await page.locator('#save-planet-data').click();
+        await openLfAmort(page);
+        await expect(rowOf(page, 'Magma Forge').locator('td').nth(4)).toHaveText('9.000 Metal, 7.200 Crystal, 900 Deuterium');
+    });
+
+    test('research level, technology bonus and cost reduction drive a research row', async ({ page }) => {
+        await setUpPlanet(page, 0);
+        await openLfAmort(page);
+        const hpe = rowOf(page, 'High-Performance Extractors');
+        await expect(hpe.locator('td').nth(5)).toHaveText('13 Metal, 4 Crystal, 2 Deuterium');
+
+        // Level 2 -> 3 costs 3 * base * 1.5^2: 47.250 / 67.500 / 33.750.
+        await fillLf(page, 'lf-res-1102', '2');
+        await expect(hpe.locator('td').nth(3)).toHaveText('2 → 3');
+        await expect(hpe.locator('td').nth(4)).toHaveText('47.250 Metal, 67.500 Crystal, 33.750 Deuterium');
+
+        // A 20% research cost reduction: floor(0.8 * cost).
+        await fillLf(page, 'lf-research-cost-reduction', '20');
+        await expect(hpe.locator('td').nth(4)).toHaveText('37.800 Metal, 54.000 Crystal, 27.000 Deuterium');
+
+        // A 50% technology bonus amplifies the gain: 21.200 * 0.06% * 1.5 = 19.
+        await fillLf(page, 'lf-tech-bonus', '50');
+        await expect(hpe.locator('td').nth(5)).toHaveText('19 Metal, 6 Crystal, 2 Deuterium');
+    });
+
+    test('the research inputs persist on reload', async ({ page }) => {
+        await fillLf(page, 'lf-res-2105', '7');
+        await fillLf(page, 'lf-tech-bonus', '12.5');
+        await fillLf(page, 'lf-research-cost-reduction', '30');
+        await page.reload();
+        await expect(page.locator('#lf-res-2105')).toHaveValue('7');
+        await expect(page.locator('#lf-tech-bonus')).toHaveValue('12.5');
+        await expect(page.locator('#lf-research-cost-reduction')).toHaveValue('30');
+    });
+
+    test('research levels are clamped to 0..100 on blur', async ({ page }) => {
+        await fillLf(page, 'lf-res-1108', '150');
+        await expect(page.locator('#lf-res-1108')).toHaveValue('100');
+    });
+});

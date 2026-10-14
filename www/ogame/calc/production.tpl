@@ -25,6 +25,7 @@
   <script src="/js/api-client.js?v=<?php echo filemtime($pfgPath.'/js/api-client.js'); ?>" defer></script>
   <script src="/ogame/calc/js/ogame-production.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/ogame-production.js'); ?>" defer></script>
   <script src="/ogame/calc/js/ogame-costs.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/ogame-costs.js'); ?>" defer></script>
+  <script src="/ogame/calc/js/ogame-lifeform.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/ogame-lifeform.js'); ?>" defer></script>
 
   <!-- DOM utilities (jQuery replacement) -->
   <script src="/ogame/calc/js/dom-utils.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/dom-utils.js'); ?>" defer></script>
@@ -96,6 +97,10 @@
         lfCollectorBonus: 0,
         lfCrawlerBonus: 0,
         lfPlasmaCostReduction: 0,
+        // Levels of the production researches, in the order of options.lfResIds
+        lfResLevels: [],
+        lfTechBonus: 0,
+        lfResearchCostReduction: 0,
 
         validate: function (field, value) {
           switch (field) {
@@ -157,7 +162,12 @@
             case 'lfCrawlerBonus':
               return validateNumber(parseFloat(value), 0, Infinity, 0);
             case 'lfPlasmaCostReduction':
+            case 'lfResearchCostReduction':
               return validateNumber(parseFloat(value), 0, 99, 0);
+            case 'lfResLevels':
+              return validateNumber(Number.parseInt(value), 0, 100, 0);
+            case 'lfTechBonus':
+              return validateNumber(parseFloat(value), 0, Infinity, 0);
             default:
               return value;
           }
@@ -239,6 +249,7 @@
     options.noUpgradesMsg = "<?= $l['no-upgrades'] ?>";
     options.crawlerName = "<?= $l['crawler'] ?>";
     options.crawlerLimitHint = "<?= $l['crawler-limit-hint'] ?>";
+    options.allPlanetsStr = <?= json_encode($l['all-planets']) ?>;
 
     <?php $techs = getTechsByType(2);?>
     options.bldCosts = {
@@ -286,6 +297,16 @@
       <?php $first = false; ?>
       <?php endforeach; ?>
     };
+
+    // Life form researches that raise resource production, in a fixed order
+    // (options.prm.lfResLevels follows it), and their raw bonuses in the
+    // options.lfBonus shape: id => {kind:[base, factor, max]}, pct = base * level.
+    options.lfResIds = <?= json_encode(array_keys($lfResearchBonus)) ?>;
+    options.lfResBonus = <?= json_encode($lfResearchBonus) ?>;
+    // Build costs of the life form objects the LF amortization table proposes,
+    // in the layout calcBuildCostLF reads, and their names.
+    options.lfCosts = <?= json_encode($lfAmortCosts) ?>;
+    options.lfNames = <?= json_encode($lfAmortNames) ?>;
   </script>
 <?php require_once '../../cookies.tpl'; ?>
 </head>
@@ -481,6 +502,41 @@
                 <input id="lf-plasma-cost-reduction" type="text" name="lf-plasma-cost-reduction" class="form-control level-input m-0" value="0">
                 <span class="input-group-text">%</span>
               </div>
+            </div>
+          </div>
+          <!-- Inputs of the "LF amortization" table on the All planets tab -->
+          <div id="lf-amort-params" class="border rounded p-2 mt-1">
+            <div class="d-flex flex-wrap column-gap-3 row-gap-1 align-items-center justify-content-center">
+              <button id="lf-research-levels-toggle" class="btn btn-outline-secondary btn-sm" type="button" data-bs-toggle="collapse" data-bs-target="#lf-research-levels" aria-expanded="false" aria-controls="lf-research-levels"><?= $l['lf-research-levels'] ?></button>
+              <div class="d-flex align-items-center gap-1">
+                <label for="lf-tech-bonus"><?= $l['lf-tech-amp'] ?></label>
+                <div class="input-group input-group-sm w-auto">
+                  <input id="lf-tech-bonus" type="text" name="lf-tech-bonus" class="form-control level-input m-0" value="0">
+                  <span class="input-group-text">%</span>
+                </div>
+                <i class="bi bi-question-circle" data-bs-toggle="tooltip" title="<?= htmlspecialchars($l['lf-tech-amp-hint'], ENT_QUOTES) ?>"></i>
+              </div>
+              <div class="d-flex align-items-center gap-1">
+                <label for="lf-research-cost-reduction"><?= $l['research-cost-reduction'] ?></label>
+                <div class="input-group input-group-sm w-auto">
+                  <input id="lf-research-cost-reduction" type="text" name="lf-research-cost-reduction" class="form-control level-input m-0" value="0">
+                  <span class="input-group-text">%</span>
+                </div>
+              </div>
+            </div>
+            <div id="lf-research-levels" class="collapse">
+              <?php foreach (array(1, 2, 3, 4) as $lfRace): ?>
+              <div class="fw-semibold mt-2 mb-1"><?= $l['race-'.$lfRace] ?></div>
+              <div class="lf-res-grid">
+                <?php foreach (array_keys($lfResearchBonus) as $lfId): ?>
+                  <?php if (intdiv($lfId, 1000) !== $lfRace) { continue; } ?>
+                  <div class="d-flex align-items-center justify-content-between gap-1">
+                    <label for="lf-res-<?= $lfId ?>"><?= $lfAmortNames[$lfId] ?></label>
+                    <input id="lf-res-<?= $lfId ?>" type="text" name="lf-res-<?= $lfId ?>" class="form-control form-control-sm level-input lf-res-level-input" data-lf-id="<?= $lfId ?>" value="0">
+                  </div>
+                <?php endforeach; ?>
+              </div>
+              <?php endforeach; ?>
             </div>
           </div>
         </div>
@@ -900,6 +956,32 @@
                     </tr>
                   </tbody>
                 </table>
+              </div>
+            </div>
+          </div>
+          <div class="accordion-item">
+            <h2 class="accordion-header">
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#all-pln-acc-lf-amort"><?= $l['lf-amortization'] ?></button>
+            </h2>
+            <div id="all-pln-acc-lf-amort" class="accordion-collapse collapse" data-bs-parent="#all-planets-accordion">
+              <div class="accordion-body">
+                <div class="table-responsive">
+                  <table id="lf-amort-tbl" class="lined w-100">
+                    <thead>
+                      <tr>
+                        <th>#</th>
+                        <th><?= $l['planet'] ?></th>
+                        <th><?= $l['lf-object'] ?></th>
+                        <th><?= $l['level'] ?></th>
+                        <th><?= $l['upgrade-cost'] ?></th>
+                        <th><?= $l['production-increase'] ?></th>
+                        <th><?= $l['amortization-time'] ?></th>
+                      </tr>
+                    </thead>
+                    <tbody id="lf-amort-body"></tbody>
+                  </table>
+                </div>
+                <div class="mt-2"><?= $l['lf-amort-comment'] ?></div>
               </div>
             </div>
           </div>

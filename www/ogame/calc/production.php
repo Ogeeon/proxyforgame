@@ -55,6 +55,47 @@ $lfBuildingBonus = array(
     3010 => array('deu' => array(2.0, 1.0, null)),                            // High-Performance Synthesiser
 );
 
+// Life form researches that raise resource production, in the same shape as
+// $lfBuildingBonus. Every one of them grows linearly (factor 1.0), so a level
+// adds base% on top of the mines' output. The figures are the raw research
+// bonus: the game multiplies them by the technology bonus, which the "LF
+// amortization" table takes from its own field. Source: lf_data.xlsx in
+// benedikt-holland/ogame-lifeform-amortisation, the source of the building
+// bonuses above. The order here is the order of options.prm.lfResLevels.
+$lfResearchBonus = array(
+    1102 => array('met' => array(0.06, 1.0, null), 'cry' => array(0.06, 1.0, null), 'deu' => array(0.06, 1.0, null)), // High-Performance Extractors
+    1108 => array('met' => array(0.06, 1.0, null), 'cry' => array(0.06, 1.0, null), 'deu' => array(0.06, 1.0, null)), // Enhanced Production Technologies
+    2102 => array('cry' => array(0.08, 1.0, null)),                           // Acoustic Scanning
+    2103 => array('deu' => array(0.08, 1.0, null)),                           // High Energy Pump Systems
+    2105 => array('met' => array(0.08, 1.0, null), 'cry' => array(0.08, 1.0, null), 'deu' => array(0.08, 1.0, null)), // Magma-Powered Production
+    2107 => array('met' => array(0.08, 1.0, null)),                           // Depth Sounding
+    2110 => array('met' => array(0.08, 1.0, null)),                           // Hardened Diamond Drill Heads
+    2111 => array('cry' => array(0.08, 1.0, null)),                           // Seismic Mining Technology
+    2112 => array('deu' => array(0.08, 1.0, null)),                           // Magma-Powered Pump Systems
+    3101 => array('deu' => array(0.08, 1.0, null)),                           // Catalyser Technology
+    3106 => array('met' => array(0.06, 1.0, null), 'cry' => array(0.06, 1.0, null), 'deu' => array(0.06, 1.0, null)), // Automated Transport Lines
+    3113 => array('met' => array(0.06, 1.0, null), 'cry' => array(0.06, 1.0, null), 'deu' => array(0.06, 1.0, null)), // Artificial Swarm Intelligence
+    4102 => array('deu' => array(0.08, 1.0, null)),                           // Sulphide Process
+    4112 => array('met' => array(0.06, 1.0, null), 'cry' => array(0.06, 1.0, null), 'deu' => array(0.06, 1.0, null)), // Psychoharmoniser
+);
+
+// Build costs of every life form object the "LF amortization" table can
+// propose: the resource-producing buildings and researches. Each row is laid
+// out the way calcBuildCostLF (ogame-lifeform.js) reads it - base metal,
+// crystal, deuterium in [0..2], growth factors in [5..7], [3..4] unused - and
+// carries the object's name, which the lfcosts section holds.
+$lfAmortCosts = array();
+$lfAmortNames = array();
+$lfProdIds = array();
+foreach ($lfBuildingBonus as $lfId => $lfB) {
+    if (isset($lfB['met']) || isset($lfB['cry']) || isset($lfB['deu'])) { $lfProdIds[] = $lfId; }
+}
+foreach (array_merge($lfProdIds, array_keys($lfResearchBonus)) as $lfId) {
+    $lfRow = $lfTechData[$lfId];
+    $lfAmortCosts[$lfId] = array($lfRow[2], $lfRow[3], $lfRow[4], 0, 0, $lfRow[7], $lfRow[8], $lfRow[9]);
+    $lfAmortNames[$lfId] = $lfTr[$lfRow[0]];
+}
+
 // id => (translation key, type, metal, crystal, deuterium, cost-growth factor}
 $techData = array(
     1 => array('metal-mine', 2, 60, 15, 0, 1.5),

@@ -7,6 +7,7 @@
     "../www/js/api-client.js",
     "../www/ogame/calc/js/ogame-production.js",
     "../www/ogame/calc/js/ogame-costs.js",
+    "../www/ogame/calc/js/ogame-lifeform.js",
     "../www/ogame/calc/js/dom-utils.js",
     "../www/ogame/calc/js/production-core.js",
     "../www/ogame/calc/js/production-data-collector.js",
