@@ -106,14 +106,14 @@
       <p class="border rounded subheader bg-primary-subtle"><?= $l['calc-results'] ?></p>
       <div class="d-flex flex-wrap gap-3 align-items-center justify-content-center">
         <div class="d-flex align-items-center gap-1">
-          <label><?= $l['moon-destroy-chance'] ?></label>
+          <span><?= $l['moon-destroy-chance'] ?></span>
           <div class="input-group input-group-sm w-auto">
             <div id="moon-destroy-chance" class="form-control chance-show ui-state-disabled m-0">0</div>
             <span class="input-group-text">%</span>
           </div>
         </div>
         <div class="d-flex align-items-center gap-1">
-          <label><?= $l['ds-blow-chance'] ?></label>
+          <span><?= $l['ds-blow-chance'] ?></span>
           <div class="input-group input-group-sm w-auto">
             <div id="ds-blow-chance" class="form-control chance-show ui-state-disabled m-0">0</div>
             <span class="input-group-text">%</span>
@@ -227,12 +227,12 @@
         <!-- Fleet tab -->
         <div id="param-fleet" class="tab-pane fade p-2 pb-0" role="tabpanel">
           <p class="text-center small text-body-secondary mb-1"><?= $l['max-count-hint'] ?></p>
-          <table class="mx-auto unit-table">
+          <table class="mx-auto unit-table" role="presentation">
 <?php foreach (array_chunk($moonFleet, 3) as $row): ?>
             <tr>
 <?php foreach ($row as $unit): ?>
               <td><label for="<?= $unit ?>"><?= $l[$unit] ?></label></td>
-              <td><label id="<?= $unit ?>-max" class="max-label">0</label></td>
+              <td><span id="<?= $unit ?>-max" class="max-label">0</span></td>
               <td><input id="<?= $unit ?>" type="text" name="<?= $unit ?>" class="form-control form-control-sm d-inline-block count-input" value="0" data-field-title="<?= $l[$unit] ?>"></td>
 <?php endforeach; ?>
             </tr>
@@ -243,12 +243,12 @@
         <!-- Defenses tab -->
         <div id="param-defenses" class="tab-pane fade p-2 pb-0" role="tabpanel">
           <p class="text-center small text-body-secondary mb-1"><?= $l['max-count-hint'] ?></p>
-          <table class="mx-auto unit-table">
+          <table class="mx-auto unit-table" role="presentation">
 <?php foreach (array_chunk($moonDefenses, 3) as $row): ?>
             <tr>
 <?php foreach ($row as $unit): ?>
               <td><label for="<?= $unit ?>"><?= $l[$unit] ?></label></td>
-              <td><label id="<?= $unit ?>-max" class="max-label">0</label></td>
+              <td><span id="<?= $unit ?>-max" class="max-label">0</span></td>
               <td><input id="<?= $unit ?>" type="text" name="<?= $unit ?>" class="form-control form-control-sm d-inline-block count-input" value="0" data-field-title="<?= $l[$unit] ?>"></td>
 <?php endforeach; ?>
             </tr>
@@ -264,14 +264,14 @@
       <p class="border rounded subheader bg-primary-subtle"><?= $l['calc-results'] ?></p>
       <div class="d-flex flex-wrap gap-3 align-items-center justify-content-center">
         <div class="d-flex align-items-center gap-1">
-          <label><?= $l['moon-create-chance'] ?></label>
+          <span><?= $l['moon-create-chance'] ?></span>
           <div class="input-group input-group-sm w-auto">
             <div id="moon-create-chance" class="form-control chance-show ui-state-disabled m-0">0</div>
             <span class="input-group-text">%</span>
           </div>
         </div>
         <div class="d-flex align-items-center gap-1">
-          <label><?= $l['moon-size-range'] ?></label>
+          <span><?= $l['moon-size-range'] ?></span>
           <div class="input-group input-group-sm w-auto">
             <div id="moon-size-range" class="form-control size-show ui-state-disabled m-0">-</div>
             <span class="input-group-text"><?= $l['km'] ?></span>
@@ -281,7 +281,7 @@
       <div class="mt-2">
         <p class="text-center small text-body-secondary mb-1"><?= $l['moon-size-hint'] ?></p>
         <div class="d-flex flex-wrap gap-2 align-items-center justify-content-center">
-          <label><?= $l['moon-size-roll-chance'] ?></label>
+          <span><?= $l['moon-size-roll-chance'] ?></span>
           <div class="input-group input-group-sm w-auto">
             <div id="moon-size-roll-chance" class="form-control chance-show ui-state-disabled m-0">-</div>
             <span class="input-group-text">%</span>
@@ -296,15 +296,15 @@
       <p class="border rounded subheader bg-primary-subtle"><?= $l['expenses'] ?></p>
       <div class="d-flex flex-wrap gap-3 align-items-center justify-content-center">
         <div class="d-flex align-items-center gap-1">
-          <label><?= $l['metal'] ?></label>
+          <span><?= $l['metal'] ?></span>
           <div id="metal-required" class="form-control form-control-sm d-inline-block resource-show ui-state-disabled">0</div>
         </div>
         <div class="d-flex align-items-center gap-1">
-          <label><?= $l['crystal'] ?></label>
+          <span><?= $l['crystal'] ?></span>
           <div id="crystal-required" class="form-control form-control-sm d-inline-block resource-show ui-state-disabled">0</div>
         </div>
         <div class="d-flex align-items-center gap-1">
-          <label><?= $l['deuterium'] ?></label>
+          <span><?= $l['deuterium'] ?></span>
           <div id="deuterium-required" class="form-control form-control-sm d-inline-block resource-show ui-state-disabled">0</div>
         </div>
       </div>
@@ -315,25 +315,25 @@
       <p class="border rounded subheader bg-primary-subtle"><?= $l['recycling'] ?></p>
       <div class="d-flex flex-wrap gap-3 align-items-center justify-content-center">
         <div class="d-flex align-items-center gap-1">
-          <label><?= $l['metal'] ?></label>
+          <span><?= $l['metal'] ?></span>
           <div id="metal-recyclable" class="form-control form-control-sm d-inline-block resource-show ui-state-disabled">0</div>
         </div>
         <div class="d-flex align-items-center gap-1">
-          <label><?= $l['crystal'] ?></label>
+          <span><?= $l['crystal'] ?></span>
           <div id="crystal-recyclable" class="form-control form-control-sm d-inline-block resource-show ui-state-disabled">0</div>
         </div>
         <div class="d-flex align-items-center gap-1">
-          <label><?= $l['deuterium'] ?></label>
+          <span><?= $l['deuterium'] ?></span>
           <div id="deuterium-recyclable" class="form-control form-control-sm d-inline-block resource-show ui-state-disabled">0</div>
         </div>
       </div>
       <div class="d-flex flex-wrap gap-3 align-items-center justify-content-center mt-2">
         <div class="d-flex align-items-center gap-1">
-          <label><?= $l['total'] ?></label>
+          <span><?= $l['total'] ?></span>
           <div id="debris-total" class="form-control form-control-sm d-inline-block resource-show ui-state-disabled">0</div>
         </div>
         <div class="d-flex align-items-center gap-1">
-          <label><?= $l['recyclers'] ?></label>
+          <span><?= $l['recyclers'] ?></span>
           <div id="recyclers" class="form-control form-control-sm d-inline-block resource-show ui-state-disabled">0</div>
         </div>
       </div>
@@ -401,19 +401,19 @@
           <input id="phalanx-lvl" type="text" name="phalanx-lvl" class="form-control form-control-sm level-input" value="1" data-field-title="<?= $l['sensor-phalanx'] ?>">
         </div>
         <div class="d-flex align-items-center gap-1">
-          <label><?= $l['phalanx-range'] ?></label>
+          <span><?= $l['phalanx-range'] ?></span>
           <div class="input-group input-group-sm w-auto">
             <div id="phalanx-range" class="form-control systems-show ui-state-disabled m-0">0</div>
             <span class="input-group-text"><?= $l['systems'] ?></span>
           </div>
         </div>
         <div class="d-flex align-items-center gap-1">
-          <label><?= $l['systems-in-range'] ?></label>
+          <span><?= $l['systems-in-range'] ?></span>
           <div id="systems-in-range" class="form-control form-control-sm d-inline-block systems-show ui-state-disabled">1</div>
         </div>
       </div>
       <div class="d-flex flex-wrap gap-2 align-items-center justify-content-center mt-2">
-        <label><?= $l['visible-systems'] ?></label>
+        <span><?= $l['visible-systems'] ?></span>
         <div id="visible-systems" class="form-control form-control-sm d-inline-block segments-show ui-state-disabled">-</div>
       </div>
     </div>
@@ -427,14 +427,14 @@
           <input id="target-system" type="text" name="target-system" class="form-control form-control-sm level-input" value="1" data-field-title="<?= $l['target-system'] ?>">
         </div>
         <div class="d-flex align-items-center gap-1">
-          <label><?= $l['distance'] ?></label>
+          <span><?= $l['distance'] ?></span>
           <div class="input-group input-group-sm w-auto">
             <div id="phalanx-distance" class="form-control systems-show ui-state-disabled m-0">0</div>
             <span class="input-group-text"><?= $l['systems'] ?></span>
           </div>
         </div>
         <div class="d-flex align-items-center gap-1">
-          <label><?= $l['phalanx-lvl-required'] ?></label>
+          <span><?= $l['phalanx-lvl-required'] ?></span>
           <div id="phalanx-lvl-required" class="form-control form-control-sm d-inline-block systems-show ui-state-disabled">1</div>
         </div>
       </div>
