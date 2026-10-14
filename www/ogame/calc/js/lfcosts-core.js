@@ -22,7 +22,9 @@ class LfCalculator {
      */
     calculate(techID, levelFrom, levelTo, ionTechLevel, rsrCostRdc, bldCostRdc, params) {
         const resCost = getBuildCostLF(techID, levelFrom, levelTo, this.techCosts, ionTechLevel, rsrCostRdc, bldCostRdc);
-        const energyCost = getBuildEnergyCostLF(techID, levelTo, this.techCosts, ionTechLevel, bldCostRdc);
+        const energyCost = levelTo < levelFrom
+            ? getDeconstrEnergyCostLF(techID, levelTo, this.techCosts, ionTechLevel, bldCostRdc)
+            : getBuildEnergyCostLF(techID, levelTo, this.techCosts, bldCostRdc);
         const timeSpan = this._getAdjustedTime(techID, levelFrom, levelTo, params);
         // Points, awarded on a build and refunded on a demolition, follow the
         // undiscounted build cost of the range, so both reductions are passed as 0.
