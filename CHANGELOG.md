@@ -22,6 +22,7 @@ release section; it is the source of truth for the other eleven translations.
 ### Fixed
 
 - LF costs: demolishing a Rock'tal building now gets the Megalith and Mineral Research Centre discount, as in the game; it used to cost the full price. The energy a life-form building needs no longer drops with the ion technology, which in the game only discounts a demolition. A building or research under a cost reduction could also come out one unit cheaper than in the game, because the base cost was rounded down before the discount was applied; the reduced cost is now rounded once, as the game does. <!-- site -->
+- Tooling: `scripts/new-calculator.js` no longer fails to sync the new calculator's translations when run from outside the repository root; it starts its helper scripts with the running node binary instead of looking `node` up on `PATH` through a shell.
 
 ## [2026-10-13] - site entry 67
 
