@@ -77,21 +77,28 @@ function sqlExec($query, $params) {
     }
 
     try {
-        $stmt = mysqli_prepare($connection, $query);
-        if ($stmt === false) {
-            error_log("sqlExec: prepare failed: " . mysqli_error($connection));
-            return false;
-        }
-        if (count($params) > 0) {
-            mysqli_stmt_bind_param($stmt, str_repeat('s', count($params)), ...$params);
-        }
-        $ok = mysqli_stmt_execute($stmt);
-        mysqli_stmt_close($stmt);
-        return $ok;
+        return runPreparedExec($connection, $query, $params);
     } catch (\mysqli_sql_exception $e) {
         error_log("sqlExec: " . $e->getMessage());
         return false;
     }
+}
+
+/** The statement half of sqlExec(); throws on the versions where mysqli does. */
+function runPreparedExec($connection, $query, $params) {
+    $stmt = mysqli_prepare($connection, $query);
+    if ($stmt === false) {
+        error_log("sqlExec: prepare failed: " . mysqli_error($connection));
+        return false;
+    }
+
+    if (count($params) > 0) {
+        mysqli_stmt_bind_param($stmt, str_repeat('s', count($params)), ...$params);
+    }
+
+    $ok = mysqli_stmt_execute($stmt);
+    mysqli_stmt_close($stmt);
+    return $ok;
 }
 
 

@@ -61,7 +61,8 @@
     // One literal string: scripts/validate-database-schema.js reads the table
     // names out of sqlQuery() calls and does not follow concatenation.
     $rows = sqlQuery('SELECT COALESCE(SUM(created_at > NOW() - INTERVAL 10 MINUTE), 0) AS recent, COUNT(*) AS daily FROM mail_rate_limit WHERE ip_hash = ? AND created_at > NOW() - INTERVAL 1 DAY', array($ipHash));
-    if ($rows === false || count($rows) === 0) {
+    // empty() covers both FALSE (no database) and a missing row.
+    if (empty($rows)) {
       error_log('antispam: rate limit unavailable (no database), message let through');
       return;
     }
