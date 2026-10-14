@@ -93,8 +93,13 @@ class TradeProfiles extends ProfileBinder {
     super(pf, app);
     /** @type {Record<string, *>} The profile-owned options as they were before a profile. */
     this.ownPrm = {};
-    /** @type {?{country: string, universe: *}} The universe picked before a profile set its own. */
-    this.ownUniverse = null;
+    this.universe = new PfLockedUniverse({
+      read: () => ({ country: options.country, universe: options.universe }),
+      write: (country, number) => {
+        options.country = country;
+        options.universe = number;
+      },
+    });
     // The original save reads `this`: it has to stay bound to options.
     this.ownSave = options.save.bind(options);
   }
@@ -161,38 +166,18 @@ class TradeProfiles extends ProfileBinder {
    * @param {TradeLinkOverrides} link
    */
   applyUniverse(profile, link) {
-    /** @type {Record<string, any>} */
-    const state = options;
     const wanted = profile.universe;
-    if (!wanted) {
-      this.unlockUniverse();
+    if (wanted && link.universe && !this.universe.matches(wanted.country, wanted.number)) {
+      this.universe.lock(false);
       return;
     }
-    const same = state.country === wanted.country && String(state.universe) === String(wanted.number);
-    if (link.universe && !same) {
-      [selectEl('#country'), selectEl('#universe')].forEach((el) => pfLockSelect(el, false));
-      return;
-    }
-    this.ownUniverse ??= { country: state.country, universe: state.universe };
-    state.country = wanted.country;
-    state.universe = wanted.number;
-    [selectEl('#country'), selectEl('#universe')].forEach((el) => pfLockSelect(el, true, getOptionValue('universeFromProfile', '')));
-  }
-
-  /** Give the universe picker back, on the universe it showed before the profile. */
-  unlockUniverse() {
-    [selectEl('#country'), selectEl('#universe')].forEach((el) => pfLockSelect(el, false));
-    const own = this.ownUniverse;
-    this.ownUniverse = null;
-    if (!own) return;
-    options.country = own.country;
-    options.universe = own.universe;
+    this.universe.apply(profile);
   }
 
   restoreOwn() {
     pfShow('#pf-body-box', false);
     Object.assign(options, cloneData(this.ownPrm));
-    this.unlockUniverse();
+    this.universe.release();
     this.app.restoreFromState();
   }
 
@@ -244,10 +229,7 @@ class TradeProfiles extends ProfileBinder {
   saveOwn() {
     /** @type {Record<string, any>} */
     const stored = { ...options, ...cloneData(this.ownPrm) };
-    if (this.ownUniverse) {
-      stored.country = this.ownUniverse.country;
-      stored.universe = this.ownUniverse.universe;
-    }
+    this.universe.overlay(stored);
     // The locale separator is the template's, never the cookie's (see options.load()).
     delete stored.decimalSeparator;
     saveToCookie('options_trade', stored);

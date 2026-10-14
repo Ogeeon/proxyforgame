@@ -123,8 +123,10 @@ class FlightProfiles extends ProfileBinder {
     this.orch = orchestrator;
     /** @type {Record<string, *>} The profile-owned prm keys as they were before a profile. */
     this.ownPrm = {};
-    /** @type {?{country: string, universe: *}} The universe picked before a profile set its own. */
-    this.ownUniverse = null;
+    this.universe = new PfLockedUniverse({
+      read: () => ({ country: options.prm.country, universe: options.prm.universe }),
+      write: (country, number) => this.showUniverse(country, number),
+    });
     this.ownSave = options.save;
     /** @type {*} The spy report waiting for the player to say where it goes. */
     this.pendingReport = null;
@@ -166,7 +168,7 @@ class FlightProfiles extends ProfileBinder {
       prm.lfShipsBonuses = FLIGHT_SHIP_IDS.map((_, i) => (Array.isArray(prm.lfShipsBonuses[i]) ? prm.lfShipsBonuses[i].slice() : [0, 0, 0]));
       FLIGHT_ACCOUNT_FIELDS.forEach((f) => f.set(prm, getProfileValue(profile.account, f.key)));
       this.orch.populateParams();
-      this.applyUniverse(profile);
+      this.universe.apply(profile);
       // Flight's reset would write every default into the profile as an edit.
       pfShow('#reset', false);
       this.renderDepartureSelect(profile);
@@ -181,42 +183,19 @@ class FlightProfiles extends ProfileBinder {
   }
 
   /**
-   * Show the profile's universe in the picker, locked: the profile says where
-   * it plays. A profile with no universe leaves the picker to the player.
+   * Show a universe in the model and in the picker; the picker's list is
+   * rebuilt only when the universe changes.
    *
-   * @param {Profile} profile
+   * @param {string} country
+   * @param {*} number
    */
-  applyUniverse(profile) {
+  showUniverse(country, number) {
     const prm = options.prm;
-    const country = selectEl('#country');
-    const universe = selectEl('#universe');
-    if (!profile.universe) {
-      this.unlockUniverse();
-      return;
-    }
-    this.ownUniverse ??= { country: prm.country, universe: prm.universe };
-    const wanted = profile.universe;
-    if (prm.country !== wanted.country || String(prm.universe) !== String(wanted.number)) {
-      prm.country = wanted.country;
-      prm.universe = wanted.number;
-      setVal('#country', wanted.country);
-      this.orch.setUniList(wanted.country, wanted.number);
-    }
-    [country, universe].forEach((el) => pfLockSelect(el, true, getOptionValue('universeFromProfile', '')));
-  }
-
-  /** Give the universe picker back, on the universe it showed before the profile. */
-  unlockUniverse() {
-    [selectEl('#country'), selectEl('#universe')].forEach((el) => pfLockSelect(el, false));
-    const own = this.ownUniverse;
-    this.ownUniverse = null;
-    if (!own) return;
-    const prm = options.prm;
-    if (prm.country === own.country && String(prm.universe) === String(own.universe)) return;
-    prm.country = own.country;
-    prm.universe = own.universe;
-    setVal('#country', own.country);
-    this.orch.setUniList(own.country, own.universe);
+    if (this.universe.matches(country, number)) return;
+    prm.country = country;
+    prm.universe = number;
+    setVal('#country', country);
+    this.orch.setUniList(country, number);
   }
 
   restoreOwn() {
@@ -224,7 +203,7 @@ class FlightProfiles extends ProfileBinder {
     pfShow('#pf-take-fleet', false);
     Object.assign(options.prm, cloneData(this.ownPrm));
     this.orch.populateParams();
-    this.unlockUniverse();
+    this.universe.release();
   }
 
   recalc() {
@@ -271,10 +250,7 @@ class FlightProfiles extends ProfileBinder {
   saveOwn() {
     /** @type {Record<string, *>} */
     const stored = { ...options.prm, ...cloneData(this.ownPrm) };
-    if (this.ownUniverse) {
-      stored.country = this.ownUniverse.country;
-      stored.universe = this.ownUniverse.universe;
-    }
+    this.universe.overlay(stored);
     saveToCookie('options_flight', stored);
   }
 

@@ -1485,6 +1485,80 @@ class PfBodySelect {
 }
 
 /**
+ * @typedef {object} PfLockedUniverseConfig
+ * @property {() => {country: string, universe: *}} read The universe the calculator shows now.
+ * @property {(country: string, universe: *) => void} write Show a universe: in the model and in the form.
+ */
+
+/**
+ * The universe picker a profile decides: the profile's universe is shown and
+ * the #country and #universe selects are locked, and the universe the player
+ * had picked before is kept to give back. A profile with no universe leaves
+ * the picker to the player. How a universe is read and shown is the page's.
+ */
+class PfLockedUniverse {
+  /** @param {PfLockedUniverseConfig} config */
+  constructor(config) {
+    this.config = config;
+    /** @type {?{country: string, universe: *}} The universe picked before a profile set its own. */
+    this.own = null;
+  }
+
+  /**
+   * Whether the calculator shows this universe.
+   *
+   * @param {string} country
+   * @param {*} number
+   * @returns {boolean}
+   */
+  matches(country, number) {
+    const now = this.config.read();
+    return now.country === country && String(now.universe) === String(number);
+  }
+
+  /**
+   * Show the profile's universe, locked.
+   *
+   * @param {Profile} profile
+   */
+  apply(profile) {
+    const wanted = profile.universe;
+    if (!wanted) {
+      this.release();
+      return;
+    }
+    this.own ??= this.config.read();
+    this.config.write(wanted.country, wanted.number);
+    this.lock(true);
+  }
+
+  /** Give the picker back, on the universe it showed before the profile. */
+  release() {
+    this.lock(false);
+    const own = this.own;
+    this.own = null;
+    if (own) this.config.write(own.country, own.universe);
+  }
+
+  /** @param {boolean} locked */
+  lock(locked) {
+    [selectEl('#country'), selectEl('#universe')].forEach((el) => pfLockSelect(el, locked, locked ? getOptionValue('universeFromProfile', '') : ''));
+  }
+
+  /**
+   * Put the universe the player picked, not the profile's, into the values a
+   * calculator stores as its own.
+   *
+   * @param {Record<string, any>} stored
+   */
+  overlay(stored) {
+    if (!this.own) return;
+    stored.country = this.own.country;
+    stored.universe = this.own.universe;
+  }
+}
+
+/**
  * What every calculator's profile binder shares: the profile it shows, the
  * guard that keeps its own writes from coming back as edits, and the two
  * entry points - save() and leave() - whose sequence is the same everywhere.
@@ -1925,6 +1999,6 @@ function createProfilesUi() {
 const pfgProfiles = createProfilesUi();
 
 Object.assign(window, {
-  pfgProfiles, ProfilesUi, PfUniverseSetting, PfBodySelect, ProfileBinder, PlanetPrmBinder, pfBind, PF_UNIVERSE_SPEED, PF_UNIVERSE_DEBRIS, PF_UNIVERSE_DEUT_IN_DEBRIS, PF_UNIVERSE_TOP_SCORE, readSavedSet,
+  pfgProfiles, ProfilesUi, PfUniverseSetting, PfBodySelect, PfLockedUniverse, ProfileBinder, PlanetPrmBinder, pfBind, PF_UNIVERSE_SPEED, PF_UNIVERSE_DEBRIS, PF_UNIVERSE_DEUT_IN_DEBRIS, PF_UNIVERSE_TOP_SCORE, readSavedSet,
   PF_UNIVERSE_DEF_DEBRIS, PF_UNIVERSE_SYSTEMS, PF_UNIVERSE_DONUT_SYSTEM,
 });
