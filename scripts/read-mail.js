@@ -134,8 +134,8 @@ async function resolveHost(host) {
  * @param {string} value
  */
 function isIpv4(value) {
-  const octet = '(25[0-5]|2[0-4]\\d|1\\d\\d|[1-9]?\\d)';
-  return new RegExp(`^${octet}(\\.${octet}){3}$`).test(value);
+  const octet = String.raw`(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)`;
+  return new RegExp(String.raw`^${octet}(\.${octet}){3}$`).test(value);
 }
 
 /**
@@ -182,17 +182,15 @@ function takeLine(buf) {
 }
 
 class ImapClient {
-  constructor() {
-    /** @type {import('node:tls').TLSSocket|null} */
-    this.socket = null;
-    /** @type {Buffer} */
-    this.buffer = Buffer.alloc(0);
-    this.tagCounter = 0;
-    /** @type {{tag: string, lines: {text: string, literals: Buffer[]}[], resolve: (lines: {text: string, literals: Buffer[]}[]) => void, reject: (err: Error) => void}|null} */
-    this.pending = null;
-    /** @type {(() => void)|null} */
-    this.onContinuation = null;
-  }
+  /** @type {import('node:tls').TLSSocket|null} */
+  socket = null;
+  /** @type {Buffer} */
+  buffer = Buffer.alloc(0);
+  tagCounter = 0;
+  /** @type {{tag: string, lines: {text: string, literals: Buffer[]}[], resolve: (lines: {text: string, literals: Buffer[]}[]) => void, reject: (err: Error) => void}|null} */
+  pending = null;
+  /** @type {(() => void)|null} */
+  onContinuation = null;
 
   /**
    * @param {string} host name to verify the certificate against
@@ -298,7 +296,7 @@ class ImapClient {
 
 /** @param {string} value */
 function quoted(value) {
-  return `"${value.replace(/([\\"])/g, '\\$1')}"`;
+  return `"${value.replace(/([\\"])/g, String.raw`\$1`)}"`;
 }
 
 /* ------------------------------------------------------------- MIME decoding */
@@ -328,7 +326,7 @@ function decodeQuotedPrintable(text) {
       bytes.push(Number.parseInt(hex[1], 16));
       i += 2;
     } else {
-      bytes.push(joined.charCodeAt(i) & 0xff);
+      bytes.push((joined.codePointAt(i) ?? 0) & 0xff);
     }
   }
   return Buffer.from(bytes);
@@ -342,7 +340,7 @@ function decodeHeaderValue(value) {
   return value.replace(/=\?([^?]+)\?([BbQq])\?([^?]*)\?=/g, (_match, charset, encoding, payload) => {
     const bytes = String(encoding).toUpperCase() === 'B'
       ? Buffer.from(payload, 'base64')
-      : decodeQuotedPrintable(String(payload).replace(/_/g, ' '));
+      : decodeQuotedPrintable(String(payload).replaceAll('_', ' '));
     return decodeText(bytes, charset);
   });
 }
@@ -376,12 +374,12 @@ function stripHtml(html) {
     .replace(/<script[\s\S]*?<\/script>/gi, '')
     .replace(/<br\s*\/?>/gi, '\n')
     .replace(/<\/p>/gi, '\n')
-    .replace(/<[^>]+>/g, '')
-    .replace(/&nbsp;/g, ' ')
-    .replace(/&amp;/g, '&')
-    .replace(/&lt;/g, '<')
-    .replace(/&gt;/g, '>')
-    .replace(/&quot;/g, '"')
+    .replace(/<[^<>]*>/g, '')
+    .replaceAll('&nbsp;', ' ')
+    .replaceAll('&amp;', '&')
+    .replaceAll('&lt;', '<')
+    .replaceAll('&gt;', '>')
+    .replaceAll('&quot;', '"')
     .replace(/\n{3,}/g, '\n\n');
 }
 
@@ -421,22 +419,44 @@ function extractText(raw) {
   const boundary = /boundary="?([^";]+)"?/i.exec(contentType);
 
   if (/^multipart\//i.test(contentType) && boundary) {
-    /** @type {string|null} */
-    let htmlFallback = null;
-    for (const part of splitParts(body, boundary[1])) {
-      const partType = splitMime(part).headers['content-type'] || 'text/plain';
-      if (/^text\/plain/i.test(partType)) return extractText(part);
-      if (/^multipart\//i.test(partType)) {
-        const nested = extractText(part);
-        if (nested.trim() !== '') return nested;
-      }
-      if (/^text\/html/i.test(partType) && htmlFallback === null) {
-        htmlFallback = stripHtml(extractText(part));
-      }
-    }
-    return htmlFallback === null ? '' : htmlFallback;
+    return extractMultipartText(body, boundary[1]);
   }
+  return decodeSinglePart(headers, body, contentType);
+}
 
+/**
+ * The text of a multipart body: the first text/plain part, else the first
+ * nested container that yields any text, else the first text/html part
+ * stripped of its markup.
+ * @param {Buffer} body
+ * @param {string} boundary
+ * @returns {string}
+ */
+function extractMultipartText(body, boundary) {
+  /** @type {string|null} */
+  let htmlFallback = null;
+  for (const part of splitParts(body, boundary)) {
+    const partType = splitMime(part).headers['content-type'] || 'text/plain';
+    if (/^text\/plain/i.test(partType)) return extractText(part);
+    if (/^multipart\//i.test(partType)) {
+      const nested = extractText(part);
+      if (nested.trim() !== '') return nested;
+    }
+    if (/^text\/html/i.test(partType) && htmlFallback === null) {
+      htmlFallback = stripHtml(extractText(part));
+    }
+  }
+  return htmlFallback ?? '';
+}
+
+/**
+ * Undoes the transfer encoding and the charset of a single, non-multipart part.
+ * @param {Record<string, string>} headers
+ * @param {Buffer} body
+ * @param {string} contentType
+ * @returns {string}
+ */
+function decodeSinglePart(headers, body, contentType) {
   const encoding = (headers['content-transfer-encoding'] || '7bit').toLowerCase();
   let bytes = body;
   if (encoding === 'base64') {
@@ -516,7 +536,10 @@ function parseArgs(argv) {
   };
   for (let i = 0; i < argv.length; i += 1) {
     const arg = argv[i];
-    const next = () => argv[i += 1] || '';
+    const next = () => {
+      i += 1;
+      return argv[i] || '';
+    };
     if (arg === '--site') options.site = true;
     else if (arg === '--body') options.body = true;
     else if (arg === '--full') { options.full = true; options.body = true; }
@@ -580,6 +603,53 @@ function labelFor(subject) {
   return known ? known[1] : null;
 }
 
+/**
+ * Fetches and decodes the given messages, newest first.
+ * @param {ImapClient} client
+ * @param {number[]} uids
+ * @param {ReturnType<typeof parseArgs>} options
+ */
+async function fetchMessages(client, uids, options) {
+  // Headers for the list, the whole message only when a body is wanted, so a
+  // plain listing stays one small fetch.
+  const wantsBody = options.body || options.uid !== null;
+  const item = wantsBody
+    ? 'BODY.PEEK[]'
+    : 'BODY.PEEK[HEADER.FIELDS (DATE FROM SUBJECT)]';
+  const fetched = parseFetch(await client.send(`UID FETCH ${uids.join(',')} (UID ${item})`));
+
+  return fetched.map(({ uid, raw }) => {
+    const { headers } = splitMime(raw);
+    const subject = decodeHeaderValue(headers.subject || '(no subject)');
+    const text = wantsBody ? extractText(raw).replaceAll('\r\n', '\n').trim() : '';
+    return {
+      uid,
+      date: headers.date || '',
+      from: decodeHeaderValue(headers.from || ''),
+      subject,
+      kind: labelFor(subject),
+      body: options.full || !wantsBody ? text : text.slice(0, EXCERPT),
+      truncated: wantsBody && !options.full && text.length > EXCERPT,
+    };
+  }).sort((a, b) => b.uid - a.uid);
+}
+
+/** @param {Awaited<ReturnType<typeof fetchMessages>>} messages */
+function printMessages(messages) {
+  for (const message of messages) {
+    const kind = message.kind === null ? '' : colorize(` [${message.kind}]`, colors.green);
+    const uid = colorize(`#${message.uid}`, colors.gray);
+    const date = colorize(formatDate(message.date), colors.cyan);
+    console.log(`${uid}  ${date}  ${colorize(message.from, colors.yellow)}`);
+    console.log(`        ${colorize(message.subject, colors.bold)}${kind}`);
+    if (message.body !== '') {
+      console.log(message.body.split('\n').map((line) => `        ${line}`).join('\n'));
+      if (message.truncated) console.log(colorize('        ... (--full for the rest)', colors.gray));
+    }
+    console.log('');
+  }
+}
+
 async function main() {
   let options;
   try {
@@ -624,46 +694,12 @@ async function main() {
       return;
     }
 
-    // Headers for the list, the whole message only when a body is wanted, so a
-    // plain listing stays one small fetch.
-    const item = options.body || options.uid !== null
-      ? 'BODY.PEEK[]'
-      : 'BODY.PEEK[HEADER.FIELDS (DATE FROM SUBJECT)]';
-    const fetched = parseFetch(await client.send(`UID FETCH ${uids.join(',')} (UID ${item})`));
-
-    const messages = fetched.map(({ uid, raw }) => {
-      const { headers } = splitMime(raw);
-      const subject = decodeHeaderValue(headers.subject || '(no subject)');
-      const wantsBody = options.body || options.uid !== null;
-      const text = wantsBody ? extractText(raw).replace(/\r\n/g, '\n').trim() : '';
-      return {
-        uid,
-        date: headers.date || '',
-        from: decodeHeaderValue(headers.from || ''),
-        subject,
-        kind: labelFor(subject),
-        body: options.full || !wantsBody ? text : text.slice(0, EXCERPT),
-        truncated: wantsBody && !options.full && text.length > EXCERPT,
-      };
-    }).sort((a, b) => b.uid - a.uid);
-
+    const messages = await fetchMessages(client, uids, options);
     if (options.json) {
       console.log(JSON.stringify(messages, null, 2));
       return;
     }
-    for (const message of messages) {
-      const kind = message.kind === null ? '' : colorize(` [${message.kind}]`, colors.green);
-      console.log(
-        `${colorize(`#${message.uid}`, colors.gray)}  ${colorize(formatDate(message.date), colors.cyan)}  ` +
-        `${colorize(message.from, colors.yellow)}`
-      );
-      console.log(`        ${colorize(message.subject, colors.bold)}${kind}`);
-      if (message.body !== '') {
-        console.log(message.body.split('\n').map((line) => `        ${line}`).join('\n'));
-        if (message.truncated) console.log(colorize('        ... (--full for the rest)', colors.gray));
-      }
-      console.log('');
-    }
+    printMessages(messages);
     console.log(colorize(`${messages.length} message(s) from ${options.mailbox} as ${user}`, colors.gray));
   } finally {
     await client.logout();
