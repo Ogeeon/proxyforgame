@@ -1,0 +1,8 @@
+# Started by pfg-mcp-restart.path; see there.
+
+[Unit]
+Description=Restart the ProxyForGame MCP server after a deploy
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/systemctl restart pfg-mcp.service

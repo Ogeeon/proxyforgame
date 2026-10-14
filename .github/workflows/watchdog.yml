@@ -37,4 +37,8 @@ jobs:
         env:
           # deploy/watchdog.sh asks the API which commit last went green.
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # 1 once the MCP server is set up on the host: a missing /mcp then
+          # fails the run instead of warning. A repository variable, so turning
+          # it on needs no commit.
+          PFG_MCP_REQUIRED: ${{ vars.PFG_MCP_REQUIRED }}
         run: bash deploy/watchdog.sh
