@@ -11,6 +11,7 @@
     "../www/ogame/calc/js/flight-data-collector.js",
     "../www/ogame/calc/js/flight-renderer.js",
     "../www/ogame/calc/js/flight-orchestration.js",
+    "../www/js/bootstrap-tooltip-guard.js",
     "../www/js/sidebar_bs.js",
     "../www/ogame/calc/js/globals.d.ts"
   ]

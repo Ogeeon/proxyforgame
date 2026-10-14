@@ -11,6 +11,7 @@
     "../www/ogame/calc/js/expeditions-data-collector.js",
     "../www/ogame/calc/js/expeditions-renderer.js",
     "../www/ogame/calc/js/expeditions-orchestration.js",
+    "../www/js/bootstrap-tooltip-guard.js",
     "../www/js/sidebar_bs.js",
     "../www/ogame/calc/js/globals.d.ts"
   ]

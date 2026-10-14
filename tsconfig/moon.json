@@ -10,6 +10,7 @@
     "../www/ogame/calc/js/moon-data-collector.js",
     "../www/ogame/calc/js/moon-renderer.js",
     "../www/ogame/calc/js/moon-orchestration.js",
+    "../www/js/bootstrap-tooltip-guard.js",
     "../www/js/sidebar_bs.js",
     "../www/ogame/calc/js/globals.d.ts"
   ]

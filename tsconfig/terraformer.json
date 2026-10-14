@@ -11,6 +11,7 @@
     "../www/ogame/calc/js/terraformer-data-collector.js",
     "../www/ogame/calc/js/terraformer-renderer.js",
     "../www/ogame/calc/js/terraformer-orchestration.js",
+    "../www/js/bootstrap-tooltip-guard.js",
     "../www/js/sidebar_bs.js",
     "../www/ogame/calc/js/globals.d.ts"
   ]

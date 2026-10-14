@@ -10,6 +10,7 @@
     "../www/ogame/calc/js/graviton-data-collector.js",
     "../www/ogame/calc/js/graviton-renderer.js",
     "../www/ogame/calc/js/graviton-orchestration.js",
+    "../www/js/bootstrap-tooltip-guard.js",
     "../www/js/sidebar_bs.js",
     "../www/ogame/calc/js/globals.d.ts"
   ]

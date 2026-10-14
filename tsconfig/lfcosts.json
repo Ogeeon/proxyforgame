@@ -12,6 +12,7 @@
     "../www/ogame/calc/js/lfcosts-data-collector.js",
     "../www/ogame/calc/js/lfcosts-renderer.js",
     "../www/ogame/calc/js/lfcosts-orchestration.js",
+    "../www/js/bootstrap-tooltip-guard.js",
     "../www/js/sidebar_bs.js",
     "../www/ogame/calc/js/globals.d.ts"
   ]
