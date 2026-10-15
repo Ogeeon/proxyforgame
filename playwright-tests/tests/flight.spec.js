@@ -2348,3 +2348,46 @@ test.describe('Flight Calculator - Tooltip disposal', () => {
         expect(errors, 'no page JS errors').toEqual([]);
     });
 });
+
+/**
+ * A saved universe or fleet is keyed by the name the user typed, so the key can
+ * carry quotes, brackets or a whole export pasted into the name field.
+ * _removeStorageOption used to look the option up with
+ * `option[value="${key}"]`, which is not a valid selector for such a key:
+ * querySelector threw, the option was never dropped and the click handler died
+ * halfway (Hawk: "Failed to execute 'querySelector' on 'Document'"). This pins
+ * that a key carrying quotes is deleted like any other.
+ */
+test.describe('Flight Calculator - Saved Universes', () => {
+    // What a universe saved from an export looks like: the key is the raw JSON.
+    const UNI_KEY = 'flight_uni_{"coords":"1:110:7","characterClassId":3}';
+
+    test.beforeEach(async ({ context, page }) => {
+        await context.addInitScript((key) => {
+            localStorage.setItem('lastChange', 'key-value;true,value;99999');
+            localStorage.setItem(key, '{"v":1}');
+        }, UNI_KEY);
+        await page.goto('/flight');
+        await installCompat(page);
+        await openParams(page);
+    });
+
+    test('deletes a saved universe whose key carries quotes', async ({ page }) => {
+        const errors = [];
+        page.on('pageerror', (e) => errors.push(String(e)));
+
+        // The placeholder option plus the saved universe
+        const select = page.locator('#universe-name-select');
+        await expect(select.locator('option')).toHaveCount(2);
+
+        await select.selectOption(UNI_KEY);
+        await page.locator('#universe-delete').click();
+        // dom-utils builds the confirmation dialog; its primary button is the OK
+        await page.locator('.dyn-dialog .btn-primary').click();
+
+        await expect(select.locator('option')).toHaveCount(1);
+        await expect(select).toHaveValue('0');
+        expect(await page.evaluate((key) => localStorage.getItem(key), UNI_KEY)).toBeNull();
+        expect(errors, 'no page JS errors').toEqual([]);
+    });
+});
