@@ -362,6 +362,13 @@ document.addEventListener('click', function (event) {
 }, true);
 
 document.addEventListener('DOMContentLoaded', function() {
+    // The bundle is served from our own origin, so a missing one means its request
+    // failed. There is nothing this handler can wire without it - the dialogs it
+    // builds are the only way the report, e-mail and changelog buttons are
+    // reachable - so it returns rather than throwing out of the handler. The click
+    // handler above carries the same guard.
+    if (typeof bootstrap === 'undefined') return;
+
     reportModal = new bootstrap.Modal(requireEl('reportModal'));
     emailModal = new bootstrap.Modal(requireEl('emailModal'));
     changelogModal = new bootstrap.Modal(requireEl('changelogModal'));
