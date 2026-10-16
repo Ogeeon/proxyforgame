@@ -340,7 +340,8 @@
     "disclaimer-title": "Uwaga",
     "discoverer-class-bonus": "Bonus klasy Odkrywca",
     "discoverer-class-bonus-hint": "Wpisz wartość 'Łącznie' z tabeli OGame z premiami form życia do premii klas, wiersz 'Odkrywca'. Stosowany tylko wtedy, gdy na karcie 'Ogólne' wybrano klasę 'Odkrywca'.",
-    "research-speed-hint": "Prędkość badawcza to prędkość ekonomiczna pomnożona przez współczynnik badań uniwersum, np. 5 × 3 = 15. Wybranie uniwersum powyżej wypełnia obie prędkości automatycznie."
+    "research-speed-hint": "Prędkość badawcza to prędkość ekonomiczna pomnożona przez współczynnik badań uniwersum, np. 5 × 3 = 15. Wybranie uniwersum powyżej wypełnia obie prędkości automatycznie.",
+    "description": "Oblicz koszt i czas budowy budynków, badań, statków i obrony w OGame z uwzględnieniem prędkości uniwersum i bonusów."
   },
   "lfcosts": {
     "title": "OGame - Kalkulator kosztow dla form życia",
@@ -464,7 +465,8 @@
     "ovrc-battleship": "Przetaktowanie (Okręt Wojenny)",
     "psy-sh-matrix": "Psioniczna Matryca Ochronna",
     "kaelesh-disc-enh": "Wzmocnienie Odkrywcy Kaeleshów",
-    "energy-cost-to-build": "Energia wymagana do budowy"
+    "energy-cost-to-build": "Energia wymagana do budowy",
+    "description": "Oblicz koszt i czas budowy budynków oraz badań form życia w OGame, uwzględniając bonusy ras i technologii."
   },
   "flight": {
     "flight-time-format": "99 H:s:s",
@@ -579,13 +581,15 @@
     "own-api-import-title": "Importuj",
     "own-api-bad-json-msg": "Nie udało się odczytać danych.\\nUpewnij się, że wkleiłeś tekst z pola API 2 na stronie „Flota”.",
     "import-failed-msg": "Nie udało się wczytać danych.\\nSerwer zwrócił nieprawidłową odpowiedź. Spróbuj ponownie później.",
-    "populated-systems-failed-msg": "Mapa zamieszkanych układów jest niedostępna, więc żaden układ nie jest liczony jako pominięty. Ich liczbę możesz wpisać ręcznie."
+    "populated-systems-failed-msg": "Mapa zamieszkanych układów jest niedostępna, więc żaden układ nie jest liczony jako pominięty. Ich liczbę możesz wpisać ręcznie.",
+    "description": "Oblicz czas lotu, zużycie deuteru i najlepszą godzinę startu floty w OGame na podstawie prędkości uniwersum, statków i trybu lotu."
   },
   "graviton": {
     "title": "OGame - Kalkulator Rozwoju grawitonow",
     "graviton-level": "Poziom Grawitona",
     "recycling": "Zbieranie odpadków",
-    "keywords": "proxyforgame,ogame,kalkulator grawitonu,technologia grawitonowa,technologia grawitacyjna,satelity słoneczne,energia na grawiton,gwiazda śmierci"
+    "keywords": "proxyforgame,ogame,kalkulator grawitonu,technologia grawitonowa,technologia grawitacyjna,satelity słoneczne,energia na grawiton,gwiazda śmierci",
+    "description": "Sprawdź, ile satelitów słonecznych i energii potrzeba do badań nad grawitonami w OGame przy podanych ustawieniach planety."
   },
   "moon": {
     "title": "OGame - Kalkulatory dla Księżyce",
@@ -616,7 +620,8 @@
     "own-system": "Twój system",
     "phalanx-lvl-required": "Wymagany poziom",
     "phalanx-range-bonus": "Premia do zasięgu falangi",
-    "class-bonus": "Premia klasy"
+    "class-bonus": "Premia klasy",
+    "description": "Oblicz szansę na powstanie księżyca, wynik próby jego zniszczenia oraz zasięg fali sensorowej w OGame."
   },
   "production": {
     "param-tab-general": "Ogólne",
@@ -698,7 +703,8 @@
     "incl-explain": "Jeśli zwiększysz poziom obciążenia kopalni, zużycie energii wzrośnie. Kalkulator może wziąć tę zmianę pod uwagę i uwzględnić w obliczeńiach koszty budowy satelitów słonecznych, które dostarczą potrzebnej energii. Kalkulacja jest przeprowadzana dla każdego budynku z osobna. Czy powinniśmy wziąć te koszty pod uwagę?",
     "incl-yes": "Tak",
     "incl-no": "Nie",
-    "lifeform-tech": "Premia technologii form życia"
+    "lifeform-tech": "Premia technologii form życia",
+    "description": "Oblicz produkcję metalu, kryształu i deuteru, zużycie energii oraz zwrot z rozbudowy kopalń na jednej planecie lub w całym imperium OGame."
   },
   "queue": {
     "start-time": "Początek",
@@ -714,7 +720,8 @@
     "next-level": "Następny poz.",
     "title": "OGame - Kolejka budynków",
     "keywords": "proxyforgame,ogame,kolejka budowy,kolejność budowy,czas budowy,kalkulator kolejki,koszty budynków",
-    "clear": "Usunąć"
+    "clear": "Usunąć",
+    "description": "Porównaj koszt i czas kolejnych ulepszeń budynków na planecie lub księżycu w OGame, uwzględniając poziomy fabryk i prędkość uniwersum."
   },
   "terraformer": {
     "title": "OGame - Kalkulator Terraformeru",
@@ -723,7 +730,8 @@
     "single-level": "Jeden poziom",
     "added-fields": "Pola do dodania",
     "satellites": "Satelity słoneczne",
-    "keywords": "proxyforgame,ogame,kalkulator terraformera,terraformer,pola planety,satelity słoneczne,zapotrzebowanie na energię,fabryka nanitów"
+    "keywords": "proxyforgame,ogame,kalkulator terraformera,terraformer,pola planety,satelity słoneczne,zapotrzebowanie na energię,fabryka nanitów",
+    "description": "Oblicz energię, zasoby i czas potrzebne do terraformowania planety w OGame, w tym satelity słoneczne i bonusy."
   },
   "expeditions": {
     "keywords": "proxyforgame,ogame,kalkulator ekspedycji,ekspedycje,surowce z ekspedycji,flota na ekspedycje,ciemna materia,znaleziska z ekspedycji",
@@ -787,7 +795,8 @@
     "class-bonus-discoverer": "Bonus klasy \"Odkrywca\"",
     "resources-discovery-booster": "Wzmocnienie odkrywania zasobów",
     "dark-matter-discovery-bonus": "Bonus do odkrycia Ciemnej Materii",
-    "large-cargo-abbrev": "DT"
+    "large-cargo-abbrev": "DT",
+    "description": "Oszacuj możliwe znaleziska zasobów, statków i Ciemnej Materii podczas ekspedycji OGame oraz porównaj spodziewane zyski różnych flot."
   },
   "trade": {
     "met": "met",
@@ -803,6 +812,7 @@
     "link": "Link",
     "text": "Tekst",
     "and": "i",
-    "keywords": "proxyforgame,ogame,kalkulator handlu,wymiana surowców,kurs wymiany,metal kryształ deuter,kupiec"
+    "keywords": "proxyforgame,ogame,kalkulator handlu,wymiana surowców,kurs wymiany,metal kryształ deuter,kupiec",
+    "description": "Porównaj wymianę metalu, kryształu i deuteru w OGame oraz sprawdź ilość zasobów przy wybranym kursie."
   }
 }

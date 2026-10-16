@@ -5,7 +5,7 @@
     <?php require_once '../../hawk.tpl'; ?>
     <meta name="viewport" content="width=device-width, initial-scale=1">
   <title><?= $l['title'] ?></title>
-  <meta name="description" content="<?= $l['title'] ?>">
+  <meta name="description" content="<?= htmlspecialchars($l['description'], ENT_QUOTES, 'UTF-8') ?>">
   <meta name="keywords" content="<?= $l['keywords'] ?>">
   <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
   <link rel="icon" href="/favicon.ico" type="image/x-icon">

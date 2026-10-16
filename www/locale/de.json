@@ -340,7 +340,8 @@
     "disclaimer-title": "Hinweis",
     "discoverer-class-bonus": "Klassenbonus Entdecker",
     "discoverer-class-bonus-hint": "Trage den Wert 'Gesamt' aus der OGame-Tabelle der Lebensform-Boni auf die Klassenboni ein, Zeile 'Entdecker'. Wird nur angewendet, wenn im Reiter 'Allgemein' die Klasse 'Entdecker' ausgewählt ist.",
-    "research-speed-hint": "Die Forschungsgeschwindigkeit ist das Wirtschaftstempo multipliziert mit dem Forschungsfaktor des Universums, z. B. 5 × 3 = 15. Wenn Sie oben das Universum auswählen, werden beide Werte automatisch eingetragen."
+    "research-speed-hint": "Die Forschungsgeschwindigkeit ist das Wirtschaftstempo multipliziert mit dem Forschungsfaktor des Universums, z. B. 5 × 3 = 15. Wenn Sie oben das Universum auswählen, werden beide Werte automatisch eingetragen.",
+    "description": "Berechne Kosten und Bauzeit von Gebäuden, Forschungen, Schiffen und Verteidigungsanlagen in OGame unter Berücksichtigung von Unispeed und Boni."
   },
   "lfcosts": {
     "title": "OGame - Kostenberechnung für Lebensformen",
@@ -464,7 +465,8 @@
     "ovrc-battleship": "Übertaktung (Schlachtschiff)",
     "psy-sh-matrix": "Psionische Schutzmatrix",
     "kaelesh-disc-enh": "Kaelesh-Entdeckerverstärkung",
-    "energy-cost-to-build": "Für den Bau benötigte Energie"
+    "energy-cost-to-build": "Für den Bau benötigte Energie",
+    "description": "Berechne Kosten und Bauzeit von Lebensformgebäuden und -forschungen in OGame einschließlich Rassen- und Technologieboni."
   },
   "flight": {
     "flight-time-format": "99 H:s:s",
@@ -579,13 +581,15 @@
     "own-api-import-title": "Importieren",
     "own-api-bad-json-msg": "Die Daten konnten nicht gelesen werden.\\nStellen Sie sicher, dass Sie den Text aus dem Feld API 2 auf der Seite „Flotte“ eingefügt haben.",
     "import-failed-msg": "Die Daten konnten nicht geladen werden.\\nDer Server hat eine ungültige Antwort zurückgegeben. Bitte versuchen Sie es später erneut.",
-    "populated-systems-failed-msg": "Die Karte der besiedelten Systeme ist nicht verfügbar, daher wird kein System als übersprungen gezählt. Sie können ihre Anzahl von Hand eingeben."
+    "populated-systems-failed-msg": "Die Karte der besiedelten Systeme ist nicht verfügbar, daher wird kein System als übersprungen gezählt. Sie können ihre Anzahl von Hand eingeben.",
+    "description": "Berechne Flugzeit, Deuteriumverbrauch und den passenden Abflugzeitpunkt in OGame anhand von Unispeed, Schiffen und Flugmodus."
   },
   "graviton": {
     "title": "OGame - Gravitonforschung Rechner",
     "recycling": "Trümmerfeld abbauen",
     "graviton-level": "Gravitron-Stufe",
-    "keywords": "proxyforgame,ogame,gravitonrechner,gravitonforschung,gravitationstechnologie,solarsatelliten,energie für graviton,todesstern"
+    "keywords": "proxyforgame,ogame,gravitonrechner,gravitonforschung,gravitationstechnologie,solarsatelliten,energie für graviton,todesstern",
+    "description": "Finde heraus, wie viele Solarsatelliten und wie viel Energie die Gravitonforschung in OGame benötigt, basierend auf den Planeteneinstellungen."
   },
   "moon": {
     "title": "OGame - Moons Rechner",
@@ -616,7 +620,8 @@
     "own-system": "Eigenes System",
     "phalanx-lvl-required": "Benötigte Stufe",
     "phalanx-range-bonus": "Bonus auf die Phalanx-Reichweite",
-    "class-bonus": "Klassenbonus"
+    "class-bonus": "Klassenbonus",
+    "description": "Berechne die Mondchance, die Folgen eines Mondzerstörungsversuchs und die Reichweite der Sensorphalanx in OGame."
   },
   "production": {
     "param-tab-general": "Allgemein",
@@ -698,7 +703,8 @@
     "incl-explain": "Wenn Sie den Füllstand der Minen erhöhen, steigt der Energieverbrauch. Der Rechner kann diese Änderung berücksichtigen und die Kosten für den Bau von Solarsatelliten, die die notwendige Energie liefern, in die Berechnung einbeziehen. Die Berechnung erfolgt für jedes einzelne Gebäude. Sollten wir diese Kosten berücksichtigen?",
     "incl-yes": "Ja",
     "incl-no": "Nein",
-    "lifeform-tech": "Lebensform-Technologiebonus"
+    "lifeform-tech": "Lebensform-Technologiebonus",
+    "description": "Berechne Metall-, Kristall- und Deuteriumproduktion, Energieverbrauch und Amortisation von Minen-Upgrades für einen Planeten oder dein ganzes OGame-Imperium."
   },
   "queue": {
     "start-time": "Start",
@@ -714,7 +720,8 @@
     "next-level": "Nächste Stufe",
     "title": "OGame - Konstruktion Warteschlange",
     "keywords": "proxyforgame,ogame,bauliste,baureihenfolge,bauzeit,warteschlangenrechner,gebäudekosten",
-    "clear": "Klar"
+    "clear": "Klar",
+    "description": "Vergleiche Kosten und Dauer aufeinanderfolgender Gebäudeausbauten auf einem OGame-Planeten oder -Mond mit Fabrikstufen und Unispeed."
   },
   "terraformer": {
     "title": "OGame - Berechnung der Terraformer",
@@ -723,7 +730,8 @@
     "single-level": "Eine Stufe",
     "added-fields": "Felder hinzugefügt werden",
     "satellites": "Solarsatelliten",
-    "keywords": "proxyforgame,ogame,terraformer rechner,terraformer,planetenfelder,solarsatelliten,energiebedarf,nanitenfabrik"
+    "keywords": "proxyforgame,ogame,terraformer rechner,terraformer,planetenfelder,solarsatelliten,energiebedarf,nanitenfabrik",
+    "description": "Berechne Energie, Ressourcen und Zeit für das Terraformen eines OGame-Planeten einschließlich Solarsatelliten und Boni."
   },
   "expeditions": {
     "keywords": "proxyforgame,ogame,expeditionsrechner,expeditionen,expeditionsrohstoffe,expeditionsflotte,dunkle materie,expeditionsfunde",
@@ -787,7 +795,8 @@
     "class-bonus-discoverer": "\"Entdecker\"-Klassenbonus",
     "resources-discovery-booster": "Ressourcenentdeckungs-Booster",
     "dark-matter-discovery-bonus": "Bonus auf Dunkle-Materie-Entdeckung",
-    "large-cargo-abbrev": "GT"
+    "large-cargo-abbrev": "GT",
+    "description": "Schätze mögliche Funde von Ressourcen, Schiffen und Dunkler Materie bei OGame-Expeditionen und vergleiche den erwarteten Ertrag verschiedener Flotten."
   },
   "trade": {
     "met": "met",
@@ -803,6 +812,7 @@
     "link": "Link",
     "text": "Text",
     "and": "und",
-    "keywords": "proxyforgame,ogame,handelsrechner,rohstofftausch,tauschverhältnis,metall kristall deuterium,händler"
+    "keywords": "proxyforgame,ogame,handelsrechner,rohstofftausch,tauschverhältnis,metall kristall deuterium,händler",
+    "description": "Vergleiche den Tausch von Metall, Kristall und Deuterium in OGame und ermittle die erhaltene Menge zum jeweiligen Kurs."
   }
 }

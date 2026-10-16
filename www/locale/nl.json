@@ -340,7 +340,8 @@
     "disclaimer-title": "Let op",
     "discoverer-class-bonus": "Klassebonus Discoverer",
     "discoverer-class-bonus-hint": "Voer de waarde 'Totaal' in uit de OGame-tabel met Life Form-bonussen op de klassebonussen, rij 'Discoverer'. Wordt alleen toegepast als op het tabblad 'Algemeen' de klasse 'Discoverer' is geselecteerd.",
-    "research-speed-hint": "De onderzoekssnelheid is de economische snelheid vermenigvuldigd met de onderzoeksfactor van het universum, bijv. 5 × 3 = 15. Als je hierboven het universum kiest, worden beide snelheden automatisch ingevuld."
+    "research-speed-hint": "De onderzoekssnelheid is de economische snelheid vermenigvuldigd met de onderzoeksfactor van het universum, bijv. 5 × 3 = 15. Als je hierboven het universum kiest, worden beide snelheden automatisch ingevuld.",
+    "description": "Bereken de kosten en bouwtijd van gebouwen, onderzoeken, schepen en verdediging in OGame, met universumsnelheid en bonussen."
   },
   "lfcosts": {
     "title": "OGame - Kosten berekening voor levensvormen",
@@ -464,7 +465,8 @@
     "ovrc-battleship": "Overklokken (Slagschip)",
     "psy-sh-matrix": "Psionische Schildmatrix",
     "kaelesh-disc-enh": "Kaelesh Ontdekker Verbetering",
-    "energy-cost-to-build": "Energie benodigd voor de bouw"
+    "energy-cost-to-build": "Energie benodigd voor de bouw",
+    "description": "Bereken de kosten en bouwtijd van levensvormgebouwen en -onderzoeken in OGame, inclusief ras- en technologiebonussen."
   },
   "flight": {
     "flight-time-format": "99 H:s:s",
@@ -579,13 +581,15 @@
     "own-api-import-title": "Importeren",
     "own-api-bad-json-msg": "Kan de gegevens niet lezen.\\nControleer of je de tekst uit het veld API 2 op de pagina 'Vloot' hebt geplakt.",
     "import-failed-msg": "Kan de gegevens niet laden.\\nDe server gaf een ongeldig antwoord. Probeer het later opnieuw.",
-    "populated-systems-failed-msg": "De kaart met bewoonde systemen is niet beschikbaar, daarom worden er geen systemen als overgeslagen geteld. Je kunt het aantal handmatig invoeren."
+    "populated-systems-failed-msg": "De kaart met bewoonde systemen is niet beschikbaar, daarom worden er geen systemen als overgeslagen geteld. Je kunt het aantal handmatig invoeren.",
+    "description": "Bereken vliegtijd, deuteriumverbruik en het beste vertrekmoment in OGame op basis van universumsnelheid, schepen en vluchtmodus."
   },
   "graviton": {
     "title": "OGame - Graviton berekening",
     "recycling": "Recycle z-sats puin",
     "graviton-level": "Gravitonniveau",
-    "keywords": "proxyforgame,ogame,gravitoncalculator,gravitontechnologie,gravitatietechnologie,zonnesatellieten,energie voor graviton,ster des doods"
+    "keywords": "proxyforgame,ogame,gravitoncalculator,gravitontechnologie,gravitatietechnologie,zonnesatellieten,energie voor graviton,ster des doods",
+    "description": "Ontdek hoeveel zonne-satellieten en energie nodig zijn voor de Graviton-technologie in OGame, op basis van je planeetinstellingen."
   },
   "moon": {
     "title": "OGame – Maan calculator",
@@ -616,7 +620,8 @@
     "own-system": "Eigen systeem",
     "phalanx-lvl-required": "Vereist niveau",
     "phalanx-range-bonus": "Bonus op phalanxbereik",
-    "class-bonus": "Klassebonus"
+    "class-bonus": "Klassebonus",
+    "description": "Bereken de kans op een maan, de uitkomst van een maanvernietigingspoging en het bereik van de sensorphalanx in OGame."
   },
   "production": {
     "param-tab-general": "Algemeen",
@@ -698,7 +703,8 @@
     "incl-explain": "Als je het niveau van de mijnen verhoogt, zal het energieverbruik toenemen. De calculator kan met deze verandering rekening houden en in de berekening de kosten opnemen van het bouwen van Zonnesatellieten, die de benodigde energie zullen geven. De berekening wordt per gebouw gemaakt. Moeten we met deze kosten rekening houden?",
     "incl-yes": "Ja",
     "incl-no": "Nee",
-    "lifeform-tech": "Levensvorm-technologiebonus"
+    "lifeform-tech": "Levensvorm-technologiebonus",
+    "description": "Bereken metaal-, kristal- en deuteriumproductie, energieverbruik en terugverdientijd van mijnverbeteringen voor één planeet of je hele OGame-rijk."
   },
   "queue": {
     "start-time": "Start",
@@ -714,7 +720,8 @@
     "next-level": "Volgende niveau",
     "title": "OGame - Productietijd",
     "keywords": "proxyforgame,ogame,bouwwachtrij,bouwvolgorde,bouwtijd,wachtrij calculator,gebouwkosten",
-    "clear": "Verwijder bouwlijst"
+    "clear": "Verwijder bouwlijst",
+    "description": "Vergelijk kosten en bouwtijd van opeenvolgende gebouwupgrades op een OGame-planeet of maan, rekening houdend met fabrieken en universumsnelheid."
   },
   "terraformer": {
     "title": "OGame - Terravormer berekening",
@@ -723,7 +730,8 @@
     "single-level": "één level",
     "added-fields": "Toe te voegen velden",
     "satellites": "Zonne-energie satellieten",
-    "keywords": "proxyforgame,ogame,terraformer calculator,terraformer,planeetvelden,zonnesatellieten,energiebehoefte,nanorobotfabriek"
+    "keywords": "proxyforgame,ogame,terraformer calculator,terraformer,planeetvelden,zonnesatellieten,energiebehoefte,nanorobotfabriek",
+    "description": "Bereken de energie, grondstoffen en tijd die nodig zijn om een planeet in OGame te terraformen, inclusief zonne-satellieten en bonussen."
   },
   "expeditions": {
     "keywords": "proxyforgame,ogame,expeditiecalculator,expedities,expeditiegrondstoffen,expeditievloot,donkere materie,expeditievondsten",
@@ -787,7 +795,8 @@
     "class-bonus-discoverer": "\"Ontdekker\"-klassebonus",
     "resources-discovery-booster": "Hulpmiddel voor grondstofontdekking",
     "dark-matter-discovery-bonus": "Bonus voor Donkere Materie ontdekking",
-    "large-cargo-abbrev": "GV"
+    "large-cargo-abbrev": "GV",
+    "description": "Schat de mogelijke vondsten van grondstoffen, schepen en Donkere Materie bij OGame-expedities en vergelijk het verwachte rendement van vloten."
   },
   "trade": {
     "met": "met",
@@ -803,6 +812,7 @@
     "link": "Url",
     "text": "Tekst",
     "and": "en",
-    "keywords": "proxyforgame,ogame,handelscalculator,grondstoffenruil,ruilverhouding,metaal kristal deuterium,handelaar"
+    "keywords": "proxyforgame,ogame,handelscalculator,grondstoffenruil,ruilverhouding,metaal kristal deuterium,handelaar",
+    "description": "Vergelijk ruilopties voor metaal, kristal en deuterium in OGame en bereken hoeveel grondstoffen je tegen een bepaalde koers ontvangt."
   }
 }

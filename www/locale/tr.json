@@ -340,7 +340,8 @@
     "disclaimer-title": "Dikkat",
     "discoverer-class-bonus": "Kaşif sınıfı bonusu",
     "discoverer-class-bonus-hint": "OGame'in yaşam formu bonuslarının sınıf bonuslarına etkisini gösteren tablosundaki 'Toplam' değerini girin, 'Kaşif' satırı. Yalnızca 'Genel' sekmesinde 'Kaşif' sınıfı seçiliyse uygulanır.",
-    "research-speed-hint": "Araştırma hızı, ekonomi hızının evrenin araştırma çarpanıyla çarpımıdır, ör. 5 × 3 = 15. Yukarıdan evreni seçtiğinizde her iki hız otomatik olarak doldurulur."
+    "research-speed-hint": "Araştırma hızı, ekonomi hızının evrenin araştırma çarpanıyla çarpımıdır, ör. 5 × 3 = 15. Yukarıdan evreni seçtiğinizde her iki hız otomatik olarak doldurulur.",
+    "description": "OGame’de evren hızı ve bonusları hesaba katarak bina, araştırma, gemi ve savunma maliyetlerini ve inşa sürelerini hesaplayın."
   },
   "lfcosts": {
     "title": "OGame – Yaşam formları için maliyet hesaplayıcı",
@@ -464,7 +465,8 @@
     "ovrc-battleship": "Hız Aşırtma (Savaş Gemisi)",
     "psy-sh-matrix": "Psionik Koruma Matrisi",
     "kaelesh-disc-enh": "Kaelesh Kaşif Takviyesi",
-    "energy-cost-to-build": "İnşaat için gereken enerji"
+    "energy-cost-to-build": "İnşaat için gereken enerji",
+    "description": "OGame’de ırk ve teknoloji bonuslarını hesaba katarak yaşam formları binalarının ve araştırmalarının maliyetini ve süresini hesaplayın."
   },
   "flight": {
     "flight-time-format": "99 H:s:s",
@@ -579,13 +581,15 @@
     "own-api-import-title": "İçe Aktar",
     "own-api-bad-json-msg": "Veriler okunamadı.\\n'Filo' sayfasındaki API 2 alanındaki metni yapıştırdığınızdan emin olun.",
     "import-failed-msg": "Veriler yüklenemedi.\\nSunucu geçersiz bir yanıt döndürdü. Lütfen daha sonra tekrar deneyin.",
-    "populated-systems-failed-msg": "Yerleşim bulunan sistemlerin haritası kullanılamıyor, bu yüzden hiçbir sistem atlanmış sayılmıyor. Sayılarını elle girebilirsiniz."
+    "populated-systems-failed-msg": "Yerleşim bulunan sistemlerin haritası kullanılamıyor, bu yüzden hiçbir sistem atlanmış sayılmıyor. Sayılarını elle girebilirsiniz.",
+    "description": "OGame’de evren hızı, gemiler ve uçuş moduna göre uçuş süresini, döteryum tüketimini ve uygun filo kalkış saatini hesaplayın."
   },
   "graviton": {
     "title": "OGame - Gravitasyon Hesaplayıcı",
     "recycling": "Dismantling SS debris",
     "graviton-level": "Graviton Seviyesi",
-    "keywords": "proxyforgame,ogame,graviton hesaplayıcı,graviton teknolojisi,yerçekimi teknolojisi,solar uydular,graviton için enerji,ölüm yıldızı"
+    "keywords": "proxyforgame,ogame,graviton hesaplayıcı,graviton teknolojisi,yerçekimi teknolojisi,solar uydular,graviton için enerji,ölüm yıldızı",
+    "description": "OGame’de gezegen ayarlarına göre graviton araştırması için gereken güneş uydusu ve enerji miktarını öğrenin."
   },
   "moon": {
     "title": "OGame - Aylar Hesaplayıcı",
@@ -616,7 +620,8 @@
     "own-system": "Kendi sisteminiz",
     "phalanx-lvl-required": "Gerekli seviye",
     "phalanx-range-bonus": "Radar menzil bonusu",
-    "class-bonus": "Sınıf bonusu"
+    "class-bonus": "Sınıf bonusu",
+    "description": "OGame’de ay oluşma şansını, ay yok etme girişiminin sonucunu ve sensör falanksının menzilini hesaplayın."
   },
   "production": {
     "param-tab-general": "Genel",
@@ -698,7 +703,8 @@
     "incl-explain": "Madenlerin seviyesini yükseltirseniz enerji tüketimi artacaktır. Hesaplayıcı bu değişikliği hesaba katabilir ve gerekli enerjiyi verecek olan Güneş Uyduları inşa etme maliyetlerini hesaplamaya dahil edebilir. Hesaplama, bina bazında yapılır. Bu maliyetleri hesaba katmalı mıyız?",
     "incl-yes": "Evet",
     "incl-no": "Hayır",
-    "lifeform-tech": "Yaşam formu teknoloji bonusu"
+    "lifeform-tech": "Yaşam formu teknoloji bonusu",
+    "description": "OGame imparatorluğunuzda tek bir gezegen veya tüm gezegenler için metal, kristal ve döteryum üretimini, enerji tüketimini ve maden yatırımlarının geri dönüşünü hesaplayın."
   },
   "queue": {
     "start-time": "Başlama zamanı",
@@ -714,7 +720,8 @@
     "next-level": "Sonraki seviye",
     "title": "OGame - İnşaat kuyruğu",
     "keywords": "proxyforgame,ogame,inşaat kuyruğu,inşaat sırası,inşaat süresi,kuyruk hesaplayıcı,bina maliyetleri",
-    "clear": "Kaldır"
+    "clear": "Kaldır",
+    "description": "OGame’de fabrika seviyeleri ve evren hızına göre bir gezegen veya aydaki ardışık bina yükseltmelerinin maliyetini ve süresini karşılaştırın."
   },
   "terraformer": {
     "title": "OGame - Terraformer Hesaplayıcı",
@@ -723,7 +730,8 @@
     "single-level": "Tek seviye",
     "added-fields": "Eklenecek Alanlar",
     "satellites": "Solar Uyduları",
-    "keywords": "proxyforgame,ogame,terraformer hesaplayıcı,terraformer,gezegen alanları,solar uydular,enerji ihtiyacı,nanit fabrikası"
+    "keywords": "proxyforgame,ogame,terraformer hesaplayıcı,terraformer,gezegen alanları,solar uydular,enerji ihtiyacı,nanit fabrikası",
+    "description": "OGame’de güneş uyduları ve bonuslar dahil bir gezegeni terraform etmek için gereken enerji, kaynak ve süreyi hesaplayın."
   },
   "expeditions": {
     "keywords": "proxyforgame,ogame,keşif seferi hesaplayıcı,keşif seferleri,keşif seferi kaynakları,keşif seferi filosu,kara madde,keşif seferi bulguları",
@@ -787,7 +795,8 @@
     "class-bonus-discoverer": "\"Kâşif\" sınıf bonusu",
     "resources-discovery-booster": "Kaynak keşif güçlendirici",
     "dark-matter-discovery-bonus": "Karanlık Madde keşif bonusu",
-    "large-cargo-abbrev": "BN"
+    "large-cargo-abbrev": "BN",
+    "description": "OGame keşiflerinde bulunabilecek kaynak, gemi ve Karanlık Madde miktarını tahmin edin ve farklı filoların beklenen getirisini karşılaştırın."
   },
   "trade": {
     "met": "Met",
@@ -803,6 +812,7 @@
     "link": "Link",
     "text": "Yazı",
     "and": "ve",
-    "keywords": "proxyforgame,ogame,ticaret hesaplayıcı,kaynak takası,takas oranı,metal kristal döteryum,tüccar"
+    "keywords": "proxyforgame,ogame,ticaret hesaplayıcı,kaynak takası,takas oranı,metal kristal döteryum,tüccar",
+    "description": "OGame’de metal, kristal ve döteryum takaslarını karşılaştırın ve belirlenen kura göre alacağınız kaynak miktarını görün."
   }
 }

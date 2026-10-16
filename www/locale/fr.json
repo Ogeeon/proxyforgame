@@ -340,7 +340,8 @@
     "disclaimer-title": "Attention",
     "discoverer-class-bonus": "Bonus de classe Explorateur",
     "discoverer-class-bonus-hint": "Saisis la valeur 'Total' du tableau OGame des bonus de formes de vie aux bonus de classe, ligne 'Explorateur'. S'applique uniquement si la classe 'Explorateur' est sélectionnée dans l'onglet 'Général'.",
-    "research-speed-hint": "La vitesse de recherche est la vitesse économique multipliée par le facteur de recherche de l'univers, par ex. 5 × 3 = 15. Choisir l'univers ci-dessus remplit les deux vitesses automatiquement."
+    "research-speed-hint": "La vitesse de recherche est la vitesse économique multipliée par le facteur de recherche de l'univers, par ex. 5 × 3 = 15. Choisir l'univers ci-dessus remplit les deux vitesses automatiquement.",
+    "description": "Calculez le coût et la durée de construction des bâtiments, recherches, vaisseaux et défenses dans OGame, selon la vitesse de l’univers et les bonus."
   },
   "lfcosts": {
     "title": "OGame - Calculateur de coûts pour les formes de vie",
@@ -464,7 +465,8 @@
     "ovrc-battleship": "Surcadençage (vaisseau de bataille)",
     "psy-sh-matrix": "Matrice de protection psionique",
     "kaelesh-disc-enh": "Renforcement d`explorateur kaelesh",
-    "energy-cost-to-build": "Énergie requise pour la construction"
+    "energy-cost-to-build": "Énergie requise pour la construction",
+    "description": "Calculez le coût et la durée des bâtiments et recherches des formes de vie dans OGame, avec les bonus de race et de technologie."
   },
   "flight": {
     "flight-time-format": "99 H:s:s",
@@ -579,13 +581,15 @@
     "own-api-import-title": "Importer",
     "own-api-bad-json-msg": "Impossible de lire les données.\\nAssurez-vous d'avoir collé le texte du champ API 2 de la page « Flotte ».",
     "import-failed-msg": "Impossible de charger les données.\\nLe serveur a renvoyé une réponse invalide. Veuillez réessayer plus tard.",
-    "populated-systems-failed-msg": "La carte des systèmes peuplés est indisponible, aucun système n'est donc compté comme ignoré. Vous pouvez saisir leur nombre à la main."
+    "populated-systems-failed-msg": "La carte des systèmes peuplés est indisponible, aucun système n'est donc compté comme ignoré. Vous pouvez saisir leur nombre à la main.",
+    "description": "Calculez la durée de vol, la consommation de deutérium et l’heure de départ idéale dans OGame selon la vitesse de l’univers, les vaisseaux et le mode de vol."
   },
   "graviton": {
     "title": "OGame - Calculateur de Graviton",
     "graviton-level": "Niveau de Graviton",
     "recycling": "Démantèlement de débris",
-    "keywords": "proxyforgame,ogame,calculatrice de graviton,technologie graviton,technologie de gravitation,satellites solaires,énergie pour graviton,étoile de la mort"
+    "keywords": "proxyforgame,ogame,calculatrice de graviton,technologie graviton,technologie de gravitation,satellites solaires,énergie pour graviton,étoile de la mort",
+    "description": "Découvrez le nombre de satellites solaires et l’énergie nécessaires à la recherche Graviton dans OGame selon les paramètres de la planète."
   },
   "moon": {
     "title": "OGame - Calculatrices pour Lunes",
@@ -616,7 +620,8 @@
     "own-system": "Votre système",
     "phalanx-lvl-required": "Niveau requis",
     "phalanx-range-bonus": "Bonus de portée de la phalange",
-    "class-bonus": "Bonus de classe"
+    "class-bonus": "Bonus de classe",
+    "description": "Calculez la probabilité de découverte d’une lune, l’issue d’une tentative de destruction et la portée de la phalange sensorielle dans OGame."
   },
   "production": {
     "param-tab-general": "Général",
@@ -698,7 +703,8 @@
     "incl-explain": "Si vous augmentez le niveau des mines, la consommation d'énergie augmentera. Le calculateur peut prendre en compte ce changement et inclure dans le calcul les coûts de construction des satellites solaires, qui fourniront l'énergie nécessaire. Le calcul se fait bâtiment par bâtiment. Faut-il prendre en compte ces coûts?",
     "incl-yes": "Oui",
     "incl-no": "Non",
-    "lifeform-tech": "Bonus technologie formes de vie"
+    "lifeform-tech": "Bonus technologie formes de vie",
+    "description": "Calculez la production de métal, cristal et deutérium, la consommation d’énergie et le retour sur investissement des mines pour une planète ou votre empire OGame."
   },
   "queue": {
     "start-time": "Début",
@@ -714,7 +720,8 @@
     "next-level": "Prochain niveau",
     "title": "OGame - Attente de la construction",
     "keywords": "proxyforgame,ogame,file de construction,ordre de construction,temps de construction,calculatrice de file,coûts de bâtiments",
-    "clear": "Supprimer"
+    "clear": "Supprimer",
+    "description": "Comparez le coût et la durée des améliorations successives de bâtiments sur une planète ou une lune OGame, selon les usines et la vitesse de l’univers."
   },
   "terraformer": {
     "title": "OGame - Calculateur de Terraformeur",
@@ -723,7 +730,8 @@
     "single-level": "Un niveau",
     "added-fields": "Les champs à ajouter",
     "satellites": "Satellites solaires",
-    "keywords": "proxyforgame,ogame,calculatrice de terraformeur,terraformeur,cases de planète,satellites solaires,besoin en énergie,usine de nanites"
+    "keywords": "proxyforgame,ogame,calculatrice de terraformeur,terraformeur,cases de planète,satellites solaires,besoin en énergie,usine de nanites",
+    "description": "Calculez l’énergie, les ressources et le temps nécessaires pour terraformer une planète OGame, satellites solaires et bonus compris."
   },
   "expeditions": {
     "keywords": "proxyforgame,ogame,calculatrice d'expédition,expéditions,ressources d'expédition,flotte d'expédition,matière noire,trouvailles d'expédition",
@@ -787,7 +795,8 @@
     "class-bonus-discoverer": "Bonus de classe \"Découvreur\"",
     "resources-discovery-booster": "Amplificateur de découverte de ressources",
     "dark-matter-discovery-bonus": "Bonus de découverte de Matière Noire",
-    "large-cargo-abbrev": "GT"
+    "large-cargo-abbrev": "GT",
+    "description": "Estimez les ressources, vaisseaux et matières noires trouvés lors des expéditions OGame et comparez le rendement attendu de différentes flottes."
   },
   "trade": {
     "met": "mét",
@@ -803,6 +812,7 @@
     "link": "Lien",
     "text": "Texte",
     "and": "et",
-    "keywords": "proxyforgame,ogame,calculatrice de commerce,échange de ressources,taux d'échange,métal cristal deutérium,marchand"
+    "keywords": "proxyforgame,ogame,calculatrice de commerce,échange de ressources,taux d'échange,métal cristal deutérium,marchand",
+    "description": "Comparez les échanges de métal, cristal et deutérium dans OGame et calculez les ressources obtenues selon un taux donné."
   }
 }
