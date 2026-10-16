@@ -94,6 +94,11 @@ function updateParams() {
 	options.prm.lfCollectorBonus = g.lfCollectorBonus;
 	options.prm.lfCrawlerBonus = g.lfCrawlerBonus;
 	options.prm.lfPlasmaCostReduction = g.lfPlasmaCostReduction;
+	options.prm.lfResLevels = g.lfResLevels;
+	options.prm.lfResAvail = g.lfResAvail;
+	syncLfResearchInputs();
+	options.prm.lfTechBonus = g.lfTechBonus;
+	options.prm.lfResearchCostReduction = g.lfResearchCostReduction;
 
 	updateOnePlnTab();
 	updateAllPlnTab();
@@ -416,6 +421,12 @@ function updateAllPlnTab() {
 	let planetsCount = options.prm.currPlanetsCount;
 	let rows = $$('#all-planets-prod tr');
 	let totalProd = [0, 0, 0];
+	// Per planet, for the LF amortization table: the planet totals and the
+	// [metal mine, crystal mine, deuterium synthesizer] rows its research gain is based on
+	/** @type {number[][]} */
+	let planetProd = [];
+	/** @type {number[][]} */
+	let minePerPlanet = [];
 	// Keep every planet's crawler limit in sync with its mines; the values are
 	// clamped on blur by the shared numeric-input validator.
 	// LEVEL_COLUMNS holds the cell indices: [0]=metal, [1]=crystal, [2]=deut, [6]=crawler.
@@ -437,6 +448,8 @@ function updateAllPlnTab() {
 		let prodData = calculateProduction(planet.prodParams, planet.plnData, false, planet.lfEff);
 		let production = prodData[1];
 		let koeff = prodData[4];
+		planetProd.push(production);
+		minePerPlanet.push([prodData[0][1][0], prodData[0][2][1], prodData[0][3][2]]);
 		rows[i * 2 + 1].children[14].innerHTML = Math.floor(koeff * 100) + '%'; // write the production coefficient into the table's last column
 
 		// Show the planet's energy booster
@@ -501,6 +514,7 @@ function updateAllPlnTab() {
 	rows[3].children[1].innerHTML = paybackToString(normCost, normIncrease);
 
 	updateMinesPriority();
+	updateLfAmortization(planetProd, minePerPlanet);
 }
 
 // How many upgrades the priority table lists
@@ -585,6 +599,117 @@ function updateMinesPriority() {
 	body.innerHTML = html;
 }
 
+/**
+ * One row of the LF amortization table.
+ * @typedef {object} LfUpgrade
+ * @property {number} id - life form object id
+ * @property {number} pln - planet index, -1 for a research (it acts on every planet)
+ * @property {number} level - current level
+ * @property {number[]} costs - [metal, crystal, deuterium]
+ * @property {number[]} delta - hourly production gain, [metal, crystal, deuterium]
+ * @property {number} normCost - costs brought to metal by the exchange rates
+ * @property {number} normIncrease - delta brought to metal the same way
+ */
+
+/**
+ * Turn an upgrade into a ranked candidate, or null when it gains nothing.
+ * @param {number[]} resMult - MSU multipliers
+ * @returns {LfUpgrade|null}
+ */
+function lfUpgradeCandidate(id, pln, level, costs, delta, resMult) {
+	let normIncrease = delta[0] + resMult[1] * delta[1] + resMult[2] * delta[2];
+	if (normIncrease <= 0)
+		return null;
+	let normCost = costs[0] + resMult[1] * costs[1] + resMult[2] * costs[2];
+	return { id: id, pln: pln, level: level, costs: costs, delta: delta, normCost: normCost, normIncrease: normIncrease };
+}
+
+/**
+ * The next level of every resource-producing life form building on every
+ * planet with a life form. A building adds to its own planet only; the gain is
+ * measured against the planet's actual production, so the energy the new level
+ * draws counts against it, as in the plasma amortization table.
+ * @param {number[]} resMult - MSU multipliers
+ * @param {number[][]} planetProd - each planet's current hourly production
+ * @returns {LfUpgrade[]}
+ */
+function lfBuildingCandidates(resMult, planetProd) {
+	let candidates = [];
+	for (let i = 0; i < options.prm.currPlanetsCount; i++) {
+		// A planet without a life form has no building to upgrade
+		let race = Number(options.prm.aPS[i][24]) || 0;
+		if (race < 1 || race > 4)
+			continue;
+		let planet = buildPlanetProdParams(i);
+		let currProd = planetProd[i];
+		let levels = options.prm.aPS[i].slice(25, 25 + LF_BUILDINGS_PER_RACE);
+		let costRdc = lfBuildingCostReduction(race, levels);
+		for (const key of Object.keys(options.lfCosts)) {
+			let id = Number(key);
+			if (Math.floor(id / 1000) !== race || id % 1000 > 100)
+				continue;
+			let pos = id % 1000 - 1;
+			let level = Number(levels[pos]) || 0;
+			let lfEff = lfBuildingEffects(race, lfBuildingUpgradeLevels(levels, pos));
+			let newProd = calculateProduction(planet.prodParams, planet.plnData, false, lfEff)[1];
+			let delta = [newProd[0] - currProd[0], newProd[1] - currProd[1], newProd[2] - currProd[2]];
+			let costs = getBuildCostLF(id, level, level + 1, options.lfCosts, 0, 0, costRdc);
+			let c = lfUpgradeCandidate(id, i, level, costs, delta, resMult);
+			if (c)
+				candidates.push(c);
+		}
+	}
+	return candidates;
+}
+
+/**
+ * Rank one-level upgrades of the life form buildings and researches that raise
+ * resource production by their payback time and list the fastest ones - the
+ * plasma amortization question, asked of the life forms. Building levels come
+ * from the planets; research levels, which researches the player can study at
+ * all, and the technology bonus come from the parameters panel.
+ * @param {number[][]} planetProd - each planet's current hourly production
+ * @param {number[][]} minePerPlanet - each planet's [metal mine, crystal mine,
+ *   deuterium synthesizer] output, the base of a research's gain
+ */
+function updateLfAmortization(planetProd, minePerPlanet) {
+	let body = $('#lf-amort-body');
+	if (!body)
+		return;
+	let resMult = collectResourceMultipliers();
+	let candidates = lfBuildingCandidates(resMult, planetProd);
+	options.lfResIds.forEach(function (id, k) {
+		// A research slot holds one race's research: the others in it are not on offer
+		if (options.prm.lfResAvail[k] !== true)
+			return;
+		let level = Number(options.prm.lfResLevels[k]) || 0;
+		let delta = lfResearchIncrease(minePerPlanet, options.lfResBonus[id], options.prm.lfTechBonus);
+		let costs = getBuildCostLF(id, level, level + 1, options.lfCosts, 0, options.prm.lfResearchCostReduction);
+		let c = lfUpgradeCandidate(id, -1, level, costs, delta, resMult);
+		if (c)
+			candidates.push(c);
+	});
+	candidates.sort(function (a, b) { return a.normCost / a.normIncrease - b.normCost / b.normIncrease; });
+
+	let html = '';
+	let shown = Math.min(candidates.length, PRIORITY_UPGRADES_COUNT);
+	for (let n = 0; n < shown; n++) {
+		let c = candidates[n];
+		html += '<tr class="' + ((n % 2) === 0 ? 'odd' : 'even') + '">';
+		html += '<td class="centered">' + (n + 1) + '</td>';
+		html += '<td>' + (c.pln < 0 ? options.allPlanetsStr : options.prm.aPNames[c.pln]) + '</td>';
+		html += '<td>' + options.lfNames[c.id] + '</td>';
+		html += '<td class="centered">' + c.level + '&nbsp;&rarr;&nbsp;' + (c.level + 1) + '</td>';
+		html += '<td class="centered">' + resourcesToString(c.costs) + '</td>';
+		html += '<td class="centered">' + resourcesToString(c.delta) + '</td>';
+		html += '<td class="centered">' + paybackToString(c.normCost, c.normIncrease) + '</td>';
+		html += '</tr>';
+	}
+	if (shown === 0)
+		html = '<tr class="odd"><td colspan="7" class="centered">' + options.noUpgradesMsg + '</td></tr>';
+	body.innerHTML = html;
+}
+
 async function changePlanetsCount(newVal, oldVal) {
 	if (newVal < options.minPlanetsCount || newVal > options.maxPlanetsCount)
 		return;
@@ -643,6 +768,10 @@ function resetParams() {
 	options.prm.lfCollectorBonus = 0;
 	options.prm.lfCrawlerBonus = 0;
 	options.prm.lfPlasmaCostReduction = 0;
+	options.prm.lfResLevels = [];
+	options.prm.lfResAvail = [];
+	options.prm.lfTechBonus = 0;
+	options.prm.lfResearchCostReduction = 0;
 
 	populateParams();
 	setVal('#storage-met', 0);
@@ -675,6 +804,15 @@ function resetParams() {
 
 	prepAllPlanetsTable();
 	updateAllPlnTab();
+}
+
+// A research's level only means something while the research is marked
+// available, so its input is disabled otherwise.
+function syncLfResearchInputs() {
+	options.lfResIds.forEach(function (id) {
+		const input = inputEl('#lf-res-' + id);
+		if (input) input.disabled = !getChecked('#lf-res-avail-' + id);
+	});
 }
 
 function toggleOnePlanetView() {
@@ -1038,6 +1176,13 @@ async function initializeProductionCalculator() {
 		});
 		// Plasma technology cost reduction is capped at 99%
 		setConstrains('lf-plasma-cost-reduction', { 'min': 0, 'max': 99, 'def': 0, 'allowFloat': true, 'allowNegative': false });
+		// LF amortization inputs: the technology bonus is open-ended, the research
+		// cost reduction capped like the plasma one, research levels 0..100
+		setConstrains('lf-tech-bonus', { 'min': 0, 'max': Infinity, 'def': 0, 'allowFloat': true, 'allowNegative': false });
+		setConstrains('lf-research-cost-reduction', { 'min': 0, 'max': 99, 'def': 0, 'allowFloat': true, 'allowNegative': false });
+		options.lfResIds.forEach(function (id) {
+			setConstrains('lf-res-' + id, { 'min': 0, 'max': 100, 'def': 0, 'allowFloat': false, 'allowNegative': false });
+		});
 		// Life form building levels: non-negative integers
 		$$('#one-planet-prod .lf-row input[type=text]').forEach(function (el) {
 			el._constrains = { 'min': 0, 'def': 0, 'allowFloat': false, 'allowNegative': false };

@@ -48,8 +48,23 @@ function collectGeneralSettings() {
 		lfEnergyProdBonus: getInputNumber($('#lf-energy-prod-bonus')),
 		lfCollectorBonus: getInputNumber($('#lf-collector-bonus')),
 		lfCrawlerBonus: getInputNumber($('#lf-crawler-bonus')),
-		lfPlasmaCostReduction: getInputNumber($('#lf-plasma-cost-reduction'))
+		lfPlasmaCostReduction: getInputNumber($('#lf-plasma-cost-reduction')),
+		lfResLevels: collectLfResearchLevels(),
+		lfResAvail: options.lfResIds.map(function (id) { return getChecked('#lf-res-avail-' + id); }),
+		lfTechBonus: getInputNumber($('#lf-tech-bonus')),
+		lfResearchCostReduction: getInputNumber($('#lf-research-cost-reduction'))
 	};
+}
+
+/**
+ * Read the life form research levels of the parameters panel, in the order of
+ * options.lfResIds - the order options.prm.lfResLevels is stored in.
+ * @returns {number[]}
+ */
+function collectLfResearchLevels() {
+	return options.lfResIds.map(function (id) {
+		return getInputNumber($('#lf-res-' + id));
+	});
 }
 
 /**
