@@ -335,7 +335,7 @@
     "msg-lab-level-raised": "Úroveň výskumného laboratória zvýšená na {0} — to vyžaduje výskum \"{1}\".",
     "mineral-res-cntr-lvl": "Výskumné centrum minerálov",
     "lf-terraformer-rdc": "Zníženie nákladov na terraformer",
-    "disclaimer-robot-nanite": "Pri čítaní časov výstavby zohľadnite poznámku v prvom riadku tabuľky. Ak staviate Robotické továrne alebo Nanotechnologické továrne, použite <a href=\"{0}\">Kalkulačku frontu výstavby</a> pre presné výpočty času výstavby.",
+    "disclaimer-robot-nanite": "Pri čítaní časov výstavby zohľadnite nápovedu {1} v prvej bunke riadkov Robotické továrne a Nanotechnologické továrne. Ak staviate Robotické továrne alebo Nanotechnologické továrne, použite <a href=\"{0}\">Kalkulačku frontu výstavby</a> pre presné výpočty času výstavby.",
     "disclaimer-title": "Upozornenie",
     "discoverer-class-bonus": "Bonus triedy Discoverer",
     "discoverer-class-bonus-hint": "Zadajte hodnotu 'Spolu' z tabuľky OGame s bonusmi foriem života k bonusom tried, riadok 'Discoverer'. Použije sa iba vtedy, ak je na karte 'Všeobecné' vybraná trieda 'Discoverer'.",

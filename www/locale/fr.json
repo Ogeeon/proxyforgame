@@ -336,7 +336,7 @@
     "msg-lab-level-raised": "Niveau du laboratoire de recherche porté à {0} — c'est ce qu'exige la recherche \"{1}\".",
     "mineral-res-cntr-lvl": "Centre de recherche sur les minéraux",
     "lf-terraformer-rdc": "Réduction des coûts du terraformeur",
-    "disclaimer-robot-nanite": "Veuillez tenir compte de la remarque figurant sur la première ligne du tableau lors de la lecture des durées de construction. Si vous construisez une Usine de robots ou une Usine de nanites, utilisez le <a href=\"{0}\">Calculateur de file de construction</a> pour des calculs de durée précis.",
+    "disclaimer-robot-nanite": "Veuillez tenir compte de l’info-bulle {1} dans la première cellule des lignes Usine de robots et Usine de nanites lors de la lecture des durées de construction. Si vous construisez une Usine de robots ou une Usine de nanites, utilisez le <a href=\"{0}\">Calculateur de file de construction</a> pour des calculs de durée précis.",
     "disclaimer-title": "Attention",
     "discoverer-class-bonus": "Bonus de classe Explorateur",
     "discoverer-class-bonus-hint": "Saisis la valeur 'Total' du tableau OGame des bonus de formes de vie aux bonus de classe, ligne 'Explorateur'. S'applique uniquement si la classe 'Explorateur' est sélectionnée dans l'onglet 'Général'.",

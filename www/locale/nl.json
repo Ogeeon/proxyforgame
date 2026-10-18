@@ -336,7 +336,7 @@
     "msg-lab-level-raised": "Niveau van het onderzoekslaboratorium verhoogd naar {0} — dat vereist het onderzoek \"{1}\".",
     "mineral-res-cntr-lvl": "Mineralen Onderzoekscentrum",
     "lf-terraformer-rdc": "Vermindering terraformerkosten",
-    "disclaimer-robot-nanite": "Houd bij het aflezen van de bouwtijden rekening met de opmerking in de eerste rij van de tabel. Als je een Robotfabriek of een Nanorobotfabriek bouwt, gebruik dan de <a href=\"{0}\">Bouwlijst-calculator</a> voor nauwkeurige berekeningen van de bouwtijd.",
+    "disclaimer-robot-nanite": "Houd bij het aflezen van de bouwtijden rekening met de hint {1} in de eerste cel van de rijen Robotfabriek en Nanorobotfabriek. Als je een Robotfabriek of een Nanorobotfabriek bouwt, gebruik dan de <a href=\"{0}\">Bouwlijst-calculator</a> voor nauwkeurige berekeningen van de bouwtijd.",
     "disclaimer-title": "Let op",
     "discoverer-class-bonus": "Klassebonus Discoverer",
     "discoverer-class-bonus-hint": "Voer de waarde 'Totaal' in uit de OGame-tabel met Life Form-bonussen op de klassebonussen, rij 'Discoverer'. Wordt alleen toegepast als op het tabblad 'Algemeen' de klasse 'Discoverer' is geselecteerd.",

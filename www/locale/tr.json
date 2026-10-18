@@ -336,7 +336,7 @@
     "msg-lab-level-raised": "Araştırma laboratuvarı seviyesi {0} değerine yükseltildi — \"{1}\" araştırması bunu gerektiriyor.",
     "mineral-res-cntr-lvl": "Maden Araştırma Merkezi",
     "lf-terraformer-rdc": "Terraformer maliyet azaltımı",
-    "disclaimer-robot-nanite": "İnşa sürelerini okurken tablonun ilk satırındaki notu dikkate alın. Robot Fabrikası veya Nanit Fabrikası inşa ediyorsanız, doğru inşa süresi hesaplamaları için <a href=\"{0}\">İnşaat kuyruğu hesaplayıcısını</a> kullanın.",
+    "disclaimer-robot-nanite": "İnşa sürelerini okurken Robot Fabrikası ve Nanit Fabrikası satırlarının ilk hücresindeki {1} ipucunu dikkate alın. Robot Fabrikası veya Nanit Fabrikası inşa ediyorsanız, doğru inşa süresi hesaplamaları için <a href=\"{0}\">İnşaat kuyruğu hesaplayıcısını</a> kullanın.",
     "disclaimer-title": "Dikkat",
     "discoverer-class-bonus": "Kaşif sınıfı bonusu",
     "discoverer-class-bonus-hint": "OGame'in yaşam formu bonuslarının sınıf bonuslarına etkisini gösteren tablosundaki 'Toplam' değerini girin, 'Kaşif' satırı. Yalnızca 'Genel' sekmesinde 'Kaşif' sınıfı seçiliyse uygulanır.",

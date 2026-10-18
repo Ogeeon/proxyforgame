@@ -336,7 +336,7 @@
     "msg-lab-level-raised": "Nivo Centra za istraživanje podignut na {0} — to zahtijeva istraživanje \"{1}\".",
     "mineral-res-cntr-lvl": "Mineral Research Centre",
     "lf-terraformer-rdc": "Smanjenje troškova terraformera",
-    "disclaimer-robot-nanite": "Molimo uzmite u obzir napomenu u prvom redu tablice pri čitanju vremena gradnje. Ako gradite Tvornicu robota ili Tvornicu nanita, koristite <a href=\"{0}\">Kalkulator reda izgradnje</a> za točan izračun vremena gradnje.",
+    "disclaimer-robot-nanite": "Molimo uzmite u obzir savjet {1} u prvoj ćeliji redova Tvornica robota i Tvornica nanita pri čitanju vremena gradnje. Ako gradite Tvornicu robota ili Tvornicu nanita, koristite <a href=\"{0}\">Kalkulator reda izgradnje</a> za točan izračun vremena gradnje.",
     "disclaimer-title": "Napomena",
     "discoverer-class-bonus": "Bonus klase Otkrivač",
     "discoverer-class-bonus-hint": "Unesite vrijednost 'Ukupno' iz OGame tabele bonusa oblika života na bonuse klasa, red 'Otkrivač'. Primjenjuje se samo ako je na kartici 'Opšte' odabrana klasa 'Otkrivač'.",

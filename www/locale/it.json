@@ -336,7 +336,7 @@
     "msg-lab-level-raised": "Livello del Laboratorio di Ricerca aumentato a {0}: è quanto richiede la ricerca \"{1}\".",
     "mineral-res-cntr-lvl": "Centro di Mineralogia",
     "lf-terraformer-rdc": "Riduzione dei costi del terraformatore",
-    "disclaimer-robot-nanite": "Si prega di tenere conto della nota nella prima riga della tabella quando si leggono i tempi di costruzione. Se stai costruendo una Fabbrica dei Robots o una Fabbrica dei Naniti, usa il <a href=\"{0}\">Calcolatore della coda di costruzione</a> per calcoli precisi dei tempi di costruzione.",
+    "disclaimer-robot-nanite": "Si prega di tenere conto del suggerimento {1} nella prima cella delle righe Fabbrica dei Robots e Fabbrica dei Naniti quando si leggono i tempi di costruzione. Se stai costruendo una Fabbrica dei Robots o una Fabbrica dei Naniti, usa il <a href=\"{0}\">Calcolatore della coda di costruzione</a> per calcoli precisi dei tempi di costruzione.",
     "disclaimer-title": "Attenzione",
     "discoverer-class-bonus": "Bonus classe Discoverer",
     "discoverer-class-bonus-hint": "Inserisci il valore 'Totale' dalla tabella OGame dei bonus delle forme di vita ai bonus di classe, riga 'Discoverer'. Si applica solo se nella scheda 'Generale' è selezionata la classe 'Discoverer'.",
