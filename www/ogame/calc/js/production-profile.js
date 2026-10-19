@@ -164,7 +164,7 @@ class ProductionProfiles extends ProfileBinder {
       pfShow('#reset', false);
       this.renderPlanetSelect(profile);
       const last = this.pf.store.getLastPlanet('production', profile.id);
-      const shown = states.find((s) => s.pfId === last) || states[0];
+      const shown = states.find((s) => last !== null && s.pfId === last) || states[0];
       this.showOnePlanet(shown.pfId || null, profile);
       pfShow('#pf-planet-row', true);
     } finally {
@@ -230,7 +230,7 @@ class ProductionProfiles extends ProfileBinder {
    */
   showOnePlanet(planetId, profile) {
     const states = /** @type {TaggedState[]} */ (options.prm.aPS);
-    const index = Math.max(0, states.findIndex((s) => s.pfId === planetId));
+    const index = Math.max(0, states.findIndex((s) => planetId !== null && s.pfId === planetId));
     this.onePlanetId = states[index] ? states[index].pfId || null : null;
     fillOnePlanetForm(states[index]);
     const planet = profile.planets.find((p) => p.id === this.onePlanetId);

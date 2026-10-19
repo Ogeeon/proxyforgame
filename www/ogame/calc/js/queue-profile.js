@@ -192,7 +192,7 @@ class QueueProfiles extends ProfileBinder {
     QUEUE_TABS.forEach((t) => {
       const body = this.body(t, profile);
       const before = this.bodySnapshot[t.tab];
-      if (!body || before === undefined) return;
+      if (!body || typeof before !== 'number') return;
       if (pfNum(prm[t.fields]) !== before) changed = setProfileValue(body, 'fields.total', pfNum(prm[t.fields])) || changed;
       this.takeBodySnapshot(t);
     });

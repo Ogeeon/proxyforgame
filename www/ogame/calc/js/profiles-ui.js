@@ -1923,7 +1923,7 @@ class PfCoordsSelect {
      */
     const add = (body, isMoon) => {
       const c = body.coords;
-      if (!c || c.galaxy === null || c.system === null || c.position === null) return;
+      if (typeof c?.galaxy !== 'number' || typeof c.system !== 'number' || typeof c.position !== 'number') return;
       const coords = [c.galaxy, c.system, c.position];
       const name = (body.name || this.config.nameFallback) + (isMoon ? ' (' + getOptionValue('moonLabel', '') + ')' : '');
       list.push({ body, coords, isMoon, label: name + ' [' + coords.join(':') + ']' });

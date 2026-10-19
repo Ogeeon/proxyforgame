@@ -325,7 +325,7 @@ function pfStartRange(from, to, level, gap) {
  */
 function pfBodyLabel(body, fallback = '—') {
   const c = body.coords;
-  const where = c && c.galaxy !== null && c.system !== null ? ' [' + c.galaxy + ':' + c.system + ':' + c.position + ']' : '';
+  const where = typeof c?.galaxy === 'number' && typeof c.system === 'number' ? ' [' + c.galaxy + ':' + c.system + ':' + c.position + ']' : '';
   return (body.name || fallback) + where;
 }
 
@@ -1002,7 +1002,7 @@ function byCoords(a, b) {
   /** @param {ProfilePlanet} p */
   const key = (p) => {
     const c = p.coords;
-    if (!c || c.galaxy === null || c.system === null || c.position === null) return Number.MAX_SAFE_INTEGER;
+    if (typeof c?.galaxy !== 'number' || typeof c.system !== 'number' || typeof c.position !== 'number') return Number.MAX_SAFE_INTEGER;
     return (c.galaxy * 1000 + c.system) * 100 + c.position;
   };
   return key(a) - key(b);
@@ -1173,7 +1173,7 @@ function parseProfilesFile(text) {
   if (!isPlainObject(raw) || !Array.isArray(raw.profiles) || !('pfgProfiles' in raw)) return { ok: false, reason: 'shape' };
   if (raw.pfgProfiles !== PROFILE_FILE_VERSION) return { ok: false, reason: 'version' };
   const profiles = raw.profiles.map(readProfile);
-  if (profiles.some((p) => p === null)) return { ok: false, reason: 'version' };
+  if (profiles.includes(null)) return { ok: false, reason: 'version' };
   // The universe choices are a bonus: a broken entry is dropped, not the file.
   const universes = (Array.isArray(raw.universes) ? raw.universes : []).map(readUniverseChoices).filter((u) => u !== null);
   return { ok: true, profiles: /** @type {Profile[]} */ (profiles), universes: /** @type {UniverseChoices[]} */ (universes) };

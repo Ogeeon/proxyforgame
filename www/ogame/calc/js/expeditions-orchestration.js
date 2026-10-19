@@ -134,7 +134,7 @@ class ExpeditionsApp {
       ['hyperTechLevel', api.hyperTechLevel], ['percentRes', api.percentRes], ['percentShips', api.percentShips],
       ['classBonusCollector', api.classBonusCollector], ['classBonusDiscoverer', api.classBonusDiscoverer],
     ];
-    this.linkKeys = new Set(named.filter(([, value]) => value !== null && value !== undefined).map(([key]) => key));
+    this.linkKeys = new Set(named.filter(([, value]) => typeof value === 'number').map(([key]) => key));
 
     const highTop = selectEl('#highTop');
     if (api.highTopIdx && highTop) highTop.selectedIndex = api.highTopIdx;

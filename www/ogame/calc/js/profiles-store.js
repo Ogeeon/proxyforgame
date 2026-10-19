@@ -238,7 +238,7 @@ class ProfileStore {
   setLastPlanet(calc, profileId, planetId) {
     const raw = this.read(this.local, PROFILE_STORAGE_KEYS.planets);
     const map = raw && typeof raw === 'object' && !Array.isArray(raw) ? raw : {};
-    map[calc] = { ...(map[calc] || {}), [profileId]: planetId };
+    map[calc] = { ...map[calc], [profileId]: planetId };
     this.write(this.local, PROFILE_STORAGE_KEYS.planets, map);
   }
 
