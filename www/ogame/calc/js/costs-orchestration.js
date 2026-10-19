@@ -609,6 +609,14 @@ class CostsCalculator {
   }
 
   /**
+   * Another technology was picked on the range tab and the tab recalculated.
+   * A hook for costs-profile.js, which fills in the profile's level there.
+   */
+  rangeTechChanged() {
+    // Nothing to do without a profile binding.
+  }
+
+  /**
    * Bind range tab events
    * @private
    */
@@ -624,6 +632,7 @@ class CostsCalculator {
     addEvent('#tech-types-select', 'change', () => {
       this._raiseLabLevelForRange();
       this.recalculateRangeTab();
+      this.rangeTechChanged();
     });
 
     ['#tab2-from-level', '#tab2-to-level'].forEach(selector => {

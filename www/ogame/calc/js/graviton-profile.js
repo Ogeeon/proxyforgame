@@ -24,15 +24,9 @@
 
 'use strict';
 
-/** @type {ProfileConvField[]} */
+/** @type {ProfilePrmField[]} */
 const GRAVITON_ACCOUNT_FIELDS = [
-  pfConvNumField('research.113', 'energyTechLevel', '#energy-tech-level'),
-  pfConvNumField('research.114', 'hyperTechLevel', '#hyper-tech-level'),
-  ...pfOfficerFields(GRAVITON_OFFICERS),
-  // The calculator has no discoverer: one shows as no class.
-  pfClassField('playerClass', 'player-class-', GRAVITON_CLASS.NONE),
-  pfTraderField('isTrader', '#trader-bonus'),
-  pfConvNumField('lf.prod.energy', 'totalLFEnrgBonus', '#total-lf-energy-bonus'),
+  ...PF_ENERGY_ACCOUNT_FIELDS,
   pfConvNumField('lf.ship.202.cargo', 'scCapacityIncrease', '#sc-capacity-increase'),
   pfConvNumField('lf.ship.203.cargo', 'lcCapacityIncrease', '#lc-capacity-increase'),
   pfConvNumField('lf.ship.209.cargo', 'rcCapacityIncrease', '#rc-capacity-increase'),
@@ -42,20 +36,15 @@ const GRAVITON_ACCOUNT_FIELDS = [
 const GRAVITON_PLANET_FIELDS = [
   pfConvNumField('building.21', 'shipyardLevel', '#shipyard-level'),
   pfConvNumField('building.15', 'nanitesFactoryLevel', '#nanites-factory-level'),
-  pfConvNumField('temperature.max', 'maxPlanetTemp', '#max-planet-temp'),
-  pfConvNumField('energyBooster', 'energyBoost', '#energy-boost'),
-  pfConvNumField('building.4', 'solarPlantLevel', '#solar-plant-level'),
-  pfConvNumField('production.4', 'solarPlantPercent', '#solar-plant-percent', 100),
-  pfConvNumField('building.12', 'fusionPlantLevel', '#fusion-plant-level'),
-  pfConvNumField('production.12', 'fusionPlantPercent', '#fusion-plant-percent', 100),
-  pfConvNumField('ship.212', 'solarSatellitesCount', '#solar-satellites-count'),
-  pfConvNumField('production.212', 'solarSatellitesPercent', '#solar-satellites-percent', 100),
-  // A Rocktal building: a planet of another life form has none.
-  pfConvNumField('lf.building.' + lfBuildingGameId(2, 7), 'disChLevel', '#disr-chamber-level'),
+  ...PF_ENERGY_PLANET_FIELDS,
 ];
 
-/** The options.prm keys of the settings that come from the profile's universe. */
-const GRAVITON_UNIVERSE_KEYS = ['universeSpeed', 'debrisPercent', 'deutInDebris'];
+/** @type {PfUniverseField[]} The settings that come from the profile's universe. */
+const GRAVITON_UNIVERSE_FIELDS = [
+  { kind: PF_UNIVERSE_SPEED, input: '#universe-speed', prm: 'universeSpeed' },
+  { kind: PF_UNIVERSE_DEBRIS, input: '#debris-percent', prm: 'debrisPercent' },
+  { kind: PF_UNIVERSE_DEUT_IN_DEBRIS, input: '#deut-in-debris', prm: 'deutInDebris' },
+];
 
 /** @extends {PlanetPrmBinder<GravitonApp>} */
 class GravitonProfiles extends PlanetPrmBinder {
@@ -69,12 +58,7 @@ class GravitonProfiles extends PlanetPrmBinder {
       planetFields: GRAVITON_PLANET_FIELDS,
       cookie: 'options_graviton',
       lastKey: 'graviton',
-      universe: [
-        [PF_UNIVERSE_SPEED, '#universe-speed'],
-        [PF_UNIVERSE_DEBRIS, '#debris-percent'],
-        [PF_UNIVERSE_DEUT_IN_DEBRIS, '#deut-in-debris'],
-      ],
-      universeKeys: GRAVITON_UNIVERSE_KEYS,
+      universe: GRAVITON_UNIVERSE_FIELDS,
       // The officers' bonus follows the officers.
       extraOwnedKeys: ['energyBonus'],
     });

@@ -19,18 +19,6 @@
 
 'use strict';
 
-/**
- * A field of the flight calculator: it writes straight into options.prm.
- *
- * @typedef {ProfileFieldBase & {
- *   input: () => ?HTMLElement,
- *   get: (prm: Record<string, any>) => *,
- *   set: (prm: Record<string, any>, value: *) => void,
- * }} FlightAccountField
- * input: the field that shows it; get: the profile value the prm holds; set: put a profile value (or
- * undefined) into the prm.
- */
-
 /** Life-form bonus columns of #lf-ships-bonuses, in cell order. */
 const FLIGHT_LF_STATS = ['speed', 'cargo', 'fuel'];
 
@@ -49,33 +37,25 @@ function flightLfBonusInput(i, j) {
   return row ? row.getElementsByTagName('input')[j] || null : null;
 }
 
-/** @type {FlightAccountField[]} */
+/** @type {ProfileField[]} */
 const FLIGHT_ACCOUNT_FIELDS = [
   ...[['research.115', '#cmb-drive'], ['research.117', '#imp-drive'], ['research.118', '#hyp-drive']].map(([key, input], i) => ({
     key,
-    input: () => $(input),
-    get: (/** @type {Record<string, any>} */ prm) => pfNum(prm.driveLevels[i]),
-    set: (/** @type {Record<string, any>} */ prm, /** @type {*} */ v) => { prm.driveLevels[i] = pfNum(v); },
+    input,
+    read: (/** @type {Record<string, any>} */ prm) => pfNum(prm.driveLevels[i]),
+    write: (/** @type {Record<string, any>} */ prm, /** @type {*} */ v) => { prm.driveLevels[i] = pfNum(v); },
   })),
-  {
-    key: 'research.114', input: () => $('#hypertech-lvl'),
-    get: (prm) => pfNum(prm.hyperTechLvl), set: (prm, v) => { prm.hyperTechLvl = pfNum(v); },
-  },
-  {
-    // Flight has no "no class": a profile without one shows as collector.
-    key: 'class', input: () => $('#class-0'),
-    get: (prm) => pfNum(prm.playerClass) + 1,
-    set: (prm, v) => { prm.playerClass = Math.min(2, Math.max(0, pfNum(v) - 1)); },
-    display: (v) => pfLabelFor('class-' + (pfNum(v) - 1)),
-  },
+  pfConvNumField('research.114', 'hyperTechLvl', '#hypertech-lvl'),
+  // Flight has no "no class": a profile without one shows as collector.
+  pfCollectorClassField('playerClass', 'class-'),
   {
     // The researcher alliance brings the fleet nothing and has no radio: it shows as none.
-    key: 'allianceClass', input: () => $('#alliance-class-none'),
-    get: (prm) => {
+    key: 'allianceClass', input: '#alliance-class-none',
+    read: (prm) => {
       if (prm.traderBonus === true) return PROFILE_ALLIANCE_CLASS.TRADER;
       return prm.warriorBonus === true ? PROFILE_ALLIANCE_CLASS.WARRIOR : PROFILE_ALLIANCE_CLASS.NONE;
     },
-    set: (prm, v) => {
+    write: (prm, v) => {
       prm.traderBonus = pfNum(v) === PROFILE_ALLIANCE_CLASS.TRADER;
       prm.warriorBonus = pfNum(v) === PROFILE_ALLIANCE_CLASS.WARRIOR;
     },
@@ -84,19 +64,13 @@ const FLIGHT_ACCOUNT_FIELDS = [
       return pfLabelFor(pfNum(v) === PROFILE_ALLIANCE_CLASS.WARRIOR ? 'warrior-bonus' : 'alliance-class-none');
     },
   },
-  {
-    key: 'lf.classBooster.1', input: () => $('#lf-rocktal-collector-enh'),
-    get: (prm) => pfNum(prm.lfRocktalCE), set: (prm, v) => { prm.lfRocktalCE = pfNum(v); },
-  },
-  {
-    key: 'lf.classBooster.2', input: () => $('#lf-mechan-general-enh'),
-    get: (prm) => pfNum(prm.lfMechanGE), set: (prm, v) => { prm.lfMechanGE = pfNum(v); },
-  },
+  pfConvNumField('lf.classBooster.1', 'lfRocktalCE', '#lf-rocktal-collector-enh'),
+  pfConvNumField('lf.classBooster.2', 'lfMechanGE', '#lf-mechan-general-enh'),
   ...FLIGHT_SHIP_IDS.flatMap((shipId, i) => FLIGHT_LF_STATS.map((stat, j) => ({
     key: 'lf.ship.' + shipId + '.' + stat,
     input: () => flightLfBonusInput(i, j),
-    get: (/** @type {Record<string, any>} */ prm) => pfNum(prm.lfShipsBonuses[i]?.[j]),
-    set: (/** @type {Record<string, any>} */ prm, /** @type {*} */ v) => { prm.lfShipsBonuses[i][j] = pfNum(v); },
+    read: (/** @type {Record<string, any>} */ prm) => pfNum(prm.lfShipsBonuses[i]?.[j]),
+    write: (/** @type {Record<string, any>} */ prm, /** @type {*} */ v) => { prm.lfShipsBonuses[i][j] = pfNum(v); },
   }))),
 ];
 
@@ -104,7 +78,7 @@ const FLIGHT_ACCOUNT_FIELDS = [
 const FLIGHT_ACCOUNT_PRM_KEYS = ['driveLevels', 'hyperTechLvl', 'playerClass', 'traderBonus', 'warriorBonus',
   'lfRocktalCE', 'lfMechanGE', 'lfShipsBonuses'];
 
-/** @extends {FlatSettingsBinder<FlightAccountField>} */
+/** @extends {FlatSettingsBinder<ProfileField>} */
 class FlightProfiles extends FlatSettingsBinder {
   /**
    * @param {ProfilesUi} pf
@@ -116,23 +90,19 @@ class FlightProfiles extends FlatSettingsBinder {
       settings: () => options.prm,
       ownedKeys: FLIGHT_ACCOUNT_PRM_KEYS,
       cookie: 'options_flight',
-      ownSave: options.save,
-      read: (f, prm) => f.get(prm),
-      write: (f, prm, v) => f.set(prm, v),
     });
     this.orch = orchestrator;
     this.universe = new PfLockedUniverse({
       read: () => ({ country: options.prm.country, universe: options.prm.universe }),
       write: (country, number) => this.showUniverse(country, number),
     });
-    this.departure = new PfCoordsSelect(pf, {
+    this.coordsSelect = new PfCoordsSelect(pf, {
       select: '#pf-departure', boxes: ['#pf-departure', '#pf-take-fleet'], lastKey: 'flight', nameFallback: '',
       isAt: (b) => sameValue(b.coords, options.prm.departure.map(Number)),
       move: (b) => this.setDeparture(b.coords),
       recalc: () => this.orch.recalc(),
       changed: () => this.syncTakeFleet(),
     });
-    this.coordsSelect = this.departure;
     /** @type {*} The spy report waiting for the player to say where it goes. */
     this.pendingReport = null;
     /** @type {?(ready: boolean) => void} Settles makeRoomForReport(). */
@@ -140,7 +110,7 @@ class FlightProfiles extends FlatSettingsBinder {
   }
 
   bindControls() {
-    addEvent('#pf-departure', 'change', () => this.departureChosen());
+    super.bindControls();
     addEvent('#pf-take-fleet', 'click', () => this.takeFleet());
     this.bindReportChoice();
   }
@@ -156,9 +126,9 @@ class FlightProfiles extends FlatSettingsBinder {
   }
 
   /** @param {Profile} profile */
-  showProfile(profile) {
+  showSettings(profile) {
     this.orch.populateParams();
-    super.showProfile(profile);
+    super.showSettings(profile);
   }
 
   /**
@@ -195,11 +165,6 @@ class FlightProfiles extends FlatSettingsBinder {
     setVal('#departure-g', coords[0]);
     setVal('#departure-s', coords[1]);
     setVal('#departure-p', coords[2]);
-  }
-
-  departureChosen() {
-    const profile = this.profile();
-    if (profile) this.departure.chosen(profile);
   }
 
   /**
@@ -318,26 +283,6 @@ class FlightProfiles extends FlatSettingsBinder {
     this.pf.store.setActive(profile.id);
     return true;
   }
-
-  // -------------------------------------------------------------------------
-  // The marks
-  // -------------------------------------------------------------------------
-
-  /** Name every value this page binds, in the page's own words. */
-  describeFields() {
-    const headers = $$('#lf-ships-bonuses tr:first-child th');
-    FLIGHT_ACCOUNT_FIELDS.forEach((f) => {
-      const input = f.input();
-      let label = pfFieldLabel(input);
-      const cell = input ? input.closest('td') : null;
-      if (cell instanceof HTMLTableCellElement && cell.parentElement instanceof HTMLTableRowElement) {
-        const ship = (cell.parentElement.cells[0]?.textContent || '').trim();
-        label = ship + ': ' + (headers[cell.cellIndex]?.textContent || '').trim();
-      }
-      this.pf.describeField(f.key, label, f.display);
-    });
-  }
-
 }
 
 /**

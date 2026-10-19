@@ -27,15 +27,9 @@
 
 'use strict';
 
-/** @type {ProfileConvField[]} */
+/** @type {ProfilePrmField[]} */
 const TERRAFORMER_ACCOUNT_FIELDS = [
-  pfConvNumField('research.113', 'energyTechLevel', '#energy-tech-level'),
-  pfConvNumField('research.114', 'hyperTechLevel', '#hyper-tech-level'),
-  ...pfOfficerFields(TERRAFORMER_OFFICERS),
-  // The calculator has no discoverer: one shows as no class.
-  pfClassField('playerClass', 'player-class-', TERRAFORMER_CLASS.NONE),
-  pfTraderField('isTrader', '#trader-bonus'),
-  pfConvNumField('lf.prod.energy', 'totalLFEnrgBonus', '#total-lf-energy-bonus'),
+  ...PF_ENERGY_ACCOUNT_FIELDS,
   // The game reports a cost reduction per technology; the calculator applies
   // one number to the Terraformer's cost and time, so it takes the cost one,
   // as the cost calculator does.
@@ -47,27 +41,15 @@ const TERRAFORMER_ACCOUNT_FIELDS = [
 /**
  * The fields of the planet picked in #pf-planet.
  *
- * @type {ProfileConvField[]}
+ * @type {ProfilePrmField[]}
  */
 const TERRAFORMER_PLANET_FIELDS = [
   pfConvNumField('building.14', 'robotsFactoryLevel', '#robots-factory-level'),
   // The field takes no level below 1, so a planet with no shipyard shows 1.
   pfConvNumField('building.21', 'shipyardLevel', '#shipyard-level', 1, 1),
   pfConvNumField('building.15', 'nanitesFactoryLevel', '#nanites-factory-level'),
-  pfConvNumField('temperature.max', 'maxPlanetTemp', '#max-planet-temp'),
-  pfConvNumField('energyBooster', 'energyBoost', '#energy-boost'),
-  pfConvNumField('building.4', 'solarPlantLevel', '#solar-plant-level'),
-  pfConvNumField('production.4', 'solarPlantPercent', '#solar-plant-percent', 100),
-  pfConvNumField('building.12', 'fusionPlantLevel', '#fusion-plant-level'),
-  pfConvNumField('production.12', 'fusionPlantPercent', '#fusion-plant-percent', 100),
-  pfConvNumField('ship.212', 'solarSatellitesCount', '#solar-satellites-count'),
-  pfConvNumField('production.212', 'solarSatellitesPercent', '#solar-satellites-percent', 100),
-  // A Rocktal building: a planet of another life form has none.
-  pfConvNumField('lf.building.' + lfBuildingGameId(2, 7), 'disChLevel', '#disr-chamber-level'),
+  ...PF_ENERGY_PLANET_FIELDS,
 ];
-
-/** The options.prm keys of the settings that come from the profile's universe. */
-const TERRAFORMER_UNIVERSE_KEYS = ['universeSpeed'];
 
 /** @extends {PlanetPrmBinder<TerraformerApp>} */
 class TerraformerProfiles extends PlanetPrmBinder {
@@ -81,8 +63,7 @@ class TerraformerProfiles extends PlanetPrmBinder {
       planetFields: TERRAFORMER_PLANET_FIELDS,
       cookie: 'options_terraformer',
       lastKey: 'terraformer',
-      universe: [[PF_UNIVERSE_SPEED, '#universe-speed']],
-      universeKeys: TERRAFORMER_UNIVERSE_KEYS,
+      universe: [{ kind: PF_UNIVERSE_SPEED, input: '#universe-speed', prm: 'universeSpeed' }],
       // The officers' bonus follows the officers, and the "from" level is filled in from the planet.
       extraOwnedKeys: ['energyBonus', 'tfLevelFrom'],
     });

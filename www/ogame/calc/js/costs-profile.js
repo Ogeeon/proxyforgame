@@ -31,114 +31,74 @@
 'use strict';
 
 /**
- * A field of the cost calculator: read from its parameters, not from options.prm.
- *
- * @typedef {ProfileFieldBase & {
- *   state: ?string,
- *   input: () => ?HTMLElement,
- *   get: (p: GlobalParams) => *,
- *   show: (value: *) => void,
- * }} CostsField
- * state: key in the calculator's stored state, null for the research bonuses table; input: the field that
- * shows it; get: the profile value the parameters hold; show: put a profile value (or undefined) into the form.
+ * The cost calculator reads its settings back from the form, so its fields
+ * write there: this stands in for the settings they are handed. They read
+ * from the calculator's parameters, whose keys are its stored state's.
  */
+const COSTS_FORM = {};
 
 /**
- * A whole-number field.
+ * An officer's switch, shown straight in the form.
  *
- * @param {string} key
- * @param {string} state
- * @param {string} selector
- * @returns {CostsField}
+ * @param {string} name
+ * @returns {ProfilePrmField}
  */
-function costsLevelField(key, state, selector) {
-  return {
-    key, state, input: () => $(selector),
-    get: (p) => pfNum(/** @type {Record<string, any>} */ (p)[state]),
-    show: (v) => setVal(selector, pfNum(v)),
-  };
+function costsOfficerField(name) {
+  return pfInForm(pfOfficerFields([name])[0], (v) => setChecked('#' + name, v));
 }
 
-/**
- * A percentage field, shown with the locale's decimal separator.
- *
- * @param {string} key
- * @param {string} state
- * @param {string} selector
- * @returns {CostsField}
- */
-function costsPercentField(key, state, selector) {
-  return {
-    key, state, input: () => $(selector),
-    get: (p) => pfNum(/** @type {Record<string, any>} */ (p)[state]),
-    show: (v) => setNumVal(selector, pfNum(v)),
-  };
-}
-
-/** @type {CostsField[]} */
+/** @type {ProfilePrmField[]} */
 const COSTS_ACCOUNT_FIELDS = [
-  costsLevelField('research.113', 'energyTechLevel', '#energy-tech-level'),
-  costsLevelField('research.122', 'plasmaTechLevel', '#plasma-tech-level'),
-  costsLevelField('research.121', 'ionTechLevel', '#ion-tech-level'),
-  costsLevelField('research.114', 'hyperTechLevel', '#hyper-tech-level'),
-  costsLevelField('research.123', 'irnLevel', '#irn-level'),
-  ...['geologist', 'engineer', 'technocrat', 'admiral', 'commander'].map((name) => ({
-    key: 'officer.' + name, state: name, input: () => $('#' + name),
-    get: (/** @type {GlobalParams} */ p) => /** @type {Record<string, any>} */ (p)[name] === true,
-    show: (/** @type {*} */ v) => setChecked('#' + name, v === true),
-  })),
-  {
-    // The calculator has no "no class": a profile without one shows as collector.
-    key: 'class', state: 'playerClass', input: () => $('#class-0'),
-    get: (p) => pfNum(p.playerClass) + 1,
-    show: (v) => setChecked('#class-' + Math.min(2, Math.max(0, pfNum(v) - 1)), true),
-    display: (v) => pfLabelFor('class-' + (pfNum(v) - 1)),
-  },
-  {
-    key: 'allianceClass', state: 'isTrader', input: () => $('#is-trader'),
-    get: (p) => (p.isTrader ? PROFILE_ALLIANCE_CLASS.TRADER : PROFILE_ALLIANCE_CLASS.NONE),
-    show: (v) => setChecked('#is-trader', pfNum(v) === PROFILE_ALLIANCE_CLASS.TRADER),
-    display: (v) => (pfNum(v) === PROFILE_ALLIANCE_CLASS.TRADER ? '✓' : '—'),
-  },
-  costsPercentField('lf.classBooster.1', 'collectorClassBonus', '#lf-collector-class-bonus'),
-  costsPercentField('lf.classBooster.3', 'discovererClassBonus', '#discoverer-class-bonus'),
-  costsPercentField('lf.ship.202.cargo', 'scCapacityIncrease', '#sc-capacity-increase'),
-  costsPercentField('lf.ship.203.cargo', 'lcCapacityIncrease', '#lc-capacity-increase'),
+  pfLevelField('research.113', 'energyTechLevel', '#energy-tech-level'),
+  pfLevelField('research.122', 'plasmaTechLevel', '#plasma-tech-level'),
+  pfLevelField('research.121', 'ionTechLevel', '#ion-tech-level'),
+  pfLevelField('research.114', 'hyperTechLevel', '#hyper-tech-level'),
+  pfLevelField('research.123', 'irnLevel', '#irn-level'),
+  ...['geologist', 'engineer', 'technocrat', 'admiral', 'commander'].map(costsOfficerField),
+  // The calculator has no "no class": a profile without one shows as collector.
+  pfInForm(pfCollectorClassField('playerClass', 'class-'), (v) => setChecked('#class-' + v, true)),
+  pfInForm(pfTraderField('isTrader', '#is-trader'), (v) => setChecked('#is-trader', v)),
+  pfPercentField('lf.classBooster.1', 'collectorClassBonus', '#lf-collector-class-bonus'),
+  pfPercentField('lf.classBooster.3', 'discovererClassBonus', '#discoverer-class-bonus'),
+  pfPercentField('lf.ship.202.cargo', 'scCapacityIncrease', '#sc-capacity-increase'),
+  pfPercentField('lf.ship.203.cargo', 'lcCapacityIncrease', '#lc-capacity-increase'),
   // The game reports a cost reduction per technology; the calculator applies
   // one number to the Terraformer's cost and time, so it takes the cost one.
-  costsPercentField('lf.cost.33.cost', 'lfTerraformerRdc', '#lf-terraformer-rdc'),
-  {
-    key: 'rates', state: 'rates', input: () => $('#exchange-rates-m'),
-    get: (p) => (Array.isArray(p.rates) ? p.rates.map(Number) : DEFAULT_RATES.slice()),
-    show: (v) => {
-      const rates = Array.isArray(v) && v.length === 3 ? v.map(Number) : DEFAULT_RATES;
-      setNumVal('#exchange-rates-m', rates[0]);
-      setNumVal('#exchange-rates-c', rates[1]);
-      setNumVal('#exchange-rates-d', rates[2]);
-    },
-  },
+  pfPercentField('lf.cost.33.cost', 'lfTerraformerRdc', '#lf-terraformer-rdc'),
+  pfInForm(pfRatesField('rates', '#exchange-rates-m'), (/** @type {number[]} */ rates) => {
+    setNumVal('#exchange-rates-m', rates[0]);
+    setNumVal('#exchange-rates-c', rates[1]);
+    setNumVal('#exchange-rates-d', rates[2]);
+  }),
 ];
 
-/** The fields of the planet picked in #pf-planet. */
+/** @type {ProfilePrmField[]} The fields of the planet picked in #pf-planet. */
 const COSTS_PLANET_FIELDS = [
-  costsLevelField('building.14', 'robotFactoryLevelPlanet', '#robot-factory-level'),
-  costsLevelField('building.15', 'naniteFactoryLevel', '#nanite-factory-level'),
-  costsLevelField('building.21', 'shipyardLevel', '#shipyard-level'),
-  costsLevelField('building.31', 'researchLabLevel', '#research-lab-level'),
-  costsLevelField('temperature.max', 'maxPlanetTemp', '#max-planet-temp'),
-  costsLevelField('lf.building.' + lfBuildingGameId(2, 11), 'mineralResCntrLvl', '#mineral-res-cntr-lvl'),
+  pfLevelField('building.14', 'robotFactoryLevelPlanet', '#robot-factory-level'),
+  pfLevelField('building.15', 'naniteFactoryLevel', '#nanite-factory-level'),
+  pfLevelField('building.21', 'shipyardLevel', '#shipyard-level'),
+  pfLevelField('building.31', 'researchLabLevel', '#research-lab-level'),
+  pfLevelField('temperature.max', 'maxPlanetTemp', '#max-planet-temp'),
+  pfLevelField('lf.building.' + lfBuildingGameId(2, 11), 'mineralResCntrLvl', '#mineral-res-cntr-lvl'),
 ];
 
-/** The fields of the moon picked in #pf-moon. */
+/** @type {ProfilePrmField[]} The fields of the moon picked in #pf-moon. */
 const COSTS_MOON_FIELDS = [
-  costsLevelField('building.14', 'robotFactoryLevelMoon', '#robot-factory-level-moon'),
+  pfLevelField('building.14', 'robotFactoryLevelMoon', '#robot-factory-level-moon'),
 ];
 
 /** The most planets the research network dialog takes (its planet count spinner's limit). */
 const COSTS_MAX_LAB_PLANETS = 99;
 
-/** The universe picker and the speeds it fills in: the profile's when it has a universe. */
-const COSTS_UNIVERSE_STATE = ['country', 'universe', 'universeSpeed', 'researchSpeed'];
+/**
+ * A speed select's value, as the calculator collects it.
+ *
+ * @param {string} selector
+ * @returns {number}
+ */
+function costsSpeed(selector) {
+  return Number.parseInt(getVal(selector), 10) || 0;
+}
 
 /**
  * The multi-level build tables whose "from" levels the profile fills in, and
@@ -147,9 +107,9 @@ const COSTS_UNIVERSE_STATE = ['country', 'universe', 'universeSpeed', 'researchS
  * @type {Array<{table: string, where: 'planet'|'moon'|'account', prefix: string}>}
  */
 const COSTS_START_TABLES = [
-  { table: 'table-1-2', where: 'planet', prefix: 'building.' },
-  { table: 'table-1-3', where: 'moon', prefix: 'building.' },
-  { table: 'table-1-4', where: 'account', prefix: 'research.' },
+  { table: '#table-1-2', where: 'planet', prefix: 'building.' },
+  { table: '#table-1-3', where: 'moon', prefix: 'building.' },
+  { table: '#table-1-4', where: 'account', prefix: 'research.' },
 ];
 
 /**
@@ -171,7 +131,7 @@ const COSTS_MOON_ROW_OFFSET = 10000;
  * The fields of the research bonuses table: a cost and a time reduction per
  * research, read from the rows the page renders.
  *
- * @returns {CostsField[]}
+ * @returns {ProfileField[]}
  */
 function costsResearchTableFields() {
   return Array.from($$('#lf-research-bonuses-tbody tr')).filter((row) => row instanceof HTMLTableRowElement).flatMap((row) => {
@@ -183,9 +143,9 @@ function costsResearchTableFields() {
     ]).map(([kind, selector, map]) => {
       const input = () => /** @type {?HTMLInputElement} */ (row.querySelector(selector));
       return {
-        key: 'lf.cost.' + techId + '.' + kind, state: null, input,
-        get: (/** @type {GlobalParams} */ p) => pfNum(p[map][techId]),
-        show: (/** @type {*} */ v) => {
+        key: 'lf.cost.' + techId + '.' + kind, input,
+        read: (/** @type {Record<string, any>} */ p) => pfNum(p[map][techId]),
+        write: (/** @type {Record<string, any>} */ _form, /** @type {*} */ v) => {
           const el = input();
           if (el) el.value = localizeFloat(pfNum(v));
         },
@@ -202,7 +162,7 @@ class CostsProfiles extends ProfileBinder {
    */
   constructor(pf, app) {
     super(pf, app);
-    /** @type {CostsField[]} The account fields, the research bonuses table included. */
+    /** @type {ProfileField[]} The account fields, the research bonuses table included. */
     this.accountFields = [...COSTS_ACCOUNT_FIELDS, ...costsResearchTableFields()];
     /** @type {?string} The planet shown; null leaves its fields to the calculator. */
     this.planetId = null;
@@ -214,10 +174,25 @@ class CostsProfiles extends ProfileBinder {
     // A moon not picked yet is the one of the planet shown.
     this.moonSelect = new PfBodySelect(pf, {
       select: '#pf-moon', box: '#pf-moon-box', bodies: (p) => p.moons, lastKey: 'costs-moon',
-      fallback: (p) => p.moons.find((m) => this.planetId !== null && m.planetId === this.planetId),
+      planetOf: () => this.planetId,
     });
-    /** True while the profile's universe is in the picker. */
-    this.universeBound = false;
+    // The profile's universe goes into the picker, locked; picking it fetches its speeds,
+    // as the picker does. The player's own universe comes back with the speeds it had.
+    this.universe = new PfLockedUniverse({
+      read: () => ({
+        country: selectEl('#country')?.value ?? '--',
+        universe: selectEl('#universe')?.value ?? '',
+        universeSpeed: costsSpeed('#universe-speed'),
+        researchSpeed: costsSpeed('#research-speed'),
+      }),
+      write: (country, number) => this.showUniverse(country, number),
+      restore: (own) => {
+        setVal('#country', own.country ?? '--');
+        this.app.fillUniverseList(own.country ?? '--', own.universe ?? '');
+        setVal('#universe-speed', own.universeSpeed ?? 1);
+        setVal('#research-speed', own.researchSpeed ?? 1);
+      },
+    });
     /** @type {Record<string, *>} The calculator's stored state as it was before a profile. */
     this.ownState = {};
     /** @type {Array<{cost: number, time: number}>} The research bonuses table as it was before a profile. */
@@ -226,25 +201,24 @@ class CostsProfiles extends ProfileBinder {
     this.ownSaveTable = app.saveLfResearchTable.bind(app);
   }
 
-  init() {
-    this.describeFields();
+  takeOverSave() {
     this.app.saveState = () => this.save();
     // The table's own key stays as it was before the profile.
     this.app.saveLfResearchTable = (data) => {
       if (this.profileId === null) this.ownSaveTable(data);
     };
+  }
+
+  bindControls() {
     this.planetSelect.onChange(() => this.bodyChosen('planet'));
     this.moonSelect.onChange(() => this.bodyChosen('moon'));
-    // Runs after the calculator's own handler, which is bound first.
-    addEvent('#tech-types-select', 'change', () => {
+    // Called by the calculator's own handler, once it has recalculated the tab.
+    this.app.rangeTechChanged = () => {
       const profile = this.profile();
       if (!profile) return;
-      this.fillRangeStart(profile);
+      pfFillRangeStart(this.rangeLevel(profile));
       this.app.recalculateRangeTab();
-    });
-    this.pf.onChange((profile) => this.apply(profile));
-    const active = this.pf.active();
-    if (active) this.apply(active);
+    };
   }
 
   /**
@@ -261,11 +235,10 @@ class CostsProfiles extends ProfileBinder {
   /** The state keys the profile owns right now. */
   ownedStateKeys() {
     return [
-      ...COSTS_ACCOUNT_FIELDS.map((f) => /** @type {string} */ (f.state)),
+      ...COSTS_ACCOUNT_FIELDS.map((f) => f.prm),
       'useIrn',
-      ...(this.planetId === null ? [] : [...COSTS_PLANET_FIELDS.map((f) => /** @type {string} */ (f.state)), 'planetPos', 'labLevels', 'labChoice']),
-      ...(this.moonId === null ? [] : COSTS_MOON_FIELDS.map((f) => /** @type {string} */ (f.state))),
-      ...(this.universeBound ? COSTS_UNIVERSE_STATE : []),
+      ...(this.planetId === null ? [] : [...COSTS_PLANET_FIELDS.map((f) => f.prm), 'planetPos', 'labLevels', 'labChoice']),
+      ...(this.moonId === null ? [] : COSTS_MOON_FIELDS.map((f) => f.prm)),
     ];
   }
 
@@ -273,36 +246,22 @@ class CostsProfiles extends ProfileBinder {
   // Profile -> calculator
   // -------------------------------------------------------------------------
 
-  /** @param {?Profile} profile */
-  apply(profile) {
-    if (!profile) {
-      this.leave();
-      return;
-    }
-    this.applying = true;
-    try {
-      if (this.profileId === null) {
-        const own = this.app.exportState();
-        this.ownState = own.state;
-        this.ownTable = own.table;
-      }
-      this.profileId = profile.id;
-      this.pf.clearMarks();
-      this.accountFields.forEach((f) => f.show(getProfileValue(profile.account, f.key)));
-      this.renderBodySelects(profile);
-      this.showBodies(profile);
-      this.fillStartLevels(profile);
-      this.showLabs(profile);
-      setChecked('#use-irn', this.irnSwitch(profile));
-      this.applyUniverse(profile);
-      // The calculator's reset would write every default into the profile as an edit.
-      pfShow('#reset', false);
-      this.app.recalculateAll();
-      this.takeSnapshot();
-    } finally {
-      this.applying = false;
-    }
-    this.markAll();
+  captureOwn() {
+    const own = this.app.exportState();
+    this.ownState = own.state;
+    this.ownTable = own.table;
+  }
+
+  /** @param {Profile} profile */
+  showProfile(profile) {
+    this.accountFields.forEach((f) => f.write(COSTS_FORM, getProfileValue(profile.account, f.key)));
+    this.renderBodySelects(profile);
+    this.showBodies(profile);
+    this.fillStartLevels(profile);
+    this.showLabs(profile);
+    setChecked('#use-irn', this.irnSwitch(profile));
+    this.universe.apply(profile);
+    this.app.recalculateAll();
   }
 
   /**
@@ -326,51 +285,31 @@ class CostsProfiles extends ProfileBinder {
    */
   showBodies(profile) {
     const { planet, moon } = this.bodies(profile);
-    COSTS_PLANET_FIELDS.forEach((f) => f.show(planet ? getProfileValue(planet, f.key, 0) : this.ownState[/** @type {string} */ (f.state)]));
+    COSTS_PLANET_FIELDS.forEach((f) => f.write(COSTS_FORM, planet ? getProfileValue(planet, f.key, 0) : this.ownState[f.prm]));
     const position = planet?.coords?.position;
     setVal('#planet-pos', planet ? position ?? 8 : pfNum(this.ownState.planetPos) || 8);
-    COSTS_MOON_FIELDS.forEach((f) => f.show(moon ? getProfileValue(moon, f.key, 0) : this.ownState[/** @type {string} */ (f.state)]));
+    COSTS_MOON_FIELDS.forEach((f) => f.write(COSTS_FORM, moon ? getProfileValue(moon, f.key, 0) : this.ownState[f.prm]));
   }
 
   /**
-   * Show the profile's universe in the picker, locked: the profile says where
-   * it plays. Picking it fetches the universe's speeds, as the picker does.
-   * A profile with no universe leaves the picker to the player.
+   * Show a universe in the picker and fetch its speeds, as the picker does;
+   * nothing happens when it shows that universe already.
    *
-   * @param {Profile} profile
+   * @param {string} country
+   * @param {*} number
    */
-  applyUniverse(profile) {
-    const wanted = profile.universe;
-    if (!wanted) {
-      this.unlockUniverse();
-      return;
-    }
-    this.universeBound = true;
-    if (getVal('#country') !== wanted.country || getVal('#universe') !== String(wanted.number)) {
-      setVal('#country', wanted.country);
-      this.app.fillUniverseList(wanted.country, wanted.number);
-      void this.app.fetchUniverseSpeeds();
-    }
-    [selectEl('#country'), selectEl('#universe')].forEach((el) => pfLockSelect(el, true, getOptionValue('universeFromProfile', '')));
-  }
-
-  /** Give the universe picker back, on the universe and speeds it had before the profile. */
-  unlockUniverse() {
-    [selectEl('#country'), selectEl('#universe')].forEach((el) => pfLockSelect(el, false));
-    if (!this.universeBound) return;
-    this.universeBound = false;
-    const own = this.ownState;
-    setVal('#country', own.country ?? '--');
-    this.app.fillUniverseList(own.country ?? '--', own.universe ?? '');
-    setVal('#universe-speed', own.universeSpeed ?? 1);
-    setVal('#research-speed', own.researchSpeed ?? 1);
+  showUniverse(country, number) {
+    if (this.universe.matches(country, number)) return;
+    setVal('#country', country);
+    this.app.fillUniverseList(country, number);
+    void this.app.fetchUniverseSpeeds();
   }
 
   restoreOwn() {
     this.planetId = null;
     this.moonId = null;
     pfShow('#pf-bodies-row', false);
-    this.unlockUniverse();
+    this.universe.release();
     const own = this.ownState;
     this.lockPlanetCount(false);
     this.fillLabTable(Array.isArray(own.labLevels) ? own.labLevels : [], pfNum(own.labChoice ?? -1), null);
@@ -384,10 +323,10 @@ class CostsProfiles extends ProfileBinder {
   takeSnapshot() {
     const p = this.app.params();
     this.snapshot = {};
-    this.accountFields.forEach((f) => { this.snapshot[f.key] = f.get(p); });
-    COSTS_PLANET_FIELDS.forEach((f) => { this.snapshot['planet:' + f.key] = f.get(p); });
+    this.accountFields.forEach((f) => { this.snapshot[f.key] = f.read(p); });
+    COSTS_PLANET_FIELDS.forEach((f) => { this.snapshot['planet:' + f.key] = f.read(p); });
     this.snapshot['planet:position'] = pfNum(p.planetPos);
-    COSTS_MOON_FIELDS.forEach((f) => { this.snapshot['moon:' + f.key] = f.get(p); });
+    COSTS_MOON_FIELDS.forEach((f) => { this.snapshot['moon:' + f.key] = f.read(p); });
     this.snapshot.labs = p.labLevels.map(pfNum);
     this.snapshot.labChoice = p.labChoice;
     this.snapshot.useIrn = p.useIrn;
@@ -410,11 +349,11 @@ class CostsProfiles extends ProfileBinder {
     let changed = false;
     /**
      * @param {{values: LayeredValues}} entity
-     * @param {CostsField} f
+     * @param {ProfileField} f
      * @param {string} snapKey
      */
     const syncField = (entity, f, snapKey) => {
-      changed = this.syncValue(entity, f.key, snapKey, f.get(p)) || changed;
+      changed = this.syncValue(entity, f.key, snapKey, f.read(p)) || changed;
     };
     this.accountFields.forEach((f) => syncField(profile.account, f, f.key));
     if (planet) {
@@ -439,15 +378,12 @@ class CostsProfiles extends ProfileBinder {
     }
     if (labs.shownLab !== null) {
       // The shown planet's lab was edited in the dialog: its field follows.
-      this.applying = true;
-      try {
-        setVal('#research-lab-level', labs.shownLab);
+      const lab = labs.shownLab;
+      this.whileApplying(() => {
+        setVal('#research-lab-level', lab);
         this.app.recalculateAll();
         this.takeSnapshot();
-      } finally {
-        this.applying = false;
-      }
-      this.markAll();
+      });
     }
   }
 
@@ -501,6 +437,8 @@ class CostsProfiles extends ProfileBinder {
    */
   saveOwn() {
     const state = this.app.buildState();
+    // A universe the profile dictates is stored as the player's own, speeds included.
+    this.universe.overlay(state);
     const owned = new Set(this.ownedStateKeys());
     Object.keys(state).forEach((key) => {
       if (owned.has(key)) state[key] = cloneData(this.ownState[key]);
@@ -522,24 +460,16 @@ class CostsProfiles extends ProfileBinder {
     this.save();
     if (kind === 'planet') {
       this.planetId = this.planetSelect.chosen(profile);
-      const moon = profile.moons.find((m) => m.planetId === this.planetId);
-      if (moon) {
-        this.moonId = moon.id;
-        this.moonSelect.choose(profile, moon.id);
-      }
+      this.moonId = this.moonSelect.follow(profile) ?? this.moonId;
     } else {
       this.moonId = this.moonSelect.chosen(profile);
     }
-    this.applying = true;
-    try {
+    this.whileApplying(() => {
       this.showBodies(profile);
       this.fillStartLevels(profile);
       this.app.recalculateAll();
       this.takeSnapshot();
-    } finally {
-      this.applying = false;
-    }
-    this.markAll();
+    });
   }
 
   // -------------------------------------------------------------------------
@@ -570,17 +500,10 @@ class CostsProfiles extends ProfileBinder {
    * @param {Profile} profile
    */
   fillStartLevels(profile) {
-    COSTS_START_TABLES.forEach((t) => {
-      getTableRows('#' + t.table).forEach((row) => {
-        if (!(row instanceof HTMLTableRowElement)) return;
-        const rowId = Number.parseInt(row.cells[0]?.textContent ?? '', 10);
-        const from = row.cells[2]?.querySelector('input');
-        const to = row.cells[3]?.querySelector('input');
-        if (!rowId || !from || !to) return;
-        const techId = rowId > COSTS_MOON_ROW_OFFSET ? rowId - COSTS_MOON_ROW_OFFSET : rowId;
-        const level = this.knownLevel(profile, t.where, t.prefix + techId);
-        if (level !== null) pfFollowStart(from, to, level, 0);
-      });
+    pfFillStartRows(COSTS_START_TABLES.map((t) => t.table), (rowId, i) => {
+      const t = COSTS_START_TABLES[i];
+      const techId = rowId > COSTS_MOON_ROW_OFFSET ? rowId - COSTS_MOON_ROW_OFFSET : rowId;
+      return this.knownLevel(profile, t.where, t.prefix + techId);
     });
     const level = this.rangeLevel(profile);
     if (level !== null) pfFollowStart(inputEl('#tab2-from-level'), inputEl('#tab2-to-level'), level, 1);
@@ -601,21 +524,6 @@ class CostsProfiles extends ProfileBinder {
     const source = COSTS_RANGE_GROUPS[Array.from(select.querySelectorAll('optgroup')).indexOf(group)];
     if (!source) return null;
     return this.knownLevel(profile, source.where, source.prefix + option.value);
-  }
-
-  /**
-   * Fill in the range tab's "from" with the known level of the technology
-   * picked there, and raise "to" to the next level when it is not above it.
-   * Another technology was picked, so whatever the player typed was for the
-   * old one.
-   *
-   * @param {Profile} profile
-   */
-  fillRangeStart(profile) {
-    const level = this.rangeLevel(profile);
-    if (level === null) return;
-    setVal('#tab2-from-level', level);
-    if ((Number.parseInt(getVal('#tab2-to-level'), 10) || 0) <= level) setVal('#tab2-to-level', level + 1);
   }
 
   // -------------------------------------------------------------------------
@@ -706,14 +614,14 @@ class CostsProfiles extends ProfileBinder {
     const profile = this.profile();
     if (!profile) return;
     this.accountFields.forEach((f) => {
-      this.pf.markField(f.input(), profile, profile.account, f.key, this.restoreAccount(f.key));
+      this.pf.markField(pfFieldInput(f), profile, profile.account, f.key, this.restoreAccount(f.key));
     });
     const { planet, moon } = this.bodies(profile);
     if (planet) {
-      COSTS_PLANET_FIELDS.forEach((f) => this.pf.markField(f.input(), profile, planet, f.key, this.restoreBody('planets', planet.id, f.key)));
+      COSTS_PLANET_FIELDS.forEach((f) => this.pf.markField(pfFieldInput(f), profile, planet, f.key, this.restoreBody('planets', planet.id, f.key)));
     }
     if (moon) {
-      COSTS_MOON_FIELDS.forEach((f) => this.pf.markField(f.input(), profile, moon, f.key, this.restoreBody('moons', moon.id, f.key)));
+      COSTS_MOON_FIELDS.forEach((f) => this.pf.markField(pfFieldInput(f), profile, moon, f.key, this.restoreBody('moons', moon.id, f.key)));
     }
     profile.planets.slice(0, COSTS_MAX_LAB_PLANETS).forEach((p, i) => {
       this.pf.markField($('#lablevel_' + (i + 1)), profile, p, 'building.31', this.restoreBody('planets', p.id, 'building.31'));

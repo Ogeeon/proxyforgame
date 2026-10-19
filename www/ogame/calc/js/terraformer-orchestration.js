@@ -103,8 +103,8 @@ const options = {
   save: function () { saveToCookie('options_terraformer', options.prm); }
 };
 
-/** The officer checkboxes, by id and options.prm key alike. */
-const TERRAFORMER_OFFICERS = ['engineer', 'geologist', 'technocrat', 'admiral', 'commander'];
+/** The officer checkboxes, by id and options.prm key alike: the profile's officers (profiles-core.js). */
+const TERRAFORMER_OFFICERS = PROFILE_OFFICERS;
 
 class TerraformerApp {
   constructor() {

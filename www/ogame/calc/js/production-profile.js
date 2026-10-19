@@ -22,7 +22,7 @@ const PRODUCTION_LOCAL_KEYS = ['universeSpeed', 'maxTempEntered', 'onePlnExtView
 /** Where the calculator fields go while a profile is active. */
 const PRODUCTION_PROFILE_OPTIONS_KEY = 'options_production_profile';
 
-/** @type {ProfileConvField[]} */
+/** @type {ProfilePrmField[]} */
 const PRODUCTION_ACCOUNT_FIELDS = [
   pfConvNumField('research.113', 'energyTechLevel', '#energy-tech-level'),
   pfConvNumField('research.122', 'plasmaTechLevel', '#plasma-tech-level'),
@@ -107,21 +107,21 @@ class ProductionProfiles extends ProfileBinder {
     this.speed = null;
   }
 
-  init() {
+  bindControls() {
     this.insertPlanetSelect();
-    this.describeFields();
-    options.save = () => this.save();
     this.speed = new PfUniverseSetting(this.pf, PF_UNIVERSE_SPEED, '#universe-speed', () => updateParams());
-    this.pf.onChange((profile) => this.apply(profile));
-    const active = this.pf.active();
-    if (active) this.apply(active);
   }
 
   // -------------------------------------------------------------------------
   // Profile -> calculator
   // -------------------------------------------------------------------------
 
-  /** @param {?Profile} profile */
+  /**
+   * Not the template apply: the snapshot is taken from options.prm before the
+   * form is drawn from it, and the recalculation runs after the guard is off.
+   *
+   * @param {?Profile} profile
+   */
   apply(profile) {
     if (!profile) {
       this.leave();
@@ -135,7 +135,7 @@ class ProductionProfiles extends ProfileBinder {
       this.pf.clearMarks();
       const prm = options.prm;
       this.loadLocal();
-      PRODUCTION_ACCOUNT_FIELDS.forEach((f) => { prm[f.prm] = f.toPrm(getProfileValue(profile.account, f.key)); });
+      PRODUCTION_ACCOUNT_FIELDS.forEach((f) => f.write(prm, getProfileValue(profile.account, f.key)));
       prm.ratesFmt = 2;
 
       /** @type {TaggedState[]} */
@@ -200,13 +200,25 @@ class ProductionProfiles extends ProfileBinder {
     const profile = this.profile();
     const state = /** @type {TaggedState[]} */ (options.prm.aPS)[index];
     if (!profile || !state) return false;
+    this.pickPlanet(profile, state.pfId || null, true);
+    return true;
+  }
+
+  /**
+   * Show another planet in the one-planet tab: what was typed for the one shown
+   * so far is saved first, and the choice is remembered.
+   *
+   * @param {Profile} profile
+   * @param {?string} planetId
+   * @param {boolean} openTab Switch to the one-planet tab too.
+   */
+  pickPlanet(profile, planetId, openTab) {
     this.save();
-    this.showOnePlanet(state.pfId || null, profile);
+    this.showOnePlanet(planetId, profile);
     if (this.onePlanetId) this.pf.store.setLastPlanet('production', profile.id, this.onePlanetId);
-    showMainTab('#one-planet-panel');
+    if (openTab) showMainTab('#one-planet-panel');
     updateOnePlnTab();
     this.markAll();
-    return true;
   }
 
   /**
@@ -289,7 +301,7 @@ class ProductionProfiles extends ProfileBinder {
 
     PRODUCTION_ACCOUNT_FIELDS.forEach((f) => {
       if (!sameValue(prm[f.prm], this.accountSnapshot[f.prm])) {
-        changed = setProfileValue(profile.account, f.key, f.fromPrm(prm[f.prm])) || changed;
+        changed = setProfileValue(profile.account, f.key, f.read(prm)) || changed;
       }
     });
 
@@ -396,13 +408,7 @@ class ProductionProfiles extends ProfileBinder {
     pfShow('#pf-planet-row', false);
     addEvent('#pf-planet', 'change', () => {
       const profile = this.profile();
-      if (!profile) return;
-      // Whatever was typed into the planet shown so far is saved first.
-      this.save();
-      this.showOnePlanet(getVal('#pf-planet') || null, profile);
-      if (this.onePlanetId) this.pf.store.setLastPlanet('production', profile.id, this.onePlanetId);
-      updateOnePlnTab();
-      this.markAll();
+      if (profile) this.pickPlanet(profile, getVal('#pf-planet') || null, false);
     });
   }
 
@@ -452,7 +458,7 @@ class ProductionProfiles extends ProfileBinder {
     const profile = this.profile();
     if (!profile) return;
     PRODUCTION_ACCOUNT_FIELDS.forEach((f) => {
-      this.pf.markField($(f.input), profile, profile.account, f.key, this.restoreAccount(f.key));
+      this.pf.markField(pfFieldInput(f), profile, profile.account, f.key, this.restoreAccount(f.key));
     });
     this.speed?.mark();
 

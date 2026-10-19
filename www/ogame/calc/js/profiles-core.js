@@ -278,35 +278,6 @@ function sameUniverse(a, b) {
  */
 
 /**
- * A field that reads and writes a calculator's settings object (options.prm)
- * through its own getter and setter.
- *
- * @typedef {ProfileFieldBase & {
- *   prm: string,
- *   input: string,
- *   get: (prm: Record<string, any>) => *,
- *   show: (value: *) => void,
- * }} ProfilePrmField
- * prm: key in options.prm; input: selector of the field that shows it; get: the profile value the prm holds;
- * show: put a profile value (or undefined) into the form.
- */
-
-/**
- * A field that converts between a profile value and a settings value.
- *
- * @typedef {ProfileFieldBase & {
- *   prm: string,
- *   input: string,
- *   toPrm: (v: *) => *,
- *   fromPrm: (v: *) => *,
- *   markIf?: (body: ProfilePlanet) => boolean,
- * }} ProfileConvField
- * prm: key in options.prm; input: selector of the field that shows it; toPrm: profile value (or undefined)
- * to the prm value; fromPrm: prm value to the profile value; markIf: the field is marked only for a
- * body it returns true for (default: always).
- */
-
-/**
  * A stored or typed value as a number; anything that is not one is 0.
  *
  * @param {*} v

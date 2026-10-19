@@ -45,23 +45,21 @@ function tradeRoundRate(x) {
   return Math.round(x * 1e4) / 1e4;
 }
 
-/** @type {ProfileConvField[]} */
+/** @type {ProfilePrmField[]} */
 const TRADE_ACCOUNT_FIELDS = [
   pfConvNumField('research.114', 'hyperTech', '#hypertech-lvl'),
   pfCollectorClassField('playerClass', 'player-class-'),
   pfConvNumField('lf.ship.202.cargo', 'scCapacityIncrease', '#sc-capacity-increase'),
   pfConvNumField('lf.ship.203.cargo', 'lcCapacityIncrease', '#lc-capacity-increase'),
-  {
-    prm: 'rates', key: 'rates', input: '#rate-md',
-    toPrm: (v) => {
+  pfPrmField('rates', 'rates', '#rate-md',
+    (v) => {
       const valid = Array.isArray(v) && v.length === 3 && v.every((r) => Number(r) > 0);
       const trade = ratesToTrade(valid ? v.map(Number) : DEFAULT_RATES);
       const md = tradeRoundRate(trade.md);
       const cd = tradeRoundRate(trade.cd);
       return { md, cd, mc: tradeMcRate(md, cd) };
     },
-    fromPrm: (v) => ratesFromTrade({ md: tradeRoundRate(v.md), cd: tradeRoundRate(v.cd) }),
-  },
+    (v) => ratesFromTrade({ md: tradeRoundRate(v.md), cd: tradeRoundRate(v.cd) })),
 ];
 
 /** The options keys the account fields above live in. */
@@ -69,7 +67,7 @@ const TRADE_OWNED_KEYS = TRADE_ACCOUNT_FIELDS.map((f) => f.prm);
 
 /** @typedef {typeof tradeApp} TradeApp */
 
-/** @extends {FlatSettingsBinder<ProfileConvField, TradeApp>} */
+/** @extends {FlatSettingsBinder<ProfilePrmField, TradeApp>} */
 class TradeProfiles extends FlatSettingsBinder {
   /**
    * @param {ProfilesUi} pf
@@ -85,8 +83,6 @@ class TradeProfiles extends FlatSettingsBinder {
       cookie: 'options_trade',
       // The original save reads `this`: it has to stay bound to options.
       ownSave: options.save.bind(options),
-      read: (f, settings) => f.fromPrm(settings[f.prm]),
-      write: (f, settings, v) => { settings[f.prm] = f.toPrm(v); },
     });
     /** @type {TradeLinkOverrides} What the page's link carries, for the apply in progress. */
     this.link = TRADE_NO_LINK;
@@ -97,17 +93,12 @@ class TradeProfiles extends FlatSettingsBinder {
         options.universe = number;
       },
     });
-    this.bodySelect = new PfCoordsSelect(pf, {
+    this.coordsSelect = new PfCoordsSelect(pf, {
       select: '#pf-body', boxes: ['#pf-body-box'], lastKey: 'trade', nameFallback: '—',
       isAt: (b) => b.isMoon === !!options.moon && sameValue(b.coords, [options.coordg, options.coords, options.coordp].map(Number)),
       move: (b) => this.setCoords(b),
       recalc: () => this.app.recalc(),
     });
-    this.coordsSelect = this.bodySelect;
-  }
-
-  bindControls() {
-    addEvent('#pf-body', 'change', () => this.bodyChosen());
   }
 
   /** @param {?Profile} active */
@@ -130,7 +121,7 @@ class TradeProfiles extends FlatSettingsBinder {
   }
 
   /**
-   * @param {ProfileConvField} field
+   * @param {ProfilePrmField} field
    * @param {*} value
    */
   writeField(field, value) {
@@ -146,14 +137,14 @@ class TradeProfiles extends FlatSettingsBinder {
    *
    * @param {Profile} profile
    */
-  showProfile(profile) {
+  showSettings(profile) {
     const wanted = profile.universe;
     if (wanted && this.link.universe && !this.universe.matches(wanted.country, wanted.number)) {
       this.universe.lock(false);
     } else {
       this.universe.apply(profile);
     }
-    this.bodySelect.render(profile, this.link.coords);
+    this.coordsSelect?.render(profile, this.link.coords);
     this.app.restoreFromState();
   }
 
@@ -187,11 +178,6 @@ class TradeProfiles extends FlatSettingsBinder {
     setVal('#coord-s', b.coords[1]);
     setVal('#coord-p', b.coords[2]);
     setChecked('#moon', b.isMoon);
-  }
-
-  bodyChosen() {
-    const profile = this.profile();
-    if (profile) this.bodySelect.chosen(profile);
   }
 
   // -------------------------------------------------------------------------

@@ -9,8 +9,19 @@
 
 'use strict';
 
-/** Old saved-set key prefixes, and the calculator each came from. */
-const SAVED_SET_PREFIXES = { prod_uni_: 'production', flight_uni_: 'flight' };
+/**
+ * A kind of old saved set: the calculator it came from, and how it becomes a profile.
+ *
+ * @typedef {Object} SavedSetKind
+ * @property {string} calc
+ * @property {(prm: Record<string, any>, init: {label: string}) => Profile} convert
+ */
+
+/** @type {Record<string, SavedSetKind>} Old saved sets, by the prefix of their keys. */
+const SAVED_SET_KINDS = {
+  prod_uni_: { calc: 'production', convert: profileFromProductionSet },
+  flight_uni_: { calc: 'flight', convert: profileFromFlightSet },
+};
 
 /** Set once the player has answered the conversion offer, either way. */
 const SAVED_SETS_ANSWERED_KEY = 'pfg_saved_sets_answered';
@@ -24,16 +35,8 @@ const PFG_COMPANION_SYNC_EVENT = 'pfg-companion:sync';
  * @typedef {Object} SavedSet
  * @property {string} key Its localStorage key.
  * @property {string} name The name the player gave it.
- * @property {string} calc 'production' or 'flight'.
+ * @property {SavedSetKind} kind
  */
-
-/**
- * @param {string} template
- * @param {...*} args
- */
-function pfFormat(template, ...args) {
-  return template.replaceAll(/\{(\d+)\}/g, (m, i) => (args[Number(i)] === undefined ? m : String(args[Number(i)])));
-}
 
 /**
  * Show or hide an element through Bootstrap's d-none: the elements here carry
@@ -118,7 +121,120 @@ function pfFollowStart(from, to, level, gap) {
 }
 
 /**
- * A whole-number field of a calculator that keeps its settings in options.prm.
+ * Fill in the levels a profile knows as the "from" levels of multi-level build
+ * tables - each row's id in its first cell, "from" and "to" in its third and
+ * fourth. A row the player left alone follows the level; one whose "to" was
+ * changed by hand keeps both its levels (pfStartRange). Prefill only: the rows
+ * stay the calculator's.
+ *
+ * @param {string[]} tables Selectors of the tables.
+ * @param {(rowId: number, table: number) => ?number} levelOf The known level of a row's technology,
+ *   null when the profile does not know it; `table` is the table's index in `tables`.
+ * @returns {HTMLInputElement[]} The "from" fields that changed.
+ */
+function pfFillStartRows(tables, levelOf) {
+  /** @type {HTMLInputElement[]} */
+  const changed = [];
+  tables.forEach((table, i) => {
+    getTableRows(table).forEach((row) => {
+      if (!(row instanceof HTMLTableRowElement)) return;
+      const rowId = Number.parseInt(row.cells[0]?.textContent ?? '', 10);
+      const from = row.cells[2]?.querySelector('input');
+      const to = row.cells[3]?.querySelector('input');
+      if (!rowId || !from || !to) return;
+      const level = levelOf(rowId, i);
+      if (level !== null && pfFollowStart(from, to, level, 0)) changed.push(from);
+    });
+  });
+  return changed;
+}
+
+/**
+ * Another technology was picked on the range tab: its "from" becomes the
+ * level the profile knows, and "to" is raised to the next level when it is not
+ * above it. Whatever the player typed was for the old technology.
+ *
+ * @param {?number} level Null leaves the fields alone.
+ */
+function pfFillRangeStart(level) {
+  if (level === null) return;
+  setVal('#tab2-from-level', level);
+  if ((Number.parseInt(getVal('#tab2-to-level'), 10) || 0) <= level) setVal('#tab2-to-level', level + 1);
+}
+
+/**
+ * A profile value as a calculator shows it: the one field shape every binder
+ * takes.
+ *
+ * @typedef {ProfileFieldBase & {
+ *   input: string|(() => ?HTMLElement),
+ *   read: (settings: Record<string, any>) => *,
+ *   write: (settings: Record<string, any>, value: *) => void,
+ *   prm?: string,
+ *   markIf?: (body: ProfilePlanet) => boolean,
+ * }} ProfileField
+ * input: the control that shows it - a selector, or a lookup for a control with no stable selector;
+ * read: the profile value the calculator's settings hold; write: show a profile value (or undefined) -
+ * into the settings, or, for a calculator that reads its settings back from the form, into the form;
+ * prm: the settings key it lives under, when it is one key; markIf: the field is marked only for a
+ * body it returns true for (default: always).
+ */
+
+/** @typedef {ProfileField & {prm: string}} ProfilePrmField A field kept under one key of the settings. */
+
+/**
+ * The control a field is shown in.
+ *
+ * @param {{input: string|(() => ?HTMLElement)}} field
+ * @returns {?HTMLElement}
+ */
+function pfFieldInput(field) {
+  return typeof field.input === 'function' ? field.input() : $(field.input);
+}
+
+/**
+ * A field kept under one key of the calculator's settings, converted on the
+ * way in and out.
+ *
+ * @param {string} key Profile value key.
+ * @param {string} prm
+ * @param {string} input Selector.
+ * @param {(v: *) => *} toPrm Profile value (or undefined) to the settings value.
+ * @param {(v: *) => *} fromPrm Settings value to the profile value.
+ * @param {{display?: (value: *) => string, markIf?: (body: ProfilePlanet) => boolean}} [extra]
+ * @returns {ProfilePrmField}
+ */
+function pfPrmField(key, prm, input, toPrm, fromPrm, extra = {}) {
+  return {
+    key, prm, input,
+    read: (settings) => fromPrm(settings[prm]),
+    write: (settings, value) => { settings[prm] = toPrm(value); },
+    ...extra,
+  };
+}
+
+/**
+ * The same field for a calculator that reads its settings back from the form:
+ * the value is converted as the settings would take it, then shown in the form.
+ *
+ * @param {ProfilePrmField} field
+ * @param {(value: *) => void} show Show a settings value in the form.
+ * @returns {ProfilePrmField}
+ */
+function pfInForm(field, show) {
+  return {
+    ...field,
+    write: (_settings, value) => {
+      /** @type {Record<string, any>} */
+      const converted = {};
+      field.write(converted, value);
+      show(converted[field.prm]);
+    },
+  };
+}
+
+/**
+ * A whole-number field of a calculator that reads its settings from the form.
  *
  * @param {string} key Profile value key.
  * @param {string} prm
@@ -126,15 +242,12 @@ function pfFollowStart(from, to, level, gap) {
  * @returns {ProfilePrmField}
  */
 function pfLevelField(key, prm, input) {
-  return {
-    key, prm, input,
-    get: (p) => pfNum(p[prm]),
-    show: (v) => setVal(input, pfNum(v)),
-  };
+  return pfInForm(pfConvNumField(key, prm, input), (v) => setVal(input, v));
 }
 
 /**
- * A percentage field, shown with the locale's decimal separator.
+ * A percentage field of a calculator that reads its settings from the form,
+ * shown with the locale's decimal separator.
  *
  * @param {string} key Profile value key.
  * @param {string} prm
@@ -142,31 +255,21 @@ function pfLevelField(key, prm, input) {
  * @returns {ProfilePrmField}
  */
 function pfPercentField(key, prm, input) {
-  return {
-    key, prm, input,
-    get: (p) => pfNum(p[prm]),
-    show: (v) => setNumVal(input, pfNum(v)),
-  };
+  return pfInForm(pfConvNumField(key, prm, input), (v) => setNumVal(input, v));
 }
 
 /**
- * A number field of a calculator that keeps its settings in options.prm and
- * converts the profile's value on the way in: a level, a count, a
- * temperature or a percentage.
+ * A number field: a level, a count, a temperature or a percentage.
  *
  * @param {string} key Profile value key.
  * @param {string} prm
  * @param {string} input Selector.
  * @param {number} [def] The value when the profile has none.
  * @param {number} [min] The lowest value the calculator accepts.
- * @returns {ProfileConvField}
+ * @returns {ProfilePrmField}
  */
 function pfConvNumField(key, prm, input, def = 0, min = -Infinity) {
-  return {
-    key, prm, input,
-    toPrm: (v) => Math.max(min, v === undefined || v === null ? def : pfNum(v)),
-    fromPrm: pfNum,
-  };
+  return pfPrmField(key, prm, input, (v) => Math.max(min, v === undefined || v === null ? def : pfNum(v)), pfNum);
 }
 
 /**
@@ -175,15 +278,13 @@ function pfConvNumField(key, prm, input, def = 0, min = -Infinity) {
  *
  * @param {string} prm
  * @param {string} prefix The id of the class radios up to their number, such as `class-`.
- * @returns {ProfileConvField}
+ * @returns {ProfilePrmField}
  */
 function pfCollectorClassField(prm, prefix) {
-  return {
-    key: 'class', prm, input: '#' + prefix + '0',
-    toPrm: (v) => Math.min(2, Math.max(0, pfNum(v) - 1)),
-    fromPrm: (v) => pfNum(v) + 1,
-    display: (v) => pfLabelFor(prefix + (pfNum(v) - 1)),
-  };
+  return pfPrmField('class', prm, '#' + prefix + '0',
+    (v) => Math.min(2, Math.max(0, pfNum(v) - 1)),
+    (v) => pfNum(v) + 1,
+    { display: (v) => pfLabelFor(prefix + (pfNum(v) - 1)) });
 }
 
 /**
@@ -191,14 +292,12 @@ function pfCollectorClassField(prm, prefix) {
  *
  * @param {string} prm
  * @param {string} input Selector.
- * @returns {ProfileConvField}
+ * @returns {ProfilePrmField}
  */
 function pfRatesField(prm, input) {
-  return {
-    key: 'rates', prm, input,
-    toPrm: (v) => (Array.isArray(v) && v.length === 3 ? v.map(Number) : DEFAULT_RATES.slice()),
-    fromPrm: (v) => (Array.isArray(v) ? v.map(Number) : DEFAULT_RATES.slice()),
-  };
+  return pfPrmField('rates', prm, input,
+    (v) => (Array.isArray(v) && v.length === 3 ? v.map(Number) : DEFAULT_RATES.slice()),
+    (v) => (Array.isArray(v) ? v.map(Number) : DEFAULT_RATES.slice()));
 }
 
 /**
@@ -208,18 +307,16 @@ function pfRatesField(prm, input) {
  * @param {string} prm
  * @param {string} prefix The id of the class radios up to their number, such as `player-class-`.
  * @param {number} none The calculator's value for no class.
- * @returns {ProfileConvField}
+ * @returns {ProfilePrmField}
  */
 function pfClassField(prm, prefix, none) {
-  return {
-    key: 'class', prm, input: '#' + prefix + '0',
-    toPrm: (v) => {
+  return pfPrmField('class', prm, '#' + prefix + '0',
+    (v) => {
       const cls = pfNum(v);
       return cls === PROFILE_CLASS.COLLECTOR || cls === PROFILE_CLASS.GENERAL ? cls : none;
     },
-    fromPrm: pfNum,
-    display: (v) => pfLabelFor(prefix + pfNum(v)),
-  };
+    pfNum,
+    { display: (v) => pfLabelFor(prefix + pfNum(v)) });
 }
 
 /**
@@ -227,28 +324,61 @@ function pfClassField(prm, prefix, none) {
  *
  * @param {string} prm
  * @param {string} input Selector.
- * @returns {ProfileConvField}
+ * @returns {ProfilePrmField}
  */
 function pfTraderField(prm, input) {
-  return {
-    key: 'allianceClass', prm, input,
-    toPrm: (v) => pfNum(v) === PROFILE_ALLIANCE_CLASS.TRADER,
-    fromPrm: (v) => (pfBool(v) ? PROFILE_ALLIANCE_CLASS.TRADER : PROFILE_ALLIANCE_CLASS.NONE),
-    display: (v) => (pfNum(v) === PROFILE_ALLIANCE_CLASS.TRADER ? '✓' : '—'),
-  };
+  return pfPrmField('allianceClass', prm, input,
+    (v) => pfNum(v) === PROFILE_ALLIANCE_CLASS.TRADER,
+    (v) => (pfBool(v) ? PROFILE_ALLIANCE_CLASS.TRADER : PROFILE_ALLIANCE_CLASS.NONE),
+    { display: (v) => (pfNum(v) === PROFILE_ALLIANCE_CLASS.TRADER ? '✓' : '—') });
 }
 
 /**
  * One switch per officer, named alike in the options and in the page's ids.
  *
  * @param {string[]} names
- * @returns {ProfileConvField[]}
+ * @returns {ProfilePrmField[]}
  */
 function pfOfficerFields(names) {
-  return names.map((name) => ({
-    key: 'officer.' + name, prm: name, input: '#' + name, toPrm: pfBool, fromPrm: pfBool,
-  }));
+  return names.map((name) => pfPrmField('officer.' + name, name, '#' + name, pfBool, pfBool));
 }
+
+/**
+ * The account fields the two calculators that work out a planet's energy -
+ * graviton and terraformer - share, under the same keys and ids in both. Their
+ * class radios have no discoverer and number "no class" 0, as the profile does.
+ *
+ * @type {ProfilePrmField[]}
+ */
+const PF_ENERGY_ACCOUNT_FIELDS = [
+  pfConvNumField('research.113', 'energyTechLevel', '#energy-tech-level'),
+  pfConvNumField('research.114', 'hyperTechLevel', '#hyper-tech-level'),
+  ...pfOfficerFields(PROFILE_OFFICERS),
+  // A discoverer shows as no class.
+  pfClassField('playerClass', 'player-class-', PROFILE_CLASS.NONE),
+  pfTraderField('isTrader', '#trader-bonus'),
+  pfConvNumField('lf.prod.energy', 'totalLFEnrgBonus', '#total-lf-energy-bonus'),
+];
+
+/**
+ * The planet fields graviton and terraformer share: its temperature, energy
+ * booster, power plants and solar satellites with their production
+ * percentages, and its Disruption Chamber.
+ *
+ * @type {ProfilePrmField[]}
+ */
+const PF_ENERGY_PLANET_FIELDS = [
+  pfConvNumField('temperature.max', 'maxPlanetTemp', '#max-planet-temp'),
+  pfConvNumField('energyBooster', 'energyBoost', '#energy-boost'),
+  pfConvNumField('building.4', 'solarPlantLevel', '#solar-plant-level'),
+  pfConvNumField('production.4', 'solarPlantPercent', '#solar-plant-percent', 100),
+  pfConvNumField('building.12', 'fusionPlantLevel', '#fusion-plant-level'),
+  pfConvNumField('production.12', 'fusionPlantPercent', '#fusion-plant-percent', 100),
+  pfConvNumField('ship.212', 'solarSatellitesCount', '#solar-satellites-count'),
+  pfConvNumField('production.212', 'solarSatellitesPercent', '#solar-satellites-percent', 100),
+  // A Rocktal building: a planet of another life form has none.
+  pfConvNumField('lf.building.' + lfBuildingGameId(2, 7), 'disChLevel', '#disr-chamber-level'),
+];
 
 /**
  * A profile value as text, for a key no calculator described: a flag as a
@@ -283,7 +413,10 @@ function pfFieldLabel(el) {
   if (legend) return clean(legend.textContent);
   const cell = el.closest('td');
   if (cell instanceof HTMLTableCellElement && cell.parentElement instanceof HTMLTableRowElement) {
-    const header = cell.closest('table')?.querySelector('thead tr')?.children[cell.cellIndex];
+    // The column header: the <thead>'s row, or - in a table without one - its first row.
+    const table = cell.closest('table');
+    const headRow = table instanceof HTMLTableElement ? table.tHead?.rows[0] ?? table.rows[0] : undefined;
+    const header = headRow && headRow !== cell.parentElement ? headRow.cells[cell.cellIndex] : undefined;
     const rowName = clean(cell.parentElement.cells[0]?.textContent);
     return header ? clean(header.textContent) + ': ' + rowName : rowName;
   }
@@ -502,7 +635,7 @@ class ProfilesUi {
       }
       return;
     }
-    const title = pfFormat(this.text.inGame, gameText) + ' - ' + this.text.resetValue;
+    const title = formatString(this.text.inGame, gameText) + ' - ' + this.text.resetValue;
     const button = existing || document.createElement('button');
     if (!existing) {
       button.type = 'button';
@@ -586,7 +719,7 @@ class ProfilesUi {
     const count = profile && hasGameLayer(profile) ? countOverrides(profile) : 0;
     badge.classList.toggle('d-none', count === 0);
     badge.textContent = String(count);
-    const title = pfFormat(this.text.overrides, count) + ' - ' + this.text.resetAll;
+    const title = formatString(this.text.overrides, count) + ' - ' + this.text.resetAll;
     pfTooltip(badge, title);
     badge.setAttribute('role', 'button');
     badge.onclick = () => this.openReset();
@@ -859,7 +992,7 @@ class ProfilesUi {
     this.pendingExport = null;
     pfModal('pf-import-modal')?.hide();
     this.store.setActive(profile.id);
-    showToast(pfFormat(this.text.importDone, profile.label, summary.planets.added, summary.planets.updated, summary.planets.removed), 'success');
+    showToast(formatString(this.text.importDone, profile.label, summary.planets.added, summary.planets.updated, summary.planets.removed), 'success');
   }
 
   /**
@@ -948,7 +1081,7 @@ class ProfilesUi {
         this.openProps(p.id);
       }));
       actions.appendChild(this.iconButton('bi-trash', this.text.delete, async () => {
-        if (!await showConfirmModal(pfFormat(this.text.deleteConfirm, p.label), this.text.confirm, this.text.cancel, this.text.attention)) return;
+        if (!await showConfirmModal(formatString(this.text.deleteConfirm, p.label), this.text.confirm, this.text.cancel, this.text.attention)) return;
         this.store.remove(p.id);
         this.renderManage();
       }));
@@ -1000,7 +1133,7 @@ class ProfilesUi {
         await showAlertModal(this.text.mergeSame, this.text.ok, this.text.attention);
         return;
       }
-      if (!await showConfirmModal(pfFormat(this.text.mergeConfirm, from.label, into.label), this.text.confirm, this.text.cancel, this.text.attention)) return;
+      if (!await showConfirmModal(formatString(this.text.mergeConfirm, from.label, into.label), this.text.confirm, this.text.cancel, this.text.attention)) return;
       if (!this.store.save(mergeProfiles(into, from))) {
         showToast(this.text.saveFailed, 'danger');
         return;
@@ -1040,7 +1173,7 @@ class ProfilesUi {
     const restored = [];
     plan.added.forEach((p) => { if (this.store.save(p)) restored.push(p); });
     for (const p of plan.conflicts) {
-      if (await showConfirmModal(pfFormat(this.text.restoreConflict, p.label), this.text.replace, this.text.skip, this.text.attention)) {
+      if (await showConfirmModal(formatString(this.text.restoreConflict, p.label), this.text.replace, this.text.skip, this.text.attention)) {
         if (this.store.save(p)) restored.push(p);
       }
     }
@@ -1050,7 +1183,7 @@ class ProfilesUi {
       .forEach((u) => PfUniverseSetting.restoreChoices(u));
     this.store.requestPersistence();
     this.renderManage();
-    showToast(pfFormat(this.text.restoreDone, restored.length), 'success');
+    showToast(formatString(this.text.restoreDone, restored.length), 'success');
   }
 
   // -------------------------------------------------------------------------
@@ -1065,8 +1198,8 @@ class ProfilesUi {
       for (let i = 0; i < localStorage.length; i++) {
         const key = localStorage.key(i);
         if (!key) continue;
-        Object.entries(SAVED_SET_PREFIXES).forEach(([prefix, calc]) => {
-          if (key.startsWith(prefix)) sets.push({ key, name: key.slice(prefix.length), calc });
+        Object.entries(SAVED_SET_KINDS).forEach(([prefix, kind]) => {
+          if (key.startsWith(prefix)) sets.push({ key, name: key.slice(prefix.length), kind });
         });
       }
     } catch {
@@ -1092,13 +1225,13 @@ class ProfilesUi {
     if (!asked && answered) return;
     const sets = this.findSavedSets();
     if (sets.length === 0) return;
-    setTextContent('#pf-migrate-body', pfFormat(this.text.migrateText, sets.length));
+    setTextContent('#pf-migrate-body', formatString(this.text.migrateText, sets.length));
     const list = document.getElementById('pf-migrate-list');
     if (list) {
       list.innerHTML = '';
       sets.forEach((s) => {
         const item = document.createElement('li');
-        item.textContent = s.name + ' (' + s.calc + ')';
+        item.textContent = s.name + ' (' + s.kind.calc + ')';
         list.appendChild(item);
       });
     }
@@ -1116,7 +1249,7 @@ class ProfilesUi {
       pfShow('#pf-migrate-go', false);
       pfShow('#pf-migrate-list', false);
       setTextContent('#pf-migrate-body', '');
-      setTextContent('#pf-migrate-result-text', converted > 0 ? pfFormat(this.text.migrateDone, converted) : this.text.migrateNone);
+      setTextContent('#pf-migrate-result-text', converted > 0 ? formatString(this.text.migrateDone, converted) : this.text.migrateNone);
       pfShow('#pf-migrate-result', true);
       // Nothing is left to postpone: the only way on is closing the dialog.
       setTextContent('#pf-migrate-later', this.text.done);
@@ -1147,10 +1280,7 @@ class ProfilesUi {
     this.findSavedSets().forEach((set) => {
       const prm = readSavedSet(set);
       if (!prm) return;
-      const profile = set.calc === 'production'
-        ? profileFromProductionSet(prm, { label: set.name })
-        : profileFromFlightSet(prm, { label: set.name });
-      if (this.store.save(profile)) count++;
+      if (this.store.save(set.kind.convert(prm, { label: set.name }))) count++;
     });
     if (count > 0) this.store.requestPersistence();
     return count;
@@ -1326,12 +1456,14 @@ class PfUniverseSetting {
    * @param {PfUniverseSettingKind} kind
    * @param {string} selector The field that shows the setting.
    * @param {() => void} recalc Recalculates the page after the setting was set.
+   * @param {string} [prm] The key the calculator keeps the setting under, where a binder needs it.
    */
-  constructor(pf, kind, selector, recalc) {
+  constructor(pf, kind, selector, recalc, prm = '') {
     this.pf = pf;
     this.kind = kind;
     this.selector = selector;
     this.recalc = recalc;
+    this.prm = prm;
     /** @type {?ProfileUniverse} The universe of the profile shown, if it has one. */
     this.universe = null;
     addEvent(selector, 'change', () => this.changed());
@@ -1519,8 +1651,8 @@ class PfUniverseSetting {
  * @property {string} box Selector of the element that holds it, hidden while there is nothing to pick.
  * @property {(profile: Profile) => ProfilePlanet[]} bodies The planets or moons it lists.
  * @property {string} lastKey Calculator name under which the last choice is remembered.
- * @property {(profile: Profile, list: ProfilePlanet[]) => (ProfilePlanet|undefined)} [fallback]
- *   The body to show when neither the current one nor the last pick is there; the first one otherwise.
+ * @property {() => ?string} [planetOf] For a select of moons: the planet shown with it. Its moon is
+ *   shown when neither the current moon nor the last pick is there, and follow() picks it.
  */
 
 /**
@@ -1540,14 +1672,14 @@ class PfBodySelect {
 
   /**
    * Fill the select and choose a body: the current one, else the one picked
-   * last time in this profile, else the fallback, else the first one.
+   * last time in this profile, else the moon of the planet shown, else the first one.
    *
    * @param {Profile} profile
    * @param {?string} currentId
    * @returns {?string} The id of the body shown.
    */
   render(profile, currentId) {
-    const { select: selector, box, bodies, lastKey, fallback } = this.config;
+    const { select: selector, box, bodies, lastKey } = this.config;
     const list = bodies(profile);
     const select = selectEl(selector);
     if (select) {
@@ -1558,11 +1690,35 @@ class PfBodySelect {
     const last = this.pf.store.getLastPlanet(lastKey, profile.id);
     const chosen = list.find((b) => b.id === currentId)
       || list.find((b) => b.id === last)
-      || fallback?.(profile, list)
+      || this.moonOfPlanet(profile)
       || list[0];
     const id = chosen ? chosen.id : null;
     if (select) select.value = id || '';
     return id;
+  }
+
+  /**
+   * The moon of the planet this select follows (planetOf), if it has one.
+   *
+   * @param {Profile} profile
+   * @returns {ProfileMoon|undefined}
+   */
+  moonOfPlanet(profile) {
+    const planetId = this.config.planetOf?.() ?? null;
+    return planetId === null ? undefined : profile.moons.find((m) => m.planetId === planetId);
+  }
+
+  /**
+   * The planet it follows was picked: pick its moon too, when it has one.
+   *
+   * @param {Profile} profile
+   * @returns {?string} The id of the moon picked; null when the planet has none.
+   */
+  follow(profile) {
+    const moon = this.moonOfPlanet(profile);
+    if (!moon) return null;
+    this.choose(profile, moon.id);
+    return moon.id;
   }
 
   /**
@@ -1599,9 +1755,18 @@ class PfBodySelect {
 }
 
 /**
+ * The universe a calculator shows, and whatever else it gives back with it (the cost
+ * calculator's speeds).
+ *
+ * @typedef {{country: string, universe: *, [setting: string]: *}} PfShownUniverse
+ */
+
+/**
  * @typedef {object} PfLockedUniverseConfig
- * @property {() => {country: string, universe: *}} read The universe the calculator shows now.
+ * @property {() => PfShownUniverse} read The universe the calculator shows now.
  * @property {(country: string, universe: *) => void} write Show a universe: in the model and in the form.
+ * @property {(own: PfShownUniverse) => void} [restore] Show the player's own universe again when the
+ *   profile lets it go; write() by default.
  */
 
 /**
@@ -1614,7 +1779,7 @@ class PfLockedUniverse {
   /** @param {PfLockedUniverseConfig} config */
   constructor(config) {
     this.config = config;
-    /** @type {?{country: string, universe: *}} The universe picked before a profile set its own. */
+    /** @type {?PfShownUniverse} The universe picked before a profile set its own. */
     this.own = null;
   }
 
@@ -1651,7 +1816,9 @@ class PfLockedUniverse {
     this.lock(false);
     const own = this.own;
     this.own = null;
-    if (own) this.config.write(own.country, own.universe);
+    if (!own) return;
+    if (this.config.restore) this.config.restore(own);
+    else this.config.write(own.country, own.universe);
   }
 
   /** @param {boolean} locked */
@@ -1661,14 +1828,12 @@ class PfLockedUniverse {
 
   /**
    * Put the universe the player picked, not the profile's, into the values a
-   * calculator stores as its own.
+   * calculator stores as its own - with whatever else read() gave back with it.
    *
    * @param {Record<string, any>} stored
    */
   overlay(stored) {
-    if (!this.own) return;
-    stored.country = this.own.country;
-    stored.universe = this.own.universe;
+    if (this.own) Object.assign(stored, this.own);
   }
 }
 
@@ -1806,10 +1971,12 @@ class PfCoordsSelect {
 
 /**
  * What every calculator's profile binder shares: the profile it shows, the
- * guard that keeps its own writes from coming back as edits, and the two
- * entry points - save() and leave() - whose sequence is the same everywhere.
- * A binder fills in the steps that differ: sync() and saveOwn() (or
- * saveWithProfile()), restoreOwn() and recalc().
+ * guard that keeps its own writes from coming back as edits, and the entry
+ * points - init(), apply(), save() and leave() - whose sequence is the same
+ * everywhere. A binder fills in the steps that differ: describeFields(),
+ * takeOverSave() and bindControls() for init(); captureOwn(), showProfile(),
+ * takeSnapshot() and afterApply() for apply(); sync() and saveOwn() (or
+ * saveWithProfile()); restoreOwn() and recalc(); markAll().
  *
  * @template [App=*]
  */
@@ -1833,7 +2000,113 @@ class ProfileBinder {
 
   /** Connect to the page; called once, with the calculator ready. */
   init() {
-    // A binder wires its fields and listeners here.
+    this.describeFields();
+    this.takeOverSave();
+    this.bindControls();
+    this.pf.onChange((profile) => this.apply(profile));
+    this.applyInitial(this.pf.active());
+  }
+
+  /** Name every value this page binds, in the page's own words; called from init(). */
+  describeFields() {
+    // A binder describes its fields here.
+  }
+
+  /** Route the calculator's save through save(); called from init(). */
+  takeOverSave() {
+    options.save = () => this.save();
+  }
+
+  /** Wire the page's own controls; called from init(). */
+  bindControls() {
+    // A binder wires its listeners here.
+  }
+
+  /**
+   * Apply the profile that is active when the page loads.
+   *
+   * @param {?Profile} active
+   */
+  applyInitial(active) {
+    if (active) this.apply(active);
+  }
+
+  // -------------------------------------------------------------------------
+  // Profile -> calculator
+  // -------------------------------------------------------------------------
+
+  /**
+   * Show a profile, or - with none - the calculator's own settings again.
+   *
+   * @param {?Profile} profile
+   */
+  apply(profile) {
+    if (!profile) {
+      this.leave();
+      return;
+    }
+    this.applying = true;
+    try {
+      if (this.profileId === null) this.captureOwn();
+      this.profileId = profile.id;
+      this.pf.clearMarks();
+      // The calculator's reset would write every default into the profile as an edit.
+      pfShow('#reset', false);
+      this.showProfile(profile);
+      this.takeSnapshot();
+    } finally {
+      this.applying = false;
+    }
+    this.afterApply(profile);
+    this.markAll();
+  }
+
+  /** Keep the calculator's own values of what the profile owns, before a profile is first shown. */
+  captureOwn() {
+    // A binder copies its own values here.
+  }
+
+  /**
+   * Fill the page from the profile and recalculate it; edits are not taken while this runs.
+   *
+   * @param {Profile} _profile
+   */
+  showProfile(_profile) {
+    // A binder fills its form from the profile here.
+  }
+
+  /** Remember the values the page shows now, so the next save writes only what changed. */
+  takeSnapshot() {
+    // A binder records its values here.
+  }
+
+  /**
+   * Called once the profile is shown and edits are taken again, before the marks.
+   *
+   * @param {Profile} _profile
+   */
+  afterApply(_profile) {
+    // A binder attaches what follows the profile on its own here, such as the universe settings.
+  }
+
+  /**
+   * Fill the form without its writes being taken for edits, then mark it.
+   *
+   * @param {() => void} fill
+   */
+  whileApplying(fill) {
+    this.applying = true;
+    try {
+      fill();
+    } finally {
+      this.applying = false;
+    }
+    this.markAll();
+  }
+
+  /** Mark every field the profile owns, and the ones that differ from the game. */
+  markAll() {
+    // A binder marks its fields here.
   }
 
   /** @returns {?Profile} */
@@ -1959,7 +2232,7 @@ class ProfileBinder {
    */
   describeFieldList(fields) {
     fields.forEach((f) => {
-      const el = typeof f.input === 'function' ? f.input() : $(f.input);
+      const el = pfFieldInput(f);
       const display = f.display || (el instanceof HTMLSelectElement ? pfOptionText(el) : undefined);
       this.pf.describeField(f.key, pfFieldLabel(el), display);
     });
@@ -1977,13 +2250,22 @@ class ProfileBinder {
 
 /**
  * @typedef {object} PlanetPrmConfig
- * @property {ProfileConvField[]} accountFields The fields the account fills.
- * @property {ProfileConvField[]} planetFields The fields the planet picked in #pf-planet fills.
+ * @property {ProfilePrmField[]} accountFields The fields the account fills.
+ * @property {ProfilePrmField[]} planetFields The fields the planet picked in #pf-planet fills.
  * @property {string} cookie Where saveOwn() writes the calculator's own values.
  * @property {string} lastKey Calculator name under which the last planet is remembered.
- * @property {[PfUniverseSettingKind, string][]} universe The settings that come from the profile's universe, with their selectors.
- * @property {string[]} universeKeys The options.prm keys of those settings.
+ * @property {PfUniverseField[]} universe The settings that come from the profile's universe.
  * @property {string[]} extraOwnedKeys Keys the profile owns without a field of its own, such as the officers' bonus.
+ * @property {() => void} [ownSave] The calculator's own save, before the binder took options.save over; options.save by default.
+ */
+
+/**
+ * A setting of the profile's universe as a calculator shows it.
+ *
+ * @typedef {object} PfUniverseField
+ * @property {PfUniverseSettingKind} kind
+ * @property {string} input Selector of the field that shows it.
+ * @property {string} prm The options.prm key the calculator keeps it under.
  */
 
 /**
@@ -2014,19 +2296,18 @@ class PlanetPrmBinder extends ProfileBinder {
     });
     /** @type {Record<string, *>} The profile-owned prm keys as the calculator has them. */
     this.ownPrm = {};
-    this.ownSave = options.save;
+    this.ownSave = config.ownSave ?? options.save;
     /** @type {PfUniverseSetting[]} The universe's settings, set in init(). */
     this.universeSettings = [];
   }
 
-  init() {
+  describeFields() {
     this.describeFieldList([...this.config.accountFields, ...this.config.planetFields]);
-    options.save = () => this.save();
-    this.universeSettings = this.config.universe.map(([kind, selector]) => new PfUniverseSetting(this.pf, kind, selector, () => this.app.recalc()));
+  }
+
+  bindControls() {
+    this.universeSettings = this.config.universe.map((u) => new PfUniverseSetting(this.pf, u.kind, u.input, () => this.app.recalc(), u.prm));
     this.planetSelect.onChange(() => this.planetChosen());
-    this.pf.onChange((profile) => this.apply(profile));
-    const active = this.pf.active();
-    if (active) this.apply(active);
   }
 
   /**
@@ -2039,45 +2320,36 @@ class PlanetPrmBinder extends ProfileBinder {
 
   /** The options.prm keys the profile may own. */
   ownedKeys() {
-    const { accountFields, planetFields, extraOwnedKeys, universeKeys } = this.config;
-    return [...accountFields, ...planetFields].map((f) => f.prm).concat(extraOwnedKeys, universeKeys);
+    const { accountFields, planetFields, extraOwnedKeys, universe } = this.config;
+    return [...accountFields, ...planetFields].map((f) => f.prm).concat(extraOwnedKeys, universe.map((u) => u.prm));
   }
 
   // -------------------------------------------------------------------------
   // Profile -> calculator
   // -------------------------------------------------------------------------
 
-  /** @param {?Profile} profile */
-  apply(profile) {
-    if (!profile) {
-      this.leave();
-      return;
-    }
-    this.applying = true;
-    try {
-      /** @type {Record<string, any>} */
-      const prm = options.prm;
-      if (this.profileId === null) {
-        this.ownPrm = {};
-        this.ownedKeys().forEach((key) => { this.ownPrm[key] = cloneData(prm[key]); });
-      }
-      this.profileId = profile.id;
-      this.pf.clearMarks();
-      this.config.accountFields.forEach((f) => { prm[f.prm] = f.toPrm(getProfileValue(profile.account, f.key)); });
-      // The calculator's reset would write every default into the profile as an edit.
-      pfShow('#reset', false);
-      this.planetId = this.planetSelect.render(profile, this.planetId);
-      this.showPlanet(profile);
-    } finally {
-      this.applying = false;
-    }
+  captureOwn() {
+    /** @type {Record<string, any>} */
+    const prm = options.prm;
+    this.ownPrm = {};
+    this.ownedKeys().forEach((key) => { this.ownPrm[key] = cloneData(prm[key]); });
+  }
+
+  /** @param {Profile} profile */
+  showProfile(profile) {
+    this.config.accountFields.forEach((f) => f.write(options.prm, getProfileValue(profile.account, f.key)));
+    this.planetId = this.planetSelect.render(profile, this.planetId);
+    this.showPlanet(profile);
+  }
+
+  /** @param {Profile} profile */
+  afterApply(profile) {
     this.universeSettings.forEach((setting) => { void setting.attach(profile); });
-    this.markAll();
   }
 
   /**
    * Put the planet's values - or, with no planet, the calculator's own - into
-   * options.prm, show the whole form and recalculate.
+   * options.prm, show the whole form and recalculate. The caller takes the snapshot.
    *
    * @param {Profile} profile
    */
@@ -2086,12 +2358,12 @@ class PlanetPrmBinder extends ProfileBinder {
     const prm = options.prm;
     const planet = this.planet(profile);
     this.config.planetFields.forEach((f) => {
-      prm[f.prm] = planet ? f.toPrm(getProfileValue(planet, f.key)) : cloneData(this.ownPrm[f.prm]);
+      if (planet) f.write(prm, getProfileValue(planet, f.key));
+      else prm[f.prm] = cloneData(this.ownPrm[f.prm]);
     });
     this.afterShowPlanet();
     this.app.restoreFromState();
     this.app.recalc();
-    this.takeSnapshot();
   }
 
   /**
@@ -2118,8 +2390,8 @@ class PlanetPrmBinder extends ProfileBinder {
     /** @type {Record<string, any>} */
     const prm = options.prm;
     this.snapshot = {};
-    this.config.accountFields.forEach((f) => { this.snapshot[f.key] = f.fromPrm(prm[f.prm]); });
-    this.config.planetFields.forEach((f) => { this.snapshot['planet:' + f.key] = f.fromPrm(prm[f.prm]); });
+    this.config.accountFields.forEach((f) => { this.snapshot[f.key] = f.read(prm); });
+    this.config.planetFields.forEach((f) => { this.snapshot['planet:' + f.key] = f.read(prm); });
   }
 
   // -------------------------------------------------------------------------
@@ -2139,17 +2411,29 @@ class PlanetPrmBinder extends ProfileBinder {
     const planet = this.planet(profile);
     let changed = false;
     this.config.accountFields.forEach((f) => {
-      changed = this.syncValue(profile.account, f.key, f.key, f.fromPrm(prm[f.prm])) || changed;
+      changed = this.syncValue(profile.account, f.key, f.key, f.read(prm)) || changed;
     });
     if (planet) {
       this.config.planetFields.forEach((f) => {
-        changed = this.syncValue(planet, f.key, 'planet:' + f.key, f.fromPrm(prm[f.prm])) || changed;
+        changed = this.syncValue(planet, f.key, 'planet:' + f.key, f.read(prm)) || changed;
       });
     }
+    changed = this.syncExtra(profile) || changed;
     if (changed) {
       this.pf.save(profile);
       this.markAll();
     }
+  }
+
+  /**
+   * Write what a subclass binds beyond the field lists into the profile being
+   * synced, which is then saved once with the rest.
+   *
+   * @param {Profile} _profile
+   * @returns {boolean} True when the profile changed.
+   */
+  syncExtra(_profile) {
+    return false;
   }
 
   /**
@@ -2166,7 +2450,7 @@ class PlanetPrmBinder extends ProfileBinder {
     }
     this.afterSaveOwn();
     if (!this.profile()?.universe) {
-      this.config.universeKeys.forEach((key) => { this.ownPrm[key] = prm[key]; });
+      this.config.universe.forEach((u) => { this.ownPrm[u.prm] = prm[u.prm]; });
     }
     saveToCookie(this.config.cookie, { ...prm, ...cloneData(this.ownPrm) });
   }
@@ -2186,13 +2470,10 @@ class PlanetPrmBinder extends ProfileBinder {
     // Whatever was typed for the planet shown so far is saved first.
     this.save();
     this.planetId = this.planetSelect.chosen(profile);
-    this.applying = true;
-    try {
+    this.whileApplying(() => {
       this.showPlanet(profile);
-    } finally {
-      this.applying = false;
-    }
-    this.markAll();
+      this.takeSnapshot();
+    });
   }
 
   // -------------------------------------------------------------------------
@@ -2204,36 +2485,26 @@ class PlanetPrmBinder extends ProfileBinder {
     const profile = this.profile();
     if (!profile) return;
     this.config.accountFields.forEach((f) => {
-      this.pf.markField($(f.input), profile, profile.account, f.key, this.restoreAccount(f.key));
+      this.pf.markField(pfFieldInput(f), profile, profile.account, f.key, this.restoreAccount(f.key));
     });
     this.universeSettings.forEach((setting) => setting.mark());
     const planet = this.planet(profile);
     if (!planet) return;
     this.config.planetFields.forEach((f) => {
       if (f.markIf && !f.markIf(planet)) return;
-      this.pf.markField($(f.input), profile, planet, f.key, this.restoreBody('planets', planet.id, f.key));
+      this.pf.markField(pfFieldInput(f), profile, planet, f.key, this.restoreBody('planets', planet.id, f.key));
     });
   }
 }
 
 /**
- * A field of a calculator bound by FlatSettingsBinder: the profile value key
- * it shows, and the control that shows it (a selector, or a lookup for a
- * control that has no stable selector).
- *
- * @typedef {ProfileFieldBase & {input: string|(() => ?HTMLElement)}} FlatSettingsField
- */
-
-/**
- * @template {FlatSettingsField} F
+ * @template {ProfileField} F
  * @typedef {object} FlatSettingsConfig
  * @property {F[]} fields The fields the account fills.
  * @property {() => Record<string, any>} settings The object the calculator keeps the fields in.
  * @property {string[]} ownedKeys The keys of that object the profile may own.
  * @property {string} cookie Where saveOwn() writes the calculator's own values.
- * @property {() => void} ownSave The save the calculator had before the binder took options.save over.
- * @property {(field: F, settings: Record<string, any>) => *} read The profile value a field holds in the settings.
- * @property {(field: F, settings: Record<string, any>, value: *) => void} write Put a profile value (or undefined) into the settings.
+ * @property {() => void} [ownSave] The calculator's own save, before the binder took options.save over; options.save by default.
  */
 
 /**
@@ -2243,12 +2514,12 @@ class PlanetPrmBinder extends ProfileBinder {
  * through options.save(). What the profile owns is stored with the values it
  * had before the profile, so "no profile" shows the calculator's own again.
  * A subclass gives the configuration and the steps that differ:
- * showProfile() and showOwn() (the form from the settings, the universe, the
+ * showSettings() and showOwn() (the form from the settings, the universe, the
  * coordinates select), plus bindControls(), prepareSettings() and
  * storable() where the page needs them. Set `universe` and `coordsSelect`
  * in the constructor if the page has them.
  *
- * @template {FlatSettingsField} F
+ * @template {ProfileField} F
  * @template [App=*]
  * @extends {ProfileBinder<App>}
  */
@@ -2263,65 +2534,40 @@ class FlatSettingsBinder extends ProfileBinder {
     this.config = config;
     /** @type {Record<string, *>} The profile-owned keys as they were before a profile. */
     this.ownPrm = {};
-    this.ownSave = config.ownSave;
+    this.ownSave = config.ownSave ?? options.save;
     /** @type {?PfLockedUniverse} The universe picker the profile locks, if the page has one. */
     this.universe = null;
   }
 
-  init() {
-    this.describeFields();
-    options.save = () => this.save();
-    this.bindControls();
-    this.pf.onChange((profile) => this.apply(profile));
-    this.applyInitial(this.pf.active());
-  }
-
-  /** Wire the page's own controls; called from init(). */
+  /** Wire the coordinates select; a subclass adds its own controls after it. */
   bindControls() {
-    // A subclass wires its listeners here.
+    this.coordsSelect?.onChange(() => this.coordsChosen());
   }
 
-  /**
-   * Apply the profile that is active when the page loads.
-   *
-   * @param {?Profile} active
-   */
-  applyInitial(active) {
-    if (active) this.apply(active);
+  /** The player picked a body in the coordinates select. */
+  coordsChosen() {
+    const profile = this.profile();
+    if (profile) this.coordsSelect?.chosen(profile);
   }
 
   // -------------------------------------------------------------------------
   // Profile -> calculator
   // -------------------------------------------------------------------------
 
-  /** @param {?Profile} profile */
-  apply(profile) {
-    if (!profile) {
-      this.leave();
-      return;
-    }
-    const { fields, settings, ownedKeys } = this.config;
-    this.applying = true;
-    try {
-      if (this.profileId === null) {
-        this.ownPrm = {};
-        ownedKeys.forEach((key) => { this.ownPrm[key] = cloneData(settings()[key]); });
-      }
-      this.profileId = profile.id;
-      this.pf.clearMarks();
-      this.prepareSettings();
-      fields.forEach((f) => this.writeField(f, getProfileValue(profile.account, f.key)));
-      // The calculator's reset would write every default into the profile as an edit.
-      pfShow('#reset', false);
-      this.showProfile(profile);
-      // The recalculation reads the fields back: the snapshot then holds the
-      // values exactly as the form gives them, and the next edit compares like with like.
-      this.recalc();
-      this.takeSnapshot();
-    } finally {
-      this.applying = false;
-    }
-    this.markAll();
+  captureOwn() {
+    const { settings, ownedKeys } = this.config;
+    this.ownPrm = {};
+    ownedKeys.forEach((key) => { this.ownPrm[key] = cloneData(settings()[key]); });
+  }
+
+  /** @param {Profile} profile */
+  showProfile(profile) {
+    this.prepareSettings();
+    this.config.fields.forEach((f) => this.writeField(f, getProfileValue(profile.account, f.key)));
+    this.showSettings(profile);
+    // The recalculation reads the fields back: the snapshot then holds the
+    // values exactly as the form gives them, and the next edit compares like with like.
+    this.recalc();
   }
 
   /** Called before the profile is written into the settings, to make them ready to take it. */
@@ -2337,7 +2583,7 @@ class FlatSettingsBinder extends ProfileBinder {
    * @param {*} value
    */
   writeField(field, value) {
-    this.config.write(field, this.config.settings(), value);
+    field.write(this.config.settings(), value);
   }
 
   /**
@@ -2347,7 +2593,7 @@ class FlatSettingsBinder extends ProfileBinder {
    *
    * @param {Profile} profile
    */
-  showProfile(profile) {
+  showSettings(profile) {
     this.universe?.apply(profile);
     this.coordsSelect?.render(profile);
   }
@@ -2364,9 +2610,9 @@ class FlatSettingsBinder extends ProfileBinder {
   }
 
   takeSnapshot() {
-    const { fields, read, settings } = this.config;
+    const { fields, settings } = this.config;
     this.snapshot = {};
-    fields.forEach((f) => { this.snapshot[f.key] = read(f, settings()); });
+    fields.forEach((f) => { this.snapshot[f.key] = f.read(settings()); });
   }
 
   // -------------------------------------------------------------------------
@@ -2381,10 +2627,10 @@ class FlatSettingsBinder extends ProfileBinder {
   sync() {
     const profile = this.profile();
     if (!profile) return;
-    const { fields, read, settings } = this.config;
+    const { fields, settings } = this.config;
     let changed = false;
     fields.forEach((f) => {
-      changed = this.syncValue(profile.account, f.key, f.key, read(f, settings())) || changed;
+      changed = this.syncValue(profile.account, f.key, f.key, f.read(settings())) || changed;
     });
     if (changed) {
       this.pf.save(profile);
@@ -2429,8 +2675,7 @@ class FlatSettingsBinder extends ProfileBinder {
     const profile = this.profile();
     if (!profile) return;
     this.config.fields.forEach((f) => {
-      const input = typeof f.input === 'function' ? f.input() : $(f.input);
-      this.pf.markField(input, profile, profile.account, f.key, this.restoreAccount(f.key));
+      this.pf.markField(pfFieldInput(f), profile, profile.account, f.key, this.restoreAccount(f.key));
     });
   }
 }

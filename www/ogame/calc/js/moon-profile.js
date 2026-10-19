@@ -28,7 +28,7 @@
 
 'use strict';
 
-/** @type {ProfileConvField[]} */
+/** @type {ProfilePrmField[]} */
 const MOON_ACCOUNT_FIELDS = [
   pfConvNumField('research.114', 'hyperTechLevel', '#hypertech-lvl'),
   pfConvNumField('lf.ship.209.cargo', 'rcCapacityIncrease', '#rc-capacity-increase'),
@@ -49,8 +49,14 @@ const MOON_MOON_FIELDS = [
   pfConvNumField('building.42', 'phalanxLevel', '#phalanx-lvl', 1, 1),
 ];
 
-/** The options.prm keys of the settings that come from the profile's universe. */
-const MOON_UNIVERSE_KEYS = ['debrisPercent', 'deutToDebris', 'defenseDebrisPercent', 'numberOfSystems', 'circularSystems'];
+/** @type {PfUniverseField[]} The settings that come from the profile's universe. */
+const MOON_UNIVERSE_FIELDS = [
+  { kind: PF_UNIVERSE_DEBRIS, input: '#debris-percent', prm: 'debrisPercent' },
+  { kind: PF_UNIVERSE_DEUT_IN_DEBRIS, input: '#deut-to-debris', prm: 'deutToDebris' },
+  { kind: PF_UNIVERSE_DEF_DEBRIS, input: '#defense-debris-percent', prm: 'defenseDebrisPercent' },
+  { kind: PF_UNIVERSE_SYSTEMS, input: '#systems-num', prm: 'numberOfSystems' },
+  { kind: PF_UNIVERSE_DONUT_SYSTEM, input: '#circular-systems', prm: 'circularSystems' },
+];
 
 /** The class checkboxes: the calculator knows the general and the discoverer, any other class is neither. */
 const MOON_CLASS_CHECKBOXES = [
@@ -100,14 +106,7 @@ class MoonProfiles extends PlanetPrmBinder {
       planetFields: MOON_PLANET_FIELDS,
       cookie: 'options_moon',
       lastKey: 'moon',
-      universe: [
-        [PF_UNIVERSE_DEBRIS, '#debris-percent'],
-        [PF_UNIVERSE_DEUT_IN_DEBRIS, '#deut-to-debris'],
-        [PF_UNIVERSE_DEF_DEBRIS, '#defense-debris-percent'],
-        [PF_UNIVERSE_SYSTEMS, '#systems-num'],
-        [PF_UNIVERSE_DONUT_SYSTEM, '#circular-systems'],
-      ],
-      universeKeys: MOON_UNIVERSE_KEYS,
+      universe: MOON_UNIVERSE_FIELDS,
       // The class is two checkboxes, the phalanx level is the moon's, and "your system" is filled in from the moon.
       extraOwnedKeys: ['isGeneral', 'isDiscoverer', 'phalanxLevel', 'ownSystem'],
     });
@@ -116,7 +115,7 @@ class MoonProfiles extends PlanetPrmBinder {
     // A moon not picked yet is the one of the planet shown.
     this.moonSelect = new PfBodySelect(pf, {
       select: '#pf-moon', box: '#pf-moon-box', bodies: (p) => p.moons, lastKey: 'moon-moon',
-      fallback: (p) => p.moons.find((m) => this.planetId !== null && m.planetId === this.planetId),
+      planetOf: () => this.planetId,
     });
   }
 
@@ -173,7 +172,8 @@ class MoonProfiles extends PlanetPrmBinder {
     Object.assign(prm, moonClassToPrm(getProfileValue(profile.account, 'class', 0)));
     const moon = this.moon(profile);
     MOON_MOON_FIELDS.forEach((f) => {
-      prm[f.prm] = moon ? f.toPrm(getProfileValue(moon, f.key)) : cloneData(this.ownPrm[f.prm]);
+      if (moon) f.write(prm, getProfileValue(moon, f.key));
+      else prm[f.prm] = cloneData(this.ownPrm[f.prm]);
     });
     prm.ownSystem = moon?.coords?.system || cloneData(this.ownPrm.ownSystem);
   }
@@ -192,32 +192,30 @@ class MoonProfiles extends PlanetPrmBinder {
     /** @type {Record<string, any>} */
     const prm = options.prm;
     this.snapshot.class = profile ? pfNum(getProfileValue(profile.account, 'class', 0)) : PROFILE_CLASS.NONE;
-    MOON_MOON_FIELDS.forEach((f) => { this.snapshot['moon:' + f.key] = f.fromPrm(prm[f.prm]); });
+    MOON_MOON_FIELDS.forEach((f) => { this.snapshot['moon:' + f.key] = f.read(prm); });
   }
 
   // -------------------------------------------------------------------------
   // Calculator -> profile
   // -------------------------------------------------------------------------
 
-  /** Write what changed since the last snapshot into the profile. */
-  sync() {
-    super.sync();
-    // The base wrote its changes already: this reads the profile as saved.
-    const profile = this.profile();
-    if (!profile) return;
+  /**
+   * The class and the moon's fields, into the profile the base is syncing.
+   *
+   * @param {Profile} profile
+   * @returns {boolean} True when the profile changed.
+   */
+  syncExtra(profile) {
     /** @type {Record<string, any>} */
     const prm = options.prm;
     const moon = this.moon(profile);
     let changed = this.syncValue(profile.account, 'class', 'class', moonClassFromPrm(prm, this.snapshot.class));
     if (moon) {
       MOON_MOON_FIELDS.forEach((f) => {
-        changed = this.syncValue(moon, f.key, 'moon:' + f.key, f.fromPrm(prm[f.prm])) || changed;
+        changed = this.syncValue(moon, f.key, 'moon:' + f.key, f.read(prm)) || changed;
       });
     }
-    if (changed) {
-      this.pf.save(profile);
-      this.markAll();
-    }
+    return changed;
   }
 
   /**
@@ -252,11 +250,7 @@ class MoonProfiles extends PlanetPrmBinder {
     // Whatever was typed for the planet shown so far is saved first.
     this.save();
     this.planetId = this.planetSelect.chosen(profile);
-    const moon = profile.moons.find((m) => m.planetId === this.planetId);
-    if (moon) {
-      this.moonId = moon.id;
-      this.moonSelect.choose(profile, moon.id);
-    }
+    this.moonId = this.moonSelect.follow(profile) ?? this.moonId;
     this.show(profile);
   }
 
@@ -271,13 +265,10 @@ class MoonProfiles extends PlanetPrmBinder {
 
   /** @param {Profile} profile */
   show(profile) {
-    this.applying = true;
-    try {
+    this.whileApplying(() => {
       this.showPlanet(profile);
-    } finally {
-      this.applying = false;
-    }
-    this.markAll();
+      this.takeSnapshot();
+    });
   }
 
   // -------------------------------------------------------------------------
@@ -293,7 +284,7 @@ class MoonProfiles extends PlanetPrmBinder {
     const moon = this.moon(profile);
     if (!moon) return;
     MOON_MOON_FIELDS.forEach((f) => {
-      this.pf.markField($(f.input), profile, moon, f.key, this.restoreBody('moons', moon.id, f.key));
+      this.pf.markField(pfFieldInput(f), profile, moon, f.key, this.restoreBody('moons', moon.id, f.key));
     });
   }
 

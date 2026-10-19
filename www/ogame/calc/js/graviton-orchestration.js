@@ -98,8 +98,8 @@ const options = {
   save: function () { saveToCookie('options_graviton', options.prm); }
 };
 
-/** The officer checkboxes, by id and options.prm key alike. */
-const GRAVITON_OFFICERS = ['engineer', 'geologist', 'technocrat', 'admiral', 'commander'];
+/** The officer checkboxes, by id and options.prm key alike: the profile's officers (profiles-core.js). */
+const GRAVITON_OFFICERS = PROFILE_OFFICERS;
 
 class GravitonApp {
   constructor() {

@@ -36,13 +36,8 @@
 const QUEUE_ACCOUNT_FIELDS = [
   pfLevelField('research.121', 'ionTechLevel', '#ion-tech-level'),
   pfLevelField('research.114', 'hyperTechLevel', '#hyper-tech-level'),
-  {
-    // The queue has no "no class": a profile without one shows as collector.
-    key: 'class', prm: 'playerClass', input: '#player-class-0',
-    get: (p) => pfNum(p.playerClass) + 1,
-    show: (v) => setChecked('#player-class-' + Math.min(2, Math.max(0, pfNum(v) - 1)), true),
-    display: (v) => pfLabelFor('player-class-' + (pfNum(v) - 1)),
-  },
+  // The queue has no "no class": a profile without one shows as collector.
+  pfInForm(pfCollectorClassField('playerClass', 'player-class-'), (v) => setChecked('#player-class-' + v, true)),
   pfPercentField('lf.ship.202.cargo', 'scCapacityIncrease', '#sc-capacity-increase'),
   pfPercentField('lf.ship.203.cargo', 'lcCapacityIncrease', '#lc-capacity-increase'),
 ];
@@ -69,9 +64,7 @@ class QueueProfiles extends ProfileBinder {
       this.bodySelects[t.tab] = new PfBodySelect(pf, {
         select: '#pf-body-' + t.tab, box: '#pf-body-box-' + t.tab, bodies: (p) => p[t.bodies], lastKey: t.lastKey,
         // A moon not picked yet is the one of the planet shown.
-        fallback: t.tab === MOON_TAB
-          ? (p) => p.moons.find((m) => this.bodyIds[PLANET_TAB] !== null && m.planetId === this.bodyIds[PLANET_TAB])
-          : undefined,
+        planetOf: t.tab === MOON_TAB ? () => this.bodyIds[PLANET_TAB] : undefined,
       });
     });
     /** @type {Record<number, number>} Per tab, the body's fields at the last apply or sync. */
@@ -83,14 +76,9 @@ class QueueProfiles extends ProfileBinder {
     this.speed = null;
   }
 
-  init() {
-    this.describeFields();
-    options.save = () => this.save();
+  bindControls() {
     this.speed = new PfUniverseSetting(this.pf, PF_UNIVERSE_SPEED, '#universe-speed', () => this.app.refreshBoth());
     QUEUE_TABS.forEach((t) => this.bodySelects[t.tab].onChange(() => this.bodyChosen(t)));
-    this.pf.onChange((profile) => this.apply(profile));
-    const active = this.pf.active();
-    if (active) this.apply(active);
   }
 
   /** The options.prm keys the profile may own, the start levels it fills in included. */
@@ -112,34 +100,24 @@ class QueueProfiles extends ProfileBinder {
   // Profile -> calculator
   // -------------------------------------------------------------------------
 
-  /** @param {?Profile} profile */
-  apply(profile) {
-    if (!profile) {
-      this.leave();
-      return;
-    }
-    this.applying = true;
-    try {
-      if (this.profileId === null) {
-        this.ownPrm = {};
-        QueueProfiles.ownedKeys().forEach((key) => { this.ownPrm[key] = cloneData(options.prm[key]); });
-      }
-      this.profileId = profile.id;
-      this.pf.clearMarks();
-      QUEUE_ACCOUNT_FIELDS.forEach((f) => f.show(getProfileValue(profile.account, f.key)));
-      // The queue's reset would write every default into the profile as an edit.
-      pfShow('#reset', false);
-      QUEUE_TABS.forEach((t) => {
-        this.bodyIds[t.tab] = this.bodySelects[t.tab].render(profile, this.bodyIds[t.tab]);
-        this.showBody(t, profile);
-      });
-      this.app.refreshBoth();
-      this.takeSnapshot();
-    } finally {
-      this.applying = false;
-    }
+  captureOwn() {
+    this.ownPrm = {};
+    QueueProfiles.ownedKeys().forEach((key) => { this.ownPrm[key] = cloneData(options.prm[key]); });
+  }
+
+  /** @param {Profile} profile */
+  showProfile(profile) {
+    QUEUE_ACCOUNT_FIELDS.forEach((f) => f.write(options.prm, getProfileValue(profile.account, f.key)));
+    QUEUE_TABS.forEach((t) => {
+      this.bodyIds[t.tab] = this.bodySelects[t.tab].render(profile, this.bodyIds[t.tab]);
+      this.showBody(t, profile);
+    });
+    this.app.refreshBoth();
+  }
+
+  /** @param {Profile} profile */
+  afterApply(profile) {
     void this.speed?.attach(profile);
-    this.markAll();
   }
 
   /**
@@ -170,7 +148,7 @@ class QueueProfiles extends ProfileBinder {
     QUEUE_TABS.forEach((t) => this.bodySelects[t.tab].hide());
     const prm = options.prm;
     Object.assign(prm, cloneData(this.ownPrm));
-    QUEUE_ACCOUNT_FIELDS.forEach((f) => f.show(f.get(prm)));
+    QUEUE_ACCOUNT_FIELDS.forEach((f) => f.write(prm, f.read(prm)));
     QUEUE_TABS.forEach((t) => {
       const levels = Array.isArray(prm[t.levels]) ? prm[t.levels] : [];
       levels.forEach((/** @type {number[]} */ [techId, level]) => setVal('#startlvl-' + t.tab + '-' + techId, level));
@@ -185,7 +163,7 @@ class QueueProfiles extends ProfileBinder {
   takeSnapshot() {
     const prm = options.prm;
     this.snapshot = {};
-    QUEUE_ACCOUNT_FIELDS.forEach((f) => { this.snapshot[f.key] = f.get(prm); });
+    QUEUE_ACCOUNT_FIELDS.forEach((f) => { this.snapshot[f.key] = f.read(prm); });
     QUEUE_TABS.forEach((t) => this.takeBodySnapshot(t));
   }
 
@@ -209,7 +187,7 @@ class QueueProfiles extends ProfileBinder {
     const prm = options.prm;
     let changed = false;
     QUEUE_ACCOUNT_FIELDS.forEach((f) => {
-      changed = this.syncValue(profile.account, f.key, f.key, f.get(prm)) || changed;
+      changed = this.syncValue(profile.account, f.key, f.key, f.read(prm)) || changed;
     });
     QUEUE_TABS.forEach((t) => {
       const body = this.body(t, profile);
@@ -256,21 +234,17 @@ class QueueProfiles extends ProfileBinder {
     /** @type {QueueTab[]} */
     const shown = [t];
     const moonTab = QUEUE_TABS[1];
-    const moon = t.tab === PLANET_TAB ? profile.moons.find((m) => m.planetId === id) : undefined;
+    const moon = t.tab === PLANET_TAB ? this.bodySelects[MOON_TAB].moonOfPlanet(profile) : undefined;
     if (moon && moon.id !== this.bodyIds[MOON_TAB]) {
       this.bodyIds[MOON_TAB] = moon.id;
       this.bodySelects[MOON_TAB].choose(profile, moon.id);
       shown.push(moonTab);
     }
-    this.applying = true;
-    try {
+    this.whileApplying(() => {
       shown.forEach((s) => this.showBody(s, profile));
       this.app.refreshBoth();
       shown.forEach((s) => this.takeBodySnapshot(s));
-    } finally {
-      this.applying = false;
-    }
-    this.markAll();
+    });
   }
 
   // -------------------------------------------------------------------------
@@ -288,7 +262,7 @@ class QueueProfiles extends ProfileBinder {
     const profile = this.profile();
     if (!profile) return;
     QUEUE_ACCOUNT_FIELDS.forEach((f) => {
-      this.pf.markField($(f.input), profile, profile.account, f.key, this.restoreAccount(f.key));
+      this.pf.markField(pfFieldInput(f), profile, profile.account, f.key, this.restoreAccount(f.key));
     });
     this.speed?.mark();
     QUEUE_TABS.forEach((t) => {

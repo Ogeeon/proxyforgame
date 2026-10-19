@@ -38,15 +38,13 @@ function expeditionsClassToPrm(v) {
   return cls === PROFILE_CLASS.COLLECTOR ? 1 : EXPEDITIONS_CLASS_OTHER;
 }
 
-/** @type {ProfileConvField[]} */
+/** @type {ProfilePrmField[]} */
 const EXPEDITIONS_ACCOUNT_FIELDS = [
-  {
-    // The calculator has no "no class": a profile without one shows as "other".
-    key: 'class', prm: 'playerClass', input: '#player-class',
-    toPrm: expeditionsClassToPrm,
-    fromPrm: (v) => [PROFILE_CLASS.DISCOVERER, PROFILE_CLASS.COLLECTOR][pfNum(v)] ?? PROFILE_CLASS.GENERAL,
-    display: (v) => pfOptionText(selectEl('#player-class'))(expeditionsClassToPrm(v)),
-  },
+  // The calculator has no "no class": a profile without one shows as "other".
+  pfPrmField('class', 'playerClass', '#player-class',
+    expeditionsClassToPrm,
+    (v) => [PROFILE_CLASS.DISCOVERER, PROFILE_CLASS.COLLECTOR][pfNum(v)] ?? PROFILE_CLASS.GENERAL,
+    { display: (v) => pfOptionText(selectEl('#player-class'))(expeditionsClassToPrm(v)) }),
   pfConvNumField('research.114', 'hyperTechLevel', '#tech-hyper-level'),
   pfConvNumField('lf.expedition.resources', 'percentRes', '#percent-resources'),
   pfConvNumField('lf.expedition.ships', 'percentShips', '#percent-ships'),
@@ -55,8 +53,11 @@ const EXPEDITIONS_ACCOUNT_FIELDS = [
   pfConvNumField('item.expeditionResources', 'resourceDiscoveryBooster', '#resource-discovery-booster'),
 ];
 
-/** The options.prm keys of the settings that come from the profile's universe, in the order of the config. */
-const EXPEDITIONS_UNIVERSE_KEYS = ['universeSpeed', 'highTop'];
+/** @type {PfUniverseField[]} The settings that come from the profile's universe. */
+const EXPEDITIONS_UNIVERSE_FIELDS = [
+  { kind: PF_UNIVERSE_SPEED, input: '#universe-speed', prm: 'universeSpeed' },
+  { kind: PF_UNIVERSE_TOP_SCORE, input: '#highTop', prm: 'highTop' },
+];
 
 /** The profile value key of a ship's life-form cargo bonus. */
 const expeditionsCargoKey = (/** @type {{techId: number}} */ ship) => 'lf.ship.' + ship.techId + '.cargo';
@@ -73,11 +74,7 @@ class ExpeditionsProfiles extends PlanetPrmBinder {
       planetFields: [],
       cookie: 'options_expeditions',
       lastKey: 'expeditions',
-      universe: [
-        [PF_UNIVERSE_SPEED, '#universe-speed'],
-        [PF_UNIVERSE_TOP_SCORE, '#highTop'],
-      ],
-      universeKeys: EXPEDITIONS_UNIVERSE_KEYS,
+      universe: EXPEDITIONS_UNIVERSE_FIELDS,
       // The array of cargo bonuses: stored with the values from before the profile.
       extraOwnedKeys: ['lfShipsBonuses'],
     });
@@ -114,7 +111,7 @@ class ExpeditionsProfiles extends PlanetPrmBinder {
     // back: the ones the link named are left out of this apply, unattached,
     // unmarked, and with nothing of theirs written to the universe's cache.
     const all = this.universeSettings;
-    this.universeSettings = all.filter((_, i) => !this.linkKeys.has(this.config.universeKeys[i]));
+    this.universeSettings = all.filter((setting) => !this.linkKeys.has(setting.prm));
     try {
       super.apply(profile);
     } finally {
@@ -142,21 +139,19 @@ class ExpeditionsProfiles extends PlanetPrmBinder {
   // Calculator -> profile
   // -------------------------------------------------------------------------
 
-  /** Write what changed since the last snapshot into the profile. */
-  sync() {
-    super.sync();
-    // The base wrote its changes already: this reads the profile as saved.
-    const profile = this.profile();
-    if (!profile) return;
+  /**
+   * The cargo bonuses, into the profile the base is syncing.
+   *
+   * @param {Profile} profile
+   * @returns {boolean} True when the profile changed.
+   */
+  syncExtra(profile) {
     let changed = false;
     EXPEDITION_SHIPS.forEach((ship, i) => {
       const key = expeditionsCargoKey(ship);
       changed = this.syncValue(profile.account, key, key, pfNum(options.prm.lfShipsBonuses[i])) || changed;
     });
-    if (changed) {
-      this.pf.save(profile);
-      this.markAll();
-    }
+    return changed;
   }
 
   // -------------------------------------------------------------------------
