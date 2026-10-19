@@ -15,6 +15,22 @@
   <!-- Bootstrap 5 and Bootstrap Icons (CSS, icon font, JS bundle) -->
   <?php require_once '../../vendor_bs.tpl'; ?>
 
+  <script>
+    // Put the stored race on <html> before the first paint: costs_bs.css then shows only
+    // that race's building rows and level inputs, so nothing shifts when renderHideNShow()
+    // runs after load. A profile planet's race is applied later, by the calculator.
+    (function () {
+      let race = 1;
+      try {
+        const stored = Number(JSON.parse(localStorage.getItem('options_lfcosts') || '{}').race);
+        if (stored >= 1 && stored <= 4) race = stored;
+      } catch {
+        race = 1; // storage blocked or not JSON: the calculator's default
+      }
+      document.documentElement.dataset.lfRace = String(race);
+    })();
+  </script>
+
   <!-- Custom styles -->
   <link type="text/css" href="/css/langs_bs.css?v=<?php echo filemtime($pfgPath.'/css/langs_bs.css'); ?>" rel="stylesheet">
   <link type="text/css" href="/css/common_bs.css?v=<?php echo filemtime($pfgPath.'/css/common_bs.css'); ?>" rel="stylesheet">
@@ -203,28 +219,32 @@
                 <option value="<?=$r?>" <?php if ($r == 1):?>selected="selected"<?php endif; ?>><?= $l['race-'.$r] ?></option>
               <?php endfor; ?>
               </select>
+              <script>
+                // The select's width follows the race name, so show the stored race from the first paint too.
+                document.getElementById('race-selector').value = document.documentElement.dataset.lfRace || '1';
+              </script>
             </div>
-            <div id="megalith-level-wrap" class="align-items-center gap-1" style="display: none;">
+            <div id="megalith-level-wrap" class="align-items-center gap-1" data-race="2">
               <label id="lbl-megalith-level" for="megalith-level"><?= $l['megalith'] ?></label>
               <input id="megalith-level" type="text" name="megalith-level" class="form-control form-control-sm level-input" value="0">
             </div>
-            <div id="mrc-level-wrap" class="align-items-center gap-1" style="display: none;">
+            <div id="mrc-level-wrap" class="align-items-center gap-1" data-race="2">
               <label id="lbl-mrc-level" for="mrc-level"><?= $l['mineral-res-centre'] ?></label>
               <input id="mrc-level" type="text" name="mrc-level" class="form-control form-control-sm level-input" value="0">
             </div>
-            <div id="research-centre-level-wrap" class="align-items-center gap-1" style="display: none;">
+            <div id="research-centre-level-wrap" class="align-items-center gap-1" data-race="1">
               <label id="lbl-research-centre-level" for="research-centre-level"><?= $l['research-centre'] ?></label>
               <input id="research-centre-level" type="text" name="research-centre-level" class="form-control form-control-sm level-input" value="0">
             </div>
-            <div id="rune-tech-level-wrap" class="align-items-center gap-1" style="display: none;">
+            <div id="rune-tech-level-wrap" class="align-items-center gap-1" data-race="2">
               <label id="lbl-rune-tech-level" for="rune-tech-level"><?= $l['rune-tech'] ?></label>
               <input id="rune-tech-level" type="text" name="rune-tech-level" class="form-control form-control-sm level-input" value="0">
             </div>
-            <div id="rbt-res-centre-level-wrap" class="align-items-center gap-1" style="display: none;">
+            <div id="rbt-res-centre-level-wrap" class="align-items-center gap-1" data-race="3">
               <label id="lbl-rbt-res-centre-level" for="rbt-res-centre-level"><?= $l['rbt-res-centre'] ?></label>
               <input id="rbt-res-centre-level" type="text" name="rbt-res-centre-level" class="form-control form-control-sm level-input" value="0">
             </div>
-            <div id="vortex-chamber-level-wrap" class="align-items-center gap-1" style="display: none;">
+            <div id="vortex-chamber-level-wrap" class="align-items-center gap-1" data-race="4">
               <label id="lbl-vortex-chamber-level" for="vortex-chamber-level"><?= $l['vortex-chamber'] ?></label>
               <input id="vortex-chamber-level" type="text" name="vortex-chamber-level" class="form-control form-control-sm level-input" value="0">
             </div>
@@ -326,7 +346,8 @@
                 <?php $techs = getTechsByType($j); $row = 1; ?>
                 <?php $energyHintBuildings = [1002, 2002, 3002, 4002]; ?>
                 <?php foreach ($techs as $tech) :?>
-                <tr class="<?= ($row++ % 2) === 1 ? 'odd' : 'even' ?>">
+                <?php // data-race: costs_bs.css shows only the stored race's rows from the first paint (see the script in <head>). ?>
+                <tr class="<?= ($row++ % 2) === 1 ? 'odd' : 'even' ?>" data-race="<?= intdiv((int) $tech, 1000) ?>">
                   <td style="display: none;"><?=$tech?></td>
                   <td class="min"><?=$l[$techData[$tech][0]]?><?php if (in_array($tech, $energyHintBuildings)): ?> <i class="bi bi-lightning-charge energy-cost-hint" data-bs-toggle="tooltip" title="<?= $l['energy-cost-to-build'] ?>: 0"></i><?php endif; ?></td>
                   <?php $techName = $l[$techData[$tech][0]]; ?>

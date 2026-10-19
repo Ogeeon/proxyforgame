@@ -140,6 +140,9 @@ class LfRenderer {
     // -------------------------------------------------------------------------
 
     renderHideNShow(race) {
+        // The stylesheet hides by this attribute; keep it on the race shown here,
+        // or a row cleared to display '' would fall back to the race stored at load.
+        document.documentElement.dataset.lfRace = String(race);
         for (let outer = 0; outer < 2; outer++) {
             const rows = getTableRows(`#table-${outer}-1`);
             for (let row = 1; row < rows.length - FOOTER_ROWS; row++) {

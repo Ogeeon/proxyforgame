@@ -456,6 +456,27 @@ td.min {
   }
 }
 
+/* lfcosts: only the selected race's building rows and level inputs. <html data-lf-race>
+   is set by an inline script in lfcosts.tpl before the first paint, and kept in step
+   by renderHideNShow(); its inline styles take over once it has run. */
+[data-lf-race] [data-race] {
+  display: none;
+}
+
+[data-lf-race="1"] tr[data-race="1"],
+[data-lf-race="2"] tr[data-race="2"],
+[data-lf-race="3"] tr[data-race="3"],
+[data-lf-race="4"] tr[data-race="4"] {
+  display: table-row;
+}
+
+[data-lf-race="1"] div[data-race="1"],
+[data-lf-race="2"] div[data-race="2"],
+[data-lf-race="3"] div[data-race="3"],
+[data-lf-race="4"] div[data-race="4"] {
+  display: flex;
+}
+
 @media (max-width: 768px) {
   #costs {
     padding: 5px;
