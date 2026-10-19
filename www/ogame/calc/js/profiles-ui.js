@@ -613,10 +613,9 @@ class ProfilesUi {
     // Only a value the game reported has a "true" value to compare with: one
     // only the player sets (production percentages, boosters, exchange rates)
     // and every value of a manual profile stay unmarked.
-    const v = entity.values[key];
-    const fromGame = hasGameLayer(profile) && !!v && 'game' in v;
-    const gameText = fromGame && differsFromGame(entity, key) ? this.displayValue(key, v.game) : null;
-    this.markInput(input, fromGame, gameText, () => restore(v.game));
+    const state = pfMarkState(entity.values[key], hasGameLayer(profile));
+    const gameText = state.differs ? this.displayValue(key, state.game) : null;
+    this.markInput(input, state.bound, gameText, () => restore(state.game));
   }
 
   /**
@@ -1495,14 +1494,12 @@ class PfUniverseSetting {
     /** @type {?UniverseEntry} */
     let known = null;
     if (this.universe) known = entry === undefined ? this.pf.universes.get(this.universe) : entry;
-    const game = known?.[this.kind.key] ?? null;
-    const input = $(this.selector);
-    if (game === null) {
-      this.pf.markInput(input, false, null, () => {});
-      return;
-    }
-    const differs = !sameValue(this.kind.get(this.selector), game);
-    this.pf.markInput(input, true, differs ? this.kind.display(game) : null, () => {
+    // The value the field shows stands in for the choice, so the mark compares
+    // what is on screen; a universe setting is marked whether or not the
+    // profile has a game layer.
+    const state = pfMarkState({ ...universeLayer(known, this.kind.key), override: this.kind.get(this.selector) }, true);
+    const game = state.game;
+    this.pf.markInput($(this.selector), state.bound, state.differs ? this.kind.display(game) : null, () => {
       this.kind.set(this.selector, game);
       this.changed();
       this.recalc();
