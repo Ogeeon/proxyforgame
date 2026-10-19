@@ -118,7 +118,7 @@
 <div id="costs">
   <div class="border rounded position-relative">
     <div class="d-flex flex-wrap align-items-center">
-      <div class="bg-body-secondary text-primary-emphasis rounded main-header text-center flex-grow-1">
+      <div class="text-primary-emphasis rounded main-header text-center flex-grow-1">
         <?= $l['title'] ?>
       </div>
       <div id="pf-bodies-row" class="pf-header-bodies d-flex flex-wrap gap-2 justify-content-end align-items-center ms-auto ps-2 me-1 d-none">

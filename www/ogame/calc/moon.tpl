@@ -79,7 +79,7 @@
   <!-- ================= Moon destruction ================= -->
   <div class="border rounded mb-2">
     <div class="d-flex align-items-center">
-      <div class="bg-body-secondary text-primary-emphasis rounded main-header text-center flex-grow-1"><?= $l['destroy-title'] ?></div>
+      <div class="text-primary-emphasis rounded main-header text-center flex-grow-1"><?= $l['destroy-title'] ?></div>
       <div id="reset-ds" class="d-flex align-items-center justify-content-center bg-danger-subtle" data-bs-toggle="tooltip" title="<?= $l['reset'] ?>">
         <i class="bi bi-arrow-counterclockwise" style="color: #dc3545; font-size: 1.25rem;"></i>
       </div>
@@ -126,7 +126,7 @@
   <!-- ================= Moon creation ================= -->
   <div class="border rounded">
     <div class="d-flex flex-wrap align-items-center">
-      <div class="bg-body-secondary text-primary-emphasis rounded main-header text-center flex-grow-1"><?= $l['create-title'] ?></div>
+      <div class="text-primary-emphasis rounded main-header text-center flex-grow-1"><?= $l['create-title'] ?></div>
       <div id="pf-planet-box" class="pf-header-bodies d-flex align-items-center gap-1 ms-auto ps-2 me-1 d-none">
         <label for="pf-planet"><?= $l['planet'] ?></label>
         <select id="pf-planet" class="form-select form-select-sm w-auto"></select>
@@ -343,7 +343,7 @@
   <!-- ================= Sensor phalanx ================= -->
   <div class="border rounded mt-2">
     <div class="d-flex flex-wrap align-items-center">
-      <div class="bg-body-secondary text-primary-emphasis rounded main-header text-center flex-grow-1"><?= $l['phalanx-title'] ?></div>
+      <div class="text-primary-emphasis rounded main-header text-center flex-grow-1"><?= $l['phalanx-title'] ?></div>
       <div id="pf-moon-box" class="pf-header-bodies d-flex align-items-center gap-1 ms-auto ps-2 me-1 d-none">
         <label for="pf-moon"><?= $l['moon'] ?></label>
         <select id="pf-moon" class="form-select form-select-sm w-auto"></select>

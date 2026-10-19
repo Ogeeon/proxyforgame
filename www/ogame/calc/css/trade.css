@@ -278,7 +278,6 @@
 #res-src-panel > p,
 #res-dst-panel > p {
     flex-shrink: 0;
-    margin-bottom: 0.5rem;
 }
 
 /* Panel content wrapper - grows to fill available space */

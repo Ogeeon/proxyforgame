@@ -90,7 +90,7 @@
       <div id="trade" class="mx-auto">
         <div class="border rounded position-relative">
           <div class="d-flex flex-wrap align-items-center">
-            <div class="bg-body-secondary text-primary-emphasis rounded main-header text-center flex-grow-1">
+            <div class="text-primary-emphasis rounded main-header text-center flex-grow-1">
               <?= $l['title'] ?>
             </div>
             <div id="pf-body-box" class="pf-header-bodies d-flex align-items-center gap-1 ms-auto ps-2 me-1 d-none">
@@ -160,7 +160,7 @@
               <!-- Source Resources Panel -->
               <div class="col-12 col-lg-6 d-flex flex-column">
                 <div id="res-src-panel" class="border rounded flex-grow-1">
-                  <p class="border rounded subheader bg-primary-subtle mb-1"><?= $l['src'] ?></p>
+                  <p class="border rounded subheader bg-primary-subtle"><?= $l['src'] ?></p>
                   <div class="pe-2 pb-1">
                     <div id="res-src" class="mb-2">
                       <div class="res-type"><input id="res-src-0" class="form-check-input" type="radio" name="src" value="0" tabindex="1"><label for="res-src-0"><?= $l['metal'] ?></label></div>
@@ -200,7 +200,7 @@
               <!-- Destination Resources Panel -->
               <div class="col-12 col-lg d-flex flex-column">
                 <div id="res-dst-panel" class="border rounded flex-grow-1">
-                  <p class="border rounded subheader bg-primary-subtle mb-1"><?= $l['dst'] ?></p>
+                  <p class="border rounded subheader bg-primary-subtle"><?= $l['dst'] ?></p>
                   <div class="pe-2 pb-1">
                     <div id="res-dst" class="mb-2">
                       <div class="res-type" id="res-type-dst-0"><input id="res-dst-0" class="form-check-input" type="radio" name="dst" value="0" tabindex="10"><label for="res-dst-0" id="res-type-dst-lbl-0"></label></div>
@@ -270,7 +270,7 @@
 
           <!-- Rates Panel -->
           <div class="border rounded me-1 ms-1">
-            <p class="border rounded subheader bg-primary-subtle mb-1 px-2"><?= $l['rates'] ?></p>
+            <p class="border rounded subheader bg-primary-subtle px-2"><?= $l['rates'] ?></p>
             <div class="rates-panel-content px-2 py-1">
               <!-- Rate Labels and Inputs Group -->
               <div class="rate-labels-inputs-group">
@@ -327,7 +327,7 @@
 
           <!-- Location Panel -->
           <div class="border rounded m-1">
-            <p class="border rounded subheader bg-primary-subtle mb-1 px-2"><?= $l['location'] ?></p>
+            <p class="border rounded subheader bg-primary-subtle px-2"><?= $l['location'] ?></p>
             <div class="px-2 py-1">
               <div class="row mb-1 align-items-center">
                 <div class="col-12 col-md-3 text-md-end tdr"><?= $l['country'] ?>:</div>
