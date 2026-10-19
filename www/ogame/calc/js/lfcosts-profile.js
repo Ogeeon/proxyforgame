@@ -11,8 +11,8 @@
 //     one planet of the profile, picked in #pf-planet: its factories, its
 //     life form and the life-form buildings that cut costs and times (the
 //     Megalith, the Mineral Research Centre and each race's research building);
-//   - sync(): options.prm -> profile, called from options.save(), writing only
-//     what changed since the last apply or sync, so a lossy mapping (a profile
+//   - writeBack(): options.prm -> profile, called from options.save(), writing
+//     only what changed since the last apply or write-back, so a lossy mapping (a profile
 //     with no class shows as collector here) never becomes an override.
 // The planet's life-form building and research levels are filled in as the
 // "from" levels of the build tables, for convenience only: they are not bound,

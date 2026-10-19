@@ -6,8 +6,8 @@
 // into it and writes the changes back:
 //   - apply(): profile -> options.prm (drives, class, alliance class,
 //     life-form bonuses) and the profile's universe into the universe picker;
-//   - sync(): options.prm -> profile, called from options.save(), writing only
-//     what changed since the last apply or sync, so a lossy mapping (a profile
+//   - writeBack(): options.prm -> profile, called from options.save(), writing
+//     only what changed since the last apply or write-back, so a lossy mapping (a profile
 //     with no class shows as collector here) never becomes an override.
 // Everything else - departure, destination, ships, times, the universe
 // settings - is the calculator's own and keeps going to options_flight. The

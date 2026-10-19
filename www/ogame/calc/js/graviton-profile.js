@@ -11,8 +11,8 @@
 //     shipyard and nanite factory, its temperature, its power plants and solar
 //     satellites with their production percentages, its energy booster and its
 //     Disruption Chamber;
-//   - sync(): options.prm -> profile, called from options.save(), writing only
-//     what changed since the last apply or sync, so a lossy mapping (a
+//   - writeBack(): options.prm -> profile, called from options.save(), writing
+//     only what changed since the last apply or write-back, so a lossy mapping (a
 //     discoverer shows as no class here) never becomes an override.
 // A profile with no planet leaves the planet's fields to the calculator. The
 // graviton level and the available resources are the calculator's own and

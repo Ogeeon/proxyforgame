@@ -7,8 +7,8 @@
 //   - apply(): profile -> options (hyperspace technology, class, the cargo
 //     bonuses of the small and large transporter, the exchange rates) and the
 //     profile's universe into the universe picker, locked;
-//   - sync(): options -> profile, called from options.save(), writing only
-//     what changed since the last apply or sync, so a lossy mapping (a profile
+//   - writeBack(): options -> profile, called from options.save(), writing
+//     only what changed since the last apply or write-back, so a lossy mapping (a profile
 //     with no class shows as collector here) never becomes an override.
 // The exchange rates are shared with production, which keeps them as
 // [metal, crystal, deuterium] in metal units; they carry no game layer, so

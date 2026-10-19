@@ -1965,7 +1965,7 @@ class PfCoordsSelect {
    *
    * @param {Profile} profile
    */
-  sync(profile) {
+  follow(profile) {
     const select = selectEl(this.config.select);
     if (!select) return;
     const bodies = this.bodies(profile);
@@ -1991,7 +1991,7 @@ class PfCoordsSelect {
  * points - init(), apply(), save() and leave() - whose sequence is the same
  * everywhere. A binder fills in the steps that differ: describeFields(),
  * takeOverSave() and bindControls() for init(); captureOwn(), showProfile(),
- * takeSnapshot() and afterApply() for apply(); sync() and saveOwn() (or
+ * takeSnapshot() and afterApply() for apply(); writeBack() and saveOwn() (or
  * saveWithProfile()); restoreOwn() and recalc(); markAll().
  *
  * @template [App=*]
@@ -2008,7 +2008,7 @@ class ProfileBinder {
     this.profileId = null;
     /** True while the binder writes into the form, so that is not taken for an edit. */
     this.applying = false;
-    /** @type {Record<string, *>} Values (by profile key, body ones prefixed) at the last apply or sync. */
+    /** @type {Record<string, *>} Values (by profile key, body ones prefixed) at the last apply or write-back. */
     this.snapshot = {};
     /** @type {?PfCoordsSelect} The coordinates select that follows the form after every save, if the page has one. */
     this.coordsSelect = null;
@@ -2147,13 +2147,13 @@ class ProfileBinder {
 
   /** Write what the player changed into the profile, and the rest into the calculator's own storage. */
   saveWithProfile() {
-    this.sync();
+    this.writeBack();
     this.saveOwn();
     const profile = this.coordsSelect ? this.profile() : null;
-    if (profile) this.coordsSelect?.sync(profile);
+    if (profile) this.coordsSelect?.follow(profile);
   }
 
-  sync() {
+  writeBack() {
     // A binder copies what changed in the form into the profile here.
   }
 
@@ -2233,7 +2233,7 @@ class ProfileBinder {
    * @param {*} value
    * @returns {boolean} True when the profile changed.
    */
-  syncValue(entity, key, snapKey, value) {
+  writeBackValue(entity, key, snapKey, value) {
     if (sameValue(value, this.snapshot[snapKey])) return false;
     this.snapshot[snapKey] = value;
     return setProfileValue(entity, key, value);
@@ -2419,7 +2419,7 @@ class PlanetPrmBinder extends ProfileBinder {
   }
 
   /** Write what changed since the last snapshot into the profile. */
-  sync() {
+  writeBack() {
     const profile = this.profile();
     if (!profile) return;
     /** @type {Record<string, any>} */
@@ -2427,14 +2427,14 @@ class PlanetPrmBinder extends ProfileBinder {
     const planet = this.planet(profile);
     let changed = false;
     this.config.accountFields.forEach((f) => {
-      changed = this.syncValue(profile.account, f.key, f.key, f.read(prm)) || changed;
+      changed = this.writeBackValue(profile.account, f.key, f.key, f.read(prm)) || changed;
     });
     if (planet) {
       this.config.planetFields.forEach((f) => {
-        changed = this.syncValue(planet, f.key, 'planet:' + f.key, f.read(prm)) || changed;
+        changed = this.writeBackValue(planet, f.key, 'planet:' + f.key, f.read(prm)) || changed;
       });
     }
-    changed = this.syncExtra(profile) || changed;
+    changed = this.writeBackExtra(profile) || changed;
     if (changed) {
       this.pf.save(profile);
       this.markAll();
@@ -2443,12 +2443,12 @@ class PlanetPrmBinder extends ProfileBinder {
 
   /**
    * Write what a subclass binds beyond the field lists into the profile being
-   * synced, which is then saved once with the rest.
+   * written back, which is then saved once with the rest.
    *
    * @param {Profile} _profile
    * @returns {boolean} True when the profile changed.
    */
-  syncExtra(_profile) {
+  writeBackExtra(_profile) {
     return false;
   }
 
@@ -2640,13 +2640,13 @@ class FlatSettingsBinder extends ProfileBinder {
   }
 
   /** Write what changed since the last snapshot into the profile. */
-  sync() {
+  writeBack() {
     const profile = this.profile();
     if (!profile) return;
     const { fields, settings } = this.config;
     let changed = false;
     fields.forEach((f) => {
-      changed = this.syncValue(profile.account, f.key, f.key, f.read(settings())) || changed;
+      changed = this.writeBackValue(profile.account, f.key, f.key, f.read(settings())) || changed;
     });
     if (changed) {
       this.pf.save(profile);

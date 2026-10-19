@@ -5,8 +5,8 @@
 // The calculator keeps working on options.prm; this file projects the profile
 // into it and writes the changes back:
 //   - apply(): profile -> options.prm (account fields and the planet list);
-//   - sync(): options.prm -> profile, called from options.save(), writing only
-//     what changed since the last apply or sync. Diffing against that snapshot,
+//   - writeBack(): options.prm -> profile, called from options.save(), writing
+//     only what changed since the last apply or write-back. Diffing against that snapshot,
 //     not against the profile, keeps a lossy mapping (a profile with no class
 //     shows as collector here) from turning into an override nobody made.
 // With a profile active, the one-planet tab shows one of the profile's planets,
@@ -59,15 +59,15 @@ class ProductionProfiles extends ProfileBinder {
   /** @param {ProfilesUi} pf */
   constructor(pf) {
     super(pf, undefined);
-    /** @type {Record<string, *>} Account prm values at the last apply or sync. */
+    /** @type {Record<string, *>} Account prm values at the last apply or write-back. */
     this.accountSnapshot = {};
-    /** @type {Map<string, {state: number[], name: string}>} Planet values at the last apply or sync. */
+    /** @type {Map<string, {state: number[], name: string}>} Planet values at the last apply or write-back. */
     this.planetSnapshot = new Map();
     /** @type {?string} The planet the one-planet tab shows. */
     this.onePlanetId = null;
-    /** @type {number[]} The one-planet inputs as last loaded or synced. */
+    /** @type {number[]} The one-planet inputs as last loaded or written back. */
     this.onePlanetSnapshot = [];
-    /** @type {Record<string, number>} The storage levels as last loaded or synced. */
+    /** @type {Record<string, number>} The storage levels as last loaded or written back. */
     this.storageSnapshot = {};
     this.ownSave = options.save;
     /** @type {Record<string, *>} The calculator's own settings, as they were before a profile. */
@@ -232,8 +232,8 @@ class ProductionProfiles extends ProfileBinder {
   }
 
   saveWithProfile() {
-    this.syncOnePlanet();
-    this.sync();
+    this.writeBackOnePlanet();
+    this.writeBack();
     this.saveLocal();
   }
 
@@ -242,7 +242,7 @@ class ProductionProfiles extends ProfileBinder {
    * row of the all-planets table - production's updateAllPlnTab() reads the
    * table back into the arrays, and would otherwise undo the edit.
    */
-  syncOnePlanet() {
+  writeBackOnePlanet() {
     const states = /** @type {TaggedState[]} */ (options.prm.aPS);
     const index = states.findIndex((s) => this.onePlanetId !== null && s.pfId === this.onePlanetId);
     // An empty profile shows one untagged planet until it is edited.
@@ -262,7 +262,7 @@ class ProductionProfiles extends ProfileBinder {
   }
 
   /** Write what changed since the last snapshot into the profile. */
-  sync() {
+  writeBack() {
     const profile = this.profile();
     if (!profile) return;
     const prm = options.prm;
@@ -289,7 +289,7 @@ class ProductionProfiles extends ProfileBinder {
         Object.entries(productionPlanetValues(s)).forEach(([key, value]) => setProfileValue(/** @type {ProfilePlanet} */ (planet), key, value));
         changed = true;
       } else {
-        changed = this.syncPlanet(planet, s, prm.aPNames[i]) || changed;
+        changed = this.writeBackPlanet(planet, s, prm.aPNames[i]) || changed;
       }
       ordered.push(planet);
     });
@@ -322,7 +322,7 @@ class ProductionProfiles extends ProfileBinder {
    * @param {string} name
    * @returns {boolean} True when the planet changed.
    */
-  syncPlanet(planet, state, name) {
+  writeBackPlanet(planet, state, name) {
     const before = this.planetSnapshot.get(planet.id);
     if (!before) return false;
     let changed = false;

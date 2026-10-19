@@ -14,8 +14,8 @@
 //     planet and whether the network is used are remembered per profile; by
 //     default the network is on when the account has researched it, and the
 //     start is the planet with the best lab;
-//   - sync(): GlobalParams -> profile, called where the calculator saves its
-//     state, writing only what changed since the last apply or sync, so a
+//   - writeBack(): GlobalParams -> profile, called where the calculator saves
+//     its state, writing only what changed since the last apply or write-back, so a
 //     lossy mapping (a profile with no class shows as collector here) never
 //     becomes an override.
 // The levels the profile knows - the buildings of the planet and the moon, the
@@ -341,7 +341,7 @@ class CostsProfiles extends ProfileBinder {
   }
 
   /** Write what changed since the last snapshot into the profile. */
-  sync() {
+  writeBack() {
     const profile = this.profile();
     if (!profile) return;
     const p = this.app.params();
@@ -352,12 +352,12 @@ class CostsProfiles extends ProfileBinder {
      * @param {ProfileField} f
      * @param {string} snapKey
      */
-    const syncField = (entity, f, snapKey) => {
-      changed = this.syncValue(entity, f.key, snapKey, f.read(p)) || changed;
+    const writeBackField = (entity, f, snapKey) => {
+      changed = this.writeBackValue(entity, f.key, snapKey, f.read(p)) || changed;
     };
-    this.accountFields.forEach((f) => syncField(profile.account, f, f.key));
+    this.accountFields.forEach((f) => writeBackField(profile.account, f, f.key));
     if (planet) {
-      COSTS_PLANET_FIELDS.forEach((f) => syncField(planet, f, 'planet:' + f.key));
+      COSTS_PLANET_FIELDS.forEach((f) => writeBackField(planet, f, 'planet:' + f.key));
       const position = pfNum(p.planetPos);
       if (position !== this.snapshot['planet:position']) {
         this.snapshot['planet:position'] = position;
@@ -365,8 +365,8 @@ class CostsProfiles extends ProfileBinder {
         changed = true;
       }
     }
-    if (moon) COSTS_MOON_FIELDS.forEach((f) => syncField(moon, f, 'moon:' + f.key));
-    const labs = this.syncLabs(profile, p);
+    if (moon) COSTS_MOON_FIELDS.forEach((f) => writeBackField(moon, f, 'moon:' + f.key));
+    const labs = this.writeBackLabs(profile, p);
     changed = labs.changed || changed;
     if (changed) {
       this.pf.save(profile);
@@ -401,7 +401,7 @@ class CostsProfiles extends ProfileBinder {
    * @param {GlobalParams} p
    * @returns {{changed: boolean, shownLab: ?number}} `shownLab`: the new lab of the planet shown, when the dialog changed it.
    */
-  syncLabs(profile, p) {
+  writeBackLabs(profile, p) {
     const planets = profile.planets.slice(0, COSTS_MAX_LAB_PLANETS);
     let changed = false;
     /** @type {?number} */

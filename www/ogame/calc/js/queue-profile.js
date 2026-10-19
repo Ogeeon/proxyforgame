@@ -8,8 +8,8 @@
 //     cargo bonuses of the transports) and, per tab, one planet or moon of the
 //     profile: its fields, and its building levels filled in as the start
 //     levels;
-//   - sync(): options.prm -> profile, called from options.save(), writing only
-//     what changed since the last apply or sync, so a lossy mapping (a profile
+//   - writeBack(): options.prm -> profile, called from options.save(), writing
+//     only what changed since the last apply or write-back, so a lossy mapping (a profile
 //     with no class shows as collector here) never becomes an override.
 // The start levels are filled in for convenience only: they are not bound, so
 // an edit there is not written back to the profile - it plans a queue, it does
@@ -67,7 +67,7 @@ class QueueProfiles extends ProfileBinder {
         planetOf: t.tab === MOON_TAB ? () => this.bodyIds[PLANET_TAB] : undefined,
       });
     });
-    /** @type {Record<number, number>} Per tab, the body's fields at the last apply or sync. */
+    /** @type {Record<number, number>} Per tab, the body's fields at the last apply or write-back. */
     this.bodySnapshot = {};
     /** @type {Record<string, *>} The profile-owned prm keys as the calculator has them. */
     this.ownPrm = {};
@@ -181,13 +181,13 @@ class QueueProfiles extends ProfileBinder {
   }
 
   /** Write what changed since the last snapshot into the profile. */
-  sync() {
+  writeBack() {
     const profile = this.profile();
     if (!profile) return;
     const prm = options.prm;
     let changed = false;
     QUEUE_ACCOUNT_FIELDS.forEach((f) => {
-      changed = this.syncValue(profile.account, f.key, f.key, f.read(prm)) || changed;
+      changed = this.writeBackValue(profile.account, f.key, f.key, f.read(prm)) || changed;
     });
     QUEUE_TABS.forEach((t) => {
       const body = this.body(t, profile);

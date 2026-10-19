@@ -8,8 +8,8 @@
 //     technology, the life-form expedition bonuses to resources and ships, the
 //     collector and discoverer class boosters, the active Expedition Resource
 //     Booster item, and the cargo bonus of every ship in the table);
-//   - sync(): options.prm -> profile, called from options.save(), writing only
-//     what changed since the last apply or sync, so a lossy mapping (a profile
+//   - writeBack(): options.prm -> profile, called from options.save(), writing
+//     only what changed since the last apply or write-back, so a lossy mapping (a profile
 //     with no class shows as "other" here) never becomes an override.
 // The cargo bonuses are one array in options.prm (lfShipsBonuses, in the order
 // of EXPEDITION_SHIPS), not a key per ship, so they are handled here rather
@@ -140,16 +140,16 @@ class ExpeditionsProfiles extends PlanetPrmBinder {
   // -------------------------------------------------------------------------
 
   /**
-   * The cargo bonuses, into the profile the base is syncing.
+   * The cargo bonuses, into the profile the base is writing back.
    *
    * @param {Profile} profile
    * @returns {boolean} True when the profile changed.
    */
-  syncExtra(profile) {
+  writeBackExtra(profile) {
     let changed = false;
     EXPEDITION_SHIPS.forEach((ship, i) => {
       const key = expeditionsCargoKey(ship);
-      changed = this.syncValue(profile.account, key, key, pfNum(options.prm.lfShipsBonuses[i])) || changed;
+      changed = this.writeBackValue(profile.account, key, key, pfNum(options.prm.lfShipsBonuses[i])) || changed;
     });
     return changed;
   }

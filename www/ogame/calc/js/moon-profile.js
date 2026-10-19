@@ -9,8 +9,8 @@
 //     phalanx range and of the discoverer class), one planet of the profile,
 //     picked in #pf-planet (its Supra Refractor) and one moon, picked in
 //     #pf-moon (its sensor phalanx);
-//   - sync(): options.prm -> profile, called from options.save(), writing only
-//     what changed since the last apply or sync, so a lossy mapping (a
+//   - writeBack(): options.prm -> profile, called from options.save(), writing
+//     only what changed since the last apply or write-back, so a lossy mapping (a
 //     collector shows as neither class here) never becomes an override.
 // The class is two checkboxes for one profile value, so it is handled here
 // rather than by the field list of the base binder.
@@ -81,7 +81,7 @@ function moonClassToPrm(v) {
  * one ticked last, which is the one the profile did not have.
  *
  * @param {Record<string, any>} prm
- * @param {*} previous The profile's class at the last apply or sync.
+ * @param {*} previous The profile's class at the last apply or write-back.
  * @returns {number}
  */
 function moonClassFromPrm(prm, previous) {
@@ -200,19 +200,19 @@ class MoonProfiles extends PlanetPrmBinder {
   // -------------------------------------------------------------------------
 
   /**
-   * The class and the moon's fields, into the profile the base is syncing.
+   * The class and the moon's fields, into the profile the base is writing back.
    *
    * @param {Profile} profile
    * @returns {boolean} True when the profile changed.
    */
-  syncExtra(profile) {
+  writeBackExtra(profile) {
     /** @type {Record<string, any>} */
     const prm = options.prm;
     const moon = this.moon(profile);
-    let changed = this.syncValue(profile.account, 'class', 'class', moonClassFromPrm(prm, this.snapshot.class));
+    let changed = this.writeBackValue(profile.account, 'class', 'class', moonClassFromPrm(prm, this.snapshot.class));
     if (moon) {
       MOON_MOON_FIELDS.forEach((f) => {
-        changed = this.syncValue(moon, f.key, 'moon:' + f.key, f.read(prm)) || changed;
+        changed = this.writeBackValue(moon, f.key, 'moon:' + f.key, f.read(prm)) || changed;
       });
     }
     return changed;
