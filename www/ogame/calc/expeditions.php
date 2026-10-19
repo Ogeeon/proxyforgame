@@ -52,6 +52,7 @@ $highTopIdx = null;
 if ($arrServerData) {
     $intTopScore = floor($arrServerData['topScore']);
     // The upper limits the option labels show, one per option but the last.
+    // EXPEDITION_TOP_SCORE_LIMITS in profiles-core.js repeats them; a unit test keeps the two equal.
     $thresholds = [10000, 100000, 1000000, 5000000, 25000000, 50000000, 75000000, 100000000];
     $highTopIdx = count($thresholds);
     foreach (array_reverse($thresholds, true) as $idx => $limit) {

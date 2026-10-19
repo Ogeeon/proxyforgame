@@ -18,6 +18,7 @@ const core = load(['ogame/calc/js/profiles-core.js'], [
     'serializeProfilesFile', 'parseProfilesFile', 'planProfilesRestore', 'universeCacheKey',
     'ratesToTrade', 'ratesFromTrade', 'profileFromProductionSet', 'profileFromFlightSet',
     'lfBuildingGameId', 'pfNum', 'pfBool', 'pfBodyLabel', 'pfStartRange', 'expeditionHighTop',
+    'EXPEDITION_TOP_SCORE_LIMITS',
 ]);
 
 const plain = (value) => JSON.parse(JSON.stringify(value));
@@ -788,5 +789,13 @@ describe('expeditionHighTop', () => {
         expect(core.expeditionHighTop(undefined)).toBe(null);
         expect(core.expeditionHighTop('abc')).toBe(null);
         expect(core.expeditionHighTop(Number.POSITIVE_INFINITY)).toBe(null);
+    });
+
+    it('uses the same limits as expeditions.php', () => {
+        const php = readFileSync(join(__dirname, '..', 'www', 'ogame', 'calc', 'expeditions.php'), 'utf8');
+        const match = /\$thresholds\s*=\s*\[([^\]]*)\]/.exec(php);
+        expect(match).not.toBe(null);
+        const limits = (match ? match[1] : '').split(',').map((s) => Number(s.trim()));
+        expect(limits).toEqual(plain(core.EXPEDITION_TOP_SCORE_LIMITS));
     });
 });

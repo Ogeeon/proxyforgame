@@ -1453,7 +1453,8 @@ function profileFromFlightSet(prm, init) {
 /**
  * The score limits of expeditions.php's `$thresholds`, one per entry of the
  * "strongest player" select but the last. The page mirrors them, so a universe
- * opened through the URL API and one bound to a profile pick the same entry.
+ * opened through the URL API and one bound to a profile pick the same entry;
+ * unit-tests/profiles-core.test.js fails when the two drift apart.
  */
 const EXPEDITION_TOP_SCORE_LIMITS = [10000, 100000, 1000000, 5000000, 25000000, 50000000, 75000000, 100000000];
 
