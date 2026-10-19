@@ -47,37 +47,6 @@ const PRODUCTION_STORAGE_FIELDS = [
 ];
 
 /**
- * A production planet array (`aPS[i]` layout, see productionPlanetValues) from
- * a profile planet. Missing values take production's own defaults.
- *
- * @param {ProfilePlanet} planet
- * @returns {number[]}
- */
-function planetToProductionState(planet) {
-  /**
-   * @param {string} key
-   * @param {number} def
-   */
-  const get = (key, def) => pfNum(getProfileValue(planet, key, def));
-  const s = createEmptyPlanet();
-  s[PLANET_TEMP] = get('temperature.max', 0);
-  s[PLANET_POS] = planet.coords && planet.coords.position !== null ? planet.coords.position : 8;
-  s[PLANET_ENERGY_BOOST] = get('energyBooster', 0);
-  PRODUCTION_ROW_TECHS.forEach((tech, i) => {
-    const j = i + 1;
-    s[mineSlot(j)] = get(productionRowKey(tech), 0);
-    s[mineSlot(j) + 1] = get('production.' + tech, 100);
-    s[mineSlot(j) + 2] = j <= 3 ? get('booster.' + tech, 0) : 0;
-  });
-  const race = get('lf.race', 0);
-  s[PLANET_RACE] = race;
-  for (let k = 0; k < LF_BUILDINGS_PER_RACE; k++) {
-    s[PLANET_LF_LEVELS + k] = race >= 1 && race <= 4 ? get('lf.building.' + lfBuildingGameId(race, k + 1), 0) : 0;
-  }
-  return s;
-}
-
-/**
  * A planet array tagged with the profile planet it shows. The tag is an
  * expando: it travels with the array through production's own splice and swap,
  * and JSON drops it, so it never reaches options_production.
@@ -141,7 +110,7 @@ class ProductionProfiles extends ProfileBinder {
       /** @type {TaggedState[]} */
       const states = profile.planets.map((planet) => {
         /** @type {TaggedState} */
-        const s = planetToProductionState(planet);
+        const s = productionPlanetState(planet);
         s.pfId = planet.id;
         return s;
       });

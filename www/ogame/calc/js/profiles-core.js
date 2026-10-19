@@ -1373,6 +1373,41 @@ function productionPlanetValues(s) {
 }
 
 /**
+ * The inverse of productionPlanetValues(): a production planet array (`aPS[i]`,
+ * same layout) from a profile planet. Missing values take production's own
+ * defaults, so a planet with nothing in it gives createEmptyPlanet()'s array.
+ * The indices are the literal ones of productionPlanetValues(); production
+ * names them PLANET_* and mineSlot() in production-core.js.
+ *
+ * @param {ProfilePlanet} planet
+ * @returns {number[]}
+ */
+function productionPlanetState(planet) {
+  /**
+   * @param {string} key
+   * @param {number} def
+   */
+  const get = (key, def) => pfNum(getProfileValue(planet, key, def));
+  /** @type {number[]} */
+  const s = [];
+  s[0] = get('temperature.max', 0);
+  s[1] = planet.coords && planet.coords.position !== null ? planet.coords.position : 8;
+  s[2] = get('energyBooster', 0);
+  PRODUCTION_ROW_TECHS.forEach((tech, i) => {
+    const j = i + 1;
+    s[j * 3] = get(productionRowKey(tech), 0);
+    s[j * 3 + 1] = get('production.' + tech, 100);
+    s[j * 3 + 2] = j <= 3 ? get('booster.' + tech, 0) : 0;
+  });
+  const race = get('lf.race', 0);
+  s[24] = race;
+  for (let k = 0; k < 12; k++) {
+    s[25 + k] = race >= 1 && race <= 4 ? get('lf.building.' + lfBuildingGameId(race, k + 1), 0) : 0;
+  }
+  return s;
+}
+
+/**
  * The game id of a race's building at a position: race 1 position 6 is 11106.
  *
  * @param {number} race 1-4
@@ -1459,6 +1494,6 @@ if (typeof window !== 'undefined') {
     readProfile, serializeProfilesFile, parseProfilesFile, planProfilesRestore,
     universeCacheKey, readUniverseChoices,
     ratesToTrade, ratesFromTrade, lfBuildingGameId,
-    productionPlanetValues, profileFromProductionSet, profileFromFlightSet,
+    productionPlanetValues, productionPlanetState, profileFromProductionSet, profileFromFlightSet,
   });
 }

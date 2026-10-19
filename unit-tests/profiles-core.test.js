@@ -17,6 +17,7 @@ const core = load(['ogame/calc/js/profiles-core.js'], [
     'parseAccountExport', 'findProfileForExport', 'importAccountExport', 'mergeProfiles',
     'serializeProfilesFile', 'parseProfilesFile', 'planProfilesRestore', 'universeCacheKey',
     'ratesToTrade', 'ratesFromTrade', 'profileFromProductionSet', 'profileFromFlightSet',
+    'productionPlanetValues', 'productionPlanetState',
     'lfBuildingGameId', 'pfNum', 'pfBool', 'pfBodyLabel', 'pfStartRange', 'expeditionHighTop',
     'EXPEDITION_TOP_SCORE_LIMITS',
 ]);
@@ -701,6 +702,44 @@ describe('saved sets', () => {
 
     it('numbers life-form buildings the way the game does', () => {
         expect(core.lfBuildingGameId(4, 12)).toBe(14112);
+    });
+});
+
+describe('the production planet array', () => {
+    // production-core.js declares no top-level `options` access, so it loads on
+    // its own and its createEmptyPlanet() is the reference for the layout.
+    const production = load(['ogame/calc/js/production-core.js'], ['createEmptyPlanet']);
+
+    /** A planet array as the page writes it: boosters only on the three mines. */
+    function state(race) {
+        const s = [37, 11, 4];
+        for (let j = 1; j < 8; j++) {
+            s[j * 3] = 20 + j;
+            s[j * 3 + 1] = 100 - j * 10;
+            s[j * 3 + 2] = j <= 3 ? j : 0;
+        }
+        s[24] = race;
+        for (let k = 0; k < 12; k++) s[25 + k] = race >= 1 && race <= 4 ? k + 2 : 0;
+        return s;
+    }
+
+    /** A profile planet holding what productionPlanetValues() reads out of `s`. */
+    function planetOf(s) {
+        const planet = core.createPlanet({ coords: { galaxy: 1, system: 2, position: s[1] } });
+        Object.entries(core.productionPlanetValues(s)).forEach(([key, value]) => core.setProfileValue(planet, key, value));
+        return planet;
+    }
+
+    for (const race of [0, 1, 2, 3, 4]) {
+        it('turns the profile values of a race ' + race + ' planet back into the same array', () => {
+            const s = state(race);
+            expect(plain(core.productionPlanetState(planetOf(s)))).toEqual(s);
+        });
+    }
+
+    it('lays out an empty planet without coordinates as production creates one', () => {
+        const empty = core.productionPlanetState(core.createPlanet({}));
+        expect(plain(empty)).toEqual(plain(production.createEmptyPlanet()));
     });
 });
 
