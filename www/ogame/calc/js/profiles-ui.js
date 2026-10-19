@@ -17,6 +17,8 @@ const SAVED_SETS_ANSWERED_KEY = 'pfg_saved_sets_answered';
 
 /** The select's action entries, after the profiles. */
 const PF_ACTION = { import: '__import', create: '__create', manage: '__manage' };
+const PFG_COMPANION_PENDING_KEY = 'pfg_companion_pending_export';
+const PFG_COMPANION_SYNC_EVENT = 'pfg-companion:sync';
 
 /**
  * @typedef {Object} SavedSet
@@ -311,6 +313,8 @@ class ProfilesUi {
     this.fields = new Map();
     /** @type {ProfileOverride[]} The rows of the reset dialog, in table order. */
     this.resetRows = [];
+    /** @type {AccountExport[]} Exports of accounts that do not have a profile yet. */
+    this.companionCandidates = [];
   }
 
   init() {
@@ -321,6 +325,7 @@ class ProfilesUi {
     this.bindManage();
     this.bindMigration();
     this.bindReset();
+    this.bindCompanionSync();
     this.store.subscribe(() => {
       this.renderSelect();
       this.renderOverrides();
@@ -503,6 +508,7 @@ class ProfilesUi {
     this.store.list().forEach((e) => add(e.id, e.label + (e.universe ? ' · s' + e.universe.number + '-' + e.universe.country : '')));
     add('', '──────────').disabled = true;
     add(PF_ACTION.import, this.text.actImport);
+    this.companionCandidates.forEach((data, index) => add('__companion_' + index, this.text.actImport + ' ' + (data.playerName || String(data.playerId))));
     add(PF_ACTION.create, this.text.actCreate);
     add(PF_ACTION.manage, this.text.actManage);
     select.value = activeId || '';
@@ -514,6 +520,7 @@ class ProfilesUi {
       if (!select) return;
       const value = select.value;
       if (value === PF_ACTION.import) this.openImport();
+      else if (value.startsWith('__companion_')) this.openCompanionImport(Number.parseInt(value.slice('__companion_'.length), 10));
       else if (value === PF_ACTION.create) this.openProps(null);
       else if (value === PF_ACTION.manage) this.openManage();
       else {
@@ -707,6 +714,64 @@ class ProfilesUi {
       if (text !== null) setVal('#pf-import-text', text);
     });
     addEvent('#pf-import-go', 'click', () => this.runImport());
+  }
+
+  // -------------------------------------------------------------------------
+  // PfG Companion sync
+  // -------------------------------------------------------------------------
+
+  bindCompanionSync() {
+    this.readCompanionPayload(localStorage.getItem(PFG_COMPANION_PENDING_KEY) || '');
+    document.addEventListener(PFG_COMPANION_SYNC_EVENT, (event) => {
+      const detail = /** @type {CustomEvent} */ (event).detail;
+      this.applyCompanionPayload(detail);
+    });
+  }
+
+  /** @param {string} text */
+  readCompanionPayload(text) {
+    if (!text) return;
+    try {
+      this.applyCompanionPayload(JSON.parse(text));
+    } catch {
+      // A userscript-owned hand-off that is not JSON is ignored.
+    }
+  }
+
+  /** @param {*} payload */
+  applyCompanionPayload(payload) {
+    if (payload?.version !== 1 || !Array.isArray(payload.exports)) return;
+    /** @type {AccountExport[]} */
+    const candidates = [];
+    payload.exports.forEach((raw) => {
+      const parsed = parseAccountExport(JSON.stringify(raw));
+      const data = parsed.data;
+      if (!parsed.ok || !data?.universe) return;
+      const existingId = findProfileForExport(this.store.list(), data.playerId, data.universe);
+      const existing = existingId ? this.store.get(existingId) : null;
+      if (!existing) {
+        candidates.push(data);
+        return;
+      }
+      const importedAt = existing.importedAt === null ? '' : existing.importedAt;
+      const exportedAt = typeof data.exportedAt === 'string' ? data.exportedAt : '';
+      if (Date.parse(exportedAt) <= Date.parse(importedAt)) return;
+      const { profile } = importAccountExport(existing, data, { keepOverrides: true });
+      this.save(profile);
+    });
+    this.companionCandidates = candidates;
+    this.renderSelect();
+  }
+
+  /** @param {number} index */
+  openCompanionImport(index) {
+    const data = this.companionCandidates[index];
+    if (!data) return;
+    setVal('#pf-import-text', JSON.stringify(data));
+    this.pendingExport = null;
+    pfShow('#pf-import-universe-box', false);
+    this.showError('#pf-import-error', '');
+    pfModal('pf-import-modal')?.show();
   }
 
   runImport() {

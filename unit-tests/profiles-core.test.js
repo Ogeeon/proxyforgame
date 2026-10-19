@@ -248,6 +248,16 @@ describe('the two layers', () => {
         expect(core.setProfileValue(alpha, 'building.1', 30)).toBe(false);
     });
 
+    it('reads the production factors the companion adds to an export', () => {
+        const obj = fixture();
+        obj.pfgCompanion = { productionFactors: { 900001: { 1: 80, 217: 150, 4: 50 } } };
+        const alpha = planetNamed(imported(obj).profile, 'Alpha');
+        expect(core.getProfileValue(alpha, 'production.1')).toBe(80);
+        expect(core.getProfileValue(alpha, 'production.217')).toBe(150);
+        expect(core.getProfileValue(alpha, 'production.4', 100)).toBe(100);
+        expect(core.getProfileValue(planetNamed(imported(obj).profile, 'Beta'), 'production.1', 100)).toBe(100);
+    });
+
     it('never marks a value the game never reported', () => {
         const alpha = planetNamed(imported().profile, 'Alpha');
         core.setProfileValue(alpha, 'production.1', 80);
@@ -399,6 +409,15 @@ describe('importAccountExport - re-importing', () => {
         const { profile, summary } = core.importAccountExport(manual, parsed(fixture()), { universe: EN1, newId: idSource() });
         expect(planetNamed(profile, 'Elsewhere').id).toBe('hand');
         expect(summary.planets.removed).toBe(0);
+    });
+
+    it('keeps the overrides of exported values when asked to', () => {
+        const first = imported().profile;
+        core.setProfileValue(planetNamed(first, 'Alpha'), 'building.1', 40);
+        const obj = fixture();
+        obj.planets['900001'].buildings['1'] = 31;
+        const { profile } = core.importAccountExport(first, parsed(obj), { newId: idSource(), keepOverrides: true });
+        expect(plain(planetNamed(profile, 'Alpha').values['building.1'])).toEqual({ game: 31, override: 40 });
     });
 
     it('keeps the universe of an existing profile when the export has none', () => {

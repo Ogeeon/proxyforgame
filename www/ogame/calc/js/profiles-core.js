@@ -588,7 +588,9 @@ function parseAccountExport(text) {
  * @returns {AccountExport}
  */
 function normalizeAccountExport(raw, schemaVersion) {
-  const planets = Object.values(raw.planets).filter(isPlainObject).map((p) => exportBody(p, true));
+  const productionFactors = isPlainObject(raw.pfgCompanion) && isPlainObject(raw.pfgCompanion.productionFactors)
+    ? raw.pfgCompanion.productionFactors : {};
+  const planets = Object.values(raw.planets).filter(isPlainObject).map((p) => exportBody(p, true, productionFactors[String(p.id)]));
   const moons = Object.values(isPlainObject(raw.moons) ? raw.moons : {}).filter(isPlainObject).map((m) => {
     const body = exportBody(m, false);
     body.planetGameId = finiteOrNull(m.siblingId) || null;
@@ -784,7 +786,7 @@ function copyNumbers(raw, keys, into) {
  * @param {boolean} isPlanet
  * @returns {ExportBody}
  */
-function exportBody(raw, isPlanet) {
+function exportBody(raw, isPlanet, productionFactors = null) {
   /** @type {Object<string, *>} */
   const values = {};
   copyLevels(raw.buildings, 'building.', values);
@@ -798,6 +800,12 @@ function exportBody(raw, isPlanet) {
     if (isPlainObject(raw.temperature)) copyNumbers(raw.temperature, { min: 'temperature.min', max: 'temperature.max' }, values);
     const speciesId = finiteOrNull(raw.selectedSpeciesId);
     values['lf.race'] = speciesId !== null ? (SPECIES_TO_RACE[/** @type {701|702|703|704} */ (speciesId)] || 0) : 0;
+    if (isPlainObject(productionFactors)) {
+      [1, 2, 3, 217].forEach((techId) => {
+        const factor = finiteOrNull(productionFactors[String(techId)]);
+        if (factor !== null) values['production.' + techId] = factor;
+      });
+    }
   }
   const galaxy = finiteOrNull(raw.galaxy);
   const system = finiteOrNull(raw.system);
@@ -837,8 +845,9 @@ function findProfileForExport(index, playerId, universe) {
  *
  * @param {{values: LayeredValues}} entity
  * @param {Object<string, *>} imported
+ * @param {boolean} [keepOverrides] Keep overrides while replacing the game layer.
  */
-function replaceGameLayer(entity, imported) {
+function replaceGameLayer(entity, imported, keepOverrides = false) {
   Object.keys(entity.values).forEach((key) => {
     if (key in imported) return;
     const v = entity.values[key];
@@ -846,7 +855,8 @@ function replaceGameLayer(entity, imported) {
     if (!('override' in v)) delete entity.values[key];
   });
   Object.entries(imported).forEach(([key, value]) => {
-    entity.values[key] = { game: cloneData(value) };
+    const override = entity.values[key]?.override;
+    entity.values[key] = keepOverrides && override !== undefined ? { game: cloneData(value), override } : { game: cloneData(value) };
   });
 }
 
@@ -861,7 +871,7 @@ function replaceGameLayer(entity, imported) {
  *
  * @param {?Profile} existing
  * @param {AccountExport} data
- * @param {{universe?: ?ProfileUniverse, newId?: () => string}} [opts]
+ * @param {{universe?: ?ProfileUniverse, newId?: () => string, keepOverrides?: boolean}} [opts]
  *   `universe` is the one the player picked, used when the export has none.
  * @returns {{profile: Profile, summary: ImportSummary}}
  */
@@ -879,15 +889,15 @@ function importAccountExport(existing, data, opts = {}) {
     profile.universe = { ...opts.universe };
     profile.universeLocked = false;
   }
-  replaceGameLayer(profile.account, data.account);
+  replaceGameLayer(profile.account, data.account, opts.keepOverrides);
 
-  const planets = applyBodies(profile.planets, data.planets, newId);
+  const planets = applyBodies(profile.planets, data.planets, newId, opts.keepOverrides);
   profile.planets = planets.bodies;
 
   /** @type {Map<number, string>} */
   const planetIdByGameId = new Map();
   profile.planets.forEach((p) => { if (p.gameId !== null) planetIdByGameId.set(p.gameId, p.id); });
-  const moons = applyBodies(profile.moons, data.moons, newId);
+  const moons = applyBodies(profile.moons, data.moons, newId, opts.keepOverrides);
   profile.moons = /** @type {ProfileMoon[]} */ (moons.bodies);
   profile.moons.forEach((moon) => {
     const source = data.moons.find((m) => m.gameId !== null && m.gameId === moon.gameId);
@@ -903,9 +913,10 @@ function importAccountExport(existing, data, opts = {}) {
  * @param {ProfilePlanet[]} current
  * @param {ExportBody[]} imported
  * @param {() => string} newId
+ * @param {boolean} [keepOverrides]
  * @returns {{bodies: ProfilePlanet[], counts: ImportCounts}}
  */
-function applyBodies(current, imported, newId) {
+function applyBodies(current, imported, newId, keepOverrides = false) {
   const counts = { added: 0, updated: 0, removed: 0 };
   /** @type {Set<ProfilePlanet>} */
   const matched = new Set();
@@ -920,11 +931,11 @@ function applyBodies(current, imported, newId) {
       target.gameId = body.gameId;
       target.name = body.name || target.name;
       target.coords = body.coords || target.coords;
-      replaceGameLayer(target, body.values);
+      replaceGameLayer(target, body.values, keepOverrides);
       counts.updated++;
     } else {
       const planet = createPlanet({ id: newId(), gameId: body.gameId, name: body.name, coords: body.coords });
-      replaceGameLayer(planet, body.values);
+      replaceGameLayer(planet, body.values, keepOverrides);
       added.push(planet);
       counts.added++;
     }
