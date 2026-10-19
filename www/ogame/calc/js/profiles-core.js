@@ -1196,6 +1196,187 @@ function universeCacheKey(universe) {
   return 'pfg_universe_' + universe.country + '_' + universe.number;
 }
 
+/** How long a universe's settings are reused before they are fetched again. */
+const UNIVERSE_SETTINGS_TTL_MS = 24 * 3600 * 1000;
+
+/**
+ * A universe's entry in the shared universe cache: `at`, when the settings
+ * were fetched (0 for an entry a backup created, which is already stale); the
+ * game's value of each setting under its key, null when the game did not say;
+ * and in `overrides` the value the player picked instead, if any. `override`
+ * is the speed's choice as it was kept before there were others - only ever
+ * read, never written.
+ *
+ * @typedef {{at: number, overrides?: Record<string, *>, override?: *, [setting: string]: *}} UniverseEntry
+ */
+
+/**
+ * @param {*} value As the answer has it, usually a string.
+ * @returns {?number} A whole number above zero, or null.
+ */
+function universeCount(value) {
+  const n = Number.parseInt(value, 10);
+  return n > 0 ? n : null;
+}
+
+/**
+ * @param {*} value A fraction, as "0.3".
+ * @returns {?number} The share in percent, or null for anything but a number of at least zero.
+ */
+function universeShare(value) {
+  const factor = Number.parseFloat(value);
+  return Number.isFinite(factor) && factor >= 0 ? Math.round(factor * 100) : null;
+}
+
+/**
+ * @param {*} value "1", "0" or an empty element.
+ * @returns {?boolean} Null only when the key is missing altogether.
+ */
+function universeFlag(value) {
+  return typeof value === 'string' ? value === '1' : null;
+}
+
+/**
+ * How each universe setting is read from a `serverdata` answer; null when the
+ * answer does not hold it.
+ *
+ * @type {Record<string, (data: Record<string, any>) => *>}
+ */
+const UNIVERSE_SETTING_PARSERS = {
+  speed: (data) => universeCount(data.speed),
+  debrisFactor: (data) => universeShare(data.debrisFactor),
+  // The game sends "1" or an empty element, so only a missing key is unknown.
+  deuteriumInDebris: (data) => universeFlag(data.deuteriumInDebris),
+  // Kept as the value of expeditions' #highTop option the score falls into, not as the score.
+  topScore: (data) => expeditionHighTop(data.topScore),
+  debrisFactorDef: (data) => universeShare(data.debrisFactorDef),
+  systems: (data) => universeCount(data.systems),
+  // The game sends "1" or "0" - flight compares it with 1 the same way.
+  donutSystem: (data) => universeFlag(data.donutSystem),
+};
+
+/**
+ * Every setting a `serverdata` answer gives, whichever field asked for it.
+ *
+ * @param {Record<string, any>} data
+ * @returns {Record<string, *>}
+ */
+function parseUniverseSettings(data) {
+  /** @type {Record<string, *>} */
+  const settings = {};
+  Object.entries(UNIVERSE_SETTING_PARSERS).forEach(([key, parse]) => { settings[key] = parse(data); });
+  return settings;
+}
+
+/**
+ * A universe cache entry as stored, with the speed's old lone choice moved
+ * into `overrides`. Nothing is written back: the entry is rewritten in the
+ * new shape the next time it is saved.
+ *
+ * @param {unknown} raw The parsed stored value.
+ * @returns {?UniverseEntry} Null for anything without a fetch time.
+ */
+function readUniverseEntry(raw) {
+  if (!isPlainObject(raw) || typeof raw.at !== 'number') return null;
+  /** @type {UniverseEntry} */
+  const entry = { ...raw, at: raw.at };
+  if ('override' in entry) {
+    entry.overrides = { speed: entry.override, ...entry.overrides };
+    delete entry.override;
+  }
+  return entry;
+}
+
+/**
+ * True when the entry can be used without asking the server again: it was
+ * fetched less than a day ago, and the setting was already part of the fetch.
+ *
+ * @param {?UniverseEntry} entry
+ * @param {string} key
+ * @param {number} now
+ */
+function isUniverseEntryFresh(entry, key, now) {
+  return !!entry && now - entry.at < UNIVERSE_SETTINGS_TTL_MS && key in entry;
+}
+
+/**
+ * One setting of a cache entry as the two layers of a profile value: the
+ * game's value, when it is known, and the player's choice, when they made one.
+ *
+ * @param {?UniverseEntry} entry
+ * @param {string} key
+ * @returns {LayeredValue}
+ */
+function universeLayer(entry, key) {
+  /** @type {LayeredValue} */
+  const layer = {};
+  if (!entry) return layer;
+  const game = entry[key];
+  if (game !== undefined && game !== null) layer.game = game;
+  if (entry.overrides && key in entry.overrides) layer.override = entry.overrides[key];
+  return layer;
+}
+
+/**
+ * The value a field should show: the player's choice, otherwise the game's.
+ *
+ * @param {?UniverseEntry} entry
+ * @param {string} key
+ * @returns {*} Null when neither is known.
+ */
+function universeValue(entry, key) {
+  return getProfileValue({ values: { [key]: universeLayer(entry, key) } }, key, null);
+}
+
+/**
+ * Remember the player's choice of a setting, by the rule of a profile value:
+ * a choice equal to the game's value is dropped. Without a game value there is
+ * nothing to compare with, and nothing is kept.
+ *
+ * @param {UniverseEntry} entry Changed in place.
+ * @param {string} key
+ * @param {*} chosen
+ * @returns {boolean} True when the entry changed.
+ */
+function setUniverseChoice(entry, key, chosen) {
+  const holder = { values: { [key]: universeLayer(entry, key) } };
+  if (!('game' in holder.values[key]) || !setProfileValue(holder, key, chosen)) return false;
+  const layer = holder.values[key];
+  const overrides = { ...entry.overrides };
+  if ('override' in layer) overrides[key] = layer.override;
+  else delete overrides[key];
+  entry.overrides = overrides;
+  return true;
+}
+
+/**
+ * A backup's choices put over an entry's own. A universe never fetched on this
+ * device gets an entry that is already stale, so its game values are fetched
+ * the first time it is shown.
+ *
+ * @param {?UniverseEntry} entry
+ * @param {Record<string, *>} overrides
+ * @returns {UniverseEntry}
+ */
+function mergeUniverseChoices(entry, overrides) {
+  const base = entry || { at: 0 };
+  return { ...base, overrides: { ...base.overrides, ...overrides } };
+}
+
+/**
+ * How a field is marked: bound when its value has a game layer to compare
+ * with and marks are wanted at all, differing when the value set on top of
+ * that layer is not the game's.
+ *
+ * @param {LayeredValue|undefined} layer
+ * @param {boolean} enabled False drops every mark.
+ * @returns {{bound: boolean, differs: boolean, game: *}} `game` is null when not bound.
+ */
+function pfMarkState(layer, enabled) {
+  if (!enabled || !layer || !('game' in layer)) return { bound: false, differs: false, game: null };
+  return { bound: true, differs: 'override' in layer && !sameValue(layer.game, layer.override), game: layer.game };
+}
+
 /**
  * The universe settings the player picked instead of the game's, for one
  * universe. They are not in a profile, so the backup file carries them beside
@@ -1606,7 +1787,9 @@ if (typeof window !== 'undefined') {
     parseAccountExport, findProfileForExport, importAccountExport, mergeProfiles,
     isNewerExport, planCompanionSync, resolveImportUniverse,
     readProfile, serializeProfilesFile, parseProfilesFile, planProfilesRestore,
-    universeCacheKey, readUniverseChoices,
+    universeCacheKey, readUniverseChoices, UNIVERSE_SETTINGS_TTL_MS, UNIVERSE_SETTING_PARSERS,
+    parseUniverseSettings, readUniverseEntry, isUniverseEntryFresh, universeLayer, universeValue,
+    setUniverseChoice, mergeUniverseChoices, pfMarkState,
     ratesToTrade, ratesFromTrade, lfBuildingGameId,
     productionPlanetValues, productionPlanetState, profileFromProductionSet, profileFromFlightSet,
     profileFromSpyReport,

@@ -20,7 +20,9 @@ const core = load(['ogame/calc/js/profiles-core.js'], [
     'productionPlanetValues', 'productionPlanetState', 'isNewerExport', 'planCompanionSync',
     'resolveImportUniverse', 'profileFromSpyReport',
     'lfBuildingGameId', 'pfNum', 'pfBool', 'pfBodyLabel', 'pfStartRange', 'expeditionHighTop',
-    'EXPEDITION_TOP_SCORE_LIMITS',
+    'EXPEDITION_TOP_SCORE_LIMITS', 'UNIVERSE_SETTINGS_TTL_MS', 'UNIVERSE_SETTING_PARSERS',
+    'parseUniverseSettings', 'readUniverseEntry', 'isUniverseEntryFresh', 'universeLayer',
+    'universeValue', 'setUniverseChoice', 'mergeUniverseChoices', 'pfMarkState',
 ]);
 
 const plain = (value) => JSON.parse(JSON.stringify(value));
@@ -787,6 +789,133 @@ describe('the profile file', () => {
         const plan = core.planProfilesRestore(['a'], [a, b]);
         expect(plan.added.map((p) => p.id)).toEqual(['b']);
         expect(plan.conflicts.map((p) => p.id)).toEqual(['a']);
+    });
+});
+
+describe('the universe settings', () => {
+    const DAY = core.UNIVERSE_SETTINGS_TTL_MS;
+
+    it('reads every setting of a serverdata answer', () => {
+        const data = {
+            speed: '8', debrisFactor: '0.3', deuteriumInDebris: '1', topScore: '1000001',
+            debrisFactorDef: '0.1', systems: '499', donutSystem: '0',
+        };
+        expect(plain(core.parseUniverseSettings(data))).toEqual({
+            speed: 8, debrisFactor: 30, deuteriumInDebris: true, topScore: 1800000,
+            debrisFactorDef: 10, systems: 499, donutSystem: false,
+        });
+    });
+
+    it('gives null for a setting the answer lacks or garbles', () => {
+        expect(plain(core.parseUniverseSettings({}))).toEqual({
+            speed: null, debrisFactor: null, deuteriumInDebris: null, topScore: null,
+            debrisFactorDef: null, systems: null, donutSystem: null,
+        });
+        const p = core.UNIVERSE_SETTING_PARSERS;
+        expect(p.speed({ speed: '0' })).toBe(null);
+        expect(p.speed({ speed: 'x' })).toBe(null);
+        expect(p.systems({ systems: '-1' })).toBe(null);
+        expect(p.debrisFactor({ debrisFactor: '-0.1' })).toBe(null);
+        expect(p.debrisFactorDef({ debrisFactorDef: 'none' })).toBe(null);
+    });
+
+    it('reads a share of zero and an empty flag as known values', () => {
+        const p = core.UNIVERSE_SETTING_PARSERS;
+        expect(p.debrisFactor({ debrisFactor: '0' })).toBe(0);
+        expect(p.deuteriumInDebris({ deuteriumInDebris: '' })).toBe(false);
+        expect(p.donutSystem({ donutSystem: '1' })).toBe(true);
+    });
+
+    it('reads a stored entry and refuses one without a fetch time', () => {
+        expect(plain(core.readUniverseEntry({ at: 5, speed: 8 }))).toEqual({ at: 5, speed: 8 });
+        expect(core.readUniverseEntry({ speed: 8 })).toBe(null);
+        expect(core.readUniverseEntry({ at: '5' })).toBe(null);
+        expect(core.readUniverseEntry(null)).toBe(null);
+        expect(core.readUniverseEntry([])).toBe(null);
+    });
+
+    it("moves the speed's old lone choice into the overrides, which win over it", () => {
+        expect(plain(core.readUniverseEntry({ at: 1, speed: 8, override: 4 }))).toEqual({ at: 1, speed: 8, overrides: { speed: 4 } });
+        expect(plain(core.readUniverseEntry({ at: 1, override: 4, overrides: { speed: 6, debrisFactor: 50 } })))
+            .toEqual({ at: 1, overrides: { speed: 6, debrisFactor: 50 } });
+    });
+
+    it('reuses an entry for a day, and only for the settings it fetched', () => {
+        const entry = { at: 1000, speed: 8 };
+        expect(core.isUniverseEntryFresh(entry, 'speed', 1000 + DAY - 1)).toBe(true);
+        expect(core.isUniverseEntryFresh(entry, 'speed', 1000 + DAY)).toBe(false);
+        expect(core.isUniverseEntryFresh(entry, 'systems', 1001)).toBe(false);
+        expect(core.isUniverseEntryFresh({ at: 1000, speed: null }, 'speed', 1001)).toBe(true);
+        expect(core.isUniverseEntryFresh(null, 'speed', 1001)).toBe(false);
+    });
+
+    it('treats an entry a backup created as stale', () => {
+        const entry = core.mergeUniverseChoices(null, { speed: 4 });
+        expect(core.isUniverseEntryFresh(entry, 'speed', Date.now())).toBe(false);
+    });
+
+    it('shows an entry as the two layers of a value', () => {
+        const entry = { at: 1, speed: 8, debrisFactor: null, overrides: { speed: 4, debrisFactor: 50 } };
+        expect(plain(core.universeLayer(entry, 'speed'))).toEqual({ game: 8, override: 4 });
+        expect(plain(core.universeLayer(entry, 'debrisFactor'))).toEqual({ override: 50 });
+        expect(plain(core.universeLayer(entry, 'systems'))).toEqual({});
+        expect(plain(core.universeLayer(null, 'speed'))).toEqual({});
+    });
+
+    it("shows the player's choice, else the game's value, else null", () => {
+        expect(core.universeValue({ at: 1, speed: 8, overrides: { speed: 4 } }, 'speed')).toBe(4);
+        expect(core.universeValue({ at: 1, speed: 8 }, 'speed')).toBe(8);
+        expect(core.universeValue({ at: 1, deuteriumInDebris: false }, 'deuteriumInDebris')).toBe(false);
+        expect(core.universeValue({ at: 1, speed: null }, 'speed')).toBe(null);
+        expect(core.universeValue(null, 'speed')).toBe(null);
+    });
+
+    it('keeps a choice that differs from the game and drops one that does not', () => {
+        const entry = { at: 1, speed: 8, debrisFactor: 30 };
+        expect(core.setUniverseChoice(entry, 'speed', 4)).toBe(true);
+        expect(core.setUniverseChoice(entry, 'debrisFactor', 50)).toBe(true);
+        expect(plain(entry.overrides)).toEqual({ speed: 4, debrisFactor: 50 });
+        expect(core.setUniverseChoice(entry, 'speed', 4)).toBe(false);
+        expect(core.setUniverseChoice(entry, 'speed', 8)).toBe(true);
+        expect(plain(entry.overrides)).toEqual({ debrisFactor: 50 });
+        expect(core.setUniverseChoice(entry, 'speed', 8)).toBe(false);
+    });
+
+    it('keeps no choice while the game value is unknown', () => {
+        const entry = { at: 1, speed: null };
+        expect(core.setUniverseChoice(entry, 'speed', 4)).toBe(false);
+        expect(core.setUniverseChoice(entry, 'systems', 499)).toBe(false);
+        expect(plain(entry)).toEqual({ at: 1, speed: null });
+    });
+
+    it("puts a backup's choices over the entry's own", () => {
+        const entry = { at: 9, speed: 8, overrides: { speed: 4, systems: 400 } };
+        expect(plain(core.mergeUniverseChoices(entry, { speed: 6, donutSystem: false })))
+            .toEqual({ at: 9, speed: 8, overrides: { speed: 6, systems: 400, donutSystem: false } });
+        expect(plain(core.mergeUniverseChoices(null, { speed: 6 }))).toEqual({ at: 0, overrides: { speed: 6 } });
+    });
+
+    it('marks a value with a game layer, and one that differs from it', () => {
+        expect(plain(core.pfMarkState({ game: 8 }, true))).toEqual({ bound: true, differs: false, game: 8 });
+        expect(plain(core.pfMarkState({ game: 8, override: 8 }, true))).toEqual({ bound: true, differs: false, game: 8 });
+        expect(plain(core.pfMarkState({ game: 8, override: 4 }, true))).toEqual({ bound: true, differs: true, game: 8 });
+        expect(plain(core.pfMarkState({ game: [1, 2], override: [1, 2] }, true)).differs).toBe(false);
+    });
+
+    it('marks nothing without a game layer or with marks turned off', () => {
+        const none = { bound: false, differs: false, game: null };
+        expect(plain(core.pfMarkState({ override: 4 }, true))).toEqual(none);
+        expect(plain(core.pfMarkState(undefined, true))).toEqual(none);
+        expect(plain(core.pfMarkState({ game: 8, override: 4 }, false))).toEqual(none);
+    });
+
+    it('marks a profile value as the profile layers say', () => {
+        const entity = { values: {} };
+        core.setProfileValue(entity, 'x', 1);
+        expect(core.pfMarkState(entity.values.x, true).bound).toBe(false);
+        entity.values.y = { game: 3 };
+        core.setProfileValue(entity, 'y', 5);
+        expect(core.pfMarkState(entity.values.y, true).differs).toBe(core.differsFromGame(entity, 'y'));
     });
 });
 

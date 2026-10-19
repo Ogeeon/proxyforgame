@@ -1326,13 +1326,9 @@ function readSavedSet(set) {
   return template;
 }
 
-/** How long a universe's settings are reused before they are fetched again. */
-const UNIVERSE_SETTINGS_TTL_MS = 24 * 3600 * 1000;
-
 /**
  * @typedef {Object} PfUniverseSettingKind
  * @property {string} key The setting's name in the cache entry.
- * @property {(data: Record<string, any>) => *} parse The setting from a `serverdata` answer; null when the answer has none.
  * @property {(selector: string) => *} get The value the field shows.
  * @property {(selector: string, value: *) => void} set Show a value in the field.
  * @property {(value: *) => string} display The game value as shown in the mark.
@@ -1362,10 +1358,6 @@ function pfNumberSelect(label) {
 /** @type {PfUniverseSettingKind} The economy speed. */
 const PF_UNIVERSE_SPEED = {
   key: 'speed',
-  parse: (data) => {
-    const speed = Number.parseInt(data.speed, 10);
-    return speed > 0 ? speed : null;
-  },
   ...pfNumberSelect(String),
   display: String,
 };
@@ -1373,10 +1365,6 @@ const PF_UNIVERSE_SPEED = {
 /** @type {PfUniverseSettingKind} The share of a destroyed fleet that goes to the debris field, in percent. */
 const PF_UNIVERSE_DEBRIS = {
   key: 'debrisFactor',
-  parse: (data) => {
-    const factor = Number.parseFloat(data.debrisFactor);
-    return Number.isFinite(factor) && factor >= 0 ? Math.round(factor * 100) : null;
-  },
   ...pfNumberSelect((v) => v + '%'),
   display: (v) => v + '%',
 };
@@ -1384,8 +1372,6 @@ const PF_UNIVERSE_DEBRIS = {
 /** @type {PfUniverseSettingKind} Whether deuterium goes to the debris field too. */
 const PF_UNIVERSE_DEUT_IN_DEBRIS = {
   key: 'deuteriumInDebris',
-  // The game sends "1" or an empty element, so only a missing key is unknown.
-  parse: (data) => (typeof data.deuteriumInDebris === 'string' ? data.deuteriumInDebris === '1' : null),
   get: (selector) => getChecked(selector),
   set: (selector, value) => setChecked(selector, value === true),
   display: (v) => pfDisplayValue(v === true),
@@ -1397,7 +1383,6 @@ const PF_UNIVERSE_DEUT_IN_DEBRIS = {
  */
 const PF_UNIVERSE_TOP_SCORE = {
   key: 'topScore',
-  parse: (data) => expeditionHighTop(data.topScore),
   get: (selector) => Number(getVal(selector)),
   // The value always comes from the select's own list, so no option is added.
   set: (selector, value) => setVal(selector, value),
@@ -1407,10 +1392,6 @@ const PF_UNIVERSE_TOP_SCORE = {
 /** @type {PfUniverseSettingKind} The share of destroyed defenses that goes to the debris field, in percent. */
 const PF_UNIVERSE_DEF_DEBRIS = {
   key: 'debrisFactorDef',
-  parse: (data) => {
-    const factor = Number.parseFloat(data.debrisFactorDef);
-    return Number.isFinite(factor) && factor >= 0 ? Math.round(factor * 100) : null;
-  },
   ...pfNumberSelect((v) => v + '%'),
   display: (v) => v + '%',
 };
@@ -1418,10 +1399,6 @@ const PF_UNIVERSE_DEF_DEBRIS = {
 /** @type {PfUniverseSettingKind} The number of systems per galaxy. */
 const PF_UNIVERSE_SYSTEMS = {
   key: 'systems',
-  parse: (data) => {
-    const systems = Number.parseInt(data.systems, 10);
-    return systems > 0 ? systems : null;
-  },
   get: (selector) => getInputNumber($(selector)),
   set: (selector, value) => setVal(selector, value),
   display: String,
@@ -1430,18 +1407,10 @@ const PF_UNIVERSE_SYSTEMS = {
 /** @type {PfUniverseSettingKind} Whether the systems of a galaxy form a ring (the last one borders the first). */
 const PF_UNIVERSE_DONUT_SYSTEM = {
   key: 'donutSystem',
-  // The game sends "1" or "0" - flight compares it with 1 the same way.
-  parse: (data) => (typeof data.donutSystem === 'string' ? data.donutSystem === '1' : null),
   get: (selector) => getChecked(selector),
   set: (selector, value) => setChecked(selector, value === true),
   display: (v) => pfDisplayValue(v === true),
 };
-
-/** Every setting a fetch stores, whichever of them asked for it. */
-const PF_UNIVERSE_SETTINGS = [
-  PF_UNIVERSE_SPEED, PF_UNIVERSE_DEBRIS, PF_UNIVERSE_DEUT_IN_DEBRIS, PF_UNIVERSE_TOP_SCORE,
-  PF_UNIVERSE_DEF_DEBRIS, PF_UNIVERSE_SYSTEMS, PF_UNIVERSE_DONUT_SYSTEM,
-];
 
 /** @typedef {{at: number, overrides?: Record<string, *>, override?: *, [setting: string]: *}} PfUniverseEntry */
 
@@ -1597,8 +1566,7 @@ class PfUniverseSetting {
       if (data) {
         // Read again: another field of the page may have written the entry meanwhile.
         /** @type {PfUniverseEntry} */
-        const fresh = { ...PfUniverseSetting.read(key), at: Date.now() };
-        PF_UNIVERSE_SETTINGS.forEach((kind) => { fresh[kind.key] = kind.parse(data); });
+        const fresh = { ...PfUniverseSetting.read(key), at: Date.now(), ...parseUniverseSettings(data) };
         PfUniverseSetting.write(key, fresh);
         entry = fresh;
       }
