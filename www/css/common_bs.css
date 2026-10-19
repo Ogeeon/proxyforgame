@@ -98,10 +98,11 @@ h3.modal-title {
    distinct. Editable inputs appear darker (more recessed), while readonly/disabled fields
    keep the panel tone (--bs-secondary-bg) and appear lighter/raised. This makes readonly
    inputs in modals visually distinguishable from editable ones. !important overrides
-   Bootstrap's default transparent background. */
+   Bootstrap's default transparent background. A page that wants a different sunk tone
+   sets --pf-sunk-input-bg rather than stacking a second !important on top of this one. */
 [data-bs-theme="dark"] .form-control:not([readonly]):not(:disabled):not(.ui-state-disabled),
 [data-bs-theme="dark"] .form-select:not([readonly]):not(:disabled):not(.ui-state-disabled) {
-  background-color: rgb(20, 23, 27) !important;
+  background-color: var(--pf-sunk-input-bg, rgb(20, 23, 27)) !important;
 }
 
 /* Modals: Bootstrap paints .modal-content with --bs-modal-color (#dee2e6 in dark

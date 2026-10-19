@@ -67,12 +67,6 @@
   margin: 2px;
 }
 
-.subheader {
-  text-align: center;
-  font-weight: 600;
-  margin: 0px !important;
-}
-
 .ui-subheader {
   margin-bottom: 7px;
 }
@@ -158,20 +152,6 @@
 #tab-1,
 #tab-2 {
   padding: 0;
-}
-
-/* Inner tabs */
-#tab-0-1,
-#tab-1-1,
-#tab-0-2,
-#tab-0-3,
-#tab-0-4,
-#tab-0-5,
-#tab-0-6,
-#tab-1-2,
-#tab-1-3,
-#tab-1-4 {
-  padding: 0.3em 0;
 }
 
 /* Tab button adjustments */
@@ -312,9 +292,9 @@ td.min {
 
 /* Dark theme: make readonly planetsSpin field visually distinct from editable irn-level.
    Editable inputs are darker (more recessed), readonly inputs appear lighter/raised.
-   !important overrides Bootstrap's transparent default. */
+   The colour itself is set by the common_bs.css dark-input rule, which reads this variable. */
 [data-bs-theme="dark"] #irn-calc .form-control:not([readonly]):not(:disabled) {
-  background-color: rgb(15, 17, 21) !important;
+  --pf-sunk-input-bg: rgb(15, 17, 21);
 }
 
 .irn-calc-info {
@@ -356,11 +336,6 @@ td.min {
    UTILITY CLASSES
    ========================================================================== */
 
-.no-mp {
-  margin: 0 !important;
-  padding: 0 !important;
-}
-
 /* Allow tables to dictate the width of the entire container hierarchy */
 #costs .tab-content,
 #costs .tab-pane,
@@ -369,21 +344,22 @@ td.min {
   min-width: fit-content;
 }
 
-/* Border utilities */
-.border-n {
-  border-top: none !important;
+/* Border utilities for the cells of .lined tables. Scoped to .lined so they
+   outrank its `border: 1px solid` cell rule by specificity, not by !important. */
+.lined :is(td, th).border-n {
+  border-top: none;
 }
 
-.border-s {
-  border-bottom: 1px solid var(--bs-border-color) !important;
+.lined :is(td, th).border-s {
+  border-bottom: 1px solid var(--bs-border-color);
 }
 
-.border-w {
-  border-left: 1px solid var(--bs-border-color) !important;
+.lined :is(td, th).border-w {
+  border-left: 1px solid var(--bs-border-color);
 }
 
-.border-e {
-  border-right: 1px solid var(--bs-border-color) !important;
+.lined :is(td, th).border-e {
+  border-right: 1px solid var(--bs-border-color);
 }
 
 /* ==========================================================================
