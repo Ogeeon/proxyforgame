@@ -17,7 +17,7 @@ const core = load(['ogame/calc/js/profiles-core.js'], [
     'parseAccountExport', 'findProfileForExport', 'importAccountExport', 'mergeProfiles',
     'serializeProfilesFile', 'parseProfilesFile', 'planProfilesRestore', 'universeCacheKey',
     'ratesToTrade', 'ratesFromTrade', 'profileFromProductionSet', 'profileFromFlightSet',
-    'productionPlanetValues', 'productionPlanetState',
+    'productionPlanetValues', 'productionPlanetState', 'isNewerExport', 'planCompanionSync',
     'lfBuildingGameId', 'pfNum', 'pfBool', 'pfBodyLabel', 'pfStartRange', 'expeditionHighTop',
     'EXPEDITION_TOP_SCORE_LIMITS',
 ]);
@@ -491,6 +491,108 @@ describe('importAccountExport - re-importing', () => {
         const manual = core.createProfile({ label: 'mine', universe: { country: 'ru', number: 166 } });
         const { profile } = core.importAccountExport(manual, parsed(fixture()), { universe: EN1, newId: idSource() });
         expect(plain(profile.universe)).toEqual({ country: 'ru', number: 166 });
+    });
+});
+
+describe('companion sync', () => {
+    const LATER = '2026-10-12T00:00:00.000Z';
+
+    /**
+     * The fixture as Companion sends it: with its universe, changed by `edit`.
+     *
+     * @param {(obj: any) => void} [edit]
+     */
+    function companionExport(edit = () => {}) {
+        const obj = fixture();
+        obj.universe = { language: 'en', number: 1 };
+        edit(obj);
+        return obj;
+    }
+
+    function laterExport(exportedAt = LATER) {
+        return companionExport((obj) => {
+            obj.exportedAt = exportedAt;
+            obj.researches['122'] = 16;
+        });
+    }
+
+    /**
+     * A stored profile of the fixture's account, plasma overridden with 20, and a store over it.
+     *
+     * @param {(profile: any) => void} [edit]
+     */
+    function stored(edit = () => {}) {
+        const profile = core.importAccountExport(null, parsed(companionExport()), { newId: idSource() }).profile;
+        core.setProfileValue(profile.account, 'research.122', 20);
+        edit(profile);
+        const text = JSON.stringify(profile);
+        const index = [{ id: profile.id, universe: profile.universe, playerId: profile.playerId }];
+        return { profile, text, index, load: (id) => (id === profile.id ? JSON.parse(text) : null) };
+    }
+
+    const plan = (payload, store) => core.planCompanionSync(payload, store.index, store.load);
+
+    it('refuses a payload that is not version 1 or carries no export list', () => {
+        const store = stored();
+        expect(plan({ version: 2, exports: [laterExport()] }, store)).toBeNull();
+        expect(plan({ version: 1, exports: {} }, store)).toBeNull();
+        expect(plan(null, store)).toBeNull();
+    });
+
+    it('skips an export that does not parse or names no universe', () => {
+        const store = stored();
+        const noUniverse = laterExport();
+        delete noUniverse.universe;
+        const result = plan({ version: 1, exports: [{ playerId: 'x' }, noUniverse] }, store);
+        expect(plain(result)).toEqual({ updates: [], candidates: [] });
+    });
+
+    it('updates a profile from a newer export and keeps its overrides', () => {
+        const result = plan({ version: 1, exports: [laterExport()] }, stored());
+        expect(result.updates).toHaveLength(1);
+        expect(result.updates[0].importedAt).toBe(LATER);
+        expect(plain(result.updates[0].account.values['research.122'])).toEqual({ game: 16, override: 20 });
+        expect(result.candidates).toHaveLength(0);
+    });
+
+    it('skips an export of the same time or older', () => {
+        const store = stored();
+        const sameTime = fixture().exportedAt;
+        expect(plan({ version: 1, exports: [laterExport(sameTime)] }, store).updates).toHaveLength(0);
+        expect(plan({ version: 1, exports: [laterExport('2026-10-01T00:00:00.000Z')] }, store).updates).toHaveLength(0);
+    });
+
+    it('never applies an export without a time, which reads as the epoch', () => {
+        const noTime = laterExport();
+        delete noTime.exportedAt;
+        expect(plan({ version: 1, exports: [noTime] }, stored()).updates).toHaveLength(0);
+    });
+
+    it('applies any export to a profile that has no import time', () => {
+        const result = plan({ version: 1, exports: [laterExport()] }, stored((p) => { p.importedAt = null; }));
+        expect(result.updates).toHaveLength(1);
+        expect(core.isNewerExport(parsed(laterExport()), core.createProfile({ label: 'x' }))).toBe(true);
+    });
+
+    it('offers an export of an account without a profile as a candidate', () => {
+        const other = companionExport((obj) => { obj.playerId = 100002; });
+        const result = plan({ version: 1, exports: [other] }, stored());
+        expect(result.updates).toHaveLength(0);
+        expect(result.candidates.map((c) => c.playerId)).toEqual([100002]);
+    });
+
+    it('applies two exports of one account in turn, so an older second one is skipped', () => {
+        const result = plan({ version: 1, exports: [laterExport(), laterExport('2026-10-11T12:00:00.000Z')] }, stored());
+        expect(result.updates).toHaveLength(1);
+        expect(result.updates[0].importedAt).toBe(LATER);
+    });
+
+    it('does not change the profiles it loads', () => {
+        const store = stored();
+        const loaded = [];
+        const tracked = (id) => { const p = store.load(id); loaded.push(p); return p; };
+        core.planCompanionSync({ version: 1, exports: [laterExport()] }, store.index, tracked);
+        expect(loaded.map((p) => JSON.stringify(p))).toEqual([store.text]);
     });
 });
 

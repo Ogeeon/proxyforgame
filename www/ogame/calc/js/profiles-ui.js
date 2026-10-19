@@ -947,26 +947,10 @@ class ProfilesUi {
 
   /** @param {*} payload */
   applyCompanionPayload(payload) {
-    if (payload?.version !== 1 || !Array.isArray(payload.exports)) return;
-    /** @type {AccountExport[]} */
-    const candidates = [];
-    payload.exports.forEach((raw) => {
-      const parsed = parseAccountExport(JSON.stringify(raw));
-      const data = parsed.data;
-      if (!parsed.ok || !data?.universe) return;
-      const existingId = findProfileForExport(this.store.list(), data.playerId, data.universe);
-      const existing = existingId ? this.store.get(existingId) : null;
-      if (!existing) {
-        candidates.push(data);
-        return;
-      }
-      const importedAt = existing.importedAt === null ? '' : existing.importedAt;
-      const exportedAt = typeof data.exportedAt === 'string' ? data.exportedAt : '';
-      if (Date.parse(exportedAt) <= Date.parse(importedAt)) return;
-      const { profile } = importAccountExport(existing, data, { keepOverrides: true });
-      this.save(profile);
-    });
-    this.companionCandidates = candidates;
+    const plan = planCompanionSync(payload, this.store.list(), (id) => this.store.get(id));
+    if (!plan) return;
+    plan.updates.forEach((profile) => this.save(profile));
+    this.companionCandidates = plan.candidates;
     this.renderSelect();
   }
 

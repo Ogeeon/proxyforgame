@@ -951,6 +951,71 @@ function importAccountExport(existing, data, opts = {}) {
   return { profile, summary: { created, planets: planets.counts, moons: moons.counts } };
 }
 
+// ---------------------------------------------------------------------------
+// Sync: what PfG Companion delivers
+// ---------------------------------------------------------------------------
+
+/**
+ * The Sync rule of ADR-0004: an export is applied only when it was made after
+ * the export the profile's game layer came from. A profile with no import time
+ * takes any export, and so does a time that does not read as a date. An export
+ * that carried no time reads as the epoch (normalizeAccountExport), so it is
+ * never newer than a real import.
+ *
+ * @param {AccountExport} data
+ * @param {Profile} profile
+ * @returns {boolean}
+ */
+function isNewerExport(data, profile) {
+  if (profile.importedAt === null) return true;
+  const exported = Date.parse(typeof data.exportedAt === 'string' ? data.exportedAt : '');
+  const imported = Date.parse(profile.importedAt);
+  if (Number.isNaN(exported) || Number.isNaN(imported)) return true;
+  return exported > imported;
+}
+
+/**
+ * @typedef {Object} CompanionSyncPlan
+ * @property {Profile[]} updates Profiles to save, each with the newer export applied.
+ * @property {AccountExport[]} candidates Exports of accounts that have no profile yet.
+ */
+
+/**
+ * Decide what a PfG Companion payload changes. Each export that names its
+ * universe either updates the profile of its account and universe - when it is
+ * newer (isNewerExport), keeping the overrides - or, for an account without a
+ * profile, becomes a candidate for the import dialog. The exports are taken in
+ * order, so a second export of one account is compared with the first one's
+ * result. Nothing is saved here.
+ *
+ * @param {*} payload What Companion handed over: `{version: 1, exports: [...]}`.
+ * @param {Array<{id: string, universe: ?ProfileUniverse, playerId: ?number}>} index
+ * @param {(id: string) => ?Profile} load A fresh copy of a stored profile.
+ * @returns {?CompanionSyncPlan} Null for a payload this site does not understand.
+ */
+function planCompanionSync(payload, index, load) {
+  if (payload?.version !== 1 || !Array.isArray(payload.exports)) return null;
+  /** @type {Map<string, Profile>} */
+  const updated = new Map();
+  /** @type {AccountExport[]} */
+  const candidates = [];
+  payload.exports.forEach((/** @type {unknown} */ raw) => {
+    const parsed = parseAccountExport(JSON.stringify(raw));
+    const data = parsed.data;
+    if (!parsed.ok || !data?.universe) return;
+    const existingId = findProfileForExport(index, data.playerId, data.universe);
+    const existing = existingId ? updated.get(existingId) || load(existingId) : null;
+    if (!existing) {
+      candidates.push(data);
+      return;
+    }
+    if (!isNewerExport(data, existing)) return;
+    const { profile } = importAccountExport(existing, data, { keepOverrides: true });
+    updated.set(profile.id, profile);
+  });
+  return { updates: [...updated.values()], candidates };
+}
+
 /**
  * @param {ProfilePlanet[]} current
  * @param {ExportBody[]} imported
@@ -1491,6 +1556,7 @@ if (typeof window !== 'undefined') {
     getProfileValue, setProfileValue, differsFromGame, resetProfileValue,
     countOverrides, hasGameLayer,
     parseAccountExport, findProfileForExport, importAccountExport, mergeProfiles,
+    isNewerExport, planCompanionSync,
     readProfile, serializeProfilesFile, parseProfilesFile, planProfilesRestore,
     universeCacheKey, readUniverseChoices,
     ratesToTrade, ratesFromTrade, lfBuildingGameId,
