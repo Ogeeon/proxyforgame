@@ -174,7 +174,9 @@ test('the economy speed is the game\'s, and a changed one survives a reload', as
     await expect(speed).toHaveClass(/pf-bound/);
     // Values only the player sets have nothing to differ from: no mark.
     await expect(page.locator('#exchange-rates-m')).not.toHaveClass(/pf-bound/);
-    await expect(page.locator('#energy-boost')).not.toHaveClass(/pf-bound/);
+    // The boosters come from the planet's buffs: none active there is a game value of 0.
+    await expect(page.locator('#energy-boost')).toHaveValue('0');
+    await expect(page.locator('#energy-boost')).toHaveClass(/pf-bound/);
 
     await speed.selectOption('7');
     await expect(speed).toHaveClass(/pf-differs/);

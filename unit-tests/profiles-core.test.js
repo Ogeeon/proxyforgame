@@ -151,6 +151,66 @@ describe('parseAccountExport', () => {
         });
     });
 
+    describe('production boosters', () => {
+        // uuids of the game's metal, crystal, deuterium and energy booster items
+        const METAL_BRONZE = 'de922af379061263a56d7204d1c395cefcfb7d75';
+        const CRYSTAL_PLATINUM_12W = '7c2edf40c5cd54ad11c6439398b83020c0a7a6be';
+        const DEUTERIUM_GOLD = '5560a1580a0330e8aadf05cb5bfe6bc3200406e2';
+        const ENERGY_SILVER = 'c2bad58fcec374d709099d11d0549e59ea7e233e';
+        const ENERGY_BRONZE = '3f6f381dc9b92822406731a942c028adf8dc978f';
+        const KEYS = ['booster.1', 'booster.2', 'booster.3', 'energyBooster'];
+        /** @param {string} itemUuid @param {?number} [effectEnd] */
+        const buff = (itemUuid, effectEnd = null) => ({ rarity: 'common', itemUuid, name: 'x', buffStart: 1, buffEnd: effectEnd, effectStart: 1, effectEnd });
+        const boosters = (body) => Object.fromEntries(KEYS.map((key) => [key, body.values[key]]));
+        const planet = (data, name) => data.planets.find((p) => p.name === name);
+
+        it('sets all four to 0 on a planet without one, ignoring items it does not know', () => {
+            const data = parsed(fixture());
+            // Alpha carries a buff with an unknown uuid, Beta none at all.
+            ['Alpha', 'Beta'].forEach((name) => {
+                expect(boosters(planet(data, name))).toEqual({ 'booster.1': 0, 'booster.2': 0, 'booster.3': 0, energyBooster: 0 });
+            });
+        });
+
+        it('reads each item by its uuid as percent / 10', () => {
+            const obj = fixture();
+            obj.planets['900001'].buffs.push(buff(METAL_BRONZE), buff(CRYSTAL_PLATINUM_12W), buff(DEUTERIUM_GOLD), buff(ENERGY_SILVER));
+            expect(boosters(planet(parsed(obj), 'Alpha'))).toEqual({ 'booster.1': 1, 'booster.2': 4, 'booster.3': 3, energyBooster: 4 });
+        });
+
+        it('reads the bronze energy booster as 2', () => {
+            const obj = fixture();
+            obj.planets['900002'].buffs = [buff(ENERGY_BRONZE)];
+            expect(planet(parsed(obj), 'Beta').values.energyBooster).toBe(2);
+        });
+
+        it('keeps a booster on the planet it was used on', () => {
+            const obj = fixture();
+            obj.planets['900001'].buffs.push(buff(METAL_BRONZE));
+            obj.planets['900002'].buffs = [buff(DEUTERIUM_GOLD)];
+            const data = parsed(obj);
+            expect(boosters(planet(data, 'Alpha'))).toEqual({ 'booster.1': 1, 'booster.2': 0, 'booster.3': 0, energyBooster: 0 });
+            expect(boosters(planet(data, 'Beta'))).toEqual({ 'booster.1': 0, 'booster.2': 0, 'booster.3': 3, energyBooster: 0 });
+        });
+
+        it('ignores a booster whose effect ended before the export', () => {
+            const obj = fixture();
+            obj.exportedAt = '2026-10-13T00:00:00.000Z';
+            obj.planets['900001'].buffs.push(buff(METAL_BRONZE, Date.parse('2026-10-12T00:00:00Z') / 1000),
+                buff(ENERGY_SILVER, Date.parse('2026-10-14T00:00:00Z') / 1000));
+            const alpha = planet(parsed(obj), 'Alpha');
+            expect(alpha.values['booster.1']).toBe(0);
+            expect(alpha.values.energyBooster).toBe(4);
+        });
+
+        it('gives a moon none of them', () => {
+            const obj = fixture();
+            Object.values(obj.moons)[0].buffs = [buff(METAL_BRONZE), buff(ENERGY_SILVER)];
+            const moon = parsed(obj).moons[0];
+            KEYS.forEach((key) => expect(key in moon.values).toBe(false));
+        });
+    });
+
     it('has no universe on schema 1', () => {
         expect(parsed(fixture()).universe).toBeNull();
     });
@@ -486,10 +546,10 @@ describe('mergeProfiles', () => {
         const primary = imported().profile;
         const secondary = core.createProfile({ label: 'old' });
         const p = core.createPlanet({ id: 's1', name: 'alpha', coords: null });
-        p.values.energyBooster = { override: 4 };
+        p.values['production.1'] = { override: 70 };
         secondary.planets.push(p);
         const merged = core.mergeProfiles(primary, secondary);
-        expect(core.getProfileValue(planetNamed(merged, 'Alpha'), 'energyBooster')).toBe(4);
+        expect(core.getProfileValue(planetNamed(merged, 'Alpha'), 'production.1')).toBe(70);
     });
 
     it('adds the planets nothing matches', () => {

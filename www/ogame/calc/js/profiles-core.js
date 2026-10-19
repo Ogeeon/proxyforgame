@@ -59,6 +59,38 @@ const EXPEDITION_RESOURCE_BOOSTER_ITEMS = {
   '3876b353a7f99b28520a82df01cd86c31b4cbfe0': 40, '505fa6275e34b816d5059e26632dcaa8c18bde9a': 40, 'b0f6477d68c9683170cb8d32be2df1177669c5a0': 40,
 };
 
+/**
+ * The metal, crystal, deuterium and energy booster items of the game's shop and
+ * inventory, by the profile value each one sets on its planet: the key and the
+ * percentage / 10 (`booster.1`-`booster.3` 1..4, `energyBooster` 2..8). As with
+ * the expedition booster, an item is told apart by its uuid, not its name. One
+ * line per tier, three uuids for the durations the shop sells; bronze is not
+ * sold and has been seen with one duration only.
+ *
+ * @type {Object<string, [string, number]>}
+ */
+const PRODUCTION_BOOSTER_ITEMS = {
+  'de922af379061263a56d7204d1c395cefcfb7d75': ['booster.1', 1],
+  'ba85cc2b8a5d986bbfba6954e2164ef71af95d4a': ['booster.1', 2], '742743b3b0ae1f0b8a1e01921042810b58f12f39': ['booster.1', 2], '6f44dcd2bd84875527abba69158b4e976c308bbc': ['booster.1', 2],
+  '05294270032e5dc968672425ab5611998c409166': ['booster.1', 3], '6fecb993169fe918d9c63cd37a2e541cc067664e': ['booster.1', 3], '21c1a65ca6aecf54ffafb94c01d0c60d821b325d': ['booster.1', 3],
+  'a83cfdc15b8dba27c82962d57e50d8101d263cfb': ['booster.1', 4], 'c690f492cffe5f9f2952337e8eed307a8a62d6cf': ['booster.1', 4], 'ca7f903a65467b70411e513b0920d66c417aa3a2': ['booster.1', 4],
+  '3c9f85221807b8d593fa5276cdf7af9913c4a35d': ['booster.2', 1],
+  '422db99aac4ec594d483d8ef7faadc5d40d6f7d3': ['booster.2', 2], '5b69663e3ba09a1fe77cf72c5094e246cfe954d6': ['booster.2', 2], '04d8afd5936976e32ce894b765ea8bd168aa07ef': ['booster.2', 2],
+  '118d34e685b5d1472267696d1010a393a59aed03': ['booster.2', 3], '36fb611e71d42014f5ebd0aa5a52bc0c81a0c1cb': ['booster.2', 3], 'd45f00e8b909f5293a83df4f369737ea7d69c684': ['booster.2', 3],
+  '35d96e441c21ef112a84c618934d9d0f026998fd': ['booster.2', 4], '6bf45fcba8a6a68158273d04a924452eca75cf39': ['booster.2', 4], '7c2edf40c5cd54ad11c6439398b83020c0a7a6be': ['booster.2', 4],
+  'd9fa5f359e80ff4f4c97545d07c66dbadab1d1be': ['booster.3', 1],
+  'e4b78acddfa6fd0234bcb814b676271898b0dbb3': ['booster.3', 2], '26416a3cdb94613844b1d3ca78b9057fd6ae9b15': ['booster.3', 2], '6f0952a919fd2ab9c009e9ccd83c1745f98f758f': ['booster.3', 2],
+  '5560a1580a0330e8aadf05cb5bfe6bc3200406e2': ['booster.3', 3], '300493ddc756869578cb2888a3a1bc0c3c66765f': ['booster.3', 3], 'dc5896bed3311434224d511fa7ced6fdbe41b4e8': ['booster.3', 3],
+  '4b51d903560edd102467b110586000bd64fdb954': ['booster.3', 4], '620f779dbffa1011aded69b091239727910a3d03': ['booster.3', 4], '831c3ea8d868eb3601536f4d5e768842988a1ba9': ['booster.3', 4],
+  '3f6f381dc9b92822406731a942c028adf8dc978f': ['energyBooster', 2],
+  'c2bad58fcec374d709099d11d0549e59ea7e233e': ['energyBooster', 4], 'bedd248aaf288c27e9351cfacfa6be03f1dbb898': ['energyBooster', 4], 'e05aa5b9e3df5be3857b43da8403eafbf5ad3b96': ['energyBooster', 4],
+  '55b52cbfb148ec80cd4e5b0580f7bed01149d643': ['energyBooster', 6], '4fa9a2273ee446284d5177fd9d60a22de01e932b': ['energyBooster', 6], '5ad783dcfce3655ef97b36197425718a0dad6b66': ['energyBooster', 6],
+  '77c36199102e074dca46f5f26ef57ce824d044dd': ['energyBooster', 8], 'dfe86378f8c3d7f3ee0790ea64603bc44e83ca47': ['energyBooster', 8], 'c39aa972a971e94b1d9b4d7a8f734b3d8be12534': ['energyBooster', 8],
+};
+
+/** The profile keys a production booster item sets, each 0 when no booster of its kind is active. */
+const PRODUCTION_BOOSTER_KEYS = ['booster.1', 'booster.2', 'booster.3', 'energyBooster'];
+
 /** Default exchange rates, [metal, crystal, deuterium] in metal units. */
 const DEFAULT_RATES = [1, 1.5, 3];
 
@@ -608,9 +640,11 @@ function parseAccountExport(text) {
 function normalizeAccountExport(raw, schemaVersion) {
   const productionFactors = isPlainObject(raw.pfgCompanion) && isPlainObject(raw.pfgCompanion.productionFactors)
     ? raw.pfgCompanion.productionFactors : {};
-  const planets = Object.values(raw.planets).filter(isPlainObject).map((p) => exportBody(p, true, productionFactors[String(p.id)]));
+  const nowSeconds = exportTimeSeconds(raw);
+  const planets = Object.values(raw.planets).filter(isPlainObject)
+    .map((p) => exportBody(p, true, nowSeconds, productionFactors[String(p.id)]));
   const moons = Object.values(isPlainObject(raw.moons) ? raw.moons : {}).filter(isPlainObject).map((m) => {
-    const body = exportBody(m, false);
+    const body = exportBody(m, false, nowSeconds);
     body.planetGameId = finiteOrNull(m.siblingId) || null;
     return body;
   });
@@ -679,8 +713,7 @@ function exportAccountValues(raw) {
  * @returns {number}
  */
 function activeExpeditionResourceBooster(raw) {
-  const exportedMs = Date.parse(typeof raw.exportedAt === 'string' ? raw.exportedAt : '');
-  const nowSeconds = Number.isFinite(exportedMs) ? exportedMs / 1000 : Number.POSITIVE_INFINITY;
+  const nowSeconds = exportTimeSeconds(raw);
   let best = 0;
   [raw.planets, raw.moons].filter(isPlainObject).forEach((bodies) => {
     Object.values(bodies).filter(isPlainObject).forEach((body) => {
@@ -692,6 +725,45 @@ function activeExpeditionResourceBooster(raw) {
     });
   });
   return best;
+}
+
+/**
+ * The moment the export was made, in seconds - the unit of a buff's
+ * `effectEnd`. +Infinity when `exportedAt` is missing or unreadable, so that no
+ * buff counts as expired.
+ *
+ * @param {Record<string, any>} raw The whole export.
+ * @returns {number}
+ */
+function exportTimeSeconds(raw) {
+  const exportedMs = Date.parse(typeof raw.exportedAt === 'string' ? raw.exportedAt : '');
+  return Number.isFinite(exportedMs) ? exportedMs / 1000 : Number.POSITIVE_INFINITY;
+}
+
+/**
+ * The production booster items active on one planet, as profile values. Unlike
+ * the expedition booster, such an item belongs to the planet it was used on.
+ * Every key is present, 0 when no booster of its kind is active, so that a
+ * re-import clears one that has expired. Unknown items and buffs whose effect
+ * ended before the export are skipped; of two boosters of one kind the higher
+ * one counts.
+ *
+ * @param {unknown} buffs The planet's `buffs`.
+ * @param {number} nowSeconds The export time (exportTimeSeconds).
+ * @returns {Object<string, number>}
+ */
+function activeProductionBoosters(buffs, nowSeconds) {
+  /** @type {Object<string, number>} */
+  const values = {};
+  PRODUCTION_BOOSTER_KEYS.forEach((key) => { values[key] = 0; });
+  (Array.isArray(buffs) ? buffs : []).filter(isPlainObject).forEach((buff) => {
+    const item = PRODUCTION_BOOSTER_ITEMS[String(buff.itemUuid)];
+    if (!item) return;
+    const [key, value] = item;
+    const end = finiteOrNull(buff.effectEnd);
+    if (value > values[key] && (end === null || end > nowSeconds)) values[key] = value;
+  });
+  return values;
 }
 
 /**
@@ -802,9 +874,11 @@ function copyNumbers(raw, keys, into) {
  *
  * @param {Record<string, any>} raw
  * @param {boolean} isPlanet
+ * @param {number} nowSeconds The export time (exportTimeSeconds).
+ * @param {unknown} [productionFactors] The planet's row of the Companion's productionFactors.
  * @returns {ExportBody}
  */
-function exportBody(raw, isPlanet, productionFactors = null) {
+function exportBody(raw, isPlanet, nowSeconds, productionFactors = null) {
   /** @type {Object<string, *>} */
   const values = {};
   copyLevels(raw.buildings, 'building.', values);
@@ -825,6 +899,7 @@ function exportBody(raw, isPlanet, productionFactors = null) {
         if (factor !== null) values['production.' + techId] = factor;
       });
     }
+    Object.assign(values, activeProductionBoosters(raw.buffs, nowSeconds));
   }
   const galaxy = finiteOrNull(raw.galaxy);
   const system = finiteOrNull(raw.system);

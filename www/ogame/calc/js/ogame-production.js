@@ -20,7 +20,7 @@
  * @property {boolean} engineer whether the Engineer is present
  * @property {number} productionFactor production coefficient (0..1, less than 1 if there is not enough energy)
  * @property {number} powerFactor power percentage (0..1, set by the user)
- * @property {number} boosterType booster type: 0-none, 1-bronze (10%), 2-silver (20%), 3-gold (30%)
+ * @property {number} boosterType booster type: 0-none, 1-bronze (10%), 2-silver (20%), 3-gold (30%), 4-platinum (40%)
  * @property {boolean} allOfficers whether all 5 officers are present
  * @property {number} playerClass player class: 0-Collector, 1-General, 2-Discoverer
  * @property {boolean} [isTrader] whether the player belongs to an alliance with the "Traders" class.
