@@ -286,6 +286,137 @@ class ProfileStore {
   }
 }
 
+/**
+ * The shared universe cache (ADR-0004), `pfg_universe_<country>_<number>`: a
+ * universe's settings as `serverdata` reports them, and the ones the player
+ * picked instead. They are not part of a profile, so every profile of the
+ * universe shares them. The rules live in profiles-core.js; this class only
+ * reads, writes and fetches. A universe's settings come in one request,
+ * whichever field asks first.
+ */
+class UniverseCache {
+  /**
+   * @param {?ProfileStorageLike} [local] Defaults to window.localStorage.
+   * @param {(universe: ProfileUniverse) => Promise<?Record<string, any>>} [fetcher] The `serverdata`
+   *   answer of a universe; defaults to the AJAX service.
+   * @param {() => number} [now] Defaults to Date.now.
+   */
+  constructor(local, fetcher, now) {
+    this.local = local === undefined ? safeStorage(() => window.localStorage) : local;
+    this.fetcher = fetcher || ((universe) => apiGet('serverdata', { country: universe.country, universe: universe.number }));
+    this.now = now || Date.now;
+    /** @type {Map<string, Promise<?Record<string, any>>>} The request of each universe still out. */
+    this.requests = new Map();
+  }
+
+  /**
+   * @param {ProfileUniverse} universe
+   * @returns {?UniverseEntry}
+   */
+  get(universe) {
+    if (!this.local) return null;
+    try {
+      return readUniverseEntry(JSON.parse(this.local.getItem(universeCacheKey(universe)) || 'null'));
+    } catch {
+      return null;
+    }
+  }
+
+  /**
+   * @param {ProfileUniverse} universe
+   * @param {UniverseEntry} entry
+   */
+  put(universe, entry) {
+    if (!this.local) return;
+    try {
+      this.local.setItem(universeCacheKey(universe), JSON.stringify(entry));
+    } catch {
+      // Without storage the settings are simply fetched again next time.
+    }
+  }
+
+  /**
+   * The universe's entry, fetched again once a day or when it never held this
+   * setting. An unreachable universe leaves the entry as it was: a stale value
+   * is still the best guess.
+   *
+   * @param {ProfileUniverse} universe
+   * @param {string} key The setting the caller is about to show.
+   * @returns {Promise<?UniverseEntry>} Null when nothing is known about the universe.
+   */
+  async refresh(universe, key) {
+    const entry = this.get(universe);
+    if (isUniverseEntryFresh(entry, key, this.now())) return entry;
+    const data = await this.fetchSettings(universe);
+    if (!data) return entry;
+    // Read again: another field of the page may have written the entry meanwhile.
+    /** @type {UniverseEntry} */
+    const fresh = { ...this.get(universe), at: this.now(), ...parseUniverseSettings(data) };
+    this.put(universe, fresh);
+    return fresh;
+  }
+
+  /**
+   * @param {ProfileUniverse} universe
+   * @returns {Promise<?Record<string, any>>} Null when the universe cannot be reached.
+   */
+  fetchSettings(universe) {
+    const key = universeCacheKey(universe);
+    let request = this.requests.get(key);
+    if (!request) {
+      request = this.fetcher(universe)
+        .catch(() => null)
+        .finally(() => this.requests.delete(key));
+      this.requests.set(key, request);
+    }
+    return request;
+  }
+
+  /**
+   * Remember the player's choice of a setting, or drop it when it is the
+   * game's value again.
+   *
+   * @param {ProfileUniverse} universe
+   * @param {string} key
+   * @param {*} chosen
+   * @returns {?UniverseEntry} The entry; null while the game value is unknown, when nothing is kept.
+   */
+  choose(universe, key, chosen) {
+    const entry = this.get(universe);
+    if (!entry || !('game' in universeLayer(entry, key))) return null;
+    if (setUniverseChoice(entry, key, chosen)) this.put(universe, entry);
+    return entry;
+  }
+
+  /**
+   * The settings the player picked for the universes of these profiles, for
+   * the backup file.
+   *
+   * @param {Profile[]} profiles
+   * @returns {UniverseChoices[]}
+   */
+  choicesOf(profiles) {
+    /** @type {UniverseChoices[]} */
+    const choices = [];
+    profiles.forEach((p) => {
+      const universe = p.universe;
+      if (!universe || choices.some((c) => sameUniverse(c.universe, universe))) return;
+      const overrides = this.get(universe)?.overrides;
+      if (overrides && Object.keys(overrides).length > 0) choices.push({ universe: { ...universe }, overrides: { ...overrides } });
+    });
+    return choices;
+  }
+
+  /**
+   * Put a backup's choices back, over the ones there.
+   *
+   * @param {UniverseChoices} choices
+   */
+  restoreChoices(choices) {
+    this.put(choices.universe, mergeUniverseChoices(this.get(choices.universe), choices.overrides));
+  }
+}
+
 if (typeof window !== 'undefined') {
-  Object.assign(window, { ProfileStore, PROFILE_STORAGE_KEYS });
+  Object.assign(window, { ProfileStore, PROFILE_STORAGE_KEYS, UniverseCache });
 }
