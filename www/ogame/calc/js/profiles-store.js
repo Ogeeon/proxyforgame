@@ -57,8 +57,10 @@ class ProfileStore {
   constructor(local, session) {
     this.local = local === undefined ? safeStorage(() => window.localStorage) : local;
     this.session = session === undefined ? safeStorage(() => window.sessionStorage) : session;
-    /** @type {Array<() => void>} */
+    /** @type {Array<(key?: ?string) => void>} */
     this.listeners = [];
+    /** @type {?{text: string, entries: ProfileIndexEntry[]}} The index as last parsed, by its stored text. */
+    this.indexCache = null;
   }
 
   /**
@@ -110,13 +112,34 @@ class ProfileStore {
     return this.local !== null;
   }
 
-  /** @returns {ProfileIndexEntry[]} Sorted by label. */
+  /**
+   * The index, parsed again only when its stored text changed - this tab's
+   * writes and another tab's alike, since the text is read every time.
+   *
+   * @returns {ProfileIndexEntry[]} Sorted by label; copies, so a caller may change them.
+   */
   list() {
-    const raw = this.read(this.local, PROFILE_STORAGE_KEYS.index);
-    if (!Array.isArray(raw)) return [];
-    return raw
-      .filter((e) => e && typeof e.id === 'string')
-      .sort((a, b) => String(a.label).localeCompare(String(b.label)));
+    let text = null;
+    try {
+      text = this.local ? this.local.getItem(PROFILE_STORAGE_KEYS.index) : null;
+    } catch {
+      text = null;
+    }
+    if (text === null) return [];
+    if (this.indexCache?.text !== text) {
+      let raw = null;
+      try {
+        raw = JSON.parse(text);
+      } catch {
+        raw = null;
+      }
+      /** @type {ProfileIndexEntry[]} */
+      const entries = Array.isArray(raw)
+        ? raw.filter((e) => e && typeof e.id === 'string').sort((a, b) => String(a.label).localeCompare(String(b.label)))
+        : [];
+      this.indexCache = { text, entries };
+    }
+    return this.indexCache.entries.map((e) => ({ ...e, universe: e.universe ? { ...e.universe } : e.universe }));
   }
 
   /**
@@ -220,16 +243,19 @@ class ProfileStore {
   }
 
   /**
-   * Call back when profiles change, in this tab or in another one.
+   * Call back when profiles change, in this tab or in another one. A change
+   * made in another tab comes with the storage key it wrote (null when that
+   * tab cleared the storage); one made here comes with none.
    *
-   * @param {() => void} listener
+   * @param {(key?: ?string) => void} listener
    */
   subscribe(listener) {
     this.listeners.push(listener);
   }
 
-  notify() {
-    this.listeners.forEach((listener) => listener());
+  /** @param {?string} [key] The key another tab wrote. */
+  notify(key) {
+    this.listeners.forEach((listener) => listener(key));
   }
 
   /**
@@ -243,7 +269,7 @@ class ProfileStore {
       // The last-planet map shares the profiles' prefix but changes no profile.
       if (e.key === PROFILE_STORAGE_KEYS.planets) return;
       if (e.key === null || e.key === PROFILE_STORAGE_KEYS.index || e.key.startsWith(PROFILE_STORAGE_KEYS.prefix)) {
-        this.notify();
+        this.notify(e.key);
       }
     });
   }

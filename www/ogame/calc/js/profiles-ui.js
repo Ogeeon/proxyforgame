@@ -495,6 +495,8 @@ class ProfilesUi {
     this.resetRows = [];
     /** @type {AccountExport[]} Exports of accounts that do not have a profile yet. */
     this.companionCandidates = [];
+    /** @type {?string} What the select's options say, as last drawn. */
+    this.selectShown = null;
   }
 
   init() {
@@ -506,10 +508,10 @@ class ProfilesUi {
     this.bindMigration();
     this.bindReset();
     this.bindCompanionSync();
-    this.store.subscribe(() => {
+    this.store.subscribe((key) => {
       this.renderSelect();
       this.renderOverrides();
-      if (!this.saving) this.emit();
+      if (!this.saving && this.concernsActive(key)) this.emit();
     });
     this.store.listenToOtherTabs(window);
     this.renderOverrides();
@@ -539,6 +541,18 @@ class ProfilesUi {
    */
   onChange(listener) {
     this.listeners.push(listener);
+  }
+
+  /**
+   * Whether a change may touch the profile this tab shows: any change made in
+   * this tab, and in another tab anything but the save of another profile.
+   *
+   * @param {?string} [key] The storage key another tab wrote; undefined for a change made here.
+   * @returns {boolean}
+   */
+  concernsActive(key) {
+    if (typeof key !== 'string' || !key.startsWith(PROFILE_STORAGE_KEYS.prefix)) return true;
+    return key === PROFILE_STORAGE_KEYS.prefix + (this.store.getActiveId() || '');
   }
 
   emit() {
@@ -668,29 +682,42 @@ class ProfilesUi {
   // The select
   // -------------------------------------------------------------------------
 
+  /**
+   * Fill the select: the profiles, then the actions. Most changes are value
+   * edits that leave the list as it was, so the options are rebuilt only when
+   * what they say changed; the choice is set every time.
+   */
   renderSelect() {
     const select = selectEl('#pf-select');
     if (!select) return;
     const activeId = this.store.getActiveId();
-    select.innerHTML = '';
-    /**
-     * @param {string} value
-     * @param {string} label
-     */
-    const add = (value, label) => {
-      const option = document.createElement('option');
-      option.value = value;
-      option.textContent = label;
-      select.appendChild(option);
-      return option;
-    };
-    add('', this.text.noProfile);
-    this.store.list().forEach((e) => add(e.id, e.label + (e.universe ? ' · s' + e.universe.number + '-' + e.universe.country : '')));
-    add('', '──────────').disabled = true;
-    add(PF_ACTION.import, this.text.actImport);
-    this.companionCandidates.forEach((data, index) => add('__companion_' + index, this.text.actImport + ' ' + (data.playerName || String(data.playerId))));
-    add(PF_ACTION.create, this.text.actCreate);
-    add(PF_ACTION.manage, this.text.actManage);
+    /** @type {Array<[string, string]>} */
+    const profiles = this.store.list().map((e) => [e.id, e.label + (e.universe ? ' · s' + e.universe.number + '-' + e.universe.country : '')]);
+    /** @type {Array<[string, string]>} */
+    const candidates = this.companionCandidates.map((data, index) => ['__companion_' + index, this.text.actImport + ' ' + (data.playerName || String(data.playerId))]);
+    const shown = JSON.stringify([profiles, candidates]);
+    if (shown !== this.selectShown || select.options.length === 0) {
+      this.selectShown = shown;
+      select.innerHTML = '';
+      /**
+       * @param {string} value
+       * @param {string} label
+       */
+      const add = (value, label) => {
+        const option = document.createElement('option');
+        option.value = value;
+        option.textContent = label;
+        select.appendChild(option);
+        return option;
+      };
+      add('', this.text.noProfile);
+      profiles.forEach(([id, label]) => add(id, label));
+      add('', '──────────').disabled = true;
+      add(PF_ACTION.import, this.text.actImport);
+      candidates.forEach(([value, label]) => add(value, label));
+      add(PF_ACTION.create, this.text.actCreate);
+      add(PF_ACTION.manage, this.text.actManage);
+    }
     select.value = activeId || '';
   }
 
@@ -1603,7 +1630,7 @@ class PfUniverseSetting {
       this.kind.set(this.selector, value);
       this.recalc();
     }
-    this.mark();
+    this.mark(entry);
   }
 
   /** No profile: the setting is the calculator's own again. */
@@ -1624,13 +1651,20 @@ class PfUniverseSetting {
     else overrides[this.kind.key] = chosen;
     entry.overrides = overrides;
     PfUniverseSetting.write(key, entry);
-    this.mark();
+    this.mark(entry);
   }
 
-  /** Mark the field as the game's, with a restore button when the player changed it. */
-  mark() {
+  /**
+   * Mark the field as the game's, with a restore button when the player changed it.
+   *
+   * @param {?PfUniverseEntry} [entry] The universe's cache entry, when the caller has just read or written it.
+   */
+  mark(entry) {
     const key = this.cacheKey();
-    const game = this.gameValue(key ? PfUniverseSetting.read(key) : null);
+    /** @type {?PfUniverseEntry} */
+    let known = null;
+    if (key) known = entry === undefined ? PfUniverseSetting.read(key) : entry;
+    const game = this.gameValue(known);
     const input = $(this.selector);
     if (game === null) {
       this.pf.markInput(input, false, null, () => {});
