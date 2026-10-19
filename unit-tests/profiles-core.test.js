@@ -250,11 +250,16 @@ describe('the two layers', () => {
 
     it('reads the production factors the companion adds to an export', () => {
         const obj = fixture();
-        obj.pfgCompanion = { productionFactors: { 900001: { 1: 80, 217: 150, 4: 50 } } };
+        obj.pfgCompanion = { productionFactors: { 900001: { 1: 80, 2: 70, 3: 60, 4: 50, 12: 40, 212: 30, 217: 150, 22: 10 } } };
         const alpha = planetNamed(imported(obj).profile, 'Alpha');
         expect(core.getProfileValue(alpha, 'production.1')).toBe(80);
+        expect(core.getProfileValue(alpha, 'production.2')).toBe(70);
+        expect(core.getProfileValue(alpha, 'production.3')).toBe(60);
+        expect(core.getProfileValue(alpha, 'production.4')).toBe(50);
+        expect(core.getProfileValue(alpha, 'production.12')).toBe(40);
+        expect(core.getProfileValue(alpha, 'production.212')).toBe(30);
         expect(core.getProfileValue(alpha, 'production.217')).toBe(150);
-        expect(core.getProfileValue(alpha, 'production.4', 100)).toBe(100);
+        expect(core.getProfileValue(alpha, 'production.22', 100)).toBe(100);
         expect(core.getProfileValue(planetNamed(imported(obj).profile, 'Beta'), 'production.1', 100)).toBe(100);
     });
 

@@ -819,7 +819,8 @@ function exportBody(raw, isPlanet, productionFactors = null) {
     const speciesId = finiteOrNull(raw.selectedSpeciesId);
     values['lf.race'] = speciesId !== null ? (SPECIES_TO_RACE[/** @type {701|702|703|704} */ (speciesId)] || 0) : 0;
     if (isPlainObject(productionFactors)) {
-      [1, 2, 3, 217].forEach((techId) => {
+      // Every row of production's table: mines, solar and fusion plants, satellites, crawlers.
+      PRODUCTION_ROW_TECHS.forEach((techId) => {
         const factor = finiteOrNull(productionFactors[String(techId)]);
         if (factor !== null) values['production.' + techId] = factor;
       });
