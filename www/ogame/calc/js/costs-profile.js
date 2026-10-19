@@ -564,8 +564,8 @@ class CostsProfiles extends ProfileBinder {
 
   /**
    * Fill in the known levels as the "from" levels of the multi-level tables
-   * and of the range tab. A "to" below the new "from" is raised to it, so the
-   * row stays idle rather than turning into a demolition.
+   * and of the range tab. A row the player left alone follows the new level;
+   * one whose "to" was changed by hand keeps both its levels (pfStartRange).
    *
    * @param {Profile} profile
    */
@@ -579,28 +579,40 @@ class CostsProfiles extends ProfileBinder {
         if (!rowId || !from || !to) return;
         const techId = rowId > COSTS_MOON_ROW_OFFSET ? rowId - COSTS_MOON_ROW_OFFSET : rowId;
         const level = this.knownLevel(profile, t.where, t.prefix + techId);
-        if (level === null) return;
-        from.value = String(level);
-        if ((Number.parseInt(to.value, 10) || 0) < level) to.value = String(level);
+        if (level !== null) pfFollowStart(from, to, level, 0);
       });
     });
-    this.fillRangeStart(profile);
+    const level = this.rangeLevel(profile);
+    if (level !== null) pfFollowStart(inputEl('#tab2-from-level'), inputEl('#tab2-to-level'), level, 1);
+  }
+
+  /**
+   * The known level of the technology picked on the range tab, or null when
+   * the profile does not know it.
+   *
+   * @param {Profile} profile
+   * @returns {?number}
+   */
+  rangeLevel(profile) {
+    const select = selectEl('#tech-types-select');
+    const option = select?.selectedOptions[0];
+    const group = option?.parentElement;
+    if (!select || !option || !(group instanceof HTMLOptGroupElement)) return null;
+    const source = COSTS_RANGE_GROUPS[Array.from(select.querySelectorAll('optgroup')).indexOf(group)];
+    if (!source) return null;
+    return this.knownLevel(profile, source.where, source.prefix + option.value);
   }
 
   /**
    * Fill in the range tab's "from" with the known level of the technology
    * picked there, and raise "to" to the next level when it is not above it.
+   * Another technology was picked, so whatever the player typed was for the
+   * old one.
    *
    * @param {Profile} profile
    */
   fillRangeStart(profile) {
-    const select = selectEl('#tech-types-select');
-    const option = select?.selectedOptions[0];
-    const group = option?.parentElement;
-    if (!select || !option || !(group instanceof HTMLOptGroupElement)) return;
-    const source = COSTS_RANGE_GROUPS[Array.from(select.querySelectorAll('optgroup')).indexOf(group)];
-    if (!source) return;
-    const level = this.knownLevel(profile, source.where, source.prefix + option.value);
+    const level = this.rangeLevel(profile);
     if (level === null) return;
     setVal('#tab2-from-level', level);
     if ((Number.parseInt(getVal('#tab2-to-level'), 10) || 0) <= level) setVal('#tab2-to-level', level + 1);

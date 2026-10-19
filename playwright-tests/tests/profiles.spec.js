@@ -906,7 +906,7 @@ test('costs fills in the known levels as the start levels, unbound', async ({ pa
     await page.goto('/costs');
     await importExport(page);
 
-    // A "to" below the known level is raised to it, so the row stays idle.
+    // A row not filled in yet starts idle at the known level.
     expect(await rowLevels(page, 'table-1-2', 1)).toEqual(['30', '30']);
     expect(await rowLevels(page, 'table-1-3', 10014)).toEqual(['8', '8']);
     expect(await rowLevels(page, 'table-1-4', 113)).toEqual(['14', '14']);
@@ -934,9 +934,37 @@ test('costs fills in the known levels as the start levels, unbound', async ({ pa
     }) });
     await expect(page.locator('#tab2-from-level')).toHaveValue('8');
 
-    // Another planet brings its own levels.
+    // Another planet brings its own levels to the rows left alone.
     await page.locator('#pf-planet').selectOption({ label: 'Beta [2:150:12]' });
-    expect(await rowLevels(page, 'table-1-2', 1)).toEqual(['28', '30']);
+    expect(await rowLevels(page, 'table-1-2', 2)).toEqual(['24', '24']);
+});
+
+test('costs rows left alone follow another planet, rows planned by hand stay', async ({ page }) => {
+    await mockServerData(page);
+    await page.goto('/costs');
+    await importExport(page);
+
+    await page.locator('#tabtag-1').click();
+    const crystalTo = page.locator('#table-1-2 tr').nth(2).locator('input').nth(1);
+    await crystalTo.fill('30');
+    await crystalTo.blur();
+
+    // Beta's levels are lower: the idle metal row goes down with them.
+    await page.locator('#pf-planet').selectOption({ label: 'Beta [2:150:12]' });
+    expect(await rowLevels(page, 'table-1-2', 1)).toEqual(['28', '28']);
+    expect(await rowLevels(page, 'table-1-2', 2)).toEqual(['26', '30']);
+    // The planned row is recalculated for Beta's factories, not cleared.
+    await expect(page.locator('#table-1-2 tr').nth(2).locator('td').nth(4)).not.toHaveText('0');
+
+    await page.locator('#tabtag-2').click();
+    await expect(page.locator('#tab2-from-level')).toHaveValue('28');
+    await expect(page.locator('#tab2-to-level')).toHaveValue('29');
+    await page.locator('#tab2-to-level').fill('35');
+    await page.locator('#tab2-to-level').blur();
+    await page.locator('#pf-planet').selectOption({ label: 'Alpha [2:148:8]' });
+    await expect(page.locator('#tab2-from-level')).toHaveValue('28');
+    await expect(page.locator('#tab2-to-level')).toHaveValue('35');
+    expect(await rowLevels(page, 'table-1-2', 1)).toEqual(['30', '30']);
 });
 
 // The LF costs: the account fields, and one planet of the profile whose
@@ -1064,6 +1092,28 @@ test('LF costs fill in the planet levels as the start levels, unbound', async ({
     await page.locator('#tabtag-2').click();
     await page.locator('#tech-types-select').selectOption('1101');
     await expect(page.locator('#tab2-from-level')).toHaveValue('8');
+});
+
+test('LF costs rows left alone follow another planet, rows planned by hand stay', async ({ page }) => {
+    await page.goto('/lfcosts');
+    await importExport(page);
+
+    await page.locator('#tabtag-1').click();
+    const to = page.locator('#table-1-1 tr').nth(3).locator('input').nth(1);
+    expect(await rowLevels(page, 'table-1-1', 1003)).toEqual(['10', '10']);
+    await to.fill('15');
+    await to.blur();
+    await page.locator('#tabtag-2').click();
+    await page.locator('#tech-types-select').selectOption('1001');
+    await page.locator('#tab2-to-level').fill('45');
+    await page.locator('#tab2-to-level').blur();
+
+    // The colony has no life form: its levels are all 0.
+    await page.locator('#pf-planet').selectOption({ label: 'Colony [3:20:4]' });
+    expect(await rowLevels(page, 'table-1-1', 1001)).toEqual(['0', '0']);
+    expect(await rowLevels(page, 'table-1-1', 1003)).toEqual(['10', '15']);
+    await expect(page.locator('#tab2-from-level')).toHaveValue('40');
+    await expect(page.locator('#tab2-to-level')).toHaveValue('45');
 });
 
 test('graviton takes the account and a planet from the profile', async ({ page }) => {

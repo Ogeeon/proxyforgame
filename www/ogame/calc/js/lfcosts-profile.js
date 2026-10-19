@@ -179,14 +179,16 @@ class LfCostsProfiles extends PlanetPrmBinder {
     const planet = this.planet(profile);
     if (!planet) return;
     this.fillStartLevels(planet);
-    this.fillRangeStart(planet);
+    const level = this.rangeLevel(planet);
+    if (level !== null) pfFollowStart(inputEl('#tab2-from-level'), inputEl('#tab2-to-level'), level, 1);
     this.app.updateTab3();
   }
 
   /**
    * Fill in the planet's levels as the "from" levels of the multi-level
-   * tables. A "to" below the new "from" is raised to it, so the row stays idle
-   * rather than turning into a demolition. A row that changed is recalculated.
+   * tables. A row the player left alone follows the new level; one whose "to"
+   * was changed by hand keeps both its levels (pfStartRange). A row that
+   * changed is recalculated.
    *
    * @param {ProfilePlanet} planet
    */
@@ -199,25 +201,34 @@ class LfCostsProfiles extends PlanetPrmBinder {
         const to = row.cells[3]?.querySelector('input');
         if (!techId || !from || !to) return;
         const level = pfNum(getProfileValue(planet, lfCostsProfileKey(techId), 0));
-        const toLevel = Math.max(level, Number.parseInt(to.value, 10) || 0);
-        if (String(level) === from.value && String(toLevel) === to.value) return;
-        from.value = String(level);
-        to.value = String(toLevel);
-        this.app.handleRowChange(from);
+        if (pfFollowStart(from, to, level, 0)) this.app.handleRowChange(from);
       });
     });
   }
 
   /**
+   * The planet's level of the technology picked on the range tab, or null
+   * when none is picked.
+   *
+   * @param {ProfilePlanet} planet
+   * @returns {?number}
+   */
+  rangeLevel(planet) {
+    const techId = Number.parseInt(getVal('#tech-types-select'), 10);
+    return techId ? pfNum(getProfileValue(planet, lfCostsProfileKey(techId), 0)) : null;
+  }
+
+  /**
    * Fill in the range tab's "from" with the planet's level of the technology
    * picked there, and raise "to" to the next level when it is not above it.
+   * Another technology was picked, so whatever the player typed was for the
+   * old one.
    *
    * @param {ProfilePlanet} planet
    */
   fillRangeStart(planet) {
-    const techId = Number.parseInt(getVal('#tech-types-select'), 10);
-    if (!techId) return;
-    const level = pfNum(getProfileValue(planet, lfCostsProfileKey(techId), 0));
+    const level = this.rangeLevel(planet);
+    if (level === null) return;
     setVal('#tab2-from-level', level);
     if ((Number.parseInt(getVal('#tab2-to-level'), 10) || 0) <= level) setVal('#tab2-to-level', level + 1);
   }

@@ -99,6 +99,25 @@ function pfLockSelect(el, locked, title = '') {
 }
 
 /**
+ * Move a build row's "from" and "to" fields to a body's level, unless the
+ * player set the row up by hand (pfStartRange).
+ *
+ * @param {?HTMLInputElement} from
+ * @param {?HTMLInputElement} to
+ * @param {number} level
+ * @param {0|1} gap
+ * @returns {boolean} Whether a field changed.
+ */
+function pfFollowStart(from, to, level, gap) {
+  if (!from || !to) return false;
+  const range = pfStartRange(pfNum(Number.parseInt(from.value, 10)), pfNum(Number.parseInt(to.value, 10)), level, gap);
+  if (!range || (String(range.from) === from.value && String(range.to) === to.value)) return false;
+  from.value = String(range.from);
+  to.value = String(range.to);
+  return true;
+}
+
+/**
  * A whole-number field of a calculator that keeps its settings in options.prm.
  *
  * @param {string} key Profile value key.

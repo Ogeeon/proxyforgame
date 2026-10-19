@@ -295,6 +295,24 @@ function pfBool(v) {
 }
 
 /**
+ * The "from" and "to" levels a build row takes when the body it is filled from
+ * changes, or null to leave the row as it is. A row the player left alone -
+ * "to" equal to "from", or empty, on the multi-level tables (gap 0); "to" not
+ * beyond the next level on the range tab (gap 1) - follows the new level. One
+ * whose "to" was set by hand keeps both its levels: it is the player's plan.
+ *
+ * @param {number} from
+ * @param {number} to
+ * @param {number} level The body's level.
+ * @param {0|1} gap How far "to" sits above "from" on a row left alone.
+ * @returns {?{from: number, to: number}}
+ */
+function pfStartRange(from, to, level, gap) {
+  const untouched = gap === 0 ? to === from || to === 0 : to <= from + gap;
+  return untouched ? { from: level, to: level + gap } : null;
+}
+
+/**
  * A planet or moon as a select shows it: its name and, when known, its
  * coordinates.
  *

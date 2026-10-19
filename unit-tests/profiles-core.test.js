@@ -17,7 +17,7 @@ const core = load(['ogame/calc/js/profiles-core.js'], [
     'parseAccountExport', 'findProfileForExport', 'importAccountExport', 'mergeProfiles',
     'serializeProfilesFile', 'parseProfilesFile', 'planProfilesRestore', 'universeCacheKey',
     'ratesToTrade', 'ratesFromTrade', 'profileFromProductionSet', 'profileFromFlightSet',
-    'lfBuildingGameId', 'pfNum', 'pfBool', 'pfBodyLabel', 'expeditionHighTop',
+    'lfBuildingGameId', 'pfNum', 'pfBool', 'pfBodyLabel', 'pfStartRange', 'expeditionHighTop',
 ]);
 
 const plain = (value) => JSON.parse(JSON.stringify(value));
@@ -635,6 +635,33 @@ describe('saved sets', () => {
 
     it('numbers life-form buildings the way the game does', () => {
         expect(core.lfBuildingGameId(4, 12)).toBe(14112);
+    });
+});
+
+describe('pfStartRange', () => {
+    it('moves an idle multi-level row to the new level, down as well as up', () => {
+        expect(plain(core.pfStartRange(20, 20, 12, 0))).toEqual({ from: 12, to: 12 });
+        expect(plain(core.pfStartRange(12, 12, 20, 0))).toEqual({ from: 20, to: 20 });
+    });
+
+    it('fills a multi-level row not filled in yet', () => {
+        expect(plain(core.pfStartRange(0, 0, 7, 0))).toEqual({ from: 7, to: 7 });
+        expect(plain(core.pfStartRange(9, 0, 7, 0))).toEqual({ from: 7, to: 7 });
+    });
+
+    it('leaves a multi-level row the player planned, a demolition included', () => {
+        expect(core.pfStartRange(20, 25, 12, 0)).toBeNull();
+        expect(core.pfStartRange(20, 15, 12, 0)).toBeNull();
+    });
+
+    it('moves a range left at the next level, or empty, to the new level', () => {
+        expect(plain(core.pfStartRange(20, 21, 12, 1))).toEqual({ from: 12, to: 13 });
+        expect(plain(core.pfStartRange(0, 0, 12, 1))).toEqual({ from: 12, to: 13 });
+        expect(plain(core.pfStartRange(20, 18, 12, 1))).toEqual({ from: 12, to: 13 });
+    });
+
+    it('leaves a range the player set beyond the next level', () => {
+        expect(core.pfStartRange(20, 25, 12, 1)).toBeNull();
     });
 });
 
