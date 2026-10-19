@@ -336,6 +336,19 @@ class UniverseCache {
   }
 
   /**
+   * The universe's entry when it can be used as it is, so a field can show it
+   * at once instead of after refresh() settles.
+   *
+   * @param {ProfileUniverse} universe
+   * @param {string} key
+   * @returns {?UniverseEntry} Null when it has to be fetched first.
+   */
+  fresh(universe, key) {
+    const entry = this.get(universe);
+    return isUniverseEntryFresh(entry, key, this.now()) ? entry : null;
+  }
+
+  /**
    * The universe's entry, fetched again once a day or when it never held this
    * setting. An unreachable universe leaves the entry as it was: a stale value
    * is still the best guess.

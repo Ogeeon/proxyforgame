@@ -477,10 +477,12 @@ class ProfilesUi {
   /**
    * @param {ProfileStore} store
    * @param {Record<string, string>} text Localized strings (pfgProfileText).
+   * @param {UniverseCache} [universes] The shared cache of the universe settings.
    */
-  constructor(store, text) {
+  constructor(store, text, universes = new UniverseCache()) {
     this.store = store;
     this.text = text;
+    this.universes = universes;
     /** @type {Array<(profile: ?Profile) => void>} */
     this.listeners = [];
     /** Set while this page saves, so its own write does not come back as a change. */
@@ -1167,7 +1169,7 @@ class ProfilesUi {
   downloadBackup() {
     const stamp = new Date().toISOString().slice(0, 10);
     const profiles = this.store.getAll();
-    pfDownload(serializeProfilesFile(profiles, undefined, PfUniverseSetting.choicesOf(profiles)), 'pfg-profiles-' + stamp + '.json');
+    pfDownload(serializeProfilesFile(profiles, undefined, this.universes.choicesOf(profiles)), 'pfg-profiles-' + stamp + '.json');
   }
 
   /** @param {string} text */
@@ -1189,7 +1191,7 @@ class ProfilesUi {
     // The universe choices come back with a profile of their universe.
     (result.universes || [])
       .filter((u) => restored.some((p) => p.universe && sameUniverse(p.universe, u.universe)))
-      .forEach((u) => PfUniverseSetting.restoreChoices(u));
+      .forEach((u) => this.universes.restoreChoices(u));
     this.store.requestPersistence();
     this.renderManage();
     showToast(formatString(this.text.restoreDone, restored.length), 'success');
@@ -1412,21 +1414,14 @@ const PF_UNIVERSE_DONUT_SYSTEM = {
   display: (v) => pfDisplayValue(v === true),
 };
 
-/** @typedef {{at: number, overrides?: Record<string, *>, override?: *, [setting: string]: *}} PfUniverseEntry */
-
-/** @type {Map<string, Promise<?Record<string, any>>>} The `serverdata` request of each universe still out. */
-const pfUniverseRequests = new Map();
-
 /**
  * One setting of the active profile's universe, for a calculator that has
  * the field but no universe picker: the economy speed of production, queue,
- * LF costs and graviton, and graviton's debris share. The entry in the shared
- * universe cache `pfg_universe_<country>_<number>` (ADR-0004) holds `at`, when
- * the settings were fetched, the game's value of each setting under its key,
- * and in `overrides` the value the player picked instead, if any. A universe
- * setting is not part of a profile, so the player's choice lives in the cache
- * too, shared by every profile of that universe. The settings of a universe
- * come in one request, whichever field asks first.
+ * LF costs and graviton, and graviton's debris share. A universe setting is
+ * not part of a profile: it lives in the shared universe cache (UniverseCache
+ * in profiles-store.js, ADR-0004) together with the value the player picked
+ * instead, shared by every profile of that universe. This class only ties the
+ * field to the cache: it shows the value, remembers a change and marks it.
  */
 class PfUniverseSetting {
   /**
@@ -1453,104 +1448,10 @@ class PfUniverseSetting {
   }
 
   /**
-   * @param {string} key
-   * @returns {?PfUniverseEntry}
-   */
-  static read(key) {
-    let entry = null;
-    try {
-      entry = JSON.parse(localStorage.getItem(key) || 'null');
-    } catch {
-      entry = null;
-    }
-    if (!entry || typeof entry.at !== 'number') return null;
-    // The speed's choice was once kept on its own, before there were others.
-    if ('override' in entry) {
-      entry.overrides = { speed: entry.override, ...entry.overrides };
-      delete entry.override;
-    }
-    return entry;
-  }
-
-  /**
-   * @param {string} key
-   * @param {PfUniverseEntry} entry
-   */
-  static write(key, entry) {
-    try {
-      localStorage.setItem(key, JSON.stringify(entry));
-    } catch {
-      // Without storage the settings are simply fetched again next time.
-    }
-  }
-
-  /**
-   * The settings the player picked for the universes of these profiles, for
-   * the backup file.
-   *
-   * @param {Profile[]} profiles
-   * @returns {UniverseChoices[]}
-   */
-  static choicesOf(profiles) {
-    /** @type {UniverseChoices[]} */
-    const choices = [];
-    profiles.forEach((p) => {
-      const universe = p.universe;
-      if (!universe || choices.some((c) => sameUniverse(c.universe, universe))) return;
-      const overrides = PfUniverseSetting.read(universeCacheKey(universe))?.overrides;
-      if (overrides && Object.keys(overrides).length > 0) choices.push({ universe: { ...universe }, overrides: { ...overrides } });
-    });
-    return choices;
-  }
-
-  /**
-   * Put a backup's choices back into the universe cache, over the ones there.
-   * A universe never fetched on this device gets an entry that is already
-   * stale, so its game values are fetched the first time it is shown.
-   *
-   * @param {UniverseChoices} choices
-   */
-  static restoreChoices(choices) {
-    const key = universeCacheKey(choices.universe);
-    const entry = PfUniverseSetting.read(key) || { at: 0 };
-    entry.overrides = { ...entry.overrides, ...choices.overrides };
-    PfUniverseSetting.write(key, entry);
-  }
-
-  /**
-   * The game's value in an entry, or null when it is not known.
-   *
-   * @param {?PfUniverseEntry} entry
-   */
-  gameValue(entry) {
-    const value = entry ? entry[this.kind.key] : null;
-    return value ?? null;
-  }
-
-  /**
-   * The universe's settings from `serverdata`, one request per universe at a
-   * time; null when it cannot be reached.
-   *
-   * @param {ProfileUniverse} universe
-   * @param {string} key
-   * @returns {Promise<?Record<string, any>>}
-   */
-  static fetchSettings(universe, key) {
-    let request = pfUniverseRequests.get(key);
-    if (!request) {
-      request = apiGet('serverdata', { country: universe.country, universe: universe.number })
-        .catch(() => null)
-        .finally(() => pfUniverseRequests.delete(key));
-      pfUniverseRequests.set(key, request);
-    }
-    return request;
-  }
-
-  /**
    * Take the setting from the profile's universe - the player's own choice if
    * they made one - fetching the settings again once a day, or when this one
-   * was never fetched. It handles its own failures; nothing waits for the
-   * network.
+   * was never fetched. A fresh entry is shown at once; nothing waits for the
+   * network, and failures are handled by the cache.
    *
    * @param {Profile} profile
    */
@@ -1559,22 +1460,11 @@ class PfUniverseSetting {
     const key = this.cacheKey();
     this.mark();
     if (!key || !profile.universe) return;
-    let entry = PfUniverseSetting.read(key);
-    if (!entry || Date.now() - entry.at >= UNIVERSE_SETTINGS_TTL_MS || !(this.kind.key in entry)) {
-      const data = await PfUniverseSetting.fetchSettings(profile.universe, key);
-      // The universe is unreachable: a stale value is still the best guess.
-      if (data) {
-        // Read again: another field of the page may have written the entry meanwhile.
-        /** @type {PfUniverseEntry} */
-        const fresh = { ...PfUniverseSetting.read(key), at: Date.now(), ...parseUniverseSettings(data) };
-        PfUniverseSetting.write(key, fresh);
-        entry = fresh;
-      }
-    }
+    const cache = this.pf.universes;
+    const entry = cache.fresh(profile.universe, this.kind.key) ?? await cache.refresh(profile.universe, this.kind.key);
     // Another profile may have been shown while the request was out.
     if (!entry || this.cacheKey() !== key) return;
-    const overrides = entry.overrides || {};
-    const value = this.kind.key in overrides ? overrides[this.kind.key] : this.gameValue(entry);
+    const value = universeValue(entry, this.kind.key);
     if (value === null) return;
     if (!sameValue(this.kind.get(this.selector), value)) {
       this.kind.set(this.selector, value);
@@ -1591,30 +1481,21 @@ class PfUniverseSetting {
 
   /** The player changed the field: remember it as theirs, or drop it when it is the game's again. */
   changed() {
-    const key = this.cacheKey();
-    const entry = key ? PfUniverseSetting.read(key) : null;
-    const game = this.gameValue(entry);
-    if (!key || !entry || game === null) return;
-    const overrides = { ...entry.overrides };
-    const chosen = this.kind.get(this.selector);
-    if (sameValue(chosen, game)) delete overrides[this.kind.key];
-    else overrides[this.kind.key] = chosen;
-    entry.overrides = overrides;
-    PfUniverseSetting.write(key, entry);
-    this.mark(entry);
+    if (!this.universe) return;
+    const entry = this.pf.universes.choose(this.universe, this.kind.key, this.kind.get(this.selector));
+    if (entry) this.mark(entry);
   }
 
   /**
    * Mark the field as the game's, with a restore button when the player changed it.
    *
-   * @param {?PfUniverseEntry} [entry] The universe's cache entry, when the caller has just read or written it.
+   * @param {?UniverseEntry} [entry] The universe's cache entry, when the caller has just read or written it.
    */
   mark(entry) {
-    const key = this.cacheKey();
-    /** @type {?PfUniverseEntry} */
+    /** @type {?UniverseEntry} */
     let known = null;
-    if (key) known = entry === undefined ? PfUniverseSetting.read(key) : entry;
-    const game = this.gameValue(known);
+    if (this.universe) known = entry === undefined ? this.pf.universes.get(this.universe) : entry;
+    const game = known?.[this.kind.key] ?? null;
     const input = $(this.selector);
     if (game === null) {
       this.pf.markInput(input, false, null, () => {});

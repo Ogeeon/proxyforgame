@@ -194,6 +194,16 @@ describe('UniverseCache', () => {
         expect(fetcher.calls).toBe(2);
     });
 
+    it('hands out a fresh entry at once, and nothing that has to be fetched', async () => {
+        const { cache, clock, fetcher } = freshCache();
+        expect(cache.fresh(EN1, 'speed')).toBeNull();
+        await cache.refresh(EN1, 'speed');
+        expect(cache.fresh(EN1, 'speed').speed).toBe(8);
+        clock.now += DAY;
+        expect(cache.fresh(EN1, 'speed')).toBeNull();
+        expect(fetcher.calls).toBe(1);
+    });
+
     it('fetches again for a setting the entry never held', async () => {
         const { cache, fetcher, local } = freshCache();
         local.setItem('pfg_universe_en_1', JSON.stringify({ at: 1000, speed: 8 }));
