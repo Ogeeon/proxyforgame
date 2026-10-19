@@ -29,6 +29,11 @@ A value the player set in a calculator on top of the game layer. An override mar
 as different from the game until it is reset or a new import supplies that field.
 _Avoid_: edit, change, local value
 
+**Write-back**:
+Writing an edit of a profile-owned field into the active profile, where it becomes an
+override. Only what the player changed since the profile was applied is written back.
+_Avoid_: sync, save
+
 **Profile-owned field**:
 A calculator input whose value belongs to the active profile, such as a research level or
 a planet's temperature, and is shared with every other calculator.
@@ -52,17 +57,19 @@ _Avoid_: server, when the settings are meant
 
 **Account export**:
 The JSON document that describes a whole account, produced from inside the game by the
-origin-exporter userscript or by the collector. It is the source of a profile's game layer.
+origin-exporter userscript or by Companion. It is the source of a profile's game layer.
 _Avoid_: dump, backup
 
-**Collector**:
-Our own code that runs on the game's pages, gathers the account export while the player
-plays, and hands it to the site.
-_Avoid_: exporter (that is origin-exporter), bot, crawler
+**Companion**:
+PfG Companion, our own code that runs on the game's pages, gathers the account export
+while the player plays, and hands it to the site.
+_Avoid_: collector (that is the game's player class), exporter (that is origin-exporter),
+bot, crawler
 
 **Sync**:
-An import the site performs by itself when the collector has delivered an account export
-newer than the profile's game layer.
+An import the site performs by itself when Companion has delivered an account export
+newer than the profile's game layer. Nothing else is a sync: an edit reaching the profile
+is a write-back.
 _Avoid_: auto-import, refresh
 
 **API 2 export**:

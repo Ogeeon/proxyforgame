@@ -6,6 +6,10 @@ Date: 2026-10-11
 
 Accepted. Not yet implemented — the phases are in `.claude/plans/player-profiles.md`.
 
+Terminology note (2026-10-20): the "collector" below shipped as **PfG Companion** and is
+called Companion in `CONTEXT.md` and in the code, since collector is also a player class
+in the game. "Sync" keeps its meaning here; an edit reaching a profile is a write-back.
+
 ## Context
 
 Every calculator asks for the same account data again: player class, research levels,
