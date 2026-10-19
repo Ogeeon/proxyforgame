@@ -15,6 +15,8 @@ release section; it is the source of truth for the other eleven translations.
 
 ## [Unreleased]
 
+## [2026-10-19] - site entry 68
+
 ### Added
 
 - Production: player profiles. A selector in the top bar holds one profile per OGame account - several accounts in one universe included - and the production calculator reads its account data and planets from the active one and writes edits back to it. A profile is filled by importing the account data the Origin Exporter userscript - by the author of Antigame Reborn - copies out of the game (all planets and moons, researches, officers, classes and the life-form bonuses as the game totals them), or entered by hand. Each value keeps the imported game value and a hand-entered override apart: a field that differs from the game is marked and restores with one click, a list of every difference restores the ticked ones at once, and a re-import replaces the game values and clears only the overrides it brings a value for, so production percentages and exchange rates survive it. The economy speed comes from the profile's universe, and a speed picked by hand is kept until it is restored. The one-planet tab picks one of the profile's planets, "no profile" brings back the calculator's own settings unchanged, and the active profile is kept per browser tab. Profiles live in the browser only, so the manage dialog downloads and restores a backup file; the old production and flight saved sets are offered for conversion once and kept as they were. The design is ADR-0004. <!-- site -->
@@ -54,6 +56,8 @@ release section; it is the source of truth for the other eleven translations.
 - Tooling: `scripts/new-calculator.js` no longer fails to sync the new calculator's translations when run from outside the repository root; it starts its helper scripts with the running node binary instead of looking `node` up on `PATH` through a shell.
 - Flight: deleting a saved profile whose name contains a quote no longer fails; the entry is removed like any other. A name carrying a quote - an export pasted into the name field, say - broke the option lookup, which passed the stored key into a CSS selector.
 - Sidebar: the wiring that runs on `DOMContentLoaded` returns when the Bootstrap bundle is missing, instead of throwing a `ReferenceError` out of the handler. The bundle is served from our own origin, so this only covers a request that failed; nothing in the handler works without the bundle anyway, so the step only keeps the failure off Hawk. The click handler above it already carried the same guard.
+
+> **RU:** Во всех калькуляторах появились профили игрока. Профиль хранит данные аккаунта OGame — планеты и луны, исследования, офицеров, классы, бонусы форм жизни — и заполняется импортом из скрипта Origin Exporter или вручную. Калькуляторы берут из него нужные значения и уровни выбранной планеты; изменённое поле помечается и одним щелчком возвращается к игровому значению. Профили хранятся в браузере, их можно сохранить в файл и восстановить.<br>Терраформер: добавлено снижение стоимости от Терраформера форм жизни. Луны: доля обороны в обломках задаётся отдельно. Гравитон и Терраформер: бонус офицеров — флажок на каждого. Стоимость: у сети исследований свой флажок.
 
 ## [2026-10-13] - site entry 67
 
