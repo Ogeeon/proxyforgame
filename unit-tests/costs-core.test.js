@@ -377,3 +377,49 @@ describe('Calculator.calculate - a research time measured in the game', () => {
         expect(result.time).toBe(140);
     });
 });
+
+// The game counts points from the full cost: a life form cost reduction lowers what
+// the player pays, not what the build or research awards.
+describe('Calculator.calculate - points ignore life form cost reductions', () => {
+    const LASER_TECH = 120;
+    const METAL_MINE = 1;
+    // [metal, crystal, deuterium, cost growth factor], as costs.tpl emits it
+    const costs = { [LASER_TECH]: [200, 100, 0, 2], [METAL_MINE]: [60, 15, 0, 1.5] };
+    const calc = new Calculator(costs, { [LASER_TECH]: 1 });
+
+    const paramsWith = (overrides) => Object.assign(new GlobalParams(), {
+        useDirectLabLevel: true,
+        researchLabLevel: 10,
+        labChoice: -1,
+    }, overrides);
+
+    it('keeps the points of a research under a 50% life form research reduction', () => {
+        const request = new BuildRequest(LASER_TECH, 0, 10);
+        const full = calc.calculate(request, paramsWith({}));
+        const reduced = calc.calculate(request, paramsWith({ lfResCostRdcMap: { [LASER_TECH]: 50 } }));
+
+        expect(full.metal).toBe(204600);
+        expect(reduced.metal).toBe(102300);
+        expect(reduced.crystal).toBe(51150);
+        expect(full.points).toBe(306);
+        expect(reduced.points).toBe(306);
+    });
+
+    it('keeps the points of a mine under a 50% Mineral Research Centre reduction', () => {
+        const request = new BuildRequest(METAL_MINE, 0, 20);
+        const full = calc.calculate(request, paramsWith({}));
+        const reduced = calc.calculate(request, paramsWith({ mineralResCntrLvl: 100 }));
+
+        expect(full.metal).toBe(398901);
+        expect(reduced.metal).toBe(199450);
+        expect(full.points).toBe(498);
+        expect(reduced.points).toBe(498);
+    });
+
+    it('still scales the unreduced points with the quantity', () => {
+        const request = new BuildRequest(LASER_TECH, 0, 10, false, 2);
+        const reduced = calc.calculate(request, paramsWith({ lfResCostRdcMap: { [LASER_TECH]: 50 } }));
+
+        expect(reduced.points).toBe(612);
+    });
+});

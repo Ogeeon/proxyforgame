@@ -316,7 +316,8 @@
       "msg-texts_equal": "The content of field [Corrected text] is identical to the content of field [Misspelled text]. Please specify your version of the misspelled text.",
       "msg-wrong_empty": "The field [Misspelled text] is empty. Please specify the misspelled text.",
       "msg-right_empty": "The field [Corrected text] is empty. Please specify your version of the misspelled text.",
-      "msg-mail_failed": "The report could not be sent. Please try again later."
+      "msg-mail_failed": "The report could not be sent. Please try again later.",
+      "msg-rate_limited": "Too many reports have been sent from your address recently. Please try again later."
     },
     "emailStrings": {
       "title": "Sending an e-mail",
@@ -330,7 +331,8 @@
       "msg-sent": "Your message has been sent. Thank you.",
       "msg-request_error": "Error in request. Please try again later.",
       "msg-nothing_to_send": "There is nothing to send... Please fill in at least one on the fields [Subject] or [Message body].",
-      "msg-mail_failed": "The message could not be sent. Please try again later."
+      "msg-mail_failed": "The message could not be sent. Please try again later.",
+      "msg-rate_limited": "Too many messages have been sent from your address recently. Please try again later."
     },
     "donateStrings": {
       "header": "Support this project",
@@ -392,11 +394,13 @@
     "msg-cant-research": "At the given level of Research laboratory research \"{0}\" is unavailable.",
     "msg-lab-level-raised": "Research laboratory level raised to {0} — that is what research \"{1}\" requires.",
     "mineral-res-cntr-lvl": "Mineral Research Centre",
-    "disclaimer-robot-nanite": "Please take into account the note in the first row of the table when reading build times. If you are building a Robotics factory or a Nanite factory, use the <a href=\"{0}\">Construction queue calculator</a> for accurate build time calculations.",
+    "lf-terraformer-rdc": "Terraformer cost/build time reduction",
+    "disclaimer-robot-nanite": "When reading build times, please take into account the hint {1} in the first cell of the Robotics factory and Nanite factory rows. If you are building a Robotics factory or a Nanite factory, use the <a href=\"{0}\">Construction queue calculator</a> for accurate build time calculations.",
     "disclaimer-title": "Please note",
     "discoverer-class-bonus": "Discoverer class bonus",
     "discoverer-class-bonus-hint": "Enter the 'Total' value from the OGame table of life form bonuses to the class bonuses, row 'Discoverer'. Applies only if the 'Discoverer' class is selected on the 'Common' tab.",
-    "research-speed-hint": "The research speed is the economy speed multiplied by the universe's research factor, e.g. 5 × 3 = 15. Picking the universe above fills in both speeds."
+    "research-speed-hint": "The research speed is the economy speed multiplied by the universe's research factor, e.g. 5 × 3 = 15. Picking the universe above fills in both speeds.",
+    "description": "Calculate the cost and build time of buildings, research, ships, and defenses in OGame, including universe speed and bonuses."
   },
   "lfcosts": {
     "title": "OGame - Costs calculator for LifeForms",
@@ -520,7 +524,8 @@
     "ovrc-battleship": "Overclocking (Battleship)",
     "psy-sh-matrix": "Psionic Shield Matrix",
     "kaelesh-disc-enh": "Kaelesh Discoverer Enhancement",
-    "energy-cost-to-build": "Energy required for construction"
+    "energy-cost-to-build": "Energy required for construction",
+    "description": "Calculate the cost and build time of Lifeform buildings and research in OGame, including race and technology bonuses."
   },
   "flight": {
     "flight-time-format": "99 H:s:s",
@@ -639,13 +644,15 @@
     "sr-profile-hdr": "Import the spy report",
     "sr-profile-text": "A profile is active. The report carries the spied player’s research, class and bonuses, and they must not overwrite your profile. How should it be imported?",
     "sr-profile-none": "Switch to “No profile” and import",
-    "sr-profile-new": "Create a new profile for the report"
+    "sr-profile-new": "Create a new profile for the report",
+    "description": "Calculate fleet flight time, deuterium consumption, and the best departure time in OGame, based on universe speed, ships, and flight mode."
   },
   "graviton": {
     "title": "OGame - Graviton calculator",
     "recycling": "Dismantling SS debris",
     "graviton-level": "Graviton level",
-    "keywords": "proxyforgame,ogame,graviton calculator,graviton technology,gravitation technology,solar satellites,energy for graviton,deathstar research"
+    "keywords": "proxyforgame,ogame,graviton calculator,graviton technology,gravitation technology,solar satellites,energy for graviton,deathstar research",
+    "description": "Find how many Solar Satellites and how much energy you need to research Graviton Technology in OGame, based on your planet settings."
   },
   "moon": {
     "title": "OGame - Moons calculator",
@@ -676,7 +683,8 @@
     "own-system": "Your system",
     "phalanx-lvl-required": "Required level",
     "phalanx-range-bonus": "Phalanx range bonus",
-    "class-bonus": "Class bonus"
+    "class-bonus": "Class bonus",
+    "description": "Calculate your chance of finding a moon, the outcome of a moon destruction attempt, and Sensor Phalanx range in OGame."
   },
   "production": {
     "param-tab-general": "General",
@@ -758,7 +766,8 @@
     "incl-explain": "If you increase the level of the mines, energy consumption will increase. The calculator can take this change into account and include in the calculation the costs of building Solar Satellites, which will give the necessary energy. The calculation is done on a building-by-building basis. Should we take these costs into account?",
     "incl-yes": "Yes",
     "incl-no": "No",
-    "lifeform-tech": "Lifeform Tech Bonus"
+    "lifeform-tech": "Lifeform Tech Bonus",
+    "description": "Calculate metal, crystal, and deuterium production, energy use, and mine upgrade payback for one planet or your entire OGame empire."
   },
   "queue": {
     "start-time": "Start",
@@ -774,7 +783,8 @@
     "next-level": "Next lvl",
     "title": "OGame - Construction queue",
     "keywords": "proxyforgame,ogame,construction queue,build queue,build order,building time,queue calculator,buildings costs",
-    "clear": "Clear"
+    "clear": "Clear",
+    "description": "Compare the cost and time of building upgrades in sequence on an OGame planet or moon, including factory levels and universe speed."
   },
   "terraformer": {
     "title": "OGame - Terraformer calculator",
@@ -783,7 +793,8 @@
     "single-level": "One level",
     "added-fields": "Fields to be added",
     "satellites": "Solar satellites",
-    "keywords": "proxyforgame,ogame,terraformer calculator,terraformer,planet fields,solar satellites,energy requirement,nanite factory"
+    "keywords": "proxyforgame,ogame,terraformer calculator,terraformer,planet fields,solar satellites,energy requirement,nanite factory",
+    "description": "Calculate the energy, resources, and time needed to terraform an OGame planet, including Solar Satellites and bonuses."
   },
   "expeditions": {
     "keywords": "proxyforgame,ogame,expedition calculator,expeditions,expedition resources,expedition ships,dark matter,expedition finds",
@@ -847,7 +858,8 @@
     "class-bonus-discoverer": "Discoverer class bonus",
     "resources-discovery-booster": "Resources discovery booster",
     "dark-matter-discovery-bonus": "Dark Matter discovery bonus",
-    "large-cargo-abbrev": "LC"
+    "large-cargo-abbrev": "LC",
+    "description": "Estimate the resources, ships, and Dark Matter you may find on OGame expeditions and compare expected returns for different fleets."
   },
   "trade": {
     "met": "met",
@@ -863,6 +875,7 @@
     "link": "Link",
     "text": "Text",
     "and": "and",
-    "keywords": "proxyforgame,ogame,trade calculator,resource exchange,trade ratio,metal crystal deuterium,merchant,resource trade"
+    "keywords": "proxyforgame,ogame,trade calculator,resource exchange,trade ratio,metal crystal deuterium,merchant,resource trade",
+    "description": "Compare metal, crystal, and deuterium trades in OGame and see how much you receive at a given exchange rate."
   }
 }

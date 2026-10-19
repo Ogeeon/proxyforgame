@@ -1987,11 +1987,18 @@ class FlightOrchestrator {
 
     _removeStorageOption(selectId, key) {
         localStorage.removeItem(key);
-        const option = document.querySelector(`#${selectId} option[value="${key}"]`);
+        const select = selectEl(`#${selectId}`);
+        // The key is the stored profile name, so it is whatever the user typed:
+        // it can carry quotes, brackets or a whole export pasted into the name
+        // field. Interpolating that into `option[value="${key}"]` produced an
+        // invalid selector and threw (Hawk: "Failed to execute 'querySelector'
+        // on 'Document'"), leaving the option behind. Compare the values, the
+        // way the production calculator already does.
+        const option = [...select.options].find((opt) => opt.value === key);
         if (option) {
             option.remove();
         }
-        selectEl(`#${selectId}`).value = '0';
+        select.value = '0';
     }
 
     _populateStorageSelects() {

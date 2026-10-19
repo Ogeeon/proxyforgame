@@ -12,6 +12,7 @@
     "../www/ogame/calc/js/trade-core.js",
     "../www/ogame/calc/js/trade.js",
     "../www/ogame/calc/js/trade-profile.js",
+    "../www/js/bootstrap-tooltip-guard.js",
     "../www/js/sidebar_bs.js",
     "../www/ogame/calc/js/globals.d.ts"
   ]

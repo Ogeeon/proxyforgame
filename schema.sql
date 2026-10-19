@@ -1153,6 +1153,18 @@ CREATE TABLE population_data (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
+-- Table structure for table `mail_rate_limit`
+--
+-- Written by the report and email services (www/api/antispam.inc.php).
+--
+CREATE TABLE IF NOT EXISTS mail_rate_limit (
+    id          INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    ip_hash     CHAR(64) NOT NULL,
+    created_at  DATETIME NOT NULL,
+    KEY ip_time (ip_hash, created_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+--
 -- Table structure for table `schema_migrations`
 --
 -- Written by deploy/pfg-migrate; see db/migrations/README.md. Kept in this
@@ -1165,7 +1177,8 @@ CREATE TABLE IF NOT EXISTS schema_migrations (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 INSERT INTO schema_migrations (version, filename) VALUES
-    (1, '0001_create_schema_migrations.sql')
+    (1, '0001_create_schema_migrations.sql'),
+    (2, '0002_create_mail_rate_limit.sql')
 ON DUPLICATE KEY UPDATE filename = VALUES(filename);
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

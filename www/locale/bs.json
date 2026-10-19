@@ -316,7 +316,8 @@
       "msg-texts_equal": "Sadrzaj polja [Ispravljen tekst] je identican kao onom u polju [Netacan tekst]. Molimo unesite vasu verziju netacnog teksta.",
       "msg-wrong_empty": "Polje [Netacan tekst] je prazno. Molimo unesite sadrzaj u polje netacan tekst.",
       "msg-right_empty": "Polje [Ispravljen tekst] je prazno. Molimo unesite sadrzaj u polje ispravljen tekst.",
-      "msg-mail_failed": "Prijava nije mogla biti poslana. Pokušajte ponovo kasnije."
+      "msg-mail_failed": "Prijava nije mogla biti poslana. Pokušajte ponovo kasnije.",
+      "msg-rate_limited": "S vaše adrese je nedavno poslano previše prijava. Pokušajte ponovo kasnije."
     },
     "emailStrings": {
       "title": "Slanje e-maila",
@@ -330,7 +331,8 @@
       "msg-sent": "Vaša poruka je poslana. Hvala!",
       "msg-request_error": "Greška u zahtjevu. Pokušajte ponovo kasnije.",
       "msg-nothing_to_send": "There is nothing to send... Please fill in at least one on the fields [Subject] or [Message body].",
-      "msg-mail_failed": "Poruka nije mogla biti poslana. Pokušajte ponovo kasnije."
+      "msg-mail_failed": "Poruka nije mogla biti poslana. Pokušajte ponovo kasnije.",
+      "msg-rate_limited": "S vaše adrese je nedavno poslano previše poruka. Pokušajte ponovo kasnije."
     },
     "donateStrings": {
       "header": "Podržite ovaj projekat",
@@ -392,11 +394,13 @@
     "msg-cant-research": "Na datom levelu Centra za istraživanje, istraživanje \"{0}\" nije dostupno.",
     "msg-lab-level-raised": "Nivo Centra za istraživanje podignut na {0} — to zahtijeva istraživanje \"{1}\".",
     "mineral-res-cntr-lvl": "Mineral Research Centre",
-    "disclaimer-robot-nanite": "Molimo uzmite u obzir napomenu u prvom redu tablice pri čitanju vremena gradnje. Ako gradite Tvornicu robota ili Tvornicu nanita, koristite <a href=\"{0}\">Kalkulator reda izgradnje</a> za točan izračun vremena gradnje.",
+    "lf-terraformer-rdc": "Smanjenje troškova terraformera",
+    "disclaimer-robot-nanite": "Molimo uzmite u obzir savjet {1} u prvoj ćeliji redova Tvornica robota i Tvornica nanita pri čitanju vremena gradnje. Ako gradite Tvornicu robota ili Tvornicu nanita, koristite <a href=\"{0}\">Kalkulator reda izgradnje</a> za točan izračun vremena gradnje.",
     "disclaimer-title": "Napomena",
     "discoverer-class-bonus": "Bonus klase Otkrivač",
     "discoverer-class-bonus-hint": "Unesite vrijednost 'Ukupno' iz OGame tabele bonusa oblika života na bonuse klasa, red 'Otkrivač'. Primjenjuje se samo ako je na kartici 'Opšte' odabrana klasa 'Otkrivač'.",
-    "research-speed-hint": "Brzina istraživanja jednaka je ekonomskoj brzini pomnoženoj s faktorom istraživanja univerzuma, npr. 5 × 3 = 15. Odabirom univerzuma iznad obje brzine se popunjavaju automatski."
+    "research-speed-hint": "Brzina istraživanja jednaka je ekonomskoj brzini pomnoženoj s faktorom istraživanja univerzuma, npr. 5 × 3 = 15. Odabirom univerzuma iznad obje brzine se popunjavaju automatski.",
+    "description": "Izračunajte cijenu i vrijeme izgradnje zgrada, istraživanja, brodova i odbrane u OGameu, uz brzinu univerzuma i bonuse."
   },
   "lfcosts": {
     "title": "Ogame - kalkulator troškova (Lifeforms)",
@@ -520,7 +524,8 @@
     "ovrc-battleship": "Overclocking (Battleship)",
     "psy-sh-matrix": "Psionic Shield Matrix",
     "kaelesh-disc-enh": "Kaelesh Discoverer Enhancement",
-    "energy-cost-to-build": "Energija potrebna za izgradnju"
+    "energy-cost-to-build": "Energija potrebna za izgradnju",
+    "description": "Izračunajte cijenu i vrijeme izgradnje zgrada i istraživanja oblika života u OGameu, uključujući bonuse rasa i tehnologija."
   },
   "flight": {
     "flight-time-format": "99 H:s:s",
@@ -639,13 +644,15 @@
     "sr-profile-hdr": "Uvoz špijunskog izvještaja",
     "sr-profile-text": "Aktivan je profil. Izvještaj sadrži istraživanja, klasu i bonuse špijuniranog igrača, a oni ne smiju prepisati vaš profil. Kako ga uvesti?",
     "sr-profile-none": "Prebaci na „Bez profila“ i uvezi",
-    "sr-profile-new": "Napravi novi profil za izvještaj"
+    "sr-profile-new": "Napravi novi profil za izvještaj",
+    "description": "Izračunajte vrijeme leta, potrošnju deuterija i najbolje vrijeme polaska flote u OGameu prema brzini univerzuma, brodovima i režimu leta."
   },
   "graviton": {
     "title": "Ogame - Kalkulator gravitona",
     "recycling": "Demontaža solarnih satelita (Ruševina)",
     "graviton-level": "Nivo Gravitona",
-    "keywords": "proxyforgame,ogame,kalkulator gravitona,graviton tehnologija,gravitaciona tehnologija,solarni sateliti,energija za graviton,zvijezda smrti"
+    "keywords": "proxyforgame,ogame,kalkulator gravitona,graviton tehnologija,gravitaciona tehnologija,solarni sateliti,energija za graviton,zvijezda smrti",
+    "description": "Saznajte koliko solarnih satelita i energije treba za istraživanje gravitona u OGameu prema postavkama planete."
   },
   "moon": {
     "title": "OGame - Moons calculator",
@@ -676,7 +683,8 @@
     "own-system": "Vaš sistem",
     "phalanx-lvl-required": "Potreban nivo",
     "phalanx-range-bonus": "Bonus na domet falange",
-    "class-bonus": "Bonus klase"
+    "class-bonus": "Bonus klase",
+    "description": "Izračunajte šansu za pronalazak mjeseca, ishod pokušaja uništenja mjeseca i domet senzorske falange u OGameu."
   },
   "production": {
     "param-tab-general": "Opšte",
@@ -758,7 +766,8 @@
     "incl-explain": "Ako povečate level rudnika, utrošak energije će se takođe povećati. Kalkulator ovo može uračunati i izračunati troškove izgradnje solarnih satelita, koji su potrebni za dovoljno energije. Kalkulacija se vrši na zgrada po zgrada osnovi. Da li želite da uzmemo u obzir te troškove i da vam izračunamo potrebne solarne satelite?",
     "incl-yes": "Da",
     "incl-no": "Ne",
-    "lifeform-tech": "Bonus tehnologije oblika života"
+    "lifeform-tech": "Bonus tehnologije oblika života",
+    "description": "Izračunajte proizvodnju metala, kristala i deuterija, potrošnju energije i isplativost nadogradnje rudnika na jednoj planeti ili u cijelom carstvu OGamea."
   },
   "queue": {
     "start-time": "Početak",
@@ -774,7 +783,8 @@
     "next-level": "Slijedeći level",
     "title": "Ogame - red izgradnje",
     "keywords": "proxyforgame,ogame,red gradnje,redoslijed gradnje,vrijeme gradnje,kalkulator reda gradnje,troškovi zgrada",
-    "clear": "Očisti"
+    "clear": "Očisti",
+    "description": "Uporedite cijenu i vrijeme uzastopnih nadogradnji zgrada na planeti ili mjesecu u OGameu uz nivoe fabrika i brzinu univerzuma."
   },
   "terraformer": {
     "title": "OGame - Kalkulator terraformera",
@@ -783,7 +793,8 @@
     "single-level": "Jedan level",
     "added-fields": "Polja koja će biti dodana",
     "satellites": "Solarni satelit",
-    "keywords": "proxyforgame,ogame,kalkulator terraformera,terraformer,polja planete,solarni sateliti,potrebna energija,tvornica nanita"
+    "keywords": "proxyforgame,ogame,kalkulator terraformera,terraformer,polja planete,solarni sateliti,potrebna energija,tvornica nanita",
+    "description": "Izračunajte energiju, resurse i vrijeme potrebne za teraformiranje planete u OGameu, uključujući solarne satelite i bonuse."
   },
   "expeditions": {
     "keywords": "proxyforgame,ogame,kalkulator ekspedicija,ekspedicije,resursi sa ekspedicija,flota za ekspedicije,tamna materija,nalazi sa ekspedicija",
@@ -847,7 +858,8 @@
     "class-bonus-discoverer": "Bonus klase \"Istraživač\"",
     "resources-discovery-booster": "Pojačivač otkrića resursa",
     "dark-matter-discovery-bonus": "Bonus otkrića Tamne materije",
-    "large-cargo-abbrev": "VT"
+    "large-cargo-abbrev": "VT",
+    "description": "Procijenite resurse, brodove i tamnu materiju koje možete pronaći u OGame ekspedicijama i uporedite očekivanu korist različitih flota."
   },
   "trade": {
     "met": "met",
@@ -863,6 +875,7 @@
     "link": "Link",
     "text": "Text",
     "and": "and",
-    "keywords": "proxyforgame,ogame,kalkulator trgovine,razmjena resursa,odnos razmjene,metal kristal deuterij,trgovac"
+    "keywords": "proxyforgame,ogame,kalkulator trgovine,razmjena resursa,odnos razmjene,metal kristal deuterij,trgovac",
+    "description": "Uporedite razmjenu metala, kristala i deuterija u OGameu i izračunajte količinu resursa prema zadatom kursu."
   }
 }

@@ -16,6 +16,7 @@
     "../www/ogame/calc/js/production-renderer.js",
     "../www/ogame/calc/js/production-orchestration.js",
     "../www/ogame/calc/js/production-profile.js",
+    "../www/js/bootstrap-tooltip-guard.js",
     "../www/js/sidebar_bs.js",
     "../www/ogame/calc/js/globals.d.ts",
     "../www/ogame/calc/js/options-global.d.ts"

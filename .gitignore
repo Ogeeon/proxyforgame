@@ -22,6 +22,7 @@ setup-statusline.ps1
 /run_tests.bat
 /docs/vps-deploy-notes.md
 .env
+.hawk/
 feature-description.txt 
 /feedback/
 .hawk

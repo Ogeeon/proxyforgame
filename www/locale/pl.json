@@ -316,7 +316,8 @@
       "msg-texts_equal": "Zawartosc pola [Poprawny tekst] nie rozni sie od pola [Bledny tekst]. Prosimy o podanie poprawnej pisowni.",
       "msg-wrong_empty": "Nie wypelniono pola [Bledny tekst]. Prosze podac bledny tekst.",
       "msg-right_empty": "Nie wypelniono pola [Poprawny tekst]. Prosimy o podanie poprawnej pisowni.",
-      "msg-mail_failed": "Nie udało się wysłać zgłoszenia. Spróbuj ponownie później."
+      "msg-mail_failed": "Nie udało się wysłać zgłoszenia. Spróbuj ponownie później.",
+      "msg-rate_limited": "Z Twojego adresu wysłano ostatnio zbyt wiele zgłoszeń. Spróbuj ponownie później."
     },
     "emailStrings": {
       "title": "Wyslij wiadomosc",
@@ -330,7 +331,8 @@
       "msg-sent": "Twoja wiadomosc zostala wyslana. Dziekujemy.",
       "msg-request_error": "Błąd żądania. Spróbuj ponownie później.",
       "msg-nothing_to_send": "Wiadomosc jest pusta... Prosze wypelnic przynajmniej jedno z pol [Temat] lub [Tresc].",
-      "msg-mail_failed": "Nie udało się wysłać wiadomości. Spróbuj ponownie później."
+      "msg-mail_failed": "Nie udało się wysłać wiadomości. Spróbuj ponownie później.",
+      "msg-rate_limited": "Z Twojego adresu wysłano ostatnio zbyt wiele wiadomości. Spróbuj ponownie później."
     },
     "donateStrings": {
       "header": "Wesprzyj ten projekt",
@@ -392,11 +394,13 @@
     "msg-cant-research": "Na tym poziomie Laboratorium badawczego badanie \"{0}\" jest niemozliwe.",
     "msg-lab-level-raised": "Poziom Laboratorium badawczego podniesiony do {0} — tego wymaga badanie \"{1}\".",
     "mineral-res-cntr-lvl": "Centrum Badań Minerałów",
-    "disclaimer-robot-nanite": "Przy odczytywaniu czasów budowy uwzględnij uwagę w pierwszym wierszu tabeli. Jeśli budujesz Fabrykę robotów lub Fabrykę nanitów, użyj <a href=\"{0}\">Kalkulatora kolejki budynków</a>, aby dokładnie obliczyć czas budowy.",
+    "lf-terraformer-rdc": "Redukcja kosztów terraformera",
+    "disclaimer-robot-nanite": "Przy odczytywaniu czasów budowy uwzględnij podpowiedź {1} w pierwszej komórce wierszy Fabryka robotów i Fabryka nanitów. Jeśli budujesz Fabrykę robotów lub Fabrykę nanitów, użyj <a href=\"{0}\">Kalkulatora kolejki budynków</a>, aby dokładnie obliczyć czas budowy.",
     "disclaimer-title": "Uwaga",
     "discoverer-class-bonus": "Bonus klasy Odkrywca",
     "discoverer-class-bonus-hint": "Wpisz wartość 'Łącznie' z tabeli OGame z premiami form życia do premii klas, wiersz 'Odkrywca'. Stosowany tylko wtedy, gdy na karcie 'Ogólne' wybrano klasę 'Odkrywca'.",
-    "research-speed-hint": "Prędkość badawcza to prędkość ekonomiczna pomnożona przez współczynnik badań uniwersum, np. 5 × 3 = 15. Wybranie uniwersum powyżej wypełnia obie prędkości automatycznie."
+    "research-speed-hint": "Prędkość badawcza to prędkość ekonomiczna pomnożona przez współczynnik badań uniwersum, np. 5 × 3 = 15. Wybranie uniwersum powyżej wypełnia obie prędkości automatycznie.",
+    "description": "Oblicz koszt i czas budowy budynków, badań, statków i obrony w OGame z uwzględnieniem prędkości uniwersum i bonusów."
   },
   "lfcosts": {
     "title": "OGame - Kalkulator kosztow dla form życia",
@@ -520,7 +524,8 @@
     "ovrc-battleship": "Przetaktowanie (Okręt Wojenny)",
     "psy-sh-matrix": "Psioniczna Matryca Ochronna",
     "kaelesh-disc-enh": "Wzmocnienie Odkrywcy Kaeleshów",
-    "energy-cost-to-build": "Energia wymagana do budowy"
+    "energy-cost-to-build": "Energia wymagana do budowy",
+    "description": "Oblicz koszt i czas budowy budynków oraz badań form życia w OGame, uwzględniając bonusy ras i technologii."
   },
   "flight": {
     "flight-time-format": "99 H:s:s",
@@ -639,13 +644,15 @@
     "sr-profile-hdr": "Import raportu szpiegowskiego",
     "sr-profile-text": "Aktywny jest profil. Raport zawiera badania, klasę i bonusy szpiegowanego gracza, które nie mogą nadpisać twojego profilu. Jak go zaimportować?",
     "sr-profile-none": "Przełącz na „Bez profilu” i importuj",
-    "sr-profile-new": "Utwórz nowy profil dla raportu"
+    "sr-profile-new": "Utwórz nowy profil dla raportu",
+    "description": "Oblicz czas lotu, zużycie deuteru i najlepszą godzinę startu floty w OGame na podstawie prędkości uniwersum, statków i trybu lotu."
   },
   "graviton": {
     "title": "OGame - Kalkulator Rozwoju grawitonow",
     "graviton-level": "Poziom Grawitona",
     "recycling": "Zbieranie odpadków",
-    "keywords": "proxyforgame,ogame,kalkulator grawitonu,technologia grawitonowa,technologia grawitacyjna,satelity słoneczne,energia na grawiton,gwiazda śmierci"
+    "keywords": "proxyforgame,ogame,kalkulator grawitonu,technologia grawitonowa,technologia grawitacyjna,satelity słoneczne,energia na grawiton,gwiazda śmierci",
+    "description": "Sprawdź, ile satelitów słonecznych i energii potrzeba do badań nad grawitonami w OGame przy podanych ustawieniach planety."
   },
   "moon": {
     "title": "OGame - Kalkulatory dla Księżyce",
@@ -676,7 +683,8 @@
     "own-system": "Twój system",
     "phalanx-lvl-required": "Wymagany poziom",
     "phalanx-range-bonus": "Premia do zasięgu falangi",
-    "class-bonus": "Premia klasy"
+    "class-bonus": "Premia klasy",
+    "description": "Oblicz szansę na powstanie księżyca, wynik próby jego zniszczenia oraz zasięg fali sensorowej w OGame."
   },
   "production": {
     "param-tab-general": "Ogólne",
@@ -758,7 +766,8 @@
     "incl-explain": "Jeśli zwiększysz poziom obciążenia kopalni, zużycie energii wzrośnie. Kalkulator może wziąć tę zmianę pod uwagę i uwzględnić w obliczeńiach koszty budowy satelitów słonecznych, które dostarczą potrzebnej energii. Kalkulacja jest przeprowadzana dla każdego budynku z osobna. Czy powinniśmy wziąć te koszty pod uwagę?",
     "incl-yes": "Tak",
     "incl-no": "Nie",
-    "lifeform-tech": "Premia technologii form życia"
+    "lifeform-tech": "Premia technologii form życia",
+    "description": "Oblicz produkcję metalu, kryształu i deuteru, zużycie energii oraz zwrot z rozbudowy kopalń na jednej planecie lub w całym imperium OGame."
   },
   "queue": {
     "start-time": "Początek",
@@ -774,7 +783,8 @@
     "next-level": "Następny poz.",
     "title": "OGame - Kolejka budynków",
     "keywords": "proxyforgame,ogame,kolejka budowy,kolejność budowy,czas budowy,kalkulator kolejki,koszty budynków",
-    "clear": "Usunąć"
+    "clear": "Usunąć",
+    "description": "Porównaj koszt i czas kolejnych ulepszeń budynków na planecie lub księżycu w OGame, uwzględniając poziomy fabryk i prędkość uniwersum."
   },
   "terraformer": {
     "title": "OGame - Kalkulator Terraformeru",
@@ -783,7 +793,8 @@
     "single-level": "Jeden poziom",
     "added-fields": "Pola do dodania",
     "satellites": "Satelity słoneczne",
-    "keywords": "proxyforgame,ogame,kalkulator terraformera,terraformer,pola planety,satelity słoneczne,zapotrzebowanie na energię,fabryka nanitów"
+    "keywords": "proxyforgame,ogame,kalkulator terraformera,terraformer,pola planety,satelity słoneczne,zapotrzebowanie na energię,fabryka nanitów",
+    "description": "Oblicz energię, zasoby i czas potrzebne do terraformowania planety w OGame, w tym satelity słoneczne i bonusy."
   },
   "expeditions": {
     "keywords": "proxyforgame,ogame,kalkulator ekspedycji,ekspedycje,surowce z ekspedycji,flota na ekspedycje,ciemna materia,znaleziska z ekspedycji",
@@ -847,7 +858,8 @@
     "class-bonus-discoverer": "Bonus klasy \"Odkrywca\"",
     "resources-discovery-booster": "Wzmocnienie odkrywania zasobów",
     "dark-matter-discovery-bonus": "Bonus do odkrycia Ciemnej Materii",
-    "large-cargo-abbrev": "DT"
+    "large-cargo-abbrev": "DT",
+    "description": "Oszacuj możliwe znaleziska zasobów, statków i Ciemnej Materii podczas ekspedycji OGame oraz porównaj spodziewane zyski różnych flot."
   },
   "trade": {
     "met": "met",
@@ -863,6 +875,7 @@
     "link": "Link",
     "text": "Tekst",
     "and": "i",
-    "keywords": "proxyforgame,ogame,kalkulator handlu,wymiana surowców,kurs wymiany,metal kryształ deuter,kupiec"
+    "keywords": "proxyforgame,ogame,kalkulator handlu,wymiana surowców,kurs wymiany,metal kryształ deuter,kupiec",
+    "description": "Porównaj wymianę metalu, kryształu i deuteru w OGame oraz sprawdź ilość zasobów przy wybranym kursie."
   }
 }

@@ -283,9 +283,9 @@ function computeBaseEnergyProduction(prodParams, plnData, fullCrew, results, pro
 				allOfficers: fullCrew, playerClass: options.prm.playerClass,
 				isTrader: options.prm.isTrader
 			});
-			energy = energyArray[1];
+			energy = energyArray[PRODUCTION_ROW.BUILDING];
 			// write the base energy produced into the power plant's/satellite's row
-			results[i + 1][3] = energyArray[1];
+			results[i + 1][3] = energy;
 		}
 		totalEnergyProduced += energy;
 		// For the fusion reactor we need to show how much deuterium it consumes
@@ -388,13 +388,15 @@ function computeResourceProduction(prodParams, plnData, fullCrew, koeff, normali
 			isTrader: options.prm.isTrader, collectorClassBonusPct: collectorClassBonusPct()
 		});
 		// Save the resource production data
-		results[0][i] += prod[0];  // base production
-		production[i] += prod[0];
-		results[i + 1][i] += prod[1];  // production at the mine
-		production[i] += prod[1];
+		results[0][i] += prod[PRODUCTION_ROW.NATURAL];  // base production
+		production[i] += prod[PRODUCTION_ROW.NATURAL];
+		results[i + 1][i] += prod[PRODUCTION_ROW.BUILDING];  // production at the mine
+		production[i] += prod[PRODUCTION_ROW.BUILDING];
+		// Table rows 8-14 show the bonus rows PLASMA..ALLIANCE_CLASS in order
 		for (let line = 8; line < 15; line++) {
-			results[line][i] += prod[line - 6];
-			production[i] += prod[line - 6];
+			const bonus = prod[PRODUCTION_ROW.PLASMA + line - 8];
+			results[line][i] += bonus;
+			production[i] += bonus;
 		}
 	}
 }

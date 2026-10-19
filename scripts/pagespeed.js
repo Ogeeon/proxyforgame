@@ -139,10 +139,11 @@ function parseArgs(argv) {
   };
   for (let i = 0; i < argv.length; i++) {
     const arg = argv[i];
+    // Checked by index: argv is typed string[], so an element read past the
+    // end is not undefined as far as the types (and Sonar's S3403) can tell.
     const next = () => {
-      const value = argv[++i];
-      if (value === undefined) fail(`${arg} needs a value`);
-      return value;
+      if (i + 1 >= argv.length) fail(`${arg} needs a value`);
+      return argv[++i];
     };
     switch (arg) {
       case '--pages': {
@@ -252,7 +253,7 @@ async function runPagespeed(url, strategy, key) {
     if (!retryable || attempt === attempts) {
       throw new Error(`${strategy} ${url}: ${status || 'network'} ${message}`);
     }
-    await sleep(5000 * attempt);
+    await sleep(5000 * attempt); // NOSONAR(S9382) - retries back off one after another
   }
 }
 
@@ -283,7 +284,7 @@ async function pool(tasks, limit) {
   const worker = async () => {
     while (nextIndex < tasks.length) {
       const index = nextIndex++;
-      results[index] = await tasks[index]();
+      results[index] = await tasks[index](); // NOSONAR(S9382) - a pool worker runs its tasks in turn
     }
   };
   await Promise.all(Array.from({ length: Math.min(limit, tasks.length) }, worker));

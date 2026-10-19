@@ -30,9 +30,26 @@
  */
 
 /**
+ * Row indices of the array getProductionRateSplit returns. The production
+ * calculator's table shows PLASMA..ALLIANCE_CLASS as consecutive bonus rows, so
+ * a new row goes at the end, not in the middle.
+ */
+const PRODUCTION_ROW = Object.freeze({
+	NATURAL: 0, // natural production of metal and crystal, independent of the mine
+	BUILDING: 1, // the building's own output: mine, power plant or satellites
+	PLASMA: 2,
+	BOOSTER: 3,
+	GEOLOGIST: 4,
+	ENGINEER: 5,
+	ALL_OFFICERS: 6,
+	CLASS: 7,
+	ALLIANCE_CLASS: 8,
+});
+
+/**
  * Calculates the resource (units/hour) and energy production rate.
  * @param {ProductionParams} params
- * @returns Number of resource units or energy produced
+ * @returns {number} Number of resource units or energy produced
  */
 function getProductionRate(params) {
 	let prod;
@@ -41,12 +58,12 @@ function getProductionRate(params) {
 		case 2:
 		case 3:
 			prod = getProductionRateSplit(params);
-			return(prod[0] + prod[1] + prod[2] + prod[3] + prod[4] + prod[5] + prod[6] + prod[7] + prod[8]);
+			return prod.reduce((sum, row) => sum + row, 0);
 		case 4:
 		case 12:
 		case 212:
 			prod = getProductionRateSplit(params);
-			return(prod[1]); // powerFactor is accounted for, while the engineer, officers and class bonuses need to be applied to the sum of remaining energy
+			return(prod[PRODUCTION_ROW.BUILDING]); // powerFactor is accounted for, while the engineer, officers and class bonuses need to be applied to the sum of remaining energy
 		default: {
 			return(0);
 		}
@@ -56,7 +73,7 @@ function getProductionRate(params) {
 /**
  * Calculates the resource (units/hour) and energy production rate. When calculating metal and crystal mines, returns the natural production in row zero
  * @param {ProductionParams} params
- * @returns Number of resource units or energy produced
+ * @returns {number[]} Production broken down by source, indexed by PRODUCTION_ROW
  */
 function getProductionRateSplit(params) {
 	const {
@@ -73,7 +90,7 @@ function getProductionRateSplit(params) {
 	let allianceClassFactor = isTrader ? 0.05 : 0;
 	let positionFactor = 1;
 	let basePR;
-	const rows = [0, 0, 0, 0, 0, 0, 0, 0, 0]; // natural, mine, geologist, all officers, plasma, booster, class, alliance class
+	const rows = Object.values(PRODUCTION_ROW).map(() => 0);
 	switch (techID*1) {
 		case 1:
 			switch (pos*1) {
@@ -81,16 +98,16 @@ function getProductionRateSplit(params) {
 				case 7: case 9: positionFactor = 1.23; break;
 				case 8: positionFactor = 1.35; break;
 			}
-			rows[0] = Math.floor(30 * universeSpeedFactor * positionFactor);
+			rows[PRODUCTION_ROW.NATURAL] = Math.floor(30 * universeSpeedFactor * positionFactor);
 			basePR = 30.0 * techLevel * Math.pow(1.1, techLevel) * productionFactor * powerFactor * positionFactor;
-			rows[1] = Math.floor(basePR * universeSpeedFactor);
-			rows[2] = Math.round(basePR * 0.01 * plasmaTechLevel * universeSpeedFactor);
-			rows[3] = Math.round(basePR * boostFactor * universeSpeedFactor);
-			rows[4] = Math.round(basePR * geologistFactor * universeSpeedFactor);
-			rows[5] = 0; // this is the Engineer's slot in the table
-			rows[6] = Math.round(basePR * allStaffFactor * universeSpeedFactor);
-			rows[7] = Math.round(basePR * classFactor * universeSpeedFactor);
-			rows[8] = Math.round(basePR * allianceClassFactor * universeSpeedFactor);
+			rows[PRODUCTION_ROW.BUILDING] = Math.floor(basePR * universeSpeedFactor);
+			rows[PRODUCTION_ROW.PLASMA] = Math.round(basePR * 0.01 * plasmaTechLevel * universeSpeedFactor);
+			rows[PRODUCTION_ROW.BOOSTER] = Math.round(basePR * boostFactor * universeSpeedFactor);
+			rows[PRODUCTION_ROW.GEOLOGIST] = Math.round(basePR * geologistFactor * universeSpeedFactor);
+			rows[PRODUCTION_ROW.ENGINEER] = 0; // the Engineer only boosts energy
+			rows[PRODUCTION_ROW.ALL_OFFICERS] = Math.round(basePR * allStaffFactor * universeSpeedFactor);
+			rows[PRODUCTION_ROW.CLASS] = Math.round(basePR * classFactor * universeSpeedFactor);
+			rows[PRODUCTION_ROW.ALLIANCE_CLASS] = Math.round(basePR * allianceClassFactor * universeSpeedFactor);
 			break;
 		case 2:
 			switch (pos*1) {
@@ -98,40 +115,40 @@ function getProductionRateSplit(params) {
 				case 2: positionFactor = 1.296; break;
 				case 3: positionFactor = 1.2; break;
 			}
-			rows[0] = Math.floor(15 * universeSpeedFactor * positionFactor);
+			rows[PRODUCTION_ROW.NATURAL] = Math.floor(15 * universeSpeedFactor * positionFactor);
 			basePR = 20.0 * techLevel * Math.pow(1.1, techLevel) * productionFactor * powerFactor * positionFactor;
-			rows[1] = Math.floor(basePR * universeSpeedFactor);
-			rows[2] = Math.round(basePR * 0.0066 * plasmaTechLevel * universeSpeedFactor);
-			rows[3] = Math.round(basePR * boostFactor * universeSpeedFactor);
-			rows[4] = Math.round(basePR * geologistFactor * universeSpeedFactor);
-			rows[5] = 0; 
-			rows[6] = Math.round(basePR * allStaffFactor * universeSpeedFactor);
-			rows[7] = Math.round(basePR * classFactor * universeSpeedFactor);
-			rows[8] = Math.round(basePR * allianceClassFactor * universeSpeedFactor);
+			rows[PRODUCTION_ROW.BUILDING] = Math.floor(basePR * universeSpeedFactor);
+			rows[PRODUCTION_ROW.PLASMA] = Math.round(basePR * 0.0066 * plasmaTechLevel * universeSpeedFactor);
+			rows[PRODUCTION_ROW.BOOSTER] = Math.round(basePR * boostFactor * universeSpeedFactor);
+			rows[PRODUCTION_ROW.GEOLOGIST] = Math.round(basePR * geologistFactor * universeSpeedFactor);
+			rows[PRODUCTION_ROW.ENGINEER] = 0;
+			rows[PRODUCTION_ROW.ALL_OFFICERS] = Math.round(basePR * allStaffFactor * universeSpeedFactor);
+			rows[PRODUCTION_ROW.CLASS] = Math.round(basePR * classFactor * universeSpeedFactor);
+			rows[PRODUCTION_ROW.ALLIANCE_CLASS] = Math.round(basePR * allianceClassFactor * universeSpeedFactor);
 			break;
 		case 3:			
-			rows[0] = 0;
+			rows[PRODUCTION_ROW.NATURAL] = 0;
 			basePR = 10.0 * techLevel * Math.pow(1.1, techLevel) * (1.44 - 0.004 * maxTemp) * productionFactor * powerFactor;
-			rows[1] = Math.floor(basePR * universeSpeedFactor);
-			rows[2] = Math.round(basePR * 0.0033 * plasmaTechLevel * universeSpeedFactor);
-			rows[3] = Math.round(basePR * boostFactor * universeSpeedFactor);
-			rows[4] = Math.round(basePR * geologistFactor * universeSpeedFactor);
-			rows[5] = 0; 
-			rows[6] = Math.round(basePR * allStaffFactor * universeSpeedFactor);
-			rows[7] = Math.round(basePR * classFactor * universeSpeedFactor);
-			rows[8] = Math.round(basePR * allianceClassFactor * universeSpeedFactor);
+			rows[PRODUCTION_ROW.BUILDING] = Math.floor(basePR * universeSpeedFactor);
+			rows[PRODUCTION_ROW.PLASMA] = Math.round(basePR * 0.0033 * plasmaTechLevel * universeSpeedFactor);
+			rows[PRODUCTION_ROW.BOOSTER] = Math.round(basePR * boostFactor * universeSpeedFactor);
+			rows[PRODUCTION_ROW.GEOLOGIST] = Math.round(basePR * geologistFactor * universeSpeedFactor);
+			rows[PRODUCTION_ROW.ENGINEER] = 0;
+			rows[PRODUCTION_ROW.ALL_OFFICERS] = Math.round(basePR * allStaffFactor * universeSpeedFactor);
+			rows[PRODUCTION_ROW.CLASS] = Math.round(basePR * classFactor * universeSpeedFactor);
+			rows[PRODUCTION_ROW.ALLIANCE_CLASS] = Math.round(basePR * allianceClassFactor * universeSpeedFactor);
 			break;
 		case 4:
 			//productionRate = Math.floor(20.0 * techLevel * Math.pow(1.1, techLevel) * engineerFactor * powerFactor);
 			basePR = Math.floor(20.0 * techLevel * Math.pow(1.1, techLevel) * powerFactor);
-			rows[1] = Math.floor(basePR);
-			rows[5] = Math.round(basePR * engineerFactor);
+			rows[PRODUCTION_ROW.BUILDING] = Math.floor(basePR);
+			rows[PRODUCTION_ROW.ENGINEER] = Math.round(basePR * engineerFactor);
 			break;
 		case 12:
 			//productionRate = Math.floor(30.0 * techLevel * Math.pow((1.05 + energyTechLevel * 0.01), techLevel) * engineerFactor * powerFactor);
 			basePR = Math.floor(30.0 * techLevel * Math.pow((1.05 + energyTechLevel * 0.01), techLevel) * powerFactor);
-			rows[1] = Math.floor(basePR);
-			rows[5] = Math.round(basePR * engineerFactor);
+			rows[PRODUCTION_ROW.BUILDING] = Math.floor(basePR);
+			rows[PRODUCTION_ROW.ENGINEER] = Math.round(basePR * engineerFactor);
 			break;
 		case 212:
 			//productionRate = techLevel * Math.floor((maxTemp + 140) / 6) * engineerFactor * powerFactor;
@@ -140,7 +157,7 @@ function getProductionRateSplit(params) {
 			if (basePR < 0) {
 				basePR = 0;
 			}
-			rows[1] = Math.floor(basePR);
+			rows[PRODUCTION_ROW.BUILDING] = Math.floor(basePR);
 	}
 	return rows;
 }

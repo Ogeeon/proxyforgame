@@ -6,9 +6,11 @@
  * @param techID ID of the building
  * @param techLevel Resulting building level
  * @param techData technology data array in the format {id:[cost_met, cost_crys, cost_deut, cost_energy, grow_koeff]}
+ * @param ionTechLevel ion technology level
+ * @param bldCostRdc cost-reducing bonus from buildings, which the game applies to a demolition as well
  * @returns Cost of demolishing the building
  */
-function calcDeconstrCostLF(techID, techLevel, techData, ionTechLevel) {
+function calcDeconstrCostLF(techID, techLevel, techData, ionTechLevel, bldCostRdc=0) {
 	const cost = [0, 0, 0];
 	if (techLevel < 0) {
 		return cost;
@@ -18,8 +20,11 @@ function calcDeconstrCostLF(techID, techLevel, techData, ionTechLevel) {
 		return cost;
 	}
 	const data = techData[techID];
+	const factor = (1 - 0.04 * ionTechLevel) * (1 - Math.min(0.99, bldCostRdc));
+	// Unlike a build, a demolition floors the level's base cost before the reductions
+	// (see getDeconstrEnergyCostLF for the data point that tells the two apart).
 	for (let i = 0; i < 3; i++)
-		cost[i] = Math.floor(Math.floor(data[i] * techLevel * Math.pow(data[5 + i], techLevel - 1)) * (1 - 0.04 * ionTechLevel));
+		cost[i] = Math.floor(Math.floor(data[i] * techLevel * Math.pow(data[5 + i], techLevel - 1)) * factor);
 	return cost;
 }
 
@@ -39,8 +44,11 @@ function calcBuildCostLF(techID, techLevel, techData, costRdc) {
 		return [0, 0, 0];
 	const cost = [0, 0, 0];
 	costRdc = Math.min(0.99, costRdc);
+	// One floor over the reduced cost, as the game does: flooring the base cost
+	// first lost a unit whenever its fraction pushed the reduced cost over an
+	// integer (Meditation Enclave 58 at 8.5%: 15574805 metal, not 15574804).
 	for (let i = 0; i < 3; i++)
-		cost[i] = Math.floor((1 - costRdc) * Math.floor(data[i] * techLevel * Math.pow(data[5 + i], (techLevel - 1))));
+		cost[i] = Math.floor((1 - costRdc) * data[i] * techLevel * Math.pow(data[5 + i], (techLevel - 1)));
 	return cost;
 }
 
@@ -67,9 +75,9 @@ function getBuildCostLF(techID, techLevelFrom, techLevelTo, techData, ionTechLev
 	if (Number(techLevelFrom) > Number(techLevelTo)) {
 		for (i = Number(techLevelFrom) - 1; i >= Math.max(Number(techLevelTo), 0); i--) {
 			if (i == 0) {
-				cost = calcDeconstrCostLF(techID, 1, techData, ionTechLevel);
+				cost = calcDeconstrCostLF(techID, 1, techData, ionTechLevel, costReduction);
 			} else {
-				cost = calcDeconstrCostLF(techID, i, techData, ionTechLevel);
+				cost = calcDeconstrCostLF(techID, i, techData, ionTechLevel, costReduction);
 			}
 			totalCost[0] += cost[0];
 			totalCost[1] += cost[1];
@@ -193,18 +201,38 @@ function getBuildTimeLF(params) {
  * @param techID ID of the building or research
  * @param techLevel building/research level
  * @param techData technology data array in the format {id:[cost_met, cost_crys, cost_deut, cost_energy, grow_koeff]}
- * @param ionTechLevel ion technology level
  * @param bldCostRdc cost-reducing bonus from buildings
  * @returns Required energy
  */
-function getBuildEnergyCostLF(techID, techLevel, techData, ionTechLevel, bldCostRdc=0) {
+function getBuildEnergyCostLF(techID, techLevel, techData, bldCostRdc=0) {
 	if (techLevel < 1)
 		return 0;
 	const data = techData[techID];
 	if (data === undefined)
 		return 0;
-	let buildCost = Math.floor(Math.floor(data[3] * techLevel * Math.pow(data[8], techLevel)) * (1 - 0.04 * ionTechLevel));
-	if (bldCostRdc > 0)
-		buildCost = Math.floor(buildCost * (1 - bldCostRdc));
-	return buildCost;
+	// The ion technology only discounts a demolition; the energy a build needs is
+	// reduced by the building bonus alone, floored once (Crystal Farm 45 at 3%: 1650).
+	return Math.floor((1 - Math.min(0.99, bldCostRdc)) * data[3] * techLevel * Math.pow(data[8], techLevel));
+}
+
+/**
+ * Calculates the amount of energy a demolition of a Life Form building requires
+ * @param techID ID of the building
+ * @param techLevel Resulting building level
+ * @param techData technology data array in the format {id:[cost_met, cost_crys, cost_deut, cost_energy, grow_koeff]}
+ * @param ionTechLevel ion technology level
+ * @param bldCostRdc cost-reducing bonus from buildings
+ * @returns Required energy
+ */
+function getDeconstrEnergyCostLF(techID, techLevel, techData, ionTechLevel, bldCostRdc=0) {
+	if (techLevel < 1)
+		return 0;
+	const data = techData[techID];
+	if (data === undefined)
+		return 0;
+	// The energy of the resulting level, discounted like the demolition's resources.
+	// The base is floored first: Crystal Farm 42 -> 41 without a Megalith needs
+	// floor(1377 * 0.8) = 1101 in the game, where one floor over 1377.46 gives 1102.
+	const factor = (1 - 0.04 * ionTechLevel) * (1 - Math.min(0.99, bldCostRdc));
+	return Math.floor(Math.floor(data[3] * techLevel * Math.pow(data[8], techLevel)) * factor);
 }

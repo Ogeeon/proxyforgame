@@ -902,7 +902,7 @@ function setupPlanetsSpin() {
 		const newVal = oldVal + 1;
 		if (newVal <= options.maxPlanetsCount) {
 			input.value = String(newVal);
-			changePlanetsCount(newVal, oldVal);
+			void changePlanetsCount(newVal, oldVal);
 		}
 	});
 	addEvent(down, 'click', function () {
@@ -910,7 +910,7 @@ function setupPlanetsSpin() {
 		const newVal = oldVal - 1;
 		if (newVal >= options.minPlanetsCount) {
 			input.value = String(newVal);
-			changePlanetsCount(newVal, oldVal);
+			void changePlanetsCount(newVal, oldVal);
 		}
 	});
 	// The field itself is readonly: typing a target count would have to add or
@@ -928,7 +928,7 @@ function _onPlanetsTableClick(event) {
 	if (btn.classList.contains('control-edit')) {
 		editRow(plnID);
 	} else if (btn.classList.contains('control-delete')) {
-		deleteRow(plnID);
+		void deleteRow(plnID);
 	} else if (btn.classList.contains('control-move-up')) {
 		movePlanet(plnID, -1);
 	} else if (btn.classList.contains('control-move-down')) {

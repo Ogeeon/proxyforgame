@@ -13,3 +13,6 @@
        starts it in parallel. The URL must match the one in that stylesheet exactly. -->
   <link rel="preload" href="/vendor/bootstrap-icons/fonts/bootstrap-icons.woff2?<?= VENDOR_ICONS_FONT_HASH ?>" as="font" type="font/woff2" crossorigin>
   <script src="/vendor/bootstrap/bootstrap.bundle.min.js?v=<?php echo filemtime($vendorDir.'/bootstrap/bootstrap.bundle.min.js'); ?>" defer></script>
+  <!-- Patches the bundle's Tooltip, so a tooltip disposed while its hide() fade is
+       still running does not throw on the nulled instance; see the file itself. -->
+  <script src="/js/bootstrap-tooltip-guard.js?v=<?php echo filemtime(__DIR__.'/js/bootstrap-tooltip-guard.js'); ?>" defer></script>

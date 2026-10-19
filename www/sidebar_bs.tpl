@@ -50,7 +50,7 @@
 <!-- Sidebar for larger screens -->
 <div id="sidebar" class="card d-none d-lg-block">
   <div class="card-body p-0">
-    <div class="sidebar-panel bg-body-secondary text-primary-emphasis"><?=$loc['ogameMenuItems']['header']?> <small>(12)</small></div>
+    <div class="sidebar-panel bg-body-secondary text-primary-emphasis"><?=$loc['ogameMenuItems']['header']?> <small>(13.0)</small></div>
     <div class="list-group list-group-flush">
     <a class="list-group-item list-group-item-action ogame-menu-item text-center" href="/<?=$lang?>/"><?=$loc['ogameMenuItems']['main-title']?></a>
     <?php foreach ($ogamePages as $page): ?>
@@ -104,7 +104,7 @@
     <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
   </div>
   <div class="offcanvas-body p-0">
-    <div class="sidebar-panel bg-body-secondary text-primary-emphasis"><?=$loc['ogameMenuItems']['header']?> <small>(12)</small></div>
+    <div class="sidebar-panel bg-body-secondary text-primary-emphasis"><?=$loc['ogameMenuItems']['header']?> <small>(13.0)</small></div>
     <div class="list-group list-group-flush">
     <a class="list-group-item list-group-item-action ogame-menu-item text-center" href="/<?=$lang?>/"><?=$loc['ogameMenuItems']['main-title']?></a>
     <?php foreach ($ogamePages as $page): ?>
@@ -173,6 +173,10 @@
             <label for="corrected-text" class="form-label text-info-emphasis"><?=$loc['reportStrings']['input2']?></label>
             <input type="text" class="form-control" id="corrected-text">
           </div>
+          <div class="pfg-hp" aria-hidden="true">
+            <label for="report-website">Website</label>
+            <input type="text" id="report-website" name="website" tabindex="-1" autocomplete="off">
+          </div>
         </div>
         <div id="report-progress" class="d-none text-center">
           <div id="report-progress-text"><?=$loc['reportStrings']['sending-progress']?></div>
@@ -180,7 +184,7 @@
             <span class="visually-hidden">Loading...</span>
           </div>
         </div>
-        <?php foreach(array('sent', 'both_empty', 'texts_equal', 'wrong_empty', 'right_empty', 'mail_failed', 'request_error') as $code): ?>
+        <?php foreach(array('sent', 'both_empty', 'texts_equal', 'wrong_empty', 'right_empty', 'mail_failed', 'rate_limited', 'request_error') as $code): ?>
         <div id="report-err-<?=$code?>" class="alert d-none"><p><?=$loc['reportStrings']['msg-'.$code]?></p></div>
         <?php endforeach; ?>
       </div>
@@ -214,6 +218,10 @@
             <label for="email-form-body" class="form-label text-info-emphasis"><?=$loc['emailStrings']['body']?></label>
             <textarea class="form-control" id="email-form-body" rows="7"></textarea>
           </div>
+          <div class="pfg-hp" aria-hidden="true">
+            <label for="email-website">Website</label>
+            <input type="text" id="email-website" name="website" tabindex="-1" autocomplete="off">
+          </div>
         </div>
         <div id="email-progress" class="d-none text-center">
           <div id="email-progress-text"><?=$loc['emailStrings']['sending-progress']?></div>
@@ -221,7 +229,7 @@
             <span class="visually-hidden">Sending...</span>
           </div>
         </div>
-        <?php foreach(array('sent', 'nothing_to_send', 'mail_failed', 'request_error') as $code): ?>
+        <?php foreach(array('sent', 'nothing_to_send', 'mail_failed', 'rate_limited', 'request_error') as $code): ?>
         <div id="email-err-<?=$code?>" class="alert d-none"><p><?=$loc['emailStrings']['msg-'.$code]?></p></div>
         <?php endforeach; ?>
       </div>

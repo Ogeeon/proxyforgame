@@ -29,6 +29,9 @@ const OUT_DIR = path.join(ROOT, 'tsconfig');
 
 // Loaded by sidebar_bs.tpl, which every calculator page includes.
 const SIDEBAR_SCRIPT = 'www/js/sidebar_bs.js';
+// Loaded by vendor_bs.tpl, which every page includes at the top of its
+// stylesheets. Loads after the Bootstrap bundle and patches it.
+const VENDOR_GUARD_SCRIPT = 'www/js/bootstrap-tooltip-guard.js';
 // Ambient declarations: page globals from PHP, expando properties, bootstrap.
 const AMBIENT = 'www/ogame/calc/js/globals.d.ts';
 // Stand-in for calculators that declare `options` in an inline <script> in the
@@ -44,8 +47,15 @@ const OPTIONS_AMBIENT = 'www/ogame/calc/js/options-global.d.ts';
 function scriptsOf(tplPath) {
   const tpl = fs.readFileSync(tplPath, 'utf8');
   const found = [...tpl.matchAll(/src="\/([^"?]+\.js)/g)].map((m) => `www/${m[1]}`);
+  const includesVendor = tpl.includes('vendor_bs.tpl');
   const includesSidebar = tpl.includes('sidebar_bs.tpl');
   const files = [...found];
+  // Neither the bundle's guard nor the sidebar comes from a src="/..." in the
+  // template itself: each arrives through a shared include this scanner cannot
+  // see into, so they are added on the strength of the include being required.
+  if (includesVendor && !files.includes(VENDOR_GUARD_SCRIPT)) {
+    files.push(VENDOR_GUARD_SCRIPT);
+  }
   if (includesSidebar && !files.includes(SIDEBAR_SCRIPT)) {
     files.push(SIDEBAR_SCRIPT);
   }

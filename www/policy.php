@@ -9,7 +9,7 @@
 <h1>Privacy Policy</h1>
 
 
-<p>Effective date: July 24, 2019<br>Last updated: October 9, 2026</p>
+<p>Effective date: July 24, 2019<br>Last updated: October 14, 2026</p>
 
 
 <p>ProxyForGame ("us", "we", or "our") operates the https://proxyforgame.net website (hereinafter referred to as the "Service").</p>
@@ -108,6 +108,8 @@
 <h2>Retention of Data</h2>
 <p>ProxyForGame will retain your Personal Data only for as long as is necessary for the purposes set out in this Privacy Policy. We will retain and use your Personal Data to the extent necessary to comply with our legal obligations (for example, if we are required to retain your data to comply with applicable laws), resolve disputes and enforce our legal agreements and policies.</p>
 <p>ProxyForGame will also retain Usage Data for internal analysis purposes. Usage Data is generally retained for a shorter period of time, except when this data is used to strengthen the security or to improve the functionality of our Service, or we are legally obligated to retain this data for longer periods.</p>
+
+<p>When you send us a misspelling report or a message through the forms on our Service, we keep a one-way hash of your IP address, together with the time of sending, for no longer than 24 hours. It lets us limit how many messages can be sent from one address, which protects the forms from spam; the address itself is not stored, and the hash is deleted automatically once that period is over.</p>
 
 <h2>Transfer of Data</h2>
 <p>Your information, including Personal Data, may be transferred to — and maintained on — computers located outside of your state, province, country or other governmental jurisdiction where the data protection laws may differ from those of your jurisdiction.</p>

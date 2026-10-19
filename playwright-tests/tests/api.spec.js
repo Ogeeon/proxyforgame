@@ -99,6 +99,60 @@ test.describe('AJAX endpoint - email', () => {
     });
 });
 
+// The antispam layer of report and email (www/api/antispam.inc.php). It runs
+// after validation, which is why every form below is a valid one.
+test.describe('AJAX endpoint - feedback antispam', () => {
+    const forms = {
+        report: { wrong: 'Elektromagnetishe', right: 'Elektromagnetische', url: '/ogame/calc/flight.php' },
+        email: { subject: 'antispam test', body: 'antispam test', address: '' },
+    };
+
+    // A trapped message is answered exactly like one that went out, so a bot
+    // has nothing to adjust to - and nothing reaches the SMTP server, which is
+    // what makes these safe to run against a server with real credentials.
+    const traps = [
+        { name: 'a filled-in honeypot', extra: { website: 'http://spam.example', elapsed: '5000' } },
+        { name: 'no elapsed time', extra: {} },
+        { name: 'a dialog sent faster than a person could', extra: { elapsed: '300' } },
+    ];
+    for (const service of ['report', 'email']) {
+        for (const { name, extra } of traps) {
+            test(`${service} with ${name} looks sent but is dropped`, async ({ request }) => {
+                const response = await request.post(ENDPOINT, {
+                    form: { service, ...forms[service], ...extra },
+                });
+                expect(response.status()).toBe(200);
+                expect(await response.json()).toEqual({ sent: true });
+            });
+        }
+    }
+
+    // Needs the lowered limit CI sets, and a server without SMTP credentials:
+    // every request that gets past the limit really tries to send. Locally
+    // that would be mail in the owner's inbox, hence the skip.
+    test('the address is refused once it reaches the limit', async ({ request }) => {
+        const limit = Number.parseInt(process.env.MAIL_RATE_LIMIT_SHORT ?? '', 10);
+        test.skip(!process.env.CI || !(limit > 0), 'needs CI with MAIL_RATE_LIMIT_SHORT set');
+
+        // A retry finds the window already used up and gets the 429 sooner;
+        // what must hold either way is that it arrives within limit + 1.
+        let refused = null;
+        for (let i = 0; i <= limit && !refused; i++) {
+            const response = await request.post(ENDPOINT, {
+                form: { service: 'email', ...forms.email, elapsed: '5000' },
+            });
+            if (response.status() === 429) {
+                refused = response;
+            } else {
+                // Counted, then handed to an SMTP server CI does not have.
+                await expectApiError(response, 502, 'mail_failed');
+            }
+        }
+        expect(refused).not.toBeNull();
+        await expectApiError(refused, 429, 'rate_limited');
+    });
+});
+
 test.describe('AJAX endpoint - changelog', () => {
     test('a locale the site does not have is a bad request', async ({ request }) => {
         const response = await request.get(`${ENDPOINT}?service=changelog&lastSeen=0&lang=xx`);

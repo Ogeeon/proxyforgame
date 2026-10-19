@@ -581,7 +581,7 @@ test.describe('Costs Calculator Page', () => {
         await expect(page.locator('#table-0-2 tr:nth-child(18) td:nth-child(7)')).toContainText('3.257.091');
         await expect(page.locator('#table-0-2 tr:nth-child(18) td:nth-child(9)')).toContainText('16.000');
         await expect(page.locator('#table-0-2 tr:nth-child(18) td:nth-child(10)')).toContainText('61w 2d 8h');
-        await expect(page.locator('#table-0-2 tr:nth-child(18) td:nth-child(11)')).toContainText('29.893');
+        await expect(page.locator('#table-0-2 tr:nth-child(18) td:nth-child(11)')).toContainText('29.894'); // points follow the undiscounted cost
 
         await page.locator('#lf-terraformer-rdc').fill('20');
         await page.locator('#lf-terraformer-rdc').press('Enter');
@@ -590,7 +590,7 @@ test.describe('Costs Calculator Page', () => {
         await expect(page.locator('#table-0-2 tr:nth-child(18) td:nth-child(7)')).toContainText('2.937.091');
         await expect(page.locator('#table-0-2 tr:nth-child(18) td:nth-child(9)')).toContainText('16.000');
         await expect(page.locator('#table-0-2 tr:nth-child(18) td:nth-child(10)')).toContainText('61w 13h');
-        await expect(page.locator('#table-0-2 tr:nth-child(18) td:nth-child(11)')).toContainText('29.413');
+        await expect(page.locator('#table-0-2 tr:nth-child(18) td:nth-child(11)')).toContainText('29.894'); // the terraformer reduction does not lower the points either
 
         await page.locator('#reset').click();
         await page.locator('#param-buildings-tab').click();

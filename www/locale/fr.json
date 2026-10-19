@@ -316,7 +316,8 @@
       "msg-texts_equal": "Le contenu du champ [Texte corrigé] est identique au contenu du champ [Texte mal orthographié]. S'il vous plaît indiquer votre version du texte mal orthographié.",
       "msg-wrong_empty": "Le champ [Texte mal orthographié] est vide. S'il vous plaît spécifier le texte mal orthographié.",
       "msg-right_empty": "Le champ [Texte corrigé] est vide. S'il vous plaît indiquer votre version du texte mal orthographié.",
-      "msg-mail_failed": "Le signalement n'a pas pu être envoyé. Veuillez réessayer plus tard."
+      "msg-mail_failed": "Le signalement n'a pas pu être envoyé. Veuillez réessayer plus tard.",
+      "msg-rate_limited": "Trop de signalements ont été envoyés depuis votre adresse récemment. Veuillez réessayer plus tard."
     },
     "emailStrings": {
       "title": "L'envoi d'un email",
@@ -330,7 +331,8 @@
       "msg-sent": "Votre message a été envoyé. Merci.",
       "msg-request_error": "Erreur lors de la requête. Veuillez réessayer plus tard.",
       "msg-nothing_to_send": "Il n'ya rien à envoyer... Remplissez s'il vous plaît au moins une des champs [Sujet] ou [Message].",
-      "msg-mail_failed": "Le message n'a pas pu être envoyé. Veuillez réessayer plus tard."
+      "msg-mail_failed": "Le message n'a pas pu être envoyé. Veuillez réessayer plus tard.",
+      "msg-rate_limited": "Trop de messages ont été envoyés depuis votre adresse récemment. Veuillez réessayer plus tard."
     },
     "donateStrings": {
       "header": "Soutenir ce projet",
@@ -392,11 +394,13 @@
     "msg-cant-research": "Au niveau donné de laboratoire de recherche, le recherche \"{0}\" n`est pas disponible.",
     "msg-lab-level-raised": "Niveau du laboratoire de recherche porté à {0} — c'est ce qu'exige la recherche \"{1}\".",
     "mineral-res-cntr-lvl": "Centre de recherche sur les minéraux",
-    "disclaimer-robot-nanite": "Veuillez tenir compte de la remarque figurant sur la première ligne du tableau lors de la lecture des durées de construction. Si vous construisez une Usine de robots ou une Usine de nanites, utilisez le <a href=\"{0}\">Calculateur de file de construction</a> pour des calculs de durée précis.",
+    "lf-terraformer-rdc": "Réduction des coûts du terraformeur",
+    "disclaimer-robot-nanite": "Veuillez tenir compte de l’info-bulle {1} dans la première cellule des lignes Usine de robots et Usine de nanites lors de la lecture des durées de construction. Si vous construisez une Usine de robots ou une Usine de nanites, utilisez le <a href=\"{0}\">Calculateur de file de construction</a> pour des calculs de durée précis.",
     "disclaimer-title": "Attention",
     "discoverer-class-bonus": "Bonus de classe Explorateur",
     "discoverer-class-bonus-hint": "Saisis la valeur 'Total' du tableau OGame des bonus de formes de vie aux bonus de classe, ligne 'Explorateur'. S'applique uniquement si la classe 'Explorateur' est sélectionnée dans l'onglet 'Général'.",
-    "research-speed-hint": "La vitesse de recherche est la vitesse économique multipliée par le facteur de recherche de l'univers, par ex. 5 × 3 = 15. Choisir l'univers ci-dessus remplit les deux vitesses automatiquement."
+    "research-speed-hint": "La vitesse de recherche est la vitesse économique multipliée par le facteur de recherche de l'univers, par ex. 5 × 3 = 15. Choisir l'univers ci-dessus remplit les deux vitesses automatiquement.",
+    "description": "Calculez le coût et la durée de construction des bâtiments, recherches, vaisseaux et défenses dans OGame, selon la vitesse de l’univers et les bonus."
   },
   "lfcosts": {
     "title": "OGame - Calculateur de coûts pour les formes de vie",
@@ -520,7 +524,8 @@
     "ovrc-battleship": "Surcadençage (vaisseau de bataille)",
     "psy-sh-matrix": "Matrice de protection psionique",
     "kaelesh-disc-enh": "Renforcement d`explorateur kaelesh",
-    "energy-cost-to-build": "Énergie requise pour la construction"
+    "energy-cost-to-build": "Énergie requise pour la construction",
+    "description": "Calculez le coût et la durée des bâtiments et recherches des formes de vie dans OGame, avec les bonus de race et de technologie."
   },
   "flight": {
     "flight-time-format": "99 H:s:s",
@@ -639,13 +644,15 @@
     "sr-profile-hdr": "Importer le rapport d’espionnage",
     "sr-profile-text": "Un profil est actif. Le rapport contient les recherches, la classe et les bonus du joueur espionné, qui ne doivent pas écraser votre profil. Comment l’importer ?",
     "sr-profile-none": "Passer à « Aucun profil » et importer",
-    "sr-profile-new": "Créer un nouveau profil pour le rapport"
+    "sr-profile-new": "Créer un nouveau profil pour le rapport",
+    "description": "Calculez la durée de vol, la consommation de deutérium et l’heure de départ idéale dans OGame selon la vitesse de l’univers, les vaisseaux et le mode de vol."
   },
   "graviton": {
     "title": "OGame - Calculateur de Graviton",
     "graviton-level": "Niveau de Graviton",
     "recycling": "Démantèlement de débris",
-    "keywords": "proxyforgame,ogame,calculatrice de graviton,technologie graviton,technologie de gravitation,satellites solaires,énergie pour graviton,étoile de la mort"
+    "keywords": "proxyforgame,ogame,calculatrice de graviton,technologie graviton,technologie de gravitation,satellites solaires,énergie pour graviton,étoile de la mort",
+    "description": "Découvrez le nombre de satellites solaires et l’énergie nécessaires à la recherche Graviton dans OGame selon les paramètres de la planète."
   },
   "moon": {
     "title": "OGame - Calculatrices pour Lunes",
@@ -676,7 +683,8 @@
     "own-system": "Votre système",
     "phalanx-lvl-required": "Niveau requis",
     "phalanx-range-bonus": "Bonus de portée de la phalange",
-    "class-bonus": "Bonus de classe"
+    "class-bonus": "Bonus de classe",
+    "description": "Calculez la probabilité de découverte d’une lune, l’issue d’une tentative de destruction et la portée de la phalange sensorielle dans OGame."
   },
   "production": {
     "param-tab-general": "Général",
@@ -758,7 +766,8 @@
     "incl-explain": "Si vous augmentez le niveau des mines, la consommation d'énergie augmentera. Le calculateur peut prendre en compte ce changement et inclure dans le calcul les coûts de construction des satellites solaires, qui fourniront l'énergie nécessaire. Le calcul se fait bâtiment par bâtiment. Faut-il prendre en compte ces coûts?",
     "incl-yes": "Oui",
     "incl-no": "Non",
-    "lifeform-tech": "Bonus technologie formes de vie"
+    "lifeform-tech": "Bonus technologie formes de vie",
+    "description": "Calculez la production de métal, cristal et deutérium, la consommation d’énergie et le retour sur investissement des mines pour une planète ou votre empire OGame."
   },
   "queue": {
     "start-time": "Début",
@@ -774,7 +783,8 @@
     "next-level": "Prochain niveau",
     "title": "OGame - Attente de la construction",
     "keywords": "proxyforgame,ogame,file de construction,ordre de construction,temps de construction,calculatrice de file,coûts de bâtiments",
-    "clear": "Supprimer"
+    "clear": "Supprimer",
+    "description": "Comparez le coût et la durée des améliorations successives de bâtiments sur une planète ou une lune OGame, selon les usines et la vitesse de l’univers."
   },
   "terraformer": {
     "title": "OGame - Calculateur de Terraformeur",
@@ -783,7 +793,8 @@
     "single-level": "Un niveau",
     "added-fields": "Les champs à ajouter",
     "satellites": "Satellites solaires",
-    "keywords": "proxyforgame,ogame,calculatrice de terraformeur,terraformeur,cases de planète,satellites solaires,besoin en énergie,usine de nanites"
+    "keywords": "proxyforgame,ogame,calculatrice de terraformeur,terraformeur,cases de planète,satellites solaires,besoin en énergie,usine de nanites",
+    "description": "Calculez l’énergie, les ressources et le temps nécessaires pour terraformer une planète OGame, satellites solaires et bonus compris."
   },
   "expeditions": {
     "keywords": "proxyforgame,ogame,calculatrice d'expédition,expéditions,ressources d'expédition,flotte d'expédition,matière noire,trouvailles d'expédition",
@@ -847,7 +858,8 @@
     "class-bonus-discoverer": "Bonus de classe \"Découvreur\"",
     "resources-discovery-booster": "Amplificateur de découverte de ressources",
     "dark-matter-discovery-bonus": "Bonus de découverte de Matière Noire",
-    "large-cargo-abbrev": "GT"
+    "large-cargo-abbrev": "GT",
+    "description": "Estimez les ressources, vaisseaux et matières noires trouvés lors des expéditions OGame et comparez le rendement attendu de différentes flottes."
   },
   "trade": {
     "met": "mét",
@@ -863,6 +875,7 @@
     "link": "Lien",
     "text": "Texte",
     "and": "et",
-    "keywords": "proxyforgame,ogame,calculatrice de commerce,échange de ressources,taux d'échange,métal cristal deutérium,marchand"
+    "keywords": "proxyforgame,ogame,calculatrice de commerce,échange de ressources,taux d'échange,métal cristal deutérium,marchand",
+    "description": "Comparez les échanges de métal, cristal et deutérium dans OGame et calculez les ressources obtenues selon un taux donné."
   }
 }
