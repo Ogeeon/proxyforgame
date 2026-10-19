@@ -85,7 +85,7 @@
       <?php require_once '../../sidebar_bs.tpl'; ?>
     </div>
     <div class="col-10">
-      <?php $profilesCalc = 'trade'; require_once '../../topbar_bs.tpl'; ?>
+      <?php $withProfiles = true; require_once '../../topbar_bs.tpl'; ?>
 
       <div id="trade" class="mx-auto">
         <div class="border rounded position-relative">

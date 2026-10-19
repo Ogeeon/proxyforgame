@@ -343,12 +343,10 @@ async function pfReadFile(input) {
 class ProfilesUi {
   /**
    * @param {ProfileStore} store
-   * @param {string} calc The calculator this page is.
    * @param {Record<string, string>} text Localized strings (pfgProfileText).
    */
-  constructor(store, calc, text) {
+  constructor(store, text) {
     this.store = store;
-    this.calc = calc;
     this.text = text;
     /** @type {Array<(profile: ?Profile) => void>} */
     this.listeners = [];
@@ -2462,7 +2460,7 @@ function pfBind(Binder, app) {
 function createProfilesUi() {
   const selector = document.getElementById('pf-selector');
   if (!selector || typeof pfgProfileText === 'undefined') return null;
-  const ui = new ProfilesUi(new ProfileStore(), selector.dataset.calc || '', pfgProfileText);
+  const ui = new ProfilesUi(new ProfileStore(), pfgProfileText);
   ui.init();
   return ui;
 }

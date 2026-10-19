@@ -1,7 +1,7 @@
 <?php
 // Player profiles: the selector in the top bar and its dialogs (ADR-0004).
-// Included by topbar_bs.tpl on a calculator page that sets $profilesCalc to its
-// own name before including the top bar; the scripts (profiles-core.js,
+// Included by topbar_bs.tpl on a calculator page that sets $withProfiles to
+// true before including the top bar; the scripts (profiles-core.js,
 // profiles-store.js, profiles-ui.js) are loaded by the calculator template
 // itself, so its TypeScript project sees them.
 require_once __DIR__ . '/universes.inc.php';
@@ -25,7 +25,7 @@ $pfUniversePicker = function ($prefix) use ($l) {
 <?php
 };
 ?>
-<div id="pf-selector" class="d-flex align-items-center gap-1" data-calc="<?= htmlspecialchars($profilesCalc, ENT_QUOTES) ?>">
+<div id="pf-selector" class="d-flex align-items-center gap-1">
   <label for="pf-select" class="text-nowrap"><i class="bi bi-person-badge" aria-hidden="true"></i><span class="d-none d-sm-inline"> <?= $l['profile'] ?></span></label>
   <select id="pf-select" class="form-select form-select-sm w-auto"></select>
   <span id="pf-overrides" class="badge text-bg-warning d-none" data-bs-toggle="tooltip" title=""></span>

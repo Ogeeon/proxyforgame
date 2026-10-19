@@ -64,7 +64,7 @@
   <div class="row">
     <div class="col-md-2"><?php require_once '../../sidebar_bs.tpl'; ?></div>
     <div class="col-md-10">
-    <?php $profilesCalc = 'terraformer'; require_once '../../topbar_bs.tpl'; ?>
+    <?php $withProfiles = true; require_once '../../topbar_bs.tpl'; ?>
 
 <div id="terraformer">
   <div class="border rounded position-relative">
