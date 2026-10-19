@@ -476,6 +476,99 @@ test('"no profile" gives flight its own account values and universe back', async
     await expect(page.locator('#reset')).toBeVisible();
 });
 
+// Sync (CONTEXT.md): PfG Companion hands account exports to the site, waiting in
+// localStorage when a page loads or as an event after it, and the site applies
+// the ones newer than a profile's game layer by itself.
+const COMPANION_KEY = 'pfg_companion_pending_export';
+const COMPANION_EVENT = 'pfg-companion:sync';
+const NEWER_AT = '2026-10-12T00:00:00.000Z';
+
+/** The fixture as Companion sends it, for en/1, changed by `edit`. */
+function companionExport(edit = () => {}) {
+    const raw = JSON.parse(EXPORT);
+    raw.universe = { language: 'en', number: 1 };
+    edit(raw);
+    return raw;
+}
+
+/** The fixture exported again at `exportedAt`, with energy 17 and plasma 16. */
+function laterExport(exportedAt = NEWER_AT) {
+    return companionExport((raw) => {
+        raw.exportedAt = exportedAt;
+        raw.researches['113'] = 17;
+        raw.researches['122'] = 16;
+    });
+}
+
+const companionPayload = (...exports) => ({ version: 1, exports });
+
+/** Leave a payload where Companion leaves it for the next page load. */
+async function leaveCompanionPayload(page, payload) {
+    await page.evaluate(([key, value]) => localStorage.setItem(key, value), [COMPANION_KEY, JSON.stringify(payload)]);
+}
+
+/** Import the fixture as en/1 on production and override plasma technology with 20. */
+async function importForCompanion(page) {
+    await page.goto('/production');
+    await importExport(page, JSON.stringify(companionExport()));
+    await page.locator('#param-researches-tab').click();
+    await page.locator('#plasma-tech-level').fill('20');
+    await page.locator('#plasma-tech-level').blur();
+    await expect.poll(async () => (await activeProfile(page)).account.values['research.122']).toEqual({ game: 15, override: 20 });
+}
+
+test('a newer Companion export waiting at load updates the game layer and keeps the overrides', async ({ page }) => {
+    await importForCompanion(page);
+    await leaveCompanionPayload(page, companionPayload(laterExport()));
+    await page.reload();
+
+    const profile = await activeProfile(page);
+    expect(profile.importedAt).toBe(NEWER_AT);
+    expect(profile.account.values['research.113']).toEqual({ game: 17 });
+    expect(profile.account.values['research.122']).toEqual({ game: 16, override: 20 });
+    await expect(page.locator('#energy-tech-level')).toHaveValue('17');
+    await expect(page.locator('#plasma-tech-level')).toHaveValue('20');
+});
+
+test('a Companion export no newer than the game layer is ignored', async ({ page }) => {
+    await importForCompanion(page);
+    const before = await activeProfile(page);
+    const sameTime = JSON.parse(EXPORT).exportedAt;
+    for (const exportedAt of [sameTime, '2026-10-01T00:00:00.000Z']) {
+        await leaveCompanionPayload(page, companionPayload(laterExport(exportedAt)));
+        await page.reload();
+        expect(await activeProfile(page)).toEqual(before);
+        await expect(page.locator('#energy-tech-level')).toHaveValue('14');
+    }
+});
+
+test('a Companion export of an account with no profile is offered for import', async ({ page }) => {
+    await page.goto('/production');
+    await leaveCompanionPayload(page, companionPayload(companionExport((raw) => {
+        raw.playerId = 100002;
+        raw.playerName = 'Other';
+    })));
+    await page.reload();
+
+    const offer = page.locator('#pf-select option[value="__companion_0"]');
+    await expect(offer).toHaveCount(1);
+    await expect(offer).toContainText('Other');
+    await chooseAction(page, '__companion_0');
+    await expect(page.locator('#pf-import-modal')).toBeVisible();
+    expect(JSON.parse(await page.locator('#pf-import-text').inputValue()).playerId).toBe(100002);
+});
+
+test('a newer Companion export arriving after load updates the stored profile', async ({ page }) => {
+    await importForCompanion(page);
+    await page.evaluate(([name, detail]) => document.dispatchEvent(new CustomEvent(name, { detail })),
+        [COMPANION_EVENT, companionPayload(laterExport())]);
+
+    await expect.poll(async () => (await activeProfile(page)).importedAt).toBe(NEWER_AT);
+    const profile = await activeProfile(page);
+    expect(profile.account.values['research.113']).toEqual({ game: 17 });
+    expect(profile.account.values['research.122']).toEqual({ game: 16, override: 20 });
+});
+
 // A spy report describes the spied player, so with a profile active the import
 // asks where it goes instead of writing that player into the profile.
 const SR_FIXTURE = readFileSync(join(__dirname, '../fixtures/sr_fs003df9447df01744296d867509e0ae7e60.json'), 'utf8');
