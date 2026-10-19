@@ -18,6 +18,7 @@ const core = load(['ogame/calc/js/profiles-core.js'], [
     'serializeProfilesFile', 'parseProfilesFile', 'planProfilesRestore', 'universeCacheKey',
     'ratesToTrade', 'ratesFromTrade', 'profileFromProductionSet', 'profileFromFlightSet',
     'productionPlanetValues', 'productionPlanetState', 'isNewerExport', 'planCompanionSync',
+    'resolveImportUniverse',
     'lfBuildingGameId', 'pfNum', 'pfBool', 'pfBodyLabel', 'pfStartRange', 'expeditionHighTop',
     'EXPEDITION_TOP_SCORE_LIMITS',
 ]);
@@ -593,6 +594,38 @@ describe('companion sync', () => {
         const tracked = (id) => { const p = store.load(id); loaded.push(p); return p; };
         core.planCompanionSync({ version: 1, exports: [laterExport()] }, store.index, tracked);
         expect(loaded.map((p) => JSON.stringify(p))).toEqual([store.text]);
+    });
+});
+
+describe('resolveImportUniverse', () => {
+    const RU = { country: 'ru', number: 166 };
+    const FIRST = { asked: false, picked: null };
+    /** @param {?{country: string, number: number}} [universe] */
+    const data = (universe = null) => ({ ...parsed(fixture()), universe });
+    const entry = (id, universe, playerId = 100001) => ({ id, universe, playerId });
+
+    it('takes the universe the export names, whatever else is known', () => {
+        const index = [entry('a', RU)];
+        expect(plain(core.resolveImportUniverse(data(EN1), index, FIRST))).toEqual(EN1);
+        expect(plain(core.resolveImportUniverse(data(EN1), index, { asked: true, picked: RU }))).toEqual(EN1);
+    });
+
+    it('takes the universe of the one profile the player already has', () => {
+        const index = [entry('a', RU), entry('b', EN1, 5)];
+        expect(plain(core.resolveImportUniverse(data(), index, FIRST))).toEqual(RU);
+    });
+
+    it('asks when the player has no profile with a universe, or more than one', () => {
+        expect(core.resolveImportUniverse(data(), [], FIRST)).toBeNull();
+        expect(core.resolveImportUniverse(data(), [entry('a', null)], FIRST)).toBeNull();
+        expect(core.resolveImportUniverse(data(), [entry('a', RU), entry('b', EN1)], FIRST)).toBeNull();
+    });
+
+    it('takes what was picked once the player was asked, and asks again for nothing picked', () => {
+        const index = [entry('a', RU)];
+        expect(plain(core.resolveImportUniverse(data(), index, { asked: true, picked: EN1 }))).toEqual(EN1);
+        // The known profile is not used on the second pass.
+        expect(core.resolveImportUniverse(data(), index, { asked: true, picked: null })).toBeNull();
     });
 });
 

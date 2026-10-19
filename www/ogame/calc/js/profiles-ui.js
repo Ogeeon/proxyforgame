@@ -976,21 +976,14 @@ class ProfilesUi {
       }
       data = result.data;
     }
-    let universe = data.universe;
+    const asked = this.pendingExport !== null;
+    const universe = resolveImportUniverse(data, this.store.list(), { asked, picked: asked ? this.readUniversePicker('pf-import') : null });
     if (!universe) {
-      const known = this.store.list().filter((e) => e.playerId === data.playerId && e.universe);
-      if (this.pendingExport) {
-        universe = this.readUniversePicker('pf-import');
-      } else if (known.length === 1) {
-        universe = known[0].universe;
-      }
-      if (!universe) {
-        this.pendingExport = data;
-        this.fillUniversePicker('pf-import', null);
-        pfShow('#pf-import-universe-box', true);
-        this.showError('#pf-import-error', this.pendingExport && getVal('#pf-import-country') ? this.text.pickUniverse : '');
-        return;
-      }
+      this.pendingExport = data;
+      this.fillUniversePicker('pf-import', null);
+      pfShow('#pf-import-universe-box', true);
+      this.showError('#pf-import-error', getVal('#pf-import-country') ? this.text.pickUniverse : '');
+      return;
     }
     const existingId = findProfileForExport(this.store.list(), data.playerId, universe);
     const existing = existingId ? this.store.get(existingId) : null;

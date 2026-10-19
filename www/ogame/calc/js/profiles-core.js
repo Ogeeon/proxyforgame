@@ -880,6 +880,25 @@ function findProfileForExport(index, playerId, universe) {
 }
 
 /**
+ * The universe an import goes to. The export's own universe always wins. An
+ * export without one (schema 1) goes, the first time round, to the universe of
+ * the player's only profile that has one; with none or several, the player is
+ * asked. Once asked, only what they picked counts.
+ *
+ * @param {AccountExport} data
+ * @param {Array<{universe: ?ProfileUniverse, playerId: ?number}>} index
+ * @param {{asked: boolean, picked: ?ProfileUniverse}} picker Whether the player
+ *   was already shown the universe picker, and what it holds.
+ * @returns {?ProfileUniverse} Null: ask the player.
+ */
+function resolveImportUniverse(data, index, picker) {
+  if (data.universe) return data.universe;
+  if (picker.asked) return picker.picked;
+  const known = index.filter((e) => e.playerId === data.playerId && e.universe);
+  return known.length === 1 ? known[0].universe : null;
+}
+
+/**
  * Replace the game layer of one entity. A key the import supplies gets the new
  * game value and loses its override; a key it does not supply loses its game
  * value and keeps its override (production percentages, rates); a key left
@@ -1556,7 +1575,7 @@ if (typeof window !== 'undefined') {
     getProfileValue, setProfileValue, differsFromGame, resetProfileValue,
     countOverrides, hasGameLayer,
     parseAccountExport, findProfileForExport, importAccountExport, mergeProfiles,
-    isNewerExport, planCompanionSync,
+    isNewerExport, planCompanionSync, resolveImportUniverse,
     readProfile, serializeProfilesFile, parseProfilesFile, planProfilesRestore,
     universeCacheKey, readUniverseChoices,
     ratesToTrade, ratesFromTrade, lfBuildingGameId,
