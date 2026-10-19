@@ -321,6 +321,25 @@ migrations. The one file that cannot be recreated from git is the checkout's
    aliases) on the document-root link — the `<Directory>` block names the link
    too, see *Traps* — and for `webhooks.proxyforgame.com` on
    `/var/www/webhooks-proxyforgame`, with the `SetEnv` above.
+   The `proxyforgame.com` HTTPS vhost also serves the PfG Companion userscript,
+   which is published by hand from its own repository
+   (`Ogeeon/pfg-companion-script`, `npm run deploy`) and lives outside the
+   checkout, because `pfg-sync` cleans it. Installed copies poll
+   `https://proxyforgame.com/companion/pfg-companion.meta.js` for updates, so
+   the path must survive a rebuild — create `/var/www/pfg-companion` and add to
+   that vhost:
+
+   ```apache
+   Alias /companion/ /var/www/pfg-companion/
+   <Directory /var/www/pfg-companion>
+       Options -Indexes
+       AllowOverride None
+       Require all granted
+       Header set Cache-Control "no-cache"
+   </Directory>
+   ```
+
+   Then run `npm run deploy` in that repository to put the files back.
 5. Install `pfg-sync`, `pfg-notify` and `pfg-cron-run` into `/usr/local/bin/`
    and `webhook.php` into the webhooks root; write `/etc/pfg-sync.conf`,
    `/etc/pfg-cron.conf` (`STAMP_DIR=/var/lib/pfg/job-stamps`, readable by
