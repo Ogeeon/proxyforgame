@@ -383,6 +383,16 @@ elif [ "$MODE" != exact ]; then
     sha=$(git rev-parse --verify --quiet "$sha^") || break
     n=$((n + 1))
   done
+  # A push of more than MAX_WALK commits whose first-parent chain does not pass
+  # through the deployed commit (a merged feature branch) exhausts the walk with
+  # no run to find - only the tip has one, and it is still building. The host
+  # is on an ancestor of the tip, so staying put is safe and the tip's own
+  # workflow_run delivers the deploy. A deployed commit that is NOT an ancestor
+  # means history was rewritten, and that still fails loudly.
+  if [ -z "$WANT_SHA" ] && git merge-base --is-ancestor "$HAVE_SHA" "$TIP" 2>/dev/null; then
+    log "no CI-passed commit within $MAX_WALK of ${TIP:0:8} yet - staying on ${HAVE_SHA:0:8} until CI finishes"
+    WANT_SHA="$HAVE_SHA"
+  fi
   [ -n "$WANT_SHA" ] \
     || fail "no CI-passed commit within $MAX_WALK of origin/main (${TIP:0:8}) - is main red?"
 fi
