@@ -1541,6 +1541,35 @@ function profileFromFlightSet(prm, init) {
 }
 
 /**
+ * A manual profile for the player a spy report describes: the report's
+ * universe and the spied planet or moon, so flight's departure select offers
+ * it. The account values stay empty - flight's report import then writes them
+ * as it would into any profile entered by hand. Nothing is saved here.
+ *
+ * @param {*} rd The report, as the ogameAPI service returns it.
+ * @param {string} label
+ * @param {() => string} [newId]
+ * @returns {Profile}
+ */
+function profileFromSpyReport(rd, label, newId = newProfileId) {
+  const number = Number(rd?.universes?.universe);
+  const country = String(rd?.universes?.domain || '');
+  const profile = createProfile({ id: newId(), label, universe: country && number > 0 ? { country, number } : null });
+  const coords = String(rd?.generic?.defender_planet_coordinates || '').split(':').map(Number);
+  if (coords.length === 3 && coords.every((n) => Number.isInteger(n) && n > 0)) {
+    const body = createPlanet({
+      id: newId(),
+      name: String(rd.generic.defender_planet_name || ''),
+      coords: { galaxy: coords[0], system: coords[1], position: coords[2] },
+    });
+    // The game's planet types: 1 planet, 3 moon.
+    if (Number(rd.generic.defender_planet_type) === 3) profile.moons.push({ ...body, planetId: null });
+    else profile.planets.push(body);
+  }
+  return profile;
+}
+
+/**
  * The score limits of expeditions.php's `$thresholds`, one per entry of the
  * "strongest player" select but the last. The page mirrors them, so a universe
  * opened through the URL API and one bound to a profile pick the same entry;
@@ -1580,5 +1609,6 @@ if (typeof window !== 'undefined') {
     universeCacheKey, readUniverseChoices,
     ratesToTrade, ratesFromTrade, lfBuildingGameId,
     productionPlanetValues, productionPlanetState, profileFromProductionSet, profileFromFlightSet,
+    profileFromSpyReport,
   });
 }

@@ -18,7 +18,7 @@ const core = load(['ogame/calc/js/profiles-core.js'], [
     'serializeProfilesFile', 'parseProfilesFile', 'planProfilesRestore', 'universeCacheKey',
     'ratesToTrade', 'ratesFromTrade', 'profileFromProductionSet', 'profileFromFlightSet',
     'productionPlanetValues', 'productionPlanetState', 'isNewerExport', 'planCompanionSync',
-    'resolveImportUniverse',
+    'resolveImportUniverse', 'profileFromSpyReport',
     'lfBuildingGameId', 'pfNum', 'pfBool', 'pfBodyLabel', 'pfStartRange', 'expeditionHighTop',
     'EXPEDITION_TOP_SCORE_LIMITS',
 ]);
@@ -626,6 +626,41 @@ describe('resolveImportUniverse', () => {
         expect(plain(core.resolveImportUniverse(data(), index, { asked: true, picked: EN1 }))).toEqual(EN1);
         // The known profile is not used on the second pass.
         expect(core.resolveImportUniverse(data(), index, { asked: true, picked: null })).toBeNull();
+    });
+});
+
+describe('profileFromSpyReport', () => {
+    const REPORT = readFileSync(join(__dirname, '..', 'playwright-tests', 'fixtures', 'sr_fs003df9447df01744296d867509e0ae7e60.json'), 'utf8');
+    const report = () => JSON.parse(REPORT);
+
+    it('makes a profile on the report\'s universe with the spied planet and no account data', () => {
+        const profile = core.profileFromSpyReport(report(), 'Pirate', idSource());
+        expect(profile.label).toBe('Pirate');
+        expect(plain(profile.universe)).toEqual(EN1);
+        expect(profile.universeLocked).toBe(false);
+        expect(profile.importedAt).toBeNull();
+        expect(plain(profile.account)).toEqual({ values: {} });
+        expect(plain(profile.planets)).toEqual([{ id: 'id2', gameId: null, name: 'swimbo', coords: { galaxy: 4, system: 123, position: 7 }, values: {} }]);
+        expect(profile.moons).toHaveLength(0);
+    });
+
+    it('puts a spied moon among the moons, with no planet known', () => {
+        const rd = report();
+        rd.generic.defender_planet_type = '3';
+        const profile = core.profileFromSpyReport(rd, 'Pirate', idSource());
+        expect(profile.planets).toHaveLength(0);
+        expect(profile.moons.map((m) => [m.name, m.planetId])).toEqual([['swimbo', null]]);
+    });
+
+    it('leaves out a body whose coordinates do not read, and a universe that does not', () => {
+        const rd = report();
+        rd.generic.defender_planet_coordinates = '4:0:7';
+        rd.universes.universe = 'x';
+        const profile = core.profileFromSpyReport(rd, 'Pirate');
+        expect(profile.planets).toHaveLength(0);
+        expect(profile.moons).toHaveLength(0);
+        expect(profile.universe).toBeNull();
+        expect(core.profileFromSpyReport({}, 'Empty').universe).toBeNull();
     });
 });
 

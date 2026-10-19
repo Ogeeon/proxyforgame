@@ -255,29 +255,14 @@ class FlightProfiles extends FlatSettingsBinder {
   }
 
   /**
-   * Make a profile for the spied player and switch to it: the report's universe
-   * and the spied planet or moon, so the departure select offers it. The
-   * account values stay empty here - the import then writes them as it would
-   * into any profile entered by hand.
+   * Make a profile for the spied player (profileFromSpyReport) and switch to it.
    *
    * @param {*} rd
    * @param {string} label
    * @returns {boolean} False when the profile could not be saved.
    */
   createReportProfile(rd, label) {
-    const number = Number(rd?.universes?.universe);
-    const country = String(rd?.universes?.domain || '');
-    const profile = createProfile({ label, universe: country && number > 0 ? { country, number } : null });
-    const coords = String(rd?.generic?.defender_planet_coordinates || '').split(':').map(Number);
-    if (coords.length === 3 && coords.every((n) => Number.isInteger(n) && n > 0)) {
-      const body = createPlanet({
-        name: String(rd.generic.defender_planet_name || ''),
-        coords: { galaxy: coords[0], system: coords[1], position: coords[2] },
-      });
-      // The game's planet types: 1 planet, 3 moon.
-      if (Number(rd.generic.defender_planet_type) === 3) profile.moons.push({ ...body, planetId: null });
-      else profile.planets.push(body);
-    }
+    const profile = profileFromSpyReport(rd, label);
     if (!this.pf.store.save(profile)) return false;
     this.pf.store.requestPersistence();
     this.pf.store.setActive(profile.id);
