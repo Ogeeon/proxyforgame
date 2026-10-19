@@ -158,13 +158,46 @@ function pfPercentField(key, prm, input) {
  * @param {string} prm
  * @param {string} input Selector.
  * @param {number} [def] The value when the profile has none.
+ * @param {number} [min] The lowest value the calculator accepts.
  * @returns {ProfileConvField}
  */
-function pfConvNumField(key, prm, input, def = 0) {
+function pfConvNumField(key, prm, input, def = 0, min = -Infinity) {
   return {
     key, prm, input,
-    toPrm: (v) => (v === undefined || v === null ? def : pfNum(v)),
+    toPrm: (v) => Math.max(min, v === undefined || v === null ? def : pfNum(v)),
     fromPrm: pfNum,
+  };
+}
+
+/**
+ * The player class of a calculator without a "no class" radio, whose radios
+ * count from the collector: a profile without a class shows as collector.
+ *
+ * @param {string} prm
+ * @param {string} prefix The id of the class radios up to their number, such as `class-`.
+ * @returns {ProfileConvField}
+ */
+function pfCollectorClassField(prm, prefix) {
+  return {
+    key: 'class', prm, input: '#' + prefix + '0',
+    toPrm: (v) => Math.min(2, Math.max(0, pfNum(v) - 1)),
+    fromPrm: (v) => pfNum(v) + 1,
+    display: (v) => pfLabelFor(prefix + (pfNum(v) - 1)),
+  };
+}
+
+/**
+ * The exchange rates, kept by the calculator as a list of three numbers.
+ *
+ * @param {string} prm
+ * @param {string} input Selector.
+ * @returns {ProfileConvField}
+ */
+function pfRatesField(prm, input) {
+  return {
+    key: 'rates', prm, input,
+    toPrm: (v) => (Array.isArray(v) && v.length === 3 ? v.map(Number) : DEFAULT_RATES.slice()),
+    fromPrm: (v) => (Array.isArray(v) ? v.map(Number) : DEFAULT_RATES.slice()),
   };
 }
 
@@ -185,10 +218,7 @@ function pfClassField(prm, prefix, none) {
       return cls === PROFILE_CLASS.COLLECTOR || cls === PROFILE_CLASS.GENERAL ? cls : none;
     },
     fromPrm: pfNum,
-    display: (v) => {
-      const label = document.querySelector('label[for="' + prefix + pfNum(v) + '"]');
-      return label ? (label.textContent || '').trim() : '—';
-    },
+    display: (v) => pfLabelFor(prefix + pfNum(v)),
   };
 }
 
@@ -1054,14 +1084,16 @@ class ProfilesUi {
    * @param {boolean} asked
    */
   offerMigration(asked) {
-    const sets = this.findSavedSets();
     let answered = false;
     try {
       answered = localStorage.getItem(SAVED_SETS_ANSWERED_KEY) !== null;
     } catch {
       answered = true;
     }
-    if (sets.length === 0 || (!asked && answered)) return;
+    // Checked before the scan of every stored key, which most page loads skip.
+    if (!asked && answered) return;
+    const sets = this.findSavedSets();
+    if (sets.length === 0) return;
     setTextContent('#pf-migrate-body', pfFormat(this.text.migrateText, sets.length));
     const list = document.getElementById('pf-migrate-list');
     if (list) {

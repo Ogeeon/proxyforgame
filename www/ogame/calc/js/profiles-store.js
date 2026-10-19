@@ -141,9 +141,12 @@ class ProfileStore {
   save(profile) {
     if (!this.write(this.local, PROFILE_STORAGE_KEYS.prefix + profile.id, profile)) return false;
     const entry = { id: profile.id, label: profile.label, universe: profile.universe, playerId: profile.playerId };
-    const index = this.list().filter((e) => e.id !== profile.id);
-    index.push(entry);
-    const ok = this.write(this.local, PROFILE_STORAGE_KEYS.index, index);
+    const list = this.list();
+    const old = list.find((e) => e.id === profile.id);
+    // Most saves are value edits: an unchanged entry spares the index write,
+    // and the second storage event it would raise in every other tab.
+    const ok = (old !== undefined && JSON.stringify(old) === JSON.stringify(entry))
+      || this.write(this.local, PROFILE_STORAGE_KEYS.index, [...list.filter((e) => e.id !== profile.id), entry]);
     this.notify();
     return ok;
   }
@@ -237,6 +240,8 @@ class ProfileStore {
    */
   listenToOtherTabs(win) {
     win.addEventListener('storage', (e) => {
+      // The last-planet map shares the profiles' prefix but changes no profile.
+      if (e.key === PROFILE_STORAGE_KEYS.planets) return;
       if (e.key === null || e.key === PROFILE_STORAGE_KEYS.index || e.key.startsWith(PROFILE_STORAGE_KEYS.prefix)) {
         this.notify();
       }

@@ -42,8 +42,11 @@ const FLIGHT_LF_STATS = ['speed', 'cargo', 'fuel'];
  * @returns {?HTMLElement}
  */
 function flightLfBonusInput(i, j) {
-  const row = $$('#lf-ships-bonuses tr')[i + 1];
-  return row ? row.querySelectorAll('input')[j] || null : null;
+  // The table is static, so its rows are reached by index rather than by a
+  // selector query per field: a mark pass resolves all 45 of them.
+  const table = document.getElementById('lf-ships-bonuses');
+  const row = table instanceof HTMLTableElement ? table.rows[i + 1] : undefined;
+  return row ? row.getElementsByTagName('input')[j] || null : null;
 }
 
 /** @type {FlightAccountField[]} */

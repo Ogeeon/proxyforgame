@@ -27,15 +27,7 @@ const PRODUCTION_ACCOUNT_FIELDS = [
   pfConvNumField('research.113', 'energyTechLevel', '#energy-tech-level'),
   pfConvNumField('research.122', 'plasmaTechLevel', '#plasma-tech-level'),
   ...pfOfficerFields(['engineer', 'geologist', 'technocrat', 'admiral', 'commander']),
-  {
-    // Production has no "no class": a profile without one shows as collector.
-    prm: 'playerClass', key: 'class', input: '#class-0',
-    toPrm: (v) => Math.min(2, Math.max(0, pfNum(v) - 1)), fromPrm: (v) => pfNum(v) + 1,
-    display: (v) => {
-      const label = document.querySelector('label[for="class-' + (pfNum(v) - 1) + '"]');
-      return label ? (label.textContent || '').trim() : '—';
-    },
-  },
+  pfCollectorClassField('playerClass', 'class-'),
   pfTraderField('isTrader', '#is-trader'),
   pfConvNumField('lf.prod.metal', 'lfMetProdBonus', '#lf-metal-prod-bonus'),
   pfConvNumField('lf.prod.crystal', 'lfCrysProdBonus', '#lf-crystal-prod-bonus'),
@@ -44,11 +36,7 @@ const PRODUCTION_ACCOUNT_FIELDS = [
   pfConvNumField('lf.classBooster.1', 'lfCollectorBonus', '#lf-collector-bonus'),
   pfConvNumField('lf.crawler', 'lfCrawlerBonus', '#lf-crawler-bonus'),
   pfConvNumField('lf.cost.122.cost', 'lfPlasmaCostReduction', '#lf-plasma-cost-reduction'),
-  {
-    prm: 'rates', key: 'rates', input: '#exchange-rates-m',
-    toPrm: (v) => (Array.isArray(v) && v.length === 3 ? v.map(Number) : DEFAULT_RATES.slice()),
-    fromPrm: (v) => (Array.isArray(v) ? v.map(Number) : DEFAULT_RATES.slice()),
-  },
+  pfRatesField('rates', '#exchange-rates-m'),
 ];
 
 /** Storage capacity levels of the one-planet tab, and the building each is. */
@@ -77,8 +65,7 @@ function planetToProductionState(planet) {
   s[PLANET_ENERGY_BOOST] = get('energyBooster', 0);
   PRODUCTION_ROW_TECHS.forEach((tech, i) => {
     const j = i + 1;
-    const kind = tech === 212 || tech === 217 ? 'ship.' : 'building.';
-    s[mineSlot(j)] = get(kind + tech, 0);
+    s[mineSlot(j)] = get(productionRowKey(tech), 0);
     s[mineSlot(j) + 1] = get('production.' + tech, 100);
     s[mineSlot(j) + 2] = j <= 3 ? get('booster.' + tech, 0) : 0;
   });
@@ -424,14 +411,7 @@ class ProductionProfiles extends ProfileBinder {
     const select = selectEl('#pf-planet');
     if (!select) return;
     select.innerHTML = '';
-    profile.planets.forEach((p) => {
-      const option = document.createElement('option');
-      option.value = p.id;
-      const c = p.coords;
-      const where = c && c.galaxy !== null && c.system !== null ? ' [' + c.galaxy + ':' + c.system + ':' + c.position + ']' : '';
-      option.textContent = (p.name || options.planetNumStr) + where;
-      select.appendChild(option);
-    });
+    profile.planets.forEach((p) => select.appendChild(new Option(pfBodyLabel(p, options.planetNumStr), p.id)));
     select.value = this.onePlanetId || '';
   }
 
@@ -453,7 +433,7 @@ class ProductionProfiles extends ProfileBinder {
       const row = rows[i + 2];
       if (!row) return;
       const name = (row.children[0].textContent || '').trim();
-      this.pf.describeField((tech === 212 || tech === 217 ? 'ship.' : 'building.') + tech, name);
+      this.pf.describeField(productionRowKey(tech), name);
       const booster = selectEl('#boosted-prod' + (i + 1));
       if (i < 3 && booster) describeSelect('booster.' + tech, booster);
     });
@@ -490,7 +470,7 @@ class ProductionProfiles extends ProfileBinder {
       PRODUCTION_ROW_TECHS.forEach((tech, i) => {
         const row = rows[i + 2];
         if (!row) return;
-        mark(cellInput(row, 2), (tech === 212 || tech === 217 ? 'ship.' : 'building.') + tech);
+        mark(cellInput(row, 2), productionRowKey(tech));
         mark(cellSelect(row, 7), 'production.' + tech);
         if (i < 3) mark(selectEl('#boosted-prod' + (i + 1)), 'booster.' + tech);
       });
@@ -510,7 +490,7 @@ class ProductionProfiles extends ProfileBinder {
       const temperature = row.children[2] ? row.children[2].querySelector('input') : null;
       this.pf.markField(temperature, profile, p, 'temperature.max', this.restoreBody('planets', p.id, 'temperature.max'));
       PRODUCTION_ROW_TECHS.forEach((tech, j) => {
-        const key = (tech === 212 || tech === 217 ? 'ship.' : 'building.') + tech;
+        const key = productionRowKey(tech);
         const cell = row.children[LEVEL_COLUMNS[j]];
         this.pf.markField(cell ? cell.querySelector('input') : null, profile, p, key, this.restoreBody('planets', p.id, key));
       });

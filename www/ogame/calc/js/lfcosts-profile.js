@@ -31,13 +31,7 @@
 const LFCOSTS_ACCOUNT_FIELDS = [
   pfConvNumField('research.121', 'ionTechLevel', '#ion-tech-level'),
   pfConvNumField('research.114', 'hyperTechLevel', '#hyper-tech-level'),
-  {
-    // The calculator has no "no class": a profile without one shows as collector.
-    key: 'class', prm: 'playerClass', input: '#class-0',
-    toPrm: (v) => Math.min(2, Math.max(0, pfNum(v) - 1)),
-    fromPrm: (v) => pfNum(v) + 1,
-    display: (v) => pfLabelFor('class-' + (pfNum(v) - 1)),
-  },
+  pfCollectorClassField('playerClass', 'class-'),
   pfConvNumField('lf.ship.202.cargo', 'capIncrSC', '#sc-capacity-increase'),
   pfConvNumField('lf.ship.203.cargo', 'capIncrLC', '#lc-capacity-increase'),
   // The game lists the reduction of life-form research under one of them,
@@ -45,11 +39,7 @@ const LFCOSTS_ACCOUNT_FIELDS = [
   // planet's third building is not in it, the calculator adds that itself.
   pfConvNumField('lf.cost.11201.cost', 'researchCostReduction', '#research-cost-reduction'),
   pfConvNumField('lf.cost.11201.time', 'researchTimeReduction', '#research-time-reduction'),
-  {
-    key: 'rates', prm: 'rates', input: '#exchange-rates-m',
-    toPrm: (v) => (Array.isArray(v) && v.length === 3 ? v.map(Number) : DEFAULT_RATES.slice()),
-    fromPrm: (v) => (Array.isArray(v) ? v.map(Number) : DEFAULT_RATES.slice()),
-  },
+  pfRatesField('rates', '#exchange-rates-m'),
 ];
 
 /** The planet's life form: a race, or 0 when none lives there. */

@@ -48,13 +48,7 @@ function tradeRoundRate(x) {
 /** @type {ProfileConvField[]} */
 const TRADE_ACCOUNT_FIELDS = [
   pfConvNumField('research.114', 'hyperTech', '#hypertech-lvl'),
-  {
-    // Trade has no "no class": a profile without one shows as collector.
-    prm: 'playerClass', key: 'class', input: '#player-class-0',
-    toPrm: (v) => Math.min(2, Math.max(0, pfNum(v) - 1)),
-    fromPrm: (v) => pfNum(v) + 1,
-    display: (v) => pfLabelFor('player-class-' + (pfNum(v) - 1)),
-  },
+  pfCollectorClassField('playerClass', 'player-class-'),
   pfConvNumField('lf.ship.202.cargo', 'scCapacityIncrease', '#sc-capacity-increase'),
   pfConvNumField('lf.ship.203.cargo', 'lcCapacityIncrease', '#lc-capacity-increase'),
   {

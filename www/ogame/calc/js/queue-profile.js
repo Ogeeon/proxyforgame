@@ -170,11 +170,7 @@ class QueueProfiles extends ProfileBinder {
     QUEUE_TABS.forEach((t) => this.bodySelects[t.tab].hide());
     const prm = options.prm;
     Object.assign(prm, cloneData(this.ownPrm));
-    setVal('#ion-tech-level', prm.ionTechLevel);
-    setVal('#hyper-tech-level', prm.hyperTechLevel);
-    setChecked('#player-class-' + prm.playerClass, true);
-    setNumVal('#sc-capacity-increase', prm.scCapacityIncrease);
-    setNumVal('#lc-capacity-increase', prm.lcCapacityIncrease);
+    QUEUE_ACCOUNT_FIELDS.forEach((f) => f.show(f.get(prm)));
     QUEUE_TABS.forEach((t) => {
       const levels = Array.isArray(prm[t.levels]) ? prm[t.levels] : [];
       levels.forEach((/** @type {number[]} */ [techId, level]) => setVal('#startlvl-' + t.tab + '-' + techId, level));

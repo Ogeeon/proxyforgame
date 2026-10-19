@@ -502,29 +502,6 @@ function resetProfileValue(entity, key) {
 }
 
 /**
- * Restore every game value of one entity.
- *
- * @param {{values: LayeredValues}} entity
- * @returns {number} How many values were reset.
- */
-function resetEntityToGame(entity) {
-  return Object.keys(entity.values).filter((key) => resetProfileValue(entity, key)).length;
-}
-
-/**
- * Restore every game value of the whole profile.
- *
- * @param {Profile} profile
- * @returns {number} How many values were reset.
- */
-function resetProfileToGame(profile) {
-  let count = resetEntityToGame(profile.account);
-  profile.planets.forEach((p) => { count += resetEntityToGame(p); });
-  profile.moons.forEach((m) => { count += resetEntityToGame(m); });
-  return count;
-}
-
-/**
  * One value of a profile that differs from the game.
  *
  * @typedef {Object} ProfileOverride
@@ -1277,6 +1254,17 @@ function ratesFromTrade(trade) {
 /** Production's planet arrays name the crawler 218; the game calls it 217. */
 const PRODUCTION_ROW_TECHS = [1, 2, 3, 4, 12, 212, 217];
 
+/**
+ * The profile value key of a production row's level: the satellite and the
+ * crawler are ships, the rest are buildings.
+ *
+ * @param {number} tech One of PRODUCTION_ROW_TECHS.
+ * @returns {string}
+ */
+function productionRowKey(tech) {
+  return (tech === 212 || tech === 217 ? 'ship.' : 'building.') + tech;
+}
+
 /** Flight's ship order, as game ids. */
 const FLIGHT_SHIP_IDS = [202, 203, 204, 205, 206, 207, 208, 209, 210, 211, 213, 214, 215, 218, 219];
 
@@ -1328,9 +1316,9 @@ function profileFromProductionSet(prm, init) {
 
   setManual(acc, 'research.113', num(prm.energyTechLevel));
   setManual(acc, 'research.122', num(prm.plasmaTechLevel));
-  PROFILE_OFFICERS.forEach((name) => setManual(acc, 'officer.' + name, prm[name] === true || prm[name] === 'true'));
+  PROFILE_OFFICERS.forEach((name) => setManual(acc, 'officer.' + name, pfBool(prm[name])));
   setManual(acc, 'class', num(prm.playerClass) + 1);
-  if (prm.isTrader === true || prm.isTrader === 'true') setManual(acc, 'allianceClass', PROFILE_ALLIANCE_CLASS.TRADER);
+  if (pfBool(prm.isTrader)) setManual(acc, 'allianceClass', PROFILE_ALLIANCE_CLASS.TRADER);
   setManual(acc, 'lf.prod.metal', num(prm.lfMetProdBonus));
   setManual(acc, 'lf.prod.crystal', num(prm.lfCrysProdBonus));
   setManual(acc, 'lf.prod.deuterium', num(prm.lfDeutProdBonus));
@@ -1397,8 +1385,7 @@ function productionPlanetValues(s) {
   };
   PRODUCTION_ROW_TECHS.forEach((tech, i) => {
     const j = i + 1;
-    const kind = tech === 212 || tech === 217 ? 'ship.' : 'building.';
-    values[kind + tech] = num(s[j * 3]);
+    values[productionRowKey(tech)] = num(s[j * 3]);
     values['production.' + tech] = finiteOrNull(s[j * 3 + 1]) ?? 100;
     if (j <= 3) values['booster.' + tech] = num(s[j * 3 + 2]);
   });
@@ -1448,8 +1435,8 @@ function profileFromFlightSet(prm, init) {
   FLIGHT_DRIVE_TECHS.forEach((tech, i) => setManual(acc, 'research.' + tech, num(drives[i])));
   setManual(acc, 'research.114', num(prm.hyperTechLvl));
   setManual(acc, 'class', num(prm.playerClass) + 1);
-  if (prm.traderBonus === true || prm.traderBonus === 'true') setManual(acc, 'allianceClass', PROFILE_ALLIANCE_CLASS.TRADER);
-  else if (prm.warriorBonus === true || prm.warriorBonus === 'true') setManual(acc, 'allianceClass', PROFILE_ALLIANCE_CLASS.WARRIOR);
+  if (pfBool(prm.traderBonus)) setManual(acc, 'allianceClass', PROFILE_ALLIANCE_CLASS.TRADER);
+  else if (pfBool(prm.warriorBonus)) setManual(acc, 'allianceClass', PROFILE_ALLIANCE_CLASS.WARRIOR);
   setManual(acc, 'lf.classBooster.1', num(prm.lfRocktalCE));
   setManual(acc, 'lf.classBooster.2', num(prm.lfMechanGE));
 
@@ -1492,10 +1479,10 @@ if (typeof window !== 'undefined') {
   Object.assign(window, {
     expeditionHighTop,
     PROFILE_FORMAT_VERSION, PROFILE_CLASS, PROFILE_ALLIANCE_CLASS, DEFAULT_RATES,
-    PRODUCTION_ROW_TECHS, FLIGHT_SHIP_IDS,
+    PRODUCTION_ROW_TECHS, productionRowKey, FLIGHT_SHIP_IDS,
     createProfile, createPlanet, newProfileId, sameUniverse, pfNum, pfBool, pfBodyLabel,
     getProfileValue, setProfileValue, differsFromGame, resetProfileValue,
-    resetEntityToGame, resetProfileToGame, countOverrides, hasGameLayer,
+    countOverrides, hasGameLayer,
     parseAccountExport, findProfileForExport, importAccountExport, mergeProfiles,
     readProfile, serializeProfilesFile, parseProfilesFile, planProfilesRestore,
     universeCacheKey, readUniverseChoices,

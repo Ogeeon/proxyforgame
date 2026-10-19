@@ -45,12 +45,8 @@ const MOON_PLANET_FIELDS = [
 
 /** The fields of the moon picked in #pf-moon. */
 const MOON_MOON_FIELDS = [
-  {
-    // The field takes no level below 1, so a moon with no phalanx shows 1.
-    key: 'building.42', prm: 'phalanxLevel', input: '#phalanx-lvl',
-    toPrm: (/** @type {*} */ v) => Math.max(1, v === undefined || v === null ? 1 : pfNum(v)),
-    fromPrm: pfNum,
-  },
+  // The field takes no level below 1, so a moon with no phalanx shows 1.
+  pfConvNumField('building.42', 'phalanxLevel', '#phalanx-lvl', 1, 1),
 ];
 
 /** The options.prm keys of the settings that come from the profile's universe. */
@@ -125,13 +121,12 @@ class MoonProfiles extends PlanetPrmBinder {
   }
 
   init() {
-    const label = (/** @type {string} */ selector) => (document.querySelector('label[for="' + selector.slice(1) + '"]')?.textContent || '').trim();
     // Both checkboxes read "Class: <name>"; the class itself is named by what comes before the colon.
-    const classLabel = label('#general-class').split(':')[0].trim();
+    const classLabel = pfLabelFor('general-class').split(':')[0].trim();
     this.pf.describeField('class', classLabel, (v) => {
       const cls = pfNum(v);
-      if (cls === PROFILE_CLASS.GENERAL) return label('#general-class');
-      return cls === PROFILE_CLASS.DISCOVERER ? label('#discoverer-class') : '—';
+      if (cls === PROFILE_CLASS.GENERAL) return pfLabelFor('general-class');
+      return cls === PROFILE_CLASS.DISCOVERER ? pfLabelFor('discoverer-class') : '—';
     });
     this.describeFieldList(MOON_MOON_FIELDS);
     this.moonSelect.onChange(() => this.moonChosen());

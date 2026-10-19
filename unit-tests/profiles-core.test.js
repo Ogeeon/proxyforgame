@@ -13,7 +13,7 @@ const { expect } = require('./expect');
 
 const core = load(['ogame/calc/js/profiles-core.js'], [
     'createProfile', 'createPlanet', 'getProfileValue', 'setProfileValue', 'differsFromGame',
-    'resetProfileValue', 'resetProfileToGame', 'countOverrides', 'listOverrides', 'resetOverrides', 'hasGameLayer',
+    'resetProfileValue', 'countOverrides', 'listOverrides', 'resetOverrides', 'hasGameLayer',
     'parseAccountExport', 'findProfileForExport', 'importAccountExport', 'mergeProfiles',
     'serializeProfilesFile', 'parseProfilesFile', 'planProfilesRestore', 'universeCacheKey',
     'ratesToTrade', 'ratesFromTrade', 'profileFromProductionSet', 'profileFromFlightSet',
@@ -344,7 +344,7 @@ describe('the two layers', () => {
         core.setProfileValue(profile.account, 'research.122', 20);
         core.setProfileValue(planetNamed(profile, 'Beta'), 'building.2', 30);
         expect(core.countOverrides(profile)).toBe(2);
-        expect(core.resetProfileToGame(profile)).toBe(2);
+        expect(core.resetOverrides(profile, core.listOverrides(profile))).toBe(2);
         expect(core.countOverrides(profile)).toBe(0);
     });
 

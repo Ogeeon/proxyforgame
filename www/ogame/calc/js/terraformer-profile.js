@@ -51,12 +51,8 @@ const TERRAFORMER_ACCOUNT_FIELDS = [
  */
 const TERRAFORMER_PLANET_FIELDS = [
   pfConvNumField('building.14', 'robotsFactoryLevel', '#robots-factory-level'),
-  {
-    // The field takes no level below 1, so a planet with no shipyard shows 1.
-    key: 'building.21', prm: 'shipyardLevel', input: '#shipyard-level',
-    toPrm: (v) => Math.max(1, v === undefined || v === null ? 1 : pfNum(v)),
-    fromPrm: pfNum,
-  },
+  // The field takes no level below 1, so a planet with no shipyard shows 1.
+  pfConvNumField('building.21', 'shipyardLevel', '#shipyard-level', 1, 1),
   pfConvNumField('building.15', 'nanitesFactoryLevel', '#nanites-factory-level'),
   pfConvNumField('temperature.max', 'maxPlanetTemp', '#max-planet-temp'),
   pfConvNumField('energyBooster', 'energyBoost', '#energy-boost'),
