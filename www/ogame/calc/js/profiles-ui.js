@@ -952,6 +952,11 @@ class ProfilesUi {
     plan.updates.forEach((profile) => this.save(profile));
     this.companionCandidates = plan.candidates;
     this.renderSelect();
+    // save() keeps a page's own edits from coming back to it, but a Sync is not
+    // the calculator's edit: it has to show the active profile's new game layer.
+    // At load no calculator listens yet, and it reads the saved profile itself.
+    const activeId = this.store.getActiveId();
+    if (plan.updates.some((profile) => profile.id === activeId)) this.emit();
   }
 
   /** @param {number} index */

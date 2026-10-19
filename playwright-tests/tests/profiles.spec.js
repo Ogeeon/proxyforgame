@@ -558,7 +558,7 @@ test('a Companion export of an account with no profile is offered for import', a
     expect(JSON.parse(await page.locator('#pf-import-text').inputValue()).playerId).toBe(100002);
 });
 
-test('a newer Companion export arriving after load updates the stored profile', async ({ page }) => {
+test('a newer Companion export arriving after load updates the profile and the calculator', async ({ page }) => {
     await importForCompanion(page);
     await page.evaluate(([name, detail]) => document.dispatchEvent(new CustomEvent(name, { detail })),
         [COMPANION_EVENT, companionPayload(laterExport())]);
@@ -567,6 +567,10 @@ test('a newer Companion export arriving after load updates the stored profile', 
     const profile = await activeProfile(page);
     expect(profile.account.values['research.113']).toEqual({ game: 17 });
     expect(profile.account.values['research.122']).toEqual({ game: 16, override: 20 });
+    // The page shows the new game layer without a reload.
+    await expect(page.locator('#energy-tech-level')).toHaveValue('17');
+    await expect(page.locator('#plasma-tech-level')).toHaveValue('20');
+    await expect(page.locator('#plasma-tech-level')).toHaveClass(/pf-differs/);
 });
 
 // A spy report describes the spied player, so with a profile active the import
