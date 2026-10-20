@@ -411,7 +411,8 @@ describe('Calculator.calculate - points ignore life form cost reductions', () =>
         const reduced = calc.calculate(request, paramsWith({ mineralResCntrLvl: 100 }));
 
         expect(full.metal).toBe(398901);
-        expect(reduced.metal).toBe(199450);
+        // Each level halved and floored on its own (#58), not half the total (199450)
+        expect(reduced.metal).toBe(199444);
         expect(full.points).toBe(498);
         expect(reduced.points).toBe(498);
     });
@@ -421,5 +422,51 @@ describe('Calculator.calculate - points ignore life form cost reductions', () =>
         const reduced = calc.calculate(request, paramsWith({ lfResCostRdcMap: { [LASER_TECH]: 50 } }));
 
         expect(reduced.points).toBe(612);
+    });
+});
+
+// The game builds one level at a time and rounds each level's reduced cost and
+// time down on its own, so a range under a life form reduction is the sum of its
+// levels. Flooring the reduced total once came out up to a unit per level higher,
+// and disagreed with the terraformer calculator on the same range (#58).
+describe('Calculator.calculate - life form reductions round each level of a range', () => {
+    const TERRAFORMER = 33;
+    const LASER_TECH = 120;
+    // [metal, crystal, deuterium, cost growth factor], as costs.tpl emits it
+    const costs = { [TERRAFORMER]: [0, 50000, 100000, 2], [LASER_TECH]: [200, 100, 0, 2] };
+    const calc = new Calculator(costs, { [LASER_TECH]: 1 });
+    const terraformerParams = () => Object.assign(new GlobalParams(), {
+        robotFactoryLevelPlanet: 10,
+        lfTerraformerRdc: 25,
+    });
+
+    it('floors the Terraformer time of each level, as the terraformer calculator does', () => {
+        // Levels 5, 6, 7 at robotics 10 take 69818, 209454 and 418909 s. A quarter
+        // off each, floored: 52363 + 157090 + 314181 = 523634 s, not 523635 s.
+        const result = calc.calculate(new BuildRequest(TERRAFORMER, 4, 7), terraformerParams());
+
+        expect(result.time).toBe(523634);
+        expect(result.crystal).toBe(4200000);
+        expect(result.deuterium).toBe(8400000);
+    });
+
+    it('floors the research time of each level', () => {
+        // Levels 1-4 at lab 10: 98.18, 196.36, 392.73 and 785.45 s. A quarter off
+        // each, floored: 73 + 147 + 294 + 589 = 1103 s, not 1104 s.
+        const params = Object.assign(new GlobalParams(), {
+            useDirectLabLevel: true,
+            researchLabLevel: 10,
+            labChoice: -1,
+            lfResTimeRdcMap: { [LASER_TECH]: 25 },
+        });
+        const result = calc.calculate(new BuildRequest(LASER_TECH, 0, 4), params);
+
+        expect(result.time).toBe(1103);
+    });
+
+    it('leaves a single level as it was', () => {
+        const result = calc.calculate(new BuildRequest(TERRAFORMER, 6, 7), terraformerParams());
+
+        expect(result.time).toBe(314181);
     });
 });
