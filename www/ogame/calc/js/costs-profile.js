@@ -232,6 +232,23 @@ class CostsProfiles extends ProfileBinder {
     };
   }
 
+  /**
+   * The account, the planet and the moon picked in the selects. They read the
+   * calculator's parameters, which collect the whole form: a pass reads them
+   * once and hands them to every group.
+   *
+   * @returns {PfFieldGroup[]}
+   */
+  fieldGroups() {
+    const settings = () => this.app.params();
+    return [
+      { scope: '', entity: (p) => p.account, fields: this.accountFields, settings },
+      { scope: 'planet', entity: (p) => this.bodies(p).planet, fields: COSTS_PLANET_FIELDS, settings },
+      // building.14 is the planet's key too: the planet names it.
+      { scope: 'moon', entity: (p) => this.bodies(p).moon, fields: COSTS_MOON_FIELDS, settings, describe: false },
+    ];
+  }
+
   /** The state keys the profile owns right now. */
   ownedStateKeys() {
     return [
@@ -320,13 +337,11 @@ class CostsProfiles extends ProfileBinder {
     this.app.recalculateAll();
   }
 
+  /** The groups, and what is bound by hand: the planet's position and the research network dialog. */
   takeSnapshot() {
     const p = this.app.params();
-    this.snapshot = {};
-    this.accountFields.forEach((f) => { this.snapshot[f.key] = f.read(p); });
-    COSTS_PLANET_FIELDS.forEach((f) => { this.snapshot['planet:' + f.key] = f.read(p); });
+    this.snapshot = snapshotReadings(this.readGroups(null, this.fieldGroups(), p));
     this.snapshot['planet:position'] = pfNum(p.planetPos);
-    COSTS_MOON_FIELDS.forEach((f) => { this.snapshot['moon:' + f.key] = f.read(p); });
     this.snapshot.labs = p.labLevels.map(pfNum);
     this.snapshot.labChoice = p.labChoice;
     this.snapshot.useIrn = p.useIrn;
@@ -345,19 +360,9 @@ class CostsProfiles extends ProfileBinder {
     const profile = this.profile();
     if (!profile) return;
     const p = this.app.params();
-    const { planet, moon } = this.bodies(profile);
-    let changed = false;
-    /**
-     * @param {{values: LayeredValues}} entity
-     * @param {ProfileField} f
-     * @param {string} snapKey
-     */
-    const writeBackField = (entity, f, snapKey) => {
-      changed = this.writeBackValue(entity, f.key, snapKey, f.read(p)) || changed;
-    };
-    this.accountFields.forEach((f) => writeBackField(profile.account, f, f.key));
+    const { planet } = this.bodies(profile);
+    let changed = this.writeBackGroups(profile, p);
     if (planet) {
-      COSTS_PLANET_FIELDS.forEach((f) => writeBackField(planet, f, 'planet:' + f.key));
       const position = pfNum(p.planetPos);
       if (position !== this.snapshot['planet:position']) {
         this.snapshot['planet:position'] = position;
@@ -365,7 +370,6 @@ class CostsProfiles extends ProfileBinder {
         changed = true;
       }
     }
-    if (moon) COSTS_MOON_FIELDS.forEach((f) => writeBackField(moon, f, 'moon:' + f.key));
     const labs = this.writeBackLabs(profile, p);
     changed = labs.changed || changed;
     if (changed) {
@@ -604,25 +608,12 @@ class CostsProfiles extends ProfileBinder {
   // The marks
   // -------------------------------------------------------------------------
 
-  /** Name every value this page binds, in the page's own words. */
-  describeFields() {
-    this.describeFieldList([...this.accountFields, ...COSTS_PLANET_FIELDS]);
-  }
-
-  /** Mark every field the profile owns, and the ones that differ from the game. */
-  markAll() {
-    const profile = this.profile();
-    if (!profile) return;
-    this.accountFields.forEach((f) => {
-      this.pf.markField(pfFieldInput(f), profile, profile.account, f.key, this.restoreAccount(f.key));
-    });
-    const { planet, moon } = this.bodies(profile);
-    if (planet) {
-      COSTS_PLANET_FIELDS.forEach((f) => this.pf.markField(pfFieldInput(f), profile, planet, f.key, this.restoreBody('planets', planet.id, f.key)));
-    }
-    if (moon) {
-      COSTS_MOON_FIELDS.forEach((f) => this.pf.markField(pfFieldInput(f), profile, moon, f.key, this.restoreBody('moons', moon.id, f.key)));
-    }
+  /**
+   * The research labs of the network dialog, one per planet of the profile.
+   *
+   * @param {Profile} profile
+   */
+  markExtra(profile) {
     profile.planets.slice(0, COSTS_MAX_LAB_PLANETS).forEach((p, i) => {
       this.pf.markField($('#lablevel_' + (i + 1)), profile, p, 'building.31', this.restoreBody('planets', p.id, 'building.31'));
     });
