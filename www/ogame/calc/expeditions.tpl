@@ -175,17 +175,16 @@
               <label for="highTop"><?= $l['LOCA_STRONGEST_CAP'] ?></label>
               <select id="highTop" name="highTop" class="form-select form-select-sm w-auto">
 <?php
-// The tiers live in data/expedition-top-tiers.json, shared with the MCP server.
-// The last one has no upper bound, is labelled "above" the bound before it,
-// and is the default.
-$expTopTiers = json_decode(file_get_contents(__DIR__ . '/data/expedition-top-tiers.json'), true);
-$expPrevBelow = 0;
+// $expTopTiers comes from data/expedition-top-tiers.json (expeditions.php).
+// The last tier has no limit, is labelled "above" the limit before it, and is
+// the default.
+$expPrevLimit = 0;
 foreach ($expTopTiers as $expTier):
-    if ($expTier['below'] === null): ?>
-                <option value="<?= $expTier['highTop'] ?>" selected="selected">&gt; <?= number_format($expPrevBelow, 0, '', '.') ?></option>
+    if ($expTier['upTo'] === null): ?>
+                <option value="<?= $expTier['highTop'] ?>" selected="selected">&gt; <?= number_format($expPrevLimit, 0, '', '.') ?></option>
 <?php else: ?>
-                <option value="<?= $expTier['highTop'] ?>">&lt; <?= number_format($expTier['below'], 0, '', '.') ?></option>
-<?php $expPrevBelow = $expTier['below'];
+                <option value="<?= $expTier['highTop'] ?>">&lt; <?= number_format($expTier['upTo'], 0, '', '.') ?></option>
+<?php $expPrevLimit = $expTier['upTo'];
     endif;
 endforeach; ?>
               </select>

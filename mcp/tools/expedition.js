@@ -13,7 +13,7 @@ const { ExpeditionsCalculator, EXPEDITION_SHIPS, EXPEDITION_CLASS } = loadBrowse
     ['ExpeditionsCalculator', 'EXPEDITION_SHIPS', 'EXPEDITION_CLASS'],
 );
 
-/** @type {{below: number|null, highTop: number}[]} */
+/** @type {{upTo: number|null, highTop: number}[]} */
 const TOP_TIERS = readWwwJson('ogame/calc/data/expedition-top-tiers.json');
 
 /** @type {{id: string, abbrev: string, cargo: number}[]} */
@@ -66,11 +66,12 @@ const inputSchema = {
 };
 
 /**
- * The tier a top score falls in: the first whose bound it stays below.
+ * The tier a top score falls in: the first whose limit it does not exceed, the
+ * last beyond them all - as expeditions.php and the profiles pick it.
  * @param {number} points
  */
 function highTopFor(points) {
-    const tier = TOP_TIERS.find((t) => t.below !== null && points < t.below) ?? TOP_TIERS.at(-1);
+    const tier = TOP_TIERS.find((t) => t.upTo !== null && points <= t.upTo) ?? TOP_TIERS.at(-1);
     return /** @type {{highTop: number}} */ (tier).highTop;
 }
 

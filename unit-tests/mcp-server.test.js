@@ -595,6 +595,16 @@ describe('MCP tool ogame_expedition', () => {
         expect(await top(500000000)).toBe(5000000);
     });
 
+    it('keeps a top score equal to a tier limit in that tier, as the page does', async () => {
+        const args = { ships: { 'large-cargo': 100 } };
+        const top = async (points) => (await call(protocolWith(), 'ogame_expedition', { ...args, topPlayerPoints: points }))
+            .structuredContent.assumptions.topTierValue;
+        expect(await top(1000000)).toBe(1200000);
+        expect(await top(1000001)).toBe(1800000);
+        expect(await top(100000000)).toBe(4200000);
+        expect(await top(100000001)).toBe(5000000);
+    });
+
     it('reads the top score and speed from a live universe', async () => {
         const site = fakeSiteApi({ 'de-1': { speed: '8', topScore: '250000.5' } });
         const out = (await call(protocolWith(site), 'ogame_expedition', {

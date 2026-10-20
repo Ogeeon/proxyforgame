@@ -1,11 +1,11 @@
 [
-  { "below": 10000, "highTop": 40000 },
-  { "below": 100000, "highTop": 500000 },
-  { "below": 1000000, "highTop": 1200000 },
-  { "below": 5000000, "highTop": 1800000 },
-  { "below": 25000000, "highTop": 2400000 },
-  { "below": 50000000, "highTop": 3000000 },
-  { "below": 75000000, "highTop": 3600000 },
-  { "below": 100000000, "highTop": 4200000 },
-  { "below": null, "highTop": 5000000 }
+  { "upTo": 10000, "highTop": 40000 },
+  { "upTo": 100000, "highTop": 500000 },
+  { "upTo": 1000000, "highTop": 1200000 },
+  { "upTo": 5000000, "highTop": 1800000 },
+  { "upTo": 25000000, "highTop": 2400000 },
+  { "upTo": 50000000, "highTop": 3000000 },
+  { "upTo": 75000000, "highTop": 3600000 },
+  { "upTo": 100000000, "highTop": 4200000 },
+  { "upTo": null, "highTop": 5000000 }
 ]

@@ -1916,14 +1916,16 @@ function profileFromSpyReport(rd, label, newId = newProfileId) {
 }
 
 /**
- * The score limits of expeditions.php's `$thresholds`, one per entry of the
- * "strongest player" select but the last. The page mirrors them, so a universe
- * opened through the URL API and one bound to a profile pick the same entry;
+ * The score limits of the "strongest player" tiers, one per entry of its
+ * select but the last - the `upTo` of data/expedition-top-tiers.json, which
+ * expeditions.php and the MCP server read. The parser below runs on every
+ * calculator that loads a universe's settings, not only on expeditions, so the
+ * tiers are repeated here rather than handed over by one page's template;
  * unit-tests/profiles-core.test.js fails when the two drift apart.
  */
 const EXPEDITION_TOP_SCORE_LIMITS = [10000, 100000, 1000000, 5000000, 25000000, 50000000, 75000000, 100000000];
 
-/** The values of expeditions' #highTop options, in the order of the select. */
+/** The values of expeditions' #highTop options, in the order of the select (the tiers' `highTop`). */
 const EXPEDITION_HIGH_TOP_VALUES = [40000, 500000, 1200000, 1800000, 2400000, 3000000, 3600000, 4200000, 5000000];
 
 /**
