@@ -10,6 +10,7 @@
     "../www/ogame/calc/js/profiles-store.js",
     "../www/ogame/calc/js/profiles-fields.js",
     "../www/ogame/calc/js/profiles-widgets.js",
+    "../www/ogame/calc/js/profiles-binders.js",
     "../www/ogame/calc/js/profiles-ui.js",
     "../www/ogame/calc/js/trade-core.js",
     "../www/ogame/calc/js/trade.js",
