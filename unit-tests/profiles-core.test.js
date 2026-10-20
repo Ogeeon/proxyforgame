@@ -23,7 +23,7 @@ const core = load(['ogame/calc/js/profiles-core.js'], [
     'EXPEDITION_TOP_SCORE_LIMITS', 'UNIVERSE_SETTINGS_TTL_MS', 'UNIVERSE_SETTING_PARSERS',
     'parseUniverseSettings', 'readUniverseEntry', 'isUniverseEntryFresh', 'universeLayer',
     'universeValue', 'setUniverseChoice', 'mergeUniverseChoices', 'pfMarkState',
-    'listUniverseOverrides', 'resetUniverseChoices',
+    'listUniverseOverrides', 'resetUniverseChoices', 'pfSnapKey', 'snapshotReadings', 'diffReadings',
 ]);
 
 const plain = (value) => JSON.parse(JSON.stringify(value));
@@ -384,6 +384,67 @@ describe('the two layers', () => {
         core.setProfileValue(profile.account, 'rates', rates);
         rates[0] = 9;
         expect(plain(core.getProfileValue(profile.account, 'rates'))).toEqual([1, 2, 3]);
+    });
+});
+
+describe('the write-back diff', () => {
+    const reading = (entity, key, value, scope = '') => ({ entity, key, snapKey: core.pfSnapKey(scope, key), value });
+
+    it('keeps an account value under its key and a body value under its scope', () => {
+        expect(core.pfSnapKey('', 'research.114')).toBe('research.114');
+        expect(core.pfSnapKey('planet', 'building.14')).toBe('planet:building.14');
+    });
+
+    it('takes a snapshot of every reading, shown entity or not', () => {
+        const { account } = core.createProfile({ label: 'x' });
+        expect(plain(core.snapshotReadings([
+            reading(account, 'research.114', 8),
+            reading(null, 'building.14', 10, 'planet'),
+        ]))).toEqual({ 'research.114': 8, 'planet:building.14': 10 });
+    });
+
+    it('writes nothing when nothing changed', () => {
+        const { account } = core.createProfile({ label: 'x' });
+        const snapshot = { 'research.114': 8 };
+        const diff = core.diffReadings([reading(account, 'research.114', 8)], snapshot);
+        expect(diff.writes).toHaveLength(0);
+        expect(plain(diff.snapshot)).toEqual({ 'research.114': 8 });
+    });
+
+    it('writes a changed value and remembers it, leaving the old snapshot alone', () => {
+        const profile = core.createProfile({ label: 'x' });
+        const snapshot = { 'research.114': 8, 'research.115': 6 };
+        const diff = core.diffReadings([
+            reading(profile.account, 'research.114', 9),
+            reading(profile.account, 'research.115', 6),
+        ], snapshot);
+        expect(diff.writes).toHaveLength(1);
+        expect(diff.writes[0].entity).toBe(profile.account);
+        expect(diff.writes[0].key).toBe('research.114');
+        expect(diff.writes[0].value).toBe(9);
+        expect(plain(diff.snapshot)).toEqual({ 'research.114': 9, 'research.115': 6 });
+        expect(snapshot['research.114']).toBe(8);
+    });
+
+    it('compares arrays by their items', () => {
+        const { account } = core.createProfile({ label: 'x' });
+        const diff = core.diffReadings([reading(account, 'rates', [1, 2, 3])], { rates: [1, 2, 3] });
+        expect(diff.writes).toHaveLength(0);
+        expect(core.diffReadings([reading(account, 'rates', [1, 2, 4])], { rates: [1, 2, 3] }).writes).toHaveLength(1);
+    });
+
+    it('skips a reading of no entity and keeps its snapshot as it was', () => {
+        const diff = core.diffReadings([reading(null, 'building.14', 12, 'planet')], { 'planet:building.14': 10 });
+        expect(diff.writes).toHaveLength(0);
+        expect(plain(diff.snapshot)).toEqual({ 'planet:building.14': 10 });
+    });
+
+    it('remembers a value set back to the game, though the profile does not change', () => {
+        const alpha = planetNamed(imported().profile, 'Alpha');
+        const diff = core.diffReadings([reading(alpha, 'building.1', 30, 'planet')], { 'planet:building.1': 31 });
+        expect(diff.writes).toHaveLength(1);
+        expect(plain(diff.snapshot)).toEqual({ 'planet:building.1': 30 });
+        expect(core.setProfileValue(alpha, 'building.1', diff.writes[0].value)).toBe(false);
     });
 });
 

@@ -473,6 +473,65 @@ function resetProfileValue(entity, key) {
 }
 
 /**
+ * One profile value as a calculator shows it now, ready to be compared with a
+ * binder's snapshot.
+ *
+ * @typedef {Object} FieldReading
+ * @property {?{values: LayeredValues}} entity What holds the value: the account, the body shown; null when no such entity is shown.
+ * @property {string} key Profile value key.
+ * @property {string} snapKey Where the snapshot keeps the value (pfSnapKey).
+ * @property {*} value
+ */
+
+/**
+ * The key a binder's snapshot keeps a value under: an account value under its
+ * own key, a body value prefixed with its scope, as in `planet:building.14`.
+ *
+ * @param {string} scope '' for the account.
+ * @param {string} key Profile value key.
+ * @returns {string}
+ */
+function pfSnapKey(scope, key) {
+  return scope ? scope + ':' + key : key;
+}
+
+/**
+ * A snapshot of the values a calculator shows, those of an entity not shown
+ * included.
+ *
+ * @param {FieldReading[]} readings
+ * @returns {Record<string, *>}
+ */
+function snapshotReadings(readings) {
+  /** @type {Record<string, *>} */
+  const snapshot = {};
+  readings.forEach((r) => { snapshot[r.snapKey] = r.value; });
+  return snapshot;
+}
+
+/**
+ * What a write-back writes: every value that differs from the snapshot, and
+ * the snapshot with those values in it. A reading of no entity is skipped and
+ * its snapshot left as it was. A value set back to the game's is written too -
+ * the profile then drops its override, or does not change - and remembered.
+ *
+ * @param {FieldReading[]} readings
+ * @param {Record<string, *>} snapshot Not changed; the result carries the new one.
+ * @returns {{writes: Array<{entity: {values: LayeredValues}, key: string, value: *}>, snapshot: Record<string, *>}}
+ */
+function diffReadings(readings, snapshot) {
+  const next = { ...snapshot };
+  /** @type {Array<{entity: {values: LayeredValues}, key: string, value: *}>} */
+  const writes = [];
+  readings.forEach((r) => {
+    if (!r.entity || sameValue(r.value, next[r.snapKey])) return;
+    next[r.snapKey] = r.value;
+    writes.push({ entity: r.entity, key: r.key, value: r.value });
+  });
+  return { writes, snapshot: next };
+}
+
+/**
  * One value of a profile that differs from the game, or a setting of its
  * universe that the player picked instead of the game's (listUniverseOverrides).
  *
@@ -1819,6 +1878,7 @@ if (typeof window !== 'undefined') {
     PRODUCTION_ROW_TECHS, productionRowKey, FLIGHT_SHIP_IDS,
     createProfile, createPlanet, newProfileId, sameUniverse, pfNum, pfBool, pfBodyLabel,
     getProfileValue, setProfileValue, differsFromGame, resetProfileValue,
+    pfSnapKey, snapshotReadings, diffReadings,
     countOverrides, hasGameLayer,
     parseAccountExport, findProfileForExport, importAccountExport, mergeProfiles,
     isNewerExport, planCompanionSync, resolveImportUniverse,

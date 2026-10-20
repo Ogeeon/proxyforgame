@@ -38,6 +38,12 @@ _Avoid_: sync, save
 A calculator input whose value belongs to the active profile, such as a research level or
 a planet's temperature, and is shared with every other calculator.
 
+**Field group**:
+The profile-owned fields of one calculator that one entity fills: the account, the planet
+or the moon shown, the body of a queue tab. A binder declares its groups, and the snapshot,
+the write-back, the marks, the reset dialog's names and the restore buttons follow from them.
+_Avoid_: field list, section
+
 **Calculator field**:
 A calculator input that never belongs to a profile, such as a fleet composition, a build
 queue or a mode.

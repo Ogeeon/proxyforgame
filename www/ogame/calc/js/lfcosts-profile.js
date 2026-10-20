@@ -48,7 +48,7 @@ const LFCOSTS_RACE_KEY = 'lf.race';
 /**
  * The race of a profile planet, or null when it has no life form.
  *
- * @param {ProfilePlanet} planet
+ * @param {{values: LayeredValues}} planet
  * @returns {?number}
  */
 function lfCostsPlanetRace(planet) {

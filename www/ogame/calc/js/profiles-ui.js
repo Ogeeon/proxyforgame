@@ -171,13 +171,13 @@ function pfFillRangeStart(level) {
  *   read: (settings: Record<string, any>) => *,
  *   write: (settings: Record<string, any>, value: *) => void,
  *   prm?: string,
- *   markIf?: (body: ProfilePlanet) => boolean,
+ *   markIf?: (entity: {values: LayeredValues}) => boolean,
  * }} ProfileField
  * input: the control that shows it - a selector, or a lookup for a control with no stable selector;
  * read: the profile value the calculator's settings hold; write: show a profile value (or undefined) -
  * into the settings, or, for a calculator that reads its settings back from the form, into the form;
- * prm: the settings key it lives under, when it is one key; markIf: the field is marked only for a
- * body it returns true for (default: always).
+ * prm: the settings key it lives under, when it is one key; markIf: the field is marked only for an
+ * entity (a body) it returns true for (default: always).
  */
 
 /** @typedef {ProfileField & {prm: string}} ProfilePrmField A field kept under one key of the settings. */
@@ -201,7 +201,7 @@ function pfFieldInput(field) {
  * @param {string} input Selector.
  * @param {(v: *) => *} toPrm Profile value (or undefined) to the settings value.
  * @param {(v: *) => *} fromPrm Settings value to the profile value.
- * @param {{display?: (value: *) => string, markIf?: (body: ProfilePlanet) => boolean}} [extra]
+ * @param {{display?: (value: *) => string, markIf?: (entity: {values: LayeredValues}) => boolean}} [extra]
  * @returns {ProfilePrmField}
  */
 function pfPrmField(key, prm, input, toPrm, fromPrm, extra = {}) {
@@ -1859,13 +1859,41 @@ class PfCoordsSelect {
 }
 
 /**
+ * A field as a field group takes it: what it reads, where it is shown and
+ * how its game value reads (ProfileField has all of it).
+ *
+ * @typedef {ProfileFieldBase & {
+ *   input: string|(() => ?HTMLElement),
+ *   read: (settings: Record<string, any>) => *,
+ *   markIf?: (entity: {values: LayeredValues}) => boolean,
+ * }} PfGroupField
+ */
+
+/**
+ * The profile-owned fields one entity of the profile fills (CONTEXT.md: Field
+ * group). A binder declares its groups in fieldGroups(); the snapshot, the
+ * write-back, the marks, the reset dialog's names and the restore buttons
+ * follow from them.
+ *
+ * @typedef {object} PfFieldGroup
+ * @property {string} scope Prefix of the group's snapshot keys (pfSnapKey): '' for the account, 'planet', 'moon'...
+ * @property {(profile: Profile) => ?{values: LayeredValues}} entity The entity that holds the values: the account, the body shown; null while there is none - the group is then neither written back nor marked, but still taken into the snapshot.
+ * @property {PfGroupField[]} fields
+ * @property {() => Record<string, any>} settings What the fields read from.
+ * @property {boolean} [describe] False keeps the fields out of describeFields() (a key another group names already); true by default.
+ */
+
+/**
  * What every calculator's profile binder shares: the profile it shows, the
  * guard that keeps its own writes from coming back as edits, and the entry
  * points - init(), apply(), save() and leave() - whose sequence is the same
  * everywhere. A binder fills in the steps that differ: describeFields(),
  * takeOverSave() and bindControls() for init(); captureOwn(), showProfile(),
  * takeSnapshot() and afterApply() for apply(); writeBack() and saveOwn() (or
- * saveWithProfile()); restoreOwn() and recalc(); markAll().
+ * saveWithProfile()); restoreOwn() and recalc(); markAll(). A binder that
+ * declares its fieldGroups() gets describeFields(), takeSnapshot(),
+ * writeBack() and markAll() from them, and adds what the groups do not cover
+ * in writeBackExtra() and markExtra().
  *
  * @template [App=*]
  */
@@ -1896,9 +1924,18 @@ class ProfileBinder {
     this.applyInitial(this.pf.active());
   }
 
+  /**
+   * The groups of profile-owned fields the page shows (none by default).
+   *
+   * @returns {PfFieldGroup[]}
+   */
+  fieldGroups() {
+    return [];
+  }
+
   /** Name every value this page binds, in the page's own words; called from init(). */
   describeFields() {
-    // A binder describes its fields here.
+    this.describeFieldList(this.fieldGroups().filter((g) => g.describe !== false).flatMap((g) => g.fields));
   }
 
   /** Route the calculator's save through save(); called from init(). */
@@ -1966,7 +2003,33 @@ class ProfileBinder {
 
   /** Remember the values the page shows now, so the next save writes only what changed. */
   takeSnapshot() {
-    // A binder records its values here.
+    this.snapshot = snapshotReadings(this.readGroups(null));
+  }
+
+  /**
+   * Remember the values of some groups only, the rest of the snapshot kept:
+   * after a body was picked, only its fields changed.
+   *
+   * @param {PfFieldGroup[]} groups
+   */
+  snapshotGroups(groups) {
+    Object.assign(this.snapshot, snapshotReadings(this.readGroups(null, groups)));
+  }
+
+  /**
+   * The values the groups' fields show now.
+   *
+   * @param {?Profile} profile Where the entities are looked up; null leaves every entity null (enough for a snapshot).
+   * @param {PfFieldGroup[]} [groups]
+   * @param {Record<string, any>} [settings] Read every group from these, instead of each group's settings().
+   * @returns {FieldReading[]}
+   */
+  readGroups(profile, groups = this.fieldGroups(), settings = undefined) {
+    return groups.flatMap((g) => {
+      const from = settings ?? g.settings();
+      const entity = profile ? g.entity(profile) : null;
+      return g.fields.map((f) => ({ entity, key: f.key, snapKey: pfSnapKey(g.scope, f.key), value: f.read(from) }));
+    });
   }
 
   /**
@@ -1995,7 +2058,26 @@ class ProfileBinder {
 
   /** Mark every field the profile owns, and the ones that differ from the game. */
   markAll() {
-    // A binder marks its fields here.
+    const profile = this.profile();
+    if (!profile) return;
+    this.fieldGroups().forEach((g) => {
+      const entity = g.entity(profile);
+      if (!entity) return;
+      g.fields.forEach((f) => {
+        if (f.markIf && !f.markIf(entity)) return;
+        this.pf.markField(pfFieldInput(f), profile, entity, f.key, this.restoreField(g, f.key));
+      });
+    });
+    this.markExtra(profile);
+  }
+
+  /**
+   * Mark what a binder binds beyond its field groups.
+   *
+   * @param {Profile} _profile
+   */
+  markExtra(_profile) {
+    // A binder marks the rest of its fields here.
   }
 
   /** @returns {?Profile} */
@@ -2026,8 +2108,43 @@ class ProfileBinder {
     if (profile) this.coordsSelect?.follow(profile);
   }
 
+  /** Write what changed since the last snapshot into the profile, save it once and mark it. */
   writeBack() {
-    // A binder copies what changed in the form into the profile here.
+    const profile = this.profile();
+    if (!profile) return;
+    let changed = this.writeBackGroups(profile);
+    changed = this.writeBackExtra(profile) || changed;
+    if (changed) {
+      this.pf.save(profile);
+      this.markAll();
+    }
+  }
+
+  /**
+   * Write the groups' values that changed since the snapshot into the profile
+   * (not saved yet), and remember them.
+   *
+   * @param {Profile} profile
+   * @param {Record<string, any>} [settings] Read every group from these, instead of each group's settings().
+   * @returns {boolean} True when the profile changed.
+   */
+  writeBackGroups(profile, settings = undefined) {
+    const { writes, snapshot } = diffReadings(this.readGroups(profile, this.fieldGroups(), settings), this.snapshot);
+    this.snapshot = snapshot;
+    let changed = false;
+    writes.forEach((w) => { changed = setProfileValue(w.entity, w.key, w.value) || changed; });
+    return changed;
+  }
+
+  /**
+   * Write what a binder binds beyond its field groups into the profile being
+   * written back, which is then saved once with the rest.
+   *
+   * @param {Profile} _profile
+   * @returns {boolean} True when the profile changed.
+   */
+  writeBackExtra(_profile) {
+    return false;
   }
 
   saveOwn() {
@@ -2076,6 +2193,18 @@ class ProfileBinder {
       const target = locate(fresh);
       if (target && resetProfileValue(target, key)) this.pf.store.save(fresh);
     };
+  }
+
+  /**
+   * The action of the restore button of a group's field: the value goes back
+   * on the group's entity in a fresh copy of the profile.
+   *
+   * @param {PfFieldGroup} group
+   * @param {string} key
+   * @returns {() => void}
+   */
+  restoreField(group, key) {
+    return this.restoreValue((fresh) => group.entity(fresh), key);
   }
 
   /**
@@ -2312,17 +2441,6 @@ class PlanetPrmBinder extends ProfileBinder {
       this.pf.save(profile);
       this.markAll();
     }
-  }
-
-  /**
-   * Write what a subclass binds beyond the field lists into the profile being
-   * written back, which is then saved once with the rest.
-   *
-   * @param {Profile} _profile
-   * @returns {boolean} True when the profile changed.
-   */
-  writeBackExtra(_profile) {
-    return false;
   }
 
   /**
