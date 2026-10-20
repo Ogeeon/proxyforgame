@@ -186,7 +186,7 @@ class TradeProfiles extends FlatSettingsBinder {
 
   /** Name every value this page binds, in the page's own words. */
   describeFields() {
-    this.describeFieldList(TRADE_ACCOUNT_FIELDS);
+    super.describeFields();
     // The rates sit in three controls; the page's word for them is the panel heading.
     this.pf.describeField('rates', l.rates);
   }

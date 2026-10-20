@@ -2319,8 +2319,13 @@ class PlanetPrmBinder extends ProfileBinder {
     this.universeSettings = [];
   }
 
-  describeFields() {
-    this.describeFieldList([...this.config.accountFields, ...this.config.planetFields]);
+  /** @returns {PfFieldGroup[]} The account, and the planet picked in #pf-planet. */
+  fieldGroups() {
+    const settings = () => options.prm;
+    return [
+      { scope: '', entity: (p) => p.account, fields: this.config.accountFields, settings },
+      { scope: 'planet', entity: (p) => this.planet(p), fields: this.config.planetFields, settings },
+    ];
   }
 
   bindControls() {
@@ -2404,43 +2409,12 @@ class PlanetPrmBinder extends ProfileBinder {
     this.app.recalc();
   }
 
-  takeSnapshot() {
-    /** @type {Record<string, any>} */
-    const prm = options.prm;
-    this.snapshot = {};
-    this.config.accountFields.forEach((f) => { this.snapshot[f.key] = f.read(prm); });
-    this.config.planetFields.forEach((f) => { this.snapshot['planet:' + f.key] = f.read(prm); });
-  }
-
   // -------------------------------------------------------------------------
   // Calculator -> profile
   // -------------------------------------------------------------------------
 
   saveWithoutProfile() {
     this.ownSave();
-  }
-
-  /** Write what changed since the last snapshot into the profile. */
-  writeBack() {
-    const profile = this.profile();
-    if (!profile) return;
-    /** @type {Record<string, any>} */
-    const prm = options.prm;
-    const planet = this.planet(profile);
-    let changed = false;
-    this.config.accountFields.forEach((f) => {
-      changed = this.writeBackValue(profile.account, f.key, f.key, f.read(prm)) || changed;
-    });
-    if (planet) {
-      this.config.planetFields.forEach((f) => {
-        changed = this.writeBackValue(planet, f.key, 'planet:' + f.key, f.read(prm)) || changed;
-      });
-    }
-    changed = this.writeBackExtra(profile) || changed;
-    if (changed) {
-      this.pf.save(profile);
-      this.markAll();
-    }
   }
 
   /**
@@ -2487,20 +2461,9 @@ class PlanetPrmBinder extends ProfileBinder {
   // The marks
   // -------------------------------------------------------------------------
 
-  /** Mark every field the profile owns, and the ones that differ from the game. */
-  markAll() {
-    const profile = this.profile();
-    if (!profile) return;
-    this.config.accountFields.forEach((f) => {
-      this.pf.markField(pfFieldInput(f), profile, profile.account, f.key, this.restoreAccount(f.key));
-    });
+  /** @param {Profile} _profile */
+  markExtra(_profile) {
     this.universeSettings.forEach((setting) => setting.mark());
-    const planet = this.planet(profile);
-    if (!planet) return;
-    this.config.planetFields.forEach((f) => {
-      if (f.markIf && !f.markIf(planet)) return;
-      this.pf.markField(pfFieldInput(f), profile, planet, f.key, this.restoreBody('planets', planet.id, f.key));
-    });
   }
 }
 
@@ -2544,6 +2507,11 @@ class FlatSettingsBinder extends ProfileBinder {
     this.ownSave = config.ownSave ?? options.save;
     /** @type {?PfLockedUniverse} The universe picker the profile locks, if the page has one. */
     this.universe = null;
+  }
+
+  /** @returns {PfFieldGroup[]} The account, the only entity the page shows. */
+  fieldGroups() {
+    return [{ scope: '', entity: (p) => p.account, fields: this.config.fields, settings: this.config.settings }];
   }
 
   /** Wire the coordinates select; a subclass adds its own controls after it. */
@@ -2616,33 +2584,12 @@ class FlatSettingsBinder extends ProfileBinder {
     // A subclass shows the restored settings in its form here.
   }
 
-  takeSnapshot() {
-    const { fields, settings } = this.config;
-    this.snapshot = {};
-    fields.forEach((f) => { this.snapshot[f.key] = f.read(settings()); });
-  }
-
   // -------------------------------------------------------------------------
   // Calculator -> profile
   // -------------------------------------------------------------------------
 
   saveWithoutProfile() {
     this.ownSave();
-  }
-
-  /** Write what changed since the last snapshot into the profile. */
-  writeBack() {
-    const profile = this.profile();
-    if (!profile) return;
-    const { fields, settings } = this.config;
-    let changed = false;
-    fields.forEach((f) => {
-      changed = this.writeBackValue(profile.account, f.key, f.key, f.read(settings())) || changed;
-    });
-    if (changed) {
-      this.pf.save(profile);
-      this.markAll();
-    }
   }
 
   /**
@@ -2666,24 +2613,6 @@ class FlatSettingsBinder extends ProfileBinder {
    */
   storable(stored) {
     return stored;
-  }
-
-  // -------------------------------------------------------------------------
-  // The marks
-  // -------------------------------------------------------------------------
-
-  /** Name every value this page binds, in the page's own words. */
-  describeFields() {
-    this.describeFieldList(this.config.fields);
-  }
-
-  /** Mark every field the profile owns, and the ones that differ from the game. */
-  markAll() {
-    const profile = this.profile();
-    if (!profile) return;
-    this.config.fields.forEach((f) => {
-      this.pf.markField(pfFieldInput(f), profile, profile.account, f.key, this.restoreAccount(f.key));
-    });
   }
 }
 
