@@ -67,8 +67,6 @@ class QueueProfiles extends ProfileBinder {
         planetOf: t.tab === MOON_TAB ? () => this.bodyIds[PLANET_TAB] : undefined,
       });
     });
-    /** @type {Record<string, *>} The profile-owned prm keys as the calculator has them. */
-    this.ownPrm = {};
     this.ownSave = options.save;
     /** @type {?PfUniverseSetting} Set in init(). */
     this.speed = null;
@@ -79,9 +77,19 @@ class QueueProfiles extends ProfileBinder {
     QUEUE_TABS.forEach((t) => this.bodySelects[t.tab].onChange(() => this.bodyChosen(t)));
   }
 
-  /** The options.prm keys the profile may own, the start levels it fills in included. */
-  static ownedKeys() {
-    return [...QUEUE_ACCOUNT_FIELDS.map((f) => f.prm), ...QUEUE_TABS.flatMap((t) => [t.levels, t.fields])];
+  /**
+   * The options.prm keys the profile owns: the account's, and per tab its
+   * fields and the start levels filled in from its body, while the profile
+   * has that body - a tab with none is the calculator's own.
+   *
+   * @param {?Profile} profile
+   * @returns {PfOwnedGroup[]}
+   */
+  ownedGroups(profile) {
+    return [
+      { keys: QUEUE_ACCOUNT_FIELDS.map((f) => f.prm), present: true },
+      ...QUEUE_TABS.map((t) => ({ keys: [t.levels, t.fields], present: this.body(t, profile) !== null })),
+    ];
   }
 
   /** @returns {PfFieldGroup[]} The account, and the body of each tab. */
@@ -122,11 +130,6 @@ class QueueProfiles extends ProfileBinder {
   // -------------------------------------------------------------------------
   // Profile -> calculator
   // -------------------------------------------------------------------------
-
-  captureOwn() {
-    this.ownPrm = {};
-    QueueProfiles.ownedKeys().forEach((key) => { this.ownPrm[key] = cloneData(options.prm[key]); });
-  }
 
   /** @param {Profile} profile */
   showProfile(profile) {
@@ -169,8 +172,8 @@ class QueueProfiles extends ProfileBinder {
     this.bodyIds = { [PLANET_TAB]: null, [MOON_TAB]: null };
     this.speed?.detach();
     QUEUE_TABS.forEach((t) => this.bodySelects[t.tab].hide());
+    super.restoreOwn();
     const prm = options.prm;
-    Object.assign(prm, cloneData(this.ownPrm));
     QUEUE_ACCOUNT_FIELDS.forEach((f) => f.write(prm, f.read(prm)));
     QUEUE_TABS.forEach((t) => {
       const levels = Array.isArray(prm[t.levels]) ? prm[t.levels] : [];
@@ -192,19 +195,13 @@ class QueueProfiles extends ProfileBinder {
   }
 
   /**
-   * options_queue gets the calculator's own fields as they are, and the
-   * profile-owned ones and the start levels as they were before the profile,
-   * so a level filled in from a body never replaces the player's. A tab with no body
-   * is the calculator's own, so its values are taken as they are.
+   * options_queue gets the start levels as they were before the profile
+   * (ownedGroups), so a level filled in from a body never replaces the player's.
+   *
+   * @param {Record<string, any>} stored
    */
-  saveOwn() {
-    const prm = options.prm;
-    QUEUE_TABS.forEach((t) => {
-      if (this.bodyIds[t.tab] !== null) return;
-      this.ownPrm[t.levels] = cloneData(prm[t.levels]);
-      this.ownPrm[t.fields] = prm[t.fields];
-    });
-    saveToCookie('options_queue', { ...prm, ...cloneData(this.ownPrm) });
+  storeOwn(stored) {
+    saveToCookie('options_queue', stored);
   }
 
   /**
