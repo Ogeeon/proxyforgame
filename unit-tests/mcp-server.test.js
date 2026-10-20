@@ -548,6 +548,37 @@ describe('MCP tool ogame_terraformer', () => {
         expect(out.terraformer.crystal).toBe(50000 * (2 ** 8 + 2 ** 9));
     });
 
+    it('prices the Terraformer as ogame_build_cost does under the same life form reduction', async () => {
+        const facilities = { roboticsFactory: 10, naniteFactory: 3 };
+        const both = async (fromLevel, toLevel) => {
+            const tf = (await call(protocolWith(), 'ogame_terraformer', {
+                fromLevel, toLevel, ...facilities, universeSpeed: 3, terraformerReduction: 20,
+                solarPlant: { level: 30 }, maxTemperature: 40,
+            })).structuredContent.terraformer;
+            const bc = (await call(protocolWith(), 'ogame_build_cost', {
+                item: 'terraformer', fromLevel, toLevel, facilities, universeSpeed: 3,
+                lifeforms: { terraformerReduction: 20 },
+            })).structuredContent;
+            return { tf, bc };
+        };
+        // One level: the same cost and time to the second.
+        const one = await both(4, 5);
+        expect([one.tf.crystal, one.tf.deuterium, one.tf.buildSeconds])
+            .toEqual([one.bc.crystal, one.bc.deuterium, one.bc.durationSeconds]);
+        // 20% off: level 5 costs 50000 * 2^4 = 800000 crystal, 640000 after.
+        expect(one.tf.crystal).toBe(640000);
+        // A range: the same resources. The time is left out - the terraformer
+        // core rounds it down per level, the costs core once for the range.
+        const range = await both(4, 7);
+        expect([range.tf.crystal, range.tf.deuterium]).toEqual([range.bc.crystal, range.bc.deuterium]);
+        expect(range.tf.crystal).toBe(0.8 * 50000 * (2 ** 4 + 2 ** 5 + 2 ** 6));
+    });
+
+    it('caps the life form Terraformer reduction at 50%', async () => {
+        const result = await call(protocolWith(), 'ogame_terraformer', { toLevel: 1, terraformerReduction: 60 });
+        expect(result.isError).toBe(true);
+    });
+
     it('refuses to go down', async () => {
         const result = await call(protocolWith(), 'ogame_terraformer', { fromLevel: 5, toLevel: 5 });
         expect(result.isError).toBe(true);
