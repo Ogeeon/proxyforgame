@@ -119,6 +119,11 @@ class MoonProfiles extends PlanetPrmBinder {
     });
   }
 
+  /** @returns {PfFieldGroup[]} The account and the planet, and the moon picked in #pf-moon. */
+  fieldGroups() {
+    return [...super.fieldGroups(), { scope: 'moon', entity: (p) => this.moon(p), fields: MOON_MOON_FIELDS, settings: () => options.prm }];
+  }
+
   init() {
     // Both checkboxes read "Class: <name>"; the class itself is named by what comes before the colon.
     const classLabel = pfLabelFor('general-class').split(':')[0].trim();
@@ -127,7 +132,6 @@ class MoonProfiles extends PlanetPrmBinder {
       if (cls === PROFILE_CLASS.GENERAL) return pfLabelFor('general-class');
       return cls === PROFILE_CLASS.DISCOVERER ? pfLabelFor('discoverer-class') : '—';
     });
-    this.describeFieldList(MOON_MOON_FIELDS);
     this.moonSelect.onChange(() => this.moonChosen());
     // A character has one class: ticking one box clears the other while a profile is active.
     MOON_CLASS_CHECKBOXES.forEach(({ selector }, i) => {
@@ -186,13 +190,11 @@ class MoonProfiles extends PlanetPrmBinder {
     super.restoreOwn();
   }
 
+  /** The class too: what the checkboxes mean depends on the class remembered here. */
   takeSnapshot() {
     super.takeSnapshot();
     const profile = this.profile();
-    /** @type {Record<string, any>} */
-    const prm = options.prm;
     this.snapshot.class = profile ? pfNum(getProfileValue(profile.account, 'class', 0)) : PROFILE_CLASS.NONE;
-    MOON_MOON_FIELDS.forEach((f) => { this.snapshot['moon:' + f.key] = f.read(prm); });
   }
 
   // -------------------------------------------------------------------------
@@ -200,22 +202,13 @@ class MoonProfiles extends PlanetPrmBinder {
   // -------------------------------------------------------------------------
 
   /**
-   * The class and the moon's fields, into the profile the base is writing back.
+   * The class, into the profile the base is writing back.
    *
    * @param {Profile} profile
    * @returns {boolean} True when the profile changed.
    */
   writeBackExtra(profile) {
-    /** @type {Record<string, any>} */
-    const prm = options.prm;
-    const moon = this.moon(profile);
-    let changed = this.writeBackValue(profile.account, 'class', 'class', moonClassFromPrm(prm, this.snapshot.class));
-    if (moon) {
-      MOON_MOON_FIELDS.forEach((f) => {
-        changed = this.writeBackValue(moon, f.key, 'moon:' + f.key, f.read(prm)) || changed;
-      });
-    }
-    return changed;
+    return this.writeBackValue(profile.account, 'class', 'class', moonClassFromPrm(options.prm, this.snapshot.class));
   }
 
   /**
@@ -275,17 +268,10 @@ class MoonProfiles extends PlanetPrmBinder {
   // The marks
   // -------------------------------------------------------------------------
 
-  /** Mark every field the profile owns, and the ones that differ from the game. */
-  markAll() {
-    super.markAll();
-    const profile = this.profile();
-    if (!profile) return;
+  /** @param {Profile} profile */
+  markExtra(profile) {
+    super.markExtra(profile);
     this.markClass(profile);
-    const moon = this.moon(profile);
-    if (!moon) return;
-    MOON_MOON_FIELDS.forEach((f) => {
-      this.pf.markField(pfFieldInput(f), profile, moon, f.key, this.restoreBody('moons', moon.id, f.key));
-    });
   }
 
   /**

@@ -12,8 +12,8 @@
 //     only what changed since the last apply or write-back, so a lossy mapping (a profile
 //     with no class shows as "other" here) never becomes an override.
 // The cargo bonuses are one array in options.prm (lfShipsBonuses, in the order
-// of EXPEDITION_SHIPS), not a key per ship, so they are handled here rather
-// than by the field list of the base binder.
+// of EXPEDITION_SHIPS), not a key per ship: they are a field group of their
+// own, each field reading one element, and are filled in by afterShowPlanet().
 // The fleet and the dark matter discovery bonus are the calculator's own and
 // keep going to options_expeditions, and so does the resource discovery booster
 // of a calculator with no profile; the
@@ -62,6 +62,18 @@ const EXPEDITIONS_UNIVERSE_FIELDS = [
 /** The profile value key of a ship's life-form cargo bonus. */
 const expeditionsCargoKey = (/** @type {{techId: number}} */ ship) => 'lf.ship.' + ship.techId + '.cargo';
 
+/**
+ * The cargo bonus of every ship in the table: one element each of
+ * options.prm.lfShipsBonuses, in the order of EXPEDITION_SHIPS.
+ *
+ * @type {PfGroupField[]}
+ */
+const EXPEDITIONS_CARGO_FIELDS = EXPEDITION_SHIPS.map((ship, i) => ({
+  key: expeditionsCargoKey(ship),
+  input: '#lf-cargo-' + ship.techId,
+  read: (/** @type {Record<string, any>} */ prm) => pfNum(prm.lfShipsBonuses[i]),
+}));
+
 /** @extends {PlanetPrmBinder<ExpeditionsApp>} */
 class ExpeditionsProfiles extends PlanetPrmBinder {
   /**
@@ -84,8 +96,12 @@ class ExpeditionsProfiles extends PlanetPrmBinder {
     this.linkValues = {};
   }
 
+  /** @returns {PfFieldGroup[]} The account and the planet, and the cargo bonuses of the account. */
+  fieldGroups() {
+    return [...super.fieldGroups(), { scope: '', entity: (p) => p.account, fields: EXPEDITIONS_CARGO_FIELDS, settings: () => options.prm }];
+  }
+
   init() {
-    this.describeFieldList(EXPEDITION_SHIPS.map((ship) => ({ key: expeditionsCargoKey(ship), input: '#lf-cargo-' + ship.techId })));
     // The link was applied before the binder existed: take what it named, once.
     /** @type {Record<string, any>} */
     const prm = options.prm;
@@ -128,45 +144,6 @@ class ExpeditionsProfiles extends PlanetPrmBinder {
     // A new array: the one in ownPrm is the calculator's own and stays as it is.
     options.prm.lfShipsBonuses = EXPEDITION_SHIPS.map((ship) => pfNum(getProfileValue(profile.account, expeditionsCargoKey(ship))));
     Object.assign(options.prm, this.linkValues);
-  }
-
-  takeSnapshot() {
-    super.takeSnapshot();
-    EXPEDITION_SHIPS.forEach((ship, i) => { this.snapshot[expeditionsCargoKey(ship)] = pfNum(options.prm.lfShipsBonuses[i]); });
-  }
-
-  // -------------------------------------------------------------------------
-  // Calculator -> profile
-  // -------------------------------------------------------------------------
-
-  /**
-   * The cargo bonuses, into the profile the base is writing back.
-   *
-   * @param {Profile} profile
-   * @returns {boolean} True when the profile changed.
-   */
-  writeBackExtra(profile) {
-    let changed = false;
-    EXPEDITION_SHIPS.forEach((ship, i) => {
-      const key = expeditionsCargoKey(ship);
-      changed = this.writeBackValue(profile.account, key, key, pfNum(options.prm.lfShipsBonuses[i])) || changed;
-    });
-    return changed;
-  }
-
-  // -------------------------------------------------------------------------
-  // The marks
-  // -------------------------------------------------------------------------
-
-  /** Mark every field the profile owns, and the ones that differ from the game. */
-  markAll() {
-    super.markAll();
-    const profile = this.profile();
-    if (!profile) return;
-    EXPEDITION_SHIPS.forEach((ship) => {
-      const key = expeditionsCargoKey(ship);
-      this.pf.markField($('#lf-cargo-' + ship.techId), profile, profile.account, key, this.restoreAccount(key));
-    });
   }
 }
 
