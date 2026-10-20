@@ -24,6 +24,7 @@ const core = load(['ogame/calc/js/profiles-core.js'], [
     'parseUniverseSettings', 'readUniverseEntry', 'isUniverseEntryFresh', 'universeLayer',
     'universeValue', 'setUniverseChoice', 'mergeUniverseChoices', 'pfMarkState',
     'listUniverseOverrides', 'resetUniverseChoices', 'pfSnapKey', 'snapshotReadings', 'diffReadings',
+    'pfPickOwn', 'pfSplitOwned', 'pfKeepOwn',
 ]);
 
 const plain = (value) => JSON.parse(JSON.stringify(value));
@@ -445,6 +446,92 @@ describe('the write-back diff', () => {
         expect(diff.writes).toHaveLength(1);
         expect(plain(diff.snapshot)).toEqual({ 'planet:building.1': 30 });
         expect(core.setProfileValue(alpha, 'building.1', diff.writes[0].value)).toBe(false);
+    });
+});
+
+describe('the calculator\'s own values', () => {
+    /** A queue's settings: the start levels are arrays of [techId, level]. */
+    const queuePrm = () => ({ hyperTechLevel: 3, slp: [[1, 4], [2, 5]], slm: [[41, 2]], totFldPln: 200, totFldMn: 5, plans: 'x' });
+
+    it('picks a deep copy of the keys asked for, leaving out what the settings do not hold', () => {
+        const prm = queuePrm();
+        const own = core.pfPickOwn(prm, ['hyperTechLevel', 'slp', 'missing']);
+        expect(own).toEqual({ hyperTechLevel: 3, slp: [[1, 4], [2, 5]] });
+        own.slp[0][1] = 99;
+        expect(prm.slp[0][1]).toBe(4);
+        // cloneData(undefined) throws; an undefined value is simply not kept.
+        expect(core.pfPickOwn({ a: undefined, b: 1 }, ['a', 'b'])).toEqual({ b: 1 });
+    });
+
+    it('splits the owned keys by whether their entity is shown', () => {
+        const split = core.pfSplitOwned([
+            { keys: ['hyperTechLevel', 'rates'], present: true },
+            { keys: ['robotFactoryLevel', 'race'], present: true },
+            { keys: ['phalanxLevel'], present: false },
+            { keys: ['universeSpeed'], present: false, show: false },
+        ]);
+        expect(split).toEqual({ profile: ['hyperTechLevel', 'rates', 'robotFactoryLevel', 'race'], own: ['phalanxLevel', 'universeSpeed'] });
+    });
+
+    it('gives a key to the profile when one present group names it, and lists it once', () => {
+        // A field with a condition of its own (lfcosts: the race of a planet
+        // with no life form) next to the planet group that holds it too.
+        const split = core.pfSplitOwned([
+            { keys: ['robotFactoryLevel', 'race'], present: true },
+            { keys: ['race'], present: false },
+            { keys: ['race', 'megalithLvl'], present: true },
+        ]);
+        expect(split).toEqual({ profile: ['robotFactoryLevel', 'race', 'megalithLvl'], own: [] });
+        expect(core.pfSplitOwned([{ keys: ['race'], present: false }, { keys: ['race'], present: false }]).own).toEqual(['race']);
+    });
+
+    it('stores the own values of what the profile fills, and the rest as it is', () => {
+        const current = { hyperTechLevel: 8, slp: [[1, 30]], slm: [[41, 3]], totFldPln: 246, totFldMn: 7, plans: 'y' };
+        const own = core.pfPickOwn(queuePrm(), ['hyperTechLevel', 'slp', 'slm', 'totFldPln', 'totFldMn']);
+        const kept = core.pfKeepOwn({
+            current, own,
+            owned: ['hyperTechLevel', 'slp', 'slm', 'totFldPln', 'totFldMn'],
+            // The planet tab shows a body, the moon tab none.
+            ownedNow: ['hyperTechLevel', 'slp', 'totFldPln'],
+        });
+        expect(kept.stored).toEqual({ hyperTechLevel: 3, slp: [[1, 4], [2, 5]], slm: [[41, 3]], totFldPln: 200, totFldMn: 7, plans: 'y' });
+        expect(kept.own).toEqual({ hyperTechLevel: 3, slp: [[1, 4], [2, 5]], slm: [[41, 3]], totFldPln: 200, totFldMn: 7 });
+    });
+
+    it('changes nothing it is given and shares no value between the results', () => {
+        const current = { labLevels: [12, 10], rates: { md: 2, cd: 1 } };
+        const own = { labLevels: [1, 2], rates: { md: 3, cd: 2 } };
+        const before = plain({ current, own });
+        const kept = core.pfKeepOwn({ current, own, owned: ['labLevels', 'rates'], ownedNow: ['rates'] });
+        expect(plain({ current, own })).toEqual(before);
+        expect(kept.stored.rates).toEqual({ md: 3, cd: 2 });
+        expect(kept.own.labLevels).toEqual([12, 10]);
+        kept.stored.rates.md = 9;
+        kept.own.labLevels[0] = 9;
+        kept.own.rates.cd = 9;
+        expect(own.rates).toEqual({ md: 3, cd: 2 });
+        expect(current.labLevels).toEqual([12, 10]);
+        expect(kept.stored.rates.cd).toBe(2);
+    });
+
+    it('takes everything it tracks as it is when the profile fills nothing (no body)', () => {
+        const current = { phalanxLevel: 4, ownSystem: 77, moonSize: 3000 };
+        const kept = core.pfKeepOwn({ current, own: { phalanxLevel: 2, ownSystem: 30 }, owned: ['phalanxLevel', 'ownSystem'], ownedNow: [] });
+        expect(kept.stored).toEqual(current);
+        expect(kept.own).toEqual({ phalanxLevel: 4, ownSystem: 77 });
+    });
+
+    it('can track keys current lacks, and keys the copy lacks', () => {
+        // The cost calculator tracks its whole state; a key may be missing on either side.
+        const kept = core.pfKeepOwn({
+            current: { a: 1, fresh: 5 },
+            own: { a: 0, gone: 7, owned: 3 },
+            owned: ['a', 'fresh', 'gone', 'owned', 'nowhere'],
+            ownedNow: ['owned', 'nowhere', 'fresh'],
+        });
+        // A key the copy lacks keeps current's value; one current lacks is dropped from the copy.
+        expect(kept.stored).toEqual({ a: 1, fresh: 5, owned: 3 });
+        expect(kept.own).toEqual({ a: 1, owned: 3 });
     });
 });
 

@@ -532,6 +532,76 @@ function diffReadings(readings, snapshot) {
 }
 
 /**
+ * Settings keys the profile owns whenever the entity behind them is shown -
+ * the account, a planet, a moon, the universe - as a binder of the
+ * calculator's own values counts them (ADR-0004: with a profile active, what
+ * the profile owns is not written to options_<calc>).
+ *
+ * @typedef {Object} PfOwnedGroup
+ * @property {string[]} keys Keys of the calculator's settings.
+ * @property {boolean} present True while the profile fills them; false leaves them to the calculator (a body the profile does not have).
+ * @property {boolean} [show] False: while absent, the form is not given the own values back - something else decides what it shows (the universe settings). Their values are still the calculator's own.
+ */
+
+/**
+ * A deep copy of some keys of a calculator's settings. A key the settings do
+ * not hold (or hold as undefined) is left out: there is no own value to keep,
+ * and cloneData() cannot copy undefined.
+ *
+ * @param {Record<string, any>} values
+ * @param {Iterable<string>} keys
+ * @returns {Record<string, any>}
+ */
+function pfPickOwn(values, keys) {
+  /** @type {Record<string, any>} */
+  const picked = {};
+  for (const key of keys) {
+    if (values[key] !== undefined) picked[key] = cloneData(values[key]);
+  }
+  return picked;
+}
+
+/**
+ * Which owned keys the profile fills now and which are the calculator's own
+ * now: a group that is not present - a body the profile does not have - is
+ * the calculator's. A key that a present group names is the profile's, even
+ * if an absent group names it too. Each key is listed once.
+ *
+ * @param {PfOwnedGroup[]} groups
+ * @returns {{profile: string[], own: string[]}}
+ */
+function pfSplitOwned(groups) {
+  const profile = new Set(groups.filter((g) => g.present).flatMap((g) => g.keys));
+  const own = new Set(groups.filter((g) => !g.present).flatMap((g) => g.keys).filter((k) => !profile.has(k)));
+  return { profile: [...profile], own: [...own] };
+}
+
+/**
+ * What a calculator stores as its own while a profile is active, and what
+ * its copy of the own values becomes. `stored` is `current` with the keys the
+ * profile fills now taken from the copy; the new copy is the old one with the
+ * keys it tracks but the profile does not fill now taken from `current`. A
+ * key the copy does not hold leaves `current`'s value in `stored`; a key
+ * `current` does not hold is dropped from the copy. Nothing passed in is
+ * changed, and neither result shares a value with the other or with `own`.
+ *
+ * @param {{current: Record<string, any>, own: Record<string, any>, owned: Iterable<string>, ownedNow: Iterable<string>}} input
+ *   `owned`: the keys the copy tracks; `ownedNow`: those of them the profile fills now.
+ * @returns {{stored: Record<string, any>, own: Record<string, any>}}
+ */
+function pfKeepOwn({ current, own, owned, ownedNow }) {
+  const now = new Set(ownedNow);
+  const stored = { ...current, ...pfPickOwn(own, now) };
+  const next = pfPickOwn(own, Object.keys(own));
+  for (const key of owned) {
+    if (now.has(key)) continue;
+    if (current[key] === undefined) delete next[key];
+    else next[key] = cloneData(current[key]);
+  }
+  return { stored, own: next };
+}
+
+/**
  * One value of a profile that differs from the game, or a setting of its
  * universe that the player picked instead of the game's (listUniverseOverrides).
  *
@@ -1878,7 +1948,7 @@ if (typeof window !== 'undefined') {
     PRODUCTION_ROW_TECHS, productionRowKey, FLIGHT_SHIP_IDS,
     createProfile, createPlanet, newProfileId, sameUniverse, pfNum, pfBool, pfBodyLabel,
     getProfileValue, setProfileValue, differsFromGame, resetProfileValue,
-    pfSnapKey, snapshotReadings, diffReadings,
+    pfSnapKey, snapshotReadings, diffReadings, pfPickOwn, pfSplitOwned, pfKeepOwn,
     countOverrides, hasGameLayer,
     parseAccountExport, findProfileForExport, importAccountExport, mergeProfiles,
     isNewerExport, planCompanionSync, resolveImportUniverse,
