@@ -48,6 +48,14 @@ _Avoid_: field list, section
 A calculator input that never belongs to a profile, such as a fleet composition, a build
 queue or a mode.
 
+**Own values**:
+What a calculator shows under "no profile". With a profile active, its calculator fields
+are stored as they are, its profile-owned fields with the values they had before the
+profile; the fields of an entity the profile does not have, such as a moon, stay the
+calculator's own and are stored as they are. A binder declares which keys each entity
+owns as its owned groups.
+_Avoid_: local values, saved settings
+
 **Saved set**:
 One of the named slots flight and production kept before profiles existed, which were
 labelled "profile" in the UI. They are converted into manual profiles.
