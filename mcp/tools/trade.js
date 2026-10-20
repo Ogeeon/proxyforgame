@@ -64,7 +64,7 @@ const inputSchema = {
             },
             additionalProperties: false,
         },
-        hyperspaceTechnology: common.level('Hyperspace Technology level: cargo capacity', 50),
+        hyperspaceTechnology: common.hyperspaceTechnologySchema,
         playerClass: common.playerClassSchema,
         lifeforms: common.lifeformsSchema([], ['small-cargo', 'large-cargo']),
     },

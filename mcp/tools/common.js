@@ -211,6 +211,56 @@ function englishNames(page) {
     return { ...en.common, ...(page ? en[page] : {}) };
 }
 
+/** Research every tool that takes them reads the same way, capped as the game's tables are. */
+const hyperspaceTechnologySchema = level('Hyperspace Technology level: +5% cargo capacity per level', 50);
+const ionTechnologySchema = level('Ion Technology level: cheaper demolition', 50);
+
+/** The facilities that shorten a build; a tool takes the ones its calculator reads. */
+const FACILITY_FIELDS = {
+    roboticsFactory: level('Robotics Factory level'),
+    naniteFactory: level('Nanite Factory level'),
+    shipyard: level('Shipyard level'),
+    researchLab: {
+        type: 'integer', minimum: 0, maximum: 100_000, default: 0,
+        description: 'Research Lab level - with an Intergalactic Research Network, the combined level of the labs taking part.',
+    },
+};
+
+/**
+ * The `facilities` argument: levels on the planet or moon the build happens on.
+ * @param {Array<keyof typeof FACILITY_FIELDS>} fields
+ */
+const facilitiesSchema = (fields) => ({
+    type: 'object',
+    description: 'Facility levels where it is built.',
+    properties: Object.fromEntries(fields.map((field) => [field, FACILITY_FIELDS[field]])),
+    additionalProperties: false,
+});
+
+/** A plant's production setting, the slider on the resource settings page. */
+const productionPercent = { type: 'integer', minimum: 0, maximum: 100, default: 100 };
+
+/** The planet's power plants and temperature, as the production, graviton and terraformer tools take them. */
+const maxTemperatureSchema = {
+    type: 'integer', minimum: -200, maximum: 300, default: 0,
+    description: 'Maximum temperature of the planet, °C. Decides what a solar satellite yields.',
+};
+const solarPlantSchema = {
+    type: 'object',
+    properties: { level: level('Solar Plant level'), percent: productionPercent },
+    additionalProperties: false,
+};
+const fusionReactorSchema = {
+    type: 'object',
+    properties: { level: level('Fusion Reactor level'), percent: productionPercent },
+    additionalProperties: false,
+};
+const solarSatellitesSchema = {
+    type: 'object',
+    properties: { count: { type: 'integer', minimum: 0, default: 0 }, percent: productionPercent },
+    additionalProperties: false,
+};
+
 /** One ship's life form bonuses, in percent: the value of `lifeforms.shipBonuses`. */
 const shipBonusSchema = {
     type: 'object',
@@ -306,28 +356,12 @@ const ENERGY_SHIPS = ['small-cargo', 'large-cargo', 'recycler'];
  * ENERGY_LIFEFORMS and ENERGY_SHIPS, in each tool's own `lifeforms`.
  */
 const energySchema = {
-    maxTemperature: {
-        type: 'integer', minimum: -200, maximum: 300, default: 0,
-        description: 'Maximum temperature of the planet, °C. Decides what a solar satellite yields.',
-    },
-    solarPlant: {
-        type: 'object',
-        properties: { level: level('Solar Plant level'), percent: { type: 'integer', minimum: 0, maximum: 100, default: 100 } },
-        additionalProperties: false,
-    },
-    fusionReactor: {
-        type: 'object',
-        properties: { level: level('Fusion Reactor level'), percent: { type: 'integer', minimum: 0, maximum: 100, default: 100 } },
-        additionalProperties: false,
-    },
+    maxTemperature: maxTemperatureSchema,
+    solarPlant: solarPlantSchema,
+    fusionReactor: fusionReactorSchema,
     solarSatellites: {
-        type: 'object',
+        ...solarSatellitesSchema,
         description: 'Satellites already in orbit, and the output they run at - new ones are built to run at it too.',
-        properties: {
-            count: { type: 'integer', minimum: 0, default: 0 },
-            percent: { type: 'integer', minimum: 0, maximum: 100, default: 100 },
-        },
-        additionalProperties: false,
     },
     energyTechnology: level('Energy Technology level', 50),
     officers: {
@@ -342,7 +376,7 @@ const energySchema = {
     energyBoosterPercent: {
         type: 'integer', enum: [0, 20, 40, 60, 80], default: 0, description: 'Energy booster item, in percent.',
     },
-    hyperspaceTechnology: level('Hyperspace Technology level: cargo capacity of the transports', 50),
+    hyperspaceTechnology: hyperspaceTechnologySchema,
 };
 
 /** Class numbers the graviton and terraformer cores use: 0 none, 1 collector, 2 general. */
@@ -412,6 +446,13 @@ module.exports = {
     keyedMap,
     resolveKey,
     englishNames,
+    hyperspaceTechnologySchema,
+    ionTechnologySchema,
+    facilitiesSchema,
+    maxTemperatureSchema,
+    solarPlantSchema,
+    fusionReactorSchema,
+    solarSatellitesSchema,
     lifeformsSchema,
     shipCargoBonus,
     ENERGY_LIFEFORMS,

@@ -444,6 +444,14 @@ describe('MCP tool ogame_build_cost', () => {
         expect(await seconds({ engineer: true })).toBe(await seconds({}));
     });
 
+    it('caps the research levels at 50, as every tool does', async () => {
+        const result = await call(protocolWith(), 'ogame_build_cost', {
+            item: 'metal-mine', toLevel: 1, hyperspaceTechnology: 51, ionTechnology: 51,
+        });
+        expect(result.content[0].text).toContain('arguments.hyperspaceTechnology must be at most 50');
+        expect(result.content[0].text).toContain('arguments.ionTechnology must be at most 50');
+    });
+
     it('takes the life form reductions for the item asked about', async () => {
         const out = async (lifeforms) => (await call(protocolWith(), 'ogame_build_cost', {
             item: 'astrophysics', fromLevel: 4, toLevel: 5, facilities: { researchLab: 3 }, lifeforms,
@@ -531,7 +539,7 @@ describe('MCP tool ogame_graviton', () => {
             maxTemperature: 40, solarPlant: { level: 30 }, fusionReactor: { level: 20, percent: 80 },
             solarSatellites: { count: 100 }, energyTechnology: 20, playerClass: 'collector',
             officers: { commander: true, admiral: true, engineer: true, geologist: true, technocrat: true },
-            energyBoosterPercent: 40, shipyard: 12, naniteFactory: 5, crystalAvailable: 1000000,
+            energyBoosterPercent: 40, facilities: { shipyard: 12, naniteFactory: 5 }, crystalAvailable: 1000000,
         })).structuredContent;
         const direct = new GravitonCalculator().compute({
             shipyardLevel: 12, nanitesFactoryLevel: 5, universeSpeed: 4, energyTechLevel: 20, hyperTechLevel: 0,
@@ -593,7 +601,7 @@ describe('MCP tool ogame_terraformer', () => {
         const facilities = { roboticsFactory: 10, naniteFactory: 3 };
         const both = async (fromLevel, toLevel) => {
             const tf = (await call(protocolWith(), 'ogame_terraformer', {
-                fromLevel, toLevel, ...facilities, universeSpeed: 3, lifeforms: { terraformerReduction: 20 },
+                fromLevel, toLevel, facilities, universeSpeed: 3, lifeforms: { terraformerReduction: 20 },
                 solarPlant: { level: 30 }, maxTemperature: 40,
             })).structuredContent.terraformer;
             const bc = (await call(protocolWith(), 'ogame_build_cost', {
@@ -750,7 +758,7 @@ describe('MCP tool ogame_lifeform_cost', () => {
 
     it('applies the Megalith to a Rock\'tal building the way the page does', async () => {
         const out = (await call(protocolWith(), 'ogame_lifeform_cost', {
-            item: 'Megalith', fromLevel: 5, toLevel: 6, lifeforms: { megalith: 5 }, roboticsFactory: 10,
+            item: 'Megalith', fromLevel: 5, toLevel: 6, lifeforms: { megalith: 5 }, facilities: { roboticsFactory: 10 },
         })).structuredContent;
         const techs = readWwwJson('ogame/calc/data/lf-techs.json');
         const costs = Object.fromEntries(Object.entries(techs).map(([id, row]) => [id, row.slice(2)]));

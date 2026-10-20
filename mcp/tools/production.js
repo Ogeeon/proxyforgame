@@ -50,26 +50,17 @@ const mine = (/** @type {string} */ what) => ({
     additionalProperties: false,
 });
 
-const plant = (/** @type {string} */ what, /** @type {string} */ unit = 'level') => ({
-    type: 'object',
-    properties: {
-        [unit]: unit === 'level' ? common.level(`${what} level`) : { type: 'integer', minimum: 0, default: 0, description: `${what} count` },
-        percent: { type: 'integer', minimum: 0, maximum: 100, default: 100, description: 'Production setting, %.' },
-    },
-    additionalProperties: false,
-});
-
 const inputSchema = {
     type: 'object',
     properties: {
-        maxTemperature: { type: 'integer', minimum: -200, maximum: 300, default: 0, description: 'Maximum temperature of the planet, °C.' },
+        maxTemperature: common.maxTemperatureSchema,
         position: { type: 'integer', minimum: 1, maximum: 15, default: 8, description: 'Planet position, 1-15: crystal favours the inner slots, metal the middle ones.' },
         metalMine: mine('Metal Mine'),
         crystalMine: mine('Crystal Mine'),
         deuteriumSynthesizer: mine('Deuterium Synthesizer'),
-        solarPlant: plant('Solar Plant'),
-        fusionReactor: plant('Fusion Reactor'),
-        solarSatellites: plant('Solar Satellite', 'count'),
+        solarPlant: common.solarPlantSchema,
+        fusionReactor: common.fusionReactorSchema,
+        solarSatellites: common.solarSatellitesSchema,
         crawlers: {
             type: 'object',
             properties: {

@@ -68,7 +68,7 @@ function createMoonTools({ siteApi }) {
                 ...common.debrisSchema,
                 defenceDebrisPercent: common.defenceDebrisSchema,
                 moonEvent: { type: 'boolean', default: false, description: 'A moon event is on: the chance caps at 40% instead of 20%.' },
-                hyperspaceTechnology: common.level('Hyperspace Technology level: recycler capacity', 50),
+                hyperspaceTechnology: common.hyperspaceTechnologySchema,
                 playerClass: { ...common.playerClassSchema, description: 'Of the player recycling. The General: +20% recycler capacity.' },
                 lifeforms: common.lifeformsSchema(['supraRefractor'], ['recycler']),
             },

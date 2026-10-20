@@ -99,7 +99,7 @@ const inputSchema = {
             },
             additionalProperties: false,
         },
-        hyperspaceTechnology: level('Hyperspace Technology level; adds 5% cargo per level'),
+        hyperspaceTechnology: common.hyperspaceTechnologySchema,
         playerClass: common.playerClassSchema,
         allianceClass: {
             ...common.allianceClassSchema,

@@ -20,9 +20,7 @@ const inputSchema = {
         toLevel: { type: 'integer', minimum: 1, maximum: 100, description: 'Terraformer level to reach.' },
         ...common.energySchema,
         lifeforms: common.lifeformsSchema([...common.ENERGY_LIFEFORMS, 'terraformerReduction'], common.ENERGY_SHIPS),
-        roboticsFactory: common.level('Robotics Factory level: Terraformer build time'),
-        shipyard: common.level('Shipyard level: satellite build time'),
-        naniteFactory: common.level('Nanite Factory level: both build times'),
+        facilities: common.facilitiesSchema(['roboticsFactory', 'shipyard', 'naniteFactory']),
         universe: common.universeSchema,
         universeSpeed: common.universeSpeedSchema,
         crystalAvailable: { type: 'integer', minimum: 0, default: 0, description: 'Crystal already on the planet.' },
@@ -53,9 +51,9 @@ function createTerraformerTool({ siteApi }) {
             const universeSpeed = await common.economySpeed(args, siteApi);
             const r = calc.compute({
                 ...common.energyParams(args),
-                robotsFactoryLevel: args.roboticsFactory,
-                shipyardLevel: args.shipyard,
-                nanitesFactoryLevel: args.naniteFactory,
+                robotsFactoryLevel: args.facilities.roboticsFactory,
+                shipyardLevel: args.facilities.shipyard,
+                nanitesFactoryLevel: args.facilities.naniteFactory,
                 lfTerraformerRdc: args.lifeforms.terraformerReduction,
                 universeSpeed,
                 tfSingleLevel: false,

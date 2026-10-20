@@ -40,9 +40,6 @@ const TECH_COSTS = Object.fromEntries(Object.entries(TECHS.techs)
 
 const KIND = { 1: 'building', 2: 'building', 3: 'building', 4: 'research', 5: 'ship', 6: 'defence' };
 
-/** @param {string} what */
-const level = (what) => ({ type: 'integer', minimum: 0, maximum: 100, default: 0, description: what });
-
 const itemList = [...IDS.keys()].map((key) => `${key} (${NAMES[key] ?? key})`).join(', ');
 
 const inputSchema = {
@@ -68,21 +65,7 @@ const inputSchema = {
             type: 'boolean', default: false,
             description: 'Build on a moon. Moon-only buildings are always built there.',
         },
-        facilities: {
-            type: 'object',
-            description: 'Levels of the facilities that shorten the build, on the planet or moon it is built on.',
-            properties: {
-                roboticsFactory: level('Robotics Factory'),
-                naniteFactory: level('Nanite Factory (planets only)'),
-                shipyard: level('Shipyard'),
-                researchLab: {
-                    type: 'integer', minimum: 0, maximum: 100_000, default: 0,
-                    description: 'Research Lab level - with an Intergalactic Research Network, the combined '
-                        + 'level of the labs taking part.',
-                },
-            },
-            additionalProperties: false,
-        },
+        facilities: common.facilitiesSchema(['roboticsFactory', 'naniteFactory', 'shipyard', 'researchLab']),
         universe: common.universeSchema,
         universeSpeed: { type: 'number', minimum: 1, maximum: 10, description: 'Economy speed. Default 1.' },
         researchSpeed: {
@@ -92,8 +75,8 @@ const inputSchema = {
         },
         playerClass: common.playerClassSchema,
         officers: { ...common.officersSchema, description: 'Officers hired. The Technocrat: research 25% faster.' },
-        ionTechnology: level('Ion Technology level: makes demolition cheaper.'),
-        hyperspaceTechnology: level('Hyperspace Technology level: for the cargo ships needed.'),
+        ionTechnology: common.ionTechnologySchema,
+        hyperspaceTechnology: common.hyperspaceTechnologySchema,
         lifeforms: common.lifeformsSchema(['itemCostReduction', 'itemTimeReduction', 'mineralResearchCentre',
             'terraformerReduction', 'discovererClassBonus']),
     },

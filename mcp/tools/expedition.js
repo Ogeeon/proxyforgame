@@ -41,7 +41,7 @@ const inputSchema = {
         playerClass: common.playerClassSchema,
         universe: common.universeSchema,
         universeSpeed: { ...common.universeSpeedSchema, description: 'Economy speed: scales a Discoverer\'s finds. ' + common.universeSpeedSchema.description },
-        hyperspaceTechnology: common.level('Hyperspace Technology level: cargo capacity', 50),
+        hyperspaceTechnology: common.hyperspaceTechnologySchema,
         lifeforms: common.lifeformsSchema(['resourceFindBonus', 'shipFindBonus', 'darkMatterFindBonus',
             'collectorClassBonus', 'discovererClassBonus'], SHIPS.map((ship) => ship.id)),
         resourceBoosterPercent: {
