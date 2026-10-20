@@ -112,6 +112,16 @@ describe('MCP protocol', () => {
         }
     });
 
+    it('keeps tools/list within its size budget', async () => {
+        // Every client loads the tool list into its model's context (mcp/README.md). Going over
+        // the budget is a deliberate decision that raises it here, in the same commit.
+        const BUDGET = 52 * 1024;
+        const { tools } = (await rpc(protocol, { jsonrpc: '2.0', id: 3, method: 'tools/list' })).result;
+        const size = tools.reduce((sum, { name, title, description, inputSchema }) =>
+            sum + JSON.stringify({ name, title, description, inputSchema }).length, 0);
+        expect(size).toBeLessThanOrEqual(BUDGET);
+    });
+
     it('reports an unknown tool as a protocol error', async () => {
         const answer = await rpc(protocol, { jsonrpc: '2.0', id: 4, method: 'tools/call', params: { name: 'nope' } });
         expect(answer.error.code).toBe(-32602);
