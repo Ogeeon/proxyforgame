@@ -189,8 +189,8 @@ function createBuildCostTool({ siteApi }) {
 
             const { universeSpeed, researchSpeed } = await speeds(args);
             const params = new GlobalParams();
-            params.useDirectLabLevel = true;
-            params.labLevels = [0, 0, 0, 0, 0, 0, 0, 0];
+            // No research network: research runs at the one lab given, 0 included.
+            params.useIrn = false;
             params.researchLabLevel = args.facilities.researchLab;
             params.robotFactoryLevelPlanet = args.facilities.roboticsFactory;
             params.robotFactoryLevelMoon = args.facilities.roboticsFactory;

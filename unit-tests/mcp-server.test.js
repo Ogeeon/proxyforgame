@@ -426,6 +426,22 @@ describe('MCP tool ogame_build_cost', () => {
         expect(result.content[0].text).toContain('Research Lab of level 12');
     });
 
+    it('times research by facilities.researchLab alone, with no research network', async () => {
+        const seconds = async (lab) => (await call(protocolWith(), 'ogame_build_cost', {
+            item: 'astrophysics', fromLevel: 4, toLevel: 5, facilities: { researchLab: lab },
+        })).structuredContent.durationSeconds;
+        // Astrophysics 5 costs 37515 metal and 75031 crystal; research takes
+        // (metal + crystal) / (1000 * (1 + lab)) hours, with the lab as entered.
+        expect(await seconds(3)).toBe(Math.round((37515 + 75031) / 4000 * 3600));
+        expect(await seconds(9)).toBe(Math.round((37515 + 75031) / 10000 * 3600));
+    });
+
+    it('refuses a research when the lab is 0, rather than making one up', async () => {
+        const result = await call(protocolWith(), 'ogame_build_cost', { item: 'astrophysics', toLevel: 1, facilities: { researchLab: 0 } });
+        expect(result.isError).toBe(true);
+        expect(result.content[0].text).toContain('facilities.researchLab is 0');
+    });
+
     it('multiplies a ship by its quantity', async () => {
         const out = (await call(protocolWith(), 'ogame_build_cost', {
             item: 'large-cargo', quantity: 10, facilities: { shipyard: 2 },
