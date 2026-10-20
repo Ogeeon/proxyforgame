@@ -468,3 +468,49 @@ describe('Moon Calculator - Reaching a target system', () => {
         expect(r.phalanxLevelRequired).toBe(24);
     });
 });
+
+// The profile binding of the class checkboxes (moon-profile.js). It loads on top
+// of the profile scripts, whose binder base classes run nothing on load.
+const { moonClassToPrm, moonClassFromPrm, PROFILE_CLASS } = load(
+    [
+        'js/utils.js', 'ogame/calc/js/dom-utils.js', 'ogame/calc/js/profiles-core.js',
+        'ogame/calc/js/profiles-fields.js', 'ogame/calc/js/profiles-widgets.js',
+        'ogame/calc/js/profiles-binders.js', 'ogame/calc/js/moon-profile.js',
+    ],
+    ['moonClassToPrm', 'moonClassFromPrm', 'PROFILE_CLASS'],
+);
+
+describe('Moon profile: the class checkboxes', () => {
+    const { NONE, COLLECTOR, GENERAL, DISCOVERER } = PROFILE_CLASS;
+
+    it('ticks the general or the discoverer, nothing for any other class', () => {
+        expect(moonClassToPrm(GENERAL)).toEqual({ isGeneral: true, isDiscoverer: false });
+        expect(moonClassToPrm(DISCOVERER)).toEqual({ isGeneral: false, isDiscoverer: true });
+        expect(moonClassToPrm(String(DISCOVERER))).toEqual({ isGeneral: false, isDiscoverer: true });
+        expect(moonClassToPrm(COLLECTOR)).toEqual({ isGeneral: false, isDiscoverer: false });
+        expect(moonClassToPrm(NONE)).toEqual({ isGeneral: false, isDiscoverer: false });
+        expect(moonClassToPrm(undefined)).toEqual({ isGeneral: false, isDiscoverer: false });
+    });
+
+    it('reads one ticked box as its class, whatever the profile had', () => {
+        expect(moonClassFromPrm({ isGeneral: true, isDiscoverer: false }, COLLECTOR)).toBe(GENERAL);
+        expect(moonClassFromPrm({ isGeneral: false, isDiscoverer: 'true' }, GENERAL)).toBe(DISCOVERER);
+    });
+
+    it('reads both ticked as the one ticked last: the class the profile did not have', () => {
+        const both = { isGeneral: true, isDiscoverer: true };
+        expect(moonClassFromPrm(both, GENERAL)).toBe(DISCOVERER);
+        expect(moonClassFromPrm(both, DISCOVERER)).toBe(GENERAL);
+        expect(moonClassFromPrm(both, COLLECTOR)).toBe(GENERAL);
+        expect(moonClassFromPrm(both, NONE)).toBe(GENERAL);
+    });
+
+    it('keeps a class the boxes cannot show when none is ticked, and drops one they can', () => {
+        const neither = { isGeneral: false, isDiscoverer: 'false' };
+        expect(moonClassFromPrm(neither, COLLECTOR)).toBe(COLLECTOR);
+        expect(moonClassFromPrm(neither, NONE)).toBe(NONE);
+        expect(moonClassFromPrm(neither, GENERAL)).toBe(NONE);
+        expect(moonClassFromPrm(neither, DISCOVERER)).toBe(NONE);
+        expect(moonClassFromPrm(neither, undefined)).toBe(NONE);
+    });
+});

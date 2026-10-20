@@ -1023,3 +1023,47 @@ describe('Flight Calculator - Time Field Parsing', () => {
         }
     });
 });
+
+// The profile binding of the alliance class (flight-profile.js): two switches for
+// three classes and none. It loads on top of the profile scripts, whose binder
+// base classes run nothing on load.
+const { FLIGHT_ACCOUNT_FIELDS, PROFILE_ALLIANCE_CLASS } = load(
+    [
+        'js/utils.js', 'ogame/calc/js/dom-utils.js', 'ogame/calc/js/profiles-core.js',
+        'ogame/calc/js/profiles-fields.js', 'ogame/calc/js/profiles-widgets.js',
+        'ogame/calc/js/profiles-binders.js', 'ogame/calc/js/flight-profile.js',
+    ],
+    ['FLIGHT_ACCOUNT_FIELDS', 'PROFILE_ALLIANCE_CLASS'],
+);
+
+describe('Flight profile: the alliance class', () => {
+    const field = FLIGHT_ACCOUNT_FIELDS.find((f) => f.key === 'allianceClass');
+    const { NONE, WARRIOR, TRADER, RESEARCHER } = PROFILE_ALLIANCE_CLASS;
+
+    /** The two switches a profile value turns into. */
+    const switches = (value) => {
+        const prm = {};
+        field.write(prm, value);
+        return prm;
+    };
+
+    it('turns on the trader or the warrior switch, neither for a researcher or none', () => {
+        expect(switches(TRADER)).toEqual({ traderBonus: true, warriorBonus: false });
+        expect(switches(String(WARRIOR))).toEqual({ traderBonus: false, warriorBonus: true });
+        expect(switches(RESEARCHER)).toEqual({ traderBonus: false, warriorBonus: false });
+        expect(switches(NONE)).toEqual({ traderBonus: false, warriorBonus: false });
+        expect(switches(undefined)).toEqual({ traderBonus: false, warriorBonus: false });
+    });
+
+    it('reads the switches back, a researcher as none', () => {
+        expect(field.read({ traderBonus: true, warriorBonus: false })).toBe(TRADER);
+        expect(field.read({ traderBonus: false, warriorBonus: true })).toBe(WARRIOR);
+        expect(field.read({ traderBonus: false, warriorBonus: false })).toBe(NONE);
+        expect(field.read(switches(RESEARCHER))).toBe(NONE);
+    });
+
+    it('takes only a real true, and the trader when both are on', () => {
+        expect(field.read({ traderBonus: 'true', warriorBonus: 'true' })).toBe(NONE);
+        expect(field.read({ traderBonus: true, warriorBonus: true })).toBe(TRADER);
+    });
+});
