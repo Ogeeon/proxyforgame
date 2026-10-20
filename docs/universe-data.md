@@ -23,7 +23,7 @@ expeditions, moon) take the active profile's universe settings from the shared u
 it for a day in `localStorage` (`pfg_universe_<country>_<number>`) with the player's own choices
 beside it. The rules - parsing the answer, the TTL, the legacy `override` key, a choice equal to
 the game's being dropped - are pure functions in `profiles-core.js` with Node tests;
-`PfUniverseSetting` in `profiles-ui.js` only ties a field to the cache. The player's choices count
+`PfUniverseSetting` in `profiles-widgets.js` only ties a field to the cache. The player's choices count
 in the profile badge of values that differ from the game, and travel in the profile backup file.
 
 ## Things that trip people up

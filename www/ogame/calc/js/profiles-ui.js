@@ -5,7 +5,10 @@
 // create and manage actions at the bottom of its list), the four dialogs, the
 // one-time offer to convert the old saved sets, and the marks a calculator
 // puts on profile-owned fields. A calculator talks to it through `pfgProfiles`,
-// which is null on a page without the selector.
+// which is null on a page without the selector. The fields, the widgets and the
+// binders a calculator builds on live in profiles-fields.js,
+// profiles-widgets.js and profiles-binders.js, loaded before this file: it
+// creates `pfgProfiles` as it runs, so it comes last.
 
 'use strict';
 
