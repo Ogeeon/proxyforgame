@@ -251,6 +251,48 @@ test('"no profile" shows the calculator\'s own settings, untouched', async ({ pa
     expect(own).toBe(3);
 });
 
+/** What production keeps in options_production. */
+function storedProduction(page) {
+    return page.evaluate(() => JSON.parse(localStorage.getItem('options_production') || '{}'));
+}
+
+test('a production calculator field changed with a profile active is kept with "no profile"', async ({ page }) => {
+    await page.goto('/production');
+    await importExport(page);
+    await page.locator('#tabtag2').click();
+    await page.locator('#all-pln-addtnl-info').check();
+    await expect.poll(async () => (await storedProduction(page)).showAddInf).toBe(true);
+    // The profile's values stay out of the calculator's own settings.
+    expect((await storedProduction(page)).energyTechLevel).toBe(0);
+    expect(await page.evaluate(() => localStorage.getItem('options_production_profile'))).toBeNull();
+
+    await page.locator('#pf-select').selectOption('');
+    await expect(page.locator('#all-pln-addtnl-info')).toBeChecked();
+    await expect(page.locator('#energy-tech-level')).toHaveValue('0');
+});
+
+test('production takes the calculator fields once from the key they had with a profile', async ({ page }) => {
+    await page.goto('/production');
+    await importExport(page);
+    await expect(page.locator('#all-pln-addtnl-info')).not.toBeChecked();
+    // What an earlier version kept apart while a profile was active.
+    await page.evaluate(() => localStorage.setItem('options_production_profile', JSON.stringify({
+        universeSpeed: 1, maxTempEntered: false, onePlnExtView: false, showAddInf: true, inclSats: 0,
+    })));
+
+    await page.reload();
+    await expect(page.locator('#all-pln-addtnl-info')).toBeChecked();
+    expect(await page.evaluate(() => localStorage.getItem('options_production_profile'))).toBeNull();
+    expect((await storedProduction(page)).showAddInf).toBe(true);
+
+    // Taken over, not lost with the old key: a reload and "no profile" still show it.
+    await page.reload();
+    await expect(page.locator('#all-pln-addtnl-info')).toBeChecked();
+    await page.locator('#pf-select').selectOption('');
+    await expect(page.locator('#all-pln-addtnl-info')).toBeChecked();
+    await expect(page.locator('#energy-tech-level')).toHaveValue('0');
+});
+
 test('another planet is picked in the one-planet tab and remembered', async ({ page }) => {
     await page.goto('/production');
     await importExport(page);

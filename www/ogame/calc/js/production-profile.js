@@ -11,16 +11,26 @@
 //     shows as collector here) from turning into an override nobody made.
 // With a profile active, the one-planet tab shows one of the profile's planets,
 // picked in #pf-planet, and edits there go straight to that planet. The
-// calculator fields (PRODUCTION_LOCAL_KEYS) are kept under their own key, so
-// options_production - what "no profile" shows - is never touched meanwhile.
+// calculator fields (PRODUCTION_LOCAL_KEYS) keep going to options_production as
+// they are; everything else in it - the account, the planets, the one-planet
+// tab - is the profile's and is stored with the values it had before the
+// profile, so "no profile" shows them untouched. The economy speed comes from
+// the profile's universe; a profile with no universe leaves it to the calculator.
 
 'use strict';
 
-/** The fields of options.prm that stay the calculator's own (ADR-0004: calculator fields). */
+/**
+ * The fields of options.prm that are the calculator's own (ADR-0004:
+ * calculator fields). The economy speed is among them only while the profile
+ * has no universe.
+ */
 const PRODUCTION_LOCAL_KEYS = ['universeSpeed', 'maxTempEntered', 'onePlnExtView', 'showAddInf', 'inclSats'];
 
-/** Where the calculator fields go while a profile is active. */
-const PRODUCTION_PROFILE_OPTIONS_KEY = 'options_production_profile';
+/**
+ * Where the calculator fields went while a profile was active, before they
+ * were shared with "no profile": read once, then removed.
+ */
+const PRODUCTION_LEGACY_PROFILE_OPTIONS_KEY = 'options_production_profile';
 
 /** @type {ProfilePrmField[]} */
 const PRODUCTION_ACCOUNT_FIELDS = [
@@ -70,8 +80,6 @@ class ProductionProfiles extends ProfileBinder {
     /** @type {Record<string, number>} The storage levels as last loaded or written back. */
     this.storageSnapshot = {};
     this.ownSave = options.save;
-    /** @type {Record<string, *>} The calculator's own settings, as they were before a profile. */
-    this.ownPrm = cloneData(options.prm);
     /** @type {?PfUniverseSetting} Set in init(). */
     this.speed = null;
   }
@@ -79,6 +87,26 @@ class ProductionProfiles extends ProfileBinder {
   bindControls() {
     this.insertPlanetSelect();
     this.speed = new PfUniverseSetting(this.pf, PF_UNIVERSE_SPEED, '#universe-speed', () => updateParams());
+  }
+
+  /**
+   * The options.prm keys the profile owns: every one but the calculator
+   * fields - the planets as a whole included, which a profile always shows,
+   * even with none of its own - and the economy speed while the profile has
+   * a universe.
+   *
+   * @param {?Profile} profile
+   * @returns {PfOwnedGroup[]}
+   */
+  ownedGroups(profile) {
+    /** @type {Record<string, any>} */
+    const prm = options.prm;
+    const local = new Set(PRODUCTION_LOCAL_KEYS);
+    const owned = Object.keys(prm).filter((key) => typeof prm[key] !== 'function' && !local.has(key));
+    return [
+      { keys: owned, present: true },
+      { keys: ['universeSpeed'], present: !!profile?.universe, show: false },
+    ];
   }
 
   // -------------------------------------------------------------------------
@@ -98,12 +126,13 @@ class ProductionProfiles extends ProfileBinder {
     }
     this.applying = true;
     try {
-      if (this.profileId === null) this.ownPrm = cloneData(options.prm);
+      const first = this.profileId === null;
+      if (first) this.captureOwn();
       this.profileId = profile.id;
+      if (first) this.takeLegacyLocal();
       // Marks of the profile shown before; markAll() only visits what this one has.
       this.pf.clearMarks();
       const prm = options.prm;
-      this.loadLocal();
       PRODUCTION_ACCOUNT_FIELDS.forEach((f) => f.write(prm, getProfileValue(profile.account, f.key)));
       prm.ratesFmt = 2;
 
@@ -150,7 +179,7 @@ class ProductionProfiles extends ProfileBinder {
     this.speed?.detach();
     // The profile's values are still in options.prm, and options.load() only
     // overwrites the keys options_production holds: start from the own copy.
-    Object.assign(options.prm, cloneData(this.ownPrm));
+    super.restoreOwn();
     options.load('options_production');
   }
 
@@ -234,7 +263,12 @@ class ProductionProfiles extends ProfileBinder {
   saveWithProfile() {
     this.writeBackOnePlanet();
     this.writeBack();
-    this.saveLocal();
+    this.saveOwn();
+  }
+
+  /** @param {Record<string, any>} stored */
+  storeOwn(stored) {
+    saveToCookie('options_production', stored);
   }
 
   /**
@@ -346,21 +380,21 @@ class ProductionProfiles extends ProfileBinder {
     return changed;
   }
 
-  /** The calculator fields, kept apart from options_production while a profile is active. */
-  saveLocal() {
-    /** @type {Record<string, *>} */
-    const stored = {};
-    PRODUCTION_LOCAL_KEYS.forEach((key) => { stored[key] = options.prm[key]; });
-    saveToCookie(PRODUCTION_PROFILE_OPTIONS_KEY, stored);
-  }
-
-  /** The calculator fields last used with a profile, if there are any. */
-  loadLocal() {
+  /**
+   * The calculator fields last used with a profile, from the key they were
+   * kept under before they were shared with "no profile": taken once, when
+   * a profile is first shown, and stored at once as the calculator's own, so
+   * they outlive the key, which is removed. Called with the profile set.
+   */
+  takeLegacyLocal() {
+    if (readSavedData(PRODUCTION_LEGACY_PROFILE_OPTIONS_KEY) === null) return;
     /** @type {Record<string, *>} */
     const target = { validate: options.prm.validate };
     PRODUCTION_LOCAL_KEYS.forEach((key) => { target[key] = options.prm[key]; });
-    loadFromCookie(PRODUCTION_PROFILE_OPTIONS_KEY, target);
+    loadFromCookie(PRODUCTION_LEGACY_PROFILE_OPTIONS_KEY, target);
     PRODUCTION_LOCAL_KEYS.forEach((key) => { options.prm[key] = target[key]; });
+    this.saveOwn();
+    removeSavedData(PRODUCTION_LEGACY_PROFILE_OPTIONS_KEY);
   }
 
   // -------------------------------------------------------------------------
