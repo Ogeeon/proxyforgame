@@ -55,6 +55,12 @@ One game server, identified by its community (country) code and its number, as i
 profile.
 _Avoid_: server, when the settings are meant
 
+**Universe choice**:
+A universe setting the player picked instead of the game's. It is kept in the universe
+cache, not in a profile, so it is shared by every profile of that universe; it is marked,
+counted and reset like an override, and the profile backup file carries it.
+_Avoid_: override (that is a value of a profile)
+
 **Account export**:
 The JSON document that describes a whole account, produced from inside the game by the
 origin-exporter userscript or by Companion. It is the source of a profile's game layer.

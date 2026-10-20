@@ -17,10 +17,14 @@ tables and two AJAX services. None of it is the player's own data — that is
 
 Client side: `flight-orchestration.js` and `costs-orchestration.js` call `apiGet('serverdata', …)`;
 costs turns the answer into speeds with `universeSpeeds()` in `costs-core.js`. Pages bound to a
-player profile with no picker of their own (production, queue, LF costs, graviton) take the active
-profile's universe settings through `PfUniverseSetting` in `profiles-ui.js`, which caches the
-answer for a day in `localStorage` (`pfg_universe_<country>_<number>`) with the player's own
-choices beside it.
+player profile with no picker of their own (production, queue, LF costs, terraformer, graviton,
+expeditions, moon) take the active profile's universe settings from the shared universe cache:
+`UniverseCache` in `profiles-store.js` fetches the answer, collapses parallel requests and keeps
+it for a day in `localStorage` (`pfg_universe_<country>_<number>`) with the player's own choices
+beside it. The rules - parsing the answer, the TTL, the legacy `override` key, a choice equal to
+the game's being dropped - are pure functions in `profiles-core.js` with Node tests;
+`PfUniverseSetting` in `profiles-ui.js` only ties a field to the cache. The player's choices count
+in the profile badge of values that differ from the game, and travel in the profile backup file.
 
 ## Things that trip people up
 
