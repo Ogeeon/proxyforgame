@@ -268,6 +268,15 @@ describe('UniverseCache', () => {
         expect(plain(cache.get(EN1).overrides)).toEqual({});
     });
 
+    it('drops the choices the reset dialog names', () => {
+        const { cache, local } = freshCache();
+        local.setItem('pfg_universe_en_1', JSON.stringify({ at: 1, speed: 8, systems: 499, overrides: { speed: 4, systems: 400 } }));
+        expect(cache.reset(EN1, ['speed'])).toBe(1);
+        expect(JSON.parse(local.getItem('pfg_universe_en_1')).overrides).toEqual({ systems: 400 });
+        expect(cache.reset(EN1, ['speed'])).toBe(0);
+        expect(cache.reset({ country: 'de', number: 9 }, ['speed'])).toBe(0);
+    });
+
     it('keeps no choice while the game value is unknown', () => {
         const { cache, local } = freshCache();
         expect(cache.choose(EN1, 'speed', 4)).toBeNull();

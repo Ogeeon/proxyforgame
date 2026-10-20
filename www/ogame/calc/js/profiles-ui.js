@@ -744,7 +744,7 @@ class ProfilesUi {
     const badge = document.getElementById('pf-overrides');
     if (!badge) return;
     const profile = this.active();
-    const count = profile && hasGameLayer(profile) ? countOverrides(profile) : 0;
+    const count = profile ? this.overridesOf(profile).length : 0;
     badge.classList.toggle('d-none', count === 0);
     badge.textContent = String(count);
     const title = formatString(this.text.overrides, count) + ' - ' + this.text.resetAll;
@@ -757,12 +757,25 @@ class ProfilesUi {
   // Restoring game values
   // -------------------------------------------------------------------------
 
+  /**
+   * Every value that differs from the game: the profile's own - only when it
+   * has a game layer, as for the marks - then the settings the player picked
+   * for its universe, which are marked whether or not it has one.
+   *
+   * @param {Profile} profile
+   * @returns {ProfileOverride[]}
+   */
+  overridesOf(profile) {
+    const own = hasGameLayer(profile) ? listOverrides(profile) : [];
+    return profile.universe ? own.concat(listUniverseOverrides(this.universes.get(profile.universe))) : own;
+  }
+
   /** List every value that differs from the game, each with a tick to restore it. */
   openReset() {
     const profile = this.active();
     const body = document.getElementById('pf-reset-rows');
     if (!profile || !body) return;
-    this.resetRows = listOverrides(profile);
+    this.resetRows = this.overridesOf(profile);
     body.innerHTML = '';
     this.resetRows.forEach((item, i) => {
       const row = document.createElement('tr');
@@ -804,6 +817,7 @@ class ProfilesUi {
    */
   entityLabel(profile, item) {
     if (item.kind === 'account') return this.text.account;
+    if (item.kind === 'universe') return this.text.universe;
     const body = item.kind === 'planet'
       ? profile.planets.find((p) => p.id === item.entityId)
       : profile.moons.find((m) => m.id === item.entityId);
@@ -843,7 +857,16 @@ class ProfilesUi {
         .filter((t) => t.checked)
         .map((t) => this.resetRows[Number(t.dataset.index)])
         .filter(Boolean);
-      if (resetOverrides(current, chosen) > 0 && !this.store.save(current)) showToast(this.text.saveFailed, 'danger');
+      const universeKeys = chosen.filter((item) => item.kind === 'universe').map((item) => item.key);
+      const fromUniverse = current.universe && universeKeys.length > 0 ? this.universes.reset(current.universe, universeKeys) : 0;
+      if (resetOverrides(current, chosen.filter((item) => item.kind !== 'universe')) > 0) {
+        // Saving calls the calculator back, which shows the universe's values too.
+        if (!this.store.save(current)) showToast(this.text.saveFailed, 'danger');
+      } else if (fromUniverse > 0) {
+        // The universe cache is not the profile: nothing calls back on its own.
+        this.renderOverrides();
+        this.emit();
+      }
       pfModal('pf-reset-modal')?.hide();
     });
   }
@@ -1439,6 +1462,8 @@ class PfUniverseSetting {
     /** @type {?ProfileUniverse} The universe of the profile shown, if it has one. */
     this.universe = null;
     addEvent(selector, 'change', () => this.changed());
+    // Named for the reset dialog, which lists the player's choice beside the profile's overrides.
+    pf.describeField(kind.key, pfFieldLabel($(selector)), kind.display);
   }
 
   /** @returns {?string} */
@@ -1482,7 +1507,9 @@ class PfUniverseSetting {
   changed() {
     if (!this.universe) return;
     const entry = this.pf.universes.choose(this.universe, this.kind.key, this.kind.get(this.selector));
-    if (entry) this.mark(entry);
+    if (!entry) return;
+    this.mark(entry);
+    this.pf.renderOverrides();
   }
 
   /**

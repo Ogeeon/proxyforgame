@@ -402,6 +402,20 @@ class UniverseCache {
   }
 
   /**
+   * Drop the player's choices of these settings, back to the game's.
+   *
+   * @param {ProfileUniverse} universe
+   * @param {string[]} keys
+   * @returns {number} How many choices were dropped.
+   */
+  reset(universe, keys) {
+    const entry = this.get(universe);
+    const count = entry ? resetUniverseChoices(entry, keys) : 0;
+    if (entry && count > 0) this.put(universe, entry);
+    return count;
+  }
+
+  /**
    * The settings the player picked for the universes of these profiles, for
    * the backup file.
    *

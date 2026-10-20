@@ -57,6 +57,7 @@ $pfUniversePicker = function ($prefix) use ($l) {
     'overrides' => $l['pf-overrides'],
     'resetAll' => $l['pf-reset-profile'],
     'account' => $l['pf-account'],
+    'universe' => $l['universe'],
     'inGame' => $l['pf-in-game'],
     'resetValue' => $l['pf-reset-value'],
     'edit' => $l['pf-edit'],

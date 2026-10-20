@@ -473,11 +473,12 @@ function resetProfileValue(entity, key) {
 }
 
 /**
- * One value of a profile that differs from the game.
+ * One value of a profile that differs from the game, or a setting of its
+ * universe that the player picked instead of the game's (listUniverseOverrides).
  *
  * @typedef {Object} ProfileOverride
- * @property {'account'|'planet'|'moon'} kind
- * @property {?string} entityId The planet's or moon's local id; null for the account.
+ * @property {'account'|'planet'|'moon'|'universe'} kind
+ * @property {?string} entityId The planet's or moon's local id; null for the account and the universe.
  * @property {string} key
  * @property {*} game
  * @property {*} override
@@ -1364,6 +1365,41 @@ function mergeUniverseChoices(entry, overrides) {
 }
 
 /**
+ * The settings the player picked that differ from the game's, as rows of the
+ * reset dialog. A choice is shared by every profile of the universe, so it
+ * counts for each of them.
+ *
+ * @param {?UniverseEntry} entry
+ * @returns {ProfileOverride[]}
+ */
+function listUniverseOverrides(entry) {
+  if (!entry?.overrides) return [];
+  /** @type {ProfileOverride[]} */
+  const list = [];
+  Object.keys(entry.overrides).forEach((key) => {
+    const layer = universeLayer(entry, key);
+    if (pfMarkState(layer, true).differs) list.push({ kind: 'universe', entityId: null, key, game: layer.game, override: layer.override });
+  });
+  return list;
+}
+
+/**
+ * Drop the player's choices of the listed settings, back to the game's.
+ *
+ * @param {UniverseEntry} entry Changed in place.
+ * @param {string[]} keys
+ * @returns {number} How many choices were dropped.
+ */
+function resetUniverseChoices(entry, keys) {
+  const overrides = { ...entry.overrides };
+  const count = keys.filter((key) => key in overrides).length;
+  if (count === 0) return 0;
+  keys.forEach((key) => { delete overrides[key]; });
+  entry.overrides = overrides;
+  return count;
+}
+
+/**
  * How a field is marked: bound when its value has a game layer to compare
  * with and marks are wanted at all, differing when the value set on top of
  * that layer is not the game's.
@@ -1789,7 +1825,7 @@ if (typeof window !== 'undefined') {
     readProfile, serializeProfilesFile, parseProfilesFile, planProfilesRestore,
     universeCacheKey, readUniverseChoices, UNIVERSE_SETTINGS_TTL_MS, UNIVERSE_SETTING_PARSERS,
     parseUniverseSettings, readUniverseEntry, isUniverseEntryFresh, universeLayer, universeValue,
-    setUniverseChoice, mergeUniverseChoices, pfMarkState,
+    setUniverseChoice, mergeUniverseChoices, pfMarkState, listUniverseOverrides, resetUniverseChoices,
     ratesToTrade, ratesFromTrade, lfBuildingGameId,
     productionPlanetValues, productionPlanetState, profileFromProductionSet, profileFromFlightSet,
     profileFromSpyReport,

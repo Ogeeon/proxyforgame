@@ -23,6 +23,7 @@ const core = load(['ogame/calc/js/profiles-core.js'], [
     'EXPEDITION_TOP_SCORE_LIMITS', 'UNIVERSE_SETTINGS_TTL_MS', 'UNIVERSE_SETTING_PARSERS',
     'parseUniverseSettings', 'readUniverseEntry', 'isUniverseEntryFresh', 'universeLayer',
     'universeValue', 'setUniverseChoice', 'mergeUniverseChoices', 'pfMarkState',
+    'listUniverseOverrides', 'resetUniverseChoices',
 ]);
 
 const plain = (value) => JSON.parse(JSON.stringify(value));
@@ -907,6 +908,22 @@ describe('the universe settings', () => {
         expect(plain(core.pfMarkState({ override: 4 }, true))).toEqual(none);
         expect(plain(core.pfMarkState(undefined, true))).toEqual(none);
         expect(plain(core.pfMarkState({ game: 8, override: 4 }, false))).toEqual(none);
+    });
+
+    it("lists the player's choices that differ from the game as overrides of the universe", () => {
+        const entry = { at: 1, speed: 8, systems: 499, debrisFactor: null, overrides: { speed: 4, systems: 499, debrisFactor: 50 } };
+        expect(plain(core.listUniverseOverrides(entry))).toEqual([
+            { kind: 'universe', entityId: null, key: 'speed', game: 8, override: 4 },
+        ]);
+        expect(plain(core.listUniverseOverrides({ at: 1, speed: 8 }))).toEqual([]);
+        expect(plain(core.listUniverseOverrides(null))).toEqual([]);
+    });
+
+    it("drops the listed choices and keeps the others", () => {
+        const entry = { at: 1, speed: 8, systems: 499, overrides: { speed: 4, systems: 400 } };
+        expect(core.resetUniverseChoices(entry, ['speed', 'donutSystem'])).toBe(1);
+        expect(plain(entry)).toEqual({ at: 1, speed: 8, systems: 499, overrides: { systems: 400 } });
+        expect(core.resetUniverseChoices({ at: 1 }, ['speed'])).toBe(0);
     });
 
     it('marks a profile value as the profile layers say', () => {

@@ -18,6 +18,7 @@ release section; it is the source of truth for the other eleven translations.
 ### Fixed
 
 - Profiles: an account export PfG Companion delivers while a calculator is open now shows in that calculator at once when it updates the active profile; until now the profile was updated in storage, but the page kept the old game values until it was reloaded.
+- Profiles: a universe setting picked by hand instead of the game's — economy speed, debris shares, galaxy size and the like — now counts in the badge of values that differ from the game, and the badge's dialog lists it under "Universe" and restores it; until now only the profile's own values were counted, so the badge stayed hidden or undercounted while such a setting differed.
 
 ## [2026-10-19] - site entry 68
 

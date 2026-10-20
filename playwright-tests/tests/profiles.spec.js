@@ -191,6 +191,38 @@ test('the economy speed is the game\'s, and a changed one survives a reload', as
     await expect(speed).toHaveValue('5');
 });
 
+test('a changed universe setting counts in the overrides badge and is restored there', async ({ page }) => {
+    await page.route('**/ajax.php?*service=serverdata*', (route) => route.fulfill({
+        status: 200, contentType: 'application/json', body: JSON.stringify({ speed: '5' }),
+    }));
+    await page.goto('/production');
+    await importExport(page);
+    const speed = page.locator('#universe-speed');
+    await expect(speed).toHaveValue('5');
+    await expect(page.locator('#pf-overrides')).toBeHidden();
+
+    await speed.selectOption('7');
+    await expect(page.locator('#pf-overrides')).toHaveText('1');
+    await page.reload();
+    await expect(page.locator('#pf-overrides')).toHaveText('1');
+
+    await page.locator('#pf-overrides').click();
+    const rows = page.locator('#pf-reset-rows tr');
+    await expect(rows).toHaveCount(1);
+    await expect(rows.nth(0).locator('td').nth(1)).toHaveText('Universe');
+    await expect(rows.nth(0).locator('td').nth(3)).toHaveText('5');
+    await expect(rows.nth(0).locator('td').nth(4)).toHaveText('7');
+    await page.locator('#pf-reset-go').click();
+
+    await expect(page.locator('#pf-reset-modal')).toBeHidden();
+    await expect(speed).toHaveValue('5');
+    await expect(speed).not.toHaveClass(/pf-differs/);
+    await expect(page.locator('#pf-overrides')).toBeHidden();
+    await page.reload();
+    await expect(speed).toHaveValue('5');
+    await expect(page.locator('#pf-overrides')).toBeHidden();
+});
+
 test('loading a profile writes no override by itself', async ({ page }) => {
     await page.goto('/production');
     await importExport(page);
@@ -1330,12 +1362,13 @@ test('graviton takes the debris settings from the universe, and keeps a changed 
     await page.reload();
     await expect(debris).toHaveValue('30');
     await expect(debris).toHaveClass(/pf-differs/);
-    // A universe setting is not in the profile.
-    await expect(page.locator('#pf-overrides')).toBeHidden();
+    // The choice is the universe's, not the profile's, but it still differs from the game.
+    await expect(page.locator('#pf-overrides')).toHaveText('1');
 
     await page.locator('#debris-percent + .pf-reset').click();
     await expect(debris).toHaveValue('75');
     await expect(debris).not.toHaveClass(/pf-differs/);
+    await expect(page.locator('#pf-overrides')).toBeHidden();
 });
 
 test('"no profile" gives graviton its own debris settings back', async ({ page }) => {
@@ -1512,12 +1545,13 @@ test('terraformer takes the economy speed from the universe, and keeps a changed
     await page.reload();
     await expect(speed).toHaveValue('2');
     await expect(speed).toHaveClass(/pf-differs/);
-    // A universe setting is not in the profile.
-    await expect(page.locator('#pf-overrides')).toBeHidden();
+    // The choice is the universe's, not the profile's, but it still differs from the game.
+    await expect(page.locator('#pf-overrides')).toHaveText('1');
 
     await page.locator('#universe-speed + .pf-reset').click();
     await expect(speed).toHaveValue('5');
     await expect(speed).not.toHaveClass(/pf-differs/);
+    await expect(page.locator('#pf-overrides')).toBeHidden();
 });
 
 // Trade: the account, the shared exchange rates, the locked universe, and a
@@ -1800,14 +1834,16 @@ test('expeditions takes the speed and the top score from the universe, and keeps
     await expect(speed).toHaveValue('2');
     await expect(top).toHaveValue('1200000');
     await expect(top).toHaveClass(/pf-differs/);
-    // A universe setting is not in the profile.
-    await expect(page.locator('#pf-overrides')).toBeHidden();
+    // The choices are the universe's, not the profile's, but they still differ from the game.
+    await expect(page.locator('#pf-overrides')).toHaveText('2');
 
     await page.locator('#highTop + .pf-reset').click();
     await expect(top).toHaveValue('2400000');
+    await expect(page.locator('#pf-overrides')).toHaveText('1');
     await page.locator('#universe-speed + .pf-reset').click();
     await expect(speed).toHaveValue('5');
     await expect(top).not.toHaveClass(/pf-differs/);
+    await expect(page.locator('#pf-overrides')).toBeHidden();
 });
 
 test('"no profile" gives expeditions its own values back', async ({ page }) => {
@@ -2117,14 +2153,15 @@ test('moon takes the debris and galaxy settings from the universe, and keeps a c
     await expect(page.locator('#defense-debris-percent')).toHaveValue('10');
     await expect(page.locator('#systems-num')).toHaveClass(/pf-differs/);
     expect(await page.evaluate(() => document.getElementById('own-system')._constrains.max)).toBe(350);
-    // A universe setting is not in the profile.
-    await expect(page.locator('#pf-overrides')).toBeHidden();
+    // The choices are the universe's, not the profile's, but they still differ from the game.
+    await expect(page.locator('#pf-overrides')).toHaveText('2');
 
     await page.locator('#systems-num + .pf-reset').click();
     await expect(page.locator('#systems-num')).toHaveValue('300');
     await page.locator('#defense-debris-percent + .pf-reset').click();
     await expect(page.locator('#defense-debris-percent')).toHaveValue('35');
     await expect(page.locator('#systems-num')).not.toHaveClass(/pf-differs/);
+    await expect(page.locator('#pf-overrides')).toBeHidden();
 });
 
 test('"no profile" gives moon its own values back', async ({ page }) => {
