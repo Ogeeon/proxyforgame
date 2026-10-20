@@ -89,22 +89,12 @@ const inputSchema = {
         allianceClass: { ...common.allianceClassSchema, description: 'trader: +5% production and energy.' },
         universe: common.universeSchema,
         universeSpeed: common.universeSpeedSchema,
-        lifeformResearch: {
-            type: 'object',
-            description: 'Life form research bonuses, as the game\'s life form panel shows them.',
-            properties: {
-                metal: common.percent('Metal production bonus'),
-                crystal: common.percent('Crystal production bonus'),
-                deuterium: common.percent('Deuterium production bonus'),
-                energy: common.percent('Energy production bonus'),
-                crawlers: common.percent('Crawler bonus (Rock\'tal Ion Crystal Modules)'),
-                collectorClassBonus: common.percent('Collector class bonus total (Rock\'tal Collector Enhancement)'),
-            },
-            additionalProperties: false,
-        },
-        lifeformBuildings: common.keyedMap(LF_BUILDINGS.map((b) => b.key), { type: 'integer', minimum: 0, maximum: 200 },
-            'Levels of the life form buildings on the planet - one race\'s only. '
-            + LF_BUILDINGS.map((b) => `${b.key}: ${NAMES[b.key] ?? b.key}`).join(', ') + '.'),
+        lifeforms: common.lifeformsSchema(
+            ['metalBonus', 'crystalBonus', 'deuteriumBonus', 'energyBonus', 'crawlerBonus', 'collectorClassBonus'], [], {
+                buildings: common.keyedMap(LF_BUILDINGS.map((b) => b.key), { type: 'integer', minimum: 0, maximum: 200 },
+                    'Levels of the life form buildings on the planet - one race\'s only. '
+                    + LF_BUILDINGS.map((b) => `${b.key}: ${NAMES[b.key] ?? b.key}`).join(', ') + '.'),
+            }),
     },
     additionalProperties: false,
 };
@@ -126,15 +116,16 @@ function createProductionTool({ siteApi }) {
             const universeSpeed = await common.economySpeed(args, siteApi);
 
             // The life form buildings, as the positional array the core expects.
-            const given = LF_BUILDINGS.filter((b) => (args.lifeformBuildings?.[b.key] ?? 0) > 0);
+            const lf = args.lifeforms;
+            const given = LF_BUILDINGS.filter((b) => (lf.buildings?.[b.key] ?? 0) > 0);
             const races = new Set(given.map((b) => b.race));
             if (races.size > 1) {
-                throw new ToolError('lifeformBuildings mixes races: a planet carries the buildings of one life form only.');
+                throw new ToolError('lifeforms.buildings mixes races: a planet carries the buildings of one life form only.');
             }
             const race = races.size ? [...races][0] : 0;
             const levels = new Array(scope.LF_BUILDINGS_PER_RACE).fill(0);
             for (const b of given) {
-                levels[b.position - 1] = args.lifeformBuildings[b.key];
+                levels[b.position - 1] = lf.buildings[b.key];
             }
 
             // The core finds the commanding staff bonus itself, from all five flags set.
@@ -142,7 +133,6 @@ function createProductionTool({ siteApi }) {
             const crawlerCap = maxCrawlers(args.metalMine.level, args.crystalMine.level, args.deuteriumSynthesizer.level, geologist);
             const crawlers = Math.min(args.crawlers.count, crawlerCap);
 
-            const lfr = args.lifeformResearch ?? {};
             scope.options = {
                 rowsToTechs: ROWS_TO_TECHS,
                 lfEnergy: LF_ENERGY,
@@ -158,12 +148,12 @@ function createProductionTool({ siteApi }) {
                     commander,
                     playerClass: common.classId(args.playerClass),
                     isTrader: args.allianceClass === 'trader',
-                    lfMetProdBonus: lfr.metal ?? 0,
-                    lfCrysProdBonus: lfr.crystal ?? 0,
-                    lfDeutProdBonus: lfr.deuterium ?? 0,
-                    lfEnergyProdBonus: lfr.energy ?? 0,
-                    lfCrawlerBonus: lfr.crawlers ?? 0,
-                    lfCollectorBonus: lfr.collectorClassBonus ?? 0,
+                    lfMetProdBonus: lf.metalBonus,
+                    lfCrysProdBonus: lf.crystalBonus,
+                    lfDeutProdBonus: lf.deuteriumBonus,
+                    lfEnergyProdBonus: lf.energyBonus,
+                    lfCrawlerBonus: lf.crawlerBonus,
+                    lfCollectorBonus: lf.collectorClassBonus,
                 },
             };
 

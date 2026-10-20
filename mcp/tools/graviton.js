@@ -17,6 +17,7 @@ const inputSchema = {
     properties: {
         gravitonLevel: { type: 'integer', minimum: 1, maximum: 10, default: 1, description: 'Graviton Technology level to research.' },
         ...common.energySchema,
+        lifeforms: common.lifeformsSchema(common.ENERGY_LIFEFORMS, common.ENERGY_SHIPS),
         shipyard: common.level('Shipyard level: satellite build time'),
         naniteFactory: common.level('Nanite Factory level: satellite build time'),
         universe: common.universeSchema,

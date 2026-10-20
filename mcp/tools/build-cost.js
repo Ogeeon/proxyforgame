@@ -92,23 +92,10 @@ const inputSchema = {
         },
         playerClass: common.playerClassSchema,
         officers: { ...common.officersSchema, description: 'Officers hired. The Technocrat: research 25% faster.' },
-        discovererClassBonus: {
-            type: 'number', minimum: 0, default: 0,
-            description: 'Kaelesh "Discoverer Enhancement" total in percent, as the life form panel shows it.',
-        },
         ionTechnology: level('Ion Technology level: makes demolition cheaper.'),
         hyperspaceTechnology: level('Hyperspace Technology level: for the cargo ships needed.'),
-        lifeforms: {
-            type: 'object',
-            description: 'Life form reductions, in percent, for this item.',
-            properties: {
-                researchCostReduction: { type: 'number', minimum: 0, maximum: 50, default: 0 },
-                researchTimeReduction: { type: 'number', minimum: 0, maximum: 99, default: 0 },
-                mineralResearchCentre: level('Rock\'tal Mineral Research Centre level: cheaper mines and power plants.'),
-                terraformerReduction: { type: 'number', minimum: 0, maximum: 50, default: 0 },
-            },
-            additionalProperties: false,
-        },
+        lifeforms: common.lifeformsSchema(['itemCostReduction', 'itemTimeReduction', 'mineralResearchCentre',
+            'terraformerReduction', 'discovererClassBonus']),
     },
     required: ['item'],
     additionalProperties: false,
@@ -198,14 +185,15 @@ function createBuildCostTool({ siteApi }) {
             params.researchSpeed = researchSpeed;
             params.playerClass = common.classId(args.playerClass);
             Object.assign(params, args.officers);
-            params.discovererClassBonus = args.discovererClassBonus;
             params.ionTechLevel = args.ionTechnology;
             params.hyperTechLevel = args.hyperspaceTechnology;
-            const lf = args.lifeforms ?? {};
-            params.lfResCostRdcMap = { [id]: lf.researchCostReduction ?? 0 };
-            params.lfResTimeRdcMap = { [id]: lf.researchTimeReduction ?? 0 };
-            params.mineralResCntrLvl = lf.mineralResearchCentre ?? 0;
-            params.lfTerraformerRdc = lf.terraformerReduction ?? 0;
+            const lf = args.lifeforms;
+            params.discovererClassBonus = lf.discovererClassBonus;
+            // The costs page keys these by research; the tool's reductions are the requested item's.
+            params.lfResCostRdcMap = { [id]: lf.itemCostReduction };
+            params.lfResTimeRdcMap = { [id]: lf.itemTimeReduction };
+            params.mineralResCntrLvl = lf.mineralResearchCentre;
+            params.lfTerraformerRdc = lf.terraformerReduction;
 
             if (kind === 'research' && !calculator.isResearchable(id, params)) {
                 throw new ToolError(`${NAMES[args.item]} needs a Research Lab of level `

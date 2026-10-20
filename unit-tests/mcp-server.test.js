@@ -444,6 +444,16 @@ describe('MCP tool ogame_build_cost', () => {
         expect(await seconds({ engineer: true })).toBe(await seconds({}));
     });
 
+    it('takes the life form reductions for the item asked about', async () => {
+        const out = async (lifeforms) => (await call(protocolWith(), 'ogame_build_cost', {
+            item: 'astrophysics', fromLevel: 4, toLevel: 5, facilities: { researchLab: 3 }, lifeforms,
+        })).structuredContent;
+        const plain = await out({});
+        const reduced = await out({ itemCostReduction: 10, itemTimeReduction: 20 });
+        expect(reduced.metal).toBe(Math.floor(plain.metal * 0.9));
+        expect(reduced.durationSeconds).toBeLessThan(plain.durationSeconds);
+    });
+
     it('refuses a research when the lab is 0, rather than making one up', async () => {
         const result = await call(protocolWith(), 'ogame_build_cost', { item: 'astrophysics', toLevel: 1, facilities: { researchLab: 0 } });
         expect(result.isError).toBe(true);
@@ -583,7 +593,7 @@ describe('MCP tool ogame_terraformer', () => {
         const facilities = { roboticsFactory: 10, naniteFactory: 3 };
         const both = async (fromLevel, toLevel) => {
             const tf = (await call(protocolWith(), 'ogame_terraformer', {
-                fromLevel, toLevel, ...facilities, universeSpeed: 3, terraformerReduction: 20,
+                fromLevel, toLevel, ...facilities, universeSpeed: 3, lifeforms: { terraformerReduction: 20 },
                 solarPlant: { level: 30 }, maxTemperature: 40,
             })).structuredContent.terraformer;
             const bc = (await call(protocolWith(), 'ogame_build_cost', {
@@ -606,7 +616,7 @@ describe('MCP tool ogame_terraformer', () => {
     });
 
     it('caps the life form Terraformer reduction at 50%', async () => {
-        const result = await call(protocolWith(), 'ogame_terraformer', { toLevel: 1, terraformerReduction: 60 });
+        const result = await call(protocolWith(), 'ogame_terraformer', { toLevel: 1, lifeforms: { terraformerReduction: 60 } });
         expect(result.isError).toBe(true);
     });
 
@@ -740,7 +750,7 @@ describe('MCP tool ogame_lifeform_cost', () => {
 
     it('applies the Megalith to a Rock\'tal building the way the page does', async () => {
         const out = (await call(protocolWith(), 'ogame_lifeform_cost', {
-            item: 'Megalith', fromLevel: 5, toLevel: 6, megalith: 5, roboticsFactory: 10,
+            item: 'Megalith', fromLevel: 5, toLevel: 6, lifeforms: { megalith: 5 }, roboticsFactory: 10,
         })).structuredContent;
         const techs = readWwwJson('ogame/calc/data/lf-techs.json');
         const costs = Object.fromEntries(Object.entries(techs).map(([id, row]) => [id, row.slice(2)]));
@@ -805,7 +815,7 @@ describe('MCP tool ogame_production', () => {
 
     it('lets a Magma Forge raise the metal output', async () => {
         const plain = (await call(protocolWith(), 'ogame_production', base)).structuredContent;
-        const forge = (await call(protocolWith(), 'ogame_production', { ...base, lifeformBuildings: { 'magma-forge': 10 } })).structuredContent;
+        const forge = (await call(protocolWith(), 'ogame_production', { ...base, lifeforms: { buildings: { 'magma-forge': 10 } } })).structuredContent;
         // 2% per level of the mine's output
         expect(forge.breakdownPerHour.lifeformBuildings.metal).toBe(Math.round(plain.breakdownPerHour.mines.metal * 0.2));
     });
@@ -836,8 +846,44 @@ describe('MCP tool ogame_production', () => {
     });
 
     it('refuses buildings of two races on one planet', async () => {
-        const result = await call(protocolWith(), 'ogame_production', { lifeformBuildings: { 'magma-forge': 1, 'high-en-smelt': 1 } });
+        const result = await call(protocolWith(), 'ogame_production', { lifeforms: { buildings: { 'magma-forge': 1, 'high-en-smelt': 1 } } });
         expect(result.isError).toBe(true);
+    });
+});
+
+describe('MCP lifeforms.shipBonuses', () => {
+    const cargo = (ship, percent) => ({ lifeforms: { shipBonuses: { [ship]: { cargo: percent } } } });
+
+    it('raises a ship\'s hold in ogame_flight', async () => {
+        const out = (await call(protocolWith(), 'ogame_flight', {
+            from: { galaxy: 1, system: 1, position: 1 }, to: { galaxy: 1, system: 2, position: 1 },
+            ships: { 'large-cargo': 100 }, speedPercent: 100, ...cargo('large-cargo', 10),
+        })).structuredContent;
+        expect(out.cargoCapacity).toBe(100 * 27500);
+    });
+
+    it('raises a ship\'s hold in ogame_trade, ogame_moon_creation and ogame_expedition', async () => {
+        const trade = async (extra) => (await call(protocolWith(), 'ogame_trade', {
+            sell: { metal: 2750000 }, buy: 'crystal', ...extra,
+        })).structuredContent.cargoShips.toDeliverSold.largeCargo;
+        expect(await trade({})).toBe(110);
+        expect(await trade(cargo('large-cargo', 10))).toBe(100);
+
+        const moon = (await call(protocolWith(), 'ogame_moon_creation', {
+            destroyed: { 'light-fighter': 2000 }, ...cargo('recycler', 10),
+        })).structuredContent;
+        expect(moon.recyclerCapacity).toBe(22000);
+
+        const expedition = async (extra) => (await call(protocolWith(), 'ogame_expedition', {
+            ships: { recycler: 10 }, ...extra,
+        })).structuredContent.fleetCargoCapacity;
+        expect(await expedition(cargo('recycler', 10))).toBe(await expedition({}) + 10 * 2000);
+    });
+
+    it('reads only the ships a tool lists', async () => {
+        const result = await call(protocolWith(), 'ogame_trade', { sell: { metal: 1 }, buy: 'crystal', ...cargo('cruiser', 10) });
+        expect(result.isError).toBe(true);
+        expect(result.content[0].text).toContain('arguments.lifeforms.shipBonuses.cruiser is not one of');
     });
 });
 

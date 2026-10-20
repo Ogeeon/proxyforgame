@@ -105,30 +105,7 @@ const inputSchema = {
             ...common.allianceClassSchema,
             description: 'trader: +10% speed for cargo ships. warrior: +10% speed on holding missions.',
         },
-        lifeforms: {
-            type: 'object',
-            description: 'Life form bonuses, as percentages the game shows.',
-            properties: {
-                mechaGeneralEnhancement: {
-                    type: 'number', minimum: 0, default: 0,
-                    description: 'Mechas "General Enhancement": raises the General class ship bonuses.',
-                },
-                rocktalCollectorEnhancement: {
-                    type: 'number', minimum: 0, default: 0,
-                    description: 'Rock\'tal "Collector Enhancement": raises the Collector class ship bonuses.',
-                },
-                shipBonuses: keyedMap(SHIP_KEYS, {
-                    type: 'object',
-                    properties: {
-                        speed: { type: 'number', minimum: 0, default: 0 },
-                        cargo: { type: 'number', minimum: 0, default: 0 },
-                        fuel: { type: 'number', minimum: 0, maximum: 90, default: 0, description: 'Fuel consumption reduction' },
-                    },
-                    additionalProperties: false,
-                }, 'Per-ship life form bonuses in percent, keyed like `ships`.'),
-            },
-            additionalProperties: false,
-        },
+        lifeforms: common.lifeformsSchema(['generalClassBonus', 'collectorClassBonus'], SHIP_KEYS),
         universe: {
             type: 'object',
             description: 'A live universe, e.g. {"country": "en", "number": 152} for s152-en.ogame.gameforge.com. '
@@ -253,7 +230,7 @@ function createFlightTool({ siteApi }) {
             const playerClass = CLASSES[/** @type {keyof typeof CLASSES} */ (args.playerClass)];
             const isGeneral = args.playerClass === 'general';
 
-            const shipBonuses = args.lifeforms?.shipBonuses ?? {};
+            const shipBonuses = args.lifeforms.shipBonuses ?? {};
             const params = {
                 driveLevels: [args.drives.combustion, args.drives.impulse, args.drives.hyperspace],
                 fleetSpeedWar: settings.fleetSpeedWar,
@@ -271,8 +248,8 @@ function createFlightTool({ siteApi }) {
                 missionType: MISSIONS[/** @type {keyof typeof MISSIONS} */ (args.mission)],
                 traderBonus: args.allianceClass === 'trader',
                 warriorBonus: args.allianceClass === 'warrior',
-                lfMechanGE: args.lifeforms?.mechaGeneralEnhancement ?? 0,
-                lfRocktalCE: args.lifeforms?.rocktalCollectorEnhancement ?? 0,
+                lfMechanGE: args.lifeforms.generalClassBonus,
+                lfRocktalCE: args.lifeforms.collectorClassBonus,
                 lfShipsBonuses: SHIP_KEYS.map((key) => {
                     const bonus = shipBonuses[key];
                     return bonus ? [bonus.speed, bonus.cargo, bonus.fuel] : [0, 0, 0];

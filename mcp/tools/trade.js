@@ -66,15 +66,7 @@ const inputSchema = {
         },
         hyperspaceTechnology: common.level('Hyperspace Technology level: cargo capacity', 50),
         playerClass: common.playerClassSchema,
-        cargoIncrease: {
-            type: 'object',
-            description: 'Life form cargo capacity increases, in percent.',
-            properties: {
-                smallCargo: { type: 'number', minimum: 0, default: 0 },
-                largeCargo: { type: 'number', minimum: 0, default: 0 },
-            },
-            additionalProperties: false,
-        },
+        lifeforms: common.lifeformsSchema([], ['small-cargo', 'large-cargo']),
     },
     required: ['sell'],
     additionalProperties: false,
@@ -199,8 +191,8 @@ function createTradeTool() {
                 ...mixParams(dstType === 2 ? args.split : undefined, pair),
                 hyperTech: args.hyperspaceTechnology,
                 playerClass: common.classId(args.playerClass),
-                scCapacityIncrease: args.cargoIncrease.smallCargo,
-                lcCapacityIncrease: args.cargoIncrease.largeCargo,
+                scCapacityIncrease: common.shipCargoBonus(args.lifeforms, 'small-cargo'),
+                lcCapacityIncrease: common.shipCargoBonus(args.lifeforms, 'large-cargo'),
             });
 
             const inRange = (/** @type {number} */ v, /** @type {{min: number, max: number}} */ l) => v >= l.min && v <= l.max;

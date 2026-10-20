@@ -41,12 +41,8 @@ const inputSchema = {
             type: 'string', enum: Object.keys(RACES),
             description: 'Life form of the planet. Its buildings give the reductions below. Defaults to the item\'s own race.',
         },
-        megalith: common.level('Rock\'tal Megalith level: cheaper and faster buildings'),
-        mineralResearchCentre: common.level('Rock\'tal Mineral Research Centre level: cheaper mines and life form production buildings'),
-        researchBuilding: common.level('Level of the planet race\'s research building - Research Centre, Rune Technologium, '
-            + 'Robotics Research Centre or Vortex Chamber: cheaper and faster life form research'),
-        researchCostReduction: common.percent('Life form research cost reduction from technologies', 50),
-        researchTimeReduction: common.percent('Life form research time reduction from technologies', 99),
+        lifeforms: common.lifeformsSchema(['megalith', 'mineralResearchCentre', 'researchBuilding',
+            'researchCostReduction', 'researchTimeReduction'], ['small-cargo', 'large-cargo']),
         roboticsFactory: common.level('Robotics Factory level'),
         naniteFactory: common.level('Nanite Factory level'),
         universe: common.universeSchema,
@@ -54,15 +50,6 @@ const inputSchema = {
         ionTechnology: common.level('Ion Technology level: cheaper demolition', 50),
         hyperspaceTechnology: common.level('Hyperspace Technology level: for the cargo ships needed', 50),
         playerClass: common.playerClassSchema,
-        cargoIncrease: {
-            type: 'object',
-            description: 'Life form cargo capacity increases, in percent.',
-            properties: {
-                smallCargo: { type: 'number', minimum: 0, default: 0 },
-                largeCargo: { type: 'number', minimum: 0, default: 0 },
-            },
-            additionalProperties: false,
-        },
     },
     required: ['item', 'toLevel'],
     additionalProperties: false,
@@ -96,25 +83,26 @@ function createLifeformCostTool({ siteApi }) {
             }
 
             const race = args.planetRace ? RACES[/** @type {keyof typeof RACES} */ (args.planetRace)] : Math.floor(id / 1000);
+            const lf = args.lifeforms;
             const params = {
                 race,
-                megalithLvl: args.megalith,
-                mineralResCntrLvl: args.mineralResearchCentre,
+                megalithLvl: lf.megalith,
+                mineralResCntrLvl: lf.mineralResearchCentre,
                 // Only the planet race's own research building counts; the core picks it by race.
-                resCentreLvl: args.researchBuilding,
-                runeTechLvl: args.researchBuilding,
-                rbtResCentreLvl: args.researchBuilding,
-                vortexChamberLvl: args.researchBuilding,
-                researchCostReduction: args.researchCostReduction,
-                researchTimeReduction: args.researchTimeReduction,
+                resCentreLvl: lf.researchBuilding,
+                runeTechLvl: lf.researchBuilding,
+                rbtResCentreLvl: lf.researchBuilding,
+                vortexChamberLvl: lf.researchBuilding,
+                researchCostReduction: lf.researchCostReduction,
+                researchTimeReduction: lf.researchTimeReduction,
                 robotFactoryLevel: args.roboticsFactory,
                 naniteFactoryLevel: args.naniteFactory,
                 universeSpeed: await common.economySpeed(args, siteApi),
                 ionTechLevel: args.ionTechnology,
                 hyperTechLevel: args.hyperspaceTechnology,
                 playerClass: common.classId(args.playerClass),
-                capIncrSC: args.cargoIncrease.smallCargo,
-                capIncrLC: args.cargoIncrease.largeCargo,
+                capIncrSC: common.shipCargoBonus(lf, 'small-cargo'),
+                capIncrLC: common.shipCargoBonus(lf, 'large-cargo'),
             };
 
             // The same reductions the page applies: research cost from the race's

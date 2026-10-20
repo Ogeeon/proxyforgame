@@ -68,10 +68,9 @@ function createMoonTools({ siteApi }) {
                 ...common.debrisSchema,
                 defenceDebrisPercent: common.defenceDebrisSchema,
                 moonEvent: { type: 'boolean', default: false, description: 'A moon event is on: the chance caps at 40% instead of 20%.' },
-                supraRefractor: common.level('Kaelesh Supra Refractor level: +0.5% chance and diameter per level'),
                 hyperspaceTechnology: common.level('Hyperspace Technology level: recycler capacity', 50),
                 playerClass: { ...common.playerClassSchema, description: 'Of the player recycling. The General: +20% recycler capacity.' },
-                recyclerCargoIncrease: common.percent('Life form recycler cargo increase'),
+                lifeforms: common.lifeformsSchema(['supraRefractor'], ['recycler']),
             },
             required: ['destroyed'],
             additionalProperties: false,
@@ -90,10 +89,10 @@ function createMoonTools({ siteApi }) {
                 defenseDebrisPercent: debris.defenceDebrisPercent,
                 hyperTechLevel: args.hyperspaceTechnology,
                 isGeneral: args.playerClass === 'general',
-                rcCapacityIncrease: args.recyclerCargoIncrease,
+                rcCapacityIncrease: common.shipCargoBonus(args.lifeforms, 'recycler'),
                 deutToDebris: debris.deuteriumInDebris,
                 promoMoon: args.moonEvent,
-                supraRefractorLevel: args.supraRefractor,
+                supraRefractorLevel: args.lifeforms.supraRefractor,
             });
 
             const unitsForMaxChance = Object.fromEntries(Object.entries(r.maxCounts)
@@ -134,9 +133,8 @@ function createMoonTools({ siteApi }) {
                 phalanxLevel: { type: 'integer', minimum: 1, maximum: 50, description: 'Sensor Phalanx level.' },
                 moonSystem: { type: 'integer', minimum: 1, maximum: 999, description: 'System the moon with the phalanx is in.' },
                 targetSystem: { type: 'integer', minimum: 1, maximum: 999, description: 'A system to reach; the answer says what level it needs.' },
-                analysisNetworkBonus: common.percent('Kaelesh Interplanetary Analysis Network range bonus, as the game shows it'),
                 playerClass: { ...common.playerClassSchema, description: 'The Discoverer: +20% phalanx range.' },
-                discovererClassBonus: common.percent('Kaelesh Discoverer Enhancement total'),
+                lifeforms: common.lifeformsSchema(['analysisNetworkBonus', 'discovererClassBonus']),
                 universe: common.universeSchema,
                 systems: { type: 'integer', minimum: 1, maximum: 999, description: 'Systems per galaxy. Read from `universe` when given, else 499.' },
                 circularSystems: { type: 'boolean', description: 'The galaxy wraps around. Read from `universe` when given, else no.' },
@@ -161,9 +159,9 @@ function createMoonTools({ siteApi }) {
 
             const r = calc.computePhalanx({
                 phalanxLevel: args.phalanxLevel,
-                phalanxRangeBonus: args.analysisNetworkBonus,
+                phalanxRangeBonus: args.lifeforms.analysisNetworkBonus,
                 isDiscoverer: args.playerClass === 'discoverer',
-                discovererBonus: args.discovererClassBonus,
+                discovererBonus: args.lifeforms.discovererClassBonus,
                 ownSystem: args.moonSystem,
                 targetSystem: args.targetSystem ?? args.moonSystem,
                 circularSystems: circular,
