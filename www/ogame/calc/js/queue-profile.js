@@ -67,8 +67,6 @@ class QueueProfiles extends ProfileBinder {
         planetOf: t.tab === MOON_TAB ? () => this.bodyIds[PLANET_TAB] : undefined,
       });
     });
-    /** @type {Record<number, number>} Per tab, the body's fields at the last apply or write-back. */
-    this.bodySnapshot = {};
     /** @type {Record<string, *>} The profile-owned prm keys as the calculator has them. */
     this.ownPrm = {};
     this.ownSave = options.save;
@@ -84,6 +82,31 @@ class QueueProfiles extends ProfileBinder {
   /** The options.prm keys the profile may own, the start levels it fills in included. */
   static ownedKeys() {
     return [...QUEUE_ACCOUNT_FIELDS.map((f) => f.prm), ...QUEUE_TABS.flatMap((t) => [t.levels, t.fields])];
+  }
+
+  /** @returns {PfFieldGroup[]} The account, and the body of each tab. */
+  fieldGroups() {
+    return [
+      { scope: '', entity: (p) => p.account, fields: QUEUE_ACCOUNT_FIELDS, settings: () => options.prm },
+      ...QUEUE_TABS.map((t) => this.tabGroup(t)),
+    ];
+  }
+
+  /**
+   * The fields of a tab's body: its total fields. Both tabs show the same
+   * key, so only the planet's names it.
+   *
+   * @param {QueueTab} t
+   * @returns {PfFieldGroup}
+   */
+  tabGroup(t) {
+    return {
+      scope: t.bodies,
+      entity: (p) => this.body(t, p),
+      fields: [{ key: 'fields.total', input: '#total-fields-' + t.tab, read: (prm) => pfNum(prm[t.fields]) }],
+      settings: () => options.prm,
+      describe: t.tab === PLANET_TAB,
+    };
   }
 
   /**
@@ -160,46 +183,12 @@ class QueueProfiles extends ProfileBinder {
     this.app.refreshBoth();
   }
 
-  takeSnapshot() {
-    const prm = options.prm;
-    this.snapshot = {};
-    QUEUE_ACCOUNT_FIELDS.forEach((f) => { this.snapshot[f.key] = f.read(prm); });
-    QUEUE_TABS.forEach((t) => this.takeBodySnapshot(t));
-  }
-
-  /** @param {QueueTab} t */
-  takeBodySnapshot(t) {
-    this.bodySnapshot[t.tab] = pfNum(options.prm[t.fields]);
-  }
-
   // -------------------------------------------------------------------------
   // Calculator -> profile
   // -------------------------------------------------------------------------
 
   saveWithoutProfile() {
     this.ownSave();
-  }
-
-  /** Write what changed since the last snapshot into the profile. */
-  writeBack() {
-    const profile = this.profile();
-    if (!profile) return;
-    const prm = options.prm;
-    let changed = false;
-    QUEUE_ACCOUNT_FIELDS.forEach((f) => {
-      changed = this.writeBackValue(profile.account, f.key, f.key, f.read(prm)) || changed;
-    });
-    QUEUE_TABS.forEach((t) => {
-      const body = this.body(t, profile);
-      const before = this.bodySnapshot[t.tab];
-      if (!body || typeof before !== 'number') return;
-      if (pfNum(prm[t.fields]) !== before) changed = setProfileValue(body, 'fields.total', pfNum(prm[t.fields])) || changed;
-      this.takeBodySnapshot(t);
-    });
-    if (changed) {
-      this.pf.save(profile);
-      this.markAll();
-    }
   }
 
   /**
@@ -243,7 +232,7 @@ class QueueProfiles extends ProfileBinder {
     this.whileApplying(() => {
       shown.forEach((s) => this.showBody(s, profile));
       this.app.refreshBoth();
-      shown.forEach((s) => this.takeBodySnapshot(s));
+      this.snapshotGroups(shown.map((s) => this.tabGroup(s)));
     });
   }
 
@@ -251,25 +240,9 @@ class QueueProfiles extends ProfileBinder {
   // The marks
   // -------------------------------------------------------------------------
 
-  /** Name every value this page binds, in the page's own words. */
-  describeFields() {
-    this.describeFieldList(QUEUE_ACCOUNT_FIELDS);
-    this.pf.describeField('fields.total', pfFieldLabel($('#total-fields-' + PLANET_TAB)));
-  }
-
-  /** Mark every field the profile owns, and the ones that differ from the game. */
-  markAll() {
-    const profile = this.profile();
-    if (!profile) return;
-    QUEUE_ACCOUNT_FIELDS.forEach((f) => {
-      this.pf.markField(pfFieldInput(f), profile, profile.account, f.key, this.restoreAccount(f.key));
-    });
+  /** @param {Profile} _profile */
+  markExtra(_profile) {
     this.speed?.mark();
-    QUEUE_TABS.forEach((t) => {
-      const body = this.body(t, profile);
-      if (!body) return;
-      this.pf.markField($('#total-fields-' + t.tab), profile, body, 'fields.total', this.restoreBody(t.bodies, body.id, 'fields.total'));
-    });
   }
 }
 
