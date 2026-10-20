@@ -44,7 +44,8 @@ same commit.
 
 A concept the game has once is one argument, with the same name and shape in every tool
 that takes it, from one schema in `tools/common.js`; a tool takes the subset its calculator
-reads. The account import is meant to produce these forms, so a new tool reuses them
+reads. `lifeforms` alone ignores the fields and ships a tool does not read (the ones it reads
+are still checked), so one block serves every tool. The account import is meant to produce these forms, so a new tool reuses them
 rather than inventing its own.
 
 | Concept | Argument | Taken by |

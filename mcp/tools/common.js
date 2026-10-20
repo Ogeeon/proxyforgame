@@ -321,6 +321,10 @@ const LIFEFORM_FIELDS = {
 /**
  * The `lifeforms` argument: life form bonuses and building levels, one
  * object in every tool.
+ *
+ * It ignores what the tool does not read - other fields, other ships - so a
+ * model can hand every tool the same block, the one ogame_import_account
+ * returns, without trimming it per tool. The fields it does read are checked.
  * @param {string[]} fields the LIFEFORM_FIELDS this tool reads
  * @param {string[]} [ships] ship keys whose `shipBonuses` it reads
  * @param {Record<string, import('../lib/schema').JsonSchema>} [extra] fields of this tool alone
@@ -335,13 +339,17 @@ function lifeformsSchema(fields, ships = [], extra = {}) {
         properties[field] = LIFEFORM_FIELDS[field];
     }
     if (ships.length > 0) {
-        properties.shipBonuses = keyedMap(ships, shipBonusSchema);
+        properties.shipBonuses = {
+            type: 'object',
+            description: `By ship; read for ${ships.join(', ')}`,
+            additionalProperties: shipBonusSchema,
+        };
     }
     return {
         type: 'object',
-        description: 'Life form bonuses in percent as the game shows them, and building levels.',
+        description: 'Life form bonuses in percent as the game shows them, and building levels. '
+            + 'Fields this tool does not read are ignored.',
         properties: { ...properties, ...extra },
-        additionalProperties: false,
     };
 }
 

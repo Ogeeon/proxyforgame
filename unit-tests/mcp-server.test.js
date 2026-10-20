@@ -915,10 +915,23 @@ describe('MCP lifeforms.shipBonuses', () => {
         expect(await expedition(cargo('recycler', 10))).toBe(await expedition({}) + 10 * 2000);
     });
 
-    it('reads only the ships a tool lists', async () => {
-        const result = await call(protocolWith(), 'ogame_trade', { sell: { metal: 1 }, buy: 'crystal', ...cargo('cruiser', 10) });
-        expect(result.isError).toBe(true);
-        expect(result.content[0].text).toContain('arguments.lifeforms.shipBonuses.cruiser is not one of');
+    it('ignores the life form fields and ships a tool does not read', async () => {
+        const trade = async (lifeforms) => (await call(protocolWith(), 'ogame_trade', {
+            sell: { metal: 2750000 }, buy: 'crystal', lifeforms,
+        })).structuredContent.cargoShips.toDeliverSold.largeCargo;
+        // The whole account block, as ogame_import_account returns it
+        const block = {
+            metalBonus: 4.2, collectorClassBonus: 12, megalith: 3,
+            shipBonuses: { 'large-cargo': { cargo: 10 }, cruiser: { speed: 5, cargo: 3 } },
+        };
+        expect(await trade(block)).toBe(await trade(cargo('large-cargo', 10).lifeforms));
+    });
+
+    it('still checks the fields a tool reads, and the top level', async () => {
+        const bad = await call(protocolWith(), 'ogame_trade', { sell: { metal: 1 }, buy: 'crystal', ...cargo('large-cargo', -5) });
+        expect(bad.isError).toBe(true);
+        const typo = await call(protocolWith(), 'ogame_trade', { sell: { metal: 1 }, buy: 'crystal', lifeform: {} });
+        expect(typo.isError).toBe(true);
     });
 });
 
