@@ -33,6 +33,7 @@
   <script src="/ogame/calc/js/profiles-core.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/profiles-core.js'); ?>" defer></script>
   <script src="/ogame/calc/js/profiles-store.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/profiles-store.js'); ?>" defer></script>
   <script src="/ogame/calc/js/profiles-fields.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/profiles-fields.js'); ?>" defer></script>
+  <script src="/ogame/calc/js/profiles-widgets.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/profiles-widgets.js'); ?>" defer></script>
   <script src="/ogame/calc/js/profiles-ui.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/profiles-ui.js'); ?>" defer></script>
   <script src="/ogame/calc/js/costs-core.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/costs-core.js'); ?>" defer></script>
   <script src="/ogame/calc/js/costs-data-collector.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/costs-data-collector.js'); ?>" defer></script>
