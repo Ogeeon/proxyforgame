@@ -133,11 +133,6 @@
     "lf-bonuses-api-import-hint": "Al deze waarden kun je ook automatisch ophalen via de knop \"Importeren uit OGame\" (klembordpictogram) bovenaan het formulier.",
     "universe": "Universum",
     "profile": "Profiel",
-    "no-profile-name-msg": "Geef een profielnaam op.",
-    "no-profile-selected-msg": "Geen profiel geselecteerd.",
-    "del-profile-confirm": "Weet u zeker dat u dit profiel wilt verwijderen?",
-    "owr-profile-confirm": "Weet u zeker dat u dit profiel wilt overschrijven?",
-    "load-profile-confirm": "Weet u zeker dat u dit profiel wilt laden? De momenteel ingevoerde gegevens gaan verloren.",
     "server-data-failed-msg": "Het laden van de universuminstellingen is mislukt. Controleer de waarden hieronder en corrigeer ze handmatig.",
     "fetching-data": "Gegevens ophalen...",
     "universe-load": "Laden",
@@ -178,6 +173,7 @@
     "disr-chamber": "Disruptiekamer",
     "disr-chamber-bonus": "Disruptiekamerbonus",
     "total-lf-energy-bonus": "Totale Life Forms-bonus voor energieproductie",
+    "lf-terraformer-rdc": "Vermindering terraformerkosten",
     "lf-tech-bonus": "Life Forms-technologiebonus",
     "country": "Land",
     "res-available": "Beschikbare middelen",
@@ -197,14 +193,12 @@
     "planet-pos": "Positie",
     "deuterium-short": "Deut.",
     "cargo-increase": "Laadvermogen",
-    "energy-bonus": "Energiebonus",
     "none": "Geen",
     "race": "Levensvorm",
     "race-1": "Mensen",
     "race-2": "Rock'tal",
     "race-3": "Mechas",
     "race-4": "Kaelesh",
-    "all-officers": "Alle 5 de officieren",
     "circular": "Circulair universum:",
     "circ-systems": "Zonnestelsels",
     "circ-systems-explain": "Afstand tussen 1:1:1 en 1:499:1 is dezelfde afstand als tussen 1:1:1 en 1:2:1",
@@ -214,7 +208,72 @@
     "character-bonus-hint": "Om deze bonussen te krijgen, ga naar Grondstofinstellingen - Life Forms spelerbonussen,\nscroll dan naar beneden naar 'Karakterklasse bonussen'.",
     "collectors-character-bonus": "Karakterklasse bonus van de Verzamelaar",
     "lf-class-bonus": "Klassebonus",
-    "lf-class-bonus-hint": "Voer de waarde 'Totaal' in uit de OGame-tabel met Life Form-bonussen op de klassebonussen, rij 'Collector'."
+    "lf-class-bonus-hint": "Voer de waarde 'Totaal' in uit de OGame-tabel met Life Form-bonussen op de klassebonussen, rij 'Collector'.",
+    "pf-no-profile": "Geen profiel",
+    "pf-import": "Importeren uit OGame…",
+    "pf-create": "Nieuw profiel…",
+    "pf-manage": "Profielen beheren…",
+    "pf-import-hdr": "Accountgegevens importeren",
+    "pf-import-hint": "Plak de gegevens die het script <a href=\"https://github.com/Rivenscryr/origin-exporter\" target=\"_blank\" rel=\"noopener\">Origin Exporter</a> heeft geëxporteerd (in OGame: Imperium-pictogram → Export account data), of kies het gedownloade bestand. Het script is gemaakt door de auteur van Antigame Reborn.",
+    "pf-file": "Bestand",
+    "pf-import-universe-hint": "De gegevens vermelden niet uit welk universum ze komen. Kies het:",
+    "pf-import-btn": "Importeren",
+    "pf-import-err-json": "Dit is geen geldige JSON.",
+    "pf-import-err-shape": "Dit zijn geen accountgegevens van Origin Exporter.",
+    "pf-import-err-schema": "Deze versie van het Origin Exporter-formaat wordt nog niet ondersteund.",
+    "pf-pick-universe": "Kies het universum.",
+    "pf-import-done": "Profiel ‘{0}’: planeten toegevoegd {1}, bijgewerkt {2}, verwijderd {3}.",
+    "pf-props-hdr": "Profiel",
+    "pf-name": "Naam",
+    "pf-universe-optional": "Universum (optioneel):",
+    "pf-universe-locked": "Het universum kwam mee met de geïmporteerde gegevens en kan niet worden gewijzigd.",
+    "pf-name-required": "Voer een naam in.",
+    "pf-manage-hdr": "Profielen",
+    "pf-source": "Geïmporteerd",
+    "pf-edit": "Bewerken",
+    "pf-no-universe": "niet ingesteld",
+    "pf-delete-confirm": "Profiel ‘{0}’ verwijderen? Dit kan niet ongedaan worden gemaakt.",
+    "pf-merge-hdr": "Profielen samenvoegen",
+    "pf-merge-from": "Profiel",
+    "pf-merge-into": "samenvoegen met",
+    "pf-merge": "Samenvoegen",
+    "pf-merge-hint": "Het tweede profiel houdt al zijn waarden en neemt van het eerste alleen over wat het mist; het eerste profiel wordt verwijderd.",
+    "pf-merge-confirm": "‘{0}’ samenvoegen met ‘{1}’? ‘{0}’ wordt verwijderd.",
+    "pf-merge-same": "Kies twee verschillende profielen.",
+    "pf-backup-hdr": "Back-up",
+    "pf-backup-hint": "Profielen worden alleen in deze browser opgeslagen. Met de hand ingevoerde waarden (productie-instellingen, wisselkoersen, handmatige profielen) komen niet terug met een nieuwe import uit OGame, dus bewaar een back-upbestand.",
+    "pf-backup-download": "Back-up downloaden",
+    "pf-backup-restore": "Herstellen uit bestand…",
+    "pf-restore-conflict": "Profiel ‘{0}’ bestaat al. Vervangen door het profiel uit het bestand?",
+    "pf-replace": "Vervangen",
+    "pf-skip": "Overslaan",
+    "pf-restore-done": "Herstelde profielen: {0}.",
+    "pf-file-err": "Dit is geen back-upbestand van profielen, of de versie ervan wordt niet ondersteund.",
+    "pf-storage-unavailable": "Deze browser staat de site niet toe gegevens op te slaan, dus profielen zijn niet beschikbaar.",
+    "pf-save-failed": "Het profiel kon niet worden opgeslagen: de browser weigerde meer gegevens op te slaan.",
+    "pf-migrate-hdr": "Opgeslagen sets gevonden",
+    "pf-migrate-text": "Sets opgeslagen door een eerdere versie van de calculators: {0}. Omzetten in profielen? De oorspronkelijke sets blijven bewaard.",
+    "pf-migrate-btn": "Sets omzetten",
+    "pf-migrate-later": "Niet nu",
+    "pf-migrate-done": "Aangemaakte profielen: {0}. Download nu een back-up: het is de enige kopie buiten deze browser.",
+    "pf-migrate-none": "Geen van de sets kon worden gelezen.",
+    "pf-overrides": "Waarden die afwijken van het spel: {0}",
+    "pf-reset-profile": "klik om te kiezen welke spelwaarden je herstelt",
+    "pf-account": "Account",
+    "pf-reset-hdr": "Spelwaarden herstellen",
+    "pf-reset-hint": "De aangevinkte waarden gaan terug naar de waarden uit het spel; de rest blijft zoals je die hebt ingesteld.",
+    "pf-select-all": "Alles selecteren",
+    "pf-col-where": "Waar",
+    "pf-col-field": "Waarde",
+    "pf-col-game": "In het spel",
+    "pf-col-current": "Nu",
+    "pf-reset-selected": "Selectie herstellen",
+    "pf-in-game": "In het spel: {0}",
+    "pf-reset-value": "klik om te herstellen",
+    "pf-departure-body": "Planeet of maan van het profiel",
+    "pf-take-fleet": "Van het vertrekpunt",
+    "pf-take-fleet-hint": "Neem de schepen over die op de als vertrekpunt gekozen planeet of maan staan, volgens de laatste import uit OGame.",
+    "pf-universe-from-profile": "Het universum wordt bepaald door het actieve profiel."
   },
   "index": {
     "title": "ProxyForGame - instrumenten het browser spel OGame",
@@ -336,11 +395,12 @@
     "msg-lab-level-raised": "Niveau van het onderzoekslaboratorium verhoogd naar {0} — dat vereist het onderzoek \"{1}\".",
     "mineral-res-cntr-lvl": "Mineralen Onderzoekscentrum",
     "lf-terraformer-rdc": "Vermindering terraformerkosten",
-    "disclaimer-robot-nanite": "Houd bij het aflezen van de bouwtijden rekening met de opmerking in de eerste rij van de tabel. Als je een Robotfabriek of een Nanorobotfabriek bouwt, gebruik dan de <a href=\"{0}\">Bouwlijst-calculator</a> voor nauwkeurige berekeningen van de bouwtijd.",
+    "disclaimer-robot-nanite": "Houd bij het aflezen van de bouwtijden rekening met de hint {1} in de eerste cel van de rijen Robotfabriek en Nanorobotfabriek. Als je een Robotfabriek of een Nanorobotfabriek bouwt, gebruik dan de <a href=\"{0}\">Bouwlijst-calculator</a> voor nauwkeurige berekeningen van de bouwtijd.",
     "disclaimer-title": "Let op",
     "discoverer-class-bonus": "Klassebonus Discoverer",
     "discoverer-class-bonus-hint": "Voer de waarde 'Totaal' in uit de OGame-tabel met Life Form-bonussen op de klassebonussen, rij 'Discoverer'. Wordt alleen toegepast als op het tabblad 'Algemeen' de klasse 'Discoverer' is geselecteerd.",
-    "research-speed-hint": "De onderzoekssnelheid is de economische snelheid vermenigvuldigd met de onderzoeksfactor van het universum, bijv. 5 × 3 = 15. Als je hierboven het universum kiest, worden beide snelheden automatisch ingevuld."
+    "research-speed-hint": "De onderzoekssnelheid is de economische snelheid vermenigvuldigd met de onderzoeksfactor van het universum, bijv. 5 × 3 = 15. Als je hierboven het universum kiest, worden beide snelheden automatisch ingevuld.",
+    "description": "Bereken de kosten en bouwtijd van gebouwen, onderzoeken, schepen en verdediging in OGame, met universumsnelheid en bonussen."
   },
   "lfcosts": {
     "title": "OGame - Kosten berekening voor levensvormen",
@@ -464,7 +524,8 @@
     "ovrc-battleship": "Overklokken (Slagschip)",
     "psy-sh-matrix": "Psionische Schildmatrix",
     "kaelesh-disc-enh": "Kaelesh Ontdekker Verbetering",
-    "energy-cost-to-build": "Energie benodigd voor de bouw"
+    "energy-cost-to-build": "Energie benodigd voor de bouw",
+    "description": "Bereken de kosten en bouwtijd van levensvormgebouwen en -onderzoeken in OGame, inclusief ras- en technologiebonussen."
   },
   "flight": {
     "flight-time-format": "99 H:s:s",
@@ -579,13 +640,19 @@
     "own-api-import-title": "Importeren",
     "own-api-bad-json-msg": "Kan de gegevens niet lezen.\\nControleer of je de tekst uit het veld API 2 op de pagina 'Vloot' hebt geplakt.",
     "import-failed-msg": "Kan de gegevens niet laden.\\nDe server gaf een ongeldig antwoord. Probeer het later opnieuw.",
-    "populated-systems-failed-msg": "De kaart met bewoonde systemen is niet beschikbaar, daarom worden er geen systemen als overgeslagen geteld. Je kunt het aantal handmatig invoeren."
+    "populated-systems-failed-msg": "De kaart met bewoonde systemen is niet beschikbaar, daarom worden er geen systemen als overgeslagen geteld. Je kunt het aantal handmatig invoeren.",
+    "sr-profile-hdr": "Spionagerapport importeren",
+    "sr-profile-text": "Er is een profiel actief. Het rapport bevat het onderzoek, de klasse en de bonussen van de bespioneerde speler, en die mogen je profiel niet overschrijven. Hoe wil je het importeren?",
+    "sr-profile-none": "Overschakelen naar ‘Geen profiel’ en importeren",
+    "sr-profile-new": "Een nieuw profiel voor het rapport aanmaken",
+    "description": "Bereken vliegtijd, deuteriumverbruik en het beste vertrekmoment in OGame op basis van universumsnelheid, schepen en vluchtmodus."
   },
   "graviton": {
     "title": "OGame - Graviton berekening",
     "recycling": "Recycle z-sats puin",
     "graviton-level": "Gravitonniveau",
-    "keywords": "proxyforgame,ogame,gravitoncalculator,gravitontechnologie,gravitatietechnologie,zonnesatellieten,energie voor graviton,ster des doods"
+    "keywords": "proxyforgame,ogame,gravitoncalculator,gravitontechnologie,gravitatietechnologie,zonnesatellieten,energie voor graviton,ster des doods",
+    "description": "Ontdek hoeveel zonne-satellieten en energie nodig zijn voor de Graviton-technologie in OGame, op basis van je planeetinstellingen."
   },
   "moon": {
     "title": "OGame – Maan calculator",
@@ -616,7 +683,8 @@
     "own-system": "Eigen systeem",
     "phalanx-lvl-required": "Vereist niveau",
     "phalanx-range-bonus": "Bonus op phalanxbereik",
-    "class-bonus": "Klassebonus"
+    "class-bonus": "Klassebonus",
+    "description": "Bereken de kans op een maan, de uitkomst van een maanvernietigingspoging en het bereik van de sensorphalanx in OGame."
   },
   "production": {
     "param-tab-general": "Algemeen",
@@ -698,7 +766,8 @@
     "incl-explain": "Als je het niveau van de mijnen verhoogt, zal het energieverbruik toenemen. De calculator kan met deze verandering rekening houden en in de berekening de kosten opnemen van het bouwen van Zonnesatellieten, die de benodigde energie zullen geven. De berekening wordt per gebouw gemaakt. Moeten we met deze kosten rekening houden?",
     "incl-yes": "Ja",
     "incl-no": "Nee",
-    "lifeform-tech": "Levensvorm-technologiebonus"
+    "lifeform-tech": "Levensvorm-technologiebonus",
+    "description": "Bereken metaal-, kristal- en deuteriumproductie, energieverbruik en terugverdientijd van mijnverbeteringen voor één planeet of je hele OGame-rijk."
   },
   "queue": {
     "start-time": "Start",
@@ -714,7 +783,8 @@
     "next-level": "Volgende niveau",
     "title": "OGame - Productietijd",
     "keywords": "proxyforgame,ogame,bouwwachtrij,bouwvolgorde,bouwtijd,wachtrij calculator,gebouwkosten",
-    "clear": "Verwijder bouwlijst"
+    "clear": "Verwijder bouwlijst",
+    "description": "Vergelijk kosten en bouwtijd van opeenvolgende gebouwupgrades op een OGame-planeet of maan, rekening houdend met fabrieken en universumsnelheid."
   },
   "terraformer": {
     "title": "OGame - Terravormer berekening",
@@ -723,7 +793,8 @@
     "single-level": "één level",
     "added-fields": "Toe te voegen velden",
     "satellites": "Zonne-energie satellieten",
-    "keywords": "proxyforgame,ogame,terraformer calculator,terraformer,planeetvelden,zonnesatellieten,energiebehoefte,nanorobotfabriek"
+    "keywords": "proxyforgame,ogame,terraformer calculator,terraformer,planeetvelden,zonnesatellieten,energiebehoefte,nanorobotfabriek",
+    "description": "Bereken de energie, grondstoffen en tijd die nodig zijn om een planeet in OGame te terraformen, inclusief zonne-satellieten en bonussen."
   },
   "expeditions": {
     "keywords": "proxyforgame,ogame,expeditiecalculator,expedities,expeditiegrondstoffen,expeditievloot,donkere materie,expeditievondsten",
@@ -787,7 +858,8 @@
     "class-bonus-discoverer": "\"Ontdekker\"-klassebonus",
     "resources-discovery-booster": "Hulpmiddel voor grondstofontdekking",
     "dark-matter-discovery-bonus": "Bonus voor Donkere Materie ontdekking",
-    "large-cargo-abbrev": "GV"
+    "large-cargo-abbrev": "GV",
+    "description": "Schat de mogelijke vondsten van grondstoffen, schepen en Donkere Materie bij OGame-expedities en vergelijk het verwachte rendement van vloten."
   },
   "trade": {
     "met": "met",
@@ -803,6 +875,7 @@
     "link": "Url",
     "text": "Tekst",
     "and": "en",
-    "keywords": "proxyforgame,ogame,handelscalculator,grondstoffenruil,ruilverhouding,metaal kristal deuterium,handelaar"
+    "keywords": "proxyforgame,ogame,handelscalculator,grondstoffenruil,ruilverhouding,metaal kristal deuterium,handelaar",
+    "description": "Vergelijk ruilopties voor metaal, kristal en deuterium in OGame en bereken hoeveel grondstoffen je tegen een bepaalde koers ontvangt."
   }
 }

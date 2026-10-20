@@ -486,9 +486,10 @@ const renderDialogMessage = (body, message) => {
  * mutable state. A cancel button is only added in confirm mode.
  * @param {string|string[]} message
  * @param {boolean} withCancel
+ * @param {string} [title] - Localised heading; the page's dialogAttentionLabel when omitted
  * @returns {{el: HTMLElement, okBtn: HTMLButtonElement, cancelBtn: HTMLButtonElement|null}}
  */
-const buildDialogModal = (message, withCancel) => {
+const buildDialogModal = (message, withCancel, title) => {
   // A short, translated heading rather than a blank bar - together with the
   // colour it names what the bar itself only hints at: a separate dialog
   // landed on top of whatever was already open (e.g. the own-api reader
@@ -498,7 +499,7 @@ const buildDialogModal = (message, withCancel) => {
   header.className = 'modal-header py-2 bg-warning-subtle';
   const headerText = document.createElement('span');
   headerText.className = 'fw-semibold';
-  headerText.textContent = getOptionValue('dialogAttentionLabel', 'Attention');
+  headerText.textContent = title ?? getOptionValue('dialogAttentionLabel', 'Attention');
   header.appendChild(headerText);
 
   const body = document.createElement('div');
@@ -558,10 +559,11 @@ const buildDialogModal = (message, withCancel) => {
  * it is acknowledged. See docs/patterns.md (g).
  * @param {string|string[]} message - Localised prose (or several lines), already translated by the caller
  * @param {string} [okLabel] - Localised label for the acknowledge button
+ * @param {string} [title] - Localised heading, for a caller that brings its own strings
  * @returns {Promise<void>} resolves once the dialog is dismissed
  */
-const showAlertModal = (message, okLabel = 'OK') => new Promise((resolve) => {
-  const { el, okBtn } = buildDialogModal(message, false);
+const showAlertModal = (message, okLabel = 'OK', title = undefined) => new Promise((resolve) => {
+  const { el, okBtn } = buildDialogModal(message, false, title);
   okBtn.textContent = okLabel;
 
   const modal = bootstrap.Modal.getOrCreateInstance(el, { backdrop: 'static' });
@@ -579,10 +581,11 @@ const showAlertModal = (message, okLabel = 'OK') => new Promise((resolve) => {
  * @param {string|string[]} message - Localised prose, already translated by the caller
  * @param {string} [confirmLabel] - Localised label for the affirmative button
  * @param {string} [cancelLabel] - Localised label for the cancel button
+ * @param {string} [title] - Localised heading, for a caller that brings its own strings
  * @returns {Promise<boolean>} true when the user confirmed, false on cancel/dismiss
  */
-const showConfirmModal = (message, confirmLabel = 'Confirm', cancelLabel = 'Cancel') => new Promise((resolve) => {
-  const { el, okBtn, cancelBtn } = buildDialogModal(message, true);
+const showConfirmModal = (message, confirmLabel = 'Confirm', cancelLabel = 'Cancel', title = undefined) => new Promise((resolve) => {
+  const { el, okBtn, cancelBtn } = buildDialogModal(message, true, title);
   okBtn.textContent = confirmLabel;
   if (cancelBtn) cancelBtn.textContent = cancelLabel;
 

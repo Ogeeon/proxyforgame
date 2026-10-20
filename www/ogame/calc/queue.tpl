@@ -4,7 +4,7 @@
   <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
   <?php require_once '../../hawk.tpl'; ?>
   <title><?= $l['title'] ?></title>
-  <meta name="description" content="<?= $l['title'] ?>">
+  <meta name="description" content="<?= htmlspecialchars($l['description'], ENT_QUOTES, 'UTF-8') ?>">
   <meta name="keywords" content="<?= $l['keywords'] ?>">
   <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
   <link rel="icon" href="/favicon.ico" type="image/x-icon">
@@ -28,11 +28,20 @@
   <!-- DOM utilities (jQuery replacement) -->
   <script src="/ogame/calc/js/dom-utils.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/dom-utils.js'); ?>" defer></script>
 
+  <!-- Player profiles -->
+  <script src="/ogame/calc/js/profiles-core.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/profiles-core.js'); ?>" defer></script>
+  <script src="/ogame/calc/js/profiles-store.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/profiles-store.js'); ?>" defer></script>
+  <script src="/ogame/calc/js/profiles-fields.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/profiles-fields.js'); ?>" defer></script>
+  <script src="/ogame/calc/js/profiles-widgets.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/profiles-widgets.js'); ?>" defer></script>
+  <script src="/ogame/calc/js/profiles-binders.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/profiles-binders.js'); ?>" defer></script>
+  <script src="/ogame/calc/js/profiles-ui.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/profiles-ui.js'); ?>" defer></script>
+
   <!-- Queue calculator modules -->
   <script src="/ogame/calc/js/queue-core.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/queue-core.js'); ?>" defer></script>
   <script src="/ogame/calc/js/queue-data-collector.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/queue-data-collector.js'); ?>" defer></script>
   <script src="/ogame/calc/js/queue-renderer.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/queue-renderer.js'); ?>" defer></script>
   <script src="/ogame/calc/js/queue-orchestration.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/queue-orchestration.js'); ?>" defer></script>
+  <script src="/ogame/calc/js/queue-profile.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/queue-profile.js'); ?>" defer></script>
 
   <script>
     var options = {
@@ -124,12 +133,12 @@
   <div class="row">
     <div class="col-md-2"><?php require_once '../../sidebar_bs.tpl'; ?></div>
     <div class="col-md-10">
-    <?php require_once '../../topbar_bs.tpl'; ?>
+    <?php $withProfiles = true; require_once '../../topbar_bs.tpl'; ?>
 
 <div id="queue">
   <div class="border rounded position-relative">
     <div class="d-inline-block d-flex align-items-center">
-      <div class="bg-body-secondary text-primary-emphasis rounded main-header text-center flex-grow-1">
+      <div class="text-primary-emphasis rounded main-header text-center flex-grow-1">
         <?= $l['title'] ?>
       </div>
       <div id="reset" class="top-0 end-0 d-flex align-items-center justify-content-center bg-danger-subtle" data-bs-toggle="tooltip" title="<?= $l['reset'] ?>">
@@ -155,15 +164,15 @@
           <label for="hyper-tech-level"><?= $l['hyper-tech'] ?></label>
           <input id="hyper-tech-level" type="text" name="hyper-tech-level" class="form-control form-control-sm level-input" value="0" data-field-title="<?= $l['hyper-tech'] ?>">
         </div>
-        <div class="d-flex align-items-center gap-1">
-          <label><?= $l['class'] ?>:</label>
+        <fieldset class="d-flex align-items-center gap-1 fieldset-reset">
+          <legend><?= $l['class'] ?>:</legend>
           <input id="player-class-0" type="radio" name="player-class" value="0" class="form-check-input">
           <label for="player-class-0"><?= $l['class-collector'] ?></label>
           <input id="player-class-1" type="radio" name="player-class" value="1" class="form-check-input">
           <label for="player-class-1"><?= $l['class-general'] ?></label>
           <input id="player-class-2" type="radio" name="player-class" value="2" class="form-check-input">
           <label for="player-class-2"><?= $l['class-discoverer'] ?></label>
-        </div>
+        </fieldset>
         <div class="d-flex align-items-center gap-1">
           <label for="sc-capacity-increase"><?= $l['cargo-cap-increase'] ?><?= $l['sc-short'] ?></label>
           <div class="input-group input-group-sm w-auto">
@@ -197,9 +206,15 @@
           <div>
             <div id="src-panel-<?=$i?>" class="border rounded p-2">
               <p class="border rounded subheader bg-primary-subtle mb-2"><?= $l['buildings'] ?></p>
-              <div class="d-flex align-items-center gap-2 mb-2">
-                <label for="total-fields-<?=$i?>"><?= $l['total-fields'] ?></label>
-                <input id="total-fields-<?=$i?>" type="text" name="total-fields-<?=$i?>" class="form-control form-control-sm level-input total-fld-input" value="0" data-field-title="<?= $l['total-fields'] ?>">
+              <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
+                <div id="pf-body-box-<?=$i?>" class="d-flex align-items-center gap-2 d-none">
+                  <label for="pf-body-<?=$i?>"><?= $l[$type] ?></label>
+                  <select id="pf-body-<?=$i?>" class="form-select form-select-sm w-auto"></select>
+                </div>
+                <div class="d-flex align-items-center gap-2">
+                  <label for="total-fields-<?=$i?>"><?= $l['total-fields'] ?></label>
+                  <input id="total-fields-<?=$i?>" type="text" name="total-fields-<?=$i?>" class="form-control form-control-sm level-input total-fld-input" value="0" data-field-title="<?= $l['total-fields'] ?>">
+                </div>
               </div>
               <table id="table-src-<?=$i?>" class="lined">
                 <tr>
@@ -247,11 +262,12 @@
                   <?= $l['start-now'] ?>
                 </button>
                 <div class="d-flex align-items-center gap-2 flex-nowrap">
-                  <label><?= $l['finish-time'] ?></label>
+                  <label for="finish-moment-<?=$i?>"><?= $l['finish-time'] ?></label>
                   <!-- Computed, never typed into: `ui-state-disabled´ is the marker
                        every calculator puts on a non-editable readout, so it wears
-                       the same fill as a disabled input. -->
-                  <span id="finish-moment-<?=$i?>" class="form-control form-control-sm startdate-input d-inline-block ui-state-disabled">?</span>
+                       the same fill as a disabled input. An <output>, not a <span>,
+                       so the label can name it. -->
+                  <output id="finish-moment-<?=$i?>" class="form-control form-control-sm startdate-input d-inline-block ui-state-disabled">?</output>
                 </div>
               </div>
 
@@ -302,6 +318,7 @@
       bootstrap.Tooltip.getOrCreateInstance(el);
     });
     initializeQueueCalculator();
+    initQueueProfiles();
   });
 </script>
 

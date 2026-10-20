@@ -367,3 +367,22 @@ describe('Graviton Calculator - Debris and net cost', () => {
         expect(r.netCrysNeeded).toBe(r.crysNeeded - Math.floor(r.crysNeeded * 0.3));
     });
 });
+
+describe('Graviton Calculator - Officers', () => {
+    const none = { engineer: false, geologist: false, technocrat: false, admiral: false, commander: false };
+    const all = { engineer: true, geologist: true, technocrat: true, admiral: true, commander: true };
+
+    it('no engineer gives no bonus, even with the other four', () => {
+        expect(GravitonCalculator.officerEnergyBonus(none)).toBe(0);
+        expect(GravitonCalculator.officerEnergyBonus({ ...all, engineer: false })).toBe(0);
+    });
+
+    it('the engineer short of the whole staff gives the engineer bonus', () => {
+        expect(GravitonCalculator.officerEnergyBonus({ ...none, engineer: true })).toBe(1);
+        expect(GravitonCalculator.officerEnergyBonus({ ...all, commander: false })).toBe(1);
+    });
+
+    it('all five officers give the commanding staff bonus', () => {
+        expect(GravitonCalculator.officerEnergyBonus(all)).toBe(2);
+    });
+});

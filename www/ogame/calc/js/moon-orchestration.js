@@ -24,7 +24,7 @@ const options = {
     hyperTechLevel: 0,
     isGeneral: false,
     rcCapacityIncrease: 0,
-    defenseToDebris: false,
+    defenseDebrisPercent: 0,
     deutToDebris: false,
     promoMoon: false,
     supraRefractorLevel: 0,
@@ -49,7 +49,7 @@ const options = {
         case 'hyperTechLevel': return validateNumber(Number.parseFloat(value), 0, 50, 0);
         case 'isGeneral': return value === 'true';
         case 'rcCapacityIncrease': return validateNumber(Number.parseFloat(value), 0, 999, 0);
-        case 'defenseToDebris': return value === 'true';
+        case 'defenseDebrisPercent': return validateNumber(Number.parseFloat(value), 0, 100, 0);
         case 'deutToDebris': return value === 'true';
         case 'promoMoon': return value === 'true';
         case 'supraRefractorLevel': return validateNumber(Number.parseFloat(value), 0, 100, 0);
@@ -70,7 +70,20 @@ const options = {
   },
 
   load: function () {
-    try { loadFromCookie('options_moon', options.prm); } catch (e) { console.error(e); }
+    try {
+      loadFromCookie('options_moon', options.prm);
+      // The defenses' share used to be a switch that gave them the fleet's
+      // share; a save from then keeps its results.
+      const legacy = {
+        defenseToDebris: false,
+        defenseDebrisPercent: null,
+        validate: (/** @type {string} */ field, /** @type {string} */ value) => (field === 'defenseToDebris' ? value === 'true' : value),
+      };
+      loadFromCookie('options_moon', legacy);
+      if (legacy.defenseDebrisPercent === null && legacy.defenseToDebris) {
+        options.prm.defenseDebrisPercent = options.prm.debrisPercent;
+      }
+    } catch (e) { console.error(e); }
   },
   save: function () { saveToCookie('options_moon', options.prm); }
 };
@@ -80,7 +93,7 @@ const options = {
 const MOON_PERSISTED_PARAMS = [
   'moonSize', 'dsCount', 'debrisPercent', 'hyperTechLevel',
   'isGeneral', 'rcCapacityIncrease',
-  'defenseToDebris', 'deutToDebris', 'promoMoon', 'supraRefractorLevel',
+  'defenseDebrisPercent', 'deutToDebris', 'promoMoon', 'supraRefractorLevel',
   'phalanxLevel', 'phalanxRangeBonus', 'isDiscoverer', 'discovererBonus',
   'ownSystem', 'targetSystem', 'circularSystems', 'numberOfSystems',
 ];
@@ -96,28 +109,29 @@ class MoonApp {
       '#own-system', '#target-system', '#systems-num',
     ].concat(MOON_UNITS.map((unit) => '#' + unit.id));
     this.checkboxes = [
-      '#general-class', '#defense-to-debris', '#deut-to-debris', '#promo-moon',
+      '#general-class', '#deut-to-debris', '#promo-moon',
       '#discoverer-class', '#circular-systems',
     ];
   }
 
   init() {
     options.load();
-    this._restoreFromState();
+    this.restoreFromState();
     this._applyConstraints();
     this._bindEvents();
     this._applyTheme();
     this.recalc();
   }
 
-  _restoreFromState() {
+  /** Fill the form from options.prm (the profile binder calls it too). */
+  restoreFromState() {
     setVal('#moon-size', options.prm.moonSize);
     setVal('#ds-count', options.prm.dsCount);
     setVal('#debris-percent', options.prm.debrisPercent);
     setVal('#hypertech-lvl', options.prm.hyperTechLevel);
     setChecked('#general-class', options.prm.isGeneral);
     setNumVal('#rc-capacity-increase', options.prm.rcCapacityIncrease);
-    setChecked('#defense-to-debris', options.prm.defenseToDebris);
+    setVal('#defense-debris-percent', options.prm.defenseDebrisPercent);
     setChecked('#deut-to-debris', options.prm.deutToDebris);
     setChecked('#promo-moon', options.prm.promoMoon);
     setVal('#supra-refractor', options.prm.supraRefractorLevel);
@@ -178,6 +192,7 @@ class MoonApp {
     });
 
     addEvent('#debris-percent', 'change', () => this.recalc());
+    addEvent('#defense-debris-percent', 'change', () => this.recalc());
 
     this.checkboxes.forEach((sel) => {
       addEvent(sel, 'change', () => this.recalc());
@@ -243,7 +258,7 @@ class MoonApp {
     options.prm.hyperTechLevel = 0;
     options.prm.isGeneral = false;
     options.prm.rcCapacityIncrease = 0;
-    options.prm.defenseToDebris = false;
+    options.prm.defenseDebrisPercent = 0;
     options.prm.deutToDebris = false;
     options.prm.promoMoon = false;
     options.prm.supraRefractorLevel = 0;
@@ -252,7 +267,7 @@ class MoonApp {
     setVal('#hypertech-lvl', options.prm.hyperTechLevel);
     setChecked('#general-class', false);
     setNumVal('#rc-capacity-increase', 0);
-    setChecked('#defense-to-debris', false);
+    setVal('#defense-debris-percent', 0);
     setChecked('#deut-to-debris', false);
     setChecked('#promo-moon', false);
     setVal('#supra-refractor', 0);

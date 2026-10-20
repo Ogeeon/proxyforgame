@@ -1,0 +1,227 @@
+{
+  "playerId": 100001,
+  "playerName": "Tester",
+  "characterClassId": 1,
+  "allianceClassId": 2,
+  "officers": {
+    "commander": true,
+    "admiral": false,
+    "engineer": false,
+    "geologist": true,
+    "technocrat": false
+  },
+  "researches": {
+    "106": 10,
+    "108": 12,
+    "113": 14,
+    "114": 8,
+    "115": 16,
+    "117": 12,
+    "118": 9,
+    "122": 15,
+    "124": 11
+  },
+  "species": {
+    "values": {
+      "701": { "experience": 120000, "level": 18 },
+      "702": { "experience": 98000, "level": 16 }
+    },
+    "distribution": {
+      "900001": 701,
+      "900002": 702,
+      "900003": null,
+      "900004": null
+    }
+  },
+  "planets": {
+    "900001": {
+      "id": 900001,
+      "galaxy": 2,
+      "system": 148,
+      "position": 8,
+      "siblingId": 900004,
+      "buffs": [
+        {
+          "rarity": "rare",
+          "itemUuid": "0000000000000000000000000000000000000000",
+          "name": "Gold Planet Fields",
+          "buffStart": 1768262340,
+          "buffEnd": null,
+          "effectStart": 1768262340,
+          "effectEnd": null
+        }
+      ],
+      "resources": { "metal": 0, "crystal": 0, "deuterium": 0, "energy": 0, "population": 0, "food": 0 },
+      "baseProduction": { "metal": 280, "crystal": 120, "deuterium": 0 },
+      "production": { "metal": 0, "crystal": 0, "deuterium": 0 },
+      "selectedSpeciesId": 701,
+      "selectedSpeciesTechnologyIds": [11101, 11102, 11201, 11202],
+      "buildings": {
+        "1": 30, "2": 26, "3": 28, "4": 25, "12": 12, "14": 10, "15": 6,
+        "21": 12, "22": 14, "23": 13, "24": 12, "31": 12, "33": 5, "34": 0,
+        "36": 4, "41": 0, "42": 0, "43": 0, "44": 8
+      },
+      "ships": {
+        "202": 0, "203": 500, "204": 0, "205": 0, "206": 0, "207": 0, "208": 0,
+        "209": 0, "210": 10, "211": 0, "212": 250, "213": 0, "214": 0, "215": 0,
+        "217": 300, "218": 0, "219": 0
+      },
+      "defenses": {
+        "401": 1000, "402": 500, "403": 100, "404": 20, "405": 0, "406": 5,
+        "407": 1, "408": 1, "502": 0, "503": 0
+      },
+      "speciesBuildings": {
+        "11101": 40, "11102": 41, "11103": 10, "11104": 9, "11105": 8, "11106": 6,
+        "11107": 12, "11108": 4, "11109": 10, "11110": 3, "11111": 2, "11112": 1
+      },
+      "speciesResearches": { "11201": 8, "11202": 5, "11208": 2, "12207": 1 },
+      "name": "Alpha",
+      "diameter": 12800,
+      "fields": { "used": 230, "total": 246 },
+      "temperature": { "min": 1, "max": 41 }
+    },
+    "900002": {
+      "id": 900002,
+      "galaxy": 2,
+      "system": 150,
+      "position": 12,
+      "siblingId": 0,
+      "buffs": [],
+      "resources": { "metal": 0, "crystal": 0, "deuterium": 0, "energy": 0, "population": 0, "food": 0 },
+      "baseProduction": { "metal": 280, "crystal": 120, "deuterium": 0 },
+      "production": { "metal": 0, "crystal": 0, "deuterium": 0 },
+      "selectedSpeciesId": 702,
+      "selectedSpeciesTechnologyIds": [12101, 12102],
+      "buildings": {
+        "1": 28, "2": 24, "3": 30, "4": 24, "12": 10, "14": 10, "15": 5,
+        "21": 10, "22": 12, "23": 11, "24": 13, "31": 10, "33": 0, "34": 0,
+        "36": 0, "41": 0, "42": 0, "43": 0, "44": 4
+      },
+      "ships": {
+        "202": 0, "203": 0, "204": 0, "205": 0, "206": 0, "207": 0, "208": 0,
+        "209": 0, "210": 0, "211": 0, "212": 300, "213": 0, "214": 0, "215": 0,
+        "217": 280, "218": 0, "219": 0
+      },
+      "defenses": {
+        "401": 500, "402": 0, "403": 0, "404": 0, "405": 0, "406": 0,
+        "407": 1, "408": 0, "502": 10, "503": 0
+      },
+      "speciesBuildings": {
+        "12101": 38, "12102": 39, "12103": 7, "12104": 6, "12105": 5, "12106": 9,
+        "12107": 4, "12108": 3, "12109": 8, "12110": 7, "12111": 2, "12112": 1
+      },
+      "speciesResearches": { "12201": 4, "12207": 2, "14208": 0 },
+      "name": "Beta",
+      "diameter": 14600,
+      "fields": { "used": 200, "total": 270 },
+      "temperature": { "min": -90, "max": -50 }
+    },
+    "900003": {
+      "id": 900003,
+      "galaxy": 3,
+      "system": 20,
+      "position": 4,
+      "siblingId": 0,
+      "buffs": [],
+      "resources": { "metal": 0, "crystal": 0, "deuterium": 0, "energy": 0, "population": 0, "food": 0 },
+      "baseProduction": { "metal": 280, "crystal": 120, "deuterium": 0 },
+      "production": { "metal": 0, "crystal": 0, "deuterium": 0 },
+      "selectedSpeciesId": 0,
+      "selectedSpeciesTechnologyIds": [],
+      "buildings": {
+        "1": 5, "2": 3, "3": 0, "4": 6, "12": 0, "14": 2, "15": 0,
+        "21": 0, "22": 0, "23": 0, "24": 0, "31": 0, "33": 0, "34": 0,
+        "36": 0, "41": 0, "42": 0, "43": 0, "44": 0
+      },
+      "ships": {
+        "202": 0, "203": 0, "204": 0, "205": 0, "206": 0, "207": 0, "208": 0,
+        "209": 0, "210": 0, "211": 0, "212": 0, "213": 0, "214": 0, "215": 0,
+        "217": 0, "218": 0, "219": 0
+      },
+      "defenses": {
+        "401": 0, "402": 0, "403": 0, "404": 0, "405": 0, "406": 0,
+        "407": 0, "408": 0, "502": 0, "503": 0
+      },
+      "speciesBuildings": {},
+      "speciesResearches": {},
+      "name": "Colony",
+      "diameter": 15300,
+      "fields": { "used": 16, "total": 290 },
+      "temperature": { "min": 60, "max": 100 }
+    }
+  },
+  "moons": {
+    "900004": {
+      "id": 900004,
+      "galaxy": 2,
+      "system": 148,
+      "position": 8,
+      "siblingId": 900001,
+      "buffs": [],
+      "resources": { "metal": 0, "crystal": 0, "deuterium": 0, "energy": 0 },
+      "production": { "metal": 0, "crystal": 0, "deuterium": 0 },
+      "buildings": {
+        "1": 0, "2": 0, "3": 0, "4": 0, "12": 0, "14": 8, "15": 0,
+        "21": 2, "22": 0, "23": 0, "24": 0, "31": 0, "33": 0, "34": 0,
+        "36": 0, "41": 7, "42": 5, "43": 1, "44": 0
+      },
+      "ships": {
+        "202": 1000, "203": 2000, "204": 0, "205": 0, "206": 0, "207": 0, "208": 0,
+        "209": 150, "210": 0, "211": 0, "212": 0, "213": 0, "214": 0, "215": 0,
+        "217": 0, "218": 0, "219": 3
+      },
+      "defenses": {
+        "401": 0, "402": 0, "403": 0, "404": 0, "405": 0, "406": 0,
+        "407": 0, "408": 0, "502": 0, "503": 0
+      },
+      "name": "Moon",
+      "diameter": 8000,
+      "fields": { "used": 20, "total": 24 }
+    }
+  },
+  "speciesBonuses": {
+    "resources": {
+      "metal": { "totalBonus": { "metal": 0.0302 }, "spaceObjectBonus": {}, "technologyBonus": {} },
+      "crystal": { "totalBonus": { "crystal": 0.0151 }, "spaceObjectBonus": {}, "technologyBonus": {} },
+      "deuterium": { "totalBonus": { "deuterium": 0.0207 }, "spaceObjectBonus": {}, "technologyBonus": {} },
+      "energy": { "totalBonus": { "energy": 0.005 }, "spaceObjectBonus": {}, "technologyBonus": {} },
+      "storage": { "totalBonus": { "storage": 0 }, "spaceObjectBonus": {}, "technologyBonus": {} }
+    },
+    "expedition": {
+      "ResultBooster": { "totalBonus": { "ResultBooster": 0.04 } },
+      "ShipResultBooster": { "totalBonus": { "ShipResultBooster": 0.02 } },
+      "FleetLostReducer": { "totalBonus": { "FleetLostReducer": 0.001 } }
+    },
+    "ships": {
+      "202": { "totalBonus": { "armor": 0, "shield": 0, "cargo": 0.0123, "speed": 0.0045, "weapon": 0, "fuel": 0.0006324 } },
+      "203": { "totalBonus": { "armor": 0, "shield": 0, "cargo": 0.025, "speed": 0, "weapon": 0, "fuel": 0.0006324 } },
+      "219": { "totalBonus": { "armor": 0, "shield": 0, "cargo": 0, "speed": 0.003066, "weapon": 0, "fuel": 0.0006324 } }
+    },
+    "defenses": {
+      "401": { "totalBonus": { "armor": 0, "shield": 0, "weapon": 0 } }
+    },
+    "costreduction": {
+      "113": { "maximumBonusCost": 0.5, "maximumBonusTime": 0.99, "totalBonus": { "time": 0.003091, "cost": 0 } },
+      "122": { "maximumBonusCost": 0.5, "maximumBonusTime": 0.99, "totalBonus": { "time": 0.012361, "cost": 0.004635 } },
+      "33": { "maximumBonusCost": 0.5, "maximumBonusTime": 0.99, "totalBonus": { "time": 0.04, "cost": 0.04 } },
+      "11201": { "maximumBonusCost": null, "maximumBonusTime": 0.99, "totalBonus": { "time": 0.003091, "cost": 0 } }
+    },
+    "characterclasses": {
+      "601": { "totalBonus": { "characterClass": 0.0215 } },
+      "602": { "totalBonus": { "characterClass": 0 } },
+      "603": { "totalBonus": { "characterClass": 0 } }
+    },
+    "misc": {
+      "discoveryBonus": { "totalBonus": { "discoveryBonus": 0.15605 } }
+    }
+  },
+  "bonusByType": {
+    "ProductionBooster": { "metal": 0.0302, "crystal": 0.0151, "deuterium": 0.0207, "energy": 0.005 },
+    "ExpeditionBooster": 0.04,
+    "ShipFuelConsumption": 0.0006324,
+    "CostReduction": { "122": { "cost": 0.004635, "time": 0.00927 } },
+    "Discoverer": 0.15605
+  },
+  "schemaVersion": 1,
+  "exportedAt": "2026-10-11T01:30:26.918Z"
+}

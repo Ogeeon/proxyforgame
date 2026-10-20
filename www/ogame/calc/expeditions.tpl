@@ -4,7 +4,7 @@
   <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
   <?php require_once '../../hawk.tpl'; ?>
   <title><?= $l['title'] ?></title>
-  <meta name="description" content="<?= $l['title'] ?>">
+  <meta name="description" content="<?= htmlspecialchars($l['description'], ENT_QUOTES, 'UTF-8') ?>">
   <meta name="keywords" content="<?= $l['keywords'] ?>">
   <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
   <link rel="icon" href="/favicon.ico" type="image/x-icon">
@@ -84,11 +84,19 @@
   <script src="/js/utils.js?v=<?php echo filemtime($pfgPath.'/js/utils.js'); ?>" defer></script>
   <script src="/js/api-client.js?v=<?php echo filemtime($pfgPath.'/js/api-client.js'); ?>" defer></script>
   <script src="/ogame/calc/js/dom-utils.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/dom-utils.js'); ?>" defer></script>
+  <!-- Player profiles -->
+  <script src="/ogame/calc/js/profiles-core.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/profiles-core.js'); ?>" defer></script>
+  <script src="/ogame/calc/js/profiles-store.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/profiles-store.js'); ?>" defer></script>
+  <script src="/ogame/calc/js/profiles-fields.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/profiles-fields.js'); ?>" defer></script>
+  <script src="/ogame/calc/js/profiles-widgets.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/profiles-widgets.js'); ?>" defer></script>
+  <script src="/ogame/calc/js/profiles-binders.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/profiles-binders.js'); ?>" defer></script>
+  <script src="/ogame/calc/js/profiles-ui.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/profiles-ui.js'); ?>" defer></script>
   <script src="/ogame/calc/js/own-api.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/own-api.js'); ?>" defer></script>
   <script src="/ogame/calc/js/expeditions-core.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/expeditions-core.js'); ?>" defer></script>
   <script src="/ogame/calc/js/expeditions-data-collector.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/expeditions-data-collector.js'); ?>" defer></script>
   <script src="/ogame/calc/js/expeditions-renderer.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/expeditions-renderer.js'); ?>" defer></script>
   <script src="/ogame/calc/js/expeditions-orchestration.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/expeditions-orchestration.js'); ?>" defer></script>
+  <script src="/ogame/calc/js/expeditions-profile.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/expeditions-profile.js'); ?>" defer></script>
 
   <script>
     // Parameters passed through the URL API. A null means "not passed", so the
@@ -137,12 +145,12 @@
   <div class="row">
     <div class="col-md-2"><?php require_once '../../sidebar_bs.tpl'; ?></div>
     <div class="col-md-10">
-    <?php require_once '../../topbar_bs.tpl'; ?>
+    <?php $withProfiles = true; require_once '../../topbar_bs.tpl'; ?>
 
 <div id="expeditions">
   <div class="border rounded">
     <div class="d-flex align-items-center">
-      <div class="bg-body-secondary text-primary-emphasis rounded main-header text-center flex-grow-1"><?= $l['title'] ?></div>
+      <div class="text-primary-emphasis rounded main-header text-center flex-grow-1"><?= $l['title'] ?></div>
       <div id="reset" class="d-flex align-items-center justify-content-center bg-danger-subtle" data-bs-toggle="tooltip" title="<?= $l['reset'] ?>">
         <i class="bi bi-arrow-counterclockwise" style="color: #dc3545; font-size: 1.25rem;"></i>
       </div>
@@ -415,6 +423,7 @@ document.addEventListener('DOMContentLoaded', function() {
     bootstrap.Tooltip.getOrCreateInstance(el);
   });
   initializeExpeditionsCalculator();
+  initExpeditionsProfiles();
 });
 </script>
 

@@ -12,7 +12,7 @@ const { expect } = require('./expect');
 
 const ctx = load(
     ['ogame/calc/js/production-core.js'],
-    ['createEmptyPlanet', 'isPlnEmpty'],
+    ['createEmptyPlanet', 'isPlnEmpty', 'mineSlot', 'PLANET_TEMP', 'PLANET_POS', 'PLANET_RACE', 'PLANET_LF_LEVELS'],
 );
 const { createEmptyPlanet, isPlnEmpty } = ctx;
 
@@ -83,5 +83,18 @@ describe('isPlnEmpty', () => {
     it('treats a planet saved before the life form fields as empty', () => {
         let planet = createEmptyPlanet().slice(0, 24);
         expect(check(planet)).toBe(true);
+    });
+});
+
+describe('the planet array layout', () => {
+    it('names the slots createEmptyPlanet fills', () => {
+        const { createEmptyPlanet, mineSlot, PLANET_TEMP, PLANET_POS, PLANET_RACE, PLANET_LF_LEVELS } = ctx;
+        const planet = createEmptyPlanet();
+        expect(planet[PLANET_TEMP]).toBe(0);
+        expect(planet[PLANET_POS]).toBe(8);
+        expect(planet[PLANET_RACE]).toBe(0);
+        expect(planet).toHaveLength(PLANET_LF_LEVELS + 12);
+        expect(mineSlot(1)).toBe(3);
+        expect(planet[mineSlot(7) + 1]).toBe(100);
     });
 });

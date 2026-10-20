@@ -4,7 +4,7 @@
   <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
   <?php require_once '../../hawk.tpl'; ?>
   <title><?= $l['title'] ?></title>
-  <meta name="description" content="<?= $l['title'] ?>">
+  <meta name="description" content="<?= htmlspecialchars($l['description'], ENT_QUOTES, 'UTF-8') ?>">
   <meta name="keywords" content="<?= $l['keywords'] ?>">
   <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
   <link rel="icon" href="/favicon.ico" type="image/x-icon">
@@ -30,10 +30,17 @@
   <script src="/ogame/calc/js/dom-utils.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/dom-utils.js'); ?>" defer></script>
 
   <!-- New modular calculator architecture -->
+  <script src="/ogame/calc/js/profiles-core.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/profiles-core.js'); ?>" defer></script>
+  <script src="/ogame/calc/js/profiles-store.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/profiles-store.js'); ?>" defer></script>
+  <script src="/ogame/calc/js/profiles-fields.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/profiles-fields.js'); ?>" defer></script>
+  <script src="/ogame/calc/js/profiles-widgets.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/profiles-widgets.js'); ?>" defer></script>
+  <script src="/ogame/calc/js/profiles-binders.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/profiles-binders.js'); ?>" defer></script>
+  <script src="/ogame/calc/js/profiles-ui.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/profiles-ui.js'); ?>" defer></script>
   <script src="/ogame/calc/js/costs-core.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/costs-core.js'); ?>" defer></script>
   <script src="/ogame/calc/js/costs-data-collector.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/costs-data-collector.js'); ?>" defer></script>
   <script src="/ogame/calc/js/costs-renderer.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/costs-renderer.js'); ?>" defer></script>
   <script src="/ogame/calc/js/costs-orchestration.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/costs-orchestration.js'); ?>" defer></script>
+  <script src="/ogame/calc/js/costs-profile.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/costs-profile.js'); ?>" defer></script>
 
   <script>
     // Global options object
@@ -69,6 +76,7 @@
     options.dialogAttentionLabel = <?= json_encode($l['dialog-attention']) ?>;
     options.serverDataFailedMsg = <?= json_encode($l['server-data-failed-msg']) ?>;
     options.dataFetchMsg = <?= json_encode($l['fetching-data']) ?>;
+    options.universeFromProfile = <?= json_encode($l['pf-universe-from-profile']) ?>;
 
     var unis = <?= universesJs($universes) ?>;
 
@@ -95,7 +103,6 @@
       labChoice: -1
     };
     options.currPlanetsCount = 8;
-    options.resultingLabLevelComputed = false;
 
   </script>
 <?php require_once '../../cookies.tpl'; ?>
@@ -109,13 +116,23 @@
   <div class="row">
     <div class="col-md-2"><?php require_once '../../sidebar_bs.tpl'; ?></div>
     <div class="col-md-10">
-    <?php require_once '../../topbar_bs.tpl'; ?>
+    <?php $withProfiles = true; require_once '../../topbar_bs.tpl'; ?>
 
 <div id="costs">
   <div class="border rounded position-relative">
-    <div class="d-inline-block d-flex align-items-center">
-      <div class="bg-body-secondary text-primary-emphasis rounded main-header text-center flex-grow-1">
+    <div class="d-flex flex-wrap align-items-center">
+      <div class="text-primary-emphasis rounded main-header text-center flex-grow-1">
         <?= $l['title'] ?>
+      </div>
+      <div id="pf-bodies-row" class="pf-header-bodies d-flex flex-wrap gap-2 justify-content-end align-items-center ms-auto ps-2 me-1 d-none">
+        <div id="pf-planet-box" class="d-flex align-items-center gap-1">
+          <label for="pf-planet"><?= $l['planet'] ?></label>
+          <select id="pf-planet" class="form-select form-select-sm w-auto"></select>
+        </div>
+        <div id="pf-moon-box" class="d-flex align-items-center gap-1">
+          <label for="pf-moon"><?= $l['moon'] ?></label>
+          <select id="pf-moon" class="form-select form-select-sm w-auto"></select>
+        </div>
       </div>
       <div id="reset" class="top-0 end-0 d-flex align-items-center justify-content-center bg-danger-subtle" data-bs-toggle="tooltip" title="<?= $l['reset'] ?>">
         <i class="bi bi-arrow-counterclockwise" style="color: #dc3545; font-size: 1.25rem;"></i>
@@ -162,12 +179,17 @@
             </div>
             <div class="d-flex align-items-center gap-1">
               <label for="research-lab-level"><?= $l['research-lab'] ?></label>
-              <div class="d-flex gap-1">
-                <input id="research-lab-level" type="text" name="research-lab-level" class="form-control form-control-sm level-input" value="0">
-                <button id="open-llc-dialog" class="btn btn-outline-secondary btn-sm" type="button" data-bs-toggle="tooltip" title="<?= $l['calculate'] ?>">
-                  <i class="bi bi-calculator"></i>
-                </button>
-              </div>
+              <input id="research-lab-level" type="text" name="research-lab-level" class="form-control form-control-sm level-input" value="0">
+            </div>
+            <div class="d-flex align-items-center gap-1">
+              <input id="use-irn" type="checkbox" name="use-irn" class="form-check-input">
+              <label for="use-irn"><?= $l['irn'] ?></label>
+              <!-- The lab level the network reaches: computed, never typed into.
+                   It and the dialog's button show only while the network is on. -->
+              <span id="irn-result" class="form-control form-control-sm level-input d-inline-block ui-state-disabled d-none">0</span>
+              <button id="open-llc-dialog" class="btn btn-outline-secondary btn-sm d-none" type="button" data-bs-toggle="tooltip" title="<?= $l['calculate'] ?>">
+                <i class="bi bi-calculator"></i>
+              </button>
             </div>
           </div>
         </div>
@@ -689,6 +711,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // Initialize the calculator app
   initializeCostsCalculator();
+  initCostsProfiles();
 });
 </script>
 
@@ -703,7 +726,7 @@ document.addEventListener('DOMContentLoaded', function() {
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
-        <?= str_replace('{0}', '/' . $lang . '/queue', $l['disclaimer-robot-nanite']) ?>
+        <?= str_replace(['{0}', '{1}'], ['/' . $lang . '/queue', '<i class="bi bi-info-circle text-primary"></i>'], $l['disclaimer-robot-nanite']) ?>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-primary" data-bs-dismiss="modal"><?= $l['done'] ?></button>

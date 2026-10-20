@@ -134,11 +134,6 @@
     "lf-bonuses-api-import-hint": "Tutti questi valori possono anche essere ottenuti automaticamente tramite il pulsante \"Importa da OGame\" (icona appunti) nella parte superiore del modulo.",
     "universe": "Universo",
     "profile": "Profilo",
-    "no-profile-name-msg": "Si prega di specificare il nome del profilo.",
-    "no-profile-selected-msg": "Nessun profilo selezionato.",
-    "del-profile-confirm": "Sei sicuro di voler cancellare questo profilo?",
-    "owr-profile-confirm": "Sei sicuro di voler sovrascrivere questo profilo?",
-    "load-profile-confirm": "Sei sicuro di voler caricare questo profilo? I dati attualmente inseriti andranno persi.",
     "server-data-failed-msg": "Impossibile caricare le impostazioni dell'universo. Controlla i valori qui sotto e correggili a mano.",
     "fetching-data": "Recupero dati...",
     "universe-load": "Carica",
@@ -154,14 +149,12 @@
     "ship-name": "Nave",
     "sc": "Cargo Leggero",
     "lc": "Cargo Pesante",
-    "energy-bonus": "Bonus Energia",
     "none": "Nessuno",
     "race": "Forma di vita",
     "race-1": "Umani",
     "race-2": "Rock'tal",
     "race-3": "Mecha",
     "race-4": "Kaelesh",
-    "all-officers": "Tutti i 5 ufficiali",
     "solar-plant-level": "Livello di Centrale Solare",
     "fusion-plant-level": "Livello di Centrale a Fusione",
     "solar-satellites-count": "Numero di satelliti solari",
@@ -185,6 +178,7 @@
     "disr-chamber": "Camera di Disruzione",
     "disr-chamber-bonus": "Bonus della Camera di Disruzione",
     "total-lf-energy-bonus": "Bonus totale delle Forme di Vita alla produzione di energia",
+    "lf-terraformer-rdc": "Riduzione dei costi del terraformatore",
     "lf-tech-bonus": "Bonus tecnologico delle Forme di Vita",
     "country": "Paese",
     "res-available": "Risorse disponibili",
@@ -214,7 +208,72 @@
     "character-bonus-hint": "Per ottenere questi bonus, vai in Impostazioni risorse - Bonus giocatore Forme di Vita,\nquindi scorri verso il basso fino a 'Bonus classe personaggio'.",
     "collectors-character-bonus": "Bonus classe personaggio del Collezionista",
     "lf-class-bonus": "Bonus classe",
-    "lf-class-bonus-hint": "Inserisci il valore 'Totale' dalla tabella OGame dei bonus delle forme di vita ai bonus di classe, riga 'Collector'."
+    "lf-class-bonus-hint": "Inserisci il valore 'Totale' dalla tabella OGame dei bonus delle forme di vita ai bonus di classe, riga 'Collector'.",
+    "pf-no-profile": "Nessun profilo",
+    "pf-import": "Importa da OGame…",
+    "pf-create": "Nuovo profilo…",
+    "pf-manage": "Gestisci profili…",
+    "pf-import-hdr": "Importa i dati dell’account",
+    "pf-import-hint": "Incolla i dati esportati dallo script <a href=\"https://github.com/Rivenscryr/origin-exporter\" target=\"_blank\" rel=\"noopener\">Origin Exporter</a> (in OGame: icona Impero → Export account data) oppure scegli il file scaricato. Lo script è sviluppato dall’autore di Antigame Reborn.",
+    "pf-file": "File",
+    "pf-import-universe-hint": "I dati non indicano da quale universo provengono. Sceglilo:",
+    "pf-import-btn": "Importa",
+    "pf-import-err-json": "Non è un JSON valido.",
+    "pf-import-err-shape": "Non sono dati dell’account di Origin Exporter.",
+    "pf-import-err-schema": "Questa versione del formato di Origin Exporter non è ancora supportata.",
+    "pf-pick-universe": "Scegli l’universo.",
+    "pf-import-done": "Profilo “{0}”: pianeti aggiunti {1}, aggiornati {2}, rimossi {3}.",
+    "pf-props-hdr": "Profilo",
+    "pf-name": "Nome",
+    "pf-universe-optional": "Universo (facoltativo):",
+    "pf-universe-locked": "L’universo è arrivato con i dati importati e non può essere cambiato.",
+    "pf-name-required": "Inserisci un nome.",
+    "pf-manage-hdr": "Profili",
+    "pf-source": "Importato",
+    "pf-edit": "Modifica",
+    "pf-no-universe": "non impostato",
+    "pf-delete-confirm": "Eliminare il profilo “{0}”? L’operazione non può essere annullata.",
+    "pf-merge-hdr": "Unisci profili",
+    "pf-merge-from": "Unisci il profilo",
+    "pf-merge-into": "in",
+    "pf-merge": "Unisci",
+    "pf-merge-hint": "Il secondo profilo mantiene tutti i suoi valori e prende dal primo solo ciò che gli manca; il primo profilo viene eliminato.",
+    "pf-merge-confirm": "Unire “{0}” in “{1}”? “{0}” verrà eliminato.",
+    "pf-merge-same": "Scegli due profili diversi.",
+    "pf-backup-hdr": "Backup",
+    "pf-backup-hint": "I profili sono salvati solo in questo browser. I valori inseriti a mano (impostazioni di produzione, tassi di cambio, profili manuali) non tornano con una nuova importazione da OGame: conserva un file di backup.",
+    "pf-backup-download": "Scarica backup",
+    "pf-backup-restore": "Ripristina da file…",
+    "pf-restore-conflict": "Il profilo “{0}” esiste già. Sostituirlo con quello del file?",
+    "pf-replace": "Sostituisci",
+    "pf-skip": "Salta",
+    "pf-restore-done": "Profili ripristinati: {0}.",
+    "pf-file-err": "Non è un file di backup dei profili, oppure la sua versione non è supportata.",
+    "pf-storage-unavailable": "Questo browser non consente al sito di salvare dati, quindi i profili non sono disponibili.",
+    "pf-save-failed": "Impossibile salvare il profilo: il browser ha rifiutato di salvare altri dati.",
+    "pf-migrate-hdr": "Set salvati trovati",
+    "pf-migrate-text": "Set salvati da una versione precedente dei calcolatori: {0}. Convertirli in profili? I set originali vengono conservati.",
+    "pf-migrate-btn": "Converti i set",
+    "pf-migrate-later": "Non ora",
+    "pf-migrate-done": "Profili creati: {0}. Scarica ora un backup: è l’unica copia fuori da questo browser.",
+    "pf-migrate-none": "Non è stato possibile leggere nessun set.",
+    "pf-overrides": "Valori diversi dal gioco: {0}",
+    "pf-reset-profile": "clicca per scegliere quali valori del gioco ripristinare",
+    "pf-account": "Account",
+    "pf-reset-hdr": "Ripristina i valori del gioco",
+    "pf-reset-hint": "I valori selezionati tornano a quelli importati dal gioco; gli altri restano come li hai impostati.",
+    "pf-select-all": "Seleziona tutto",
+    "pf-col-where": "Dove",
+    "pf-col-field": "Valore",
+    "pf-col-game": "Nel gioco",
+    "pf-col-current": "Ora",
+    "pf-reset-selected": "Ripristina selezionati",
+    "pf-in-game": "Nel gioco: {0}",
+    "pf-reset-value": "clicca per ripristinare",
+    "pf-departure-body": "Pianeta o luna del profilo",
+    "pf-take-fleet": "Dalla partenza",
+    "pf-take-fleet-hint": "Inserisci le navi presenti sul pianeta o sulla luna scelti come punto di partenza, secondo l’ultima importazione da OGame.",
+    "pf-universe-from-profile": "L’universo è impostato dal profilo attivo."
   },
   "index": {
     "title": "ProxyForGame - strumenti per i giochi per browser OGame",
@@ -336,11 +395,12 @@
     "msg-lab-level-raised": "Livello del Laboratorio di Ricerca aumentato a {0}: è quanto richiede la ricerca \"{1}\".",
     "mineral-res-cntr-lvl": "Centro di Mineralogia",
     "lf-terraformer-rdc": "Riduzione dei costi del terraformatore",
-    "disclaimer-robot-nanite": "Si prega di tenere conto della nota nella prima riga della tabella quando si leggono i tempi di costruzione. Se stai costruendo una Fabbrica dei Robots o una Fabbrica dei Naniti, usa il <a href=\"{0}\">Calcolatore della coda di costruzione</a> per calcoli precisi dei tempi di costruzione.",
+    "disclaimer-robot-nanite": "Si prega di tenere conto del suggerimento {1} nella prima cella delle righe Fabbrica dei Robots e Fabbrica dei Naniti quando si leggono i tempi di costruzione. Se stai costruendo una Fabbrica dei Robots o una Fabbrica dei Naniti, usa il <a href=\"{0}\">Calcolatore della coda di costruzione</a> per calcoli precisi dei tempi di costruzione.",
     "disclaimer-title": "Attenzione",
     "discoverer-class-bonus": "Bonus classe Discoverer",
     "discoverer-class-bonus-hint": "Inserisci il valore 'Totale' dalla tabella OGame dei bonus delle forme di vita ai bonus di classe, riga 'Discoverer'. Si applica solo se nella scheda 'Generale' è selezionata la classe 'Discoverer'.",
-    "research-speed-hint": "La velocità di ricerca è la velocità economia moltiplicata per il fattore di ricerca dell'universo, ad es. 5 × 3 = 15. Scegliendo l'universo qui sopra, entrambe le velocità vengono compilate automaticamente."
+    "research-speed-hint": "La velocità di ricerca è la velocità economia moltiplicata per il fattore di ricerca dell'universo, ad es. 5 × 3 = 15. Scegliendo l'universo qui sopra, entrambe le velocità vengono compilate automaticamente.",
+    "description": "Calcola costo e tempo di costruzione di edifici, ricerche, navi e difese in OGame, considerando velocità dell’universo e bonus."
   },
   "lfcosts": {
     "title": "OGame - Calcolatore di Costi per le forme di vita",
@@ -464,7 +524,8 @@
     "ovrc-battleship": "Overclocking (Nave da battaglia)",
     "psy-sh-matrix": "Matrice Protezione psionica",
     "kaelesh-disc-enh": "Rinforzo Esploratore Kaelesh",
-    "energy-cost-to-build": "Energia necessaria per la costruzione"
+    "energy-cost-to-build": "Energia necessaria per la costruzione",
+    "description": "Calcola costo e tempo di edifici e ricerche delle forme di vita in OGame, inclusi i bonus di razza e tecnologia."
   },
   "flight": {
     "flight-time-format": "99 H:s:s",
@@ -579,13 +640,19 @@
     "own-api-import-title": "Importa",
     "own-api-bad-json-msg": "Impossibile leggere i dati.\\nAssicurati di aver incollato il testo dal campo API 2 della pagina «Flotta».",
     "import-failed-msg": "Impossibile caricare i dati.\\nIl server ha restituito una risposta non valida. Riprova più tardi.",
-    "populated-systems-failed-msg": "La mappa dei sistemi abitati non è disponibile, quindi nessun sistema viene contato come saltato. Puoi inserire il loro numero a mano."
+    "populated-systems-failed-msg": "La mappa dei sistemi abitati non è disponibile, quindi nessun sistema viene contato come saltato. Puoi inserire il loro numero a mano.",
+    "sr-profile-hdr": "Importa il rapporto di spionaggio",
+    "sr-profile-text": "È attivo un profilo. Il rapporto contiene le ricerche, la classe e i bonus del giocatore spiato, che non devono sovrascrivere il tuo profilo. Come vuoi importarlo?",
+    "sr-profile-none": "Passa a «Nessun profilo» e importa",
+    "sr-profile-new": "Crea un nuovo profilo per il rapporto",
+    "description": "Calcola durata del volo, consumo di deuterio e orario di partenza ideale in OGame in base a velocità dell’universo, navi e modalità di volo."
   },
   "graviton": {
     "title": "OGame - Calcolatore per Gravitonica",
     "graviton-level": "Livello del Gravitone",
     "recycling": "Riciclare il campo di detriti",
-    "keywords": "proxyforgame,ogame,calcolatore gravitone,tecnologia gravitonica,tecnologia della gravitazione,satelliti solari,energia per gravitone,morte nera"
+    "keywords": "proxyforgame,ogame,calcolatore gravitone,tecnologia gravitonica,tecnologia della gravitazione,satelliti solari,energia per gravitone,morte nera",
+    "description": "Scopri quanti satelliti solari e quanta energia servono per la ricerca gravitone in OGame in base alle impostazioni del pianeta."
   },
   "moon": {
     "title": "OGame - Calcolatrici per Lune",
@@ -616,7 +683,8 @@
     "own-system": "Il tuo sistema",
     "phalanx-lvl-required": "Livello richiesto",
     "phalanx-range-bonus": "Bonus alla portata della falange",
-    "class-bonus": "Bonus di classe"
+    "class-bonus": "Bonus di classe",
+    "description": "Calcola la probabilità di trovare una luna, l’esito di un tentativo di distruzione e la portata della falange sensoriale in OGame."
   },
   "production": {
     "param-tab-general": "Generale",
@@ -698,7 +766,8 @@
     "incl-explain": "Se si aumenta il livello delle miniere, il consumo di energia aumenterà. Il calcolatore può tenere conto di questo cambiamento e includere nel calcolo i costi di costruzione dei satelliti solari, che daranno l'energia necessaria. Il calcolo viene fatto edificio per edificio. Dobbiamo prendere in considerazione questi costi?",
     "incl-yes": "Sì",
     "incl-no": "No",
-    "lifeform-tech": "Bonus tecnologia forme di vita"
+    "lifeform-tech": "Bonus tecnologia forme di vita",
+    "description": "Calcola produzione di metallo, cristallo e deuterio, consumo energetico e rientro degli investimenti nelle miniere per un pianeta o tutto l’impero OGame."
   },
   "queue": {
     "start-time": "Inizio",
@@ -714,7 +783,8 @@
     "next-level": "Livello successivo",
     "title": "OGame - Coda di costruzione",
     "keywords": "proxyforgame,ogame,coda di costruzione,ordine di costruzione,tempo di costruzione,calcolatore coda,costi edifici",
-    "clear": "Rimuovere"
+    "clear": "Rimuovere",
+    "description": "Confronta costo e durata dei potenziamenti in sequenza su un pianeta o una luna di OGame, considerando fabbriche e velocità dell’universo."
   },
   "terraformer": {
     "title": "OGame - Calcolatrice Terraformer",
@@ -723,7 +793,8 @@
     "single-level": "Un livello",
     "added-fields": "Campi da aggiungere",
     "satellites": "Satelliti solari",
-    "keywords": "proxyforgame,ogame,calcolatore terraformer,terraformer,campi del pianeta,satelliti solari,fabbisogno energetico,fabbrica dei naniti"
+    "keywords": "proxyforgame,ogame,calcolatore terraformer,terraformer,campi del pianeta,satelliti solari,fabbisogno energetico,fabbrica dei naniti",
+    "description": "Calcola energia, risorse e tempo necessari per terraformare un pianeta in OGame, inclusi satelliti solari e bonus."
   },
   "expeditions": {
     "keywords": "proxyforgame,ogame,calcolatore spedizioni,spedizioni,risorse dalle spedizioni,flotta per spedizioni,materia oscura,ritrovamenti spedizioni",
@@ -787,7 +858,8 @@
     "class-bonus-discoverer": "Bonus classe \"Scopritore\"",
     "resources-discovery-booster": "Potenziamento scoperta risorse",
     "dark-matter-discovery-bonus": "Bonus scoperta Materia Oscura",
-    "large-cargo-abbrev": "CP"
+    "large-cargo-abbrev": "CP",
+    "description": "Stima risorse, navi e materia oscura ottenibili nelle spedizioni di OGame e confronta il rendimento previsto di flotte diverse."
   },
   "trade": {
     "met": "met",
@@ -803,6 +875,7 @@
     "link": "Collegamento",
     "text": "Testo",
     "and": "e",
-    "keywords": "proxyforgame,ogame,calcolatore commercio,scambio di risorse,tasso di scambio,metallo cristallo deuterio,mercante"
+    "keywords": "proxyforgame,ogame,calcolatore commercio,scambio di risorse,tasso di scambio,metallo cristallo deuterio,mercante",
+    "description": "Confronta gli scambi di metallo, cristallo e deuterio in OGame e calcola le risorse ottenute con un determinato rapporto."
   }
 }

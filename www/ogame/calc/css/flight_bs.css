@@ -35,8 +35,12 @@
 /* --- Narrow numeric fields keep their compact footprint under form-control --- */
 .level-input        { width: 44px;  text-align: center; }
 .level-input-small  { width: 36px;  text-align: center; }
-.coord-input        { width: 40px;  text-align: center; }
-.coord-input-small  { width: 32px;  text-align: center; }
+/* Coordinates keep their footprint but take a narrower side padding than
+   form-control-sm's .5rem: at 32px that left 14px of content box, and a
+   two-digit position (~15px) lost its edges; the 40px system field fell short
+   of three digits by about a pixel too. */
+.coord-input        { width: 40px;  text-align: center; padding-inline: .25rem; }
+.coord-input-small  { width: 32px;  text-align: center; padding-inline: .25rem; }
 .count-input        { width: 64px;  text-align: center; }
 .input-7columns     { width: 60px;  text-align: center; }
 /* 160px, as in the queue calculator: at 150px the content box is 132px and the
@@ -302,15 +306,16 @@
 
 /* Bootstrap's .form-control sets width: 100%, and an auto flex-basis takes
    that as the item's flex-basis. On the SR_KEY row's flex-wrap line, the
-   wrap test runs against that 100%-of-the-row hypothetical size before
-   flex-grow/shrink ever get to redistribute space, so the input alone
-   "doesn't fit" and the row splits into three lines: the label, the input,
-   then the icon and buttons. flex-basis: 0 discards the width:100% for that
-   test and lets flex-grow-1 size the input purely from the space its
-   siblings leave — min-width: 0 keeps it free to shrink below its own
-   content size too, so all five children share the one line as before. */
+   wrap test runs against that 100%-of-the-row hypothetical size, so the input
+   alone "doesn't fit" and the row splits into three lines: the label, the
+   input, then the icon and buttons. An explicit width replaces the 100%, and
+   flex-basis follows it. It must be a real width: the panel's max-content
+   width is built from the input's own width, and since the saved-set row
+   that used to set the panel's width is gone, the input's intrinsic ~175px
+   was too narrow for a 36-character report code (~280px). min-width: 0
+   still lets it shrink on a narrow screen. */
 #api-code {
-  flex-basis: 0;
+  width: 19rem;
   min-width: 0;
 }
 

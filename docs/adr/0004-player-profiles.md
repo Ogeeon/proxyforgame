@@ -6,6 +6,10 @@ Date: 2026-10-11
 
 Accepted. Not yet implemented — the phases are in `.claude/plans/player-profiles.md`.
 
+Terminology note (2026-10-20): the "collector" below shipped as **PfG Companion** and is
+called Companion in `CONTEXT.md` and in the code, since collector is also a player class
+in the game. "Sync" keeps its meaning here; an edit reaching a profile is a write-back.
+
 ## Context
 
 Every calculator asks for the same account data again: player class, research levels,
@@ -27,6 +31,12 @@ allow it.
 
 A player can have several accounts in one universe, so the account identity is a
 compound of universe and player id.
+
+Pasting an export is a chore the player repeats after every change in the game. The
+OValue Exporter userscript shows another way: it reads the same `accountInfo` endpoint
+whenever the player opens the game, keeps the result in the script's storage, and hands it
+to its own site when the player opens that, through `localStorage` and a `CustomEvent`. The
+player does nothing after installing it.
 
 ## Decision
 
@@ -63,9 +73,34 @@ calculators read from it and write back to it.
   formulas.
 - **The active profile is per tab** (`sessionStorage`). `localStorage` only remembers the
   last choice, for a new tab. Two accounts can then be open side by side.
+- **Two ways in for the account export: paste and sync.** Pasting stays and is always
+  available; it is the only way on a phone. **Sync** is our own collector, run inside the
+  game page: it calls `accountInfo` and `speciesBonuses` and produces the same document as
+  origin-exporter, plus the universe from `location.hostname`. One translator serves both.
+  On our pages it writes the document to our origin's `localStorage` and dispatches an
+  event; the page reads the key on load and listens for the event, since the collector may
+  start after the page has initialised.
+- **The collector behaves like a player, not a bot.** It makes requests only on a game page
+  the player opened, at most once every few minutes, never from a timer or a background
+  context, and never with `cp=` (that switches the planet and shows activity in the
+  galaxy). What the endpoints lack — production percentages — it reads from the DOM of
+  `component=resourcesettings` when the player opens that page.
+- **A sync applies only newer data.** It imports a document only when the document was
+  collected after the profile's `importedAt`, so an override survives until the player
+  next visits the game, exactly as it would until the next manual paste. Reloading
+  calculators does not wipe it.
+- **One collector source, two wrappers.** The collection and hand-off code is shared. It
+  ships first as a **userscript**, while the export format and the sync rule can still
+  change and a fix must reach players at once. A **browser extension** (Chrome Web Store
+  and AMO) follows once the format is stable, and becomes the option the site recommends;
+  the userscript stays for players who already run a script manager. Both are released
+  separately from the site with their own version numbers, never auto-updated from
+  `main`.
 - **Universe settings are not in the profile.** The profile names its universe. The
   settings (speeds, donut, deuterium factor) come from the existing `serverdata` service
-  and are cached per universe, shared by every profile in it.
+  and are cached per universe, shared by every profile in it. A setting the player picks
+  instead of the game's is kept in that cache too; the backup file carries those choices
+  for the universes of its profiles, and restoring a profile brings its universe's back.
 
 ## Considered options
 
@@ -86,6 +121,22 @@ calculators read from it and write back to it.
 - **Recomputing life-form bonuses from levels.** That means reproducing every life-form
   research formula with the species-level amplifier. Our formulas have already diverged
   from the game once; the game's own totals are exact by definition.
+- **Paste only.** It works everywhere, but the profile goes stale unless the player keeps
+  pasting, and most will not.
+- **Contributing a bridge to origin-exporter instead of writing our own.** Its script
+  would need a `@match` for our domains and a hand-off tailored to our pages; the universe
+  issue shows the turnaround on even a small change. Our collector is a few hundred lines
+  over two documented endpoints, and it lets us add the production percentages.
+- **A sync that clears overrides, like a paste does.** Every page load after any game
+  visit would silently undo a what-if experiment.
+- **Polling the game from the extension's background.** Technically possible with host
+  permissions, but it is automated traffic in the player's session, the kind of thing the
+  game's rules are written against.
+- **Extension only.** Chrome now makes userscript managers ask for an extra "Allow user
+  scripts" switch, so an extension installs more easily. But store review delays every
+  fix by hours to days, Chrome Web Store wants a privacy policy and a data disclosure, and
+  Safari needs a paid Apple developer account; none of that is worth paying while the
+  format still moves.
 - **The active profile shared by all tabs.** It makes the main use case — two accounts in
   one universe — impossible to work with side by side.
 
@@ -106,5 +157,12 @@ calculators read from it and write back to it.
   a schema-1 import.
 - Exchange rates become account data with no game layer. The canonical form is
   `[metal, crystal, deuterium]` in metal units. Trade converts it to its own `{md, cd}`.
+- The collector runs our code inside the player's game session, so it has to stay small
+  and readable: no cross-origin requests (`GM_xmlhttpRequest`, `@connect`), source in this
+  repository. Whoever controls the GreasyFork or store account can push code into every
+  user's game: those accounts need two-factor authentication.
+- A synced profile is only as fresh as the player's last visit to the game. The UI shows
+  when the game layer was collected.
+- Neither wrapper reaches Chrome on Android or Safari on iOS, so paste is never retired.
 - Every calculator keeps working with no profile at all. That is the default and the
   rollback path.

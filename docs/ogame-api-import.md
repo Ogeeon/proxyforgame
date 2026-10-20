@@ -28,7 +28,7 @@ Worth knowing:
   is a bonus of `0.3066%`. They carry the life-form bonuses only — the player class bonus and the
   hyperspace technology are separate inputs in both calculators, so a calculator that added them
   again would double-count.
-- `characterClassId` is 1/2/3 for collector/general/discoverer; `allianceClassId` 2 is the trader.
+- `characterClassId` is 1/2/3 for collector/general/discoverer; `allianceClassId` is 1/2/3 for warrior/trader/researcher (the order the OValue Exporter userscript maps for the same `accountInfo` field; the spy report's `defender_alliance_class_id` uses the same ids).
 - `fleetspeed` and the rest of the universe settings are **ignored on purpose**: the export names
   no fleet-speed variant, so the value cannot be attached to one of the three fields the flight
   calculator has. Use the country/universe selects for that.

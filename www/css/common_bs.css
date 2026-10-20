@@ -13,6 +13,7 @@ html {
   font-weight: 600;
   padding: 4px;
   margin: 2px;
+  background-color: var(--bs-secondary-bg);
 }
 
 /* Modal titles are h2/h3 in the markup so the heading outline stays flat below
@@ -27,7 +28,7 @@ h3.modal-title {
 .subheader {
   text-align: center;
   font-weight: 600;
-  margin: 0px !important;
+  margin: 0;
 }
 
 [data-bs-theme="dark"] body {
@@ -41,6 +42,8 @@ h3.modal-title {
   --pfg-btn-bg: #272d34;
   --pfg-btn-shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
   --pfg-btn-shadow-active: inset 0 1px 2px rgba(0, 0, 0, 0.5);
+  /* Profile mark for a field that matches the game, see .pf-bound below. */
+  --pfg-mark-same: var(--bs-success-text-emphasis);
 }
 
 /* Soften the pure-white light theme evenly across the whole UI (tune the 94% knob).
@@ -55,6 +58,8 @@ h3.modal-title {
   --pfg-btn-bg: #e3e8ef;
   --pfg-btn-shadow: 0 1px 2px rgba(0, 0, 0, 0.18);
   --pfg-btn-shadow-active: inset 0 1px 2px rgba(0, 0, 0, 0.18);
+  /* Profile mark for a field that matches the game, see .pf-bound below. */
+  --pfg-mark-same: color-mix(in srgb, var(--bs-info) 50%, var(--bs-body-bg));
 }
 
 /* Darken the page surround around the calculator (tune the 88% knob). The panels
@@ -88,20 +93,23 @@ h3.modal-title {
   --bs-form-check-bg: color-mix(in srgb, #fff 100%, black);
 }
 
-/* Slightly darken the calculator title header (next to the reset button).
-   !important beats the .bg-body-secondary utility that colours it. */
+/* Slightly darken the calculator title header (next to the reset button). The
+   header takes its fill from the .main-header rule above rather than from a
+   .bg-body-secondary utility, whose !important no theme rule could beat. */
 [data-bs-theme="light"] .main-header {
-  background-color: color-mix(in srgb, var(--bs-secondary-bg) 92%, black) !important;
+  background-color: color-mix(in srgb, var(--bs-secondary-bg) 92%, black);
 }
 
 /* Dark theme: sink editable form controls below the readonly/disabled tone so they are visually
    distinct. Editable inputs appear darker (more recessed), while readonly/disabled fields
    keep the panel tone (--bs-secondary-bg) and appear lighter/raised. This makes readonly
-   inputs in modals visually distinguishable from editable ones. !important overrides
-   Bootstrap's default transparent background. */
+   inputs in modals visually distinguishable from editable ones. The :not()s lift the
+   selector to (0,5,0), above Bootstrap's .form-control/.form-select fill and its :focus
+   state, so no !important is needed. A page that wants a different sunk tone sets
+   --pf-sunk-input-bg rather than writing a competing background rule. */
 [data-bs-theme="dark"] .form-control:not([readonly]):not(:disabled):not(.ui-state-disabled),
 [data-bs-theme="dark"] .form-select:not([readonly]):not(:disabled):not(.ui-state-disabled) {
-  background-color: rgb(20, 23, 27) !important;
+  background-color: var(--pf-sunk-input-bg, rgb(20, 23, 27));
 }
 
 /* Modals: Bootstrap paints .modal-content with --bs-modal-color (#dee2e6 in dark
@@ -257,6 +265,12 @@ button:not(.btn) {
 
 #topbar {
   width: 100%
+}
+
+/* A side wider than its half (a phone) grows and pushes the selector off centre
+   rather than overlapping it. */
+.topbar-side {
+  flex: 1 1 0;
 }
 
 #topbar td {
@@ -490,4 +504,74 @@ textarea:disabled {
   margin: 0;
   font-size: inherit;
   line-height: inherit;
+}
+
+/* The profile's planet (and moon) selects next to a calculator's title: a
+   few pixels off the panel's top edge, so the gap above them matches the one
+   below, to the panel underneath - and to the title when they wrap under it. */
+.pf-header-bodies {
+  margin-top: 3px;
+}
+
+/* The profile select in the top bar: never wider than the bar can spare. */
+#pf-select {
+  max-width: 40vw;
+}
+
+/* Player profiles (profiles-ui.js): a field the active profile owns gets a
+   stripe on its left edge; one whose value differs from the game gets it in the
+   warning colour, followed by a button that restores the game value.
+   The "matches the game" colour, --pfg-mark-same, is per theme and lives in the
+   theme blocks at the top: the dark theme already sets its body text in the
+   info colour, so the mark there is green; in the light theme the info colour
+   is kept but faded towards the background. */
+.pf-bound {
+  box-shadow: inset 3px 0 0 var(--pfg-mark-same);
+}
+
+.pf-bound.pf-differs {
+  box-shadow: inset 3px 0 0 var(--bs-warning);
+}
+
+input[type="checkbox"].pf-bound,
+input[type="radio"].pf-bound {
+  box-shadow: none;
+  outline: 2px solid var(--pfg-mark-same);
+  outline-offset: 1px;
+}
+
+input[type="checkbox"].pf-bound.pf-differs,
+input[type="radio"].pf-bound.pf-differs,
+fieldset.pf-bound.pf-differs {
+  outline-color: var(--bs-warning);
+}
+
+fieldset.pf-bound {
+  box-shadow: none;
+  border-left: 3px solid var(--pfg-mark-same);
+  padding-left: 0.25rem;
+}
+
+fieldset.pf-bound.pf-differs {
+  border-left-color: var(--bs-warning);
+}
+
+.input-group.pf-bound {
+  box-shadow: none;
+}
+
+.pf-reset {
+  line-height: 1;
+  color: var(--bs-warning-text-emphasis);
+}
+
+/* A form control is a block, so the restore button after it would drop to the
+   next line - in a table cell it always does. Inline, the two share the line. */
+:is(.form-control, .form-select).pf-bound:has(+ .pf-reset) {
+  display: inline-block;
+  vertical-align: middle;
+}
+
+:has(> .form-control.pf-bound + .pf-reset, > .form-select.pf-bound + .pf-reset) {
+  white-space: nowrap;
 }

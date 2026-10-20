@@ -63,6 +63,16 @@ declare const apiParams: Record<string, any>;
 /** Universe lists per language, inlined by the flight, costs and trade templates. */
 declare const unis: Record<string, any[]>;
 
+// Values profiles_bs.tpl inlines for profiles-ui.js, on the pages with the
+// profile selector.
+
+/** Localised strings of the profile selector and its dialogs. */
+declare const pfgProfileText: Record<string, string>;
+/** Countries whose universes can be picked: [country code, localised name]. */
+declare const pfgCountries: Array<[string, string]>;
+/** Universes per country code: [number, name]. */
+declare const pfgUniverses: Record<string, Array<[number, string]>>;
+
 /**
  * The pseudo-event the validation helpers are called with. The real listeners
  * pass a genuine Event, but most call sites synthesise `{ currentTarget }`.

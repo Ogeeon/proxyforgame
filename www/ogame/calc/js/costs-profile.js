@@ -1,0 +1,655 @@
+// ============================================================================
+// COSTS CALCULATOR - PLAYER PROFILE BINDING
+// ============================================================================
+// Connects the cost calculator to the active player profile (ADR-0004).
+// The calculator reads its settings from the form; this file projects the
+// profile into the form and writes the changes back:
+//   - apply(): profile -> form - the account (researches, officers, classes,
+//     the life-form bonuses, the research bonuses table) and one planet and
+//     one moon of the profile, picked in #pf-planet and #pf-moon (their
+//     factories, shipyard, research lab, temperature, position, Mineral
+//     Research Centre); the profile's universe goes into the picker, locked;
+//     The research network dialog lists the profile's planets with their
+//     research labs; a lab edited there goes back to its planet. The start
+//     planet and whether the network is used are remembered per profile; by
+//     default the network is on when the account has researched it, and the
+//     start is the planet with the best lab;
+//   - writeBack(): GlobalParams -> profile, called where the calculator saves
+//     its state, writing only what changed since the last apply or write-back, so a
+//     lossy mapping (a profile with no class shows as collector here) never
+//     becomes an override.
+// The levels the profile knows - the buildings of the planet and the moon, the
+// researches - are filled in as the "from" levels of the build tables, for
+// convenience only: they are not bound, so an edit there stays the
+// calculator's. A planet or moon the profile does not have leaves those fields
+// to the calculator. The build tables, the speeds, the boosters and the research
+// event are the calculator's own and keep going to costs_calculator_state; the
+// profile-owned values are stored there as they were before the profile, and
+// the research bonuses table keeps its own key untouched, so "no profile"
+// shows both as they were.
+
+'use strict';
+
+/**
+ * The cost calculator reads its settings back from the form, so its fields
+ * write there: this stands in for the settings they are handed. They read
+ * from the calculator's parameters, whose keys are its stored state's.
+ */
+const COSTS_FORM = {};
+
+/**
+ * An officer's switch, shown straight in the form.
+ *
+ * @param {string} name
+ * @returns {ProfilePrmField}
+ */
+function costsOfficerField(name) {
+  return pfInForm(pfOfficerFields([name])[0], (v) => setChecked('#' + name, v));
+}
+
+/** @type {ProfilePrmField[]} */
+const COSTS_ACCOUNT_FIELDS = [
+  pfLevelField('research.113', 'energyTechLevel', '#energy-tech-level'),
+  pfLevelField('research.122', 'plasmaTechLevel', '#plasma-tech-level'),
+  pfLevelField('research.121', 'ionTechLevel', '#ion-tech-level'),
+  pfLevelField('research.114', 'hyperTechLevel', '#hyper-tech-level'),
+  pfLevelField('research.123', 'irnLevel', '#irn-level'),
+  ...['geologist', 'engineer', 'technocrat', 'admiral', 'commander'].map(costsOfficerField),
+  // The calculator has no "no class": a profile without one shows as collector.
+  pfInForm(pfCollectorClassField('playerClass', 'class-'), (v) => setChecked('#class-' + v, true)),
+  pfInForm(pfTraderField('isTrader', '#is-trader'), (v) => setChecked('#is-trader', v)),
+  pfPercentField('lf.classBooster.1', 'collectorClassBonus', '#lf-collector-class-bonus'),
+  pfPercentField('lf.classBooster.3', 'discovererClassBonus', '#discoverer-class-bonus'),
+  pfPercentField('lf.ship.202.cargo', 'scCapacityIncrease', '#sc-capacity-increase'),
+  pfPercentField('lf.ship.203.cargo', 'lcCapacityIncrease', '#lc-capacity-increase'),
+  // The game reports a cost reduction per technology; the calculator applies
+  // one number to the Terraformer's cost and time, so it takes the cost one.
+  pfPercentField('lf.cost.33.cost', 'lfTerraformerRdc', '#lf-terraformer-rdc'),
+  pfInForm(pfRatesField('rates', '#exchange-rates-m'), (/** @type {number[]} */ rates) => {
+    setNumVal('#exchange-rates-m', rates[0]);
+    setNumVal('#exchange-rates-c', rates[1]);
+    setNumVal('#exchange-rates-d', rates[2]);
+  }),
+];
+
+/** @type {ProfilePrmField[]} The fields of the planet picked in #pf-planet. */
+const COSTS_PLANET_FIELDS = [
+  pfLevelField('building.14', 'robotFactoryLevelPlanet', '#robot-factory-level'),
+  pfLevelField('building.15', 'naniteFactoryLevel', '#nanite-factory-level'),
+  pfLevelField('building.21', 'shipyardLevel', '#shipyard-level'),
+  pfLevelField('building.31', 'researchLabLevel', '#research-lab-level'),
+  pfLevelField('temperature.max', 'maxPlanetTemp', '#max-planet-temp'),
+  pfLevelField('lf.building.' + lfBuildingGameId(2, 11), 'mineralResCntrLvl', '#mineral-res-cntr-lvl'),
+];
+
+/** @type {ProfilePrmField[]} The fields of the moon picked in #pf-moon. */
+const COSTS_MOON_FIELDS = [
+  pfLevelField('building.14', 'robotFactoryLevelMoon', '#robot-factory-level-moon'),
+];
+
+/** The most planets the research network dialog takes (its planet count spinner's limit). */
+const COSTS_MAX_LAB_PLANETS = 99;
+
+/**
+ * A speed select's value, as the calculator collects it.
+ *
+ * @param {string} selector
+ * @returns {number}
+ */
+function costsSpeed(selector) {
+  return Number.parseInt(getVal(selector), 10) || 0;
+}
+
+/**
+ * The multi-level build tables whose "from" levels the profile fills in, and
+ * where each finds a level: on the planet, on the moon or in the account.
+ *
+ * @type {Array<{table: string, where: 'planet'|'moon'|'account', prefix: string}>}
+ */
+const COSTS_START_TABLES = [
+  { table: '#table-1-2', where: 'planet', prefix: 'building.' },
+  { table: '#table-1-3', where: 'moon', prefix: 'building.' },
+  { table: '#table-1-4', where: 'account', prefix: 'research.' },
+];
+
+/**
+ * Where the range tab finds the level of its technology, by the optgroup it
+ * is picked from: planet buildings, moon buildings, researches.
+ *
+ * @type {Array<{where: 'planet'|'moon'|'account', prefix: string}>}
+ */
+const COSTS_RANGE_GROUPS = [
+  { where: 'planet', prefix: 'building.' },
+  { where: 'moon', prefix: 'building.' },
+  { where: 'account', prefix: 'research.' },
+];
+
+/** A moon building's id in the build tables: its game id plus this. */
+const COSTS_MOON_ROW_OFFSET = 10000;
+
+/**
+ * The fields of the research bonuses table: a cost and a time reduction per
+ * research, read from the rows the page renders.
+ *
+ * @returns {ProfileField[]}
+ */
+function costsResearchTableFields() {
+  return Array.from($$('#lf-research-bonuses-tbody tr')).filter((row) => row instanceof HTMLTableRowElement).flatMap((row) => {
+    const techId = Number.parseInt(row.dataset.techId ?? '', 10);
+    if (!techId) return [];
+    return /** @type {Array<['cost'|'time', string, 'lfResCostRdcMap'|'lfResTimeRdcMap']>} */ ([
+      ['cost', '.lf-research-cost-input', 'lfResCostRdcMap'],
+      ['time', '.lf-research-time-input', 'lfResTimeRdcMap'],
+    ]).map(([kind, selector, map]) => {
+      const input = () => /** @type {?HTMLInputElement} */ (row.querySelector(selector));
+      return {
+        key: 'lf.cost.' + techId + '.' + kind, input,
+        read: (/** @type {Record<string, any>} */ p) => pfNum(p[map][techId]),
+        write: (/** @type {Record<string, any>} */ _form, /** @type {*} */ v) => {
+          const el = input();
+          if (el) el.value = localizeFloat(pfNum(v));
+        },
+      };
+    });
+  });
+}
+
+/** @extends {ProfileBinder<CostsCalculator>} */
+class CostsProfiles extends ProfileBinder {
+  /**
+   * @param {ProfilesUi} pf
+   * @param {CostsCalculator} app
+   */
+  constructor(pf, app) {
+    super(pf, app);
+    /** @type {ProfileField[]} The account fields, the research bonuses table included. */
+    this.accountFields = [...COSTS_ACCOUNT_FIELDS, ...costsResearchTableFields()];
+    /** @type {?string} The planet shown; null leaves its fields to the calculator. */
+    this.planetId = null;
+    /** @type {?string} The moon shown. */
+    this.moonId = null;
+    this.planetSelect = new PfBodySelect(pf, {
+      select: '#pf-planet', box: '#pf-planet-box', bodies: (p) => p.planets, lastKey: 'costs',
+    });
+    // A moon not picked yet is the one of the planet shown.
+    this.moonSelect = new PfBodySelect(pf, {
+      select: '#pf-moon', box: '#pf-moon-box', bodies: (p) => p.moons, lastKey: 'costs-moon',
+      planetOf: () => this.planetId,
+    });
+    // The profile's universe goes into the picker, locked; picking it fetches its speeds,
+    // as the picker does. The player's own universe comes back with the speeds it had.
+    this.universe = new PfLockedUniverse({
+      read: () => ({
+        country: selectEl('#country')?.value ?? '--',
+        universe: selectEl('#universe')?.value ?? '',
+        universeSpeed: costsSpeed('#universe-speed'),
+        researchSpeed: costsSpeed('#research-speed'),
+      }),
+      write: (country, number) => this.showUniverse(country, number),
+      restore: (own) => {
+        setVal('#country', own.country ?? '--');
+        this.app.fillUniverseList(own.country ?? '--', own.universe ?? '');
+        setVal('#universe-speed', own.universeSpeed ?? 1);
+        setVal('#research-speed', own.researchSpeed ?? 1);
+      },
+    });
+    /** @type {Array<{cost: number, time: number}>} The research bonuses table as it was before a profile. */
+    this.ownTable = [];
+    this.ownSaveState = app.saveState.bind(app);
+    this.ownSaveTable = app.saveLfResearchTable.bind(app);
+  }
+
+  takeOverSave() {
+    this.app.saveState = () => this.save();
+    // The table's own key stays as it was before the profile.
+    this.app.saveLfResearchTable = (data) => {
+      if (this.profileId === null) this.ownSaveTable(data);
+    };
+  }
+
+  bindControls() {
+    this.planetSelect.onChange(() => this.bodyChosen('planet'));
+    this.moonSelect.onChange(() => this.bodyChosen('moon'));
+    // Called by the calculator's own handler, once it has recalculated the tab.
+    this.app.rangeTechChanged = () => {
+      const profile = this.profile();
+      if (!profile) return;
+      pfFillRangeStart(this.rangeLevel(profile));
+      this.app.recalculateRangeTab();
+    };
+  }
+
+  /**
+   * @param {?Profile} profile
+   * @returns {{planet: ?ProfilePlanet, moon: ?ProfileMoon}}
+   */
+  bodies(profile) {
+    return {
+      planet: profile?.planets.find((p) => p.id === this.planetId) || null,
+      moon: profile?.moons.find((m) => m.id === this.moonId) || null,
+    };
+  }
+
+  /**
+   * The account, the planet and the moon picked in the selects. They read the
+   * calculator's parameters, which collect the whole form: a pass reads them
+   * once and hands them to every group.
+   *
+   * @returns {PfFieldGroup[]}
+   */
+  fieldGroups() {
+    const settings = () => this.app.params();
+    return [
+      { scope: '', entity: (p) => p.account, fields: this.accountFields, settings },
+      { scope: 'planet', entity: (p) => this.bodies(p).planet, fields: COSTS_PLANET_FIELDS, settings },
+      // building.14 is the planet's key too: the planet names it.
+      { scope: 'moon', entity: (p) => this.bodies(p).moon, fields: COSTS_MOON_FIELDS, settings, describe: false },
+    ];
+  }
+
+  /**
+   * The state keys the profile owns: the account's always, the planet's and
+   * the moon's while it has them. The copy of the own values (ownPrm) is the
+   * whole state, not only these: restoreOwnState() gives it all back.
+   *
+   * @param {?Profile} profile
+   * @returns {PfOwnedGroup[]}
+   */
+  ownedGroups(profile) {
+    const { planet, moon } = this.bodies(profile);
+    return [
+      { keys: [...COSTS_ACCOUNT_FIELDS.map((f) => f.prm), 'useIrn'], present: true },
+      { keys: [...COSTS_PLANET_FIELDS.map((f) => f.prm), 'planetPos', 'labLevels', 'labChoice'], present: planet !== null },
+      { keys: COSTS_MOON_FIELDS.map((f) => f.prm), present: moon !== null },
+    ];
+  }
+
+  // -------------------------------------------------------------------------
+  // Profile -> calculator
+  // -------------------------------------------------------------------------
+
+  /** The whole state, and the research bonuses table, which keeps its own key. */
+  captureOwn() {
+    const own = this.app.exportState();
+    this.ownPrm = own.state;
+    this.ownTable = own.table;
+  }
+
+  /** @param {Profile} profile */
+  showProfile(profile) {
+    this.accountFields.forEach((f) => f.write(COSTS_FORM, getProfileValue(profile.account, f.key)));
+    this.renderBodySelects(profile);
+    this.showBodies(profile);
+    this.fillStartLevels(profile);
+    this.showLabs(profile);
+    setChecked('#use-irn', this.irnSwitch(profile));
+    this.universe.apply(profile);
+    this.app.recalculateAll();
+  }
+
+  /**
+   * Fill the planet and moon selects and choose what they show: the body
+   * picked last time in this profile, else - for the moon - the moon of the
+   * planet shown, else the first one.
+   *
+   * @param {Profile} profile
+   */
+  renderBodySelects(profile) {
+    this.planetId = this.planetSelect.render(profile, this.planetId);
+    this.moonId = this.moonSelect.render(profile, this.moonId);
+    pfShow('#pf-bodies-row', profile.planets.length + profile.moons.length > 0);
+  }
+
+  /**
+   * Show the planet's and the moon's values. A body the profile does not have
+   * shows the calculator's own values.
+   *
+   * @param {Profile} profile
+   */
+  showBodies(profile) {
+    const { planet, moon } = this.bodies(profile);
+    COSTS_PLANET_FIELDS.forEach((f) => f.write(COSTS_FORM, planet ? getProfileValue(planet, f.key, 0) : this.ownPrm[f.prm]));
+    const position = planet?.coords?.position;
+    setVal('#planet-pos', planet ? position ?? 8 : pfNum(this.ownPrm.planetPos) || 8);
+    COSTS_MOON_FIELDS.forEach((f) => f.write(COSTS_FORM, moon ? getProfileValue(moon, f.key, 0) : this.ownPrm[f.prm]));
+  }
+
+  /**
+   * Show a universe in the picker and fetch its speeds, as the picker does;
+   * nothing happens when it shows that universe already.
+   *
+   * @param {string} country
+   * @param {*} number
+   */
+  showUniverse(country, number) {
+    if (this.universe.matches(country, number)) return;
+    setVal('#country', country);
+    this.app.fillUniverseList(country, number);
+    void this.app.fetchUniverseSpeeds();
+  }
+
+  restoreOwn() {
+    this.planetId = null;
+    this.moonId = null;
+    pfShow('#pf-bodies-row', false);
+    this.universe.release();
+    const own = this.ownPrm;
+    this.lockPlanetCount(false);
+    this.fillLabTable(Array.isArray(own.labLevels) ? own.labLevels : [], pfNum(own.labChoice ?? -1), null);
+    this.app.restoreOwnState({ state: own, table: this.ownTable });
+  }
+
+  recalc() {
+    this.app.recalculateAll();
+  }
+
+  /** The groups, and what is bound by hand: the planet's position and the research network dialog. */
+  takeSnapshot() {
+    const p = this.app.params();
+    this.snapshot = snapshotReadings(this.readGroups(null, this.fieldGroups(), p));
+    this.snapshot['planet:position'] = pfNum(p.planetPos);
+    this.snapshot.labs = p.labLevels.map(pfNum);
+    this.snapshot.labChoice = p.labChoice;
+    this.snapshot.useIrn = p.useIrn;
+  }
+
+  // -------------------------------------------------------------------------
+  // Calculator -> profile
+  // -------------------------------------------------------------------------
+
+  saveWithoutProfile() {
+    this.ownSaveState();
+  }
+
+  /** Write what changed since the last snapshot into the profile. */
+  writeBack() {
+    const profile = this.profile();
+    if (!profile) return;
+    const p = this.app.params();
+    const { planet } = this.bodies(profile);
+    let changed = this.writeBackGroups(profile, p);
+    if (planet) {
+      const position = pfNum(p.planetPos);
+      if (position !== this.snapshot['planet:position']) {
+        this.snapshot['planet:position'] = position;
+        planet.coords = { galaxy: planet.coords?.galaxy ?? null, system: planet.coords?.system ?? null, position };
+        changed = true;
+      }
+    }
+    const labs = this.writeBackLabs(profile, p);
+    changed = labs.changed || changed;
+    if (changed) {
+      this.pf.save(profile);
+      this.renderBodySelects(profile);
+      // A lab level typed on the Buildings tab shows in the dialog too - but not
+      // while the dialog is open: that would throw away what is typed there.
+      if (!this.dialogOpen()) this.showLabs(profile);
+      this.markAll();
+    }
+    if (labs.shownLab !== null) {
+      // The shown planet's lab was edited in the dialog: its field follows.
+      const lab = labs.shownLab;
+      this.whileApplying(() => {
+        setVal('#research-lab-level', lab);
+        this.app.recalculateAll();
+        this.takeSnapshot();
+      });
+    }
+  }
+
+  /** True while the research network dialog is open. */
+  dialogOpen() {
+    return !!document.getElementById('irn-calc')?.classList.contains('show');
+  }
+
+  /**
+   * Carry the research network dialog into the profile: the lab levels - once
+   * the dialog is closed, so its Cancel can still take them back - and the
+   * start planet and the network switch, which are remembered per profile.
+   *
+   * @param {Profile} profile
+   * @param {GlobalParams} p
+   * @returns {{changed: boolean, shownLab: ?number}} `shownLab`: the new lab of the planet shown, when the dialog changed it.
+   */
+  writeBackLabs(profile, p) {
+    const planets = profile.planets.slice(0, COSTS_MAX_LAB_PLANETS);
+    let changed = false;
+    /** @type {?number} */
+    let shownLab = null;
+    if (planets.length > 0 && !this.dialogOpen()) {
+      const before = Array.isArray(this.snapshot.labs) ? this.snapshot.labs : [];
+      planets.forEach((planet, i) => {
+        const level = pfNum(p.labLevels[i]);
+        if (level === before[i]) return;
+        changed = setProfileValue(planet, 'building.31', level) || changed;
+        if (planet.id === this.planetId) shownLab = level;
+      });
+      this.snapshot.labs = p.labLevels.map(pfNum);
+    }
+    // The start planet and the switch are choices, not account data: they go
+    // with the other per-calculator choices of the store.
+    if (planets.length > 0 && p.labChoice !== this.snapshot.labChoice) {
+      this.snapshot.labChoice = p.labChoice;
+      const start = planets[p.labChoice];
+      if (start) this.pf.store.setLastPlanet('costs-irn-start', profile.id, start.id);
+    }
+    if (p.useIrn !== this.snapshot.useIrn) {
+      this.snapshot.useIrn = p.useIrn;
+      this.pf.store.setLastPlanet('costs-irn', profile.id, p.useIrn ? '1' : '0');
+    }
+    return { changed, shownLab };
+  }
+
+  /**
+   * The state about to be stored: a universe the profile dictates is stored
+   * as the player's own, speeds included - before the owned keys get their
+   * own values back.
+   *
+   * @returns {Record<string, any>}
+   */
+  ownCurrent() {
+    const state = this.app.buildState();
+    this.universe.overlay(state);
+    return state;
+  }
+
+  /**
+   * The copy keeps the whole state up to date.
+   *
+   * @param {Record<string, any>} current
+   * @returns {string[]}
+   */
+  ownCopyKeys(current) {
+    return Object.keys(current);
+  }
+
+  /** @param {Record<string, any>} stored */
+  storeOwn(stored) {
+    this.app.writeState(stored);
+  }
+
+  /**
+   * The player picked another planet or moon. Choosing a planet also shows
+   * its moon, when it has one.
+   *
+   * @param {'planet'|'moon'} kind
+   */
+  bodyChosen(kind) {
+    const profile = this.profile();
+    if (!profile) return;
+    // Whatever was typed for the body shown so far is saved first.
+    this.save();
+    if (kind === 'planet') {
+      this.planetId = this.planetSelect.chosen(profile);
+      this.moonId = this.moonSelect.follow(profile) ?? this.moonId;
+    } else {
+      this.moonId = this.moonSelect.chosen(profile);
+    }
+    this.whileApplying(() => {
+      this.showBodies(profile);
+      this.fillStartLevels(profile);
+      this.app.recalculateAll();
+      this.takeSnapshot();
+    });
+  }
+
+  // -------------------------------------------------------------------------
+  // The start levels
+  // -------------------------------------------------------------------------
+
+  /**
+   * The level the planet, the moon or the account has of a technology, or null
+   * when the profile has no such body.
+   *
+   * @param {Profile} profile
+   * @param {'planet'|'moon'|'account'} where
+   * @param {string} key
+   * @returns {?number}
+   */
+  knownLevel(profile, where, key) {
+    const { planet, moon } = this.bodies(profile);
+    const bodies = { account: profile.account, planet, moon };
+    const entity = bodies[where];
+    return entity ? pfNum(getProfileValue(entity, key, 0)) : null;
+  }
+
+  /**
+   * Fill in the known levels as the "from" levels of the multi-level tables
+   * and of the range tab. A row the player left alone follows the new level;
+   * one whose "to" was changed by hand keeps both its levels (pfStartRange).
+   *
+   * @param {Profile} profile
+   */
+  fillStartLevels(profile) {
+    pfFillStartRows(COSTS_START_TABLES.map((t) => t.table), (rowId, i) => {
+      const t = COSTS_START_TABLES[i];
+      const techId = rowId > COSTS_MOON_ROW_OFFSET ? rowId - COSTS_MOON_ROW_OFFSET : rowId;
+      return this.knownLevel(profile, t.where, t.prefix + techId);
+    });
+    const level = this.rangeLevel(profile);
+    if (level !== null) pfFollowStart(inputEl('#tab2-from-level'), inputEl('#tab2-to-level'), level, 1);
+  }
+
+  /**
+   * The known level of the technology picked on the range tab, or null when
+   * the profile does not know it.
+   *
+   * @param {Profile} profile
+   * @returns {?number}
+   */
+  rangeLevel(profile) {
+    const select = selectEl('#tech-types-select');
+    const option = select?.selectedOptions[0];
+    const group = option?.parentElement;
+    if (!select || !option || !(group instanceof HTMLOptGroupElement)) return null;
+    const source = COSTS_RANGE_GROUPS[Array.from(select.querySelectorAll('optgroup')).indexOf(group)];
+    if (!source) return null;
+    return this.knownLevel(profile, source.where, source.prefix + option.value);
+  }
+
+  // -------------------------------------------------------------------------
+  // The research network dialog
+  // -------------------------------------------------------------------------
+
+  /**
+   * Whether the research network is switched on for a profile: the player's
+   * last choice there, else on when the account has researched the network.
+   *
+   * @param {Profile} profile
+   */
+  irnSwitch(profile) {
+    const chosen = this.pf.store.getLastPlanet('costs-irn', profile.id);
+    if (chosen !== null) return chosen === '1';
+    return pfNum(getProfileValue(profile.account, 'research.123', 0)) > 0;
+  }
+
+  /**
+   * List the profile's planets in the research network dialog, each with its
+   * research lab. The start is the planet picked there last time, while it
+   * still has a lab, else the one with the best lab - on a tie the lowest game
+   * id, the oldest planet. A profile with no planet leaves the dialog to the
+   * calculator.
+   *
+   * @param {Profile} profile
+   */
+  showLabs(profile) {
+    const planets = profile.planets.slice(0, COSTS_MAX_LAB_PLANETS);
+    this.lockPlanetCount(planets.length > 0);
+    if (planets.length === 0) return;
+    const levels = planets.map((p) => pfNum(getProfileValue(p, 'building.31', 0)));
+    const last = this.pf.store.getLastPlanet('costs-irn-start', profile.id);
+    let start = planets.findIndex((p) => p.id === last);
+    if (start < 0 || levels[start] === 0) {
+      const gameId = (/** @type {ProfilePlanet} */ p) => p.gameId ?? Number.MAX_SAFE_INTEGER;
+      start = levels.reduce((best, level, i) => {
+        const better = level > levels[best] || (level === levels[best] && gameId(planets[i]) < gameId(planets[best]));
+        return better ? i : best;
+      }, 0);
+    }
+    this.fillLabTable(levels, levels[start] > 0 ? start : -1, planets.map((p) => pfBodyLabel(p)));
+  }
+
+  /**
+   * With a profile the dialog lists its planets: the count is theirs.
+   *
+   * @param {boolean} locked
+   */
+  lockPlanetCount(locked) {
+    ['planetsSpin-up', 'planetsSpin-down'].forEach((id) => {
+      const button = document.getElementById(id);
+      if (button instanceof HTMLButtonElement) button.disabled = locked;
+    });
+  }
+
+  /**
+   * Rebuild the dialog's lab table, and the page's copies of it, from a list
+   * of levels - the dialog's own cancel does the same from its backup.
+   *
+   * @param {number[]} levels
+   * @param {number} choice Index of the start planet, -1 for none.
+   * @param {?string[]} names Row labels; null keeps the numbered ones.
+   */
+  fillLabTable(levels, choice, names) {
+    const labLevels = levels.length > 0 ? levels.slice(0, COSTS_MAX_LAB_PLANETS).map(pfNum) : [0];
+    options.prm.planetsSpin = labLevels.length;
+    options.prm.labLevels = [...labLevels];
+    options.prm.labChoice = choice;
+    options.prm.labNames = names;
+    options.currPlanetsCount = labLevels.length;
+    setVal('#planetsSpin', labLevels.length);
+    rebuildLabTable({ irnLevel: options.prm.irnLevel, labLevels, labChoice: choice });
+    this.app.updateResultingLevel();
+  }
+
+  // -------------------------------------------------------------------------
+  // The marks
+  // -------------------------------------------------------------------------
+
+  /**
+   * The research labs of the network dialog, one per planet of the profile.
+   *
+   * @param {Profile} profile
+   */
+  markExtra(profile) {
+    profile.planets.slice(0, COSTS_MAX_LAB_PLANETS).forEach((p, i) => {
+      this.pf.markField($('#lablevel_' + (i + 1)), profile, p, 'building.31', this.restoreBody('planets', p.id, 'building.31'));
+    });
+  }
+}
+
+/**
+ * Connect the cost calculator to the profiles, when the page has the selector.
+ *
+ * @returns {?CostsProfiles}
+ */
+function initCostsProfiles() {
+  costsProfiles = pfBind(CostsProfiles, calculatorApp);
+  return costsProfiles;
+}
+
+/** @type {?CostsProfiles} Set once the page is wired. */
+let costsProfiles = null;
+
+if (typeof globalThis !== 'undefined') {
+  globalThisRecord().initCostsProfiles = initCostsProfiles;
+}

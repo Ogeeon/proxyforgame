@@ -60,6 +60,26 @@ test.describe('Lifeforms costs Calculator Page', () => {
         await expect(page.locator('#robot-factory-level')).toHaveValue('10');
     });
 
+    // The stored race is shown from the first paint, before the calculator's
+    // scripts run: with them blocked, only the page's inline script and the
+    // stylesheet decide which rows and inputs are visible.
+    test('the stored race is shown before the calculator loads', async ({ page }) => {
+        await page.locator('#param-lifeforms-tab').click();
+        await page.locator('#race-selector').selectOption('3');
+
+        await page.route('**/lfcosts-orchestration.js*', (route) => route.abort());
+        await page.reload();
+
+        await expect(page.locator('html')).toHaveAttribute('data-lf-race', '3');
+        await expect(page.locator('#race-selector')).toHaveValue('3');
+        await expect(page.locator('#rbt-res-centre-level-wrap')).toBeVisible();
+        await expect(page.locator('#research-centre-level-wrap')).toBeHidden();
+        await expect(page.locator('#table-0-1 tr[data-race="3"]').first()).toBeAttached();
+        const visibleRaces = await page.locator('#table-0-1 tr[data-race]').evaluateAll(
+            (rows) => [...new Set(rows.filter((r) => getComputedStyle(r).display !== 'none').map((r) => r.dataset.race))]);
+        expect(visibleRaces).toEqual(['3']);
+    });
+
     // By default we end up with Humans selected
     test('[all items - one level / buildings / human] calculations are correct', async ({ page }) => {
         test.setTimeout(60000);

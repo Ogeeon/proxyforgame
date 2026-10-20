@@ -5,7 +5,7 @@
     <?php require_once '../../hawk.tpl'; ?>
     <meta name="viewport" content="width=device-width, initial-scale=1">
   <title><?= $l['title'] ?></title>
-  <meta name="description" content="<?= $l['title'] ?>">
+  <meta name="description" content="<?= htmlspecialchars($l['description'], ENT_QUOTES, 'UTF-8') ?>">
   <meta name="keywords" content="<?= $l['keywords'] ?>">
   <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
   <link rel="icon" href="/favicon.ico" type="image/x-icon">
@@ -22,8 +22,16 @@
   <script src="/js/utils.js?v=<?php echo filemtime($pfgPath.'/js/utils.js'); ?>" defer></script>
   <script src="/js/api-client.js?v=<?php echo filemtime($pfgPath.'/js/api-client.js'); ?>" defer></script>
   <script src="/ogame/calc/js/dom-utils.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/dom-utils.js'); ?>" defer></script>
+  <!-- Player profiles -->
+  <script src="/ogame/calc/js/profiles-core.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/profiles-core.js'); ?>" defer></script>
+  <script src="/ogame/calc/js/profiles-store.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/profiles-store.js'); ?>" defer></script>
+  <script src="/ogame/calc/js/profiles-fields.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/profiles-fields.js'); ?>" defer></script>
+  <script src="/ogame/calc/js/profiles-widgets.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/profiles-widgets.js'); ?>" defer></script>
+  <script src="/ogame/calc/js/profiles-binders.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/profiles-binders.js'); ?>" defer></script>
+  <script src="/ogame/calc/js/profiles-ui.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/profiles-ui.js'); ?>" defer></script>
   <script src="/ogame/calc/js/trade-core.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/trade-core.js'); ?>" defer></script>
   <script src="/ogame/calc/js/trade.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/trade.js'); ?>" defer></script>
+  <script src="/ogame/calc/js/trade-profile.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/trade-profile.js'); ?>" defer></script>
 
   <script type="module">
     // A module, so it runs after the deferred trade.js that declares `l` and
@@ -44,6 +52,8 @@
     l.rates = '<?= $l['rates'] ?>';
     l.moonstr = '<?= $l['moon'] ?>';
     options.decimalSeparator = '<?= $l['decimal-separator'] ?>';
+    options.moonLabel = <?= json_encode($l['moon']) ?>;
+    options.universeFromProfile = <?= json_encode($l['pf-universe-from-profile']) ?>;
     options.dialogOk = <?= json_encode($l['dialog-ok']) ?>;
     options.dialogAttentionLabel = <?= json_encode($l['dialog-attention']) ?>;
   </script>
@@ -78,15 +88,19 @@
       <?php require_once '../../sidebar_bs.tpl'; ?>
     </div>
     <div class="col-10">
-      <?php require_once '../../topbar_bs.tpl'; ?>
+      <?php $withProfiles = true; require_once '../../topbar_bs.tpl'; ?>
 
       <div id="trade" class="mx-auto">
         <div class="border rounded position-relative">
-          <div class="d-inline-block d-flex align-items-center">
-            <div class="bg-body-secondary text-primary-emphasis rounded main-header text-center flex-grow-1">
+          <div class="d-flex flex-wrap align-items-center">
+            <div class="text-primary-emphasis rounded main-header text-center flex-grow-1">
               <?= $l['title'] ?>
             </div>
-            <div id="reset_bs" class="top-0 end-0 d-flex align-items-center justify-content-center bg-danger-subtle" title="<?= $l['reset'] ?>">
+            <div id="pf-body-box" class="pf-header-bodies d-flex align-items-center gap-1 ms-auto ps-2 me-1 d-none">
+              <label for="pf-body"><?= $l['coords'] ?></label>
+              <select id="pf-body" class="form-select form-select-sm w-auto"></select>
+            </div>
+            <div id="reset" class="top-0 end-0 d-flex align-items-center justify-content-center bg-danger-subtle" title="<?= $l['reset'] ?>">
               <i class="bi bi-arrow-counterclockwise" style="color: #dc3545; font-size: 1.25rem;"></i>
             </div>
           </div>
@@ -103,22 +117,23 @@
                   <input id="hypertech-lvl" type="text" name="hypertech-lvl" class="form-control form-control-sm rate-input trade-editable" value="0">
                 </div>
               </div>
-              <div class="row align-items-center justify-content-center py-1">
-                <div class="col-auto">
-                  <label><?= $l['class'] ?>:</label>
-                </div>
-                <div class="col-auto d-flex align-items-center gap-1">
-                  <input id="player-class-0" type="radio" name="player-class" value="0" class="form-check-input trade-editable">
-                  <label for="player-class-0"><?= $l['class-collector'] ?></label>
-                </div>
-                <div class="col-auto d-flex align-items-center gap-1">
-                  <input id="player-class-1" type="radio" name="player-class" value="1" class="form-check-input trade-editable">
-                  <label for="player-class-1"><?= $l['class-general'] ?></label>
-                </div>
-                <div class="col-auto d-flex align-items-center gap-1">
-                  <input id="player-class-2" type="radio" name="player-class" value="2" class="form-check-input trade-editable">
-                  <label for="player-class-2"><?= $l['class-discoverer'] ?></label>
-                </div>
+              <!-- The fieldset hugs its radios, so the profile mark on its left edge sits next to them. -->
+              <div class="d-flex justify-content-center py-1">
+                <fieldset class="d-flex flex-wrap align-items-center column-gap-4 fieldset-reset">
+                  <legend><?= $l['class'] ?>:</legend>
+                  <div class="d-flex align-items-center gap-1">
+                    <input id="player-class-0" type="radio" name="player-class" value="0" class="form-check-input trade-editable">
+                    <label for="player-class-0"><?= $l['class-collector'] ?></label>
+                  </div>
+                  <div class="d-flex align-items-center gap-1">
+                    <input id="player-class-1" type="radio" name="player-class" value="1" class="form-check-input trade-editable">
+                    <label for="player-class-1"><?= $l['class-general'] ?></label>
+                  </div>
+                  <div class="d-flex align-items-center gap-1">
+                    <input id="player-class-2" type="radio" name="player-class" value="2" class="form-check-input trade-editable">
+                    <label for="player-class-2"><?= $l['class-discoverer'] ?></label>
+                  </div>
+                </fieldset>
               </div>
               <div class="row align-items-center justify-content-center py-1">
                 <div class="col-auto">
@@ -148,7 +163,7 @@
               <!-- Source Resources Panel -->
               <div class="col-12 col-lg-6 d-flex flex-column">
                 <div id="res-src-panel" class="border rounded flex-grow-1">
-                  <p class="border rounded subheader bg-primary-subtle mb-1"><?= $l['src'] ?></p>
+                  <p class="border rounded subheader bg-primary-subtle"><?= $l['src'] ?></p>
                   <div class="pe-2 pb-1">
                     <div id="res-src" class="mb-2">
                       <div class="res-type"><input id="res-src-0" class="form-check-input" type="radio" name="src" value="0" tabindex="1"><label for="res-src-0"><?= $l['metal'] ?></label></div>
@@ -188,7 +203,7 @@
               <!-- Destination Resources Panel -->
               <div class="col-12 col-lg d-flex flex-column">
                 <div id="res-dst-panel" class="border rounded flex-grow-1">
-                  <p class="border rounded subheader bg-primary-subtle mb-1"><?= $l['dst'] ?></p>
+                  <p class="border rounded subheader bg-primary-subtle"><?= $l['dst'] ?></p>
                   <div class="pe-2 pb-1">
                     <div id="res-dst" class="mb-2">
                       <div class="res-type" id="res-type-dst-0"><input id="res-dst-0" class="form-check-input" type="radio" name="dst" value="0" tabindex="10"><label for="res-dst-0" id="res-type-dst-lbl-0"></label></div>
@@ -258,7 +273,7 @@
 
           <!-- Rates Panel -->
           <div class="border rounded me-1 ms-1">
-            <p class="border rounded subheader bg-primary-subtle mb-1 px-2"><?= $l['rates'] ?></p>
+            <p class="border rounded subheader bg-primary-subtle px-2"><?= $l['rates'] ?></p>
             <div class="rates-panel-content px-2 py-1">
               <!-- Rate Labels and Inputs Group -->
               <div class="rate-labels-inputs-group">
@@ -315,7 +330,7 @@
 
           <!-- Location Panel -->
           <div class="border rounded m-1">
-            <p class="border rounded subheader bg-primary-subtle mb-1 px-2"><?= $l['location'] ?></p>
+            <p class="border rounded subheader bg-primary-subtle px-2"><?= $l['location'] ?></p>
             <div class="px-2 py-1">
               <div class="row mb-1 align-items-center">
                 <div class="col-12 col-md-3 text-md-end tdr"><?= $l['country'] ?>:</div>
