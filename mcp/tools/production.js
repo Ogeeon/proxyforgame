@@ -72,7 +72,7 @@ const inputSchema = {
             },
             additionalProperties: false,
         },
-        energyBoosterPercent: { type: 'integer', enum: [0, 20, 40, 60, 80], default: 0, description: 'Energy booster item, %.' },
+        energyBoosterPercent: common.energyBoosterSchema,
         energyTechnology: common.level('Energy Technology level', 50),
         plasmaTechnology: common.level('Plasma Technology level', 50),
         officers: common.officersSchema,

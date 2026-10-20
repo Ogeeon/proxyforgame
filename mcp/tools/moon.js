@@ -136,16 +136,24 @@ function createMoonTools({ siteApi }) {
                 playerClass: { ...common.playerClassSchema, description: 'The Discoverer: +20% phalanx range.' },
                 lifeforms: common.lifeformsSchema(['analysisNetworkBonus', 'discovererClassBonus']),
                 universe: common.universeSchema,
-                systems: { type: 'integer', minimum: 1, maximum: 999, description: 'Systems per galaxy. Read from `universe` when given, else 499.' },
-                circularSystems: { type: 'boolean', description: 'The galaxy wraps around. Read from `universe` when given, else no.' },
+                universeSettings: {
+                    type: 'object',
+                    description: 'Galaxy shape given by hand. Unset ones come from `universe` when given, else 499 '
+                        + 'systems that do not wrap around.',
+                    properties: {
+                        systems: { type: 'integer', minimum: 1, maximum: 999 },
+                        circularSystems: { type: 'boolean' },
+                    },
+                    additionalProperties: false,
+                },
             },
             required: ['phalanxLevel', 'moonSystem'],
             additionalProperties: false,
         },
         openWorld: true,
         async run(args) {
-            let systems = args.systems;
-            let circular = args.circularSystems;
+            let systems = args.universeSettings?.systems;
+            let circular = args.universeSettings?.circularSystems;
             if (args.universe && (systems === undefined || circular === undefined)) {
                 const data = await siteApi.serverData(common.universeRef(args.universe));
                 systems ??= Number.parseInt(String(data.systems), 10) || undefined;

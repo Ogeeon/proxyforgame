@@ -44,9 +44,9 @@ const inputSchema = {
         hyperspaceTechnology: common.hyperspaceTechnologySchema,
         lifeforms: common.lifeformsSchema(['resourceFindBonus', 'shipFindBonus', 'darkMatterFindBonus',
             'collectorClassBonus', 'discovererClassBonus'], SHIPS.map((ship) => ship.id)),
-        resourceBoosterPercent: {
+        discoveryBoosterPercent: {
             type: 'integer', enum: [0, 5, 10, 15, 20, 25, 30, 35, 40], default: 0,
-            description: 'Resource discovery booster item, in percent.',
+            description: 'Expedition resource discovery booster item, in percent.',
         },
     },
     required: ['ships'],
@@ -83,13 +83,13 @@ function createExpeditionTool({ siteApi }) {
                 throw new ToolError('The fleet is empty: give at least one ship in `ships`.');
             }
 
+            const universeSpeed = await common.economySpeed(args, siteApi);
             let topPoints = args.topPlayerPoints;
-            let universeSpeed = args.universeSpeed;
-            if (args.universe && (topPoints === undefined || universeSpeed === undefined)) {
+            if (args.universe && topPoints === undefined) {
+                // The site API caches the universe, so economySpeed() having read it costs nothing here.
                 const data = await siteApi.serverData(common.universeRef(args.universe));
                 const top = Number.parseFloat(data.topScore);
-                topPoints ??= Number.isFinite(top) ? Math.floor(top) : undefined;
-                universeSpeed ??= Number.parseInt(String(data.speed), 10) || 1;
+                topPoints = Number.isFinite(top) ? Math.floor(top) : undefined;
             }
             const highTop = topPoints === undefined ? /** @type {{highTop: number}} */ (TOP_TIERS.at(-1)).highTop : highTopFor(topPoints);
 
@@ -97,13 +97,13 @@ function createExpeditionTool({ siteApi }) {
             const r = calc.compute({
                 highTop,
                 playerClass: CLASSES[/** @type {keyof typeof CLASSES} */ (args.playerClass)],
-                universeSpeed: universeSpeed ?? 1,
+                universeSpeed,
                 hyperTechLevel: args.hyperspaceTechnology,
                 percentRes: lf.resourceFindBonus,
                 percentShips: lf.shipFindBonus,
                 classBonusCollector: lf.collectorClassBonus,
                 classBonusDiscoverer: lf.discovererClassBonus,
-                resourceDiscoveryBooster: args.resourceBoosterPercent,
+                resourceDiscoveryBooster: args.discoveryBoosterPercent,
                 darkMatterDiscoveryBonus: lf.darkMatterFindBonus,
                 lfShipsBonuses: SHIPS.map((ship) => common.shipCargoBonus(lf, ship.id)),
                 counts,
@@ -125,7 +125,7 @@ function createExpeditionTool({ siteApi }) {
                 assumptions: {
                     topPlayerPoints: topPoints ?? null,
                     topTierValue: highTop,
-                    universeSpeed: universeSpeed ?? 1,
+                    universeSpeed,
                 },
             };
         },

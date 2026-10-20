@@ -61,13 +61,13 @@ const inputSchema = {
             type: 'integer', minimum: 1, maximum: 100_000_000,
             description: 'Ships and defence: how many to build.',
         },
-        onMoon: {
-            type: 'boolean', default: false,
-            description: 'Build on a moon. Moon-only buildings are always built there.',
+        location: {
+            type: 'string', enum: ['planet', 'moon'], default: 'planet',
+            description: 'Where it is built. Moon-only buildings are always built on the moon.',
         },
         facilities: common.facilitiesSchema(['roboticsFactory', 'naniteFactory', 'shipyard', 'researchLab']),
         universe: common.universeSchema,
-        universeSpeed: { type: 'number', minimum: 1, maximum: 10, description: 'Economy speed. Default 1.' },
+        universeSpeed: common.universeSpeedSchema,
         researchSpeed: {
             type: 'number', minimum: 1, maximum: 100,
             description: 'Research speed - the economy speed times the universe\'s research divisor. '
@@ -128,11 +128,15 @@ function createBuildCostTool({ siteApi }) {
      * @param {any} args
      */
     async function speeds(args) {
+        const universeSpeed = await common.economySpeed(args, siteApi);
+        if (args.researchSpeed !== undefined) {
+            return { universeSpeed, researchSpeed: args.researchSpeed };
+        }
+        // The live universe's own research speed, its divisor included; the site API caches the read.
         const live = args.universe
             ? universeSpeeds(await siteApi.serverData(common.universeRef(args.universe)))
             : null;
-        const universeSpeed = args.universeSpeed ?? live?.universeSpeed ?? 1;
-        return { universeSpeed, researchSpeed: args.researchSpeed ?? live?.researchSpeed ?? universeSpeed };
+        return { universeSpeed, researchSpeed: live?.researchSpeed ?? universeSpeed };
     }
 
     return {
@@ -150,7 +154,7 @@ function createBuildCostTool({ siteApi }) {
             const kind = KIND[/** @type {keyof typeof KIND} */ (tech.type)];
             const isUnit = kind === 'ship' || kind === 'defence';
             const { from, to } = buildRange(args, id, kind);
-            const onMoon = tech.type === 3 || args.onMoon;
+            const onMoon = tech.type === 3 || args.location === 'moon';
             if (onMoon && tech.type === 2) {
                 throw new ToolError(`The ${NAMES[args.item]} cannot be built on a moon.`);
             }

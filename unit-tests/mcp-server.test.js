@@ -485,7 +485,7 @@ describe('MCP tool ogame_build_cost', () => {
     it('keeps moon buildings on the moon and planet buildings off it', async () => {
         const phalanx = (await call(protocolWith(), 'ogame_build_cost', { item: 'sensor-phalanx', toLevel: 1 })).structuredContent;
         expect(phalanx.location).toBe('moon');
-        const mine = await call(protocolWith(), 'ogame_build_cost', { item: 'metal-mine', toLevel: 1, onMoon: true });
+        const mine = await call(protocolWith(), 'ogame_build_cost', { item: 'metal-mine', toLevel: 1, location: 'moon' });
         expect(mine.isError).toBe(true);
     });
 
@@ -671,6 +671,13 @@ describe('MCP tool ogame_expedition', () => {
         expect(await cap('general')).toBe(240000);
     });
 
+    it('raises the resource find with discoveryBoosterPercent', async () => {
+        const metal = async (discoveryBoosterPercent) => (await call(protocolWith(), 'ogame_expedition', {
+            ships: { 'large-cargo': 1000 }, discoveryBoosterPercent,
+        })).structuredContent.maxFind.metal;
+        expect(await metal(20)).toBeGreaterThan(await metal(0));
+    });
+
     it('lists only the ships the fleet unlocks', async () => {
         const out = (await call(protocolWith(), 'ogame_expedition', { ships: { 'small-cargo': 100 } })).structuredContent;
         expect(Object.keys(out.findableShips)).toEqual(['esp-probe', 'small-cargo', 'light-fighter']);
@@ -742,11 +749,21 @@ describe('MCP moon tools', () => {
 
     it('ogame_phalanx: wraps round a circular galaxy and names the level a target needs', async () => {
         const out = (await call(protocolWith(), 'ogame_phalanx', {
-            phalanxLevel: 7, moonSystem: 5, targetSystem: 470, circularSystems: true,
+            phalanxLevel: 7, moonSystem: 5, targetSystem: 470, universeSettings: { circularSystems: true },
         })).structuredContent;
         expect(out.rangeSystems).toBe(48);
         expect(out.covers).toEqual([{ from: 456, to: 499 }, { from: 1, to: 53 }]);
         expect(out.target).toEqual({ system: 470, distance: 34, inRange: true, levelNeeded: 6 });
+    });
+
+    it('ogame_phalanx: reads the galaxy shape from a live universe, and lets universeSettings win', async () => {
+        const site = fakeSiteApi({ 'en-3': { systems: '400', donutSystem: '1' } });
+        const galaxy = async (universeSettings) => (await call(protocolWith(site), 'ogame_phalanx', {
+            phalanxLevel: 7, moonSystem: 5, universe: { country: 'en', number: 3 }, universeSettings,
+        })).structuredContent.galaxy;
+        expect(await galaxy({})).toEqual({ systems: 400, circular: true });
+        expect(await galaxy({ circularSystems: false })).toEqual({ systems: 400, circular: false });
+        expect(await galaxy({ systems: 499, circularSystems: false })).toEqual({ systems: 499, circular: false });
     });
 });
 

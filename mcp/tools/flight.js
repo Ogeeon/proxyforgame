@@ -106,18 +106,7 @@ const inputSchema = {
             description: 'trader: +10% speed for cargo ships. warrior: +10% speed on holding missions.',
         },
         lifeforms: common.lifeformsSchema(['generalClassBonus', 'collectorClassBonus'], SHIP_KEYS),
-        universe: {
-            type: 'object',
-            description: 'A live universe, e.g. {"country": "en", "number": 152} for s152-en.ogame.gameforge.com. '
-                + 'Its fleet speeds, size, donut settings, deuterium factor and system skipping are read from '
-                + 'the game. Anything in universeSettings overrides what is read.',
-            properties: {
-                country: { type: 'string', description: 'Two or three letters: en, de, ru, us, ...' },
-                number: { type: 'integer', minimum: 1 },
-            },
-            required: ['country', 'number'],
-            additionalProperties: false,
-        },
+        universe: common.universeSchema,
         universeSettings: {
             type: 'object',
             description: 'Universe settings given by hand. Unset ones come from `universe` when it is given, '
@@ -193,10 +182,7 @@ function createFlightTool({ siteApi }) {
         let source = 'defaults';
 
         if (args.universe) {
-            const ref = { country: String(args.universe.country).toLowerCase(), universe: args.universe.number };
-            if (!/^[a-z]{2,3}$/.test(ref.country)) {
-                throw new ToolError('universe.country must be two or three letters, like "en" or "de".');
-            }
+            const ref = common.universeRef(args.universe);
             Object.assign(settings, fromServerData(await siteApi.serverData(ref)));
             source = `${ref.country}-${ref.universe}`;
             if (settings.ignoreEmptySystems || settings.ignoreInactiveSystems) {

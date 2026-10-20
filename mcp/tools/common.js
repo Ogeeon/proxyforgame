@@ -237,6 +237,11 @@ const facilitiesSchema = (fields) => ({
     additionalProperties: false,
 });
 
+/** The `energyBoosterPercent` argument: the energy booster item. */
+const energyBoosterSchema = {
+    type: 'integer', enum: [0, 20, 40, 60, 80], default: 0, description: 'Energy booster item, in percent.',
+};
+
 /** A plant's production setting, the slider on the resource settings page. */
 const productionPercent = { type: 'integer', minimum: 0, maximum: 100, default: 100 };
 
@@ -373,9 +378,7 @@ const energySchema = {
         description: 'The Collector gets +10% energy and +25% transport cargo; the General +20% recycler cargo.',
     },
     allianceClass: { ...allianceClassSchema, description: 'trader: +5% energy.' },
-    energyBoosterPercent: {
-        type: 'integer', enum: [0, 20, 40, 60, 80], default: 0, description: 'Energy booster item, in percent.',
-    },
+    energyBoosterPercent: energyBoosterSchema,
     hyperspaceTechnology: hyperspaceTechnologySchema,
 };
 
@@ -449,6 +452,7 @@ module.exports = {
     hyperspaceTechnologySchema,
     ionTechnologySchema,
     facilitiesSchema,
+    energyBoosterSchema,
     maxTemperatureSchema,
     solarPlantSchema,
     fusionReactorSchema,
