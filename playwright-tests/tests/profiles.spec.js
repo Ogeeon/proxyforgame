@@ -796,6 +796,38 @@ test('"no profile" gives the queue its own values back', async ({ page }) => {
     await expect(page.locator('#reset')).toBeVisible();
 });
 
+test('a queue tab whose body the profile does not have stays the calculator\'s own', async ({ page }) => {
+    await page.goto('/queue');
+    await importExport(page);
+    await editProfile(page, 'profile.moons = [];');
+    await page.locator('#tabtag-3').click();
+    await expect(page.locator('#pf-body-box-3')).toBeHidden();
+
+    await blurFill(page, '#startlvl-3-41', '3');
+    await blurFill(page, '#total-fields-3', '5');
+    await expect.poll(async () => (await page.evaluate(() => JSON.parse(localStorage.getItem('options_queue') || '{}'))).totFldMn).toBe(5);
+    const stored = await page.evaluate(() => JSON.parse(localStorage.getItem('options_queue') || '{}'));
+    expect(stored.slm).toContainEqual([41, 3]);
+    await expect(page.locator('#pf-overrides')).toBeHidden();
+
+    await page.locator('#pf-select').selectOption('');
+    await expect(page.locator('#startlvl-3-41')).toHaveValue('3');
+    await expect(page.locator('#total-fields-3')).toHaveValue('5');
+});
+
+test('a queue built with a profile active is still there with "no profile"', async ({ page }) => {
+    await page.goto('/queue');
+    await importExport(page);
+    await page.locator('#build-2-1').click();
+    await expect(page.locator('#table-dst-2 tr')).toHaveCount(4);
+
+    await page.locator('#pf-select').selectOption('');
+    await expect(page.locator('#table-dst-2 tr')).toHaveCount(4);
+    await page.reload();
+    await expect(page.locator('#pf-select')).toHaveValue('');
+    await expect(page.locator('#table-dst-2 tr')).toHaveCount(4);
+});
+
 // The cost calculator: the account, the research bonuses table, one planet and
 // one moon of the profile, and the profile's universe in the picker.
 
@@ -905,6 +937,21 @@ test('"no profile" gives costs its own values and table back', async ({ page }) 
     await expect(page.locator('#pf-bodies-row')).toBeHidden();
     await expect(page.locator('.pf-bound')).toHaveCount(0);
     await expect(page.locator('#reset')).toBeVisible();
+});
+
+test('a costs profile with no moon leaves the moon\'s field to the calculator', async ({ page }) => {
+    await mockServerData(page);
+    await page.goto('/costs');
+    await importExport(page);
+    await editProfile(page, 'profile.moons = [];');
+    await expect(page.locator('#pf-moon-box')).toBeHidden();
+
+    await blurFill(page, '#robot-factory-level-moon', '3');
+    await expect.poll(async () => (await page.evaluate(() => JSON.parse(localStorage.getItem('costs_calculator_state') || '{}'))).robotFactoryLevelMoon).toBe(3);
+    await expect(page.locator('#pf-overrides')).toBeHidden();
+
+    await page.locator('#pf-select').selectOption('');
+    await expect(page.locator('#robot-factory-level-moon')).toHaveValue('3');
 });
 
 /** Edit the stored active profile, then reload so the page reads it. */
@@ -1545,6 +1592,47 @@ test('"no profile" gives terraformer its own values back', async ({ page }) => {
     await expect(page.locator('#pf-planet-box')).toBeHidden();
     await expect(page.locator('.pf-bound')).toHaveCount(0);
     await expect(page.locator('#reset')).toBeVisible();
+});
+
+test('a terraformer profile with no planet leaves the planet and the universe to the calculator', async ({ page }) => {
+    await page.goto('/terraformer');
+    await chooseAction(page, '__create');
+    await page.locator('#pf-props-name').fill('Empty');
+    await page.locator('#pf-props-go').click();
+    await expect(page.locator('#pf-select option:checked')).toHaveText('Empty');
+    await expect(page.locator('#pf-planet-box')).toBeHidden();
+
+    await blurFill(page, '#solar-plant-level', '9');
+    await blurFill(page, '#tf-level-from', '4');
+    await page.locator('#universe-speed').selectOption('3');
+    // The account is the profile's, planet or not.
+    await page.locator('#engineer').check();
+    const stored = () => page.evaluate(() => JSON.parse(localStorage.getItem('options_terraformer') || '{}'));
+    await expect.poll(async () => (await stored()).universeSpeed).toBe(3);
+    expect((await stored()).solarPlantLevel).toBe(9);
+    expect((await stored()).tfLevelFrom).toBe(4);
+    expect((await stored()).engineer).toBe(false);
+
+    await page.locator('#pf-select').selectOption('');
+    await expect(page.locator('#solar-plant-level')).toHaveValue('9');
+    await expect(page.locator('#tf-level-from')).toHaveValue('4');
+    await expect(page.locator('#universe-speed')).toHaveValue('3');
+    await expect(page.locator('#engineer')).not.toBeChecked();
+});
+
+test('terraformer gives its own values back after a reload with a profile active', async ({ page }) => {
+    await page.goto('/terraformer');
+    await blurFill(page, '#solar-plant-level', '7');
+    await page.locator('#engineer').check();
+    await importExport(page);
+    await page.reload();
+    await expect(page.locator('#solar-plant-level')).toHaveValue('25');
+    await expect(page.locator('#engineer')).not.toBeChecked();
+
+    // The copy of the own values is taken again on the reload, from what options_terraformer kept.
+    await page.locator('#pf-select').selectOption('');
+    await expect(page.locator('#solar-plant-level')).toHaveValue('7');
+    await expect(page.locator('#engineer')).toBeChecked();
 });
 
 test('terraformer takes the economy speed from the universe, and keeps a changed one', async ({ page }) => {
@@ -2263,4 +2351,60 @@ test('"no profile" gives moon its own values back', async ({ page }) => {
     await expect(page.locator('#reset-cr')).toBeVisible();
     await expect(page.locator('#reset-ph')).toBeVisible();
     await expect(page.locator('#reset-ds')).toBeVisible();
+});
+
+/** What the moon page keeps in options_moon. */
+function storedMoon(page) {
+    return page.evaluate(() => JSON.parse(localStorage.getItem('options_moon') || '{}'));
+}
+
+test('a moon profile with no moon leaves the phalanx and "your system" to the calculator', async ({ page }) => {
+    await openMoonWithProfile(page, 'profile.moons = [];');
+    await expect(page.locator('#pf-moon-box')).toBeHidden();
+
+    await blurFill(page, '#phalanx-lvl', '4');
+    await blurFill(page, '#own-system', '77');
+    await expect.poll(async () => (await storedMoon(page)).ownSystem).toBe(77);
+    expect((await storedMoon(page)).phalanxLevel).toBe(4);
+    await expect(page.locator('#pf-overrides')).toBeHidden();
+
+    await page.locator('#pf-select').selectOption('');
+    await expect(page.locator('#phalanx-lvl')).toHaveValue('4');
+    await expect(page.locator('#own-system')).toHaveValue('77');
+});
+
+test('a moon with no known system leaves "your system" to the calculator, the phalanx not', async ({ page }) => {
+    await fillOwnMoonValues(page);
+    await openMoonWithProfile(page, 'profile.moons.forEach((m) => { m.coords = null; });');
+    await expect(page.locator('#phalanx-lvl')).toHaveValue('5');
+    await expect(page.locator('#own-system')).toHaveValue('30');
+
+    await blurFill(page, '#own-system', '77');
+    await blurFill(page, '#phalanx-lvl', '6');
+    await expect.poll(async () => (await storedMoon(page)).ownSystem).toBe(77);
+    // The phalanx is the moon's: options_moon keeps the level from before the profile.
+    expect((await storedMoon(page)).phalanxLevel).toBe(2);
+    const profile = await activeProfile(page);
+    expect(profile.moons[0].values['building.42']).toEqual({ game: 5, override: 6 });
+
+    await page.locator('#pf-select').selectOption('');
+    await expect(page.locator('#own-system')).toHaveValue('77');
+    await expect(page.locator('#phalanx-lvl')).toHaveValue('2');
+});
+
+/** Give the moon page its own phalanx (2) and "your system" (30) before any profile. */
+async function fillOwnMoonValues(page) {
+    await mockMoonUniverse(page);
+    await page.goto('/moon');
+    await blurFill(page, '#phalanx-lvl', '2');
+    await blurFill(page, '#own-system', '30');
+}
+
+test('the size of the moon changed with a profile active is kept with "no profile"', async ({ page }) => {
+    await openMoonWithProfile(page);
+    await blurFill(page, '#moon-size', '3000');
+    await expect.poll(async () => (await storedMoon(page)).moonSize).toBe(3000);
+
+    await page.locator('#pf-select').selectOption('');
+    await expect(page.locator('#moon-size')).toHaveValue('3000');
 });
