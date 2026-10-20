@@ -2565,8 +2565,6 @@ class FlatSettingsBinder extends ProfileBinder {
   constructor(pf, app, config) {
     super(pf, app);
     this.config = config;
-    /** @type {Record<string, *>} The profile-owned keys as they were before a profile. */
-    this.ownPrm = {};
     this.ownSave = config.ownSave ?? options.save;
     /** @type {?PfLockedUniverse} The universe picker the profile locks, if the page has one. */
     this.universe = null;
@@ -2588,15 +2586,25 @@ class FlatSettingsBinder extends ProfileBinder {
     if (profile) this.coordsSelect?.chosen(profile);
   }
 
+  /**
+   * The keys the profile may own, all filled by the account; a universe the
+   * profile dictates is kept apart, by PfLockedUniverse.
+   *
+   * @param {?Profile} _profile
+   * @returns {PfOwnedGroup[]}
+   */
+  ownedGroups(_profile) {
+    return [{ keys: this.config.ownedKeys, present: true }];
+  }
+
+  /** @returns {Record<string, any>} */
+  ownSettings() {
+    return this.config.settings();
+  }
+
   // -------------------------------------------------------------------------
   // Profile -> calculator
   // -------------------------------------------------------------------------
-
-  captureOwn() {
-    const { settings, ownedKeys } = this.config;
-    this.ownPrm = {};
-    ownedKeys.forEach((key) => { this.ownPrm[key] = cloneData(settings()[key]); });
-  }
 
   /** @param {Profile} profile */
   showProfile(profile) {
@@ -2638,7 +2646,7 @@ class FlatSettingsBinder extends ProfileBinder {
 
   restoreOwn() {
     this.coordsSelect?.hide();
-    Object.assign(this.config.settings(), cloneData(this.ownPrm));
+    super.restoreOwn();
     this.showOwn();
   }
 
@@ -2656,13 +2664,12 @@ class FlatSettingsBinder extends ProfileBinder {
   }
 
   /**
-   * The calculator's own storage gets its own fields as they are, and the
-   * profile-owned ones - and a universe the profile dictates - as they were
-   * before the profile.
+   * A universe the profile dictates is stored as the one the player picked
+   * before the profile, after the owned keys got their own values back.
+   *
+   * @param {Record<string, any>} stored
    */
-  saveOwn() {
-    /** @type {Record<string, any>} */
-    const stored = { ...this.config.settings(), ...cloneData(this.ownPrm) };
+  storeOwn(stored) {
     this.universe?.overlay(stored);
     saveToCookie(this.config.cookie, this.storable(stored));
   }
