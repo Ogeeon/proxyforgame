@@ -436,6 +436,14 @@ describe('MCP tool ogame_build_cost', () => {
         expect(await seconds(9)).toBe(Math.round((37515 + 75031) / 10000 * 3600));
     });
 
+    it('makes research 25% faster with officers.technocrat', async () => {
+        const seconds = async (officers) => (await call(protocolWith(), 'ogame_build_cost', {
+            item: 'astrophysics', fromLevel: 4, toLevel: 5, facilities: { researchLab: 3 }, officers,
+        })).structuredContent.durationSeconds;
+        expect(await seconds({ technocrat: true })).toBe(Math.round((37515 + 75031) / 4000 * 3600 * 0.75));
+        expect(await seconds({ engineer: true })).toBe(await seconds({}));
+    });
+
     it('refuses a research when the lab is 0, rather than making one up', async () => {
         const result = await call(protocolWith(), 'ogame_build_cost', { item: 'astrophysics', toLevel: 1, facilities: { researchLab: 0 } });
         expect(result.isError).toBe(true);
@@ -511,7 +519,8 @@ describe('MCP tool ogame_graviton', () => {
         const out = (await call(protocolWith(site), 'ogame_graviton', {
             universe: { country: 'en', number: 5 },
             maxTemperature: 40, solarPlant: { level: 30 }, fusionReactor: { level: 20, percent: 80 },
-            solarSatellites: { count: 100 }, energyTechnology: 20, officers: 'all', playerClass: 'collector',
+            solarSatellites: { count: 100 }, energyTechnology: 20, playerClass: 'collector',
+            officers: { commander: true, admiral: true, engineer: true, geologist: true, technocrat: true },
             energyBoosterPercent: 40, shipyard: 12, naniteFactory: 5, crystalAvailable: 1000000,
         })).structuredContent;
         const direct = new GravitonCalculator().compute({
@@ -528,6 +537,28 @@ describe('MCP tool ogame_graviton', () => {
         expect(out.ifShotDown.debris.deuterium).toBe(direct.dfDeuterium);
         expect(out.ifShotDown.debrisPercent).toBe(50);
         expect(out.universeSpeed).toBe(4);
+    });
+
+    it('reads the officers\' energy bonus off the five flags: the Engineer alone, or the whole staff', async () => {
+        const planet = { maxTemperature: 40, solarPlant: { level: 30 }, energyTechnology: 20 };
+        const officersBonus = async (officers) => (await call(protocolWith(), 'ogame_graviton', { ...planet, officers }))
+            .structuredContent.energyAvailable.officers;
+        const direct = (energyBonus) => new GravitonCalculator().compute({
+            shipyardLevel: 0, nanitesFactoryLevel: 0, universeSpeed: 1, energyTechLevel: 20, hyperTechLevel: 0,
+            maxPlanetTemp: 40, energyBonus, solarPlantLevel: 30, solarPlantPercent: 100, fusionPlantLevel: 0,
+            fusionPlantPercent: 100, solarSatellitesCount: 0, solarSatellitesPercent: 100, debrisPercent: 30,
+            playerClass: 0, isTrader: false, energyBoost: 0, disChLevel: 0, gravitonLevel: 1, totalLFEnrgBonus: 0,
+            scCapacityIncrease: 0, lcCapacityIncrease: 0, rcCapacityIncrease: 0, crysAvailable: 0,
+            deutAvailable: 0, deutInDebris: false,
+        }).officerBonus;
+        const staff = { commander: true, admiral: true, engineer: true, geologist: true, technocrat: true };
+        expect(await officersBonus({})).toBe(0);
+        expect(await officersBonus({ geologist: true })).toBe(0);
+        expect(await officersBonus({ engineer: true })).toBe(direct(1));
+        // Four of five, the Engineer among them, is still only the Engineer.
+        expect(await officersBonus({ ...staff, technocrat: false })).toBe(direct(1));
+        expect(await officersBonus(staff)).toBe(direct(2));
+        expect(direct(2)).toBeGreaterThan(direct(1));
     });
 
     it('says so when satellites cannot help', async () => {
@@ -782,6 +813,16 @@ describe('MCP tool ogame_production', () => {
     it('caps crawlers at 8 per mine level and says so', async () => {
         const out = (await call(protocolWith(), 'ogame_production', { ...base, crawlers: { count: 5000 } })).structuredContent;
         expect(out.note).toContain('Only 600 crawlers');
+    });
+
+    it('gives the commanding staff bonus for all five officers only', async () => {
+        const staff = { commander: true, admiral: true, engineer: true, geologist: true, technocrat: true };
+        const row = async (officers) => (await call(protocolWith(), 'ogame_production', { ...base, officers }))
+            .structuredContent.breakdownPerHour;
+        expect((await row({ ...staff, admiral: false })).commandingStaff.metal).toBe(0);
+        const full = await row(staff);
+        expect(full.commandingStaff.metal).toBeGreaterThan(0);
+        expect(full.geologist.metal).toBeGreaterThan(0);
     });
 
     it('gives the alliance Trader bonus to the trader class only', async () => {

@@ -91,7 +91,7 @@ const inputSchema = {
                 + 'Defaults to universeSpeed.',
         },
         playerClass: common.playerClassSchema,
-        technocrat: { type: 'boolean', default: false, description: 'Technocrat officer: research 25% faster.' },
+        officers: { ...common.officersSchema, description: 'Officers hired. The Technocrat: research 25% faster.' },
         discovererClassBonus: {
             type: 'number', minimum: 0, default: 0,
             description: 'Kaelesh "Discoverer Enhancement" total in percent, as the life form panel shows it.',
@@ -197,7 +197,7 @@ function createBuildCostTool({ siteApi }) {
             params.universeSpeed = universeSpeed;
             params.researchSpeed = researchSpeed;
             params.playerClass = common.classId(args.playerClass);
-            params.technocrat = args.technocrat;
+            Object.assign(params, args.officers);
             params.discovererClassBonus = args.discovererClassBonus;
             params.ionTechLevel = args.ionTechnology;
             params.hyperTechLevel = args.hyperspaceTechnology;

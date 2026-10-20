@@ -4,8 +4,13 @@
 // English names the pages show, and the planet energy inputs the graviton and
 // terraformer calculators both take.
 
-const { readWwwJson } = require('../lib/browser-scripts');
+const { loadBrowserScripts, readWwwJson } = require('../lib/browser-scripts');
 const { ToolError } = require('../lib/protocol');
+
+const { GravitonCalculator } = loadBrowserScripts(
+    ['js/utils.js', 'ogame/calc/js/graviton-core.js'],
+    ['GravitonCalculator'],
+);
 
 /**
  * @typedef {ReturnType<typeof import('../lib/site-api').createSiteApi>} SiteApi
@@ -118,6 +123,27 @@ const classId = (name) => CLASS_IDS[/** @type {keyof typeof CLASS_IDS} */ (name)
 /** The `allianceClass` argument, the same in every tool. */
 const allianceClassSchema = { type: 'string', enum: ['none', 'trader', 'warrior'], default: 'none' };
 
+/**
+ * The `officers` argument, the same in every tool. There is no separate
+ * commanding staff flag: the staff is all five hired, as the cores read it.
+ */
+const officersSchema = {
+    type: 'object',
+    description: 'Officers hired. All five are the commanding staff.',
+    properties: Object.fromEntries(['commander', 'admiral', 'engineer', 'geologist', 'technocrat']
+        .map((officer) => [officer, { type: 'boolean', default: false }])),
+    additionalProperties: false,
+};
+
+/**
+ * The officers' energy bonus code the graviton and terraformer cores take:
+ * 2 for the whole staff, 1 for an Engineer alone, 0 otherwise - the graviton
+ * core's own rule, not a copy of it.
+ * @param {{commander: boolean, admiral: boolean, engineer: boolean, geologist: boolean, technocrat: boolean}} officers
+ * @returns {number}
+ */
+const officerEnergyBonus = (officers) => GravitonCalculator.officerEnergyBonus(officers);
+
 /** The `universeSpeed` argument. */
 const universeSpeedSchema = {
     type: 'number', minimum: 1, maximum: 10,
@@ -215,8 +241,8 @@ const energySchema = {
     },
     energyTechnology: level('Energy Technology level', 50),
     officers: {
-        type: 'string', enum: ['none', 'engineer', 'all'], default: 'none',
-        description: 'engineer: +10% energy. all: the whole commanding staff, +12%.',
+        ...officersSchema,
+        description: 'Officers hired. The Engineer: +10% energy; all five, the commanding staff: +12%.',
     },
     playerClass: {
         ...playerClassSchema,
@@ -253,7 +279,7 @@ function energyParams(args) {
         energyTechLevel: args.energyTechnology,
         hyperTechLevel: args.hyperspaceTechnology,
         maxPlanetTemp: args.maxTemperature,
-        energyBonus: { none: 0, engineer: 1, all: 2 }[/** @type {'none'|'engineer'|'all'} */ (args.officers)],
+        energyBonus: officerEnergyBonus(args.officers),
         solarPlantLevel: args.solarPlant.level,
         solarPlantPercent: args.solarPlant.percent,
         fusionPlantLevel: args.fusionReactor.level,
@@ -296,6 +322,8 @@ module.exports = {
     playerClassSchema,
     classId,
     allianceClassSchema,
+    officersSchema,
+    officerEnergyBonus,
     universeRef,
     economySpeed,
     debrisSettings,

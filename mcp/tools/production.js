@@ -84,15 +84,7 @@ const inputSchema = {
         energyBoosterPercent: { type: 'integer', enum: [0, 20, 40, 60, 80], default: 0, description: 'Energy booster item, %.' },
         energyTechnology: common.level('Energy Technology level', 50),
         plasmaTechnology: common.level('Plasma Technology level', 50),
-        officers: {
-            type: 'object',
-            properties: {
-                geologist: { type: 'boolean', default: false },
-                engineer: { type: 'boolean', default: false },
-                commandingStaff: { type: 'boolean', default: false, description: 'All five officers.' },
-            },
-            additionalProperties: false,
-        },
+        officers: common.officersSchema,
         playerClass: common.playerClassSchema,
         allianceClass: { ...common.allianceClassSchema, description: 'trader: +5% production and energy.' },
         universe: common.universeSchema,
@@ -145,10 +137,8 @@ function createProductionTool({ siteApi }) {
                 levels[b.position - 1] = args.lifeformBuildings[b.key];
             }
 
-            const fullCrew = args.officers.commandingStaff;
-            // The commanding staff is all five officers, the Geologist and the Engineer among them.
-            const geologist = args.officers.geologist || fullCrew;
-            const engineer = args.officers.engineer || fullCrew;
+            // The core finds the commanding staff bonus itself, from all five flags set.
+            const { geologist, engineer, technocrat, admiral, commander } = args.officers;
             const crawlerCap = maxCrawlers(args.metalMine.level, args.crystalMine.level, args.deuteriumSynthesizer.level, geologist);
             const crawlers = Math.min(args.crawlers.count, crawlerCap);
 
@@ -163,9 +153,9 @@ function createProductionTool({ siteApi }) {
                     universeSpeed,
                     geologist,
                     engineer,
-                    technocrat: fullCrew,
-                    admiral: fullCrew,
-                    commander: fullCrew,
+                    technocrat,
+                    admiral,
+                    commander,
                     playerClass: common.classId(args.playerClass),
                     isTrader: args.allianceClass === 'trader',
                     lfMetProdBonus: lfr.metal ?? 0,
