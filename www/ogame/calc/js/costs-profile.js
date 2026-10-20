@@ -193,8 +193,6 @@ class CostsProfiles extends ProfileBinder {
         setVal('#research-speed', own.researchSpeed ?? 1);
       },
     });
-    /** @type {Record<string, *>} The calculator's stored state as it was before a profile. */
-    this.ownState = {};
     /** @type {Array<{cost: number, time: number}>} The research bonuses table as it was before a profile. */
     this.ownTable = [];
     this.ownSaveState = app.saveState.bind(app);
@@ -249,13 +247,20 @@ class CostsProfiles extends ProfileBinder {
     ];
   }
 
-  /** The state keys the profile owns right now. */
-  ownedStateKeys() {
+  /**
+   * The state keys the profile owns: the account's always, the planet's and
+   * the moon's while it has them. The copy of the own values (ownPrm) is the
+   * whole state, not only these: restoreOwnState() gives it all back.
+   *
+   * @param {?Profile} profile
+   * @returns {PfOwnedGroup[]}
+   */
+  ownedGroups(profile) {
+    const { planet, moon } = this.bodies(profile);
     return [
-      ...COSTS_ACCOUNT_FIELDS.map((f) => f.prm),
-      'useIrn',
-      ...(this.planetId === null ? [] : [...COSTS_PLANET_FIELDS.map((f) => f.prm), 'planetPos', 'labLevels', 'labChoice']),
-      ...(this.moonId === null ? [] : COSTS_MOON_FIELDS.map((f) => f.prm)),
+      { keys: [...COSTS_ACCOUNT_FIELDS.map((f) => f.prm), 'useIrn'], present: true },
+      { keys: [...COSTS_PLANET_FIELDS.map((f) => f.prm), 'planetPos', 'labLevels', 'labChoice'], present: planet !== null },
+      { keys: COSTS_MOON_FIELDS.map((f) => f.prm), present: moon !== null },
     ];
   }
 
@@ -263,9 +268,10 @@ class CostsProfiles extends ProfileBinder {
   // Profile -> calculator
   // -------------------------------------------------------------------------
 
+  /** The whole state, and the research bonuses table, which keeps its own key. */
   captureOwn() {
     const own = this.app.exportState();
-    this.ownState = own.state;
+    this.ownPrm = own.state;
     this.ownTable = own.table;
   }
 
@@ -302,10 +308,10 @@ class CostsProfiles extends ProfileBinder {
    */
   showBodies(profile) {
     const { planet, moon } = this.bodies(profile);
-    COSTS_PLANET_FIELDS.forEach((f) => f.write(COSTS_FORM, planet ? getProfileValue(planet, f.key, 0) : this.ownState[f.prm]));
+    COSTS_PLANET_FIELDS.forEach((f) => f.write(COSTS_FORM, planet ? getProfileValue(planet, f.key, 0) : this.ownPrm[f.prm]));
     const position = planet?.coords?.position;
-    setVal('#planet-pos', planet ? position ?? 8 : pfNum(this.ownState.planetPos) || 8);
-    COSTS_MOON_FIELDS.forEach((f) => f.write(COSTS_FORM, moon ? getProfileValue(moon, f.key, 0) : this.ownState[f.prm]));
+    setVal('#planet-pos', planet ? position ?? 8 : pfNum(this.ownPrm.planetPos) || 8);
+    COSTS_MOON_FIELDS.forEach((f) => f.write(COSTS_FORM, moon ? getProfileValue(moon, f.key, 0) : this.ownPrm[f.prm]));
   }
 
   /**
@@ -327,7 +333,7 @@ class CostsProfiles extends ProfileBinder {
     this.moonId = null;
     pfShow('#pf-bodies-row', false);
     this.universe.release();
-    const own = this.ownState;
+    const own = this.ownPrm;
     this.lockPlanetCount(false);
     this.fillLabTable(Array.isArray(own.labLevels) ? own.labLevels : [], pfNum(own.labChoice ?? -1), null);
     this.app.restoreOwnState({ state: own, table: this.ownTable });
@@ -435,20 +441,31 @@ class CostsProfiles extends ProfileBinder {
   }
 
   /**
-   * The stored state gets the calculator's own values as they are, and the
-   * profile-owned ones as they were before the profile. A body the profile
-   * does not have is the calculator's own, so its values are taken as they are.
+   * The state about to be stored: a universe the profile dictates is stored
+   * as the player's own, speeds included - before the owned keys get their
+   * own values back.
+   *
+   * @returns {Record<string, any>}
    */
-  saveOwn() {
+  ownCurrent() {
     const state = this.app.buildState();
-    // A universe the profile dictates is stored as the player's own, speeds included.
     this.universe.overlay(state);
-    const owned = new Set(this.ownedStateKeys());
-    Object.keys(state).forEach((key) => {
-      if (owned.has(key)) state[key] = cloneData(this.ownState[key]);
-      else this.ownState[key] = cloneData(state[key]);
-    });
-    this.app.writeState(state);
+    return state;
+  }
+
+  /**
+   * The copy keeps the whole state up to date.
+   *
+   * @param {Record<string, any>} current
+   * @returns {string[]}
+   */
+  ownCopyKeys(current) {
+    return Object.keys(current);
+  }
+
+  /** @param {Record<string, any>} stored */
+  storeOwn(stored) {
+    this.app.writeState(stored);
   }
 
   /**
