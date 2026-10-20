@@ -15,7 +15,6 @@ const { TradeCalculator, TRADE_RATE_LIMITS, tradeMcRate, tradeDefaultRates } = l
 const RESOURCES = ['metal', 'crystal', 'deuterium'];
 /** Source type numbers trade-core.js uses, keyed by the resources sold. */
 const SOURCE_TYPES = { metal: 0, crystal: 1, deuterium: 2, 'metal+crystal': 3, 'metal+deuterium': 4, 'crystal+deuterium': 5 };
-const CLASS_IDS = { collector: 0, general: 1, discoverer: 2, none: -1 };
 
 const DEFAULT_RATES = tradeDefaultRates();
 
@@ -65,17 +64,9 @@ const inputSchema = {
             },
             additionalProperties: false,
         },
-        hyperspaceTechnology: common.level('Hyperspace Technology level: cargo capacity', 50),
-        playerClass: { type: 'string', enum: Object.keys(CLASS_IDS), default: 'none' },
-        cargoIncrease: {
-            type: 'object',
-            description: 'Life form cargo capacity increases, in percent.',
-            properties: {
-                smallCargo: { type: 'number', minimum: 0, default: 0 },
-                largeCargo: { type: 'number', minimum: 0, default: 0 },
-            },
-            additionalProperties: false,
-        },
+        hyperspaceTechnology: common.hyperspaceTechnologySchema,
+        playerClass: common.playerClassSchema,
+        lifeforms: common.lifeformsSchema([], ['small-cargo', 'large-cargo']),
     },
     required: ['sell'],
     additionalProperties: false,
@@ -199,9 +190,9 @@ function createTradeTool() {
                 dstType,
                 ...mixParams(dstType === 2 ? args.split : undefined, pair),
                 hyperTech: args.hyperspaceTechnology,
-                playerClass: CLASS_IDS[/** @type {keyof typeof CLASS_IDS} */ (args.playerClass)],
-                scCapacityIncrease: args.cargoIncrease.smallCargo,
-                lcCapacityIncrease: args.cargoIncrease.largeCargo,
+                playerClass: common.classId(args.playerClass),
+                scCapacityIncrease: common.shipCargoBonus(args.lifeforms, 'small-cargo'),
+                lcCapacityIncrease: common.shipCargoBonus(args.lifeforms, 'large-cargo'),
             });
 
             const inRange = (/** @type {number} */ v, /** @type {{min: number, max: number}} */ l) => v >= l.min && v <= l.max;

@@ -50,28 +50,17 @@ const mine = (/** @type {string} */ what) => ({
     additionalProperties: false,
 });
 
-const plant = (/** @type {string} */ what, /** @type {string} */ unit = 'level') => ({
-    type: 'object',
-    properties: {
-        [unit]: unit === 'level' ? common.level(`${what} level`) : { type: 'integer', minimum: 0, default: 0, description: `${what} count` },
-        percent: { type: 'integer', minimum: 0, maximum: 100, default: 100, description: 'Production setting, %.' },
-    },
-    additionalProperties: false,
-});
-
-const CLASS_IDS = { collector: 0, general: 1, discoverer: 2, none: -1 };
-
 const inputSchema = {
     type: 'object',
     properties: {
-        maxTemperature: { type: 'integer', minimum: -200, maximum: 300, default: 0, description: 'Maximum temperature of the planet, °C.' },
+        maxTemperature: common.maxTemperatureSchema,
         position: { type: 'integer', minimum: 1, maximum: 15, default: 8, description: 'Planet position, 1-15: crystal favours the inner slots, metal the middle ones.' },
         metalMine: mine('Metal Mine'),
         crystalMine: mine('Crystal Mine'),
         deuteriumSynthesizer: mine('Deuterium Synthesizer'),
-        solarPlant: plant('Solar Plant'),
-        fusionReactor: plant('Fusion Reactor'),
-        solarSatellites: plant('Solar Satellite', 'count'),
+        solarPlant: common.solarPlantSchema,
+        fusionReactor: common.fusionReactorSchema,
+        solarSatellites: common.solarSatellitesSchema,
         crawlers: {
             type: 'object',
             properties: {
@@ -83,38 +72,20 @@ const inputSchema = {
             },
             additionalProperties: false,
         },
-        energyBoosterPercent: { type: 'integer', enum: [0, 20, 40, 60, 80], default: 0, description: 'Energy booster item, %.' },
+        energyBoosterPercent: common.energyBoosterSchema,
         energyTechnology: common.level('Energy Technology level', 50),
         plasmaTechnology: common.level('Plasma Technology level', 50),
-        officers: {
-            type: 'object',
-            properties: {
-                geologist: { type: 'boolean', default: false },
-                engineer: { type: 'boolean', default: false },
-                commandingStaff: { type: 'boolean', default: false, description: 'All five officers.' },
-            },
-            additionalProperties: false,
-        },
-        playerClass: { type: 'string', enum: Object.keys(CLASS_IDS), default: 'none' },
-        allianceTrader: { type: 'boolean', default: false, description: 'Alliance class Trader: +5% production and energy.' },
+        officers: common.officersSchema,
+        playerClass: common.playerClassSchema,
+        allianceClass: { ...common.allianceClassSchema, description: 'trader: +5% production and energy.' },
         universe: common.universeSchema,
         universeSpeed: common.universeSpeedSchema,
-        lifeformResearch: {
-            type: 'object',
-            description: 'Life form research bonuses, as the game\'s life form panel shows them.',
-            properties: {
-                metal: common.percent('Metal production bonus'),
-                crystal: common.percent('Crystal production bonus'),
-                deuterium: common.percent('Deuterium production bonus'),
-                energy: common.percent('Energy production bonus'),
-                crawlers: common.percent('Crawler bonus (Rock\'tal Ion Crystal Modules)'),
-                collectorClassBonus: common.percent('Collector class bonus total (Rock\'tal Collector Enhancement)'),
-            },
-            additionalProperties: false,
-        },
-        lifeformBuildings: common.keyedMap(LF_BUILDINGS.map((b) => b.key), { type: 'integer', minimum: 0, maximum: 200 },
-            'Levels of the life form buildings on the planet - one race\'s only. '
-            + LF_BUILDINGS.map((b) => `${b.key}: ${NAMES[b.key] ?? b.key}`).join(', ') + '.'),
+        lifeforms: common.lifeformsSchema(
+            ['metalBonus', 'crystalBonus', 'deuteriumBonus', 'energyBonus', 'crawlerBonus', 'collectorClassBonus'], [], {
+                buildings: common.keyedMap(LF_BUILDINGS.map((b) => b.key), { type: 'integer', minimum: 0, maximum: 200 },
+                    'Levels of the life form buildings on the planet - one race\'s only. '
+                    + LF_BUILDINGS.map((b) => `${b.key}: ${NAMES[b.key] ?? b.key}`).join(', ') + '.'),
+            }),
     },
     additionalProperties: false,
 };
@@ -136,25 +107,23 @@ function createProductionTool({ siteApi }) {
             const universeSpeed = await common.economySpeed(args, siteApi);
 
             // The life form buildings, as the positional array the core expects.
-            const given = LF_BUILDINGS.filter((b) => (args.lifeformBuildings?.[b.key] ?? 0) > 0);
+            const lf = args.lifeforms;
+            const given = LF_BUILDINGS.filter((b) => (lf.buildings?.[b.key] ?? 0) > 0);
             const races = new Set(given.map((b) => b.race));
             if (races.size > 1) {
-                throw new ToolError('lifeformBuildings mixes races: a planet carries the buildings of one life form only.');
+                throw new ToolError('lifeforms.buildings mixes races: a planet carries the buildings of one life form only.');
             }
             const race = races.size ? [...races][0] : 0;
             const levels = new Array(scope.LF_BUILDINGS_PER_RACE).fill(0);
             for (const b of given) {
-                levels[b.position - 1] = args.lifeformBuildings[b.key];
+                levels[b.position - 1] = lf.buildings[b.key];
             }
 
-            const fullCrew = args.officers.commandingStaff;
-            // The commanding staff is all five officers, the Geologist and the Engineer among them.
-            const geologist = args.officers.geologist || fullCrew;
-            const engineer = args.officers.engineer || fullCrew;
+            // The core finds the commanding staff bonus itself, from all five flags set.
+            const { geologist, engineer, technocrat, admiral, commander } = args.officers;
             const crawlerCap = maxCrawlers(args.metalMine.level, args.crystalMine.level, args.deuteriumSynthesizer.level, geologist);
             const crawlers = Math.min(args.crawlers.count, crawlerCap);
 
-            const lfr = args.lifeformResearch ?? {};
             scope.options = {
                 rowsToTechs: ROWS_TO_TECHS,
                 lfEnergy: LF_ENERGY,
@@ -165,17 +134,17 @@ function createProductionTool({ siteApi }) {
                     universeSpeed,
                     geologist,
                     engineer,
-                    technocrat: fullCrew,
-                    admiral: fullCrew,
-                    commander: fullCrew,
-                    playerClass: CLASS_IDS[/** @type {keyof typeof CLASS_IDS} */ (args.playerClass)],
-                    isTrader: args.allianceTrader,
-                    lfMetProdBonus: lfr.metal ?? 0,
-                    lfCrysProdBonus: lfr.crystal ?? 0,
-                    lfDeutProdBonus: lfr.deuterium ?? 0,
-                    lfEnergyProdBonus: lfr.energy ?? 0,
-                    lfCrawlerBonus: lfr.crawlers ?? 0,
-                    lfCollectorBonus: lfr.collectorClassBonus ?? 0,
+                    technocrat,
+                    admiral,
+                    commander,
+                    playerClass: common.classId(args.playerClass),
+                    isTrader: args.allianceClass === 'trader',
+                    lfMetProdBonus: lf.metalBonus,
+                    lfCrysProdBonus: lf.crystalBonus,
+                    lfDeutProdBonus: lf.deuteriumBonus,
+                    lfEnergyProdBonus: lf.energyBonus,
+                    lfCrawlerBonus: lf.crawlerBonus,
+                    lfCollectorBonus: lf.collectorClassBonus,
                 },
             };
 

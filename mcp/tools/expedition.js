@@ -38,27 +38,15 @@ const inputSchema = {
             description: 'Points of the strongest player in the universe; it caps what an expedition finds. '
                 + 'Read from `universe` when that is given. Leave both out for the highest tier.',
         },
-        playerClass: { type: 'string', enum: Object.keys(CLASSES), default: 'none' },
+        playerClass: common.playerClassSchema,
         universe: common.universeSchema,
         universeSpeed: { ...common.universeSpeedSchema, description: 'Economy speed: scales a Discoverer\'s finds. ' + common.universeSpeedSchema.description },
-        hyperspaceTechnology: common.level('Hyperspace Technology level: cargo capacity', 50),
-        lifeforms: {
-            type: 'object',
-            description: 'Life form bonuses, as the game shows them.',
-            properties: {
-                resourceFindBonus: common.percent('Expedition resource find bonus'),
-                shipFindBonus: common.percent('Expedition ship find bonus'),
-                darkMatterFindBonus: common.percent('Expedition dark matter find bonus'),
-                collectorClassBonus: common.percent('Rock\'tal Collector Enhancement total'),
-                discovererClassBonus: common.percent('Kaelesh Discoverer Enhancement total'),
-                cargoBonus: common.keyedMap(SHIPS.map((ship) => ship.id), { type: 'number', minimum: 0 },
-                    'Cargo capacity increase per ship, in percent, keyed like `ships`.'),
-            },
-            additionalProperties: false,
-        },
-        resourceBoosterPercent: {
+        hyperspaceTechnology: common.hyperspaceTechnologySchema,
+        lifeforms: common.lifeformsSchema(['resourceFindBonus', 'shipFindBonus', 'darkMatterFindBonus',
+            'collectorClassBonus', 'discovererClassBonus'], SHIPS.map((ship) => ship.id)),
+        discoveryBoosterPercent: {
             type: 'integer', enum: [0, 5, 10, 15, 20, 25, 30, 35, 40], default: 0,
-            description: 'Resource discovery booster item, in percent.',
+            description: 'Expedition resource discovery booster item, in percent.',
         },
     },
     required: ['ships'],
@@ -95,30 +83,29 @@ function createExpeditionTool({ siteApi }) {
                 throw new ToolError('The fleet is empty: give at least one ship in `ships`.');
             }
 
+            const universeSpeed = await common.economySpeed(args, siteApi);
             let topPoints = args.topPlayerPoints;
-            let universeSpeed = args.universeSpeed;
-            if (args.universe && (topPoints === undefined || universeSpeed === undefined)) {
+            if (args.universe && topPoints === undefined) {
+                // The site API caches the universe, so economySpeed() having read it costs nothing here.
                 const data = await siteApi.serverData(common.universeRef(args.universe));
                 const top = Number.parseFloat(data.topScore);
-                topPoints ??= Number.isFinite(top) ? Math.floor(top) : undefined;
-                universeSpeed ??= Number.parseInt(String(data.speed), 10) || 1;
+                topPoints = Number.isFinite(top) ? Math.floor(top) : undefined;
             }
             const highTop = topPoints === undefined ? /** @type {{highTop: number}} */ (TOP_TIERS.at(-1)).highTop : highTopFor(topPoints);
 
-            const lf = args.lifeforms ?? {};
-            const cargoBonus = lf.cargoBonus ?? {};
+            const lf = args.lifeforms;
             const r = calc.compute({
                 highTop,
                 playerClass: CLASSES[/** @type {keyof typeof CLASSES} */ (args.playerClass)],
-                universeSpeed: universeSpeed ?? 1,
+                universeSpeed,
                 hyperTechLevel: args.hyperspaceTechnology,
-                percentRes: lf.resourceFindBonus ?? 0,
-                percentShips: lf.shipFindBonus ?? 0,
-                classBonusCollector: lf.collectorClassBonus ?? 0,
-                classBonusDiscoverer: lf.discovererClassBonus ?? 0,
-                resourceDiscoveryBooster: args.resourceBoosterPercent,
-                darkMatterDiscoveryBonus: lf.darkMatterFindBonus ?? 0,
-                lfShipsBonuses: SHIPS.map((ship) => cargoBonus[ship.id] ?? 0),
+                percentRes: lf.resourceFindBonus,
+                percentShips: lf.shipFindBonus,
+                classBonusCollector: lf.collectorClassBonus,
+                classBonusDiscoverer: lf.discovererClassBonus,
+                resourceDiscoveryBooster: args.discoveryBoosterPercent,
+                darkMatterDiscoveryBonus: lf.darkMatterFindBonus,
+                lfShipsBonuses: SHIPS.map((ship) => common.shipCargoBonus(lf, ship.id)),
                 counts,
             });
 
@@ -138,7 +125,7 @@ function createExpeditionTool({ siteApi }) {
                 assumptions: {
                     topPlayerPoints: topPoints ?? null,
                     topTierValue: highTop,
-                    universeSpeed: universeSpeed ?? 1,
+                    universeSpeed,
                 },
             };
         },
