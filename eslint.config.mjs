@@ -52,9 +52,9 @@ export default [
     },
   },
 
-  // Build scripts and the node:test suite: CommonJS.
+  // Build scripts, the node:test suite and the MCP server: CommonJS.
   {
-    files: ['scripts/**/*.js', 'unit-tests/**/*.js'],
+    files: ['scripts/**/*.js', 'unit-tests/**/*.js', 'mcp/**/*.js'],
     ...js.configs.recommended,
     languageOptions: {
       ecmaVersion: 2022,

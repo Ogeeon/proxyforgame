@@ -20,7 +20,7 @@ const core = load(['ogame/calc/js/profiles-core.js'], [
     'productionPlanetValues', 'productionPlanetState', 'isNewerExport', 'planCompanionSync',
     'resolveImportUniverse', 'profileFromSpyReport',
     'lfBuildingGameId', 'pfNum', 'pfBool', 'pfBodyLabel', 'pfStartRange', 'expeditionHighTop',
-    'EXPEDITION_TOP_SCORE_LIMITS', 'UNIVERSE_SETTINGS_TTL_MS', 'UNIVERSE_SETTING_PARSERS',
+    'EXPEDITION_TOP_SCORE_LIMITS', 'EXPEDITION_HIGH_TOP_VALUES', 'UNIVERSE_SETTINGS_TTL_MS', 'UNIVERSE_SETTING_PARSERS',
     'parseUniverseSettings', 'readUniverseEntry', 'isUniverseEntryFresh', 'universeLayer',
     'universeValue', 'setUniverseChoice', 'mergeUniverseChoices', 'pfMarkState',
     'listUniverseOverrides', 'resetUniverseChoices', 'pfSnapKey', 'snapshotReadings', 'diffReadings',
@@ -1294,11 +1294,18 @@ describe('expeditionHighTop', () => {
         expect(core.expeditionHighTop(Number.POSITIVE_INFINITY)).toBe(null);
     });
 
-    it('uses the same limits as expeditions.php', () => {
+    it('uses the tiers of data/expedition-top-tiers.json, which expeditions.php and the MCP server read', () => {
+        const json = readFileSync(join(__dirname, '..', 'www', 'ogame', 'calc', 'data', 'expedition-top-tiers.json'), 'utf8');
+        /** @type {{upTo: number|null, highTop: number}[]} */
+        const tiers = JSON.parse(json);
+        expect(tiers.at(-1)?.upTo).toBe(null);
+        expect(tiers.slice(0, -1).map((t) => t.upTo)).toEqual(plain(core.EXPEDITION_TOP_SCORE_LIMITS));
+        expect(tiers.map((t) => t.highTop)).toEqual(plain(core.EXPEDITION_HIGH_TOP_VALUES));
+    });
+
+    it('is the file expeditions.php takes its limits from', () => {
         const php = readFileSync(join(__dirname, '..', 'www', 'ogame', 'calc', 'expeditions.php'), 'utf8');
-        const match = /\$thresholds\s*=\s*\[([^\]]*)\]/.exec(php);
-        expect(match).not.toBe(null);
-        const limits = (match ? match[1] : '').split(',').map((s) => Number(s.trim()));
-        expect(limits).toEqual(plain(core.EXPEDITION_TOP_SCORE_LIMITS));
+        expect(php).toContain("'/data/expedition-top-tiers.json'");
+        expect(/\$thresholds\s*=\s*\[/.test(php)).toBe(false);
     });
 });

@@ -15,6 +15,10 @@ release section; it is the source of truth for the other eleven translations.
 
 ## [Unreleased]
 
+### Added
+
+- MCP server: every calculator is available to LLM clients - ChatGPT, Claude and other Model Context Protocol clients - at `https://proxyforgame.com/mcp`, as twelve tools: flight, build cost, life form cost, build queue, production, expedition, moon destruction, moon creation, sensor phalanx, graviton, terraformer and trade. Most can read a live universe's settings. They compute with the calculators' own formulas.
+
 ### Fixed
 
 - Profiles: an account export PfG Companion delivers while a calculator is open now shows in that calculator at once when it updates the active profile; until now the profile was updated in storage, but the page kept the old game values until it was reloaded.

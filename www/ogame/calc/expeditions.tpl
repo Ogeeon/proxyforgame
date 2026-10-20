@@ -174,15 +174,19 @@
             <div class="d-flex align-items-center gap-1">
               <label for="highTop"><?= $l['LOCA_STRONGEST_CAP'] ?></label>
               <select id="highTop" name="highTop" class="form-select form-select-sm w-auto">
-                <option value="40000">&lt; 10.000</option>
-                <option value="500000">&lt; 100.000</option>
-                <option value="1200000">&lt; 1.000.000</option>
-                <option value="1800000">&lt; 5.000.000</option>
-                <option value="2400000">&lt; 25.000.000</option>
-                <option value="3000000">&lt; 50.000.000</option>
-                <option value="3600000">&lt; 75.000.000</option>
-                <option value="4200000">&lt; 100.000.000</option>
-                <option value="5000000" selected="selected">&gt; 100.000.000</option>
+<?php
+// $expTopTiers comes from data/expedition-top-tiers.json (expeditions.php).
+// The last tier has no limit, is labelled "above" the limit before it, and is
+// the default.
+$expPrevLimit = 0;
+foreach ($expTopTiers as $expTier):
+    if ($expTier['upTo'] === null): ?>
+                <option value="<?= $expTier['highTop'] ?>" selected="selected">&gt; <?= number_format($expPrevLimit, 0, '', '.') ?></option>
+<?php else: ?>
+                <option value="<?= $expTier['highTop'] ?>">&lt; <?= number_format($expTier['upTo'], 0, '', '.') ?></option>
+<?php $expPrevLimit = $expTier['upTo'];
+    endif;
+endforeach; ?>
               </select>
               <span><?= $l['LOCA_STRONGEST_CAP2'] ?></span>
             </div>

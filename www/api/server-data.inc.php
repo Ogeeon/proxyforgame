@@ -25,14 +25,18 @@
       'warriorBonusFuelConsumption' => (string)$xml->warriorBonusFuelConsumption,
       'probeCargo' => (string)$xml->probeCargo,
       // Share of a destroyed fleet that goes to the debris field (0.3 = 30%),
-      // and '1' when deuterium goes there too - empty otherwise.
+      // and '1' when deuterium goes there too - empty otherwise. The MCP
+      // server's moon and graviton tools read both as well.
       'debrisFactor' => (string)$xml->debrisFactor,
       'deuteriumInDebris' => (string)$xml->deuteriumInDebris,
       // The same share for destroyed defenses (0 in most universes); moon
-      // shows it in its "defenses to debris" select.
+      // shows it in its "defenses to debris" select, and the MCP server's
+      // moon tool takes its default from it.
       'debrisFactorDef' => (string)$xml->debrisFactorDef,
       // Score of the strongest player; expeditions turns it into the "strongest
-      // player" class that caps the expedition's find.
+      // player" class that caps the expedition's find, and so does the MCP
+      // server's expedition tool. An element a universe does not publish
+      // comes back as an empty string.
       'topScore' => (string)$xml->topScore,
       'fleetIgnoreEmptySystems' => (string)$xml->fleetIgnoreEmptySystems,
       // Independent of the one above: it skips systems where every player is

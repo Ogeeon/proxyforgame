@@ -36,16 +36,6 @@ const TRADE_SHORT_LABELS = { metal: 'met', crystal: 'crys', deuterium: 'deut' };
 const TRADE_SRC_RESOURCES = ['metal', 'crystal', 'deuterium'];
 
 /**
- * The rates a fresh form starts from: the middle of each fair-trade range.
- * @returns {{md: number, cd: number, mc: number}}
- */
-function defaultRates() {
-    const md = (TRADE_RATE_LIMITS.md.min + TRADE_RATE_LIMITS.md.max) / 2;
-    const cd = (TRADE_RATE_LIMITS.cd.min + TRADE_RATE_LIMITS.cd.max) / 2;
-    return { md, cd, mc: tradeMcRate(md, cd) };
-}
-
-/**
  * What the last options.parseFromUri() took from the link: the exchange rates,
  * the universe and the coordinates. The profile binder reads it once, on load,
  * to let the link win over the active profile (see takeLinkOverrides()).
@@ -62,7 +52,7 @@ let options = {
     // mc is stored, not derived: saveToCookie JSON-encodes this object and
     // loadFromCookie replaces it with the parsed result, which would drop an
     // accessor. syncMcRate() is what keeps it in step with md and cd.
-    rates: defaultRates(),
+    rates: tradeDefaultRates(),
 
     srcType: 2,
     dstType: 2,
@@ -127,14 +117,14 @@ let options = {
             // it as the toFixed string it used to be.
             //
             // Widen to unknown before testing: the declared type comes from
-            // defaultRates() and says "always an object", which would make the
+            // tradeDefaultRates() and says "always an object", which would make the
             // null arm dead code to a reader and to the analyzer alike. It is
             // not — loadFromCookie just overwrote the property, and `typeof
             // null` is 'object', so null is exactly the case the typeof test
             // lets through.
             const loaded = /** @type {unknown} */ (this.rates);
             if (typeof loaded !== 'object' || loaded === null) {
-                this.rates = defaultRates();
+                this.rates = tradeDefaultRates();
             }
             syncMcRate();
         } catch(e) {
@@ -617,7 +607,7 @@ function updateDstInputState(resEnable) {
 }
 
 function resetParams() {
-    options.rates = defaultRates();
+    options.rates = tradeDefaultRates();
     options.srcType = 2;
     options.dstType = 2;
     options.dstMixType = 0;

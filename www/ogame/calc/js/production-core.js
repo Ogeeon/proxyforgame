@@ -14,6 +14,18 @@
 // nor draw energy.
 const LF_BUILDINGS_PER_RACE = 12;
 
+// OGame lets a planet use at most 8 crawlers per summed mine level (metal +
+// crystal + deuterium), or 8.8 per level with a Geologist. Extra crawlers
+// beyond that produce nothing, so the calculator caps the entered count.
+const CRAWLER_CAP_PER_MINE = 8;
+const CRAWLER_CAP_PER_MINE_GEOLOGIST = 8.8;
+
+function maxCrawlers(metalMineLvl, crystalMineLvl, deutSynthLvl, geologist) {
+	const mineSum = metalMineLvl + crystalMineLvl + deutSynthLvl;
+	const factor = geologist ? CRAWLER_CAP_PER_MINE_GEOLOGIST : CRAWLER_CAP_PER_MINE;
+	return Math.floor(factor * mineSum);
+}
+
 function convertAllPlanetParams() {
 	let prm = [];
 	options.prm.aPS = [];
