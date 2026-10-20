@@ -734,6 +734,25 @@ test('a queue start level is not written back to the profile', async ({ page }) 
     await expect(page.locator('#startlvl-2-1')).toHaveValue('30');
 });
 
+test('a queue fields edit is named in the reset dialog and restored on its planet', async ({ page }) => {
+    await page.goto('/queue');
+    await importExport(page);
+    await blurFill(page, '#total-fields-2', '250');
+
+    await page.locator('#total-fields-2 + .pf-reset').click();
+    await expect(page.locator('#total-fields-2')).toHaveValue('246');
+    await expect(page.locator('#pf-overrides')).toBeHidden();
+    const profile = await activeProfile(page);
+    expect(profile.planets[0].values['fields.total']).toEqual({ game: 246 });
+
+    await blurFill(page, '#total-fields-2', '250');
+    await page.locator('#pf-overrides').click();
+    const label = page.locator('#pf-reset-rows tr').nth(0).locator('td').nth(2);
+    // Named in the page's words, not by its key.
+    await expect(label).not.toHaveText('fields.total');
+    await expect(label).not.toHaveText('');
+});
+
 test('another planet is picked in the queue and remembered, the queue kept', async ({ page }) => {
     await page.goto('/queue');
     await importExport(page);
@@ -1796,6 +1815,18 @@ test('an expeditions edit becomes an override that can be restored', async ({ pa
     expect(profile.account.values['research.114']).toEqual({ game: 8 });
 });
 
+test('the reset dialog names an expeditions cargo bonus in the page\'s words', async ({ page }) => {
+    await page.goto('/expeditions');
+    await importExport(page);
+    await page.locator('#param-lf-tab').click();
+    await blurFill(page, '#lf-cargo-203', '3');
+
+    await page.locator('#pf-overrides').click();
+    const label = page.locator('#pf-reset-rows tr').nth(0).locator('td').nth(2);
+    await expect(label).not.toHaveText('lf.ship.203.cargo');
+    await expect(label).not.toHaveText('');
+});
+
 test('the cargo bonuses reader makes overrides of what it reads', async ({ page }) => {
     await page.goto('/expeditions');
     await importExport(page);
@@ -2062,6 +2093,17 @@ test('moon edits become overrides of the account, the planet and the moon', asyn
     expect(profile.moons[0].values['building.42']).toEqual({ game: 5 });
     expect(profile.planets[0].values['lf.building.14112']).toEqual({ game: 30 });
     expect(profile.account.values['research.114']).toEqual({ game: 8, override: 9 });
+});
+
+test('the reset dialog names the moon\'s phalanx in the page\'s words', async ({ page }) => {
+    await openMoonWithProfile(page);
+    await page.locator('#param-lifeforms-tab').click();
+    await blurFill(page, '#phalanx-lvl', '9');
+
+    await page.locator('#pf-overrides').click();
+    const label = page.locator('#pf-reset-rows tr').nth(0).locator('td').nth(2);
+    await expect(label).not.toHaveText('building.42');
+    await expect(label).not.toHaveText('');
 });
 
 test('the class checkboxes of moon write the class, and a collector is no override', async ({ page }) => {
