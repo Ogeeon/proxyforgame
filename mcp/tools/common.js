@@ -1,8 +1,10 @@
 'use strict';
 
 // Pieces several tools share: the universe argument, level fields, the
-// English names the pages show, and the planet energy inputs the graviton and
-// terraformer calculators both take.
+// English names the pages show, the planet energy inputs the graviton and
+// terraformer calculators both take - and the one schema of each game concept
+// (playerClass, allianceClass, officers, facilities, lifeforms, research,
+// boosters), so that a concept has the same name and shape in every tool.
 
 const { loadBrowserScripts, readWwwJson } = require('../lib/browser-scripts');
 const { ToolError } = require('../lib/protocol');
@@ -445,7 +447,6 @@ module.exports = {
     defenceDebrisSchema,
     debrisSchema,
     level,
-    percent,
     keyedMap,
     resolveKey,
     englishNames,

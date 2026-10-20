@@ -71,7 +71,7 @@ const inputSchema = {
         researchSpeed: {
             type: 'number', minimum: 1, maximum: 100,
             description: 'Research speed - the economy speed times the universe\'s research divisor. '
-                + 'Defaults to universeSpeed.',
+                + 'Read from `universe` when given, else universeSpeed.',
         },
         playerClass: common.playerClassSchema,
         officers: { ...common.officersSchema, description: 'Officers hired. The Technocrat: research 25% faster.' },
