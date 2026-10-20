@@ -59,8 +59,6 @@ const plant = (/** @type {string} */ what, /** @type {string} */ unit = 'level')
     additionalProperties: false,
 });
 
-const CLASS_IDS = { collector: 0, general: 1, discoverer: 2, none: -1 };
-
 const inputSchema = {
     type: 'object',
     properties: {
@@ -95,8 +93,8 @@ const inputSchema = {
             },
             additionalProperties: false,
         },
-        playerClass: { type: 'string', enum: Object.keys(CLASS_IDS), default: 'none' },
-        allianceTrader: { type: 'boolean', default: false, description: 'Alliance class Trader: +5% production and energy.' },
+        playerClass: common.playerClassSchema,
+        allianceClass: { ...common.allianceClassSchema, description: 'trader: +5% production and energy.' },
         universe: common.universeSchema,
         universeSpeed: common.universeSpeedSchema,
         lifeformResearch: {
@@ -168,8 +166,8 @@ function createProductionTool({ siteApi }) {
                     technocrat: fullCrew,
                     admiral: fullCrew,
                     commander: fullCrew,
-                    playerClass: CLASS_IDS[/** @type {keyof typeof CLASS_IDS} */ (args.playerClass)],
-                    isTrader: args.allianceTrader,
+                    playerClass: common.classId(args.playerClass),
+                    isTrader: args.allianceClass === 'trader',
                     lfMetProdBonus: lfr.metal ?? 0,
                     lfCrysProdBonus: lfr.crystal ?? 0,
                     lfDeutProdBonus: lfr.deuterium ?? 0,

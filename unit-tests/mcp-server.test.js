@@ -668,6 +668,29 @@ describe('MCP moon tools', () => {
         expect(out.assumptions.defenceDebrisPercent).toBe(0);
     });
 
+    it('ogame_moon_creation: gives a General\'s recyclers 20% more hold', async () => {
+        const capacity = async (playerClass) => (await call(protocolWith(), 'ogame_moon_creation', {
+            destroyed: { 'light-fighter': 2000 }, playerClass,
+        })).structuredContent.recyclerCapacity;
+        expect(await capacity('none')).toBe(20000);
+        expect(await capacity('discoverer')).toBe(20000);
+        expect(await capacity('general')).toBe(24000);
+    });
+
+    it('ogame_phalanx: gives the Discoverer class its range bonus, and no other class', async () => {
+        const { MoonCalculator } = load(['js/utils.js', 'ogame/calc/js/moon-core.js'], ['MoonCalculator']);
+        const range = async (playerClass) => (await call(protocolWith(), 'ogame_phalanx', {
+            phalanxLevel: 7, moonSystem: 100, playerClass,
+        })).structuredContent.rangeSystems;
+        const direct = (isDiscoverer) => new MoonCalculator().computePhalanx({
+            phalanxLevel: 7, phalanxRangeBonus: 0, isDiscoverer, discovererBonus: 0, ownSystem: 100,
+            targetSystem: 100, circularSystems: false, numberOfSystems: 499,
+        }).phalanxRange;
+        expect(await range('collector')).toBe(direct(false));
+        expect(await range('discoverer')).toBe(direct(true));
+        expect(direct(true)).toBeGreaterThan(direct(false));
+    });
+
     it('ogame_phalanx: wraps round a circular galaxy and names the level a target needs', async () => {
         const out = (await call(protocolWith(), 'ogame_phalanx', {
             phalanxLevel: 7, moonSystem: 5, targetSystem: 470, circularSystems: true,
@@ -759,6 +782,16 @@ describe('MCP tool ogame_production', () => {
     it('caps crawlers at 8 per mine level and says so', async () => {
         const out = (await call(protocolWith(), 'ogame_production', { ...base, crawlers: { count: 5000 } })).structuredContent;
         expect(out.note).toContain('Only 600 crawlers');
+    });
+
+    it('gives the alliance Trader bonus to the trader class only', async () => {
+        const alliance = async (allianceClass) => (await call(protocolWith(), 'ogame_production', { ...base, allianceClass }))
+            .structuredContent.breakdownPerHour.allianceClass;
+        expect((await alliance('none')).metal).toBe(0);
+        expect((await alliance('warrior')).metal).toBe(0);
+        const plain = (await call(protocolWith(), 'ogame_production', base)).structuredContent;
+        // +5% of the mines' output
+        expect((await alliance('trader')).metal).toBe(Math.round(plain.breakdownPerHour.mines.metal * 0.05));
     });
 
     it('refuses buildings of two races on one planet', async () => {

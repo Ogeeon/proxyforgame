@@ -25,7 +25,6 @@ const IDS = new Map(Object.entries(LF_TECHS).map(([id, row]) => [row[0], Number(
 const TECH_COSTS = Object.fromEntries(Object.entries(LF_TECHS).map(([id, row]) => [id, row.slice(2)]));
 
 const RACES = { humans: 1, rocktal: 2, mechas: 3, kaelesh: 4 };
-const CLASS_IDS = { none: -1, collector: 0, general: 1, discoverer: 2 };
 
 // Grouped by race, so the race is named once rather than with every item.
 const itemList = Object.entries(RACES).map(([race, n]) => `${race}: ` + [...IDS.entries()]
@@ -54,7 +53,7 @@ const inputSchema = {
         universeSpeed: common.universeSpeedSchema,
         ionTechnology: common.level('Ion Technology level: cheaper demolition', 50),
         hyperspaceTechnology: common.level('Hyperspace Technology level: for the cargo ships needed', 50),
-        playerClass: { type: 'string', enum: Object.keys(CLASS_IDS), default: 'none' },
+        playerClass: common.playerClassSchema,
         cargoIncrease: {
             type: 'object',
             description: 'Life form cargo capacity increases, in percent.',
@@ -113,7 +112,7 @@ function createLifeformCostTool({ siteApi }) {
                 universeSpeed: await common.economySpeed(args, siteApi),
                 ionTechLevel: args.ionTechnology,
                 hyperTechLevel: args.hyperspaceTechnology,
-                playerClass: CLASS_IDS[/** @type {keyof typeof CLASS_IDS} */ (args.playerClass)],
+                playerClass: common.classId(args.playerClass),
                 capIncrSC: args.cargoIncrease.smallCargo,
                 capIncrLC: args.cargoIncrease.largeCargo,
             };

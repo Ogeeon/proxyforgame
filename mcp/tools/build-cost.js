@@ -90,7 +90,7 @@ const inputSchema = {
             description: 'Research speed - the economy speed times the universe\'s research divisor. '
                 + 'Defaults to universeSpeed.',
         },
-        playerClass: { type: 'string', enum: ['none', 'collector', 'general', 'discoverer'], default: 'none' },
+        playerClass: common.playerClassSchema,
         technocrat: { type: 'boolean', default: false, description: 'Technocrat officer: research 25% faster.' },
         discovererClassBonus: {
             type: 'number', minimum: 0, default: 0,
@@ -113,8 +113,6 @@ const inputSchema = {
     required: ['item'],
     additionalProperties: false,
 };
-
-const CLASS_IDS = { none: -1, collector: 0, general: 1, discoverer: 2 };
 
 /**
  * The level range a request covers - from 0 to the quantity for ships and
@@ -198,7 +196,7 @@ function createBuildCostTool({ siteApi }) {
             params.shipyardLevel = args.facilities.shipyard;
             params.universeSpeed = universeSpeed;
             params.researchSpeed = researchSpeed;
-            params.playerClass = CLASS_IDS[/** @type {keyof typeof CLASS_IDS} */ (args.playerClass)];
+            params.playerClass = common.classId(args.playerClass);
             params.technocrat = args.technocrat;
             params.discovererClassBonus = args.discovererClassBonus;
             params.ionTechLevel = args.ionTechnology;

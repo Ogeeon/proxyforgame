@@ -6,7 +6,9 @@
 const { loadBrowserScripts } = require('../lib/browser-scripts');
 const { ToolError } = require('../lib/protocol');
 const { formatDuration } = require('../lib/format');
-const { keyedMap } = require('./common');
+const common = require('./common');
+
+const { keyedMap } = common;
 
 const { FlightCalculator, SHIPS_BASE, MISSION, PLAYER_CLASS } = loadBrowserScripts(
     ['ogame/calc/js/flight-core.js'],
@@ -98,11 +100,9 @@ const inputSchema = {
             additionalProperties: false,
         },
         hyperspaceTechnology: level('Hyperspace Technology level; adds 5% cargo per level'),
-        playerClass: { type: 'string', enum: Object.keys(CLASSES), default: 'none' },
+        playerClass: common.playerClassSchema,
         allianceClass: {
-            type: 'string',
-            enum: ['none', 'trader', 'warrior'],
-            default: 'none',
+            ...common.allianceClassSchema,
             description: 'trader: +10% speed for cargo ships. warrior: +10% speed on holding missions.',
         },
         lifeforms: {

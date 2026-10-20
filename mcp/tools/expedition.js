@@ -38,7 +38,7 @@ const inputSchema = {
             description: 'Points of the strongest player in the universe; it caps what an expedition finds. '
                 + 'Read from `universe` when that is given. Leave both out for the highest tier.',
         },
-        playerClass: { type: 'string', enum: Object.keys(CLASSES), default: 'none' },
+        playerClass: common.playerClassSchema,
         universe: common.universeSchema,
         universeSpeed: { ...common.universeSpeedSchema, description: 'Economy speed: scales a Discoverer\'s finds. ' + common.universeSpeedSchema.description },
         hyperspaceTechnology: common.level('Hyperspace Technology level: cargo capacity', 50),

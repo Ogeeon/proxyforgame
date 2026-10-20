@@ -15,7 +15,6 @@ const { TradeCalculator, TRADE_RATE_LIMITS, tradeMcRate, tradeDefaultRates } = l
 const RESOURCES = ['metal', 'crystal', 'deuterium'];
 /** Source type numbers trade-core.js uses, keyed by the resources sold. */
 const SOURCE_TYPES = { metal: 0, crystal: 1, deuterium: 2, 'metal+crystal': 3, 'metal+deuterium': 4, 'crystal+deuterium': 5 };
-const CLASS_IDS = { collector: 0, general: 1, discoverer: 2, none: -1 };
 
 const DEFAULT_RATES = tradeDefaultRates();
 
@@ -66,7 +65,7 @@ const inputSchema = {
             additionalProperties: false,
         },
         hyperspaceTechnology: common.level('Hyperspace Technology level: cargo capacity', 50),
-        playerClass: { type: 'string', enum: Object.keys(CLASS_IDS), default: 'none' },
+        playerClass: common.playerClassSchema,
         cargoIncrease: {
             type: 'object',
             description: 'Life form cargo capacity increases, in percent.',
@@ -199,7 +198,7 @@ function createTradeTool() {
                 dstType,
                 ...mixParams(dstType === 2 ? args.split : undefined, pair),
                 hyperTech: args.hyperspaceTechnology,
-                playerClass: CLASS_IDS[/** @type {keyof typeof CLASS_IDS} */ (args.playerClass)],
+                playerClass: common.classId(args.playerClass),
                 scCapacityIncrease: args.cargoIncrease.smallCargo,
                 lcCapacityIncrease: args.cargoIncrease.largeCargo,
             });

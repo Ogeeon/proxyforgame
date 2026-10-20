@@ -99,6 +99,25 @@ const defenceDebrisSchema = {
     description: 'Share of destroyed defence that becomes debris, in percent. Read from `universe` when given, else 0.',
 };
 
+/**
+ * Player class numbers the costs, LF costs, production and trade cores share;
+ * the flight, expedition and energy cores have constants of their own.
+ */
+const CLASS_IDS = { none: -1, collector: 0, general: 1, discoverer: 2 };
+
+/** The `playerClass` argument, the same in every tool. */
+const playerClassSchema = { type: 'string', enum: Object.keys(CLASS_IDS), default: 'none' };
+
+/**
+ * The CLASS_IDS number of a validated `playerClass`.
+ * @param {string} name
+ * @returns {number}
+ */
+const classId = (name) => CLASS_IDS[/** @type {keyof typeof CLASS_IDS} */ (name)];
+
+/** The `allianceClass` argument, the same in every tool. */
+const allianceClassSchema = { type: 'string', enum: ['none', 'trader', 'warrior'], default: 'none' };
+
 /** The `universeSpeed` argument. */
 const universeSpeedSchema = {
     type: 'number', minimum: 1, maximum: 10,
@@ -200,10 +219,10 @@ const energySchema = {
         description: 'engineer: +10% energy. all: the whole commanding staff, +12%.',
     },
     playerClass: {
-        type: 'string', enum: ['none', 'collector', 'general', 'discoverer'], default: 'none',
+        ...playerClassSchema,
         description: 'The Collector gets +10% energy and +25% transport cargo; the General +20% recycler cargo.',
     },
-    allianceTrader: { type: 'boolean', default: false, description: 'Alliance class Trader: +5% energy.' },
+    allianceClass: { ...allianceClassSchema, description: 'trader: +5% energy.' },
     energyBoosterPercent: {
         type: 'integer', enum: [0, 20, 40, 60, 80], default: 0, description: 'Energy booster item, in percent.',
     },
@@ -242,7 +261,7 @@ function energyParams(args) {
         solarSatellitesCount: args.solarSatellites.count,
         solarSatellitesPercent: args.solarSatellites.percent,
         playerClass: ENERGY_CLASS[/** @type {keyof typeof ENERGY_CLASS} */ (args.playerClass)],
-        isTrader: args.allianceTrader,
+        isTrader: args.allianceClass === 'trader',
         energyBoost: args.energyBoosterPercent / 10,
         disChLevel: args.disruptionChamber,
         totalLFEnrgBonus: args.lifeformEnergyBonus,
@@ -274,6 +293,9 @@ function energyBreakdown(r) {
 module.exports = {
     universeSchema,
     universeSpeedSchema,
+    playerClassSchema,
+    classId,
+    allianceClassSchema,
     universeRef,
     economySpeed,
     debrisSettings,
