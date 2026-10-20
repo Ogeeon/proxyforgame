@@ -138,14 +138,15 @@ class LfCostsProfiles extends PlanetPrmBinder {
   }
 
   /**
-   * With no planet - or a planet with no life form - the race is the
-   * calculator's own.
+   * A planet with no life form leaves the race to the calculator, as no
+   * planet does (ownedGroups). This is a condition on a value, for the form
+   * only: an edit of the race there is still the planet's.
    */
   afterShowPlanet() {
     /** @type {Record<string, any>} */
     const prm = options.prm;
     const planet = this.planet(this.profile());
-    if (!planet || lfCostsPlanetRace(planet) === null) prm.race = pfNum(this.ownPrm.race) || 1;
+    if (planet && lfCostsPlanetRace(planet) === null) prm.race = pfNum(this.ownPrm.race) || 1;
   }
 
   /** @param {Profile} profile */

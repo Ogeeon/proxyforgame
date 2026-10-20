@@ -1893,7 +1893,10 @@ class PfCoordsSelect {
  * saveWithProfile()); restoreOwn() and recalc(); markAll(). A binder that
  * declares its fieldGroups() gets describeFields(), takeSnapshot(),
  * writeBack() and markAll() from them, and adds what the groups do not cover
- * in writeBackExtra() and markExtra().
+ * in writeBackExtra() and markExtra(). A binder that declares its
+ * ownedGroups() gets captureOwn(), saveOwn() and restoreOwn() from them
+ * (ADR-0004: what the profile owns is stored as it was before the profile),
+ * and says where the own values live in ownSettings() and storeOwn().
  *
  * @template [App=*]
  */
@@ -1913,6 +1916,8 @@ class ProfileBinder {
     this.snapshot = {};
     /** @type {?PfCoordsSelect} The coordinates select that follows the form after every save, if the page has one. */
     this.coordsSelect = null;
+    /** @type {Record<string, *>} The calculator's own values of what the profile owns (ownedGroups()), kept while a profile is shown. */
+    this.ownPrm = {};
   }
 
   /** Connect to the page; called once, with the calculator ready. */
@@ -1989,7 +1994,41 @@ class ProfileBinder {
 
   /** Keep the calculator's own values of what the profile owns, before a profile is first shown. */
   captureOwn() {
-    // A binder copies its own values here.
+    this.ownPrm = pfPickOwn(this.ownSettings(), this.ownedGroups(this.profile()).flatMap((g) => g.keys));
+  }
+
+  /**
+   * The keys of the calculator's settings the profile owns, grouped by what
+   * fills them: a group whose entity the profile does not have is the
+   * calculator's own while that lasts, both in the form and in its storage.
+   * None by default.
+   *
+   * @param {?Profile} _profile The profile shown; null before one is.
+   * @returns {PfOwnedGroup[]}
+   */
+  ownedGroups(_profile) {
+    return [];
+  }
+
+  /**
+   * The settings the own values are taken from and given back to.
+   *
+   * @returns {Record<string, any>}
+   */
+  ownSettings() {
+    return options.prm;
+  }
+
+  /**
+   * The calculator's own values of what the profile does not fill now - a
+   * body it does not have - to show in their place.
+   *
+   * @param {?Profile} profile
+   * @returns {Record<string, any>}
+   */
+  ownInPlace(profile) {
+    const groups = this.ownedGroups(profile).filter((g) => g.show !== false);
+    return pfPickOwn(this.ownPrm, pfSplitOwned(groups).own);
   }
 
   /**
@@ -2147,8 +2186,47 @@ class ProfileBinder {
     return false;
   }
 
+  /**
+   * Store the calculator's settings as its own: what the profile fills now
+   * with the values from before the profile, the rest as it is - and that
+   * rest, where the profile owns it but does not fill it now, becomes the
+   * own value.
+   */
   saveOwn() {
-    // A binder stores the calculator's own values here.
+    const { profile: ownedNow, own } = pfSplitOwned(this.ownedGroups(this.profile()));
+    const current = this.ownCurrent();
+    const kept = pfKeepOwn({ current, own: this.ownPrm, owned: this.ownCopyKeys(current, [...ownedNow, ...own]), ownedNow });
+    this.ownPrm = kept.own;
+    this.storeOwn(kept.stored);
+  }
+
+  /**
+   * The settings about to be stored as the calculator's own.
+   *
+   * @returns {Record<string, any>}
+   */
+  ownCurrent() {
+    return this.ownSettings();
+  }
+
+  /**
+   * The keys the copy of the own values keeps up to date: the owned ones by default.
+   *
+   * @param {Record<string, any>} _current
+   * @param {string[]} owned
+   * @returns {string[]}
+   */
+  ownCopyKeys(_current, owned) {
+    return owned;
+  }
+
+  /**
+   * Write the calculator's own values into its storage.
+   *
+   * @param {Record<string, any>} _stored
+   */
+  storeOwn(_stored) {
+    // A binder saves them under its own key here.
   }
 
   /** Back to the calculator's own settings. */
@@ -2166,9 +2244,12 @@ class ProfileBinder {
     this.recalc();
   }
 
-  /** Put the calculator's own values back into its form; the profile is already left. */
+  /**
+   * Put the calculator's own values back; the profile is already left. A
+   * binder shows them in its form after this.
+   */
   restoreOwn() {
-    // A binder puts the calculator's own values back here.
+    Object.assign(this.ownSettings(), cloneData(this.ownPrm));
   }
 
   /** Recalculate the page after the form was filled from outside. */
@@ -2273,7 +2354,7 @@ class ProfileBinder {
  * @property {string} cookie Where saveOwn() writes the calculator's own values.
  * @property {string} lastKey Calculator name under which the last planet is remembered.
  * @property {PfUniverseField[]} universe The settings that come from the profile's universe.
- * @property {string[]} extraOwnedKeys Keys the profile owns without a field of its own, such as the officers' bonus.
+ * @property {string[]} extraOwnedKeys Keys the account fills without a field of its own, such as the officers' bonus.
  * @property {() => void} [ownSave] The calculator's own save, before the binder took options.save over; options.save by default.
  */
 
@@ -2293,7 +2374,8 @@ class ProfileBinder {
  * through options.save(). What the profile owns is stored with the values it
  * had before the profile, so "no profile" shows the calculator's own again.
  * A subclass gives the configuration and, where it differs, the hooks
- * afterShowPlanet() and afterSaveOwn().
+ * afterShowPlanet() and ownedGroups() - a value it fills in from a body that
+ * may be missing is a group of its own, present while the body is there.
  *
  * @template {PlanetPrmApp} App
  * @extends {ProfileBinder<App>}
@@ -2312,8 +2394,6 @@ class PlanetPrmBinder extends ProfileBinder {
     this.planetSelect = new PfBodySelect(pf, {
       select: '#pf-planet', box: '#pf-planet-box', bodies: (p) => p.planets, lastKey: config.lastKey,
     });
-    /** @type {Record<string, *>} The profile-owned prm keys as the calculator has them. */
-    this.ownPrm = {};
     this.ownSave = config.ownSave ?? options.save;
     /** @type {PfUniverseSetting[]} The universe's settings, set in init(). */
     this.universeSettings = [];
@@ -2341,22 +2421,26 @@ class PlanetPrmBinder extends ProfileBinder {
     return profile?.planets.find((p) => p.id === this.planetId) || null;
   }
 
-  /** The options.prm keys the profile may own. */
-  ownedKeys() {
+  /**
+   * The options.prm keys the profile owns: the account's always, the
+   * planet's while it has the planet, and the universe's while it has a
+   * universe - shown by the universe settings, not given back by the binder.
+   *
+   * @param {?Profile} profile
+   * @returns {PfOwnedGroup[]}
+   */
+  ownedGroups(profile) {
     const { accountFields, planetFields, extraOwnedKeys, universe } = this.config;
-    return [...accountFields, ...planetFields].map((f) => f.prm).concat(extraOwnedKeys, universe.map((u) => u.prm));
+    return [
+      { keys: [...accountFields.map((f) => f.prm), ...extraOwnedKeys], present: true },
+      { keys: planetFields.map((f) => f.prm), present: this.planet(profile) !== null },
+      { keys: universe.map((u) => u.prm), present: !!profile?.universe, show: false },
+    ];
   }
 
   // -------------------------------------------------------------------------
   // Profile -> calculator
   // -------------------------------------------------------------------------
-
-  captureOwn() {
-    /** @type {Record<string, any>} */
-    const prm = options.prm;
-    this.ownPrm = {};
-    this.ownedKeys().forEach((key) => { this.ownPrm[key] = cloneData(prm[key]); });
-  }
 
   /** @param {Profile} profile */
   showProfile(profile) {
@@ -2380,18 +2464,19 @@ class PlanetPrmBinder extends ProfileBinder {
     /** @type {Record<string, any>} */
     const prm = options.prm;
     const planet = this.planet(profile);
-    this.config.planetFields.forEach((f) => {
-      if (planet) f.write(prm, getProfileValue(planet, f.key));
-      else prm[f.prm] = cloneData(this.ownPrm[f.prm]);
-    });
+    if (planet) this.config.planetFields.forEach((f) => f.write(prm, getProfileValue(planet, f.key)));
     this.afterShowPlanet();
+    // What the profile has no entity for is the calculator's own (ownedGroups).
+    Object.assign(prm, this.ownInPlace(profile));
     this.app.restoreFromState();
     this.app.recalc();
   }
 
   /**
    * Called with the planet's fields in options.prm (this.planetId is the planet
-   * shown, null for none), before the form is shown.
+   * shown, null for none), before the form is shown. A subclass writes what
+   * the profile fills here; the own values of what it does not fill
+   * (ownedGroups) are put in after.
    */
   afterShowPlanet() {
     // A subclass fills in what depends on the planet and has no field of its own.
@@ -2401,7 +2486,7 @@ class PlanetPrmBinder extends ProfileBinder {
     this.planetId = null;
     this.universeSettings.forEach((setting) => setting.detach());
     this.planetSelect.hide();
-    Object.assign(options.prm, cloneData(this.ownPrm));
+    super.restoreOwn();
     this.app.restoreFromState();
   }
 
@@ -2417,31 +2502,9 @@ class PlanetPrmBinder extends ProfileBinder {
     this.ownSave();
   }
 
-  /**
-   * The calculator's own storage gets its own fields as they are, and the
-   * profile-owned ones as they were before the profile. With no planet the
-   * planet's fields are the calculator's own, so they are taken as they are,
-   * and so are the universe settings of a profile with no universe.
-   */
-  saveOwn() {
-    /** @type {Record<string, any>} */
-    const prm = options.prm;
-    if (this.planetId === null) {
-      this.config.planetFields.forEach((f) => { this.ownPrm[f.prm] = prm[f.prm]; });
-    }
-    this.afterSaveOwn();
-    if (!this.profile()?.universe) {
-      this.config.universe.forEach((u) => { this.ownPrm[u.prm] = prm[u.prm]; });
-    }
-    saveToCookie(this.config.cookie, { ...prm, ...cloneData(this.ownPrm) });
-  }
-
-  /**
-   * Called before the own values are stored, to take over values that are the
-   * calculator's own only while the profile has no planet.
-   */
-  afterSaveOwn() {
-    // A subclass takes over the values it fills in from the planet here.
+  /** @param {Record<string, any>} stored */
+  storeOwn(stored) {
+    saveToCookie(this.config.cookie, stored);
   }
 
   /** The player picked another planet. */

@@ -64,9 +64,20 @@ class TerraformerProfiles extends PlanetPrmBinder {
       cookie: 'options_terraformer',
       lastKey: 'terraformer',
       universe: [{ kind: PF_UNIVERSE_SPEED, input: '#universe-speed', prm: 'universeSpeed' }],
-      // The officers' bonus follows the officers, and the "from" level is filled in from the planet.
-      extraOwnedKeys: ['energyBonus', 'tfLevelFrom'],
+      // The officers' bonus follows the officers.
+      extraOwnedKeys: ['energyBonus'],
     });
+  }
+
+  /**
+   * The account, the planet and the universe, and the "from" level, filled
+   * in from the planet while the profile has one.
+   *
+   * @param {?Profile} profile
+   * @returns {PfOwnedGroup[]}
+   */
+  ownedGroups(profile) {
+    return [...super.ownedGroups(profile), { keys: ['tfLevelFrom'], present: this.planet(profile) !== null }];
   }
 
   /**
@@ -77,15 +88,9 @@ class TerraformerProfiles extends PlanetPrmBinder {
     /** @type {Record<string, any>} */
     const prm = options.prm;
     const planet = this.planet(this.profile());
-    prm.tfLevelFrom = planet ? pfNum(getProfileValue(planet, 'building.33', 0)) : cloneData(this.ownPrm.tfLevelFrom);
-    if (planet && pfNum(prm.tfLevelTo) <= prm.tfLevelFrom) prm.tfLevelTo = prm.tfLevelFrom + 1;
-  }
-
-  /**
-   * With no planet "from" is the calculator's own, so it is taken as it is.
-   */
-  afterSaveOwn() {
-    if (this.planetId === null) this.ownPrm.tfLevelFrom = options.prm.tfLevelFrom;
+    if (!planet) return;
+    prm.tfLevelFrom = pfNum(getProfileValue(planet, 'building.33', 0));
+    if (pfNum(prm.tfLevelTo) <= prm.tfLevelFrom) prm.tfLevelTo = prm.tfLevelFrom + 1;
   }
 }
 

@@ -107,8 +107,8 @@ class MoonProfiles extends PlanetPrmBinder {
       cookie: 'options_moon',
       lastKey: 'moon',
       universe: MOON_UNIVERSE_FIELDS,
-      // The class is two checkboxes, the phalanx level is the moon's, and "your system" is filled in from the moon.
-      extraOwnedKeys: ['isGeneral', 'isDiscoverer', 'phalanxLevel', 'ownSystem'],
+      // The class is two checkboxes; the moon's keys are in ownedGroups().
+      extraOwnedKeys: ['isGeneral', 'isDiscoverer'],
     });
     /** @type {?string} The moon shown; null leaves its fields to the calculator. */
     this.moonId = null;
@@ -122,6 +122,23 @@ class MoonProfiles extends PlanetPrmBinder {
   /** @returns {PfFieldGroup[]} The account and the planet, and the moon picked in #pf-moon. */
   fieldGroups() {
     return [...super.fieldGroups(), { scope: 'moon', entity: (p) => this.moon(p), fields: MOON_MOON_FIELDS, settings: () => options.prm }];
+  }
+
+  /**
+   * The account, the planet and the universe, and the moon: its phalanx while
+   * the profile has the moon, and "your system", filled in from it, while
+   * the moon's system is known.
+   *
+   * @param {?Profile} profile
+   * @returns {PfOwnedGroup[]}
+   */
+  ownedGroups(profile) {
+    const moon = this.moon(profile);
+    return [
+      ...super.ownedGroups(profile),
+      { keys: MOON_MOON_FIELDS.map((f) => f.prm), present: moon !== null },
+      { keys: ['ownSystem'], present: !!moon?.coords?.system },
+    ];
   }
 
   init() {
@@ -175,11 +192,8 @@ class MoonProfiles extends PlanetPrmBinder {
     const prm = options.prm;
     Object.assign(prm, moonClassToPrm(getProfileValue(profile.account, 'class', 0)));
     const moon = this.moon(profile);
-    MOON_MOON_FIELDS.forEach((f) => {
-      if (moon) f.write(prm, getProfileValue(moon, f.key));
-      else prm[f.prm] = cloneData(this.ownPrm[f.prm]);
-    });
-    prm.ownSystem = moon?.coords?.system || cloneData(this.ownPrm.ownSystem);
+    if (moon) MOON_MOON_FIELDS.forEach((f) => f.write(prm, getProfileValue(moon, f.key)));
+    if (moon?.coords?.system) prm.ownSystem = moon.coords.system;
   }
 
   restoreOwn() {
@@ -209,18 +223,6 @@ class MoonProfiles extends PlanetPrmBinder {
    */
   writeBackExtra(profile) {
     return this.writeBackValue(profile.account, 'class', 'class', moonClassFromPrm(options.prm, this.snapshot.class));
-  }
-
-  /**
-   * The phalanx level and "your system" are the calculator's own while the
-   * profile has no moon to fill them in from.
-   */
-  afterSaveOwn() {
-    /** @type {Record<string, any>} */
-    const prm = options.prm;
-    const moon = this.moon(this.profile());
-    if (!moon) this.ownPrm.phalanxLevel = prm.phalanxLevel;
-    if (!moon?.coords?.system) this.ownPrm.ownSystem = prm.ownSystem;
   }
 
   /**
