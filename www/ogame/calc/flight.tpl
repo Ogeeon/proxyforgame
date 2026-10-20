@@ -27,6 +27,7 @@
   <!-- Player profiles -->
   <script src="/ogame/calc/js/profiles-core.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/profiles-core.js'); ?>" defer></script>
   <script src="/ogame/calc/js/profiles-store.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/profiles-store.js'); ?>" defer></script>
+  <script src="/ogame/calc/js/profiles-fields.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/profiles-fields.js'); ?>" defer></script>
   <script src="/ogame/calc/js/profiles-ui.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/profiles-ui.js'); ?>" defer></script>
   <script src="/ogame/calc/js/own-api.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/own-api.js'); ?>" defer></script>
   <script src="/ogame/calc/js/flight-core.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/flight-core.js'); ?>" defer></script>

@@ -2,8 +2,8 @@
 // Player profiles: the selector in the top bar and its dialogs (ADR-0004).
 // Included by topbar_bs.tpl on a calculator page that sets $withProfiles to
 // true before including the top bar; the scripts (profiles-core.js,
-// profiles-store.js, profiles-ui.js) are loaded by the calculator template
-// itself, so its TypeScript project sees them.
+// profiles-store.js, profiles-fields.js, profiles-ui.js, in that order) are
+// loaded by the calculator template itself, so its TypeScript project sees them.
 require_once __DIR__ . '/universes.inc.php';
 $pfCountries = loadUniverseCountries($lang);
 $pfUniverses = loadUniverses($pfCountries);

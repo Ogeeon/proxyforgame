@@ -25,6 +25,7 @@
   <!-- Player profiles -->
   <script src="/ogame/calc/js/profiles-core.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/profiles-core.js'); ?>" defer></script>
   <script src="/ogame/calc/js/profiles-store.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/profiles-store.js'); ?>" defer></script>
+  <script src="/ogame/calc/js/profiles-fields.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/profiles-fields.js'); ?>" defer></script>
   <script src="/ogame/calc/js/profiles-ui.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/profiles-ui.js'); ?>" defer></script>
   <script src="/ogame/calc/js/trade-core.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/trade-core.js'); ?>" defer></script>
   <script src="/ogame/calc/js/trade.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/trade.js'); ?>" defer></script>
