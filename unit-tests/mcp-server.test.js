@@ -585,13 +585,30 @@ describe('MCP moon tools', () => {
         expect(out.unitsForMaxChance['rocket-launcher']).toBe(undefined);
     });
 
-    it('ogame_moon_creation: counts defence when the universe sends it to debris', async () => {
+    it('ogame_moon_creation: counts defence at the universe\'s defence share, ships at theirs', async () => {
         const site = fakeSiteApi({ 'en-9': { debrisFactor: '0.5', debrisFactorDef: '0.3', deuteriumInDebris: '0' } });
         const out = (await call(protocolWith(site), 'ogame_moon_creation', {
-            universe: { country: 'en', number: 9 }, destroyed: { 'rocket-launcher': 100 },
+            universe: { country: 'en', number: 9 }, destroyed: { 'rocket-launcher': 100, 'light-fighter': 10 },
         })).structuredContent;
-        expect(out.assumptions.defenceToDebris).toBe(true);
-        expect(out.debris.metal).toBe(100000);
+        expect(out.assumptions).toEqual({ debrisPercent: 50, defenceDebrisPercent: 30, deuteriumInDebris: false });
+        // 100 rocket launchers (2000 metal) at 30%, 10 light fighters (3000/1000) at 50%.
+        expect(out.debris.metal).toBe(100 * 2000 * 0.3 + 10 * 3000 * 0.5);
+        expect(out.debris.crystal).toBe(10 * 1000 * 0.5);
+    });
+
+    it('ogame_moon_creation: a defence share given by hand wins over the universe\'s', async () => {
+        const site = fakeSiteApi({ 'en-9': { debrisFactor: '0.5', debrisFactorDef: '0.3', deuteriumInDebris: '0' } });
+        const out = (await call(protocolWith(site), 'ogame_moon_creation', {
+            universe: { country: 'en', number: 9 }, destroyed: { 'rocket-launcher': 100 }, defenceDebrisPercent: 10,
+        })).structuredContent;
+        expect(out.debris.metal).toBe(20000);
+        expect(out.assumptions.defenceDebrisPercent).toBe(10);
+    });
+
+    it('ogame_moon_creation: no defence in the field without a universe or a share', async () => {
+        const out = (await call(protocolWith(), 'ogame_moon_creation', { destroyed: { 'rocket-launcher': 100 } })).structuredContent;
+        expect(out.debris.total).toBe(0);
+        expect(out.assumptions.defenceDebrisPercent).toBe(0);
     });
 
     it('ogame_phalanx: wraps round a circular galaxy and names the level a target needs', async () => {

@@ -62,14 +62,11 @@ function createMoonTools({ siteApi }) {
             type: 'object',
             properties: {
                 destroyed: common.keyedMap(UNITS.map((unit) => unit.id), { type: 'integer', minimum: 0 },
-                    'Units destroyed in the battle, ships and defence alike. Solar satellites always feed the debris '
-                    + 'field; defence only when the universe sends defence to debris.'),
+                    'Units destroyed in the battle, ships and defence alike. Ships and solar satellites feed the '
+                    + 'debris field at the ships\' share, defence at its own.'),
                 universe: common.universeSchema,
                 ...common.debrisSchema,
-                defenceToDebris: {
-                    type: 'boolean',
-                    description: 'Destroyed defence becomes debris too. Read from `universe` when given, else no.',
-                },
+                defenceDebrisPercent: common.defenceDebrisSchema,
                 moonEvent: { type: 'boolean', default: false, description: 'A moon event is on: the chance caps at 40% instead of 20%.' },
                 supraRefractor: common.level('Kaelesh Supra Refractor level: +0.5% chance and diameter per level'),
                 hyperspaceTechnology: common.level('Hyperspace Technology level: recycler capacity', 50),
@@ -85,28 +82,15 @@ function createMoonTools({ siteApi }) {
             if (!Object.values(counts).some((n) => n > 0)) {
                 throw new ToolError('Nothing was destroyed: give at least one unit in `destroyed`.');
             }
-            // Only whether defence feeds the field matters here, not its share:
-            // the moon core puts it in at the ships' share.
-            /** @type {number|undefined} */
-            let defenceDebrisPercent;
-            if (args.defenceToDebris !== undefined) {
-                defenceDebrisPercent = args.defenceToDebris ? 1 : 0;
-            }
-            const debris = await common.debrisSettings({
-                universe: args.universe,
-                debrisPercent: args.debrisPercent,
-                deuteriumInDebris: args.deuteriumInDebris,
-                defenceDebrisPercent,
-            }, siteApi);
-            const defenceToDebris = args.defenceToDebris ?? debris.defenceDebrisPercent > 0;
+            const debris = await common.debrisSettings(args, siteApi);
 
             const r = calc.computeCreate({
                 counts,
                 debrisPercent: debris.debrisPercent,
+                defenseDebrisPercent: debris.defenceDebrisPercent,
                 hyperTechLevel: args.hyperspaceTechnology,
                 isGeneral: args.general,
                 rcCapacityIncrease: args.recyclerCargoIncrease,
-                defenseToDebris: defenceToDebris,
                 deutToDebris: debris.deuteriumInDebris,
                 promoMoon: args.moonEvent,
                 supraRefractorLevel: args.supraRefractor,
@@ -131,7 +115,7 @@ function createMoonTools({ siteApi }) {
                 recyclerCapacity: r.recyclerCapacity,
                 unitsCost: { metal: r.metalRequired, crystal: r.crystalRequired, deuterium: r.deuteriumRequired },
                 unitsForMaxChance,
-                assumptions: { ...debris, defenceToDebris },
+                assumptions: debris,
                 unitNames: Object.fromEntries(UNITS.map((u) => [u.id, NAMES[u.id] ?? u.id])
                     .filter(([id]) => counts[id] > 0)),
             };

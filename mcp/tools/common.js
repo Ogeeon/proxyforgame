@@ -93,6 +93,12 @@ const debrisSchema = {
     },
 };
 
+/** The `defenceDebrisPercent` argument, for the tools that count destroyed defence. */
+const defenceDebrisSchema = {
+    type: 'integer', minimum: 0, maximum: 100,
+    description: 'Share of destroyed defence that becomes debris, in percent. Read from `universe` when given, else 0.',
+};
+
 /** The `universeSpeed` argument. */
 const universeSpeedSchema = {
     type: 'number', minimum: 1, maximum: 10,
@@ -271,6 +277,7 @@ module.exports = {
     universeRef,
     economySpeed,
     debrisSettings,
+    defenceDebrisSchema,
     debrisSchema,
     level,
     percent,
