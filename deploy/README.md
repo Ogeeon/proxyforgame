@@ -295,13 +295,32 @@ answers with data (which is `.env` plus MySQL), the deployed commit equals the
 newest commit of `main` whose CI passed - with a fifteen-minute grace - the PHP
 in the health report equals `.php-version`, the installed `webhook.php` matches
 the repository's copy, and every reported job finished within its window, with
-status 0. Each name is asked with full certificate verification, and a
+status 0, and apt has been patching the host (see *OS patching*). Each name is asked with full certificate verification, and a
 certificate with under 14 days left fails the run: certbot renews 30 days
 ahead, so that means renewal broke.
 
 `bash deploy/watchdog.sh` runs the same checks from a laptop; a name as an
 argument limits it to that name. It needs `curl`, `node` and, for the commit
 comparison, `gh`.
+
+## OS patching
+
+The host patches itself with `unattended-upgrades`: security pocket only, no
+automatic reboot (one host, no standby — a reboot at a random hour is an
+outage). It needs `apt-daily.timer` and `apt-daily-upgrade.timer` **enabled**;
+`20auto-upgrades` alone does nothing without them, and on this host they were
+off for months with an empty log (found 2026-10-23).
+
+`ajax.php?service=health` publishes three ages from `PATCH_STAMP_DIR`
+(`/var/lib/apt/periodic`) and `REBOOT_FLAG_FILE` (`/var/run/reboot-required`),
+both in the checkout's `.env`. The watchdog fails the run when `apt update` or
+`unattended-upgrade` last ran over three days ago, or when a reboot has been
+pending for over a week. A reboot flag younger than that is normal: reboot in a
+quiet hour, then check `systemctl --failed` and the site.
+
+Ubuntu fixes security bugs by backporting, so `php8.5 8.5.4-0ubuntu1.5` can
+carry a fix that upstream shipped as 8.5.12. Check the CVE in the Ubuntu
+tracker, not the version number.
 
 ## Rebuilding the host
 

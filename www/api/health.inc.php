@@ -25,8 +25,42 @@
         'webhook' => healthWebhookHash(getenv('WEBHOOK_FILE')),
         // Cast so an empty result encodes as {} and not as [] - the watchdog
         // indexes this by job name.
-        'jobs'   => (object)healthJobStamps(getenv('JOB_STAMP_DIR'))
+        'jobs'   => (object)healthJobStamps(getenv('JOB_STAMP_DIR')),
+        // How stale the host's OS patching is. NULL where it is not configured.
+        'patching' => healthPatching(getenv('PATCH_STAMP_DIR'), getenv('REBOOT_FLAG_FILE'))
       );
+  }
+
+  /**
+   * Ages, in seconds, of the files apt leaves behind: the last successful
+   * `apt update`, the last unattended-upgrade run, and the reboot-required flag.
+   *
+   * Like the cron stamps this makes silence measurable - a timer that was
+   * switched off writes nothing, and this host went months that way unnoticed.
+   * Only ages are published, never package names. A key is NULL when its file
+   * does not exist: for the first two that is the finding, for the reboot flag
+   * it is the healthy answer.
+   *
+   * Returns NULL when no stamp directory is configured, which is every host but
+   * the one running apt.
+   */
+  function healthPatching($dir, $rebootFlag) {
+      if (!is_string($dir) || $dir === '' || !is_dir($dir)) {
+          return null;
+      }
+      $dir = rtrim($dir, '/\\');
+      return array(
+        'updateAgeSeconds'         => healthFileAge($dir . '/update-success-stamp'),
+        'upgradeAgeSeconds'        => healthFileAge($dir . '/unattended-upgrades-stamp'),
+        'rebootRequiredAgeSeconds' => is_string($rebootFlag) && $rebootFlag !== ''
+                                        ? healthFileAge($rebootFlag) : null
+      );
+  }
+
+  /** Seconds since the file was last modified, or NULL if it does not exist. */
+  function healthFileAge($path) {
+      $mtime = @filemtime($path);
+      return $mtime === false ? null : max(0, time() - $mtime);
   }
 
   /**

@@ -36,6 +36,11 @@ DEPLOY_GRACE=900
 # Certbot renews 30 days ahead, so a certificate under this has missed two weeks
 # of daily attempts.
 CERT_MIN_DAYS=14
+# OS patching: apt runs daily, so a stamp older than three days means the timer
+# stopped or the run keeps failing. A reboot flag is normal right after an
+# update; one a week old means nobody acted on it.
+PATCH_MAX_AGE=259200
+REBOOT_MAX_AGE=604800
 # The MCP server at /mcp. Until it is set up on the host (deploy/README.md, "The
 # MCP server") Apache answers that path with a 404, which only warns; once it
 # is, set the repository variable PFG_MCP_REQUIRED=1 and a missing endpoint fails.
@@ -74,6 +79,9 @@ read_health() {
     for (const [name, job] of Object.entries(d.jobs || {})) {
       console.log("job " + name + " " + job.ageSeconds + " " + job.status);
     }
+    const p = d.patching;
+    const age = v => (v === null || v === undefined) ? "none" : v;
+    console.log(p ? "patching " + age(p.updateAgeSeconds) + " " + age(p.upgradeAgeSeconds) + " " + age(p.rebootRequiredAgeSeconds) : "patching off");
   ' "$file"
   return $?
 }
@@ -320,6 +328,40 @@ check_host() {
       ok "$job ran $((age / 3600))h ago"
     fi
   done <<< "$jobs"
+
+  # ---- OS patching ----
+  local patching update_age upgrade_age reboot_age
+  patching=$(echo "$health" | sed -n 's/^patching //p')
+  if [[ "$patching" = off ]]; then
+    warn "health reports no patching state - set PATCH_STAMP_DIR in the checkout's .env"
+  else
+    read -r update_age upgrade_age reboot_age <<< "$patching"
+    check_patch_age "apt update" "$update_age"
+    check_patch_age "unattended-upgrade" "$upgrade_age"
+    if [[ "$reboot_age" = none ]]; then
+      ok "no reboot pending"
+    elif ! [[ "$reboot_age" =~ ^[0-9]+$ ]]; then
+      fail "reboot flag reports no usable age ($reboot_age)"
+    elif [[ "$reboot_age" -gt "$REBOOT_MAX_AGE" ]]; then
+      fail "reboot pending for $((reboot_age / 86400)) days - schedule one (deploy/README.md, OS patching)"
+    else
+      ok "reboot pending for $((reboot_age / 3600))h"
+    fi
+  fi
+}
+
+# check_patch_age <label> <age|none>: one apt stamp must be recent.
+check_patch_age() {
+  local label="$1" age="$2"
+  if [[ "$age" = none ]]; then
+    fail "$label has never run - are apt-daily*.timer enabled?"
+  elif ! [[ "$age" =~ ^[0-9]+$ ]]; then
+    fail "$label reports no usable age ($age)"
+  elif [[ "$age" -gt "$PATCH_MAX_AGE" ]]; then
+    fail "$label last ran $((age / 86400)) days ago, over the $((PATCH_MAX_AGE / 86400))-day limit - are apt-daily*.timer enabled?"
+  else
+    ok "$label ran $((age / 3600))h ago"
+  fi
 }
 
 # ---------------------------------------------------------------------------
