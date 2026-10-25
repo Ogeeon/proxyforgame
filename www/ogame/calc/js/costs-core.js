@@ -478,14 +478,19 @@ class Calculator {
     );
     let resources = baseResources;
 
-    // Apply LF cost reductions
+    // Apply LF cost reductions. The game builds one level at a time and rounds
+    // each level's reduced cost down on its own, so a range is the sum of its
+    // levels - flooring the reduced total once would charge up to a unit more
+    // per level than the game does (lfcosts and terraformer count the same way).
     const costFactor = this._lfCostFactor(request.techId, params);
     if (costFactor < 1) {
-      resources = {
-        metal: Math.floor(resources.metal * costFactor),
-        crystal: Math.floor(resources.crystal * costFactor),
-        deuterium: Math.floor(resources.deuterium * costFactor)
-      };
+      resources = { metal: 0, crystal: 0, deuterium: 0 };
+      for (const [from, to] of this._levelSteps(request.fromLevel, request.toLevel)) {
+        const step = this._calculateResources(request.techId, from, to, params.ionTechLevel);
+        resources.metal += Math.floor(step.metal * costFactor);
+        resources.crystal += Math.floor(step.crystal * costFactor);
+        resources.deuterium += Math.floor(step.deuterium * costFactor);
+      }
     }
 
     // Calculate energy cost (consumption or production)
@@ -503,10 +508,14 @@ class Calculator {
       params
     );
 
-    // Apply LF time reductions
+    // Apply LF time reductions, level by level as the costs above
     const timeFactor = this._lfTimeFactor(request.techId, params);
     if (timeFactor < 1) {
-      time = Math.floor(time * timeFactor);
+      time = 0;
+      for (const [from, to] of this._levelSteps(request.fromLevel, request.toLevel)) {
+        const step = this._calculateTime(request.techId, from, to, request.isMoon, params);
+        time += Math.floor(step * timeFactor);
+      }
     }
 
     // Calculate points gained/lost (from the cost before any LF reduction)
@@ -755,6 +764,27 @@ class Calculator {
       return -Math.floor((buildCost.metal + buildCost.crystal + buildCost.deuterium) / 1000);
     }
   }
+
+  /**
+   * The single-level steps a range is built in: [3, 4], [4, 5] for 3 -> 5,
+   * or [5, 4], [4, 3] for a demolition from 5 to 3.
+   * @private
+   * @param {number} fromLevel
+   * @param {number} toLevel
+   * @returns {Array<[number, number]>}
+   */
+  _levelSteps(fromLevel, toLevel) {
+    /** @type {Array<[number, number]>} */
+    const steps = [];
+    const dir = toLevel > fromLevel ? 1 : -1;
+    const count = Math.abs(toLevel - fromLevel);
+    for (let i = 0; i < count; i++) {
+      const level = fromLevel + i * dir;
+      steps.push([level, level + dir]);
+    }
+    return steps;
+  }
+
   /**
    * Calculate the LF cost multiplier for a tech (1 = no reduction)
    * @private

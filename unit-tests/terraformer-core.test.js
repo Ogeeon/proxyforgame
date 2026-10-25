@@ -306,6 +306,16 @@ describe('Terraformer Calculator - Life-form cost reduction', () => {
         expect(r.secsTF).toBe(expected('secsTF'));
     });
 
+    it('floors the time of each level of a range, not the range total (#58)', () => {
+        // Levels 5, 6, 7 at robotics 10 take 69818, 209454 and 418909 s (698181 in
+        // all). A quarter off each, floored: 52363 + 157090 + 314181 = 523634 s,
+        // where flooring 75% of the total would give 523635 s.
+        const r = compute({ tfLevelFrom: 4, tfLevelTo: 7, robotsFactoryLevel: 10, lfTerraformerRdc: 25 });
+        expect(r.secsTF).toBe(523634);
+        expect(r.crysTF).toBe(4200000);
+        expect(r.deutTF).toBe(8400000);
+    });
+
     it('shortens the build time as well', () => {
         const plain = compute({ tfLevelTo: 2, robotsFactoryLevel: 10 });
         const reduced = compute({ tfLevelTo: 2, robotsFactoryLevel: 10, lfTerraformerRdc: 20 });
