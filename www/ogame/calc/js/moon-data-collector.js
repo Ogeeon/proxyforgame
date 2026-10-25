@@ -19,7 +19,7 @@ class MoonDataCollector {
       hyperTechLevel: getInputNumber($('#hypertech-lvl')),
       isGeneral: getChecked('#general-class'),
       rcCapacityIncrease: getInputNumber($('#rc-capacity-increase')),
-      defenseToDebris: getChecked('#defense-to-debris'),
+      defenseDebrisPercent: Number.parseInt(getVal('#defense-debris-percent'), 10) || 0,
       deutToDebris: getChecked('#deut-to-debris'),
       promoMoon: getChecked('#promo-moon'),
       supraRefractorLevel: getInputNumber($('#supra-refractor')),

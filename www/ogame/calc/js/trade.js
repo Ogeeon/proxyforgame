@@ -36,14 +36,11 @@ const TRADE_SHORT_LABELS = { metal: 'met', crystal: 'crys', deuterium: 'deut' };
 const TRADE_SRC_RESOURCES = ['metal', 'crystal', 'deuterium'];
 
 /**
- * The rates a fresh form starts from: the middle of each fair-trade range.
- * @returns {{md: number, cd: number, mc: number}}
+ * What the last options.parseFromUri() took from the link: the exchange rates,
+ * the universe and the coordinates. The profile binder reads it once, on load,
+ * to let the link win over the active profile (see takeLinkOverrides()).
  */
-function defaultRates() {
-    const md = (TRADE_RATE_LIMITS.md.min + TRADE_RATE_LIMITS.md.max) / 2;
-    const cd = (TRADE_RATE_LIMITS.cd.min + TRADE_RATE_LIMITS.cd.max) / 2;
-    return { md, cd, mc: tradeMcRate(md, cd) };
-}
+let linkOverrides = { rates: false, universe: false, coords: false };
 
 let options = {
     metal: 0,
@@ -55,7 +52,7 @@ let options = {
     // mc is stored, not derived: saveToCookie JSON-encodes this object and
     // loadFromCookie replaces it with the parsed result, which would drop an
     // accessor. syncMcRate() is what keeps it in step with md and cd.
-    rates: defaultRates(),
+    rates: tradeDefaultRates(),
 
     srcType: 2,
     dstType: 2,
@@ -120,14 +117,14 @@ let options = {
             // it as the toFixed string it used to be.
             //
             // Widen to unknown before testing: the declared type comes from
-            // defaultRates() and says "always an object", which would make the
+            // tradeDefaultRates() and says "always an object", which would make the
             // null arm dead code to a reader and to the analyzer alike. It is
             // not — loadFromCookie just overwrote the property, and `typeof
             // null` is 'object', so null is exactly the case the typeof test
             // lets through.
             const loaded = /** @type {unknown} */ (this.rates);
             if (typeof loaded !== 'object' || loaded === null) {
-                this.rates = defaultRates();
+                this.rates = tradeDefaultRates();
             }
             syncMcRate();
         } catch(e) {
@@ -165,6 +162,7 @@ let options = {
     _parseRatesFromParams: function(prm) {
         if (isset(prm['rmd'])) this.rates.md = validateNumber(Number.parseFloat(prm['rmd']), 1, 5, this.rates.md);
         if (isset(prm['rcd'])) this.rates.cd = validateNumber(Number.parseFloat(prm['rcd']), 1, 5, this.rates.cd);
+        if (isset(prm['rmd']) || isset(prm['rcd'])) linkOverrides.rates = true;
         syncMcRate();
     },
 
@@ -217,6 +215,7 @@ let options = {
             if (m.length == 2) {
                 this.country = checkCountryLang(m[0]);
                 this.universe = validateNumber(Number.parseInt(m[1]), 0, Infinity, 101);
+                linkOverrides.universe = true;
             }
         }
 
@@ -226,6 +225,7 @@ let options = {
                 this.coordg = validateNumber(Number.parseInt(m[0]), 0, 12, 0);
                 this.coords = validateNumber(Number.parseInt(m[1]), 0, 550, 0);
                 this.coordp = validateNumber(Number.parseInt(m[2]), 0, 15, 0);
+                linkOverrides.coords = true;
             }
         }
 
@@ -607,7 +607,7 @@ function updateDstInputState(resEnable) {
 }
 
 function resetParams() {
-    options.rates = defaultRates();
+    options.rates = tradeDefaultRates();
     options.srcType = 2;
     options.dstType = 2;
     options.dstMixType = 0;
@@ -797,16 +797,35 @@ function initMixSlider(sliderId, fieldId, mixType, value, store) {
     });
 }
 
-/** Puts the loaded options into the form. */
-function renderInitialState() {
+/**
+ * Shows the account, the rates, the universe and the coordinates of the model
+ * in the form. The profile binder calls it after it changed them in options.
+ */
+function restoreFromState() {
     setVal('#hypertech-lvl', options.hyperTech);
     setChecked('#player-class-' + options.playerClass, true);
-    inputEl('#sc-capacity-increase')._constrains = { min: 0, def: 0, allowFloat: true, allowNegative: false };
-    inputEl('#lc-capacity-increase')._constrains = { min: 0, def: 0, allowFloat: true, allowNegative: false };
     setNumVal('#sc-capacity-increase', options.scCapacityIncrease);
     setNumVal('#lc-capacity-increase', options.lcCapacityIncrease);
     setVal('#country', options.country);
     setUniList(options.country, options.universe);
+
+    setVal('#rate-md', options.rates.md);
+    setVal('#rate-cd', options.rates.cd);
+    setVal('#md-slider', options.rates.md);
+    setVal('#cd-slider', options.rates.cd);
+    renderMcRate();
+    validateRateLimits();
+
+    setVal('#coord-g', options.coordg ? options.coordg : '');
+    setVal('#coord-s', options.coords ? options.coords : '');
+    setVal('#coord-p', options.coordp ? options.coordp : '');
+    setChecked('#moon', options.moon);
+}
+
+/** Puts the loaded options into the form. */
+function renderInitialState() {
+    inputEl('#sc-capacity-increase')._constrains = { min: 0, def: 0, allowFloat: true, allowNegative: false };
+    inputEl('#lc-capacity-increase')._constrains = { min: 0, def: 0, allowFloat: true, allowNegative: false };
 
     setTextContent('#rate-md-min', TRADE_RATE_LIMITS.md.min.toFixed(1));
     setTextContent('#rate-md-max', TRADE_RATE_LIMITS.md.max.toFixed(1));
@@ -814,17 +833,29 @@ function renderInitialState() {
     setTextContent('#rate-cd-max', TRADE_RATE_LIMITS.cd.max.toFixed(1));
     setTextContent('#rate-mc-min', TRADE_RATE_LIMITS.mc.min.toFixed(1));
     setTextContent('#rate-mc-max', TRADE_RATE_LIMITS.mc.max.toFixed(1));
-    setVal('#rate-md', options.rates.md);
-    setVal('#rate-cd', options.rates.cd);
-    renderMcRate();
     setVal('#mix-balance-proc', options.mixBalance);
     setVal('#mix-balance-prop1', options.mixProp1);
     setVal('#mix-balance-prop2', options.mixProp2);
     setVal('#mix-src-balance-proc', options.mixSrcBalance);
-    setVal('#coord-g', options.coordg ? options.coordg : '');
-    setVal('#coord-s', options.coords ? options.coords : '');
-    setVal('#coord-p', options.coordp ? options.coordp : '');
-    setChecked('#moon', options.moon);
+    restoreFromState();
+}
+
+/**
+ * What the link brought, handed over once: the binder lets those values win
+ * over the profile on the first apply after the page loaded.
+ * @returns {{rates: boolean, universe: boolean, coords: boolean}}
+ */
+function takeLinkOverrides() {
+    const taken = linkOverrides;
+    linkOverrides = { rates: false, universe: false, coords: false };
+    return taken;
+}
+
+/** What the profile binder drives: the form from the model, and the recalculation. */
+const tradeApp = { restoreFromState, recalc: updateNumbers, setUniList, takeLinkOverrides };
+
+if (typeof globalThis !== 'undefined') {
+    globalThisRecord().tradeApp = tradeApp;
 }
 
 /** The six preset exchange rates above the sliders. */
@@ -986,7 +1017,7 @@ try {
         addEvent(input, 'focusout', function() { input.classList.remove('ui-state-focus'); });
     }
 
-    addEvent('#reset_bs', 'click', resetParams);
+    addEvent('#reset', 'click', resetParams);
     initRateButtons();
     validateRateLimits();
     initTypeRadios();
@@ -1003,6 +1034,8 @@ try {
     }
 
     onUpdateSrcType();
+    // After everything above: the binder takes over options.save().
+    if (typeof initTradeProfiles === 'function') initTradeProfiles();
 } catch (e) {
     await showAlertModal('Exception: ' + e, getOptionValue('dialogOk', 'OK'));
 }

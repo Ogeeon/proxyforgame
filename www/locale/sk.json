@@ -137,11 +137,6 @@
     "lf-bonuses-api-import-hint": "Všetky tieto hodnoty môžete tiež získať automaticky pomocou tlačidla „Import z OGame“ (ikona schránky) v hornej časti formulára.",
     "universe": "Vesmír",
     "profile": "Profil",
-    "no-profile-name-msg": "Uveďte názov profilu.",
-    "no-profile-selected-msg": "Nie je vybratý žiadny profil.",
-    "del-profile-confirm": "Naozaj chcete odstrániť tento profil?",
-    "owr-profile-confirm": "Naozaj chcete prepísať tento profil?",
-    "load-profile-confirm": "Naozaj chcete načítať tento profil? Aktuálne zadané údaje sa stratia.",
     "server-data-failed-msg": "Nepodarilo sa načítať nastavenia vesmíru. Skontrolujte hodnoty nižšie a opravte ich ručne.",
     "fetching-data": "Načítavanie údajov...",
     "universe-load": "Naložiť",
@@ -159,7 +154,6 @@
     "lc": "Veľký transportér",
     "nanites-factory-level": "Úroveň nanotech. tovární",
     "shipyard-level": "Úroveň lodeníc",
-    "energy-bonus": "Bonus energie",
     "none": "Žiadne",
     "race": "Forma Života",
     "race-1": "Ľudia",
@@ -189,6 +183,7 @@
     "disr-chamber": "Komora porušenia",
     "disr-chamber-bonus": "Bonus Komory porušenia",
     "total-lf-energy-bonus": "Celkový bonus Foriem života pre produkciu energie",
+    "lf-terraformer-rdc": "Zníženie nákladov na terraformer",
     "lf-tech-bonus": "Technologický bonus Foriem života",
     "country": "Krajina",
     "res-available": "Dostupné zdroje",
@@ -204,7 +199,6 @@
     "plasma-tech": "Plazmové technológie",
     "planet-pos": "Pozícia",
     "cargo-increase": "Kapacita nákladu",
-    "all-officers": "Všetkých 5 veliteľov",
     "circular": "Krozna:",
     "circ-systems": "Slnečná sústava",
     "circ-systems-explain": "Razdalja med 1:1:1 in 1:499:1, je enaka kot razdalja med 1:1:1 in 1:2:1",
@@ -214,7 +208,72 @@
     "character-bonus-hint": "Ak chcete získať tieto bonusy, prejdite do Nastavenia zdrojov - Bonusy hráča Foriem života,\npotom prejdite nadol k 'Bonusom triedy postavy'.",
     "collectors-character-bonus": "Bonus triedy postavy Zberateľa",
     "lf-class-bonus": "Bonus triedy",
-    "lf-class-bonus-hint": "Zadajte hodnotu 'Spolu' z tabuľky OGame s bonusmi foriem života k bonusom tried, riadok 'Collector'."
+    "lf-class-bonus-hint": "Zadajte hodnotu 'Spolu' z tabuľky OGame s bonusmi foriem života k bonusom tried, riadok 'Collector'.",
+    "pf-no-profile": "Bez profilu",
+    "pf-import": "Importovať z OGame…",
+    "pf-create": "Nový profil…",
+    "pf-manage": "Spravovať profily…",
+    "pf-import-hdr": "Import údajov účtu",
+    "pf-import-hint": "Vložte údaje exportované skriptom <a href=\"https://github.com/Rivenscryr/origin-exporter\" target=\"_blank\" rel=\"noopener\">Origin Exporter</a> (v OGame: ikona Impérium → Export account data) alebo vyberte stiahnutý súbor. Skript vytvoril autor Antigame Reborn.",
+    "pf-file": "Súbor",
+    "pf-import-universe-hint": "Údaje neuvádzajú, z ktorého vesmíru pochádzajú. Vyberte ho:",
+    "pf-import-btn": "Importovať",
+    "pf-import-err-json": "Toto nie je platný JSON.",
+    "pf-import-err-shape": "Toto nie sú údaje účtu z Origin Exporter.",
+    "pf-import-err-schema": "Táto verzia formátu Origin Exporter zatiaľ nie je podporovaná.",
+    "pf-pick-universe": "Vyberte vesmír.",
+    "pf-import-done": "Profil „{0}“: planét pridaných {1}, aktualizovaných {2}, odstránených {3}.",
+    "pf-props-hdr": "Profil",
+    "pf-name": "Názov",
+    "pf-universe-optional": "Vesmír (nepovinné):",
+    "pf-universe-locked": "Vesmír prišiel s importovanými údajmi a nedá sa zmeniť.",
+    "pf-name-required": "Zadajte názov.",
+    "pf-manage-hdr": "Profily",
+    "pf-source": "Importovaný",
+    "pf-edit": "Upraviť",
+    "pf-no-universe": "nenastavený",
+    "pf-delete-confirm": "Odstrániť profil „{0}“? Táto akcia sa nedá vrátiť.",
+    "pf-merge-hdr": "Zlúčenie profilov",
+    "pf-merge-from": "Zlúčiť profil",
+    "pf-merge-into": "s profilom",
+    "pf-merge": "Zlúčiť",
+    "pf-merge-hint": "Druhý profil si ponechá všetky svoje hodnoty a z prvého prevezme len to, čo mu chýba; prvý profil sa odstráni.",
+    "pf-merge-confirm": "Zlúčiť „{0}“ s „{1}“? Profil „{0}“ bude odstránený.",
+    "pf-merge-same": "Vyberte dva rôzne profily.",
+    "pf-backup-hdr": "Záloha",
+    "pf-backup-hint": "Profily sa ukladajú len v tomto prehliadači. Ručne zadané hodnoty (nastavenia produkcie, výmenné kurzy, ručné profily) sa novým importom z OGame nevrátia, preto si uchovajte súbor so zálohou.",
+    "pf-backup-download": "Stiahnuť zálohu",
+    "pf-backup-restore": "Obnoviť zo súboru…",
+    "pf-restore-conflict": "Profil „{0}“ už existuje. Nahradiť ho profilom zo súboru?",
+    "pf-replace": "Nahradiť",
+    "pf-skip": "Preskočiť",
+    "pf-restore-done": "Obnovené profily: {0}.",
+    "pf-file-err": "Toto nie je súbor so zálohou profilov alebo jeho verzia nie je podporovaná.",
+    "pf-storage-unavailable": "Tento prehliadač nedovoľuje stránke ukladať údaje, preto profily nie sú k dispozícii.",
+    "pf-save-failed": "Profil sa nepodarilo uložiť: prehliadač odmietol uložiť ďalšie údaje.",
+    "pf-migrate-hdr": "Nájdené uložené sady",
+    "pf-migrate-text": "Sady uložené staršou verziou kalkulačiek: {0}. Previesť ich na profily? Pôvodné sady zostanú zachované.",
+    "pf-migrate-btn": "Previesť sady",
+    "pf-migrate-later": "Teraz nie",
+    "pf-migrate-done": "Vytvorené profily: {0}. Stiahnite si teraz zálohu: je to jediná kópia mimo tohto prehliadača.",
+    "pf-migrate-none": "Nepodarilo sa prečítať žiadnu sadu.",
+    "pf-overrides": "Hodnoty odlišné od hry: {0}",
+    "pf-reset-profile": "kliknutím vyberiete, ktoré hodnoty z hry obnoviť",
+    "pf-account": "Účet",
+    "pf-reset-hdr": "Obnoviť hodnoty z hry",
+    "pf-reset-hint": "Označené hodnoty sa vrátia na hodnoty importované z hry, ostatné zostanú tak, ako ste ich nastavili.",
+    "pf-select-all": "Vybrať všetko",
+    "pf-col-where": "Kde",
+    "pf-col-field": "Parameter",
+    "pf-col-game": "V hre",
+    "pf-col-current": "Teraz",
+    "pf-reset-selected": "Obnoviť vybrané",
+    "pf-in-game": "V hre: {0}",
+    "pf-reset-value": "kliknutím obnovíte",
+    "pf-departure-body": "Planéta alebo mesiac profilu",
+    "pf-take-fleet": "Z miesta odletu",
+    "pf-take-fleet-hint": "Doplniť lode umiestnené na planéte alebo mesiaci zvolenom ako miesto odletu, podľa posledného importu z OGame.",
+    "pf-universe-from-profile": "Vesmír je určený aktívnym profilom."
   },
   "index": {
     "title": "ProxyForGame - software pre online hry v prehliadači OGame",
@@ -335,12 +394,13 @@
     "msg-lab-level-raised": "Úroveň výskumného laboratória zvýšená na {0} — to vyžaduje výskum \"{1}\".",
     "mineral-res-cntr-lvl": "Výskumné centrum minerálov",
     "lf-terraformer-rdc": "Zníženie nákladov na terraformer",
-    "disclaimer-robot-nanite": "Pri čítaní časov výstavby zohľadnite poznámku v prvom riadku tabuľky. Ak staviate Robotické továrne alebo Nanotechnologické továrne, použite <a href=\"{0}\">Kalkulačku frontu výstavby</a> pre presné výpočty času výstavby.",
+    "disclaimer-robot-nanite": "Pri čítaní časov výstavby zohľadnite nápovedu {1} v prvej bunke riadkov Robotické továrne a Nanotechnologické továrne. Ak staviate Robotické továrne alebo Nanotechnologické továrne, použite <a href=\"{0}\">Kalkulačku frontu výstavby</a> pre presné výpočty času výstavby.",
     "disclaimer-title": "Upozornenie",
     "discoverer-class-bonus": "Bonus triedy Discoverer",
     "discoverer-class-bonus-hint": "Zadajte hodnotu 'Spolu' z tabuľky OGame s bonusmi foriem života k bonusom tried, riadok 'Discoverer'. Použije sa iba vtedy, ak je na karte 'Všeobecné' vybraná trieda 'Discoverer'.",
     "research-speed-hint": "Rýchlosť výskumu je rýchlosť ekonomiky vynásobená faktorom výskumu vesmíru, napr. 5 × 3 = 15. Výberom vesmíru vyššie sa obe rýchlosti vyplnia automaticky.",
-    "keywords": "proxyforgame,ogame,kalkulačka nákladov,náklady budov,náklady výskumu,náklady flotily,náklady obrany,výpočet nákladov,náklady na suroviny"
+    "keywords": "proxyforgame,ogame,kalkulačka nákladov,náklady budov,náklady výskumu,náklady flotily,náklady obrany,výpočet nákladov,náklady na suroviny",
+    "description": "Vypočítajte cenu a čas výstavby budov, výskumu, lodí a obrany v OGame s ohľadom na rýchlosť univerza a bonusy."
   },
   "lfcosts": {
     "title": "OGame - Kalkulátor pre ceny pre formy života",
@@ -464,7 +524,8 @@
     "psy-sh-matrix": "Psionický matricový štít",
     "kaelesh-disc-enh": "Objaviteľský rozlet kaelešov",
     "energy-cost-to-build": "Energia potrebná na výstavbu",
-    "keywords": "proxyforgame,ogame,formy života,kalkulačka foriem života,budovy foriem života,výskumy foriem života,náklady foriem života,kalkulačka nákladov"
+    "keywords": "proxyforgame,ogame,formy života,kalkulačka foriem života,budovy foriem života,výskumy foriem života,náklady foriem života,kalkulačka nákladov",
+    "description": "Vypočítajte cenu a čas výstavby budov a výskumu foriem života v OGame vrátane bonusov rás a technológií."
   },
   "flight": {
     "flight-time-format": "99 H:s:s",
@@ -579,13 +640,19 @@
     "own-api-bad-json-msg": "Údaje sa nepodarilo načítať.\\nUistite sa, že ste vložili text z poľa API 2 na stránke „Flotila“.",
     "import-failed-msg": "Údaje sa nepodarilo načítať.\\nServer vrátil neplatnú odpoveď. Skúste to znova neskôr.",
     "populated-systems-failed-msg": "Mapa obývaných systémov nie je dostupná, takže žiadny systém sa nepočíta ako preskočený. Ich počet môžete zadať ručne.",
-    "keywords": "proxyforgame,ogame,kalkulačka času letu,čas letu,body uloženia,save,rýchlosť flotily,spotreba deutéria,spotreba paliva"
+    "keywords": "proxyforgame,ogame,kalkulačka času letu,čas letu,body uloženia,save,rýchlosť flotily,spotreba deutéria,spotreba paliva",
+    "sr-profile-hdr": "Import špionážnej správy",
+    "sr-profile-text": "Je aktívny profil. Správa obsahuje výskumy, triedu a bonusy špehovaného hráča, ktoré nesmú prepísať váš profil. Ako ju importovať?",
+    "sr-profile-none": "Prepnúť na „Bez profilu“ a importovať",
+    "sr-profile-new": "Vytvoriť pre správu nový profil",
+    "description": "Vypočítajte čas letu, spotrebu deutéria a vhodný čas odletu flotily v OGame podľa rýchlosti univerza, lodí a režimu letu."
   },
   "graviton": {
     "title": "OGame - Kalkulátor pre Graviton",
     "recycling": "Dismantling SS debris",
     "graviton-level": "Úroveň Gravitónu",
-    "keywords": "proxyforgame,ogame,kalkulačka gravitónu,gravitónová technológia,gravitačná technológia,solárne satelity,energia pre gravitón,hviezda smrti"
+    "keywords": "proxyforgame,ogame,kalkulačka gravitónu,gravitónová technológia,gravitačná technológia,solárne satelity,energia pre gravitón,hviezda smrti",
+    "description": "Zistite, koľko solárnych satelitov a energie treba na výskum gravitónu v OGame podľa nastavení planéty."
   },
   "moon": {
     "title": "OGame - Kalkulatorji za lune",
@@ -616,7 +683,8 @@
     "own-system": "Vlastný systém",
     "phalanx-lvl-required": "Potrebná úroveň",
     "phalanx-range-bonus": "Bonus k dosahu teleskopov",
-    "class-bonus": "Bonus triedy"
+    "class-bonus": "Bonus triedy",
+    "description": "Vypočítajte šancu na vznik mesiaca, výsledok pokusu o jeho zničenie a dosah senzorovej falangy v OGame."
   },
   "production": {
     "param-tab-general": "Všeobecné",
@@ -706,7 +774,8 @@
     "incl-explain": "Ak zvýšite úroveň baní, spotreba energie sa zvýši. Kalkulačka môže túto zmenu zohľadniť a zahrnúť do výpočtu náklady na výstavbu solárnych satelitov, ktoré dodajú potrebnú energiu. Výpočet sa vykonáva na základe jednotlivých budov. Mali by sme tieto náklady zohľadniť?",
     "incl-yes": "Áno",
     "incl-no": "Nie",
-    "lifeform-tech": "Bonus technológie foriem života"
+    "lifeform-tech": "Bonus technológie foriem života",
+    "description": "Vypočítajte produkciu kovu, kryštálu a deutéria, spotrebu energie a návratnosť vylepšení baní na jednej planéte alebo v celej ríši OGame."
   },
   "queue": {
     "start-time": "štart",
@@ -722,7 +791,8 @@
     "next-level": "Ďalší úroveň",
     "title": "OGame - Stavba front",
     "clear": "Odstrániť",
-    "keywords": "proxyforgame,ogame,fronta výstavby,poradie výstavby,čas výstavby,kalkulačka fronty,náklady budov"
+    "keywords": "proxyforgame,ogame,fronta výstavby,poradie výstavby,čas výstavby,kalkulačka fronty,náklady budov",
+    "description": "Porovnajte cenu a čas postupných vylepšení budov na planéte alebo mesiaci v OGame s ohľadom na úrovne tovární a rýchlosť univerza."
   },
   "terraformer": {
     "title": "OGame - Kalkulátor pre Terraformer",
@@ -731,7 +801,8 @@
     "single-level": "Jeden úroveň",
     "added-fields": "Polia pridaný",
     "satellites": "Solárne satelity",
-    "keywords": "proxyforgame,ogame,kalkulačka terraformera,terraformer,polia planéty,solárne satelity,potrebná energia,nanotechnologická továreň"
+    "keywords": "proxyforgame,ogame,kalkulačka terraformera,terraformer,polia planéty,solárne satelity,potrebná energia,nanotechnologická továreň",
+    "description": "Vypočítajte energiu, suroviny a čas potrebné na terraformovanie planéty v OGame vrátane solárnych satelitov a bonusov."
   },
   "expeditions": {
     "keywords": "proxyforgame,ogame,kalkulačka expedícií,expedície,suroviny z expedícií,flotila na expedície,temná hmota,nálezy z expedícií",
@@ -795,7 +866,8 @@
     "class-bonus-discoverer": "Bonus triedy \"Bádateľ\"",
     "resources-discovery-booster": "Zvýšenie objavu zdrojov",
     "dark-matter-discovery-bonus": "Bonus k objavu Temnej hmoty",
-    "large-cargo-abbrev": "VT"
+    "large-cargo-abbrev": "VT",
+    "description": "Odhadnite suroviny, lode a temnú hmotu získateľné na expedíciách OGame a porovnajte očakávaný výnos rôznych flotíl."
   },
   "trade": {
     "met": "kov",
@@ -811,6 +883,7 @@
     "link": "Odkaz",
     "text": "Text",
     "and": "a",
-    "keywords": "proxyforgame,ogame,kalkulačka obchodovania,výmena surovín,výmenný kurz,kov kryštál deutérium,obchodník"
+    "keywords": "proxyforgame,ogame,kalkulačka obchodovania,výmena surovín,výmenný kurz,kov kryštál deutérium,obchodník",
+    "description": "Porovnajte výmenu kovu, kryštálu a deutéria v OGame a zistite množstvo získaných surovín pri zadanom kurze."
   }
 }

@@ -388,16 +388,30 @@ test.describe('Flight Calculator - OGame Object Import', () => {
         expect(errors, 'no page JS errors').toEqual([]);
     });
 
-    // The three alliance classes are 1 researcher, 2 trader, 3 warrior. Only the
-    // trader used to be read, so a warrior alliance imported as no alliance at all.
+    // The three alliance classes are 1 warrior, 2 trader, 3 researcher. Only the
+    // trader used to be read, and then 3 was taken for the warrior.
     test('imports the warrior alliance class onto its own radio', async ({ page }) => {
+        await page.locator('#import-own-api').click();
+        await page.locator('#own-api-input')
+            .fill(OWN_API_FIXTURE.replace('"allianceClassId":2', '"allianceClassId":1'));
+        await page.locator(OWN_API_IMPORT_BUTTON).click();
+
+        await expect(page.locator('#warrior-bonus')).toBeChecked();
+        await expect(page.locator('#trader-bonus')).not.toBeChecked();
+    });
+
+    // The researcher alliance speeds no fleet up, so it has no radio of its own.
+    test('a researcher alliance selects none', async ({ page }) => {
+        await openParams(page);
+        await page.locator('#warrior-bonus').check();
+
         await page.locator('#import-own-api').click();
         await page.locator('#own-api-input')
             .fill(OWN_API_FIXTURE.replace('"allianceClassId":2', '"allianceClassId":3'));
         await page.locator(OWN_API_IMPORT_BUTTON).click();
 
-        await expect(page.locator('#warrior-bonus')).toBeChecked();
-        await expect(page.locator('#trader-bonus')).not.toBeChecked();
+        await expect(page.locator('#alliance-class-none')).toBeChecked();
+        await expect(page.locator('#warrior-bonus')).not.toBeChecked();
     });
 
     test('an alliance without a class selects none', async ({ page }) => {
@@ -511,13 +525,13 @@ async function showParamTab(page, probe) {
 
 /**
  * Expands the parameters section and brings the tab owning `probe` to the front.
- * The collapse itself is probed through #universe-name-select, which sits above
+ * The collapse itself is probed through #api-code, which sits above
  * the tab strip and is therefore visible whichever tab is active — probing a
  * tabbed control instead would ask Bootstrap to re-show an already open panel,
  * and shown.bs.collapse would never fire.
  */
 async function openParams(page, probe = '#cmb-drive') {
-    await openCollapse(page, '#accordion-prm', '#universe-name-select');
+    await openCollapse(page, '#accordion-prm', '#api-code');
     await showParamTab(page, probe);
 }
 
@@ -2287,5 +2301,107 @@ test.describe('Flight Calculator - Fleet Recall', () => {
         await expect(page.locator('#recall-mode-0')).toBeChecked();
         await expect(page.locator('#recall-moment')).toBeDisabled();
         expect(await returnMoment(page)).toBe('?');
+    });
+});
+
+test.describe('Flight Calculator - Tooltip disposal', () => {
+    test.beforeEach(async ({ context, page }) => {
+        await context.addInitScript(() => {
+            localStorage.setItem('lastChange', 'key-value;true,value;99999');
+        });
+        await page.goto('/flight');
+        await page.locator('#tabtag1').click();
+    });
+
+    // Tooltip.dispose() ends in BaseComponent.dispose(), which nulls every own
+    // property of the instance - _activeTrigger and _element included. A hide()
+    // transition callback queued a moment earlier still runs afterwards and calls
+    // _isWithActiveTrigger(), i.e. Object.values(null):
+    //
+    //   TypeError: Cannot convert undefined or null to object
+    //
+    // Hawk has been catching exactly that on the live site ever since Bootstrap
+    // started being served from our own origin, which put the bundle's frames back
+    // in the reports (twbs/bootstrap#37474). www/js/bootstrap-tooltip-guard.js is
+    // what keeps it from being thrown; this pins that it stays effective.
+    test('removing a row whose tooltip is fading does not throw', async ({ page }) => {
+        const errors = [];
+        page.on('pageerror', (e) => errors.push(String(e)));
+
+        // A second row, so the remove button drops the row instead of clearing it
+        await page.locator('#flight-time').fill('00 01:00:00');
+        await page.locator('#flight-time').press('End');
+        await page.locator('#add-flight-time').click();
+        await expect(page.locator('#flight-data .flight-leg')).toHaveCount(2);
+
+        // Show the tooltip and wait for it to finish appearing, so the only
+        // transition callback left pending afterwards is the one hide() queues.
+        await page.evaluate(() => new Promise((resolve) => {
+            const toggle = document.querySelector('#flight-data .flight-leg:last-child .button-toggle');
+            toggle.addEventListener('shown.bs.tooltip', resolve, { once: true });
+            window.bootstrap.Tooltip.getOrCreateInstance(toggle).show();
+        }));
+
+        // Stretch the fade, so the window between hide() and its callback is wide
+        // enough to dispose inside it on purpose rather than by luck.
+        await page.addStyleTag({ content: '.tooltip { transition-duration: 1s !important; }' });
+
+        await page.evaluate(async () => {
+            const row = document.querySelector('#flight-data .flight-leg:last-child');
+            window.bootstrap.Tooltip.getInstance(row.querySelector('.button-toggle')).hide();
+            await new Promise((resolve) => setTimeout(resolve, 0));
+            // The row's click handler disposes its tooltips, then drops the row
+            row.querySelector('.button-remove')
+                .dispatchEvent(new MouseEvent('click', { bubbles: true }));
+        });
+        await expect(page.locator('#flight-data .flight-leg')).toHaveCount(1);
+
+        // The queued callback runs at the end of the fade, or on the 5 ms fallback
+        // timer Bootstrap sets when the tip is no longer attached to the document.
+        await page.waitForTimeout(1500);
+        expect(errors, 'no page JS errors').toEqual([]);
+    });
+});
+
+/**
+ * A saved fleet is keyed by the name the user typed, so the key can
+ * carry quotes, brackets or a whole export pasted into the name field.
+ * _removeStorageOption used to look the option up with
+ * `option[value="${key}"]`, which is not a valid selector for such a key:
+ * querySelector threw, the option was never dropped and the click handler died
+ * halfway (Hawk: "Failed to execute 'querySelector' on 'Document'"). This pins
+ * that a key carrying quotes is deleted like any other.
+ */
+test.describe('Flight Calculator - Saved Fleets', () => {
+    // What a fleet named by pasting an export looks like: the key is the raw JSON.
+    const FLEET_KEY = 'flight_fleet_{"coords":"1:110:7","characterClassId":3}';
+
+    test.beforeEach(async ({ context, page }) => {
+        await context.addInitScript((key) => {
+            localStorage.setItem('lastChange', 'key-value;true,value;99999');
+            localStorage.setItem(key, '{"v":1}');
+        }, FLEET_KEY);
+        await page.goto('/flight');
+        await installCompat(page);
+        // The fleet selector sits in the Ships section, which is open on load.
+    });
+
+    test('deletes a saved fleet whose key carries quotes', async ({ page }) => {
+        const errors = [];
+        page.on('pageerror', (e) => errors.push(String(e)));
+
+        // The placeholder option plus the saved fleet
+        const select = page.locator('#fleet-name-select');
+        await expect(select.locator('option')).toHaveCount(2);
+
+        await select.selectOption(FLEET_KEY);
+        await page.locator('#fleet-delete').click();
+        // dom-utils builds the confirmation dialog; its primary button is the OK
+        await page.locator('.dyn-dialog .btn-primary').click();
+
+        await expect(select.locator('option')).toHaveCount(1);
+        await expect(select).toHaveValue('0');
+        expect(await page.evaluate((key) => localStorage.getItem(key), FLEET_KEY)).toBeNull();
+        expect(errors, 'no page JS errors').toEqual([]);
     });
 });

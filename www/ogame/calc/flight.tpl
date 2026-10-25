@@ -4,7 +4,7 @@
   <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
   <?php require_once '../../hawk.tpl'; ?>
   <title><?= $l['title'] ?></title>
-  <meta name="description" content="<?= $l['title'] ?>">
+  <meta name="description" content="<?= htmlspecialchars($l['description'], ENT_QUOTES, 'UTF-8') ?>">
   <meta name="keywords" content="<?= $l['keywords'] ?>">
   <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
   <link rel="icon" href="/favicon.ico" type="image/x-icon">
@@ -24,11 +24,19 @@
   <script src="/js/utils.js?v=<?php echo filemtime($pfgPath.'/js/utils.js'); ?>" defer></script>
   <script src="/js/api-client.js?v=<?php echo filemtime($pfgPath.'/js/api-client.js'); ?>" defer></script>
   <script src="/ogame/calc/js/dom-utils.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/dom-utils.js'); ?>" defer></script>
+  <!-- Player profiles -->
+  <script src="/ogame/calc/js/profiles-core.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/profiles-core.js'); ?>" defer></script>
+  <script src="/ogame/calc/js/profiles-store.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/profiles-store.js'); ?>" defer></script>
+  <script src="/ogame/calc/js/profiles-fields.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/profiles-fields.js'); ?>" defer></script>
+  <script src="/ogame/calc/js/profiles-widgets.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/profiles-widgets.js'); ?>" defer></script>
+  <script src="/ogame/calc/js/profiles-binders.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/profiles-binders.js'); ?>" defer></script>
+  <script src="/ogame/calc/js/profiles-ui.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/profiles-ui.js'); ?>" defer></script>
   <script src="/ogame/calc/js/own-api.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/own-api.js'); ?>" defer></script>
   <script src="/ogame/calc/js/flight-core.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/flight-core.js'); ?>" defer></script>
   <script src="/ogame/calc/js/flight-data-collector.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/flight-data-collector.js'); ?>" defer></script>
   <script src="/ogame/calc/js/flight-renderer.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/flight-renderer.js'); ?>" defer></script>
   <script src="/ogame/calc/js/flight-orchestration.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/flight-orchestration.js'); ?>" defer></script>
+  <script src="/ogame/calc/js/flight-profile.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/flight-profile.js'); ?>" defer></script>
 
   <script type="module">
     // A module, so it runs after the deferred scripts above have defined `options`.
@@ -67,11 +75,6 @@
     options.msgNoSavepointsFound = "<?= $l['msg-no-savepoints-found'] ?>";
     options.flightmodesNote = "<?= $l['flightmodes-note'] ?>";
     options.savepointsNote = "<?= $l['savepoints-note'] ?>";
-    options.noUniNameMsg = <?= json_encode($l['no-profile-name-msg']) ?>;
-    options.noUniSelectedMsg = <?= json_encode($l['no-profile-selected-msg']) ?>;
-    options.uniDelConfMsg = <?= json_encode($l['del-profile-confirm']) ?>;
-    options.uniOwrConfMsg = <?= json_encode($l['owr-profile-confirm']) ?>;
-    options.uniLoadConfMsg = <?= json_encode($l['load-profile-confirm']) ?>;
     options.noFleetNameMsg = "<?= $l['no-fleet-name-msg'] ?>";
     options.noFleetSelectedMsg = "<?= $l['no-fleet-selected-msg'] ?>";
     options.fleetDelConfMsg = "<?= $l['del-fleet-confirm'] ?>";
@@ -90,6 +93,8 @@
     options.dialogConfirm = <?= json_encode($l['dialog-confirm']) ?>;
     options.cancel = <?= json_encode($l['cancel']) ?>;
     options.dialogAttentionLabel = <?= json_encode($l['dialog-attention']) ?>;
+    options.moonLabel = <?= json_encode($l['moon']) ?>;
+    options.universeFromProfile = <?= json_encode($l['pf-universe-from-profile']) ?>;
   </script>
   <script>
     // A classic script, not a module: the orchestrator reads `unis` as a global.
@@ -106,12 +111,12 @@
   <div class="row">
     <div class="col-md-2"><?php require_once '../../sidebar_bs.tpl'; ?></div>
     <div class="col-md-10">
-    <?php require_once '../../topbar_bs.tpl'; ?>
+    <?php $withProfiles = true; require_once '../../topbar_bs.tpl'; ?>
 
 <div id="flight">
   <div class="border rounded position-relative">
     <div class="d-flex align-items-center">
-      <div class="bg-body-secondary text-primary-emphasis rounded main-header text-center flex-grow-1"><?= $l['title'] ?></div>
+      <div class="text-primary-emphasis rounded main-header text-center flex-grow-1"><?= $l['title'] ?></div>
       <div id="reset" class="d-flex align-items-center justify-content-center bg-danger-subtle" data-bs-toggle="tooltip" title="<?= $l['reset'] ?>">
         <i class="bi bi-arrow-counterclockwise" style="color: #dc3545; font-size: 1.25rem;"></i>
       </div>
@@ -130,19 +135,6 @@
 
               <div id="universes-panel" class="border rounded p-2 mb-2">
                 <div class="universe-panel-rows mx-auto">
-                  <div class="d-flex flex-wrap align-items-center justify-content-center gap-2 mb-1">
-                    <label for="universe-name-select"><?= $l['profile'] ?></label>
-                    <select id="universe-name-select" name="universe-name-select" class="form-select form-select-sm d-inline-block w-auto ui-input-margin">
-                      <option value="0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</option>
-                    </select>
-                    <div id="universe-control" class="btn-group" role="group">
-                      <button id="universe-load" type="button" data-bs-toggle="tooltip" title="<?= $l['universe-load'] ?>" class="btn btn-sm btn-outline-secondary uni-control-btn"><i class="bi bi-box-arrow-up"></i></button>
-                      <button id="universe-save" type="button" data-bs-toggle="tooltip" title="<?= $l['universe-save'] ?>" class="btn btn-sm btn-outline-secondary uni-control-btn"><i class="bi bi-box-arrow-in-down"></i></button>
-                      <button id="universe-delete" type="button" data-bs-toggle="tooltip" title="<?= $l['universe-delete'] ?>" class="btn btn-sm btn-outline-secondary uni-control-btn"><i class="bi bi-x-lg"></i></button>
-                    </div>
-                    <input id="universe-name" type="text" name="universe-name" class="form-control form-control-sm d-inline-block input-20columns ui-input-margin" aria-label="<?= $l['profile'] ?>">
-                    <button id="universe-add" type="button" data-bs-toggle="tooltip" title="<?= $l['universe-add'] ?>" class="btn btn-sm btn-outline-secondary uni-control-btn"><i class="bi bi-plus-lg"></i></button>
-                  </div>
                   <div class="d-flex flex-wrap align-items-center justify-content-center gap-1">
                     <span>SR_KEY:</span>
                     <input id="api-code" placeholder="API OGame / API LogServer.net" type="text" class="form-control form-control-sm flex-grow-1 text-center ui-input-margin" aria-label="<?= $l['import-hint'] ?>">
@@ -176,6 +168,8 @@
                       <span class="text-nowrap">
                         <input id="departure-g" type="text" name="departure-g" class="form-control form-control-sm d-inline-block coord-input-small" value="1" data-field-title="<?= $l['departure-point'] ?>-<?= $l['galaxy'] ?>">:<input id="departure-s" type="text" name="departure-s" class="form-control form-control-sm d-inline-block coord-input" value="1" data-field-title="<?= $l['departure-point'] ?>-<?= $l['system'] ?>" aria-label="<?= $l['departure-point'] ?>-<?= $l['system'] ?>">:<input id="departure-p" type="text" name="departure-p" class="form-control form-control-sm d-inline-block coord-input-small" value="1" data-field-title="<?= $l['departure-point'] ?>-<?= $l['planet'] ?>" aria-label="<?= $l['departure-point'] ?>-<?= $l['planet'] ?>">
                       </span>
+                      <!-- Filled from the active profile; picking a body copies its coordinates. -->
+                      <select id="pf-departure" class="form-select form-select-sm w-auto d-none" aria-label="<?= $l['pf-departure-body'] ?>" title="<?= $l['pf-departure-body'] ?>"></select>
                     </div>
                     <fieldset class="d-flex flex-wrap align-items-center gap-2 fieldset-reset">
                       <legend class="text-nowrap"><?= $l['class'] ?>:</legend>
@@ -410,7 +404,10 @@
                   <label for="ovr-speed-cb"><abbr data-bs-toggle="tooltip" title="<?= $l['ovr-fleet-speed-explain'] ?>"><?= $l['ovr-fleet-speed'] ?></abbr></label>
                   <input id="ovr-speed-t" type="text" class="form-control form-control-sm d-inline-block input-7columns" value="10000" aria-label="<?= $l['ovr-fleet-speed'] ?>">
                 </div>
+                <div class="d-flex flex-wrap gap-1 ms-auto">
+                <button id="pf-take-fleet" type="button" class="btn btn-sm btn-outline-secondary d-none" data-bs-toggle="tooltip" title="<?= $l['pf-take-fleet-hint'] ?>"><i class="bi bi-box-arrow-in-down-right"></i> <?= $l['pf-take-fleet'] ?></button>
                 <button id="clear-ships" type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="tooltip" title="<?= $l['clear-ships-hint'] ?>"><i class="bi bi-eraser"></i> <?= $l['clear-ships'] ?></button>
+                </div>
               </div>
 
               <div class="d-grid ships-grid">
@@ -737,6 +734,38 @@
   </div>
 </div>
 
+<!-- Where a spy report goes while a profile is active -->
+<div class="modal fade" role="dialog" id="flight-sr-profile-modal" tabindex="-1" aria-labelledby="flight-sr-profile-label" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title fs-5" id="flight-sr-profile-label"><?= $l['sr-profile-hdr'] ?></h3>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="<?= $l['cancel'] ?>"></button>
+      </div>
+      <div class="modal-body">
+        <p class="small mb-2"><?= $l['sr-profile-text'] ?></p>
+        <div class="form-check mb-1">
+          <input id="flight-sr-profile-none" type="radio" name="flight-sr-profile" class="form-check-input" checked>
+          <label class="form-check-label" for="flight-sr-profile-none"><?= $l['sr-profile-none'] ?></label>
+        </div>
+        <div class="form-check mb-1">
+          <input id="flight-sr-profile-new" type="radio" name="flight-sr-profile" class="form-check-input">
+          <label class="form-check-label" for="flight-sr-profile-new"><?= $l['sr-profile-new'] ?></label>
+        </div>
+        <div class="d-flex align-items-center gap-2 ms-4">
+          <label for="flight-sr-profile-name"><?= $l['pf-name'] ?></label>
+          <input id="flight-sr-profile-name" type="text" maxlength="60" class="form-control form-control-sm">
+        </div>
+        <div id="flight-sr-profile-error" class="text-danger small mt-2 d-none" role="alert"></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><?= $l['cancel'] ?></button>
+        <button type="button" id="flight-sr-profile-go" class="btn btn-primary"><?= $l['pf-import-btn'] ?></button>
+      </div>
+    </div>
+  </div>
+</div>
+
     </div> <!-- End col-md-10 -->
   </div> <!-- End row -->
 </div> <!-- End container-fluid -->
@@ -750,6 +779,7 @@ document.addEventListener('DOMContentLoaded', function() {
     bootstrap.Tooltip.getOrCreateInstance(el);
   });
   initializeFlightCalculator();
+  initFlightProfiles();
 });
 </script>
 

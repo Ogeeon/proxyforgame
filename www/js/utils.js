@@ -465,6 +465,18 @@ function readSavedData(name) {
 	return null;
 }
 
+/** Removes a value written by saveToCookie, from localStorage and from the cookie fallback. */
+function removeSavedData(name) {
+	if (supports_html5_storage()) {
+		try {
+			localStorage.removeItem(name);
+		} catch (e) {
+			consoleLog(e);
+		}
+	}
+	document.cookie = name + '=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/';
+}
+
 // --- Legacy reader ---------------------------------------------------------
 // The `key-value;true,key;value,...` string format saveToCookie wrote before
 // the JSON switch. Kept only to read payloads still in a returning visitor's

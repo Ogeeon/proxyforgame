@@ -4,7 +4,7 @@
   <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
   <?php require_once '../../hawk.tpl'; ?>
   <title><?= $l['title'] ?></title>
-  <meta name="description" content="<?= $l['title'] ?>">
+  <meta name="description" content="<?= htmlspecialchars($l['description'], ENT_QUOTES, 'UTF-8') ?>">
   <meta name="keywords" content="<?= $l['keywords'] ?>">
   <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
   <link rel="icon" href="/favicon.ico" type="image/x-icon">
@@ -24,10 +24,18 @@
   <script src="/js/utils.js?v=<?php echo filemtime($pfgPath.'/js/utils.js'); ?>" defer></script>
   <script src="/js/api-client.js?v=<?php echo filemtime($pfgPath.'/js/api-client.js'); ?>" defer></script>
   <script src="/ogame/calc/js/dom-utils.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/dom-utils.js'); ?>" defer></script>
+  <!-- Player profiles -->
+  <script src="/ogame/calc/js/profiles-core.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/profiles-core.js'); ?>" defer></script>
+  <script src="/ogame/calc/js/profiles-store.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/profiles-store.js'); ?>" defer></script>
+  <script src="/ogame/calc/js/profiles-fields.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/profiles-fields.js'); ?>" defer></script>
+  <script src="/ogame/calc/js/profiles-widgets.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/profiles-widgets.js'); ?>" defer></script>
+  <script src="/ogame/calc/js/profiles-binders.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/profiles-binders.js'); ?>" defer></script>
+  <script src="/ogame/calc/js/profiles-ui.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/profiles-ui.js'); ?>" defer></script>
   <script src="/ogame/calc/js/graviton-core.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/graviton-core.js'); ?>" defer></script>
   <script src="/ogame/calc/js/graviton-data-collector.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/graviton-data-collector.js'); ?>" defer></script>
   <script src="/ogame/calc/js/graviton-renderer.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/graviton-renderer.js'); ?>" defer></script>
   <script src="/ogame/calc/js/graviton-orchestration.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/graviton-orchestration.js'); ?>" defer></script>
+  <script src="/ogame/calc/js/graviton-profile.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/graviton-profile.js'); ?>" defer></script>
 
   <script type="module">
     // A module, so it runs after the deferred scripts above have defined `options`.
@@ -59,12 +67,16 @@
   <div class="row">
     <div class="col-md-2"><?php require_once '../../sidebar_bs.tpl'; ?></div>
     <div class="col-md-10">
-    <?php require_once '../../topbar_bs.tpl'; ?>
+    <?php $withProfiles = true; require_once '../../topbar_bs.tpl'; ?>
 
 <div id="graviton">
   <div class="border rounded position-relative">
-    <div class="d-flex align-items-center">
-      <div class="bg-body-secondary text-primary-emphasis rounded main-header text-center flex-grow-1"><?= $l['title'] ?></div>
+    <div class="d-flex flex-wrap align-items-center">
+      <div class="text-primary-emphasis rounded main-header text-center flex-grow-1"><?= $l['title'] ?></div>
+      <div id="pf-planet-box" class="pf-header-bodies d-flex align-items-center gap-1 ms-auto ps-2 me-1 d-none">
+        <label for="pf-planet"><?= $l['planet'] ?></label>
+        <select id="pf-planet" class="form-select form-select-sm w-auto"></select>
+      </div>
       <div id="reset" class="d-flex align-items-center justify-content-center bg-danger-subtle" data-bs-toggle="tooltip" title="<?= $l['reset'] ?>">
         <i class="bi bi-arrow-counterclockwise" style="color: #dc3545; font-size: 1.25rem;"></i>
       </div>
@@ -114,20 +126,20 @@
             </div>
           </div>
           <div class="d-flex flex-wrap gap-2 align-items-center justify-content-center mb-1">
-            <div class="d-flex align-items-center gap-1 flex-nowrap">
-              <label><?= $l['energy-bonus'] ?>:</label>
-              <input id="energy-bonus-0" type="radio" name="energy-bonus" value="0" class="form-check-input"> <label for="energy-bonus-0"><?= $l['none'] ?></label>
-              <input id="energy-bonus-1" type="radio" name="energy-bonus" value="1" class="form-check-input ms-2"> <label for="energy-bonus-1"><?= $l['engineer'] ?></label>
-              <input id="energy-bonus-2" type="radio" name="energy-bonus" value="2" class="form-check-input ms-2"> <label for="energy-bonus-2"><?= $l['all-officers'] ?></label>
+            <?php foreach (['engineer', 'geologist', 'technocrat', 'admiral', 'commander'] as $officer): ?>
+            <div class="d-flex align-items-center gap-1">
+              <input id="<?= $officer ?>" type="checkbox" name="<?= $officer ?>" class="form-check-input">
+              <label for="<?= $officer ?>"><?= $l[$officer] ?></label>
             </div>
+            <?php endforeach; ?>
           </div>
           <div class="d-flex flex-wrap gap-2 align-items-center justify-content-center">
-            <div class="d-flex align-items-center gap-1 flex-nowrap">
-              <label><?= $l['class'] ?>:</label>
+            <fieldset class="d-flex align-items-center gap-1 flex-nowrap fieldset-reset">
+              <legend><?= $l['class'] ?>:</legend>
               <input id="player-class-0" type="radio" name="player-class" value="0" class="form-check-input" checked="checked"> <label for="player-class-0"><?= $l['none'] ?></label>
               <input id="player-class-1" type="radio" name="player-class" value="1" class="form-check-input ms-2"> <label for="player-class-1"><?= $l['class-collector'] ?></label>
               <input id="player-class-2" type="radio" name="player-class" value="2" class="form-check-input ms-2"> <label for="player-class-2"><?= $l['class-general'] ?></label>
-            </div>
+            </fieldset>
             <div class="d-flex align-items-center gap-1">
               <input id="trader-bonus" type="checkbox" name="trader-bonus" class="form-check-input">
               <label for="trader-bonus"><?= $l['trader-bonus'] ?></label>
@@ -207,75 +219,75 @@
       <hr class="my-2">
 
       <div id="plants-settings">
-        <table class="mx-auto">
+        <table class="mx-auto" role="presentation">
           <tr>
             <td><label for="solar-plant-level"><?= $l['solar-plant-level'] ?></label></td>
             <td><input id="solar-plant-level" type="text" name="solar-plant-level" class="form-control form-control-sm d-inline-block energy-input ui-input-margin" value="0" data-field-title="<?= $l['solar-plant-level'] ?>"></td>
             <td>
-              <select id="solar-plant-percent" name="solar-plant-percent" class="form-select form-select-sm d-inline-block w-auto ui-input-margin">
+              <select id="solar-plant-percent" name="solar-plant-percent" class="form-select form-select-sm d-inline-block w-auto ui-input-margin" aria-label="<?= htmlspecialchars($l['solar-plant-level'] . ', %', ENT_QUOTES) ?>">
                 <option value="100" selected="selected">100%</option><option value="90">90%</option><option value="80">80%</option><option value="70">70%</option><option value="60">60%</option>
-                <option value="50">50%</option><option value="40">40%</option><option value="30">30%</option><option value="20">20%</option><option value="10">10%</option>
+                <option value="50">50%</option><option value="40">40%</option><option value="30">30%</option><option value="20">20%</option><option value="10">10%</option><option value="0">0%</option>
               </select>
             </td>
-            <td><label id="solar-plant-energy">0</label>&nbsp;<label><?= $l['energy'] ?></label></td>
+            <td><span id="solar-plant-energy">0</span>&nbsp;<span><?= $l['energy'] ?></span></td>
           </tr>
           <tr>
             <td><label for="fusion-plant-level"><?= $l['fusion-plant-level'] ?></label></td>
             <td><input id="fusion-plant-level" type="text" name="fusion-plant-level" class="form-control form-control-sm d-inline-block energy-input ui-input-margin" value="0" data-field-title="<?= $l['fusion-plant-level'] ?>"></td>
             <td>
-              <select id="fusion-plant-percent" name="fusion-plant-percent" class="form-select form-select-sm d-inline-block w-auto ui-input-margin">
+              <select id="fusion-plant-percent" name="fusion-plant-percent" class="form-select form-select-sm d-inline-block w-auto ui-input-margin" aria-label="<?= htmlspecialchars($l['fusion-plant-level'] . ', %', ENT_QUOTES) ?>">
                 <option value="100" selected="selected">100%</option><option value="90">90%</option><option value="80">80%</option><option value="70">70%</option><option value="60">60%</option>
-                <option value="50">50%</option><option value="40">40%</option><option value="30">30%</option><option value="20">20%</option><option value="10">10%</option>
+                <option value="50">50%</option><option value="40">40%</option><option value="30">30%</option><option value="20">20%</option><option value="10">10%</option><option value="0">0%</option>
               </select>
             </td>
-            <td><label id="fusion-plant-energy">0</label>&nbsp;<label><?= $l['energy'] ?></label></td>
+            <td><span id="fusion-plant-energy">0</span>&nbsp;<span><?= $l['energy'] ?></span></td>
           </tr>
           <tr>
             <td><label for="solar-satellites-count"><?= $l['solar-satellites-count'] ?></label></td>
             <td><input id="solar-satellites-count" type="text" name="solar-satellites-count" class="form-control form-control-sm d-inline-block energy-input ui-input-margin" value="0" data-field-title="<?= $l['solar-satellites-count'] ?>"></td>
             <td>
-              <select id="solar-satellites-percent" name="solar-satellites-percent" class="form-select form-select-sm d-inline-block w-auto ui-input-margin">
+              <select id="solar-satellites-percent" name="solar-satellites-percent" class="form-select form-select-sm d-inline-block w-auto ui-input-margin" aria-label="<?= htmlspecialchars($l['solar-satellites-count'] . ', %', ENT_QUOTES) ?>">
                 <option value="100" selected="selected">100%</option><option value="90">90%</option><option value="80">80%</option><option value="70">70%</option><option value="60">60%</option>
-                <option value="50">50%</option><option value="40">40%</option><option value="30">30%</option><option value="20">20%</option><option value="10">10%</option>
+                <option value="50">50%</option><option value="40">40%</option><option value="30">30%</option><option value="20">20%</option><option value="10">10%</option><option value="0">0%</option>
               </select>
             </td>
-            <td><label id="solar-satellites-energy">0</label>&nbsp;<label><?= $l['energy'] ?></label></td>
+            <td><span id="solar-satellites-energy">0</span>&nbsp;<span><?= $l['energy'] ?></span></td>
           </tr>
           <tr>
-            <td><label><?= $l['officers-bonus'] ?></label></td>
+            <td><span><?= $l['officers-bonus'] ?></span></td>
             <td>&nbsp;</td>
             <td>&nbsp;</td>
-            <td><label id="officers-bonus-energy">0</label>&nbsp;<label><?= $l['energy'] ?></label></td>
+            <td><span id="officers-bonus-energy">0</span>&nbsp;<span><?= $l['energy'] ?></span></td>
           </tr>
           <tr>
-            <td><label><?= $l['class-bonus'] ?></label></td>
+            <td><span><?= $l['class-bonus'] ?></span></td>
             <td>&nbsp;</td>
             <td>&nbsp;</td>
-            <td><label id="class-bonus-energy">0</label>&nbsp;<label><?= $l['energy'] ?></label></td>
+            <td><span id="class-bonus-energy">0</span>&nbsp;<span><?= $l['energy'] ?></span></td>
           </tr>
           <tr>
-            <td><label><?= $l['alliance-bonus'] ?></label></td>
+            <td><span><?= $l['alliance-bonus'] ?></span></td>
             <td>&nbsp;</td>
             <td>&nbsp;</td>
-            <td><label id="alliance-bonus-energy">0</label>&nbsp;<label><?= $l['energy'] ?></label></td>
+            <td><span id="alliance-bonus-energy">0</span>&nbsp;<span><?= $l['energy'] ?></span></td>
           </tr>
           <tr>
-            <td><label><?= $l['boost-bonus'] ?></label></td>
+            <td><span><?= $l['boost-bonus'] ?></span></td>
             <td>&nbsp;</td>
             <td>&nbsp;</td>
-            <td><label id="boost-bonus-energy">0</label>&nbsp;<label><?= $l['energy'] ?></label></td>
+            <td><span id="boost-bonus-energy">0</span>&nbsp;<span><?= $l['energy'] ?></span></td>
           </tr>
           <tr>
-            <td><label><?= $l['disr-chamber-bonus'] ?></label></td>
+            <td><span><?= $l['disr-chamber-bonus'] ?></span></td>
             <td>&nbsp;</td>
             <td>&nbsp;</td>
-            <td><label id="disr-chamber-bonus-energy">0</label>&nbsp;<label><?= $l['energy'] ?></label></td>
+            <td><span id="disr-chamber-bonus-energy">0</span>&nbsp;<span><?= $l['energy'] ?></span></td>
           </tr>
           <tr>
-            <td><label><?= $l['lf-tech-bonus'] ?></label></td>
+            <td><span><?= $l['lf-tech-bonus'] ?></span></td>
             <td>&nbsp;</td>
             <td>&nbsp;</td>
-            <td><label id="lf-tech-bonus-energy">0</label>&nbsp;<label><?= $l['energy'] ?></label></td>
+            <td><span id="lf-tech-bonus-energy">0</span>&nbsp;<span><?= $l['energy'] ?></span></td>
           </tr>
         </table>
       </div>
@@ -283,7 +295,7 @@
       <hr class="my-2">
 
       <div id="tech-settings">
-        <table class="mx-auto">
+        <table class="mx-auto" role="presentation">
           <tr>
             <td><label for="graviton-level"><?= $l['graviton-level'] ?></label></td>
             <td><input id="graviton-level" type="text" name="graviton-level" class="form-control form-control-sm d-inline-block energy-input ui-input-margin" value="0" data-field-title="<?= $l['graviton-level'] ?>"></td>
@@ -295,14 +307,14 @@
     <!-- Results -->
     <div class="border rounded m-1 p-2">
       <p class="border rounded subheader bg-primary-subtle"><?= $l['calc-results'] ?></p>
-      <table class="mx-auto">
+      <table class="mx-auto" role="presentation">
         <tr>
-          <td><label><?= $l['energy-produced'] ?></label></td>
+          <td><span><?= $l['energy-produced'] ?></span></td>
           <td><div id="energy-produced" class="form-control form-control-sm d-inline-block energy-show ui-input-margin ui-state-disabled">0</div></td>
-          <td><label id="energy-requirement"></label></td>
+          <td><span id="energy-requirement"></span></td>
         </tr>
         <tr>
-          <td colspan="2"><label><?= $l['solar-satellites-needed'] ?></label></td>
+          <td colspan="2"><span><?= $l['solar-satellites-needed'] ?></span></td>
           <td><div id="solar-satellites-needed" class="form-control form-control-sm d-inline-block energy-show ui-input-margin ui-state-disabled">0</div></td>
         </tr>
       </table>
@@ -311,31 +323,31 @@
     <!-- Expenses -->
     <div class="border rounded m-1 p-2">
       <p class="border rounded subheader bg-primary-subtle"><?= $l['expenses'] ?></p>
-      <table class="mx-auto">
+      <table class="mx-auto" role="presentation">
         <tr>
-          <td><label><?= $l['crystal'] ?></label></td>
+          <td><span><?= $l['crystal'] ?></span></td>
           <td><div id="crystal-required" class="form-control form-control-sm d-inline-block resource-show ui-input-margin ui-state-disabled">0</div></td>
-          <td><label><?= $l['deuterium'] ?></label></td>
+          <td><span><?= $l['deuterium'] ?></span></td>
           <td><div id="deuterium-required" class="form-control form-control-sm d-inline-block resource-show ui-input-margin ui-state-disabled">0</div></td>
-          <td><label><?= $l['time'] ?></label></td>
+          <td><span><?= $l['time'] ?></span></td>
           <td><div id="time-required" class="form-control form-control-sm d-inline-block time-show ui-input-margin ui-state-disabled">0</div></td>
         </tr>
         <tr>
           <td><label for="crystal-available"><?= $l['res-available'] ?></label></td>
           <td><input id="crystal-available" type="text" name="crystal-available" class="form-control form-control-sm d-inline-block resource-show ui-input-margin" value="0" data-field-title="<?= $l['res-available'] ?> <?= $l['crystal'] ?>"></td>
           <td>&nbsp;</td>
-          <td><input id="deuterium-available" type="text" name="deuterium-available" class="form-control form-control-sm d-inline-block resource-show ui-input-margin" value="0" data-field-title="<?= $l['res-available'] ?> <?= $l['deuterium'] ?>"></td>
+          <td><input id="deuterium-available" type="text" name="deuterium-available" class="form-control form-control-sm d-inline-block resource-show ui-input-margin" value="0" data-field-title="<?= $l['res-available'] ?> <?= $l['deuterium'] ?>" aria-label="<?= htmlspecialchars($l['res-available'] . ': ' . $l['deuterium'], ENT_QUOTES) ?>"></td>
           <td colspan="2">&nbsp;</td>
         </tr>
         <tr>
-          <td><label><?= $l['res-needed'] ?></label></td>
+          <td><span><?= $l['res-needed'] ?></span></td>
           <td><div id="crystal-to-deliver" class="form-control form-control-sm d-inline-block resource-show ui-input-margin ui-state-disabled">0</div></td>
           <td>&nbsp;</td>
           <td><div id="deuterium-to-deliver" class="form-control form-control-sm d-inline-block resource-show ui-input-margin ui-state-disabled">0</div></td>
           <td colspan="2">&nbsp;</td>
         </tr>
         <tr>
-          <td><label><?= $l['cargoes'] ?></label></td>
+          <td><span><?= $l['cargoes'] ?></span></td>
           <td colspan="5"><div id="cargoes" class="form-control form-control-sm d-inline-block transport-show ui-input-margin ui-state-disabled">0</div><i class="bi bi-question-circle" data-bs-toggle="tooltip" title="<?= $l['sc'] ?> / <?= $l['lc'] ?>"></i></td>
         </tr>
       </table>
@@ -344,7 +356,7 @@
     <!-- Recycling -->
     <div class="border rounded m-1 p-2">
       <p class="border rounded subheader bg-primary-subtle"><?= $l['recycling'] ?></p>
-      <table class="mx-auto">
+      <table class="mx-auto" role="presentation">
         <tr>
           <td><label for="debris-percent"><?= $l['debris-percent'] ?></label></td>
           <td>
@@ -364,15 +376,15 @@
           </td>
         </tr>
         <tr>
-          <td><label><?= $l['crystal'] ?></label></td>
+          <td><span><?= $l['crystal'] ?></span></td>
           <td><div id="crystal-recyclable" class="form-control form-control-sm d-inline-block resource-show ui-input-margin ui-state-disabled">0</div></td>
-          <td><label><?= $l['deuterium'] ?></label></td>
+          <td><span><?= $l['deuterium'] ?></span></td>
           <td><div id="deuterium-recyclable" class="form-control form-control-sm d-inline-block resource-show ui-input-margin ui-state-disabled">0</div></td>
         </tr>
         <tr>
-          <td><label><?= $l['recyclers'] ?></label></td>
+          <td><span><?= $l['recyclers'] ?></span></td>
           <td><div id="recyclers" class="form-control form-control-sm d-inline-block energy-show ui-input-margin ui-state-disabled">0</div></td>
-          <td><label><?= $l['cargoes'] ?></label></td>
+          <td><span><?= $l['cargoes'] ?></span></td>
           <td><div id="cargoes-for-df" class="form-control form-control-sm d-inline-block transport-show ui-input-margin ui-state-disabled">0</div></td>
         </tr>
         <tr>
@@ -384,9 +396,9 @@
           </td>
         </tr>
         <tr>
-          <td class="pt-0"><label><?= $l['crystal'] ?></label></td>
+          <td class="pt-0"><span><?= $l['crystal'] ?></span></td>
           <td class="pt-0"><div id="net-crystal-required" class="form-control form-control-sm d-inline-block resource-show ui-input-margin ui-state-disabled">0</div></td>
-          <td class="pt-0"><label><?= $l['deuterium'] ?></label></td>
+          <td class="pt-0"><span><?= $l['deuterium'] ?></span></td>
           <td class="pt-0"><div id="net-deuterium-required" class="form-control form-control-sm d-inline-block resource-show ui-input-margin ui-state-disabled">0</div></td>
         </tr>
       </table>
@@ -411,6 +423,7 @@ document.addEventListener('DOMContentLoaded', function() {
     bootstrap.Tooltip.getOrCreateInstance(el);
   });
   initializeGravitonCalculator();
+  initGravitonProfiles();
 });
 </script>
 

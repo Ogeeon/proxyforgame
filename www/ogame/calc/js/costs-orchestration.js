@@ -15,7 +15,7 @@ class CostsCalculator {
     this.changeDetector = new ChangeDetector();
 
     // State
-    /** @type {?GlobalParams} Filled on the first collection; read via _params(). */
+    /** @type {?GlobalParams} Filled on the first collection; read via params(). */
     this.currentParams = null;
     this.isInitialized = false;
     /** Requests in flight under the settings panel's loading overlay. */
@@ -63,9 +63,9 @@ class CostsCalculator {
    * before the first recalculateAll(), and the calculator and the renderer
    * both need a real object.
    * @returns {GlobalParams}
-   * @private
+   * Also used by costs-profile.js.
    */
-  _params() {
+  params() {
     this.currentParams ??= this.collector.collectGlobalParams();
     return this.currentParams;
   }
@@ -94,7 +94,10 @@ class CostsCalculator {
     // 5. Show the robot/nanite factory disclaimer once if applicable
     this._maybeShowRobotNaniteDisclaimer();
 
-    // 6. Save state
+    // 6. The lab level the research network reaches
+    this._renderIrnResult();
+
+    // 7. Save state
     this.saveState();
 
     const elapsed = performance.now() - startTime;
@@ -123,7 +126,7 @@ class CostsCalculator {
     });
 
     // Render all tables in one batch
-    batchRenderer.renderAllTables(outerTab, allRequests, allResults, this._params());
+    batchRenderer.renderAllTables(outerTab, allRequests, allResults, this.params());
 
     this.stats.calculations++;
     this.stats.renders++;
@@ -138,7 +141,7 @@ class CostsCalculator {
 
     // console.log(`Recalculating tables: ${tableIds.join(', ')}`);
 
-    const params = this._params();
+    const params = this.params();
 
     tableIds.forEach(tableId => {
       const requests = this.collector.collectTableRequests(tableId);
@@ -185,7 +188,7 @@ class CostsCalculator {
     });
 
     grandTotal.energy = maxEnergy;
-    this.renderer.renderGrandTotals(outerTab, grandTotal, this._params());
+    this.renderer.renderGrandTotals(outerTab, grandTotal, this.params());
   }
 
   /**
@@ -219,13 +222,13 @@ class CostsCalculator {
 
         if (isProducer) {
           productions[level] = this.calculator.calculateProduction(
-            techId, level, this._params()
+            techId, level, this.params()
           );
         }
 
         if (isConsumer) {
           consumptions[level] = this.calculator.calculateConsumption(
-            techId, level, this._params()
+            techId, level, this.params()
           );
         }
       });
@@ -237,7 +240,7 @@ class CostsCalculator {
       results,
       isProducer ? productions : null,
       isConsumer ? consumptions : null,
-      this._params()
+      this.params()
     );
   }
 
@@ -246,7 +249,7 @@ class CostsCalculator {
    * @private
    */
   _calculateRequests(requests) {
-    const params = this._params();
+    const params = this.params();
     return requests.map(req => {
       const result = this.calculator.calculate(req, params);
 
@@ -282,11 +285,11 @@ class CostsCalculator {
    * @private
    */
   _maybeRaiseLabLevel(techId) {
-    if (options.resultingLabLevelComputed) {
+    if (this.params().useIrn) {
       return;
     }
 
-    const target = this.calculator.getLabLevelRaiseTarget(techId, this._params());
+    const target = this.calculator.getLabLevelRaiseTarget(techId, this.params());
     if (target === 0) {
       return;
     }
@@ -548,6 +551,7 @@ class CostsCalculator {
       '#technocrat',
       '#research-bonus',
       '#full-numbers',
+      '#use-irn',
       '#geologist',
       '#engineer',
       '#admiral',
@@ -605,6 +609,14 @@ class CostsCalculator {
   }
 
   /**
+   * Another technology was picked on the range tab and the tab recalculated.
+   * A hook for costs-profile.js, which fills in the profile's level there.
+   */
+  rangeTechChanged() {
+    // Nothing to do without a profile binding.
+  }
+
+  /**
    * Bind range tab events
    * @private
    */
@@ -620,6 +632,7 @@ class CostsCalculator {
     addEvent('#tech-types-select', 'change', () => {
       this._raiseLabLevelForRange();
       this.recalculateRangeTab();
+      this.rangeTechChanged();
     });
 
     ['#tab2-from-level', '#tab2-to-level'].forEach(selector => {
@@ -742,12 +755,12 @@ class CostsCalculator {
       removeAllEvents(tableModalEl, 'show.bs.modal');
       addEvent(tableModalEl, 'show.bs.modal', () => {
         this._lfTableApplied = false;
-        this._lfTableSnapshot = this._readLfResearchTable();
+        this._lfTableSnapshot = this.readLfResearchTable();
       });
       removeAllEvents(tableModalEl, 'hidden.bs.modal');
       addEvent(tableModalEl, 'hidden.bs.modal', () => {
         if (!this._lfTableApplied && this._lfTableSnapshot) {
-          this._restoreLfResearchTable(this._lfTableSnapshot);
+          this.restoreLfResearchTable(this._lfTableSnapshot);
         }
         this._lfTableSnapshot = null;
       });
@@ -801,14 +814,14 @@ class CostsCalculator {
   _bindUniverseEvents() {
     removeAllEvents('#country', 'change');
     addEvent('#country', 'change', () => {
-      this._fillUniverseList(selectEl('#country')?.value ?? '', '');
+      this.fillUniverseList(selectEl('#country')?.value ?? '', '');
       this.saveState();
     });
     removeAllEvents('#universe', 'change');
     addEvent('#universe', 'change', () => {
       this.saveState();
-      // Fire and forget: the method reports its own failures with a toast.
-      void this._fetchUniverseSpeeds();
+      // It reports its own failures, so nothing is left to catch here.
+      void this.fetchUniverseSpeeds();
     });
   }
 
@@ -817,9 +830,9 @@ class CostsCalculator {
    * of them - or none, when it is not in the list.
    * @param {string} country country code, '--' for none
    * @param {string|number} universe universe number to select
-   * @private
+   * Also used by costs-profile.js.
    */
-  _fillUniverseList(country, universe) {
+  fillUniverseList(country, universe) {
     const universeEl = selectEl('#universe');
     if (!universeEl) return;
     universeEl.innerHTML = '';
@@ -836,9 +849,9 @@ class CostsCalculator {
 
   /**
    * Fetch the chosen universe's settings and apply its speeds.
-   * @private
+   * Also used by costs-profile.js.
    */
-  async _fetchUniverseSpeeds() {
+  async fetchUniverseSpeeds() {
     const country = selectEl('#country')?.value ?? '';
     const universe = selectEl('#universe')?.value ?? '';
     if (country === '' || country === '--' || universe === '') return;
@@ -920,9 +933,9 @@ class CostsCalculator {
   /**
    * Read the cost/time value pairs currently entered in the table.
    * @returns {{cost: number, time: number}[]}
-   * @private
+   * Also used by costs-profile.js.
    */
-  _readLfResearchTable() {
+  readLfResearchTable() {
     const rows = /** @type {HTMLTableRowElement[]} */ (Array.from($$('#lf-research-bonuses-tbody tr')));
     return rows.map(row => ({
       cost: this._parsePercent(row.querySelector('.lf-research-cost-input')),
@@ -934,9 +947,9 @@ class CostsCalculator {
    * Write a snapshot of value pairs back into the table inputs. Used to revert
    * the modal to its pre-edit state when the user cancels.
    * @param {{cost: number, time: number}[]} data
-   * @private
+   * Also used by costs-profile.js.
    */
-  _restoreLfResearchTable(data) {
+  restoreLfResearchTable(data) {
     const rows = $$('#lf-research-bonuses-tbody tr');
     rows.forEach((row, i) => {
       const entry = data[i];
@@ -967,22 +980,22 @@ class CostsCalculator {
    * @private
    */
   _applyLfResearchTable() {
-    const data = this._readLfResearchTable();
+    const data = this.readLfResearchTable();
     if (data.length === 0) return;
 
-    this._saveLfResearchTable(data);
+    this.saveLfResearchTable(data);
     this._handleParamChange('lf-research-table');
   }
 
   /**
    * Persist the research bonuses table to localStorage.
    * @param {{cost: number, time: number}[]} [data]
-   * @private
+   * Also used by costs-profile.js.
    */
-  _saveLfResearchTable(data) {
+  saveLfResearchTable(data) {
     if (!this._isStorageAvailable()) return;
     try {
-      const payload = (data || this._readLfResearchTable()).map(d => [d.cost, d.time]);
+      const payload = (data || this.readLfResearchTable()).map(d => [d.cost, d.time]);
       localStorage.setItem(CostsCalculator.LF_TABLE_STORAGE_KEY, JSON.stringify(payload));
     } catch (e) {
       console.error('Failed to save LF research table:', e.message);
@@ -1128,6 +1141,8 @@ class CostsCalculator {
       this.recalculateRangeTab();
     }
 
+    this._renderIrnResult();
+
     // Save state
     this.saveState();
   }
@@ -1173,18 +1188,25 @@ class CostsCalculator {
     const techId = this._rowTechId(row);
     if (techId === null || !factoryIds.has(techId)) return false;
 
-    // Single-level row: level input at children[2]; multi-level: to-level at children[3]
+    // Single-level row: level input at children[2]; multi-level: from-level at
+    // children[2] and to-level at children[3]
     const cell = row.children[multi ? 3 : 2];
     const input = /** @type {HTMLInputElement|undefined} */ (cell?.children[0]);
     if (!input) return false;
+    const fromInput = /** @type {HTMLInputElement|undefined} */ (multi ? row.children[2]?.children[0] : undefined);
 
-    // Locale-aware read: the field may hold a comma decimal separator
-    return getInputNumber(input) > 0;
+    // Locale-aware read: the field may hold a comma decimal separator. A
+    // multi-level row changes the factory only when "to" differs from "from":
+    // the two equal - as a profile fills them in - build nothing. A "to" of 0
+    // is a row not filled in yet, not a demolition to the ground.
+    const to = getInputNumber(input);
+    return to > 0 && (!fromInput || to !== getInputNumber(fromInput));
   }
 
   /**
    * Scan the Robotics/Nanite factory rows and report whether any of them is
-   * being built: a non-zero level on tab 0 or a non-zero "to-level" on tab 1.
+   * being built: a non-zero level on tab 0 or a "to-level" other than the
+   * "from-level" on tab 1.
    * @private
    */
   _isRobotNaniteFactoryBuilt() {
@@ -1270,10 +1292,40 @@ class CostsCalculator {
    * Uses native JSON serialization
    */
   saveState() {
-    const params = this._params();
+    this.writeState(this.buildState());
+  }
+
+  /**
+   * Everything the calculator itself holds, to be put back by restoreOwnState:
+   * the settings and the research bonuses table.
+   * Used by costs-profile.js.
+   *
+   * @returns {{state: Record<string, any>, table: {cost: number, time: number}[]}}
+   */
+  exportState() {
+    return { state: cloneData(this.buildState()), table: this.readLfResearchTable() };
+  }
+
+  /**
+   * Put back what exportState returned.
+   * Used by costs-profile.js.
+   *
+   * @param {{state: Record<string, any>, table: {cost: number, time: number}[]}} own
+   */
+  restoreOwnState(own) {
+    this.applyState(cloneData(own.state));
+    this.restoreLfResearchTable(own.table);
+  }
+
+  /**
+   * The settings as they are stored: the current parameters as a plain object.
+   * @returns {Record<string, any>}
+   */
+  buildState() {
+    const params = this.params();
 
     // Convert params to plain object for JSON serialization
-    const state = {
+    return {
       shipyardLevel: params.shipyardLevel,
       robotFactoryLevelPlanet: params.robotFactoryLevelPlanet,
       robotFactoryLevelMoon: params.robotFactoryLevelMoon,
@@ -1300,6 +1352,7 @@ class CostsCalculator {
       labLevels: params.labLevels,
       labChoice: params.labChoice,
       fullNumbers: params.fullNumbers,
+      useIrn: params.useIrn,
       mineralResCntrLvl: params.mineralResCntrLvl,
       lfTerraformerRdc: params.lfTerraformerRdc,
       discovererClassBonus: params.discovererClassBonus,
@@ -1311,7 +1364,13 @@ class CostsCalculator {
       country: selectEl('#country')?.value ?? '--',
       universe: selectEl('#universe')?.value ?? ''
     };
+  }
 
+  /**
+   * @param {Record<string, any>} state
+   * Also used by costs-profile.js.
+   */
+  writeState(state) {
     try {
       const json = JSON.stringify(state);
       if (this._isStorageAvailable()) {
@@ -1368,7 +1427,7 @@ class CostsCalculator {
         // console.log('Loading state from storage...');
 
         // Apply state to UI elements
-        this._applyStateToUI(state);
+        this.applyState(state);
 
         // Collect params after applying state
         this.currentParams = this.collector.collectGlobalParams();
@@ -1382,9 +1441,9 @@ class CostsCalculator {
 
   /**
    * Apply saved state to UI elements
-   * @private
+   * Also used by costs-profile.js.
    */
-  _applyStateToUI(state) {
+  applyState(state) {
     const fieldMap = {
       shipyardLevel: '#shipyard-level',
       robotFactoryLevelPlanet: '#robot-factory-level',
@@ -1442,6 +1501,7 @@ class CostsCalculator {
     setChecked('#commander', state.commander === true);
     setChecked('#research-bonus', state.researchBonus === true);
     setChecked('#full-numbers', state.fullNumbers === true);
+    setChecked('#use-irn', state.useIrn === true);
 
     // Class
     if (state.playerClass !== undefined) {
@@ -1453,7 +1513,7 @@ class CostsCalculator {
     // already among the fields above - no need to fetch them again
     if (typeof state.country === 'string') {
       setVal('#country', state.country);
-      this._fillUniverseList(state.country, state.universe ?? '');
+      this.fillUniverseList(state.country, state.universe ?? '');
     }
 
     // IRN lab levels
@@ -1536,7 +1596,7 @@ class CostsCalculator {
 
     // Speeds and the universe picker that fills them in
     setVal('#country', '--');
-    this._fillUniverseList('--', '');
+    this.fillUniverseList('--', '');
     setVal('#universe-speed', 1);
     setVal('#research-speed', 1);
 
@@ -1557,6 +1617,7 @@ class CostsCalculator {
     setChecked('#commander', false);
     setChecked('#research-bonus', false);
     setChecked('#full-numbers', false);
+    setChecked('#use-irn', false);
 
     // Class
     setChecked('#class-0', true);
@@ -1584,7 +1645,7 @@ class CostsCalculator {
     // LF research bonuses table: it persists in localStorage rather than in
     // the settings, so save the cleared table or a reload brings it back
     this._clearLfResearchTable();
-    this._saveLfResearchTable();
+    this.saveLfResearchTable();
 
     // Clear all table inputs (except qty inputs which default to 1)
     inputsAll('#tab-0 input[type="text"], #tab-1 input[type="text"]').forEach(el => {
@@ -1802,7 +1863,7 @@ class CostsCalculator {
         removeAllEvents('#labchoice_' + i, 'click');
         addEvent('#labchoice_' + i, 'click', () => {
           if (calculatorApp) {
-            calculatorApp._updateResultingLevel();
+            calculatorApp.updateResultingLevel();
             calculatorApp.recalculateAll();
           }
         });
@@ -1819,7 +1880,7 @@ class CostsCalculator {
     }
 
     // Update resulting level display if function exists
-    this._updateResultingLevel();
+    this.updateResultingLevel();
   }
 
   // ==========================================================================
@@ -1849,30 +1910,35 @@ class CostsCalculator {
   }
 
   /**
-   * Calculate and display IRN resulting lab level
+   * Show the lab level the research network reaches, and the button of the
+   * dialog that sets the network up, while the network is switched on.
    * @private
    */
-  _updateResultingLevel() {
+  _renderIrnResult() {
+    const params = this.params();
+    toggleClass('#irn-result', 'd-none', !params.useIrn);
+    toggleClass('#open-llc-dialog', 'd-none', !params.useIrn);
+    const el = $('#irn-result');
+    if (el && params.useIrn) el.textContent = String(params.getResultingLabLevel());
+  }
+
+  /**
+   * Calculate and display IRN resulting lab level
+   * Also used by costs-profile.js.
+   */
+  updateResultingLevel() {
     const irnLevel = this._getInputNumber('#irn-level');
     const planetCount = this._getInputNumber('#planetsSpin');
 
-    // First check if any radio button is selected
-    let haveSelection = false;
+    // The checked start planet, if any. With none the sum below starts on
+    // the best lab - the rule GlobalParams.getResultingLabLevel() applies too.
     for (let i = 1; i <= planetCount; i++) {
       if (getChecked(`#labchoice_${i}`)) {
-        haveSelection = true;
-        // Update lab choice in options
         if (options.prm) {
           options.prm.labChoice = i - 1;
         }
         break;
       }
-    }
-
-    // If no lab is selected, display "?" and return
-    if (!haveSelection) {
-      setHtml('#resulting-level', '<b>?</b>');
-      return;
     }
 
     // Collect lab levels
@@ -1930,7 +1996,7 @@ class CostsCalculator {
    * @private
    */
   _openIRNDialog() {
-    const params = this._params();
+    const params = this.params();
 
     // Store backup on the dialog element for Bootstrap modal
     const modalEl = document.getElementById('irn-calc');
@@ -1949,7 +2015,7 @@ class CostsCalculator {
     bootstrap.Modal.getOrCreateInstance(modalEl).show();
 
     // Update resulting level display after dialog opens
-    this._updateResultingLevel();
+    this.updateResultingLevel();
   }
 
   /**
@@ -2060,11 +2126,11 @@ function onPlanetsChange(newVal, oldVal) {
       '</tr>'
     );
     bindLabLevelInput('#lablevel_' + newVal);
-    addEvent('#labchoice_' + newVal, 'click', () => calculatorApp._updateResultingLevel());
+    addEvent('#labchoice_' + newVal, 'click', () => calculatorApp.updateResultingLevel());
     options.prm.labLevels.push(0);
   }
 
-  calculatorApp._updateResultingLevel();
+  calculatorApp.updateResultingLevel();
   if (calculatorApp) {
     calculatorApp.recalculateAll();
   }
@@ -2120,7 +2186,7 @@ function setupIrnInputHandlers() {
     removeAllEvents(radio, 'click');
     addEvent(radio, 'click', () => {
       if (calculatorApp) {
-        calculatorApp._updateResultingLevel();
+        calculatorApp.updateResultingLevel();
         calculatorApp.recalculateAll();
       }
     });
@@ -2130,7 +2196,7 @@ function setupIrnInputHandlers() {
   if (irnLevelInput) {
     const refreshIrn = () => {
       if (calculatorApp) {
-        calculatorApp._updateResultingLevel();
+        calculatorApp.updateResultingLevel();
         calculatorApp.recalculateAll();
       }
     };
@@ -2151,7 +2217,6 @@ function setupIrnInputHandlers() {
     removeAllEvents(researchLabInput, 'keyup');
     addEvent(researchLabInput, 'keyup', (e) => {
       validateInputNumber.call(researchLabInput, e);
-      options.resultingLabLevelComputed = false;
       if (calculatorApp) {
         calculatorApp._handleParamChange('research-lab-level');
       }
@@ -2178,19 +2243,12 @@ function setupIrnModalHandlers(irnModal, planetsSpinInput) {
 }
 
 /**
- * Apply the IRN dialog result to the research-lab-level input.
+ * Confirming the IRN dialog switches the research network on. The research
+ * lab field keeps its own meaning - one planet's lab - and the level the
+ * network reaches shows next to it.
  */
 function applyIrnResult() {
-  const resultingLevelText = getTextContent('#resulting-level');
-  const resultingLevel = Number.parseInt(resultingLevelText, 10);
-
-  if (!Number.isNaN(resultingLevel)) {
-    setVal('#research-lab-level', resultingLevel);
-    options.resultingLabLevel = resultingLevel;
-    options.resultingLabLevelComputed = true;
-    calculatorApp.currentParams.researchLabLevel = resultingLevel;
-  }
-
+  setChecked('#use-irn', true);
   calculatorApp.currentParams = calculatorApp.collector.collectGlobalParams();
   calculatorApp.recalculateAll();
 }
@@ -2220,7 +2278,19 @@ function cancelIrnDialog(irnModal, planetsSpinInput) {
   }
 
   rebuildLabTable(backup);
-  calculatorApp._updateResultingLevel();
+  calculatorApp.updateResultingLevel();
+}
+
+/**
+ * Label lab row `i` (1-based) with its planet's name, when a profile named
+ * the planets (costs-profile.js). A name is the player's text, so it goes in
+ * as text, never as markup.
+ * @param {number} i
+ */
+function nameLabRow(i) {
+  const name = Array.isArray(options.prm.labNames) ? options.prm.labNames[i - 1] : null;
+  const nameCell = document.getElementById('lablevel_' + i)?.closest('tr')?.cells[0];
+  if (name && nameCell) nameCell.textContent = name;
 }
 
 /**
@@ -2247,6 +2317,8 @@ function rebuildLabTable(backup) {
       '</tr>'
     );
 
+    nameLabRow(i);
+
     const radioEl = /** @type {HTMLInputElement} */ (document.getElementById('labchoice_' + i));
     if (radioEl) {
       if (backup.labLevels[i - 1] > 0) {
@@ -2260,7 +2332,7 @@ function rebuildLabTable(backup) {
     bindLabLevelInput('#lablevel_' + i);
     addEvent('#labchoice_' + i, 'click', () => {
       if (calculatorApp) {
-        calculatorApp._updateResultingLevel();
+        calculatorApp.updateResultingLevel();
         calculatorApp.recalculateAll();
       }
     });
@@ -2295,7 +2367,7 @@ function changeLabLevel() {
 
   // Update resulting level display
   if (calculatorApp) {
-    calculatorApp._updateResultingLevel();
+    calculatorApp.updateResultingLevel();
   }
 }
 

@@ -13,6 +13,17 @@ const GRAVITON_CLASS = { NONE: 0, COLLECTOR: 1, GENERAL: 2 };
 
 class GravitonCalculator {
   /**
+   * The officers' energy bonus the core expects: 2 for the whole commanding
+   * staff (+12%), 1 for an engineer alone (+10%), 0 otherwise.
+   *
+   * @param {{engineer: boolean, geologist: boolean, technocrat: boolean, admiral: boolean, commander: boolean}} o
+   */
+  static officerEnergyBonus(o) {
+    if (o.engineer && o.geologist && o.technocrat && o.admiral && o.commander) return 2;
+    return o.engineer ? 1 : 0;
+  }
+
+  /**
    * Cargo capacity, matching the costs calculator formula:
    *   base * (1 + 0.05 * hyperTech)  +  base * classBonus  +  floor(base * cap%/100)
    * where the class bonus and the life-form capacity increase are additive.

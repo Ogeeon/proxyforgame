@@ -30,6 +30,7 @@ const options = {
         researchCostReduction: 0,
         researchTimeReduction: 0,
         rates: [1, 1.5, 3],
+        race: 1,
 
         validate: function (field, value) {
             switch (field) {
@@ -51,6 +52,7 @@ const options = {
                 case 'researchCostReduction': return validateNumber(Number.parseFloat(value), 0, 50,  0);
                 case 'researchTimeReduction': return validateNumber(Number.parseFloat(value), 0, 99,  0);
                 case 'rates':                 return validateNumber(Number.parseFloat(value), 0.1, 100, 1);
+                case 'race':                  return validateNumber(Number.parseFloat(value), 1, 4, 1);
                 default: return value;
             }
         }
@@ -184,7 +186,10 @@ class LfCostsOrchestrator {
         });
         addEvent('#full-numbers', 'click', () => this.handleParamChange());
         addEvent('#reset', 'click', () => this.resetParams());
-        addEvent('#tech-types-select', 'change', () => this.updateTab3());
+        addEvent('#tech-types-select', 'change', () => {
+            this.updateTab3();
+            this.rangeTechChanged();
+        });
         addEvent('#race-selector', 'change', () => this.handleRaceChange());
 
         // Available-resource inputs — spread across all tabs
@@ -463,6 +468,8 @@ class LfCostsOrchestrator {
 
     handleRaceChange() {
         const race = Number(selectEl('#race-selector').value);
+        // Stored with the other settings: the page opens on the race picked last.
+        this.opts.prm.race = race;
         this.renderer.renderHideNShow(race);
         this.updateTotals();
         this.updateTab3();
@@ -656,18 +663,29 @@ class LfCostsOrchestrator {
         });
     }
 
+    /** The form on load: the stored settings, and the range tab and the full-numbers switch. */
     _restoreInputsFromPrm() {
+        this.restoreFromState();
+        setVal('#tech-types-select', 1);
+        setVal('#tab2-from-level', 0);
+        setVal('#tab2-to-level', 0);
+        setChecked('#full-numbers', this.opts.prm.fullNumbers);
+    }
+
+    /**
+     * Show the settings a player profile can own - the ones kept in opts.prm -
+     * in the form. The tables, the range tab and the full-numbers switch are
+     * the calculator's own and stay as they are.
+     */
+    restoreFromState() {
         const prm = this.opts.prm;
+        setVal('#race-selector', Number(prm.race) || 1);
         setVal('#robot-factory-level', prm.robotFactoryLevel);
         setVal('#nanite-factory-level', prm.naniteFactoryLevel);
         setVal('#universe-speed', prm.universeSpeed);
         setVal('#ion-tech-level', prm.ionTechLevel);
         setVal('#hyper-tech-level', prm.hyperTechLevel);
-        setVal('#tech-types-select', 1);
-        setVal('#tab2-from-level', 0);
-        setVal('#tab2-to-level', 0);
         setChecked(`#class-${prm.playerClass}`, true);
-        setChecked('#full-numbers', prm.fullNumbers);
         setNumVal('#sc-capacity-increase', prm.capIncrSC);
         setNumVal('#lc-capacity-increase', prm.capIncrLC);
         setVal('#megalith-level', prm.megalithLvl);
@@ -681,6 +699,20 @@ class LfCostsOrchestrator {
         setNumVal('#exchange-rates-m', prm.rates[0]);
         setNumVal('#exchange-rates-c', prm.rates[1]);
         setNumVal('#exchange-rates-d', prm.rates[2]);
+    }
+
+    /**
+     * Another technology was picked on the range tab and the tab recalculated.
+     * A hook for lfcosts-profile.js, which fills in the planet's level there.
+     */
+    rangeTechChanged() {
+        // Nothing to do without a profile binding.
+    }
+
+    /** Recalculate every table after the form was filled from outside. */
+    recalc() {
+        this.renderer.renderHideNShow(Number(getVal('#race-selector')));
+        this.handleParamChange();
     }
 
     _clearAvailableResourceInputs() {
@@ -759,8 +791,11 @@ class LfCostsOrchestrator {
     }
 }
 
+/** @type {?LfCostsOrchestrator} Set once the page is wired; the profile binding drives it. */
+let lfCostsApp = null;
+
 function initializeLfCostsCalculator() {
-    const orch = new LfCostsOrchestrator(options);
-    orch.init();
+    lfCostsApp = new LfCostsOrchestrator(options);
+    lfCostsApp.init();
 }
 window.initializeLfCostsCalculator = initializeLfCostsCalculator;

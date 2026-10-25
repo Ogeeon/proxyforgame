@@ -44,16 +44,16 @@ foreach ($lfTechData as $lfId => $lfRow) {
 // Production) is not listed: OGame folds it into the research percentages entered
 // on the parameters panel, so the calculator has nothing left to apply it to.
 // See docs/calculators/production-vs-ogame.md.
-$lfBuildingBonus = array(
-    1006 => array('met' => array(1.5, 1.0, null)),                            // High Energy Smelting
-    1008 => array('cry' => array(1.5, 1.0, null), 'deu' => array(1.0, 1.0, null)), // Fusion-Powered Production
-    2006 => array('met' => array(2.0, 1.0, null)),                            // Magma Forge
-    2007 => array('enP' => array(1.5, 1.0, null), 'enR' => array(0.5, 1.0, 0.4)),  // Disruption Chamber
-    2009 => array('cry' => array(2.0, 1.0, null)),                            // Crystal Refinery
-    2010 => array('deu' => array(2.0, 1.0, null)),                            // Deuterium Synthesiser (Rock'tal)
-    3007 => array('enP' => array(1.0, 1.0, 1.0)),                            // High-Performance Transformer
-    3010 => array('deu' => array(2.0, 1.0, null)),                            // High-Performance Synthesiser
-);
+//
+// The table lives in data/lf-building-bonuses.json, shared with the MCP server
+// (mcp/). The buildings it lists: 1006 High Energy Smelting, 1008 Fusion-Powered
+// Production, 2006 Magma Forge, 2007 Disruption Chamber, 2009 Crystal Refinery,
+// 2010 Deuterium Synthesiser (Rock'tal), 3007 High-Performance Transformer,
+// 3010 High-Performance Synthesiser.
+$lfBuildingBonus = array();
+foreach (json_decode(file_get_contents(__DIR__ . '/data/lf-building-bonuses.json'), true) as $lfId => $lfB) {
+    $lfBuildingBonus[(int)$lfId] = $lfB;
+}
 
 // Life form researches that raise resource production, in the same shape as
 // $lfBuildingBonus. Every one of them grows linearly (factor 1.0), so a level

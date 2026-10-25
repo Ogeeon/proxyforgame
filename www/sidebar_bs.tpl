@@ -50,7 +50,7 @@
 <!-- Sidebar for larger screens -->
 <div id="sidebar" class="card d-none d-lg-block">
   <div class="card-body p-0">
-    <div class="sidebar-panel bg-body-secondary text-primary-emphasis"><?=$loc['ogameMenuItems']['header']?> <small>(12)</small></div>
+    <div class="sidebar-panel bg-body-secondary text-primary-emphasis"><?=$loc['ogameMenuItems']['header']?> <small>(13.0)</small></div>
     <div class="list-group list-group-flush">
     <a class="list-group-item list-group-item-action ogame-menu-item text-center" href="/<?=$lang?>/"><?=$loc['ogameMenuItems']['main-title']?></a>
     <?php foreach ($ogamePages as $page): ?>
@@ -104,7 +104,7 @@
     <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
   </div>
   <div class="offcanvas-body p-0">
-    <div class="sidebar-panel bg-body-secondary text-primary-emphasis"><?=$loc['ogameMenuItems']['header']?> <small>(12)</small></div>
+    <div class="sidebar-panel bg-body-secondary text-primary-emphasis"><?=$loc['ogameMenuItems']['header']?> <small>(13.0)</small></div>
     <div class="list-group list-group-flush">
     <a class="list-group-item list-group-item-action ogame-menu-item text-center" href="/<?=$lang?>/"><?=$loc['ogameMenuItems']['main-title']?></a>
     <?php foreach ($ogamePages as $page): ?>

@@ -1,0 +1,49 @@
+# The MCP server (mcp/server.js): the calculators as tools for LLM clients.
+# Listens on loopback only; Apache proxies https://<site>/mcp to it
+# (deploy/apache-mcp.conf). Install, then enable:
+#
+#   install -m 644 <checkout>/deploy/pfg-mcp.service /etc/systemd/system/
+#   systemctl daemon-reload && systemctl enable --now pfg-mcp
+#
+# A deploy restarts it through pfg-mcp-restart.path; see deploy/README.md,
+# "The MCP server".
+
+[Unit]
+Description=ProxyForGame MCP server
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=www-data
+Group=www-data
+WorkingDirectory=/var/www/proxyforgame-gh
+ExecStart=/usr/bin/node /var/www/proxyforgame-gh/mcp/server.js
+Environment=NODE_ENV=production
+Environment=PFG_MCP_HOST=127.0.0.1
+Environment=PFG_MCP_PORT=8787
+Environment=PFG_SITE_URL=https://proxyforgame.com
+Restart=always
+RestartSec=2
+
+# The box has 1 CPU and 1 GB and runs the site, MariaDB and a VPN as well.
+# The server runs at ~60 MB resident; the cap keeps a runaway from taking the site with it.
+MemoryMax=160M
+CPUQuota=50%
+
+# Reads the checkout, writes nothing, talks HTTPS to the site and nothing else.
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+PrivateDevices=yes
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectControlGroups=yes
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+RestrictNamespaces=yes
+LockPersonality=yes
+SystemCallArchitectures=native
+
+[Install]
+WantedBy=multi-user.target

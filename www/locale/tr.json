@@ -137,11 +137,6 @@
     "lf-bonuses-api-import-hint": "Bu değerlerin tümünü, formun üst kısmındaki \"OGame'den içe aktar\" düğmesi (pano simgesi) ile otomatik olarak da alabilirsiniz.",
     "universe": "Evren",
     "profile": "Profil",
-    "no-profile-name-msg": "Lütfen profil adını belirtin.",
-    "no-profile-selected-msg": "Profil seçilmedi.",
-    "del-profile-confirm": "Bu profili silmek istediğinizden emin misiniz?",
-    "owr-profile-confirm": "Bu profilin üzerine yazmak istediğinizden emin misiniz?",
-    "load-profile-confirm": "Bu profili yüklemek istediğinizden emin misiniz? Şu anda girilen veriler kaybolacak.",
     "server-data-failed-msg": "Evren ayarları yüklenemedi. Aşağıdaki değerleri kontrol edip elle düzeltin.",
     "fetching-data": "Veriler alınıyor...",
     "universe-load": "Yük",
@@ -157,7 +152,6 @@
     "ship-name": "Gemi",
     "sc": "Küçük Nakliye",
     "lc": "Büyük Nakliye",
-    "all-officers": "Komuta Heyeti",
     "fusion-plant-level": "Füzyoenerji Seviyesi",
     "energy-produced": "Enerji üretimi",
     "energy-needed": "den hariç",
@@ -179,6 +173,7 @@
     "disr-chamber": "Disruptör Odası",
     "disr-chamber-bonus": "Disruptör Odası Bonusu",
     "total-lf-energy-bonus": "Enerji üretimi için Yaşam Formları toplam bonusu",
+    "lf-terraformer-rdc": "Terraformer maliyet azaltımı",
     "lf-tech-bonus": "Yaşam Formları teknoloji bonusu",
     "country": "Ülke",
     "res-available": "Mevcut kaynaklar",
@@ -196,7 +191,6 @@
     "cargo-increase": "Kargo kapasitesi",
     "nanites-factory-level": "Nanit fabrikası seviyesi",
     "shipyard-level": "Tersane seviyesi",
-    "energy-bonus": "Enerji bonusu",
     "none": "Yok",
     "race": "Yaşam formu",
     "race-1": "İnsanlar",
@@ -214,7 +208,72 @@
     "character-bonus-hint": "Bu bonusları almak için, Kaynak ayarları - Yaşam Formları oyuncu bonusları'na gidin,\nsonra 'Karakter sınıfı bonusları'na aşağı kaydırın.",
     "collectors-character-bonus": "Koleksiyoncunun karakter sınıfı bonusu",
     "lf-class-bonus": "Sınıf bonusu",
-    "lf-class-bonus-hint": "OGame'in yaşam formu bonuslarının sınıf bonuslarına etkisini gösteren tablosundaki 'Toplam' değerini girin, 'Koleksiyoncu' satırı."
+    "lf-class-bonus-hint": "OGame'in yaşam formu bonuslarının sınıf bonuslarına etkisini gösteren tablosundaki 'Toplam' değerini girin, 'Koleksiyoncu' satırı.",
+    "pf-no-profile": "Profil yok",
+    "pf-import": "OGame’den içe aktar…",
+    "pf-create": "Yeni profil…",
+    "pf-manage": "Profilleri yönet…",
+    "pf-import-hdr": "Hesap verilerini içe aktar",
+    "pf-import-hint": "<a href=\"https://github.com/Rivenscryr/origin-exporter\" target=\"_blank\" rel=\"noopener\">Origin Exporter</a> betiğinin dışa aktardığı verileri yapıştırın (OGame’de: İmparatorluk simgesi → Export account data) veya indirilen dosyayı seçin. Betik, Antigame Reborn’un geliştiricisi tarafından yazılmıştır.",
+    "pf-file": "Dosya",
+    "pf-import-universe-hint": "Veriler hangi evrenden geldiğini belirtmiyor. Evreni seçin:",
+    "pf-import-btn": "İçe aktar",
+    "pf-import-err-json": "Bu geçerli bir JSON değil.",
+    "pf-import-err-shape": "Bu, Origin Exporter’dan gelen hesap verisi değil.",
+    "pf-import-err-schema": "Origin Exporter biçiminin bu sürümü henüz desteklenmiyor.",
+    "pf-pick-universe": "Evreni seçin.",
+    "pf-import-done": "“{0}” profili: eklenen gezegen {1}, güncellenen {2}, kaldırılan {3}.",
+    "pf-props-hdr": "Profil",
+    "pf-name": "Ad",
+    "pf-universe-optional": "Evren (isteğe bağlı):",
+    "pf-universe-locked": "Evren içe aktarılan verilerle geldi ve değiştirilemez.",
+    "pf-name-required": "Bir ad girin.",
+    "pf-manage-hdr": "Profiller",
+    "pf-source": "İçe aktarıldı",
+    "pf-edit": "Düzenle",
+    "pf-no-universe": "belirlenmedi",
+    "pf-delete-confirm": "“{0}” profili silinsin mi? Bu işlem geri alınamaz.",
+    "pf-merge-hdr": "Profilleri birleştir",
+    "pf-merge-from": "Şu profili",
+    "pf-merge-into": "şununla birleştir",
+    "pf-merge": "Birleştir",
+    "pf-merge-hint": "İkinci profil tüm değerlerini korur ve birinciden yalnızca eksik olanları alır; birinci profil silinir.",
+    "pf-merge-confirm": "“{0}”, “{1}” ile birleştirilsin mi? “{0}” silinecek.",
+    "pf-merge-same": "İki farklı profil seçin.",
+    "pf-backup-hdr": "Yedek",
+    "pf-backup-hint": "Profiller yalnızca bu tarayıcıda saklanır. Elle girilen değerler (üretim ayarları, takas oranları, elle oluşturulan profiller) OGame’den yeniden içe aktarmayla geri gelmez, bu yüzden bir yedek dosyası saklayın.",
+    "pf-backup-download": "Yedeği indir",
+    "pf-backup-restore": "Dosyadan geri yükle…",
+    "pf-restore-conflict": "“{0}” profili zaten var. Dosyadaki profille değiştirilsin mi?",
+    "pf-replace": "Değiştir",
+    "pf-skip": "Atla",
+    "pf-restore-done": "Geri yüklenen profiller: {0}.",
+    "pf-file-err": "Bu bir profil yedek dosyası değil veya sürümü desteklenmiyor.",
+    "pf-storage-unavailable": "Bu tarayıcı sitenin veri saklamasına izin vermiyor, bu yüzden profiller kullanılamıyor.",
+    "pf-save-failed": "Profil kaydedilemedi: tarayıcı daha fazla veri saklamayı reddetti.",
+    "pf-migrate-hdr": "Kayıtlı setler bulundu",
+    "pf-migrate-text": "Hesaplayıcıların önceki bir sürümüyle kaydedilmiş setler: {0}. Profillere dönüştürülsün mü? Asıl setler korunur.",
+    "pf-migrate-btn": "Setleri dönüştür",
+    "pf-migrate-later": "Şimdi değil",
+    "pf-migrate-done": "Oluşturulan profiller: {0}. Şimdi bir yedek indirin: bu tarayıcı dışındaki tek kopya odur.",
+    "pf-migrate-none": "Setlerin hiçbiri okunamadı.",
+    "pf-overrides": "Oyundakinden farklı değerler: {0}",
+    "pf-reset-profile": "hangi oyun değerlerinin geri yükleneceğini seçmek için tıklayın",
+    "pf-account": "Hesap",
+    "pf-reset-hdr": "Oyun değerlerini geri yükle",
+    "pf-reset-hint": "İşaretli değerler oyundan içe aktarılanlara döner; diğerleri ayarladığınız gibi kalır.",
+    "pf-select-all": "Tümünü seç",
+    "pf-col-where": "Nerede",
+    "pf-col-field": "Değer",
+    "pf-col-game": "Oyunda",
+    "pf-col-current": "Şimdi",
+    "pf-reset-selected": "Seçilenleri geri yükle",
+    "pf-in-game": "Oyunda: {0}",
+    "pf-reset-value": "geri yüklemek için tıklayın",
+    "pf-departure-body": "Profilin gezegeni veya ayı",
+    "pf-take-fleet": "Kalkış noktasından",
+    "pf-take-fleet-hint": "Kalkış noktası olarak seçilen gezegende veya ayda bulunan gemileri, OGame’den yapılan son içe aktarmaya göre doldurur.",
+    "pf-universe-from-profile": "Evren etkin profil tarafından belirlenir."
   },
   "index": {
     "title": "ProxyForGame - OGame için hesaplamalar",
@@ -336,11 +395,12 @@
     "msg-lab-level-raised": "Araştırma laboratuvarı seviyesi {0} değerine yükseltildi — \"{1}\" araştırması bunu gerektiriyor.",
     "mineral-res-cntr-lvl": "Maden Araştırma Merkezi",
     "lf-terraformer-rdc": "Terraformer maliyet azaltımı",
-    "disclaimer-robot-nanite": "İnşa sürelerini okurken tablonun ilk satırındaki notu dikkate alın. Robot Fabrikası veya Nanit Fabrikası inşa ediyorsanız, doğru inşa süresi hesaplamaları için <a href=\"{0}\">İnşaat kuyruğu hesaplayıcısını</a> kullanın.",
+    "disclaimer-robot-nanite": "İnşa sürelerini okurken Robot Fabrikası ve Nanit Fabrikası satırlarının ilk hücresindeki {1} ipucunu dikkate alın. Robot Fabrikası veya Nanit Fabrikası inşa ediyorsanız, doğru inşa süresi hesaplamaları için <a href=\"{0}\">İnşaat kuyruğu hesaplayıcısını</a> kullanın.",
     "disclaimer-title": "Dikkat",
     "discoverer-class-bonus": "Kaşif sınıfı bonusu",
     "discoverer-class-bonus-hint": "OGame'in yaşam formu bonuslarının sınıf bonuslarına etkisini gösteren tablosundaki 'Toplam' değerini girin, 'Kaşif' satırı. Yalnızca 'Genel' sekmesinde 'Kaşif' sınıfı seçiliyse uygulanır.",
-    "research-speed-hint": "Araştırma hızı, ekonomi hızının evrenin araştırma çarpanıyla çarpımıdır, ör. 5 × 3 = 15. Yukarıdan evreni seçtiğinizde her iki hız otomatik olarak doldurulur."
+    "research-speed-hint": "Araştırma hızı, ekonomi hızının evrenin araştırma çarpanıyla çarpımıdır, ör. 5 × 3 = 15. Yukarıdan evreni seçtiğinizde her iki hız otomatik olarak doldurulur.",
+    "description": "OGame’de evren hızı ve bonusları hesaba katarak bina, araştırma, gemi ve savunma maliyetlerini ve inşa sürelerini hesaplayın."
   },
   "lfcosts": {
     "title": "OGame – Yaşam formları için maliyet hesaplayıcı",
@@ -464,7 +524,8 @@
     "ovrc-battleship": "Hız Aşırtma (Savaş Gemisi)",
     "psy-sh-matrix": "Psionik Koruma Matrisi",
     "kaelesh-disc-enh": "Kaelesh Kaşif Takviyesi",
-    "energy-cost-to-build": "İnşaat için gereken enerji"
+    "energy-cost-to-build": "İnşaat için gereken enerji",
+    "description": "OGame’de ırk ve teknoloji bonuslarını hesaba katarak yaşam formları binalarının ve araştırmalarının maliyetini ve süresini hesaplayın."
   },
   "flight": {
     "flight-time-format": "99 H:s:s",
@@ -579,13 +640,19 @@
     "own-api-import-title": "İçe Aktar",
     "own-api-bad-json-msg": "Veriler okunamadı.\\n'Filo' sayfasındaki API 2 alanındaki metni yapıştırdığınızdan emin olun.",
     "import-failed-msg": "Veriler yüklenemedi.\\nSunucu geçersiz bir yanıt döndürdü. Lütfen daha sonra tekrar deneyin.",
-    "populated-systems-failed-msg": "Yerleşim bulunan sistemlerin haritası kullanılamıyor, bu yüzden hiçbir sistem atlanmış sayılmıyor. Sayılarını elle girebilirsiniz."
+    "populated-systems-failed-msg": "Yerleşim bulunan sistemlerin haritası kullanılamıyor, bu yüzden hiçbir sistem atlanmış sayılmıyor. Sayılarını elle girebilirsiniz.",
+    "sr-profile-hdr": "Casusluk raporunu içe aktar",
+    "sr-profile-text": "Bir profil etkin. Rapor, casusluk yapılan oyuncunun araştırmalarını, sınıfını ve bonuslarını içerir; bunlar profilinizin üzerine yazılmamalı. Nasıl içe aktarılsın?",
+    "sr-profile-none": "“Profil yok” seçeneğine geç ve içe aktar",
+    "sr-profile-new": "Rapor için yeni profil oluştur",
+    "description": "OGame’de evren hızı, gemiler ve uçuş moduna göre uçuş süresini, döteryum tüketimini ve uygun filo kalkış saatini hesaplayın."
   },
   "graviton": {
     "title": "OGame - Gravitasyon Hesaplayıcı",
     "recycling": "Dismantling SS debris",
     "graviton-level": "Graviton Seviyesi",
-    "keywords": "proxyforgame,ogame,graviton hesaplayıcı,graviton teknolojisi,yerçekimi teknolojisi,solar uydular,graviton için enerji,ölüm yıldızı"
+    "keywords": "proxyforgame,ogame,graviton hesaplayıcı,graviton teknolojisi,yerçekimi teknolojisi,solar uydular,graviton için enerji,ölüm yıldızı",
+    "description": "OGame’de gezegen ayarlarına göre graviton araştırması için gereken güneş uydusu ve enerji miktarını öğrenin."
   },
   "moon": {
     "title": "OGame - Aylar Hesaplayıcı",
@@ -616,7 +683,8 @@
     "own-system": "Kendi sisteminiz",
     "phalanx-lvl-required": "Gerekli seviye",
     "phalanx-range-bonus": "Radar menzil bonusu",
-    "class-bonus": "Sınıf bonusu"
+    "class-bonus": "Sınıf bonusu",
+    "description": "OGame’de ay oluşma şansını, ay yok etme girişiminin sonucunu ve sensör falanksının menzilini hesaplayın."
   },
   "production": {
     "param-tab-general": "Genel",
@@ -706,7 +774,8 @@
     "incl-explain": "Madenlerin seviyesini yükseltirseniz enerji tüketimi artacaktır. Hesaplayıcı bu değişikliği hesaba katabilir ve gerekli enerjiyi verecek olan Güneş Uyduları inşa etme maliyetlerini hesaplamaya dahil edebilir. Hesaplama, bina bazında yapılır. Bu maliyetleri hesaba katmalı mıyız?",
     "incl-yes": "Evet",
     "incl-no": "Hayır",
-    "lifeform-tech": "Yaşam formu teknoloji bonusu"
+    "lifeform-tech": "Yaşam formu teknoloji bonusu",
+    "description": "OGame imparatorluğunuzda tek bir gezegen veya tüm gezegenler için metal, kristal ve döteryum üretimini, enerji tüketimini ve maden yatırımlarının geri dönüşünü hesaplayın."
   },
   "queue": {
     "start-time": "Başlama zamanı",
@@ -722,7 +791,8 @@
     "next-level": "Sonraki seviye",
     "title": "OGame - İnşaat kuyruğu",
     "keywords": "proxyforgame,ogame,inşaat kuyruğu,inşaat sırası,inşaat süresi,kuyruk hesaplayıcı,bina maliyetleri",
-    "clear": "Kaldır"
+    "clear": "Kaldır",
+    "description": "OGame’de fabrika seviyeleri ve evren hızına göre bir gezegen veya aydaki ardışık bina yükseltmelerinin maliyetini ve süresini karşılaştırın."
   },
   "terraformer": {
     "title": "OGame - Terraformer Hesaplayıcı",
@@ -731,7 +801,8 @@
     "single-level": "Tek seviye",
     "added-fields": "Eklenecek Alanlar",
     "satellites": "Solar Uyduları",
-    "keywords": "proxyforgame,ogame,terraformer hesaplayıcı,terraformer,gezegen alanları,solar uydular,enerji ihtiyacı,nanit fabrikası"
+    "keywords": "proxyforgame,ogame,terraformer hesaplayıcı,terraformer,gezegen alanları,solar uydular,enerji ihtiyacı,nanit fabrikası",
+    "description": "OGame’de güneş uyduları ve bonuslar dahil bir gezegeni terraform etmek için gereken enerji, kaynak ve süreyi hesaplayın."
   },
   "expeditions": {
     "keywords": "proxyforgame,ogame,keşif seferi hesaplayıcı,keşif seferleri,keşif seferi kaynakları,keşif seferi filosu,kara madde,keşif seferi bulguları",
@@ -795,7 +866,8 @@
     "class-bonus-discoverer": "\"Kâşif\" sınıf bonusu",
     "resources-discovery-booster": "Kaynak keşif güçlendirici",
     "dark-matter-discovery-bonus": "Karanlık Madde keşif bonusu",
-    "large-cargo-abbrev": "BN"
+    "large-cargo-abbrev": "BN",
+    "description": "OGame keşiflerinde bulunabilecek kaynak, gemi ve Karanlık Madde miktarını tahmin edin ve farklı filoların beklenen getirisini karşılaştırın."
   },
   "trade": {
     "met": "Met",
@@ -811,6 +883,7 @@
     "link": "Link",
     "text": "Yazı",
     "and": "ve",
-    "keywords": "proxyforgame,ogame,ticaret hesaplayıcı,kaynak takası,takas oranı,metal kristal döteryum,tüccar"
+    "keywords": "proxyforgame,ogame,ticaret hesaplayıcı,kaynak takası,takas oranı,metal kristal döteryum,tüccar",
+    "description": "OGame’de metal, kristal ve döteryum takaslarını karşılaştırın ve belirlenen kura göre alacağınız kaynak miktarını görün."
   }
 }

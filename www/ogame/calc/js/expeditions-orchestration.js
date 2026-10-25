@@ -91,12 +91,14 @@ class ExpeditionsApp {
       .concat(EXPEDITION_SHIPS.map((ship) => '#lf-cargo-' + ship.techId))
       .concat(EXPEDITION_SHIPS.map((ship) => '#num' + ship.abbrev));
     this.selects = ['#highTop', '#player-class', '#universe-speed', '#resource-discovery-booster'];
+    /** @type {Set<string>} The options.prm keys the URL API passed; read once by the profile binder. */
+    this.linkKeys = new Set();
   }
 
   init() {
     options.load();
     if (!this._applyApiParams()) {
-      this._restoreFromState();
+      this.restoreFromState();
     }
     this._applyConstraints();
     this._bindEvents();
@@ -125,6 +127,15 @@ class ExpeditionsApp {
 
     this._resetParams(false);
 
+    // What the link names is what it shows: a profile bound later keeps these on screen once.
+    /** @type {[string, ?number][]} */
+    const named = [
+      ['highTop', api.highTopIdx], ['universeSpeed', api.universeSpeed], ['playerClass', api.playerClass],
+      ['hyperTechLevel', api.hyperTechLevel], ['percentRes', api.percentRes], ['percentShips', api.percentShips],
+      ['classBonusCollector', api.classBonusCollector], ['classBonusDiscoverer', api.classBonusDiscoverer],
+    ];
+    this.linkKeys = new Set(named.filter(([, value]) => typeof value === 'number').map(([key]) => key));
+
     const highTop = selectEl('#highTop');
     if (api.highTopIdx && highTop) highTop.selectedIndex = api.highTopIdx;
     if (api.universeSpeed) setVal('#universe-speed', api.universeSpeed);
@@ -142,7 +153,8 @@ class ExpeditionsApp {
     return true;
   }
 
-  _restoreFromState() {
+  /** Fill the form from options.prm. */
+  restoreFromState() {
     setVal('#highTop', options.prm.highTop);
     setVal('#player-class', options.prm.playerClass);
     setVal('#universe-speed', options.prm.universeSpeed);
@@ -375,7 +387,7 @@ class ExpeditionsApp {
     options.prm.fleet = EXPEDITIONS_EMPTY_FLEET;
     options.prm.lfShipsBonuses = EXPEDITION_SHIPS.map(() => 0);
 
-    this._restoreFromState();
+    this.restoreFromState();
     if (recalc) this.recalc();
   }
 }

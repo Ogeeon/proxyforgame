@@ -42,6 +42,9 @@ export default [
         // `for (const _ of rows)` - iterate the right number of times without
         // naming the item.
         varsIgnorePattern: '^_$',
+        // A base class's no-op hook names the argument its overrides take:
+        // `showProfile(_profile) {}`.
+        argsIgnorePattern: '^_',
       }],
       // The project is free of eval(); the rule is enabled so it stays that way
       // (it is not part of eslint:recommended).
@@ -49,9 +52,9 @@ export default [
     },
   },
 
-  // Build scripts and the node:test suite: CommonJS.
+  // Build scripts, the node:test suite and the MCP server: CommonJS.
   {
-    files: ['scripts/**/*.js', 'unit-tests/**/*.js'],
+    files: ['scripts/**/*.js', 'unit-tests/**/*.js', 'mcp/**/*.js'],
     ...js.configs.recommended,
     languageOptions: {
       ecmaVersion: 2022,

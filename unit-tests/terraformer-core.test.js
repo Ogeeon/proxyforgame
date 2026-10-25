@@ -34,6 +34,7 @@ const BASE_PRM = {
     energyBoost: 0,
     disChLevel: 0,
     totalLFEnrgBonus: 0,
+    lfTerraformerRdc: 0,
     scCapacityIncrease: 0,
     lcCapacityIncrease: 0,
     tfSingleLevel: false,
@@ -265,5 +266,73 @@ describe('getBuildEnergyCost_C - return shape', () => {
     it('stays subtractable so missing energy never becomes NaN', () => {
         const missing = getBuildEnergyCost_C(999, 1, {}) - 500;
         expect(missing).toBe(-500);
+    });
+});
+
+describe('Terraformer Calculator - Officers', () => {
+    const none = { engineer: false, geologist: false, technocrat: false, admiral: false, commander: false };
+    const all = { engineer: true, geologist: true, technocrat: true, admiral: true, commander: true };
+
+    it('no engineer gives no bonus, even with the other four', () => {
+        expect(TerraformerCalculator.officerBonusLevel(none)).toBe(0);
+        expect(TerraformerCalculator.officerBonusLevel({ ...all, engineer: false })).toBe(0);
+    });
+
+    it('the engineer short of the whole staff gives the engineer bonus', () => {
+        expect(TerraformerCalculator.officerBonusLevel({ ...none, engineer: true })).toBe(1);
+        expect(TerraformerCalculator.officerBonusLevel({ ...all, commander: false })).toBe(1);
+    });
+
+    it('all five officers give the commanding staff bonus', () => {
+        expect(TerraformerCalculator.officerBonusLevel(all)).toBe(2);
+    });
+});
+
+describe('Terraformer Calculator - Life-form cost reduction', () => {
+    it('cuts the terraformer cost of a level by the percentage', () => {
+        // Level 1: crystal 50000, deuterium 100000.
+        const r = compute({ tfLevelTo: 1, lfTerraformerRdc: 10 });
+        expect(r.crysTF).toBe(45000);
+        expect(r.deutTF).toBe(90000);
+        expect(r.crysTotal).toBe(r.crysSS + 45000);
+    });
+
+    it('rounds each level down on its own, as the cost calculator does', () => {
+        const plain = [1, 2, 3].map((level) => compute({ tfLevelFrom: level - 1, tfLevelTo: level }));
+        const r = compute({ tfLevelTo: 3, lfTerraformerRdc: 15.5 });
+        const expected = (key) => plain.reduce((sum, p) => sum + Math.floor(p[key] * 0.845), 0);
+        expect(r.crysTF).toBe(expected('crysTF'));
+        expect(r.deutTF).toBe(expected('deutTF'));
+        expect(r.secsTF).toBe(expected('secsTF'));
+    });
+
+    it('floors the time of each level of a range, not the range total (#58)', () => {
+        // Levels 5, 6, 7 at robotics 10 take 69818, 209454 and 418909 s (698181 in
+        // all). A quarter off each, floored: 52363 + 157090 + 314181 = 523634 s,
+        // where flooring 75% of the total would give 523635 s.
+        const r = compute({ tfLevelFrom: 4, tfLevelTo: 7, robotsFactoryLevel: 10, lfTerraformerRdc: 25 });
+        expect(r.secsTF).toBe(523634);
+        expect(r.crysTF).toBe(4200000);
+        expect(r.deutTF).toBe(8400000);
+    });
+
+    it('shortens the build time as well', () => {
+        const plain = compute({ tfLevelTo: 2, robotsFactoryLevel: 10 });
+        const reduced = compute({ tfLevelTo: 2, robotsFactoryLevel: 10, lfTerraformerRdc: 20 });
+        expect(reduced.secsTF).toBeLessThan(plain.secsTF);
+    });
+
+    it('is capped at 50%', () => {
+        const half = compute({ tfLevelTo: 4, lfTerraformerRdc: 50 });
+        const more = compute({ tfLevelTo: 4, lfTerraformerRdc: 80 });
+        expect(more.crysTF).toBe(half.crysTF);
+        expect(more.secsTF).toBe(half.secsTF);
+    });
+
+    it('leaves the satellites alone', () => {
+        const plain = compute({ tfLevelTo: 2 });
+        const reduced = compute({ tfLevelTo: 2, lfTerraformerRdc: 30 });
+        expect(reduced.crysSS).toBe(plain.crysSS);
+        expect(reduced.secsSS).toBe(plain.secsSS);
     });
 });

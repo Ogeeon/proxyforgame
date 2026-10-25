@@ -28,7 +28,9 @@ jobs:
       fail-fast: false
       matrix:
         shard: ['1/4', '2/4', '3/4', '4/4']
-    runs-on: ubuntu-latest
+    # Pinned: ubuntu-latest moved to 26.04 on 2026-10-22 and Playwright has no
+    # chromium build for it ("does not support chromium on ubuntu26.04-x64").
+    runs-on: ubuntu-24.04
     env:
       # Must be PFG_BASE_URL - that is the name playwright.config.js reads.
       PFG_BASE_URL: 'http://localhost:8000'

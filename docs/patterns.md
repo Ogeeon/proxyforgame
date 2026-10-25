@@ -542,7 +542,10 @@ if (await showConfirmModal(this.opts.uniLoadConfMsg, this.opts.dialogConfirm, th
   the button labels, `dialogAttentionLabel` is not a function argument: it is invariant across
   every call, so `buildDialogModal()` reads it straight off the page global via
   `getOptionValue('dialogAttentionLabel', 'Attention')` (the same helper `readBonuses()` uses
-  for its own message) rather than making every call site pass the same string.
+  for its own message) rather than making every call site pass the same string. A component
+  shared between pages and carrying its own string bundle — the player-profile dialogs in
+  `profiles-ui.js` — passes the heading as the optional last `title` argument instead, so it
+  does not depend on every page that includes it setting `dialogAttentionLabel`.
 
 **Solid variants are reserved for modal footers.** `btn-primary` on the confirm and
 `btn-secondary` on the cancel is the one place the filled treatment carries meaning — it marks
@@ -574,3 +577,41 @@ tabs, the only bare `<button>`s that matter, still match.
 (`bg-primary-subtle` is `!important` and beats `--bs-btn-bg`); a solid `btn-primary` or
 `btn-danger` outside a modal footer; a per-calculator sheet that sets `background-color` on a
 button directly instead of retuning `--pfg-btn-bg`.
+
+---
+
+## (h) Profile body selects in the calculator's title bar
+
+Source: `costs.tpl`, `lfcosts.tpl`, `graviton.tpl`; the class lives in `common_bs.css`.
+
+A calculator bound to player profiles puts the select of the profile's planet - and, in
+costs, of its moon - **in the title bar, next to the title**, not inside a tab or a panel
+header. The box sits between `.main-header` and `#reset` (the reset button is hidden while
+a profile is active) and is hidden with `d-none` until a profile with bodies is applied:
+
+```html
+<div class="d-flex flex-wrap align-items-center">
+  <div class="... main-header ... flex-grow-1"><?= $l['title'] ?></div>
+  <div id="pf-planet-box" class="pf-header-bodies d-flex align-items-center gap-1 ms-auto ps-2 me-1 d-none">
+    <label for="pf-planet"><?= $l['planet'] ?></label>
+    <select id="pf-planet" class="form-select form-select-sm w-auto"></select>
+  </div>
+  <div id="reset" ...>
+```
+
+**The gaps above and below the selects must be about equal** - ~4 px on each side. Above
+is the panel's top edge, or the title when the bar has wrapped; below is the panel
+underneath (`#general-settings-panel`, `m-1`). `.pf-header-bodies` gives the box the
+`margin-top: 3px` that evens them out; do not replace it with `mt-1` (4 px tips the
+balance) or add a `row-gap-*` to the bar (it widens the gap above once the selects wrap
+under the title).
+
+**The bar must wrap** (`flex-wrap`, the box pushed right with `ms-auto`): at phone width
+the title takes its own line and the selects go under it on the right. Without the wrap the
+title is squeezed into three lines and a second select is cut off at the panel's edge.
+Two selects (costs) sit in one `#pf-bodies-row` that also wraps, `justify-content-end`.
+
+**Deviation to look for**: a body select placed in a tab or in the `Parameters` subheader;
+a title bar without `flex-wrap`; a box without `.pf-header-bodies`, or with extra vertical
+margin of its own. Check new markup at 1300 px and 400 px with a profile active - measure
+the select's top against the panel (or title) and its bottom against the next panel.

@@ -139,11 +139,6 @@
     "lf-bonuses-api-import-hint": "All these values can also be obtained automatically using the \"Import from OGame\" button (clipboard icon) at the top of the form.",
     "universe": "Universe",
     "profile": "Profile",
-    "no-profile-name-msg": "Please specify a profile name.",
-    "no-profile-selected-msg": "No profile selected.",
-    "del-profile-confirm": "Are you sure you want to delete this profile?",
-    "owr-profile-confirm": "Are you sure you want to overwrite this profile?",
-    "load-profile-confirm": "Are you sure you want to load this profile? Currently entered data will be lost.",
     "server-data-failed-msg": "Failed to load the universe settings. Check the values below and correct them by hand.",
     "fetching-data": "Fetching data...",
     "universe-load": "Load",
@@ -161,14 +156,12 @@
     "sc": "Small cargo",
     "lc": "Large cargo",
     "shipyard-level": "Shipyard level",
-    "energy-bonus": "Energy bonus",
     "none": "None",
     "race": "Lifeform",
     "race-1": "Human",
     "race-2": "Rock'tal",
     "race-3": "Mechas",
     "race-4": "Kaelesh",
-    "all-officers": "All 5 officers",
     "solar-plant-level": "Solar plant level",
     "fusion-plant-level": "Fusion plant level",
     "solar-satellites-count": "Solar satellites count",
@@ -191,6 +184,7 @@
     "alliance-bonus": "Alliance bonus",
     "disr-chamber-bonus": "Disruption Chamber bonus",
     "total-lf-energy-bonus": "Total Life Forms bonus to energy production",
+    "lf-terraformer-rdc": "Terraformer cost/build time reduction",
     "lf-tech-bonus": "Life Forms tech bonus",
     "country": "Country",
     "res-available": "Resources available",
@@ -214,7 +208,72 @@
     "character-bonus-hint": "To get these bonuses, go to Resource settings - Lifeform player bonuses,\nthen scroll down to 'Character class bonuses'.",
     "collectors-character-bonus": "Collector's character class bonus",
     "lf-class-bonus": "Class bonus",
-    "lf-class-bonus-hint": "Enter the 'Total' value from the OGame table of life form bonuses to the class bonuses, row 'Collector'."
+    "lf-class-bonus-hint": "Enter the 'Total' value from the OGame table of life form bonuses to the class bonuses, row 'Collector'.",
+    "pf-no-profile": "No profile",
+    "pf-import": "Import from OGame…",
+    "pf-create": "New profile…",
+    "pf-manage": "Manage profiles…",
+    "pf-import-hdr": "Import account data",
+    "pf-import-hint": "Paste the data exported by the <a href=\"https://github.com/Rivenscryr/origin-exporter\" target=\"_blank\" rel=\"noopener\">Origin Exporter</a> userscript (in OGame: Empire icon → Export account data), or choose the downloaded file. The script is made by the author of Antigame Reborn.",
+    "pf-file": "File",
+    "pf-import-universe-hint": "The data does not say which universe it comes from. Choose it:",
+    "pf-import-btn": "Import",
+    "pf-import-err-json": "This is not valid JSON.",
+    "pf-import-err-shape": "This is not account data from Origin Exporter.",
+    "pf-import-err-schema": "This version of the Origin Exporter format is not supported yet.",
+    "pf-pick-universe": "Choose the universe.",
+    "pf-import-done": "Profile “{0}”: planets added {1}, updated {2}, removed {3}.",
+    "pf-props-hdr": "Profile",
+    "pf-name": "Name",
+    "pf-universe-optional": "Universe (optional):",
+    "pf-universe-locked": "The universe came with the imported data and cannot be changed.",
+    "pf-name-required": "Enter a name.",
+    "pf-manage-hdr": "Profiles",
+    "pf-source": "Imported",
+    "pf-edit": "Edit",
+    "pf-no-universe": "not set",
+    "pf-delete-confirm": "Delete profile “{0}”? This cannot be undone.",
+    "pf-merge-hdr": "Merge profiles",
+    "pf-merge-from": "Merge profile",
+    "pf-merge-into": "into",
+    "pf-merge": "Merge",
+    "pf-merge-hint": "The second profile keeps all its values and takes from the first only what it lacks; the first profile is deleted.",
+    "pf-merge-confirm": "Merge “{0}” into “{1}”? “{0}” will be deleted.",
+    "pf-merge-same": "Choose two different profiles.",
+    "pf-backup-hdr": "Backup",
+    "pf-backup-hint": "Profiles are stored only in this browser. Values entered by hand (production settings, exchange rates, manual profiles) do not come back with a new import from OGame, so keep a backup file.",
+    "pf-backup-download": "Download backup",
+    "pf-backup-restore": "Restore from file…",
+    "pf-restore-conflict": "Profile “{0}” already exists. Replace it with the one from the file?",
+    "pf-replace": "Replace",
+    "pf-skip": "Skip",
+    "pf-restore-done": "Profiles restored: {0}.",
+    "pf-file-err": "This is not a profile backup file, or its version is not supported.",
+    "pf-storage-unavailable": "This browser does not let the site store data, so profiles are unavailable.",
+    "pf-save-failed": "The profile could not be saved: the browser refused to store more data.",
+    "pf-migrate-hdr": "Saved sets found",
+    "pf-migrate-text": "Found {0} sets saved by an earlier version of the calculators. Convert them into profiles? The original sets are kept.",
+    "pf-migrate-btn": "Convert saved sets",
+    "pf-migrate-later": "Not now",
+    "pf-migrate-done": "Profiles created: {0}. Download a backup now: it is the only copy outside this browser.",
+    "pf-migrate-none": "None of the sets could be read.",
+    "pf-overrides": "Values that differ from the game: {0}",
+    "pf-reset-profile": "click to choose which game values to restore",
+    "pf-account": "Account",
+    "pf-reset-hdr": "Restore game values",
+    "pf-reset-hint": "The ticked values go back to what was imported from the game; the others stay as you set them.",
+    "pf-select-all": "Select all",
+    "pf-col-where": "Where",
+    "pf-col-field": "Value",
+    "pf-col-game": "In game",
+    "pf-col-current": "Now",
+    "pf-reset-selected": "Restore selected",
+    "pf-in-game": "In game: {0}",
+    "pf-reset-value": "click to restore",
+    "pf-departure-body": "Planet or moon of the profile",
+    "pf-take-fleet": "From the departure",
+    "pf-take-fleet-hint": "Fill in the ships stationed on the planet or moon chosen as the departure point, as of the last import from OGame.",
+    "pf-universe-from-profile": "The universe is set by the active profile."
   },
   "index": {
     "title": "ProxyForGame - tools for online browser game OGame",
@@ -336,11 +395,12 @@
     "msg-lab-level-raised": "Research laboratory level raised to {0} — that is what research \"{1}\" requires.",
     "mineral-res-cntr-lvl": "Mineral Research Centre",
     "lf-terraformer-rdc": "Terraformer cost/build time reduction",
-    "disclaimer-robot-nanite": "Please take into account the note in the first row of the table when reading build times. If you are building a Robotics factory or a Nanite factory, use the <a href=\"{0}\">Construction queue calculator</a> for accurate build time calculations.",
+    "disclaimer-robot-nanite": "When reading build times, please take into account the hint {1} in the first cell of the Robotics factory and Nanite factory rows. If you are building a Robotics factory or a Nanite factory, use the <a href=\"{0}\">Construction queue calculator</a> for accurate build time calculations.",
     "disclaimer-title": "Please note",
     "discoverer-class-bonus": "Discoverer class bonus",
     "discoverer-class-bonus-hint": "Enter the 'Total' value from the OGame table of life form bonuses to the class bonuses, row 'Discoverer'. Applies only if the 'Discoverer' class is selected on the 'Common' tab.",
-    "research-speed-hint": "The research speed is the economy speed multiplied by the universe's research factor, e.g. 5 × 3 = 15. Picking the universe above fills in both speeds."
+    "research-speed-hint": "The research speed is the economy speed multiplied by the universe's research factor, e.g. 5 × 3 = 15. Picking the universe above fills in both speeds.",
+    "description": "Calculate the cost and build time of buildings, research, ships, and defenses in OGame, including universe speed and bonuses."
   },
   "lfcosts": {
     "title": "OGame - Costs calculator for LifeForms",
@@ -464,7 +524,8 @@
     "ovrc-battleship": "Overclocking (Battleship)",
     "psy-sh-matrix": "Psionic Shield Matrix",
     "kaelesh-disc-enh": "Kaelesh Discoverer Enhancement",
-    "energy-cost-to-build": "Energy required for construction"
+    "energy-cost-to-build": "Energy required for construction",
+    "description": "Calculate the cost and build time of Lifeform buildings and research in OGame, including race and technology bonuses."
   },
   "flight": {
     "flight-time-format": "99 H:s:s",
@@ -579,13 +640,19 @@
     "own-api-import-title": "Import",
     "own-api-bad-json-msg": "Failed to read the data.\\nMake sure you pasted the text from the API 2 field on the 'Fleet' page.",
     "import-failed-msg": "Failed to load the data.\\nThe server returned an invalid response. Please try again later.",
-    "populated-systems-failed-msg": "The map of populated systems is unavailable, so no systems are counted as skipped. You can enter their number by hand."
+    "populated-systems-failed-msg": "The map of populated systems is unavailable, so no systems are counted as skipped. You can enter their number by hand.",
+    "sr-profile-hdr": "Import the spy report",
+    "sr-profile-text": "A profile is active. The report carries the spied player’s research, class and bonuses, and they must not overwrite your profile. How should it be imported?",
+    "sr-profile-none": "Switch to “No profile” and import",
+    "sr-profile-new": "Create a new profile for the report",
+    "description": "Calculate fleet flight time, deuterium consumption, and the best departure time in OGame, based on universe speed, ships, and flight mode."
   },
   "graviton": {
     "title": "OGame - Graviton calculator",
     "recycling": "Dismantling SS debris",
     "graviton-level": "Graviton level",
-    "keywords": "proxyforgame,ogame,graviton calculator,graviton technology,gravitation technology,solar satellites,energy for graviton,deathstar research"
+    "keywords": "proxyforgame,ogame,graviton calculator,graviton technology,gravitation technology,solar satellites,energy for graviton,deathstar research",
+    "description": "Find how many Solar Satellites and how much energy you need to research Graviton Technology in OGame, based on your planet settings."
   },
   "moon": {
     "title": "OGame - Moons calculator",
@@ -616,7 +683,8 @@
     "own-system": "Your system",
     "phalanx-lvl-required": "Required level",
     "phalanx-range-bonus": "Phalanx range bonus",
-    "class-bonus": "Class bonus"
+    "class-bonus": "Class bonus",
+    "description": "Calculate your chance of finding a moon, the outcome of a moon destruction attempt, and Sensor Phalanx range in OGame."
   },
   "production": {
     "param-tab-general": "General",
@@ -706,7 +774,8 @@
     "incl-explain": "If you increase the level of the mines, energy consumption will increase. The calculator can take this change into account and include in the calculation the costs of building Solar Satellites, which will give the necessary energy. The calculation is done on a building-by-building basis. Should we take these costs into account?",
     "incl-yes": "Yes",
     "incl-no": "No",
-    "lifeform-tech": "Lifeform Tech Bonus"
+    "lifeform-tech": "Lifeform Tech Bonus",
+    "description": "Calculate metal, crystal, and deuterium production, energy use, and mine upgrade payback for one planet or your entire OGame empire."
   },
   "queue": {
     "start-time": "Start",
@@ -722,7 +791,8 @@
     "next-level": "Next lvl",
     "title": "OGame - Construction queue",
     "keywords": "proxyforgame,ogame,construction queue,build queue,build order,building time,queue calculator,buildings costs",
-    "clear": "Clear"
+    "clear": "Clear",
+    "description": "Compare the cost and time of building upgrades in sequence on an OGame planet or moon, including factory levels and universe speed."
   },
   "terraformer": {
     "title": "OGame - Terraformer calculator",
@@ -731,7 +801,8 @@
     "single-level": "One level",
     "added-fields": "Fields to be added",
     "satellites": "Solar satellites",
-    "keywords": "proxyforgame,ogame,terraformer calculator,terraformer,planet fields,solar satellites,energy requirement,nanite factory"
+    "keywords": "proxyforgame,ogame,terraformer calculator,terraformer,planet fields,solar satellites,energy requirement,nanite factory",
+    "description": "Calculate the energy, resources, and time needed to terraform an OGame planet, including Solar Satellites and bonuses."
   },
   "expeditions": {
     "keywords": "proxyforgame,ogame,expedition calculator,expeditions,expedition resources,expedition ships,dark matter,expedition finds",
@@ -795,7 +866,8 @@
     "class-bonus-discoverer": "Discoverer class bonus",
     "resources-discovery-booster": "Resources discovery booster",
     "dark-matter-discovery-bonus": "Dark Matter discovery bonus",
-    "large-cargo-abbrev": "LC"
+    "large-cargo-abbrev": "LC",
+    "description": "Estimate the resources, ships, and Dark Matter you may find on OGame expeditions and compare expected returns for different fleets."
   },
   "trade": {
     "met": "met",
@@ -811,6 +883,7 @@
     "link": "Link",
     "text": "Text",
     "and": "and",
-    "keywords": "proxyforgame,ogame,trade calculator,resource exchange,trade ratio,metal crystal deuterium,merchant,resource trade"
+    "keywords": "proxyforgame,ogame,trade calculator,resource exchange,trade ratio,metal crystal deuterium,merchant,resource trade",
+    "description": "Compare metal, crystal, and deuterium trades in OGame and see how much you receive at a given exchange rate."
   }
 }

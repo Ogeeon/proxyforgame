@@ -257,6 +257,13 @@ test.describe('AJAX endpoint - health', () => {
         expect(Array.isArray(body.jobs)).toBe(false);
         expect(typeof body.jobs).toBe('object');
         expect(body.jobs).not.toBeNull();
+        // Null where PATCH_STAMP_DIR is unset (every host but the one running
+        // apt); otherwise ages in seconds, each null if its file is missing.
+        if (body.patching !== null) {
+            for (const key of ['updateAgeSeconds', 'upgradeAgeSeconds', 'rebootRequiredAgeSeconds']) {
+                expect(body.patching[key] === null || Number.isInteger(body.patching[key])).toBe(true);
+            }
+        }
     });
 
     // It reads no database, so it must keep answering when the database is the

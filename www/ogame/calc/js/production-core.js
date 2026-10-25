@@ -14,6 +14,18 @@
 // nor draw energy.
 const LF_BUILDINGS_PER_RACE = 12;
 
+// OGame lets a planet use at most 8 crawlers per summed mine level (metal +
+// crystal + deuterium), or 8.8 per level with a Geologist. Extra crawlers
+// beyond that produce nothing, so the calculator caps the entered count.
+const CRAWLER_CAP_PER_MINE = 8;
+const CRAWLER_CAP_PER_MINE_GEOLOGIST = 8.8;
+
+function maxCrawlers(metalMineLvl, crystalMineLvl, deutSynthLvl, geologist) {
+	const mineSum = metalMineLvl + crystalMineLvl + deutSynthLvl;
+	const factor = geologist ? CRAWLER_CAP_PER_MINE_GEOLOGIST : CRAWLER_CAP_PER_MINE;
+	return Math.floor(factor * mineSum);
+}
+
 function convertAllPlanetParams() {
 	let prm = [];
 	options.prm.aPS = [];
@@ -63,19 +75,37 @@ function convertExchangeRates() {
 	options.prm.ratesFmt = 2;
 }
 
+// The planet array: three leading values, then one slot of three per mine
+// (1 metal ... 7 crawlers), then the life form.
+const PLANET_TEMP = 0;
+const PLANET_POS = 1;
+const PLANET_ENERGY_BOOST = 2;
+const PLANET_RACE = 24;
+const PLANET_LF_LEVELS = 25; // LF_BUILDINGS_PER_RACE levels, positional per race
+
+/**
+ * The first index of a mine's slot in the planet array: its level, then its
+ * production coefficient, then its booster.
+ *
+ * @param {number} mine 1 (metal) to 7 (crawlers).
+ * @returns {number}
+ */
+function mineSlot(mine) {
+	return mine * 3;
+}
+
 function createEmptyPlanet() {
 	let prm = [];
-	// 0 - temperature, 1-6 - mines, power plants and satellites, 7 - crawlers, 8 - position
-	prm[0] = 0; // temperature
-	prm[1] = 8; // position
-	prm[2] = 0; // energy booster
+	prm[PLANET_TEMP] = 0;
+	prm[PLANET_POS] = 8;
+	prm[PLANET_ENERGY_BOOST] = 0;
 	for (let j = 1; j < 8; j++) {
-		prm[j * 3] = 0;
-		prm[j * 3 + 1] = 100; // production coefficient
-		prm[j * 3 + 2] = 0; // booster
+		prm[mineSlot(j)] = 0;
+		prm[mineSlot(j) + 1] = 100; // production coefficient
+		prm[mineSlot(j) + 2] = 0; // booster
 	}
-	prm[24] = 0; // life form (race)
-	for (let k = 0; k < LF_BUILDINGS_PER_RACE; k++) prm[25 + k] = 0; // life form building levels (positional per race)
+	prm[PLANET_RACE] = 0;
+	for (let k = 0; k < LF_BUILDINGS_PER_RACE; k++) prm[PLANET_LF_LEVELS + k] = 0;
 	return prm;
 }
 

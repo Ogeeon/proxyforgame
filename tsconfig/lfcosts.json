@@ -8,10 +8,18 @@
     "../www/ogame/calc/js/ogame-costs.js",
     "../www/ogame/calc/js/ogame-lifeform.js",
     "../www/ogame/calc/js/dom-utils.js",
+    "../www/ogame/calc/js/profiles-core.js",
+    "../www/ogame/calc/js/profiles-store.js",
+    "../www/ogame/calc/js/profiles-fields.js",
+    "../www/ogame/calc/js/profiles-widgets.js",
+    "../www/ogame/calc/js/profiles-binders.js",
+    "../www/ogame/calc/js/profiles-ui.js",
     "../www/ogame/calc/js/lfcosts-core.js",
     "../www/ogame/calc/js/lfcosts-data-collector.js",
     "../www/ogame/calc/js/lfcosts-renderer.js",
     "../www/ogame/calc/js/lfcosts-orchestration.js",
+    "../www/ogame/calc/js/lfcosts-profile.js",
+    "../www/js/bootstrap-tooltip-guard.js",
     "../www/js/sidebar_bs.js",
     "../www/ogame/calc/js/globals.d.ts"
   ]

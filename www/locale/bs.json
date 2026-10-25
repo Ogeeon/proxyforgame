@@ -135,11 +135,6 @@
     "lf-bonuses-api-import-hint": "Sve ove vrijednosti također možete automatski dobiti putem dugmeta „Uvoz iz OGame“ (ikona međuspremnika) na vrhu obrasca.",
     "universe": "Univerzum",
     "profile": "Profil",
-    "no-profile-name-msg": "Molimo navedite naziv profila.",
-    "no-profile-selected-msg": "Nije odabran profil.",
-    "del-profile-confirm": "Jeste li sigurni da želite izbrisati ovaj profil?",
-    "owr-profile-confirm": "Jeste li sigurni da želite prepisati ovaj profil?",
-    "load-profile-confirm": "Jeste li sigurni da želite učitati ovaj profil? Trenutno uneseni podaci će biti izgubljeni.",
     "server-data-failed-msg": "Učitavanje postavki univerzuma nije uspjelo. Provjerite vrijednosti ispod i ispravite ih ručno.",
     "fetching-data": "Preuzimanje podataka...",
     "universe-load": "Učitaj",
@@ -158,14 +153,12 @@
     "lc": "Veliki transporter",
     "nanites-factory-level": "Level tvornice nanita",
     "shipyard-level": "Level tvornice brodova",
-    "energy-bonus": "Bonus energije",
     "none": "Ništa",
     "race": "Lifeform",
     "race-1": "Human",
     "race-2": "Rock'tal",
     "race-3": "Mechas",
     "race-4": "Kaelesh",
-    "all-officers": "Svih 5 oficira",
     "solar-plant-level": "Level solarne elektrane",
     "fusion-plant-level": "Level fuzijskog reaktora",
     "solar-satellites-count": "Broj solarnih satelita",
@@ -183,6 +176,7 @@
     "disr-chamber": "Komora za disruptiju",
     "disr-chamber-bonus": "Bonus Komore za disruptiju",
     "total-lf-energy-bonus": "Ukupni bonus Oblika života za proizvodnju energije",
+    "lf-terraformer-rdc": "Smanjenje troškova terraformera",
     "lf-tech-bonus": "Tehnološki bonus Oblika života",
     "country": "Zemlja",
     "res-available": "Resources available",
@@ -214,7 +208,72 @@
     "character-bonus-hint": "Da biste dobili ove bonuse, idite na Postavke resursa - Bonusi igrača Oblika života,\nzatim se spustite do 'Bonusi klase lika'.",
     "collectors-character-bonus": "Bonus klase lika Kolektora",
     "lf-class-bonus": "Bonus klase",
-    "lf-class-bonus-hint": "Unesite vrijednost 'Ukupno' iz OGame tabele bonusa oblika života na bonuse klasa, red 'Sakupljač'."
+    "lf-class-bonus-hint": "Unesite vrijednost 'Ukupno' iz OGame tabele bonusa oblika života na bonuse klasa, red 'Sakupljač'.",
+    "pf-no-profile": "Bez profila",
+    "pf-import": "Uvezi iz OGame…",
+    "pf-create": "Novi profil…",
+    "pf-manage": "Upravljaj profilima…",
+    "pf-import-hdr": "Uvoz podataka računa",
+    "pf-import-hint": "Zalijepite podatke koje je izvezla skripta <a href=\"https://github.com/Rivenscryr/origin-exporter\" target=\"_blank\" rel=\"noopener\">Origin Exporter</a> (u OGame: ikona Carstvo → Export account data) ili odaberite preuzetu datoteku. Skriptu je razvio autor Antigame Reborn.",
+    "pf-file": "Datoteka",
+    "pf-import-universe-hint": "Podaci ne navode iz kojeg su univerzuma. Odaberite ga:",
+    "pf-import-btn": "Uvezi",
+    "pf-import-err-json": "Ovo nije ispravan JSON.",
+    "pf-import-err-shape": "Ovo nisu podaci računa iz Origin Exportera.",
+    "pf-import-err-schema": "Ova verzija formata Origin Exportera još nije podržana.",
+    "pf-pick-universe": "Odaberite univerzum.",
+    "pf-import-done": "Profil „{0}“: planeta dodano {1}, ažurirano {2}, uklonjeno {3}.",
+    "pf-props-hdr": "Profil",
+    "pf-name": "Naziv",
+    "pf-universe-optional": "Univerzum (neobavezno):",
+    "pf-universe-locked": "Univerzum je došao s uvezenim podacima i ne može se promijeniti.",
+    "pf-name-required": "Unesite naziv.",
+    "pf-manage-hdr": "Profili",
+    "pf-source": "Uvezen",
+    "pf-edit": "Uredi",
+    "pf-no-universe": "nije postavljen",
+    "pf-delete-confirm": "Obrisati profil „{0}“? Ovo se ne može poništiti.",
+    "pf-merge-hdr": "Spajanje profila",
+    "pf-merge-from": "Spoji profil",
+    "pf-merge-into": "s profilom",
+    "pf-merge": "Spoji",
+    "pf-merge-hint": "Drugi profil zadržava sve svoje vrijednosti i iz prvog uzima samo ono što mu nedostaje; prvi profil se briše.",
+    "pf-merge-confirm": "Spojiti „{0}“ s „{1}“? Profil „{0}“ će biti obrisan.",
+    "pf-merge-same": "Odaberite dva različita profila.",
+    "pf-backup-hdr": "Rezervna kopija",
+    "pf-backup-hint": "Profili se čuvaju samo u ovom pregledniku. Ručno unesene vrijednosti (postavke proizvodnje, kursevi razmjene, ručni profili) ne vraćaju se novim uvozom iz OGame, zato čuvajte datoteku s rezervnom kopijom.",
+    "pf-backup-download": "Preuzmi kopiju",
+    "pf-backup-restore": "Vrati iz datoteke…",
+    "pf-restore-conflict": "Profil „{0}“ već postoji. Zamijeniti ga profilom iz datoteke?",
+    "pf-replace": "Zamijeni",
+    "pf-skip": "Preskoči",
+    "pf-restore-done": "Vraćeni profili: {0}.",
+    "pf-file-err": "Ovo nije datoteka s rezervnom kopijom profila ili njena verzija nije podržana.",
+    "pf-storage-unavailable": "Ovaj preglednik ne dozvoljava stranici da čuva podatke, pa profili nisu dostupni.",
+    "pf-save-failed": "Profil nije moguće sačuvati: preglednik je odbio čuvati još podataka.",
+    "pf-migrate-hdr": "Pronađeni sačuvani setovi",
+    "pf-migrate-text": "Setovi sačuvani ranijom verzijom kalkulatora: {0}. Pretvoriti ih u profile? Originalni setovi ostaju sačuvani.",
+    "pf-migrate-btn": "Pretvori setove",
+    "pf-migrate-later": "Ne sada",
+    "pf-migrate-done": "Kreirani profili: {0}. Preuzmite sada rezervnu kopiju: to je jedina kopija izvan ovog preglednika.",
+    "pf-migrate-none": "Nijedan set nije bilo moguće pročitati.",
+    "pf-overrides": "Vrijednosti koje se razlikuju od igre: {0}",
+    "pf-reset-profile": "kliknite da odaberete koje vrijednosti iz igre vratiti",
+    "pf-account": "Račun",
+    "pf-reset-hdr": "Vrati vrijednosti iz igre",
+    "pf-reset-hint": "Označene vrijednosti vraćaju se na one uvezene iz igre; ostale ostaju onakve kakve ste ih postavili.",
+    "pf-select-all": "Odaberi sve",
+    "pf-col-where": "Gdje",
+    "pf-col-field": "Vrijednost",
+    "pf-col-game": "U igri",
+    "pf-col-current": "Sada",
+    "pf-reset-selected": "Vrati odabrane",
+    "pf-in-game": "U igri: {0}",
+    "pf-reset-value": "kliknite da vratite",
+    "pf-departure-body": "Planeta ili mjesec profila",
+    "pf-take-fleet": "Sa mjesta polaska",
+    "pf-take-fleet-hint": "Unesi brodove stacionirane na planeti ili mjesecu odabranom kao mjesto polaska, prema posljednjem uvozu iz OGame.",
+    "pf-universe-from-profile": "Univerzum je određen aktivnim profilom."
   },
   "index": {
     "title": "ProxyForGame - alati za online igru Ogame",
@@ -336,11 +395,12 @@
     "msg-lab-level-raised": "Nivo Centra za istraživanje podignut na {0} — to zahtijeva istraživanje \"{1}\".",
     "mineral-res-cntr-lvl": "Mineral Research Centre",
     "lf-terraformer-rdc": "Smanjenje troškova terraformera",
-    "disclaimer-robot-nanite": "Molimo uzmite u obzir napomenu u prvom redu tablice pri čitanju vremena gradnje. Ako gradite Tvornicu robota ili Tvornicu nanita, koristite <a href=\"{0}\">Kalkulator reda izgradnje</a> za točan izračun vremena gradnje.",
+    "disclaimer-robot-nanite": "Molimo uzmite u obzir savjet {1} u prvoj ćeliji redova Tvornica robota i Tvornica nanita pri čitanju vremena gradnje. Ako gradite Tvornicu robota ili Tvornicu nanita, koristite <a href=\"{0}\">Kalkulator reda izgradnje</a> za točan izračun vremena gradnje.",
     "disclaimer-title": "Napomena",
     "discoverer-class-bonus": "Bonus klase Otkrivač",
     "discoverer-class-bonus-hint": "Unesite vrijednost 'Ukupno' iz OGame tabele bonusa oblika života na bonuse klasa, red 'Otkrivač'. Primjenjuje se samo ako je na kartici 'Opšte' odabrana klasa 'Otkrivač'.",
-    "research-speed-hint": "Brzina istraživanja jednaka je ekonomskoj brzini pomnoženoj s faktorom istraživanja univerzuma, npr. 5 × 3 = 15. Odabirom univerzuma iznad obje brzine se popunjavaju automatski."
+    "research-speed-hint": "Brzina istraživanja jednaka je ekonomskoj brzini pomnoženoj s faktorom istraživanja univerzuma, npr. 5 × 3 = 15. Odabirom univerzuma iznad obje brzine se popunjavaju automatski.",
+    "description": "Izračunajte cijenu i vrijeme izgradnje zgrada, istraživanja, brodova i odbrane u OGameu, uz brzinu univerzuma i bonuse."
   },
   "lfcosts": {
     "title": "Ogame - kalkulator troškova (Lifeforms)",
@@ -464,7 +524,8 @@
     "ovrc-battleship": "Overclocking (Battleship)",
     "psy-sh-matrix": "Psionic Shield Matrix",
     "kaelesh-disc-enh": "Kaelesh Discoverer Enhancement",
-    "energy-cost-to-build": "Energija potrebna za izgradnju"
+    "energy-cost-to-build": "Energija potrebna za izgradnju",
+    "description": "Izračunajte cijenu i vrijeme izgradnje zgrada i istraživanja oblika života u OGameu, uključujući bonuse rasa i tehnologija."
   },
   "flight": {
     "flight-time-format": "99 H:s:s",
@@ -579,13 +640,19 @@
     "own-api-import-title": "Uvezi",
     "own-api-bad-json-msg": "Nije moguće očitati podatke.\\nProvjerite da ste zalijepili tekst iz polja API 2 na stranici 'Flota'.",
     "import-failed-msg": "Nije moguće učitati podatke.\\nServer je vratio neispravan odgovor. Molimo pokušajte ponovo kasnije.",
-    "populated-systems-failed-msg": "Karta naseljenih sistema nije dostupna, pa se nijedan sistem ne broji kao preskočen. Njihov broj možete unijeti ručno."
+    "populated-systems-failed-msg": "Karta naseljenih sistema nije dostupna, pa se nijedan sistem ne broji kao preskočen. Njihov broj možete unijeti ručno.",
+    "sr-profile-hdr": "Uvoz špijunskog izvještaja",
+    "sr-profile-text": "Aktivan je profil. Izvještaj sadrži istraživanja, klasu i bonuse špijuniranog igrača, a oni ne smiju prepisati vaš profil. Kako ga uvesti?",
+    "sr-profile-none": "Prebaci na „Bez profila“ i uvezi",
+    "sr-profile-new": "Napravi novi profil za izvještaj",
+    "description": "Izračunajte vrijeme leta, potrošnju deuterija i najbolje vrijeme polaska flote u OGameu prema brzini univerzuma, brodovima i režimu leta."
   },
   "graviton": {
     "title": "Ogame - Kalkulator gravitona",
     "recycling": "Demontaža solarnih satelita (Ruševina)",
     "graviton-level": "Nivo Gravitona",
-    "keywords": "proxyforgame,ogame,kalkulator gravitona,graviton tehnologija,gravitaciona tehnologija,solarni sateliti,energija za graviton,zvijezda smrti"
+    "keywords": "proxyforgame,ogame,kalkulator gravitona,graviton tehnologija,gravitaciona tehnologija,solarni sateliti,energija za graviton,zvijezda smrti",
+    "description": "Saznajte koliko solarnih satelita i energije treba za istraživanje gravitona u OGameu prema postavkama planete."
   },
   "moon": {
     "title": "OGame - Moons calculator",
@@ -616,7 +683,8 @@
     "own-system": "Vaš sistem",
     "phalanx-lvl-required": "Potreban nivo",
     "phalanx-range-bonus": "Bonus na domet falange",
-    "class-bonus": "Bonus klase"
+    "class-bonus": "Bonus klase",
+    "description": "Izračunajte šansu za pronalazak mjeseca, ishod pokušaja uništenja mjeseca i domet senzorske falange u OGameu."
   },
   "production": {
     "param-tab-general": "Opšte",
@@ -706,7 +774,8 @@
     "incl-explain": "Ako povečate level rudnika, utrošak energije će se takođe povećati. Kalkulator ovo može uračunati i izračunati troškove izgradnje solarnih satelita, koji su potrebni za dovoljno energije. Kalkulacija se vrši na zgrada po zgrada osnovi. Da li želite da uzmemo u obzir te troškove i da vam izračunamo potrebne solarne satelite?",
     "incl-yes": "Da",
     "incl-no": "Ne",
-    "lifeform-tech": "Bonus tehnologije oblika života"
+    "lifeform-tech": "Bonus tehnologije oblika života",
+    "description": "Izračunajte proizvodnju metala, kristala i deuterija, potrošnju energije i isplativost nadogradnje rudnika na jednoj planeti ili u cijelom carstvu OGamea."
   },
   "queue": {
     "start-time": "Početak",
@@ -722,7 +791,8 @@
     "next-level": "Slijedeći level",
     "title": "Ogame - red izgradnje",
     "keywords": "proxyforgame,ogame,red gradnje,redoslijed gradnje,vrijeme gradnje,kalkulator reda gradnje,troškovi zgrada",
-    "clear": "Očisti"
+    "clear": "Očisti",
+    "description": "Uporedite cijenu i vrijeme uzastopnih nadogradnji zgrada na planeti ili mjesecu u OGameu uz nivoe fabrika i brzinu univerzuma."
   },
   "terraformer": {
     "title": "OGame - Kalkulator terraformera",
@@ -731,7 +801,8 @@
     "single-level": "Jedan level",
     "added-fields": "Polja koja će biti dodana",
     "satellites": "Solarni satelit",
-    "keywords": "proxyforgame,ogame,kalkulator terraformera,terraformer,polja planete,solarni sateliti,potrebna energija,tvornica nanita"
+    "keywords": "proxyforgame,ogame,kalkulator terraformera,terraformer,polja planete,solarni sateliti,potrebna energija,tvornica nanita",
+    "description": "Izračunajte energiju, resurse i vrijeme potrebne za teraformiranje planete u OGameu, uključujući solarne satelite i bonuse."
   },
   "expeditions": {
     "keywords": "proxyforgame,ogame,kalkulator ekspedicija,ekspedicije,resursi sa ekspedicija,flota za ekspedicije,tamna materija,nalazi sa ekspedicija",
@@ -795,7 +866,8 @@
     "class-bonus-discoverer": "Bonus klase \"Istraživač\"",
     "resources-discovery-booster": "Pojačivač otkrića resursa",
     "dark-matter-discovery-bonus": "Bonus otkrića Tamne materije",
-    "large-cargo-abbrev": "VT"
+    "large-cargo-abbrev": "VT",
+    "description": "Procijenite resurse, brodove i tamnu materiju koje možete pronaći u OGame ekspedicijama i uporedite očekivanu korist različitih flota."
   },
   "trade": {
     "met": "met",
@@ -811,6 +883,7 @@
     "link": "Link",
     "text": "Text",
     "and": "and",
-    "keywords": "proxyforgame,ogame,kalkulator trgovine,razmjena resursa,odnos razmjene,metal kristal deuterij,trgovac"
+    "keywords": "proxyforgame,ogame,kalkulator trgovine,razmjena resursa,odnos razmjene,metal kristal deuterij,trgovac",
+    "description": "Uporedite razmjenu metala, kristala i deuterija u OGameu i izračunajte količinu resursa prema zadatom kursu."
   }
 }

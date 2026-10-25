@@ -135,6 +135,7 @@ test.describe('Costs Calculator Page', () => {
         // An IRN configuration leaves the lab level alone instead of raising it,
         // so the research below stays impossible.
         await page.locator('#param-buildings-tab').click();
+        await page.locator('#use-irn').check();
         await page.locator('#open-llc-dialog').click();
         await page.locator('#lablevel_1').fill('5');
         await page.locator('#lablevel_1').press('Enter');
@@ -142,14 +143,17 @@ test.describe('Costs Calculator Page', () => {
         await expect(page.locator('#resulting-level')).toHaveText('5');
         await page.locator('#irn-done-btn').click();
         await expect(page.locator('#irn-calc')).toBeHidden();
-        await expect(page.locator('#research-lab-level')).toHaveValue('5');
+        // Done switches the network on; the lab field stays one planet's lab.
+        await expect(page.locator('#use-irn')).toBeChecked();
+        await expect(page.locator('#irn-result')).toHaveText('5');
+        await expect(page.locator('#research-lab-level')).toHaveValue('0');
 
         // Graviton technology, the last research row, needs a Research Lab of 12.
         const graviton = page.locator('#table-0-4 tr:nth-child(17) td:nth-child(3) input');
         await graviton.fill('1');
         await graviton.blur();
 
-        await expect(page.locator('#research-lab-level')).toHaveValue('5');
+        await expect(page.locator('#research-lab-level')).toHaveValue('0');
         await expect(page.locator('#table-0-4 tr:nth-child(17) td:nth-child(9)')).toContainText('0s');
         await expect(page.locator('#table-0-4 tr:nth-child(17) td:nth-child(11)')).toHaveText('0');
     });
@@ -495,6 +499,9 @@ test.describe('Costs Calculator Page', () => {
     });
 
     test('IRN calculation works', async ({ page }) => {
+        await expect(page.locator('#open-llc-dialog')).toBeHidden();
+        await page.locator('#use-irn').check();
+        await expect(page.locator('#irn-result')).toHaveText('0');
         await page.locator('#open-llc-dialog').click();
         await page.locator(`#irn-level`).fill('3');
         for (let i = 1; i <= 8; i++) {
@@ -509,7 +516,50 @@ test.describe('Costs Calculator Page', () => {
         await page.locator(`#irn-level`).press('Enter');
         await expect(page.locator('#resulting-level')).toContainText('36');
         await page.getByRole('button', { name: 'Done' }).click();
-        await expect(page.locator('#research-lab-level')).toHaveValue('36');
+        await expect(page.locator('#use-irn')).toBeChecked();
+        await expect(page.locator('#irn-result')).toHaveText('36');
+        await expect(page.locator('#research-lab-level')).toHaveValue('0');
+    });
+
+    test('the research network switch survives a reload and can be turned off', async ({ page }) => {
+        await page.locator('#use-irn').check();
+        await page.locator('#open-llc-dialog').click();
+        await page.locator('#irn-level').fill('1');
+        await page.locator('#lablevel_1').fill('10');
+        await page.locator('#lablevel_1').press('Enter');
+        await page.locator('#lablevel_2').fill('8');
+        await page.locator('#lablevel_2').press('Enter');
+        await page.locator('#labchoice_1').click();
+        await page.getByRole('button', { name: 'Done' }).click();
+        await expect(page.locator('#irn-result')).toHaveText('18');
+
+        await page.reload();
+        await expect(page.locator('#use-irn')).toBeChecked();
+        await expect(page.locator('#irn-result')).toHaveText('18');
+
+        await page.locator('#use-irn').click();
+        await expect(page.locator('#irn-result')).toBeHidden();
+        await expect(page.locator('#open-llc-dialog')).toBeHidden();
+    });
+
+    test('without the network a lab of 0 is not made up from the lab table', async ({ page }) => {
+        await page.locator('#use-irn').check();
+        await page.locator('#open-llc-dialog').click();
+        await page.locator('#lablevel_1').fill('12');
+        await page.locator('#lablevel_1').press('Enter');
+        await page.locator('#labchoice_1').click();
+        await page.getByRole('button', { name: 'Done' }).click();
+        await expect(page.locator('#irn-calc')).toBeHidden();
+        await page.locator('#use-irn').uncheck();
+
+        // Graviton technology, the last research row, needs a Research Lab of 12:
+        // the empty lab field is raised, not quietly replaced by the table.
+        await page.locator('#param-buildings-tab').click();
+        const graviton = page.locator('#table-0-4 tr:nth-child(17) td:nth-child(3) input');
+        await page.locator('#tabtag-0-4').click();
+        await graviton.fill('1');
+        await graviton.blur();
+        await expect(page.locator('#research-lab-level')).toHaveValue('12');
     });
 
     test('lifeform bonuses are correct', async ({ page }) => {
@@ -660,6 +710,26 @@ test.describe('Costs Calculator - Robot/Nanite factory disclaimer', () => {
         await naniteToLevel.fill('3');
         await naniteToLevel.press('Enter');
 
+        await expect(modal).toBeVisible();
+    });
+
+    test('a multi-level factory row that stays at its level does not trigger the disclaimer', async ({ page }) => {
+        const modal = page.locator('#robot-nanite-disclaimer');
+        await page.getByRole('tab', { name: 'All items - multiple levels' }).click();
+        await page.getByRole('tab', { name: 'Buildings (planet)' }).click();
+
+        const row = page.locator('#table-1-2 tr', { hasText: 'Robotics factory' });
+        await row.locator('td:nth-child(3) input').fill('6');
+        await row.locator('td:nth-child(4) input').fill('6');
+        await row.locator('td:nth-child(4) input').press('Enter');
+        // Showing the modal sets its cookie in the same handler, so this is
+        // settled once the key press is.
+        expect(await page.evaluate(() => document.cookie)).not.toContain('costs_rn_disclaimer_shown');
+        await expect(modal).toBeHidden();
+
+        // Going down changes the build times as much as going up.
+        await row.locator('td:nth-child(4) input').fill('4');
+        await row.locator('td:nth-child(4) input').press('Enter');
         await expect(modal).toBeVisible();
     });
 

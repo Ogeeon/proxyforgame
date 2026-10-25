@@ -50,13 +50,13 @@ describe('calcBuildCost_C: astrophysics', () => {
 });
 
 /**
- * Global params with the IRN left unconfigured — the calculator's default state,
- * where the entered lab level is the only source of the resulting level.
+ * Global params with the research network switched off — the calculator's
+ * default state, where the entered lab level is the only source of the
+ * resulting level.
  * @param {Partial<any>} [overrides]
  */
 function directParams(overrides = {}) {
     const params = new GlobalParams();
-    params.useDirectLabLevel = true;
     params.labLevels = [0, 0, 0, 0, 0, 0, 0, 0];
     params.labChoice = -1;
     return Object.assign(params, overrides);
@@ -93,16 +93,46 @@ describe('Calculator.isResearchable', () => {
     });
 
     it('reads the level through the IRN sum, not off the entered field', () => {
-        // Same case as the getLabLevelRaiseTarget test below: the entered field
-        // is empty and the per-planet table is what the calculation uses.
+        // Same case as the getLabLevelRaiseTarget test below: with the network
+        // switched on the per-planet table is what the calculation uses.
         const irn = new GlobalParams();
-        irn.useDirectLabLevel = true;
+        irn.useIrn = true;
         irn.researchLabLevel = 0;
         irn.labLevels = [12, 10, 0, 0, 0, 0, 0, 0];
         irn.labChoice = 0;
         irn.irnLevel = 1;
 
         expect(calculator.isResearchable(199, irn)).toBe(true);
+    });
+});
+
+describe('GlobalParams.getResultingLabLevel', () => {
+    it('without the network takes the entered lab, 0 included, never the table', () => {
+        const params = directParams({ researchLabLevel: 0, labLevels: [12, 10, 0], labChoice: 0, irnLevel: 1 });
+        expect(params.getResultingLabLevel()).toBe(0);
+        expect(calculator.isResearchable(199, params)).toBe(false);
+    });
+
+    it('with the network takes the table alone, never the entered lab', () => {
+        const params = Object.assign(new GlobalParams(), {
+            useIrn: true, researchLabLevel: 20, labLevels: [0, 0, 0], labChoice: -1, irnLevel: 2,
+        });
+        expect(params.getResultingLabLevel()).toBe(0);
+        expect(calculator.isResearchable(106, params)).toBe(false);
+    });
+
+    it('with the network and no lab meeting the requirement, the research cannot run', () => {
+        const params = Object.assign(new GlobalParams(), {
+            useIrn: true, researchLabLevel: 20, labLevels: [5, 5, 5], labChoice: 0, irnLevel: 2,
+        });
+        expect(params.getResultingLabLevel(12)).toBe(0);
+    });
+
+    it('with no start chosen the network starts on the best lab', () => {
+        const params = Object.assign(new GlobalParams(), {
+            useIrn: true, labLevels: [4, 9, 7, 1], labChoice: -1, irnLevel: 1,
+        });
+        expect(params.getResultingLabLevel()).toBe(16);
     });
 });
 
@@ -135,12 +165,12 @@ describe('Calculator.getLabLevelRaiseTarget', () => {
     });
 
     it('reads the level through the IRN sum, not off the entered field', () => {
-        // The entered field is empty, so getResultingLabLevel() falls through to
-        // the per-planet table, where a lab of 12 already clears what the Graviton
-        // needs. Comparing against researchLabLevel alone would report a shortfall
-        // here and overwrite a configuration that is in fact sufficient.
+        // With the network switched on the per-planet table counts, where a lab
+        // of 12 already clears what the Graviton needs. Comparing against
+        // researchLabLevel alone would report a shortfall here and overwrite a
+        // configuration that is in fact sufficient.
         const irn = new GlobalParams();
-        irn.useDirectLabLevel = true;
+        irn.useIrn = true;
         irn.researchLabLevel = 0;
         irn.labLevels = [12, 10, 0, 0, 0, 0, 0, 0];
         irn.labChoice = 0;
@@ -153,7 +183,7 @@ describe('Calculator.getLabLevelRaiseTarget', () => {
         // Four labs of 5 sum to 20, but a research only starts on a lab that on
         // its own reaches the required level, so the IRN filter drops all four.
         const irn = new GlobalParams();
-        irn.useDirectLabLevel = true;
+        irn.useIrn = true;
         irn.researchLabLevel = 0;
         irn.labLevels = [5, 5, 5, 5, 0, 0, 0, 0];
         irn.labChoice = 0;
@@ -337,7 +367,6 @@ describe('Calculator.calculate - a research time measured in the game', () => {
         params.discovererClassBonus = 57.35;
         params.technocrat = true;
         params.researchSpeed = 20;          // economy 10 x research divisor 2
-        params.useDirectLabLevel = true;
         params.researchLabLevel = 340;      // 17 planets at lab 20, all in the IRN
         params.labChoice = -1;
         params.lfResTimeRdcMap = { [LASER_TECH]: 52.382 };
@@ -382,7 +411,8 @@ describe('Calculator.calculate - points ignore life form cost reductions', () =>
         const reduced = calc.calculate(request, paramsWith({ mineralResCntrLvl: 100 }));
 
         expect(full.metal).toBe(398901);
-        expect(reduced.metal).toBe(199450);
+        // Each level halved and floored on its own (#58), not half the total (199450)
+        expect(reduced.metal).toBe(199444);
         expect(full.points).toBe(498);
         expect(reduced.points).toBe(498);
     });
@@ -392,5 +422,51 @@ describe('Calculator.calculate - points ignore life form cost reductions', () =>
         const reduced = calc.calculate(request, paramsWith({ lfResCostRdcMap: { [LASER_TECH]: 50 } }));
 
         expect(reduced.points).toBe(612);
+    });
+});
+
+// The game builds one level at a time and rounds each level's reduced cost and
+// time down on its own, so a range under a life form reduction is the sum of its
+// levels. Flooring the reduced total once came out up to a unit per level higher,
+// and disagreed with the terraformer calculator on the same range (#58).
+describe('Calculator.calculate - life form reductions round each level of a range', () => {
+    const TERRAFORMER = 33;
+    const LASER_TECH = 120;
+    // [metal, crystal, deuterium, cost growth factor], as costs.tpl emits it
+    const costs = { [TERRAFORMER]: [0, 50000, 100000, 2], [LASER_TECH]: [200, 100, 0, 2] };
+    const calc = new Calculator(costs, { [LASER_TECH]: 1 });
+    const terraformerParams = () => Object.assign(new GlobalParams(), {
+        robotFactoryLevelPlanet: 10,
+        lfTerraformerRdc: 25,
+    });
+
+    it('floors the Terraformer time of each level, as the terraformer calculator does', () => {
+        // Levels 5, 6, 7 at robotics 10 take 69818, 209454 and 418909 s. A quarter
+        // off each, floored: 52363 + 157090 + 314181 = 523634 s, not 523635 s.
+        const result = calc.calculate(new BuildRequest(TERRAFORMER, 4, 7), terraformerParams());
+
+        expect(result.time).toBe(523634);
+        expect(result.crystal).toBe(4200000);
+        expect(result.deuterium).toBe(8400000);
+    });
+
+    it('floors the research time of each level', () => {
+        // Levels 1-4 at lab 10: 98.18, 196.36, 392.73 and 785.45 s. A quarter off
+        // each, floored: 73 + 147 + 294 + 589 = 1103 s, not 1104 s.
+        const params = Object.assign(new GlobalParams(), {
+            useDirectLabLevel: true,
+            researchLabLevel: 10,
+            labChoice: -1,
+            lfResTimeRdcMap: { [LASER_TECH]: 25 },
+        });
+        const result = calc.calculate(new BuildRequest(LASER_TECH, 0, 4), params);
+
+        expect(result.time).toBe(1103);
+    });
+
+    it('leaves a single level as it was', () => {
+        const result = calc.calculate(new BuildRequest(TERRAFORMER, 6, 7), terraformerParams());
+
+        expect(result.time).toBe(314181);
     });
 });
