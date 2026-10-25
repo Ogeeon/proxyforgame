@@ -2,8 +2,12 @@
 # Listens on loopback only; Apache proxies https://<site>/mcp to it
 # (deploy/apache-mcp.conf). Install, then enable:
 #
-#   install -m 644 <checkout>/deploy/pfg-mcp.service /etc/systemd/system/
+#   install -m 644 <release>/deploy/pfg-mcp.service /etc/systemd/system/
 #   systemctl daemon-reload && systemctl enable --now pfg-mcp
+#
+# The paths go through /var/www/pfg-current - the symlink to the live release
+# (deploy/README.md, "The host") - so a deploy flips the code under the server
+# without the unit ever naming a release directory.
 #
 # A deploy restarts it through pfg-mcp-restart.path; see deploy/README.md,
 # "The MCP server".
@@ -17,8 +21,8 @@ Wants=network-online.target
 Type=simple
 User=www-data
 Group=www-data
-WorkingDirectory=/var/www/proxyforgame-gh
-ExecStart=/usr/bin/node /var/www/proxyforgame-gh/mcp/server.js
+WorkingDirectory=/var/www/pfg-current
+ExecStart=/usr/bin/node /var/www/pfg-current/mcp/server.js
 Environment=NODE_ENV=production
 Environment=PFG_MCP_HOST=127.0.0.1
 Environment=PFG_MCP_PORT=8787

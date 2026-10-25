@@ -1,47 +1,59 @@
 #!/bin/bash
 #
-# Bring a deploy checkout to a commit of GitHub main, then prove the site still
-# serves. This is the ONLY thing that writes to a checkout - the webhook calls
-# it, the reconcile timer calls it, and a human rolling back calls it.
+# Bring the site to a commit of GitHub main through release directories, then
+# prove it still serves. This is the ONLY thing that writes to a release - the
+# webhook calls it, the reconcile timer calls it, and a human rolling back
+# calls it.
 #
 #   pfg-sync                 sync to the newest commit of main whose CI passed
 #   pfg-sync --sha <sha>     sync to exactly that commit (webhook / rollback)
 #   pfg-sync --check         report drift and exit; change nothing
 #
+# Layout (issue #14 - release directories behind the docroot symlink):
+#
+#   REPO_DIR        bare repository, the shared object store. The only thing
+#                   that is ever fetched; every release is a worktree of it.
+#   RELEASES_DIR    one worktree per deployed commit, named by its full sha.
+#                   A directory that exists under that name is complete:
+#                   worktrees are built under a .tmp- name and renamed into
+#                   place (rename(2) is atomic).
+#   CURRENT_LINK    symlink to the live release. The document root points at
+#                   <CURRENT_LINK>/www, and so do the crontab's jobs and the
+#                   MCP server - nothing outside this script names a release
+#                   directory directly.
+#   SHARED_ENV      the one real .env, the only file git cannot recreate.
+#                   Every release links to it; a deploy never copies, saves
+#                   or restores it again.
+#   KEEP_RELEASES   how many releases to keep. The current release and the
+#                   one it replaced are never pruned - the second is the
+#                   rollback.
+#
+# A deploy is one atomic rename of CURRENT_LINK, so a request is served either
+# the whole old release or the whole new one; a half-updated tree cannot
+# exist, which is the whole point of the layout. A rollback - dispatched or
+# by hand - is the same rename pointed at a release that already exists, or
+# one rebuilt from the store.
+#
 # Config comes from PFG_SYNC_CONF, else /etc/pfg-sync.conf, else
-# ~/.pfg-sync.conf. It is written by the cutover script and defines:
+# ~/.pfg-sync.conf. It defines the layout keys above plus SMOKE_BASE,
+# SMOKE_RESOLVE, SMOKE_INSECURE, LOG, LOCK, MAIL_TO, MAX_WALK and
+# MCP_RESTART_FILE. A config that still names CHECKOUT is the pre-#14
+# single-checkout layout; it is refused with a pointer to deploy/README.md
+# rather than half-working.
 #
-#   CHECKOUT        absolute path of the git checkout
-#   SMOKE_BASE      base URL to smoke-test after updating
-#   SMOKE_RESOLVE   optional curl --resolve entry, for a host that is not in DNS
-#   SMOKE_INSECURE  optional; 1 to skip certificate verification in the smoke
-#                   test, for a host smoke-tested under a name whose certificate
-#                   it cannot renew. Neither host needs it now: the standby is
-#                   tested as proxyforgame.net, a name it holds a certificate
-#                   for.
-#   LOG             file to append to
-#   MAIL_TO         address for failure reports (optional)
-#   MAX_WALK        optional; how many commits back from the tip of main to
-#                   consider in green mode before giving up (default 20)
-#   MCP_RESTART_FILE optional; after a deploy, the commit is written here, and
-#                   pfg-mcp-restart.path restarts the MCP server on that write
-#                   (deploy/README.md, "The MCP server"). Unset: no MCP server.
-#
-# Deliberately NOT `git pull`: a pull can merge, and merges are how the previous
-# Bitbucket checkout accumulated 26 commits that existed nowhere else. A reset
-# makes the checkout a mirror that cannot drift. `clean -fd` sweeps stray files
-# but MUST NOT gain -x: the gitignored .env lives in the checkout root and is
-# the one thing here that cannot be recreated from git.
+# Deliberately still NOT `git pull`: a pull can merge, and merges are how the
+# previous Bitbucket checkout accumulated 26 commits that existed nowhere
+# else. A detached worktree at an exact sha is a snapshot that cannot drift,
+# and there is no `git clean` either - a fresh worktree has nothing stray in
+# it to sweep, and the gitignored .env is not git's to touch at all.
 #
 # The target is always resolved from origin/main after a fetch: the tip if its
 # CI has gone green, else the newest ancestor that has - but never a commit
 # below the one already deployed, so green mode cannot roll back. Older history
 # is never a candidate - a stale answer from the runs API once reset a host six
-# months back,
-# and the reset onto and back off a commit that still tracked .env destroyed the
-# file. Two guards remain against that class of bug: .env is saved across every
-# reset and put back if it moved, and a deploy whose smoke test fails is rolled
-# back to the commit it came from rather than left live.
+# months back, and the reset onto and back off a commit that still tracked
+# .env destroyed the file. The releases hold no .env of their own any more,
+# but the ancestor rule stays: going back is the pin's job, not green mode's.
 #
 set -euo pipefail
 
@@ -64,13 +76,24 @@ CONF="${PFG_SYNC_CONF:-}"
 [ -n "$CONF" ] || { echo "pfg-sync: no config file found" >&2; exit 2; }
 # shellcheck disable=SC1090
 . "$CONF"
-: "${CHECKOUT:?CHECKOUT not set in $CONF}"
+if [ -n "${CHECKOUT:-}" ]; then
+  echo "pfg-sync: this config names CHECKOUT - the single-checkout layout. The" >&2
+  echo "pfg-sync: release layout needs REPO_DIR, RELEASES_DIR, CURRENT_LINK and" >&2
+  echo "pfg-sync: SHARED_ENV instead; see deploy/README.md, 'The host'." >&2
+  exit 2
+fi
+: "${REPO_DIR:?REPO_DIR not set in $CONF}"
+: "${RELEASES_DIR:?RELEASES_DIR not set in $CONF}"
+: "${CURRENT_LINK:?CURRENT_LINK not set in $CONF}"
+: "${SHARED_ENV:?SHARED_ENV not set in $CONF}"
 : "${SMOKE_BASE:?SMOKE_BASE not set in $CONF}"
 LOG="${LOG:-/dev/null}"
+LOCK="${LOCK:-/tmp/pfg-sync.lock}"
 MAIL_TO="${MAIL_TO:-}"
 SMOKE_RESOLVE="${SMOKE_RESOLVE:-}"
 SMOKE_INSECURE="${SMOKE_INSECURE:-}"
 MAX_WALK="${MAX_WALK:-20}"
+KEEP_RELEASES="${KEEP_RELEASES:-5}"
 MCP_RESTART_FILE="${MCP_RESTART_FILE:-}"
 
 log() { printf '%s %s\n' "$(date -Is)" "$*" >> "$LOG"; }
@@ -83,41 +106,39 @@ fail() {
 }
 
 # ---------------------------------------------------------------------------
-# Pipe the checkout's changelog.sql into this host's database. changelog.sql is
-# committed and every statement in it is an upsert, so this is a no-op on a host
-# that already has the entry and a catch-up on one that is behind. Each host
-# writes to its own database - nothing replicates between them - which is what
-# keeps the standby's sidebar changelog from going stale.
+# Pipe a release's changelog.sql into this host's database. changelog.sql is
+# committed and every statement in it is an upsert, so this is a no-op on a
+# database that already has the entry and a catch-up on one that is behind.
 #
-# The in-checkout copy is run, not an installed one: it does no git work, the
-# tree is quiescent by the time it runs, and this way it always matches the
-# release just synced. A failure is logged and swallowed - the site code is
+# The in-release copy is run, not an installed one: it does no git work, the
+# release is quiescent by the time it runs, and this way it always matches the
+# code just deployed. A failure is logged and swallowed - the site code is
 # already live and correct; only the changelog rows would lag one release.
 #
-# Called only when HEAD actually moved (or a --sha was re-asserted), never on an
-# idle green-mode reconcile, so the standby's five-minute timer does not write a
-# log line every time it finds nothing to do.
+# Called only when a deploy actually moved the site (or a --sha was
+# re-asserted), never on an idle green-mode reconcile, so the five-minute
+# timer does not write a log line every time it finds nothing to do.
 # ---------------------------------------------------------------------------
 apply_changelog() {
-  local applier="$CHECKOUT/deploy/pfg-changelog-apply"
+  local applier="$1/deploy/pfg-changelog-apply"
   [ -x "$applier" ] || return 0
-  "$applier" "$CHECKOUT" >> "$LOG" 2>&1 \
+  "$applier" "$1" >> "$LOG" 2>&1 \
     || log "WARNING: changelog apply failed - code is deployed, sidebar rows may lag one release"
 }
 
 # ---------------------------------------------------------------------------
-# Apply db/migrations/*.sql to this host's database before the smoke test runs.
-# Same in-checkout copy, same reasons as apply_changelog. UNLIKE the changelog,
-# a failure here is fatal: the code just deployed may need the schema. The
-# caller rolls the code back and calls fail(). Returns non-zero on failure.
-#
-# Runs on a HEAD move and on a --sha re-assert (mirroring apply_changelog),
-# never on an idle green-mode reconcile.
+# Apply a release's db/migrations/*.sql to this host's database before the
+# site is switched to it. Same in-release copy, same reasons as
+# apply_changelog. UNLIKE the changelog, a failure here is fatal: the code
+# about to go live may need the schema. But it is fatal without consequences
+# now - the old release is still what the document root serves, so the caller
+# drops the new release and the site never notices. Expand-only migrations
+# keep that old release compatible with a half-applied change.
 # ---------------------------------------------------------------------------
 apply_migrations() {
-  local migrator="$CHECKOUT/deploy/pfg-migrate"
+  local migrator="$1/deploy/pfg-migrate"
   [ -x "$migrator" ] || { log "NOTE: $migrator missing - skipping migrations"; return 0; }
-  "$migrator" "$CHECKOUT" >> "$LOG" 2>&1
+  "$migrator" "$1" >> "$LOG" 2>&1
 }
 
 # ---------------------------------------------------------------------------
@@ -139,22 +160,22 @@ signal_mcp() {
 }
 
 # ---------------------------------------------------------------------------
-# git fetch, retried. GitHub now and then answers an unauthenticated fetch with
-# a 401 - "could not read Username for 'https://github.com'" - for a few minutes
-# at a stretch, a transient blip rather than a real outage. Both hosts hit one
-# on 2026-08-31 and each recovered on its own by the next run; retrying here
-# spares the alarm mail for a wobble that fixes itself. GIT_TERMINAL_PROMPT=0
-# turns the credential prompt that 401 provokes into an immediate error instead
-# of a read against cron's dead stdin.
+# git fetch into the store, retried. GitHub now and then answers an
+# unauthenticated fetch with a 401 - "could not read Username for
+# 'https://github.com'" - for a few minutes at a stretch, a transient blip
+# rather than a real outage. One was ridden out on 2026-08-31 by waiting;
+# retrying here spares the alarm mail for a wobble that fixes itself.
+# GIT_TERMINAL_PROMPT=0 turns the credential prompt that 401 provokes into an
+# immediate error instead of a read against cron's dead stdin.
 #
 # http.version=HTTP/1.1 is pinned because from 2026-09-02 the HTTP/2 POST to
-# github.com/.../git-upload-pack started hanging from production - the GET that
+# github.com/.../git-upload-pack started hanging from the host - the GET that
 # advertises the refs is served fine over h2, the POST that negotiates the pack
 # resets ("the remote end hung up unexpectedly", or "expected flush after ref
 # listing"), and git then falls through to a credential prompt and reports
 # "could not read Username for 'https://github.com'". Old libcurl (git 2.30.2,
-# no root to upgrade) against GitHub's edge; curl and the standby's newer git
-# are both unaffected. Forcing HTTP/1.1 sidesteps the broken h2 upload entirely.
+# no root to upgrade) against GitHub's edge; curl and a newer git are both
+# unaffected. Forcing HTTP/1.1 sidesteps the broken h2 upload entirely.
 #
 # `timeout` bounds each attempt: git has no overall deadline of its own, and on
 # 2026-10-03 a connection to GitHub that stalled without closing held the lock
@@ -163,7 +184,7 @@ signal_mcp() {
 fetch_main() {
   local attempt=1 delay
   while :; do
-    GIT_TERMINAL_PROMPT=0 timeout 60 git -c http.version=HTTP/1.1 fetch --quiet origin main \
+    GIT_TERMINAL_PROMPT=0 timeout 60 git -C "$REPO_DIR" -c http.version=HTTP/1.1 fetch --quiet origin main \
       && return 0
     [ "$attempt" -ge 3 ] && return 1
     delay=$((attempt * 10))
@@ -174,9 +195,9 @@ fetch_main() {
 }
 
 # ---------------------------------------------------------------------------
-# GET a GitHub API URL, print the body. Same three tries as fetch_main, for the
-# same reason: a single unanswered request is a blip, not an outage, and the
-# standby's five-minute timer would otherwise mail about every one of them.
+# GET a GitHub API URL, print the body. Same three tries as fetch_main, for
+# the same reason: a single unanswered request is a blip, not an outage, and
+# the five-minute timer would otherwise mail about every one of them.
 # --max-time keeps a stalled connection from holding the lock indefinitely.
 # ---------------------------------------------------------------------------
 api_get() {
@@ -188,14 +209,6 @@ api_get() {
     sleep $((attempt * 5))
     attempt=$((attempt + 1))
   done
-}
-
-# Put the checkout back on HAVE_SHA. Shared by the migration-failure and
-# smoke-failure paths.
-rollback_code() {
-  git reset --quiet --hard "$HAVE_SHA" || true
-  git clean --quiet -fd || true
-  restore_env
 }
 
 # ---------------------------------------------------------------------------
@@ -219,25 +232,23 @@ ci_passed() {
 # The commit a dispatched rollback pinned this host to, or empty.
 #
 # A rollback is `deploy.yml` creating a deployment for an older commit. That
-# reaches production as a webhook delivery, but the standby has no inbound
-# address and both hosts also reconcile on a timer in green mode - which, left
-# alone, walks back to the newest green commit of main and undoes the rollback.
-# Production's reconcile is hourly, so before this the lever held for at most
-# 59 minutes; the standby's is every five.
+# reaches the host as a webhook delivery, but the five-minute timer reconciles
+# in green mode too - which, left alone, walks back to the newest green commit
+# of main and undoes the rollback within five minutes.
 #
 # So green mode asks GitHub for the newest deployment and honours it as a pin.
-# The pin lapses on its own when main moves: `deploy.yml` records the tip it saw
-# at dispatch time in the deployment payload, and the pin only applies while the
-# tip is still that commit. Landing the fix - a `git revert`, normally - is
-# therefore all it takes to resume rolling forward, and a rollback dispatched at
-# the current tip is not a pin at all.
+# The pin lapses on its own when main moves: `deploy.yml` records the tip it
+# saw at dispatch time in the deployment payload, and the pin only applies
+# while the tip is still that commit. Landing the fix - a `git revert`,
+# normally - is therefore all it takes to resume rolling forward, and a
+# rollback dispatched at the current tip is not a pin at all.
 #
 # CI is deliberately not re-checked for a pinned commit: `deploy.yml` already
-# proved it is an ancestor of main, and an older commit's workflow runs can have
-# aged out of the API entirely.
+# proved it is an ancestor of main, and an older commit's workflow runs can
+# have aged out of the API entirely.
 #
-# Prints the sha to pin to, or nothing. Never fails the run - an unreachable API
-# here means "no pin", and the green walk below has its own API guard.
+# Prints the sha to pin to, or nothing. Never fails the run - an unreachable
+# API here means "no pin", and the green walk below has its own API guard.
 # ---------------------------------------------------------------------------
 pinned_target() {
   local tip="$1" json sha pinned_tip
@@ -255,13 +266,13 @@ pinned_target() {
   [ "$pinned_tip" = "$tip" ] || return 0
   # A deployment for the tip itself is a roll-forward, not a rollback.
   [ "$sha" != "$tip" ] || return 0
-  git merge-base --is-ancestor "$sha" "$tip" 2>/dev/null || return 0
+  git -C "$REPO_DIR" merge-base --is-ancestor "$sha" "$tip" 2>/dev/null || return 0
   printf '%s' "$sha"
 }
 
 # ---------------------------------------------------------------------------
-# The smoke test, as a function so a rollback can re-run it. Prints the list of
-# things that are wrong (empty when the site is healthy); never exits.
+# The smoke test, as a function so a flip-back can re-run it. Prints the list
+# of things that are wrong (empty when the site is healthy); never exits.
 # ---------------------------------------------------------------------------
 smoke() {
   local bad="" path body code size
@@ -289,8 +300,8 @@ smoke() {
       bad="$bad $path(redirected off the host to $effective)"
     fi
   done
-  # One database-backed read. A static page cannot tell us the .env survived the
-  # deploy or that MySQL is answering; this can.
+  # One database-backed read. A static page cannot tell us the .env behind the
+  # release is reachable or that MySQL is answering; this can.
   body=$(mktemp)
   code=$("${curl_cmd[@]}" -o "$body" -w '%{http_code}' \
     "$SMOKE_BASE/ajax.php?service=populatedSystems&country=ru&universe=268") || code=000
@@ -301,52 +312,121 @@ smoke() {
 }
 
 # ---------------------------------------------------------------------------
-# .env is gitignored now, but it was a tracked file until commit 8ac690a. A
-# reset onto anything older overwrites the real credentials with the committed
-# placeholder, and the reset back deletes the file outright. Save it around
-# every reset and put it back whenever it ends up missing or changed.
+# The commit the current link points at, or empty when there is no release
+# (a host mid-bootstrap). The directory a release lives in is named for its
+# sha, but reading git is the honest answer - it is what the site serves.
 # ---------------------------------------------------------------------------
-ENV_BAK=""
-cleanup() { [ -n "$ENV_BAK" ] && rm -f "$ENV_BAK"; return 0; }
-trap cleanup EXIT
-
-save_env() {
-  if [ -f "$CHECKOUT/.env" ]; then
-    ENV_BAK=$(mktemp)
-    cp -p "$CHECKOUT/.env" "$ENV_BAK"
-  fi
-}
-restore_env() {
-  [ -n "$ENV_BAK" ] || return 0
-  if ! cmp -s "$ENV_BAK" "$CHECKOUT/.env" 2>/dev/null; then
-    cp -p "$ENV_BAK" "$CHECKOUT/.env"
-    log "restored .env - the reset had removed or changed it"
-  fi
+current_sha() {
+  local rel
+  rel=$(readlink -f "$CURRENT_LINK" 2>/dev/null) || return 0
+  [ -n "$rel" ] || return 0
+  git -C "$rel" rev-parse HEAD 2>/dev/null || true
 }
 
-# One deploy at a time. A second delivery arriving mid-reset would otherwise see
-# a half-written tree, and GitHub can deliver two events for one push.
+# ---------------------------------------------------------------------------
+# Point every release's .env at the shared file. The one file git may put in
+# the way is the committed placeholder: .env was a tracked file until 8ac690a,
+# so a release of an older commit carries it as a real file, and it is simply
+# replaced. A release that already has the right link is left untouched - it
+# may be the one the site is serving, and rm+ln would leave it without an .env
+# for an instant.
+# ---------------------------------------------------------------------------
+link_env() {
+  [ "$(readlink "$1/.env" 2>/dev/null || true)" = "$SHARED_ENV" ] && return 0
+  rm -f "$1/.env"
+  ln -s "$SHARED_ENV" "$1/.env"
+}
+
+# ---------------------------------------------------------------------------
+# Build RELEASES_DIR/<sha> as a worktree of the store: complete or absent,
+# never half-written. git checks out under a .tmp- name; the finished tree is
+# renamed into place, and the name a release is known by never exists until
+# the worktree is whole - a [ -d ] test on it is a completeness guarantee.
 #
-# A timer reconcile that finds the lock taken just steps aside: whoever holds it
-# is doing the same job, and the next tick tries again. A host that stays stuck
-# shows up as drift in the watchdog, so nothing goes unreported. A --sha
+# A .tmp left behind by an interrupted run is cleaned first: worktree remove
+# when git still knows it, rm -rf when it does not, prune to drop the stale
+# metadata. The move itself leaves the store's record of where the worktree
+# lives pointing at the old name, so `worktree repair` heals it - without
+# that, the next prune would call the finished release abandoned.
+# ---------------------------------------------------------------------------
+ensure_release() {
+  local sha="$1" release="$RELEASES_DIR/$1" tmp="$RELEASES_DIR/.tmp-$1"
+  if [ -d "$release" ]; then
+    link_env "$release"
+    return 0
+  fi
+  git -C "$REPO_DIR" worktree remove --force "$tmp" >/dev/null 2>&1 || rm -rf "$tmp"
+  git -C "$REPO_DIR" worktree prune
+  git -C "$REPO_DIR" worktree add --quiet --detach "$tmp" "$sha" \
+    || fail "git worktree add for $sha failed"
+  link_env "$tmp"
+  mv -T "$tmp" "$release"
+  git -C "$REPO_DIR" worktree repair
+}
+
+# ---------------------------------------------------------------------------
+# Point CURRENT_LINK at a release with one atomic rename: ln builds the new
+# link beside the old one, mv -T renames it over. `ln -sfn` alone would do an
+# unlink+symlink instead, and for an instant in between there would be no link
+# at all - every request in that instant an error. The document root goes
+# through this link, so this is the one swap on the host that must be atomic.
+# ---------------------------------------------------------------------------
+flip_current() {
+  local tmp="$CURRENT_LINK.tmp.$$"
+  ln -s "$1" "$tmp"
+  mv -T "$tmp" "$CURRENT_LINK"
+}
+
+# ---------------------------------------------------------------------------
+# Keep the newest KEEP_RELEASES releases; the current one and the release it
+# replaced are untouchable whatever their age - the second is the rollback.
+# Newest is mtime, which is creation order here: a release is written once
+# and never modified. Removal goes through `git worktree remove`, never
+# rm -rf, so the store's worktree metadata stays consistent.
+# ---------------------------------------------------------------------------
+prune_releases() {
+  local current="$1" prev="$2" r path kept=0
+  while IFS= read -r r; do
+    [ -n "$r" ] || continue
+    path="$RELEASES_DIR/$r"
+    if [ "$path" = "$current" ] || { [ -n "$prev" ] && [ "$path" = "$prev" ]; }; then
+      kept=$((kept + 1))
+      continue
+    fi
+    if [ "$kept" -lt "$KEEP_RELEASES" ]; then
+      kept=$((kept + 1))
+      continue
+    fi
+    git -C "$REPO_DIR" worktree remove --force "$path" \
+      || log "NOTE: could not prune $r - left in place"
+  done < <(ls -1t "$RELEASES_DIR" 2>/dev/null | grep -E '^[0-9a-f]{40}$' || true)
+  git -C "$REPO_DIR" worktree prune
+}
+
+# One deploy at a time. A second delivery arriving mid-flip would otherwise
+# see the layout half-moved, and GitHub can deliver two events for one push.
+#
+# A timer reconcile that finds the lock taken just steps aside: whoever holds
+# it is doing the same job, and the next tick tries again. A host that stays
+# stuck shows up as drift in the watchdog, so nothing goes unreported. A --sha
 # (webhook, rollback) or --check still waits, and still fails loudly - that
 # instruction would otherwise be lost.
-exec 9>"${LOCK:-/tmp/pfg-sync.lock}"
+exec 9>"$LOCK"
 if [ "$MODE" = green ]; then
   flock -n 9 || { log "another pfg-sync holds the lock - skipping this run"; exit 0; }
 else
   flock -w 120 9 || fail "another pfg-sync held the lock for over two minutes"
 fi
 
-cd "$CHECKOUT" || fail "checkout $CHECKOUT is not there"
+[ -d "$REPO_DIR" ] || fail "object store $REPO_DIR is not there - see deploy/README.md, 'Rebuilding the host'"
+[ -d "$RELEASES_DIR" ] || fail "releases directory $RELEASES_DIR is not there"
 
 # ---------------------------------------------------------------------------
 # origin/main is the frame of reference for both modes: every target has to be
 # it or an ancestor of it. Fetch before deciding anything.
 # ---------------------------------------------------------------------------
-fetch_main || fail "git fetch failed after 3 attempts - leaving the checkout alone"
-TIP=$(git rev-parse FETCH_HEAD)
+fetch_main || fail "git fetch failed after 3 attempts - leaving the site alone"
+TIP=$(git -C "$REPO_DIR" rev-parse FETCH_HEAD)
 
 # ---------------------------------------------------------------------------
 # Which commit do we want?
@@ -357,11 +437,11 @@ if [ "$MODE" = exact ]; then
     *[!0-9a-fA-F]* | "") fail "refusing a target that is not a hex sha: '$WANT_SHA'" ;;
   esac
   [ ${#WANT_SHA} -ge 7 ] || fail "sha too short: '$WANT_SHA'"
-  git cat-file -e "$WANT_SHA^{commit}" 2>/dev/null \
+  git -C "$REPO_DIR" cat-file -e "$WANT_SHA^{commit}" 2>/dev/null \
     || fail "$WANT_SHA is not in the fetched history"
-  git merge-base --is-ancestor "$WANT_SHA" "$TIP" \
+  git -C "$REPO_DIR" merge-base --is-ancestor "$WANT_SHA" "$TIP" \
     || fail "$WANT_SHA is not an ancestor of origin/main - refusing it"
-  WANT_SHA=$(git rev-parse "$WANT_SHA") || fail "cannot resolve $WANT_SHA"
+  WANT_SHA=$(git -C "$REPO_DIR" rev-parse "$WANT_SHA") || fail "cannot resolve $WANT_SHA"
 else
   # A dispatched rollback outranks the walk: while it holds, this host stays on
   # the commit it names instead of climbing back to the tip.
@@ -372,7 +452,7 @@ fi
 # otherwise a correctly pinned host reads as drifted to the watchdog.
 if [ "$MODE" != exact ] && [ -n "${PIN:-}" ]; then
   WANT_SHA="$PIN"
-  [ "$(git rev-parse HEAD)" = "$WANT_SHA" ] \
+  [ "$(current_sha)" = "$WANT_SHA" ] \
     || log "pinned to ${WANT_SHA:0:8} by a dispatched rollback (main is at ${TIP:0:8})"
 elif [ "$MODE" != exact ]; then
   # The tip of main if its CI has gone green, otherwise the newest ancestor
@@ -389,10 +469,10 @@ elif [ "$MODE" != exact ]; then
   # the API: it got here green (or by an explicit --sha), and green mode only
   # ever rolls forward - rolling back is the pin's job. The runs API answers
   # "no successful run" for a commit that has one now and then; before this,
-  # every such answer for the tip reset the host one commit back for a cycle
-  # (from 2026-09-28: production hourly, the standby every few minutes). It
-  # also means an idle reconcile makes no API call at all.
-  HAVE_SHA=$(git rev-parse HEAD)
+  # every such answer for the tip put the host one commit back for a cycle,
+  # several times a day (from 2026-09-28). It also means an idle reconcile
+  # makes no API call at all.
+  HAVE_SHA=$(current_sha)
   sha="$TIP"
   n=0
   WANT_SHA=""
@@ -401,8 +481,8 @@ elif [ "$MODE" != exact ]; then
     rc=0
     ci_passed "$sha" || rc=$?
     if [ "$rc" -eq 0 ]; then WANT_SHA="$sha"; break; fi
-    [ "$rc" -eq 2 ] && fail "GitHub API unreachable - leaving the checkout alone"
-    sha=$(git rev-parse --verify --quiet "$sha^") || break
+    [ "$rc" -eq 2 ] && fail "GitHub API unreachable - leaving the site alone"
+    sha=$(git -C "$REPO_DIR" rev-parse --verify --quiet "$sha^") || break
     n=$((n + 1))
   done
   # A push of more than MAX_WALK commits whose first-parent chain does not pass
@@ -411,7 +491,8 @@ elif [ "$MODE" != exact ]; then
   # is on an ancestor of the tip, so staying put is safe and the tip's own
   # workflow_run delivers the deploy. A deployed commit that is NOT an ancestor
   # means history was rewritten, and that still fails loudly.
-  if [ -z "$WANT_SHA" ] && git merge-base --is-ancestor "$HAVE_SHA" "$TIP" 2>/dev/null; then
+  if [ -z "$WANT_SHA" ] && [ -n "$HAVE_SHA" ] \
+     && git -C "$REPO_DIR" merge-base --is-ancestor "$HAVE_SHA" "$TIP" 2>/dev/null; then
     log "no CI-passed commit within $MAX_WALK of ${TIP:0:8} yet - staying on ${HAVE_SHA:0:8} until CI finishes"
     WANT_SHA="$HAVE_SHA"
   fi
@@ -419,82 +500,93 @@ elif [ "$MODE" != exact ]; then
     || fail "no CI-passed commit within $MAX_WALK of origin/main (${TIP:0:8}) - is main red?"
 fi
 
-HAVE_SHA=$(git rev-parse HEAD)
+HAVE_SHA=$(current_sha)
 if [ "$HAVE_SHA" = "$WANT_SHA" ]; then
   if [ "$MODE" = check ]; then
     echo "up to date at $HAVE_SHA"
   elif [ "$MODE" = exact ]; then
-    # A webhook redelivery or a rollback re-assertion: the commit is already
-    # here, but "apply the migrations and the changelog" is still part of that
-    # instruction. Nothing moved, so a migration failure only warns here.
-    apply_migrations \
+    # A webhook redelivery or a rollback re-assertion: the site is already on
+    # the commit, but "apply the migrations and the changelog" is still part of
+    # that instruction. Nothing moved, so a migration failure only warns here.
+    RELEASE=$(readlink -f "$CURRENT_LINK")
+    apply_migrations "$RELEASE" \
       || log "WARNING: migration apply failed on --sha re-assert of ${WANT_SHA:0:8}"
-    apply_changelog
+    apply_changelog "$RELEASE"
   fi
   exit 0
 fi
 
 if [ "$MODE" = check ]; then
-  echo "DRIFT: checkout is at $HAVE_SHA, wanted $WANT_SHA"
-  log "drift detected: $HAVE_SHA != $WANT_SHA"
+  echo "DRIFT: site is at ${HAVE_SHA:-no release}, wanted $WANT_SHA"
+  log "drift detected: ${HAVE_SHA:-none} != $WANT_SHA"
   exit 1
 fi
 
 # ---------------------------------------------------------------------------
-# Update
+# Deploy: build the release aside, migrate it, flip the link, prove the site.
 # ---------------------------------------------------------------------------
-log "syncing $HAVE_SHA -> $WANT_SHA"
-save_env
-git reset --quiet --hard "$WANT_SHA" || fail "git reset failed"
-git clean --quiet -fd            # never -fdx: that would delete .env
-restore_env
+log "syncing ${HAVE_SHA:-<none>} -> $WANT_SHA"
+
+NEW_RELEASE="$RELEASES_DIR/$WANT_SHA"
+CREATED=no
+[ -d "$NEW_RELEASE" ] || CREATED=yes
+# A release that already exists is a rollback to it (or a re-deploy after a
+# smoke failure); it is reused as it stands. One that does not is built.
+ensure_release "$WANT_SHA"
+
+PREV_RELEASE=$(readlink -f "$CURRENT_LINK" 2>/dev/null || true)
 
 # ---------------------------------------------------------------------------
-# Schema before code. The reset put the new code and the new migration files in
-# place together; apply the migrations now, before the smoke test exercises the
-# new code's database reads. A failure is fatal - roll the code back to HAVE_SHA
-# (expand-only migrations mean the old code tolerates a half-applied change) and
-# bail loudly.
+# Schema before the switch. The document root still serves the old release
+# while the new code's migrations run against the new release's own tree, so
+# a failure here never reaches a visitor: the new release is dropped, the old
+# one never stopped serving, and the mail says what happened.
 # ---------------------------------------------------------------------------
-if ! apply_migrations; then
-  log "migration failed on ${WANT_SHA:0:8} - rolling back to ${HAVE_SHA:0:8}"
-  rollback_code
-  sleep 3
-  BACK=$(smoke)
-  [ -z "$BACK" ] \
-    || fail "migration failed on $WANT_SHA and the rollback to $HAVE_SHA is also unhealthy ($BACK)"
-  fail "migration failed deploying $WANT_SHA - rolled back to $HAVE_SHA (schema may be partially changed; see the log)"
+if ! apply_migrations "$NEW_RELEASE"; then
+  log "migration failed on ${WANT_SHA:0:8} - the site keeps ${HAVE_SHA:-<none>}"
+  if [ "$CREATED" = yes ]; then
+    git -C "$REPO_DIR" worktree remove --force "$NEW_RELEASE" \
+      || log "NOTE: could not remove $NEW_RELEASE - remove it by hand"
+  fi
+  fail "migration failed deploying $WANT_SHA - the site was never switched (schema may be partially changed; see the log)"
 fi
 
 # ---------------------------------------------------------------------------
-# Prove it still serves. Opcache revalidates on a 2s timestamp check, so give
-# it a moment before deciding the deploy broke something. A failure is rolled
-# back to HAVE_SHA - a broken commit left live is worse than a missed update.
+# Flip, then prove it still serves. Opcache revalidates on a 2s timestamp
+# check, so give it a moment before deciding the deploy broke something. A
+# smoke failure flips straight back to the previous release - one rename, no
+# git involved - and the failed release is kept for inspection.
 # ---------------------------------------------------------------------------
+flip_current "$NEW_RELEASE"
 sleep 3
 BAD=$(smoke)
 if [ -n "$BAD" ]; then
-  log "smoke failed on ${WANT_SHA:0:8}:$BAD - rolling back to ${HAVE_SHA:0:8}"
-  rollback_code
-  sleep 3
-  BACK=$(smoke)
-  [ -z "$BACK" ] \
-    || fail "deployed $WANT_SHA, smoke failed ($BAD), and the rollback to $HAVE_SHA is also unhealthy ($BACK)"
-  fail "deployed $WANT_SHA but the site does not serve correctly:$BAD - rolled back to $HAVE_SHA"
+  if [ -n "$PREV_RELEASE" ]; then
+    log "smoke failed on ${WANT_SHA:0:8}:$BAD - flipping back to ${HAVE_SHA:0:8}"
+    flip_current "$PREV_RELEASE"
+    sleep 3
+    BACK=$(smoke)
+    [ -z "$BACK" ] \
+      || fail "deployed $WANT_SHA, smoke failed ($BAD), and the flip back to $HAVE_SHA is also unhealthy ($BACK)"
+    fail "deployed $WANT_SHA but the site does not serve correctly:$BAD - flipped back to $HAVE_SHA (the release is kept at $NEW_RELEASE)"
+  fi
+  fail "smoke failed on ${WANT_SHA:0:8}:$BAD - and there is no previous release to fall back on"
 fi
 
 log "deployed $WANT_SHA - smoke passed"
 echo "deployed $WANT_SHA"
 
-apply_changelog
+apply_changelog "$(readlink -f "$CURRENT_LINK")"
 signal_mcp "$WANT_SHA"
+prune_releases "$(readlink -f "$CURRENT_LINK")" "$PREV_RELEASE"
 
-# The copy that runs lives outside the checkout on purpose: resetting the tree
-# under a running bash would let it read the second half of a different file.
-# The cost is that this script does not update itself - say so when it is stale.
+# The copy that runs lives outside the releases on purpose: bash reads a
+# script as it executes it, and a release may be pruned - or flipped away
+# from - under a running one. The cost is that this script does not update
+# itself - say so when it is stale.
 MINE="$(dirname "$0")/$(basename "$0")"
-THEIRS="$CHECKOUT/deploy/$(basename "$0")"
+THEIRS="$(readlink -f "$CURRENT_LINK")/deploy/$(basename "$0")"
 if [ -r "$THEIRS" ] && ! cmp -s "$MINE" "$THEIRS"; then
   log "NOTE: $MINE differs from $THEIRS - reinstall it with: cp $THEIRS $MINE"
-  echo "note: $MINE is out of date against the checkout" >&2
+  echo "note: $MINE is out of date against the current release" >&2
 fi

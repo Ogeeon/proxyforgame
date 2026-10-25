@@ -85,27 +85,47 @@
   }
 
   /**
-   * The commit the checkout is on, read straight out of .git rather than by
+   * The commit the site is on, read straight out of .git rather than by
    * shelling out to git - the web user has no business running commands, and
    * .git sits one level above the document root where it can still be read.
+   *
+   * That holds for a plain checkout (.git a directory) and for a release
+   * worktree (.git a file pointing at the worktree's metadata inside the bare
+   * store, "gitdir: <path>" - the pointer is followed and HEAD read from
+   * there). A worktree HEAD is always detached, so the sha is in HEAD itself.
    *
    * Returns NULL when there is no readable checkout, which is the normal
    * answer under `make serve` from a tarball or in a test fixture.
    */
   function healthDeployedCommit($root) {
       $git = $root . '/.git';
+      if (is_file($git)) {
+          $pointer = @file_get_contents($git);
+          if ($pointer !== false && preg_match('/^gitdir:[ \t]*(.+)$/', trim($pointer), $m) === 1) {
+              $dir = trim($m[1]);
+              if ($dir !== '' && preg_match('#^([A-Za-z]:[\\\\/]|/)#', $dir) !== 1) {
+                  // A relative pointer counts from the worktree root. An absolute
+                  // one is either /var/... on the host or D:/... under WAMP.
+                  $dir = $root . '/' . $dir;
+              }
+              $git = $dir;
+          }
+      }
+      $sha = null;
       $head = @file_get_contents($git . '/HEAD');
-      if ($head === false) {
-          return null;
+      if ($head !== false) {
+          $head = trim($head);
+          // Detached HEAD - the SHA is in the file itself. A worktree HEAD is
+          // always detached; a checked-out branch has to be resolved.
+          if (strpos($head, 'ref: ') !== 0) {
+              if (preg_match('/^[0-9a-f]{40}$/', $head) === 1) {
+                  $sha = $head;
+              }
+          } else {
+              $sha = healthResolveRef($git, substr($head, 5));
+          }
       }
-      $head = trim($head);
-
-      // Detached HEAD - the SHA is in the file itself.
-      if (strpos($head, 'ref: ') !== 0) {
-          return preg_match('/^[0-9a-f]{40}$/', $head) === 1 ? $head : null;
-      }
-
-      return healthResolveRef($git, substr($head, 5));
+      return $sha;
   }
 
   /**
