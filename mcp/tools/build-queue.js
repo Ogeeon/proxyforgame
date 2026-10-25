@@ -58,7 +58,7 @@ const inputSchema = {
         },
         universe: common.universeSchema,
         universeSpeed: common.universeSpeedSchema,
-        ionTechnology: common.level('Ion Technology level: cheaper demolition', 50),
+        ionTechnology: common.ionTechnologySchema,
     },
     required: ['queue'],
     additionalProperties: false,

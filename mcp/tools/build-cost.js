@@ -40,9 +40,6 @@ const TECH_COSTS = Object.fromEntries(Object.entries(TECHS.techs)
 
 const KIND = { 1: 'building', 2: 'building', 3: 'building', 4: 'research', 5: 'ship', 6: 'defence' };
 
-/** @param {string} what */
-const level = (what) => ({ type: 'integer', minimum: 0, maximum: 100, default: 0, description: what });
-
 const itemList = [...IDS.keys()].map((key) => `${key} (${NAMES[key] ?? key})`).join(', ');
 
 const inputSchema = {
@@ -64,57 +61,28 @@ const inputSchema = {
             type: 'integer', minimum: 1, maximum: 100_000_000,
             description: 'Ships and defence: how many to build.',
         },
-        onMoon: {
-            type: 'boolean', default: false,
-            description: 'Build on a moon. Moon-only buildings are always built there.',
+        location: {
+            type: 'string', enum: ['planet', 'moon'], default: 'planet',
+            description: 'Where it is built. Moon-only buildings are always built on the moon.',
         },
-        facilities: {
-            type: 'object',
-            description: 'Levels of the facilities that shorten the build, on the planet or moon it is built on.',
-            properties: {
-                roboticsFactory: level('Robotics Factory'),
-                naniteFactory: level('Nanite Factory (planets only)'),
-                shipyard: level('Shipyard'),
-                researchLab: {
-                    type: 'integer', minimum: 0, maximum: 100_000, default: 0,
-                    description: 'Research Lab level - with an Intergalactic Research Network, the combined '
-                        + 'level of the labs taking part.',
-                },
-            },
-            additionalProperties: false,
-        },
+        facilities: common.facilitiesSchema(['roboticsFactory', 'naniteFactory', 'shipyard', 'researchLab']),
         universe: common.universeSchema,
-        universeSpeed: { type: 'number', minimum: 1, maximum: 10, description: 'Economy speed. Default 1.' },
+        universeSpeed: common.universeSpeedSchema,
         researchSpeed: {
             type: 'number', minimum: 1, maximum: 100,
             description: 'Research speed - the economy speed times the universe\'s research divisor. '
-                + 'Defaults to universeSpeed.',
+                + 'Read from `universe` when given, else universeSpeed.',
         },
-        playerClass: { type: 'string', enum: ['none', 'collector', 'general', 'discoverer'], default: 'none' },
-        technocrat: { type: 'boolean', default: false, description: 'Technocrat officer: research 25% faster.' },
-        discovererClassBonus: {
-            type: 'number', minimum: 0, default: 0,
-            description: 'Kaelesh "Discoverer Enhancement" total in percent, as the life form panel shows it.',
-        },
-        ionTechnology: level('Ion Technology level: makes demolition cheaper.'),
-        hyperspaceTechnology: level('Hyperspace Technology level: for the cargo ships needed.'),
-        lifeforms: {
-            type: 'object',
-            description: 'Life form reductions, in percent, for this item.',
-            properties: {
-                researchCostReduction: { type: 'number', minimum: 0, maximum: 50, default: 0 },
-                researchTimeReduction: { type: 'number', minimum: 0, maximum: 99, default: 0 },
-                mineralResearchCentre: level('Rock\'tal Mineral Research Centre level: cheaper mines and power plants.'),
-                terraformerReduction: { type: 'number', minimum: 0, maximum: 50, default: 0 },
-            },
-            additionalProperties: false,
-        },
+        playerClass: common.playerClassSchema,
+        officers: { ...common.officersSchema, description: 'Officers hired. The Technocrat: research 25% faster.' },
+        ionTechnology: common.ionTechnologySchema,
+        hyperspaceTechnology: common.hyperspaceTechnologySchema,
+        lifeforms: common.lifeformsSchema(['itemCostReduction', 'itemTimeReduction', 'mineralResearchCentre',
+            'terraformerReduction', 'discovererClassBonus']),
     },
     required: ['item'],
     additionalProperties: false,
 };
-
-const CLASS_IDS = { none: -1, collector: 0, general: 1, discoverer: 2 };
 
 /**
  * The level range a request covers - from 0 to the quantity for ships and
@@ -160,11 +128,15 @@ function createBuildCostTool({ siteApi }) {
      * @param {any} args
      */
     async function speeds(args) {
+        const universeSpeed = await common.economySpeed(args, siteApi);
+        if (args.researchSpeed !== undefined) {
+            return { universeSpeed, researchSpeed: args.researchSpeed };
+        }
+        // The live universe's own research speed, its divisor included; the site API caches the read.
         const live = args.universe
             ? universeSpeeds(await siteApi.serverData(common.universeRef(args.universe)))
             : null;
-        const universeSpeed = args.universeSpeed ?? live?.universeSpeed ?? 1;
-        return { universeSpeed, researchSpeed: args.researchSpeed ?? live?.researchSpeed ?? universeSpeed };
+        return { universeSpeed, researchSpeed: live?.researchSpeed ?? universeSpeed };
     }
 
     return {
@@ -182,7 +154,7 @@ function createBuildCostTool({ siteApi }) {
             const kind = KIND[/** @type {keyof typeof KIND} */ (tech.type)];
             const isUnit = kind === 'ship' || kind === 'defence';
             const { from, to } = buildRange(args, id, kind);
-            const onMoon = tech.type === 3 || args.onMoon;
+            const onMoon = tech.type === 3 || args.location === 'moon';
             if (onMoon && tech.type === 2) {
                 throw new ToolError(`The ${NAMES[args.item]} cannot be built on a moon.`);
             }
@@ -198,16 +170,17 @@ function createBuildCostTool({ siteApi }) {
             params.shipyardLevel = args.facilities.shipyard;
             params.universeSpeed = universeSpeed;
             params.researchSpeed = researchSpeed;
-            params.playerClass = CLASS_IDS[/** @type {keyof typeof CLASS_IDS} */ (args.playerClass)];
-            params.technocrat = args.technocrat;
-            params.discovererClassBonus = args.discovererClassBonus;
+            params.playerClass = common.classId(args.playerClass);
+            Object.assign(params, args.officers);
             params.ionTechLevel = args.ionTechnology;
             params.hyperTechLevel = args.hyperspaceTechnology;
-            const lf = args.lifeforms ?? {};
-            params.lfResCostRdcMap = { [id]: lf.researchCostReduction ?? 0 };
-            params.lfResTimeRdcMap = { [id]: lf.researchTimeReduction ?? 0 };
-            params.mineralResCntrLvl = lf.mineralResearchCentre ?? 0;
-            params.lfTerraformerRdc = lf.terraformerReduction ?? 0;
+            const lf = args.lifeforms;
+            params.discovererClassBonus = lf.discovererClassBonus;
+            // The costs page keys these by research; the tool's reductions are the requested item's.
+            params.lfResCostRdcMap = { [id]: lf.itemCostReduction };
+            params.lfResTimeRdcMap = { [id]: lf.itemTimeReduction };
+            params.mineralResCntrLvl = lf.mineralResearchCentre;
+            params.lfTerraformerRdc = lf.terraformerReduction;
 
             if (kind === 'research' && !calculator.isResearchable(id, params)) {
                 throw new ToolError(`${NAMES[args.item]} needs a Research Lab of level `

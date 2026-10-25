@@ -112,6 +112,16 @@ describe('MCP protocol', () => {
         }
     });
 
+    it('keeps tools/list within its size budget', async () => {
+        // Every client loads the tool list into its model's context (mcp/README.md). Going over
+        // the budget is a deliberate decision that raises it here, in the same commit.
+        const BUDGET = 52 * 1024;
+        const { tools } = (await rpc(protocol, { jsonrpc: '2.0', id: 3, method: 'tools/list' })).result;
+        const size = tools.reduce((sum, { name, title, description, inputSchema }) =>
+            sum + JSON.stringify({ name, title, description, inputSchema }).length, 0);
+        expect(size).toBeLessThanOrEqual(BUDGET);
+    });
+
     it('reports an unknown tool as a protocol error', async () => {
         const answer = await rpc(protocol, { jsonrpc: '2.0', id: 4, method: 'tools/call', params: { name: 'nope' } });
         expect(answer.error.code).toBe(-32602);
@@ -436,6 +446,32 @@ describe('MCP tool ogame_build_cost', () => {
         expect(await seconds(9)).toBe(Math.round((37515 + 75031) / 10000 * 3600));
     });
 
+    it('makes research 25% faster with officers.technocrat', async () => {
+        const seconds = async (officers) => (await call(protocolWith(), 'ogame_build_cost', {
+            item: 'astrophysics', fromLevel: 4, toLevel: 5, facilities: { researchLab: 3 }, officers,
+        })).structuredContent.durationSeconds;
+        expect(await seconds({ technocrat: true })).toBe(Math.round((37515 + 75031) / 4000 * 3600 * 0.75));
+        expect(await seconds({ engineer: true })).toBe(await seconds({}));
+    });
+
+    it('caps the research levels at 50, as every tool does', async () => {
+        const result = await call(protocolWith(), 'ogame_build_cost', {
+            item: 'metal-mine', toLevel: 1, hyperspaceTechnology: 51, ionTechnology: 51,
+        });
+        expect(result.content[0].text).toContain('arguments.hyperspaceTechnology must be at most 50');
+        expect(result.content[0].text).toContain('arguments.ionTechnology must be at most 50');
+    });
+
+    it('takes the life form reductions for the item asked about', async () => {
+        const out = async (lifeforms) => (await call(protocolWith(), 'ogame_build_cost', {
+            item: 'astrophysics', fromLevel: 4, toLevel: 5, facilities: { researchLab: 3 }, lifeforms,
+        })).structuredContent;
+        const plain = await out({});
+        const reduced = await out({ itemCostReduction: 10, itemTimeReduction: 20 });
+        expect(reduced.metal).toBe(Math.floor(plain.metal * 0.9));
+        expect(reduced.durationSeconds).toBeLessThan(plain.durationSeconds);
+    });
+
     it('refuses a research when the lab is 0, rather than making one up', async () => {
         const result = await call(protocolWith(), 'ogame_build_cost', { item: 'astrophysics', toLevel: 1, facilities: { researchLab: 0 } });
         expect(result.isError).toBe(true);
@@ -459,7 +495,7 @@ describe('MCP tool ogame_build_cost', () => {
     it('keeps moon buildings on the moon and planet buildings off it', async () => {
         const phalanx = (await call(protocolWith(), 'ogame_build_cost', { item: 'sensor-phalanx', toLevel: 1 })).structuredContent;
         expect(phalanx.location).toBe('moon');
-        const mine = await call(protocolWith(), 'ogame_build_cost', { item: 'metal-mine', toLevel: 1, onMoon: true });
+        const mine = await call(protocolWith(), 'ogame_build_cost', { item: 'metal-mine', toLevel: 1, location: 'moon' });
         expect(mine.isError).toBe(true);
     });
 
@@ -511,8 +547,9 @@ describe('MCP tool ogame_graviton', () => {
         const out = (await call(protocolWith(site), 'ogame_graviton', {
             universe: { country: 'en', number: 5 },
             maxTemperature: 40, solarPlant: { level: 30 }, fusionReactor: { level: 20, percent: 80 },
-            solarSatellites: { count: 100 }, energyTechnology: 20, officers: 'all', playerClass: 'collector',
-            energyBoosterPercent: 40, shipyard: 12, naniteFactory: 5, crystalAvailable: 1000000,
+            solarSatellites: { count: 100 }, energyTechnology: 20, playerClass: 'collector',
+            officers: { commander: true, admiral: true, engineer: true, geologist: true, technocrat: true },
+            energyBoosterPercent: 40, facilities: { shipyard: 12, naniteFactory: 5 }, crystalAvailable: 1000000,
         })).structuredContent;
         const direct = new GravitonCalculator().compute({
             shipyardLevel: 12, nanitesFactoryLevel: 5, universeSpeed: 4, energyTechLevel: 20, hyperTechLevel: 0,
@@ -528,6 +565,28 @@ describe('MCP tool ogame_graviton', () => {
         expect(out.ifShotDown.debris.deuterium).toBe(direct.dfDeuterium);
         expect(out.ifShotDown.debrisPercent).toBe(50);
         expect(out.universeSpeed).toBe(4);
+    });
+
+    it('reads the officers\' energy bonus off the five flags: the Engineer alone, or the whole staff', async () => {
+        const planet = { maxTemperature: 40, solarPlant: { level: 30 }, energyTechnology: 20 };
+        const officersBonus = async (officers) => (await call(protocolWith(), 'ogame_graviton', { ...planet, officers }))
+            .structuredContent.energyAvailable.officers;
+        const direct = (energyBonus) => new GravitonCalculator().compute({
+            shipyardLevel: 0, nanitesFactoryLevel: 0, universeSpeed: 1, energyTechLevel: 20, hyperTechLevel: 0,
+            maxPlanetTemp: 40, energyBonus, solarPlantLevel: 30, solarPlantPercent: 100, fusionPlantLevel: 0,
+            fusionPlantPercent: 100, solarSatellitesCount: 0, solarSatellitesPercent: 100, debrisPercent: 30,
+            playerClass: 0, isTrader: false, energyBoost: 0, disChLevel: 0, gravitonLevel: 1, totalLFEnrgBonus: 0,
+            scCapacityIncrease: 0, lcCapacityIncrease: 0, rcCapacityIncrease: 0, crysAvailable: 0,
+            deutAvailable: 0, deutInDebris: false,
+        }).officerBonus;
+        const staff = { commander: true, admiral: true, engineer: true, geologist: true, technocrat: true };
+        expect(await officersBonus({})).toBe(0);
+        expect(await officersBonus({ geologist: true })).toBe(0);
+        expect(await officersBonus({ engineer: true })).toBe(direct(1));
+        // Four of five, the Engineer among them, is still only the Engineer.
+        expect(await officersBonus({ ...staff, technocrat: false })).toBe(direct(1));
+        expect(await officersBonus(staff)).toBe(direct(2));
+        expect(direct(2)).toBeGreaterThan(direct(1));
     });
 
     it('says so when satellites cannot help', async () => {
@@ -552,7 +611,7 @@ describe('MCP tool ogame_terraformer', () => {
         const facilities = { roboticsFactory: 10, naniteFactory: 3 };
         const both = async (fromLevel, toLevel) => {
             const tf = (await call(protocolWith(), 'ogame_terraformer', {
-                fromLevel, toLevel, ...facilities, universeSpeed: 3, terraformerReduction: 20,
+                fromLevel, toLevel, facilities, universeSpeed: 3, lifeforms: { terraformerReduction: 20 },
                 solarPlant: { level: 30 }, maxTemperature: 40,
             })).structuredContent.terraformer;
             const bc = (await call(protocolWith(), 'ogame_build_cost', {
@@ -575,7 +634,7 @@ describe('MCP tool ogame_terraformer', () => {
     });
 
     it('caps the life form Terraformer reduction at 50%', async () => {
-        const result = await call(protocolWith(), 'ogame_terraformer', { toLevel: 1, terraformerReduction: 60 });
+        const result = await call(protocolWith(), 'ogame_terraformer', { toLevel: 1, lifeforms: { terraformerReduction: 60 } });
         expect(result.isError).toBe(true);
     });
 
@@ -620,6 +679,13 @@ describe('MCP tool ogame_expedition', () => {
             .structuredContent.fleetCargoCapacity;
         expect(await cap('none')).toBe(200000);
         expect(await cap('general')).toBe(240000);
+    });
+
+    it('raises the resource find with discoveryBoosterPercent', async () => {
+        const metal = async (discoveryBoosterPercent) => (await call(protocolWith(), 'ogame_expedition', {
+            ships: { 'large-cargo': 1000 }, discoveryBoosterPercent,
+        })).structuredContent.maxFind.metal;
+        expect(await metal(20)).toBeGreaterThan(await metal(0));
     });
 
     it('lists only the ships the fleet unlocks', async () => {
@@ -668,13 +734,46 @@ describe('MCP moon tools', () => {
         expect(out.assumptions.defenceDebrisPercent).toBe(0);
     });
 
+    it('ogame_moon_creation: gives a General\'s recyclers 20% more hold', async () => {
+        const capacity = async (playerClass) => (await call(protocolWith(), 'ogame_moon_creation', {
+            destroyed: { 'light-fighter': 2000 }, playerClass,
+        })).structuredContent.recyclerCapacity;
+        expect(await capacity('none')).toBe(20000);
+        expect(await capacity('discoverer')).toBe(20000);
+        expect(await capacity('general')).toBe(24000);
+    });
+
+    it('ogame_phalanx: gives the Discoverer class its range bonus, and no other class', async () => {
+        const { MoonCalculator } = load(['js/utils.js', 'ogame/calc/js/moon-core.js'], ['MoonCalculator']);
+        const range = async (playerClass) => (await call(protocolWith(), 'ogame_phalanx', {
+            phalanxLevel: 7, moonSystem: 100, playerClass,
+        })).structuredContent.rangeSystems;
+        const direct = (isDiscoverer) => new MoonCalculator().computePhalanx({
+            phalanxLevel: 7, phalanxRangeBonus: 0, isDiscoverer, discovererBonus: 0, ownSystem: 100,
+            targetSystem: 100, circularSystems: false, numberOfSystems: 499,
+        }).phalanxRange;
+        expect(await range('collector')).toBe(direct(false));
+        expect(await range('discoverer')).toBe(direct(true));
+        expect(direct(true)).toBeGreaterThan(direct(false));
+    });
+
     it('ogame_phalanx: wraps round a circular galaxy and names the level a target needs', async () => {
         const out = (await call(protocolWith(), 'ogame_phalanx', {
-            phalanxLevel: 7, moonSystem: 5, targetSystem: 470, circularSystems: true,
+            phalanxLevel: 7, moonSystem: 5, targetSystem: 470, universeSettings: { circularSystems: true },
         })).structuredContent;
         expect(out.rangeSystems).toBe(48);
         expect(out.covers).toEqual([{ from: 456, to: 499 }, { from: 1, to: 53 }]);
         expect(out.target).toEqual({ system: 470, distance: 34, inRange: true, levelNeeded: 6 });
+    });
+
+    it('ogame_phalanx: reads the galaxy shape from a live universe, and lets universeSettings win', async () => {
+        const site = fakeSiteApi({ 'en-3': { systems: '400', donutSystem: '1' } });
+        const galaxy = async (universeSettings) => (await call(protocolWith(site), 'ogame_phalanx', {
+            phalanxLevel: 7, moonSystem: 5, universe: { country: 'en', number: 3 }, universeSettings,
+        })).structuredContent.galaxy;
+        expect(await galaxy({})).toEqual({ systems: 400, circular: true });
+        expect(await galaxy({ circularSystems: false })).toEqual({ systems: 400, circular: false });
+        expect(await galaxy({ systems: 499, circularSystems: false })).toEqual({ systems: 499, circular: false });
     });
 });
 
@@ -686,7 +785,7 @@ describe('MCP tool ogame_lifeform_cost', () => {
 
     it('applies the Megalith to a Rock\'tal building the way the page does', async () => {
         const out = (await call(protocolWith(), 'ogame_lifeform_cost', {
-            item: 'Megalith', fromLevel: 5, toLevel: 6, megalith: 5, roboticsFactory: 10,
+            item: 'Megalith', fromLevel: 5, toLevel: 6, lifeforms: { megalith: 5 }, facilities: { roboticsFactory: 10 },
         })).structuredContent;
         const techs = readWwwJson('ogame/calc/data/lf-techs.json');
         const costs = Object.fromEntries(Object.entries(techs).map(([id, row]) => [id, row.slice(2)]));
@@ -751,7 +850,7 @@ describe('MCP tool ogame_production', () => {
 
     it('lets a Magma Forge raise the metal output', async () => {
         const plain = (await call(protocolWith(), 'ogame_production', base)).structuredContent;
-        const forge = (await call(protocolWith(), 'ogame_production', { ...base, lifeformBuildings: { 'magma-forge': 10 } })).structuredContent;
+        const forge = (await call(protocolWith(), 'ogame_production', { ...base, lifeforms: { buildings: { 'magma-forge': 10 } } })).structuredContent;
         // 2% per level of the mine's output
         expect(forge.breakdownPerHour.lifeformBuildings.metal).toBe(Math.round(plain.breakdownPerHour.mines.metal * 0.2));
     });
@@ -761,9 +860,78 @@ describe('MCP tool ogame_production', () => {
         expect(out.note).toContain('Only 600 crawlers');
     });
 
+    it('gives the commanding staff bonus for all five officers only', async () => {
+        const staff = { commander: true, admiral: true, engineer: true, geologist: true, technocrat: true };
+        const row = async (officers) => (await call(protocolWith(), 'ogame_production', { ...base, officers }))
+            .structuredContent.breakdownPerHour;
+        expect((await row({ ...staff, admiral: false })).commandingStaff.metal).toBe(0);
+        const full = await row(staff);
+        expect(full.commandingStaff.metal).toBeGreaterThan(0);
+        expect(full.geologist.metal).toBeGreaterThan(0);
+    });
+
+    it('gives the alliance Trader bonus to the trader class only', async () => {
+        const alliance = async (allianceClass) => (await call(protocolWith(), 'ogame_production', { ...base, allianceClass }))
+            .structuredContent.breakdownPerHour.allianceClass;
+        expect((await alliance('none')).metal).toBe(0);
+        expect((await alliance('warrior')).metal).toBe(0);
+        const plain = (await call(protocolWith(), 'ogame_production', base)).structuredContent;
+        // +5% of the mines' output
+        expect((await alliance('trader')).metal).toBe(Math.round(plain.breakdownPerHour.mines.metal * 0.05));
+    });
+
     it('refuses buildings of two races on one planet', async () => {
-        const result = await call(protocolWith(), 'ogame_production', { lifeformBuildings: { 'magma-forge': 1, 'high-en-smelt': 1 } });
+        const result = await call(protocolWith(), 'ogame_production', { lifeforms: { buildings: { 'magma-forge': 1, 'high-en-smelt': 1 } } });
         expect(result.isError).toBe(true);
+    });
+});
+
+describe('MCP lifeforms.shipBonuses', () => {
+    const cargo = (ship, percent) => ({ lifeforms: { shipBonuses: { [ship]: { cargo: percent } } } });
+
+    it('raises a ship\'s hold in ogame_flight', async () => {
+        const out = (await call(protocolWith(), 'ogame_flight', {
+            from: { galaxy: 1, system: 1, position: 1 }, to: { galaxy: 1, system: 2, position: 1 },
+            ships: { 'large-cargo': 100 }, speedPercent: 100, ...cargo('large-cargo', 10),
+        })).structuredContent;
+        expect(out.cargoCapacity).toBe(100 * 27500);
+    });
+
+    it('raises a ship\'s hold in ogame_trade, ogame_moon_creation and ogame_expedition', async () => {
+        const trade = async (extra) => (await call(protocolWith(), 'ogame_trade', {
+            sell: { metal: 2750000 }, buy: 'crystal', ...extra,
+        })).structuredContent.cargoShips.toDeliverSold.largeCargo;
+        expect(await trade({})).toBe(110);
+        expect(await trade(cargo('large-cargo', 10))).toBe(100);
+
+        const moon = (await call(protocolWith(), 'ogame_moon_creation', {
+            destroyed: { 'light-fighter': 2000 }, ...cargo('recycler', 10),
+        })).structuredContent;
+        expect(moon.recyclerCapacity).toBe(22000);
+
+        const expedition = async (extra) => (await call(protocolWith(), 'ogame_expedition', {
+            ships: { recycler: 10 }, ...extra,
+        })).structuredContent.fleetCargoCapacity;
+        expect(await expedition(cargo('recycler', 10))).toBe(await expedition({}) + 10 * 2000);
+    });
+
+    it('ignores the life form fields and ships a tool does not read', async () => {
+        const trade = async (lifeforms) => (await call(protocolWith(), 'ogame_trade', {
+            sell: { metal: 2750000 }, buy: 'crystal', lifeforms,
+        })).structuredContent.cargoShips.toDeliverSold.largeCargo;
+        // The whole account block, as ogame_import_account returns it
+        const block = {
+            metalBonus: 4.2, collectorClassBonus: 12, megalith: 3,
+            shipBonuses: { 'large-cargo': { cargo: 10 }, cruiser: { speed: 5, cargo: 3 } },
+        };
+        expect(await trade(block)).toBe(await trade(cargo('large-cargo', 10).lifeforms));
+    });
+
+    it('still checks the fields a tool reads, and the top level', async () => {
+        const bad = await call(protocolWith(), 'ogame_trade', { sell: { metal: 1 }, buy: 'crystal', ...cargo('large-cargo', -5) });
+        expect(bad.isError).toBe(true);
+        const typo = await call(protocolWith(), 'ogame_trade', { sell: { metal: 1 }, buy: 'crystal', lifeform: {} });
+        expect(typo.isError).toBe(true);
     });
 });
 

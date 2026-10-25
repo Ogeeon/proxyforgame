@@ -32,11 +32,35 @@ for s152-en - and read its speeds and settings through the site's `serverdata` a
 overrides what is read. The input schemas in `tools/*.js` are the reference: the
 server validates every call against the schema it publishes.
 
-Everything all twelve publish in `tools/list` comes to about 50 KB - every client loads it
-into its model's context, so keep new schemas lean: write a map from ships or buildings to
-a value with `keyedMap()` rather than one property per key, and list an item's keys with
-their names in the description once instead of as an enum (`resolveKey()` then accepts
-either).
+Everything all twelve publish in `tools/list` comes to about 51.5 KB, held to a 52 KB budget
+by a test in `unit-tests/mcp-server.test.js` - every client loads it into its model's
+context, so keep new schemas lean: write a map from ships or buildings to a value with
+`keyedMap()` rather than one property per key, list an item's keys with their names in the
+description once instead of as an enum (`resolveKey()` then accepts either), and keep
+descriptions short. Going over the budget is a deliberate decision that raises it in the
+same commit.
+
+## One name and shape per game concept
+
+A concept the game has once is one argument, with the same name and shape in every tool
+that takes it, from one schema in `tools/common.js`; a tool takes the subset its calculator
+reads. `lifeforms` alone ignores the fields and ships a tool does not read (the ones it reads
+are still checked), so one block serves every tool. The account import is meant to produce these forms, so a new tool reuses them
+rather than inventing its own.
+
+| Concept | Argument | Taken by |
+|---|---|---|
+| Player class | `playerClass`: `none` \| `collector` \| `general` \| `discoverer` | every tool that has a class rule |
+| Alliance class | `allianceClass`: `none` \| `trader` \| `warrior` | flight, production, graviton, terraformer |
+| Officers | `officers: {commander, admiral, engineer, geologist, technocrat}`, booleans. The commanding staff is all five set - there is no flag of its own | build-cost, production, graviton, terraformer |
+| Life forms | `lifeforms`: one object with every life form bonus (percent, as the game shows it) and building level - `metalBonus`, `energyBonus`, `collectorClassBonus` / `generalClassBonus` / `discovererClassBonus`, `terraformerReduction`, `megalith`, `disruptionChamber`, ...; per ship `shipBonuses[ship-key].{speed, cargo, fuel}` with the kebab ship keys of the cores; production's buildings as `lifeforms.buildings` | every tool with a life form input |
+| Item vs research reductions | build-cost `lifeforms.itemCostReduction` / `itemTimeReduction` (the item asked about); lifeform-cost `lifeforms.researchCostReduction` / `researchTimeReduction` (life form research) - different things, kept apart | build-cost, lifeform-cost |
+| Facilities | `facilities.{roboticsFactory, naniteFactory, shipyard, researchLab}` | build-cost, lifeform-cost, graviton, terraformer; build-queue keeps its keyed `levels` |
+| Plants | `maxTemperature`, `solarPlant`, `fusionReactor`, `solarSatellites` | production, graviton, terraformer |
+| Research | `hyperspaceTechnology`, `ionTechnology`, max 50 | wherever cargo or demolition is computed |
+| Boosters | `energyBoosterPercent`; expedition's `discoveryBoosterPercent` is the expedition booster, not the mine one | production, graviton, terraformer, expedition |
+| Universe | `universe: {country, number}`, `universeSpeed`; flight and phalanx override the galaxy shape in `universeSettings` | most |
+| Planet or moon | `location`: `planet` \| `moon` | build-cost, build-queue |
 
 `ogame_production` is the one tool whose core reads page-wide state: `production-core.js`
 takes its settings from the `options` object `production.tpl` declares. The tool builds that
@@ -96,4 +120,4 @@ node mcp/server.js --stdio        # one client over stdin/stdout
 | `lib/browser-scripts.js` | Runs `www/` scripts in a `vm` context - shared with the unit tests |
 | `lib/site-api.js` | Reads universe data from the site, with a short cache |
 | `lib/revision.js` | The checkout's commit, for the version string |
-| `tools/common.js` | Shared argument schemas: universe, levels, maps, the planet energy inputs |
+| `tools/common.js` | Shared argument schemas: universe, levels, maps, the planet energy inputs, and one schema per game concept |

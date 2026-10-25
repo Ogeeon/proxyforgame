@@ -17,8 +17,8 @@ const inputSchema = {
     properties: {
         gravitonLevel: { type: 'integer', minimum: 1, maximum: 10, default: 1, description: 'Graviton Technology level to research.' },
         ...common.energySchema,
-        shipyard: common.level('Shipyard level: satellite build time'),
-        naniteFactory: common.level('Nanite Factory level: satellite build time'),
+        lifeforms: common.lifeformsSchema(common.ENERGY_LIFEFORMS, common.ENERGY_SHIPS),
+        facilities: common.facilitiesSchema(['shipyard', 'naniteFactory']),
         universe: common.universeSchema,
         universeSpeed: common.universeSpeedSchema,
         ...common.debrisSchema,
@@ -47,8 +47,8 @@ function createGravitonTool({ siteApi }) {
             const debris = await common.debrisSettings(args, siteApi);
             const r = calc.compute({
                 ...common.energyParams(args),
-                shipyardLevel: args.shipyard,
-                nanitesFactoryLevel: args.naniteFactory,
+                shipyardLevel: args.facilities.shipyard,
+                nanitesFactoryLevel: args.facilities.naniteFactory,
                 universeSpeed,
                 gravitonLevel: args.gravitonLevel,
                 debrisPercent: debris.debrisPercent,
