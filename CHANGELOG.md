@@ -15,6 +15,8 @@ release section; it is the source of truth for the other eleven translations.
 
 ## [Unreleased]
 
+## [2026-10-25] - site entry 69
+
 ### Added
 
 - Production: an "Amortisation of Life Form buildings and researches" table on the All planets tab ranks one more level of every Life Form building and research that raises resource production by its payback time - the question the plasma table answers, asked of the life forms. A building counts on its own planet, with the levels saved for it from the One planet tab and the Megalith discount for Rock'tal; a research counts on every planet. The gain is measured against the planets' current production, energy included. The Life Forms parameters tab gets the research levels, an "available" checkbox per research - a research slot holds one race's research, so the others in it are left out - the technology bonus that amplifies their gain and the research cost reduction. <!-- site -->
@@ -25,7 +27,9 @@ release section; it is the source of truth for the other eleven translations.
 - Profiles: an account export PfG Companion delivers while a calculator is open now shows in that calculator at once when it updates the active profile; until now the profile was updated in storage, but the page kept the old game values until it was reloaded.
 - Profiles: a universe setting picked by hand instead of the game's — economy speed, debris shares, galaxy size and the like — now counts in the badge of values that differ from the game, and the badge's dialog lists it under "Universe" and restores it; until now only the profile's own values were counted, so the badge stayed hidden or undercounted while such a setting differed.
 - Profiles: the production calculator's own settings — its display options such as the additional information and the one-planet view, and the economy speed of a profile with no universe — are now the same whether or not a profile is active, as in the other calculators; until now production kept a separate copy of them for profiles, so a change made with a profile active was not there under "no profile". That copy is taken over once, the first time a profile is shown.
-- Costs: a range of levels under a life-form reduction - the research cost and time reductions, the Mineral Research Centre and the Terraformer reduction - is now the sum of its levels, each reduced and rounded down on its own, as the game charges one level at a time. The reduction used to be applied to the range's total and rounded once, which could come out a unit of resources or a second per level higher than the game, and a Terraformer range differed from the terraformer calculator (levels 4 to 7 by one second). A single level is unchanged. <!-- site -->
+- Costs: a range of levels under a life-form reduction - the research cost and time reductions, the Mineral Research Centre and the Terraformer reduction - is now the sum of its levels, each reduced and rounded down on its own, as the game charges one level at a time. The reduction used to be applied to the range's total and rounded once, which could come out a unit of resources or a second per level higher than the game, and a Terraformer range differed from the terraformer calculator (levels 4 to 7 by one second). A single level is unchanged.
+
+> **RU:** В Калькуляторе производства на вкладке «Все планеты» появилась таблица «Окупаемость построек и исследований Форм Жизни». Она показывает, какие уровни построек и исследований Форм жизни, повышающих добычу, быстрее всего окупаются. Постройка учитывается на своей планете, для построек Рок’тал — со скидкой Мегалита. Исследование учитывается на всех планетах. Уровни исследований, доступность в слоте, технологический бонус и снижение стоимости исследований задаются на вкладке «Формы жизни» параметров.
 
 ## [2026-10-19] - site entry 68
 
