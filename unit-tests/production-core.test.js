@@ -12,9 +12,9 @@ const { expect } = require('./expect');
 
 const ctx = load(
     ['ogame/calc/js/production-core.js'],
-    ['createEmptyPlanet', 'isPlnEmpty', 'mineSlot', 'PLANET_TEMP', 'PLANET_POS', 'PLANET_RACE', 'PLANET_LF_LEVELS'],
+    ['createEmptyPlanet', 'isPlnEmpty', 'mineSlot', 'PLANET_TEMP', 'PLANET_POS', 'PLANET_RACE', 'PLANET_LF_LEVELS', 'lfResearchIncrease', 'lfBuildingUpgradeLevels', 'lfBuildingCostReduction'],
 );
-const { createEmptyPlanet, isPlnEmpty } = ctx;
+const { createEmptyPlanet, isPlnEmpty, lfResearchIncrease, lfBuildingUpgradeLevels, lfBuildingCostReduction } = ctx;
 
 // The functions read the planet through the shared `options` object the page
 // builds in production.tpl; a bare aPS holder is all they touch.
@@ -83,6 +83,68 @@ describe('isPlnEmpty', () => {
     it('treats a planet saved before the life form fields as empty', () => {
         let planet = createEmptyPlanet().slice(0, 24);
         expect(check(planet)).toBe(true);
+    });
+});
+
+// The LF amortization table on the All planets tab ranks one more level of each
+// production research by payback. The gain is linear in the level, so it comes
+// straight from the mines' output rather than from a second production pass.
+describe('lfResearchIncrease', () => {
+    // [metal mine, crystal mine, deuterium synthesizer] per planet
+    const mines = [[21200, 9000, 4000], [10000, 5000, 2500]];
+
+    it('adds base% of every planet\'s mine output, rounded per planet', () => {
+        // High-Performance Extractors: 0.06% of all three resources
+        const bonus = { met: [0.06, 1, null], cry: [0.06, 1, null], deu: [0.06, 1, null] };
+        // 21200*0.0006 = 12.72 -> 13, 10000*0.0006 = 6; 5.4 -> 5, 3; 2.4 -> 2, 1.5 -> 2
+        expect(lfResearchIncrease(mines, bonus, 0)).toEqual([19, 8, 4]);
+    });
+
+    it('touches only the resources the research boosts', () => {
+        // Acoustic Scanning: crystal 0.08%
+        expect(lfResearchIncrease(mines, { cry: [0.08, 1, null] }, 0)).toEqual([0, 11, 0]);
+    });
+
+    it('is amplified by the technology bonus', () => {
+        // Depth Sounding, metal 0.08%, with a 50% technology bonus:
+        // 21200*0.0012 = 25.44 -> 25, 10000*0.0012 = 12
+        expect(lfResearchIncrease(mines, { met: [0.08, 1, null] }, 50)).toEqual([37, 0, 0]);
+    });
+
+    it('gains nothing without mines', () => {
+        expect(lfResearchIncrease([], { met: [0.08, 1, null] }, 50)).toEqual([0, 0, 0]);
+        expect(lfResearchIncrease([[0, 0, 0]], { met: [0.08, 1, null] }, 0)).toEqual([0, 0, 0]);
+    });
+});
+
+describe('lfBuildingUpgradeLevels', () => {
+    it('raises one building and leaves the planet untouched', () => {
+        const levels = [0, 0, 0, 0, 0, 7, 0, 3, 0, 0, 0, 0];
+        const upgraded = lfBuildingUpgradeLevels(levels, 5);
+        expect(upgraded[5]).toBe(8);
+        expect(upgraded[7]).toBe(3);
+        expect(levels[5]).toBe(7);
+    });
+
+    it('reads levels stored as strings or left blank as numbers', () => {
+        const upgraded = lfBuildingUpgradeLevels(['4', '', undefined], 0);
+        expect(upgraded[0]).toBe(5);
+        expect(upgraded[1]).toBe(0);
+        expect(upgraded[2]).toBe(0);
+    });
+});
+
+describe('lfBuildingCostReduction', () => {
+    const levels = [0, 0, 0, 0, 0, 0, 0, 12, 0, 0, 0, 0]; // Megalith (position 8) at 12
+
+    it('gives Rock\'tal buildings 1% per Megalith level', () => {
+        expect(lfBuildingCostReduction(2, levels)).toBeCloseTo(0.12, 10);
+    });
+
+    it('gives the other races nothing', () => {
+        expect(lfBuildingCostReduction(1, levels)).toBe(0);
+        expect(lfBuildingCostReduction(3, levels)).toBe(0);
+        expect(lfBuildingCostReduction(4, levels)).toBe(0);
     });
 });
 

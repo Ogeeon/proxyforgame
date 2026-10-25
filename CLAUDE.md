@@ -196,7 +196,7 @@ SDK: `docs/adr/0005-mcp-node-service.md`.
 | `www/db.connect.inc.php` | Database connection helpers |
 | `www/ogame/calc/js/ogame-production.js` | Production rates, consumption, storage capacity (costs, production) |
 | `www/ogame/calc/js/ogame-costs.js` | Classic build cost/time, demolition, halving cost (costs, production, queue, terraformer, lfcosts) |
-| `www/ogame/calc/js/ogame-lifeform.js` | Life Form cost/time (lfcosts only) |
+| `www/ogame/calc/js/ogame-lifeform.js` | Life Form cost/time (lfcosts, production) |
 | `www/ogame/calc/js/dom-utils.js` | Native DOM helpers (the jQuery replacement) |
 | `www/ogame/calc/js/own-api.js` | Normalizes OGame's API 2 export (`flight`, `expeditions`) |
 

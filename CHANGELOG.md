@@ -17,6 +17,7 @@ release section; it is the source of truth for the other eleven translations.
 
 ### Added
 
+- Production: an "Amortisation of Life Form buildings and researches" table on the All planets tab ranks one more level of every Life Form building and research that raises resource production by its payback time - the question the plasma table answers, asked of the life forms. A building counts on its own planet, with the levels saved for it from the One planet tab and the Megalith discount for Rock'tal; a research counts on every planet. The gain is measured against the planets' current production, energy included. The Life Forms parameters tab gets the research levels, an "available" checkbox per research - a research slot holds one race's research, so the others in it are left out - the technology bonus that amplifies their gain and the research cost reduction. <!-- site -->
 - MCP server: every calculator is available to LLM clients - ChatGPT, Claude and other Model Context Protocol clients - at `https://proxyforgame.com/mcp`, as twelve tools: flight, build cost, life form cost, build queue, production, expedition, moon destruction, moon creation, sensor phalanx, graviton, terraformer and trade. Most can read a live universe's settings. They compute with the calculators' own formulas.
 
 ### Fixed

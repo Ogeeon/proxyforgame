@@ -275,6 +275,61 @@ function lfBuildingEffects(race, levels) {
 	return eff;
 }
 
+// Position of the Megalith in a Rock'tal planet's building levels (id 2008)
+const LF_MEGALITH_POS = 7;
+
+/**
+ * Copy of a planet's positional life form building levels with one building
+ * raised by a level - the planet as it would be after that upgrade.
+ * @param {number[]} levels - index 0 is the race's first building
+ * @param {number} pos - index of the building to raise
+ * @returns {number[]}
+ */
+function lfBuildingUpgradeLevels(levels, pos) {
+	let upgraded = levels.map(function (v) { return Number(v) || 0; });
+	upgraded[pos] = (upgraded[pos] || 0) + 1;
+	return upgraded;
+}
+
+/**
+ * Cost reduction of a life form building on a planet, as a fraction. Only the
+ * Megalith counts here: 1% per level on every Rock'tal building. The Mineral
+ * Research Centre discounts the mines, never a life form building (see
+ * computeBldCostRdc in lfcosts-core.js).
+ * @param {number} race
+ * @param {number[]} levels - the planet's positional building levels
+ * @returns {number}
+ */
+function lfBuildingCostReduction(race, levels) {
+	return race === 2 ? 0.01 * (Number(levels[LF_MEGALITH_POS]) || 0) : 0;
+}
+
+/**
+ * Hourly production gain of one more level of a life form research. Every
+ * production research grows linearly, so the gain does not depend on the
+ * current level: each planet gets base% of its mines' output, amplified by
+ * the life form technology bonus - on the same base and with the same per-row
+ * rounding as the "Life form tech bonus" row of calculateProduction.
+ * @param {number[][]} minePerPlanet - [metal mine, crystal mine, deuterium
+ *   synthesizer] output of every planet
+ * @param {Object<string, number[]>} bonus - {met|cry|deu: [base, factor, max]}
+ * @param {number} techBonusPct - the life form technology bonus, percent
+ * @returns {number[]} [metal, crystal, deuterium] per hour
+ */
+function lfResearchIncrease(minePerPlanet, bonus, techBonusPct) {
+	const kinds = ['met', 'cry', 'deu'];
+	const amp = 1 + (Number(techBonusPct) || 0) / 100;
+	let delta = [0, 0, 0];
+	for (const mine of minePerPlanet) {
+		for (let res = 0; res < 3; res++) {
+			const b = bonus[kinds[res]];
+			if (b)
+				delta[res] += Math.round(mine[res] * b[0] / 100 * amp);
+		}
+	}
+	return delta;
+}
+
 // Power plants/satellites base output (rows 4-6) plus the fusion reactor's
 // deuterium draw, recorded into `results` and `production` row 3 (deuterium).
 function computeBaseEnergyProduction(prodParams, plnData, fullCrew, results, production) {
