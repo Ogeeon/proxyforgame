@@ -17,10 +17,16 @@
 #                   A directory that exists under that name is complete:
 #                   worktrees are built under a .tmp- name and renamed into
 #                   place (rename(2) is atomic).
-#   CURRENT_LINK    symlink to the live release. The document root points at
-#                   <CURRENT_LINK>/www, and so do the crontab's jobs and the
-#                   MCP server - nothing outside this script names a release
-#                   directory directly.
+#   CURRENT_LINK    symlink to the live release. The crontab's jobs and the
+#                   MCP server go through it - nothing outside this script
+#                   names a release directory directly.
+#   DOCROOT_LINK    optional symlink to <live release>/www that the web
+#                   server's document root goes through. Flipped with
+#                   CURRENT_LINK on every deploy: PHP's opcache keeps serving
+#                   the compiled code of a path it has already cached (with
+#                   __DIR__ folded in at compile time), and an indirection
+#                   whose target changes while the path stays the same is
+#                   exactly that. One release, one set of paths.
 #   SHARED_ENV      the one real .env, the only file git cannot recreate.
 #                   Every release links to it; a deploy never copies, saves
 #                   or restores it again.
@@ -87,6 +93,7 @@ fi
 : "${CURRENT_LINK:?CURRENT_LINK not set in $CONF}"
 : "${SHARED_ENV:?SHARED_ENV not set in $CONF}"
 : "${SMOKE_BASE:?SMOKE_BASE not set in $CONF}"
+DOCROOT_LINK="${DOCROOT_LINK:-}"
 LOG="${LOG:-/dev/null}"
 LOCK="${LOCK:-/tmp/pfg-sync.lock}"
 MAIL_TO="${MAIL_TO:-}"
@@ -366,16 +373,29 @@ ensure_release() {
 }
 
 # ---------------------------------------------------------------------------
-# Point CURRENT_LINK at a release with one atomic rename: ln builds the new
-# link beside the old one, mv -T renames it over. `ln -sfn` alone would do an
+# Point a link at a target with one atomic rename: ln builds the new link
+# beside the old one, mv -T renames it over. `ln -sfn` alone would do an
 # unlink+symlink instead, and for an instant in between there would be no link
-# at all - every request in that instant an error. The document root goes
-# through this link, so this is the one swap on the host that must be atomic.
+# at all - every request in that instant an error. The document root and the
+# current-release link are swapped this way, so these are the renames on the
+# host that must be atomic.
 # ---------------------------------------------------------------------------
-flip_current() {
-  local tmp="$CURRENT_LINK.tmp.$$"
-  ln -s "$1" "$tmp"
-  mv -T "$tmp" "$CURRENT_LINK"
+flip_link() {
+  local tmp="$1.tmp.$$"
+  ln -s "$2" "$tmp"
+  mv -T "$tmp" "$1"
+}
+
+# The document root link moves to the release's own www, not through
+# CURRENT_LINK: opcache keeps serving the compiled code of a path it has
+# already cached, __DIR__ folded in at compile time, and an indirection whose
+# target changes while the path stays the same leaves every PHP file on the
+# old release until the cache drops it. Pointing the link straight at each
+# release gives every deploy a set of paths nothing has cached yet, so the
+# new code is what runs from the first request after the flip.
+flip_site() {
+  flip_link "$CURRENT_LINK" "$1"
+  [ -z "$DOCROOT_LINK" ] || flip_link "$DOCROOT_LINK" "$1/www"
 }
 
 # ---------------------------------------------------------------------------
@@ -553,18 +573,18 @@ if ! apply_migrations "$NEW_RELEASE"; then
 fi
 
 # ---------------------------------------------------------------------------
-# Flip, then prove it still serves. Opcache revalidates on a 2s timestamp
-# check, so give it a moment before deciding the deploy broke something. A
-# smoke failure flips straight back to the previous release - one rename, no
-# git involved - and the failed release is kept for inspection.
+# Flip, then prove it still serves. Give opcache a moment before deciding the
+# deploy broke something. A smoke failure flips straight back to the previous
+# release - two renames, no git involved - and the failed release is kept for
+# inspection.
 # ---------------------------------------------------------------------------
-flip_current "$NEW_RELEASE"
+flip_site "$NEW_RELEASE"
 sleep 3
 BAD=$(smoke)
 if [ -n "$BAD" ]; then
   if [ -n "$PREV_RELEASE" ]; then
     log "smoke failed on ${WANT_SHA:0:8}:$BAD - flipping back to ${HAVE_SHA:0:8}"
-    flip_current "$PREV_RELEASE"
+    flip_site "$PREV_RELEASE"
     sleep 3
     BACK=$(smoke)
     [ -z "$BACK" ] \

@@ -23,7 +23,7 @@ GitHub Actions "CI"  ──── green ────▶  webhook: workflow_run
                                             ▼
                                     pfg-sync --sha <commit>
                                     fetch → build releases/<commit> → migrate
-                                    → flip the current link → smoke test
+                                    → flip the links → smoke test
                                     → mail on failure
 ```
 
@@ -105,7 +105,7 @@ The receiver's own settings (the secret, the `pfg-sync` path, the log) are in
 | releases | `/var/www/pfg-releases/<sha>` — one worktree per deployed commit |
 | current | `/var/www/pfg-current` → the live release; the crontab's jobs and the MCP server go through it |
 | shared `.env` | `/var/www/pfg-shared/.env` — the one file git cannot recreate; every release links to it |
-| document root | `/var/www/proxyforgame-docroot` → `<current link>/www` |
+| document root | `/var/www/proxyforgame-docroot` → the current release's own `www` |
 | PHP | 8.5 (`/usr/bin/php`), the distribution's — and the pin, see [`.php-version`](../.php-version) and [ADR-0003](../docs/adr/0003-single-host-php-8-5.md) |
 | database | MariaDB 11.8, local |
 | cron owner | `www-data` |
@@ -132,12 +132,20 @@ and `revalidate_freq=2`, so a deploy needs no cache flush — new files are pick
 up within two seconds.
 
 **The document root is a symlink, and so is the current release.** A deploy
-builds `releases/<sha>` aside and flips `/var/www/pfg-current` onto it with one
+builds `releases/<sha>` aside and flips two links onto it, each with one
 atomic rename — `ln -s <new> <link>.tmp && mv -T <link>.tmp <link>`, never
-`ln -sfn`, whose unlink+symlink leaves an instant with no link at all. The
-document root follows `pfg-current`, so a request is served the whole old
-release or the whole new one, never a half-updated tree, and a rollback is the
-same rename pointed at a release that already exists.
+`ln -sfn`, whose unlink+symlink leaves an instant with no link at all:
+`pfg-current` (what the crontab's jobs and the MCP server go through) and
+`proxyforgame-docroot` (what Apache serves). A request is served the whole old
+release or the whole new one, never a half-updated tree, and a rollback is
+the same two renames pointed at a release that already exists.
+
+The document root link points at the release's **own** `www`, not through
+`pfg-current`: opcache keeps serving the compiled code of a path it has
+already cached — `__DIR__` folded in at compile time — and an indirection
+whose target changes while the path stays the same leaves every PHP file
+running the old release long after the flip. One release, one set of paths,
+and the new code is what runs from the first request.
 
 The host carries an unrelated VPN service as well. It must not be disturbed,
 which is also why the host is not rebuilt on a whim.
@@ -376,13 +384,13 @@ migrations. The one file that cannot be recreated from git is the shared
    Then, as `www-data`, build the first release at the tip (`git -C
    /var/www/pfg-objects.git worktree add --detach /var/www/pfg-releases/<sha>
    <sha>`), link its `.env` at the shared file (step 3), and point the two
-   links at it — the current link with the atomic idiom, the document root
-   with a single `ln -sfn`:
+   links at it — both with the atomic idiom:
 
    ```
    ln -s /var/www/pfg-releases/<sha> /var/www/pfg-current.tmp
    mv -T /var/www/pfg-current.tmp /var/www/pfg-current
-   ln -sfn /var/www/pfg-current/www /var/www/proxyforgame-docroot
+   ln -s /var/www/pfg-releases/<sha>/www /var/www/proxyforgame-docroot.tmp
+   mv -T /var/www/proxyforgame-docroot.tmp /var/www/proxyforgame-docroot
    ```
 3. Restore `.env` into `/var/www/pfg-shared/.env` (mode 600, `www-data`).
    Create the database and its users
@@ -414,7 +422,8 @@ migrations. The one file that cannot be recreated from git is the shared
    Then run `npm run deploy` in that repository to put the files back.
 5. Install `pfg-sync`, `pfg-notify` and `pfg-cron-run` into `/usr/local/bin/`
    and `webhook.php` into the webhooks root; write `/etc/pfg-sync.conf`
-   (`REPO_DIR`, `RELEASES_DIR`, `CURRENT_LINK`, `SHARED_ENV`, `KEEP_RELEASES`
+   (`REPO_DIR`, `RELEASES_DIR`, `CURRENT_LINK`, `DOCROOT_LINK`, `SHARED_ENV`,
+   `KEEP_RELEASES`
    and the smoke keys, as the script's header documents), `/etc/pfg-cron.conf`
    (`STAMP_DIR=/var/lib/pfg/job-stamps`, readable by
    `www-data`) and `/etc/pfg-webhook.conf` (the secret is in the GitHub webhook
@@ -569,13 +578,24 @@ with every release, and `pfg-sync` pipes it into the host's database through
   ignored, every language prefix answers 404, and `/` and `*.php` keep answering
   200 — the failure looks like a routing bug, not a config one. Both site
   vhosts name the link in both places, which is what lets the release layout
-  flip `pfg-current` under it without ever touching Apache.
+  flip that link without ever touching Apache.
 - **`ln -sfn` is not an atomic swap.** It unlinks and then symlinks, and for
   the instant in between the link does not exist — through the document root
   that is a burst of errors. Every link the site serves through is swapped as
   `ln -s <target> <link>.tmp && mv -T <link>.tmp <link>`; `rename(2)` is
   atomic. `ln -sfn` remains fine for links nothing serves through yet, like
   the document root during a rebuild.
+- **An indirecting symlink does not switch PHP code.** The first release
+  layout pointed the document root at `pfg-current/www` and flipped only
+  `pfg-current`; static files moved with the flip, but every PHP script kept
+  running the old release for as long as opcache held the compiled code for
+  the (unchanged) request path — `__DIR__` is folded in at compile time, so
+  even `ajax.php?service=health` reported the previous commit while `curl`
+  of a static file in the same tree served the new one. Found on 2026-10-26
+  when a deploy went out and health never moved. The document root link now
+  targets each release's own `www`, so every deploy is a set of paths nothing
+  has cached; `systemctl reload php8.5-fpm` is the escape hatch if a stale
+  entry ever needs clearing by hand.
 - **A release worktree's `.git` is a file, not a directory** — `gitdir:
   <path>` into the bare store. Anything that walks `.git/` by hand has to
   follow the pointer; `ajax.php?service=health` does (that is what its
