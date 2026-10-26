@@ -21,7 +21,7 @@ const { GravitonCalculator } = loadBrowserScripts(
 /** The `universe` argument: a live universe whose settings are read from the game. */
 const universeSchema = {
     type: 'object',
-    description: 'A live universe, e.g. {"country": "en", "number": 152} for s152-en.ogame.gameforge.com. '
+    description: 'A live universe, e.g. {"country": "en", "number": 1} for s1-en.ogame.gameforge.com. '
         + 'Its settings are read from the game; anything given by hand overrides them.',
     properties: {
         country: { type: 'string', description: 'Two or three letters: en, de, ru, us, ...' },

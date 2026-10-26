@@ -26,8 +26,8 @@ Why it is built this way - Node, no dependencies, one process behind Apache:
 | `ogame_terraformer` | terraformer | Terraformer cost, fields and energy, and the satellites that cover the shortfall | `terraformer-core.js`, `ogame-costs.js` |
 | `ogame_trade` | trade | What resources buy at given rates - one for one, one for a mix, two for one - and the cargo ships | `trade-core.js` |
 
-Most take an optional `universe: {country, number}` - `{"country": "en", "number": 152}`
-for s152-en - and read its speeds and settings through the site's `serverdata` and
+Most take an optional `universe: {country, number}` - `{"country": "en", "number": 1}`
+for s1-en - and read its speeds and settings through the site's `serverdata` and
 `populatedSystems` services (`docs/universe-data.md`). Anything given by hand
 overrides what is read. The input schemas in `tools/*.js` are the reference: the
 server validates every call against the schema it publishes.

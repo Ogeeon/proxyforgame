@@ -30,7 +30,7 @@ const VERSION = JSON.parse(readFileSync(join(__dirname, 'package.json'), 'utf8')
 
 const INSTRUCTIONS = 'Calculators for the browser game OGame, from proxyforgame.com. '
     + 'Use these tools instead of estimating OGame formulas: the results are exact. '
-    + 'Ask the player for their universe (country and number, e.g. en 152) when speeds or '
+    + 'Ask the player for their universe (country and number, e.g. en 1) when speeds or '
     + 'universe settings matter and they have not said; the tools read the rest from the game.';
 
 /** @param {string} line */
