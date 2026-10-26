@@ -361,9 +361,12 @@ migrations. The one file that cannot be recreated from git is the shared
    `mod_expires`, `mod_headers`, `mod_ssl`, plus `Protocols h2 http/1.1`), the
    PHP named in `.php-version` as `php<ver>-fpm` (`a2enconf php<ver>-fpm`) with
    `curl intl mbstring mysql xml`, MariaDB, git, certbot with the Apache plugin.
-2. Lay out the release structure, all of it owned by `www-data`:
+2. Lay out the release structure, all of it owned by `www-data` - and let
+   `www-data` write `/var/www` itself, which it cannot by default: `pfg-sync`
+   builds the `pfg-current` link there:
 
    ```
+   chgrp www-data /var/www && chmod 775 /var/www
    git init --bare /var/www/pfg-objects.git
    git -C /var/www/pfg-objects.git remote add origin https://github.com/Ogeeon/proxyforgame.git
    mkdir -p /var/www/pfg-releases /var/www/pfg-shared

@@ -345,9 +345,10 @@ link_env() {
 #
 # A .tmp left behind by an interrupted run is cleaned first: worktree remove
 # when git still knows it, rm -rf when it does not, prune to drop the stale
-# metadata. The move itself leaves the store's record of where the worktree
-# lives pointing at the old name, so `worktree repair` heals it - without
-# that, the next prune would call the finished release abandoned.
+# metadata. The move itself breaks the store's record of where the worktree
+# lives, and `worktree repair` needs the worktree's NEW path to fix it - with
+# no argument it only checks records it can already resolve, and the next
+# prune would then call the finished release abandoned and drop it.
 # ---------------------------------------------------------------------------
 ensure_release() {
   local sha="$1" release="$RELEASES_DIR/$1" tmp="$RELEASES_DIR/.tmp-$1"
@@ -361,7 +362,7 @@ ensure_release() {
     || fail "git worktree add for $sha failed"
   link_env "$tmp"
   mv -T "$tmp" "$release"
-  git -C "$REPO_DIR" worktree repair
+  git -C "$REPO_DIR" worktree repair "$release"
 }
 
 # ---------------------------------------------------------------------------

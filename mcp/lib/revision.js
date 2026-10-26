@@ -13,7 +13,26 @@ const { join } = require('node:path');
  * @returns {string} the full sha, or '' when it cannot be read
  */
 function checkoutCommit(root = join(__dirname, '..', '..')) {
-    const gitDir = join(root, '.git');
+    let gitDir = join(root, '.git');
+    try {
+        // A release worktree's .git is a file - "gitdir: <path>" - pointing at
+        // the worktree's metadata inside the bare store; follow it. A plain
+        // checkout keeps .git a directory and is read in place. Reading a
+        // directory throws, which is how the two shapes are told apart.
+        const pointer = readFileSync(gitDir, 'utf8').trim();
+        const m = /^gitdir: (.+)$/.exec(pointer);
+        if (!m) {
+            return '';
+        }
+        gitDir = m[1];
+        if (!/^([A-Za-z]:[\\/]|\/)/.test(gitDir)) {
+            // A relative pointer counts from the worktree root; an absolute
+            // one is either /var/... on the host or D:/... on a dev box.
+            gitDir = join(root, gitDir);
+        }
+    } catch {
+        // .git is a directory (a plain checkout) - nothing to follow.
+    }
     try {
         const head = readFileSync(join(gitDir, 'HEAD'), 'utf8').trim();
         const ref = /^ref: (.+)$/.exec(head)?.[1];
