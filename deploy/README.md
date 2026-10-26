@@ -122,14 +122,18 @@ plus `mod_rewrite`, `mod_expires` and `mod_headers`, so `www/.htaccess` applies
 in full - rewrites and the browser-cache rules. `Protocols h2 http/1.1`
 (`conf-available/http2-protocols.conf`) serves HTTP/2; under prefork it would be
 silently off, which is why mod_php was retired on 2026-10-10. PHP settings live
-in `/etc/php/8.5/fpm/php.ini` (`expose_php = Off`, `pcre.jit = 0`); the
+in `/etc/php/8.5/fpm/php.ini` (`expose_php = Off`, `pcre.jit = 0`) and
+`conf.d/99-pfg-revalidate.ini` (`opcache.revalidate_path = 1`); the
 `apache2/php.ini` beside it is no longer read. Rolling back to prefork is
 `a2dismod mpm_event proxy_fcgi http2 && a2disconf php8.5-fpm http2-protocols &&
 a2enmod mpm_prefork php8.5 && systemctl restart apache2`.
 No Docker — that is a local-dev convenience only
 (`docs/adr/0002-docker-local-dev.md`). Opcache is on with `validate_timestamps`
 and `revalidate_freq=2`, so a deploy needs no cache flush — new files are picked
-up within two seconds.
+up within two seconds. **`revalidate_path=1` is set in
+`/etc/php/8.5/fpm/conf.d/99-pfg-revalidate.ini`** and must stay: with the
+default 0, opcache resolves the document-root symlink once and keeps serving
+the first release it ever resolved to (see *Traps*).
 
 **The document root is a symlink, and so is the current release.** A deploy
 builds `releases/<sha>` aside and flips two links onto it, each with one
@@ -588,14 +592,20 @@ with every release, and `pfg-sync` pipes it into the host's database through
 - **An indirecting symlink does not switch PHP code.** The first release
   layout pointed the document root at `pfg-current/www` and flipped only
   `pfg-current`; static files moved with the flip, but every PHP script kept
-  running the old release for as long as opcache held the compiled code for
-  the (unchanged) request path — `__DIR__` is folded in at compile time, so
-  even `ajax.php?service=health` reported the previous commit while `curl`
-  of a static file in the same tree served the new one. Found on 2026-10-26
-  when a deploy went out and health never moved. The document root link now
-  targets each release's own `www`, so every deploy is a set of paths nothing
-  has cached; `systemctl reload php8.5-fpm` is the escape hatch if a stale
-  entry ever needs clearing by hand.
+  running the old release: opcache resolves a symlink in the script path
+  **once** (`opcache.revalidate_path=0`, the default) and then serves and
+  timestamp-checks the release path it first resolved to — the old release
+  still exists (kept for rollback), its mtime never changes, so nothing ever
+  revalidates. `__DIR__` is folded in at compile time, so even
+  `ajax.php?service=health` reported the previous commit while a static file
+  in the same tree served the new one. Found on 2026-10-26 when a deploy went
+  out and health never moved. Two things together fix it:
+  `/etc/php/8.5/fpm/conf.d/99-pfg-revalidate.ini` sets
+  `opcache.revalidate_path=1` (re-resolve per request), and the document root
+  link targets each release's own `www`, so every deploy is also a set of
+  request paths nothing has cached. Verified by flipping back and forth
+  between releases: health follows within two seconds, no reload.
+  `systemctl reload php8.5-fpm` remains the escape hatch for a stale entry.
 - **A release worktree's `.git` is a file, not a directory** — `gitdir:
   <path>` into the bare store. Anything that walks `.git/` by hand has to
   follow the pointer; `ajax.php?service=health` does (that is what its
