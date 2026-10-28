@@ -263,6 +263,26 @@ test.describe('Trade Calculator Page', () => {
         await expect(page.locator('#abbcode')).toContainText('/trade#rmd=2.4&rcd=1.5&st=0&dt=2&dmt=3&fix2=10000&m=100000&l=en:1&lc=4:3:2&lm=1]Selling 100.000 met. Buying 47.500 crys and 10.000 deut. Exchange rates 2.4:1.5:1. Coordinates [4:3:2], Moon (Universe 1, en.ogame.gameforge.com)[/url]');
     });
 
+    test('switching to a country without the universe picks its first one', async ({ page }) => {
+        await page.locator('#country').selectOption('en');
+        await page.locator('#universe').selectOption('1');
+        // No 'ar' universe is numbered 1, so the picker falls back to the country's first.
+        await page.locator('#country').selectOption('ar');
+        const first = await page.locator('#universe option').first().getAttribute('value');
+        expect(first).not.toBe('1');
+        await expect(page.locator('#universe')).toHaveValue(first ?? '');
+        expect(await page.evaluate(() => options.universe)).toBe(Number(first));
+        // The message names the universe through the selected option, so it is not blank.
+        await page.locator('#res-src-0').click();
+        await page.locator('#res-src-m').fill('100000');
+        await page.locator('#res-src-m').press('Enter');
+        for (const [id, v] of [['#coord-g', '4'], ['#coord-s', '3'], ['#coord-p', '2']]) {
+            await page.locator(id).fill('');
+            await page.locator(id).pressSequentially(v);
+        }
+        await expect(page.locator('#atext')).toContainText(/\[4:3:2\] \(\S[^,]*, ar\.ogame\.gameforge\.com\)/);
+    });
+
     test('parsing a source split from a link works', async ({ page }) => {
         await page.goto('/trade#rmd=2.4&rcd=1.5&st=2&dt=2&dmt=4&msrc=50&d=100000&l=en:1');
         await expect(page.locator('#res-src-2')).toBeChecked();

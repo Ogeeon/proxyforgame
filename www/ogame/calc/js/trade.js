@@ -404,16 +404,10 @@ function setUniList(lang, uni) {
     universeEl.innerHTML = '';
     let ulist = unis[lang] || [];
 
-    // check whether such a universe exists in the given country. if not, reset to the start of the list
-    let fu = false;
-    for (const item of ulist) {
-        if (item[0] == uni) {
-            fu = true;
-            break;
-        }
-    }
-    if (!fu) {
-        options.universe = uni = 101;
+    // A universe the country does not have falls back to the country's first one,
+    // so the select never ends up with nothing selected.
+    if (ulist.length > 0 && !ulist.some(item => item[0] == uni)) {
+        options.universe = uni = ulist[0][0];
         options.save();
     }
 
