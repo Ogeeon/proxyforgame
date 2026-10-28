@@ -1095,3 +1095,201 @@ test.describe('Costs Calculator - universe picker', () => {
         await expect(page.locator('#research-speed')).toHaveValue('7');
     });
 });
+
+// Settings persistence. costs keeps its settings in `costs_calculator_state`, a
+// JSON document written by its own saveState/loadState (issue #37 moves it onto
+// the shared saveToCookie/loadFromCookie store). Visitors already hold that
+// key, so whatever replaces the reader has to take today's payload as-is.
+test.describe('Costs Calculator - saved settings', () => {
+    const STATE_KEY = 'costs_calculator_state';
+
+    // What the calculator writes on a first visit, untouched.
+    const DEFAULTS = {
+        shipyardLevel: 0, robotFactoryLevelPlanet: 0, robotFactoryLevelMoon: 0, naniteFactoryLevel: 0,
+        universeSpeed: 1, researchSpeed: 1, researchLabLevel: 0,
+        energyTechLevel: 0, plasmaTechLevel: 0, ionTechLevel: 0, hyperTechLevel: 0,
+        maxPlanetTemp: 0, planetPos: 0,
+        geologist: false, engineer: false, technocrat: false, admiral: false, commander: false,
+        researchBonus: false, playerClass: 0, isTrader: false, booster: 0,
+        irnLevel: 0, labLevels: [0, 0, 0, 0, 0, 0, 0, 0], labChoice: -1,
+        fullNumbers: false, useIrn: false,
+        mineralResCntrLvl: 0, lfTerraformerRdc: 0, discovererClassBonus: 0, collectorClassBonus: 0,
+        scCapacityIncrease: 0, lcCapacityIncrease: 0,
+        rates: [1, 1.5, 3], country: '--', universe: ''
+    };
+
+    // A payload in today's format with every field off its default. Frozen
+    // here on purpose: it stands for what returning visitors have stored.
+    const SAVED = {
+        shipyardLevel: 12, robotFactoryLevelPlanet: 10, robotFactoryLevelMoon: 8, naniteFactoryLevel: 5,
+        universeSpeed: 4, researchSpeed: 9, researchLabLevel: 14,
+        energyTechLevel: 16, plasmaTechLevel: 13, ionTechLevel: 7, hyperTechLevel: 9,
+        maxPlanetTemp: -23, planetPos: 11,
+        geologist: true, engineer: true, technocrat: true, admiral: true, commander: true,
+        researchBonus: true, playerClass: 2, isTrader: true, booster: 3,
+        irnLevel: 2, labLevels: [12, 11, 10], labChoice: 0,
+        fullNumbers: true, useIrn: true,
+        mineralResCntrLvl: 6, lfTerraformerRdc: 12.5, discovererClassBonus: 3.25, collectorClassBonus: 1.5,
+        scCapacityIncrease: 40.5, lcCapacityIncrease: 22,
+        rates: [2.5, 1.75, 1], country: '--', universe: ''
+    };
+
+    /** Puts `state` into storage before the page's own scripts run. */
+    async function seedState(context, state) {
+        await context.addInitScript(({ key, json }) => {
+            localStorage.setItem('lastChange', 'key-value;true,value;99999');
+            document.cookie = 'costs_rn_disclaimer_shown=1; path=/';
+            // Only on the first load: later reloads must read what the page saved.
+            if (!sessionStorage.getItem('pfg-test-seeded')) {
+                sessionStorage.setItem('pfg-test-seeded', '1');
+                localStorage.setItem(key, json);
+            }
+        }, { key: STATE_KEY, json: typeof state === 'string' ? state : JSON.stringify(state) });
+    }
+
+    async function storedState(page) {
+        return page.evaluate((key) => JSON.parse(localStorage.getItem(key) || 'null'), STATE_KEY);
+    }
+
+    /** Every field of SAVED, as the form shows it; `dec` is the locale's decimal separator. */
+    async function expectSavedForm(page, dec) {
+        const num = (v) => String(v).replace('.', dec);
+        const values = {
+            '#shipyard-level': '12', '#robot-factory-level': '10', '#robot-factory-level-moon': '8',
+            '#nanite-factory-level': '5', '#universe-speed': '4', '#research-speed': '9',
+            '#research-lab-level': '14', '#energy-tech-level': '16', '#plasma-tech-level': '13',
+            '#ion-tech-level': '7', '#hyper-tech-level': '9', '#max-planet-temp': '-23',
+            '#planet-pos': '11', '#booster': '3', '#irn-level': '2', '#planetsSpin': '3',
+            '#mineral-res-cntr-lvl': '6',
+            '#lf-terraformer-rdc': num(12.5), '#discoverer-class-bonus': num(3.25),
+            '#lf-collector-class-bonus': num(1.5), '#sc-capacity-increase': num(40.5),
+            '#lc-capacity-increase': '22',
+            '#exchange-rates-m': num(2.5), '#exchange-rates-c': num(1.75), '#exchange-rates-d': '1',
+            '#lablevel_1': '12', '#lablevel_2': '11', '#lablevel_3': '10', '#country': '--'
+        };
+        for (const [selector, value] of Object.entries(values)) {
+            await expect(page.locator(selector), selector).toHaveValue(value);
+        }
+        for (const id of ['geologist', 'engineer', 'technocrat', 'admiral', 'commander',
+            'research-bonus', 'is-trader', 'full-numbers', 'use-irn', 'class-2', 'labchoice_1']) {
+            await expect(page.locator(`#${id}`), id).toBeChecked();
+        }
+        await expect(page.locator('#lab-levels-table tbody tr')).toHaveCount(3);
+        // Lab 12 chosen, plus the two best of the others for a network of 2
+        await expect(page.locator('#irn-result')).toHaveText('33');
+    }
+
+    test('a payload in the current format is read field for field', async ({ context, page }) => {
+        await seedState(context, SAVED);
+        await page.goto('/costs');
+        await expectSavedForm(page, '.');
+    });
+
+    test('a payload in the current format is saved back unchanged', async ({ context, page }) => {
+        await seedState(context, SAVED);
+        await page.goto('/costs');
+        await expect(page.locator('#irn-result')).toHaveText('33');
+        // Reading must not lose anything: the load recalculates and saves again.
+        await page.locator('#full-numbers').evaluate((el) => el.dispatchEvent(new Event('change', { bubbles: true })));
+        await expect.poll(() => storedState(page)).toEqual(SAVED);
+        await page.reload();
+        await expectSavedForm(page, '.');
+    });
+
+    test('the fractional fields come back with the locale\'s separator', async ({ context, page }) => {
+        await seedState(context, SAVED);
+        await page.goto('/ru/costs');
+        await expectSavedForm(page, ',');
+    });
+
+    test('settings typed into the form survive a reload', async ({ context, page }) => {
+        await seedState(context, DEFAULTS);
+        await page.goto('/costs');
+
+        const type = async (selector, value) => {
+            await page.locator(selector).fill(value);
+            await page.locator(selector).press('Tab');
+        };
+        await type('#robot-factory-level', '10');
+        await type('#robot-factory-level-moon', '6');
+        await type('#nanite-factory-level', '4');
+        await type('#shipyard-level', '12');
+        await type('#research-lab-level', '15');
+
+        await page.locator('#param-researches-tab').click();
+        await type('#ion-tech-level', '8');
+        await type('#hyper-tech-level', '11');
+
+        await page.locator('#param-common-tab').click();
+        await page.locator('#universe-speed').selectOption('3');
+        await page.locator('#research-speed').selectOption('6');
+        await page.locator('#technocrat').check();
+        await page.locator('#research-bonus').check();
+        await page.locator('#class-1').check();
+        await page.locator('#is-trader').check();
+        await page.locator('#full-numbers').check();
+        await type('#exchange-rates-m', '2.5');
+        await type('#exchange-rates-c', '1.8');
+        await type('#exchange-rates-d', '1.2');
+
+        await page.locator('#param-lifeforms-tab').click();
+        await type('#lf-collector-class-bonus', '1.5');
+        await type('#discoverer-class-bonus', '2.25');
+        await type('#mineral-res-cntr-lvl', '5');
+        await type('#lf-terraformer-rdc', '12.5');
+        await type('#sc-capacity-increase', '30');
+        await type('#lc-capacity-increase', '20.5');
+
+        await page.reload();
+
+        const values = {
+            '#robot-factory-level': '10', '#robot-factory-level-moon': '6', '#nanite-factory-level': '4',
+            '#shipyard-level': '12', '#research-lab-level': '15', '#ion-tech-level': '8',
+            '#hyper-tech-level': '11', '#universe-speed': '3', '#research-speed': '6',
+            '#exchange-rates-m': '2.5', '#exchange-rates-c': '1.8', '#exchange-rates-d': '1.2',
+            '#lf-collector-class-bonus': '1.5', '#discoverer-class-bonus': '2.25',
+            '#mineral-res-cntr-lvl': '5', '#lf-terraformer-rdc': '12.5',
+            '#sc-capacity-increase': '30', '#lc-capacity-increase': '20.5'
+        };
+        for (const [selector, value] of Object.entries(values)) {
+            await expect(page.locator(selector), selector).toHaveValue(value);
+        }
+        for (const id of ['technocrat', 'research-bonus', 'class-1', 'is-trader', 'full-numbers']) {
+            await expect(page.locator(`#${id}`), id).toBeChecked();
+        }
+        await expect(page.locator('#geologist')).not.toBeChecked();
+    });
+
+    test('an unreadable payload leaves the defaults', async ({ context, page }) => {
+        await seedState(context, JSON.stringify(SAVED).slice(0, 120));
+        await page.goto('/costs');
+        await expect(page.locator('#shipyard-level')).toHaveValue('0');
+        await expect(page.locator('#robot-factory-level')).toHaveValue('0');
+        await expect(page.locator('#universe-speed')).toHaveValue('1');
+        await expect(page.locator('#full-numbers')).not.toBeChecked();
+    });
+
+    // Nothing is validated on the way out of storage yet: these fail until
+    // costs reads through loadFromCookie and a params.validate() (issue #37).
+    // A value the form would never accept falls back to that field's default,
+    // as validateNumber does for the other calculators.
+    test.describe('a value the form would not accept is not restored', () => {
+        const cases = [
+            { name: 'a negative level', state: { shipyardLevel: -5 }, selector: '#shipyard-level', value: '0' },
+            { name: 'a level that is not a number', state: { robotFactoryLevelPlanet: 'abc' }, selector: '#robot-factory-level', value: '0' },
+            { name: 'a speed the select does not offer', state: { universeSpeed: 99 }, selector: '#universe-speed', value: '1' },
+            { name: 'a terraformer reduction above 50%', state: { lfTerraformerRdc: 80 }, selector: '#lf-terraformer-rdc', value: '0' },
+            { name: 'an exchange rate above 100', state: { rates: [1, 500, 3] }, selector: '#exchange-rates-c', value: '1.5' },
+            { name: 'a temperature below -134', state: { maxPlanetTemp: -500 }, selector: '#max-planet-temp', value: '0' },
+            { name: 'lab levels that are not a list', state: { labLevels: 'garbage' }, selector: '#planetsSpin', value: '8' },
+        ];
+        for (const { name, state, selector, value } of cases) {
+            test(name, async ({ context, page }) => {
+                test.fail(true, 'costs does not validate its saved settings yet (issue #37)');
+                await seedState(context, { ...DEFAULTS, ...state });
+                await page.goto('/costs');
+                await expect(page.locator(selector)).toHaveValue(value, { timeout: 2000 });
+            });
+        }
+    });
+});
