@@ -1910,6 +1910,7 @@ class FlightOrchestrator {
             el.addEventListener('blur', () => this.recalc());
         });
         document.querySelectorAll('#flight select').forEach((el) => {
+            if (el.id.startsWith('pf-')) return; // Profile widgets bind their own handlers.
             el.addEventListener('change', () => this.recalc());
         });
         document.querySelectorAll('input[name="class"], input[name="alliance-class"], input[name="mission-type"]').forEach((el) => {

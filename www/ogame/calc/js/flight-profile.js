@@ -160,8 +160,14 @@ class FlightProfiles extends FlatSettingsBinder {
   // Departure body and its fleet
   // -------------------------------------------------------------------------
 
-  /** @param {number[]} coords */
+  /**
+   * Write the model before the DOM so the first recalc()/follow() already sees
+   * the fresh coordinates.
+   *
+   * @param {number[]} coords
+   */
   setDeparture(coords) {
+    options.prm.departure = coords.slice();
     setVal('#departure-g', coords[0]);
     setVal('#departure-s', coords[1]);
     setVal('#departure-p', coords[2]);
