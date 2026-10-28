@@ -36,7 +36,7 @@ const PFG_COMPANION_SYNC_EVENT = 'pfg-companion:sync';
 
 /**
  * @typedef {Object} SavedSet
- * @property {string} key Its localStorage key.
+ * @property {string} key Its saveToCookie key (localStorage or the cookie fallback).
  * @property {string} name The name the player gave it.
  * @property {SavedSetKind} kind
  */
@@ -853,17 +853,9 @@ class ProfilesUi {
   findSavedSets() {
     /** @type {SavedSet[]} */
     const sets = [];
-    try {
-      for (let i = 0; i < localStorage.length; i++) {
-        const key = localStorage.key(i);
-        if (!key) continue;
-        Object.entries(SAVED_SET_KINDS).forEach(([prefix, kind]) => {
-          if (key.startsWith(prefix)) sets.push({ key, name: key.slice(prefix.length), kind });
-        });
-      }
-    } catch {
-      return [];
-    }
+    Object.entries(SAVED_SET_KINDS).forEach(([prefix, kind]) => {
+      listSavedKeys(prefix).forEach((key) => sets.push({ key, name: key.slice(prefix.length), kind }));
+    });
     return sets.sort((a, b) => a.key.localeCompare(b.key));
   }
 

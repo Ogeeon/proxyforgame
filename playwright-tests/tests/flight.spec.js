@@ -2404,4 +2404,23 @@ test.describe('Flight Calculator - Saved Fleets', () => {
         expect(await page.evaluate((key) => localStorage.getItem(key), FLEET_KEY)).toBeNull();
         expect(errors, 'no page JS errors').toEqual([]);
     });
+    test('a deleted fleet also kept in the cookie fallback does not come back', async ({ page }) => {
+        const key = 'flight_fleet_both';
+        await page.evaluate((k) => {
+            localStorage.setItem(k, '{"savedShips":[1]}');
+            document.cookie = k + '=' + encodeURIComponent('{"savedShips":[2]}') + '; path=/';
+        }, key);
+        await page.reload();
+        const select = page.locator('#fleet-name-select');
+        await expect(select.locator('option')).toHaveCount(3);
+
+        await select.selectOption(key);
+        await page.locator('#fleet-delete').click();
+        await page.locator('.dyn-dialog .btn-primary').click();
+        await expect(select.locator('option')).toHaveCount(2);
+
+        await page.reload();
+        await expect(select.locator('option')).toHaveCount(2);
+        expect(await page.evaluate(() => document.cookie)).not.toContain('flight_fleet_both=');
+    });
 });

@@ -465,6 +465,35 @@ function readSavedData(name) {
 	return null;
 }
 
+/**
+ * Lists the keys saveToCookie wrote under `prefix` - a family of named slots
+ * such as `flight_fleet_` - from localStorage and from the cookie fallback, each
+ * key once. A cookie with an empty value is a deleted one and is left out.
+ * @param {string} prefix - start of the keys to list
+ * @returns {string[]}
+ */
+function listSavedKeys(prefix) {
+	const keys = new Set();
+	if (supports_html5_storage()) {
+		try {
+			for (let i = 0; i < localStorage.length; i++) {
+				const key = localStorage.key(i);
+				if (key?.startsWith(prefix))
+					keys.add(key);
+			}
+		} catch (e) {
+			consoleLog(e);
+		}
+	}
+	for (const rawCookie of document.cookie.split(';')) {
+		const cookie = rawCookie.trim();
+		const eq = cookie.indexOf('=');
+		if (eq > 0 && eq < cookie.length - 1 && cookie.startsWith(prefix))
+			keys.add(cookie.substring(0, eq));
+	}
+	return [...keys];
+}
+
 /** Removes a value written by saveToCookie, from localStorage and from the cookie fallback. */
 function removeSavedData(name) {
 	if (supports_html5_storage()) {

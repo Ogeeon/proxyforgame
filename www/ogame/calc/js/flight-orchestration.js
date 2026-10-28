@@ -1987,7 +1987,8 @@ class FlightOrchestrator {
     }
 
     _removeStorageOption(selectId, key) {
-        localStorage.removeItem(key);
+        // Both stores: a slot that also sits in the cookie fallback would come back on the next visit.
+        removeSavedData(key);
         const select = selectEl(`#${selectId}`);
         // The key is the stored profile name, so it is whatever the user typed:
         // it can carry quotes, brackets or a whole export pasted into the name
@@ -2004,14 +2005,7 @@ class FlightOrchestrator {
 
     _populateStorageSelects() {
         const fill = (prefix, selectId) => {
-            /** @type {string[]} */
-            const keys = [];
-            for (let i = 0; i < localStorage.length; i++) {
-                const key = localStorage.key(i);
-                if (key?.includes(prefix)) {
-                    keys.push(key);
-                }
-            }
+            const keys = listSavedKeys(prefix);
             // The names are user typed, so order them the way the reader's
             // language does rather than by code point.
             keys.sort((a, b) => a.replace(prefix, '').localeCompare(b.replace(prefix, '')));
