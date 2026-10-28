@@ -1096,10 +1096,10 @@ test.describe('Costs Calculator - universe picker', () => {
     });
 });
 
-// Settings persistence. costs keeps its settings in `costs_calculator_state`, a
-// JSON document written by its own saveState/loadState (issue #37 moves it onto
-// the shared saveToCookie/loadFromCookie store). Visitors already hold that
-// key, so whatever replaces the reader has to take today's payload as-is.
+// Settings persistence. costs keeps its settings in `costs_calculator_state`,
+// read and written through the shared saveToCookie/loadFromCookie store. Until
+// issue #37 it had a reader of its own; visitors still hold what that wrote, so
+// the payload below has to be read as-is.
 test.describe('Costs Calculator - saved settings', () => {
     const STATE_KEY = 'costs_calculator_state';
 
@@ -1108,7 +1108,7 @@ test.describe('Costs Calculator - saved settings', () => {
         shipyardLevel: 0, robotFactoryLevelPlanet: 0, robotFactoryLevelMoon: 0, naniteFactoryLevel: 0,
         universeSpeed: 1, researchSpeed: 1, researchLabLevel: 0,
         energyTechLevel: 0, plasmaTechLevel: 0, ionTechLevel: 0, hyperTechLevel: 0,
-        maxPlanetTemp: 0, planetPos: 0,
+        maxPlanetTemp: 0, planetPos: 8,
         geologist: false, engineer: false, technocrat: false, admiral: false, commander: false,
         researchBonus: false, playerClass: 0, isTrader: false, booster: 0,
         irnLevel: 0, labLevels: [0, 0, 0, 0, 0, 0, 0, 0], labChoice: -1,
@@ -1118,8 +1118,8 @@ test.describe('Costs Calculator - saved settings', () => {
         rates: [1, 1.5, 3], country: '--', universe: ''
     };
 
-    // A payload in today's format with every field off its default. Frozen
-    // here on purpose: it stands for what returning visitors have stored.
+    // A payload in the format the old reader wrote, every field off its
+    // default. Frozen here on purpose: it stands for what visitors have stored.
     const SAVED = {
         shipyardLevel: 12, robotFactoryLevelPlanet: 10, robotFactoryLevelMoon: 8, naniteFactoryLevel: 5,
         universeSpeed: 4, researchSpeed: 9, researchLabLevel: 14,
@@ -1269,10 +1269,9 @@ test.describe('Costs Calculator - saved settings', () => {
         await expect(page.locator('#full-numbers')).not.toBeChecked();
     });
 
-    // Nothing is validated on the way out of storage yet: these fail until
-    // costs reads through loadFromCookie and a params.validate() (issue #37).
-    // A value the form would never accept falls back to that field's default,
-    // as validateNumber does for the other calculators.
+    // Every value goes through GlobalParams.validate on the way out of storage:
+    // one the form would never accept falls back to that field's default, as
+    // validateNumber does for the other calculators.
     test.describe('a value the form would not accept is not restored', () => {
         const cases = [
             { name: 'a negative level', state: { shipyardLevel: -5 }, selector: '#shipyard-level', value: '0' },
@@ -1282,13 +1281,14 @@ test.describe('Costs Calculator - saved settings', () => {
             { name: 'an exchange rate above 100', state: { rates: [1, 500, 3] }, selector: '#exchange-rates-c', value: '1.5' },
             { name: 'a temperature below -134', state: { maxPlanetTemp: -500 }, selector: '#max-planet-temp', value: '0' },
             { name: 'lab levels that are not a list', state: { labLevels: 'garbage' }, selector: '#planetsSpin', value: '8' },
+            // The old reader saved the position as 0 until the form was touched
+            { name: 'planet position 0', state: { planetPos: 0 }, selector: '#planet-pos', value: '8' },
         ];
         for (const { name, state, selector, value } of cases) {
             test(name, async ({ context, page }) => {
-                test.fail(true, 'costs does not validate its saved settings yet (issue #37)');
                 await seedState(context, { ...DEFAULTS, ...state });
                 await page.goto('/costs');
-                await expect(page.locator(selector)).toHaveValue(value, { timeout: 2000 });
+                await expect(page.locator(selector)).toHaveValue(value);
             });
         }
     });

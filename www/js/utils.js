@@ -523,10 +523,10 @@ function removeSavedData(name) {
 // indefinitely, and removing this reader resets them to their defaults,
 // silently.
 //
-// The costs calculator is in neither list: it keeps its settings outside this
-// store entirely, in `costs_calculator_state` and `costs_lf_research_table`,
-// written to localStorage as JSON by its own saveState/loadState. Nothing of
-// costs has ever been in the legacy format.
+// The costs calculator is in neither list. Its settings key,
+// `costs_calculator_state`, was written as JSON by a reader of its own before
+// it moved onto this store, and its research table, `costs_lf_research_table`,
+// still is. Nothing of costs has ever been in the legacy format.
 //
 // See .claude/plans/settings-serialization.md (phase 4).
 

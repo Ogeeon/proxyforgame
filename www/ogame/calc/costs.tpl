@@ -567,7 +567,7 @@
                   <label for="max-planet-temp"><?= $l['max-planet-temp'] ?></label>
                   <input id="max-planet-temp" type="text" name="max-planet-temp" class="form-control form-control-sm level-input" value="0" data-field-title="<?= $l['max-planet-temp'] ?>">
                   <label for="planet-pos"><?= $l['planet-pos'] ?></label>
-                  <input id="planet-pos" type="text" name="planet-pos" class="form-control form-control-sm level-input" value="0" data-field-title="<?= $l['planet-pos'] ?>">
+                  <input id="planet-pos" type="text" name="planet-pos" class="form-control form-control-sm level-input" value="8" data-field-title="<?= $l['planet-pos'] ?>">
                 </div>
                 <div id="range-officers-row" class="d-flex align-items-center flex-wrap gap-3">
                   <div class="d-flex align-items-center gap-1"><input id="engineer" type="checkbox" name="engineer" class="form-check-input"><label for="engineer"><?= $l['engineer'] ?></label></div>
