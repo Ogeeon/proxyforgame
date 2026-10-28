@@ -470,3 +470,78 @@ describe('Calculator.calculate - life form reductions round each level of a rang
         expect(result.time).toBe(314181);
     });
 });
+
+describe('GlobalParams.validate', () => {
+    // loadFromCookie hands every stored leaf over as a string.
+    const v = (field, value) => GlobalParams.validate(field, String(value));
+
+    it('keeps a value the form accepts', () => {
+        expect(v('shipyardLevel', 12)).toBe(12);
+        expect(v('maxPlanetTemp', -23)).toBe(-23);
+        expect(v('lfTerraformerRdc', 12.5)).toBe(12.5);
+        expect(v('rates', 1.75)).toBe(1.75);
+        expect(v('labChoice', -1)).toBe(-1);
+    });
+
+    it('falls back to the default, not to the nearest bound', () => {
+        expect(v('shipyardLevel', -5)).toBe(0);
+        expect(v('planetPos', 0)).toBe(8);
+        expect(v('planetPos', 17)).toBe(8);
+        expect(v('universeSpeed', 99)).toBe(1);
+        expect(v('lfTerraformerRdc', 80)).toBe(0);
+        expect(v('maxPlanetTemp', -500)).toBe(0);
+    });
+
+    it('takes a value that is not a number as the default', () => {
+        expect(v('robotFactoryLevelPlanet', 'abc')).toBe(0);
+        expect(v('booster', '')).toBe(0);
+    });
+
+    it('reads a boolean only from "true"', () => {
+        expect(v('geologist', true)).toBe(true);
+        expect(v('geologist', false)).toBe(false);
+        expect(v('geologist', 'yes')).toBe(false);
+    });
+
+    it('leaves a rate it rejects for normalizeStored to fill in', () => {
+        expect(Number.isNaN(v('rates', 500))).toBe(true);
+    });
+
+    it('passes a field it has no rule for through', () => {
+        expect(v('country', 'de')).toBe('de');
+        expect(v('toString', 'x')).toBe('x');
+    });
+});
+
+describe('GlobalParams.normalizeStored', () => {
+    const normalized = (state) => {
+        GlobalParams.normalizeStored(state);
+        return { labLevels: [...state.labLevels], labChoice: state.labChoice, rates: [...state.rates] };
+    };
+
+    it('keeps lab levels and rates of the right shape', () => {
+        expect(normalized({ labLevels: [12, 11, 10], labChoice: 2, rates: [2.5, 1.75, 1] }))
+            .toEqual({ labLevels: [12, 11, 10], labChoice: 2, rates: [2.5, 1.75, 1] });
+    });
+
+    it('gives lab levels that are not a list eight planets at 0', () => {
+        expect(normalized({ labLevels: 0, labChoice: -1, rates: [1, 1.5, 3] }).labLevels)
+            .toEqual([0, 0, 0, 0, 0, 0, 0, 0]);
+        expect(normalized({ labLevels: [], labChoice: -1, rates: [1, 1.5, 3] }).labLevels)
+            .toEqual([0, 0, 0, 0, 0, 0, 0, 0]);
+    });
+
+    it('drops a lab choice past the last planet', () => {
+        expect(normalized({ labLevels: [12, 11], labChoice: 5, rates: [1, 1.5, 3] }).labChoice).toBe(-1);
+    });
+
+    it('fills a rejected rate with that rate\'s own default', () => {
+        expect(normalized({ labLevels: [0], labChoice: -1, rates: [Number.NaN, 2, Number.NaN] }).rates)
+            .toEqual([1, 2, 3]);
+    });
+
+    it('replaces rates that are not three numbers', () => {
+        expect(normalized({ labLevels: [0], labChoice: -1, rates: 1 }).rates).toEqual([1, 1.5, 3]);
+        expect(normalized({ labLevels: [0], labChoice: -1, rates: [1, 2] }).rates).toEqual([1, 1.5, 3]);
+    });
+});

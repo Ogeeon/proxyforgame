@@ -993,7 +993,7 @@ class CostsCalculator {
    * Also used by costs-profile.js.
    */
   saveLfResearchTable(data) {
-    if (!this._isStorageAvailable()) return;
+    if (!supports_html5_storage()) return;
     try {
       const payload = (data || this.readLfResearchTable()).map(d => [d.cost, d.time]);
       localStorage.setItem(CostsCalculator.LF_TABLE_STORAGE_KEY, JSON.stringify(payload));
@@ -1007,7 +1007,7 @@ class CostsCalculator {
    * @private
    */
   _loadLfResearchTable() {
-    if (!this._isStorageAvailable()) return;
+    if (!supports_html5_storage()) return;
     let payload = null;
     try {
       const json = localStorage.getItem(CostsCalculator.LF_TABLE_STORAGE_KEY);
@@ -1276,20 +1276,7 @@ class CostsCalculator {
   static RN_DISCLAIMER_COOKIE = 'costs_rn_disclaimer_shown';
 
   /**
-   * Check if localStorage is available
-   * @private
-   */
-  _isStorageAvailable() {
-    try {
-      return 'localStorage' in globalThis && globalThis['localStorage'] !== null;
-    } catch {
-      return false;
-    }
-  }
-
-  /**
-   * Save current state to localStorage
-   * Uses native JSON serialization
+   * Save current state through the shared settings store (utils.js)
    */
   saveState() {
     this.writeState(this.buildState());
@@ -1322,9 +1309,19 @@ class CostsCalculator {
    * @returns {Record<string, any>}
    */
   buildState() {
-    const params = this.params();
+    // The picker is not a calculation input, so it lives outside GlobalParams
+    return CostsCalculator.stateOf(this.params(),
+      selectEl('#country')?.value ?? '--', selectEl('#universe')?.value ?? '');
+  }
 
-    // Convert params to plain object for JSON serialization
+  /**
+   * The stored form of a set of parameters and the universe picker's choice.
+   * @param {GlobalParams} params
+   * @param {string} country
+   * @param {string} universe
+   * @returns {Record<string, any>}
+   */
+  static stateOf(params, country, universe) {
     return {
       shipyardLevel: params.shipyardLevel,
       robotFactoryLevelPlanet: params.robotFactoryLevelPlanet,
@@ -1360,9 +1357,8 @@ class CostsCalculator {
       scCapacityIncrease: params.scCapacityIncrease,
       lcCapacityIncrease: params.lcCapacityIncrease,
       rates: params.rates,
-      // The picker is not a calculation input, so it lives outside GlobalParams
-      country: selectEl('#country')?.value ?? '--',
-      universe: selectEl('#universe')?.value ?? ''
+      country,
+      universe
     };
   }
 
@@ -1371,72 +1367,31 @@ class CostsCalculator {
    * Also used by costs-profile.js.
    */
   writeState(state) {
-    try {
-      const json = JSON.stringify(state);
-      if (this._isStorageAvailable()) {
-        localStorage.setItem(CostsCalculator.STORAGE_KEY, json);
-      } else {
-        // Fallback to cookie for browsers without localStorage
-        const d = new Date();
-        d.setTime(d.getTime() + (365 * 24 * 60 * 60 * 1000));
-        document.cookie = CostsCalculator.STORAGE_KEY + '=' + encodeURIComponent(json) +
-          '; expires=' + d.toUTCString() + '; path=/';
-      }
-    } catch (e) {
-      console.error('Failed to save state:', e.message);
-    }
+    saveToCookie(CostsCalculator.STORAGE_KEY, state);
   }
 
   /**
-   * Load state from localStorage
-   * Uses native JSON deserialization
+   * Restore the saved settings into the form. Every value goes through
+   * GlobalParams.validate on the way, so a stale, truncated or hand-edited
+   * payload falls back to the defaults field by field.
    */
   loadState() {
+    if (readSavedData(CostsCalculator.STORAGE_KEY) === null) return;
+    const state = /** @type {Record<string, any>} */ (CostsCalculator.stateOf(new GlobalParams(), '--', ''));
+    state.validate = GlobalParams.validate;
+    loadFromCookie(CostsCalculator.STORAGE_KEY, state);
+    delete state.validate;
+    GlobalParams.normalizeStored(state);
+    if (typeof state.country !== 'string') state.country = '--';
+    if (typeof state.universe !== 'string') state.universe = '';
+
+    // init() binds the events after this: a throw here must not leave the page dead
     try {
-      let json = null;
-
-      // Try localStorage first
-      if (this._isStorageAvailable()) {
-        json = localStorage.getItem(CostsCalculator.STORAGE_KEY);
-      }
-
-      // Fallback to cookie if localStorage is empty
-      if (!json) {
-        const cookies = document.cookie.split(';');
-        for (const rawCookie of cookies) {
-          const cookie = rawCookie.trim();
-          if (cookie.startsWith(CostsCalculator.STORAGE_KEY + '=')) {
-            json = decodeURIComponent(cookie.substring(CostsCalculator.STORAGE_KEY.length + 1));
-            break;
-          }
-        }
-      }
-
-      let state = null;
-
-      // Parse saved state
-      if (json) {
-        try {
-          state = JSON.parse(json);
-        } catch {
-          console.warn('Failed to parse saved state');
-        }
-      }
-
-      if (state) {
-        // console.log('Loading state from storage...');
-
-        // Apply state to UI elements
-        this.applyState(state);
-
-        // Collect params after applying state
-        this.currentParams = this.collector.collectGlobalParams();
-
-        // console.log('State loaded');
-      }
+      this.applyState(state);
     } catch (e) {
-      console.error('Failed to load state:', e.message, e.stack);
+      console.error('Failed to restore saved settings:', e);
     }
+    this.currentParams = this.collector.collectGlobalParams();
   }
 
   /**

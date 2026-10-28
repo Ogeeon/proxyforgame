@@ -214,40 +214,100 @@ class GlobalParams {
   }
 
   /**
-   * Validate a parameter value
+   * Validate one stored settings value on its way out of storage, as the
+   * `validate` of the object handed to loadFromCookie (utils.js). The value
+   * arrives as a string; anything the form would not accept falls back to the
+   * field's default, as validateNumber does for the other calculators.
+   *
+   * The bounds are the form's own: a narrower one would make a value the form
+   * accepted vanish on the next page load.
+   *
+   * Array fields are validated element by element under the field's name, so
+   * an invalid `rates` entry comes back as NaN and `labLevels` given as a
+   * scalar comes back as a number: normalizeStored() puts those right.
+   *
+   * @param {string} field
+   * @param {string} value
+   * @returns {*}
    */
   static validate(field, value) {
-    const rules = {
-      shipyardLevel: { min: 0, max: 100, default: 0 },
-      robotFactoryLevelPlanet: { min: 0, max: 100, default: 0 },
-      robotFactoryLevelMoon: { min: 0, max: 100, default: 0 },
-      naniteFactoryLevel: { min: 0, max: 100, default: 0 },
-      universeSpeed: { min: 1, max: 10, default: 1 },
-      researchSpeed: { min: 1, max: 20, default: 1 },
-      researchLabLevel: { min: 0, max: 999999, default: 0 },
-      energyTechLevel: { min: 0, max: 50, default: 0 },
-      plasmaTechLevel: { min: 0, max: 50, default: 0 },
-      ionTechLevel: { min: 0, max: 50, default: 0 },
-      hyperTechLevel: { min: 0, max: 50, default: 0 },
-      maxPlanetTemp: { min: -134, max: Infinity, default: 0 },
-      planetPos: { min: 1, max: 16, default: 8 },
-      irnLevel: { min: 0, max: Infinity, default: 0 },
-      booster: { min: 0, max: 4, default: 0 },
-      playerClass: { min: 0, max: 2, default: 0 },
-      mineralResCntrLvl: { min: 0, max: 100, default: 0 },
-      lfTerraformerRdc: { min: 0, max: 50, default: 0 }
-    };
+    // Own keys only: a field named after an Object.prototype member has no rule
+    if (!Object.hasOwn(STORED_RULES, field)) return value;
+    const rule = STORED_RULES[field];
+    if (rule === 'boolean') return value === 'true';
+    const num = rule.float ? Number.parseFloat(value) : Number.parseInt(value, 10);
+    return (!Number.isNaN(num) && num >= rule.min && num <= rule.max) ? num : rule.def;
+  }
 
-    const rule = rules[field];
-    if (!rule) return value;
-
-    const num = Number(value);
-    if (Number.isNaN(num)) return rule.default;
-    if (num < rule.min) return rule.min;
-    if (num > rule.max) return rule.max;
-    return num;
+  /**
+   * Put right what validate() cannot see field by field: the shape of the
+   * array fields. Changes `state` in place.
+   *
+   * @param {Record<string, any>} state - loaded settings
+   */
+  static normalizeStored(state) {
+    const defaults = new GlobalParams();
+    const labs = state.labLevels;
+    if (!Array.isArray(labs) || labs.length < 1 || labs.length > IRN_MAX_PLANETS) {
+      state.labLevels = new Array(IRN_DEFAULT_PLANETS).fill(0);
+    }
+    if (state.labChoice >= state.labLevels.length) {
+      state.labChoice = defaults.labChoice;
+    }
+    const rates = state.rates;
+    state.rates = Array.isArray(rates) && rates.length === defaults.rates.length
+      ? rates.map((rate, i) => Number.isNaN(rate) ? defaults.rates[i] : rate)
+      : defaults.rates;
   }
 }
+
+/** The planet count the research network dialog starts with, and its ceiling. */
+const IRN_DEFAULT_PLANETS = 8;
+const IRN_MAX_PLANETS = 99;
+
+/**
+ * GlobalParams.validate's rules: the stored settings fields that are numbers,
+ * with the bounds and default of their form field, and the ones that are
+ * booleans. `rates` has a default per entry, so an invalid entry is NaN here
+ * and normalizeStored() fills it in.
+ * @type {Record<string, 'boolean' | {min: number, max: number, def: number, float?: boolean}>}
+ */
+const STORED_RULES = {
+  shipyardLevel: { min: 0, max: Infinity, def: 0 },
+  robotFactoryLevelPlanet: { min: 0, max: Infinity, def: 0 },
+  robotFactoryLevelMoon: { min: 0, max: Infinity, def: 0 },
+  naniteFactoryLevel: { min: 0, max: Infinity, def: 0 },
+  universeSpeed: { min: 1, max: 10, def: 1 },
+  researchSpeed: { min: 1, max: 20, def: 1 },
+  researchLabLevel: { min: 0, max: Infinity, def: 0 },
+  energyTechLevel: { min: 0, max: Infinity, def: 0 },
+  plasmaTechLevel: { min: 0, max: Infinity, def: 0 },
+  ionTechLevel: { min: 0, max: Infinity, def: 0 },
+  hyperTechLevel: { min: 0, max: Infinity, def: 0 },
+  maxPlanetTemp: { min: -134, max: Infinity, def: 0 },
+  planetPos: { min: 1, max: 16, def: 8 },
+  playerClass: { min: 0, max: 2, def: 0 },
+  booster: { min: 0, max: 4, def: 0 },
+  irnLevel: { min: 0, max: Infinity, def: 0 },
+  labLevels: { min: 0, max: Infinity, def: 0 },
+  labChoice: { min: -1, max: IRN_MAX_PLANETS - 1, def: -1 },
+  mineralResCntrLvl: { min: 0, max: Infinity, def: 0 },
+  lfTerraformerRdc: { min: 0, max: 50, def: 0, float: true },
+  discovererClassBonus: { min: 0, max: Infinity, def: 0, float: true },
+  collectorClassBonus: { min: 0, max: Infinity, def: 0, float: true },
+  scCapacityIncrease: { min: 0, max: 1000, def: 0, float: true },
+  lcCapacityIncrease: { min: 0, max: 1000, def: 0, float: true },
+  rates: { min: 0.1, max: 100, def: Number.NaN, float: true },
+  geologist: 'boolean',
+  engineer: 'boolean',
+  technocrat: 'boolean',
+  admiral: 'boolean',
+  commander: 'boolean',
+  researchBonus: 'boolean',
+  isTrader: 'boolean',
+  fullNumbers: 'boolean',
+  useIrn: 'boolean',
+};
 
 /**
  * Individual build/research request
