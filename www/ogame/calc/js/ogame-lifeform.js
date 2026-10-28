@@ -97,19 +97,6 @@ function getBuildCostLF(techID, techLevelFrom, techLevelTo, techData, ionTechLev
 }
 
 /**
- * Calculates the duration of researching/building several levels for Life Forms
- * @param techID ID of the Building or research
- * @param techLevelFrom Starting building/research level (not included in the calculation)
- * @param techLevelTo Final building/research level
- * @param techData Technology data array in the format {id:[cost_met, cost_crys, cost_deut, cost_energy, grow_koeff]}
- * @param robotsLevel Robot Factory level
- * @param nanitesLevel Nanite Factory level
- * @param uniSpeed Universe speed
- * @param rsrTimeRdc Research time reduction (in %)
- * @param megalithRdc bonus from the Megalith
- * @returns Total duration of the building/research upgrade, ship construction
- */
-/**
  * Contribution of a single level to the build/demolish time of an LF building.
  * Level 0 has no cost of its own - when demolishing down to it, level 1's values are used.
  */
@@ -118,20 +105,29 @@ function getBuildingTimeStepLF(next, data, robotsLevel, nanitesLevel) {
 	return Math.floor((n * data[4] * Math.pow(data[9], n)) / ((robotsLevel + 1.0) * Math.pow(2.0, nanitesLevel)));
 }
 
+/**
+ * What the game charges for one level: the reduction and the universe speed
+ * applied to that level alone, each rounded down, and never under a second.
+ * A range is the sum of its levels, since the game builds one level at a time.
+ */
+function lfLevelSeconds(raw, reductionFactor, uniSpeed) {
+	return Math.max(1, Math.floor(Math.floor(raw * reductionFactor) / uniSpeed));
+}
+
 /** Time to build/demolish an LF building (techID % 1000 <= 100) between two levels. */
 function getBuildingTimeLF(techLevelFrom, techLevelTo, data, robotsLevel, nanitesLevel, uniSpeed, megalithRdc) {
 	let timeSpan = 0;
+	const factor = 1 - megalithRdc;
 	if (techLevelFrom < techLevelTo) {
 		for (let next = Number(techLevelFrom) + 1; next <= Number(techLevelTo); next++) {
-			timeSpan += getBuildingTimeStepLF(next, data, robotsLevel, nanitesLevel);
+			timeSpan += lfLevelSeconds(getBuildingTimeStepLF(next, data, robotsLevel, nanitesLevel), factor, uniSpeed);
 		}
 	} else {
 		for (let next = Number(techLevelFrom) - 1; next >= Math.max(Number(techLevelTo), 0); next--) {
-			timeSpan += getBuildingTimeStepLF(next, data, robotsLevel, nanitesLevel);
+			timeSpan += lfLevelSeconds(getBuildingTimeStepLF(next, data, robotsLevel, nanitesLevel), factor, uniSpeed);
 		}
 	}
-	timeSpan = Math.floor(timeSpan * (1 - megalithRdc));
-	return Math.floor(timeSpan / uniSpeed);
+	return timeSpan;
 }
 
 /** Time to research an LF technology (techID % 1000 > 100); LF research cannot be "unlearned", so demolition is not applicable. */
@@ -139,10 +135,9 @@ function getResearchTimeLF(techLevelFrom, techLevelTo, data, uniSpeed, rsrTimeRd
 	let timeSpan = 0;
 	if (techLevelFrom >= techLevelTo)
 		return timeSpan;
+	const factor = 1 - 0.01 * rsrTimeRdc;
 	for (let next = Number(techLevelFrom) + 1; next <= Number(techLevelTo); next++) {
-		let duration = Math.floor(next * data[4] * Math.pow(data[9], next));
-		duration = Math.floor(duration * (1 - 0.01 * rsrTimeRdc));
-		timeSpan += Math.floor(duration / uniSpeed);
+		timeSpan += lfLevelSeconds(Math.floor(next * data[4] * Math.pow(data[9], next)), factor, uniSpeed);
 	}
 	return timeSpan;
 }
@@ -164,7 +159,10 @@ function getResearchTimeLF(techLevelFrom, techLevelTo, data, uniSpeed, rsrTimeRd
  */
 
 /**
- * Calculates how long a life-form build or research takes.
+ * Calculates how long a life-form build or research takes over a range of
+ * levels: the sum of its levels, each charged on its own (see lfLevelSeconds).
+ * Buildings depend on the Robotics and Nanite Factories and the Megalith,
+ * researches on the research time reduction.
  * @param {BuildTimeLFParams} params
  * @returns Seconds
  */

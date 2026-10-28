@@ -167,3 +167,56 @@ describe('LF Costs Calculator - Mineral Research Centre on the Crystal Farm', ()
         expect(result.energy).toBe(3387);
     });
 });
+
+// The game builds one level at a time and charges each level on its own: the
+// Megalith reduction and the universe speed are applied to that level, rounded
+// down, and a level never takes under a second. A range is the sum of its levels;
+// reducing the range's total and flooring once came out a few seconds longer (#62).
+// Same Crystal Farm and account as above: Megalith 3, Robotics 10, Nanites 3, speed 8.
+describe('LF Costs Calculator - a range of building levels is charged level by level', () => {
+    const rockPARAMS = {
+        ...PARAMS, race: 2, megalithLvl: 3, robotFactoryLevel: 10, naniteFactoryLevel: 3, universeSpeed: 8,
+    };
+    const bldCostRdc = calc.computeBldCostRdc(2002, 2, 3, 0);
+
+    it('an upgrade over three levels is the sum of the levels', () => {
+        // Levels 45, 46, 47: 13176 + 16298 + 20149 s; reducing the total once gave 49624 s.
+        const result = calc.calculate(2002, 44, 47, 0, 0, bldCostRdc, rockPARAMS);
+        expect(result.time).toBe(49623);
+    });
+
+    it('a demolition over three levels is the sum of the levels', () => {
+        // Levels 46, 45, 44: 16298 + 13176 + 10647 s; reducing the total once gave 40123 s.
+        const result = calc.calculate(2002, 47, 44, 5, 0, bldCostRdc, rockPARAMS);
+        expect(result.time).toBe(40121);
+    });
+
+    it('the universe speed alone is applied per level too', () => {
+        // No Megalith: dividing the total by 8 once gave 180460 s.
+        const params = { ...rockPARAMS, megalithLvl: 0 };
+        const result = calc.calculate(2002, 40, 50, 0, 0, 0, params);
+        expect(result.time).toBe(180455);
+    });
+
+    it('every level takes at least a second', () => {
+        // Levels 1-3 are 0, 0 and 0 s after the reduction and the speed; the range
+        // used to be floored to 0 and lifted to a single second.
+        const result = calc.calculate(2002, 0, 3, 0, 0, bldCostRdc, rockPARAMS);
+        expect(result.time).toBe(3);
+    });
+
+    it('a single level is unchanged', () => {
+        const result = calc.calculate(2002, 44, 45, 0, 0, bldCostRdc, rockPARAMS);
+        expect(result.time).toBe(3 * 3600 + 39 * 60 + 36);
+    });
+});
+
+describe('LF Costs Calculator - every research level takes at least a second', () => {
+    it('a research range under a 99% reduction at speed 10 takes a second per level', () => {
+        // Levels 1-3 take 120, 288 and 518 s raw: 1, 2 and 5 s after 99% off,
+        // 0 s each at speed 10. The range used to come out 0 and be lifted to 1 s.
+        const params = { ...PARAMS, resCentreLvl: 0, universeSpeed: 10, researchTimeReduction: 99 };
+        const result = calc.calculate(11101, 0, 3, 0, 0, 0, params);
+        expect(result.time).toBe(3);
+    });
+});
