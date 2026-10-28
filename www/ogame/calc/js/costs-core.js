@@ -231,9 +231,10 @@ class GlobalParams {
    * @returns {*}
    */
   static validate(field, value) {
+    // Own keys only: a field named after an Object.prototype member has no rule
+    if (!Object.hasOwn(STORED_RULES, field)) return value;
     const rule = STORED_RULES[field];
     if (rule === 'boolean') return value === 'true';
-    if (rule === undefined) return value;
     const num = rule.float ? Number.parseFloat(value) : Number.parseInt(value, 10);
     return (!Number.isNaN(num) && num >= rule.min && num <= rule.max) ? num : rule.def;
   }

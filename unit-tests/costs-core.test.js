@@ -509,6 +509,7 @@ describe('GlobalParams.validate', () => {
 
     it('passes a field it has no rule for through', () => {
         expect(v('country', 'de')).toBe('de');
+        expect(v('toString', 'x')).toBe('x');
     });
 });
 
