@@ -10,7 +10,8 @@
 //     case the old `key;value,` format destroyed - see
 //     .claude/plans/settings-serialization.md);
 //   - each value still passes through params.validate() on load;
-//   - a payload written in the pre-JSON format is still read.
+//   - a payload written in the pre-JSON format is still read;
+//   - named slots are listed and removed in both stores.
 
 const { describe, it, beforeEach } = require('node:test');
 const { readFileSync } = require('node:fs');
@@ -27,6 +28,8 @@ function freshEnv() {
         getItem: (k) => (store.has(k) ? store.get(k) : null),
         setItem: (k, v) => store.set(k, String(v)),
         removeItem: (k) => store.delete(k),
+        get length() { return store.size; },
+        key: (i) => [...store.keys()][i] ?? null,
     };
     // Host JSON so the objects loadFromCookie returns are this realm's, and
     // node:assert's deepStrictEqual (prototype-sensitive) can compare them.
@@ -143,5 +146,34 @@ describe('settings serialization', () => {
         env.loadFromCookie('options_x', loaded);
         expect(loaded.speed).toBe(8);
         expect(loaded.rates).toEqual({ md: 2, cd: 4 });
+    });
+});
+
+describe('named slots', () => {
+    let env;
+    beforeEach(() => { env = freshEnv(); });
+
+    it('lists the keys under a prefix from localStorage and the cookie fallback, each once', () => {
+        env.localStorage.setItem('flight_fleet_a', '{}');
+        env.localStorage.setItem('flight_fleet_b', '{}');
+        env.localStorage.setItem('flight_uni_a', '{}');
+        env.document.cookie = 'flight_fleet_c=' + encodeURIComponent('{}') + '; path=/';
+        env.document.cookie = 'flight_fleet_a=' + encodeURIComponent('{}') + '; path=/';
+        expect([...env.listSavedKeys('flight_fleet_')].sort()).toEqual(['flight_fleet_a', 'flight_fleet_b', 'flight_fleet_c']);
+    });
+
+    it('matches the prefix at the start of the key only', () => {
+        env.localStorage.setItem('old_flight_fleet_a', '{}');
+        expect([...env.listSavedKeys('flight_fleet_')]).toEqual([]);
+    });
+
+    it('removes a slot from both stores, so it is not listed or read again', () => {
+        env.localStorage.setItem('flight_fleet_a', '{"savedShips":[1]}');
+        env.document.cookie = 'flight_fleet_a=' + encodeURIComponent('{"savedShips":[2]}') + '; path=/';
+        env.removeSavedData('flight_fleet_a');
+        expect([...env.listSavedKeys('flight_fleet_')]).toEqual([]);
+        expect(env.localStorage.getItem('flight_fleet_a')).toBe(null);
+        // This fake jar keeps an expired cookie as an empty value; a browser drops it.
+        expect(env.readSavedData('flight_fleet_a')).toBe('');
     });
 });
