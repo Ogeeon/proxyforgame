@@ -978,7 +978,11 @@ function readSavedSet(set) {
 function createProfilesUi() {
   const selector = document.getElementById('pf-selector');
   if (!selector || typeof pfgProfileText === 'undefined') return null;
-  const ui = new ProfilesUi(new ProfileStore(), pfgProfileText);
+  const store = new ProfileStore();
+  // The stored profiles of the imports that ran before the zeros: brought up
+  // to date before the first reader - init(), the binders - sees them.
+  migrateLfGameLevels(store);
+  const ui = new ProfilesUi(store, pfgProfileText);
   ui.init();
   return ui;
 }

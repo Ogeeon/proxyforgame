@@ -19,7 +19,9 @@ const core = load(['ogame/calc/js/profiles-core.js'], [
     'ratesToTrade', 'ratesFromTrade', 'profileFromProductionSet', 'profileFromFlightSet',
     'productionPlanetValues', 'productionPlanetState', 'isNewerExport', 'planCompanionSync',
     'resolveImportUniverse', 'profileFromSpyReport',
-    'lfBuildingGameId', 'pfNum', 'pfBool', 'pfBodyLabel', 'pfStartRange', 'expeditionHighTop',
+    'lfBuildingGameId', 'lfResearchGameId', 'LF_RACES', 'LF_BUILDING_POSITIONS', 'LF_RESEARCH_POSITIONS',
+    'lfTechValueKeys', 'fillLfGameLevels', 'migrateLfGameLevels',
+    'pfNum', 'pfBool', 'pfBodyLabel', 'pfStartRange', 'expeditionHighTop',
     'EXPEDITION_TOP_SCORE_LIMITS', 'EXPEDITION_HIGH_TOP_VALUES', 'UNIVERSE_SETTINGS_TTL_MS', 'UNIVERSE_SETTING_PARSERS',
     'parseUniverseSettings', 'readUniverseEntry', 'isUniverseEntryFresh', 'universeLayer',
     'universeValue', 'setUniverseChoice', 'mergeUniverseChoices', 'pfMarkState',
@@ -246,6 +248,60 @@ describe('parseAccountExport', () => {
 
     it('gives a planet with no species race 0', () => {
         expect(parsed(fixture()).planets.find((p) => p.name === 'Colony').values['lf.race']).toBe(0);
+    });
+});
+
+describe('the zeros of the unbuilt life-form techs', () => {
+    const countKeys = (values, prefix) => Object.keys(values).filter((k) => k.startsWith(prefix)).length;
+
+    it('fills every race\'s buildings and researches a planet lacks', () => {
+        const alpha = planetNamed(imported().profile, 'Alpha');
+        expect(countKeys(alpha.values, 'lf.building.')).toBe(core.LF_RACES * core.LF_BUILDING_POSITIONS);
+        expect(countKeys(alpha.values, 'lf.research.')).toBe(core.LF_RACES * core.LF_RESEARCH_POSITIONS);
+        expect(plain(alpha.values['lf.building.11106'])).toEqual({ game: 6 }); // the standing ones keep theirs
+        expect(plain(alpha.values['lf.research.11201'])).toEqual({ game: 8 });
+        expect(plain(alpha.values['lf.research.12207'])).toEqual({ game: 1 });
+        expect(plain(alpha.values['lf.building.12108'])).toEqual({ game: 0 }); // another race's building
+        expect(plain(alpha.values['lf.research.14218'])).toEqual({ game: 0 }); // an unresearched one
+    });
+
+    it('gives a planet whose export lists no techs the whole zero set', () => {
+        const obj = fixture();
+        obj.planets['900001'].speciesBuildings = {};
+        obj.planets['900001'].speciesResearches = {};
+        const alpha = planetNamed(imported(obj).profile, 'Alpha');
+        expect(plain(alpha.values['lf.building.11101'])).toEqual({ game: 0 });
+        expect(plain(alpha.values['lf.research.11201'])).toEqual({ game: 0 });
+        expect(countKeys(alpha.values, 'lf.building.')).toBe(core.LF_RACES * core.LF_BUILDING_POSITIONS);
+    });
+
+    it('gives a planet with no life form and a moon nothing', () => {
+        const { profile } = imported();
+        [planetNamed(profile, 'Colony'), profile.moons[0]].forEach((body) => {
+            expect(countKeys(body.values, 'lf.building.')).toBe(0);
+            expect(countKeys(body.values, 'lf.research.')).toBe(0);
+        });
+    });
+
+    it('marks the zero as the game value, and an edit as an override of it', () => {
+        const alpha = planetNamed(imported().profile, 'Alpha');
+        expect(plain(core.pfMarkState(alpha.values['lf.building.12108'], true))).toEqual({ bound: true, differs: false, game: 0 });
+        core.setProfileValue(alpha, 'lf.building.12108', 3);
+        expect(plain(core.pfMarkState(alpha.values['lf.building.12108'], true))).toEqual({ bound: true, differs: true, game: 0 });
+    });
+
+    it('a player-set level rides out a sync re-import against the game zero', () => {
+        const first = imported().profile;
+        core.setProfileValue(planetNamed(first, 'Alpha'), 'lf.building.12108', 3);
+        const { profile } = core.importAccountExport(first, parsed(fixture()), { newId: idSource(), keepOverrides: true });
+        expect(plain(planetNamed(profile, 'Alpha').values['lf.building.12108'])).toEqual({ game: 0, override: 3 });
+        expect(core.differsFromGame(planetNamed(profile, 'Alpha'), 'lf.building.12108')).toBe(true);
+    });
+
+    it('researches count out at their game ids like the buildings do', () => {
+        expect(core.lfResearchGameId(1, 7)).toBe(11207);
+        expect(core.lfResearchGameId(4, 18)).toBe(14218);
+        expect(core.lfTechValueKeys()).toHaveLength(core.LF_RACES * (core.LF_BUILDING_POSITIONS + core.LF_RESEARCH_POSITIONS));
     });
 });
 

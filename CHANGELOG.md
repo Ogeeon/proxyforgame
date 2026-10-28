@@ -27,6 +27,7 @@ release section; it is the source of truth for the other eleven translations.
 - Trade: switching to a country that has no universe with the current number now selects that country's first universe. It used to fall back to universe 101, which no country has, leaving the universe list blank and the trade message without a universe name. <!-- site -->
 - Flight: a saved fleet that only made it into the cookie fallback (storage full when it was saved) is now listed, and deleting a fleet removes its cookie copy too, so it cannot reappear later. The fleet list and the profile manager's conversion of old saved sets now find their keys through one shared helper, `listSavedKeys`, next to `removeSavedData`.
 - Flight: with an active profile, choosing a body in the departure select no longer snaps back to the previous one without touching the coordinates — the profile select keeps its own change handler, and picking a body writes the model before the DOM so the recalculation sees the fresh coordinates.
+- Profiles: with an imported profile, the fields of unbuilt life-form buildings and unresearched ones now carry the "as in game" mark like every other field, instead of showing their 0 unmarked. The import used to carry only the standing techs, so an unbuilt one had no game value to compare with; the import now fills in 0 for every building and research of every race the planet lacks, and the profiles stored before get the zeros on the next page load. <!-- site -->
 
 ## [2026-10-25] - site entry 69
 

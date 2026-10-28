@@ -8,9 +8,9 @@ const { describe, it } = require('node:test');
 const { load } = require('./load');
 const { expect } = require('./expect');
 
-const { ProfileStore, UniverseCache, createProfile } = load(
+const { ProfileStore, UniverseCache, createProfile, createPlanet, migrateLfGameLevels } = load(
     ['ogame/calc/js/profiles-core.js', 'ogame/calc/js/profiles-store.js'],
-    ['ProfileStore', 'UniverseCache', 'createProfile'],
+    ['ProfileStore', 'UniverseCache', 'createProfile', 'createPlanet', 'migrateLfGameLevels'],
 );
 
 /** A Storage stand-in backed by a Map. */
@@ -141,6 +141,44 @@ describe('ProfileStore', () => {
         expect(store.available).toBe(false);
         expect(store.getActiveId()).toBeNull();
         expect(store.save(createProfile({ label: 'A', id: 'a' }))).toBe(false);
+    });
+});
+
+describe('migrateLfGameLevels', () => {
+    /** A stored profile as an import left it, with one standing building on its planet. */
+    function importedStore() {
+        const { store } = freshStore();
+        const profile = createProfile({ label: 'Imported', id: 'imp' });
+        profile.importedAt = '2026-01-01T00:00:00Z';
+        const planet = createPlanet({ id: 'p1', name: 'Alpha' });
+        planet.values = { 'lf.race': { game: 1 }, 'lf.building.11101': { game: 40 } };
+        profile.planets.push(planet);
+        store.save(profile);
+        return store;
+    }
+
+    it('fills the imported profiles and skips the manual ones', () => {
+        const store = importedStore();
+        const manual = createProfile({ label: 'Manual', id: 'man' });
+        const hand = createPlanet({ id: 'p2', name: 'Hand' });
+        hand.values = { 'lf.race': { override: 1 }, 'lf.building.11101': { override: 2 } };
+        manual.planets.push(hand);
+        store.save(manual);
+
+        expect(migrateLfGameLevels(store)).toBe(1);
+        const planet = store.get('imp').planets[0];
+        expect(plain(planet.values['lf.building.11101'])).toEqual({ game: 40 });
+        expect(plain(planet.values['lf.building.12101'])).toEqual({ game: 0 });
+        expect(plain(planet.values['lf.research.11201'])).toEqual({ game: 0 });
+        expect(store.get('man').planets[0].values['lf.building.11101']).toEqual({ override: 2 });
+        expect('lf.research.11201' in store.get('man').planets[0].values).toBe(false);
+    });
+
+    it('leaves a stored profile alone once it is filled, and storage with none', () => {
+        const store = importedStore();
+        migrateLfGameLevels(store);
+        expect(migrateLfGameLevels(store)).toBe(0);
+        expect(migrateLfGameLevels(new ProfileStore(null, null))).toBe(0);
     });
 });
 
