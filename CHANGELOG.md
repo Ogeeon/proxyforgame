@@ -15,6 +15,10 @@ release section; it is the source of truth for the other eleven translations.
 
 ## [Unreleased]
 
+### Added
+
+- MCP server: a thirteenth tool, `ogame_import_account`, reads the account export a player copies out of the game - the Origin Exporter's, or several from PfG Companion - and answers with the account and every planet and moon under the other tools' argument names, so a model fills them from one paste instead of asking for every level and bonus. Player name and id, defences and stored resources are left out. The server now takes request bodies up to 256 KB (64 KB before), and `facilities`, like `lifeforms`, ignores the facilities a tool does not read.
+
 ### Fixed
 
 - All calculators: a page whose scripts fail to load — a blocked or dropped request — now shows a "reload the page" banner instead of silently leaving a dead calculator that also reported one error per missing symbol to the error tracker. The versioned script and stylesheet URLs now carry a hash of the file's content instead of its modification time, so one URL can no longer serve two different file versions across a deploy; that mix is what had a stale cached page declare a moved constant twice and break every script after it.
