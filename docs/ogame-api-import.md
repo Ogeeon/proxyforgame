@@ -57,6 +57,35 @@ The flight calculator also imports **spy reports** through their `sr-...` API co
 (`#api-code` + `#api-get`, fetched by `ajax.php`). That payload is a different shape but states the
 per-ship bonuses as the same fractions, so it shares `bonusPercent()` with the API 2 path.
 
+## The account export
+
+The **Origin Exporter** userscript (and the PfG Companion, which wraps it) copies the whole account
+out of the game as one JSON document: `playerId`, `characterClassId`, `allianceClassId`, `officers`,
+`researches`, `species`, `planets` and `moons` keyed by the game's ids, `speciesBonuses`,
+`bonusByType`, `schemaVersion` and `exportedAt`. Schema 2 adds a `universe` block
+(`{language, number, ...}`); schema 1 does not name its universe. The Companion may add
+`pfgCompanion.productionFactors` (each planet's production settings, by tech id) and hands several
+exports over as `{version: 1, exports: [...]}`.
+
+`parseAccountExport()` / `normalizeAccountExport()` in `www/ogame/calc/js/profiles-core.js` are the
+one reader. The player profiles import through them, and so does the MCP tool
+`ogame_import_account` (`mcp/tools/import-account.js`), which maps the normalized values onto the
+other tools' argument names. An unknown `schemaVersion` is refused, never read best-effort.
+
+### What a trimmed export may leave out
+
+The Companion's "copy for AI" sends a trimmed export to keep it small in a model's context — about
+16 KB instead of 38 KB for an 8-planet account. It is the same document under the same
+`schemaVersion`, and the normalizer must keep accepting it:
+
+- planets and moons carry no `resources`, `defenses` or `baseProduction`;
+- every entry of `speciesBonuses` is reduced to its `totalBonus` — the normalizer reads nothing else
+  of an entry (`spaceObjectBonus`, `technologyBonus`, the maxima go).
+
+Everything else stays as exported. `unit-tests/mcp-server.test.js` trims
+`playwright-tests/fixtures/account-export-large.json` (a synthetic 8-planet account) this way and
+checks that the tool's answer does not change.
+
 ## The two bonus sources in the expeditions calculator
 
 The cargo-bonus reader accepts either input, in one dialog:

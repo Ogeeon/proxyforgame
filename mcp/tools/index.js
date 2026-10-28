@@ -1,6 +1,7 @@
 'use strict';
 
-// The tools the server offers, in the order tools/list presents them: one per
+// The tools the server offers, in the order tools/list presents them: the
+// account import first, whose answer fills the others, then one per
 // calculator, three for the moon calculator's three panels.
 
 const { createBuildCostTool } = require('./build-cost');
@@ -13,6 +14,7 @@ const { createMoonTools } = require('./moon');
 const { createGravitonTool } = require('./graviton');
 const { createTerraformerTool } = require('./terraformer');
 const { createTradeTool } = require('./trade');
+const { createImportAccountTool } = require('./import-account');
 
 /**
  * @param {{siteApi: import('./common').SiteApi}} deps
@@ -20,6 +22,7 @@ const { createTradeTool } = require('./trade');
  */
 function createTools(deps) {
     return [
+        createImportAccountTool(),
         createFlightTool(deps),
         createBuildCostTool(deps),
         createLifeformCostTool(deps),

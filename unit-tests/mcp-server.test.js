@@ -102,7 +102,7 @@ describe('MCP protocol', () => {
     it('lists every tool as read-only', async () => {
         const { tools } = (await rpc(protocol, { jsonrpc: '2.0', id: 3, method: 'tools/list' })).result;
         expect(tools.map((t) => t.name)).toEqual([
-            'ogame_flight', 'ogame_build_cost', 'ogame_lifeform_cost', 'ogame_build_queue', 'ogame_production',
+            'ogame_import_account', 'ogame_flight', 'ogame_build_cost', 'ogame_lifeform_cost', 'ogame_build_queue', 'ogame_production',
             'ogame_expedition', 'ogame_moon_destruction', 'ogame_moon_creation', 'ogame_phalanx',
             'ogame_graviton', 'ogame_terraformer', 'ogame_trade',
         ]);
@@ -115,7 +115,8 @@ describe('MCP protocol', () => {
     it('keeps tools/list within its size budget', async () => {
         // Every client loads the tool list into its model's context (mcp/README.md). Going over
         // the budget is a deliberate decision that raises it here, in the same commit.
-        const BUDGET = 52 * 1024;
+        // 52 KB until ogame_import_account added its 1.5 KB.
+        const BUDGET = 54 * 1024;
         const { tools } = (await rpc(protocol, { jsonrpc: '2.0', id: 3, method: 'tools/list' })).result;
         const size = tools.reduce((sum, { name, title, description, inputSchema }) =>
             sum + JSON.stringify({ name, title, description, inputSchema }).length, 0);
@@ -237,8 +238,13 @@ describe('MCP HTTP transport', () => {
     });
 
     it('refuses an oversized body', async () => {
-        const res = await post(JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'ping', pad: 'x'.repeat(70 * 1024) }));
+        const res = await post(JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'ping', pad: 'x'.repeat(260 * 1024) }));
         expect(res.status).toBe(413);
+    });
+
+    it('takes a body the size of a big account export passed as a string', async () => {
+        const res = await post(JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'ping', pad: 'x'.repeat(120 * 1024) }));
+        expect(res.status).toBe(200);
     });
 
     it('answers 404 off the endpoint and serves a health check', async () => {
@@ -963,5 +969,172 @@ describe('MCP tool ogame_trade', () => {
         expect(await error({ sell: { metal: 1, crystal: 1, deuterium: 1 } })).toBe(true);
         expect(await error({ sell: { metal: 1 }, buy: 'metal' })).toBe(true);
         expect(await error({ sell: { metal: 1 }, buy: 'crystal', split: { fixed: { crystal: 1 } } })).toBe(true);
+    });
+});
+
+describe('MCP tool ogame_import_account', () => {
+    const { ACCOUNT_MAP, PLANET_MAP, BODY_MAP, lfBuildingFields } = require('../mcp/tools/import-account');
+    const { readFileSync } = require('node:fs');
+    const { join } = require('node:path');
+    // A synthetic 8-planet account (schemaVersion 2, every block a real export has, booster
+    // uuids from the game's shop), sized like a real one; and the small schema-1 export.
+    const fixture = (name) => JSON.parse(readFileSync(join(__dirname, '..', 'playwright-tests', 'fixtures', name), 'utf8'));
+    const LARGE = fixture('account-export-large.json');
+    const SMALL = fixture('account-export-v1.json');
+    const tools = createTools({ siteApi: fakeSiteApi({}) });
+    const importAccount = async (args) => call(protocolWith(), 'ogame_import_account', args);
+
+    /**
+     * What the PfG Companion's "copy for AI" leaves of an export (docs/ogame-api-import.md):
+     * no resources, defences or baseProduction on a body, every speciesBonuses entry cut
+     * down to its totalBonus.
+     */
+    function trimmed(raw) {
+        const copy = structuredClone(raw);
+        for (const bodies of [copy.planets, copy.moons]) {
+            for (const body of Object.values(bodies ?? {})) {
+                delete body.resources;
+                delete body.defenses;
+                delete body.baseProduction;
+            }
+        }
+        for (const group of Object.values(copy.speciesBonuses)) {
+            for (const [id, entry] of Object.entries(group)) {
+                group[id] = { totalBonus: entry.totalBonus };
+            }
+        }
+        return copy;
+    }
+
+    /**
+     * The schema an argument path leads to in a tool's input schema, or undefined:
+     * named properties first, then a map's shared value schema with its key list.
+     */
+    function schemaAt(schema, path) {
+        let at = schema;
+        for (const part of path.split('.')) {
+            const names = at?.propertyNames?.enum;
+            const next = at?.properties?.[part]
+                ?? (typeof at?.additionalProperties === 'object' && (!names || names.includes(part)) ? at.additionalProperties : undefined);
+            if (!next) return undefined;
+            at = next;
+        }
+        return at;
+    }
+
+    it('maps every value onto an argument the named tools take', () => {
+        const maps = [...ACCOUNT_MAP, ...PLANET_MAP, ...BODY_MAP, ...[0, 1, 2, 3, 4].flatMap(lfBuildingFields),
+            { path: 'planetRace', tools: ['ogame_lifeform_cost'] }, { path: 'position', tools: ['ogame_production'] }];
+        const missing = [];
+        for (const field of maps) {
+            for (const name of field.tools) {
+                const tool = tools.find((t) => t.name === name);
+                if (!tool || !schemaAt(tool.inputSchema, field.path)) missing.push(`${name}: ${field.path}`);
+            }
+        }
+        expect(missing).toEqual([]);
+    });
+
+    it('answers the same for a full export and the Companion\'s trimmed copy of it', async () => {
+        const full = await importAccount({ export: LARGE });
+        expect(full.isError === true).toBe(false);
+        const cut = trimmed(LARGE);
+        expect(JSON.stringify(cut).length).toBeLessThan(JSON.stringify(LARGE).length * 0.6);
+        expect((await importAccount({ export: cut })).structuredContent).toEqual(full.structuredContent);
+    });
+
+    it('reads the account and the bodies under the tools\' argument names', async () => {
+        const out = (await importAccount({ export: LARGE })).structuredContent;
+        expect(out.universe).toEqual({ country: 'en', number: 152 });
+        expect(out.bodies.length).toBe(14);
+        const { account } = out;
+        expect(account.playerClass).toBe('collector');
+        expect(account.allianceClass).toBe('trader');
+        expect(account.officers).toEqual({ commander: true, admiral: true, engineer: true, geologist: true, technocrat: false });
+        expect(account.discoveryBoosterPercent).toBe(20);
+        expect(account.lifeforms.crawlerBonus).toBe(2.75);
+
+        const alpha = out.bodies[0];
+        expect(alpha.location).toBe('planet');
+        expect(alpha.planetRace).toBe('humans');
+        // Platinum metal booster active, the gold one on planet 4 expired before the export.
+        expect(alpha.metalMine.boosterPercent).toBe(40);
+        expect(out.bodies[3].metalMine.boosterPercent).toBe(0);
+        // The Companion's production settings: crawlers overloaded on the first four planets.
+        expect(alpha.crawlers.percent).toBe(150);
+        expect(alpha.crawlers.count).toBe(LARGE.planets['30000001'].ships['217']);
+        expect(alpha.ships.reaper).toBe(LARGE.planets['30000001'].ships['218']);
+
+        const moon = out.bodies.find((b) => b.location === 'moon');
+        expect(moon.levels['lunar-base']).toBeGreaterThan(0);
+        expect(moon.metalMine).toBe(undefined);
+    });
+
+    it('leaves out who the player is, defences and resources', async () => {
+        const text = JSON.stringify((await importAccount({ export: LARGE })).structuredContent);
+        for (const secret of ['Synthetic Player', '104729', 'itemUuid', 'a83cfdc15b8dba27c82962d57e50d8101d263cfb', 'buffStart']) {
+            expect(text.includes(secret)).toBe(false);
+        }
+        expect(text.includes('rocket-launcher')).toBe(false);
+        expect(text.includes('"resources"')).toBe(false);
+    });
+
+    it('fills the other tools straight from its answer', async () => {
+        const out = (await importAccount({ export: LARGE })).structuredContent;
+        const planet = out.bodies[1];
+        /** The model's part: the fields a tool takes, account and planet life forms merged. */
+        const argsFor = (name, extra = {}) => {
+            const props = tools.find((t) => t.name === name)?.inputSchema.properties ?? {};
+            const merged = { ...out.account, ...planet, lifeforms: { ...out.account.lifeforms, ...planet.lifeforms } };
+            return { ...Object.fromEntries(Object.entries(merged).filter(([key]) => key in props)), ...extra };
+        };
+        for (const [name, extra] of [
+            ['ogame_production', {}],
+            ['ogame_graviton', {}],
+            ['ogame_terraformer', { toLevel: 3 }],
+            ['ogame_build_queue', { queue: [{ building: 'metal-mine' }] }],
+            ['ogame_lifeform_cost', { item: 'rune-tech', fromLevel: planet.lifeformLevels['rune-tech'], toLevel: 25 }],
+            ['ogame_build_cost', { item: 'plasma-tech', fromLevel: out.account.research['plasma-tech'], toLevel: 20 }],
+            ['ogame_flight', { from: planet.coordinates, to: out.bodies[2].coordinates }],
+            ['ogame_expedition', {}],
+        ]) {
+            const result = await call(protocolWith(), name, argsFor(name, extra));
+            expect([name, result.isError ? result.content[0].text : 'ok']).toEqual([name, 'ok']);
+        }
+    });
+
+    it('copies the universe asked for into a schemaVersion 1 answer, null without', async () => {
+        expect((await importAccount({ export: SMALL })).structuredContent.universe).toBe(null);
+        const out = (await importAccount({ export: SMALL, universe: { country: 'EN', number: 1 } })).structuredContent;
+        expect(out.universe).toEqual({ country: 'en', number: 1 });
+    });
+
+    it('takes the export as a string too', async () => {
+        const out = await importAccount({ export: JSON.stringify(SMALL) });
+        expect(out.structuredContent.account.playerClass).toBe('collector');
+    });
+
+    it('picks the export out of a Companion payload', async () => {
+        const second = { ...structuredClone(LARGE), universe: { language: 'de', number: 3 } };
+        const one = await importAccount({ export: { version: 1, exports: [LARGE] } });
+        expect(one.structuredContent.universe).toEqual({ country: 'en', number: 152 });
+
+        const several = await importAccount({ export: { version: 1, exports: [LARGE, second] } });
+        expect(several.isError).toBe(true);
+        expect(several.content[0].text).toContain('en-152, de-3');
+
+        const picked = await importAccount({ export: { version: 1, exports: [LARGE, second] }, universe: { country: 'de', number: 3 } });
+        expect(picked.structuredContent.universe).toEqual({ country: 'de', number: 3 });
+        const absent = await importAccount({ export: { version: 1, exports: [LARGE] }, universe: { country: 'fr', number: 1 } });
+        expect(absent.content[0].text).toContain('no export of fr-1');
+    });
+
+    it('refuses what it cannot read, with a reason', async () => {
+        const schema = await importAccount({ export: { ...SMALL, schemaVersion: 3 } });
+        expect(schema.content[0].text).toContain('schemaVersion 3 is not supported');
+        expect((await importAccount({ export: '{nope' })).content[0].text).toContain('not valid JSON');
+        expect((await importAccount({ export: { planets: {} } })).content[0].text).toContain('needs playerId and planets');
+        const other = await importAccount({ export: LARGE, universe: { country: 'de', number: 1 } });
+        expect(other.content[0].text).toContain('from en-152, not de-1');
     });
 });

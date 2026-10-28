@@ -230,13 +230,15 @@ const FACILITY_FIELDS = {
 
 /**
  * The `facilities` argument: levels on the planet or moon the build happens on.
+ *
+ * Like `lifeforms`, it ignores the facilities the tool does not read, so a
+ * body's whole block from ogame_import_account fits every tool.
  * @param {Array<keyof typeof FACILITY_FIELDS>} fields
  */
 const facilitiesSchema = (fields) => ({
     type: 'object',
-    description: 'Facility levels where it is built.',
+    description: 'Facility levels where it is built. Others are ignored.',
     properties: Object.fromEntries(fields.map((field) => [field, FACILITY_FIELDS[field]])),
-    additionalProperties: false,
 });
 
 /** The `energyBoosterPercent` argument: the energy booster item. */

@@ -68,4 +68,6 @@ resetting a git checkout - no install step, no build.
   in orchestration code, that piece moves into a shared file first, the way
   the costs tech table did.
 - The tools are public and unauthenticated, as the site is. The server
-  limits each client address to 120 requests a minute and bodies to 64 KB.
+  limits each client address to 120 requests a minute and bodies to 256 KB
+  (64 KB until `ogame_import_account`, whose account export is the largest
+  body a client sends).

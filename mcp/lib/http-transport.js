@@ -11,7 +11,10 @@
 
 const { errorResponse, PARSE_ERROR, INVALID_REQUEST, SUPPORTED_VERSIONS } = require('./protocol');
 
-const MAX_BODY_BYTES = 64 * 1024;
+// An account export for ogame_import_account is the largest body a client
+// sends: about 40 KB minified for an 8-planet account, nearer 90 KB when a
+// model passes it as an escaped string. 256 KB leaves room for a big account.
+const MAX_BODY_BYTES = 256 * 1024;
 
 /**
  * @typedef {object} HttpOptions

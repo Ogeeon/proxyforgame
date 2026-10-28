@@ -13,6 +13,7 @@ Why it is built this way - Node, no dependencies, one process behind Apache:
 
 | Tool | Calculator | What it answers | Computed by |
 |---|---|---|---|
+| `ogame_import_account` | profiles | The player's account export, under the other tools' argument names: account-wide values and every planet and moon | `profiles-core.js` |
 | `ogame_flight` | flight | Distance, one-way duration and deuterium at each speed step, cargo capacity | `flight-core.js` |
 | `ogame_build_cost` | costs | Metal, crystal, deuterium, energy, time, points, DM to halve, cargo ships - for a building or research range, or a number of ships or defences | `costs-core.js`, `ogame-costs.js`, `data/costs-techs.json` |
 | `ogame_lifeform_cost` | lfcosts | The same for a life form building or research, with the Megalith, MRC and research-building reductions | `lfcosts-core.js`, `ogame-lifeform.js`, `data/lf-techs.json` |
@@ -32,7 +33,7 @@ for s1-en - and read its speeds and settings through the site's `serverdata` and
 overrides what is read. The input schemas in `tools/*.js` are the reference: the
 server validates every call against the schema it publishes.
 
-Everything all twelve publish in `tools/list` comes to about 51.5 KB, held to a 52 KB budget
+Everything all thirteen publish in `tools/list` comes to about 53 KB, held to a 54 KB budget
 by a test in `unit-tests/mcp-server.test.js` - every client loads it into its model's
 context, so keep new schemas lean: write a map from ships or buildings to a value with
 `keyedMap()` rather than one property per key, list an item's keys with their names in the
@@ -45,7 +46,7 @@ same commit.
 A concept the game has once is one argument, with the same name and shape in every tool
 that takes it, from one schema in `tools/common.js`; a tool takes the subset its calculator
 reads. `lifeforms` alone ignores the fields and ships a tool does not read (the ones it reads
-are still checked), so one block serves every tool. The account import is meant to produce these forms, so a new tool reuses them
+are still checked), so one block serves every tool. The account import produces these forms, so a new tool reuses them
 rather than inventing its own.
 
 | Concept | Argument | Taken by |
@@ -55,12 +56,35 @@ rather than inventing its own.
 | Officers | `officers: {commander, admiral, engineer, geologist, technocrat}`, booleans. The commanding staff is all five set - there is no flag of its own | build-cost, production, graviton, terraformer |
 | Life forms | `lifeforms`: one object with every life form bonus (percent, as the game shows it) and building level - `metalBonus`, `energyBonus`, `collectorClassBonus` / `generalClassBonus` / `discovererClassBonus`, `terraformerReduction`, `megalith`, `disruptionChamber`, ...; per ship `shipBonuses[ship-key].{speed, cargo, fuel}` with the kebab ship keys of the cores; production's buildings as `lifeforms.buildings` | every tool with a life form input |
 | Item vs research reductions | build-cost `lifeforms.itemCostReduction` / `itemTimeReduction` (the item asked about); lifeform-cost `lifeforms.researchCostReduction` / `researchTimeReduction` (life form research) - different things, kept apart | build-cost, lifeform-cost |
-| Facilities | `facilities.{roboticsFactory, naniteFactory, shipyard, researchLab}` | build-cost, lifeform-cost, graviton, terraformer; build-queue keeps its keyed `levels` |
+| Facilities | `facilities.{roboticsFactory, naniteFactory, shipyard, researchLab}`; like `lifeforms`, ignores the ones a tool does not read | build-cost, lifeform-cost, graviton, terraformer; build-queue keeps its keyed `levels` |
 | Plants | `maxTemperature`, `solarPlant`, `fusionReactor`, `solarSatellites` | production, graviton, terraformer |
 | Research | `hyperspaceTechnology`, `ionTechnology`, max 50 | wherever cargo or demolition is computed |
 | Boosters | `energyBoosterPercent`; expedition's `discoveryBoosterPercent` is the expedition booster, not the mine one | production, graviton, terraformer, expedition |
 | Universe | `universe: {country, number}`, `universeSpeed`; flight and phalanx override the galaxy shape in `universeSettings` | most |
 | Planet or moon | `location`: `planet` \| `moon` | build-cost, build-queue |
+
+## The account import
+
+`ogame_import_account` takes the account export the player copies out of the game (the Origin
+Exporter's, schemaVersion 1 or 2, or a PfG Companion payload of several - `universe` picks one) and
+answers with `account` and `bodies[]`, both keyed by the other tools' argument names, so a model
+calls it once and fills the rest from its answer. For a tool about one planet the model merges
+`account.lifeforms` with that body's `lifeforms`; the account block is not repeated on every body.
+`account.research`, a body's `levels` and `lifeformLevels` are levels for `fromLevel`, and
+`account.itemReductions[item]` is the life form reduction of one item for `ogame_build_cost`.
+
+The mapping is one table in `tools/import-account.js`, from the profiles' value keys to argument
+paths, each with the tools that take it; a test checks every path against those tools' schemas.
+The export is read by `profiles-core.js`, the parser the site's profiles use - what a trimmed export
+may leave out is in `docs/ogame-api-import.md`.
+
+**Privacy.** The answer has no player name or id, no item uuids and no buff times; it does have
+planet names, coordinates, the universe and the export time. Defences and stored resources are left
+out - no tool reads defences, and resources are stale at once. The server never logs a request body,
+only the stack of an internal error.
+
+The largest body a client sends is such an export, which is why the HTTP transport takes up to
+256 KB.
 
 `ogame_production` is the one tool whose core reads page-wide state: `production-core.js`
 takes its settings from the `options` object `production.tpl` declares. The tool builds that
@@ -115,7 +139,7 @@ node mcp/server.js --stdio        # one client over stdin/stdout
 |---|---|
 | `server.js` | Entry point: configuration, HTTP or stdio |
 | `lib/protocol.js` | JSON-RPC and the MCP methods; transport-free |
-| `lib/http-transport.js` | Streamable HTTP, stateless: POST only, rate limit, origin check |
+| `lib/http-transport.js` | Streamable HTTP, stateless: POST only, rate limit, origin check, 256 KB bodies |
 | `lib/schema.js` | Validates arguments against the published input schema |
 | `lib/browser-scripts.js` | Runs `www/` scripts in a `vm` context - shared with the unit tests |
 | `lib/site-api.js` | Reads universe data from the site, with a short cache |
