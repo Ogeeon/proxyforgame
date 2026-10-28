@@ -596,3 +596,49 @@ test.describe('Lifeforms costs Calculator Page', () => {
 
     // todo: hyperspace, class bonus and lf bonuses to cargo cap
 });
+
+// ---------------------------------------------------------------------------
+// The multi-level table ("commons") totals writer indexes rows by counting
+// backwards from the table end, and Hawk caught it throwing on tables that
+// lost that shape ("Cannot read properties of undefined (reading 'children')",
+// 2026-10-25) - the cross-version page mixes of that week could serve a stale
+// table with the new renderer. The renderer now skips a table without its
+// footer shape. The empty level range (from == to) is the closest state a
+// healthy page can reach: no data rows, footer only - it must render clean.
+// ---------------------------------------------------------------------------
+test.describe('Multi-level table with an empty level range', () => {
+    test('the totals writer does not throw', async ({ page }) => {
+        const errors = [];
+        page.on('pageerror', (e) => errors.push(String(e)));
+
+        await page.addInitScript(() => {
+            localStorage.setItem('lastChange', 'key-value;true,value;99999');
+        });
+        await page.goto('/lfcosts');
+
+        // Reveal the pane holding the multi-level controls, outer tabs first.
+        const paneChain = await page.evaluate(() => {
+            const panes = [];
+            let el = document.getElementById('tab2-from-level');
+            while (el && el !== document.body) {
+                if (el.classList && el.classList.contains('tab-pane')) panes.unshift(el.id);
+                el = el.parentElement;
+            }
+            return panes;
+        });
+        for (const paneId of paneChain) {
+            await page.locator(`[data-bs-target="#${paneId}"]`).click();
+        }
+
+        await page.locator('#tab2-from-level').fill('5');
+        await page.locator('#tab2-from-level').press('Enter');
+        await page.locator('#tab2-to-level').fill('5');
+        await page.locator('#tab2-to-level').press('Enter');
+        await page.waitForTimeout(250);
+
+        expect(
+            errors.filter((e) => /reading 'children'|reading 'innerHTML'/.test(e)),
+            'no uncaught error from the totals writer',
+        ).toEqual([]);
+    });
+});

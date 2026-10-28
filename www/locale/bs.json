@@ -273,7 +273,8 @@
     "pf-departure-body": "Planeta ili mjesec profila",
     "pf-take-fleet": "Sa mjesta polaska",
     "pf-take-fleet-hint": "Unesi brodove stacionirane na planeti ili mjesecu odabranom kao mjesto polaska, prema posljednjem uvozu iz OGame.",
-    "pf-universe-from-profile": "Univerzum je određen aktivnim profilom."
+    "pf-universe-from-profile": "Univerzum je određen aktivnim profilom.",
+    "scripts-failed-to-load": "Neki skriptovi stranice se nisu učitali, pa kalkulator možda neće raditi. Ponovo učitajte stranicu."
   },
   "index": {
     "title": "ProxyForGame - alati za online igru Ogame",

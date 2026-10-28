@@ -273,7 +273,8 @@
     "pf-departure-body": "Planète ou lune du profil",
     "pf-take-fleet": "Depuis le départ",
     "pf-take-fleet-hint": "Reprendre les vaisseaux stationnés sur la planète ou la lune choisie comme point de départ, d’après le dernier import depuis OGame.",
-    "pf-universe-from-profile": "L’univers est défini par le profil actif."
+    "pf-universe-from-profile": "L’univers est défini par le profil actif.",
+    "scripts-failed-to-load": "Certains scripts de la page n'ont pas pu être chargés, donc la calculatrice risque de ne pas fonctionner. Veuillez recharger la page."
   },
   "index": {
     "title": "ProxyForGame - l'utilité pour les jeux par navigateurs OGame",

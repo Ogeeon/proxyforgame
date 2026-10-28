@@ -273,7 +273,8 @@
     "pf-departure-body": "Planeet of maan van het profiel",
     "pf-take-fleet": "Van het vertrekpunt",
     "pf-take-fleet-hint": "Neem de schepen over die op de als vertrekpunt gekozen planeet of maan staan, volgens de laatste import uit OGame.",
-    "pf-universe-from-profile": "Het universum wordt bepaald door het actieve profiel."
+    "pf-universe-from-profile": "Het universum wordt bepaald door het actieve profiel.",
+    "scripts-failed-to-load": "Sommige scripts van de pagina konden niet worden geladen, dus werkt de calculator mogelijk niet. Laad de pagina opnieuw."
   },
   "index": {
     "title": "ProxyForGame - instrumenten het browser spel OGame",

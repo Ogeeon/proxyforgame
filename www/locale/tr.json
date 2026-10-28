@@ -273,7 +273,8 @@
     "pf-departure-body": "Profilin gezegeni veya ayı",
     "pf-take-fleet": "Kalkış noktasından",
     "pf-take-fleet-hint": "Kalkış noktası olarak seçilen gezegende veya ayda bulunan gemileri, OGame’den yapılan son içe aktarmaya göre doldurur.",
-    "pf-universe-from-profile": "Evren etkin profil tarafından belirlenir."
+    "pf-universe-from-profile": "Evren etkin profil tarafından belirlenir.",
+    "scripts-failed-to-load": "Sayfanın bazı betikleri yüklenemedi, bu yüzden hesaplayıcı çalışmayabilir. Lütfen sayfayı yeniden yükleyin."
   },
   "index": {
     "title": "ProxyForGame - OGame için hesaplamalar",

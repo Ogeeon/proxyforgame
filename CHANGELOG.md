@@ -15,6 +15,11 @@ release section; it is the source of truth for the other eleven translations.
 
 ## [Unreleased]
 
+### Fixed
+
+- All calculators: a page whose scripts fail to load — a blocked or dropped request — now shows a "reload the page" banner instead of silently leaving a dead calculator that also reported one error per missing symbol to the error tracker. The versioned script and stylesheet URLs now carry a hash of the file's content instead of its modification time, so one URL can no longer serve two different file versions across a deploy; that mix is what had a stale cached page declare a moved constant twice and break every script after it.
+- LF costs: the multi-level table's totals no longer crash on a table that has lost its footer rows, and skip rendering instead.
+
 ## [2026-10-25] - site entry 69
 
 ### Added

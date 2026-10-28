@@ -37,6 +37,34 @@ test.describe('Graviton Calculator Page', () => {
 });
 
 // ---------------------------------------------------------------------------
+// A deferred script that never arrives (blocked or failed request) leaves the
+// page's globals missing, and the inline modules used to throw one
+// ReferenceError per symbol - Hawk carried each as its own group
+// ("options is not defined", 34 events by 2026-10-28). Aborting the
+// orchestration isolates the head module: it is what fills `options`.
+// ---------------------------------------------------------------------------
+test.describe('Graviton with a failed deferred script', () => {
+    test('the inline module shows the banner instead of throwing', async ({ page }) => {
+        const errors = [];
+        page.on('pageerror', (e) => errors.push(String(e)));
+
+        await page.addInitScript(() => {
+            localStorage.setItem('lastChange', 'key-value;true,value;99999');
+        });
+        await page.route('**/ogame/calc/js/graviton-orchestration.js*', (route) => route.abort());
+        await page.goto('/graviton');
+        await page.waitForLoadState('networkidle');
+
+        expect(
+            errors.filter((e) => /options is not defined/.test(e)),
+            'no uncaught reference to the missing orchestration',
+        ).toEqual([]);
+        await expect(page.locator('#pfg-scripts-failed')).toBeVisible();
+        await expect(page.locator('#pfg-scripts-failed')).toHaveText(/reload the page/i);
+    });
+});
+
+// ---------------------------------------------------------------------------
 // DOM integration: form inputs drive the rendered breakdown and results.
 // ---------------------------------------------------------------------------
 

@@ -9,38 +9,38 @@
   <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
   <link rel="icon" href="/favicon.ico" type="image/x-icon">
 <?php
-  // www/ on disk, for the filemtime() cache-busting stamps below.
+  // www/ on disk, for the content-hash cache-busting stamps below.
   $pfgPath = dirname(__DIR__, 2);
 ?>
   <!-- Bootstrap 5 and Bootstrap Icons (CSS, icon font, JS bundle) -->
   <?php require_once '../../vendor_bs.tpl'; ?>
 
   <!-- Custom styles -->
-  <link type="text/css" href="/css/langs_bs.css?v=<?php echo filemtime($pfgPath.'/css/langs_bs.css'); ?>" rel="stylesheet">
-  <link type="text/css" href="/css/common_bs.css?v=<?php echo filemtime($pfgPath.'/css/common_bs.css'); ?>" rel="stylesheet">
-  <link type="text/css" href="/ogame/calc/css/costs_bs.css?v=<?php echo filemtime($pfgPath.'/ogame/calc/css/costs_bs.css'); ?>" rel="stylesheet">
+  <link type="text/css" href="/css/langs_bs.css?v=<?php echo assetVersion($pfgPath, '/css/langs_bs.css'); ?>" rel="stylesheet">
+  <link type="text/css" href="/css/common_bs.css?v=<?php echo assetVersion($pfgPath, '/css/common_bs.css'); ?>" rel="stylesheet">
+  <link type="text/css" href="/ogame/calc/css/costs_bs.css?v=<?php echo assetVersion($pfgPath, '/ogame/calc/css/costs_bs.css'); ?>" rel="stylesheet">
 
   <!-- Utility libraries -->
-  <script src="/js/utils.js?v=<?php echo filemtime($pfgPath.'/js/utils.js'); ?>" defer></script>
-  <script src="/js/api-client.js?v=<?php echo filemtime($pfgPath.'/js/api-client.js'); ?>" defer></script>
-  <script src="/ogame/calc/js/ogame-production.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/ogame-production.js'); ?>" defer></script>
-  <script src="/ogame/calc/js/ogame-costs.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/ogame-costs.js'); ?>" defer></script>
+  <script src="/js/utils.js?v=<?php echo assetVersion($pfgPath, '/js/utils.js'); ?>" defer></script>
+  <script src="/js/api-client.js?v=<?php echo assetVersion($pfgPath, '/js/api-client.js'); ?>" defer></script>
+  <script src="/ogame/calc/js/ogame-production.js?v=<?php echo assetVersion($pfgPath, '/ogame/calc/js/ogame-production.js'); ?>" defer></script>
+  <script src="/ogame/calc/js/ogame-costs.js?v=<?php echo assetVersion($pfgPath, '/ogame/calc/js/ogame-costs.js'); ?>" defer></script>
 
   <!-- DOM Utilities (jQuery replacement) -->
-  <script src="/ogame/calc/js/dom-utils.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/dom-utils.js'); ?>" defer></script>
+  <script src="/ogame/calc/js/dom-utils.js?v=<?php echo assetVersion($pfgPath, '/ogame/calc/js/dom-utils.js'); ?>" defer></script>
 
   <!-- New modular calculator architecture -->
-  <script src="/ogame/calc/js/profiles-core.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/profiles-core.js'); ?>" defer></script>
-  <script src="/ogame/calc/js/profiles-store.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/profiles-store.js'); ?>" defer></script>
-  <script src="/ogame/calc/js/profiles-fields.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/profiles-fields.js'); ?>" defer></script>
-  <script src="/ogame/calc/js/profiles-widgets.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/profiles-widgets.js'); ?>" defer></script>
-  <script src="/ogame/calc/js/profiles-binders.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/profiles-binders.js'); ?>" defer></script>
-  <script src="/ogame/calc/js/profiles-ui.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/profiles-ui.js'); ?>" defer></script>
-  <script src="/ogame/calc/js/costs-core.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/costs-core.js'); ?>" defer></script>
-  <script src="/ogame/calc/js/costs-data-collector.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/costs-data-collector.js'); ?>" defer></script>
-  <script src="/ogame/calc/js/costs-renderer.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/costs-renderer.js'); ?>" defer></script>
-  <script src="/ogame/calc/js/costs-orchestration.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/costs-orchestration.js'); ?>" defer></script>
-  <script src="/ogame/calc/js/costs-profile.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/costs-profile.js'); ?>" defer></script>
+  <script src="/ogame/calc/js/profiles-core.js?v=<?php echo assetVersion($pfgPath, '/ogame/calc/js/profiles-core.js'); ?>" defer></script>
+  <script src="/ogame/calc/js/profiles-store.js?v=<?php echo assetVersion($pfgPath, '/ogame/calc/js/profiles-store.js'); ?>" defer></script>
+  <script src="/ogame/calc/js/profiles-fields.js?v=<?php echo assetVersion($pfgPath, '/ogame/calc/js/profiles-fields.js'); ?>" defer></script>
+  <script src="/ogame/calc/js/profiles-widgets.js?v=<?php echo assetVersion($pfgPath, '/ogame/calc/js/profiles-widgets.js'); ?>" defer></script>
+  <script src="/ogame/calc/js/profiles-binders.js?v=<?php echo assetVersion($pfgPath, '/ogame/calc/js/profiles-binders.js'); ?>" defer></script>
+  <script src="/ogame/calc/js/profiles-ui.js?v=<?php echo assetVersion($pfgPath, '/ogame/calc/js/profiles-ui.js'); ?>" defer></script>
+  <script src="/ogame/calc/js/costs-core.js?v=<?php echo assetVersion($pfgPath, '/ogame/calc/js/costs-core.js'); ?>" defer></script>
+  <script src="/ogame/calc/js/costs-data-collector.js?v=<?php echo assetVersion($pfgPath, '/ogame/calc/js/costs-data-collector.js'); ?>" defer></script>
+  <script src="/ogame/calc/js/costs-renderer.js?v=<?php echo assetVersion($pfgPath, '/ogame/calc/js/costs-renderer.js'); ?>" defer></script>
+  <script src="/ogame/calc/js/costs-orchestration.js?v=<?php echo assetVersion($pfgPath, '/ogame/calc/js/costs-orchestration.js'); ?>" defer></script>
+  <script src="/ogame/calc/js/costs-profile.js?v=<?php echo assetVersion($pfgPath, '/ogame/calc/js/costs-profile.js'); ?>" defer></script>
 
   <script>
     // Global options object
@@ -693,9 +693,14 @@
   require_once '../../analitics.tpl';
 ?>
 
+<?php require_once __DIR__ . '/../../scripts-guard.tpl'; ?>
 <script type="module">
 // Initialize the calculator app
 document.addEventListener('DOMContentLoaded', function() {
+  if (typeof bootstrap === 'undefined' || typeof initializeCostsCalculator !== 'function' || typeof initCostsProfiles !== 'function') {
+    pfgScriptsFailed();
+    return;
+  }
   // Bootstrap tabs are auto-initialized from markup
   // Bootstrap modals are auto-initialized from markup
 

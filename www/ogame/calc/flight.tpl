@@ -9,93 +9,101 @@
   <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
   <link rel="icon" href="/favicon.ico" type="image/x-icon">
 <?php
-  // www/ on disk, for the filemtime() cache-busting stamps below.
+  // www/ on disk, for the content-hash cache-busting stamps below.
   $pfgPath = dirname(__DIR__, 2);
 ?>
   <!-- Bootstrap 5 and Bootstrap Icons (CSS, icon font, JS bundle) -->
   <?php require_once '../../vendor_bs.tpl'; ?>
 
   <!-- Custom styles -->
-  <link type="text/css" href="/css/langs_bs.css?v=<?php echo filemtime($pfgPath.'/css/langs_bs.css'); ?>" rel="stylesheet">
-  <link type="text/css" href="/css/common_bs.css?v=<?php echo filemtime($pfgPath.'/css/common_bs.css'); ?>" rel="stylesheet">
-  <link type="text/css" href="/ogame/calc/css/flight_bs.css?v=<?php echo filemtime($pfgPath.'/ogame/calc/css/flight_bs.css'); ?>" rel="stylesheet">
+  <link type="text/css" href="/css/langs_bs.css?v=<?php echo assetVersion($pfgPath, '/css/langs_bs.css'); ?>" rel="stylesheet">
+  <link type="text/css" href="/css/common_bs.css?v=<?php echo assetVersion($pfgPath, '/css/common_bs.css'); ?>" rel="stylesheet">
+  <link type="text/css" href="/ogame/calc/css/flight_bs.css?v=<?php echo assetVersion($pfgPath, '/ogame/calc/css/flight_bs.css'); ?>" rel="stylesheet">
 
   <!-- Utility libraries and calculator modules -->
-  <script src="/js/utils.js?v=<?php echo filemtime($pfgPath.'/js/utils.js'); ?>" defer></script>
-  <script src="/js/api-client.js?v=<?php echo filemtime($pfgPath.'/js/api-client.js'); ?>" defer></script>
-  <script src="/ogame/calc/js/dom-utils.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/dom-utils.js'); ?>" defer></script>
+  <script src="/js/utils.js?v=<?php echo assetVersion($pfgPath, '/js/utils.js'); ?>" defer></script>
+  <script src="/js/api-client.js?v=<?php echo assetVersion($pfgPath, '/js/api-client.js'); ?>" defer></script>
+  <script src="/ogame/calc/js/dom-utils.js?v=<?php echo assetVersion($pfgPath, '/ogame/calc/js/dom-utils.js'); ?>" defer></script>
   <!-- Player profiles -->
-  <script src="/ogame/calc/js/profiles-core.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/profiles-core.js'); ?>" defer></script>
-  <script src="/ogame/calc/js/profiles-store.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/profiles-store.js'); ?>" defer></script>
-  <script src="/ogame/calc/js/profiles-fields.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/profiles-fields.js'); ?>" defer></script>
-  <script src="/ogame/calc/js/profiles-widgets.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/profiles-widgets.js'); ?>" defer></script>
-  <script src="/ogame/calc/js/profiles-binders.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/profiles-binders.js'); ?>" defer></script>
-  <script src="/ogame/calc/js/profiles-ui.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/profiles-ui.js'); ?>" defer></script>
-  <script src="/ogame/calc/js/own-api.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/own-api.js'); ?>" defer></script>
-  <script src="/ogame/calc/js/flight-core.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/flight-core.js'); ?>" defer></script>
-  <script src="/ogame/calc/js/flight-data-collector.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/flight-data-collector.js'); ?>" defer></script>
-  <script src="/ogame/calc/js/flight-renderer.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/flight-renderer.js'); ?>" defer></script>
-  <script src="/ogame/calc/js/flight-orchestration.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/flight-orchestration.js'); ?>" defer></script>
-  <script src="/ogame/calc/js/flight-profile.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/flight-profile.js'); ?>" defer></script>
+  <script src="/ogame/calc/js/profiles-core.js?v=<?php echo assetVersion($pfgPath, '/ogame/calc/js/profiles-core.js'); ?>" defer></script>
+  <script src="/ogame/calc/js/profiles-store.js?v=<?php echo assetVersion($pfgPath, '/ogame/calc/js/profiles-store.js'); ?>" defer></script>
+  <script src="/ogame/calc/js/profiles-fields.js?v=<?php echo assetVersion($pfgPath, '/ogame/calc/js/profiles-fields.js'); ?>" defer></script>
+  <script src="/ogame/calc/js/profiles-widgets.js?v=<?php echo assetVersion($pfgPath, '/ogame/calc/js/profiles-widgets.js'); ?>" defer></script>
+  <script src="/ogame/calc/js/profiles-binders.js?v=<?php echo assetVersion($pfgPath, '/ogame/calc/js/profiles-binders.js'); ?>" defer></script>
+  <script src="/ogame/calc/js/profiles-ui.js?v=<?php echo assetVersion($pfgPath, '/ogame/calc/js/profiles-ui.js'); ?>" defer></script>
+  <script src="/ogame/calc/js/own-api.js?v=<?php echo assetVersion($pfgPath, '/ogame/calc/js/own-api.js'); ?>" defer></script>
+  <script src="/ogame/calc/js/flight-core.js?v=<?php echo assetVersion($pfgPath, '/ogame/calc/js/flight-core.js'); ?>" defer></script>
+  <script src="/ogame/calc/js/flight-data-collector.js?v=<?php echo assetVersion($pfgPath, '/ogame/calc/js/flight-data-collector.js'); ?>" defer></script>
+  <script src="/ogame/calc/js/flight-renderer.js?v=<?php echo assetVersion($pfgPath, '/ogame/calc/js/flight-renderer.js'); ?>" defer></script>
+  <script src="/ogame/calc/js/flight-orchestration.js?v=<?php echo assetVersion($pfgPath, '/ogame/calc/js/flight-orchestration.js'); ?>" defer></script>
+  <script src="/ogame/calc/js/flight-profile.js?v=<?php echo assetVersion($pfgPath, '/ogame/calc/js/flight-profile.js'); ?>" defer></script>
 
-  <script type="module">
+  <?php require_once __DIR__ . '/../../scripts-guard.tpl'; ?>
+<script type="module">
     // A module, so it runs after the deferred scripts above have defined `options`.
     // `options` is defined in flight-orchestration.js; here we only fill in the
     // translation strings the renderer and orchestrator read.
-    options.decimalSeparator = '<?= $l['decimal-separator'] ?>';
-    options.datetimeW = '<?= $l['datetime-w'] ?>';
-    options.datetimeD = '<?= $l['datetime-d'] ?>';
-    options.datetimeH = '<?= $l['datetime-h'] ?>';
-    options.datetimeM = '<?= $l['datetime-m'] ?>';
-    options.datetimeS = '<?= $l['datetime-s'] ?>';
-    options.datetimeFormat = '<?= $l['datetime-format'] ?>';
-    options.flightTimeFormat = '<?= $l['flight-time-format'] ?>';
-    options.flightTimeFormatHint = '<?= $l['flight-time-format-hint'] ?>';
-    options.toleranceTimeFormat = '<?= $l['tolerance-time-format'] ?>';
-    options.toggleSignHint = '<?= $l['toggle-sign'] ?>';
-    options.removeRowHint = '<?= $l['remove-row'] ?>';
-    options.departureTitle = '<?= $l['departure'] ?>';
-    options.arrivalTitle = '<?= $l['arrival'] ?>';
-    options.returnTitle = '<?= $l['return'] ?>';
-    options.warnindDivId = 'warning';
-    options.warnindMsgDivId = 'warning-message';
-    options.fieldHint = '<?= $l['field-hint'] ?>';
-    options.msgMinConstraintViolated = '<?= $l['msg-min-constraint-violated'] ?>';
-    options.msgMaxConstraintViolated = '<?= $l['msg-max-constraint-violated'] ?>';
-    options.msgNoShips = "<?= $l['msg-no-ships'] ?>";
-    options.msgWrongDepartureTime = "<?= $l['msg-wrong-departure-time'] ?>";
-    options.msgWrongReturnTime = "<?= $l['msg-wrong-return-time'] ?>";
-    options.msgWrongArrivalTime = "<?= $l['msg-wrong-arrival-time'] ?>";
-    options.msgDepartureAfterReturn = "<?= $l['msg-departure-after-return'] ?>";
-    options.msgDepartureAfterArrival = "<?= $l['msg-departure-after-arrival'] ?>";
-    options.msgWrongTolerance = "<?= $l['msg-wrong-tolerance'] ?>";
-    options.msgWrongDepartureCoordinates = "<?= $l['msg-wrong-departure-coordinates'] ?>";
-    options.msgRecallBeforeDeparture = "<?= $l['msg-recall-before-departure'] ?>";
-    options.msgRecallAfterArrival = "<?= $l['msg-recall-after-arrival'] ?>";
-    options.msgNoSavepointsFound = "<?= $l['msg-no-savepoints-found'] ?>";
-    options.flightmodesNote = "<?= $l['flightmodes-note'] ?>";
-    options.savepointsNote = "<?= $l['savepoints-note'] ?>";
-    options.noFleetNameMsg = "<?= $l['no-fleet-name-msg'] ?>";
-    options.noFleetSelectedMsg = "<?= $l['no-fleet-selected-msg'] ?>";
-    options.fleetDelConfMsg = "<?= $l['del-fleet-confirm'] ?>";
-    options.fleetOwrConfMsg = "<?= $l['owr-fleet-confirm'] ?>";
-    options.fleetLoadConfMsg = "<?= $l['load-fleet-confirm'] ?>";
-    options.smallCargoName = "<?= $l['small-cargo'] ?>";
-    options.missingSCName = "<?= $l['no-sc-message'] ?>";
-    options.badSRCode = "<?= $l['import-bad-code-msg'] ?>";
-    options.emptySRCodeMsg = <?= json_encode($l['import-empty-code-msg']) ?>;
-    options.dataFetchMsg = <?= json_encode($l['fetching-data']) ?>;
-    options.ownApiBadJsonMsg = "<?= $l['own-api-bad-json-msg'] ?>";
-    options.importFailedMsg = "<?= $l['import-failed-msg'] ?>";
-    options.serverDataFailedMsg = <?= json_encode($l['server-data-failed-msg']) ?>;
-    options.populatedSystemsFailedMsg = <?= json_encode($l['populated-systems-failed-msg']) ?>;
-    options.dialogOk = <?= json_encode($l['dialog-ok']) ?>;
-    options.dialogConfirm = <?= json_encode($l['dialog-confirm']) ?>;
-    options.cancel = <?= json_encode($l['cancel']) ?>;
-    options.dialogAttentionLabel = <?= json_encode($l['dialog-attention']) ?>;
-    options.moonLabel = <?= json_encode($l['moon']) ?>;
-    options.universeFromProfile = <?= json_encode($l['pf-universe-from-profile']) ?>;
-  </script>
+    // A missing `options` means a deferred script never ran
+    // (blocked or failed request): show the banner and stop instead of throwing
+    // the ReferenceError Hawk logs as a separate group per symbol.
+    if (typeof options === 'undefined') {
+      pfgScriptsFailed();
+    } else {
+      options.decimalSeparator = '<?= $l['decimal-separator'] ?>';
+      options.datetimeW = '<?= $l['datetime-w'] ?>';
+      options.datetimeD = '<?= $l['datetime-d'] ?>';
+      options.datetimeH = '<?= $l['datetime-h'] ?>';
+      options.datetimeM = '<?= $l['datetime-m'] ?>';
+      options.datetimeS = '<?= $l['datetime-s'] ?>';
+      options.datetimeFormat = '<?= $l['datetime-format'] ?>';
+      options.flightTimeFormat = '<?= $l['flight-time-format'] ?>';
+      options.flightTimeFormatHint = '<?= $l['flight-time-format-hint'] ?>';
+      options.toleranceTimeFormat = '<?= $l['tolerance-time-format'] ?>';
+      options.toggleSignHint = '<?= $l['toggle-sign'] ?>';
+      options.removeRowHint = '<?= $l['remove-row'] ?>';
+      options.departureTitle = '<?= $l['departure'] ?>';
+      options.arrivalTitle = '<?= $l['arrival'] ?>';
+      options.returnTitle = '<?= $l['return'] ?>';
+      options.warnindDivId = 'warning';
+      options.warnindMsgDivId = 'warning-message';
+      options.fieldHint = '<?= $l['field-hint'] ?>';
+      options.msgMinConstraintViolated = '<?= $l['msg-min-constraint-violated'] ?>';
+      options.msgMaxConstraintViolated = '<?= $l['msg-max-constraint-violated'] ?>';
+      options.msgNoShips = "<?= $l['msg-no-ships'] ?>";
+      options.msgWrongDepartureTime = "<?= $l['msg-wrong-departure-time'] ?>";
+      options.msgWrongReturnTime = "<?= $l['msg-wrong-return-time'] ?>";
+      options.msgWrongArrivalTime = "<?= $l['msg-wrong-arrival-time'] ?>";
+      options.msgDepartureAfterReturn = "<?= $l['msg-departure-after-return'] ?>";
+      options.msgDepartureAfterArrival = "<?= $l['msg-departure-after-arrival'] ?>";
+      options.msgWrongTolerance = "<?= $l['msg-wrong-tolerance'] ?>";
+      options.msgWrongDepartureCoordinates = "<?= $l['msg-wrong-departure-coordinates'] ?>";
+      options.msgRecallBeforeDeparture = "<?= $l['msg-recall-before-departure'] ?>";
+      options.msgRecallAfterArrival = "<?= $l['msg-recall-after-arrival'] ?>";
+      options.msgNoSavepointsFound = "<?= $l['msg-no-savepoints-found'] ?>";
+      options.flightmodesNote = "<?= $l['flightmodes-note'] ?>";
+      options.savepointsNote = "<?= $l['savepoints-note'] ?>";
+      options.noFleetNameMsg = "<?= $l['no-fleet-name-msg'] ?>";
+      options.noFleetSelectedMsg = "<?= $l['no-fleet-selected-msg'] ?>";
+      options.fleetDelConfMsg = "<?= $l['del-fleet-confirm'] ?>";
+      options.fleetOwrConfMsg = "<?= $l['owr-fleet-confirm'] ?>";
+      options.fleetLoadConfMsg = "<?= $l['load-fleet-confirm'] ?>";
+      options.smallCargoName = "<?= $l['small-cargo'] ?>";
+      options.missingSCName = "<?= $l['no-sc-message'] ?>";
+      options.badSRCode = "<?= $l['import-bad-code-msg'] ?>";
+      options.emptySRCodeMsg = <?= json_encode($l['import-empty-code-msg']) ?>;
+      options.dataFetchMsg = <?= json_encode($l['fetching-data']) ?>;
+      options.ownApiBadJsonMsg = "<?= $l['own-api-bad-json-msg'] ?>";
+      options.importFailedMsg = "<?= $l['import-failed-msg'] ?>";
+      options.serverDataFailedMsg = <?= json_encode($l['server-data-failed-msg']) ?>;
+      options.populatedSystemsFailedMsg = <?= json_encode($l['populated-systems-failed-msg']) ?>;
+      options.dialogOk = <?= json_encode($l['dialog-ok']) ?>;
+      options.dialogConfirm = <?= json_encode($l['dialog-confirm']) ?>;
+      options.cancel = <?= json_encode($l['cancel']) ?>;
+      options.dialogAttentionLabel = <?= json_encode($l['dialog-attention']) ?>;
+      options.moonLabel = <?= json_encode($l['moon']) ?>;
+      options.universeFromProfile = <?= json_encode($l['pf-universe-from-profile']) ?>;
+    }
+</script>
   <script>
     // A classic script, not a module: the orchestrator reads `unis` as a global.
     var unis = <?= universesJs($universes) ?>;
@@ -775,6 +783,10 @@
 
 <script type="module">
 document.addEventListener('DOMContentLoaded', function() {
+  if (typeof bootstrap === 'undefined' || typeof initializeFlightCalculator !== 'function' || typeof initFlightProfiles !== 'function') {
+    pfgScriptsFailed();
+    return;
+  }
   document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(function(el) {
     bootstrap.Tooltip.getOrCreateInstance(el);
   });

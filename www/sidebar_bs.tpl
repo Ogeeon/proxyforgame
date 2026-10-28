@@ -23,12 +23,12 @@
   if ($result !== false && isset($result[0]['m'])) {
     $currChange = $result[0]['m'];
   }
-  // www/ on disk, for the filemtime() cache-busting stamps below.
+  // www/ on disk, for the content-hash cache-busting stamps below.
   $pfgPath = __DIR__;
 ?>
 
 <?php $sidebarCss = $pfgPath . '/css/sidebar_bs.css'; ?>
-<link type="text/css" href="/css/sidebar_bs.css?v=<?php echo file_exists($sidebarCss) ? filemtime($sidebarCss) : 0; ?>" rel="stylesheet">
+<link type="text/css" href="/css/sidebar_bs.css?v=<?php echo assetVersion($sidebarCss); ?>" rel="stylesheet">
 <script>
   var buttonsText = {};
   buttonsText.send = <?= json_encode($loc['reportStrings']['send']) ?>;
@@ -40,7 +40,7 @@
   var currLang = <?= json_encode($lang) ?>;
 </script>
 <?php $sidebarJs = $pfgPath . '/js/sidebar_bs.js'; ?>
-<script src="/js/sidebar_bs.js?v=<?php echo file_exists($sidebarJs) ? filemtime($sidebarJs) : 0; ?>" defer></script>
+<script src="/js/sidebar_bs.js?v=<?php echo assetVersion($sidebarJs); ?>" defer></script>
 
 <!-- Sidebar Toggle Button (visible when sidebar is hidden) -->
 <button class="btn btn-primary d-lg-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebarOffcanvas" aria-controls="sidebarOffcanvas">

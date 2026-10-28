@@ -273,7 +273,8 @@
     "pf-departure-body": "Planéta alebo mesiac profilu",
     "pf-take-fleet": "Z miesta odletu",
     "pf-take-fleet-hint": "Doplniť lode umiestnené na planéte alebo mesiaci zvolenom ako miesto odletu, podľa posledného importu z OGame.",
-    "pf-universe-from-profile": "Vesmír je určený aktívnym profilom."
+    "pf-universe-from-profile": "Vesmír je určený aktívnym profilom.",
+    "scripts-failed-to-load": "Niektoré skripty stránky sa nepodarilo načítať, takže kalkulačka nemusí fungovať. Obnovte stránku."
   },
   "index": {
     "title": "ProxyForGame - software pre online hry v prehliadači OGame",

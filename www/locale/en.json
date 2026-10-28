@@ -273,7 +273,8 @@
     "pf-departure-body": "Planet or moon of the profile",
     "pf-take-fleet": "From the departure",
     "pf-take-fleet-hint": "Fill in the ships stationed on the planet or moon chosen as the departure point, as of the last import from OGame.",
-    "pf-universe-from-profile": "The universe is set by the active profile."
+    "pf-universe-from-profile": "The universe is set by the active profile.",
+    "scripts-failed-to-load": "Some page scripts failed to load, so the calculator may not work. Please reload the page."
   },
   "index": {
     "title": "ProxyForGame - tools for online browser game OGame",

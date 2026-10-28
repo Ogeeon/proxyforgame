@@ -9,39 +9,39 @@
   <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
   <link rel="icon" href="/favicon.ico" type="image/x-icon">
 <?php
-  // www/ on disk, for the filemtime() cache-busting stamps below.
+  // www/ on disk, for the content-hash cache-busting stamps below.
   $pfgPath = dirname(__DIR__, 2);
 ?>
   <!-- Bootstrap 5 and Bootstrap Icons (CSS, icon font, JS bundle) -->
   <?php require_once '../../vendor_bs.tpl'; ?>
 
   <!-- Custom styles -->
-  <link type="text/css" href="/css/langs_bs.css?v=<?php echo filemtime($pfgPath.'/css/langs_bs.css'); ?>" rel="stylesheet">
-  <link type="text/css" href="/css/common_bs.css?v=<?php echo filemtime($pfgPath.'/css/common_bs.css'); ?>" rel="stylesheet">
-  <link type="text/css" href="/ogame/calc/css/queue_bs.css?v=<?php echo filemtime($pfgPath.'/ogame/calc/css/queue_bs.css'); ?>" rel="stylesheet">
+  <link type="text/css" href="/css/langs_bs.css?v=<?php echo assetVersion($pfgPath, '/css/langs_bs.css'); ?>" rel="stylesheet">
+  <link type="text/css" href="/css/common_bs.css?v=<?php echo assetVersion($pfgPath, '/css/common_bs.css'); ?>" rel="stylesheet">
+  <link type="text/css" href="/ogame/calc/css/queue_bs.css?v=<?php echo assetVersion($pfgPath, '/ogame/calc/css/queue_bs.css'); ?>" rel="stylesheet">
 
   <!-- Utility libraries -->
-  <script src="/js/utils.js?v=<?php echo filemtime($pfgPath.'/js/utils.js'); ?>" defer></script>
-  <script src="/js/api-client.js?v=<?php echo filemtime($pfgPath.'/js/api-client.js'); ?>" defer></script>
-  <script src="/ogame/calc/js/ogame-costs.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/ogame-costs.js'); ?>" defer></script>
+  <script src="/js/utils.js?v=<?php echo assetVersion($pfgPath, '/js/utils.js'); ?>" defer></script>
+  <script src="/js/api-client.js?v=<?php echo assetVersion($pfgPath, '/js/api-client.js'); ?>" defer></script>
+  <script src="/ogame/calc/js/ogame-costs.js?v=<?php echo assetVersion($pfgPath, '/ogame/calc/js/ogame-costs.js'); ?>" defer></script>
 
   <!-- DOM utilities (jQuery replacement) -->
-  <script src="/ogame/calc/js/dom-utils.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/dom-utils.js'); ?>" defer></script>
+  <script src="/ogame/calc/js/dom-utils.js?v=<?php echo assetVersion($pfgPath, '/ogame/calc/js/dom-utils.js'); ?>" defer></script>
 
   <!-- Player profiles -->
-  <script src="/ogame/calc/js/profiles-core.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/profiles-core.js'); ?>" defer></script>
-  <script src="/ogame/calc/js/profiles-store.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/profiles-store.js'); ?>" defer></script>
-  <script src="/ogame/calc/js/profiles-fields.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/profiles-fields.js'); ?>" defer></script>
-  <script src="/ogame/calc/js/profiles-widgets.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/profiles-widgets.js'); ?>" defer></script>
-  <script src="/ogame/calc/js/profiles-binders.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/profiles-binders.js'); ?>" defer></script>
-  <script src="/ogame/calc/js/profiles-ui.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/profiles-ui.js'); ?>" defer></script>
+  <script src="/ogame/calc/js/profiles-core.js?v=<?php echo assetVersion($pfgPath, '/ogame/calc/js/profiles-core.js'); ?>" defer></script>
+  <script src="/ogame/calc/js/profiles-store.js?v=<?php echo assetVersion($pfgPath, '/ogame/calc/js/profiles-store.js'); ?>" defer></script>
+  <script src="/ogame/calc/js/profiles-fields.js?v=<?php echo assetVersion($pfgPath, '/ogame/calc/js/profiles-fields.js'); ?>" defer></script>
+  <script src="/ogame/calc/js/profiles-widgets.js?v=<?php echo assetVersion($pfgPath, '/ogame/calc/js/profiles-widgets.js'); ?>" defer></script>
+  <script src="/ogame/calc/js/profiles-binders.js?v=<?php echo assetVersion($pfgPath, '/ogame/calc/js/profiles-binders.js'); ?>" defer></script>
+  <script src="/ogame/calc/js/profiles-ui.js?v=<?php echo assetVersion($pfgPath, '/ogame/calc/js/profiles-ui.js'); ?>" defer></script>
 
   <!-- Queue calculator modules -->
-  <script src="/ogame/calc/js/queue-core.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/queue-core.js'); ?>" defer></script>
-  <script src="/ogame/calc/js/queue-data-collector.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/queue-data-collector.js'); ?>" defer></script>
-  <script src="/ogame/calc/js/queue-renderer.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/queue-renderer.js'); ?>" defer></script>
-  <script src="/ogame/calc/js/queue-orchestration.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/queue-orchestration.js'); ?>" defer></script>
-  <script src="/ogame/calc/js/queue-profile.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/queue-profile.js'); ?>" defer></script>
+  <script src="/ogame/calc/js/queue-core.js?v=<?php echo assetVersion($pfgPath, '/ogame/calc/js/queue-core.js'); ?>" defer></script>
+  <script src="/ogame/calc/js/queue-data-collector.js?v=<?php echo assetVersion($pfgPath, '/ogame/calc/js/queue-data-collector.js'); ?>" defer></script>
+  <script src="/ogame/calc/js/queue-renderer.js?v=<?php echo assetVersion($pfgPath, '/ogame/calc/js/queue-renderer.js'); ?>" defer></script>
+  <script src="/ogame/calc/js/queue-orchestration.js?v=<?php echo assetVersion($pfgPath, '/ogame/calc/js/queue-orchestration.js'); ?>" defer></script>
+  <script src="/ogame/calc/js/queue-profile.js?v=<?php echo assetVersion($pfgPath, '/ogame/calc/js/queue-profile.js'); ?>" defer></script>
 
   <script>
     var options = {
@@ -312,8 +312,13 @@
 
 <?php require_once '../../analitics.tpl'; ?>
 
+<?php require_once __DIR__ . '/../../scripts-guard.tpl'; ?>
 <script type="module">
   document.addEventListener('DOMContentLoaded', function() {
+  if (typeof bootstrap === 'undefined' || typeof initializeQueueCalculator !== 'function' || typeof initQueueProfiles !== 'function') {
+    pfgScriptsFailed();
+    return;
+  }
     document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(function(el) {
       bootstrap.Tooltip.getOrCreateInstance(el);
     });

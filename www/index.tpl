@@ -9,19 +9,19 @@
   <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
   <link rel="icon" href="/favicon.ico" type="image/x-icon">
 <?php
-  // www/ on disk, for the filemtime() cache-busting stamps below.
+  // www/ on disk, for the content-hash cache-busting stamps below.
   $pfgPath = __DIR__;
 ?>
   <!-- Bootstrap 5 and Bootstrap Icons (CSS, icon font, JS bundle) -->
   <?php require_once 'vendor_bs.tpl'; ?>
 
   <!-- Custom styles -->
-  <link type="text/css" href="/css/langs_bs.css?v=<?php echo filemtime($pfgPath.'/css/langs_bs.css'); ?>" rel="stylesheet">
-  <link type="text/css" href="/css/common_bs.css?v=<?php echo filemtime($pfgPath.'/css/common_bs.css'); ?>" rel="stylesheet">
+  <link type="text/css" href="/css/langs_bs.css?v=<?php echo assetVersion($pfgPath, '/css/langs_bs.css'); ?>" rel="stylesheet">
+  <link type="text/css" href="/css/common_bs.css?v=<?php echo assetVersion($pfgPath, '/css/common_bs.css'); ?>" rel="stylesheet">
 
   <!-- Utility libraries -->
-  <script src="/js/utils.js?v=<?php echo filemtime($pfgPath.'/js/utils.js'); ?>" defer></script>
-  <script src="/js/api-client.js?v=<?php echo filemtime($pfgPath.'/js/api-client.js'); ?>" defer></script>
+  <script src="/js/utils.js?v=<?php echo assetVersion($pfgPath, '/js/utils.js'); ?>" defer></script>
+  <script src="/js/api-client.js?v=<?php echo assetVersion($pfgPath, '/js/api-client.js'); ?>" defer></script>
 <?php require_once 'cookies.tpl'; ?>
 </head>
 
@@ -46,9 +46,14 @@
   require_once 'analitics.tpl';
 ?>
 
+<?php require_once __DIR__ . '/scripts-guard.tpl'; ?>
 <script type="module">
   // Theme toggle (no calculator orchestration on the start page)
   document.addEventListener('DOMContentLoaded', function() {
+    if (typeof loadFromCookie !== 'function' || typeof toggleLightBS !== 'function') {
+      pfgScriptsFailed();
+      return;
+    }
     let theme = { value: 'light', validate: function(key, val) { return val; } };
     loadFromCookie('theme', theme);
     toggleLightBS(theme.value === 'light');

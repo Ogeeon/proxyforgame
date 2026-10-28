@@ -9,7 +9,7 @@
   <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
   <link rel="icon" href="/favicon.ico" type="image/x-icon">
 <?php
-  // www/ on disk, for the filemtime() cache-busting stamps below.
+  // www/ on disk, for the content-hash cache-busting stamps below.
   $pfgPath = dirname(__DIR__, 2);
 
   // Ships that can be sent on an expedition. The order must stay in sync with
@@ -76,27 +76,27 @@
   <?php require_once '../../vendor_bs.tpl'; ?>
 
   <!-- Custom styles -->
-  <link type="text/css" href="/css/langs_bs.css?v=<?php echo filemtime($pfgPath.'/css/langs_bs.css'); ?>" rel="stylesheet">
-  <link type="text/css" href="/css/common_bs.css?v=<?php echo filemtime($pfgPath.'/css/common_bs.css'); ?>" rel="stylesheet">
-  <link type="text/css" href="/ogame/calc/css/expeditions_bs.css?v=<?php echo filemtime($pfgPath.'/ogame/calc/css/expeditions_bs.css'); ?>" rel="stylesheet">
+  <link type="text/css" href="/css/langs_bs.css?v=<?php echo assetVersion($pfgPath, '/css/langs_bs.css'); ?>" rel="stylesheet">
+  <link type="text/css" href="/css/common_bs.css?v=<?php echo assetVersion($pfgPath, '/css/common_bs.css'); ?>" rel="stylesheet">
+  <link type="text/css" href="/ogame/calc/css/expeditions_bs.css?v=<?php echo assetVersion($pfgPath, '/ogame/calc/css/expeditions_bs.css'); ?>" rel="stylesheet">
 
   <!-- Utility libraries and calculator modules -->
-  <script src="/js/utils.js?v=<?php echo filemtime($pfgPath.'/js/utils.js'); ?>" defer></script>
-  <script src="/js/api-client.js?v=<?php echo filemtime($pfgPath.'/js/api-client.js'); ?>" defer></script>
-  <script src="/ogame/calc/js/dom-utils.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/dom-utils.js'); ?>" defer></script>
+  <script src="/js/utils.js?v=<?php echo assetVersion($pfgPath, '/js/utils.js'); ?>" defer></script>
+  <script src="/js/api-client.js?v=<?php echo assetVersion($pfgPath, '/js/api-client.js'); ?>" defer></script>
+  <script src="/ogame/calc/js/dom-utils.js?v=<?php echo assetVersion($pfgPath, '/ogame/calc/js/dom-utils.js'); ?>" defer></script>
   <!-- Player profiles -->
-  <script src="/ogame/calc/js/profiles-core.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/profiles-core.js'); ?>" defer></script>
-  <script src="/ogame/calc/js/profiles-store.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/profiles-store.js'); ?>" defer></script>
-  <script src="/ogame/calc/js/profiles-fields.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/profiles-fields.js'); ?>" defer></script>
-  <script src="/ogame/calc/js/profiles-widgets.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/profiles-widgets.js'); ?>" defer></script>
-  <script src="/ogame/calc/js/profiles-binders.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/profiles-binders.js'); ?>" defer></script>
-  <script src="/ogame/calc/js/profiles-ui.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/profiles-ui.js'); ?>" defer></script>
-  <script src="/ogame/calc/js/own-api.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/own-api.js'); ?>" defer></script>
-  <script src="/ogame/calc/js/expeditions-core.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/expeditions-core.js'); ?>" defer></script>
-  <script src="/ogame/calc/js/expeditions-data-collector.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/expeditions-data-collector.js'); ?>" defer></script>
-  <script src="/ogame/calc/js/expeditions-renderer.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/expeditions-renderer.js'); ?>" defer></script>
-  <script src="/ogame/calc/js/expeditions-orchestration.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/expeditions-orchestration.js'); ?>" defer></script>
-  <script src="/ogame/calc/js/expeditions-profile.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/expeditions-profile.js'); ?>" defer></script>
+  <script src="/ogame/calc/js/profiles-core.js?v=<?php echo assetVersion($pfgPath, '/ogame/calc/js/profiles-core.js'); ?>" defer></script>
+  <script src="/ogame/calc/js/profiles-store.js?v=<?php echo assetVersion($pfgPath, '/ogame/calc/js/profiles-store.js'); ?>" defer></script>
+  <script src="/ogame/calc/js/profiles-fields.js?v=<?php echo assetVersion($pfgPath, '/ogame/calc/js/profiles-fields.js'); ?>" defer></script>
+  <script src="/ogame/calc/js/profiles-widgets.js?v=<?php echo assetVersion($pfgPath, '/ogame/calc/js/profiles-widgets.js'); ?>" defer></script>
+  <script src="/ogame/calc/js/profiles-binders.js?v=<?php echo assetVersion($pfgPath, '/ogame/calc/js/profiles-binders.js'); ?>" defer></script>
+  <script src="/ogame/calc/js/profiles-ui.js?v=<?php echo assetVersion($pfgPath, '/ogame/calc/js/profiles-ui.js'); ?>" defer></script>
+  <script src="/ogame/calc/js/own-api.js?v=<?php echo assetVersion($pfgPath, '/ogame/calc/js/own-api.js'); ?>" defer></script>
+  <script src="/ogame/calc/js/expeditions-core.js?v=<?php echo assetVersion($pfgPath, '/ogame/calc/js/expeditions-core.js'); ?>" defer></script>
+  <script src="/ogame/calc/js/expeditions-data-collector.js?v=<?php echo assetVersion($pfgPath, '/ogame/calc/js/expeditions-data-collector.js'); ?>" defer></script>
+  <script src="/ogame/calc/js/expeditions-renderer.js?v=<?php echo assetVersion($pfgPath, '/ogame/calc/js/expeditions-renderer.js'); ?>" defer></script>
+  <script src="/ogame/calc/js/expeditions-orchestration.js?v=<?php echo assetVersion($pfgPath, '/ogame/calc/js/expeditions-orchestration.js'); ?>" defer></script>
+  <script src="/ogame/calc/js/expeditions-profile.js?v=<?php echo assetVersion($pfgPath, '/ogame/calc/js/expeditions-profile.js'); ?>" defer></script>
 
   <script>
     // Parameters passed through the URL API. A null means "not passed", so the
@@ -115,25 +115,33 @@
       fleet: <?= $jsonFleet ? json_encode($jsonFleet) : 'null' ?>
     };
   </script>
-  <script type="module">
+  <?php require_once __DIR__ . '/../../scripts-guard.tpl'; ?>
+<script type="module">
     // A module, so it runs after the deferred scripts above have defined `options`.
     // `options` is defined in expeditions-orchestration.js; here we only fill in
     // the translation strings the renderer and the bonus reader use. They go
     // through json_encode because several locales carry apostrophes.
-    options.decimalSeparator = <?= json_encode($l['decimal-separator'], JSON_UNESCAPED_UNICODE) ?>;
-    options.locaYes = <?= json_encode($l['LOCA_YES'], JSON_UNESCAPED_UNICODE) ?>;
-    options.locaNo = <?= json_encode($l['LOCA_NO'], JSON_UNESCAPED_UNICODE) ?>;
-    options.smallCargoName = <?= json_encode($l['small-cargo'], JSON_UNESCAPED_UNICODE) ?>;
-    options.noBonusDataMsg = <?= json_encode($l['no-bonus-data-msg'], JSON_UNESCAPED_UNICODE) ?>;
-    options.dialogOk = <?= json_encode($l['dialog-ok'], JSON_UNESCAPED_UNICODE) ?>;
-    options.dialogAttentionLabel = <?= json_encode($l['dialog-attention'], JSON_UNESCAPED_UNICODE) ?>;
-    options.largeCargoAbbrev = <?= json_encode($l['large-cargo-abbrev'], JSON_UNESCAPED_UNICODE) ?>;
-    options.warnindDivId = 'warning';
-    options.warnindMsgDivId = 'warning-message';
-    options.fieldHint = <?= json_encode($l['field-hint'], JSON_UNESCAPED_UNICODE) ?>;
-    options.msgMinConstraintViolated = <?= json_encode($l['msg-min-constraint-violated'], JSON_UNESCAPED_UNICODE) ?>;
-    options.msgMaxConstraintViolated = <?= json_encode($l['msg-max-constraint-violated'], JSON_UNESCAPED_UNICODE) ?>;
-  </script>
+    // A missing `options` means a deferred script never ran
+    // (blocked or failed request): show the banner and stop instead of throwing
+    // the ReferenceError Hawk logs as a separate group per symbol.
+    if (typeof options === 'undefined') {
+      pfgScriptsFailed();
+    } else {
+      options.decimalSeparator = <?= json_encode($l['decimal-separator'], JSON_UNESCAPED_UNICODE) ?>;
+      options.locaYes = <?= json_encode($l['LOCA_YES'], JSON_UNESCAPED_UNICODE) ?>;
+      options.locaNo = <?= json_encode($l['LOCA_NO'], JSON_UNESCAPED_UNICODE) ?>;
+      options.smallCargoName = <?= json_encode($l['small-cargo'], JSON_UNESCAPED_UNICODE) ?>;
+      options.noBonusDataMsg = <?= json_encode($l['no-bonus-data-msg'], JSON_UNESCAPED_UNICODE) ?>;
+      options.dialogOk = <?= json_encode($l['dialog-ok'], JSON_UNESCAPED_UNICODE) ?>;
+      options.dialogAttentionLabel = <?= json_encode($l['dialog-attention'], JSON_UNESCAPED_UNICODE) ?>;
+      options.largeCargoAbbrev = <?= json_encode($l['large-cargo-abbrev'], JSON_UNESCAPED_UNICODE) ?>;
+      options.warnindDivId = 'warning';
+      options.warnindMsgDivId = 'warning-message';
+      options.fieldHint = <?= json_encode($l['field-hint'], JSON_UNESCAPED_UNICODE) ?>;
+      options.msgMinConstraintViolated = <?= json_encode($l['msg-min-constraint-violated'], JSON_UNESCAPED_UNICODE) ?>;
+      options.msgMaxConstraintViolated = <?= json_encode($l['msg-max-constraint-violated'], JSON_UNESCAPED_UNICODE) ?>;
+    }
+</script>
 <?php require_once '../../cookies.tpl'; ?>
 </head>
 
@@ -418,6 +426,10 @@ endforeach; ?>
 
 <script type="module">
 document.addEventListener('DOMContentLoaded', function() {
+  if (typeof bootstrap === 'undefined' || typeof initializeExpeditionsCalculator !== 'function' || typeof initExpeditionsProfiles !== 'function') {
+    pfgScriptsFailed();
+    return;
+  }
   document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(function(el) {
     bootstrap.Tooltip.getOrCreateInstance(el);
   });

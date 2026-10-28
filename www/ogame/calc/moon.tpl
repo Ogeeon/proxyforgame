@@ -9,7 +9,7 @@
   <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
   <link rel="icon" href="/favicon.ico" type="image/x-icon">
 <?php
-  // www/ on disk, for the filemtime() cache-busting stamps below.
+  // www/ on disk, for the content-hash cache-busting stamps below.
   $pfgPath = dirname(__DIR__, 2);
 
   // Unit ids rendered as count inputs. They must stay in sync with MOON_UNITS
@@ -32,38 +32,46 @@
   <?php require_once '../../vendor_bs.tpl'; ?>
 
   <!-- Custom styles -->
-  <link type="text/css" href="/css/langs_bs.css?v=<?php echo filemtime($pfgPath.'/css/langs_bs.css'); ?>" rel="stylesheet">
-  <link type="text/css" href="/css/common_bs.css?v=<?php echo filemtime($pfgPath.'/css/common_bs.css'); ?>" rel="stylesheet">
-  <link type="text/css" href="/ogame/calc/css/moon_bs.css?v=<?php echo filemtime($pfgPath.'/ogame/calc/css/moon_bs.css'); ?>" rel="stylesheet">
+  <link type="text/css" href="/css/langs_bs.css?v=<?php echo assetVersion($pfgPath, '/css/langs_bs.css'); ?>" rel="stylesheet">
+  <link type="text/css" href="/css/common_bs.css?v=<?php echo assetVersion($pfgPath, '/css/common_bs.css'); ?>" rel="stylesheet">
+  <link type="text/css" href="/ogame/calc/css/moon_bs.css?v=<?php echo assetVersion($pfgPath, '/ogame/calc/css/moon_bs.css'); ?>" rel="stylesheet">
 
   <!-- Utility libraries and calculator modules -->
-  <script src="/js/utils.js?v=<?php echo filemtime($pfgPath.'/js/utils.js'); ?>" defer></script>
-  <script src="/js/api-client.js?v=<?php echo filemtime($pfgPath.'/js/api-client.js'); ?>" defer></script>
-  <script src="/ogame/calc/js/dom-utils.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/dom-utils.js'); ?>" defer></script>
+  <script src="/js/utils.js?v=<?php echo assetVersion($pfgPath, '/js/utils.js'); ?>" defer></script>
+  <script src="/js/api-client.js?v=<?php echo assetVersion($pfgPath, '/js/api-client.js'); ?>" defer></script>
+  <script src="/ogame/calc/js/dom-utils.js?v=<?php echo assetVersion($pfgPath, '/ogame/calc/js/dom-utils.js'); ?>" defer></script>
   <!-- Player profiles -->
-  <script src="/ogame/calc/js/profiles-core.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/profiles-core.js'); ?>" defer></script>
-  <script src="/ogame/calc/js/profiles-store.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/profiles-store.js'); ?>" defer></script>
-  <script src="/ogame/calc/js/profiles-fields.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/profiles-fields.js'); ?>" defer></script>
-  <script src="/ogame/calc/js/profiles-widgets.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/profiles-widgets.js'); ?>" defer></script>
-  <script src="/ogame/calc/js/profiles-binders.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/profiles-binders.js'); ?>" defer></script>
-  <script src="/ogame/calc/js/profiles-ui.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/profiles-ui.js'); ?>" defer></script>
-  <script src="/ogame/calc/js/moon-core.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/moon-core.js'); ?>" defer></script>
-  <script src="/ogame/calc/js/moon-data-collector.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/moon-data-collector.js'); ?>" defer></script>
-  <script src="/ogame/calc/js/moon-renderer.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/moon-renderer.js'); ?>" defer></script>
-  <script src="/ogame/calc/js/moon-orchestration.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/moon-orchestration.js'); ?>" defer></script>
-  <script src="/ogame/calc/js/moon-profile.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/moon-profile.js'); ?>" defer></script>
+  <script src="/ogame/calc/js/profiles-core.js?v=<?php echo assetVersion($pfgPath, '/ogame/calc/js/profiles-core.js'); ?>" defer></script>
+  <script src="/ogame/calc/js/profiles-store.js?v=<?php echo assetVersion($pfgPath, '/ogame/calc/js/profiles-store.js'); ?>" defer></script>
+  <script src="/ogame/calc/js/profiles-fields.js?v=<?php echo assetVersion($pfgPath, '/ogame/calc/js/profiles-fields.js'); ?>" defer></script>
+  <script src="/ogame/calc/js/profiles-widgets.js?v=<?php echo assetVersion($pfgPath, '/ogame/calc/js/profiles-widgets.js'); ?>" defer></script>
+  <script src="/ogame/calc/js/profiles-binders.js?v=<?php echo assetVersion($pfgPath, '/ogame/calc/js/profiles-binders.js'); ?>" defer></script>
+  <script src="/ogame/calc/js/profiles-ui.js?v=<?php echo assetVersion($pfgPath, '/ogame/calc/js/profiles-ui.js'); ?>" defer></script>
+  <script src="/ogame/calc/js/moon-core.js?v=<?php echo assetVersion($pfgPath, '/ogame/calc/js/moon-core.js'); ?>" defer></script>
+  <script src="/ogame/calc/js/moon-data-collector.js?v=<?php echo assetVersion($pfgPath, '/ogame/calc/js/moon-data-collector.js'); ?>" defer></script>
+  <script src="/ogame/calc/js/moon-renderer.js?v=<?php echo assetVersion($pfgPath, '/ogame/calc/js/moon-renderer.js'); ?>" defer></script>
+  <script src="/ogame/calc/js/moon-orchestration.js?v=<?php echo assetVersion($pfgPath, '/ogame/calc/js/moon-orchestration.js'); ?>" defer></script>
+  <script src="/ogame/calc/js/moon-profile.js?v=<?php echo assetVersion($pfgPath, '/ogame/calc/js/moon-profile.js'); ?>" defer></script>
 
-  <script type="module">
+  <?php require_once __DIR__ . '/../../scripts-guard.tpl'; ?>
+<script type="module">
     // A module, so it runs after the deferred scripts above have defined `options`.
     // `options` is defined in moon-orchestration.js; here we only fill in the
     // translation strings the renderer and validators read.
-    options.decimalSeparator = '<?= $l['decimal-separator'] ?>';
-    options.warnindDivId = 'warning';
-    options.warnindMsgDivId = 'warning-message';
-    options.fieldHint = '<?= $l['field-hint'] ?>';
-    options.msgMinConstraintViolated = '<?= $l['msg-min-constraint-violated'] ?>';
-    options.msgMaxConstraintViolated = '<?= $l['msg-max-constraint-violated'] ?>';
-  </script>
+    // A missing `options` means a deferred script never ran
+    // (blocked or failed request): show the banner and stop instead of throwing
+    // the ReferenceError Hawk logs as a separate group per symbol.
+    if (typeof options === 'undefined') {
+      pfgScriptsFailed();
+    } else {
+      options.decimalSeparator = '<?= $l['decimal-separator'] ?>';
+      options.warnindDivId = 'warning';
+      options.warnindMsgDivId = 'warning-message';
+      options.fieldHint = '<?= $l['field-hint'] ?>';
+      options.msgMinConstraintViolated = '<?= $l['msg-min-constraint-violated'] ?>';
+      options.msgMaxConstraintViolated = '<?= $l['msg-max-constraint-violated'] ?>';
+    }
+</script>
 <?php require_once '../../cookies.tpl'; ?>
 </head>
 
@@ -458,6 +466,10 @@
 
 <script type="module">
 document.addEventListener('DOMContentLoaded', function() {
+  if (typeof bootstrap === 'undefined' || typeof initializeMoonCalculator !== 'function' || typeof initMoonProfiles !== 'function') {
+    pfgScriptsFailed();
+    return;
+  }
   document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(function(el) {
     bootstrap.Tooltip.getOrCreateInstance(el);
   });

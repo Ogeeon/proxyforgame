@@ -217,6 +217,16 @@ class LfRenderer {
         const rows      = tbl.querySelectorAll('tr');
         const totalsRow = rows.length - 4;
 
+        // A table that lost its footer shape - an empty level range renders
+        // no data rows, a stale page mix can even strip the footer itself -
+        // has nowhere to write the totals. Skip rather than throw (Hawk:
+        // "Cannot read properties of undefined (reading 'children')").
+        const totalsCells = rows[totalsRow]?.children;
+        if (!totalsCells || totalsCells.length < 7
+            || !rows[totalsRow + 2] || !rows[totalsRow + 3]) {
+            return;
+        }
+
         rows[totalsRow].children[1].innerHTML = '<b>' + this._fmt(totals.metal)          + '</b>';
         rows[totalsRow].children[2].innerHTML = '<b>' + this._fmt(totals.crystal)        + '</b>';
         rows[totalsRow].children[3].innerHTML = '<b>' + this._fmt(totals.deut)           + '</b>';
@@ -245,6 +255,11 @@ class LfRenderer {
 
         const rows      = tbl.querySelectorAll('tr');
         const totalsRow = rows.length - 4;
+        const totalsCells = rows[totalsRow]?.children;
+        if (!totalsCells || totalsCells.length < 7
+            || !rows[totalsRow + 2] || !rows[totalsRow + 3]) {
+            return;
+        }
         rows[totalsRow].children[1].innerHTML = '<b>0</b>';
         rows[totalsRow].children[2].innerHTML = '<b>0</b>';
         rows[totalsRow].children[3].innerHTML = '<b>0</b>';

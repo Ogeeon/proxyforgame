@@ -273,7 +273,8 @@
     "pf-departure-body": "Planeta lub księżyc profilu",
     "pf-take-fleet": "Z miejsca startu",
     "pf-take-fleet-hint": "Wstaw statki stacjonujące na planecie lub księżycu wybranym jako miejsce startu, według ostatniego importu z OGame.",
-    "pf-universe-from-profile": "Uniwersum jest ustawione przez aktywny profil."
+    "pf-universe-from-profile": "Uniwersum jest ustawione przez aktywny profil.",
+    "scripts-failed-to-load": "Niektóre skrypty strony nie zostały wczytane, więc kalkulator może nie działać. Odśwież stronę."
   },
   "index": {
     "title": "Narzedzia do gier przegladarkowych OGame",

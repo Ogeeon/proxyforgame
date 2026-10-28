@@ -22,8 +22,10 @@ RewriteRule ^(css|js)/(.*)\.[0-9]+\.(.*)$ /$1/$2.$3 [L]
 RewriteRule ^(ogame/calc/css|/ogame/calc/js)/(.*)\.[0-9]+\.(.*)$ /$1/$2.$3 [L]
 
 # Browser caching for static files. Every stylesheet and script the pages load
-# carries a ?v=<filemtime> stamp, so a changed file gets a new URL and these can
-# be kept for a year without ever serving a stale copy. Images and the favicon
+# carries a ?v=<content-hash> stamp (assetVersion() in asset-version.inc.php),
+# so a changed file gets a new URL and these can be kept for a year without
+# ever serving a stale copy - or a different content under an old URL, which
+# an mtime stamp allowed across a release switch. Images and the favicon
 # are referenced without a stamp, so they get a month. PHP output (pages, the
 # ajax.php JSON) is not matched by any of these types and stays uncached.
 # Wrapped in IfModule so a server without the modules (php -S, a fresh WAMP)
@@ -46,8 +48,8 @@ RewriteRule ^(ogame/calc/css|/ogame/calc/js)/(.*)\.[0-9]+\.(.*)$ /$1/$2.$3 [L]
 </IfModule>
 <IfModule mod_headers.c>
     # A stamped URL never changes content: tell the browser not to revalidate
-    # it even on a reload.
-    <If "%{QUERY_STRING} =~ /^v=\d+$/">
+    # it even on a reload. The stamp is a crc32b content hash, so hex digits.
+    <If "%{QUERY_STRING} =~ /^v=[0-9a-f]{1,8}$/">
         Header merge Cache-Control "immutable"
     </If>
 </IfModule>

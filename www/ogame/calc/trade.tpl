@@ -10,53 +10,61 @@
   <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
   <link rel="icon" href="/favicon.ico" type="image/x-icon">
 <?php
-  // www/ on disk, for the filemtime() cache-busting stamps below.
+  // www/ on disk, for the content-hash cache-busting stamps below.
   $pfgPath = dirname(__DIR__, 2);
 ?>
 
   <?php require_once '../../vendor_bs.tpl'; ?>
-  <link type="text/css" href="/css/langs_bs.css?v=<?php echo filemtime($pfgPath.'/css/langs_bs.css'); ?>" rel="stylesheet">
-  <link type="text/css" href="/css/common_bs.css?v=<?php echo filemtime($pfgPath.'/css/common_bs.css'); ?>" rel="stylesheet">
-  <link type="text/css" href="/ogame/calc/css/trade.css?v=<?php echo filemtime($pfgPath.'/ogame/calc/css/trade.css'); ?>" rel="stylesheet">
+  <link type="text/css" href="/css/langs_bs.css?v=<?php echo assetVersion($pfgPath, '/css/langs_bs.css'); ?>" rel="stylesheet">
+  <link type="text/css" href="/css/common_bs.css?v=<?php echo assetVersion($pfgPath, '/css/common_bs.css'); ?>" rel="stylesheet">
+  <link type="text/css" href="/ogame/calc/css/trade.css?v=<?php echo assetVersion($pfgPath, '/ogame/calc/css/trade.css'); ?>" rel="stylesheet">
 
-  <script src="/js/utils.js?v=<?php echo filemtime($pfgPath.'/js/utils.js'); ?>" defer></script>
-  <script src="/js/api-client.js?v=<?php echo filemtime($pfgPath.'/js/api-client.js'); ?>" defer></script>
-  <script src="/ogame/calc/js/dom-utils.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/dom-utils.js'); ?>" defer></script>
+  <script src="/js/utils.js?v=<?php echo assetVersion($pfgPath, '/js/utils.js'); ?>" defer></script>
+  <script src="/js/api-client.js?v=<?php echo assetVersion($pfgPath, '/js/api-client.js'); ?>" defer></script>
+  <script src="/ogame/calc/js/dom-utils.js?v=<?php echo assetVersion($pfgPath, '/ogame/calc/js/dom-utils.js'); ?>" defer></script>
   <!-- Player profiles -->
-  <script src="/ogame/calc/js/profiles-core.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/profiles-core.js'); ?>" defer></script>
-  <script src="/ogame/calc/js/profiles-store.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/profiles-store.js'); ?>" defer></script>
-  <script src="/ogame/calc/js/profiles-fields.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/profiles-fields.js'); ?>" defer></script>
-  <script src="/ogame/calc/js/profiles-widgets.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/profiles-widgets.js'); ?>" defer></script>
-  <script src="/ogame/calc/js/profiles-binders.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/profiles-binders.js'); ?>" defer></script>
-  <script src="/ogame/calc/js/profiles-ui.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/profiles-ui.js'); ?>" defer></script>
-  <script src="/ogame/calc/js/trade-core.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/trade-core.js'); ?>" defer></script>
-  <script src="/ogame/calc/js/trade.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/trade.js'); ?>" defer></script>
-  <script src="/ogame/calc/js/trade-profile.js?v=<?php echo filemtime($pfgPath.'/ogame/calc/js/trade-profile.js'); ?>" defer></script>
+  <script src="/ogame/calc/js/profiles-core.js?v=<?php echo assetVersion($pfgPath, '/ogame/calc/js/profiles-core.js'); ?>" defer></script>
+  <script src="/ogame/calc/js/profiles-store.js?v=<?php echo assetVersion($pfgPath, '/ogame/calc/js/profiles-store.js'); ?>" defer></script>
+  <script src="/ogame/calc/js/profiles-fields.js?v=<?php echo assetVersion($pfgPath, '/ogame/calc/js/profiles-fields.js'); ?>" defer></script>
+  <script src="/ogame/calc/js/profiles-widgets.js?v=<?php echo assetVersion($pfgPath, '/ogame/calc/js/profiles-widgets.js'); ?>" defer></script>
+  <script src="/ogame/calc/js/profiles-binders.js?v=<?php echo assetVersion($pfgPath, '/ogame/calc/js/profiles-binders.js'); ?>" defer></script>
+  <script src="/ogame/calc/js/profiles-ui.js?v=<?php echo assetVersion($pfgPath, '/ogame/calc/js/profiles-ui.js'); ?>" defer></script>
+  <script src="/ogame/calc/js/trade-core.js?v=<?php echo assetVersion($pfgPath, '/ogame/calc/js/trade-core.js'); ?>" defer></script>
+  <script src="/ogame/calc/js/trade.js?v=<?php echo assetVersion($pfgPath, '/ogame/calc/js/trade.js'); ?>" defer></script>
+  <script src="/ogame/calc/js/trade-profile.js?v=<?php echo assetVersion($pfgPath, '/ogame/calc/js/trade-profile.js'); ?>" defer></script>
 
-  <script type="module">
+  <?php require_once __DIR__ . '/../../scripts-guard.tpl'; ?>
+<script type="module">
     // A module, so it runs after the deferred trade.js that declares `l` and
     // `options`.
-    l.sc ='<?= $l['sc-short'] ?>';
-    l.lc = '<?= $l['lc-short'] ?>';
-    l.metal = '<?= $l['metal'] ?>';
-    l.crystal = '<?= $l['crystal'] ?>';
-    l.deuterium = '<?= $l['deuterium'] ?>';
-    l.met = '<?= $l['met'] ?>';
-    l.crys = '<?= $l['crys'] ?>';
-    l.deut = '<?= $l['deut'] ?>';
-    l.src = '<?= $l['src'] ?>';
-    l.dst = '<?= $l['dst'] ?>';
-    l.fix = '<?= $l['fix'] ?>';
-    l.and = '<?= $l['and'] ?>';
-    l.coords = '<?= $l['coords'] ?>';
-    l.rates = '<?= $l['rates'] ?>';
-    l.moonstr = '<?= $l['moon'] ?>';
-    options.decimalSeparator = '<?= $l['decimal-separator'] ?>';
-    options.moonLabel = <?= json_encode($l['moon']) ?>;
-    options.universeFromProfile = <?= json_encode($l['pf-universe-from-profile']) ?>;
-    options.dialogOk = <?= json_encode($l['dialog-ok']) ?>;
-    options.dialogAttentionLabel = <?= json_encode($l['dialog-attention']) ?>;
-  </script>
+    // A missing `l` / `options` means a deferred script never ran (blocked
+    // or failed request): show the banner and stop instead of throwing the
+    // ReferenceError Hawk logs as a separate group per symbol.
+    if (typeof l === 'undefined' || typeof options === 'undefined') {
+      pfgScriptsFailed();
+    } else {
+      l.sc ='<?= $l['sc-short'] ?>';
+      l.lc = '<?= $l['lc-short'] ?>';
+      l.metal = '<?= $l['metal'] ?>';
+      l.crystal = '<?= $l['crystal'] ?>';
+      l.deuterium = '<?= $l['deuterium'] ?>';
+      l.met = '<?= $l['met'] ?>';
+      l.crys = '<?= $l['crys'] ?>';
+      l.deut = '<?= $l['deut'] ?>';
+      l.src = '<?= $l['src'] ?>';
+      l.dst = '<?= $l['dst'] ?>';
+      l.fix = '<?= $l['fix'] ?>';
+      l.and = '<?= $l['and'] ?>';
+      l.coords = '<?= $l['coords'] ?>';
+      l.rates = '<?= $l['rates'] ?>';
+      l.moonstr = '<?= $l['moon'] ?>';
+      options.decimalSeparator = '<?= $l['decimal-separator'] ?>';
+      options.moonLabel = <?= json_encode($l['moon']) ?>;
+      options.universeFromProfile = <?= json_encode($l['pf-universe-from-profile']) ?>;
+      options.dialogOk = <?= json_encode($l['dialog-ok']) ?>;
+      options.dialogAttentionLabel = <?= json_encode($l['dialog-attention']) ?>;
+    }
+</script>
   <script>
     // A classic script, not a module: trade.js reads `unis` as a global.
     var unis = {
