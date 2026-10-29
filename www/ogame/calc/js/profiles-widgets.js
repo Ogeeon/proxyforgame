@@ -533,7 +533,204 @@ class PfCoordsSelect {
   }
 }
 
+/**
+ * A moment as a date and time in the page's language - the <html lang> the
+ * site set from the URL (/ru/ -> ru) - rather than the browser's.
+ *
+ * @param {number} ms Unix milliseconds.
+ * @returns {string}
+ */
+function pfPageDateTime(ms) {
+  const date = new Date(ms);
+  try {
+    return date.toLocaleString(document.documentElement.lang || undefined);
+  } catch {
+    // A tag the browser does not take: its own language then.
+    return date.toLocaleString();
+  }
+}
+
+/** The resources a reading carries, as BodyResources names them. */
+const PF_RESOURCE_KEYS = /** @type {const} */ (['metal', 'crystal', 'deuterium']);
+
+/**
+ * One set of a calculator's resource fields - whichever of metal, crystal and
+ * deuterium it has a field for - and the caption that says how old the
+ * reading in them is.
+ *
+ * @typedef {object} PfResourceGroup
+ * @property {string} [metal] Selector of the metal field; a group without one leaves metal out.
+ * @property {string} [crystal]
+ * @property {string} [deuterium]
+ * @property {string} caption Selector of the element the age caption is written into.
+ * @property {string} [captionBox] Selector of what is hidden with the caption, such as its
+ *   table row; the caption itself by default.
+ */
+
+/**
+ * @typedef {object} PfBodyResourcesConfig
+ * @property {PfResourceGroup[]} groups Every group gets the same reading.
+ * @property {() => ?string} body Our own id of the body shown (the value of #pf-planet,
+ *   #pf-moon...); null for none.
+ * @property {() => void} recalc Recalculate after fields were filled.
+ * @property {boolean} [linked] The calculator copies a value typed into one group into the
+ *   same field of every other group: typing counts as an edit of them all.
+ */
+
+/**
+ * @typedef {object} PfResourceField
+ * @property {HTMLInputElement} el
+ * @property {'metal'|'crystal'|'deuterium'} key
+ * @property {boolean} edited Typed into by the player since it was last filled.
+ * @property {?number} at The time of the reading it shows; null when it shows none.
+ */
+
+/**
+ * The resources on the body a calculator shows, as the game last reported them
+ * (profileBodyResources), in the calculator's resource fields. They stay the
+ * calculator's fields - nothing is written back to the profile, nothing is
+ * marked; the profile only fills them in (planResourceFill): every field when
+ * another profile or body is shown or the page loads, and only the fields the
+ * player has not touched when a Sync brings a newer reading. A caption under
+ * each group says how old the reading is, in a warning colour after an hour,
+ * and goes once the player types into one of its fields. A body without a
+ * reading puts the fields that still show the reading of the body before back
+ * to 0, and leaves the ones the player typed into alone; with no reading shown
+ * before - a page load among them - the calculator's own values stay. A
+ * binder calls show() whenever it showed a profile or another body, and
+ * clear() when it leaves the profile: the values stay then too.
+ */
+class PfBodyResources {
+  /**
+   * @param {ProfilesUi} pf
+   * @param {PfBodyResourcesConfig} config
+   */
+  constructor(pf, config) {
+    this.pf = pf;
+    this.config = config;
+    /** @type {Array<{group: PfResourceGroup, fields: PfResourceField[]}>} */
+    this.groups = config.groups.map((group) => ({ group, fields: PF_RESOURCE_KEYS.flatMap((key) => {
+      const selector = group[key];
+      const el = selector ? document.querySelector(selector) : null;
+      return el instanceof HTMLInputElement ? [{ el, key, edited: false, at: null }] : [];
+    }) }));
+    /** @type {?ResourceFillShown} What the fields showed last; null while no profile is shown. */
+    this.shown = null;
+    /** @type {?ReturnType<typeof setInterval>} Repaints the captions while one is shown, as they age. */
+    this.timer = null;
+    this.groups.forEach((g) => g.fields.forEach((f) => {
+      // `input` comes from the player only: the page's own writes do not raise it.
+      f.el.addEventListener('input', () => {
+        if (this.config.linked) {
+          this.eachField((other) => { if (other.key === f.key) other.edited = true; });
+          this.paintAll();
+        } else {
+          f.edited = true;
+          this.paint(g);
+        }
+      });
+    }));
+  }
+
+  /** @param {(f: PfResourceField) => void} fn */
+  eachField(fn) {
+    this.groups.forEach((g) => g.fields.forEach(fn));
+  }
+
+  /**
+   * Fill the fields from the body the binder shows now, as far as the rules
+   * say (planResourceFill), and recalculate when a field changed.
+   *
+   * @param {Profile} profile
+   */
+  show(profile) {
+    const bodyId = this.config.body();
+    const reading = bodyId === null ? null : profileBodyResources(profile, bodyId);
+    const sameBody = this.shown?.profileId === profile.id && this.shown.bodyId === bodyId;
+    const plan = planResourceFill(this.shown, profile.id, bodyId, reading);
+    if (plan === 'keep') return;
+    let changed = false;
+    this.shown = { profileId: profile.id, bodyId, at: reading ? reading.at : null };
+    if (!reading || plan === 'none') {
+      // A field still showing the reading of the body before would pass it off
+      // as this body's: it goes back to 0, its caption along. What the player
+      // typed stays.
+      this.eachField((f) => {
+        if (f.at !== null && !f.edited && f.el.value !== '0') {
+          f.el.value = '0';
+          changed = true;
+        }
+        f.at = null;
+        if (!sameBody) f.edited = false;
+      });
+    } else {
+      if (!sameBody) this.forget();
+      this.eachField((f) => {
+        // A Sync does not take a field from under the player.
+        if (plan === 'refresh' && (f.edited || f.el === document.activeElement)) return;
+        const value = String(Math.max(0, Math.floor(reading[f.key])));
+        if (f.el.value !== value) {
+          f.el.value = value;
+          changed = true;
+        }
+        f.edited = false;
+        f.at = reading.at;
+      });
+    }
+    this.paintAll();
+    if (changed) this.config.recalc();
+  }
+
+  /** The profile is left: the fields stay as they are, the captions go. */
+  clear() {
+    this.shown = null;
+    this.forget();
+    this.paintAll();
+  }
+
+  /** Forget what the fields showed and what the player typed. */
+  forget() {
+    this.eachField((f) => {
+      f.edited = false;
+      f.at = null;
+    });
+  }
+
+  paintAll() {
+    let anyShown = false;
+    this.groups.forEach((g) => { anyShown = this.paint(g) || anyShown; });
+    if (anyShown && this.timer === null) {
+      this.timer = setInterval(() => this.paintAll(), 60 * 1000);
+    } else if (!anyShown && this.timer !== null) {
+      clearInterval(this.timer);
+      this.timer = null;
+    }
+  }
+
+  /**
+   * Show a group's caption with the age of the oldest reading its fields show,
+   * or hide it when a field shows none or was typed into.
+   *
+   * @param {{group: PfResourceGroup, fields: PfResourceField[]}} g
+   * @returns {boolean} Whether the caption is shown.
+   */
+  paint(g) {
+    const { caption, captionBox } = g.group;
+    const shown = g.fields.length > 0 && g.fields.every((f) => !f.edited && f.at !== null);
+    pfShow(captionBox ?? caption, shown);
+    const el = $(caption);
+    if (!shown || !el) return shown;
+    const at = Math.min(...g.fields.map((f) => f.at ?? 0));
+    el.textContent = formatString(this.pf.text.resourcesAsOf, pfPageDateTime(at));
+    const stale = isResourceReadingStale(at, Date.now());
+    el.classList.toggle('text-body-secondary', !stale);
+    el.classList.toggle('text-warning-emphasis', stale);
+    return shown;
+  }
+}
+
 Object.assign(window, {
+  PfBodyResources,
   PfUniverseSetting, PfBodySelect, PfLockedUniverse, PfCoordsSelect, PF_UNIVERSE_SPEED, PF_UNIVERSE_DEBRIS, PF_UNIVERSE_DEUT_IN_DEBRIS, PF_UNIVERSE_TOP_SCORE,
   PF_UNIVERSE_DEF_DEBRIS, PF_UNIVERSE_SYSTEMS, PF_UNIVERSE_DONUT_SYSTEM,
 });

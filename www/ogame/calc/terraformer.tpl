@@ -379,6 +379,10 @@
           <td><input id="deuterium-available" type="text" name="deuterium-available" class="form-control form-control-sm d-inline-block resource-show ui-input-margin" value="0" data-field-title="<?= $l['res-available'] ?> <?= $l['deuterium'] ?>"></td>
           <td colspan="2">&nbsp;</td>
         </tr>
+        <tr id="resources-age-row" class="d-none">
+          <td></td>
+          <td colspan="5" class="pt-0"><small id="resources-age" class="text-body-secondary"></small></td>
+        </tr>
         <tr>
           <td><label><?= $l['res-needed'] ?></label></td>
           <td><div id="crystal-to-deliver" class="form-control form-control-sm d-inline-block resource-show ui-input-margin ui-state-disabled">0</div></td>

@@ -272,6 +272,7 @@
     "pf-reset-selected": "Przywróć zaznaczone",
     "pf-in-game": "W grze: {0}",
     "pf-reset-value": "kliknij, aby przywrócić",
+    "pf-resources-as-of": "Dane z gry z {0}",
     "pf-departure-body": "Planeta lub księżyc profilu",
     "pf-take-fleet": "Z miejsca startu",
     "pf-take-fleet-hint": "Wstaw statki stacjonujące na planecie lub księżycu wybranym jako miejsce startu, według ostatniego importu z OGame.",

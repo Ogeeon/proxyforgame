@@ -129,6 +129,21 @@ class ProfileBinder {
     this.coordsSelect = null;
     /** @type {Record<string, *>} The calculator's own values of what the profile owns (ownedGroups()), kept while a profile is shown. */
     this.ownPrm = {};
+    /**
+     * @type {PfBodyResources[]} The resource fields the bodies shown fill, if the page has any -
+     *   one set per body they follow: shown after every apply, cleared on leave. A binder
+     *   that shows another body calls showBodyResources() itself.
+     */
+    this.bodyResources = [];
+  }
+
+  /**
+   * Fill the resource fields from the bodies shown now (PfBodyResources).
+   *
+   * @param {Profile} profile
+   */
+  showBodyResources(profile) {
+    this.bodyResources.forEach((r) => r.show(profile));
   }
 
   /** Connect to the page; called once, with the calculator ready. */
@@ -201,6 +216,8 @@ class ProfileBinder {
     }
     this.afterApply(profile);
     this.markAll();
+    // After the guard: filling the resources recalculates, and that save is taken.
+    this.showBodyResources(profile);
   }
 
   /** Keep the calculator's own values of what the profile owns, before a profile is first shown. */
@@ -452,6 +469,7 @@ class ProfileBinder {
     } finally {
       this.applying = false;
     }
+    this.bodyResources.forEach((r) => r.clear());
     this.recalc();
   }
 
@@ -567,6 +585,9 @@ class ProfileBinder {
  * @property {PfUniverseField[]} universe The settings that come from the profile's universe.
  * @property {string[]} extraOwnedKeys Keys the account fills without a field of its own, such as the officers' bonus.
  * @property {() => void} [ownSave] The calculator's own save, before the binder took options.save over; options.save by default.
+ * @property {PfResourceGroup[]} [resources] The resource fields the planet's last reported resources fill (PfBodyResources).
+ * @property {boolean} [resourcesLinked] The calculator copies a resource typed into one group into the others
+ *   (PfBodyResourcesConfig.linked).
  */
 
 /**
@@ -608,6 +629,12 @@ class PlanetPrmBinder extends ProfileBinder {
     this.ownSave = config.ownSave ?? options.save;
     /** @type {PfUniverseSetting[]} The universe's settings, set in init(). */
     this.universeSettings = [];
+    if (config.resources) {
+      this.bodyResources = [new PfBodyResources(pf, {
+        groups: config.resources, body: () => this.planetId, recalc: () => this.app.recalc(),
+        linked: config.resourcesLinked,
+      })];
+    }
   }
 
   /** @returns {PfFieldGroup[]} The account, and the planet picked in #pf-planet. */
@@ -729,6 +756,7 @@ class PlanetPrmBinder extends ProfileBinder {
       this.showPlanet(profile);
       this.takeSnapshot();
     });
+    this.showBodyResources(profile);
   }
 
   // -------------------------------------------------------------------------

@@ -88,9 +88,16 @@ bot, crawler
 
 **Sync**:
 An import the site performs by itself when Companion has delivered an account export
-newer than the profile's game layer. Nothing else is a sync: an edit reaching the profile
-is a write-back.
+newer than the profile's game layer, or one that brings only newer resource readings.
+Nothing else is a sync: an edit reaching the profile is a write-back.
 _Avoid_: auto-import, refresh
+
+**Resource reading**:
+The metal, crystal and deuterium on one planet or moon at one moment, as the game showed
+them, with that moment (`at`). A profile keeps the newest reading per body. It is not part
+of the game layer: it is never marked or restored, and the backup file leaves it out. A
+calculator shows it in its "resources available" fields, as it was, never projected to now.
+_Avoid_: current resources, stock, balance
 
 **API 2 export**:
 The one-line JSON the game shows on its Fleet page. It describes one planet's fleet and the

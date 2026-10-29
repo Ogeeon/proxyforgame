@@ -72,13 +72,47 @@ one reader. The player profiles import through them, and so does the MCP tool
 `ogame_import_account` (`mcp/tools/import-account.js`), which maps the normalized values onto the
 other tools' argument names. An unknown `schemaVersion` is refused, never read best-effort.
 
+### Available resources
+
+Every full export carries each body's stored resources, `planets[id].resources` and
+`moons[id].resources` (`{metal, crystal, deuterium, energy}`), as of `exportedAt`. The Companion
+may add newer readings it took off the resource bar of a game page since:
+
+```json
+"pfgCompanion": {
+  "resources": {
+    "33620011": { "metal": 1234567, "crystal": 456789, "deuterium": 98765, "at": "2026-10-29T12:34:56.000Z" }
+  }
+}
+```
+
+keyed by the body's game id, `at` being when that body's bar was read — an ISO string like
+`exportedAt`, or Unix milliseconds; the site normalizes both to milliseconds. `exportResources()`
+in `profiles-core.js` takes a body's Companion reading whenever there is one, whatever the two
+times say, and the export's own `resources` only for a body Companion has no entry for (an export
+from another tool). Companion seeds its entry from the export's `resources` with their true time,
+but moves `exportedAt` to "now" on saves that do not refetch the account (the Resource Settings
+save, a `speciesBonuses` retry), so comparing against `exportedAt` would let a stale reading win.
+It reads only metal, crystal and deuterium, drops a Companion entry for a body the export does not list and
+an entry missing any of the three, and never extrapolates a reading to "now".
+
+The profile keeps them in `profile.resources`, by game id — **not** a game layer: no mark, no
+"restore game value", not counted by the badge, and not written to the profiles backup file (a
+restore keeps the readings the profile already has). A later import or Sync takes a body's reading
+only when its `at` is newer, independently of whether the export as a whole is newer, and drops the
+readings of bodies the profile no longer has. `PfBodyResources` (`profiles-widgets.js`) fills the
+"resources available" fields of graviton, terraformer, costs, LF costs and production's one-planet
+tab from the body shown, with a "Game data as of …" caption that turns to the warning colour after
+an hour. The MCP tool leaves resources out.
+
 ### What a trimmed export may leave out
 
 The Companion's "copy for AI" sends a trimmed export to keep it small in a model's context — about
 16 KB instead of 38 KB for an 8-planet account. It is the same document under the same
 `schemaVersion`, and the normalizer must keep accepting it:
 
-- planets and moons carry no `resources`, `defenses` or `baseProduction`;
+- planets and moons carry no `resources`, `defenses` or `baseProduction`, and there is no
+  `pfgCompanion.resources` — a trimmed export brings no available resources;
 - every entry of `speciesBonuses` is reduced to its `totalBonus` — the normalizer reads nothing else
   of an entry (`spaceObjectBonus`, `technologyBonus`, the maxima go).
 

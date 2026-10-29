@@ -272,6 +272,7 @@
     "pf-reset-selected": "Ripristina selezionati",
     "pf-in-game": "Nel gioco: {0}",
     "pf-reset-value": "clicca per ripristinare",
+    "pf-resources-as-of": "Dati di gioco al {0}",
     "pf-departure-body": "Pianeta o luna del profilo",
     "pf-take-fleet": "Dalla partenza",
     "pf-take-fleet-hint": "Inserisci le navi presenti sul pianeta o sulla luna scelti come punto di partenza, secondo l’ultima importazione da OGame.",

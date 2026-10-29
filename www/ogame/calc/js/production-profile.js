@@ -16,6 +16,10 @@
 // tab - is the profile's and is stored with the values it had before the
 // profile, so "no profile" shows them untouched. The economy speed comes from
 // the profile's universe; a profile with no universe leaves it to the calculator.
+// The metal, crystal and deuterium on the planet the one-planet tab shows, as
+// the game last reported them, fill its current resources (PfBodyResources):
+// they are read from the form on every recalculation, not kept in options.prm,
+// so a re-render of the tab does not take them back.
 
 'use strict';
 
@@ -82,6 +86,12 @@ class ProductionProfiles extends ProfileBinder {
     this.ownSave = options.save;
     /** @type {?PfUniverseSetting} Set in init(). */
     this.speed = null;
+    // The resources on the planet the one-planet tab shows.
+    this.bodyResources = [new PfBodyResources(pf, {
+      groups: [{ metal: '#onepln-curr-met', crystal: '#onepln-curr-crys', deuterium: '#onepln-curr-deut', caption: '#onepln-resources-age' }],
+      body: () => this.onePlanetId,
+      recalc: () => updateOnePlnTab(),
+    })];
   }
 
   bindControls() {
@@ -171,6 +181,7 @@ class ProductionProfiles extends ProfileBinder {
     updateParams();
     void this.speed?.attach(profile);
     this.markAll();
+    this.showBodyResources(profile);
   }
 
   restoreOwn() {
@@ -217,6 +228,7 @@ class ProductionProfiles extends ProfileBinder {
     if (openTab) showMainTab('#one-planet-panel');
     updateOnePlnTab();
     this.markAll();
+    this.showBodyResources(profile);
   }
 
   /**

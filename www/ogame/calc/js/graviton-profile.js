@@ -20,7 +20,9 @@
 // with the values they had before the profile, so "no profile" shows them
 // untouched. The economy speed, the debris share and whether deuterium goes to
 // the debris field come from the profile's universe; a profile with no
-// universe leaves them to the calculator.
+// universe leaves them to the calculator. The crystal and deuterium on the
+// planet, as the game last reported them, fill the available resources
+// (PfBodyResources).
 
 'use strict';
 
@@ -61,6 +63,10 @@ class GravitonProfiles extends PlanetPrmBinder {
       universe: GRAVITON_UNIVERSE_FIELDS,
       // The officers' bonus follows the officers.
       extraOwnedKeys: ['energyBonus'],
+      resources: [{
+        crystal: '#crystal-available', deuterium: '#deuterium-available',
+        caption: '#resources-age', captionBox: '#resources-age-row',
+      }],
     });
   }
 }

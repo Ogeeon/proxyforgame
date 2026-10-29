@@ -272,6 +272,7 @@
     "pf-reset-selected": "Auswahl wiederherstellen",
     "pf-in-game": "Im Spiel: {0}",
     "pf-reset-value": "klicken zum Wiederherstellen",
+    "pf-resources-as-of": "Spieldaten vom {0}",
     "pf-departure-body": "Planet oder Mond des Profils",
     "pf-take-fleet": "Vom Startort",
     "pf-take-fleet-hint": "Die Schiffe übernehmen, die auf dem als Startort gewählten Planeten oder Mond stehen, Stand des letzten Imports aus OGame.",

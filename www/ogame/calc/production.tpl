@@ -750,6 +750,7 @@
                       <td class="text-center"><span id="storage-cap-deut">0</span></td>
                     </tr>
                   </table>
+                  <div id="onepln-resources-age" class="small text-body-secondary mt-1 d-none"></div>
                 </div>
                 <div class="d-flex flex-wrap gap-2 align-items-stretch">
                   <div class="border rounded p-2 flex-grow-1">

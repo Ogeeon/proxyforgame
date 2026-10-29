@@ -272,6 +272,7 @@
     "pf-reset-selected": "Seçilenleri geri yükle",
     "pf-in-game": "Oyunda: {0}",
     "pf-reset-value": "geri yüklemek için tıklayın",
+    "pf-resources-as-of": "{0} itibarıyla oyun verileri",
     "pf-departure-body": "Profilin gezegeni veya ayı",
     "pf-take-fleet": "Kalkış noktasından",
     "pf-take-fleet-hint": "Kalkış noktası olarak seçilen gezegende veya ayda bulunan gemileri, OGame’den yapılan son içe aktarmaya göre doldurur.",

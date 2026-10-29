@@ -272,6 +272,7 @@
     "pf-reset-selected": "Obnoviť vybrané",
     "pf-in-game": "V hre: {0}",
     "pf-reset-value": "kliknutím obnovíte",
+    "pf-resources-as-of": "Údaje z hry k {0}",
     "pf-departure-body": "Planéta alebo mesiac profilu",
     "pf-take-fleet": "Z miesta odletu",
     "pf-take-fleet-hint": "Doplniť lode umiestnené na planéte alebo mesiaci zvolenom ako miesto odletu, podľa posledného importu z OGame.",

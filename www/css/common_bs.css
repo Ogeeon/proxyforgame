@@ -552,6 +552,17 @@ fieldset.pf-bound {
   padding-left: 0.25rem;
 }
 
+/* "Game data as of ..." under the available resources of the cost tables
+   (PfBodyResources): it takes the width the columns already have and wraps
+   in it, rather than widening the energy and time columns of a max-content
+   table. d-none still hides it - it is !important. */
+.pf-resources-age {
+  display: block;
+  width: 0;
+  min-width: 100%;
+  white-space: normal;
+}
+
 fieldset.pf-bound.pf-differs {
   border-left-color: var(--bs-warning);
 }

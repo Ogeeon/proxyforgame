@@ -73,6 +73,7 @@ $pfUniversePicker = function ($prefix) use ($l) {
     'cancel' => $l['cancel'],
     'replace' => $l['pf-replace'],
     'skip' => $l['pf-skip'],
+    'resourcesAsOf' => $l['pf-resources-as-of'],
   ), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
   var pfgCountries = <?= json_encode($pfCountryList, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
   var pfgUniverses = <?= universesJs($pfUniverses) ?>;

@@ -26,7 +26,10 @@
 // event are the calculator's own and keep going to costs_calculator_state; the
 // profile-owned values are stored there as they were before the profile, and
 // the research bonuses table keeps its own key untouched, so "no profile"
-// shows both as they were.
+// shows both as they were. The metal, crystal and deuterium on a body, as the
+// game last reported them, fill the available resources (PfBodyResources): the
+// moon's those of the moon buildings' tables, the planet's those of the other
+// build tables; the range tab takes the body its technology is built on.
 
 'use strict';
 
@@ -124,6 +127,43 @@ const COSTS_RANGE_GROUPS = [
   { where: 'account', prefix: 'research.' },
 ];
 
+/**
+ * The technology picked on the range tab, and where its level is found.
+ *
+ * @returns {?{techId: string, source: {where: 'planet'|'moon'|'account', prefix: string}}}
+ */
+function costsRangePick() {
+  const select = selectEl('#tech-types-select');
+  const option = select?.selectedOptions[0];
+  const group = option?.parentElement;
+  if (!select || !option || !(group instanceof HTMLOptGroupElement)) return null;
+  const source = COSTS_RANGE_GROUPS[Array.from(select.querySelectorAll('optgroup')).indexOf(group)];
+  return source ? { techId: option.value, source } : null;
+}
+
+/**
+ * The build tables of the one-level and the multi-level tab, as [outer tab,
+ * inner tab]; each has its own available resources. Inner tab 3 is the moon
+ * buildings'.
+ */
+const COSTS_LEVEL_TABLES = [[0, 2], [0, 3], [0, 4], [0, 5], [0, 6], [1, 2], [1, 3], [1, 4]];
+
+/**
+ * The available resources of the build tables of the moon buildings, or of
+ * every other build table.
+ *
+ * @param {boolean} moon
+ * @returns {PfResourceGroup[]}
+ */
+function costsLevelResourceGroups(moon) {
+  return COSTS_LEVEL_TABLES.filter(([, inner]) => (inner === 3) === moon).map(([outer, inner]) => ({
+    metal: `#metal-available-${outer}-${inner}`,
+    crystal: `#crystal-available-${outer}-${inner}`,
+    deuterium: `#deut-available-${outer}-${inner}`,
+    caption: `#resources-age-${outer}-${inner}`,
+  }));
+}
+
 /** A moon building's id in the build tables: its game id plus this. */
 const COSTS_MOON_ROW_OFFSET = 10000;
 
@@ -197,6 +237,24 @@ class CostsProfiles extends ProfileBinder {
     this.ownTable = [];
     this.ownSaveState = app.saveState.bind(app);
     this.ownSaveTable = app.saveLfResearchTable.bind(app);
+    this.bodyResources = [
+      // The range tab's two tables - one shows at a time - get the same reading.
+      new PfBodyResources(pf, {
+        groups: [
+          { metal: '#prods-metal-available', crystal: '#prods-crystal-available', deuterium: '#prods-deut-available', caption: '#prods-resources-age' },
+          { metal: '#commons-metal-available', crystal: '#commons-crystal-available', deuterium: '#commons-deut-available', caption: '#commons-resources-age' },
+        ],
+        body: () => this.resourceBody(),
+        recalc: () => this.app.recalculateRangeTab(),
+      }),
+      // The build tables: the moon buildings' take the moon's, the others the planet's.
+      new PfBodyResources(pf, {
+        groups: costsLevelResourceGroups(false), body: () => this.planetId, recalc: () => this.app.recalculateAll(),
+      }),
+      new PfBodyResources(pf, {
+        groups: costsLevelResourceGroups(true), body: () => this.moonId, recalc: () => this.app.recalculateAll(),
+      }),
+    ];
   }
 
   takeOverSave() {
@@ -216,6 +274,8 @@ class CostsProfiles extends ProfileBinder {
       if (!profile) return;
       pfFillRangeStart(this.rangeLevel(profile));
       this.app.recalculateRangeTab();
+      // A moon building takes the moon's resources, anything else the planet's.
+      this.showBodyResources(profile);
     };
   }
 
@@ -491,6 +551,7 @@ class CostsProfiles extends ProfileBinder {
       this.app.recalculateAll();
       this.takeSnapshot();
     });
+    this.showBodyResources(profile);
   }
 
   // -------------------------------------------------------------------------
@@ -538,13 +599,18 @@ class CostsProfiles extends ProfileBinder {
    * @returns {?number}
    */
   rangeLevel(profile) {
-    const select = selectEl('#tech-types-select');
-    const option = select?.selectedOptions[0];
-    const group = option?.parentElement;
-    if (!select || !option || !(group instanceof HTMLOptGroupElement)) return null;
-    const source = COSTS_RANGE_GROUPS[Array.from(select.querySelectorAll('optgroup')).indexOf(group)];
-    if (!source) return null;
-    return this.knownLevel(profile, source.where, source.prefix + option.value);
+    const picked = costsRangePick();
+    return picked ? this.knownLevel(profile, picked.source.where, picked.source.prefix + picked.techId) : null;
+  }
+
+  /**
+   * The body whose resources fill the range tab's available resources: the
+   * moon for a moon building, else the planet.
+   *
+   * @returns {?string}
+   */
+  resourceBody() {
+    return costsRangePick()?.source.where === 'moon' ? this.moonId : this.planetId;
   }
 
   // -------------------------------------------------------------------------

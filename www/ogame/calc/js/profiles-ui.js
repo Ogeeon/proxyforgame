@@ -727,7 +727,7 @@ class ProfilesUi {
     profiles.forEach((p) => {
       const row = document.createElement('tr');
       const universe = p.universe ? 's' + p.universe.number + '-' + p.universe.country : this.text.noUniverse;
-      const source = hasGameLayer(p) && p.importedAt ? new Date(p.importedAt).toLocaleString() : '—';
+      const source = hasGameLayer(p) && p.importedAt ? pfPageDateTime(Date.parse(p.importedAt)) : '—';
       [p.label, universe, source].forEach((text) => {
         const cell = document.createElement('td');
         cell.textContent = text;
@@ -833,7 +833,9 @@ class ProfilesUi {
     plan.added.forEach((p) => { if (this.store.save(p)) restored.push(p); });
     for (const p of plan.conflicts) {
       if (await showConfirmModal(formatString(this.text.restoreConflict, p.label), this.text.replace, this.text.skip, this.text.attention)) {
-        if (this.store.save(p)) restored.push(p);
+        // The file carries no resource readings: the stored profile's stay.
+        const replacement = keepBodyResources(p, this.store.get(p.id));
+        if (this.store.save(replacement)) restored.push(replacement);
       }
     }
     // The universe choices come back with a profile of their universe.

@@ -1499,6 +1499,410 @@ test('"no profile" gives graviton its own debris settings back', async ({ page }
     await expect(page.locator('#universe-speed')).toHaveValue('1');
 });
 
+// The available resources (graviton, terraformer): the crystal and deuterium on the planet
+// shown, as the game last reported them, with a caption that says how old they are.
+const HOUR_MS = 60 * 60 * 1000;
+
+/**
+ * The Companion fixture exported at `exportedAtMs`, with readings on Alpha and
+ * Beta and none on Colony, changed by `edit`.
+ */
+function exportWithResources(exportedAtMs, edit = () => {}) {
+    return companionExport((raw) => {
+        raw.exportedAt = new Date(exportedAtMs).toISOString();
+        raw.planets['900001'].resources = { metal: 1, crystal: 12345, deuterium: 6789, energy: 0 };
+        raw.planets['900002'].resources = { metal: 2, crystal: 222, deuterium: 333, energy: 0 };
+        delete raw.planets['900003'].resources;
+        edit(raw);
+    });
+}
+
+/** Companion's reading of Alpha, taken at `atMs`. */
+const alphaReading = (atMs, crystal, deuterium) => (raw) => {
+    raw.pfgCompanion = { resources: { 900001: { metal: 0, crystal, deuterium, at: new Date(atMs).toISOString() } } };
+};
+
+/** A Sync after load whose export is no newer, with only a new reading of Alpha. */
+async function syncAlphaReading(page, exportedAtMs, atMs, crystal, deuterium) {
+    const payload = companionPayload(exportWithResources(exportedAtMs, alphaReading(atMs, crystal, deuterium)));
+    await page.evaluate(([name, detail]) => document.dispatchEvent(new CustomEvent(name, { detail })), [COMPANION_EVENT, payload]);
+}
+
+/** The settings graviton or terraformer saved, available resources included. */
+function storedOptions(page, calc) {
+    return page.evaluate((key) => JSON.parse(localStorage.getItem(key) || '{}'), 'options_' + calc);
+}
+
+// Graviton and terraformer share the markup: #crystal-available,
+// #deuterium-available, and the caption in #resources-age-row.
+for (const calc of ['graviton', 'terraformer']) {
+    test(`${calc} fills the available resources from the planet, and they win over the saved ones on load`, async ({ page }) => {
+        await page.goto('/' + calc);
+        await importExport(page, JSON.stringify(exportWithResources(Date.now())));
+
+        const crystal = page.locator('#crystal-available');
+        const caption = page.locator('#resources-age');
+        await expect(crystal).toHaveValue('12345');
+        await expect(page.locator('#deuterium-available')).toHaveValue('6789');
+        await expect(caption).toBeVisible();
+        await expect(caption).toContainText('Game data as of');
+        await expect(caption).toHaveClass(/text-body-secondary/);
+        await expect(caption).not.toHaveClass(/text-warning-emphasis/);
+        // The calculator recalculated with them, and saved them as it saves its own.
+        await expect.poll(async () => (await storedOptions(page, calc)).crysAvailable).toBe(12345);
+
+        // Typing hides the caption; the typed value is saved, and loses to the reading on load.
+        await crystal.fill('5');
+        await crystal.blur();
+        await expect(page.locator('#resources-age-row')).toBeHidden();
+        await expect.poll(async () => (await storedOptions(page, calc)).crysAvailable).toBe(5);
+        await page.reload();
+        await expect(crystal).toHaveValue('12345');
+        await expect(caption).toBeVisible();
+    });
+
+    test(`another planet in ${calc} brings its own resources, or leaves the fields without a reading`, async ({ page }) => {
+        await page.goto('/' + calc);
+        // The export is two hours old; Companion read Alpha just now.
+        const now = Date.now();
+        await importExport(page, JSON.stringify(exportWithResources(now - 2 * HOUR_MS, alphaReading(now, 100, 200))));
+        const crystal = page.locator('#crystal-available');
+        const deut = page.locator('#deuterium-available');
+        const caption = page.locator('#resources-age');
+        await expect(crystal).toHaveValue('100');
+        await expect(caption).not.toHaveClass(/text-warning-emphasis/);
+
+        await page.locator('#pf-planet').selectOption({ label: 'Beta [2:150:12]' });
+        await expect(crystal).toHaveValue('222');
+        await expect(deut).toHaveValue('333');
+        await expect(caption).toBeVisible();
+        await expect(caption).toHaveClass(/text-warning-emphasis/);
+
+        // Colony has no reading: Beta's go back to 0, without a caption; what
+        // the player typed stays.
+        await deut.fill('55');
+        await deut.blur();
+        await page.locator('#pf-planet').selectOption({ label: 'Colony [3:20:4]' });
+        await expect(page.locator('#resources-age-row')).toBeHidden();
+        await expect(crystal).toHaveValue('0');
+        await expect(deut).toHaveValue('55');
+        await expect.poll(async () => (await storedOptions(page, calc)).crysAvailable).toBe(0);
+
+        // A planet picked again overwrites what was typed.
+        await page.locator('#pf-planet').selectOption({ label: 'Alpha [2:148:8]' });
+        await crystal.fill('7');
+        await page.locator('#pf-planet').selectOption({ label: 'Beta [2:150:12]' });
+        await page.locator('#pf-planet').selectOption({ label: 'Alpha [2:148:8]' });
+        await expect(crystal).toHaveValue('100');
+        await expect(caption).toBeVisible();
+    });
+
+    test(`a Sync with a newer reading refills ${calc}'s resources, but not a field the player typed into`, async ({ page }) => {
+        await page.goto('/' + calc);
+        const exportedAt = Date.now() - 10 * 60 * 1000;
+        await importExport(page, JSON.stringify(exportWithResources(exportedAt)));
+        const crystal = page.locator('#crystal-available');
+        const deut = page.locator('#deuterium-available');
+        await expect(crystal).toHaveValue('12345');
+
+        await syncAlphaReading(page, exportedAt, Date.now() - 60 * 1000, 500, 600);
+        await expect(crystal).toHaveValue('500');
+        await expect(deut).toHaveValue('600');
+        await expect(page.locator('#resources-age')).toBeVisible();
+        await expect.poll(async () => (await storedOptions(page, calc)).deutAvailable).toBe(600);
+
+        await crystal.fill('42');
+        await crystal.blur();
+        await expect(page.locator('#resources-age-row')).toBeHidden();
+        await syncAlphaReading(page, exportedAt, Date.now(), 900, 1000);
+        await expect(deut).toHaveValue('1000');
+        await expect(crystal).toHaveValue('42');
+        // One field of the group still shows the player's value: no caption.
+        await expect(page.locator('#resources-age-row')).toBeHidden();
+    });
+
+    test(`without a profile ${calc} keeps its own available resources, without a caption`, async ({ page }) => {
+        await page.goto('/' + calc);
+        await page.locator('#crystal-available').fill('777');
+        await page.locator('#crystal-available').blur();
+        await page.reload();
+        await expect(page.locator('#crystal-available')).toHaveValue('777');
+        await expect(page.locator('#resources-age-row')).toBeHidden();
+    });
+}
+
+// The available resources of the cost calculator's range tab: the body is the
+// one the picked technology is built on - the moon for a moon building, else
+// the planet - and both of its tables (producers, the rest) get the reading.
+
+/** A cell of the range tab's "resources needed" row, by column (1: metal). */
+function costsNeeded(page, table, column) {
+    return page.locator(`#${table} tr:nth-last-child(2) td:nth-child(${column + 1})`);
+}
+
+test('costs fills the range tab\'s available resources from the planet, or from the moon for a moon building', async ({ page }) => {
+    await mockServerData(page);
+    await page.goto('/costs');
+    await importExport(page, JSON.stringify(exportWithResources(Date.now(), (raw) => {
+        raw.planets['900001'].resources = { metal: 1e12, crystal: 1e12, deuterium: 1e12, energy: 0 };
+        raw.moons['900004'].resources = { metal: 11, crystal: 22, deuterium: 33, energy: 0 };
+    })));
+    await page.locator('#tabtag-2').click();
+
+    // The metal mine is built on the planet.
+    await expect(page.locator('#prods-metal-available')).toHaveValue('1000000000000');
+    await expect(page.locator('#prods-crystal-available')).toHaveValue('1000000000000');
+    await expect(page.locator('#prods-deut-available')).toHaveValue('1000000000000');
+    const prodsCaption = page.locator('#prods-resources-age');
+    await expect(prodsCaption).toBeVisible();
+    await expect(prodsCaption).toContainText('Game data as of');
+    // Recalculated: nothing is left to deliver.
+    await expect(costsNeeded(page, 'prods-table', 1)).toHaveText('0');
+
+    // A research is the planet's too, and shows in the other table.
+    await page.locator('#tech-types-select').selectOption('113');
+    await expect(page.locator('#commons-metal-available')).toHaveValue('1000000000000');
+    await expect(page.locator('#commons-resources-age')).toBeVisible();
+
+    // The Lunar Base is built on the moon: every table takes the moon's reading.
+    await page.locator('#tech-types-select').selectOption('41');
+    await expect(page.locator('#commons-metal-available')).toHaveValue('11');
+    await expect(page.locator('#commons-crystal-available')).toHaveValue('22');
+    await expect(page.locator('#commons-deut-available')).toHaveValue('33');
+    await expect(page.locator('#prods-metal-available')).toHaveValue('11');
+    await expect(page.locator('#commons-resources-age')).toBeVisible();
+    await expect(costsNeeded(page, 'commons-table', 1)).not.toHaveText('0');
+
+    // Back on the planet, another planet brings its own reading.
+    await page.locator('#tech-types-select').selectOption('1');
+    await expect(page.locator('#prods-metal-available')).toHaveValue('1000000000000');
+    await page.locator('#pf-planet').selectOption({ label: 'Beta [2:150:12]' });
+    await expect(page.locator('#prods-metal-available')).toHaveValue('2');
+    await expect(page.locator('#prods-crystal-available')).toHaveValue('222');
+    await expect(page.locator('#prods-deut-available')).toHaveValue('333');
+    await expect(costsNeeded(page, 'prods-table', 1)).not.toHaveText('0');
+
+    // Colony has no reading: Beta's go back to 0, the caption goes.
+    await page.locator('#pf-planet').selectOption({ label: 'Colony [3:20:4]' });
+    await expect(prodsCaption).toBeHidden();
+    await expect(page.locator('#prods-metal-available')).toHaveValue('0');
+    await expect(page.locator('#prods-crystal-available')).toHaveValue('0');
+});
+
+test('a Sync with a newer reading refills costs\' available resources, but not a field the player typed into', async ({ page }) => {
+    await mockServerData(page);
+    await page.goto('/costs');
+    const exportedAt = Date.now() - 10 * 60 * 1000;
+    await importExport(page, JSON.stringify(exportWithResources(exportedAt)));
+    await page.locator('#tabtag-2').click();
+    const crystal = page.locator('#prods-crystal-available');
+    const deut = page.locator('#prods-deut-available');
+    await expect(crystal).toHaveValue('12345');
+
+    await syncAlphaReading(page, exportedAt, Date.now() - 60 * 1000, 500, 600);
+    await expect(crystal).toHaveValue('500');
+    await expect(deut).toHaveValue('600');
+    await expect(page.locator('#prods-resources-age')).toBeVisible();
+
+    await crystal.fill('42');
+    await crystal.blur();
+    await expect(page.locator('#prods-resources-age')).toBeHidden();
+    await syncAlphaReading(page, exportedAt, Date.now(), 900, 1000);
+    await expect(deut).toHaveValue('1000');
+    await expect(crystal).toHaveValue('42');
+    await expect(page.locator('#prods-resources-age')).toBeHidden();
+    // The other table's fields were not typed into: they follow the Sync.
+    await expect(page.locator('#commons-crystal-available')).toHaveValue('900');
+});
+
+test('without a profile costs keeps the available resources typed in, without a caption', async ({ page }) => {
+    await mockServerData(page);
+    await page.goto('/costs');
+    await page.locator('#tabtag-2').click();
+    await page.locator('#prods-metal-available').fill('777');
+    await page.locator('#prods-metal-available').blur();
+    await page.locator('#tech-types-select').selectOption('2');
+    await expect(page.locator('#prods-metal-available')).toHaveValue('777');
+    await expect(page.locator('#prods-resources-age')).toBeHidden();
+});
+
+/** The data row of a build table whose hidden first cell holds `techId`. */
+function techRow(page, table, techId) {
+    return page.locator(`#${table} tr`).filter({ has: page.locator('td:first-child', { hasText: new RegExp(`^${techId}$`) }) });
+}
+
+/** A cell of a build table's "resources needed" row, by column (1: metal), past the hidden id cell. */
+function tableNeeded(page, table, column) {
+    return page.locator(`#${table} tr:nth-last-child(2) td:nth-child(${column + 2})`);
+}
+
+test('costs fills the build tables\' available resources: the moon buildings\' from the moon, the others from the planet', async ({ page }) => {
+    await mockServerData(page);
+    await page.goto('/costs');
+    // A metal mine to build, with nothing available yet.
+    const mine = techRow(page, 'table-0-2', 1).locator('input.level-input');
+    await mine.fill('20');
+    await mine.blur();
+    await expect(tableNeeded(page, 'table-0-2', 1)).not.toHaveText('0');
+
+    await importExport(page, JSON.stringify(exportWithResources(Date.now(), (raw) => {
+        raw.planets['900001'].resources = { metal: 1e12, crystal: 12345, deuterium: 6789, energy: 0 };
+        raw.moons['900004'].resources = { metal: 11, crystal: 22, deuterium: 33, energy: 0 };
+    })));
+    for (const t of ['0-2', '0-4', '0-5', '0-6', '1-2', '1-4']) {
+        await expect(page.locator(`#metal-available-${t}`)).toHaveValue('1000000000000');
+        await expect(page.locator(`#crystal-available-${t}`)).toHaveValue('12345');
+        await expect(page.locator(`#deut-available-${t}`)).toHaveValue('6789');
+        await expect(page.locator(`#resources-age-${t}`)).not.toHaveClass(/d-none/);
+    }
+    for (const t of ['0-3', '1-3']) {
+        await expect(page.locator(`#metal-available-${t}`)).toHaveValue('11');
+        await expect(page.locator(`#crystal-available-${t}`)).toHaveValue('22');
+        await expect(page.locator(`#deut-available-${t}`)).toHaveValue('33');
+    }
+    const caption = page.locator('#resources-age-0-2');
+    await expect(caption).toBeVisible();
+    await expect(caption).toContainText('Game data as of');
+    // Recalculated: the metal is there.
+    await expect(tableNeeded(page, 'table-0-2', 1)).toHaveText('0');
+
+    // Typing hides the caption of that table only.
+    await page.locator('#crystal-available-0-2').fill('5');
+    await page.locator('#crystal-available-0-2').blur();
+    await expect(caption).toBeHidden();
+    await expect(page.locator('#resources-age-0-4')).not.toHaveClass(/d-none/);
+
+    // Colony has no reading: the planet's tables go back to 0 but for what was
+    // typed, and are recalculated; the moon's keep the moon's reading.
+    await page.locator('#pf-planet').selectOption({ label: 'Colony [3:20:4]' });
+    await expect(page.locator('#metal-available-0-2')).toHaveValue('0');
+    await expect(page.locator('#crystal-available-0-2')).toHaveValue('5');
+    await expect(page.locator('#crystal-available-1-4')).toHaveValue('0');
+    await expect(page.locator('#resources-age-0-4')).toHaveClass(/d-none/);
+    await expect(tableNeeded(page, 'table-0-2', 1)).not.toHaveText('0');
+    await expect(page.locator('#metal-available-0-3')).toHaveValue('11');
+    await expect(page.locator('#resources-age-0-3')).not.toHaveClass(/d-none/);
+
+    // Beta brings its own.
+    await page.locator('#pf-planet').selectOption({ label: 'Beta [2:150:12]' });
+    await expect(page.locator('#metal-available-0-2')).toHaveValue('2');
+    await expect(page.locator('#crystal-available-0-2')).toHaveValue('222');
+});
+
+// The LF costs: every table's available resources take the planet's reading;
+// the calculator copies a value typed into one table into all the others.
+
+/** The available resources of every LF costs table, as `outer-inner`. */
+const LFCOSTS_RESOURCE_TABLES = ['0-1', '0-2', '1-1', '1-2', '2-1'];
+
+test('LF costs fill the available resources of every table from the planet', async ({ page }) => {
+    await page.goto('/lfcosts');
+    // A Residential Sector to build, with nothing available yet.
+    const sector = techRow(page, 'table-0-1', 1001).locator('input.level-input');
+    await sector.fill('5');
+    await sector.blur();
+    await expect(tableNeeded(page, 'table-0-1', 1)).not.toHaveText('0');
+
+    await importExport(page, JSON.stringify(exportWithResources(Date.now(), (raw) => {
+        raw.planets['900001'].resources = { metal: 1e12, crystal: 12345, deuterium: 6789, energy: 0 };
+    })));
+    for (const t of LFCOSTS_RESOURCE_TABLES) {
+        await expect(page.locator(`#metal-available-${t}`)).toHaveValue('1000000000000');
+        await expect(page.locator(`#crystal-available-${t}`)).toHaveValue('12345');
+        await expect(page.locator(`#deut-available-${t}`)).toHaveValue('6789');
+        await expect(page.locator(`#resources-age-${t}`)).not.toHaveClass(/d-none/);
+    }
+    const caption = page.locator('#resources-age-0-1');
+    await expect(caption).toBeVisible();
+    await expect(caption).toContainText('Game data as of');
+    // Recalculated: the metal is there.
+    await expect(tableNeeded(page, 'table-0-1', 1)).toHaveText('0');
+
+    // A value typed into one table goes to all of them, and so does the edit:
+    // every caption goes.
+    await page.locator('#crystal-available-0-1').fill('7');
+    await page.locator('#crystal-available-0-1').blur();
+    for (const t of LFCOSTS_RESOURCE_TABLES) {
+        await expect(page.locator(`#crystal-available-${t}`)).toHaveValue('7');
+        await expect(page.locator(`#resources-age-${t}`)).toHaveClass(/d-none/);
+    }
+
+    // Colony has no reading: Alpha's go back to 0 but for what was typed, and
+    // the tables are recalculated.
+    await page.locator('#pf-planet').selectOption({ label: 'Colony [3:20:4]' });
+    for (const t of LFCOSTS_RESOURCE_TABLES) {
+        await expect(page.locator(`#metal-available-${t}`)).toHaveValue('0');
+        await expect(page.locator(`#crystal-available-${t}`)).toHaveValue('7');
+    }
+    await expect(tableNeeded(page, 'table-0-1', 1)).not.toHaveText('0');
+
+    // Beta brings its own, on reload too.
+    await page.locator('#pf-planet').selectOption({ label: 'Beta [2:150:12]' });
+    await expect(page.locator('#crystal-available-2-1')).toHaveValue('222');
+    await page.reload();
+    await expect(page.locator('#deut-available-1-2')).toHaveValue('333');
+    await expect(page.locator('#resources-age-0-1')).toBeVisible();
+});
+
+// Production: the one-planet tab's current resources take the reading of the
+// planet the tab shows.
+
+test('production fills the one-planet tab\'s current resources from the planet shown', async ({ page }) => {
+    await page.goto('/production');
+    await importExport(page, JSON.stringify(exportWithResources(Date.now())));
+    await page.locator('[data-bs-target="#one-pln-acc-accum"]').click();
+    const met = page.locator('#onepln-curr-met');
+    const crys = page.locator('#onepln-curr-crys');
+    const deut = page.locator('#onepln-curr-deut');
+    const caption = page.locator('#onepln-resources-age');
+    await expect(met).toBeVisible();
+    await expect(met).toHaveValue('1');
+    await expect(crys).toHaveValue('12345');
+    await expect(deut).toHaveValue('6789');
+    await expect(caption).toBeVisible();
+    await expect(caption).toContainText('Game data as of');
+    // Recalculated: what is there after no time at all is what there is.
+    await expect(page.locator('#onepln-accumwhat-met')).toHaveText('1');
+
+    await page.locator('#pf-planet').selectOption({ label: 'Beta [2:150:12]' });
+    await expect(met).toHaveValue('2');
+    await expect(crys).toHaveValue('222');
+    await expect(page.locator('#onepln-accumwhat-met')).toHaveText('2');
+
+    // The tab drawn again from production's own state keeps them.
+    await page.locator('#param-researches-tab').click();
+    await page.locator('#energy-tech-level').fill('15');
+    await page.locator('#energy-tech-level').blur();
+    await expect(met).toHaveValue('2');
+    await expect(crys).toHaveValue('222');
+    await expect(caption).not.toHaveClass(/d-none/);
+
+    // Colony has no reading: Beta's go back to 0 but for what was typed.
+    await met.fill('50');
+    await met.blur();
+    await expect(caption).toHaveClass(/d-none/);
+    await page.locator('#pf-planet').selectOption({ label: 'Colony [3:20:4]' });
+    await expect(met).toHaveValue('50');
+    await expect(crys).toHaveValue('0');
+    await expect(deut).toHaveValue('0');
+    await expect(page.locator('#onepln-accumwhat-met')).toHaveText('50');
+
+    // The pencil of a planet in the all-planets table shows it, with its reading.
+    await page.locator('#mainTabs button[data-bs-target="#all-planets-panel"]').click();
+    await page.locator('#all-planets-prod button.control-edit[data-pln="0"]').click();
+    await expect(met).toHaveValue('1');
+    await expect(crys).toHaveValue('12345');
+});
+
+test('the age of the reading is written in the page\'s language, not the browser\'s', async ({ page }) => {
+    const at = Date.UTC(2026, 9, 29, 12, 34, 56);
+    await page.goto('/ru/graviton');
+    await importExport(page, JSON.stringify(exportWithResources(at)));
+    const expected = await page.evaluate((ms) => new Date(ms).toLocaleString('ru'), at);
+    await expect(page.locator('#resources-age')).toHaveText('Данные из игры на ' + expected);
+    expect(expected).toMatch(/^29\.10\.2026/);
+});
+
 test('terraformer takes the account and a planet from the profile', async ({ page }) => {
     await page.goto('/terraformer');
     await importExport(page);

@@ -146,7 +146,23 @@ const PROFILE_PERCENT_DIGITS = 6;
  * @property {{values: LayeredValues}} account
  * @property {ProfilePlanet[]} planets
  * @property {ProfileMoon[]} moons
+ * @property {BodyResourcesMap} [resources] The resources on each body, as last
+ *   reported. Not a game layer: no override, no mark, not in the backup file.
+ *   Absent on a profile never imported.
  */
+
+/**
+ * The metal, crystal and deuterium on one planet or moon at one moment, as the
+ * game showed them. Not extrapolated: `at` says how old they are.
+ *
+ * @typedef {Object} BodyResources
+ * @property {number} metal
+ * @property {number} crystal
+ * @property {number} deuterium
+ * @property {number} at When they were read, in Unix milliseconds.
+ */
+
+/** @typedef {Object<string, BodyResources>} BodyResourcesMap Keyed by the body's game id, as a string. */
 
 /**
  * @typedef {Object} ExportBody
@@ -167,6 +183,8 @@ const PROFILE_PERCENT_DIGITS = 6;
  * @property {Object<string, *>} account Plain values, not layered.
  * @property {ExportBody[]} planets
  * @property {ExportBody[]} moons
+ * @property {BodyResourcesMap} resources Per body, Companion's reading, else the
+ *   export's own (exportResources). Empty for a trimmed export.
  */
 
 /**
@@ -735,7 +753,74 @@ function normalizeAccountExport(raw, schemaVersion) {
     account: exportAccountValues(raw),
     planets,
     moons,
+    resources: exportResources(raw),
   };
+}
+
+/**
+ * One reading of a body's resources, or null when any of the three is missing.
+ *
+ * @param {unknown} raw `{metal, crystal, deuterium, ...}`
+ * @param {number} at Unix milliseconds.
+ * @returns {?BodyResources}
+ */
+function readBodyResources(raw, at) {
+  if (!isPlainObject(raw) || !Number.isFinite(at) || at <= 0) return null;
+  const metal = finiteOrNull(raw.metal);
+  const crystal = finiteOrNull(raw.crystal);
+  const deuterium = finiteOrNull(raw.deuterium);
+  if (metal === null || crystal === null || deuterium === null) return null;
+  return { metal, crystal, deuterium, at };
+}
+
+/**
+ * A time as the export or Companion writes it - an ISO string, or already
+ * Unix milliseconds - in Unix milliseconds; NaN when it does not read.
+ *
+ * @param {unknown} value
+ * @returns {number}
+ */
+function timeMs(value) {
+  if (typeof value === 'number') return value;
+  return Date.parse(typeof value === 'string' ? value : '');
+}
+
+/**
+ * The resources on each body the export names. Two sources: every full export
+ * carries a body's resources as of `exportedAt`, and Companion adds the ones it
+ * read off a game page since, in `pfgCompanion.resources`, each with its own
+ * `at`. A body's Companion reading wins whatever the two times say: Companion
+ * seeds it from the export's resources with their true time, but moves
+ * `exportedAt` to "now" on saves that do not refetch them, so `exportedAt`
+ * can make a stale reading look newer. The export's resources only cover the
+ * bodies Companion has no entry for (an export from another tool). A Companion
+ * entry of a body the export does not list is dropped, and so are the export's
+ * own resources when its time does not read. A trimmed export gives nothing.
+ *
+ * @param {Record<string, any>} raw The whole export.
+ * @returns {BodyResourcesMap}
+ */
+function exportResources(raw) {
+  /** @type {BodyResourcesMap} */
+  const found = {};
+  const exportedAt = timeMs(raw.exportedAt);
+  /** @type {Set<string>} */
+  const bodyIds = new Set();
+  [raw.planets, raw.moons].filter((bodies) => isPlainObject(bodies)).forEach((bodies) => {
+    Object.values(bodies).filter((body) => isPlainObject(body)).forEach((body) => {
+      const id = finiteOrNull(body.id);
+      if (id === null) return;
+      bodyIds.add(String(id));
+      const reading = readBodyResources(body.resources, exportedAt);
+      if (reading) found[String(id)] = reading;
+    });
+  });
+  const companion = isPlainObject(raw.pfgCompanion) && isPlainObject(raw.pfgCompanion.resources) ? raw.pfgCompanion.resources : {};
+  Object.entries(companion).forEach(([id, entry]) => {
+    const reading = isPlainObject(entry) ? readBodyResources(entry, timeMs(entry.at)) : null;
+    if (reading && bodyIds.has(id)) found[id] = reading;
+  });
+  return found;
 }
 
 /**
@@ -793,8 +878,8 @@ function exportAccountValues(raw) {
 function activeExpeditionResourceBooster(raw) {
   const nowSeconds = exportTimeSeconds(raw);
   let best = 0;
-  [raw.planets, raw.moons].filter(isPlainObject).forEach((bodies) => {
-    Object.values(bodies).filter(isPlainObject).forEach((body) => {
+  [raw.planets, raw.moons].filter((bodies) => isPlainObject(bodies)).forEach((bodies) => {
+    Object.values(bodies).filter((body) => isPlainObject(body)).forEach((body) => {
       (Array.isArray(body.buffs) ? body.buffs : []).filter(isPlainObject).forEach((buff) => {
         const percent = EXPEDITION_RESOURCE_BOOSTER_ITEMS[String(buff.itemUuid)] ?? 0;
         const end = finiteOrNull(buff.effectEnd);
@@ -1166,8 +1251,117 @@ function importAccountExport(existing, data, opts = {}) {
     // A moon new to the profile was created as a planet and has no planetId yet.
     moon.planetId = linked ?? moon.planetId ?? null;
   });
+  mergeBodyResources(profile, data.resources);
 
   return { profile, summary: { created, planets: planets.counts, moons: moons.counts } };
+}
+
+/**
+ * Take the resource readings that are newer than the profile's, body by body,
+ * and drop the readings of bodies the profile no longer has (or has only as
+ * entered by hand, without a game id). Run after the bodies of an applied
+ * export, this drops the bodies the export no longer lists.
+ *
+ * @param {Profile} profile Changed in place.
+ * @param {BodyResourcesMap|undefined} incoming
+ * @returns {boolean} True when the profile's readings changed.
+ */
+function mergeBodyResources(profile, incoming) {
+  const current = isPlainObject(profile.resources) ? profile.resources : {};
+  const known = new Set([...profile.planets, ...profile.moons].filter((b) => b.gameId !== null).map((b) => String(b.gameId)));
+  /** @type {BodyResourcesMap} */
+  const next = {};
+  let changed = false;
+  Object.entries(current).forEach(([id, reading]) => {
+    if (known.has(id)) next[id] = reading;
+    else changed = true;
+  });
+  Object.entries(incoming || {}).forEach(([id, reading]) => {
+    if (!known.has(id) || (next[id] && next[id].at >= reading.at)) return;
+    next[id] = { ...reading };
+    changed = true;
+  });
+  profile.resources = next;
+  return changed;
+}
+
+/**
+ * The resources last reported on a planet or moon of the profile.
+ *
+ * @param {Profile} profile
+ * @param {string} bodyId Our own id of the planet or moon, as the body selects hold it.
+ * @returns {?BodyResources} A copy; null for a body without a game id or a reading.
+ */
+function profileBodyResources(profile, bodyId) {
+  const body = profile.planets.find((p) => p.id === bodyId) || profile.moons.find((m) => m.id === bodyId);
+  if (!body || body.gameId === null || !isPlainObject(profile.resources)) return null;
+  const reading = profile.resources[String(body.gameId)];
+  return reading ? { ...reading } : null;
+}
+
+/** A resource reading older than this is shown as stale. */
+const RESOURCE_READING_STALE_MS = 60 * 60 * 1000;
+
+/**
+ * Whether a resource reading is old enough to warn about.
+ *
+ * @param {number} at When it was read, in Unix milliseconds.
+ * @param {number} now
+ * @returns {boolean}
+ */
+function isResourceReadingStale(at, now) {
+  return now - at > RESOURCE_READING_STALE_MS;
+}
+
+/**
+ * What a calculator's resource fields last showed of the profile: whose body,
+ * and the time of the reading - null when the body had none.
+ *
+ * @typedef {Object} ResourceFillShown
+ * @property {string} profileId
+ * @property {?string} bodyId
+ * @property {?number} at
+ */
+
+/**
+ * How a calculator's resource fields follow the profile shown:
+ *   - 'replace': another profile or body than last time - every field takes
+ *     the reading, whatever the player typed (a page load is one too);
+ *   - 'refresh': the same body has a newer reading (a Sync) - only the fields
+ *     the player left alone take it;
+ *   - 'keep': nothing new for the fields;
+ *   - 'none': no reading for the body - the fields are the calculator's, but
+ *     for the ones still showing another body's reading (PfBodyResources).
+ *
+ * @param {?ResourceFillShown} shown What the fields showed last; null for nothing yet.
+ * @param {string} profileId
+ * @param {?string} bodyId Our own id of the body shown; null for none.
+ * @param {?BodyResources} reading
+ * @returns {'replace'|'refresh'|'keep'|'none'}
+ */
+function planResourceFill(shown, profileId, bodyId, reading) {
+  if (!reading || bodyId === null) return 'none';
+  if (!shown || shown.profileId !== profileId || shown.bodyId !== bodyId) return 'replace';
+  if (shown.at === null || reading.at > shown.at) return 'refresh';
+  return 'keep';
+}
+
+/**
+ * A profile from a backup file, about to replace the stored one of the same
+ * id, keeping the stored one's resource readings: the file carries none
+ * (withoutResources), and saving replaces the whole profile. The readings of
+ * bodies the restored profile does not have are dropped.
+ *
+ * @param {Profile} restored
+ * @param {?Profile} stored
+ * @returns {Profile} A shallow copy of `restored`; `restored` itself is not changed.
+ */
+function keepBodyResources(restored, stored) {
+  const copy = { ...restored };
+  if (!isPlainObject(stored?.resources)) return copy;
+  delete copy.resources;
+  mergeBodyResources(copy, stored.resources);
+  return copy;
 }
 
 // ---------------------------------------------------------------------------
@@ -1195,7 +1389,7 @@ function isNewerExport(data, profile) {
 
 /**
  * @typedef {Object} CompanionSyncPlan
- * @property {Profile[]} updates Profiles to save, each with the newer export applied.
+ * @property {Profile[]} updates Profiles to save, each with the newer export or only newer resources applied.
  * @property {AccountExport[]} candidates Exports of accounts that have no profile yet.
  */
 
@@ -1203,7 +1397,9 @@ function isNewerExport(data, profile) {
  * Decide what a PfG Companion payload changes. Each export that names its
  * universe either updates the profile of its account and universe - when it is
  * newer (isNewerExport), keeping the overrides - or, for an account without a
- * profile, becomes a candidate for the import dialog. The exports are taken in
+ * profile, becomes a candidate for the import dialog. The resources on the
+ * bodies are taken body by body whenever they are newer, the export newer or
+ * not (mergeBodyResources). The exports are taken in
  * order, so a second export of one account is compared with the first one's
  * result. Nothing is saved here.
  *
@@ -1228,9 +1424,15 @@ function planCompanionSync(payload, index, load) {
       candidates.push(data);
       return;
     }
-    if (!isNewerExport(data, existing)) return;
-    const { profile } = importAccountExport(existing, data, { keepOverrides: true });
-    updated.set(profile.id, profile);
+    if (isNewerExport(data, existing)) {
+      const { profile } = importAccountExport(existing, data, { keepOverrides: true });
+      updated.set(profile.id, profile);
+      return;
+    }
+    // Companion reads the resources off every game page, so an export whose
+    // game layer is not newer can still carry newer resources.
+    const profile = cloneData(existing);
+    if (mergeBodyResources(profile, data.resources)) updated.set(profile.id, profile);
   });
   return { updates: [...updated.values()], candidates };
 }
@@ -1327,6 +1529,8 @@ function mergeProfiles(primary, secondary) {
   result.moons.forEach((moon) => {
     if (moon.planetId && planetIds.has(moon.planetId)) moon.planetId = planetIds.get(moon.planetId) || null;
   });
+  // The resources are no value to keep: per body the newer reading wins.
+  if (other.resources || result.resources) mergeBodyResources(result, other.resources);
   return result;
 }
 
@@ -1383,7 +1587,22 @@ function readProfile(raw) {
   if (!isPlainObject(raw) || raw.formatVersion !== PROFILE_FORMAT_VERSION) return null;
   if (typeof raw.id !== 'string' || !raw.id || !isPlainObject(raw.account) || !isPlainObject(raw.account.values)) return null;
   if (!Array.isArray(raw.planets) || !Array.isArray(raw.moons)) return null;
+  // The resources are a convenience: a broken map is dropped, not the profile.
+  if ('resources' in raw && !isPlainObject(raw.resources)) delete raw.resources;
   return /** @type {Profile} */ (raw);
+}
+
+/**
+ * A profile as the backup file carries it: without the resources on its
+ * bodies, which are hours old by the time a backup is restored.
+ *
+ * @param {Profile} profile
+ * @returns {Profile} A shallow copy; the profile itself is not changed.
+ */
+function withoutResources(profile) {
+  const copy = { ...profile };
+  delete copy.resources;
+  return copy;
 }
 
 /**
@@ -1639,8 +1858,9 @@ function readUniverseChoices(raw) {
 }
 
 /**
- * The backup file: every profile given, in our own format, and the universe
- * settings the player picked for their universes.
+ * The backup file: every profile given, in our own format but for the
+ * resources on the bodies (withoutResources), and the universe settings the
+ * player picked for their universes.
  *
  * @param {Profile[]} profiles
  * @param {string} [exportedAt]
@@ -1648,7 +1868,7 @@ function readUniverseChoices(raw) {
  * @returns {string}
  */
 function serializeProfilesFile(profiles, exportedAt = new Date().toISOString(), universes = []) {
-  return JSON.stringify({ pfgProfiles: PROFILE_FILE_VERSION, exportedAt, profiles, universes }, null, 2);
+  return JSON.stringify({ pfgProfiles: PROFILE_FILE_VERSION, exportedAt, profiles: profiles.map(withoutResources), universes }, null, 2);
 }
 
 /**
@@ -1672,7 +1892,8 @@ function parseProfilesFile(text) {
   }
   if (!isPlainObject(raw) || !Array.isArray(raw.profiles) || !('pfgProfiles' in raw)) return { ok: false, reason: 'shape' };
   if (raw.pfgProfiles !== PROFILE_FILE_VERSION) return { ok: false, reason: 'version' };
-  const profiles = raw.profiles.map(readProfile);
+  // Resources a hand-edited file carries are ignored, as the backup never writes them.
+  const profiles = raw.profiles.map(readProfile).map((p) => p && withoutResources(p));
   if (profiles.includes(null)) return { ok: false, reason: 'version' };
   // The universe choices are a bonus: a broken entry is dropped, not the file.
   const universes = (Array.isArray(raw.universes) ? raw.universes : []).map(readUniverseChoices).filter((u) => u !== null);
@@ -2037,7 +2258,8 @@ if (typeof window !== 'undefined') {
     pfSnapKey, snapshotReadings, diffReadings, pfPickOwn, pfSplitOwned, pfKeepOwn,
     countOverrides, hasGameLayer,
     parseAccountExport, findProfileForExport, importAccountExport, mergeProfiles,
-    isNewerExport, planCompanionSync, resolveImportUniverse,
+    isNewerExport, planCompanionSync, resolveImportUniverse, profileBodyResources,
+    RESOURCE_READING_STALE_MS, isResourceReadingStale, planResourceFill, keepBodyResources,
     readProfile, serializeProfilesFile, parseProfilesFile, planProfilesRestore,
     universeCacheKey, readUniverseChoices, UNIVERSE_SETTINGS_TTL_MS, UNIVERSE_SETTING_PARSERS,
     parseUniverseSettings, readUniverseEntry, isUniverseEntryFresh, universeLayer, universeValue,

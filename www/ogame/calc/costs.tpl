@@ -500,12 +500,10 @@
                   <tr>
                     <td style="display: none;"></td>
                     <td colspan="<?= 1 + $levelCols + $qtyOffset ?>" class="border-w"><?=$l['res-available']?></td>
-                    <td class="text-center"><input id="metal-available-<?=$i?>-<?=$j?>" type="text" name="metal-available" class="form-control form-control-sm" style="text-align:center" value="0"></td>
-                    <td class="text-center"><input id="crystal-available-<?=$i?>-<?=$j?>" type="text" name="crystal-available" class="form-control form-control-sm" style="text-align:center" value="0"></td>
-                    <td class="text-center"><input id="deut-available-<?=$i?>-<?=$j?>" type="text" name="deut-available" class="form-control form-control-sm" style="text-align:center" value="0"></td>
-                    <td></td>
-                    <td colspan="<?= ($i == 1)?'2':'3' ?>"></td>
-                    <td class="border-e"></td>
+                    <td class="text-center"><input id="metal-available-<?=$i?>-<?=$j?>" type="text" name="metal-available" class="form-control form-control-sm res-input" value="0"></td>
+                    <td class="text-center"><input id="crystal-available-<?=$i?>-<?=$j?>" type="text" name="crystal-available" class="form-control form-control-sm res-input" value="0"></td>
+                    <td class="text-center"><input id="deut-available-<?=$i?>-<?=$j?>" type="text" name="deut-available" class="form-control form-control-sm res-input" value="0"></td>
+                    <td colspan="<?= ($i == 1)?'4':'5' ?>" class="text-start border-e"><small id="resources-age-<?=$i?>-<?=$j?>" class="pf-resources-age text-body-secondary d-none"></small></td>
                   </tr>
                   <tr>
                     <td style="display: none;"></td>
@@ -601,11 +599,10 @@
                 </tr>
                 <tr>
                   <td class="text-center"><?=$l['res-available']?></td>
-                  <td class="text-center"><input id="prods-metal-available" type="text" class="form-control form-control-sm" style="text-align:center" value="0" aria-label="<?= $l['res-available'] ?>-<?= $l['metal'] ?>"></td>
-                  <td class="text-center"><input id="prods-crystal-available" type="text" class="form-control form-control-sm" style="text-align:center" value="0" aria-label="<?= $l['res-available'] ?>-<?= $l['crystal'] ?>"></td>
-                  <td class="text-center"><input id="prods-deut-available" type="text" class="form-control form-control-sm" style="text-align:center" value="0" aria-label="<?= $l['res-available'] ?>-<?= $l['deuterium'] ?>"></td>
-                  <td></td>
-                  <td colspan="5"></td>
+                  <td class="text-center"><input id="prods-metal-available" type="text" class="form-control form-control-sm res-input" value="0" aria-label="<?= $l['res-available'] ?>-<?= $l['metal'] ?>"></td>
+                  <td class="text-center"><input id="prods-crystal-available" type="text" class="form-control form-control-sm res-input" value="0" aria-label="<?= $l['res-available'] ?>-<?= $l['crystal'] ?>"></td>
+                  <td class="text-center"><input id="prods-deut-available" type="text" class="form-control form-control-sm res-input" value="0" aria-label="<?= $l['res-available'] ?>-<?= $l['deuterium'] ?>"></td>
+                  <td colspan="6" class="text-start"><small id="prods-resources-age" class="pf-resources-age text-body-secondary d-none"></small></td>
                 </tr>
                 <tr>
                   <td class="text-center"><?=$l['res-needed']?></td>
@@ -645,11 +642,10 @@
                 </tr>
                 <tr>
                   <td class="text-center"><?=$l['res-available']?></td>
-                  <td class="text-center"><input id="commons-metal-available" type="text" class="form-control form-control-sm" style="text-align:center" value="0" aria-label="<?= $l['res-available'] ?>-<?= $l['metal'] ?>"></td>
-                  <td class="text-center"><input id="commons-crystal-available" type="text" class="form-control form-control-sm" style="text-align:center" value="0" aria-label="<?= $l['res-available'] ?>-<?= $l['crystal'] ?>"></td>
-                  <td class="text-center"><input id="commons-deut-available" type="text" class="form-control form-control-sm" style="text-align:center" value="0" aria-label="<?= $l['res-available'] ?>-<?= $l['deuterium'] ?>"></td>
-                  <td></td>
-                  <td colspan="3"></td>
+                  <td class="text-center"><input id="commons-metal-available" type="text" class="form-control form-control-sm res-input" value="0" aria-label="<?= $l['res-available'] ?>-<?= $l['metal'] ?>"></td>
+                  <td class="text-center"><input id="commons-crystal-available" type="text" class="form-control form-control-sm res-input" value="0" aria-label="<?= $l['res-available'] ?>-<?= $l['crystal'] ?>"></td>
+                  <td class="text-center"><input id="commons-deut-available" type="text" class="form-control form-control-sm res-input" value="0" aria-label="<?= $l['res-available'] ?>-<?= $l['deuterium'] ?>"></td>
+                  <td colspan="4" class="text-start"><small id="commons-resources-age" class="pf-resources-age text-body-secondary d-none"></small></td>
                 </tr>
                 <tr>
                   <td class="text-center"><?=$l['res-needed']?></td>

@@ -23,7 +23,9 @@
 // are written there with the values they had before the profile, so "no
 // profile" shows them untouched.
 // The economy speed comes from the profile's universe; a profile with no
-// universe leaves it to the calculator.
+// universe leaves it to the calculator. The crystal and deuterium on the
+// planet, as the game last reported them, fill the available resources
+// (PfBodyResources).
 
 'use strict';
 
@@ -66,6 +68,10 @@ class TerraformerProfiles extends PlanetPrmBinder {
       universe: [{ kind: PF_UNIVERSE_SPEED, input: '#universe-speed', prm: 'universeSpeed' }],
       // The officers' bonus follows the officers.
       extraOwnedKeys: ['energyBonus'],
+      resources: [{
+        crystal: '#crystal-available', deuterium: '#deuterium-available',
+        caption: '#resources-age', captionBox: '#resources-age-row',
+      }],
     });
   }
 

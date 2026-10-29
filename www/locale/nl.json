@@ -272,6 +272,7 @@
     "pf-reset-selected": "Selectie herstellen",
     "pf-in-game": "In het spel: {0}",
     "pf-reset-value": "klik om te herstellen",
+    "pf-resources-as-of": "Spelgegevens van {0}",
     "pf-departure-body": "Planeet of maan van het profiel",
     "pf-take-fleet": "Van het vertrekpunt",
     "pf-take-fleet-hint": "Neem de schepen over die op de als vertrekpunt gekozen planeet of maan staan, volgens de laatste import uit OGame.",

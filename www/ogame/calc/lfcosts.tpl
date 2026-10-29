@@ -411,12 +411,7 @@
                   <td class="text-center"><input id="metal-available-<?=$i?>-<?=$j?>" type="text" name="metal-available" class="form-control form-control-sm res-input" value="0" aria-label="<?= htmlspecialchars($l['res-available'] . ': ' . $l['metal'], ENT_QUOTES) ?>"></td>
                   <td class="text-center"><input id="crystal-available-<?=$i?>-<?=$j?>" type="text" name="crystal-available" class="form-control form-control-sm res-input" value="0" aria-label="<?= htmlspecialchars($l['res-available'] . ': ' . $l['crystal'], ENT_QUOTES) ?>"></td>
                   <td class="text-center"><input id="deut-available-<?=$i?>-<?=$j?>" type="text" name="deut-available" class="form-control form-control-sm res-input" value="0" aria-label="<?= htmlspecialchars($l['res-available'] . ': ' . $l['deuterium'], ENT_QUOTES) ?>"></td>
-                  <td></td>
-                  <td></td>
-                  <?php if ($i == 0):?>
-                  <td></td>
-                  <?php endif; ?>
-                  <td class="border-e"></td>
+                  <td colspan="<?= ($i == 0)?'4':'3' ?>" class="text-start border-e"><small id="resources-age-<?=$i?>-<?=$j?>" class="pf-resources-age text-body-secondary d-none"></small></td>
                 </tr>
                 <tr>
                   <td style="display: none;">dlv</td>
@@ -496,9 +491,7 @@
                 <td class="text-center"><input id="metal-available-2-1" type="text" name="metal-available" class="form-control form-control-sm res-input" value="0" aria-label="<?= htmlspecialchars($l['res-available'] . ': ' . $l['metal'], ENT_QUOTES) ?>"></td>
                 <td class="text-center"><input id="crystal-available-2-1" type="text" name="crystal-available" class="form-control form-control-sm res-input" value="0" aria-label="<?= htmlspecialchars($l['res-available'] . ': ' . $l['crystal'], ENT_QUOTES) ?>"></td>
                 <td class="text-center"><input id="deut-available-2-1" type="text" name="deut-available" class="form-control form-control-sm res-input" value="0" aria-label="<?= htmlspecialchars($l['res-available'] . ': ' . $l['deuterium'], ENT_QUOTES) ?>"></td>
-                <td></td>
-                <td></td>
-                <td class="border-e"></td>
+                <td colspan="3" class="text-start border-e"><small id="resources-age-2-1" class="pf-resources-age text-body-secondary d-none"></small></td>
               </tr>
               <tr>
                 <td class="border-w"><?= $l['res-needed'] ?></td>

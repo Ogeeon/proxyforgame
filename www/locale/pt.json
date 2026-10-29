@@ -272,6 +272,7 @@
     "pf-reset-selected": "Repor selecionados",
     "pf-in-game": "No jogo: {0}",
     "pf-reset-value": "clique para repor",
+    "pf-resources-as-of": "Dados do jogo de {0}",
     "pf-departure-body": "Planeta ou lua do perfil",
     "pf-take-fleet": "Do ponto de partida",
     "pf-take-fleet-hint": "Preencher as naves estacionadas no planeta ou na lua escolhidos como ponto de partida, segundo a última importação do OGame.",

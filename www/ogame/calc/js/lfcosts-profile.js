@@ -18,12 +18,13 @@
 // "from" levels of the build tables, for convenience only: they are not bound,
 // so an edit there stays the calculator's. A profile with no planet leaves the
 // planet's fields to the calculator, and so does a planet with no life form for
-// the race. The build tables and the
-// available resources are the calculator's own
+// the race. The build tables are the calculator's own
 // and keep going to options_lfcosts; the profile-owned keys are written there
 // with the values they had before the profile, so "no profile" shows them
 // untouched. The economy speed comes from the profile's universe; a profile
-// with no universe leaves it to the calculator.
+// with no universe leaves it to the calculator. The metal, crystal and
+// deuterium on the planet, as the game last reported them, fill the available
+// resources of every table (PfBodyResources).
 
 'use strict';
 
@@ -96,6 +97,20 @@ function lfCostsProfileKey(techId) {
 /** The multi-level build tables, buildings and researches, whose "from" levels the planet fills in. */
 const LFCOSTS_START_TABLES = ['#table-1-1', '#table-1-2'];
 
+/**
+ * The available resources of every table, as [outer tab, inner tab]: the
+ * buildings and researches of the one-level and the multi-level tab, and the
+ * range tab.
+ *
+ * @type {PfResourceGroup[]}
+ */
+const LFCOSTS_RESOURCE_GROUPS = [[0, 1], [0, 2], [1, 1], [1, 2], [2, 1]].map(([outer, inner]) => ({
+  metal: `#metal-available-${outer}-${inner}`,
+  crystal: `#crystal-available-${outer}-${inner}`,
+  deuterium: `#deut-available-${outer}-${inner}`,
+  caption: `#resources-age-${outer}-${inner}`,
+}));
+
 /** @extends {PlanetPrmBinder<LfCostsOrchestrator>} */
 class LfCostsProfiles extends PlanetPrmBinder {
   /**
@@ -110,6 +125,9 @@ class LfCostsProfiles extends PlanetPrmBinder {
       lastKey: 'lfcosts',
       universe: [{ kind: PF_UNIVERSE_SPEED, input: '#universe-speed', prm: 'universeSpeed' }],
       extraOwnedKeys: [],
+      resources: LFCOSTS_RESOURCE_GROUPS,
+      // A resource typed into one table is copied into every other (handleResourceInput).
+      resourcesLinked: true,
     });
   }
 

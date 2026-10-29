@@ -272,6 +272,7 @@
     "pf-reset-selected": "Vrati odabrane",
     "pf-in-game": "U igri: {0}",
     "pf-reset-value": "kliknite da vratite",
+    "pf-resources-as-of": "Podaci iz igre od {0}",
     "pf-departure-body": "Planeta ili mjesec profila",
     "pf-take-fleet": "Sa mjesta polaska",
     "pf-take-fleet-hint": "Unesi brodove stacionirane na planeti ili mjesecu odabranom kao mjesto polaska, prema posljednjem uvozu iz OGame.",

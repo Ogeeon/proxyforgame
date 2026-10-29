@@ -15,6 +15,14 @@ release section; it is the source of truth for the other eleven translations.
 
 ## [Unreleased]
 
+### Added
+
+- Profiles: a profile keeps the metal, crystal and deuterium of each planet and moon from the account export (PfG Companion's own readings first), and graviton, terraformer, costs, LF costs and production's one-planet tab fill their "resources available" fields from the body shown, with a "Game data as of ..." caption. A Sync never overwrites a field being typed in or edited. The readings are not game values and stay out of the backup file. The cost calculator's available-resource fields are wider, so nine-digit amounts fit.
+
+### Changed
+
+- Profiles: the profile manager writes the time a profile was imported in the page's language, like the "Game data as of" caption, instead of the browser's.
+
 ### Fixed
 
 - Costs, production, MCP server: the crawler, the reaper and the pathfinder now carry their game ids (217, 218, 219) in the site's own tech tables, which numbered them 218, 216 and 217 - 216 being no ship at all. Every profile, import and the flight and expedition calculators already used the game ids, so nothing needs translating between them any more, and the MCP account import reads its ship table from `costs-techs.json` instead of keeping its own copy. No cost or production figure changes; the last three rows of the fleet tables now follow the game order, crawler, reaper, pathfinder.

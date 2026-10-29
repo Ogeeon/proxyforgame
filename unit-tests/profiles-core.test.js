@@ -18,7 +18,8 @@ const core = load(['ogame/calc/js/profiles-core.js'], [
     'serializeProfilesFile', 'parseProfilesFile', 'planProfilesRestore', 'universeCacheKey',
     'ratesToTrade', 'ratesFromTrade', 'profileFromProductionSet', 'profileFromFlightSet',
     'productionPlanetValues', 'productionPlanetState', 'isNewerExport', 'planCompanionSync',
-    'resolveImportUniverse', 'profileFromSpyReport',
+    'resolveImportUniverse', 'profileFromSpyReport', 'profileBodyResources',
+    'RESOURCE_READING_STALE_MS', 'isResourceReadingStale', 'planResourceFill', 'keepBodyResources',
     'lfBuildingGameId', 'lfResearchGameId', 'LF_RACES', 'LF_BUILDING_POSITIONS', 'LF_RESEARCH_POSITIONS',
     'lfTechValueKeys', 'fillLfGameLevels', 'migrateLfGameLevels',
     'pfNum', 'pfBool', 'pfBodyLabel', 'pfStartRange', 'expeditionHighTop',
@@ -804,6 +805,223 @@ describe('companion sync', () => {
     });
 });
 
+describe('the resources on the bodies', () => {
+    const EXPORTED_MS = Date.parse('2026-10-11T01:30:26.918Z');
+    const LATER = '2026-10-12T00:00:00.000Z';
+    const LATER_MS = Date.parse(LATER);
+
+    /**
+     * The fixture with its universe and a reading on Alpha (900001) and the moon (900004), changed by `edit`.
+     *
+     * @param {(obj: any) => void} [edit]
+     */
+    function withResources(edit = () => {}) {
+        const obj = fixture();
+        obj.universe = { language: 'en', number: 1 };
+        obj.planets['900001'].resources = { metal: 100, crystal: 200, deuterium: 300, energy: 5, population: 1, food: 1 };
+        obj.moons['900004'].resources = { metal: 7, crystal: 8, deuterium: 9, energy: 0 };
+        edit(obj);
+        return obj;
+    }
+
+    /** @param {Record<string, any>} entries */
+    const companion = (entries) => (obj) => { obj.pfgCompanion = { resources: entries }; };
+
+    const bodyId = (profile, name) => (profile.planets.find((p) => p.name === name) || profile.moons.find((m) => m.name === name)).id;
+
+    it('reads metal, crystal and deuterium of planets and moons as of the export time, in ms', () => {
+        const res = parsed(withResources()).resources;
+        expect(plain(res['900001'])).toEqual({ metal: 100, crystal: 200, deuterium: 300, at: EXPORTED_MS });
+        expect(plain(res['900004'])).toEqual({ metal: 7, crystal: 8, deuterium: 9, at: EXPORTED_MS });
+    });
+
+    it('reads nothing from a trimmed export, which still imports', () => {
+        const obj = withResources((o) => {
+            Object.values(o.planets).forEach((p) => { delete p.resources; });
+            Object.values(o.moons).forEach((m) => { delete m.resources; });
+        });
+        expect(plain(parsed(obj).resources)).toEqual({});
+        const { profile } = core.importAccountExport(null, parsed(obj), { newId: idSource() });
+        expect(plain(profile.resources)).toEqual({});
+        expect(profile.planets).toHaveLength(3);
+        expect(core.profileBodyResources(profile, bodyId(profile, 'Alpha'))).toBeNull();
+    });
+
+    it('reads nothing from the bodies of an export whose time does not read', () => {
+        const obj = withResources((o) => { delete o.exportedAt; });
+        expect(plain(parsed(obj).resources)).toEqual({});
+    });
+
+    it('takes Companion\'s reading of a body, the export\'s only for a body Companion has none of', () => {
+        const obj = withResources(companion({
+            900001: { metal: 1, crystal: 2, deuterium: 3, at: LATER },
+            900002: { metal: 10, crystal: 20, deuterium: 30, at: LATER_MS },
+        }));
+        const res = parsed(obj).resources;
+        expect(plain(res['900001'])).toEqual({ metal: 1, crystal: 2, deuterium: 3, at: LATER_MS });
+        expect(plain(res['900002'])).toEqual({ metal: 10, crystal: 20, deuterium: 30, at: LATER_MS });
+        expect(plain(res['900004'])).toEqual({ metal: 7, crystal: 8, deuterium: 9, at: EXPORTED_MS });
+    });
+
+    it('takes Companion\'s reading even when exportedAt is later, as Companion moves it without refetching', () => {
+        const companionAt = '2026-10-01T00:00:00.000Z';
+        const obj = withResources(companion({
+            900001: { metal: 4, crystal: 5, deuterium: 6, at: companionAt },
+        }));
+        const res = parsed(obj).resources;
+        expect(plain(res['900001'])).toEqual({ metal: 4, crystal: 5, deuterium: 6, at: Date.parse(companionAt) });
+    });
+
+    it('drops a Companion reading of a body the export does not list, or one that does not read', () => {
+        const obj = withResources(companion({
+            123: { metal: 1, crystal: 2, deuterium: 3, at: LATER },
+            900002: { metal: 1, crystal: 2, at: LATER },
+            900003: { metal: 1, crystal: 2, deuterium: 3, at: 'soon' },
+        }));
+        const res = parsed(obj).resources;
+        expect('123' in res).toBe(false);
+        expect(res['900002'].at).toBe(EXPORTED_MS);
+        expect(res['900003'].at).toBe(EXPORTED_MS);
+    });
+
+    it('gives the reading of a planet or a moon by its own id', () => {
+        const { profile } = core.importAccountExport(null, parsed(withResources()), { newId: idSource() });
+        expect(plain(core.profileBodyResources(profile, bodyId(profile, 'Alpha')))).toEqual({ metal: 100, crystal: 200, deuterium: 300, at: EXPORTED_MS });
+        expect(core.profileBodyResources(profile, bodyId(profile, 'Moon')).deuterium).toBe(9);
+        expect(core.profileBodyResources(profile, 'nope')).toBeNull();
+        profile.planets.push(core.createPlanet({ id: 'hand', name: 'Hand' }));
+        expect(core.profileBodyResources(profile, 'hand')).toBeNull();
+        expect(core.profileBodyResources(core.createProfile({ label: 'x' }), 'hand')).toBeNull();
+    });
+
+    it('is no game value: no override, nothing to restore', () => {
+        const { profile } = core.importAccountExport(null, parsed(withResources()), { newId: idSource() });
+        expect(core.countOverrides(profile)).toBe(0);
+        expect(core.listOverrides(profile)).toHaveLength(0);
+        expect(Object.keys(profile.planets[0].values).some((k) => k.startsWith('resources'))).toBe(false);
+    });
+
+    it('keeps a newer reading through the import of an older export', () => {
+        const newer = withResources((o) => { o.exportedAt = LATER; o.planets['900001'].resources.metal = 555; });
+        const first = core.importAccountExport(null, parsed(newer), { newId: idSource() }).profile;
+        const { profile } = core.importAccountExport(first, parsed(withResources()));
+        expect(plain(profile.resources['900001'])).toEqual({ metal: 555, crystal: 200, deuterium: 300, at: LATER_MS });
+    });
+
+    it('drops the reading of a body the applied export no longer lists', () => {
+        const first = core.importAccountExport(null, parsed(withResources()), { newId: idSource() }).profile;
+        const gone = withResources((o) => { o.exportedAt = LATER; delete o.planets['900002']; });
+        const { profile } = core.importAccountExport(first, parsed(gone));
+        expect('900002' in profile.resources).toBe(false);
+        expect(Object.keys(profile.resources).sort()).toEqual(['900001', '900003', '900004']);
+    });
+
+    describe('on a Companion sync', () => {
+        function stored() {
+            const profile = core.importAccountExport(null, parsed(withResources()), { newId: idSource() }).profile;
+            core.setProfileValue(profile.account, 'research.122', 20);
+            const text = JSON.stringify(profile);
+            const index = [{ id: profile.id, universe: profile.universe, playerId: profile.playerId }];
+            return { profile, text, index, load: (id) => (id === profile.id ? JSON.parse(text) : null) };
+        }
+        const plan = (raw, store) => core.planCompanionSync({ version: 1, exports: [raw] }, store.index, store.load);
+
+        it('takes newer resources from an export that is not newer itself', () => {
+            const store = stored();
+            const raw = withResources(companion({ 900004: { metal: 70, crystal: 80, deuterium: 90, at: LATER } }));
+            raw.researches['122'] = 99;
+            const result = plan(raw, store);
+            expect(result.updates).toHaveLength(1);
+            const updated = result.updates[0];
+            expect(plain(updated.resources['900004'])).toEqual({ metal: 70, crystal: 80, deuterium: 90, at: LATER_MS });
+            expect(plain(updated.resources['900001'])).toEqual(plain(store.profile.resources['900001']));
+            // The game layer stays as it was.
+            expect(updated.importedAt).toBe(store.profile.importedAt);
+            expect(plain(updated.account.values['research.122'])).toEqual({ game: 15, override: 20 });
+            expect(JSON.parse(store.text).resources['900004'].metal).toBe(7);
+        });
+
+        it('changes nothing when neither the export nor its resources are newer', () => {
+            const store = stored();
+            const older = withResources(companion({ 900004: { metal: 70, crystal: 80, deuterium: 90, at: '2026-10-01T00:00:00.000Z' } }));
+            expect(plan(older, store).updates).toHaveLength(0);
+        });
+
+        it('applies a newer export with its resources and keeps a newer stored reading', () => {
+            const store = stored();
+            const raw = withResources((o) => {
+                o.exportedAt = LATER;
+                o.planets['900001'].resources.metal = 1000;
+                companion({ 900004: { metal: 1, crystal: 1, deuterium: 1, at: '2026-10-01T00:00:00.000Z' } })(o);
+            });
+            const updated = plan(raw, store).updates[0];
+            expect(updated.importedAt).toBe(LATER);
+            expect(plain(updated.resources['900001'])).toEqual({ metal: 1000, crystal: 200, deuterium: 300, at: LATER_MS });
+            // The moon's Companion reading beats the export's own, and is older than the stored one.
+            expect(plain(updated.resources['900004'])).toEqual({ metal: 7, crystal: 8, deuterium: 9, at: EXPORTED_MS });
+        });
+    });
+
+    describe('restoring a backup over a stored profile', () => {
+        it('keeps the stored readings, as the file carries none', () => {
+            const storedProfile = core.importAccountExport(null, parsed(withResources()), { newId: idSource() }).profile;
+            const fromFile = core.parseProfilesFile(core.serializeProfilesFile([storedProfile])).profiles[0];
+            expect('resources' in fromFile).toBe(false);
+            const replacement = core.keepBodyResources(fromFile, storedProfile);
+            expect(plain(replacement.resources)).toEqual(plain(storedProfile.resources));
+            expect('resources' in fromFile).toBe(false);
+        });
+
+        it('drops the readings of bodies the restored profile does not have', () => {
+            const storedProfile = core.importAccountExport(null, parsed(withResources()), { newId: idSource() }).profile;
+            const fromFile = core.parseProfilesFile(core.serializeProfilesFile([storedProfile])).profiles[0];
+            fromFile.planets = fromFile.planets.filter((p) => p.name !== 'Alpha');
+            const replacement = core.keepBodyResources(fromFile, storedProfile);
+            expect('900001' in replacement.resources).toBe(false);
+            expect(replacement.resources['900004'].deuterium).toBe(9);
+        });
+
+        it('adds nothing when the stored profile has no readings, or there is none', () => {
+            const fromFile = core.createProfile({ label: 'x' });
+            expect('resources' in core.keepBodyResources(fromFile, null)).toBe(false);
+            expect('resources' in core.keepBodyResources(fromFile, core.createProfile({ label: 'y' }))).toBe(false);
+        });
+    });
+});
+
+describe('filling the resource fields', () => {
+    const AT = 1_000_000;
+    const reading = (at = AT) => ({ metal: 1, crystal: 2, deuterium: 3, at });
+    /** @type {(bodyId: string, at?: ?number) => {profileId: string, bodyId: string, at: ?number}} */
+    const shown = (bodyId, at = AT) => ({ profileId: 'p', bodyId, at });
+
+    it('replaces every field on a first fill, another body or another profile', () => {
+        expect(core.planResourceFill(null, 'p', 'a', reading())).toBe('replace');
+        expect(core.planResourceFill(shown('b'), 'p', 'a', reading())).toBe('replace');
+        expect(core.planResourceFill(shown('a'), 'q', 'a', reading(AT - 1))).toBe('replace');
+    });
+
+    it('refreshes the same body only with a newer reading', () => {
+        expect(core.planResourceFill(shown('a'), 'p', 'a', reading(AT + 1))).toBe('refresh');
+        expect(core.planResourceFill(shown('a'), 'p', 'a', reading())).toBe('keep');
+        expect(core.planResourceFill(shown('a'), 'p', 'a', reading(AT - 1))).toBe('keep');
+        // The body had no reading so far: the first one is a refresh, not a replace.
+        expect(core.planResourceFill(shown('a', null), 'p', 'a', reading())).toBe('refresh');
+    });
+
+    it('leaves the fields alone without a reading or a body', () => {
+        expect(core.planResourceFill(null, 'p', 'a', null)).toBe('none');
+        expect(core.planResourceFill(shown('a'), 'p', 'a', null)).toBe('none');
+        expect(core.planResourceFill(null, 'p', null, reading())).toBe('none');
+    });
+
+    it('calls a reading stale after an hour', () => {
+        expect(core.isResourceReadingStale(AT, AT + core.RESOURCE_READING_STALE_MS)).toBe(false);
+        expect(core.isResourceReadingStale(AT, AT + core.RESOURCE_READING_STALE_MS + 1)).toBe(true);
+        expect(core.RESOURCE_READING_STALE_MS).toBe(60 * 60 * 1000);
+    });
+});
+
 describe('resolveImportUniverse', () => {
     const RU = { country: 'ru', number: 166 };
     const FIRST = { asked: false, picked: null };
@@ -940,12 +1158,25 @@ describe('mergeProfiles', () => {
 });
 
 describe('the profile file', () => {
-    it('round-trips the profiles', () => {
+    it('round-trips the profiles, all but the resources on their bodies', () => {
         const { profile } = imported();
+        expect(Object.keys(profile.resources)).toHaveLength(4);
         const text = core.serializeProfilesFile([profile], '2026-10-11T00:00:00.000Z');
+        expect(text.includes('"resources"')).toBe(false);
+        expect(Object.keys(profile.resources)).toHaveLength(4);
         const result = core.parseProfilesFile(text);
         expect(result.ok).toBe(true);
-        expect(plain(result.profiles)).toEqual(plain([profile]));
+        const expected = plain(profile);
+        delete expected.resources;
+        expect(plain(result.profiles)).toEqual([expected]);
+    });
+
+    it('ignores the resources a file carries', () => {
+        const { profile } = imported();
+        const text = JSON.stringify({ pfgProfiles: 1, profiles: [profile] });
+        const result = core.parseProfilesFile(text);
+        expect(result.ok).toBe(true);
+        expect('resources' in result.profiles[0]).toBe(false);
     });
 
     it('carries the universe settings the player picked', () => {

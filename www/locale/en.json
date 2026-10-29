@@ -272,6 +272,7 @@
     "pf-reset-selected": "Restore selected",
     "pf-in-game": "In game: {0}",
     "pf-reset-value": "click to restore",
+    "pf-resources-as-of": "Game data as of {0}",
     "pf-departure-body": "Planet or moon of the profile",
     "pf-take-fleet": "From the departure",
     "pf-take-fleet-hint": "Fill in the ships stationed on the planet or moon chosen as the departure point, as of the last import from OGame.",
