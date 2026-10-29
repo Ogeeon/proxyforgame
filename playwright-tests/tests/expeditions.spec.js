@@ -92,6 +92,20 @@ test.describe('Expeditions Calculator - DOM integration', () => {
         await expect(page.locator('#highTop')).toBeHidden();
     });
 
+    // Both fields take the class panel's Total as the game shows it, like every
+    // other calculator's class bonus: a hint says which row, and no cap applies.
+    for (const [cls, row] of [['collector', 'Collector'], ['discoverer', 'Discoverer']]) {
+        test(`the ${cls} class bonus names the panel row and takes any Total`, async ({ page }) => {
+            const field = page.locator(`#class-bonus-${cls}`);
+            const hint = field.locator('xpath=../following-sibling::i[1]');
+            // Bootstrap adopts the icon on load and moves `title´ to data-bs-original-title.
+            await expect(hint).toHaveAttribute('data-bs-original-title', new RegExp(`'Total'.*'${row}'`));
+
+            await fillNumber(page, `#class-bonus-${cls}`, '1234.5');
+            await expect(field).toHaveValue('1234.5');
+        });
+    }
+
     test('the fleet drives the capacity, points and resource readouts', async ({ page }) => {
         await fillNumber(page, '#numLC', 10);
 

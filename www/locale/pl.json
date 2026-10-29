@@ -209,6 +209,8 @@
     "collectors-character-bonus": "Premia klasy postaci Kolekcjonera",
     "lf-class-bonus": "Premia klasy",
     "lf-class-bonus-hint": "Wpisz wartość 'Łącznie' z tabeli OGame z premiami form życia do premii klas, wiersz 'Zbieracz'.",
+    "lf-class-bonus-hint-general": "Wpisz wartość 'Łącznie' z tabeli OGame z premiami form życia do premii klas, wiersz 'Generał'.",
+    "lf-class-bonus-hint-discoverer": "Wpisz wartość 'Łącznie' z tabeli OGame z premiami form życia do premii klas, wiersz 'Odkrywca'.",
     "pf-no-profile": "Bez profilu",
     "pf-import": "Importuj z OGame…",
     "pf-create": "Nowy profil…",

@@ -385,6 +385,7 @@
             <input id="discoverer-bonus" type="text" name="discoverer-bonus" class="form-control m-0" value="0" data-field-title="<?= $l['class-bonus'] ?>">
             <span class="input-group-text">%</span>
           </div>
+          <i class="bi bi-question-circle" data-bs-toggle="tooltip" title="<?= htmlspecialchars($l['lf-class-bonus-hint-discoverer'], ENT_QUOTES) ?>"></i>
         </div>
       </div>
       <div class="d-flex flex-wrap gap-3 align-items-center justify-content-center">

@@ -327,17 +327,18 @@
                     <div class="d-flex align-items-center gap-1 text-nowrap">
                       <label for="lf-mechan-general-enh"><?= $l['generals-character-bonus'] ?></label>
                       <div class="input-group input-group-sm w-auto">
-                        <input id="lf-mechan-general-enh" type="text" name="lf-mechan-general-enh" class="form-control count-input" value="0">
+                        <input id="lf-mechan-general-enh" type="text" name="lf-mechan-general-enh" class="form-control count-input" value="0" data-field-title="<?= htmlspecialchars($l['generals-character-bonus'], ENT_QUOTES) ?>">
                         <span class="input-group-text">%</span>
                       </div>
+                      <i class="bi bi-question-circle" data-bs-toggle="tooltip" title="<?= htmlspecialchars($l['lf-class-bonus-hint-general'] . "\n\n" . $l['character-bonus-hint'] . "\n\n" . $l['lf-bonuses-api-import-hint'], ENT_QUOTES) ?>"></i>
                     </div>
                     <div class="d-flex align-items-center gap-1 text-nowrap">
                       <label for="lf-rocktal-collector-enh"><?= $l['collectors-character-bonus'] ?></label>
                       <div class="input-group input-group-sm w-auto">
-                        <input id="lf-rocktal-collector-enh" type="text" name="lf-rocktal-collector-enh" class="form-control count-input" value="0">
+                        <input id="lf-rocktal-collector-enh" type="text" name="lf-rocktal-collector-enh" class="form-control count-input" value="0" data-field-title="<?= htmlspecialchars($l['collectors-character-bonus'], ENT_QUOTES) ?>">
                         <span class="input-group-text">%</span>
                       </div>
-                      <i class="bi bi-question-circle" data-bs-toggle="tooltip" title="<?= htmlspecialchars($l['character-bonus-hint'] . "\n\n" . $l['lf-bonuses-api-import-hint'], ENT_QUOTES) ?>"></i>
+                      <i class="bi bi-question-circle" data-bs-toggle="tooltip" title="<?= htmlspecialchars($l['lf-class-bonus-hint'] . "\n\n" . $l['character-bonus-hint'] . "\n\n" . $l['lf-bonuses-api-import-hint'], ENT_QUOTES) ?>"></i>
                     </div>
                   </div>
 

@@ -209,6 +209,8 @@
     "collectors-character-bonus": "Collector's character class bonus",
     "lf-class-bonus": "Class bonus",
     "lf-class-bonus-hint": "Enter the 'Total' value from the OGame table of life form bonuses to the class bonuses, row 'Collector'.",
+    "lf-class-bonus-hint-general": "Enter the 'Total' value from the OGame table of life form bonuses to the class bonuses, row 'General'.",
+    "lf-class-bonus-hint-discoverer": "Enter the 'Total' value from the OGame table of life form bonuses to the class bonuses, row 'Discoverer'.",
     "pf-no-profile": "No profile",
     "pf-import": "Import from OGame…",
     "pf-create": "New profile…",

@@ -896,8 +896,8 @@ class FlightOrchestrator {
         this._showAllianceClass(prm.traderBonus, prm.warriorBonus);
         setChecked(`#mission-type-${prm.missionType}`, true);
         setNumVal('#sp-cargohold', prm.spCargohold);
-        setVal('#lf-mechan-general-enh', prm.lfMechanGE);
-        setVal('#lf-rocktal-collector-enh', prm.lfRocktalCE);
+        setNumVal('#lf-mechan-general-enh', prm.lfMechanGE);
+        setNumVal('#lf-rocktal-collector-enh', prm.lfRocktalCE);
 
         const rows = $$('#lf-ships-bonuses tr');
         prm.lfShipsBonuses.forEach((bonus, i) => {

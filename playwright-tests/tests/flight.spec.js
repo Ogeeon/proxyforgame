@@ -1782,6 +1782,53 @@ test.describe('Flight Calculator - Save Points', () => {
 // Block 5. Persistence and reset.
 // ---------------------------------------------------------------------------
 
+test.describe('Flight Calculator - Class bonus fields', () => {
+    test.beforeEach(async ({ context, page }) => {
+        await context.addInitScript(() => {
+            localStorage.setItem('lastChange', 'key-value;true,value;99999');
+        });
+        await page.goto('/flight');
+        await installCompat(page);
+        await openLfBonuses(page);
+    });
+
+    // Both fields take the class panel's Total as the game shows it, like every
+    // other calculator's class bonus: a hint says which row, and no cap applies.
+    for (const [id, row] of [['lf-mechan-general-enh', 'General'], ['lf-rocktal-collector-enh', 'Collector']]) {
+        test(`#${id} names the panel row and takes any Total`, async ({ page }) => {
+            const field = page.locator(`#${id}`);
+            const hint = field.locator('xpath=../following-sibling::i[1]');
+            // Bootstrap adopts the icon on load and moves `title´ to data-bs-original-title.
+            await expect(hint).toHaveAttribute('data-bs-original-title', new RegExp(`'Total'.*'${row}'`));
+
+            await field.fill('1234.5');
+            await field.blur();
+            await expect(field).toHaveValue('1234.5');
+        });
+    }
+
+    // Russian uses a comma as the decimal separator; a stored fraction has to
+    // come back with it, or the field shows a value its own validator rejects.
+    test.describe('Russian locale', () => {
+        test.use({ locale: 'ru-RU' });
+
+        test('a fractional bonus survives a reload with the language separator', async ({ page }) => {
+            for (const id of ['#lf-mechan-general-enh', '#lf-rocktal-collector-enh']) {
+                await page.locator(id).fill('12,5');
+                await page.locator(id).blur();
+            }
+            await page.evaluate(() => updateNumbers());
+
+            await page.reload();
+            await installCompat(page);
+            await openLfBonuses(page);
+
+            await expect(page.locator('#lf-mechan-general-enh')).toHaveValue('12,5');
+            await expect(page.locator('#lf-rocktal-collector-enh')).toHaveValue('12,5');
+        });
+    });
+});
+
 test.describe('Flight Calculator - Persistence', () => {
     test.beforeEach(async ({ context, page }) => {
         await context.addInitScript(() => {

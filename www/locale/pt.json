@@ -209,6 +209,8 @@
     "collectors-character-bonus": "Bônus de classe de personagem do Coletor",
     "lf-class-bonus": "Bônus de classe",
     "lf-class-bonus-hint": "Insira o valor 'Total' da tabela do OGame com os bônus das formas de vida para os bônus de classe, linha 'Colecionador'.",
+    "lf-class-bonus-hint-general": "Insira o valor 'Total' da tabela do OGame com os bônus das formas de vida para os bônus de classe, linha 'General'.",
+    "lf-class-bonus-hint-discoverer": "Insira o valor 'Total' da tabela do OGame com os bônus das formas de vida para os bônus de classe, linha 'Descobridor'.",
     "pf-no-profile": "Sem perfil",
     "pf-import": "Importar do OGame…",
     "pf-create": "Novo perfil…",

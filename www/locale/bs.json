@@ -209,6 +209,8 @@
     "collectors-character-bonus": "Bonus klase lika Kolektora",
     "lf-class-bonus": "Bonus klase",
     "lf-class-bonus-hint": "Unesite vrijednost 'Ukupno' iz OGame tabele bonusa oblika života na bonuse klasa, red 'Sakupljač'.",
+    "lf-class-bonus-hint-general": "Unesite vrijednost 'Ukupno' iz OGame tabele bonusa oblika života na bonuse klasa, red 'General'.",
+    "lf-class-bonus-hint-discoverer": "Unesite vrijednost 'Ukupno' iz OGame tabele bonusa oblika života na bonuse klasa, red 'Otkrivač'.",
     "pf-no-profile": "Bez profila",
     "pf-import": "Uvezi iz OGame…",
     "pf-create": "Novi profil…",

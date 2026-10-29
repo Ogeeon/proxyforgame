@@ -209,6 +209,8 @@
     "collectors-character-bonus": "Karakterklasse bonus van de Verzamelaar",
     "lf-class-bonus": "Klassebonus",
     "lf-class-bonus-hint": "Voer de waarde 'Totaal' in uit de OGame-tabel met Life Form-bonussen op de klassebonussen, rij 'Collector'.",
+    "lf-class-bonus-hint-general": "Voer de waarde 'Totaal' in uit de OGame-tabel met Life Form-bonussen op de klassebonussen, rij 'General'.",
+    "lf-class-bonus-hint-discoverer": "Voer de waarde 'Totaal' in uit de OGame-tabel met Life Form-bonussen op de klassebonussen, rij 'Discoverer'.",
     "pf-no-profile": "Geen profiel",
     "pf-import": "Importeren uit OGame…",
     "pf-create": "Nieuw profiel…",

@@ -205,8 +205,9 @@ class ExpeditionsApp {
     const percentFields = {
       'percent-resources': 999,
       'percent-ships': 999,
-      'class-bonus-collector': 999,
-      'class-bonus-discoverer': 999,
+      // The class panel's Total, as every calculator takes it: uncapped.
+      'class-bonus-collector': Infinity,
+      'class-bonus-discoverer': Infinity,
       'dark-matter-discovery-bonus': 9999,
     };
     Object.keys(percentFields).forEach((id) => {

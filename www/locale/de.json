@@ -209,6 +209,8 @@
     "collectors-character-bonus": "Charakterklassenbonus des Kollektors",
     "lf-class-bonus": "Klassenbonus",
     "lf-class-bonus-hint": "Trage den Wert 'Gesamt' aus der OGame-Tabelle der Lebensform-Boni auf die Klassenboni ein, Zeile 'Kollektor'.",
+    "lf-class-bonus-hint-general": "Trage den Wert 'Gesamt' aus der OGame-Tabelle der Lebensform-Boni auf die Klassenboni ein, Zeile 'General'.",
+    "lf-class-bonus-hint-discoverer": "Trage den Wert 'Gesamt' aus der OGame-Tabelle der Lebensform-Boni auf die Klassenboni ein, Zeile 'Entdecker'.",
     "pf-no-profile": "Kein Profil",
     "pf-import": "Aus OGame importieren…",
     "pf-create": "Neues Profil…",

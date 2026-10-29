@@ -209,6 +209,8 @@
     "collectors-character-bonus": "Koleksiyoncunun karakter sınıfı bonusu",
     "lf-class-bonus": "Sınıf bonusu",
     "lf-class-bonus-hint": "OGame'in yaşam formu bonuslarının sınıf bonuslarına etkisini gösteren tablosundaki 'Toplam' değerini girin, 'Koleksiyoncu' satırı.",
+    "lf-class-bonus-hint-general": "OGame'in yaşam formu bonuslarının sınıf bonuslarına etkisini gösteren tablosundaki 'Toplam' değerini girin, 'General' satırı.",
+    "lf-class-bonus-hint-discoverer": "OGame'in yaşam formu bonuslarının sınıf bonuslarına etkisini gösteren tablosundaki 'Toplam' değerini girin, 'Kaşif' satırı.",
     "pf-no-profile": "Profil yok",
     "pf-import": "OGame’den içe aktar…",
     "pf-create": "Yeni profil…",
