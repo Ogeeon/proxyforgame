@@ -209,6 +209,8 @@
     "collectors-character-bonus": "Bonus triedy postavy Zberateľa",
     "lf-class-bonus": "Bonus triedy",
     "lf-class-bonus-hint": "Zadajte hodnotu 'Spolu' z tabuľky OGame s bonusmi foriem života k bonusom tried, riadok 'Collector'.",
+    "lf-class-bonus-hint-general": "Zadajte hodnotu 'Spolu' z tabuľky OGame s bonusmi foriem života k bonusom tried, riadok 'General'.",
+    "lf-class-bonus-hint-discoverer": "Zadajte hodnotu 'Spolu' z tabuľky OGame s bonusmi foriem života k bonusom tried, riadok 'Discoverer'.",
     "pf-no-profile": "Bez profilu",
     "pf-import": "Importovať z OGame…",
     "pf-create": "Nový profil…",

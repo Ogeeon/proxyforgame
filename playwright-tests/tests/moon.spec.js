@@ -409,6 +409,18 @@ test.describe('Moon Calculator - Sensor phalanx', () => {
         await expect(page.locator('#phalanx-range')).toHaveText('31');
     });
 
+    // The field takes the class panel's Total as the game shows it, like every
+    // other calculator's class bonus: a hint says which row, and no cap applies.
+    test('the class bonus names the panel row and takes any Total', async ({ page }) => {
+        const hint = page.locator('#discoverer-bonus').locator('xpath=../following-sibling::i[1]');
+        // Bootstrap adopts the icon on load and moves `title´ to data-bs-original-title.
+        await expect(hint).toHaveAttribute('data-bs-original-title', /'Total'.*'Discoverer'/);
+
+        await page.locator('#discoverer-bonus').fill('1234.5');
+        await page.locator('#discoverer-bonus').blur();
+        await expect(page.locator('#discoverer-bonus')).toHaveValue('1234.5');
+    });
+
     test('the class bonus is inert while the class is unchecked', async ({ page }) => {
         await page.locator('#phalanx-lvl').fill('5');
         await page.locator('#phalanx-lvl').blur();

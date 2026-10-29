@@ -247,6 +247,7 @@ endforeach; ?>
                 <input id="class-bonus-collector" type="text" class="form-control m-0 percent-input" value="0" data-field-title="<?= htmlspecialchars($l['class-bonus-collector'], ENT_QUOTES) ?>">
                 <span class="input-group-text">%</span>
               </div>
+              <i class="bi bi-question-circle" data-bs-toggle="tooltip" title="<?= htmlspecialchars($l['lf-class-bonus-hint'], ENT_QUOTES) ?>"></i>
             </div>
             <div class="d-flex align-items-center gap-1">
               <label for="class-bonus-discoverer"><?= $l['class-bonus-discoverer'] ?></label>
@@ -254,6 +255,7 @@ endforeach; ?>
                 <input id="class-bonus-discoverer" type="text" class="form-control m-0 percent-input" value="0" data-field-title="<?= htmlspecialchars($l['class-bonus-discoverer'], ENT_QUOTES) ?>">
                 <span class="input-group-text">%</span>
               </div>
+              <i class="bi bi-question-circle" data-bs-toggle="tooltip" title="<?= htmlspecialchars($l['lf-class-bonus-hint-discoverer'], ENT_QUOTES) ?>"></i>
             </div>
           </div>
 

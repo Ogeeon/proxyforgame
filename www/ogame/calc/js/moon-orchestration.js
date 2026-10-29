@@ -166,7 +166,7 @@ class MoonApp {
     // Both range bonuses are open-ended: the life form researches behind them
     // have no level cap and no bonus cap.
     setConstrains('phalanx-range-bonus', { min: 0, def: 0, allowNegative: false, allowFloat: true });
-    setConstrains('discoverer-bonus', { min: 0, def: 0, allowNegative: false, allowFloat: true });
+    setConstrains('discoverer-bonus', { min: 0, max: Infinity, def: 0, allowFloat: true, allowNegative: false });
     setConstrains('systems-num', { min: 1, max: MOON_MAX_SYSTEMS, def: 499 });
     this._applySystemLimits(options.prm.numberOfSystems);
   }
