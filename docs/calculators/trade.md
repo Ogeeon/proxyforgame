@@ -2,6 +2,10 @@
 
 **URL:** `http://pfg.wmp/ogame/calc/trade.php`
 
+## Description
+
+Compare metal, crystal, and deuterium trades in OGame and see how much you receive at a given exchange rate.
+
 **Keywords:** proxyforgame,ogame,trade calculator,resource exchange,trade ratio,metal crystal deuterium,merchant,resource trade
 
 ## Technical Details
@@ -19,21 +23,33 @@
 
 | File | Lines |
 |------|-------|
-| `www/ogame/calc/js/trade-core.js` | 410 |
-| `www/ogame/calc/js/trade.js` | 963 |
+| `www/ogame/calc/js/trade-core.js` | 561 |
+| `www/ogame/calc/js/trade.js` | 1200 |
+| `www/ogame/calc/js/trade-profile.js` | 211 |
 
 The page also loads these shared scripts:
 
 - `www/js/utils.js`
+- `www/js/api-client.js`
 - `www/ogame/calc/js/dom-utils.js`
+- `www/ogame/calc/js/profiles-core.js`
+- `www/ogame/calc/js/profiles-store.js`
+- `www/ogame/calc/js/profiles-fields.js`
+- `www/ogame/calc/js/profiles-widgets.js`
+- `www/ogame/calc/js/profiles-binders.js`
+- `www/ogame/calc/js/profiles-ui.js`
 
 ## Configuration Options
 
 The calculator keeps these settings in `options_trade`:
 
+- `direction`
 - `metal`
 - `crystal`
 - `deuterium`
+- `wantMetal`
+- `wantCrystal`
+- `wantDeuterium`
 - `fix1`
 - `fix2`
 - `rates`
@@ -43,6 +59,7 @@ The calculator keeps these settings in `options_trade`:
 - `mixBalance`
 - `mixProp1`
 - `mixProp2`
+- `mixSrcBalance`
 - `country`
 - `universe`
 - `coordg`

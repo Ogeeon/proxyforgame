@@ -2,6 +2,10 @@
 
 **URL:** `http://pfg.wmp/ogame/calc/moon.php`
 
+## Description
+
+Calculate your chance of finding a moon, the outcome of a moon destruction attempt, and Sensor Phalanx range in OGame.
+
 **Keywords:** proxyforgame,ogame,moon calculator,moon chance,debris field,moon destruction,lunar base,recyclers,deathstar,Sensor phalanx
 
 ## Technical Details
@@ -19,15 +23,23 @@
 
 | File | Lines |
 |------|-------|
-| `www/ogame/calc/js/moon-core.js` | 443 |
+| `www/ogame/calc/js/moon-core.js` | 463 |
 | `www/ogame/calc/js/moon-data-collector.js` | 57 |
 | `www/ogame/calc/js/moon-renderer.js` | 152 |
-| `www/ogame/calc/js/moon-orchestration.js` | 300 |
+| `www/ogame/calc/js/moon-orchestration.js` | 315 |
+| `www/ogame/calc/js/moon-profile.js` | 316 |
 
 The page also loads these shared scripts:
 
 - `www/js/utils.js`
+- `www/js/api-client.js`
 - `www/ogame/calc/js/dom-utils.js`
+- `www/ogame/calc/js/profiles-core.js`
+- `www/ogame/calc/js/profiles-store.js`
+- `www/ogame/calc/js/profiles-fields.js`
+- `www/ogame/calc/js/profiles-widgets.js`
+- `www/ogame/calc/js/profiles-binders.js`
+- `www/ogame/calc/js/profiles-ui.js`
 
 ## Configuration Options
 
@@ -39,7 +51,7 @@ The calculator keeps these settings in `options_moon`:
 - `hyperTechLevel`
 - `isGeneral`
 - `rcCapacityIncrease`
-- `defenseToDebris`
+- `defenseDebrisPercent`
 - `deutToDebris`
 - `promoMoon`
 - `supraRefractorLevel`

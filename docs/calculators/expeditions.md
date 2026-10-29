@@ -2,6 +2,10 @@
 
 **URL:** `http://pfg.wmp/ogame/calc/expeditions.php`
 
+## Description
+
+Estimate the resources, ships, and Dark Matter you may find on OGame expeditions and compare expected returns for different fleets.
+
 **Keywords:** proxyforgame,ogame,expedition calculator,expeditions,expedition resources,expedition ships,dark matter,expedition finds
 
 ## Technical Details
@@ -22,12 +26,20 @@
 | `www/ogame/calc/js/expeditions-core.js` | 223 |
 | `www/ogame/calc/js/expeditions-data-collector.js` | 59 |
 | `www/ogame/calc/js/expeditions-renderer.js` | 75 |
-| `www/ogame/calc/js/expeditions-orchestration.js` | 381 |
+| `www/ogame/calc/js/expeditions-orchestration.js` | 409 |
+| `www/ogame/calc/js/expeditions-profile.js` | 166 |
 
 The page also loads these shared scripts:
 
 - `www/js/utils.js`
+- `www/js/api-client.js`
 - `www/ogame/calc/js/dom-utils.js`
+- `www/ogame/calc/js/profiles-core.js`
+- `www/ogame/calc/js/profiles-store.js`
+- `www/ogame/calc/js/profiles-fields.js`
+- `www/ogame/calc/js/profiles-widgets.js`
+- `www/ogame/calc/js/profiles-binders.js`
+- `www/ogame/calc/js/profiles-ui.js`
 - `www/ogame/calc/js/own-api.js`
 
 ## Configuration Options

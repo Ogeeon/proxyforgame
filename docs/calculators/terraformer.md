@@ -2,6 +2,10 @@
 
 **URL:** `http://pfg.wmp/ogame/calc/terraformer.php`
 
+## Description
+
+Calculate the energy, resources, and time needed to terraform an OGame planet, including Solar Satellites and bonuses.
+
 **Keywords:** proxyforgame,ogame,terraformer calculator,terraformer,planet fields,solar satellites,energy requirement,nanite factory
 
 ## Technical Details
@@ -19,16 +23,24 @@
 
 | File | Lines |
 |------|-------|
-| `www/ogame/calc/js/terraformer-core.js` | 231 |
-| `www/ogame/calc/js/terraformer-data-collector.js` | 68 |
+| `www/ogame/calc/js/terraformer-core.js` | 267 |
+| `www/ogame/calc/js/terraformer-data-collector.js` | 73 |
 | `www/ogame/calc/js/terraformer-renderer.js` | 107 |
-| `www/ogame/calc/js/terraformer-orchestration.js` | 321 |
+| `www/ogame/calc/js/terraformer-orchestration.js` | 346 |
+| `www/ogame/calc/js/terraformer-profile.js` | 119 |
 
 The page also loads these shared scripts:
 
 - `www/js/utils.js`
+- `www/js/api-client.js`
 - `www/ogame/calc/js/ogame-costs.js`
 - `www/ogame/calc/js/dom-utils.js`
+- `www/ogame/calc/js/profiles-core.js`
+- `www/ogame/calc/js/profiles-store.js`
+- `www/ogame/calc/js/profiles-fields.js`
+- `www/ogame/calc/js/profiles-widgets.js`
+- `www/ogame/calc/js/profiles-binders.js`
+- `www/ogame/calc/js/profiles-ui.js`
 
 ## Configuration Options
 
@@ -42,6 +54,11 @@ The calculator keeps these settings in `options_terraformer`:
 - `hyperTechLevel`
 - `maxPlanetTemp`
 - `energyBonus`
+- `engineer`
+- `geologist`
+- `technocrat`
+- `admiral`
+- `commander`
 - `solarPlantLevel`
 - `solarPlantPercent`
 - `fusionPlantLevel`
@@ -53,6 +70,7 @@ The calculator keeps these settings in `options_terraformer`:
 - `energyBoost`
 - `disChLevel`
 - `totalLFEnrgBonus`
+- `lfTerraformerRdc`
 - `scCapacityIncrease`
 - `lcCapacityIncrease`
 - `tfSingleLevel`
