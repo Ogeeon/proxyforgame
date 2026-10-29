@@ -15,6 +15,8 @@ release section; it is the source of truth for the other eleven translations.
 
 ## [Unreleased]
 
+## [2026-10-29] - site entry 70
+
 ### Added
 
 - MCP server: a thirteenth tool, `ogame_import_account`, reads the account export a player copies out of the game - the Origin Exporter's, or several from PfG Companion - and answers with the account and every planet and moon under the other tools' argument names, so a model fills them from one paste instead of asking for every level and bonus. Player name and id, defences and stored resources are left out. The server now takes request bodies up to 256 KB (64 KB before), and `facilities`, like `lifeforms`, ignores the facilities a tool does not read.
@@ -31,6 +33,8 @@ release section; it is the source of truth for the other eleven translations.
 - Flight: with an active profile, choosing a body in the departure select no longer snaps back to the previous one without touching the coordinates — the profile select keeps its own change handler, and picking a body writes the model before the DOM so the recalculation sees the fresh coordinates.
 - Profiles: with an imported profile, the fields of unbuilt life-form buildings and unresearched ones now carry the "as in game" mark like every other field, instead of showing their 0 unmarked. The import used to carry only the standing techs, so an unbuilt one had no game value to compare with; the import now fills in 0 for every building and research of every race the planet lacks, and the profiles stored before get the zeros on the next page load. <!-- site -->
 - Flight, moon, expeditions: the life form class bonus fields now carry the same hint as in costs and production - enter the 'Total' from the game's class bonus table, row Collector, General or Discoverer, which already includes the technology bonus. The expedition fields are no longer capped at 999%, matching the other calculators. Flight now shows a fractional class bonus restored from saved settings or a profile with the language's decimal separator; on Russian it showed a dot.
+
+> **RU:** Торговый калькулятор теперь считает и в обратную сторону: укажите, сколько ресурсов хотите получить, и он покажет, сколько нужно продать (с округлением вверх). Направление переключается кнопками над панелями или щелчком по стрелке между ними.
 
 ## [2026-10-25] - site entry 69
 
