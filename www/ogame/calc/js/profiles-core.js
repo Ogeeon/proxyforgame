@@ -948,6 +948,75 @@ function copyNumbers(raw, keys, into) {
 }
 
 /**
+ * The techs a planet may hold of each life form, at the game ids
+ * lfBuildingGameId() and lfResearchGameId() count out. The counts follow
+ * data/lf-techs.json. An export names only the standing buildings and
+ * researches, so an import fills the rest with zeros (fillLfGameLevels):
+ * an unbuilt one is level 0 too, and without the game's zero the field
+ * that shows it gets no "as in game" mark.
+ */
+const LF_RACES = 4;
+const LF_BUILDING_POSITIONS = 12;
+const LF_RESEARCH_POSITIONS = 18;
+
+/** Every life-form value key a planet may hold: all races, buildings first. */
+function lfTechValueKeys() {
+  const keys = [];
+  for (let race = 1; race <= LF_RACES; race++) {
+    for (let position = 1; position <= LF_BUILDING_POSITIONS; position++) keys.push('lf.building.' + lfBuildingGameId(race, position));
+    for (let position = 1; position <= LF_RESEARCH_POSITIONS; position++) keys.push('lf.research.' + lfResearchGameId(race, position));
+  }
+  return keys;
+}
+
+/**
+ * Add the zeros the export left out. Every race's techs are filled, not only
+ * the planet's own: the player's planets may show different races, and lfcosts
+ * names buildings of all four. Only the keys that are missing are added, so
+ * this runs twice without harm - the stored profiles go through it on every
+ * page load (migrateLfGameLevels()).
+ *
+ * @param {Object<string, *>} values The game values the import has built.
+ * @param {number} race The planet's race, as `lf.race`; a planet with no life form gets nothing.
+ */
+function fillLfGameLevels(values, race) {
+  if (race < 1 || race > LF_RACES) return;
+  lfTechValueKeys().forEach((key) => { if (!(key in values)) values[key] = 0; });
+}
+
+/**
+ * The profiles imported before the zeros: their planets lack the game values
+ * an import adds now, and the fields of the unbuilt techs show up unmarked.
+ * Give every imported planet the missing zeros and save the profiles that
+ * changed. Runs once a page, from createProfilesUi(), before anything reads
+ * the profiles; after the first run it adds nothing and saves nothing. A
+ * hand-entered planet (its race lives in the override layer) is left alone -
+ * the next import matches it and fills it as it fills the others.
+ *
+ * @param {ProfileStore} store
+ * @returns {number} How many profiles were rewritten.
+ */
+function migrateLfGameLevels(store) {
+  let count = 0;
+  store.getAll().forEach((profile) => {
+    if (!hasGameLayer(profile)) return;
+    let changed = false;
+    profile.planets.forEach((planet) => {
+      const race = planet.values['lf.race'];
+      if (!race || !('game' in race) || race.game < 1 || race.game > LF_RACES) return;
+      lfTechValueKeys().forEach((key) => {
+        if (!(key in planet.values)) { planet.values[key] = { game: 0 }; changed = true; }
+      });
+    });
+    if (changed) {
+      store.save(profile);
+      count++;
+    }
+  });
+  return count;
+}
+
+/**
  * One planet or moon of the export.
  *
  * @param {Record<string, any>} raw
@@ -970,6 +1039,7 @@ function exportBody(raw, isPlanet, nowSeconds, productionFactors = null) {
     if (isPlainObject(raw.temperature)) copyNumbers(raw.temperature, { min: 'temperature.min', max: 'temperature.max' }, values);
     const speciesId = finiteOrNull(raw.selectedSpeciesId);
     values['lf.race'] = speciesId !== null ? (SPECIES_TO_RACE[/** @type {701|702|703|704} */ (speciesId)] || 0) : 0;
+    fillLfGameLevels(values, values['lf.race']);
     if (isPlainObject(productionFactors)) {
       // Every row of production's table: mines, solar and fusion plants, satellites, crawlers.
       PRODUCTION_ROW_TECHS.forEach((techId) => {
@@ -1848,6 +1918,16 @@ function lfBuildingGameId(race, position) {
 }
 
 /**
+ * The game id of a race's research at a position: race 1 position 7 is 11207.
+ *
+ * @param {number} race 1-4
+ * @param {number} position 1-18
+ */
+function lfResearchGameId(race, position) {
+  return 10000 + race * 1000 + 200 + position;
+}
+
+/**
  * A manual profile from a flight saved set (`flight_uni_<name>`). Only the
  * universe and the account data move; the flight being planned (departure,
  * destination, times, mode) is working state and is dropped, and the universe
@@ -1958,7 +2038,9 @@ if (typeof window !== 'undefined') {
     universeCacheKey, readUniverseChoices, UNIVERSE_SETTINGS_TTL_MS, UNIVERSE_SETTING_PARSERS,
     parseUniverseSettings, readUniverseEntry, isUniverseEntryFresh, universeLayer, universeValue,
     setUniverseChoice, mergeUniverseChoices, pfMarkState, listUniverseOverrides, resetUniverseChoices,
-    ratesToTrade, ratesFromTrade, lfBuildingGameId,
+    ratesToTrade, ratesFromTrade, lfBuildingGameId, lfResearchGameId,
+    LF_RACES, LF_BUILDING_POSITIONS, LF_RESEARCH_POSITIONS,
+    lfTechValueKeys, fillLfGameLevels, migrateLfGameLevels,
     productionPlanetValues, productionPlanetState, profileFromProductionSet, profileFromFlightSet,
     profileFromSpyReport,
   });
