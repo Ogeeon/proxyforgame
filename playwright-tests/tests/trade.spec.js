@@ -1,5 +1,17 @@
 import { test, expect } from './base';
 
+/**
+ * Types a value into a field and presses Enter, which fires the keyup the page
+ * recalculates on.
+ * @param {import('@playwright/test').Page} page
+ * @param {string} selector
+ * @param {string} value
+ */
+async function enter(page, selector, value) {
+    await page.locator(selector).fill(value);
+    await page.locator(selector).press('Enter');
+}
+
 test.describe('Trade Calculator Page', () => {
     test.beforeEach(async ({ context, page }, testInfo) => {
         // Avoid changelog popup
@@ -34,215 +46,111 @@ test.describe('Trade Calculator Page', () => {
         expect(unisLoaded).toBe(true);
     });
 
-    test('Metal calculations are correct', async ({ page }) => {
-        await page.locator('#rate-btn-6').click();
-        await page.locator('#res-src-0').click();
-        await page.locator('#res-src-m').dblclick();
-        await page.locator('#res-src-m').fill('100000');
-        await page.locator('#res-src-m').press('Enter');
-        await expect(page.locator('#res-src-cargo')).toContainText('16 SC / 4 LC');
-        await page.locator('#res-dst-0').click();
-        await expect(page.locator('#res-dst-c')).toContainText('62.500');
-        await expect(page.locator('#res-dst-cargo')).toContainText('10 SC / 2 LC');
-        await page.locator('#res-dst-1').click();
-        await expect(page.locator('#res-dst-d')).toContainText('41.667');
-        await expect(page.locator('#res-dst-cargo')).toContainText('7 SC / 2 LC');
-        await page.locator('#res-dst-2').click();
-        await page.locator('#mix-balance-proc').dblclick();
-        await page.locator('#mix-balance-proc').fill('60');
-        await page.locator('#mix-balance-proc').press('Enter');
-        await expect(page.locator('#res-dst-c')).toContainText('31.250');
-        await expect(page.locator('#res-dst-d')).toContainText('20.833');
-        await expect(page.locator('#res-dst-cargo')).toContainText('9 SC / 2 LC');
-        await page.locator('#res-dst-mix-1').check();
-        await page.locator('#mix-balance-prop1').dblclick();
-        await page.locator('#mix-balance-prop1').fill('2');
-        await page.locator('#mix-balance-prop1').press('Enter');
-        await expect(page.locator('#res-dst-c')).toContainText('35.714');
-        await expect(page.locator('#res-dst-d')).toContainText('17.857');
-        await page.locator('#res-dst-mix-2').check();
-        await page.locator('#mix-fix1').dblclick();
-        await page.locator('#mix-fix1').fill('20000');
-        await page.locator('#mix-fix1').press('Enter');
-        await expect(page.locator('#res-dst-c')).toContainText('20.000');
-        await expect(page.locator('#res-dst-d')).toContainText('28.333');
-        await page.locator('#res-dst-mix-3').check();
-        await page.locator('#mix-fix2').dblclick();
-        await page.locator('#mix-fix2').fill('10000');
-        await page.locator('#mix-fix2').press('Enter');
-        await expect(page.locator('#res-dst-c')).toContainText('47.500');
-        await expect(page.locator('#res-dst-d')).toContainText('10.000');
-        await page.locator('#hypertech-lvl').dblclick();
-        await page.locator('#hypertech-lvl').fill('20');
-        await page.locator('#hypertech-lvl').press('Enter');
-        await expect(page.locator('#res-src-cargo')).toContainText('9 SC / 2 LC');
-        await expect(page.locator('#res-dst-cargo')).toContainText('6 SC / 2 LC');
-    });
+    // Selling one resource, every destination and mix mode at 2.4 : 1.5 : 1.
+    // `first` and `second` are the two resources it buys, in mix order.
+    const SINGLE_SOURCES = [
+        {
+            name: 'Metal', src: 0, field: 'm', first: 'c', second: 'd',
+            onlyFirst: ['62.500', '10 SC / 2 LC'], onlySecond: ['41.667', '7 SC / 2 LC'],
+            percent: ['31.250', '20.833', '9 SC / 2 LC'], proportion: ['35.714', '17.857'],
+            fixFirst: ['20.000', '28.333'], fixSecond: ['47.500', '10.000'], hyperCargo: '6 SC / 2 LC',
+        },
+        {
+            name: 'Crystal', src: 1, field: 'c', first: 'm', second: 'd',
+            onlyFirst: ['160.000', '26 SC / 6 LC'], onlySecond: ['66.667', '11 SC / 3 LC'],
+            percent: ['61.538', '41.026', '17 SC / 4 LC'], proportion: ['72.727', '36.364'],
+            fixFirst: ['20.000', '58.333'], fixSecond: ['136.000', '10.000'], hyperCargo: '13 SC / 3 LC',
+        },
+        {
+            name: 'Deut', src: 2, field: 'd', first: 'm', second: 'c',
+            onlyFirst: ['240.000', '39 SC / 8 LC'], onlySecond: ['150.000', '24 SC / 5 LC'],
+            percent: ['116.129', '77.419', '31 SC / 7 LC'], proportion: ['133.333', '66.667', '32 SC / 7 LC'],
+            fixFirst: ['20.000', '137.500'], fixSecond: ['224.000', '10.000'], hyperCargo: '21 SC / 5 LC',
+        },
+    ];
 
-    test('Crystal calculations are correct', async ({ page }) => {
-        await page.locator('#rate-btn-6').click();
-        await page.locator('#res-src-1').click();
-        await page.locator('#res-src-c').dblclick();
-        await page.locator('#res-src-c').fill('100000');
-        await page.locator('#res-src-c').press('Enter');
-        await expect(page.locator('#res-src-cargo')).toContainText('16 SC / 4 LC');
-        await page.locator('#res-dst-0').click();
-        await expect(page.locator('#res-dst-m')).toContainText('160.000');
-        await expect(page.locator('#res-dst-cargo')).toContainText('26 SC / 6 LC');
-        await page.locator('#res-dst-1').click();
-        await expect(page.locator('#res-dst-d')).toContainText('66.667');
-        await expect(page.locator('#res-dst-cargo')).toContainText('11 SC / 3 LC');
-        await page.locator('#res-dst-2').click();
-        await page.locator('#mix-balance-proc').dblclick();
-        await page.locator('#mix-balance-proc').fill('60');
-        await page.locator('#mix-balance-proc').press('Enter');
-        await expect(page.locator('#res-dst-m')).toContainText('61.538');
-        await expect(page.locator('#res-dst-d')).toContainText('41.026');
-        await expect(page.locator('#res-dst-cargo')).toContainText('17 SC / 4 LC');
-        await page.locator('#res-dst-mix-1').check();
-        await page.locator('#mix-balance-prop1').dblclick();
-        await page.locator('#mix-balance-prop1').fill('2');
-        await page.locator('#mix-balance-prop1').press('Enter');
-        await expect(page.locator('#res-dst-m')).toContainText('72.727');
-        await expect(page.locator('#res-dst-d')).toContainText('36.364');
-        await page.locator('#res-dst-mix-2').check();
-        await page.locator('#mix-fix1').dblclick();
-        await page.locator('#mix-fix1').fill('20000');
-        await page.locator('#mix-fix1').press('Enter');
-        await expect(page.locator('#res-dst-m')).toContainText('20.000');
-        await expect(page.locator('#res-dst-d')).toContainText('58.333');
-        await page.locator('#res-dst-mix-3').check();
-        await page.locator('#mix-fix2').dblclick();
-        await page.locator('#mix-fix2').fill('10000');
-        await page.locator('#mix-fix2').press('Enter');
-        await expect(page.locator('#res-dst-m')).toContainText('136.000');
-        await expect(page.locator('#res-dst-d')).toContainText('10.000');
-        await page.locator('#hypertech-lvl').dblclick();
-        await page.locator('#hypertech-lvl').fill('20');
-        await page.locator('#hypertech-lvl').press('Enter');
-        await expect(page.locator('#res-src-cargo')).toContainText('9 SC / 2 LC');
-        await expect(page.locator('#res-dst-cargo')).toContainText('13 SC / 3 LC');
-    });
+    for (const c of SINGLE_SOURCES) {
+        test(`${c.name} calculations are correct`, async ({ page }) => {
+            const dst = (r) => page.locator('#res-dst-' + r);
+            /** The two destination amounts, and the destination cargo when given. */
+            const expectMix = async ([first, second, cargo]) => {
+                await expect(dst(c.first)).toHaveValue(first);
+                await expect(dst(c.second)).toHaveValue(second);
+                if (cargo) await expect(page.locator('#res-dst-cargo')).toContainText(cargo);
+            };
 
-    test('Deut calculations are correct', async ({ page }) => {
-        await page.locator('#rate-btn-6').click();
-        await page.locator('#res-src-2').click();
-        await page.locator('#res-src-d').dblclick();
-        await page.locator('#res-src-d').fill('100000');
-        await page.locator('#res-src-d').press('Enter');
-        await expect(page.locator('#res-src-cargo')).toContainText('16 SC / 4 LC');
-        await page.locator('#res-dst-0').click();
-        await expect(page.locator('#res-dst-m')).toContainText('240.000');
-        await expect(page.locator('#res-dst-cargo')).toContainText('39 SC / 8 LC');
-        await page.locator('#res-dst-1').click();
-        await expect(page.locator('#res-dst-c')).toContainText('150.000');
-        await expect(page.locator('#res-dst-cargo')).toContainText('24 SC / 5 LC');
-        await page.locator('#res-dst-2').click();
-        await page.locator('#mix-balance-proc').dblclick();
-        await page.locator('#mix-balance-proc').fill('60');
-        await page.locator('#mix-balance-proc').press('Enter');
-        await expect(page.locator('#res-dst-m')).toContainText('116.129');
-        await expect(page.locator('#res-dst-c')).toContainText('77.419');
-        await expect(page.locator('#res-dst-cargo')).toContainText('31 SC / 7 LC');
-        await page.locator('#res-dst-mix-1').check();
-        await page.locator('#mix-balance-prop1').dblclick();
-        await page.locator('#mix-balance-prop1').fill('2');
-        await page.locator('#mix-balance-prop1').press('Enter');
-        await expect(page.locator('#res-dst-m')).toContainText('133.333');
-        await expect(page.locator('#res-dst-c')).toContainText('66.667');
-        await expect(page.locator('#res-dst-cargo')).toContainText('32 SC / 7 LC');
-        await page.locator('#res-dst-mix-2').check();
-        await page.locator('#mix-fix1').dblclick();
-        await page.locator('#mix-fix1').fill('20000');
-        await page.locator('#mix-fix1').press('Enter');
-        await expect(page.locator('#res-dst-m')).toContainText('20.000');
-        await expect(page.locator('#res-dst-c')).toContainText('137.500');
-        await page.locator('#res-dst-mix-3').check();
-        await page.locator('#mix-fix2').dblclick();
-        await page.locator('#mix-fix2').fill('10000');
-        await page.locator('#mix-fix2').press('Enter');
-        await expect(page.locator('#res-dst-m')).toContainText('224.000');
-        await expect(page.locator('#res-dst-c')).toContainText('10.000');
-        await page.locator('#hypertech-lvl').dblclick();
-        await page.locator('#hypertech-lvl').fill('20');
-        await page.locator('#hypertech-lvl').press('Enter');
-        await expect(page.locator('#res-src-cargo')).toContainText('9 SC / 2 LC');
-        await expect(page.locator('#res-dst-cargo')).toContainText('21 SC / 5 LC');
-    });
+            await page.locator('#rate-btn-6').click();
+            await page.locator('#res-src-' + c.src).click();
+            await enter(page, '#res-src-' + c.field, '100000');
+            await expect(page.locator('#res-src-cargo')).toContainText('16 SC / 4 LC');
+
+            await page.locator('#res-dst-0').click();
+            await expect(dst(c.first)).toHaveValue(c.onlyFirst[0]);
+            await expect(page.locator('#res-dst-cargo')).toContainText(c.onlyFirst[1]);
+            await page.locator('#res-dst-1').click();
+            await expect(dst(c.second)).toHaveValue(c.onlySecond[0]);
+            await expect(page.locator('#res-dst-cargo')).toContainText(c.onlySecond[1]);
+
+            await page.locator('#res-dst-2').click();
+            await enter(page, '#mix-balance-proc', '60');
+            await expectMix(c.percent);
+            await page.locator('#res-dst-mix-1').check();
+            await enter(page, '#mix-balance-prop1', '2');
+            await expectMix(c.proportion);
+            await page.locator('#res-dst-mix-2').check();
+            await enter(page, '#mix-fix1', '20000');
+            await expectMix(c.fixFirst);
+            await page.locator('#res-dst-mix-3').check();
+            await enter(page, '#mix-fix2', '10000');
+            await expectMix(c.fixSecond);
+
+            await enter(page, '#hypertech-lvl', '20');
+            await expect(page.locator('#res-src-cargo')).toContainText('9 SC / 2 LC');
+            await expect(page.locator('#res-dst-cargo')).toContainText(c.hyperCargo);
+        });
+    }
 
     test('the source split mode divides what is being sold', async ({ page }) => {
         await page.locator('#rate-btn-6').click();
         await page.locator('#res-src-2').click();
-        await page.locator('#res-src-d').dblclick();
-        await page.locator('#res-src-d').fill('100000');
-        await page.locator('#res-src-d').press('Enter');
+        await enter(page, '#res-src-d', '100000');
         await page.locator('#res-dst-2').click();
-        await page.locator('#mix-src-balance-proc').dblclick();
-        await page.locator('#mix-src-balance-proc').fill('50');
-        await page.locator('#mix-src-balance-proc').press('Enter');
+        await enter(page, '#mix-src-balance-proc', '50');
         // 50.000 deut buys metal at 2.4 and the other 50.000 buys crystal at 1.5
         await expect(page.locator('#res-dst-mix-4')).toBeChecked();
-        await expect(page.locator('#res-dst-m')).toContainText('120.000');
-        await expect(page.locator('#res-dst-c')).toContainText('75.000');
-        await page.locator('#mix-src-balance-proc').dblclick();
-        await page.locator('#mix-src-balance-proc').fill('25');
-        await page.locator('#mix-src-balance-proc').press('Enter');
-        await expect(page.locator('#res-dst-m')).toContainText('60.000');
-        await expect(page.locator('#res-dst-c')).toContainText('112.500');
+        await expect(page.locator('#res-dst-m')).toHaveValue('120.000');
+        await expect(page.locator('#res-dst-c')).toHaveValue('75.000');
+        await enter(page, '#mix-src-balance-proc', '25');
+        await expect(page.locator('#res-dst-m')).toHaveValue('60.000');
+        await expect(page.locator('#res-dst-c')).toHaveValue('112.500');
     });
 
-    test('Metal+Crystal calculations are correct', async ({ page }) => {
-        await page.locator('#rate-btn-6').click();
-        await page.locator('#res-src-3').click();
-        await page.locator('#res-src-m').click();
-        await page.locator('#res-src-m').fill('100000');
-        await page.locator('#res-src-m').press('Enter');
-        await page.locator('#res-src-c').click();
-        await page.locator('#res-src-c').fill('50000');
-        await page.locator('#res-src-c').press('Enter');
-        await expect(page.locator('#res-src-cargo')).toContainText('24 SC / 5 LC');
-        await expect(page.locator('#res-dst-d')).toContainText('75.000');
-        await expect(page.locator('#res-dst-cargo')).toContainText('12 SC / 3 LC');
-    });
+    // Selling a pair: the one resource it can buy, at 2.4 : 1.5 : 1.
+    const PAIR_SOURCES = [
+        { name: 'Metal+Crystal', src: 3, sold: [['m', '100000'], ['c', '50000']], dst: 'd', value: '75.000', cargo: '12 SC / 3 LC' },
+        { name: 'Metal+Deut', src: 4, sold: [['m', '100000'], ['d', '50000']], dst: 'c', value: '137.500', cargo: '22 SC / 5 LC' },
+        { name: 'Crystal+Deut', src: 5, sold: [['c', '100000'], ['d', '50000']], dst: 'm', value: '280.000', cargo: '45 SC / 9 LC' },
+    ];
 
-    test('Metal+Deut calculations are correct', async ({ page }) => {
-        await page.locator('#rate-btn-6').click();
-        await page.locator('#res-src-4').click();
-        await page.locator('#res-src-m').click();
-        await page.locator('#res-src-m').fill('100000');
-        await page.locator('#res-src-m').press('Enter');
-        await page.locator('#res-src-d').click();
-        await page.locator('#res-src-d').fill('50000');
-        await page.locator('#res-src-d').press('Enter');
-        await expect(page.locator('#res-src-cargo')).toContainText('24 SC / 5 LC');
-        await expect(page.locator('#res-dst-c')).toContainText('137.500');
-        await expect(page.locator('#res-dst-cargo')).toContainText('22 SC / 5 LC');
-    });
-
-    test('Crystal+Deut calculations are correct', async ({ page }) => {
-        await page.locator('#rate-btn-6').click();
-        await page.locator('#res-src-5').click();
-        await page.locator('#res-src-c').click();
-        await page.locator('#res-src-c').fill('100000');
-        await page.locator('#res-src-c').press('Enter');
-        await page.locator('#res-src-d').click();
-        await page.locator('#res-src-d').fill('50000');
-        await page.locator('#res-src-d').press('Enter');
-        await expect(page.locator('#res-src-cargo')).toContainText('24 SC / 5 LC');
-        await expect(page.locator('#res-dst-m')).toContainText('280.000');
-        await expect(page.locator('#res-dst-cargo')).toContainText('45 SC / 9 LC');
-    });
+    for (const c of PAIR_SOURCES) {
+        test(`${c.name} calculations are correct`, async ({ page }) => {
+            await page.locator('#rate-btn-6').click();
+            await page.locator('#res-src-' + c.src).click();
+            for (const [field, amount] of c.sold) {
+                await enter(page, '#res-src-' + field, amount);
+            }
+            await expect(page.locator('#res-src-cargo')).toContainText('24 SC / 5 LC');
+            await expect(page.locator('#res-dst-' + c.dst)).toHaveValue(c.value);
+            await expect(page.locator('#res-dst-cargo')).toContainText(c.cargo);
+        });
+    }
 
     test('links are correct', async ({ page }) => {
         await page.locator('#rate-btn-6').click();
         await page.locator('#res-src-0').click();
-        await page.locator('#res-src-m').dblclick();
-        await page.locator('#res-src-m').fill('100000');
-        await page.locator('#res-src-m').press('Enter');
+        await enter(page, '#res-src-m', '100000');
         await page.locator('#res-dst-mix-3').check();
-        await page.locator('#mix-fix2').dblclick();
-        await page.locator('#mix-fix2').fill('10000');
-        await page.locator('#mix-fix2').press('Enter');
+        await enter(page, '#mix-fix2', '10000');
         await page.locator('#universe').selectOption('1');
         await page.locator('#coord-g').click();
         await page.locator('#coord-g').fill('');
@@ -274,8 +182,7 @@ test.describe('Trade Calculator Page', () => {
         expect(await page.evaluate(() => options.universe)).toBe(Number(first));
         // The message names the universe through the selected option, so it is not blank.
         await page.locator('#res-src-0').click();
-        await page.locator('#res-src-m').fill('100000');
-        await page.locator('#res-src-m').press('Enter');
+        await enter(page, '#res-src-m', '100000');
         for (const [id, v] of [['#coord-g', '4'], ['#coord-s', '3'], ['#coord-p', '2']]) {
             await page.locator(id).fill('');
             await page.locator(id).pressSequentially(v);
@@ -288,8 +195,8 @@ test.describe('Trade Calculator Page', () => {
         await expect(page.locator('#res-src-2')).toBeChecked();
         await expect(page.locator('#res-dst-mix-4')).toBeChecked();
         await expect(page.locator('#mix-src-balance-proc')).toHaveValue('50');
-        await expect(page.locator('#res-dst-m')).toContainText('120.000');
-        await expect(page.locator('#res-dst-c')).toContainText('75.000');
+        await expect(page.locator('#res-dst-m')).toHaveValue('120.000');
+        await expect(page.locator('#res-dst-c')).toHaveValue('75.000');
     });
 
     test('parsing from link works', async ({ page }) => {
@@ -300,8 +207,8 @@ test.describe('Trade Calculator Page', () => {
         await expect(page.locator('#mix-balance-prop1')).toHaveValue('2');
         await expect(page.locator('#mix-balance-prop2')).toHaveValue('3');
         await expect(page.locator('#res-src-c')).toHaveValue('100000');
-        await expect(page.locator('#res-dst-m')).toContainText('34.783');
-        await expect(page.locator('#res-dst-d')).toContainText('52.174');
+        await expect(page.locator('#res-dst-m')).toHaveValue('34.783');
+        await expect(page.locator('#res-dst-d')).toHaveValue('52.174');
         await expect(page.locator('#rate-md')).toHaveValue('2.4');
         await expect(page.locator('#rate-cd')).toHaveValue('1.5');
         await expect(page.locator('#trade')).toContainText('1.600');
@@ -326,5 +233,62 @@ test.describe('Trade Calculator Page', () => {
         await page.reload();
         await expect(page.locator('#rate-md')).toHaveValue('4');
         await expect(page.locator('#rate-cd')).toHaveValue('2');
+    });
+    // Issue #33: name what you want to receive, get the amount to sell.
+    test('reverse answers the example from the request', async ({ page }) => {
+        await page.locator('#rate-btn-5').click(); // 2 : 1.5 : 1
+        await page.locator('#res-src-2').click();
+        await page.locator('#res-dst-2').click();
+        await page.locator('#dir-1').check();
+        await expect(page.locator('#big-arrow')).toHaveClass(/bi-caret-left-fill/);
+        await expect(page.locator('#dst-mix-block')).toBeHidden();
+        await expect(page.locator('#res-dst-m')).toBeEditable();
+        await expect(page.locator('#res-src-d')).not.toBeEditable();
+
+        await enter(page, '#res-dst-m', '11000000');
+        await enter(page, '#res-dst-c', '4000000');
+        // 11 000 000 / 2 + 4 000 000 / 1.5 = 8 166 666.67, rounded up.
+        await expect(page.locator('#res-src-d')).toHaveValue('8.166.667');
+        await expect(page.locator('#res-src-cargo')).toContainText('1.307 SC / 262 LC');
+        await expect(page.locator('#res-dst-cargo')).toContainText('2.400 SC / 480 LC');
+        await expect(page.locator('#alink')).toContainText('&st=2&dt=2&dir=1&wm=11000000&wc=4000000&');
+        await expect(page.locator('#atext')).toContainText('Selling 8.166.667 deut. Buying 11.000.000 met and 4.000.000 crys.');
+    });
+
+    test('the arrow flips the direction and keeps the deal', async ({ page }) => {
+        await page.locator('#rate-btn-6').click();
+        await page.locator('#res-src-0').click();
+        await page.locator('#res-dst-0').click();
+        await enter(page, '#res-src-m', '100000');
+        await expect(page.locator('#res-dst-c')).toHaveValue('62.500');
+        await expect(page.locator('#res-dst-c')).not.toBeEditable();
+
+        await page.locator('#dir-switch').click();
+        await expect(page.locator('#dir-1')).toBeChecked();
+        await expect(page.locator('#res-dst-c')).toHaveValue('62500');
+        await expect(page.locator('#res-src-m')).toHaveValue('100.000');
+
+        await page.locator('#dir-switch').click();
+        await expect(page.locator('#dir-0')).toBeChecked();
+        await expect(page.locator('#big-arrow')).toHaveClass(/bi-caret-right-fill/);
+        await expect(page.locator('#res-src-m')).toHaveValue('100000');
+        await expect(page.locator('#res-dst-c')).toHaveValue('62.500');
+    });
+
+    test('reverse is not offered for a pair source', async ({ page }) => {
+        await page.locator('#res-src-3').click();
+        await expect(page.locator('#dir-1')).toBeDisabled();
+        await expect(page.locator('#dir-switch')).toBeDisabled();
+
+        await page.locator('#res-src-2').click();
+        await page.locator('#dir-1').check();
+        await expect(page.locator('#res-src-3')).toBeDisabled();
+    });
+
+    test('parsing a reverse link works', async ({ page }) => {
+        await page.goto('/trade#rmd=2&rcd=1.5&st=2&dt=2&dir=1&wm=11000000&wc=4000000&l=en:1');
+        await expect(page.locator('#dir-1')).toBeChecked();
+        await expect(page.locator('#res-dst-m')).toHaveValue('11000000');
+        await expect(page.locator('#res-src-d')).toHaveValue('8.166.667');
     });
 });

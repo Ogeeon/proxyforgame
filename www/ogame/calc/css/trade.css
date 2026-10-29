@@ -226,6 +226,33 @@
     justify-content: center;
 }
 
+/* The arrow is the direction switch: a bare icon that reads as clickable. */
+.arrow-btn {
+    background: none;
+    border: 0;
+    padding: 0;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.arrow-btn:hover #big-arrow,
+.arrow-btn:focus-visible #big-arrow {
+    color: #0d6efd;
+}
+
+.arrow-btn:disabled {
+    cursor: default;
+    opacity: 0.5;
+}
+
+/* The side of the deal that shows the answer: readonly, so it can still be
+   selected and copied, on the same fill as every other non-editable field
+   (docs/patterns.md, (e)) but at full contrast - it is what the page is for. */
+#main input.res-input[readonly] {
+    background-color: var(--bs-secondary-bg);
+    cursor: default;
+}
+
 /* Minimal horizontal margin around the icon itself */
 .arrow-col #big-arrow {
     margin: 0;

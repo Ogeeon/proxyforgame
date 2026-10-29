@@ -46,6 +46,19 @@ const TRADE_CLASS_COLLECTOR = 0;
 /** Decimals the metal:crystal rate is kept to. See tradeMcRate. */
 const TRADE_MC_DECIMALS = 3;
 
+/**
+ * Which way the deal is worked out: from the amount sold to what it buys, or
+ * from the amounts wanted to what has to be sold for them.
+ */
+const TRADE_DIR_FORWARD = 0;
+const TRADE_DIR_REVERSE = 1;
+
+/**
+ * Decimals a reverse amount is cut to before it is rounded up, so that float
+ * noise on an exact answer (4500.0000000001) does not cost a whole unit.
+ */
+const TRADE_REVERSE_PRECISION = 6;
+
 // ============================================================================
 // RATES
 // ============================================================================
@@ -265,6 +278,21 @@ function tradeSourceTotal(srcType, sm, sc, sd) {
  * @property {number} lcCapacityIncrease - Large Cargo capacity increase, percent
  */
 
+/**
+ * What a reverse calculation needs on top of the cargo settings: the amounts
+ * wanted, and which of them the deal covers.
+ * @typedef {object} TradeReverseParams
+ * @property {number} srcType - source resource type, 0..2 - a pair has no single answer
+ * @property {number} dstType - destination resource type, 0..2; 2 wants both
+ * @property {number} wantMetal - metal wanted
+ * @property {number} wantCrystal - crystal wanted
+ * @property {number} wantDeuterium - deuterium wanted
+ * @property {number} hyperTech - Hyperspace Technology level
+ * @property {number} playerClass - player class, Collector is 0
+ * @property {number} scCapacityIncrease - Small Cargo capacity increase, percent
+ * @property {number} lcCapacityIncrease - Large Cargo capacity increase, percent
+ */
+
 class TradeCalculator {
     /**
      * @param {{md: number, cd: number, mc: number}} rates - the exchange rates
@@ -439,6 +467,62 @@ class TradeCalculator {
         const dstTotal = dm + dc + dd;
 
         return {
+            sm, sc, sd,
+            dm, dc, dd,
+            srcTotal,
+            dstTotal,
+            capacity,
+            srcCargo: tradeCargoCount(srcTotal, capacity),
+            dstCargo: tradeCargoCount(dstTotal, capacity)
+        };
+    }
+
+    /**
+     * What one unit of each resource costs in the resource being sold.
+     * @param {number} srcType - source resource type, 0..2
+     * @returns {number[]} [metal, crystal, deuterium]; the source itself costs 0
+     */
+    _unitCosts(srcType) {
+        const r = this.rates;
+        switch (srcType) {
+            case 0: return [0, r.mc, r.md];
+            case 1: return [1 / r.mc, 0, r.cd];
+            case 2: return [1 / r.md, 1 / r.cd, 0];
+            default: return [0, 0, 0];
+        }
+    }
+
+    /**
+     * The deal worked out backwards: the amounts wanted are given, and the
+     * answer is how much of the single source resource buys them. It is the
+     * forward formula inverted, and it is rounded up - one unit short does not
+     * buy the goods. Resources the destination type does not cover are left
+     * out, whatever their fields hold.
+     *
+     * Returns the same shape as compute(), so the page renders either one.
+     *
+     * @param {TradeReverseParams} prm - the current form state
+     */
+    computeReverse(prm) {
+        const covered = getDstInputState(prm.srcType, prm.dstType);
+        const wanted = [prm.wantMetal, prm.wantCrystal, prm.wantDeuterium]
+            .map((amount, i) => covered[i] === 0 ? Math.round(clampNumber(amount, 0, Infinity)) : 0);
+        const costs = this._unitCosts(prm.srcType);
+        const exact = wanted.reduce((sum, amount, i) => sum + amount * costs[i], 0);
+        const sell = Math.ceil(Number(exact.toFixed(TRADE_REVERSE_PRECISION)));
+
+        const sold = [0, 0, 0];
+        if (prm.srcType >= 0 && prm.srcType <= 2) sold[prm.srcType] = sell;
+        const [dm, dc, dd] = wanted;
+        const [sm, sc, sd] = sold;
+
+        const capacity = tradeCargoCapacity(
+            prm.hyperTech, prm.playerClass, prm.scCapacityIncrease, prm.lcCapacityIncrease);
+        const srcTotal = sm + sc + sd;
+        const dstTotal = dm + dc + dd;
+
+        return {
+            sm, sc, sd,
             dm, dc, dd,
             srcTotal,
             dstTotal,
@@ -460,6 +544,9 @@ if (typeof window !== 'undefined') {
         TRADE_COLLECTOR_BONUS,
         TRADE_CLASS_COLLECTOR,
         TRADE_MC_DECIMALS,
+        TRADE_DIR_FORWARD,
+        TRADE_DIR_REVERSE,
+        TRADE_REVERSE_PRECISION,
         tradeMcRate,
         tradeDefaultRates,
         getDstInputState,
