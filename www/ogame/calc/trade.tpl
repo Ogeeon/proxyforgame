@@ -58,6 +58,7 @@
       l.coords = '<?= $l['coords'] ?>';
       l.rates = '<?= $l['rates'] ?>';
       l.moonstr = '<?= $l['moon'] ?>';
+      l.dirPairHint = <?= json_encode($l['dir-pair-hint']) ?>;
       options.decimalSeparator = '<?= $l['decimal-separator'] ?>';
       options.moonLabel = <?= json_encode($l['moon']) ?>;
       options.universeFromProfile = <?= json_encode($l['pf-universe-from-profile']) ?>;
@@ -167,6 +168,20 @@
 
           <!-- Main Resources Section -->
           <div id="main" class="ms-1 me-1">
+            <!-- Which side of the deal is typed in. A pair source has no single answer
+                 in reverse, so the reverse radio switches off for one (see trade.js). -->
+            <div class="d-flex justify-content-center py-1">
+              <fieldset id="direction" class="d-flex flex-wrap align-items-center column-gap-4 fieldset-reset">
+                <div class="d-flex align-items-center gap-1">
+                  <input id="dir-0" type="radio" name="dir" value="0" class="form-check-input">
+                  <label for="dir-0"><?= $l['dir-forward'] ?></label>
+                </div>
+                <div id="dir-1-box" class="d-flex align-items-center gap-1">
+                  <input id="dir-1" type="radio" name="dir" value="1" class="form-check-input">
+                  <label for="dir-1"><?= $l['dir-reverse'] ?></label>
+                </div>
+              </fieldset>
+            </div>
             <div class="row g-2 row-tight">
               <!-- Source Resources Panel -->
               <div class="col-12 col-lg-6 d-flex flex-column">
@@ -204,8 +219,11 @@
               </div>
 
               <!-- Arrow -->
+              <!-- Clicking it flips the direction, the same switch as the radios above. -->
               <div class="col-12 col-lg-auto arrow-col d-flex align-items-center justify-content-center py-1 py-lg-0 px-0">
-                <i class="bi bi-caret-right-fill text-info-subtle" id="big-arrow"></i>
+                <button type="button" id="dir-switch" class="arrow-btn" title="<?= htmlspecialchars($l['dir-switch'], ENT_QUOTES) ?>" aria-label="<?= htmlspecialchars($l['dir-switch'], ENT_QUOTES) ?>">
+                  <i class="bi bi-caret-right-fill text-info-subtle" id="big-arrow"></i>
+                </button>
               </div>
 
               <!-- Destination Resources Panel -->
@@ -258,15 +276,15 @@
                     <div class="hr mb-1"></div>
                     <div class="row mb-1 align-items-center">
                       <div class="col-5 text-end res-dst-m"><?= $l['metal'] ?>:</div>
-                      <div class="col-7"><div id="res-dst-m" class="res-dst-m res-input ps-1">0</div></div>
+                      <div class="col-7"><input id="res-dst-m" type="text" name="res-dst-m" class="form-control form-control-sm res-dst-m res-input trade-editable" tabindex="17"></div>
                     </div>
                     <div class="row mb-1 align-items-center">
                       <div class="col-5 text-end res-dst-c"><?= $l['crystal'] ?>:</div>
-                      <div class="col-7"><div id="res-dst-c" class="res-dst-c res-input ps-1">0</div></div>
+                      <div class="col-7"><input id="res-dst-c" type="text" name="res-dst-c" class="form-control form-control-sm res-dst-c res-input trade-editable" tabindex="17"></div>
                     </div>
                     <div class="row mb-1 align-items-center">
                       <div class="col-5 text-end res-dst-d"><?= $l['deuterium'] ?>:</div>
-                      <div class="col-7"><div id="res-dst-d" class="res-dst-d res-input ps-1">0</div></div>
+                      <div class="col-7"><input id="res-dst-d" type="text" name="res-dst-d" class="form-control form-control-sm res-dst-d res-input trade-editable" tabindex="17"></div>
                     </div>
                     <div class="hr mb-1"></div>
                     <div class="row mb-1 align-items-center">

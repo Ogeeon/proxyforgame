@@ -43,9 +43,15 @@ const TRADE_SRC_RESOURCES = ['metal', 'crystal', 'deuterium'];
 let linkOverrides = { rates: false, universe: false, coords: false };
 
 let options = {
+    // TRADE_DIR_FORWARD types what is sold, TRADE_DIR_REVERSE what is wanted.
+    direction: TRADE_DIR_FORWARD,
+
     metal: 0,
     crystal: 0,
     deuterium: 0,
+    wantMetal: 0,
+    wantCrystal: 0,
+    wantDeuterium: 0,
     fix1: 0,
     fix2: 0,
 
@@ -82,6 +88,10 @@ let options = {
             case 'metal': return validateNumber(Number.parseInt(value), 0, Infinity, 0);
             case 'crystal': return validateNumber(Number.parseInt(value), 0, Infinity, 0);
             case 'deuterium': return validateNumber(Number.parseInt(value), 0, Infinity, 0);
+            case 'wantMetal': return validateNumber(Number.parseInt(value), 0, Infinity, 0);
+            case 'wantCrystal': return validateNumber(Number.parseInt(value), 0, Infinity, 0);
+            case 'wantDeuterium': return validateNumber(Number.parseInt(value), 0, Infinity, 0);
+            case 'direction': return validateNumber(Number.parseInt(value), TRADE_DIR_FORWARD, TRADE_DIR_REVERSE, TRADE_DIR_FORWARD);
             case 'srcType': return validateNumber(Number.parseInt(value), 0, 5, this.srcType);
             case 'dstType': return validateNumber(Number.parseInt(value), 0, 5, this.dstType);
             case 'dstMixType': return validateNumber(Number.parseInt(value), 0, 4, this.dstMixType);
@@ -167,6 +177,10 @@ let options = {
     },
 
     _parseTypesFromParams: function(prm) {
+        // A link without the key is from before the switch existed: forward.
+        this.direction = isset(prm['dir'])
+            ? validateNumber(Number.parseInt(prm['dir']), TRADE_DIR_FORWARD, TRADE_DIR_REVERSE, TRADE_DIR_FORWARD)
+            : TRADE_DIR_FORWARD;
         if (isset(prm['st'])) this.srcType = validateNumber(Number.parseInt(prm['st']), 0, 5, this.srcType);
         if (isset(prm['dt'])) this.dstType = validateNumber(Number.parseInt(prm['dt']), 0, 5, this.dstType);
         if (isset(prm['dmt'])) this.dstMixType = validateNumber(Number.parseInt(prm['dmt']), 0, 4, this.dstMixType);
@@ -206,6 +220,13 @@ let options = {
         if (isset(prm['d'])) {
             const d = validateNumber(Number.parseInt(prm['d']), 0, Infinity, 0);
             setVal('#res-src-d', d == 0 ? '' : d);
+        }
+        // The amounts wanted, which only a reverse link carries.
+        for (const [param, field] of [['wm', '#res-dst-m'], ['wc', '#res-dst-c'], ['wd', '#res-dst-d']]) {
+            if (isset(prm[param])) {
+                const w = validateNumber(Number.parseInt(prm[param]), 0, Infinity, 0);
+                setVal(field, w == 0 ? '' : w);
+            }
         }
     },
 
@@ -262,6 +283,18 @@ let options = {
     },
 
     _buildResourceParams: function() {
+        if (this.direction === TRADE_DIR_REVERSE) {
+            const covered = getDstInputState(this.srcType, this.dstType);
+            const wanted = [
+                { index: 0, value: this.wantMetal, param: 'wm' },
+                { index: 1, value: this.wantCrystal, param: 'wc' },
+                { index: 2, value: this.wantDeuterium, param: 'wd' }
+            ];
+            return wanted
+                .filter(r => covered[r.index] === 0 && r.value)
+                .map(r => '&' + r.param + '=' + r.value)
+                .join('');
+        }
         const resources = [
             { index: 0, value: this.metal, param: 'm' },
             { index: 1, value: this.crystal, param: 'c' },
@@ -284,10 +317,12 @@ let options = {
         const baseUrl = loc.protocol + '//' + loc.host + loc.pathname + loc.search;
         const rateParams = '#rmd=' + this.rates.md + '&rcd=' + this.rates.cd;
         const typeParams = '&st=' + this.srcType + '&dt=' + this.dstType;
+        const dirParam = this.direction === TRADE_DIR_REVERSE ? '&dir=' + TRADE_DIR_REVERSE : '';
 
-        let url = baseUrl + rateParams + typeParams;
+        let url = baseUrl + rateParams + typeParams + dirParam;
 
-        if (this.dstType === 2) {
+        // In reverse both amounts are typed, so there is no split to carry.
+        if (this.dstType === 2 && this.direction === TRADE_DIR_FORWARD) {
             url += '&dmt=' + this.dstMixType + this._buildMixTypeParams();
         }
 
@@ -298,11 +333,15 @@ let options = {
         return url;
     },
 
-    makeString: function(dm, dc, dd) {
+    /**
+     * The deal as a sentence, for the plain-text and BB-code links.
+     * @param {ReturnType<TradeCalculator['compute']>} result - the computed deal
+     */
+    makeString: function(result) {
         const parts = [
-            this._formatSourceResources(),
+            this._formatSourceResources(result.sm, result.sc, result.sd),
             '. ',
-            this._formatDestinationResources(dm, dc, dd),
+            this._formatDestinationResources(result.dm, result.dc, result.dd),
             l.rates + ' ' + options.rates.md + ':' + options.rates.cd + ':1. ',
             this._formatCoordinates()
         ];
@@ -315,11 +354,11 @@ let options = {
         }
     },
 
-    _formatSourceResources: function() {
+    _formatSourceResources: function(sm, sc, sd) {
         const resources = [];
-        this._addResourceIfNeeded(resources, 0, this.metal, l.met);
-        this._addResourceIfNeeded(resources, 1, this.crystal, l.crys);
-        this._addResourceIfNeeded(resources, 2, this.deuterium, l.deut);
+        this._addResourceIfNeeded(resources, 0, sm, l.met);
+        this._addResourceIfNeeded(resources, 1, sc, l.crys);
+        this._addResourceIfNeeded(resources, 2, sd, l.deut);
         return l.src + ' ' + resources.join(' ' + l.and + ' ');
     },
 
@@ -447,9 +486,98 @@ function checkCountryLang(lang) {
  */
 function onUpdateSrcType() {
     setChecked('#res-src-' + options.srcType, true);
+    updateDirectionControls();
     updateSrcInputState(TRADE_RES_TYPES[options.srcType]);
     updateDstFromSrc();
     onUpdateDstType();
+}
+
+// ============================================================================
+// DIRECTION
+// ============================================================================
+
+/**
+ * Whether the reverse direction has an answer for the current source. A pair
+ * does not: N deuterium can be bought with any split of metal and crystal.
+ */
+function canReverse() {
+    return options.srcType <= 2;
+}
+
+/**
+ * Falls back to forward when the loaded state asks for a reverse it cannot
+ * have - an old cookie or a hand-edited link with a pair source.
+ */
+function sanitizeDirection() {
+    if (!canReverse()) {
+        options.direction = TRADE_DIR_FORWARD;
+    }
+}
+
+/**
+ * Shows the direction in the controls that carry it: the two radios, the
+ * arrow, the pair sources a reverse cannot sell, and the mix block a reverse
+ * has no use for - both amounts are typed in.
+ */
+function updateDirectionControls() {
+    const reverse = options.direction === TRADE_DIR_REVERSE;
+    setChecked('#dir-' + options.direction, true);
+
+    const arrow = $('#big-arrow');
+    arrow?.classList.toggle('bi-caret-right-fill', !reverse);
+    arrow?.classList.toggle('bi-caret-left-fill', reverse);
+
+    // The reverse radio is off while a pair is being sold, and says why.
+    const dirReverse = inputEl('#dir-1');
+    dirReverse.disabled = !canReverse();
+    toggleClass('#dir-1-box', 'ui-state-disabled', !canReverse());
+    const dirBox = $('#dir-1-box');
+    if (dirBox) dirBox.title = canReverse() ? '' : (l.dirPairHint ?? '');
+    const dirSwitch = $('#dir-switch');
+    if (dirSwitch) dirSwitch.toggleAttribute('disabled', !canReverse());
+
+    // ...and in reverse, the pairs are off the other way round.
+    for (let type = 3; type < TRADE_RES_TYPES.length; type++) {
+        inputEl('#res-src-' + type).disabled = reverse;
+        $('#res-src-' + type)?.parentElement?.classList.toggle('ui-state-disabled', reverse);
+    }
+
+    const mixBlock = $('#dst-mix-block');
+    if (mixBlock) mixBlock.style.visibility = reverse ? 'hidden' : 'visible';
+}
+
+/**
+ * Raw value for a field that is about to become editable: the number it shows,
+ * without the thousands dots, and empty rather than 0.
+ * @param {number} n
+ */
+function editableValue(n) {
+    return n ? String(n) : '';
+}
+
+/**
+ * Turns the deal around. The side that becomes editable keeps the amounts it
+ * was showing, so flipping back and forth does not lose the deal.
+ * @param {number} direction - TRADE_DIR_FORWARD or TRADE_DIR_REVERSE
+ */
+function setDirection(direction) {
+    if (direction === options.direction) return;
+    if (direction === TRADE_DIR_REVERSE && !canReverse()) {
+        updateDirectionControls();
+        return;
+    }
+    const shown = computeDeal();
+    if (direction === TRADE_DIR_REVERSE) {
+        setVal('#res-dst-m', editableValue(shown.dm));
+        setVal('#res-dst-c', editableValue(shown.dc));
+        setVal('#res-dst-d', editableValue(shown.dd));
+    } else {
+        const sold = [shown.sm, shown.sc, shown.sd];
+        const fields = ['#res-src-m', '#res-src-c', '#res-src-d'];
+        setVal(fields[options.srcType], editableValue(sold[options.srcType]));
+    }
+    options.direction = direction;
+    onUpdateSrcType();
 }
 
 /**
@@ -525,20 +653,21 @@ function activateDstMixType(obj) {
 }
 
 /**
- * Sets the availability state for a single resource class.
- * @param className element class name
- * @param panelSelector panel selector
- * @param enabled availability flag
+ * Sets the state of a single resource class: out of the deal (disabled and
+ * faded), typed into, or showing the answer (readonly, so it can still be
+ * selected and copied into the game).
+ * @param {string} className element class name
+ * @param {string} panelSelector panel selector
+ * @param {boolean} enabled the resource takes part in the deal
+ * @param {boolean} computed its field shows a result instead of taking input
  */
-function updateResourceState(className, panelSelector, enabled) {
-    const elems = $$(panelSelector + ' .' + className);
-    const inputs = inputsAll('input.' + className);
-    if (enabled) {
-        for (const el of elems) el.classList.remove('ui-state-disabled');
-        for (const inp of inputs) inp.removeAttribute('disabled');
-    } else {
-        for (const el of elems) el.classList.add('ui-state-disabled');
-        for (const inp of inputs) inp.disabled = true;
+function updateResourceState(className, panelSelector, enabled, computed) {
+    for (const el of $$(panelSelector + ' .' + className)) {
+        el.classList.toggle('ui-state-disabled', !enabled);
+    }
+    for (const inp of inputsAll('input.' + className)) {
+        inp.disabled = !enabled;
+        inp.readOnly = enabled && computed;
     }
 }
 
@@ -548,8 +677,9 @@ function updateResourceState(className, panelSelector, enabled) {
  */
 function updateSrcInputState(resEnable) {
     const classNames = ['res-src-m', 'res-src-c', 'res-src-d'];
+    const computed = options.direction === TRADE_DIR_REVERSE;
     for (let i = 0; i < 3; i++) {
-        updateResourceState(classNames[i], '#res-src-panel', resEnable[i] == 1);
+        updateResourceState(classNames[i], '#res-src-panel', resEnable[i] == 1, computed);
     }
 }
 
@@ -589,18 +719,15 @@ function updateDstFromSrc() {
  * @param resEnable availability array for the resource input fields: e.g. [1,0,0]
  */
 function updateDstInputState(resEnable) {
-    let classNames = ['res-dst-m', 'res-dst-c', 'res-dst-d'];
+    const classNames = ['res-dst-m', 'res-dst-c', 'res-dst-d'];
+    const computed = options.direction === TRADE_DIR_FORWARD;
     for (let i = 0; i < 3; i++) {
-        let elems = $$('#res-dst-panel .' + classNames[i]);
-        if (resEnable[i] == 0) {
-            for (const el of elems) el.classList.remove('ui-state-disabled');
-        } else {
-            for (const el of elems) el.classList.add('ui-state-disabled');
-        }
+        updateResourceState(classNames[i], '#res-dst-panel', resEnable[i] == 0, computed);
     }
 }
 
 function resetParams() {
+    options.direction = TRADE_DIR_FORWARD;
     options.rates = tradeDefaultRates();
     options.srcType = 2;
     options.dstType = 2;
@@ -620,6 +747,9 @@ function resetParams() {
     setVal('#res-src-m', '');
     setVal('#res-src-c', '');
     setVal('#res-src-d', '');
+    setVal('#res-dst-m', '');
+    setVal('#res-dst-c', '');
+    setVal('#res-dst-d', '');
     setVal('#rate-md', options.rates.md);
     setVal('#rate-cd', options.rates.cd);
     setVal('#md-slider', options.rates.md);
@@ -653,9 +783,16 @@ function resetParams() {
  * fields, which are only read when a recalculation happens.
  */
 function collectInputs() {
-    options.metal = clampNumber(getInputNumber(inputEl('#res-src-m')), 0, Infinity);
-    options.crystal = clampNumber(getInputNumber(inputEl('#res-src-c')), 0, Infinity);
-    options.deuterium = clampNumber(getInputNumber(inputEl('#res-src-d')), 0, Infinity);
+    // Only the side being typed into: the other one holds a formatted result.
+    if (options.direction === TRADE_DIR_REVERSE) {
+        options.wantMetal = clampNumber(getInputNumber(inputEl('#res-dst-m')), 0, Infinity);
+        options.wantCrystal = clampNumber(getInputNumber(inputEl('#res-dst-c')), 0, Infinity);
+        options.wantDeuterium = clampNumber(getInputNumber(inputEl('#res-dst-d')), 0, Infinity);
+    } else {
+        options.metal = clampNumber(getInputNumber(inputEl('#res-src-m')), 0, Infinity);
+        options.crystal = clampNumber(getInputNumber(inputEl('#res-src-c')), 0, Infinity);
+        options.deuterium = clampNumber(getInputNumber(inputEl('#res-src-d')), 0, Infinity);
+    }
 
     options.fix1 = getInputNumber(inputEl('#mix-fix1'));
     options.fix2 = getInputNumber(inputEl('#mix-fix2'));
@@ -682,7 +819,7 @@ function formatCargo(cargo) {
  */
 function renderShareLinks(result) {
     const alink = /** @type {HTMLAnchorElement} */ ($('#alink'));
-    if (!options.metal && !options.crystal && !options.deuterium) {
+    if (!result.srcTotal && !result.dstTotal) {
         alink.href = '';
         alink.textContent = '';
         setTextContent('#atext', '');
@@ -691,7 +828,7 @@ function renderShareLinks(result) {
     }
 
     const uri = options.makeUri();
-    const txt = options.makeString(result.dm, result.dc, result.dd);
+    const txt = options.makeString(result);
     alink.href = uri;
     alink.textContent = uri;
     setTextContent('#atext', txt);
@@ -703,9 +840,17 @@ function renderShareLinks(result) {
  * @param {ReturnType<TradeCalculator['compute']>} result - the computed deal
  */
 function renderResults(result) {
-    setTextContent('#res-dst-m', numToOGame(result.dm));
-    setTextContent('#res-dst-c', numToOGame(result.dc));
-    setTextContent('#res-dst-d', numToOGame(result.dd));
+    if (options.direction === TRADE_DIR_REVERSE) {
+        // Only the resource being sold: the other two fields keep what the
+        // player typed there in forward, for when they flip back.
+        const sold = [result.sm, result.sc, result.sd];
+        const fields = ['#res-src-m', '#res-src-c', '#res-src-d'];
+        setVal(fields[options.srcType], numToOGame(sold[options.srcType]));
+    } else {
+        setVal('#res-dst-m', numToOGame(result.dm));
+        setVal('#res-dst-c', numToOGame(result.dc));
+        setVal('#res-dst-d', numToOGame(result.dd));
+    }
     setTextContent('#res-src-cargo', formatCargo(result.srcCargo));
     setTextContent('#res-dst-cargo', formatCargo(result.dstCargo));
     renderShareLinks(result);
@@ -714,9 +859,17 @@ function renderResults(result) {
 /**
  * Recalculates the resource values according to the settings in the model.
  */
+/** The deal as the model stands, worked out in the current direction. */
+function computeDeal() {
+    const calculator = new TradeCalculator(options.rates);
+    return options.direction === TRADE_DIR_REVERSE
+        ? calculator.computeReverse(options)
+        : calculator.compute(options);
+}
+
 function updateNumbers() {
     collectInputs();
-    renderResults(new TradeCalculator(options.rates).compute(options));
+    renderResults(computeDeal());
     options.save();
 }
 
@@ -888,6 +1041,14 @@ function initTypeRadios() {
             if (forceDstMix()) onUpdateDstType(); else onUpdateDstMixType();
         });
     }
+    for (const radio of inputsAll('input[name="dir"]')) {
+        addEvent(radio, 'change', function() {
+            setDirection(Number.parseInt(radio.value));
+        });
+    }
+    addEvent('#dir-switch', 'click', function() {
+        setDirection(options.direction === TRADE_DIR_REVERSE ? TRADE_DIR_FORWARD : TRADE_DIR_REVERSE);
+    });
     for (const radio of inputsAll('input[name="player-class"]')) {
         addEvent(radio, 'change', function() {
             options.playerClass = Number.parseInt(radio.value);
@@ -927,7 +1088,8 @@ function initMixInputs() {
 
 /** The exchange rate fields, the coordinates and the cargo capacity fields. */
 function initTextInputs() {
-    for (const input of inputsAll('#res-src-panel input[type="text"]')) {
+    // Both sides: whichever one is typed into, the other one is recalculated.
+    for (const input of inputsAll('#res-src-panel input[type="text"], #res-dst-panel > div > .row input[type="text"]')) {
         addEvent(input, 'keyup', updateNumbers);
     }
 
@@ -1002,6 +1164,7 @@ document.addEventListener('DOMContentLoaded', async function() {
 try {
     options.load();
     options.parseFromUri();
+    sanitizeDirection();
 
     initSliders();
     renderInitialState();

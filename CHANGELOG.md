@@ -18,6 +18,7 @@ release section; it is the source of truth for the other eleven translations.
 ### Added
 
 - MCP server: a thirteenth tool, `ogame_import_account`, reads the account export a player copies out of the game - the Origin Exporter's, or several from PfG Companion - and answers with the account and every planet and moon under the other tools' argument names, so a model fills them from one paste instead of asking for every level and bonus. Player name and id, defences and stored resources are left out. The server now takes request bodies up to 256 KB (64 KB before), and `facilities`, like `lifeforms`, ignores the facilities a tool does not read.
+- Trade: the calculation also runs the other way - name the amounts you want to receive and get the exact amount to sell, rounded up so it is never one unit short. A pair of radios above the panels switches the direction, and so does a click on the arrow between them, which turns to point the way the deal is worked out. The side you type in is editable and the other shows the answer, still selectable for copying; switching keeps the deal on screen. A reverse deal is saved and shared in the link (`dir=1`). It is not available while two resources are being sold, since the amount wanted can be paid with any split of them. <!-- site -->
 
 ### Fixed
 

@@ -411,3 +411,74 @@ describe('Trade Calculator - cargo counts follow the ship bonuses', () => {
         expect(cargo(r.dstCargo)).toBe('0 SC / 0 LC');
     });
 });
+
+describe('Trade Calculator - reverse: the amount to sell for the amounts wanted', () => {
+    const REVERSE_BASE = {
+        srcType: 2, dstType: 2,
+        wantMetal: 0, wantCrystal: 0, wantDeuterium: 0,
+        hyperTech: 0, playerClass: 1, scCapacityIncrease: 0, lcCapacityIncrease: 0,
+    };
+    const reverse = (rates, overrides = {}) =>
+        new TradeCalculator(rates).computeReverse({ ...REVERSE_BASE, ...overrides });
+    const RATES_2_15 = { md: 2, cd: 1.5, mc: tradeMcRate(2, 1.5) };
+
+    it('answers the letter: 11 M metal + 4 M crystal at 2 : 1.5 : 1', () => {
+        // 11 000 000 / 2 + 4 000 000 / 1.5 = 8 166 666.67
+        const r = reverse(RATES_2_15, { wantMetal: 11000000, wantCrystal: 4000000 });
+        expect(r.sd).toBe(8166667);
+        expect(r.sm).toBe(0);
+        expect(r.sc).toBe(0);
+        expect(r.dm).toBe(11000000);
+        expect(r.dc).toBe(4000000);
+    });
+
+    it('is bought back by the forward calculation it inverts', () => {
+        const r = reverse(RATES_2_15, { wantMetal: 11000000, wantCrystal: 4000000 });
+        const forward = new TradeCalculator(RATES_2_15).compute({
+            ...BASE_PRM, srcType: 2, deuterium: r.sd, dstType: 2, dstMixType: 1,
+            mixProp1: 11, mixProp2: 4,
+        });
+        expect(forward.dm).toBe(11000000);
+        expect(forward.dc).toBe(4000000);
+    });
+
+    it('rounds up, never down', () => {
+        // 1000 crystal at 1.5 : 1 is 666.67 deuterium; 666 does not buy it.
+        expect(reverse(RATES_2_15, { dstType: 1, wantCrystal: 1000 }).sd).toBe(667);
+    });
+
+    it('does not round an exact answer up on float noise', () => {
+        // 50 deuterium at a crystal:deuterium rate of 1.1 is exactly 55 crystal,
+        // which floating point puts at 55.00000000000001.
+        const rates = { md: 2, cd: 1.1, mc: tradeMcRate(2, 1.1) };
+        const r = reverse(rates, { srcType: 1, dstType: 1, wantDeuterium: 50 });
+        expect(r.sc).toBe(55);
+    });
+
+    it('prices each resource in the one being sold', () => {
+        // Selling crystal at 2.4 : 1.5 : 1 (mc 1.6): 1600 metal and 1000 deuterium.
+        const r = reverse(RATES, { srcType: 1, dstType: 2, wantMetal: 1600, wantDeuterium: 1000 });
+        expect(r.sc).toBe(1000 + 1500);
+    });
+
+    it('ignores what the destination type does not cover', () => {
+        // Selling deuterium for metal only: the crystal field does not count.
+        const r = reverse(RATES_2_15, { dstType: 0, wantMetal: 1000, wantCrystal: 999999 });
+        expect(r.sd).toBe(500);
+        expect(r.dc).toBe(0);
+        expect(r.dstTotal).toBe(1000);
+    });
+
+    it('counts the ships each side takes', () => {
+        const r = reverse(RATES_2_15, { wantMetal: 11000000, wantCrystal: 4000000 });
+        expect(r.srcTotal).toBe(8166667);
+        expect(cargo(r.srcCargo)).toBe('1634 SC / 327 LC');
+        expect(cargo(r.dstCargo)).toBe('3000 SC / 600 LC');
+    });
+
+    it('asks for nothing while nothing is wanted', () => {
+        const r = reverse(RATES_2_15);
+        expect(r.srcTotal).toBe(0);
+        expect(cargo(r.srcCargo)).toBe('0 SC / 0 LC');
+    });
+});
