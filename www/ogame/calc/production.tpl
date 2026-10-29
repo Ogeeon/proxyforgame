@@ -54,7 +54,7 @@
         allowFloat: false,
         allowNegative: false
       },
-      rowsToTechs: [1, 2, 3, 4, 12, 212, 218, 0, 0, 0, 0, 0, 0, 0],
+      rowsToTechs: [1, 2, 3, 4, 12, 212, 217, 0, 0, 0, 0, 0, 0, 0],
       minPlanetsCount: 1,
       maxPlanetsCount: 99,
       defPlanetsCount: 8,

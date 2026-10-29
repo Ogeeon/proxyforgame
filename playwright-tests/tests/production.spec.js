@@ -45,6 +45,21 @@ test('economy speed factored correctly', async ({ page }) => {
     await expect(totalRow.locator('td').nth(6)).toHaveText('11');
 });
 
+test('fleet production prices each ship row by its own cost', async ({ page }) => {
+    // 1.353 metal, 663 crystal and 77 deuterium an hour (see the test above).
+    await expect(page.locator('#one-planet-prod tr').filter({ hasText: 'Total per hour' }).locator('td').nth(5)).toHaveText('77');
+    await page.getByRole('button', { name: 'Fleet production' }).first().click();
+    const week = (name) => page.locator('#one-pln-fleet-prod tr').filter({ hasText: name }).locator('td').nth(3);
+    // The rows follow the game ids: ... battlecruiser, crawler (217), reaper (218), pathfinder (219).
+    const names = await page.locator('#one-pln-fleet-prod tr td:first-child').allTextContents();
+    expect(names.slice(-3).map((n) => n.trim())).toEqual(['Crawler', 'Reaper', 'Pathfinder']);
+    // A week of the (unrounded) 77 deuterium an hour is just over 13.000: 13 crawlers
+    // at 1.000 each; the reaper's 20.000 is out of reach and the pathfinder's 8.000 is met once.
+    await expect(week('Crawler')).toHaveText('13');
+    await expect(week('Reaper')).toHaveText('0');
+    await expect(week('Pathfinder')).toHaveText('1');
+});
+
 test('officers bonuses calculations are correct', async ({ page }) => {
     // Check Engineer
     await page.locator('#engineer').click();

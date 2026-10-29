@@ -493,6 +493,16 @@ describe('MCP tool ogame_build_cost', () => {
         expect(out.darkMatterToHalve).toBe(undefined);
     });
 
+    it('prices the crawler, the reaper and the pathfinder', async () => {
+        const price = async (item) => {
+            const out = (await call(protocolWith(), 'ogame_build_cost', { item, quantity: 1, facilities: { shipyard: 2 } })).structuredContent;
+            return [out.metal, out.crystal, out.deuterium];
+        };
+        expect(await price('crawler')).toEqual([2000, 2000, 1000]);
+        expect(await price('reaper')).toEqual([85000, 55000, 20000]);
+        expect(await price('pathfinder')).toEqual([8000, 15000, 8000]);
+    });
+
     it('asks for a quantity for a ship and for levels for a building', async () => {
         expect((await call(protocolWith(), 'ogame_build_cost', { item: 'cruiser', toLevel: 3 })).content[0].text).toContain('give quantity');
         expect((await call(protocolWith(), 'ogame_build_cost', { item: 'shipyard', quantity: 3 })).content[0].text).toContain('give toLevel');
@@ -1064,6 +1074,8 @@ describe('MCP tool ogame_import_account', () => {
         expect(alpha.crawlers.percent).toBe(150);
         expect(alpha.crawlers.count).toBe(LARGE.planets['30000001'].ships['217']);
         expect(alpha.ships.reaper).toBe(LARGE.planets['30000001'].ships['218']);
+        expect(alpha.ships.pathfinder).toBe(LARGE.planets['30000001'].ships['219']);
+        expect(alpha.ships.crawler).toBe(undefined);
 
         const moon = out.bodies.find((b) => b.location === 'moon');
         expect(moon.levels['lunar-base']).toBeGreaterThan(0);

@@ -30,25 +30,18 @@ const COST_TECHS = readWwwJson('ogame/calc/data/costs-techs.json');
 /** @type {Record<string, any[]>} */
 const LF_TECHS = readWwwJson('ogame/calc/data/lf-techs.json');
 
-/**
- * Game ship ids to the cores' kebab keys. Not costs-techs.json: the site
- * numbers the last three ships its own way (216 reaper, 217 pathfinder, 218
- * crawler), the game 217 crawler, 218 reaper, 219 pathfinder.
- */
-const GAME_SHIPS = {
-    202: 'small-cargo', 203: 'large-cargo', 204: 'light-fighter', 205: 'heavy-fighter', 206: 'cruiser',
-    207: 'battleship', 208: 'colony-ship', 209: 'recycler', 210: 'esp-probe', 211: 'bomber', 212: 'solar-sat',
-    213: 'destroyer', 214: 'death-star', 215: 'battlecruiser', 217: 'crawler', 218: 'reaper', 219: 'pathfinder',
-};
+/** Game ship ids to the cores' kebab keys: costs-techs.json numbers its ships the game's way. */
+const GAME_SHIPS = Object.fromEntries(
+    Object.entries(COST_TECHS.techs).filter(([, t]) => t.type === 5).map(([id, t]) => [id, t.key]),
+);
 
 /** The ships the fleet tools take (flight, expedition): every ship but the satellite and the crawler. */
 const FLEET_SHIPS = Object.entries(GAME_SHIPS).filter(([, key]) => key !== 'solar-sat' && key !== 'crawler');
 
-/** Game tech id to costs key: buildings and research share the site's numbering; ships are the game's. */
-const GAME_TECHS = {
-    ...Object.fromEntries(Object.entries(COST_TECHS.techs).filter(([, t]) => t.type <= 4).map(([id, t]) => [id, t.key])),
-    ...GAME_SHIPS,
-};
+/** Game tech id to costs key, for the buildings, research and ships of costs-techs.json. */
+const GAME_TECHS = Object.fromEntries(
+    Object.entries(COST_TECHS.techs).filter(([, t]) => t.type <= 5).map(([id, t]) => [id, t.key]),
+);
 
 /** Research of the account, by game id. */
 const RESEARCH_IDS = Object.entries(COST_TECHS.techs).filter(([, t]) => t.type === 4).map(([id]) => id);

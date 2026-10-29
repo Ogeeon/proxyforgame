@@ -38,7 +38,7 @@ const LF_BUILDINGS = Object.keys(LF_ENERGY).map((id) => ({
 }));
 
 /** The rows production.tpl maps its table onto: what tech each one is. */
-const ROWS_TO_TECHS = [1, 2, 3, 4, 12, 212, 218, 0, 0, 0, 0, 0, 0, 0];
+const ROWS_TO_TECHS = [1, 2, 3, 4, 12, 212, 217, 0, 0, 0, 0, 0, 0, 0];
 
 const mine = (/** @type {string} */ what) => ({
     type: 'object',

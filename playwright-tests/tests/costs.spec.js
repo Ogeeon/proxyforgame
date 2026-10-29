@@ -216,6 +216,23 @@ test.describe('Costs Calculator Page', () => {
         await expect(page.locator('#table-0-5 tr:nth-child(19) td:nth-child(11)')).toContainText('5.100');
     });
 
+    test('[fleet] the crawler, reaper and pathfinder rows carry the game ids', async ({ page }) => {
+        await page.getByRole('tab', { name: 'All items - one level' }).click();
+        await page.getByRole('tab', { name: 'Fleet' }).click();
+        // The hidden first cell of each row holds the tech id the cost is looked up by.
+        const ids = await page.locator('#table-0-5 tr td:first-child').evaluateAll(
+            (cells) => cells.map((c) => c.textContent.trim()).filter((t) => t !== ''));
+        expect(ids.slice(-3)).toEqual(['217', '218', '219']);
+        expect(ids).not.toContain('216');
+        // Row 17 (after the header and 15 earlier ships) is the reaper.
+        await expect(page.locator('#table-0-5 tr:nth-child(17) td:nth-child(2)')).toContainText('Reaper');
+        await page.locator('#table-0-5 tr:nth-child(17) td:nth-child(3) input').fill('1');
+        await page.locator('#table-0-5 tr:nth-child(17) td:nth-child(3) input').press('Enter');
+        await expect(page.locator('#table-0-5 tr:nth-child(17) td:nth-child(4)')).toHaveText('85.000');
+        await expect(page.locator('#table-0-5 tr:nth-child(17) td:nth-child(5)')).toHaveText('55.000');
+        await expect(page.locator('#table-0-5 tr:nth-child(17) td:nth-child(6)')).toHaveText('20.000');
+    });
+
     test('[all items - one level / defenses] calculations are correct', async ({ page }) => {
         await page.getByRole('tab', { name: 'All items - one level' }).click();
         await page.getByRole('tab', { name: 'Defenses' }).click();

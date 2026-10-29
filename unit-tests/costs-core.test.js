@@ -545,3 +545,23 @@ describe('GlobalParams.normalizeStored', () => {
         expect(normalized({ labLevels: [0], labChoice: -1, rates: [1, 2] }).rates).toEqual([1, 1.5, 3]);
     });
 });
+
+describe('data/costs-techs.json: ship ids', () => {
+    const { readFileSync } = require('node:fs');
+    const path = require('node:path');
+    /** @type {{techs: Record<string, {key: string, type: number, cost: number[]}>}} */
+    const data = JSON.parse(readFileSync(path.join(__dirname, '../www/ogame/calc/data/costs-techs.json'), 'utf8'));
+    const ships = Object.entries(data.techs).filter(([, t]) => t.type === 5);
+
+    it('numbers the ships the way the game does', () => {
+        // 216 is no game ship; the last three are the crawler, the reaper and the pathfinder.
+        expect(ships.map(([id]) => Number(id))).toEqual(
+            [202, 203, 204, 205, 206, 207, 208, 209, 210, 211, 212, 213, 214, 215, 217, 218, 219]);
+    });
+
+    it('prices the crawler, the reaper and the pathfinder under their game ids', () => {
+        expect([data.techs['217'].key, data.techs['217'].cost]).toEqual(['crawler', [2000, 2000, 1000]]);
+        expect([data.techs['218'].key, data.techs['218'].cost]).toEqual(['reaper', [85000, 55000, 20000]]);
+        expect([data.techs['219'].key, data.techs['219'].cost]).toEqual(['pathfinder', [8000, 15000, 8000]]);
+    });
+});

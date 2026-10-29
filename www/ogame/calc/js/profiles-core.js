@@ -13,8 +13,8 @@
 // and the page wiring live in profiles-store.js and the calculators.
 //
 // Value keys are flat strings with GAME ids throughout ('research.113',
-// 'building.22', 'ship.217' for the crawler). A calculator whose own arrays use
-// other ids (production numbers the crawler 218) translates at its boundary.
+// 'building.22', 'ship.217' for the crawler). The calculators' own tech tables
+// use the same game ids, so no value needs translating at their boundary.
 
 'use strict';
 
@@ -1722,7 +1722,11 @@ function ratesFromTrade(trade) {
 // Saved sets: the old named slots of flight and production
 // ---------------------------------------------------------------------------
 
-/** Production's planet arrays name the crawler 218; the game calls it 217. */
+/**
+ * The techs of production's planet rows, in row order: the first seven entries
+ * of production's `rowsToTechs` (production.tpl), which this DOM-free file
+ * cannot read, so they are repeated here.
+ */
 const PRODUCTION_ROW_TECHS = [1, 2, 3, 4, 12, 212, 217];
 
 /**

@@ -116,9 +116,9 @@ $techData = array(
     213 => array('destroyer', 5, 60000, 50000, 15000, 1),
     214 => array('death-star', 5, 5000000, 4000000, 1000000, 1),
     215 => array('battlecruiser', 5, 30000, 40000, 15000, 1),
-    216 => array('reaper', 5, 85000, 55000, 20000, 1),
-    217 => array('pathfinder', 5, 8000, 15000, 8000, 1),
-    218 => array('crawler', 5, 2000, 2000, 1000, 1),
+    217 => array('crawler', 5, 2000, 2000, 1000, 1),
+    218 => array('reaper', 5, 85000, 55000, 20000, 1),
+    219 => array('pathfinder', 5, 8000, 15000, 8000, 1),
 
     401 => array('rocket-launcher', 6, 2000, 0, 0, 1),
     402 => array('light-laser', 6, 1500, 500, 0, 1),
