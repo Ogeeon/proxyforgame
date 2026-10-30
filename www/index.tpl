@@ -3,6 +3,7 @@
 <head>
   <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
   <?php require_once 'hawk.tpl'; ?>
+  <?php require_once __DIR__ . '/scripts-guard.tpl'; ?>
   <title><?= $l['title'] ?></title>
   <meta name="description" content="<?= $l['title'] ?>">
   <meta name="keywords" content="<?= $l['keywords'] ?>">
@@ -46,7 +47,6 @@
   require_once 'analitics.tpl';
 ?>
 
-<?php require_once __DIR__ . '/scripts-guard.tpl'; ?>
 <script type="module">
   // Theme toggle (no calculator orchestration on the start page)
   document.addEventListener('DOMContentLoaded', function() {

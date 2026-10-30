@@ -3,6 +3,7 @@
 <head>
     <meta charset="utf-8">
     <?php require_once '../../hawk.tpl'; ?>
+    <?php require_once __DIR__ . '/../../scripts-guard.tpl'; ?>
     <meta name="viewport" content="width=device-width, initial-scale=1">
   <title><?= $l['title'] ?></title>
   <meta name="description" content="<?= htmlspecialchars($l['description'], ENT_QUOTES, 'UTF-8') ?>">
@@ -33,7 +34,6 @@
   <script src="/ogame/calc/js/trade.js?v=<?php echo assetVersion($pfgPath, '/ogame/calc/js/trade.js'); ?>" defer></script>
   <script src="/ogame/calc/js/trade-profile.js?v=<?php echo assetVersion($pfgPath, '/ogame/calc/js/trade-profile.js'); ?>" defer></script>
 
-  <?php require_once __DIR__ . '/../../scripts-guard.tpl'; ?>
 <script type="module">
     // A module, so it runs after the deferred trade.js that declares `l` and
     // `options`.

@@ -3,6 +3,7 @@
 <head>
   <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
   <?php require_once '../../hawk.tpl'; ?>
+  <?php require_once __DIR__ . '/../../scripts-guard.tpl'; ?>
   <title><?= $l['title'] ?></title>
   <meta name="description" content="<?= htmlspecialchars($l['description'], ENT_QUOTES, 'UTF-8') ?>">
   <meta name="keywords" content="<?= $l['keywords'] ?>">
@@ -689,7 +690,6 @@
   require_once '../../analitics.tpl';
 ?>
 
-<?php require_once __DIR__ . '/../../scripts-guard.tpl'; ?>
 <script type="module">
 // Initialize the calculator app
 document.addEventListener('DOMContentLoaded', function() {

@@ -3,6 +3,7 @@
 <head>
   <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
   <?php require_once '../../hawk.tpl'; ?>
+  <?php require_once __DIR__ . '/../../scripts-guard.tpl'; ?>
   <title><?= $l['title'] ?></title>
   <meta name="description" content="<?= htmlspecialchars($l['description'], ENT_QUOTES, 'UTF-8') ?>">
   <meta name="keywords" content="<?= $l['keywords'] ?>">
@@ -115,7 +116,6 @@
       fleet: <?= $jsonFleet ? json_encode($jsonFleet) : 'null' ?>
     };
   </script>
-  <?php require_once __DIR__ . '/../../scripts-guard.tpl'; ?>
 <script type="module">
     // A module, so it runs after the deferred scripts above have defined `options`.
     // `options` is defined in expeditions-orchestration.js; here we only fill in

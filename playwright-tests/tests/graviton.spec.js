@@ -65,6 +65,52 @@ test.describe('Graviton with a failed deferred script', () => {
 });
 
 // ---------------------------------------------------------------------------
+// profiles-core.js is the file Hawk's "pfNum is not defined" (18 events, 11
+// users by 2026-10-30) traces to: the scripts after it throw at load, which no
+// inline guard sees. The failed request itself is what the page can hear.
+// ---------------------------------------------------------------------------
+test.describe('Graviton when a script request fails', () => {
+    test.beforeEach(async ({ page }) => {
+        await page.addInitScript(() => {
+            localStorage.setItem('lastChange', 'key-value;true,value;99999');
+            // Stands in for hawk.tpl's queue; the test env sends nothing to Hawk.
+            window.hawkEarlyErrors = [];
+        });
+    });
+
+    test('the missing file is named, shown to the visitor and reported once', async ({ page }) => {
+        await page.route('**/ogame/calc/js/profiles-core.js*', (route) => route.abort());
+        await page.goto('/graviton');
+        await page.waitForLoadState('networkidle');
+
+        await expect(page.locator('#pfg-scripts-failed')).toBeVisible();
+        const seen = await page.evaluate(() => ({
+            failed: window.pfgFailedScripts,
+            reported: window.hawkEarlyErrors
+                .filter((e) => e instanceof Error)
+                .map((e) => e.message)
+                .filter((m) => m.startsWith('Script failed to load:')),
+        }));
+        expect(seen.failed).toEqual(['/ogame/calc/js/profiles-core.js']);
+        expect(seen.reported).toEqual(['Script failed to load: /ogame/calc/js/profiles-core.js']);
+    });
+
+    test('a blocked third-party script is not a broken page', async ({ page }) => {
+        await page.goto('/graviton');
+        await page.waitForLoadState('networkidle');
+        await page.evaluate(() => new Promise((resolve) => {
+            const s = document.createElement('script');
+            s.src = 'http://127.0.0.1:9/counter.js';
+            s.onerror = s.onload = resolve;
+            document.head.appendChild(s);
+        }));
+
+        await expect(page.locator('#pfg-scripts-failed')).toHaveCount(0);
+        expect(await page.evaluate(() => window.pfgFailedScripts)).toEqual([]);
+    });
+});
+
+// ---------------------------------------------------------------------------
 // DOM integration: form inputs drive the rendered breakdown and results.
 // ---------------------------------------------------------------------------
 

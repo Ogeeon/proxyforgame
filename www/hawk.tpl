@@ -45,6 +45,14 @@ if (is_string($hawkToken) && $hawkToken !== ''):
       // translators and third-party counters fail on this page too, and none
       // of that is ours to fix.
       hawkSettings.beforeSend = function (event) {
+        // Once a script of ours failed to load (scripts-guard.tpl), whatever
+        // else the page throws is that failure's echo - a ReferenceError per
+        // symbol it would have defined. The failure itself is reported once, by
+        // name; its echoes only bury it.
+        if (window.pfgFailedScripts && window.pfgFailedScripts.length > 0
+            && event.title.indexOf('Script failed to load:') !== 0) {
+          return false;
+        }
         const frames = event.backtrace;
         if (!frames || frames.length === 0) {
           // All a browser reveals about an error in a cross-origin script.
