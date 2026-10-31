@@ -1294,8 +1294,9 @@ function mergeBodyResources(profile, incoming) {
  */
 function profileBodyResources(profile, bodyId) {
   const body = profile.planets.find((p) => p.id === bodyId) || profile.moons.find((m) => m.id === bodyId);
-  if (!body || body.gameId === null || !isPlainObject(profile.resources)) return null;
-  const reading = profile.resources[String(body.gameId)];
+  const gameId = body?.gameId ?? null;
+  if (gameId === null || !isPlainObject(profile.resources)) return null;
+  const reading = profile.resources[String(gameId)];
   return reading ? { ...reading } : null;
 }
 
@@ -1341,7 +1342,7 @@ function isResourceReadingStale(at, now) {
  */
 function planResourceFill(shown, profileId, bodyId, reading) {
   if (!reading || bodyId === null) return 'none';
-  if (!shown || shown.profileId !== profileId || shown.bodyId !== bodyId) return 'replace';
+  if (shown?.profileId !== profileId || shown.bodyId !== bodyId) return 'replace';
   if (shown.at === null || reading.at > shown.at) return 'refresh';
   return 'keep';
 }
