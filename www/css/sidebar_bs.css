@@ -10,7 +10,7 @@
     bottom: 0;
     width: 15%;
     margin: 0;
-    border-radius: 0 !important;
+    border-radius: 0;
     overflow-y: auto;
     z-index: 1030;
 }
@@ -24,12 +24,12 @@
     position: fixed;
     top: 10px;
     left: 10px;
-    z-index: 1050 !important;
+    z-index: 1050;
 }
 
 /* Hide toggle while offcanvas is open to prevent double menus */
 body.sidebar-offcanvas-open .btn[data-bs-toggle="offcanvas"] {
-    display: none !important;
+    display: none;
 }
 
 /* ========================================
@@ -99,8 +99,8 @@ body.sidebar-offcanvas-open .btn[data-bs-toggle="offcanvas"] {
 
 #sidebar .changelog,
 #sidebarOffcanvas .changelog {
-    border: none !important;
-    font-weight: bold !important;
+    border: none;
+    font-weight: bold;
     text-align: center;
 }
 
@@ -193,7 +193,7 @@ body.sidebar-offcanvas-open .btn[data-bs-toggle="offcanvas"] {
     }
 
     .btn[data-bs-toggle="offcanvas"] {
-        display: inline-flex !important;
+        display: inline-flex;
     }
 }
 
