@@ -46,15 +46,15 @@
 .subheader {
   text-align: center;
   font-weight: 600;
-  margin: 0 0 6px 0 !important;
+  margin: 0 0 6px 0;
   padding: 2px 6px;
 }
 
 /* Header row pairing a subheader with a button (e.g. the queue clear button):
-   the subheader's own margin-bottom !important would otherwise inflate the
-   flex row's height and throw off align-items: center. */
+   the subheader's own margin-bottom would otherwise inflate the flex row's
+   height and throw off align-items: center. */
 .subheader-row .subheader {
-  margin-bottom: 0 !important;
+  margin-bottom: 0;
 }
 
 #reset {
@@ -142,11 +142,13 @@
   background-color: transparent;
 }
 
-/* Border helpers used by totals/transports rows */
-.border-n { border-top: none !important; }
-.border-s { border-bottom: 1px solid var(--bs-border-color) !important; }
-.border-w { border-left: 1px solid var(--bs-border-color) !important; }
-.border-e { border-right: 1px solid var(--bs-border-color) !important; }
+/* Border helpers used by totals/transports rows. Scoped to .lined so they
+   outrank its `border: 1px solid` cell rule by specificity, not by !important
+   (same as in costs_bs.css). */
+.lined :is(td, th).border-n { border-top: none; }
+.lined :is(td, th).border-s { border-bottom: 1px solid var(--bs-border-color); }
+.lined :is(td, th).border-w { border-left: 1px solid var(--bs-border-color); }
+.lined :is(td, th).border-e { border-right: 1px solid var(--bs-border-color); }
 
 /* Action buttons in queue rows: keep them compact */
 .queue-row-up,
@@ -199,9 +201,15 @@
   --bs-btn-active-border-color: #7a3030;
 }
 
-[data-bs-theme="dark"] .is-invalid {
-  border-color: #b05050 !important;
-  box-shadow: none !important;
+/* The extra .form-control lifts both selectors above Bootstrap's
+   .form-control.is-invalid and its :focus state, which paint the bright red. */
+[data-bs-theme="dark"] .form-control.is-invalid {
+  border-color: #b05050;
+}
+
+[data-bs-theme="dark"] .form-control.is-invalid:focus {
+  border-color: #b05050;
+  box-shadow: none;
 }
 
 /* Responsive */

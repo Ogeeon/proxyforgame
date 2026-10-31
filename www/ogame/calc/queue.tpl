@@ -206,7 +206,7 @@
           <!-- Available buildings (src) -->
           <div>
             <div id="src-panel-<?=$i?>" class="border rounded p-2">
-              <p class="border rounded subheader bg-primary-subtle mb-2"><?= $l['buildings'] ?></p>
+              <p class="border rounded subheader bg-primary-subtle"><?= $l['buildings'] ?></p>
               <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
                 <div id="pf-body-box-<?=$i?>" class="d-flex align-items-center gap-2 d-none">
                   <label for="pf-body-<?=$i?>"><?= $l[$type] ?></label>
