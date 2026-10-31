@@ -303,10 +303,11 @@ implementation for every pattern.
 
 - **Frontend**: vanilla JS on Bootstrap 5.3, no jQuery — `www/ogame/calc/js/dom-utils.js` provides the
   DOM helpers that replaced it. Nine calculators went through the full BS5 migration;
-  **`trade` is only part-way**. Its JS is migrated — `dom-utils.js`, `trade-core.js`,
-  type-checked — but its UI is not: `trade.css` has no BS custom properties, the numeric fields
-  validate on `keyup` instead of on blur, and it carries one Bootstrap tooltip against flight's
-  thirty. Do not assume a `docs/patterns.md` UI rule already holds there.
+  **`trade` is only part-way**. Its markup (Bootstrap grid, form and utility classes) and its JS
+  are migrated — `dom-utils.js`, `trade-core.js`, type-checked — but the UI conventions are not:
+  `trade.css` uses `--bs-*` custom properties in only two places, the numeric fields validate on
+  `keyup` instead of on blur, and the page has no Bootstrap tooltip against flight's thirty. Do not
+  assume a `docs/patterns.md` UI rule already holds there.
 - **External services**: `https://logserver.net/api/proxyforgame/` (used by `GetDataCode`)
 - **Database**: Optional MySQL/MariaDB for changelog and trade calculator features
 
