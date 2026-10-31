@@ -366,7 +366,7 @@
 }
 
 /* Disabled inputs should have muted text. The extra .form-control lifts the
-   rule above the theme's .form-control text colour in common_bs.css. */
+   rule above the theme's .form-control text colour in common.css. */
 input.form-control:disabled,
 input.form-control.ui-state-disabled {
     color: #6c757d;

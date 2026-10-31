@@ -1,45 +1,42 @@
-#langs-menu {
-	width: 115px; 
-	float: right;
-	text-align: left;
-	cursor: pointer;
-	z-index: 99;
+/* Language menu button styling */
+.lang-menu-btn {
+	transition: color 0.2s ease-in-out, background-color 0.2s ease-in-out,
+		border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
 }
 
-#langs-options {
-	position: absolute;
-	left: 300px; 
-	top: 10px;
-	width: 117px; 
-	text-align: left;
-	display: none;
-	z-index: 99;
+.lang-menu-btn:hover,
+.lang-menu-btn:focus {
+	box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.15);
 }
 
-#langs-options a {
-	display: block;
-	border-top-width: 0px;
-	border-bottom-width: 0px;
-	padding: 2px;
-	text-decoration: none;
+/* Language menu dropdown item hover effect. Fix dropdown item alignment -
+   remove extra padding on right. The .dropdown-menu prefix lifts these rules
+   above Bootstrap's .dropdown-item padding and its :hover/:focus/:active
+   states, which have the same specificity as a bare .lang-menu-item. */
+.dropdown-menu .lang-menu-item {
+	transition: background-color 0.15s ease-in-out, color 0.15s ease-in-out;
+	padding-right: 0.1rem;
+	width: 100%;
 }
 
-#langs-options .last-option {
-	border-bottom-width: 1px;
+.dropdown-menu .lang-menu-item:hover,
+.dropdown-menu .lang-menu-item:focus {
+	background-color: var(--bs-primary-bg-subtle, #cfe2ff);
+	color: var(--bs-primary-text-emphasis, #052c65);
 }
 
-#langs-options a:hover {	
-	color: #E17009;
+.dropdown-menu .lang-menu-item:active {
+	background-color: var(--bs-primary, #0d6efd);
+	color: white;
 }
 
-.lang-icon {
-	margin-right: 6px;
+/* Ensure images don't stretch */
+.lang-menu-btn img,
+.lang-menu-item img {
+	flex-shrink: 0;
+	object-fit: cover;
 }
 
-#lang-options-stub {
-	position: absolute;
-	width: 115px;
-	height: 3px;
-	z-index: -1;
-	display: none;
+.dropdown-menu {
+	padding: 0;
 }

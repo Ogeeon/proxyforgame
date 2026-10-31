@@ -14,7 +14,7 @@ Estimate the resources, ships, and Dark Matter you may find on OGame expeditions
 |----------|-------|
 | PHP controller | `www/ogame/calc/expeditions.php` |
 | Template | `www/ogame/calc/expeditions.tpl` |
-| Stylesheet | `www/ogame/calc/css/expeditions_bs.css` |
+| Stylesheet | `www/ogame/calc/css/expeditions.css` |
 | Options cookie | `options_expeditions` |
 | E2E test | ✅ `playwright-tests/tests/expeditions.spec.js` |
 | Unit test | ✅ `unit-tests/expeditions-core.test.js` |

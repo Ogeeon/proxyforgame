@@ -10,7 +10,7 @@
   "files": [
     "www/js/utils.js",
     "www/js/api-client.js",
-    "www/js/sidebar_bs.js",
+    "www/js/sidebar.js",
     "www/ogame/calc/js/ogame-production.js",
     "www/ogame/calc/js/ogame-costs.js",
     "www/ogame/calc/js/ogame-lifeform.js",

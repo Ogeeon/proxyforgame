@@ -1,7 +1,7 @@
 # UI patterns of the Bootstrap 5 calculators
 
 The canonical implementation of every pattern below is the **flight** calculator
-(`flight.tpl`, `css/flight_bs.css`, `js/flight-*.js`) — the most heavily refined of the
+(`flight.tpl`, `css/flight.css`, `js/flight-*.js`) — the most heavily refined of the
 migrated set. Where flight has no instance of a pattern, the source is named explicitly.
 
 Scope: the nine migrated calculators — costs, expeditions, flight, graviton, lfcosts,
@@ -15,8 +15,8 @@ Bootstrap 5 but never went through the migration (monolithic `trade.js`, its own
 
 Two halves: the CSS skin and the JS initialisation.
 
-**Skin** — lives once in `www/css/common_bs.css`, which every calculator already loads.
-Do **not** restate it in a per-calculator `*_bs.css`.
+**Skin** — lives once in `www/css/common.css`, which every calculator already loads.
+Do **not** restate it in a per-calculator `*.css`.
 
 ```css
 /* Tooltip skin shared by every calculator: the Bootstrap default is an opaque
@@ -76,7 +76,7 @@ Do **not** restate it in a per-calculator `*_bs.css`.
   border-width: var(--bs-tooltip-arrow-height) calc(var(--bs-tooltip-arrow-width) * .5) 0;
   border-top-color: var(--bs-tooltip-bg);
 }
-/* ...and the same pair for right/bottom/left — see common_bs.css. */
+/* ...and the same pair for right/bottom/left — see common.css. */
 ```
 
 **Initialisation** — in the template's `DOMContentLoaded` block, always via
@@ -113,7 +113,7 @@ rather than left to taste:
 | A button whose `title` merely repeats its own visible label | leave it; a bubble that echoes the button is noise (`production.tpl:616-617`) |
 
 **Deviation to look for**: a `.tooltip-inner` block still sitting in a per-calculator CSS
-file (or in `www/css/sidebar_bs.css`, which still carries its own stale, non-matching copy);
+file (or in `www/css/sidebar.css`, which still carries its own stale, non-matching copy);
 `new bootstrap.Tooltip(...)`; an icon-only button still on a bare native `title=`;
 a dynamically built row that inits tooltips but never disposes them.
 
@@ -248,7 +248,7 @@ banner cannot name it.
 
 ## (d) Input-group sizing
 
-> **Source: `production.tpl` / `common_bs.css`, not flight** — flight contains no
+> **Source: `production.tpl` / `common.css`, not flight** — flight contains no
 > `input-group` at all, so it cannot supply this pattern. That is a deliberate choice, not
 > an oversight: flight carries the unit **in the label** (`"General's character class bonus
 > (%)"`) or in the option text of a `<select>`, which is a legitimate alternative to an
@@ -271,7 +271,7 @@ any width class that is not id-scoped and blows a fixed-width numeric field up t
 </div>
 ```
 
-**The escape rule** — for classes shared across calculators it lives in `common_bs.css`:
+**The escape rule** — for classes shared across calculators it lives in `common.css`:
 
 ```css
 /* Keep value inputs compact when wrapped in a Bootstrap input-group with a unit
@@ -286,8 +286,8 @@ any width class that is not id-scoped and blows a fixed-width numeric field up t
 }
 ```
 
-A calculator-private class keeps its rule in its own `*_bs.css` — the shape is identical,
-only the width differs (`expeditions_bs.css:130`):
+A calculator-private class keeps its rule in its own `*.css` — the shape is identical,
+only the width differs (`expeditions.css:130`):
 
 ```css
 .input-group > .form-control.percent-input {
@@ -342,7 +342,7 @@ readout and a switched-off input look alike:
 }
 ```
 
-The light theme completes the pair from `common_bs.css`: editable controls are lifted one
+The light theme completes the pair from `common.css`: editable controls are lifted one
 step above the panel, and all three non-editable kinds are excluded so they keep the panel
 tone.
 
@@ -358,11 +358,11 @@ On a real `:disabled` input the marker class is **redundant** — Bootstrap's
 toggle sets both (`toggleSpeedOverride`) while `_initSpeedOverride` sets only `disabled`;
 both render identically. Belt-and-braces, not a bug.
 
-### Why this rule is *not* hoisted into `common_bs.css`
+### Why this rule is *not* hoisted into `common.css`
 
-It is duplicated verbatim in five `*_bs.css` files, and hoisting it the way the tooltip skin
+It is duplicated verbatim in five `*.css` files, and hoisting it the way the tooltip skin
 was hoisted looks obvious. It was tried and rejected on measurement. `trade` is out of scope
-but loads `common_bs.css` **before** its own `trade.css`, which defines the same class name
+but loads `common.css` **before** its own `trade.css`, which defines the same class name
 differently (`opacity: .5; pointer-events: none`, no fill). Of trade's seven
 `.ui-state-disabled` elements, the `<input>`s already resolve to `--bs-secondary-bg` via
 Bootstrap's higher-specificity `.form-control:disabled`, so they would not move — but three
@@ -434,7 +434,7 @@ The three surfaces must stay ordered, in both themes:
 | panel `.border.rounded` | `#f5f5f5` | `#1a1e21` |
 | **button** | `#e3e8ef` + shadow | `#272d34` + shadow |
 
-`common_bs.css` owns all of it, through knobs declared next to the theme blocks:
+`common.css` owns all of it, through knobs declared next to the theme blocks:
 
 ```css
 [data-bs-theme="light"] {
@@ -464,7 +464,7 @@ Two rules, deliberately split by selector:
 ```
 
 **Never set `--bs-btn-bg` on a bare `.btn`.** It has the same (0,1,0) specificity as
-Bootstrap's `.btn-primary`, and `common_bs.css` loads later, so it would strip the fill off
+Bootstrap's `.btn-primary`, and `common.css` loads later, so it would strip the fill off
 every solid variant. `box-shadow` and `transform` carry no such risk, which is why relief and
 fill use different selectors. Bootstrap's own `.btn:focus-visible` ring is (0,2,0) and still
 beats the shadow rule, so focus keeps working without a further override.
@@ -564,7 +564,7 @@ Unlike section (e), this pattern **does** cover `trade`: its rate presets were c
 `btn btn-sm bg-primary-subtle` and were switched to `btn-outline-secondary` so they inherit
 the shared surface. Nothing in `trade.css` competes — its rules there are geometry only.
 
-Only one calculator overrides `--bs-btn-*` today — `queue_bs.css:191` dims the dark-theme
+Only one calculator overrides `--bs-btn-*` today — `queue.css:191` dims the dark-theme
 `.btn-outline-danger.queue-row-del`. It sets colour and border but not `bg`, so it composes
 with the rule above rather than fighting it.
 
@@ -582,7 +582,7 @@ button directly instead of retuning `--pfg-btn-bg`.
 
 ## (h) Profile body selects in the calculator's title bar
 
-Source: `costs.tpl`, `lfcosts.tpl`, `graviton.tpl`; the class lives in `common_bs.css`.
+Source: `costs.tpl`, `lfcosts.tpl`, `graviton.tpl`; the class lives in `common.css`.
 
 A calculator bound to player profiles puts the select of the profile's planet - and, in
 costs, of its moon - **in the title bar, next to the title**, not inside a tab or a panel

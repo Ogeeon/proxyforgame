@@ -47,7 +47,7 @@ interface HTMLInputElement {
   _inputMask?: any;
 }
 
-// Values sidebar_bs.tpl inlines into the page before sidebar_bs.js runs. Their
+// Values sidebar.tpl inlines into the page before sidebar.js runs. Their
 // declarations live in PHP, so nothing in the .js files can define them.
 
 /** Localised button captions for the report and e-mail dialogs. */
@@ -63,7 +63,7 @@ declare const apiParams: Record<string, any>;
 /** Universe lists per language, inlined by the flight, costs and trade templates. */
 declare const unis: Record<string, any[]>;
 
-// Values profiles_bs.tpl inlines for profiles-ui.js, on the pages with the
+// Values profiles.tpl inlines for profiles-ui.js, on the pages with the
 // profile selector.
 
 /** Localised strings of the profile selector and its dialogs. */

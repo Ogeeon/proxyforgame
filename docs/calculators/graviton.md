@@ -14,7 +14,7 @@ Find how many Solar Satellites and how much energy you need to research Graviton
 |----------|-------|
 | PHP controller | `www/ogame/calc/graviton.php` |
 | Template | `www/ogame/calc/graviton.tpl` |
-| Stylesheet | `www/ogame/calc/css/graviton_bs.css` |
+| Stylesheet | `www/ogame/calc/css/graviton.css` |
 | Options cookie | `options_graviton` |
 | E2E test | ✅ `playwright-tests/tests/graviton.spec.js` |
 | Unit test | ✅ `unit-tests/graviton-core.test.js` |

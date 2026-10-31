@@ -1,6 +1,6 @@
 <?php
 // Player profiles: the selector in the top bar and its dialogs (ADR-0004).
-// Included by topbar_bs.tpl on a calculator page that sets $withProfiles to
+// Included by topbar.tpl on a calculator page that sets $withProfiles to
 // true before including the top bar; the scripts (profiles-core.js,
 // profiles-store.js, profiles-fields.js, profiles-widgets.js,
 // profiles-binders.js, profiles-ui.js, in that order) are

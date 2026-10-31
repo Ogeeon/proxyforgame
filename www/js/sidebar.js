@@ -15,7 +15,7 @@ const EMAIL_CODES = ['sent', 'nothing_to_send', 'mail_failed', 'rate_limited', '
 const SEND_DIV_IDS = ['data', 'progress', ...new Set([...REPORT_CODES, ...EMAIL_CODES].map((code) => `err-${code}`))];
 
 /**
- * An element sidebar_bs.tpl is required to contain.
+ * An element sidebar.tpl is required to contain.
  *
  * Every id passed here is written in that template, so a miss means the two
  * have drifted apart. Saying so by name beats the "cannot read properties of
@@ -249,7 +249,7 @@ async function requestAndShowChangelog(fromChange) {
 }
 
 /**
- * The changelog table body, which sidebar_bs.tpl always provides.
+ * The changelog table body, which sidebar.tpl always provides.
  * @returns {HTMLElement}
  */
 function changelogBody() {

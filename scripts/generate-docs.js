@@ -6,7 +6,7 @@
  * What a page is made of is read from its .tpl: the `<script>` and `<link>`
  * tags are the only place that knows, and they are what scripts/generate-tsconfigs.js
  * reads as well. Nothing here assumes a naming scheme, because none holds any
- * more - `lfcosts` ships no stylesheet of its own and loads `costs_bs.css`,
+ * more - `lfcosts` ships no stylesheet of its own and loads `costs.css`,
  * `trade` still keeps its page code in one `trade.js` rather than in the
  * collector/renderer/orchestration trio, and `costs` persists no cookie at all.
  *

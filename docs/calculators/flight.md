@@ -14,7 +14,7 @@ Calculate fleet flight time, deuterium consumption, and the best departure time 
 |----------|-------|
 | PHP controller | `www/ogame/calc/flight.php` |
 | Template | `www/ogame/calc/flight.tpl` |
-| Stylesheet | `www/ogame/calc/css/flight_bs.css` |
+| Stylesheet | `www/ogame/calc/css/flight.css` |
 | Options cookie | `options_flight` |
 | E2E test | ✅ `playwright-tests/tests/flight.spec.js` |
 | Unit test | ✅ `unit-tests/flight-core.test.js` |

@@ -216,7 +216,7 @@ class MoonApp {
       });
     });
 
-    // Theme toggle (rendered inside topbar_bs).
+    // Theme toggle (rendered inside topbar).
     const lightCb = inputEl('#cb-light-theme');
     if (lightCb) {
       lightCb.addEventListener('click', () => {

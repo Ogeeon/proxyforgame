@@ -14,10 +14,10 @@
   $pfgPath = dirname(__DIR__, 2);
 ?>
   <!-- Bootstrap 5 and Bootstrap Icons (CSS, icon font, JS bundle) -->
-  <?php require_once '../../vendor_bs.tpl'; ?>
+  <?php require_once '../../vendor.tpl'; ?>
 
   <script>
-    // Put the stored race on <html> before the first paint: costs_bs.css then shows only
+    // Put the stored race on <html> before the first paint: costs.css then shows only
     // that race's building rows and level inputs, so nothing shifts when renderHideNShow()
     // runs after load. A profile planet's race is applied later, by the calculator.
     (function () {
@@ -33,9 +33,9 @@
   </script>
 
   <!-- Custom styles -->
-  <link type="text/css" href="/css/langs_bs.css?v=<?php echo assetVersion($pfgPath, '/css/langs_bs.css'); ?>" rel="stylesheet">
-  <link type="text/css" href="/css/common_bs.css?v=<?php echo assetVersion($pfgPath, '/css/common_bs.css'); ?>" rel="stylesheet">
-  <link type="text/css" href="/ogame/calc/css/costs_bs.css?v=<?php echo assetVersion($pfgPath, '/ogame/calc/css/costs_bs.css'); ?>" rel="stylesheet">
+  <link type="text/css" href="/css/langs.css?v=<?php echo assetVersion($pfgPath, '/css/langs.css'); ?>" rel="stylesheet">
+  <link type="text/css" href="/css/common.css?v=<?php echo assetVersion($pfgPath, '/css/common.css'); ?>" rel="stylesheet">
+  <link type="text/css" href="/ogame/calc/css/costs.css?v=<?php echo assetVersion($pfgPath, '/ogame/calc/css/costs.css'); ?>" rel="stylesheet">
 
   <!-- Utility libraries -->
   <script src="/js/utils.js?v=<?php echo assetVersion($pfgPath, '/js/utils.js'); ?>" defer></script>
@@ -110,9 +110,9 @@
 
 <div class="container-fluid">
   <div class="row">
-    <div class="col-md-2"><?php require_once '../../sidebar_bs.tpl'; ?></div>
+    <div class="col-md-2"><?php require_once '../../sidebar.tpl'; ?></div>
     <div class="col-md-10">
-    <?php $withProfiles = true; require_once '../../topbar_bs.tpl'; ?>
+    <?php $withProfiles = true; require_once '../../topbar.tpl'; ?>
 
 <div id="lfcosts">
   <div class="border rounded position-relative">
@@ -356,7 +356,7 @@
                 <?php $techs = getTechsByType($j); $row = 1; ?>
                 <?php $energyHintBuildings = [1002, 2002, 3002, 4002]; ?>
                 <?php foreach ($techs as $tech) :?>
-                <?php // data-race: costs_bs.css shows only the stored race's rows from the first paint (see the script in <head>). ?>
+                <?php // data-race: costs.css shows only the stored race's rows from the first paint (see the script in <head>). ?>
                 <tr class="<?= ($row++ % 2) === 1 ? 'odd' : 'even' ?>" data-race="<?= intdiv((int) $tech, 1000) ?>">
                   <td style="display: none;"><?=$tech?></td>
                   <td class="min"><?=$l[$techData[$tech][0]]?><?php if (in_array($tech, $energyHintBuildings)): ?> <i class="bi bi-lightning-charge energy-cost-hint" data-bs-toggle="tooltip" title="<?= $l['energy-cost-to-build'] ?>: 0"></i><?php endif; ?></td>

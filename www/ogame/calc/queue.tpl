@@ -14,12 +14,12 @@
   $pfgPath = dirname(__DIR__, 2);
 ?>
   <!-- Bootstrap 5 and Bootstrap Icons (CSS, icon font, JS bundle) -->
-  <?php require_once '../../vendor_bs.tpl'; ?>
+  <?php require_once '../../vendor.tpl'; ?>
 
   <!-- Custom styles -->
-  <link type="text/css" href="/css/langs_bs.css?v=<?php echo assetVersion($pfgPath, '/css/langs_bs.css'); ?>" rel="stylesheet">
-  <link type="text/css" href="/css/common_bs.css?v=<?php echo assetVersion($pfgPath, '/css/common_bs.css'); ?>" rel="stylesheet">
-  <link type="text/css" href="/ogame/calc/css/queue_bs.css?v=<?php echo assetVersion($pfgPath, '/ogame/calc/css/queue_bs.css'); ?>" rel="stylesheet">
+  <link type="text/css" href="/css/langs.css?v=<?php echo assetVersion($pfgPath, '/css/langs.css'); ?>" rel="stylesheet">
+  <link type="text/css" href="/css/common.css?v=<?php echo assetVersion($pfgPath, '/css/common.css'); ?>" rel="stylesheet">
+  <link type="text/css" href="/ogame/calc/css/queue.css?v=<?php echo assetVersion($pfgPath, '/ogame/calc/css/queue.css'); ?>" rel="stylesheet">
 
   <!-- Utility libraries -->
   <script src="/js/utils.js?v=<?php echo assetVersion($pfgPath, '/js/utils.js'); ?>" defer></script>
@@ -132,9 +132,9 @@
 
 <div class="container-fluid">
   <div class="row">
-    <div class="col-md-2"><?php require_once '../../sidebar_bs.tpl'; ?></div>
+    <div class="col-md-2"><?php require_once '../../sidebar.tpl'; ?></div>
     <div class="col-md-10">
-    <?php $withProfiles = true; require_once '../../topbar_bs.tpl'; ?>
+    <?php $withProfiles = true; require_once '../../topbar.tpl'; ?>
 
 <div id="queue">
   <div class="border rounded position-relative">

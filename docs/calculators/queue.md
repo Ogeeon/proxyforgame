@@ -14,7 +14,7 @@ Compare the cost and time of building upgrades in sequence on an OGame planet or
 |----------|-------|
 | PHP controller | `www/ogame/calc/queue.php` |
 | Template | `www/ogame/calc/queue.tpl` |
-| Stylesheet | `www/ogame/calc/css/queue_bs.css` |
+| Stylesheet | `www/ogame/calc/css/queue.css` |
 | Options cookie | `options_queue` |
 | E2E test | ✅ `playwright-tests/tests/queue.spec.js` |
 | Unit test | ✅ `unit-tests/queue-core.test.js` |

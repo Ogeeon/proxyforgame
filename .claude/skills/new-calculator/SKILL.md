@@ -15,10 +15,10 @@ make new-calc name=<calc>
 
 - `www/ogame/calc/<calc>.php`, `<calc>.tpl`
 - `www/ogame/calc/js/<calc>-core.js`, `-data-collector.js`, `-renderer.js`, `-orchestration.js`
-- `www/ogame/calc/css/<calc>_bs.css`
+- `www/ogame/calc/css/<calc>.css`
 - `playwright-tests/tests/<calc>.spec.js`
 - adds the translation keys to `en.json` and syncs them to all 13 locales
-- adds the entry to `www/sidebar_bs.tpl`
+- adds the entry to `www/sidebar.tpl`
 - registers the address `/<lang>/<calc>`: `PFG_CALCULATORS` in `www/routes.inc.php` and the
   rewrite rule in `www/.htaccess`
 

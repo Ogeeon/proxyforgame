@@ -107,7 +107,7 @@
    it has to stay fully readable while still reading as not-editable. This is the
    same fill :disabled paints, so the computed <span>, which can carry no such
    attribute, matches a switched-off input exactly. Identical to the rule in
-   flight_bs.css — keep the two in step. */
+   flight.css — keep the two in step. */
 .ui-state-disabled {
   background-color: var(--bs-secondary-bg);
   cursor: default;
@@ -144,7 +144,7 @@
 
 /* Border helpers used by totals/transports rows. Scoped to .lined so they
    outrank its `border: 1px solid` cell rule by specificity, not by !important
-   (same as in costs_bs.css). */
+   (same as in costs.css). */
 .lined :is(td, th).border-n { border-top: none; }
 .lined :is(td, th).border-s { border-bottom: 1px solid var(--bs-border-color); }
 .lined :is(td, th).border-w { border-left: 1px solid var(--bs-border-color); }

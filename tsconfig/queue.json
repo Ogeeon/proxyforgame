@@ -19,7 +19,7 @@
     "../www/ogame/calc/js/queue-orchestration.js",
     "../www/ogame/calc/js/queue-profile.js",
     "../www/js/bootstrap-tooltip-guard.js",
-    "../www/js/sidebar_bs.js",
+    "../www/js/sidebar.js",
     "../www/ogame/calc/js/globals.d.ts",
     "../www/ogame/calc/js/options-global.d.ts"
   ]

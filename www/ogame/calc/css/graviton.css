@@ -75,7 +75,7 @@
    marker instead — the same marker the flight and trade calculators use. It gets
    the Bootstrap disabled-field fill rather than the legacy jQuery-UI fade: the
    numbers are the answer the panel exists to give, so they have to stay fully
-   readable while still reading as not-editable. common_bs.css excludes the class
+   readable while still reading as not-editable. common.css excludes the class
    from the light-theme "lift editable controls" rule, which is what keeps these
    divs on the panel tone instead of the editable one. */
 .ui-state-disabled {

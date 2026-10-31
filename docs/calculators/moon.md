@@ -14,7 +14,7 @@ Calculate your chance of finding a moon, the outcome of a moon destruction attem
 |----------|-------|
 | PHP controller | `www/ogame/calc/moon.php` |
 | Template | `www/ogame/calc/moon.tpl` |
-| Stylesheet | `www/ogame/calc/css/moon_bs.css` |
+| Stylesheet | `www/ogame/calc/css/moon.css` |
 | Options cookie | `options_moon` |
 | E2E test | ✅ `playwright-tests/tests/moon.spec.js` |
 | Unit test | ✅ `unit-tests/moon-core.test.js` |

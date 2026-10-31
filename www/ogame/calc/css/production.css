@@ -64,7 +64,7 @@
 
 /* The life-form bonuses come from the game with up to four decimals (0,4635),
    plus the profile mark's stripe on the left edge. Scoped by id, or the
-   input-group width rule in common_bs.css wins. */
+   input-group width rule in common.css wins. */
 #param-lifeforms .input-group > .form-control.level-input {
   width: 4.75rem;
 }
@@ -86,7 +86,7 @@
   padding-bottom: 0;
 }
 
-/* The width classes from common_bs.css are sized for padding-less legacy
+/* The width classes from common.css are sized for padding-less legacy
    inputs; Bootstrap form controls carry ~1rem of horizontal padding, so widen
    them here to keep the values readable. */
 #production .input-1column { width: 32px; }

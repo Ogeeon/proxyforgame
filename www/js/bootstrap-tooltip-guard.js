@@ -1,4 +1,4 @@
-// Boots after bootstrap.bundle.min.js (see vendor_bs.tpl) and repairs one defect
+// Boots after bootstrap.bundle.min.js (see vendor.tpl) and repairs one defect
 // in it, so the vendored bundle itself stays byte-identical to the release it
 // was copied from (`make vendor-check` hashes it).
 //

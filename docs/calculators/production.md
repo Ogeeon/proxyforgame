@@ -14,7 +14,7 @@ Calculate metal, crystal, and deuterium production, energy use, and mine upgrade
 |----------|-------|
 | PHP controller | `www/ogame/calc/production.php` |
 | Template | `www/ogame/calc/production.tpl` |
-| Stylesheet | `www/ogame/calc/css/production_bs.css` |
+| Stylesheet | `www/ogame/calc/css/production.css` |
 | Options cookie | `options_production` |
 | E2E test | ✅ `playwright-tests/tests/production.spec.js` |
 | Unit test | ✅ `unit-tests/production-core.test.js` |

@@ -292,7 +292,7 @@ td.min {
 
 /* Dark theme: make readonly planetsSpin field visually distinct from editable irn-level.
    Editable inputs are darker (more recessed), readonly inputs appear lighter/raised.
-   The colour itself is set by the common_bs.css dark-input rule, which reads this variable. */
+   The colour itself is set by the common.css dark-input rule, which reads this variable. */
 [data-bs-theme="dark"] #irn-calc .form-control:not([readonly]):not(:disabled) {
   --pf-sunk-input-bg: rgb(15, 17, 21);
 }

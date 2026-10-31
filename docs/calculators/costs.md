@@ -14,7 +14,7 @@ Calculate the cost and build time of buildings, research, ships, and defenses in
 |----------|-------|
 | PHP controller | `www/ogame/calc/costs.php` |
 | Template | `www/ogame/calc/costs.tpl` |
-| Stylesheet | `www/ogame/calc/css/costs_bs.css` |
+| Stylesheet | `www/ogame/calc/css/costs.css` |
 | Options cookie | none |
 | E2E test | ✅ `playwright-tests/tests/costs.spec.js` |
 | Unit test | ✅ `unit-tests/costs-core.test.js` |

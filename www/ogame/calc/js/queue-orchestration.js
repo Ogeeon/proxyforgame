@@ -225,7 +225,7 @@ class QueueCalculatorApp {
     addEvent(`#set-start-now-${PLANET_TAB}`, 'click', () => this._setStartNow(PLANET_TAB));
     addEvent(`#set-start-now-${MOON_TAB}`, 'click', () => this._setStartNow(MOON_TAB));
 
-    // Theme toggle hook (toggle is rendered inside topbar_bs)
+    // Theme toggle hook (toggle is rendered inside topbar)
     const lightCb = inputEl('#cb-light-theme');
     if (lightCb) {
       lightCb.addEventListener('click', () => {

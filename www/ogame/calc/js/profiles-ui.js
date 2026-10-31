@@ -1,7 +1,7 @@
 // ============================================================================
 // PLAYER PROFILES - the selector, its dialogs and the field marks
 // ============================================================================
-// Wires profiles_bs.tpl: the profile select in the top bar (with the import,
+// Wires profiles.tpl: the profile select in the top bar (with the import,
 // create and manage actions at the bottom of its list), the four dialogs, the
 // one-time offer to convert the old saved sets, and the marks a calculator
 // puts on profile-owned fields. A calculator talks to it through `pfgProfiles`,

@@ -3,7 +3,7 @@
  * Migrated from jQuery UI to Bootstrap 5.3.8
  * Shared pieces (.main-header, .subheader, .lined tables, warning banner)
  * follow the same conventions as the moon / graviton calculators. The tooltip
- * skin is not restated here - it lives once in css/common_bs.css.
+ * skin is not restated here - it lives once in css/common.css.
  */
 
 #expeditions {

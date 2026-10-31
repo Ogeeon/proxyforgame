@@ -74,7 +74,7 @@
    neither `readonly´ nor `disabled´. They wear the `ui-state-disabled´ marker
    instead — the same marker the flight and trade calculators use — which paints
    the Bootstrap disabled-field fill and is excluded from the light-theme
-   "lift editable controls" rule in common_bs.css. Note `.resource-show´ is
+   "lift editable controls" rule in common.css. Note `.resource-show´ is
    shared with the two editable resources-on-hand inputs, which deliberately do
    not carry the marker. */
 .ui-state-disabled {

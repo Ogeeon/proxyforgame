@@ -94,7 +94,7 @@
 }
 
 /* The moon diameter carries a `km´ addon, so it needs the input-group escape.
-   common_bs.css already supplies one for .level-input, but at 3.5rem - repeating
+   common.css already supplies one for .level-input, but at 3.5rem - repeating
    it here (same specificity, loaded later) keeps the field at the 60px of the
    plain level inputs it sits next to. */
 .input-group>.form-control.level-input {

@@ -24,7 +24,7 @@ const CALC_DIR = path.join(__dirname, '..', 'www', 'ogame', 'calc');
 const JS_DIR = path.join(CALC_DIR, 'js');
 const CSS_DIR = path.join(CALC_DIR, 'css');
 const LOCALE_DIR = path.join(__dirname, '..', 'www', 'locale');
-const SIDEBAR_FILE = path.join(__dirname, '..', 'www', 'sidebar_bs.tpl');
+const SIDEBAR_FILE = path.join(__dirname, '..', 'www', 'sidebar.tpl');
 const ROUTES_FILE = path.join(__dirname, '..', 'www', 'routes.inc.php');
 const HTACCESS_FILE = path.join(__dirname, '..', 'www', '.htaccess');
 const TESTS_DIR = path.join(__dirname, '..', 'playwright-tests', 'tests');
@@ -145,12 +145,12 @@ function generateTPL(calcName) {
   $pfgPath = dirname(__DIR__, 2);
 ?>
   <!-- Bootstrap 5 and Bootstrap Icons (CSS, icon font, JS bundle) -->
-  <?php require_once '../../vendor_bs.tpl'; ?>
+  <?php require_once '../../vendor.tpl'; ?>
 
   <!-- Custom styles -->
-  <link type="text/css" href="/css/langs_bs.css?v=<?php echo filemtime($pfgPath.'/css/langs_bs.css'); ?>" rel="stylesheet" />
-  <link type="text/css" href="/css/common_bs.css?v=<?php echo filemtime($pfgPath.'/css/common_bs.css'); ?>" rel="stylesheet"/>
-  <link type="text/css" href="/ogame/calc/css/${calcName}_bs.css?v=<?php echo filemtime($pfgPath.'/ogame/calc/css/${calcName}_bs.css'); ?>" rel="stylesheet"/>
+  <link type="text/css" href="/css/langs.css?v=<?php echo filemtime($pfgPath.'/css/langs.css'); ?>" rel="stylesheet" />
+  <link type="text/css" href="/css/common.css?v=<?php echo filemtime($pfgPath.'/css/common.css'); ?>" rel="stylesheet"/>
+  <link type="text/css" href="/ogame/calc/css/${calcName}.css?v=<?php echo filemtime($pfgPath.'/ogame/calc/css/${calcName}.css'); ?>" rel="stylesheet"/>
 
   <!-- Utility libraries and calculator modules -->
   <script type="text/javascript" src="/js/utils.js?v=<?php echo filemtime($pfgPath.'/js/utils.js'); ?>" defer></script>
@@ -178,9 +178,9 @@ function generateTPL(calcName) {
 
 <div class="container-fluid">
   <div class="row">
-    <div class="col-md-2"><?php require_once '../../sidebar_bs.tpl'; ?></div>
+    <div class="col-md-2"><?php require_once '../../sidebar.tpl'; ?></div>
     <div class="col-md-10">
-    <?php require_once '../../topbar_bs.tpl'; ?>
+    <?php require_once '../../topbar.tpl'; ?>
 
 <div id="${calcName}">
   <div class="border rounded position-relative">
@@ -378,7 +378,7 @@ class ${pascalName}App {
 
     addEvent('#reset', 'click', () => this._resetParams());
 
-    // Theme toggle (rendered inside topbar_bs).
+    // Theme toggle (rendered inside topbar).
     const lightCb = $('#cb-light-theme');
     if (lightCb) {
       lightCb.addEventListener('click', () => {
@@ -472,7 +472,7 @@ function addTranslationKeys(calcName, translations) {
 }
 
 /**
- * Update sidebar navigation (www/sidebar_bs.tpl's $ogamePages array)
+ * Update sidebar navigation (www/sidebar.tpl's $ogamePages array)
  */
 function updateSidebar(calcName) {
   const content = fs.readFileSync(SIDEBAR_FILE, 'utf8');
@@ -563,7 +563,7 @@ function main() {
     { path: path.join(JS_DIR, `${calcName}-data-collector.js`), name: 'Data-collector JS module' },
     { path: path.join(JS_DIR, `${calcName}-renderer.js`), name: 'Renderer JS module' },
     { path: path.join(JS_DIR, `${calcName}-orchestration.js`), name: 'Orchestration JS module' },
-    { path: path.join(CSS_DIR, `${calcName}_bs.css`), name: 'CSS file' },
+    { path: path.join(CSS_DIR, `${calcName}.css`), name: 'CSS file' },
     { path: path.join(TESTS_DIR, `${calcName}.spec.js`), name: 'Test file' }
   ];
 
@@ -608,7 +608,7 @@ function main() {
   writeIfMissing(path.join(JS_DIR, `${calcName}-data-collector.js`), generateDataCollectorJS(calcName), 'Data-collector JS module');
   writeIfMissing(path.join(JS_DIR, `${calcName}-renderer.js`), generateRendererJS(calcName), 'Renderer JS module');
   writeIfMissing(path.join(JS_DIR, `${calcName}-orchestration.js`), generateOrchestrationJS(calcName), 'Orchestration JS module');
-  writeIfMissing(path.join(CSS_DIR, `${calcName}_bs.css`), generateCSS(calcName), 'CSS file');
+  writeIfMissing(path.join(CSS_DIR, `${calcName}.css`), generateCSS(calcName), 'CSS file');
 
   // Add translation keys
   console.log(colorize(`\n  Adding translation keys to en.json...`, colors.gray));
@@ -666,7 +666,7 @@ function main() {
   const rendererJsPath = `www/ogame/calc/js/${calcName}-renderer.js`;
   const orchestrationJsPath = `www/ogame/calc/js/${calcName}-orchestration.js`;
   const tplPath = `www/ogame/calc/${calcName}.tpl`;
-  const cssPath = `www/ogame/calc/css/${calcName}_bs.css`;
+  const cssPath = `www/ogame/calc/css/${calcName}.css`;
   const specPath = `playwright-tests/tests/${calcName}.spec.js`;
   const calcUrl = `http://pfg.wmp/en/${calcName}`;
   console.log(`  1. Customize the calculation logic in ${colorize(coreJsPath, colors.blue)}`);

@@ -14,7 +14,7 @@ Calculate the cost and build time of Lifeform buildings and research in OGame, i
 |----------|-------|
 | PHP controller | `www/ogame/calc/lfcosts.php` |
 | Template | `www/ogame/calc/lfcosts.tpl` |
-| Stylesheet | `www/ogame/calc/css/costs_bs.css` |
+| Stylesheet | `www/ogame/calc/css/costs.css` |
 | Options cookie | `options_lfcosts` |
 | E2E test | ✅ `playwright-tests/tests/lfcosts.spec.js` |
 | Unit test | ✅ `unit-tests/lfcosts-core.test.js` |

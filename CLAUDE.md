@@ -44,7 +44,7 @@ Things worth knowing before running or writing a test:
   every test needs has one place to go. New spec files must use the same import. Video
   recording is off locally (`PFG_VIDEO=1` brings it back for a failing run).
 - **Bootstrap and Bootstrap Icons are vendored**: `www/vendor/` holds committed copies of the
-  versions `package.json` pins, included by `www/vendor_bs.tpl`. Upgrading is a version bump
+  versions `package.json` pins, included by `www/vendor.tpl`. Upgrading is a version bump
   plus `make vendor`; `make check` fails (`vendor-check`) when the two disagree.
 
 ### Running PHP Scripts (PowerShell)
@@ -176,7 +176,7 @@ Single endpoint `www/ajax.php` handles all AJAX requests:
 Calculators in `www/ogame/calc/` consist of:
 - `<name>.php` - Controller (sets language, loads translations)
 - `<name>.tpl` - Template (renders HTML with inline JS)
-- `css/<name>_bs.css` - Per-calculator styles
+- `css/<name>.css` - Per-calculator styles
 - `js/<name>-core.js` - DOM-free formulas (what the node:test suite exercises)
 - `js/<name>-data-collector.js`, `-renderer.js`, `-orchestration.js` - form reading, output, wiring
 

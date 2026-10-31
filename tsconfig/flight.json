@@ -19,7 +19,7 @@
     "../www/ogame/calc/js/flight-orchestration.js",
     "../www/ogame/calc/js/flight-profile.js",
     "../www/js/bootstrap-tooltip-guard.js",
-    "../www/js/sidebar_bs.js",
+    "../www/js/sidebar.js",
     "../www/ogame/calc/js/globals.d.ts"
   ]
 }

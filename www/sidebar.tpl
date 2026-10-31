@@ -27,8 +27,8 @@
   $pfgPath = __DIR__;
 ?>
 
-<?php $sidebarCss = $pfgPath . '/css/sidebar_bs.css'; ?>
-<link type="text/css" href="/css/sidebar_bs.css?v=<?php echo assetVersion($sidebarCss); ?>" rel="stylesheet">
+<?php $sidebarCss = $pfgPath . '/css/sidebar.css'; ?>
+<link type="text/css" href="/css/sidebar.css?v=<?php echo assetVersion($sidebarCss); ?>" rel="stylesheet">
 <script>
   var buttonsText = {};
   buttonsText.send = <?= json_encode($loc['reportStrings']['send']) ?>;
@@ -39,8 +39,8 @@
   let currChange = { value: <?= (int)$currChange ?>, validate: function(key, val) { return val; } };
   var currLang = <?= json_encode($lang) ?>;
 </script>
-<?php $sidebarJs = $pfgPath . '/js/sidebar_bs.js'; ?>
-<script src="/js/sidebar_bs.js?v=<?php echo assetVersion($sidebarJs); ?>" defer></script>
+<?php $sidebarJs = $pfgPath . '/js/sidebar.js'; ?>
+<script src="/js/sidebar.js?v=<?php echo assetVersion($sidebarJs); ?>" defer></script>
 
 <!-- Sidebar Toggle Button (visible when sidebar is hidden) -->
 <button class="btn btn-primary d-lg-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebarOffcanvas" aria-controls="sidebarOffcanvas">

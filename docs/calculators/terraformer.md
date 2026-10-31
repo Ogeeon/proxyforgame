@@ -14,7 +14,7 @@ Calculate the energy, resources, and time needed to terraform an OGame planet, i
 |----------|-------|
 | PHP controller | `www/ogame/calc/terraformer.php` |
 | Template | `www/ogame/calc/terraformer.tpl` |
-| Stylesheet | `www/ogame/calc/css/terraformer_bs.css` |
+| Stylesheet | `www/ogame/calc/css/terraformer.css` |
 | Options cookie | `options_terraformer` |
 | E2E test | ✅ `playwright-tests/tests/terraformer.spec.js` |
 | Unit test | ✅ `unit-tests/terraformer-core.test.js` |

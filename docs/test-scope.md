@@ -21,7 +21,7 @@ A file belongs to calculator `<name>` if it is one of:
 | `www/ogame/calc/<name>.tpl` | template |
 | `www/ogame/calc/js/<name>-*.js` | `-core`, `-data-collector`, `-orchestration`, `-renderer` |
 | `www/ogame/calc/js/trade.js` | `trade` only — its page code is still one file, `-core` aside |
-| `www/ogame/calc/css/<name>_bs.css` | |
+| `www/ogame/calc/css/<name>.css` | |
 | `unit-tests/<name>-core.test.js` | present for 8 of the 10 |
 | `playwright-tests/tests/<name>.spec.js` | |
 
