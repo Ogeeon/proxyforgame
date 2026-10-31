@@ -229,11 +229,6 @@
   display: block;
 }
 
-[data-bs-theme="dark"] .is-invalid {
-  border-color: #b05050 !important;
-  box-shadow: none !important;
-}
-
 /* Responsive */
 @media (max-width: 992px) {
   #production {
