@@ -107,6 +107,18 @@ Three consequences for everyday work:
   there; CI's database is still MariaDB 10.4, so SQL that only newer MariaDB accepts passes
   on the site and fails in CI, never the other way round.
 
+**After a push, watch it through.** A push is not finished when `git push` returns:
+
+1. Follow the CI run for the pushed SHA (`gh run list --limit 5`, then `gh run watch <id>`
+   or a re-check) until it ends. Report a failure with the failing job's output; do not push
+   a fix on top without saying so.
+2. Once CI is green, check SonarCloud for the new analysis (`Ogeeon_proxyforgame`): the
+   quality gate and the OPEN issues, via the sonarqube MCP server. The scan lands a few
+   minutes after the push, so compare against what was expected — a Sonar-driven change
+   should have closed its findings, and anything new is reported, not silently left.
+3. Say the outcome in one line: CI result, quality gate, and any open issue that was not
+   there before the push.
+
 Writing an in-app changelog release stays manual; **applying** it is now part of the deploy —
 `changelog.sql` is committed and `pfg-sync` pipes it into the host's database. See below.
 
