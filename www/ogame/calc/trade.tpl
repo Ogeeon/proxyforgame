@@ -220,7 +220,7 @@
 
               <!-- Arrow -->
               <!-- Clicking it flips the direction, the same switch as the radios above. -->
-              <div class="col-12 col-lg-auto arrow-col d-flex align-items-center justify-content-center py-1 py-lg-0 px-0">
+              <div class="col-12 col-lg-auto arrow-col d-flex align-items-center justify-content-center p-0">
                 <button type="button" id="dir-switch" class="arrow-btn" title="<?= htmlspecialchars($l['dir-switch'], ENT_QUOTES) ?>" aria-label="<?= htmlspecialchars($l['dir-switch'], ENT_QUOTES) ?>">
                   <i class="bi bi-caret-right-fill text-info-subtle" id="big-arrow"></i>
                 </button>

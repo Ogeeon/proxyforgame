@@ -213,10 +213,9 @@
     font-size: 3rem;
 }
 
-/* Keep the arrow column tight: remove column padding and prevent extra flex growth */
+/* Keep the arrow column tight: prevent extra flex growth (the column padding is
+   removed by the p-0 utility on the element) */
 .arrow-col {
-    padding-left: 0 !important;
-    padding-right: 0 !important;
     margin-left: 0;
     margin-right: 0;
     flex: 0 0 auto;
@@ -262,13 +261,11 @@
 @media (max-width: 991.98px) {
     .arrow-col {
         width: 100%;
-        padding-top: 0 !important;
-        padding-bottom: 0 !important;
     }
-    
+
     #big-arrow {
         transform: rotate(90deg);
-        font-size: 2.5rem !important;
+        font-size: 2.5rem;
     }
     
     .res-input {
@@ -285,8 +282,6 @@
 @media (min-width: 992px) {
     .arrow-col {
         width: auto;
-        padding-left: 0 !important;
-        padding-right: 0 !important;
         margin-left: -0.5rem;
         margin-right: -0.5rem;
     }
