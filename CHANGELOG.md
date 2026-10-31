@@ -25,6 +25,7 @@ release section; it is the source of truth for the other eleven translations.
 
 ### Fixed
 
+- Queue: leaving a profile gives the queue its own economy speed back. With a profile active, every save stored the speed of the profile's universe as the queue's own, so "no profile" kept showing it.
 - Costs, production, MCP server: the crawler, the reaper and the pathfinder now carry their game ids (217, 218, 219) in the site's own tech tables, which numbered them 218, 216 and 217 - 216 being no ship at all. Every profile, import and the flight and expedition calculators already used the game ids, so nothing needs translating between them any more, and the MCP account import reads its ship table from `costs-techs.json` instead of keeping its own copy. No cost or production figure changes; the last three rows of the fleet tables now follow the game order, crawler, reaper, pathfinder.
 - Shared: a calculator script that fails to load now shows the "reload the page" banner and is reported to Hawk once, by file name, instead of as a `pfNum is not defined` for every script that needed it. The banner's guard moved into `<head>`, ahead of the first script request, in every page.
 

@@ -838,6 +838,24 @@ test('"no profile" gives the queue its own values back', async ({ page }) => {
     await expect(page.locator('#reset')).toBeVisible();
 });
 
+test('"no profile" gives the queue its own economy speed back', async ({ page }) => {
+    await page.route('**/ajax.php?*service=serverdata*', (route) => route.fulfill({
+        status: 200, contentType: 'application/json',
+        body: JSON.stringify({ speed: '5' }),
+    }));
+    await page.goto('/queue');
+    await page.locator('#universe-speed').selectOption('3');
+
+    await importExport(page);
+    await expect(page.locator('#universe-speed')).toHaveValue('5');
+    // A save with the profile active must not store the universe's speed as the queue's own.
+    await blurFill(page, '#hyper-tech-level', '9');
+    await expect.poll(async () => (await page.evaluate(() => JSON.parse(localStorage.getItem('options_queue') || '{}'))).universeSpeed).toBe(3);
+
+    await page.locator('#pf-select').selectOption('');
+    await expect(page.locator('#universe-speed')).toHaveValue('3');
+});
+
 test('a queue tab whose body the profile does not have stays the calculator\'s own', async ({ page }) => {
     await page.goto('/queue');
     await importExport(page);

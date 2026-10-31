@@ -80,7 +80,8 @@ class QueueProfiles extends ProfileBinder {
   /**
    * The options.prm keys the profile owns: the account's, and per tab its
    * fields and the start levels filled in from its body, while the profile
-   * has that body - a tab with none is the calculator's own.
+   * has that body - a tab with none is the calculator's own; and the economy
+   * speed while the profile has a universe, shown by the universe setting.
    *
    * @param {?Profile} profile
    * @returns {PfOwnedGroup[]}
@@ -89,6 +90,7 @@ class QueueProfiles extends ProfileBinder {
     return [
       { keys: QUEUE_ACCOUNT_FIELDS.map((f) => f.prm), present: true },
       ...QUEUE_TABS.map((t) => ({ keys: [t.levels, t.fields], present: this.body(t, profile) !== null })),
+      { keys: ['universeSpeed'], present: !!profile?.universe, show: false },
     ];
   }
 
@@ -174,6 +176,7 @@ class QueueProfiles extends ProfileBinder {
     QUEUE_TABS.forEach((t) => this.bodySelects[t.tab].hide());
     super.restoreOwn();
     const prm = options.prm;
+    setVal('#universe-speed', prm.universeSpeed);
     QUEUE_ACCOUNT_FIELDS.forEach((f) => f.write(prm, f.read(prm)));
     QUEUE_TABS.forEach((t) => {
       const levels = Array.isArray(prm[t.levels]) ? prm[t.levels] : [];
