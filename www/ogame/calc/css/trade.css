@@ -365,10 +365,11 @@
     pointer-events: none;
 }
 
-/* Disabled inputs should have muted text */
-input:disabled,
-input.ui-state-disabled {
-    color: #6c757d !important;
+/* Disabled inputs should have muted text. The extra .form-control lifts the
+   rule above the theme's .form-control text colour in common_bs.css. */
+input.form-control:disabled,
+input.form-control.ui-state-disabled {
+    color: #6c757d;
 }
 
 /* Read-only display divs (not editable, for display purposes only) */
@@ -376,10 +377,17 @@ input.ui-state-disabled {
     cursor: default;
 }
 
-/* Error state for rate inputs */
+/* Error state for rate inputs. The rate fields draw their border from
+   --bs-border-color (.form-control and the .border utility alike, the latter
+   with !important), so the variable is what has to change; :focus is the one
+   state that sets a literal colour of its own. */
 .ui-state-error {
-    border-color: #dc3545 !important;
+    --bs-border-color: #dc3545;
     background-color: var(--bs-danger-bg-subtle);
+}
+
+.ui-state-error:focus {
+    border-color: #dc3545;
 }
 
 /* Range slider styling for better visibility */
