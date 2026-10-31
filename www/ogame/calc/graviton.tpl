@@ -199,6 +199,17 @@
               </div>
             </div>
             <div class="d-flex flex-wrap align-items-center gap-2 border rounded p-2">
+              <span class="fw-semibold"><?= $l['class-collector'] ?>:</span>
+              <div class="d-flex align-items-center gap-1">
+                <label for="lf-collector-class-bonus"><?= $l['lf-class-bonus'] ?></label>
+                <div class="input-group input-group-sm w-auto">
+                  <input id="lf-collector-class-bonus" type="text" name="lf-collector-class-bonus" class="form-control level-input m-0" value="0" data-field-title="<?= $l['collectors-character-bonus'] ?>">
+                  <span class="input-group-text">%</span>
+                </div>
+                <i class="bi bi-question-circle" data-bs-toggle="tooltip" title="<?= htmlspecialchars($l['lf-class-bonus-hint'], ENT_QUOTES) ?>"></i>
+              </div>
+            </div>
+            <div class="d-flex flex-wrap align-items-center gap-2 border rounded p-2">
               <span class="fw-semibold"><?= $l['cargo-cap-increase'] ?></span>
               <div class="d-flex align-items-center gap-1">
                 <label for="sc-capacity-increase"><?= $l['sc-short'] ?></label>

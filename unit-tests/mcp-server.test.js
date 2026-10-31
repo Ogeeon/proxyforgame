@@ -605,6 +605,33 @@ describe('MCP tool ogame_graviton', () => {
         expect(direct(2)).toBeGreaterThan(direct(1));
     });
 
+    it('raises the Collector\'s energy and transport hold by the Collector Enhancement, and nobody else\'s', async () => {
+        const graviton = async (playerClass, collectorClassBonus) => (await call(protocolWith(), 'ogame_graviton', {
+            maxTemperature: 40, solarPlant: { level: 30 }, energyTechnology: 20, playerClass,
+            lifeforms: { collectorClassBonus },
+        })).structuredContent;
+        const plain = await graviton('collector', 0);
+        const enhanced = await graviton('collector', 50);
+        const direct = new GravitonCalculator().compute({
+            shipyardLevel: 0, nanitesFactoryLevel: 0, universeSpeed: 1, energyTechLevel: 20, hyperTechLevel: 0,
+            maxPlanetTemp: 40, energyBonus: 0, solarPlantLevel: 30, solarPlantPercent: 100, fusionPlantLevel: 0,
+            fusionPlantPercent: 100, solarSatellitesCount: 0, solarSatellitesPercent: 100, debrisPercent: 30,
+            playerClass: 1, isTrader: false, energyBoost: 0, disChLevel: 0, gravitonLevel: 1, totalLFEnrgBonus: 0,
+            collectorClassBonus: 50, scCapacityIncrease: 0, lcCapacityIncrease: 0, rcCapacityIncrease: 0,
+            crysAvailable: 0, deutAvailable: 0, deutInDebris: false,
+        });
+        expect(enhanced.energyAvailable.playerClass).toBe(direct.classEnergyBonus);
+        expect(enhanced.energyAvailable.playerClass).toBeGreaterThan(plain.energyAvailable.playerClass);
+        expect(enhanced.transportsNeeded.largeCargo).toBeLessThan(plain.transportsNeeded.largeCargo);
+        expect(await graviton('general', 50)).toEqual(await graviton('general', 0));
+        // The same block reaches the terraformer.
+        const tf = async (collectorClassBonus) => (await call(protocolWith(), 'ogame_terraformer', {
+            toLevel: 1, maxTemperature: 40, solarPlant: { level: 30 }, energyTechnology: 20, playerClass: 'collector',
+            lifeforms: { collectorClassBonus },
+        })).structuredContent.energyAvailable.playerClass;
+        expect(await tf(50)).toBeGreaterThan(await tf(0));
+    });
+
     it('says so when satellites cannot help', async () => {
         const out = (await call(protocolWith(), 'ogame_graviton', { maxTemperature: -140 })).structuredContent;
         expect(out.satellitesNeeded).toBe(undefined);

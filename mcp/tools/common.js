@@ -364,7 +364,7 @@ function lifeformsSchema(fields, ships = [], extra = {}) {
 const shipCargoBonus = (lifeforms, ship) => lifeforms?.shipBonuses?.[ship]?.cargo ?? 0;
 
 /** The life form fields and ships the graviton and terraformer energy reads. */
-const ENERGY_LIFEFORMS = ['energyBonus', 'disruptionChamber'];
+const ENERGY_LIFEFORMS = ['energyBonus', 'disruptionChamber', 'collectorClassBonus'];
 const ENERGY_SHIPS = ['small-cargo', 'large-cargo', 'recycler'];
 
 /**
@@ -418,6 +418,7 @@ function energyParams(args) {
         energyBoost: args.energyBoosterPercent / 10,
         disChLevel: args.lifeforms.disruptionChamber,
         totalLFEnrgBonus: args.lifeforms.energyBonus,
+        collectorClassBonus: args.lifeforms.collectorClassBonus,
         scCapacityIncrease: shipCargoBonus(args.lifeforms, 'small-cargo'),
         lcCapacityIncrease: shipCargoBonus(args.lifeforms, 'large-cargo'),
         rcCapacityIncrease: shipCargoBonus(args.lifeforms, 'recycler'),

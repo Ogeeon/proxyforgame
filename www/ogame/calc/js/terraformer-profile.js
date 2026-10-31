@@ -6,7 +6,8 @@
 // into it and writes the changes back:
 //   - apply(): profile -> form - the account (energy and hyperspace
 //     technology, the officers, the character and alliance class, the
-//     life-form energy bonus, the Terraformer cost reduction and the cargo
+//     life-form energy bonus, the Rock'tal Collector Enhancement, the
+//     Terraformer cost reduction and the cargo
 //     bonuses of the transports) and one planet of the profile, picked in
 //     #pf-planet: its robotics, shipyard and nanite factories, its
 //     temperature, its power plants and solar satellites with their production

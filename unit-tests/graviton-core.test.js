@@ -36,6 +36,7 @@ const BASE_PRM = {
     disChLevel: 0,
     gravitonLevel: 1,
     totalLFEnrgBonus: 0,
+    collectorClassBonus: 0,
     scCapacityIncrease: 0,
     lcCapacityIncrease: 0,
     rcCapacityIncrease: 0,
@@ -132,6 +133,22 @@ describe('Graviton Calculator - Core computation', () => {
         expect(general.classEnergyBonus).toBe(0);
     });
 
+    it('the Collector Enhancement raises the collector energy bonus', () => {
+        // +10% raised by half is +15% of the base, rounded as the game shows it.
+        const r = compute({ solarPlantLevel: 10, playerClass: 1, collectorClassBonus: 50 });
+        expect(r.classEnergyBonus).toBe(Math.round(0.15 * r.solarPlantEnergy));
+        expect(r.classEnergyBonus).toBeGreaterThan(compute({ solarPlantLevel: 10, playerClass: 1 }).classEnergyBonus);
+        // ...and every new satellite carries the raised share too.
+        expect(compute({ playerClass: 1, collectorClassBonus: 50 }).energyPerSat).toBeCloseTo(23 * 1.15);
+    });
+
+    it('the Collector Enhancement counts for nothing under another class', () => {
+        for (const playerClass of [0, 2]) {
+            expect(compute({ solarPlantLevel: 10, playerClass, collectorClassBonus: 50 }))
+                .toEqual(compute({ solarPlantLevel: 10, playerClass }));
+        }
+    });
+
     it('a new satellite carries the disruption chamber share on a cold planet', () => {
         // 3 energy per satellite at -120; 30 chamber levels add 45% of it, which
         // used to be rounded down to nothing on its own
@@ -182,6 +199,16 @@ describe('Graviton Calculator - Cargo capacity', () => {
         // dfAmount / 20000, not dfAmount / 25000 (which a +25% hold would give).
         const collector = compute({ gravitonLevel: 1, playerClass: 1 });
         expect(collector.rcNeeded).toBe(Math.ceil(collector.dfAmount / 20000));
+    });
+
+    it('the Collector Enhancement raises the collector transport bonus', () => {
+        // +25% raised by half is +37.5%: holds of 6875 and 34375.
+        const big = compute({ gravitonLevel: 1, playerClass: 1, collectorClassBonus: 50 });
+        const sum = big.crysToDeliver + big.deutToDeliver;
+        expect(big.scNeeded).toBe(Math.ceil(sum / 6875));
+        expect(big.lcNeeded).toBe(Math.ceil(sum / 34375));
+        // The recycler hold stays the base one.
+        expect(big.rcNeeded).toBe(Math.ceil(big.dfAmount / 20000));
     });
 
     it('the general class boosts the recycler hold by 20%', () => {

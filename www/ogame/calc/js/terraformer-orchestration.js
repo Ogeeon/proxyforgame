@@ -36,6 +36,7 @@ const options = {
     energyBoost: 0,
     disChLevel: 0,
     totalLFEnrgBonus: 0,
+    collectorClassBonus: 0,
     lfTerraformerRdc: 0,
     scCapacityIncrease: 0,
     lcCapacityIncrease: 0,
@@ -75,6 +76,8 @@ const options = {
         // legitimately entered value vanish on the next page load.
         // The life-form energy bonus has no ceiling in the game.
         case 'totalLFEnrgBonus': return validateNumber(Number.parseFloat(value), 0, Infinity, 0);
+        // The Rock'tal Collector Enhancement total, uncapped as in the cost calculator.
+        case 'collectorClassBonus': return validateNumber(Number.parseFloat(value), 0, Infinity, 0);
         // The game caps the Terraformer reduction at 50%, as the cost calculator does.
         case 'lfTerraformerRdc': return validateNumber(Number.parseFloat(value), 0, 50, 0);
         case 'scCapacityIncrease': return validateNumber(Number.parseFloat(value), 0, 999, 0);
@@ -114,7 +117,7 @@ class TerraformerApp {
       '#robots-factory-level', '#shipyard-level', '#nanites-factory-level',
       '#energy-tech-level', '#hyper-tech-level', '#max-planet-temp',
       '#solar-plant-level', '#fusion-plant-level', '#solar-satellites-count',
-      '#disr-chamber-level', '#total-lf-energy-bonus', '#lf-terraformer-rdc',
+      '#disr-chamber-level', '#total-lf-energy-bonus', '#lf-collector-class-bonus', '#lf-terraformer-rdc',
       '#sc-capacity-increase', '#lc-capacity-increase',
       '#tf-level-from', '#tf-level-to',
       '#crystal-available', '#deuterium-available'
@@ -156,6 +159,7 @@ class TerraformerApp {
     setVal('#energy-boost', options.prm.energyBoost);
     setVal('#disr-chamber-level', options.prm.disChLevel);
     setNumVal('#total-lf-energy-bonus', options.prm.totalLFEnrgBonus);
+    setNumVal('#lf-collector-class-bonus', options.prm.collectorClassBonus);
     setNumVal('#lf-terraformer-rdc', options.prm.lfTerraformerRdc);
     setNumVal('#sc-capacity-increase', options.prm.scCapacityIncrease);
     setNumVal('#lc-capacity-increase', options.prm.lcCapacityIncrease);
@@ -202,6 +206,7 @@ class TerraformerApp {
     set('disr-chamber-level', level(100));
     // Unlike the capacity bonuses, this one is uncapped.
     set('total-lf-energy-bonus', percent(Infinity));
+    set('lf-collector-class-bonus', percent(Infinity));
     set('lf-terraformer-rdc', percent(50));
     set('sc-capacity-increase', percent(999));
     set('lc-capacity-increase', percent(999));
@@ -312,6 +317,7 @@ class TerraformerApp {
     options.prm.energyBoost = 0;
     options.prm.disChLevel = 0;
     options.prm.totalLFEnrgBonus = 0;
+    options.prm.collectorClassBonus = 0;
     options.prm.lfTerraformerRdc = 0;
     options.prm.scCapacityIncrease = 0;
     options.prm.lcCapacityIncrease = 0;

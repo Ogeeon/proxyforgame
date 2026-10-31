@@ -88,7 +88,8 @@ class TerraformerCalculator {
    *   energyTechLevel, hyperTechLevel, maxPlanetTemp, energyBonus (0/1/2),
    *   solarPlantLevel, solarPlantPercent, fusionPlantLevel, fusionPlantPercent,
    *   solarSatellitesCount, solarSatellitesPercent, playerClass (0/1/2),
-   *   isTrader, energyBoost, disChLevel, totalLFEnrgBonus, lfTerraformerRdc, scCapacityIncrease,
+   *   isTrader, energyBoost, disChLevel, totalLFEnrgBonus, collectorClassBonus
+   *   (the Rock'tal Collector Enhancement total, %), lfTerraformerRdc, scCapacityIncrease,
    *   lcCapacityIncrease, tfSingleLevel, tfLevelFrom, tfLevelTo,
    *   crysAvailable, deutAvailable
    * @returns {Object} Result with the per-source energy breakdown, the
@@ -98,6 +99,9 @@ class TerraformerCalculator {
    */
   compute(p) {
     const isCollector = p.playerClass === TERRAFORMER_CLASS.COLLECTOR;
+    // The Collector Enhancement raises the Collector's own bonuses only, so it
+    // counts for nothing under another class.
+    const collectorEnhancement = isCollector ? (p.collectorClassBonus || 0) : 0;
     /** @type {PlanetEnergyParams} */
     const planet = {
       solarPlantLevel: p.solarPlantLevel, solarPlantPercent: p.solarPlantPercent,
@@ -105,7 +109,7 @@ class TerraformerCalculator {
       energyTechLevel: p.energyTechLevel, maxTemp: p.maxPlanetTemp,
       satellites: p.solarSatellitesCount, satellitesPercent: p.solarSatellitesPercent,
       booster: p.energyBoost, engineer: p.energyBonus >= 1, fullCrew: p.energyBonus === 2,
-      collector: isCollector, trader: p.isTrader,
+      collector: isCollector, collectorEnhancement, trader: p.isTrader,
       lfTechBonus: p.totalLFEnrgBonus, lfBuildingBonus: DISRUPTION_CHAMBER_ENERGY * p.disChLevel,
     };
     const energy = planetEnergy(planet);
@@ -186,10 +190,12 @@ class TerraformerCalculator {
     // The Collector bonus applies to transports only.
     const collectorCargoBonus = isCollector ? HOLD_CLASS_BONUS.COLLECTOR : 0;
     const capSC = shipHold(5000, {
-      hyperTechLevel: p.hyperTechLevel, classBonus: collectorCargoBonus, lfBonus: p.scCapacityIncrease,
+      hyperTechLevel: p.hyperTechLevel, classBonus: collectorCargoBonus,
+      classEnhancement: collectorEnhancement, lfBonus: p.scCapacityIncrease,
     });
     const capLC = shipHold(25000, {
-      hyperTechLevel: p.hyperTechLevel, classBonus: collectorCargoBonus, lfBonus: p.lcCapacityIncrease,
+      hyperTechLevel: p.hyperTechLevel, classBonus: collectorCargoBonus,
+      classEnhancement: collectorEnhancement, lfBonus: p.lcCapacityIncrease,
     });
 
     // Resources already sitting on the planet cut down what has to be shipped

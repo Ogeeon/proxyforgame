@@ -37,6 +37,7 @@ const options = {
     disChLevel: 0,
     gravitonLevel: 1,
     totalLFEnrgBonus: 0,
+    collectorClassBonus: 0,
     scCapacityIncrease: 0,
     lcCapacityIncrease: 0,
     rcCapacityIncrease: 0,
@@ -73,6 +74,8 @@ const options = {
         // narrower range here would silently cut back a value the form accepted.
         // The life-form energy bonus has no ceiling in the game.
         case 'totalLFEnrgBonus': return validateNumber(Number.parseFloat(value), 0, Infinity, 0);
+        // The Rock'tal Collector Enhancement total, uncapped as in the cost calculator.
+        case 'collectorClassBonus': return validateNumber(Number.parseFloat(value), 0, Infinity, 0);
         case 'scCapacityIncrease': return validateNumber(Number.parseFloat(value), 0, 999, 0);
         case 'lcCapacityIncrease': return validateNumber(Number.parseFloat(value), 0, 999, 0);
         case 'rcCapacityIncrease': return validateNumber(Number.parseFloat(value), 0, 999, 0);
@@ -109,7 +112,7 @@ class GravitonApp {
       '#shipyard-level', '#nanites-factory-level', '#energy-tech-level',
       '#hyper-tech-level', '#max-planet-temp', '#solar-plant-level',
       '#fusion-plant-level', '#solar-satellites-count', '#disr-chamber-level',
-      '#graviton-level', '#total-lf-energy-bonus',
+      '#graviton-level', '#total-lf-energy-bonus', '#lf-collector-class-bonus',
       '#sc-capacity-increase', '#lc-capacity-increase', '#rc-capacity-increase',
       '#crystal-available', '#deuterium-available'
     ];
@@ -150,6 +153,7 @@ class GravitonApp {
     setVal('#disr-chamber-level', options.prm.disChLevel);
     setVal('#graviton-level', options.prm.gravitonLevel);
     setNumVal('#total-lf-energy-bonus', options.prm.totalLFEnrgBonus);
+    setNumVal('#lf-collector-class-bonus', options.prm.collectorClassBonus);
     setNumVal('#sc-capacity-increase', options.prm.scCapacityIncrease);
     setNumVal('#lc-capacity-increase', options.prm.lcCapacityIncrease);
     setNumVal('#rc-capacity-increase', options.prm.rcCapacityIncrease);
@@ -185,6 +189,7 @@ class GravitonApp {
       'deuterium-available': { min: 0, max: Infinity, def: 0 },
       // Unlike the capacity bonuses, this one is uncapped.
       'total-lf-energy-bonus': { ...percent(), max: Infinity },
+      'lf-collector-class-bonus': { ...percent(), max: Infinity },
       'sc-capacity-increase': percent(),
       'lc-capacity-increase': percent(),
       'rc-capacity-increase': percent()
@@ -273,6 +278,7 @@ class GravitonApp {
     options.prm.disChLevel = 0;
     options.prm.gravitonLevel = 1;
     options.prm.totalLFEnrgBonus = 0;
+    options.prm.collectorClassBonus = 0;
     options.prm.scCapacityIncrease = 0;
     options.prm.lcCapacityIncrease = 0;
     options.prm.rcCapacityIncrease = 0;

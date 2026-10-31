@@ -231,6 +231,8 @@ const PF_ENERGY_ACCOUNT_FIELDS = [
   pfClassField('playerClass', 'player-class-', PROFILE_CLASS.NONE),
   pfTraderField('isTrader', '#trader-bonus'),
   pfConvNumField('lf.prod.energy', 'totalLFEnrgBonus', '#total-lf-energy-bonus'),
+  // The Rock'tal Collector Enhancement total, as production and costs bind it.
+  pfConvNumField('lf.classBooster.1', 'collectorClassBonus', '#lf-collector-class-bonus'),
 ];
 
 /**

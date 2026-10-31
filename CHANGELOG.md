@@ -18,6 +18,7 @@ release section; it is the source of truth for the other eleven translations.
 ### Added
 
 - Profiles: a profile keeps the metal, crystal and deuterium of each planet and moon from the account export (PfG Companion's own readings first), and graviton, terraformer, costs, LF costs and production's one-planet tab fill their "resources available" fields from the body shown, with a "Game data as of ..." caption. A Sync never overwrites a field being typed in or edited. The readings are not game values and stay out of the backup file. The cost calculator's available-resource fields are wider, so nine-digit amounts fit.
+- Graviton, terraformer: a Collector Enhancement field on the LifeForms tab, as in the cost and production calculators, takes the "Collector, Total" figure from the game's life form panel and raises the Collector's energy bonus and its small and large cargo hold bonus by it. It counts only when the Collector class is chosen, is filled from a player profile and is written back to it, and the MCP server's `ogame_graviton` and `ogame_terraformer` accept it as `lifeforms.collectorClassBonus` (which `ogame_import_account` now hands them). <!-- site -->
 
 ### Changed
 

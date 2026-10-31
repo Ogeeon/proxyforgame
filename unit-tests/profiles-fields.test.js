@@ -228,11 +228,11 @@ describe('pfOfficerFields', () => {
 });
 
 describe('the energy fields graviton and terraformer share', () => {
-    it('cover the account: technologies, officers, class, trader and the life-form energy bonus', () => {
+    it('cover the account: technologies, officers, class, trader, the life-form energy bonus and the Collector Enhancement', () => {
         expect(f.PF_ENERGY_ACCOUNT_FIELDS.map((x) => x.key)).toEqual([
             'research.113', 'research.114',
             ...f.PROFILE_OFFICERS.map((o) => 'officer.' + o),
-            'class', 'allianceClass', 'lf.prod.energy',
+            'class', 'allianceClass', 'lf.prod.energy', 'lf.classBooster.1',
         ]);
     });
 

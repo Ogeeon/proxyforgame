@@ -36,6 +36,7 @@ class GravitonDataCollector {
       disChLevel: getInputNumber($('#disr-chamber-level')),
       gravitonLevel: getInputNumber($('#graviton-level')),
       totalLFEnrgBonus: getInputNumber($('#total-lf-energy-bonus')),
+      collectorClassBonus: getInputNumber($('#lf-collector-class-bonus')),
       scCapacityIncrease: getInputNumber($('#sc-capacity-increase')),
       lcCapacityIncrease: getInputNumber($('#lc-capacity-increase')),
       rcCapacityIncrease: getInputNumber($('#rc-capacity-increase')),

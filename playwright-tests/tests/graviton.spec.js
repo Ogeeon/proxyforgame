@@ -320,6 +320,39 @@ test.describe('Graviton Calculator - Delivery and debris DOM', () => {
     });
 });
 
+test.describe('Graviton Calculator - Collector Enhancement', () => {
+    test.beforeEach(async ({ page, context }) => {
+        await context.addInitScript(() => {
+            localStorage.setItem('lastChange', 'key-value;true,value;99999');
+        });
+        await page.goto('/graviton');
+    });
+
+    test('raises the collector energy row and survives a reload', async ({ page }) => {
+        await page.locator('#solar-plant-level').fill('10');
+        await page.locator('#solar-plant-level').blur();
+        await page.locator('#player-class-1').check();
+        // round(0.1 * 518)
+        await expect(page.locator('#class-bonus-energy')).toHaveText('52');
+        await openLifeformsTab(page);
+        await page.locator('#lf-collector-class-bonus').fill('50');
+        await page.locator('#lf-collector-class-bonus').blur();
+        // round(0.1 * 1.5 * 518)
+        await expect(page.locator('#class-bonus-energy')).toHaveText('78');
+
+        await page.reload();
+        await expect(page.locator('#lf-collector-class-bonus')).toHaveValue('50');
+        await expect(page.locator('#class-bonus-energy')).toHaveText('78');
+
+        // Under another class it counts for nothing.
+        await page.locator('#player-class-2').check();
+        await expect(page.locator('#class-bonus-energy')).toHaveText('0');
+
+        await page.locator('#reset').click();
+        await expect(page.locator('#lf-collector-class-bonus')).toHaveValue('0');
+    });
+});
+
 test.describe('Graviton Calculator - Officers', () => {
     test.beforeEach(async ({ page, context }) => {
         await context.addInitScript(() => {
