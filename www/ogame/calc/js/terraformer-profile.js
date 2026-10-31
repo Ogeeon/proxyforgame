@@ -67,23 +67,14 @@ class TerraformerProfiles extends PlanetPrmBinder {
       lastKey: 'terraformer',
       universe: [{ kind: PF_UNIVERSE_SPEED, input: '#universe-speed', prm: 'universeSpeed' }],
       // The officers' bonus follows the officers.
-      extraOwnedKeys: ['energyBonus'],
+      accountAlsoOwns: ['energyBonus'],
+      // The "from" level, filled in from the planet by afterShowPlanet().
+      planetAlsoOwns: ['tfLevelFrom'],
       resources: [{
         crystal: '#crystal-available', deuterium: '#deuterium-available',
         caption: '#resources-age', captionBox: '#resources-age-row',
       }],
     });
-  }
-
-  /**
-   * The account, the planet and the universe, and the "from" level, filled
-   * in from the planet while the profile has one.
-   *
-   * @param {?Profile} profile
-   * @returns {PfOwnedGroup[]}
-   */
-  ownedGroups(profile) {
-    return [...super.ownedGroups(profile), { keys: ['tfLevelFrom'], present: this.planet(profile) !== null }];
   }
 
   /**

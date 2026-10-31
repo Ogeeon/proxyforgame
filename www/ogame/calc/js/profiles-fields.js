@@ -42,13 +42,15 @@ function pfLabelFor(id) {
  *   read: (settings: Record<string, any>) => *,
  *   write: (settings: Record<string, any>, value: *) => void,
  *   prm?: string,
+ *   owns: string[],
  *   markIf?: (entity: {values: LayeredValues}) => boolean,
  * }} ProfileField
  * input: the control that shows it - a selector, or a lookup for a control with no stable selector;
  * read: the profile value the calculator's settings hold; write: show a profile value (or undefined) -
  * into the settings, or, for a calculator that reads its settings back from the form, into the form;
- * prm: the settings key it lives under, when it is one key; markIf: the field is marked only for an
- * entity (a body) it returns true for (default: always).
+ * prm: the settings key it lives under, when it is one key; owns: every settings key it writes, which
+ * the profile owns (empty for a field kept outside the settings); markIf: the field is marked only for
+ * an entity (a body) it returns true for (default: always).
  */
 
 /** @typedef {ProfileField & {prm: string}} ProfilePrmField A field kept under one key of the settings. */
@@ -77,7 +79,7 @@ function pfFieldInput(field) {
  */
 function pfPrmField(key, prm, input, toPrm, fromPrm, extra = {}) {
   return {
-    key, prm, input,
+    key, prm, input, owns: [prm],
     read: (settings) => fromPrm(settings[prm]),
     write: (settings, value) => { settings[prm] = toPrm(value); },
     ...extra,

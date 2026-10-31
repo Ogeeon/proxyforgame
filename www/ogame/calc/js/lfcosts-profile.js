@@ -124,7 +124,6 @@ class LfCostsProfiles extends PlanetPrmBinder {
       cookie: 'options_lfcosts',
       lastKey: 'lfcosts',
       universe: [{ kind: PF_UNIVERSE_SPEED, input: '#universe-speed', prm: 'universeSpeed' }],
-      extraOwnedKeys: [],
       resources: LFCOSTS_RESOURCE_GROUPS,
       // A resource typed into one table is copied into every other (handleResourceInput).
       resourcesLinked: true,

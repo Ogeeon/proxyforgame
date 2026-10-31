@@ -71,6 +71,8 @@ const expeditionsCargoKey = (/** @type {{techId: number}} */ ship) => 'lf.ship.'
 const EXPEDITIONS_CARGO_FIELDS = EXPEDITION_SHIPS.map((ship, i) => ({
   key: expeditionsCargoKey(ship),
   input: '#lf-cargo-' + ship.techId,
+  // The array is stored with the values from before the profile.
+  owns: ['lfShipsBonuses'],
   read: (/** @type {Record<string, any>} */ prm) => pfNum(prm.lfShipsBonuses[i]),
 }));
 
@@ -87,8 +89,6 @@ class ExpeditionsProfiles extends PlanetPrmBinder {
       cookie: 'options_expeditions',
       lastKey: 'expeditions',
       universe: EXPEDITIONS_UNIVERSE_FIELDS,
-      // The array of cargo bonuses: stored with the values from before the profile.
-      extraOwnedKeys: ['lfShipsBonuses'],
     });
     /** @type {Set<string>} The prm keys the page's link named, until the first apply has used them. */
     this.linkKeys = new Set();

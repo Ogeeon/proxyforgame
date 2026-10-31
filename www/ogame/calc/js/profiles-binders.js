@@ -76,6 +76,7 @@ function pfFillRangeStart(level) {
  * @typedef {ProfileFieldBase & {
  *   input: string|(() => ?HTMLElement),
  *   read: (settings: Record<string, any>) => *,
+ *   owns: string[],
  *   markIf?: (entity: {values: LayeredValues}) => boolean,
  * }} PfGroupField
  */
@@ -83,14 +84,15 @@ function pfFillRangeStart(level) {
 /**
  * The profile-owned fields one entity of the profile fills (CONTEXT.md: Field
  * group). A binder declares its groups in fieldGroups(); the snapshot, the
- * write-back, the marks, the reset dialog's names and the restore buttons
- * follow from them.
+ * write-back, the marks, the reset dialog's names, the restore buttons and the
+ * owned groups (pfOwnedGroups) follow from them.
  *
  * @typedef {object} PfFieldGroup
  * @property {string} scope Prefix of the group's snapshot keys (pfSnapKey): '' for the account, 'planet', 'moon'...
  * @property {(profile: Profile) => ?{values: LayeredValues}} entity The entity that holds the values: the account, the body shown; null while there is none - the group is then neither written back nor marked, but still taken into the snapshot.
  * @property {PfGroupField[]} fields
  * @property {() => Record<string, any>} settings What the fields read from.
+ * @property {string[]} [alsoOwns] Settings keys the entity fills without a field of its own, such as the officers' bonus or a start level.
  * @property {boolean} [describe] False keeps the fields out of describeFields() (a key another group names already); true by default.
  */
 
@@ -104,10 +106,10 @@ function pfFillRangeStart(level) {
  * saveWithProfile()); restoreOwn() and recalc(); markAll(). A binder that
  * declares its fieldGroups() gets describeFields(), takeSnapshot(),
  * writeBack() and markAll() from them, and adds what the groups do not cover
- * in writeBackExtra() and markExtra(). A binder that declares its
- * ownedGroups() gets captureOwn(), saveOwn() and restoreOwn() from them
- * (ADR-0004: what the profile owns is stored as it was before the profile),
- * and says where the own values live in ownSettings() and storeOwn().
+ * in writeBackExtra() and markExtra(). Its ownedGroups() follow from the field
+ * groups and the universe settings, and give it captureOwn(), saveOwn() and
+ * restoreOwn() (ADR-0004: what the profile owns is stored as it was before
+ * the profile); it says where the own values live in ownSettings() and storeOwn().
  *
  * @template [App=*]
  */
@@ -135,6 +137,8 @@ class ProfileBinder {
      *   that shows another body calls showBodyResources() itself.
      */
     this.bodyResources = [];
+    /** @type {PfUniverseSetting[]} The settings of the profile's universe the page shows, set in bindControls(). */
+    this.universeSettings = [];
   }
 
   /**
@@ -229,13 +233,23 @@ class ProfileBinder {
    * The keys of the calculator's settings the profile owns, grouped by what
    * fills them: a group whose entity the profile does not have is the
    * calculator's own while that lasts, both in the form and in its storage.
-   * None by default.
+   * They follow from the field groups and the universe settings; a binder
+   * adds a group only for a key with a condition of its own.
    *
-   * @param {?Profile} _profile The profile shown; null before one is.
+   * @param {?Profile} profile The profile shown; null before one is.
    * @returns {PfOwnedGroup[]}
    */
-  ownedGroups(_profile) {
-    return [];
+  ownedGroups(profile) {
+    return pfOwnedGroups(this.fieldGroups(), this.universeKeys(), profile);
+  }
+
+  /**
+   * The settings keys the universe settings show.
+   *
+   * @returns {string[]}
+   */
+  universeKeys() {
+    return this.universeSettings.map((setting) => setting.prm).filter(Boolean);
   }
 
   /**
@@ -583,7 +597,8 @@ class ProfileBinder {
  * @property {string} cookie Where saveOwn() writes the calculator's own values.
  * @property {string} lastKey Calculator name under which the last planet is remembered.
  * @property {PfUniverseField[]} universe The settings that come from the profile's universe.
- * @property {string[]} extraOwnedKeys Keys the account fills without a field of its own, such as the officers' bonus.
+ * @property {string[]} [accountAlsoOwns] Keys the account fills without a field of its own, such as the officers' bonus.
+ * @property {string[]} [planetAlsoOwns] Keys the planet fills without a field of its own, such as a start level.
  * @property {() => void} [ownSave] The calculator's own save, before the binder took options.save over; options.save by default.
  * @property {PfResourceGroup[]} [resources] The resource fields the planet's last reported resources fill (PfBodyResources).
  * @property {boolean} [resourcesLinked] The calculator copies a resource typed into one group into the others
@@ -605,9 +620,9 @@ class ProfileBinder {
  * options.prm and the form is shown again from it, and the changes come back
  * through options.save(). What the profile owns is stored with the values it
  * had before the profile, so "no profile" shows the calculator's own again.
- * A subclass gives the configuration and, where it differs, the hooks
- * afterShowPlanet() and ownedGroups() - a value it fills in from a body that
- * may be missing is a group of its own, present while the body is there.
+ * A subclass gives the configuration and, where it differs, the hook
+ * afterShowPlanet(); a value it fills in there is named in the configuration
+ * (accountAlsoOwns, planetAlsoOwns), so the profile owns it while its entity is there.
  *
  * @template {PlanetPrmApp} App
  * @extends {ProfileBinder<App>}
@@ -627,8 +642,6 @@ class PlanetPrmBinder extends ProfileBinder {
       select: '#pf-planet', box: '#pf-planet-box', bodies: (p) => p.planets, lastKey: config.lastKey,
     });
     this.ownSave = config.ownSave ?? options.save;
-    /** @type {PfUniverseSetting[]} The universe's settings, set in init(). */
-    this.universeSettings = [];
     if (config.resources) {
       this.bodyResources = [new PfBodyResources(pf, {
         groups: config.resources, body: () => this.planetId, recalc: () => this.app.recalc(),
@@ -640,9 +653,10 @@ class PlanetPrmBinder extends ProfileBinder {
   /** @returns {PfFieldGroup[]} The account, and the planet picked in #pf-planet. */
   fieldGroups() {
     const settings = () => options.prm;
+    const { accountFields, planetFields, accountAlsoOwns, planetAlsoOwns } = this.config;
     return [
-      { scope: '', entity: (p) => p.account, fields: this.config.accountFields, settings },
-      { scope: 'planet', entity: (p) => this.planet(p), fields: this.config.planetFields, settings },
+      { scope: '', entity: (p) => p.account, fields: accountFields, settings, alsoOwns: accountAlsoOwns },
+      { scope: 'planet', entity: (p) => this.planet(p), fields: planetFields, settings, alsoOwns: planetAlsoOwns },
     ];
   }
 
@@ -660,20 +674,13 @@ class PlanetPrmBinder extends ProfileBinder {
   }
 
   /**
-   * The options.prm keys the profile owns: the account's always, the
-   * planet's while it has the planet, and the universe's while it has a
-   * universe - shown by the universe settings, not given back by the binder.
+   * The configured universe settings, not the live list: a binder may leave
+   * some out of one apply (expeditions, for a link's values) and still owns them.
    *
-   * @param {?Profile} profile
-   * @returns {PfOwnedGroup[]}
+   * @returns {string[]}
    */
-  ownedGroups(profile) {
-    const { accountFields, planetFields, extraOwnedKeys, universe } = this.config;
-    return [
-      { keys: [...accountFields.map((f) => f.prm), ...extraOwnedKeys], present: true },
-      { keys: planetFields.map((f) => f.prm), present: this.planet(profile) !== null },
-      { keys: universe.map((u) => u.prm), present: !!profile?.universe, show: false },
-    ];
+  universeKeys() {
+    return this.config.universe.map((u) => u.prm);
   }
 
   // -------------------------------------------------------------------------
@@ -774,7 +781,6 @@ class PlanetPrmBinder extends ProfileBinder {
  * @typedef {object} FlatSettingsConfig
  * @property {F[]} fields The fields the account fills.
  * @property {() => Record<string, any>} settings The object the calculator keeps the fields in.
- * @property {string[]} ownedKeys The keys of that object the profile may own.
  * @property {string} cookie Where saveOwn() writes the calculator's own values.
  * @property {() => void} [ownSave] The calculator's own save, before the binder took options.save over; options.save by default.
  */
@@ -823,17 +829,6 @@ class FlatSettingsBinder extends ProfileBinder {
   coordsChosen() {
     const profile = this.profile();
     if (profile) this.coordsSelect?.chosen(profile);
-  }
-
-  /**
-   * The keys the profile may own, all filled by the account; a universe the
-   * profile dictates is kept apart, by PfLockedUniverse.
-   *
-   * @param {?Profile} _profile
-   * @returns {PfOwnedGroup[]}
-   */
-  ownedGroups(_profile) {
-    return [{ keys: this.config.ownedKeys, present: true }];
   }
 
   /** @returns {Record<string, any>} */

@@ -96,7 +96,8 @@ class ProductionProfiles extends ProfileBinder {
 
   bindControls() {
     this.insertPlanetSelect();
-    this.speed = new PfUniverseSetting(this.pf, PF_UNIVERSE_SPEED, '#universe-speed', () => updateParams());
+    this.speed = new PfUniverseSetting(this.pf, PF_UNIVERSE_SPEED, '#universe-speed', () => updateParams(), 'universeSpeed');
+    this.universeSettings = [this.speed];
   }
 
   /**
@@ -113,10 +114,7 @@ class ProductionProfiles extends ProfileBinder {
     const prm = options.prm;
     const local = new Set(PRODUCTION_LOCAL_KEYS);
     const owned = Object.keys(prm).filter((key) => typeof prm[key] !== 'function' && !local.has(key));
-    return [
-      { keys: owned, present: true },
-      { keys: ['universeSpeed'], present: !!profile?.universe, show: false },
-    ];
+    return [{ keys: owned, present: true }, ...pfOwnedGroups([], this.universeKeys(), profile)];
   }
 
   // -------------------------------------------------------------------------

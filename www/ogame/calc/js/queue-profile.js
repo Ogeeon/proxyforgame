@@ -73,25 +73,9 @@ class QueueProfiles extends ProfileBinder {
   }
 
   bindControls() {
-    this.speed = new PfUniverseSetting(this.pf, PF_UNIVERSE_SPEED, '#universe-speed', () => this.app.refreshBoth());
+    this.speed = new PfUniverseSetting(this.pf, PF_UNIVERSE_SPEED, '#universe-speed', () => this.app.refreshBoth(), 'universeSpeed');
+    this.universeSettings = [this.speed];
     QUEUE_TABS.forEach((t) => this.bodySelects[t.tab].onChange(() => this.bodyChosen(t)));
-  }
-
-  /**
-   * The options.prm keys the profile owns: the account's, and per tab its
-   * fields and the start levels filled in from its body, while the profile
-   * has that body - a tab with none is the calculator's own; and the economy
-   * speed while the profile has a universe, shown by the universe setting.
-   *
-   * @param {?Profile} profile
-   * @returns {PfOwnedGroup[]}
-   */
-  ownedGroups(profile) {
-    return [
-      { keys: QUEUE_ACCOUNT_FIELDS.map((f) => f.prm), present: true },
-      ...QUEUE_TABS.map((t) => ({ keys: [t.levels, t.fields], present: this.body(t, profile) !== null })),
-      { keys: ['universeSpeed'], present: !!profile?.universe, show: false },
-    ];
   }
 
   /** @returns {PfFieldGroup[]} The account, and the body of each tab. */
@@ -103,8 +87,10 @@ class QueueProfiles extends ProfileBinder {
   }
 
   /**
-   * The fields of a tab's body: its total fields. Both tabs show the same
-   * key, so only the planet's names it.
+   * The fields of a tab's body: its total fields, and the start levels filled
+   * in from it - the profile owns both while it has that body; a tab with none
+   * is the calculator's own. Both tabs show the same key, so only the planet's
+   * names it.
    *
    * @param {QueueTab} t
    * @returns {PfFieldGroup}
@@ -113,9 +99,10 @@ class QueueProfiles extends ProfileBinder {
     return {
       scope: t.bodies,
       entity: (p) => this.body(t, p),
-      fields: [{ key: 'fields.total', input: '#total-fields-' + t.tab, read: (prm) => pfNum(prm[t.fields]) }],
+      fields: [{ key: 'fields.total', input: '#total-fields-' + t.tab, owns: [t.fields], read: (prm) => pfNum(prm[t.fields]) }],
       settings: () => options.prm,
       describe: t.tab === PLANET_TAB,
+      alsoOwns: [t.levels],
     };
   }
 

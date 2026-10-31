@@ -62,9 +62,6 @@ const TRADE_ACCOUNT_FIELDS = [
     (v) => ratesFromTrade({ md: tradeRoundRate(v.md), cd: tradeRoundRate(v.cd) })),
 ];
 
-/** The options keys the account fields above live in. */
-const TRADE_OWNED_KEYS = TRADE_ACCOUNT_FIELDS.map((f) => f.prm);
-
 /** @typedef {typeof tradeApp} TradeApp */
 
 /** @extends {FlatSettingsBinder<ProfilePrmField, TradeApp>} */
@@ -79,7 +76,6 @@ class TradeProfiles extends FlatSettingsBinder {
     super(pf, app, {
       fields: TRADE_ACCOUNT_FIELDS,
       settings: () => state,
-      ownedKeys: TRADE_OWNED_KEYS,
       cookie: 'options_trade',
       // The original save reads `this`: it has to stay bound to options.
       ownSave: options.save.bind(options),

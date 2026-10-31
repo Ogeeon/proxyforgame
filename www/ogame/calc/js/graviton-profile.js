@@ -62,7 +62,7 @@ class GravitonProfiles extends PlanetPrmBinder {
       lastKey: 'graviton',
       universe: GRAVITON_UNIVERSE_FIELDS,
       // The officers' bonus follows the officers.
-      extraOwnedKeys: ['energyBonus'],
+      accountAlsoOwns: ['energyBonus'],
       resources: [{
         crystal: '#crystal-available', deuterium: '#deuterium-available',
         caption: '#resources-age', captionBox: '#resources-age-row',

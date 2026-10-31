@@ -183,7 +183,8 @@ function costsResearchTableFields() {
     ]).map(([kind, selector, map]) => {
       const input = () => /** @type {?HTMLInputElement} */ (row.querySelector(selector));
       return {
-        key: 'lf.cost.' + techId + '.' + kind, input,
+        // The table keeps its own key, untouched by a profile: nothing here is owned.
+        key: 'lf.cost.' + techId + '.' + kind, input, owns: [],
         read: (/** @type {Record<string, any>} */ p) => pfNum(p[map][techId]),
         write: (/** @type {Record<string, any>} */ _form, /** @type {*} */ v) => {
           const el = input();
@@ -293,34 +294,23 @@ class CostsProfiles extends ProfileBinder {
   /**
    * The account, the planet and the moon picked in the selects. They read the
    * calculator's parameters, which collect the whole form: a pass reads them
-   * once and hands them to every group.
+   * once and hands them to every group. The state keys the profile owns follow
+   * from them; the copy of the own values (ownPrm) is the whole state, not only
+   * these: restoreOwnState() gives it all back.
    *
    * @returns {PfFieldGroup[]}
    */
   fieldGroups() {
     const settings = () => this.app.params();
     return [
-      { scope: '', entity: (p) => p.account, fields: this.accountFields, settings },
-      { scope: 'planet', entity: (p) => this.bodies(p).planet, fields: COSTS_PLANET_FIELDS, settings },
+      { scope: '', entity: (p) => p.account, fields: this.accountFields, settings, alsoOwns: ['useIrn'] },
+      {
+        scope: 'planet', entity: (p) => this.bodies(p).planet, fields: COSTS_PLANET_FIELDS, settings,
+        // Its position, and the research network dialog's labs, are filled in from the planet.
+        alsoOwns: ['planetPos', 'labLevels', 'labChoice'],
+      },
       // building.14 is the planet's key too: the planet names it.
       { scope: 'moon', entity: (p) => this.bodies(p).moon, fields: COSTS_MOON_FIELDS, settings, describe: false },
-    ];
-  }
-
-  /**
-   * The state keys the profile owns: the account's always, the planet's and
-   * the moon's while it has them. The copy of the own values (ownPrm) is the
-   * whole state, not only these: restoreOwnState() gives it all back.
-   *
-   * @param {?Profile} profile
-   * @returns {PfOwnedGroup[]}
-   */
-  ownedGroups(profile) {
-    const { planet, moon } = this.bodies(profile);
-    return [
-      { keys: [...COSTS_ACCOUNT_FIELDS.map((f) => f.prm), 'useIrn'], present: true },
-      { keys: [...COSTS_PLANET_FIELDS.map((f) => f.prm), 'planetPos', 'labLevels', 'labChoice'], present: planet !== null },
-      { keys: COSTS_MOON_FIELDS.map((f) => f.prm), present: moon !== null },
     ];
   }
 

@@ -52,8 +52,9 @@ queue or a mode.
 What a calculator shows under "no profile". With a profile active, its calculator fields
 are stored as they are, its profile-owned fields with the values they had before the
 profile; the fields of an entity the profile does not have, such as a moon, stay the
-calculator's own and are stored as they are. A binder declares which keys each entity
-owns as its owned groups.
+calculator's own and are stored as they are. Which keys each entity owns follows from the
+field groups: each field names the keys it writes, a field group adds the keys no field
+covers, and the universe settings add theirs; these are the binder's owned groups.
 _Avoid_: local values, saved settings
 
 **Saved set**:

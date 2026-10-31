@@ -107,8 +107,8 @@ class MoonProfiles extends PlanetPrmBinder {
       cookie: 'options_moon',
       lastKey: 'moon',
       universe: MOON_UNIVERSE_FIELDS,
-      // The class is two checkboxes; the moon's keys are in ownedGroups().
-      extraOwnedKeys: ['isGeneral', 'isDiscoverer'],
+      // The class is two checkboxes, written by writeBackExtra() rather than by a field.
+      accountAlsoOwns: ['isGeneral', 'isDiscoverer'],
     });
     /** @type {?string} The moon shown; null leaves its fields to the calculator. */
     this.moonId = null;
@@ -125,20 +125,14 @@ class MoonProfiles extends PlanetPrmBinder {
   }
 
   /**
-   * The account, the planet and the universe, and the moon: its phalanx while
-   * the profile has the moon, and "your system", filled in from it, while
-   * the moon's system is known.
+   * What the field groups own, and "your system", filled in from the moon,
+   * while the moon's system is known.
    *
    * @param {?Profile} profile
    * @returns {PfOwnedGroup[]}
    */
   ownedGroups(profile) {
-    const moon = this.moon(profile);
-    return [
-      ...super.ownedGroups(profile),
-      { keys: MOON_MOON_FIELDS.map((f) => f.prm), present: moon !== null },
-      { keys: ['ownSystem'], present: !!moon?.coords?.system },
-    ];
+    return [...super.ownedGroups(profile), { keys: ['ownSystem'], present: !!this.moon(profile)?.coords?.system }];
   }
 
   init() {

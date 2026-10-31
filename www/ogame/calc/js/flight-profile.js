@@ -42,6 +42,7 @@ const FLIGHT_ACCOUNT_FIELDS = [
   ...[['research.115', '#cmb-drive'], ['research.117', '#imp-drive'], ['research.118', '#hyp-drive']].map(([key, input], i) => ({
     key,
     input,
+    owns: ['driveLevels'],
     read: (/** @type {Record<string, any>} */ prm) => pfNum(prm.driveLevels[i]),
     write: (/** @type {Record<string, any>} */ prm, /** @type {*} */ v) => { prm.driveLevels[i] = pfNum(v); },
   })),
@@ -50,7 +51,7 @@ const FLIGHT_ACCOUNT_FIELDS = [
   pfCollectorClassField('playerClass', 'class-'),
   {
     // The researcher alliance brings the fleet nothing and has no radio: it shows as none.
-    key: 'allianceClass', input: '#alliance-class-none',
+    key: 'allianceClass', input: '#alliance-class-none', owns: ['traderBonus', 'warriorBonus'],
     read: (prm) => {
       if (prm.traderBonus === true) return PROFILE_ALLIANCE_CLASS.TRADER;
       return prm.warriorBonus === true ? PROFILE_ALLIANCE_CLASS.WARRIOR : PROFILE_ALLIANCE_CLASS.NONE;
@@ -69,14 +70,11 @@ const FLIGHT_ACCOUNT_FIELDS = [
   ...FLIGHT_SHIP_IDS.flatMap((shipId, i) => FLIGHT_LF_STATS.map((stat, j) => ({
     key: 'lf.ship.' + shipId + '.' + stat,
     input: () => flightLfBonusInput(i, j),
+    owns: ['lfShipsBonuses'],
     read: (/** @type {Record<string, any>} */ prm) => pfNum(prm.lfShipsBonuses[i]?.[j]),
     write: (/** @type {Record<string, any>} */ prm, /** @type {*} */ v) => { prm.lfShipsBonuses[i][j] = pfNum(v); },
   }))),
 ];
-
-/** The options.prm keys the account fields above live in. */
-const FLIGHT_ACCOUNT_PRM_KEYS = ['driveLevels', 'hyperTechLvl', 'playerClass', 'traderBonus', 'warriorBonus',
-  'lfRocktalCE', 'lfMechanGE', 'lfShipsBonuses'];
 
 /** @extends {FlatSettingsBinder<ProfileField>} */
 class FlightProfiles extends FlatSettingsBinder {
@@ -88,7 +86,6 @@ class FlightProfiles extends FlatSettingsBinder {
     super(pf, orchestrator, {
       fields: FLIGHT_ACCOUNT_FIELDS,
       settings: () => options.prm,
-      ownedKeys: FLIGHT_ACCOUNT_PRM_KEYS,
       cookie: 'options_flight',
     });
     this.orch = orchestrator;
