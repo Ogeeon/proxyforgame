@@ -65,7 +65,7 @@ const T = {
     production: 'ogame_production', expedition: 'ogame_expedition', moonCreation: 'ogame_moon_creation',
     phalanx: 'ogame_phalanx', graviton: 'ogame_graviton', terraformer: 'ogame_terraformer', trade: 'ogame_trade',
 };
-const SHIP_BONUS_TOOLS = [T.flight, T.lfCost, T.expedition, T.moonCreation, T.graviton, T.terraformer, T.trade];
+const SHIP_BONUS_TOOLS = [T.flight, T.cost, T.lfCost, T.expedition, T.moonCreation, T.graviton, T.terraformer, T.trade];
 
 /**
  * One value of the export, and where the answer puts it.
@@ -105,7 +105,7 @@ const ACCOUNT_MAP = [
     { key: 'lf.prod.energy', path: 'lifeforms.energyBonus', tools: [T.production, T.graviton, T.terraformer] },
     { key: 'lf.crawler', path: 'lifeforms.crawlerBonus', tools: [T.production] },
     { key: 'lf.classBooster.1', path: 'lifeforms.collectorClassBonus',
-        tools: [T.flight, T.production, T.expedition, T.graviton, T.terraformer] },
+        tools: [T.flight, T.cost, T.production, T.expedition, T.graviton, T.terraformer] },
     { key: 'lf.classBooster.2', path: 'lifeforms.generalClassBonus', tools: [T.flight] },
     { key: 'lf.classBooster.3', path: 'lifeforms.discovererClassBonus', tools: [T.cost, T.expedition, T.phalanx] },
     { key: 'lf.expedition.resources', path: 'lifeforms.resourceFindBonus', tools: [T.expedition] },

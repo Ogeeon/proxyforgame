@@ -493,6 +493,26 @@ describe('MCP tool ogame_build_cost', () => {
         expect(out.darkMatterToHalve).toBe(undefined);
     });
 
+    it('raises a Collector\'s transport holds by lifeforms.collectorClassBonus', async () => {
+        const ships = async (playerClass, collectorClassBonus) => (await call(protocolWith(), 'ogame_build_cost', {
+            item: 'large-cargo', quantity: 1000, playerClass, lifeforms: { collectorClassBonus },
+        })).structuredContent.cargoShipsNeeded;
+        // 12,000,000 resources; the Collector's +25% hold, +100% of it with the enhancement at 100.
+        expect(await ships('collector', 0)).toEqual({ smallCargo: 1920, largeCargo: 384 });
+        expect(await ships('collector', 100)).toEqual({ smallCargo: 1600, largeCargo: 320 });
+        // The enhancement raises the Collector's bonus only.
+        expect(await ships('general', 100)).toEqual({ smallCargo: 2400, largeCargo: 480 });
+    });
+
+    it('raises the transport holds by their own life form cargo bonus', async () => {
+        const out = (await call(protocolWith(), 'ogame_build_cost', {
+            item: 'large-cargo', quantity: 1000, playerClass: 'general',
+            lifeforms: { shipBonuses: { 'small-cargo': { cargo: 50 }, 'large-cargo': { cargo: 20 } } },
+        })).structuredContent;
+        // 12,000,000 resources in holds of 7500 and 30000.
+        expect(out.cargoShipsNeeded).toEqual({ smallCargo: 1600, largeCargo: 400 });
+    });
+
     it('prices the crawler, the reaper and the pathfinder', async () => {
         const price = async (item) => {
             const out = (await call(protocolWith(), 'ogame_build_cost', { item, quantity: 1, facilities: { shipyard: 2 } })).structuredContent;
@@ -1140,6 +1160,19 @@ describe('MCP tool ogame_import_account', () => {
             const result = await call(protocolWith(), name, argsFor(name, extra));
             expect([name, result.isError ? result.content[0].text : 'ok']).toEqual([name, 'ok']);
         }
+    });
+
+    it('hands the Collector Enhancement to ogame_build_cost', async () => {
+        const row = ACCOUNT_MAP.find((field) => field.key === 'lf.classBooster.1');
+        expect(row?.tools.includes('ogame_build_cost')).toBe(true);
+        const { account } = (await importAccount({ export: LARGE })).structuredContent;
+        expect(account.lifeforms.collectorClassBonus).toBe(7.6077);
+        const ships = async (lifeforms) => (await call(protocolWith(), 'ogame_build_cost', {
+            item: 'large-cargo', quantity: 1000, playerClass: account.playerClass, lifeforms,
+        })).structuredContent.cargoShipsNeeded.largeCargo;
+        // 12,000,000 resources in holds of 25000 * (1 + 0.25 * 1.076077) = 31725
+        expect(await ships({ collectorClassBonus: account.lifeforms.collectorClassBonus })).toBe(Math.ceil(12_000_000 / 31725));
+        expect(await ships({})).toBe(384);
     });
 
     it('copies the universe asked for into a schemaVersion 1 answer, null without', async () => {

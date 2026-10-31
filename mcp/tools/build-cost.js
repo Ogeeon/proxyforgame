@@ -78,7 +78,7 @@ const inputSchema = {
         ionTechnology: common.ionTechnologySchema,
         hyperspaceTechnology: common.hyperspaceTechnologySchema,
         lifeforms: common.lifeformsSchema(['itemCostReduction', 'itemTimeReduction', 'mineralResearchCentre',
-            'terraformerReduction', 'discovererClassBonus']),
+            'terraformerReduction', 'discovererClassBonus', 'collectorClassBonus'], ['small-cargo', 'large-cargo']),
     },
     required: ['item'],
     additionalProperties: false,
@@ -176,6 +176,9 @@ function createBuildCostTool({ siteApi }) {
             params.hyperTechLevel = args.hyperspaceTechnology;
             const lf = args.lifeforms;
             params.discovererClassBonus = lf.discovererClassBonus;
+            params.collectorClassBonus = lf.collectorClassBonus;
+            params.scCapacityIncrease = common.shipCargoBonus(lf, 'small-cargo');
+            params.lcCapacityIncrease = common.shipCargoBonus(lf, 'large-cargo');
             // The costs page keys these by research; the tool's reductions are the requested item's.
             params.lfResCostRdcMap = { [id]: lf.itemCostReduction };
             params.lfResTimeRdcMap = { [id]: lf.itemTimeReduction };
