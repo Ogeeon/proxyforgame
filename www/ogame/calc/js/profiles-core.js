@@ -562,6 +562,39 @@ function diffReadings(readings, snapshot) {
  */
 
 /**
+ * What a field group tells pfOwnedGroups(): the entity that fills it, and the
+ * settings keys it writes - each field's own, and those no field covers
+ * (`alsoOwns`: a value filled in from the entity, a key the binder writes itself).
+ *
+ * @typedef {Object} PfOwningGroup
+ * @property {(profile: Profile) => ?Object} entity
+ * @property {Array<{owns: string[]}>} fields
+ * @property {string[]} [alsoOwns]
+ */
+
+/**
+ * The owned groups that follow from a binder's field groups and the settings
+ * its universe fills (CONTEXT.md: Own values): one per field group, present
+ * while the profile has its entity, and one for the universe settings, present
+ * while the profile has a universe and never given back to the form - the
+ * universe setting shows them. A key is listed once per group.
+ *
+ * @param {PfOwningGroup[]} groups
+ * @param {string[]} universeKeys
+ * @param {?Profile} profile The profile shown; null before one is, when only the keys count.
+ * @returns {PfOwnedGroup[]}
+ */
+function pfOwnedGroups(groups, universeKeys, profile) {
+  /** @type {PfOwnedGroup[]} */
+  const owned = groups.map((g) => ({
+    keys: [...new Set([...g.fields.flatMap((f) => f.owns), ...(g.alsoOwns ?? [])])],
+    present: profile !== null && (g.entity(profile) ?? null) !== null,
+  }));
+  if (universeKeys.length > 0) owned.push({ keys: universeKeys, present: !!profile?.universe, show: false });
+  return owned;
+}
+
+/**
  * A deep copy of some keys of a calculator's settings. A key the settings do
  * not hold (or hold as undefined) is left out: there is no own value to keep,
  * and cloneData() cannot copy undefined.
@@ -2256,7 +2289,7 @@ if (typeof window !== 'undefined') {
     PRODUCTION_ROW_TECHS, productionRowKey, FLIGHT_SHIP_IDS,
     createProfile, createPlanet, newProfileId, sameUniverse, pfNum, pfBool, pfBodyLabel,
     getProfileValue, setProfileValue, differsFromGame, resetProfileValue,
-    pfSnapKey, snapshotReadings, diffReadings, pfPickOwn, pfSplitOwned, pfKeepOwn,
+    pfSnapKey, snapshotReadings, diffReadings, pfOwnedGroups, pfPickOwn, pfSplitOwned, pfKeepOwn,
     countOverrides, hasGameLayer,
     parseAccountExport, findProfileForExport, importAccountExport, mergeProfiles,
     isNewerExport, planCompanionSync, resolveImportUniverse, profileBodyResources,

@@ -27,7 +27,7 @@ const core = load(['ogame/calc/js/profiles-core.js'], [
     'parseUniverseSettings', 'readUniverseEntry', 'isUniverseEntryFresh', 'universeLayer',
     'universeValue', 'setUniverseChoice', 'mergeUniverseChoices', 'pfMarkState',
     'listUniverseOverrides', 'resetUniverseChoices', 'pfSnapKey', 'snapshotReadings', 'diffReadings',
-    'pfPickOwn', 'pfSplitOwned', 'pfKeepOwn',
+    'pfOwnedGroups', 'pfPickOwn', 'pfSplitOwned', 'pfKeepOwn',
 ]);
 
 const plain = (value) => JSON.parse(JSON.stringify(value));
@@ -518,6 +518,45 @@ describe('the calculator\'s own values', () => {
         expect(prm.slp[0][1]).toBe(4);
         // cloneData(undefined) throws; an undefined value is simply not kept.
         expect(core.pfPickOwn({ a: undefined, b: 1 }, ['a', 'b'])).toEqual({ b: 1 });
+    });
+
+    describe('owned groups from field groups', () => {
+        const planet = { id: 'p1', values: {} };
+        /** The field groups of a binder with an account, a planet picked and a moon. */
+        const groups = (/** @type {?object} */ shown) => [
+            { entity: (p) => p.account, fields: [{ owns: ['hyperTechLevel'] }, { owns: ['traderBonus', 'warriorBonus'] }], alsoOwns: ['energyBonus'] },
+            { entity: (p) => p.planets.find((b) => b === shown) ?? null, fields: [{ owns: ['robotFactoryLevel'] }], alsoOwns: ['planetPos'] },
+            { entity: () => undefined, fields: [{ owns: ['phalanxLevel'] }] },
+        ];
+        const profile = { account: { values: {} }, planets: [planet], moons: [], universe: { community: 'en', number: 1 } };
+
+        it('names each field\'s keys and the ones no field covers, present while the entity is there', () => {
+            expect(core.pfOwnedGroups(groups(planet), [], profile)).toEqual([
+                { keys: ['hyperTechLevel', 'traderBonus', 'warriorBonus', 'energyBonus'], present: true },
+                { keys: ['robotFactoryLevel', 'planetPos'], present: true },
+                // An entity that is undefined counts as missing, as null does.
+                { keys: ['phalanxLevel'], present: false },
+            ]);
+            expect(core.pfOwnedGroups(groups(null), [], profile)[1].present).toBe(false);
+        });
+
+        it('lists a key once, and a field that writes nothing adds nothing', () => {
+            const cargo = { entity: (p) => p.account, fields: [{ owns: ['lfShipsBonuses'] }, { owns: ['lfShipsBonuses'] }, { owns: [] }] };
+            expect(core.pfOwnedGroups([cargo], [], profile)).toEqual([{ keys: ['lfShipsBonuses'], present: true }]);
+        });
+
+        it('adds the universe settings, kept out of the form, while the profile has a universe', () => {
+            const owned = core.pfOwnedGroups([], ['universeSpeed', 'debrisPercent'], profile);
+            expect(owned).toEqual([{ keys: ['universeSpeed', 'debrisPercent'], present: true, show: false }]);
+            expect(core.pfOwnedGroups([], ['universeSpeed'], { ...profile, universe: null })[0].present).toBe(false);
+            expect(core.pfOwnedGroups([], [], profile)).toEqual([]);
+        });
+
+        it('takes only the keys before a profile is shown, nothing present', () => {
+            const owned = core.pfOwnedGroups(groups(planet), ['universeSpeed'], null);
+            expect(owned.map((g) => g.present)).toEqual([false, false, false, false]);
+            expect(owned.flatMap((g) => g.keys)).toContain('universeSpeed');
+        });
     });
 
     it('splits the owned keys by whether their entity is shown', () => {
