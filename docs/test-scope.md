@@ -60,8 +60,9 @@ Anything not in a calculator's file set, notably:
   (`node --test mcp-server.test.js` from `unit-tests/`), but `mcp/lib/browser-scripts.js`
   is also the loader every unit test runs through
 - `www/ogame/calc/data/*.json` — tables a page and the MCP server both read: `costs-techs.json`
-  (`costs.php`, `queue.php`), `lf-techs.json` (`lf-techdata.inc.php`: lfcosts and production),
-  `lf-building-bonuses.json` (`production.php`), `expedition-top-tiers.json` (`expeditions.php`; `profiles-core.js` mirrors it)
+  (`costs.php`, `queue.php`, `production.php`), `lf-techs.json` (`lf-techdata.inc.php`: lfcosts and production),
+  `lf-building-bonuses.json` and `lf-research-bonuses.json` (`production.php`), `expedition-top-tiers.json`
+  (`expeditions.php`; `profiles-core.js` mirrors it)
 - `playwright-tests/tests/base.js` — **note the path**, it sits in `tests/`, not the root
 - `playwright-tests/playwright.config.js`
 - anything under `unit-tests/` other than a single `<name>-core.test.js` (`load.js`, `expect.js`,

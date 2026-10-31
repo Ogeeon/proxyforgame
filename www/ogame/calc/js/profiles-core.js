@@ -1978,9 +1978,9 @@ function ratesFromTrade(trade) {
 // ---------------------------------------------------------------------------
 
 /**
- * The techs of production's planet rows, in row order: the first seven entries
- * of production's `rowsToTechs` (production.tpl), which this DOM-free file
- * cannot read, so they are repeated here.
+ * The techs of production's planet rows, in row order: production-core.js's
+ * PRODUCTION_ROWS, which loads on the production page only, so they are
+ * repeated here.
  */
 const PRODUCTION_ROW_TECHS = [1, 2, 3, 4, 12, 212, 217];
 

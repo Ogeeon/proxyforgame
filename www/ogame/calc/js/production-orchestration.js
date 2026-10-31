@@ -305,7 +305,7 @@ function renderMineUpgradeRow(rows, i, plnData, msuMult, currProd, newProd) {
 	let costs = getBuildCost_C(i, options.prm.oPPP[i - 1][0], options.prm.oPPP[i - 1][0] + 1, options.bldCosts, 0);
 	let totalCost;
 	if (options.prm.inclSats) {
-		let satsCost = getSSCost(i, options.prm.oPPP[i - 1][0], plnData);
+		let satsCost = getSSCost(i, options.prm.oPPP[i - 1][0], plnData, options.prm);
 		costs[1] += satsCost[1];
 		costs[2] += satsCost[2];
 		rows[i].children[1].innerHTML = numberToShortenedString(costs[0], options.unitSuffix) + ' ' + options.metal + ', ' +
@@ -326,12 +326,12 @@ function renderMineUpgradeRow(rows, i, plnData, msuMult, currProd, newProd) {
 // Mine amortization table: for each of metal/crystal/deuterium, the cost of the
 // next level, the resulting production increase and its payback time.
 function renderMinesAmortizationTable(rows, params, plnData, lfEff) {
-	let currProd = calculateProduction(params, plnData, true, lfEff);
+	let currProd = calculateProduction(params, plnData, options.prm, { normalized: true, lfEff });
 	let paramsCopy = params.map(function (arr) {
 		return arr.slice();
 	});
 	paramsCopy[0][0] = paramsCopy[0][0] + 1; paramsCopy[1][0] = paramsCopy[1][0] + 1; paramsCopy[2][0] = paramsCopy[2][0] + 1;
-	let newProd = calculateProduction(paramsCopy, plnData, true, lfEff);
+	let newProd = calculateProduction(paramsCopy, plnData, options.prm, { normalized: true, lfEff });
 	let msuMult = collectResourceMultipliers();
 	options.prm.inclSats = getChecked('#include-SS-y');
 	for (let i = 1; i < 4; i++) {
@@ -359,7 +359,7 @@ function updateOnePlnTab() {
 	options.prm.energyBoost = inputEl('#energy-boost').value;
 	options.prm.onePlnRace = Number(inputEl('#one-pln-race').value);
 	options.prm.onePlnLfLevels = readOnePlnLfLevels();
-	let lfEff = lfBuildingEffects(options.prm.onePlnRace, options.prm.onePlnLfLevels);
+	let lfEff = lfBuildingEffects(options.prm.onePlnRace, options.prm.onePlnLfLevels, options.lfTables);
 	let plnData = [options.prm.maxPlanetTemp, options.prm.planetPos, options.prm.energyBoost];
 	let rows = $$('#one-planet-prod tr:not(.lf-row)');
 	// Keep the crawler count (row 8) limit in sync with the mines (rows 2-4);
@@ -373,7 +373,7 @@ function updateOnePlnTab() {
 	);
 	let params = collectOnePlanetParams(rows);
 
-	let prodData = calculateProduction(params, plnData, false, lfEff);
+	let prodData = calculateProduction(params, plnData, options.prm, { lfEff });
 	let results = prodData[0];
 	let production = prodData[1];
 	let totalEnergyProduced = prodData[2];
@@ -433,7 +433,7 @@ function updateAllPlnTab() {
 	collectAllPlanetsInputs(rows);
 	for (let i = 0; i < planetsCount; i++) {
 		let planet = buildPlanetProdParams(i);
-		let prodData = calculateProduction(planet.prodParams, planet.plnData, false, planet.lfEff);
+		let prodData = calculateProduction(planet.prodParams, planet.plnData, options.prm, { lfEff: planet.lfEff });
 		let production = prodData[1];
 		let koeff = prodData[4];
 		planetProd.push(production);
@@ -479,11 +479,11 @@ function updateAllPlnTab() {
 		costs[i] = Math.round(costs[i] * plasmaCostFactor);
 	let msuMult = collectResourceMultipliers();
 	let normCost = costs[0] + msuMult[1] * costs[1] + msuMult[2] * costs[2];
-	options.prm.plasmaTechLevel += 1;
+	const plasmaUp = { ...options.prm, plasmaTechLevel: options.prm.plasmaTechLevel + 1 };
 	let newProd = [0, 0, 0];
 	for (let i = 0; i < planetsCount; i++) {
 		let planet = buildPlanetProdParams(i);
-		let prodData = calculateProduction(planet.prodParams, planet.plnData, false, planet.lfEff);
+		let prodData = calculateProduction(planet.prodParams, planet.plnData, plasmaUp, { lfEff: planet.lfEff });
 		newProd[0] += prodData[1][0];
 		newProd[1] += prodData[1][1];
 		newProd[2] += prodData[1][2];
@@ -493,7 +493,6 @@ function updateAllPlnTab() {
 	increase[1] = newProd[1] - totalProd[1];
 	increase[2] = newProd[2] - totalProd[2];
 	let normIncrease = increase[0] + msuMult[1] * increase[1] + msuMult[2] * increase[2];
-	options.prm.plasmaTechLevel -= 1;
 	rows = $$('#plasma-amort-tbl tr');
 	for (let i = 0; i < 3; i++) {
 		rows[1].children[i + 1].innerHTML = numToOGame(costs[i]);
@@ -548,13 +547,13 @@ function updateMinesPriority() {
 	let candidates = [];
 	for (let i = 0; i < options.prm.currPlanetsCount; i++) {
 		let planet = buildPlanetProdParams(i);
-		let currProd = calculateProduction(planet.prodParams, planet.plnData, true, planet.lfEff)[1];
+		let currProd = calculateProduction(planet.prodParams, planet.plnData, options.prm, { normalized: true, lfEff: planet.lfEff })[1];
 		for (let m = 0; m < 3; m++) {
 			let level = Number(planet.prodParams[m][0]) || 0;
 			let costs = getBuildCost_C(m + 1, level, level + 1, options.bldCosts, 0);
 			let upgraded = planet.prodParams.map(function (arr) { return arr.slice(); });
 			upgraded[m][0] = level + 1;
-			let newProd = calculateProduction(upgraded, planet.plnData, true, planet.lfEff)[1];
+			let newProd = calculateProduction(upgraded, planet.plnData, options.prm, { normalized: true, lfEff: planet.lfEff })[1];
 			let delta = [newProd[0] - currProd[0], newProd[1] - currProd[1], newProd[2] - currProd[2]];
 			let normIncrease = delta[0] + resMult[1] * delta[1] + resMult[2] * delta[2];
 			if (normIncrease <= 0)
@@ -638,8 +637,8 @@ function lfBuildingCandidates(resMult, planetProd) {
 				continue;
 			let pos = id % 1000 - 1;
 			let level = Number(levels[pos]) || 0;
-			let lfEff = lfBuildingEffects(race, lfBuildingUpgradeLevels(levels, pos));
-			let newProd = calculateProduction(planet.prodParams, planet.plnData, false, lfEff)[1];
+			let lfEff = lfBuildingEffects(race, lfBuildingUpgradeLevels(levels, pos), options.lfTables);
+			let newProd = calculateProduction(planet.prodParams, planet.plnData, options.prm, { lfEff })[1];
 			let delta = [newProd[0] - currProd[0], newProd[1] - currProd[1], newProd[2] - currProd[2]];
 			let costs = getBuildCostLF(id, level, level + 1, options.lfCosts, 0, 0, costRdc);
 			let c = lfUpgradeCandidate(id, i, level, costs, delta, resMult);
@@ -704,7 +703,7 @@ async function changePlanetsCount(newVal, oldVal) {
 	if (newVal < oldVal) {
 		// Pick up any direct edits made in the table before judging the planet empty
 		collectAllPlanetsInputs($$('#all-planets-prod tr'));
-		if (!isPlnEmpty(oldVal - 1) && await showConfirmModal(options.plnDelConfMsg, options.dialogConfirm, options.cancel) === false) {
+		if (!isPlnEmpty(options.prm.aPS[oldVal - 1]) && await showConfirmModal(options.plnDelConfMsg, options.dialogConfirm, options.cancel) === false) {
 			setVal('#planetsSpin', oldVal);
 			return;
 		}
@@ -963,7 +962,7 @@ function movePlanet(plnID, delta) {
 async function deleteRow(plnID) {
 	// Pick up any direct edits made in the table before judging the planet empty
 	collectAllPlanetsInputs($$('#all-planets-prod tr'));
-	if (!isPlnEmpty(plnID) && await showConfirmModal(options.plnDelConfMsg, options.dialogConfirm, options.cancel) === false) {
+	if (!isPlnEmpty(options.prm.aPS[plnID]) && await showConfirmModal(options.plnDelConfMsg, options.dialogConfirm, options.cancel) === false) {
 		return;
 	}
 	options.prm.aPNames.splice(plnID, 1);

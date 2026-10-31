@@ -2,21 +2,15 @@
 
 // Hourly production of one planet - the production calculator's one-planet
 // tab, computed by its own production-core.js and ogame-production.js.
-//
-// production-core.js reads its settings from the page-wide `options` object
-// production.tpl declares, not from arguments. The tool builds that object in
-// the scripts' sandbox right before each call: calls are synchronous, so no
-// other call can see it half-built.
 
 const { loadBrowserScripts, readWwwJson } = require('../lib/browser-scripts');
 const { ToolError } = require('../lib/protocol');
 const common = require('./common');
 
-const scope = loadBrowserScripts(
+const { calculateProduction, lfBuildingEffects, maxCrawlers, LF_BUILDINGS_PER_RACE } = loadBrowserScripts(
     ['ogame/calc/js/ogame-production.js', 'ogame/calc/js/production-core.js'],
     ['calculateProduction', 'lfBuildingEffects', 'maxCrawlers', 'LF_BUILDINGS_PER_RACE'],
 );
-const { calculateProduction, lfBuildingEffects, maxCrawlers } = scope;
 
 /** @type {Record<string, any[]>} */
 const LF_TECHS = readWwwJson('ogame/calc/data/lf-techs.json');
@@ -32,13 +26,12 @@ const LF_ENERGY = Object.fromEntries(Object.entries(LF_TECHS)
     .map(([id, row]) => [id, [row[5], row[10]]]));
 const LF_BONUS = readWwwJson('ogame/calc/data/lf-building-bonuses.json');
 
+const LF_TABLES = { lfEnergy: LF_ENERGY, lfBonus: LF_BONUS };
+
 /** Keys of the life form buildings the tool takes, with their race and position. */
 const LF_BUILDINGS = Object.keys(LF_ENERGY).map((id) => ({
     key: LF_TECHS[id][0], race: Math.floor(Number(id) / 1000), position: Number(id) % 1000,
 }));
-
-/** The rows production.tpl maps its table onto: what tech each one is. */
-const ROWS_TO_TECHS = [1, 2, 3, 4, 12, 212, 217, 0, 0, 0, 0, 0, 0, 0];
 
 const mine = (/** @type {string} */ what) => ({
     type: 'object',
@@ -114,7 +107,7 @@ function createProductionTool({ siteApi }) {
                 throw new ToolError('lifeforms.buildings mixes races: a planet carries the buildings of one life form only.');
             }
             const race = races.size ? [...races][0] : 0;
-            const levels = new Array(scope.LF_BUILDINGS_PER_RACE).fill(0);
+            const levels = new Array(LF_BUILDINGS_PER_RACE).fill(0);
             for (const b of given) {
                 levels[b.position - 1] = lf.buildings[b.key];
             }
@@ -124,28 +117,23 @@ function createProductionTool({ siteApi }) {
             const crawlerCap = maxCrawlers(args.metalMine.level, args.crystalMine.level, args.deuteriumSynthesizer.level, geologist);
             const crawlers = Math.min(args.crawlers.count, crawlerCap);
 
-            scope.options = {
-                rowsToTechs: ROWS_TO_TECHS,
-                lfEnergy: LF_ENERGY,
-                lfBonus: LF_BONUS,
-                prm: {
-                    energyTechLevel: args.energyTechnology,
-                    plasmaTechLevel: args.plasmaTechnology,
-                    universeSpeed,
-                    geologist,
-                    engineer,
-                    technocrat,
-                    admiral,
-                    commander,
-                    playerClass: common.classId(args.playerClass),
-                    isTrader: args.allianceClass === 'trader',
-                    lfMetProdBonus: lf.metalBonus,
-                    lfCrysProdBonus: lf.crystalBonus,
-                    lfDeutProdBonus: lf.deuteriumBonus,
-                    lfEnergyProdBonus: lf.energyBonus,
-                    lfCrawlerBonus: lf.crawlerBonus,
-                    lfCollectorBonus: lf.collectorClassBonus,
-                },
+            const settings = {
+                energyTechLevel: args.energyTechnology,
+                plasmaTechLevel: args.plasmaTechnology,
+                universeSpeed,
+                geologist,
+                engineer,
+                technocrat,
+                admiral,
+                commander,
+                playerClass: common.classId(args.playerClass),
+                isTrader: args.allianceClass === 'trader',
+                lfMetProdBonus: lf.metalBonus,
+                lfCrysProdBonus: lf.crystalBonus,
+                lfDeutProdBonus: lf.deuteriumBonus,
+                lfEnergyProdBonus: lf.energyBonus,
+                lfCrawlerBonus: lf.crawlerBonus,
+                lfCollectorBonus: lf.collectorClassBonus,
             };
 
             const rows = [
@@ -158,9 +146,9 @@ function createProductionTool({ siteApi }) {
                 [crawlers, args.crawlers.percent, 0],
             ];
             const planet = [args.maxTemperature, args.position, args.energyBoosterPercent / 10];
-            const lfEff = lfBuildingEffects(race, levels);
+            const lfEff = lfBuildingEffects(race, levels, LF_TABLES);
             const [results, perHour, energyProduced, energyUsed, factor, lfBld] =
-                calculateProduction(rows, planet, false, lfEff);
+                calculateProduction(rows, planet, settings, { lfEff });
 
             const row = (/** @type {number} */ i) => ({ metal: results[i][0], crystal: results[i][1], deuterium: results[i][2] });
             const lfBuildings = { metal: 0, crystal: 0, deuterium: 0 };

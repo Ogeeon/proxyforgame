@@ -1,12 +1,51 @@
 // ============================================================================
 // PRODUCTION CALCULATOR - CORE
 // ============================================================================
-// Pure calculation logic and state helpers. No DOM access except through the
-// shared `options` object defined in production.tpl. Ported verbatim from the
-// legacy jQuery production.js — including its historical quirks — because the
-// Playwright expectations encode the current numeric behavior.
+// Pure calculation logic and state helpers. Nothing here reads the page: the
+// player's settings and the data tables arrive as arguments, which is what lets
+// the MCP server and node:test call the same functions as production.tpl.
+// Ported verbatim from the legacy jQuery production.js — including its
+// historical quirks — because the Playwright expectations encode the current
+// numeric behavior.
 
 'use strict';
+
+/**
+ * The player-wide settings the production formulas read. The page passes its
+ * `options.prm`, which carries these among its own fields.
+ * @typedef {object} ProductionSettings
+ * @property {number} energyTechLevel
+ * @property {number} plasmaTechLevel
+ * @property {number} universeSpeed - economy speed
+ * @property {boolean} geologist
+ * @property {boolean} engineer
+ * @property {boolean} technocrat
+ * @property {boolean} admiral
+ * @property {boolean} commander
+ * @property {number} playerClass - 0 Collector, 1 General, 2 Discoverer
+ * @property {boolean} isTrader - the Trader alliance class
+ * @property {number} [lfMetProdBonus] - life form research production bonuses, percent
+ * @property {number} [lfCrysProdBonus]
+ * @property {number} [lfDeutProdBonus]
+ * @property {number} [lfEnergyProdBonus]
+ * @property {number} [lfCrawlerBonus]
+ * @property {number} [lfCollectorBonus] - the Collector class bonus increase, percent
+ */
+
+/**
+ * The life form building tables, as production.php derives them from
+ * data/lf-techs.json and data/lf-building-bonuses.json.
+ * @typedef {object} LfBuildingTables
+ * @property {Object<string, number[]>} lfEnergy - id => [base energy, growth]
+ * @property {Object<string, Object<string, (number|null)[]>>} lfBonus - id => {kind: [base, factor, max]}
+ */
+
+/**
+ * The tech behind each of the seven rows calculateProduction takes: the three
+ * mines, the two power plants, solar satellites and crawlers. profiles-core.js
+ * keeps its own copy (PRODUCTION_ROW_TECHS) because it loads on every page.
+ */
+const PRODUCTION_ROWS = [1, 2, 3, 4, 12, 212, 217];
 
 // Every life form has the same number of buildings; planet data reserves one
 // level slot per building (aPS indexes 25..36), including the first two
@@ -26,53 +65,61 @@ function maxCrawlers(metalMineLvl, crystalMineLvl, deutSynthLvl, geologist) {
 	return Math.floor(factor * mineSum);
 }
 
-function convertAllPlanetParams() {
-	let prm = [];
-	options.prm.aPS = [];
+/**
+ * Migrate saved settings that predate `aPS`: rebuild the planet list from the
+ * old `aPPP` rows of [temperature, seven levels, position], in place.
+ * @param {{currPlanetsCount: number, aPPP: any[][], aPS: any[][], aPNames: string[], aPB: any[][]}} prm
+ *   the stored settings
+ * @param {string} planetNumStr - the localized prefix of a default planet name
+ */
+function convertAllPlanetParams(prm, planetNumStr) {
+	let planets = [];
 	let names = [];
-	for (let i = 0; i < options.prm.currPlanetsCount; i++) {
-		prm = [];
-		names[i] = options.planetNumStr + (i + 1);
+	for (let i = 0; i < prm.currPlanetsCount; i++) {
+		let planet = [];
+		names[i] = planetNumStr + (i + 1);
 		// 0 - temperature, 1-6 - mines, power plants and satellites, 7 - crawlers, 8 - position
-		prm[0] = options.prm.aPPP[i][0]; // temperature
-		prm[1] = options.prm.aPPP[i][8]; // position
-		prm[2] = 0; // energy booster
+		planet[0] = prm.aPPP[i][0]; // temperature
+		planet[1] = prm.aPPP[i][8]; // position
+		planet[2] = 0; // energy booster
 		for (let j = 1; j < 8; j++) {
-			if (options.prm.aPPP[i][j] === undefined) {
-				prm[j * 3] = 0;
+			if (prm.aPPP[i][j] === undefined) {
+				planet[j * 3] = 0;
 			} else {
-				prm[j * 3] = options.prm.aPPP[i][j]; // level (in the historically established order)
+				planet[j * 3] = prm.aPPP[i][j]; // level (in the historically established order)
 			}
-			prm[j * 3 + 1] = 100; // production coefficient
-			prm[j * 3 + 2] = 0; // booster
+			planet[j * 3 + 1] = 100; // production coefficient
+			planet[j * 3 + 2] = 0; // booster
 		}
-		prm[24] = 0; // life form (race)
-		for (let k = 0; k < LF_BUILDINGS_PER_RACE; k++) prm[25 + k] = 0; // life form building levels (positional per race)
-		options.prm.aPS[i] = prm;
+		planet[24] = 0; // life form (race)
+		for (let k = 0; k < LF_BUILDINGS_PER_RACE; k++) planet[25 + k] = 0; // life form building levels (positional per race)
+		planets[i] = planet;
 	}
-	options.prm.aPNames = names;
-	options.prm.aPPP = [[]];
-	options.prm.aPB = [[]];
+	prm.aPS = planets;
+	prm.aPNames = names;
+	prm.aPPP = [[]];
+	prm.aPB = [[]];
 }
 
 /**
  * Migrate exchange rates saved in the legacy trade-ratio format (metal:crystal:
  * deuterium, e.g. 3:2:1) to the MSU-weight format shared with the cost
- * calculators (metal:crystal:deuterium, e.g. 1:1.5:3). The two describe the
- * same economy, so the stored ratio is preserved, only rewritten.
+ * calculators (metal:crystal:deuterium, e.g. 1:1.5:3), in place. The two
+ * describe the same economy, so the stored ratio is preserved, only rewritten.
+ * @param {{rates: unknown, ratesFmt: number}} prm - the stored settings
  */
-function convertExchangeRates() {
-	if (options.prm.ratesFmt >= 2)
+function convertExchangeRates(prm) {
+	if (prm.ratesFmt >= 2)
 		return;
-	let old = options.prm.rates;
+	let old = prm.rates;
 	// Ratios like 4:3 do not divide evenly, so round to two decimals: the error is
 	// far below the precision anyone picks a trade ratio with, and it keeps the
 	// migrated value readable in the input.
 	if (Array.isArray(old) && old.length === 3 && old[0] > 0 && old[1] > 0 && old[2] > 0)
-		options.prm.rates = [1, Math.round(old[0] / old[1] * 100) / 100, Math.round(old[0] / old[2] * 100) / 100];
+		prm.rates = [1, Math.round(old[0] / old[1] * 100) / 100, Math.round(old[0] / old[2] * 100) / 100];
 	else
-		options.prm.rates = [1, 1.5, 3];
-	options.prm.ratesFmt = 2;
+		prm.rates = [1, 1.5, 3];
+	prm.ratesFmt = 2;
 }
 
 // The planet array: three leading values, then one slot of three per mine
@@ -116,9 +163,9 @@ function createEmptyPlanet() {
  * strings. The planet name is deliberately left out — names are not renumbered
  * after a planet is deleted or moved, so a default name may well differ from
  * the one the position would suggest.
+ * @param {any[]} plnData - the planet's entry in the stored planet list
  */
-function isPlnEmpty(plnID) {
-	let plnData = options.prm.aPS[plnID];
+function isPlnEmpty(plnData) {
 	let empty = createEmptyPlanet();
 	for (let i = 0; i < empty.length; i++) {
 		// A planet saved before a field existed simply keeps that field's default
@@ -152,17 +199,35 @@ function stripHTMLTags(input) {
  * Total: X%" - is the amplified one: every bonus listed under it is the base
  * bonus times 1 + X/100. So the field holds the final value and nothing is
  * applied to it here.
+ * @param {ProductionSettings} settings
  * @returns {number} percent by which every Collector bonus is increased
  */
-function collectorClassBonusPct() {
-	return options.prm.lfCollectorBonus || 0;
+function collectorClassBonusPct(settings) {
+	return settings.lfCollectorBonus || 0;
 }
 
-function getSSCost(techID, currLvl, plnData) {
-	let currCons = getHourlyConsumption(techID, currLvl, options.prm.universeSpeed, 1);
-	let newCons = getHourlyConsumption(techID, currLvl + 1, options.prm.universeSpeed, 1);
+/**
+ * Whether all five officers are hired - the commanding staff bonus.
+ * @param {ProductionSettings} settings
+ * @returns {boolean}
+ */
+function hasFullCrew(settings) {
+	return settings.geologist && settings.engineer && settings.admiral && settings.commander && settings.technocrat;
+}
+
+/**
+ * The solar satellites that cover the energy one more level of a mine draws.
+ * @param {number} techID - the mine
+ * @param {number} currLvl - its current level
+ * @param {number[]} plnData - [max temperature, position, energy booster]
+ * @param {ProductionSettings} settings
+ * @returns {number[]} their build cost
+ */
+function getSSCost(techID, currLvl, plnData, settings) {
+	let currCons = getHourlyConsumption(techID, currLvl, settings.universeSpeed, 1);
+	let newCons = getHourlyConsumption(techID, currLvl + 1, settings.universeSpeed, 1);
 	let energyReq = newCons - currCons;
-	let fullCrew = options.prm.geologist && options.prm.engineer && options.prm.admiral && options.prm.commander && options.prm.technocrat;
+	let fullCrew = hasFullCrew(settings);
 	// plnData = [temp., pos., booster]
 	// The booster, officer and class bonuses are deliberately not passed in: they
 	// are applied to oneSSProd below, the way production.js applies them to the
@@ -170,17 +235,17 @@ function getSSCost(techID, currLvl, plnData) {
 	// none of them anyway - only techLevel, maxTemp and powerFactor.
 	let oneSSProd = getProductionRate({
 		techID: 212, techLevel: 1,
-		energyTechLevel: options.prm.energyTechLevel, plasmaTechLevel: options.prm.plasmaTechLevel,
-		maxTemp: plnData[0], pos: plnData[1], universeSpeedFactor: options.prm.universeSpeed,
-		geologist: options.prm.geologist, engineer: options.prm.engineer,
+		energyTechLevel: settings.energyTechLevel, plasmaTechLevel: settings.plasmaTechLevel,
+		maxTemp: plnData[0], pos: plnData[1], universeSpeedFactor: settings.universeSpeed,
+		geologist: settings.geologist, engineer: settings.engineer,
 		productionFactor: 1, powerFactor: 1, boosterType: 0,
-		allOfficers: false, playerClass: options.prm.playerClass
+		allOfficers: false, playerClass: settings.playerClass
 	});
 	let boosterFactor = 0.1 * plnData[2];
-	let engineerFactor = (options.prm.engineer === true) ? 0.1 : 0;
+	let engineerFactor = (settings.engineer === true) ? 0.1 : 0;
 	let allStaffFactor = fullCrew === true ? 0.02 : 0;
-	let classFactor = options.prm.playerClass === 0 ? 0.1 * (1 + 0.01 * collectorClassBonusPct()) : 0;
-	let allianceClassFactor = options.prm.isTrader ? 0.05 : 0;
+	let classFactor = settings.playerClass === 0 ? 0.1 * (1 + 0.01 * collectorClassBonusPct(settings)) : 0;
+	let allianceClassFactor = settings.isTrader ? 0.05 : 0;
 	let totalEnergyProd = oneSSProd;
 	totalEnergyProd += Math.round(oneSSProd * boosterFactor);
 	totalEnergyProd += Math.round(oneSSProd * engineerFactor);
@@ -224,11 +289,12 @@ function emptyLfEffects() {
 
 // Energy consumed by a single life form building at a given level.
 // Mirrors OGame's mine-style formula: floor(base * level * coeff^level),
-// where base and coeff come from options.lfEnergy (see lf-techdata.inc.php).
-function lfBuildingEnergy(bldId, level) {
+// where base and coeff come from the lfEnergy table (see lf-techdata.inc.php).
+/** @param {Object<string, number[]>} [lfEnergy] */
+function lfBuildingEnergy(bldId, level, lfEnergy) {
 	level = Number(level) || 0;
 	if (level < 1) return 0;
-	let data = options.lfEnergy ? options.lfEnergy[bldId] : undefined;
+	let data = lfEnergy ? lfEnergy[bldId] : undefined;
 	if (data === undefined) return 0;
 	return Math.floor(data[0] * level * Math.pow(data[1], level));
 }
@@ -253,20 +319,25 @@ function applyLfBuildingBonus(bonus, level, bld, eff) {
 //   enR         - energy consumption reduction (%)
 // `perBld` keeps the same numbers per building (index = building position), so
 // that each building can show its own contribution in the one-planet table.
-/** @returns {LfEffects} */
-function lfBuildingEffects(race, levels) {
+/**
+ * @param {number} race
+ * @param {any[]} levels - positional building levels, index 0 is the race's first building
+ * @param {LfBuildingTables} tables
+ * @returns {LfEffects}
+ */
+function lfBuildingEffects(race, levels, tables) {
 	let eff = emptyLfEffects();
 	if (race < 1 || race > 4) return eff;
 	if (!levels) return eff;
 	for (let pos = 0; pos < levels.length; pos++) {
 		let level = Number(levels[pos]) || 0;
 		let bldId = race * 1000 + (pos + 1);
-		let e = lfBuildingEnergy(bldId, level);
+		let e = lfBuildingEnergy(bldId, level, tables.lfEnergy);
 		// enR acts on the whole planet, so it stays out of the per-building numbers -
 		// only what a single building adds on its own is listed here.
 		let bld = { id: bldId, level: level, energyUsed: e, met: 0, cry: 0, deu: 0, enP: 0 };
 		eff.energyUsed += e;
-		let bonus = options.lfBonus ? options.lfBonus[bldId] : undefined;
+		let bonus = tables.lfBonus ? tables.lfBonus[bldId] : undefined;
 		if (bonus && level > 0) {
 			applyLfBuildingBonus(bonus, level, bld, eff);
 		}
@@ -332,7 +403,7 @@ function lfResearchIncrease(minePerPlanet, bonus, techBonusPct) {
 
 // Power plants/satellites base output (rows 4-6) plus the fusion reactor's
 // deuterium draw, recorded into `results` and `production` row 3 (deuterium).
-function computeBaseEnergyProduction(prodParams, plnData, fullCrew, results, production) {
+function computeBaseEnergyProduction(prodParams, plnData, settings, results, production) {
 	let totalEnergyProduced = 0;
 	for (let i = 3; i < 6; i++) {
 		// Take the building's level and the power percentage it runs at from the table
@@ -342,13 +413,13 @@ function computeBaseEnergyProduction(prodParams, plnData, fullCrew, results, pro
 		// Power percentage is passed straight into getProductionRateSplit so the officer/plasma/booster bonus rows stay proportional to it.
 		if (level > 0) {
 			let energyArray = getProductionRateSplit({
-				techID: options.rowsToTechs[i], techLevel: level,
-				energyTechLevel: options.prm.energyTechLevel, plasmaTechLevel: 0,
-				maxTemp: plnData[0], pos: plnData[1], universeSpeedFactor: options.prm.universeSpeed,
-				geologist: options.prm.geologist, engineer: options.prm.engineer,
+				techID: PRODUCTION_ROWS[i], techLevel: level,
+				energyTechLevel: settings.energyTechLevel, plasmaTechLevel: 0,
+				maxTemp: plnData[0], pos: plnData[1], universeSpeedFactor: settings.universeSpeed,
+				geologist: settings.geologist, engineer: settings.engineer,
 				productionFactor: 1, powerFactor: perCent / 100.0, boosterType: 0,
-				allOfficers: fullCrew, playerClass: options.prm.playerClass,
-				isTrader: options.prm.isTrader
+				allOfficers: hasFullCrew(settings), playerClass: settings.playerClass,
+				isTrader: settings.isTrader
 			});
 			energy = energyArray[PRODUCTION_ROW.BUILDING];
 			// write the base energy produced into the power plant's/satellite's row
@@ -356,8 +427,8 @@ function computeBaseEnergyProduction(prodParams, plnData, fullCrew, results, pro
 		}
 		totalEnergyProduced += energy;
 		// For the fusion reactor we need to show how much deuterium it consumes
-		if (options.rowsToTechs[i] === 12) {
-			let deutCons = level > 0 ? getHourlyConsumption(12, level, options.prm.universeSpeed, perCent / 100.0) : 0;
+		if (PRODUCTION_ROWS[i] === 12) {
+			let deutCons = level > 0 ? getHourlyConsumption(12, level, settings.universeSpeed, perCent / 100.0) : 0;
 			results[i + 1][2] = -deutCons;
 			production[2] = -deutCons;
 		}
@@ -367,15 +438,15 @@ function computeBaseEnergyProduction(prodParams, plnData, fullCrew, results, pro
 
 // Adds the booster/officer/class/life-form energy bonuses on top of the base
 // production, plus what each life form building contributes to its own row.
-function applyEnergyBonuses(totalEnergyProduced, plnData, fullCrew, lfEff, results, lfBld) {
+function applyEnergyBonuses(totalEnergyProduced, plnData, settings, lfEff, results, lfBld) {
 	let energyBalance = totalEnergyProduced; // the base for calculating energy bonuses must be taken before Crawlers
 	if (energyBalance < 0) energyBalance = 0;
 	const boosterFactor = 0.1 * plnData[2];
-	const engineerFactor = (options.prm.engineer === true) ? 0.1 : 0;
-	const allStaffFactor = fullCrew === true ? 0.02 : 0;
-	const classFactor = options.prm.playerClass === 0 ? 0.1 * (1 + 0.01 * collectorClassBonusPct()) : 0;
-	const allianceClassFactor = options.prm.isTrader ? 0.05 : 0;
-	const lfEnergyFactor = (options.prm.lfEnergyProdBonus || 0) / 100;
+	const engineerFactor = (settings.engineer === true) ? 0.1 : 0;
+	const allStaffFactor = hasFullCrew(settings) === true ? 0.02 : 0;
+	const classFactor = settings.playerClass === 0 ? 0.1 * (1 + 0.01 * collectorClassBonusPct(settings)) : 0;
+	const allianceClassFactor = settings.isTrader ? 0.05 : 0;
+	const lfEnergyFactor = (settings.lfEnergyProdBonus || 0) / 100;
 	results[9][3] = Math.round(energyBalance * boosterFactor);
 	results[11][3] = Math.round(energyBalance * engineerFactor);
 	results[12][3] = Math.round(energyBalance * allStaffFactor);
@@ -393,12 +464,12 @@ function applyEnergyBonuses(totalEnergyProduced, plnData, fullCrew, lfEff, resul
 }
 
 // We know how much energy the planet produces in total - now we need to find out how much of it is consumed
-function computeEnergyConsumption(prodParams, results) {
+function computeEnergyConsumption(prodParams, settings, results) {
 	let totalEnergyUsed = 0;
 	for (let i = 0; i < 3; i++) {
 		let level = prodParams[i][0];
 		let perCent = prodParams[i][1];
-		let energy = level > 0 ? getHourlyConsumption(options.rowsToTechs[i], level, options.prm.universeSpeed, perCent / 100.0) : 0;
+		let energy = level > 0 ? getHourlyConsumption(PRODUCTION_ROWS[i], level, settings.universeSpeed, perCent / 100.0) : 0;
 		results[i + 1][4] = energy;
 		totalEnergyUsed += energy;
 	}
@@ -406,7 +477,7 @@ function computeEnergyConsumption(prodParams, results) {
 }
 
 // Crawlers are in row 6
-function computeCrawlersEnergyConsumption(prodParams, results) {
+function computeCrawlersEnergyConsumption(prodParams, settings, results) {
 	let cralwersPwrPcnt = prodParams[6][1] / 100.0;
 	let crawlersOlPcnt = 0;
 	if (cralwersPwrPcnt > 1) {
@@ -416,7 +487,7 @@ function computeCrawlersEnergyConsumption(prodParams, results) {
 	// Ion Crystal Modules (lf-crawler-bonus): the same percentage that boosts
 	// crawler production also cuts their energy draw - see
 	// docs/calculators/production-vs-ogame.md.
-	let lfCrawlerFactor = Math.min(options.prm.lfCrawlerBonus || 0, 100) / 100;
+	let lfCrawlerFactor = Math.min(settings.lfCrawlerBonus || 0, 100) / 100;
 	let crawlersEenergyCons = Math.round((prodParams[6][0] * (cralwersPwrPcnt + crawlersOlPcnt * 2)) * 50 * (1 - lfCrawlerFactor));
 	results[7][3] = -crawlersEenergyCons;
 	return crawlersEenergyCons;
@@ -441,18 +512,18 @@ function applyLfEnergyReduction(lfEff, totalEnergyUsed, crawlersEenergyCons, res
 
 // Base resource production (mines/synthesizer rows plus officer/class/plasma
 // bonus rows 8-14), scaled by the energy coefficient unless normalized.
-function computeResourceProduction(prodParams, plnData, fullCrew, koeff, normalized, results, production) {
+function computeResourceProduction(prodParams, plnData, settings, koeff, normalized, results, production) {
 	let prodFactor = normalized ? 1 : koeff;
 	for (const i of [0, 1, 2]) {
 		let pwrFactor = normalized ? 1 : prodParams[i][1] / 100.0;
 		let prod = getProductionRateSplit({
-			techID: options.rowsToTechs[i], techLevel: prodParams[i][0],
-			energyTechLevel: options.prm.energyTechLevel, plasmaTechLevel: options.prm.plasmaTechLevel,
-			maxTemp: plnData[0], pos: plnData[1], universeSpeedFactor: options.prm.universeSpeed,
-			geologist: options.prm.geologist, engineer: options.prm.engineer,
+			techID: PRODUCTION_ROWS[i], techLevel: prodParams[i][0],
+			energyTechLevel: settings.energyTechLevel, plasmaTechLevel: settings.plasmaTechLevel,
+			maxTemp: plnData[0], pos: plnData[1], universeSpeedFactor: settings.universeSpeed,
+			geologist: settings.geologist, engineer: settings.engineer,
 			productionFactor: prodFactor, powerFactor: pwrFactor, boosterType: prodParams[i][2],
-			allOfficers: fullCrew, playerClass: options.prm.playerClass,
-			isTrader: options.prm.isTrader, collectorClassBonusPct: collectorClassBonusPct()
+			allOfficers: hasFullCrew(settings), playerClass: settings.playerClass,
+			isTrader: settings.isTrader, collectorClassBonusPct: collectorClassBonusPct(settings)
 		});
 		// Save the resource production data
 		results[0][i] += prod[PRODUCTION_ROW.NATURAL];  // base production
@@ -468,10 +539,10 @@ function computeResourceProduction(prodParams, plnData, fullCrew, koeff, normali
 	}
 }
 
-function applyCrawlerProductionBonus(prodParams, results, production) {
+function applyCrawlerProductionBonus(prodParams, settings, results, production) {
 	// The Collector's +50% crawler bonus is amplified by the same character class
 	// bonus as the +25% mine and +10% energy bonuses (see getProductionRateSplit).
-	let crMult = options.prm.playerClass === 0 ? 1 + 0.5 * (1 + 0.01 * collectorClassBonusPct()) : 1;
+	let crMult = settings.playerClass === 0 ? 1 + 0.5 * (1 + 0.01 * collectorClassBonusPct(settings)) : 1;
 	// OGame caps the total crawler bonus at 50% of each mine's base production. The
 	// ceiling is flat: neither the crawler count nor the 150% overload raises it -
 	// overload only reaches it faster (and doubles the energy draw).
@@ -490,11 +561,11 @@ function applyCrawlerProductionBonus(prodParams, results, production) {
 // crawler boost - to their production. With zero bonuses the row contributes nothing.
 // The crawler bonus percentage also reduces crawler energy consumption - that
 // side of it is applied earlier, in computeCrawlersEnergyConsumption().
-function applyLfTechProductionBonus(results, production) {
-	let lfMetFactor = (options.prm.lfMetProdBonus || 0) / 100;
-	let lfCrysFactor = (options.prm.lfCrysProdBonus || 0) / 100;
-	let lfDeutFactor = (options.prm.lfDeutProdBonus || 0) / 100;
-	let lfCrawlerFactor = (options.prm.lfCrawlerBonus || 0) / 100;
+function applyLfTechProductionBonus(settings, results, production) {
+	let lfMetFactor = (settings.lfMetProdBonus || 0) / 100;
+	let lfCrysFactor = (settings.lfCrysProdBonus || 0) / 100;
+	let lfDeutFactor = (settings.lfDeutProdBonus || 0) / 100;
+	let lfCrawlerFactor = (settings.lfCrawlerBonus || 0) / 100;
 	results[15][0] = Math.round(results[1][0] * lfMetFactor) + Math.round(results[7][0] * lfCrawlerFactor);
 	results[15][1] = Math.round(results[2][1] * lfCrysFactor) + Math.round(results[7][1] * lfCrawlerFactor);
 	results[15][2] = Math.round(results[3][2] * lfDeutFactor) + Math.round(results[7][2] * lfCrawlerFactor);
@@ -517,12 +588,20 @@ function applyLfBuildingProduction(lfEff, results, lfBld, production) {
 }
 
 /**
- * @param {LfEffects} [lfEff] - omitted where the planet has no life form data
+ * Hourly production and energy balance of one planet.
+ * @param {number[][]} prodParams - [level, percent, booster] of each of the
+ *   PRODUCTION_ROWS, in that order
+ * @param {number[]} plnData - [max temperature, position, energy booster]
+ * @param {ProductionSettings} settings
+ * @param {object} [opts]
+ * @param {boolean} [opts.normalized] - mines at 100% with all the energy they
+ *   need, the base for payback estimates
+ * @param {LfEffects} [opts.lfEff] - omitted where the planet has no life form data
  * @returns {[number[][], number[], number, number, number, number[][]]} the 16
  *   result rows, the planet totals, energy produced, energy used, the energy
  *   coefficient and one row per life form building
  */
-function calculateProduction(prodParams, plnData, normalized = false, lfEff = undefined) {
+function calculateProduction(prodParams, plnData, settings, { normalized = false, lfEff = undefined } = {}) {
 	if (!lfEff) lfEff = emptyLfEffects();
 	// NOTE: the life form technology bonus (Metropolis, Chip Mass Production,
 	// HP-Transformer) is not modelled here. OGame folds it into the percentages
@@ -541,13 +620,12 @@ function calculateProduction(prodParams, plnData, normalized = false, lfEff = un
 	// 10-geologist, 11-engineer, 12-officers, 13-class, 14-alliance class,
 	// 15-life form tech bonus
 	for (let i = 0; i < 16; i++) { results.push([0, 0, 0, 0, 0]); } // metal, crystal, deuterium, energy produced, energy required
-	const fullCrew = options.prm.geologist && options.prm.engineer && options.prm.admiral && options.prm.commander && options.prm.technocrat;
 
-	let totalEnergyProduced = computeBaseEnergyProduction(prodParams, plnData, fullCrew, results, production);
-	totalEnergyProduced = applyEnergyBonuses(totalEnergyProduced, plnData, fullCrew, lfEff, results, lfBld);
+	let totalEnergyProduced = computeBaseEnergyProduction(prodParams, plnData, settings, results, production);
+	totalEnergyProduced = applyEnergyBonuses(totalEnergyProduced, plnData, settings, lfEff, results, lfBld);
 
-	let totalEnergyUsed = computeEnergyConsumption(prodParams, results);
-	let crawlersEenergyCons = computeCrawlersEnergyConsumption(prodParams, results);
+	let totalEnergyUsed = computeEnergyConsumption(prodParams, settings, results);
+	let crawlersEenergyCons = computeCrawlersEnergyConsumption(prodParams, settings, results);
 	totalEnergyUsed += crawlersEenergyCons;
 	// Life form buildings draw energy from the same pool as mines and crawlers.
 	totalEnergyUsed += lfEff.energyUsed;
@@ -560,9 +638,9 @@ function calculateProduction(prodParams, plnData, normalized = false, lfEff = un
 		koeff = 1;
 	}
 
-	computeResourceProduction(prodParams, plnData, fullCrew, koeff, normalized, results, production);
-	applyCrawlerProductionBonus(prodParams, results, production);
-	applyLfTechProductionBonus(results, production);
+	computeResourceProduction(prodParams, plnData, settings, koeff, normalized, results, production);
+	applyCrawlerProductionBonus(prodParams, settings, results, production);
+	applyLfTechProductionBonus(settings, results, production);
 	applyLfBuildingProduction(lfEff, results, lfBld, production);
 
 	return [results, production, totalEnergyProduced, totalEnergyUsed, koeff, lfBld];

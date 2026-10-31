@@ -198,11 +198,11 @@
         }
         try {
           if (options.prm.aPS.length === 0)
-            convertAllPlanetParams();
+            convertAllPlanetParams(options.prm, options.planetNumStr);
         } catch (e) {
           resetParams();
         }
-        convertExchangeRates();
+        convertExchangeRates(options.prm);
 
         populateParams();
         if (options.prm.planetPos === 0)
@@ -289,29 +289,31 @@
       <?php endforeach; ?>
     };
 
-    // Life form building energy consumption: id => [base energy, growth coefficient].
-    // Consumption at level n = floor(base * n * pow(coeff, n)).
-    options.lfEnergy = {
-      <?php $first = true; ?>
-      <?php foreach ($lfBuildingEnergy as $lfId => $lfE): ?>
-      <?=(!$first)?',':''?><?= $lfId ?>:[<?= $lfE[0] ?>, <?= $lfE[1] ?>]
-      <?php $first = false; ?>
-      <?php endforeach; ?>
-    };
-
-    // Life form building production/energy bonuses: id => {kind:[base, factor, max]}.
-    // kind is met/cry/deu/enP/enR; pct(level) = min(max*100, base*factor^(level-1)*level).
-    options.lfBonus = {
-      <?php $first = true; ?>
-      <?php foreach ($lfBuildingBonus as $lfId => $lfB): ?>
-      <?=(!$first)?',':''?><?= $lfId ?>:{<?php $bf = true; foreach ($lfB as $kind => $p): ?><?=(!$bf)?',':''?><?= $kind ?>:[<?= $p[0] ?>, <?= $p[1] ?>, <?= $p[2] === null ? 'null' : $p[2] ?>]<?php $bf = false; endforeach; ?>}
-      <?php $first = false; ?>
-      <?php endforeach; ?>
+    // The life form building tables lfBuildingEffects() reads (production-core.js).
+    options.lfTables = {
+      // Energy consumption: id => [base energy, growth coefficient].
+      // Consumption at level n = floor(base * n * pow(coeff, n)).
+      lfEnergy: {
+        <?php $first = true; ?>
+        <?php foreach ($lfBuildingEnergy as $lfId => $lfE): ?>
+        <?=(!$first)?',':''?><?= $lfId ?>:[<?= $lfE[0] ?>, <?= $lfE[1] ?>]
+        <?php $first = false; ?>
+        <?php endforeach; ?>
+      },
+      // Production/energy bonuses: id => {kind:[base, factor, max]}.
+      // kind is met/cry/deu/enP/enR; pct(level) = min(max*100, base*factor^(level-1)*level).
+      lfBonus: {
+        <?php $first = true; ?>
+        <?php foreach ($lfBuildingBonus as $lfId => $lfB): ?>
+        <?=(!$first)?',':''?><?= $lfId ?>:{<?php $bf = true; foreach ($lfB as $kind => $p): ?><?=(!$bf)?',':''?><?= $kind ?>:[<?= $p[0] ?>, <?= $p[1] ?>, <?= $p[2] === null ? 'null' : $p[2] ?>]<?php $bf = false; endforeach; ?>}
+        <?php $first = false; ?>
+        <?php endforeach; ?>
+      }
     };
 
     // Life form researches that raise resource production, in a fixed order
     // (options.prm.lfResLevels follows it), and their raw bonuses in the
-    // options.lfBonus shape: id => {kind:[base, factor, max]}, pct = base * level.
+    // options.lfTables.lfBonus shape: id => {kind:[base, factor, max]}, pct = base * level.
     options.lfResIds = <?= json_encode(array_keys($lfResearchBonus)) ?>;
     options.lfResBonus = <?= json_encode($lfResearchBonus) ?>;
     // Build costs of the life form objects the LF amortization table proposes,

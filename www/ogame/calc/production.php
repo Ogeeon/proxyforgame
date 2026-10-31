@@ -62,22 +62,18 @@ foreach (json_decode(file_get_contents(__DIR__ . '/data/lf-building-bonuses.json
 // amortization" table takes from its own field. Source: lf_data.xlsx in
 // benedikt-holland/ogame-lifeform-amortisation, the source of the building
 // bonuses above. The order here is the order of options.prm.lfResLevels.
-$lfResearchBonus = array(
-    1102 => array('met' => array(0.06, 1.0, null), 'cry' => array(0.06, 1.0, null), 'deu' => array(0.06, 1.0, null)), // High-Performance Extractors
-    1108 => array('met' => array(0.06, 1.0, null), 'cry' => array(0.06, 1.0, null), 'deu' => array(0.06, 1.0, null)), // Enhanced Production Technologies
-    2102 => array('cry' => array(0.08, 1.0, null)),                           // Acoustic Scanning
-    2103 => array('deu' => array(0.08, 1.0, null)),                           // High Energy Pump Systems
-    2105 => array('met' => array(0.08, 1.0, null), 'cry' => array(0.08, 1.0, null), 'deu' => array(0.08, 1.0, null)), // Magma-Powered Production
-    2107 => array('met' => array(0.08, 1.0, null)),                           // Depth Sounding
-    2110 => array('met' => array(0.08, 1.0, null)),                           // Hardened Diamond Drill Heads
-    2111 => array('cry' => array(0.08, 1.0, null)),                           // Seismic Mining Technology
-    2112 => array('deu' => array(0.08, 1.0, null)),                           // Magma-Powered Pump Systems
-    3101 => array('deu' => array(0.08, 1.0, null)),                           // Catalyser Technology
-    3106 => array('met' => array(0.06, 1.0, null), 'cry' => array(0.06, 1.0, null), 'deu' => array(0.06, 1.0, null)), // Automated Transport Lines
-    3113 => array('met' => array(0.06, 1.0, null), 'cry' => array(0.06, 1.0, null), 'deu' => array(0.06, 1.0, null)), // Artificial Swarm Intelligence
-    4102 => array('deu' => array(0.08, 1.0, null)),                           // Sulphide Process
-    4112 => array('met' => array(0.06, 1.0, null), 'cry' => array(0.06, 1.0, null), 'deu' => array(0.06, 1.0, null)), // Psychoharmoniser
-);
+//
+// The table lives in data/lf-research-bonuses.json. The researches it lists:
+// 1102 High-Performance Extractors, 1108 Enhanced Production Technologies,
+// 2102 Acoustic Scanning, 2103 High Energy Pump Systems, 2105 Magma-Powered
+// Production, 2107 Depth Sounding, 2110 Hardened Diamond Drill Heads, 2111
+// Seismic Mining Technology, 2112 Magma-Powered Pump Systems, 3101 Catalyser
+// Technology, 3106 Automated Transport Lines, 3113 Artificial Swarm
+// Intelligence, 4102 Sulphide Process, 4112 Psychoharmoniser.
+$lfResearchBonus = array();
+foreach (json_decode(file_get_contents(__DIR__ . '/data/lf-research-bonuses.json'), true) as $lfId => $lfB) {
+    $lfResearchBonus[(int)$lfId] = $lfB;
+}
 
 // Build costs of every life form object the "LF amortization" table can
 // propose: the resource-producing buildings and researches. Each row is laid
@@ -96,41 +92,18 @@ foreach (array_merge($lfProdIds, array_keys($lfResearchBonus)) as $lfId) {
     $lfAmortNames[$lfId] = $lfTr[$lfRow[0]];
 }
 
-// id => (translation key, type, metal, crystal, deuterium, cost-growth factor}
-$techData = array(
-    1 => array('metal-mine', 2, 60, 15, 0, 1.5),
-    2 => array('crystal-mine', 2, 48, 24, 0, 1.6),
-    3 => array('deut-synth', 2, 225, 75, 0, 1.5),
-
-    202 => array('small-cargo', 5, 2000, 2000, 0, 1),
-    203 => array('large-cargo', 5, 6000, 6000, 0, 1),
-    204 => array('light-fighter', 5, 3000, 1000, 0, 1),
-    205 => array('heavy-fighter', 5, 6000, 4000, 0, 1),
-    206 => array('cruiser', 5, 20000, 7000, 2000, 1),
-    207 => array('battleship', 5, 45000, 15000, 0, 1),
-    208 => array('colony-ship', 5, 10000, 20000, 10000, 1),
-    209 => array('recycler', 5, 10000, 6000, 2000, 1),
-    210 => array('esp-probe', 5, 0, 1000, 0, 1),
-    211 => array('bomber', 5, 50000, 25000, 15000, 1),
-    212 => array('solar-sat', 5, 0, 2000, 500, 1),
-    213 => array('destroyer', 5, 60000, 50000, 15000, 1),
-    214 => array('death-star', 5, 5000000, 4000000, 1000000, 1),
-    215 => array('battlecruiser', 5, 30000, 40000, 15000, 1),
-    217 => array('crawler', 5, 2000, 2000, 1000, 1),
-    218 => array('reaper', 5, 85000, 55000, 20000, 1),
-    219 => array('pathfinder', 5, 8000, 15000, 8000, 1),
-
-    401 => array('rocket-launcher', 6, 2000, 0, 0, 1),
-    402 => array('light-laser', 6, 1500, 500, 0, 1),
-    403 => array('heavy-laser', 6, 6000, 2000, 0, 1),
-    404 => array('gauss-cannon', 6, 20000, 15000, 2000, 1),
-    405 => array('ion-cannon', 6, 5000, 3000, 0, 1),
-    406 => array('plasma-turret', 6, 50000, 50000, 30000, 1),
-    407 => array('small-shield', 6, 10000, 10000, 0, 1),
-    408 => array('large-shield', 6, 50000, 50000, 0, 1),
-    502 => array('abm', 6, 8000, 0, 2000, 1),
-    503 => array('ipm', 6, 12500, 2500, 10000, 1)
-);
+// id => (translation key, type, metal, crystal, deuterium, cost-growth factor),
+// taken from the costs calculator's table (data/costs-techs.json): the three
+// mines, whose next level the amortization tables price, and every ship (type 5)
+// and defence (type 6), which the accumulation panel counts.
+define('PRODUCTION_MINES', array(1, 2, 3));
+$techData = array();
+foreach (json_decode(file_get_contents(__DIR__ . '/data/costs-techs.json'), true)['techs'] as $techId => $tech) {
+    $techId = (int)$techId;
+    if (in_array($techId, PRODUCTION_MINES, true) || $tech['type'] === 5 || $tech['type'] === 6) {
+        $techData[$techId] = array($tech['key'], $tech['type'], $tech['cost'][0], $tech['cost'][1], $tech['cost'][2], $tech['growth']);
+    }
+}
 
 $oneTblProdRows = array('natural-production', 'metal-mine', 'crystal-mine', 'deut-synth', 'solar-plant', 'fusion-reactor', 'solar-sat', 'crawler', 'plasma-tech', 'booster', 'geologist', 'engineer', 'commanding-staff', 'class', 'alliance-class', 'lifeform-tech', 'prod-per-hour', 'prod-per-day', 'prod-per-week');
 $allTblTotalRows = array('prod-per-hour', 'prod-per-day', 'prod-per-week');
