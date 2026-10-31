@@ -546,7 +546,10 @@ class FlightOrchestrator {
         const tolerance = Math.round(toleranceSeconds / legs);
         this.opts.prm.saveTolerance = toleranceSeconds;
 
-        const params = this.collector.collectParams(this._state());
+        // A flight to a save point is always a peaceful mission, whatever the
+        // flight tab has picked: that also keeps the warrior's holding-only
+        // speed bonus out of the search.
+        const params = { ...this.collector.collectParams(this._state()), missionType: MISSION.PEACEFUL };
         const ships = this.calc.buildShipsData(params.driveLevels, params.spCargohold);
         const counts = this.collector.collectShipCounts();
         const minSpeed = this._effectiveMinSpeed(ships, counts, params);
@@ -1175,6 +1178,12 @@ class FlightOrchestrator {
      */
     showFlightTime(point, depTime, speed, legs) {
         FlightOrchestrator._showTab('tabtag1');
+        // A flight to a save point is always a peaceful mission - the search ran
+        // at that speed - so the flight tab is switched to it before the recalc.
+        // Left on war or moon destruction, the table and the legs seeded below
+        // would describe another flight than the row the user picked.
+        setChecked(`#mission-type-${MISSION.PEACEFUL}`, true);
+        this.opts.prm.missionType = MISSION.PEACEFUL;
         setVal('#destination-g', point[0]);
         setVal('#destination-s', point[1]);
         setVal('#destination-p', point[2]);
@@ -1189,7 +1198,7 @@ class FlightOrchestrator {
         // The save point was found with the overridden speed, so the leg it seeds
         // has to be built the same way.
         const minSpeed = this._effectiveMinSpeed(ships, counts, params);
-        const fleetSpeed = this.calc.fleetSpeedFor(params.missionType, params);
+        const fleetSpeed = this.calc.fleetSpeedFor(MISSION.PEACEFUL, params);
         const duration = this.calc.getFlightDuration(minSpeed, distance, speed, fleetSpeed);
 
         this._resetLegRows();

@@ -1586,6 +1586,34 @@ test.describe('Flight Calculator - Save Points', () => {
     });
 
     /**
+     * A flight to a save point is always a peaceful mission: the search runs at
+     * the peaceful universe speed. A war or moon-destruction mission left picked
+     * on the flight tab must not leak into the legs the point seeds, or the
+     * arrival there describes another flight than the row promised.
+     */
+    for (const [mission, name] of [['0', 'war'], ['3', 'moon destruction']]) {
+        test(`a save point picked under a ${name} mission flies peaceful`, async ({ page }) => {
+            await openParams(page, '#speed-fleet-war');
+            await page.locator('#speed-fleet-war').selectOption('1');
+            await page.locator('#speed-fleet-peaceful').selectOption('5');
+            await openFlightTimesTab(page);
+            await page.locator(`#mission-type-${mission}`).check();
+            await page.locator('#tabtag2').click();
+
+            await fillSavePoints(page);
+            await page.locator('#calculate-savepoints').click();
+
+            const row = page.locator('#savepoints-systems tr').nth(1);
+            const shown = await row.locator('.savepoint-return').innerText();
+            await row.locator('a').click();
+
+            await expect(page.locator('#arrival-moment')).toHaveText(shown);
+            await expect(page.locator('#mission-type-1')).toBeChecked();
+            expect(await page.evaluate(() => options.prm.missionType)).toBe(1);
+        });
+    }
+
+    /**
      * A ring universe with the departure in galaxy 4 of 9: stepping four
      * galaxies down runs off the end of the ring and comes back onto galaxy 9,
      * which is those same four galaxies away the other way round. Listing any
