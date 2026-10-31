@@ -83,11 +83,12 @@ class FlightRenderer {
 
     /**
      * Fill the flight-times table.
-     * @param {Array<{duration: number, deut: number, cargo: number}>} entries
+     * @param {Array<{duration: number, deut: number}>} entries
      *   one per speed step, index 0 = 100% down to index 19 = 5%
+     * @param {number} cargo the fleet's capacity, the same at every speed
      * @param {number} playerClass drives which rows are visible and their striping
      */
-    renderFlightTimes(entries, playerClass) {
+    renderFlightTimes(entries, cargo, playerClass) {
         const rows = speedRows();
         entries.forEach((entry, i) => {
             const row = rows[i];
@@ -96,7 +97,7 @@ class FlightRenderer {
             }
             row.children[1].innerHTML = this._fmtTime(entry.duration);
             row.children[2].innerHTML = numToOGame(entry.deut);
-            row.children[3].innerHTML = numToOGame(entry.cargo);
+            row.children[3].innerHTML = numToOGame(cargo);
             takeToCalcButton(row).hidden = false;
             this._stripeRow(row, i + 1, playerClass);
         });

@@ -392,18 +392,6 @@ class FlightCalculator {
     }
 
     // ------------------------------------------------------------------
-    // Save points
-    // ------------------------------------------------------------------
-
-    /**
-     * Orders save point candidates: slowest fleet speed first, and among equally
-     * slow ones the cheapest trip first.
-     */
-    compareSavePoints(a, b) {
-        return a[0] === b[0] ? a[2] - b[2] : a[0] - b[0];
-    }
-
-    // ------------------------------------------------------------------
     // Mission type
     // ------------------------------------------------------------------
 
@@ -432,4 +420,277 @@ class FlightCalculator {
         }
         return params.fleetSpeedWar;
     }
+
+    /**
+     * Everything the mission decides about a flight: the speed it flies at at
+     * 100%, the universe factor that divides its duration, and the one speed
+     * every ship burns fuel at when the mission pins it (0 when it does not).
+     * The fuel is read back out of the duration, which carries the speed
+     * percentage, so the fixed speed alone is enough for a throttled trip too.
+     *
+     * @param {number} missionType
+     * @param {number} minSpeed the slowest ship's speed, or the manual override
+     * @returns {{flightSpeed: number, fleetSpeed: number, fixedSpeed: number}}
+     */
+    missionSpeeds(missionType, minSpeed, params) {
+        const flightSpeed = this.speedForMission(missionType, minSpeed);
+        return {
+            flightSpeed,
+            fleetSpeed: this.fleetSpeedFor(missionType, params),
+            fixedSpeed: missionType === MISSION.DESTROY ? flightSpeed : 0,
+        };
+    }
+
+    /**
+     * The speed steps the fleet-speed control offers, fastest first: every 5%
+     * for the general, every 10% for every other class.
+     * @param {number} playerClass
+     * @returns {number[]}
+     */
+    speedPercents(playerClass) {
+        return percentSteps(playerClass === PLAYER_CLASS.GENERAL ? 5 : 10);
+    }
+
+    // ------------------------------------------------------------------
+    // Flight plan
+    // ------------------------------------------------------------------
+
+    /**
+     * One flight at one or more speed percentages: how long it takes and what
+     * it burns at each, and what the fleet carries.
+     *
+     * @param {any[][]} shipsData from buildShipsData()
+     * @param {number[]} counts ships in table order
+     * @param {number} distance from getDistance()
+     * @param {object} params
+     * @param {object} [flight]
+     * @param {number} [flight.minSpeed] the fleet's speed at 100% before the
+     *   mission has its say - the manual override goes here; the slowest ship's
+     *   speed when left out
+     * @param {number} [flight.missionType] defaults to params.missionType
+     * @param {number[]} [flight.percents] defaults to every 5% step, 100 down to 5
+     * @returns {FlightPlan}
+     */
+    planFlight(shipsData, counts, distance, params, flight = {}) {
+        const missionType = flight.missionType ?? params.missionType;
+        // The mission also decides the warrior's holding-only speed bonus, so
+        // the ships are timed and fuelled under the same one.
+        const mission = { ...params, missionType };
+        const minSpeed = flight.minSpeed ?? this.getMinSpeed(shipsData, counts, mission);
+        const { flightSpeed, fleetSpeed, fixedSpeed } = this.missionSpeeds(missionType, minSpeed, mission);
+
+        const entries = (flight.percents ?? percentSteps(5)).map((percent) => {
+            const duration = this.getFlightDuration(flightSpeed, distance, percent, fleetSpeed);
+            return {
+                percent,
+                duration,
+                deut: this.getDeutConsumption(shipsData, counts, distance, duration, fleetSpeed, mission,
+                    fixedSpeed),
+            };
+        });
+        return { flightSpeed, fleetSpeed, cargo: this.getCargoCapacity(shipsData, counts, mission), entries };
+    }
+
+    // ------------------------------------------------------------------
+    // Save points
+    // ------------------------------------------------------------------
+
+    /**
+     * The flight a save-point window asks for. The window covers the whole
+     * trip: one leg when the fleet only flies out, two when it comes back. Both
+     * the target duration and the tolerance are per leg, so they are split the
+     * same way.
+     *
+     * @param {number} startMs departure, epoch ms
+     * @param {number} returnMs return home - or arrival, one way - epoch ms
+     * @param {number} toleranceSeconds for the whole window
+     * @param {boolean} oneWay
+     * @returns {{legs: number, target: number, tolerance: number}} target and
+     *   tolerance in seconds per leg
+     */
+    saveWindow(startMs, returnMs, toleranceSeconds, oneWay) {
+        const legs = oneWay ? 1 : 2;
+        return {
+            legs,
+            target: Math.round(Math.ceil((returnMs - startMs) / 1000) / legs),
+            tolerance: Math.round(toleranceSeconds / legs),
+        };
+    }
+
+    /**
+     * Orders save points: slowest fleet speed first, and among equally slow
+     * ones the cheapest trip first.
+     * @param {SavePoint} a
+     * @param {SavePoint} b
+     */
+    compareSavePoints(a, b) {
+        return a.speedPercent === b.speedPercent ? a.cost - b.cost : a.speedPercent - b.speedPercent;
+    }
+
+    /**
+     * Every point along the three axes - other galaxies, other systems of the
+     * departure galaxy, other positions of the departure system - that the
+     * fleet reaches at one of its speed steps with a leg strictly inside
+     * target ± tolerance. A flight to a save point is always a peaceful
+     * mission, whatever params.missionType says.
+     *
+     * @param {any[][]} shipsData from buildShipsData()
+     * @param {number[]} counts ships in table order
+     * @param {number[]} departure
+     * @param {object} params
+     * @param {object} search
+     * @param {number} search.target seconds per leg, from saveWindow()
+     * @param {number} search.tolerance seconds per leg, exclusive on both sides
+     * @param {number} search.legs 1 one way, 2 there and back
+     * @param {number} [search.startAt] departure, epoch ms; arriveAt counts from it
+     * @param {number} [search.minSpeed] the manual speed override; the slowest
+     *   ship's speed when left out
+     * @returns {{galaxies: SavePoint[], systems: SavePoint[], planets: SavePoint[]}}
+     *   each sorted by compareSavePoints()
+     */
+    findSavePoints(shipsData, counts, departure, params, search) {
+        const peaceful = { ...params, missionType: MISSION.PEACEFUL };
+        const minSpeed = search.minSpeed ?? this.getMinSpeed(shipsData, counts, peaceful);
+        const ctx = {
+            shipsData, counts, departure,
+            params: peaceful,
+            speeds: this.missionSpeeds(MISSION.PEACEFUL, minSpeed, peaceful),
+            percents: this.speedPercents(params.playerClass),
+            target: search.target,
+            tolerance: search.tolerance,
+            legs: search.legs,
+            startAt: search.startAt ?? 0,
+        };
+        const axes = [
+            { limit: params.numberOfGalaxies, circular: params.circularGalaxies },
+            { limit: params.numberOfSystems, circular: params.circularSystems },
+            { limit: 16, circular: false },
+        ];
+        const [galaxies, systems, planets] = axes.map((axis, axisIndex) =>
+            this._axisSavePoints(ctx, axisIndex, axis));
+        return { galaxies, systems, planets };
+    }
+
+    /**
+     * Sweeps one axis outwards from the departure, one step at a time.
+     * @returns {SavePoint[]}
+     */
+    _axisSavePoints(ctx, axisIndex, axis) {
+        const { shipsData, counts, departure, params, speeds, percents, target, tolerance, legs, startAt } = ctx;
+        /** @type {SavePoint[]} */
+        const rows = [];
+        // Past half a ring the fleet would take the short way round, so every
+        // farther delta only repeats a trip already listed. A straight axis has
+        // no such repeat and runs to its own ends.
+        const half = Math.floor(axis.limit / 2);
+        for (let delta = 1; !(axis.circular && delta > half); delta++) {
+            const distance = this._distanceForDelta(axisIndex, delta, departure, params, axis.limit);
+            if (distance === 0) {
+                break;
+            }
+            for (const percent of percents) {
+                const duration = this.getFlightDuration(speeds.flightSpeed, distance, percent, speeds.fleetSpeed);
+                // Too far even at full speed: every slower step and every
+                // farther delta only take longer.
+                if (percent === 100 && duration > target + tolerance) {
+                    break;
+                }
+                if (duration <= target - tolerance || duration >= target + tolerance) {
+                    continue;
+                }
+                const cost = this.getDeutConsumption(shipsData, counts, distance, duration, speeds.fleetSpeed,
+                    params, speeds.fixedSpeed);
+                // A one-way fleet is done on landing; a returning one is home
+                // after twice the same flight.
+                const arriveAt = startAt + duration * 1000 * legs;
+                this._pointsAtDelta(axisIndex, delta, departure, axis).forEach((point) =>
+                    rows.push({ speedPercent: percent, point, cost, arriveAt }));
+            }
+        }
+        return rows.sort((a, b) => this.compareSavePoints(a, b));
+    }
+
+    /** Distance to the point `delta` steps from departure along one axis, or 0 if out of range. */
+    _distanceForDelta(axisIndex, delta, departure, params, limit) {
+        const destination = [...departure];
+        if (departure[axisIndex] - delta > 0) {
+            destination[axisIndex] = departure[axisIndex] - delta;
+        } else if (departure[axisIndex] + delta <= limit) {
+            destination[axisIndex] = departure[axisIndex] + delta;
+        } else {
+            return 0;
+        }
+        return this.getDistance(departure, destination, params).distance;
+    }
+
+    /**
+     * The one or two points `delta` steps from the departure along one axis.
+     *
+     * Both have to sit exactly `delta` steps away, or the arrival promised for
+     * them is not the one the flight tab computes. On a ring axis the step off
+     * the end wraps to the other end - `below + limit` going down, `above -
+     * limit` going up - which is `delta` steps the long way round and therefore
+     * the same trip. A wrap can land on the point the other direction already
+     * gave (an even-sized ring, delta at half of it): one is enough.
+     *
+     * @returns {number[][]}
+     */
+    _pointsAtDelta(axisIndex, delta, departure, axis) {
+        const coords = [];
+        const below = departure[axisIndex] - delta;
+        const above = departure[axisIndex] + delta;
+
+        if (below > 0) {
+            coords.push(below);
+        } else if (axis.circular) {
+            coords.push(below + axis.limit);
+        }
+
+        let up = null;
+        if (above <= axis.limit) {
+            up = above;
+        } else if (axis.circular) {
+            up = above - axis.limit;
+        }
+        if (up !== null && !coords.includes(up)) {
+            coords.push(up);
+        }
+
+        return coords.map((coord) => {
+            const point = [...departure];
+            point[axisIndex] = coord;
+            return point;
+        });
+    }
 }
+
+/**
+ * Speed percentages from 100 down in steps of `step`.
+ * @param {number} step
+ * @returns {number[]}
+ */
+function percentSteps(step) {
+    const percents = [];
+    for (let percent = 100; percent > 0; percent -= step) {
+        percents.push(percent);
+    }
+    return percents;
+}
+
+/**
+ * @typedef {object} FlightPlan
+ * @property {number} flightSpeed the speed at 100%, after the mission's rules
+ * @property {number} fleetSpeed the universe factor the mission flies under
+ * @property {number} cargo what the fleet carries
+ * @property {Array<{percent: number, duration: number, deut: number}>} entries
+ *   one per speed step asked for, in the same order; duration in seconds
+ */
+
+/**
+ * @typedef {object} SavePoint
+ * @property {number} speedPercent the speed step that fits the window
+ * @property {number[]} point the coordinates to fly to
+ * @property {number} cost deuterium for one leg
+ * @property {number} arriveAt epoch ms the fleet lands - at the point one way,
+ *   back home on a round trip
+ */

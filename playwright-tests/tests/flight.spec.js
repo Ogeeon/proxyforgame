@@ -51,7 +51,6 @@ async function installCompat(page) {
             return calc.getCargoCapacity(ships(), collector.collectShipCounts(), p);
         };
         window.getSecondsFromTimeField = (t) => orch._legSeconds(t);
-        window.compareSavePoints = (a, b) => calc.compareSavePoints(a, b);
         window.validateSPParams = () => orch._validateSavePointForm();
 
         if (!Object.getOwnPropertyDescriptor(options, 'isSpeedOvr')?.get) {
@@ -1477,6 +1476,9 @@ async function enableSpeedOverride(page, speed) {
     await page.locator('#tabtag2').click();
 }
 
+// The search itself - ring wrap, axis ends, tolerance bounds, speed steps, the
+// order of the rows - is covered by findSavePoints() in unit-tests/flight-core.test.js.
+// What stays here drives the form, the result tables and a picked point.
 test.describe('Flight Calculator - Save Points', () => {
     test.beforeEach(async ({ context, page }) => {
         await context.addInitScript(() => {
@@ -1485,15 +1487,6 @@ test.describe('Flight Calculator - Save Points', () => {
         await page.goto('/flight');
         await installCompat(page);
         await page.locator('#tabtag2').click();
-    });
-
-    test('candidates are ordered by speed, then by fuel cost', async ({ page }) => {
-        const sorted = await page.evaluate(() => {
-            const points = [[50, 'a', 300], [10, 'b', 100], [50, 'c', 100], [10, 'd', 500]];
-            return [...points].sort(compareSavePoints).map((p) => p[1]);
-        });
-        // Slowest first; within one speed the cheaper trip wins
-        expect(sorted).toEqual(['b', 'd', 'c', 'a']);
     });
 
     test('an empty fleet is reported first', async ({ page }) => {
@@ -1545,30 +1538,6 @@ test.describe('Flight Calculator - Save Points', () => {
         await expect(firstCell).toHaveText(/^\d+%$/);
     });
 
-    test('every candidate shows the forecast return moment', async ({ page }) => {
-        await fillSavePoints(page);
-        await page.locator('#calculate-savepoints').click();
-
-        // Read the cells through parseDate so the check survives both date formats
-        const offsets = await page.evaluate(() => {
-            const start = parseDate(document.getElementById('save-start-datetime').value, options.datetimeFormat);
-            const seconds = [];
-            ['savepoints-galaxies', 'savepoints-systems', 'savepoints-planets'].forEach((id) => {
-                document.querySelectorAll(`#${id} .savepoint-return`).forEach((td) => {
-                    seconds.push((parseDate(td.textContent, options.datetimeFormat) - start) / 1000);
-                });
-            });
-            return seconds;
-        });
-
-        expect(offsets.length).toBeGreaterThan(0);
-        // A 4h round trip searched with a 2h tolerance: home between 14:00 and 18:00
-        for (const offset of offsets) {
-            expect(offset).toBeGreaterThan(2 * 3600);
-            expect(offset).toBeLessThan(6 * 3600);
-        }
-    });
-
     test('the shown return moment matches the legs the point seeds', async ({ page }) => {
         await fillSavePoints(page);
         await page.locator('#calculate-savepoints').click();
@@ -1612,54 +1581,6 @@ test.describe('Flight Calculator - Save Points', () => {
             expect(await page.evaluate(() => options.prm.missionType)).toBe(1);
         });
     }
-
-    /**
-     * A ring universe with the departure in galaxy 4 of 9: stepping four
-     * galaxies down runs off the end of the ring and comes back onto galaxy 9,
-     * which is those same four galaxies away the other way round. Listing any
-     * other galaxy there promises a flight time the first tab will not honour.
-     */
-    test('a save point past the end of the galaxy ring is as far away as its row promises', async ({ page }) => {
-        await openParams(page, '#departure-g');
-        await page.locator('#departure-g').fill('4');
-        await openParams(page, '#galaxies-num');
-        await page.locator('#galaxies-num').fill('9');
-        await page.locator('#circular-galaxies').check();
-        await page.evaluate(() => updateNumbers());
-        await enableSpeedOverride(page, 100000); // fast enough to cross galaxies
-
-        await fillSavePoints(page, { roundTripHours: 5.5, tolerance: '01:00' });
-        await page.locator('#calculate-savepoints').click();
-
-        const rows = page.locator('#savepoints-galaxies tr');
-        const count = await rows.count();
-        expect(count, 'the search lists galaxies').toBeGreaterThan(1);
-
-        for (let i = 1; i < count; i++) {
-            const row = rows.nth(i);
-            const shown = await row.locator('.savepoint-return').innerText();
-            const label = await row.locator('a').innerText();
-            await row.locator('a').click();
-
-            const expected = await page.evaluate(() => {
-                const start = parseDate(document.getElementById('save-start-datetime').value, options.datetimeFormat);
-                const roundTrip = options.prm.flightData.reduce((sum, leg) => sum + leg, 0);
-                return getDateStr(start + roundTrip * 1000, options.datetimeFormat);
-            });
-            expect(shown, `save point ${label}`).toBe(expected);
-            await page.locator('#tabtag2').click();
-        }
-    });
-
-    test('results are listed slowest first', async ({ page }) => {
-        await fillSavePoints(page);
-        await page.locator('#calculate-savepoints').click();
-
-        const speeds = await page.locator('#savepoints-systems tr td:first-child').allInnerTexts();
-        const numeric = speeds.map((s) => Number(s.replace('%', '')));
-        const ascending = [...numeric].sort((a, b) => a - b);
-        expect(numeric).toEqual(ascending);
-    });
 
     test('a zero tolerance finds nothing and says so', async ({ page }) => {
         await fillSavePoints(page, { tolerance: '00:00' });
@@ -1776,24 +1697,6 @@ test.describe('Flight Calculator - Save Points', () => {
             return getDateStr(start + flight * 1000, options.datetimeFormat);
         });
         expect(shown).toBe(expected);
-    });
-
-    test('a one-way search reaches farther than a round trip', async ({ page }) => {
-        const farthestSystem = async () => {
-            const labels = await page.locator('#savepoints-systems tr td:nth-child(2)').allInnerTexts();
-            return Math.max(...labels.map((label) => Number(label.split(':')[1])));
-        };
-
-        await fillSavePoints(page);
-        await page.locator('#calculate-savepoints').click();
-        const roundTrip = await farthestSystem();
-
-        await page.locator('#save-one-way').check();
-        await fillSavePoints(page);
-        await page.locator('#calculate-savepoints').click();
-
-        // The same window buys twice the flight when the fleet stays there
-        expect(await farthestSystem()).toBeGreaterThan(roundTrip);
     });
 
     test('a one-way departure later than the arrival names the arrival', async ({ page }) => {

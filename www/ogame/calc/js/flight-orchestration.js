@@ -242,33 +242,17 @@ class FlightOrchestrator {
 
         // An empty fleet has nothing to fly, so there is no duration, fuel or
         // cargo to show — not even when the manual speed override is on.
-        const minSpeed = counts.some((count) => count > 0)
-            ? this._effectiveMinSpeed(ships, counts, params)
-            : Infinity;
-        if (minSpeed === Infinity) {
+        if (!counts.some((count) => count > 0)) {
             this.renderer.renderEmptyState('ships', params.playerClass);
             this.opts.save();
             return;
         }
 
-        const fleetSpeed = this.calc.fleetSpeedFor(params.missionType, params);
-        const flightSpeed = this.calc.speedForMission(params.missionType, minSpeed);
-        // Moon destruction flies at 310 whatever the fleet could do, but the speed
-        // percentage is still picked by the player, so it keeps all twenty steps.
-        // The fuel is read back out of the duration, which carries the percentage,
-        // so handing over the fixed speed is enough for a throttled trip too.
-        const fixedSpeed = params.missionType === MISSION.DESTROY ? flightSpeed : 0;
-        const entries = [];
-        for (let percent = 100; percent > 0; percent -= 5) {
-            const duration = this.calc.getFlightDuration(flightSpeed, distance, percent, fleetSpeed);
-            entries.push({
-                duration,
-                deut: this.calc.getDeutConsumption(ships, counts, distance, duration, fleetSpeed, params,
-                    fixedSpeed),
-                cargo: this.calc.getCargoCapacity(ships, counts, params),
-            });
-        }
-        this.renderer.renderFlightTimes(entries, params.playerClass);
+        // All twenty steps, whatever the class: the renderer hides the ones
+        // the class cannot pick. Moon destruction keeps them too - it flies at
+        // 310 whatever the fleet could do, but the percentage is the player's.
+        const plan = this.calc.planFlight(ships, counts, distance, params, { minSpeed: this._overrideSpeed() });
+        this.renderer.renderFlightTimes(plan.entries, plan.cargo, params.playerClass);
         this.opts.save();
     }
 
@@ -290,13 +274,17 @@ class FlightOrchestrator {
         }
     }
 
-    /** Manual speed override wins over the fleet's slowest ship; 0 means "use 10000". */
-    _effectiveMinSpeed(ships, counts, params) {
-        const override = this.collector.collectSpeedOverride();
+    /**
+     * The manual speed override, which wins over the fleet's slowest ship, or
+     * undefined while it is off - the core then takes the slowest ship itself.
+     * An override of 0 means "use 10000", and the field is told so.
+     * @returns {number|undefined}
+     */
+    _overrideSpeed() {
         if (!this.speedOverride.enabled) {
-            return this.calc.getMinSpeed(ships, counts, params);
+            return undefined;
         }
-        let speed = override.speed;
+        let speed = this.collector.collectSpeedOverride().speed;
         if (speed === 0) {
             speed = 10000;
             setVal('#ovr-speed-t', 10000);
@@ -533,158 +521,33 @@ class FlightOrchestrator {
         this.opts.prm.saveStartDT = startDTValue;
         this.opts.prm.saveReturnDT = returnDTValue;
         this.opts.prm.saveOneWay = form.oneWay;
-        // The window the user gave covers the whole trip: one leg when the fleet
-        // only flies out, two when it comes back. Both the target duration and
-        // the tolerance are per leg, so they are split the same way.
-        const legs = form.oneWay ? 1 : 2;
-        const target = Math.round(Math.ceil((returnDTValue - startDTValue) / 1000) / legs);
-
         // An unfilled tolerance field leaves the regexp without a match, which
         // is the same as asking for an exact hit.
         const tol = TOLERANCE_RE.exec(form.tolerance);
         const toleranceSeconds = tol ? Number(tol[1]) * 3600 + Number(tol[2]) * 60 : 0;
-        const tolerance = Math.round(toleranceSeconds / legs);
         this.opts.prm.saveTolerance = toleranceSeconds;
+        const span = this.calc.saveWindow(startDTValue, returnDTValue, toleranceSeconds, form.oneWay);
 
-        // A flight to a save point is always a peaceful mission, whatever the
-        // flight tab has picked: that also keeps the warrior's holding-only
-        // speed bonus out of the search.
-        const params = { ...this.collector.collectParams(this._state()), missionType: MISSION.PEACEFUL };
+        // The core flies the search as a peaceful mission whatever the flight
+        // tab has picked; showFlightTime() switches that tab to match.
+        const params = this.collector.collectParams(this._state());
         const ships = this.calc.buildShipsData(params.driveLevels, params.spCargohold);
         const counts = this.collector.collectShipCounts();
-        const minSpeed = this._effectiveMinSpeed(ships, counts, params);
         const departure = this.opts.prm.departure;
+        const found = this.calc.findSavePoints(ships, counts, departure, params,
+            { ...span, startAt: startDTValue, minSpeed: this._overrideSpeed() });
 
-        const found = this._searchSavePoints(
-            { params, ships, counts, minSpeed, departure, target, tolerance, legs, startAt: startDTValue },
-            form.startDT);
-        if (!found) {
+        const tables = [
+            { id: 'savepoints-galaxies', rows: found.galaxies, label: (p) => `${p[0]}:xxx:xx` },
+            { id: 'savepoints-systems', rows: found.systems, label: (p) => `${p[0]}:${p[1]}:xx` },
+            { id: 'savepoints-planets', rows: found.planets, label: (p) => p.join(':') },
+        ];
+        tables.forEach(({ id, rows, label }) => this.renderer.renderSavePoints(id,
+            rows.map((row) => ({ ...row, coordLabel: label(row.point) })), form.startDT, span.legs));
+        if (tables.every(({ rows }) => rows.length === 0)) {
             this.renderer.renderWarning(this.opts.msgNoSavepointsFound);
         }
         this.opts.save();
-    }
-
-    /** Sweep galaxies, systems and planets for arrival times within tolerance. */
-    _searchSavePoints(ctx, startDT) {
-        const { params, departure } = ctx;
-        const coordAxes = [
-            { limit: params.numberOfGalaxies, table: 'savepoints-galaxies', fmt: (v) => `${v}:xxx:xx`, circular: params.circularGalaxies },
-            { limit: params.numberOfSystems, table: 'savepoints-systems', fmt: (v) => `${departure[0]}:${v}:xx`, circular: params.circularSystems },
-            { limit: 16, table: 'savepoints-planets', fmt: (v) => `${departure[0]}:${departure[1]}:${v}`, circular: false },
-        ];
-        const increment = params.playerClass === PLAYER_CLASS.GENERAL ? 5 : 10;
-        let haveResults = false;
-
-        coordAxes.forEach((axis, axisIndex) => {
-            if (this._searchAxisSavePoints(axis, axisIndex, ctx, increment, startDT)) {
-                haveResults = true;
-            }
-        });
-
-        return haveResults;
-    }
-
-    /** Sweeps one coordinate axis (galaxy/system/planet) for save points within tolerance; returns true if any were found. */
-    _searchAxisSavePoints(axis, axisIndex, ctx, increment, startDT) {
-        const { params, ships, counts, minSpeed, departure, target, tolerance, legs, startAt } = ctx;
-        const rows = [];
-        const halve = Math.floor(axis.limit / 2);
-        let delta = 0;
-        while (true) {
-            delta++;
-            // Past half a ring the fleet would take the short way round, so
-            // every farther delta only repeats a trip already listed. A
-            // straight axis has no such repeat and runs to its own ends.
-            if (axis.circular && delta > halve) {
-                break;
-            }
-            const distance = this._distanceForDelta(axisIndex, delta, departure, params, axis.limit);
-            if (distance === 0) {
-                break;
-            }
-            for (let percent = 100; percent > 0; percent -= increment) {
-                const duration = this.calc.getFlightDuration(minSpeed, distance, percent, params.fleetSpeedPeaceful);
-                if (percent === 100 && duration > target + tolerance) {
-                    break;
-                }
-                if (duration <= target - tolerance || duration >= target + tolerance) {
-                    continue;
-                }
-                const cost = this.calc.getDeutConsumption(ships, counts, distance, duration, params.fleetSpeedPeaceful, params);
-                // A one-way fleet is done on landing; a returning one is home
-                // after twice the same flight.
-                const arriveAt = startAt + duration * 1000 * legs;
-                this._collectSavePointRows(rows, axisIndex, delta, departure, axis,
-                    { percent, cost, arriveAt });
-            }
-        }
-        rows.sort((a, b) => this.calc.compareSavePoints(
-            [a.speedPercent, 0, a.cost], [b.speedPercent, 0, b.cost]));
-        this.renderer.renderSavePoints(axis.table, rows, startDT, legs);
-        return rows.length > 0;
-    }
-
-    /** Distance to the point `delta` steps from departure along one axis, or 0 if out of range. */
-    _distanceForDelta(axisIndex, delta, departure, params, limit) {
-        const destination = [...departure];
-        if (departure[axisIndex] - delta > 0) {
-            destination[axisIndex] = departure[axisIndex] - delta;
-        } else if (departure[axisIndex] + delta <= limit) {
-            destination[axisIndex] = departure[axisIndex] + delta;
-        } else {
-            return 0;
-        }
-        return this.calc.getDistance(departure, destination, params).distance;
-    }
-
-    /**
-     * Build the one or two save-point rows a matching delta produces.
-     *
-     * Both rows have to sit exactly `delta` steps from the departure, or the
-     * arrival time shown here is not the one the first tab computes for that
-     * coordinate. On a ring axis the step off the end wraps to the other end —
-     * `below + limit` going down, `above - limit` going up — which is `delta`
-     * steps the long way round and therefore the same trip.
-     *
-     * @param {{percent: number, cost: number, arriveAt: number}} match the speed
-     *        step that fits the tolerance, its fuel bill and the moment the
-     *        fleet lands — at the target on a one-way flight, back home
-     *        otherwise (epoch ms).
-     */
-    _collectSavePointRows(rows, axisIndex, delta, departure, axis, match) {
-        const { percent, cost, arriveAt } = match;
-        const point = [...departure];
-        const added = [];
-        const addRow = (coord) => {
-            // A wrap can land on the coordinate the other direction already used
-            // (an even-sized ring, delta at half of it) — one row is enough.
-            if (added.includes(coord)) {
-                return;
-            }
-            added.push(coord);
-            point[axisIndex] = coord;
-            rows.push({
-                speedPercent: percent,
-                coordLabel: axis.fmt(coord),
-                cost,
-                arriveAt,
-                point: [...point],
-            });
-        };
-        const below = departure[axisIndex] - delta;
-        const above = departure[axisIndex] + delta;
-
-        if (below > 0) {
-            addRow(below);
-        } else if (axis.circular) {
-            addRow(below + axis.limit);
-        }
-
-        if (above <= axis.limit) {
-            addRow(above);
-        } else if (axis.circular) {
-            addRow(above - axis.limit);
-        }
     }
 
     /** @returns the id of the first bad field, or '' when the form is usable. */
@@ -1129,15 +992,13 @@ class FlightOrchestrator {
         const counts = this.collector.collectShipCounts();
         const route = this.collector.collectRoute();
         const distance = this.calc.getDistance(route.departure.coords, route.destination.coords, params).distance;
-        // Must match the row the user clicked, so it has to honour the manual
-        // speed override and the mission's fixed speed exactly like the
-        // flight-times table does.
-        const minSpeed = this.calc.speedForMission(params.missionType,
-            this._effectiveMinSpeed(ships, counts, params));
         const percentText = button.closest('tr').children[0].textContent;
         const percent = Number.parseInt(percentText, 10);
-        const fleetSpeed = this.calc.fleetSpeedFor(params.missionType, params);
-        const duration = this.calc.getFlightDuration(minSpeed, distance, percent, fleetSpeed);
+        // Must match the row the user clicked, so it is planned exactly like
+        // the flight-times table: same override, same mission.
+        const plan = this.calc.planFlight(ships, counts, distance, params,
+            { minSpeed: this._overrideSpeed(), percents: [percent] });
+        const duration = plan.entries[0].duration;
         // The picked row belongs to the departure tab on screen, and to that one
         // only: filling the recall panel used to grow a leg row behind the user's
         // back on the tab they were not looking at.
@@ -1195,11 +1056,11 @@ class FlightOrchestrator {
         const ships = this.calc.buildShipsData(params.driveLevels, params.spCargohold);
         const counts = this.collector.collectShipCounts();
         const distance = this.calc.getDistance(this.opts.prm.departure, point, params).distance;
-        // The save point was found with the overridden speed, so the leg it seeds
-        // has to be built the same way.
-        const minSpeed = this._effectiveMinSpeed(ships, counts, params);
-        const fleetSpeed = this.calc.fleetSpeedFor(MISSION.PEACEFUL, params);
-        const duration = this.calc.getFlightDuration(minSpeed, distance, speed, fleetSpeed);
+        // The save point was found as a peaceful flight with the overridden
+        // speed, so the leg it seeds has to be planned the same way.
+        const plan = this.calc.planFlight(ships, counts, distance, params,
+            { minSpeed: this._overrideSpeed(), missionType: MISSION.PEACEFUL, percents: [speed] });
+        const duration = plan.entries[0].duration;
 
         this._resetLegRows();
         for (let i = 0; i < legs; i++) {

@@ -978,6 +978,239 @@ describe('Flight Calculator - Cargo Capacity', () => {
     });
 });
 
+// ---------------------------------------------------------------------------
+// The flight plan and the save-point search: the sequences every caller - the
+// flight-times table, take-to-calc, a picked save point, the MCP tool - runs
+// through, rather than each stringing the primitives together on its own.
+// ---------------------------------------------------------------------------
+
+/** Universe speeds that differ per mission, so a wrong pick shows. */
+const MISSION_UNI = { fleetSpeedWar: 2, fleetSpeedPeaceful: 5, fleetSpeedHolding: 8 };
+
+/** A collectParams()-shaped object for a whole flight, discoverer, no research. */
+const flightParams = (over = {}) => shipParams({
+    ...UNI_DEFAULTS, ...MISSION_UNI, missionType: MISSION.PEACEFUL, ...over,
+});
+
+describe('Flight Calculator - Flight Plan', () => {
+    const counts = fleet({ [SHIP.LARGE_CARGO]: 100 });
+    const ships = calc.buildShipsData([0, 0, 0]);
+    const plan = (over, flight) => calc.planFlight(ships, counts, 3650, flightParams(over), flight);
+
+    it('plans every 5% step by default, fastest first', () => {
+        const { entries, flightSpeed, fleetSpeed } = plan();
+        expect(entries.map((e) => e.percent)).toEqual(
+            Array.from({ length: 20 }, (_, i) => 100 - i * 5));
+        expect(flightSpeed).toBe(7500);
+        expect(fleetSpeed).toBe(5);
+        entries.forEach((e) => {
+            expect(e.duration).toBe(calc.getFlightDuration(7500, 3650, e.percent, 5));
+            expect(e.deut).toBe(calc.getDeutConsumption(ships, counts, 3650, e.duration, 5, flightParams()));
+        });
+    });
+
+    it('plans only the steps asked for, in the order asked', () => {
+        expect(plan({}, { percents: [30, 100] }).entries.map((e) => e.percent)).toEqual([30, 100]);
+    });
+
+    it('flies under the universe speed of the mission', () => {
+        expect(plan({ missionType: MISSION.WAR }).fleetSpeed).toBe(2);
+        expect(plan({ missionType: MISSION.PEACEFUL }).fleetSpeed).toBe(5);
+        expect(plan({ missionType: MISSION.HOLDING }).fleetSpeed).toBe(8);
+    });
+
+    it('a mission given to it outranks the one in params, warrior bonus included', () => {
+        const holding = { missionType: MISSION.HOLDING, warriorBonus: true };
+        // The warrior speeds the large cargo up by a tenth of its base on holding only
+        expect(plan(holding).flightSpeed).toBe(8250);
+        const peaceful = plan(holding, { missionType: MISSION.PEACEFUL });
+        expect(peaceful.flightSpeed).toBe(7500);
+        expect(peaceful.fleetSpeed).toBe(5);
+    });
+
+    it('a manual speed replaces the slowest ship', () => {
+        const { flightSpeed, entries } = plan({}, { minSpeed: 100000, percents: [100] });
+        expect(flightSpeed).toBe(100000);
+        expect(entries[0].duration).toBe(calc.getFlightDuration(100000, 3650, 100, 5));
+    });
+
+    it('moon destruction flies at 310 outside the universe speed, and pays fuel at it', () => {
+        const stars = fleet({ [SHIP.DEATH_STAR]: 10 });
+        const params = flightParams({ driveLevels: [0, 0, 12], missionType: MISSION.DESTROY });
+        const fast = calc.buildShipsData(params.driveLevels);
+        const result = calc.planFlight(fast, stars, 3650, params, { minSpeed: 100000, percents: [100, 50] });
+
+        // Not even the manual override moves it
+        expect(result.flightSpeed).toBe(310);
+        expect(result.fleetSpeed).toBe(1);
+        const [full, half] = result.entries;
+        expect(full.duration).toBe(calc.getFlightDuration(310, 3650, 100, 1));
+        expect(half.duration).toBe(calc.getFlightDuration(310, 3650, 50, 1));
+        expect(full.deut).toBe(calc.getDeutConsumption(fast, stars, 3650, full.duration, 1, params, 310));
+        // At their own 460 the stars would burn less: the fixed speed is what counts
+        expect(full.deut).not.toBe(calc.getDeutConsumption(fast, stars, 3650, full.duration, 1, params));
+    });
+
+    it('carries the fleet\'s cargo capacity', () => {
+        expect(plan().cargo).toBe(calc.getCargoCapacity(ships, counts, flightParams()));
+    });
+
+    it('offers every 5% step to the general and every 10% to the others', () => {
+        expect(calc.speedPercents(PLAYER_CLASS.GENERAL)).toEqual(
+            Array.from({ length: 20 }, (_, i) => 100 - i * 5));
+        [PLAYER_CLASS.COLLECTOR, PLAYER_CLASS.DISCOVERER].forEach((playerClass) => {
+            expect(calc.speedPercents(playerClass)).toEqual(
+                Array.from({ length: 10 }, (_, i) => 100 - i * 10));
+        });
+    });
+});
+
+describe('Flight Calculator - Save Points', () => {
+    const counts = fleet({ [SHIP.LARGE_CARGO]: 100 });
+    const ships = calc.buildShipsData([0, 0, 0]);
+    const START = Date.UTC(2026, 0, 15, 12);
+    // Wide enough for every point at every speed: target ± (target - 1)
+    const EVERYTHING = { target: 1e9, tolerance: 1e9 - 1, legs: 2, startAt: START };
+
+    const find = (departure, over = {}, search = EVERYTHING) =>
+        calc.findSavePoints(ships, counts, departure, flightParams(over), search);
+    /** The coordinate the axis moves along, of every row found at full speed. */
+    const coordsAt100 = (rows, axis) => rows.filter((r) => r.speedPercent === 100).map((r) => r.point[axis])
+        .sort((a, b) => a - b);
+    /** The one-leg duration of a peaceful flight to `point` at `percent`. */
+    const legTo = (departure, point, percent, over = {}) => {
+        const params = flightParams(over);
+        const { distance } = calc.getDistance(departure, point, params);
+        return calc.planFlight(ships, counts, distance, params,
+            { missionType: MISSION.PEACEFUL, percents: [percent] }).entries[0];
+    };
+
+    it('splits the window over the legs of the trip', () => {
+        expect(calc.saveWindow(START, START + 4 * 3600e3, 7200, false))
+            .toEqual({ legs: 2, target: 7200, tolerance: 3600 });
+        expect(calc.saveWindow(START, START + 4 * 3600e3, 7200, true))
+            .toEqual({ legs: 1, target: 14400, tolerance: 7200 });
+        // A part second still counts as a second
+        expect(calc.saveWindow(START, START + 1001, 0, true).target).toBe(2);
+    });
+
+    it('a straight axis runs to its own ends', () => {
+        const { galaxies } = find([2, 100, 8]);
+        expect(coordsAt100(galaxies, 0)).toEqual([1, 3, 4, 5, 6, 7, 8, 9]);
+        // Straight, galaxy 9 is seven galaxies away
+        const far = galaxies.find((r) => r.point[0] === 9 && r.speedPercent === 100);
+        expect(far?.arriveAt).toBe(START + legTo([2, 100, 8], [9, 100, 8], 100).duration * 2000);
+    });
+
+    it('a ring lists each point once, at its short distance', () => {
+        const ring = { circularGalaxies: true };
+        const { galaxies } = find([2, 100, 8], ring);
+        expect(coordsAt100(galaxies, 0)).toEqual([1, 3, 4, 5, 6, 7, 8, 9]);
+        // Round the ring, galaxy 9 is two away
+        const far = galaxies.find((r) => r.point[0] === 9 && r.speedPercent === 100);
+        expect(far?.arriveAt).toBe(START + legTo([2, 100, 8], [4, 100, 8], 100).duration * 2000);
+    });
+
+    it('an even ring lists the point half way round once', () => {
+        // Galaxy 4 of 8: four steps down wraps onto galaxy 8, four steps up is galaxy 8 too
+        const ring = { circularGalaxies: true, numberOfGalaxies: 8 };
+        const { galaxies } = find([4, 100, 8], ring);
+        expect(coordsAt100(galaxies, 0)).toEqual([1, 2, 3, 5, 6, 7, 8]);
+    });
+
+    it('every row arrives when the flight planned for its point does', () => {
+        const over = { circularGalaxies: true, circularSystems: true, numberOfSystems: 30 };
+        const departure = [2, 3, 8];
+        const found = find(departure, over);
+        const rows = [...found.galaxies, ...found.systems, ...found.planets];
+        expect(rows.length).toBeGreaterThan(0);
+        rows.forEach((row) => {
+            const leg = legTo(departure, row.point, row.speedPercent, over);
+            expect(row.arriveAt).toBe(START + leg.duration * 2000);
+            expect(row.cost).toBe(leg.deut);
+        });
+    });
+
+    it('the systems axis stays in the departure galaxy', () => {
+        const { systems } = find([3, 5, 8], { numberOfSystems: 9 });
+        expect(coordsAt100(systems, 1)).toEqual([1, 2, 3, 4, 6, 7, 8, 9]);
+        systems.forEach((r) => {
+            expect(r.point[0]).toBe(3);
+            expect(r.point[2]).toBe(8);
+        });
+    });
+
+    it('the planet axis covers the sixteen positions of the system', () => {
+        const { planets } = find([3, 5, 15]);
+        expect(coordsAt100(planets, 2)).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 16]);
+    });
+
+    it('a one-way flight is done on landing, a round trip back home', () => {
+        const departure = [3, 5, 8];
+        const oneWay = find(departure, {}, { ...EVERYTHING, legs: 1 }).planets;
+        const roundTrip = find(departure, {}, EVERYTHING).planets;
+        const leg = legTo(departure, [3, 5, 7], 100).duration;
+        const at = (rows) => rows.find((r) => r.point[2] === 7 && r.speedPercent === 100)?.arriveAt;
+        expect(at(oneWay)).toBe(START + leg * 1000);
+        expect(at(roundTrip)).toBe(START + leg * 2000);
+    });
+
+    it('the tolerance excludes both of its bounds', () => {
+        const departure = [3, 5, 8];
+        const leg = legTo(departure, [3, 5, 7], 100).duration;
+        const hit = (target) => find(departure, {}, { target, tolerance: 60, legs: 1, startAt: START })
+            .planets.some((r) => r.point[2] === 7 && r.speedPercent === 100);
+
+        expect(hit(leg)).toBe(true);
+        expect(hit(leg + 59)).toBe(true);
+        expect(hit(leg + 60)).toBe(false);
+        expect(hit(leg - 59)).toBe(true);
+        expect(hit(leg - 60)).toBe(false);
+    });
+
+    it('a zero tolerance finds nothing', () => {
+        const found = find([3, 5, 8], {}, { target: 7200, tolerance: 0, legs: 2, startAt: START });
+        expect(found).toEqual({ galaxies: [], systems: [], planets: [] });
+    });
+
+    it('steps every 5% for the general and every 10% for the others', () => {
+        const percentsTo = (playerClass) => find([3, 5, 8], { playerClass }).planets
+            .filter((r) => r.point[2] === 7).map((r) => r.speedPercent);
+        expect(percentsTo(PLAYER_CLASS.GENERAL)).toEqual(Array.from({ length: 20 }, (_, i) => 5 + i * 5));
+        expect(percentsTo(PLAYER_CLASS.DISCOVERER)).toEqual(Array.from({ length: 10 }, (_, i) => 10 + i * 10));
+    });
+
+    it('lists the slowest first, and the cheapest first within a speed', () => {
+        const { systems } = find([3, 250, 8]);
+        for (let i = 1; i < systems.length; i++) {
+            expect(calc.compareSavePoints(systems[i - 1], systems[i])).toBeLessThanOrEqual(0);
+        }
+        const rows = [
+            { speedPercent: 50, cost: 300, name: 'a' }, { speedPercent: 10, cost: 100, name: 'b' },
+            { speedPercent: 50, cost: 100, name: 'c' }, { speedPercent: 10, cost: 500, name: 'd' },
+        ];
+        expect(rows.sort((x, y) => calc.compareSavePoints(x, y)).map((r) => r.name)).toEqual(['b', 'd', 'c', 'a']);
+    });
+
+    it('always flies peaceful, whatever mission the flight tab has picked', () => {
+        const peaceful = find([3, 5, 8]);
+        expect(find([3, 5, 8], { missionType: MISSION.WAR })).toEqual(peaceful);
+        expect(find([3, 5, 8], { missionType: MISSION.DESTROY })).toEqual(peaceful);
+        // The warrior's holding bonus does not ride along either
+        expect(find([3, 5, 8], { missionType: MISSION.HOLDING, warriorBonus: true }))
+            .toEqual(find([3, 5, 8], { warriorBonus: true }));
+    });
+
+    it('a manual speed replaces the slowest ship', () => {
+        const departure = [3, 5, 8];
+        const found = calc.findSavePoints(ships, counts, departure, flightParams(),
+            { ...EVERYTHING, minSpeed: 100000 });
+        const row = found.planets.find((r) => r.point[2] === 7 && r.speedPercent === 100);
+        const distance = calc.getDistance(departure, [3, 5, 7], flightParams()).distance;
+        expect(row?.arriveAt).toBe(START + calc.getFlightDuration(100000, distance, 100, 5) * 2000);
+    });
+});
+
 describe('Flight Calculator - Time Field Parsing', () => {
     it('a full "DD HH:MM:SS" value is converted to seconds', () => {
         expect(parse('00 00:00:01')).toBe(1);

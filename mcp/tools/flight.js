@@ -214,7 +214,6 @@ function createFlightTool({ siteApi }) {
             const counts = SHIP_KEYS.map((key) => args.ships[key] ?? 0);
             checkRequest(args, settings, counts);
             const playerClass = CLASSES[/** @type {keyof typeof CLASSES} */ (args.playerClass)];
-            const isGeneral = args.playerClass === 'general';
 
             const shipBonuses = args.lifeforms.shipBonuses ?? {};
             const params = {
@@ -253,35 +252,27 @@ function createFlightTool({ siteApi }) {
             const to = [args.to.galaxy, args.to.system, args.to.position];
             const { distance, emptySystems } = calc.getDistance(from, to, params);
 
-            const minSpeed = calc.getMinSpeed(ships, counts, params);
-            const flightSpeed = calc.speedForMission(params.missionType, minSpeed);
-            const fleetSpeed = calc.fleetSpeedFor(params.missionType, params);
-            const fixedSpeed = params.missionType === MISSION.DESTROY ? flightSpeed : 0;
-
-            const step = isGeneral ? 5 : 10;
             const percents = args.speedPercent !== undefined
                 ? [args.speedPercent]
-                : Array.from({ length: 100 / step }, (_, i) => 100 - i * step);
+                : calc.speedPercents(playerClass);
+            const plan = calc.planFlight(ships, counts, distance, params, { percents });
 
-            const flights = percents.map((percent) => {
-                const duration = calc.getFlightDuration(flightSpeed, distance, percent, fleetSpeed);
-                return {
-                    speedPercent: percent,
-                    durationSeconds: duration,
-                    duration: formatDuration(duration),
-                    deuterium: calc.getDeutConsumption(ships, counts, distance, duration, fleetSpeed, params, fixedSpeed),
-                };
-            });
+            const flights = plan.entries.map((entry) => ({
+                speedPercent: entry.percent,
+                durationSeconds: entry.duration,
+                duration: formatDuration(entry.duration),
+                deuterium: entry.deut,
+            }));
 
             /** @type {Record<string, unknown>} */
             const result = {
                 distance,
-                fleetSpeed: flightSpeed,
-                cargoCapacity: calc.getCargoCapacity(ships, counts, params),
+                fleetSpeed: plan.flightSpeed,
+                cargoCapacity: plan.cargo,
                 flights,
                 universe: {
                     source,
-                    fleetSpeedFactor: fleetSpeed,
+                    fleetSpeedFactor: plan.fleetSpeed,
                     galaxies: settings.galaxies,
                     systems: settings.systems,
                     circularGalaxies: settings.circularGalaxies,
