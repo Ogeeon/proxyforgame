@@ -11,6 +11,9 @@
 // because it grants no energy or cargo bonus here, so it would behave as NONE.
 const GRAVITON_CLASS = { NONE: 0, COLLECTOR: 1, GENERAL: 2 };
 
+// Energy production added by each level of the Kaelesh Disruption Chamber, %.
+const DISRUPTION_CHAMBER_ENERGY = 1.5;
+
 class GravitonCalculator {
   /**
    * The officers' energy bonus the core expects: 2 for the whole commanding
@@ -21,24 +24,6 @@ class GravitonCalculator {
   static officerEnergyBonus(o) {
     if (o.engineer && o.geologist && o.technocrat && o.admiral && o.commander) return 2;
     return o.engineer ? 1 : 0;
-  }
-
-  /**
-   * Cargo capacity, matching the costs calculator formula:
-   *   base * (1 + 0.05 * hyperTech)  +  base * classBonus  +  floor(base * cap%/100)
-   * where the class bonus and the life-form capacity increase are additive.
-   *
-   * @param {number} base Base cargo capacity (5000 SC / 25000 LC / 20000 recycler).
-   * @param {number} hyperTechLevel Hyperspace technology level.
-   * @param {number} classBonus Additive class fraction: 0.25 for a Collector's
-   *   transports, 0.20 for a General's recyclers, 0 otherwise.
-   * @param {number} capacityIncrease Life-form cargo capacity increase, %.
-   */
-  static cargoCapacity(base, hyperTechLevel, classBonus, capacityIncrease) {
-    let cap = base * (1 + 0.05 * hyperTechLevel);
-    cap += base * classBonus;
-    cap += Math.floor(base * 0.01 * capacityIncrease);
-    return cap;
   }
 
   /**
@@ -58,68 +43,36 @@ class GravitonCalculator {
    *   shortfall — the resource, transport, recycling and time figures.
    */
   compute(p) {
-    const solarPlantEnergy = Math.floor(
-      0.01 * p.solarPlantPercent *
-      Math.floor(20 * p.solarPlantLevel * Math.pow(1.1, p.solarPlantLevel))
-    );
-    const fusionPlantEnergy = Math.floor(
-      0.01 * p.fusionPlantPercent *
-      Math.floor(30 * p.fusionPlantLevel * Math.pow(1.05 + p.energyTechLevel * 0.01, p.fusionPlantLevel))
-    );
-    const baseEnergyPerSat = 0.01 * p.solarSatellitesPercent * Math.floor((p.maxPlanetTemp + 140) / 6);
-    const solarSatsEnergy = Math.max(p.solarSatellitesCount * baseEnergyPerSat, 0);
-    const totalEnergy = solarPlantEnergy + fusionPlantEnergy + solarSatsEnergy;
-
-    // The per-satellite yield accumulates every bonus at the same rate the
-    // total energy does, so a freshly built satellite covers the same share.
-    let energyPerSat = baseEnergyPerSat;
-
     const isCollector = p.playerClass === GRAVITON_CLASS.COLLECTOR;
-    const classEnergyBonus = isCollector ? Math.floor(0.1 * totalEnergy) : 0;
-    energyPerSat += isCollector ? 0.1 * baseEnergyPerSat : 0;
-
-    const allianceEnergyBonus = p.isTrader ? Math.floor(0.05 * totalEnergy) : 0;
-    energyPerSat += p.isTrader ? 0.05 * baseEnergyPerSat : 0;
-
-    const disChEnergyBonus = Math.floor(p.disChLevel * 0.015 * totalEnergy);
-    energyPerSat += Math.floor(p.disChLevel * 0.015 * baseEnergyPerSat);
-
-    const lfTechBonus = Math.round(p.totalLFEnrgBonus * 0.01 * totalEnergy);
-    energyPerSat += 0.01 * p.totalLFEnrgBonus * baseEnergyPerSat;
-
-    let officerBonus = 0;
-    if (p.energyBonus === 1) {
-      officerBonus = Math.floor(0.1 * totalEnergy);
-      energyPerSat += 0.1 * baseEnergyPerSat;
-    } else if (p.energyBonus === 2) {
-      officerBonus = Math.floor(0.12 * totalEnergy);
-      energyPerSat += 0.12 * baseEnergyPerSat;
-    }
-
-    const boostEnergyBonus = Math.floor(0.1 * p.energyBoost * totalEnergy);
-    energyPerSat += 0.1 * p.energyBoost * baseEnergyPerSat;
-
-    const availableEnergy = Math.floor(
-      solarPlantEnergy + fusionPlantEnergy + solarSatsEnergy + officerBonus +
-      classEnergyBonus + allianceEnergyBonus + boostEnergyBonus + disChEnergyBonus + lfTechBonus
-    );
+    /** @type {PlanetEnergyParams} */
+    const planet = {
+      solarPlantLevel: p.solarPlantLevel, solarPlantPercent: p.solarPlantPercent,
+      fusionPlantLevel: p.fusionPlantLevel, fusionPlantPercent: p.fusionPlantPercent,
+      energyTechLevel: p.energyTechLevel, maxTemp: p.maxPlanetTemp,
+      satellites: p.solarSatellitesCount, satellitesPercent: p.solarSatellitesPercent,
+      booster: p.energyBoost, engineer: p.energyBonus >= 1, fullCrew: p.energyBonus === 2,
+      collector: isCollector, trader: p.isTrader,
+      lfTechBonus: p.totalLFEnrgBonus, lfBuildingBonus: DISRUPTION_CHAMBER_ENERGY * p.disChLevel,
+    };
+    const energy = planetEnergy(planet);
+    const availableEnergy = energy.total;
+    // What a freshly built satellite adds, its share of every bonus included.
+    const energyPerSat = satelliteEnergyYield(planet);
     const energyRequirement = p.gravitonLevel > 0
       ? 300000 * Math.pow(3, p.gravitonLevel - 1)
       : 0;
 
-    let missingEnergy = energyRequirement - availableEnergy;
-    if (missingEnergy < 0) missingEnergy = 0;
 
     const result = {
-      solarPlantEnergy: Math.floor(solarPlantEnergy),
-      fusionPlantEnergy: Math.floor(fusionPlantEnergy),
-      solarSatsEnergy: Math.floor(solarSatsEnergy),
-      officerBonus,
-      classEnergyBonus,
-      allianceEnergyBonus,
-      boostEnergyBonus,
-      disChEnergyBonus,
-      lfTechBonus,
+      solarPlantEnergy: energy.solarPlant,
+      fusionPlantEnergy: energy.fusionPlant,
+      solarSatsEnergy: energy.satellites,
+      officerBonus: energy.engineer + energy.fullCrew,
+      classEnergyBonus: energy.playerClass,
+      allianceEnergyBonus: energy.trader,
+      boostEnergyBonus: energy.booster,
+      disChEnergyBonus: energy.lfBuildings,
+      lfTechBonus: energy.lfTech,
       availableEnergy,
       energyRequirement,
       energyPerSat,
@@ -149,7 +102,7 @@ class GravitonCalculator {
       return result;
     }
 
-    const neededSats = Math.ceil(missingEnergy / energyPerSat);
+    const neededSats = satellitesForEnergy(planet, energyRequirement);
     result.neededSats = neededSats;
 
     const crysNeeded = neededSats * 2000;
@@ -157,13 +110,14 @@ class GravitonCalculator {
     result.crysNeeded = crysNeeded;
     result.deutNeeded = deutNeeded;
 
-    // Cargo capacity mirrors the (canonical) costs calculator: the Collector
-    // +25% and the life-form capacity increase are added to the base, not
-    // multiplied onto the hyperspace-boosted value. The Collector bonus applies
-    // to transports only.
-    const collectorCargoBonus = isCollector ? 0.25 : 0;
-    const capSC = GravitonCalculator.cargoCapacity(5000, p.hyperTechLevel, collectorCargoBonus, p.scCapacityIncrease);
-    const capLC = GravitonCalculator.cargoCapacity(25000, p.hyperTechLevel, collectorCargoBonus, p.lcCapacityIncrease);
+    // The Collector bonus applies to transports only.
+    const collectorCargoBonus = isCollector ? HOLD_CLASS_BONUS.COLLECTOR : 0;
+    const capSC = shipHold(5000, {
+      hyperTechLevel: p.hyperTechLevel, classBonus: collectorCargoBonus, lfBonus: p.scCapacityIncrease,
+    });
+    const capLC = shipHold(25000, {
+      hyperTechLevel: p.hyperTechLevel, classBonus: collectorCargoBonus, lfBonus: p.lcCapacityIncrease,
+    });
 
     // Resources already sitting on the planet cut down what has to be shipped
     // in. Each resource is offset on its own: a crystal surplus never covers a
@@ -201,8 +155,10 @@ class GravitonCalculator {
 
     // Recyclers get the General +20% bonus (never the Collector one), plus the
     // hyperspace tech and the life-form recycler capacity increase.
-    const generalCargoBonus = p.playerClass === GRAVITON_CLASS.GENERAL ? 0.20 : 0;
-    const capRc = GravitonCalculator.cargoCapacity(20000, p.hyperTechLevel, generalCargoBonus, p.rcCapacityIncrease);
+    const generalCargoBonus = p.playerClass === GRAVITON_CLASS.GENERAL ? HOLD_CLASS_BONUS.GENERAL : 0;
+    const capRc = shipHold(20000, {
+      hyperTechLevel: p.hyperTechLevel, classBonus: generalCargoBonus, lfBonus: p.rcCapacityIncrease,
+    });
     result.rcNeeded = Math.ceil(dfAmount / capRc);
     result.lcNeededForDF = Math.ceil(dfAmount / capLC);
     result.scNeededForDF = Math.ceil(dfAmount / capSC);

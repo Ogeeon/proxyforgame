@@ -19,7 +19,7 @@ const { formatDuration } = require('../mcp/lib/format');
 const { readWwwJson } = require('../mcp/lib/browser-scripts');
 const { createTools } = require('../mcp/tools');
 
-const { FlightCalculator } = load(['ogame/calc/js/flight-core.js'], ['FlightCalculator']);
+const { FlightCalculator } = load(['ogame/calc/js/ogame-cargo.js', 'ogame/calc/js/flight-core.js'], ['FlightCalculator']);
 
 /**
  * A stand-in for the site's ajax.php: serverdata and populatedSystems answers
@@ -556,7 +556,7 @@ describe('MCP input validation of keyed maps', () => {
 });
 
 describe('MCP tool ogame_graviton', () => {
-    const { GravitonCalculator } = load(['js/utils.js', 'ogame/calc/js/graviton-core.js'], ['GravitonCalculator']);
+    const { GravitonCalculator } = load(['js/utils.js', 'ogame/calc/js/ogame-production.js', 'ogame/calc/js/ogame-cargo.js', 'ogame/calc/js/graviton-core.js'], ['GravitonCalculator']);
 
     it('maps its arguments onto the graviton calculator', async () => {
         const site = fakeSiteApi({ 'en-5': { speed: '4', debrisFactor: '0.5', deuteriumInDebris: '1' } });
@@ -760,7 +760,7 @@ describe('MCP moon tools', () => {
     });
 
     it('ogame_phalanx: gives the Discoverer class its range bonus, and no other class', async () => {
-        const { MoonCalculator } = load(['js/utils.js', 'ogame/calc/js/moon-core.js'], ['MoonCalculator']);
+        const { MoonCalculator } = load(['js/utils.js', 'ogame/calc/js/ogame-cargo.js', 'ogame/calc/js/moon-core.js'], ['MoonCalculator']);
         const range = async (playerClass) => (await call(protocolWith(), 'ogame_phalanx', {
             phalanxLevel: 7, moonSystem: 100, playerClass,
         })).structuredContent.rangeSystems;

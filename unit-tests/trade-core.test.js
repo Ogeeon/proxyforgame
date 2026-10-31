@@ -18,7 +18,7 @@ const {
     tradeCargoCapacity,
     tradeCargoCount,
     tradeSourceTotal,
-} = load(['js/utils.js', 'ogame/calc/js/trade-core.js'], [
+} = load(['js/utils.js', 'ogame/calc/js/ogame-cargo.js', 'ogame/calc/js/trade-core.js'], [
     'TradeCalculator',
     'tradeMcRate',
     'getDstInputState',

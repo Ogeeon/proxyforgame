@@ -9,7 +9,7 @@ const { load } = require('./load');
 const { expect } = require('./expect');
 
 const { ExpeditionsCalculator } = load(
-    ['js/utils.js', 'ogame/calc/js/expeditions-core.js'],
+    ['js/utils.js', 'ogame/calc/js/ogame-cargo.js', 'ogame/calc/js/expeditions-core.js'],
     ['ExpeditionsCalculator'],
 );
 

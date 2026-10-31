@@ -259,15 +259,16 @@ test.describe('Expeditions Calculator - cargo bonus import', () => {
         await expect(page.locator('#lf-cargo-203')).toHaveValue('12');
     });
 
-    test('an imported bonus reaches the capacity readout', async ({ page }) => {
+    test('an imported bonus is counted per ship, as the game holds it', async ({ page }) => {
         await page.locator('#own-api-input').fill(OWN_API_FIXTURE);
         await page.locator('#lf-bonuses-read-btn').click();
         await expect(page.locator('#lf-cargo-204')).toHaveValue('0.3066');
 
-        // 1000 light fighters: 1000 * 50 * 1.003066, rounded for display.
+        // 1000 light fighters: 0.3066% lifts one hold from 50 to 50.15, and the
+        // game drops that fraction per ship - the fleet carries 50 000, not 50 153.
         await page.locator('#param-common-tab').click();
         await fillNumber(page, '#numLF', 1000);
-        await expect(page.locator('#storage-capacity')).toHaveText('50.153');
+        await expect(page.locator('#storage-capacity')).toHaveText('50.000');
     });
 
     test('the API 2 export wins over a report pasted alongside it', async ({ page }) => {

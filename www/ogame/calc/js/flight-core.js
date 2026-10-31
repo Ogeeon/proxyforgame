@@ -45,10 +45,6 @@ const UPGRADES = {
     RECYCLER_IMPULSE: 16,     // above this, the recycler runs on impulse
 };
 
-// How far below a whole unit a ship's hold may land before it is read as that unit.
-// Cargo runs to eight digits at most, so this is far below anything meaningful.
-const CARGO_ROUNDING_TOLERANCE = 1e-6;
-
 // The class and life form fuel discounts add up rather than compound, and the game
 // stops the total here however deep the life form enhancement runs.
 const DEUT_REDUCTION_CAP = 90;
@@ -371,25 +367,25 @@ class FlightCalculator {
             if (count <= 0) {
                 continue;
             }
-            const baseCargo = shipsData[i][4];
-            let perShip = baseCargo * (1 + 0.05 * params.hyperTechLvl);
 
             // The collector hauls more in transports, the general in recyclers and
             // pathfinders; both extras are scaled by their life form enhancement
+            let classBonus = 0;
+            let classEnhancement = 0;
             if (params.playerClass === PLAYER_CLASS.COLLECTOR && i < 2) {
-                perShip += baseCargo * 0.25 * (1 + params.lfRocktalCE * 0.01);
+                classBonus = HOLD_CLASS_BONUS.COLLECTOR;
+                classEnhancement = params.lfRocktalCE;
             }
             if (params.playerClass === PLAYER_CLASS.GENERAL
                 && (i === SHIP.RECYCLER || i === SHIP.PATHFINDER)) {
-                perShip += baseCargo * 0.2 * (1 + params.lfMechanGE * 0.01);
+                classBonus = HOLD_CLASS_BONUS.GENERAL;
+                classEnhancement = params.lfMechanGE;
             }
 
-            perShip += baseCargo * params.lfShipsBonuses[i][1] * 0.01;
-
-            // The tolerance keeps a hold that is a whole number on paper, but lands a
-            // hair under it once the bonuses have been summed in binary, from losing
-            // a unit on every ship in the fleet
-            capacity += Math.floor(perShip + CARGO_ROUNDING_TOLERANCE) * count;
+            capacity += shipHold(shipsData[i][4], {
+                hyperTechLevel: params.hyperTechLvl, classBonus, classEnhancement,
+                lfBonus: params.lfShipsBonuses[i][1],
+            }) * count;
         }
 
         return capacity;

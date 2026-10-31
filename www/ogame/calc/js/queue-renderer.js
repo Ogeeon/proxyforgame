@@ -145,7 +145,7 @@ class QueueRenderer {
 
   /**
    * Update the transports-needed row (SC + LC counts based on hypertech,
-   * Collector class and cargo capacity increase — matches the Trade/Costs calculators).
+   * Collector class and cargo capacity increase, held by shipHold).
    */
   static updateTransports(tabNum, totals, hyperTechLevel, playerClass, scCapacityIncrease, lcCapacityIncrease) {
     const tbl = tableEl(`#table-dst-${tabNum}`);
@@ -153,8 +153,9 @@ class QueueRenderer {
     const transportsRow = tbl.rows[tbl.rows.length - 1];
     if (!transportsRow) return;
     const totalRes = totals[1] + totals[2] + totals[3];
-    const capSC = 5000.0 * (1 + 0.05 * hyperTechLevel) + (playerClass === 0 ? 5000 * 0.25 : 0) + Math.floor(5000 * 0.01 * scCapacityIncrease);
-    const capLC = 25000.0 * (1 + 0.05 * hyperTechLevel) + (playerClass === 0 ? 25000 * 0.25 : 0) + Math.floor(25000 * 0.01 * lcCapacityIncrease);
+    const classBonus = playerClass === 0 ? HOLD_CLASS_BONUS.COLLECTOR : 0;
+    const capSC = shipHold(5000, { hyperTechLevel, classBonus, lfBonus: scCapacityIncrease });
+    const capLC = shipHold(25000, { hyperTechLevel, classBonus, lfBonus: lcCapacityIncrease });
     const needSC = Math.ceil(totalRes / capSC) || 0;
     const needLC = Math.ceil(totalRes / capLC) || 0;
     const cells = transportsRow.cells;

@@ -8,7 +8,7 @@ const { formatDuration } = require('../lib/format');
 const common = require('./common');
 
 const { GravitonCalculator } = loadBrowserScripts(
-    ['js/utils.js', 'ogame/calc/js/graviton-core.js'],
+    ['js/utils.js', 'ogame/calc/js/ogame-production.js', 'ogame/calc/js/ogame-cargo.js', 'ogame/calc/js/graviton-core.js'],
     ['GravitonCalculator'],
 );
 

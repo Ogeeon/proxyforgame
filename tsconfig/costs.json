@@ -14,6 +14,7 @@
     "../www/ogame/calc/js/profiles-widgets.js",
     "../www/ogame/calc/js/profiles-binders.js",
     "../www/ogame/calc/js/profiles-ui.js",
+    "../www/ogame/calc/js/ogame-cargo.js",
     "../www/ogame/calc/js/costs-core.js",
     "../www/ogame/calc/js/costs-data-collector.js",
     "../www/ogame/calc/js/costs-renderer.js",

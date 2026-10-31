@@ -10,7 +10,7 @@ const { loadBrowserScripts, readWwwJson } = require('../lib/browser-scripts');
 const { ToolError } = require('../lib/protocol');
 
 const { GravitonCalculator } = loadBrowserScripts(
-    ['js/utils.js', 'ogame/calc/js/graviton-core.js'],
+    ['js/utils.js', 'ogame/calc/js/ogame-production.js', 'ogame/calc/js/ogame-cargo.js', 'ogame/calc/js/graviton-core.js'],
     ['GravitonCalculator'],
 );
 

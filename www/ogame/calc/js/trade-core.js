@@ -37,10 +37,7 @@ const TRADE_RATE_LIMITS = {
 /** Base hold of a Small Cargo and of a Large Cargo. */
 const TRADE_SC_CAPACITY = 5000;
 const TRADE_LC_CAPACITY = 25000;
-/** Extra hold per Hyperspace Technology level. */
-const TRADE_HYPERSPACE_BONUS = 0.05;
-/** Extra hold the Collector class grants, and the class number that is it. */
-const TRADE_COLLECTOR_BONUS = 0.25;
+/** The class number that is the Collector. */
 const TRADE_CLASS_COLLECTOR = 0;
 
 /** Decimals the metal:crystal rate is kept to. See tradeMcRate. */
@@ -189,9 +186,8 @@ function tradeMixPercent(prm, rates) {
 }
 
 /**
- * Hold of one Small and one Large Cargo. Hyperspace Technology, the Collector
- * class and the universe's cargo capacity increase all add to the base
- * capacity rather than multiplying (matches the costs/lfcosts calculators).
+ * Hold of one Small and one Large Cargo, with Hyperspace Technology, the
+ * Collector class and the cargo capacity increase (see shipHold).
  *
  * @param {number} hyperTech - Hyperspace Technology level
  * @param {number} playerClass - player class, Collector is 0
@@ -200,13 +196,10 @@ function tradeMixPercent(prm, rates) {
  * @returns {{sc: number, lc: number}}
  */
 function tradeCargoCapacity(hyperTech, playerClass, scIncrease, lcIncrease) {
-    const hyper = 1 + TRADE_HYPERSPACE_BONUS * hyperTech;
-    const classBonus = playerClass === TRADE_CLASS_COLLECTOR ? TRADE_COLLECTOR_BONUS : 0;
+    const classBonus = playerClass === TRADE_CLASS_COLLECTOR ? HOLD_CLASS_BONUS.COLLECTOR : 0;
     return {
-        sc: TRADE_SC_CAPACITY * hyper + TRADE_SC_CAPACITY * classBonus
-            + Math.floor(TRADE_SC_CAPACITY * 0.01 * scIncrease),
-        lc: TRADE_LC_CAPACITY * hyper + TRADE_LC_CAPACITY * classBonus
-            + Math.floor(TRADE_LC_CAPACITY * 0.01 * lcIncrease)
+        sc: shipHold(TRADE_SC_CAPACITY, { hyperTechLevel: hyperTech, classBonus, lfBonus: scIncrease }),
+        lc: shipHold(TRADE_LC_CAPACITY, { hyperTechLevel: hyperTech, classBonus, lfBonus: lcIncrease })
     };
 }
 
@@ -540,8 +533,6 @@ if (typeof window !== 'undefined') {
         TRADE_RATE_LIMITS,
         TRADE_SC_CAPACITY,
         TRADE_LC_CAPACITY,
-        TRADE_HYPERSPACE_BONUS,
-        TRADE_COLLECTOR_BONUS,
         TRADE_CLASS_COLLECTOR,
         TRADE_MC_DECIMALS,
         TRADE_DIR_FORWARD,

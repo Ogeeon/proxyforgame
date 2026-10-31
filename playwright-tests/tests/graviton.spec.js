@@ -332,12 +332,12 @@ test.describe('Graviton Calculator - Officers', () => {
         await page.locator('#solar-plant-level').fill('10');
         await page.locator('#solar-plant-level').blur();
         await page.locator('#engineer').check();
-        // floor(0.1 * 518)
-        await expect(page.locator('#officers-bonus-energy')).toHaveText('51');
+        // round(0.1 * 518)
+        await expect(page.locator('#officers-bonus-energy')).toHaveText('52');
         for (const id of ['#geologist', '#technocrat', '#admiral', '#commander']) {
             await page.locator(id).check();
         }
-        // floor(0.12 * 518)
+        // round(0.1 * 518) + round(0.02 * 518): two bonuses, each rounded
         await expect(page.locator('#officers-bonus-energy')).toHaveText('62');
     });
 

@@ -73,33 +73,32 @@ const EXPEDITION_MIN_SHIP_POOL = 10000;
 
 class ExpeditionsCalculator {
   /**
-   * Cargo capacity of `count` ships of the given type, with the hyperspace
-   * technology boost, the player-class bonus and the life-form capacity
-   * increase all added on top of the base capacity.
+   * Hold of a single ship of the given type: the hyperspace technology, the
+   * player-class bonus and the life-form capacity increase, as shipHold adds
+   * them up.
    *
    * @param {number} index Index into EXPEDITION_SHIPS.
-   * @param {number} count Number of ships of that type.
    * @param {Object} p Params (hyperTechLevel, playerClass, classBonusCollector,
    *   lfShipsBonuses).
-   * @returns {number} Capacity, not yet floored.
+   * @returns {number} Whole units.
    */
-  static shipCargoCapacity(index, count, p) {
-    const base = EXPEDITION_SHIPS[index].cargo;
-    let capacity = count * base * (1 + 0.05 * p.hyperTechLevel);
-
+  static shipCargoCapacity(index, p) {
+    let classBonus = 0;
+    let classEnhancement = 0;
     // A Collector's transports carry 25% more, itself raised by the class bonus.
     if (p.playerClass === EXPEDITION_CLASS.COLLECTOR && EXPEDITION_TRANSPORTS.has(index)) {
-      capacity += Math.floor(count * base * 0.25 * (1 + p.classBonusCollector * 0.01));
+      classBonus = HOLD_CLASS_BONUS.COLLECTOR;
+      classEnhancement = p.classBonusCollector;
     }
     // A General's recyclers and pathfinders carry 20% more.
     if (p.playerClass === EXPEDITION_CLASS.OTHER && EXPEDITION_GENERAL_SHIPS.has(index)) {
-      capacity += count * base * 0.2;
+      classBonus = HOLD_CLASS_BONUS.GENERAL;
     }
 
-    const bonus = Number.isFinite(p.lfShipsBonuses[index]) ? p.lfShipsBonuses[index] : 0;
-    capacity += Math.floor(count * base * bonus * 0.01); // the bonus is a percentage
-
-    return capacity;
+    const lfBonus = Number.isFinite(p.lfShipsBonuses[index]) ? p.lfShipsBonuses[index] : 0;
+    return shipHold(EXPEDITION_SHIPS[index].cargo, {
+      hyperTechLevel: p.hyperTechLevel, classBonus, classEnhancement, lfBonus,
+    });
   }
 
   /** Total cargo capacity of the whole fleet described by `p.counts`. */
@@ -108,10 +107,10 @@ class ExpeditionsCalculator {
     EXPEDITION_SHIPS.forEach((ship, index) => {
       const count = p.counts[ship.abbrev] || 0;
       if (count > 0) {
-        capacity += ExpeditionsCalculator.shipCargoCapacity(index, count, p);
+        capacity += ExpeditionsCalculator.shipCargoCapacity(index, p) * count;
       }
     });
-    return Math.floor(capacity);
+    return capacity;
   }
 
   /**
@@ -168,7 +167,7 @@ class ExpeditionsCalculator {
     const maxPoints = Math.floor(basePoints * (1 + p.percentRes / 100) * discovererBonus);
 
     // How many large cargoes it takes to carry a maximum find home.
-    const singleLCCapacity = Math.floor(ExpeditionsCalculator.shipCargoCapacity(1, 1, p));
+    const singleLCCapacity = ExpeditionsCalculator.shipCargoCapacity(1, p);
     const minLC = singleLCCapacity > 0 ? Math.ceil(maxPoints / singleLCCapacity) : 0;
 
     // The resource pool the find is drawn from, capped by the fleet capacity.

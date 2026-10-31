@@ -33,6 +33,8 @@
   <script src="/ogame/calc/js/profiles-widgets.js?v=<?php echo assetVersion($pfgPath, '/ogame/calc/js/profiles-widgets.js'); ?>" defer></script>
   <script src="/ogame/calc/js/profiles-binders.js?v=<?php echo assetVersion($pfgPath, '/ogame/calc/js/profiles-binders.js'); ?>" defer></script>
   <script src="/ogame/calc/js/profiles-ui.js?v=<?php echo assetVersion($pfgPath, '/ogame/calc/js/profiles-ui.js'); ?>" defer></script>
+  <script src="/ogame/calc/js/ogame-production.js?v=<?php echo assetVersion($pfgPath, '/ogame/calc/js/ogame-production.js'); ?>" defer></script>
+  <script src="/ogame/calc/js/ogame-cargo.js?v=<?php echo assetVersion($pfgPath, '/ogame/calc/js/ogame-cargo.js'); ?>" defer></script>
   <script src="/ogame/calc/js/terraformer-core.js?v=<?php echo assetVersion($pfgPath, '/ogame/calc/js/terraformer-core.js'); ?>" defer></script>
   <script src="/ogame/calc/js/terraformer-data-collector.js?v=<?php echo assetVersion($pfgPath, '/ogame/calc/js/terraformer-data-collector.js'); ?>" defer></script>
   <script src="/ogame/calc/js/terraformer-renderer.js?v=<?php echo assetVersion($pfgPath, '/ogame/calc/js/terraformer-renderer.js'); ?>" defer></script>

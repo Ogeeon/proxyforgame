@@ -73,11 +73,10 @@ const MOON_SIZE_CAP = 9400;
 // Base recycler hold; hyperspace technology adds 5% per level.
 const MOON_RECYCLER_CAPACITY = 20000;
 
-// Recycler cargo bonus granted by the General class. It is the only player
-// class that changes anything here - the Collector's +25% applies to
+// The General's recycler bonus (HOLD_CLASS_BONUS.GENERAL) is the only player
+// class bonus that changes anything here - the Collector's +25% applies to
 // transports, which this calculator never uses - so the form offers a single
 // General checkbox instead of the usual class selector.
-const MOON_GENERAL_CARGO_BONUS = 0.20;
 
 // Sensor phalanx range bonus granted by the Discoverer class. The class
 // checkbox of the phalanx panel is independent of the General checkbox above:
@@ -92,25 +91,6 @@ const PHALANX_DISCOVERER_BONUS = 0.20;
 const PHALANX_MAX_LEVEL = 50;
 
 class MoonCalculator {
-  /**
-   * Cargo capacity, matching the costs / graviton calculators:
-   *   base * (1 + 0.05 * hyperTech)  +  base * classBonus  +  floor(base * cap%/100)
-   * where the class bonus and the life-form capacity increase are additive,
-   * never multiplied onto the hyperspace-boosted value.
-   *
-   * @param {number} base Base cargo capacity (20000 for a recycler).
-   * @param {number} hyperTechLevel Hyperspace technology level.
-   * @param {number} classBonus Additive class fraction: 0.20 for a General's
-   *   recyclers, 0 otherwise (see MOON_GENERAL_CARGO_BONUS).
-   * @param {number} capacityIncrease Life-form cargo capacity increase, %.
-   */
-  static cargoCapacity(base, hyperTechLevel, classBonus, capacityIncrease) {
-    let cap = base * (1 + 0.05 * hyperTechLevel);
-    cap += base * classBonus;
-    cap += Math.floor(base * 0.01 * capacityIncrease);
-    return cap;
-  }
-
   /**
    * Destruction sub-calculator: the chance to blow up the target moon and the
    * chance the Death Stars are destroyed in the process.
@@ -190,10 +170,11 @@ class MoonCalculator {
     );
     const moonSizes = MoonCalculator.moonSizes(debrisTotal, p.supraRefractorLevel);
 
-    const classBonus = p.isGeneral ? MOON_GENERAL_CARGO_BONUS : 0;
-    const recyclerCapacity = MoonCalculator.cargoCapacity(
-      MOON_RECYCLER_CAPACITY, p.hyperTechLevel, classBonus, p.rcCapacityIncrease
-    );
+    const recyclerCapacity = shipHold(MOON_RECYCLER_CAPACITY, {
+      hyperTechLevel: p.hyperTechLevel,
+      classBonus: p.isGeneral ? HOLD_CLASS_BONUS.GENERAL : 0,
+      lfBonus: p.rcCapacityIncrease,
+    });
     const recyclers = recyclerCapacity > 0 ? Math.ceil(debrisTotal / recyclerCapacity) : 0;
 
     return {
@@ -455,7 +436,6 @@ if (typeof window !== 'undefined') {
     MOON_SIZE_CAP,
     MOON_SUPRA_BONUS_PER_LEVEL,
     MOON_RECYCLER_CAPACITY,
-    MOON_GENERAL_CARGO_BONUS,
     PHALANX_DISCOVERER_BONUS,
     PHALANX_MAX_LEVEL,
   });

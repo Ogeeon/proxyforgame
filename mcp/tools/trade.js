@@ -8,7 +8,7 @@ const { ToolError } = require('../lib/protocol');
 const common = require('./common');
 
 const { TradeCalculator, TRADE_RATE_LIMITS, tradeMcRate, tradeDefaultRates } = loadBrowserScripts(
-    ['js/utils.js', 'ogame/calc/js/trade-core.js'],
+    ['js/utils.js', 'ogame/calc/js/ogame-cargo.js', 'ogame/calc/js/trade-core.js'],
     ['TradeCalculator', 'TRADE_RATE_LIMITS', 'tradeMcRate', 'tradeDefaultRates'],
 );
 

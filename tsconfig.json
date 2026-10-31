@@ -14,6 +14,7 @@
     "www/ogame/calc/js/ogame-production.js",
     "www/ogame/calc/js/ogame-costs.js",
     "www/ogame/calc/js/ogame-lifeform.js",
+    "www/ogame/calc/js/ogame-cargo.js",
     "www/ogame/calc/js/dom-utils.js",
     "www/ogame/calc/js/globals.d.ts",
     "www/ogame/calc/js/options-global.d.ts"

@@ -8,7 +8,7 @@ const { describe, it } = require('node:test');
 const { load } = require('./load');
 const { expect } = require('./expect');
 
-const { MoonCalculator } = load(['js/utils.js', 'ogame/calc/js/moon-core.js'], ['MoonCalculator']);
+const { MoonCalculator } = load(['js/utils.js', 'ogame/calc/js/ogame-cargo.js', 'ogame/calc/js/moon-core.js'], ['MoonCalculator']);
 
 const BASE_PRM = {
     moonSize: 1,

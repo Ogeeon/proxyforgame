@@ -38,6 +38,7 @@
   <script src="/ogame/calc/js/profiles-ui.js?v=<?php echo assetVersion($pfgPath, '/ogame/calc/js/profiles-ui.js'); ?>" defer></script>
 
   <!-- Queue calculator modules -->
+  <script src="/ogame/calc/js/ogame-cargo.js?v=<?php echo assetVersion($pfgPath, '/ogame/calc/js/ogame-cargo.js'); ?>" defer></script>
   <script src="/ogame/calc/js/queue-core.js?v=<?php echo assetVersion($pfgPath, '/ogame/calc/js/queue-core.js'); ?>" defer></script>
   <script src="/ogame/calc/js/queue-data-collector.js?v=<?php echo assetVersion($pfgPath, '/ogame/calc/js/queue-data-collector.js'); ?>" defer></script>
   <script src="/ogame/calc/js/queue-renderer.js?v=<?php echo assetVersion($pfgPath, '/ogame/calc/js/queue-renderer.js'); ?>" defer></script>

@@ -10,7 +10,7 @@ const { expect } = require('./expect');
 
 // utils.js supplies dropFraction(); ogame-costs.js supplies getBuildCost_C/getBuildTime_C.
 const { TerraformerCalculator, getBuildEnergyCost_C } = load(
-    ['js/utils.js', 'ogame/calc/js/ogame-costs.js', 'ogame/calc/js/terraformer-core.js'],
+    ['js/utils.js', 'ogame/calc/js/ogame-costs.js', 'ogame/calc/js/ogame-production.js', 'ogame/calc/js/ogame-cargo.js', 'ogame/calc/js/terraformer-core.js'],
     ['TerraformerCalculator', 'getBuildEnergyCost_C'],
 );
 
@@ -47,9 +47,6 @@ const BASE_PRM = {
 function compute(overrides = {}) {
     return new TerraformerCalculator().compute({ ...BASE_PRM, ...overrides });
 }
-
-const capacity = (base, hyper, classBonus, inc) =>
-    TerraformerCalculator.cargoCapacity(base, hyper, classBonus, inc);
 
 describe('Terraformer Calculator - Core computation', () => {
     it('solar plant energy follows the OGame formula', () => {
@@ -155,28 +152,6 @@ describe('Terraformer Calculator - Core computation', () => {
 });
 
 describe('Terraformer Calculator - Cargo capacity', () => {
-    it('base capacity with no bonuses', () => {
-        expect(capacity(5000, 0, 0, 0)).toBe(5000);
-        expect(capacity(25000, 0, 0, 0)).toBe(25000);
-    });
-
-    it('hyperspace technology adds 5% per level', () => {
-        expect(capacity(5000, 10, 0, 0)).toBe(5000 * 1.5);
-        expect(capacity(25000, 20, 0, 0)).toBe(25000 * 2);
-    });
-
-    it('the class bonus is additive, not scaled by hyperspace tech', () => {
-        // 5000*1.5 + 5000*0.25 = 8750, NOT 5000*1.5*1.25 = 9375 (the old bug).
-        expect(capacity(5000, 10, 0.25, 0)).toBe(5000 * 1.5 + 5000 * 0.25);
-        expect(capacity(25000, 10, 0.25, 0)).toBe(25000 * 1.5 + 25000 * 0.25);
-    });
-
-    it('cargo capacity increase adds floor(base * increase%)', () => {
-        expect(capacity(5000, 0, 0, 100)).toBe(10000);
-        expect(capacity(25000, 0, 0, 50)).toBe(25000 + 12500);
-        expect(capacity(5000, 0, 0, 33)).toBe(5000 + Math.floor(5000 * 0.33));
-    });
-
     it('transports use the capacity-adjusted cargo holds', () => {
         const plain = compute({ tfLevelTo: 1 });
         const sum = plain.crysTotal + plain.deutTotal;

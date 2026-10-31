@@ -9,13 +9,14 @@ const { describe, it } = require('node:test');
 const { load } = require('./load');
 const { expect } = require('./expect');
 
-// ogame-production.js and ogame-costs.js first: costs-core.js calls their
-// getProductionRate and getHalvingCost helpers the way the page does, with all
-// three scripts sharing one global scope.
+// ogame-production.js, ogame-costs.js and ogame-cargo.js first: costs-core.js
+// calls their getProductionRate, getHalvingCost and shipHold helpers the way the
+// page does, with all four scripts sharing one global scope.
 const { GlobalParams, Calculator, BuildRequest, universeSpeeds, calcBuildCost_C, getBuildCost_C } = load(
     [
         'ogame/calc/js/ogame-production.js',
         'ogame/calc/js/ogame-costs.js',
+        'ogame/calc/js/ogame-cargo.js',
         'ogame/calc/js/costs-core.js',
     ],
     ['GlobalParams', 'Calculator', 'BuildRequest', 'universeSpeeds', 'calcBuildCost_C', 'getBuildCost_C'],

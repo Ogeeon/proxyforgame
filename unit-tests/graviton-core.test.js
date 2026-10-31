@@ -11,7 +11,7 @@ const { expect } = require('./expect');
 
 // utils.js first: graviton-core calls dropFraction() from it.
 const { GravitonCalculator } = load(
-    ['js/utils.js', 'ogame/calc/js/graviton-core.js'],
+    ['js/utils.js', 'ogame/calc/js/ogame-production.js', 'ogame/calc/js/ogame-cargo.js', 'ogame/calc/js/graviton-core.js'],
     ['GravitonCalculator'],
 );
 
@@ -47,11 +47,6 @@ const BASE_PRM = {
 function compute(overrides = {}) {
     return new GravitonCalculator().compute({ ...BASE_PRM, ...overrides });
 }
-
-// classBonus is the additive class fraction (0.25 Collector transports,
-// 0.20 General recyclers, 0 otherwise).
-const capacity = (base, hyper, classBonus, inc) =>
-    GravitonCalculator.cargoCapacity(base, hyper, classBonus, inc);
 
 describe('Graviton Calculator - Core computation', () => {
     it('solar plant energy follows the OGame formula', () => {
@@ -136,40 +131,22 @@ describe('Graviton Calculator - Core computation', () => {
         const general = compute({ solarPlantLevel: 20, playerClass: 2 });
         expect(general.classEnergyBonus).toBe(0);
     });
+
+    it('a new satellite carries the disruption chamber share on a cold planet', () => {
+        // 3 energy per satellite at -120; 30 chamber levels add 45% of it, which
+        // used to be rounded down to nothing on its own
+        const r = compute({ maxPlanetTemp: -120, disChLevel: 30, gravitonLevel: 1 });
+        expect(r.energyPerSat).toBeCloseTo(3 * 1.45);
+        expect(r.neededSats).toBe(Math.ceil(300000 / (3 * 1.45)));
+    });
 });
 
 // ---------------------------------------------------------------------------
-// Cargo capacity. Mirrors the costs calculator: the transport holds grow with
-// hyperspace tech, the Collector bonus and the life-form capacity increase —
-// all added to the base, never multiplied together.
+// Cargo capacity. The hold formula itself is pinned in ogame-cargo.test.js;
+// these check that the graviton hands it the right bonuses.
 // ---------------------------------------------------------------------------
 
 describe('Graviton Calculator - Cargo capacity', () => {
-    it('base capacity with no bonuses', () => {
-        expect(capacity(5000, 0, 0, 0)).toBe(5000);
-        expect(capacity(25000, 0, 0, 0)).toBe(25000);
-    });
-
-    it('hyperspace technology adds 5% per level', () => {
-        expect(capacity(5000, 10, 0, 0)).toBe(5000 * 1.5);
-        expect(capacity(25000, 20, 0, 0)).toBe(25000 * 2);
-    });
-
-    it('the class bonus is additive, not scaled by hyperspace tech', () => {
-        // 5000*1.5 + 5000*0.25 = 8750, NOT 5000*1.5*1.25 = 9375 (the old bug).
-        expect(capacity(5000, 10, 0.25, 0)).toBe(5000 * 1.5 + 5000 * 0.25);
-        expect(capacity(25000, 10, 0.25, 0)).toBe(25000 * 1.5 + 25000 * 0.25);
-        // General recyclers add +20% the same way.
-        expect(capacity(20000, 10, 0.20, 0)).toBe(20000 * 1.5 + 20000 * 0.20);
-    });
-
-    it('cargo capacity increase adds floor(base * increase%)', () => {
-        expect(capacity(5000, 0, 0, 100)).toBe(10000);
-        expect(capacity(25000, 0, 0, 50)).toBe(25000 + 12500);
-        // Fractional percentages are floored on the base contribution.
-        expect(capacity(5000, 0, 0, 33)).toBe(5000 + Math.floor(5000 * 0.33));
-    });
-
     it('transports use the capacity-adjusted cargo holds', () => {
         const plain = compute({ gravitonLevel: 1 });
         const sum = plain.crysNeeded + plain.deutNeeded;
@@ -187,11 +164,6 @@ describe('Graviton Calculator - Cargo capacity', () => {
         // +100% SC capacity doubles the hold (5000 -> 10000), halving the count.
         const sum = boosted.crysNeeded + boosted.deutNeeded;
         expect(boosted.scNeeded).toBe(Math.ceil(sum / 10000));
-    });
-
-    it('recycler capacity uses the 20000 hold with the general bonus', () => {
-        expect(capacity(20000, 0, 0, 0)).toBe(20000);
-        expect(capacity(20000, 10, 0, 50)).toBe(20000 * 1.5 + Math.floor(20000 * 0.5));
     });
 
     it('recycler capacity increase lowers the recyclers needed', () => {

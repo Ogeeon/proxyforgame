@@ -1,5 +1,6 @@
 // Resource and energy production: mine and plant output, hourly deuterium
-// consumption, storage capacity. Read by the costs and production calculators.
+// consumption, storage capacity, and a planet's energy with every bonus on it.
+// Read by the costs, production, graviton and terraformer calculators.
 
 /**
  * Everything the production formula reads, in one object. It used to be sixteen
@@ -202,4 +203,119 @@ function getStorageCapacity(level) {
 	if (level == 0)
 		return 10000;
 	return 5000 * Math.floor(2.5 * Math.exp(20.0 * level/33.0));
+}
+
+/**
+ * A planet's power plants, satellites and everything that raises their output -
+ * what the graviton and terraformer calculators weigh an energy requirement
+ * against.
+ * @typedef {object} PlanetEnergyParams
+ * @property {number} solarPlantLevel
+ * @property {number} solarPlantPercent power setting, 0..100
+ * @property {number} fusionPlantLevel
+ * @property {number} fusionPlantPercent power setting, 0..100
+ * @property {number} energyTechLevel energy technology level (fusion plant output)
+ * @property {number} satellites solar satellites in orbit
+ * @property {number} satellitesPercent power setting, 0..100
+ * @property {number} maxTemp max temperature on the planet
+ * @property {number} [booster] energy booster in tens of percent: 2 is +20%
+ * @property {boolean} [engineer] whether the Engineer is present (+10%)
+ * @property {boolean} [fullCrew] whether all five officers are present (+2%)
+ * @property {boolean} [collector] whether the player is a Collector (+10%)
+ * @property {number} [collectorEnhancement] percent by which the Rock'tal
+ *           Collector Enhancement raises the Collector bonus
+ * @property {boolean} [trader] whether the alliance has the Trader class (+5%)
+ * @property {number} [lfTechBonus] energy production bonus of the life form research, %
+ * @property {number} [lfBuildingBonus] energy production bonus of the life form buildings, %
+ */
+
+/**
+ * Energy the planet produces, by source. The plants and satellites give the
+ * base; every bonus is a share of that base, rounded on its own, the way the
+ * production calculator lays out its energy rows.
+ * @param {PlanetEnergyParams} p
+ * @returns {{solarPlant: number, fusionPlant: number, satellites: number, booster: number,
+ *   engineer: number, fullCrew: number, playerClass: number, trader: number,
+ *   lfTech: number, lfBuildings: number, total: number}}
+ */
+function planetEnergy(p) {
+	/** @param {number} techID @param {number} level @param {number} percent */
+	const plant = (techID, level, percent) => getProductionRateSplit({
+		techID, techLevel: level, energyTechLevel: p.energyTechLevel, plasmaTechLevel: 0,
+		maxTemp: p.maxTemp, pos: 0, universeSpeedFactor: 1, geologist: false, engineer: false,
+		productionFactor: 1, powerFactor: percent / 100, boosterType: 0, allOfficers: false,
+		playerClass: -1,
+	})[PRODUCTION_ROW.BUILDING];
+	const solarPlant = plant(4, p.solarPlantLevel, p.solarPlantPercent);
+	const fusionPlant = plant(12, p.fusionPlantLevel, p.fusionPlantPercent);
+	const satellites = plant(212, p.satellites, p.satellitesPercent);
+	const base = Math.max(solarPlant + fusionPlant + satellites, 0);
+
+	const factors = planetEnergyFactors(p);
+	/** @type {Record<keyof typeof factors, number>} */
+	const bonus = {
+		booster: 0, engineer: 0, fullCrew: 0, playerClass: 0, trader: 0, lfTech: 0, lfBuildings: 0,
+	};
+	let total = base;
+	for (const key of /** @type {(keyof typeof factors)[]} */ (Object.keys(factors))) {
+		bonus[key] = Math.round(base * factors[key]);
+		total += bonus[key];
+	}
+	return { solarPlant, fusionPlant, satellites, ...bonus, total };
+}
+
+/**
+ * The share of the base energy each bonus adds.
+ * @param {PlanetEnergyParams} p
+ */
+function planetEnergyFactors(p) {
+	return {
+		booster: 0.1 * (p.booster || 0),
+		engineer: p.engineer ? 0.1 : 0,
+		fullCrew: p.fullCrew ? 0.02 : 0,
+		playerClass: p.collector ? 0.1 * (1 + 0.01 * (p.collectorEnhancement || 0)) : 0,
+		trader: p.trader ? 0.05 : 0,
+		lfTech: 0.01 * (p.lfTechBonus || 0),
+		lfBuildings: 0.01 * (p.lfBuildingBonus || 0),
+	};
+}
+
+/**
+ * What one more satellite adds to the planet's energy, bonuses included, before
+ * any rounding. Zero when the satellites are switched off or the planet is too
+ * cold for them to yield anything.
+ * @param {PlanetEnergyParams} p
+ * @returns {number}
+ */
+function satelliteEnergyYield(p) {
+	const own = Math.max(Math.floor((p.maxTemp + 140) / 6), 0) * p.satellitesPercent / 100;
+	const shares = Object.values(planetEnergyFactors(p)).reduce((sum, f) => sum + f, 0);
+	return own * (1 + shares);
+}
+
+/**
+ * The fewest satellites to add for the planet's energy to reach `required`:
+ * none when it already does, Infinity when satellites yield nothing. Each
+ * candidate count is checked against planetEnergy itself, so the rounding of
+ * the base and of every bonus is the one the planet will actually show.
+ * @param {PlanetEnergyParams} p
+ * @param {number} required
+ * @returns {number}
+ */
+function satellitesForEnergy(p, required) {
+	/** @param {number} n */
+	const reaches = (n) => planetEnergy({ ...p, satellites: p.satellites + n }).total >= required;
+	if (reaches(0)) {
+		return 0;
+	}
+	const perSatellite = satelliteEnergyYield(p);
+	if (perSatellite <= 0) {
+		return Infinity;
+	}
+	// The unrounded yield lands within a satellite or two of the answer; the
+	// rounding of the individual rows decides which side
+	let n = Math.max(Math.ceil((required - planetEnergy(p).total) / perSatellite), 1);
+	while (n > 1 && reaches(n - 1)) n--;
+	while (!reaches(n)) n++;
+	return n;
 }

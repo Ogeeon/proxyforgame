@@ -9,7 +9,7 @@ const { ToolError } = require('../lib/protocol');
 const common = require('./common');
 
 const { MoonCalculator, MOON_UNITS } = loadBrowserScripts(
-    ['js/utils.js', 'ogame/calc/js/moon-core.js'],
+    ['js/utils.js', 'ogame/calc/js/ogame-cargo.js', 'ogame/calc/js/moon-core.js'],
     ['MoonCalculator', 'MOON_UNITS'],
 );
 

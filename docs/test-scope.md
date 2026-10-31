@@ -42,7 +42,7 @@ than trusting this line, and skip the step for a calculator that has none.
 
 Anything not in a calculator's file set, notably:
 
-- `www/ogame/calc/js/ogame-production.js`, `ogame-costs.js`, `ogame-lifeform.js` — the game
+- `www/ogame/calc/js/ogame-production.js`, `ogame-costs.js`, `ogame-lifeform.js`, `ogame-cargo.js` — the game
   formulas; **note the path**, they sit in `www/ogame/calc/js/`, not in `www/ogame/`
 - `www/ogame/calc/js/dom-utils.js`
 - `www/ogame/calc/js/own-api.js` — the API 2 import, read by `flight` and `expeditions`

@@ -15,7 +15,7 @@ const { expect } = require('./expect');
 // utils.js supplies strPad() for getFlightTimeStr; the orchestration file carries
 // getFlightTimeStr and _legSeconds, both of which are pure.
 const { FlightCalculator, FlightOrchestrator, getFlightTimeStr, MISSION, SHIP, PLAYER_CLASS } = load(
-    ['js/utils.js', 'ogame/calc/js/flight-core.js', 'ogame/calc/js/flight-orchestration.js'],
+    ['js/utils.js', 'ogame/calc/js/ogame-cargo.js', 'ogame/calc/js/flight-core.js', 'ogame/calc/js/flight-orchestration.js'],
     ['FlightCalculator', 'FlightOrchestrator', 'getFlightTimeStr', 'MISSION', 'SHIP', 'PLAYER_CLASS'],
 );
 

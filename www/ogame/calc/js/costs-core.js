@@ -161,36 +161,31 @@ class GlobalParams {
       .reduce((sum, lab) => sum + lab.level, 0);
   }
 
-  /**
-   * Get small cargo ship capacity.
-   * Hyperspace tech, Collector class and the cargo capacity increase are all
-   * additive to the base capacity (matches the LFCosts calculator).
-   */
+  /** Get small cargo ship capacity. */
   get smallCargoCapacity() {
-    const baseCapacity = 5000;
-    let cap = baseCapacity * (1 + 0.05 * this.hyperTechLevel);
-    // Collector +25%, itself boosted by the Rock'tal Collector Enhancement
-    if (this.playerClass === 0) {
-      cap += baseCapacity * 0.25 * (1 + 0.01 * this.collectorClassBonus);
-    }
-    cap += Math.floor(baseCapacity * 0.01 * this.scCapacityIncrease);
-    return cap;
+    return shipHold(5000, this._holdParams(this.scCapacityIncrease));
+  }
+
+  /** Get large cargo ship capacity. */
+  get largeCargoCapacity() {
+    return shipHold(25000, this._holdParams(this.lcCapacityIncrease));
   }
 
   /**
-   * Get large cargo ship capacity.
-   * Hyperspace tech, Collector class and the cargo capacity increase are all
-   * additive to the base capacity (matches the LFCosts calculator).
+   * The bonuses a transport's hold takes: the Collector's +25%, itself boosted
+   * by the Rock'tal Collector Enhancement, and the ship's own increase.
+   * @private
+   * @param {number} lfBonus cargo capacity increase of the ship, %
+   * @returns {HoldParams}
    */
-  get largeCargoCapacity() {
-    const baseCapacity = 25000;
-    let cap = baseCapacity * (1 + 0.05 * this.hyperTechLevel);
-    // Collector +25%, itself boosted by the Rock'tal Collector Enhancement
-    if (this.playerClass === 0) {
-      cap += baseCapacity * 0.25 * (1 + 0.01 * this.collectorClassBonus);
-    }
-    cap += Math.floor(baseCapacity * 0.01 * this.lcCapacityIncrease);
-    return cap;
+  _holdParams(lfBonus) {
+    const collector = this.playerClass === 0;
+    return {
+      hyperTechLevel: this.hyperTechLevel,
+      classBonus: collector ? HOLD_CLASS_BONUS.COLLECTOR : 0,
+      classEnhancement: collector ? this.collectorClassBonus : 0,
+      lfBonus,
+    };
   }
 
   /**

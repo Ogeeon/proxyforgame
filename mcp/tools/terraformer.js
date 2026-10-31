@@ -9,7 +9,7 @@ const { formatDuration } = require('../lib/format');
 const common = require('./common');
 
 const { TerraformerCalculator } = loadBrowserScripts(
-    ['js/utils.js', 'ogame/calc/js/ogame-costs.js', 'ogame/calc/js/terraformer-core.js'],
+    ['js/utils.js', 'ogame/calc/js/ogame-costs.js', 'ogame/calc/js/ogame-production.js', 'ogame/calc/js/ogame-cargo.js', 'ogame/calc/js/terraformer-core.js'],
     ['TerraformerCalculator'],
 );
 

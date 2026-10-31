@@ -11,7 +11,7 @@ const common = require('./common');
 const { keyedMap } = common;
 
 const { FlightCalculator, SHIPS_BASE, MISSION, PLAYER_CLASS } = loadBrowserScripts(
-    ['ogame/calc/js/flight-core.js'],
+    ['ogame/calc/js/ogame-cargo.js', 'ogame/calc/js/flight-core.js'],
     ['FlightCalculator', 'SHIPS_BASE', 'MISSION', 'PLAYER_CLASS'],
 );
 

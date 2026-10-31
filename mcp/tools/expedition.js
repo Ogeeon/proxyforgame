@@ -9,7 +9,7 @@ const { ToolError } = require('../lib/protocol');
 const common = require('./common');
 
 const { ExpeditionsCalculator, EXPEDITION_SHIPS, EXPEDITION_CLASS } = loadBrowserScripts(
-    ['ogame/calc/js/expeditions-core.js'],
+    ['ogame/calc/js/ogame-cargo.js', 'ogame/calc/js/expeditions-core.js'],
     ['ExpeditionsCalculator', 'EXPEDITION_SHIPS', 'EXPEDITION_CLASS'],
 );
 
