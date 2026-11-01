@@ -44,7 +44,7 @@ const options = {
         case 'debrisPercent': return validateNumber(Number.parseFloat(value), 0, 100, 30);
         case 'hyperTechLevel': return validateNumber(Number.parseFloat(value), 0, 50, 0);
         case 'isGeneral': return value === 'true';
-        case 'rcCapacityIncrease': return validateNumber(Number.parseFloat(value), 0, 999, 0);
+        case 'rcCapacityIncrease': return validateNumber(Number.parseFloat(value), 0, Infinity, 0);
         case 'defenseDebrisPercent': return validateNumber(Number.parseFloat(value), 0, 100, 0);
         case 'deutToDebris': return value === 'true';
         case 'promoMoon': return value === 'true';
@@ -150,7 +150,7 @@ class MoonApp {
     const hyperTech = document.getElementById('hypertech-lvl');
     if (hyperTech) hyperTech._constrains = { min: 0, max: 50, def: 0 };
     const rcCap = document.getElementById('rc-capacity-increase');
-    if (rcCap) rcCap._constrains = { min: 0, max: 999, def: 0, allowNegative: false, allowFloat: true };
+    if (rcCap) rcCap._constrains = { min: 0, max: Infinity, def: 0, allowNegative: false, allowFloat: true };
     const supra = document.getElementById('supra-refractor');
     if (supra) supra._constrains = { min: 0, max: 100, def: 0 };
     MOON_UNITS.forEach((unit) => {

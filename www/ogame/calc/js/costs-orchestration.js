@@ -492,7 +492,7 @@ class CostsCalculator {
     ];
 
     setConstrains('max-planet-temp', { 'min': -134, 'def': 0, 'allowNegative': true });
-    setConstrains('planet-pos', { 'min': 1, 'max': 16, 'def': 8, 'allowNegative': false });
+    setConstrains('planet-pos', { 'min': 1, 'max': 15, 'def': 8, 'allowNegative': false });
 
     // The two fields above already carry their own constraints, so the
     // defaults applied here skip them
@@ -524,8 +524,8 @@ class CostsCalculator {
     setConstrains('discoverer-class-bonus', { min: 0, max: Infinity, def: 0, allowFloat: true, allowNegative: false });
     setConstrains('lf-collector-class-bonus', { min: 0, max: Infinity, def: 0, allowFloat: true, allowNegative: false });
     setConstrains('lf-terraformer-rdc', { min: 0, max: 50, def: 0, allowFloat: true, allowNegative: false });
-    setConstrains('sc-capacity-increase', { min: 0, max: 1000, def: 0, allowFloat: true, allowNegative: false });
-    setConstrains('lc-capacity-increase', { min: 0, max: 1000, def: 0, allowFloat: true, allowNegative: false });
+    setConstrains('sc-capacity-increase', { min: 0, max: Infinity, def: 0, allowFloat: true, allowNegative: false });
+    setConstrains('lc-capacity-increase', { min: 0, max: Infinity, def: 0, allowFloat: true, allowNegative: false });
 
     this._bindNumericFieldEvents(lfInputs);
 

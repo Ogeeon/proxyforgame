@@ -36,7 +36,7 @@ function createMoonTools({ siteApi }) {
         inputSchema: {
             type: 'object',
             properties: {
-                moonDiameter: { type: 'integer', minimum: 1, maximum: 20000, description: 'Diameter of the moon, km.' },
+                moonDiameter: { type: 'integer', minimum: 1, maximum: 10000, description: 'Diameter of the moon, km.' },
                 deathStars: { type: 'integer', minimum: 1, description: 'Number of Death Stars sent.' },
             },
             required: ['moonDiameter', 'deathStars'],

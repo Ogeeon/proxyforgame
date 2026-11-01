@@ -74,8 +74,8 @@
             // Capacity increases are percentages and may be fractional, so they
             // are parsed as floats and clamped to the same range the field's
             // _constrains use.
-            case 'scCapacityIncrease': return validateNumber(Number.parseFloat(value), 0, 1000, 0);
-            case 'lcCapacityIncrease': return validateNumber(Number.parseFloat(value), 0, 1000, 0);
+            case 'scCapacityIncrease': return validateNumber(Number.parseFloat(value), 0, Infinity, 0);
+            case 'lcCapacityIncrease': return validateNumber(Number.parseFloat(value), 0, Infinity, 0);
             case 'totFldPln':      return validateNumber(Number.parseFloat(value), 1, Infinity, 163);
             case 'totFldMn':       return validateNumber(Number.parseFloat(value), 1, Infinity, 1);
             case 'sDTP':           return validateNumber(Number.parseFloat(value), 0, Infinity, 0);

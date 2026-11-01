@@ -668,10 +668,10 @@ test.describe('Costs Calculator Page', () => {
     test('[one item - multiple levels] planet position clamps to valid range on blur', async ({ page }) => {
         await page.getByRole('tab', { name: 'One item - multiple levels' }).click();
 
-        // Position is capped at 16
+        // Position is capped at 15: 16 is the expedition slot, not a planet
         await page.locator('#planet-pos').fill('20');
         await page.locator('#planet-pos').blur();
-        await expect(page.locator('#planet-pos')).toHaveValue('16');
+        await expect(page.locator('#planet-pos')).toHaveValue('15');
 
         // Position below 1 is raised to 1
         await page.locator('#planet-pos').fill('0');

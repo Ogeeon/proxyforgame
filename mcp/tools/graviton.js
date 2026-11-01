@@ -15,7 +15,7 @@ const { GravitonCalculator } = loadBrowserScripts(
 const inputSchema = {
     type: 'object',
     properties: {
-        gravitonLevel: { type: 'integer', minimum: 1, maximum: 10, default: 1, description: 'Graviton Technology level to research.' },
+        gravitonLevel: { type: 'integer', minimum: 1, default: 1, description: 'Graviton Technology level to research.' },
         ...common.energySchema,
         lifeforms: common.lifeformsSchema(common.ENERGY_LIFEFORMS, common.ENERGY_SHIPS),
         facilities: common.facilitiesSchema(['shipyard', 'naniteFactory']),

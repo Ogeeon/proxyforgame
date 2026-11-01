@@ -251,7 +251,7 @@ const productionPercent = { type: 'integer', minimum: 0, maximum: 100, default: 
 
 /** The planet's power plants and temperature, as the production, graviton and terraformer tools take them. */
 const maxTemperatureSchema = {
-    type: 'integer', minimum: -200, maximum: 300, default: 0,
+    type: 'integer', minimum: -134, maximum: 300, default: 0,
     description: 'Maximum temperature of the planet, °C. Decides what a solar satellite yields.',
 };
 const solarPlantSchema = {

@@ -319,7 +319,7 @@
         <table class="mx-auto" role="presentation">
           <tr>
             <td><label for="graviton-level"><?= $l['graviton-level'] ?></label></td>
-            <td><input id="graviton-level" type="text" name="graviton-level" class="form-control form-control-sm d-inline-block energy-input ui-input-margin" value="0" data-field-title="<?= $l['graviton-level'] ?>"></td>
+            <td><input id="graviton-level" type="text" name="graviton-level" class="form-control form-control-sm d-inline-block energy-input ui-input-margin" value="1" data-field-title="<?= $l['graviton-level'] ?>"></td>
           </tr>
         </table>
       </div>

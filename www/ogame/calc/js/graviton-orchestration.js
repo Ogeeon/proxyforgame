@@ -69,16 +69,14 @@ const options = {
         case 'isTrader': return value === 'true';
         case 'energyBoost': return validateNumber(Number.parseInt(value), 0, 8, 0);
         case 'disChLevel': return validateNumber(Number.parseFloat(value), 0, 100, 0);
-        case 'gravitonLevel': return validateNumber(Number.parseFloat(value), 0, 100, 0);
-        // Same 0..999 range the field's own _constrains enforce on blur: a
-        // narrower range here would silently cut back a value the form accepted.
-        // The life-form energy bonus has no ceiling in the game.
+        case 'gravitonLevel': return validateNumber(Number.parseFloat(value), 1, Infinity, 1);
+        // The life-form bonuses have no ceiling in the game.
         case 'totalLFEnrgBonus': return validateNumber(Number.parseFloat(value), 0, Infinity, 0);
         // The Rock'tal Collector Enhancement total, uncapped as in the cost calculator.
         case 'collectorClassBonus': return validateNumber(Number.parseFloat(value), 0, Infinity, 0);
-        case 'scCapacityIncrease': return validateNumber(Number.parseFloat(value), 0, 999, 0);
-        case 'lcCapacityIncrease': return validateNumber(Number.parseFloat(value), 0, 999, 0);
-        case 'rcCapacityIncrease': return validateNumber(Number.parseFloat(value), 0, 999, 0);
+        case 'scCapacityIncrease': return validateNumber(Number.parseFloat(value), 0, Infinity, 0);
+        case 'lcCapacityIncrease': return validateNumber(Number.parseFloat(value), 0, Infinity, 0);
+        case 'rcCapacityIncrease': return validateNumber(Number.parseFloat(value), 0, Infinity, 0);
         case 'crysAvailable': return validateNumber(Number.parseFloat(value), 0, Infinity, 0);
         case 'deutAvailable': return validateNumber(Number.parseFloat(value), 0, Infinity, 0);
         case 'deutInDebris': return value === 'true';
@@ -170,8 +168,9 @@ class GravitonApp {
    * the next page load.
    */
   _applyConstraints() {
-    // The life-form percentages are the only fractional fields on the page.
-    const percent = () => ({ min: 0, max: 999, def: 0, allowNegative: false, allowFloat: true });
+    // The life-form percentages are the only fractional fields on the page,
+    // and none of them has a ceiling in the game.
+    const percent = () => ({ min: 0, max: Infinity, def: 0, allowNegative: false, allowFloat: true });
     const constraints = {
       'shipyard-level': { min: 1, max: 100, def: 1 },
       'nanites-factory-level': { min: 0, max: 100, def: 0 },
@@ -184,12 +183,11 @@ class GravitonApp {
       'fusion-plant-level': { min: 0, max: 100, def: 0 },
       'solar-satellites-count': { min: 0, max: Infinity, def: 0 },
       'disr-chamber-level': { min: 0, max: 100, def: 0 },
-      'graviton-level': { min: 0, max: 100, def: 0 },
+      'graviton-level': { min: 1, max: Infinity, def: 1 },
       'crystal-available': { min: 0, max: Infinity, def: 0 },
       'deuterium-available': { min: 0, max: Infinity, def: 0 },
-      // Unlike the capacity bonuses, this one is uncapped.
-      'total-lf-energy-bonus': { ...percent(), max: Infinity },
-      'lf-collector-class-bonus': { ...percent(), max: Infinity },
+      'total-lf-energy-bonus': percent(),
+      'lf-collector-class-bonus': percent(),
       'sc-capacity-increase': percent(),
       'lc-capacity-increase': percent(),
       'rc-capacity-increase': percent()

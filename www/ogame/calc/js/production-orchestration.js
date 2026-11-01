@@ -1100,7 +1100,7 @@ async function initializeProductionCalculator() {
 		setConstrains('energy-tech-level', { 'min': 0, 'max': 50, 'def': 0, 'allowNegative': false });
 		setConstrains('plasma-tech-level', { 'min': 0, 'max': 50, 'def': 0, 'allowNegative': false });
 		setConstrains('max-planet-temp', { 'min': -134, 'def': 0, 'allowNegative': true });
-		setConstrains('planet-pos', { 'min': 1, 'max': 16, 'def': 8, 'allowNegative': false });
+		setConstrains('planet-pos', { 'min': 1, 'max': 15, 'def': 8, 'allowNegative': false });
 		setConstrains('exchange-rates-m', { 'min': 0.1, 'max': 100, 'def': 1,   'allowFloat': true, 'allowNegative': false });
 		setConstrains('exchange-rates-c', { 'min': 0.1, 'max': 100, 'def': 1.5, 'allowFloat': true, 'allowNegative': false });
 		setConstrains('exchange-rates-d', { 'min': 0.1, 'max': 100, 'def': 3,   'allowFloat': true, 'allowNegative': false });

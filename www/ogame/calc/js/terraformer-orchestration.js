@@ -42,7 +42,7 @@ const options = {
     lcCapacityIncrease: 0,
     tfSingleLevel: false,
     tfLevelFrom: 0,
-    tfLevelTo: 0,
+    tfLevelTo: 1,
     crysAvailable: 0,
     deutAvailable: 0,
 
@@ -71,20 +71,17 @@ const options = {
         case 'isTrader': return value === 'true';
         case 'energyBoost': return validateNumber(Number.parseInt(value), 0, 8, 0);
         case 'disChLevel': return validateNumber(Number.parseFloat(value), 0, 100, 0);
-        // 999 matches the field's own _constrains: the blur validator already
-        // accepts anything up to 999, so a narrower bound here would only make a
-        // legitimately entered value vanish on the next page load.
-        // The life-form energy bonus has no ceiling in the game.
+        // The life-form bonuses have no ceiling in the game.
         case 'totalLFEnrgBonus': return validateNumber(Number.parseFloat(value), 0, Infinity, 0);
         // The Rock'tal Collector Enhancement total, uncapped as in the cost calculator.
         case 'collectorClassBonus': return validateNumber(Number.parseFloat(value), 0, Infinity, 0);
         // The game caps the Terraformer reduction at 50%, as the cost calculator does.
         case 'lfTerraformerRdc': return validateNumber(Number.parseFloat(value), 0, 50, 0);
-        case 'scCapacityIncrease': return validateNumber(Number.parseFloat(value), 0, 999, 0);
-        case 'lcCapacityIncrease': return validateNumber(Number.parseFloat(value), 0, 999, 0);
+        case 'scCapacityIncrease': return validateNumber(Number.parseFloat(value), 0, Infinity, 0);
+        case 'lcCapacityIncrease': return validateNumber(Number.parseFloat(value), 0, Infinity, 0);
         case 'tfSingleLevel': return value === 'true';
         case 'tfLevelFrom': return validateNumber(Number.parseFloat(value), 0, 100, 0);
-        case 'tfLevelTo': return validateNumber(Number.parseFloat(value), 0, 100, 0);
+        case 'tfLevelTo': return validateNumber(Number.parseFloat(value), 1, 100, 1);
         case 'crysAvailable': return validateNumber(Number.parseFloat(value), 0, Infinity, 0);
         case 'deutAvailable': return validateNumber(Number.parseFloat(value), 0, Infinity, 0);
         default: return value;
@@ -204,14 +201,15 @@ class TerraformerApp {
     set('fusion-plant-level', level(100));
     set('solar-satellites-count', amount());
     set('disr-chamber-level', level(100));
-    // Unlike the capacity bonuses, this one is uncapped.
+    // None of the life-form bonuses has a ceiling in the game.
     set('total-lf-energy-bonus', percent(Infinity));
     set('lf-collector-class-bonus', percent(Infinity));
     set('lf-terraformer-rdc', percent(50));
-    set('sc-capacity-increase', percent(999));
-    set('lc-capacity-increase', percent(999));
+    set('sc-capacity-increase', percent(Infinity));
+    set('lc-capacity-increase', percent(Infinity));
     set('tf-level-from', level(100));
-    set('tf-level-to', level(100));
+    // The level to reach: there is nothing to build below level 1.
+    set('tf-level-to', { ...level(100), min: 1, def: 1 });
     set('crystal-available', amount());
     set('deuterium-available', amount());
   }
@@ -323,7 +321,7 @@ class TerraformerApp {
     options.prm.lcCapacityIncrease = 0;
     options.prm.tfSingleLevel = false;
     options.prm.tfLevelFrom = 0;
-    options.prm.tfLevelTo = 0;
+    options.prm.tfLevelTo = 1;
     options.prm.crysAvailable = 0;
     options.prm.deutAvailable = 0;
 

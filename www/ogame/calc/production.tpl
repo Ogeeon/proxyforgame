@@ -136,7 +136,7 @@
             case 'maxTempEntered':
               return value === 'true';
             case 'maxPlanetTemp':
-              return validateNumber(parseFloat(value), -272, Infinity, 0);
+              return validateNumber(parseFloat(value), -134, Infinity, 0);
             case 'onePlnExtView':
               return value === 'true';
             case 'onePlnRace':
@@ -152,7 +152,7 @@
             case 'playerClass':
               return validateNumber(parseFloat(value), 0, 2, 0);
             case 'planetPos':
-              return validateNumber(parseFloat(value), 1, 16, 8);
+              return validateNumber(parseFloat(value), 1, 15, 8);
             case 'energyBoost':
               return validateNumber(Number.parseInt(value), 0, 4, 0);
             case 'aPS':

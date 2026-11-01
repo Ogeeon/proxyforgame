@@ -325,7 +325,7 @@
             <td class="text-nowrap"><label for="tf-level-to"><?= $l['tf-level'] ?>&nbsp;(</label><input id="single-level" type="checkbox" name="single-level" class="form-check-input"> <label for="single-level"><?= $l['single-level'] ?>)</label></td>
             <td><input id="tf-level-from" type="text" name="tf-level-from" class="form-control form-control-sm d-inline-block energy-input ui-input-margin" value="0" data-field-title="<?= $l['tf-level'] ?>"></td>
             <td><label id="level-spacer">&#8212;</label></td>
-            <td><input id="tf-level-to" type="text" name="tf-level-to" class="form-control form-control-sm d-inline-block energy-input ui-input-margin" value="0" data-field-title="<?= $l['tf-level'] ?>"></td>
+            <td><input id="tf-level-to" type="text" name="tf-level-to" class="form-control form-control-sm d-inline-block energy-input ui-input-margin" value="1" data-field-title="<?= $l['tf-level'] ?>"></td>
           </tr>
         </table>
       </div>

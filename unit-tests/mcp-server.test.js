@@ -653,7 +653,8 @@ describe('MCP tool ogame_graviton', () => {
     });
 
     it('says so when satellites cannot help', async () => {
-        const out = (await call(protocolWith(), 'ogame_graviton', { maxTemperature: -140 })).structuredContent;
+        // No planet is cold enough to zero a satellite's yield; running them at 0% does.
+        const out = (await call(protocolWith(), 'ogame_graviton', { solarSatellites: { percent: 0 } })).structuredContent;
         expect(out.satellitesNeeded).toBe(undefined);
         expect(out.note).toContain('no number of them');
     });

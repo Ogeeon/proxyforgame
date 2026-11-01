@@ -41,8 +41,8 @@ const options = {
                 case 'hyperTechLevel':        return validateNumber(Number.parseFloat(value), 0, 50,  0);
                 case 'playerClass':           return validateNumber(Number.parseFloat(value), 0, 2,   0);
                 case 'fullNumbers':           return value === 'true';
-                case 'capIncrSC':             return validateNumber(Number.parseFloat(value), 0, 1000, 0);
-                case 'capIncrLC':             return validateNumber(Number.parseFloat(value), 0, 1000, 0);
+                case 'capIncrSC':             return validateNumber(Number.parseFloat(value), 0, Infinity, 0);
+                case 'capIncrLC':             return validateNumber(Number.parseFloat(value), 0, Infinity, 0);
                 case 'megalithLvl':           return validateNumber(Number.parseFloat(value), 0, 100, 0);
                 case 'mineralResCntrLvl':     return validateNumber(Number.parseFloat(value), 0, 100, 0);
                 case 'resCentreLvl':          return validateNumber(Number.parseFloat(value), 0, 100, 0);
@@ -624,8 +624,8 @@ class LfCostsOrchestrator {
         set('rune-tech-level',         level(100));
         set('rbt-res-centre-level',    level(100));
         set('vortex-chamber-level',    level(100));
-        set('sc-capacity-increase',    percent(1000));
-        set('lc-capacity-increase',    percent(1000));
+        set('sc-capacity-increase',    percent(Infinity));
+        set('lc-capacity-increase',    percent(Infinity));
         set('research-cost-reduction', percent(50));
         set('research-time-reduction', percent(99));
 

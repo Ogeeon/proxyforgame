@@ -186,7 +186,7 @@ test.describe('Terraformer Calculator - DOM integration', () => {
         await page.locator('#reset').click();
 
         await expect(page.locator('#solar-plant-level')).toHaveValue('0');
-        await expect(page.locator('#tf-level-to')).toHaveValue('0');
+        await expect(page.locator('#tf-level-to')).toHaveValue('1');
         for (const id of OFFICERS) {
             await expect(page.locator(id)).not.toBeChecked();
         }

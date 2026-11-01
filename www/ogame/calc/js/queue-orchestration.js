@@ -122,8 +122,8 @@ class QueueCalculatorApp {
     set('ion-tech-level', { min: 0, max: 50, def: 0, allowFloat: false, allowNegative: false });
     set('hyper-tech-level', { min: 0, max: 50, def: 0, allowFloat: false, allowNegative: false });
     // Percentages: fractional values are the norm, matching the costs calculator.
-    set('sc-capacity-increase', { min: 0, max: 1000, def: 0, allowFloat: true, allowNegative: false });
-    set('lc-capacity-increase', { min: 0, max: 1000, def: 0, allowFloat: true, allowNegative: false });
+    set('sc-capacity-increase', { min: 0, max: Infinity, def: 0, allowFloat: true, allowNegative: false });
+    set('lc-capacity-increase', { min: 0, max: Infinity, def: 0, allowFloat: true, allowNegative: false });
     set(`total-fields-${PLANET_TAB}`, { min: 1, def: options.defPlfFlds, allowFloat: false, allowNegative: false });
     set(`total-fields-${MOON_TAB}`, { min: 1, def: options.defMnFlds, allowFloat: false, allowNegative: false });
     // Start levels: whole numbers, no upper bound (OGame caps none of them).
