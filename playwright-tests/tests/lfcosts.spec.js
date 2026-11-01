@@ -1,4 +1,5 @@
 import { test, expect } from './base';
+import { expectMcpBoundsMatchPage } from './mcp-bounds';
 
 test.describe('Lifeforms costs Calculator Page', () => {
     test.beforeEach(async ({ context, page }) => {
@@ -640,5 +641,39 @@ test.describe('Multi-level table with an empty level range', () => {
             errors.filter((e) => /reading 'children'|reading 'innerHTML'/.test(e)),
             'no uncaught error from the totals writer',
         ).toEqual([]);
+    });
+});
+
+test.describe('LF Costs Calculator - MCP tools', () => {
+    test('the tool takes the ranges the page does', async ({ context, page }) => {
+        await context.addInitScript(() => {
+            localStorage.setItem('lastChange', 'key-value;true,value;99999');
+        });
+        await page.goto('/lfcosts');
+
+        const tool = 'ogame_lifeform_cost';
+        // The tool's one research building stands for whichever the race has.
+        const researchBuildings = [
+            ['#research-centre-level', 'resCentreLvl'],
+            ['#rune-tech-level', 'runeTechLvl'],
+            ['#rbt-res-centre-level', 'rbtResCentreLvl'],
+            ['#vortex-chamber-level', 'vortexChamberLvl'],
+        ];
+        await expectMcpBoundsMatchPage(page, [
+            { tool, arg: 'fromLevel', selector: '#tab2-from-level' },
+            { tool, arg: 'toLevel', selector: '#tab2-to-level' },
+            { tool, arg: 'lifeforms.megalith', selector: '#megalith-level', prm: 'megalithLvl' },
+            { tool, arg: 'lifeforms.mineralResearchCentre', selector: '#mrc-level', prm: 'mineralResCntrLvl' },
+            ...researchBuildings.map(([selector, prm]) => ({ tool, arg: 'lifeforms.researchBuilding', selector, prm })),
+            { tool, arg: 'lifeforms.researchCostReduction', selector: '#research-cost-reduction', prm: 'researchCostReduction' },
+            { tool, arg: 'lifeforms.researchTimeReduction', selector: '#research-time-reduction', prm: 'researchTimeReduction' },
+            { tool, arg: 'lifeforms.shipBonuses.small-cargo.cargo', selector: '#sc-capacity-increase', prm: 'capIncrSC' },
+            { tool, arg: 'lifeforms.shipBonuses.large-cargo.cargo', selector: '#lc-capacity-increase', prm: 'capIncrLC' },
+            { tool, arg: 'facilities.roboticsFactory', selector: '#robot-factory-level', prm: 'robotFactoryLevel' },
+            { tool, arg: 'facilities.naniteFactory', selector: '#nanite-factory-level', prm: 'naniteFactoryLevel' },
+            { tool, arg: 'universeSpeed', selector: '#universe-speed', prm: 'universeSpeed' },
+            { tool, arg: 'ionTechnology', selector: '#ion-tech-level', prm: 'ionTechLevel' },
+            { tool, arg: 'hyperspaceTechnology', selector: '#hyper-tech-level', prm: 'hyperTechLevel' },
+        ]);
     });
 });

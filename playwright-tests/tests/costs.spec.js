@@ -1,4 +1,5 @@
 import { test, expect } from './base';
+import { expectMcpBoundsMatchPage } from './mcp-bounds';
 import { readFileSync } from 'fs';
 import { join } from 'path';
 
@@ -1308,5 +1309,37 @@ test.describe('Costs Calculator - saved settings', () => {
                 await expect(page.locator(selector)).toHaveValue(value);
             });
         }
+    });
+});
+
+test.describe('Costs Calculator - MCP tools', () => {
+    test('the tool takes the ranges the page does', async ({ context, page }) => {
+        await context.addInitScript(() => {
+            localStorage.setItem('lastChange', 'key-value;true,value;99999');
+        });
+        await page.goto('/costs');
+
+        const tool = 'ogame_build_cost';
+        // The tool's per-item life form reductions have no field of their own:
+        // the page takes them per research, in a table of its own.
+        await expectMcpBoundsMatchPage(page, [
+            { tool, arg: 'fromLevel', selector: '#tab2-from-level' },
+            { tool, arg: 'toLevel', selector: '#tab2-to-level' },
+            { tool, arg: 'quantity', selector: '.qty-input' },
+            { tool, arg: 'facilities.roboticsFactory', selector: '#robot-factory-level', prm: 'robotFactoryLevelPlanet' },
+            { tool, arg: 'facilities.naniteFactory', selector: '#nanite-factory-level', prm: 'naniteFactoryLevel' },
+            { tool, arg: 'facilities.shipyard', selector: '#shipyard-level', prm: 'shipyardLevel' },
+            { tool, arg: 'facilities.researchLab', selector: '#research-lab-level', prm: 'researchLabLevel' },
+            { tool, arg: 'universeSpeed', selector: '#universe-speed', prm: 'universeSpeed' },
+            { tool, arg: 'researchSpeed', selector: '#research-speed', prm: 'researchSpeed' },
+            { tool, arg: 'ionTechnology', selector: '#ion-tech-level', prm: 'ionTechLevel' },
+            { tool, arg: 'hyperspaceTechnology', selector: '#hyper-tech-level', prm: 'hyperTechLevel' },
+            { tool, arg: 'lifeforms.mineralResearchCentre', selector: '#mineral-res-cntr-lvl', prm: 'mineralResCntrLvl' },
+            { tool, arg: 'lifeforms.terraformerReduction', selector: '#lf-terraformer-rdc', prm: 'lfTerraformerRdc' },
+            { tool, arg: 'lifeforms.discovererClassBonus', selector: '#discoverer-class-bonus', prm: 'discovererClassBonus' },
+            { tool, arg: 'lifeforms.collectorClassBonus', selector: '#lf-collector-class-bonus', prm: 'collectorClassBonus' },
+            { tool, arg: 'lifeforms.shipBonuses.small-cargo.cargo', selector: '#sc-capacity-increase', prm: 'scCapacityIncrease' },
+            { tool, arg: 'lifeforms.shipBonuses.large-cargo.cargo', selector: '#lc-capacity-increase', prm: 'lcCapacityIncrease' },
+        ], () => GlobalParams);
     });
 });

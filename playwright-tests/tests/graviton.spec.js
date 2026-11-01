@@ -1,4 +1,5 @@
 import { test, expect } from './base';
+import { energyRows, expectMcpBoundsMatchPage } from './mcp-bounds';
 
 test.describe('Graviton Calculator Page', () => {
     test.beforeEach(async ({ context, page }) => {
@@ -383,5 +384,21 @@ test.describe('Graviton Calculator - Officers', () => {
             await expect(page.locator(id)).toBeChecked();
         }
         await expect(page.locator('#officers-bonus-energy')).toHaveText('62');
+    });
+});
+
+test.describe('Graviton Calculator - MCP tools', () => {
+    test('the tool takes the ranges the page does', async ({ context, page }) => {
+        await context.addInitScript(() => {
+            localStorage.setItem('lastChange', 'key-value;true,value;99999');
+        });
+        await page.goto('/graviton');
+
+        await expectMcpBoundsMatchPage(page, [
+            ...energyRows('ogame_graviton'),
+            { tool: 'ogame_graviton', arg: 'gravitonLevel', selector: '#graviton-level', prm: 'gravitonLevel' },
+            { tool: 'ogame_graviton', arg: 'lifeforms.shipBonuses.recycler.cargo', selector: '#rc-capacity-increase', prm: 'rcCapacityIncrease' },
+            { tool: 'ogame_graviton', arg: 'debrisPercent', selector: '#debris-percent', prm: 'debrisPercent' },
+        ]);
     });
 });

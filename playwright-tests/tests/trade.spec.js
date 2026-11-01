@@ -1,4 +1,5 @@
 import { test, expect } from './base';
+import { expectMcpBoundsMatchPage } from './mcp-bounds';
 
 /**
  * Types a value into a field and presses Enter, which fires the keyup the page
@@ -290,5 +291,32 @@ test.describe('Trade Calculator Page', () => {
         await expect(page.locator('#dir-1')).toBeChecked();
         await expect(page.locator('#res-dst-m')).toHaveValue('11000000');
         await expect(page.locator('#res-src-d')).toHaveValue('8.166.667');
+    });
+});
+
+test.describe('Trade Calculator - MCP tools', () => {
+    test('the tool takes the ranges the page does', async ({ context, page }) => {
+        await context.addInitScript(() => {
+            localStorage.setItem('lastChange', 'key-value;true,value;99999');
+        });
+        await page.goto('/trade');
+
+        const tool = 'ogame_trade';
+        await expectMcpBoundsMatchPage(page, [
+            { tool, arg: 'sell.metal', selector: '#res-src-m', prm: 'metal' },
+            { tool, arg: 'sell.crystal', selector: '#res-src-c', prm: 'crystal' },
+            { tool, arg: 'sell.deuterium', selector: '#res-src-d', prm: 'deuterium' },
+            { tool, arg: 'split.receivePercent.metal', selector: '#mix-balance', prm: 'mixBalance' },
+            { tool, arg: 'split.ratio.metal', selector: '#mix-balance-prop1', prm: 'mixProp1' },
+            { tool, arg: 'split.ratio.crystal', selector: '#mix-balance-prop2', prm: 'mixProp2' },
+            { tool, arg: 'split.fixed.metal', selector: '#mix-fix1' },
+            { tool, arg: 'split.fixed.crystal', selector: '#mix-fix2' },
+            { tool, arg: 'split.sellPercent.metal', selector: '#mix-src-balance', prm: 'mixSrcBalance' },
+            // The rates are left out: the page takes any rate and marks one
+            // outside TRADE_RATE_LIMITS as an error, where the tool refuses it.
+            { tool, arg: 'hyperspaceTechnology', selector: '#hypertech-lvl', prm: 'hyperTech' },
+            { tool, arg: 'lifeforms.shipBonuses.small-cargo.cargo', selector: '#sc-capacity-increase', prm: 'scCapacityIncrease' },
+            { tool, arg: 'lifeforms.shipBonuses.large-cargo.cargo', selector: '#lc-capacity-increase', prm: 'lcCapacityIncrease' },
+        ]);
     });
 });

@@ -1,4 +1,7 @@
 import { test, expect } from './base';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
+import { expectMcpBoundsMatchPage } from './mcp-bounds';
 
 test.describe('Construction Queue Calculator Page', () => {
     test.beforeEach(async ({ context, page }) => {
@@ -339,5 +342,28 @@ test.describe('Construction Queue Calculator Page', () => {
 
         await expect(page.locator('#table-dst-2 tr').filter({ hasText: 'Total' }).first()).toBeVisible();
         expect(await getQueueTotals(page)).toEqual(before);
+    });
+});
+
+test.describe('Queue Calculator - MCP tools', () => {
+    test('the tool takes the ranges the page does', async ({ context, page }) => {
+        await context.addInitScript(() => {
+            localStorage.setItem('lastChange', 'key-value;true,value;99999');
+        });
+        await page.goto('/queue');
+
+        const tool = 'ogame_build_queue';
+        // The buildings the tool offers, as it reads them: types 1 (both), 2 (planet) and 3 (moon).
+        const techs = JSON.parse(readFileSync(join(__dirname, '../../www/ogame/calc/data/costs-techs.json'), 'utf8')).techs;
+        const buildings = Object.entries(techs).filter(([, tech]) => tech.type <= 3);
+        await expectMcpBoundsMatchPage(page, [
+            // The planet's tab is numbered 2, the moon's 3, after the building types they list.
+            ...buildings.map(([id, tech]) => (
+                { tool, arg: `levels.${tech.key}`, selector: `#startlvl-${tech.type === 3 ? 3 : 2}-${id}` }
+            )),
+            { tool, arg: 'fields', selector: '#total-fields-2', prm: 'totFldPln' },
+            { tool, arg: 'universeSpeed', selector: '#universe-speed', prm: 'universeSpeed' },
+            { tool, arg: 'ionTechnology', selector: '#ion-tech-level', prm: 'ionTechLevel' },
+        ]);
     });
 });

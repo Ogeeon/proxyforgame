@@ -1,4 +1,5 @@
 import { test, expect } from './base';
+import { expectMcpBoundsMatchPage } from './mcp-bounds';
 
 test.beforeEach(async ({ context, page }) => {
     // Avoid changelog popup
@@ -1208,5 +1209,45 @@ test.describe('Life Forms amortization', () => {
         await makeAvailable(page, 1108);
         await fillLf(page, 'lf-res-1108', '150');
         await expect(page.locator('#lf-res-1108')).toHaveValue('100');
+    });
+});
+
+test.describe('Production Calculator - MCP tools', () => {
+    test('the tool takes the ranges the page does', async ({ context, page }) => {
+        await context.addInitScript(() => {
+            localStorage.setItem('lastChange', 'key-value;true,value;99999');
+        });
+        await page.goto('/production');
+
+        const tool = 'ogame_production';
+        // The one-planet table's rows, after its header: count or level, then the
+        // production setting, and a booster for the three mines. The life form
+        // buildings' rows sit among them and do not count.
+        const row = (/** @type {number} */ i) => `#one-planet-prod tr:nth-child(${i + 2} of :not(.lf-row))`;
+        const plants = ['metalMine', 'crystalMine', 'deuteriumSynthesizer', 'solarPlant', 'fusionReactor', 'solarSatellites', 'crawlers'];
+        await expectMcpBoundsMatchPage(page, [
+            ...plants.flatMap((plant, n) => {
+                const i = n + 1;
+                const amount = plant === 'solarSatellites' || plant === 'crawlers' ? 'count' : 'level';
+                return [
+                    // The crawlers' ceiling follows the mine levels; the tool caps the count itself and says so.
+                    ...(plant === 'crawlers' ? [] : [{ tool, arg: `${plant}.${amount}`, selector: `${row(i)} input[type=text]` }]),
+                    { tool, arg: `${plant}.percent`, selector: `${row(i)} select:not([name=boosted-prod])` },
+                    ...(i < 4 ? [{ tool, arg: `${plant}.boosterPercent`, selector: `#boosted-prod${i}`, scale: 0.1 }] : []),
+                ];
+            }),
+            { tool, arg: 'maxTemperature', selector: '#max-planet-temp', prm: 'maxPlanetTemp' },
+            { tool, arg: 'position', selector: '#planet-pos', prm: 'planetPos' },
+            { tool, arg: 'energyBoosterPercent', selector: '#energy-boost', prm: 'energyBoost', scale: 0.1 },
+            { tool, arg: 'energyTechnology', selector: '#energy-tech-level', prm: 'energyTechLevel' },
+            { tool, arg: 'plasmaTechnology', selector: '#plasma-tech-level', prm: 'plasmaTechLevel' },
+            { tool, arg: 'universeSpeed', selector: '#universe-speed', prm: 'universeSpeed' },
+            { tool, arg: 'lifeforms.metalBonus', selector: '#lf-metal-prod-bonus', prm: 'lfMetProdBonus' },
+            { tool, arg: 'lifeforms.crystalBonus', selector: '#lf-crystal-prod-bonus', prm: 'lfCrysProdBonus' },
+            { tool, arg: 'lifeforms.deuteriumBonus', selector: '#lf-deut-prod-bonus', prm: 'lfDeutProdBonus' },
+            { tool, arg: 'lifeforms.energyBonus', selector: '#lf-energy-prod-bonus', prm: 'lfEnergyProdBonus' },
+            { tool, arg: 'lifeforms.crawlerBonus', selector: '#lf-crawler-bonus', prm: 'lfCrawlerBonus' },
+            { tool, arg: 'lifeforms.collectorClassBonus', selector: '#lf-collector-bonus', prm: 'lfCollectorBonus' },
+        ]);
     });
 });

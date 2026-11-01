@@ -1,4 +1,5 @@
 import { test, expect } from './base';
+import { expectMcpBoundsMatchPage } from './mcp-bounds';
 import { readFileSync } from 'fs';
 import { join } from 'path';
 
@@ -2400,5 +2401,56 @@ test.describe('Flight Calculator - Saved Fleets', () => {
         await page.reload();
         await expect(select.locator('option')).toHaveCount(2);
         expect(await page.evaluate(() => document.cookie)).not.toContain('flight_fleet_both=');
+    });
+});
+
+test.describe('Flight Calculator - MCP tools', () => {
+    test('the tool takes the ranges the page does', async ({ context, page }) => {
+        await context.addInitScript(() => {
+            localStorage.setItem('lastChange', 'key-value;true,value;99999');
+        });
+        await page.goto('/flight');
+        // The coordinate fields stop at the universe size; open it all the way.
+        await page.evaluate(() => {
+            setVal('#galaxies-num', 1000);
+            setVal('#systems-num', 1000);
+            flightOrchestrator.recalc();
+        });
+
+        const ships = await page.evaluate(() => SHIPS_BASE.map((ship) => ship[0]));
+        const lfCell = (/** @type {number} */ row, /** @type {number} */ cell) =>
+            `#lf-ships-bonuses tr:nth-child(${row + 2}) > :nth-child(${cell + 1}) input`;
+        await expectMcpBoundsMatchPage(page, [
+            ...['from', 'to'].flatMap((end) => {
+                const id = end === 'from' ? 'departure' : 'destination';
+                return [
+                    { tool: 'ogame_flight', arg: `${end}.galaxy`, selector: `#${id}-g`, prm: id },
+                    { tool: 'ogame_flight', arg: `${end}.system`, selector: `#${id}-s`, prm: id },
+                    // One saved key holds all three parts, so its validate takes
+                    // the widest of them; only the field bounds the position.
+                    { tool: 'ogame_flight', arg: `${end}.position`, selector: `#${id}-p` },
+                ];
+            }),
+            ...ships.map((key) => ({ tool: 'ogame_flight', arg: `ships.${key}`, selector: `#${key}` })),
+            { tool: 'ogame_flight', arg: 'drives.combustion', selector: '#cmb-drive', prm: 'driveLevels' },
+            { tool: 'ogame_flight', arg: 'drives.impulse', selector: '#imp-drive', prm: 'driveLevels' },
+            { tool: 'ogame_flight', arg: 'drives.hyperspace', selector: '#hyp-drive', prm: 'driveLevels' },
+            { tool: 'ogame_flight', arg: 'hyperspaceTechnology', selector: '#hypertech-lvl', prm: 'hyperTechLvl' },
+            { tool: 'ogame_flight', arg: 'lifeforms.generalClassBonus', selector: '#lf-mechan-general-enh', prm: 'lfMechanGE' },
+            { tool: 'ogame_flight', arg: 'lifeforms.collectorClassBonus', selector: '#lf-rocktal-collector-enh', prm: 'lfRocktalCE' },
+            ...ships.flatMap((key, i) => ['speed', 'cargo', 'fuel'].map((bonus, cell) => (
+                { tool: 'ogame_flight', arg: `lifeforms.shipBonuses.${key}.${bonus}`, selector: lfCell(i, cell + 1), prm: 'lfShipsBonuses' }
+            ))),
+            { tool: 'ogame_flight', arg: 'universeSettings.fleetSpeedWar', selector: '#speed-fleet-war', prm: 'fleetSpeedWar' },
+            { tool: 'ogame_flight', arg: 'universeSettings.fleetSpeedPeaceful', selector: '#speed-fleet-peaceful', prm: 'fleetSpeedPeaceful' },
+            { tool: 'ogame_flight', arg: 'universeSettings.fleetSpeedHolding', selector: '#speed-fleet-holding', prm: 'fleetSpeedHolding' },
+            { tool: 'ogame_flight', arg: 'universeSettings.galaxies', selector: '#galaxies-num', prm: 'numberOfGalaxies' },
+            { tool: 'ogame_flight', arg: 'universeSettings.systems', selector: '#systems-num', prm: 'numberOfSystems' },
+            // The page takes the factor in tenths: 0.5..1 is the select's 5..10.
+            { tool: 'ogame_flight', arg: 'universeSettings.deuteriumFactor', selector: '#deut-factor', prm: 'deutFactor', scale: 10 },
+            { tool: 'ogame_flight', arg: 'universeSettings.generalFuelReduction', selector: '#deut-generals-bonus', prm: 'deutConsReduction' },
+            { tool: 'ogame_flight', arg: 'universeSettings.probeCargo', selector: '#sp-cargohold', prm: 'spCargohold' },
+            { tool: 'ogame_flight', arg: 'universeSettings.skippedSystems', selector: '#empty-systems-count-spin' },
+        ]);
     });
 });

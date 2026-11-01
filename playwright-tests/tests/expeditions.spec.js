@@ -1,4 +1,5 @@
 import { test, expect } from './base';
+import { expectMcpBoundsMatchPage } from './mcp-bounds';
 import { readFileSync } from 'fs';
 import { join } from 'path';
 
@@ -337,5 +338,28 @@ test.describe('Expeditions Calculator - URL API', () => {
         await expect(page.locator('#dark-matter-discovery-bonus')).toHaveValue('50');
         await expect(page.locator('#numLC')).toHaveValue('12');
         await expect(page.locator('#numPA')).toHaveValue('1');
+    });
+});
+
+test.describe('Expeditions Calculator - MCP tools', () => {
+    test('the tool takes the ranges the page does', async ({ context, page }) => {
+        await openPage(context, page);
+
+        const ships = await page.evaluate(() => EXPEDITION_SHIPS.map((ship) => [ship.id, ship.abbrev, ship.techId]));
+        const tool = 'ogame_expedition';
+        await expectMcpBoundsMatchPage(page, [
+            ...ships.flatMap(([id, abbrev, techId]) => [
+                { tool, arg: `ships.${id}`, selector: `#num${abbrev}` },
+                { tool, arg: `lifeforms.shipBonuses.${id}.cargo`, selector: `#lf-cargo-${techId}`, prm: 'lfShipsBonuses' },
+            ]),
+            { tool, arg: 'universeSpeed', selector: '#universe-speed', prm: 'universeSpeed' },
+            { tool, arg: 'hyperspaceTechnology', selector: '#tech-hyper-level', prm: 'hyperTechLevel' },
+            { tool, arg: 'lifeforms.resourceFindBonus', selector: '#percent-resources', prm: 'percentRes' },
+            { tool, arg: 'lifeforms.shipFindBonus', selector: '#percent-ships', prm: 'percentShips' },
+            { tool, arg: 'lifeforms.darkMatterFindBonus', selector: '#dark-matter-discovery-bonus', prm: 'darkMatterDiscoveryBonus' },
+            { tool, arg: 'lifeforms.collectorClassBonus', selector: '#class-bonus-collector', prm: 'classBonusCollector' },
+            { tool, arg: 'lifeforms.discovererClassBonus', selector: '#class-bonus-discoverer', prm: 'classBonusDiscoverer' },
+            { tool, arg: 'discoveryBoosterPercent', selector: '#resource-discovery-booster', prm: 'resourceDiscoveryBooster' },
+        ]);
     });
 });

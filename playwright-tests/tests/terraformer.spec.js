@@ -1,4 +1,5 @@
 import { test, expect } from './base';
+import { energyRows, expectMcpBoundsMatchPage } from './mcp-bounds';
 
 test.describe('Terraformer Calculator Page', () => {
     test.beforeEach(async ({ context, page }) => {
@@ -287,5 +288,22 @@ test.describe('Terraformer Calculator - Officers', () => {
         for (const id of OFFICERS.slice(1)) {
             await expect(page.locator(id)).not.toBeChecked();
         }
+    });
+});
+
+test.describe('Terraformer Calculator - MCP tools', () => {
+    test('the tool takes the ranges the page does', async ({ context, page }) => {
+        await context.addInitScript(() => {
+            localStorage.setItem('lastChange', 'key-value;true,value;99999');
+        });
+        await page.goto('/terraformer');
+
+        await expectMcpBoundsMatchPage(page, [
+            ...energyRows('ogame_terraformer'),
+            { tool: 'ogame_terraformer', arg: 'fromLevel', selector: '#tf-level-from', prm: 'tfLevelFrom' },
+            { tool: 'ogame_terraformer', arg: 'toLevel', selector: '#tf-level-to', prm: 'tfLevelTo' },
+            { tool: 'ogame_terraformer', arg: 'lifeforms.terraformerReduction', selector: '#lf-terraformer-rdc', prm: 'lfTerraformerRdc' },
+            { tool: 'ogame_terraformer', arg: 'facilities.roboticsFactory', selector: '#robots-factory-level', prm: 'robotsFactoryLevel' },
+        ]);
     });
 });

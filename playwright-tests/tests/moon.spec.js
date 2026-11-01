@@ -1,4 +1,5 @@
 import { test, expect } from './base';
+import { expectMcpBoundsMatchPage } from './mcp-bounds';
 
 test.describe('Moon Calculator Page', () => {
     test.beforeEach(async ({ context, page }) => {
@@ -550,5 +551,35 @@ test.describe('Moon Calculator - Sensor phalanx', () => {
         await expect(page.locator('#systems-num')).toHaveValue('499');
         await expect(page.locator('#phalanx-range')).toHaveText('0');
         await expect(page.locator('#visible-systems')).toHaveText('1');
+    });
+});
+
+test.describe('Moon Calculator - MCP tools', () => {
+    test('the tools take the ranges the page does', async ({ context, page }) => {
+        await context.addInitScript(() => {
+            localStorage.setItem('lastChange', 'key-value;true,value;99999');
+        });
+        await page.goto('/moon');
+        // The coordinate fields stop at the galaxy size; open it all the way.
+        await page.locator('#systems-num').fill('1000');
+        await page.locator('#systems-num').blur();
+
+        const units = await page.evaluate(() => MOON_UNITS.map((unit) => unit.id));
+        await expectMcpBoundsMatchPage(page, [
+            { tool: 'ogame_moon_destruction', arg: 'moonDiameter', selector: '#moon-size', prm: 'moonSize' },
+            { tool: 'ogame_moon_destruction', arg: 'deathStars', selector: '#ds-count', prm: 'dsCount' },
+            ...units.map((id) => ({ tool: 'ogame_moon_creation', arg: `destroyed.${id}`, selector: `#${id}` })),
+            { tool: 'ogame_moon_creation', arg: 'debrisPercent', selector: '#debris-percent', prm: 'debrisPercent' },
+            { tool: 'ogame_moon_creation', arg: 'defenceDebrisPercent', selector: '#defense-debris-percent', prm: 'defenseDebrisPercent' },
+            { tool: 'ogame_moon_creation', arg: 'hyperspaceTechnology', selector: '#hypertech-lvl', prm: 'hyperTechLevel' },
+            { tool: 'ogame_moon_creation', arg: 'lifeforms.supraRefractor', selector: '#supra-refractor', prm: 'supraRefractorLevel' },
+            { tool: 'ogame_moon_creation', arg: 'lifeforms.shipBonuses.recycler.cargo', selector: '#rc-capacity-increase', prm: 'rcCapacityIncrease' },
+            { tool: 'ogame_phalanx', arg: 'phalanxLevel', selector: '#phalanx-lvl', prm: 'phalanxLevel' },
+            { tool: 'ogame_phalanx', arg: 'moonSystem', selector: '#own-system', prm: 'ownSystem' },
+            { tool: 'ogame_phalanx', arg: 'targetSystem', selector: '#target-system', prm: 'targetSystem' },
+            { tool: 'ogame_phalanx', arg: 'universeSettings.systems', selector: '#systems-num', prm: 'numberOfSystems' },
+            { tool: 'ogame_phalanx', arg: 'lifeforms.analysisNetworkBonus', selector: '#phalanx-range-bonus', prm: 'phalanxRangeBonus' },
+            { tool: 'ogame_phalanx', arg: 'lifeforms.discovererClassBonus', selector: '#discoverer-bonus', prm: 'discovererBonus' },
+        ]);
     });
 });
