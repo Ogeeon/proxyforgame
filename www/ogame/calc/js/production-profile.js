@@ -319,27 +319,22 @@ class ProductionProfiles extends ProfileBinder {
     });
 
     const states = /** @type {TaggedState[]} */ (prm.aPS);
-    /** @type {ProfilePlanet[]} */
-    const ordered = [];
-    states.forEach((s, i) => {
-      let planet = s.pfId ? profile.planets.find((p) => p.id === s.pfId) : undefined;
-      // An empty profile shows one blank planet; it joins the profile once edited.
-      if (!planet && profile.planets.length === 0 && states.length === 1 && sameValue(s.slice(), createEmptyPlanet())) return;
-      if (!planet) {
-        planet = createPlanet({ name: prm.aPNames[i], coords: { galaxy: null, system: null, position: s[1] } });
-        s.pfId = planet.id;
-        // The blank planet of an empty profile is the one the one-planet tab shows.
-        if (this.onePlanetId === null && states.length === 1) this.onePlanetId = planet.id;
-        Object.entries(productionPlanetValues(s)).forEach(([key, value]) => setProfileValue(/** @type {ProfilePlanet} */ (planet), key, value));
-        changed = true;
-      } else {
-        changed = this.writeBackPlanet(planet, s, prm.aPNames[i]) || changed;
-      }
-      ordered.push(planet);
+    const rows = states.map((s, i) => ({ id: s.pfId, state: s, name: prm.aPNames[i] }));
+    const result = reconcileProductionPlanets(profile.planets, rows, this.planetSnapshot);
+    result.created.forEach(({ row, id }) => {
+      states[row].pfId = id;
+      // The blank planet of an empty profile is the one the one-planet tab shows.
+      if (this.onePlanetId === null && states.length === 1) this.onePlanetId = id;
     });
-    // Planets dropped from the table leave the profile; their moons stay.
-    if (ordered.length !== profile.planets.length || ordered.some((p, i) => p !== profile.planets[i])) changed = true;
-    profile.planets = ordered;
+    // An edit in the all-planets table of the planet the one-planet tab shows.
+    const shown = this.onePlanetId !== null && result.edited.has(this.onePlanetId)
+      ? states.find((s) => s.pfId === this.onePlanetId) : undefined;
+    if (shown) {
+      fillOnePlanetForm(shown);
+      this.onePlanetSnapshot = readOnePlanetForm();
+    }
+    changed = result.changed || changed;
+    profile.planets = result.planets;
 
     const selected = profile.planets.find((p) => p.id === this.onePlanetId);
     if (selected) {
@@ -358,36 +353,6 @@ class ProductionProfiles extends ProfileBinder {
       this.renderPlanetSelect(profile);
       this.markAll();
     }
-  }
-
-  /**
-   * @param {ProfilePlanet} planet
-   * @param {number[]} state
-   * @param {string} name
-   * @returns {boolean} True when the planet changed.
-   */
-  writeBackPlanet(planet, state, name) {
-    const before = this.planetSnapshot.get(planet.id);
-    if (!before) return false;
-    let changed = false;
-    const was = productionPlanetValues(before.state);
-    Object.entries(productionPlanetValues(state)).forEach(([key, value]) => {
-      if (!sameValue(was[key], value)) changed = setProfileValue(planet, key, value) || changed;
-    });
-    if (state[1] !== before.state[1]) {
-      planet.coords = { galaxy: planet.coords ? planet.coords.galaxy : null, system: planet.coords ? planet.coords.system : null, position: state[1] };
-      changed = true;
-    }
-    if (name !== before.name) {
-      planet.name = name;
-      changed = true;
-    }
-    // An edit in the all-planets table of the planet the one-planet tab shows.
-    if (changed && planet.id === this.onePlanetId && state.some((v, i) => v !== before.state[i])) {
-      fillOnePlanetForm(state);
-      this.onePlanetSnapshot = readOnePlanetForm();
-    }
-    return changed;
   }
 
   /**

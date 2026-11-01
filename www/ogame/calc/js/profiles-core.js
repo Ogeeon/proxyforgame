@@ -2167,6 +2167,93 @@ function productionPlanetState(planet) {
 }
 
 /**
+ * One row of production's all-planets table: the profile planet it shows, if
+ * any, its planet array (`aPS[i]`) and its name.
+ *
+ * @typedef {Object} ProductionPlanetRow
+ * @property {?string} [id] The profile planet's id; none for a row added since.
+ * @property {number[]} state
+ * @property {string} name
+ */
+
+/**
+ * The planets of a profile after production's all-planets table was edited.
+ * The planets follow the rows, in their order: a row of a planet that is not
+ * there becomes a new planet, a planet with no row leaves the profile (its
+ * moons are not touched). A planet the profile has gets only what changed in
+ * its row since `snapshot` - the values, the position (galaxy and system stay),
+ * the name; one the snapshot does not know is left as it is.
+ * The blank planet a profile without planets is shown as does not join the
+ * profile until it is edited.
+ * The planets the profile keeps are changed in place.
+ *
+ * @param {ProfilePlanet[]} planets The profile's planets.
+ * @param {ProductionPlanetRow[]} rows The table, in its order.
+ * @param {Map<string, {state: number[], name: string}>} snapshot The rows at the last apply or write-back.
+ * @param {() => string} [newId]
+ * @returns {{planets: ProfilePlanet[], created: Array<{row: number, id: string}>, edited: Set<string>, changed: boolean}}
+ *   `created` names the planets made from rows, by row index; `edited`, the
+ *   planets kept whose values changed in their row, so a form showing one can
+ *   be filled again; `changed` is true when anything in the planets changed.
+ */
+function reconcileProductionPlanets(planets, rows, snapshot, newId = newProfileId) {
+  const placeholder = planets.length === 0 && rows.length === 1
+    && sameValue(rows[0].state, productionPlanetState(createPlanet({})));
+  /** @type {ProfilePlanet[]} */
+  const ordered = [];
+  /** @type {Array<{row: number, id: string}>} */
+  const created = [];
+  /** @type {Set<string>} */
+  const edited = new Set();
+  let changed = false;
+  rows.forEach((row, i) => {
+    const existing = row.id ? planets.find((p) => p.id === row.id) : undefined;
+    if (existing) {
+      const before = snapshot.get(existing.id);
+      if (before && reconcileProductionPlanet(existing, row, before)) {
+        changed = true;
+        if (row.state.some((v, k) => v !== before.state[k])) edited.add(existing.id);
+      }
+      ordered.push(existing);
+      return;
+    }
+    if (placeholder) return;
+    const planet = createPlanet({ id: newId(), name: row.name, coords: { galaxy: null, system: null, position: row.state[1] } });
+    Object.entries(productionPlanetValues(row.state)).forEach(([key, value]) => setProfileValue(planet, key, value));
+    created.push({ row: i, id: planet.id });
+    ordered.push(planet);
+    changed = true;
+  });
+  if (ordered.length !== planets.length || ordered.some((p, i) => p !== planets[i])) changed = true;
+  return { planets: ordered, created, edited, changed };
+}
+
+/**
+ * Write what changed in a planet's row since `before` into the planet.
+ *
+ * @param {ProfilePlanet} planet
+ * @param {ProductionPlanetRow} row
+ * @param {{state: number[], name: string}} before
+ * @returns {boolean} True when the planet changed.
+ */
+function reconcileProductionPlanet(planet, row, before) {
+  let changed = false;
+  const was = productionPlanetValues(before.state);
+  Object.entries(productionPlanetValues(row.state)).forEach(([key, value]) => {
+    if (!sameValue(was[key], value)) changed = setProfileValue(planet, key, value) || changed;
+  });
+  if (row.state[1] !== before.state[1]) {
+    planet.coords = { galaxy: planet.coords ? planet.coords.galaxy : null, system: planet.coords ? planet.coords.system : null, position: row.state[1] };
+    changed = true;
+  }
+  if (row.name !== before.name) {
+    planet.name = row.name;
+    changed = true;
+  }
+  return changed;
+}
+
+/**
  * The game id of a race's building at a position: race 1 position 6 is 11106.
  *
  * @param {number} race 1-4
@@ -2301,7 +2388,7 @@ if (typeof window !== 'undefined') {
     ratesToTrade, ratesFromTrade, lfBuildingGameId, lfResearchGameId,
     LF_RACES, LF_BUILDING_POSITIONS, LF_RESEARCH_POSITIONS,
     lfTechValueKeys, fillLfGameLevels, migrateLfGameLevels,
-    productionPlanetValues, productionPlanetState, profileFromProductionSet, profileFromFlightSet,
+    productionPlanetValues, productionPlanetState, reconcileProductionPlanets, profileFromProductionSet, profileFromFlightSet,
     profileFromSpyReport,
   });
 }

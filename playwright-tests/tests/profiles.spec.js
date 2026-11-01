@@ -319,6 +319,54 @@ test('a new empty profile gains a planet only once it is edited', async ({ page 
     await expect(page.locator('.pf-bound')).toHaveCount(0);
 });
 
+/** Planet i of production's all-planets table: the header first, then a planet row and its info row each. */
+function allPlanetsRow(page, i) {
+    return page.locator('#all-planets-prod tr').nth(i * 2 + 1);
+}
+
+test('a planet row added to or removed from the table is added to or removed from the profile', async ({ page }) => {
+    await page.goto('/production');
+    await importExport(page);
+    const ids = (await activeProfile(page)).planets.map((p) => p.id);
+    expect(ids).toHaveLength(3);
+    await page.locator('#tabtag2').click();
+
+    await page.locator('#planetsSpin-up').click();
+    await expect.poll(async () => (await activeProfile(page)).planets.length).toBe(4);
+    const added = (await activeProfile(page)).planets[3];
+    expect(added.coords).toEqual({ galaxy: null, system: null, position: 8 });
+    // An edit of the new row goes to the planet it became, not to yet another one.
+    const metal = allPlanetsRow(page, 3).locator('input[type=text]').nth(2);
+    await metal.fill('7');
+    await metal.press('Tab');
+    await expect.poll(async () => (await activeProfile(page)).planets[3]?.values['building.1']).toEqual({ override: 7 });
+    expect((await activeProfile(page)).planets.map((p) => p.id)).toEqual([...ids, added.id]);
+
+    await allPlanetsRow(page, 0).locator('.control-delete').click();
+    // The planet has levels in it: production asks first.
+    await page.locator('.dyn-dialog.show .btn-primary').click();
+    await expect.poll(async () => (await activeProfile(page)).planets.map((p) => p.id)).toEqual([ids[1], ids[2], added.id]);
+});
+
+test('a planet moved in the table or given another position is moved in the profile', async ({ page }) => {
+    await page.goto('/production');
+    await importExport(page);
+    const before = (await activeProfile(page)).planets;
+    await page.locator('#tabtag2').click();
+
+    const position = allPlanetsRow(page, 1).locator('input[type=text]').nth(1);
+    await position.fill('5');
+    await position.press('Tab');
+    await expect.poll(async () => (await activeProfile(page)).planets[1].coords.position).toBe(5);
+    const moved = (await activeProfile(page)).planets[1];
+    expect(moved.coords.galaxy).toBe(before[1].coords.galaxy);
+    expect(moved.coords.system).toBe(before[1].coords.system);
+
+    await allPlanetsRow(page, 0).locator('.control-move-down').click();
+    await expect.poll(async () => (await activeProfile(page)).planets.map((p) => p.id))
+        .toEqual([before[1].id, before[0].id, before[2].id]);
+});
+
 test('an old production saved set is offered for conversion', async ({ page, context }) => {
     await context.addInitScript(() => {
         if (localStorage.getItem('prod_uni_main')) return;

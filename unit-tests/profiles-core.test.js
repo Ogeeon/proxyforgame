@@ -17,7 +17,7 @@ const core = load(['ogame/calc/js/profiles-core.js'], [
     'parseAccountExport', 'findProfileForExport', 'importAccountExport', 'mergeProfiles',
     'serializeProfilesFile', 'parseProfilesFile', 'planProfilesRestore', 'universeCacheKey',
     'ratesToTrade', 'ratesFromTrade', 'profileFromProductionSet', 'profileFromFlightSet',
-    'productionPlanetValues', 'productionPlanetState', 'isNewerExport', 'planCompanionSync',
+    'productionPlanetValues', 'productionPlanetState', 'reconcileProductionPlanets', 'isNewerExport', 'planCompanionSync',
     'resolveImportUniverse', 'profileFromSpyReport', 'profileBodyResources',
     'RESOURCE_READING_STALE_MS', 'isResourceReadingStale', 'planResourceFill', 'keepBodyResources',
     'lfBuildingGameId', 'lfResearchGameId', 'LF_RACES', 'LF_BUILDING_POSITIONS', 'LF_RESEARCH_POSITIONS',
@@ -1530,6 +1530,173 @@ describe('the production planet array', () => {
     it('lays out an empty planet without coordinates as production creates one', () => {
         const empty = core.productionPlanetState(core.createPlanet({}));
         expect(plain(empty)).toEqual(plain(production.createEmptyPlanet()));
+    });
+});
+
+describe('reconcileProductionPlanets', () => {
+    const empty = () => core.productionPlanetState(core.createPlanet({}));
+
+    /** A profile planet with its values in the game layer, as an import leaves them. */
+    function gamePlanet(id, name, position, level) {
+        const planet = core.createPlanet({ id, name, coords: { galaxy: 2, system: 40, position } });
+        const s = empty();
+        s[1] = position;
+        s[3] = level;
+        Object.entries(core.productionPlanetValues(s)).forEach(([key, value]) => { planet.values[key] = { game: value }; });
+        return planet;
+    }
+
+    /** The planets as production's table shows them, and the snapshot apply() takes of it. */
+    function table(planets) {
+        const rows = planets.map((p) => ({ id: p.id, state: core.productionPlanetState(p), name: p.name }));
+        const snapshot = new Map(rows.map((r) => [r.id, { state: r.state.slice(), name: r.name }]));
+        return { rows, snapshot };
+    }
+
+    const reconcile = (planets, rows, snapshot) => core.reconcileProductionPlanets(planets, rows, snapshot, idSource());
+
+    it('changes nothing when the table was not edited', () => {
+        const planets = [gamePlanet('a', 'A', 4, 20), gamePlanet('b', 'B', 8, 25)];
+        const before = plain(planets);
+        const { rows, snapshot } = table(planets);
+        const result = reconcile(planets, rows, snapshot);
+        expect(result.changed).toBe(false);
+        expect(result.planets[0]).toBe(planets[0]);
+        expect(result.planets[1]).toBe(planets[1]);
+        expect(plain(result.planets)).toEqual(before);
+        expect(result.created).toEqual([]);
+        expect(result.edited.size).toBe(0);
+    });
+
+    it('turns a row added to the table into a new planet with the row\'s values', () => {
+        const planets = [gamePlanet('a', 'A', 4, 20)];
+        const { rows, snapshot } = table(planets);
+        const added = empty();
+        added[1] = 11;
+        added[6] = 17;
+        rows.push({ state: added, name: 'Colony' });
+        const result = reconcile(planets, rows, snapshot);
+        expect(result.changed).toBe(true);
+        expect(plain(result.created)).toEqual([{ row: 1, id: 'id1' }]);
+        const planet = result.planets[1];
+        expect(planet.id).toBe('id1');
+        expect(planet.name).toBe('Colony');
+        expect(plain(planet.coords)).toEqual({ galaxy: null, system: null, position: 11 });
+        expect(plain(core.productionPlanetState(planet))).toEqual(plain(added));
+        expect(planet.values['building.2']).toEqual({ override: 17 });
+    });
+
+    it('treats a row whose planet is gone as a new one', () => {
+        const planets = [gamePlanet('a', 'A', 4, 20)];
+        const { rows, snapshot } = table(planets);
+        rows.push({ id: 'gone', state: empty(), name: 'Other' });
+        const result = reconcile(planets, rows, snapshot);
+        expect(plain(result.created)).toEqual([{ row: 1, id: 'id1' }]);
+        expect(result.planets.map((p) => p.id)).toEqual(['a', 'id1']);
+    });
+
+    it('keeps the blank planet of an empty profile out until it is edited', () => {
+        const result = reconcile([], [{ state: empty(), name: 'Planet 1' }], new Map());
+        expect(result.changed).toBe(false);
+        expect(result.planets).toEqual([]);
+        expect(result.created).toEqual([]);
+    });
+
+    it('adds the blank planet of an empty profile once it is edited', () => {
+        const edited = empty();
+        edited[0] = 35;
+        const result = reconcile([], [{ state: edited, name: 'Planet 1' }], new Map());
+        expect(result.changed).toBe(true);
+        expect(plain(result.created)).toEqual([{ row: 0, id: 'id1' }]);
+        expect(result.planets[0].values['temperature.max']).toEqual({ override: 35 });
+    });
+
+    it('adds blank planets once there is more than one row', () => {
+        const result = reconcile([], [{ state: empty(), name: 'Planet 1' }, { state: empty(), name: 'Planet 2' }], new Map());
+        expect(result.changed).toBe(true);
+        expect(result.planets.map((p) => p.name)).toEqual(['Planet 1', 'Planet 2']);
+    });
+
+    it('orders the planets as the rows are', () => {
+        const planets = [gamePlanet('a', 'A', 4, 20), gamePlanet('b', 'B', 8, 25)];
+        const { rows, snapshot } = table(planets);
+        rows.reverse();
+        const result = reconcile(planets, rows, snapshot);
+        expect(result.changed).toBe(true);
+        expect(result.planets[0]).toBe(planets[1]);
+        expect(result.planets[1]).toBe(planets[0]);
+        expect(result.edited.size).toBe(0);
+    });
+
+    it('drops the planet of a removed row', () => {
+        const planets = [gamePlanet('a', 'A', 4, 20), gamePlanet('b', 'B', 8, 25)];
+        const { rows, snapshot } = table(planets);
+        rows.splice(0, 1);
+        const result = reconcile(planets, rows, snapshot);
+        expect(result.changed).toBe(true);
+        expect(result.planets.map((p) => p.id)).toEqual(['b']);
+    });
+
+    it('writes an edited value as an override and names the planet as edited', () => {
+        const planets = [gamePlanet('a', 'A', 4, 20), gamePlanet('b', 'B', 8, 25)];
+        const { rows, snapshot } = table(planets);
+        rows[1].state[3] = 26;
+        const result = reconcile(planets, rows, snapshot);
+        expect(result.changed).toBe(true);
+        expect(planets[1].values['building.1']).toEqual({ game: 25, override: 26 });
+        expect([...result.edited]).toEqual(['b']);
+    });
+
+    it('drops the override when a value is set back to the game\'s', () => {
+        const planets = [gamePlanet('a', 'A', 4, 20)];
+        planets[0].values['building.1'].override = 21;
+        const { rows, snapshot } = table(planets);
+        rows[0].state[3] = 20;
+        const result = reconcile(planets, rows, snapshot);
+        expect(result.changed).toBe(true);
+        expect(planets[0].values['building.1']).toEqual({ game: 20 });
+    });
+
+    it('moves a planet to a new position, keeping its galaxy and system', () => {
+        const planets = [gamePlanet('a', 'A', 4, 20)];
+        const { rows, snapshot } = table(planets);
+        rows[0].state[1] = 9;
+        const result = reconcile(planets, rows, snapshot);
+        expect(result.changed).toBe(true);
+        expect(plain(planets[0].coords)).toEqual({ galaxy: 2, system: 40, position: 9 });
+        expect([...result.edited]).toEqual(['a']);
+    });
+
+    it('renames a planet without naming it as edited', () => {
+        const planets = [gamePlanet('a', 'A', 4, 20)];
+        const { rows, snapshot } = table(planets);
+        rows[0].name = 'Home';
+        const result = reconcile(planets, rows, snapshot);
+        expect(result.changed).toBe(true);
+        expect(planets[0].name).toBe('Home');
+        expect(result.edited.size).toBe(0);
+    });
+
+    it('does not name a planet as edited when its row changed nothing the profile keeps', () => {
+        const planets = [gamePlanet('a', 'A', 4, 20)];
+        const { rows, snapshot } = table(planets);
+        // The booster of a power plant: the page keeps it at 0, the profile has no key for it.
+        rows[0].state[14] = 2;
+        const result = reconcile(planets, rows, snapshot);
+        expect(result.changed).toBe(false);
+        expect(result.edited.size).toBe(0);
+    });
+
+    it('leaves a planet the snapshot does not know as it is', () => {
+        const planets = [gamePlanet('a', 'A', 4, 20)];
+        const before = plain(planets);
+        const { rows } = table(planets);
+        rows[0].state[3] = 30;
+        rows[0].name = 'Home';
+        const result = reconcile(planets, rows, new Map());
+        expect(result.changed).toBe(false);
+        expect(plain(result.planets)).toEqual(before);
+        expect(result.edited.size).toBe(0);
     });
 });
 
