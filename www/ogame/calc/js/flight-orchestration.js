@@ -1687,6 +1687,10 @@ class FlightOrchestrator {
         this._setCoordConstraint('departure-g', UNIVERSE_MAX_GALAXIES); this._setCoordConstraint('destination-g', UNIVERSE_MAX_GALAXIES);
         this._setCoordConstraint('departure-s', UNIVERSE_MAX_SYSTEMS); this._setCoordConstraint('destination-s', UNIVERSE_MAX_SYSTEMS);
         this._setCoordConstraint('departure-p', 16); this._setCoordConstraint('destination-p', 16);
+        setConstrains('galaxies-num', { min: 1, max: UNIVERSE_MAX_GALAXIES, def: 9 });
+        setConstrains('systems-num', { min: 1, max: UNIVERSE_MAX_SYSTEMS, def: 499 });
+        // A probe carries 0 or 5 in every universe the game runs.
+        setConstrains('sp-cargohold', { min: 0, max: 5, def: 0 });
     }
 
     _bindControls() {

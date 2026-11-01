@@ -121,7 +121,7 @@ const inputSchema = {
                 circularSystems: { type: 'boolean' },
                 deuteriumFactor: { type: 'number', minimum: 0.5, maximum: 1, description: 'Fuel consumption factor, 0.5-1.' },
                 generalFuelReduction: { type: 'number', minimum: 0, maximum: 50, description: 'General class fuel reduction in percent.' },
-                probeCargo: { type: 'integer', minimum: 0, maximum: 100, description: 'Espionage probe cargo capacity.' },
+                probeCargo: { type: 'integer', minimum: 0, maximum: 5, description: 'Espionage probe cargo capacity: 0, or 5 where the universe gives probes a hold.' },
                 ignoreEmptySystems: { type: 'boolean', description: 'Fleets skip systems with no planets.' },
                 ignoreInactiveSystems: { type: 'boolean', description: 'Fleets skip systems with only inactive players.' },
                 skippedSystems: {
