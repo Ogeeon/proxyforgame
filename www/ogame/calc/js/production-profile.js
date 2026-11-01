@@ -327,8 +327,9 @@ class ProductionProfiles extends ProfileBinder {
       if (this.onePlanetId === null && states.length === 1) this.onePlanetId = id;
     });
     // An edit in the all-planets table of the planet the one-planet tab shows.
-    const shown = this.onePlanetId !== null && result.edited.has(this.onePlanetId)
-      ? states.find((s) => s.pfId === this.onePlanetId) : undefined;
+    const shownId = this.onePlanetId;
+    const shown = shownId !== null && result.edited.has(shownId)
+      ? states.find((s) => s.pfId === shownId) : undefined;
     if (shown) {
       fillOnePlanetForm(shown);
       this.onePlanetSnapshot = readOnePlanetForm();
