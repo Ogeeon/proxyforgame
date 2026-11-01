@@ -121,6 +121,97 @@ function validateAccepts(settings, prm, values) {
 const upperAgrees = (tool, pageMax) => tool === pageMax || pageMax === Infinity;
 
 /**
+ * @typedef {ReturnType<typeof toolBounds>} ToolBounds
+ * @typedef {{min: number, max: number, options: number[] | null}} FieldBounds
+ */
+
+/**
+ * A tool that lists its values: the field has to be a select offering exactly
+ * those.
+ * @param {string} name
+ * @param {number[]} values
+ * @param {FieldBounds} field
+ * @returns {string | null}
+ */
+function enumProblem(name, values, field) {
+    const same = field.options?.length === values.length
+        && values.every((v) => field.options?.includes(v));
+    return same ? null : `${name}: tool takes ${values.join(', ')}, field ${field.options?.join(', ') ?? 'is not a select'}`;
+}
+
+/**
+ * A tool with a range: a select's options lie within it, any other field
+ * shares it (bar an open-ended page maximum).
+ * @param {string} name
+ * @param {ToolBounds} tool
+ * @param {FieldBounds} field
+ * @returns {string | null}
+ */
+function rangeProblem(name, tool, field) {
+    const agrees = field.options
+        ? tool.min <= field.min && field.max <= tool.max
+        : tool.min === field.min && upperAgrees(tool.max, field.max);
+    return agrees ? null : `${name}: tool ${tool.min}..${tool.max}, field ${field.min}..${field.max}`;
+}
+
+/**
+ * A select's saved setting: validate has to keep every option it offers.
+ * @param {import('@playwright/test').JSHandle} settings
+ * @param {string} name
+ * @param {string} prm
+ * @param {number[]} options
+ * @returns {Promise<string | null>}
+ */
+async function optionsValidateProblem(settings, name, prm, options) {
+    const kept = await validateAccepts(settings, prm, options);
+    const lost = options.filter((_, i) => !kept[i]);
+    return lost.length > 0 ? `${name}: validate('${prm}') drops the options ${lost.join(', ')}` : null;
+}
+
+/**
+ * Any other saved setting: validate has to keep the tool's range and reject
+ * what lies just outside it.
+ * @param {import('@playwright/test').JSHandle} settings
+ * @param {string} name
+ * @param {string} prm
+ * @param {ToolBounds} tool
+ * @returns {Promise<string | null>}
+ */
+async function rangeValidateProblem(settings, name, prm, tool) {
+    const step = tool.integer ? 1 : 0.001;
+    const probes = [tool.min, tool.min - step, tool.max, tool.max + step, 1e15]
+        .map((v) => (Number.isFinite(v) ? v : Math.sign(v) * 1e15));
+    const [min, belowMin, max, aboveMax, huge] = await validateAccepts(settings, prm, probes);
+    const savedMin = min && !belowMin;
+    const savedMax = tool.max === Infinity ? huge : max && (!aboveMax || huge);
+    if (savedMin && savedMax) return null;
+    return `${name}: validate('${prm}') does not keep ${tool.min}..${tool.max} `
+        + `(min ${min}, below ${belowMin}, max ${max}, above ${aboveMax}, 1e15 ${huge})`;
+}
+
+/**
+ * One row's disagreements between the tool and the page.
+ * @param {import('@playwright/test').Page} page
+ * @param {import('@playwright/test').JSHandle} settings
+ * @param {BoundsRow} row
+ * @returns {Promise<(string | null)[]>}
+ */
+async function rowProblems(page, settings, row) {
+    const tool = toolBounds(row);
+    const name = `${row.tool} ${row.arg} / ${row.selector}`;
+    const field = await fieldBounds(page, row.selector);
+    if (!field) return [`${name}: no such field on the page`];
+    if (tool.values) return [enumProblem(name, tool.values, field)];
+    const problems = [rangeProblem(name, tool, field)];
+    if (row.prm) {
+        problems.push(field.options
+            ? await optionsValidateProblem(settings, name, row.prm, field.options)
+            : await rangeValidateProblem(settings, name, row.prm, tool));
+    }
+    return problems;
+}
+
+/**
  * Every row's tool bounds against the page's; all disagreements are reported
  * together, one line each.
  * @param {import('@playwright/test').Page} page
@@ -131,48 +222,11 @@ const upperAgrees = (tool, pageMax) => tool === pageMax || pageMax === Infinity;
 export async function expectMcpBoundsMatchPage(page, rows, settingsOf = defaultSettings) {
     const settings = await page.evaluateHandle(settingsOf);
     const problems = [];
+    // One row at a time: the rows share the page and its settings handle.
     for (const row of rows) {
-        const tool = toolBounds(row);
-        const name = `${row.tool} ${row.arg} / ${row.selector}`;
-        const field = await fieldBounds(page, row.selector);
-        if (!field) {
-            problems.push(`${name}: no such field on the page`);
-            continue;
-        }
-        if (tool.values) {
-            const same = field.options && field.options.length === tool.values.length
-                && tool.values.every((v) => field.options?.includes(v));
-            if (!same) {
-                problems.push(`${name}: tool takes ${tool.values.join(', ')}, field ${field.options?.join(', ') ?? 'is not a select'}`);
-            }
-            continue;
-        }
-        const agrees = field.options
-            ? tool.min <= field.min && field.max <= tool.max
-            : tool.min === field.min && upperAgrees(tool.max, field.max);
-        if (!agrees) {
-            problems.push(`${name}: tool ${tool.min}..${tool.max}, field ${field.min}..${field.max}`);
-        }
-        if (row.prm && field.options) {
-            const kept = await validateAccepts(settings, row.prm, field.options);
-            const lost = field.options.filter((_, i) => !kept[i]);
-            if (lost.length > 0) {
-                problems.push(`${name}: validate('${row.prm}') drops the options ${lost.join(', ')}`);
-            }
-        } else if (row.prm) {
-            const step = tool.integer ? 1 : 0.001;
-            const probes = [tool.min, tool.min - step, tool.max, tool.max + step, 1e15]
-                .map((v) => (Number.isFinite(v) ? v : Math.sign(v) * 1e15));
-            const [min, belowMin, max, aboveMax, huge] = await validateAccepts(settings, row.prm, probes);
-            const savedMin = min && !belowMin;
-            const savedMax = tool.max === Infinity ? huge : max && (!aboveMax || huge);
-            if (!savedMin || !savedMax) {
-                problems.push(`${name}: validate('${row.prm}') does not keep ${tool.min}..${tool.max} `
-                    + `(min ${min}, below ${belowMin}, max ${max}, above ${aboveMax}, 1e15 ${huge})`);
-            }
-        }
+        problems.push(...await rowProblems(page, settings, row));
     }
-    expect(problems).toEqual([]);
+    expect(problems.filter((p) => p !== null)).toEqual([]);
 }
 
 /**
