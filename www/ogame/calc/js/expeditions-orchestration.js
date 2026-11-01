@@ -40,12 +40,12 @@ const options = {
         case 'highTop': return validateNumber(Number.parseFloat(value), 40000, 5000000, 40000);
         case 'playerClass': return validateNumber(Number.parseFloat(value), 0, 2, 0);
         case 'universeSpeed': return validateNumber(Number.parseFloat(value), 1, 10, 1);
-        case 'hyperTechLevel': return validateNumber(Number.parseFloat(value), 0, 999, 0);
-        case 'percentRes': return validateNumber(Number.parseFloat(value), 0, 999, 0);
-        case 'percentShips': return validateNumber(Number.parseFloat(value), 0, 999, 0);
-        case 'classBonusCollector': return validateNumber(Number.parseFloat(value), 0, 999, 0);
-        case 'classBonusDiscoverer': return validateNumber(Number.parseFloat(value), 0, 999, 0);
-        case 'darkMatterDiscoveryBonus': return validateNumber(Number.parseFloat(value), 0, 9999, 0);
+        case 'hyperTechLevel': return validateNumber(Number.parseFloat(value), 0, 50, 0);
+        case 'percentRes': return validateNumber(Number.parseFloat(value), 0, Infinity, 0);
+        case 'percentShips': return validateNumber(Number.parseFloat(value), 0, Infinity, 0);
+        case 'classBonusCollector': return validateNumber(Number.parseFloat(value), 0, Infinity, 0);
+        case 'classBonusDiscoverer': return validateNumber(Number.parseFloat(value), 0, Infinity, 0);
+        case 'darkMatterDiscoveryBonus': return validateNumber(Number.parseFloat(value), 0, Infinity, 0);
         case 'resourceDiscoveryBooster': return validateNumber(Number.parseFloat(value), 0, 40, 0);
         case 'fleet': return isValidExpeditionFleet(value) ? value.replaceAll('~', ',') : EXPEDITIONS_EMPTY_FLEET;
         case 'lfShipsBonuses': return validateNumber(Number.parseFloat(value), 0, Infinity, 0);
@@ -202,21 +202,14 @@ class ExpeditionsApp {
   }
 
   _applyConstraints() {
-    const percentFields = {
-      'percent-resources': 999,
-      'percent-ships': 999,
-      // The class panel's Total, as every calculator takes it: uncapped.
-      'class-bonus-collector': Infinity,
-      'class-bonus-discoverer': Infinity,
-      'dark-matter-discovery-bonus': 9999,
-    };
-    Object.keys(percentFields).forEach((id) => {
-      const el = document.getElementById(id);
-      if (el) el._constrains = { min: 0, max: percentFields[id], def: 0, allowNegative: false, allowFloat: true };
+    // Life form bonuses and the class panel's Total, as every calculator takes
+    // them: uncapped, since the researches behind them have no level cap.
+    ['percent-resources', 'percent-ships', 'class-bonus-collector', 'class-bonus-discoverer',
+      'dark-matter-discovery-bonus'].forEach((id) => {
+      setConstrains(id, { min: 0, max: Infinity, def: 0, allowNegative: false, allowFloat: true });
     });
 
-    const hyperTech = document.getElementById('tech-hyper-level');
-    if (hyperTech) hyperTech._constrains = { min: 0, max: 999, def: 0 };
+    setConstrains('tech-hyper-level', { min: 0, max: 50, def: 0 });
 
     EXPEDITION_SHIPS.forEach((ship) => {
       const bonus = document.getElementById('lf-cargo-' + ship.techId);

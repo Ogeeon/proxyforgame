@@ -181,8 +181,8 @@ test.describe('Expeditions Calculator - DOM integration', () => {
     });
 
     test('out-of-range values are clamped on blur with a warning', async ({ page }) => {
-        await fillNumber(page, '#percent-resources', 5000);
-        await expect(page.locator('#percent-resources')).toHaveValue('999');
+        await fillNumber(page, '#tech-hyper-level', 60);
+        await expect(page.locator('#tech-hyper-level')).toHaveValue('50');
         await expect(page.locator('#warning')).toHaveClass(/visible/);
     });
 
