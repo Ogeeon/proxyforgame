@@ -10,9 +10,9 @@ const common = require('./common');
 
 const { keyedMap } = common;
 
-const { FlightCalculator, SHIPS_BASE, MISSION, PLAYER_CLASS } = loadBrowserScripts(
-    ['ogame/calc/js/ogame-cargo.js', 'ogame/calc/js/flight-core.js'],
-    ['FlightCalculator', 'SHIPS_BASE', 'MISSION', 'PLAYER_CLASS'],
+const { FlightCalculator, SHIPS_BASE, MISSION, PLAYER_CLASS, UNIVERSE_MAX_GALAXIES, UNIVERSE_MAX_SYSTEMS } = loadBrowserScripts(
+    ['ogame/calc/js/ogame-universe.js', 'ogame/calc/js/ogame-cargo.js', 'ogame/calc/js/flight-core.js'],
+    ['FlightCalculator', 'SHIPS_BASE', 'MISSION', 'PLAYER_CLASS', 'UNIVERSE_MAX_GALAXIES', 'UNIVERSE_MAX_SYSTEMS'],
 );
 
 /** Ship keys in the order flight-core.js indexes them - the site's own input ids. */
@@ -59,8 +59,8 @@ const coordinates = (/** @type {string} */ what) => ({
     type: 'object',
     description: `${what} coordinates, galaxy:system:position.`,
     properties: {
-        galaxy: { type: 'integer', minimum: 1, maximum: 50 },
-        system: { type: 'integer', minimum: 1, maximum: 999 },
+        galaxy: { type: 'integer', minimum: 1, maximum: UNIVERSE_MAX_GALAXIES },
+        system: { type: 'integer', minimum: 1, maximum: UNIVERSE_MAX_SYSTEMS },
         position: { type: 'integer', minimum: 1, maximum: 16, description: '1-15 are planets, 16 is the expedition slot.' },
     },
     required: ['galaxy', 'system', 'position'],
@@ -115,8 +115,8 @@ const inputSchema = {
                 fleetSpeedWar: { type: 'number', minimum: 1, maximum: 10 },
                 fleetSpeedPeaceful: { type: 'number', minimum: 1, maximum: 10 },
                 fleetSpeedHolding: { type: 'number', minimum: 1, maximum: 10 },
-                galaxies: { type: 'integer', minimum: 1, maximum: 50 },
-                systems: { type: 'integer', minimum: 1, maximum: 999 },
+                galaxies: { type: 'integer', minimum: 1, maximum: UNIVERSE_MAX_GALAXIES },
+                systems: { type: 'integer', minimum: 1, maximum: UNIVERSE_MAX_SYSTEMS },
                 circularGalaxies: { type: 'boolean' },
                 circularSystems: { type: 'boolean' },
                 deuteriumFactor: { type: 'number', minimum: 0.5, maximum: 1, description: 'Fuel consumption factor, 0.5-1.' },

@@ -101,8 +101,8 @@ let options = {
             case 'mixSrcBalance': return validateNumber(Number.parseFloat(value), 0, 100, this.mixSrcBalance);
             case 'country': return value;
             case 'universe': return validateNumber(Number.parseInt(value), 0, Infinity, 101);
-            case 'coordg': return validateNumber(Number.parseInt(value), 0, 12, this.coordg);
-            case 'coords': return validateNumber(Number.parseInt(value), 0, 550, this.coords);
+            case 'coordg': return validateNumber(Number.parseInt(value), 0, UNIVERSE_MAX_GALAXIES, this.coordg);
+            case 'coords': return validateNumber(Number.parseInt(value), 0, UNIVERSE_MAX_SYSTEMS, this.coords);
             case 'coordp': return validateNumber(Number.parseInt(value), 0, 15, this.coordp);
             case 'hyperTech': return validateNumber(Number.parseInt(value), 0, 50, this.hyperTech);
             case 'playerClass': return validateNumber(Number.parseInt(value), 0, 2, this.playerClass);
@@ -243,8 +243,8 @@ let options = {
         if (isset(prm['lc'])) {
             const m = prm['lc'].split(':');
             if (m.length == 3) {
-                this.coordg = validateNumber(Number.parseInt(m[0]), 0, 12, 0);
-                this.coords = validateNumber(Number.parseInt(m[1]), 0, 550, 0);
+                this.coordg = validateNumber(Number.parseInt(m[0]), 0, UNIVERSE_MAX_GALAXIES, 0);
+                this.coords = validateNumber(Number.parseInt(m[1]), 0, UNIVERSE_MAX_SYSTEMS, 0);
                 this.coordp = validateNumber(Number.parseInt(m[2]), 0, 15, 0);
                 linkOverrides.coords = true;
             }
@@ -1105,12 +1105,12 @@ function initTextInputs() {
     });
 
     addEvent('#coord-g', 'keyup', function() {
-        options.coordg = clampNumber(getInputNumber(inputEl('#coord-g')), 0, 12);
+        options.coordg = clampNumber(getInputNumber(inputEl('#coord-g')), 0, UNIVERSE_MAX_GALAXIES);
         updateNumbers();
         options.save();
     });
     addEvent('#coord-s', 'keyup', function() {
-        options.coords = clampNumber(getInputNumber(inputEl('#coord-s')), 0, 550);
+        options.coords = clampNumber(getInputNumber(inputEl('#coord-s')), 0, UNIVERSE_MAX_SYSTEMS);
         updateNumbers();
         options.save();
     });

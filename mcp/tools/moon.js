@@ -8,9 +8,9 @@ const { loadBrowserScripts } = require('../lib/browser-scripts');
 const { ToolError } = require('../lib/protocol');
 const common = require('./common');
 
-const { MoonCalculator, MOON_UNITS } = loadBrowserScripts(
-    ['js/utils.js', 'ogame/calc/js/ogame-cargo.js', 'ogame/calc/js/moon-core.js'],
-    ['MoonCalculator', 'MOON_UNITS'],
+const { MoonCalculator, MOON_UNITS, UNIVERSE_MAX_SYSTEMS } = loadBrowserScripts(
+    ['js/utils.js', 'ogame/calc/js/ogame-universe.js', 'ogame/calc/js/ogame-cargo.js', 'ogame/calc/js/moon-core.js'],
+    ['MoonCalculator', 'MOON_UNITS', 'UNIVERSE_MAX_SYSTEMS'],
 );
 
 /** @type {{id: string, group: string}[]} */
@@ -131,8 +131,8 @@ function createMoonTools({ siteApi }) {
             type: 'object',
             properties: {
                 phalanxLevel: { type: 'integer', minimum: 1, maximum: 50, description: 'Sensor Phalanx level.' },
-                moonSystem: { type: 'integer', minimum: 1, maximum: 999, description: 'System the moon with the phalanx is in.' },
-                targetSystem: { type: 'integer', minimum: 1, maximum: 999, description: 'A system to reach; the answer says what level it needs.' },
+                moonSystem: { type: 'integer', minimum: 1, maximum: UNIVERSE_MAX_SYSTEMS, description: 'System the moon with the phalanx is in.' },
+                targetSystem: { type: 'integer', minimum: 1, maximum: UNIVERSE_MAX_SYSTEMS, description: 'A system to reach; the answer says what level it needs.' },
                 playerClass: { ...common.playerClassSchema, description: 'The Discoverer: +20% phalanx range.' },
                 lifeforms: common.lifeformsSchema(['analysisNetworkBonus', 'discovererClassBonus']),
                 universe: common.universeSchema,
@@ -141,7 +141,7 @@ function createMoonTools({ siteApi }) {
                     description: 'Galaxy shape given by hand. Unset ones come from `universe` when given, else 499 '
                         + 'systems that do not wrap around.',
                     properties: {
-                        systems: { type: 'integer', minimum: 1, maximum: 999 },
+                        systems: { type: 'integer', minimum: 1, maximum: UNIVERSE_MAX_SYSTEMS },
                         circularSystems: { type: 'boolean' },
                     },
                     additionalProperties: false,

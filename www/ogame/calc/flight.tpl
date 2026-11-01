@@ -33,6 +33,7 @@
   <script src="/ogame/calc/js/profiles-binders.js?v=<?php echo assetVersion($pfgPath, '/ogame/calc/js/profiles-binders.js'); ?>" defer></script>
   <script src="/ogame/calc/js/profiles-ui.js?v=<?php echo assetVersion($pfgPath, '/ogame/calc/js/profiles-ui.js'); ?>" defer></script>
   <script src="/ogame/calc/js/own-api.js?v=<?php echo assetVersion($pfgPath, '/ogame/calc/js/own-api.js'); ?>" defer></script>
+  <script src="/ogame/calc/js/ogame-universe.js?v=<?php echo assetVersion($pfgPath, '/ogame/calc/js/ogame-universe.js'); ?>" defer></script>
   <script src="/ogame/calc/js/ogame-cargo.js?v=<?php echo assetVersion($pfgPath, '/ogame/calc/js/ogame-cargo.js'); ?>" defer></script>
   <script src="/ogame/calc/js/flight-core.js?v=<?php echo assetVersion($pfgPath, '/ogame/calc/js/flight-core.js'); ?>" defer></script>
   <script src="/ogame/calc/js/flight-data-collector.js?v=<?php echo assetVersion($pfgPath, '/ogame/calc/js/flight-data-collector.js'); ?>" defer></script>
@@ -175,7 +176,7 @@
                     <div class="d-flex align-items-center gap-1 text-nowrap">
                       <label for="departure-g"><?= $l['departure-point'] ?></label>
                       <span class="text-nowrap">
-                        <input id="departure-g" type="text" name="departure-g" class="form-control form-control-sm d-inline-block coord-input-small" value="1" data-field-title="<?= $l['departure-point'] ?>-<?= $l['galaxy'] ?>">:<input id="departure-s" type="text" name="departure-s" class="form-control form-control-sm d-inline-block coord-input" value="1" data-field-title="<?= $l['departure-point'] ?>-<?= $l['system'] ?>" aria-label="<?= $l['departure-point'] ?>-<?= $l['system'] ?>">:<input id="departure-p" type="text" name="departure-p" class="form-control form-control-sm d-inline-block coord-input-small" value="1" data-field-title="<?= $l['departure-point'] ?>-<?= $l['planet'] ?>" aria-label="<?= $l['departure-point'] ?>-<?= $l['planet'] ?>">
+                        <input id="departure-g" type="text" name="departure-g" class="form-control form-control-sm d-inline-block coord-input" value="1" data-field-title="<?= $l['departure-point'] ?>-<?= $l['galaxy'] ?>">:<input id="departure-s" type="text" name="departure-s" class="form-control form-control-sm d-inline-block coord-input" value="1" data-field-title="<?= $l['departure-point'] ?>-<?= $l['system'] ?>" aria-label="<?= $l['departure-point'] ?>-<?= $l['system'] ?>">:<input id="departure-p" type="text" name="departure-p" class="form-control form-control-sm d-inline-block coord-input-small" value="1" data-field-title="<?= $l['departure-point'] ?>-<?= $l['planet'] ?>" aria-label="<?= $l['departure-point'] ?>-<?= $l['planet'] ?>">
                       </span>
                       <!-- Filled from the active profile; picking a body copies its coordinates. -->
                       <select id="pf-departure" class="form-select form-select-sm w-auto d-none" aria-label="<?= $l['pf-departure-body'] ?>" title="<?= $l['pf-departure-body'] ?>"></select>
@@ -260,11 +261,11 @@
                     </fieldset>
                     <div class="d-flex align-items-center gap-1 text-nowrap">
                       <label for="systems-num"><?= $l['systems-num'] ?></label>
-                      <input id="systems-num" type="text" name="systems-num" class="form-control form-control-sm d-inline-block level-input" value="499">
+                      <input id="systems-num" type="text" name="systems-num" class="form-control form-control-sm d-inline-block coord-input" value="499">
                     </div>
                     <div class="d-flex align-items-center gap-1 text-nowrap">
                       <label for="galaxies-num"><?= $l['galaxies-num'] ?></label>
-                      <input id="galaxies-num" type="text" name="galaxies-num" class="form-control form-control-sm d-inline-block level-input-small" value="9">
+                      <input id="galaxies-num" type="text" name="galaxies-num" class="form-control form-control-sm d-inline-block coord-input" value="9">
                     </div>
                   </div>
 
@@ -470,7 +471,7 @@
               <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
                 <label for="destination-g"><?= $l['destination-point'] ?></label>
                 <span class="text-nowrap">
-                  <input id="destination-g" type="text" name="destination-g" class="form-control form-control-sm d-inline-block coord-input-small" value="1" data-field-title="<?= $l['destination-point'] ?>-<?= $l['galaxy'] ?>">:<input id="destination-s" type="text" name="destination-s" class="form-control form-control-sm d-inline-block coord-input" value="1" data-field-title="<?= $l['destination-point'] ?>-<?= $l['system'] ?>" aria-label="<?= $l['destination-point'] ?>-<?= $l['system'] ?>">:<input id="destination-p" type="text" name="destination-p" class="form-control form-control-sm d-inline-block coord-input-small" value="1" data-field-title="<?= $l['destination-point'] ?>-<?= $l['planet'] ?>" aria-label="<?= $l['destination-point'] ?>-<?= $l['planet'] ?>">
+                  <input id="destination-g" type="text" name="destination-g" class="form-control form-control-sm d-inline-block coord-input" value="1" data-field-title="<?= $l['destination-point'] ?>-<?= $l['galaxy'] ?>">:<input id="destination-s" type="text" name="destination-s" class="form-control form-control-sm d-inline-block coord-input" value="1" data-field-title="<?= $l['destination-point'] ?>-<?= $l['system'] ?>" aria-label="<?= $l['destination-point'] ?>-<?= $l['system'] ?>">:<input id="destination-p" type="text" name="destination-p" class="form-control form-control-sm d-inline-block coord-input-small" value="1" data-field-title="<?= $l['destination-point'] ?>-<?= $l['planet'] ?>" aria-label="<?= $l['destination-point'] ?>-<?= $l['planet'] ?>">
                 </span>
                 <span class="ms-3"><?= $l['distance'] ?></span>
                 <span id="distance"></span>

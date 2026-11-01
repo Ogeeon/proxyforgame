@@ -470,6 +470,21 @@ test.describe('Moon Calculator - Sensor phalanx', () => {
         await expect(page.locator('#target-system')).toHaveValue('100');
     });
 
+    // en300 and en301 have 1000 systems per galaxy; the old 550 ceiling cut
+    // them short and kept the far half of the galaxy out of reach.
+    test('the widest galaxy the game runs fits, and the one past it does not', async ({ page }) => {
+        await page.locator('#systems-num').fill('1001');
+        await page.locator('#systems-num').blur();
+        await expect(page.locator('#systems-num')).toHaveValue('1000');
+
+        await page.locator('#target-system').fill('1000');
+        await page.locator('#target-system').blur();
+        await page.reload();
+
+        await expect(page.locator('#systems-num')).toHaveValue('1000');
+        await expect(page.locator('#target-system')).toHaveValue('1000');
+    });
+
     test('a reach that closes the ring collapses to the whole galaxy', async ({ page }) => {
         await page.locator('#systems-num').fill('100');
         await page.locator('#systems-num').blur();

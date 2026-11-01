@@ -34,12 +34,11 @@
 
 /* --- Narrow numeric fields keep their compact footprint under form-control --- */
 .level-input        { width: 44px;  text-align: center; }
-.level-input-small  { width: 36px;  text-align: center; }
 /* Coordinates keep their footprint but take a narrower side padding than
    form-control-sm's .5rem: at 32px that left 14px of content box, and a
-   two-digit position (~15px) lost its edges; the 40px system field fell short
-   of three digits by about a pixel too. */
-.coord-input        { width: 40px;  text-align: center; padding-inline: .25rem; }
+   two-digit position (~15px) lost its edges. The wider one takes four digits:
+   a galaxy, a system or a galaxy size of the 1000x1000 universes. */
+.coord-input        { width: 44px;  text-align: center; padding-inline: .25rem; }
 .coord-input-small  { width: 32px;  text-align: center; padding-inline: .25rem; }
 .count-input        { width: 64px;  text-align: center; }
 .input-7columns     { width: 60px;  text-align: center; }

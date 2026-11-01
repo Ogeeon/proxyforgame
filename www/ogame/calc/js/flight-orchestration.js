@@ -77,8 +77,8 @@ const options = {
                 case 'saveOneWay':
                 case 'fleetIgnoreEmptySystems':
                 case 'fleetIgnoreInactiveSystems': return value === 'true';
-                case 'numberOfSystems': return validateNumber(Number.parseFloat(value), 1, 550, 499);
-                case 'numberOfGalaxies': return validateNumber(Number.parseFloat(value), 1, 12, 9);
+                case 'numberOfSystems': return validateNumber(Number.parseFloat(value), 1, UNIVERSE_MAX_SYSTEMS, 499);
+                case 'numberOfGalaxies': return validateNumber(Number.parseFloat(value), 1, UNIVERSE_MAX_GALAXIES, 9);
                 case 'deutFactor': return validateNumber(Number.parseFloat(value), 5, 10, 10);
                 case 'deutConsReduction': return validateNumber(Number.parseFloat(value), 25, 50, 25);
                 case 'departure':
@@ -1684,8 +1684,8 @@ class FlightOrchestrator {
                 el._constrains = { min: 0, max: Infinity, def: 0, allowFloat: true, allowNegative: false };
             }
         });
-        this._setCoordConstraint('departure-g', 12); this._setCoordConstraint('destination-g', 12);
-        this._setCoordConstraint('departure-s', 550); this._setCoordConstraint('destination-s', 550);
+        this._setCoordConstraint('departure-g', UNIVERSE_MAX_GALAXIES); this._setCoordConstraint('destination-g', UNIVERSE_MAX_GALAXIES);
+        this._setCoordConstraint('departure-s', UNIVERSE_MAX_SYSTEMS); this._setCoordConstraint('destination-s', UNIVERSE_MAX_SYSTEMS);
         this._setCoordConstraint('departure-p', 16); this._setCoordConstraint('destination-p', 16);
     }
 

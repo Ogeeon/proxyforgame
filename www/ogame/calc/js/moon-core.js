@@ -85,9 +85,9 @@ const MOON_RECYCLER_CAPACITY = 20000;
 // deliberately not tied together even though a player has a single class.
 const PHALANX_DISCOVERER_BONUS = 0.20;
 
-// Levels above this are unreachable in practice: at level 24 the range already
-// spans 575 systems, more than the largest universe the flight calculator
-// admits (550).
+// Levels above this are unreachable in practice: at level 32 the range already
+// spans 1023 systems, more than the largest universe the calculators admit
+// (UNIVERSE_MAX_SYSTEMS).
 const PHALANX_MAX_LEVEL = 50;
 
 class MoonCalculator {

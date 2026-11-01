@@ -10,10 +10,6 @@
 
 'use strict';
 
-// Widest galaxy the calculator accepts, matching the flight calculator's own
-// ceiling for the same setting.
-const MOON_MAX_SYSTEMS = 550;
-
 const options = {
   defConstraints: { min: -Infinity, max: Infinity, def: 0, allowFloat: false, allowNegative: false },
 
@@ -60,10 +56,10 @@ const options = {
         // The real ceiling is whatever `numberOfSystems` currently holds, which
         // is not known here; _applySystemLimits keeps the fields themselves in
         // step, and the core clamps anything that slips through either way.
-        case 'ownSystem': return validateNumber(Number.parseFloat(value), 1, MOON_MAX_SYSTEMS, 1);
-        case 'targetSystem': return validateNumber(Number.parseFloat(value), 1, MOON_MAX_SYSTEMS, 1);
+        case 'ownSystem': return validateNumber(Number.parseFloat(value), 1, UNIVERSE_MAX_SYSTEMS, 1);
+        case 'targetSystem': return validateNumber(Number.parseFloat(value), 1, UNIVERSE_MAX_SYSTEMS, 1);
         case 'circularSystems': return value === 'true';
-        case 'numberOfSystems': return validateNumber(Number.parseFloat(value), 1, MOON_MAX_SYSTEMS, 499);
+        case 'numberOfSystems': return validateNumber(Number.parseFloat(value), 1, UNIVERSE_MAX_SYSTEMS, 499);
         default: return value;
       }
     }
@@ -167,7 +163,7 @@ class MoonApp {
     // have no level cap and no bonus cap.
     setConstrains('phalanx-range-bonus', { min: 0, def: 0, allowNegative: false, allowFloat: true });
     setConstrains('discoverer-bonus', { min: 0, max: Infinity, def: 0, allowFloat: true, allowNegative: false });
-    setConstrains('systems-num', { min: 1, max: MOON_MAX_SYSTEMS, def: 499 });
+    setConstrains('systems-num', { min: 1, max: UNIVERSE_MAX_SYSTEMS, def: 499 });
     this._applySystemLimits(options.prm.numberOfSystems);
   }
 
@@ -177,7 +173,7 @@ class MoonApp {
    * static constraints above.
    */
   _applySystemLimits(numberOfSystems) {
-    const max = clampNumber(Math.floor(numberOfSystems || 1), 1, MOON_MAX_SYSTEMS);
+    const max = clampNumber(Math.floor(numberOfSystems || 1), 1, UNIVERSE_MAX_SYSTEMS);
     setConstrains('own-system', { min: 1, max: max, def: 1 });
     setConstrains('target-system', { min: 1, max: max, def: 1 });
   }
