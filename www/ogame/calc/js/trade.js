@@ -96,8 +96,8 @@ let options = {
             case 'dstType': return validateNumber(Number.parseInt(value), 0, 5, this.dstType);
             case 'dstMixType': return validateNumber(Number.parseInt(value), 0, 4, this.dstMixType);
             case 'mixBalance': return validateNumber(Number.parseFloat(value), 0, 100, this.mixBalance);
-            case 'mixProp1': return validateNumber(Number.parseInt(value), 0, 100, this.mixProp1);
-            case 'mixProp2': return validateNumber(Number.parseInt(value), 0, 100, this.mixProp2);
+            case 'mixProp1': return validateNumber(Number.parseInt(value), 0, Infinity, this.mixProp1);
+            case 'mixProp2': return validateNumber(Number.parseInt(value), 0, Infinity, this.mixProp2);
             case 'mixSrcBalance': return validateNumber(Number.parseFloat(value), 0, 100, this.mixSrcBalance);
             case 'country': return value;
             case 'universe': return validateNumber(Number.parseInt(value), 0, Infinity, 101);
@@ -191,11 +191,11 @@ let options = {
         if (isset(prm['msrc'])) this.mixSrcBalance = validateNumber(Number.parseFloat(prm['msrc']), 0, 100, this.mixSrcBalance);
 
         if (isset(prm['mp1'])) {
-            this.mixProp1 = validateNumber(Number.parseInt(prm['mp1']), 0, 100, this.mixProp1);
+            this.mixProp1 = validateNumber(Number.parseInt(prm['mp1']), 0, Infinity, this.mixProp1);
             setVal('#mix-balance-prop1', this.mixProp1 == 0 ? '' : this.mixProp1);
         }
         if (isset(prm['mp2'])) {
-            this.mixProp2 = validateNumber(Number.parseInt(prm['mp2']), 0, 100, this.mixProp2);
+            this.mixProp2 = validateNumber(Number.parseInt(prm['mp2']), 0, Infinity, this.mixProp2);
             setVal('#mix-balance-prop2', this.mixProp2 == 0 ? '' : this.mixProp2);
         }
         if (isset(prm['fix1'])) {
@@ -1073,11 +1073,11 @@ function initMixInputs() {
         options.save();
     });
     addEvent('#mix-balance-prop1', 'keyup', function() {
-        options.mixProp1 = clampNumber(getInputNumber(inputEl('#mix-balance-prop1')), 0, 100);
+        options.mixProp1 = clampNumber(getInputNumber(inputEl('#mix-balance-prop1')), 0, Infinity);
         options.save();
     });
     addEvent('#mix-balance-prop2', 'keyup', function() {
-        options.mixProp2 = clampNumber(getInputNumber(inputEl('#mix-balance-prop2')), 0, 100);
+        options.mixProp2 = clampNumber(getInputNumber(inputEl('#mix-balance-prop2')), 0, Infinity);
         options.save();
     });
     for (const input of inputsAll('#dst-mix-block input[type="text"]')) {

@@ -18,11 +18,14 @@ const SOURCE_TYPES = { metal: 0, crystal: 1, deuterium: 2, 'metal+crystal': 3, '
 
 const DEFAULT_RATES = tradeDefaultRates();
 
-/** @param {string} what */
-const byResource = (what) => ({
+/**
+ * @param {string} what
+ * @param {number} [maximum] A percentage's 100.
+ */
+const byResource = (what, maximum) => ({
     type: 'object',
     description: what,
-    properties: Object.fromEntries(RESOURCES.map((r) => [r, { type: 'number', minimum: 0 }])),
+    properties: Object.fromEntries(RESOURCES.map((r) => [r, { type: 'number', minimum: 0, ...(maximum === undefined ? {} : { maximum }) }])),
     additionalProperties: false,
 });
 
@@ -46,10 +49,10 @@ const inputSchema = {
                 + 'the returned units each.',
             properties: {
                 receivePercent: byResource('Share of the returned amount one resource makes up, counted in units, '
-                    + 'in percent, e.g. {"crystal": 70}.'),
+                    + 'in percent, e.g. {"crystal": 70}.', 100),
                 ratio: byResource('Amounts of the two resources in this proportion, e.g. {"crystal": 2, "deuterium": 1}.'),
                 fixed: byResource('A fixed amount of one resource; the rest goes on the other, e.g. {"deuterium": 100000}.'),
-                sellPercent: byResource('Share of what is sold that goes on one resource, in percent, e.g. {"crystal": 50}.'),
+                sellPercent: byResource('Share of what is sold that goes on one resource, in percent, e.g. {"crystal": 50}.', 100),
             },
             additionalProperties: false,
         },
@@ -101,8 +104,8 @@ function mixParams(split, pair) {
 
 /**
  * The one way of splitting the split argument names, checked: it names only
- * the resources bought, both of them for a ratio, one for the others, and a
- * percentage stays at most 100. Null when none was given.
+ * the resources bought, both of them for a ratio and one for the others (the
+ * schema keeps a percentage at most 100). Null when none was given.
  * @param {any} split
  * @param {string[]} pair
  * @returns {{mode: string, value: Record<string, number>}|null}
@@ -130,9 +133,6 @@ function chosenSplit(split, pair) {
     }
     if (keys.length !== 1) {
         throw new ToolError(`split.${mode} names one resource, ${first} or ${second}.`);
-    }
-    if (mode !== 'fixed' && value[keys[0]] > 100) {
-        throw new ToolError(`split.${mode} is a percentage: at most 100.`);
     }
     return { mode, value };
 }
