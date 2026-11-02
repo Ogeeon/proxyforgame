@@ -542,17 +542,14 @@ Also `make pagespeed args="--pages flight --out before.json"`.
 - CrUX lags a deploy by up to four weeks; the lab numbers show a change the same day.
 
 
-Runs a command on one of the two deploy hosts, from the repo root:
+Runs a command on the deploy host (the one host serving both domains), from the repo root:
 
 ```bash
-bash scripts/pfg-ssh.sh prod    'git -C ~/deploy/proxyforgame.com-gh log --oneline -1'
-bash scripts/pfg-ssh.sh standby 'tail -20 /var/log/pfg-cron.log'
-bash scripts/pfg-ssh.sh prod 'bash -s' < local-script.sh
+bash scripts/pfg-ssh.sh 'tail -20 /var/log/pfg-cron.log'
+bash scripts/pfg-ssh.sh 'bash -s' < local-script.sh
 ```
 
-Production is password-only, so it goes through `plink` with the password read from
-`PFG_PROD_PWFILE` (default `D:\tmp\claude\_pfg-prod.txt`, kept outside the repo); the standby
-uses the ed25519 key. Host paths: `deploy/README.md`, *The two hosts*.
+It connects as `root` with the ed25519 key. Host paths: `deploy/README.md`, *The host*.
 
 ### stage-lines.js
 

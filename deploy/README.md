@@ -112,7 +112,7 @@ The receiver's own settings (the secret, the `pfg-sync` path, the log) are in
 | config | `/etc/pfg-sync.conf`, `/etc/pfg-cron.conf`, `/etc/pfg-webhook.conf` |
 | deploy log | `/var/log/pfg-cron.log` (the webhook logs there too) |
 | trigger | webhook, plus a five-minute reconcile |
-| shell from the dev box | `bash scripts/pfg-ssh.sh standby '<cmd>'` |
+| shell from the dev box | `bash scripts/pfg-ssh.sh '<cmd>'` |
 | Node | the distribution's `nodejs`, 20 or newer — only for the MCP server |
 | MCP server | `pfg-mcp.service` on `127.0.0.1:8787`, public as `https://<name>/mcp` |
 
