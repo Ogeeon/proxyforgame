@@ -17,7 +17,7 @@ release section; it is the source of truth for the other eleven translations.
 
 ### Added
 
-- The universe pickers list the public test server universe (Singularity, s808-en), so its settings and profile can be chosen.
+- The universe pickers list the public test server universe as "Singularity (PTS)" (s808-en), so its settings and profile can be chosen.
 
 ### Fixed
 

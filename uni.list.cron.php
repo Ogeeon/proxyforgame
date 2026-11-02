@@ -147,7 +147,7 @@ function parseUniverses($data)
 // of its host name
 // ********************************************************************************************
 const PTS_UNIVERSES = [
-    ['language' => 'en', 'number' => 808, 'name' => 'PTS: Singularity'],
+    ['language' => 'en', 'number' => 808, 'name' => 'Singularity (PTS)'],
 ];
 
 function addPtsUniverses($unisArr)
