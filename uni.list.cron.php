@@ -96,9 +96,8 @@ function httpGet($uri)
             curl_setopt($curl, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
             $out = curl_exec($curl);
             if(curl_errno($curl)){
-                logDie("Curl error: " . curl_error($curl).", ".curl_getinfo($curl));
+                logDie("Curl error: " . curl_error($curl) . ", HTTP " . curl_getinfo($curl, CURLINFO_RESPONSE_CODE));
             }
-            curl_close($curl);
             return $out;
         } else {
             logDie("Failed to initialize curl");

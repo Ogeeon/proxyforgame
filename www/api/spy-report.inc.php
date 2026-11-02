@@ -25,9 +25,7 @@
     curl_setopt($ch, CURLOPT_TIMEOUT, 30);
     $h = curl_exec($ch);
     if (curl_errno($ch)) {
-      // Read the message before closing the handle, or it comes back empty
       $err = curl_error($ch);
-      curl_close($ch);
       // Maybe Logserver isn't accessible. Let's try fallback method
       $data = getSpyReportByFallbackMethod($strCode);
       if ($data !== null) {
@@ -35,7 +33,6 @@
       }
       throw new ApiError(502, 'upstream_unavailable', $err);
     }
-    curl_close($ch);
 
     $data = readUsableSpyReport($h);
     if ($data !== null) {

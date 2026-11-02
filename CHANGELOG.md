@@ -19,6 +19,10 @@ release section; it is the source of truth for the other eleven translations.
 
 - The universe pickers list the public test server universe (Singularity, s808-en), so its settings and profile can be chosen.
 
+### Fixed
+
+- The daily universe-list job and the spy report import no longer call `curl_close()`, which PHP 8.5 deprecates; the job logged the deprecation on every run. A failed universe-list download now logs the HTTP status instead of the word "Array".
+
 ## [2026-11-01] - site entry 71
 
 ### Added
