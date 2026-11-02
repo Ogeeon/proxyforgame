@@ -18,6 +18,7 @@ release section; it is the source of truth for the other eleven translations.
 ### Added
 
 - The universe pickers list the public test server universe as "Singularity (PTS)" (s808-en), so its settings and profile can be chosen.
+- Monitoring: every page of the public site measures its field INP and sends one record per page load to the site's own database (`interaction_timing`, migration 0003): the INP picked as web-vitals picks it, its input delay, processing and presentation phases, the event and a selector for the element behind it, the time since navigation and since DOMContentLoaded, the interaction count, the pointer type and the CPU core count. The "INP slow" events Hawk received since 2026-11-02 are gone: they were 80% of its traffic, one group per element id, and had no denominator. A random per-load id lets a later beacon of the same page replace the earlier one; nothing is stored in the browser, rows are deleted after 90 days and the service caps itself at 1000 rows an hour. The privacy policy describes the record. Queries for reading it: `docs/interaction-timing.md`.
 
 ### Fixed
 

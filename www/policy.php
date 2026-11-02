@@ -9,7 +9,7 @@
 <h1>Privacy Policy</h1>
 
 
-<p>Effective date: July 24, 2019<br>Last updated: October 14, 2026</p>
+<p>Effective date: July 24, 2019<br>Last updated: November 3, 2026</p>
 
 
 <p>ProxyForGame ("us", "we", or "our") operates the https://proxyforgame.net website (hereinafter referred to as the "Service").</p>
@@ -69,6 +69,9 @@
 <h4>Usage Data</h4>
 
 <p>We may also collect information on how the Service is accessed and used ("Usage Data"). This Usage Data may include information such as your computer's Internet Protocol address (e.g. IP address), browser type, browser version, the pages of our Service that you visit, the time and date of your visit, the time spent on those pages, unique device identifiers and other diagnostic data.</p>
+
+<h4>Responsiveness Measurement</h4>
+<p>To find out which parts of the Service respond slowly, our pages measure how long they take to react to clicks, taps and key presses. When you leave a page you interacted with, your browser sends our own server one record about that page view: the address and language of the page, how many interactions there were, the time the slowest of them took and how that time was spent, the type of that interaction and a short description of the page element it was aimed at (such as "button#calculate"), the time since the page was opened, whether your device is operated by touch or a mouse, and the number of processor cores your browser reports. The record never contains anything you typed. It carries a random number created for that page view only, so that a second record from the same view replaces the first one; that number is not stored in your browser and does not link the record to you or to your other visits. No other service receives these records, and we delete them after 90 days.</p>
 
 
 <h4>Tracking & Cookies Data</h4>

@@ -12,16 +12,18 @@
   require_once __DIR__ . '/api/server-data.inc.php';
   require_once __DIR__ . '/api/populated-systems.inc.php';
   require_once __DIR__ . '/api/health.inc.php';
+  require_once __DIR__ . '/api/interaction-timing.inc.php';
 
   // Services with a side effect take POST; the rest are reads and take GET.
   $apiRoutes = array(
-    'report'           => array('POST', 'apiReport'),
-    'email'            => array('POST', 'apiEmail'),
-    'changelog'        => array('GET',  'apiChangelog'),
-    'ogameAPI'         => array('GET',  'apiSpyReport'),
-    'serverdata'       => array('GET',  'apiServerData'),
-    'populatedSystems' => array('GET',  'apiPopulatedSystems'),
-    'health'           => array('GET',  'apiHealth'),
+    'report'            => array('POST', 'apiReport'),
+    'email'             => array('POST', 'apiEmail'),
+    'changelog'         => array('GET',  'apiChangelog'),
+    'ogameAPI'          => array('GET',  'apiSpyReport'),
+    'serverdata'        => array('GET',  'apiServerData'),
+    'populatedSystems'  => array('GET',  'apiPopulatedSystems'),
+    'health'            => array('GET',  'apiHealth'),
+    'interactionTiming' => array('POST', 'apiInteractionTiming'),
   );
 
   try {

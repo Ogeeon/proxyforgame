@@ -1,5 +1,8 @@
 <?php require_once __DIR__ . '/hosts.inc.php'; ?>
+<?php require_once __DIR__ . '/asset-version.inc.php'; ?>
 <?php if (isPublicHost()): ?>
+<!-- Field INP, one row per page load in our own database -->
+<script src="/js/interaction-timing.js?v=<?php echo assetVersion(__DIR__ . '/js/interaction-timing.js'); ?>" defer></script>
 <!-- Yandex.Metrika counter -->
 <script>
     (function(m,e,t,r,i,k,a){

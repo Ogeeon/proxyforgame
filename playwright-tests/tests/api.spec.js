@@ -280,3 +280,79 @@ test.describe('AJAX endpoint - health', () => {
         expect(response.headers()['allow']).toBe('GET');
     });
 });
+
+test.describe('AJAX endpoint - interactionTiming', () => {
+    /** A random id per call, so that runs do not update each other's rows. */
+    const loadId = () => Array.from({ length: 32 }, () => Math.floor(Math.random() * 16).toString(16)).join('');
+
+    // What www/js/interaction-timing.js sends. The page is not a real one, so
+    // rows a test leaves behind are easy to tell from measurements.
+    const beacon = () => ({
+        service: 'interactionTiming',
+        loadId: loadId(),
+        page: '/e2e/interaction-timing',
+        lang: 'en',
+        pointer: 'fine',
+        cores: '8',
+        dcl: '640',
+        interactions: '3',
+        inp: '336',
+        inputDelay: '255',
+        processing: '5',
+        presentation: '76',
+        start: '5000',
+        event: 'click',
+        target: 'input.form-control.form-control-sm',
+    });
+
+    // The beacon writes a row, so it takes POST like the other services with
+    // a side effect.
+    test('refuses GET and says what it accepts', async ({ request }) => {
+        const response = await request.get(`${ENDPOINT}?service=interactionTiming`);
+        await expectApiError(response, 405, 'method_not_allowed');
+        expect(response.headers()['allow']).toBe('POST');
+    });
+
+    test('a beacon without its fields is a 400', async ({ request }) => {
+        const response = await request.post(ENDPOINT, { form: { service: 'interactionTiming' } });
+        await expectApiError(response, 400, 'missing_params');
+    });
+
+    // Each one is a field the database would take as is, so the service is
+    // the only thing between a forged request and a junk row.
+    const malformed = [
+        { field: 'loadId', value: 'not-hex' },
+        { field: 'page', value: 'https://example.com/' },
+        { field: 'target', value: '<script>' },
+        { field: 'event', value: 'Click!' },
+        { field: 'inp', value: '-5' },
+        { field: 'inputDelay', value: '600000' },
+        { field: 'interactions', value: '0' },
+    ];
+    for (const { field, value } of malformed) {
+        test(`${field}=${value} is refused`, async ({ request }) => {
+            const response = await request.post(ENDPOINT, { form: { ...beacon(), [field]: value } });
+            await expectApiError(response, 400, 'bad_params');
+        });
+    }
+
+    // The optional fields are the browser's to give; a value that makes no
+    // sense is stored as unknown rather than costing the whole measurement.
+    test('a well-formed beacon is answered, also with nonsense in the optional fields', async ({ request }) => {
+        for (const extra of [{}, { pointer: 'pen', cores: '-1', dcl: 'soon' }]) {
+            const response = await request.post(ENDPOINT, { form: { ...beacon(), ...extra } });
+            expect(response.status()).toBe(200);
+            // false where the server has no database, which is allowed.
+            expect(typeof (await response.json()).stored).toBe('boolean');
+        }
+    });
+
+    // A page hidden twice sends twice under one id; the second beacon carries
+    // the whole visit and replaces the first.
+    test('a second beacon of the same page load is accepted', async ({ request }) => {
+        const first = beacon();
+        expect((await request.post(ENDPOINT, { form: first })).status()).toBe(200);
+        const response = await request.post(ENDPOINT, { form: { ...first, interactions: '5', inp: '512' } });
+        expect(response.status()).toBe(200);
+    });
+});
