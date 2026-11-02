@@ -143,10 +143,28 @@ function parseUniverses($data)
 
 
 // ********************************************************************************************
+// adds the public test server, which the lobby list does not carry; it is one
+// universe shared by every language, so it is listed under English, the language
+// of its host name
+// ********************************************************************************************
+const PTS_UNIVERSES = [
+    ['language' => 'en', 'number' => 808, 'name' => 'PTS: Singularity'],
+];
+
+function addPtsUniverses($unisArr)
+{
+    foreach (PTS_UNIVERSES as $pts) {
+        $host = 's' . $pts['number'] . '-' . $pts['language'] . '.ogame.gameforge.com';
+        $unisArr[$pts['language']][$host] = $pts['name'];
+    }
+    return $unisArr;
+}
+
+// ********************************************************************************************
 
 $r = httpGet(OGAME_HOST);
 $unis = json_decode($r, true);
-$unisArr = parseUniverses($unis);
+$unisArr = addPtsUniverses(parseUniverses($unis));
 
 loadEnv(__DIR__ . DIRECTORY_SEPARATOR . '.env');
 
