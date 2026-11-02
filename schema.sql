@@ -1165,6 +1165,35 @@ CREATE TABLE IF NOT EXISTS mail_rate_limit (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
+-- Table structure for table `interaction_timing`
+--
+-- Written by the interactionTiming service (www/api/interaction-timing.inc.php).
+--
+
+CREATE TABLE IF NOT EXISTS interaction_timing (
+    id                  INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    load_id             CHAR(32) NOT NULL,
+    created_at          DATETIME NOT NULL,
+    release_sha         CHAR(40) NULL,
+    page                VARCHAR(64) NOT NULL,
+    lang                VARCHAR(8) NOT NULL,
+    pointer_type        VARCHAR(8) NULL,
+    cpu_cores           SMALLINT UNSIGNED NULL,
+    interactions        SMALLINT UNSIGNED NOT NULL,
+    dcl_ms              INT UNSIGNED NULL,
+    inp_ms              INT UNSIGNED NOT NULL,
+    input_delay_ms      INT UNSIGNED NOT NULL,
+    processing_ms       INT UNSIGNED NOT NULL,
+    presentation_ms     INT UNSIGNED NOT NULL,
+    start_ms            INT UNSIGNED NOT NULL,
+    event_type          VARCHAR(16) NOT NULL,
+    target              VARCHAR(96) NOT NULL,
+    UNIQUE KEY load_id (load_id),
+    KEY created (created_at),
+    KEY page_time (page, created_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+--
 -- Table structure for table `schema_migrations`
 --
 -- Written by deploy/pfg-migrate; see db/migrations/README.md. Kept in this
@@ -1178,7 +1207,8 @@ CREATE TABLE IF NOT EXISTS schema_migrations (
 
 INSERT INTO schema_migrations (version, filename) VALUES
     (1, '0001_create_schema_migrations.sql'),
-    (2, '0002_create_mail_rate_limit.sql')
+    (2, '0002_create_mail_rate_limit.sql'),
+    (3, '0003_create_interaction_timing.sql')
 ON DUPLICATE KEY UPDATE filename = VALUES(filename);
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
