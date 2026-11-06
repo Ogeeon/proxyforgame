@@ -1,4 +1,4 @@
-import { test, expect } from './base';
+import { test, expect, expectLoadsCleanly } from './base';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { expectMcpBoundsMatchPage } from './mcp-bounds';
@@ -50,8 +50,8 @@ test.describe('Construction Queue Calculator Page', () => {
         await buildButton.click();
     }
 
-    test('page loads successfully', async ({ page }) => {
-        await expect(page).toHaveTitle(/Construction queue/i);
+    test('the page loads without a script error', async ({ page }) => {
+        await expectLoadsCleanly(page, /Construction queue/i);
     });
 
     test('[planet / metal mine / from level 0] calculates correctly', async ({ page }) => {

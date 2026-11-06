@@ -37,6 +37,12 @@ export default defineConfig({
     // ~25% of the local run time. Keep it in CI, where a failure is not reproducible
     // on demand; locally set PFG_VIDEO=1 when a failure needs one.
     video: process.env.CI || process.env.PFG_VIDEO ? 'retain-on-failure' : 'off',
+
+    // Bootstrap drops its transitions under prefers-reduced-motion, so a modal,
+    // a collapse or a tooltip is shown at once instead of after its fade - ~11%
+    // of the run. A test about the animated path opts back in with
+    // test.use({ reducedMotion: 'no-preference' }).
+    reducedMotion: 'reduce',
   },
 
   // Enable retries in CI for stability

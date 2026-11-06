@@ -1,4 +1,4 @@
-import { test, expect } from './base';
+import { test, expect, expectLoadsCleanly } from './base';
 import { energyRows, expectMcpBoundsMatchPage } from './mcp-bounds';
 
 test.describe('Graviton Calculator Page', () => {
@@ -10,30 +10,8 @@ test.describe('Graviton Calculator Page', () => {
         await page.goto('/graviton');
     });
 
-    test('page loads successfully', async ({ page }) => {
-        await expect(page).toHaveTitle(/Graviton/i);
-    });
-
-    test('calculator options are available', async ({ page }) => {
-        const optionsExists = await page.evaluate(() => typeof options !== 'undefined');
-        expect(optionsExists).toBe(true);
-    });
-
-    test('the migrated modules are wired up', async ({ page }) => {
-        const wired = await page.evaluate(() => ({
-            core: typeof GravitonCalculator,
-            collector: typeof GravitonDataCollector,
-            renderer: typeof GravitonRenderer,
-            app: typeof GravitonApp,
-            instance: !!window.gravitonApp,
-        }));
-        expect(wired).toEqual({
-            core: 'function',
-            collector: 'function',
-            renderer: 'function',
-            app: 'function',
-            instance: true,
-        });
+    test('the page loads without a script error', async ({ page }) => {
+        await expectLoadsCleanly(page, /Graviton/i);
     });
 });
 

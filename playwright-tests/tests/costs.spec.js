@@ -1,4 +1,4 @@
-import { test, expect } from './base';
+import { test, expect, expectLoadsCleanly } from './base';
 import { expectMcpBoundsMatchPage } from './mcp-bounds';
 import { readFileSync } from 'fs';
 import { join } from 'path';
@@ -27,14 +27,8 @@ test.describe('Costs Calculator Page', () => {
         }
     }
 
-    test('page loads successfully', async ({ page }) => {
-        await expect(page).toHaveTitle(/Costs/);
-    });
-
-    test('costs.js functionality is available', async ({ page }) => {
-        // Check if the options object exists
-        const optionsExists = await page.evaluate(() => typeof options !== 'undefined');
-        expect(optionsExists).toBe(true);
+    test('the page loads without a script error', async ({ page }) => {
+        await expectLoadsCleanly(page, /Costs/);
     });
 
     test('[all items - one level / planet] calculations are correct', async ({ page }) => {

@@ -1,4 +1,4 @@
-import { test, expect } from './base';
+import { test, expect, expectLoadsCleanly } from './base';
 import { expectMcpBoundsMatchPage } from './mcp-bounds';
 
 test.beforeEach(async ({ context, page }) => {
@@ -19,14 +19,8 @@ test.beforeEach(async ({ context, page }) => {
     }
 });
 
-test('page loads successfully', async ({ page }) => {
-    await expect(page).toHaveTitle(/Production/i);
-});
-
-test('calculator options are available', async ({ page }) => {
-    // Check if the options object exists
-    const optionsExists = await page.evaluate(() => typeof options !== 'undefined');
-    expect(optionsExists).toBe(true);
+test('the page loads without a script error', async ({ page }) => {
+    await expectLoadsCleanly(page, /Production/i);
 });
 
 test('economy speed factored correctly', async ({ page }) => {

@@ -1,4 +1,4 @@
-import { test, expect } from './base';
+import { test, expect, expectLoadsCleanly } from './base';
 import { expectMcpBoundsMatchPage } from './mcp-bounds';
 import { readFileSync } from 'fs';
 import { join } from 'path';
@@ -18,38 +18,8 @@ test.describe('Expeditions Calculator Page', () => {
         await openPage(context, page);
     });
 
-    test('page loads successfully', async ({ page }) => {
-        await expect(page).toHaveTitle(/Expeditions/i);
-    });
-
-    test('calculator options are available', async ({ page }) => {
-        const optionsExists = await page.evaluate(() => typeof options !== 'undefined');
-        expect(optionsExists).toBe(true);
-    });
-
-    test('the migrated modules are wired up', async ({ page }) => {
-        const wired = await page.evaluate(() => ({
-            core: typeof ExpeditionsCalculator,
-            collector: typeof ExpeditionsDataCollector,
-            renderer: typeof ExpeditionsRenderer,
-            app: typeof ExpeditionsApp,
-            instance: !!window.expeditionsApp,
-        }));
-        expect(wired).toEqual({
-            core: 'function',
-            collector: 'function',
-            renderer: 'function',
-            app: 'function',
-            instance: true,
-        });
-    });
-
-    test('jQuery is gone and Bootstrap is in', async ({ page }) => {
-        const libs = await page.evaluate(() => ({
-            jquery: typeof window.jQuery,
-            bootstrap: typeof window.bootstrap,
-        }));
-        expect(libs).toEqual({ jquery: 'undefined', bootstrap: 'object' });
+    test('the page loads without a script error', async ({ page }) => {
+        await expectLoadsCleanly(page, /Expeditions/i);
     });
 });
 

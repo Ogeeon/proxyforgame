@@ -1,4 +1,4 @@
-import { test, expect } from './base';
+import { test, expect, expectLoadsCleanly } from './base';
 import { expectMcpBoundsMatchPage } from './mcp-bounds';
 
 /**
@@ -25,24 +25,9 @@ test.describe('Trade Calculator Page', () => {
         await page.goto('/trade');
     });
 
-    test('page loads successfully', async ({ page }) => {
-        await expect(page).toHaveTitle(/Trade/);
-    });
-
-    test('trade.js functionality is available', async ({ page }) => {
-        // Check if the options object exists
-        const optionsExists = await page.evaluate(() => typeof options !== 'undefined');
-        expect(optionsExists).toBe(true);
-    });
-
-    test('localization object is available', async ({ page }) => {
-        // Check if the l object (localization) is loaded
-        const lExists = await page.evaluate(() => typeof l !== 'undefined');
-        expect(lExists).toBe(true);
-    });
-
-    test('universes data is loaded', async ({ page }) => {
-        // Check if the unis object is loaded
+    test('the page loads without a script error', async ({ page }) => {
+        await expectLoadsCleanly(page, /Trade/);
+        // The universe list the template inlines for the picker.
         const unisLoaded = await page.evaluate(() => typeof unis !== 'undefined' && Object.keys(unis).length > 0);
         expect(unisLoaded).toBe(true);
     });

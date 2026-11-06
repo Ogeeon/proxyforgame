@@ -1,4 +1,4 @@
-import { test, expect } from './base';
+import { test, expect, expectLoadsCleanly } from './base';
 import { expectMcpBoundsMatchPage } from './mcp-bounds';
 
 test.describe('Moon Calculator Page', () => {
@@ -10,31 +10,8 @@ test.describe('Moon Calculator Page', () => {
         await page.goto('/moon');
     });
 
-    test('page loads successfully', async ({ page }) => {
-        await expect(page).toHaveTitle(/Moon/i);
-    });
-
-    test('calculator options are available', async ({ page }) => {
-        // Check if the options object exists
-        const optionsExists = await page.evaluate(() => typeof options !== 'undefined');
-        expect(optionsExists).toBe(true);
-    });
-
-    test('the migrated modules are wired up', async ({ page }) => {
-        const wired = await page.evaluate(() => ({
-            core: typeof MoonCalculator,
-            collector: typeof MoonDataCollector,
-            renderer: typeof MoonRenderer,
-            app: typeof MoonApp,
-            instance: !!window.moonApp,
-        }));
-        expect(wired).toEqual({
-            core: 'function',
-            collector: 'function',
-            renderer: 'function',
-            app: 'function',
-            instance: true,
-        });
+    test('the page loads without a script error', async ({ page }) => {
+        await expectLoadsCleanly(page, /Moon/i);
     });
 });
 

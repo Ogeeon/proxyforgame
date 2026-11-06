@@ -1,4 +1,4 @@
-import { test, expect } from './base';
+import { test, expect, expectLoadsCleanly } from './base';
 import { energyRows, expectMcpBoundsMatchPage } from './mcp-bounds';
 
 test.describe('Terraformer Calculator Page', () => {
@@ -10,30 +10,8 @@ test.describe('Terraformer Calculator Page', () => {
         await page.goto('/terraformer');
     });
 
-    test('page loads successfully', async ({ page }) => {
-        await expect(page).toHaveTitle(/Terraformer/i);
-    });
-
-    test('calculator options are available', async ({ page }) => {
-        const optionsExists = await page.evaluate(() => typeof options !== 'undefined');
-        expect(optionsExists).toBe(true);
-    });
-
-    test('the migrated modules are wired up', async ({ page }) => {
-        const wired = await page.evaluate(() => ({
-            core: typeof TerraformerCalculator,
-            collector: typeof TerraformerDataCollector,
-            renderer: typeof TerraformerRenderer,
-            app: typeof TerraformerApp,
-            instance: !!window.terraformerApp,
-        }));
-        expect(wired).toEqual({
-            core: 'function',
-            collector: 'function',
-            renderer: 'function',
-            app: 'function',
-            instance: true,
-        });
+    test('the page loads without a script error', async ({ page }) => {
+        await expectLoadsCleanly(page, /Terraformer/i);
     });
 });
 

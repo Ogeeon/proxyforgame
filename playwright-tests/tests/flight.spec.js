@@ -1,4 +1,4 @@
-import { test, expect } from './base';
+import { test, expect, expectLoadsCleanly } from './base';
 import { expectMcpBoundsMatchPage } from './mcp-bounds';
 import { readFileSync } from 'fs';
 import { join } from 'path';
@@ -71,16 +71,9 @@ test.describe('Flight Calculator Page', () => {
         await installCompat(page);
     });
 
-    test('page loads successfully', async ({ page }) => {
-        await expect(page).toHaveTitle(/Flight/i);
+    test('the page loads without a script error', async ({ page }) => {
+        await expectLoadsCleanly(page, /Flight/i);
     });
-
-    test('calculator options are available', async ({ page }) => {
-        // Check if the options object exists
-        const optionsExists = await page.evaluate(() => typeof options !== 'undefined');
-        expect(optionsExists).toBe(true);
-    });
-
 });
 
 // Fixture: spy report code fs003df9447df01744296d867509e0ae7e60
@@ -2284,6 +2277,10 @@ test.describe('Flight Calculator - Fleet Recall', () => {
 });
 
 test.describe('Flight Calculator - Tooltip disposal', () => {
+    // The test needs the fade: under reduced motion Bootstrap sets `transition:
+    // none`, hide() completes at once and there is no window to dispose inside.
+    test.use({ reducedMotion: 'no-preference' });
+
     test.beforeEach(async ({ context, page }) => {
         await context.addInitScript(() => {
             localStorage.setItem('lastChange', 'key-value;true,value;99999');

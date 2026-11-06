@@ -1,4 +1,4 @@
-import { test, expect } from './base';
+import { test, expect, expectLoadsCleanly } from './base';
 import { expectMcpBoundsMatchPage } from './mcp-bounds';
 
 test.describe('Lifeforms costs Calculator Page', () => {
@@ -33,14 +33,8 @@ test.describe('Lifeforms costs Calculator Page', () => {
         }
     }
 
-    test('page loads successfully', async ({ page }) => {
-        await expect(page).toHaveTitle(/Costs calculator for LifeForms/);
-    });
-
-    test('ldcosts.js functionality is available', async ({ page }) => {
-        // Check if the options object exists
-        const optionsExists = await page.evaluate(() => typeof options !== 'undefined');
-        expect(optionsExists).toBe(true);
+    test('the page loads without a script error', async ({ page }) => {
+        await expectLoadsCleanly(page, /Costs calculator for LifeForms/);
     });
 
     // options.prm.rates is an array; it and the scalar params must all come back
