@@ -664,20 +664,179 @@ test('a Companion export no newer than the game layer is ignored', async ({ page
     }
 });
 
-test('a Companion export of an account with no profile is offered for import', async ({ page }) => {
-    await page.goto('/production');
-    await leaveCompanionPayload(page, companionPayload(companionExport((raw) => {
+/** The fixture's universe, as the export of another account that has no profile. */
+function otherAccountExport() {
+    return companionExport((raw) => {
         raw.playerId = 100002;
         raw.playerName = 'Other';
-    })));
+    });
+}
+
+test('a Companion export of an account with no profile is offered by the badge and becomes a profile', async ({ page }) => {
+    await importForCompanion(page);
+    const activeId = (await activeProfile(page)).id;
+    await leaveCompanionPayload(page, companionPayload(otherAccountExport()));
     await page.reload();
 
-    const offer = page.locator('#pf-select option[value="__companion_0"]');
-    await expect(offer).toHaveCount(1);
-    await expect(offer).toContainText('Other');
-    await chooseAction(page, '__companion_0');
-    await expect(page.locator('#pf-import-modal')).toBeVisible();
-    expect(JSON.parse(await page.locator('#pf-import-text').inputValue()).playerId).toBe(100002);
+    // Not an entry of the select any more: a badge beside it says what waits.
+    await expect(page.locator('#pf-select option[value^="__companion_"]')).toHaveCount(0);
+    const badge = page.locator('#pf-companion-new');
+    await expect(badge).toBeVisible();
+    await expect(badge).toHaveText('1');
+
+    await badge.click();
+    await expect(page.locator('#pf-new-profiles-modal')).toBeVisible();
+    await expect(page.locator('#pf-new-profiles-rows')).toContainText('Other');
+    await page.locator('#pf-new-profiles-rows button', { hasText: 'Create profile' }).click();
+
+    await expect(page.locator('#pf-new-profiles-modal')).toBeHidden();
+    await expect(badge).toBeHidden();
+    await expect(page.locator('.toast.text-bg-success')).toContainText('Other');
+    const created = await page.evaluate(() => JSON.parse(localStorage.getItem('pfg_profiles') || '[]')
+        .find((entry) => entry.playerId === 100002) || null);
+    expect(created?.label).toBe('Other');
+    // Creating a profile is not choosing it: the tab keeps working with its own.
+    await expect(page.locator('#pf-select')).toHaveValue(activeId);
+});
+
+test('ignoring a Companion account is permanent until the manager takes it back', async ({ page }) => {
+    await page.goto('/production');
+    await leaveCompanionPayload(page, companionPayload(otherAccountExport()));
+    await page.reload();
+
+    const badge = page.locator('#pf-companion-new');
+    await expect(badge).toBeVisible();
+    await badge.click();
+    await page.locator('#pf-new-profiles-rows button', { hasText: 'Ignore' }).click();
+    // The choice names its consequence before it is taken.
+    const confirm = page.locator('.dyn-dialog.show');
+    await expect(confirm).toContainText('Other');
+    await expect(confirm).toContainText('never be offered again');
+    await confirm.locator('.btn-primary').click();
+
+    await expect(page.locator('#pf-new-profiles-modal')).toBeHidden();
+    await expect(badge).toBeHidden();
+    // The refusal holds through a reload that hands the same payload over again.
+    await page.reload();
+    await expect(badge).toBeHidden();
+
+    await chooseAction(page, '__manage');
+    const box = page.locator('#pf-ignored-box');
+    await expect(box).toBeVisible();
+    await expect(box).toContainText('Other');
+    await box.locator('button', { hasText: 'Stop ignoring' }).click();
+    await expect(box).toBeHidden();
+    // The payload still lists the account, so it is offered again.
+    await expect(badge).toBeVisible();
+});
+
+test('an ignored Companion account gets its profile from the manager', async ({ page }) => {
+    await page.goto('/production');
+    await leaveCompanionPayload(page, companionPayload(otherAccountExport()));
+    await page.evaluate(() => localStorage.setItem('pfg_companion_ignored', JSON.stringify([
+        { playerId: 100002, universe: { country: 'en', number: 1 }, playerName: 'Other', ignoredAt: '2026-10-20T00:00:00.000Z' },
+    ])));
+    await page.reload();
+
+    await expect(page.locator('#pf-companion-new')).toBeHidden();
+    await chooseAction(page, '__manage');
+    const box = page.locator('#pf-ignored-box');
+    await expect(box).toContainText('Other');
+    // Its export is still the payload this page loaded, so it can be created here.
+    await box.locator('button', { hasText: 'Create profile' }).click();
+
+    await expect(box).toBeHidden();
+    const created = await page.evaluate(() => JSON.parse(localStorage.getItem('pfg_profiles') || '[]')
+        .find((entry) => entry.playerId === 100002) || null);
+    expect(created?.label).toBe('Other');
+    // A profile the account now has makes the refusal moot.
+    await page.reload();
+    await chooseAction(page, '__manage');
+    await expect(page.locator('#pf-ignored-box')).toBeHidden();
+});
+
+test('an ignored account whose export is not in the payload can only be taken off the list', async ({ page }) => {
+    await page.goto('/production');
+    await leaveCompanionPayload(page, companionPayload(otherAccountExport()));
+    await page.evaluate(() => localStorage.setItem('pfg_companion_ignored', JSON.stringify([
+        { playerId: 100003, universe: { country: 'en', number: 1 }, playerName: 'Gone', ignoredAt: '2026-10-20T00:00:00.000Z' },
+    ])));
+    await page.reload();
+
+    await chooseAction(page, '__manage');
+    const box = page.locator('#pf-ignored-box');
+    await expect(box).toContainText('Gone');
+    await expect(box.locator('button', { hasText: 'Create profile' })).toHaveCount(0);
+    await expect(box.locator('button', { hasText: 'Stop ignoring' })).toHaveCount(1);
+});
+
+test('the Companion badge counts each waiting account once, from its newest export', async ({ page }) => {
+    await page.goto('/production');
+    const older = companionExport((raw) => {
+        raw.playerId = 100002;
+        raw.playerName = 'Old name';
+        raw.exportedAt = '2026-10-01T00:00:00.000Z';
+    });
+    const newer = companionExport((raw) => {
+        raw.playerId = 100002;
+        raw.playerName = 'Other';
+        raw.exportedAt = NEWER_AT;
+    });
+    const third = companionExport((raw) => {
+        raw.playerId = 100003;
+        raw.playerName = 'Third';
+    });
+    // The newer export comes first: the order of the payload does not decide.
+    await leaveCompanionPayload(page, companionPayload(newer, third, older));
+    await page.reload();
+
+    const badge = page.locator('#pf-companion-new');
+    await expect(badge).toHaveText('2');
+    await badge.click();
+    const rows = page.locator('#pf-new-profiles-rows tr');
+    await expect(rows).toHaveCount(2);
+    await expect(rows.filter({ hasText: 'Other' })).toHaveCount(1);
+    await expect(page.locator('#pf-new-profiles-rows')).not.toContainText('Old name');
+
+    // The dialog stays open while an account is left to offer.
+    await rows.filter({ hasText: 'Third' }).locator('button', { hasText: 'Create profile' }).click();
+    await expect(rows).toHaveCount(1);
+    await expect(badge).toHaveText('1');
+});
+
+test('the Companion badge follows profiles created and deleted outside its dialog', async ({ page }) => {
+    await page.goto('/production');
+    await leaveCompanionPayload(page, companionPayload(otherAccountExport()));
+    await page.reload();
+    const badge = page.locator('#pf-companion-new');
+    await expect(badge).toHaveText('1');
+
+    // The import dialog gives the account its profile: nothing is left to offer.
+    await importExport(page, JSON.stringify(otherAccountExport()));
+    await expect(badge).toBeHidden();
+
+    // Deleting that profile makes the account a candidate again.
+    await chooseAction(page, '__manage');
+    await page.locator('#pf-manage-rows tr').first().locator('button').nth(1).click();
+    await page.locator('.modal.show:not([id^="pf-"]) .btn-primary').click();
+    await expect(page.locator('#pf-manage-rows tr')).toHaveCount(0);
+    await expect(badge).toHaveText('1');
+});
+
+test('an account ignored in one tab leaves the badge of another', async ({ page, context }) => {
+    await page.goto('/production');
+    await leaveCompanionPayload(page, companionPayload(otherAccountExport()));
+    await page.reload();
+    const second = await context.newPage();
+    await second.goto('/production');
+    await expect(second.locator('#pf-companion-new')).toHaveText('1');
+
+    await page.locator('#pf-companion-new').click();
+    await page.locator('#pf-new-profiles-rows button', { hasText: 'Ignore' }).click();
+    await page.locator('.dyn-dialog.show .btn-primary').click();
+    await expect(page.locator('#pf-companion-new')).toBeHidden();
+
+    await expect(second.locator('#pf-companion-new')).toBeHidden();
 });
 
 test('a newer Companion export arriving after load updates the profile and the calculator', async ({ page }) => {

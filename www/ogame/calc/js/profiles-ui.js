@@ -75,6 +75,35 @@ function pfModal(id) {
 }
 
 /**
+ * @param {string} id
+ * @returns {boolean} True while the modal is shown.
+ */
+function pfModalOpen(id) {
+  return document.getElementById(id)?.classList.contains('show') ?? false;
+}
+
+/**
+ * How the page names a universe: "s<number>-<country>".
+ *
+ * @param {ProfileUniverse} universe
+ * @returns {string}
+ */
+function pfUniverseLabel(universe) {
+  return 's' + universe.number + '-' + universe.country;
+}
+
+/**
+ * How the page names a Companion account: its player name, or its id when the
+ * export carried none.
+ *
+ * @param {{playerId: number, playerName: string}} account
+ * @returns {string}
+ */
+function pfAccountName(account) {
+  return account.playerName || String(account.playerId);
+}
+
+/**
  * @param {string} text
  * @param {string} fileName
  */
@@ -123,6 +152,12 @@ class ProfilesUi {
     this.resetRows = [];
     /** @type {AccountExport[]} Exports of accounts that do not have a profile yet. */
     this.companionCandidates = [];
+    /** @type {?CompanionPayload} The last Companion payload, planned again when the profiles or the ignore list change. */
+    this.companionPayload = null;
+    /** @type {?string} The accounts and the ignore list the candidates were last planned against (companionPlanBasis). */
+    this.companionPlannedFor = null;
+    /** @type {AccountExport[]} Exports of ignored accounts, to create their profiles from the manager. */
+    this.companionIgnoredExports = [];
     /** @type {?string} What the select's options say, as last drawn. */
     this.selectShown = null;
   }
@@ -139,10 +174,15 @@ class ProfilesUi {
     this.store.subscribe((key) => {
       this.renderSelect();
       this.renderOverrides();
+      // A profile created, deleted or merged - here, in another tab or by a
+      // restore - or an account (un)ignored changes what the badge offers.
+      this.replanCompanion();
+      if (pfModalOpen('pf-manage-modal')) this.renderIgnored();
       if (!this.saving && this.concernsActive(key)) this.emit();
     });
     this.store.listenToOtherTabs(window);
     this.renderOverrides();
+    this.renderCompanionBadge();
     if (!this.store.available) {
       const select = selectEl('#pf-select');
       if (select) select.disabled = true;
@@ -172,13 +212,15 @@ class ProfilesUi {
   }
 
   /**
-   * Whether a change may touch the profile this tab shows: any change made in
-   * this tab, and in another tab anything but the save of another profile.
+   * Whether a change may touch the profile this tab shows: any profile change
+   * made in this tab, and in another tab anything but the save of another
+   * profile. The Companion ignore list is no profile's.
    *
    * @param {?string} [key] The storage key another tab wrote; undefined for a change made here.
    * @returns {boolean}
    */
   concernsActive(key) {
+    if (key === PROFILE_STORAGE_KEYS.companionIgnored) return false;
     if (typeof key !== 'string' || !key.startsWith(PROFILE_STORAGE_KEYS.prefix)) return true;
     return key === PROFILE_STORAGE_KEYS.prefix + (this.store.getActiveId() || '');
   }
@@ -319,10 +361,8 @@ class ProfilesUi {
     if (!select) return;
     const activeId = this.store.getActiveId();
     /** @type {Array<[string, string]>} */
-    const profiles = this.store.list().map((e) => [e.id, e.label + (e.universe ? ' · s' + e.universe.number + '-' + e.universe.country : '')]);
-    /** @type {Array<[string, string]>} */
-    const candidates = this.companionCandidates.map((data, index) => ['__companion_' + index, this.text.actImport + ' ' + (data.playerName || String(data.playerId))]);
-    const shown = JSON.stringify([profiles, candidates]);
+    const profiles = this.store.list().map((e) => [e.id, e.label + (e.universe ? ' · ' + pfUniverseLabel(e.universe) : '')]);
+    const shown = JSON.stringify(profiles);
     if (shown !== this.selectShown || select.options.length === 0) {
       this.selectShown = shown;
       select.innerHTML = '';
@@ -341,7 +381,6 @@ class ProfilesUi {
       profiles.forEach(([id, label]) => add(id, label));
       add('', '──────────').disabled = true;
       add(PF_ACTION.import, this.text.actImport);
-      candidates.forEach(([value, label]) => add(value, label));
       add(PF_ACTION.create, this.text.actCreate);
       add(PF_ACTION.manage, this.text.actManage);
     }
@@ -354,7 +393,6 @@ class ProfilesUi {
       if (!select) return;
       const value = select.value;
       if (value === PF_ACTION.import) this.openImport();
-      else if (value.startsWith('__companion_')) this.openCompanionImport(Number.parseInt(value.slice('__companion_'.length), 10));
       else if (value === PF_ACTION.create) this.openProps(null);
       else if (value === PF_ACTION.manage) this.openManage();
       else {
@@ -377,6 +415,22 @@ class ProfilesUi {
     pfTooltip(badge, title);
     badge.setAttribute('role', 'button');
     badge.onclick = () => this.openReset();
+  }
+
+  /**
+   * The badge by the select: how many accounts Companion offers that have no
+   * profile yet (ADR-0004). It is a state, not a notification - it stays until
+   * each account got its profile or was ignored.
+   */
+  renderCompanionBadge() {
+    const badge = document.getElementById('pf-companion-new');
+    if (!badge) return;
+    const count = this.store.available ? this.companionCandidates.length : 0;
+    badge.classList.toggle('d-none', count === 0);
+    badge.innerHTML = count === 0 ? '' : '<i class="bi bi-person-plus" aria-hidden="true"></i> ' + count;
+    pfTooltip(badge, formatString(this.text.companionBadge, count));
+    badge.setAttribute('role', 'button');
+    badge.onclick = () => this.openNewProfiles();
   }
 
   // -------------------------------------------------------------------------
@@ -597,11 +651,13 @@ class ProfilesUi {
 
   /** @param {*} payload */
   applyCompanionPayload(payload) {
-    const plan = planCompanionSync(payload, this.store.list(), (id) => this.store.get(id));
+    const plan = this.planCompanion(payload);
     if (!plan) return;
+    this.companionPayload = payload;
+    // Taken before the updates are saved: they change no account, so the
+    // replans their saves set off find nothing to plan again.
+    this.takeCompanionPlan(plan);
     plan.updates.forEach((profile) => this.save(profile));
-    this.companionCandidates = plan.candidates;
-    this.renderSelect();
     // save() keeps a page's own edits from coming back to it, but a Sync is not
     // the calculator's edit: it has to show the active profile's new game layer.
     // At load no calculator listens yet, and it reads the saved profile itself.
@@ -609,15 +665,144 @@ class ProfilesUi {
     if (plan.updates.some((profile) => profile.id === activeId)) this.emit();
   }
 
-  /** @param {number} index */
-  openCompanionImport(index) {
-    const data = this.companionCandidates[index];
-    if (!data) return;
-    setVal('#pf-import-text', JSON.stringify(data));
-    this.pendingExport = null;
-    pfShow('#pf-import-universe-box', false);
-    this.showError('#pf-import-error', '');
-    pfModal('pf-import-modal')?.show();
+  /**
+   * Plan a payload against the stored profiles and the ignore list.
+   *
+   * @param {*} payload
+   * @returns {?CompanionSyncPlan}
+   */
+  planCompanion(payload) {
+    return planCompanionSync(payload, this.store.list(), (id) => this.store.get(id), this.store.listCompanionIgnored());
+  }
+
+  /**
+   * What the candidates depend on besides the payload: which accounts have a
+   * profile, and the ignore list. A value edit changes neither, so the many
+   * saves a calculator makes do not plan the payload again.
+   *
+   * @returns {string}
+   */
+  companionPlanBasis() {
+    return JSON.stringify([this.store.list().map((e) => [e.playerId, e.universe]), this.store.listCompanionIgnored()]);
+  }
+
+  /**
+   * Show a plan's candidates: the badge, and the badge's dialog while it is
+   * open - closed once nothing is left to offer.
+   *
+   * @param {CompanionSyncPlan} plan
+   */
+  takeCompanionPlan(plan) {
+    this.companionPlannedFor = this.companionPlanBasis();
+    this.companionCandidates = plan.candidates;
+    this.companionIgnoredExports = plan.ignored;
+    this.renderCompanionBadge();
+    if (!pfModalOpen('pf-new-profiles-modal')) return;
+    if (this.companionCandidates.length === 0) pfModal('pf-new-profiles-modal')?.hide();
+    else this.renderNewProfiles();
+  }
+
+  /**
+   * Plan the payload this page loaded again when a profile was created,
+   * deleted or merged, or an account (un)ignored, without touching the
+   * profiles: an account that got its profile leaves the badge, one whose
+   * profile is gone or that was taken off the ignore list comes back.
+   */
+  replanCompanion() {
+    if (this.companionPayload === null || this.companionPlanBasis() === this.companionPlannedFor) return;
+    const plan = this.planCompanion(this.companionPayload);
+    if (plan) this.takeCompanionPlan(plan);
+  }
+
+  /** The badge's dialog: one row per account Companion offers. */
+  openNewProfiles() {
+    this.renderNewProfiles();
+    pfModal('pf-new-profiles-modal')?.show();
+  }
+
+  renderNewProfiles() {
+    const body = document.getElementById('pf-new-profiles-rows');
+    if (!body) return;
+    pfDropTooltips(body);
+    body.innerHTML = '';
+    this.companionCandidates.forEach((data) => {
+      const row = document.createElement('tr');
+      const name = document.createElement('td');
+      const label = document.createElement('div');
+      label.textContent = pfAccountName(data);
+      name.appendChild(label);
+      const at = Date.parse(data.exportedAt || '');
+      if (!Number.isNaN(at)) {
+        const when = document.createElement('div');
+        when.className = 'small text-body-secondary';
+        when.textContent = pfPageDateTime(at);
+        name.appendChild(when);
+      }
+      const universe = document.createElement('td');
+      universe.textContent = data.universe ? pfUniverseLabel(data.universe) : this.text.noUniverse;
+      const actions = document.createElement('td');
+      actions.className = 'text-end text-nowrap';
+      actions.appendChild(this.textButton('btn-primary', this.text.companionCreate, () => this.createCompanionProfile(data)));
+      actions.appendChild(this.textButton('btn-outline-secondary', this.text.companionIgnore, () => this.ignoreCompanionCandidate(data)));
+      row.append(name, universe, actions);
+      body.appendChild(row);
+    });
+  }
+
+  /**
+   * Create a profile from a candidate's export - or, when a profile of that
+   * account appeared since the payload was planned, update it like an import
+   * would, keeping the overrides. The active profile is not switched: creating
+   * one is not choosing it.
+   *
+   * @param {AccountExport} data
+   */
+  createCompanionProfile(data) {
+    const existingId = findProfileForExport(this.store.list(), data.playerId, data.universe);
+    const existing = existingId ? this.store.get(existingId) : null;
+    const { profile, summary } = importAccountExport(existing, data, { keepOverrides: existing !== null });
+    if (!this.store.save(profile)) {
+      showToast(this.text.saveFailed, 'danger');
+      return;
+    }
+    this.store.requestPersistence();
+    // A profile the account now has makes its ignore entry moot. The badge,
+    // its dialog and the manager follow the store (replanCompanion).
+    this.store.unignoreCompanionAccount(data);
+    showToast(formatString(this.text.importDone, profile.label, summary.planets.added, summary.planets.updated, summary.planets.removed), 'success');
+  }
+
+  /**
+   * Never offer the account again, unless the player takes it off the ignore
+   * list in the manager - so the choice asks for a confirmation.
+   *
+   * @param {AccountExport} data
+   */
+  async ignoreCompanionCandidate(data) {
+    // A candidate always names its universe - the plan skips schema-1 exports.
+    if (!data.universe) return;
+    if (!await showConfirmModal(formatString(this.text.companionIgnoreConfirm, pfAccountName(data)), this.text.confirm, this.text.cancel, this.text.attention)) return;
+    const ok = this.store.ignoreCompanionAccount({
+      playerId: data.playerId,
+      universe: { ...data.universe },
+      playerName: data.playerName,
+      ignoredAt: new Date().toISOString(),
+    });
+    if (!ok) showToast(this.text.saveFailed, 'danger');
+  }
+
+  /**
+   * @param {string} style
+   * @param {string} label
+   * @param {() => void} onClick
+   */
+  textButton(style, label, onClick) {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'btn btn-sm ms-1 ' + style;
+    button.textContent = label;
+    button.addEventListener('click', onClick);
+    return button;
   }
 
   runImport() {
@@ -726,7 +911,7 @@ class ProfilesUi {
     const profiles = this.store.getAll();
     profiles.forEach((p) => {
       const row = document.createElement('tr');
-      const universe = p.universe ? 's' + p.universe.number + '-' + p.universe.country : this.text.noUniverse;
+      const universe = p.universe ? pfUniverseLabel(p.universe) : this.text.noUniverse;
       const source = hasGameLayer(p) && p.importedAt ? pfPageDateTime(Date.parse(p.importedAt)) : '—';
       [p.label, universe, source].forEach((text) => {
         const cell = document.createElement('td');
@@ -760,7 +945,40 @@ class ProfilesUi {
     });
     const into = selectEl('#pf-merge-into');
     if (into && profiles.length > 1) into.selectedIndex = 1;
+    this.renderIgnored();
     pfShow('#pf-migrate-open', this.findSavedSets().length > 0);
+  }
+
+  /**
+   * The manager's section of the accounts the player refused (ADR-0004): each
+   * can be offered again, and - while its export is still the payload this page
+   * loaded - get its profile right from here.
+   */
+  renderIgnored() {
+    const box = document.getElementById('pf-ignored-box');
+    const body = document.getElementById('pf-ignored-rows');
+    if (!box || !body) return;
+    pfDropTooltips(body);
+    body.innerHTML = '';
+    const entries = this.store.listCompanionIgnored();
+    box.classList.toggle('d-none', entries.length === 0);
+    entries.forEach((entry) => {
+      const row = document.createElement('div');
+      row.className = 'd-flex flex-wrap gap-2 align-items-center mb-1';
+      const name = document.createElement('span');
+      name.className = 'text-nowrap';
+      name.textContent = pfAccountName(entry) + ' · ' + pfUniverseLabel(entry.universe);
+      const actions = document.createElement('span');
+      actions.className = 'ms-auto text-nowrap';
+      // The manager and the badge follow the store, so the buttons only act.
+      const data = this.companionIgnoredExports.find((e) => sameCompanionAccount(e, entry));
+      if (data) {
+        actions.appendChild(this.textButton('btn-outline-secondary', this.text.companionCreate, () => this.createCompanionProfile(data)));
+      }
+      actions.appendChild(this.textButton('btn-outline-secondary', this.text.manageUnignore, () => this.store.unignoreCompanionAccount(entry)));
+      row.append(name, actions);
+      body.appendChild(row);
+    });
   }
 
   /**
@@ -817,7 +1035,10 @@ class ProfilesUi {
   downloadBackup() {
     const stamp = new Date().toISOString().slice(0, 10);
     const profiles = this.store.getAll();
-    pfDownload(serializeProfilesFile(profiles, undefined, this.universes.choicesOf(profiles)), 'pfg-profiles-' + stamp + '.json');
+    pfDownload(
+      serializeProfilesFile(profiles, undefined, this.universes.choicesOf(profiles), this.store.listCompanionIgnored()),
+      'pfg-profiles-' + stamp + '.json',
+    );
   }
 
   /** @param {string} text */
@@ -842,6 +1063,10 @@ class ProfilesUi {
     (result.universes || [])
       .filter((u) => restored.some((p) => p.universe && sameUniverse(p.universe, u.universe)))
       .forEach((u) => this.universes.restoreChoices(u));
+    // The ignore list comes back beside the entries already there, so a
+    // restored device is not asked about accounts it has refused either way.
+    // The badge follows the store (replanCompanion).
+    this.store.saveCompanionIgnored(mergeCompanionIgnored(this.store.listCompanionIgnored(), result.companionIgnored || []));
     this.store.requestPersistence();
     this.renderManage();
     showToast(formatString(this.text.restoreDone, restored.length), 'success');

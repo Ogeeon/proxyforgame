@@ -16,6 +16,7 @@ const core = load(['ogame/calc/js/profiles-core.js'], [
     'resetProfileValue', 'countOverrides', 'listOverrides', 'resetOverrides', 'hasGameLayer',
     'parseAccountExport', 'findProfileForExport', 'importAccountExport', 'mergeProfiles',
     'serializeProfilesFile', 'parseProfilesFile', 'planProfilesRestore', 'universeCacheKey',
+    'mergeCompanionIgnored', 'readCompanionIgnoredEntry', 'sameCompanionAccount',
     'ratesToTrade', 'ratesFromTrade', 'profileFromProductionSet', 'profileFromFlightSet',
     'productionPlanetValues', 'productionPlanetState', 'reconcileProductionPlanets', 'isNewerExport', 'planCompanionSync',
     'resolveImportUniverse', 'profileFromSpyReport', 'profileBodyResources',
@@ -792,7 +793,7 @@ describe('companion sync', () => {
         const noUniverse = laterExport();
         delete noUniverse.universe;
         const result = plan({ version: 1, exports: [{ playerId: 'x' }, noUniverse] }, store);
-        expect(plain(result)).toEqual({ updates: [], candidates: [] });
+        expect(plain(result)).toEqual({ updates: [], candidates: [], ignored: [] });
     });
 
     it('updates a profile from a newer export and keeps its overrides', () => {
@@ -827,6 +828,31 @@ describe('companion sync', () => {
         const result = plan({ version: 1, exports: [other] }, stored());
         expect(result.updates).toHaveLength(0);
         expect(result.candidates.map((c) => c.playerId)).toEqual([100002]);
+        expect(result.ignored).toHaveLength(0);
+    });
+
+    it('keeps the ignore list out of the candidates, but reports it for the manager', () => {
+        const other = companionExport((obj) => { obj.playerId = 100002; });
+        const ignoredEntry = { playerId: 100002, universe: { country: 'en', number: 1 }, playerName: 'Other', ignoredAt: '2026-10-20T00:00:00.000Z' };
+        const store = stored();
+        const result = core.planCompanionSync({ version: 1, exports: [other] }, store.index, store.load, [ignoredEntry]);
+        expect(result.candidates).toHaveLength(0);
+        expect(result.ignored.map((c) => c.playerId)).toEqual([100002]);
+    });
+
+    it('offers one export per account, the newest one', () => {
+        const older = companionExport((obj) => { obj.playerId = 100002; obj.exportedAt = '2026-10-01T00:00:00.000Z'; });
+        const newer = companionExport((obj) => { obj.playerId = 100002; obj.exportedAt = LATER; });
+        expect(plan({ version: 1, exports: [older, newer] }, stored()).candidates.map((c) => c.exportedAt)).toEqual([LATER]);
+        expect(plan({ version: 1, exports: [newer, older] }, stored()).candidates.map((c) => c.exportedAt)).toEqual([LATER]);
+    });
+
+    it('tells accounts apart by player id and universe', () => {
+        const account = { playerId: 100002, universe: { country: 'en', number: 1 } };
+        expect(core.sameCompanionAccount(account, { playerId: 100002, universe: { country: 'en', number: 1 } })).toBe(true);
+        expect(core.sameCompanionAccount(account, { playerId: 100002, universe: { country: 'en', number: 2 } })).toBe(false);
+        expect(core.sameCompanionAccount(account, { playerId: 100003, universe: { country: 'en', number: 1 } })).toBe(false);
+        expect(core.sameCompanionAccount(account, { playerId: 100002, universe: null })).toBe(false);
     });
 
     it('applies two exports of one account in turn, so an older second one is skipped', () => {
@@ -1228,6 +1254,32 @@ describe('the profile file', () => {
         const result = core.parseProfilesFile('{"pfgProfiles":1,"profiles":[]}');
         expect(result.ok).toBe(true);
         expect(plain(result.universes)).toEqual([]);
+    });
+
+    it('carries the Companion ignore list', () => {
+        const ignored = [
+            { playerId: 100002, universe: { country: 'en', number: 1 }, playerName: 'Other', ignoredAt: '2026-10-20T00:00:00.000Z' },
+            { playerId: 100003, universe: { country: 'ru', number: 166 }, playerName: '', ignoredAt: '' },
+        ];
+        const text = core.serializeProfilesFile([], '2026-10-12T00:00:00.000Z', [], ignored);
+        expect(plain(core.parseProfilesFile(text).companionIgnored)).toEqual(ignored);
+    });
+
+    it('reads a file that carries no usable ignore list as none', () => {
+        const result = core.parseProfilesFile('{"pfgProfiles":1,"profiles":[],"companionIgnored":"nope"}');
+        expect(result.ok).toBe(true);
+        expect(plain(result.companionIgnored)).toEqual([]);
+    });
+
+    it('merges the ignore list of a backup with the one there, by account', () => {
+        const entry = (playerId, country, number, ignoredAt) => ({ playerId, universe: { country, number }, playerName: 'p' + playerId, ignoredAt });
+        const stored = [entry(100002, 'en', 1, '2026-10-20T00:00:00.000Z'), entry(100004, 'de', 1, '2026-10-18T00:00:00.000Z')];
+        const incoming = [entry(100002, 'en', 1, '2026-10-19T00:00:00.000Z'), entry(100003, 'ru', 166, '2026-10-21T00:00:00.000Z')];
+        const merged = core.mergeCompanionIgnored(stored, incoming);
+        expect(merged.map((e) => e.playerId).sort()).toEqual([100002, 100003, 100004]);
+        // The account both lists have keeps the more recent refusal.
+        expect(merged.find((e) => e.playerId === 100002).ignoredAt).toBe('2026-10-20T00:00:00.000Z');
+        expect(stored).toHaveLength(2);
     });
 
     it('drops a broken universe entry, not the file', () => {

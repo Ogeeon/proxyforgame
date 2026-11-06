@@ -30,6 +30,7 @@ $pfUniversePicker = function ($prefix) use ($l) {
   <label for="pf-select" class="text-nowrap"><i class="bi bi-person-badge" aria-hidden="true"></i><span class="d-none d-sm-inline"> <?= $l['profile'] ?></span></label>
   <select id="pf-select" class="form-select form-select-sm w-auto"></select>
   <span id="pf-overrides" class="badge text-bg-warning d-none" data-bs-toggle="tooltip" title=""></span>
+  <span id="pf-companion-new" class="badge text-bg-success d-none" data-bs-toggle="tooltip" title=""></span>
 </div>
 
 <script>
@@ -74,6 +75,11 @@ $pfUniversePicker = function ($prefix) use ($l) {
     'replace' => $l['pf-replace'],
     'skip' => $l['pf-skip'],
     'resourcesAsOf' => $l['pf-resources-as-of'],
+    'companionBadge' => $l['pf-companion-badge'],
+    'companionCreate' => $l['pf-companion-create'],
+    'companionIgnore' => $l['pf-companion-ignore'],
+    'companionIgnoreConfirm' => $l['pf-companion-ignore-confirm'],
+    'manageUnignore' => $l['pf-manage-unignore'],
   ), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
   var pfgCountries = <?= json_encode($pfCountryList, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
   var pfgUniverses = <?= universesJs($pfUniverses) ?>;
@@ -103,6 +109,29 @@ $pfUniversePicker = function ($prefix) use ($l) {
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><?= $l['cancel'] ?></button>
         <button type="button" id="pf-import-go" class="btn btn-primary"><?= $l['pf-import-btn'] ?></button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Accounts Companion found that have no profile yet -->
+<div class="modal fade" role="dialog" id="pf-new-profiles-modal" tabindex="-1" aria-labelledby="pf-new-profiles-label" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title fs-5" id="pf-new-profiles-label"><?= $l['pf-new-profiles-hdr'] ?></h3>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="<?= $l['cancel'] ?>"></button>
+      </div>
+      <div class="modal-body">
+        <table class="table table-sm align-middle mb-0">
+          <thead>
+            <tr><th scope="col"><?= $l['pf-name'] ?></th><th scope="col"><?= $l['universe'] ?></th><th scope="col"></th></tr>
+          </thead>
+          <tbody id="pf-new-profiles-rows"></tbody>
+        </table>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" data-bs-dismiss="modal"><?= $l['done'] ?></button>
       </div>
     </div>
   </div>
@@ -149,6 +178,10 @@ $pfUniversePicker = function ($prefix) use ($l) {
           </thead>
           <tbody id="pf-manage-rows"></tbody>
         </table>
+        <div id="pf-ignored-box" class="border rounded p-2 mb-2 d-none">
+          <div class="fw-semibold mb-1"><?= $l['pf-manage-ignored'] ?></div>
+          <div id="pf-ignored-rows"></div>
+        </div>
         <div class="border rounded p-2 mb-2">
           <div class="fw-semibold mb-1"><?= $l['pf-merge-hdr'] ?></div>
           <div class="d-flex flex-wrap gap-2 align-items-center">

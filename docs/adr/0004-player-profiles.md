@@ -89,6 +89,15 @@ calculators read from it and write back to it.
   collected after the profile's `importedAt`, so an override survives until the player
   next visits the game, exactly as it would until the next manual paste. Reloading
   calculators does not wipe it.
+- **An account without a profile is offered, not imported.** An export whose account
+  (player id and universe) matches no profile becomes a candidate: a badge by the
+  profile select counts the accounts waiting, and its dialog creates the profile -
+  without switching to it - or puts the account on an ignore list, for good, undone
+  only in the profile manager (which can also create the profile while the export is
+  still the payload the page loaded). Candidates are not entries of the select's
+  action list: the import dialog takes only Origin Exporter text. The ignore list is
+  keyed like a profile match and travels in the backup file; an account named by
+  several exports is offered once, from its newest one.
 - **One collector source, two wrappers.** The collection and hand-off code is shared. It
   ships first as a **userscript**, while the export format and the sync rule can still
   change and a fix must reach players at once. A **browser extension** (Chrome Web Store

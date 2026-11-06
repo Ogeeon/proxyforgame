@@ -286,6 +286,32 @@ function sameUniverse(a, b) {
 }
 
 /**
+ * A universe as stored data names it - a backup file, the ignore list - when
+ * it is one: a two- or three-letter country and a positive number.
+ *
+ * @param {unknown} raw
+ * @returns {?ProfileUniverse}
+ */
+function readProfileUniverse(raw) {
+  if (!isPlainObject(raw)) return null;
+  const { country, number } = raw;
+  if (typeof country !== 'string' || !/^[a-z]{2,3}$/i.test(country) || !Number.isInteger(number) || number <= 0) return null;
+  return { country, number };
+}
+
+/**
+ * Whether time `a` comes after time `b`. A missing time, or one that does not
+ * read as a date, counts as the epoch.
+ *
+ * @param {?string|undefined} a
+ * @param {?string|undefined} b
+ * @returns {boolean}
+ */
+function isLaterThan(a, b) {
+  return (Date.parse(a || '') || 0) > (Date.parse(b || '') || 0);
+}
+
+/**
  * What every calculator's profile field has: the profile value key it shows,
  * and how its game value reads in the "in game" mark (default: the value
  * as text).
@@ -1422,32 +1448,131 @@ function isNewerExport(data, profile) {
 }
 
 /**
+ * An OGame account as Companion and the profiles tell one from another: the
+ * player id and the universe, the way a profile is matched
+ * (findProfileForExport). An export, an ignore-list entry and a profile index
+ * entry all carry it.
+ *
+ * @typedef {Object} CompanionAccount
+ * @property {number} playerId
+ * @property {?ProfileUniverse} universe
+ */
+
+/**
+ * An account the player asked not to be offered again, on the ignore list
+ * (`pfg_companion_ignored`). The name is a snapshot from the export, so the
+ * manager can still name the account after Companion has moved on to other
+ * exports.
+ *
+ * @typedef {Object} CompanionIgnoredEntry
+ * @property {number} playerId
+ * @property {ProfileUniverse} universe
+ * @property {string} playerName
+ * @property {string} ignoredAt
+ */
+
+/**
+ * What PfG Companion hands the page: the exports it collected, one or more per
+ * account. Only version 1 is understood (planCompanionSync).
+ *
+ * @typedef {Object} CompanionPayload
+ * @property {number} version
+ * @property {unknown[]} exports
+ */
+
+/**
+ * @param {unknown} raw
+ * @returns {?CompanionIgnoredEntry} Null for anything that is not an entry.
+ */
+function readCompanionIgnoredEntry(raw) {
+  if (!isPlainObject(raw)) return null;
+  const universe = readProfileUniverse(raw.universe);
+  const playerId = finiteOrNull(raw.playerId);
+  if (universe === null || playerId === null) return null;
+  return {
+    playerId,
+    universe,
+    playerName: typeof raw.playerName === 'string' ? raw.playerName : '',
+    ignoredAt: typeof raw.ignoredAt === 'string' ? raw.ignoredAt : '',
+  };
+}
+
+/**
+ * Whether two exports, ignore-list entries or index entries speak of one account.
+ *
+ * @param {CompanionAccount} a
+ * @param {CompanionAccount} b
+ * @returns {boolean}
+ */
+function sameCompanionAccount(a, b) {
+  return a.playerId === b.playerId && sameUniverse(a.universe, b.universe);
+}
+
+/**
+ * Put an item into a list that holds one per account: it joins the list, or
+ * replaces the item of its account when its time is later (isLaterThan).
+ *
+ * @template {CompanionAccount} T
+ * @param {T[]} list Changed in place.
+ * @param {T} item
+ * @param {(item: T) => ?string} timeOf
+ */
+function keepLatestPerAccount(list, item, timeOf) {
+  const at = list.findIndex((old) => sameCompanionAccount(old, item));
+  if (at === -1) list.push(item);
+  else if (isLaterThan(timeOf(item), timeOf(list[at]))) list[at] = item;
+}
+
+/**
+ * The union of two ignore lists, by account; when both have an entry for one,
+ * the one ignored more recently wins, so restoring a backup never brings back
+ * an account ignored after the file was made.
+ *
+ * @param {CompanionIgnoredEntry[]} stored
+ * @param {CompanionIgnoredEntry[]} incoming
+ * @returns {CompanionIgnoredEntry[]} Copies; neither list is changed.
+ */
+function mergeCompanionIgnored(stored, incoming) {
+  /** @param {CompanionIgnoredEntry} e */
+  const copy = (e) => ({ ...e, universe: { ...e.universe } });
+  const merged = stored.map(copy);
+  incoming.forEach((entry) => keepLatestPerAccount(merged, copy(entry), (e) => e.ignoredAt));
+  return merged;
+}
+
+/**
  * @typedef {Object} CompanionSyncPlan
  * @property {Profile[]} updates Profiles to save, each with the newer export or only newer resources applied.
- * @property {AccountExport[]} candidates Exports of accounts that have no profile yet.
+ * @property {AccountExport[]} candidates Exports of accounts that have no profile and are not ignored.
+ * @property {AccountExport[]} ignored Exports of accounts that have no profile and are on the ignore list.
  */
 
 /**
  * Decide what a PfG Companion payload changes. Each export that names its
  * universe either updates the profile of its account and universe - when it is
  * newer (isNewerExport), keeping the overrides - or, for an account without a
- * profile, becomes a candidate for the import dialog. The resources on the
- * bodies are taken body by body whenever they are newer, the export newer or
- * not (mergeBodyResources). The exports are taken in
+ * profile, becomes a candidate: one to offer the player, or an ignored one,
+ * which is only reported so the manager can create its profile after all. An
+ * account named by several exports is offered once, from its newest export.
+ * The resources on the bodies are taken body by body whenever they are newer,
+ * the export newer or not (mergeBodyResources). The exports are taken in
  * order, so a second export of one account is compared with the first one's
  * result. Nothing is saved here.
  *
  * @param {*} payload What Companion handed over: `{version: 1, exports: [...]}`.
  * @param {Array<{id: string, universe: ?ProfileUniverse, playerId: ?number}>} index
  * @param {(id: string) => ?Profile} load A fresh copy of a stored profile.
+ * @param {CompanionIgnoredEntry[]} [ignoredEntries] Accounts the player asked not to be offered again.
  * @returns {?CompanionSyncPlan} Null for a payload this site does not understand.
  */
-function planCompanionSync(payload, index, load) {
+function planCompanionSync(payload, index, load, ignoredEntries = []) {
   if (payload?.version !== 1 || !Array.isArray(payload.exports)) return null;
   /** @type {Map<string, Profile>} */
   const updated = new Map();
   /** @type {AccountExport[]} */
   const candidates = [];
+  /** @type {AccountExport[]} */
+  const ignored = [];
   payload.exports.forEach((/** @type {unknown} */ raw) => {
     const parsed = parseAccountExport(JSON.stringify(raw));
     const data = parsed.data;
@@ -1455,7 +1580,9 @@ function planCompanionSync(payload, index, load) {
     const existingId = findProfileForExport(index, data.playerId, data.universe);
     const existing = existingId ? updated.get(existingId) || load(existingId) : null;
     if (!existing) {
-      candidates.push(data);
+      const onIgnoreList = ignoredEntries.some((entry) => sameCompanionAccount(entry, data));
+      // One export per account, the newest, whatever order the payload lists them in.
+      keepLatestPerAccount(onIgnoreList ? ignored : candidates, data, (d) => d.exportedAt);
       return;
     }
     if (isNewerExport(data, existing)) {
@@ -1468,7 +1595,7 @@ function planCompanionSync(payload, index, load) {
     const profile = cloneData(existing);
     if (mergeBodyResources(profile, data.resources)) updated.set(profile.id, profile);
   });
-  return { updates: [...updated.values()], candidates };
+  return { updates: [...updated.values()], candidates, ignored };
 }
 
 /**
@@ -1880,29 +2007,31 @@ function pfMarkState(layer, enabled) {
  * @returns {?UniverseChoices} Null for anything but a universe with at least one choice.
  */
 function readUniverseChoices(raw) {
-  if (!isPlainObject(raw) || !isPlainObject(raw.universe) || !isPlainObject(raw.overrides)) return null;
-  const { country, number } = raw.universe;
-  if (typeof country !== 'string' || !/^[a-z]{2,3}$/i.test(country) || !Number.isInteger(number) || number <= 0) return null;
+  if (!isPlainObject(raw) || !isPlainObject(raw.overrides)) return null;
+  const universe = readProfileUniverse(raw.universe);
+  if (universe === null) return null;
   /** @type {Record<string, number|boolean>} */
   const overrides = {};
   Object.entries(raw.overrides).forEach(([key, value]) => {
     if (typeof value === 'boolean' || (typeof value === 'number' && Number.isFinite(value))) overrides[key] = value;
   });
-  return Object.keys(overrides).length > 0 ? { universe: { country, number }, overrides } : null;
+  return Object.keys(overrides).length > 0 ? { universe, overrides } : null;
 }
 
 /**
  * The backup file: every profile given, in our own format but for the
- * resources on the bodies (withoutResources), and the universe settings the
- * player picked for their universes.
+ * resources on the bodies (withoutResources), the universe settings the
+ * player picked for their universes, and the Companion ignore list, so a
+ * restored device is not asked about accounts it has already refused.
  *
  * @param {Profile[]} profiles
  * @param {string} [exportedAt]
  * @param {UniverseChoices[]} [universes]
+ * @param {CompanionIgnoredEntry[]} [companionIgnored]
  * @returns {string}
  */
-function serializeProfilesFile(profiles, exportedAt = new Date().toISOString(), universes = []) {
-  return JSON.stringify({ pfgProfiles: PROFILE_FILE_VERSION, exportedAt, profiles: profiles.map(withoutResources), universes }, null, 2);
+function serializeProfilesFile(profiles, exportedAt = new Date().toISOString(), universes = [], companionIgnored = []) {
+  return JSON.stringify({ pfgProfiles: PROFILE_FILE_VERSION, exportedAt, profiles: profiles.map((p) => withoutResources(p)), universes, companionIgnored }, null, 2);
 }
 
 /**
@@ -1910,6 +2039,7 @@ function serializeProfilesFile(profiles, exportedAt = new Date().toISOString(), 
  * @property {boolean} ok
  * @property {Profile[]} [profiles]
  * @property {UniverseChoices[]} [universes] Empty for a file written before they were kept.
+ * @property {CompanionIgnoredEntry[]} [companionIgnored] Empty for a file written before the ignore list was kept.
  * @property {'json'|'shape'|'version'} [reason]
  */
 
@@ -1931,7 +2061,9 @@ function parseProfilesFile(text) {
   if (profiles.includes(null)) return { ok: false, reason: 'version' };
   // The universe choices are a bonus: a broken entry is dropped, not the file.
   const universes = (Array.isArray(raw.universes) ? raw.universes : []).map(readUniverseChoices).filter((u) => u !== null);
-  return { ok: true, profiles: /** @type {Profile[]} */ (profiles), universes: /** @type {UniverseChoices[]} */ (universes) };
+  // So is the ignore list.
+  const companionIgnored = (Array.isArray(raw.companionIgnored) ? raw.companionIgnored : []).map((e) => readCompanionIgnoredEntry(e)).filter((e) => e !== null);
+  return { ok: true, profiles: /** @type {Profile[]} */ (profiles), universes: /** @type {UniverseChoices[]} */ (universes), companionIgnored };
 }
 
 /**
@@ -2380,6 +2512,7 @@ if (typeof window !== 'undefined') {
     countOverrides, hasGameLayer,
     parseAccountExport, findProfileForExport, importAccountExport, mergeProfiles,
     isNewerExport, planCompanionSync, resolveImportUniverse, profileBodyResources,
+    readCompanionIgnoredEntry, sameCompanionAccount, mergeCompanionIgnored,
     RESOURCE_READING_STALE_MS, isResourceReadingStale, planResourceFill, keepBodyResources,
     readProfile, serializeProfilesFile, parseProfilesFile, planProfilesRestore,
     universeCacheKey, readUniverseChoices, UNIVERSE_SETTINGS_TTL_MS, UNIVERSE_SETTING_PARSERS,

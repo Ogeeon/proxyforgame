@@ -2,10 +2,12 @@
 // PLAYER PROFILES - storage
 // ============================================================================
 // Where profiles live in the browser (ADR-0004):
-//   pfg_profiles          the index: id, label, universe, player id per profile
-//   pfg_profile_<id>      one profile, so saving one never rewrites the others
-//   pfg_active_profile    the last choice, read by a tab that has none yet
-//   pfg_profile_planets   the last planet picked, per calculator and profile
+//   pfg_profiles            the index: id, label, universe, player id per profile
+//   pfg_profile_<id>        one profile, so saving one never rewrites the others
+//   pfg_active_profile      the last choice, read by a tab that has none yet
+//   pfg_profile_planets     the last planet picked, per calculator and profile
+//   pfg_companion_ignored   Companion accounts the player refused, by player id
+//                           and universe (CompanionIgnoredEntry, profiles-core.js)
 // The active profile itself is per tab (sessionStorage), so two accounts can be
 // open side by side. Storage can be missing or full - a private window, blocked
 // site data - so every access is guarded and the page keeps working without it.
@@ -17,6 +19,7 @@ const PROFILE_STORAGE_KEYS = {
   prefix: 'pfg_profile_',
   active: 'pfg_active_profile',
   planets: 'pfg_profile_planets',
+  companionIgnored: 'pfg_companion_ignored',
 };
 
 /**
@@ -243,9 +246,56 @@ class ProfileStore {
   }
 
   /**
-   * Call back when profiles change, in this tab or in another one. A change
-   * made in another tab comes with the storage key it wrote (null when that
-   * tab cleared the storage); one made here comes with none.
+   * The Companion accounts the player refused (CompanionIgnoredEntry,
+   * profiles-core.js), as the store reads them back. A broken entry is
+   * dropped, not the list.
+   *
+   * @returns {CompanionIgnoredEntry[]}
+   */
+  listCompanionIgnored() {
+    const raw = this.read(this.local, PROFILE_STORAGE_KEYS.companionIgnored);
+    return Array.isArray(raw) ? raw.map((e) => readCompanionIgnoredEntry(e)).filter((e) => e !== null) : [];
+  }
+
+  /**
+   * Replace the whole ignore list. The change is announced with the list's key,
+   * so a listener can tell it from a profile change.
+   *
+   * @param {CompanionIgnoredEntry[]} entries
+   * @returns {boolean} False when the browser refused the write.
+   */
+  saveCompanionIgnored(entries) {
+    const ok = this.write(this.local, PROFILE_STORAGE_KEYS.companionIgnored, entries);
+    this.notify(PROFILE_STORAGE_KEYS.companionIgnored);
+    return ok;
+  }
+
+  /**
+   * Put an account on the ignore list, replacing an older entry for it.
+   *
+   * @param {CompanionIgnoredEntry} entry
+   * @returns {boolean} False when the browser refused the write.
+   */
+  ignoreCompanionAccount(entry) {
+    return this.saveCompanionIgnored([...this.listCompanionIgnored().filter((e) => !sameCompanionAccount(e, entry)), entry]);
+  }
+
+  /**
+   * Take an account off the ignore list; one that is not on it changes nothing.
+   *
+   * @param {CompanionAccount} account
+   */
+  unignoreCompanionAccount(account) {
+    const entries = this.listCompanionIgnored();
+    const kept = entries.filter((e) => !sameCompanionAccount(e, account));
+    if (kept.length !== entries.length) this.saveCompanionIgnored(kept);
+  }
+
+  /**
+   * Call back when profiles or the Companion ignore list change, in this tab or
+   * in another one. A change made in another tab comes with the storage key it
+   * wrote (null when that tab cleared the storage); a profile change made here
+   * comes with none, an ignore-list change with the list's key.
    *
    * @param {(key?: ?string) => void} listener
    */
@@ -253,14 +303,14 @@ class ProfileStore {
     this.listeners.push(listener);
   }
 
-  /** @param {?string} [key] The key another tab wrote. */
+  /** @param {?string} [key] The key that was written. */
   notify(key) {
     this.listeners.forEach((listener) => listener(key));
   }
 
   /**
-   * Forward profile changes made in other tabs. The `storage` event fires only
-   * in the tabs that did not write.
+   * Forward profile and ignore-list changes made in other tabs. The `storage`
+   * event fires only in the tabs that did not write.
    *
    * @param {Window} win
    */
@@ -268,7 +318,8 @@ class ProfileStore {
     win.addEventListener('storage', (e) => {
       // The last-planet map shares the profiles' prefix but changes no profile.
       if (e.key === PROFILE_STORAGE_KEYS.planets) return;
-      if (e.key === null || e.key === PROFILE_STORAGE_KEYS.index || e.key.startsWith(PROFILE_STORAGE_KEYS.prefix)) {
+      if (e.key === null || e.key === PROFILE_STORAGE_KEYS.index || e.key === PROFILE_STORAGE_KEYS.companionIgnored
+        || e.key.startsWith(PROFILE_STORAGE_KEYS.prefix)) {
         this.notify(e.key);
       }
     });
