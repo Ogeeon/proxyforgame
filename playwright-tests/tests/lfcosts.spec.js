@@ -200,7 +200,7 @@ test.describe('Lifeforms costs Calculator Page', () => {
 
         // Buildings alone
         await page.locator('#tabtag-1').click();
-        await page.locator('#tab-1').waitFor({ state: 'visible' });
+        await expect(page.locator('#tab-1')).toBeVisible();
         await fillOneToTwo('#table-1-1');
         await expect.poll(() => transports('#table-1-1')).toEqual({ sc: 552, lc: 111 });
         await setCargo(10, 0);
@@ -211,7 +211,7 @@ test.describe('Lifeforms costs Calculator Page', () => {
         // The researches join the buildings: the count is for the whole tab.
         await setCargo(0, 0);
         await page.locator('#tabtag-1-2').click();
-        await page.locator('#tab-1-2').waitFor({ state: 'visible' });
+        await expect(page.locator('#tab-1-2')).toBeVisible();
         await addAllResearchesForRace(page, 1, '1');
         await fillOneToTwo('#table-1-2');
         await expect.poll(() => transports('#table-1-2')).toEqual({ sc: 3041, lc: 609 });
