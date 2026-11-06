@@ -43,10 +43,50 @@ async function importExport(page, text = EXPORT) {
     await expect(page.locator('#pf-import-modal')).toBeHidden();
 }
 
-/** The stored profile currently active in this tab. */
+/** @type {Record<string, string> | null} The pfg_* keys an import of EXPORT leaves, once per worker. */
+let importedStorage = null;
+
+/**
+ * Open `url` as a returning player whose profile is the fixture export: its
+ * storage is in place before the page loads, as if imported on an earlier visit.
+ * The keys come from one real import per worker, so they are whatever the
+ * import writes rather than a copy of the format. A test about the import
+ * itself, or about what the calculator holds before one, uses importExport().
+ */
+async function openWithProfile(page, url) {
+    if (!importedStorage) {
+        const context = await page.context().browser().newContext({
+            baseURL: test.info().project.use.baseURL,
+            reducedMotion: 'reduce',
+        });
+        await context.addInitScript(() => localStorage.setItem('lastChange', 'key-value;true,value;99999'));
+        const source = await context.newPage();
+        await source.goto('/production');
+        await importExport(source);
+        importedStorage = await source.evaluate(() => Object.fromEntries(
+            Object.keys(localStorage).filter((k) => k.startsWith('pfg_')).map((k) => [k, localStorage.getItem(k)])));
+        await context.close();
+    }
+    // Once per page: a reload, or a test that has already changed the profile,
+    // must find what it left behind. The active profile is read from
+    // localStorage by a tab that has none of its own.
+    await page.addInitScript((entries) => {
+        if (localStorage.getItem('test_profile_seeded')) return;
+        localStorage.setItem('test_profile_seeded', '1');
+        for (const [key, value] of Object.entries(entries)) localStorage.setItem(key, value);
+    }, importedStorage);
+    await page.goto(url);
+    await expect(page.locator('#pf-select'), 'the seeded profile is the active one').not.toHaveValue('');
+}
+
+/**
+ * The stored profile currently active in this tab: its own choice, otherwise
+ * the last one made in any tab - ProfileStore.getActiveId()'s rule.
+ */
 async function activeProfile(page) {
     return page.evaluate(() => {
-        const id = JSON.parse(sessionStorage.getItem('pfg_active_profile') || '""');
+        const own = sessionStorage.getItem('pfg_active_profile');
+        const id = JSON.parse(own ?? localStorage.getItem('pfg_active_profile') ?? '""');
         return id ? JSON.parse(localStorage.getItem('pfg_profile_' + id) || 'null') : null;
     });
 }
@@ -79,8 +119,7 @@ test('importing an export fills the calculator from the profile', async ({ page 
 });
 
 test('an edit becomes an override that can be restored', async ({ page }) => {
-    await page.goto('/production');
-    await importExport(page);
+    await openWithProfile(page, '/production');
 
     await metalMineInput(page).fill('31');
     await metalMineInput(page).blur();
@@ -99,8 +138,7 @@ test('an edit becomes an override that can be restored', async ({ page }) => {
 });
 
 test('the restore button has a Bootstrap tooltip that goes with it', async ({ page }) => {
-    await page.goto('/production');
-    await importExport(page);
+    await openWithProfile(page, '/production');
     await metalMineInput(page).fill('31');
     await metalMineInput(page).blur();
 
@@ -112,8 +150,7 @@ test('the restore button has a Bootstrap tooltip that goes with it', async ({ pa
 });
 
 test('the buttons of the manage dialog have a tooltip that goes with the row', async ({ page }) => {
-    await page.goto('/production');
-    await importExport(page);
+    await openWithProfile(page, '/production');
     await chooseAction(page, '__manage');
 
     const del = page.locator('#pf-manage-rows tr').first().locator('button').nth(1);
@@ -127,8 +164,7 @@ test('the buttons of the manage dialog have a tooltip that goes with the row', a
 });
 
 test('the overrides badge restores only the ticked values', async ({ page }) => {
-    await page.goto('/production');
-    await importExport(page);
+    await openWithProfile(page, '/production');
     await page.locator('#param-researches-tab').click();
     await page.locator('#plasma-tech-level').fill('20');
     await page.locator('#plasma-tech-level').blur();
@@ -155,8 +191,7 @@ test('the overrides badge restores only the ticked values', async ({ page }) => 
 });
 
 test('a select from the game is marked, and a radio group as a whole', async ({ page }) => {
-    await page.goto('/production');
-    await importExport(page);
+    await openWithProfile(page, '/production');
     await expect(page.locator('#one-pln-race')).toHaveClass(/pf-bound/);
     await expect(page.locator('#class-0').locator('xpath=ancestor::fieldset')).toHaveClass(/pf-bound/);
     // The first radio is not necessarily the chosen one: it carries no mark.
@@ -167,8 +202,7 @@ test('the economy speed is the game\'s, and a changed one survives a reload', as
     await page.route('**/ajax.php?*service=serverdata*', (route) => route.fulfill({
         status: 200, contentType: 'application/json', body: JSON.stringify({ speed: '5' }),
     }));
-    await page.goto('/production');
-    await importExport(page);
+    await openWithProfile(page, '/production');
     const speed = page.locator('#universe-speed');
     await expect(speed).toHaveValue('5');
     await expect(speed).toHaveClass(/pf-bound/);
@@ -195,8 +229,7 @@ test('a changed universe setting counts in the overrides badge and is restored t
     await page.route('**/ajax.php?*service=serverdata*', (route) => route.fulfill({
         status: 200, contentType: 'application/json', body: JSON.stringify({ speed: '5' }),
     }));
-    await page.goto('/production');
-    await importExport(page);
+    await openWithProfile(page, '/production');
     const speed = page.locator('#universe-speed');
     await expect(speed).toHaveValue('5');
     await expect(page.locator('#pf-overrides')).toBeHidden();
@@ -224,8 +257,7 @@ test('a changed universe setting counts in the overrides badge and is restored t
 });
 
 test('loading a profile writes no override by itself', async ({ page }) => {
-    await page.goto('/production');
-    await importExport(page);
+    await openWithProfile(page, '/production');
     await page.reload();
     await expect(page.locator('#energy-tech-level')).toHaveValue('14');
     const profile = await activeProfile(page);
@@ -257,8 +289,7 @@ function storedProduction(page) {
 }
 
 test('a production calculator field changed with a profile active is kept with "no profile"', async ({ page }) => {
-    await page.goto('/production');
-    await importExport(page);
+    await openWithProfile(page, '/production');
     await page.locator('#tabtag2').click();
     await page.locator('#all-pln-addtnl-info').check();
     await expect.poll(async () => (await storedProduction(page)).showAddInf).toBe(true);
@@ -272,8 +303,7 @@ test('a production calculator field changed with a profile active is kept with "
 });
 
 test('production takes the calculator fields once from the key they had with a profile', async ({ page }) => {
-    await page.goto('/production');
-    await importExport(page);
+    await openWithProfile(page, '/production');
     await expect(page.locator('#all-pln-addtnl-info')).not.toBeChecked();
     // What an earlier version kept apart while a profile was active.
     await page.evaluate(() => localStorage.setItem('options_production_profile', JSON.stringify({
@@ -294,8 +324,7 @@ test('production takes the calculator fields once from the key they had with a p
 });
 
 test('another planet is picked in the one-planet tab and remembered', async ({ page }) => {
-    await page.goto('/production');
-    await importExport(page);
+    await openWithProfile(page, '/production');
     await page.locator('#pf-planet').selectOption({ label: 'Beta [2:150:12]' });
     await expect(page.locator('#max-planet-temp')).toHaveValue('-50');
     await expect(page.locator('#one-pln-race')).toHaveValue('2');
@@ -325,8 +354,7 @@ function allPlanetsRow(page, i) {
 }
 
 test('a planet row added to or removed from the table is added to or removed from the profile', async ({ page }) => {
-    await page.goto('/production');
-    await importExport(page);
+    await openWithProfile(page, '/production');
     const ids = (await activeProfile(page)).planets.map((p) => p.id);
     expect(ids).toHaveLength(3);
     await page.locator('#tabtag2').click();
@@ -349,8 +377,7 @@ test('a planet row added to or removed from the table is added to or removed fro
 });
 
 test('a planet moved in the table or given another position is moved in the profile', async ({ page }) => {
-    await page.goto('/production');
-    await importExport(page);
+    await openWithProfile(page, '/production');
     const before = (await activeProfile(page)).planets;
     await page.locator('#tabtag2').click();
 
@@ -405,8 +432,7 @@ test('the backup file restores the profiles', async ({ page }) => {
     await page.route('**/ajax.php?*service=serverdata*', (route) => route.fulfill({
         status: 200, contentType: 'application/json', body: JSON.stringify({ speed: '5' }),
     }));
-    await page.goto('/production');
-    await importExport(page);
+    await openWithProfile(page, '/production');
     // A universe setting picked by hand lives beside the profiles, not in them.
     await expect(page.locator('#universe-speed')).toHaveValue('5');
     await page.locator('#universe-speed').selectOption('7');
@@ -440,8 +466,7 @@ test('the backup file restores the profiles', async ({ page }) => {
 test('the delete confirmation is headed in the page language', async ({ page }) => {
     // The queue sets no dialogAttentionLabel of its own, so the heading has to
     // come with the profile dialogs.
-    await page.goto('/ru/queue');
-    await importExport(page);
+    await openWithProfile(page, '/ru/queue');
     await chooseAction(page, '__manage');
     await page.locator('#pf-manage-rows tr').first().locator('button').nth(1).click();
     const dialog = page.locator('.dyn-dialog.show');
@@ -451,8 +476,7 @@ test('the delete confirmation is headed in the page language', async ({ page }) 
 });
 
 test('editing a profile returns to the manage dialog', async ({ page }) => {
-    await page.goto('/production');
-    await importExport(page);
+    await openWithProfile(page, '/production');
     await chooseAction(page, '__manage');
     const edit = page.locator('#pf-manage-rows tr').first().locator('button').first();
 
@@ -471,6 +495,7 @@ test('editing a profile returns to the manage dialog', async ({ page }) => {
 });
 
 test('each tab keeps its own active profile', async ({ page, context }) => {
+    // Imported here rather than seeded: the first tab has to have made its own choice.
     await page.goto('/production');
     await importExport(page);
     const second = await context.newPage();
@@ -497,8 +522,7 @@ async function openFlightParams(page) {
 }
 
 test('flight takes the account from the profile and locks its universe', async ({ page }) => {
-    await page.goto('/flight');
-    await importExport(page);
+    await openWithProfile(page, '/flight');
     await openFlightParams(page);
 
     await expect(page.locator('#cmb-drive')).toHaveValue('16');
@@ -529,8 +553,7 @@ test('flight takes the account from the profile and locks its universe', async (
 });
 
 test('a flight edit becomes an override that can be restored', async ({ page }) => {
-    await page.goto('/flight');
-    await importExport(page);
+    await openWithProfile(page, '/flight');
     await openFlightParams(page);
 
     await page.locator('#cmb-drive').fill('17');
@@ -548,8 +571,7 @@ test('a flight edit becomes an override that can be restored', async ({ page }) 
 });
 
 test('flight copies a moon\'s coordinates and its fleet', async ({ page }) => {
-    await page.goto('/flight');
-    await importExport(page);
+    await openWithProfile(page, '/flight');
     await openFlightParams(page);
     const profile = await activeProfile(page);
 
@@ -870,8 +892,7 @@ async function startReportImport(page) {
 }
 
 test('a spy report can go to "no profile", leaving the profile alone', async ({ page }) => {
-    await page.goto('/flight');
-    await importExport(page);
+    await openWithProfile(page, '/flight');
     const before = await activeProfile(page);
     await startReportImport(page);
     await expect(page.locator('#flight-sr-profile-name')).toHaveValue('coshoni');
@@ -886,8 +907,7 @@ test('a spy report can go to "no profile", leaving the profile alone', async ({ 
 });
 
 test('a spy report can go to a new profile of its own', async ({ page }) => {
-    await page.goto('/flight');
-    await importExport(page);
+    await openWithProfile(page, '/flight');
     const before = await activeProfile(page);
     await startReportImport(page);
 
@@ -914,8 +934,7 @@ test('a spy report can go to a new profile of its own', async ({ page }) => {
 });
 
 test('cancelling the spy report choice imports nothing', async ({ page }) => {
-    await page.goto('/flight');
-    await importExport(page);
+    await openWithProfile(page, '/flight');
     const before = await activeProfile(page);
     await startReportImport(page);
 
@@ -930,8 +949,7 @@ test('cancelling the spy report choice imports nothing', async ({ page }) => {
 // whose building levels are the start levels.
 
 test('the queue takes the account, a planet and its moon from the profile', async ({ page }) => {
-    await page.goto('/queue');
-    await importExport(page);
+    await openWithProfile(page, '/queue');
 
     await expect(page.locator('#hyper-tech-level')).toHaveValue('8');
     await expect(page.locator('#player-class-0')).toBeChecked();
@@ -961,8 +979,7 @@ test('the queue takes the account, a planet and its moon from the profile', asyn
 });
 
 test('a queue start level is not written back to the profile', async ({ page }) => {
-    await page.goto('/queue');
-    await importExport(page);
+    await openWithProfile(page, '/queue');
 
     await page.locator('#startlvl-2-1').fill('31');
     await page.locator('#startlvl-2-1').blur();
@@ -984,8 +1001,7 @@ test('a queue start level is not written back to the profile', async ({ page }) 
 });
 
 test('a queue fields edit is named in the reset dialog and restored on its planet', async ({ page }) => {
-    await page.goto('/queue');
-    await importExport(page);
+    await openWithProfile(page, '/queue');
     await blurFill(page, '#total-fields-2', '250');
 
     await page.locator('#total-fields-2 + .pf-reset').click();
@@ -1003,8 +1019,7 @@ test('a queue fields edit is named in the reset dialog and restored on its plane
 });
 
 test('another planet is picked in the queue and remembered, the queue kept', async ({ page }) => {
-    await page.goto('/queue');
-    await importExport(page);
+    await openWithProfile(page, '/queue');
     await page.locator('#build-2-1').click();
     await expect(page.locator('#table-dst-2 tr')).toHaveCount(4);
 
@@ -1064,8 +1079,7 @@ test('"no profile" gives the queue its own economy speed back', async ({ page })
 });
 
 test('a queue tab whose body the profile does not have stays the calculator\'s own', async ({ page }) => {
-    await page.goto('/queue');
-    await importExport(page);
+    await openWithProfile(page, '/queue');
     await editProfile(page, 'profile.moons = [];');
     await page.locator('#tabtag-3').click();
     await expect(page.locator('#pf-body-box-3')).toBeHidden();
@@ -1083,8 +1097,7 @@ test('a queue tab whose body the profile does not have stays the calculator\'s o
 });
 
 test('a queue built with a profile active is still there with "no profile"', async ({ page }) => {
-    await page.goto('/queue');
-    await importExport(page);
+    await openWithProfile(page, '/queue');
     await page.locator('#build-2-1').click();
     await expect(page.locator('#table-dst-2 tr')).toHaveCount(4);
 
@@ -1107,8 +1120,7 @@ async function mockServerData(page) {
 
 test('costs takes the account, a planet and its moon from the profile', async ({ page }) => {
     await mockServerData(page);
-    await page.goto('/costs');
-    await importExport(page);
+    await openWithProfile(page, '/costs');
 
     await expect(page.locator('#pf-planet option')).toHaveCount(3);
     await expect(page.locator('#pf-planet option:checked')).toHaveText('Alpha [2:148:8]');
@@ -1147,8 +1159,7 @@ test('costs takes the account, a planet and its moon from the profile', async ({
 
 test('a costs edit becomes an override of the planet or the moon', async ({ page }) => {
     await mockServerData(page);
-    await page.goto('/costs');
-    await importExport(page);
+    await openWithProfile(page, '/costs');
 
     await page.locator('#robot-factory-level').fill('11');
     await page.locator('#robot-factory-level').blur();
@@ -1169,8 +1180,7 @@ test('a costs edit becomes an override of the planet or the moon', async ({ page
 
 test('another planet is picked in costs and remembered', async ({ page }) => {
     await mockServerData(page);
-    await page.goto('/costs');
-    await importExport(page);
+    await openWithProfile(page, '/costs');
     await page.locator('#pf-planet').selectOption({ label: 'Beta [2:150:12]' });
     await expect(page.locator('#nanite-factory-level')).toHaveValue('5');
     await expect(page.locator('#shipyard-level')).toHaveValue('10');
@@ -1208,8 +1218,7 @@ test('"no profile" gives costs its own values and table back', async ({ page }) 
 
 test('a costs profile with no moon leaves the moon\'s field to the calculator', async ({ page }) => {
     await mockServerData(page);
-    await page.goto('/costs');
-    await importExport(page);
+    await openWithProfile(page, '/costs');
     await editProfile(page, 'profile.moons = [];');
     await expect(page.locator('#pf-moon-box')).toBeHidden();
 
@@ -1224,7 +1233,8 @@ test('a costs profile with no moon leaves the moon\'s field to the calculator', 
 /** Edit the stored active profile, then reload so the page reads it. */
 async function editProfile(page, edit) {
     await page.evaluate((body) => {
-        const id = JSON.parse(sessionStorage.getItem('pfg_active_profile'));
+        // activeProfile()'s rule: this tab's choice, else the last one.
+        const id = JSON.parse(sessionStorage.getItem('pfg_active_profile') ?? localStorage.getItem('pfg_active_profile'));
         const profile = JSON.parse(localStorage.getItem('pfg_profile_' + id));
         new Function('profile', body)(profile);
         localStorage.setItem('pfg_profile_' + id, JSON.stringify(profile));
@@ -1234,8 +1244,7 @@ async function editProfile(page, edit) {
 
 test('the research network dialog lists the profile\'s planets and their labs', async ({ page }) => {
     await mockServerData(page);
-    await page.goto('/costs');
-    await importExport(page);
+    await openWithProfile(page, '/costs');
 
     const rows = page.locator('#lab-levels-table tbody tr');
     await expect(rows).toHaveCount(3);
@@ -1263,8 +1272,7 @@ test('the research network dialog lists the profile\'s planets and their labs', 
 
 test('the default start is the best lab, the oldest planet on a tie', async ({ page }) => {
     await mockServerData(page);
-    await page.goto('/costs');
-    await importExport(page);
+    await openWithProfile(page, '/costs');
     await editProfile(page, "profile.planets[1].values['building.31'] = { game: 14 };");
     await expect(page.locator('#labchoice_2')).toBeChecked();
     await editProfile(page, "profile.planets[1].values['building.31'] = { game: 12 }; profile.planets[0].gameId = 900005;");
@@ -1277,8 +1285,7 @@ test('the default start is the best lab, the oldest planet on a tie', async ({ p
 
 test('labs edited in the research network dialog go to their planets', async ({ page }) => {
     await mockServerData(page);
-    await page.goto('/costs');
-    await importExport(page);
+    await openWithProfile(page, '/costs');
 
     await page.locator('#use-irn').check();
     await page.locator('#open-llc-dialog').click();
@@ -1314,8 +1321,7 @@ test('labs edited in the research network dialog go to their planets', async ({ 
 
 test('cancelling the research network dialog writes nothing', async ({ page }) => {
     await mockServerData(page);
-    await page.goto('/costs');
-    await importExport(page);
+    await openWithProfile(page, '/costs');
     await page.locator('#use-irn').check();
     await page.locator('#open-llc-dialog').click();
     await page.locator('#lablevel_2').fill('11');
@@ -1332,11 +1338,11 @@ test('cancelling the research network dialog writes nothing', async ({ page }) =
 
 test('the Mineral Research Centre follows the planet picked in costs', async ({ page }) => {
     await mockServerData(page);
-    await page.goto('/costs');
-    await importExport(page);
+    await openWithProfile(page, '/costs');
     // The fixture has no Rock'tal planet: give Beta a Mineral Research Centre.
     await page.evaluate(() => {
-        const id = JSON.parse(sessionStorage.getItem('pfg_active_profile'));
+        // activeProfile()'s rule: this tab's choice, else the last one.
+        const id = JSON.parse(sessionStorage.getItem('pfg_active_profile') ?? localStorage.getItem('pfg_active_profile'));
         const profile = JSON.parse(localStorage.getItem('pfg_profile_' + id));
         profile.planets[1].values['lf.building.12111'] = { game: 5 };
         localStorage.setItem('pfg_profile_' + id, JSON.stringify(profile));
@@ -1367,8 +1373,7 @@ async function rowLevels(page, table, techId) {
 
 test('costs fills in the known levels as the start levels, unbound', async ({ page }) => {
     await mockServerData(page);
-    await page.goto('/costs');
-    await importExport(page);
+    await openWithProfile(page, '/costs');
 
     // A row not filled in yet starts idle at the known level.
     expect(await rowLevels(page, 'table-1-2', 1)).toEqual(['30', '30']);
@@ -1405,8 +1410,7 @@ test('costs fills in the known levels as the start levels, unbound', async ({ pa
 
 test('costs rows left alone follow another planet, rows planned by hand stay', async ({ page }) => {
     await mockServerData(page);
-    await page.goto('/costs');
-    await importExport(page);
+    await openWithProfile(page, '/costs');
 
     await page.locator('#tabtag-1').click();
     const crystalTo = page.locator('#table-1-2 tr').nth(2).locator('input').nth(1);
@@ -1435,8 +1439,7 @@ test('costs rows left alone follow another planet, rows planned by hand stay', a
 // factories, life form and life-form buildings feed the calculation.
 
 test('LF costs take the account and a planet from the profile', async ({ page }) => {
-    await page.goto('/lfcosts');
-    await importExport(page);
+    await openWithProfile(page, '/lfcosts');
 
     await page.locator('#param-researches-tab').click();
     await expect(page.locator('#hyper-tech-level')).toHaveValue('8');
@@ -1466,8 +1469,7 @@ test('LF costs take the account and a planet from the profile', async ({ page })
 });
 
 test('another planet brings its life form and buildings, and is remembered', async ({ page }) => {
-    await page.goto('/lfcosts');
-    await importExport(page);
+    await openWithProfile(page, '/lfcosts');
 
     await page.locator('#pf-planet').selectOption({ label: 'Beta [2:150:12]' });
     await expect(page.locator('#race-selector')).toHaveValue('2');
@@ -1484,8 +1486,7 @@ test('another planet brings its life form and buildings, and is remembered', asy
 });
 
 test('an LF building level becomes an override of the planet', async ({ page }) => {
-    await page.goto('/lfcosts');
-    await importExport(page);
+    await openWithProfile(page, '/lfcosts');
 
     await page.locator('#research-centre-level').fill('12');
     await page.locator('#research-centre-level').blur();
@@ -1525,8 +1526,7 @@ test('"no profile" gives the LF costs their own values back', async ({ page }) =
 });
 
 test('LF costs fill in the planet levels as the start levels, unbound', async ({ page }) => {
-    await page.goto('/lfcosts');
-    await importExport(page);
+    await openWithProfile(page, '/lfcosts');
 
     // Alpha is human: 11101 is the Residential Sector, 1001 here.
     expect(await rowLevels(page, 'table-1-1', 1001)).toEqual(['40', '40']);
@@ -1559,8 +1559,7 @@ test('LF costs fill in the planet levels as the start levels, unbound', async ({
 });
 
 test('LF costs rows left alone follow another planet, rows planned by hand stay', async ({ page }) => {
-    await page.goto('/lfcosts');
-    await importExport(page);
+    await openWithProfile(page, '/lfcosts');
 
     await page.locator('#tabtag-1').click();
     const to = page.locator('#table-1-1 tr').nth(3).locator('input').nth(1);
@@ -1581,8 +1580,7 @@ test('LF costs rows left alone follow another planet, rows planned by hand stay'
 });
 
 test('graviton takes the account and a planet from the profile', async ({ page }) => {
-    await page.goto('/graviton');
-    await importExport(page);
+    await openWithProfile(page, '/graviton');
 
     // Commander and geologist only: no engineer, so no officers' energy bonus.
     await expect(page.locator('#commander')).toBeChecked();
@@ -1616,8 +1614,7 @@ test('graviton takes the account and a planet from the profile', async ({ page }
 });
 
 test('another planet in graviton brings its plants and Disruption Chamber, and is remembered', async ({ page }) => {
-    await page.goto('/graviton');
-    await importExport(page);
+    await openWithProfile(page, '/graviton');
 
     await page.locator('#pf-planet').selectOption({ label: 'Beta [2:150:12]' });
     await expect(page.locator('#max-planet-temp')).toHaveValue('-50');
@@ -1631,8 +1628,7 @@ test('another planet in graviton brings its plants and Disruption Chamber, and i
 });
 
 test('graviton edits become overrides of the account and the planet', async ({ page }) => {
-    await page.goto('/graviton');
-    await importExport(page);
+    await openWithProfile(page, '/graviton');
 
     await page.locator('#solar-satellites-count').fill('400');
     await page.locator('#solar-satellites-count').blur();
@@ -1676,8 +1672,7 @@ test('graviton takes the debris settings from the universe, and keeps a changed 
         status: 200, contentType: 'application/json',
         body: JSON.stringify({ speed: '5', debrisFactor: '0.75', deuteriumInDebris: '1' }),
     }));
-    await page.goto('/graviton');
-    await importExport(page);
+    await openWithProfile(page, '/graviton');
 
     const debris = page.locator('#debris-percent');
     const deut = page.locator('#deut-in-debris');
@@ -2129,8 +2124,7 @@ test('the age of the reading is written in the page\'s language, not the browser
 });
 
 test('terraformer takes the account and a planet from the profile', async ({ page }) => {
-    await page.goto('/terraformer');
-    await importExport(page);
+    await openWithProfile(page, '/terraformer');
 
     // Commander and geologist only: no engineer, so no officers' energy bonus.
     await expect(page.locator('#commander')).toBeChecked();
@@ -2174,8 +2168,7 @@ test('terraformer takes the account and a planet from the profile', async ({ pag
 });
 
 test('another planet in terraformer brings its levels and Disruption Chamber, and is remembered', async ({ page }) => {
-    await page.goto('/terraformer');
-    await importExport(page);
+    await openWithProfile(page, '/terraformer');
 
     await page.locator('#pf-planet').selectOption({ label: 'Beta [2:150:12]' });
     await expect(page.locator('#max-planet-temp')).toHaveValue('-50');
@@ -2192,8 +2185,7 @@ test('another planet in terraformer brings its levels and Disruption Chamber, an
 });
 
 test('a planet with no shipyard shows level 1 in terraformer without an override', async ({ page }) => {
-    await page.goto('/terraformer');
-    await importExport(page);
+    await openWithProfile(page, '/terraformer');
 
     await page.locator('#pf-planet').selectOption({ label: 'Colony [3:20:4]' });
     await expect(page.locator('#shipyard-level')).toHaveValue('1');
@@ -2208,8 +2200,7 @@ test('a planet with no shipyard shows level 1 in terraformer without an override
 });
 
 test('terraformer edits become overrides of the account and the planet', async ({ page }) => {
-    await page.goto('/terraformer');
-    await importExport(page);
+    await openWithProfile(page, '/terraformer');
 
     await page.locator('#solar-satellites-count').fill('400');
     await page.locator('#solar-satellites-count').blur();
@@ -2311,8 +2302,7 @@ test('terraformer takes the economy speed from the universe, and keeps a changed
         status: 200, contentType: 'application/json',
         body: JSON.stringify({ speed: '5', debrisFactor: '0.5', deuteriumInDebris: '0' }),
     }));
-    await page.goto('/terraformer');
-    await importExport(page);
+    await openWithProfile(page, '/terraformer');
 
     const speed = page.locator('#universe-speed');
     await expect(speed).toHaveValue('5');
@@ -2342,8 +2332,7 @@ async function typeTrade(page, selector, value) {
 }
 
 test('trade takes the account from the profile and locks its universe', async ({ page }) => {
-    await page.goto('/trade');
-    await importExport(page);
+    await openWithProfile(page, '/trade');
 
     await expect(page.locator('#hypertech-lvl')).toHaveValue('8');
     await expect(page.locator('#player-class-0')).toBeChecked();
@@ -2370,8 +2359,7 @@ test('trade takes the account from the profile and locks its universe', async ({
 });
 
 test('a trade edit becomes an override that can be restored', async ({ page }) => {
-    await page.goto('/trade');
-    await importExport(page);
+    await openWithProfile(page, '/trade');
 
     await typeTrade(page, '#hypertech-lvl', '9');
     await expect(page.locator('#hypertech-lvl')).toHaveClass(/pf-differs/);
@@ -2387,8 +2375,7 @@ test('a trade edit becomes an override that can be restored', async ({ page }) =
 });
 
 test('trade rates go to the profile and production reads them', async ({ page }) => {
-    await page.goto('/trade');
-    await importExport(page);
+    await openWithProfile(page, '/trade');
     // The profile has no rates yet: trade shows the defaults, 3 : 2 : 1.
     await expect(page.locator('#rate-md')).toHaveValue('3');
     await expect(page.locator('#rate-cd')).toHaveValue('2');
@@ -2413,8 +2400,7 @@ test('trade rates go to the profile and production reads them', async ({ page })
 });
 
 test('trade copies a moon\'s coordinates', async ({ page }) => {
-    await page.goto('/trade');
-    await importExport(page);
+    await openWithProfile(page, '/trade');
     const profile = await activeProfile(page);
     const moon = profile.moons[0];
 
@@ -2457,8 +2443,7 @@ test('"no profile" gives trade its own values and universe back', async ({ page 
 });
 
 test('a trade link wins over the profile on load', async ({ page }) => {
-    await page.goto('/trade');
-    await importExport(page);
+    await openWithProfile(page, '/trade');
     const profile = await activeProfile(page);
     const other = await page.evaluate((own) => {
         const country = Object.keys(unis).find((c) => c !== own && unis[c].length > 0);
@@ -2545,8 +2530,7 @@ test('expeditions takes the account from the profile', async ({ page }) => {
 });
 
 test('an expeditions edit becomes an override that can be restored', async ({ page }) => {
-    await page.goto('/expeditions');
-    await importExport(page);
+    await openWithProfile(page, '/expeditions');
     await blurFill(page, '#numLC', '100');
     const capacity = await page.locator('#storage-capacity').textContent();
 
@@ -2575,8 +2559,7 @@ test('an expeditions edit becomes an override that can be restored', async ({ pa
 });
 
 test('the reset dialog names an expeditions cargo bonus in the page\'s words', async ({ page }) => {
-    await page.goto('/expeditions');
-    await importExport(page);
+    await openWithProfile(page, '/expeditions');
     await page.locator('#param-lf-tab').click();
     await blurFill(page, '#lf-cargo-203', '3');
 
@@ -2587,8 +2570,7 @@ test('the reset dialog names an expeditions cargo bonus in the page\'s words', a
 });
 
 test('the cargo bonuses reader makes overrides of what it reads', async ({ page }) => {
-    await page.goto('/expeditions');
-    await importExport(page);
+    await openWithProfile(page, '/expeditions');
 
     await page.locator('#param-lf-tab').click();
     await page.locator('#open-lfbr').click();
@@ -2606,8 +2588,7 @@ test('the cargo bonuses reader makes overrides of what it reads', async ({ page 
 test('expeditions takes the speed and the top score from the universe, and keeps a changed one', async ({ page }) => {
     // 20 million points fall into the "< 25.000.000" entry.
     await mockExpeditionsUniverse(page, '20000000');
-    await page.goto('/expeditions');
-    await importExport(page);
+    await openWithProfile(page, '/expeditions');
 
     const speed = page.locator('#universe-speed');
     const top = page.locator('#highTop');
@@ -2673,8 +2654,7 @@ test('"no profile" gives expeditions its own values back', async ({ page }) => {
 
 test('an expeditions API link wins over the profile on load', async ({ page }) => {
     await mockExpeditionsUniverse(page, '20000000');
-    await page.goto('/expeditions');
-    await importExport(page);
+    await openWithProfile(page, '/expeditions');
 
     await page.goto('/expeditions?h=7&pr=10&us=3');
     // The top score is not in the link: it comes from the profile's universe.
@@ -2734,8 +2714,7 @@ const MOON_PROFILE_EDIT = `
 /** Import the fixture on the moon page and add what MOON_PROFILE_EDIT (and `extra`) say. */
 async function openMoonWithProfile(page, extra = '') {
     await mockMoonUniverse(page);
-    await page.goto('/moon');
-    await importExport(page);
+    await openWithProfile(page, '/moon');
     await editProfile(page, MOON_PROFILE_EDIT + extra);
 }
 
@@ -2867,8 +2846,7 @@ test('the reset dialog names the moon\'s phalanx in the page\'s words', async ({
 
 test('the class checkboxes of moon write the class, and a collector is no override', async ({ page }) => {
     await mockMoonUniverse(page);
-    await page.goto('/moon');
-    await importExport(page);
+    await openWithProfile(page, '/moon');
 
     // The export's collector shows as neither box, and is not an edit.
     await expect(page.locator('#general-class')).not.toBeChecked();
@@ -2929,8 +2907,7 @@ test('moon takes the debris and galaxy settings from the universe, and keeps a c
     await mockMoonUniverse(page, {
         speed: '1', debrisFactor: '0.6', deuteriumInDebris: '1', debrisFactorDef: '0.35', systems: '300', donutSystem: '0',
     });
-    await page.goto('/moon');
-    await importExport(page);
+    await openWithProfile(page, '/moon');
 
     await expect(page.locator('#debris-percent')).toHaveValue('60');
     await expect(page.locator('#deut-to-debris')).toBeChecked();
