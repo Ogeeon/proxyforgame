@@ -35,10 +35,21 @@
   buttonsText.cancel = <?= json_encode($loc['reportStrings']['cancel']) ?>;
   buttonsText.correct = <?= json_encode($loc['reportStrings']['correct']) ?>;
   buttonsText.ok = 'OK';
+  // The texts the report dialog swaps in when the calculation-error switch is
+  // on; the misspelling ones it falls back to are the ones rendered below.
+  // json_encode throughout: an apostrophe in the French or Italian of these
+  // must not break the inline script.
+  var reportCalcText = {};
+  reportCalcText.title = <?= json_encode($loc['reportStrings']['calc-title']) ?>;
+  reportCalcText.info = <?= json_encode($loc['reportStrings']['calc-info']) ?>;
+  reportCalcText.wrong = <?= json_encode($loc['reportStrings']['calc-input1']) ?>;
+  reportCalcText.right = <?= json_encode($loc['reportStrings']['calc-input2']) ?>;
   var currUrl = <?= json_encode($_SERVER['REQUEST_URI'], JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) ?>;
   let currChange = { value: <?= (int)$currChange ?>, validate: function(key, val) { return val; } };
   var currLang = <?= json_encode($lang) ?>;
 </script>
+<?php $reportContextJs = $pfgPath . '/js/report-context.js'; ?>
+<script src="/js/report-context.js?v=<?php echo assetVersion($reportContextJs); ?>" defer></script>
 <?php $sidebarJs = $pfgPath . '/js/sidebar.js'; ?>
 <script src="/js/sidebar.js?v=<?php echo assetVersion($sidebarJs); ?>" defer></script>
 
@@ -165,12 +176,23 @@
           <div id="report-info" class="text-center mb-3 text-info-emphasis">
             <?=$loc['reportStrings']['info']?>
           </div>
+          <div id="report-calc-block" class="mb-3 d-none">
+            <div class="form-check">
+              <input type="checkbox" class="form-check-input" id="report-calc-toggle">
+              <label for="report-calc-toggle" class="form-check-label text-info-emphasis"><?=$loc['reportStrings']['calc-toggle']?></label>
+            </div>
+            <details id="report-calc-details" class="d-none small mt-2">
+              <summary class="text-info-emphasis"><?=$loc['reportStrings']['calc-context-summary']?></summary>
+              <ul id="report-calc-values" class="list-unstyled mb-0 ps-3"></ul>
+            </details>
+            <div id="report-calc-discord" class="d-none small mt-2"><?=$loc['reportStrings']['calc-discord']?></div>
+          </div>
           <div class="mb-3">
-            <label for="misspelled-text" class="form-label text-info-emphasis"><?=$loc['reportStrings']['input1']?></label>
+            <label for="misspelled-text" id="report-label-wrong" class="form-label text-info-emphasis"><?=$loc['reportStrings']['input1']?></label>
             <input type="text" class="form-control" id="misspelled-text">
           </div>
           <div class="mb-3">
-            <label for="corrected-text" class="form-label text-info-emphasis"><?=$loc['reportStrings']['input2']?></label>
+            <label for="corrected-text" id="report-label-right" class="form-label text-info-emphasis"><?=$loc['reportStrings']['input2']?></label>
             <input type="text" class="form-control" id="corrected-text">
           </div>
           <div class="pfg-hp" aria-hidden="true">
@@ -184,7 +206,7 @@
             <span class="visually-hidden">Loading...</span>
           </div>
         </div>
-        <?php foreach(array('sent', 'both_empty', 'texts_equal', 'wrong_empty', 'right_empty', 'mail_failed', 'rate_limited', 'request_error') as $code): ?>
+        <?php foreach(array('sent', 'both_empty', 'calc_both_empty', 'texts_equal', 'wrong_empty', 'calc_wrong_empty', 'right_empty', 'mail_failed', 'rate_limited', 'request_error') as $code): ?>
         <div id="report-err-<?=$code?>" class="alert d-none"><p><?=$loc['reportStrings']['msg-'.$code]?></p></div>
         <?php endforeach; ?>
       </div>

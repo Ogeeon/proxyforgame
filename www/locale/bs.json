@@ -328,7 +328,16 @@
       "msg-wrong_empty": "Polje [Netacan tekst] je prazno. Molimo unesite sadrzaj u polje netacan tekst.",
       "msg-right_empty": "Polje [Ispravljen tekst] je prazno. Molimo unesite sadrzaj u polje ispravljen tekst.",
       "msg-mail_failed": "Prijava nije mogla biti poslana. Pokušajte ponovo kasnije.",
-      "msg-rate_limited": "S vaše adrese je nedavno poslano previše prijava. Pokušajte ponovo kasnije."
+      "msg-rate_limited": "S vaše adrese je nedavno poslano previše prijava. Pokušajte ponovo kasnije.",
+      "calc-toggle": "Ovo je greška u izračunu",
+      "calc-title": "Prijavljivanje greške u izračunu",
+      "calc-info": "Recite nam šta pokazuje kalkulator, a šta igra. Trenutne vrijednosti polja na stranici priložit ćemo automatski.",
+      "calc-input1": "Šta pokazuje kalkulator",
+      "calc-input2": "Šta pokazuje igra",
+      "calc-context-summary": "Izvještaj će sadržavati trenutne vrijednosti polja na stranici",
+      "calc-discord": "Screenshotove kalkulatora i igre možete nam poslati i na naš <a href=\"https://discord.gg/H8xPdA9FbE\" style=\"display: inline\" target=\"_blank\">Discord</a>.",
+      "msg-calc_wrong_empty": "Polje [Šta pokazuje kalkulator] je prazno. Unesite vrijednost.",
+      "msg-calc_both_empty": "Oba polja su prazna. Napišite šta pokazuje kalkulator."
     },
     "emailStrings": {
       "title": "Slanje e-maila",

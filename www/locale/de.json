@@ -328,7 +328,16 @@
       "msg-wrong_empty": "Das Eingabefeld fur den fehlerhaften Text ist leer. Bitte ausfullen.",
       "msg-right_empty": "Das Eingabefeld fur die korrektur ist leer. Bitte ausfullen.",
       "msg-mail_failed": "Die Fehlermeldung konnte nicht gesendet werden. Bitte versuchen Sie es später erneut.",
-      "msg-rate_limited": "Von Ihrer Adresse wurden in letzter Zeit zu viele Fehlermeldungen gesendet. Bitte versuchen Sie es später erneut."
+      "msg-rate_limited": "Von Ihrer Adresse wurden in letzter Zeit zu viele Fehlermeldungen gesendet. Bitte versuchen Sie es später erneut.",
+      "calc-toggle": "Dies ist ein Rechenfehler",
+      "calc-title": "Rechenfehler melden",
+      "calc-info": "Sagen Sie uns, was der Rechner anzeigt und was das Spiel zeigt. Die aktuellen Werte der Felder dieser Seite werden automatisch angehängt.",
+      "calc-input1": "Was der Rechner anzeigt",
+      "calc-input2": "Was das Spiel zeigt",
+      "calc-context-summary": "Der Bericht enthält die aktuellen Werte der Felder dieser Seite",
+      "calc-discord": "Screenshots des Rechners und des Spiels können Sie auch an unseren <a href=\"https://discord.gg/H8xPdA9FbE\" style=\"display: inline\" target=\"_blank\">Discord</a> senden.",
+      "msg-calc_wrong_empty": "Das Feld [Was der Rechner anzeigt] ist leer. Bitte ausfüllen.",
+      "msg-calc_both_empty": "Beide Felder sind leer. Bitte geben Sie an, was der Rechner anzeigt."
     },
     "emailStrings": {
       "title": "Schicken Sie Briefe",

@@ -10,7 +10,10 @@ let emailOpenedAt = 0;
 // Anything else, an unexpected status or a dropped connection, falls back to
 // `request_error`: the user gets "something went wrong with the request", which
 // is all the three separate "error in request" messages ever said anyway.
-const REPORT_CODES = ['sent', 'both_empty', 'texts_equal', 'wrong_empty', 'right_empty', 'mail_failed', 'rate_limited', 'request_error'];
+// The calc_* codes are the calculation-error mode's wording of the two
+// mistakes that mode can still make; the template renders them in the same
+// order as this list.
+const REPORT_CODES = ['sent', 'both_empty', 'calc_both_empty', 'texts_equal', 'wrong_empty', 'calc_wrong_empty', 'right_empty', 'mail_failed', 'rate_limited', 'request_error'];
 const EMAIL_CODES = ['sent', 'nothing_to_send', 'mail_failed', 'rate_limited', 'request_error'];
 const SEND_DIV_IDS = ['data', 'progress', ...new Set([...REPORT_CODES, ...EMAIL_CODES].map((code) => `err-${code}`))];
 
@@ -42,11 +45,219 @@ function formField(id) {
     return /** @type {HTMLInputElement} */ (requireEl(id));
 }
 
+// The calculation-error flavour of the report dialog. The texts the template
+// renders are the misspelling flavour's; setReportCalcMode swaps them for the
+// ones sidebar.tpl inlines as reportCalcText, keeping the originals here.
+let reportCalcDefaults = null;
+
+// What collectReportControls() last built for the open dialog. The page cannot
+// change while the modal is up, so one collection per open is the truth the
+// whole open works with; empty until then.
+/** @type {ReportContext} */
+let reportContext = { pairs: [], text: '', omitted: 0 };
+
+// Page chrome, not the calculator: the sidebar with its selects of its own,
+// the topbar's language and profile pickers, every dialog, and the honeypot.
+const REPORT_CONTEXT_EXCLUDES = '#sidebar, #sidebarOffcanvas, #topbar, .modal, .offcanvas, .pfg-hp';
+
+// Input types that are UI plumbing rather than a value a person set.
+const REPORT_SKIP_TYPES = new Set(['hidden', 'button', 'submit', 'reset', 'image', 'file', 'password']);
+
+/**
+ * The text of the control's label: the label pointing at its id, else a label
+ * wrapped around it, else '' - the name is the fallback the context builder
+ * applies. Left unsqueezed; buildReportContext does that for every field.
+ * @param {HTMLInputElement|HTMLSelectElement|HTMLTextAreaElement} el
+ * @returns {string}
+ */
+function reportLabelOf(el) {
+    if (el.id !== '') {
+        const label = document.querySelector(`label[for="${CSS.escape(el.id)}"]`);
+        if (label && label.textContent.trim() !== '') {
+            return label.textContent;
+        }
+    }
+    const wrapped = el.closest('label');
+    if (wrapped && wrapped.textContent.trim() !== '') {
+        return wrapped.textContent;
+    }
+    return '';
+}
+
+/**
+ * Reads the page's form controls into the plain objects report-context.js
+ * works on: what a person would read off the page. Radios of one group
+ * collapse into the option that is on - a group nobody answered says nothing
+ * about the calculation - and a select reports its option's text, not the key
+ * in its value attribute.
+ * @returns {ReportControl[]}
+ */
+function collectReportControls() {
+    /** @type {ReportControl[]} */
+    const controls = [];
+    const seenRadioGroups = new Set();
+    for (const el of document.querySelectorAll('input, select, textarea')) {
+        const control = readReportControl(el, seenRadioGroups);
+        if (control !== null) {
+            controls.push(control);
+        }
+    }
+    return controls;
+}
+
+/**
+ * One control as the report carries it, or null for an element the report
+ * leaves out: page chrome, a hidden or button input, an unanswered radio.
+ * @param {Element} el
+ * @param {Set<string>} seenRadioGroups - radio groups already carried
+ * @returns {ReportControl|null}
+ */
+function readReportControl(el, seenRadioGroups) {
+    if (!(el instanceof HTMLInputElement || el instanceof HTMLSelectElement || el instanceof HTMLTextAreaElement)) {
+        return null;
+    }
+    const kind = el instanceof HTMLInputElement ? el.type : el.tagName.toLowerCase();
+    if (REPORT_SKIP_TYPES.has(kind)) {
+        return null;
+    }
+    if (el.closest(REPORT_CONTEXT_EXCLUDES) !== null) {
+        return null;
+    }
+    if (el instanceof HTMLInputElement && el.type === 'radio') {
+        return readReportRadio(el, seenRadioGroups);
+    }
+    return { type: kind, name: el.name || el.id || '', label: reportLabelOf(el), value: readReportValue(el) };
+}
+
+/**
+ * The one line a radio group contributes: the checked option, or null for an
+ * unchecked one and for a group another radio has already answered.
+ * @param {HTMLInputElement} el
+ * @param {Set<string>} seenRadioGroups
+ * @returns {ReportControl|null}
+ */
+function readReportRadio(el, seenRadioGroups) {
+    const group = el.name || el.id;
+    if (!el.checked || (group !== '' && seenRadioGroups.has(group))) {
+        return null;
+    }
+    if (group !== '') {
+        seenRadioGroups.add(group);
+    }
+    // The line reads "player-class: Collector": the group says which setting
+    // it is, the option's label says where it stands.
+    return { type: 'radio', name: group, label: group, value: reportLabelOf(el) || el.value };
+}
+
+/**
+ * What a control says as a person reads it: the chosen option's text for a
+ * select, the state for a checkbox, the value for the rest.
+ * @param {HTMLInputElement|HTMLSelectElement|HTMLTextAreaElement} el
+ * @returns {string}
+ */
+function readReportValue(el) {
+    if (el instanceof HTMLSelectElement) {
+        // The calculators have no multiple select; the first option is it.
+        return String(el.selectedOptions.length > 0 ? el.selectedOptions[0].textContent : el.value);
+    }
+    if (el instanceof HTMLInputElement && el.type === 'checkbox') {
+        return el.checked ? 'on' : 'off';
+    }
+    return String(el.value ?? '');
+}
+
+/**
+ * Whether the calculation-error switch is on. When it is hidden - a page with
+ * nothing to attach - it is also unchecked, so one read answers both.
+ * @returns {boolean}
+ */
+function isReportCalcOn() {
+    return formField('report-calc-toggle').checked;
+}
+
+/**
+ * Fills the list the dialog shows of what will be attached. Values are what
+ * the visitor typed on the page: textContent, never innerHTML, so a pasted
+ * `<script>` stays the text it is.
+ * @param {{label: string, value: string}[]} pairs
+ */
+function fillReportContextList(pairs) {
+    const list = requireEl('report-calc-values');
+    list.innerHTML = '';
+    for (const pair of pairs) {
+        const li = document.createElement('li');
+        li.textContent = `${pair.label}: ${pair.value}`;
+        list.appendChild(li);
+    }
+}
+
+/**
+ * Turns the dialog into the asked-for flavour. The texts come from the
+ * template (misspelling) or reportCalcText (calculation error); the details
+ * list and the Discord hint are part of the calculation flavour only.
+ * @param {boolean} on
+ */
+function setReportCalcMode(on) {
+    const title = requireEl('reportModalLabel');
+    const info = requireEl('report-info');
+    const wrongLabel = requireEl('report-label-wrong');
+    const rightLabel = requireEl('report-label-right');
+    if (reportCalcDefaults === null) {
+        reportCalcDefaults = {
+            title: title.textContent,
+            info: info.textContent,
+            wrong: wrongLabel.textContent,
+            right: rightLabel.textContent,
+        };
+    }
+    formField('report-calc-toggle').checked = on;
+    requireEl('report-calc-details').classList.toggle('d-none', !on);
+    requireEl('report-calc-discord').classList.toggle('d-none', !on);
+    if (on) {
+        // The prefill put the selection into both fields, for the typo flow
+        // where the second is the first, edited. Left standing here it would
+        // claim the game shows what the calculator shows; an empty field says
+        // "don't know", which this mode accepts.
+        const wrong = formField('misspelled-text');
+        const right = formField('corrected-text');
+        if (right.value === wrong.value) {
+            right.value = '';
+        }
+    }
+    const texts = on ? reportCalcText : reportCalcDefaults;
+    title.textContent = texts.title;
+    info.textContent = texts.info;
+    wrongLabel.textContent = texts.wrong;
+    rightLabel.textContent = texts.right;
+}
+
+/**
+ * Collects the page's fields and decides the switch's start for the dialog
+ * about to open: offered only where something can be attached, and pre-flipped
+ * on when the selection reads like a wrong number rather than a misspelling.
+ * @param {string} selection - the text the dialog was opened with
+ */
+function prepareReportCalcMode(selection) {
+    reportContext = buildReportContext(collectReportControls());
+    const block = requireEl('report-calc-block');
+    if (reportContext.pairs.length === 0) {
+        // Nothing to attach on this page (the front page): the switch is not
+        // offered and the dialog keeps its misspelling shape.
+        block.classList.add('d-none');
+        setReportCalcMode(false);
+        return;
+    }
+    block.classList.remove('d-none');
+    fillReportContextList(reportContext.pairs);
+    setReportCalcMode(looksLikeCalculationError(selection));
+}
+
 function showReportWindow(text) {
     formField('misspelled-text').value = text;
     formField('corrected-text').value = text;
     formField('report-website').value = '';
     reportOpenedAt = performance.now();
+    prepareReportCalcMode(text);
     reportModal.show();
     showSendDiv('report', 'data');
     setTimeout(() => requireEl('corrected-text').focus(), 300);
@@ -161,12 +372,17 @@ async function sendReport() {
     showSendDiv('report', 'progress');
 
     try {
+        const calc = isReportCalcOn();
         await apiPost('report', {
             url: currUrl,
             wrong: formField('misspelled-text').value,
             right: formField('corrected-text').value,
             website: formField('report-website').value,
             elapsed: Math.round(performance.now() - reportOpenedAt),
+            // '1'/'0' strings: the API client stringifies every value anyway,
+            // and the server compares against exactly this.
+            calc: calc ? '1' : '0',
+            context: calc ? reportContext.text : '',
         });
         finishSend('report', 'sent');
     } catch (e) {
@@ -431,12 +647,18 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
     
+    requireEl('report-calc-toggle').addEventListener('change', () => setReportCalcMode(isReportCalcOn()));
+
     requireEl('changelog-prev').querySelector('button')?.addEventListener('click', () => stepChangelogPage(-1));
     requireEl('changelog-next').querySelector('button')?.addEventListener('click', () => stepChangelogPage(1));
 
     requireEl('reportModal').addEventListener('hidden.bs.modal', function() {
         reportStep = 0;
         showSendDiv('report', 'data');
+        // Back to the misspelling shape, so the next open starts clean whether
+        // it re-runs prepareReportCalcMode or not (the e-mail dialog flows
+        // through here too and would otherwise find stale labels).
+        setReportCalcMode(false);
     });
     
     requireEl('emailModal').addEventListener('hidden.bs.modal', function() {

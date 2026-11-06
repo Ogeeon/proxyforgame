@@ -328,7 +328,16 @@
       "msg-wrong_empty": "Yanlış yazılmış metin alanı boş. Yanlış yazılmış metni belirtiniz.",
       "msg-right_empty": "Düzeltilmiş metin alanı boş. Yanlış yazılmış metin sürümünü belirtin.",
       "msg-mail_failed": "Bildirim gönderilemedi. Lütfen daha sonra tekrar deneyin.",
-      "msg-rate_limited": "Son zamanlarda adresinizden çok fazla bildirim gönderildi. Lütfen daha sonra tekrar deneyin."
+      "msg-rate_limited": "Son zamanlarda adresinizden çok fazla bildirim gönderildi. Lütfen daha sonra tekrar deneyin.",
+      "calc-toggle": "Bu bir hesaplama hatası",
+      "calc-title": "Hesaplama hatası bildirimi",
+      "calc-info": "Hesaplayıcının ne gösterdiğini ve oyunun ne gösterdiğini bize anlatın. Sayfadaki alanların güncel değerleri otomatik olarak eklenecek.",
+      "calc-input1": "Hesaplayıcının gösterdiği",
+      "calc-input2": "Oyunun gösterdiği",
+      "calc-context-summary": "Bildirim sayfadaki alanların güncel değerlerini içerecek",
+      "calc-discord": "Hesaplayıcı ve oyun ekran görüntülerini <a href=\"https://discord.gg/H8xPdA9FbE\" style=\"display: inline\" target=\"_blank\">Discord</a> sunucumuza da gönderebilirsiniz.",
+      "msg-calc_wrong_empty": "[Hesaplayıcının gösterdiği] alanı boş. Lütfen bir değer girin.",
+      "msg-calc_both_empty": "İki alan da boş. Hesaplayıcının ne gösterdiğini belirtin."
     },
     "emailStrings": {
       "title": "E-Posta Gönderme",

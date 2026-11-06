@@ -29,6 +29,9 @@ const OUT_DIR = path.join(ROOT, 'tsconfig');
 
 // Loaded by sidebar.tpl, which every calculator page includes.
 const SIDEBAR_SCRIPT = 'www/js/sidebar.js';
+// Loaded by sidebar.tpl right before sidebar.js: the DOM-free half of the
+// report dialog's calculation-error context.
+const REPORT_CONTEXT_SCRIPT = 'www/js/report-context.js';
 // Loaded by vendor.tpl, which every page includes at the top of its
 // stylesheets. Loads after the Bootstrap bundle and patches it.
 const VENDOR_GUARD_SCRIPT = 'www/js/bootstrap-tooltip-guard.js';
@@ -57,6 +60,7 @@ function scriptsOf(tplPath) {
     files.push(VENDOR_GUARD_SCRIPT);
   }
   if (includesSidebar && !files.includes(SIDEBAR_SCRIPT)) {
+    files.push(REPORT_CONTEXT_SCRIPT);
     files.push(SIDEBAR_SCRIPT);
   }
   files.push(AMBIENT);

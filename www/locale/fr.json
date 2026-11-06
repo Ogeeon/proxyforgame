@@ -328,7 +328,16 @@
       "msg-wrong_empty": "Le champ [Texte mal orthographié] est vide. S'il vous plaît spécifier le texte mal orthographié.",
       "msg-right_empty": "Le champ [Texte corrigé] est vide. S'il vous plaît indiquer votre version du texte mal orthographié.",
       "msg-mail_failed": "Le signalement n'a pas pu être envoyé. Veuillez réessayer plus tard.",
-      "msg-rate_limited": "Trop de signalements ont été envoyés depuis votre adresse récemment. Veuillez réessayer plus tard."
+      "msg-rate_limited": "Trop de signalements ont été envoyés depuis votre adresse récemment. Veuillez réessayer plus tard.",
+      "calc-toggle": "C'est une erreur de calcul",
+      "calc-title": "Signaler une erreur de calcul",
+      "calc-info": "Dites-nous ce que montre le calculateur et ce que montre le jeu. Les valeurs actuelles des champs de la page seront jointes automatiquement.",
+      "calc-input1": "Ce que montre le calculateur",
+      "calc-input2": "Ce que montre le jeu",
+      "calc-context-summary": "Le rapport inclura les valeurs actuelles des champs de la page",
+      "calc-discord": "Vous pouvez aussi envoyer des captures d'écran du calculateur et du jeu sur notre <a href=\"https://discord.gg/H8xPdA9FbE\" style=\"display: inline\" target=\"_blank\">Discord</a>.",
+      "msg-calc_wrong_empty": "Le champ [Ce que montre le calculateur] est vide. Merci de l'indiquer.",
+      "msg-calc_both_empty": "Les deux champs sont vides. Merci d'indiquer ce que montre le calculateur."
     },
     "emailStrings": {
       "title": "L'envoi d'un email",

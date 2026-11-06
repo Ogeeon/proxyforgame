@@ -328,7 +328,16 @@
       "msg-wrong_empty": "El campo [Texto mal Traducido] está vacío. Por favor especifica el texto.",
       "msg-right_empty": "El campo [Texto Corregido] está vacío. Por favor especifica tu versión del texto mal traducido.",
       "msg-mail_failed": "No se ha podido enviar el aviso. Inténtalo de nuevo más tarde.",
-      "msg-rate_limited": "Se han enviado demasiados avisos desde tu dirección recientemente. Inténtalo de nuevo más tarde."
+      "msg-rate_limited": "Se han enviado demasiados avisos desde tu dirección recientemente. Inténtalo de nuevo más tarde.",
+      "calc-toggle": "Es un error de cálculo",
+      "calc-title": "Informar de un error de cálculo",
+      "calc-info": "Dinos qué muestra la calculadora y qué muestra el juego. Los valores actuales de los campos de la página se adjuntarán automáticamente.",
+      "calc-input1": "Qué muestra la calculadora",
+      "calc-input2": "Qué muestra el juego",
+      "calc-context-summary": "El informe incluirá los valores actuales de los campos de la página",
+      "calc-discord": "También puedes enviar capturas de la calculadora y del juego a nuestro <a href=\"https://discord.gg/H8xPdA9FbE\" style=\"display: inline\" target=\"_blank\">Discord</a>.",
+      "msg-calc_wrong_empty": "El campo [Qué muestra la calculadora] está vacío. Por favor, indícalo.",
+      "msg-calc_both_empty": "Ambos campos están vacíos. Por favor, indica qué muestra la calculadora."
     },
     "emailStrings": {
       "title": "Enviando e-mail",

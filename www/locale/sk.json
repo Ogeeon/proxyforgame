@@ -328,7 +328,16 @@
       "msg-wrong_empty": "Pole [Nesprávny text] je prázdne. Prosím uveďte nesprávny text.",
       "msg-right_empty": "Pole [Opravený text] je prázdne. Prosím uveďte vašu verziu opraveného textu.",
       "msg-mail_failed": "Hlásenie sa nepodarilo odoslať. Skúste to znova neskôr.",
-      "msg-rate_limited": "Z vašej adresy bolo nedávno odoslaných príliš veľa hlásení. Skúste to znova neskôr."
+      "msg-rate_limited": "Z vašej adresy bolo nedávno odoslaných príliš veľa hlásení. Skúste to znova neskôr.",
+      "calc-toggle": "Toto je chyba vo výpočte",
+      "calc-title": "Nahlásenie chyby vo výpočte",
+      "calc-info": "Napíšte nám, čo zobrazuje kalkulačka a čo zobrazuje hra. Aktuálne hodnoty polí stránky priložíme automaticky.",
+      "calc-input1": "Čo zobrazuje kalkulačka",
+      "calc-input2": "Čo zobrazuje hra",
+      "calc-context-summary": "Hlásenie bude obsahovať aktuálne hodnoty polí stránky",
+      "calc-discord": "Screenshoty kalkulačky a hry nám môžete poslať aj na náš <a href=\"https://discord.gg/H8xPdA9FbE\" style=\"display: inline\" target=\"_blank\">Discord</a>.",
+      "msg-calc_wrong_empty": "Pole [Čo zobrazuje kalkulačka] je prázdne. Zadajte hodnotu.",
+      "msg-calc_both_empty": "Obidve polia sú prázdne. Napíšte, čo zobrazuje kalkulačka."
     },
     "emailStrings": {
       "title": "Odosielanie e-mailu",

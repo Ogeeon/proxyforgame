@@ -328,7 +328,16 @@
       "msg-wrong_empty": "The field [Misspelled text] is empty. Please specify the misspelled text.",
       "msg-right_empty": "The field [Corrected text] is empty. Please specify your version of the misspelled text.",
       "msg-mail_failed": "The report could not be sent. Please try again later.",
-      "msg-rate_limited": "Too many reports have been sent from your address recently. Please try again later."
+      "msg-rate_limited": "Too many reports have been sent from your address recently. Please try again later.",
+      "calc-toggle": "This is a calculation error",
+      "calc-title": "Reporting a calculation error",
+      "calc-info": "Tell us what the calculator shows and what the game shows. The current values of the page's fields will be attached automatically.",
+      "calc-input1": "What the calculator shows",
+      "calc-input2": "What the game shows",
+      "calc-context-summary": "The report will include the current values of the page's fields",
+      "calc-discord": "You can also send screenshots of the calculator and the game to our <a href=\"https://discord.gg/H8xPdA9FbE\" style=\"display: inline\" target=\"_blank\">Discord</a>.",
+      "msg-calc_wrong_empty": "The field [What the calculator shows] is empty. Please fill it in.",
+      "msg-calc_both_empty": "Both fields are empty. Please fill in what the calculator shows."
     },
     "emailStrings": {
       "title": "Sending an e-mail",

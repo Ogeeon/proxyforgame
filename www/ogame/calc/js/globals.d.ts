@@ -52,6 +52,11 @@ interface HTMLInputElement {
 
 /** Localised button captions for the report and e-mail dialogs. */
 declare const buttonsText: Record<string, string>;
+/**
+ * Localised texts the report dialog swaps in when its calculation-error
+ * switch is on: title, info line and the two field labels.
+ */
+declare const reportCalcText: Record<string, string>;
 /** REQUEST_URI of the current page, sent along with a misspelling report. */
 declare const currUrl: string;
 /** Current language code, e.g. 'en'. */

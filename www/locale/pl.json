@@ -328,7 +328,16 @@
       "msg-wrong_empty": "Nie wypelniono pola [Bledny tekst]. Prosze podac bledny tekst.",
       "msg-right_empty": "Nie wypelniono pola [Poprawny tekst]. Prosimy o podanie poprawnej pisowni.",
       "msg-mail_failed": "Nie udało się wysłać zgłoszenia. Spróbuj ponownie później.",
-      "msg-rate_limited": "Z Twojego adresu wysłano ostatnio zbyt wiele zgłoszeń. Spróbuj ponownie później."
+      "msg-rate_limited": "Z Twojego adresu wysłano ostatnio zbyt wiele zgłoszeń. Spróbuj ponownie później.",
+      "calc-toggle": "To błąd w obliczeniach",
+      "calc-title": "Zgłaszanie błędu w obliczeniach",
+      "calc-info": "Napisz, co pokazuje kalkulator i co pokazuje gra. Aktualne wartości pól na stronie dołączymy automatycznie.",
+      "calc-input1": "Co pokazuje kalkulator",
+      "calc-input2": "Co pokazuje gra",
+      "calc-context-summary": "Raport będzie zawierał aktualne wartości pól na stronie",
+      "calc-discord": "Zrzuty ekranu kalkulatora i gry możesz też wysłać na nasz <a href=\"https://discord.gg/H8xPdA9FbE\" style=\"display: inline\" target=\"_blank\">Discord</a>.",
+      "msg-calc_wrong_empty": "Pole [Co pokazuje kalkulator] jest puste. Podaj wartość.",
+      "msg-calc_both_empty": "Oba pola są puste. Napisz, co pokazuje kalkulator."
     },
     "emailStrings": {
       "title": "Wyslij wiadomosc",
