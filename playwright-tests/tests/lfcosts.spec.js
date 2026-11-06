@@ -154,313 +154,71 @@ test.describe('Lifeforms costs Calculator Page', () => {
         await expect(page.locator('#table-0-2 tr:nth-child(20) td:nth-child(8)')).toContainText('4d 13h 55m');
     });
 
-    test('[transport calculations with hyperspace and capacity increase] SC/LC counts update correctly', async ({ page }) => {
-        // Helper function to get transport counts from the "transports needed" row
-        async function getTransportCounts(tableId) {
-            const transportsRow = page.locator(`${tableId} tr`).filter({ hasText: 'SC' }).and(page.locator(`${tableId} tr`).filter({ hasText: 'LC' })).first();
-            const scText = await transportsRow.locator('td:nth-child(3)').textContent();
-            const lcText = await transportsRow.locator('td:nth-child(4)').textContent();
-            return {
-                sc: parseInt(scText.replace(/\D/g, '')),
-                lc: parseInt(lcText.replace(/\D/g, ''))
-            };
+    // The transports needed for the whole tab, read from the form: the range inputs
+    // of both tables, the race, Hyperspace Technology and the two capacity bonuses.
+    // The arithmetic - and the same counts for the other three races - is pinned
+    // in unit-tests/lfcosts-core.test.js; this is the wiring.
+    test('[all items - multiple levels / human] SC/LC counts follow the tables and the cargo settings', async ({ page }) => {
+        test.setTimeout(60000);
+
+        /** The SC and LC counts of a table's "transports needed" row. */
+        async function transports(tableId) {
+            const row = page.locator(`${tableId} tr`).filter({ hasText: 'SC' })
+                .and(page.locator(`${tableId} tr`).filter({ hasText: 'LC' })).first();
+            const sc = await row.locator('td:nth-child(3)').textContent();
+            const lc = await row.locator('td:nth-child(4)').textContent();
+            return { sc: Number.parseInt(sc.replace(/\D/g, ''), 10), lc: Number.parseInt(lc.replace(/\D/g, ''), 10) };
         }
 
-        // Test Buildings table
-        await page.locator('#tabtag-0').click();
-        await page.locator('#tabtag-0-1').click();
-
-        // Fill level 5 for all VISIBLE rows in Buildings table (rows vary by selected race)
-        const buildingsInputs = page.locator('#table-0-1 tr td:nth-child(3) input').filter({ hasText: /^[0-9]*$/ });
-        const buildingsInputCount = await buildingsInputs.count();
-        for (let i = 0; i < buildingsInputCount; i++) {
-            const input = buildingsInputs.nth(i);
-            if (await input.isVisible()) {
-                await input.fill('5');
-                await input.press('Enter');
+        /** Every visible row of the table goes from level 1 to level 2. */
+        async function fillOneToTwo(tableId) {
+            const from = page.locator(`${tableId} tr td:nth-child(3) input`);
+            const to = page.locator(`${tableId} tr td:nth-child(4) input`);
+            const count = await from.count();
+            for (let i = 0; i < count; i++) {
+                if (await from.nth(i).isVisible()) {
+                    await from.nth(i).fill('1');
+                    await from.nth(i).press('Enter');
+                    await to.nth(i).fill('2');
+                    await to.nth(i).press('Enter');
+                }
             }
         }
 
-        // Record initial transport counts
-        const buildingsInitial = await getTransportCounts('#table-0-1');
-
-        // Set hyperspace tech to 10
-        await page.locator('#param-researches-tab').click();
-        await page.locator('#hyper-tech-level').fill('10');
-        await page.locator('#hyper-tech-level').press('Enter');
-        const buildingsAfterHyper = await getTransportCounts('#table-0-1');
-
-        // Set SC and LC capacity increase to 10
-        await page.locator('#param-lifeforms-tab').click();
-        await page.locator('#sc-capacity-increase').fill('10');
-        await page.locator('#sc-capacity-increase').press('Enter');
-        await page.locator('#lc-capacity-increase').fill('10');
-        await page.locator('#lc-capacity-increase').press('Enter');
-        const buildingsAfterCapIncr = await getTransportCounts('#table-0-1');
-
-        // Test Researches table
-        await page.locator('#tabtag-0-2').click();
-        await addAllResearchesForRace(page, 0, '1');
-
-        // Reset hyperspace and capacity settings for clean test
-        await page.locator('#param-researches-tab').click();
-        await page.locator('#hyper-tech-level').fill('0');
-        await page.locator('#hyper-tech-level').press('Enter');
-        await page.locator('#param-lifeforms-tab').click();
-        await page.locator('#sc-capacity-increase').fill('0');
-        await page.locator('#sc-capacity-increase').press('Enter');
-        await page.locator('#lc-capacity-increase').fill('0');
-        await page.locator('#lc-capacity-increase').press('Enter');
-
-        // Fill level 5 for all VISIBLE rows in Researches table (rows vary by selected race)
-        const researchesInputs = page.locator('#table-0-2 tr td:nth-child(3) input').filter({ hasText: /^[0-9]*$/ });
-        const researchesInputCount = await researchesInputs.count();
-        for (let i = 0; i < researchesInputCount; i++) {
-            const input = researchesInputs.nth(i);
-            if (await input.isVisible()) {
-                await input.fill('5');
-                await input.press('Enter');
-            }
+        async function setCargo(hyper, capIncr) {
+            await page.locator('#param-researches-tab').click();
+            await page.locator('#hyper-tech-level').fill(String(hyper));
+            await page.locator('#hyper-tech-level').press('Enter');
+            await page.locator('#param-lifeforms-tab').click();
+            await page.locator('#sc-capacity-increase').fill(String(capIncr));
+            await page.locator('#sc-capacity-increase').press('Enter');
+            await page.locator('#lc-capacity-increase').fill(String(capIncr));
+            await page.locator('#lc-capacity-increase').press('Enter');
         }
 
-        // Record initial transport counts
-        const researchesInitial = await getTransportCounts('#table-0-2');
+        await page.locator('#race-selector').selectOption('1');
 
-        // Set hyperspace tech to 10
-        await page.locator('#param-researches-tab').click();
-        await page.locator('#hyper-tech-level').fill('10');
-        await page.locator('#hyper-tech-level').press('Enter');
-        const researchesAfterHyper = await getTransportCounts('#table-0-2');
-
-        // Set SC and LC capacity increase to 10
-        await page.locator('#param-lifeforms-tab').click();
-        await page.locator('#sc-capacity-increase').fill('10');
-        await page.locator('#sc-capacity-increase').press('Enter');
-        await page.locator('#lc-capacity-increase').fill('10');
-        await page.locator('#lc-capacity-increase').press('Enter');
-        const researchesAfterCapIncr = await getTransportCounts('#table-0-2');
-
-        // Verify exact transport counts at each stage
-        // Buildings - Initial state (hyperspace=0, capIncrease=0)
-        expect(buildingsInitial.sc).toBe(3404);
-        expect(buildingsInitial.lc).toBe(681);
-
-        // Buildings - After Hyperspace 10
-        expect(buildingsAfterHyper.sc).toBe(2432);
-        expect(buildingsAfterHyper.lc).toBe(487);
-
-        // Buildings - After SC/LC capacity increase 10
-        expect(buildingsAfterCapIncr.sc).toBe(2300);
-        expect(buildingsAfterCapIncr.lc).toBe(460);
-
-        // Researches - Initial state (hyperspace=0, capIncrease=0)
-        expect(researchesInitial.sc).toBe(21803);
-        expect(researchesInitial.lc).toBe(4361);
-
-        // Researches - After Hyperspace 10
-        expect(researchesAfterHyper.sc).toBe(15574);
-        expect(researchesAfterHyper.lc).toBe(3115);
-
-        // Researches - After SC/LC capacity increase 10
-        expect(researchesAfterCapIncr.sc).toBe(14732);
-        expect(researchesAfterCapIncr.lc).toBe(2947);
-    });
-
-    // Helper function to test second outer tab for a specific lifeform
-    async function testSecondOuterTab(page, lifeformValue, lifeformName, expectedData) {
-        // Reset page to clean state
-        await page.locator('#reset').click();
-
-        // Reset settings
-        await page.locator('#param-researches-tab').click();
-        await page.locator('#hyper-tech-level').fill('0');
-        await page.locator('#hyper-tech-level').press('Enter');
-        await page.locator('#param-lifeforms-tab').click();
-        await page.locator('#sc-capacity-increase').fill('0');
-        await page.locator('#sc-capacity-increase').press('Enter');
-        await page.locator('#lc-capacity-increase').fill('0');
-        await page.locator('#lc-capacity-increase').press('Enter');
-
-        // Select lifeform BEFORE navigating to tabs (important for row visibility)
-        await page.locator('#race-selector').selectOption(lifeformValue);
-
-        // Helper function to get transport counts
-        async function getTransportCounts(tableId) {
-            const transportsRow = page.locator(`${tableId} tr`).filter({ hasText: 'SC' }).and(page.locator(`${tableId} tr`).filter({ hasText: 'LC' })).first();
-            const scText = await transportsRow.locator('td:nth-child(3)').textContent();
-            const lcText = await transportsRow.locator('td:nth-child(4)').textContent();
-            return {
-                sc: parseInt(scText.replace(/\D/g, '')),
-                lc: parseInt(lcText.replace(/\D/g, ''))
-            };
-        }
-
-        // Test Buildings (outer tab 1, inner tab 1) - table-1-1
+        // Buildings alone
         await page.locator('#tabtag-1').click();
         await page.locator('#tab-1').waitFor({ state: 'visible' });
+        await fillOneToTwo('#table-1-1');
+        await expect.poll(() => transports('#table-1-1')).toEqual({ sc: 552, lc: 111 });
+        await setCargo(10, 0);
+        await expect.poll(() => transports('#table-1-1')).toEqual({ sc: 395, lc: 79 });
+        await setCargo(10, 10);
+        await expect.poll(() => transports('#table-1-1')).toEqual({ sc: 373, lc: 75 });
 
-        // Fill from=1, to=2 for all visible rows
-        const fromInputsLoc = page.locator('#table-1-1 tr td:nth-child(3) input');
-        const toInputsLoc = page.locator('#table-1-1 tr td:nth-child(4) input');
-        const inputCount = await fromInputsLoc.count();
-
-        for (let i = 0; i < inputCount; i++) {
-            const fromInput = fromInputsLoc.nth(i);
-            const toInput = toInputsLoc.nth(i);
-            if (await fromInput.isVisible()) {
-                await fromInput.fill('1');
-                await fromInput.press('Enter');
-                await toInput.fill('2');
-                await toInput.press('Enter');
-            }
-        }
-
-
-        // Get initial counts
-        const buildingsInitial = await getTransportCounts('#table-1-1');
-
-        // Set hyperspace to 10
-        await page.locator('#param-researches-tab').click();
-        await page.locator('#hyper-tech-level').fill('10');
-        await page.locator('#hyper-tech-level').press('Enter');
-        const buildingsAfterHyper = await getTransportCounts('#table-1-1');
-
-        // Set capacity increase to 10
-        await page.locator('#param-lifeforms-tab').click();
-        await page.locator('#sc-capacity-increase').fill('10');
-        await page.locator('#sc-capacity-increase').press('Enter');
-        await page.locator('#lc-capacity-increase').fill('10');
-        await page.locator('#lc-capacity-increase').press('Enter');
-        const buildingsAfterCapIncr = await getTransportCounts('#table-1-1');
-
-        // Verify Buildings transport counts
-        expect(buildingsInitial.sc).toBe(expectedData.buildings.initial.sc);
-        expect(buildingsInitial.lc).toBe(expectedData.buildings.initial.lc);
-        expect(buildingsAfterHyper.sc).toBe(expectedData.buildings.afterHyper.sc);
-        expect(buildingsAfterHyper.lc).toBe(expectedData.buildings.afterHyper.lc);
-        expect(buildingsAfterCapIncr.sc).toBe(expectedData.buildings.afterCapIncr.sc);
-        expect(buildingsAfterCapIncr.lc).toBe(expectedData.buildings.afterCapIncr.lc);
-
-        // Reset settings for researches
-        await page.locator('#param-researches-tab').click();
-        await page.locator('#hyper-tech-level').fill('0');
-        await page.locator('#hyper-tech-level').press('Enter');
-        await page.locator('#param-lifeforms-tab').click();
-        await page.locator('#sc-capacity-increase').fill('0');
-        await page.locator('#sc-capacity-increase').press('Enter');
-        await page.locator('#lc-capacity-increase').fill('0');
-        await page.locator('#lc-capacity-increase').press('Enter');
-
-        // Test Researches (outer tab 1, inner tab 2) - table-1-2
+        // The researches join the buildings: the count is for the whole tab.
+        await setCargo(0, 0);
         await page.locator('#tabtag-1-2').click();
         await page.locator('#tab-1-2').waitFor({ state: 'visible' });
-        await addAllResearchesForRace(page, 1, lifeformValue);
-
-        // Fill from=1, to=2 for all visible rows
-        const resFromInputsLoc = page.locator('#table-1-2 tr td:nth-child(3) input');
-        const resToInputsLoc = page.locator('#table-1-2 tr td:nth-child(4) input');
-        const resInputCount = await resFromInputsLoc.count();
-
-        for (let i = 0; i < resInputCount; i++) {
-            const fromInput = resFromInputsLoc.nth(i);
-            const toInput = resToInputsLoc.nth(i);
-            if (await fromInput.isVisible()) {
-                await fromInput.fill('1');
-                await fromInput.press('Enter');
-                await toInput.fill('2');
-                await toInput.press('Enter');
-            }
-        }
-
-
-        // Get initial counts
-        const researchesInitial = await getTransportCounts('#table-1-2');
-
-        // Set hyperspace to 10
-        await page.locator('#param-researches-tab').click();
-        await page.locator('#hyper-tech-level').fill('10');
-        await page.locator('#hyper-tech-level').press('Enter');
-        const researchesAfterHyper = await getTransportCounts('#table-1-2');
-
-        // Set capacity increase to 10
-        await page.locator('#param-lifeforms-tab').click();
-        await page.locator('#sc-capacity-increase').fill('10');
-        await page.locator('#sc-capacity-increase').press('Enter');
-        await page.locator('#lc-capacity-increase').fill('10');
-        await page.locator('#lc-capacity-increase').press('Enter');
-        const researchesAfterCapIncr = await getTransportCounts('#table-1-2');
-
-        // Verify Researches transport counts
-        expect(researchesInitial.sc).toBe(expectedData.researches.initial.sc);
-        expect(researchesInitial.lc).toBe(expectedData.researches.initial.lc);
-        expect(researchesAfterHyper.sc).toBe(expectedData.researches.afterHyper.sc);
-        expect(researchesAfterHyper.lc).toBe(expectedData.researches.afterHyper.lc);
-        expect(researchesAfterCapIncr.sc).toBe(expectedData.researches.afterCapIncr.sc);
-        expect(researchesAfterCapIncr.lc).toBe(expectedData.researches.afterCapIncr.lc);
-    }
-
-    test('[all items - multiple levels / human] SC/LC counts update correctly', async ({ page }) => {
-        test.setTimeout(60000);
-        await testSecondOuterTab(page, '1', 'Human', {
-            buildings: {
-                initial: { sc: 552, lc: 111 },
-                afterHyper: { sc: 395, lc: 79 },
-                afterCapIncr: { sc: 373, lc: 75 }
-            },
-            researches: {
-                initial: { sc: 3041, lc: 609 },
-                afterHyper: { sc: 2173, lc: 435 },
-                afterCapIncr: { sc: 2055, lc: 411 }
-            }
-        });
-    });
-
-    test('[all items - multiple levels / rocktal] SC/LC counts update correctly', async ({ page }) => {
-        test.setTimeout(60000);
-        await testSecondOuterTab(page, '2', 'Rocktal', {
-            buildings: {
-                initial: { sc: 863, lc: 173 },
-                afterHyper: { sc: 616, lc: 124 },
-                afterCapIncr: { sc: 583, lc: 117 }
-            },
-            researches: {
-                initial: { sc: 3215, lc: 643 },
-                afterHyper: { sc: 2297, lc: 460 },
-                afterCapIncr: { sc: 2173, lc: 435 }
-            }
-        });
-    });
-
-    test('[all items - multiple levels / mechas] SC/LC counts update correctly', async ({ page }) => {
-        test.setTimeout(60000);
-        await testSecondOuterTab(page, '3', 'Mechas', {
-            buildings: {
-                initial: { sc: 588, lc: 118 },
-                afterHyper: { sc: 420, lc: 84 },
-                afterCapIncr: { sc: 397, lc: 80 }
-            },
-            researches: {
-                initial: { sc: 3309, lc: 662 },
-                afterHyper: { sc: 2363, lc: 473 },
-                afterCapIncr: { sc: 2236, lc: 448 }
-            }
-        });
-    });
-
-    test('[all items - multiple levels / Kaleesh] SC/LC counts update correctly', async ({ page }) => {
-        test.setTimeout(60000);
-        await testSecondOuterTab(page, '4', 'Kaleesh', {
-            buildings: {
-                initial: { sc: 839, lc: 168 },
-                afterHyper: { sc: 600, lc: 120 },
-                afterCapIncr: { sc: 567, lc: 114 }
-            },
-            researches: {
-                initial: { sc: 3338, lc: 668 },
-                afterHyper: { sc: 2385, lc: 477 },
-                afterCapIncr: { sc: 2256, lc: 452 }
-            }
-        });
+        await addAllResearchesForRace(page, 1, '1');
+        await fillOneToTwo('#table-1-2');
+        await expect.poll(() => transports('#table-1-2')).toEqual({ sc: 3041, lc: 609 });
+        await setCargo(10, 0);
+        await expect.poll(() => transports('#table-1-2')).toEqual({ sc: 2173, lc: 435 });
+        await setCargo(10, 10);
+        await expect.poll(() => transports('#table-1-2')).toEqual({ sc: 2055, lc: 411 });
     });
 
     test('[researches / human / research-centre bonus] reduces costs and time', async ({ page }) => {

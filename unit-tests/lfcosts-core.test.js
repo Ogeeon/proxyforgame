@@ -220,3 +220,95 @@ describe('LF Costs Calculator - every research level takes at least a second', (
         expect(result.time).toBe(3);
     });
 });
+
+// A Small Cargo holds 5000 and a Large Cargo 25000, plus 5% per Hyperspace
+// Technology level, a quarter more for a Collector and the life-form bonus in %.
+describe('LF Costs Calculator - transports needed', () => {
+    const CARGO = { hyperTechLevel: 0, playerClass: 1, capIncrSC: 0, capIncrLC: 0 };
+
+    it('a partly filled ship still counts as a whole ship', () => {
+        expect(calc.calculateShipCount(5001, CARGO)).toEqual({ needSC: 2, needLC: 1 });
+        expect(calc.calculateShipCount(0, CARGO)).toEqual({ needSC: 0, needLC: 0 });
+    });
+
+    it('a Collector carries a quarter more', () => {
+        // 6250 = 5000 * 1.25: one Collector SC, two of anyone else's.
+        expect(calc.calculateShipCount(6250, { ...CARGO, playerClass: 0 }).needSC).toBe(1);
+        expect(calc.calculateShipCount(6250, CARGO).needSC).toBe(2);
+        expect(calc.calculateShipCount(31250, { ...CARGO, playerClass: 2 }).needLC).toBe(2);
+        expect(calc.calculateShipCount(31250, { ...CARGO, playerClass: 0 }).needLC).toBe(1);
+    });
+
+    it('Hyperspace Technology and the life-form bonus add to the hold', () => {
+        // Level 10: 7500 and 37500; then 10% more of the base: 8000 and 40000.
+        expect(calc.calculateShipCount(75000, { ...CARGO, hyperTechLevel: 10 }))
+            .toEqual({ needSC: 10, needLC: 2 });
+        expect(calc.calculateShipCount(80000, { ...CARGO, hyperTechLevel: 10, capIncrSC: 10, capIncrLC: 10 }))
+            .toEqual({ needSC: 10, needLC: 2 });
+        expect(calc.calculateShipCount(80001, { ...CARGO, hyperTechLevel: 10, capIncrSC: 10, capIncrLC: 10 }))
+            .toEqual({ needSC: 11, needLC: 3 });
+    });
+});
+
+// What the multi-level tab shows with every building of a race, then every
+// building and research, taken from level 1 to 2 under the page's defaults
+// (Collector, no reductions). Priced from data/lf-techs.json, the table the
+// page and the MCP server read, so a changed row of any race shows up here.
+// These were four Playwright tests; lfcosts.spec.js keeps the human one for
+// the wiring.
+describe('LF Costs Calculator - transports for a whole race, levels 1 to 2', () => {
+    const { readFileSync } = require('node:fs');
+    const path = require('node:path');
+    const rows = JSON.parse(readFileSync(path.join(__dirname, '../www/ogame/calc/data/lf-techs.json'), 'utf8'));
+    // A row is [key, type (1 building, 2 research), ...the costs the page hands the calculator].
+    const techCosts = Object.fromEntries(Object.entries(rows).map(([id, row]) => [id, row.slice(2)]));
+    const lfCalc = new LfCalculator(techCosts);
+    const params = {
+        ...PARAMS, mineralResCntrLvl: 0, researchCostReduction: 0,
+        resCentreLvl: 0, runeTechLvl: 0, rbtResCentreLvl: 0, vortexChamberLvl: 0,
+        hyperTechLevel: 0, playerClass: 0, capIncrSC: 0, capIncrLC: 0,
+    };
+
+    /** Metal + crystal + deuterium of every tech of `race` whose type is in `types`. */
+    function resources(race, types) {
+        const p = { ...params, race };
+        let total = 0;
+        for (const [id, row] of Object.entries(rows)) {
+            if (Math.floor(Number(id) / 1000) !== race || !types.includes(row[1])) continue;
+            const techID = Number(id);
+            const r = lfCalc.calculate(techID, 1, 2, 0, lfCalc.computeRsrCostRdc(p),
+                lfCalc.computeBldCostRdc(techID, race, 0, 0), p);
+            total += r.metal + r.crystal + r.deut;
+        }
+        return total;
+    }
+
+    /** [SC, LC] as is, at Hyperspace 10, and at Hyperspace 10 with +10% capacity. */
+    function counts(total) {
+        return [
+            {},
+            { hyperTechLevel: 10 },
+            { hyperTechLevel: 10, capIncrSC: 10, capIncrLC: 10 },
+        ].map((cargo) => {
+            const { needSC, needLC } = lfCalc.calculateShipCount(total, { ...params, ...cargo });
+            return [needSC, needLC];
+        });
+    }
+
+    const EXPECTED = [
+        { race: 1, name: 'Humans', buildings: [[552, 111], [395, 79], [373, 75]], all: [[3041, 609], [2173, 435], [2055, 411]] },
+        { race: 2, name: "Rock'tal", buildings: [[863, 173], [616, 124], [583, 117]], all: [[3215, 643], [2297, 460], [2173, 435]] },
+        { race: 3, name: 'Mechas', buildings: [[588, 118], [420, 84], [397, 80]], all: [[3309, 662], [2363, 473], [2236, 448]] },
+        { race: 4, name: 'Kaelesh', buildings: [[839, 168], [600, 120], [567, 114]], all: [[3338, 668], [2385, 477], [2256, 452]] },
+    ];
+
+    for (const { race, name, buildings, all } of EXPECTED) {
+        it(`${name}: the buildings alone`, () => {
+            expect(counts(resources(race, [1]))).toEqual(buildings);
+        });
+
+        it(`${name}: the buildings and the researches`, () => {
+            expect(counts(resources(race, [1, 2]))).toEqual(all);
+        });
+    }
+});
