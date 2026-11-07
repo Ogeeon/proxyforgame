@@ -71,6 +71,9 @@ const options = {
     },
 
     techData: {},
+
+    /** @type {Record<string, string>} Captions of the report's columns and rows, filled in by the template. */
+    reportText: {},
 };
 
 class LfCostsOrchestrator {
@@ -755,7 +758,9 @@ class LfCostsOrchestrator {
         const rowClass = dataRowCount % 2 === 0 ? 'odd' : 'even';
         const removeBtn = `<button class="btn btn-sm btn-outline-danger research-remove-btn ms-1" style="padding:1px 5px;line-height:1;">&times;</button>`;
 
-        let rowHtml = `<tr class="${rowClass}"><td style="display:none;">${techID}</td>`;
+        // The locale slug names the row in a calculation-error report.
+        const slug = (this.opts.researchList || []).find(r => r.id === techID)?.key ?? String(techID);
+        let rowHtml = `<tr class="${rowClass}" data-report-key="${slug}"><td style="display:none;">${techID}</td>`;
         rowHtml += `<td class="min">${techName}${removeBtn}</td>`;
         if (outerTab === 1) {
             rowHtml += `<td align="center"><input type="text" class="form-control form-control-sm level-input ui-input-margin" value="0"/></td>`;

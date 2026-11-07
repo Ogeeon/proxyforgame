@@ -96,9 +96,20 @@
 
       options.researchList = [
           <?php $first = true; foreach ($techData as $id => $tech): if ($tech[1] == 2): ?>
-          <?=(!$first)?',':''?>{id: <?=$id?>, name: <?=json_encode($l[$tech[0]])?>, race: <?=(int)($id/1000)?>}
+          <?=(!$first)?',':''?>{id: <?=$id?>, key: <?=json_encode($tech[0])?>, name: <?=json_encode($l[$tech[0]])?>, race: <?=(int)($id/1000)?>}
           <?php $first = false; endif; endforeach; ?>
       ];
+
+      // Captions of the calculation-error report (lfcosts-data-collector.js):
+      // the result columns, the summary rows and the fields it names.
+      options.reportText = <?= json_encode(array(
+        'metal' => $l['metal'], 'crystal' => $l['crystal'], 'deuterium' => $l['deuterium'],
+        'msu' => $l['msu'], 'time' => $l['time'], 'points' => $l['points'], 'dm' => $l['dm-abbr'],
+        'total' => $l['total'], 'grand-total' => $l['grand-total'], 'res-needed' => $l['res-needed'],
+        'transports' => $l['transports-needed'], 'sc' => $l['sc-short'], 'lc' => $l['lc-short'],
+        'level' => $l['level'], 'from-level' => $l['from-level'], 'to-level' => $l['to-level'],
+        'parameters' => $l['parameters'], 'exchange-rates' => $l['exchange-rates'], 'cargo-cap-increase' => $l['cargo-cap-increase'],
+      )) ?>;
     }
 </script>
 <?php require_once '../../cookies.tpl'; ?>
@@ -357,7 +368,7 @@
                 <?php $energyHintBuildings = [1002, 2002, 3002, 4002]; ?>
                 <?php foreach ($techs as $tech) :?>
                 <?php // data-race: costs.css shows only the stored race's rows from the first paint (see the script in <head>). ?>
-                <tr class="<?= ($row++ % 2) === 1 ? 'odd' : 'even' ?>" data-race="<?= intdiv((int) $tech, 1000) ?>">
+                <tr class="<?= ($row++ % 2) === 1 ? 'odd' : 'even' ?>" data-race="<?= intdiv((int) $tech, 1000) ?>" data-report-key="<?= $techData[$tech][0] ?>">
                   <td style="display: none;"><?=$tech?></td>
                   <td class="min"><?=$l[$techData[$tech][0]]?><?php if (in_array($tech, $energyHintBuildings)): ?> <i class="bi bi-lightning-charge energy-cost-hint" data-bs-toggle="tooltip" title="<?= $l['energy-cost-to-build'] ?>: 0"></i><?php endif; ?></td>
                   <?php $techName = $l[$techData[$tech][0]]; ?>

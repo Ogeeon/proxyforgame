@@ -17,6 +17,33 @@
  * Grand-totals / needed / transport rows use colspan on the label
  * to shift data left by one: children[2]=M, [3]=C, [4]=D, [5]=time, [6]=pts.
  */
+// The result columns of every table, in display order, as the calculation-
+// error report names them: a cell is marked data-report-cell="<row>.<column>",
+// e.g. "lf-high-performance-transformer.metal" or "grand-total.time", and
+// lfDescribeCell() turns that into a caption.
+const LF_REPORT_COLUMNS = ['metal', 'crystal', 'deuterium', 'msu', 'time', 'points', 'dm'];
+const LF_REPORT_TRANSPORTS = ['sc', 'lc'];
+
+/**
+ * Marks `count` consecutive result cells of a row for the report dialog.
+ * @param {Element|undefined} row
+ * @param {number} firstCol - index of the row's first marked cell
+ * @param {string|undefined} rowKey - the row's name; nothing is marked without one
+ * @param {number} count
+ * @param {string[]} [columns]
+ */
+function markLfReportCells(row, firstCol, rowKey, count, columns = LF_REPORT_COLUMNS) {
+    if (!row || !rowKey) {
+        return;
+    }
+    for (let i = 0; i < count; i++) {
+        const cell = row.children[firstCol + i];
+        if (cell instanceof HTMLElement) {
+            cell.dataset.reportCell = `${rowKey}.${columns[i]}`;
+        }
+    }
+}
+
 class LfRenderer {
     constructor(opts) {
         this.opts = opts;
@@ -41,6 +68,7 @@ class LfRenderer {
         if (outerTab === 0) {
             row.children[fdc + 6].innerHTML = this._fmt(getHalvingCost(techID, result.time));
         }
+        markLfReportCells(row, fdc, row.dataset.reportKey, outerTab === 0 ? 7 : 6);
         if (ENERGY_TECH_IDS.has(techID)) {
             this.renderEnergyTooltip(row, result.energy);
         }
@@ -86,6 +114,7 @@ class LfRenderer {
         row.children[6].innerHTML = '<b>' + this._fmt(this._msu(totals)) + '</b>';
         row.children[7].innerHTML = '<b>' + this._fmtTime(totals.time) + '</b>';
         row.children[8].innerHTML = '<b>' + this._fmt(totals.points)  + '</b>';
+        markLfReportCells(row, 3, 'total', 6);
     }
 
     // -------------------------------------------------------------------------
@@ -109,6 +138,7 @@ class LfRenderer {
         gtRow.children[6].innerHTML = '<b>' + this._fmtTime(grandTotals.time) + '</b>';
         gtRow.children[7].innerHTML = '<b>' + this._fmt(grandTotals.points)  + '</b>';
         if (outerTab === 0) gtRow.children[8].innerHTML = '<b>0</b>';
+        markLfReportCells(gtRow, 2, 'grand-total', 6);
 
         const needMet  = Math.max(0, grandTotals.metal   - availRes.metal);
         const needCrys = Math.max(0, grandTotals.crystal - availRes.crystal);
@@ -117,10 +147,12 @@ class LfRenderer {
         needRow.children[2].innerHTML = '<b>' + this._fmt(needMet)  + '</b>';
         needRow.children[3].innerHTML = '<b>' + this._fmt(needCrys) + '</b>';
         needRow.children[4].innerHTML = '<b>' + this._fmt(needDeut) + '</b>';
+        markLfReportCells(needRow, 2, 'res-needed', 3);
 
         const tRow = rows.at(-1);
         this._setCellHtml(tRow.children[2], numToOGame(needSC) + ' <abbr data-bs-toggle="tooltip" title="' + this.opts.scFull + '">' + this.opts.scShort + '</abbr>');
         this._setCellHtml(tRow.children[3], numToOGame(needLC) + ' <abbr data-bs-toggle="tooltip" title="' + this.opts.lcFull + '">' + this.opts.lcShort + '</abbr>');
+        markLfReportCells(tRow, 2, 'transports', 2, LF_REPORT_TRANSPORTS);
     }
 
     // -------------------------------------------------------------------------
@@ -196,6 +228,7 @@ class LfRenderer {
             rowStr += `<td align="center">${this._fmt(Math.round(result.points))}</td>`;
             rowStr += '</tr>';
             tbl.tBodies[0].insertAdjacentHTML('beforeend', rowStr);
+            markLfReportCells(tbl.tBodies[0].lastElementChild ?? undefined, 1, `level-${level}`, 6);
         });
 
         footer.forEach(r => tbl.tBodies[0].appendChild(r));
@@ -233,6 +266,7 @@ class LfRenderer {
         rows[totalsRow].children[4].innerHTML = '<b>' + this._fmt(this._msu(totals))     + '</b>';
         rows[totalsRow].children[5].innerHTML = '<b>' + this._fmtTime(totals.time)       + '</b>';
         rows[totalsRow].children[6].innerHTML = '<b>' + this._fmt(Math.round(totals.points)) + '</b>';
+        markLfReportCells(rows[totalsRow], 1, 'total', 6);
 
         const needMet  = Math.max(0, totals.metal   - availRes.metal);
         const needCrys = Math.max(0, totals.crystal - availRes.crystal);
@@ -240,9 +274,11 @@ class LfRenderer {
         rows[totalsRow + 2].children[1].innerHTML = '<b>' + this._fmt(needMet)  + '</b>';
         rows[totalsRow + 2].children[2].innerHTML = '<b>' + this._fmt(needCrys) + '</b>';
         rows[totalsRow + 2].children[3].innerHTML = '<b>' + this._fmt(needDeut) + '</b>';
+        markLfReportCells(rows[totalsRow + 2], 1, 'res-needed', 3);
 
         this._setCellHtml(rows[totalsRow + 3].children[1], numToOGame(needSC) + ' <abbr data-bs-toggle="tooltip" title="' + this.opts.scFull + '">' + this.opts.scShort + '</abbr>');
         this._setCellHtml(rows[totalsRow + 3].children[2], numToOGame(needLC) + ' <abbr data-bs-toggle="tooltip" title="' + this.opts.lcFull + '">' + this.opts.lcShort + '</abbr>');
+        markLfReportCells(rows[totalsRow + 3], 1, 'transports', 2, LF_REPORT_TRANSPORTS);
     }
 
     /** Zero out Tab 3 when techID = 0. */

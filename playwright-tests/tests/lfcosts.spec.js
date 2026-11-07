@@ -1,5 +1,6 @@
 import { test, expect, expectLoadsCleanly } from './base';
 import { expectMcpBoundsMatchPage } from './mcp-bounds';
+import { catchReport, reportCell, sendReport } from './report-dialog';
 
 test.describe('Lifeforms costs Calculator Page', () => {
     test.beforeEach(async ({ context, page }) => {
@@ -396,17 +397,69 @@ test.describe('Multi-level table with an empty level range', () => {
     });
 });
 
-// LF costs has no reportSnapshot() hook yet, so the calculation-error report
-// falls back to walking the visible fields: a table input is named by its
-// aria-label, a checkbox reads yes/no, and what still stands at its default -
-// or is empty - is not listed, nor is a field marked data-report-skip.
+// The calculation-error report attaches the calculator's own snapshot
+// (reportSnapshot in lfcosts-data-collector.js): the tabs the number was read
+// on, the cell it came from, and only the fields that differ from their
+// factory defaults - never the resources available, nor the full-numbers
+// switch, which only changes how the numbers are written.
+test.describe('LF Costs Calculator - calculation-error report', () => {
+    test('names the mode, the selected cell and the changed fields', async ({ page }) => {
+        await page.addInitScript(() => {
+            localStorage.setItem('lastChange', 'key-value;true,value;99999');
+        });
+        await page.goto('/lfcosts');
+        const sent = await catchReport(page);
+
+        await page.locator('#tabtag-0').click();
+        await page.locator('#tabtag-0-1').click();
+        const level = page.locator('#table-0-1 tr[data-report-key="resid-sector"] input');
+        await level.fill('5');
+        await level.press('Enter');
+        await page.locator('#param-buildings-tab').click();
+        await page.locator('#robot-factory-level').fill('10');
+        await page.locator('#robot-factory-level').press('Enter');
+        await page.locator('#param-common-tab').click();
+        await page.locator('#full-numbers').check();
+        await page.locator('#metal-available-0-1').fill('5000');
+        await page.locator('#metal-available-0-1').press('Enter');
+        const cell = page.locator('#table-0-1 [data-report-cell="grand-total.metal"]');
+        await expect(cell).toHaveText('72');
+
+        await reportCell(page, cell);
+        await expect(page.locator('#report-calc-values li')).toHaveText([
+            'Mode: All items - one level › Buildings',
+            'Selected: Grand total, Metal',
+            'Buildings',
+            'Residential Sector — Level: 5',
+            'Parameters — Buildings',
+            'Robotics factory: 10',
+        ]);
+
+        await sendReport(page, sent, '73');
+        expect(sent()?.get('context')).toBe([
+            'mode: tabtag-0 / tabtag-0-1',
+            'selected: grand-total.metal = "72"',
+            'resid-sector.level = 5',
+            'robot-factory-level = 10',
+        ].join('\n'));
+    });
+});
+
+// Every calculator has a reportSnapshot() hook now, but sidebar.js still walks
+// the visible fields when a page has none - or when the hook throws. Without
+// the hook, a table input is named by its aria-label, a checkbox reads
+// yes/no, and what still stands at its default - or is empty - is not listed,
+// nor is a field marked data-report-skip.
 test.describe('Calculation-error report without a calculator hook', () => {
     test('lists the changed fields by their aria-label and leaves out defaults and empty values', async ({ page }) => {
         await page.addInitScript(() => {
             localStorage.setItem('lastChange', 'key-value;true,value;99999');
         });
         await page.goto('/lfcosts');
-        expect(await page.evaluate(() => typeof globalThis.reportSnapshot)).toBe('undefined');
+        await page.evaluate(() => {
+            delete globalThis.reportSnapshot;
+            delete globalThis.describeCell;
+        });
 
         await page.locator('#tabtag-0').click();
         await page.locator('#tabtag-0-1').click();
