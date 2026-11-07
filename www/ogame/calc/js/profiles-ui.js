@@ -1198,9 +1198,15 @@ function readSavedSet(set) {
  * Created when the deferred script runs - the DOM is parsed by then - so a
  * calculator can use it from its own DOMContentLoaded handler.
  *
+ * Also null when Bootstrap or its facade (bootstrap-access.js) failed to load:
+ * init() builds tooltips right away, and this runs outside the page's inline
+ * guard, so it would throw a ReferenceError on top of the pfgScriptsFailed()
+ * banner the guard shows.
+ *
  * @returns {?ProfilesUi}
  */
 function createProfilesUi() {
+  if (typeof bootstrapAvailable !== 'function' || !bootstrapAvailable()) return null;
   const selector = document.getElementById('pf-selector');
   if (!selector || typeof pfgProfileText === 'undefined') return null;
   const store = new ProfileStore();

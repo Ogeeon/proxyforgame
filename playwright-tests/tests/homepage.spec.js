@@ -81,4 +81,22 @@ test.describe('Sidebar with the Bootstrap facade missing', () => {
       'no uncaught reference to the missing facade',
     ).toEqual([]);
   });
+
+  // A calculator page adds the profile controller, which builds its tooltips as
+  // soon as profiles-ui.js runs - outside the page's inline guard. It has to
+  // stand down too, leaving only the "scripts failed" banner.
+  test('a calculator page shows the banner and nothing throws', async ({ page }) => {
+    const errors = [];
+    page.on('pageerror', (e) => errors.push(String(e)));
+
+    await page.route('**/js/bootstrap-access.js*', (route) => route.abort());
+    await page.goto('/flight');
+    await page.waitForLoadState('networkidle');
+
+    await expect(page.locator('#pfg-scripts-failed')).toBeVisible();
+    expect(
+      errors.filter((e) => /is not defined/.test(e)),
+      'no uncaught reference to the missing facade',
+    ).toEqual([]);
+  });
 });
