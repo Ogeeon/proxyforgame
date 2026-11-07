@@ -1,4 +1,4 @@
-import { test, expect, expectLoadsCleanly } from './base';
+import { test, expect, expectLoadsCleanly, expectTooltipTitle, openDialog, dialogBody, expectExpanded } from './base';
 import { expectMcpBoundsMatchPage } from './mcp-bounds';
 import { catchReport, reportCell, sendReport } from './report-dialog';
 
@@ -273,7 +273,7 @@ test.describe('crawler count capped by mine levels', () => {
         await oneCrawler(page).press('Tab');
         // The hint is a Bootstrap tooltip, so its text lives in
         // data-bs-original-title; Bootstrap empties `title´ when it adopts the field.
-        await expect(oneCrawler(page)).toHaveAttribute('data-bs-original-title', /Max crawlers: 1\.040/);
+        await expectTooltipTitle(oneCrawler(page), /Max crawlers: 1\.040/);
     });
 
     test('caps each planet on the All planets tab on blur', async ({ page }) => {
@@ -307,7 +307,7 @@ test.describe('All planets - delete confirmation', () => {
         await page.locator('#planetsSpin-down').click();
 
         // An untouched planet goes away silently, so the table really shrinks back
-        await expect(page.locator('.dyn-dialog.show')).toHaveCount(0);
+        await expect(openDialog(page)).toHaveCount(0);
         await expect(page.locator('#planetsSpin')).toHaveValue('8');
         await expect(page.locator('#all-planets-prod .control-delete')).toHaveCount(8);
     });
@@ -323,9 +323,9 @@ test.describe('All planets - delete confirmation', () => {
 
         await page.locator('#planetsSpin-down').click();
 
-        const dialog = page.locator('.dyn-dialog.show');
+        const dialog = openDialog(page);
         await expect(dialog).toBeVisible();
-        const dialogMessage = await dialog.locator('.modal-body').innerText();
+        const dialogMessage = await dialogBody(dialog).innerText();
         expect(dialogMessage).toContain('You entered data for this planet');
         // Cancelling keeps the planet and rolls the counter back
         await dialog.locator('.btn-secondary').click();
@@ -576,7 +576,7 @@ test.describe('Collector character class bonus', () => {
         await page.locator('#param-lifeforms-tab').click();
         const hint = page.locator('#lf-crawler-bonus').locator('xpath=../following-sibling::i[1]');
         // Bootstrap adopts the icon on load and moves `title´ to data-bs-original-title.
-        await expect(hint).toHaveAttribute('data-bs-original-title', /Ion Crystal Modules/);
+        await expectTooltipTitle(hint, /Ion Crystal Modules/);
     });
 
     test('lf-crawler-bonus reduces crawler energy consumption by the same percentage', async ({ page }) => {
@@ -1062,14 +1062,14 @@ test.describe('Life Forms amortization', () => {
     async function openLfAmort(page) {
         await page.locator('#tabtag2').click();
         await page.locator('text=Amortisation of Life Form buildings and researches').click();
-        await expect(page.locator('#all-pln-acc-lf-amort')).toHaveClass(/show/);
+        await expectExpanded(page.locator('#all-pln-acc-lf-amort'));
     }
 
     async function openResearchLevels(page) {
         await page.locator('#param-lifeforms-tab').click();
         if (!(await page.locator('#lf-research-levels').isVisible()))
             await page.locator('#lf-research-levels-toggle').click();
-        await expect(page.locator('#lf-research-levels')).toHaveClass(/show/);
+        await expectExpanded(page.locator('#lf-research-levels'));
     }
 
     // Mark a research as available to the player, so the table may offer it.

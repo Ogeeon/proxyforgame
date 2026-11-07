@@ -1,4 +1,4 @@
-import { test, expect, expectLoadsCleanly } from './base';
+import { test, expect, expectLoadsCleanly, expectTooltipTitle } from './base';
 import { expectMcpBoundsMatchPage } from './mcp-bounds';
 import { catchReport, reportCell, sendReport } from './report-dialog';
 
@@ -393,7 +393,7 @@ test.describe('Moon Calculator - Sensor phalanx', () => {
     test('the class bonus names the panel row and takes any Total', async ({ page }) => {
         const hint = page.locator('#discoverer-bonus').locator('xpath=../following-sibling::i[1]');
         // Bootstrap adopts the icon on load and moves `title´ to data-bs-original-title.
-        await expect(hint).toHaveAttribute('data-bs-original-title', /'Total'.*'Discoverer'/);
+        await expectTooltipTitle(hint, /'Total'.*'Discoverer'/);
 
         await page.locator('#discoverer-bonus').fill('1234.5');
         await page.locator('#discoverer-bonus').blur();

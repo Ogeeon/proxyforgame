@@ -1,4 +1,4 @@
-import { test, expect, expectLoadsCleanly } from './base';
+import { test, expect, expectLoadsCleanly, openDialog, dialogBody, toastBody } from './base';
 import { expectMcpBoundsMatchPage } from './mcp-bounds';
 import { readFileSync } from 'fs';
 import { join } from 'path';
@@ -111,8 +111,8 @@ test.describe('Costs Calculator Page', () => {
         await graviton.blur();
 
         await expect(page.locator('#research-lab-level')).toHaveValue('12');
-        await expect(page.locator('.toast-body')).toContainText('12');
-        await expect(page.locator('.toast-body')).toContainText('Graviton technology');
+        await expect(toastBody(page)).toContainText('12');
+        await expect(toastBody(page)).toContainText('Graviton technology');
         // The research is now possible, so the row carries a build time.
         await expect(page.locator('#table-0-4 tr:nth-child(17) td:nth-child(9)')).not.toContainText('0s');
     });
@@ -161,7 +161,7 @@ test.describe('Costs Calculator Page', () => {
         await page.locator('#tech-types-select').selectOption('199');
 
         await expect(page.locator('#research-lab-level')).toHaveValue('12');
-        await expect(page.locator('.toast-body')).toContainText('Graviton technology');
+        await expect(toastBody(page)).toContainText('Graviton technology');
     });
 
     test('[researches] Discoverer class bonus boosts the Discoverer research-speed bonus', async ({ page }) => {
@@ -700,7 +700,7 @@ test.describe('Costs Calculator - Robot/Nanite factory disclaimer', () => {
 
         await expect(modal).toBeVisible();
         // Body links to the construction queue calculator
-        await expect(modal.locator('.modal-body a')).toHaveAttribute('href', /^\/[a-z]{2}\/queue$/);
+        await expect(dialogBody(modal).locator('a')).toHaveAttribute('href', /^\/[a-z]{2}\/queue$/);
 
         // Dismiss; it must not reappear on further input (remembered via cookie)
         await modal.locator('.btn-close').click();
@@ -894,9 +894,9 @@ test.describe('Costs Calculator - LifeForm research bonuses table', () => {
         await page.locator('#lf-research-paste-import').click();
 
         // A warning is shown, the paste modal stays open and nothing is written
-        const dialog = page.locator('.dyn-dialog.show');
+        const dialog = openDialog(page);
         await expect(dialog).toBeVisible();
-        const dialogMessage = await dialog.locator('.modal-body').innerText();
+        const dialogMessage = await dialogBody(dialog).innerText();
         expect(dialogMessage).toContain('Espionage');
         await dialog.locator('.btn-primary').click();
         await expect(dialog).toHaveCount(0);
@@ -919,9 +919,9 @@ test.describe('Costs Calculator - LifeForm research bonuses table', () => {
         await page.locator('#lf-research-paste-txtarea').fill(partial);
         await page.locator('#lf-research-paste-import').click();
 
-        const dialog = page.locator('.dyn-dialog.show');
+        const dialog = openDialog(page);
         await expect(dialog).toBeVisible();
-        const dialogMessage = await dialog.locator('.modal-body').innerText();
+        const dialogMessage = await dialogBody(dialog).innerText();
         expect(dialogMessage).toContain('16');
         await dialog.locator('.btn-primary').click();
         await expect(dialog).toHaveCount(0);
@@ -1148,7 +1148,7 @@ test.describe('Costs Calculator - universe picker', () => {
         await page.locator('#country').selectOption('en');
         await page.locator('#universe').selectOption({ index: 0 });
 
-        await expect(page.locator('.toast-body')).toContainText('universe settings');
+        await expect(toastBody(page)).toContainText('universe settings');
         await expect(page.locator('.panel-overlay')).toHaveCount(0);
     });
 
@@ -1181,7 +1181,7 @@ test.describe('Costs Calculator - universe picker', () => {
         await page.locator('#country').selectOption('en');
         await page.locator('#universe').selectOption({ index: 0 });
 
-        await expect(page.locator('.toast-body')).toContainText('universe settings');
+        await expect(toastBody(page)).toContainText('universe settings');
         await expect(page.locator('#research-speed')).toHaveValue('7');
     });
 });

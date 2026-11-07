@@ -1,4 +1,4 @@
-import { test, expect, expectLoadsCleanly } from './base';
+import { test, expect, expectLoadsCleanly, expectTooltipTitle, openDialog, dialogBody } from './base';
 import { expectMcpBoundsMatchPage } from './mcp-bounds';
 import { catchReport, reportCell, sendReport } from './report-dialog';
 import { readFileSync } from 'fs';
@@ -71,7 +71,7 @@ test.describe('Expeditions Calculator - DOM integration', () => {
             const field = page.locator(`#class-bonus-${cls}`);
             const hint = field.locator('xpath=../following-sibling::i[1]');
             // Bootstrap adopts the icon on load and moves `title´ to data-bs-original-title.
-            await expect(hint).toHaveAttribute('data-bs-original-title', new RegExp(`'Total'.*'${row}'`));
+            await expectTooltipTitle(hint, new RegExp(`'Total'.*'${row}'`));
 
             await fillNumber(page, `#class-bonus-${cls}`, '1234.5');
             await expect(field).toHaveValue('1234.5');
@@ -268,9 +268,9 @@ test.describe('Expeditions Calculator - cargo bonus import', () => {
     test('two empty fields warn and keep the dialog open', async ({ page }) => {
         await page.locator('#lf-bonuses-read-btn').click();
 
-        const dialog = page.locator('.dyn-dialog.show');
+        const dialog = openDialog(page);
         await expect(dialog).toBeVisible();
-        const alertMsg = await dialog.locator('.modal-body').innerText();
+        const alertMsg = await dialogBody(dialog).innerText();
         expect(alertMsg).toContain('API 2');
         await dialog.locator('.btn-primary').click();
         await expect(dialog).toHaveCount(0);
@@ -283,7 +283,7 @@ test.describe('Expeditions Calculator - cargo bonus import', () => {
         await page.locator('#own-api-input').fill('111');
         await page.locator('#lf-bonuses-read-btn').click();
 
-        const dialog = page.locator('.dyn-dialog.show');
+        const dialog = openDialog(page);
         await expect(dialog).toHaveCount(1);
         await dialog.locator('.btn-primary').click();
         await expect(dialog).toHaveCount(0);

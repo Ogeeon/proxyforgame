@@ -36,6 +36,29 @@ test.describe('Changelog dialog on load', () => {
 });
 
 /**
+ * The tripwire for a Bootstrap major upgrade. www/js/bootstrap-access.js and
+ * www/js/bootstrap-tooltip-guard.js read the bundle's UMD global and the
+ * components below off it; Bootstrap 6 is ESM-only and renames Modal, Offcanvas
+ * and Dropdown. This test MUST fail on v6: that failure is the signal to follow
+ * docs/bootstrap-6-migration.md, not something to fix by loosening the test.
+ */
+test('the bundle is Bootstrap 5 with its UMD global', async ({ page }) => {
+  await page.goto('/');
+  const bundle = await page.evaluate(() => {
+    const bs = /** @type {any} */ (window).bootstrap;
+    if (!bs) return null;
+    return {
+      components: ['Tooltip', 'Popover', 'Modal', 'Tab', 'Collapse', 'Toast', 'Offcanvas']
+        .filter((name) => typeof bs[name] !== 'function'),
+      version: bs.Tooltip?.VERSION ?? '',
+    };
+  });
+  expect(bundle, 'window.bootstrap is defined').not.toBeNull();
+  expect(bundle?.components, 'components missing from window.bootstrap').toEqual([]);
+  expect(bundle?.version, 'bootstrap.Tooltip.VERSION').toMatch(/^5\./);
+});
+
+/**
  * The bundle is served from our own origin, so the only way it goes missing is a
  * request that failed. A `defer` script that never arrives leaves `bootstrap`
  * undefined, and the sidebar wiring used to throw straight out of its

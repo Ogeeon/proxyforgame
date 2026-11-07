@@ -1,4 +1,4 @@
-import { test, expect } from './base';
+import { test, expect, tooltipBubble, openDialog, openNonProfileDialog, dialogHeader, dialogFooter, toasts } from './base';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
@@ -144,9 +144,9 @@ test('the restore button has a Bootstrap tooltip that goes with it', async ({ pa
 
     const reset = page.locator('#one-planet-prod .pf-reset').first();
     await reset.hover();
-    await expect(page.locator('.tooltip')).toContainText('In game: 30');
+    await expect(tooltipBubble(page)).toContainText('In game: 30');
     await reset.click();
-    await expect(page.locator('.tooltip')).toHaveCount(0);
+    await expect(tooltipBubble(page)).toHaveCount(0);
 });
 
 test('the buttons of the manage dialog have a tooltip that goes with the row', async ({ page }) => {
@@ -155,12 +155,12 @@ test('the buttons of the manage dialog have a tooltip that goes with the row', a
 
     const del = page.locator('#pf-manage-rows tr').first().locator('button').nth(1);
     await del.hover();
-    await expect(page.locator('.tooltip')).toContainText('Delete');
+    await expect(tooltipBubble(page)).toContainText('Delete');
     await del.click();
-    await expect(page.locator('.tooltip')).toHaveCount(0);
-    await page.locator('.modal.show:not([id^="pf-"]) .btn-primary').click();
+    await expect(tooltipBubble(page)).toHaveCount(0);
+    await openNonProfileDialog(page).locator('.btn-primary').click();
     await expect(page.locator('#pf-manage-rows tr')).toHaveCount(0);
-    await expect(page.locator('.tooltip')).toHaveCount(0);
+    await expect(tooltipBubble(page)).toHaveCount(0);
 });
 
 test('the overrides badge restores only the ticked values', async ({ page }) => {
@@ -372,7 +372,7 @@ test('a planet row added to or removed from the table is added to or removed fro
 
     await allPlanetsRow(page, 0).locator('.control-delete').click();
     // The planet has levels in it: production asks first.
-    await page.locator('.dyn-dialog.show .btn-primary').click();
+    await openDialog(page).locator('.btn-primary').click();
     await expect.poll(async () => (await activeProfile(page)).planets.map((p) => p.id)).toEqual([ids[1], ids[2], added.id]);
 });
 
@@ -446,7 +446,7 @@ test('the backup file restores the profiles', async ({ page }) => {
     // Delete the profile, then restore it from the file.
     await page.locator('#pf-manage-rows tr').first().locator('button').nth(1).click();
     // The confirm dialog is the one shown modal that is not ours.
-    await page.locator('.modal.show:not([id^="pf-"]) .btn-primary').click();
+    await openNonProfileDialog(page).locator('.btn-primary').click();
     await expect(page.locator('#pf-manage-rows tr')).toHaveCount(0);
     // As on another device: the universe was never seen here.
     await page.evaluate((key) => localStorage.removeItem(key), universeKey);
@@ -469,8 +469,8 @@ test('the delete confirmation is headed in the page language', async ({ page }) 
     await openWithProfile(page, '/ru/queue');
     await chooseAction(page, '__manage');
     await page.locator('#pf-manage-rows tr').first().locator('button').nth(1).click();
-    const dialog = page.locator('.dyn-dialog.show');
-    await expect(dialog.locator('.modal-header')).toHaveText('Внимание');
+    const dialog = openDialog(page);
+    await expect(dialogHeader(dialog)).toHaveText('Внимание');
     await dialog.locator('.btn-secondary').click();
     await expect(page.locator('#pf-manage-rows tr')).toHaveCount(1);
 });
@@ -482,7 +482,7 @@ test('editing a profile returns to the manage dialog', async ({ page }) => {
 
     await edit.click();
     await expect(page.locator('#pf-props-modal')).toBeVisible();
-    await page.locator('#pf-props-modal .modal-footer .btn-secondary').click();
+    await dialogFooter(page.locator('#pf-props-modal')).locator('.btn-secondary').click();
     await expect(page.locator('#pf-props-modal')).toBeHidden();
     await expect(page.locator('#pf-manage-modal')).toBeVisible();
 
@@ -713,7 +713,7 @@ test('a Companion export of an account with no profile is offered by the badge a
 
     await expect(page.locator('#pf-new-profiles-modal')).toBeHidden();
     await expect(badge).toBeHidden();
-    await expect(page.locator('.toast.text-bg-success')).toContainText('Other');
+    await expect(toasts(page, '.text-bg-success')).toContainText('Other');
     const created = await page.evaluate(() => JSON.parse(localStorage.getItem('pfg_profiles') || '[]')
         .find((entry) => entry.playerId === 100002) || null);
     expect(created?.label).toBe('Other');
@@ -731,7 +731,7 @@ test('ignoring a Companion account is permanent until the manager takes it back'
     await badge.click();
     await page.locator('#pf-new-profiles-rows button', { hasText: 'Ignore' }).click();
     // The choice names its consequence before it is taken.
-    const confirm = page.locator('.dyn-dialog.show');
+    const confirm = openDialog(page);
     await expect(confirm).toContainText('Other');
     await expect(confirm).toContainText('never be offered again');
     await confirm.locator('.btn-primary').click();
@@ -840,7 +840,7 @@ test('the Companion badge follows profiles created and deleted outside its dialo
     // Deleting that profile makes the account a candidate again.
     await chooseAction(page, '__manage');
     await page.locator('#pf-manage-rows tr').first().locator('button').nth(1).click();
-    await page.locator('.modal.show:not([id^="pf-"]) .btn-primary').click();
+    await openNonProfileDialog(page).locator('.btn-primary').click();
     await expect(page.locator('#pf-manage-rows tr')).toHaveCount(0);
     await expect(badge).toHaveText('1');
 });
@@ -855,7 +855,7 @@ test('an account ignored in one tab leaves the badge of another', async ({ page,
 
     await page.locator('#pf-companion-new').click();
     await page.locator('#pf-new-profiles-rows button', { hasText: 'Ignore' }).click();
-    await page.locator('.dyn-dialog.show .btn-primary').click();
+    await openDialog(page).locator('.btn-primary').click();
     await expect(page.locator('#pf-companion-new')).toBeHidden();
 
     await expect(second.locator('#pf-companion-new')).toBeHidden();

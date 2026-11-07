@@ -1,4 +1,4 @@
-import { test, expect, expectLoadsCleanly } from './base';
+import { test, expect, expectLoadsCleanly, expectTooltipTitle, tooltipBubble, openDialog, dialogBody, toasts, toastBody, toastClose } from './base';
 import { expectMcpBoundsMatchPage } from './mcp-bounds';
 import { catchReport, reportCell, sendReport } from './report-dialog';
 import { readFileSync } from 'fs';
@@ -168,8 +168,8 @@ test.describe('Flight Calculator - Spy Report Import', () => {
         // The stubbed 503 raises a toast of its own, and a danger toast waits for
         // the user instead of fading — get it off the corner it shares with the
         // controls this test is about to click.
-        await page.locator('.toast .btn-close').click();
-        await expect(page.locator('.toast')).toHaveCount(0);
+        await toastClose(page).click();
+        await expect(toasts(page)).toHaveCount(0);
 
         await showParamTab(page, '#circular-galaxies');
         await expect(page.locator('#circular-galaxies')).not.toBeChecked();
@@ -190,7 +190,7 @@ test.describe('Flight Calculator - Spy Report Import', () => {
             { status: 502, body: '<html><body>Bad Gateway</body></html>' },
             { status: 200, body: '<br /><b>Warning</b>: gzuncompress(): data error' },
         ];
-        const dialog = page.locator('.dyn-dialog.show');
+        const dialog = openDialog(page);
         for (const { status, body } of badResponses) {
             // Routes registered later win, so this overrides the fixture route above
             await page.route(OGAME_API_ROUTE, (route) => route.fulfill({ status, body }));
@@ -202,7 +202,7 @@ test.describe('Flight Calculator - Spy Report Import', () => {
             // awaits showAlertModal() before its `finally` runs - so the dialog
             // itself is what to wait for here, not the overlay.
             await expect(dialog, `alert shown for ${JSON.stringify(body)}`).toBeVisible();
-            const alertMsg = await dialog.locator('.modal-body').innerText();
+            const alertMsg = await dialogBody(dialog).innerText();
             expect(alertMsg.length, `alert shown for ${JSON.stringify(body)}`).toBeGreaterThan(0);
             await dialog.locator('.btn-primary').click();
             await expect(dialog).toHaveCount(0);
@@ -282,10 +282,10 @@ test.describe('Flight Calculator - Server data fetch', () => {
         await page.locator('#country').selectOption('en');
         await page.locator('#universe').selectOption({ index: 0 });
 
-        const toast = page.locator('.toast');
+        const toast = toasts(page);
         await expect(toast).toBeVisible();
         await expect(toast).toHaveClass(/text-bg-danger/);
-        await expect(toast.locator('.toast-body')).not.toBeEmpty();
+        await expect(toastBody(toast)).not.toBeEmpty();
 
         await toast.locator('.btn-close').click();
         await expect(toast).toHaveCount(0);
@@ -308,7 +308,7 @@ test.describe('Flight Calculator - Server data fetch', () => {
         await page.locator('#country').selectOption('en');
         await page.locator('#universe').selectOption({ index: 0 });
 
-        const toast = page.locator('.toast');
+        const toast = toasts(page);
         await expect(toast).toBeVisible();
         await expect(toast).toHaveClass(/text-bg-warning/);
     });
@@ -453,14 +453,14 @@ test.describe('Flight Calculator - OGame Object Import', () => {
         await page.locator('#import-own-api').click();
         await expect(page.locator('#own-api-reader')).toBeVisible();
 
-        const dialog = page.locator('.dyn-dialog.show');
+        const dialog = openDialog(page);
         // Malformed JSON, and a bare primitive that JSON.parse would otherwise accept ("111" -> 111).
         for (const bad of ['{not valid json', '111']) {
             await page.locator('#own-api-input').fill(bad);
             await page.locator(OWN_API_IMPORT_BUTTON).click();
 
             await expect(dialog, `alert shown for input ${JSON.stringify(bad)}`).toBeVisible();
-            const alertMsg = await dialog.locator('.modal-body').innerText();
+            const alertMsg = await dialogBody(dialog).innerText();
             expect(alertMsg.length, `alert shown for input ${JSON.stringify(bad)}`).toBeGreaterThan(0);
             await dialog.locator('.btn-primary').click();
             await expect(dialog).toHaveCount(0);
@@ -489,16 +489,17 @@ const SHIP = {
 // ships — and only one stays expanded, so tests open the one they need.
 /**
  * Expands a Bootstrap accordion section unless its probe element is visible.
- * Drives Bootstrap's Collapse API and waits for shown.bs.collapse so the panel
- * is fully open (height:auto) before the caller interacts — a plain click would
- * return mid-animation, leaving lower controls overlapped by the next header.
+ * Expands it through the page's Bootstrap facade (www/js/bootstrap-access.js) and
+ * waits for the collapse-shown event so the panel is fully open (height:auto)
+ * before the caller interacts — a plain click would return mid-animation, leaving
+ * lower controls overlapped by the next header.
  */
 async function openCollapse(page, target, probe) {
     if (!await page.locator(probe).isVisible()) {
         await page.evaluate((t) => new Promise((resolve) => {
             const el = document.querySelector(t);
-            el.addEventListener('shown.bs.collapse', resolve, { once: true });
-            bootstrap.Collapse.getOrCreateInstance(el).show();
+            el.addEventListener(window.BS_EVENT.collapseShown, resolve, { once: true });
+            window.expandCollapse(el);
         }), target);
     }
     await expect(page.locator(probe)).toBeVisible();
@@ -511,8 +512,7 @@ async function openCollapse(page, target, probe) {
 async function showParamTab(page, probe) {
     await page.evaluate((sel) => {
         const pane = document.querySelector(sel).closest('.tab-pane');
-        const btn = document.querySelector(`#paramTabs [data-bs-target="#${pane.id}"]`);
-        bootstrap.Tab.getOrCreateInstance(btn).show();
+        window.activateTab(document.querySelector(`#paramTabs [data-bs-target="#${pane.id}"]`));
     }, probe);
     await expect(page.locator(probe)).toBeVisible();
 }
@@ -1247,7 +1247,7 @@ test.describe('Flight Calculator - Arrival Time', () => {
 
         await expect(button).not.toHaveAttribute('aria-describedby', /tooltip/);
         // The midnight shortcut clicked in beforeEach must not have left one behind either
-        await expect(page.locator('.tooltip')).toHaveCount(0);
+        await expect(tooltipBubble(page)).toHaveCount(0);
     });
 
     test('swapping the mode relabels departure and arrival', async ({ page }) => {
@@ -1725,7 +1725,7 @@ test.describe('Flight Calculator - Class bonus fields', () => {
             const field = page.locator(`#${id}`);
             const hint = field.locator('xpath=../following-sibling::i[1]');
             // Bootstrap adopts the icon on load and moves `title´ to data-bs-original-title.
-            await expect(hint).toHaveAttribute('data-bs-original-title', new RegExp(`'Total'.*'${row}'`));
+            await expectTooltipTitle(hint, new RegExp(`'Total'.*'${row}'`));
 
             await field.fill('1234.5');
             await field.blur();
