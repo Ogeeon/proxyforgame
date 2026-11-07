@@ -37,6 +37,13 @@ updates:
     allow:
       - dependency-name: "bootstrap"
       - dependency-name: "bootstrap-icons"
+    # A Bootstrap major is a migration, not a monthly bump: v6 drops the UMD global
+    # and renames components, events and CSS variables. It is taken on deliberately,
+    # following docs/bootstrap-6-migration.md. Bootstrap Icons version on their own
+    # scheme and are not held back.
+    ignore:
+      - dependency-name: "bootstrap"
+        update-types: ["version-update:semver-major"]
     groups:
       bootstrap:
         patterns:

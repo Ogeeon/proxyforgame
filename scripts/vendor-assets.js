@@ -37,9 +37,25 @@ const FILES = [
 
 const INC = 'vendor.inc.php';
 
+// The Bootstrap major the site's JavaScript and CSS are written against. Another
+// major is a migration (docs/bootstrap-6-migration.md), not a vendor refresh, so
+// both `make vendor` and `make vendor-check` refuse it. Change this deliberately,
+// on migration day, together with the code the runbook lists.
+const BOOTSTRAP_MAJOR = 5;
+
 /** @param {string} pkg */
 function versionOf(pkg) {
   return JSON.parse(fs.readFileSync(path.join(MODULES, pkg, 'package.json'), 'utf8')).version;
+}
+
+/** Exit with a pointer to the runbook if node_modules holds another Bootstrap major. */
+function assertBootstrapMajor() {
+  const version = versionOf('bootstrap');
+  const major = Number.parseInt(version.split('.')[0], 10);
+  if (major !== BOOTSTRAP_MAJOR) {
+    console.error(`Bootstrap ${major} (${version}) in node_modules, the site is built for Bootstrap ${BOOTSTRAP_MAJOR}: see docs/bootstrap-6-migration.md.`);
+    process.exit(1);
+  }
 }
 
 /**
@@ -75,6 +91,7 @@ function expected() {
 
 function main() {
   const check = process.argv.includes('--check');
+  assertBootstrapMajor();
   const stale = [];
   for (const [rel, bytes] of expected()) {
     const target = path.join(VENDOR, rel);
