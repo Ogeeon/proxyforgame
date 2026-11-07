@@ -1,5 +1,6 @@
 import { test, expect, expectLoadsCleanly } from './base';
 import { energyRows, expectMcpBoundsMatchPage } from './mcp-bounds';
+import { catchReport, reportCell, sendReport } from './report-dialog';
 
 test.describe('Terraformer Calculator Page', () => {
     test.beforeEach(async ({ context, page }) => {
@@ -266,6 +267,46 @@ test.describe('Terraformer Calculator - Officers', () => {
         for (const id of OFFICERS.slice(1)) {
             await expect(page.locator(id)).not.toBeChecked();
         }
+    });
+});
+
+// The calculation-error report attaches the calculator's own snapshot
+// (reportSnapshot in terraformer-data-collector.js): the cell the number came
+// from and only the fields that differ from their factory defaults - never
+// the resources available. The page has no result tabs, so no mode line.
+test.describe('Terraformer Calculator - calculation-error report', () => {
+    test('names the selected cell and the changed fields only', async ({ context, page }) => {
+        await context.addInitScript(() => {
+            localStorage.setItem('lastChange', 'key-value;true,value;99999');
+            localStorage.removeItem('options_terraformer');
+        });
+        await page.goto('/terraformer');
+        const sent = await catchReport(page);
+
+        await page.locator('#tf-level-to').fill('5');
+        await page.locator('#tf-level-to').blur();
+        await page.locator('#solar-plant-level').fill('20');
+        await page.locator('#solar-plant-level').blur();
+        await page.locator('#crystal-available').fill('5000');
+        await page.locator('#crystal-available').blur();
+        const cell = page.locator('[data-report-cell="solar-satellites-needed"]');
+        await expect(cell).toHaveText('579');
+
+        await reportCell(page, cell);
+        await expect(page.locator('#report-calc-values li')).toHaveText([
+            'Selected: Solar satellites needed',
+            'Energy',
+            'Solar plant level: 20',
+            'Terraformer',
+            'Terraformer level — To level: 5',
+        ]);
+
+        await sendReport(page, sent, '580');
+        expect(sent()?.get('context')).toBe([
+            'selected: solar-satellites-needed = "579"',
+            'solar-plant-level = 20',
+            'tf-level-to = 5',
+        ].join('\n'));
     });
 });
 
