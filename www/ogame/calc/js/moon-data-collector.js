@@ -51,6 +51,72 @@ class MoonDataCollector {
   }
 }
 
+// ============================================================================
+// CALCULATION-ERROR REPORT
+// ============================================================================
+//
+// What the sidebar's report dialog attaches for this page (the contract is in
+// www/js/report-context.js): every field of the three panels - destruction,
+// creation, phalanx - next to its factory default. The page has no result
+// tabs, so the mode stays empty. reportFieldById() and cleanReportLabel()
+// come from sidebar.js.
+
+// The fields under each caption: a panel's title (options.reportText) or a
+// parameter tab of the creation panel (its button's id).
+/** @type {[string, string[]][]} */
+const MOON_REPORT_GROUPS = [
+  ['destroy', ['moon-size', 'ds-count']],
+  ['param-common-tab', ['hypertech-lvl', 'general-class', 'debris-percent', 'defense-debris-percent',
+    'deut-to-debris', 'promo-moon']],
+  ['param-lifeforms-tab', ['supra-refractor', 'rc-capacity-increase']],
+  ['phalanx', ['phalanx-range-bonus', 'discoverer-class', 'discoverer-bonus', 'own-system',
+    'circular-systems', 'systems-num', 'phalanx-lvl', 'target-system']],
+];
+
+/**
+ * A group's caption: a tab button's text, or a panel title the template
+ * inlined.
+ * @param {string} key
+ * @returns {string}
+ */
+function moonReportGroup(key) {
+  const tab = document.getElementById(key);
+  return cleanReportLabel(tab === null ? options.reportText[key] ?? key : tab.textContent ?? '');
+}
+
+/**
+ * The report hook: every field the results depend on, defaults included.
+ * @returns {ReportSnapshot}
+ */
+function moonReportSnapshot() {
+  /** @type {(ReportEntry|null)[]} */
+  const entries = [];
+  for (const [group, ids] of MOON_REPORT_GROUPS) {
+    const caption = moonReportGroup(group);
+    for (const id of ids) {
+      entries.push(reportFieldById(id, caption));
+    }
+  }
+  // The units sit on the fleet and defence tabs; the tab names the group.
+  for (const unit of MOON_UNITS) {
+    const pane = document.getElementById(unit.id)?.closest('.tab-pane');
+    const caption = pane ? moonReportGroup(`${pane.id}-tab`) : '';
+    entries.push(reportFieldById(unit.id, caption, { key: `${unit.id}.qty` }));
+  }
+  return { mode: [], entries: entries.filter((entry) => entry !== null) };
+}
+
+/**
+ * The caption of a result cell the template marked, e.g. "Recycling, Metal".
+ * @param {string} key - the cell's id
+ * @returns {string}
+ */
+function moonDescribeCell(key) {
+  return cleanReportLabel(options.reportCells[key] ?? '');
+}
+
 if (typeof window !== 'undefined') {
   Object.assign(window, { MoonDataCollector });
+  globalThis.reportSnapshot = moonReportSnapshot;
+  globalThis.describeCell = moonDescribeCell;
 }

@@ -13,6 +13,11 @@
 const options = {
   defConstraints: { min: -Infinity, max: Infinity, def: 0, allowFloat: false, allowNegative: false },
 
+  /** @type {Record<string, string>} Captions of the report's panel groups, filled in by the template. */
+  reportText: {},
+  /** @type {Record<string, string>} Captions of the result cells by id, filled in by the template. */
+  reportCells: {},
+
   prm: {
     moonSize: 1,
     dsCount: 1,

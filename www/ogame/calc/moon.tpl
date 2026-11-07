@@ -72,6 +72,25 @@
       options.fieldHint = '<?= $l['field-hint'] ?>';
       options.msgMinConstraintViolated = '<?= $l['msg-min-constraint-violated'] ?>';
       options.msgMaxConstraintViolated = '<?= $l['msg-max-constraint-violated'] ?>';
+      // Captions of the calculation-error report (moon-data-collector.js): the
+      // panels its groups are named after, and every result cell by its id.
+      options.reportText = <?= json_encode(array('destroy' => $l['destroy-title'], 'phalanx' => $l['phalanx-title'])) ?>;
+      options.reportCells = <?= json_encode(array(
+        'moon-destroy-chance' => $l['moon-destroy-chance'], 'ds-blow-chance' => $l['ds-blow-chance'],
+        'moon-create-chance' => $l['moon-create-chance'], 'moon-size-range' => $l['moon-size-range'],
+        'moon-size-roll-chance' => $l['moon-size-roll-chance'],
+        'metal-required' => $l['expenses'] . ', ' . $l['metal'],
+        'crystal-required' => $l['expenses'] . ', ' . $l['crystal'],
+        'deuterium-required' => $l['expenses'] . ', ' . $l['deuterium'],
+        'metal-recyclable' => $l['recycling'] . ', ' . $l['metal'],
+        'crystal-recyclable' => $l['recycling'] . ', ' . $l['crystal'],
+        'deuterium-recyclable' => $l['recycling'] . ', ' . $l['deuterium'],
+        'debris-total' => $l['recycling'] . ', ' . $l['total'],
+        'recyclers' => $l['recycling'] . ', ' . $l['recyclers'],
+        'phalanx-range' => $l['phalanx-range'], 'systems-in-range' => $l['systems-in-range'],
+        'visible-systems' => $l['visible-systems'], 'phalanx-distance' => $l['distance'],
+        'phalanx-lvl-required' => $l['phalanx-lvl-required'],
+      )) ?>;
     }
 </script>
 <?php require_once '../../cookies.tpl'; ?>
@@ -121,14 +140,14 @@
         <div class="d-flex align-items-center gap-1">
           <span><?= $l['moon-destroy-chance'] ?></span>
           <div class="input-group input-group-sm w-auto">
-            <div id="moon-destroy-chance" class="form-control chance-show ui-state-disabled m-0">0</div>
+            <div id="moon-destroy-chance" data-report-cell="moon-destroy-chance" class="form-control chance-show ui-state-disabled m-0">0</div>
             <span class="input-group-text">%</span>
           </div>
         </div>
         <div class="d-flex align-items-center gap-1">
           <span><?= $l['ds-blow-chance'] ?></span>
           <div class="input-group input-group-sm w-auto">
-            <div id="ds-blow-chance" class="form-control chance-show ui-state-disabled m-0">0</div>
+            <div id="ds-blow-chance" data-report-cell="ds-blow-chance" class="form-control chance-show ui-state-disabled m-0">0</div>
             <span class="input-group-text">%</span>
           </div>
         </div>
@@ -279,14 +298,14 @@
         <div class="d-flex align-items-center gap-1">
           <span><?= $l['moon-create-chance'] ?></span>
           <div class="input-group input-group-sm w-auto">
-            <div id="moon-create-chance" class="form-control chance-show ui-state-disabled m-0">0</div>
+            <div id="moon-create-chance" data-report-cell="moon-create-chance" class="form-control chance-show ui-state-disabled m-0">0</div>
             <span class="input-group-text">%</span>
           </div>
         </div>
         <div class="d-flex align-items-center gap-1">
           <span><?= $l['moon-size-range'] ?></span>
           <div class="input-group input-group-sm w-auto">
-            <div id="moon-size-range" class="form-control size-show ui-state-disabled m-0">-</div>
+            <div id="moon-size-range" data-report-cell="moon-size-range" class="form-control size-show ui-state-disabled m-0">-</div>
             <span class="input-group-text"><?= $l['km'] ?></span>
           </div>
         </div>
@@ -296,7 +315,7 @@
         <div class="d-flex flex-wrap gap-2 align-items-center justify-content-center">
           <span><?= $l['moon-size-roll-chance'] ?></span>
           <div class="input-group input-group-sm w-auto">
-            <div id="moon-size-roll-chance" class="form-control chance-show ui-state-disabled m-0">-</div>
+            <div id="moon-size-roll-chance" data-report-cell="moon-size-roll-chance" class="form-control chance-show ui-state-disabled m-0">-</div>
             <span class="input-group-text">%</span>
           </div>
         </div>
@@ -310,15 +329,15 @@
       <div class="d-flex flex-wrap gap-3 align-items-center justify-content-center">
         <div class="d-flex align-items-center gap-1">
           <span><?= $l['metal'] ?></span>
-          <div id="metal-required" class="form-control form-control-sm d-inline-block resource-show ui-state-disabled">0</div>
+          <div id="metal-required" data-report-cell="metal-required" class="form-control form-control-sm d-inline-block resource-show ui-state-disabled">0</div>
         </div>
         <div class="d-flex align-items-center gap-1">
           <span><?= $l['crystal'] ?></span>
-          <div id="crystal-required" class="form-control form-control-sm d-inline-block resource-show ui-state-disabled">0</div>
+          <div id="crystal-required" data-report-cell="crystal-required" class="form-control form-control-sm d-inline-block resource-show ui-state-disabled">0</div>
         </div>
         <div class="d-flex align-items-center gap-1">
           <span><?= $l['deuterium'] ?></span>
-          <div id="deuterium-required" class="form-control form-control-sm d-inline-block resource-show ui-state-disabled">0</div>
+          <div id="deuterium-required" data-report-cell="deuterium-required" class="form-control form-control-sm d-inline-block resource-show ui-state-disabled">0</div>
         </div>
       </div>
     </div>
@@ -329,25 +348,25 @@
       <div class="d-flex flex-wrap gap-3 align-items-center justify-content-center">
         <div class="d-flex align-items-center gap-1">
           <span><?= $l['metal'] ?></span>
-          <div id="metal-recyclable" class="form-control form-control-sm d-inline-block resource-show ui-state-disabled">0</div>
+          <div id="metal-recyclable" data-report-cell="metal-recyclable" class="form-control form-control-sm d-inline-block resource-show ui-state-disabled">0</div>
         </div>
         <div class="d-flex align-items-center gap-1">
           <span><?= $l['crystal'] ?></span>
-          <div id="crystal-recyclable" class="form-control form-control-sm d-inline-block resource-show ui-state-disabled">0</div>
+          <div id="crystal-recyclable" data-report-cell="crystal-recyclable" class="form-control form-control-sm d-inline-block resource-show ui-state-disabled">0</div>
         </div>
         <div class="d-flex align-items-center gap-1">
           <span><?= $l['deuterium'] ?></span>
-          <div id="deuterium-recyclable" class="form-control form-control-sm d-inline-block resource-show ui-state-disabled">0</div>
+          <div id="deuterium-recyclable" data-report-cell="deuterium-recyclable" class="form-control form-control-sm d-inline-block resource-show ui-state-disabled">0</div>
         </div>
       </div>
       <div class="d-flex flex-wrap gap-3 align-items-center justify-content-center mt-2">
         <div class="d-flex align-items-center gap-1">
           <span><?= $l['total'] ?></span>
-          <div id="debris-total" class="form-control form-control-sm d-inline-block resource-show ui-state-disabled">0</div>
+          <div id="debris-total" data-report-cell="debris-total" class="form-control form-control-sm d-inline-block resource-show ui-state-disabled">0</div>
         </div>
         <div class="d-flex align-items-center gap-1">
           <span><?= $l['recyclers'] ?></span>
-          <div id="recyclers" class="form-control form-control-sm d-inline-block resource-show ui-state-disabled">0</div>
+          <div id="recyclers" data-report-cell="recyclers" class="form-control form-control-sm d-inline-block resource-show ui-state-disabled">0</div>
         </div>
       </div>
     </div>
@@ -417,18 +436,18 @@
         <div class="d-flex align-items-center gap-1">
           <span><?= $l['phalanx-range'] ?></span>
           <div class="input-group input-group-sm w-auto">
-            <div id="phalanx-range" class="form-control systems-show ui-state-disabled m-0">0</div>
+            <div id="phalanx-range" data-report-cell="phalanx-range" class="form-control systems-show ui-state-disabled m-0">0</div>
             <span class="input-group-text"><?= $l['systems'] ?></span>
           </div>
         </div>
         <div class="d-flex align-items-center gap-1">
           <span><?= $l['systems-in-range'] ?></span>
-          <div id="systems-in-range" class="form-control form-control-sm d-inline-block systems-show ui-state-disabled">1</div>
+          <div id="systems-in-range" data-report-cell="systems-in-range" class="form-control form-control-sm d-inline-block systems-show ui-state-disabled">1</div>
         </div>
       </div>
       <div class="d-flex flex-wrap gap-2 align-items-center justify-content-center mt-2">
         <span><?= $l['visible-systems'] ?></span>
-        <div id="visible-systems" class="form-control form-control-sm d-inline-block segments-show ui-state-disabled">-</div>
+        <div id="visible-systems" data-report-cell="visible-systems" class="form-control form-control-sm d-inline-block segments-show ui-state-disabled">-</div>
       </div>
     </div>
 
@@ -443,13 +462,13 @@
         <div class="d-flex align-items-center gap-1">
           <span><?= $l['distance'] ?></span>
           <div class="input-group input-group-sm w-auto">
-            <div id="phalanx-distance" class="form-control systems-show ui-state-disabled m-0">0</div>
+            <div id="phalanx-distance" data-report-cell="phalanx-distance" class="form-control systems-show ui-state-disabled m-0">0</div>
             <span class="input-group-text"><?= $l['systems'] ?></span>
           </div>
         </div>
         <div class="d-flex align-items-center gap-1">
           <span><?= $l['phalanx-lvl-required'] ?></span>
-          <div id="phalanx-lvl-required" class="form-control form-control-sm d-inline-block systems-show ui-state-disabled">1</div>
+          <div id="phalanx-lvl-required" data-report-cell="phalanx-lvl-required" class="form-control form-control-sm d-inline-block systems-show ui-state-disabled">1</div>
         </div>
       </div>
     </div>

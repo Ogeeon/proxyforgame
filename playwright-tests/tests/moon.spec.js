@@ -1,5 +1,6 @@
 import { test, expect, expectLoadsCleanly } from './base';
 import { expectMcpBoundsMatchPage } from './mcp-bounds';
+import { catchReport, reportCell, sendReport } from './report-dialog';
 
 test.describe('Moon Calculator Page', () => {
     test.beforeEach(async ({ context, page }) => {
@@ -528,6 +529,44 @@ test.describe('Moon Calculator - Sensor phalanx', () => {
         await expect(page.locator('#systems-num')).toHaveValue('499');
         await expect(page.locator('#phalanx-range')).toHaveText('0');
         await expect(page.locator('#visible-systems')).toHaveText('1');
+    });
+});
+
+// The calculation-error report attaches the calculator's own snapshot
+// (reportSnapshot in moon-data-collector.js): the cell the number came from
+// and only the fields that differ from their factory defaults, grouped by the
+// tab or panel they sit on. The page has no result tabs, so no mode line.
+test.describe('Moon Calculator - calculation-error report', () => {
+    test('names the selected cell and the changed fields only', async ({ context, page }) => {
+        await context.addInitScript(() => {
+            localStorage.setItem('lastChange', 'key-value;true,value;99999');
+            localStorage.removeItem('options_moon');
+        });
+        await page.goto('/moon');
+        const sent = await catchReport(page);
+
+        await page.locator('#debris-percent').selectOption('50');
+        await page.locator('#param-fleet-tab').click();
+        await page.locator('#large-cargo').fill('1000');
+        await page.locator('#large-cargo').blur();
+        const cell = page.locator('[data-report-cell="moon-create-chance"]');
+        await expect(cell).toHaveText('20');
+
+        await reportCell(page, cell);
+        await expect(page.locator('#report-calc-values li')).toHaveText([
+            'Selected: Moon creation chance',
+            'Common',
+            'Structure going into DF: 50%',
+            'Fleet',
+            'Large cargo: 1000',
+        ]);
+
+        await sendReport(page, sent, '19');
+        expect(sent()?.get('context')).toBe([
+            'selected: moon-create-chance = "20"',
+            'debris-percent = 50',
+            'large-cargo.qty = 1000',
+        ].join('\n'));
     });
 });
 
