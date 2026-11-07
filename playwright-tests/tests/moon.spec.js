@@ -568,6 +568,35 @@ test.describe('Moon Calculator - calculation-error report', () => {
             'large-cargo.qty = 1000',
         ].join('\n'));
     });
+
+    // The count next to a fleet or defence input is a result too: the number
+    // of units that reaches the maximum creation chance.
+    test('names the maximum next to a unit input by its unit', async ({ context, page }) => {
+        await context.addInitScript(() => {
+            localStorage.setItem('lastChange', 'key-value;true,value;99999');
+            localStorage.removeItem('options_moon');
+        });
+        await page.goto('/moon');
+        const sent = await catchReport(page);
+
+        await page.locator('#param-fleet-tab').click();
+        const cell = page.locator('[data-report-cell="large-cargo.max"]');
+        await expect(cell).toBeVisible();
+        const shown = (await cell.textContent())?.trim() ?? '';
+        expect(shown).toMatch(/\d/);
+
+        await reportCell(page, cell);
+        await expect(page.locator('#report-calc-values li')).toHaveText([
+            'Selected: Large cargo, maximum',
+            'All fields are at their default values.',
+        ]);
+
+        await sendReport(page, sent, '1');
+        expect(sent()?.get('context')).toBe([
+            `selected: large-cargo.max = "${shown}"`,
+            '(all fields at their defaults)',
+        ].join('\n'));
+    });
 });
 
 test.describe('Moon Calculator - MCP tools', () => {

@@ -107,11 +107,17 @@ function moonReportSnapshot() {
 }
 
 /**
- * The caption of a result cell the template marked, e.g. "Recycling, Metal".
- * @param {string} key - the cell's id
+ * The caption of a result cell the template marked, e.g. "Recycling, Metal",
+ * or "Large cargo, maximum" for the count next to a fleet or defence input.
+ * @param {string} key - the cell's id, or "<unit>.max"
  * @returns {string}
  */
 function moonDescribeCell(key) {
+  if (key.endsWith('.max')) {
+    const unit = key.slice(0, -'.max'.length);
+    const name = cleanReportLabel(document.querySelector(`label[for="${CSS.escape(unit)}"]`)?.textContent ?? unit);
+    return `${name}, ${cleanReportLabel(options.reportCells.max ?? '')}`;
+  }
   return cleanReportLabel(options.reportCells[key] ?? '');
 }
 

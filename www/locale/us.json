@@ -701,6 +701,7 @@
     "deut-to-debris": "Deuterium to debris",
     "promo-moon": "Event: chance up to 40%",
     "max-count-hint": "Number of units that reach the maximum moon creation chance. Click a number next to an input to fill it in.",
+    "report-max-count": "maximum",
     "keywords": "proxyforgame,ogame,moon calculator,moon chance,debris field,moon destruction,lunar base,recyclers,deathstar,Sensor phalanx",
     "phalanx-title": "OGame - Sensor phalanx calculator",
     "phalanx-coverage-title": "Phalanx coverage",

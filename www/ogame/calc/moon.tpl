@@ -78,7 +78,7 @@
       options.reportCells = <?= json_encode(array(
         'moon-destroy-chance' => $l['moon-destroy-chance'], 'ds-blow-chance' => $l['ds-blow-chance'],
         'moon-create-chance' => $l['moon-create-chance'], 'moon-size-range' => $l['moon-size-range'],
-        'moon-size-roll-chance' => $l['moon-size-roll-chance'],
+        'moon-size-roll-chance' => $l['moon-size-roll-chance'], 'max' => $l['report-max-count'],
         'metal-required' => $l['expenses'] . ', ' . $l['metal'],
         'crystal-required' => $l['expenses'] . ', ' . $l['crystal'],
         'deuterium-required' => $l['expenses'] . ', ' . $l['deuterium'],
@@ -264,7 +264,7 @@
             <tr>
 <?php foreach ($row as $unit): ?>
               <td><label for="<?= $unit ?>"><?= $l[$unit] ?></label></td>
-              <td><span id="<?= $unit ?>-max" class="max-label">0</span></td>
+              <td><span id="<?= $unit ?>-max" class="max-label" data-report-cell="<?= $unit ?>.max">0</span></td>
               <td><input id="<?= $unit ?>" type="text" name="<?= $unit ?>" class="form-control form-control-sm d-inline-block count-input" value="0" data-field-title="<?= $l[$unit] ?>"></td>
 <?php endforeach; ?>
             </tr>
@@ -280,7 +280,7 @@
             <tr>
 <?php foreach ($row as $unit): ?>
               <td><label for="<?= $unit ?>"><?= $l[$unit] ?></label></td>
-              <td><span id="<?= $unit ?>-max" class="max-label">0</span></td>
+              <td><span id="<?= $unit ?>-max" class="max-label" data-report-cell="<?= $unit ?>.max">0</span></td>
               <td><input id="<?= $unit ?>" type="text" name="<?= $unit ?>" class="form-control form-control-sm d-inline-block count-input" value="0" data-field-title="<?= $l[$unit] ?>"></td>
 <?php endforeach; ?>
             </tr>
