@@ -1,5 +1,6 @@
 import { test, expect, expectLoadsCleanly } from './base';
 import { expectMcpBoundsMatchPage } from './mcp-bounds';
+import { catchReport, reportCell, sendReport } from './report-dialog';
 
 /**
  * Types a value into a field and presses Enter, which fires the keyup the page
@@ -276,6 +277,46 @@ test.describe('Trade Calculator Page', () => {
         await expect(page.locator('#dir-1')).toBeChecked();
         await expect(page.locator('#res-dst-m')).toHaveValue('11000000');
         await expect(page.locator('#res-src-d')).toHaveValue('8.166.667');
+    });
+});
+
+// The calculation-error report attaches the calculator's own snapshot
+// (reportSnapshot in trade.js): the cell the number came from and the deal as
+// the model holds it - only what differs from a fresh page, except the
+// country and universe, which follow the page's language and always go.
+test.describe('Trade Calculator - calculation-error report', () => {
+    test('names the selected cell and the changed parts of the deal', async ({ context, page }) => {
+        await context.addInitScript(() => {
+            localStorage.setItem('lastChange', 'key-value;true,value;99999');
+        });
+        await page.goto('/trade');
+        const sent = await catchReport(page);
+
+        await page.locator('#res-dst-0').check();
+        await enter(page, '#res-src-d', '100000');
+        const cell = page.locator('[data-report-cell="dst.cargo"]');
+        await expect(cell).toHaveText('39 SC / 8 LC');
+
+        await reportCell(page, cell);
+        await expect(page.locator('#report-calc-values li')).toHaveText([
+            'Selected: Buying, Cargoes',
+            'Selling',
+            'Deuterium: 100.000',
+            'Buying',
+            'Metal',
+            'Location',
+            'Country: United Kingdom (en.ogame.gameforge.com)',
+            'Universe: Fafnir (s261-en.ogame.gameforge.com)',
+        ]);
+
+        await sendReport(page, sent, '40 SC / 8 LC');
+        expect(sent()?.get('context')).toBe([
+            'selected: dst.cargo = "39 SC / 8 LC"',
+            'src.deuterium = 100000',
+            'dst = 0',
+            'country = en',
+            'universe = 261',
+        ].join('\n'));
     });
 });
 

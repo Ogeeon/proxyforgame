@@ -61,6 +61,12 @@
       l.rates = '<?= $l['rates'] ?>';
       l.moonstr = '<?= $l['moon'] ?>';
       l.dirPairHint = <?= json_encode($l['dir-pair-hint']) ?>;
+      // Group captions of the calculation-error report (trade.js, tradeReportSnapshot).
+      l.parameters = <?= json_encode($l['parameters']) ?>;
+      l.location = <?= json_encode($l['location']) ?>;
+      l.country = <?= json_encode($l['country']) ?>;
+      l.universe = <?= json_encode($l['universe']) ?>;
+      l.cargoCapIncrease = <?= json_encode($l['cargo-cap-increase']) ?>;
       options.decimalSeparator = '<?= $l['decimal-separator'] ?>';
       options.moonLabel = <?= json_encode($l['moon']) ?>;
       options.universeFromProfile = <?= json_encode($l['pf-universe-from-profile']) ?>;
@@ -214,7 +220,7 @@
                     <div class="hr mb-1"></div>
                     <div class="row mb-1 align-items-center">
                       <div class="col-5 text-end"><?= $l['cargoes'] ?>:</div>
-                      <div class="col-7"><div id="res-src-cargo" class="res-input ps-1"></div></div>
+                      <div class="col-7"><div id="res-src-cargo" class="res-input ps-1" data-report-cell="src.cargo" data-report-caption="<?= htmlspecialchars($l['src'] . ', ' . $l['cargoes'], ENT_QUOTES) ?>"></div></div>
                     </div>
                   </div>
                 </div>
@@ -291,7 +297,7 @@
                     <div class="hr mb-1"></div>
                     <div class="row mb-1 align-items-center">
                       <div class="col-5 text-end"><?= $l['cargoes'] ?>:</div>
-                      <div class="col-7"><div id="res-dst-cargo" class="res-input ps-1"></div></div>
+                      <div class="col-7"><div id="res-dst-cargo" class="res-input ps-1" data-report-cell="dst.cargo" data-report-caption="<?= htmlspecialchars($l['dst'] . ', ' . $l['cargoes'], ENT_QUOTES) ?>"></div></div>
                     </div>
                   </div>
                 </div>
@@ -320,7 +326,7 @@
                 <div class="rate-label-input-row">
                   <div class="rate-label"><?= $l['metal'] ?> : <?= $l['crystal'] ?></div>
                   <div class="rate-input-group">
-                    <div id="rate-mc" class="border rounded rate-input p-1 text-center ui-state-disabled"></div>
+                    <div id="rate-mc" class="border rounded rate-input p-1 text-center ui-state-disabled" data-report-cell="rate-mc" data-report-caption="<?= htmlspecialchars($l['rates'] . ', ' . $l['metal'] . ' : ' . $l['crystal'], ENT_QUOTES) ?>"></div>
                   </div>
                 </div>
               </div>
@@ -402,7 +408,7 @@
         <?= $l['link'] ?>:<br><a id="alink" href="#"></a>
       </div>
       <div id="text" class="my-4 text-center small">
-        <?= $l['text'] ?>:<br><span id="atext"></span>
+        <?= $l['text'] ?>:<br><span id="atext" data-report-cell="text" data-report-caption="<?= htmlspecialchars($l['text'], ENT_QUOTES) ?>"></span>
       </div>
       <div id="bbcode" class="my-4 text-center small">
         BB-Code:<br><textarea id="abbcode" class="form-control border rounded w-100" rows="2"></textarea>

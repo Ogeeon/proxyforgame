@@ -389,6 +389,10 @@ let options = {
     }
 };
 
+// The model as a fresh page starts from, before load() reads the cookie: the
+// calculation-error report compares against it (tradeReportSnapshot below).
+const TRADE_FACTORY_OPTIONS = { ...options, rates: { ...options.rates } };
+
 // ============================================================================
 // EXCHANGE RATES
 // ============================================================================
@@ -996,6 +1000,157 @@ function takeLinkOverrides() {
     const taken = linkOverrides;
     linkOverrides = { rates: false, universe: false, coords: false };
     return taken;
+}
+
+// ============================================================================
+// CALCULATION-ERROR REPORT
+// ============================================================================
+//
+// What the sidebar's report dialog attaches for this page (the contract is in
+// www/js/report-context.js): the deal as the model holds it - direction,
+// what is sold and bought and how, the amounts typed in, the rates, the
+// parameters and the location - next to the factory model. Read from the
+// model rather than the form: half the form's fields are results, and most
+// of them carry no value attribute to compare with. The page has no tabs,
+// so the mode stays empty. cleanReportLabel() and reportLabelOf() come from
+// sidebar.js.
+
+// The mix field each destination mix type reads, as the model names it.
+const TRADE_REPORT_MIX_FIELDS = ['mixBalance', 'mixProp', 'fix1', 'fix2', 'mixSrcBalance'];
+
+/**
+ * The caption of a checked radio of a group, '' when none is.
+ * @param {string} name
+ * @returns {string}
+ */
+function tradeCheckedLabel(name) {
+    const on = checkedRadio(name);
+    return on === null ? '' : reportLabelOf(on);
+}
+
+/**
+ * A model field as a report entry: its value against the factory model's.
+ * @param {string} key
+ * @param {string} group
+ * @param {string} label
+ * @param {string|number|boolean} value
+ * @param {string|number|boolean} start
+ * @param {string} [display]
+ * @returns {ReportEntry}
+ */
+function tradeReportEntry(key, group, label, value, start, display) {
+    return display === undefined
+        ? { key, group, label, value, default: start }
+        : { key, group, label, value, default: start, display };
+}
+
+/**
+ * The mix the buying side asks for, when the mix controls are on screen: the
+ * mix type and the one field it reads.
+ * @returns {ReportEntry[]}
+ */
+function tradeReportMix() {
+    const f = TRADE_FACTORY_OPTIONS;
+    const mixBlock = document.getElementById('dst-mix-block');
+    if (options.dstType !== 2 || mixBlock === null || mixBlock.getClientRects().length === 0) {
+        return [];
+    }
+    const mixType = options.dstMixType;
+    const caption = cleanReportLabel(document.getElementById(`res-subtype-dst-${mixType}`)?.textContent ?? '');
+    const type = tradeReportEntry('dst-mix', l.dst, '', mixType, f.dstMixType, caption);
+    const field = TRADE_REPORT_MIX_FIELDS[mixType] ?? '';
+    if (field === 'mixProp') {
+        return [type, tradeReportEntry('mix-prop', l.dst, caption, `${options.mixProp1}/${options.mixProp2}`,
+            `${f.mixProp1}/${f.mixProp2}`)];
+    }
+    return field === '' ? [type] : [type, tradeReportEntry(field, l.dst, caption, options[field], f[field])];
+}
+
+/**
+ * What is sold and bought: direction, both sides' types, the mix the buying
+ * side asks for and the amounts of the side being typed into.
+ * @returns {ReportEntry[]}
+ */
+function tradeReportDeal() {
+    const f = TRADE_FACTORY_OPTIONS;
+    const reverse = options.direction === TRADE_DIR_REVERSE;
+    // A line that is a radio's own text - the direction's sentence, the
+    // resource a side trades - needs no caption: the heading says the side.
+    return [
+        tradeReportEntry('direction', '', '', options.direction, f.direction, tradeCheckedLabel('dir')),
+        tradeReportEntry('src', l.src, '', options.srcType, f.srcType, tradeCheckedLabel('src')),
+        ...(reverse ? [] : tradeReportAmounts('src', l.src, ['metal', 'crystal', 'deuterium'])),
+        tradeReportEntry('dst', l.dst, '', options.dstType, f.dstType, tradeCheckedLabel('dst')),
+        ...tradeReportMix(),
+        ...(reverse ? tradeReportAmounts('dst', l.dst, ['wantMetal', 'wantCrystal', 'wantDeuterium']) : []),
+    ];
+}
+
+/**
+ * The three amounts of the side being typed into.
+ * @param {string} side - 'src' or 'dst', the keys' prefix
+ * @param {string} group
+ * @param {string[]} fields - the model's metal, crystal and deuterium fields
+ * @returns {ReportEntry[]}
+ */
+function tradeReportAmounts(side, group, fields) {
+    return TRADE_SRC_RESOURCES.map((resource, i) => {
+        const field = fields[i];
+        return tradeReportEntry(`${side}.${resource}`, group, l[resource], options[field],
+            TRADE_FACTORY_OPTIONS[field], numToOGame(options[field]));
+    });
+}
+
+/**
+ * The report hook: every field of the deal, defaults included.
+ * @returns {ReportSnapshot}
+ */
+function tradeReportSnapshot() {
+    const f = TRADE_FACTORY_OPTIONS;
+    const parameters = l.parameters;
+    const field = (/** @type {string} */ id) => cleanReportLabel(document.querySelector(`label[for="${id}"]`)?.textContent ?? id);
+    const cargo = cleanReportLabel(l.cargoCapIncrease ?? '');
+    // The location only goes into the shared message, but the message is
+    // part of what is reported on. Country and universe follow the page's
+    // language, so they have no default and always go.
+    const location = l.location;
+    /** @type {ReportEntry[]} */
+    const entries = [
+        ...tradeReportDeal(),
+        tradeReportEntry('rate-md', l.rates, `${l.metal} : ${l.deuterium}`, options.rates.md, f.rates.md),
+        tradeReportEntry('rate-cd', l.rates, `${l.crystal} : ${l.deuterium}`, options.rates.cd, f.rates.cd),
+        tradeReportEntry('hypertech-lvl', parameters, field('hypertech-lvl'), options.hyperTech, f.hyperTech),
+        tradeReportEntry('player-class', parameters,
+            cleanReportLabel(document.querySelector('#tech-settings legend')?.textContent ?? ''),
+            options.playerClass, f.playerClass, tradeCheckedLabel('player-class')),
+        tradeReportEntry('sc-capacity-increase', parameters, `${cargo} — ${field('sc-capacity-increase')}`,
+            options.scCapacityIncrease, f.scCapacityIncrease),
+        tradeReportEntry('lc-capacity-increase', parameters, `${cargo} — ${field('lc-capacity-increase')}`,
+            options.lcCapacityIncrease, f.lcCapacityIncrease),
+        { key: 'country', group: location, label: l.country, value: options.country,
+            display: cleanReportLabel(getTextContent('#country option:checked')) },
+        { key: 'universe', group: location, label: l.universe, value: options.universe,
+            display: cleanReportLabel(getTextContent('#universe option:checked')) },
+        tradeReportEntry('coords', location, l.coords, `${options.coordg}:${options.coords}:${options.coordp}`,
+            `${f.coordg}:${f.coords}:${f.coordp}`),
+        tradeReportEntry('moon', location, l.moonstr, options.moon, f.moon),
+    ];
+    return { mode: [], entries };
+}
+
+/**
+ * The caption of a result cell the template marked.
+ * @param {string} key - e.g. "dst.cargo", "rate-mc", "text"
+ * @returns {string}
+ */
+function tradeDescribeCell(key) {
+    const cell = document.querySelector(`[data-report-cell="${CSS.escape(key)}"]`);
+    return cell instanceof HTMLElement ? cleanReportLabel(cell.dataset.reportCaption ?? '') : '';
+}
+
+if (typeof globalThis !== 'undefined') {
+    globalThis.reportSnapshot = tradeReportSnapshot;
+    globalThis.describeCell = tradeDescribeCell;
 }
 
 /** What the profile binder drives: the form from the model, and the recalculation. */
