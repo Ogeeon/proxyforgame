@@ -119,8 +119,9 @@ function lfParamGroup(id) {
  * @returns {string}
  */
 function lfReportRowName(row) {
-    const cell = row.cells[1];
-    if (cell === undefined) {
+    // item() says null for a missing cell; the indexer's type claims it never misses.
+    const cell = row.cells.item(1);
+    if (cell === null) {
         return '';
     }
     const text = Array.from(cell.childNodes)
