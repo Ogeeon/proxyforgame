@@ -7,6 +7,9 @@
 
 'use strict';
 
+// The production cells of an all-planets row, after each mine's level.
+const PLANET_REPORT_RESOURCES = ['metal', 'crystal', 'deuterium'];
+
 function populateParams() {
 	setVal('#universe-speed', options.prm.universeSpeed);
 	setVal('#energy-tech-level', options.prm.energyTechLevel);
@@ -90,15 +93,18 @@ function buildPlanetRowHtml(i) {
 	// temperature and position
 	tr += '<td><input type="text" class="form-control form-control-sm no-mp input-3columns temperature-input centered" value="' + options.prm.aPS[i][0] + '" alt="' + options.maxTempAlt + '"/></td>';
 	tr += '<td><input type="text" class="form-control form-control-sm no-mp input-2columns position-input centered" value="' + options.prm.aPS[i][1] + '" alt="' + options.positionAlt + '"/></td>';
+	// The production cells are named for the calculation-error report
+	// (productionDescribeCell in production-data-collector.js).
+	const reportRow = 'planet-' + (i + 1);
 	for (let j = 1; j < 8; j++) {
 		// placeholder: level and zero production
 		let inputClass = 'form-control form-control-sm no-mp input-' + (j < 6 ? '2columns centered' : '4columns centered');
 		tr += '<td class="centered"><input type="text" class="' + inputClass + '" value="' + options.prm.aPS[i][j * 3] + '"/></td>';
 		if (j < 4) {
-			tr += '<td class="centered">0</td>';
+			tr += '<td class="centered" data-report-cell="' + reportRow + '.' + PLANET_REPORT_RESOURCES[j - 1] + '">0</td>';
 		}
 	}
-	tr += '<td class="centered">0</td>'; // coefficient - also a placeholder
+	tr += '<td class="centered" data-report-cell="' + reportRow + '.coeff">0</td>'; // coefficient - also a placeholder
 	tr += '<td><div id="control-' + i + '" class="btn-group">';
 	tr += '<button id="control-' + i + '-u" type="button" class="btn btn-outline-secondary btn-sm control-btn control-move-up" data-pln="' + i + '" data-bs-toggle="tooltip" title="' + options.movePlanetUpTitle + '"' + (i === 0 ? ' disabled' : '') + '><i class="bi bi-arrow-up"></i></button>';
 	tr += '<button id="control-' + i + '-w" type="button" class="btn btn-outline-secondary btn-sm control-btn control-move-down" data-pln="' + i + '" data-bs-toggle="tooltip" title="' + options.movePlanetDownTitle + '"' + (i === options.prm.currPlanetsCount - 1 ? ' disabled' : '') + '><i class="bi bi-arrow-down"></i></button>';

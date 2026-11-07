@@ -1,5 +1,6 @@
 import { test, expect, expectLoadsCleanly } from './base';
 import { expectMcpBoundsMatchPage } from './mcp-bounds';
+import { catchReport, reportCell, sendReport } from './report-dialog';
 
 test.beforeEach(async ({ context, page }) => {
     // Avoid changelog popup
@@ -1203,6 +1204,48 @@ test.describe('Life Forms amortization', () => {
         await makeAvailable(page, 1108);
         await fillLf(page, 'lf-res-1108', '150');
         await expect(page.locator('#lf-res-1108')).toHaveValue('100');
+    });
+});
+
+// The calculation-error report attaches the calculator's own snapshot
+// (reportSnapshot in production-data-collector.js): the tab the number was
+// read on, the cell it came from, and only the fields that differ from their
+// factory defaults - never the resources currently on the planet.
+test.describe('Production Calculator - calculation-error report', () => {
+    test('names the tab, the selected cell and the changed fields', async ({ page }) => {
+        const sent = await catchReport(page);
+        // Back to the factory state the shared setup above leaves behind.
+        await page.locator('#reset').click();
+
+        for (const [slug, level] of [['metal-mine', '20'], ['solar-plant', '20']]) {
+            const input = page.locator(`#one-planet-prod tr[data-report-key="${slug}"] input`);
+            await input.fill(level);
+            await input.press('Tab');
+        }
+        // A stock typed into the accumulation panel stays out of the report.
+        await page.locator('[data-bs-target="#one-pln-acc-accum"]').click();
+        await expect(page.locator('#onepln-curr-met')).toBeVisible();
+        await page.locator('#onepln-curr-met').fill('5000');
+        await page.locator('#onepln-curr-met').press('Tab');
+        const cell = page.locator('#one-planet-prod [data-report-cell="prod-per-hour.metal"]');
+        await expect(cell).toHaveText('6.851');
+
+        await reportCell(page, cell);
+        await expect(page.locator('#report-calc-values li')).toHaveText([
+            'Mode: One planet',
+            'Selected: Total per hour, Metal',
+            'One planet',
+            'Metal mine — Lvl/Qty: 20',
+            'Solar plant — Lvl/Qty: 20',
+        ]);
+
+        await sendReport(page, sent, '6.852');
+        expect(sent()?.get('context')).toBe([
+            'mode: tabtag1',
+            'selected: prod-per-hour.metal = "6.851"',
+            'metal-mine.level = 20',
+            'solar-plant.level = 20',
+        ].join('\n'));
     });
 });
 
