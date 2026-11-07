@@ -298,7 +298,10 @@ implementation for every pattern.
 ## CSS / Bootstrap Gotchas
 - Bootstrap `input-group` overrides non-id-scoped width classes — scope width rules or they will blow up to ~177px.
 - Accordions and tables inside calculator panels use `max-content` intrinsic width and will widen the panel; apply `width: 0; min-width: 100%` to contain them.
-- Prefer `bootstrap.Tooltip.getOrCreateInstance()` over `new bootstrap.Tooltip()` (SonarQube S1848).
+- Reach Bootstrap's JavaScript through `attachTooltips()`, `openModal()`, `BS_EVENT` and the other
+  helpers of `www/js/bootstrap-access.js` — they use `getOrCreateInstance()`, never `new`
+  (SonarQube S1848). Only that file and `bootstrap-tooltip-guard.js` read the `bootstrap` global;
+  ESLint enforces it. The Bootstrap 6 plan is `docs/bootstrap-6-migration.md`.
 
 ## Important Notes
 
