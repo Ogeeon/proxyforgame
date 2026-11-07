@@ -282,7 +282,7 @@ td.min {
 }
 
 #irn-calc .form-check-input:not(:disabled):hover {
-  box-shadow: 0 0 0 0.2rem rgba(var(--bs-primary-rgb), 0.25);
+  box-shadow: 0 0 0 0.2rem color-mix(in srgb, var(--bs-primary) 25%, transparent);
 }
 
 #irn-calc .form-check-input:disabled {
