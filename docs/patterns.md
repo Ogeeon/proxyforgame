@@ -9,6 +9,10 @@ moon, production, queue, terraformer. `trade` is deliberately **out of scope**: 
 Bootstrap 5 but never went through the migration (monolithic `trade.js`, its own
 `trade.css` with no BS custom properties, no `dom-utils.js`).
 
+Everything here is Bootstrap 5. What moving to Bootstrap 6 involves — the `--bs-*` inventory,
+the markup checklist, the places in the code that change — is in
+[`bootstrap-6-migration.md`](bootstrap-6-migration.md).
+
 ---
 
 ## (a) Bootstrap tooltip skinning
@@ -79,25 +83,44 @@ Do **not** restate it in a per-calculator `*.css`.
 /* ...and the same pair for right/bottom/left — see common.css. */
 ```
 
-**Initialisation** — in the template's `DOMContentLoaded` block, always via
-`getOrCreateInstance` (SonarQube S1848 flags the bare `new bootstrap.Tooltip(el)` as an
-object created for its side effect, and it double-binds an element that is re-initialised):
+**Initialisation** — through the helpers of `www/js/bootstrap-access.js`, never through the
+`bootstrap` global. **Only `bootstrap-access.js` and `bootstrap-tooltip-guard.js` read that
+global; ESLint (`no-restricted-globals`) fails any other `www/**/*.js` that does**, and the
+inline template blocks, which ESLint does not see, follow the same rule. The facade's helpers
+are no-ops when the bundle failed to load, so callers carry no guard of their own.
+
+| Helper | Use |
+|---|---|
+| `attachTooltips(root)` | `getOrCreateInstance` for every `[data-bs-toggle="tooltip"]` inside `root` |
+| `attachTooltips(root, { refresh: true })` | the same, disposing an existing instance first so a rewritten `title` is picked up (costs and lfcosts transport `<abbr>`s) |
+| `disposeTooltips(root, selector?)` | release the tooltips of `root` and of everything inside it matching `selector` (default `[data-bs-toggle="tooltip"]`) |
+| `setTooltipText(el, text)` | change the text of an adopted tooltip, or create one — hides that Bootstrap keeps the text in `data-bs-original-title` |
+| `hideTooltip(el)` | hide without creating an instance (the sidebar's capture-click handler) |
+
+`getOrCreateInstance` rather than `new bootstrap.Tooltip(el)` is built into the helpers
+(SonarQube S1848 flags the bare `new` as an object created for its side effect, and it
+double-binds an element that is re-initialised). The template's `DOMContentLoaded` block
+checks for the facade with `typeof` first — when the facade itself failed to load, calling it
+would throw instead of showing the `pfgScriptsFailed()` banner:
 
 ```js
 document.addEventListener('DOMContentLoaded', function() {
-  document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(function(el) {
-    bootstrap.Tooltip.getOrCreateInstance(el);
-  });
+  if (typeof bootstrapAvailable !== 'function' || !bootstrapAvailable() || typeof initializeFlightCalculator !== 'function' || typeof initFlightProfiles !== 'function') {
+    pfgScriptsFailed();
+    return;
+  }
+  attachTooltips(document);
   initializeFlightCalculator();
+  initFlightProfiles();
 });
 ```
 
-Rows built at run time carry their own call after insertion — see
-`queue-renderer.js:97`, `lfcosts-renderer.js:134` and
-`flight-orchestration.js` (`_initRowTooltips`). A row that is removed must dispose its
-tooltips **before** the markup is replaced, or the instance leaks and the bubble outlives
-its anchor. Disposing after an `innerHTML` write is a no-op — it walks the *new* nodes.
-`flight-orchestration.js` (`_disposeRowTooltips`) is the reference for the pair.
+Rows built at run time carry their own `attachTooltips(row)` after insertion — see
+`queue-renderer.js` (`appendQueueRow`), `production-renderer.js` and `flight-orchestration.js`
+(`_wireLegRow`). A row that is removed must `disposeTooltips(row)` **before** the markup is
+replaced, or the instance leaks and the bubble outlives its anchor. Disposing after an
+`innerHTML` write is a no-op — it walks the *new* nodes. `flight-orchestration.js`
+(`removeFlightLeg` and `_wireLegRow`) is the reference for the pair.
 
 ### Which elements get a Bootstrap tooltip
 
@@ -114,7 +137,8 @@ rather than left to taste:
 
 **Deviation to look for**: a `.tooltip-inner` block still sitting in a per-calculator CSS
 file (or in `www/css/sidebar.css`, which still carries its own stale, non-matching copy);
-`new bootstrap.Tooltip(...)`; an icon-only button still on a bare native `title=`;
+any `bootstrap.*` outside `www/js/bootstrap-access.js` (ESLint catches the `.js` files, not the
+`.tpl` blocks); an icon-only button still on a bare native `title=`;
 a dynamically built row that inits tooltips but never disposes them.
 
 ---
@@ -501,9 +525,10 @@ why no template carries a toast container or a dialog markup block of its own.
   when the feature degraded in a way the result survives.
 - A `danger` toast does not autohide: it stays until dismissed, because the user has to know
   the figures on screen are not the ones they think. Every other level clears after 7s.
-- The instance goes through `bootstrap.Toast.getOrCreateInstance()`, not `new` (SonarQube
-  S1848), and is disposed on `hidden.bs.toast` along with its element — toasts are created per
-  failure and must not pile up in the DOM.
+- The instance goes through `openToast()` in `www/js/bootstrap-access.js`, which uses
+  `getOrCreateInstance()`, not `new` (SonarQube S1848), and disposes it on
+  `BS_EVENT.toastHidden`; `showToast()` removes the element on the same event — toasts are
+  created per failure and must not pile up in the DOM.
 - The message is a locale key passed in from the template, like every other string; the
   `ApiError.message` that came from the server is English and belongs in `consoleLog` only.
 
@@ -512,9 +537,12 @@ why no template carries a toast container or a dialog markup block of its own.
 Native `alert()`/`confirm()` are not used anywhere in this codebase — their browser chrome
 (“this page says…”, an OK button that visually behaves like a confirmation) doesn't fit prose
 that is only ever asking the user to acknowledge or decide something, not confirm the page
-itself. Both helpers build a real `bootstrap.Modal` (`backdrop: 'static'`, so the page stays
-inert until it is answered) as a throwaway element, the same per-call, dispose-on-`hidden`
-idiom `showToast()` uses — two overlapping calls never share mutable state.
+itself. Both helpers build a real Bootstrap modal — `modalFor(el, { backdrop: 'static' })` from
+`www/js/bootstrap-access.js`, so the page stays inert until it is answered — as a throwaway
+element, the same per-call, dispose-on-`BS_EVENT.modalHidden` idiom `showToast()` uses — two
+overlapping calls never share mutable state. A template-authored modal is opened and closed
+with `openModal(el)` / `hideModal(el)`; `hideModal` goes through `getInstance()`, so it never
+creates an instance just to hide it.
 
 ```js
 await showAlertModal(this.opts.badSRCode, this.opts.dialogOk);
