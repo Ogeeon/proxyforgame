@@ -15,6 +15,8 @@ release section; it is the source of truth for the other eleven translations.
 
 ## [Unreleased]
 
+## [2026-11-07] - site entry 72
+
 ### Added
 
 - Sidebar: the misspelling report dialog has a "This is a calculation error" switch, offered wherever the page has fields to attach. On it the dialog asks what the calculator shows and what the game shows (the game's value optional), and attaches the calculator's state to the e-mail so a report about a wrong number can be reproduced without a follow-up question: the tabs the number was read on, the result cell it was selected in, and every field that differs from its factory default - player-profile values included - as language-independent `key = value` lines. A selection containing a digit starts with the switch on; what will be attached is listed in a fold-out under the switch in the page's language, grouped under sub-headings, with yes/no for switches and a line saying how many fields the cap left out, and screenshots can be pointed at the Discord. Every calculator describes its own state: the tabs, every field that feeds the result - the parameter tabs included, radio groups as one line, the construction queue step by step - and a caption for the selected result cell. Should a page have no description of its own, or fail to produce one, its visible fields that differ from the defaults are attached instead, captioned by their label or aria-label. The resources available are never attached, on any calculator. The e-mail arrives under its own subject ("Calculation error from ProxyForGame site") with the field values in the body. <!-- site -->
@@ -26,6 +28,8 @@ release section; it is the source of truth for the other eleven translations.
 
 - The daily universe-list job and the spy report import no longer call `curl_close()`, which PHP 8.5 deprecates; the job logged the deprecation on every run. A failed universe-list download now logs the HTTP status instead of the word "Array".
 - Profiles: a Companion account without a profile could never be imported - choosing it from the profile select opened the import dialog filled with the site's own converted data, which the Origin Exporter check refused ("This is not account data from Origin Exporter"). The select no longer offers these accounts; the badge beside it does.
+
+> **RU:** Теперь через диалог «Нашли ошибку?» можно сообщить не только об опечатке, но и об ошибке в расчётах. Выделите неверное число и нажмите Ctrl+Enter — в диалоге включится переключатель «Это ошибка в расчетах». Укажите, какое значение показывает игра (если знаете), и отправьте сообщение: к нему автоматически приложатся данные, нужные, чтобы воспроизвести расчёт, — открытая вкладка, ячейка, из которой взято число, и поля, значения которых отличаются от значений по умолчанию. Список приложенного можно посмотреть в диалоге перед отправкой; ресурсы в наличии не передаются. Скриншоты можно прислать в наш Discord.
 
 ## [2026-11-01] - site entry 71
 
