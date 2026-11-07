@@ -1247,6 +1247,27 @@ test.describe('Production Calculator - calculation-error report', () => {
             'solar-plant.level = 20',
         ].join('\n'));
     });
+
+    // The ranked upgrade lists are rebuilt on every recalculation, so a rank
+    // alone would not say which upgrade the number belongs to: the caption
+    // carries the planet, the mine and its levels.
+    test('names a cell of the priority upgrades list by its upgrade', async ({ page }) => {
+        const sent = await catchReport(page);
+        await page.locator('#reset').click();
+        await page.locator('#tabtag2').click();
+        await page.locator('[data-bs-target="#all-pln-acc-priority"]').click();
+        const cell = page.locator('[data-report-cell="priority-1.amortization-time"]');
+        await expect(cell).toBeVisible();
+        const row = cell.locator('xpath=ancestor::tr');
+        const planet = (await row.locator('td').nth(1).textContent())?.trim();
+
+        await reportCell(page, cell);
+        await expect(page.locator('#report-calc-values li').nth(1))
+            .toHaveText(`Selected: Priority mine upgrades #1 (${planet}, Metal mine 0 → 1), Amortisation time`);
+
+        await sendReport(page, sent, '1h 31m');
+        expect(sent()?.get('context')?.split('\n')[1]).toMatch(/^selected: priority-1\.amortization-time = "1h 30m\s*"$/);
+    });
 });
 
 test.describe('Production Calculator - MCP tools', () => {

@@ -576,9 +576,11 @@ function updateMinesPriority() {
 		html += '<td>' + options.prm.aPNames[c.pln] + '</td>';
 		html += '<td>' + options.mineNames[c.mine] + '</td>';
 		html += '<td class="centered">' + c.level + '&nbsp;&rarr;&nbsp;' + (c.level + 1) + '</td>';
-		html += '<td class="centered">' + resourcesToString(c.costs) + '</td>';
-		html += '<td class="centered">' + resourcesToString(c.delta) + '</td>';
-		html += '<td class="centered">' + timespanToShortenedString(Math.ceil(c.time * 3600), options.datetimeW, options.datetimeD, options.datetimeH, options.datetimeM, options.datetimeS, true) + '</td>';
+		// The report dialog names a selected cell by this key (productionDescribeCell).
+		const cell = `priority-${n + 1}`;
+		html += `<td class="centered" data-report-cell="${cell}.upgrade-cost">${resourcesToString(c.costs)}</td>`;
+		html += `<td class="centered" data-report-cell="${cell}.production-increase">${resourcesToString(c.delta)}</td>`;
+		html += `<td class="centered" data-report-cell="${cell}.amortization-time">` + timespanToShortenedString(Math.ceil(c.time * 3600), options.datetimeW, options.datetimeD, options.datetimeH, options.datetimeM, options.datetimeS, true) + '</td>';
 		html += '</tr>';
 	}
 	if (shown === 0)
@@ -687,9 +689,11 @@ function updateLfAmortization(planetProd, minePerPlanet) {
 		html += '<td>' + (c.pln < 0 ? options.allPlanetsStr : options.prm.aPNames[c.pln]) + '</td>';
 		html += '<td>' + options.lfNames[c.id] + '</td>';
 		html += '<td class="centered">' + c.level + '&nbsp;&rarr;&nbsp;' + (c.level + 1) + '</td>';
-		html += '<td class="centered">' + resourcesToString(c.costs) + '</td>';
-		html += '<td class="centered">' + resourcesToString(c.delta) + '</td>';
-		html += '<td class="centered">' + paybackToString(c.normCost, c.normIncrease) + '</td>';
+		// The report dialog names a selected cell by this key (productionDescribeCell).
+		const cell = `lf-amort-${n + 1}`;
+		html += `<td class="centered" data-report-cell="${cell}.upgrade-cost">${resourcesToString(c.costs)}</td>`;
+		html += `<td class="centered" data-report-cell="${cell}.production-increase">${resourcesToString(c.delta)}</td>`;
+		html += `<td class="centered" data-report-cell="${cell}.amortization-time">${paybackToString(c.normCost, c.normIncrease)}</td>`;
 		html += '</tr>';
 	}
 	if (shown === 0)

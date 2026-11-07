@@ -279,6 +279,7 @@
       'per-week' => $l['per-week'], 'prod-coeff' => $l['prod-coeff'], 'coeff' => $l['prod-coeff'],
       'prod-per-hour' => $l['prod-per-hour'], 'prod-per-day' => $l['prod-per-day'], 'prod-per-week' => $l['prod-per-week'],
       'plasma-amortization' => $l['plasma-amortization'],
+      'priority' => $l['priority-upgrades'], 'lf-amort' => $l['lf-amortization'],
       'storage-cap-met' => $l['storage-capacity'] . ', ' . $l['metal'],
       'storage-cap-crys' => $l['storage-capacity'] . ', ' . $l['crystal'],
       'storage-cap-deut' => $l['storage-capacity'] . ', ' . $l['deuterium'],

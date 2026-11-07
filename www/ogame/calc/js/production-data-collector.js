@@ -406,8 +406,18 @@ function productionDescribeCell(key) {
 	const rowKey = key.slice(0, dot);
 	const column = productionReportText(key.slice(dot + 1));
 	const planet = /^planet-(\d+)$/.exec(rowKey);
+	const ranked = /^(priority|lf-amort)-(\d+)$/.exec(rowKey);
 	let row = '';
-	if (planet === null) {
+	if (ranked !== null) {
+		// A row of a ranked upgrade list, rebuilt on every recalculation: its
+		// rank alone says nothing, so the planet, object and level travel along.
+		const cell = document.querySelector(`[data-report-cell="${CSS.escape(key)}"]`);
+		// Columns 1-3: the planet, the object and its "level → level + 1".
+		const [where = '', object = '', level = ''] = [...(cell?.closest('tr')?.cells ?? [])]
+			.slice(1, 4).map((td) => cleanReportLabel(td.textContent));
+		const what = [where, `${object} ${level}`.trim()].filter((text) => text !== '').join(', ');
+		row = `${productionReportText(ranked[1])} #${ranked[2]}` + (what === '' ? '' : ` (${what})`);
+	} else if (planet === null) {
 		const cell = document.querySelector(`[data-report-cell="${CSS.escape(key)}"]`);
 		row = cleanReportLabel(cell?.closest('tr')?.querySelector('td, th')?.textContent ?? '') || productionReportText(rowKey);
 	} else {
