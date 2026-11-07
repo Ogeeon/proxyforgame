@@ -349,8 +349,9 @@ function productionReportPlanet(out, i) {
 	const race = Number(planet[PLANET_RACE] ?? 0);
 	push(PLANET_RACE, 'race', productionReportText('race'));
 	const raceName = document.querySelector(`#one-pln-race option[value="${race}"]`)?.textContent;
-	if (raceName) {
-		out.entries[out.entries.length - 1].display = cleanReportLabel(raceName);
+	const raceEntry = out.entries.at(-1);
+	if (raceName && raceEntry) {
+		raceEntry.display = cleanReportLabel(raceName);
 	}
 	for (let k = 0; k < LF_BUILDINGS_PER_RACE; k++) {
 		const input = document.querySelector(`#one-planet-prod .lf-row-${race} input[data-lf-id="${race * 1000 + k + 1}"]`);
