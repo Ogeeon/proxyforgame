@@ -232,14 +232,17 @@ class FlightRenderer {
         }
         rows.forEach((row, i) => {
             const stripe = i % 2 === 1 ? 'odd' : 'even';
+            // The calculation-error report names a cell "<table> <n>, <column>"
+            // (flightDescribeCell in flight-data-collector.js).
+            const cell = `${tableId}-${i + 1}`;
             table.insertAdjacentHTML('beforeend',
                 `<tr class="${stripe}">` +
                 `<td>${row.speedPercent}%</td>` +
-                `<td><a href="#" class="save-point-link" data-point="${row.point.join(',')}"` +
+                `<td data-report-cell="${cell}.coords"><a href="#" class="save-point-link" data-point="${row.point.join(',')}"` +
                 ` data-start="${this._escapeAttr(startDT)}" data-speed="${row.speedPercent}"` +
                 ` data-legs="${legs}">${row.coordLabel}</a></td>` +
-                `<td>${numToOGame(row.cost)}</td>` +
-                `<td class="savepoint-return">${getDateStr(row.arriveAt, this.opts.datetimeFormat)}</td>` +
+                `<td data-report-cell="${cell}.deuterium">${numToOGame(row.cost)}</td>` +
+                `<td class="savepoint-return" data-report-cell="${cell}.return">${getDateStr(row.arriveAt, this.opts.datetimeFormat)}</td>` +
                 '</tr>');
         });
     }

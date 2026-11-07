@@ -104,6 +104,18 @@
       options.dialogAttentionLabel = <?= json_encode($l['dialog-attention']) ?>;
       options.moonLabel = <?= json_encode($l['moon']) ?>;
       options.universeFromProfile = <?= json_encode($l['pf-universe-from-profile']) ?>;
+      // Captions of the calculation-error report (flight-data-collector.js):
+      // the groups and radio groups it lists, and the rows and columns of the
+      // result cells.
+      options.reportText = <?= json_encode(array(
+        'class' => $l['class'], 'alliance-class' => $l['alliance-class'], 'ships' => $l['ships'],
+        'mission-type' => $l['mission-type-title'], 'empty-systems' => $l['empty-systems'],
+        'recall' => $l['recall'], 'flight' => $l['flight'], 'toggle-mode' => $l['toggle-mode'], 'speed' => $l['speed'],
+        'duration' => $l['flight-duration'], 'fuel' => $l['deut-consumption'], 'cargo' => $l['cargo-capacity'],
+        'distance' => $l['distance'], 'recall-return' => $l['return'],
+        'galaxies' => $l['galaxies'], 'systems' => $l['systems'], 'planets' => $l['planets'],
+        'coords' => $l['coords-short'], 'deuterium' => $l['deuterium-short'],
+      )) ?>;
     }
 </script>
   <script>
@@ -368,7 +380,7 @@
                         $name = $r[0]; $tech = $r[1];
                         $cls = ($idx % 2) === 0 ? 'odd' : 'even';
                     ?>
-                    <tr class="<?= $cls ?>">
+                    <tr class="<?= $cls ?>" data-report-key="<?= $name ?>">
                       <td><?= $l[$name] ?></td>
                       <td class="centered"><input type="text" class="form-control form-control-sm d-inline-block no-mp input-7columns centered <?= $tech ?>-speed" aria-label="<?= $l['speed-increase'] ?>"></td>
                       <td class="centered"><input type="text" class="form-control form-control-sm d-inline-block no-mp input-7columns centered <?= $tech ?>-cargo" aria-label="<?= $l['cargo-increase'] ?>"></td>
@@ -434,7 +446,7 @@
                     foreach ($row as $ship): $s = $ship[0];
                 ?>
                 <label for="<?= $s ?>"><?= $l[$s] ?></label>
-                <span id="<?= $s ?>-speed" class="speed-label">0</span>
+                <span id="<?= $s ?>-speed" class="speed-label" data-report-cell="<?= $s ?>.speed">0</span>
                 <input id="<?= $s ?>" type="text" name="<?= $s ?>" class="form-control form-control-sm d-inline-block count-input ui-input-margin" value="0">
                 <?php endforeach; endforeach; ?>
               </div>
@@ -474,7 +486,7 @@
                   <input id="destination-g" type="text" name="destination-g" class="form-control form-control-sm d-inline-block coord-input" value="1" data-field-title="<?= $l['destination-point'] ?>-<?= $l['galaxy'] ?>">:<input id="destination-s" type="text" name="destination-s" class="form-control form-control-sm d-inline-block coord-input" value="1" data-field-title="<?= $l['destination-point'] ?>-<?= $l['system'] ?>" aria-label="<?= $l['destination-point'] ?>-<?= $l['system'] ?>">:<input id="destination-p" type="text" name="destination-p" class="form-control form-control-sm d-inline-block coord-input-small" value="1" data-field-title="<?= $l['destination-point'] ?>-<?= $l['planet'] ?>" aria-label="<?= $l['destination-point'] ?>-<?= $l['planet'] ?>">
                 </span>
                 <span class="ms-3"><?= $l['distance'] ?></span>
-                <span id="distance"></span>
+                <span id="distance" data-report-cell="distance"></span>
                 <label id="empty-systems-label" style="display: none;">(<?= $l['empty-systems'] ?>&nbsp;
                   <input type="number" id="empty-systems-count-spin" class="form-control form-control-sm d-inline-block" step="1" min="0">)
                 </label>
@@ -491,9 +503,9 @@
                 <?php for($i=100; $i>0; $i-=5): ?>
                 <tr class="speed-row <?= ($i % 10) === 5 ? 'odd' : 'even' ?>">
                   <td class="text-center"><?= $i ?>%</td>
-                  <td class="text-center"></td>
-                  <td class="text-center"></td>
-                  <td class="text-center"></td>
+                  <td class="text-center" data-report-cell="speed-<?= $i ?>.duration"></td>
+                  <td class="text-center" data-report-cell="speed-<?= $i ?>.fuel"></td>
+                  <td class="text-center" data-report-cell="speed-<?= $i ?>.cargo"></td>
                   <td class="text-center">
                     <div class="btn btn-sm btn-outline-secondary button-taketocalc" data-bs-toggle="tooltip" title="<?= $l['take-to-calc'] ?>">
                       <i class="bi bi-arrow-right"></i>
@@ -561,7 +573,7 @@
                     <div class="text-center fw-bold mt-1"><span id="flight-title-2"><?= $l['arrival'] ?></span></div>
                     <!-- Computed, never typed into: `ui-state-disabled´ is the same
                          marker the trade calculator puts on its derived rate field. -->
-                    <div id="arrival-moment" class="form-control form-control-sm startdate-input text-center ui-state-disabled">?</div>
+                    <div id="arrival-moment" data-report-cell="arrival-moment" class="form-control form-control-sm startdate-input text-center ui-state-disabled">?</div>
                   </div>
 
                   <div class="tab-pane" id="departure-recall-panel" role="tabpanel">
@@ -597,7 +609,7 @@
                       </div>
                     </div>
                     <div class="text-center fw-bold mt-1"><?= $l['return'] ?></div>
-                    <div id="recall-return-moment" class="form-control form-control-sm startdate-input text-center ui-state-disabled">?</div>
+                    <div id="recall-return-moment" data-report-cell="recall-return" class="form-control form-control-sm startdate-input text-center ui-state-disabled">?</div>
                   </div>
 
                 </div>

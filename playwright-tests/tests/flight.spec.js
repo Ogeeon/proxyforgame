@@ -1,5 +1,6 @@
 import { test, expect, expectLoadsCleanly } from './base';
 import { expectMcpBoundsMatchPage } from './mcp-bounds';
+import { catchReport, reportCell, sendReport } from './report-dialog';
 import { readFileSync } from 'fs';
 import { join } from 'path';
 
@@ -2398,6 +2399,53 @@ test.describe('Flight Calculator - Saved Fleets', () => {
         await page.reload();
         await expect(select.locator('option')).toHaveCount(2);
         expect(await page.evaluate(() => document.cookie)).not.toContain('flight_fleet_both=');
+    });
+});
+
+// The calculation-error report attaches the calculator's own snapshot
+// (reportSnapshot in flight-data-collector.js): the result tab and departure
+// panel the number was read on, the cell it came from, and only the fields
+// that differ from their factory defaults - the radio groups as one line each.
+test.describe('Flight Calculator - calculation-error report', () => {
+    test('names the mode, the selected cell and the changed fields', async ({ context, page }) => {
+        await context.addInitScript(() => {
+            localStorage.setItem('lastChange', 'key-value;true,value;99999');
+        });
+        await page.goto('/flight');
+        const sent = await catchReport(page);
+
+        await openParams(page);
+        await page.locator('#class-1').check();
+        await openFlightTimesTab(page);
+        await page.locator('#mission-type-0').check();
+        await setFleet(page, { 'large-cargo': 100 });
+        await page.locator('#destination-s').fill('50');
+        await page.locator('#destination-s').blur();
+        const cell = page.locator('[data-report-cell="speed-100.fuel"]');
+        await expect(cell).toHaveText('3.110');
+
+        await reportCell(page, cell);
+        await expect(page.locator('#report-calc-values li')).toHaveText([
+            'Mode: Flight times › Regular',
+            'Selected: Speed 100%, Deut consumption',
+            'Common',
+            'Class: General',
+            'Ships',
+            'Large cargo: 100',
+            'Flight times',
+            'Mission type: War',
+            'Destination point: 1:50:1',
+        ]);
+
+        await sendReport(page, sent, '1');
+        expect(sent()?.get('context')).toBe([
+            'mode: tabtag1 / recall-tabtag-regular',
+            'selected: speed-100.fuel = "3.110"',
+            'class = 1',
+            'large-cargo.qty = 100',
+            'mission-type = 0',
+            'destination = 1:50:1',
+        ].join('\n'));
     });
 });
 

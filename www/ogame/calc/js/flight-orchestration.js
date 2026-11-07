@@ -18,6 +18,8 @@ const options = {
         min: -Infinity, max: Infinity, def: 0, allowFloat: false, allowNegative: false,
     },
     universe: null,
+    /** @type {Record<string, string>} Captions of the report's groups and cells, filled in by the template. */
+    reportText: {},
     prm: {
         country: '--',
         /** @type {?(number|string)} */

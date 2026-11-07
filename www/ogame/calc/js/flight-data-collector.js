@@ -230,3 +230,309 @@ class FlightDataCollector {
         return { country: this.text('country'), universe: this.text('universe') };
     }
 }
+
+// ============================================================================
+// CALCULATION-ERROR REPORT
+// ============================================================================
+//
+// What the sidebar's report dialog attaches for this page (the contract is in
+// www/js/report-context.js): the result tab and, on the flight-time tab, the
+// departure panel's tab; every field that feeds the result next to its
+// factory default. reportEntryOf(), reportLabelOf() and cleanReportLabel()
+// come from sidebar.js.
+
+// The life-form ship table's three inputs per row, in column order.
+const FLIGHT_REPORT_LF_COLUMNS = ['speed', 'cargo', 'fuel'];
+// A flight leg as a fresh page shows it.
+const FLIGHT_REPORT_EMPTY_LEG = '+00 00:00:00';
+
+/**
+ * A localized caption the template inlined for the report (options.reportText).
+ * @param {string} key
+ * @returns {string}
+ */
+function flightReportText(key) {
+    return cleanReportLabel(options.reportText[key] ?? key);
+}
+
+/**
+ * The caption of a tab button, '' for a missing one.
+ * @param {string} id
+ * @returns {string}
+ */
+function flightTabLabel(id) {
+    return cleanReportLabel(document.getElementById(id)?.textContent ?? '');
+}
+
+/**
+ * Collects the report's entries; `add` reads one field by id.
+ */
+class FlightReportEntries {
+    constructor() {
+        /** @type {ReportEntry[]} */
+        this.entries = [];
+    }
+
+    /**
+     * @param {string} id
+     * @param {string} group
+     * @param {ReportFieldOptions} [opts]
+     * @returns {ReportEntry|null} the entry added, null for a missing field
+     */
+    add(id, group, opts = {}) {
+        const el = document.getElementById(id);
+        if (!(el instanceof HTMLInputElement || el instanceof HTMLSelectElement)) {
+            return null;
+        }
+        const entry = reportEntryOf(el, { group, ...opts });
+        this.entries.push(entry);
+        return entry;
+    }
+
+    /**
+     * @param {string[]} ids
+     * @param {string} group
+     */
+    addNumbers(ids, group) {
+        for (const id of ids) {
+            this.add(id, group, { numeric: true });
+        }
+    }
+
+    /**
+     * A radio group as one entry: the option that is on, against the one the
+     * page starts on.
+     * @param {string} name
+     * @param {string} group
+     * @param {string} label
+     * @param {string} start - the value of the option a fresh page has on
+     */
+    addRadio(name, group, label, start) {
+        const on = checkedRadio(name);
+        this.entries.push({
+            key: name, group, label,
+            value: on?.value ?? '', default: start,
+            display: on instanceof HTMLInputElement ? reportLabelOf(on) || on.value : '',
+        });
+    }
+
+    /**
+     * Galaxy, system and position as one "g:s:p" entry.
+     * @param {string} point - 'departure' or 'destination'
+     * @param {string} group
+     */
+    addCoords(point, group) {
+        const value = ['g', 's', 'p'].map((suffix) => getVal(`#${point}-${suffix}`)).join(':');
+        this.entries.push({
+            key: point, group, label: cleanReportLabel(document.querySelector(`label[for="${point}-g"]`)?.textContent ?? point),
+            value, default: '1:1:1',
+        });
+    }
+}
+
+/**
+ * The tabs the result is read on: the result tab, and on the flight-time tab
+ * the departure panel's tab (plain arrival or recall).
+ * @returns {ReportModePart[]}
+ */
+function flightReportMode() {
+    /** @type {ReportModePart[]} */
+    const mode = [];
+    const outer = document.querySelector('#tabs .nav-link.active');
+    if (outer === null) {
+        return mode;
+    }
+    mode.push({ key: outer.id, label: flightTabLabel(outer.id) });
+    const inner = document.querySelector('#recall-tabs .nav-link.active');
+    if (outer.id === 'tabtag1' && inner !== null) {
+        mode.push({ key: inner.id, label: flightTabLabel(inner.id) });
+    }
+    return mode;
+}
+
+/**
+ * The parameter panel: all three of its tabs, the hidden ones included.
+ * @param {FlightReportEntries} out
+ */
+function flightReportParameters(out) {
+    const common = flightTabLabel('param-common-tab');
+    out.addCoords('departure', common);
+    out.addRadio('class', common, flightReportText('class'), '0');
+    out.addRadio('alliance-class', common, flightReportText('alliance-class'), '0');
+    out.addNumbers(['cmb-drive', 'imp-drive', 'hyp-drive', 'hypertech-lvl'], common);
+
+    const universe = flightTabLabel('param-universe-tab');
+    out.add('country', universe);
+    // The universe list is built from the country, so it has no default of
+    // its own: named whenever a country is picked.
+    const uni = out.add('universe', universe);
+    if (uni !== null) {
+        delete uni.default;
+    }
+    out.add('circular-systems', universe);
+    out.add('circular-galaxies', universe);
+    out.addNumbers(['systems-num', 'galaxies-num'], universe);
+    out.add('speed-fleet-war', universe);
+    out.add('speed-fleet-peaceful', universe);
+    out.add('speed-fleet-holding', universe);
+    out.add('sp-cargohold', universe, { numeric: true });
+    out.add('deut-factor', universe);
+    out.add('deut-generals-bonus', universe);
+
+    const lifeforms = flightTabLabel('param-lifeforms-tab');
+    out.addNumbers(['lf-mechan-general-enh', 'lf-rocktal-collector-enh'], lifeforms);
+    for (const row of document.querySelectorAll('#lf-ships-bonuses tr[data-report-key]')) {
+        if (!(row instanceof HTMLTableRowElement)) {
+            continue;
+        }
+        const name = cleanReportLabel(row.cells[0]?.textContent ?? '');
+        row.querySelectorAll('input').forEach((input, i) => {
+            out.entries.push(reportEntryOf(input, {
+                key: `${row.dataset.reportKey}.${FLIGHT_REPORT_LF_COLUMNS[i] ?? i}-bonus`, group: lifeforms,
+                numeric: true, label: `${name} — ${reportLabelOf(input)}`,
+            }));
+        });
+    }
+}
+
+/**
+ * The ships panel: the count of every ship and the speed override.
+ * @param {FlightReportEntries} out
+ */
+function flightReportShips(out) {
+    const ships = flightReportText('ships');
+    for (const ship of SHIPS_BASE) {
+        const slug = String(ship[0]);
+        out.add(slug, ships, { key: `${slug}.qty`, numeric: true });
+    }
+    out.add('ovr-speed-cb', ships);
+    if (getChecked('#ovr-speed-cb')) {
+        out.add('ovr-speed-t', ships, { numeric: true });
+    }
+}
+
+/**
+ * The flight-time tab: mission, target, and the departure panel the mode
+ * names - the arrival calculator's legs or the recall.
+ * @param {FlightReportEntries} out
+ * @param {ReportModePart[]} mode
+ */
+function flightReportFlightTimes(out, mode) {
+    const group = mode[0].label;
+    out.addRadio('mission-type', group, flightReportText('mission-type'), '1');
+    out.addCoords('destination', group);
+    const override = window.flightOrchestrator?.emptyOverride;
+    if (override?.enabled) {
+        out.add('empty-systems-count-spin', group, { numeric: true, label: flightReportText('empty-systems') });
+    }
+
+    const panel = mode[1];
+    if (panel === undefined) {
+        return;
+    }
+    if (panel.key === 'recall-tabtag-recall') {
+        out.add('recall-start-datetime', panel.label);
+        out.add('recall-full-flight', panel.label);
+        out.addRadio('recall-mode', panel.label, flightReportText('recall'), '0');
+        out.add(checkedRadio('recall-mode')?.value === '1' ? 'recall-after' : 'recall-moment', panel.label);
+        return;
+    }
+    // The arrow button swaps what the first moment is: the departure, or -
+    // counting back - the arrival.
+    const reversed = window.flightOrchestrator?.opts.prm.mode === 1;
+    out.entries.push({
+        key: 'arrival-mode', group: panel.label, label: flightReportText('toggle-mode'),
+        value: reversed ? 1 : 0, default: 0,
+        display: cleanReportLabel(document.getElementById('flight-title-1')?.textContent ?? ''),
+    });
+    out.add('start-datetime', panel.label, { label: cleanReportLabel(document.getElementById('flight-title-1')?.textContent ?? '') });
+    document.querySelectorAll('#flight-data .flight-leg').forEach((row, i) => {
+        const input = row.querySelector('.flight-time-input');
+        if (!(input instanceof HTMLInputElement)) {
+            return;
+        }
+        const sign = row.querySelector('.flight-leg-sign');
+        const back = sign instanceof HTMLElement && sign.dataset.sign === '-';
+        const time = input.value.trim();
+        const direction = back ? '-' : '+';
+        const value = time === '' ? '' : `${direction}${time}`;
+        // A fresh page shows one empty leg as a forward "00 00:00:00".
+        out.entries.push({
+            key: `flight-leg.${i + 1}`, group: panel.label, label: `${flightReportText('flight')} ${i + 1}`,
+            value, default: FLIGHT_REPORT_EMPTY_LEG,
+        });
+    });
+}
+
+/**
+ * The save-point search's own fields.
+ * @param {FlightReportEntries} out
+ * @param {string} group
+ */
+function flightReportSavePoints(out, group) {
+    out.add('save-start-datetime', group);
+    out.add('save-return-datetime', group, { label: cleanReportLabel(document.getElementById('save-return-label')?.textContent ?? '') });
+    // The template leaves it empty; a fresh page fills in a zero tolerance.
+    const tolerance = out.add('save-tolerance-time', group);
+    if (tolerance !== null) {
+        tolerance.default = '00:00';
+    }
+    out.add('save-one-way', group);
+}
+
+/**
+ * The report hook: the open tabs and every field the result there depends
+ * on, defaults included.
+ * @returns {ReportSnapshot}
+ */
+function flightReportSnapshot() {
+    const mode = flightReportMode();
+    const out = new FlightReportEntries();
+    flightReportParameters(out);
+    flightReportShips(out);
+    if (mode[0]?.key === 'tabtag1') {
+        flightReportFlightTimes(out, mode);
+    } else if (mode[0]?.key === 'tabtag2') {
+        flightReportSavePoints(out, mode[0].label);
+    }
+    return { mode, entries: out.entries };
+}
+
+/**
+ * The caption of a result cell the page marked.
+ * @param {string} key - e.g. "speed-100.duration", "large-cargo.speed",
+ *   "savepoints-systems-2.deuterium", "distance"
+ * @returns {string}
+ */
+function flightDescribeCell(key) {
+    const dot = key.lastIndexOf('.');
+    if (key === 'arrival-moment') {
+        // Arrival, or the departure when the panel counts back from it.
+        return cleanReportLabel(document.getElementById('flight-title-2')?.textContent ?? '');
+    }
+    if (dot < 0) {
+        return flightReportText(key);
+    }
+    const rowKey = key.slice(0, dot);
+    const columnKey = key.slice(dot + 1);
+    // The save points' last column reads "Return" or, one-way, "Arrival".
+    const column = columnKey === 'return'
+        ? cleanReportLabel(document.querySelector('.savepoint-return-header')?.textContent ?? '')
+        : flightReportText(columnKey);
+    let row = '';
+    const speed = /^speed-(\d+)$/.exec(rowKey);
+    const savePoint = /^savepoints-(galaxies|systems|planets)-(\d+)$/.exec(rowKey);
+    if (speed !== null) {
+        row = `${flightReportText('speed')} ${speed[1]}%`;
+    } else if (savePoint !== null) {
+        row = `${flightReportText(savePoint[1])} ${savePoint[2]}`;
+    } else {
+        row = cleanReportLabel(document.querySelector(`label[for="${CSS.escape(rowKey)}"]`)?.textContent ?? '');
+    }
+    return row === '' ? column : `${row}, ${column}`;
+}
+
+if (typeof window !== 'undefined') {
+    globalThis.reportSnapshot = flightReportSnapshot;
+    globalThis.describeCell = flightDescribeCell;
+}
