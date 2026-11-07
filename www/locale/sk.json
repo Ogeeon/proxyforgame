@@ -284,7 +284,16 @@
     "pf-take-fleet": "Z miesta odletu",
     "pf-take-fleet-hint": "Doplniť lode umiestnené na planéte alebo mesiaci zvolenom ako miesto odletu, podľa posledného importu z OGame.",
     "pf-universe-from-profile": "Vesmír je určený aktívnym profilom.",
-    "scripts-failed-to-load": "Niektoré skripty stránky sa nepodarilo načítať, takže kalkulačka nemusí fungovať. Obnovte stránku."
+    "scripts-failed-to-load": "Niektoré skripty stránky sa nepodarilo načítať, takže kalkulačka nemusí fungovať. Obnovte stránku.",
+    "report-mode": "Režim",
+    "report-selected": "Označené",
+    "report-yes": "áno",
+    "report-no": "nie",
+    "report-all-defaults": "Všetky polia majú predvolené hodnoty.",
+    "report-omitted-one": "ďalšie {0} pole nebolo priložené",
+    "report-omitted-few": "ďalšie {0} polia neboli priložené",
+    "report-omitted-many": "ďalších {0} polí nebolo priložených",
+    "report-omitted-other": "ďalších {0} polí nebolo priložených"
   },
   "index": {
     "title": "ProxyForGame - software pre online hry v prehliadači OGame",

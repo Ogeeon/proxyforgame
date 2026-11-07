@@ -284,7 +284,16 @@
     "pf-take-fleet": "Z miejsca startu",
     "pf-take-fleet-hint": "Wstaw statki stacjonujące na planecie lub księżycu wybranym jako miejsce startu, według ostatniego importu z OGame.",
     "pf-universe-from-profile": "Uniwersum jest ustawione przez aktywny profil.",
-    "scripts-failed-to-load": "Niektóre skrypty strony nie zostały wczytane, więc kalkulator może nie działać. Odśwież stronę."
+    "scripts-failed-to-load": "Niektóre skrypty strony nie zostały wczytane, więc kalkulator może nie działać. Odśwież stronę.",
+    "report-mode": "Tryb",
+    "report-selected": "Zaznaczono",
+    "report-yes": "tak",
+    "report-no": "nie",
+    "report-all-defaults": "Wszystkie pola mają wartości domyślne.",
+    "report-omitted-one": "jeszcze {0} pole nie zostało dołączone",
+    "report-omitted-few": "jeszcze {0} pola nie zostały dołączone",
+    "report-omitted-many": "jeszcze {0} pól nie zostało dołączonych",
+    "report-omitted-other": "jeszcze {0} pola nie zostało dołączone"
   },
   "index": {
     "title": "Narzedzia do gier przegladarkowych OGame",

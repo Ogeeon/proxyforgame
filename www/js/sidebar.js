@@ -50,120 +50,265 @@ function formField(id) {
 // ones sidebar.tpl inlines as reportCalcText, keeping the originals here.
 let reportCalcDefaults = null;
 
-// What collectReportControls() last built for the open dialog. The page cannot
+// What prepareReportCalcMode() last built for the open dialog. The page cannot
 // change while the modal is up, so one collection per open is the truth the
 // whole open works with; empty until then.
 /** @type {ReportContext} */
-let reportContext = { pairs: [], text: '', omitted: 0 };
+let reportContext = { offered: false, lines: [], text: '', omitted: 0 };
 
 // Page chrome, not the calculator: the sidebar with its selects of its own,
-// the topbar's language and profile pickers, every dialog, and the honeypot.
-const REPORT_CONTEXT_EXCLUDES = '#sidebar, #sidebarOffcanvas, #topbar, .modal, .offcanvas, .pfg-hp';
+// the topbar's language and profile pickers, every dialog, and the honeypot -
+// plus any field a template marks data-report-skip: the resources available,
+// which a report never carries.
+const REPORT_CONTEXT_EXCLUDES = '#sidebar, #sidebarOffcanvas, #topbar, .modal, .offcanvas, .pfg-hp, [data-report-skip]';
 
 // Input types that are UI plumbing rather than a value a person set.
 const REPORT_SKIP_TYPES = new Set(['hidden', 'button', 'submit', 'reset', 'image', 'file', 'password']);
 
 /**
- * The text of the control's label: the label pointing at its id, else a label
- * wrapped around it, else '' - the name is the fallback the context builder
- * applies. Left unsqueezed; buildReportContext does that for every field.
+ * A label as the report shows it: squeezed, without the trailing colon the
+ * templates put after a caption ("Exchange rates:").
+ * @param {string} text
+ * @returns {string}
+ */
+function cleanReportLabel(text) {
+    const squeezed = text.replace(/\s+/g, ' ').trim();
+    // A plain endsWith rather than /\s*:$/, which backtracks (Sonar S8786).
+    return squeezed.endsWith(':') ? squeezed.slice(0, -1).trimEnd() : squeezed;
+}
+
+/**
+ * The text of the field's label: the label pointing at its id, else a label
+ * wrapped around it, else its aria-label - what the table inputs carry - else
+ * ''; reportEntryOf() falls back to the key.
  * @param {HTMLInputElement|HTMLSelectElement|HTMLTextAreaElement} el
  * @returns {string}
  */
 function reportLabelOf(el) {
     if (el.id !== '') {
         const label = document.querySelector(`label[for="${CSS.escape(el.id)}"]`);
-        if (label && label.textContent.trim() !== '') {
-            return label.textContent;
+        const text = cleanReportLabel(label?.textContent ?? '');
+        if (text !== '') {
+            return text;
         }
     }
-    const wrapped = el.closest('label');
-    if (wrapped && wrapped.textContent.trim() !== '') {
-        return wrapped.textContent;
+    const wrapped = cleanReportLabel(el.closest('label')?.textContent ?? '');
+    if (wrapped !== '') {
+        return wrapped;
     }
-    return '';
+    return cleanReportLabel(el.getAttribute('aria-label') ?? '');
 }
 
 /**
- * Reads the page's form controls into the plain objects report-context.js
- * works on: what a person would read off the page. Radios of one group
- * collapse into the option that is on - a group nobody answered says nothing
- * about the calculation - and a select reports its option's text, not the key
- * in its value attribute.
- * @returns {ReportControl[]}
+ * How a calculator's reportSnapshot() hook overrides what reportEntryOf()
+ * reads off a field.
+ * @typedef {object} ReportFieldOptions
+ * @property {string} [key]        defaults to the id, else the name
+ * @property {string} [group]      defaults to none
+ * @property {string} [label]      defaults to reportLabelOf()
+ * @property {boolean} [numeric]   read a text field as a locale-aware number,
+ *                                 its default from the template's dot-decimal value
  */
-function collectReportControls() {
-    /** @type {ReportControl[]} */
-    const controls = [];
+
+/**
+ * One field as a report entry: its canonical value next to its factory
+ * default - the template's value, checked state or selected option, which a
+ * profile or a saved setting never touches - and what the page shows.
+ * Shared by the generic walk below and the calculators' reportSnapshot() hooks.
+ * @param {HTMLInputElement|HTMLSelectElement|HTMLTextAreaElement} el
+ * @param {ReportFieldOptions} [opts]
+ * @returns {ReportEntry}
+ */
+function reportEntryOf(el, opts = {}) {
+    const key = opts.key ?? (el.id || el.name);
+    const group = opts.group ?? '';
+    // A field with no caption at all is still better named by its id than
+    // shown as a bare value.
+    const label = opts.label ?? (reportLabelOf(el) || key);
+    if (el instanceof HTMLInputElement && el.type === 'checkbox') {
+        return { key, group, label, value: el.checked, default: el.defaultChecked };
+    }
+    if (el instanceof HTMLSelectElement) {
+        const all = Array.from(el.options);
+        // A select with no option marked selected starts on its first one.
+        const start = all.find((option) => option.defaultSelected) ?? all[0];
+        const shown = el.selectedOptions.length > 0 ? el.selectedOptions[0].textContent ?? '' : el.value;
+        return { key, group, label, value: el.value, default: start ? start.value : '', display: shown.trim() };
+    }
+    if (opts.numeric) {
+        return {
+            key, group, label,
+            value: getInputNumber(el),
+            default: Number.parseFloat(el.defaultValue) || 0,
+            display: el.value,
+        };
+    }
+    return { key, group, label, value: el.value, default: el.defaultValue };
+}
+
+/**
+ * Reads the page's form fields into a snapshot, for a calculator without a
+ * reportSnapshot() hook. What a person sees and set: hidden fields - an
+ * inactive tab, a closed dialog - are left out, and radios of one group
+ * collapse into one entry, the option that is on. The defaults go along;
+ * buildReportContext drops the fields still standing at them.
+ * @returns {ReportSnapshot}
+ */
+function collectFallbackSnapshot() {
+    /** @type {ReportEntry[]} */
+    const entries = [];
     const seenRadioGroups = new Set();
     for (const el of document.querySelectorAll('input, select, textarea')) {
-        const control = readReportControl(el, seenRadioGroups);
-        if (control !== null) {
-            controls.push(control);
+        const entry = readReportField(el, seenRadioGroups);
+        if (entry !== null) {
+            entries.push(entry);
         }
     }
-    return controls;
+    return { mode: [], entries };
 }
 
 /**
- * One control as the report carries it, or null for an element the report
- * leaves out: page chrome, a hidden or button input, an unanswered radio.
+ * One field as the generic walk carries it, or null for an element the report
+ * leaves out: page chrome, a hidden field, a button input, a radio group
+ * already carried.
  * @param {Element} el
  * @param {Set<string>} seenRadioGroups - radio groups already carried
- * @returns {ReportControl|null}
+ * @returns {ReportEntry|null}
  */
-function readReportControl(el, seenRadioGroups) {
+function readReportField(el, seenRadioGroups) {
     if (!(el instanceof HTMLInputElement || el instanceof HTMLSelectElement || el instanceof HTMLTextAreaElement)) {
         return null;
     }
     const kind = el instanceof HTMLInputElement ? el.type : el.tagName.toLowerCase();
-    if (REPORT_SKIP_TYPES.has(kind)) {
+    if (REPORT_SKIP_TYPES.has(kind) || el.closest(REPORT_CONTEXT_EXCLUDES) !== null) {
         return null;
     }
-    if (el.closest(REPORT_CONTEXT_EXCLUDES) !== null) {
+    // No layout box: an inactive tab pane, a collapsed panel, a d-none row.
+    if (el.getClientRects().length === 0) {
         return null;
     }
     if (el instanceof HTMLInputElement && el.type === 'radio') {
         return readReportRadio(el, seenRadioGroups);
     }
-    return { type: kind, name: el.name || el.id || '', label: reportLabelOf(el), value: readReportValue(el) };
+    return reportEntryOf(el);
 }
 
 /**
- * The one line a radio group contributes: the checked option, or null for an
- * unchecked one and for a group another radio has already answered.
+ * The one entry a radio group contributes: the option that is on, against
+ * the one the template checks (else its first).
  * @param {HTMLInputElement} el
  * @param {Set<string>} seenRadioGroups
- * @returns {ReportControl|null}
+ * @returns {ReportEntry|null}
  */
 function readReportRadio(el, seenRadioGroups) {
     const group = el.name || el.id;
-    if (!el.checked || (group !== '' && seenRadioGroups.has(group))) {
+    if (group === '' || seenRadioGroups.has(group)) {
         return null;
     }
-    if (group !== '') {
-        seenRadioGroups.add(group);
+    seenRadioGroups.add(group);
+    /** @type {HTMLInputElement[]} */
+    const radios = [];
+    for (const r of el.name === '' ? [el] : document.getElementsByName(el.name)) {
+        if (r instanceof HTMLInputElement && r.type === 'radio') {
+            radios.push(r);
+        }
     }
-    // The line reads "player-class: Collector": the group says which setting
-    // it is, the option's label says where it stands.
-    return { type: 'radio', name: group, label: group, value: reportLabelOf(el) || el.value };
+    const on = radios.find((r) => r.checked);
+    // A group the template checks none of gets its first option checked by
+    // the calculator on load, so that one stands for the default.
+    const start = radios.find((r) => r.defaultChecked) ?? radios[0];
+    // The line reads "Class: Collector": the fieldset's legend says which
+    // setting it is, the option's label says where it stands.
+    const legend = cleanReportLabel(el.closest('fieldset')?.querySelector('legend')?.textContent ?? '');
+    return {
+        key: group,
+        group: '',
+        label: legend || group,
+        value: on ? on.value : '',
+        default: start ? start.value : '',
+        display: on ? reportLabelOf(on) || on.value : '',
+    };
 }
 
 /**
- * What a control says as a person reads it: the chosen option's text for a
- * select, the state for a checkbox, the value for the rest.
- * @param {HTMLInputElement|HTMLSelectElement|HTMLTextAreaElement} el
- * @returns {string}
+ * The snapshot the dialog attaches: the calculator's own when it has a
+ * reportSnapshot() hook, the generic field walk otherwise - and also when the
+ * hook throws, because the report must still go out.
+ * @returns {ReportSnapshot}
  */
-function readReportValue(el) {
-    if (el instanceof HTMLSelectElement) {
-        // The calculators have no multiple select; the first option is it.
-        return String(el.selectedOptions.length > 0 ? el.selectedOptions[0].textContent : el.value);
+function collectReportSnapshot() {
+    const hook = globalThis.reportSnapshot;
+    if (typeof hook === 'function') {
+        try {
+            return hook();
+        } catch (e) {
+            console.error('reportSnapshot failed, attaching the page fields instead:', e);
+        }
     }
-    if (el instanceof HTMLInputElement && el.type === 'checkbox') {
-        return el.checked ? 'on' : 'off';
+    return collectFallbackSnapshot();
+}
+
+/**
+ * The result cell the current selection sits in: the closest element marked
+ * data-report-cell around everything selected. A selection spanning several
+ * cells has its common ancestor above them, so it answers null, as does no
+ * selection at all.
+ * @returns {HTMLElement|null}
+ */
+function selectedReportCell() {
+    const selection = globalThis.getSelection?.();
+    if (!selection || selection.rangeCount === 0) {
+        return null;
     }
-    return String(el.value ?? '');
+    const node = selection.getRangeAt(0).commonAncestorContainer;
+    const el = node instanceof Element ? node : node.parentElement;
+    const cell = el?.closest('[data-report-cell]') ?? null;
+    return cell instanceof HTMLElement ? cell : null;
+}
+
+/**
+ * The selection as the report names it: the marked cell's key and the
+ * calculator's caption for it (describeCell), with the text as selected.
+ * @param {string} text - the selected text
+ * @param {HTMLElement|null} cell - the marked cell it came from, if any
+ * @returns {ReportSelection|null}
+ */
+function reportSelectionOf(text, cell) {
+    const key = cell?.dataset.reportCell ?? '';
+    if (key === '') {
+        return null;
+    }
+    let caption = '';
+    const describe = globalThis.describeCell;
+    if (typeof describe === 'function') {
+        try {
+            caption = describe(key);
+        } catch (e) {
+            console.error('describeCell failed:', e);
+        }
+    }
+    return { key, caption, text };
+}
+
+/**
+ * The words of the shown list, out of what sidebar.tpl inlines.
+ * @returns {ReportTexts}
+ */
+function reportTexts() {
+    return {
+        locale: document.documentElement.lang,
+        mode: reportCalcText.mode,
+        selected: reportCalcText.selected,
+        yes: reportCalcText.yes,
+        no: reportCalcText.no,
+        allDefaults: reportCalcText.allDefaults,
+        omitted: {
+            one: reportCalcText.omittedOne,
+            few: reportCalcText.omittedFew,
+            many: reportCalcText.omittedMany,
+            other: reportCalcText.omittedOther,
+        },
+    };
 }
 
 /**
@@ -175,18 +320,29 @@ function isReportCalcOn() {
     return formField('report-calc-toggle').checked;
 }
 
+// How each kind of line of the shown list is set apart.
+const REPORT_LINE_CLASSES = {
+    mode: ['fw-semibold'],
+    selected: ['fw-semibold'],
+    group: ['fw-semibold', 'mt-1'],
+    entry: ['ps-2'],
+    omitted: ['fst-italic', 'mt-1'],
+    empty: ['fst-italic'],
+};
+
 /**
  * Fills the list the dialog shows of what will be attached. Values are what
  * the visitor typed on the page: textContent, never innerHTML, so a pasted
  * `<script>` stays the text it is.
- * @param {{label: string, value: string}[]} pairs
+ * @param {ReportLine[]} lines
  */
-function fillReportContextList(pairs) {
+function fillReportContextList(lines) {
     const list = requireEl('report-calc-values');
     list.innerHTML = '';
-    for (const pair of pairs) {
+    for (const line of lines) {
         const li = document.createElement('li');
-        li.textContent = `${pair.label}: ${pair.value}`;
+        li.classList.add(...REPORT_LINE_CLASSES[line.kind]);
+        li.textContent = line.text;
         list.appendChild(li);
     }
 }
@@ -236,11 +392,12 @@ function setReportCalcMode(on) {
  * about to open: offered only where something can be attached, and pre-flipped
  * on when the selection reads like a wrong number rather than a misspelling.
  * @param {string} selection - the text the dialog was opened with
+ * @param {HTMLElement|null} cell - the marked result cell it was selected in
  */
-function prepareReportCalcMode(selection) {
-    reportContext = buildReportContext(collectReportControls());
+function prepareReportCalcMode(selection, cell) {
+    reportContext = buildReportContext(collectReportSnapshot(), reportSelectionOf(selection, cell), reportTexts());
     const block = requireEl('report-calc-block');
-    if (reportContext.pairs.length === 0) {
+    if (!reportContext.offered) {
         // Nothing to attach on this page (the front page): the switch is not
         // offered and the dialog keeps its misspelling shape.
         block.classList.add('d-none');
@@ -248,16 +405,22 @@ function prepareReportCalcMode(selection) {
         return;
     }
     block.classList.remove('d-none');
-    fillReportContextList(reportContext.pairs);
+    fillReportContextList(reportContext.lines);
     setReportCalcMode(looksLikeCalculationError(selection));
 }
 
-function showReportWindow(text) {
+/**
+ * Opens the report dialog for the selected text.
+ * @param {string} text - the selected text
+ * @param {HTMLElement|null} [cell] - the marked result cell it sits in, read
+ *        before anything else can move the selection
+ */
+function showReportWindow(text, cell = null) {
     formField('misspelled-text').value = text;
     formField('corrected-text').value = text;
     formField('report-website').value = '';
     reportOpenedAt = performance.now();
-    prepareReportCalcMode(text);
+    prepareReportCalcMode(text, cell);
     reportModal.show();
     showSendDiv('report', 'data');
     setTimeout(() => requireEl('corrected-text').focus(), 300);
@@ -268,9 +431,9 @@ function showReportWindow(text) {
 function getText(e) {
     if (!e) return;
     if (e.ctrlKey && (e.key === 'Enter' || e.keyCode === 13 || e.keyCode === 10)) {
-        let mis = getSelectedText();
+        const mis = getSelectedText();
         if (mis) {
-            showReportWindow(mis);
+            showReportWindow(mis, selectedReportCell());
         }
     }
 }
@@ -282,10 +445,10 @@ function getSelectedText() {
     return /** @type {any} */ (document).selection?.createRange()?.text ?? '';
 }
 
-function findSelection() { 
-    let mis = getSelectedText();
+function findSelection() {
+    const mis = getSelectedText();
     if (mis) {
-        showReportWindow(mis);
+        showReportWindow(mis, selectedReportCell());
     }
 }
 

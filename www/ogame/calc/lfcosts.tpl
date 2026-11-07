@@ -408,9 +408,9 @@
                 <tr>
                   <td style="display: none;">ra</td>
                   <td colspan="<?= ($i == 1)?'3':'2' ?>" class="border-w"><?= $l['res-available'] ?></td>
-                  <td class="text-center"><input id="metal-available-<?=$i?>-<?=$j?>" type="text" name="metal-available" class="form-control form-control-sm res-input" value="0" aria-label="<?= htmlspecialchars($l['res-available'] . ': ' . $l['metal'], ENT_QUOTES) ?>"></td>
-                  <td class="text-center"><input id="crystal-available-<?=$i?>-<?=$j?>" type="text" name="crystal-available" class="form-control form-control-sm res-input" value="0" aria-label="<?= htmlspecialchars($l['res-available'] . ': ' . $l['crystal'], ENT_QUOTES) ?>"></td>
-                  <td class="text-center"><input id="deut-available-<?=$i?>-<?=$j?>" type="text" name="deut-available" class="form-control form-control-sm res-input" value="0" aria-label="<?= htmlspecialchars($l['res-available'] . ': ' . $l['deuterium'], ENT_QUOTES) ?>"></td>
+                  <td class="text-center"><input id="metal-available-<?=$i?>-<?=$j?>" data-report-skip type="text" name="metal-available" class="form-control form-control-sm res-input" value="0" aria-label="<?= htmlspecialchars($l['res-available'] . ': ' . $l['metal'], ENT_QUOTES) ?>"></td>
+                  <td class="text-center"><input id="crystal-available-<?=$i?>-<?=$j?>" data-report-skip type="text" name="crystal-available" class="form-control form-control-sm res-input" value="0" aria-label="<?= htmlspecialchars($l['res-available'] . ': ' . $l['crystal'], ENT_QUOTES) ?>"></td>
+                  <td class="text-center"><input id="deut-available-<?=$i?>-<?=$j?>" data-report-skip type="text" name="deut-available" class="form-control form-control-sm res-input" value="0" aria-label="<?= htmlspecialchars($l['res-available'] . ': ' . $l['deuterium'], ENT_QUOTES) ?>"></td>
                   <td colspan="<?= ($i == 0)?'4':'3' ?>" class="text-start border-e"><small id="resources-age-<?=$i?>-<?=$j?>" class="pf-resources-age text-body-secondary d-none"></small></td>
                 </tr>
                 <tr>
@@ -488,9 +488,9 @@
               </tr>
               <tr>
                 <td class="border-w"><?= $l['res-available'] ?></td>
-                <td class="text-center"><input id="metal-available-2-1" type="text" name="metal-available" class="form-control form-control-sm res-input" value="0" aria-label="<?= htmlspecialchars($l['res-available'] . ': ' . $l['metal'], ENT_QUOTES) ?>"></td>
-                <td class="text-center"><input id="crystal-available-2-1" type="text" name="crystal-available" class="form-control form-control-sm res-input" value="0" aria-label="<?= htmlspecialchars($l['res-available'] . ': ' . $l['crystal'], ENT_QUOTES) ?>"></td>
-                <td class="text-center"><input id="deut-available-2-1" type="text" name="deut-available" class="form-control form-control-sm res-input" value="0" aria-label="<?= htmlspecialchars($l['res-available'] . ': ' . $l['deuterium'], ENT_QUOTES) ?>"></td>
+                <td class="text-center"><input id="metal-available-2-1" data-report-skip type="text" name="metal-available" class="form-control form-control-sm res-input" value="0" aria-label="<?= htmlspecialchars($l['res-available'] . ': ' . $l['metal'], ENT_QUOTES) ?>"></td>
+                <td class="text-center"><input id="crystal-available-2-1" data-report-skip type="text" name="crystal-available" class="form-control form-control-sm res-input" value="0" aria-label="<?= htmlspecialchars($l['res-available'] . ': ' . $l['crystal'], ENT_QUOTES) ?>"></td>
+                <td class="text-center"><input id="deut-available-2-1" data-report-skip type="text" name="deut-available" class="form-control form-control-sm res-input" value="0" aria-label="<?= htmlspecialchars($l['res-available'] . ': ' . $l['deuterium'], ENT_QUOTES) ?>"></td>
                 <td colspan="3" class="text-start border-e"><small id="resources-age-2-1" class="pf-resources-age text-body-secondary d-none"></small></td>
               </tr>
               <tr>

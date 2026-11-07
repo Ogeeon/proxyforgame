@@ -1009,6 +1009,84 @@ test.describe('Costs Calculator - LifeForm research bonuses table', () => {
     });
 });
 
+// Russian through the context locale, as in the describes above: the "/ru/"
+// prefix needs an Apache rewrite the PHP built-in server in CI does not have.
+test.describe('Costs Calculator - calculation-error report', () => {
+    test.use({ locale: 'ru-RU' });
+
+    test.beforeEach(async ({ context, page }) => {
+        await context.addInitScript(() => {
+            localStorage.setItem('lastChange', 'key-value;true,value;99999');
+            document.cookie = 'costs_rn_disclaimer_shown=1; path=/';
+        });
+        await page.goto('/costs');
+    });
+
+    // The calculation-error report attaches the calculator's own snapshot
+    // (reportSnapshot in costs-data-collector.js): the tabs the number was
+    // read on, the cell it came from, and only the fields that differ from
+    // their defaults - each with a caption, none of them a bare on/off, and
+    // never the resources available.
+    test('a calculation-error report names the mode, the selected cell and the changed field', async ({ page }) => {
+        let sent = null;
+        await page.route(/\/ajax\.php/, async (route) => {
+            const body = new URLSearchParams(route.request().postData() ?? '');
+            if (route.request().method() !== 'POST' || body.get('service') !== 'report') {
+                await route.continue();
+                return;
+            }
+            sent = body;
+            await route.fulfill({ status: 200, contentType: 'application/json', body: '{}' });
+        });
+
+        await page.locator('#tabtag-0').click();
+        await page.locator('#tabtag-0-2').click();
+        const level = page.locator('#table-0-2 tr[data-report-key="metal-mine"] input').first();
+        await level.fill('10');
+        await level.press('Enter');
+        // The resources available are left out of the report on purpose:
+        // a stock the visitor typed in must not show up in either list below.
+        const available = page.locator('#metal-available-0-2');
+        await available.fill('5000');
+        await available.press('Enter');
+        const cell = page.locator('#table-0-2 [data-report-cell="grand-total.metal"]');
+        await expect(cell).toHaveText('2.306');
+
+        // Select the number the way a visitor does, then open the dialog
+        // through the sidebar link's handler.
+        await cell.evaluate((td) => {
+            const range = document.createRange();
+            range.selectNodeContents(td);
+            const selection = getSelection();
+            selection?.removeAllRanges();
+            selection?.addRange(range);
+            findSelection();
+        });
+        await expect(page.locator('#reportModal')).toBeVisible();
+        await expect(page.locator('#report-calc-toggle')).toBeChecked();
+        await page.locator('#report-calc-details summary').click();
+
+        const list = page.locator('#report-calc-values li');
+        await expect(list).toHaveText([
+            'Режим: Все элементы - один уровень › Постройки (планета)',
+            'Выделено: Всего, Металл',
+            'Постройки (планета)',
+            'Рудник по добыче металла — Уровень: 10',
+        ]);
+        for (const line of await list.allTextContents()) {
+            expect(line).not.toMatch(/^\s*:|:\s*$|\b(on|off)\b/);
+        }
+
+        await page.locator('#corrected-text').fill('2.307');
+        await page.locator('#report-btn-ok').click();
+        await expect.poll(() => sent?.get('context')).toBe([
+            'mode: tabtag-0 / tabtag-0-2',
+            'selected: grand-total.metal = "2.306"',
+            'metal-mine.level = 10',
+        ].join('\n'));
+    });
+});
+
 // The picker fills in both speeds from the universe's serverData. The research
 // speed is not published as such: it is economy speed * researchDurationDivisor,
 // and players who pick it by hand get it wrong (Buzz: 5 * 3 = 15, not 10).

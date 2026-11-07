@@ -284,7 +284,16 @@
     "pf-take-fleet": "Dalla partenza",
     "pf-take-fleet-hint": "Inserisci le navi presenti sul pianeta o sulla luna scelti come punto di partenza, secondo l’ultima importazione da OGame.",
     "pf-universe-from-profile": "L’universo è impostato dal profilo attivo.",
-    "scripts-failed-to-load": "Alcuni script della pagina non sono stati caricati, quindi la calcolatrice potrebbe non funzionare. Ricarica la pagina."
+    "scripts-failed-to-load": "Alcuni script della pagina non sono stati caricati, quindi la calcolatrice potrebbe non funzionare. Ricarica la pagina.",
+    "report-mode": "Modalità",
+    "report-selected": "Selezionato",
+    "report-yes": "sì",
+    "report-no": "no",
+    "report-all-defaults": "Tutti i campi hanno i valori predefiniti.",
+    "report-omitted-one": "{0} altro campo non allegato",
+    "report-omitted-few": "{0} altri campi non allegati",
+    "report-omitted-many": "{0} altri campi non allegati",
+    "report-omitted-other": "{0} altri campi non allegati"
   },
   "index": {
     "title": "ProxyForGame - strumenti per i giochi per browser OGame",

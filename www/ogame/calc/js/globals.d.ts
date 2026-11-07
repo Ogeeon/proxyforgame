@@ -53,10 +53,21 @@ interface HTMLInputElement {
 /** Localised button captions for the report and e-mail dialogs. */
 declare const buttonsText: Record<string, string>;
 /**
- * Localised texts the report dialog swaps in when its calculation-error
- * switch is on: title, info line and the two field labels.
+ * Localised texts of the report dialog's calculation-error mode: the title,
+ * info line and two field labels it swaps in, and the words of the list of
+ * attached values (mode, selected, yes/no, the omitted line's plural forms).
  */
 declare const reportCalcText: Record<string, string>;
+
+// The report dialog's per-calculator hooks. A calculator defines them by
+// assigning globalThis.reportSnapshot / globalThis.describeCell; sidebar.js
+// calls them when present and falls back to walking the page's fields when
+// not. ReportSnapshot is the typedef in www/js/report-context.js.
+
+/** The calculator's state for a calculation-error report: mode and every field that feeds the result. */
+declare var reportSnapshot: (() => ReportSnapshot) | undefined;
+/** The localized caption of a result cell marked data-report-cell, e.g. "Total, Metal". */
+declare var describeCell: ((key: string) => string) | undefined;
 /** REQUEST_URI of the current page, sent along with a misspelling report. */
 declare const currUrl: string;
 /** Current language code, e.g. 'en'. */

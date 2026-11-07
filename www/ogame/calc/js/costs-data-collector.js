@@ -629,6 +629,296 @@ class ChangeDetector {
 }
 
 // ============================================================================
+// CALCULATION-ERROR REPORT
+// ============================================================================
+//
+// What the sidebar's report dialog attaches for this page (the contract is in
+// www/js/report-context.js): the tabs the result was read on, and every field
+// that feeds it next to its factory default - except the resources available,
+// which the report leaves out by design. reportEntryOf() and
+// cleanReportLabel() come from sidebar.js, which every page loads.
+
+// The single-level tab's ships and defence: their one input is a quantity.
+const REPORT_QTY_TABLES = new Set(['table-0-5', 'table-0-6']);
+// The rows the renderer marks by their role rather than by an element.
+const REPORT_SUMMARY_ROWS = new Set(['total', 'grand-total', 'res-needed']);
+
+/**
+ * A localized caption the template inlined for the report (options.reportText).
+ * @param {string} key
+ * @returns {string}
+ */
+function costsReportText(key) {
+  return options.reportText?.[key] ?? key;
+}
+
+/**
+ * The caption of a tab button, '' for a missing one.
+ * @param {string} id
+ * @returns {string}
+ */
+function costsTabLabel(id) {
+  return cleanReportLabel(document.getElementById(id)?.textContent ?? '');
+}
+
+/**
+ * The active tab button inside a tab list.
+ * @param {string} listId
+ * @returns {Element|null}
+ */
+function costsActiveTab(listId) {
+  return document.querySelector(`#${listId} .nav-link.active`);
+}
+
+/**
+ * The tabs the result is read on: the main tab, and its inner tab where it has
+ * them.
+ * @returns {ReportModePart[]}
+ */
+function costsReportMode() {
+  /** @type {ReportModePart[]} */
+  const mode = [];
+  const outer = costsActiveTab('mainTabs');
+  if (outer === null) {
+    return mode;
+  }
+  mode.push({ key: outer.id, label: costsTabLabel(outer.id) });
+  const inner = costsActiveTab(`innerTabs${outer.id.replace('tabtag-', '')}`);
+  if (inner !== null) {
+    mode.push({ key: inner.id, label: costsTabLabel(inner.id) });
+  }
+  return mode;
+}
+
+/**
+ * Collects the report's entries; `add` reads one field by id.
+ */
+class CostsReportEntries {
+  constructor() {
+    /** @type {ReportEntry[]} */
+    this.entries = [];
+  }
+
+  /**
+   * @param {string} id
+   * @param {string} group
+   * @param {ReportFieldOptions} [opts]
+   */
+  add(id, group, opts = {}) {
+    const el = document.getElementById(id);
+    if (el instanceof HTMLInputElement || el instanceof HTMLSelectElement) {
+      this.entries.push(reportEntryOf(el, { group, ...opts }));
+    }
+  }
+
+  /**
+   * @param {string[]} ids
+   * @param {string} group
+   */
+  addNumbers(ids, group) {
+    for (const id of ids) {
+      this.add(id, group, { numeric: true });
+    }
+  }
+}
+
+/**
+ * The parameter panel: all four of its tabs, the hidden ones included - every
+ * field there feeds the result whichever tab is open.
+ * @param {CostsReportEntries} out
+ */
+function costsReportParameters(out) {
+  const buildings = costsTabLabel('param-buildings-tab');
+  out.addNumbers(['robot-factory-level', 'robot-factory-level-moon', 'nanite-factory-level',
+    'shipyard-level', 'research-lab-level'], buildings);
+  out.add('use-irn', buildings);
+  if (getChecked('#use-irn')) {
+    out.addNumbers(['irn-level', 'planetsSpin'], buildings);
+    const planets = Number.parseInt(getVal('#planetsSpin'), 10) || 0;
+    let start = 0;
+    for (let i = 1; i <= planets; i++) {
+      out.add(`lablevel_${i}`, buildings, {
+        numeric: true,
+        label: `${options.planetNumStr}${i} — ${costsReportText('level')}`,
+      });
+      if (getChecked(`#labchoice_${i}`)) {
+        start = i;
+      }
+    }
+    out.entries.push({
+      key: 'labchoice', group: buildings, label: `${costsReportText('irn')} — ${costsReportText('start')}`,
+      value: start, default: 0, display: `${options.planetNumStr}${start}`,
+    });
+  }
+
+  out.addNumbers(['ion-tech-level', 'hyper-tech-level'], costsTabLabel('param-researches-tab'));
+
+  const common = costsTabLabel('param-common-tab');
+  out.add('country', common);
+  out.add('universe', common);
+  out.add('universe-speed', common);
+  out.add('research-speed', common);
+  out.add('research-bonus', common);
+  out.add('technocrat', common);
+  let playerClass = 0;
+  if (getChecked('#class-2')) {
+    playerClass = 2;
+  } else if (getChecked('#class-1')) {
+    playerClass = 1;
+  }
+  out.entries.push({
+    key: 'class', group: common, label: costsReportText('class'),
+    value: playerClass, default: 0,
+    display: cleanReportLabel(document.querySelector(`label[for="class-${playerClass}"]`)?.textContent ?? ''),
+  });
+  out.add('is-trader', common);
+  const rates = costsReportText('exchange-rates');
+  out.add('exchange-rates-m', common, { numeric: true, label: `${rates} — ${costsReportText('metal')}` });
+  out.add('exchange-rates-c', common, { numeric: true, label: `${rates} — ${costsReportText('crystal')}` });
+  out.add('exchange-rates-d', common, { numeric: true, label: `${rates} — ${costsReportText('deuterium')}` });
+
+  const lifeforms = costsTabLabel('param-lifeforms-tab');
+  // The two class bonuses share the caption "Class bonus"; their
+  // data-field-title says whose it is.
+  for (const id of ['lf-collector-class-bonus', 'discoverer-class-bonus']) {
+    const title = document.getElementById(id)?.dataset.fieldTitle;
+    out.add(id, lifeforms, title ? { numeric: true, label: title } : { numeric: true });
+  }
+  out.addNumbers(['mineral-res-cntr-lvl', 'lf-terraformer-rdc'], lifeforms);
+  const cargo = costsReportText('cargo-cap-increase');
+  out.add('sc-capacity-increase', lifeforms, { numeric: true, label: `${cargo} — ${options.scFull}` });
+  out.add('lc-capacity-increase', lifeforms, { numeric: true, label: `${cargo} — ${options.lcFull}` });
+  costsReportResearchBonuses(out, lifeforms);
+}
+
+/**
+ * The "Research bonuses" dialog: a cost and a time reduction per research.
+ * @param {CostsReportEntries} out
+ * @param {string} group
+ */
+function costsReportResearchBonuses(out, group) {
+  for (const row of document.querySelectorAll('#lf-research-bonuses-tbody tr[data-report-key]')) {
+    if (!(row instanceof HTMLTableRowElement)) {
+      continue;
+    }
+    const name = cleanReportLabel(row.cells[0]?.textContent ?? '');
+    const slug = row.dataset.reportKey ?? '';
+    for (const [suffix, selector] of [['cost', '.lf-research-cost-input'], ['time', '.lf-research-time-input']]) {
+      const input = row.querySelector(selector);
+      if (input instanceof HTMLInputElement) {
+        out.entries.push(reportEntryOf(input, {
+          key: `lf-research.${slug}.${suffix}`, group, numeric: true,
+          label: `${name} — ${reportLabelOf(input)}`,
+        }));
+      }
+    }
+  }
+}
+
+/**
+ * The element tables of one of the two "all items" tabs: every inner table,
+ * not only the open one, because the grand total adds them all up.
+ * @param {CostsReportEntries} out
+ * @param {number} outerTab - 0 single level, 1 several levels
+ */
+function costsReportTables(out, outerTab) {
+  for (const table of document.querySelectorAll(`#tab-${outerTab} table[id^="table-${outerTab}-"]`)) {
+    const inner = table.id.split('-')[2];
+    const group = costsTabLabel(`tabtag-${outerTab}-${inner}`);
+    let suffixes = ['level', 'qty'];
+    if (outerTab === 1) {
+      suffixes = ['from', 'to', 'qty'];
+    } else if (REPORT_QTY_TABLES.has(table.id)) {
+      suffixes = ['qty'];
+    }
+    for (const row of table.querySelectorAll('tr[data-report-key]')) {
+      if (!(row instanceof HTMLTableRowElement)) {
+        continue;
+      }
+      const name = cleanReportLabel(row.cells[1]?.textContent ?? '');
+      row.querySelectorAll('input').forEach((input, i) => {
+        out.entries.push(reportEntryOf(input, {
+          key: `${row.dataset.reportKey}.${suffixes[i] ?? i}`, group, numeric: true,
+          label: `${name} — ${reportLabelOf(input)}`,
+        }));
+      });
+    }
+  }
+}
+
+/**
+ * The "one item, several levels" tab: the item and its range, and for a
+ * producer the production settings shown under it.
+ * @param {CostsReportEntries} out
+ * @param {string} group
+ */
+function costsReportRange(out, group) {
+  const select = document.getElementById('tech-types-select');
+  if (select instanceof HTMLSelectElement) {
+    // The item is what the whole tab is about, so it is named even at its
+    // default; the option's group ("Buildings (planet)") is its caption.
+    const optgroup = select.selectedOptions[0]?.parentElement;
+    const label = optgroup instanceof HTMLOptGroupElement ? cleanReportLabel(optgroup.label) : '';
+    const entry = reportEntryOf(select, label === '' ? { group } : { group, label });
+    delete entry.default;
+    out.entries.push(entry);
+  }
+  out.addNumbers(['tab2-from-level', 'tab2-to-level'], group);
+  if (!hasClass('#range-producer-row', 'd-none')) {
+    out.add('booster', group);
+    out.addNumbers(['energy-tech-level', 'plasma-tech-level', 'max-planet-temp', 'planet-pos'], group);
+    for (const id of ['engineer', 'admiral', 'geologist', 'commander']) {
+      out.add(id, group);
+    }
+  }
+}
+
+/**
+ * The report hook: the open tabs and every field the result there depends
+ * on, defaults included.
+ * @returns {ReportSnapshot}
+ */
+function costsReportSnapshot() {
+  const mode = costsReportMode();
+  const out = new CostsReportEntries();
+  const outer = mode[0]?.key ?? '';
+  if (outer === 'tabtag-0' || outer === 'tabtag-1') {
+    costsReportTables(out, outer === 'tabtag-0' ? 0 : 1);
+  } else if (outer === 'tabtag-2') {
+    costsReportRange(out, mode[0].label);
+  }
+  costsReportParameters(out);
+  return { mode, entries: out.entries };
+}
+
+/**
+ * The caption of a result cell the renderer marked: "<row>, <column>", the
+ * row being an element's name, a summary row or a level of the range tab.
+ * @param {string} key - e.g. "grand-total.metal", "moon.lunar-base.time", "level-11.metal"
+ * @returns {string}
+ */
+function costsDescribeCell(key) {
+  const dot = key.lastIndexOf('.');
+  if (dot < 0) {
+    return '';
+  }
+  const rowKey = key.slice(0, dot);
+  const column = costsReportText(key.slice(dot + 1));
+  let row = REPORT_SUMMARY_ROWS.has(rowKey) ? costsReportText(rowKey) : '';
+  const level = /^level-(\d+)$/.exec(rowKey);
+  if (level !== null) {
+    row = `${costsReportText('level')} ${level[1]}`;
+  } else if (row === '') {
+    const tr = document.querySelector(`#mainTabContent tr[data-report-key="${CSS.escape(rowKey)}"]`);
+    row = tr instanceof HTMLTableRowElement ? cleanReportLabel(tr.cells[1]?.textContent ?? '') : '';
+    if (row !== '' && rowKey.startsWith('moon.')) {
+      row = `${row} (${costsReportText('moon')})`;
+    }
+  }
+  return row === '' ? column : `${row}, ${column}`;
+}
+
+// ============================================================================
 // EXPORT FOR USE
 // ============================================================================
 
@@ -638,4 +928,6 @@ if (typeof window !== 'undefined') {
   const g = /** @type {Record<string, unknown>} */ (/** @type {unknown} */ (globalThis));
   g.DataCollector = DataCollector;
   g.ChangeDetector = ChangeDetector;
+  globalThis.reportSnapshot = costsReportSnapshot;
+  globalThis.describeCell = costsDescribeCell;
 }

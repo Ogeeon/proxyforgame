@@ -284,7 +284,16 @@
     "pf-take-fleet": "Do ponto de partida",
     "pf-take-fleet-hint": "Preencher as naves estacionadas no planeta ou na lua escolhidos como ponto de partida, segundo a última importação do OGame.",
     "pf-universe-from-profile": "O universo é definido pelo perfil ativo.",
-    "scripts-failed-to-load": "Alguns scripts da página não foram carregados, por isso a calculadora pode não funcionar. Recarregue a página."
+    "scripts-failed-to-load": "Alguns scripts da página não foram carregados, por isso a calculadora pode não funcionar. Recarregue a página.",
+    "report-mode": "Modo",
+    "report-selected": "Selecionado",
+    "report-yes": "sim",
+    "report-no": "não",
+    "report-all-defaults": "Todos os campos estão nos valores padrão.",
+    "report-omitted-one": "mais {0} campo não anexado",
+    "report-omitted-few": "mais {0} campos não anexados",
+    "report-omitted-many": "mais {0} campos não anexados",
+    "report-omitted-other": "mais {0} campos não anexados"
   },
   "index": {
     "title": "ProxyForGame - Calculadoras para OGame",

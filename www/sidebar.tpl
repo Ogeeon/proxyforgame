@@ -44,6 +44,17 @@
   reportCalcText.info = <?= json_encode($loc['reportStrings']['calc-info']) ?>;
   reportCalcText.wrong = <?= json_encode($loc['reportStrings']['calc-input1']) ?>;
   reportCalcText.right = <?= json_encode($loc['reportStrings']['calc-input2']) ?>;
+  // The words of the attached-values list: its mode and selection lines, how a
+  // switch reads, and the line for what the cap left out, one per plural form.
+  reportCalcText.mode = <?= json_encode($loc['report-mode']) ?>;
+  reportCalcText.selected = <?= json_encode($loc['report-selected']) ?>;
+  reportCalcText.yes = <?= json_encode($loc['report-yes']) ?>;
+  reportCalcText.no = <?= json_encode($loc['report-no']) ?>;
+  reportCalcText.allDefaults = <?= json_encode($loc['report-all-defaults']) ?>;
+  reportCalcText.omittedOne = <?= json_encode($loc['report-omitted-one']) ?>;
+  reportCalcText.omittedFew = <?= json_encode($loc['report-omitted-few']) ?>;
+  reportCalcText.omittedMany = <?= json_encode($loc['report-omitted-many']) ?>;
+  reportCalcText.omittedOther = <?= json_encode($loc['report-omitted-other']) ?>;
   var currUrl = <?= json_encode($_SERVER['REQUEST_URI'], JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) ?>;
   let currChange = { value: <?= (int)$currChange ?>, validate: function(key, val) { return val; } };
   var currLang = <?= json_encode($lang) ?>;

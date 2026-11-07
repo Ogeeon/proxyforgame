@@ -284,7 +284,16 @@
     "pf-take-fleet": "Van het vertrekpunt",
     "pf-take-fleet-hint": "Neem de schepen over die op de als vertrekpunt gekozen planeet of maan staan, volgens de laatste import uit OGame.",
     "pf-universe-from-profile": "Het universum wordt bepaald door het actieve profiel.",
-    "scripts-failed-to-load": "Sommige scripts van de pagina konden niet worden geladen, dus werkt de calculator mogelijk niet. Laad de pagina opnieuw."
+    "scripts-failed-to-load": "Sommige scripts van de pagina konden niet worden geladen, dus werkt de calculator mogelijk niet. Laad de pagina opnieuw.",
+    "report-mode": "Modus",
+    "report-selected": "Geselecteerd",
+    "report-yes": "ja",
+    "report-no": "nee",
+    "report-all-defaults": "Alle velden staan op hun standaardwaarde.",
+    "report-omitted-one": "{0} extra veld niet bijgevoegd",
+    "report-omitted-few": "{0} extra velden niet bijgevoegd",
+    "report-omitted-many": "{0} extra velden niet bijgevoegd",
+    "report-omitted-other": "{0} extra velden niet bijgevoegd"
   },
   "index": {
     "title": "ProxyForGame - instrumenten het browser spel OGame",

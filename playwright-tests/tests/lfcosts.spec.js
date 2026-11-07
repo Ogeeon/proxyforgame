@@ -396,6 +396,57 @@ test.describe('Multi-level table with an empty level range', () => {
     });
 });
 
+// LF costs has no reportSnapshot() hook yet, so the calculation-error report
+// falls back to walking the visible fields: a table input is named by its
+// aria-label, a checkbox reads yes/no, and what still stands at its default -
+// or is empty - is not listed, nor is a field marked data-report-skip.
+test.describe('Calculation-error report without a calculator hook', () => {
+    test('lists the changed fields by their aria-label and leaves out defaults and empty values', async ({ page }) => {
+        await page.addInitScript(() => {
+            localStorage.setItem('lastChange', 'key-value;true,value;99999');
+        });
+        await page.goto('/lfcosts');
+        expect(await page.evaluate(() => typeof globalThis.reportSnapshot)).toBe('undefined');
+
+        await page.locator('#tabtag-0').click();
+        await page.locator('#tabtag-0-1').click();
+        const level = page.locator('#table-0-1 tr:nth-child(2) td:nth-child(3) input');
+        await level.fill('2');
+        await level.press('Enter');
+        const caption = await level.getAttribute('aria-label');
+        // A resources-available field is marked data-report-skip: typed in,
+        // it still stays out of the report.
+        const available = page.locator('#metal-available-0-1');
+        await available.fill('5000');
+        await available.press('Enter');
+        const availableCaption = await available.getAttribute('aria-label');
+        await page.locator('#param-common-tab').click();
+        await page.locator('#full-numbers').check();
+
+        await page.locator('#table-0-1 tr:nth-child(2) td:nth-child(4)').evaluate((td) => {
+            const range = document.createRange();
+            range.selectNodeContents(td);
+            const selection = getSelection();
+            selection?.removeAllRanges();
+            selection?.addRange(range);
+            findSelection();
+        });
+        await expect(page.locator('#reportModal')).toBeVisible();
+
+        const lines = await page.locator('#report-calc-values li').allTextContents();
+        expect(lines).toContain(`${caption}: 2`);
+        expect(lines).toContain('Full numbers: yes');
+        for (const line of lines) {
+            expect(line).not.toMatch(/^\s*:|:\s*$|\b(on|off)\b/);
+        }
+        // The parameters left alone are not listed.
+        expect(lines.some((line) => line.startsWith('Exchange rates'))).toBe(false);
+        expect(availableCaption).toBeTruthy();
+        expect(lines.some((line) => line.startsWith(`${availableCaption}:`))).toBe(false);
+        expect(lines.some((line) => line.includes('5000') || line.includes('5.000'))).toBe(false);
+    });
+});
+
 test.describe('LF Costs Calculator - MCP tools', () => {
     test('the tool takes the ranges the page does', async ({ context, page }) => {
         await context.addInitScript(() => {

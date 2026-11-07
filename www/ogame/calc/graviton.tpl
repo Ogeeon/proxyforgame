@@ -355,9 +355,9 @@
         </tr>
         <tr>
           <td><label for="crystal-available"><?= $l['res-available'] ?></label></td>
-          <td><input id="crystal-available" type="text" name="crystal-available" class="form-control form-control-sm d-inline-block resource-show ui-input-margin" value="0" data-field-title="<?= $l['res-available'] ?> <?= $l['crystal'] ?>"></td>
+          <td><input id="crystal-available" data-report-skip type="text" name="crystal-available" class="form-control form-control-sm d-inline-block resource-show ui-input-margin" value="0" data-field-title="<?= $l['res-available'] ?> <?= $l['crystal'] ?>"></td>
           <td>&nbsp;</td>
-          <td><input id="deuterium-available" type="text" name="deuterium-available" class="form-control form-control-sm d-inline-block resource-show ui-input-margin" value="0" data-field-title="<?= $l['res-available'] ?> <?= $l['deuterium'] ?>" aria-label="<?= htmlspecialchars($l['res-available'] . ': ' . $l['deuterium'], ENT_QUOTES) ?>"></td>
+          <td><input id="deuterium-available" data-report-skip type="text" name="deuterium-available" class="form-control form-control-sm d-inline-block resource-show ui-input-margin" value="0" data-field-title="<?= $l['res-available'] ?> <?= $l['deuterium'] ?>" aria-label="<?= htmlspecialchars($l['res-available'] . ': ' . $l['deuterium'], ENT_QUOTES) ?>"></td>
           <td colspan="2">&nbsp;</td>
         </tr>
         <tr id="resources-age-row" class="d-none">

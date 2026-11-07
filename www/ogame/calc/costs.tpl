@@ -79,6 +79,17 @@
     options.serverDataFailedMsg = <?= json_encode($l['server-data-failed-msg']) ?>;
     options.dataFetchMsg = <?= json_encode($l['fetching-data']) ?>;
     options.universeFromProfile = <?= json_encode($l['pf-universe-from-profile']) ?>;
+    // Captions of the result cells the calculation-error report names
+    // (costs-data-collector.js, describeCell): the column, the summary row.
+    options.reportText = <?= json_encode(array(
+      'metal' => $l['metal'], 'crystal' => $l['crystal'], 'deuterium' => $l['deuterium'],
+      'msu' => $l['msu'], 'energy' => $l['energy'], 'time' => $l['time'], 'points' => $l['points'],
+      'dm' => $l['dm-abbr'], 'production' => $l['hourly-prod'], 'consumption' => $l['hourly-cons'],
+      'total' => $l['total'], 'grand-total' => $l['grand-total'], 'res-needed' => $l['res-needed'],
+      'level' => $l['level'], 'class' => $l['class'], 'moon' => $l['moon'],
+      'exchange-rates' => $l['exchange-rates'],
+      'cargo-cap-increase' => $l['cargo-cap-increase'], 'irn' => $l['irn'], 'start' => $l['start'],
+    )) ?>;
 
     var unis = <?= universesJs($universes) ?>;
 
@@ -442,7 +453,7 @@
                   <?php
                     $techID = $j == 3 ? $tech + 10000 : $tech; // give moon buildings an id 1000 higher, so they can be told apart when reading row ids
                   ?>
-                  <tr class="<?= ($row++ % 2) === 1 ? 'odd' : 'even' ?>">
+                  <tr class="<?= ($row++ % 2) === 1 ? 'odd' : 'even' ?>" data-report-key="<?= ($j == 3 ? 'moon.' : '') . $techData[$tech][0] ?>">
                     <td style="display: none;"><?=$techID?></td>
                     <td style="white-space: nowrap"><?=$l[$techData[$tech][0]]?><?php if ($tech == 14 || $tech == 15): ?> <i class="bi bi-info-circle text-primary" data-bs-toggle="popover" data-bs-trigger="hover focus" data-bs-html="true" data-bs-content="<?= htmlspecialchars($l['robot-nanite-hint'], ENT_QUOTES) ?>" style="cursor: pointer;"></i><?php endif; ?></td>
                     <?php if ($i == 1): ?>
@@ -502,9 +513,9 @@
                   <tr>
                     <td style="display: none;"></td>
                     <td colspan="<?= 1 + $levelCols + $qtyOffset ?>" class="border-w"><?=$l['res-available']?></td>
-                    <td class="text-center"><input id="metal-available-<?=$i?>-<?=$j?>" type="text" name="metal-available" class="form-control form-control-sm res-input" value="0"></td>
-                    <td class="text-center"><input id="crystal-available-<?=$i?>-<?=$j?>" type="text" name="crystal-available" class="form-control form-control-sm res-input" value="0"></td>
-                    <td class="text-center"><input id="deut-available-<?=$i?>-<?=$j?>" type="text" name="deut-available" class="form-control form-control-sm res-input" value="0"></td>
+                    <td class="text-center"><input id="metal-available-<?=$i?>-<?=$j?>" data-report-skip type="text" name="metal-available" class="form-control form-control-sm res-input" value="0"></td>
+                    <td class="text-center"><input id="crystal-available-<?=$i?>-<?=$j?>" data-report-skip type="text" name="crystal-available" class="form-control form-control-sm res-input" value="0"></td>
+                    <td class="text-center"><input id="deut-available-<?=$i?>-<?=$j?>" data-report-skip type="text" name="deut-available" class="form-control form-control-sm res-input" value="0"></td>
                     <td colspan="<?= ($i == 1)?'4':'5' ?>" class="text-start border-e"><small id="resources-age-<?=$i?>-<?=$j?>" class="pf-resources-age text-body-secondary d-none"></small></td>
                   </tr>
                   <tr>
@@ -601,9 +612,9 @@
                 </tr>
                 <tr>
                   <td class="text-center"><?=$l['res-available']?></td>
-                  <td class="text-center"><input id="prods-metal-available" type="text" class="form-control form-control-sm res-input" value="0" aria-label="<?= $l['res-available'] ?>-<?= $l['metal'] ?>"></td>
-                  <td class="text-center"><input id="prods-crystal-available" type="text" class="form-control form-control-sm res-input" value="0" aria-label="<?= $l['res-available'] ?>-<?= $l['crystal'] ?>"></td>
-                  <td class="text-center"><input id="prods-deut-available" type="text" class="form-control form-control-sm res-input" value="0" aria-label="<?= $l['res-available'] ?>-<?= $l['deuterium'] ?>"></td>
+                  <td class="text-center"><input id="prods-metal-available" data-report-skip type="text" class="form-control form-control-sm res-input" value="0" aria-label="<?= $l['res-available'] ?>-<?= $l['metal'] ?>"></td>
+                  <td class="text-center"><input id="prods-crystal-available" data-report-skip type="text" class="form-control form-control-sm res-input" value="0" aria-label="<?= $l['res-available'] ?>-<?= $l['crystal'] ?>"></td>
+                  <td class="text-center"><input id="prods-deut-available" data-report-skip type="text" class="form-control form-control-sm res-input" value="0" aria-label="<?= $l['res-available'] ?>-<?= $l['deuterium'] ?>"></td>
                   <td colspan="6" class="text-start"><small id="prods-resources-age" class="pf-resources-age text-body-secondary d-none"></small></td>
                 </tr>
                 <tr>
@@ -644,9 +655,9 @@
                 </tr>
                 <tr>
                   <td class="text-center"><?=$l['res-available']?></td>
-                  <td class="text-center"><input id="commons-metal-available" type="text" class="form-control form-control-sm res-input" value="0" aria-label="<?= $l['res-available'] ?>-<?= $l['metal'] ?>"></td>
-                  <td class="text-center"><input id="commons-crystal-available" type="text" class="form-control form-control-sm res-input" value="0" aria-label="<?= $l['res-available'] ?>-<?= $l['crystal'] ?>"></td>
-                  <td class="text-center"><input id="commons-deut-available" type="text" class="form-control form-control-sm res-input" value="0" aria-label="<?= $l['res-available'] ?>-<?= $l['deuterium'] ?>"></td>
+                  <td class="text-center"><input id="commons-metal-available" data-report-skip type="text" class="form-control form-control-sm res-input" value="0" aria-label="<?= $l['res-available'] ?>-<?= $l['metal'] ?>"></td>
+                  <td class="text-center"><input id="commons-crystal-available" data-report-skip type="text" class="form-control form-control-sm res-input" value="0" aria-label="<?= $l['res-available'] ?>-<?= $l['crystal'] ?>"></td>
+                  <td class="text-center"><input id="commons-deut-available" data-report-skip type="text" class="form-control form-control-sm res-input" value="0" aria-label="<?= $l['res-available'] ?>-<?= $l['deuterium'] ?>"></td>
                   <td colspan="4" class="text-start"><small id="commons-resources-age" class="pf-resources-age text-body-secondary d-none"></small></td>
                 </tr>
                 <tr>
@@ -824,7 +835,7 @@ document.addEventListener('DOMContentLoaded', function() {
             <?php $lfResearchTechs = getTechsByType(4); ?>
             <?php $row = 0; ?>
             <?php foreach ($lfResearchTechs as $tech): ?>
-            <tr class="<?= ($row++ % 2) === 1 ? 'odd' : 'even' ?>" data-tech-id="<?= $tech ?>">
+            <tr class="<?= ($row++ % 2) === 1 ? 'odd' : 'even' ?>" data-tech-id="<?= $tech ?>" data-report-key="<?= $techData[$tech][0] ?>">
               <td class="text-start"><?= $l[$techData[$tech][0]] ?></td>
               <td class="text-center"><input type="text" class="form-control form-control-sm input-3columns input-in-table lf-research-cost-input" value="0" aria-label="<?= $l['lf-col-cost-reduction'] ?>"></td>
               <td class="text-center"><input type="text" class="form-control form-control-sm input-3columns input-in-table lf-research-time-input" value="0" aria-label="<?= $l['lf-col-time-reduction'] ?>"></td>

@@ -284,7 +284,16 @@
     "pf-take-fleet": "Sa mjesta polaska",
     "pf-take-fleet-hint": "Unesi brodove stacionirane na planeti ili mjesecu odabranom kao mjesto polaska, prema posljednjem uvozu iz OGame.",
     "pf-universe-from-profile": "Univerzum je određen aktivnim profilom.",
-    "scripts-failed-to-load": "Neki skriptovi stranice se nisu učitali, pa kalkulator možda neće raditi. Ponovo učitajte stranicu."
+    "scripts-failed-to-load": "Neki skriptovi stranice se nisu učitali, pa kalkulator možda neće raditi. Ponovo učitajte stranicu.",
+    "report-mode": "Režim",
+    "report-selected": "Označeno",
+    "report-yes": "da",
+    "report-no": "ne",
+    "report-all-defaults": "Sva polja imaju podrazumijevane vrijednosti.",
+    "report-omitted-one": "još {0} polje nije priloženo",
+    "report-omitted-few": "još {0} polja nisu priložena",
+    "report-omitted-many": "još {0} polja nije priloženo",
+    "report-omitted-other": "još {0} polja nije priloženo"
   },
   "index": {
     "title": "ProxyForGame - alati za online igru Ogame",

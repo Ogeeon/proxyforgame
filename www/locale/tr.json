@@ -284,7 +284,16 @@
     "pf-take-fleet": "Kalkış noktasından",
     "pf-take-fleet-hint": "Kalkış noktası olarak seçilen gezegende veya ayda bulunan gemileri, OGame’den yapılan son içe aktarmaya göre doldurur.",
     "pf-universe-from-profile": "Evren etkin profil tarafından belirlenir.",
-    "scripts-failed-to-load": "Sayfanın bazı betikleri yüklenemedi, bu yüzden hesaplayıcı çalışmayabilir. Lütfen sayfayı yeniden yükleyin."
+    "scripts-failed-to-load": "Sayfanın bazı betikleri yüklenemedi, bu yüzden hesaplayıcı çalışmayabilir. Lütfen sayfayı yeniden yükleyin.",
+    "report-mode": "Mod",
+    "report-selected": "Seçilen",
+    "report-yes": "evet",
+    "report-no": "hayır",
+    "report-all-defaults": "Tüm alanlar varsayılan değerlerinde.",
+    "report-omitted-one": "{0} alan daha eklenmedi",
+    "report-omitted-few": "{0} alan daha eklenmedi",
+    "report-omitted-many": "{0} alan daha eklenmedi",
+    "report-omitted-other": "{0} alan daha eklenmedi"
   },
   "index": {
     "title": "ProxyForGame - OGame için hesaplamalar",

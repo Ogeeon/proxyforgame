@@ -2,6 +2,34 @@
 // RENDERING LAYER
 // ============================================================================
 
+// The result columns of every costs table, in display order, as the
+// calculation-error report names them: a cell is marked
+// data-report-cell="<row>.<column>", e.g. "metal-mine.metal" or
+// "grand-total.metal", and describeCell() turns that into a caption.
+const REPORT_COLUMNS = ['metal', 'crystal', 'deuterium', 'msu', 'energy', 'time', 'points', 'dm'];
+// The range tab's producer table has two more after points.
+const REPORT_RANGE_COLUMNS = ['metal', 'crystal', 'deuterium', 'msu', 'energy', 'time', 'points', 'production', 'consumption'];
+
+/**
+ * Marks `count` consecutive result cells of a row for the report dialog.
+ * @param {HTMLTableRowElement} row
+ * @param {number} firstCol - index of the row's metal cell
+ * @param {string|undefined} rowKey - the row's name; nothing is marked without one
+ * @param {number} count
+ * @param {string[]} [columns]
+ */
+function markReportCells(row, firstCol, rowKey, count, columns = REPORT_COLUMNS) {
+  if (!rowKey) {
+    return;
+  }
+  for (let i = 0; i < count; i++) {
+    const cell = row.cells[firstCol + i];
+    if (cell) {
+      cell.dataset.reportCell = `${rowKey}.${columns[i]}`;
+    }
+  }
+}
+
 /**
  * Main renderer - displays calculation results in DOM
  * This class bridges the gap between data models and jQuery UI
@@ -117,6 +145,7 @@ class Renderer {
       const dmCost = Calculator.halvingCost(techId, result.time, params);
       row.cells[firstDataCol + 7].innerHTML = this._formatNumber(dmCost, params);
     }
+    markReportCells(row, firstDataCol, row.dataset.reportKey, !isMultiLevel && techId < 200 ? 8 : 7);
   }
 
   /**
@@ -195,7 +224,7 @@ class Renderer {
     if (!isMultiLevel) {
       this._renderSubtotalDmCell(rows[subtotalRow].cells[subtotalStartCol + 7], isFleetOrDefenseTable, totals, params);
     }
-
+    markReportCells(rows[subtotalRow], subtotalStartCol, 'total', isFleetOrDefenseTable ? 8 : 7);
   }
 
   /**
@@ -262,6 +291,7 @@ class Renderer {
       if (!isMultiLevel) {
         rows[grandTotalRow].cells[startCol + 7].innerHTML = '';
       }
+      markReportCells(rows[grandTotalRow], startCol, 'grand-total', 7);
 
       // Update res-needed and delivery transport rows (grand total minus available resources)
       const [, tabOuter, tabInner] = tableId.split('-');
@@ -276,6 +306,7 @@ class Renderer {
       rows[resNeededRow].cells[2].innerHTML = this._formatNumber(needMetal, params);
       rows[resNeededRow].cells[3].innerHTML = this._formatNumber(needCrystal, params);
       rows[resNeededRow].cells[4].innerHTML = this._formatNumber(needDeut, params);
+      markReportCells(rows[resNeededRow], 2, 'res-needed', 3);
       const delivery = this._calculateTransport(needMetal + needCrystal + needDeut, params);
       this.disposeTooltips(rows[deliveryTransportRow]);
       rows[deliveryTransportRow].cells[2].innerHTML =
@@ -421,6 +452,11 @@ class Renderer {
     const rows = getTableRows(`#${tableId}`);
     const insertBefore = rows.at(-4);
     insertBefore.insertAdjacentHTML('beforebegin', html);
+    const added = insertBefore.previousElementSibling;
+    if (added instanceof HTMLTableRowElement) {
+      const count = 7 + (production === null ? 0 : 1) + (consumption === null ? 0 : 1);
+      markReportCells(added, 1, `level-${level}`, count, REPORT_RANGE_COLUMNS);
+    }
   }
 
   /**
@@ -446,6 +482,7 @@ class Renderer {
       rows[totalsRow].cells[8].innerHTML = `<b>${this._formatNumber(maxProduction, params)}</b>`;
       rows[totalsRow].cells[9].innerHTML = `<b>${this._formatNumber(maxConsumption, params)}</b>`;
     }
+    markReportCells(rows[totalsRow], 1, 'total', isProducer ? 9 : 7, REPORT_RANGE_COLUMNS);
 
     // Read available resources from input fields
     const prefix = isProducer ? 'prods' : 'commons';
@@ -461,6 +498,7 @@ class Renderer {
     rows[neededRow].cells[1].innerHTML = this._formatNumber(needMetal, params);
     rows[neededRow].cells[2].innerHTML = this._formatNumber(needCrystal, params);
     rows[neededRow].cells[3].innerHTML = this._formatNumber(needDeut, params);
+    markReportCells(rows[neededRow], 1, 'res-needed', 3);
 
     // Transport row (based on needed resources, not total)
     const transport = this._calculateTransport(needMetal + needCrystal + needDeut, params);

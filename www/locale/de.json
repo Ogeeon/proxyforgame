@@ -284,7 +284,16 @@
     "pf-take-fleet": "Vom Startort",
     "pf-take-fleet-hint": "Die Schiffe übernehmen, die auf dem als Startort gewählten Planeten oder Mond stehen, Stand des letzten Imports aus OGame.",
     "pf-universe-from-profile": "Das Universum wird durch das aktive Profil festgelegt.",
-    "scripts-failed-to-load": "Einige Skripte der Seite konnten nicht geladen werden, daher funktioniert der Rechner möglicherweise nicht. Bitte laden Sie die Seite neu."
+    "scripts-failed-to-load": "Einige Skripte der Seite konnten nicht geladen werden, daher funktioniert der Rechner möglicherweise nicht. Bitte laden Sie die Seite neu.",
+    "report-mode": "Modus",
+    "report-selected": "Markiert",
+    "report-yes": "ja",
+    "report-no": "nein",
+    "report-all-defaults": "Alle Felder stehen auf ihren Standardwerten.",
+    "report-omitted-one": "{0} weiteres Feld nicht angehängt",
+    "report-omitted-few": "{0} weitere Felder nicht angehängt",
+    "report-omitted-many": "{0} weitere Felder nicht angehängt",
+    "report-omitted-other": "{0} weitere Felder nicht angehängt"
   },
   "index": {
     "title": "ProxyForGame - Hilfsprogramme für das Online-Browsergame OGame",
