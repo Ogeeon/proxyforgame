@@ -1,5 +1,6 @@
 import { test, expect, expectLoadsCleanly } from './base';
 import { expectMcpBoundsMatchPage } from './mcp-bounds';
+import { catchReport, reportCell, sendReport } from './report-dialog';
 import { readFileSync } from 'fs';
 import { join } from 'path';
 
@@ -289,6 +290,40 @@ test.describe('Expeditions Calculator - cargo bonus import', () => {
         await expect(page.locator('#lf-bonuses-reader')).toBeVisible();
         await expect(page.locator('#lf-cargo-203')).toHaveValue('0');
         await expect(page.locator('#lf-cargo-204')).toHaveValue('0');
+    });
+});
+
+// The calculation-error report attaches the calculator's own snapshot
+// (reportSnapshot in expeditions-data-collector.js): the cell the number came
+// from and only the fields that differ from their factory defaults. The page
+// has no result tabs, so there is no mode line.
+test.describe('Expeditions Calculator - calculation-error report', () => {
+    test('names the selected cell and the changed fields only', async ({ context, page }) => {
+        await openDom(context, page);
+        const sent = await catchReport(page);
+
+        await fillNumber(page, '#numLC', '100');
+        await fillNumber(page, '#tech-hyper-level', '10');
+        const cell = page.locator('[data-report-cell="storage"]');
+        await expect(cell).toHaveText('3.750.000');
+
+        await reportCell(page, cell);
+        await expect(page.locator('#report-calc-values li')).toHaveText([
+            'Selected: Storage Capacity',
+            'Common',
+            'Level of Hyperspace Technology: 10',
+            'Fleet',
+            'Large cargo: 100',
+        ]);
+        // A fleet-table cell is named by its ship and its column.
+        expect(await page.evaluate(() => describeCell?.('light-fighter.found'))).toBe('Light fighter, Discoverable number of ships (max)');
+
+        await sendReport(page, sent, '3.750.001');
+        expect(sent()?.get('context')).toBe([
+            'selected: storage = "3.750.000"',
+            'tech-hyper-level = 10',
+            'large-cargo.qty = 100',
+        ].join('\n'));
     });
 });
 

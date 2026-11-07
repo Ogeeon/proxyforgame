@@ -141,6 +141,15 @@
       options.fieldHint = <?= json_encode($l['field-hint'], JSON_UNESCAPED_UNICODE) ?>;
       options.msgMinConstraintViolated = <?= json_encode($l['msg-min-constraint-violated'], JSON_UNESCAPED_UNICODE) ?>;
       options.msgMaxConstraintViolated = <?= json_encode($l['msg-max-constraint-violated'], JSON_UNESCAPED_UNICODE) ?>;
+      // Captions of the calculation-error report (expeditions-data-collector.js):
+      // the fleet group, and the columns and rows of the result cells. The
+      // column headers break their line with <br>, which a caption reads as a space.
+      options.reportText = <?= json_encode(array_map(fn($s) => str_replace('<br>', ' ', $s), array(
+        'fleet' => $l['fleet'], 'can-be-found' => $l['LOCA_SHIP_CAN_BE_FOND'],
+        'found' => $l['LOCA_DISCOVERED'], 'expedition-points' => $l['LOCA_SI_NEW'],
+        'storage' => $l['LOCA_STORAGE'], 'res-find' => $l['LOCA_RES_FIND'], 'dark-matter' => $l['LOCA_DM'],
+        'metal' => $l['LOCA_M'], 'crystal' => $l['LOCA_K'], 'deuterium' => $l['LOCA_D'],
+      )), JSON_UNESCAPED_UNICODE) ?>;
     }
 </script>
 <?php require_once '../../cookies.tpl'; ?>
@@ -319,17 +328,17 @@ endforeach; ?>
         <tr class="<?= ($idx % 2) === 0 ? 'odd' : 'even' ?>">
           <td><label for="num<?= $ship[1] ?>"><?= $l[$ship[0]] ?></label></td>
           <td class="centered"><input id="num<?= $ship[1] ?>" type="text" class="form-control form-control-sm d-inline-block count-input" value="0" data-field-title="<?= $l[$ship[0]] ?>"></td>
-          <td class="centered"><span id="can<?= $ship[1] ?>">-</span></td>
-          <td class="centered"><?= in_array($ship[1], $neverFound) ? '0' : '<span id="find'.$ship[1].'">0</span>' ?></td>
+          <td class="centered"><span id="can<?= $ship[1] ?>" data-report-cell="<?= $ship[0] ?>.can-be-found">-</span></td>
+          <td class="centered"><?= in_array($ship[1], $neverFound) ? '0' : '<span id="find'.$ship[1].'" data-report-cell="'.$ship[0].'.found">0</span>' ?></td>
         </tr>
 <?php endforeach; ?>
         <tr class="odd">
           <td colspan="2"><?= $l['LOCA_SI_NEW'] ?></td>
-          <td colspan="2" class="right-aligned"><span id="max-points">0</span></td>
+          <td colspan="2" class="right-aligned"><span id="max-points" data-report-cell="expedition-points">0</span></td>
         </tr>
         <tr class="even">
           <td colspan="2"><?= $l['LOCA_STORAGE'] ?></td>
-          <td colspan="2" class="right-aligned"><span id="storage-capacity">0</span></td>
+          <td colspan="2" class="right-aligned"><span id="storage-capacity" data-report-cell="storage">0</span></td>
         </tr>
         <tr class="odd">
           <td colspan="2"><?= $l['LOCA_RES_FIND'] ?></td>
@@ -339,14 +348,14 @@ endforeach; ?>
             <?= $l['LOCA_D'] ?>
           </td>
           <td class="right-aligned">
-            <span id="max-find-met">0</span><br>
-            <span id="max-find-cry">0</span><br>
-            <span id="max-find-deu">0</span>
+            <span id="max-find-met" data-report-cell="res-find.metal">0</span><br>
+            <span id="max-find-cry" data-report-cell="res-find.crystal">0</span><br>
+            <span id="max-find-deu" data-report-cell="res-find.deuterium">0</span>
           </td>
         </tr>
         <tr class="even">
           <td colspan="2"><?= $l['LOCA_DM'] ?></td>
-          <td colspan="2" class="right-aligned"><span id="dark-matter-find">0</span></td>
+          <td colspan="2" class="right-aligned"><span id="dark-matter-find" data-report-cell="dark-matter">0</span></td>
         </tr>
       </table>
     </div>

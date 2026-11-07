@@ -13,11 +13,18 @@
 const EXPEDITIONS_EMPTY_FLEET =
   '{"202":0,"203":0,"204":0,"205":0,"206":0,"207":0,"208":0,"209":0,"210":0,"211":0,"213":0,"214":0,"215":0,"218":0,"219":0}';
 
+// The top player's tier the page opens on - the first one. The report hook
+// (expeditions-data-collector.js) compares against it too.
+const EXPEDITIONS_HIGH_TOP_DEFAULT = 40000;
+
 const options = {
   defConstraints: { min: -Infinity, max: Infinity, def: 0, allowFloat: false, allowNegative: false },
 
+  /** @type {Record<string, string>} Captions of the report's groups and cells, filled in by the template. */
+  reportText: {},
+
   prm: {
-    highTop: 40000,
+    highTop: EXPEDITIONS_HIGH_TOP_DEFAULT,
     playerClass: 0,
     // The select offers 1..10, so 0 would leave it without a selected option.
     universeSpeed: 1,
@@ -37,7 +44,7 @@ const options = {
 
     validate: function (field, value) {
       switch (field) {
-        case 'highTop': return validateNumber(Number.parseFloat(value), 40000, 5000000, 40000);
+        case 'highTop': return validateNumber(Number.parseFloat(value), 40000, 5000000, EXPEDITIONS_HIGH_TOP_DEFAULT);
         case 'playerClass': return validateNumber(Number.parseFloat(value), 0, 2, 0);
         case 'universeSpeed': return validateNumber(Number.parseFloat(value), 1, 10, 1);
         case 'hyperTechLevel': return validateNumber(Number.parseFloat(value), 0, 50, 0);
