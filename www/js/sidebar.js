@@ -147,6 +147,33 @@ function reportEntryOf(el, opts = {}) {
 }
 
 /**
+ * A field by id as a report entry, for the calculators' hooks: a select or a
+ * checkbox as it is, a text field as a locale-aware number, and an id no
+ * element has as the name of a radio group - one entry captioned by its
+ * fieldset's legend, reading as the option that is on against the one the
+ * template checks. Null when there is nothing by that id or name.
+ * @param {string} id - a field id, or the name of a radio group
+ * @param {string} group
+ * @param {ReportFieldOptions} [opts]
+ * @returns {ReportEntry|null}
+ */
+function reportFieldById(id, group, opts = {}) {
+    const el = document.getElementById(id);
+    if (el instanceof HTMLSelectElement || (el instanceof HTMLInputElement && el.type === 'checkbox')) {
+        return reportEntryOf(el, { group, ...opts });
+    }
+    if (el instanceof HTMLInputElement) {
+        return reportEntryOf(el, { group, numeric: true, ...opts });
+    }
+    const first = document.getElementsByName(id)[0];
+    if (!(first instanceof HTMLInputElement) || first.type !== 'radio') {
+        return null;
+    }
+    const entry = readReportRadio(first, new Set());
+    return entry === null ? null : { ...entry, group, ...opts };
+}
+
+/**
  * Reads the page's form fields into a snapshot, for a calculator without a
  * reportSnapshot() hook. What a person sees and set: hidden fields - an
  * inactive tab, a closed dialog - are left out, and radios of one group

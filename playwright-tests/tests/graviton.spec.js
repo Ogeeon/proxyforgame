@@ -1,5 +1,6 @@
 import { test, expect, expectLoadsCleanly } from './base';
 import { energyRows, expectMcpBoundsMatchPage } from './mcp-bounds';
+import { catchReport, reportCell, sendReport } from './report-dialog';
 
 test.describe('Graviton Calculator Page', () => {
     test.beforeEach(async ({ context, page }) => {
@@ -362,6 +363,45 @@ test.describe('Graviton Calculator - Officers', () => {
             await expect(page.locator(id)).toBeChecked();
         }
         await expect(page.locator('#officers-bonus-energy')).toHaveText('62');
+    });
+});
+
+// The calculation-error report attaches the calculator's own snapshot
+// (reportSnapshot in graviton-data-collector.js): the cell the number came
+// from and only the fields that differ from their factory defaults - the
+// class radio as one line, and never the resources available.
+test.describe('Graviton Calculator - calculation-error report', () => {
+    test('names the selected cell and the changed fields only', async ({ context, page }) => {
+        await context.addInitScript(() => {
+            localStorage.setItem('lastChange', 'key-value;true,value;99999');
+            localStorage.removeItem('options_graviton');
+        });
+        await page.goto('/graviton');
+        const sent = await catchReport(page);
+
+        await page.locator('#max-planet-temp').fill('40');
+        await page.locator('#max-planet-temp').blur();
+        await page.locator('#player-class-1').check();
+        // Typed in, the stock still stays out of the report.
+        await page.locator('#crystal-available').fill('5000');
+        await page.locator('#crystal-available').blur();
+        const cell = page.locator('[data-report-cell="solar-satellites-needed"]');
+        await expect(cell).toHaveText('9.091');
+
+        await reportCell(page, cell);
+        await expect(page.locator('#report-calc-values li')).toHaveText([
+            'Selected: Solar satellites needed',
+            'Common',
+            'Planet max temperature: 40',
+            'Class: Collector',
+        ]);
+
+        await sendReport(page, sent, '9.092');
+        expect(sent()?.get('context')).toBe([
+            'selected: solar-satellites-needed = "9.091"',
+            'max-planet-temp = 40',
+            'player-class = 1',
+        ].join('\n'));
     });
 });
 

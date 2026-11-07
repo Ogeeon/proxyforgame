@@ -64,6 +64,30 @@
       options.msgMinConstraintViolated = '<?= $l['msg-min-constraint-violated'] ?>';
       options.msgMaxConstraintViolated = '<?= $l['msg-max-constraint-violated'] ?>';
       options.energyReqConjunction = '<?= $l['energy-needed'] ?>';
+      // Captions of the calculation-error report (graviton-data-collector.js):
+      // the groups below the parameter tabs, and every result cell by its id.
+      options.reportText = <?= json_encode(array('energy' => $l['energy'], 'recycling' => $l['recycling'])) ?>;
+      options.reportCells = <?= json_encode(array(
+        'solar-plant-energy' => $l['solar-plant-level'] . ', ' . $l['energy'],
+        'fusion-plant-energy' => $l['fusion-plant-level'] . ', ' . $l['energy'],
+        'solar-satellites-energy' => $l['solar-satellites-count'] . ', ' . $l['energy'],
+        'officers-bonus-energy' => $l['officers-bonus'], 'class-bonus-energy' => $l['class-bonus'],
+        'alliance-bonus-energy' => $l['alliance-bonus'], 'boost-bonus-energy' => $l['boost-bonus'],
+        'disr-chamber-bonus-energy' => $l['disr-chamber-bonus'], 'lf-tech-bonus-energy' => $l['lf-tech-bonus'],
+        'energy-produced' => $l['energy-produced'], 'solar-satellites-needed' => $l['solar-satellites-needed'],
+        'crystal-required' => $l['expenses'] . ', ' . $l['crystal'],
+        'deuterium-required' => $l['expenses'] . ', ' . $l['deuterium'],
+        'time-required' => $l['expenses'] . ', ' . $l['time'],
+        'crystal-to-deliver' => $l['res-needed'] . ', ' . $l['crystal'],
+        'deuterium-to-deliver' => $l['res-needed'] . ', ' . $l['deuterium'],
+        'cargoes' => $l['res-needed'] . ', ' . $l['cargoes'],
+        'crystal-recyclable' => $l['recycling'] . ', ' . $l['crystal'],
+        'deuterium-recyclable' => $l['recycling'] . ', ' . $l['deuterium'],
+        'recyclers' => $l['recycling'] . ', ' . $l['recyclers'],
+        'cargoes-for-df' => $l['recycling'] . ', ' . $l['cargoes'],
+        'net-crystal-required' => $l['net-cost'] . ', ' . $l['crystal'],
+        'net-deuterium-required' => $l['net-cost'] . ', ' . $l['deuterium'],
+      )) ?>;
     }
 </script>
 <?php require_once '../../cookies.tpl'; ?>
@@ -250,7 +274,7 @@
                 <option value="50">50%</option><option value="40">40%</option><option value="30">30%</option><option value="20">20%</option><option value="10">10%</option><option value="0">0%</option>
               </select>
             </td>
-            <td><span id="solar-plant-energy">0</span>&nbsp;<span><?= $l['energy'] ?></span></td>
+            <td><span id="solar-plant-energy" data-report-cell="solar-plant-energy">0</span>&nbsp;<span><?= $l['energy'] ?></span></td>
           </tr>
           <tr>
             <td><label for="fusion-plant-level"><?= $l['fusion-plant-level'] ?></label></td>
@@ -261,7 +285,7 @@
                 <option value="50">50%</option><option value="40">40%</option><option value="30">30%</option><option value="20">20%</option><option value="10">10%</option><option value="0">0%</option>
               </select>
             </td>
-            <td><span id="fusion-plant-energy">0</span>&nbsp;<span><?= $l['energy'] ?></span></td>
+            <td><span id="fusion-plant-energy" data-report-cell="fusion-plant-energy">0</span>&nbsp;<span><?= $l['energy'] ?></span></td>
           </tr>
           <tr>
             <td><label for="solar-satellites-count"><?= $l['solar-satellites-count'] ?></label></td>
@@ -272,43 +296,43 @@
                 <option value="50">50%</option><option value="40">40%</option><option value="30">30%</option><option value="20">20%</option><option value="10">10%</option><option value="0">0%</option>
               </select>
             </td>
-            <td><span id="solar-satellites-energy">0</span>&nbsp;<span><?= $l['energy'] ?></span></td>
+            <td><span id="solar-satellites-energy" data-report-cell="solar-satellites-energy">0</span>&nbsp;<span><?= $l['energy'] ?></span></td>
           </tr>
           <tr>
             <td><span><?= $l['officers-bonus'] ?></span></td>
             <td>&nbsp;</td>
             <td>&nbsp;</td>
-            <td><span id="officers-bonus-energy">0</span>&nbsp;<span><?= $l['energy'] ?></span></td>
+            <td><span id="officers-bonus-energy" data-report-cell="officers-bonus-energy">0</span>&nbsp;<span><?= $l['energy'] ?></span></td>
           </tr>
           <tr>
             <td><span><?= $l['class-bonus'] ?></span></td>
             <td>&nbsp;</td>
             <td>&nbsp;</td>
-            <td><span id="class-bonus-energy">0</span>&nbsp;<span><?= $l['energy'] ?></span></td>
+            <td><span id="class-bonus-energy" data-report-cell="class-bonus-energy">0</span>&nbsp;<span><?= $l['energy'] ?></span></td>
           </tr>
           <tr>
             <td><span><?= $l['alliance-bonus'] ?></span></td>
             <td>&nbsp;</td>
             <td>&nbsp;</td>
-            <td><span id="alliance-bonus-energy">0</span>&nbsp;<span><?= $l['energy'] ?></span></td>
+            <td><span id="alliance-bonus-energy" data-report-cell="alliance-bonus-energy">0</span>&nbsp;<span><?= $l['energy'] ?></span></td>
           </tr>
           <tr>
             <td><span><?= $l['boost-bonus'] ?></span></td>
             <td>&nbsp;</td>
             <td>&nbsp;</td>
-            <td><span id="boost-bonus-energy">0</span>&nbsp;<span><?= $l['energy'] ?></span></td>
+            <td><span id="boost-bonus-energy" data-report-cell="boost-bonus-energy">0</span>&nbsp;<span><?= $l['energy'] ?></span></td>
           </tr>
           <tr>
             <td><span><?= $l['disr-chamber-bonus'] ?></span></td>
             <td>&nbsp;</td>
             <td>&nbsp;</td>
-            <td><span id="disr-chamber-bonus-energy">0</span>&nbsp;<span><?= $l['energy'] ?></span></td>
+            <td><span id="disr-chamber-bonus-energy" data-report-cell="disr-chamber-bonus-energy">0</span>&nbsp;<span><?= $l['energy'] ?></span></td>
           </tr>
           <tr>
             <td><span><?= $l['lf-tech-bonus'] ?></span></td>
             <td>&nbsp;</td>
             <td>&nbsp;</td>
-            <td><span id="lf-tech-bonus-energy">0</span>&nbsp;<span><?= $l['energy'] ?></span></td>
+            <td><span id="lf-tech-bonus-energy" data-report-cell="lf-tech-bonus-energy">0</span>&nbsp;<span><?= $l['energy'] ?></span></td>
           </tr>
         </table>
       </div>
@@ -331,12 +355,12 @@
       <table class="mx-auto" role="presentation">
         <tr>
           <td><span><?= $l['energy-produced'] ?></span></td>
-          <td><div id="energy-produced" class="form-control form-control-sm d-inline-block energy-show ui-input-margin ui-state-disabled">0</div></td>
+          <td><div id="energy-produced" data-report-cell="energy-produced" class="form-control form-control-sm d-inline-block energy-show ui-input-margin ui-state-disabled">0</div></td>
           <td><span id="energy-requirement"></span></td>
         </tr>
         <tr>
           <td colspan="2"><span><?= $l['solar-satellites-needed'] ?></span></td>
-          <td><div id="solar-satellites-needed" class="form-control form-control-sm d-inline-block energy-show ui-input-margin ui-state-disabled">0</div></td>
+          <td><div id="solar-satellites-needed" data-report-cell="solar-satellites-needed" class="form-control form-control-sm d-inline-block energy-show ui-input-margin ui-state-disabled">0</div></td>
         </tr>
       </table>
     </div>
@@ -347,11 +371,11 @@
       <table class="mx-auto" role="presentation">
         <tr>
           <td><span><?= $l['crystal'] ?></span></td>
-          <td><div id="crystal-required" class="form-control form-control-sm d-inline-block resource-show ui-input-margin ui-state-disabled">0</div></td>
+          <td><div id="crystal-required" data-report-cell="crystal-required" class="form-control form-control-sm d-inline-block resource-show ui-input-margin ui-state-disabled">0</div></td>
           <td><span><?= $l['deuterium'] ?></span></td>
-          <td><div id="deuterium-required" class="form-control form-control-sm d-inline-block resource-show ui-input-margin ui-state-disabled">0</div></td>
+          <td><div id="deuterium-required" data-report-cell="deuterium-required" class="form-control form-control-sm d-inline-block resource-show ui-input-margin ui-state-disabled">0</div></td>
           <td><span><?= $l['time'] ?></span></td>
-          <td><div id="time-required" class="form-control form-control-sm d-inline-block time-show ui-input-margin ui-state-disabled">0</div></td>
+          <td><div id="time-required" data-report-cell="time-required" class="form-control form-control-sm d-inline-block time-show ui-input-margin ui-state-disabled">0</div></td>
         </tr>
         <tr>
           <td><label for="crystal-available"><?= $l['res-available'] ?></label></td>
@@ -366,14 +390,14 @@
         </tr>
         <tr>
           <td><span><?= $l['res-needed'] ?></span></td>
-          <td><div id="crystal-to-deliver" class="form-control form-control-sm d-inline-block resource-show ui-input-margin ui-state-disabled">0</div></td>
+          <td><div id="crystal-to-deliver" data-report-cell="crystal-to-deliver" class="form-control form-control-sm d-inline-block resource-show ui-input-margin ui-state-disabled">0</div></td>
           <td>&nbsp;</td>
-          <td><div id="deuterium-to-deliver" class="form-control form-control-sm d-inline-block resource-show ui-input-margin ui-state-disabled">0</div></td>
+          <td><div id="deuterium-to-deliver" data-report-cell="deuterium-to-deliver" class="form-control form-control-sm d-inline-block resource-show ui-input-margin ui-state-disabled">0</div></td>
           <td colspan="2">&nbsp;</td>
         </tr>
         <tr>
           <td><span><?= $l['cargoes'] ?></span></td>
-          <td colspan="5"><div id="cargoes" class="form-control form-control-sm d-inline-block transport-show ui-input-margin ui-state-disabled">0</div><i class="bi bi-question-circle" data-bs-toggle="tooltip" title="<?= $l['sc'] ?> / <?= $l['lc'] ?>"></i></td>
+          <td colspan="5"><div id="cargoes" data-report-cell="cargoes" class="form-control form-control-sm d-inline-block transport-show ui-input-margin ui-state-disabled">0</div><i class="bi bi-question-circle" data-bs-toggle="tooltip" title="<?= $l['sc'] ?> / <?= $l['lc'] ?>"></i></td>
         </tr>
       </table>
     </div>
@@ -402,15 +426,15 @@
         </tr>
         <tr>
           <td><span><?= $l['crystal'] ?></span></td>
-          <td><div id="crystal-recyclable" class="form-control form-control-sm d-inline-block resource-show ui-input-margin ui-state-disabled">0</div></td>
+          <td><div id="crystal-recyclable" data-report-cell="crystal-recyclable" class="form-control form-control-sm d-inline-block resource-show ui-input-margin ui-state-disabled">0</div></td>
           <td><span><?= $l['deuterium'] ?></span></td>
-          <td><div id="deuterium-recyclable" class="form-control form-control-sm d-inline-block resource-show ui-input-margin ui-state-disabled">0</div></td>
+          <td><div id="deuterium-recyclable" data-report-cell="deuterium-recyclable" class="form-control form-control-sm d-inline-block resource-show ui-input-margin ui-state-disabled">0</div></td>
         </tr>
         <tr>
           <td><span><?= $l['recyclers'] ?></span></td>
-          <td><div id="recyclers" class="form-control form-control-sm d-inline-block energy-show ui-input-margin ui-state-disabled">0</div></td>
+          <td><div id="recyclers" data-report-cell="recyclers" class="form-control form-control-sm d-inline-block energy-show ui-input-margin ui-state-disabled">0</div></td>
           <td><span><?= $l['cargoes'] ?></span></td>
-          <td><div id="cargoes-for-df" class="form-control form-control-sm d-inline-block transport-show ui-input-margin ui-state-disabled">0</div></td>
+          <td><div id="cargoes-for-df" data-report-cell="cargoes-for-df" class="form-control form-control-sm d-inline-block transport-show ui-input-margin ui-state-disabled">0</div></td>
         </tr>
         <tr>
           <td colspan="4" class="pb-0">
@@ -422,9 +446,9 @@
         </tr>
         <tr>
           <td class="pt-0"><span><?= $l['crystal'] ?></span></td>
-          <td class="pt-0"><div id="net-crystal-required" class="form-control form-control-sm d-inline-block resource-show ui-input-margin ui-state-disabled">0</div></td>
+          <td class="pt-0"><div id="net-crystal-required" data-report-cell="net-crystal-required" class="form-control form-control-sm d-inline-block resource-show ui-input-margin ui-state-disabled">0</div></td>
           <td class="pt-0"><span><?= $l['deuterium'] ?></span></td>
-          <td class="pt-0"><div id="net-deuterium-required" class="form-control form-control-sm d-inline-block resource-show ui-input-margin ui-state-disabled">0</div></td>
+          <td class="pt-0"><div id="net-deuterium-required" data-report-cell="net-deuterium-required" class="form-control form-control-sm d-inline-block resource-show ui-input-margin ui-state-disabled">0</div></td>
         </tr>
       </table>
     </div>
