@@ -2,6 +2,7 @@ import { test, expect, expectLoadsCleanly } from './base';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { expectMcpBoundsMatchPage } from './mcp-bounds';
+import { catchReport, reportCell, sendReport } from './report-dialog';
 
 test.describe('Construction Queue Calculator Page', () => {
     test.beforeEach(async ({ context, page }) => {
@@ -342,6 +343,48 @@ test.describe('Construction Queue Calculator Page', () => {
 
         await expect(page.locator('#table-dst-2 tr').filter({ hasText: 'Total' }).first()).toBeVisible();
         expect(await getQueueTotals(page)).toEqual(before);
+    });
+});
+
+// The calculation-error report attaches the calculator's own snapshot
+// (reportSnapshot in queue-data-collector.js): the open tab, the cell the
+// number came from, the start levels and parameters that differ from their
+// factory defaults, and every step of the queue, a demolition marked as one.
+test.describe('Queue Calculator - calculation-error report', () => {
+    test('names the tab, the selected cell, the changed fields and the queue', async ({ context, page }) => {
+        await context.addInitScript(() => {
+            localStorage.setItem('lastChange', 'key-value;true,value;99999');
+            localStorage.removeItem('options_queue');
+        });
+        await page.goto('/queue');
+        const sent = await catchReport(page);
+
+        await page.locator('#startlvl-2-1').fill('10');
+        await page.locator('#startlvl-2-1').blur();
+        await page.locator('#build-2-1').click();
+        await page.locator('#destroy-2-1').click();
+        const cell = page.locator('#table-dst-2 [data-report-cell="total.metal"]');
+        await expect(cell).toHaveText('5.765');
+
+        await reportCell(page, cell);
+        await expect(page.locator('#report-calc-values li')).toHaveText([
+            'Mode: Planet',
+            'Selected: Total, Metal',
+            'Available buildings',
+            'Metal mine — Start lvl: 10',
+            'Construction queue',
+            '#1: Metal mine → 11',
+            '#2: Metal mine ↓ 10',
+        ]);
+
+        await sendReport(page, sent, '5.766');
+        expect(sent()?.get('context')).toBe([
+            'mode: tabtag-2',
+            'selected: total.metal = "5.765"',
+            'metal-mine.level = 10',
+            'queue.1 = metal-mine:11',
+            'queue.2 = metal-mine:10:demolish',
+        ].join('\n'));
     });
 });
 

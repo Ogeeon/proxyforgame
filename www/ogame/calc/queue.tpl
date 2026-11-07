@@ -117,6 +117,16 @@
     options.moveUpTitle = '<?= $l['move-up'] ?? '' ?>';
     options.moveDownTitle = '<?= $l['move-down'] ?? '' ?>';
     options.removeRowTitle = '<?= $l['remove-row'] ?? '' ?>';
+    // Captions of the calculation-error report (queue-data-collector.js): its
+    // groups, and the rows and columns of the result cells.
+    options.reportText = <?= json_encode(array(
+      'parameters' => $l['parameters'], 'buildings' => $l['buildings'], 'queue' => $l['queue'],
+      'start-level' => $l['start-level'], 'next-level' => $l['next-level'], 'level' => $l['level'],
+      'cargo-cap-increase' => $l['cargo-cap-increase'], 'metal' => $l['metal'], 'crystal' => $l['crystal'],
+      'deuterium' => $l['deuterium'], 'time' => $l['time'], 'total' => $l['total'],
+      'transports' => $l['transports-needed'], 'sc' => $l['sc-short'], 'lc' => $l['lc-short'],
+      'finish' => $l['finish-time'], 'fields' => $l['total-fields'],
+    )) ?>;
 
     options.techCosts = {
 <?php $first = true; foreach ($techData as $id => $tech): ?>
@@ -227,12 +237,12 @@
                 </tr>
                 <?php $techs = getTechsByType($i); $row = 1; ?>
                 <?php foreach ($techs as $tech): ?>
-                <tr class="<?= ($row++ % 2) === 1 ? 'odd' : 'even' ?>">
+                <tr class="<?= ($row++ % 2) === 1 ? 'odd' : 'even' ?>" data-report-key="<?= $techData[$tech][0] ?>">
                   <td style="display: none;"><?=$tech?></td>
                   <td><?= $l[$techData[$tech][0]] ?></td>
                   <td class="text-center"><input id="startlvl-<?=$i?>-<?=$tech?>" type="text" class="form-control form-control-sm level-input" value="0"></td>
                   <td class="text-center" style="white-space: nowrap;">
-                    <span id="nextlvl-<?=$i?>-<?=$tech?>">0</span>
+                    <span id="nextlvl-<?=$i?>-<?=$tech?>" data-report-cell="<?= $techData[$tech][0] ?>.next-level">0</span>
                     <button id="build-<?=$i?>-<?=$tech?>" type="button" data-tech="<?=$tech?>" class="btn btn-outline-secondary btn-sm button-build" data-bs-toggle="tooltip" title="<?= $l['build'] ?>">
                       <i class="bi bi-arrow-right"></i>
                     </button>
@@ -269,7 +279,7 @@
                        every calculator puts on a non-editable readout, so it wears
                        the same fill as a disabled input. An <output>, not a <span>,
                        so the label can name it. -->
-                  <output id="finish-moment-<?=$i?>" class="form-control form-control-sm startdate-input d-inline-block ui-state-disabled">?</output>
+                  <output id="finish-moment-<?=$i?>" data-report-cell="finish" class="form-control form-control-sm startdate-input d-inline-block ui-state-disabled">?</output>
                 </div>
               </div>
 

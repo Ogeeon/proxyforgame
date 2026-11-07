@@ -6,6 +6,11 @@
 
 'use strict';
 
+// The result columns of a queue step and of the totals row, in display order,
+// as the calculation-error report names them.
+const QUEUE_REPORT_STEP_COLUMNS = ['level', 'metal', 'crystal', 'deuterium', 'time'];
+const QUEUE_REPORT_TOTAL_COLUMNS = ['fields', 'metal', 'crystal', 'deuterium', 'time'];
+
 class QueueRenderer {
   /**
    * Dispose every Bootstrap tooltip inside `root´. Must be called before the
@@ -116,9 +121,28 @@ class QueueRenderer {
         `</div>` +
       `</td>`;
 
+    QueueRenderer.markReportCells(tr, 1, `queue-${rowIndex + 1}`, QUEUE_REPORT_STEP_COLUMNS);
+
     // Skin the freshly created row control buttons with Bootstrap tooltips.
     QueueRenderer.initTooltips(tr);
     return tr;
+  }
+
+  /**
+   * Marks consecutive result cells of a row for the calculation-error report:
+   * data-report-cell="<row>.<column>", which queueDescribeCell() captions.
+   * @param {HTMLTableRowElement} row
+   * @param {number} firstCol - index of the first marked cell
+   * @param {string} rowKey
+   * @param {string[]} columns
+   */
+  static markReportCells(row, firstCol, rowKey, columns) {
+    columns.forEach((column, i) => {
+      const cell = row.cells[firstCol + i];
+      if (cell) {
+        cell.dataset.reportCell = `${rowKey}.${column}`;
+      }
+    });
   }
 
   /**
@@ -141,6 +165,7 @@ class QueueRenderer {
     cells[3].innerHTML = `<b>${QueueRenderer.formatNumber(totals[2])}</b>`;
     cells[4].innerHTML = `<b>${QueueRenderer.formatNumber(totals[3])}</b>`;
     cells[5].innerHTML = `<b>${QueueRenderer.formatTime(totals[4])}</b>`;
+    QueueRenderer.markReportCells(totalsRow, 1, 'total', QUEUE_REPORT_TOTAL_COLUMNS);
   }
 
   /**
@@ -165,6 +190,7 @@ class QueueRenderer {
     QueueRenderer.disposeTooltips(transportsRow);
     cells[1].innerHTML = `${numToOGame(needSC)} <abbr data-bs-toggle="tooltip" title="${options.scFull}">${options.scShort}</abbr>`;
     cells[2].innerHTML = `${numToOGame(needLC)} <abbr data-bs-toggle="tooltip" title="${options.lcFull}">${options.lcShort}</abbr>`;
+    QueueRenderer.markReportCells(transportsRow, 1, 'transports', ['sc', 'lc']);
     // Skin the transport abbreviations with Bootstrap tooltips.
     QueueRenderer.initTooltips(transportsRow);
   }
