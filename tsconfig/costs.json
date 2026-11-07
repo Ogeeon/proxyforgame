@@ -3,6 +3,7 @@
 {
   "extends": "../tsconfig.base.json",
   "files": [
+    "../www/js/bootstrap-access.js",
     "../www/js/utils.js",
     "../www/js/api-client.js",
     "../www/ogame/calc/js/ogame-production.js",

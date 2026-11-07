@@ -89,11 +89,7 @@ class LfRenderer {
 
     renderEnergyTooltip(row, energyCost) {
         const hintEl = row.children[1].querySelector('.energy-cost-hint');
-        if (!hintEl) return;
-        const existing = bootstrap.Tooltip.getInstance(hintEl);
-        if (existing) existing.dispose();
-        hintEl.setAttribute('title', this.opts.energyCostToBuildLabel + ': ' + this._fmt(energyCost));
-        bootstrap.Tooltip.getOrCreateInstance(hintEl);
+        setTooltipText(hintEl, this.opts.energyCostToBuildLabel + ': ' + this._fmt(energyCost));
     }
 
     // -------------------------------------------------------------------------
@@ -153,18 +149,6 @@ class LfRenderer {
         this._setCellHtml(tRow.children[2], numToOGame(needSC) + ' <abbr data-bs-toggle="tooltip" title="' + this.opts.scFull + '">' + this.opts.scShort + '</abbr>');
         this._setCellHtml(tRow.children[3], numToOGame(needLC) + ' <abbr data-bs-toggle="tooltip" title="' + this.opts.lcFull + '">' + this.opts.lcShort + '</abbr>');
         markLfReportCells(tRow, 2, 'transports', 2, LF_REPORT_TRANSPORTS);
-    }
-
-    // -------------------------------------------------------------------------
-    // Tooltip init
-    // -------------------------------------------------------------------------
-
-    initTooltips(root) {
-        (root || document).querySelectorAll('[data-bs-toggle="tooltip"]').forEach(function (el) {
-            const existing = bootstrap.Tooltip.getInstance(el);
-            if (existing) existing.dispose();
-            bootstrap.Tooltip.getOrCreateInstance(el);
-        });
     }
 
     // -------------------------------------------------------------------------
@@ -318,10 +302,7 @@ class LfRenderer {
      * an instance whose anchor has been thrown away keeps its bubble on screen.
      */
     _setCellHtml(cell, html) {
-        cell.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(function (el) {
-            const existing = bootstrap.Tooltip.getInstance(el);
-            if (existing) existing.dispose();
-        });
+        disposeTooltips(cell);
         cell.innerHTML = html;
     }
 

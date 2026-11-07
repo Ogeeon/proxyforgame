@@ -314,7 +314,7 @@ const show = (selector) => {
   // For Bootstrap modals. getOrCreateInstance, not `new´: a second instance
   // would take the element over while the first one keeps its listeners.
   if (el.classList.contains('modal')) {
-    bootstrap.Modal.getOrCreateInstance(el).show();
+    openModal(el);
   } else {
     el.style.display = '';
   }
@@ -330,8 +330,7 @@ const hide = (selector) => {
 
   // For Bootstrap modals
   if (el.classList.contains('modal')) {
-    const modal = bootstrap.Modal.getInstance(el);
-    if (modal) modal.hide();
+    hideModal(el);
   } else {
     el.style.display = 'none';
   }
@@ -438,16 +437,17 @@ const showToast = (message, level = 'info') => {
   toastContainer().appendChild(el);
 
   // A failure leaves the page holding wrong numbers, so it waits for the user
-  // to acknowledge it; anything milder clears itself.
-  const toast = bootstrap.Toast.getOrCreateInstance(el, {
+  // to acknowledge it; anything milder clears itself. openToast() disposes the
+  // instance once the toast is hidden; the element goes with it.
+  const shown = openToast(el, {
     autohide: level !== 'danger',
     delay: 7000
   });
-  el.addEventListener('hidden.bs.toast', () => {
-    toast.dispose();
-    el.remove();
-  });
-  toast.show();
+  if (!shown) {
+    el.remove(); // no Bootstrap bundle: nothing can show it
+    return;
+  }
+  el.addEventListener(BS_EVENT.toastHidden, () => el.remove());
 };
 
 // ==========================================================================
@@ -566,8 +566,14 @@ const showAlertModal = (message, okLabel = 'OK', title = undefined) => new Promi
   const { el, okBtn } = buildDialogModal(message, false, title);
   okBtn.textContent = okLabel;
 
-  const modal = bootstrap.Modal.getOrCreateInstance(el, { backdrop: 'static' });
-  el.addEventListener('hidden.bs.modal', () => {
+  const modal = modalFor(el, { backdrop: 'static' });
+  if (!modal) {
+    // No Bootstrap bundle: nothing can show the dialog, so read it as dismissed.
+    el.remove();
+    resolve();
+    return;
+  }
+  el.addEventListener(BS_EVENT.modalHidden, () => {
     modal.dispose();
     el.remove();
     resolve();
@@ -592,8 +598,14 @@ const showConfirmModal = (message, confirmLabel = 'Confirm', cancelLabel = 'Canc
   let confirmed = false;
   okBtn.addEventListener('click', () => { confirmed = true; });
 
-  const modal = bootstrap.Modal.getOrCreateInstance(el, { backdrop: 'static' });
-  el.addEventListener('hidden.bs.modal', () => {
+  const modal = modalFor(el, { backdrop: 'static' });
+  if (!modal) {
+    // No Bootstrap bundle: nothing can show the dialog, so read it as cancelled.
+    el.remove();
+    resolve(false);
+    return;
+  }
+  el.addEventListener(BS_EVENT.modalHidden, () => {
     modal.dispose();
     el.remove();
     resolve(confirmed);

@@ -58,3 +58,27 @@ test.describe('Sidebar with the Bootstrap bundle missing', () => {
     ).toEqual([]);
   });
 });
+
+/**
+ * The same failure one file later: the bundle arrives, but www/js/bootstrap-access.js
+ * - the facade every script reaches Bootstrap through - does not. The guards check
+ * for the facade with `typeof` before calling it, so a missing one is a skipped
+ * handler, not a ReferenceError for each of its functions.
+ */
+test.describe('Sidebar with the Bootstrap facade missing', () => {
+  test('the sidebar wiring does not throw', async ({ page }) => {
+    const errors = [];
+    page.on('pageerror', (e) => errors.push(String(e)));
+
+    await page.route('**/js/bootstrap-access.js*', (route) => route.abort());
+    await page.goto('/');
+    await page.waitForLoadState('networkidle');
+    // The capture-phase click handler carries the same guard.
+    await page.locator('body').click();
+
+    expect(
+      errors.filter((e) => /is not defined/.test(e)),
+      'no uncaught reference to the missing facade',
+    ).toEqual([]);
+  });
+});

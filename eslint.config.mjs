@@ -23,11 +23,18 @@ export default [
     languageOptions: {
       ecmaVersion: 2022,
       sourceType: 'script',
-      globals: { ...globals.browser, bootstrap: 'readonly' },
+      globals: { ...globals.browser },
     },
     rules: {
       ...js.configs.recommended.rules,
       'no-undef': 'off',
+      // Bootstrap's global is read in two files only (override below), so the
+      // day it goes away - Bootstrap 6 is ESM-only - is an edit to them, not a
+      // hunt through every calculator. `typeof bootstrap` counts as a read.
+      'no-restricted-globals': ['error', {
+        name: 'bootstrap',
+        message: 'Go through www/js/bootstrap-access.js',
+      }],
       // `vars: local` for the same reason `no-undef` is off: a top-level
       // function here is a page global, and the file that calls it is a
       // different <script>. Checked once against every .js, .tpl, .php and
@@ -49,6 +56,18 @@ export default [
       // The project is free of eval(); the rule is enabled so it stays that way
       // (it is not part of eslint:recommended).
       'no-eval': 'error',
+    },
+  },
+
+  // The facade and the bundle patch are the two files that may read the
+  // Bootstrap global; see docs/bootstrap-6-migration.md.
+  {
+    files: ['www/js/bootstrap-access.js', 'www/js/bootstrap-tooltip-guard.js'],
+    languageOptions: {
+      globals: { bootstrap: 'readonly' },
+    },
+    rules: {
+      'no-restricted-globals': 'off',
     },
   },
 

@@ -308,12 +308,12 @@ class Renderer {
       rows[resNeededRow].cells[4].innerHTML = this._formatNumber(needDeut, params);
       markReportCells(rows[resNeededRow], 2, 'res-needed', 3);
       const delivery = this._calculateTransport(needMetal + needCrystal + needDeut, params);
-      this.disposeTooltips(rows[deliveryTransportRow]);
+      disposeTooltips(rows[deliveryTransportRow]);
       rows[deliveryTransportRow].cells[2].innerHTML =
         `${delivery.small} <abbr data-bs-toggle="tooltip" title="${this.scFull}">${this.scShort}</abbr>`;
       rows[deliveryTransportRow].cells[3].innerHTML =
         `${delivery.large} <abbr data-bs-toggle="tooltip" title="${this.lcFull}">${this.lcShort}</abbr>`;
-      this.initTooltips(rows[deliveryTransportRow]);
+      attachTooltips(rows[deliveryTransportRow], { refresh: true });
     });
   }
 
@@ -502,35 +502,12 @@ class Renderer {
 
     // Transport row (based on needed resources, not total)
     const transport = this._calculateTransport(needMetal + needCrystal + needDeut, params);
-    this.disposeTooltips(rows[transportRow]);
+    disposeTooltips(rows[transportRow]);
     rows[transportRow].cells[1].innerHTML =
       `${transport.small} <abbr data-bs-toggle="tooltip" title="${this.scFull}">${this.scShort}</abbr>`;
     rows[transportRow].cells[2].innerHTML =
       `${transport.large} <abbr data-bs-toggle="tooltip" title="${this.lcFull}">${this.lcShort}</abbr>`;
-    this.initTooltips(rows[transportRow]);
-  }
-
-  initTooltips(root) {
-    (root || document).querySelectorAll('[data-bs-toggle="tooltip"]').forEach(function (el) {
-      const existing = bootstrap.Tooltip.getInstance(el);
-      if (existing) existing.dispose();
-      bootstrap.Tooltip.getOrCreateInstance(el);
-    });
-  }
-
-  /**
-   * Dispose the Bootstrap tooltips anchored inside `root` before its markup is
-   * replaced. Without this the bubble of a removed <abbr> outlives its anchor.
-   * @param {Element} root
-   */
-  disposeTooltips(root) {
-    if (!root || typeof bootstrap === 'undefined' || !bootstrap.Tooltip) {
-      return;
-    }
-    root.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(function (el) {
-      const existing = bootstrap.Tooltip.getInstance(el);
-      if (existing) existing.dispose();
-    });
+    attachTooltips(rows[transportRow], { refresh: true });
   }
 
   // ==========================================================================

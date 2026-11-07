@@ -11,6 +11,9 @@
 // modules. It is pulled in through `types` in tsconfig.json, and its
 // @popperjs/core import is why that package sits in devDependencies - the
 // browser gets Popper inside the vendored bootstrap.bundle.min.js (www/vendor/).
+// Only www/js/bootstrap-access.js (the facade every other script calls) and
+// www/js/bootstrap-tooltip-guard.js use that global; the facade's functions
+// need no declaration here, because it is one of the scripts in each project.
 
 // Properties the calculators hang directly off DOM elements. They are set in
 // dom-utils.js and utils.js and read all over the place, so they are part of

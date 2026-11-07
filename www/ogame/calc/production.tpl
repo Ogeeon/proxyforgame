@@ -1133,13 +1133,11 @@
 
 <script type="module">
   document.addEventListener('DOMContentLoaded', function() {
-  if (typeof bootstrap === 'undefined' || typeof initializeProductionCalculator !== 'function' || typeof initProductionProfiles !== 'function') {
+  if (typeof bootstrapAvailable !== 'function' || !bootstrapAvailable() || typeof initializeProductionCalculator !== 'function' || typeof initProductionProfiles !== 'function') {
     pfgScriptsFailed();
     return;
   }
-    document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(function(el) {
-      bootstrap.Tooltip.getOrCreateInstance(el);
-    });
+    attachTooltips(document);
     initializeProductionCalculator();
     initProductionProfiles();
   });

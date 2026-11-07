@@ -17,3 +17,6 @@
   <!-- Patches the bundle's Tooltip, so a tooltip disposed while its hide() fade is
        still running does not throw on the nulled instance; see the file itself. -->
   <script src="/js/bootstrap-tooltip-guard.js?v=<?php echo assetVersion(__DIR__, '/js/bootstrap-tooltip-guard.js'); ?>" defer></script>
+  <!-- The facade every other script reaches Bootstrap's JavaScript through; the
+       guard above is the only other reader of the bundle's global. -->
+  <script src="/js/bootstrap-access.js?v=<?php echo assetVersion(__DIR__, '/js/bootstrap-access.js'); ?>" defer></script>

@@ -66,20 +66,13 @@ function setOnePlanetProdData() {
 	setVal('#storage-deut', options.prm.deutStorageLvl);
 }
 
-// Dispose Bootstrap tooltips before dropping a row so no orphaned instances or
-// lingering tips are left behind.
-function disposeRowTooltips(row) {
-	row.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(function (el) {
-		const inst = bootstrap.Tooltip.getInstance(el);
-		if (inst) inst.dispose();
-	});
-}
-
 // Keep the header (first row) and the footer (2px line, 3 totals rows, 3px
 // line); drop previously rendered planet rows in between.
 function clearOldPlanetRows(allRows, footerStart) {
 	for (let r = 1; r < footerStart; r++) {
-		disposeRowTooltips(allRows[r]);
+		// Dispose Bootstrap tooltips before dropping a row so no orphaned
+		// instances or lingering tips are left behind.
+		disposeTooltips(allRows[r]);
 		allRows[r].remove();
 	}
 }
@@ -151,9 +144,7 @@ function prepAllPlanetsTable() {
 	footerFirst.insertAdjacentHTML('beforebegin', html);
 
 	// Skin the freshly created row control buttons with Bootstrap tooltips
-	$$('#all-planets-prod [data-bs-toggle="tooltip"]').forEach(function (el) {
-		bootstrap.Tooltip.getOrCreateInstance(el);
-	});
+	attachTooltips($('#all-planets-prod'));
 
 	let rows = $$('#all-planets-prod tr');
 	for (let i = 0; i < options.prm.currPlanetsCount; i++) {

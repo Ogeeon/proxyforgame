@@ -51,7 +51,7 @@ const PFG_COMPANION_SYNC_EVENT = 'pfg-companion:sync';
 function pfTooltip(el, title) {
   el.setAttribute('aria-label', title);
   el.dataset.bsTitle = title;
-  bootstrap.Tooltip.getOrCreateInstance(el).setContent({ '.tooltip-inner': title });
+  setTooltipText(el, title);
 }
 
 /**
@@ -61,17 +61,15 @@ function pfTooltip(el, title) {
  * @param {ParentNode & Element} root
  */
 function pfDropTooltips(root) {
-  bootstrap.Tooltip.getInstance(root)?.dispose();
-  root.querySelectorAll('[data-bs-title]').forEach((el) => bootstrap.Tooltip.getInstance(el)?.dispose());
+  disposeTooltips(root, '[data-bs-title]');
 }
 
 /**
  * @param {string} id
- * @returns {?bootstrap.Modal}
+ * @returns {ReturnType<typeof modalFor>}
  */
 function pfModal(id) {
-  const el = document.getElementById(id);
-  return el ? bootstrap.Modal.getOrCreateInstance(el) : null;
+  return modalFor(document.getElementById(id));
 }
 
 /**
@@ -889,7 +887,7 @@ class ProfilesUi {
     // Bootstrap keeps one modal open at a time, and the first one's focus trap
     // would take the keyboard away from the name field. Saving or cancelling
     // the edit returns to it.
-    addEvent('#pf-props-modal', 'hidden.bs.modal', () => {
+    addEvent('#pf-props-modal', BS_EVENT.modalHidden, () => {
       if (this.editingId) this.openManage();
     });
   }

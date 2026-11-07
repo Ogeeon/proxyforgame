@@ -752,19 +752,18 @@ function stepChangelogPage(delta) {
 // Form fields are skipped: there the focus-driven tooltip is the intended behaviour
 // (e.g. the crawler-limit hint attached in production-orchestration.js).
 document.addEventListener('click', function (event) {
-    if (typeof bootstrap === 'undefined' || !bootstrap.Tooltip) return;
+    // `typeof` first: when the facade itself failed to load, calling it would throw.
+    if (typeof bootstrapAvailable !== 'function' || !bootstrapAvailable()) return;
     const target = /** @type {HTMLElement|null} */ (event.target);
     if (!target || typeof target.closest !== 'function') return;
     const el = target.closest('[data-bs-toggle="tooltip"]');
     if (!el || el.matches('input, select, textarea')) return;
-    const instance = bootstrap.Tooltip.getInstance(el);
-    if (!instance) return;
-    instance.hide();
+    if (!hideTooltip(el)) return;
     // The mouseenter right before the click queues the show through a timeout, so on a
     // fast click the tooltip is not on screen yet and hide() above is a no-op. Repeat it
     // on the next task: hide() is harmless when nothing is shown, and it is what clears
     // the focus trigger that would otherwise keep the bubble pinned to the button.
-    setTimeout(() => instance.hide(), 0);
+    setTimeout(() => hideTooltip(el), 0);
 }, true);
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -772,30 +771,29 @@ document.addEventListener('DOMContentLoaded', function() {
     // failed. There is nothing this handler can wire without it - the dialogs it
     // builds are the only way the report, e-mail and changelog buttons are
     // reachable - so it returns rather than throwing out of the handler. The click
-    // handler above carries the same guard.
-    if (typeof bootstrap === 'undefined') return;
+    // handler above carries the same guard; `typeof` covers the facade itself
+    // having failed to load.
+    if (typeof bootstrapAvailable !== 'function' || !bootstrapAvailable()) return;
 
-    reportModal = new bootstrap.Modal(requireEl('reportModal'));
-    emailModal = new bootstrap.Modal(requireEl('emailModal'));
-    changelogModal = new bootstrap.Modal(requireEl('changelogModal'));
+    reportModal = modalFor(requireEl('reportModal'));
+    emailModal = modalFor(requireEl('emailModal'));
+    changelogModal = modalFor(requireEl('changelogModal'));
 
-    document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(function(el) {
-        bootstrap.Tooltip.getOrCreateInstance(el);
-    });
+    attachTooltips(document);
 
     const sidebarToggleBtn = document.querySelector('[data-bs-target="#sidebarOffcanvas"]');
     const sidebarOffcanvas = document.getElementById('sidebarOffcanvas');
     const body = document.body;
     const offcanvasOpenClass = 'sidebar-offcanvas-open';
     if (sidebarToggleBtn && sidebarOffcanvas) {
-        sidebarOffcanvas.addEventListener('show.bs.offcanvas', function () {
+        sidebarOffcanvas.addEventListener(BS_EVENT.offcanvasShow, function () {
             sidebarToggleBtn.classList.add('d-none');
             body.classList.add(offcanvasOpenClass);
         });
-        sidebarOffcanvas.addEventListener('hide.bs.offcanvas', function () {
+        sidebarOffcanvas.addEventListener(BS_EVENT.offcanvasHide, function () {
             body.classList.remove(offcanvasOpenClass);
         });
-        sidebarOffcanvas.addEventListener('hidden.bs.offcanvas', function () {
+        sidebarOffcanvas.addEventListener(BS_EVENT.offcanvasHidden, function () {
             sidebarToggleBtn.classList.remove('d-none');
             body.classList.remove(offcanvasOpenClass);
         });
@@ -842,7 +840,7 @@ document.addEventListener('DOMContentLoaded', function() {
     requireEl('changelog-prev').querySelector('button')?.addEventListener('click', () => stepChangelogPage(-1));
     requireEl('changelog-next').querySelector('button')?.addEventListener('click', () => stepChangelogPage(1));
 
-    requireEl('reportModal').addEventListener('hidden.bs.modal', function() {
+    requireEl('reportModal').addEventListener(BS_EVENT.modalHidden, function() {
         reportStep = 0;
         showSendDiv('report', 'data');
         // Back to the misspelling shape, so the next open starts clean whether
@@ -851,7 +849,7 @@ document.addEventListener('DOMContentLoaded', function() {
         setReportCalcMode(false);
     });
     
-    requireEl('emailModal').addEventListener('hidden.bs.modal', function() {
+    requireEl('emailModal').addEventListener(BS_EVENT.modalHidden, function() {
         emailStep = 0;
         showSendDiv('email', 'data');
     });

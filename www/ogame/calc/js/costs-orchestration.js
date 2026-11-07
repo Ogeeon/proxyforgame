@@ -741,10 +741,7 @@ class CostsCalculator {
     // Open the table modal
     removeAllEvents('#lf-research-table-open', 'click');
     addEvent('#lf-research-table-open', 'click', () => {
-      const el = document.getElementById('lf-research-table');
-      if (el && typeof bootstrap !== 'undefined' && bootstrap.Modal) {
-        bootstrap.Modal.getOrCreateInstance(el).show();
-      }
+      openModal(document.getElementById('lf-research-table'));
     });
 
     // Snapshot the table on open and restore it on close unless the user
@@ -752,13 +749,13 @@ class CostsCalculator {
     // and don't reappear the next time the modal is opened.
     const tableModalEl = document.getElementById('lf-research-table');
     if (tableModalEl) {
-      removeAllEvents(tableModalEl, 'show.bs.modal');
-      addEvent(tableModalEl, 'show.bs.modal', () => {
+      removeAllEvents(tableModalEl, BS_EVENT.modalShow);
+      addEvent(tableModalEl, BS_EVENT.modalShow, () => {
         this._lfTableApplied = false;
         this._lfTableSnapshot = this.readLfResearchTable();
       });
-      removeAllEvents(tableModalEl, 'hidden.bs.modal');
-      addEvent(tableModalEl, 'hidden.bs.modal', () => {
+      removeAllEvents(tableModalEl, BS_EVENT.modalHidden);
+      addEvent(tableModalEl, BS_EVENT.modalHidden, () => {
         if (!this._lfTableApplied && this._lfTableSnapshot) {
           this.restoreLfResearchTable(this._lfTableSnapshot);
         }
@@ -771,10 +768,7 @@ class CostsCalculator {
     addEvent('#lf-research-table-ok', 'click', () => {
       this._applyLfResearchTable();
       this._lfTableApplied = true;
-      const el = document.getElementById('lf-research-table');
-      if (el && typeof bootstrap !== 'undefined' && bootstrap.Modal) {
-        bootstrap.Modal.getOrCreateInstance(el).hide();
-      }
+      hideModal(document.getElementById('lf-research-table'));
     });
 
     // Clear: reset every cost/time input in the table to zero
@@ -784,10 +778,7 @@ class CostsCalculator {
     // Get: open the paste-from-OGame modal on top of the table modal
     removeAllEvents('#lf-research-table-get', 'click');
     addEvent('#lf-research-table-get', 'click', () => {
-      const el = document.getElementById('lf-research-paste');
-      if (el && typeof bootstrap !== 'undefined' && bootstrap.Modal) {
-        bootstrap.Modal.getOrCreateInstance(el).show();
-      }
+      openModal(document.getElementById('lf-research-paste'));
     });
 
     // Import: parse the pasted text into the table, then close the paste modal
@@ -797,10 +788,7 @@ class CostsCalculator {
       if (!txtarea) return;
       if (await this._importLfResearchBonuses(txtarea.value)) {
         txtarea.value = '';
-        const el = document.getElementById('lf-research-paste');
-        if (el && typeof bootstrap !== 'undefined' && bootstrap.Modal) {
-          bootstrap.Modal.getOrCreateInstance(el).hide();
-        }
+        hideModal(document.getElementById('lf-research-paste'));
       }
     });
   }
@@ -1160,10 +1148,7 @@ class CostsCalculator {
     if (getCookie(CostsCalculator.RN_DISCLAIMER_COOKIE) === '1') return;
     if (!this._isRobotNaniteFactoryBuilt()) return;
 
-    const el = document.getElementById('robot-nanite-disclaimer');
-    if (!el || typeof bootstrap === 'undefined' || !bootstrap.Modal) return;
-
-    bootstrap.Modal.getOrCreateInstance(el).show();
+    if (!openModal(document.getElementById('robot-nanite-disclaimer'))) return;
     setCookie(CostsCalculator.RN_DISCLAIMER_COOKIE, '1', 30); // remember for ~1 month
   }
 
@@ -1712,12 +1697,12 @@ class CostsCalculator {
     // Clear delivery transport row. The cargo abbreviations are Bootstrap
     // tooltips, exactly as the renderer builds them, so the old bubbles have to
     // be disposed before the markup is replaced and the new ones initialised.
-    this.renderer.disposeTooltips(rows[deliveryTransportRow]);
+    disposeTooltips(rows[deliveryTransportRow]);
     rows[deliveryTransportRow].cells[2].innerHTML =
       '0 <abbr data-bs-toggle="tooltip" title="' + scFull + '">' + scShort + '</abbr>';
     rows[deliveryTransportRow].cells[3].innerHTML =
       '0 <abbr data-bs-toggle="tooltip" title="' + lcFull + '">' + lcShort + '</abbr>';
-    this.renderer.initTooltips(rows[deliveryTransportRow]);
+    attachTooltips(rows[deliveryTransportRow], { refresh: true });
   }
 
   /**
@@ -1772,12 +1757,12 @@ class CostsCalculator {
     const scFull = options.scFull || 'Small Cargo';
     const lcFull = options.lcFull || 'Large Cargo';
 
-    this.renderer.disposeTooltips(remainingRows[transportRow]);
+    disposeTooltips(remainingRows[transportRow]);
     remainingRows[transportRow].cells[1].innerHTML =
       '0 <abbr data-bs-toggle="tooltip" title="' + scFull + '">' + scShort + '</abbr>';
     remainingRows[transportRow].cells[2].innerHTML =
       '0 <abbr data-bs-toggle="tooltip" title="' + lcFull + '">' + lcShort + '</abbr>';
-    this.renderer.initTooltips(remainingRows[transportRow]);
+    attachTooltips(remainingRows[transportRow], { refresh: true });
   }
 
   /**
@@ -1967,7 +1952,7 @@ class CostsCalculator {
     modalEl._irnExecute = false; // Reset execute flag
 
     // Open the Bootstrap modal
-    bootstrap.Modal.getOrCreateInstance(modalEl).show();
+    openModal(modalEl);
 
     // Update resulting level display after dialog opens
     this.updateResultingLevel();
@@ -2045,8 +2030,10 @@ function initializeCostsCalculator() {
     addEvent(irnDoneBtn, 'click', () => {
       if (irnModal) {
         irnModal._irnExecute = true;
-        const modal = bootstrap.Modal.getInstance(irnModal);
-        if (modal) { irnDoneBtn.blur(); modal.hide(); }
+        // The button is only reachable while the dialog is open, so there is an
+        // instance to hide; blur first, before the dialog hides its contents.
+        irnDoneBtn.blur();
+        hideModal(irnModal);
       }
     });
   }
@@ -2180,12 +2167,12 @@ function setupIrnInputHandlers() {
 }
 
 /**
- * Bind the hidden.bs.modal handler for the IRN dialog.
+ * Bind the modal-hidden handler (BS_EVENT.modalHidden) for the IRN dialog.
  * @param {HTMLElement} irnModal
  * @param {HTMLInputElement|null} planetsSpinInput
  */
 function setupIrnModalHandlers(irnModal, planetsSpinInput) {
-  addEvent(irnModal, 'hidden.bs.modal', () => {
+  addEvent(irnModal, BS_EVENT.modalHidden, () => {
     if (irnModal._irnExecute && calculatorApp) {
       applyIrnResult();
     } else {

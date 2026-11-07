@@ -454,13 +454,11 @@
 
 <script type="module">
 document.addEventListener('DOMContentLoaded', function() {
-  if (typeof bootstrap === 'undefined' || typeof initializeTerraformerCalculator !== 'function' || typeof initTerraformerProfiles !== 'function') {
+  if (typeof bootstrapAvailable !== 'function' || !bootstrapAvailable() || typeof initializeTerraformerCalculator !== 'function' || typeof initTerraformerProfiles !== 'function') {
     pfgScriptsFailed();
     return;
   }
-  document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(function(el) {
-    bootstrap.Tooltip.getOrCreateInstance(el);
-  });
+  attachTooltips(document);
   initializeTerraformerCalculator();
   initTerraformerProfiles();
 });

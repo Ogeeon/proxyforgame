@@ -93,9 +93,9 @@ class LfCostsOrchestrator {
         // Tab-state persistence. addEvent skips a strip the template did not
         // render instead of throwing, so the inner strips need no check of
         // their own.
-        addEvent('#mainTabs', 'shown.bs.tab', () => this.storeTabsState());
-        addEvent('#innerTabs0', 'shown.bs.tab', () => this.storeTabsState());
-        addEvent('#innerTabs1', 'shown.bs.tab', () => this.storeTabsState());
+        addEvent('#mainTabs', BS_EVENT.tabShown, () => this.storeTabsState());
+        addEvent('#innerTabs0', BS_EVENT.tabShown, () => this.storeTabsState());
+        addEvent('#innerTabs1', BS_EVENT.tabShown, () => this.storeTabsState());
 
         this.opts.load();
         this._restoreInputsFromPrm();
@@ -409,7 +409,7 @@ class LfCostsOrchestrator {
         }
 
         this.opts.save();
-        this.renderer.initTooltips();
+        attachTooltips(document, { refresh: true });
     }
 
     // -------------------------------------------------------------------------
@@ -425,7 +425,7 @@ class LfCostsOrchestrator {
 
         if (techID == 0) {
             this.renderer.renderTab3Empty(tbl);
-            this.renderer.initTooltips();
+            attachTooltips(document, { refresh: true });
             return;
         }
 
@@ -462,7 +462,7 @@ class LfCostsOrchestrator {
         this.renderer.renderTab3Totals(tbl, totals, availRes, needSC, needLC);
 
         this.opts.save();
-        this.renderer.initTooltips();
+        attachTooltips(document, { refresh: true });
     }
 
     // -------------------------------------------------------------------------
@@ -581,18 +581,9 @@ class LfCostsOrchestrator {
     restoreTabsState() {
         if (!this.opts.prm.tabsState) return;
         const [t0, t1, t2] = this.opts.prm.tabsState.split('^');
-        if (t0) {
-            const btn = document.querySelector(`#mainTabs [data-bs-target="${t0}"]`);
-            if (btn) bootstrap.Tab.getOrCreateInstance(btn).show();
-        }
-        if (t1) {
-            const btn = document.querySelector(`#innerTabs0 [data-bs-target="${t1}"]`);
-            if (btn) bootstrap.Tab.getOrCreateInstance(btn).show();
-        }
-        if (t2) {
-            const btn = document.querySelector(`#innerTabs1 [data-bs-target="${t2}"]`);
-            if (btn) bootstrap.Tab.getOrCreateInstance(btn).show();
-        }
+        if (t0) activateTab(document.querySelector(`#mainTabs [data-bs-target="${t0}"]`));
+        if (t1) activateTab(document.querySelector(`#innerTabs0 [data-bs-target="${t1}"]`));
+        if (t2) activateTab(document.querySelector(`#innerTabs1 [data-bs-target="${t2}"]`));
     }
 
     // -------------------------------------------------------------------------

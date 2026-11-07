@@ -705,7 +705,7 @@
 <script type="module">
 // Initialize the calculator app
 document.addEventListener('DOMContentLoaded', function() {
-  if (typeof bootstrap === 'undefined' || typeof initializeCostsCalculator !== 'function' || typeof initCostsProfiles !== 'function') {
+  if (typeof bootstrapAvailable !== 'function' || !bootstrapAvailable() || typeof initializeCostsCalculator !== 'function' || typeof initCostsProfiles !== 'function') {
     pfgScriptsFailed();
     return;
   }
@@ -713,14 +713,10 @@ document.addEventListener('DOMContentLoaded', function() {
   // Bootstrap modals are auto-initialized from markup
 
   // Initialize Bootstrap tooltips
-  document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(function(el) {
-    bootstrap.Tooltip.getOrCreateInstance(el);
-  });
+  attachTooltips(document);
 
   // Initialize Bootstrap popovers for hint icons
-  document.querySelectorAll('[data-bs-toggle="popover"]').forEach(function(el) {
-    bootstrap.Popover.getOrCreateInstance(el);
-  });
+  attachPopovers(document);
 
   // Initialize the calculator app
   initializeCostsCalculator();

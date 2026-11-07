@@ -40,25 +40,15 @@ function updateCrawlerLimit(input, metalMineLvl, crystalMineLvl, deutSynthLvl, g
 	if (!options.crawlerLimitHint) return;
 
 	const hint = options.crawlerLimitHint.replace('{0}', numToOGame(max));
-	if (bootstrap.Tooltip.getInstance(input)) {
-		// Bootstrap moves `title´ into `data-bs-original-title´ when it adopts an
-		// element and re-reads the bubble text from there on every show, so that
-		// attribute — not `title´ — is what keeps a recomputed hint in sync.
-		// Writing `title´ back would leave the element with a native tooltip and
-		// a Bootstrap one at the same time.
-		input.dataset.bsOriginalTitle = hint;
-	} else {
-		input.dataset.bsToggle = 'tooltip';
-		input.title = hint;
-		bootstrap.Tooltip.getOrCreateInstance(input);
-	}
+	// The marker makes the field one of the page's tooltip anchors; the text
+	// itself goes through the facade, which knows that an adopted element keeps
+	// it somewhere other than `title´.
+	input.dataset.bsToggle = 'tooltip';
+	setTooltipText(input, hint);
 }
 
 function showMainTab(target) {
-	const trigger = document.querySelector('#mainTabs button[data-bs-target="' + target + '"]');
-	if (trigger && typeof bootstrap !== 'undefined' && bootstrap.Tab) {
-		bootstrap.Tab.getOrCreateInstance(trigger).show();
-	}
+	activateTab(document.querySelector('#mainTabs button[data-bs-target="' + target + '"]'));
 }
 
 // Accounts for changes in the parameters: energy tech, universe speed, officers and class.
@@ -1067,7 +1057,7 @@ function _onPlanetsTableClick(event) {
 
 function _bindTabPersistence() {
 	$$('#mainTabs button[data-bs-toggle="tab"]').forEach(function (btn) {
-		btn.addEventListener('shown.bs.tab', function () {
+		btn.addEventListener(BS_EVENT.tabShown, function () {
 			const target = btn.dataset.bsTarget || '';
 			const cookie = { value: target === '#all-planets-panel' ? 'all' : 'one', validate: function (k, v) { return v; } };
 			saveToCookie(PRODUCTION_ACTIVE_TAB_COOKIE, cookie);

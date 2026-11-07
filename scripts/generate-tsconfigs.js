@@ -35,7 +35,13 @@ const REPORT_CONTEXT_SCRIPT = 'www/js/report-context.js';
 // Loaded by vendor.tpl, which every page includes at the top of its
 // stylesheets. Loads after the Bootstrap bundle and patches it.
 const VENDOR_GUARD_SCRIPT = 'www/js/bootstrap-tooltip-guard.js';
-// Ambient declarations: page globals from PHP, expando properties, bootstrap.
+// Loaded by vendor.tpl right after the guard: the facade every other script
+// reaches Bootstrap through. Listed ahead of the template's own scripts, which
+// is where it runs.
+const BOOTSTRAP_ACCESS_SCRIPT = 'www/js/bootstrap-access.js';
+// Ambient declarations: page globals from PHP, expando properties. Bootstrap's
+// own types come from @types/bootstrap; the facade above is a script like any
+// other, so its functions need no declaration.
 const AMBIENT = 'www/ogame/calc/js/globals.d.ts';
 // Stand-in for calculators that declare `options` in an inline <script> in the
 // template rather than in a .js file. Only added where no script declares it -
@@ -53,9 +59,13 @@ function scriptsOf(tplPath) {
   const includesVendor = tpl.includes('vendor.tpl');
   const includesSidebar = tpl.includes('sidebar.tpl');
   const files = [...found];
-  // Neither the bundle's guard nor the sidebar comes from a src="/..." in the
-  // template itself: each arrives through a shared include this scanner cannot
-  // see into, so they are added on the strength of the include being required.
+  // Neither the bundle's guard, the Bootstrap facade nor the sidebar comes from
+  // a src="/..." in the template itself: each arrives through a shared include
+  // this scanner cannot see into, so they are added on the strength of the
+  // include being required.
+  if (includesVendor && !files.includes(BOOTSTRAP_ACCESS_SCRIPT)) {
+    files.unshift(BOOTSTRAP_ACCESS_SCRIPT);
+  }
   if (includesVendor && !files.includes(VENDOR_GUARD_SCRIPT)) {
     files.push(VENDOR_GUARD_SCRIPT);
   }

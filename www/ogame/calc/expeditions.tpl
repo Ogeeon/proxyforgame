@@ -438,13 +438,11 @@ endforeach; ?>
 
 <script type="module">
 document.addEventListener('DOMContentLoaded', function() {
-  if (typeof bootstrap === 'undefined' || typeof initializeExpeditionsCalculator !== 'function' || typeof initExpeditionsProfiles !== 'function') {
+  if (typeof bootstrapAvailable !== 'function' || !bootstrapAvailable() || typeof initializeExpeditionsCalculator !== 'function' || typeof initExpeditionsProfiles !== 'function') {
     pfgScriptsFailed();
     return;
   }
-  document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(function(el) {
-    bootstrap.Tooltip.getOrCreateInstance(el);
-  });
+  attachTooltips(document);
   initializeExpeditionsCalculator();
   initExpeditionsProfiles();
 });

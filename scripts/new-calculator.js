@@ -134,6 +134,7 @@ function generateTPL(calcName) {
 <head>
   <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
   <?php require_once('../../hawk.tpl'); ?>
+  <?php require_once __DIR__ . '/../../scripts-guard.tpl'; ?>
   <meta http-equiv="Cache-Control" content="no-cache" />
   <title><?= $l['title'] ?></title>
   <meta name="description" content="<?= $l['title'] ?>"/>
@@ -226,9 +227,11 @@ function generateTPL(calcName) {
 
 <script type="module">
 document.addEventListener('DOMContentLoaded', function() {
-  document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(function(el) {
-    bootstrap.Tooltip.getOrCreateInstance(el);
-  });
+  if (typeof bootstrapAvailable !== 'function' || !bootstrapAvailable() || typeof initialize${pascalName}Calculator !== 'function') {
+    pfgScriptsFailed();
+    return;
+  }
+  attachTooltips(document);
   initialize${pascalName}Calculator();
 });
 </script>

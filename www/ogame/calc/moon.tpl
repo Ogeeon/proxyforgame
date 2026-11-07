@@ -488,13 +488,11 @@
 
 <script type="module">
 document.addEventListener('DOMContentLoaded', function() {
-  if (typeof bootstrap === 'undefined' || typeof initializeMoonCalculator !== 'function' || typeof initMoonProfiles !== 'function') {
+  if (typeof bootstrapAvailable !== 'function' || !bootstrapAvailable() || typeof initializeMoonCalculator !== 'function' || typeof initMoonProfiles !== 'function') {
     pfgScriptsFailed();
     return;
   }
-  document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(function(el) {
-    bootstrap.Tooltip.getOrCreateInstance(el);
-  });
+  attachTooltips(document);
   initializeMoonCalculator();
   initMoonProfiles();
 });

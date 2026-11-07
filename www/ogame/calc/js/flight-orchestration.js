@@ -684,16 +684,16 @@ class FlightOrchestrator {
         this._showTabOf(el);
         const section = el.closest('.accordion-collapse');
         if (section && !section.classList.contains('show')) {
-            section.addEventListener('shown.bs.collapse', () => this._scrollTo(el), { once: true });
+            section.addEventListener(BS_EVENT.collapseShown, () => this._scrollTo(el), { once: true });
             // Bootstrap drops show() on a panel that is still animating, and the
             // sibling sections collapse this one the moment another opens. Asking
             // again once that has finished is what makes the shortcut reliable
             // right after the user has opened some other section.
             if (section.classList.contains('collapsing')) {
-                section.addEventListener('hidden.bs.collapse',
-                    () => bootstrap.Collapse.getOrCreateInstance(section).show(), { once: true });
+                section.addEventListener(BS_EVENT.collapseHidden,
+                    () => expandCollapse(section), { once: true });
             } else {
-                bootstrap.Collapse.getOrCreateInstance(section).show();
+                expandCollapse(section);
             }
             return;
         }
@@ -710,10 +710,7 @@ class FlightOrchestrator {
         if (!pane || pane.classList.contains('active')) {
             return;
         }
-        const tab = document.querySelector(`[role="tab"][data-bs-target="#${pane.id}"]`);
-        if (tab) {
-            bootstrap.Tab.getOrCreateInstance(tab).show();
-        }
+        activateTab(document.querySelector(`[role="tab"][data-bs-target="#${pane.id}"]`));
     }
 
     _scrollTo(el) {
@@ -918,7 +915,9 @@ class FlightOrchestrator {
             input.value = '';
             this._setLegSign(row.querySelector('.flight-leg-sign'), '+');
         } else {
-            FlightOrchestrator._disposeRowTooltips(row);
+            // Before the row goes: a disposed anchor would otherwise leave its
+            // bubble on screen pointing at nothing.
+            disposeTooltips(row);
             row.remove();
         }
         this.updateArrival();
@@ -934,29 +933,10 @@ class FlightOrchestrator {
         button.innerHTML = sign === '-' ? '<i class="bi bi-dash-lg"></i>' : '<i class="bi bi-plus-lg"></i>';
     }
 
-    /**
-     * Give every tooltip anchor inside a run-time built row its instance, and
-     * take them back before the row is thrown away — a disposed anchor would
-     * otherwise leave its bubble on screen pointing at nothing.
-     */
-    static _initRowTooltips(root) {
-        root.querySelectorAll('[data-bs-toggle="tooltip"]').forEach((el) =>
-            bootstrap.Tooltip.getOrCreateInstance(el));
-    }
-
-    static _disposeRowTooltips(root) {
-        root.querySelectorAll('[data-bs-toggle="tooltip"]').forEach((el) => {
-            const tip = bootstrap.Tooltip.getInstance(el);
-            if (tip) {
-                tip.dispose();
-            }
-        });
-    }
-
     _wireLegRow(row) {
         row.querySelector('.flight-leg-sign').addEventListener('click', (e) => this.toggleLegSign(e.currentTarget));
         row.querySelector('.button-remove').addEventListener('click', (e) => this.removeFlightLeg(e.currentTarget.closest('.flight-leg')));
-        FlightOrchestrator._initRowTooltips(row);
+        attachTooltips(row);
         const field = row.querySelector('.flight-time-input');
         attachInputMask(field, this.opts.flightTimeFormat);
         // The mask cancels the native edit and re-fires `input´ itself, so that
@@ -971,7 +951,7 @@ class FlightOrchestrator {
         if (!container) {
             return;
         }
-        FlightOrchestrator._disposeRowTooltips(container);
+        disposeTooltips(container);
         container.innerHTML = this._legRowHtml(true);
         const row = container.querySelector('.flight-leg');
         if (row) {
@@ -1018,10 +998,7 @@ class FlightOrchestrator {
 
     /** Activate a tab of the main tab strip by its id. */
     static _showTab(id) {
-        const tab = document.getElementById(id);
-        if (tab) {
-            bootstrap.Tab.getOrCreateInstance(tab).show();
-        }
+        activateTab(document.getElementById(id));
     }
 
     /** Is the departure panel showing its Recall tab rather than the plain one? */
@@ -1927,7 +1904,7 @@ class FlightOrchestrator {
 
     _bindTabs() {
         document.querySelectorAll('#tabs button[data-bs-toggle="tab"]').forEach((btn) => {
-            btn.addEventListener('shown.bs.tab', (e) => this.showTabsHint(/** @type {HTMLElement} */ (e.target).id));
+            btn.addEventListener(BS_EVENT.tabShown, (e) => this.showTabsHint(/** @type {HTMLElement} */ (e.target).id));
         });
     }
 

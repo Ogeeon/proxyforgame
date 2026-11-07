@@ -468,13 +468,11 @@
 
 <script type="module">
 document.addEventListener('DOMContentLoaded', function() {
-  if (typeof bootstrap === 'undefined' || typeof initializeGravitonCalculator !== 'function' || typeof initGravitonProfiles !== 'function') {
+  if (typeof bootstrapAvailable !== 'function' || !bootstrapAvailable() || typeof initializeGravitonCalculator !== 'function' || typeof initGravitonProfiles !== 'function') {
     pfgScriptsFailed();
     return;
   }
-  document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(function(el) {
-    bootstrap.Tooltip.getOrCreateInstance(el);
-  });
+  attachTooltips(document);
   initializeGravitonCalculator();
   initGravitonProfiles();
 });

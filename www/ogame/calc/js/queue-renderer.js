@@ -13,33 +13,6 @@ const QUEUE_REPORT_TOTAL_COLUMNS = ['fields', 'metal', 'crystal', 'deuterium', '
 
 class QueueRenderer {
   /**
-   * Dispose every Bootstrap tooltip inside `root´. Must be called before the
-   * anchors are detached (row deleted, innerHTML replaced): a bubble whose
-   * anchor is gone stays on screen and its instance is never released.
-   * @param {Element} root
-   */
-  static disposeTooltips(root) {
-    if (!root || typeof bootstrap === 'undefined' || !bootstrap.Tooltip) return;
-    root.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(function (el) {
-      const inst = bootstrap.Tooltip.getInstance(el);
-      if (inst) inst.dispose();
-    });
-  }
-
-  /**
-   * Attach a Bootstrap tooltip to every hinted element inside `root´.
-   * getOrCreateInstance (not `new´) so a re-initialised element is not
-   * double-bound — SonarQube S1848.
-   * @param {Element} root
-   */
-  static initTooltips(root) {
-    if (!root || typeof bootstrap === 'undefined' || !bootstrap.Tooltip) return;
-    root.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(function (el) {
-      bootstrap.Tooltip.getOrCreateInstance(el);
-    });
-  }
-
-  /**
    * Format a duration in seconds using locale-aware suffixes from `options`.
    */
   static formatTime(seconds) {
@@ -84,7 +57,7 @@ class QueueRenderer {
     while (tbl.rows.length > 3) {
       // Dispose Bootstrap tooltips before dropping the row so no orphaned
       // instances or lingering tips are left behind.
-      QueueRenderer.disposeTooltips(tbl.rows[1]);
+      disposeTooltips(tbl.rows[1]);
       tbl.deleteRow(1);
     }
   }
@@ -124,7 +97,7 @@ class QueueRenderer {
     QueueRenderer.markReportCells(tr, 1, `queue-${rowIndex + 1}`, QUEUE_REPORT_STEP_COLUMNS);
 
     // Skin the freshly created row control buttons with Bootstrap tooltips.
-    QueueRenderer.initTooltips(tr);
+    attachTooltips(tr);
     return tr;
   }
 
@@ -187,12 +160,12 @@ class QueueRenderer {
     // Dispose first: the innerHTML assignments below detach the current <abbr>
     // anchors, and a tooltip disposed after that would leave its bubble on
     // screen with nothing to point at (this row is rewritten on every keystroke).
-    QueueRenderer.disposeTooltips(transportsRow);
+    disposeTooltips(transportsRow);
     cells[1].innerHTML = `${numToOGame(needSC)} <abbr data-bs-toggle="tooltip" title="${options.scFull}">${options.scShort}</abbr>`;
     cells[2].innerHTML = `${numToOGame(needLC)} <abbr data-bs-toggle="tooltip" title="${options.lcFull}">${options.lcShort}</abbr>`;
     QueueRenderer.markReportCells(transportsRow, 1, 'transports', ['sc', 'lc']);
     // Skin the transport abbreviations with Bootstrap tooltips.
-    QueueRenderer.initTooltips(transportsRow);
+    attachTooltips(transportsRow);
   }
 
   /**

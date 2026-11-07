@@ -246,7 +246,7 @@ class FlightProfiles extends FlatSettingsBinder {
       this.settleReport(true);
       pfModal('flight-sr-profile-modal')?.hide();
     });
-    addEvent('#flight-sr-profile-modal', 'hidden.bs.modal', () => this.settleReport(false));
+    addEvent('#flight-sr-profile-modal', BS_EVENT.modalHidden, () => this.settleReport(false));
   }
 
   /** @param {boolean} ready */

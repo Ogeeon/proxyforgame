@@ -798,13 +798,11 @@
 
 <script type="module">
 document.addEventListener('DOMContentLoaded', function() {
-  if (typeof bootstrap === 'undefined' || typeof initializeFlightCalculator !== 'function' || typeof initFlightProfiles !== 'function') {
+  if (typeof bootstrapAvailable !== 'function' || !bootstrapAvailable() || typeof initializeFlightCalculator !== 'function' || typeof initFlightProfiles !== 'function') {
     pfgScriptsFailed();
     return;
   }
-  document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(function(el) {
-    bootstrap.Tooltip.getOrCreateInstance(el);
-  });
+  attachTooltips(document);
   initializeFlightCalculator();
   initFlightProfiles();
 });

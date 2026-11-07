@@ -91,10 +91,7 @@ class QueueCalculatorApp {
     const cookie = { value: '2', validate: (k, v) => v };
     loadFromCookie(ACTIVE_TAB_COOKIE, cookie);
     const target = `#tab-${cookie.value}`;
-    const trigger = document.querySelector(`[data-bs-target="${target}"]`);
-    if (trigger && typeof bootstrap !== 'undefined' && bootstrap.Tab) {
-      bootstrap.Tab.getOrCreateInstance(trigger).show();
-    }
+    activateTab(document.querySelector(`[data-bs-target="${target}"]`));
   }
 
   _applyTheme() {
@@ -137,7 +134,7 @@ class QueueCalculatorApp {
   _bindEvents() {
     // Tab persistence
     $$('#mainTabs button[data-bs-toggle="tab"]').forEach((btn) => {
-      btn.addEventListener('shown.bs.tab', () => {
+      btn.addEventListener(BS_EVENT.tabShown, () => {
         const target = btn.dataset.bsTarget || '';
         const m = target.match(/tab-(\d+)/);
         if (m) {

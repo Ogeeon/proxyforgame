@@ -326,13 +326,11 @@
 
 <script type="module">
   document.addEventListener('DOMContentLoaded', function() {
-  if (typeof bootstrap === 'undefined' || typeof initializeQueueCalculator !== 'function' || typeof initQueueProfiles !== 'function') {
+  if (typeof bootstrapAvailable !== 'function' || !bootstrapAvailable() || typeof initializeQueueCalculator !== 'function' || typeof initQueueProfiles !== 'function') {
     pfgScriptsFailed();
     return;
   }
-    document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(function(el) {
-      bootstrap.Tooltip.getOrCreateInstance(el);
-    });
+    attachTooltips(document);
     initializeQueueCalculator();
     initQueueProfiles();
   });
