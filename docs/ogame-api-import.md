@@ -120,7 +120,9 @@ lists them in. The Companion adds it:
 
 — the planets' game ids (numbers; numeric strings are read too), in the order the game's planet
 list (`#planetList`) shows them. Planets only: a moon follows its planet. The full export and the
-trimmed copy for AI both carry it.
+trimmed copy for AI both carry it. Companion reads the list on every game page, so re-sorting it
+in the game's options needs no Refresh: a changed order is stored without an account request and
+moves `exportedAt`, which is what makes the site import it again.
 
 `exportPlanetOrder()` in `profiles-core.js` reads it best-effort, never refusing an import over
 it: a value that is not a number and a repeated id are skipped, an id the export does not list is
