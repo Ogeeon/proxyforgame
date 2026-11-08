@@ -341,6 +341,61 @@ describe('importAccountExport - a new profile', () => {
     it('sorts the planets by coordinates', () => {
         expect(imported().profile.planets.map((p) => p.name)).toEqual(['Alpha', 'Beta', 'Colony']);
     });
+
+    describe('the planet order the player chose in the game', () => {
+        /** The fixture with Companion's planetOrder. */
+        const withOrder = (planetOrder) => {
+            const obj = fixture();
+            obj.pfgCompanion = { ...obj.pfgCompanion, planetOrder };
+            return obj;
+        };
+        const names = (bodies) => bodies.map((b) => b.name);
+
+        it('follows it in the export and in the profile', () => {
+            const obj = withOrder([900003, 900001, 900002]);
+            expect(names(parsed(obj).planets)).toEqual(['Colony', 'Alpha', 'Beta']);
+            expect(names(imported(obj).profile.planets)).toEqual(['Colony', 'Alpha', 'Beta']);
+        });
+
+        it('puts a planet it does not list after the listed ones, by coordinates', () => {
+            expect(names(parsed(withOrder([900002])).planets)).toEqual(['Beta', 'Alpha', 'Colony']);
+        });
+
+        it('skips an unknown id, a duplicate and a value that is not a number', () => {
+            const obj = withOrder([42, 900003, 'x', 900003, null, 900002, 900001]);
+            expect(names(parsed(obj).planets)).toEqual(['Colony', 'Beta', 'Alpha']);
+        });
+
+        it('falls back to coordinates when the order is not a list', () => {
+            expect(names(parsed(withOrder('900003,900001')).planets)).toEqual(['Alpha', 'Beta', 'Colony']);
+        });
+
+        it('lets a new import reorder a profile, the game\'s order winning over the stored one', () => {
+            const ids = idSource();
+            const first = core.importAccountExport(null, parsed(fixture()), { universe: EN1, newId: ids }).profile;
+            first.planets.reverse();
+            const idOf = (name) => planetNamed(first, name).id;
+            const again = core.importAccountExport(first, parsed(withOrder([900002, 900003, 900001])), { newId: ids });
+            expect(names(again.profile.planets)).toEqual(['Beta', 'Colony', 'Alpha']);
+            expect(again.profile.planets.map((p) => p.id)).toEqual([idOf('Beta'), idOf('Colony'), idOf('Alpha')]);
+            expect(plain(again.summary.planets)).toEqual({ added: 0, updated: 3, removed: 0 });
+        });
+
+        it('keeps a hand-entered planet the export does not match, after the game\'s planets', () => {
+            const ids = idSource();
+            const first = core.importAccountExport(null, parsed(fixture()), { universe: EN1, newId: ids }).profile;
+            first.planets.unshift(core.createPlanet({ id: 'hand', name: 'Hand', coords: { galaxy: 1, system: 1, position: 1 } }));
+            const again = core.importAccountExport(first, parsed(withOrder([900003, 900002, 900001])), { newId: ids }).profile;
+            expect(names(again.planets)).toEqual(['Colony', 'Beta', 'Alpha', 'Hand']);
+        });
+
+        it('orders the moons as their planets', () => {
+            const obj = withOrder([900002, 900001, 900003]);
+            obj.moons['900005'] = { ...obj.moons['900004'], id: 900005, name: 'Moon B', siblingId: 900002, galaxy: 2, system: 150, position: 12 };
+            expect(names(parsed(obj).moons)).toEqual(['Moon B', 'Moon']);
+            expect(names(imported(obj).profile.moons)).toEqual(['Moon B', 'Moon']);
+        });
+    });
 });
 
 describe('the two layers', () => {
@@ -1263,6 +1318,18 @@ describe('profileFromSpyReport', () => {
 });
 
 describe('mergeProfiles', () => {
+    it('keeps the primary planet order and adds the new planets after it, by coordinates', () => {
+        const primary = imported().profile;
+        primary.planets.reverse();
+        const secondary = core.createProfile({ label: 'old' });
+        secondary.planets.push(
+            core.createPlanet({ id: 's2', name: 'Far', coords: { galaxy: 9, system: 1, position: 1 } }),
+            core.createPlanet({ id: 's1', name: 'Near', coords: { galaxy: 1, system: 1, position: 1 } }),
+        );
+        const merged = core.mergeProfiles(primary, secondary);
+        expect(merged.planets.map((p) => p.name)).toEqual(['Colony', 'Beta', 'Alpha', 'Near', 'Far']);
+    });
+
     it('keeps the primary values and takes only what it lacks', () => {
         const primary = imported().profile;
         const secondary = core.createProfile({ label: 'old', universe: { country: 'xx', number: 2 } });

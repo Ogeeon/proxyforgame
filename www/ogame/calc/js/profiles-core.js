@@ -807,9 +807,11 @@ function normalizeAccountExport(raw, schemaVersion) {
   const productionFactors = isPlainObject(raw.pfgCompanion) && isPlainObject(raw.pfgCompanion.productionFactors)
     ? raw.pfgCompanion.productionFactors : {};
   const nowSeconds = exportTimeSeconds(raw);
-  const planets = Object.values(raw.planets).filter(isPlainObject)
+  const planetRank = exportPlanetOrder(raw);
+  const exported = Object.values(raw.planets).filter((p) => isPlainObject(p))
     .map((p) => exportBody(p, true, nowSeconds, productionFactors[String(p.id)]));
-  const moons = Object.values(isPlainObject(raw.moons) ? raw.moons : {}).filter(isPlainObject).map((m) => {
+  const planets = orderByRank(exported, (p) => (p.gameId === null ? -1 : planetRank.get(p.gameId) ?? -1));
+  const moons = Object.values(isPlainObject(raw.moons) ? raw.moons : {}).filter((m) => isPlainObject(m)).map((m) => {
     const body = exportBody(m, false, nowSeconds);
     body.planetGameId = finiteOrNull(m.siblingId) || null;
     return body;
@@ -822,9 +824,33 @@ function normalizeAccountExport(raw, schemaVersion) {
     exportedAt: typeof raw.exportedAt === 'string' ? raw.exportedAt : new Date(0).toISOString(),
     account: exportAccountValues(raw),
     planets,
-    moons,
+    moons: orderByRank(moons, (m) => planets.findIndex((p) => p.gameId !== null && p.gameId === m.planetGameId)),
     resources: exportResources(raw),
   };
+}
+
+/**
+ * Where each planet stands in the player's own planet list, by game id. The
+ * game lets the player sort that list (by emergence, coordinates, name, size,
+ * fields, either way round); PfG Companion reports the result as
+ * `pfgCompanion.planetOrder`, the planets' game ids in the order the list
+ * shows them. The export itself carries no order: its `planets` is keyed by id.
+ * An id that is not a number, or one listed twice, is skipped - the order is
+ * cosmetic and never fails an import.
+ *
+ * @param {Record<string, any>} raw
+ * @returns {Map<number, number>} Game id to position; empty when there is no order.
+ */
+function exportPlanetOrder(raw) {
+  /** @type {Map<number, number>} */
+  const rank = new Map();
+  const order = isPlainObject(raw.pfgCompanion) ? raw.pfgCompanion.planetOrder : null;
+  if (!Array.isArray(order)) return rank;
+  order.forEach((value) => {
+    const id = finiteOrNull(value);
+    if (id !== null && !rank.has(id)) rank.set(id, rank.size);
+  });
+  return rank;
 }
 
 /**
@@ -1322,6 +1348,7 @@ function importAccountExport(existing, data, opts = {}) {
     // A moon new to the profile was created as a planet and has no planetId yet.
     moon.planetId = linked ?? moon.planetId ?? null;
   });
+  profile.moons = orderMoonsByPlanets(profile.planets, profile.moons);
   mergeBodyResources(profile, data.resources);
 
   return { profile, summary: { created, planets: planets.counts, moons: moons.counts, renamed } };
@@ -1674,8 +1701,8 @@ function applyBodies(current, imported, newId, keepOverrides = false) {
   const counts = { added: 0, updated: 0, removed: 0 };
   /** @type {Set<ProfilePlanet>} */
   const matched = new Set();
-  /** @type {ProfilePlanet[]} */
-  const added = [];
+  /** @type {ProfilePlanet[]} The bodies of the export, in its order. */
+  const ordered = [];
 
   imported.forEach((body) => {
     const target = current.find((p) => !matched.has(p) && p.gameId !== null && p.gameId === body.gameId)
@@ -1686,38 +1713,74 @@ function applyBodies(current, imported, newId, keepOverrides = false) {
       target.name = body.name || target.name;
       target.coords = body.coords || target.coords;
       replaceGameLayer(target, body.values, keepOverrides);
+      ordered.push(target);
       counts.updated++;
     } else {
       const planet = createPlanet({ id: newId(), gameId: body.gameId, name: body.name, coords: body.coords });
       replaceGameLayer(planet, body.values, keepOverrides);
-      added.push(planet);
+      ordered.push(planet);
       counts.added++;
     }
   });
 
-  const kept = current.filter((p) => {
-    if (matched.has(p)) return true;
+  // A hand-entered body the export did not match stays, after the game's ones.
+  const handEntered = current.filter((p) => {
+    if (matched.has(p)) return false;
     if (p.gameId === null) return true;
     counts.removed++;
     return false;
   });
-  return { bodies: kept.concat(added).sort(byCoords), counts };
+  handEntered.sort(byCoords);
+  return { bodies: ordered.concat(handEntered), counts };
 }
 
 /**
- * Planets in the game's own order: by coordinates, unknown ones last.
+ * Bodies by coordinates, unknown ones last. The order the site falls back to
+ * when the game's own is not known - the player may sort their planets in the
+ * game any way they like (exportPlanetOrder).
  *
- * @param {ProfilePlanet} a
- * @param {ProfilePlanet} b
+ * @param {{coords: ?ProfileCoords}} a
+ * @param {{coords: ?ProfileCoords}} b
  */
 function byCoords(a, b) {
-  /** @param {ProfilePlanet} p */
+  /** @param {{coords: ?ProfileCoords}} p */
   const key = (p) => {
     const c = p.coords;
     if (typeof c?.galaxy !== 'number' || typeof c.system !== 'number' || typeof c.position !== 'number') return Number.MAX_SAFE_INTEGER;
     return (c.galaxy * 1000 + c.system) * 100 + c.position;
   };
   return key(a) - key(b);
+}
+
+/**
+ * Bodies by a rank, those without one (-1) after them by coordinates.
+ *
+ * @template {{coords: ?ProfileCoords}} T
+ * @param {T[]} bodies
+ * @param {(body: T) => number} rank
+ * @returns {T[]} A new array.
+ */
+function orderByRank(bodies, rank) {
+  const ranked = bodies.map((body) => ({ body, rank: rank(body) }));
+  ranked.sort((a, b) => {
+    if (a.rank >= 0 && b.rank >= 0) return a.rank - b.rank;
+    if (a.rank >= 0) return -1;
+    if (b.rank >= 0) return 1;
+    return byCoords(a.body, b.body);
+  });
+  return ranked.map((r) => r.body);
+}
+
+/**
+ * The moons in the order of their planets; a moon whose planet the profile does
+ * not know comes last, by coordinates.
+ *
+ * @param {ProfilePlanet[]} planets
+ * @param {ProfileMoon[]} moons
+ * @returns {ProfileMoon[]} A new array.
+ */
+function orderMoonsByPlanets(planets, moons) {
+  return orderByRank(moons, (m) => (m.planetId === null ? -1 : planets.findIndex((p) => p.id === m.planetId)));
 }
 
 // ---------------------------------------------------------------------------
@@ -1756,6 +1819,7 @@ function mergeProfiles(primary, secondary) {
   result.moons.forEach((moon) => {
     if (moon.planetId && planetIds.has(moon.planetId)) moon.planetId = planetIds.get(moon.planetId) || null;
   });
+  result.moons = orderMoonsByPlanets(result.planets, result.moons);
   // The resources are no value to keep: per body the newer reading wins.
   if (other.resources || result.resources) mergeBodyResources(result, other.resources);
   return result;
@@ -1780,7 +1844,8 @@ function fillMissing(target, source) {
 function mergeBodies(primary, secondary, idMap) {
   /** @type {Set<ProfilePlanet>} */
   const used = new Set();
-  const result = primary.slice();
+  /** @type {ProfilePlanet[]} The second profile's bodies the primary lacks. */
+  const added = [];
   secondary.forEach((body) => {
     let target = uniqueCoordsMatch(primary.filter((p) => !used.has(p)), body.coords, secondary);
     if (!target && body.name) {
@@ -1793,11 +1858,13 @@ function mergeBodies(primary, secondary, idMap) {
       if (!target.coords) target.coords = body.coords;
       idMap.set(body.id, target.id);
     } else {
-      result.push(body);
+      added.push(body);
       idMap.set(body.id, body.id);
     }
   });
-  return result.sort(byCoords);
+  // The primary keeps its order - the game's, when it was imported.
+  added.sort(byCoords);
+  return primary.concat(added);
 }
 
 // ---------------------------------------------------------------------------

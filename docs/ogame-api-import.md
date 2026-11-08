@@ -105,6 +105,37 @@ readings of bodies the profile no longer has. `PfBodyResources` (`profiles-widge
 tab from the body shown, with a "Game data as of …" caption that turns to the warning colour after
 an hour. The MCP tool leaves resources out.
 
+### Planet order
+
+The game lets the player sort their planet list (Options: by emergence, coordinates, alphabet,
+size or used fields, either way round). The export does not carry that order: `planets` is an
+object keyed by game id, which JavaScript enumerates by ascending id whatever order the document
+lists them in. The Companion adds it:
+
+```json
+"pfgCompanion": {
+  "planetOrder": [33620011, 33620457, 33620002]
+}
+```
+
+— the planets' game ids (numbers; numeric strings are read too), in the order the game's planet
+list (`#planetList`) shows them. Planets only: a moon follows its planet. The full export and the
+trimmed copy for AI both carry it.
+
+`exportPlanetOrder()` in `profiles-core.js` reads it best-effort, never refusing an import over
+it: a value that is not a number and a repeated id are skipped, an id the export does not list is
+ignored, and a planet the list leaves out goes after the listed ones by coordinates. Without the
+field, or when it is not an array, the planets are ordered by coordinates. The normalized
+`planets` and `moons` (each moon at its planet's place) come out in that order, so the MCP tool
+answers in it too.
+
+On import the profile takes the export's order — the game's order wins over one stored on the
+site, including the one production's all-planets table writes back. Planets entered by hand that
+the export does not match keep their place after the game's, by coordinates. Merging two profiles
+keeps the primary's order and appends the second profile's new planets by coordinates. The planet
+selects of every calculator list `profile.planets` as stored and the moons in their planets' order
+(`orderMoonsByPlanets()`).
+
 ### What a trimmed export may leave out
 
 The Companion's "copy for AI" sends a trimmed export to keep it small in a model's context — about

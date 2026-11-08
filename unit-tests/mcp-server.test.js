@@ -1130,6 +1130,16 @@ describe('MCP tool ogame_import_account', () => {
         expect(moon.metalMine).toBe(undefined);
     });
 
+    it('lists the bodies in the planet order the player chose in the game', async () => {
+        const ordered = { ...LARGE, pfgCompanion: { ...LARGE.pfgCompanion, planetOrder: [30000008, 30000002, 30000001] } };
+        const { bodies } = (await importAccount({ export: ordered })).structuredContent;
+        expect(bodies.filter((b) => b.location === 'planet').map((b) => b.name)).toEqual(
+            ['Colony 8', 'Colony 2', 'Colony 1', 'Colony 3', 'Colony 4', 'Colony 5', 'Colony 6', 'Colony 7']);
+        expect(bodies.filter((b) => b.location === 'moon').map((b) => b.name)).toEqual(
+            [LARGE.moons['30000102'].name, LARGE.moons['30000101'].name, LARGE.moons['30000103'].name,
+                LARGE.moons['30000104'].name, LARGE.moons['30000105'].name, LARGE.moons['30000106'].name]);
+    });
+
     it('leaves out who the player is, defences and resources', async () => {
         const text = JSON.stringify((await importAccount({ export: LARGE })).structuredContent);
         for (const secret of ['Synthetic Player', '104729', 'itemUuid', 'a83cfdc15b8dba27c82962d57e50d8101d263cfb', 'buffStart']) {

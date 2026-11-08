@@ -459,7 +459,8 @@ class PfCoordsSelect {
       list.push({ body, coords, isMoon, label: name + ' [' + coords.join(':') + ']' });
     };
     profile.planets.forEach((p) => add(p, false));
-    profile.moons.forEach((m) => add(m, true));
+    // Production's table can reorder the planets and leaves the moons as they were.
+    orderMoonsByPlanets(profile.planets, profile.moons).forEach((m) => add(m, true));
     return list;
   }
 
