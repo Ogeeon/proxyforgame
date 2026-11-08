@@ -269,6 +269,13 @@ class CostsProfiles extends ProfileBinder {
   bindControls() {
     this.planetSelect.onChange(() => this.bodyChosen('planet'));
     this.moonSelect.onChange(() => this.bodyChosen('moon'));
+    // A lab edited in the research network dialog is marked as it is typed. The
+    // table's rows are rebuilt, so the table listens for them; the dialog's
+    // own handlers, on the field, have run by then. Cancel rebuilds the rows
+    // unmarked: opening the dialog marks them again.
+    addEvent('#lab-levels-table', 'keyup', () => this.markLabs());
+    addEvent('#lab-levels-table', 'focusout', () => this.markLabs());
+    addEvent('#irn-calc', BS_EVENT.modalShow, () => this.markLabs());
     // Called by the calculator's own handler, once it has recalculated the tab.
     this.app.rangeTechChanged = () => {
       const profile = this.profile();
@@ -683,13 +690,41 @@ class CostsProfiles extends ProfileBinder {
 
   /**
    * The research labs of the network dialog, one per planet of the profile.
+   * A level goes into the profile only once the dialog is closed (its Cancel
+   * takes it back), so each is marked as it would be written: what the field
+   * holds now, over the planet's game value. The restore button acts on the
+   * field too, so Cancel still undoes it.
    *
    * @param {Profile} profile
    */
   markExtra(profile) {
     profile.planets.slice(0, COSTS_MAX_LAB_PLANETS).forEach((p, i) => {
-      this.pf.markField($('#lablevel_' + (i + 1)), profile, p, 'building.31', this.restoreBody('planets', p.id, 'building.31'));
+      const input = inputEl('#lablevel_' + (i + 1));
+      if (!input) return;
+      const layer = p.values['building.31'];
+      /** @type {{values: LayeredValues}} */
+      const pending = { values: layer ? { 'building.31': cloneData(layer) } : {} };
+      setProfileValue(pending, 'building.31', pfNum(input.value));
+      this.pf.markField(input, profile, pending, 'building.31', (game) => this.restoreLab(input, game));
     });
+  }
+
+  /** Mark the dialog's labs again, after an edit there. */
+  markLabs() {
+    const profile = this.profile();
+    if (profile) this.markExtra(profile);
+  }
+
+  /**
+   * Put a planet's game lab level back into its field of the dialog.
+   *
+   * @param {HTMLInputElement} input
+   * @param {*} game
+   */
+  restoreLab(input, game) {
+    input.value = String(pfNum(game));
+    changeLabLevel.call(input);
+    this.markLabs();
   }
 }
 

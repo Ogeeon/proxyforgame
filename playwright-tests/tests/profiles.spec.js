@@ -1336,6 +1336,39 @@ test('cancelling the research network dialog writes nothing', async ({ page }) =
     await expect(page.locator('#pf-overrides')).toBeHidden();
 });
 
+test('a lab edited in the research network dialog is marked at once', async ({ page }) => {
+    await mockServerData(page);
+    await openWithProfile(page, '/costs');
+    await page.locator('#use-irn').check();
+    await page.locator('#open-llc-dialog').click();
+    const lab = page.locator('#lablevel_2');
+    const reset = page.locator('#lablevel_2 + .pf-reset');
+    await expect(lab).not.toHaveClass(/pf-differs/);
+
+    // Marked while the dialog is still open, before anything reaches the profile.
+    await lab.fill('11');
+    await lab.press('Enter');
+    await expect(lab).toHaveClass(/pf-differs/);
+    await expect(reset).toBeVisible();
+    expect((await activeProfile(page)).planets[1].values['building.31']).toEqual({ game: 10 });
+
+    // The restore button puts the game value back into the field.
+    await reset.click();
+    await expect(lab).toHaveValue('10');
+    await expect(lab).not.toHaveClass(/pf-differs/);
+    await expect(reset).toHaveCount(0);
+
+    // Cancel rebuilds the rows; opening the dialog again marks them as the profile has them.
+    await lab.fill('11');
+    await lab.press('Enter');
+    await page.locator('#irn-calc .btn-secondary').click();
+    await expect(page.locator('#irn-calc')).toBeHidden();
+    await page.locator('#open-llc-dialog').click();
+    await expect(lab).toHaveValue('10');
+    await expect(lab).toHaveClass(/pf-bound/);
+    await expect(lab).not.toHaveClass(/pf-differs/);
+});
+
 test('the Mineral Research Centre follows the planet picked in costs', async ({ page }) => {
     await mockServerData(page);
     await openWithProfile(page, '/costs');
