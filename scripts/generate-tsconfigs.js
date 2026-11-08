@@ -70,8 +70,7 @@ function scriptsOf(tplPath) {
     files.push(VENDOR_GUARD_SCRIPT);
   }
   if (includesSidebar && !files.includes(SIDEBAR_SCRIPT)) {
-    files.push(REPORT_CONTEXT_SCRIPT);
-    files.push(SIDEBAR_SCRIPT);
+    files.push(REPORT_CONTEXT_SCRIPT, SIDEBAR_SCRIPT);
   }
   files.push(AMBIENT);
 
