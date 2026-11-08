@@ -320,10 +320,16 @@ class ProfilesUi {
     const button = existing || document.createElement('button');
     if (!existing) {
       button.type = 'button';
-      button.className = 'pf-reset btn btn-link btn-sm p-0 ms-1';
+      button.className = 'pf-reset btn btn-link btn-sm p-0';
       button.innerHTML = '<i class="bi bi-arrow-counterclockwise" aria-hidden="true"></i>';
       anchor.after(button);
     }
+    // The CSS takes the container's flex/grid gap back so the button hugs the
+    // field; only a block layout has no gap to take back.
+    const parent = anchor.parentElement;
+    const layout = parent ? getComputedStyle(parent) : null;
+    const gap = layout && /flex|grid|none/.test(layout.display) ? Number.parseFloat(layout.columnGap) || 0 : 0;
+    button.style.setProperty('--pfg-flex-gap', gap + 'px');
     pfTooltip(button, title);
     // Restoring redraws the marks and removes this button, so its bubble goes first.
     button.onclick = () => {

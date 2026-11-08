@@ -581,9 +581,22 @@ fieldset.pf-bound.pf-differs {
   box-shadow: none;
 }
 
+/* The restore button hugs its field, 2px away so the two borders stay apart.
+   The spacing the layout puts after a field - its own right margin, the flex
+   gap of its container - would push the button off by up to 16px, so the
+   field drops its margin while the button is there, and the button takes the
+   gap back with a negative margin. The gap comes from a utility class or from
+   a page's own CSS alike, so ProfileUi.markInput() reads it off the container
+   into --pfg-flex-gap. */
 .pf-reset {
+  --pfg-reset-gap: 2px;
+  margin-left: calc(var(--pfg-reset-gap) - var(--pfg-flex-gap, 0px));
   line-height: 1;
   color: var(--bs-warning-text-emphasis);
+}
+
+.pf-bound:has(+ .pf-reset) {
+  margin-right: 0 !important;
 }
 
 /* A form control is a block, so the restore button after it would drop to the
