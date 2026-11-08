@@ -22,6 +22,7 @@ release section; it is the source of truth for the other eleven translations.
 ### Fixed
 
 - Profiles: on a calculator page whose Bootstrap bundle (or the new `bootstrap-access.js` that every script now reaches it through) failed to load, the profile controller no longer throws a `ReferenceError` on top of the "reload the page" banner. It builds its tooltips as soon as `profiles-ui.js` runs, outside the page's inline guard, so it now stands down by itself when Bootstrap is unavailable.
+- Profiles: in the dark theme, the "Game data as of ..." caption under the available resources no longer turns bright yellow once the reading is over an hour old. Bootstrap's dark warning text (#ffda6a) outshone everything around it; the caption now fades it 65% toward the page background, a muted ochre that still reads as a warning. The light theme keeps its colour.
 
 ## [2026-11-07] - site entry 72
 

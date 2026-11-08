@@ -44,6 +44,10 @@ h3.modal-title {
   --pfg-btn-shadow-active: inset 0 1px 2px rgba(0, 0, 0, 0.5);
   /* Profile mark for a field that matches the game, see .pf-bound below. */
   --pfg-mark-same: var(--bs-success-text-emphasis);
+  /* Stale resource caption, see .pf-resources-stale below: Bootstrap's dark
+     warning text (#ffda6a) outshines the page text, so fade it 65% toward the
+     page background - a muted ochre, still above 4.5:1. */
+  --pfg-stale-text: color-mix(in srgb, var(--bs-warning-text-emphasis) 65%, color-mix(in srgb, var(--bs-body-bg) 80%, black));
 }
 
 /* Soften the pure-white light theme evenly across the whole UI (tune the 94% knob).
@@ -561,6 +565,12 @@ fieldset.pf-bound {
   width: 0;
   min-width: 100%;
   white-space: normal;
+}
+
+/* A resource caption whose reading is over an hour old (PfBodyResources).
+   Only the dark theme sets --pfg-stale-text; the light one keeps Bootstrap's. */
+.pf-resources-stale {
+  color: var(--pfg-stale-text, var(--bs-warning-text-emphasis));
 }
 
 fieldset.pf-bound.pf-differs {

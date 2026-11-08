@@ -1767,7 +1767,7 @@ for (const calc of ['graviton', 'terraformer']) {
         await expect(caption).toBeVisible();
         await expect(caption).toContainText('Game data as of');
         await expect(caption).toHaveClass(/text-body-secondary/);
-        await expect(caption).not.toHaveClass(/text-warning-emphasis/);
+        await expect(caption).not.toHaveClass(/pf-resources-stale/);
         // The calculator recalculated with them, and saved them as it saves its own.
         await expect.poll(async () => (await storedOptions(page, calc)).crysAvailable).toBe(12345);
 
@@ -1790,13 +1790,13 @@ for (const calc of ['graviton', 'terraformer']) {
         const deut = page.locator('#deuterium-available');
         const caption = page.locator('#resources-age');
         await expect(crystal).toHaveValue('100');
-        await expect(caption).not.toHaveClass(/text-warning-emphasis/);
+        await expect(caption).not.toHaveClass(/pf-resources-stale/);
 
         await page.locator('#pf-planet').selectOption({ label: 'Beta [2:150:12]' });
         await expect(crystal).toHaveValue('222');
         await expect(deut).toHaveValue('333');
         await expect(caption).toBeVisible();
-        await expect(caption).toHaveClass(/text-warning-emphasis/);
+        await expect(caption).toHaveClass(/pf-resources-stale/);
 
         // Colony has no reading: Beta's go back to 0, without a caption; what
         // the player typed stays.

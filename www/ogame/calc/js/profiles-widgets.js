@@ -724,7 +724,7 @@ class PfBodyResources {
     el.textContent = formatString(this.pf.text.resourcesAsOf, pfPageDateTime(at));
     const stale = isResourceReadingStale(at, Date.now());
     el.classList.toggle('text-body-secondary', !stale);
-    el.classList.toggle('text-warning-emphasis', stale);
+    el.classList.toggle('pf-resources-stale', stale);
     return shown;
   }
 }
