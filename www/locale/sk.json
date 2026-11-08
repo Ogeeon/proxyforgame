@@ -225,6 +225,7 @@
     "pf-import-err-schema": "Táto verzia formátu Origin Exporter zatiaľ nie je podporovaná.",
     "pf-pick-universe": "Vyberte vesmír.",
     "pf-import-done": "Profil „{0}“: planét pridaných {1}, aktualizovaných {2}, odstránených {3}.",
+    "pf-import-renamed": "Účet bol v hre premenovaný: „{0}“ → „{1}“.",
     "pf-companion-badge": "Nové profily z Companion: {0} - kliknutím ich skontrolujete",
     "pf-new-profiles-hdr": "Nové profily",
     "pf-companion-create": "Vytvoriť profil",

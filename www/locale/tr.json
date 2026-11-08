@@ -225,6 +225,7 @@
     "pf-import-err-schema": "Origin Exporter biçiminin bu sürümü henüz desteklenmiyor.",
     "pf-pick-universe": "Evreni seçin.",
     "pf-import-done": "“{0}” profili: eklenen gezegen {1}, güncellenen {2}, kaldırılan {3}.",
+    "pf-import-renamed": "Hesap oyunda yeniden adlandırıldı: “{0}” → “{1}”.",
     "pf-companion-badge": "Companion'dan yeni profiller: {0} - incelemek için tıklayın",
     "pf-new-profiles-hdr": "Yeni profiller",
     "pf-companion-create": "Profil oluştur",

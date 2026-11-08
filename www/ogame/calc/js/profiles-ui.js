@@ -652,10 +652,14 @@ class ProfilesUi {
     const plan = this.planCompanion(payload);
     if (!plan) return;
     this.companionPayload = payload;
+    // The names an ignored account's newest export carries. Saved before the
+    // plan is taken, so the basis the plan records already has them.
+    if (plan.ignoredRefreshed) this.store.saveCompanionIgnored(plan.ignoredRefreshed);
     // Taken before the updates are saved: they change no account, so the
     // replans their saves set off find nothing to plan again.
     this.takeCompanionPlan(plan);
     plan.updates.forEach((profile) => this.save(profile));
+    plan.renamed.forEach((rename) => showToast(this.renameText(rename), 'info'));
     // save() keeps a page's own edits from coming back to it, but a Sync is not
     // the calculator's edit: it has to show the active profile's new game layer.
     // At load no calculator listens yet, and it reads the saved profile itself.
@@ -767,7 +771,7 @@ class ProfilesUi {
     // A profile the account now has makes its ignore entry moot. The badge,
     // its dialog and the manager follow the store (replanCompanion).
     this.store.unignoreCompanionAccount(data);
-    showToast(formatString(this.text.importDone, profile.label, summary.planets.added, summary.planets.updated, summary.planets.removed), 'success');
+    showToast(this.importDoneText(profile, summary), 'success');
   }
 
   /**
@@ -834,7 +838,27 @@ class ProfilesUi {
     this.pendingExport = null;
     pfModal('pf-import-modal')?.hide();
     this.store.setActive(profile.id);
-    showToast(formatString(this.text.importDone, profile.label, summary.planets.added, summary.planets.updated, summary.planets.removed), 'success');
+    showToast(this.importDoneText(profile, summary), 'success');
+  }
+
+  /**
+   * The toast of an import: what it did to the planets, and the rename, if any.
+   *
+   * @param {Profile} profile
+   * @param {ImportSummary} summary
+   * @returns {string}
+   */
+  importDoneText(profile, summary) {
+    const done = formatString(this.text.importDone, profile.label, summary.planets.added, summary.planets.updated, summary.planets.removed);
+    return summary.renamed ? done + ' ' + this.renameText(summary.renamed) : done;
+  }
+
+  /**
+   * @param {ProfileRename} rename
+   * @returns {string}
+   */
+  renameText(rename) {
+    return formatString(this.text.importRenamed, rename.from, rename.to);
   }
 
   /**

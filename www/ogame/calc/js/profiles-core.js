@@ -142,6 +142,9 @@ const PROFILE_PERCENT_DIGITS = 6;
  * @property {?ProfileUniverse} universe
  * @property {boolean} universeLocked True when the universe came from the export itself.
  * @property {?number} playerId
+ * @property {?string} [playerName] The account's name in the game as the last
+ *   import named it. The label follows it while the two agree (followPlayerName).
+ *   Null on a manual profile; absent on one stored before it was kept.
  * @property {?string} importedAt ISO time of the export the game layer came from.
  * @property {{values: LayeredValues}} account
  * @property {ProfilePlanet[]} planets
@@ -199,6 +202,13 @@ const PROFILE_PERCENT_DIGITS = 6;
  * @property {boolean} created True when the import made a new profile.
  * @property {ImportCounts} planets
  * @property {ImportCounts} moons
+ * @property {?ProfileRename} renamed The label the import changed, if it did.
+ */
+
+/**
+ * @typedef {Object} ProfileRename
+ * @property {string} from
+ * @property {string} to
  */
 
 // ---------------------------------------------------------------------------
@@ -426,6 +436,7 @@ function createProfile(init) {
     universe: init.universe ? { country: init.universe.country, number: init.universe.number } : null,
     universeLocked: false,
     playerId: null,
+    playerName: null,
     importedAt: null,
     account: { values: {} },
     planets: [],
@@ -1285,6 +1296,7 @@ function importAccountExport(existing, data, opts = {}) {
   const created = !existing;
   const profile = existing ? cloneData(existing) : createProfile({ id: newId(), label: data.playerName || String(data.playerId) });
 
+  const renamed = followPlayerName(profile, data);
   profile.playerId = data.playerId;
   profile.importedAt = data.exportedAt;
   if (data.universe) {
@@ -1312,7 +1324,32 @@ function importAccountExport(existing, data, opts = {}) {
   });
   mergeBodyResources(profile, data.resources);
 
-  return { profile, summary: { created, planets: planets.counts, moons: moons.counts } };
+  return { profile, summary: { created, planets: planets.counts, moons: moons.counts, renamed } };
+}
+
+/**
+ * Keep the label in step with the account's name in the game. The label is
+ * renamed only while it is still the name the last import gave - one the
+ * player typed is theirs and stays. A profile stored before the name was kept
+ * cannot tell, so it is renamed only when its label is the player id, the
+ * label an export without a name leaves. An export without a name changes
+ * nothing: an empty name is an unknown one.
+ *
+ * @param {Profile} profile Changed in place; its playerId is still the old one.
+ * @param {AccountExport} data
+ * @returns {?ProfileRename}
+ */
+function followPlayerName(profile, data) {
+  const name = data.playerName;
+  if (!name) return null;
+  const automatic = typeof profile.playerName === 'string'
+    ? profile.label === profile.playerName
+    : profile.label === String(data.playerId);
+  profile.playerName = name;
+  if (!automatic || profile.label === name) return null;
+  const renamed = { from: profile.label, to: name };
+  profile.label = name;
+  return renamed;
 }
 
 /**
@@ -1545,6 +1582,9 @@ function mergeCompanionIgnored(stored, incoming) {
  * @property {Profile[]} updates Profiles to save, each with the newer export or only newer resources applied.
  * @property {AccountExport[]} candidates Exports of accounts that have no profile and are not ignored.
  * @property {AccountExport[]} ignored Exports of accounts that have no profile and are on the ignore list.
+ * @property {ProfileRename[]} renamed The labels the updates changed, one per profile.
+ * @property {?CompanionIgnoredEntry[]} ignoredRefreshed The ignore list with the
+ *   names the newest exports carry; null when no name changed.
  */
 
 /**
@@ -1557,7 +1597,8 @@ function mergeCompanionIgnored(stored, incoming) {
  * The resources on the bodies are taken body by body whenever they are newer,
  * the export newer or not (mergeBodyResources). The exports are taken in
  * order, so a second export of one account is compared with the first one's
- * result. Nothing is saved here.
+ * result. An ignored account renamed in the game gets the new name on its
+ * ignore-list entry. Nothing is saved here.
  *
  * @param {*} payload What Companion handed over: `{version: 1, exports: [...]}`.
  * @param {Array<{id: string, universe: ?ProfileUniverse, playerId: ?number}>} index
@@ -1573,6 +1614,8 @@ function planCompanionSync(payload, index, load, ignoredEntries = []) {
   const candidates = [];
   /** @type {AccountExport[]} */
   const ignored = [];
+  /** @type {Map<string, ProfileRename>} */
+  const renames = new Map();
   payload.exports.forEach((/** @type {unknown} */ raw) => {
     const parsed = parseAccountExport(JSON.stringify(raw));
     const data = parsed.data;
@@ -1586,8 +1629,10 @@ function planCompanionSync(payload, index, load, ignoredEntries = []) {
       return;
     }
     if (isNewerExport(data, existing)) {
-      const { profile } = importAccountExport(existing, data, { keepOverrides: true });
+      const { profile, summary } = importAccountExport(existing, data, { keepOverrides: true });
       updated.set(profile.id, profile);
+      // Two exports of one account renaming it twice are one rename, from the first name.
+      if (summary.renamed) renames.set(profile.id, { from: renames.get(profile.id)?.from ?? summary.renamed.from, to: summary.renamed.to });
       return;
     }
     // Companion reads the resources off every game page, so an export whose
@@ -1595,7 +1640,27 @@ function planCompanionSync(payload, index, load, ignoredEntries = []) {
     const profile = cloneData(existing);
     if (mergeBodyResources(profile, data.resources)) updated.set(profile.id, profile);
   });
-  return { updates: [...updated.values()], candidates, ignored };
+  const renamed = [...renames.values()].filter((r) => r.from !== r.to);
+  return { updates: [...updated.values()], candidates, ignored, renamed, ignoredRefreshed: refreshIgnoredNames(ignoredEntries, ignored) };
+}
+
+/**
+ * The ignore list with each entry's name taken from its account's export, when
+ * the export names it and the name differs.
+ *
+ * @param {CompanionIgnoredEntry[]} entries
+ * @param {AccountExport[]} exports One per account.
+ * @returns {?CompanionIgnoredEntry[]} A new list, `entries` unchanged; null when no name changed.
+ */
+function refreshIgnoredNames(entries, exports) {
+  let changed = false;
+  const refreshed = entries.map((entry) => {
+    const name = exports.find((data) => sameCompanionAccount(entry, data))?.playerName;
+    if (!name || name === entry.playerName) return entry;
+    changed = true;
+    return { ...entry, universe: { ...entry.universe }, playerName: name };
+  });
+  return changed ? refreshed : null;
 }
 
 /**
@@ -1662,7 +1727,7 @@ function byCoords(a, b) {
 /**
  * Merge a second profile into a primary one (ADR-0004). The primary keeps every
  * value it has, game or override; from the second it takes only the keys it
- * lacks, and the universe and player id when it has none. Planets are matched by
+ * lacks, and the universe, player id and game name when it has none. Planets are matched by
  * coordinates - a planet carried over from production knows only its position,
  * which counts only when it is unambiguous (uniqueCoordsMatch) - then by a
  * unique case-insensitive name. The second profile's unmatched
@@ -1680,6 +1745,7 @@ function mergeProfiles(primary, secondary) {
     result.universeLocked = other.universeLocked;
   }
   if (result.playerId === null) result.playerId = other.playerId;
+  if (typeof result.playerName !== 'string' && typeof other.playerName === 'string') result.playerName = other.playerName;
   if (result.importedAt === null) result.importedAt = other.importedAt;
   fillMissing(result.account, other.account);
 
@@ -1750,6 +1816,8 @@ function readProfile(raw) {
   if (!Array.isArray(raw.planets) || !Array.isArray(raw.moons)) return null;
   // The resources are a convenience: a broken map is dropped, not the profile.
   if ('resources' in raw && !isPlainObject(raw.resources)) delete raw.resources;
+  // So is the game name: without it the label only stops following the game.
+  if ('playerName' in raw && raw.playerName !== null && typeof raw.playerName !== 'string') delete raw.playerName;
   return /** @type {Profile} */ (raw);
 }
 

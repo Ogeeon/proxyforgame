@@ -225,6 +225,7 @@
     "pf-import-err-schema": "Esta versión del formato de Origin Exporter aún no es compatible.",
     "pf-pick-universe": "Elige el universo.",
     "pf-import-done": "Perfil «{0}»: planetas añadidos {1}, actualizados {2}, eliminados {3}.",
+    "pf-import-renamed": "Cuenta renombrada en el juego: «{0}» → «{1}».",
     "pf-companion-badge": "Perfiles nuevos de Companion: {0} - haz clic para revisarlos",
     "pf-new-profiles-hdr": "Perfiles nuevos",
     "pf-companion-create": "Crear perfil",

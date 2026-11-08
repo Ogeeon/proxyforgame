@@ -44,6 +44,7 @@ $pfUniversePicker = function ($prefix) use ($l) {
     'errSchema' => $l['pf-import-err-schema'],
     'pickUniverse' => $l['pf-pick-universe'],
     'importDone' => $l['pf-import-done'],
+    'importRenamed' => $l['pf-import-renamed'],
     'nameRequired' => $l['pf-name-required'],
     'deleteConfirm' => $l['pf-delete-confirm'],
     'mergeConfirm' => $l['pf-merge-confirm'],

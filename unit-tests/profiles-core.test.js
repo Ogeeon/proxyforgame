@@ -743,6 +743,84 @@ describe('importAccountExport - re-importing', () => {
     });
 });
 
+describe('importAccountExport - the account renamed in the game', () => {
+    /** The fixture under another player name. */
+    function renamedTo(name) {
+        const obj = fixture();
+        obj.playerName = name;
+        return parsed(obj);
+    }
+
+    const reimport = (profile, data) => core.importAccountExport(profile, data, { newId: idSource() });
+
+    it('keeps the game name of a new profile and reports no rename', () => {
+        const { profile, summary } = imported();
+        expect(profile.playerName).toBe('Tester');
+        expect(summary.renamed).toBeNull();
+    });
+
+    it('renames a profile whose label is still the game name', () => {
+        const { profile, summary } = reimport(imported().profile, renamedTo('Renamed'));
+        expect(profile.label).toBe('Renamed');
+        expect(profile.playerName).toBe('Renamed');
+        expect(plain(summary.renamed)).toEqual({ from: 'Tester', to: 'Renamed' });
+    });
+
+    it('keeps a label the player typed, but remembers the new game name', () => {
+        const first = imported().profile;
+        first.label = 'Main';
+        const { profile, summary } = reimport(first, renamedTo('Renamed'));
+        expect(profile.label).toBe('Main');
+        expect(profile.playerName).toBe('Renamed');
+        expect(summary.renamed).toBeNull();
+    });
+
+    it('follows the game again once the player types the game name back', () => {
+        const first = imported().profile;
+        first.label = 'Tester';
+        expect(reimport(first, renamedTo('Renamed')).profile.label).toBe('Renamed');
+    });
+
+    it('keeps the label of a profile stored before the game name was kept', () => {
+        const first = imported().profile;
+        delete first.playerName;
+        const { profile, summary } = reimport(first, renamedTo('Renamed'));
+        expect(profile.label).toBe('Tester');
+        expect(profile.playerName).toBe('Renamed');
+        expect(summary.renamed).toBeNull();
+    });
+
+    it('renames such a profile when its label is the player id', () => {
+        const first = imported().profile;
+        delete first.playerName;
+        first.label = '100001';
+        const { profile, summary } = reimport(first, renamedTo('Renamed'));
+        expect(profile.label).toBe('Renamed');
+        expect(plain(summary.renamed)).toEqual({ from: '100001', to: 'Renamed' });
+    });
+
+    it('names a profile created from an export without a name once one arrives', () => {
+        const first = imported(Object.assign(fixture(), { playerName: '' })).profile;
+        expect(first.label).toBe('100001');
+        expect(first.playerName).toBeNull();
+        expect(reimport(first, renamedTo('Tester')).profile.label).toBe('Tester');
+    });
+
+    it('changes neither the label nor the game name for an export without a name', () => {
+        const { profile, summary } = reimport(imported().profile, renamedTo(''));
+        expect(profile.label).toBe('Tester');
+        expect(profile.playerName).toBe('Tester');
+        expect(summary.renamed).toBeNull();
+    });
+
+    it('drops a stored game name that is not a string', () => {
+        const first = imported().profile;
+        first.playerName = 42;
+        const [entry] = core.parseProfilesFile(core.serializeProfilesFile([first])).profiles;
+        expect('playerName' in entry).toBe(false);
+    });
+});
+
 describe('companion sync', () => {
     const LATER = '2026-10-12T00:00:00.000Z';
 
@@ -793,7 +871,7 @@ describe('companion sync', () => {
         const noUniverse = laterExport();
         delete noUniverse.universe;
         const result = plan({ version: 1, exports: [{ playerId: 'x' }, noUniverse] }, store);
-        expect(plain(result)).toEqual({ updates: [], candidates: [], ignored: [] });
+        expect(plain(result)).toEqual({ updates: [], candidates: [], ignored: [], renamed: [], ignoredRefreshed: null });
     });
 
     it('updates a profile from a newer export and keeps its overrides', () => {
@@ -867,6 +945,36 @@ describe('companion sync', () => {
         const tracked = (id) => { const p = store.load(id); loaded.push(p); return p; };
         core.planCompanionSync({ version: 1, exports: [laterExport()] }, store.index, tracked);
         expect(loaded.map((p) => JSON.stringify(p))).toEqual([store.text]);
+    });
+
+    it('reports the profiles a newer export renamed, once per profile', () => {
+        const rename = (name, exportedAt) => companionExport((obj) => { obj.playerName = name; obj.exportedAt = exportedAt; });
+        const result = plan({ version: 1, exports: [rename('Second', LATER), rename('Third', '2026-10-13T00:00:00.000Z')] }, stored());
+        expect(result.updates[0].label).toBe('Third');
+        expect(plain(result.renamed)).toEqual([{ from: 'Tester', to: 'Third' }]);
+    });
+
+    it('reports no rename when the name did not change', () => {
+        expect(plan({ version: 1, exports: [laterExport()] }, stored()).renamed).toHaveLength(0);
+    });
+
+    it('gives an ignored account renamed in the game its new name on the ignore list', () => {
+        const other = companionExport((obj) => { obj.playerId = 100002; obj.playerName = 'Renamed'; });
+        const ignoredEntry = { playerId: 100002, universe: { country: 'en', number: 1 }, playerName: 'Other', ignoredAt: '2026-10-20T00:00:00.000Z' };
+        const untouched = { playerId: 100003, universe: { country: 'en', number: 1 }, playerName: 'Third', ignoredAt: '' };
+        const store = stored();
+        const entries = [ignoredEntry, untouched];
+        const result = core.planCompanionSync({ version: 1, exports: [other] }, store.index, store.load, entries);
+        expect(plain(result.ignoredRefreshed)).toEqual([{ ...ignoredEntry, playerName: 'Renamed' }, untouched]);
+        expect(ignoredEntry.playerName).toBe('Other');
+    });
+
+    it('leaves the ignore list alone when the names agree or the export has none', () => {
+        const ignoredEntry = { playerId: 100002, universe: { country: 'en', number: 1 }, playerName: 'Other', ignoredAt: '' };
+        const store = stored();
+        const run = (name) => core.planCompanionSync({ version: 1, exports: [companionExport((obj) => { obj.playerId = 100002; obj.playerName = name; })] }, store.index, store.load, [ignoredEntry]);
+        expect(run('Other').ignoredRefreshed).toBeNull();
+        expect(run('').ignoredRefreshed).toBeNull();
     });
 });
 
@@ -1165,6 +1273,19 @@ describe('mergeProfiles', () => {
         expect(plain(core.getProfileValue(merged.account, 'rates'))).toEqual([1, 2, 4]);
         expect(plain(merged.universe)).toEqual(EN1);
         expect(merged.id).toBe(primary.id);
+    });
+
+    it('keeps the primary label and takes the game name only when the primary has none', () => {
+        const fromExport = imported().profile;
+        const manual = core.createProfile({ label: 'Main' });
+        const intoManual = core.mergeProfiles(manual, fromExport);
+        expect(intoManual.label).toBe('Main');
+        expect(intoManual.playerName).toBe('Tester');
+        const legacy = core.createProfile({ label: 'Old' });
+        delete legacy.playerName;
+        expect(core.mergeProfiles(legacy, fromExport).playerName).toBe('Tester');
+        const other = imported(Object.assign(fixture(), { playerName: 'Other' })).profile;
+        expect(core.mergeProfiles(fromExport, other).playerName).toBe('Tester');
     });
 
     it('matches a production planet by position and system-less coordinates', () => {

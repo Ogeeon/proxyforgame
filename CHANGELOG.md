@@ -15,6 +15,10 @@ release section; it is the source of truth for the other eleven translations.
 
 ## [Unreleased]
 
+### Added
+
+- Profiles: a profile follows its account's renaming in the game. Each import now keeps the name the game gave the account, and the next import that brings a different one renames the profile too - as long as its name is still the game's, so a name the player typed in the profile's properties stays. The import toast says so ("Account renamed in the game: A → B"), and a Companion sync that renames a profile in the background shows the same line on its own. A profile stored before this change has no game name yet: it is renamed only if its name is the player id, which an export without a name leaves; otherwise the first import just records the name. An ignored Companion account shows its new name on the ignore list.
+
 ### Fixed
 
 - Profiles: on a calculator page whose Bootstrap bundle (or the new `bootstrap-access.js` that every script now reaches it through) failed to load, the profile controller no longer throws a `ReferenceError` on top of the "reload the page" banner. It builds its tooltips as soon as `profiles-ui.js` runs, outside the page's inline guard, so it now stands down by itself when Bootstrap is unavailable.

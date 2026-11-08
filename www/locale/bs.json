@@ -225,6 +225,7 @@
     "pf-import-err-schema": "Ova verzija formata Origin Exportera još nije podržana.",
     "pf-pick-universe": "Odaberite univerzum.",
     "pf-import-done": "Profil „{0}“: planeta dodano {1}, ažurirano {2}, uklonjeno {3}.",
+    "pf-import-renamed": "Račun je preimenovan u igri: „{0}“ → „{1}“.",
     "pf-companion-badge": "Novi profili iz Companion: {0} - kliknite za pregled",
     "pf-new-profiles-hdr": "Novi profili",
     "pf-companion-create": "Napravi profil",
