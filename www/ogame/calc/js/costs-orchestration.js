@@ -1472,6 +1472,7 @@ class CostsCalculator {
     setVal('#planetsSpin', planetCount);
     options.currPlanetsCount = planetCount;
     options.prm.planetsSpin = planetCount;
+    syncPlanetsSpin();
 
     // Keep the parallel options.prm store in sync with the restored planet
     // count. Without this, options.prm.labLevels keeps its default length (8)
@@ -1775,6 +1776,7 @@ class CostsCalculator {
 
     // Reset planets spin to default (8)
     setVal('#planetsSpin', 8);
+    syncPlanetsSpin();
 
     // Rebuild lab levels table with default values
     const tbl = $('#lab-levels-table');
@@ -2071,6 +2073,7 @@ function onPlanetsChange(newVal, oldVal) {
     addEvent('#labchoice_' + newVal, 'click', () => calculatorApp.updateResultingLevel());
     options.prm.labLevels.push(0);
   }
+  syncPlanetsSpin();
 
   calculatorApp.updateResultingLevel();
   if (calculatorApp) {
@@ -2099,11 +2102,33 @@ function setupPlanetsSpin(planetsSpinInput, planetsSpinUp, planetsSpinDown) {
   addEvent(planetsSpinDown, 'click', () => {
     const oldVal = Number.parseInt(planetsSpinInput.value) || 0;
     const newVal = oldVal - 1;
-    if (newVal >= 1) {
+    if (newVal >= planetsFloor()) {
       planetsSpinInput.value = String(newVal);
       onPlanetsChange(newVal, oldVal);
     }
   });
+  syncPlanetsSpin();
+}
+
+/**
+ * The fewest rows the IRN dialog's lab table may have: a profile's planets
+ * cannot be taken out of it (costs-profile.js), only rows added after them.
+ * @returns {number}
+ */
+function planetsFloor() {
+  return Math.max(1, Number.parseInt(options.minPlanetsCount, 10) || 1);
+}
+
+/**
+ * Enable the planet count spin buttons as far as the count can move: down to
+ * planetsFloor(), up to 99 rows.
+ */
+function syncPlanetsSpin() {
+  const count = Number.parseInt(getVal('#planetsSpin'), 10) || 0;
+  const up = document.getElementById('planetsSpin-up');
+  const down = document.getElementById('planetsSpin-down');
+  if (up instanceof HTMLButtonElement) up.disabled = count >= 99;
+  if (down instanceof HTMLButtonElement) down.disabled = count <= planetsFloor();
 }
 
 /**
@@ -2218,6 +2243,7 @@ function cancelIrnDialog(irnModal, planetsSpinInput) {
   if (planetsSpinInput) {
     planetsSpinInput.value = String(backup.labLevels.length);
   }
+  syncPlanetsSpin();
 
   rebuildLabTable(backup);
   calculatorApp.updateResultingLevel();

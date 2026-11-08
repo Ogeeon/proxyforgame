@@ -1249,7 +1249,9 @@ test('the research network dialog lists the profile\'s planets and their labs', 
     const rows = page.locator('#lab-levels-table tbody tr');
     await expect(rows).toHaveCount(3);
     await expect(page.locator('#planetsSpin')).toHaveValue('3');
-    await expect(page.locator('#planetsSpin-up')).toBeDisabled();
+    // Rows can be added after the planets, the planets' own not taken out.
+    await expect(page.locator('#planetsSpin-up')).toBeEnabled();
+    await expect(page.locator('#planetsSpin-down')).toBeDisabled();
     await expect(rows.nth(0).locator('td').first()).toHaveText('Alpha [2:148:8]');
     await expect(page.locator('#lablevel_1')).toHaveValue('12');
     await expect(page.locator('#lablevel_2')).toHaveValue('10');
@@ -1268,6 +1270,56 @@ test('the research network dialog lists the profile\'s planets and their labs', 
     await expect(rows).toHaveCount(8);
     await expect(rows.nth(0).locator('td').first()).not.toHaveText('Alpha [2:148:8]');
     await expect(page.locator('#planetsSpin-up')).toBeEnabled();
+    await expect(page.locator('#planetsSpin-down')).toBeEnabled();
+});
+
+test('a row added after the profile\'s planets is a what-if that stays out of the profile', async ({ page }) => {
+    await mockServerData(page);
+    await openWithProfile(page, '/costs');
+    const rows = page.locator('#lab-levels-table tbody tr');
+
+    await page.locator('#use-irn').check();
+    await page.locator('#open-llc-dialog').click();
+    await page.locator('#planetsSpin-up').click();
+    await expect(rows).toHaveCount(4);
+    await expect(page.locator('#planetsSpin-down')).toBeEnabled();
+    await expect(rows.nth(3).locator('td').first()).not.toHaveText(/\[/);
+    const extra = page.locator('#lablevel_4');
+    await extra.fill('14');
+    await extra.press('Enter');
+    await expect(extra).not.toHaveClass(/pf-bound/);
+    await page.locator('#labchoice_4').click();
+    await page.locator('#irn-done-btn').click();
+    await expect(page.locator('#irn-calc')).toBeHidden();
+    // The network is not researched: the start's lab alone.
+    await expect(page.locator('#irn-result')).toHaveText('14');
+
+    let profile = await activeProfile(page);
+    expect(profile.planets).toHaveLength(3);
+    expect(profile.planets.map((p) => p.values['building.31'])).toEqual([{ game: 12 }, { game: 10 }, { game: 0 }]);
+
+    // A planet's lab written to the profile rebuilds the table: the added row, and the start on it, stay.
+    await page.locator('#research-lab-level').fill('15');
+    await page.locator('#research-lab-level').blur();
+    await expect(page.locator('#lablevel_1')).toHaveValue('15');
+    await expect(rows).toHaveCount(4);
+    await expect(extra).toHaveValue('14');
+    await expect(page.locator('#labchoice_4')).toBeChecked();
+    profile = await activeProfile(page);
+    expect(profile.planets[0].values['building.31']).toEqual({ game: 12, override: 15 });
+
+    // Down to the planets and no further.
+    await page.locator('#open-llc-dialog').click();
+    await page.locator('#planetsSpin-down').click();
+    await expect(rows).toHaveCount(3);
+    await expect(page.locator('#planetsSpin-down')).toBeDisabled();
+    await page.locator('#irn-calc .btn-secondary').click();
+    await expect(page.locator('#irn-calc')).toBeHidden();
+    await expect(rows).toHaveCount(4);
+
+    // It lasts while the page is open.
+    await page.reload();
+    await expect(rows).toHaveCount(3);
 });
 
 test('the default start is the best lab, the oldest planet on a tie', async ({ page }) => {

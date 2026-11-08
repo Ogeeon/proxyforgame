@@ -10,7 +10,9 @@
 //     factories, shipyard, research lab, temperature, position, Mineral
 //     Research Centre); the profile's universe goes into the picker, locked;
 //     The research network dialog lists the profile's planets with their
-//     research labs; a lab edited there goes back to its planet. The start
+//     research labs; a lab edited there goes back to its planet. Rows added
+//     after the planets are a what-if - a planet not colonised yet - and stay
+//     out of the profile: they last while the page is open. The start
 //     planet and whether the network is used are remembered per profile; by
 //     default the network is on when the account has researched it, and the
 //     start is the planet with the best lab;
@@ -209,6 +211,13 @@ class CostsProfiles extends ProfileBinder {
     this.planetId = null;
     /** @type {?string} The moon shown. */
     this.moonId = null;
+    /**
+     * The research network dialog's rows after the profile's planets, and the
+     * start planet when it is one of them (-1 when not): kept for the profile
+     * they were added in, so rebuilding the table does not drop them.
+     * @type {?{profileId: string, levels: number[], choice: number}}
+     */
+    this.extraLabs = null;
     this.planetSelect = new PfBodySelect(pf, {
       select: '#pf-planet', box: '#pf-planet-box', bodies: (p) => p.planets, lastKey: 'costs',
     });
@@ -391,7 +400,7 @@ class CostsProfiles extends ProfileBinder {
     pfShow('#pf-bodies-row', false);
     this.universe.release();
     const own = this.ownPrm;
-    this.lockPlanetCount(false);
+    options.minPlanetsCount = 1;
     this.fillLabTable(Array.isArray(own.labLevels) ? own.labLevels : [], pfNum(own.labChoice ?? -1), null);
     this.app.restoreOwnState({ state: own, table: this.ownTable });
   }
@@ -482,6 +491,13 @@ class CostsProfiles extends ProfileBinder {
         if (planet.id === this.planetId) shownLab = level;
       });
       this.snapshot.labs = p.labLevels.map(pfNum);
+      // The rows after the planets go nowhere in the profile, but the table
+      // is rebuilt from it: keep them for the next showLabs().
+      this.extraLabs = {
+        profileId: profile.id,
+        levels: p.labLevels.slice(planets.length).map((v) => pfNum(v)),
+        choice: p.labChoice >= planets.length ? p.labChoice - planets.length : -1,
+      };
     }
     // The start planet and the switch are choices, not account data: they go
     // with the other per-calculator choices of the store.
@@ -630,16 +646,23 @@ class CostsProfiles extends ProfileBinder {
    * List the profile's planets in the research network dialog, each with its
    * research lab. The start is the planet picked there last time, while it
    * still has a lab, else the one with the best lab - on a tie the lowest game
-   * id, the oldest planet. A profile with no planet leaves the dialog to the
-   * calculator.
+   * id, the oldest planet. The planets' rows cannot be taken out - the count
+   * goes no lower than theirs - but rows added after them (extraLabs) come
+   * back with the table, the start among them too. A profile with no planet
+   * leaves the dialog to the calculator.
    *
    * @param {Profile} profile
    */
   showLabs(profile) {
     const planets = profile.planets.slice(0, COSTS_MAX_LAB_PLANETS);
-    this.lockPlanetCount(planets.length > 0);
-    if (planets.length === 0) return;
+    options.minPlanetsCount = Math.max(1, planets.length);
+    if (planets.length === 0) {
+      syncPlanetsSpin();
+      return;
+    }
     const levels = planets.map((p) => pfNum(getProfileValue(p, 'building.31', 0)));
+    const extra = this.extraLabs?.profileId === profile.id ? this.extraLabs : null;
+    const extraLevels = extra ? extra.levels.slice(0, COSTS_MAX_LAB_PLANETS - planets.length) : [];
     const last = this.pf.store.getLastPlanet('costs-irn-start', profile.id);
     let start = planets.findIndex((p) => p.id === last);
     if (start < 0 || levels[start] === 0) {
@@ -649,19 +672,9 @@ class CostsProfiles extends ProfileBinder {
         return better ? i : best;
       }, 0);
     }
-    this.fillLabTable(levels, levels[start] > 0 ? start : -1, planets.map((p) => pfBodyLabel(p)));
-  }
-
-  /**
-   * With a profile the dialog lists its planets: the count is theirs.
-   *
-   * @param {boolean} locked
-   */
-  lockPlanetCount(locked) {
-    ['planetsSpin-up', 'planetsSpin-down'].forEach((id) => {
-      const button = document.getElementById(id);
-      if (button instanceof HTMLButtonElement) button.disabled = locked;
-    });
+    if (extra && extraLevels[extra.choice] > 0) start = planets.length + extra.choice;
+    const all = [...levels, ...extraLevels];
+    this.fillLabTable(all, all[start] > 0 ? start : -1, planets.map((p) => pfBodyLabel(p)));
   }
 
   /**
@@ -670,16 +683,17 @@ class CostsProfiles extends ProfileBinder {
    *
    * @param {number[]} levels
    * @param {number} choice Index of the start planet, -1 for none.
-   * @param {?string[]} names Row labels; null keeps the numbered ones.
+   * @param {?string[]} names Row labels; null keeps the numbered ones, and so does a row past the list's end.
    */
   fillLabTable(levels, choice, names) {
-    const labLevels = levels.length > 0 ? levels.slice(0, COSTS_MAX_LAB_PLANETS).map(pfNum) : [0];
+    const labLevels = levels.length > 0 ? levels.slice(0, COSTS_MAX_LAB_PLANETS).map((v) => pfNum(v)) : [0];
     options.prm.planetsSpin = labLevels.length;
     options.prm.labLevels = [...labLevels];
     options.prm.labChoice = choice;
     options.prm.labNames = names;
     options.currPlanetsCount = labLevels.length;
     setVal('#planetsSpin', labLevels.length);
+    syncPlanetsSpin();
     rebuildLabTable({ irnLevel: options.prm.irnLevel, labLevels, labChoice: choice });
     this.app.updateResultingLevel();
   }
