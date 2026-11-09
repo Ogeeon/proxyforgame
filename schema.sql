@@ -1194,6 +1194,34 @@ CREATE TABLE IF NOT EXISTS interaction_timing (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
+-- Table structure for table `mcp_event`
+--
+-- Written by the mcpUsage service (www/api/mcp-usage.inc.php) for the MCP server.
+--
+
+CREATE TABLE IF NOT EXISTS mcp_event (
+    id                  BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    created_at          DATETIME(3) NOT NULL,
+    host                VARCHAR(32) NULL,
+    session_id          CHAR(32) NULL,
+    method              VARCHAR(32) NULL,
+    tool                VARCHAR(48) NULL,
+    outcome             VARCHAR(16) NOT NULL,
+    http_status         SMALLINT UNSIGNED NOT NULL,
+    duration_ms         INT UNSIGNED NULL,
+    body_bytes          INT UNSIGNED NOT NULL,
+    client_name         VARCHAR(64) NULL,
+    client_version      VARCHAR(32) NULL,
+    user_agent          VARCHAR(128) NULL,
+    universe            VARCHAR(16) NULL,
+    error_paths         VARCHAR(512) NULL,
+    arg_keys            VARCHAR(512) NULL,
+    internal            TINYINT(1) NOT NULL DEFAULT 0,
+    KEY created (created_at),
+    KEY tool_time (tool, created_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+--
 -- Table structure for table `schema_migrations`
 --
 -- Written by deploy/pfg-migrate; see db/migrations/README.md. Kept in this
@@ -1208,7 +1236,8 @@ CREATE TABLE IF NOT EXISTS schema_migrations (
 INSERT INTO schema_migrations (version, filename) VALUES
     (1, '0001_create_schema_migrations.sql'),
     (2, '0002_create_mail_rate_limit.sql'),
-    (3, '0003_create_interaction_timing.sql')
+    (3, '0003_create_interaction_timing.sql'),
+    (4, '0004_create_mcp_event.sql')
 ON DUPLICATE KEY UPDATE filename = VALUES(filename);
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
