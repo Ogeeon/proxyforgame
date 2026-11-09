@@ -3,10 +3,12 @@
 -- @days first. Internal traffic - the watchdog, PFG_MCP_INTERNAL_IPS - is left
 -- out of every table but the first.
 
+SET @call = 'tools/call';
+
 SELECT '== totals ==' AS report;
 SELECT COUNT(*) AS events, SUM(internal) AS internal_events,
        COUNT(DISTINCT CASE WHEN internal = 0 THEN session_id END) AS sessions,
-       SUM(internal = 0 AND method = 'tools/call') AS tool_calls,
+       SUM(internal = 0 AND method = @call) AS tool_calls,
        MIN(created_at) AS first_event, MAX(created_at) AS last_event
 FROM mcp_event
 WHERE created_at > NOW() - INTERVAL @days DAY;
@@ -16,8 +18,8 @@ SELECT DATE(created_at) AS day,
        COUNT(DISTINCT session_id) AS sessions,
        SUM(method = 'initialize') AS inits,
        SUM(method = 'tools/list') AS lists,
-       SUM(method = 'tools/call') AS calls,
-       SUM(method = 'tools/call' AND outcome <> 'ok') AS failed_calls,
+       SUM(method = @call) AS calls,
+       SUM(method = @call AND outcome <> 'ok') AS failed_calls,
        SUM(outcome = 'rejected') AS rejected
 FROM mcp_event
 WHERE created_at > NOW() - INTERVAL @days DAY AND internal = 0
@@ -35,7 +37,7 @@ SELECT tool,
        MAX(duration_ms) AS max_ms,
        SUM(universe IS NOT NULL) AS with_universe
 FROM mcp_event
-WHERE created_at > NOW() - INTERVAL @days DAY AND internal = 0 AND method = 'tools/call'
+WHERE created_at > NOW() - INTERVAL @days DAY AND internal = 0 AND method = @call
 GROUP BY tool
 ORDER BY calls DESC;
 
@@ -45,8 +47,8 @@ ORDER BY calls DESC;
 SELECT '== clients ==' AS report;
 SELECT COALESCE(i.client_name, CONCAT('(no session) ', SUBSTRING_INDEX(COALESCE(e.user_agent, '?'), '/', 1))) AS client,
        COUNT(DISTINCT e.session_id) AS sessions,
-       SUM(e.method = 'tools/call') AS calls,
-       SUM(e.method = 'tools/call' AND e.outcome <> 'ok') AS failed_calls
+       SUM(e.method = @call) AS calls,
+       SUM(e.method = @call AND e.outcome <> 'ok') AS failed_calls
 FROM mcp_event e
 LEFT JOIN mcp_event i ON i.session_id = e.session_id AND i.method = 'initialize'
 WHERE e.created_at > NOW() - INTERVAL @days DAY AND e.internal = 0
