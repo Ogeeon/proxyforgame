@@ -323,7 +323,7 @@
     "tools-header": "Čo dokáže vypočítať",
     "tools-import": "Export vášho účtu z hry (API), aby ste nemuseli zadávať úrovne ručne",
     "privacy-header": "Súkromie",
-    "privacy": "Server nič neukladá a nezaznamenáva vaše otázky. To, čo poviete asistentovi, sa spracúva podľa pravidiel daného asistenta: ChatGPT, Claude alebo toho, ktorý používate.",
+    "privacy": "Server neukladá vaše otázky ani údaje, ktoré mu posielate, a nezaznamenáva vašu IP adresu. Vedie len štatistiku používania: aký výpočet bol vyvolaný a pre ktoré univerzum, názvy vyplnených polí (nie ich hodnoty), či sa podaril, ako dlho trval a ktorý asistent ho vyvolal. To, čo poviete asistentovi, sa spracúva podľa pravidiel daného asistenta: ChatGPT, Claude alebo toho, ktorý používate.",
     "developers": "Pre vývojárov: zdrojový kód a dokumentácia servera na GitHube"
   },
   "sidebar": {

@@ -323,7 +323,7 @@
     "tools-header": "Co potrafi policzyć",
     "tools-import": "Eksport twojego konta z gry (API), żeby nie wpisywać poziomów ręcznie",
     "privacy-header": "Prywatność",
-    "privacy": "Serwer niczego nie przechowuje i nie zapisuje twoich pytań. To, co przekazujesz asystentowi, podlega jego własnym zasadom: ChatGPT, Claude lub tego, z którego korzystasz.",
+    "privacy": "Serwer nie przechowuje twoich pytań ani danych, które mu wysyłasz, i nie zapisuje twojego adresu IP. Prowadzi tylko statystykę użycia: które obliczenie wywołano i dla którego uniwersum, nazwy wypełnionych pól (bez ich wartości), czy się udało, ile trwało i który asystent je wywołał. To, co przekazujesz asystentowi, podlega jego własnym zasadom: ChatGPT, Claude lub tego, z którego korzystasz.",
     "developers": "Dla programistów: kod źródłowy i dokumentacja serwera na GitHubie"
   },
   "sidebar": {

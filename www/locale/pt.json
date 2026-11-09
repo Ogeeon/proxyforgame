@@ -323,7 +323,7 @@
     "tools-header": "O que consegue calcular",
     "tools-import": "A exportação da sua conta do jogo (API), para não ter de introduzir os níveis à mão",
     "privacy-header": "Privacidade",
-    "privacy": "O servidor não guarda nada e não regista as suas perguntas. O que diz ao assistente é tratado segundo as regras desse assistente: as do ChatGPT, do Claude ou daquele que usar.",
+    "privacy": "O servidor não guarda as suas perguntas nem os dados que lhe envia, e não regista o seu endereço IP. Mantém apenas estatísticas de utilização: que cálculo foi pedido e para que universo, os nomes dos campos preenchidos (não os seus valores), se correu bem, quanto tempo demorou e que assistente o pediu. O que diz ao assistente é tratado segundo as regras desse assistente: as do ChatGPT, do Claude ou daquele que usar.",
     "developers": "Para programadores: código-fonte e documentação do servidor no GitHub"
   },
   "sidebar": {

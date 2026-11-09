@@ -13,6 +13,7 @@
   require_once __DIR__ . '/api/populated-systems.inc.php';
   require_once __DIR__ . '/api/health.inc.php';
   require_once __DIR__ . '/api/interaction-timing.inc.php';
+  require_once __DIR__ . '/api/mcp-usage.inc.php';
 
   // Services with a side effect take POST; the rest are reads and take GET.
   $apiRoutes = array(
@@ -24,6 +25,7 @@
     'populatedSystems'  => array('GET',  'apiPopulatedSystems'),
     'health'            => array('GET',  'apiHealth'),
     'interactionTiming' => array('POST', 'apiInteractionTiming'),
+    'mcpUsage'          => array('POST', 'apiMcpUsage'),
   );
 
   try {

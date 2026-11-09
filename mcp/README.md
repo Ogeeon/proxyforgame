@@ -83,6 +83,12 @@ planet names, coordinates, the universe and the export time. Defences and stored
 out - no tool reads defences, and resources are stale at once. The server never logs a request body,
 only the stack of an internal error.
 
+What it does record is usage metadata, one row per message in `mcp_event`: the method and tool,
+how the call ended, how long it took, the client's name and user agent, the universe, and the
+*names* of the arguments passed and of the schema paths that failed - never a value, never an IP
+address. The site page `/<lang>/mcp` tells the players so. Columns and queries:
+[`docs/mcp-usage.md`](../docs/mcp-usage.md).
+
 The largest body a client sends is such an export, which is why the HTTP transport takes up to
 256 KB.
 
@@ -106,6 +112,10 @@ node mcp/server.js --stdio        # one client over stdin/stdout
 | `PFG_MCP_ALLOWED_ORIGINS` | the two site origins | Browser origins allowed to call; requests with another `Origin` get 403 |
 | `PFG_MCP_RATE_LIMIT` | `120` | Requests per client address per minute, 0 for none |
 | `PFG_MCP_TRUST_PROXY` | on | `0` stops reading the client address from `X-Forwarded-For` |
+| `PFG_MCP_EVENTS_URL` | unset | The site's `ajax.php` the usage record goes to; unset, nothing is recorded |
+| `PFG_MCP_EVENTS_TOKEN` | unset | Shared with the `mcpUsage` service through `.env`; unset, nothing is recorded |
+| `PFG_MCP_EVENTS_CONNECT` | unset | Address to connect to instead of the URL's host - `127.0.0.1` on the site's own machine; TLS still checks the URL's name |
+| `PFG_MCP_INTERNAL_IPS` | empty | Comma-separated client addresses whose events are marked internal |
 
 `PFG_SITE_URL=http://localhost:8000` points it at `make serve`.
 
@@ -148,4 +158,5 @@ there. Keep the two in step.
 | `lib/browser-scripts.js` | Runs `www/` scripts in a `vm` context - shared with the unit tests |
 | `lib/site-api.js` | Reads universe data from the site, with a short cache |
 | `lib/revision.js` | The checkout's commit, for the version string |
+| `lib/usage.js` | The usage record: queues an event per message and posts batches to the site |
 | `tools/common.js` | Shared argument schemas: universe, levels, maps, the planet energy inputs, and one schema per game concept |

@@ -27,6 +27,13 @@ Environment=NODE_ENV=production
 Environment=PFG_MCP_HOST=127.0.0.1
 Environment=PFG_MCP_PORT=8787
 Environment=PFG_SITE_URL=https://proxyforgame.com
+# The usage record (mcp/lib/usage.js): batches go to the site's own ajax.php
+# over loopback, so the mcpUsage service sees 127.0.0.1; TLS is still checked
+# against the site's name. PFG_MCP_EVENTS_TOKEN comes from the site's .env,
+# which the PHP side reads too - without it the server records nothing.
+Environment=PFG_MCP_EVENTS_URL=https://proxyforgame.com/ajax.php
+Environment=PFG_MCP_EVENTS_CONNECT=127.0.0.1
+EnvironmentFile=-/var/www/pfg-shared/.env
 Restart=always
 RestartSec=2
 
@@ -35,7 +42,8 @@ RestartSec=2
 MemoryMax=160M
 CPUQuota=50%
 
-# Reads the checkout, writes nothing, talks HTTPS to the site and nothing else.
+# Reads the checkout, writes nothing, talks HTTPS to the site and nothing else
+# (the universe data, and the usage record over loopback).
 NoNewPrivileges=yes
 ProtectSystem=strict
 ProtectHome=yes

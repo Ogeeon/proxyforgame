@@ -9,7 +9,7 @@
 <h1>Privacy Policy</h1>
 
 
-<p>Effective date: July 24, 2019<br>Last updated: November 3, 2026</p>
+<p>Effective date: July 24, 2019<br>Last updated: November 9, 2026</p>
 
 
 <p>ProxyForGame ("us", "we", or "our") operates the https://proxyforgame.net website (hereinafter referred to as the "Service").</p>
@@ -72,6 +72,9 @@
 
 <h4>Responsiveness Measurement</h4>
 <p>To find out which parts of the Service respond slowly, our pages measure how long they take to react to clicks, taps and key presses. When you leave a page you interacted with, your browser sends our own server one record about that page view: the address and language of the page, how many interactions there were, the time the slowest of them took and how that time was spent, the type of that interaction and a short description of the page element it was aimed at (such as "button#calculate"), the time since the page was opened, whether your device is operated by touch or a mouse, and the number of processor cores your browser reports. The record never contains anything you typed. It carries a random number created for that page view only, so that a second record from the same view replaces the first one; that number is not stored in your browser and does not link the record to you or to your other visits. No other service receives these records, and we delete them after 90 days.</p>
+
+<h4>AI Assistant Usage</h4>
+<p>When an AI assistant such as ChatGPT or Claude uses our calculators through our MCP server (https://proxyforgame.com/mcp), the server keeps one usage record per request: the time, which calculation was asked for and for which game universe, the names of the fields the assistant filled in, whether the calculation succeeded and how long it took, the name and version the assistant's software reports, its user agent, and a random connection number the server creates so that the requests of one connection can be counted together. The record never contains the values that were sent - your levels, coordinates, account data or anything else you asked about - and it does not contain your IP address. No other service receives these records; we keep them to see how the server is used and where assistants have trouble with it. What you tell the assistant itself is handled under that assistant's own privacy rules.</p>
 
 
 <h4>Tracking & Cookies Data</h4>

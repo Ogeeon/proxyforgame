@@ -52,6 +52,19 @@ function build(actual, negated) {
         toBeLessThan: (n) => check(actual < n, `to be less than ${n}`),
         toBeLessThanOrEqual: (n) => check(actual <= n, `to be <= ${n}`),
         toContain: (item) => check(actual.includes(item), `to contain ${JSON.stringify(item)}`),
+        toMatch: (pattern) => check(typeof actual === 'string' && pattern.test(actual), `to match ${pattern}`),
+        // The listed properties equal; any others the object has are not looked at.
+        toMatchObject: (expected) => {
+            let equal = actual !== null && typeof actual === 'object';
+            for (const [key, value] of Object.entries(expected)) {
+                try {
+                    assert.deepStrictEqual(rehome(actual?.[key]), rehome(value));
+                } catch {
+                    equal = false;
+                }
+            }
+            check(equal, `to match ${JSON.stringify(expected)}`);
+        },
         toHaveLength: (n) => check(actual.length === n, `to have length ${n}`),
         toBeNull: () => check(actual === null, 'to be null'),
         toBeTruthy: () => check(!!actual, 'to be truthy'),

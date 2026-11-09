@@ -15,6 +15,10 @@ release section; it is the source of truth for the other eleven translations.
 
 ## [Unreleased]
 
+### Added
+
+- Monitoring: the MCP server records its usage in the site's own database (`mcp_event`, migration 0004) - one row per JSON-RPC message, plus one per request the transport refused: the method and tool, the outcome (`ok`, `invalid`, `tool_error`, `internal`, `rejected`), the HTTP status, the time it took, the body size, the client's `clientInfo` and user agent, the universe, the names of the top-level arguments and the schema paths that failed validation. Never an argument value, a request body or an IP address. An `initialize` answer now carries an `Mcp-Session-Id`, which the server neither stores nor checks, so one connection's calls group together; the watchdog and the addresses in `PFG_MCP_INTERNAL_IPS` are marked internal. The server posts batches to a new `mcpUsage` service over loopback, with a token both sides read from `.env`, and records nothing without it. The page `/<lang>/mcp`, which said the server stores nothing, and the privacy policy now describe the record. `make mcp-stats` prints a summary; columns and queries: `docs/mcp-usage.md`.
+
 ## [2026-11-09] - site entry 73
 
 ### Added

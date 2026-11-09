@@ -323,7 +323,7 @@
     "tools-header": "What it can calculate",
     "tools-import": "Your account export from the game (API), so you don't have to type in the levels by hand",
     "privacy-header": "Privacy",
-    "privacy": "The server stores nothing and does not record what you ask it. What you tell the assistant is handled under that assistant's own rules: those of ChatGPT, Claude or whichever one you use.",
+    "privacy": "The server does not keep what you ask or the data you send it, and does not record your IP address. It only keeps usage statistics: which calculation was called and for which universe, the names of the fields filled in (not their values), whether it succeeded, how long it took and which assistant made the call. What you tell the assistant is handled under that assistant's own rules: those of ChatGPT, Claude or whichever one you use.",
     "developers": "For developers: the server's source code and documentation on GitHub"
   },
   "sidebar": {

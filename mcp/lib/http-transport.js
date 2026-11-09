@@ -4,14 +4,24 @@
 // POST of a JSON-RPC message to a single endpoint, answered with one JSON body.
 // The server never opens an SSE stream - no tool here runs long enough to need
 // progress, and nothing is ever pushed to a client - so GET answers 405, which
-// the spec reserves for exactly that, and no Mcp-Session-Id is issued. The one
-// exception is a browser opening the address as a page, which is redirected to
-// the site page about the server (HttpOptions.pagePath).
+// the spec reserves for exactly that. The one exception is a browser opening
+// the address as a page, which is redirected to the site page about the server
+// (HttpOptions.pagePath).
+//
+// An initialize answer carries an Mcp-Session-Id, which the client then sends
+// on every request. The server keeps no record of it and never refuses a
+// request for its id: it is only there so the usage record (lib/usage.js) can
+// tell which calls came over one connection. A DELETE that would end the
+// session gets the 405 the spec allows for a server that does not end them.
 //
 // Apache proxies the public /mcp path here (deploy/apache-mcp.conf); the
 // process itself listens on loopback only.
 
-const { errorResponse, PARSE_ERROR, INVALID_REQUEST, SUPPORTED_VERSIONS } = require('./protocol');
+const { randomBytes } = require('node:crypto');
+const { errorResponse, printable, PARSE_ERROR, INVALID_REQUEST, SUPPORTED_VERSIONS } = require('./protocol');
+
+/** The client the watchdog (deploy/watchdog.sh) introduces itself as. */
+const WATCHDOG_CLIENT = 'pfg-watchdog';
 
 // An account export for ogame_import_account is the largest body a client
 // sends: about 40 KB minified for an 8-planet account, nearer 90 KB when a
@@ -31,17 +41,72 @@ const MAX_BODY_BYTES = 256 * 1024;
  * @property {string} [pagePath] where a browser that opens the endpoint as a
  *   page is sent: the site page that explains the server. Unset, it gets the
  *   405 every other GET gets.
+ * @property {import('./usage').UsageRecorder} [usage] where each handled
+ *   message and each refused request is recorded
+ * @property {string[]} [internalAddresses] client addresses whose events are
+ *   marked internal (PFG_MCP_INTERNAL_IPS)
  * @property {() => number} [now]
  */
 
 /**
- * @param {{handle: (message: unknown) => Promise<object|null>}} protocol
+ * What every event of one request shares.
+ * @typedef {Pick<import('./usage').UsageEvent,
+ *   'host'|'sessionId'|'userAgent'|'bodyBytes'|'internal'>} RequestFacts
+ */
+
+/**
+ * @param {{handle: (message: unknown, trace?: import('./protocol').Trace) => Promise<object|null>}} protocol
  * @param {HttpOptions} options
  * @returns {(req: import('node:http').IncomingMessage, res: import('node:http').ServerResponse) => void}
  */
 function createHttpHandler(protocol, options) {
     const now = options.now ?? Date.now;
     const limiter = createRateLimiter(options.rateLimit, now);
+    const internalAddresses = new Set(options.internalAddresses ?? []);
+
+    /**
+     * @param {RequestFacts} facts
+     * @param {number} ts
+     * @param {number} status
+     * @param {import('./protocol').Trace|null} trace null for a request
+     *   refused before any message was read
+     * @param {number|null} durationMs
+     */
+    function record(facts, ts, status, trace, durationMs) {
+        if (!options.usage) {
+            return;
+        }
+        options.usage.record({
+            ts,
+            ...facts,
+            method: trace?.method ?? null,
+            tool: trace?.tool ?? null,
+            outcome: trace?.outcome ?? 'rejected',
+            status,
+            durationMs,
+            clientName: trace?.clientName ?? null,
+            clientVersion: trace?.clientVersion ?? null,
+            universe: trace?.universe ?? null,
+            errorPaths: trace?.errorPaths ?? [],
+            argKeys: trace?.argKeys ?? [],
+            internal: facts.internal || trace?.clientName === WATCHDOG_CLIENT,
+        });
+    }
+
+    /**
+     * @param {import('node:http').IncomingMessage} req
+     * @returns {RequestFacts}
+     */
+    function requestFacts(req) {
+        const session = req.headers['mcp-session-id'];
+        return {
+            host: siteHost(req),
+            sessionId: typeof session === 'string' && /^[0-9a-f]{32}$/.test(session) ? session : null,
+            userAgent: printable(req.headers['user-agent'], 128),
+            bodyBytes: Number.parseInt(String(req.headers['content-length'] ?? '0'), 10) || 0,
+            internal: internalAddresses.has(clientAddress(req, options.trustProxy)),
+        };
+    }
 
     return (req, res) => {
         handle(req, res).catch((error) => {
@@ -78,39 +143,88 @@ function createHttpHandler(protocol, options) {
             return;
         }
 
+        const ts = now();
+        const facts = requestFacts(req);
+        const received = await receive(req, res, facts, ts);
+        if (received.ok) {
+            await answer(received.message, res, facts, ts);
+        }
+    }
+
+    /**
+     * The request's parsed body, or - having answered and recorded the
+     * refusal already - nothing.
+     * @param {import('node:http').IncomingMessage} req
+     * @param {import('node:http').ServerResponse} res
+     * @param {RequestFacts} facts
+     * @param {number} ts
+     * @returns {Promise<{ok: true, message: unknown}|{ok: false}>}
+     */
+    async function receive(req, res, facts, ts) {
         const refused = refusal(req);
         if (refused) {
             for (const [name, value] of Object.entries(refused.headers ?? {})) {
                 res.setHeader(name, value);
             }
             sendJson(res, refused.status, errorResponse(null, INVALID_REQUEST, refused.message));
-            return;
+            // A 405 is a GET or a DELETE - scanners and session ends, not use.
+            if (refused.status !== 405) {
+                record(facts, ts, refused.status, null, null);
+            }
+            return { ok: false };
         }
 
         const body = await readBody(req);
         if (body === null) {
             sendJson(res, 413, errorResponse(null, INVALID_REQUEST, `Body over ${MAX_BODY_BYTES} bytes`));
-            return;
+            record(facts, ts, 413, null, null);
+            return { ok: false };
         }
-        let message;
+        facts.bodyBytes = Buffer.byteLength(body);
         try {
-            message = JSON.parse(body);
+            return { ok: true, message: JSON.parse(body) };
         } catch {
             sendJson(res, 400, errorResponse(null, PARSE_ERROR, 'Body is not valid JSON'));
-            return;
+            record(facts, ts, 400, null, null);
+            return { ok: false };
         }
+    }
 
+    /**
+     * Hands the message - or each message of a batch - to the protocol,
+     * answers, and records every one.
+     * @param {unknown} message
+     * @param {import('node:http').ServerResponse} res
+     * @param {RequestFacts} facts
+     * @param {number} ts
+     */
+    async function answer(message, res, facts, ts) {
         // A batch is a 2025-03-26 feature the later versions dropped; answering
         // it costs nothing and keeps the older clients working.
-        const answers = Array.isArray(message)
-            ? (await Promise.all(message.map((m) => protocol.handle(m)))).filter((a) => a !== null)
-            : await protocol.handle(message);
-        if (answers === null || (Array.isArray(answers) && answers.length === 0)) {
+        const messages = Array.isArray(message) ? message : [message];
+        const handled = await Promise.all(messages.map(async (m) => {
+            /** @type {import('./protocol').Trace} */
+            const trace = {};
+            const start = now();
+            const reply = await protocol.handle(m, trace);
+            return { reply, trace, durationMs: now() - start };
+        }));
+        const answers = handled.map((h) => h.reply).filter((a) => a !== null);
+
+        if (handled.some((h) => h.trace.method === 'initialize' && h.reply !== null)) {
+            facts.sessionId = randomBytes(16).toString('hex');
+            res.setHeader('Mcp-Session-Id', facts.sessionId);
+        }
+        const status = answers.length === 0 ? 202 : 200;
+        if (answers.length === 0) {
             // Notifications or responses only: accepted, nothing to say back.
             res.writeHead(202).end();
-            return;
+        } else {
+            sendJson(res, 200, Array.isArray(message) ? answers : answers[0]);
         }
-        sendJson(res, 200, answers);
+        for (const h of handled) {
+            record(facts, ts, status, h.trace, h.durationMs);
+        }
     }
 
     /**
@@ -148,6 +262,18 @@ function createHttpHandler(protocol, options) {
 function wantsHtml(req) {
     const accept = req.headers.accept ?? '';
     return accept.includes('text/html') && !accept.includes('text/event-stream');
+}
+
+/**
+ * The site name the client called - proxyforgame.com or .net - from the
+ * X-Forwarded-Host Apache adds, else Host; without the port.
+ * @param {import('node:http').IncomingMessage} req
+ */
+function siteHost(req) {
+    const forwarded = req.headers['x-forwarded-host'];
+    const raw = (typeof forwarded === 'string' ? forwarded.split(',')[0] : req.headers.host) ?? '';
+    const host = raw.trim().toLowerCase().replace(/:\d+$/, '');
+    return /^[a-z0-9.-]{1,32}$/.test(host) ? host : null;
 }
 
 /**
@@ -232,4 +358,4 @@ function sendJson(res, status, body) {
     res.end(text);
 }
 
-module.exports = { createHttpHandler, clientAddress, createRateLimiter, MAX_BODY_BYTES };
+module.exports = { createHttpHandler, clientAddress, createRateLimiter, MAX_BODY_BYTES, WATCHDOG_CLIENT };

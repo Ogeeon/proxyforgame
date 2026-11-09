@@ -14,6 +14,7 @@ const { load } = require('./load');
 const { createProtocol, SUPPORTED_VERSIONS } = require('../mcp/lib/protocol');
 const { createHttpHandler, clientAddress } = require('../mcp/lib/http-transport');
 const { createSiteApi } = require('../mcp/lib/site-api');
+const { createUsageRecorder, MAX_BATCH: USAGE_MAX_BATCH } = require('../mcp/lib/usage');
 const { validate } = require('../mcp/lib/schema');
 const { formatDuration } = require('../mcp/lib/format');
 const { readWwwJson } = require('../mcp/lib/browser-scripts');
@@ -284,6 +285,170 @@ describe('MCP HTTP transport', () => {
         expect(clientAddress(req('127.0.0.1', 'spoofed, 198.51.100.7'), true)).toBe('198.51.100.7');
         expect(clientAddress(req('198.51.100.8', '10.0.0.1'), true)).toBe('198.51.100.8');
         expect(clientAddress(req('127.0.0.1', '198.51.100.7'), false)).toBe('127.0.0.1');
+    });
+});
+
+describe('MCP usage record', () => {
+    let server;
+    let base;
+    /** @type {any[]} */
+    const events = [];
+
+    before(async () => {
+        const handler = createHttpHandler(protocolWith(), {
+            path: '/mcp',
+            allowedOrigins: [],
+            rateLimit: 0,
+            trustProxy: true,
+            log: () => {},
+            usage: { record: (event) => events.push(event), flush: async () => {} },
+            internalAddresses: ['198.51.100.50'],
+        });
+        server = http.createServer(handler);
+        await new Promise((resolve) => server.listen(0, '127.0.0.1', resolve));
+        base = `http://127.0.0.1:${/** @type {import('node:net').AddressInfo} */ (server.address()).port}`;
+    });
+
+    after(() => new Promise((resolve) => server.close(resolve)));
+
+    /** Posts a body and returns the response with the events it produced. */
+    async function post(body, headers = {}) {
+        events.length = 0;
+        const res = await fetch(`${base}/mcp`, {
+            method: 'POST',
+            headers: { 'content-type': 'application/json', 'user-agent': 'test-client/1.0', ...headers },
+            body: typeof body === 'string' ? body : JSON.stringify(body),
+        });
+        await res.arrayBuffer();
+        return { res, events: [...events] };
+    }
+
+    const initialize = (clientName = 'codex-mcp-client') => ({
+        jsonrpc: '2.0', id: 1, method: 'initialize',
+        params: { protocolVersion: '2025-06-18', capabilities: {}, clientInfo: { name: clientName, version: '0.166.0' } },
+    });
+    const toolCall = (name, args) => ({ jsonrpc: '2.0', id: 2, method: 'tools/call', params: { name, arguments: args } });
+
+    it('hands out a session id with initialize and records the client', async () => {
+        const { res, events: [event] } = await post(initialize(), { 'x-forwarded-host': 'proxyforgame.com' });
+        const session = res.headers.get('mcp-session-id');
+        expect(session).toMatch(/^[0-9a-f]{32}$/);
+        expect(event).toMatchObject({
+            host: 'proxyforgame.com', sessionId: session, method: 'initialize', tool: null, outcome: 'ok',
+            status: 200, clientName: 'codex-mcp-client', clientVersion: '0.166.0', userAgent: 'test-client/1.0', internal: false,
+        });
+        expect(typeof event.durationMs).toBe('number');
+        expect(event.bodyBytes).toBeGreaterThan(0);
+    });
+
+    it('records a successful call with its tool, argument names and session', async () => {
+        const session = 'ab'.repeat(16);
+        const { events: [event] } = await post(toolCall('ogame_build_cost', { item: 'metal-mine', toLevel: 5 }), { 'mcp-session-id': session });
+        expect(event).toMatchObject({ method: 'tools/call', tool: 'ogame_build_cost', outcome: 'ok', sessionId: session });
+        expect(event.argKeys).toEqual(['item', 'toLevel']);
+        expect(event.errorPaths).toEqual([]);
+    });
+
+    it('records where validation failed, and never what was passed', async () => {
+        const { events: [event] } = await post(toolCall('ogame_build_cost', {
+            item: 'metal-mine', toLevel: -1, colour: 'secret-value', universe: { country: 'EN', number: 1 },
+        }));
+        expect(event).toMatchObject({ outcome: 'invalid', universe: 'en-1' });
+        expect(event.errorPaths).toEqual(['toLevel', 'colour']);
+        expect(event.argKeys).toEqual(['item', 'toLevel', 'colour', 'universe']);
+        expect(JSON.stringify(event)).not.toContain('secret-value');
+    });
+
+    it('records an unknown tool and an unknown method as invalid', async () => {
+        expect((await post(toolCall('nope', {}))).events[0]).toMatchObject({ outcome: 'invalid', tool: null });
+        expect((await post({ jsonrpc: '2.0', id: 3, method: 'resources/list' })).events[0])
+            .toMatchObject({ outcome: 'invalid', method: 'resources/list' });
+    });
+
+    it('records each message of a batch, notifications included', async () => {
+        const { events: batch } = await post([{ jsonrpc: '2.0', id: 1, method: 'ping' }, { jsonrpc: '2.0', method: 'notifications/initialized' }]);
+        expect(batch.map((e) => [e.method, e.status])).toEqual([['ping', 200], ['notifications/initialized', 200]]);
+        const { events: [note] } = await post({ jsonrpc: '2.0', method: 'notifications/initialized' });
+        expect(note).toMatchObject({ status: 202, outcome: 'ok' });
+    });
+
+    it('records a refused request as rejected, but not a GET', async () => {
+        const refused = (await post('{nope')).events;
+        expect(refused).toHaveLength(1);
+        expect(refused[0]).toMatchObject({ outcome: 'rejected', status: 400, method: null });
+        events.length = 0;
+        await fetch(`${base}/mcp`, { headers: { accept: 'text/event-stream' } });
+        expect(events).toEqual([]);
+    });
+
+    it('marks the watchdog and the internal addresses', async () => {
+        expect((await post(initialize('pfg-watchdog'))).events[0].internal).toBe(true);
+        expect((await post({ jsonrpc: '2.0', id: 1, method: 'ping' }, { 'x-forwarded-for': '198.51.100.50' })).events[0].internal).toBe(true);
+        expect((await post({ jsonrpc: '2.0', id: 1, method: 'ping' }, { 'x-forwarded-for': '198.51.100.51' })).events[0].internal).toBe(false);
+    });
+
+    it('ignores a session id it could not have issued', async () => {
+        const { events: [event] } = await post({ jsonrpc: '2.0', id: 1, method: 'ping' }, { 'mcp-session-id': 'not-ours' });
+        expect(event.sessionId).toBeNull();
+    });
+});
+
+describe('MCP usage recorder', () => {
+    const event = (n) => ({ ts: n, outcome: 'ok', status: 200, bodyBytes: 10 });
+
+    it('records nothing without a URL and a token', async () => {
+        const sent = [];
+        const recorder = createUsageRecorder({ url: 'https://example.com/ajax.php', send: async (b) => { sent.push(b); return 200; } });
+        recorder.record(/** @type {any} */ (event(1)));
+        await recorder.flush();
+        expect(sent).toEqual([]);
+    });
+
+    it('sends the queued events as one form post to the mcpUsage service', async () => {
+        const sent = [];
+        const recorder = createUsageRecorder({
+            url: 'https://example.com/ajax.php', token: 't0k', flushMs: 60_000,
+            send: async (body) => { sent.push(new URLSearchParams(body)); return 200; },
+        });
+        recorder.record(/** @type {any} */ (event(1)));
+        recorder.record(/** @type {any} */ (event(2)));
+        await recorder.flush();
+        expect(sent.length).toBe(1);
+        expect(sent[0].get('service')).toBe('mcpUsage');
+        expect(sent[0].get('token')).toBe('t0k');
+        expect(JSON.parse(sent[0].get('events')).map((e) => e.ts)).toEqual([1, 2]);
+    });
+
+    it('splits a long queue into batches the service accepts', async () => {
+        const sizes = [];
+        const recorder = createUsageRecorder({
+            url: 'https://example.com/ajax.php', token: 't', flushMs: 60_000,
+            send: async (body) => { sizes.push(JSON.parse(new URLSearchParams(body).get('events') ?? '[]').length); return 200; },
+        });
+        for (let i = 0; i < USAGE_MAX_BATCH * 2 + 5; i++) {
+            recorder.record(/** @type {any} */ (event(i)));
+        }
+        await recorder.flush();
+        expect(sizes.reduce((a, b) => a + b, 0)).toBe(USAGE_MAX_BATCH * 2 + 5);
+        expect(Math.max(...sizes)).toBeLessThanOrEqual(USAGE_MAX_BATCH);
+    });
+
+    it('says once that the service is failing, and once that it is back', async () => {
+        const lines = [];
+        let status = 503;
+        const recorder = createUsageRecorder({
+            url: 'https://example.com/ajax.php', token: 't', flushMs: 60_000,
+            log: (line) => lines.push(line), send: async () => status,
+        });
+        for (let i = 0; i < 3; i++) {
+            recorder.record(/** @type {any} */ (event(i)));
+            await recorder.flush();
+        }
+        status = 200;
+        recorder.record(/** @type {any} */ (event(9)));
+        await recorder.flush();
+        expect(lines.length).toBe(2);
+        expect(lines[0]).toContain('HTTP 503');
     });
 });
 

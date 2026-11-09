@@ -18,6 +18,7 @@ const { join } = require('node:path');
 const { createProtocol } = require('./lib/protocol');
 const { createHttpHandler } = require('./lib/http-transport');
 const { createSiteApi } = require('./lib/site-api');
+const { createUsageRecorder } = require('./lib/usage');
 const { createTools } = require('./tools');
 const { checkoutCommit } = require('./lib/revision');
 
@@ -56,6 +57,12 @@ function main() {
 
     const host = env.PFG_MCP_HOST || '127.0.0.1';
     const port = Number.parseInt(env.PFG_MCP_PORT || '8787', 10);
+    const usage = createUsageRecorder({
+        url: env.PFG_MCP_EVENTS_URL,
+        token: env.PFG_MCP_EVENTS_TOKEN,
+        connectAddress: env.PFG_MCP_EVENTS_CONNECT,
+        log,
+    });
     const handler = createHttpHandler(protocol, {
         path: '/mcp',
         // The page's controller; it redirects on to /<lang>/mcp by the
@@ -65,6 +72,8 @@ function main() {
             .split(',').map((o) => o.trim()).filter(Boolean),
         rateLimit: Number.parseInt(env.PFG_MCP_RATE_LIMIT || '120', 10),
         trustProxy: env.PFG_MCP_TRUST_PROXY !== '0',
+        usage,
+        internalAddresses: (env.PFG_MCP_INTERNAL_IPS || '').split(',').map((a) => a.trim()).filter(Boolean),
         log,
     });
 
@@ -78,7 +87,8 @@ function main() {
     for (const signal of ['SIGTERM', 'SIGINT']) {
         process.once(signal, () => {
             log(`${signal}: shutting down`);
-            server.close(() => process.exit(0));
+            // The queued usage events go out with the last answers.
+            server.close(() => usage.flush().finally(() => process.exit(0)));
             setTimeout(() => process.exit(0), 5000).unref();
         });
     }

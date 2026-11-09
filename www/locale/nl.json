@@ -323,7 +323,7 @@
     "tools-header": "Wat hij kan berekenen",
     "tools-import": "De export van je account uit het spel (API), zodat je de niveaus niet met de hand hoeft in te typen",
     "privacy-header": "Privacy",
-    "privacy": "De server slaat niets op en legt je vragen niet vast. Wat je de assistent vertelt, valt onder de regels van die assistent: die van ChatGPT, Claude of welke je ook gebruikt.",
+    "privacy": "De server bewaart je vragen en de gegevens die je stuurt niet, en legt je IP-adres niet vast. Hij houdt alleen gebruiksstatistieken bij: welke berekening voor welk universum werd opgevraagd, de namen van de ingevulde velden (niet hun waarden), of het lukte, hoe lang het duurde en welke assistent erom vroeg. Wat je de assistent vertelt, valt onder de regels van die assistent: die van ChatGPT, Claude of welke je ook gebruikt.",
     "developers": "Voor ontwikkelaars: broncode en documentatie van de server op GitHub"
   },
   "sidebar": {

@@ -471,6 +471,15 @@ means the restart never happened. A 404 — Apache not proxying the path — onl
 warns, until the repository variable `PFG_MCP_REQUIRED` is set to `1`; from then
 on it fails like anything else.
 
+**It records its usage through the site.** Every message it handles becomes a
+row in `mcp_event` (`docs/mcp-usage.md`): the server posts batches to the
+`mcpUsage` service of the site's own `ajax.php`, connecting to `127.0.0.1:443`
+under the site's name (`PFG_MCP_EVENTS_URL`, `PFG_MCP_EVENTS_CONNECT` in the
+unit), so the service sees a loopback address. Both sides check the
+`PFG_MCP_EVENTS_TOKEN` in `/var/www/pfg-shared/.env`, which the unit reads as its
+`EnvironmentFile`; without that line nothing is recorded and nothing else
+changes. `make mcp-stats` prints the summary.
+
 ### Setting it up
 
 ```
@@ -491,6 +500,10 @@ apachectl configtest && systemctl reload apache2
 
 echo 'MCP_RESTART_FILE=/var/lib/pfg/mcp/deployed' >> /etc/pfg-sync.conf
 cp /var/www/pfg-current/deploy/pfg-sync /usr/local/bin/pfg-sync    # the copy that knows MCP_RESTART_FILE
+
+# the usage record: one secret shared by the server and the mcpUsage service
+echo "PFG_MCP_EVENTS_TOKEN=$(openssl rand -hex 24)" >> /var/www/pfg-shared/.env
+systemctl restart pfg-mcp
 ```
 
 Then check it from outside with `bash deploy/watchdog.sh` (an `ok   MCP …` line

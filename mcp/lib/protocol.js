@@ -57,6 +57,21 @@ class ToolError extends Error {}
  */
 
 /**
+ * What handle() learned about one message, for the usage record
+ * (lib/usage.js). Metadata only: the names of the arguments a call passed and
+ * the schema paths that failed, never a value.
+ * @typedef {object} Trace
+ * @property {string|null} [method]
+ * @property {string|null} [tool]
+ * @property {'ok'|'invalid'|'tool_error'|'internal'} [outcome]
+ * @property {string|null} [clientName] clientInfo of an initialize
+ * @property {string|null} [clientVersion]
+ * @property {string|null} [universe] e.g. "en-1", when a call named one
+ * @property {string[]} [argKeys]
+ * @property {string[]} [errorPaths]
+ */
+
+/**
  * @param {string|number|null} id
  * @param {number} code
  * @param {string} message
@@ -91,6 +106,53 @@ function toolResult(result) {
 /** @param {string} message */
 function toolFailure(message) {
     return { content: [{ type: 'text', text: message }], isError: true };
+}
+
+/**
+ * A universe argument as "en-1", or null when the call named none or named it
+ * in a shape the schema will refuse anyway.
+ * @param {unknown} universe
+ */
+function universeLabel(universe) {
+    if (typeof universe !== 'object' || universe === null) {
+        return null;
+    }
+    const { country, number } = /** @type {Record<string, unknown>} */ (universe);
+    const code = typeof country === 'string' ? country.toLowerCase() : '';
+    const n = typeof number === 'number' ? number : Number.NaN;
+    if (!/^[a-z]{2,3}$/.test(code) || !Number.isInteger(n) || n < 1 || n > 9999) {
+        return null;
+    }
+    return `${code}-${n}`;
+}
+
+/**
+ * The schema paths behind validation errors, without their values: every
+ * message from lib/schema.js starts with the path ("arguments.x.y must be ...").
+ * Array indexes collapse to [] so that the same mistake groups together.
+ * @param {string[]} errors
+ */
+function errorPaths(errors) {
+    const paths = errors.map((error) => error.split(' ', 1)[0]
+        .replace(/^arguments\.?/, '')
+        .replaceAll(/\[\d+\]/g, '[]')
+        .replaceAll(/[^\w.[\]-]/g, '')
+        || '(arguments)');
+    return [...new Set(paths)];
+}
+
+/**
+ * A client-supplied string as the usage record keeps it - a clientInfo field,
+ * a header: printable ASCII, trimmed and cut short; null when nothing is left.
+ * @param {unknown} value
+ * @param {number} max
+ */
+function printable(value, max) {
+    if (typeof value !== 'string') {
+        return null;
+    }
+    const clean = value.replaceAll(/[^\x20-\x7e]/g, '').trim().slice(0, max);
+    return clean === '' ? null : clean;
 }
 
 /**
@@ -135,24 +197,36 @@ function createProtocol(tools, info, options = {}) {
     /**
      * @param {any} params
      * @param {string|number|null} id
+     * @param {Trace} trace
      * @returns {Promise<JsonRpcResponse>}
      */
-    async function callTool(params, id) {
+    async function callTool(params, id, trace) {
         const name = params?.name;
         const tool = typeof name === 'string' ? byName.get(name) : undefined;
         if (!tool) {
+            trace.outcome = 'invalid';
             return errorResponse(id, INVALID_PARAMS, `Unknown tool: ${String(name)}`);
         }
-        const { value, errors } = validate(tool.inputSchema, params.arguments ?? {});
+        trace.tool = tool.name;
+        const args = params.arguments ?? {};
+        if (typeof args === 'object' && args !== null && !Array.isArray(args)) {
+            trace.argKeys = Object.keys(args);
+            trace.universe = universeLabel(args.universe);
+        }
+        const { value, errors } = validate(tool.inputSchema, args);
         if (errors.length > 0) {
+            trace.outcome = 'invalid';
+            trace.errorPaths = errorPaths(errors);
             return resultResponse(id, toolFailure(`Invalid arguments:\n- ${errors.join('\n- ')}`));
         }
         try {
             return resultResponse(id, toolResult(await tool.run(value)));
         } catch (error) {
             if (error instanceof ToolError) {
+                trace.outcome = 'tool_error';
                 return resultResponse(id, toolFailure(error.message));
             }
+            trace.outcome = 'internal';
             log(`tool ${tool.name} failed: ${error instanceof Error ? error.stack : String(error)}`);
             return errorResponse(id, INTERNAL_ERROR, 'Internal error');
         }
@@ -161,22 +235,30 @@ function createProtocol(tools, info, options = {}) {
     /**
      * Handles one JSON-RPC message.
      * @param {unknown} message the parsed message
+     * @param {Trace} [trace] filled in with what the message was and how it
+     *   ended, for a caller that records usage
      * @returns {Promise<JsonRpcResponse|null>} null for a notification or a response
      */
-    async function handle(message) {
+    async function handle(message, trace = {}) {
+        trace.outcome = 'ok';
         if (typeof message !== 'object' || message === null || Array.isArray(message)) {
+            trace.outcome = 'invalid';
             return errorResponse(null, INVALID_REQUEST, 'Expected a JSON-RPC message object');
         }
         const msg = /** @type {Record<string, any>} */ (message);
+        if (typeof msg.method === 'string') {
+            trace.method = msg.method.slice(0, 32);
+        }
         if (msg.jsonrpc !== '2.0') {
+            trace.outcome = 'invalid';
             return errorResponse(msg.id ?? null, INVALID_REQUEST, 'jsonrpc must be "2.0"');
         }
         const isRequest = 'id' in msg && msg.id !== null;
         if (typeof msg.method !== 'string') {
             // A response to something we never ask, or garbage. Neither gets an answer.
-            return isRequest && !('result' in msg || 'error' in msg)
-                ? errorResponse(msg.id, INVALID_REQUEST, 'method is missing')
-                : null;
+            const garbage = isRequest && !('result' in msg || 'error' in msg);
+            trace.outcome = garbage ? 'invalid' : 'ok';
+            return garbage ? errorResponse(msg.id, INVALID_REQUEST, 'method is missing') : null;
         }
         if (!isRequest) {
             // notifications/initialized, notifications/cancelled and the like.
@@ -186,14 +268,17 @@ function createProtocol(tools, info, options = {}) {
         }
         switch (msg.method) {
             case 'initialize':
+                trace.clientName = printable(msg.params?.clientInfo?.name, 64);
+                trace.clientVersion = printable(msg.params?.clientInfo?.version, 32);
                 return resultResponse(msg.id, initialize(msg.params));
             case 'ping':
                 return resultResponse(msg.id, {});
             case 'tools/list':
                 return resultResponse(msg.id, { tools: toolList });
             case 'tools/call':
-                return callTool(msg.params, msg.id);
+                return callTool(msg.params, msg.id, trace);
             default:
+                trace.outcome = 'invalid';
                 return errorResponse(msg.id, METHOD_NOT_FOUND, `Method not found: ${msg.method}`);
         }
     }
@@ -205,6 +290,7 @@ module.exports = {
     createProtocol,
     ToolError,
     errorResponse,
+    printable,
     SUPPORTED_VERSIONS,
     PARSE_ERROR,
     INVALID_REQUEST,

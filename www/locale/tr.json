@@ -323,7 +323,7 @@
     "tools-header": "Neleri hesaplayabilir",
     "tools-import": "Seviyeleri elle girmemeniz için hesabınızın oyundan dışa aktarımı (API)",
     "privacy-header": "Gizlilik",
-    "privacy": "Sunucu hiçbir şey saklamaz ve sorularınızı kaydetmez. Asistana söyledikleriniz o asistanın kendi kurallarına göre işlenir: ChatGPT, Claude ya da kullandığınız asistan hangisiyse onun.",
+    "privacy": "Sunucu sorularınızı ve ona gönderdiğiniz verileri saklamaz, IP adresinizi de kaydetmez. Yalnızca kullanım istatistiği tutar: hangi hesaplamanın hangi evren için çağrıldığı, doldurulan alanların adları (değerleri değil), başarılı olup olmadığı, ne kadar sürdüğü ve hangi asistanın çağırdığı. Asistana söyledikleriniz o asistanın kendi kurallarına göre işlenir: ChatGPT, Claude ya da kullandığınız asistan hangisiyse onun.",
     "developers": "Geliştiriciler için: sunucunun kaynak kodu ve belgeleri GitHub'da"
   },
   "sidebar": {

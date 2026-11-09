@@ -323,7 +323,7 @@
     "tools-header": "Was er berechnen kann",
     "tools-import": "Deinen Account-Export aus dem Spiel (API), damit du die Stufen nicht von Hand eintippen musst",
     "privacy-header": "Datenschutz",
-    "privacy": "Der Server speichert nichts und zeichnet deine Fragen nicht auf. Was du dem Assistenten mitteilst, unterliegt dessen eigenen Regeln: denen von ChatGPT, Claude oder dem Assistenten, den du nutzt.",
+    "privacy": "Der Server speichert weder deine Fragen noch die Daten, die du ihm schickst, und auch nicht deine IP-Adresse. Er führt nur eine Nutzungsstatistik: welche Berechnung für welches Universum aufgerufen wurde, die Namen der ausgefüllten Felder (nicht ihre Werte), ob sie geklappt hat, wie lange sie dauerte und welcher Assistent sie aufgerufen hat. Was du dem Assistenten mitteilst, unterliegt dessen eigenen Regeln: denen von ChatGPT, Claude oder dem Assistenten, den du nutzt.",
     "developers": "Für Entwickler: Quellcode und Dokumentation des Servers auf GitHub"
   },
   "sidebar": {

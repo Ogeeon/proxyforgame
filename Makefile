@@ -260,6 +260,12 @@ mail: ## Read the feedback mailbox, e.g. make mail args="--site --body"
 pagespeed: ## Measure page speed of the live site, e.g. make pagespeed args="--pages flight --out before.json"
 	node scripts/pagespeed.js $(args)
 
+# Reads mcp_event on the host over scripts/pfg-ssh.sh; the queries are in
+# scripts/mcp-stats.sql, the rest of them in docs/mcp-usage.md.
+days ?= 7
+mcp-stats: ## Usage of the MCP server on the live site, e.g. make mcp-stats days=30
+	bash scripts/mcp-stats.sh $(days)
+
 # Writes changelog.sql with the Russian text in all twelve rows; run
 # /translate-changelog next, then commit the file. The deploy applies it to
 # both hosts - see deploy/README.md, "The in-app changelog".

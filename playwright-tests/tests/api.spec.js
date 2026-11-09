@@ -356,3 +356,54 @@ test.describe('AJAX endpoint - interactionTiming', () => {
         expect(response.status()).toBe(200);
     });
 });
+
+test.describe('AJAX endpoint - mcpUsage', () => {
+    // The suite calls the server from the same machine, so the requests come
+    // from loopback like the MCP server's; what stands between them and the
+    // table is the token. CI sets it in the job environment, which the PHP
+    // server inherits.
+    const token = process.env.PFG_MCP_EVENTS_TOKEN ?? '';
+
+    /** One event as mcp/lib/usage.js sends it. The client name marks rows a test left. */
+    const event = (extra = {}) => ({
+        ts: Date.now(), host: 'proxyforgame.com', sessionId: 'e2e0'.repeat(8), method: 'tools/call',
+        tool: 'ogame_flight', outcome: 'ok', status: 200, durationMs: 12, bodyBytes: 340,
+        clientName: 'e2e', clientVersion: '1', userAgent: 'playwright', universe: 'en-1',
+        errorPaths: [], argKeys: ['origin', 'destination'], internal: true, ...extra,
+    });
+    const form = (events, t = token) => ({ service: 'mcpUsage', token: t, events: JSON.stringify(events) });
+
+    test('refuses GET and says what it accepts', async ({ request }) => {
+        const response = await request.get(`${ENDPOINT}?service=mcpUsage`);
+        await expectApiError(response, 405, 'method_not_allowed');
+        expect(response.headers()['allow']).toBe('POST');
+    });
+
+    test('refuses a request without the right token', async ({ request }) => {
+        await expectApiError(await request.post(ENDPOINT, { form: form([event()], '') }), 403, 'forbidden');
+        await expectApiError(await request.post(ENDPOINT, { form: form([event()], 'wrong-token') }), 403, 'forbidden');
+    });
+
+    test('refuses events that are not a short JSON array', async ({ request }) => {
+        test.skip(token === '', 'needs PFG_MCP_EVENTS_TOKEN, as CI sets it');
+        await expectApiError(await request.post(ENDPOINT, { form: { ...form([]), events: '{"ts":1}' } }), 400, 'bad_params');
+        const tooMany = Array.from({ length: 101 }, () => event());
+        await expectApiError(await request.post(ENDPOINT, { form: form(tooMany) }), 400, 'bad_params');
+    });
+
+    // The server is the only sender, but the table still takes nothing it
+    // could not have sent: such an event is skipped, the rest are stored.
+    test('stores the well-formed events and skips the rest', async ({ request }) => {
+        test.skip(token === '', 'needs PFG_MCP_EVENTS_TOKEN, as CI sets it');
+        const response = await request.post(ENDPOINT, {
+            form: form([
+                event(),
+                event({ outcome: 'invalid', errorPaths: ['toLevel', 'lifeforms.shipBonuses'], universe: 'not a universe' }),
+                event({ outcome: 'exploded' }),
+                event({ ts: Date.now() - 3 * 86400000 }),
+            ]),
+        });
+        expect(response.status()).toBe(200);
+        expect(await response.json()).toEqual({ stored: 2, skipped: 2 });
+    });
+});

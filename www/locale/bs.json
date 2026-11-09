@@ -323,7 +323,7 @@
     "tools-header": "Šta može izračunati",
     "tools-import": "Izvoz vašeg računa iz igre (API), da ne morate ručno upisivati nivoe",
     "privacy-header": "Privatnost",
-    "privacy": "Server ništa ne čuva i ne bilježi vaša pitanja. Ono što kažete asistentu obrađuje se po pravilima tog asistenta: ChatGPT-a, Claudea ili onog kojeg koristite.",
+    "privacy": "Server ne čuva vaša pitanja ni podatke koje mu šaljete i ne bilježi vašu IP adresu. Vodi samo statistiku korištenja: koji je proračun pozvan i za koji univerzum, nazive popunjenih polja (bez njihovih vrijednosti), da li je uspio, koliko je trajao i koji ga je asistent pozvao. Ono što kažete asistentu obrađuje se po pravilima tog asistenta: ChatGPT-a, Claudea ili onog kojeg koristite.",
     "developers": "Za programere: izvorni kod i dokumentacija servera na GitHubu"
   },
   "sidebar": {

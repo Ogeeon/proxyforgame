@@ -43,6 +43,10 @@ jobs:
       # the job environment, and by the spec, which skips the test without it.
       # No SMTP credentials exist here, so none of those requests sends mail.
       MAIL_RATE_LIMIT_SHORT: '2'
+      # Opens the mcpUsage service (www/api/mcp-usage.inc.php) to api.spec.js,
+      # which calls it from loopback like the MCP server does on the host and
+      # skips the tests that store events without it.
+      PFG_MCP_EVENTS_TOKEN: 'e2e-mcp-usage'
 
     services:
       # MariaDB, not MySQL: production, the standby and local dev (WAMP 10.4.13)
