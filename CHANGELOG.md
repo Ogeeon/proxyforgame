@@ -22,6 +22,7 @@ release section; it is the source of truth for the other eleven translations.
 ### Fixed
 
 - Topbar: on a screen narrower than 576px the language picker shows only the flag, so the topbar fits on one line instead of widening the page by some 40px. It matters only on a page that sets a viewport - the trade calculator, for now; the others still render a phone at 980px. The button keeps the language's name as its `aria-label`, and the flag's `alt` is empty since it only decorates.
+- Start page, AI assistants page, privacy policy: on a phone the text is readable at its normal size. The pages set no viewport, so a phone laid them out 980px wide and zoomed them out to fit; they now set `width=device-width`, and all three fit a 320px screen without scrolling sideways. A new `mobile.spec.js` checks each phone-ready page at 360px with phone emulation; a calculator joins it once it is made to fit.
 
 ## [2026-11-09] - site entry 73
 
