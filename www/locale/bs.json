@@ -298,7 +298,33 @@
   },
   "index": {
     "title": "ProxyForGame - alati za online igru Ogame",
-    "keywords": "proxyforgame,ogame,ogame kalkulator,ogame alati,online kalkulator,igra u pregledniku,kalkulator troškova,kalkulator vremena leta,kalkulator trgovine,kalkulator proizvodnje,kalkulator gravitona,kalkulator mjeseca,kalkulator terraformera,kalkulator ekspedicija,red gradnje"
+    "keywords": "proxyforgame,ogame,ogame kalkulator,ogame alati,online kalkulator,igra u pregledniku,kalkulator troškova,kalkulator vremena leta,kalkulator trgovine,kalkulator proizvodnje,kalkulator gravitona,kalkulator mjeseca,kalkulator terraformera,kalkulator ekspedicija,red gradnje",
+    "ai-card-text": "Da otvorite kalkulator, izaberite ga u meniju. Može se koristiti i drugačije: direktno iz ChatGPT-a, Claudea i drugih AI asistenata. Pitajte koliko košta zgrada ili koliko dugo leti flota, a asistent će to izračunati po formulama ove stranice.",
+    "ai-card-button": "Kako ga povezati"
+  },
+  "assistants": {
+    "title": "ProxyForGame kalkulatori u ChatGPT-u, Claudeu i drugim AI asistentima",
+    "description": "Povežite ProxyForGame kalkulatore za OGame sa ChatGPT-om, Claudeom ili bilo kojim drugim AI asistentom koji podržava MCP i pitajte svojim riječima.",
+    "keywords": "proxyforgame,ogame,mcp,mcp server,chatgpt,claude,ai asistent,ogame kalkulator",
+    "intro": "Svi kalkulatori ove stranice dostupni su i AI asistentima. Pitajte ChatGPT, Claude ili drugog asistenta svojim riječima o troškovima, letovima, proizvodnji ili ekspedicijama, i on će računati po istim formulama kao ove stranice. Tehnički, ovo je MCP server (Model Context Protocol), standardni način da asistent dobije nove alate.",
+    "address-header": "Adresa servera",
+    "address-hint": "Zalijepite ovu adresu u postavke svog asistenta. Otvorena u pregledniku, samo vas vraća na ovu stranicu.",
+    "copy": "Kopiraj",
+    "copied": "Kopirano",
+    "connect-header": "Kako ga povezati",
+    "connect-chatgpt": "<strong>ChatGPT</strong>: u postavkama uključite režim za programere, a zatim dodajte vlastiti konektor s ovom adresom, bez autentifikacije.",
+    "connect-claude": "<strong>Claude</strong> (claude.ai i desktop aplikacija): Postavke → Konektori → dodajte vlastiti konektor s ovom adresom.",
+    "connect-other": "<strong>Bilo koji drugi asistent ili klijent koji podržava MCP</strong>: dodajte ovu adresu kao udaljeni MCP server.",
+    "examples-header": "Šta pitati",
+    "example-1": "Koliko koštaju nivoi od 30 do 35 Rudnika metala i koliko traje njihova gradnja uz Tvornicu robota 10 i Tvornicu nanita 5?",
+    "example-2": "Koliko dugo leti 300 Velikih transportera od 1:100:8 do 3:250:8 i koliko deuterija potroše?",
+    "example-3": "Kolika je šansa da 5 Zvijezda smrti uništi mjesec promjera 8.000 km?",
+    "example-4": "Evo izvoza mog računa iz igre. Koja od mojih planeta proizvodi najviše deuterija dnevno?",
+    "tools-header": "Šta može izračunati",
+    "tools-import": "Izvoz vašeg računa iz igre (API), da ne morate ručno upisivati nivoe",
+    "privacy-header": "Privatnost",
+    "privacy": "Server ništa ne čuva i ne bilježi vaša pitanja. Ono što kažete asistentu obrađuje se po pravilima tog asistenta: ChatGPT-a, Claudea ili onog kojeg koristite.",
+    "developers": "Za programere: izvorni kod i dokumentacija servera na GitHubu"
   },
   "sidebar": {
     "ogameMenuItems": {
@@ -383,7 +409,9 @@
     "external": {
       "external-links": "Eksterni linkovi",
       "expedition-calc": "Kalkulator za ekspedicije"
-    }
+    },
+    "ai-header": "AI asistenti",
+    "ai-link": "Kalkulatori u ChatGPT-u, Claudeu i drugim"
   },
   "costs": {
     "title": "Ogame - kalkulator troškova",

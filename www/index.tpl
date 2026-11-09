@@ -40,6 +40,16 @@
   <?= str_replace('ProxyForGame', '<strong>ProxyForGame</strong>', $l['title']) ?>
 </div>
 
+<div id="ai-card" class="card mx-2">
+  <div class="card-body d-flex align-items-start gap-3">
+    <i class="bi bi-robot fs-2 text-primary-emphasis" aria-hidden="true"></i>
+    <div>
+      <p class="card-text"><?= $l['ai-card-text'] ?></p>
+      <a href="/<?= $lang ?>/mcp" class="btn btn-primary btn-sm"><?= $l['ai-card-button'] ?></a>
+    </div>
+  </div>
+</div>
+
     </div> <!-- End col-md-10 -->
   </div> <!-- End row -->
 </div> <!-- End container-fluid -->

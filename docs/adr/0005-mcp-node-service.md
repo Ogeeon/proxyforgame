@@ -37,7 +37,9 @@ resetting a git checkout - no install step, no build.
   when this was written.
 - **Stateless Streamable HTTP, no SSE.** Every call finishes in milliseconds,
   so nothing needs streaming or a session; `GET /mcp` answers 405, which the
-  spec provides for exactly that.
+  spec provides for exactly that. (Since 2026-11-09 a GET that asks for HTML -
+  a player who opened the address in a browser - is redirected to the site's
+  page about the server instead.)
 - **Loopback behind Apache.** The process listens on `127.0.0.1:8787`; Apache
   proxies `https://<site>/mcp` to it, so TLS and the certificates stay where
   they are. Only that path is proxied.

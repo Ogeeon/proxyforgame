@@ -298,7 +298,33 @@
   },
   "index": {
     "title": "ProxyForGame - software pre online hry v prehliadači OGame",
-    "keywords": "proxyforgame,ogame,ogame kalkulačka,ogame nástroje,online kalkulačka,prehliadačová hra,kalkulačka nákladov,kalkulačka času letu,kalkulačka obchodovania,kalkulačka produkcie,kalkulačka gravitónu,kalkulačka mesiacov,kalkulačka terraformera,kalkulačka expedícií,fronta výstavby"
+    "keywords": "proxyforgame,ogame,ogame kalkulačka,ogame nástroje,online kalkulačka,prehliadačová hra,kalkulačka nákladov,kalkulačka času letu,kalkulačka obchodovania,kalkulačka produkcie,kalkulačka gravitónu,kalkulačka mesiacov,kalkulačka terraformera,kalkulačka expedícií,fronta výstavby",
+    "ai-card-text": "Ak chcete otvoriť kalkulačku, vyberte ju v menu. Dajú sa používať aj inak: priamo z ChatGPT, Claude a ďalších AI asistentov. Opýtajte sa, koľko stojí budova alebo ako dlho letí flotila, a asistent to vypočíta podľa vzorcov tejto stránky.",
+    "ai-card-button": "Ako ho pripojiť"
+  },
+  "assistants": {
+    "title": "Kalkulačky ProxyForGame v ChatGPT, Claude a ďalších AI asistentoch",
+    "description": "Pripojte kalkulačky ProxyForGame pre OGame k ChatGPT, Claude alebo inému AI asistentovi s podporou MCP a pýtajte sa vlastnými slovami.",
+    "keywords": "proxyforgame,ogame,mcp,mcp server,chatgpt,claude,ai asistent,ogame kalkulačka",
+    "intro": "Všetky kalkulačky tejto stránky sú dostupné aj AI asistentom. Opýtajte sa ChatGPT, Claude alebo iného asistenta vlastnými slovami na náklady, lety, produkciu či expedície a on to vypočíta podľa rovnakých vzorcov ako tieto stránky. Technicky ide o MCP server (Model Context Protocol), štandardný spôsob, ako dať asistentovi nové nástroje.",
+    "address-header": "Adresa servera",
+    "address-hint": "Vložte túto adresu do nastavení svojho asistenta. Ak ju otvoríte v prehliadači, jednoducho vás vráti na túto stránku.",
+    "copy": "Kopírovať",
+    "copied": "Skopírované",
+    "connect-header": "Ako ho pripojiť",
+    "connect-chatgpt": "<strong>ChatGPT</strong>: v nastaveniach zapnite režim vývojára a potom pridajte vlastný konektor s touto adresou, bez overovania.",
+    "connect-claude": "<strong>Claude</strong> (claude.ai a desktopová aplikácia): Nastavenia → Konektory → pridajte vlastný konektor s touto adresou.",
+    "connect-other": "<strong>Akýkoľvek iný asistent alebo klient s podporou MCP</strong>: pridajte túto adresu ako vzdialený MCP server.",
+    "examples-header": "Na čo sa opýtať",
+    "example-1": "Koľko stoja úrovne 30 až 35 budovy Ťažobný komplex - kovy a ako dlho trvá ich stavba pri Robotických továrňach 10 a Nanotechnologických továrňach 5?",
+    "example-2": "Ako dlho letí 300 Veľkých transportérov z 1:100:8 na 3:250:8 a koľko deutéria spotrebujú?",
+    "example-3": "Aká je šanca, že 5 Hviezd smrti zničí mesiac s priemerom 8 000 km?",
+    "example-4": "Tu je export môjho účtu z hry. Ktorá z mojich planét vyrába najviac deutéria za deň?",
+    "tools-header": "Čo dokáže vypočítať",
+    "tools-import": "Export vášho účtu z hry (API), aby ste nemuseli zadávať úrovne ručne",
+    "privacy-header": "Súkromie",
+    "privacy": "Server nič neukladá a nezaznamenáva vaše otázky. To, čo poviete asistentovi, sa spracúva podľa pravidiel daného asistenta: ChatGPT, Claude alebo toho, ktorý používate.",
+    "developers": "Pre vývojárov: zdrojový kód a dokumentácia servera na GitHube"
   },
   "sidebar": {
     "ogameMenuItems": {
@@ -383,7 +409,9 @@
     "external": {
       "external-links": "Externé odkazy",
       "expedition-calc": "Kalkulačka expedícií"
-    }
+    },
+    "ai-header": "AI asistenti",
+    "ai-link": "Kalkulačky v ChatGPT, Claude a ďalších"
   },
   "costs": {
     "title": "OGame - Kalkulátor pre ceny",

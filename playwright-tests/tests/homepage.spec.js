@@ -5,6 +5,15 @@ test('homepage loads', async ({ page }) => {
   await expect(page).toHaveTitle(/ProxyForGame - tools for online browser game OGame/);
 });
 
+test('the AI assistants card leads to the page about the MCP server', async ({ page }) => {
+  await page.goto('/ru/');
+  const link = page.locator('#ai-card a[href="/ru/mcp"]');
+  await expect(link).toBeVisible();
+  await link.click();
+  await expect(page).toHaveURL(/\/ru\/mcp$/);
+  await expect(page.locator('#mcp-address')).toHaveValue('https://proxyforgame.com/mcp');
+});
+
 test.describe('Changelog dialog on load', () => {
   // A first visit must not be read as "last saw some old release": the dialog
   // would then list every release on the site. The seeded changelog holds

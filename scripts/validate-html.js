@@ -31,6 +31,7 @@ const VNU_JAR = path.join(REPO_ROOT, 'node_modules', 'vnu-jar', 'build', 'dist',
 const PAGES = [
     'index',
     'policy',
+    'assistants',
     'costs',
     'expeditions',
     'flight',

@@ -4,7 +4,7 @@
  * Render a page without a web server, for offline HTML validation.
  *
  * Usage: php scripts/render-page.php <page> [<lang>]
- *   page - one of: index, policy, or a calculator name (costs, expeditions,
+ *   page - one of: index, policy, assistants (/<lang>/mcp), or a calculator name (costs, expeditions,
  *          flight, graviton, lfcosts, moon, production, queue, terraformer, trade)
  *   lang - locale code, default 'en' (ignored by policy, which is static)
  *
@@ -26,6 +26,8 @@ if ($page === 'index') {
     $reqUri = '/' . $lang . '/';
 } elseif ($page === 'policy') {
     $reqUri = '/policy.php';
+} elseif ($page === 'assistants') {
+    $reqUri = '/' . $lang . '/mcp';
 } elseif (in_array($page, PFG_CALCULATORS, true)) {
     $reqUri = '/' . $lang . '/' . $page;
 } else {
@@ -54,9 +56,9 @@ ini_set('display_errors', '0');
 if ($page === 'policy') {
     chdir($wwwRoot);
     readfile($wwwRoot . DIRECTORY_SEPARATOR . 'policy.php');
-} elseif ($page === 'index') {
+} elseif ($page === 'index' || $page === 'assistants') {
     chdir($wwwRoot);
-    require_once $wwwRoot . DIRECTORY_SEPARATOR . 'index.php';
+    require_once $wwwRoot . DIRECTORY_SEPARATOR . $page . '.php';
 } else {
     chdir($wwwRoot . DIRECTORY_SEPARATOR . 'ogame' . DIRECTORY_SEPARATOR . 'calc');
     require_once $wwwRoot . DIRECTORY_SEPARATOR . 'ogame' . DIRECTORY_SEPARATOR . 'calc' . DIRECTORY_SEPARATOR . $page . '.php';

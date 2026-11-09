@@ -287,6 +287,24 @@ button:not(.btn) {
   padding: 10px;
 }
 
+/* The start page's card about the AI assistants, and the page it leads to:
+   both read as text, so they keep to a line length that reads comfortably. */
+#ai-card {
+  max-width: 40rem;
+}
+
+#assistants-page {
+  max-width: 50rem;
+}
+
+#mcp-address-group {
+  max-width: 28rem;
+}
+
+.assistants-examples q {
+  font-style: italic;
+}
+
 /* Exchange rate inputs (costs / lfcosts / production). They hold MSU weights,
    so fractional values like 1,5 or 1,33 are the norm rather than the exception.
    The text is centered, so the roomy form-control-sm side padding buys nothing

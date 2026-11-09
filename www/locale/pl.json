@@ -298,7 +298,33 @@
   },
   "index": {
     "title": "Narzedzia do gier przegladarkowych OGame",
-    "keywords": "proxyforgame,ogame,kalkulator ogame,narzędzia ogame,kalkulator online,gra przeglądarkowa,kalkulator kosztów,kalkulator czasu lotu,kalkulator handlu,kalkulator produkcji,kalkulator grawitonu,kalkulator księżyca,kalkulator terraformera,kalkulator ekspedycji,kolejka budowy"
+    "keywords": "proxyforgame,ogame,kalkulator ogame,narzędzia ogame,kalkulator online,gra przeglądarkowa,kalkulator kosztów,kalkulator czasu lotu,kalkulator handlu,kalkulator produkcji,kalkulator grawitonu,kalkulator księżyca,kalkulator terraformera,kalkulator ekspedycji,kolejka budowy",
+    "ai-card-text": "Aby otworzyć kalkulator, wybierz go w menu. Można z nich korzystać także inaczej: prosto z ChatGPT, Claude i innych asystentów AI. Zapytaj, ile kosztuje budynek albo jak długo leci flota, a asystent obliczy to według wzorów tej strony.",
+    "ai-card-button": "Jak go podłączyć"
+  },
+  "assistants": {
+    "title": "Kalkulatory ProxyForGame w ChatGPT, Claude i innych asystentach AI",
+    "description": "Podłącz kalkulatory ProxyForGame do OGame do ChatGPT, Claude lub dowolnego innego asystenta AI obsługującego MCP i pytaj własnymi słowami.",
+    "keywords": "proxyforgame,ogame,mcp,serwer mcp,chatgpt,claude,asystent ai,kalkulator ogame",
+    "intro": "Wszystkie kalkulatory tej strony są dostępne także dla asystentów AI. Zapytaj ChatGPT, Claude lub innego asystenta własnymi słowami o koszty, loty, produkcję czy ekspedycje, a policzy to według tych samych wzorów co te strony. Technicznie jest to serwer MCP (Model Context Protocol), standardowy sposób na danie asystentowi nowych narzędzi.",
+    "address-header": "Adres serwera",
+    "address-hint": "Wklej ten adres w ustawieniach swojego asystenta. Otwarty w przeglądarce po prostu przeniesie cię z powrotem na tę stronę.",
+    "copy": "Kopiuj",
+    "copied": "Skopiowano",
+    "connect-header": "Jak go podłączyć",
+    "connect-chatgpt": "<strong>ChatGPT</strong>: włącz w ustawieniach tryb dewelopera, a następnie dodaj własny konektor z tym adresem, bez uwierzytelniania.",
+    "connect-claude": "<strong>Claude</strong> (claude.ai i aplikacja na komputer): Ustawienia → Konektory → dodaj własny konektor z tym adresem.",
+    "connect-other": "<strong>Każdy inny asystent lub klient obsługujący MCP</strong>: dodaj ten adres jako zdalny serwer MCP.",
+    "examples-header": "O co zapytać",
+    "example-1": "Ile kosztują poziomy od 30 do 35 Kopalni metalu i jak długo trwa ich budowa przy Fabryce robotów 10 i Fabryce nanitów 5?",
+    "example-2": "Jak długo leci 300 Dużych transporterów z 1:100:8 na 3:250:8 i ile deuteru zużyją?",
+    "example-3": "Jaka jest szansa, że 5 Gwiazd Śmierci zniszczy księżyc o średnicy 8 000 km?",
+    "example-4": "Oto eksport mojego konta z gry. Która z moich planet produkuje najwięcej deuteru na dobę?",
+    "tools-header": "Co potrafi policzyć",
+    "tools-import": "Eksport twojego konta z gry (API), żeby nie wpisywać poziomów ręcznie",
+    "privacy-header": "Prywatność",
+    "privacy": "Serwer niczego nie przechowuje i nie zapisuje twoich pytań. To, co przekazujesz asystentowi, podlega jego własnym zasadom: ChatGPT, Claude lub tego, z którego korzystasz.",
+    "developers": "Dla programistów: kod źródłowy i dokumentacja serwera na GitHubie"
   },
   "sidebar": {
     "ogameMenuItems": {
@@ -383,7 +409,9 @@
     "external": {
       "external-links": "Linki zewnętrzne",
       "expedition-calc": "Kalkulator wypraw"
-    }
+    },
+    "ai-header": "Asystenci AI",
+    "ai-link": "Kalkulatory w ChatGPT, Claude i innych"
   },
   "costs": {
     "title": "OGame - Kalkulator kosztow",

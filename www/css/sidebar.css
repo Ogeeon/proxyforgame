@@ -62,9 +62,11 @@ body.sidebar-offcanvas-open .btn[data-bs-toggle="offcanvas"] {
     border-top: none;
 }
 
-/* OGame menu items - reduced size */
+/* OGame menu items, and the AI assistants item below them - reduced size */
 #sidebar .ogame-menu-item,
-#sidebarOffcanvas .ogame-menu-item {
+#sidebarOffcanvas .ogame-menu-item,
+#sidebar .ai-menu-item,
+#sidebarOffcanvas .ai-menu-item {
     padding: 6px 8px;
     font-size: 0.9em;
     color: var(--bs-info-text-emphasis);

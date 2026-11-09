@@ -49,3 +49,64 @@ test.describe('Calculator routes', () => {
         await expect(page.locator('a.lang-menu-item[href="/de/costs"]')).toBeAttached();
     });
 });
+
+// The page about the MCP server. Its controller is assistants.php, not mcp.php:
+// a bare /mcp is the server itself on the live site (PFG_PAGES in routes.inc.php).
+test.describe('The AI assistants page', () => {
+    test('/ru/mcp serves it, with the server address', async ({ request }) => {
+        const response = await request.get('/ru/mcp', { maxRedirects: 0 });
+        expect(response.status()).toBe(200);
+        const html = await response.text();
+        expect(html).toContain('<html lang="ru"');
+        expect(html).toContain('value="https://proxyforgame.com/mcp"');
+    });
+
+    test('a trailing slash redirects to the address without it', async ({ request }) => {
+        expect(await head(request, '/de/mcp/')).toEqual({ status: 301, location: '/de/mcp' });
+    });
+
+    test('the controller path redirects temporarily to the Accept-Language address', async ({ request }) => {
+        // Where the MCP server sends a browser that opens its address.
+        const headers = { 'Accept-Language': 'de-DE,de;q=0.9' };
+        expect(await head(request, '/assistants.php', headers)).toEqual({ status: 302, location: '/de/mcp' });
+    });
+
+    test('the sidebar links to it in both layouts, and marks it on the page itself', async ({ page }) => {
+        await page.goto('/ru/costs');
+        await expect(page.locator('a.ai-menu-item[href="/ru/mcp"]')).toHaveCount(2);
+
+        await page.goto('/ru/mcp');
+        await expect(page.locator('a.ai-menu-item')).toHaveCount(0);
+        await expect(page.locator('.ai-menu-item.active')).toHaveCount(2);
+        await expect(page.locator('a.lang-menu-item[href="/de/mcp"]')).toBeAttached();
+    });
+
+    // The real clipboard exists only in a secure context, which http://pfg.wmp is
+    // not, so both tests stand in a fake one: what they check is the page's code.
+    test('the copy button puts the address on the clipboard', async ({ page }) => {
+        await page.addInitScript(() => {
+            Object.defineProperty(navigator, 'clipboard', {
+                value: { writeText: async (text) => { /** @type {any} */ (window).copiedText = text; } },
+            });
+        });
+        await page.goto('/en/mcp');
+        const button = page.locator('#mcp-address-copy');
+        await button.click();
+        await expect(button).toContainText('Copied');
+        expect(await page.evaluate(() => /** @type {any} */ (window).copiedText)).toBe('https://proxyforgame.com/mcp');
+    });
+
+    test('where the clipboard refuses, the address is selected for copying by hand', async ({ page }) => {
+        await page.addInitScript(() => {
+            Object.defineProperty(navigator, 'clipboard', {
+                value: { writeText: async () => { throw new Error('denied'); } },
+            });
+        });
+        await page.goto('/en/mcp');
+        await page.locator('#mcp-address-copy').click();
+        await expect.poll(() => page.evaluate(() => {
+            const input = /** @type {HTMLInputElement} */ (document.getElementById('mcp-address'));
+            return document.activeElement === input && input.selectionEnd - input.selectionStart === input.value.length;
+        })).toBe(true);
+    });
+});

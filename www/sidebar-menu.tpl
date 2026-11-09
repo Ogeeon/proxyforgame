@@ -15,6 +15,15 @@
     <?php endforeach; ?>
     </div>
     <div class="spacer"></div>
+    <div class="sidebar-panel bg-body-secondary text-primary-emphasis"><?=$loc['ai-header']?></div>
+    <div class="list-group list-group-flush">
+    <?php if (($currUrl ?? '') !== '/mcp'): ?>
+      <a class="list-group-item list-group-item-action ai-menu-item text-center" href="/<?=$lang?>/mcp"><?=$loc['ai-link']?></a>
+    <?php else: ?>
+      <div class="list-group-item list-group-item-action ai-menu-item active text-center"><?=$loc['ai-link']?></div>
+    <?php endif; ?>
+    </div>
+    <div class="spacer"></div>
     <div class="sidebar-panel bg-body-secondary text-primary-emphasis"><?=$loc['feedbackItems']['header']?></div>
     <div class="list-group list-group-flush">
       <div class="list-group-item feedback text-center">

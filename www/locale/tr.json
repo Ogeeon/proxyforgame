@@ -298,7 +298,33 @@
   },
   "index": {
     "title": "ProxyForGame - OGame için hesaplamalar",
-    "keywords": "proxyforgame,ogame,ogame hesaplayıcı,ogame araçları,çevrimiçi hesaplayıcı,tarayıcı oyunu,maliyet hesaplayıcı,uçuş süresi hesaplayıcı,ticaret hesaplayıcı,üretim hesaplayıcı,graviton hesaplayıcı,ay hesaplayıcı,terraformer hesaplayıcı,keşif seferi hesaplayıcı,inşaat kuyruğu"
+    "keywords": "proxyforgame,ogame,ogame hesaplayıcı,ogame araçları,çevrimiçi hesaplayıcı,tarayıcı oyunu,maliyet hesaplayıcı,uçuş süresi hesaplayıcı,ticaret hesaplayıcı,üretim hesaplayıcı,graviton hesaplayıcı,ay hesaplayıcı,terraformer hesaplayıcı,keşif seferi hesaplayıcı,inşaat kuyruğu",
+    "ai-card-text": "Bir hesaplayıcıyı açmak için menüden seçin. Onları kullanmanın başka bir yolu da var: doğrudan ChatGPT, Claude ve diğer yapay zekâ asistanlarından. Bir binanın ne kadara mal olduğunu ya da bir filonun ne kadar sürede uçtuğunu sorun, asistan bu sitenin formülleriyle hesaplasın.",
+    "ai-card-button": "Nasıl bağlanır"
+  },
+  "assistants": {
+    "title": "ChatGPT, Claude ve diğer yapay zekâ asistanlarında ProxyForGame hesaplayıcıları",
+    "description": "ProxyForGame'in OGame hesaplayıcılarını ChatGPT, Claude veya MCP destekli başka bir yapay zekâ asistanına bağlayın ve kendi sözlerinizle sorun.",
+    "keywords": "proxyforgame,ogame,mcp,mcp sunucusu,chatgpt,claude,yapay zeka asistanı,ogame hesaplayıcı",
+    "intro": "Bu sitedeki tüm hesaplayıcılar yapay zekâ asistanları tarafından da kullanılabilir. ChatGPT, Claude veya başka bir asistana maliyetleri, uçuşları, üretimi ya da keşifleri kendi sözlerinizle sorun; bu sayfalarla aynı formüllerle hesaplar. Teknik olarak bu bir MCP sunucusudur (Model Context Protocol), bir asistana yeni araçlar vermenin standart yolu.",
+    "address-header": "Sunucu adresi",
+    "address-hint": "Bu adresi asistanınızın ayarlarına yapıştırın. Tarayıcıda açılırsa sizi yalnızca bu sayfaya geri getirir.",
+    "copy": "Kopyala",
+    "copied": "Kopyalandı",
+    "connect-header": "Nasıl bağlanır",
+    "connect-chatgpt": "<strong>ChatGPT</strong>: ayarlardan geliştirici modunu açın, ardından bu adresle, kimlik doğrulaması olmadan özel bir bağlayıcı ekleyin.",
+    "connect-claude": "<strong>Claude</strong> (claude.ai ve masaüstü uygulaması): Ayarlar → Bağlayıcılar → bu adresle özel bir bağlayıcı ekleyin.",
+    "connect-other": "<strong>MCP destekli başka herhangi bir asistan veya istemci</strong>: bu adresi uzak MCP sunucusu olarak ekleyin.",
+    "examples-header": "Ne sorabilirsiniz",
+    "example-1": "Metal Madeni 30 ile 35 arası seviyeler ne kadar tutar ve Robot Fabrikası 10, Nanit Fabrikası 5 ile inşaatı ne kadar sürer?",
+    "example-2": "300 Büyük Nakliye 1:100:8 konumundan 3:250:8 konumuna ne kadar sürede uçar ve ne kadar deuterium harcar?",
+    "example-3": "5 Ölüm Yıldızının 8.000 km çapındaki bir ayı yok etme şansı nedir?",
+    "example-4": "İşte oyundan hesabımın dışa aktarımı. Gezegenlerimden hangisi günde en çok deuterium üretiyor?",
+    "tools-header": "Neleri hesaplayabilir",
+    "tools-import": "Seviyeleri elle girmemeniz için hesabınızın oyundan dışa aktarımı (API)",
+    "privacy-header": "Gizlilik",
+    "privacy": "Sunucu hiçbir şey saklamaz ve sorularınızı kaydetmez. Asistana söyledikleriniz o asistanın kendi kurallarına göre işlenir: ChatGPT, Claude ya da kullandığınız asistan hangisiyse onun.",
+    "developers": "Geliştiriciler için: sunucunun kaynak kodu ve belgeleri GitHub'da"
   },
   "sidebar": {
     "ogameMenuItems": {
@@ -383,7 +409,9 @@
     "external": {
       "external-links": "Dış bağlantılar",
       "expedition-calc": "Keşif hesaplayıcısı"
-    }
+    },
+    "ai-header": "Yapay zekâ asistanları",
+    "ai-link": "ChatGPT, Claude ve diğerlerinde hesaplayıcılar"
   },
   "costs": {
     "title": "OGame – Maliyet Hesaplayıcı",

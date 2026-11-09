@@ -23,6 +23,10 @@ if (preg_match('@^/\w\w(/.*)$@', $path, $m) && !str_starts_with($path, '/js/')) 
 }
 if (preg_match('@^/([a-z0-9-]+)/?$@', $path, $m) && in_array($m[1], PFG_CALCULATORS, true)) {
     $path = '/ogame/calc/' . $m[1] . '.php';
+} elseif (preg_match('@^/([a-z0-9-]+)/?$@', $path, $m) && isset(PFG_PAGES[$m[1]])) {
+    // Unlike Apache, the built-in server has no MCP proxy in front of it, so a
+    // bare /mcp reaches the page too and is redirected to /<lang>/mcp.
+    $path = PFG_PAGES[$m[1]];
 }
 if ($path === $requestPath) {
     return false;

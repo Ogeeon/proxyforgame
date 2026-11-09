@@ -298,7 +298,33 @@
   },
   "index": {
     "title": "ProxyForGame - herramientas para los juegos de navegador en línea OGame",
-    "keywords": "proxyforgame,ogame,calculadora ogame,herramientas ogame,calculadora online,juego de navegador,calculadora de costes,calculadora de tiempo de vuelo,calculadora de comercio,calculadora de producción,calculadora de gravitón,calculadora de luna,calculadora de terraformador,calculadora de expediciones,cola de construcción"
+    "keywords": "proxyforgame,ogame,calculadora ogame,herramientas ogame,calculadora online,juego de navegador,calculadora de costes,calculadora de tiempo de vuelo,calculadora de comercio,calculadora de producción,calculadora de gravitón,calculadora de luna,calculadora de terraformador,calculadora de expediciones,cola de construcción",
+    "ai-card-text": "Para abrir una calculadora, elígela en el menú. También hay otra forma de usarlas: directamente desde ChatGPT, Claude y otros asistentes de IA. Pregunta cuánto cuesta un edificio o cuánto tarda en volar una flota, y el asistente lo calcula con las fórmulas de este sitio.",
+    "ai-card-button": "Cómo conectarlo"
+  },
+  "assistants": {
+    "title": "Las calculadoras de ProxyForGame en ChatGPT, Claude y otros asistentes de IA",
+    "description": "Conecta las calculadoras de ProxyForGame para OGame a ChatGPT, Claude o cualquier otro asistente de IA compatible con MCP y pregunta con tus propias palabras.",
+    "keywords": "proxyforgame,ogame,mcp,servidor mcp,chatgpt,claude,asistente de ia,calculadora ogame",
+    "intro": "Todas las calculadoras de este sitio están disponibles también para los asistentes de IA. Pregunta a ChatGPT, Claude u otro asistente con tus propias palabras sobre costes, vuelos, producción o expediciones, y calculará con las mismas fórmulas que estas páginas. Técnicamente es un servidor MCP (Model Context Protocol), la forma estándar de dar nuevas herramientas a un asistente.",
+    "address-header": "Dirección del servidor",
+    "address-hint": "Pega esta dirección en la configuración de tu asistente. Si la abres en un navegador, simplemente te devuelve a esta página.",
+    "copy": "Copiar",
+    "copied": "Copiado",
+    "connect-header": "Cómo conectarlo",
+    "connect-chatgpt": "<strong>ChatGPT</strong>: activa el modo desarrollador en la configuración y añade un conector personalizado con esta dirección, sin autenticación.",
+    "connect-claude": "<strong>Claude</strong> (claude.ai y la aplicación de escritorio): Configuración → Conectores → añade un conector personalizado con esta dirección.",
+    "connect-other": "<strong>Cualquier otro asistente o cliente compatible con MCP</strong>: añade esta dirección como servidor MCP remoto.",
+    "examples-header": "Qué preguntar",
+    "example-1": "¿Cuánto cuestan los niveles 30 a 35 de la Mina de Metal y cuánto tardan en construirse con Fábrica de Robots 10 y Fábrica de Nanobots 5?",
+    "example-2": "¿Cuánto tardan 300 Naves de Carga Grande en volar de 1:100:8 a 3:250:8 y cuánto deuterio gastan?",
+    "example-3": "¿Qué probabilidad hay de que 5 Estrellas de la Muerte destruyan una luna de 8.000 km?",
+    "example-4": "Aquí tienes la exportación de mi cuenta del juego. ¿Cuál de mis planetas produce más deuterio al día?",
+    "tools-header": "Qué puede calcular",
+    "tools-import": "La exportación de tu cuenta del juego (API), para no tener que escribir los niveles a mano",
+    "privacy-header": "Privacidad",
+    "privacy": "El servidor no guarda nada ni registra lo que le preguntas. Lo que le cuentas al asistente se trata según las reglas de ese asistente: las de ChatGPT, Claude o el que uses.",
+    "developers": "Para desarrolladores: código fuente y documentación del servidor en GitHub"
   },
   "sidebar": {
     "ogameMenuItems": {
@@ -383,7 +409,9 @@
     "external": {
       "external-links": "Enlaces externos",
       "expedition-calc": "Calculadora de expediciones"
-    }
+    },
+    "ai-header": "Asistentes de IA",
+    "ai-link": "Calculadoras en ChatGPT, Claude y otros"
   },
   "costs": {
     "title": "OGame - Calculadora de Costes",

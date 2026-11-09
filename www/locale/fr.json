@@ -298,7 +298,33 @@
   },
   "index": {
     "title": "ProxyForGame - l'utilité pour les jeux par navigateurs OGame",
-    "keywords": "proxyforgame,ogame,calculatrice ogame,outils ogame,calculatrice en ligne,jeu par navigateur,calculatrice de coûts,calculateur de temps de vol,calculatrice de commerce,calculatrice de production,calculatrice de graviton,calculatrice de lune,calculatrice de terraformeur,calculatrice d'expédition,file de construction"
+    "keywords": "proxyforgame,ogame,calculatrice ogame,outils ogame,calculatrice en ligne,jeu par navigateur,calculatrice de coûts,calculateur de temps de vol,calculatrice de commerce,calculatrice de production,calculatrice de graviton,calculatrice de lune,calculatrice de terraformeur,calculatrice d'expédition,file de construction",
+    "ai-card-text": "Pour ouvrir un calculateur, choisissez-le dans le menu. Il existe aussi une autre façon de les utiliser : directement depuis ChatGPT, Claude et d'autres assistants IA. Demandez combien coûte un bâtiment ou combien de temps vole une flotte, et l'assistant fait le calcul avec les formules de ce site.",
+    "ai-card-button": "Comment le connecter"
+  },
+  "assistants": {
+    "title": "Les calculateurs ProxyForGame dans ChatGPT, Claude et les autres assistants IA",
+    "description": "Connectez les calculateurs ProxyForGame pour OGame à ChatGPT, Claude ou tout autre assistant IA compatible MCP, et posez vos questions avec vos propres mots.",
+    "keywords": "proxyforgame,ogame,mcp,serveur mcp,chatgpt,claude,assistant ia,calculateur ogame",
+    "intro": "Tous les calculateurs de ce site sont aussi accessibles aux assistants IA. Interrogez ChatGPT, Claude ou un autre assistant avec vos propres mots sur les coûts, les vols, la production ou les expéditions : il calcule avec les mêmes formules que ces pages. Techniquement, il s'agit d'un serveur MCP (Model Context Protocol), la manière standard de donner de nouveaux outils à un assistant.",
+    "address-header": "Adresse du serveur",
+    "address-hint": "Collez cette adresse dans les paramètres de votre assistant. Ouverte dans un navigateur, elle vous ramène simplement sur cette page.",
+    "copy": "Copier",
+    "copied": "Copié",
+    "connect-header": "Comment le connecter",
+    "connect-chatgpt": "<strong>ChatGPT</strong> : activez le mode développeur dans les paramètres, puis ajoutez un connecteur personnalisé avec cette adresse, sans authentification.",
+    "connect-claude": "<strong>Claude</strong> (claude.ai et l'application de bureau) : Paramètres → Connecteurs → ajoutez un connecteur personnalisé avec cette adresse.",
+    "connect-other": "<strong>Tout autre assistant ou client compatible MCP</strong> : ajoutez cette adresse comme serveur MCP distant.",
+    "examples-header": "Que demander",
+    "example-1": "Combien coûtent les niveaux 30 à 35 de la Mine de métal, et combien de temps prend leur construction avec une Usine de robots 10 et une Usine de nanites 5 ?",
+    "example-2": "Combien de temps volent 300 Grands transporteurs de 1:100:8 à 3:250:8, et combien de deutérium consomment-ils ?",
+    "example-3": "Quelle est la probabilité que 5 Étoiles de la mort détruisent une lune de 8 000 km ?",
+    "example-4": "Voici l'export de mon compte depuis le jeu. Laquelle de mes planètes produit le plus de deutérium par jour ?",
+    "tools-header": "Ce qu'il sait calculer",
+    "tools-import": "L'export de votre compte depuis le jeu (API), pour ne pas saisir les niveaux à la main",
+    "privacy-header": "Confidentialité",
+    "privacy": "Le serveur ne stocke rien et n'enregistre pas vos questions. Ce que vous confiez à l'assistant est traité selon les règles de cet assistant : celles de ChatGPT, de Claude ou de celui que vous utilisez.",
+    "developers": "Pour les développeurs : code source et documentation du serveur sur GitHub"
   },
   "sidebar": {
     "ogameMenuItems": {
@@ -383,7 +409,9 @@
     "external": {
       "external-links": "Liens externes",
       "expedition-calc": "Calculateur d'expéditions"
-    }
+    },
+    "ai-header": "Assistants IA",
+    "ai-link": "Calculateurs dans ChatGPT, Claude et autres"
   },
   "costs": {
     "title": "OGame - Calculateur de coûts",

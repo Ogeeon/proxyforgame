@@ -4,7 +4,9 @@
 // POST of a JSON-RPC message to a single endpoint, answered with one JSON body.
 // The server never opens an SSE stream - no tool here runs long enough to need
 // progress, and nothing is ever pushed to a client - so GET answers 405, which
-// the spec reserves for exactly that, and no Mcp-Session-Id is issued.
+// the spec reserves for exactly that, and no Mcp-Session-Id is issued. The one
+// exception is a browser opening the address as a page, which is redirected to
+// the site page about the server (HttpOptions.pagePath).
 //
 // Apache proxies the public /mcp path here (deploy/apache-mcp.conf); the
 // process itself listens on loopback only.
@@ -26,6 +28,9 @@ const MAX_BODY_BYTES = 256 * 1024;
  * @property {boolean} trustProxy take the client address from X-Forwarded-For
  *   when the connection comes from loopback, i.e. from Apache
  * @property {(line: string) => void} log
+ * @property {string} [pagePath] where a browser that opens the endpoint as a
+ *   page is sent: the site page that explains the server. Unset, it gets the
+ *   405 every other GET gets.
  * @property {() => number} [now]
  */
 
@@ -62,6 +67,14 @@ function createHttpHandler(protocol, options) {
         }
         if (url.pathname !== options.path) {
             sendJson(res, 404, { error: 'Not found' });
+            return;
+        }
+
+        // A player who pastes the address into the browser's address bar would
+        // otherwise read a bare JSON-RPC error. A client's GET asks for
+        // text/event-stream, never text/html, so it still gets the 405 below.
+        if (options.pagePath && req.method === 'GET' && wantsHtml(req)) {
+            res.writeHead(302, { Location: options.pagePath, 'Cache-Control': 'no-store' }).end();
             return;
         }
 
@@ -125,6 +138,16 @@ function createHttpHandler(protocol, options) {
         }
         return null;
     }
+}
+
+/**
+ * Whether the request is a browser navigation: it accepts HTML and is not
+ * asking for the event stream a client's GET would.
+ * @param {import('node:http').IncomingMessage} req
+ */
+function wantsHtml(req) {
+    const accept = req.headers.accept ?? '';
+    return accept.includes('text/html') && !accept.includes('text/event-stream');
 }
 
 /**

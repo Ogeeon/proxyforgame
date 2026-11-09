@@ -298,7 +298,33 @@
   },
   "index": {
     "title": "ProxyForGame - tools for online browser game OGame",
-    "keywords": "proxyforgame,ogame,ogame calculator,ogame tools,online calculator,browser game,cost calculator,flight time calculator,trade calculator,production calculator,graviton calculator,moon calculator,terraformer calculator,expedition calculator,construction queue"
+    "keywords": "proxyforgame,ogame,ogame calculator,ogame tools,online calculator,browser game,cost calculator,flight time calculator,trade calculator,production calculator,graviton calculator,moon calculator,terraformer calculator,expedition calculator,construction queue",
+    "ai-card-text": "To open a calculator, pick it in the menu. There is another way to use them too: right from ChatGPT, Claude and other AI assistants. Ask what a building costs or how long a fleet takes to fly, and the assistant works it out with this site's formulas.",
+    "ai-card-button": "How to connect"
+  },
+  "assistants": {
+    "title": "ProxyForGame calculators in ChatGPT, Claude and other AI assistants",
+    "description": "Connect the ProxyForGame calculators for OGame to ChatGPT, Claude or any other AI assistant with MCP support, and ask in your own words.",
+    "keywords": "proxyforgame,ogame,mcp,mcp server,chatgpt,claude,ai assistant,ogame calculator",
+    "intro": "Every calculator on this site is available to AI assistants too. Ask ChatGPT, Claude or another assistant about costs, flights, production or expeditions in your own words, and it calculates with the same formulas as these pages. Technically this is an MCP server (Model Context Protocol), the standard way to give an assistant new tools.",
+    "address-header": "Server address",
+    "address-hint": "Paste this address into your assistant's settings. Opened in a browser, it just brings you back to this page.",
+    "copy": "Copy",
+    "copied": "Copied",
+    "connect-header": "How to connect",
+    "connect-chatgpt": "<strong>ChatGPT</strong>: turn on developer mode in the settings, then add a custom connector with this address and no authentication.",
+    "connect-claude": "<strong>Claude</strong> (claude.ai and the desktop app): Settings → Connectors → add a custom connector with this address.",
+    "connect-other": "<strong>Any other assistant or client with MCP support</strong>: add this address as a remote MCP server.",
+    "examples-header": "What to ask",
+    "example-1": "What do Metal mine levels 30 to 35 cost, and how long do they take to build with Robotics factory 10 and Nanite factory 5?",
+    "example-2": "How long do 300 Large cargo ships take to fly from 1:100:8 to 3:250:8, and how much deuterium do they use?",
+    "example-3": "What is the chance that 5 Death Stars destroy a moon of 8,000 km?",
+    "example-4": "Here is my account export from the game. Which of my planets produces the most deuterium per day?",
+    "tools-header": "What it can calculate",
+    "tools-import": "Your account export from the game (API), so you don't have to type in the levels by hand",
+    "privacy-header": "Privacy",
+    "privacy": "The server stores nothing and does not record what you ask it. What you tell the assistant is handled under that assistant's own rules: those of ChatGPT, Claude or whichever one you use.",
+    "developers": "For developers: the server's source code and documentation on GitHub"
   },
   "sidebar": {
     "ogameMenuItems": {
@@ -383,7 +409,9 @@
     "external": {
       "external-links": "External links",
       "expedition-calc": "Expeditions calculator"
-    }
+    },
+    "ai-header": "AI assistants",
+    "ai-link": "Calculators in ChatGPT, Claude & more"
   },
   "costs": {
     "title": "OGame - Costs calculator",

@@ -298,7 +298,33 @@
   },
   "index": {
     "title": "ProxyForGame - instrumenten het browser spel OGame",
-    "keywords": "proxyforgame,ogame,ogame calculator,ogame tools,online calculator,browsergame,kostencalculator,vliegtijd calculator,handelscalculator,productiecalculator,gravitoncalculator,maancalculator,terraformer calculator,expeditiecalculator,bouwwachtrij"
+    "keywords": "proxyforgame,ogame,ogame calculator,ogame tools,online calculator,browsergame,kostencalculator,vliegtijd calculator,handelscalculator,productiecalculator,gravitoncalculator,maancalculator,terraformer calculator,expeditiecalculator,bouwwachtrij",
+    "ai-card-text": "Kies een calculator in het menu om hem te openen. Je kunt ze ook op een andere manier gebruiken: rechtstreeks vanuit ChatGPT, Claude en andere AI-assistenten. Vraag wat een gebouw kost of hoe lang een vloot onderweg is, en de assistent rekent het uit met de formules van deze site.",
+    "ai-card-button": "Zo koppel je hem"
+  },
+  "assistants": {
+    "title": "ProxyForGame-calculators in ChatGPT, Claude en andere AI-assistenten",
+    "description": "Koppel de ProxyForGame-calculators voor OGame aan ChatGPT, Claude of een andere AI-assistent met MCP-ondersteuning en vraag het in je eigen woorden.",
+    "keywords": "proxyforgame,ogame,mcp,mcp-server,chatgpt,claude,ai-assistent,ogame calculator",
+    "intro": "Alle calculators op deze site zijn ook beschikbaar voor AI-assistenten. Vraag ChatGPT, Claude of een andere assistent in je eigen woorden naar kosten, vluchten, productie of expedities, en hij rekent met dezelfde formules als deze pagina's. Technisch is dit een MCP-server (Model Context Protocol), de standaardmanier om een assistent nieuwe hulpmiddelen te geven.",
+    "address-header": "Serveradres",
+    "address-hint": "Plak dit adres in de instellingen van je assistent. Geopend in een browser brengt het je gewoon terug naar deze pagina.",
+    "copy": "Kopiëren",
+    "copied": "Gekopieerd",
+    "connect-header": "Zo koppel je hem",
+    "connect-chatgpt": "<strong>ChatGPT</strong>: zet in de instellingen de ontwikkelaarsmodus aan en voeg dan een eigen connector toe met dit adres, zonder authenticatie.",
+    "connect-claude": "<strong>Claude</strong> (claude.ai en de desktop-app): Instellingen → Connectors → voeg een eigen connector toe met dit adres.",
+    "connect-other": "<strong>Elke andere assistent of client met MCP-ondersteuning</strong>: voeg dit adres toe als externe MCP-server.",
+    "examples-header": "Wat je kunt vragen",
+    "example-1": "Wat kosten de niveaus 30 tot 35 van de Metaalmijn, en hoe lang duurt de bouw met Robotfabriek 10 en Nanorobotfabriek 5?",
+    "example-2": "Hoe lang vliegen 300 Grote vrachtschepen van 1:100:8 naar 3:250:8, en hoeveel deuterium verbruiken ze?",
+    "example-3": "Hoe groot is de kans dat 5 Sterren des Doods een maan van 8.000 km vernietigen?",
+    "example-4": "Hier is de export van mijn account uit het spel. Welke van mijn planeten produceert de meeste deuterium per dag?",
+    "tools-header": "Wat hij kan berekenen",
+    "tools-import": "De export van je account uit het spel (API), zodat je de niveaus niet met de hand hoeft in te typen",
+    "privacy-header": "Privacy",
+    "privacy": "De server slaat niets op en legt je vragen niet vast. Wat je de assistent vertelt, valt onder de regels van die assistent: die van ChatGPT, Claude of welke je ook gebruikt.",
+    "developers": "Voor ontwikkelaars: broncode en documentatie van de server op GitHub"
   },
   "sidebar": {
     "ogameMenuItems": {
@@ -383,7 +409,9 @@
     "external": {
       "external-links": "Externe links",
       "expedition-calc": "Expedities rekenmachine"
-    }
+    },
+    "ai-header": "AI-assistenten",
+    "ai-link": "Calculators in ChatGPT, Claude e.a."
   },
   "costs": {
     "title": "OGame - Kosten berekening",

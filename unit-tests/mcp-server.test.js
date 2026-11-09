@@ -182,6 +182,7 @@ describe('MCP HTTP transport', () => {
             rateLimit: 30,
             trustProxy: true,
             log: () => {},
+            pagePath: '/assistants.php',
         });
         server = http.createServer(handler);
         await new Promise((resolve) => server.listen(0, '127.0.0.1', resolve));
@@ -218,6 +219,20 @@ describe('MCP HTTP transport', () => {
         const res = await fetch(`${base}/mcp`, { headers: { accept: 'text/event-stream' } });
         expect(res.status).toBe(405);
         expect(res.headers.get('allow')).toBe('POST');
+    });
+
+    it('sends a browser that opens the address to the page about the server', async () => {
+        const res = await fetch(`${base}/mcp`, {
+            redirect: 'manual',
+            headers: { accept: 'text/html,application/xhtml+xml,*/*;q=0.8' },
+        });
+        expect(res.status).toBe(302);
+        expect(res.headers.get('location')).toBe('/assistants.php');
+    });
+
+    it('keeps the 405 for a GET that asks for both HTML and the event stream', async () => {
+        const res = await fetch(`${base}/mcp`, { redirect: 'manual', headers: { accept: 'text/html, text/event-stream' } });
+        expect(res.status).toBe(405);
     });
 
     it('refuses a browser origin it does not know, and serves one it does', async () => {

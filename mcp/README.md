@@ -111,6 +111,10 @@ node mcp/server.js --stdio        # one client over stdin/stdout
 
 ## Connecting a client
 
+The players' version of this section is the site page `/<lang>/mcp` (`www/assistants.php`),
+linked from the sidebar and the start page; a browser that opens `/mcp` itself is redirected
+there. Keep the two in step.
+
 - **ChatGPT** - with developer mode on, add a custom MCP connector with the URL
   `https://proxyforgame.com/mcp` and no authentication.
 - **Claude** (claude.ai, Desktop) - Settings → Connectors → add a custom connector with

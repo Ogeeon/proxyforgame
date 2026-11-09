@@ -13,6 +13,18 @@ const PFG_CALCULATORS = array(
     'graviton', 'terraformer', 'flight', 'moon', 'expeditions',
 );
 
+// Pages that are not calculators, by their short address, with the controller
+// each one runs. They follow the same rule: /<lang>/<page> is the one URL, and
+// the controller calls canonicalCalcPath() with the short name.
+//
+// /<lang>/mcp is the page that explains the MCP server. Its controller must not
+// be called mcp.php: the server itself is at /mcp, which Apache hands to the
+// Node process by a ProxyPass prefix match (deploy/apache-mcp.conf), and the
+// internal rewrite to /mcp.php would be re-matched against that prefix.
+const PFG_PAGES = array(
+    'mcp' => '/assistants.php',
+);
+
 /**
  * Redirects the request to /<lang>/<calc> unless it already arrived there,
  * and returns the calculator's path without the language prefix - what the

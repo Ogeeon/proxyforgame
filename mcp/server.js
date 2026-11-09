@@ -58,6 +58,9 @@ function main() {
     const port = Number.parseInt(env.PFG_MCP_PORT || '8787', 10);
     const handler = createHttpHandler(protocol, {
         path: '/mcp',
+        // The page's controller; it redirects on to /<lang>/mcp by the
+        // visitor's language. Relative: Apache serves both from the same host.
+        pagePath: '/assistants.php',
         allowedOrigins: (env.PFG_MCP_ALLOWED_ORIGINS || 'https://proxyforgame.com,https://proxyforgame.net')
             .split(',').map((o) => o.trim()).filter(Boolean),
         rateLimit: Number.parseInt(env.PFG_MCP_RATE_LIMIT || '120', 10),
