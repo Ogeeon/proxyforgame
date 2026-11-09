@@ -99,9 +99,10 @@
     const cbLight = document.getElementById('cb-light-theme');
     if (cbLight) cbLight.addEventListener('click', function() { toggleLightBS(this.checked); });
 
-    // Copy the server address. Where the clipboard is unavailable (an insecure
-    // origin, a refused permission) the address is selected instead, ready for
-    // the player to copy by hand.
+    // Copy the server address. The Clipboard API exists only in a secure
+    // context and may be refused; the fallback copies the selected address the
+    // old way, which works on plain http too. Should both fail, the address
+    // stays selected, ready for the player to copy by hand.
     const address = document.getElementById('mcp-address');
     const copy = document.getElementById('mcp-address-copy');
     if (!address || !copy) return;
@@ -112,13 +113,26 @@
       if (label) label.textContent = copied ? (copy.dataset.copiedText || original) : original;
       if (icon) icon.className = copied ? 'bi bi-clipboard-check' : 'bi bi-clipboard';
     };
-    copy.addEventListener('click', async function() {
+    const copyAddress = async function() {
+      if (navigator.clipboard) {
+        try {
+          await navigator.clipboard.writeText(address.value);
+          return true;
+        } catch {
+          // Refused: fall back to the selection below.
+        }
+      }
+      address.select();
       try {
-        await navigator.clipboard.writeText(address.value);
+        return document.execCommand('copy'); // NOSONAR(S1874) - the only copy outside a secure context
+      } catch {
+        return false;
+      }
+    };
+    copy.addEventListener('click', async function() {
+      if (await copyAddress()) {
         showCopied(true);
         setTimeout(function() { showCopied(false); }, 2000);
-      } catch {
-        address.select();
       }
     });
   });

@@ -82,7 +82,7 @@ test.describe('The AI assistants page', () => {
     });
 
     // The real clipboard exists only in a secure context, which http://pfg.wmp is
-    // not, so both tests stand in a fake one: what they check is the page's code.
+    // not, so these tests stand in fakes: what they check is the page's code.
     test('the copy button puts the address on the clipboard', async ({ page }) => {
         await page.addInitScript(() => {
             Object.defineProperty(navigator, 'clipboard', {
@@ -96,17 +96,48 @@ test.describe('The AI assistants page', () => {
         expect(await page.evaluate(() => /** @type {any} */ (window).copiedText)).toBe('https://proxyforgame.com/mcp');
     });
 
-    test('where the clipboard refuses, the address is selected for copying by hand', async ({ page }) => {
-        await page.addInitScript(() => {
+    /**
+     * Stands in the clipboard of an insecure origin (none) or a refusing one, and
+     * an execCommand('copy') that records the selection it copied, or fails.
+     * @param {import('@playwright/test').Page} page
+     * @param {{clipboard: 'none'|'refuses', execCommandWorks: boolean}} setup
+     */
+    async function fakeCopy(page, setup) {
+        await page.addInitScript((s) => {
+            const w = /** @type {any} */ (window);
             Object.defineProperty(navigator, 'clipboard', {
-                value: { writeText: async () => { throw new Error('denied'); } },
+                value: s.clipboard === 'none' ? undefined : { writeText: async () => { throw new Error('denied'); } },
             });
+            document.execCommand = (command) => {
+                const input = /** @type {HTMLInputElement} */ (document.activeElement);
+                w.copiedText = s.execCommandWorks && command === 'copy'
+                    ? input.value.slice(input.selectionStart ?? 0, input.selectionEnd ?? 0)
+                    : undefined;
+                return s.execCommandWorks;
+            };
+        }, setup);
+    }
+
+    for (const clipboard of /** @type {const} */ (['none', 'refuses'])) {
+        test(`without the Clipboard API (${clipboard}) the button still copies the address`, async ({ page }) => {
+            await fakeCopy(page, { clipboard, execCommandWorks: true });
+            await page.goto('/en/mcp');
+            const button = page.locator('#mcp-address-copy');
+            await button.click();
+            await expect(button).toContainText('Copied');
+            expect(await page.evaluate(() => /** @type {any} */ (window).copiedText)).toBe('https://proxyforgame.com/mcp');
         });
+    }
+
+    test('where no copy works, the address is left selected for copying by hand', async ({ page }) => {
+        await fakeCopy(page, { clipboard: 'none', execCommandWorks: false });
         await page.goto('/en/mcp');
-        await page.locator('#mcp-address-copy').click();
+        const button = page.locator('#mcp-address-copy');
+        await button.click();
         await expect.poll(() => page.evaluate(() => {
             const input = /** @type {HTMLInputElement} */ (document.getElementById('mcp-address'));
             return document.activeElement === input && input.selectionEnd - input.selectionStart === input.value.length;
         })).toBe(true);
+        await expect(button).not.toContainText('Copied');
     });
 });
