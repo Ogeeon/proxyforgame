@@ -4,19 +4,12 @@
   require_once 'Intl.php'; // NOSONAR
   $loc = Intl::getTranslations($lang, 'sidebar');
 
-  $ogamePages = array(
-    array('/trade', 'trade-title'),
-    array('/costs', 'costs-title'),
-    array('/lfcosts', 'lfcosts-title'),
-    array('/queue', 'queue-title'),
-    array('/production', 'production-title'),
-    array('/graviton', 'graviton-title'),
-    array('/terraformer', 'terraformer-title'),
-    array('/flight', 'flight-title'),
-    array('/moon', 'moon-title'),
-    array('/expeditions', 'expeditions-title')
-  );
-  
+  require_once __DIR__ . '/routes.inc.php'; // NOSONAR
+  $ogamePages = array();
+  foreach (PFG_CALCULATORS as $calc) {
+    $ogamePages[] = array('/' . $calc, $calc . '-title');
+  }
+
   require_once 'db.connect.inc.php'; // NOSONAR
   $result = sqlQuery("SELECT MAX(id) as m FROM change_headers", array());
   $currChange = 0;
@@ -72,51 +65,7 @@
 <!-- Sidebar for larger screens -->
 <div id="sidebar" class="card d-none d-lg-block">
   <div class="card-body p-0">
-    <div class="sidebar-panel bg-body-secondary text-primary-emphasis"><?=$loc['ogameMenuItems']['header']?> <small>(13.0)</small></div>
-    <div class="list-group list-group-flush">
-    <a class="list-group-item list-group-item-action ogame-menu-item text-center" href="/<?=$lang?>/"><?=$loc['ogameMenuItems']['main-title']?></a>
-    <?php foreach ($ogamePages as $page): ?>
-      <?php if ($page[0] !== ($currUrl ?? '')): ?>
-        <a class="list-group-item list-group-item-action ogame-menu-item text-center" href="/<?=$lang.$page[0]?>"><?=$loc['ogameMenuItems'][$page[1]]?></a>
-      <?php else: ?>
-        <div class="list-group-item list-group-item-action ogame-menu-item active text-center"><?=$loc['ogameMenuItems'][$page[1]]?></div>
-      <?php endif; ?>
-    <?php endforeach; ?>
-    </div>
-    <div class="spacer"></div>
-    <div class="sidebar-panel bg-body-secondary text-primary-emphasis"><?=$loc['feedbackItems']['header']?></div>
-    <div class="list-group list-group-flush">
-      <div class="list-group-item feedback text-center">
-        <?=str_replace(['<br>', '<br/>'], ' ', $loc['feedbackItems']['misspelling'])?>
-      </div>
-      <div class="list-group-item feedback text-center">
-        <?=str_replace(['<br>', '<br/>'], ' ', $loc['feedbackItems']['mail'])?>
-      </div>
-      <div class="list-group-item feedback text-center">
-        <?=str_replace(['<br>', '<br/>'], ' ', $loc['feedbackItems']['board'])?>
-      </div>
-      <div class="list-group-item feedback text-center">
-        <?=str_replace(['<br>', '<br/>'], ' ', $loc['feedbackItems']['discord'])?>
-      </div>
-    </div>
-    <div class="spacer"></div>
-    <div class="sidebar-panel bg-body-secondary text-primary-emphasis">Cookies</div>
-    <div class="list-group list-group-flush">
-      <div class="list-group-item feedback text-center">
-        <a href="/policy.php" class="d-inline" target="_blank">Privacy Policy</a>
-      </div>
-    </div>
-    <div class="spacer"></div>
-    <div class="list-group list-group-flush">
-      <div class="list-group-item text-center">
-        <a href="https://github.com/Ogeeon/proxyforgame" target="_blank" rel="noopener noreferrer" data-bs-toggle="tooltip" title="ProxyForGame on GitHub">
-          <i class="bi bi-github" style="font-size: 1.5rem;"></i>
-        </a>
-      </div>
-      <div class="list-group-item changelog">
-        <a href="#" onclick="requestAndShowChangelog(-1); return false;"><?=$loc['changelogStrings']['changelog']?></a>
-      </div>
-    </div>
+    <?php require __DIR__ . '/sidebar-menu.tpl'; // NOSONAR - rendered twice, once per layout ?>
   </div>
 </div>
 
@@ -126,51 +75,7 @@
     <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
   </div>
   <div class="offcanvas-body p-0">
-    <div class="sidebar-panel bg-body-secondary text-primary-emphasis"><?=$loc['ogameMenuItems']['header']?> <small>(13.0)</small></div>
-    <div class="list-group list-group-flush">
-    <a class="list-group-item list-group-item-action ogame-menu-item text-center" href="/<?=$lang?>/"><?=$loc['ogameMenuItems']['main-title']?></a>
-    <?php foreach ($ogamePages as $page): ?>
-      <?php if ($page[0] !== ($currUrl ?? '')): ?>
-        <a class="list-group-item list-group-item-action ogame-menu-item text-center" href="/<?=$lang.$page[0]?>"><?=$loc['ogameMenuItems'][$page[1]]?></a>
-      <?php else: ?>
-        <div class="list-group-item list-group-item-action ogame-menu-item active text-center"><?=$loc['ogameMenuItems'][$page[1]]?></div>
-      <?php endif; ?>
-    <?php endforeach; ?>
-    </div>
-    <div class="spacer"></div>
-    <div class="sidebar-panel bg-body-secondary text-primary-emphasis"><?=$loc['feedbackItems']['header']?></div>
-    <div class="list-group list-group-flush">
-      <div class="list-group-item feedback text-center">
-        <?=str_replace(['<br>', '<br/>'], ' ', $loc['feedbackItems']['misspelling'])?>
-      </div>
-      <div class="list-group-item feedback text-center">
-        <?=str_replace(['<br>', '<br/>'], ' ', $loc['feedbackItems']['mail'])?>
-      </div>
-      <div class="list-group-item feedback text-center">
-        <?=str_replace(['<br>', '<br/>'], ' ', $loc['feedbackItems']['board'])?>
-      </div>
-      <div class="list-group-item feedback text-center">
-        <?=str_replace(['<br>', '<br/>'], ' ', $loc['feedbackItems']['discord'])?>
-      </div>
-    </div>
-    <div class="spacer"></div>
-    <div class="sidebar-panel bg-body-secondary text-primary-emphasis">Cookies</div>
-    <div class="list-group list-group-flush">
-      <div class="list-group-item feedback text-center">
-        <a href="/policy.php" class="d-inline" target="_blank">Privacy Policy</a>
-      </div>
-    </div>
-    <div class="spacer"></div>
-    <div class="list-group list-group-flush">
-      <div class="list-group-item text-center">
-        <a href="https://github.com/Ogeeon/proxyforgame" target="_blank" rel="noopener noreferrer" data-bs-toggle="tooltip" title="ProxyForGame on GitHub">
-          <i class="bi bi-github" style="font-size: 1.5rem;"></i>
-        </a>
-      </div>
-      <div class="list-group-item changelog">
-        <a href="#" onclick="requestAndShowChangelog(-1); return false;"><?=$loc['changelogStrings']['changelog']?></a>
-      </div>
-    </div>
+    <?php require __DIR__ . '/sidebar-menu.tpl'; // NOSONAR - rendered twice, once per layout ?>
   </div>
 </div>
 

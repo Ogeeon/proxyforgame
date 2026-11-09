@@ -25,6 +25,13 @@ test.describe('Changelog dialog on load', () => {
     expect(JSON.parse(saved || '{}').value).toBe(current);
   });
 
+  test('the sidebar button opens it on demand', async ({ page }) => {
+    await page.goto('/');
+    await page.locator('#sidebar .changelog-open').click();
+    await expect(page.locator('#changelogModal')).toBeVisible();
+    await expect(page.locator('#changelog-tbl tbody tr').first()).toBeVisible();
+  });
+
   test('a returning visitor who missed a release gets it', async ({ page }) => {
     await page.addInitScript(() => {
       localStorage.setItem('lastChange', JSON.stringify({ value: 0 }));

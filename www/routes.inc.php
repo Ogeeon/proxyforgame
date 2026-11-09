@@ -7,9 +7,10 @@
 // Apache, which carries its own copy of this list, and in scripts/dev-router.php
 // under the built-in server, which reads it from here.
 
+// In the order the sidebar menu lists them, which reads them from here.
 const PFG_CALCULATORS = array(
-    'costs', 'expeditions', 'flight', 'graviton', 'lfcosts',
-    'moon', 'production', 'queue', 'terraformer', 'trade',
+    'trade', 'costs', 'lfcosts', 'queue', 'production',
+    'graviton', 'terraformer', 'flight', 'moon', 'expeditions',
 );
 
 /**

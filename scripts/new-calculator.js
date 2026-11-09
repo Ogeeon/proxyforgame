@@ -24,7 +24,6 @@ const CALC_DIR = path.join(__dirname, '..', 'www', 'ogame', 'calc');
 const JS_DIR = path.join(CALC_DIR, 'js');
 const CSS_DIR = path.join(CALC_DIR, 'css');
 const LOCALE_DIR = path.join(__dirname, '..', 'www', 'locale');
-const SIDEBAR_FILE = path.join(__dirname, '..', 'www', 'sidebar.tpl');
 const ROUTES_FILE = path.join(__dirname, '..', 'www', 'routes.inc.php');
 const HTACCESS_FILE = path.join(__dirname, '..', 'www', '.htaccess');
 const TESTS_DIR = path.join(__dirname, '..', 'playwright-tests', 'tests');
@@ -475,30 +474,9 @@ function addTranslationKeys(calcName, translations) {
 }
 
 /**
- * Update sidebar navigation (www/sidebar.tpl's $ogamePages array)
- */
-function updateSidebar(calcName) {
-  const content = fs.readFileSync(SIDEBAR_FILE, 'utf8');
-
-  // Check if already exists
-  if (content.includes(`array('/${calcName}',`)) {
-    return false; // Already exists
-  }
-
-  // Find the expeditions line and add after it
-  const newEntry = `    array('/${calcName}', '${calcName}-title'),\n`;
-  const updatedContent = content.replace(
-    /( {4}array\('\/expeditions', 'expeditions-title'\)\n)/,
-    `${newEntry}$1`
-  );
-
-  fs.writeFileSync(SIDEBAR_FILE, updatedContent, 'utf8');
-  return true;
-}
-
-/**
  * Register the short address /<lang>/<calc>: PFG_CALCULATORS in www/routes.inc.php
- * (read by the controller and the dev router) and the rewrite rule in www/.htaccess
+ * (read by the controller, the dev router and the sidebar menu, which lists the
+ * calculators in its order) and the rewrite rule in www/.htaccess
  */
 function updateRoutes(calcName) {
   const routes = fs.readFileSync(ROUTES_FILE, 'utf8');
@@ -628,19 +606,10 @@ function main() {
     console.error(colorize(`  ⚠ Translation sync failed: ${error.message}`, colors.yellow));
   }
 
-  // Update sidebar
-  console.log(colorize(`\n  Updating sidebar navigation...`, colors.gray));
-  const sidebarUpdated = updateSidebar(calcName);
-  if (sidebarUpdated) {
-    console.log(colorize(`  ✓ Sidebar navigation updated`, colors.green));
-  } else {
-    console.log(colorize(`  ○ Sidebar already has entry, skipping`, colors.yellow));
-  }
-
-  // Register the short address
+  // Register the short address; the sidebar menu lists PFG_CALCULATORS, so this adds it there too
   console.log(colorize(`\n  Registering the /<lang>/${calcName} route...`, colors.gray));
   if (updateRoutes(calcName)) {
-    console.log(colorize(`  ✓ routes.inc.php and .htaccess updated`, colors.green));
+    console.log(colorize(`  ✓ routes.inc.php and .htaccess updated (the sidebar lists it last)`, colors.green));
   } else {
     console.log(colorize(`  ○ Route already registered, skipping`, colors.yellow));
   }

@@ -104,14 +104,19 @@ body.sidebar-offcanvas-open .btn[data-bs-toggle="offcanvas"] {
     text-align: center;
 }
 
-#sidebar .changelog a,
-#sidebarOffcanvas .changelog a {
+/* A button (it opens a dialog, it goes nowhere) that reads as the link it used to be */
+#sidebar .changelog .changelog-open,
+#sidebarOffcanvas .changelog .changelog-open {
+    padding: 0;
+    border: 0;
+    font-weight: inherit;
+    vertical-align: baseline;
     text-decoration: none;
     color: #0d6efd;
 }
 
-#sidebar .changelog a:hover,
-#sidebarOffcanvas .changelog a:hover {
+#sidebar .changelog .changelog-open:hover,
+#sidebarOffcanvas .changelog .changelog-open:hover {
     text-decoration: underline;
 }
 
