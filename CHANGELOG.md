@@ -15,6 +15,8 @@ release section; it is the source of truth for the other eleven translations.
 
 ## [Unreleased]
 
+## [2026-11-09] - site entry 73
+
 ### Added
 
 - The site tells its visitors about the MCP server: a new page, `/<lang>/mcp`, explains how to use the calculators from ChatGPT, Claude and other AI assistants - the server address with a copy button, short connection steps for ChatGPT, Claude and any other MCP client, example questions, what the server can calculate (each calculator, linked, and the account export), and that the server stores nothing and logs no request. The sidebar has an "AI assistants" panel under the calculators linking to it, on every page and in the mobile menu, and the start page a card that points to the menu for the calculators and to the page for the assistants. A browser that opens the server's own address, `https://proxyforgame.com/mcp`, is redirected to the page in the visitor's language instead of reading a JSON-RPC error; a client's GET still gets the 405. <!-- site -->
@@ -27,7 +29,9 @@ release section; it is the source of truth for the other eleven translations.
 
 - Profiles: on a calculator page whose Bootstrap bundle (or the new `bootstrap-access.js` that every script now reaches it through) failed to load, the profile controller no longer throws a `ReferenceError` on top of the "reload the page" banner. It builds its tooltips as soon as `profiles-ui.js` runs, outside the page's inline guard, so it now stands down by itself when Bootstrap is unavailable.
 - Profiles: in the dark theme, the "Game data as of ..." caption under the available resources no longer turns bright yellow once the reading is over an hour old. Bootstrap's dark warning text (#ffda6a) outshone everything around it; the caption now fades it 65% toward the page background, a muted ochre that still reads as a warning. The light theme keeps its colour.
-- Costs: a research lab level changed in the research network dialog is marked as differing from the game straight away, with its restore button, while the dialog is still open. The level reaches the profile only once the dialog is confirmed (so Cancel can take it back), and the mark used to wait for that, showing only the next time the dialog opened; Cancel also left the rebuilt rows unmarked. The restore button in the dialog puts the game level back into the field, so Cancel undoes it too. <!-- site -->
+- Costs: a research lab level changed in the research network dialog is marked as differing from the game straight away, with its restore button, while the dialog is still open. The level reaches the profile only once the dialog is confirmed (so Cancel can take it back), and the mark used to wait for that, showing only the next time the dialog opened; Cancel also left the rebuilt rows unmarked. The restore button in the dialog puts the game level back into the field, so Cancel undoes it too.
+
+> **RU:** Калькуляторами теперь можно пользоваться прямо из ChatGPT, Claude и других ИИ-ассистентов: спросите своими словами, а ассистент сам посчитает стоимость построек, время полёта, производство и многое другое. Как подключить, рассказано на новой странице: ссылка на неё есть в меню, в разделе «ИИ-ассистенты», и на главной.
 
 ## [2026-11-07] - site entry 72
 
