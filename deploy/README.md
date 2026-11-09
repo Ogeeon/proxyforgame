@@ -123,7 +123,8 @@ in full - rewrites and the browser-cache rules. `Protocols h2 http/1.1`
 (`conf-available/http2-protocols.conf`) serves HTTP/2; under prefork it would be
 silently off, which is why mod_php was retired on 2026-10-10. PHP settings live
 in `/etc/php/8.5/fpm/php.ini` (`expose_php = Off`, `pcre.jit = 0`) and
-`conf.d/99-pfg-revalidate.ini` (`opcache.revalidate_path = 1`); the
+`conf.d/99-pfg-revalidate.ini` (`opcache.revalidate_path = 1`,
+`realpath_cache_ttl = 2`); the
 `apache2/php.ini` beside it is no longer read. Rolling back to prefork is
 `a2dismod mpm_event proxy_fcgi http2 && a2disconf php8.5-fpm http2-protocols &&
 a2enmod mpm_prefork php8.5 && systemctl restart apache2`.
@@ -133,7 +134,9 @@ and `revalidate_freq=2`, so a deploy needs no cache flush — new files are pick
 up within two seconds. **`revalidate_path=1` is set in
 `/etc/php/8.5/fpm/conf.d/99-pfg-revalidate.ini`** and must stay: with the
 default 0, opcache resolves the document-root symlink once and keeps serving
-the first release it ever resolved to (see *Traps*).
+the first release it ever resolved to (see *Traps*). `realpath_cache_ttl=2`
+in the same file does the same for PHP's realpath cache, which php-fpm consults
+to find the script.
 
 **The document root is a symlink, and so is the current release.** A deploy
 builds `releases/<sha>` aside and flips two links onto it, each with one
@@ -606,6 +609,12 @@ with every release, and `pfg-sync` pipes it into the host's database through
   request paths nothing has cached. Verified by flipping back and forth
   between releases: health follows within two seconds, no reload.
   `systemctl reload php8.5-fpm` remains the escape hatch for a stale entry.
+  The realpath cache is a second copy of the same link: with its default
+  120 s TTL, a script **new** in a release (`assistants.php`, 2026-11-09)
+  answered 404 "No input file specified" on the workers that still resolved
+  the document root to the previous release, where it does not exist, for a
+  minute or two after the flip. `realpath_cache_ttl=2`, in the same ini, makes
+  that two seconds.
 - **A release worktree's `.git` is a file, not a directory** — `gitdir:
   <path>` into the bare store. Anything that walks `.git/` by hand has to
   follow the pointer; `ajax.php?service=health` does (that is what its
