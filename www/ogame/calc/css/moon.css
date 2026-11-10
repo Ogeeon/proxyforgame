@@ -76,15 +76,39 @@
   vertical-align: middle;
 }
 
-/* The unit tables hold three name/max/count triplets per row. Separate the
-   triplets and right-align the "max" column so the numbers hug their input. */
-.unit-table td:nth-child(3n + 1) {
-  padding-left: 12px;
+/* The fleet and defense units: three groups, the three columns of the old
+   <table class="unit-table">, that stand side by side where there is room and
+   wrap where there is not - three abreast, two with the third under the first,
+   or stacked on a phone - so the page makes no guess at how wide a group is
+   (that depends on the language's unit names). The flight calculator's ship
+   groups work the same way (flight.css, .ships-groups).
+
+   auto-fit counts the columns from the 15rem minimum; a column then grows to
+   its group's max-content, and min(100%, ...) lets a single column shrink on
+   a screen narrower than 15rem. `safe center` keeps a row that is still too
+   wide from overflowing to the left, where nothing can scroll to it. */
+.unit-groups {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), max-content));
+  justify-content: safe center;
+  column-gap: 12px;
+  row-gap: 4px;
 }
 
-.unit-table td:nth-child(3n + 2) {
-  text-align: right;
-  padding-right: 0;
+/* One group: a name / max / count track each, so the names, the max counts
+   and the fields of a group share an edge as the table's columns did. The
+   name track takes what is left (1fr), which puts the fields of stacked
+   groups on one line. The max count hugs its field, as it did right-aligned. */
+.unit-grid {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  align-items: center;
+  column-gap: 4px;
+  row-gap: 4px;
+}
+
+.unit-grid > .max-label {
+  justify-self: end;
 }
 
 /* Inputs */
@@ -246,5 +270,11 @@
   #moon {
     max-width: 100%;
     padding: 0 10px;
+  }
+
+  /* Phone layout (docs/patterns.md): a squeezed input-group wraps its unit
+     ("%", "km", "systems") under the field; keep it beside, the label wraps. */
+  #moon .input-group {
+    flex-wrap: nowrap;
   }
 }

@@ -22,6 +22,13 @@ import { test, expect } from './base';
  * @type {Array<{name: string, url: string, calculate?: (page: import('@playwright/test').Page) => Promise<void>}>}
  */
 const PHONE_PAGES = [
+  { name: 'moon calculator', url: '/ru/ogame/calc/moon.php',
+    calculate: async (page) => {
+      // A large fleet: the creation chance and the max counts beside every unit.
+      await page.locator('#param-fleet-tab').click();
+      await page.locator('#death-star').fill('123456');
+      await page.locator('#death-star').blur();
+    } },
   { name: 'terraformer calculator', url: '/ru/ogame/calc/terraformer.php',
     calculate: async (page) => {
       await page.locator('#solar-satellites-count').fill('12345');

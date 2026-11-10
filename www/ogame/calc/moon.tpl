@@ -4,6 +4,7 @@
   <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
   <?php require_once '../../hawk.tpl'; ?>
   <?php require_once __DIR__ . '/../../scripts-guard.tpl'; ?>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title><?= $l['title'] ?></title>
   <meta name="description" content="<?= htmlspecialchars($l['description'], ENT_QUOTES, 'UTF-8') ?>">
   <meta name="keywords" content="<?= $l['keywords'] ?>">
@@ -259,33 +260,35 @@
         <!-- Fleet tab -->
         <div id="param-fleet" class="tab-pane fade p-2 pb-0" role="tabpanel">
           <p class="text-center small text-body-secondary mb-1"><?= $l['max-count-hint'] ?></p>
-          <table class="mx-auto unit-table" role="presentation">
-<?php foreach (array_chunk($moonFleet, 3) as $row): ?>
-            <tr>
-<?php foreach ($row as $unit): ?>
-              <td><label for="<?= $unit ?>"><?= $l[$unit] ?></label></td>
-              <td><span id="<?= $unit ?>-max" class="max-label" data-report-cell="<?= $unit ?>.max">0</span></td>
-              <td><input id="<?= $unit ?>" type="text" name="<?= $unit ?>" class="form-control form-control-sm d-inline-block count-input" value="0" data-field-title="<?= $l[$unit] ?>"></td>
+          <?php // Three groups, the three columns of the old table (unit k, k+3, k+6...); they sit side by side where there is room and wrap where there is not (moon.css, .unit-groups). ?>
+          <div class="unit-groups">
+<?php for ($column = 0; $column < 3; $column++): ?>
+            <div class="unit-grid">
+<?php foreach (array_values(array_filter($moonFleet, fn($k) => $k % 3 === $column, ARRAY_FILTER_USE_KEY)) as $unit): ?>
+              <label for="<?= $unit ?>"><?= $l[$unit] ?></label>
+              <span id="<?= $unit ?>-max" class="max-label" data-report-cell="<?= $unit ?>.max">0</span>
+              <input id="<?= $unit ?>" type="text" name="<?= $unit ?>" class="form-control form-control-sm d-inline-block count-input" value="0" data-field-title="<?= $l[$unit] ?>">
 <?php endforeach; ?>
-            </tr>
-<?php endforeach; ?>
-          </table>
+            </div>
+<?php endfor; ?>
+          </div>
         </div><!-- /param-fleet -->
 
         <!-- Defenses tab -->
         <div id="param-defenses" class="tab-pane fade p-2 pb-0" role="tabpanel">
           <p class="text-center small text-body-secondary mb-1"><?= $l['max-count-hint'] ?></p>
-          <table class="mx-auto unit-table" role="presentation">
-<?php foreach (array_chunk($moonDefenses, 3) as $row): ?>
-            <tr>
-<?php foreach ($row as $unit): ?>
-              <td><label for="<?= $unit ?>"><?= $l[$unit] ?></label></td>
-              <td><span id="<?= $unit ?>-max" class="max-label" data-report-cell="<?= $unit ?>.max">0</span></td>
-              <td><input id="<?= $unit ?>" type="text" name="<?= $unit ?>" class="form-control form-control-sm d-inline-block count-input" value="0" data-field-title="<?= $l[$unit] ?>"></td>
+          <?php // Three groups, the three columns of the old table (unit k, k+3, k+6...); they sit side by side where there is room and wrap where there is not (moon.css, .unit-groups). ?>
+          <div class="unit-groups">
+<?php for ($column = 0; $column < 3; $column++): ?>
+            <div class="unit-grid">
+<?php foreach (array_values(array_filter($moonDefenses, fn($k) => $k % 3 === $column, ARRAY_FILTER_USE_KEY)) as $unit): ?>
+              <label for="<?= $unit ?>"><?= $l[$unit] ?></label>
+              <span id="<?= $unit ?>-max" class="max-label" data-report-cell="<?= $unit ?>.max">0</span>
+              <input id="<?= $unit ?>" type="text" name="<?= $unit ?>" class="form-control form-control-sm d-inline-block count-input" value="0" data-field-title="<?= $l[$unit] ?>">
 <?php endforeach; ?>
-            </tr>
-<?php endforeach; ?>
-          </table>
+            </div>
+<?php endfor; ?>
+          </div>
         </div><!-- /param-defenses -->
 
       </div><!-- /paramTabContent -->
