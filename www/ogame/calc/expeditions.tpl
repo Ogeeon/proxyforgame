@@ -317,8 +317,10 @@ endforeach; ?>
     <div id="data-panel" class="border rounded m-1 p-2">
       <p class="border rounded subheader bg-primary-subtle"><?= $l['calc-results'] ?></p>
 
+      <?php // The totals are a table of their own under the fleet one, outside its scroll wrapper, so a phone shows them without scrolling sideways; .results-stack keeps the two the same width (expeditions.css). ?>
+      <div class="results-stack">
       <div class="pfg-scroll-x">
-        <table id="data-table" class="lined mx-auto">
+        <table id="data-table" class="lined w-100">
           <tr>
             <th class="centered"><?= $l['LOCA_SHIP_TYPE'] ?></th>
             <th class="centered">
@@ -336,16 +338,19 @@ endforeach; ?>
             <td class="centered"><?= in_array($ship[1], $neverFound) ? '0' : '<span id="find'.$ship[1].'" data-report-cell="'.$ship[0].'.found">0</span>' ?></td>
           </tr>
   <?php endforeach; ?>
+        </table>
+      </div>
+        <table id="totals-table" class="lined w-100" role="presentation">
           <tr class="odd">
-            <td colspan="2"><?= $l['LOCA_SI_NEW'] ?></td>
+            <td><?= $l['LOCA_SI_NEW'] ?></td>
             <td colspan="2" class="right-aligned"><span id="max-points" data-report-cell="expedition-points">0</span></td>
           </tr>
           <tr class="even">
-            <td colspan="2"><?= $l['LOCA_STORAGE'] ?></td>
+            <td><?= $l['LOCA_STORAGE'] ?></td>
             <td colspan="2" class="right-aligned"><span id="storage-capacity" data-report-cell="storage">0</span></td>
           </tr>
           <tr class="odd">
-            <td colspan="2"><?= $l['LOCA_RES_FIND'] ?></td>
+            <td><?= $l['LOCA_RES_FIND'] ?></td>
             <td class="right-aligned">
               <?= $l['LOCA_M'] ?><br>
               <?= $l['LOCA_K'] ?><br>
@@ -358,7 +363,7 @@ endforeach; ?>
             </td>
           </tr>
           <tr class="even">
-            <td colspan="2"><?= $l['LOCA_DM'] ?></td>
+            <td><?= $l['LOCA_DM'] ?></td>
             <td colspan="2" class="right-aligned"><span id="dark-matter-find" data-report-cell="dark-matter">0</span></td>
           </tr>
         </table>

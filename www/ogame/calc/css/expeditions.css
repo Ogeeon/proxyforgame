@@ -107,6 +107,22 @@
   background-color: transparent;
 }
 
+/* The fleet table and the totals under it read as one table: the stack is as
+   wide as the wider of the two (the fleet table), both fill it, and the
+   totals drop their top border so the seam is a single line. On a phone the
+   stack is held to the screen: the fleet table scrolls in its .pfg-scroll-x
+   wrapper, and the totals - two columns of label and value - fit as they are,
+   which is why they are a table of their own. */
+.results-stack {
+  width: max-content;
+  max-width: 100%;
+  margin-inline: auto;
+}
+
+#totals-table tr:first-child > td {
+  border-top-width: 0;
+}
+
 /* Compact controls placed inside .lined tables */
 .lined .form-control-sm {
   height: 1.5rem;
@@ -195,12 +211,22 @@
    them: a squeezed input-group wraps it under the field. */
 @media (max-width: 575.98px) {
   #data-table th,
-  #data-table td[colspan] {
+  #totals-table td {
     white-space: normal;
   }
 
   #data-table th,
-  #data-table td {
+  #data-table td,
+  #totals-table td {
     padding: 2px 4px;
+  }
+
+  /* A totals label is a single long word at worst ("Грузоподъёмность:"); with
+     the numbers beside it, a wide font left it no room on a 360px screen. It
+     may break inside the word, but only when it does not fit otherwise - not
+     hyphens: auto, which hyphenated labels that would have wrapped at a space
+     anyway. */
+  #totals-table td:first-child {
+    overflow-wrap: anywhere;
   }
 }
