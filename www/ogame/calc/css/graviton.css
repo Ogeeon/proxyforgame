@@ -83,25 +83,42 @@
   cursor: default;
 }
 
-/* Read-only result fields (rendered as form-control divs) */
+/* Read-only result fields (rendered as form-control divs). Each class names
+   its width in --readout-width, read by the field rule below. */
 .energy-show {
-  width: 64px;
+  --readout-width: 64px;
+  width: var(--readout-width);
   text-align: center;
 }
 
 .resource-show {
-  width: 100px;
+  --readout-width: 100px;
+  width: var(--readout-width);
   text-align: center;
 }
 
 .time-show {
-  width: 150px;
+  --readout-width: 150px;
+  width: var(--readout-width);
   text-align: center;
 }
 
 .transport-show {
-  width: 170px;
+  --readout-width: 170px;
+  width: var(--readout-width);
   text-align: center;
+}
+
+/* A readout's width is a minimum, not a size: the numbers have no upper bound
+   (a large satellite fleet needs trillions of crystal), and a fixed width let
+   them run out of the box and past the panel. The box grows with its number
+   instead, up to its cell; past that a duration wraps at its spaces, while a
+   number, having none, stays whole. Only the divs: the editable inputs
+   sharing .resource-show keep their fixed width. */
+div.ui-state-disabled {
+  width: auto;
+  min-width: var(--readout-width, 0);
+  max-width: 100%;
 }
 
 /* Warning banner (shared look with the queue calculator) */
@@ -147,6 +164,6 @@
   }
 
   .transport-show {
-    width: 150px;
+    --readout-width: 150px;
   }
 }

@@ -707,9 +707,12 @@ fieldset.pf-bound.pf-differs {
      line of its own and the field, the percentage and the energy go under
      it. A row with no field (a bonus) keeps its name and energy on one line,
      the energy in the same column as the plants'. */
+  /* The field and percentage tracks are min-content - the width of the field
+     and of the select, which do not shrink - so a bonus's name, spanning both,
+     wraps inside them instead of widening them and squeezing the energy. */
   table.pfg-energy-rows > tbody {
     display: grid;
-    grid-template-columns: auto auto 1fr;
+    grid-template-columns: min-content min-content 1fr;
     align-items: center;
   }
 
@@ -717,10 +720,9 @@ fieldset.pf-bound.pf-differs {
     grid-column: 1 / -1;
   }
 
-  /* "283.935 Energy" stays on one line. */
-  table.pfg-energy-rows tr > td:last-child {
-    white-space: nowrap;
-  }
+  /* "283.935 Energy" is free to wrap at its space: the field and the
+     percentage beside it do not shrink, so on a 360px screen with a wide font
+     the unit is all that can give. The number, having no space, stays whole. */
 
   table.pfg-energy-rows tr:not(:has(input, select)) > td:first-child {
     grid-column: 1 / 3;
