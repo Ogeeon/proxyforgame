@@ -433,14 +433,27 @@ td.min {
 
   /* Phone layout (docs/patterns.md): the cost tables scroll inside their
      .pfg-scroll-x wrappers, so the panes stop growing to fit them. */
+  #costs .tab-content,
+  #costs .tab-pane,
   #lfcosts .tab-content,
   #lfcosts .tab-pane {
     min-width: 0;
   }
 
   /* The class radios wrap under their legend instead of running off the panel. */
+  #costs #param-common fieldset.d-flex,
   #lfcosts #param-common fieldset.d-flex {
     flex-wrap: wrap;
+  }
+
+  /* The cargo capacity row (a caption and two fields) wraps, each field whole:
+     a squeezed input-group wraps its "%" under the field. */
+  #costs #param-lifeforms .d-flex:has(> .d-flex > .input-group) {
+    flex-wrap: wrap;
+  }
+
+  #costs .input-group {
+    flex-wrap: nowrap;
   }
 
   /* The building / research select is as wide as its longest option name. */
@@ -483,5 +496,14 @@ td.min {
   .nav-tabs .nav-link {
     padding: 0.2em 0.6em;
     font-size: 0.9rem;
+  }
+}
+/* Phone layout (docs/patterns.md): the life form research bonuses dialog
+   lets its headers and research names wrap, so its three columns fit the
+   screen; the .pfg-scroll-x wrapper around it is the fallback. */
+@media (max-width: 575.98px) {
+  #lf-research-bonuses-table th,
+  #lf-research-bonuses-table td.text-start {
+    white-space: normal;
   }
 }

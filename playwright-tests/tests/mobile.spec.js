@@ -73,6 +73,15 @@ const PHONE_PAGES = [
         await fields.nth(i).blur();
       }
     } },
+  { name: 'costs calculator', url: '/ru/ogame/calc/costs.php',
+    calculate: async (page) => {
+      // High levels of the first buildings: the cost table's widest numbers.
+      const fields = page.locator('#table-0-2 input.level-input:visible');
+      for (let i = 0; i < 3; i++) {
+        await fields.nth(i).fill('45');
+        await fields.nth(i).blur();
+      }
+    } },
 ];
 
 const WIDTH = 360;

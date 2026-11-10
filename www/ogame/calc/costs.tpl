@@ -4,6 +4,7 @@
   <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
   <?php require_once '../../hawk.tpl'; ?>
   <?php require_once __DIR__ . '/../../scripts-guard.tpl'; ?>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title><?= $l['title'] ?></title>
   <meta name="description" content="<?= htmlspecialchars($l['description'], ENT_QUOTES, 'UTF-8') ?>">
   <meta name="keywords" content="<?= $l['keywords'] ?>">
@@ -432,111 +433,113 @@
                  $qtyAfterIdx = ($i == 1) ? 2 : 1; // insert qty header after to-level (multi) or level (single)
               ?>
               <div class="tab-pane fade <?= $j === $firstInnerTab ? 'show active' : '' ?> no-mp" id="tab-<?=$i?>-<?=$j?>" role="tabpanel">
-                <table id="table-<?=$i?>-<?=$j?>" class="lined">
-                  <tr>
-                    <th style="display: none;"></th>
-                    <?php foreach ($colHeaders as $idx => $header) :?>
-                    <th <?=($idx > 0)?'class="text-center"':''?> style="white-space:nowrap">
-                      <?php if ($header == 'dm-abbr'): ?>
-                        <abbr data-bs-toggle="tooltip" title="<?= $l['dm-explanation'] ?>"><?=$l[$header] ?></abbr>
-                      <?php else: ?>
-                        <?=$l[$header] ?>
+                <div class="pfg-scroll-x pfg-sticky-col">
+                  <table id="table-<?=$i?>-<?=$j?>" class="lined">
+                    <tr>
+                      <th style="display: none;"></th>
+                      <?php foreach ($colHeaders as $idx => $header) :?>
+                      <th class="<?= ($idx > 0) ? 'text-center' : 'pfg-sticky' ?>" style="white-space:nowrap">
+                        <?php if ($header == 'dm-abbr'): ?>
+                          <abbr data-bs-toggle="tooltip" title="<?= $l['dm-explanation'] ?>"><?=$l[$header] ?></abbr>
+                        <?php else: ?>
+                          <?=$l[$header] ?>
+                        <?php endif; ?>
+                      </th>
+                       <?php if ($hasQtyCol && $idx == $qtyAfterIdx): ?>
+                      <th class="text-center" style="white-space:nowrap"><?=$l['quantity'] ?></th>
                       <?php endif; ?>
-                    </th>
-                     <?php if ($hasQtyCol && $idx == $qtyAfterIdx): ?>
-                    <th class="text-center" style="white-space:nowrap"><?=$l['quantity'] ?></th>
-                    <?php endif; ?>
-                    <?php endforeach; ?>
-                  </tr>
-                  <?php $techs = getTechsByType($j); $row = 1;?>
-                  <?php foreach ($techs as $tech) :?>
-                  <?php
-                    $techID = $j == 3 ? $tech + 10000 : $tech; // give moon buildings an id 1000 higher, so they can be told apart when reading row ids
-                  ?>
-                  <tr class="<?= ($row++ % 2) === 1 ? 'odd' : 'even' ?>" data-report-key="<?= ($j == 3 ? 'moon.' : '') . $techData[$tech][0] ?>">
-                    <td style="display: none;"><?=$techID?></td>
-                    <td style="white-space: nowrap"><?=$l[$techData[$tech][0]]?><?php if ($tech == 14 || $tech == 15): ?> <i class="bi bi-info-circle text-primary" data-bs-toggle="popover" data-bs-trigger="hover focus" data-bs-html="true" data-bs-content="<?= htmlspecialchars($l['robot-nanite-hint'], ENT_QUOTES) ?>" style="cursor: pointer;"></i><?php endif; ?></td>
-                    <?php if ($i == 1): ?>
-                    <td class="text-center"><input type="text" class="form-control form-control-sm level-input ui-input-margin" value="0" aria-label="<?= $l[$colHeaders[1]] ?>"></td>
-                    <?php endif;?>
-                    <?php if ($j == 5 || $j == 6): ?>
-                      <td class="text-center"><input type="text" class="form-control form-control-sm fleet-input ui-input-margin" value="0" aria-label="<?= $l[$colHeaders[$i == 1 ? 2 : 1]] ?>"></td>
-                    <?php else: ?>
-                      <td class="text-center"><input type="text" class="form-control form-control-sm level-input ui-input-margin" value="0" aria-label="<?= $l[$colHeaders[$i == 1 ? 2 : 1]] ?>"></td>
-                    <?php endif; ?>
-                     <?php if ($hasQtyCol): ?>
-                      <td class="text-center"><input type="text" class="form-control form-control-sm qty-input ui-input-margin" value="1" style="text-align:center" aria-label="<?= $l['quantity'] ?>"></td>
-                     <?php endif; ?>
-                    <td class="text-center">0</td>
-                    <td class="text-center">0</td>
-                    <td class="text-center">0</td>
-                    <td class="text-center">0</td>
-                    <td class="text-center">0</td>
-                    <td class="text-center">0<?=$l['datetime-s']?></td>
-                    <td class="text-center">0</td>
-                    <?php if ($i == 0):?>
+                      <?php endforeach; ?>
+                    </tr>
+                    <?php $techs = getTechsByType($j); $row = 1;?>
+                    <?php foreach ($techs as $tech) :?>
+                    <?php
+                      $techID = $j == 3 ? $tech + 10000 : $tech; // give moon buildings an id 1000 higher, so they can be told apart when reading row ids
+                    ?>
+                    <tr class="<?= ($row++ % 2) === 1 ? 'odd' : 'even' ?>" data-report-key="<?= ($j == 3 ? 'moon.' : '') . $techData[$tech][0] ?>">
+                      <td style="display: none;"><?=$techID?></td>
+                      <td class="min pfg-sticky"><?=$l[$techData[$tech][0]]?><?php if ($tech == 14 || $tech == 15): ?> <i class="bi bi-info-circle text-primary" data-bs-toggle="popover" data-bs-trigger="hover focus" data-bs-html="true" data-bs-content="<?= htmlspecialchars($l['robot-nanite-hint'], ENT_QUOTES) ?>" style="cursor: pointer;"></i><?php endif; ?></td>
+                      <?php if ($i == 1): ?>
+                      <td class="text-center"><input type="text" class="form-control form-control-sm level-input ui-input-margin" value="0" aria-label="<?= $l[$colHeaders[1]] ?>"></td>
+                      <?php endif;?>
+                      <?php if ($j == 5 || $j == 6): ?>
+                        <td class="text-center"><input type="text" class="form-control form-control-sm fleet-input ui-input-margin" value="0" aria-label="<?= $l[$colHeaders[$i == 1 ? 2 : 1]] ?>"></td>
+                      <?php else: ?>
+                        <td class="text-center"><input type="text" class="form-control form-control-sm level-input ui-input-margin" value="0" aria-label="<?= $l[$colHeaders[$i == 1 ? 2 : 1]] ?>"></td>
+                      <?php endif; ?>
+                       <?php if ($hasQtyCol): ?>
+                        <td class="text-center"><input type="text" class="form-control form-control-sm qty-input ui-input-margin" value="1" style="text-align:center" aria-label="<?= $l['quantity'] ?>"></td>
+                       <?php endif; ?>
                       <td class="text-center">0</td>
-                    <?php endif; ?>
-                  </tr>
-                  <?php endforeach; ?>
-                  <tr>
-                    <td style="display: none;"></td>
-                    <td colspan="<?= $levelCols ?>" class="border-n" ><?=$l['total']?></td>
-                    <td class="border-n text-center" >0</td>
-                    <?php if ($hasQtyCol): ?><td class="border-n"></td><?php endif; ?>
-                    <td class="border-n border-s border-w text-center" ><b>0</b></td>
-                    <td class="border-n border-s text-center" ><b>0</b></td>
-                    <td class="border-n border-s text-center" ><b>0</b></td>
-                    <td class="border-n border-s text-center" ><b>0</b></td>
-                    <td class="border-n border-s text-center" ><b>0</b></td>
-                    <td class="border-n border-s text-center" ><b>0</b></td>
-                    <?php if ($i == 0):?>
-                    <td class="border-n border-s text-center" ><b>0</b></td>
-                    <?php endif; ?>
-                    <td class="border-n border-s border-e text-center" ><b>0</b></td>
-                  </tr>
-                  <tr><td colspan="<?= 11 + $qtyOffset ?>" style="height: 5px">&nbsp;</td></tr>
-                  <tr>
-                    <td style="display: none;"></td>
-                    <td colspan="<?= 1 + $levelCols + $qtyOffset ?>" class="border-n border-w" ><?=$l['grand-total']?></td>
-                    <td class="border-n text-center" >0</td>
-                    <td class="border-n text-center" >0</td>
-                    <td class="border-n text-center" >0</td>
-                    <td class="border-n text-center" >0</td>
-                    <td class="border-n text-center" >0</td>
-                    <td class="border-n text-center" >0</td>
-                    <?php if ($i == 0):?>
-                    <td class="border-n text-center" ><b>0</b></td>
-                    <?php endif; ?>
-                    <td class="border-n border-e text-center" >0</td>
-                  </tr>
-                  <tr>
-                    <td style="display: none;"></td>
-                    <td colspan="<?= 1 + $levelCols + $qtyOffset ?>" class="border-w"><?=$l['res-available']?></td>
-                    <td class="text-center"><input id="metal-available-<?=$i?>-<?=$j?>" data-report-skip type="text" name="metal-available" class="form-control form-control-sm res-input" value="0"></td>
-                    <td class="text-center"><input id="crystal-available-<?=$i?>-<?=$j?>" data-report-skip type="text" name="crystal-available" class="form-control form-control-sm res-input" value="0"></td>
-                    <td class="text-center"><input id="deut-available-<?=$i?>-<?=$j?>" data-report-skip type="text" name="deut-available" class="form-control form-control-sm res-input" value="0"></td>
-                    <td colspan="<?= ($i == 1)?'4':'5' ?>" class="text-start border-e"><small id="resources-age-<?=$i?>-<?=$j?>" class="pf-resources-age text-body-secondary d-none"></small></td>
-                  </tr>
-                  <tr>
-                    <td style="display: none;"></td>
-                    <td colspan="<?= 1 + $levelCols + $qtyOffset ?>" class="border-w"><?=$l['res-needed']?></td>
-                    <td class="text-center">0</td>
-                    <td class="text-center">0</td>
-                    <td class="text-center">0</td>
-                    <td></td>
-                    <td colspan="<?= ($i == 1)?'2':'3' ?>"></td>
-                    <td class="border-e"></td>
-                  </tr>
-                  <tr>
-                    <td style="display: none;"></td>
-                    <td class="border-s border-w"><?=$l['transports-needed']?></td>
-                    <td class="border-s text-center">0 <?=$l['sc-short']?></td>
-                    <td class="border-s text-center">0 <?=$l['lc-short']?></td>
-                    <td colspan="<?= 6 + $qtyOffset ?>" class="border-s text-center">&nbsp;</td>
-                    <td class="border-s border-e text-center">&nbsp;</td>
-                  </tr>
-                </table>
+                      <td class="text-center">0</td>
+                      <td class="text-center">0</td>
+                      <td class="text-center">0</td>
+                      <td class="text-center">0</td>
+                      <td class="text-center">0<?=$l['datetime-s']?></td>
+                      <td class="text-center">0</td>
+                      <?php if ($i == 0):?>
+                        <td class="text-center">0</td>
+                      <?php endif; ?>
+                    </tr>
+                    <?php endforeach; ?>
+                    <tr>
+                      <td style="display: none;"></td>
+                      <td colspan="<?= $levelCols ?>" class="border-n" ><?=$l['total']?></td>
+                      <td class="border-n text-center" >0</td>
+                      <?php if ($hasQtyCol): ?><td class="border-n"></td><?php endif; ?>
+                      <td class="border-n border-s border-w text-center" ><b>0</b></td>
+                      <td class="border-n border-s text-center" ><b>0</b></td>
+                      <td class="border-n border-s text-center" ><b>0</b></td>
+                      <td class="border-n border-s text-center" ><b>0</b></td>
+                      <td class="border-n border-s text-center" ><b>0</b></td>
+                      <td class="border-n border-s text-center" ><b>0</b></td>
+                      <?php if ($i == 0):?>
+                      <td class="border-n border-s text-center" ><b>0</b></td>
+                      <?php endif; ?>
+                      <td class="border-n border-s border-e text-center" ><b>0</b></td>
+                    </tr>
+                    <tr><td colspan="<?= 11 + $qtyOffset ?>" style="height: 5px">&nbsp;</td></tr>
+                    <tr>
+                      <td style="display: none;"></td>
+                      <td colspan="<?= 1 + $levelCols + $qtyOffset ?>" class="border-n border-w" ><?=$l['grand-total']?></td>
+                      <td class="border-n text-center" >0</td>
+                      <td class="border-n text-center" >0</td>
+                      <td class="border-n text-center" >0</td>
+                      <td class="border-n text-center" >0</td>
+                      <td class="border-n text-center" >0</td>
+                      <td class="border-n text-center" >0</td>
+                      <?php if ($i == 0):?>
+                      <td class="border-n text-center" ><b>0</b></td>
+                      <?php endif; ?>
+                      <td class="border-n border-e text-center" >0</td>
+                    </tr>
+                    <tr>
+                      <td style="display: none;"></td>
+                      <td colspan="<?= 1 + $levelCols + $qtyOffset ?>" class="border-w"><?=$l['res-available']?></td>
+                      <td class="text-center"><input id="metal-available-<?=$i?>-<?=$j?>" data-report-skip type="text" name="metal-available" class="form-control form-control-sm res-input" value="0"></td>
+                      <td class="text-center"><input id="crystal-available-<?=$i?>-<?=$j?>" data-report-skip type="text" name="crystal-available" class="form-control form-control-sm res-input" value="0"></td>
+                      <td class="text-center"><input id="deut-available-<?=$i?>-<?=$j?>" data-report-skip type="text" name="deut-available" class="form-control form-control-sm res-input" value="0"></td>
+                      <td colspan="<?= ($i == 1)?'4':'5' ?>" class="text-start border-e"><small id="resources-age-<?=$i?>-<?=$j?>" class="pf-resources-age text-body-secondary d-none"></small></td>
+                    </tr>
+                    <tr>
+                      <td style="display: none;"></td>
+                      <td colspan="<?= 1 + $levelCols + $qtyOffset ?>" class="border-w"><?=$l['res-needed']?></td>
+                      <td class="text-center">0</td>
+                      <td class="text-center">0</td>
+                      <td class="text-center">0</td>
+                      <td></td>
+                      <td colspan="<?= ($i == 1)?'2':'3' ?>"></td>
+                      <td class="border-e"></td>
+                    </tr>
+                    <tr>
+                      <td style="display: none;"></td>
+                      <td class="border-s border-w"><?=$l['transports-needed']?></td>
+                      <td class="border-s text-center">0 <?=$l['sc-short']?></td>
+                      <td class="border-s text-center">0 <?=$l['lc-short']?></td>
+                      <td colspan="<?= 6 + $qtyOffset ?>" class="border-s text-center">&nbsp;</td>
+                      <td class="border-s border-e text-center">&nbsp;</td>
+                    </tr>
+                  </table>
+                </div>
               </div>
               <?php endforeach; ?>
             </div> <!-- End inner tab-content -->
@@ -589,92 +592,96 @@
               </div>
             </div>
             <div id="prods-table-div">
-              <table id="prods-table" class="lined w-100">
-                <tr>
-                <?php foreach ($colHeadersOneProd as $colName): ?>
-                  <th><?=$l[$colName]?></th>
-                <?php endforeach; ?>
-                </tr>
-                <tr>
-                  <td colspan="10">&nbsp;</td>
-                </tr>
-                <tr class="<?= ($row % 2) === 1 ? 'odd' : 'even' ?>">
-                  <td class="border-n text-center" ><?=$l['total']?></td>
-                  <td class="border-n border-s border-w text-center" ><b>0</b></td>
-                  <td class="border-n border-s text-center" ><b>0</b></td>
-                  <td class="border-n border-s text-center" ><b>0</b></td>
-                  <td class="border-n border-s text-center" ><b>0</b></td>
-                  <td class="border-n border-s text-center" ><b>0</b></td>
-                  <td class="border-n border-s text-center" ><b>0</b></td>
-                  <td class="border-n border-s text-center" ><b>0</b></td>
-                  <td class="border-n border-s text-center" ><b>0</b></td>
-                  <td class="border-n border-s border-e text-center" ><b>0</b></td>
-                </tr>
-                <tr>
-                  <td class="text-center"><?=$l['res-available']?></td>
-                  <td class="text-center"><input id="prods-metal-available" data-report-skip type="text" class="form-control form-control-sm res-input" value="0" aria-label="<?= $l['res-available'] ?>-<?= $l['metal'] ?>"></td>
-                  <td class="text-center"><input id="prods-crystal-available" data-report-skip type="text" class="form-control form-control-sm res-input" value="0" aria-label="<?= $l['res-available'] ?>-<?= $l['crystal'] ?>"></td>
-                  <td class="text-center"><input id="prods-deut-available" data-report-skip type="text" class="form-control form-control-sm res-input" value="0" aria-label="<?= $l['res-available'] ?>-<?= $l['deuterium'] ?>"></td>
-                  <td colspan="6" class="text-start"><small id="prods-resources-age" class="pf-resources-age text-body-secondary d-none"></small></td>
-                </tr>
-                <tr>
-                  <td class="text-center"><?=$l['res-needed']?></td>
-                  <td class="text-center">0</td>
-                  <td class="text-center">0</td>
-                  <td class="text-center">0</td>
-                  <td></td>
-                  <td colspan="5"></td>
-                </tr>
-                <tr class="<?= ($row % 2) === 1 ? 'odd' : 'even' ?>">
-                  <td class="text-center" ><?=$l['transports-needed-short']?></td>
-                  <td class="text-center" >0 <?=$l['sc-short']?></td>
-                  <td class="text-center" >0 <?=$l['lc-short']?></td>
-                  <td colspan="7" ></td>
-                </tr>
-              </table>
+              <div class="pfg-scroll-x pfg-sticky-col">
+                <table id="prods-table" class="lined w-100">
+                  <tr>
+                  <?php foreach ($colHeadersOneProd as $colName): ?>
+                    <th><?=$l[$colName]?></th>
+                  <?php endforeach; ?>
+                  </tr>
+                  <tr>
+                    <td colspan="10">&nbsp;</td>
+                  </tr>
+                  <tr class="<?= ($row % 2) === 1 ? 'odd' : 'even' ?>">
+                    <td class="border-n text-center" ><?=$l['total']?></td>
+                    <td class="border-n border-s border-w text-center" ><b>0</b></td>
+                    <td class="border-n border-s text-center" ><b>0</b></td>
+                    <td class="border-n border-s text-center" ><b>0</b></td>
+                    <td class="border-n border-s text-center" ><b>0</b></td>
+                    <td class="border-n border-s text-center" ><b>0</b></td>
+                    <td class="border-n border-s text-center" ><b>0</b></td>
+                    <td class="border-n border-s text-center" ><b>0</b></td>
+                    <td class="border-n border-s text-center" ><b>0</b></td>
+                    <td class="border-n border-s border-e text-center" ><b>0</b></td>
+                  </tr>
+                  <tr>
+                    <td class="text-center"><?=$l['res-available']?></td>
+                    <td class="text-center"><input id="prods-metal-available" data-report-skip type="text" class="form-control form-control-sm res-input" value="0" aria-label="<?= $l['res-available'] ?>-<?= $l['metal'] ?>"></td>
+                    <td class="text-center"><input id="prods-crystal-available" data-report-skip type="text" class="form-control form-control-sm res-input" value="0" aria-label="<?= $l['res-available'] ?>-<?= $l['crystal'] ?>"></td>
+                    <td class="text-center"><input id="prods-deut-available" data-report-skip type="text" class="form-control form-control-sm res-input" value="0" aria-label="<?= $l['res-available'] ?>-<?= $l['deuterium'] ?>"></td>
+                    <td colspan="6" class="text-start"><small id="prods-resources-age" class="pf-resources-age text-body-secondary d-none"></small></td>
+                  </tr>
+                  <tr>
+                    <td class="text-center"><?=$l['res-needed']?></td>
+                    <td class="text-center">0</td>
+                    <td class="text-center">0</td>
+                    <td class="text-center">0</td>
+                    <td></td>
+                    <td colspan="5"></td>
+                  </tr>
+                  <tr class="<?= ($row % 2) === 1 ? 'odd' : 'even' ?>">
+                    <td class="text-center" ><?=$l['transports-needed-short']?></td>
+                    <td class="text-center" >0 <?=$l['sc-short']?></td>
+                    <td class="text-center" >0 <?=$l['lc-short']?></td>
+                    <td colspan="7" ></td>
+                  </tr>
+                </table>
+              </div>
             </div>
             <div id="commons-table-div" style="display: none;">
-              <table id="commons-table" class="lined w-100">
-                <tr>
-                <?php foreach ($colHeadersOneCommon as $colName): ?>
-                  <th><?=$l[$colName]?></th>
-                <?php endforeach; ?>
-                </tr>
-                <tr>
-                  <td colspan="8">&nbsp;</td>
-                </tr>
-                <tr class="<?= ($row % 2) === 1 ? 'odd' : 'even' ?>">
-                  <td class="border-n text-center" ><?=$l['total']?></td>
-                  <td class="border-n border-s border-w text-center" ><b>0</b></td>
-                  <td class="border-n border-s text-center" ><b>0</b></td>
-                  <td class="border-n border-s text-center" ><b>0</b></td>
-                  <td class="border-n border-s text-center" ><b>0</b></td>
-                  <td class="border-n border-s text-center" ><b>0</b></td>
-                  <td class="border-n border-s text-center" ><b>0</b></td>
-                  <td class="border-n border-s border-e text-center" ><b>0</b></td>
-                </tr>
-                <tr>
-                  <td class="text-center"><?=$l['res-available']?></td>
-                  <td class="text-center"><input id="commons-metal-available" data-report-skip type="text" class="form-control form-control-sm res-input" value="0" aria-label="<?= $l['res-available'] ?>-<?= $l['metal'] ?>"></td>
-                  <td class="text-center"><input id="commons-crystal-available" data-report-skip type="text" class="form-control form-control-sm res-input" value="0" aria-label="<?= $l['res-available'] ?>-<?= $l['crystal'] ?>"></td>
-                  <td class="text-center"><input id="commons-deut-available" data-report-skip type="text" class="form-control form-control-sm res-input" value="0" aria-label="<?= $l['res-available'] ?>-<?= $l['deuterium'] ?>"></td>
-                  <td colspan="4" class="text-start"><small id="commons-resources-age" class="pf-resources-age text-body-secondary d-none"></small></td>
-                </tr>
-                <tr>
-                  <td class="text-center"><?=$l['res-needed']?></td>
-                  <td class="text-center">0</td>
-                  <td class="text-center">0</td>
-                  <td class="text-center">0</td>
-                  <td></td>
-                  <td colspan="3"></td>
-                </tr>
-                <tr class="<?= ($row % 2) === 1 ? 'odd' : 'even' ?>">
-                  <td class="text-center" ><?=$l['transports-needed-short']?></td>
-                  <td class="text-center" >0 <?=$l['sc-short']?></td>
-                  <td class="text-center" >0 <?=$l['lc-short']?></td>
-                  <td colspan="5" ></td>
-                </tr>
-              </table>
+              <div class="pfg-scroll-x pfg-sticky-col">
+                <table id="commons-table" class="lined w-100">
+                  <tr>
+                  <?php foreach ($colHeadersOneCommon as $colName): ?>
+                    <th><?=$l[$colName]?></th>
+                  <?php endforeach; ?>
+                  </tr>
+                  <tr>
+                    <td colspan="8">&nbsp;</td>
+                  </tr>
+                  <tr class="<?= ($row % 2) === 1 ? 'odd' : 'even' ?>">
+                    <td class="border-n text-center" ><?=$l['total']?></td>
+                    <td class="border-n border-s border-w text-center" ><b>0</b></td>
+                    <td class="border-n border-s text-center" ><b>0</b></td>
+                    <td class="border-n border-s text-center" ><b>0</b></td>
+                    <td class="border-n border-s text-center" ><b>0</b></td>
+                    <td class="border-n border-s text-center" ><b>0</b></td>
+                    <td class="border-n border-s text-center" ><b>0</b></td>
+                    <td class="border-n border-s border-e text-center" ><b>0</b></td>
+                  </tr>
+                  <tr>
+                    <td class="text-center"><?=$l['res-available']?></td>
+                    <td class="text-center"><input id="commons-metal-available" data-report-skip type="text" class="form-control form-control-sm res-input" value="0" aria-label="<?= $l['res-available'] ?>-<?= $l['metal'] ?>"></td>
+                    <td class="text-center"><input id="commons-crystal-available" data-report-skip type="text" class="form-control form-control-sm res-input" value="0" aria-label="<?= $l['res-available'] ?>-<?= $l['crystal'] ?>"></td>
+                    <td class="text-center"><input id="commons-deut-available" data-report-skip type="text" class="form-control form-control-sm res-input" value="0" aria-label="<?= $l['res-available'] ?>-<?= $l['deuterium'] ?>"></td>
+                    <td colspan="4" class="text-start"><small id="commons-resources-age" class="pf-resources-age text-body-secondary d-none"></small></td>
+                  </tr>
+                  <tr>
+                    <td class="text-center"><?=$l['res-needed']?></td>
+                    <td class="text-center">0</td>
+                    <td class="text-center">0</td>
+                    <td class="text-center">0</td>
+                    <td></td>
+                    <td colspan="3"></td>
+                  </tr>
+                  <tr class="<?= ($row % 2) === 1 ? 'odd' : 'even' ?>">
+                    <td class="text-center" ><?=$l['transports-needed-short']?></td>
+                    <td class="text-center" >0 <?=$l['sc-short']?></td>
+                    <td class="text-center" >0 <?=$l['lc-short']?></td>
+                    <td colspan="5" ></td>
+                  </tr>
+                </table>
+              </div>
             </div>
           <?php endif;?>
           </div>
@@ -819,26 +826,28 @@ document.addEventListener('DOMContentLoaded', function() {
           <button type="button" class="btn btn-outline-secondary btn-sm" id="lf-research-table-get"><i class="bi bi-clipboard"></i> <?= $l['lf-get-from-ogame'] ?></button>
           <button type="button" class="btn btn-outline-danger btn-sm" id="lf-research-table-clear" data-bs-toggle="tooltip" title="<?= $l['lf-clear-table'] ?>"><i class="bi bi-trash"></i></button>
         </div>
-        <table id="lf-research-bonuses-table" class="lined">
-          <thead>
-            <tr>
-              <th><?= $l['lf-research-col'] ?></th>
-              <th class="lf-col-value"><?= $l['lf-col-cost-reduction'] ?>,&nbsp;%</th>
-              <th class="lf-col-value"><?= $l['lf-col-time-reduction'] ?>,&nbsp;%</th>
-            </tr>
-          </thead>
-          <tbody id="lf-research-bonuses-tbody">
-            <?php $lfResearchTechs = getTechsByType(4); ?>
-            <?php $row = 0; ?>
-            <?php foreach ($lfResearchTechs as $tech): ?>
-            <tr class="<?= ($row++ % 2) === 1 ? 'odd' : 'even' ?>" data-tech-id="<?= $tech ?>" data-report-key="<?= $techData[$tech][0] ?>">
-              <td class="text-start"><?= $l[$techData[$tech][0]] ?></td>
-              <td class="text-center"><input type="text" class="form-control form-control-sm input-3columns input-in-table lf-research-cost-input" value="0" aria-label="<?= $l['lf-col-cost-reduction'] ?>"></td>
-              <td class="text-center"><input type="text" class="form-control form-control-sm input-3columns input-in-table lf-research-time-input" value="0" aria-label="<?= $l['lf-col-time-reduction'] ?>"></td>
-            </tr>
-            <?php endforeach; ?>
-          </tbody>
-        </table>
+        <div class="pfg-scroll-x">
+          <table id="lf-research-bonuses-table" class="lined">
+            <thead>
+              <tr>
+                <th><?= $l['lf-research-col'] ?></th>
+                <th class="lf-col-value"><?= $l['lf-col-cost-reduction'] ?>,&nbsp;%</th>
+                <th class="lf-col-value"><?= $l['lf-col-time-reduction'] ?>,&nbsp;%</th>
+              </tr>
+            </thead>
+            <tbody id="lf-research-bonuses-tbody">
+              <?php $lfResearchTechs = getTechsByType(4); ?>
+              <?php $row = 0; ?>
+              <?php foreach ($lfResearchTechs as $tech): ?>
+              <tr class="<?= ($row++ % 2) === 1 ? 'odd' : 'even' ?>" data-tech-id="<?= $tech ?>" data-report-key="<?= $techData[$tech][0] ?>">
+                <td class="text-start"><?= $l[$techData[$tech][0]] ?></td>
+                <td class="text-center"><input type="text" class="form-control form-control-sm input-3columns input-in-table lf-research-cost-input" value="0" aria-label="<?= $l['lf-col-cost-reduction'] ?>"></td>
+                <td class="text-center"><input type="text" class="form-control form-control-sm input-3columns input-in-table lf-research-time-input" value="0" aria-label="<?= $l['lf-col-time-reduction'] ?>"></td>
+              </tr>
+              <?php endforeach; ?>
+            </tbody>
+          </table>
+        </div>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><?= $l['cancel'] ?></button>
