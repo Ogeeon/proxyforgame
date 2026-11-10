@@ -134,9 +134,39 @@
 }
 
 /* Responsive */
+/* The terraformer level label with its single-level checkbox stays on one line
+   (it was the text-nowrap utility, which a phone rule could not undo). */
+.tf-level-label {
+  white-space: nowrap;
+}
+
 @media (max-width: 992px) {
   #terraformer {
     max-width: 100%;
     padding: 0 10px;
+  }
+}
+
+/* Phone layout (docs/patterns.md): the level label wraps once it has a line
+   of its own; at a phone's 16px field text a five-digit satellite count needs
+   more than 54px, a large energy requirement more than 64px, and the 170px
+   transport readout runs past the panel. */
+@media (max-width: 575.98px) {
+  .tf-level-label {
+    white-space: normal;
+  }
+
+  .energy-input {
+    width: 72px;
+  }
+
+  /* An eleven-digit energy requirement (a high terraformer level) ran out of
+     the 64px readout; on a phone the pairs layout has room for it. */
+  .energy-show {
+    width: 110px;
+  }
+
+  .transport-show {
+    width: 150px;
   }
 }

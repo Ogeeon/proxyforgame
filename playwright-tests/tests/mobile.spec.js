@@ -22,6 +22,13 @@ import { test, expect } from './base';
  * @type {Array<{name: string, url: string, calculate?: (page: import('@playwright/test').Page) => Promise<void>}>}
  */
 const PHONE_PAGES = [
+  { name: 'terraformer calculator', url: '/ru/ogame/calc/terraformer.php',
+    calculate: async (page) => {
+      await page.locator('#solar-satellites-count').fill('12345');
+      await page.locator('#solar-satellites-count').blur();
+      await page.locator('#tf-level-to').fill('25');
+      await page.locator('#tf-level-to').blur();
+    } },
   { name: 'graviton calculator', url: '/ru/ogame/calc/graviton.php',
     calculate: async (page) => {
       await page.locator('#solar-satellites-count').fill('12345');

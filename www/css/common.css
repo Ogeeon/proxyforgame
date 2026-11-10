@@ -717,6 +717,11 @@ fieldset.pf-bound.pf-differs {
     grid-column: 1 / -1;
   }
 
+  /* "283.935 Energy" stays on one line. */
+  table.pfg-energy-rows tr > td:last-child {
+    white-space: nowrap;
+  }
+
   table.pfg-energy-rows tr:not(:has(input, select)) > td:first-child {
     grid-column: 1 / 3;
   }
