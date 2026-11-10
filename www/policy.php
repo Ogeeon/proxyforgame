@@ -4,6 +4,9 @@
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Privacy Policy</title>
+    <!-- The long Yandex URLs have no space to break at; on a narrow screen
+         they would widen the page past it. -->
+    <style>a { overflow-wrap: anywhere; }</style>
 </head>
 <body class="ui-widget">
 

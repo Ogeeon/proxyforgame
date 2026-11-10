@@ -275,7 +275,7 @@
                 <option value="50">50%</option><option value="40">40%</option><option value="30">30%</option><option value="20">20%</option><option value="10">10%</option><option value="0">0%</option>
               </select>
             </td>
-            <td><span id="solar-plant-energy" data-report-cell="solar-plant-energy">0</span>&nbsp;<span><?= $l['energy'] ?></span></td>
+            <td><span id="solar-plant-energy" data-report-cell="solar-plant-energy">0</span> <span><?= $l['energy'] ?></span></td>
           </tr>
           <tr>
             <td><label for="fusion-plant-level"><?= $l['fusion-plant-level'] ?></label></td>
@@ -286,7 +286,7 @@
                 <option value="50">50%</option><option value="40">40%</option><option value="30">30%</option><option value="20">20%</option><option value="10">10%</option><option value="0">0%</option>
               </select>
             </td>
-            <td><span id="fusion-plant-energy" data-report-cell="fusion-plant-energy">0</span>&nbsp;<span><?= $l['energy'] ?></span></td>
+            <td><span id="fusion-plant-energy" data-report-cell="fusion-plant-energy">0</span> <span><?= $l['energy'] ?></span></td>
           </tr>
           <tr>
             <td><label for="solar-satellites-count"><?= $l['solar-satellites-count'] ?></label></td>
@@ -297,43 +297,43 @@
                 <option value="50">50%</option><option value="40">40%</option><option value="30">30%</option><option value="20">20%</option><option value="10">10%</option><option value="0">0%</option>
               </select>
             </td>
-            <td><span id="solar-satellites-energy" data-report-cell="solar-satellites-energy">0</span>&nbsp;<span><?= $l['energy'] ?></span></td>
+            <td><span id="solar-satellites-energy" data-report-cell="solar-satellites-energy">0</span> <span><?= $l['energy'] ?></span></td>
           </tr>
           <tr>
             <td><span><?= $l['officers-bonus'] ?></span></td>
             <td>&nbsp;</td>
             <td>&nbsp;</td>
-            <td><span id="officers-bonus-energy" data-report-cell="officers-bonus-energy">0</span>&nbsp;<span><?= $l['energy'] ?></span></td>
+            <td><span id="officers-bonus-energy" data-report-cell="officers-bonus-energy">0</span> <span><?= $l['energy'] ?></span></td>
           </tr>
           <tr>
             <td><span><?= $l['class-bonus'] ?></span></td>
             <td>&nbsp;</td>
             <td>&nbsp;</td>
-            <td><span id="class-bonus-energy" data-report-cell="class-bonus-energy">0</span>&nbsp;<span><?= $l['energy'] ?></span></td>
+            <td><span id="class-bonus-energy" data-report-cell="class-bonus-energy">0</span> <span><?= $l['energy'] ?></span></td>
           </tr>
           <tr>
             <td><span><?= $l['alliance-bonus'] ?></span></td>
             <td>&nbsp;</td>
             <td>&nbsp;</td>
-            <td><span id="alliance-bonus-energy" data-report-cell="alliance-bonus-energy">0</span>&nbsp;<span><?= $l['energy'] ?></span></td>
+            <td><span id="alliance-bonus-energy" data-report-cell="alliance-bonus-energy">0</span> <span><?= $l['energy'] ?></span></td>
           </tr>
           <tr>
             <td><span><?= $l['boost-bonus'] ?></span></td>
             <td>&nbsp;</td>
             <td>&nbsp;</td>
-            <td><span id="boost-bonus-energy" data-report-cell="boost-bonus-energy">0</span>&nbsp;<span><?= $l['energy'] ?></span></td>
+            <td><span id="boost-bonus-energy" data-report-cell="boost-bonus-energy">0</span> <span><?= $l['energy'] ?></span></td>
           </tr>
           <tr>
             <td><span><?= $l['disr-chamber-bonus'] ?></span></td>
             <td>&nbsp;</td>
             <td>&nbsp;</td>
-            <td><span id="disr-chamber-bonus-energy" data-report-cell="disr-chamber-bonus-energy">0</span>&nbsp;<span><?= $l['energy'] ?></span></td>
+            <td><span id="disr-chamber-bonus-energy" data-report-cell="disr-chamber-bonus-energy">0</span> <span><?= $l['energy'] ?></span></td>
           </tr>
           <tr>
             <td><span><?= $l['lf-tech-bonus'] ?></span></td>
             <td>&nbsp;</td>
             <td>&nbsp;</td>
-            <td><span id="lf-tech-bonus-energy" data-report-cell="lf-tech-bonus-energy">0</span>&nbsp;<span><?= $l['energy'] ?></span></td>
+            <td><span id="lf-tech-bonus-energy" data-report-cell="lf-tech-bonus-energy">0</span> <span><?= $l['energy'] ?></span></td>
           </tr>
         </table>
       </div>
