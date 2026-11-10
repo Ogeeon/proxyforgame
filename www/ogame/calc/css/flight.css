@@ -74,25 +74,48 @@
   white-space: nowrap;
 }
 
-/* Ship count grid: was a <table class="mx-auto">, three ships per row and one
-   cell per part, so nine columns each sized to the widest name / speed / field
-   in it. The grid has to keep those nine tracks rather than three ship-sized
-   ones — with one track per ship the three parts only line up inside their own
-   cell and the columns of names, speeds and inputs no longer share an edge.
+/* Ship counts: three groups of five ships, one per column of the old
+   <table class="mx-auto">. The groups wrap rather than switching layout at a
+   breakpoint, so the page needs no guess at how wide three groups are - that
+   depends on the language's ship names and on the field width - and a group
+   never splits: three abreast, two with the third under the first, or all
+   three stacked on a phone, each still reads as its own column.
 
-   `auto` tracks reproduce the table's automatic column widths, and they only
-   stretch to fill the row while justify-content is normal/stretch, so centring
-   the tracks is also what keeps them shrink-to-fit (the old `mx-auto`). The
-   gaps are the removed `td { padding: 2px 4px }` — 4px on each side of the
-   boundary horizontally, 2px vertically — on top of the margins .speed-label
-   and .ui-input-margin still carry. */
+   A grid rather than flex-wrap so that groups stacked in one column share its
+   width: flex would centre each one on its own and leave their edges ragged.
+   auto-fit counts the columns from the 18rem minimum (a group at its natural
+   width is a little narrower); a column then grows to its group's max-content,
+   and min(100%, ...) lets a single column shrink on a screen narrower than
+   18rem. `safe center` keeps a row that is still too wide from overflowing to
+   the left, where nothing can scroll to it. */
+.ships-groups {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), max-content));
+  justify-content: safe center;
+  column-gap: 8px;
+  row-gap: 4px;
+}
+
+/* One group: a name / speed / field track each, so within a group the names,
+   speeds and fields share an edge as the table's columns did. The name track
+   takes what is left of the column (1fr), which puts the speeds and fields of
+   stacked groups on one line. The gaps are the removed
+   `td { padding: 2px 4px }` - 4px on each side of the boundary horizontally,
+   2px vertically - on top of the margins .speed-label and .ui-input-margin
+   still carry. Every row holds a field of the same height, so the rows of
+   groups standing side by side stay level as long as no name wraps. */
 .ships-grid {
-  grid-template-columns: repeat(9, auto);
-  justify-content: center;
+  grid-template-columns: 1fr auto auto;
   justify-items: start;
   align-items: center;
   column-gap: 8px;
   row-gap: 4px;
+}
+
+/* Speeds sit against their field, digits aligned, whatever the widest speed
+   of the group makes the track. */
+.ships-grid > .speed-label {
+  justify-self: end;
 }
 
 /* The two-column layout holding the flight times and the arrival calculator
@@ -411,12 +434,6 @@
    ========================================================================== */
 
 @media (max-width: 575.98px) {
-  /* One ship per line: three abreast need some 570px. The ships keep their
-     source order, row by row of the desktop grid. */
-  .ships-grid {
-    grid-template-columns: repeat(3, auto);
-  }
-
   /* The arrival calculator goes under the flight times instead of beside them. */
   .flight-layout {
     flex-wrap: wrap;

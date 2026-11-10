@@ -436,22 +436,24 @@
                 </div>
               </div>
 
-              <div class="d-grid ships-grid">
+              <?php // Three groups, the three columns of ships; they sit side by side where there is room and wrap where there is not (flight.css, .ships-groups). ?>
+              <div class="ships-groups">
                 <?php
-                  $shipRows = [
-                    [['small-cargo'], ['cruiser'], ['battlecruiser']],
-                    [['large-cargo'], ['battleship'], ['death-star']],
-                    [['light-fighter'], ['destroyer'], ['colony-ship']],
-                    [['heavy-fighter'], ['bomber'], ['recycler']],
-                    [['reaper'], ['pathfinder'], ['esp-probe']],
+                  $shipGroups = [
+                    ['small-cargo', 'large-cargo', 'light-fighter', 'heavy-fighter', 'reaper'],
+                    ['cruiser', 'battleship', 'destroyer', 'bomber', 'pathfinder'],
+                    ['battlecruiser', 'death-star', 'colony-ship', 'recycler', 'esp-probe'],
                   ];
-                  foreach ($shipRows as $row):
-                    foreach ($row as $ship): $s = $ship[0];
+                  foreach ($shipGroups as $group):
                 ?>
-                <label for="<?= $s ?>"><?= $l[$s] ?></label>
-                <span id="<?= $s ?>-speed" class="speed-label" data-report-cell="<?= $s ?>.speed">0</span>
-                <input id="<?= $s ?>" type="text" name="<?= $s ?>" class="form-control form-control-sm d-inline-block count-input ui-input-margin" value="0">
-                <?php endforeach; endforeach; ?>
+                <div class="d-grid ships-grid">
+                  <?php foreach ($group as $s): ?>
+                  <label for="<?= $s ?>"><?= $l[$s] ?></label>
+                  <span id="<?= $s ?>-speed" class="speed-label" data-report-cell="<?= $s ?>.speed">0</span>
+                  <input id="<?= $s ?>" type="text" name="<?= $s ?>" class="form-control form-control-sm d-inline-block count-input ui-input-margin" value="0">
+                  <?php endforeach; ?>
+                </div>
+                <?php endforeach; ?>
               </div>
 
             </div>
