@@ -39,6 +39,13 @@ const PHONE_PAGES = [
       for (let i = 0; i < 3; i++) await page.locator('#build-2-1').click();
       await page.locator('#build-2-2').click();
     } },
+  { name: 'expeditions calculator', url: '/ru/ogame/calc/expeditions.php',
+    calculate: async (page) => {
+      await page.locator('#numSC').fill('1234567');
+      await page.locator('#numSC').blur();
+      await page.locator('#numLC').fill('123456');
+      await page.locator('#numLC').blur();
+    } },
 ];
 
 const WIDTH = 360;

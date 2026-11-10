@@ -4,6 +4,7 @@
   <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
   <?php require_once '../../hawk.tpl'; ?>
   <?php require_once __DIR__ . '/../../scripts-guard.tpl'; ?>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title><?= $l['title'] ?></title>
   <meta name="description" content="<?= htmlspecialchars($l['description'], ENT_QUOTES, 'UTF-8') ?>">
   <meta name="keywords" content="<?= $l['keywords'] ?>">
@@ -293,18 +294,20 @@ endforeach; ?>
           <div class="text-end mb-1">
             <button id="open-lfbr" type="button" class="btn btn-sm btn-outline-secondary"><?= $l['open-lfbr'] ?></button>
           </div>
-          <table id="lf-ships-bonuses" class="lined mx-auto">
-            <tr>
-              <th><?= $l['ship-name'] ?></th>
-              <th><?= $l['cargo-increase'] ?></th>
-            </tr>
-<?php foreach ($expeditionShips as $idx => $ship): ?>
-            <tr class="<?= ($idx % 2) === 0 ? 'odd' : 'even' ?>">
-              <td><label for="lf-cargo-<?= $ship[2] ?>"><?= $l[$ship[0]] ?></label></td>
-              <td class="centered"><input id="lf-cargo-<?= $ship[2] ?>" type="text" class="form-control form-control-sm d-inline-block no-mp input-5columns centered" value="0" data-field-title="<?= $l[$ship[0]] ?>"></td>
-            </tr>
-<?php endforeach; ?>
-          </table>
+          <div class="pfg-scroll-x">
+            <table id="lf-ships-bonuses" class="lined mx-auto">
+              <tr>
+                <th><?= $l['ship-name'] ?></th>
+                <th><?= $l['cargo-increase'] ?></th>
+              </tr>
+  <?php foreach ($expeditionShips as $idx => $ship): ?>
+              <tr class="<?= ($idx % 2) === 0 ? 'odd' : 'even' ?>">
+                <td><label for="lf-cargo-<?= $ship[2] ?>"><?= $l[$ship[0]] ?></label></td>
+                <td class="centered"><input id="lf-cargo-<?= $ship[2] ?>" type="text" class="form-control form-control-sm d-inline-block no-mp input-5columns centered" value="0" data-field-title="<?= $l[$ship[0]] ?>"></td>
+              </tr>
+  <?php endforeach; ?>
+            </table>
+          </div>
         </div><!-- /param-lf -->
 
       </div><!-- /paramTabContent -->
@@ -314,50 +317,52 @@ endforeach; ?>
     <div id="data-panel" class="border rounded m-1 p-2">
       <p class="border rounded subheader bg-primary-subtle"><?= $l['calc-results'] ?></p>
 
-      <table id="data-table" class="lined mx-auto">
-        <tr>
-          <th class="centered"><?= $l['LOCA_SHIP_TYPE'] ?></th>
-          <th class="centered">
-            <button id="clear-fleet" type="button" class="btn btn-sm btn-outline-danger clear-fleet-btn" data-bs-toggle="tooltip" title="<?= $l['reset'] ?>"><i class="bi bi-x-lg"></i></button>
-            <?= $l['LOCA_NUMBER'] ?>
-          </th>
-          <th class="centered"><?= $l['LOCA_SHIP_CAN_BE_FOND'] ?></th>
-          <th class="centered"><?= $l['LOCA_DISCOVERED'] ?></th>
-        </tr>
-<?php foreach ($fleetRows as $idx => $ship): ?>
-        <tr class="<?= ($idx % 2) === 0 ? 'odd' : 'even' ?>">
-          <td><label for="num<?= $ship[1] ?>"><?= $l[$ship[0]] ?></label></td>
-          <td class="centered"><input id="num<?= $ship[1] ?>" type="text" class="form-control form-control-sm d-inline-block count-input" value="0" data-field-title="<?= $l[$ship[0]] ?>"></td>
-          <td class="centered"><span id="can<?= $ship[1] ?>" data-report-cell="<?= $ship[0] ?>.can-be-found">-</span></td>
-          <td class="centered"><?= in_array($ship[1], $neverFound) ? '0' : '<span id="find'.$ship[1].'" data-report-cell="'.$ship[0].'.found">0</span>' ?></td>
-        </tr>
-<?php endforeach; ?>
-        <tr class="odd">
-          <td colspan="2"><?= $l['LOCA_SI_NEW'] ?></td>
-          <td colspan="2" class="right-aligned"><span id="max-points" data-report-cell="expedition-points">0</span></td>
-        </tr>
-        <tr class="even">
-          <td colspan="2"><?= $l['LOCA_STORAGE'] ?></td>
-          <td colspan="2" class="right-aligned"><span id="storage-capacity" data-report-cell="storage">0</span></td>
-        </tr>
-        <tr class="odd">
-          <td colspan="2"><?= $l['LOCA_RES_FIND'] ?></td>
-          <td class="right-aligned">
-            <?= $l['LOCA_M'] ?><br>
-            <?= $l['LOCA_K'] ?><br>
-            <?= $l['LOCA_D'] ?>
-          </td>
-          <td class="right-aligned">
-            <span id="max-find-met" data-report-cell="res-find.metal">0</span><br>
-            <span id="max-find-cry" data-report-cell="res-find.crystal">0</span><br>
-            <span id="max-find-deu" data-report-cell="res-find.deuterium">0</span>
-          </td>
-        </tr>
-        <tr class="even">
-          <td colspan="2"><?= $l['LOCA_DM'] ?></td>
-          <td colspan="2" class="right-aligned"><span id="dark-matter-find" data-report-cell="dark-matter">0</span></td>
-        </tr>
-      </table>
+      <div class="pfg-scroll-x">
+        <table id="data-table" class="lined mx-auto">
+          <tr>
+            <th class="centered"><?= $l['LOCA_SHIP_TYPE'] ?></th>
+            <th class="centered">
+              <button id="clear-fleet" type="button" class="btn btn-sm btn-outline-danger clear-fleet-btn" data-bs-toggle="tooltip" title="<?= $l['reset'] ?>"><i class="bi bi-x-lg"></i></button>
+              <?= $l['LOCA_NUMBER'] ?>
+            </th>
+            <th class="centered"><?= $l['LOCA_SHIP_CAN_BE_FOND'] ?></th>
+            <th class="centered"><?= $l['LOCA_DISCOVERED'] ?></th>
+          </tr>
+  <?php foreach ($fleetRows as $idx => $ship): ?>
+          <tr class="<?= ($idx % 2) === 0 ? 'odd' : 'even' ?>">
+            <td><label for="num<?= $ship[1] ?>"><?= $l[$ship[0]] ?></label></td>
+            <td class="centered"><input id="num<?= $ship[1] ?>" type="text" class="form-control form-control-sm d-inline-block count-input" value="0" data-field-title="<?= $l[$ship[0]] ?>"></td>
+            <td class="centered"><span id="can<?= $ship[1] ?>" data-report-cell="<?= $ship[0] ?>.can-be-found">-</span></td>
+            <td class="centered"><?= in_array($ship[1], $neverFound) ? '0' : '<span id="find'.$ship[1].'" data-report-cell="'.$ship[0].'.found">0</span>' ?></td>
+          </tr>
+  <?php endforeach; ?>
+          <tr class="odd">
+            <td colspan="2"><?= $l['LOCA_SI_NEW'] ?></td>
+            <td colspan="2" class="right-aligned"><span id="max-points" data-report-cell="expedition-points">0</span></td>
+          </tr>
+          <tr class="even">
+            <td colspan="2"><?= $l['LOCA_STORAGE'] ?></td>
+            <td colspan="2" class="right-aligned"><span id="storage-capacity" data-report-cell="storage">0</span></td>
+          </tr>
+          <tr class="odd">
+            <td colspan="2"><?= $l['LOCA_RES_FIND'] ?></td>
+            <td class="right-aligned">
+              <?= $l['LOCA_M'] ?><br>
+              <?= $l['LOCA_K'] ?><br>
+              <?= $l['LOCA_D'] ?>
+            </td>
+            <td class="right-aligned">
+              <span id="max-find-met" data-report-cell="res-find.metal">0</span><br>
+              <span id="max-find-cry" data-report-cell="res-find.crystal">0</span><br>
+              <span id="max-find-deu" data-report-cell="res-find.deuterium">0</span>
+            </td>
+          </tr>
+          <tr class="even">
+            <td colspan="2"><?= $l['LOCA_DM'] ?></td>
+            <td colspan="2" class="right-aligned"><span id="dark-matter-find" data-report-cell="dark-matter">0</span></td>
+          </tr>
+        </table>
+      </div>
     </div>
 
     <!-- ================= URL API ================= -->
@@ -368,33 +373,35 @@ endforeach; ?>
         </h2>
         <div id="accordion-api" class="accordion-collapse collapse" data-bs-parent="#api-accordion">
           <div class="accordion-body">
-            <table id="api-table" class="lined w-100">
-              <tr>
-                <th><?= $l['api_param'] ?></th>
-                <th><?= $l['api_prm_meaning'] ?></th>
-                <th><?= $l['api_prm_type'] ?></th>
-                <th><?= $l['api_prm_explain'] ?></th>
-              </tr>
-<?php foreach ($apiDoc as $idx => $prm): ?>
-              <tr class="<?= ($idx % 2) === 0 ? 'odd' : 'even' ?>">
-                <td class="centered"><?= $prm[0] ?></td>
-                <td><?= $prm[1] ?></td>
-                <td><?= $prm[2] ?></td>
-                <td><?= $prm[3] ?></td>
-              </tr>
-<?php endforeach; ?>
-              <tr>
-                <td colspan="4" class="centered"><b><?= $l['examples'] ?></b></td>
-              </tr>
-              <tr class="odd">
-                <td colspan="3"><a href="<?= $baseUrl ?>?u=1&amp;d=ru"><?= $baseUrl ?>?u=1&amp;d=ru</a></td>
-                <td><?= $l['auto_select'] ?></td>
-              </tr>
-              <tr class="even">
-                <td colspan="3"><a href='<?= $baseUrl ?>?u=1&amp;d=ru&amp;h=8&amp;c=0&amp;f=%7B%22203%22:2140,%22219%22:1,%22210%22:1,%22218%22:1%7D&amp;pr=10.9&amp;ps=9.89&amp;bc=10.5&amp;bd=60.7&amp;rd=20&amp;dd=50'><?= $baseUrl ?>?u=1&amp;d=ru<br>&amp;h=8&amp;c=0<br>&amp;f={"203":2140,"219":1,"210":1,"218":1}<br>&amp;pr=10.9&amp;ps=9.89&amp;bc=10.5&amp;bd=60.7&amp;rd=20&amp;dd=50</a></td>
-                <td><?= $l['all_options'] ?></td>
-              </tr>
-            </table>
+            <div class="pfg-scroll-x">
+              <table id="api-table" class="lined w-100">
+                <tr>
+                  <th><?= $l['api_param'] ?></th>
+                  <th><?= $l['api_prm_meaning'] ?></th>
+                  <th><?= $l['api_prm_type'] ?></th>
+                  <th><?= $l['api_prm_explain'] ?></th>
+                </tr>
+  <?php foreach ($apiDoc as $idx => $prm): ?>
+                <tr class="<?= ($idx % 2) === 0 ? 'odd' : 'even' ?>">
+                  <td class="centered"><?= $prm[0] ?></td>
+                  <td><?= $prm[1] ?></td>
+                  <td><?= $prm[2] ?></td>
+                  <td><?= $prm[3] ?></td>
+                </tr>
+  <?php endforeach; ?>
+                <tr>
+                  <td colspan="4" class="centered"><b><?= $l['examples'] ?></b></td>
+                </tr>
+                <tr class="odd">
+                  <td colspan="3"><a href="<?= $baseUrl ?>?u=1&amp;d=ru"><?= $baseUrl ?>?u=1&amp;d=ru</a></td>
+                  <td><?= $l['auto_select'] ?></td>
+                </tr>
+                <tr class="even">
+                  <td colspan="3"><a href='<?= $baseUrl ?>?u=1&amp;d=ru&amp;h=8&amp;c=0&amp;f=%7B%22203%22:2140,%22219%22:1,%22210%22:1,%22218%22:1%7D&amp;pr=10.9&amp;ps=9.89&amp;bc=10.5&amp;bd=60.7&amp;rd=20&amp;dd=50'><?= $baseUrl ?>?u=1&amp;d=ru<br>&amp;h=8&amp;c=0<br>&amp;f={"203":2140,"219":1,"210":1,"218":1}<br>&amp;pr=10.9&amp;ps=9.89&amp;bc=10.5&amp;bd=60.7&amp;rd=20&amp;dd=50</a></td>
+                  <td><?= $l['all_options'] ?></td>
+                </tr>
+              </table>
+            </div>
           </div>
         </div>
       </div>

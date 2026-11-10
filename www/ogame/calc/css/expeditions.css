@@ -178,4 +178,33 @@
     max-width: 100%;
     padding: 0 10px;
   }
+
+  /* Phone layout (docs/patterns.md): the cargo bonus table scrolls inside its
+     .pfg-scroll-x wrapper, so the stacked panes' grid column must not grow to
+     the table's width - an auto track would. */
+  #paramTabContent {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* Phone layout (docs/patterns.md). The results table scrolls sideways in
+   its .pfg-scroll-x wrapper; its headers and the long labels of the total
+   rows wrap and its cells tighten, so there is less of it to scroll. The
+   ship names stay on one line - wrapped, they doubled the rows' height and
+   the table still did not fit. The percent fields keep their "%" beside
+   them: a squeezed input-group wraps it under the field. */
+@media (max-width: 575.98px) {
+  #data-table th,
+  #data-table td[colspan] {
+    white-space: normal;
+  }
+
+  #data-table th,
+  #data-table td {
+    padding: 2px 4px;
+  }
+
+  #param-common .input-group {
+    flex-wrap: nowrap;
+  }
 }
