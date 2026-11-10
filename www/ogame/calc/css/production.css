@@ -243,4 +243,16 @@
   }
 
   .level-input { width: 45px; }
+
+  /* Phone layout (docs/patterns.md): the tables scroll inside their
+     .pfg-scroll-x wrappers, so the panes must stop growing to fit them. */
+  #production .tab-content,
+  #production .tab-pane {
+    min-width: 0;
+  }
+
+  /* A squeezed input-group wraps its "%" under the field; keep it beside. */
+  #general-settings-panel .input-group {
+    flex-wrap: nowrap;
+  }
 }

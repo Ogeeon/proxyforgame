@@ -4,6 +4,7 @@
   <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
   <?php require_once '../../hawk.tpl'; ?>
   <?php require_once __DIR__ . '/../../scripts-guard.tpl'; ?>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title><?= $l['title'] ?></title>
   <meta name="description" content="<?= htmlspecialchars($l['description'], ENT_QUOTES, 'UTF-8') ?>">
   <meta name="keywords" content="<?= $l['keywords'] ?>">
@@ -414,7 +415,7 @@
             </div>
           </div>
           <div class="d-flex flex-wrap gap-2 align-items-center justify-content-center mb-1">
-            <fieldset class="d-flex align-items-center gap-1 flex-nowrap fieldset-reset">
+            <fieldset class="d-flex align-items-center gap-1 flex-wrap flex-sm-nowrap fieldset-reset">
               <legend><?= $l['class'] ?>:</legend>
               <input id="class-0" type="radio" name="class" value="0" class="form-check-input">
               <label for="class-0"><?= $l['class-collector'] ?></label>
@@ -613,93 +614,95 @@
           </div>
         </div>
 
-        <table id="one-planet-prod" class="lined w-100">
-          <tr>
-            <th>&nbsp;</th>
-            <th style="display: none;"><?= $l['boosted'] ?></th>
-            <th><?= $l['qty-header'] ?></th>
-            <th><?= $l['metal'] ?></th>
-            <th><?= $l['crystal'] ?></th>
-            <th><?= $l['deuterium'] ?></th>
-            <th><?= $l['energy'] ?></th>
-            <th style="display: none;">%</th>
-          </tr>
-          <?php for($i = 0; $i < count($oneTblProdRows); $i++): ?>
-            <?php if ($i == 16):?>
-              <tr><td colspan="8" class="table-line-2px"></td></tr>
-            <?php endif; ?>
-            <tr class="<?= ($i % 2) === 1 ? 'odd' : 'even' ?>" data-report-key="<?= $oneTblProdRows[$i] ?>">
-                <td class="text-start" ><?= $l[$oneTblProdRows[$i]] ?></td>
-                <?php if ($i > 0 && $i < 8): ?>
-                  <?php if ($i < 4): ?>
+        <div class="pfg-scroll-x">
+          <table id="one-planet-prod" class="lined w-100">
+            <tr>
+              <th>&nbsp;</th>
+              <th style="display: none;"><?= $l['boosted'] ?></th>
+              <th><?= $l['qty-header'] ?></th>
+              <th><?= $l['metal'] ?></th>
+              <th><?= $l['crystal'] ?></th>
+              <th><?= $l['deuterium'] ?></th>
+              <th><?= $l['energy'] ?></th>
+              <th style="display: none;">%</th>
+            </tr>
+            <?php for($i = 0; $i < count($oneTblProdRows); $i++): ?>
+              <?php if ($i == 16):?>
+                <tr><td colspan="8" class="table-line-2px"></td></tr>
+              <?php endif; ?>
+              <tr class="<?= ($i % 2) === 1 ? 'odd' : 'even' ?>" data-report-key="<?= $oneTblProdRows[$i] ?>">
+                  <td class="text-start" ><?= $l[$oneTblProdRows[$i]] ?></td>
+                  <?php if ($i > 0 && $i < 8): ?>
+                    <?php if ($i < 4): ?>
+                      <td class="text-center" style="display: none;">
+                        <select id="boosted-prod<?= $i ?>" name="boosted-prod" class="form-select form-select-sm input-in-table">
+                          <option value="0" selected="selected">0%</option>
+                          <option value="1">10%</option>
+                          <option value="2">20%</option>
+                          <option value="3">30%</option>
+                          <option value="4">40%</option>
+                        </select>
+                      </td>
+                    <?php else: ?>
+                      <td style="display: none;"></td>
+                    <?php endif; ?>
+                    <td class="text-center">
+                      <input type="text" class="form-control form-control-sm <?=($i==6 || $i==7)?'input-4columns':'input-3columns' ?> input-in-table" value="0" aria-label="<?= $l[$oneTblProdRows[$i]] ?>-<?= $l['qty-header'] ?>">
+                    </td>
+                    <?php foreach (array('metal', 'crystal', 'deuterium', 'energy') as $col): ?><td class="text-center" data-report-cell="<?= $oneTblProdRows[$i] ?>.<?= $col ?>"></td><?php endforeach; ?>
                     <td class="text-center" style="display: none;">
-                      <select id="boosted-prod<?= $i ?>" name="boosted-prod" class="form-select form-select-sm input-in-table">
-                        <option value="0" selected="selected">0%</option>
-                        <option value="1">10%</option>
-                        <option value="2">20%</option>
-                        <option value="3">30%</option>
-                        <option value="4">40%</option>
+                      <select class="form-select form-select-sm input-in-table" aria-label="<?= $l[$oneTblProdRows[$i]] ?>-%">
+                      <?php if ($i == 7): ?>
+                        <option value="150">150</option>
+                        <option value="140">140</option>
+                        <option value="130">130</option>
+                        <option value="120">120</option>
+                        <option value="110">110</option>
+                      <?php endif; ?>
+                        <option value="100" selected="selected">100</option>
+                        <option value="90">90</option>
+                        <option value="80">80</option>
+                        <option value="70">70</option>
+                        <option value="60">60</option>
+                        <option value="50">50</option>
+                        <option value="40">40</option>
+                        <option value="30">30</option>
+                        <option value="20">20</option>
+                        <option value="10">10</option>
+                        <option value="0">0</option>
                       </select>
                     </td>
                   <?php else: ?>
-                    <td style="display: none;"></td>
+                    <?php for ($j = 0; $j < 7; $j++): ?>
+                      <?php if ($j == 0 || $j == 6): ?>
+                        <td class="text-center" style="display: none;"></td>
+                      <?php elseif ($j == 1): ?>
+                        <td class="text-center"></td>
+                      <?php else: ?>
+                        <td class="text-center" data-report-cell="<?= $oneTblProdRows[$i] ?>.<?= array(2 => 'metal', 3 => 'crystal', 4 => 'deuterium', 5 => 'energy')[$j] ?>"></td>
+                      <?php endif; ?>
+                    <?php endfor; ?>
                   <?php endif; ?>
-                  <td class="text-center">
-                    <input type="text" class="form-control form-control-sm <?=($i==6 || $i==7)?'input-4columns':'input-3columns' ?> input-in-table" value="0" aria-label="<?= $l[$oneTblProdRows[$i]] ?>-<?= $l['qty-header'] ?>">
-                  </td>
-                  <?php foreach (array('metal', 'crystal', 'deuterium', 'energy') as $col): ?><td class="text-center" data-report-cell="<?= $oneTblProdRows[$i] ?>.<?= $col ?>"></td><?php endforeach; ?>
-                  <td class="text-center" style="display: none;">
-                    <select class="form-select form-select-sm input-in-table" aria-label="<?= $l[$oneTblProdRows[$i]] ?>-%">
-                    <?php if ($i == 7): ?>
-                      <option value="150">150</option>
-                      <option value="140">140</option>
-                      <option value="130">130</option>
-                      <option value="120">120</option>
-                      <option value="110">110</option>
-                    <?php endif; ?>
-                      <option value="100" selected="selected">100</option>
-                      <option value="90">90</option>
-                      <option value="80">80</option>
-                      <option value="70">70</option>
-                      <option value="60">60</option>
-                      <option value="50">50</option>
-                      <option value="40">40</option>
-                      <option value="30">30</option>
-                      <option value="20">20</option>
-                      <option value="10">10</option>
-                      <option value="0">0</option>
-                    </select>
-                  </td>
-                <?php else: ?>
-                  <?php for ($j = 0; $j < 7; $j++): ?>
-                    <?php if ($j == 0 || $j == 6): ?>
+              </tr>
+              <?php if ($i == 5): // life form building rows, shown only for the selected race ?>
+                <?php foreach ($lfBuildingKeys as $lfRace => $lfKeys): ?>
+                  <?php foreach ($lfKeys as $lfPos => $lfKey): ?>
+                    <tr class="lf-row lf-row-<?= $lfRace ?> <?= ($lfPos % 2) === 0 ? 'odd' : 'even' ?>" style="display: none;" data-report-key="<?= $lfKey ?>">
+                      <td class="text-start"><?= $lfTr[$lfKey] ?></td>
                       <td class="text-center" style="display: none;"></td>
-                    <?php elseif ($j == 1): ?>
-                      <td class="text-center"></td>
-                    <?php else: ?>
-                      <td class="text-center" data-report-cell="<?= $oneTblProdRows[$i] ?>.<?= array(2 => 'metal', 3 => 'crystal', 4 => 'deuterium', 5 => 'energy')[$j] ?>"></td>
-                    <?php endif; ?>
-                  <?php endfor; ?>
-                <?php endif; ?>
-            </tr>
-            <?php if ($i == 5): // life form building rows, shown only for the selected race ?>
-              <?php foreach ($lfBuildingKeys as $lfRace => $lfKeys): ?>
-                <?php foreach ($lfKeys as $lfPos => $lfKey): ?>
-                  <tr class="lf-row lf-row-<?= $lfRace ?> <?= ($lfPos % 2) === 0 ? 'odd' : 'even' ?>" style="display: none;" data-report-key="<?= $lfKey ?>">
-                    <td class="text-start"><?= $lfTr[$lfKey] ?></td>
-                    <td class="text-center" style="display: none;"></td>
-                    <td class="text-center">
-                      <input type="text" class="form-control form-control-sm input-3columns lf-level-input" data-lf-id="<?= $lfRace * 1000 + $lfPos ?>" value="0" aria-label="<?= $lfTr[$lfKey] ?>">
-                    </td>
-                    <?php foreach (array('metal', 'crystal', 'deuterium', 'energy') as $col): ?><td class="text-center" data-report-cell="<?= $lfKey ?>.<?= $col ?>"></td><?php endforeach; ?>
-                    <td class="text-center" style="display: none;"></td>
-                  </tr>
+                      <td class="text-center">
+                        <input type="text" class="form-control form-control-sm input-3columns lf-level-input" data-lf-id="<?= $lfRace * 1000 + $lfPos ?>" value="0" aria-label="<?= $lfTr[$lfKey] ?>">
+                      </td>
+                      <?php foreach (array('metal', 'crystal', 'deuterium', 'energy') as $col): ?><td class="text-center" data-report-cell="<?= $lfKey ?>.<?= $col ?>"></td><?php endforeach; ?>
+                      <td class="text-center" style="display: none;"></td>
+                    </tr>
+                  <?php endforeach; ?>
                 <?php endforeach; ?>
-              <?php endforeach; ?>
-            <?php endif; ?>
-          <?php endfor; ?>
-          <tr><td colspan="8" class="table-line-3px"></td></tr>
-        </table>
+              <?php endif; ?>
+            <?php endfor; ?>
+            <tr><td colspan="8" class="table-line-3px"></td></tr>
+          </table>
+        </div>
         <div id="planet-save-div" class="border rounded p-2 my-1" style="display:none">
           <div class="d-flex flex-wrap gap-2 align-items-center justify-content-center">
             <div class="d-flex align-items-center gap-1">
@@ -726,27 +729,29 @@
                     <label for="include-SS-n"><?= $l['incl-no'] ?></label>
                   </div>
                 </div>
-                <table id="mines-amort-tbl" class="lined w-100">
-                  <thead>
-                    <tr>
-                      <th><?= $l['mine'] ?></th>
-                      <th><?= $l['upgrade-cost'] ?></th>
-                      <th><?= $l['production-increase'] ?></th>
-                      <th><?= $l['amortization-time'] ?></th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr class="odd">
-                      <td><?= $l['metal-mine'] ?></td><td class="centered" data-report-cell="metal-mine.upgrade-cost"></td><td class="centered" data-report-cell="metal-mine.production-increase"></td><td class="centered" data-report-cell="metal-mine.amortization-time"></td>
-                    </tr>
-                    <tr class="even">
-                      <td><?= $l['crystal-mine'] ?></td><td class="centered" data-report-cell="crystal-mine.upgrade-cost"></td><td class="centered" data-report-cell="crystal-mine.production-increase"></td><td class="centered" data-report-cell="crystal-mine.amortization-time"></td>
-                    </tr>
-                    <tr class="odd">
-                      <td><?= $l['deut-synth'] ?></td><td class="centered" data-report-cell="deut-synth.upgrade-cost"></td><td class="centered" data-report-cell="deut-synth.production-increase"></td><td class="centered" data-report-cell="deut-synth.amortization-time"></td>
-                    </tr>
-                  </tbody>
-                </table>
+                <div class="pfg-scroll-x">
+                  <table id="mines-amort-tbl" class="lined w-100">
+                    <thead>
+                      <tr>
+                        <th><?= $l['mine'] ?></th>
+                        <th><?= $l['upgrade-cost'] ?></th>
+                        <th><?= $l['production-increase'] ?></th>
+                        <th><?= $l['amortization-time'] ?></th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr class="odd">
+                        <td><?= $l['metal-mine'] ?></td><td class="centered" data-report-cell="metal-mine.upgrade-cost"></td><td class="centered" data-report-cell="metal-mine.production-increase"></td><td class="centered" data-report-cell="metal-mine.amortization-time"></td>
+                      </tr>
+                      <tr class="even">
+                        <td><?= $l['crystal-mine'] ?></td><td class="centered" data-report-cell="crystal-mine.upgrade-cost"></td><td class="centered" data-report-cell="crystal-mine.production-increase"></td><td class="centered" data-report-cell="crystal-mine.amortization-time"></td>
+                      </tr>
+                      <tr class="odd">
+                        <td><?= $l['deut-synth'] ?></td><td class="centered" data-report-cell="deut-synth.upgrade-cost"></td><td class="centered" data-report-cell="deut-synth.production-increase"></td><td class="centered" data-report-cell="deut-synth.amortization-time"></td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
                 <div class="mt-2"><?= $l['amort-comment'] ?></div>
               </div>
             </div>
@@ -759,32 +764,34 @@
               <div class="accordion-body">
                 <div class="border rounded p-2 mb-2">
                   <div class="fw-semibold mb-1"><?= $l['current-resources'] ?></div>
-                  <table id="one-pln-accum" class="lined w-100" >
-                    <tr>
-                      <th><?= $l['resource'] ?></th>
-                      <th><?= $l['amount'] ?></th>
-                      <th><?= $l['storage-level'] ?></th>
-                      <th><?= $l['storage-capacity'] ?></th>
-                    </tr>
-                    <tr>
-                      <td><?= $l['metal'] ?></td>
-                      <td class="text-center"><input id="onepln-curr-met" data-report-skip type="text" name="onepln-curr-met" class="form-control form-control-sm input-10columns" value="0" aria-label="<?= $l['amount'] ?>-<?= $l['metal'] ?>"></td>
-                      <td class="text-center"><input id="storage-met" type="text" name="storage-met" class="form-control form-control-sm input-3columns" value="0" aria-label="<?= $l['storage-level'] ?>-<?= $l['metal'] ?>"></td>
-                      <td class="text-center"><span id="storage-cap-met" data-report-cell="storage-cap-met">0</span></td>
-                    </tr>
-                    <tr>
-                      <td><?= $l['crystal'] ?></td>
-                      <td class="text-center"><input id="onepln-curr-crys" data-report-skip type="text" name="onepln-curr-crys" class="form-control form-control-sm input-10columns" value="0" aria-label="<?= $l['amount'] ?>-<?= $l['crystal'] ?>"></td>
-                      <td class="text-center"><input id="storage-crys" type="text" name="storage-crys" class="form-control form-control-sm input-3columns" value="0" aria-label="<?= $l['storage-level'] ?>-<?= $l['crystal'] ?>"></td>
-                      <td class="text-center"><span id="storage-cap-crys" data-report-cell="storage-cap-crys">0</span></td>
-                    </tr>
-                    <tr>
-                      <td><?= $l['deuterium'] ?></td>
-                      <td class="text-center"><input id="onepln-curr-deut" data-report-skip type="text" name="onepln-curr-deut" class="form-control form-control-sm input-10columns" value="0" aria-label="<?= $l['amount'] ?>-<?= $l['deuterium'] ?>"></td>
-                      <td class="text-center"><input id="storage-deut" type="text" name="storage-deut" class="form-control form-control-sm input-3columns" value="0" aria-label="<?= $l['storage-level'] ?>-<?= $l['deuterium'] ?>"></td>
-                      <td class="text-center"><span id="storage-cap-deut" data-report-cell="storage-cap-deut">0</span></td>
-                    </tr>
-                  </table>
+                  <div class="pfg-scroll-x">
+                    <table id="one-pln-accum" class="lined w-100" >
+                      <tr>
+                        <th><?= $l['resource'] ?></th>
+                        <th><?= $l['amount'] ?></th>
+                        <th><?= $l['storage-level'] ?></th>
+                        <th><?= $l['storage-capacity'] ?></th>
+                      </tr>
+                      <tr>
+                        <td><?= $l['metal'] ?></td>
+                        <td class="text-center"><input id="onepln-curr-met" data-report-skip type="text" name="onepln-curr-met" class="form-control form-control-sm input-10columns" value="0" aria-label="<?= $l['amount'] ?>-<?= $l['metal'] ?>"></td>
+                        <td class="text-center"><input id="storage-met" type="text" name="storage-met" class="form-control form-control-sm input-3columns" value="0" aria-label="<?= $l['storage-level'] ?>-<?= $l['metal'] ?>"></td>
+                        <td class="text-center"><span id="storage-cap-met" data-report-cell="storage-cap-met">0</span></td>
+                      </tr>
+                      <tr>
+                        <td><?= $l['crystal'] ?></td>
+                        <td class="text-center"><input id="onepln-curr-crys" data-report-skip type="text" name="onepln-curr-crys" class="form-control form-control-sm input-10columns" value="0" aria-label="<?= $l['amount'] ?>-<?= $l['crystal'] ?>"></td>
+                        <td class="text-center"><input id="storage-crys" type="text" name="storage-crys" class="form-control form-control-sm input-3columns" value="0" aria-label="<?= $l['storage-level'] ?>-<?= $l['crystal'] ?>"></td>
+                        <td class="text-center"><span id="storage-cap-crys" data-report-cell="storage-cap-crys">0</span></td>
+                      </tr>
+                      <tr>
+                        <td><?= $l['deuterium'] ?></td>
+                        <td class="text-center"><input id="onepln-curr-deut" data-report-skip type="text" name="onepln-curr-deut" class="form-control form-control-sm input-10columns" value="0" aria-label="<?= $l['amount'] ?>-<?= $l['deuterium'] ?>"></td>
+                        <td class="text-center"><input id="storage-deut" type="text" name="storage-deut" class="form-control form-control-sm input-3columns" value="0" aria-label="<?= $l['storage-level'] ?>-<?= $l['deuterium'] ?>"></td>
+                        <td class="text-center"><span id="storage-cap-deut" data-report-cell="storage-cap-deut">0</span></td>
+                      </tr>
+                    </table>
+                  </div>
                   <div id="onepln-resources-age" class="small text-body-secondary mt-1 d-none"></div>
                 </div>
                 <div class="d-flex flex-wrap gap-2 align-items-stretch">
@@ -836,17 +843,19 @@
             <div id="one-pln-acc-fleet" class="accordion-collapse collapse" data-bs-parent="#one-planet-accordion">
               <div class="accordion-body">
                 <?php $techs = getTechsByType(5);?>
-                <table id="one-pln-fleet-prod" class="lined w-100">
-                  <tr>
-                    <th><?= $l['ship'] ?></th><th><?= $l['per-hour'] ?></th><th><?= $l['per-day'] ?></th><th><?= $l['per-week'] ?></th>
-                  </tr>
-                  <?php $row = 0;?>
-                  <?php foreach ($techs as $tech) :?>
-                  <tr class="<?= ($row++ % 2) === 1 ? 'odd' : 'even' ?>">
-                    <td class="text-start"><?=$l[$techData[$tech][0]]?></td><?php foreach (array('per-hour', 'per-day', 'per-week') as $col): ?><td class="text-center" data-report-cell="<?= $techData[$tech][0] ?>.<?= $col ?>">0</td><?php endforeach; ?>
-                  </tr>
-                  <?php endforeach; ?>
-                </table>
+                <div class="pfg-scroll-x">
+                  <table id="one-pln-fleet-prod" class="lined w-100">
+                    <tr>
+                      <th><?= $l['ship'] ?></th><th><?= $l['per-hour'] ?></th><th><?= $l['per-day'] ?></th><th><?= $l['per-week'] ?></th>
+                    </tr>
+                    <?php $row = 0;?>
+                    <?php foreach ($techs as $tech) :?>
+                    <tr class="<?= ($row++ % 2) === 1 ? 'odd' : 'even' ?>">
+                      <td class="text-start"><?=$l[$techData[$tech][0]]?></td><?php foreach (array('per-hour', 'per-day', 'per-week') as $col): ?><td class="text-center" data-report-cell="<?= $techData[$tech][0] ?>.<?= $col ?>">0</td><?php endforeach; ?>
+                    </tr>
+                    <?php endforeach; ?>
+                  </table>
+                </div>
               </div>
             </div>
           </div>
@@ -857,17 +866,19 @@
             <div id="one-pln-acc-defense" class="accordion-collapse collapse" data-bs-parent="#one-planet-accordion">
               <div class="accordion-body">
                 <?php $techs = getTechsByType(6);?>
-                <table id="one-pln-defense-prod" class="lined w-100">
-                  <tr>
-                    <th><?= $l['building'] ?></th><th><?= $l['per-hour'] ?></th><th><?= $l['per-day'] ?></th><th><?= $l['per-week'] ?></th>
-                  </tr>
-                  <?php $row = 0;?>
-                  <?php foreach ($techs as $tech) :?>
-                  <tr class="<?= ($row++ % 2) === 1 ? 'odd' : 'even' ?>">
-                    <td class="text-start"><?=$l[$techData[$tech][0]]?></td><?php foreach (array('per-hour', 'per-day', 'per-week') as $col): ?><td class="text-center" data-report-cell="<?= $techData[$tech][0] ?>.<?= $col ?>">0</td><?php endforeach; ?>
-                  </tr>
-                  <?php endforeach; ?>
-                </table>
+                <div class="pfg-scroll-x">
+                  <table id="one-pln-defense-prod" class="lined w-100">
+                    <tr>
+                      <th><?= $l['building'] ?></th><th><?= $l['per-hour'] ?></th><th><?= $l['per-day'] ?></th><th><?= $l['per-week'] ?></th>
+                    </tr>
+                    <?php $row = 0;?>
+                    <?php foreach ($techs as $tech) :?>
+                    <tr class="<?= ($row++ % 2) === 1 ? 'odd' : 'even' ?>">
+                      <td class="text-start"><?=$l[$techData[$tech][0]]?></td><?php foreach (array('per-hour', 'per-day', 'per-week') as $col): ?><td class="text-center" data-report-cell="<?= $techData[$tech][0] ?>.<?= $col ?>">0</td><?php endforeach; ?>
+                    </tr>
+                    <?php endforeach; ?>
+                  </table>
+                </div>
               </div>
             </div>
           </div>
@@ -893,38 +904,40 @@
             <label for="all-pln-addtnl-info"><?= $l['show-addtnl-info'] ?></label>
           </div>
         </div>
-        <table id="all-planets-prod" class="lined w-100" >
-          <tr>
-            <th>&nbsp;</th>
-            <th>&nbsp;</th>
-            <th><abbr title="<?= $l['max-planet-temp'] ?>" data-bs-toggle="tooltip">t°</abbr></th>
-            <th><abbr title="<?= $l['planet-pos'] ?>" data-bs-toggle="tooltip"><?= $l['planet-pos-short'] ?></abbr></th>
-            <th><abbr title="<?= $l['metal-mine'] ?>" data-bs-toggle="tooltip"><?= $l['metal-mine-short'] ?></abbr></th>
-            <th><?= $l['metal-short'] ?></th>
-            <th><abbr title="<?= $l['crystal-mine'] ?>" data-bs-toggle="tooltip"><?= $l['crystal-mine-short'] ?></abbr></th>
-            <th><?= $l['crystal-short'] ?></th>
-            <th><abbr title="<?= $l['deut-synth'] ?>" data-bs-toggle="tooltip"><?= $l['deuterium-synth-short'] ?></abbr></th>
-            <th><?= $l['deuterium-short'] ?></th>
-            <th><abbr title="<?= $l['solar-plant'] ?>" data-bs-toggle="tooltip"><?= $l['solar-short'] ?></abbr></th>
-            <th><abbr title="<?= $l['fusion-reactor'] ?>" data-bs-toggle="tooltip"><?= $l['fusion-short'] ?></abbr></th>
-            <th><abbr title="<?= $l['solar-sat'] ?>" data-bs-toggle="tooltip"><?= $l['sats-short'] ?></abbr></th>
-            <th><abbr title="<?= $l['crawler'] ?>" data-bs-toggle="tooltip"><?= $l['crawler-short'] ?></abbr></th>
-            <th><abbr title="<?= $l['prod-coeff'] ?>" data-bs-toggle="tooltip"><?= $l['coeff-short'] ?></abbr></th>
-            <th class="control-buttons">&nbsp;</th>
-          </tr>
-          <tr><td colspan="16" class="table-line-2px"></td></tr>
-          <?php for ($i = 0; $i < 3; $i++): ?>
-            <tr class="<?= (($i+1) % 2) === 1 ? 'odd' : 'even' ?>">
-              <td></td>
-              <td><?= $l[$allTblTotalRows[$i]] ?></td>
-              <?php for ($j = 1; $j < 15; $j++): ?>
-                <?php $col = array(4 => 'metal', 6 => 'crystal', 8 => 'deuterium')[$j] ?? ''; ?>
-                <td class="text-center"<?php if ($col !== ''): ?> data-report-cell="<?= $allTblTotalRows[$i] ?>.<?= $col ?>"<?php endif; ?>></td>
-              <?php endfor; ?>
+        <div class="pfg-scroll-x">
+          <table id="all-planets-prod" class="lined w-100" >
+            <tr>
+              <th>&nbsp;</th>
+              <th>&nbsp;</th>
+              <th><abbr title="<?= $l['max-planet-temp'] ?>" data-bs-toggle="tooltip">t°</abbr></th>
+              <th><abbr title="<?= $l['planet-pos'] ?>" data-bs-toggle="tooltip"><?= $l['planet-pos-short'] ?></abbr></th>
+              <th><abbr title="<?= $l['metal-mine'] ?>" data-bs-toggle="tooltip"><?= $l['metal-mine-short'] ?></abbr></th>
+              <th><?= $l['metal-short'] ?></th>
+              <th><abbr title="<?= $l['crystal-mine'] ?>" data-bs-toggle="tooltip"><?= $l['crystal-mine-short'] ?></abbr></th>
+              <th><?= $l['crystal-short'] ?></th>
+              <th><abbr title="<?= $l['deut-synth'] ?>" data-bs-toggle="tooltip"><?= $l['deuterium-synth-short'] ?></abbr></th>
+              <th><?= $l['deuterium-short'] ?></th>
+              <th><abbr title="<?= $l['solar-plant'] ?>" data-bs-toggle="tooltip"><?= $l['solar-short'] ?></abbr></th>
+              <th><abbr title="<?= $l['fusion-reactor'] ?>" data-bs-toggle="tooltip"><?= $l['fusion-short'] ?></abbr></th>
+              <th><abbr title="<?= $l['solar-sat'] ?>" data-bs-toggle="tooltip"><?= $l['sats-short'] ?></abbr></th>
+              <th><abbr title="<?= $l['crawler'] ?>" data-bs-toggle="tooltip"><?= $l['crawler-short'] ?></abbr></th>
+              <th><abbr title="<?= $l['prod-coeff'] ?>" data-bs-toggle="tooltip"><?= $l['coeff-short'] ?></abbr></th>
+              <th class="control-buttons">&nbsp;</th>
             </tr>
-          <?php endfor; ?>
-          <tr><td colspan="16" class="table-line-3px"></td></tr>
-        </table>
+            <tr><td colspan="16" class="table-line-2px"></td></tr>
+            <?php for ($i = 0; $i < 3; $i++): ?>
+              <tr class="<?= (($i+1) % 2) === 1 ? 'odd' : 'even' ?>">
+                <td></td>
+                <td><?= $l[$allTblTotalRows[$i]] ?></td>
+                <?php for ($j = 1; $j < 15; $j++): ?>
+                  <?php $col = array(4 => 'metal', 6 => 'crystal', 8 => 'deuterium')[$j] ?? ''; ?>
+                  <td class="text-center"<?php if ($col !== ''): ?> data-report-cell="<?= $allTblTotalRows[$i] ?>.<?= $col ?>"<?php endif; ?>></td>
+                <?php endfor; ?>
+              </tr>
+            <?php endfor; ?>
+            <tr><td colspan="16" class="table-line-3px"></td></tr>
+          </table>
+        </div>
         <div class="accordion mt-1" id="all-planets-accordion">
           <div class="accordion-item">
             <h2 class="accordion-header">
@@ -933,20 +946,22 @@
             <div id="all-pln-acc-priority" class="accordion-collapse collapse" data-bs-parent="#all-planets-accordion">
               <div class="accordion-body">
                 <div class="table-responsive">
-                  <table id="mines-priority-tbl" class="lined w-100">
-                    <thead>
-                      <tr>
-                        <th>#</th>
-                        <th><?= $l['planet'] ?></th>
-                        <th><?= $l['mine'] ?></th>
-                        <th><?= $l['level'] ?></th>
-                        <th><?= $l['upgrade-cost'] ?></th>
-                        <th><?= $l['production-increase'] ?></th>
-                        <th><?= $l['amortization-time'] ?></th>
-                      </tr>
-                    </thead>
-                    <tbody id="mines-priority-body"></tbody>
-                  </table>
+                  <div class="pfg-scroll-x">
+                    <table id="mines-priority-tbl" class="lined w-100">
+                      <thead>
+                        <tr>
+                          <th>#</th>
+                          <th><?= $l['planet'] ?></th>
+                          <th><?= $l['mine'] ?></th>
+                          <th><?= $l['level'] ?></th>
+                          <th><?= $l['upgrade-cost'] ?></th>
+                          <th><?= $l['production-increase'] ?></th>
+                          <th><?= $l['amortization-time'] ?></th>
+                        </tr>
+                      </thead>
+                      <tbody id="mines-priority-body"></tbody>
+                    </table>
+                  </div>
                 </div>
                 <div class="mt-2"><?= $l['priority-upgrades-comment'] ?></div>
               </div>
@@ -958,27 +973,29 @@
             </h2>
             <div id="all-pln-acc-amort" class="accordion-collapse collapse" data-bs-parent="#all-planets-accordion">
               <div class="accordion-body">
-                <table id="plasma-amort-tbl" class="lined w-100">
-                  <thead>
-                    <tr>
-                      <th style="width: 55%"></th>
-                      <th style="width: 15%"><?= $l['metal'] ?></th>
-                      <th style="width: 15%"><?= $l['crystal'] ?></th>
-                      <th style="width: 15%"><?= $l['deuterium'] ?></th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr class="odd">
-                      <td><?= $l['upgrade-cost'] ?></td><td class="centered" data-report-cell="plasma-upgrade-cost.metal"></td><td class="centered" data-report-cell="plasma-upgrade-cost.crystal"></td><td class="centered" data-report-cell="plasma-upgrade-cost.deuterium"></td>
-                    </tr>
-                    <tr class="even">
-                      <td><?= $l['production-increase'] ?></td><td class="centered" data-report-cell="plasma-production-increase.metal"></td><td class="centered" data-report-cell="plasma-production-increase.crystal"></td><td class="centered" data-report-cell="plasma-production-increase.deuterium"></td>
-                    </tr>
-                    <tr class="odd">
-                      <td><?= $l['amortization-time'] ?></td><td class="centered" colspan="3" data-report-cell="plasma-amortization"></td>
-                    </tr>
-                  </tbody>
-                </table>
+                <div class="pfg-scroll-x">
+                  <table id="plasma-amort-tbl" class="lined w-100">
+                    <thead>
+                      <tr>
+                        <th style="width: 55%"></th>
+                        <th style="width: 15%"><?= $l['metal'] ?></th>
+                        <th style="width: 15%"><?= $l['crystal'] ?></th>
+                        <th style="width: 15%"><?= $l['deuterium'] ?></th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr class="odd">
+                        <td><?= $l['upgrade-cost'] ?></td><td class="centered" data-report-cell="plasma-upgrade-cost.metal"></td><td class="centered" data-report-cell="plasma-upgrade-cost.crystal"></td><td class="centered" data-report-cell="plasma-upgrade-cost.deuterium"></td>
+                      </tr>
+                      <tr class="even">
+                        <td><?= $l['production-increase'] ?></td><td class="centered" data-report-cell="plasma-production-increase.metal"></td><td class="centered" data-report-cell="plasma-production-increase.crystal"></td><td class="centered" data-report-cell="plasma-production-increase.deuterium"></td>
+                      </tr>
+                      <tr class="odd">
+                        <td><?= $l['amortization-time'] ?></td><td class="centered" colspan="3" data-report-cell="plasma-amortization"></td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
               </div>
             </div>
           </div>
@@ -989,20 +1006,22 @@
             <div id="all-pln-acc-lf-amort" class="accordion-collapse collapse" data-bs-parent="#all-planets-accordion">
               <div class="accordion-body">
                 <div class="table-responsive">
-                  <table id="lf-amort-tbl" class="lined w-100">
-                    <thead>
-                      <tr>
-                        <th>#</th>
-                        <th><?= $l['planet'] ?></th>
-                        <th><?= $l['lf-object'] ?></th>
-                        <th><?= $l['level'] ?></th>
-                        <th><?= $l['upgrade-cost'] ?></th>
-                        <th><?= $l['production-increase'] ?></th>
-                        <th><?= $l['amortization-time'] ?></th>
-                      </tr>
-                    </thead>
-                    <tbody id="lf-amort-body"></tbody>
-                  </table>
+                  <div class="pfg-scroll-x">
+                    <table id="lf-amort-tbl" class="lined w-100">
+                      <thead>
+                        <tr>
+                          <th>#</th>
+                          <th><?= $l['planet'] ?></th>
+                          <th><?= $l['lf-object'] ?></th>
+                          <th><?= $l['level'] ?></th>
+                          <th><?= $l['upgrade-cost'] ?></th>
+                          <th><?= $l['production-increase'] ?></th>
+                          <th><?= $l['amortization-time'] ?></th>
+                        </tr>
+                      </thead>
+                      <tbody id="lf-amort-body"></tbody>
+                    </table>
+                  </div>
                 </div>
                 <div class="mt-2"><?= $l['lf-amort-comment'] ?></div>
               </div>
@@ -1080,17 +1099,19 @@
             <div id="all-pln-acc-fleet" class="accordion-collapse collapse" data-bs-parent="#all-planets-accordion">
               <div class="accordion-body">
                 <?php $techs = getTechsByType(5);?>
-                <table id="all-pln-fleet-prod" class="lined w-100">
-                  <tr>
-                    <th><?= $l['ship'] ?></th><th><?= $l['per-hour'] ?></th><th><?= $l['per-day'] ?></th><th><?= $l['per-week'] ?></th>
-                  </tr>
-                  <?php $row = 0;?>
-                  <?php foreach ($techs as $tech) :?>
-                  <tr class="<?= ($row++ % 2) === 1 ? 'odd' : 'even' ?>">
-                    <td class="text-start"><?=$l[$techData[$tech][0]]?></td><?php foreach (array('per-hour', 'per-day', 'per-week') as $col): ?><td class="text-center" data-report-cell="<?= $techData[$tech][0] ?>.<?= $col ?>">0</td><?php endforeach; ?>
-                  </tr>
-                  <?php endforeach; ?>
-                </table>
+                <div class="pfg-scroll-x">
+                  <table id="all-pln-fleet-prod" class="lined w-100">
+                    <tr>
+                      <th><?= $l['ship'] ?></th><th><?= $l['per-hour'] ?></th><th><?= $l['per-day'] ?></th><th><?= $l['per-week'] ?></th>
+                    </tr>
+                    <?php $row = 0;?>
+                    <?php foreach ($techs as $tech) :?>
+                    <tr class="<?= ($row++ % 2) === 1 ? 'odd' : 'even' ?>">
+                      <td class="text-start"><?=$l[$techData[$tech][0]]?></td><?php foreach (array('per-hour', 'per-day', 'per-week') as $col): ?><td class="text-center" data-report-cell="<?= $techData[$tech][0] ?>.<?= $col ?>">0</td><?php endforeach; ?>
+                    </tr>
+                    <?php endforeach; ?>
+                  </table>
+                </div>
               </div>
             </div>
           </div>
@@ -1101,17 +1122,19 @@
             <div id="all-pln-acc-defense" class="accordion-collapse collapse" data-bs-parent="#all-planets-accordion">
               <div class="accordion-body">
                 <?php $techs = getTechsByType(6);?>
-                <table id="all-pln-defense-prod" class="lined w-100">
-                  <tr>
-                    <th><?= $l['building'] ?></th><th><?= $l['per-hour'] ?></th><th><?= $l['per-day'] ?></th><th><?= $l['per-week'] ?></th>
-                  </tr>
-                  <?php $row = 0;?>
-                  <?php foreach ($techs as $tech) :?>
-                  <tr class="<?= ($row++ % 2) === 1 ? 'odd' : 'even' ?>">
-                    <td class="text-start"><?=$l[$techData[$tech][0]]?></td><?php foreach (array('per-hour', 'per-day', 'per-week') as $col): ?><td class="text-center" data-report-cell="<?= $techData[$tech][0] ?>.<?= $col ?>">0</td><?php endforeach; ?>
-                  </tr>
-                  <?php endforeach; ?>
-                </table>
+                <div class="pfg-scroll-x">
+                  <table id="all-pln-defense-prod" class="lined w-100">
+                    <tr>
+                      <th><?= $l['building'] ?></th><th><?= $l['per-hour'] ?></th><th><?= $l['per-day'] ?></th><th><?= $l['per-week'] ?></th>
+                    </tr>
+                    <?php $row = 0;?>
+                    <?php foreach ($techs as $tech) :?>
+                    <tr class="<?= ($row++ % 2) === 1 ? 'odd' : 'even' ?>">
+                      <td class="text-start"><?=$l[$techData[$tech][0]]?></td><?php foreach (array('per-hour', 'per-day', 'per-week') as $col): ?><td class="text-center" data-report-cell="<?= $techData[$tech][0] ?>.<?= $col ?>">0</td><?php endforeach; ?>
+                    </tr>
+                    <?php endforeach; ?>
+                  </table>
+                </div>
               </div>
             </div>
           </div>

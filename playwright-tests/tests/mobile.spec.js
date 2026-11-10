@@ -46,6 +46,16 @@ const PHONE_PAGES = [
       await page.locator('#numLC').fill('123456');
       await page.locator('#numLC').blur();
     } },
+  { name: 'production calculator', url: '/ru/ogame/calc/production.php',
+    calculate: async (page) => {
+      // Mines and a power plant at high levels: the production table's widest numbers.
+      const table = page.locator('#one-planet-prod');
+      for (const label of ['Рудник по добыче металла', 'Рудник по добыче кристалла', 'Солнечная электростанция']) {
+        const field = table.getByLabel(`${label}-Ур/Кол-во`);
+        await field.fill('45');
+        await field.blur();
+      }
+    } },
 ];
 
 const WIDTH = 360;
