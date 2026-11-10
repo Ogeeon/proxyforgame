@@ -33,6 +33,12 @@ const PHONE_PAGES = [
       await page.locator('#res-src-m').blur();
       await page.locator('#res-dst-2').click();
     } },
+  { name: 'queue calculator', url: '/ru/ogame/calc/queue.php',
+    calculate: async (page) => {
+      // A few queued levels fill the queue table with rows and their buttons.
+      for (let i = 0; i < 3; i++) await page.locator('#build-2-1').click();
+      await page.locator('#build-2-2').click();
+    } },
 ];
 
 const WIDTH = 360;

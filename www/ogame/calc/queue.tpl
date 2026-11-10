@@ -4,6 +4,7 @@
   <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
   <?php require_once '../../hawk.tpl'; ?>
   <?php require_once __DIR__ . '/../../scripts-guard.tpl'; ?>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title><?= $l['title'] ?></title>
   <meta name="description" content="<?= htmlspecialchars($l['description'], ENT_QUOTES, 'UTF-8') ?>">
   <meta name="keywords" content="<?= $l['keywords'] ?>">
@@ -228,33 +229,35 @@
                   <input id="total-fields-<?=$i?>" type="text" name="total-fields-<?=$i?>" class="form-control form-control-sm level-input total-fld-input" value="0" data-field-title="<?= $l['total-fields'] ?>">
                 </div>
               </div>
-              <table id="table-src-<?=$i?>" class="lined">
-                <tr>
-                  <th style="display: none;">ID</th>
-                  <?php foreach ($colHeadersSrc as $idx => $header): ?>
-                  <th <?=($idx > 0)?'class="text-center"':''?>><?= $l[$header] ?></th>
+              <div class="pfg-scroll-x">
+                <table id="table-src-<?=$i?>" class="lined">
+                  <tr>
+                    <th style="display: none;">ID</th>
+                    <?php foreach ($colHeadersSrc as $idx => $header): ?>
+                    <th <?=($idx > 0)?'class="text-center"':''?>><?= $l[$header] ?></th>
+                    <?php endforeach; ?>
+                  </tr>
+                  <?php $techs = getTechsByType($i); $row = 1; ?>
+                  <?php foreach ($techs as $tech): ?>
+                  <tr class="<?= ($row++ % 2) === 1 ? 'odd' : 'even' ?>" data-report-key="<?= $techData[$tech][0] ?>">
+                    <td style="display: none;"><?=$tech?></td>
+                    <td><?= $l[$techData[$tech][0]] ?></td>
+                    <td class="text-center"><input id="startlvl-<?=$i?>-<?=$tech?>" type="text" class="form-control form-control-sm level-input" value="0"></td>
+                    <td class="text-center" style="white-space: nowrap;">
+                      <span id="nextlvl-<?=$i?>-<?=$tech?>" data-report-cell="<?= $techData[$tech][0] ?>.next-level">0</span>
+                      <button id="build-<?=$i?>-<?=$tech?>" type="button" data-tech="<?=$tech?>" class="btn btn-outline-secondary btn-sm button-build" data-bs-toggle="tooltip" title="<?= $l['build'] ?>">
+                        <i class="bi bi-arrow-right"></i>
+                      </button>
+                      <?php if (!in_array($tech, [33, 36, 41])): ?>
+                      <button id="destroy-<?=$i?>-<?=$tech?>" type="button" data-tech="<?=$tech?>" class="btn btn-outline-secondary btn-sm button-destroy" data-bs-toggle="tooltip" title="<?= $l['destroy'] ?>">
+                        <i class="bi bi-arrow-left"></i>
+                      </button>
+                      <?php endif; ?>
+                    </td>
+                  </tr>
                   <?php endforeach; ?>
-                </tr>
-                <?php $techs = getTechsByType($i); $row = 1; ?>
-                <?php foreach ($techs as $tech): ?>
-                <tr class="<?= ($row++ % 2) === 1 ? 'odd' : 'even' ?>" data-report-key="<?= $techData[$tech][0] ?>">
-                  <td style="display: none;"><?=$tech?></td>
-                  <td><?= $l[$techData[$tech][0]] ?></td>
-                  <td class="text-center"><input id="startlvl-<?=$i?>-<?=$tech?>" type="text" class="form-control form-control-sm level-input" value="0"></td>
-                  <td class="text-center" style="white-space: nowrap;">
-                    <span id="nextlvl-<?=$i?>-<?=$tech?>" data-report-cell="<?= $techData[$tech][0] ?>.next-level">0</span>
-                    <button id="build-<?=$i?>-<?=$tech?>" type="button" data-tech="<?=$tech?>" class="btn btn-outline-secondary btn-sm button-build" data-bs-toggle="tooltip" title="<?= $l['build'] ?>">
-                      <i class="bi bi-arrow-right"></i>
-                    </button>
-                    <?php if (!in_array($tech, [33, 36, 41])): ?>
-                    <button id="destroy-<?=$i?>-<?=$tech?>" type="button" data-tech="<?=$tech?>" class="btn btn-outline-secondary btn-sm button-destroy" data-bs-toggle="tooltip" title="<?= $l['destroy'] ?>">
-                      <i class="bi bi-arrow-left"></i>
-                    </button>
-                    <?php endif; ?>
-                  </td>
-                </tr>
-                <?php endforeach; ?>
-              </table>
+                </table>
+              </div>
             </div>
           </div>
 
@@ -283,28 +286,30 @@
                 </div>
               </div>
 
-              <table id="table-dst-<?=$i?>" class="lined">
-                <tr>
-                  <?php foreach ($colHeadersDst as $idx => $header): ?>
-                  <th <?=($idx > 0)?'class="text-center"':''?>><?= $header == '-' ? '' : $l[$header] ?></th>
-                  <?php endforeach; ?>
-                </tr>
-                <tr class="even">
-                  <td class="border-n"><?= $l['total'] ?></td>
-                  <td class="border-n text-center"><b>0</b></td>
-                  <td class="border-n border-s border-w text-center"><b>0</b></td>
-                  <td class="border-n border-s text-center"><b>0</b></td>
-                  <td class="border-n border-s text-center"><b>0</b></td>
-                  <td class="border-n border-s border-e text-center"><b>0</b></td>
-                  <td></td>
-                </tr>
-                <tr class="even">
-                  <td><?= $l['transports-needed'] ?></td>
-                  <td class="text-center" colspan="2">0 <?= $l['sc-short'] ?></td>
-                  <td class="text-center" colspan="2">0 <?= $l['lc-short'] ?></td>
-                  <td colspan="2"></td>
-                </tr>
-              </table>
+              <div class="pfg-scroll-x">
+                <table id="table-dst-<?=$i?>" class="lined">
+                  <tr>
+                    <?php foreach ($colHeadersDst as $idx => $header): ?>
+                    <th <?=($idx > 0)?'class="text-center"':''?>><?= $header == '-' ? '' : $l[$header] ?></th>
+                    <?php endforeach; ?>
+                  </tr>
+                  <tr class="even">
+                    <td class="border-n"><?= $l['total'] ?></td>
+                    <td class="border-n text-center"><b>0</b></td>
+                    <td class="border-n border-s border-w text-center"><b>0</b></td>
+                    <td class="border-n border-s text-center"><b>0</b></td>
+                    <td class="border-n border-s text-center"><b>0</b></td>
+                    <td class="border-n border-s border-e text-center"><b>0</b></td>
+                    <td></td>
+                  </tr>
+                  <tr class="even">
+                    <td><?= $l['transports-needed'] ?></td>
+                    <td class="text-center" colspan="2">0 <?= $l['sc-short'] ?></td>
+                    <td class="text-center" colspan="2">0 <?= $l['lc-short'] ?></td>
+                    <td colspan="2"></td>
+                  </tr>
+                </table>
+              </div>
             </div>
           </div>
         </div>
