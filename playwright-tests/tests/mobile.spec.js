@@ -56,6 +56,14 @@ const PHONE_PAGES = [
         await field.blur();
       }
     } },
+  { name: 'flight calculator', url: '/ru/ogame/calc/flight.php',
+    calculate: async (page) => {
+      // A big fleet far away: the flight times table's longest durations and fuel.
+      await page.locator('#large-cargo').fill('123456');
+      await page.locator('#large-cargo').blur();
+      await page.locator('#destination-g').fill('5');
+      await page.locator('#destination-g').blur();
+    } },
 ];
 
 const WIDTH = 360;

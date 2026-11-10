@@ -405,3 +405,38 @@
   border: 1px solid var(--bs-border-color);
   border-radius: var(--bs-border-radius);
 }
+
+/* ==========================================================================
+   PHONE LAYOUT (docs/patterns.md, "Phone layout")
+   ========================================================================== */
+
+@media (max-width: 575.98px) {
+  /* One ship per line: three abreast need some 570px. The ships keep their
+     source order, row by row of the desktop grid. */
+  .ships-grid {
+    grid-template-columns: repeat(3, auto);
+  }
+
+  /* The arrival calculator goes under the flight times instead of beside them. */
+  .flight-layout {
+    flex-wrap: wrap;
+  }
+
+  .flight-layout > .arrival-cell {
+    flex: 1 1 100%;
+  }
+
+  /* A long label beside its select ("deuterium consumption reduction") may
+     wrap; the row keeps text-nowrap for the select and its value. */
+  #accordion-prm .text-nowrap > label {
+    white-space: normal;
+  }
+
+  /* A phone's fields have 16px text (common.css) where these widths were
+     sized for 14px: a six-digit ship count, a full date and a flight time
+     lost their last characters. */
+  .count-input           { width: 80px; }
+  .startdate-input       { width: 180px; }
+  .flight-time-input     { width: 112px; }
+  .tolerance-time-input  { width: 76px; }
+}

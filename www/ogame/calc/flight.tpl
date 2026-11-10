@@ -4,6 +4,7 @@
   <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
   <?php require_once '../../hawk.tpl'; ?>
   <?php require_once __DIR__ . '/../../scripts-guard.tpl'; ?>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title><?= $l['title'] ?></title>
   <meta name="description" content="<?= htmlspecialchars($l['description'], ENT_QUOTES, 'UTF-8') ?>">
   <meta name="keywords" content="<?= $l['keywords'] ?>">
@@ -361,33 +362,35 @@
                     <span class="fw-semibold"><?= $l['lf-bonuses-ships'] ?> <i class="bi bi-question-circle" data-bs-toggle="tooltip" title="<?= htmlspecialchars($l['lf-bonuses-api-import-hint'], ENT_QUOTES) ?>"></i></span>
                     <button id="open-lfbr" type="button" class="btn btn-sm btn-outline-secondary"><?= $l['open-lfbr'] ?></button>
                   </div>
-                  <table id="lf-ships-bonuses" class="lined mx-auto" style="width: 80%;">
-                    <tr>
-                      <th><?= $l['ship-name'] ?></th>
-                      <th><?= $l['speed-increase'] ?></th>
-                      <th><?= $l['cargo-increase'] ?></th>
-                      <th><?= $l['fuel-decrease'] ?></th>
-                    </tr>
-                    <?php
-                      $lfRows = [
-                        ['small-cargo', 202], ['large-cargo', 203], ['light-fighter', 204],
-                        ['heavy-fighter', 205], ['cruiser', 206], ['battleship', 207],
-                        ['colony-ship', 208], ['recycler', 209], ['esp-probe', 210],
-                        ['bomber', 211], ['destroyer', 213], ['death-star', 214],
-                        ['battlecruiser', 215], ['reaper', 218], ['pathfinder', 219],
-                      ];
-                      foreach ($lfRows as $idx => $r):
-                        $name = $r[0]; $tech = $r[1];
-                        $cls = ($idx % 2) === 0 ? 'odd' : 'even';
-                    ?>
-                    <tr class="<?= $cls ?>" data-report-key="<?= $name ?>">
-                      <td><?= $l[$name] ?></td>
-                      <td class="centered"><input type="text" class="form-control form-control-sm d-inline-block no-mp input-7columns centered <?= $tech ?>-speed" aria-label="<?= $l['speed-increase'] ?>"></td>
-                      <td class="centered"><input type="text" class="form-control form-control-sm d-inline-block no-mp input-7columns centered <?= $tech ?>-cargo" aria-label="<?= $l['cargo-increase'] ?>"></td>
-                      <td class="centered"><input type="text" class="form-control form-control-sm d-inline-block no-mp input-7columns centered <?= $tech ?>-fuel" aria-label="<?= $l['fuel-decrease'] ?>"></td>
-                    </tr>
-                    <?php endforeach; ?>
-                  </table>
+                  <div class="pfg-scroll-x">
+                    <table id="lf-ships-bonuses" class="lined mx-auto" style="width: 80%;">
+                      <tr>
+                        <th><?= $l['ship-name'] ?></th>
+                        <th><?= $l['speed-increase'] ?></th>
+                        <th><?= $l['cargo-increase'] ?></th>
+                        <th><?= $l['fuel-decrease'] ?></th>
+                      </tr>
+                      <?php
+                        $lfRows = [
+                          ['small-cargo', 202], ['large-cargo', 203], ['light-fighter', 204],
+                          ['heavy-fighter', 205], ['cruiser', 206], ['battleship', 207],
+                          ['colony-ship', 208], ['recycler', 209], ['esp-probe', 210],
+                          ['bomber', 211], ['destroyer', 213], ['death-star', 214],
+                          ['battlecruiser', 215], ['reaper', 218], ['pathfinder', 219],
+                        ];
+                        foreach ($lfRows as $idx => $r):
+                          $name = $r[0]; $tech = $r[1];
+                          $cls = ($idx % 2) === 0 ? 'odd' : 'even';
+                      ?>
+                      <tr class="<?= $cls ?>" data-report-key="<?= $name ?>">
+                        <td><?= $l[$name] ?></td>
+                        <td class="centered"><input type="text" class="form-control form-control-sm d-inline-block no-mp input-7columns centered <?= $tech ?>-speed" aria-label="<?= $l['speed-increase'] ?>"></td>
+                        <td class="centered"><input type="text" class="form-control form-control-sm d-inline-block no-mp input-7columns centered <?= $tech ?>-cargo" aria-label="<?= $l['cargo-increase'] ?>"></td>
+                        <td class="centered"><input type="text" class="form-control form-control-sm d-inline-block no-mp input-7columns centered <?= $tech ?>-fuel" aria-label="<?= $l['fuel-decrease'] ?>"></td>
+                      </tr>
+                      <?php endforeach; ?>
+                    </table>
+                  </div>
 
                 </div><!-- /param-lifeforms -->
 
@@ -492,46 +495,48 @@
                 </label>
               </div>
 
-              <table id="flight-times" class="lined w-100">
-                <tr>
-                  <th><?= $l['speed'] ?></th>
-                  <th><?= $l['flight-duration'] ?></th>
-                  <th><?= $l['deut-consumption'] ?></th>
-                  <th><?= $l['cargo-capacity'] ?></th>
-                  <th style="width: 32px;">&nbsp;</th>
-                </tr>
-                <?php for($i=100; $i>0; $i-=5): ?>
-                <tr class="speed-row <?= ($i % 10) === 5 ? 'odd' : 'even' ?>">
-                  <td class="text-center"><?= $i ?>%</td>
-                  <td class="text-center" data-report-cell="speed-<?= $i ?>.duration"></td>
-                  <td class="text-center" data-report-cell="speed-<?= $i ?>.fuel"></td>
-                  <td class="text-center" data-report-cell="speed-<?= $i ?>.cargo"></td>
-                  <td class="text-center">
-                    <div class="btn btn-sm btn-outline-secondary button-taketocalc" data-bs-toggle="tooltip" title="<?= $l['take-to-calc'] ?>">
-                      <i class="bi bi-arrow-right"></i>
-                    </div>
-                  </td>
-                </tr>
-                <?php endfor; ?>
-                <?php
-                  // Why the table is blank. The speed rows step aside for one of
-                  // these (see #flight-times.is-empty in flight.css); the verb
-                  // group is a button that takes the user to the field to fill in.
-                  $emptyStates = [
-                    ['flight-times-empty-ships', 'flight-times-goto-ships', 'flight-times-no-ships'],
-                    ['flight-times-empty-coords', 'flight-times-goto-coords', 'flight-times-bad-coords'],
-                  ];
-                  foreach ($emptyStates as $state):
-                    $action = '<button type="button" id="' . $state[1]
-                      . '" class="btn btn-link p-0 align-baseline">' . $l[$state[2] . '-action'] . '</button>';
-                ?>
-                <tr id="<?= $state[0] ?>" class="flight-times-empty" hidden>
-                  <td colspan="5" class="text-center text-muted py-3">
-                    <i class="bi bi-info-circle"></i> <?= sprintf($l[$state[2]], $action) ?>
-                  </td>
-                </tr>
-                <?php endforeach; ?>
-              </table>
+              <div class="pfg-scroll-x">
+                <table id="flight-times" class="lined w-100">
+                  <tr>
+                    <th><?= $l['speed'] ?></th>
+                    <th><?= $l['flight-duration'] ?></th>
+                    <th><?= $l['deut-consumption'] ?></th>
+                    <th><?= $l['cargo-capacity'] ?></th>
+                    <th style="width: 32px;">&nbsp;</th>
+                  </tr>
+                  <?php for($i=100; $i>0; $i-=5): ?>
+                  <tr class="speed-row <?= ($i % 10) === 5 ? 'odd' : 'even' ?>">
+                    <td class="text-center"><?= $i ?>%</td>
+                    <td class="text-center" data-report-cell="speed-<?= $i ?>.duration"></td>
+                    <td class="text-center" data-report-cell="speed-<?= $i ?>.fuel"></td>
+                    <td class="text-center" data-report-cell="speed-<?= $i ?>.cargo"></td>
+                    <td class="text-center">
+                      <div class="btn btn-sm btn-outline-secondary button-taketocalc" data-bs-toggle="tooltip" title="<?= $l['take-to-calc'] ?>">
+                        <i class="bi bi-arrow-right"></i>
+                      </div>
+                    </td>
+                  </tr>
+                  <?php endfor; ?>
+                  <?php
+                    // Why the table is blank. The speed rows step aside for one of
+                    // these (see #flight-times.is-empty in flight.css); the verb
+                    // group is a button that takes the user to the field to fill in.
+                    $emptyStates = [
+                      ['flight-times-empty-ships', 'flight-times-goto-ships', 'flight-times-no-ships'],
+                      ['flight-times-empty-coords', 'flight-times-goto-coords', 'flight-times-bad-coords'],
+                    ];
+                    foreach ($emptyStates as $state):
+                      $action = '<button type="button" id="' . $state[1]
+                        . '" class="btn btn-link p-0 align-baseline">' . $l[$state[2] . '-action'] . '</button>';
+                  ?>
+                  <tr id="<?= $state[0] ?>" class="flight-times-empty" hidden>
+                    <td colspan="5" class="text-center text-muted py-3">
+                      <i class="bi bi-info-circle"></i> <?= sprintf($l[$state[2]], $action) ?>
+                    </td>
+                  </tr>
+                  <?php endforeach; ?>
+                </table>
+              </div>
           </div>
             <div class="ps-2 arrival-cell">
               <div class="arrival-panel">
@@ -648,20 +653,22 @@
               ];
               foreach ($spTables as $spt):
             ?>
-            <div class="col-4">
+            <div class="col-12 col-sm-4 mb-2 mb-sm-0">
               <div class="border rounded p-2 text-center">
                 <span><?= $l[$spt[0]] ?></span>
-                <table id="<?= $spt[1] ?>" class="lined w-100">
-                  <!-- Four columns share a third of the panel, so the headers
-                       are the abbreviated ones. -->
-                  <tr>
-                    <th><?= $l['speed-short'] ?></th>
-                    <th><?= $l['coords-short'] ?></th>
-                    <th><?= $l['deuterium-short'] ?></th>
-                    <!-- Renamed to `arrival´ by the renderer while one-way search is on. -->
-                    <th class="savepoint-return-header"><?= $l['return'] ?></th>
-                  </tr>
-                </table>
+                <div class="pfg-scroll-x">
+                  <table id="<?= $spt[1] ?>" class="lined w-100">
+                    <!-- Four columns share a third of the panel, so the headers
+                         are the abbreviated ones. -->
+                    <tr>
+                      <th><?= $l['speed-short'] ?></th>
+                      <th><?= $l['coords-short'] ?></th>
+                      <th><?= $l['deuterium-short'] ?></th>
+                      <!-- Renamed to `arrival´ by the renderer while one-way search is on. -->
+                      <th class="savepoint-return-header"><?= $l['return'] ?></th>
+                    </tr>
+                  </table>
+                </div>
               </div>
             </div>
             <?php endforeach; ?>
