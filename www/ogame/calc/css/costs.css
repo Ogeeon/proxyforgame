@@ -446,14 +446,10 @@ td.min {
     flex-wrap: wrap;
   }
 
-  /* The cargo capacity row (a caption and two fields) wraps, each field whole:
-     a squeezed input-group wraps its "%" under the field. */
+  /* The cargo capacity row (a caption and two fields) wraps, each field whole,
+     its "%" beside it (common.css). */
   #costs #param-lifeforms .d-flex:has(> .d-flex > .input-group) {
     flex-wrap: wrap;
-  }
-
-  #costs .input-group {
-    flex-wrap: nowrap;
   }
 
   /* The building / research select is as wide as its longest option name. */

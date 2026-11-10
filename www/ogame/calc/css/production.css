@@ -250,9 +250,4 @@
   #production .tab-pane {
     min-width: 0;
   }
-
-  /* A squeezed input-group wraps its "%" under the field; keep it beside. */
-  #general-settings-panel .input-group {
-    flex-wrap: nowrap;
-  }
 }

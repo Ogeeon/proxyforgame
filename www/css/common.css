@@ -687,6 +687,15 @@ fieldset.pf-bound.pf-differs {
   }
 }
 
+/* A field with its unit ("%", "km", "systems") stays one piece. Bootstrap's
+   .input-group wraps, so on a narrow screen a squeezed group dropped its unit
+   under the field; the row it sits in wraps instead, the group whole. Every
+   width, since a desktop has room and nothing changes there; groups holding a
+   button rather than a unit (the MCP page's copy button) keep wrapping. */
+.input-group:has(> .input-group-text) {
+  flex-wrap: nowrap;
+}
+
 /* Layout tables that reflow below md instead of scrolling (docs/patterns.md,
    "Phone layout"): a form whose answers sit at the end of its rows would hide
    them past the right edge. The rows become display: contents, so the cells

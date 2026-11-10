@@ -271,10 +271,4 @@
     max-width: 100%;
     padding: 0 10px;
   }
-
-  /* Phone layout (docs/patterns.md): a squeezed input-group wraps its unit
-     ("%", "km", "systems") under the field; keep it beside, the label wraps. */
-  #moon .input-group {
-    flex-wrap: nowrap;
-  }
 }

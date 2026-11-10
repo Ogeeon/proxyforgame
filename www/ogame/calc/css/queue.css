@@ -243,15 +243,11 @@
   }
 
   /* The class radios wrap under their legend instead of running off the panel,
-     and so do the two cargo fields - each one whole: a squeezed input-group
-     would otherwise drop its "%" under the field. */
+     and so do the two cargo fields - each one whole, its "%" beside it
+     (common.css). */
   #general-settings-panel fieldset.d-flex,
   #general-settings-panel .d-flex:has(> .input-group) {
     flex-wrap: wrap;
-  }
-
-  #general-settings-panel .input-group {
-    flex-wrap: nowrap;
   }
 }
 

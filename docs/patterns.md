@@ -724,6 +724,12 @@ forbids pinch-zoom altogether. A calculator's own `font-size` on a field must no
 outrank the rule (it is `input.form-control`, so a single class loses to it; an id
 selector would win - check).
 
+**A field keeps its unit beside it.** A Bootstrap `.input-group` holding an
+`.input-group-text` ("%", "km", "systems") does not wrap, by one rule in `common.css`, so
+the unit never drops under its field. If the row is too narrow, let the row around the
+group wrap (`flex-wrap: wrap` on the `.d-flex` parent); do not add a calculator-scoped
+`flex-wrap: nowrap` of your own.
+
 **Before reaching for a wrapper, try to make the thing narrower** - a smaller cell
 padding, a narrower field, a grid going from two columns to one below `sm` - inside the
 calculator's existing `@media (max-width: 992px)` block or a new `max-width: 575.98px`

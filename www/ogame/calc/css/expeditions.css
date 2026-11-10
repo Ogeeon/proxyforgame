@@ -203,8 +203,4 @@
   #data-table td {
     padding: 2px 4px;
   }
-
-  #param-common .input-group {
-    flex-wrap: nowrap;
-  }
 }
