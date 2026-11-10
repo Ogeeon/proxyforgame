@@ -627,3 +627,50 @@ fieldset.pf-bound.pf-differs {
 :has(> .form-control.pf-bound + .pf-reset, > .form-select.pf-bound + .pf-reset) {
   white-space: nowrap;
 }
+
+/* Phone layout (docs/patterns.md, "Phone layout").
+
+   A wide table on a narrow screen scrolls sideways inside a .pfg-scroll-x
+   wrapper, so the rest of the calculator - title, tabs, settings - stays on the
+   screen. Below lg only: on a desktop the calculator is as wide as its widest
+   table, nothing would scroll, and an overflow container would only clip the
+   focus ring of a field at its edge. */
+@media (max-width: 991.98px) {
+  .pfg-scroll-x {
+    max-width: 100%;
+    overflow-x: auto;
+  }
+
+  /* The first column - the building, ship or research a row is about - stays
+     in view while the rest of the row scrolls under it. A sticky cell has to
+     be opaque, so the row stripe is laid over the page colour. */
+  .pfg-sticky-col :is(td, th).pfg-sticky,
+  .pfg-sticky-col tr > :is(td, th):first-child:not(.pfg-unsticky) {
+    position: sticky;
+    left: 0;
+    z-index: 1;
+  }
+
+  .pfg-sticky-col tr > td:first-child:not(.pfg-unsticky),
+  .pfg-sticky-col td.pfg-sticky {
+    background-color: var(--bs-body-bg);
+  }
+
+  .pfg-sticky-col tr.odd > td:first-child:not(.pfg-unsticky),
+  .pfg-sticky-col tr.odd > td.pfg-sticky {
+    --pfg-stripe: color-mix(in srgb, var(--bs-body-color) 7%, transparent);
+    background-image: linear-gradient(var(--pfg-stripe), var(--pfg-stripe));
+  }
+}
+
+/* Safari on iOS zooms the page in whenever a field whose text is smaller than
+   16px takes the focus, and leaves it zoomed. form-control-sm is 14px, so on a
+   phone the fields get 16px. Element-qualified to outrank a calculator's own
+   single-class font size (trade's .rate-input). */
+@media (max-width: 575.98px) {
+  input.form-control,
+  select.form-select,
+  textarea.form-control {
+    font-size: 16px;
+  }
+}

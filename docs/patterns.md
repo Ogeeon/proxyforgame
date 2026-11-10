@@ -643,3 +643,71 @@ Two selects (costs) sit in one `#pf-bodies-row` that also wraps, `justify-conten
 a title bar without `flex-wrap`; a box without `.pf-header-bodies`, or with extra vertical
 margin of its own. Check new markup at 1300 px and 400 px with a profile active - measure
 the select's top against the panel (or title) and its bottom against the next panel.
+
+---
+
+## (i) Phone layout
+
+Source: `common.css` (the end of the file), `playwright-tests/tests/mobile.spec.js`; the
+first calculators to follow it are listed in that spec's `PHONE_PAGES`.
+
+A page is laid out for a phone by the **viewport tag** in its `<head>`, right after the
+`scripts-guard.tpl` include:
+
+```html
+<meta name="viewport" content="width=device-width, initial-scale=1">
+```
+
+Without it a phone lays the page out 980px wide and zooms it out to fit: everything is
+there, but the text is too small to read. With it the page gets the phone's real width,
+360–430px - and a calculator that is wider than that now scrolls sideways instead.
+**The tag goes in the same commit that makes the page fit**, never ahead of it: the
+zoomed-out page is worse, but it is not broken.
+
+**What "fits" means** - the test in `mobile.spec.js` checks it at 360px with phone
+emulation, in every tab and collapsible panel and after a calculation:
+
+- the page is no wider than the screen;
+- nothing scrolls sideways **except a `.pfg-scroll-x` wrapper**. A whole calculator
+  root with `overflow-x: auto` (most of them have one) fails: the title, the tabs and
+  the settings would scroll off the screen together with the table.
+
+**A wide table scrolls inside its own wrapper.** Wrap it, and keep it centred the way it
+was:
+
+```html
+<div class="pfg-scroll-x">
+  <table class="lined mx-auto">…</table>
+</div>
+```
+
+`.pfg-scroll-x` only does anything below `lg` (992px): on a desktop the calculator is as
+wide as its widest table, so nothing would scroll, and an overflow container there would
+only clip the focus ring of a field at its edge. That is also why the calculators'
+`width: max-content` root can stay: the root is capped at `max-width: 100%`, the wrapper
+is as wide as the root, and the table scrolls inside it.
+
+**Keep the row's name in view.** In a table whose first column names the row - a
+building, a ship, a research - add `pfg-sticky-col` next to `pfg-scroll-x` (or on the
+table). The first cell of every row then stays at the left edge while the rest scrolls
+under it; it is painted opaque, row stripe included, so the scrolled cells do not show
+through. A header row whose first cell is not the name column (a `colspan` group
+heading) marks that cell `pfg-unsticky`; a name cell that is not the first child (after a
+`rowspan`) marks itself `pfg-sticky`.
+
+**Form fields are 16px below `sm`** (576px), by one rule in `common.css`. Safari on iOS
+zooms the page in when a field with text smaller than 16px takes the focus, and
+`form-control-sm` is 14px. Do not use `maximum-scale=1` in the tag instead: Android then
+forbids pinch-zoom altogether. A calculator's own `font-size` on a field must not
+outrank the rule (it is `input.form-control`, so a single class loses to it; an id
+selector would win - check).
+
+**Before reaching for a wrapper, try to make the thing narrower** - a smaller cell
+padding, a narrower field, a grid going from two columns to one below `sm` - inside the
+calculator's existing `@media (max-width: 992px)` block or a new `max-width: 575.98px`
+one. The desktop must not change: new rules go only inside narrow-screen media
+queries, and the e2e suite, which runs in a desktop window, guards that.
+
+**Deviation to look for**: a viewport tag on a page that is not in `PHONE_PAGES`; an
+element other than `.pfg-scroll-x` that scrolls sideways at 360px; a `font-size` on a
+field set by id; a sticky first column whose cells are transparent.
