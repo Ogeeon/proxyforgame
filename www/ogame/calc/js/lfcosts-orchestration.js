@@ -752,7 +752,8 @@ class LfCostsOrchestrator {
         // The locale slug names the row in a calculation-error report.
         const slug = (this.opts.researchList || []).find(r => r.id === techID)?.key ?? String(techID);
         let rowHtml = `<tr class="${rowClass}" data-report-key="${slug}"><td style="display:none;">${techID}</td>`;
-        rowHtml += `<td class="min">${techName}${removeBtn}</td>`;
+        // pfg-sticky: the name stays in view while a phone scrolls the row (docs/patterns.md).
+        rowHtml += `<td class="min pfg-sticky">${techName}${removeBtn}</td>`;
         if (outerTab === 1) {
             rowHtml += `<td align="center"><input type="text" class="form-control form-control-sm level-input ui-input-margin" value="0"/></td>`;
             rowHtml += `<td align="center"><input type="text" class="form-control form-control-sm level-input ui-input-margin" value="0"/></td>`;

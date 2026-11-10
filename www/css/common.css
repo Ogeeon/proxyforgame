@@ -661,6 +661,18 @@ fieldset.pf-bound.pf-differs {
     --pfg-stripe: color-mix(in srgb, var(--bs-body-color) 7%, transparent);
     background-image: linear-gradient(var(--pfg-stripe), var(--pfg-stripe));
   }
+
+  /* A name column as wide as its longest name ("Fusion-powered production",
+     on one line) would cover most of a phone's screen once it stays put, and
+     leave the numbers a sliver to scroll through. A name cell marked
+     .pfg-sticky is held to 8rem and wraps, hyphenated in the page's language. */
+  .pfg-sticky-col :is(td, th).pfg-sticky {
+    width: 8rem;
+    min-width: 8rem;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    hyphens: auto;
+  }
 }
 
 /* Safari on iOS zooms the page in whenever a field whose text is smaller than

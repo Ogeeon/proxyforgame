@@ -430,6 +430,23 @@ td.min {
     padding: 2px 4px;
     font-size: 0.9rem;
   }
+
+  /* Phone layout (docs/patterns.md): the cost tables scroll inside their
+     .pfg-scroll-x wrappers, so the panes stop growing to fit them. */
+  #lfcosts .tab-content,
+  #lfcosts .tab-pane {
+    min-width: 0;
+  }
+
+  /* The class radios wrap under their legend instead of running off the panel. */
+  #lfcosts #param-common fieldset.d-flex {
+    flex-wrap: wrap;
+  }
+
+  /* The building / research select is as wide as its longest option name. */
+  #tech-types-select {
+    max-width: 100%;
+  }
 }
 
 /* lfcosts: only the selected race's building rows and level inputs. <html data-lf-race>

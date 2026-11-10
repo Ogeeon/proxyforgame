@@ -693,7 +693,9 @@ table). The first cell of every row then stays at the left edge while the rest s
 under it; it is painted opaque, row stripe included, so the scrolled cells do not show
 through. A header row whose first cell is not the name column (a `colspan` group
 heading) marks that cell `pfg-unsticky`; a name cell that is not the first child (after a
-`rowspan`) marks itself `pfg-sticky`.
+`rowspan`, or after a hidden id cell) marks itself `pfg-sticky` - and a `pfg-sticky` cell is
+held to 8rem and wraps its name, hyphenated, since a column as wide as its longest name on
+one line would cover most of the screen once it stays put.
 
 **Form fields are 16px below `sm`** (576px), by one rule in `common.css`. Safari on iOS
 zooms the page in when a field with text smaller than 16px takes the focus, and

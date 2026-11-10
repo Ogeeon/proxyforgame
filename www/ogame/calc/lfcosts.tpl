@@ -4,6 +4,7 @@
   <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
   <?php require_once '../../hawk.tpl'; ?>
   <?php require_once __DIR__ . '/../../scripts-guard.tpl'; ?>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title><?= $l['title'] ?></title>
   <meta name="description" content="<?= htmlspecialchars($l['description'], ENT_QUOTES, 'UTF-8') ?>">
   <meta name="keywords" content="<?= $l['keywords'] ?>">
@@ -350,102 +351,104 @@
                 <button id="research-add-btn-<?=$i?>" class="btn btn-sm btn-outline-secondary research-add-btn" data-tab="<?=$i?>"><?= $l['universe-add'] ?></button>
               </div>
               <?php endif; ?>
-              <table id="table-<?=$i?>-<?=$j?>" class="lined">
-                <tr>
-                  <th style="display: none;"></th>
-                  <?php foreach ($colHeaders as $idx => $header) :?>
-                  <th <?=($idx > 0)?'class="text-center"':''?>>
-                    <?php if ($header == 'dm-abbr'): ?>
-                      <abbr data-bs-toggle="tooltip" title="<?= $l['dm-explanation'] ?>"><?=$l[$header] ?></abbr>
-                    <?php else: ?>
-                      <?=$l[$header] ?>
-                    <?php endif; ?>
-                  </th>
-                  <?php endforeach; ?>
-                </tr>
-                <?php if ($j != 2): ?>
-                <?php $techs = getTechsByType($j); $row = 1; ?>
-                <?php $energyHintBuildings = [1002, 2002, 3002, 4002]; ?>
-                <?php foreach ($techs as $tech) :?>
-                <?php // data-race: costs.css shows only the stored race's rows from the first paint (see the script in <head>). ?>
-                <tr class="<?= ($row++ % 2) === 1 ? 'odd' : 'even' ?>" data-race="<?= intdiv((int) $tech, 1000) ?>" data-report-key="<?= $techData[$tech][0] ?>">
-                  <td style="display: none;"><?=$tech?></td>
-                  <td class="min"><?=$l[$techData[$tech][0]]?><?php if (in_array($tech, $energyHintBuildings)): ?> <i class="bi bi-lightning-charge energy-cost-hint" data-bs-toggle="tooltip" title="<?= $l['energy-cost-to-build'] ?>: 0"></i><?php endif; ?></td>
-                  <?php $techName = $l[$techData[$tech][0]]; ?>
-                  <?php if ($i == 1): ?>
-                  <td class="text-center"><input type="text" class="form-control form-control-sm level-input ui-input-margin" value="0" aria-label="<?= htmlspecialchars($techName . ': ' . $l['from-level'], ENT_QUOTES) ?>"></td>
-                  <?php endif;?>
-                  <td class="text-center"><input type="text" class="form-control form-control-sm level-input ui-input-margin" value="0" aria-label="<?= htmlspecialchars($techName . ': ' . $l[$i == 1 ? 'to-level' : 'level'], ENT_QUOTES) ?>"></td>
-                  <td class="text-center">0</td>
-                  <td class="text-center">0</td>
-                  <td class="text-center">0</td>
-                  <td class="text-center">0</td>
-                  <td class="text-center">0<?=$l['datetime-s']?></td>
-                  <td class="text-center">0</td>
-                  <?php if ($i == 0):?>
+              <div class="pfg-scroll-x pfg-sticky-col">
+                <table id="table-<?=$i?>-<?=$j?>" class="lined">
+                  <tr>
+                    <th style="display: none;"></th>
+                    <?php foreach ($colHeaders as $idx => $header) :?>
+                    <th class="<?= ($idx > 0) ? 'text-center' : 'pfg-sticky' ?>">
+                      <?php if ($header == 'dm-abbr'): ?>
+                        <abbr data-bs-toggle="tooltip" title="<?= $l['dm-explanation'] ?>"><?=$l[$header] ?></abbr>
+                      <?php else: ?>
+                        <?=$l[$header] ?>
+                      <?php endif; ?>
+                    </th>
+                    <?php endforeach; ?>
+                  </tr>
+                  <?php if ($j != 2): ?>
+                  <?php $techs = getTechsByType($j); $row = 1; ?>
+                  <?php $energyHintBuildings = [1002, 2002, 3002, 4002]; ?>
+                  <?php foreach ($techs as $tech) :?>
+                  <?php // data-race: costs.css shows only the stored race's rows from the first paint (see the script in <head>). ?>
+                  <tr class="<?= ($row++ % 2) === 1 ? 'odd' : 'even' ?>" data-race="<?= intdiv((int) $tech, 1000) ?>" data-report-key="<?= $techData[$tech][0] ?>">
+                    <td style="display: none;"><?=$tech?></td>
+                    <td class="min pfg-sticky"><?=$l[$techData[$tech][0]]?><?php if (in_array($tech, $energyHintBuildings)): ?> <i class="bi bi-lightning-charge energy-cost-hint" data-bs-toggle="tooltip" title="<?= $l['energy-cost-to-build'] ?>: 0"></i><?php endif; ?></td>
+                    <?php $techName = $l[$techData[$tech][0]]; ?>
+                    <?php if ($i == 1): ?>
+                    <td class="text-center"><input type="text" class="form-control form-control-sm level-input ui-input-margin" value="0" aria-label="<?= htmlspecialchars($techName . ': ' . $l['from-level'], ENT_QUOTES) ?>"></td>
+                    <?php endif;?>
+                    <td class="text-center"><input type="text" class="form-control form-control-sm level-input ui-input-margin" value="0" aria-label="<?= htmlspecialchars($techName . ': ' . $l[$i == 1 ? 'to-level' : 'level'], ENT_QUOTES) ?>"></td>
                     <td class="text-center">0</td>
+                    <td class="text-center">0</td>
+                    <td class="text-center">0</td>
+                    <td class="text-center">0</td>
+                    <td class="text-center">0<?=$l['datetime-s']?></td>
+                    <td class="text-center">0</td>
+                    <?php if ($i == 0):?>
+                      <td class="text-center">0</td>
+                    <?php endif; ?>
+                  </tr>
+                  <?php endforeach; ?>
                   <?php endif; ?>
-                </tr>
-                <?php endforeach; ?>
-                <?php endif; ?>
-                <tr>
-                  <td style="display: none;">t</td>
-                  <td colspan="<?= ($i == 1)?'2':'1' ?>" class="border-n"><?=$l['total']?></td>
-                  <td class="border-n text-center">0</td>
-                  <td class="border-n border-s border-w text-center"><b>0</b></td>
-                  <td class="border-n border-s text-center"><b>0</b></td>
-                  <td class="border-n border-s text-center"><b>0</b></td>
-                  <td class="border-n border-s text-center"><b>0</b></td>
-                  <td class="border-n border-s text-center"><b>0</b></td>
-                  <?php if ($i == 0):?>
-                  <td class="border-n border-s text-center"><b>0</b></td>
-                  <?php endif; ?>
-                  <td class="border-n border-s border-e text-center"><b>0</b></td>
-                </tr>
-                <tr><td colspan="10" style="height: 5px">&nbsp;</td></tr>
-                <tr>
-                  <td style="display: none;">gt</td>
-                  <td colspan="<?= ($i == 1)?'3':'2' ?>" class="border-n border-w"><?=$l['grand-total']?></td>
-                  <td class="border-n text-center">0</td>
-                  <td class="border-n text-center">0</td>
-                  <td class="border-n text-center">0</td>
-                  <td class="border-n text-center">0</td>
-                  <td class="border-n text-center">0</td>
-                  <?php if ($i == 0):?>
-                  <td class="border-n text-center"><b>0</b></td>
-                  <?php endif; ?>
-                  <td class="border-n border-e text-center">0</td>
-                </tr>
-                <tr>
-                  <td style="display: none;">ra</td>
-                  <td colspan="<?= ($i == 1)?'3':'2' ?>" class="border-w"><?= $l['res-available'] ?></td>
-                  <td class="text-center"><input id="metal-available-<?=$i?>-<?=$j?>" data-report-skip type="text" name="metal-available" class="form-control form-control-sm res-input" value="0" aria-label="<?= htmlspecialchars($l['res-available'] . ': ' . $l['metal'], ENT_QUOTES) ?>"></td>
-                  <td class="text-center"><input id="crystal-available-<?=$i?>-<?=$j?>" data-report-skip type="text" name="crystal-available" class="form-control form-control-sm res-input" value="0" aria-label="<?= htmlspecialchars($l['res-available'] . ': ' . $l['crystal'], ENT_QUOTES) ?>"></td>
-                  <td class="text-center"><input id="deut-available-<?=$i?>-<?=$j?>" data-report-skip type="text" name="deut-available" class="form-control form-control-sm res-input" value="0" aria-label="<?= htmlspecialchars($l['res-available'] . ': ' . $l['deuterium'], ENT_QUOTES) ?>"></td>
-                  <td colspan="<?= ($i == 0)?'4':'3' ?>" class="text-start border-e"><small id="resources-age-<?=$i?>-<?=$j?>" class="pf-resources-age text-body-secondary d-none"></small></td>
-                </tr>
-                <tr>
-                  <td style="display: none;">dlv</td>
-                  <td colspan="<?= ($i == 1)?'3':'2' ?>" class="border-w"><?= $l['res-needed'] ?></td>
-                  <td class="text-center">0</td>
-                  <td class="text-center">0</td>
-                  <td class="text-center">0</td>
-                  <td></td>
-                  <td></td>
-                  <?php if ($i == 0):?>
-                  <td></td>
-                  <?php endif; ?>
-                  <td class="border-e"></td>
-                </tr>
-                <tr>
-                  <td style="display: none;">gtt</td>
-                  <td class="border-s border-w"><?=$l['transports-needed']?></td>
-                  <td class="border-s text-center">0 <?=$l['sc-short']?></td>
-                  <td class="border-s text-center">0 <?=$l['lc-short']?></td>
-                  <td colspan="5" class="border-s text-center">&nbsp;</td>
-                  <td class="border-s border-e text-center">&nbsp;</td>
-                </tr>
-              </table>
+                  <tr>
+                    <td style="display: none;">t</td>
+                    <td colspan="<?= ($i == 1)?'2':'1' ?>" class="border-n"><?=$l['total']?></td>
+                    <td class="border-n text-center">0</td>
+                    <td class="border-n border-s border-w text-center"><b>0</b></td>
+                    <td class="border-n border-s text-center"><b>0</b></td>
+                    <td class="border-n border-s text-center"><b>0</b></td>
+                    <td class="border-n border-s text-center"><b>0</b></td>
+                    <td class="border-n border-s text-center"><b>0</b></td>
+                    <?php if ($i == 0):?>
+                    <td class="border-n border-s text-center"><b>0</b></td>
+                    <?php endif; ?>
+                    <td class="border-n border-s border-e text-center"><b>0</b></td>
+                  </tr>
+                  <tr><td colspan="10" style="height: 5px">&nbsp;</td></tr>
+                  <tr>
+                    <td style="display: none;">gt</td>
+                    <td colspan="<?= ($i == 1)?'3':'2' ?>" class="border-n border-w"><?=$l['grand-total']?></td>
+                    <td class="border-n text-center">0</td>
+                    <td class="border-n text-center">0</td>
+                    <td class="border-n text-center">0</td>
+                    <td class="border-n text-center">0</td>
+                    <td class="border-n text-center">0</td>
+                    <?php if ($i == 0):?>
+                    <td class="border-n text-center"><b>0</b></td>
+                    <?php endif; ?>
+                    <td class="border-n border-e text-center">0</td>
+                  </tr>
+                  <tr>
+                    <td style="display: none;">ra</td>
+                    <td colspan="<?= ($i == 1)?'3':'2' ?>" class="border-w"><?= $l['res-available'] ?></td>
+                    <td class="text-center"><input id="metal-available-<?=$i?>-<?=$j?>" data-report-skip type="text" name="metal-available" class="form-control form-control-sm res-input" value="0" aria-label="<?= htmlspecialchars($l['res-available'] . ': ' . $l['metal'], ENT_QUOTES) ?>"></td>
+                    <td class="text-center"><input id="crystal-available-<?=$i?>-<?=$j?>" data-report-skip type="text" name="crystal-available" class="form-control form-control-sm res-input" value="0" aria-label="<?= htmlspecialchars($l['res-available'] . ': ' . $l['crystal'], ENT_QUOTES) ?>"></td>
+                    <td class="text-center"><input id="deut-available-<?=$i?>-<?=$j?>" data-report-skip type="text" name="deut-available" class="form-control form-control-sm res-input" value="0" aria-label="<?= htmlspecialchars($l['res-available'] . ': ' . $l['deuterium'], ENT_QUOTES) ?>"></td>
+                    <td colspan="<?= ($i == 0)?'4':'3' ?>" class="text-start border-e"><small id="resources-age-<?=$i?>-<?=$j?>" class="pf-resources-age text-body-secondary d-none"></small></td>
+                  </tr>
+                  <tr>
+                    <td style="display: none;">dlv</td>
+                    <td colspan="<?= ($i == 1)?'3':'2' ?>" class="border-w"><?= $l['res-needed'] ?></td>
+                    <td class="text-center">0</td>
+                    <td class="text-center">0</td>
+                    <td class="text-center">0</td>
+                    <td></td>
+                    <td></td>
+                    <?php if ($i == 0):?>
+                    <td></td>
+                    <?php endif; ?>
+                    <td class="border-e"></td>
+                  </tr>
+                  <tr>
+                    <td style="display: none;">gtt</td>
+                    <td class="border-s border-w"><?=$l['transports-needed']?></td>
+                    <td class="border-s text-center">0 <?=$l['sc-short']?></td>
+                    <td class="border-s text-center">0 <?=$l['lc-short']?></td>
+                    <td colspan="5" class="border-s text-center">&nbsp;</td>
+                    <td class="border-s border-e text-center">&nbsp;</td>
+                  </tr>
+                </table>
+              </div>
             </div>
             <?php endforeach; ?>
           </div> <!-- End inner tab-content -->
@@ -479,47 +482,49 @@
             </div>
           </div>
           <div id="commons-table-div">
-            <table id="commons-table" class="lined">
-              <tr>
-              <?php foreach ($colHeadersOneCommon as $colName): ?>
-                <th><?=$l[$colName]?></th>
-              <?php endforeach; ?>
-              </tr>
-              <tr>
-                <td colspan="7">&nbsp;</td>
-              </tr>
-              <tr class="<?= ($row % 2) === 1 ? 'odd' : 'even' ?>">
-                <td class="border-n border-w"><?=$l['total']?></td>
-                <td class="border-n text-center"><b>0</b></td>
-                <td class="border-n text-center"><b>0</b></td>
-                <td class="border-n text-center"><b>0</b></td>
-                <td class="border-n text-center"><b>0</b></td>
-                <td class="border-n text-center"><b>0</b></td>
-                <td class="border-n border-e text-center"><b>0</b></td>
-              </tr>
-              <tr>
-                <td class="border-w"><?= $l['res-available'] ?></td>
-                <td class="text-center"><input id="metal-available-2-1" data-report-skip type="text" name="metal-available" class="form-control form-control-sm res-input" value="0" aria-label="<?= htmlspecialchars($l['res-available'] . ': ' . $l['metal'], ENT_QUOTES) ?>"></td>
-                <td class="text-center"><input id="crystal-available-2-1" data-report-skip type="text" name="crystal-available" class="form-control form-control-sm res-input" value="0" aria-label="<?= htmlspecialchars($l['res-available'] . ': ' . $l['crystal'], ENT_QUOTES) ?>"></td>
-                <td class="text-center"><input id="deut-available-2-1" data-report-skip type="text" name="deut-available" class="form-control form-control-sm res-input" value="0" aria-label="<?= htmlspecialchars($l['res-available'] . ': ' . $l['deuterium'], ENT_QUOTES) ?>"></td>
-                <td colspan="3" class="text-start border-e"><small id="resources-age-2-1" class="pf-resources-age text-body-secondary d-none"></small></td>
-              </tr>
-              <tr>
-                <td class="border-w"><?= $l['res-needed'] ?></td>
-                <td class="text-center">0</td>
-                <td class="text-center">0</td>
-                <td class="text-center">0</td>
-                <td></td>
-                <td></td>
-                <td class="border-e"></td>
-              </tr>
-              <tr class="<?= ($row % 2) === 1 ? 'odd' : 'even' ?>">
-                <td class="border-s border-w"><?=$l['transports-needed']?></td>
-                <td class="border-s text-center">0 <?=$l['sc-short']?></td>
-                <td class="border-s text-center">0 <?=$l['lc-short']?></td>
-                <td colspan="4" class="border-s border-e"></td>
-              </tr>
-            </table>
+            <div class="pfg-scroll-x pfg-sticky-col">
+              <table id="commons-table" class="lined">
+                <tr>
+                <?php foreach ($colHeadersOneCommon as $colName): ?>
+                  <th><?=$l[$colName]?></th>
+                <?php endforeach; ?>
+                </tr>
+                <tr>
+                  <td colspan="7">&nbsp;</td>
+                </tr>
+                <tr class="<?= ($row % 2) === 1 ? 'odd' : 'even' ?>">
+                  <td class="border-n border-w"><?=$l['total']?></td>
+                  <td class="border-n text-center"><b>0</b></td>
+                  <td class="border-n text-center"><b>0</b></td>
+                  <td class="border-n text-center"><b>0</b></td>
+                  <td class="border-n text-center"><b>0</b></td>
+                  <td class="border-n text-center"><b>0</b></td>
+                  <td class="border-n border-e text-center"><b>0</b></td>
+                </tr>
+                <tr>
+                  <td class="border-w"><?= $l['res-available'] ?></td>
+                  <td class="text-center"><input id="metal-available-2-1" data-report-skip type="text" name="metal-available" class="form-control form-control-sm res-input" value="0" aria-label="<?= htmlspecialchars($l['res-available'] . ': ' . $l['metal'], ENT_QUOTES) ?>"></td>
+                  <td class="text-center"><input id="crystal-available-2-1" data-report-skip type="text" name="crystal-available" class="form-control form-control-sm res-input" value="0" aria-label="<?= htmlspecialchars($l['res-available'] . ': ' . $l['crystal'], ENT_QUOTES) ?>"></td>
+                  <td class="text-center"><input id="deut-available-2-1" data-report-skip type="text" name="deut-available" class="form-control form-control-sm res-input" value="0" aria-label="<?= htmlspecialchars($l['res-available'] . ': ' . $l['deuterium'], ENT_QUOTES) ?>"></td>
+                  <td colspan="3" class="text-start border-e"><small id="resources-age-2-1" class="pf-resources-age text-body-secondary d-none"></small></td>
+                </tr>
+                <tr>
+                  <td class="border-w"><?= $l['res-needed'] ?></td>
+                  <td class="text-center">0</td>
+                  <td class="text-center">0</td>
+                  <td class="text-center">0</td>
+                  <td></td>
+                  <td></td>
+                  <td class="border-e"></td>
+                </tr>
+                <tr class="<?= ($row % 2) === 1 ? 'odd' : 'even' ?>">
+                  <td class="border-s border-w"><?=$l['transports-needed']?></td>
+                  <td class="border-s text-center">0 <?=$l['sc-short']?></td>
+                  <td class="border-s text-center">0 <?=$l['lc-short']?></td>
+                  <td colspan="4" class="border-s border-e"></td>
+                </tr>
+              </table>
+            </div>
           </div>
         <?php endif;?>
         </div>
