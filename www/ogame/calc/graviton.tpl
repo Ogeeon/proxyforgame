@@ -4,6 +4,7 @@
   <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
   <?php require_once '../../hawk.tpl'; ?>
   <?php require_once __DIR__ . '/../../scripts-guard.tpl'; ?>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title><?= $l['title'] ?></title>
   <meta name="description" content="<?= htmlspecialchars($l['description'], ENT_QUOTES, 'UTF-8') ?>">
   <meta name="keywords" content="<?= $l['keywords'] ?>">
@@ -168,7 +169,7 @@
             <?php endforeach; ?>
           </div>
           <div class="d-flex flex-wrap gap-2 align-items-center justify-content-center">
-            <fieldset class="d-flex align-items-center gap-1 flex-nowrap fieldset-reset">
+            <fieldset class="d-flex align-items-center gap-1 flex-wrap flex-sm-nowrap fieldset-reset">
               <legend><?= $l['class'] ?>:</legend>
               <input id="player-class-0" type="radio" name="player-class" value="0" class="form-check-input" checked="checked"> <label for="player-class-0"><?= $l['none'] ?></label>
               <input id="player-class-1" type="radio" name="player-class" value="1" class="form-check-input ms-2"> <label for="player-class-1"><?= $l['class-collector'] ?></label>
@@ -264,7 +265,7 @@
       <hr class="my-2">
 
       <div id="plants-settings">
-        <table class="mx-auto" role="presentation">
+        <table class="mx-auto pfg-energy-rows" role="presentation">
           <tr>
             <td><label for="solar-plant-level"><?= $l['solar-plant-level'] ?></label></td>
             <td><input id="solar-plant-level" type="text" name="solar-plant-level" class="form-control form-control-sm d-inline-block energy-input ui-input-margin" value="0" data-field-title="<?= $l['solar-plant-level'] ?>"></td>
@@ -368,36 +369,36 @@
     <!-- Expenses -->
     <div class="border rounded m-1 p-2">
       <p class="border rounded subheader bg-primary-subtle"><?= $l['expenses'] ?></p>
-      <table class="mx-auto" role="presentation">
+      <table class="mx-auto pfg-pairs" role="presentation">
         <tr>
-          <td><span><?= $l['crystal'] ?></span></td>
-          <td><div id="crystal-required" data-report-cell="crystal-required" class="form-control form-control-sm d-inline-block resource-show ui-input-margin ui-state-disabled">0</div></td>
-          <td><span><?= $l['deuterium'] ?></span></td>
-          <td><div id="deuterium-required" data-report-cell="deuterium-required" class="form-control form-control-sm d-inline-block resource-show ui-input-margin ui-state-disabled">0</div></td>
-          <td><span><?= $l['time'] ?></span></td>
-          <td><div id="time-required" data-report-cell="time-required" class="form-control form-control-sm d-inline-block time-show ui-input-margin ui-state-disabled">0</div></td>
+          <td class="pfg-order-1"><span><?= $l['crystal'] ?></span></td>
+          <td class="pfg-order-1"><div id="crystal-required" data-report-cell="crystal-required" class="form-control form-control-sm d-inline-block resource-show ui-input-margin ui-state-disabled">0</div></td>
+          <td class="pfg-order-4"><span><?= $l['deuterium'] ?></span></td>
+          <td class="pfg-order-4"><div id="deuterium-required" data-report-cell="deuterium-required" class="form-control form-control-sm d-inline-block resource-show ui-input-margin ui-state-disabled">0</div></td>
+          <td class="pfg-order-7"><span><?= $l['time'] ?></span></td>
+          <td class="pfg-order-7"><div id="time-required" data-report-cell="time-required" class="form-control form-control-sm d-inline-block time-show ui-input-margin ui-state-disabled">0</div></td>
         </tr>
         <tr>
-          <td><label for="crystal-available"><?= $l['res-available'] ?></label></td>
-          <td><input id="crystal-available" data-report-skip type="text" name="crystal-available" class="form-control form-control-sm d-inline-block resource-show ui-input-margin" value="0" data-field-title="<?= $l['res-available'] ?> <?= $l['crystal'] ?>"></td>
-          <td>&nbsp;</td>
-          <td><input id="deuterium-available" data-report-skip type="text" name="deuterium-available" class="form-control form-control-sm d-inline-block resource-show ui-input-margin" value="0" data-field-title="<?= $l['res-available'] ?> <?= $l['deuterium'] ?>" aria-label="<?= htmlspecialchars($l['res-available'] . ': ' . $l['deuterium'], ENT_QUOTES) ?>"></td>
-          <td colspan="2">&nbsp;</td>
+          <td class="pfg-order-2 pfg-phone-sub"><label for="crystal-available"><?= $l['res-available'] ?></label></td>
+          <td class="pfg-order-2"><input id="crystal-available" data-report-skip type="text" name="crystal-available" class="form-control form-control-sm d-inline-block resource-show ui-input-margin" value="0" data-field-title="<?= $l['res-available'] ?> <?= $l['crystal'] ?>"></td>
+          <td class="pfg-order-5 pfg-phone-sub" data-phone-label="<?= htmlspecialchars($l['res-available'], ENT_QUOTES) ?>">&nbsp;</td>
+          <td class="pfg-order-5"><input id="deuterium-available" data-report-skip type="text" name="deuterium-available" class="form-control form-control-sm d-inline-block resource-show ui-input-margin" value="0" data-field-title="<?= $l['res-available'] ?> <?= $l['deuterium'] ?>" aria-label="<?= htmlspecialchars($l['res-available'] . ': ' . $l['deuterium'], ENT_QUOTES) ?>"></td>
+          <td colspan="2" class="pfg-phone-hide">&nbsp;</td>
         </tr>
         <tr id="resources-age-row" class="d-none">
-          <td></td>
-          <td colspan="5" class="pt-0"><small id="resources-age" class="text-body-secondary"></small></td>
+          <td class="pfg-phone-hide"></td>
+          <td colspan="5" class="pt-0 pfg-order-5 pfg-phone-full"><small id="resources-age" class="text-body-secondary"></small></td>
         </tr>
         <tr>
-          <td><span><?= $l['res-needed'] ?></span></td>
-          <td><div id="crystal-to-deliver" data-report-cell="crystal-to-deliver" class="form-control form-control-sm d-inline-block resource-show ui-input-margin ui-state-disabled">0</div></td>
-          <td>&nbsp;</td>
-          <td><div id="deuterium-to-deliver" data-report-cell="deuterium-to-deliver" class="form-control form-control-sm d-inline-block resource-show ui-input-margin ui-state-disabled">0</div></td>
-          <td colspan="2">&nbsp;</td>
+          <td class="pfg-order-3 pfg-phone-sub"><span><?= $l['res-needed'] ?></span></td>
+          <td class="pfg-order-3"><div id="crystal-to-deliver" data-report-cell="crystal-to-deliver" class="form-control form-control-sm d-inline-block resource-show ui-input-margin ui-state-disabled">0</div></td>
+          <td class="pfg-order-6 pfg-phone-sub" data-phone-label="<?= htmlspecialchars($l['res-needed'], ENT_QUOTES) ?>">&nbsp;</td>
+          <td class="pfg-order-6"><div id="deuterium-to-deliver" data-report-cell="deuterium-to-deliver" class="form-control form-control-sm d-inline-block resource-show ui-input-margin ui-state-disabled">0</div></td>
+          <td colspan="2" class="pfg-phone-hide">&nbsp;</td>
         </tr>
         <tr>
-          <td><span><?= $l['cargoes'] ?></span></td>
-          <td colspan="5"><div id="cargoes" data-report-cell="cargoes" class="form-control form-control-sm d-inline-block transport-show ui-input-margin ui-state-disabled">0</div><i class="bi bi-question-circle" data-bs-toggle="tooltip" title="<?= $l['sc'] ?> / <?= $l['lc'] ?>"></i></td>
+          <td class="pfg-order-8"><span><?= $l['cargoes'] ?></span></td>
+          <td colspan="5" class="pfg-order-8"><div id="cargoes" data-report-cell="cargoes" class="form-control form-control-sm d-inline-block transport-show ui-input-margin ui-state-disabled">0</div><i class="bi bi-question-circle" data-bs-toggle="tooltip" title="<?= $l['sc'] ?> / <?= $l['lc'] ?>"></i></td>
         </tr>
       </table>
     </div>
@@ -405,7 +406,7 @@
     <!-- Recycling -->
     <div class="border rounded m-1 p-2">
       <p class="border rounded subheader bg-primary-subtle"><?= $l['recycling'] ?></p>
-      <table class="mx-auto" role="presentation">
+      <table class="mx-auto pfg-pairs" role="presentation">
         <tr>
           <td><label for="debris-percent"><?= $l['debris-percent'] ?></label></td>
           <td>
@@ -419,7 +420,7 @@
               <option value="80">80%</option>
             </select>
           </td>
-          <td colspan="2">
+          <td colspan="2" class="pfg-phone-full">
             <input id="deut-in-debris" type="checkbox" name="deut-in-debris" class="form-check-input">
             <label for="deut-in-debris"><?= $l['deut-in-debris'] ?></label>
           </td>
@@ -437,7 +438,7 @@
           <td><div id="cargoes-for-df" data-report-cell="cargoes-for-df" class="form-control form-control-sm d-inline-block transport-show ui-input-margin ui-state-disabled">0</div></td>
         </tr>
         <tr>
-          <td colspan="4" class="pb-0">
+          <td colspan="4" class="pb-0 pfg-phone-full">
             <div class="border-top mt-2 pt-2">
               <span class="fw-semibold"><?= $l['net-cost'] ?></span>
               <i class="bi bi-question-circle" data-bs-toggle="tooltip" title="<?= $l['net-cost-hint'] ?>"></i>

@@ -697,6 +697,26 @@ heading) marks that cell `pfg-unsticky`; a name cell that is not the first child
 held to 8rem and wraps its name, hyphenated, since a column as wide as its longest name on
 one line would cover most of the screen once it stays put.
 
+**A layout table reflows instead.** Scrolling suits a table of data; it does not suit a form
+laid out with a `<table>` whose answers sit at the end of its rows (graviton, terraformer):
+the answers would be the part past the right edge. Below `md` two classes in `common.css`
+turn such a table into a grid - its rows become `display: contents`, so the cells of every
+row stay aligned:
+
+- `pfg-energy-rows` - "name | field | % | energy" rows: the name on a line of its own, the
+  rest under it; a row without a field keeps name and value on one line.
+- `pfg-pairs` - "label | value | label | value" rows: one pair a line. `pfg-order-N` on the
+  cells regroups them (one resource after another rather than one row after another),
+  `pfg-phone-full` spans a cell over both columns, `pfg-phone-hide` drops a spacer,
+  `data-phone-label` gives a spacer cell the label it stood under, and `pfg-phone-sub`
+  indents a label that belongs to the resource above it.
+
+Where a layout switches between "N abreast" and "one per line", let the content decide
+rather than a breakpoint: `display: grid; grid-template-columns: repeat(auto-fit,
+minmax(min(100%, <min>), max-content)); justify-content: safe center` (flight's
+`.ships-groups`). Use `safe center`, never plain `center`, on anything that can be wider
+than its box - centred overflow goes past the left edge, where nothing scrolls to it.
+
 **Form fields are 16px below `sm`** (576px), by one rule in `common.css`. Safari on iOS
 zooms the page in when a field with text smaller than 16px takes the focus, and
 `form-control-sm` is 14px. Do not use `maximum-scale=1` in the tag instead: Android then

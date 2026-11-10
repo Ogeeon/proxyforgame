@@ -686,3 +686,82 @@ fieldset.pf-bound.pf-differs {
     font-size: 16px;
   }
 }
+
+/* Layout tables that reflow below md instead of scrolling (docs/patterns.md,
+   "Phone layout"): a form whose answers sit at the end of its rows would hide
+   them past the right edge. The rows become display: contents, so the cells
+   of every row share one grid on the tbody and stay aligned. Below md, not
+   sm: these tables are some 650px wide, more than a 600px screen holds. */
+@media (max-width: 767.98px) {
+  table.pfg-energy-rows,
+  table.pfg-pairs {
+    display: block;
+  }
+
+  table.pfg-energy-rows tr,
+  table.pfg-pairs tr {
+    display: contents;
+  }
+
+  /* .pfg-energy-rows - "name | field | % | energy" rows: the name takes a
+     line of its own and the field, the percentage and the energy go under
+     it. A row with no field (a bonus) keeps its name and energy on one line,
+     the energy in the same column as the plants'. */
+  table.pfg-energy-rows > tbody {
+    display: grid;
+    grid-template-columns: auto auto 1fr;
+    align-items: center;
+  }
+
+  table.pfg-energy-rows tr > td:first-child {
+    grid-column: 1 / -1;
+  }
+
+  table.pfg-energy-rows tr:not(:has(input, select)) > td:first-child {
+    grid-column: 1 / 3;
+  }
+
+  table.pfg-energy-rows tr:not(:has(input, select)) > td:not(:first-child, :last-child) {
+    display: none;
+  }
+
+  /* .pfg-pairs - "label | value | label | value ..." rows: one pair a line.
+     .pfg-order-N regroups the cells (one resource after another rather than
+     one row after another), .pfg-phone-full spans a cell over both columns,
+     .pfg-phone-hide drops a spacer, data-phone-label gives an empty spacer
+     cell the label it stood under, and .pfg-phone-sub indents a label that
+     belongs to the resource above it. */
+  table.pfg-pairs > tbody {
+    display: grid;
+    grid-template-columns: auto auto;
+    justify-content: safe center;
+    align-items: center;
+  }
+
+  table.pfg-pairs .pfg-phone-full {
+    grid-column: 1 / -1;
+  }
+
+  table.pfg-pairs .pfg-phone-hide {
+    display: none;
+  }
+
+  table.pfg-pairs td[data-phone-label]::before {
+    content: attr(data-phone-label);
+  }
+
+  /* A margin, not padding: a calculator's own td padding rule is id-scoped. */
+  table.pfg-pairs .pfg-phone-sub {
+    margin-left: 1rem;
+  }
+
+  .pfg-order-1 { order: 1; }
+  .pfg-order-2 { order: 2; }
+  .pfg-order-3 { order: 3; }
+  .pfg-order-4 { order: 4; }
+  .pfg-order-5 { order: 5; }
+  .pfg-order-6 { order: 6; }
+  .pfg-order-7 { order: 7; }
+  .pfg-order-8 { order: 8; }
+  .pfg-order-9 { order: 9; }
+}

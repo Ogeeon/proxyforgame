@@ -22,6 +22,11 @@ import { test, expect } from './base';
  * @type {Array<{name: string, url: string, calculate?: (page: import('@playwright/test').Page) => Promise<void>}>}
  */
 const PHONE_PAGES = [
+  { name: 'graviton calculator', url: '/ru/ogame/calc/graviton.php',
+    calculate: async (page) => {
+      await page.locator('#solar-satellites-count').fill('12345');
+      await page.locator('#solar-satellites-count').blur();
+    } },
   { name: 'start page', url: '/ru/' },
   { name: 'AI assistants page', url: '/ru/mcp' },
   { name: 'privacy policy', url: '/policy.php' },

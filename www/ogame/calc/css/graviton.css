@@ -137,3 +137,16 @@
     padding: 0 10px;
   }
 }
+
+/* Phone layout (docs/patterns.md): at a phone's 16px field text a five-digit
+   satellite count needs more than 54px, and the 170px transport readouts of
+   the recycling panel, one pair a line, run past the panel's edge. */
+@media (max-width: 575.98px) {
+  .energy-input {
+    width: 72px;
+  }
+
+  .transport-show {
+    width: 150px;
+  }
+}
