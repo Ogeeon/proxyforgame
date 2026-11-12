@@ -348,6 +348,92 @@ test('a new empty profile gains a planet only once it is edited', async ({ page 
     await expect(page.locator('.pf-bound')).toHaveCount(0);
 });
 
+/** Every override the profile holds, as `<entity>:<key>`. */
+function overrideKeys(profile) {
+    return [['account', profile.account], ...profile.planets.map((p) => [p.name, p])]
+        .flatMap(([name, e]) => Object.entries(e.values).filter(([, v]) => 'override' in v).map(([key]) => name + ':' + key));
+}
+
+test('an account field edited on production goes to the account, and nothing else is written', async ({ page }) => {
+    await openWithProfile(page, '/production');
+    await page.locator('#param-researches-tab').click();
+    await page.locator('#plasma-tech-level').fill('20');
+    await page.locator('#plasma-tech-level').blur();
+    await expect.poll(async () => (await activeProfile(page)).account.values['research.122']).toEqual({ game: 15, override: 20 });
+    expect(overrideKeys(await activeProfile(page))).toEqual(['account:research.122']);
+});
+
+test('a save that changes no profile value writes nothing, a class the profile lacks included', async ({ page }) => {
+    // The fixture profile: class, rates and storage levels are taken as they are.
+    await openWithProfile(page, '/production');
+    await page.locator('#tabtag2').click();
+    await page.locator('#all-pln-addtnl-info').check();
+    await expect.poll(async () => (await storedProduction(page)).showAddInf).toBe(true);
+    expect(overrideKeys(await activeProfile(page))).toEqual([]);
+
+    // A manual profile has no class, which production shows as collector, and no rates.
+    await chooseAction(page, '__create');
+    await page.locator('#pf-props-name').fill('Alt');
+    await page.locator('#pf-props-go').click();
+    await expect(page.locator('#pf-select option:checked')).toHaveText('Alt');
+    await page.locator('#all-pln-addtnl-info').uncheck();
+    await expect.poll(async () => (await storedProduction(page)).showAddInf).toBe(false);
+    const profile = await activeProfile(page);
+    expect(profile.account.values).toEqual({});
+    expect(profile.planets).toHaveLength(0);
+});
+
+/** Open the one-planet tab's resource accumulation, where the storage levels are. */
+async function openStorageLevels(page) {
+    await page.locator('[data-bs-target="#one-pln-acc-accum"]').click();
+    await expect(page.locator('#storage-met')).toBeVisible();
+}
+
+test('a storage level goes to the planet shown, and after a switch to the new one only', async ({ page }) => {
+    await openWithProfile(page, '/production');
+    await openStorageLevels(page);
+    await expect(page.locator('#storage-met')).toHaveValue('14');
+    await page.locator('#storage-met').fill('15');
+    await page.locator('#storage-met').blur();
+    await expect.poll(async () => (await activeProfile(page)).planets[0].values['building.22']).toEqual({ game: 14, override: 15 });
+
+    await page.locator('#pf-planet').selectOption({ label: 'Beta [2:150:12]' });
+    await expect(page.locator('#storage-met')).toHaveValue('12');
+    await page.locator('#storage-crys').fill('20');
+    await page.locator('#storage-crys').blur();
+    await expect.poll(async () => (await activeProfile(page)).planets[1].values['building.23']).toEqual({ game: 11, override: 20 });
+    const profile = await activeProfile(page);
+    expect(profile.planets[0].values['building.22']).toEqual({ game: 14, override: 15 });
+    expect(profile.planets[0].values['building.23']).toEqual({ game: 13 });
+    expect(profile.planets[1].values['building.22']).toEqual({ game: 12 });
+    expect(overrideKeys(profile)).toEqual(['Alpha:building.22', 'Beta:building.23']);
+});
+
+test('the storage level typed on an empty profile goes to the planet its first edit creates', async ({ page }) => {
+    await page.goto('/production');
+    await chooseAction(page, '__create');
+    await page.locator('#pf-props-name').fill('Alt');
+    await page.locator('#pf-props-go').click();
+    await expect(page.locator('#pf-select option:checked')).toHaveText('Alt');
+
+    // A storage level alone does not make the blank planet a planet of the profile...
+    await openStorageLevels(page);
+    const capacity = await page.locator('#storage-cap-met').textContent();
+    await page.locator('#storage-met').fill('3');
+    await page.locator('#storage-met').blur();
+    // Recalculated, and saved with it.
+    await expect(page.locator('#storage-cap-met')).not.toHaveText(capacity);
+    expect((await activeProfile(page)).planets).toHaveLength(0);
+
+    // ...but it is not lost: the edit that creates the planet takes it along.
+    await metalMineInput(page).fill('5');
+    await metalMineInput(page).blur();
+    await expect.poll(async () => (await activeProfile(page)).planets.length).toBe(1);
+    const planet = (await activeProfile(page)).planets[0];
+    expect(planet.values['building.1']).toEqual({ override: 5 });
+    expect(planet.values['building.22']).toEqual({ override: 3 });
+});
+
 /** Planet i of production's all-planets table: the header first, then a planet row and its info row each. */
 function allPlanetsRow(page, i) {
     return page.locator('#all-planets-prod tr').nth(i * 2 + 1);

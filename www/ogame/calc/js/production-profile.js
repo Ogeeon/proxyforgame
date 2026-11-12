@@ -9,6 +9,10 @@
 //     only what changed since the last apply or write-back. Diffing against that snapshot,
 //     not against the profile, keeps a lossy mapping (a profile with no class
 //     shows as collector here) from turning into an override nobody made.
+// The account and the storage levels of the planet shown are field groups
+// (fieldGroups()), snapshotted, written back and marked by ProfileBinder; the
+// all-planets table is reconciled with the profile's planets on its own
+// (reconcileProductionPlanets), against a snapshot of the table.
 // With a profile active, the one-planet tab shows one of the profile's planets,
 // picked in #pf-planet, and edits there go straight to that planet. The
 // calculator fields (PRODUCTION_LOCAL_KEYS) keep going to options_production as
@@ -53,11 +57,11 @@ const PRODUCTION_ACCOUNT_FIELDS = [
   pfRatesField('rates', '#exchange-rates-m'),
 ];
 
-/** Storage capacity levels of the one-planet tab, and the building each is. */
+/** @type {ProfilePrmField[]} Storage capacity levels of the one-planet tab, and the building each is. */
 const PRODUCTION_STORAGE_FIELDS = [
-  { prm: 'metStorageLvl', key: 'building.22', input: '#storage-met' },
-  { prm: 'crysStorageLvl', key: 'building.23', input: '#storage-crys' },
-  { prm: 'deutStorageLvl', key: 'building.24', input: '#storage-deut' },
+  pfConvNumField('building.22', 'metStorageLvl', '#storage-met'),
+  pfConvNumField('building.23', 'crysStorageLvl', '#storage-crys'),
+  pfConvNumField('building.24', 'deutStorageLvl', '#storage-deut'),
 ];
 
 /**
@@ -73,16 +77,12 @@ class ProductionProfiles extends ProfileBinder {
   /** @param {ProfilesUi} pf */
   constructor(pf) {
     super(pf, undefined);
-    /** @type {Record<string, *>} Account prm values at the last apply or write-back. */
-    this.accountSnapshot = {};
-    /** @type {Map<string, {state: number[], name: string}>} Planet values at the last apply or write-back. */
+    /** @type {Map<string, {state: number[], name: string}>} The all-planets table at the last apply or write-back. */
     this.planetSnapshot = new Map();
     /** @type {?string} The planet the one-planet tab shows. */
     this.onePlanetId = null;
     /** @type {number[]} The one-planet inputs as last loaded or written back. */
     this.onePlanetSnapshot = [];
-    /** @type {Record<string, number>} The storage levels as last loaded or written back. */
-    this.storageSnapshot = {};
     this.ownSave = options.save;
     /** @type {?PfUniverseSetting} Set in init(). */
     this.speed = null;
@@ -92,6 +92,29 @@ class ProductionProfiles extends ProfileBinder {
       body: () => this.onePlanetId,
       recalc: () => updateOnePlnTab(),
     })];
+  }
+
+  /**
+   * The account, and the storage levels of the planet the one-planet tab
+   * shows - the rest of that planet is its row of the all-planets table, which
+   * writeBack() reconciles on its own.
+   *
+   * @returns {PfFieldGroup[]}
+   */
+  fieldGroups() {
+    const settings = () => options.prm;
+    return [
+      { scope: '', entity: (p) => p.account, fields: PRODUCTION_ACCOUNT_FIELDS, settings },
+      { scope: 'planet', entity: (p) => this.onePlanet(p), fields: PRODUCTION_STORAGE_FIELDS, settings },
+    ];
+  }
+
+  /**
+   * @param {Profile} profile
+   * @returns {?ProfilePlanet} The planet the one-planet tab shows; none for the blank planet of an empty profile.
+   */
+  onePlanet(profile) {
+    return profile.planets.find((p) => p.id === this.onePlanetId) || null;
   }
 
   bindControls() {
@@ -241,21 +264,26 @@ class ProductionProfiles extends ProfileBinder {
     const index = Math.max(0, states.findIndex((s) => planetId !== null && s.pfId === planetId));
     this.onePlanetId = states[index] ? states[index].pfId || null : null;
     fillOnePlanetForm(states[index]);
-    const planet = profile.planets.find((p) => p.id === this.onePlanetId);
+    const planet = this.onePlanet(profile);
     PRODUCTION_STORAGE_FIELDS.forEach((f) => {
-      const level = planet ? pfNum(getProfileValue(planet, f.key, 0)) : 0;
-      setVal(f.input, level);
-      options.prm[f.prm] = level;
-      this.storageSnapshot[f.prm] = level;
+      f.write(options.prm, planet ? getProfileValue(planet, f.key) : undefined);
+      const input = pfFieldInput(f);
+      if (input instanceof HTMLInputElement) input.value = String(options.prm[f.prm]);
     });
+    // Only the storage levels changed: the account stays as it was last written back.
+    this.snapshotGroups(this.fieldGroups().filter((g) => g.scope === 'planet'));
     this.onePlanetSnapshot = readOnePlanetForm();
     setVal('#pf-planet', this.onePlanetId || '');
   }
 
+  /** The field groups' values, and the all-planets table the reconcile compares against. */
   takeSnapshot() {
+    super.takeSnapshot();
+    this.takePlanetSnapshot();
+  }
+
+  takePlanetSnapshot() {
     const prm = options.prm;
-    this.accountSnapshot = {};
-    PRODUCTION_ACCOUNT_FIELDS.forEach((f) => { this.accountSnapshot[f.prm] = cloneData(prm[f.prm]); });
     this.planetSnapshot = new Map();
     /** @type {TaggedState[]} */ (prm.aPS).forEach((s, i) => {
       if (s.pfId) this.planetSnapshot.set(s.pfId, { state: s.slice(), name: prm.aPNames[i] });
@@ -310,13 +338,6 @@ class ProductionProfiles extends ProfileBinder {
     const profile = this.profile();
     if (!profile) return;
     const prm = options.prm;
-    let changed = false;
-
-    PRODUCTION_ACCOUNT_FIELDS.forEach((f) => {
-      if (!sameValue(prm[f.prm], this.accountSnapshot[f.prm])) {
-        changed = setProfileValue(profile.account, f.key, f.read(prm)) || changed;
-      }
-    });
 
     const states = /** @type {TaggedState[]} */ (prm.aPS);
     const rows = states.map((s, i) => ({ id: s.pfId, state: s, name: prm.aPNames[i] }));
@@ -334,21 +355,16 @@ class ProductionProfiles extends ProfileBinder {
       fillOnePlanetForm(shown);
       this.onePlanetSnapshot = readOnePlanetForm();
     }
-    changed = result.changed || changed;
     profile.planets = result.planets;
 
-    const selected = profile.planets.find((p) => p.id === this.onePlanetId);
-    if (selected) {
-      PRODUCTION_STORAGE_FIELDS.forEach((f) => {
-        const level = pfNum(prm[f.prm]);
-        if (level !== this.storageSnapshot[f.prm]) {
-          changed = setProfileValue(selected, f.key, level) || changed;
-          this.storageSnapshot[f.prm] = level;
-        }
-      });
-    }
+    // After the reconcile: the storage levels go to the planet the one-planet
+    // tab shows, which for an empty profile it has only just created.
+    const changed = this.writeBackGroups(profile) || result.changed;
 
-    this.takeSnapshot();
+    // Not takeSnapshot(): a group with no entity - the storage levels of the
+    // blank planet of an empty profile - keeps its snapshot, so the edit that
+    // creates the planet still carries the levels typed before it.
+    this.takePlanetSnapshot();
     if (changed) {
       this.pf.save(profile);
       this.renderPlanetSelect(profile);
@@ -406,7 +422,7 @@ class ProductionProfiles extends ProfileBinder {
    * named, not only the shown one: another planet may be of another species.
    */
   describeFields() {
-    this.describeFieldList(PRODUCTION_ACCOUNT_FIELDS);
+    super.describeFields();
     const describeSelect = (/** @type {string} */ key, /** @type {?HTMLSelectElement} */ select) => {
       this.pf.describeField(key, pfFieldLabel(select), pfOptionText(select));
     };
@@ -422,7 +438,6 @@ class ProductionProfiles extends ProfileBinder {
       const booster = selectEl('#boosted-prod' + (i + 1));
       if (i < 3 && booster) describeSelect('booster.' + tech, booster);
     });
-    PRODUCTION_STORAGE_FIELDS.forEach((f) => this.pf.describeField(f.key, pfFieldLabel($(f.input))));
     for (let race = 1; race <= 4; race++) {
       inputsAll('#one-planet-prod .lf-row-' + race + ' input[type=text]').forEach((el) => {
         const row = el.closest('tr');
@@ -432,16 +447,16 @@ class ProductionProfiles extends ProfileBinder {
     }
   }
 
-  /** Mark every field the profile owns, and the ones that differ from the game. */
-  markAll() {
-    const profile = this.profile();
-    if (!profile) return;
-    PRODUCTION_ACCOUNT_FIELDS.forEach((f) => {
-      this.pf.markField(pfFieldInput(f), profile, profile.account, f.key, this.restoreAccount(f.key));
-    });
+  /**
+   * Mark the rest of the one-planet tab and the all-planets table; the field
+   * groups - the account and the storage levels - are marked by markAll().
+   *
+   * @param {Profile} profile
+   */
+  markExtra(profile) {
     this.speed?.mark();
 
-    const planet = profile.planets.find((p) => p.id === this.onePlanetId);
+    const planet = this.onePlanet(profile);
     if (planet) {
       const rows = $$('#one-planet-prod tr:not(.lf-row)');
       /**
@@ -464,7 +479,6 @@ class ProductionProfiles extends ProfileBinder {
         const key = 'lf.building.' + lfBuildingGameId(race, lfRowIndex(el) + 1);
         this.pf.markField(el, profile, planet, key, this.restoreBody('planets', planet.id, key));
       });
-      PRODUCTION_STORAGE_FIELDS.forEach((f) => this.pf.markField($(f.input), profile, planet, f.key, this.restoreBody('planets', planet.id, f.key)));
     }
 
     const tableRows = $$('#all-planets-prod tr');
