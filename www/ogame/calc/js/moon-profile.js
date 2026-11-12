@@ -232,30 +232,12 @@ class MoonProfiles extends PlanetPrmBinder {
 
   /** The player picked another planet; its moon is shown with it, when it has one. */
   planetChosen() {
-    const profile = this.profile();
-    if (!profile) return;
-    // Whatever was typed for the planet shown so far is saved first.
-    this.save();
-    this.planetSelect.pick(profile);
-    this.moonSelect.follow(profile);
-    this.show(profile);
+    super.planetChosen([this.moonSelect]);
   }
 
   /** The player picked another moon. */
   moonChosen() {
-    const profile = this.profile();
-    if (!profile) return;
-    this.save();
-    this.moonSelect.pick(profile);
-    this.show(profile);
-  }
-
-  /** @param {Profile} profile */
-  show(profile) {
-    this.whileApplying(() => {
-      this.showPlanet(profile);
-      this.takeSnapshot();
-    });
+    this.bodyPicked(this.moonSelect, (profile) => this.showPlanet(profile));
   }
 
   // -------------------------------------------------------------------------

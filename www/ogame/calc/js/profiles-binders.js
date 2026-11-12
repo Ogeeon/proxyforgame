@@ -337,6 +337,32 @@ class ProfileBinder {
     this.markAll();
   }
 
+  /**
+   * The player picked another body in a select. What was typed for the bodies
+   * shown so far goes to them first; then the select - and the selects that
+   * follow it, such as the moon of a planet - show the bodies picked, the form
+   * is filled from them without that being taken for an edit, and their
+   * resources come once edits are taken again.
+   *
+   * @param {PfBodySelect} select
+   * @param {(profile: Profile, moved: PfBodySelect[]) => void} show Fill the form from the
+   *   bodies shown and recalculate; `moved` holds the selects that show another body now.
+   * @param {PfBodySelect[]} [followers] The selects that follow this one.
+   */
+  bodyPicked(select, show, followers = []) {
+    const profile = this.profile();
+    if (!profile) return;
+    this.save();
+    select.pick(profile);
+    const moved = [select, ...followers.filter((f) => f.follow(profile))];
+    this.whileApplying(() => {
+      show(profile, moved);
+      this.takeSnapshot();
+    });
+    // After the guard: filling the resources recalculates, and that save is taken.
+    this.showBodyResources(profile);
+  }
+
   /** Mark every field the profile owns, and the ones that differ from the game. */
   markAll() {
     const profile = this.profile();
@@ -750,18 +776,13 @@ class PlanetPrmBinder extends ProfileBinder {
     saveToCookie(this.config.cookie, stored);
   }
 
-  /** The player picked another planet. */
-  planetChosen() {
-    const profile = this.profile();
-    if (!profile) return;
-    // Whatever was typed for the planet shown so far is saved first.
-    this.save();
-    this.planetSelect.pick(profile);
-    this.whileApplying(() => {
-      this.showPlanet(profile);
-      this.takeSnapshot();
-    });
-    this.showBodyResources(profile);
+  /**
+   * The player picked another planet.
+   *
+   * @param {PfBodySelect[]} [followers] The selects that follow the planet's.
+   */
+  planetChosen(followers = []) {
+    this.bodyPicked(this.planetSelect, (profile) => this.showPlanet(profile), followers);
   }
 
   // -------------------------------------------------------------------------

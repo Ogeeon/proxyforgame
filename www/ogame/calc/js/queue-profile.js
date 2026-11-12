@@ -200,19 +200,11 @@ class QueueProfiles extends ProfileBinder {
    * @param {QueueTab} t
    */
   bodyChosen(t) {
-    const profile = this.profile();
-    if (!profile) return;
-    // Whatever was typed for the body shown so far is saved first.
-    this.save();
-    this.bodySelects[t.tab].pick(profile);
-    /** @type {QueueTab[]} */
-    const shown = [t];
-    if (t.tab === PLANET_TAB && this.bodySelects[MOON_TAB].follow(profile)) shown.push(QUEUE_TABS[1]);
-    this.whileApplying(() => {
-      shown.forEach((s) => this.showBody(s, profile));
+    const followers = t.tab === PLANET_TAB ? [this.bodySelects[MOON_TAB]] : [];
+    this.bodyPicked(this.bodySelects[t.tab], (profile, moved) => {
+      QUEUE_TABS.filter((s) => moved.includes(this.bodySelects[s.tab])).forEach((s) => this.showBody(s, profile));
       this.app.refreshBoth();
-      this.snapshotGroups(shown.map((s) => this.tabGroup(s)));
-    });
+    }, followers);
   }
 
   // -------------------------------------------------------------------------

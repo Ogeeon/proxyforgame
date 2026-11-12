@@ -545,23 +545,14 @@ class CostsProfiles extends ProfileBinder {
    * @param {'planet'|'moon'} kind
    */
   bodyChosen(kind) {
-    const profile = this.profile();
-    if (!profile) return;
-    // Whatever was typed for the body shown so far is saved first.
-    this.save();
-    if (kind === 'planet') {
-      this.planetSelect.pick(profile);
-      this.moonSelect.follow(profile);
-    } else {
-      this.moonSelect.pick(profile);
-    }
-    this.whileApplying(() => {
+    /** @param {Profile} profile */
+    const show = (profile) => {
       this.showBodies(profile);
       this.fillStartLevels(profile);
       this.app.recalculateAll();
-      this.takeSnapshot();
-    });
-    this.showBodyResources(profile);
+    };
+    if (kind === 'planet') this.bodyPicked(this.planetSelect, show, [this.moonSelect]);
+    else this.bodyPicked(this.moonSelect, show);
   }
 
   // -------------------------------------------------------------------------
