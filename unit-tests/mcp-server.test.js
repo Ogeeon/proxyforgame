@@ -939,6 +939,25 @@ describe('MCP tool ogame_expedition', () => {
 });
 
 describe('MCP moon tools', () => {
+    it('bounds its arguments as the moon page does, open-ended where the page is', () => {
+        const tools = createTools({ siteApi: fakeSiteApi({}) });
+        /** @returns {Record<string, any>} */
+        const props = (/** @type {string} */ name) => {
+            const tool = tools.find((t) => t.name === name);
+            if (!tool) throw new Error(`no tool ${name}`);
+            return tool.inputSchema.properties ?? {};
+        };
+        const bounds = (/** @type {any} */ p) => ({ minimum: p.minimum, maximum: p.maximum });
+        const destruction = props('ogame_moon_destruction');
+        const phalanx = props('ogame_phalanx');
+        expect(bounds(destruction.moonDiameter)).toEqual({ minimum: 1, maximum: 10000 });
+        expect(bounds(destruction.deathStars)).toEqual({ minimum: 1, maximum: undefined });
+        expect(bounds(phalanx.phalanxLevel)).toEqual({ minimum: 1, maximum: 50 });
+        expect(bounds(phalanx.moonSystem)).toEqual({ minimum: 1, maximum: 1000 });
+        expect(bounds(phalanx.targetSystem)).toEqual({ minimum: 1, maximum: 1000 });
+        expect(bounds(phalanx.universeSettings.properties.systems)).toEqual({ minimum: 1, maximum: 1000 });
+    });
+
     it('ogame_moon_destruction: (100 - sqrt(D)) * sqrt(n) and sqrt(D) / 2', async () => {
         const out = (await call(protocolWith(), 'ogame_moon_destruction', { moonDiameter: 8100, deathStars: 4 })).structuredContent;
         expect(out).toEqual({ moonDestroyedPercent: 20, deathStarsLostPercent: 45 });

@@ -8,13 +8,30 @@ const { loadBrowserScripts } = require('../lib/browser-scripts');
 const { ToolError } = require('../lib/protocol');
 const common = require('./common');
 
-const { MoonCalculator, MOON_UNITS, UNIVERSE_MAX_SYSTEMS } = loadBrowserScripts(
+const { MoonCalculator, MOON_UNITS, MOON_FIELDS } = loadBrowserScripts(
     ['js/utils.js', 'ogame/calc/js/ogame-universe.js', 'ogame/calc/js/ogame-cargo.js', 'ogame/calc/js/moon-core.js'],
-    ['MoonCalculator', 'MOON_UNITS', 'UNIVERSE_MAX_SYSTEMS'],
+    ['MoonCalculator', 'MOON_UNITS', 'MOON_FIELDS'],
 );
 
 /** @type {{id: string, group: string}[]} */
 const UNITS = MOON_UNITS;
+/** @type {{prm: string, min?: number, max?: number}[]} */
+const FIELDS = MOON_FIELDS;
+
+/**
+ * The bounds of a moon page field (MOON_FIELDS, by its options.prm key) as JSON
+ * Schema keywords, so an argument takes exactly what the page's field takes.
+ * An open-ended field gets no `maximum`: Infinity does not survive JSON.
+ *
+ * @param {string} prm
+ * @returns {{minimum: number, maximum?: number}}
+ */
+function fieldBounds(prm) {
+    const field = FIELDS.find((f) => f.prm === prm);
+    if (field?.min === undefined) throw new Error(`MOON_FIELDS has no numeric field ${prm}`);
+    return Number.isFinite(field.max) ? { minimum: field.min, maximum: field.max } : { minimum: field.min };
+}
+
 const NAMES = common.englishNames('moon');
 
 /** Rounds a percentage for reading, without pretending to more precision than it has. */
@@ -36,8 +53,8 @@ function createMoonTools({ siteApi }) {
         inputSchema: {
             type: 'object',
             properties: {
-                moonDiameter: { type: 'integer', minimum: 1, maximum: 10000, description: 'Diameter of the moon, km.' },
-                deathStars: { type: 'integer', minimum: 1, description: 'Number of Death Stars sent.' },
+                moonDiameter: { type: 'integer', ...fieldBounds('moonSize'), description: 'Diameter of the moon, km.' },
+                deathStars: { type: 'integer', ...fieldBounds('dsCount'), description: 'Number of Death Stars sent.' },
             },
             required: ['moonDiameter', 'deathStars'],
             additionalProperties: false,
@@ -130,9 +147,9 @@ function createMoonTools({ siteApi }) {
         inputSchema: {
             type: 'object',
             properties: {
-                phalanxLevel: { type: 'integer', minimum: 1, maximum: 50, description: 'Sensor Phalanx level.' },
-                moonSystem: { type: 'integer', minimum: 1, maximum: UNIVERSE_MAX_SYSTEMS, description: 'System the moon with the phalanx is in.' },
-                targetSystem: { type: 'integer', minimum: 1, maximum: UNIVERSE_MAX_SYSTEMS, description: 'A system to reach; the answer says what level it needs.' },
+                phalanxLevel: { type: 'integer', ...fieldBounds('phalanxLevel'), description: 'Sensor Phalanx level.' },
+                moonSystem: { type: 'integer', ...fieldBounds('ownSystem'), description: 'System the moon with the phalanx is in.' },
+                targetSystem: { type: 'integer', ...fieldBounds('targetSystem'), description: 'A system to reach; the answer says what level it needs.' },
                 playerClass: { ...common.playerClassSchema, description: 'The Discoverer: +20% phalanx range.' },
                 lifeforms: common.lifeformsSchema(['analysisNetworkBonus', 'discovererClassBonus']),
                 universe: common.universeSchema,
@@ -141,7 +158,7 @@ function createMoonTools({ siteApi }) {
                     description: 'Galaxy shape given by hand. Unset ones come from `universe` when given, else 499 '
                         + 'systems that do not wrap around.',
                     properties: {
-                        systems: { type: 'integer', minimum: 1, maximum: UNIVERSE_MAX_SYSTEMS },
+                        systems: { type: 'integer', ...fieldBounds('numberOfSystems') },
                         circularSystems: { type: 'boolean' },
                     },
                     additionalProperties: false,
