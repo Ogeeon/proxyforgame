@@ -4,11 +4,15 @@
 // MoonCalculator touches no DOM. Test bodies are unchanged from
 // playwright-tests/tests/moon.spec.js — only the plumbing above them differs.
 
+const assert = require('node:assert');
 const { describe, it } = require('node:test');
 const { load } = require('./load');
 const { expect } = require('./expect');
 
-const { MoonCalculator } = load(['js/utils.js', 'ogame/calc/js/ogame-cargo.js', 'ogame/calc/js/moon-core.js'], ['MoonCalculator']);
+const { MoonCalculator, MOON_FIELDS, moonFieldDefaults, moonValidateField, PHALANX_MAX_LEVEL, UNIVERSE_MAX_SYSTEMS } = load(
+    ['js/utils.js', 'ogame/calc/js/ogame-universe.js', 'ogame/calc/js/ogame-cargo.js', 'ogame/calc/js/moon-core.js'],
+    ['MoonCalculator', 'MOON_FIELDS', 'moonFieldDefaults', 'moonValidateField', 'PHALANX_MAX_LEVEL', 'UNIVERSE_MAX_SYSTEMS'],
+);
 
 const BASE_PRM = {
     moonSize: 1,
@@ -512,5 +516,87 @@ describe('Moon profile: the class checkboxes', () => {
         expect(moonClassFromPrm(neither, GENERAL)).toBe(NONE);
         expect(moonClassFromPrm(neither, DISCOVERER)).toBe(NONE);
         expect(moonClassFromPrm(neither, undefined)).toBe(NONE);
+    });
+});
+
+describe('Moon Calculator - the field table', () => {
+    const KINDS = ['int', 'float', 'bool', 'select'];
+    const GROUPS = ['destroy', 'create', 'phalanx'];
+
+    it('names every key and every input once', () => {
+        const prms = MOON_FIELDS.map((f) => f.prm);
+        const selectors = MOON_FIELDS.map((f) => f.selector);
+        expect(new Set(prms).size).toBe(prms.length);
+        expect(new Set(selectors).size).toBe(selectors.length);
+        for (const selector of selectors) expect(selector).toMatch(/^#[a-z][a-z-]*$/);
+    });
+
+    it('gives every row a known kind and reset group', () => {
+        for (const f of MOON_FIELDS) {
+            assert.ok(KINDS.includes(f.kind), `${f.prm}: kind ${f.kind}`);
+            assert.ok(GROUPS.includes(f.group), `${f.prm}: group ${f.group}`);
+        }
+    });
+
+    it('keeps every number default within its bounds, and every checkbox default a boolean', () => {
+        for (const f of MOON_FIELDS) {
+            if (f.kind === 'bool') {
+                assert.strictEqual(typeof f.def, 'boolean', f.prm);
+                assert.ok(f.min === undefined && f.max === undefined, `${f.prm}: a checkbox has no bounds`);
+                continue;
+            }
+            assert.strictEqual(typeof f.def, 'number', f.prm);
+            assert.ok(f.min <= f.def && f.def <= f.max, `${f.prm}: ${f.min} <= ${f.def} <= ${f.max}`);
+            if (f.kind === 'int') assert.ok(Number.isInteger(f.def), `${f.prm}: a whole default`);
+        }
+    });
+
+    it('has the defaults the computation tests start from', () => {
+        const defaults = moonFieldDefaults();
+        const fields = Object.fromEntries(Object.entries(BASE_PRM).filter(([key]) => key !== 'counts'));
+        expect(Object.keys(defaults).join()).toBe(Object.keys(fields).join());
+        for (const [key, value] of Object.entries(fields)) assert.strictEqual(defaults[key], value, key);
+    });
+
+    // The switch options.prm.validate was before the table, frozen here as the
+    // reference the derived validate has to answer like.
+    function legacyValidate(field, value) {
+        switch (field) {
+            case 'moonSize': return validateNumber(Number.parseFloat(value), 1, 10000, 1);
+            case 'dsCount': return validateNumber(Number.parseFloat(value), 1, Infinity, 1);
+            case 'debrisPercent': return validateNumber(Number.parseFloat(value), 0, 100, 30);
+            case 'hyperTechLevel': return validateNumber(Number.parseFloat(value), 0, 50, 0);
+            case 'isGeneral': return value === 'true';
+            case 'rcCapacityIncrease': return validateNumber(Number.parseFloat(value), 0, Infinity, 0);
+            case 'defenseDebrisPercent': return validateNumber(Number.parseFloat(value), 0, 100, 0);
+            case 'deutToDebris': return value === 'true';
+            case 'promoMoon': return value === 'true';
+            case 'supraRefractorLevel': return validateNumber(Number.parseFloat(value), 0, 100, 0);
+            case 'phalanxLevel': return validateNumber(Number.parseFloat(value), 1, PHALANX_MAX_LEVEL, 1);
+            case 'phalanxRangeBonus': return validateNumber(Number.parseFloat(value), 0, Infinity, 0);
+            case 'isDiscoverer': return value === 'true';
+            case 'discovererBonus': return validateNumber(Number.parseFloat(value), 0, Infinity, 0);
+            case 'ownSystem': return validateNumber(Number.parseFloat(value), 1, UNIVERSE_MAX_SYSTEMS, 1);
+            case 'targetSystem': return validateNumber(Number.parseFloat(value), 1, UNIVERSE_MAX_SYSTEMS, 1);
+            case 'circularSystems': return value === 'true';
+            case 'numberOfSystems': return validateNumber(Number.parseFloat(value), 1, UNIVERSE_MAX_SYSTEMS, 499);
+            default: return value;
+        }
+    }
+    // The same algorithm as utils.js, so the reference does not lean on the
+    // file under test.
+    function validateNumber(num, min, max, def) {
+        return (!Number.isNaN(num) && num >= min && num <= max) ? num : def;
+    }
+
+    const PROBES = ['', 'abc', 'true', 'false', '-1', '-0', '0', '0.5', '1', '2.5', '30', '49', '50', '51',
+        '99', '100', '101', '498', '499', '500', '999', '1000', '1001', '10000', '10001', '1e15', 'Infinity', '12abc'];
+
+    it('validates a saved value exactly as the old switch did', () => {
+        for (const prm of [...MOON_FIELDS.map((f) => f.prm), 'notAField']) {
+            for (const value of PROBES) {
+                assert.strictEqual(moonValidateField(prm, value), legacyValidate(prm, value), `${prm} <- '${value}'`);
+            }
+        }
     });
 });

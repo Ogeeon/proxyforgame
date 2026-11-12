@@ -18,56 +18,12 @@ const options = {
   /** @type {Record<string, string>} Captions of the result cells by id, filled in by the template. */
   reportCells: {},
 
+  // One key per row of MOON_FIELDS (moon-core.js), which holds the defaults
+  // and the bounds validate() checks a saved value against.
+  /** @type {Record<string, any> & {validate: (prm: string, value: string) => any}} */
   prm: {
-    moonSize: 1,
-    dsCount: 1,
-    debrisPercent: 30,
-    hyperTechLevel: 0,
-    isGeneral: false,
-    rcCapacityIncrease: 0,
-    defenseDebrisPercent: 0,
-    deutToDebris: false,
-    promoMoon: false,
-    supraRefractorLevel: 0,
-    phalanxLevel: 1,
-    phalanxRangeBonus: 0,
-    isDiscoverer: false,
-    discovererBonus: 0,
-    ownSystem: 1,
-    targetSystem: 1,
-    // Unlike the flight calculator, which defaults to a galaxy that does not
-    // wrap, the phalanx panel assumes it does: nearly every current universe is
-    // circular, and the wrong assumption here silently hands the player a range
-    // of systems they cannot actually see.
-    circularSystems: true,
-    numberOfSystems: 499,
-
-    validate: function (field, value) {
-      switch (field) {
-        case 'moonSize': return validateNumber(Number.parseFloat(value), 1, 10000, 1);
-        case 'dsCount': return validateNumber(Number.parseFloat(value), 1, Infinity, 1);
-        case 'debrisPercent': return validateNumber(Number.parseFloat(value), 0, 100, 30);
-        case 'hyperTechLevel': return validateNumber(Number.parseFloat(value), 0, 50, 0);
-        case 'isGeneral': return value === 'true';
-        case 'rcCapacityIncrease': return validateNumber(Number.parseFloat(value), 0, Infinity, 0);
-        case 'defenseDebrisPercent': return validateNumber(Number.parseFloat(value), 0, 100, 0);
-        case 'deutToDebris': return value === 'true';
-        case 'promoMoon': return value === 'true';
-        case 'supraRefractorLevel': return validateNumber(Number.parseFloat(value), 0, 100, 0);
-        case 'phalanxLevel': return validateNumber(Number.parseFloat(value), 1, PHALANX_MAX_LEVEL, 1);
-        case 'phalanxRangeBonus': return validateNumber(Number.parseFloat(value), 0, Infinity, 0);
-        case 'isDiscoverer': return value === 'true';
-        case 'discovererBonus': return validateNumber(Number.parseFloat(value), 0, Infinity, 0);
-        // The real ceiling is whatever `numberOfSystems` currently holds, which
-        // is not known here; _applySystemLimits keeps the fields themselves in
-        // step, and the core clamps anything that slips through either way.
-        case 'ownSystem': return validateNumber(Number.parseFloat(value), 1, UNIVERSE_MAX_SYSTEMS, 1);
-        case 'targetSystem': return validateNumber(Number.parseFloat(value), 1, UNIVERSE_MAX_SYSTEMS, 1);
-        case 'circularSystems': return value === 'true';
-        case 'numberOfSystems': return validateNumber(Number.parseFloat(value), 1, UNIVERSE_MAX_SYSTEMS, 499);
-        default: return value;
-      }
-    }
+    ...moonFieldDefaults(),
+    validate: moonValidateField,
   },
 
   load: function () {
@@ -89,30 +45,40 @@ const options = {
   save: function () { saveToCookie('options_moon', options.prm); }
 };
 
-// Params carried over from the collected form state into the saved options.
-// The unit counts are deliberately absent - see the note at the top.
-const MOON_PERSISTED_PARAMS = [
-  'moonSize', 'dsCount', 'debrisPercent', 'hyperTechLevel',
-  'isGeneral', 'rcCapacityIncrease',
-  'defenseDebrisPercent', 'deutToDebris', 'promoMoon', 'supraRefractorLevel',
-  'phalanxLevel', 'phalanxRangeBonus', 'isDiscoverer', 'discovererBonus',
-  'ownSystem', 'targetSystem', 'circularSystems', 'numberOfSystems',
-];
+/**
+ * Whether a field is a text input that carries a number, with the blur
+ * validation and constraints that go with it.
+ *
+ * @param {MoonField} field
+ */
+function isMoonTextField(field) {
+  return field.kind === 'int' || field.kind === 'float';
+}
+
+/**
+ * Show a value in its field the way the field's kind needs.
+ *
+ * @param {MoonField} field
+ * @param {*} value
+ */
+function showMoonField(field, value) {
+  if (field.kind === 'bool') setChecked(field.selector, value);
+  else if (field.kind === 'float') setNumVal(field.selector, value);
+  else setVal(field.selector, value);
+}
+
+/** The two coordinates, whose ceiling follows the number of systems. */
+const MOON_COORDINATE_FIELDS = MOON_FIELDS.filter((field) => field.prm === 'ownSystem' || field.prm === 'targetSystem');
 
 class MoonApp {
   constructor() {
     this.calc = new MoonCalculator();
     // Text inputs that carry numeric values and share the blur-validation flow:
-    // the two destruction fields, the hyperspace level and every unit count.
-    this.numericInputs = [
-      '#moon-size', '#ds-count', '#hypertech-lvl', '#rc-capacity-increase', '#supra-refractor',
-      '#phalanx-lvl', '#phalanx-range-bonus', '#discoverer-bonus',
-      '#own-system', '#target-system', '#systems-num',
-    ].concat(MOON_UNITS.map((unit) => '#' + unit.id));
-    this.checkboxes = [
-      '#general-class', '#deut-to-debris', '#promo-moon',
-      '#discoverer-class', '#circular-systems',
-    ];
+    // the table's int and float fields and every unit count.
+    this.numericInputs = MOON_FIELDS.filter(isMoonTextField).map((field) => field.selector)
+      .concat(MOON_UNITS.map((unit) => '#' + unit.id));
+    // The debris-percent selects and the checkboxes recalculate on change.
+    this.changeInputs = MOON_FIELDS.filter((field) => !isMoonTextField(field)).map((field) => field.selector);
   }
 
   init() {
@@ -126,49 +92,20 @@ class MoonApp {
 
   /** Fill the form from options.prm (the profile binder calls it too). */
   restoreFromState() {
-    setVal('#moon-size', options.prm.moonSize);
-    setVal('#ds-count', options.prm.dsCount);
-    setVal('#debris-percent', options.prm.debrisPercent);
-    setVal('#hypertech-lvl', options.prm.hyperTechLevel);
-    setChecked('#general-class', options.prm.isGeneral);
-    setNumVal('#rc-capacity-increase', options.prm.rcCapacityIncrease);
-    setVal('#defense-debris-percent', options.prm.defenseDebrisPercent);
-    setChecked('#deut-to-debris', options.prm.deutToDebris);
-    setChecked('#promo-moon', options.prm.promoMoon);
-    setVal('#supra-refractor', options.prm.supraRefractorLevel);
-
-    setVal('#phalanx-lvl', options.prm.phalanxLevel);
-    setNumVal('#phalanx-range-bonus', options.prm.phalanxRangeBonus);
-    setChecked('#discoverer-class', options.prm.isDiscoverer);
-    setNumVal('#discoverer-bonus', options.prm.discovererBonus);
-    setVal('#own-system', options.prm.ownSystem);
-    setVal('#target-system', options.prm.targetSystem);
-    setChecked('#circular-systems', options.prm.circularSystems);
-    setVal('#systems-num', options.prm.numberOfSystems);
+    MOON_FIELDS.forEach((field) => showMoonField(field, options.prm[field.prm]));
   }
 
   _applyConstraints() {
-    const moonSize = document.getElementById('moon-size');
-    if (moonSize) moonSize._constrains = { min: 1, max: 10000, def: 1 };
-    const dsCount = document.getElementById('ds-count');
-    if (dsCount) dsCount._constrains = { min: 1, def: 1 };
-    const hyperTech = document.getElementById('hypertech-lvl');
-    if (hyperTech) hyperTech._constrains = { min: 0, max: 50, def: 0 };
-    const rcCap = document.getElementById('rc-capacity-increase');
-    if (rcCap) rcCap._constrains = { min: 0, max: Infinity, def: 0, allowNegative: false, allowFloat: true };
-    const supra = document.getElementById('supra-refractor');
-    if (supra) supra._constrains = { min: 0, max: 100, def: 0 };
+    // No field takes a negative number: allowNegative stays at its default.
+    MOON_FIELDS.filter(isMoonTextField).forEach((field) => {
+      const el = $(field.selector);
+      if (el) el._constrains = { min: field.min, max: field.max, def: field.def, allowFloat: field.kind === 'float' };
+    });
     MOON_UNITS.forEach((unit) => {
       const el = document.getElementById(unit.id);
       if (el) el._constrains = { min: 0, def: 0 };
     });
-
-    setConstrains('phalanx-lvl', { min: 1, max: PHALANX_MAX_LEVEL, def: 1 });
-    // Both range bonuses are open-ended: the life form researches behind them
-    // have no level cap and no bonus cap.
-    setConstrains('phalanx-range-bonus', { min: 0, def: 0, allowNegative: false, allowFloat: true });
-    setConstrains('discoverer-bonus', { min: 0, max: Infinity, def: 0, allowFloat: true, allowNegative: false });
-    setConstrains('systems-num', { min: 1, max: UNIVERSE_MAX_SYSTEMS, def: 499 });
+    // The coordinates' static bound, set above, gives way to the galaxy's size.
     this._applySystemLimits(options.prm.numberOfSystems);
   }
 
@@ -179,8 +116,10 @@ class MoonApp {
    */
   _applySystemLimits(numberOfSystems) {
     const max = clampNumber(Math.floor(numberOfSystems || 1), 1, UNIVERSE_MAX_SYSTEMS);
-    setConstrains('own-system', { min: 1, max: max, def: 1 });
-    setConstrains('target-system', { min: 1, max: max, def: 1 });
+    MOON_COORDINATE_FIELDS.forEach((field) => {
+      const el = $(field.selector);
+      if (el) el._constrains = { min: field.min, max: max, def: field.def };
+    });
   }
 
   _bindEvents() {
@@ -192,16 +131,13 @@ class MoonApp {
       addEvent(el, 'blur', (e) => { validateInputNumberOnBlurNative(e); this.recalc(); });
     });
 
-    addEvent('#debris-percent', 'change', () => this.recalc());
-    addEvent('#defense-debris-percent', 'change', () => this.recalc());
-
-    this.checkboxes.forEach((sel) => {
+    this.changeInputs.forEach((sel) => {
       addEvent(sel, 'change', () => this.recalc());
     });
 
-    addEvent('#reset-ds', 'click', () => this._resetDestroyParams());
-    addEvent('#reset-cr', 'click', () => this._resetCreateParams());
-    addEvent('#reset-ph', 'click', () => this._resetPhalanxParams());
+    addEvent('#reset-ds', 'click', () => this._resetGroup('destroy'));
+    addEvent('#reset-cr', 'click', () => this._resetGroup('create'));
+    addEvent('#reset-ph', 'click', () => this._resetGroup('phalanx'));
 
     // Click a per-unit "max" label to copy that count into the adjacent input.
     // The renderer stashes the raw integer in data-max-count; a dash (no
@@ -241,61 +177,24 @@ class MoonApp {
   recalc() {
     const p = MoonDataCollector.readParams();
     this._applySystemLimits(p.numberOfSystems);
-    MOON_PERSISTED_PARAMS.forEach((key) => { options.prm[key] = p[key]; });
+    // Every field of the table is saved; the unit counts are not (see the top).
+    MOON_FIELDS.forEach((field) => { options.prm[field.prm] = p[field.prm]; });
     MoonRenderer.render(this.calc.compute(p));
     options.save();
   }
 
-  _resetDestroyParams() {
-    options.prm.moonSize = 1;
-    options.prm.dsCount = 1;
-    setVal('#moon-size', options.prm.moonSize);
-    setVal('#ds-count', options.prm.dsCount);
-    this.recalc();
-  }
-
-  _resetCreateParams() {
-    options.prm.debrisPercent = 30;
-    options.prm.hyperTechLevel = 0;
-    options.prm.isGeneral = false;
-    options.prm.rcCapacityIncrease = 0;
-    options.prm.defenseDebrisPercent = 0;
-    options.prm.deutToDebris = false;
-    options.prm.promoMoon = false;
-    options.prm.supraRefractorLevel = 0;
-
-    setVal('#debris-percent', options.prm.debrisPercent);
-    setVal('#hypertech-lvl', options.prm.hyperTechLevel);
-    setChecked('#general-class', false);
-    setNumVal('#rc-capacity-increase', 0);
-    setVal('#defense-debris-percent', 0);
-    setChecked('#deut-to-debris', false);
-    setChecked('#promo-moon', false);
-    setVal('#supra-refractor', 0);
-    MOON_UNITS.forEach((unit) => setVal('#' + unit.id, 0));
-
-    this.recalc();
-  }
-
-  _resetPhalanxParams() {
-    options.prm.phalanxLevel = 1;
-    options.prm.phalanxRangeBonus = 0;
-    options.prm.isDiscoverer = false;
-    options.prm.discovererBonus = 0;
-    options.prm.ownSystem = 1;
-    options.prm.targetSystem = 1;
-    options.prm.circularSystems = true;
-    options.prm.numberOfSystems = 499;
-
-    setVal('#phalanx-lvl', options.prm.phalanxLevel);
-    setNumVal('#phalanx-range-bonus', 0);
-    setChecked('#discoverer-class', false);
-    setNumVal('#discoverer-bonus', 0);
-    setVal('#own-system', options.prm.ownSystem);
-    setVal('#target-system', options.prm.targetSystem);
-    setChecked('#circular-systems', true);
-    setVal('#systems-num', options.prm.numberOfSystems);
-
+  /**
+   * One panel's reset button: its fields go back to their defaults, and the
+   * creation panel's unit counts to zero with them.
+   *
+   * @param {MoonField['group']} group
+   */
+  _resetGroup(group) {
+    MOON_FIELDS.filter((field) => field.group === group).forEach((field) => {
+      options.prm[field.prm] = field.def;
+      showMoonField(field, field.def);
+    });
+    if (group === 'create') MOON_UNITS.forEach((unit) => setVal('#' + unit.id, 0));
     this.recalc();
   }
 }

@@ -532,6 +532,191 @@ test.describe('Moon Calculator - Sensor phalanx', () => {
     });
 });
 
+// ---------------------------------------------------------------------------
+// Every form field: reset groups, persistence, saved-value validation and blur
+// clamping, field by field. Written as a list of its own on purpose - it
+// checks the page against MOON_FIELDS rather than being derived from it.
+// ---------------------------------------------------------------------------
+
+// The 18 fields of the three panels in form order (systems-num before the
+// coordinates it bounds), a value other than the default, and the default.
+// `float` values are written with a dot and shown with the locale separator.
+const MOON_FORM = [
+    { sel: '#moon-size', kind: 'text', value: '2500', def: '1', group: 'destroy' },
+    { sel: '#ds-count', kind: 'text', value: '7', def: '1', group: 'destroy' },
+    { sel: '#hypertech-lvl', kind: 'text', value: '12', def: '0', group: 'create', tab: 'common' },
+    { sel: '#general-class', kind: 'check', value: true, def: false, group: 'create', tab: 'common' },
+    { sel: '#debris-percent', kind: 'select', value: '60', def: '30', group: 'create', tab: 'common' },
+    { sel: '#defense-debris-percent', kind: 'select', value: '20', def: '0', group: 'create', tab: 'common' },
+    { sel: '#deut-to-debris', kind: 'check', value: true, def: false, group: 'create', tab: 'common' },
+    { sel: '#promo-moon', kind: 'check', value: true, def: false, group: 'create', tab: 'common' },
+    { sel: '#supra-refractor', kind: 'text', value: '15', def: '0', group: 'create', tab: 'lifeforms' },
+    { sel: '#rc-capacity-increase', kind: 'text', value: '12.5', def: '0', group: 'create', tab: 'lifeforms', float: true },
+    { sel: '#phalanx-lvl', kind: 'text', value: '7', def: '1', group: 'phalanx' },
+    { sel: '#phalanx-range-bonus', kind: 'text', value: '3.5', def: '0', group: 'phalanx', float: true },
+    { sel: '#discoverer-class', kind: 'check', value: true, def: false, group: 'phalanx' },
+    { sel: '#discoverer-bonus', kind: 'text', value: '12.5', def: '0', group: 'phalanx', float: true },
+    { sel: '#circular-systems', kind: 'check', value: false, def: true, group: 'phalanx' },
+    { sel: '#systems-num', kind: 'text', value: '400', def: '499', group: 'phalanx' },
+    { sel: '#own-system', kind: 'text', value: '42', def: '1', group: 'phalanx' },
+    { sel: '#target-system', kind: 'text', value: '64', def: '1', group: 'phalanx' },
+];
+
+/** A row's value as the field shows it under the given decimal separator. */
+function shown(row, value, sep) {
+    return row.float ? String(value).replace('.', sep) : value;
+}
+
+/** Give every field of the three panels its non-default value. */
+async function fillMoonForm(page, sep = '.') {
+    let tab = 'common';
+    for (const row of MOON_FORM) {
+        if (row.tab && row.tab !== tab) {
+            await page.locator(`#param-${row.tab}-tab`).click();
+            tab = row.tab;
+        }
+        const field = page.locator(row.sel);
+        if (row.kind === 'check') {
+            await field.setChecked(row.value);
+        } else if (row.kind === 'select') {
+            await field.selectOption(row.value);
+        } else {
+            await field.fill(shown(row, row.value, sep));
+            await field.blur();
+        }
+    }
+}
+
+/**
+ * Expect each field to hold its non-default value, or its default when
+ * `isDefault(row)` says so.
+ */
+async function expectMoonForm(page, isDefault, sep = '.') {
+    for (const row of MOON_FORM) {
+        const want = isDefault(row) ? row.def : row.value;
+        const field = page.locator(row.sel);
+        if (row.kind === 'check') {
+            await expect(field, row.sel).toBeChecked({ checked: want });
+        } else {
+            await expect(field, row.sel).toHaveValue(shown(row, want, sep));
+        }
+    }
+}
+
+test.describe('Moon Calculator - every field', () => {
+    test.beforeEach(async ({ context, page }) => {
+        await context.addInitScript(() => {
+            localStorage.setItem('lastChange', 'key-value;true,value;99999');
+            if (!localStorage.getItem('pfg-fields-cleared')) {
+                localStorage.removeItem('options_moon');
+                localStorage.setItem('pfg-fields-cleared', '1');
+            }
+        });
+        await page.goto('/moon');
+    });
+
+    for (const [group, button] of [['destroy', '#reset-ds'], ['create', '#reset-cr'], ['phalanx', '#reset-ph']]) {
+        test(`the ${group} reset restores its own group and leaves the others alone`, async ({ page }) => {
+            await fillMoonForm(page);
+            await expectMoonForm(page, () => false);
+
+            await page.locator(button).click();
+
+            await expectMoonForm(page, (row) => row.group === group);
+        });
+    }
+
+    test('every field survives a reload', async ({ page }) => {
+        await fillMoonForm(page);
+        await page.reload();
+        await expectMoonForm(page, () => false);
+    });
+
+    test('a saved value out of range falls back to its default', async ({ page }) => {
+        await page.evaluate(() => localStorage.setItem('options_moon', JSON.stringify({
+            moonSize: 10001, dsCount: 0, debrisPercent: 101, hyperTechLevel: 51,
+            isGeneral: 'yes', rcCapacityIncrease: -1, defenseDebrisPercent: -1,
+            deutToDebris: 1, promoMoon: 'on', supraRefractorLevel: 101,
+            phalanxLevel: 51, phalanxRangeBonus: -0.5, isDiscoverer: 'TRUE', discovererBonus: 'x',
+            ownSystem: 1001, targetSystem: 0, circularSystems: 1, numberOfSystems: 1001,
+        })));
+        await page.reload();
+        // Booleans keep only the string 'true': anything else reads as false,
+        // which for the ring setting is not its default.
+        await expectMoonForm(page, (row) => row.sel !== '#circular-systems');
+    });
+
+    test('a saved value on the bounds is kept', async ({ page }) => {
+        await page.evaluate(() => localStorage.setItem('options_moon', JSON.stringify({
+            moonSize: 10000, dsCount: 1e9, hyperTechLevel: 50, supraRefractorLevel: 100,
+            phalanxLevel: 50, numberOfSystems: 1000, ownSystem: 1000, targetSystem: 1000,
+            rcCapacityIncrease: 1e6, phalanxRangeBonus: 0, discovererBonus: 0.25,
+        })));
+        await page.reload();
+        await expect(page.locator('#moon-size')).toHaveValue('10000');
+        await expect(page.locator('#ds-count')).toHaveValue('1000000000');
+        await expect(page.locator('#hypertech-lvl')).toHaveValue('50');
+        await expect(page.locator('#supra-refractor')).toHaveValue('100');
+        await expect(page.locator('#phalanx-lvl')).toHaveValue('50');
+        await expect(page.locator('#systems-num')).toHaveValue('1000');
+        await expect(page.locator('#own-system')).toHaveValue('1000');
+        await expect(page.locator('#target-system')).toHaveValue('1000');
+        await expect(page.locator('#rc-capacity-increase')).toHaveValue('1000000');
+        await expect(page.locator('#phalanx-range-bonus')).toHaveValue('0');
+        await expect(page.locator('#discoverer-bonus')).toHaveValue('0.25');
+    });
+
+    test('blur clamps a value out of range', async ({ page }) => {
+        /** @type {[string, string, string][]} selector, typed, kept */
+        const cases = [
+            ['#moon-size', '10001', '10000'],
+            ['#moon-size', '0', '1'],
+            ['#ds-count', '0', '1'],
+            // An integer field drops the separator: 2.5 becomes 25.
+            ['#hypertech-lvl', '2.5', '25'],
+            ['#hypertech-lvl', '51', '50'],
+            ['#phalanx-lvl', '51', '50'],
+            ['#phalanx-lvl', '0', '1'],
+            ['#systems-num', '1001', '1000'],
+            ['#systems-num', '0', '1'],
+            ['#own-system', '0', '1'],
+            // A float field keeps its fraction, has no ceiling, and refuses a sign.
+            ['#discoverer-bonus', '2.75', '2.75'],
+            ['#discoverer-bonus', '-3', '3'],
+            ['#phalanx-range-bonus', '99999.5', '99999.5'],
+            // An emptied field takes its default.
+            ['#ds-count', '', '1'],
+            ['#systems-num', '', '499'],
+        ];
+        for (const [sel, typed, kept] of cases) {
+            await page.locator(sel).fill(typed);
+            await page.locator(sel).blur();
+            await expect(page.locator(sel), `${sel} <- '${typed}'`).toHaveValue(kept);
+        }
+        await openLifeformsTab(page);
+        for (const [sel, typed, kept] of [['#supra-refractor', '101', '100'], ['#rc-capacity-increase', '0.5', '0.5'], ['#rc-capacity-increase', '', '0']]) {
+            await page.locator(sel).fill(typed);
+            await page.locator(sel).blur();
+            await expect(page.locator(sel), `${sel} <- '${typed}'`).toHaveValue(kept);
+        }
+    });
+
+    test.describe('Russian locale', () => {
+        test.use({ locale: 'ru-RU' });
+
+        test('every field survives a reload, the fractions with a comma', async ({ page }) => {
+            await fillMoonForm(page, ',');
+            await page.reload();
+            await expectMoonForm(page, () => false, ',');
+            // ...and the save itself holds plain numbers.
+            const saved = await page.evaluate(() => JSON.parse(localStorage.getItem('options_moon') ?? '{}'));
+            expect(saved.rcCapacityIncrease).toBe(12.5);
+            expect(saved.phalanxRangeBonus).toBe(3.5);
+            expect(saved.discovererBonus).toBe(12.5);
+        });
+    });
+});
+
 // The calculation-error report attaches the calculator's own snapshot
 // (reportSnapshot in moon-data-collector.js): the cell the number came from
 // and only the fields that differ from their factory defaults, grouped by the

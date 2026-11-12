@@ -988,7 +988,7 @@ describe('MCP moon tools', () => {
     });
 
     it('ogame_phalanx: gives the Discoverer class its range bonus, and no other class', async () => {
-        const { MoonCalculator } = load(['js/utils.js', 'ogame/calc/js/ogame-cargo.js', 'ogame/calc/js/moon-core.js'], ['MoonCalculator']);
+        const { MoonCalculator } = load(['js/utils.js', 'ogame/calc/js/ogame-universe.js', 'ogame/calc/js/ogame-cargo.js', 'ogame/calc/js/moon-core.js'], ['MoonCalculator']);
         const range = async (playerClass) => (await call(protocolWith(), 'ogame_phalanx', {
             phalanxLevel: 7, moonSystem: 100, playerClass,
         })).structuredContent.rangeSystems;

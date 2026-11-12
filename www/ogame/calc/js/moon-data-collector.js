@@ -12,27 +12,24 @@ class MoonDataCollector {
    * sub-calculators (destruction and creation).
    */
   static readParams() {
-    return {
-      moonSize: getInputNumber($('#moon-size')),
-      dsCount: getInputNumber($('#ds-count')),
-      debrisPercent: Number.parseInt(getVal('#debris-percent'), 10) || 0,
-      hyperTechLevel: getInputNumber($('#hypertech-lvl')),
-      isGeneral: getChecked('#general-class'),
-      rcCapacityIncrease: getInputNumber($('#rc-capacity-increase')),
-      defenseDebrisPercent: Number.parseInt(getVal('#defense-debris-percent'), 10) || 0,
-      deutToDebris: getChecked('#deut-to-debris'),
-      promoMoon: getChecked('#promo-moon'),
-      supraRefractorLevel: getInputNumber($('#supra-refractor')),
-      counts: MoonDataCollector.readCounts(),
-      phalanxLevel: getInputNumber($('#phalanx-lvl')),
-      phalanxRangeBonus: getInputNumber($('#phalanx-range-bonus')),
-      isDiscoverer: getChecked('#discoverer-class'),
-      discovererBonus: getInputNumber($('#discoverer-bonus')),
-      ownSystem: getInputNumber($('#own-system')),
-      targetSystem: getInputNumber($('#target-system')),
-      circularSystems: getChecked('#circular-systems'),
-      numberOfSystems: getInputNumber($('#systems-num')),
-    };
+    /** @type {Record<string, any>} Every MOON_FIELDS key, and the unit counts. */
+    const p = { counts: MoonDataCollector.readCounts() };
+    MOON_FIELDS.forEach((field) => { p[field.prm] = MoonDataCollector.readField(field); });
+    return p;
+  }
+
+  /**
+   * One field's value, read the way its kind needs.
+   *
+   * @param {MoonField} field
+   * @returns {number|boolean}
+   */
+  static readField(field) {
+    switch (field.kind) {
+      case 'bool': return getChecked(field.selector);
+      case 'select': return Number.parseInt(getVal(field.selector), 10) || 0;
+      default: return getInputNumber($(field.selector));
+    }
   }
 
   /**

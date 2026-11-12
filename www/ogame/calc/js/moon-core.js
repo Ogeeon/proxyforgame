@@ -90,6 +90,97 @@ const PHALANX_DISCOVERER_BONUS = 0.20;
 // (UNIVERSE_MAX_SYSTEMS).
 const PHALANX_MAX_LEVEL = 50;
 
+// ----------------------------------------------------------------------------
+// THE FORM'S FIELDS
+// ----------------------------------------------------------------------------
+
+/**
+ * One form field of the three panels.
+ *
+ * @typedef {Object} MoonField
+ * @property {string} prm The options.prm key it is saved under (options_moon).
+ * @property {string} selector Its input.
+ * @property {'int'|'float'|'bool'|'select'} kind How it is read, shown and checked:
+ *   int    - a text input of whole numbers;
+ *   float  - a text input that takes a fraction, shown with the locale's
+ *            decimal separator;
+ *   bool   - a checkbox;
+ *   select - a debris-percent select: its options are its bounds, so it gets
+ *            no blur constraints.
+ * @property {number} [min] Lowest value kept (all but `bool`).
+ * @property {number} [max] Highest value kept (all but `bool`).
+ * @property {number|boolean} def The default: what a reset restores and what a
+ *   saved value out of [min, max] falls back to.
+ * @property {'destroy'|'create'|'phalanx'} group The panel whose reset button
+ *   restores it.
+ */
+
+// Every field of the three panels, in the order options.prm has always listed
+// them (which keeps options_moon byte-for-byte what it was). The page derives
+// from this table its defaults, validate() for a saved value, the event
+// bindings, the restored form, the blur constraints, reading the form and the
+// three resets - nothing else lists the fields.
+//
+// Every row is saved, so the table has no column for it. The unit counts
+// (MOON_UNITS) are not rows: they describe a single battle rather than a
+// lasting preference, so they are never saved, and their rule is one for all.
+/** @type {MoonField[]} */
+const MOON_FIELDS = [
+  { prm: 'moonSize', selector: '#moon-size', kind: 'int', min: 1, max: 10000, def: 1, group: 'destroy' },
+  { prm: 'dsCount', selector: '#ds-count', kind: 'int', min: 1, max: Infinity, def: 1, group: 'destroy' },
+  { prm: 'debrisPercent', selector: '#debris-percent', kind: 'select', min: 0, max: 100, def: 30, group: 'create' },
+  { prm: 'hyperTechLevel', selector: '#hypertech-lvl', kind: 'int', min: 0, max: 50, def: 0, group: 'create' },
+  { prm: 'isGeneral', selector: '#general-class', kind: 'bool', def: false, group: 'create' },
+  { prm: 'rcCapacityIncrease', selector: '#rc-capacity-increase', kind: 'float', min: 0, max: Infinity, def: 0, group: 'create' },
+  { prm: 'defenseDebrisPercent', selector: '#defense-debris-percent', kind: 'select', min: 0, max: 100, def: 0, group: 'create' },
+  { prm: 'deutToDebris', selector: '#deut-to-debris', kind: 'bool', def: false, group: 'create' },
+  { prm: 'promoMoon', selector: '#promo-moon', kind: 'bool', def: false, group: 'create' },
+  { prm: 'supraRefractorLevel', selector: '#supra-refractor', kind: 'int', min: 0, max: 100, def: 0, group: 'create' },
+  { prm: 'phalanxLevel', selector: '#phalanx-lvl', kind: 'int', min: 1, max: PHALANX_MAX_LEVEL, def: 1, group: 'phalanx' },
+  // Both range bonuses are open-ended: the life form researches behind them
+  // have no level cap and no bonus cap.
+  { prm: 'phalanxRangeBonus', selector: '#phalanx-range-bonus', kind: 'float', min: 0, max: Infinity, def: 0, group: 'phalanx' },
+  { prm: 'isDiscoverer', selector: '#discoverer-class', kind: 'bool', def: false, group: 'phalanx' },
+  { prm: 'discovererBonus', selector: '#discoverer-bonus', kind: 'float', min: 0, max: Infinity, def: 0, group: 'phalanx' },
+  // The real ceiling of the two coordinates is whatever numberOfSystems holds:
+  // MoonApp._applySystemLimits keeps the fields in step with it, and the core
+  // clamps anything that slips through. The bound here is the one a saved
+  // value is checked against, where that number is not known yet.
+  { prm: 'ownSystem', selector: '#own-system', kind: 'int', min: 1, max: UNIVERSE_MAX_SYSTEMS, def: 1, group: 'phalanx' },
+  { prm: 'targetSystem', selector: '#target-system', kind: 'int', min: 1, max: UNIVERSE_MAX_SYSTEMS, def: 1, group: 'phalanx' },
+  // Unlike the flight calculator, which defaults to a galaxy that does not
+  // wrap, the phalanx panel assumes it does: nearly every current universe is
+  // circular, and the wrong assumption here silently hands the player a range
+  // of systems they cannot actually see.
+  { prm: 'circularSystems', selector: '#circular-systems', kind: 'bool', def: true, group: 'phalanx' },
+  { prm: 'numberOfSystems', selector: '#systems-num', kind: 'int', min: 1, max: UNIVERSE_MAX_SYSTEMS, def: 499, group: 'phalanx' },
+];
+
+/**
+ * Every field's default, keyed by its options.prm key.
+ *
+ * @returns {Record<string, number|boolean>}
+ */
+function moonFieldDefaults() {
+  return Object.fromEntries(MOON_FIELDS.map((field) => [field.prm, field.def]));
+}
+
+/**
+ * A value read back from options_moon: a checkbox is ticked by the string
+ * 'true' alone, a number outside its field's bounds becomes the default. A key
+ * the table does not know passes through as it is.
+ *
+ * @param {string} prm
+ * @param {string} value
+ * @returns {*}
+ */
+function moonValidateField(prm, value) {
+  const field = MOON_FIELDS.find((f) => f.prm === prm);
+  if (!field) return value;
+  if (field.kind === 'bool') return value === 'true';
+  return validateNumber(Number.parseFloat(value), field.min, field.max, field.def);
+}
+
 class MoonCalculator {
   /**
    * Destruction sub-calculator: the chance to blow up the target moon and the
@@ -429,6 +520,9 @@ if (typeof window !== 'undefined') {
   Object.assign(window, {
     MoonCalculator,
     MOON_UNITS,
+    MOON_FIELDS,
+    moonFieldDefaults,
+    moonValidateField,
     MOON_DF_PER_FULL_CHANCE,
     MOON_CHANCE_CAP,
     MOON_CHANCE_CAP_PROMO,
