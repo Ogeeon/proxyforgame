@@ -636,15 +636,14 @@ class PlanetPrmBinder extends ProfileBinder {
   constructor(pf, app, config) {
     super(pf, app);
     this.config = config;
-    /** @type {?string} The planet shown; null leaves its fields to the calculator. */
-    this.planetId = null;
+    /** The planet shown, picked in #pf-planet; none leaves its fields to the calculator. */
     this.planetSelect = new PfBodySelect(pf, {
       select: '#pf-planet', box: '#pf-planet-box', bodies: (p) => p.planets, lastKey: config.lastKey,
     });
     this.ownSave = config.ownSave ?? options.save;
     if (config.resources) {
       this.bodyResources = [new PfBodyResources(pf, {
-        groups: config.resources, body: () => this.planetId, recalc: () => this.app.recalc(),
+        groups: config.resources, body: () => this.planetSelect.id, recalc: () => this.app.recalc(),
         linked: config.resourcesLinked,
       })];
     }
@@ -670,7 +669,7 @@ class PlanetPrmBinder extends ProfileBinder {
    * @returns {?ProfilePlanet}
    */
   planet(profile) {
-    return profile?.planets.find((p) => p.id === this.planetId) || null;
+    return this.planetSelect.entity(profile);
   }
 
   /**
@@ -690,7 +689,7 @@ class PlanetPrmBinder extends ProfileBinder {
   /** @param {Profile} profile */
   showProfile(profile) {
     this.config.accountFields.forEach((f) => f.write(options.prm, getProfileValue(profile.account, f.key)));
-    this.planetId = this.planetSelect.render(profile, this.planetId);
+    this.planetSelect.render(profile);
     this.showPlanet(profile);
   }
 
@@ -718,7 +717,7 @@ class PlanetPrmBinder extends ProfileBinder {
   }
 
   /**
-   * Called with the planet's fields in options.prm (this.planetId is the planet
+   * Called with the planet's fields in options.prm (this.planet() is the planet
    * shown, null for none), before the form is shown. A subclass writes what
    * the profile fills here; the own values of what it does not fill
    * (ownedGroups) are put in after.
@@ -728,7 +727,6 @@ class PlanetPrmBinder extends ProfileBinder {
   }
 
   restoreOwn() {
-    this.planetId = null;
     this.universeSettings.forEach((setting) => setting.detach());
     this.planetSelect.hide();
     super.restoreOwn();
@@ -758,7 +756,7 @@ class PlanetPrmBinder extends ProfileBinder {
     if (!profile) return;
     // Whatever was typed for the planet shown so far is saved first.
     this.save();
-    this.planetId = this.planetSelect.chosen(profile);
+    this.planetSelect.pick(profile);
     this.whileApplying(() => {
       this.showPlanet(profile);
       this.takeSnapshot();

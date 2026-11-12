@@ -210,39 +210,55 @@ class PfUniverseSetting {
 }
 
 /**
+ * @template {ProfilePlanet} [B=ProfilePlanet]
  * @typedef {object} PfBodySelectConfig
  * @property {string} select Selector of the <select>.
  * @property {string} box Selector of the element that holds it, hidden while there is nothing to pick.
- * @property {(profile: Profile) => ProfilePlanet[]} bodies The planets or moons it lists.
+ * @property {(profile: Profile) => B[]} bodies The planets or moons it lists.
  * @property {string} lastKey Calculator name under which the last choice is remembered.
- * @property {() => ?string} [planetOf] For a select of moons: the planet shown with it. Its moon is
- *   shown when neither the current moon nor the last pick is there, and follow() picks it.
+ * @property {PfBodySelect} [follows] For a select of moons: the select of the planet shown with it.
+ *   Its moon is shown when neither the current moon nor the last pick is there, and follow() picks it.
  */
 
 /**
- * The select that picks a planet or a moon of the active profile: its
- * options, the choice made last time in each profile, and the box around it.
- * A binder holds one per kind of body and keeps the chosen id itself.
+ * The select that picks a planet or a moon of the active profile, and the
+ * body it shows: its options, the choice made last time in each profile, and
+ * the box around it. A binder holds one per kind of body and asks it for the
+ * body shown (entity()); a null id leaves that body's fields to the calculator.
+ *
+ * @template {ProfilePlanet} [B=ProfilePlanet]
  */
 class PfBodySelect {
   /**
    * @param {ProfilesUi} pf
-   * @param {PfBodySelectConfig} config
+   * @param {PfBodySelectConfig<B>} config
    */
   constructor(pf, config) {
     this.pf = pf;
     this.config = config;
+    /** @type {?string} The id of the body shown; null while there is none. */
+    this.id = null;
   }
 
   /**
-   * Fill the select and choose a body: the current one, else the one picked
-   * last time in this profile, else the moon of the planet shown, else the first one.
+   * The body shown, looked up in a profile.
+   *
+   * @param {?Profile} profile
+   * @returns {?B}
+   */
+  entity(profile) {
+    const id = this.id;
+    return profile && id !== null ? this.config.bodies(profile).find((b) => b.id === id) || null : null;
+  }
+
+  /**
+   * Fill the select and choose a body: the one shown so far, else the one
+   * picked last time in this profile, else the moon of the planet shown, else the first one.
    *
    * @param {Profile} profile
-   * @param {?string} currentId
    * @returns {?string} The id of the body shown.
    */
-  render(profile, currentId) {
+  render(profile) {
     const { select: selector, box, bodies, lastKey } = this.config;
     const list = bodies(profile);
     const select = selectEl(selector);
@@ -252,23 +268,23 @@ class PfBodySelect {
     }
     pfShow(box, list.length > 0);
     const last = this.pf.store.getLastPlanet(lastKey, profile.id);
-    const chosen = list.find((b) => b.id === currentId)
+    const chosen = list.find((b) => b.id === this.id)
       || list.find((b) => b.id === last)
       || this.moonOfPlanet(profile)
       || list[0];
-    const id = chosen ? chosen.id : null;
-    if (select) select.value = id || '';
-    return id;
+    this.id = chosen ? chosen.id : null;
+    if (select) select.value = this.id || '';
+    return this.id;
   }
 
   /**
-   * The moon of the planet this select follows (planetOf), if it has one.
+   * The moon of the planet this select follows, if it has one.
    *
    * @param {Profile} profile
    * @returns {ProfileMoon|undefined}
    */
   moonOfPlanet(profile) {
-    const planetId = this.config.planetOf?.() ?? null;
+    const planetId = this.config.follows?.id ?? null;
     return planetId === null ? undefined : profile.moons.find((m) => m.planetId === planetId);
   }
 
@@ -276,36 +292,26 @@ class PfBodySelect {
    * The planet it follows was picked: pick its moon too, when it has one.
    *
    * @param {Profile} profile
-   * @returns {?string} The id of the moon picked; null when the planet has none.
+   * @returns {boolean} True when it shows another moon now.
    */
   follow(profile) {
     const moon = this.moonOfPlanet(profile);
-    if (!moon) return null;
-    this.choose(profile, moon.id);
-    return moon.id;
+    if (!moon) return false;
+    const moved = moon.id !== this.id;
+    this.id = moon.id;
+    setVal(this.config.select, moon.id);
+    this.pf.store.setLastPlanet(this.config.lastKey, profile.id, moon.id);
+    return moved;
   }
 
   /**
-   * The player picked a body: remember it.
+   * The player picked a body: show it, and remember it.
    *
    * @param {Profile} profile
-   * @returns {?string} The id picked.
    */
-  chosen(profile) {
-    const id = getVal(this.config.select) || null;
-    if (id) this.pf.store.setLastPlanet(this.config.lastKey, profile.id, id);
-    return id;
-  }
-
-  /**
-   * Pick a body from code, and remember it.
-   *
-   * @param {Profile} profile
-   * @param {string} id
-   */
-  choose(profile, id) {
-    setVal(this.config.select, id);
-    this.pf.store.setLastPlanet(this.config.lastKey, profile.id, id);
+  pick(profile) {
+    this.id = getVal(this.config.select) || null;
+    if (this.id) this.pf.store.setLastPlanet(this.config.lastKey, profile.id, this.id);
   }
 
   /** Call a handler when the player picks another body. */
@@ -313,7 +319,9 @@ class PfBodySelect {
     addEvent(this.config.select, 'change', handler);
   }
 
+  /** Hide the select; it shows no body until it is rendered again. */
   hide() {
+    this.id = null;
     pfShow(this.config.box, false);
   }
 }

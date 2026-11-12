@@ -110,12 +110,11 @@ class MoonProfiles extends PlanetPrmBinder {
       // The class is two checkboxes, written by writeBackExtra() rather than by a field.
       accountAlsoOwns: ['isGeneral', 'isDiscoverer'],
     });
-    /** @type {?string} The moon shown; null leaves its fields to the calculator. */
-    this.moonId = null;
-    // A moon not picked yet is the one of the planet shown.
+    // The moon shown; none leaves its fields to the calculator. A moon not picked
+    // yet is the one of the planet shown.
     this.moonSelect = new PfBodySelect(pf, {
       select: '#pf-moon', box: '#pf-moon-box', bodies: (p) => p.moons, lastKey: 'moon-moon',
-      planetOf: () => this.planetId,
+      follows: this.planetSelect,
     });
   }
 
@@ -156,7 +155,7 @@ class MoonProfiles extends PlanetPrmBinder {
    * @returns {?ProfileMoon}
    */
   moon(profile) {
-    return profile?.moons.find((m) => m.id === this.moonId) || null;
+    return this.moonSelect.entity(profile);
   }
 
   // -------------------------------------------------------------------------
@@ -181,7 +180,7 @@ class MoonProfiles extends PlanetPrmBinder {
   afterShowPlanet() {
     const profile = this.profile();
     if (!profile) return;
-    this.moonId = this.moonSelect.render(profile, this.moonId);
+    this.moonSelect.render(profile);
     /** @type {Record<string, any>} */
     const prm = options.prm;
     Object.assign(prm, moonClassToPrm(getProfileValue(profile.account, 'class', 0)));
@@ -191,7 +190,6 @@ class MoonProfiles extends PlanetPrmBinder {
   }
 
   restoreOwn() {
-    this.moonId = null;
     this.moonSelect.hide();
     pfShow('#reset-cr', true);
     pfShow('#reset-ph', true);
@@ -238,8 +236,8 @@ class MoonProfiles extends PlanetPrmBinder {
     if (!profile) return;
     // Whatever was typed for the planet shown so far is saved first.
     this.save();
-    this.planetId = this.planetSelect.chosen(profile);
-    this.moonId = this.moonSelect.follow(profile) ?? this.moonId;
+    this.planetSelect.pick(profile);
+    this.moonSelect.follow(profile);
     this.show(profile);
   }
 
@@ -248,7 +246,7 @@ class MoonProfiles extends PlanetPrmBinder {
     const profile = this.profile();
     if (!profile) return;
     this.save();
-    this.moonId = this.moonSelect.chosen(profile);
+    this.moonSelect.pick(profile);
     this.show(profile);
   }
 

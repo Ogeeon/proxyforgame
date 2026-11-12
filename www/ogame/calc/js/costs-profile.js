@@ -207,10 +207,6 @@ class CostsProfiles extends ProfileBinder {
     super(pf, app);
     /** @type {ProfileField[]} The account fields, the research bonuses table included. */
     this.accountFields = [...COSTS_ACCOUNT_FIELDS, ...costsResearchTableFields()];
-    /** @type {?string} The planet shown; null leaves its fields to the calculator. */
-    this.planetId = null;
-    /** @type {?string} The moon shown. */
-    this.moonId = null;
     /**
      * The research network dialog's rows after the profile's planets, and the
      * start planet when it is one of them (-1 when not): kept for the profile
@@ -218,13 +214,14 @@ class CostsProfiles extends ProfileBinder {
      * @type {?{profileId: string, levels: number[], choice: number}}
      */
     this.extraLabs = null;
+    // The planet and the moon shown; none leaves that body's fields to the calculator.
     this.planetSelect = new PfBodySelect(pf, {
       select: '#pf-planet', box: '#pf-planet-box', bodies: (p) => p.planets, lastKey: 'costs',
     });
     // A moon not picked yet is the one of the planet shown.
     this.moonSelect = new PfBodySelect(pf, {
       select: '#pf-moon', box: '#pf-moon-box', bodies: (p) => p.moons, lastKey: 'costs-moon',
-      planetOf: () => this.planetId,
+      follows: this.planetSelect,
     });
     // The profile's universe goes into the picker, locked; picking it fetches its speeds,
     // as the picker does. The player's own universe comes back with the speeds it had.
@@ -259,10 +256,10 @@ class CostsProfiles extends ProfileBinder {
       }),
       // The build tables: the moon buildings' take the moon's, the others the planet's.
       new PfBodyResources(pf, {
-        groups: costsLevelResourceGroups(false), body: () => this.planetId, recalc: () => this.app.recalculateAll(),
+        groups: costsLevelResourceGroups(false), body: () => this.planetSelect.id, recalc: () => this.app.recalculateAll(),
       }),
       new PfBodyResources(pf, {
-        groups: costsLevelResourceGroups(true), body: () => this.moonId, recalc: () => this.app.recalculateAll(),
+        groups: costsLevelResourceGroups(true), body: () => this.moonSelect.id, recalc: () => this.app.recalculateAll(),
       }),
     ];
   }
@@ -302,8 +299,8 @@ class CostsProfiles extends ProfileBinder {
    */
   bodies(profile) {
     return {
-      planet: profile?.planets.find((p) => p.id === this.planetId) || null,
-      moon: profile?.moons.find((m) => m.id === this.moonId) || null,
+      planet: this.planetSelect.entity(profile),
+      moon: this.moonSelect.entity(profile),
     };
   }
 
@@ -361,8 +358,8 @@ class CostsProfiles extends ProfileBinder {
    * @param {Profile} profile
    */
   renderBodySelects(profile) {
-    this.planetId = this.planetSelect.render(profile, this.planetId);
-    this.moonId = this.moonSelect.render(profile, this.moonId);
+    this.planetSelect.render(profile);
+    this.moonSelect.render(profile);
     pfShow('#pf-bodies-row', profile.planets.length + profile.moons.length > 0);
   }
 
@@ -395,8 +392,8 @@ class CostsProfiles extends ProfileBinder {
   }
 
   restoreOwn() {
-    this.planetId = null;
-    this.moonId = null;
+    this.planetSelect.hide();
+    this.moonSelect.hide();
     pfShow('#pf-bodies-row', false);
     this.universe.release();
     const own = this.ownPrm;
@@ -488,7 +485,7 @@ class CostsProfiles extends ProfileBinder {
         const level = pfNum(p.labLevels[i]);
         if (level === before[i]) return;
         changed = setProfileValue(planet, 'building.31', level) || changed;
-        if (planet.id === this.planetId) shownLab = level;
+        if (planet.id === this.planetSelect.id) shownLab = level;
       });
       this.snapshot.labs = p.labLevels.map(pfNum);
       // The rows after the planets go nowhere in the profile, but the table
@@ -553,10 +550,10 @@ class CostsProfiles extends ProfileBinder {
     // Whatever was typed for the body shown so far is saved first.
     this.save();
     if (kind === 'planet') {
-      this.planetId = this.planetSelect.chosen(profile);
-      this.moonId = this.moonSelect.follow(profile) ?? this.moonId;
+      this.planetSelect.pick(profile);
+      this.moonSelect.follow(profile);
     } else {
-      this.moonId = this.moonSelect.chosen(profile);
+      this.moonSelect.pick(profile);
     }
     this.whileApplying(() => {
       this.showBodies(profile);
@@ -623,7 +620,7 @@ class CostsProfiles extends ProfileBinder {
    * @returns {?string}
    */
   resourceBody() {
-    return costsRangePick()?.source.where === 'moon' ? this.moonId : this.planetId;
+    return costsRangePick()?.source.where === 'moon' ? this.moonSelect.id : this.planetSelect.id;
   }
 
   // -------------------------------------------------------------------------

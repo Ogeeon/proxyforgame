@@ -56,15 +56,16 @@ class QueueProfiles extends ProfileBinder {
    */
   constructor(pf, app) {
     super(pf, app);
-    /** @type {Record<number, ?string>} Per tab, the profile body it shows; null leaves the tab to the calculator. */
-    this.bodyIds = { [PLANET_TAB]: null, [MOON_TAB]: null };
-    /** @type {Record<number, PfBodySelect>} Per tab, the select that picks its body. */
+    /**
+     * @type {Record<number, PfBodySelect>} Per tab, the select that picks its body and
+     *   the body it shows; none leaves the tab to the calculator.
+     */
     this.bodySelects = {};
     QUEUE_TABS.forEach((t) => {
       this.bodySelects[t.tab] = new PfBodySelect(pf, {
         select: '#pf-body-' + t.tab, box: '#pf-body-box-' + t.tab, bodies: (p) => p[t.bodies], lastKey: t.lastKey,
         // A moon not picked yet is the one of the planet shown.
-        planetOf: t.tab === MOON_TAB ? () => this.bodyIds[PLANET_TAB] : undefined,
+        follows: t.tab === MOON_TAB ? this.bodySelects[PLANET_TAB] : undefined,
       });
     });
     this.ownSave = options.save;
@@ -112,8 +113,7 @@ class QueueProfiles extends ProfileBinder {
    * @returns {?ProfilePlanet}
    */
   body(t, profile) {
-    const id = this.bodyIds[t.tab];
-    return profile && id ? profile[t.bodies].find((b) => b.id === id) || null : null;
+    return this.bodySelects[t.tab].entity(profile);
   }
 
   // -------------------------------------------------------------------------
@@ -124,7 +124,7 @@ class QueueProfiles extends ProfileBinder {
   showProfile(profile) {
     QUEUE_ACCOUNT_FIELDS.forEach((f) => f.write(options.prm, getProfileValue(profile.account, f.key)));
     QUEUE_TABS.forEach((t) => {
-      this.bodyIds[t.tab] = this.bodySelects[t.tab].render(profile, this.bodyIds[t.tab]);
+      this.bodySelects[t.tab].render(profile);
       this.showBody(t, profile);
     });
     this.app.refreshBoth();
@@ -158,7 +158,6 @@ class QueueProfiles extends ProfileBinder {
   }
 
   restoreOwn() {
-    this.bodyIds = { [PLANET_TAB]: null, [MOON_TAB]: null };
     this.speed?.detach();
     QUEUE_TABS.forEach((t) => this.bodySelects[t.tab].hide());
     super.restoreOwn();
@@ -205,17 +204,10 @@ class QueueProfiles extends ProfileBinder {
     if (!profile) return;
     // Whatever was typed for the body shown so far is saved first.
     this.save();
-    const id = this.bodySelects[t.tab].chosen(profile);
-    this.bodyIds[t.tab] = id;
+    this.bodySelects[t.tab].pick(profile);
     /** @type {QueueTab[]} */
     const shown = [t];
-    const moonTab = QUEUE_TABS[1];
-    const moon = t.tab === PLANET_TAB ? this.bodySelects[MOON_TAB].moonOfPlanet(profile) : undefined;
-    if (moon && moon.id !== this.bodyIds[MOON_TAB]) {
-      this.bodyIds[MOON_TAB] = moon.id;
-      this.bodySelects[MOON_TAB].choose(profile, moon.id);
-      shown.push(moonTab);
-    }
+    if (t.tab === PLANET_TAB && this.bodySelects[MOON_TAB].follow(profile)) shown.push(QUEUE_TABS[1]);
     this.whileApplying(() => {
       shown.forEach((s) => this.showBody(s, profile));
       this.app.refreshBoth();
