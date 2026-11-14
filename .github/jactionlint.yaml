@@ -16,6 +16,9 @@ ignores:
       Bash(node:*) and Bash(npx:*) are what the non-browser gate needs (lint,
       typecheck, unit tests). Only the owner and collaborators can trigger a run
       (see the dangerous-triggers entry), so outsiders cannot steer the agent.
+      Injected text in an issue or diff still could, so the repository ruleset
+      "main: admin only" lets nothing but an admin update main: the agent can
+      push a branch and open a PR, never deploy.
     expires: "2027-05-14"
 
   - rule: github-app
