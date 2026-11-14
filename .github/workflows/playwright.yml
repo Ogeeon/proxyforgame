@@ -21,6 +21,10 @@ on:
   # so it dispatches this workflow on the PR branch instead.
   workflow_dispatch:
 
+# The job only reads the repository; the artifact upload uses its own runtime token.
+permissions:
+  contents: read
+
 jobs:
   test:
     strategy:
@@ -31,6 +35,7 @@ jobs:
     # Pinned: ubuntu-latest moved to 26.04 on 2026-10-22 and Playwright has no
     # chromium build for it ("does not support chromium on ubuntu26.04-x64").
     runs-on: ubuntu-24.04
+    timeout-minutes: 45
     env:
       # Must be PFG_BASE_URL - that is the name playwright.config.js reads.
       PFG_BASE_URL: 'http://localhost:8000'
@@ -141,7 +146,7 @@ jobs:
 
           # Wait for server to respond
           echo "------ Waiting for server... ------"
-          for i in {1..30}; do
+          for _ in {1..30}; do
             if curl -s -I http://localhost:8000 | grep -q "200\|302"; then
               echo "Server is up!"
               break

@@ -43,6 +43,7 @@ jobs:
         (github.event.issue.author_association == 'OWNER' ||
          github.event.issue.author_association == 'COLLABORATOR'))
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     permissions:
       # These govern the built-in GITHUB_TOKEN, which is only the fallback here - the
       # push and the PR normally go through the App token minted below. Write is kept

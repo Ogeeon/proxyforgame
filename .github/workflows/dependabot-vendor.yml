@@ -31,6 +31,7 @@ jobs:
       github.event.pull_request.user.login == 'dependabot[bot]' &&
       startsWith(github.head_ref, 'dependabot/npm_and_yarn/')
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     permissions:
       contents: write   # pushing the regenerated files
       actions: write    # dispatching CI on the new head

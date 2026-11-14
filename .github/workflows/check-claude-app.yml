@@ -17,6 +17,7 @@ on:
 jobs:
   check:
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     # The built-in GITHUB_TOKEN is not used at all here - everything runs on the App token.
     permissions: {}
     steps:
@@ -50,6 +51,7 @@ jobs:
           GH_TOKEN: ${{ steps.mint.outputs.token }}
           INSTALLATION_ID: ${{ steps.mint.outputs.installation-id }}
         run: |
+          set -o pipefail
           echo "Installation id: $INSTALLATION_ID"
           echo "Repositories this token can reach:"
           gh api /installation/repositories --jq '.repositories[].full_name' | sed 's/^/  - /'
