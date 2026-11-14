@@ -1,0 +1,9 @@
+# hadolint configuration (`make docker-lint`). Fails on every level, info included.
+failure-threshold: info
+
+ignored:
+  # Pinning apt package versions: the image is for local development only (see
+  # docs/adr/0002-docker-local-dev.md) and follows the php:8.5-cli base, whose
+  # Debian release decides which versions exist - a pinned one would break the
+  # build at the next base update without making anything safer.
+  - DL3008

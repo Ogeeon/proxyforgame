@@ -72,7 +72,7 @@ PW ?= node node_modules/@playwright/test/cli.js
         docker-up docker-down docker-logs \
         test test-unit test-e2e test-e2e-ui test-one report \
         check audit quality coverage db-validate lint typecheck php-version-check \
-        actions-lint \
+        actions-lint shell-lint docker-lint \
         changelog-validate changelog-release \
         tsconfigs tsconfigs-check vendor vendor-check \
         html-render html-validate html-audit \
@@ -164,7 +164,7 @@ report: ## Open the last Playwright HTML report
 # `make check` always means "you broke something". The two reporters below
 # both exit non-zero on pre-existing issues, so they live in `audit` instead and
 # are prefixed with `-` there to keep one failure from hiding the other.
-check: php-version-check changelog-validate i18n-validate actions-lint lint typecheck tsconfigs-check vendor-check html-validate test ## Green gate - what must pass before a commit
+check: php-version-check changelog-validate i18n-validate actions-lint shell-lint docker-lint lint typecheck tsconfigs-check vendor-check html-validate test ## Green gate - what must pass before a commit
 
 audit: ## Advisory reports; these flag pre-existing issues and do not gate
 	-node scripts/check-test-coverage.js
@@ -179,6 +179,19 @@ lint: ## Run ESLint over every JS file
 # warnings too - without it only error-level findings change the exit code.
 actions-lint: ## Lint the GitHub Actions workflows and dependabot.yml (jactionlint)
 	jactionlint --strict-exit --no-color
+
+# Every tracked bash script. Listed by hand because most have no extension and
+# cmd.exe cannot glob them - add a new script here. Workflow `run:` blocks are
+# shellchecked by jactionlint.
+SHELL_SCRIPTS := deploy/pfg-changelog-apply deploy/pfg-cron-run deploy/pfg-migrate \
+                 deploy/pfg-notify deploy/pfg-sync deploy/watchdog.sh \
+                 scripts/mcp-stats.sh scripts/pfg-ssh.sh
+
+shell-lint: ## Lint the deploy and helper bash scripts (ShellCheck)
+	shellcheck $(SHELL_SCRIPTS)
+
+docker-lint: ## Lint the local-dev Dockerfile (Hadolint, config in .hadolint.yaml)
+	hadolint docker/php/Dockerfile
 
 typecheck: ## Type-check every JS file in the browser and Node projects
 	npm run typecheck --silent
