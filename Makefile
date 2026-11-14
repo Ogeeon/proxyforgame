@@ -72,7 +72,7 @@ PW ?= node node_modules/@playwright/test/cli.js
         docker-up docker-down docker-logs \
         test test-unit test-e2e test-e2e-ui test-one report \
         check audit quality coverage db-validate lint typecheck php-version-check \
-        secrets vulns actions-lint shell-lint docker-lint \
+        secrets vulns actions-lint shell-lint docker-lint php-lint php-baseline \
         changelog-validate changelog-release \
         tsconfigs tsconfigs-check vendor vendor-check \
         html-render html-validate html-audit \
@@ -164,7 +164,7 @@ report: ## Open the last Playwright HTML report
 # `make check` always means "you broke something". The two reporters below
 # both exit non-zero on pre-existing issues, so they live in `audit` instead and
 # are prefixed with `-` there to keep one failure from hiding the other.
-check: php-version-check changelog-validate i18n-validate secrets actions-lint shell-lint docker-lint lint typecheck tsconfigs-check vendor-check html-validate test ## Green gate - what must pass before a commit
+check: php-version-check changelog-validate i18n-validate secrets actions-lint shell-lint docker-lint php-lint lint typecheck tsconfigs-check vendor-check html-validate test ## Green gate - what must pass before a commit
 
 audit: ## Advisory reports; these flag pre-existing issues and do not gate
 	-node scripts/check-test-coverage.js
@@ -197,6 +197,18 @@ docker-lint: ## Lint the local-dev Dockerfile (Hadolint, config in .hadolint.yam
 # the uncommitted and the staged changes, so a key is caught before it is
 # committed too. The allowlists in .betterleaks.toml name exact values.
 BETTERLEAKS := betterleaks git . -c .betterleaks.toml --redact --no-banner --log-level warn
+# Mago, configured in mago.toml. Both commands fail on warnings; what the code
+# base already had is in mago-lint-baseline.toml and mago-analyze-baseline.toml.
+php-lint: ## Lint and statically analyse the PHP (Mago, new findings only)
+	mago lint
+	mago analyze
+
+# Rewrites both baselines from the current findings. For shrinking them after a
+# fix - a baseline that grows hides a new finding, so review the diff.
+php-baseline: ## Regenerate the Mago baselines (review the diff: they should only shrink)
+	mago lint --generate-baseline --baseline mago-lint-baseline.toml
+	mago analyze --generate-baseline --baseline mago-analyze-baseline.toml
+
 # Not part of `check`: the answer depends on the advisory database, not on the
 # change, so a new advisory would block an unrelated commit. The Security
 # workflow runs it on every push and pull request and weekly; exceptions go in

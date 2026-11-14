@@ -1,0 +1,2251 @@
+variant = "loose"
+
+[[issues]]
+file = "deploy/webhook.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #1 of `escapeshellarg`: expected `string`, but found `mixed`."
+count = 1
+
+[[issues]]
+file = "deploy/webhook.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #1 of `file_put_contents`: expected `string`, but found `mixed`."
+count = 1
+
+[[issues]]
+file = "deploy/webhook.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #1 of `http_response_code`: expected `int`, but found `mixed`."
+count = 1
+
+[[issues]]
+file = "deploy/webhook.php"
+code = "mixed-assignment"
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
+count = 1
+
+[[issues]]
+file = "deploy/webhook.php"
+code = "mixed-assignment"
+message = "Assigning `nonnull` type to a variable may lead to unexpected behavior."
+count = 4
+
+[[issues]]
+file = "deploy/webhook.php"
+code = "mixed-operand"
+message = "Invalid left operand: type `mixed` cannot be reliably used in string concatenation."
+count = 1
+
+[[issues]]
+file = "deploy/webhook.php"
+code = "mixed-operand"
+message = "Invalid middle operand: type `mixed` cannot be reliably used in string concatenation."
+count = 1
+
+[[issues]]
+file = "deploy/webhook.php"
+code = "mixed-operand"
+message = "Invalid middle operand: type `nonnull` cannot be reliably used in string concatenation."
+count = 1
+
+[[issues]]
+file = "deploy/webhook.php"
+code = "mixed-operand"
+message = "Invalid right operand: type `nonnull` cannot be reliably used in string concatenation."
+count = 1
+
+[[issues]]
+file = "deploy/webhook.php"
+code = "possibly-false-argument"
+message = "Argument #1 of function `json_decode` is possibly `false`, but parameter type `string` does not accept it."
+count = 1
+
+[[issues]]
+file = "deploy/webhook.php"
+code = "possibly-false-argument"
+message = "Argument #2 of function `hash_hmac` is possibly `false`, but parameter type `string` does not accept it."
+count = 1
+
+[[issues]]
+file = "get_population.php"
+code = "duplicate-definition"
+message = "Function `loadEnv` is already defined elsewhere."
+count = 1
+
+[[issues]]
+file = "get_population.php"
+code = "invalid-iterator"
+message = "The expression provided to `foreach` is not iterable. It resolved to type `mixed`, which is not iterable."
+count = 3
+
+[[issues]]
+file = "get_population.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #1 of `array_keys`: expected `array<('K.array_keys() extends array-key), ('V.array_keys() extends mixed)>`, but found `mixed`."
+count = 1
+
+[[issues]]
+file = "get_population.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #1 of `ksort`: expected `array<('K.ksort() extends array-key), ('V.ksort() extends mixed)>`, but found `mixed`."
+count = 1
+
+[[issues]]
+file = "get_population.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #2 of `preg_match`: expected `string`, but found `mixed`."
+count = 1
+
+[[issues]]
+file = "get_population.php"
+code = "mixed-array-access"
+message = "Unsafe array access on type `mixed`."
+count = 7
+
+[[issues]]
+file = "get_population.php"
+code = "mixed-array-access"
+message = "Unsafe array access on type `nonnull`."
+count = 6
+
+[[issues]]
+file = "get_population.php"
+code = "mixed-assignment"
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
+count = 12
+
+[[issues]]
+file = "get_population.php"
+code = "mixed-method-access"
+message = "Attempting to call method `execute()` on a non-object type (`mixed`)."
+count = 1
+
+[[issues]]
+file = "get_population.php"
+code = "mixed-method-access"
+message = "Attempting to call method `fetchAll()` on a non-object type (`mixed`)."
+count = 1
+
+[[issues]]
+file = "get_population.php"
+code = "mixed-method-access"
+message = "Attempting to call method `prepare()` on a non-object type (`mixed`)."
+count = 1
+
+[[issues]]
+file = "get_population.php"
+code = "mixed-method-access"
+message = "Attempting to call method `query()` on a non-object type (`mixed`)."
+count = 1
+
+[[issues]]
+file = "get_population.php"
+code = "mixed-property-access"
+message = "Attempting to access property `$planet` on a non-object type (`mixed`)."
+count = 1
+
+[[issues]]
+file = "get_population.php"
+code = "mixed-property-access"
+message = "Attempting to access property `$player` on a non-object type (`mixed`)."
+count = 1
+
+[[issues]]
+file = "get_population.php"
+code = "non-documented-property"
+message = "Ambiguous property access: $fleetIgnoreEmptySystems on class `SimpleXMLElement`."
+count = 1
+
+[[issues]]
+file = "get_population.php"
+code = "non-documented-property"
+message = "Ambiguous property access: $fleetIgnoreInactiveSystems on class `SimpleXMLElement`."
+count = 1
+
+[[issues]]
+file = "get_population.php"
+code = "possibly-false-argument"
+message = "Argument #2 of method `PDO::__construct` is possibly `false`, but parameter type `null|string` does not accept it."
+count = 1
+
+[[issues]]
+file = "get_population.php"
+code = "possibly-false-argument"
+message = "Argument #3 of method `PDO::__construct` is possibly `false`, but parameter type `null|string` does not accept it."
+count = 1
+
+[[issues]]
+file = "get_population.php"
+code = "reference-to-undefined-variable"
+message = "Reference created from a previously undefined variable `$matches`."
+count = 1
+
+[[issues]]
+file = "scripts/dev-router.php"
+code = "possibly-false-argument"
+message = "Argument #1 of function `str_ends_with` is possibly `false`, but parameter type `string` does not accept it."
+count = 1
+
+[[issues]]
+file = "scripts/dev-router.php"
+code = "possibly-false-argument"
+message = "Argument #1 of function `str_starts_with` is possibly `false`, but parameter type `string` does not accept it."
+count = 1
+
+[[issues]]
+file = "scripts/dev-router.php"
+code = "possibly-false-argument"
+message = "Argument #2 of function `preg_match` is possibly `false`, but parameter type `string` does not accept it."
+count = 4
+
+[[issues]]
+file = "scripts/dev-router.php"
+code = "possibly-false-argument"
+message = "Argument #2 of function `str_starts_with` is possibly `false`, but parameter type `string` does not accept it."
+count = 1
+
+[[issues]]
+file = "scripts/dev-router.php"
+code = "possibly-false-operand"
+message = "Possibly false left operand used in string concatenation (type `false|string`)."
+count = 2
+
+[[issues]]
+file = "scripts/dev-router.php"
+code = "possibly-false-operand"
+message = "Possibly false right operand used in string concatenation (type `false|string`)."
+count = 1
+
+[[issues]]
+file = "scripts/dev-router.php"
+code = "reference-to-undefined-variable"
+message = "Reference created from a previously undefined variable `$m`."
+count = 1
+
+[[issues]]
+file = "scripts/dump-db-columns.php"
+code = "invalid-global"
+message = "The 'global' keyword has no effect in the global scope."
+count = 1
+
+[[issues]]
+file = "scripts/dump-db-columns.php"
+code = "mixed-assignment"
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
+count = 1
+
+[[issues]]
+file = "uni.list.cron.php"
+code = "duplicate-definition"
+message = "Function `loadEnv` is already defined elsewhere."
+count = 1
+
+[[issues]]
+file = "uni.list.cron.php"
+code = "invalid-iterator"
+message = "The expression provided to `foreach` is not iterable. It resolved to type `mixed`, which is not iterable."
+count = 2
+
+[[issues]]
+file = "uni.list.cron.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #1 of `count`: expected `Countable|array<array-key, mixed>`, but found `mixed`."
+count = 1
+
+[[issues]]
+file = "uni.list.cron.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #1 of `json_decode`: expected `string`, but found `mixed`."
+count = 1
+
+[[issues]]
+file = "uni.list.cron.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #1 of `mysqli_errno`: expected `mysqli`, but found `mixed`."
+count = 1
+
+[[issues]]
+file = "uni.list.cron.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #1 of `mysqli_error`: expected `mysqli`, but found `mixed`."
+count = 1
+
+[[issues]]
+file = "uni.list.cron.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #1 of `mysqli_query`: expected `mysqli`, but found `mixed`."
+count = 1
+
+[[issues]]
+file = "uni.list.cron.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #2 of `mysqli_query`: expected `string`, but found `mixed`."
+count = 1
+
+[[issues]]
+file = "uni.list.cron.php"
+code = "mixed-array-access"
+message = "Unsafe array access on type `mixed`."
+count = 8
+
+[[issues]]
+file = "uni.list.cron.php"
+code = "mixed-array-assignment"
+message = "Unsafe array assignment on type `mixed`."
+count = 2
+
+[[issues]]
+file = "uni.list.cron.php"
+code = "mixed-array-index"
+message = "Invalid index type `mixed` used in array assignment on `array<array-key, non-empty-array<truthy-string, mixed>>`."
+count = 1
+
+[[issues]]
+file = "uni.list.cron.php"
+code = "mixed-assignment"
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
+count = 7
+
+[[issues]]
+file = "uni.list.cron.php"
+code = "mixed-operand"
+message = "Invalid left operand: type `mixed` cannot be reliably used in string concatenation."
+count = 1
+
+[[issues]]
+file = "uni.list.cron.php"
+code = "mixed-operand"
+message = "Invalid middle operand: type `mixed` cannot be reliably used in string concatenation."
+count = 2
+
+[[issues]]
+file = "uni.list.cron.php"
+code = "mixed-operand"
+message = "Invalid right operand: type `mixed` cannot be reliably used in string concatenation."
+count = 1
+
+[[issues]]
+file = "uni.list.cron.php"
+code = "possibly-false-argument"
+message = "Argument #1 of function `mysqli_close` is possibly `false`, but parameter type `mysqli` does not accept it."
+count = 1
+
+[[issues]]
+file = "uni.list.cron.php"
+code = "possibly-false-argument"
+message = "Argument #1 of function `mysqli_connect` is possibly `false`, but parameter type `null|string` does not accept it."
+count = 1
+
+[[issues]]
+file = "uni.list.cron.php"
+code = "possibly-false-argument"
+message = "Argument #1 of function `mysqli_set_charset` is possibly `false`, but parameter type `mysqli` does not accept it."
+count = 1
+
+[[issues]]
+file = "uni.list.cron.php"
+code = "possibly-false-argument"
+message = "Argument #2 of function `mysqli_connect` is possibly `false`, but parameter type `null|string` does not accept it."
+count = 1
+
+[[issues]]
+file = "uni.list.cron.php"
+code = "possibly-false-argument"
+message = "Argument #3 of function `mysqli_connect` is possibly `false`, but parameter type `null|string` does not accept it."
+count = 1
+
+[[issues]]
+file = "uni.list.cron.php"
+code = "possibly-false-argument"
+message = "Argument #4 of function `mysqli_connect` is possibly `false`, but parameter type `null|string` does not accept it."
+count = 1
+
+[[issues]]
+file = "uni.list.cron.php"
+code = "redundant-condition"
+message = "This condition (type `true`) will always evaluate to true."
+count = 1
+
+[[issues]]
+file = "uni.list.cron.php"
+code = "redundant-logical-operation"
+message = "Redundant `||` operation: left operand is always falsy and right operand is always truthy."
+count = 1
+
+[[issues]]
+file = "www/Intl.php"
+code = "invalid-iterator"
+message = "The expression provided to `foreach` is not iterable. It resolved to type `mixed`, which is not iterable."
+count = 1
+
+[[issues]]
+file = "www/Intl.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #1 of `array_merge`: expected `array<('K.array_merge() extends array-key), ('V.array_merge() extends mixed)>`, but found `nonnull`."
+count = 1
+
+[[issues]]
+file = "www/Intl.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #2 of `array_merge`: expected `array<('K.array_merge() extends array-key), ('V.array_merge() extends mixed)>`, but found `mixed`."
+count = 1
+
+[[issues]]
+file = "www/Intl.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #2 of `in_array`: expected `array<array-key, ('V.in_array() extends mixed)>`, but found `mixed`."
+count = 1
+
+[[issues]]
+file = "www/Intl.php"
+code = "mixed-array-assignment"
+message = "Unsafe array assignment on type `mixed`."
+count = 1
+
+[[issues]]
+file = "www/Intl.php"
+code = "mixed-array-index"
+message = "Invalid index type `mixed` used in array assignment on `mixed`."
+count = 1
+
+[[issues]]
+file = "www/Intl.php"
+code = "mixed-assignment"
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
+count = 1
+
+[[issues]]
+file = "www/Intl.php"
+code = "mixed-assignment"
+message = "Assigning `nonnull` type to a variable may lead to unexpected behavior."
+count = 1
+
+[[issues]]
+file = "www/Intl.php"
+code = "mixed-operand"
+message = "Invalid middle operand: type `mixed` cannot be reliably used in string concatenation."
+count = 2
+
+[[issues]]
+file = "www/Intl.php"
+code = "possibly-false-argument"
+message = "Argument #1 of function `json_decode` is possibly `false`, but parameter type `string` does not accept it."
+count = 1
+
+[[issues]]
+file = "www/Intl.php"
+code = "possibly-false-iterator"
+message = "Expression being iterated (type `false|list<non-empty-string>`) might be `false` at runtime."
+count = 1
+
+[[issues]]
+file = "www/Intl.php"
+code = "possibly-invalid-array-access"
+message = "Cannot perform array access on value of type `falsy-mixed`."
+count = 1
+
+[[issues]]
+file = "www/Intl.php"
+code = "too-few-arguments"
+message = "Too few arguments provided for method `Intl::getTranslations`."
+count = 1
+
+[[issues]]
+file = "www/ajax.php"
+code = "implicit-to-string-cast"
+message = "Implicit conversion to `string` for right operand via `Throwable::__toString()`."
+count = 1
+
+[[issues]]
+file = "www/api/antispam.inc.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #1 of `getenv`: expected `null|string`, but found `mixed`."
+count = 1
+
+[[issues]]
+file = "www/api/antispam.inc.php"
+code = "mixed-array-access"
+message = "Unsafe array access on type `mixed`."
+count = 2
+
+[[issues]]
+file = "www/api/antispam.inc.php"
+code = "mixed-array-access"
+message = "Unsafe array access on type `truthy-mixed`."
+count = 2
+
+[[issues]]
+file = "www/api/antispam.inc.php"
+code = "mixed-assignment"
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
+count = 3
+
+[[issues]]
+file = "www/api/antispam.inc.php"
+code = "mixed-operand"
+message = "Invalid left operand: type `nonnull` cannot be reliably used in string concatenation."
+count = 1
+
+[[issues]]
+file = "www/api/antispam.inc.php"
+code = "mixed-operand"
+message = "Left operand in `<` comparison has `mixed` type."
+count = 1
+
+[[issues]]
+file = "www/api/antispam.inc.php"
+code = "mixed-operand"
+message = "Right operand in `>=` comparison has `mixed` type."
+count = 2
+
+[[issues]]
+file = "www/api/antispam.inc.php"
+code = "redundant-logical-operation"
+message = "Redundant `&&` operation: left operand is evaluated and right operand is always truthy."
+count = 1
+
+[[issues]]
+file = "www/api/changelog.inc.php"
+code = "mixed-assignment"
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
+count = 3
+
+[[issues]]
+file = "www/api/health.inc.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #1 of `filemtime`: expected `string`, but found `mixed`."
+count = 1
+
+[[issues]]
+file = "www/api/health.inc.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #1 of `strtotime`: expected `string`, but found `nonnull`."
+count = 1
+
+[[issues]]
+file = "www/api/health.inc.php"
+code = "mixed-assignment"
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
+count = 2
+
+[[issues]]
+file = "www/api/health.inc.php"
+code = "mixed-operand"
+message = "Invalid left operand: type `mixed` cannot be reliably used in string concatenation."
+count = 4
+
+[[issues]]
+file = "www/api/health.inc.php"
+code = "mixed-operand"
+message = "Invalid right operand: type `mixed` cannot be reliably used in string concatenation."
+count = 1
+
+[[issues]]
+file = "www/api/health.inc.php"
+code = "reference-to-undefined-variable"
+message = "Reference created from a previously undefined variable `$m`."
+count = 2
+
+[[issues]]
+file = "www/api/http.inc.php"
+code = "invalid-callable"
+message = "Expression of type `mixed` cannot be called as a function or method."
+count = 1
+
+[[issues]]
+file = "www/api/http.inc.php"
+code = "invalid-destructuring-source"
+message = "Invalid destructuring assignment: Cannot unpack type `mixed` into variables."
+count = 1
+
+[[issues]]
+file = "www/api/http.inc.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #1 of `Exception::__construct`: expected `string`, but found `mixed`."
+count = 1
+
+[[issues]]
+file = "www/api/http.inc.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #1 of `http_response_code`: expected `int`, but found `mixed`."
+count = 1
+
+[[issues]]
+file = "www/api/http.inc.php"
+code = "mixed-assignment"
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
+count = 3
+
+[[issues]]
+file = "www/api/http.inc.php"
+code = "mixed-operand"
+message = "Invalid right operand: type `mixed` cannot be reliably used in string concatenation."
+count = 1
+
+[[issues]]
+file = "www/api/interaction-timing.inc.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #1 of `preg_match`: expected `string`, but found `mixed`."
+count = 1
+
+[[issues]]
+file = "www/api/interaction-timing.inc.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #2 of `preg_match`: expected `string`, but found `mixed`."
+count = 1
+
+[[issues]]
+file = "www/api/interaction-timing.inc.php"
+code = "mixed-array-access"
+message = "Unsafe array access on type `mixed`."
+count = 1
+
+[[issues]]
+file = "www/api/interaction-timing.inc.php"
+code = "mixed-array-access"
+message = "Unsafe array access on type `truthy-mixed`."
+count = 1
+
+[[issues]]
+file = "www/api/interaction-timing.inc.php"
+code = "mixed-assignment"
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
+count = 6
+
+[[issues]]
+file = "www/api/interaction-timing.inc.php"
+code = "mixed-operand"
+message = "Casting `mixed` to `bool`."
+count = 1
+
+[[issues]]
+file = "www/api/interaction-timing.inc.php"
+code = "mixed-operand"
+message = "Left operand in `<` comparison has `mixed` type."
+count = 2
+
+[[issues]]
+file = "www/api/interaction-timing.inc.php"
+code = "mixed-operand"
+message = "Left operand in `>` comparison has `mixed` type."
+count = 2
+
+[[issues]]
+file = "www/api/interaction-timing.inc.php"
+code = "mixed-operand"
+message = "Right operand in `<` comparison has `mixed` type."
+count = 2
+
+[[issues]]
+file = "www/api/interaction-timing.inc.php"
+code = "mixed-operand"
+message = "Right operand in `>=` comparison has `mixed` type."
+count = 1
+
+[[issues]]
+file = "www/api/interaction-timing.inc.php"
+code = "mixed-operand"
+message = "Right operand in `>` comparison has `mixed` type."
+count = 2
+
+[[issues]]
+file = "www/api/mail.inc.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #1 of `reportValidation`: expected `string`, but found `mixed`."
+count = 1
+
+[[issues]]
+file = "www/api/mail.inc.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #2 of `reportValidation`: expected `string`, but found `mixed`."
+count = 1
+
+[[issues]]
+file = "www/api/mail.inc.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #3 of `preg_replace`: expected `array<('K.preg_replace() extends array-key), string>|string`, but found `mixed`."
+count = 1
+
+[[issues]]
+file = "www/api/mail.inc.php"
+code = "mixed-assignment"
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
+count = 7
+
+[[issues]]
+file = "www/api/mail.inc.php"
+code = "mixed-operand"
+message = "Invalid left operand: type `mixed` cannot be reliably used in string concatenation."
+count = 1
+
+[[issues]]
+file = "www/api/mail.inc.php"
+code = "mixed-operand"
+message = "Invalid middle operand: type `mixed` cannot be reliably used in string concatenation."
+count = 2
+
+[[issues]]
+file = "www/api/mail.inc.php"
+code = "mixed-operand"
+message = "Invalid middle operand: type `nonnull` cannot be reliably used in string concatenation."
+count = 3
+
+[[issues]]
+file = "www/api/mail.inc.php"
+code = "reference-to-undefined-variable"
+message = "Reference created from a previously undefined variable `$errno`."
+count = 1
+
+[[issues]]
+file = "www/api/mail.inc.php"
+code = "reference-to-undefined-variable"
+message = "Reference created from a previously undefined variable `$errstr`."
+count = 1
+
+[[issues]]
+file = "www/api/mcp-usage.inc.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #1 of `preg_match`: expected `string`, but found `mixed`."
+count = 1
+
+[[issues]]
+file = "www/api/mcp-usage.inc.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #2 of `hash_equals`: expected `string`, but found `nonnull`."
+count = 1
+
+[[issues]]
+file = "www/api/mcp-usage.inc.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #3 of `substr`: expected `int|null`, but found `mixed`."
+count = 1
+
+[[issues]]
+file = "www/api/mcp-usage.inc.php"
+code = "mixed-assignment"
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
+count = 12
+
+[[issues]]
+file = "www/api/mcp-usage.inc.php"
+code = "mixed-operand"
+message = "Left operand in binary operation has type `mixed`."
+count = 2
+
+[[issues]]
+file = "www/api/mcp-usage.inc.php"
+code = "mixed-operand"
+message = "Right operand in `<=` comparison has `mixed` type."
+count = 1
+
+[[issues]]
+file = "www/api/mcp-usage.inc.php"
+code = "mixed-operand"
+message = "Right operand in `>=` comparison has `mixed` type."
+count = 1
+
+[[issues]]
+file = "www/api/mcp-usage.inc.php"
+code = "possibly-null-argument"
+message = "Argument #1 of function `trim` is possibly `null`, but parameter type `string` does not accept it."
+count = 1
+
+[[issues]]
+file = "www/api/populated-systems.inc.php"
+code = "invalid-destructuring-source"
+message = "Invalid destructuring assignment: Cannot unpack type `mixed` into variables."
+count = 1
+
+[[issues]]
+file = "www/api/populated-systems.inc.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #1 of `json_decode`: expected `string`, but found `mixed`."
+count = 2
+
+[[issues]]
+file = "www/api/populated-systems.inc.php"
+code = "mixed-array-access"
+message = "Unsafe array access on type `mixed`."
+count = 4
+
+[[issues]]
+file = "www/api/populated-systems.inc.php"
+code = "mixed-array-access"
+message = "Unsafe array access on type `truthy-mixed`."
+count = 1
+
+[[issues]]
+file = "www/api/populated-systems.inc.php"
+code = "mixed-assignment"
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
+count = 4
+
+[[issues]]
+file = "www/api/server-data.inc.php"
+code = "invalid-destructuring-source"
+message = "Invalid destructuring assignment: Cannot unpack type `mixed` into variables."
+count = 1
+
+[[issues]]
+file = "www/api/server-data.inc.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #2 of `preg_match`: expected `string`, but found `nonnull`."
+count = 1
+
+[[issues]]
+file = "www/api/server-data.inc.php"
+code = "mixed-assignment"
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
+count = 5
+
+[[issues]]
+file = "www/api/server-data.inc.php"
+code = "mixed-property-access"
+message = "Attempting to access property `$debrisFactorDef` on a non-object type (`mixed`)."
+count = 1
+
+[[issues]]
+file = "www/api/server-data.inc.php"
+code = "mixed-property-access"
+message = "Attempting to access property `$debrisFactor` on a non-object type (`mixed`)."
+count = 1
+
+[[issues]]
+file = "www/api/server-data.inc.php"
+code = "mixed-property-access"
+message = "Attempting to access property `$deuteriumInDebris` on a non-object type (`mixed`)."
+count = 1
+
+[[issues]]
+file = "www/api/server-data.inc.php"
+code = "mixed-property-access"
+message = "Attempting to access property `$donutGalaxy` on a non-object type (`mixed`)."
+count = 1
+
+[[issues]]
+file = "www/api/server-data.inc.php"
+code = "mixed-property-access"
+message = "Attempting to access property `$donutSystem` on a non-object type (`mixed`)."
+count = 1
+
+[[issues]]
+file = "www/api/server-data.inc.php"
+code = "mixed-property-access"
+message = "Attempting to access property `$fleetIgnoreEmptySystems` on a non-object type (`mixed`)."
+count = 1
+
+[[issues]]
+file = "www/api/server-data.inc.php"
+code = "mixed-property-access"
+message = "Attempting to access property `$fleetIgnoreInactiveSystems` on a non-object type (`mixed`)."
+count = 1
+
+[[issues]]
+file = "www/api/server-data.inc.php"
+code = "mixed-property-access"
+message = "Attempting to access property `$galaxies` on a non-object type (`mixed`)."
+count = 1
+
+[[issues]]
+file = "www/api/server-data.inc.php"
+code = "mixed-property-access"
+message = "Attempting to access property `$globalDeuteriumSaveFactor` on a non-object type (`mixed`)."
+count = 1
+
+[[issues]]
+file = "www/api/server-data.inc.php"
+code = "mixed-property-access"
+message = "Attempting to access property `$probeCargo` on a non-object type (`mixed`)."
+count = 1
+
+[[issues]]
+file = "www/api/server-data.inc.php"
+code = "mixed-property-access"
+message = "Attempting to access property `$researchDurationDivisor` on a non-object type (`mixed`)."
+count = 1
+
+[[issues]]
+file = "www/api/server-data.inc.php"
+code = "mixed-property-access"
+message = "Attempting to access property `$speedFleetHolding` on a non-object type (`mixed`)."
+count = 1
+
+[[issues]]
+file = "www/api/server-data.inc.php"
+code = "mixed-property-access"
+message = "Attempting to access property `$speedFleetPeaceful` on a non-object type (`mixed`)."
+count = 1
+
+[[issues]]
+file = "www/api/server-data.inc.php"
+code = "mixed-property-access"
+message = "Attempting to access property `$speedFleetWar` on a non-object type (`mixed`)."
+count = 1
+
+[[issues]]
+file = "www/api/server-data.inc.php"
+code = "mixed-property-access"
+message = "Attempting to access property `$speed` on a non-object type (`mixed`)."
+count = 1
+
+[[issues]]
+file = "www/api/server-data.inc.php"
+code = "mixed-property-access"
+message = "Attempting to access property `$systems` on a non-object type (`mixed`)."
+count = 1
+
+[[issues]]
+file = "www/api/server-data.inc.php"
+code = "mixed-property-access"
+message = "Attempting to access property `$topScore` on a non-object type (`mixed`)."
+count = 1
+
+[[issues]]
+file = "www/api/server-data.inc.php"
+code = "mixed-property-access"
+message = "Attempting to access property `$warriorBonusFuelConsumption` on a non-object type (`mixed`)."
+count = 1
+
+[[issues]]
+file = "www/api/spy-report.inc.php"
+code = "invalid-destructuring-source"
+message = "Invalid destructuring assignment: Cannot unpack type `mixed` into variables."
+count = 1
+
+[[issues]]
+file = "www/api/spy-report.inc.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #1 of `json_decode`: expected `string`, but found `mixed`."
+count = 1
+
+[[issues]]
+file = "www/api/spy-report.inc.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #1 of `rawurlencode`: expected `string`, but found `mixed`."
+count = 1
+
+[[issues]]
+file = "www/api/spy-report.inc.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #2 of `preg_match`: expected `string`, but found `mixed`."
+count = 2
+
+[[issues]]
+file = "www/api/spy-report.inc.php"
+code = "mixed-array-access"
+message = "Unsafe array access on type `nonnull`."
+count = 1
+
+[[issues]]
+file = "www/api/spy-report.inc.php"
+code = "mixed-array-assignment"
+message = "Unsafe array assignment on type `mixed`."
+count = 1
+
+[[issues]]
+file = "www/api/spy-report.inc.php"
+code = "mixed-array-assignment"
+message = "Unsafe array assignment on type `nonnull`."
+count = 1
+
+[[issues]]
+file = "www/api/spy-report.inc.php"
+code = "mixed-assignment"
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
+count = 11
+
+[[issues]]
+file = "www/api/spy-report.inc.php"
+code = "mixed-operand"
+message = "Invalid right operand: type `mixed` cannot be reliably used in string concatenation."
+count = 1
+
+[[issues]]
+file = "www/api/spy-report.inc.php"
+code = "mixed-operand"
+message = "Left operand in `==` comparison has `mixed` type."
+count = 1
+
+[[issues]]
+file = "www/api/spy-report.inc.php"
+code = "mixed-property-access"
+message = "Attempting to access property `$acs` on a non-object type (`mixed`)."
+count = 1
+
+[[issues]]
+file = "www/api/spy-report.inc.php"
+code = "mixed-property-access"
+message = "Attempting to access property `$bonusFields` on a non-object type (`mixed`)."
+count = 1
+
+[[issues]]
+file = "www/api/spy-report.inc.php"
+code = "mixed-property-access"
+message = "Attempting to access property `$debrisFactorDef` on a non-object type (`mixed`)."
+count = 1
+
+[[issues]]
+file = "www/api/spy-report.inc.php"
+code = "mixed-property-access"
+message = "Attempting to access property `$debrisFactor` on a non-object type (`mixed`)."
+count = 1
+
+[[issues]]
+file = "www/api/spy-report.inc.php"
+code = "mixed-property-access"
+message = "Attempting to access property `$defToTF` on a non-object type (`mixed`)."
+count = 1
+
+[[issues]]
+file = "www/api/spy-report.inc.php"
+code = "mixed-property-access"
+message = "Attempting to access property `$donutGalaxy` on a non-object type (`mixed`)."
+count = 1
+
+[[issues]]
+file = "www/api/spy-report.inc.php"
+code = "mixed-property-access"
+message = "Attempting to access property `$donutSystem` on a non-object type (`mixed`)."
+count = 1
+
+[[issues]]
+file = "www/api/spy-report.inc.php"
+code = "mixed-property-access"
+message = "Attempting to access property `$fleetIgnoreEmptySystems` on a non-object type (`mixed`)."
+count = 1
+
+[[issues]]
+file = "www/api/spy-report.inc.php"
+code = "mixed-property-access"
+message = "Attempting to access property `$fleetIgnoreInactiveSystems` on a non-object type (`mixed`)."
+count = 1
+
+[[issues]]
+file = "www/api/spy-report.inc.php"
+code = "mixed-property-access"
+message = "Attempting to access property `$galaxies` on a non-object type (`mixed`)."
+count = 1
+
+[[issues]]
+file = "www/api/spy-report.inc.php"
+code = "mixed-property-access"
+message = "Attempting to access property `$globalDeuteriumSaveFactor` on a non-object type (`mixed`)."
+count = 1
+
+[[issues]]
+file = "www/api/spy-report.inc.php"
+code = "mixed-property-access"
+message = "Attempting to access property `$id` on a non-object type (`mixed`)."
+count = 1
+
+[[issues]]
+file = "www/api/spy-report.inc.php"
+code = "mixed-property-access"
+message = "Attempting to access property `$name` on a non-object type (`mixed`)."
+count = 1
+
+[[issues]]
+file = "www/api/spy-report.inc.php"
+code = "mixed-property-access"
+message = "Attempting to access property `$newbieProtectionHigh` on a non-object type (`mixed`)."
+count = 1
+
+[[issues]]
+file = "www/api/spy-report.inc.php"
+code = "mixed-property-access"
+message = "Attempting to access property `$newbieProtectionLimit` on a non-object type (`mixed`)."
+count = 1
+
+[[issues]]
+file = "www/api/spy-report.inc.php"
+code = "mixed-property-access"
+message = "Attempting to access property `$probeCargo` on a non-object type (`mixed`)."
+count = 1
+
+[[issues]]
+file = "www/api/spy-report.inc.php"
+code = "mixed-property-access"
+message = "Attempting to access property `$rapidFire` on a non-object type (`mixed`)."
+count = 1
+
+[[issues]]
+file = "www/api/spy-report.inc.php"
+code = "mixed-property-access"
+message = "Attempting to access property `$repairFactor` on a non-object type (`mixed`)."
+count = 1
+
+[[issues]]
+file = "www/api/spy-report.inc.php"
+code = "mixed-property-access"
+message = "Attempting to access property `$speedFleetHolding` on a non-object type (`mixed`)."
+count = 1
+
+[[issues]]
+file = "www/api/spy-report.inc.php"
+code = "mixed-property-access"
+message = "Attempting to access property `$speedFleetPeaceful` on a non-object type (`mixed`)."
+count = 1
+
+[[issues]]
+file = "www/api/spy-report.inc.php"
+code = "mixed-property-access"
+message = "Attempting to access property `$speedFleetWar` on a non-object type (`mixed`)."
+count = 1
+
+[[issues]]
+file = "www/api/spy-report.inc.php"
+code = "mixed-property-access"
+message = "Attempting to access property `$speed` on a non-object type (`mixed`)."
+count = 1
+
+[[issues]]
+file = "www/api/spy-report.inc.php"
+code = "mixed-property-access"
+message = "Attempting to access property `$systems` on a non-object type (`mixed`)."
+count = 1
+
+[[issues]]
+file = "www/api/spy-report.inc.php"
+code = "mixed-property-access"
+message = "Attempting to access property `$timestamp` on a non-object type (`mixed`)."
+count = 1
+
+[[issues]]
+file = "www/api/spy-report.inc.php"
+code = "mixed-property-access"
+message = "Attempting to access property `$topScore` on a non-object type (`mixed`)."
+count = 1
+
+[[issues]]
+file = "www/api/spy-report.inc.php"
+code = "possibly-false-operand"
+message = "Left operand in `>` comparison might be `false` (type `false|non-negative-int`)."
+count = 2
+
+[[issues]]
+file = "www/api/spy-report.inc.php"
+code = "possibly-invalid-argument"
+message = "Possible argument type mismatch for argument #1 of `strpos`: expected `string`, but possibly received `bool|string`."
+count = 2
+
+[[issues]]
+file = "www/api/spy-report.inc.php"
+code = "redundant-isset-check"
+message = "Redundant condition: variable `$json['RESULT_CODE']` (type `nonnull`) is always considered set (not null)."
+count = 1
+
+[[issues]]
+file = "www/api/spy-report.inc.php"
+code = "redundant-isset-check"
+message = "Redundant condition: variable `$json['RESULT_DATA']` (type `nonnull`) is always considered set (not null)."
+count = 1
+
+[[issues]]
+file = "www/api/spy-report.inc.php"
+code = "reference-to-undefined-variable"
+message = "Reference created from a previously undefined variable `$m`."
+count = 1
+
+[[issues]]
+file = "www/asset-version.inc.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #2 of `hash_file`: expected `string`, but found `mixed`."
+count = 1
+
+[[issues]]
+file = "www/asset-version.inc.php"
+code = "mixed-array-index"
+message = "Invalid index type `mixed` used in array assignment on `array<array-key, string>`."
+count = 1
+
+[[issues]]
+file = "www/asset-version.inc.php"
+code = "mixed-assignment"
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
+count = 1
+
+[[issues]]
+file = "www/asset-version.inc.php"
+code = "mixed-operand"
+message = "Invalid left operand: type `mixed` cannot be reliably used in string concatenation."
+count = 1
+
+[[issues]]
+file = "www/asset-version.inc.php"
+code = "mixed-operand"
+message = "Invalid right operand: type `nonnull` cannot be reliably used in string concatenation."
+count = 1
+
+[[issues]]
+file = "www/assistants.php"
+code = "mixed-array-access"
+message = "Unsafe array access on type `mixed`."
+count = 1
+
+[[issues]]
+file = "www/assistants.php"
+code = "mixed-assignment"
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
+count = 4
+
+[[issues]]
+file = "www/db.connect.inc.php"
+code = "duplicate-definition"
+message = "Function `sqlQuery` is already defined elsewhere."
+count = 1
+
+[[issues]]
+file = "www/db.connect.inc.php"
+code = "mixed-argument"
+message = "Cannot unpack argument of type `mixed` because it is not guaranteed to be iterable."
+count = 2
+
+[[issues]]
+file = "www/db.connect.inc.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #1 of `count`: expected `Countable|array<array-key, mixed>`, but found `mixed`."
+count = 4
+
+[[issues]]
+file = "www/db.connect.inc.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #1 of `mysqli_error`: expected `mysqli`, but found `mixed`."
+count = 2
+
+[[issues]]
+file = "www/db.connect.inc.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #1 of `mysqli_prepare`: expected `mysqli`, but found `mixed`."
+count = 2
+
+[[issues]]
+file = "www/db.connect.inc.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #2 of `mysqli_prepare`: expected `string`, but found `mixed`."
+count = 2
+
+[[issues]]
+file = "www/db.connect.inc.php"
+code = "mixed-assignment"
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
+count = 2
+
+[[issues]]
+file = "www/env.inc.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #1 of `file_exists`: expected `string`, but found `mixed`."
+count = 1
+
+[[issues]]
+file = "www/env.inc.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #1 of `file`: expected `string`, but found `mixed`."
+count = 1
+
+[[issues]]
+file = "www/env.inc.php"
+code = "possibly-false-iterator"
+message = "Expression being iterated (type `array<int, string>|false`) might be `false` at runtime."
+count = 1
+
+[[issues]]
+file = "www/index.php"
+code = "mixed-assignment"
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
+count = 2
+
+[[issues]]
+file = "www/index.tpl"
+code = "possibly-invalid-argument"
+message = "The first value for `echo` might have the wrong type."
+count = 1
+
+[[issues]]
+file = "www/langs.php"
+code = "array-to-string-conversion"
+message = "Potential array in left operand of string concatenation."
+count = 1
+
+[[issues]]
+file = "www/langs.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #1 of `strlen`: expected `string`, but found `mixed`."
+count = 1
+
+[[issues]]
+file = "www/langs.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #2 of `preg_match`: expected `string`, but found `mixed`."
+count = 1
+
+[[issues]]
+file = "www/langs.php"
+code = "mixed-assignment"
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
+count = 1
+
+[[issues]]
+file = "www/langs.php"
+code = "mixed-operand"
+message = "Invalid middle operand: type `mixed` cannot be reliably used in string concatenation."
+count = 1
+
+[[issues]]
+file = "www/langs.php"
+code = "mixed-operand"
+message = "Right operand in `!=` comparison has `mixed` type."
+count = 1
+
+[[issues]]
+file = "www/langs.php"
+code = "possibly-false-argument"
+message = "Argument #1 of function `substr` is possibly `false`, but parameter type `string` does not accept it."
+count = 1
+
+[[issues]]
+file = "www/langs.php"
+code = "possibly-false-array-access"
+message = "Cannot perform array access on possibly `false` value."
+count = 4
+
+[[issues]]
+file = "www/langs.php"
+code = "possibly-null-argument"
+message = "Argument #2 of function `preg_match` is possibly `null`, but parameter type `string` does not accept it."
+count = 1
+
+[[issues]]
+file = "www/langs.php"
+code = "possibly-null-argument"
+message = "Argument #3 of function `preg_replace` is possibly `null`, but parameter type `array<('K.preg_replace() extends array-key), string>|string` does not accept it."
+count = 1
+
+[[issues]]
+file = "www/langs.php"
+code = "possibly-null-operand"
+message = "Possibly null left operand used in string concatenation (type `array<array-key, string>|null|string`)."
+count = 1
+
+[[issues]]
+file = "www/langs.php"
+code = "possibly-undefined-string-array-index"
+message = "Possibly undefined array key 'path' accessed on `array{'fragment'?: string, 'host'?: non-empty-string, 'pass'?: string, 'path'?: non-empty-string, 'port'?: int<0, 65535>, 'query'?: string, 'scheme'?: non-empty-string, 'user'?: string}`."
+count = 2
+
+[[issues]]
+file = "www/langs.php"
+code = "reference-to-undefined-variable"
+message = "Reference created from a previously undefined variable `$r`."
+count = 1
+
+[[issues]]
+file = "www/langs.tpl"
+code = "invalid-iterator"
+message = "The expression provided to `foreach` is not iterable. It resolved to type `mixed`, which is not iterable."
+count = 1
+
+[[issues]]
+file = "www/langs.tpl"
+code = "mixed-assignment"
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
+count = 2
+
+[[issues]]
+file = "www/langs.tpl"
+code = "mixed-operand"
+message = "Invalid left operand: type `mixed` cannot be reliably used in string concatenation."
+count = 1
+
+[[issues]]
+file = "www/langs.tpl"
+code = "mixed-operand"
+message = "Invalid right operand: type `mixed` cannot be reliably used in string concatenation."
+count = 1
+
+[[issues]]
+file = "www/ogame/calc/costs.php"
+code = "invalid-iterator"
+message = "The expression provided to `foreach` is not iterable. It resolved to type `mixed`, which is not iterable."
+count = 2
+
+[[issues]]
+file = "www/ogame/calc/costs.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #1 of `loadUniverseCountries`: expected `string`, but found `mixed`."
+count = 1
+
+[[issues]]
+file = "www/ogame/calc/costs.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #2 of `array_merge`: expected `array<non-negative-int, mixed>`, but found `mixed`."
+count = 1
+
+[[issues]]
+file = "www/ogame/calc/costs.php"
+code = "mixed-array-access"
+message = "Unsafe array access on type `mixed`."
+count = 8
+
+[[issues]]
+file = "www/ogame/calc/costs.php"
+code = "mixed-assignment"
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
+count = 8
+
+[[issues]]
+file = "www/ogame/calc/costs.php"
+code = "mixed-operand"
+message = "Left operand in `==` comparison has `mixed` type."
+count = 5
+
+[[issues]]
+file = "www/ogame/calc/costs.php"
+code = "mixed-operand"
+message = "Right operand in `==` comparison has `mixed` type."
+count = 1
+
+[[issues]]
+file = "www/ogame/calc/costs.php"
+code = "possibly-false-argument"
+message = "Argument #1 of function `json_decode` is possibly `false`, but parameter type `string` does not accept it."
+count = 1
+
+[[issues]]
+file = "www/ogame/calc/costs.tpl"
+code = "invalid-iterator"
+message = "The expression provided to `foreach` is not iterable. It resolved to type `mixed`, which is not iterable."
+count = 10
+
+[[issues]]
+file = "www/ogame/calc/costs.tpl"
+code = "invalid-iterator"
+message = "The expression provided to `foreach` is not iterable. It resolved to type `nonnull`, which is not iterable."
+count = 1
+
+[[issues]]
+file = "www/ogame/calc/costs.tpl"
+code = "mixed-array-assignment"
+message = "Unsafe array assignment on type `mixed`."
+count = 5
+
+[[issues]]
+file = "www/ogame/calc/costs.tpl"
+code = "mixed-assignment"
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
+count = 21
+
+[[issues]]
+file = "www/ogame/calc/costs.tpl"
+code = "mixed-operand"
+message = "Invalid middle operand: type `mixed` cannot be reliably used in string concatenation."
+count = 1
+
+[[issues]]
+file = "www/ogame/calc/costs.tpl"
+code = "mixed-operand"
+message = "Invalid right operand: type `mixed` cannot be reliably used in string concatenation."
+count = 1
+
+[[issues]]
+file = "www/ogame/calc/costs.tpl"
+code = "mixed-operand"
+message = "Left operand in `==` comparison has `mixed` type."
+count = 15
+
+[[issues]]
+file = "www/ogame/calc/costs.tpl"
+code = "mixed-operand"
+message = "Left operand in `>` comparison has `mixed` type."
+count = 1
+
+[[issues]]
+file = "www/ogame/calc/costs.tpl"
+code = "mixed-operand"
+message = "Left operand in binary operation has type `mixed`."
+count = 5
+
+[[issues]]
+file = "www/ogame/calc/costs.tpl"
+code = "possibly-invalid-argument"
+message = "The first value for `echo` might have the wrong type."
+count = 1
+
+[[issues]]
+file = "www/ogame/calc/costs.tpl"
+code = "undefined-int-array-index"
+message = "Undefined array key 5 accessed on `array{2: string('buildings-planet'), 3: string('buildings-moon'), 4: string('researches')}`."
+count = 1
+
+[[issues]]
+file = "www/ogame/calc/costs.tpl"
+code = "undefined-int-array-index"
+message = "Undefined array key 6 accessed on `array{2: string('buildings-planet'), 3: string('buildings-moon'), 4: string('researches')}`."
+count = 1
+
+[[issues]]
+file = "www/ogame/calc/expeditions.php"
+code = "less-specific-nested-argument-type"
+message = "Argument type mismatch for argument #1 of `array_column`: expected `array<array-key, array<string('upTo'), ('V.array_column() extends mixed)>|object>|list<array<string('upTo'), ('V.array_column() extends mixed)>|object>`, but provided type `array<array-key, mixed>|list<mixed>` is less specific."
+count = 1
+
+[[issues]]
+file = "www/ogame/calc/expeditions.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #1 of `array_slice`: expected `array<('K.array_slice() extends array-key), ('V.array_slice() extends mixed)>`, but found `mixed`."
+count = 1
+
+[[issues]]
+file = "www/ogame/calc/expeditions.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #1 of `floor`: expected `float|int`, but found `mixed`."
+count = 1
+
+[[issues]]
+file = "www/ogame/calc/expeditions.php"
+code = "mixed-array-access"
+message = "Unsafe array access on type `truthy-mixed`."
+count = 2
+
+[[issues]]
+file = "www/ogame/calc/expeditions.php"
+code = "mixed-assignment"
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
+count = 20
+
+[[issues]]
+file = "www/ogame/calc/expeditions.php"
+code = "mixed-operand"
+message = "Left operand in `&&` operation has `mixed` type."
+count = 1
+
+[[issues]]
+file = "www/ogame/calc/expeditions.php"
+code = "mixed-operand"
+message = "Right operand in `&&` operation has `mixed` type."
+count = 2
+
+[[issues]]
+file = "www/ogame/calc/expeditions.php"
+code = "mixed-operand"
+message = "Right operand in `<=` comparison has `mixed` type."
+count = 1
+
+[[issues]]
+file = "www/ogame/calc/expeditions.php"
+code = "possibly-false-argument"
+message = "Argument #1 of function `json_decode` is possibly `false`, but parameter type `string` does not accept it."
+count = 1
+
+[[issues]]
+file = "www/ogame/calc/expeditions.php"
+code = "possibly-invalid-argument"
+message = "Possible argument type mismatch for argument #1 of `json_decode`: expected `string`, but possibly received `non-empty-array<int|non-empty-string, array<int|non-empty-string, mixed>|string>|string`."
+count = 1
+
+[[issues]]
+file = "www/ogame/calc/expeditions.tpl"
+code = "falsable-return-statement"
+message = "Function `expeditionsJsNumber` is declared to return `string` but possibly returns 'false' (inferred as `false|string`)."
+count = 1
+
+[[issues]]
+file = "www/ogame/calc/expeditions.tpl"
+code = "invalid-iterator"
+message = "The expression provided to `foreach` is not iterable. It resolved to type `mixed`, which is not iterable."
+count = 1
+
+[[issues]]
+file = "www/ogame/calc/expeditions.tpl"
+code = "invalid-return-statement"
+message = "Invalid return type for function `expeditionsJsNumber`: expected `string`, but found `false|string`."
+count = 1
+
+[[issues]]
+file = "www/ogame/calc/expeditions.tpl"
+code = "mixed-assignment"
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
+count = 3
+
+[[issues]]
+file = "www/ogame/calc/flight.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #1 of `loadUniverseCountries`: expected `string`, but found `mixed`."
+count = 1
+
+[[issues]]
+file = "www/ogame/calc/flight.php"
+code = "mixed-assignment"
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
+count = 3
+
+[[issues]]
+file = "www/ogame/calc/flight.tpl"
+code = "invalid-iterator"
+message = "The expression provided to `foreach` is not iterable. It resolved to type `mixed`, which is not iterable."
+count = 1
+
+[[issues]]
+file = "www/ogame/calc/flight.tpl"
+code = "mixed-assignment"
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
+count = 1
+
+[[issues]]
+file = "www/ogame/calc/flight.tpl"
+code = "mixed-operand"
+message = "Invalid left operand: type `mixed` cannot be reliably used in string concatenation."
+count = 2
+
+[[issues]]
+file = "www/ogame/calc/flight.tpl"
+code = "mixed-operand"
+message = "Invalid middle operand: type `mixed` cannot be reliably used in string concatenation."
+count = 3
+
+[[issues]]
+file = "www/ogame/calc/flight.tpl"
+code = "mixed-operand"
+message = "Invalid right operand: type `mixed` cannot be reliably used in string concatenation."
+count = 2
+
+[[issues]]
+file = "www/ogame/calc/graviton.php"
+code = "mixed-assignment"
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
+count = 3
+
+[[issues]]
+file = "www/ogame/calc/graviton.tpl"
+code = "mixed-operand"
+message = "Invalid left operand: type `mixed` cannot be reliably used in string concatenation."
+count = 19
+
+[[issues]]
+file = "www/ogame/calc/graviton.tpl"
+code = "mixed-operand"
+message = "Invalid right operand: type `mixed` cannot be reliably used in string concatenation."
+count = 16
+
+[[issues]]
+file = "www/ogame/calc/h_abox.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #1 of `get_headers`: expected `string`, but found `mixed`."
+count = 1
+
+[[issues]]
+file = "www/ogame/calc/h_abox.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #1 of `stripos`: expected `string`, but found `mixed`."
+count = 1
+
+[[issues]]
+file = "www/ogame/calc/h_abox.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #3 of `preg_replace`: expected `array<('K.preg_replace() extends array-key), string>|string`, but found `mixed`."
+count = 1
+
+[[issues]]
+file = "www/ogame/calc/h_abox.php"
+code = "possibly-false-array-access"
+message = "Cannot perform array access on possibly `false` value."
+count = 1
+
+[[issues]]
+file = "www/ogame/calc/h_abox.php"
+code = "possibly-null-argument"
+message = "Argument #3 of function `str_replace` is possibly `null`, but parameter type `array<array-key, string>|string` does not accept it."
+count = 1
+
+[[issues]]
+file = "www/ogame/calc/h_functions.php"
+code = "false-array-access"
+message = "Cannot perform array access on `false`."
+count = 1
+
+[[issues]]
+file = "www/ogame/calc/h_functions.php"
+code = "invalid-callable"
+message = "Expression of type `mixed` cannot be called as a function or method."
+count = 1
+
+[[issues]]
+file = "www/ogame/calc/h_functions.php"
+code = "invalid-method-access"
+message = "Attempting to call method `asXML()` on a non-object type (`false`)."
+count = 1
+
+[[issues]]
+file = "www/ogame/calc/h_functions.php"
+code = "invalid-type-cast"
+message = "Casting `mixed` to `float`."
+count = 1
+
+[[issues]]
+file = "www/ogame/calc/h_functions.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #1 of `file_exists`: expected `string`, but found `mixed`."
+count = 1
+
+[[issues]]
+file = "www/ogame/calc/h_functions.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #1 of `file_get_contents`: expected `string`, but found `mixed`."
+count = 1
+
+[[issues]]
+file = "www/ogame/calc/h_functions.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #1 of `filemtime`: expected `string`, but found `mixed`."
+count = 1
+
+[[issues]]
+file = "www/ogame/calc/h_functions.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #1 of `fopen`: expected `string`, but found `mixed`."
+count = 1
+
+[[issues]]
+file = "www/ogame/calc/h_functions.php"
+code = "mixed-operand"
+message = "Invalid middle operand: type `mixed` cannot be reliably used in string concatenation."
+count = 4
+
+[[issues]]
+file = "www/ogame/calc/h_functions.php"
+code = "mixed-operand"
+message = "Right operand in `<` comparison has `mixed` type."
+count = 1
+
+[[issues]]
+file = "www/ogame/calc/h_functions.php"
+code = "possibly-false-argument"
+message = "Argument #1 of function `simplexml_load_string` is possibly `false`, but parameter type `string` does not accept it."
+count = 1
+
+[[issues]]
+file = "www/ogame/calc/h_functions.php"
+code = "possibly-false-operand"
+message = "Right operand in arithmetic operation might be `false` (type `false|int<1750595956, max>`)."
+count = 1
+
+[[issues]]
+file = "www/ogame/calc/h_functions.php"
+code = "possibly-invalid-argument"
+message = "Possible argument type mismatch for argument #2 of `fwrite`: expected `string`, but possibly received `bool|string`."
+count = 1
+
+[[issues]]
+file = "www/ogame/calc/h_functions.php"
+code = "possibly-null-iterator"
+message = "Expression being iterated (type `SimpleXMLElement&static|null`) might be `null` at runtime."
+count = 1
+
+[[issues]]
+file = "www/ogame/calc/lf-techdata.inc.php"
+code = "invalid-iterator"
+message = "The expression provided to `foreach` is not iterable. It resolved to type `mixed`, which is not iterable."
+count = 1
+
+[[issues]]
+file = "www/ogame/calc/lf-techdata.inc.php"
+code = "mixed-assignment"
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
+count = 2
+
+[[issues]]
+file = "www/ogame/calc/lf-techdata.inc.php"
+code = "possibly-false-argument"
+message = "Argument #1 of function `json_decode` is possibly `false`, but parameter type `string` does not accept it."
+count = 1
+
+[[issues]]
+file = "www/ogame/calc/lfcosts.php"
+code = "duplicate-definition"
+message = "Function `getTechsByType` is already defined elsewhere."
+count = 1
+
+[[issues]]
+file = "www/ogame/calc/lfcosts.php"
+code = "mixed-assignment"
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
+count = 4
+
+[[issues]]
+file = "www/ogame/calc/lfcosts.php"
+code = "undefined-variable"
+message = "Undefined variable: `$lfTechData`."
+count = 1
+
+[[issues]]
+file = "www/ogame/calc/lfcosts.tpl"
+code = "invalid-iterator"
+message = "The expression provided to `foreach` is not iterable. It resolved to type `mixed`, which is not iterable."
+count = 9
+
+[[issues]]
+file = "www/ogame/calc/lfcosts.tpl"
+code = "mixed-array-assignment"
+message = "Unsafe array assignment on type `mixed`."
+count = 1
+
+[[issues]]
+file = "www/ogame/calc/lfcosts.tpl"
+code = "mixed-assignment"
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
+count = 19
+
+[[issues]]
+file = "www/ogame/calc/lfcosts.tpl"
+code = "mixed-operand"
+message = "Invalid left operand: type `mixed` cannot be reliably used in string concatenation."
+count = 11
+
+[[issues]]
+file = "www/ogame/calc/lfcosts.tpl"
+code = "mixed-operand"
+message = "Invalid right operand: type `mixed` cannot be reliably used in string concatenation."
+count = 11
+
+[[issues]]
+file = "www/ogame/calc/lfcosts.tpl"
+code = "mixed-operand"
+message = "Left operand in `!=` comparison has `mixed` type."
+count = 1
+
+[[issues]]
+file = "www/ogame/calc/lfcosts.tpl"
+code = "mixed-operand"
+message = "Left operand in `==` comparison has `mixed` type."
+count = 5
+
+[[issues]]
+file = "www/ogame/calc/lfcosts.tpl"
+code = "mixed-operand"
+message = "Left operand in `>` comparison has `mixed` type."
+count = 1
+
+[[issues]]
+file = "www/ogame/calc/lfcosts.tpl"
+code = "mixed-operand"
+message = "Left operand in binary operation has type `mixed`."
+count = 4
+
+[[issues]]
+file = "www/ogame/calc/moon.php"
+code = "mixed-assignment"
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
+count = 3
+
+[[issues]]
+file = "www/ogame/calc/moon.tpl"
+code = "mixed-operand"
+message = "Invalid left operand: type `mixed` cannot be reliably used in string concatenation."
+count = 8
+
+[[issues]]
+file = "www/ogame/calc/moon.tpl"
+code = "mixed-operand"
+message = "Invalid right operand: type `mixed` cannot be reliably used in string concatenation."
+count = 8
+
+[[issues]]
+file = "www/ogame/calc/production.php"
+code = "duplicate-definition"
+message = "Function `getTechsByType` is already defined elsewhere."
+count = 1
+
+[[issues]]
+file = "www/ogame/calc/production.php"
+code = "invalid-iterator"
+message = "The expression provided to `foreach` is not iterable. It resolved to type `mixed`, which is not iterable."
+count = 4
+
+[[issues]]
+file = "www/ogame/calc/production.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #1 of `intdiv`: expected `int`, but found `mixed`."
+count = 1
+
+[[issues]]
+file = "www/ogame/calc/production.php"
+code = "mixed-array-access"
+message = "Unsafe array access on type `mixed`."
+count = 21
+
+[[issues]]
+file = "www/ogame/calc/production.php"
+code = "mixed-array-index"
+message = "Invalid index type `mixed` used in array assignment on `array<array-key, list{mixed, mixed}>`."
+count = 1
+
+[[issues]]
+file = "www/ogame/calc/production.php"
+code = "mixed-array-index"
+message = "Invalid index type `mixed` used in array assignment on `array<mixed, mixed>`."
+count = 1
+
+[[issues]]
+file = "www/ogame/calc/production.php"
+code = "mixed-assignment"
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
+count = 15
+
+[[issues]]
+file = "www/ogame/calc/production.php"
+code = "mixed-operand"
+message = "Left operand in `<` comparison has `mixed` type."
+count = 1
+
+[[issues]]
+file = "www/ogame/calc/production.php"
+code = "mixed-operand"
+message = "Left operand in binary operation has type `mixed`."
+count = 1
+
+[[issues]]
+file = "www/ogame/calc/production.php"
+code = "possibly-false-argument"
+message = "Argument #1 of function `json_decode` is possibly `false`, but parameter type `string` does not accept it."
+count = 3
+
+[[issues]]
+file = "www/ogame/calc/production.php"
+code = "undefined-variable"
+message = "Undefined variable: `$lfTechData`."
+count = 2
+
+[[issues]]
+file = "www/ogame/calc/production.tpl"
+code = "invalid-iterator"
+message = "The expression provided to `foreach` is not iterable. It resolved to type `mixed`, which is not iterable."
+count = 12
+
+[[issues]]
+file = "www/ogame/calc/production.tpl"
+code = "less-specific-argument"
+message = "Argument type mismatch for argument #1 of `intdiv`: expected `int`, but provided type `array-key` is less specific."
+count = 1
+
+[[issues]]
+file = "www/ogame/calc/production.tpl"
+code = "mixed-assignment"
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
+count = 24
+
+[[issues]]
+file = "www/ogame/calc/production.tpl"
+code = "mixed-operand"
+message = "Invalid left operand: type `mixed` cannot be reliably used in string concatenation."
+count = 9
+
+[[issues]]
+file = "www/ogame/calc/production.tpl"
+code = "mixed-operand"
+message = "Invalid right operand: type `mixed` cannot be reliably used in string concatenation."
+count = 9
+
+[[issues]]
+file = "www/ogame/calc/production.tpl"
+code = "mixed-operand"
+message = "Left operand in binary operation has type `mixed`."
+count = 3
+
+[[issues]]
+file = "www/ogame/calc/production.tpl"
+code = "mixed-operand"
+message = "Right operand in binary operation has type `mixed`."
+count = 1
+
+[[issues]]
+file = "www/ogame/calc/production.tpl"
+code = "possibly-invalid-argument"
+message = "Possible argument type mismatch for argument #1 of `htmlspecialchars`: expected `string`, but possibly received `array<array-key, string>|string`."
+count = 1
+
+[[issues]]
+file = "www/ogame/calc/profiles.tpl"
+code = "undefined-variable-in-closure-use"
+message = "Cannot import undefined variable `$l` into closure."
+count = 1
+
+[[issues]]
+file = "www/ogame/calc/queue.php"
+code = "duplicate-definition"
+message = "Function `getTechsByType` is already defined elsewhere."
+count = 1
+
+[[issues]]
+file = "www/ogame/calc/queue.php"
+code = "invalid-iterator"
+message = "The expression provided to `foreach` is not iterable. It resolved to type `mixed`, which is not iterable."
+count = 1
+
+[[issues]]
+file = "www/ogame/calc/queue.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #2 of `array_merge`: expected `array<non-negative-int, mixed>`, but found `mixed`."
+count = 1
+
+[[issues]]
+file = "www/ogame/calc/queue.php"
+code = "mixed-array-access"
+message = "Unsafe array access on type `mixed`."
+count = 2
+
+[[issues]]
+file = "www/ogame/calc/queue.php"
+code = "mixed-assignment"
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
+count = 6
+
+[[issues]]
+file = "www/ogame/calc/queue.php"
+code = "mixed-operand"
+message = "Left operand in `<=` comparison has `mixed` type."
+count = 1
+
+[[issues]]
+file = "www/ogame/calc/queue.php"
+code = "possibly-false-argument"
+message = "Argument #1 of function `json_decode` is possibly `false`, but parameter type `string` does not accept it."
+count = 1
+
+[[issues]]
+file = "www/ogame/calc/queue.tpl"
+code = "invalid-iterator"
+message = "The expression provided to `foreach` is not iterable. It resolved to type `mixed`, which is not iterable."
+count = 5
+
+[[issues]]
+file = "www/ogame/calc/queue.tpl"
+code = "mixed-assignment"
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
+count = 10
+
+[[issues]]
+file = "www/ogame/calc/queue.tpl"
+code = "mixed-operand"
+message = "Left operand in `==` comparison has `mixed` type."
+count = 1
+
+[[issues]]
+file = "www/ogame/calc/queue.tpl"
+code = "mixed-operand"
+message = "Left operand in `>` comparison has `mixed` type."
+count = 2
+
+[[issues]]
+file = "www/ogame/calc/terraformer.php"
+code = "mixed-assignment"
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
+count = 3
+
+[[issues]]
+file = "www/ogame/calc/terraformer.tpl"
+code = "mixed-operand"
+message = "Invalid left operand: type `mixed` cannot be reliably used in string concatenation."
+count = 16
+
+[[issues]]
+file = "www/ogame/calc/terraformer.tpl"
+code = "mixed-operand"
+message = "Invalid middle operand: type `mixed` cannot be reliably used in string concatenation."
+count = 2
+
+[[issues]]
+file = "www/ogame/calc/terraformer.tpl"
+code = "mixed-operand"
+message = "Invalid right operand: type `mixed` cannot be reliably used in string concatenation."
+count = 16
+
+[[issues]]
+file = "www/ogame/calc/trade.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #1 of `loadUniverseCountries`: expected `string`, but found `mixed`."
+count = 1
+
+[[issues]]
+file = "www/ogame/calc/trade.php"
+code = "mixed-assignment"
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
+count = 3
+
+[[issues]]
+file = "www/ogame/calc/trade.tpl"
+code = "invalid-iterator"
+message = "The expression provided to `foreach` is not iterable. It resolved to type `mixed`, which is not iterable."
+count = 3
+
+[[issues]]
+file = "www/ogame/calc/trade.tpl"
+code = "mixed-assignment"
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
+count = 4
+
+[[issues]]
+file = "www/ogame/calc/trade.tpl"
+code = "mixed-operand"
+message = "Invalid left operand: type `mixed` cannot be reliably used in string concatenation."
+count = 4
+
+[[issues]]
+file = "www/ogame/calc/trade.tpl"
+code = "mixed-operand"
+message = "Invalid middle operand: type `mixed` cannot be reliably used in string concatenation."
+count = 3
+
+[[issues]]
+file = "www/ogame/calc/trade.tpl"
+code = "mixed-operand"
+message = "Invalid right operand: type `mixed` cannot be reliably used in string concatenation."
+count = 3
+
+[[issues]]
+file = "www/ogame/calc/universes.inc.php"
+code = "invalid-iterator"
+message = "The expression provided to `foreach` is not iterable. It resolved to type `mixed`, which is not iterable."
+count = 2
+
+[[issues]]
+file = "www/ogame/calc/universes.inc.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #1 of `file_get_contents`: expected `string`, but found `mixed`."
+count = 1
+
+[[issues]]
+file = "www/ogame/calc/universes.inc.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #1 of `filemtime`: expected `string`, but found `mixed`."
+count = 1
+
+[[issues]]
+file = "www/ogame/calc/universes.inc.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #2 of `array_map`: expected `array<('K.array_map() extends array-key), ('V.array_map() extends mixed)>`, but found `mixed`."
+count = 1
+
+[[issues]]
+file = "www/ogame/calc/universes.inc.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #2 of `preg_match`: expected `string`, but found `mixed`."
+count = 1
+
+[[issues]]
+file = "www/ogame/calc/universes.inc.php"
+code = "mixed-argument"
+message = "Invalid argument type for argument #2 of `rename`: expected `string`, but found `mixed`."
+count = 1
+
+[[issues]]
+file = "www/ogame/calc/universes.inc.php"
+code = "mixed-array-access"
+message = "Unsafe array access on type `mixed`."
+count = 8
+
+[[issues]]
+file = "www/ogame/calc/universes.inc.php"
+code = "mixed-array-index"
+message = "Invalid index type `mixed` used in array assignment on `array<array-key, array{}>`."
+count = 1
+
+[[issues]]
+file = "www/ogame/calc/universes.inc.php"
+code = "mixed-array-index"
+message = "Invalid index type `mixed` used in array assignment on `non-empty-array<array-key, array{}>`."
+count = 1
+
+[[issues]]
+file = "www/ogame/calc/universes.inc.php"
+code = "mixed-assignment"
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
+count = 9
+
+[[issues]]
+file = "www/ogame/calc/universes.inc.php"
+code = "mixed-assignment"
+message = "Assigning `nonnull` type to a variable may lead to unexpected behavior."
+count = 1
+
+[[issues]]
+file = "www/ogame/calc/universes.inc.php"
+code = "mixed-operand"
+message = "Invalid left operand: type `mixed` cannot be reliably used in string concatenation."
+count = 1
+
+[[issues]]
+file = "www/ogame/calc/universes.inc.php"
+code = "mixed-return-statement"
+message = "Could not infer a precise return type for function `universeSnapshot`. Saw type `nonnull`."
+count = 1
+
+[[issues]]
+file = "www/ogame/calc/universes.inc.php"
+code = "possibly-false-operand"
+message = "Possibly false middle operand used in string concatenation (type `false|int`)."
+count = 1
+
+[[issues]]
+file = "www/ogame/calc/universes.inc.php"
+code = "reference-to-undefined-variable"
+message = "Reference created from a previously undefined variable `$m`."
+count = 1
+
+[[issues]]
+file = "www/routes.inc.php"
+code = "mixed-operand"
+message = "Invalid middle operand: type `mixed` cannot be reliably used in string concatenation."
+count = 1
+
+[[issues]]
+file = "www/routes.inc.php"
+code = "mixed-operand"
+message = "Invalid right operand: type `mixed` cannot be reliably used in string concatenation."
+count = 1
+
+[[issues]]
+file = "www/sidebar-menu.tpl"
+code = "invalid-iterator"
+message = "The expression provided to `foreach` is not iterable. It resolved to type `mixed`, which is not iterable."
+count = 1
+
+[[issues]]
+file = "www/sidebar-menu.tpl"
+code = "mixed-assignment"
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
+count = 1
+
+[[issues]]
+file = "www/sidebar-menu.tpl"
+code = "mixed-operand"
+message = "Invalid left operand: type `mixed` cannot be reliably used in string concatenation."
+count = 1
+
+[[issues]]
+file = "www/sidebar-menu.tpl"
+code = "mixed-operand"
+message = "Invalid right operand: type `mixed` cannot be reliably used in string concatenation."
+count = 1
+
+[[issues]]
+file = "www/sidebar-menu.tpl"
+code = "possibly-invalid-argument"
+message = "The first value for `echo` might have the wrong type."
+count = 4
+
+[[issues]]
+file = "www/sidebar.tpl"
+code = "mixed-assignment"
+message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
+count = 3
+
+[[issues]]
+file = "www/sidebar.tpl"
+code = "mixed-assignment"
+message = "Assigning `nonnull` type to a variable may lead to unexpected behavior."
+count = 1
+
+[[issues]]
+file = "www/vendor.tpl"
+code = "non-existent-constant"
+message = "Undefined constant: `VENDOR_ICONS_FONT_HASH`."
+count = 1
