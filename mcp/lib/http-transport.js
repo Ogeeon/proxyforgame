@@ -171,6 +171,12 @@ function createHttpHandler(protocol, options) {
             if (refused.status !== 405) {
                 record(facts, ts, refused.status, null, null);
             }
+            // The usage record keeps no headers, so a refusal's cause is
+            // logged here: the protocol version a client asked for is the
+            // only part of the request that tells the two 400 causes apart.
+            if (refused.status === 400) {
+                options.log(`refused 400: ${printable(refused.message, 200)}; user agent ${facts.userAgent ?? '-'}`);
+            }
             return { ok: false };
         }
 
@@ -186,6 +192,9 @@ function createHttpHandler(protocol, options) {
         } catch {
             sendJson(res, 400, errorResponse(null, PARSE_ERROR, 'Body is not valid JSON'));
             record(facts, ts, 400, null, null);
+            // The body is not logged: its size and the client are enough to
+            // tell a client that sends garbage from one that sends another protocol.
+            options.log(`refused 400: body is not valid JSON (${facts.bodyBytes} bytes); user agent ${facts.userAgent ?? '-'}`);
             return { ok: false };
         }
     }

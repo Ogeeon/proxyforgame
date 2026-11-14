@@ -253,6 +253,26 @@ describe('MCP HTTP transport', () => {
         expect(body.error.code).toBe(-32700);
     });
 
+    it('logs the cause of each 400, with the user agent that sent it', async () => {
+        const lines = [];
+        const local = http.createServer(createHttpHandler(protocolWith(), {
+            path: '/mcp', allowedOrigins: [], rateLimit: 0, trustProxy: true, log: (line) => lines.push(line),
+        }));
+        await new Promise((resolve) => local.listen(0, '127.0.0.1', () => resolve(undefined)));
+        const url =`http://127.0.0.1:${/** @type {import('node:net').AddressInfo} */ (local.address()).port}/mcp`;
+        try {
+            const headers = { 'content-type': 'application/json', 'user-agent': 'test-client/1' };
+            await fetch(url, { method: 'POST', headers: { ...headers, 'mcp-protocol-version': '1999-01-01' }, body: '{}' });
+            await fetch(url, { method: 'POST', headers, body: '{nope' });
+            expect(lines).toHaveLength(2);
+            expect(lines[0]).toContain('Unsupported MCP-Protocol-Version 1999-01-01');
+            expect(lines[0]).toContain('user agent test-client/1');
+            expect(lines[1]).toBe('refused 400: body is not valid JSON (5 bytes); user agent test-client/1');
+        } finally {
+            await new Promise((resolve) => local.close(resolve));
+        }
+    });
+
     it('refuses an oversized body', async () => {
         const res = await post(JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'ping', pad: 'x'.repeat(260 * 1024) }));
         expect(res.status).toBe(413);
