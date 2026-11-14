@@ -23,7 +23,7 @@ const path = require('node:path');
  * @returns {string}
  */
 function mise(args) {
-  return execFileSync('mise', args, { encoding: 'utf8' }).trim();
+  return execFileSync('mise', args, { encoding: 'utf8' }).trim(); // NOSONAR(S4036) - a dev/CI tool resolved from the caller PATH
 }
 
 function main() {
