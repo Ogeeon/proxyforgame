@@ -195,6 +195,11 @@ jobs:
           path: ~/.cache/ms-playwright
           key: playwright-${{ runner.os }}-${{ hashFiles('playwright-tests/package-lock.json') }}
 
+      # The standalone checkers `make check` runs, at the versions mise.toml pins -
+      # the same file developers install from, so CI cannot run a different linter.
+      - name: Set up mise
+        uses: jdx/mise-action@d5574b52816a478f9d4e6529a3f6ff17a8a36785 # v5.2.8
+
       - name: Install dependencies and browsers
         run: make install PW_DEPS=--with-deps
 

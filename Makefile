@@ -88,7 +88,13 @@ help: ## Show this list
 # postinstall downloads a JRE that scripts/validate-html.js never asks for (it runs
 # the system `java` against the jar directly), and fsevents is macOS-only. The
 # Playwright browsers come from the explicit `playwright install` below, not a hook.
-install: ## Install test dependencies and Playwright browsers
+#
+# `mise install` fetches the standalone checkers pinned in mise.toml (jactionlint,
+# shellcheck, betterleaks, mago...). The recipes call them by bare name, which
+# resolves through the mise shims directory on PATH - mise's installer puts it
+# there on Windows, `mise activate` or jdx/mise-action does elsewhere.
+install: ## Install the pinned checkers, test dependencies and Playwright browsers
+	mise install
 	npm ci --ignore-scripts
 	cd playwright-tests && npm ci --ignore-scripts
 	cd playwright-tests && $(PW) install $(PW_DEPS)
