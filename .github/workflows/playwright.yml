@@ -212,6 +212,22 @@ jobs:
       - name: Install dependencies and browsers
         run: make install PW_DEPS=--with-deps
 
+      # The commits this push or pull request adds follow Conventional Commits.
+      # Not part of `make check`, which has no range to look at on main itself.
+      # One shard is enough. A new branch pushed with no `before` (all zeros) and
+      # a manual dispatch have no range, so they skip.
+      - name: Commit messages (make commitlint)
+        if: ${{ strategy.job-index == 0 }}
+        env:
+          FROM: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.event.before }}
+          TO: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
+        run: |
+          if [ -z "$FROM" ] || [ "$FROM" = "0000000000000000000000000000000000000000" ]; then
+            echo "No commit range for this event; nothing to check."
+            exit 0
+          fi
+          make commitlint FROM="$FROM" TO="$TO"
+
       # -------------------------------------------------------------
       # The gate - the same target developers run before a commit
       # -------------------------------------------------------------

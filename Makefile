@@ -72,7 +72,7 @@ PW ?= node node_modules/@playwright/test/cli.js
         docker-up docker-down docker-logs \
         test test-unit test-e2e test-e2e-ui test-one report \
         check audit quality coverage db-validate lint typecheck php-version-check \
-        secrets vulns actions-lint shell-lint docker-lint php-lint php-baseline css-lint typos agents-lint \
+        secrets vulns actions-lint shell-lint docker-lint php-lint php-baseline css-lint typos agents-lint commitlint \
         changelog-validate changelog-release \
         tsconfigs tsconfigs-check vendor vendor-check \
         html-render html-validate html-audit \
@@ -202,6 +202,14 @@ BETTERLEAKS := betterleaks git . -c .betterleaks.toml --redact --no-banner --log
 # one fails. Shrink that file with `npx stylelint ... --suppress` after a fix.
 css-lint: ## Lint the site CSS (Stylelint)
 	npm run lint:css --silent
+
+# Conventional Commits over FROM..TO, by default what this branch adds to
+# origin/main. CI passes the range of the push or the pull request. Not in
+# `check`: on main itself the default range is empty.
+FROM ?= origin/main
+TO ?= HEAD
+commitlint: ## Check commit messages in FROM..TO (default origin/main..HEAD) (commitlint)
+	npx --no-install commitlint --strict --from $(FROM) --to $(TO)
 
 # CLAUDE.md, .claude/skills and commands, MCP config. --strict fails on
 # warnings, which agnix otherwise reports with exit 0.

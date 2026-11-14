@@ -33,6 +33,8 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@commitlint/cli": "^21.2.4",
+    "@commitlint/config-conventional": "^21.2.4",
     "@eslint/js": "^9.39.0",
     "@popperjs/core": "^2.11.8",
     "@types/bootstrap": "^5.2.0",
