@@ -72,7 +72,7 @@ PW ?= node node_modules/@playwright/test/cli.js
         docker-up docker-down docker-logs \
         test test-unit test-e2e test-e2e-ui test-one report \
         check audit quality coverage db-validate lint typecheck php-version-check \
-        secrets vulns actions-lint shell-lint docker-lint php-lint php-baseline css-lint typos agents-lint commitlint migrations-check \
+        secrets vulns actions-lint shell-lint docker-lint php-lint php-baseline css-lint typos agents-lint commitlint migrations-check fix \
         changelog-validate changelog-release \
         tsconfigs tsconfigs-check vendor vendor-check \
         html-render html-validate html-audit \
@@ -165,6 +165,13 @@ report: ## Open the last Playwright HTML report
 # both exit non-zero on pre-existing issues, so they live in `audit` instead and
 # are prefixed with `-` there to keep one failure from hiding the other.
 check: php-version-check changelog-validate i18n-validate migrations-check secrets actions-lint shell-lint docker-lint php-lint css-lint typos agents-lint lint typecheck tsconfigs-check vendor-check html-validate test ## Green gate - what must pass before a commit
+
+# The autofixes that only rewrite what their check reports and never delete
+# code. Read the diff before committing; one tool's fixes per commit.
+fix: ## Apply the safe autofixes: Stylelint, typos, jactionlint
+	npm run lint:css --silent -- --fix
+	typos --write-changes
+	jactionlint --fix
 
 audit: ## Advisory reports; these flag pre-existing issues and do not gate
 	-node scripts/check-test-coverage.js

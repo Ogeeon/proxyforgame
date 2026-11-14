@@ -21,8 +21,28 @@ target**. **Requires GNU Make 4.x**; the GnuWin32 3.81 build that is still on ma
 boxes is too old (`choco install make`). The ones you reach for most:
 
 - `make test` — both suites, the ritual before a commit; `make test-one spec=flight` — one spec.
-- `make check` — the green gate: changelog, i18n, lint, typecheck, `html-validate` (needs
-  Java 17+) and both suites.
+- `make check` — the green gate: changelog, i18n, migrations, secrets, the linters (workflows,
+  shell, Dockerfile, PHP, CSS, spelling, agent files, JS), typecheck, `html-validate` (needs
+  Java 17+) and both suites. **A change is not done until it passes.** The standalone
+  checkers come from `mise.toml` (`make install` runs `mise install`); `make fix` applies
+  the safe autofixes.
+
+### Quality gate rules
+
+- **Never disable a lint rule or add a suppression to get a change through.** An exception
+  is one path and one rule, carries its reason, and needs the user's decision. The places
+  they live: `.github/jactionlint.yaml`, `.hadolint.yaml`, `.betterleaks.toml`,
+  `osv-scanner.toml`, `mago.toml`, `_typos.toml`, `.agnix.toml`, inline
+  `# shellcheck disable=`.
+- **Baselines only shrink.** `mago-*-baseline.toml` and `stylelint-suppressions.json` hold
+  the findings that predate the check. Fix a finding, then regenerate (`make php-baseline`)
+  and check the diff only removes entries — never regenerate to absorb a new one.
+- **Generated files are never edited by hand**: `tsconfig/<calc>.json` (`make tsconfigs`)
+  and `www/vendor/` (`make vendor`); `tsconfigs-check` and `vendor-check` fail on a hand
+  edit.
+- A shipped `db/migrations/*.sql` is never edited (`make migrations-check`); add a new one.
+- Commit messages are linted in CI (`make commitlint`): Conventional Commits, body lines
+  ≤ 100 columns, no body line starting with `word:` (it parses as a footer).
 
 Variables override on the command line: `make serve PORT=8080`, `make serve PHP=...`. The
 constraints on writing recipes (platform default shell, one command per line, never pin
