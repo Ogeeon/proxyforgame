@@ -1,0 +1,9 @@
+# OSV-Scanner configuration (`make vulns`). Empty: no advisory is accepted.
+#
+# To accept one, add an entry with a reason and an ignoreUntil date; after the
+# date the advisory fails the scan again and has to be looked at anew:
+#
+# [[IgnoredVulns]]
+# id = "GHSA-xxxx-xxxx-xxxx"
+# ignoreUntil = 2027-01-31
+# reason = "dev-only, the vulnerable code path is not reachable from our use"

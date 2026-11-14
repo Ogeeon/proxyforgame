@@ -1,0 +1,42 @@
+# Known vulnerabilities in the npm lockfiles (OSV-Scanner, `make vulns`).
+#
+# Kept out of `make check` and the CI workflow on purpose: the result depends on
+# the advisory database, so a new advisory would fail an unrelated change and
+# block the deploy. It runs on each push and pull request so a dependency change
+# is checked as it lands, and weekly so an advisory published later still
+# surfaces. A red run here does not stop a deploy - read it and fix or accept
+# the advisory in osv-scanner.toml.
+name: Security
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+  schedule:
+    - cron: '23 5 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: security-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  vulns:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up mise
+        uses: jdx/mise-action@d5574b52816a478f9d4e6529a3f6ff17a8a36785 # v5.2.8
+        with:
+          install_args: osv-scanner
+
+      - name: Known vulnerabilities (make vulns)
+        run: make vulns

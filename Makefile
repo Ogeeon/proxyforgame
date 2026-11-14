@@ -72,7 +72,7 @@ PW ?= node node_modules/@playwright/test/cli.js
         docker-up docker-down docker-logs \
         test test-unit test-e2e test-e2e-ui test-one report \
         check audit quality coverage db-validate lint typecheck php-version-check \
-        secrets actions-lint shell-lint docker-lint \
+        secrets vulns actions-lint shell-lint docker-lint \
         changelog-validate changelog-release \
         tsconfigs tsconfigs-check vendor vendor-check \
         html-render html-validate html-audit \
@@ -197,6 +197,13 @@ docker-lint: ## Lint the local-dev Dockerfile (Hadolint, config in .hadolint.yam
 # the uncommitted and the staged changes, so a key is caught before it is
 # committed too. The allowlists in .betterleaks.toml name exact values.
 BETTERLEAKS := betterleaks git . -c .betterleaks.toml --redact --no-banner --log-level warn
+# Not part of `check`: the answer depends on the advisory database, not on the
+# change, so a new advisory would block an unrelated commit. The Security
+# workflow runs it on every push and pull request and weekly; exceptions go in
+# osv-scanner.toml with an ignoreUntil date.
+vulns: ## Check the npm lockfiles for known vulnerabilities (OSV-Scanner)
+	osv-scanner scan source --config osv-scanner.toml --lockfile package-lock.json --lockfile playwright-tests/package-lock.json
+
 secrets: ## Scan the git history and the working tree for secrets (Betterleaks)
 	$(BETTERLEAKS) --git-workers 8
 	$(BETTERLEAKS) --pre-commit
