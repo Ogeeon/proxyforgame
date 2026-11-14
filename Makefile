@@ -72,6 +72,7 @@ PW ?= node node_modules/@playwright/test/cli.js
         docker-up docker-down docker-logs \
         test test-unit test-e2e test-e2e-ui test-one report \
         check audit quality coverage db-validate lint typecheck php-version-check \
+        actions-lint \
         changelog-validate changelog-release \
         tsconfigs tsconfigs-check vendor vendor-check \
         html-render html-validate html-audit \
@@ -163,7 +164,7 @@ report: ## Open the last Playwright HTML report
 # `make check` always means "you broke something". The two reporters below
 # both exit non-zero on pre-existing issues, so they live in `audit` instead and
 # are prefixed with `-` there to keep one failure from hiding the other.
-check: php-version-check changelog-validate i18n-validate lint typecheck tsconfigs-check vendor-check html-validate test ## Green gate - what must pass before a commit
+check: php-version-check changelog-validate i18n-validate actions-lint lint typecheck tsconfigs-check vendor-check html-validate test ## Green gate - what must pass before a commit
 
 audit: ## Advisory reports; these flag pre-existing issues and do not gate
 	-node scripts/check-test-coverage.js
@@ -172,6 +173,12 @@ audit: ## Advisory reports; these flag pre-existing issues and do not gate
 
 lint: ## Run ESLint over every JS file
 	npm run lint --silent
+
+# Workflows and dependabot.yml; accepted findings live in .github/jactionlint.yaml
+# with a reason, the security ones with an expiry date. --strict-exit fails on
+# warnings too - without it only error-level findings change the exit code.
+actions-lint: ## Lint the GitHub Actions workflows and dependabot.yml (jactionlint)
+	jactionlint --strict-exit --no-color
 
 typecheck: ## Type-check every JS file in the browser and Node projects
 	npm run typecheck --silent

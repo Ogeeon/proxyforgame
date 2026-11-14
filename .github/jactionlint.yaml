@@ -1,0 +1,41 @@
+# jactionlint configuration (`make actions-lint`). Each accepted finding names its
+# rule and file and says why. The ones that hide a security finding expire: after
+# the date the finding fails the build again (rule expired-ignore) and has to be
+# looked at, not re-dated on reflex.
+ignores:
+  - rule: dangerous-triggers
+    file: .github/workflows/claude.yml
+    reason: >-
+      issue_comment is how @claude is summoned. The job-level `if:` admits only
+      OWNER and COLLABORATOR authors, read off the object that carries the text.
+    expires: "2027-05-14"
+
+  - rule: agentic-actions
+    file: .github/workflows/claude.yml
+    reason: >-
+      Bash(node:*) and Bash(npx:*) are what the non-browser gate needs (lint,
+      typecheck, unit tests). Only the owner and collaborators can trigger a run
+      (see the dangerous-triggers entry), so outsiders cannot steer the agent.
+    expires: "2027-05-14"
+
+  - rule: github-app
+    file: .github/workflows/check-claude-app.yml
+    reason: >-
+      The "Mint a token" step checks that the App key and installation are valid
+      at all; its token only lists the installation's repositories, and the next
+      step asks for the four permissions explicitly.
+    expires: "2027-05-14"
+
+  - rule: unpinned-images
+    file: .github/workflows/playwright.yml
+    reason: >-
+      mariadb:10.4 is the CI database service; Dependabot does not track service
+      images in workflows, so a digest would freeze it without updates.
+    expires: "2027-05-14"
+
+  # Not a risk finding, so no date. CI runs on push to main are what deploys -
+  # cancelling an older run would skip a deploy - and the Claude workflows
+  # answer separate comments that must not cancel each other.
+  - rule: concurrency-limits
+    file: .github/workflows/{playwright,claude,claude-code-review,dependabot-vendor}.yml
+    reason: Every run is wanted; superseding one would drop a deploy or a reply.
