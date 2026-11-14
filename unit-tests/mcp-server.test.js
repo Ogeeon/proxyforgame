@@ -116,8 +116,9 @@ describe('MCP protocol', () => {
     it('keeps tools/list within its size budget', async () => {
         // Every client loads the tool list into its model's context (mcp/README.md). Going over
         // the budget is a deliberate decision that raises it here, in the same commit.
-        // 52 KB until ogame_import_account added its 1.5 KB.
-        const BUDGET = 54 * 1024;
+        // 52 KB until ogame_import_account added its 1.5 KB; 54 KB until the anomaly scanner
+        // (one more building in ogame_build_cost and ogame_build_queue) went 30 bytes over.
+        const BUDGET = 55 * 1024;
         const { tools } = (await rpc(protocol, { jsonrpc: '2.0', id: 3, method: 'tools/list' })).result;
         const size = tools.reduce((sum, { name, title, description, inputSchema }) =>
             sum + JSON.stringify({ name, title, description, inputSchema }).length, 0);

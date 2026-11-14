@@ -35,16 +35,16 @@ test.describe('Costs Calculator Page', () => {
         await page.getByRole('tab', { name: 'All items - one level' }).click();
         await page.getByRole('tab', { name: 'Buildings (planet)' }).click();
         await fillTableRows(page, '#table-0-2', 2, 17, 1);
-        await expect(page.locator('#table-0-2 tr:nth-child(18) td:nth-child(5)')).toContainText('1.045M');
-        await expect(page.locator('#table-0-2 tr:nth-child(18) td:nth-child(6)')).toContainText('612.724');
-        await expect(page.locator('#table-0-2 tr:nth-child(18) td:nth-child(7)')).toContainText('201.730');
-        await expect(page.locator('#table-0-2 tr:nth-child(18) td:nth-child(8)')).toContainText('2.569M');
-        await expect(page.locator('#table-0-2 tr:nth-child(18) td:nth-child(9)')).toContainText('1.000');
-        await expect(page.locator('#table-0-2 tr:nth-child(18) td:nth-child(10)')).toContainText('3w 4d 18h');
+        await expect(page.locator('#table-0-2 tr:nth-child(19) td:nth-child(5)')).toContainText('1.045M');
+        await expect(page.locator('#table-0-2 tr:nth-child(19) td:nth-child(6)')).toContainText('612.724');
+        await expect(page.locator('#table-0-2 tr:nth-child(19) td:nth-child(7)')).toContainText('201.730');
+        await expect(page.locator('#table-0-2 tr:nth-child(19) td:nth-child(8)')).toContainText('2.569M');
+        await expect(page.locator('#table-0-2 tr:nth-child(19) td:nth-child(9)')).toContainText('1.000');
+        await expect(page.locator('#table-0-2 tr:nth-child(19) td:nth-child(10)')).toContainText('3w 4d 18h');
         await page.locator('#param-common-tab').click();
         await page.locator('#full-numbers').click();
-        await expect(page.locator('#table-0-2 tr:nth-child(18) td:nth-child(5)')).toContainText('1.045.508');
-        await expect(page.locator('#table-0-2 tr:nth-child(18) td:nth-child(8)')).toContainText('2.569.784');
+        await expect(page.locator('#table-0-2 tr:nth-child(19) td:nth-child(5)')).toContainText('1.045.508');
+        await expect(page.locator('#table-0-2 tr:nth-child(19) td:nth-child(8)')).toContainText('2.569.784');
     });
 
     test('[all items - one level / moon] calculations are correct', async ({ page }) => {
@@ -250,13 +250,13 @@ test.describe('Costs Calculator Page', () => {
         await page.getByRole('tab', { name: 'All items - multiple levels' }).click();
         await page.getByRole('tab', { name: 'Buildings (planet)' }).click();
         await fillTableRows(page, '#table-1-2', 2, 17, 5, 6);
-        await expect(page.locator('#table-1-2 tr:nth-child(18) td:nth-child(3)')).toContainText('96');
-        await expect(page.locator('#table-1-2 tr:nth-child(18) td:nth-child(5)')).toContainText('34.053M');
-        await expect(page.locator('#table-1-2 tr:nth-child(18) td:nth-child(6)')).toContainText('19.599M');
-        await expect(page.locator('#table-1-2 tr:nth-child(18) td:nth-child(7)')).toContainText('6.607M');
-        await expect(page.locator('#table-1-2 tr:nth-child(18) td:nth-child(9)')).toContainText('32.000');
-        await expect(page.locator('#table-1-2 tr:nth-child(18) td:nth-child(10)')).toContainText('127w 5d 4h');
-        await expect(page.locator('#table-1-2 tr:nth-child(18) td:nth-child(11)')).toContainText('60.256');
+        await expect(page.locator('#table-1-2 tr:nth-child(19) td:nth-child(3)')).toContainText('96');
+        await expect(page.locator('#table-1-2 tr:nth-child(19) td:nth-child(5)')).toContainText('34.053M');
+        await expect(page.locator('#table-1-2 tr:nth-child(19) td:nth-child(6)')).toContainText('19.599M');
+        await expect(page.locator('#table-1-2 tr:nth-child(19) td:nth-child(7)')).toContainText('6.607M');
+        await expect(page.locator('#table-1-2 tr:nth-child(19) td:nth-child(9)')).toContainText('32.000');
+        await expect(page.locator('#table-1-2 tr:nth-child(19) td:nth-child(10)')).toContainText('127w 5d 4h');
+        await expect(page.locator('#table-1-2 tr:nth-child(19) td:nth-child(11)')).toContainText('60.256');
     });
 
     test('[all items - multiple levels / moon] calculations are correct', async ({ page }) => {
@@ -451,12 +451,12 @@ test.describe('Costs Calculator Page', () => {
         await page.locator(`#table-1-2 tr:nth-child(2) td:nth-child(4) input`).fill('19');
         await page.locator(`#table-1-2 tr:nth-child(2) td:nth-child(4) input`).press('Enter');
 
-        await expect(page.locator('#table-1-2 tr:nth-child(18) td:nth-child(5)')).toContainText('88.673');
-        await expect(page.locator('#table-1-2 tr:nth-child(18) td:nth-child(6)')).toContainText('22.168');
-        await expect(page.locator('#table-1-2 tr:nth-child(18) td:nth-child(7)')).toContainText('0');
-        await expect(page.locator('#table-1-2 tr:nth-child(18) td:nth-child(9)')).toContainText('0');
-        await expect(page.locator('#table-1-2 tr:nth-child(18) td:nth-child(10)')).toContainText('1d 20h 20m');
-        await expect(page.locator('#table-1-2 tr:nth-child(18) td:nth-child(11)')).toContainText('-166');
+        await expect(page.locator('#table-1-2 tr:nth-child(19) td:nth-child(5)')).toContainText('88.673');
+        await expect(page.locator('#table-1-2 tr:nth-child(19) td:nth-child(6)')).toContainText('22.168');
+        await expect(page.locator('#table-1-2 tr:nth-child(19) td:nth-child(7)')).toContainText('0');
+        await expect(page.locator('#table-1-2 tr:nth-child(19) td:nth-child(9)')).toContainText('0');
+        await expect(page.locator('#table-1-2 tr:nth-child(19) td:nth-child(10)')).toContainText('1d 20h 20m');
+        await expect(page.locator('#table-1-2 tr:nth-child(19) td:nth-child(11)')).toContainText('-166');
     });
 
     test('[available resources] delivery transport is correct', async ({ page }) => {
@@ -482,7 +482,7 @@ test.describe('Costs Calculator Page', () => {
         await page.locator('#table-0-2 tr:nth-child(2) td:nth-child(3) input').fill('1');
         await page.locator('#table-0-2 tr:nth-child(2) td:nth-child(4) input').fill('5');
         await page.locator('#table-0-2 tr:nth-child(2) td:nth-child(4) input').press('Enter');
-        await expect(page.locator('#table-0-2 tr:nth-child(18) td:nth-child(5)')).toContainText('300');
+        await expect(page.locator('#table-0-2 tr:nth-child(19) td:nth-child(5)')).toContainText('300');
 
         // Test for moon buildings
         await page.getByRole('tab', { name: 'Buildings (moon)' }).click();
@@ -578,31 +578,31 @@ test.describe('Costs Calculator Page', () => {
         await fillTableRows(page, '#table-0-2', 2, 17, 5);
         await page.locator('#param-common-tab').click();
         await page.locator('#full-numbers').click();
-        await expect(page.locator('#table-0-2 tr:nth-child(18) td:nth-child(5)')).toContainText('16.840.582');
-        await expect(page.locator('#table-0-2 tr:nth-child(18) td:nth-child(6)')).toContainText('9.800.061');
-        await expect(page.locator('#table-0-2 tr:nth-child(18) td:nth-child(7)')).toContainText('3.257.139');
-        await expect(page.locator('#table-0-2 tr:nth-child(18) td:nth-child(9)')).toContainText('16.000');
-        await expect(page.locator('#table-0-2 tr:nth-child(18) td:nth-child(10)')).toContainText('61w 2d 8h');
-        await expect(page.locator('#table-0-2 tr:nth-child(18) td:nth-child(11)')).toContainText('29.894');
+        await expect(page.locator('#table-0-2 tr:nth-child(19) td:nth-child(5)')).toContainText('16.840.582');
+        await expect(page.locator('#table-0-2 tr:nth-child(19) td:nth-child(6)')).toContainText('9.800.061');
+        await expect(page.locator('#table-0-2 tr:nth-child(19) td:nth-child(7)')).toContainText('3.257.139');
+        await expect(page.locator('#table-0-2 tr:nth-child(19) td:nth-child(9)')).toContainText('16.000');
+        await expect(page.locator('#table-0-2 tr:nth-child(19) td:nth-child(10)')).toContainText('61w 2d 8h');
+        await expect(page.locator('#table-0-2 tr:nth-child(19) td:nth-child(11)')).toContainText('29.894');
 
         await page.locator('#param-lifeforms-tab').click();
         await page.locator('#mineral-res-cntr-lvl').fill('5');
         await page.locator('#mineral-res-cntr-lvl').press('Enter');
-        await expect(page.locator('#table-0-2 tr:nth-child(18) td:nth-child(5)')).toContainText('16.840.290');
-        await expect(page.locator('#table-0-2 tr:nth-child(18) td:nth-child(6)')).toContainText('9.799.946');
-        await expect(page.locator('#table-0-2 tr:nth-child(18) td:nth-child(7)')).toContainText('3.257.091');
-        await expect(page.locator('#table-0-2 tr:nth-child(18) td:nth-child(9)')).toContainText('16.000');
-        await expect(page.locator('#table-0-2 tr:nth-child(18) td:nth-child(10)')).toContainText('61w 2d 8h');
-        await expect(page.locator('#table-0-2 tr:nth-child(18) td:nth-child(11)')).toContainText('29.894'); // points follow the undiscounted cost
+        await expect(page.locator('#table-0-2 tr:nth-child(19) td:nth-child(5)')).toContainText('16.840.290');
+        await expect(page.locator('#table-0-2 tr:nth-child(19) td:nth-child(6)')).toContainText('9.799.946');
+        await expect(page.locator('#table-0-2 tr:nth-child(19) td:nth-child(7)')).toContainText('3.257.091');
+        await expect(page.locator('#table-0-2 tr:nth-child(19) td:nth-child(9)')).toContainText('16.000');
+        await expect(page.locator('#table-0-2 tr:nth-child(19) td:nth-child(10)')).toContainText('61w 2d 8h');
+        await expect(page.locator('#table-0-2 tr:nth-child(19) td:nth-child(11)')).toContainText('29.894'); // points follow the undiscounted cost
 
         await page.locator('#lf-terraformer-rdc').fill('20');
         await page.locator('#lf-terraformer-rdc').press('Enter');
-        await expect(page.locator('#table-0-2 tr:nth-child(18) td:nth-child(5)')).toContainText('16.840.290');
-        await expect(page.locator('#table-0-2 tr:nth-child(18) td:nth-child(6)')).toContainText('9.639.946');
-        await expect(page.locator('#table-0-2 tr:nth-child(18) td:nth-child(7)')).toContainText('2.937.091');
-        await expect(page.locator('#table-0-2 tr:nth-child(18) td:nth-child(9)')).toContainText('16.000');
-        await expect(page.locator('#table-0-2 tr:nth-child(18) td:nth-child(10)')).toContainText('61w 13h');
-        await expect(page.locator('#table-0-2 tr:nth-child(18) td:nth-child(11)')).toContainText('29.894'); // the terraformer reduction does not lower the points either
+        await expect(page.locator('#table-0-2 tr:nth-child(19) td:nth-child(5)')).toContainText('16.840.290');
+        await expect(page.locator('#table-0-2 tr:nth-child(19) td:nth-child(6)')).toContainText('9.639.946');
+        await expect(page.locator('#table-0-2 tr:nth-child(19) td:nth-child(7)')).toContainText('2.937.091');
+        await expect(page.locator('#table-0-2 tr:nth-child(19) td:nth-child(9)')).toContainText('16.000');
+        await expect(page.locator('#table-0-2 tr:nth-child(19) td:nth-child(10)')).toContainText('61w 13h');
+        await expect(page.locator('#table-0-2 tr:nth-child(19) td:nth-child(11)')).toContainText('29.894'); // the terraformer reduction does not lower the points either
 
         await page.locator('#reset').click();
         await page.locator('#param-buildings-tab').click();
@@ -647,17 +647,17 @@ test.describe('Costs Calculator Page', () => {
         await page.locator('#param-common-tab').click();
         await page.locator('#full-numbers').click();
         // Default rates 1:1.5:3 → MSU = m + 1.5c + 3d = 2.569.784
-        await expect(page.locator('#table-0-2 tr:nth-child(18) td:nth-child(8)')).toContainText('2.569.784');
+        await expect(page.locator('#table-0-2 tr:nth-child(19) td:nth-child(8)')).toContainText('2.569.784');
         // Rates 1:2:2 → multipliers match old hardcoded formula → MSU = 2.674.416
         await page.locator('#exchange-rates-c').fill('2');
         await page.locator('#exchange-rates-c').press('Enter');
         await page.locator('#exchange-rates-d').fill('2');
         await page.locator('#exchange-rates-d').press('Enter');
-        await expect(page.locator('#table-0-2 tr:nth-child(18) td:nth-child(8)')).toContainText('2.674.416');
+        await expect(page.locator('#table-0-2 tr:nth-child(19) td:nth-child(8)')).toContainText('2.674.416');
         // Rates 2:2:2 → cMult=dMult=1 → MSU = m + c + d = 1.859.962
         await page.locator('#exchange-rates-m').fill('2');
         await page.locator('#exchange-rates-m').press('Enter');
-        await expect(page.locator('#table-0-2 tr:nth-child(18) td:nth-child(8)')).toContainText('1.859.962');
+        await expect(page.locator('#table-0-2 tr:nth-child(19) td:nth-child(8)')).toContainText('1.859.962');
     });
 
     test('[one item - multiple levels] planet position clamps to valid range on blur', async ({ page }) => {

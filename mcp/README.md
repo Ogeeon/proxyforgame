@@ -33,7 +33,7 @@ for s1-en - and read its speeds and settings through the site's `serverdata` and
 overrides what is read. The input schemas in `tools/*.js` are the reference: the
 server validates every call against the schema it publishes.
 
-Everything all thirteen publish in `tools/list` comes to about 53 KB, held to a 54 KB budget
+Everything all thirteen publish in `tools/list` comes to about 54 KB, held to a 55 KB budget
 by a test in `unit-tests/mcp-server.test.js` - every client loads it into its model's
 context, so keep new schemas lean: write a map from ships or buildings to a value with
 `keyedMap()` rather than one property per key, list an item's keys with their names in the

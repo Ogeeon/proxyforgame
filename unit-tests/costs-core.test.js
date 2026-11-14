@@ -12,14 +12,17 @@ const { expect } = require('./expect');
 // ogame-production.js, ogame-costs.js and ogame-cargo.js first: costs-core.js
 // calls their getProductionRate, getHalvingCost and shipHold helpers the way the
 // page does, with all four scripts sharing one global scope.
-const { GlobalParams, Calculator, BuildRequest, universeSpeeds, calcBuildCost_C, getBuildCost_C } = load(
+const {
+    GlobalParams, Calculator, BuildRequest, universeSpeeds, calcBuildCost_C, getBuildCost_C, getBuildTime_C,
+} = load(
     [
         'ogame/calc/js/ogame-production.js',
         'ogame/calc/js/ogame-costs.js',
         'ogame/calc/js/ogame-cargo.js',
         'ogame/calc/js/costs-core.js',
     ],
-    ['GlobalParams', 'Calculator', 'BuildRequest', 'universeSpeeds', 'calcBuildCost_C', 'getBuildCost_C'],
+    ['GlobalParams', 'Calculator', 'BuildRequest', 'universeSpeeds', 'calcBuildCost_C', 'getBuildCost_C',
+        'getBuildTime_C'],
 );
 
 // Research Lab levels the game requires, mirrored from $techReqs in costs.php.
@@ -564,5 +567,49 @@ describe('data/costs-techs.json: ship ids', () => {
         expect([data.techs['217'].key, data.techs['217'].cost]).toEqual(['crawler', [2000, 2000, 1000]]);
         expect([data.techs['218'].key, data.techs['218'].cost]).toEqual(['reaper', [85000, 55000, 20000]]);
         expect([data.techs['219'].key, data.techs['219'].cost]).toEqual(['pathfinder', [8000, 15000, 8000]]);
+    });
+});
+
+describe('data/costs-techs.json: anomaly scanner', () => {
+    const { readFileSync } = require('node:fs');
+    const path = require('node:path');
+    /** @type {{techs: Record<string, {key: string, type: number, cost: number[], growth: number}>}} */
+    const data = JSON.parse(readFileSync(path.join(__dirname, '../www/ogame/calc/data/costs-techs.json'), 'utf8'));
+    const scanner = data.techs['45'];
+    // The [metal, crystal, deut, growth] shape the cost and time functions take.
+    const techData = { 45: [...scanner.cost, scanner.growth] };
+
+    // Levels 1-10 as recorded in the game (Project Orion beta): metal, crystal, deuterium,
+    // and the build time in seconds at universe speed 100 with no robotics or nanites.
+    // The game shows whole seconds, truncated rather than rounded.
+    const SHEET = [
+        [90, 45, 15, 1],
+        [135, 67, 22, 1],
+        [202, 101, 33, 1],
+        [303, 151, 50, 3],
+        [455, 227, 75, 6],
+        [683, 341, 113, 14],
+        [1025, 512, 170, 22],
+        [1537, 768, 256, 33],
+        [2306, 1153, 384, 49],
+        [3459, 1729, 576, 74],
+    ];
+
+    it('is a planet-only building priced 90/45/15 with growth 1.5', () => {
+        expect([scanner.key, scanner.type, scanner.cost, scanner.growth])
+            .toEqual(['anomaly-scanner', 2, [90, 45, 15], 1.5]);
+    });
+
+    it('costs what the game charges for levels 1-10', () => {
+        const costs = SHEET.map((_, i) => calcBuildCost_C(45, i + 1, techData));
+        expect(costs).toEqual(SHEET.map(row => row.slice(0, 3)));
+    });
+
+    it('takes the game build time for each level, early-level reduction included', () => {
+        const times = SHEET.map((_, i) => Math.floor(getBuildTime_C({
+            techID: 45, techLevelFrom: i, techLevelTo: i + 1, techData,
+            robotsLevel: 0, nanitesLevel: 0, uniSpeed: 100,
+        })));
+        expect(times).toEqual(SHEET.map(row => row[3]));
     });
 });
