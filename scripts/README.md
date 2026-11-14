@@ -33,6 +33,15 @@ that already ran it; the fix is a new migration.
 merge base with `origin/main`, or with the commit given as the first argument or in
 `MIGRATIONS_BASE` (CI passes the commit before the push).
 
+## check-tool-updates.js
+
+Lists the checkers pinned in `mise.toml` that are behind their latest release, as a Markdown
+table; prints nothing when every pin is current. Dependabot does not read `mise.toml`, so the
+monthly `tool-updates.yml` workflow runs this and keeps one reminder issue open while anything
+is behind.
+
+**Usage:** `node scripts/check-tool-updates.js` (needs `mise` and network access).
+
 ## Translation Management Scripts
 
 ### validate-translations.js
