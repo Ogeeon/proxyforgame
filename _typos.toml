@@ -1,0 +1,43 @@
+# typos configuration (`make typos`). Files git ignores are skipped already.
+
+[files]
+extend-exclude = [
+  # Third-party copies and generated files.
+  "www/vendor/",
+  "*.min.js",
+  "*.min.css",
+  "*.map",
+  "package-lock.json",
+  "mago-*-baseline.toml",
+  "docs/calculators/",
+  # Translations and the in-app changelog: twelve of the thirteen languages
+  # are not English.
+  "www/locale/",
+  "changelog.sql",
+]
+
+# Spellings that are deliberate. Each is an identifier, a protocol word or a
+# quotation; renaming the identifiers would touch files, cookies or keys that
+# live outside this repository.
+[default.extend-words]
+# The `analitics.tpl` include and what documents it.
+analitics = "analitics"
+# options.warnindDivId / warnindMsgDivId, kept on purpose (docs/patterns.md).
+warnind = "warnind"
+# LOCA_YES / LOCA_NO locale keys and the locaYes option built from them.
+loca = "loca"
+# The life-form tech id "intergal-envoys" in data/lf-techs.json.
+intergal = "intergal"
+# SMTP's greeting command.
+helo = "helo"
+# Short local names: "misspelling" text, a teched-up result, High-Performance
+# Extractors.
+mis = "mis"
+teched = "teched"
+hpe = "hpe"
+# Accepted variant spelling.
+unparseable = "unparseable"
+# Misspellings quoted on purpose: a test input and a changelog bullet that lists
+# the spelling mistakes it fixed.
+exibition = "exibition"
+enchanced = "enchanced"
