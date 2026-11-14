@@ -30,13 +30,15 @@ concurrency:
   group: deploy
   cancel-in-progress: false
 
-permissions:
-  contents: read
-  deployments: write   # creating the deployment below
+permissions: {}
 
 jobs:
   announce:
+    permissions:
+      contents: read
+      deployments: write   # creating the deployment below
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
       - name: Checkout full history
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1

@@ -19,7 +19,8 @@ EXPOSE 8000
 # Drop root: the container only reads the bind-mounted repo and serves it. The
 # php image ships this account (uid 33); port 8000 is unprivileged so the
 # built-in server needs nothing more. See docs/adr/0002-docker-local-dev.md.
-USER www-data
+# Numeric, so a host that has no www-data still resolves it (hadolint DL3066).
+USER 33:33
 
 # Byte-identical to `make serve` and to what CI does: the built-in server,
 # document root www/, and the router that stands in for www/.htaccess.

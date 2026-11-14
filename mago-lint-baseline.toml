@@ -1,0 +1,1909 @@
+variant = "loose"
+
+[[issues]]
+file = "deploy/webhook.php"
+code = "braced-string-interpolation"
+message = "Unbraced variable in string interpolation."
+count = 10
+
+[[issues]]
+file = "deploy/webhook.php"
+code = "function-name"
+message = "Function name `deployLog` should be in snake case."
+count = 1
+
+[[issues]]
+file = "deploy/webhook.php"
+code = "no-else-clause"
+message = "Avoid `else` clauses."
+count = 1
+
+[[issues]]
+file = "deploy/webhook.php"
+code = "no-else-clause"
+message = "Avoid `elseif` clauses."
+count = 1
+
+[[issues]]
+file = "deploy/webhook.php"
+code = "no-empty"
+message = "Use of the `empty` construct."
+count = 3
+
+[[issues]]
+file = "deploy/webhook.php"
+code = "no-empty-comment"
+message = "Empty comments are not allowed."
+count = 2
+
+[[issues]]
+file = "deploy/webhook.php"
+code = "no-error-control-operator"
+message = "Unsafe use of error control operator `@`."
+count = 2
+
+[[issues]]
+file = "deploy/webhook.php"
+code = "no-global"
+message = "Unsafe use of `global` keyword."
+count = 1
+
+[[issues]]
+file = "deploy/webhook.php"
+code = "no-shorthand-ternary"
+message = "Use of the shorthand ternary operator."
+count = 2
+
+[[issues]]
+file = "deploy/webhook.php"
+code = "prefer-arrow-function"
+message = "This closure can be simplified to a more concise arrow function."
+count = 1
+
+[[issues]]
+file = "deploy/webhook.php"
+code = "str-contains"
+message = "Consider replacing `strpos` with `!str_contains` for improved readability and intent clarity."
+count = 1
+
+[[issues]]
+file = "deploy/webhook.php"
+code = "strict-types"
+message = "Missing `declare(strict_types=1);` statement at the beginning of the file."
+count = 1
+
+[[issues]]
+file = "get_population.php"
+code = "braced-string-interpolation"
+message = "Unbraced variable in string interpolation."
+count = 3
+
+[[issues]]
+file = "get_population.php"
+code = "function-name"
+message = "Function name `buildInactivePlayers` should be in snake case."
+count = 1
+
+[[issues]]
+file = "get_population.php"
+code = "function-name"
+message = "Function name `buildPopulatedSystems` should be in snake case."
+count = 1
+
+[[issues]]
+file = "get_population.php"
+code = "function-name"
+message = "Function name `finalizePopulatedSystems` should be in snake case."
+count = 1
+
+[[issues]]
+file = "get_population.php"
+code = "function-name"
+message = "Function name `getPopulation` should be in snake case."
+count = 1
+
+[[issues]]
+file = "get_population.php"
+code = "function-name"
+message = "Function name `loadEnv` should be in snake case."
+count = 1
+
+[[issues]]
+file = "get_population.php"
+code = "function-name"
+message = "Function name `parseServerString` should be in snake case."
+count = 1
+
+[[issues]]
+file = "get_population.php"
+code = "function-name"
+message = "Function name `updateAllUniverses` should be in snake case."
+count = 1
+
+[[issues]]
+file = "get_population.php"
+code = "no-error-control-operator"
+message = "Unsafe use of error control operator `@`."
+count = 3
+
+[[issues]]
+file = "get_population.php"
+code = "no-isset"
+message = "Use of the `isset` construct."
+count = 1
+
+[[issues]]
+file = "get_population.php"
+code = "single-class-per-file"
+message = "File contains multiple class-like definitions; found class `DatabaseException` but class `ServerDataFetchException` is already defined in this file."
+count = 1
+
+[[issues]]
+file = "get_population.php"
+code = "single-class-per-file"
+message = "File contains multiple class-like definitions; found class `PlayersDataFetchException` but class `ServerDataFetchException` is already defined in this file."
+count = 1
+
+[[issues]]
+file = "get_population.php"
+code = "single-class-per-file"
+message = "File contains multiple class-like definitions; found class `PlayersDataParseException` but class `ServerDataFetchException` is already defined in this file."
+count = 1
+
+[[issues]]
+file = "get_population.php"
+code = "single-class-per-file"
+message = "File contains multiple class-like definitions; found class `ServerDataParseException` but class `ServerDataFetchException` is already defined in this file."
+count = 1
+
+[[issues]]
+file = "get_population.php"
+code = "single-class-per-file"
+message = "File contains multiple class-like definitions; found class `UniverseDataFetchException` but class `ServerDataFetchException` is already defined in this file."
+count = 1
+
+[[issues]]
+file = "get_population.php"
+code = "single-class-per-file"
+message = "File contains multiple class-like definitions; found class `UniverseDataParseException` but class `ServerDataFetchException` is already defined in this file."
+count = 1
+
+[[issues]]
+file = "get_population.php"
+code = "str-starts-with"
+message = "Consider replacing `strpos` with `str_starts_with` for improved readability and intent clarity."
+count = 1
+
+[[issues]]
+file = "get_population.php"
+code = "strict-types"
+message = "Missing `declare(strict_types=1);` statement at the beginning of the file."
+count = 1
+
+[[issues]]
+file = "scripts/dev-router.php"
+code = "no-else-clause"
+message = "Avoid `elseif` clauses."
+count = 1
+
+[[issues]]
+file = "scripts/dev-router.php"
+code = "no-isset"
+message = "Use of the `isset` construct."
+count = 1
+
+[[issues]]
+file = "scripts/dev-router.php"
+code = "no-multi-assignments"
+message = "Avoid multiple assignments in a single statement."
+count = 1
+
+[[issues]]
+file = "scripts/dev-router.php"
+code = "strict-types"
+message = "Missing `declare(strict_types=1);` statement at the beginning of the file."
+count = 1
+
+[[issues]]
+file = "scripts/dump-db-columns.php"
+code = "array-style"
+message = "Short array style `[..]` is preferred over `array(..)`."
+count = 2
+
+[[issues]]
+file = "scripts/dump-db-columns.php"
+code = "no-global"
+message = "Unsafe use of `global` keyword."
+count = 1
+
+[[issues]]
+file = "scripts/dump-db-columns.php"
+code = "no-isset"
+message = "Use of the `isset` construct."
+count = 1
+
+[[issues]]
+file = "scripts/dump-db-columns.php"
+code = "strict-types"
+message = "Missing `declare(strict_types=1);` statement at the beginning of the file."
+count = 1
+
+[[issues]]
+file = "scripts/render-page.php"
+code = "braced-string-interpolation"
+message = "Unbraced variable in string interpolation."
+count = 1
+
+[[issues]]
+file = "scripts/render-page.php"
+code = "no-else-clause"
+message = "Avoid `else` clauses."
+count = 2
+
+[[issues]]
+file = "scripts/render-page.php"
+code = "no-else-clause"
+message = "Avoid `elseif` clauses."
+count = 4
+
+[[issues]]
+file = "scripts/render-page.php"
+code = "no-ini-set"
+message = "ini_set should not be used."
+count = 1
+
+[[issues]]
+file = "scripts/render-page.php"
+code = "no-isset"
+message = "Use of the `isset` construct."
+count = 2
+
+[[issues]]
+file = "scripts/render-page.php"
+code = "strict-types"
+message = "Missing `declare(strict_types=1);` statement at the beginning of the file."
+count = 1
+
+[[issues]]
+file = "uni.list.cron.php"
+code = "array-style"
+message = "Short array style `[..]` is preferred over `array(..)`."
+count = 1
+
+[[issues]]
+file = "uni.list.cron.php"
+code = "braced-string-interpolation"
+message = "Unbraced variable in string interpolation."
+count = 6
+
+[[issues]]
+file = "uni.list.cron.php"
+code = "function-name"
+message = "Function name `addPtsUniverses` should be in snake case."
+count = 1
+
+[[issues]]
+file = "uni.list.cron.php"
+code = "function-name"
+message = "Function name `getFirefoxHeaders` should be in snake case."
+count = 1
+
+[[issues]]
+file = "uni.list.cron.php"
+code = "function-name"
+message = "Function name `httpGet` should be in snake case."
+count = 1
+
+[[issues]]
+file = "uni.list.cron.php"
+code = "function-name"
+message = "Function name `loadEnv` should be in snake case."
+count = 1
+
+[[issues]]
+file = "uni.list.cron.php"
+code = "function-name"
+message = "Function name `logDie` should be in snake case."
+count = 1
+
+[[issues]]
+file = "uni.list.cron.php"
+code = "function-name"
+message = "Function name `parseUniverses` should be in snake case."
+count = 1
+
+[[issues]]
+file = "uni.list.cron.php"
+code = "function-name"
+message = "Function name `saveData` should be in snake case."
+count = 1
+
+[[issues]]
+file = "uni.list.cron.php"
+code = "function-name"
+message = "Function name `sqlQuery` should be in snake case."
+count = 1
+
+[[issues]]
+file = "uni.list.cron.php"
+code = "no-assign-in-condition"
+message = "Avoid assignments in conditions."
+count = 3
+
+[[issues]]
+file = "uni.list.cron.php"
+code = "no-else-clause"
+message = "Avoid `else` clauses."
+count = 2
+
+[[issues]]
+file = "uni.list.cron.php"
+code = "str-starts-with"
+message = "Consider replacing `strpos` with `str_starts_with` for improved readability and intent clarity."
+count = 1
+
+[[issues]]
+file = "uni.list.cron.php"
+code = "strict-types"
+message = "Missing `declare(strict_types=1);` statement at the beginning of the file."
+count = 1
+
+[[issues]]
+file = "www/Intl.php"
+code = "no-else-clause"
+message = "Avoid `elseif` clauses."
+count = 1
+
+[[issues]]
+file = "www/Intl.php"
+code = "no-empty"
+message = "Use of the `empty` construct."
+count = 1
+
+[[issues]]
+file = "www/Intl.php"
+code = "no-isset"
+message = "Use of the `isset` construct."
+count = 3
+
+[[issues]]
+file = "www/Intl.php"
+code = "strict-behavior"
+message = "Call to `in_array` must enforce strict comparison."
+count = 1
+
+[[issues]]
+file = "www/Intl.php"
+code = "strict-types"
+message = "Missing `declare(strict_types=1);` statement at the beginning of the file."
+count = 1
+
+[[issues]]
+file = "www/ajax.php"
+code = "array-style"
+message = "Short array style `[..]` is preferred over `array(..)`."
+count = 10
+
+[[issues]]
+file = "www/ajax.php"
+code = "strict-types"
+message = "Missing `declare(strict_types=1);` statement at the beginning of the file."
+count = 1
+
+[[issues]]
+file = "www/analitics.tpl"
+code = "strict-types"
+message = "Missing `declare(strict_types=1);` statement at the beginning of the file."
+count = 1
+
+[[issues]]
+file = "www/api/antispam.inc.php"
+code = "array-style"
+message = "Short array style `[..]` is preferred over `array(..)`."
+count = 5
+
+[[issues]]
+file = "www/api/antispam.inc.php"
+code = "function-name"
+message = "Function name `enforceMailRateLimit` should be in snake case."
+count = 1
+
+[[issues]]
+file = "www/api/antispam.inc.php"
+code = "function-name"
+message = "Function name `isTrapped` should be in snake case."
+count = 1
+
+[[issues]]
+file = "www/api/antispam.inc.php"
+code = "function-name"
+message = "Function name `mailLimit` should be in snake case."
+count = 1
+
+[[issues]]
+file = "www/api/antispam.inc.php"
+code = "no-empty"
+message = "Use of the `empty` construct."
+count = 1
+
+[[issues]]
+file = "www/api/antispam.inc.php"
+code = "no-isset"
+message = "Use of the `isset` construct."
+count = 1
+
+[[issues]]
+file = "www/api/antispam.inc.php"
+code = "strict-types"
+message = "Missing `declare(strict_types=1);` statement at the beginning of the file."
+count = 1
+
+[[issues]]
+file = "www/api/changelog.inc.php"
+code = "array-style"
+message = "Short array style `[..]` is preferred over `array(..)`."
+count = 1
+
+[[issues]]
+file = "www/api/changelog.inc.php"
+code = "braced-string-interpolation"
+message = "Unbraced variable in string interpolation."
+count = 1
+
+[[issues]]
+file = "www/api/changelog.inc.php"
+code = "function-name"
+message = "Function name `apiChangelog` should be in snake case."
+count = 1
+
+[[issues]]
+file = "www/api/changelog.inc.php"
+code = "strict-types"
+message = "Missing `declare(strict_types=1);` statement at the beginning of the file."
+count = 1
+
+[[issues]]
+file = "www/api/health.inc.php"
+code = "array-style"
+message = "Short array style `[..]` is preferred over `array(..)`."
+count = 4
+
+[[issues]]
+file = "www/api/health.inc.php"
+code = "function-name"
+message = "Function name `apiHealth` should be in snake case."
+count = 1
+
+[[issues]]
+file = "www/api/health.inc.php"
+code = "function-name"
+message = "Function name `healthDeployedCommit` should be in snake case."
+count = 1
+
+[[issues]]
+file = "www/api/health.inc.php"
+code = "function-name"
+message = "Function name `healthFileAge` should be in snake case."
+count = 1
+
+[[issues]]
+file = "www/api/health.inc.php"
+code = "function-name"
+message = "Function name `healthJobStamps` should be in snake case."
+count = 1
+
+[[issues]]
+file = "www/api/health.inc.php"
+code = "function-name"
+message = "Function name `healthPatching` should be in snake case."
+count = 1
+
+[[issues]]
+file = "www/api/health.inc.php"
+code = "function-name"
+message = "Function name `healthResolveRef` should be in snake case."
+count = 1
+
+[[issues]]
+file = "www/api/health.inc.php"
+code = "function-name"
+message = "Function name `healthWebhookHash` should be in snake case."
+count = 1
+
+[[issues]]
+file = "www/api/health.inc.php"
+code = "no-else-clause"
+message = "Avoid `else` clauses."
+count = 1
+
+[[issues]]
+file = "www/api/health.inc.php"
+code = "no-error-control-operator"
+message = "Unsafe use of error control operator `@`."
+count = 7
+
+[[issues]]
+file = "www/api/health.inc.php"
+code = "no-isset"
+message = "Use of the `isset` construct."
+count = 2
+
+[[issues]]
+file = "www/api/health.inc.php"
+code = "prefer-early-continue"
+message = "Consider using early continue pattern to reduce nesting."
+count = 1
+
+[[issues]]
+file = "www/api/health.inc.php"
+code = "str-starts-with"
+message = "Consider replacing `strpos` with `str_starts_with` for improved readability and intent clarity."
+count = 1
+
+[[issues]]
+file = "www/api/health.inc.php"
+code = "strict-types"
+message = "Missing `declare(strict_types=1);` statement at the beginning of the file."
+count = 1
+
+[[issues]]
+file = "www/api/http.inc.php"
+code = "array-style"
+message = "Short array style `[..]` is preferred over `array(..)`."
+count = 2
+
+[[issues]]
+file = "www/api/http.inc.php"
+code = "braced-string-interpolation"
+message = "Unbraced variable in string interpolation."
+count = 3
+
+[[issues]]
+file = "www/api/http.inc.php"
+code = "file-name"
+message = "Class `ApiError` should be in a file named `ApiError.php`, found `http.inc.php`."
+count = 1
+
+[[issues]]
+file = "www/api/http.inc.php"
+code = "function-name"
+message = "Function name `apiErrorBody` should be in snake case."
+count = 1
+
+[[issues]]
+file = "www/api/http.inc.php"
+code = "function-name"
+message = "Function name `getParam` should be in snake case."
+count = 1
+
+[[issues]]
+file = "www/api/http.inc.php"
+code = "function-name"
+message = "Function name `requireParam` should be in snake case."
+count = 1
+
+[[issues]]
+file = "www/api/http.inc.php"
+code = "function-name"
+message = "Function name `respondJson` should be in snake case."
+count = 1
+
+[[issues]]
+file = "www/api/http.inc.php"
+code = "no-else-clause"
+message = "Avoid `elseif` clauses."
+count = 1
+
+[[issues]]
+file = "www/api/http.inc.php"
+code = "no-isset"
+message = "Use of the `isset` construct."
+count = 5
+
+[[issues]]
+file = "www/api/http.inc.php"
+code = "strict-types"
+message = "Missing `declare(strict_types=1);` statement at the beginning of the file."
+count = 1
+
+[[issues]]
+file = "www/api/interaction-timing.inc.php"
+code = "array-style"
+message = "Short array style `[..]` is preferred over `array(..)`."
+count = 9
+
+[[issues]]
+file = "www/api/interaction-timing.inc.php"
+code = "braced-string-interpolation"
+message = "Unbraced variable in string interpolation."
+count = 2
+
+[[issues]]
+file = "www/api/interaction-timing.inc.php"
+code = "function-name"
+message = "Function name `apiInteractionTiming` should be in snake case."
+count = 1
+
+[[issues]]
+file = "www/api/interaction-timing.inc.php"
+code = "function-name"
+message = "Function name `interactionTimingInt` should be in snake case."
+count = 1
+
+[[issues]]
+file = "www/api/interaction-timing.inc.php"
+code = "function-name"
+message = "Function name `interactionTimingLimit` should be in snake case."
+count = 1
+
+[[issues]]
+file = "www/api/interaction-timing.inc.php"
+code = "function-name"
+message = "Function name `interactionTimingMatch` should be in snake case."
+count = 1
+
+[[issues]]
+file = "www/api/interaction-timing.inc.php"
+code = "function-name"
+message = "Function name `interactionTimingOptionalInt` should be in snake case."
+count = 1
+
+[[issues]]
+file = "www/api/interaction-timing.inc.php"
+code = "no-empty"
+message = "Use of the `empty` construct."
+count = 1
+
+[[issues]]
+file = "www/api/interaction-timing.inc.php"
+code = "readable-literal"
+message = "Numeric literal could use underscore separators for readability."
+count = 4
+
+[[issues]]
+file = "www/api/interaction-timing.inc.php"
+code = "strict-types"
+message = "Missing `declare(strict_types=1);` statement at the beginning of the file."
+count = 1
+
+[[issues]]
+file = "www/api/mail.inc.php"
+code = "array-style"
+message = "Short array style `[..]` is preferred over `array(..)`."
+count = 9
+
+[[issues]]
+file = "www/api/mail.inc.php"
+code = "braced-string-interpolation"
+message = "Unbraced variable in string interpolation."
+count = 10
+
+[[issues]]
+file = "www/api/mail.inc.php"
+code = "function-name"
+message = "Function name `apiEmail` should be in snake case."
+count = 1
+
+[[issues]]
+file = "www/api/mail.inc.php"
+code = "function-name"
+message = "Function name `apiReport` should be in snake case."
+count = 1
+
+[[issues]]
+file = "www/api/mail.inc.php"
+code = "function-name"
+message = "Function name `reportValidation` should be in snake case."
+count = 1
+
+[[issues]]
+file = "www/api/mail.inc.php"
+code = "function-name"
+message = "Function name `sendOrFail` should be in snake case."
+count = 1
+
+[[issues]]
+file = "www/api/mail.inc.php"
+code = "function-name"
+message = "Function name `utf8Clip` should be in snake case."
+count = 1
+
+[[issues]]
+file = "www/api/mail.inc.php"
+code = "no-alias-function"
+message = "Function alias `fputs` should not be used."
+count = 14
+
+[[issues]]
+file = "www/api/mail.inc.php"
+code = "no-else-clause"
+message = "Avoid `elseif` clauses."
+count = 3
+
+[[issues]]
+file = "www/api/mail.inc.php"
+code = "readable-literal"
+message = "Numeric literal could use underscore separators for readability."
+count = 1
+
+[[issues]]
+file = "www/api/mail.inc.php"
+code = "strict-types"
+message = "Missing `declare(strict_types=1);` statement at the beginning of the file."
+count = 1
+
+[[issues]]
+file = "www/api/mcp-usage.inc.php"
+code = "array-style"
+message = "Short array style `[..]` is preferred over `array(..)`."
+count = 5
+
+[[issues]]
+file = "www/api/mcp-usage.inc.php"
+code = "braced-string-interpolation"
+message = "Unbraced variable in string interpolation."
+count = 1
+
+[[issues]]
+file = "www/api/mcp-usage.inc.php"
+code = "function-name"
+message = "Function name `apiMcpUsage` should be in snake case."
+count = 1
+
+[[issues]]
+file = "www/api/mcp-usage.inc.php"
+code = "function-name"
+message = "Function name `mcpUsageInt` should be in snake case."
+count = 1
+
+[[issues]]
+file = "www/api/mcp-usage.inc.php"
+code = "function-name"
+message = "Function name `mcpUsageMatch` should be in snake case."
+count = 1
+
+[[issues]]
+file = "www/api/mcp-usage.inc.php"
+code = "function-name"
+message = "Function name `mcpUsageNames` should be in snake case."
+count = 1
+
+[[issues]]
+file = "www/api/mcp-usage.inc.php"
+code = "function-name"
+message = "Function name `mcpUsageRow` should be in snake case."
+count = 1
+
+[[issues]]
+file = "www/api/mcp-usage.inc.php"
+code = "function-name"
+message = "Function name `mcpUsageText` should be in snake case."
+count = 1
+
+[[issues]]
+file = "www/api/mcp-usage.inc.php"
+code = "no-empty"
+message = "Use of the `empty` construct."
+count = 1
+
+[[issues]]
+file = "www/api/mcp-usage.inc.php"
+code = "no-isset"
+message = "Use of the `isset` construct."
+count = 6
+
+[[issues]]
+file = "www/api/mcp-usage.inc.php"
+code = "readable-literal"
+message = "Numeric literal could use underscore separators for readability."
+count = 4
+
+[[issues]]
+file = "www/api/mcp-usage.inc.php"
+code = "strict-types"
+message = "Missing `declare(strict_types=1);` statement at the beginning of the file."
+count = 1
+
+[[issues]]
+file = "www/api/populated-systems.inc.php"
+code = "array-style"
+message = "Short array style `[..]` is preferred over `array(..)`."
+count = 2
+
+[[issues]]
+file = "www/api/populated-systems.inc.php"
+code = "function-name"
+message = "Function name `apiPopulatedSystems` should be in snake case."
+count = 1
+
+[[issues]]
+file = "www/api/populated-systems.inc.php"
+code = "no-empty"
+message = "Use of the `empty` construct."
+count = 1
+
+[[issues]]
+file = "www/api/populated-systems.inc.php"
+code = "strict-types"
+message = "Missing `declare(strict_types=1);` statement at the beginning of the file."
+count = 1
+
+[[issues]]
+file = "www/api/server-data.inc.php"
+code = "array-style"
+message = "Short array style `[..]` is preferred over `array(..)`."
+count = 2
+
+[[issues]]
+file = "www/api/server-data.inc.php"
+code = "function-name"
+message = "Function name `apiServerData` should be in snake case."
+count = 1
+
+[[issues]]
+file = "www/api/server-data.inc.php"
+code = "function-name"
+message = "Function name `loadServerDataXml` should be in snake case."
+count = 1
+
+[[issues]]
+file = "www/api/server-data.inc.php"
+code = "function-name"
+message = "Function name `requireUniverse` should be in snake case."
+count = 1
+
+[[issues]]
+file = "www/api/server-data.inc.php"
+code = "no-error-control-operator"
+message = "Unsafe use of error control operator `@`."
+count = 1
+
+[[issues]]
+file = "www/api/server-data.inc.php"
+code = "strict-types"
+message = "Missing `declare(strict_types=1);` statement at the beginning of the file."
+count = 1
+
+[[issues]]
+file = "www/api/spy-report.inc.php"
+code = "function-name"
+message = "Function name `apiSpyReport` should be in snake case."
+count = 1
+
+[[issues]]
+file = "www/api/spy-report.inc.php"
+code = "function-name"
+message = "Function name `buildUniverseDataFromXml` should be in snake case."
+count = 1
+
+[[issues]]
+file = "www/api/spy-report.inc.php"
+code = "function-name"
+message = "Function name `fetchSpyReportFromFallback` should be in snake case."
+count = 1
+
+[[issues]]
+file = "www/api/spy-report.inc.php"
+code = "function-name"
+message = "Function name `getSpyReportByFallbackMethod` should be in snake case."
+count = 1
+
+[[issues]]
+file = "www/api/spy-report.inc.php"
+code = "function-name"
+message = "Function name `parseSpyReportId` should be in snake case."
+count = 1
+
+[[issues]]
+file = "www/api/spy-report.inc.php"
+code = "function-name"
+message = "Function name `readUsableSpyReport` should be in snake case."
+count = 1
+
+[[issues]]
+file = "www/api/spy-report.inc.php"
+code = "identity-comparison"
+message = "Use identity comparison `===` instead of equality comparison `==`."
+count = 1
+
+[[issues]]
+file = "www/api/spy-report.inc.php"
+code = "no-empty"
+message = "Use of the `empty` construct."
+count = 1
+
+[[issues]]
+file = "www/api/spy-report.inc.php"
+code = "no-error-control-operator"
+message = "Unsafe use of error control operator `@`."
+count = 1
+
+[[issues]]
+file = "www/api/spy-report.inc.php"
+code = "no-isset"
+message = "Use of the `isset` construct."
+count = 3
+
+[[issues]]
+file = "www/api/spy-report.inc.php"
+code = "strict-types"
+message = "Missing `declare(strict_types=1);` statement at the beginning of the file."
+count = 1
+
+[[issues]]
+file = "www/asset-version.inc.php"
+code = "array-style"
+message = "Short array style `[..]` is preferred over `array(..)`."
+count = 1
+
+[[issues]]
+file = "www/asset-version.inc.php"
+code = "function-name"
+message = "Function name `assetVersion` should be in snake case."
+count = 1
+
+[[issues]]
+file = "www/asset-version.inc.php"
+code = "no-isset"
+message = "Use of the `isset` construct."
+count = 1
+
+[[issues]]
+file = "www/asset-version.inc.php"
+code = "strict-types"
+message = "Missing `declare(strict_types=1);` statement at the beginning of the file."
+count = 1
+
+[[issues]]
+file = "www/assistants.php"
+code = "strict-types"
+message = "Missing `declare(strict_types=1);` statement at the beginning of the file."
+count = 1
+
+[[issues]]
+file = "www/assistants.tpl"
+code = "array-style"
+message = "Short array style `[..]` is preferred over `array(..)`."
+count = 1
+
+[[issues]]
+file = "www/assistants.tpl"
+code = "strict-types"
+message = "Missing `declare(strict_types=1);` statement at the beginning of the file."
+count = 1
+
+[[issues]]
+file = "www/cookies.tpl"
+code = "no-closing-tag"
+message = "Redundant closing tag ( `?>` ) followed by trailing whitespace."
+count = 1
+
+[[issues]]
+file = "www/cookies.tpl"
+code = "strict-types"
+message = "Missing `declare(strict_types=1);` statement at the beginning of the file."
+count = 1
+
+[[issues]]
+file = "www/db.connect.inc.php"
+code = "array-style"
+message = "Short array style `[..]` is preferred over `array(..)`."
+count = 1
+
+[[issues]]
+file = "www/db.connect.inc.php"
+code = "function-name"
+message = "Function name `runPreparedExec` should be in snake case."
+count = 1
+
+[[issues]]
+file = "www/db.connect.inc.php"
+code = "function-name"
+message = "Function name `runPreparedSelect` should be in snake case."
+count = 1
+
+[[issues]]
+file = "www/db.connect.inc.php"
+code = "function-name"
+message = "Function name `sqlExec` should be in snake case."
+count = 1
+
+[[issues]]
+file = "www/db.connect.inc.php"
+code = "function-name"
+message = "Function name `sqlQuery` should be in snake case."
+count = 1
+
+[[issues]]
+file = "www/db.connect.inc.php"
+code = "no-assign-in-condition"
+message = "Avoid assignments in conditions."
+count = 1
+
+[[issues]]
+file = "www/db.connect.inc.php"
+code = "no-else-clause"
+message = "Avoid `else` clauses."
+count = 1
+
+[[issues]]
+file = "www/db.connect.inc.php"
+code = "no-error-control-operator"
+message = "Unsafe use of error control operator `@`."
+count = 1
+
+[[issues]]
+file = "www/db.connect.inc.php"
+code = "no-global"
+message = "Unsafe use of `global` keyword."
+count = 2
+
+[[issues]]
+file = "www/db.connect.inc.php"
+code = "no-isset"
+message = "Use of the `isset` construct."
+count = 2
+
+[[issues]]
+file = "www/db.connect.inc.php"
+code = "strict-types"
+message = "Missing `declare(strict_types=1);` statement at the beginning of the file."
+count = 1
+
+[[issues]]
+file = "www/env.inc.php"
+code = "braced-string-interpolation"
+message = "Unbraced variable in string interpolation."
+count = 2
+
+[[issues]]
+file = "www/env.inc.php"
+code = "function-name"
+message = "Function name `loadEnv` should be in snake case."
+count = 1
+
+[[issues]]
+file = "www/env.inc.php"
+code = "str-starts-with"
+message = "Consider replacing `strpos` with `str_starts_with` for improved readability and intent clarity."
+count = 1
+
+[[issues]]
+file = "www/env.inc.php"
+code = "strict-types"
+message = "Missing `declare(strict_types=1);` statement at the beginning of the file."
+count = 1
+
+[[issues]]
+file = "www/hawk.tpl"
+code = "array-style"
+message = "Short array style `[..]` is preferred over `array(..)`."
+count = 2
+
+[[issues]]
+file = "www/hawk.tpl"
+code = "no-closing-tag"
+message = "Redundant closing tag ( `?>` ) followed by trailing whitespace."
+count = 1
+
+[[issues]]
+file = "www/hawk.tpl"
+code = "strict-types"
+message = "Missing `declare(strict_types=1);` statement at the beginning of the file."
+count = 1
+
+[[issues]]
+file = "www/hosts.inc.php"
+code = "array-style"
+message = "Short array style `[..]` is preferred over `array(..)`."
+count = 1
+
+[[issues]]
+file = "www/hosts.inc.php"
+code = "function-name"
+message = "Function name `isPublicHost` should be in snake case."
+count = 1
+
+[[issues]]
+file = "www/hosts.inc.php"
+code = "strict-types"
+message = "Missing `declare(strict_types=1);` statement at the beginning of the file."
+count = 1
+
+[[issues]]
+file = "www/index.php"
+code = "strict-types"
+message = "Missing `declare(strict_types=1);` statement at the beginning of the file."
+count = 1
+
+[[issues]]
+file = "www/index.tpl"
+code = "strict-types"
+message = "Missing `declare(strict_types=1);` statement at the beginning of the file."
+count = 1
+
+[[issues]]
+file = "www/langs.php"
+code = "array-style"
+message = "Short array style `[..]` is preferred over `array(..)`."
+count = 1
+
+[[issues]]
+file = "www/langs.php"
+code = "function-name"
+message = "Function name `firstNonEmpty` should be in snake case."
+count = 1
+
+[[issues]]
+file = "www/langs.php"
+code = "function-name"
+message = "Function name `getLangAttr` should be in snake case."
+count = 1
+
+[[issues]]
+file = "www/langs.php"
+code = "function-name"
+message = "Function name `getLang` should be in snake case."
+count = 1
+
+[[issues]]
+file = "www/langs.php"
+code = "identity-comparison"
+message = "Use identity inequality `!==` instead of inequality comparison `!=`."
+count = 2
+
+[[issues]]
+file = "www/langs.php"
+code = "no-global"
+message = "Unsafe use of `global` keyword."
+count = 2
+
+[[issues]]
+file = "www/langs.php"
+code = "no-isset"
+message = "Use of the `isset` construct."
+count = 3
+
+[[issues]]
+file = "www/langs.php"
+code = "strict-types"
+message = "Missing `declare(strict_types=1);` statement at the beginning of the file."
+count = 1
+
+[[issues]]
+file = "www/langs.tpl"
+code = "strict-types"
+message = "Missing `declare(strict_types=1);` statement at the beginning of the file."
+count = 1
+
+[[issues]]
+file = "www/ogame/calc/costs.php"
+code = "array-style"
+message = "Short array style `[..]` is preferred over `array(..)`."
+count = 11
+
+[[issues]]
+file = "www/ogame/calc/costs.php"
+code = "function-name"
+message = "Function name `getTechsByType` should be in snake case."
+count = 1
+
+[[issues]]
+file = "www/ogame/calc/costs.php"
+code = "identity-comparison"
+message = "Use identity comparison `===` instead of equality comparison `==`."
+count = 5
+
+[[issues]]
+file = "www/ogame/calc/costs.php"
+code = "no-global"
+message = "Unsafe use of `global` keyword."
+count = 1
+
+[[issues]]
+file = "www/ogame/calc/costs.php"
+code = "no-isset"
+message = "Use of the `isset` construct."
+count = 1
+
+[[issues]]
+file = "www/ogame/calc/costs.php"
+code = "strict-types"
+message = "Missing `declare(strict_types=1);` statement at the beginning of the file."
+count = 1
+
+[[issues]]
+file = "www/ogame/calc/costs.tpl"
+code = "array-style"
+message = "Short array style `[..]` is preferred over `array(..)`."
+count = 3
+
+[[issues]]
+file = "www/ogame/calc/costs.tpl"
+code = "identity-comparison"
+message = "Use identity comparison `===` instead of equality comparison `==`."
+count = 27
+
+[[issues]]
+file = "www/ogame/calc/costs.tpl"
+code = "no-else-clause"
+message = "Avoid `else` clauses."
+count = 5
+
+[[issues]]
+file = "www/ogame/calc/costs.tpl"
+code = "no-else-clause"
+message = "Avoid `elseif` clauses."
+count = 1
+
+[[issues]]
+file = "www/ogame/calc/costs.tpl"
+code = "no-php-tag-terminator"
+message = "Semicolon terminator is preferred over tag-pair terminator."
+count = 1
+
+[[issues]]
+file = "www/ogame/calc/costs.tpl"
+code = "no-shorthand-ternary"
+message = "Use of the shorthand ternary operator."
+count = 1
+
+[[issues]]
+file = "www/ogame/calc/costs.tpl"
+code = "readable-literal"
+message = "Numeric literal could use underscore separators for readability."
+count = 1
+
+[[issues]]
+file = "www/ogame/calc/costs.tpl"
+code = "strict-types"
+message = "Missing `declare(strict_types=1);` statement at the beginning of the file."
+count = 1
+
+[[issues]]
+file = "www/ogame/calc/expeditions.php"
+code = "function-name"
+message = "Function name `expeditionsApiParam` should be in snake case."
+count = 1
+
+[[issues]]
+file = "www/ogame/calc/expeditions.php"
+code = "function-name"
+message = "Function name `expeditionsBaseUrl` should be in snake case."
+count = 1
+
+[[issues]]
+file = "www/ogame/calc/expeditions.php"
+code = "function-name"
+message = "Function name `expeditionsIsJson` should be in snake case."
+count = 1
+
+[[issues]]
+file = "www/ogame/calc/expeditions.php"
+code = "no-else-clause"
+message = "Avoid `else` clauses."
+count = 1
+
+[[issues]]
+file = "www/ogame/calc/expeditions.php"
+code = "no-isset"
+message = "Use of the `isset` construct."
+count = 3
+
+[[issues]]
+file = "www/ogame/calc/expeditions.php"
+code = "no-redundant-parentheses"
+message = "Redundant parentheses around expression."
+count = 1
+
+[[issues]]
+file = "www/ogame/calc/expeditions.php"
+code = "no-shorthand-ternary"
+message = "Use of the shorthand ternary operator."
+count = 1
+
+[[issues]]
+file = "www/ogame/calc/expeditions.php"
+code = "prefer-early-continue"
+message = "Consider using early continue pattern to reduce nesting."
+count = 1
+
+[[issues]]
+file = "www/ogame/calc/expeditions.php"
+code = "strict-types"
+message = "Missing `declare(strict_types=1);` statement at the beginning of the file."
+count = 1
+
+[[issues]]
+file = "www/ogame/calc/expeditions.tpl"
+code = "array-style"
+message = "Short array style `[..]` is preferred over `array(..)`."
+count = 47
+
+[[issues]]
+file = "www/ogame/calc/expeditions.tpl"
+code = "function-name"
+message = "Function name `expeditionsJsNumber` should be in snake case."
+count = 1
+
+[[issues]]
+file = "www/ogame/calc/expeditions.tpl"
+code = "no-else-clause"
+message = "Avoid `else` clauses."
+count = 1
+
+[[issues]]
+file = "www/ogame/calc/expeditions.tpl"
+code = "no-redundant-math"
+message = "Redundant addition of `0`: adding 0 does not alter the value."
+count = 1
+
+[[issues]]
+file = "www/ogame/calc/expeditions.tpl"
+code = "strict-behavior"
+message = "Call to `in_array` must enforce strict comparison."
+count = 1
+
+[[issues]]
+file = "www/ogame/calc/expeditions.tpl"
+code = "strict-types"
+message = "Missing `declare(strict_types=1);` statement at the beginning of the file."
+count = 1
+
+[[issues]]
+file = "www/ogame/calc/flight.php"
+code = "strict-types"
+message = "Missing `declare(strict_types=1);` statement at the beginning of the file."
+count = 1
+
+[[issues]]
+file = "www/ogame/calc/flight.tpl"
+code = "array-style"
+message = "Short array style `[..]` is preferred over `array(..)`."
+count = 1
+
+[[issues]]
+file = "www/ogame/calc/flight.tpl"
+code = "strict-types"
+message = "Missing `declare(strict_types=1);` statement at the beginning of the file."
+count = 1
+
+[[issues]]
+file = "www/ogame/calc/graviton.php"
+code = "strict-types"
+message = "Missing `declare(strict_types=1);` statement at the beginning of the file."
+count = 1
+
+[[issues]]
+file = "www/ogame/calc/graviton.tpl"
+code = "array-style"
+message = "Short array style `[..]` is preferred over `array(..)`."
+count = 2
+
+[[issues]]
+file = "www/ogame/calc/graviton.tpl"
+code = "strict-types"
+message = "Missing `declare(strict_types=1);` statement at the beginning of the file."
+count = 1
+
+[[issues]]
+file = "www/ogame/calc/h_abox.php"
+code = "array-style"
+message = "Short array style `[..]` is preferred over `array(..)`."
+count = 2
+
+[[issues]]
+file = "www/ogame/calc/h_abox.php"
+code = "function-name"
+message = "Function name `killInjection` should be in snake case."
+count = 1
+
+[[issues]]
+file = "www/ogame/calc/h_abox.php"
+code = "function-name"
+message = "Function name `urExists` should be in snake case."
+count = 1
+
+[[issues]]
+file = "www/ogame/calc/h_abox.php"
+code = "inline-variable-return"
+message = "Variable assignment can be inlined into the return statement."
+count = 1
+
+[[issues]]
+file = "www/ogame/calc/h_abox.php"
+code = "strict-types"
+message = "Missing `declare(strict_types=1);` statement at the beginning of the file."
+count = 1
+
+[[issues]]
+file = "www/ogame/calc/h_functions.php"
+code = "function-name"
+message = "Function name `castServerDataValue` should be in snake case."
+count = 1
+
+[[issues]]
+file = "www/ogame/calc/h_functions.php"
+code = "function-name"
+message = "Function name `getServerData` should be in snake case."
+count = 1
+
+[[issues]]
+file = "www/ogame/calc/h_functions.php"
+code = "function-name"
+message = "Function name `refreshServerDataCache` should be in snake case."
+count = 1
+
+[[issues]]
+file = "www/ogame/calc/h_functions.php"
+code = "no-isset"
+message = "Use of the `isset` construct."
+count = 1
+
+[[issues]]
+file = "www/ogame/calc/h_functions.php"
+code = "prefer-early-continue"
+message = "Consider using early continue pattern to reduce nesting."
+count = 1
+
+[[issues]]
+file = "www/ogame/calc/h_functions.php"
+code = "strict-types"
+message = "Missing `declare(strict_types=1);` statement at the beginning of the file."
+count = 1
+
+[[issues]]
+file = "www/ogame/calc/lf-techdata.inc.php"
+code = "array-style"
+message = "Short array style `[..]` is preferred over `array(..)`."
+count = 1
+
+[[issues]]
+file = "www/ogame/calc/lf-techdata.inc.php"
+code = "strict-types"
+message = "Missing `declare(strict_types=1);` statement at the beginning of the file."
+count = 1
+
+[[issues]]
+file = "www/ogame/calc/lfcosts.php"
+code = "array-style"
+message = "Short array style `[..]` is preferred over `array(..)`."
+count = 6
+
+[[issues]]
+file = "www/ogame/calc/lfcosts.php"
+code = "function-name"
+message = "Function name `getTechsByType` should be in snake case."
+count = 1
+
+[[issues]]
+file = "www/ogame/calc/lfcosts.php"
+code = "identity-comparison"
+message = "Use identity comparison `===` instead of equality comparison `==`."
+count = 2
+
+[[issues]]
+file = "www/ogame/calc/lfcosts.php"
+code = "no-global"
+message = "Unsafe use of `global` keyword."
+count = 1
+
+[[issues]]
+file = "www/ogame/calc/lfcosts.php"
+code = "no-isset"
+message = "Use of the `isset` construct."
+count = 1
+
+[[issues]]
+file = "www/ogame/calc/lfcosts.php"
+code = "strict-types"
+message = "Missing `declare(strict_types=1);` statement at the beginning of the file."
+count = 1
+
+[[issues]]
+file = "www/ogame/calc/lfcosts.tpl"
+code = "array-style"
+message = "Short array style `[..]` is preferred over `array(..)`."
+count = 1
+
+[[issues]]
+file = "www/ogame/calc/lfcosts.tpl"
+code = "identity-comparison"
+message = "Use identity comparison `===` instead of equality comparison `==`."
+count = 19
+
+[[issues]]
+file = "www/ogame/calc/lfcosts.tpl"
+code = "identity-comparison"
+message = "Use identity inequality `!==` instead of inequality comparison `!=`."
+count = 1
+
+[[issues]]
+file = "www/ogame/calc/lfcosts.tpl"
+code = "no-else-clause"
+message = "Avoid `else` clauses."
+count = 2
+
+[[issues]]
+file = "www/ogame/calc/lfcosts.tpl"
+code = "no-php-tag-terminator"
+message = "Semicolon terminator is preferred over tag-pair terminator."
+count = 1
+
+[[issues]]
+file = "www/ogame/calc/lfcosts.tpl"
+code = "prefer-early-continue"
+message = "Consider using early continue pattern to reduce nesting."
+count = 1
+
+[[issues]]
+file = "www/ogame/calc/lfcosts.tpl"
+code = "strict-behavior"
+message = "Call to `in_array` must enforce strict comparison."
+count = 1
+
+[[issues]]
+file = "www/ogame/calc/lfcosts.tpl"
+code = "strict-types"
+message = "Missing `declare(strict_types=1);` statement at the beginning of the file."
+count = 1
+
+[[issues]]
+file = "www/ogame/calc/moon.php"
+code = "strict-types"
+message = "Missing `declare(strict_types=1);` statement at the beginning of the file."
+count = 1
+
+[[issues]]
+file = "www/ogame/calc/moon.tpl"
+code = "array-style"
+message = "Short array style `[..]` is preferred over `array(..)`."
+count = 4
+
+[[issues]]
+file = "www/ogame/calc/moon.tpl"
+code = "strict-types"
+message = "Missing `declare(strict_types=1);` statement at the beginning of the file."
+count = 1
+
+[[issues]]
+file = "www/ogame/calc/production.php"
+code = "array-style"
+message = "Short array style `[..]` is preferred over `array(..)`."
+count = 19
+
+[[issues]]
+file = "www/ogame/calc/production.php"
+code = "function-name"
+message = "Function name `getTechsByType` should be in snake case."
+count = 1
+
+[[issues]]
+file = "www/ogame/calc/production.php"
+code = "identity-comparison"
+message = "Use identity comparison `===` instead of equality comparison `==`."
+count = 5
+
+[[issues]]
+file = "www/ogame/calc/production.php"
+code = "no-global"
+message = "Unsafe use of `global` keyword."
+count = 1
+
+[[issues]]
+file = "www/ogame/calc/production.php"
+code = "no-isset"
+message = "Use of the `isset` construct."
+count = 4
+
+[[issues]]
+file = "www/ogame/calc/production.php"
+code = "prefer-early-continue"
+message = "Consider using early continue pattern to reduce nesting."
+count = 1
+
+[[issues]]
+file = "www/ogame/calc/production.php"
+code = "strict-types"
+message = "Missing `declare(strict_types=1);` statement at the beginning of the file."
+count = 1
+
+[[issues]]
+file = "www/ogame/calc/production.tpl"
+code = "array-style"
+message = "Short array style `[..]` is preferred over `array(..)`."
+count = 10
+
+[[issues]]
+file = "www/ogame/calc/production.tpl"
+code = "identity-comparison"
+message = "Use identity comparison `===` instead of equality comparison `==`."
+count = 8
+
+[[issues]]
+file = "www/ogame/calc/production.tpl"
+code = "no-else-clause"
+message = "Avoid `else` clauses."
+count = 3
+
+[[issues]]
+file = "www/ogame/calc/production.tpl"
+code = "no-else-clause"
+message = "Avoid `elseif` clauses."
+count = 1
+
+[[issues]]
+file = "www/ogame/calc/production.tpl"
+code = "strict-types"
+message = "Missing `declare(strict_types=1);` statement at the beginning of the file."
+count = 1
+
+[[issues]]
+file = "www/ogame/calc/profiles.tpl"
+code = "array-style"
+message = "Short array style `[..]` is preferred over `array(..)`."
+count = 3
+
+[[issues]]
+file = "www/ogame/calc/profiles.tpl"
+code = "no-shorthand-ternary"
+message = "Use of the shorthand ternary operator."
+count = 1
+
+[[issues]]
+file = "www/ogame/calc/profiles.tpl"
+code = "strict-types"
+message = "Missing `declare(strict_types=1);` statement at the beginning of the file."
+count = 1
+
+[[issues]]
+file = "www/ogame/calc/queue.php"
+code = "array-style"
+message = "Short array style `[..]` is preferred over `array(..)`."
+count = 7
+
+[[issues]]
+file = "www/ogame/calc/queue.php"
+code = "function-name"
+message = "Function name `getTechsByType` should be in snake case."
+count = 1
+
+[[issues]]
+file = "www/ogame/calc/queue.php"
+code = "identity-comparison"
+message = "Use identity comparison `===` instead of equality comparison `==`."
+count = 5
+
+[[issues]]
+file = "www/ogame/calc/queue.php"
+code = "no-global"
+message = "Unsafe use of `global` keyword."
+count = 1
+
+[[issues]]
+file = "www/ogame/calc/queue.php"
+code = "no-isset"
+message = "Use of the `isset` construct."
+count = 1
+
+[[issues]]
+file = "www/ogame/calc/queue.php"
+code = "prefer-early-continue"
+message = "Consider using early continue pattern to reduce nesting."
+count = 1
+
+[[issues]]
+file = "www/ogame/calc/queue.php"
+code = "strict-types"
+message = "Missing `declare(strict_types=1);` statement at the beginning of the file."
+count = 1
+
+[[issues]]
+file = "www/ogame/calc/queue.tpl"
+code = "array-style"
+message = "Short array style `[..]` is preferred over `array(..)`."
+count = 1
+
+[[issues]]
+file = "www/ogame/calc/queue.tpl"
+code = "identity-comparison"
+message = "Use identity comparison `===` instead of equality comparison `==`."
+count = 1
+
+[[issues]]
+file = "www/ogame/calc/queue.tpl"
+code = "strict-behavior"
+message = "Call to `in_array` must enforce strict comparison."
+count = 1
+
+[[issues]]
+file = "www/ogame/calc/queue.tpl"
+code = "strict-types"
+message = "Missing `declare(strict_types=1);` statement at the beginning of the file."
+count = 1
+
+[[issues]]
+file = "www/ogame/calc/terraformer.php"
+code = "strict-types"
+message = "Missing `declare(strict_types=1);` statement at the beginning of the file."
+count = 1
+
+[[issues]]
+file = "www/ogame/calc/terraformer.tpl"
+code = "array-style"
+message = "Short array style `[..]` is preferred over `array(..)`."
+count = 2
+
+[[issues]]
+file = "www/ogame/calc/terraformer.tpl"
+code = "strict-types"
+message = "Missing `declare(strict_types=1);` statement at the beginning of the file."
+count = 1
+
+[[issues]]
+file = "www/ogame/calc/trade.php"
+code = "strict-types"
+message = "Missing `declare(strict_types=1);` statement at the beginning of the file."
+count = 1
+
+[[issues]]
+file = "www/ogame/calc/trade.tpl"
+code = "strict-types"
+message = "Missing `declare(strict_types=1);` statement at the beginning of the file."
+count = 1
+
+[[issues]]
+file = "www/ogame/calc/universes.inc.php"
+code = "array-style"
+message = "Short array style `[..]` is preferred over `array(..)`."
+count = 10
+
+[[issues]]
+file = "www/ogame/calc/universes.inc.php"
+code = "function-name"
+message = "Function name `fetchUniverseSnapshot` should be in snake case."
+count = 1
+
+[[issues]]
+file = "www/ogame/calc/universes.inc.php"
+code = "function-name"
+message = "Function name `loadUniverseCountries` should be in snake case."
+count = 1
+
+[[issues]]
+file = "www/ogame/calc/universes.inc.php"
+code = "function-name"
+message = "Function name `loadUniverses` should be in snake case."
+count = 1
+
+[[issues]]
+file = "www/ogame/calc/universes.inc.php"
+code = "function-name"
+message = "Function name `readUniverseCache` should be in snake case."
+count = 1
+
+[[issues]]
+file = "www/ogame/calc/universes.inc.php"
+code = "function-name"
+message = "Function name `universeCacheFile` should be in snake case."
+count = 1
+
+[[issues]]
+file = "www/ogame/calc/universes.inc.php"
+code = "function-name"
+message = "Function name `universeNumber` should be in snake case."
+count = 1
+
+[[issues]]
+file = "www/ogame/calc/universes.inc.php"
+code = "function-name"
+message = "Function name `universeSnapshot` should be in snake case."
+count = 1
+
+[[issues]]
+file = "www/ogame/calc/universes.inc.php"
+code = "function-name"
+message = "Function name `universesJs` should be in snake case."
+count = 1
+
+[[issues]]
+file = "www/ogame/calc/universes.inc.php"
+code = "no-empty"
+message = "Use of the `empty` construct."
+count = 1
+
+[[issues]]
+file = "www/ogame/calc/universes.inc.php"
+code = "no-error-control-operator"
+message = "Unsafe use of error control operator `@`."
+count = 4
+
+[[issues]]
+file = "www/ogame/calc/universes.inc.php"
+code = "no-isset"
+message = "Use of the `isset` construct."
+count = 2
+
+[[issues]]
+file = "www/ogame/calc/universes.inc.php"
+code = "prefer-early-continue"
+message = "Consider using early continue pattern to reduce nesting."
+count = 2
+
+[[issues]]
+file = "www/ogame/calc/universes.inc.php"
+code = "strict-types"
+message = "Missing `declare(strict_types=1);` statement at the beginning of the file."
+count = 1
+
+[[issues]]
+file = "www/routes.inc.php"
+code = "array-style"
+message = "Short array style `[..]` is preferred over `array(..)`."
+count = 2
+
+[[issues]]
+file = "www/routes.inc.php"
+code = "function-name"
+message = "Function name `canonicalCalcPath` should be in snake case."
+count = 1
+
+[[issues]]
+file = "www/routes.inc.php"
+code = "strict-types"
+message = "Missing `declare(strict_types=1);` statement at the beginning of the file."
+count = 1
+
+[[issues]]
+file = "www/scripts-guard.tpl"
+code = "strict-types"
+message = "Missing `declare(strict_types=1);` statement at the beginning of the file."
+count = 1
+
+[[issues]]
+file = "www/sidebar-menu.tpl"
+code = "no-else-clause"
+message = "Avoid `else` clauses."
+count = 2
+
+[[issues]]
+file = "www/sidebar-menu.tpl"
+code = "strict-types"
+message = "Missing `declare(strict_types=1);` statement at the beginning of the file."
+count = 1
+
+[[issues]]
+file = "www/sidebar.tpl"
+code = "array-style"
+message = "Short array style `[..]` is preferred over `array(..)`."
+count = 5
+
+[[issues]]
+file = "www/sidebar.tpl"
+code = "no-isset"
+message = "Use of the `isset` construct."
+count = 1
+
+[[issues]]
+file = "www/sidebar.tpl"
+code = "strict-types"
+message = "Missing `declare(strict_types=1);` statement at the beginning of the file."
+count = 1
+
+[[issues]]
+file = "www/topbar.tpl"
+code = "no-empty"
+message = "Use of the `empty` construct."
+count = 1
+
+[[issues]]
+file = "www/topbar.tpl"
+code = "strict-types"
+message = "Missing `declare(strict_types=1);` statement at the beginning of the file."
+count = 1
+
+[[issues]]
+file = "www/vendor.tpl"
+code = "strict-types"
+message = "Missing `declare(strict_types=1);` statement at the beginning of the file."
+count = 1

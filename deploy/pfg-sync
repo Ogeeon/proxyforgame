@@ -407,6 +407,9 @@ flip_site() {
 # ---------------------------------------------------------------------------
 prune_releases() {
   local current="$1" prev="$2" r path kept=0
+  # The `ls` below is there for -t, newest first; its grep admits only 40-hex
+  # names, so the filename hazards SC2010 warns about cannot reach the loop.
+  # shellcheck disable=SC2010
   while IFS= read -r r; do
     [ -n "$r" ] || continue
     path="$RELEASES_DIR/$r"

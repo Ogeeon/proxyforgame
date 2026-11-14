@@ -72,6 +72,7 @@ PW ?= node node_modules/@playwright/test/cli.js
         docker-up docker-down docker-logs \
         test test-unit test-e2e test-e2e-ui test-one report \
         check audit quality coverage db-validate lint typecheck php-version-check \
+        secrets vulns actions-lint shell-lint docker-lint php-lint php-baseline css-lint typos agents-lint commitlint migrations-check fix \
         changelog-validate changelog-release \
         tsconfigs tsconfigs-check vendor vendor-check \
         html-render html-validate html-audit \
@@ -88,7 +89,13 @@ help: ## Show this list
 # postinstall downloads a JRE that scripts/validate-html.js never asks for (it runs
 # the system `java` against the jar directly), and fsevents is macOS-only. The
 # Playwright browsers come from the explicit `playwright install` below, not a hook.
-install: ## Install test dependencies and Playwright browsers
+#
+# `mise install` fetches the standalone checkers pinned in mise.toml (jactionlint,
+# shellcheck, betterleaks, mago...). The recipes call them by bare name, which
+# resolves through the mise shims directory on PATH - mise's installer puts it
+# there on Windows, `mise activate` or jdx/mise-action does elsewhere.
+install: ## Install the pinned checkers, test dependencies and Playwright browsers
+	mise install
 	npm ci --ignore-scripts
 	cd playwright-tests && npm ci --ignore-scripts
 	cd playwright-tests && $(PW) install $(PW_DEPS)
@@ -157,7 +164,14 @@ report: ## Open the last Playwright HTML report
 # `make check` always means "you broke something". The two reporters below
 # both exit non-zero on pre-existing issues, so they live in `audit` instead and
 # are prefixed with `-` there to keep one failure from hiding the other.
-check: php-version-check changelog-validate i18n-validate lint typecheck tsconfigs-check vendor-check html-validate test ## Green gate - what must pass before a commit
+check: php-version-check changelog-validate i18n-validate migrations-check secrets actions-lint shell-lint docker-lint php-lint css-lint typos agents-lint lint typecheck tsconfigs-check vendor-check html-validate test ## Green gate - what must pass before a commit
+
+# The autofixes that only rewrite what their check reports and never delete
+# code. Read the diff before committing; one tool's fixes per commit.
+fix: ## Apply the safe autofixes: Stylelint, typos, jactionlint
+	npm run lint:css --silent -- --fix
+	typos --write-changes
+	jactionlint --fix
 
 audit: ## Advisory reports; these flag pre-existing issues and do not gate
 	-node scripts/check-test-coverage.js
@@ -166,6 +180,77 @@ audit: ## Advisory reports; these flag pre-existing issues and do not gate
 
 lint: ## Run ESLint over every JS file
 	npm run lint --silent
+
+# Workflows and dependabot.yml; accepted findings live in .github/jactionlint.yaml
+# with a reason, the security ones with an expiry date. --strict-exit fails on
+# warnings too - without it only error-level findings change the exit code.
+actions-lint: ## Lint the GitHub Actions workflows and dependabot.yml (jactionlint)
+	jactionlint --strict-exit --no-color
+
+# Every tracked bash script. Listed by hand because most have no extension and
+# cmd.exe cannot glob them - add a new script here. Workflow `run:` blocks are
+# shellchecked by jactionlint.
+SHELL_SCRIPTS := deploy/pfg-changelog-apply deploy/pfg-cron-run deploy/pfg-migrate \
+                 deploy/pfg-notify deploy/pfg-sync deploy/watchdog.sh \
+                 scripts/mcp-stats.sh scripts/pfg-ssh.sh
+
+shell-lint: ## Lint the deploy and helper bash scripts (ShellCheck)
+	shellcheck $(SHELL_SCRIPTS)
+
+docker-lint: ## Lint the local-dev Dockerfile (Hadolint, config in .hadolint.yaml)
+	hadolint docker/php/Dockerfile
+
+# Every commit of the history (CI checks out with fetch-depth 0 for this), then
+# the uncommitted and the staged changes, so a key is caught before it is
+# committed too. The allowlists in .betterleaks.toml name exact values.
+BETTERLEAKS := betterleaks git . -c .betterleaks.toml --redact --no-banner --log-level warn
+# stylelint-config-recommended: correctness rules only, no style opinions. The
+# findings the CSS already had are counted in stylelint-suppressions.json; a new
+# one fails. Shrink that file with `npx stylelint ... --suppress` after a fix.
+css-lint: ## Lint the site CSS (Stylelint)
+	npm run lint:css --silent
+
+# Conventional Commits over FROM..TO, by default what this branch adds to
+# origin/main. CI passes the range of the push or the pull request. Not in
+# `check`: on main itself the default range is empty.
+FROM ?= origin/main
+TO ?= HEAD
+commitlint: ## Check commit messages in FROM..TO (default origin/main..HEAD) (commitlint)
+	npx --no-install commitlint --strict --from $(FROM) --to $(TO)
+
+# CLAUDE.md, .claude/skills and commands, MCP config. --strict fails on
+# warnings, which agnix otherwise reports with exit 0.
+agents-lint: ## Lint the agent instruction files and skills (agnix)
+	agnix --strict .
+
+# Known misspellings in code, comments and docs. Deliberate spellings and the
+# non-English files are listed in _typos.toml; `typos -w` applies the fixes.
+typos: ## Check code and docs for common misspellings (typos)
+	typos
+
+# Mago, configured in mago.toml. Both commands fail on warnings; what the code
+# base already had is in mago-lint-baseline.toml and mago-analyze-baseline.toml.
+php-lint: ## Lint and statically analyse the PHP (Mago, new findings only)
+	mago lint
+	mago analyze
+
+# Rewrites both baselines from the current findings. For shrinking them after a
+# fix - a baseline that grows hides a new finding, so review the diff.
+php-baseline: ## Regenerate the Mago baselines (review the diff: they should only shrink)
+	mago lint --generate-baseline --baseline mago-lint-baseline.toml
+	mago analyze --generate-baseline --baseline mago-analyze-baseline.toml
+
+# Not part of `check`: the answer depends on the advisory database, not on the
+# change, so a new advisory would block an unrelated commit. The Security
+# workflow runs it on every push and pull request and weekly; exceptions go in
+# osv-scanner.toml with an ignoreUntil date.
+vulns: ## Check the npm lockfiles for known vulnerabilities (OSV-Scanner)
+	osv-scanner scan source --config osv-scanner.toml --lockfile package-lock.json --lockfile playwright-tests/package-lock.json
+
+secrets: ## Scan the git history and the working tree for secrets (Betterleaks)
+	$(BETTERLEAKS) --git-workers 8
+	$(BETTERLEAKS) --pre-commit
+	$(BETTERLEAKS) --staged
 
 typecheck: ## Type-check every JS file in the browser and Node projects
 	npm run typecheck --silent
@@ -198,6 +283,12 @@ coverage: ## Report which calculators have no spec
 # and the table half of the check still runs. Pass --no-db to skip it explicitly.
 db-validate: ## Compare schema.sql against the sqlQuery calls in PHP and against the live column types
 	node scripts/validate-database-schema.js
+
+# A migration that exists on the base is never edited, renamed or deleted -
+# hosts that already ran it would never see the change. MIGRATIONS_BASE (CI
+# sets it to the commit before the push) overrides the origin/main default.
+migrations-check: ## Fail if an already-shipped db/migrations/*.sql was changed
+	node scripts/check-migrations-immutable.js
 
 # First in `check` because it is the cheapest gate in the list: a structural
 # mistake in CHANGELOG.md surfaces before anything spawns tsc or a browser.

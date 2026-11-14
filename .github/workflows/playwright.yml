@@ -21,6 +21,10 @@ on:
   # so it dispatches this workflow on the PR branch instead.
   workflow_dispatch:
 
+# The job only reads the repository; the artifact upload uses its own runtime token.
+permissions:
+  contents: read
+
 jobs:
   test:
     strategy:
@@ -31,6 +35,7 @@ jobs:
     # Pinned: ubuntu-latest moved to 26.04 on 2026-10-22 and Playwright has no
     # chromium build for it ("does not support chromium on ubuntu26.04-x64").
     runs-on: ubuntu-24.04
+    timeout-minutes: 45
     env:
       # Must be PFG_BASE_URL - that is the name playwright.config.js reads.
       PFG_BASE_URL: 'http://localhost:8000'
@@ -73,8 +78,12 @@ jobs:
       # -------------------------------------------------------------
       # Checkout repository
       # -------------------------------------------------------------
+      # Full history: `make secrets` scans every commit, and the commit-message
+      # check needs the commits of the push or the pull request.
       - name: Checkout code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
 
       # -------------------------------------------------------------
       # Install PHP (with Apache-like extensions)
@@ -141,7 +150,7 @@ jobs:
 
           # Wait for server to respond
           echo "------ Waiting for server... ------"
-          for i in {1..30}; do
+          for _ in {1..30}; do
             if curl -s -I http://localhost:8000 | grep -q "200\|302"; then
               echo "Server is up!"
               break
@@ -195,8 +204,29 @@ jobs:
           path: ~/.cache/ms-playwright
           key: playwright-${{ runner.os }}-${{ hashFiles('playwright-tests/package-lock.json') }}
 
+      # The standalone checkers `make check` runs, at the versions mise.toml pins -
+      # the same file developers install from, so CI cannot run a different linter.
+      - name: Set up mise
+        uses: jdx/mise-action@d5574b52816a478f9d4e6529a3f6ff17a8a36785 # v5.2.8
+
       - name: Install dependencies and browsers
         run: make install PW_DEPS=--with-deps
+
+      # The commits this push or pull request adds follow Conventional Commits.
+      # Not part of `make check`, which has no range to look at on main itself.
+      # One shard is enough. A new branch pushed with no `before` (all zeros) and
+      # a manual dispatch have no range, so they skip.
+      - name: Commit messages (make commitlint)
+        if: ${{ strategy.job-index == 0 }}
+        env:
+          FROM: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.event.before }}
+          TO: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
+        run: |
+          if [ -z "$FROM" ] || [ "$FROM" = "0000000000000000000000000000000000000000" ]; then
+            echo "No commit range for this event; nothing to check."
+            exit 0
+          fi
+          make commitlint FROM="$FROM" TO="$TO"
 
       # -------------------------------------------------------------
       # The gate - the same target developers run before a commit
@@ -210,8 +240,12 @@ jobs:
       # came to be missing (issue #21).
       #
       # PW_REPORTER: list for readable logs, html so the upload step below has
-      # an artifact.
+      # an artifact. MIGRATIONS_BASE gives migrations-check the commit before
+      # this push (or the pull request's base); on a push to main origin/main is
+      # HEAD itself and would show no change at all.
       - name: Green gate (make check)
+        env:
+          MIGRATIONS_BASE: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.event.before }}
         run: make check PW_REPORTER=list,html PW_SHARD=${{ matrix.shard }}
 
       # Reporters that still flag pre-existing issues; `audit` prefixes each with

@@ -43,6 +43,7 @@ jobs:
         (github.event.issue.author_association == 'OWNER' ||
          github.event.issue.author_association == 'COLLABORATOR'))
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     permissions:
       # These govern the built-in GITHUB_TOKEN, which is only the fallback here - the
       # push and the PR normally go through the App token minted below. Write is kept
@@ -68,6 +69,12 @@ jobs:
         with:
           client-id: ${{ secrets.CLAUDE_APP_CLIENT_ID }}
           private-key: ${{ secrets.CLAUDE_APP_PRIVATE_KEY }}
+          # The four check-claude-app.yml proves the installation holds; without
+          # them the token carries everything the App was ever granted.
+          permission-contents: write
+          permission-pull-requests: write
+          permission-issues: write
+          permission-actions: read
 
       - name: Checkout repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1

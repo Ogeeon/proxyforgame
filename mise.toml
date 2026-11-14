@@ -1,0 +1,17 @@
+# Pinned versions of the standalone checkers `make check` runs, read by developers
+# and CI alike (`mise install`, then the Makefile finds them through the mise
+# shims on PATH). Node, PHP, Java and the npm tooling are not here: PHP comes from
+# .php-version, Node/Java from the CI setup actions, ESLint, TypeScript,
+# Stylelint and commitlint from package.json.
+#
+# Bump a version on purpose: check the tool's release notes, then run
+# `make check` - a new rule in a new release can fail the gate.
+[tools]
+"github:jdx/jactionlint" = "2.6.0"
+"github:agent-sh/agnix" = "0.61.0"
+shellcheck = "0.11.0"
+betterleaks = "1.10.1"
+osv-scanner = "2.7.1"
+mago = "1.59.0"
+typos = "1.52.2"
+hadolint = "2.15.1"

@@ -1,0 +1,78 @@
+# Monthly reminder for the checkers pinned in mise.toml (`make install` and CI
+# install them from there). Dependabot does not read mise.toml, so without this
+# the pins would stay at the day they were set.
+#
+# One issue, fixed title: opened when a pin is behind its latest release,
+# rewritten on later runs while it stays open, and closed by the first run that
+# finds every pin current. Updating is by hand - bump mise.toml, run
+# `make install && make check`, read the release notes; a new linter version
+# can add findings, which are fixed, not baselined.
+name: Tool updates
+
+on:
+  schedule:
+    - cron: '41 6 1 * *'
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: tool-updates
+  cancel-in-progress: false
+
+jobs:
+  check:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      issues: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      # Only mise itself: the check asks for the latest versions, it does not
+      # need the tools installed.
+      - name: Set up mise
+        uses: jdx/mise-action@d5574b52816a478f9d4e6529a3f6ff17a8a36785 # v5.2.8
+        with:
+          install: false
+
+      - name: Open, update or close the reminder issue
+        env:
+          GH_TOKEN: ${{ github.token }}
+          # mise asks the GitHub API for releases; a token lifts the rate limit.
+          GITHUB_TOKEN: ${{ github.token }}
+          TITLE: 'Tool updates: mise.toml pins are behind'
+        run: |
+          set -euo pipefail
+          table=$(node scripts/check-tool-updates.js)
+          issue=$(gh issue list --state open --search "in:title \"$TITLE\"" \
+            --json number,title --jq ".[] | select(.title == env.TITLE) | .number" | head -n1)
+
+          if [ -z "$table" ]; then
+            echo "Every pin in mise.toml is current."
+            if [ -n "$issue" ]; then
+              gh issue close "$issue" --comment "All pins in mise.toml are current as of $(date -u +%F)."
+            fi
+            exit 0
+          fi
+
+          {
+            echo "These checkers in \`mise.toml\` are behind their latest release (checked $(date -u +%F)):"
+            echo
+            echo "$table"
+            echo
+            echo "Bump the pins in \`mise.toml\`, run \`make install && make check\`, and read each release"
+            echo "note. Findings a new version adds are fixed, not added to a baseline. This issue is"
+            echo "rewritten monthly while it stays open and closed once every pin is current."
+          } > body.md
+          echo "$table"
+
+          if [ -n "$issue" ]; then
+            gh issue edit "$issue" --body-file body.md
+          else
+            gh issue create --title "$TITLE" --body-file body.md
+          fi

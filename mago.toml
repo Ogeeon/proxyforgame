@@ -1,0 +1,39 @@
+# Mago configuration (`make php-lint`): the PHP linter and static analyzer.
+# The formatter is not used - adopting it would rewrite every PHP file.
+#
+# Findings that predate the check live in the two baseline files; a new one fails
+# the build. Regenerate a baseline only to shrink it after fixing findings
+# (`make php-baseline`), never to wave a new finding through.
+
+# The live host's PHP, as pinned in .php-version.
+php-version = "8.5"
+
+[source]
+paths = ["www", "scripts", "deploy", "get_population.php", "uni.list.cron.php"]
+excludes = ["www/vendor", "**/node_modules"]
+# Calculator templates are PHP files that mostly hold HTML and inline JS.
+extensions = ["php", "tpl"]
+
+[linter]
+# Warnings and errors fail; notes and help are suggestions.
+minimum-fail-level = "warning"
+baseline = "mago-lint-baseline.toml"
+
+[linter.rules]
+# Wants a named argument for every literal (`round($x, precision: 2)`). The code
+# base passes them positionally in ~440 places; requiring the opposite in new
+# code would be a new style standard, which is not this change's to set.
+literal-named-argument = { enabled = false }
+
+[analyzer]
+minimum-fail-level = "warning"
+baseline = "mago-analyze-baseline.toml"
+# A .tpl is require_once'd by its controller (www/ogame/calc/<name>.php) and
+# reads the controller's variables - $tr, $lang and friends. Analysed on its
+# own, every such read is "undefined", and every use of the result "mixed".
+ignore = [
+  { code = "undefined-variable", in = ["www/**/*.tpl"] },
+  { code = "possibly-undefined-variable", in = ["www/**/*.tpl"] },
+  { code = "mixed-array-access", in = ["www/**/*.tpl"] },
+  { code = "mixed-argument", in = ["www/**/*.tpl"] },
+]

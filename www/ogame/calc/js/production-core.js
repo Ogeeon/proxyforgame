@@ -478,17 +478,17 @@ function computeEnergyConsumption(prodParams, settings, results) {
 
 // Crawlers are in row 6
 function computeCrawlersEnergyConsumption(prodParams, settings, results) {
-	let cralwersPwrPcnt = prodParams[6][1] / 100.0;
+	let crawlersPwrPcnt = prodParams[6][1] / 100.0;
 	let crawlersOlPcnt = 0;
-	if (cralwersPwrPcnt > 1) {
-		crawlersOlPcnt = cralwersPwrPcnt - 1;
-		cralwersPwrPcnt = 1;
+	if (crawlersPwrPcnt > 1) {
+		crawlersOlPcnt = crawlersPwrPcnt - 1;
+		crawlersPwrPcnt = 1;
 	}
 	// Ion Crystal Modules (lf-crawler-bonus): the same percentage that boosts
 	// crawler production also cuts their energy draw - see
 	// docs/calculators/production-vs-ogame.md.
 	let lfCrawlerFactor = Math.min(settings.lfCrawlerBonus || 0, 100) / 100;
-	let crawlersEenergyCons = Math.round((prodParams[6][0] * (cralwersPwrPcnt + crawlersOlPcnt * 2)) * 50 * (1 - lfCrawlerFactor));
+	let crawlersEenergyCons = Math.round((prodParams[6][0] * (crawlersPwrPcnt + crawlersOlPcnt * 2)) * 50 * (1 - lfCrawlerFactor));
 	results[7][3] = -crawlersEenergyCons;
 	return crawlersEenergyCons;
 }

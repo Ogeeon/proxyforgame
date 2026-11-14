@@ -1,0 +1,25 @@
+# Betterleaks configuration (`make secrets`): the default rules plus the narrow
+# allowlists below. Each allowlist names exact values, not paths or whole rules,
+# so a real secret in the same files is still reported.
+
+[extend]
+useDefault = true
+
+[[allowlists]]
+description = """Two sample OGame spy-report codes kept as comments in \
+www/api/spy-report.inc.php (and in ajax.php before the API split). They are \
+the shareable report ids the game hands every player, not credentials."""
+regexes = [
+  '''fs008d2cbfee933ddbb85e2e20d8872ce34d''',
+  '''sr-ru-1-360e215d03d5115e828c70bba761b361dd8b4c0c''',
+]
+
+[[allowlists]]
+description = """The throwaway password of the local Docker and CI MariaDB \
+containers; neither is reachable from outside its machine."""
+paths = [
+  '''^docker-compose\.yml$''',
+  '''^\.github/workflows/playwright\.yml$''',
+]
+regexTarget = "match"
+regexes = ['''PASSWORD: secret''']

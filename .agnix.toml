@@ -1,0 +1,17 @@
+# agnix configuration (`make agents-lint`): CLAUDE.md, the skills and commands
+# under .claude/, and the MCP config, checked for Claude Code.
+tools = ["claude-code"]
+
+# The commit skill is meant to load when the user says "commit" in plain words,
+# not only on /commit - CLAUDE.md relies on that for its SonarQube question and
+# test scoping. Turning off model invocation would drop exactly that.
+[[overrides]]
+paths = [".claude/skills/commit/SKILL.md"]
+disabled_rules = ["CC-SK-006"]
+
+# CLAUDE.md is past the recommended 200 lines. Splitting it is a decision about
+# what agents always load, and a change of its own - drop this override once
+# the file is split.
+[[overrides]]
+paths = ["CLAUDE.md"]
+disabled_rules = ["CC-MEM-014"]
