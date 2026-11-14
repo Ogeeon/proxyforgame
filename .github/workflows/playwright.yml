@@ -240,8 +240,12 @@ jobs:
       # came to be missing (issue #21).
       #
       # PW_REPORTER: list for readable logs, html so the upload step below has
-      # an artifact.
+      # an artifact. MIGRATIONS_BASE gives migrations-check the commit before
+      # this push (or the pull request's base); on a push to main origin/main is
+      # HEAD itself and would show no change at all.
       - name: Green gate (make check)
+        env:
+          MIGRATIONS_BASE: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.event.before }}
         run: make check PW_REPORTER=list,html PW_SHARD=${{ matrix.shard }}
 
       # Reporters that still flag pre-existing issues; `audit` prefixes each with

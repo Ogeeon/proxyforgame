@@ -72,7 +72,7 @@ PW ?= node node_modules/@playwright/test/cli.js
         docker-up docker-down docker-logs \
         test test-unit test-e2e test-e2e-ui test-one report \
         check audit quality coverage db-validate lint typecheck php-version-check \
-        secrets vulns actions-lint shell-lint docker-lint php-lint php-baseline css-lint typos agents-lint commitlint \
+        secrets vulns actions-lint shell-lint docker-lint php-lint php-baseline css-lint typos agents-lint commitlint migrations-check \
         changelog-validate changelog-release \
         tsconfigs tsconfigs-check vendor vendor-check \
         html-render html-validate html-audit \
@@ -164,7 +164,7 @@ report: ## Open the last Playwright HTML report
 # `make check` always means "you broke something". The two reporters below
 # both exit non-zero on pre-existing issues, so they live in `audit` instead and
 # are prefixed with `-` there to keep one failure from hiding the other.
-check: php-version-check changelog-validate i18n-validate secrets actions-lint shell-lint docker-lint php-lint css-lint typos agents-lint lint typecheck tsconfigs-check vendor-check html-validate test ## Green gate - what must pass before a commit
+check: php-version-check changelog-validate i18n-validate migrations-check secrets actions-lint shell-lint docker-lint php-lint css-lint typos agents-lint lint typecheck tsconfigs-check vendor-check html-validate test ## Green gate - what must pass before a commit
 
 audit: ## Advisory reports; these flag pre-existing issues and do not gate
 	-node scripts/check-test-coverage.js
@@ -276,6 +276,12 @@ coverage: ## Report which calculators have no spec
 # and the table half of the check still runs. Pass --no-db to skip it explicitly.
 db-validate: ## Compare schema.sql against the sqlQuery calls in PHP and against the live column types
 	node scripts/validate-database-schema.js
+
+# A migration that exists on the base is never edited, renamed or deleted -
+# hosts that already ran it would never see the change. MIGRATIONS_BASE (CI
+# sets it to the commit before the push) overrides the origin/main default.
+migrations-check: ## Fail if an already-shipped db/migrations/*.sql was changed
+	node scripts/check-migrations-immutable.js
 
 # First in `check` because it is the cheapest gate in the list: a structural
 # mistake in CHANGELOG.md surfaces before anything spawns tsc or a browser.

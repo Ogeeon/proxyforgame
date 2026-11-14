@@ -23,6 +23,16 @@ portably is not worth the trouble. Node is already required by every other targe
 Targets without a `##` comment are hidden from the listing, which is the intended way to keep
 internal helpers out of it.
 
+## check-migrations-immutable.js
+
+Fails when an existing `db/migrations/*.sql` is edited, renamed or deleted. Each host applies a
+migration once and records it in `schema_migrations`, so a changed file never reaches a database
+that already ran it; the fix is a new migration.
+
+**Usage:** `make migrations-check`, part of `make check`. Compares the working tree against the
+merge base with `origin/main`, or with the commit given as the first argument or in
+`MIGRATIONS_BASE` (CI passes the commit before the push).
+
 ## Translation Management Scripts
 
 ### validate-translations.js
