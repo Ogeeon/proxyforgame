@@ -1115,6 +1115,16 @@ describe('MCP tool ogame_build_queue', () => {
         expect(await error({ levels: { terraformer: 2 }, queue: [{ building: 'terraformer', action: 'demolish' }] }))
             .toContain('cannot be demolished');
         expect(await error({ queue: [{ building: 'sensor-phalanx' }] })).toContain('cannot be built on a planet');
+        expect(await error({ queue: [{ building: 'warp-gate' }] })).toContain('Unknown building "warp-gate"');
+    });
+
+    it('takes a building by its English name as well as by its key', async () => {
+        const run = async (building) => (await call(protocolWith(), 'ogame_build_queue', {
+            levels: { 'metal-mine': 10 }, queue: [{ building }],
+        })).structuredContent.steps[0];
+        const byKey = await run('metal-mine');
+        expect(await run('  METAL MINE ')).toEqual(byKey);
+        expect(byKey.building).toBe('metal-mine');
     });
 });
 
