@@ -14,6 +14,7 @@
 .claude/*
 !.claude/skills/
 !.claude/commands/
+!.claude/rules/
 # A Claude Code session started from inside .claude/commands drops its own
 # settings there; commands/ is versioned now, so keep that out.
 .claude/commands/.claude/

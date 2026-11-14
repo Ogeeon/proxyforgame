@@ -8,10 +8,3 @@ tools = ["claude-code"]
 [[overrides]]
 paths = [".claude/skills/commit/SKILL.md"]
 disabled_rules = ["CC-SK-006"]
-
-# CLAUDE.md is past the recommended 200 lines. Splitting it is a decision about
-# what agents always load, and a change of its own - drop this override once
-# the file is split.
-[[overrides]]
-paths = ["CLAUDE.md"]
-disabled_rules = ["CC-MEM-014"]
