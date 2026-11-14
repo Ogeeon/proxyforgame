@@ -9,7 +9,7 @@ class Intl
     //private var $locale_dir = __DIR__.'/locale'; // Locales directory.
 
     static $locales; // Will contain all locales.
-    static $translations; // Wil contain all translations indexed by locale.
+    static $translations; // Will contain all translations indexed by locale.
 
     /**
      * Get all locales.
