@@ -72,7 +72,7 @@ PW ?= node node_modules/@playwright/test/cli.js
         docker-up docker-down docker-logs \
         test test-unit test-e2e test-e2e-ui test-one report \
         check audit quality coverage db-validate lint typecheck php-version-check \
-        actions-lint shell-lint docker-lint \
+        secrets actions-lint shell-lint docker-lint \
         changelog-validate changelog-release \
         tsconfigs tsconfigs-check vendor vendor-check \
         html-render html-validate html-audit \
@@ -164,7 +164,7 @@ report: ## Open the last Playwright HTML report
 # `make check` always means "you broke something". The two reporters below
 # both exit non-zero on pre-existing issues, so they live in `audit` instead and
 # are prefixed with `-` there to keep one failure from hiding the other.
-check: php-version-check changelog-validate i18n-validate actions-lint shell-lint docker-lint lint typecheck tsconfigs-check vendor-check html-validate test ## Green gate - what must pass before a commit
+check: php-version-check changelog-validate i18n-validate secrets actions-lint shell-lint docker-lint lint typecheck tsconfigs-check vendor-check html-validate test ## Green gate - what must pass before a commit
 
 audit: ## Advisory reports; these flag pre-existing issues and do not gate
 	-node scripts/check-test-coverage.js
@@ -192,6 +192,15 @@ shell-lint: ## Lint the deploy and helper bash scripts (ShellCheck)
 
 docker-lint: ## Lint the local-dev Dockerfile (Hadolint, config in .hadolint.yaml)
 	hadolint docker/php/Dockerfile
+
+# Every commit of the history (CI checks out with fetch-depth 0 for this), then
+# the uncommitted and the staged changes, so a key is caught before it is
+# committed too. The allowlists in .betterleaks.toml name exact values.
+BETTERLEAKS := betterleaks git . -c .betterleaks.toml --redact --no-banner --log-level warn
+secrets: ## Scan the git history and the working tree for secrets (Betterleaks)
+	$(BETTERLEAKS) --git-workers 8
+	$(BETTERLEAKS) --pre-commit
+	$(BETTERLEAKS) --staged
 
 typecheck: ## Type-check every JS file in the browser and Node projects
 	npm run typecheck --silent
