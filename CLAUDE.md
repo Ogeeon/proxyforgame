@@ -12,6 +12,22 @@ This repo contains ten calculators: `costs`, `expeditions`, `flight`, `graviton`
 `moon`, `production`, `queue`, `terraformer`, `trade`. Before exploring or editing, confirm which
 one the request targets if the file path is ambiguous — do not assume the cost calculator by default.
 
+## Path-scoped rules
+
+The rules for one part of the code live in `.claude/rules/` and load when a file under their
+`paths:` is read. Read the matching file first when a task reaches that area before any file
+in it has been opened:
+
+| File | Covers |
+|------|--------|
+| `.claude/rules/architecture.md` | Calculator file layout, i18n loader, key shared files, external services |
+| `.claude/rules/php-backend.md` | Page controller pattern, the AJAX API and adding a service |
+| `.claude/rules/javascript.md` | JS style, type checking (`strictNullChecks`, per-calculator tsconfig), cookie storage, fleet mapping |
+| `.claude/rules/ui.md` | `docs/patterns.md`, input validation, CSS/Bootstrap gotchas, vendored Bootstrap, the state of `trade` |
+| `.claude/rules/mcp.md` | The MCP server and why formulas stay in `*-core.js` |
+| `.claude/rules/tests.md` | How the e2e suite finds its server, the `./base` import |
+| `.claude/rules/local-dev.md` | Running PHP scripts, Docker, WAMP and `make serve` |
+
 ## Development Commands
 
 ### Task Runner (`make`)
@@ -39,7 +55,8 @@ boxes is too old (`choco install make`). The ones you reach for most:
   and check the diff only removes entries — never regenerate to absorb a new one.
 - **Generated files are never edited by hand**: `tsconfig/<calc>.json` (`make tsconfigs`)
   and `www/vendor/` (`make vendor`); `tsconfigs-check` and `vendor-check` fail on a hand
-  edit.
+  edit. `docs/calculators/*.md` is generated too (`make docs` overwrites it), so nothing
+  hand-written goes there.
 - A shipped `db/migrations/*.sql` is never edited (`make migrations-check`); add a new one.
 - Commit messages are linted in CI (`make commitlint`): Conventional Commits, body lines
   ≤ 100 columns, no body line starting with `word:` (it parses as a footer).
@@ -53,43 +70,6 @@ constraints on writing recipes (platform default shell, one command per line, ne
 `docs/test-scope.md` — the file-set table and the shared-file list. `unit-tests/README.md`
 covers whether a given test belongs in Node or in Playwright. Tests live in
 `unit-tests/<name>-core.test.js` and `playwright-tests/tests/<name>.spec.js`.
-
-Things worth knowing before running or writing a test:
-
-- **The e2e suite finds its server itself**: with `PFG_BASE_URL` unset,
-  `playwright-tests/playwright.config.js` probes `http://pfg.wmp` (WAMP) and then
-  `http://localhost:8000`, and fails up front when neither answers — start one, don't guess.
-  `PFG_BASE_URL` (**not** `PLAYWRIGHT_BASE_URL`) pins a host explicitly.
-- Specs import `test`/`expect` from `./base`, **not** from `@playwright/test`, so a fixture
-  every test needs has one place to go. New spec files must use the same import. Video
-  recording is off locally (`PFG_VIDEO=1` brings it back for a failing run).
-- **Bootstrap and Bootstrap Icons are vendored**: `www/vendor/` holds committed copies of the
-  versions `package.json` pins, included by `www/vendor.tpl`. Upgrading is a version bump
-  plus `make vendor`; `make check` fails (`vendor-check`) when the two disagree.
-
-### Running PHP Scripts (PowerShell)
-```powershell
-& 'd:\wamp64\bin\php\php8.2.33\php.exe' .\ogame\calc\flight.php
-```
-With the Docker stack up: `docker compose exec web php ogame/calc/flight.php`.
-Local PHP should match the host's version pinned in `.php-version` (see
-`docs/adr/0003-single-host-php-8-5.md`). Local dev is authoritative only for
-the Node suite, lint and typecheck; anything PHP-shaped is confirmed by CI or by
-`make serve` on a matching build. `make check` warns — but does not fail — on a
-version mismatch.
-
-### Local Development
-- `docker compose up -d` (or `make docker-up`) brings up the PHP built-in server on
-  `http://localhost:8000` plus a MariaDB seeded from `schema.sql` + the fixtures and
-  migrated — the quickest path. `docker compose down -v` resets the database. See
-  `docs/adr/0002-docker-local-dev.md`.
-- Or configure a WAMP virtual host pointing to `www/` (see README.md), add
-  `127.0.0.1 pfg.wmp` to the hosts file, and browse `http://pfg.wmp` for full-site testing.
-  The database is **MariaDB 10.4 on port 3306** — the engine CI runs (the site's host has
-  11.8); `.env` carries no port, so whatever answers on 3306 is what the site uses. WAMP's
-  services need admin rights to start.
-- Or skip both: `make serve` runs the built-in PHP server on `http://localhost:8000`
-  against whatever PHP/MariaDB is on the machine (`.env` for the DB).
 
 ## Git & Commits
 
@@ -168,77 +148,6 @@ Cutting the release is manual: `make changelog-release` writes `changelog.sql`,
 `deploy/pfg-changelog-apply` after every sync, and the SQL is all upserts so
 re-applying an entry is a no-op (`deploy/README.md`, *The in-app changelog*).
 
-## Architecture
-
-### Page Controller Pattern
-Every page follows this three-step pattern:
-1. Set `$lang` and context variables
-2. Call `Intl::getTranslations($lang, '<page>')` to load translations from `locale/*.json`
-3. `require_once('<page>.tpl')` to render HTML + inline JS
-
-**Example:**
-```php
-$lang = $_GET['lang'] ?? 'en';
-$tr = Intl::getTranslations($lang, 'flight');
-require_once('flight.tpl');
-```
-
-### AJAX API
-Single endpoint `www/ajax.php` handles all AJAX requests:
-- Request: a `service` parameter names the action. Reads take GET, anything with a
-  side effect takes POST; the `$apiRoutes` table in `ajax.php` declares which.
-- Response: **JSON**, with the HTTP status carrying the outcome — `respondJson(200, …)`
-  on success, and an error body of `{"error": {"code": …, "message": …}}` otherwise.
-- Each service is a plain function in its own file under `www/api/`, returning its
-  result or throwing an `ApiError`. Nothing below a handler writes to the output.
-
-### Calculator Structure
-Calculators in `www/ogame/calc/` consist of:
-- `<name>.php` - Controller (sets language, loads translations)
-- `<name>.tpl` - Template (renders HTML with inline JS)
-- `css/<name>.css` - Per-calculator styles
-- `js/<name>-core.js` - DOM-free formulas (what the node:test suite exercises)
-- `js/<name>-data-collector.js`, `-renderer.js`, `-orchestration.js` - form reading, output, wiring
-
-`trade` is half-way there: it has `js/trade-core.js` and a type-checked `js/trade.js`, but the
-rest of the page — form reading, output and wiring — still lives in that one file rather than in
-a collector/renderer/orchestration trio. To create a new calculator use the
-**`new-calculator` skill**.
-
-### MCP server
-`mcp/` is a dependency-free Node service that exposes calculators as MCP tools to LLM clients
-(ChatGPT, Claude), at `https://proxyforgame.com/mcp`. Its tools compute with the same
-`*-core.js` files the pages load — never copy a formula into `mcp/tools/`; if the arithmetic or
-data still lives in PHP or orchestration code, move it into a shared file first (the tables in
-`www/ogame/calc/data/` and `QueueCalculator.simulate()` got there that way). `make mcp` runs it locally; layout and how to add a
-tool: `mcp/README.md`; host setup: `deploy/README.md`, *The MCP server*; why Node without an
-SDK: `docs/adr/0005-mcp-node-service.md`.
-
-### Internationalization
-- `www/langs.php` - Maps URL prefixes to languages (`/en/` → English, `us` → `en`)
-- `www/Intl.php` - `Intl::getTranslations($lang, $page)` merges common + page-specific keys
-- `www/locale/*.json` - Translation files for 13 languages
-
-### Key Files
-| File | Purpose |
-|------|---------|
-| `www/ajax.php` | Central AJAX dispatcher |
-| `www/langs.php` | Language detection from URL |
-| `www/Intl.php` | Translation loader |
-| `www/db.connect.inc.php` | Database connection helpers |
-| `www/ogame/calc/js/ogame-production.js` | Production rates, consumption, storage capacity, planet energy with its bonuses (costs, production, graviton, terraformer) |
-| `www/ogame/calc/js/ogame-cargo.js` | One ship's hold — `shipHold` (costs, expeditions, flight, graviton, moon, queue, terraformer, trade) |
-| `www/ogame/calc/js/ogame-costs.js` | Classic build cost/time, demolition, halving cost (costs, production, queue, terraformer, lfcosts) |
-| `www/ogame/calc/js/ogame-lifeform.js` | Life Form cost/time (lfcosts, production) |
-| `www/ogame/calc/js/dom-utils.js` | Native DOM helpers (the jQuery replacement) |
-| `www/ogame/calc/js/own-api.js` | Normalizes OGame's API 2 export (`flight`, `expeditions`) |
-
-Importing data the player copies out of the game — the API 2 export and the spy report, what each
-calculator takes from them — is documented in `docs/ogame-api-import.md`. The country/universe
-picker (flight, costs, trade) — the crons, tables and `serverdata`/`populatedSystems` services
-behind it — is `docs/universe-data.md`. Note that
-`docs/calculators/*.md` is generated (`make docs` overwrites it), so nothing hand-written goes there.
-
 ## Project Conventions
 
 ### Bug Fixes & Refactoring
@@ -251,89 +160,12 @@ behind it — is `docs/universe-data.md`. Note that
 ### Code Comments
 Write all comments in code files in English only.
 
-### JavaScript Style
-Prefer `const`/`let` over `var`, and `Number.parseInt`/`Number.parseFloat` over the bare global
-forms — in new code and whenever you're already touching a line. Don't do a drive-by rewrite of
-an entire legacy file just to convert unrelated `var` declarations.
-
-**Every JS file is type-checked** — `checkJs: true`, types expressed in JSDoc, no `.ts` sources
-and no per-file `// @ts-check` opt-in. `make typecheck` gates `make check`, so a change that
-breaks types cannot be committed green. Three consequences worth knowing:
-
-- **`strictNullChecks` is on**, the rest of the `strict` family is not. A DOM lookup that can
-  miss returns `HTMLElement|null` and the null has to be dealt with — early return, `?.`, or a
-  narrowing `if`. Do not silence it with `/** @type {HTMLElement} */ (x)`: `dom-utils.js`
-  already carries null-safe `$`, `setHtml`, `show`, `hide`, `addEvent`, `setConstrains` and
-  friends, and reaching for one of those is almost always the fix. `noImplicitAny` was measured
-  and deliberately left off — an unannotated parameter is missing documentation, not a defect.
-- The browser code is checked **one project per calculator** (`tsconfig/<calc>.json`), because
-  a page loads exactly one calculator and the files share a global scope. Those projects are
-  generated from the `<script>` tags of the matching `.tpl` — after adding, removing or
-  reordering a tag, run `make tsconfigs`, otherwise `make check` fails on a stale project.
-- Ambient declarations for page globals, expando properties and `bootstrap` live in
-  `www/ogame/calc/js/globals.d.ts`; `options-global.d.ts` covers the calculators that declare
-  `options` in an inline template script.
-
-### Cookie Storage
-Calculator options persist via cookies (e.g., `options_expeditions`). Note that `options.prm.fleet` uses `~` as a comma placeholder for encoded values.
-
-That placeholder is a workaround, not a convention: `saveToCookie`/`loadFromCookie` in
-`www/js/utils.js` join records with `,`, and never escape it, so **any stored value containing a
-comma is destroyed on read** — including a nested object, which is written as JSON. Settings then
-fall back to their defaults with no error. If a calculator appears not to remember something,
-check this before looking for a bug in the calculator itself.
-
-### Fleet Mapping
-`EXPEDITION_SHIPS` in `www/ogame/calc/js/expeditions-core.js` maps short ship codes to indices,
-and the core addresses that array **by index**. If you change ship order, update the PHP side
-and `expeditions.tpl` to match.
-
-### Adding AJAX Services
-Add a row to `$apiRoutes` in `www/ajax.php` naming the method and the handler, and put the
-handler in its own file under `www/api/`. A handler returns the value to serialize or throws
-an `ApiError`; it must not echo anything itself. On the client, check the HTTP status — the
-body is JSON either way.
-
 ## Localization
 
 Any new user-visible string (labels, tooltips, warnings, modal text) must be added to **all 13
 locale files** in the same commit; reuse an existing key before creating one, and put
 cross-page keys in `common` rather than duplicating them per page. Procedure: **`add-translation`
 skill**.
-
-## UI Patterns
-
-`docs/patterns.md` is the canonical reference for the Bootstrap 5 calculator UI — tooltip
-skinning, locale-aware decimal input, blur validation, input-group sizing, non-editable fields,
-button styling. **Read the relevant section there before writing UI code**; the two lists below
-are only a summary of its most frequently hit rules. The `flight` calculator is the reference
-implementation for every pattern.
-
-## Validation & Input Conventions
-- All numeric inputs use the **blur-validation pattern** (validate/clamp on blur, never live-clamp while typing). Follow the existing helpers rather than inventing new behavior.
-- Always use the locale-aware decimal helper for user-entered fractional values (RU uses `,`). **Never** apply locale separators to imported OGame API data — the API 2 export and the spy-report JSON always use `.`.
-- **Text the player pastes out of the game UI is different**: its separator follows the game client's language (`.` on EN/RU, `,` on DE), so a paste parser accepts both.
-- Never persist a locale decimal separator into comma-delimited cookies; serialize with a canonical dot format.
-
-## CSS / Bootstrap Gotchas
-- Bootstrap `input-group` overrides non-id-scoped width classes — scope width rules or they will blow up to ~177px.
-- Accordions and tables inside calculator panels use `max-content` intrinsic width and will widen the panel; apply `width: 0; min-width: 100%` to contain them.
-- Reach Bootstrap's JavaScript through `attachTooltips()`, `openModal()`, `BS_EVENT` and the other
-  helpers of `www/js/bootstrap-access.js` — they use `getOrCreateInstance()`, never `new`
-  (SonarQube S1848). Only that file and `bootstrap-tooltip-guard.js` read the `bootstrap` global;
-  ESLint enforces it. The Bootstrap 6 plan is `docs/bootstrap-6-migration.md`.
-
-## Important Notes
-
-- **Frontend**: vanilla JS on Bootstrap 5.3, no jQuery — `www/ogame/calc/js/dom-utils.js` provides the
-  DOM helpers that replaced it. Nine calculators went through the full BS5 migration;
-  **`trade` is only part-way**. Its markup (Bootstrap grid, form and utility classes) and its JS
-  are migrated — `dom-utils.js`, `trade-core.js`, type-checked — but the UI conventions are not:
-  `trade.css` uses `--bs-*` custom properties in only two places, the numeric fields validate on
-  `keyup` instead of on blur, and the page has no Bootstrap tooltip against flight's thirty. Do not
-  assume a `docs/patterns.md` UI rule already holds there.
-- **External services**: `https://logserver.net/api/proxyforgame/` (used by `GetDataCode`)
-- **Database**: Optional MySQL/MariaDB for changelog and trade calculator features
 
 ## Agent skills
 
