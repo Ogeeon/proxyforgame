@@ -1,0 +1,32 @@
+{
+  "www/css/common.css": {
+    "no-descending-specificity": {
+      "count": 10
+    }
+  },
+  "www/ogame/calc/css/costs.css": {
+    "no-descending-specificity": {
+      "count": 1
+    }
+  },
+  "www/ogame/calc/css/expeditions.css": {
+    "no-descending-specificity": {
+      "count": 2
+    }
+  },
+  "www/ogame/calc/css/flight.css": {
+    "no-descending-specificity": {
+      "count": 1
+    }
+  },
+  "www/ogame/calc/css/moon.css": {
+    "no-descending-specificity": {
+      "count": 1
+    }
+  },
+  "www/ogame/calc/css/trade.css": {
+    "no-descending-specificity": {
+      "count": 2
+    }
+  }
+}
