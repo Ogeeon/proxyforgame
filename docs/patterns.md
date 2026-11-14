@@ -183,7 +183,7 @@ this._setClassVal(`${id}-speed`, localizeFloat(frac(v.speed, 6) * 100, 4));
 ```
 
 **Never** apply the locale separator to imported OGame API data — that payload always
-uses `.` (CLAUDE.md). Likewise, never persist a locale separator into a comma-delimited
+uses `.` (`.claude/rules/ui.md`). Likewise, never persist a locale separator into a comma-delimited
 cookie: serialise with a canonical dot.
 
 **Deviation to look for**: `parseFloat(input.value)` / `Number(input.value)` on a
