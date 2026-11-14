@@ -72,7 +72,7 @@ PW ?= node node_modules/@playwright/test/cli.js
         docker-up docker-down docker-logs \
         test test-unit test-e2e test-e2e-ui test-one report \
         check audit quality coverage db-validate lint typecheck php-version-check \
-        secrets vulns actions-lint shell-lint docker-lint php-lint php-baseline css-lint typos \
+        secrets vulns actions-lint shell-lint docker-lint php-lint php-baseline css-lint typos agents-lint \
         changelog-validate changelog-release \
         tsconfigs tsconfigs-check vendor vendor-check \
         html-render html-validate html-audit \
@@ -164,7 +164,7 @@ report: ## Open the last Playwright HTML report
 # `make check` always means "you broke something". The two reporters below
 # both exit non-zero on pre-existing issues, so they live in `audit` instead and
 # are prefixed with `-` there to keep one failure from hiding the other.
-check: php-version-check changelog-validate i18n-validate secrets actions-lint shell-lint docker-lint php-lint css-lint typos lint typecheck tsconfigs-check vendor-check html-validate test ## Green gate - what must pass before a commit
+check: php-version-check changelog-validate i18n-validate secrets actions-lint shell-lint docker-lint php-lint css-lint typos agents-lint lint typecheck tsconfigs-check vendor-check html-validate test ## Green gate - what must pass before a commit
 
 audit: ## Advisory reports; these flag pre-existing issues and do not gate
 	-node scripts/check-test-coverage.js
@@ -202,6 +202,11 @@ BETTERLEAKS := betterleaks git . -c .betterleaks.toml --redact --no-banner --log
 # one fails. Shrink that file with `npx stylelint ... --suppress` after a fix.
 css-lint: ## Lint the site CSS (Stylelint)
 	npm run lint:css --silent
+
+# CLAUDE.md, .claude/skills and commands, MCP config. --strict fails on
+# warnings, which agnix otherwise reports with exit 0.
+agents-lint: ## Lint the agent instruction files and skills (agnix)
+	agnix --strict .
 
 # Known misspellings in code, comments and docs. Deliberate spellings and the
 # non-English files are listed in _typos.toml; `typos -w` applies the fixes.
