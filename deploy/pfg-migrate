@@ -54,7 +54,7 @@ ENV_FILE="$CHECKOUT/.env"
 conf_get() {
   local key="$1" line=""
   if [ -r "$ENV_FILE" ]; then
-    line=$(grep -m1 "^[[:space:]]*$key[[:space:]]*=" "$ENV_FILE" 2>/dev/null) || true
+    line=$(grep -m1 "^[[:space:]]*${key}[[:space:]]*=" "$ENV_FILE" 2>/dev/null) || true
   fi
   if [ -n "$line" ]; then
     line=${line#*=}
@@ -107,7 +107,7 @@ if [ ${#FILES[@]} -eq 0 ]; then
   exit 0
 fi
 
-IFS=$'\n' FILES=($(printf '%s\n' "${FILES[@]}" | sort)); unset IFS
+mapfile -t FILES < <(printf '%s\n' "${FILES[@]}" | sort)
 
 expect=1
 for f in "${FILES[@]}"; do
