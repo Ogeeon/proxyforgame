@@ -15,6 +15,8 @@ release section; it is the source of truth for the other eleven translations.
 
 ## [Unreleased]
 
+## [2026-11-15] - site entry 74
+
 ### Added
 
 - Monitoring: the MCP server records its usage in the site's own database (`mcp_event`, migration 0004) - one row per JSON-RPC message, plus one per request the transport refused: the method and tool, the outcome (`ok`, `invalid`, `tool_error`, `internal`, `rejected`), the HTTP status, the time it took, the body size, the client's `clientInfo` and user agent, the universe, the names of the top-level arguments and the schema paths that failed validation. Never an argument value, a request body or an IP address. An `initialize` answer now carries an `Mcp-Session-Id`, which the server neither stores nor checks, so one connection's calls group together; the watchdog and the addresses in `PFG_MCP_INTERNAL_IPS` are marked internal. The server posts batches to a new `mcpUsage` service over loopback, with a token both sides read from `.env`, and records nothing without it. The page `/<lang>/mcp`, which said the server stores nothing, and the privacy policy now describe the record. `make mcp-stats` prints a summary; columns and queries: `docs/mcp-usage.md`.
@@ -37,6 +39,8 @@ release section; it is the source of truth for the other eleven translations.
 - Graviton, terraformer: a result field grows with its number instead of letting it run out of the box - at a high terraformer level, or with a large satellite fleet, the energy, crystal, deuterium and time readouts held numbers wider than their fixed width, on the desktop too. Their old width is now a minimum. On a phone a long duration wraps at its spaces, and so does the unit of a power plant's energy ("283.935 / Энергия") when the line is too short for both.
 - Moon calculator: on a phone the page is laid out at the screen's width instead of zoomed out from 980px. The fleet and defense units stand in three groups - the three columns they had - that sit side by side where there is room and wrap where there is not: one group under another on a phone, one unit a line. The "%", "km" and "systems" units stay beside their fields.
 - Trade calculator: a URL fragment that carries no deal-link key - `#foo=bar`, or a profile share link's `#pfp=...` - is no longer read as a deal link, which used to reset the saved direction to forward and clear the moon checkbox. `_parseUrlParams` now returns nothing unless one of the keys in `TRADE_LINK_KEYS` is present.
+
+> **RU:** Профиль теперь можно перенести на другое устройство без файла: выберите «Передать…» в списке профилей (или кнопку с QR-кодом в «Управлении профилями…») и откройте ссылку на другом устройстве либо отсканируйте QR-код камерой телефона. Большой профиль показывается серией из нескольких кодов — отсканируйте их все, в любом порядке. Переносятся аккаунт, планеты, луны, ручные правки и настройки вселенной; ресурсы на планетах — нет. На сервер ничего не отправляется: профиль передаётся внутри самой ссылки.
 
 ## [2026-11-09] - site entry 73
 
