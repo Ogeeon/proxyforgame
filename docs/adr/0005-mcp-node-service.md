@@ -28,7 +28,7 @@ resetting a git checkout - no install step, no build.
   load, through the loader the unit tests use (`mcp/lib/browser-scripts.js`).
   A PHP server would have needed every formula ported and then kept in step
   by hand - two implementations that disagree a little more after every fix.
-- **No SDK.** For a stateless, tools-only server the protocol is five
+- **No SDK.** For a stateless, tools-only server the protocol is six
   JSON-RPC methods over one POST endpoint (`mcp/lib/protocol.js`,
   `mcp/lib/http-transport.js`). An SDK would bring a `node_modules` that the
   deploy has no step to install, and a supply chain to keep current for a
