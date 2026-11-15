@@ -3304,7 +3304,7 @@ test('a small profile is shared by one QR code, the whole link', async ({ page }
  * values overridden - a profile whose link takes a series of QR codes.
  */
 async function makeHeavy(page) {
-    await page.evaluate(() => {
+    const heavy = await page.evaluate(() => {
         const id = JSON.parse(localStorage.getItem('pfg_profiles') || '[]')[0].id;
         const profile = JSON.parse(localStorage.getItem('pfg_profile_' + id) || 'null');
         while (profile.planets.length < 12) {
@@ -3321,14 +3321,20 @@ async function makeHeavy(page) {
                 if (i % 2 === 0 && typeof game === 'number') setProfileValue(body, key, game + 1 + (i % 7));
             });
         }
-        localStorage.setItem('pfg_profile_' + id, JSON.stringify(profile));
+        return { key: 'pfg_profile_' + id, json: JSON.stringify(profile) };
     });
-    await page.reload();
+    // Written from a page with no calculator on it: a save production still
+    // has pending would write its three planets back over the twelve.
+    const calculator = page.url();
+    await page.goto('/robots.txt');
+    await page.evaluate(({ key, json }) => localStorage.setItem(key, json), heavy);
+    await page.goto(calculator);
 }
 
 test('a heavy profile goes as a series of QR codes, taken on the last one in any order', async ({ page, browser }) => {
     await openWithProfile(page, '/production');
     await makeHeavy(page);
+    expect((await activeProfile(page)).planets).toHaveLength(12);
     const [id] = await storedIds(page);
     await shareLink(page);
 
