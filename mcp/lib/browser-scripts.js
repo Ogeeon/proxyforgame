@@ -33,7 +33,7 @@ function loadBrowserScripts(files, names) {
     // Copied only where the running node has them, so an older one still loads
     // every other script; the codec checks for them itself.
     for (const name of ['CompressionStream', 'DecompressionStream', 'TextEncoder', 'TextDecoder', 'btoa', 'atob']) {
-        if (typeof globalThis[name] !== 'undefined') sandbox[name] = globalThis[name];
+        if (globalThis[name] !== undefined) sandbox[name] = globalThis[name];
     }
     // Scripts that end with `Object.assign(window, {...})` expect a window; point
     // it at the sandbox so those assignments land among the globals too.

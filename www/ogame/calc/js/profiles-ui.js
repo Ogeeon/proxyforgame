@@ -432,7 +432,7 @@ class ProfilesUi {
       if (value === PF_ACTION.import) this.openImport();
       else if (value === PF_ACTION.create) this.openProps(null);
       else if (value === PF_ACTION.manage) this.openManage();
-      else if (value === PF_ACTION.share) this.openShare(this.store.getActiveId() || '', false);
+      else if (value === PF_ACTION.share) this.openShare(this.store.getActiveId() || '', false).catch((e) => consoleLog(e));
       else {
         this.store.setActive(value || null);
         return;
@@ -994,7 +994,7 @@ class ProfilesUi {
       const share = this.iconButton('bi-qr-code', this.text.share, () => {
         // One modal at a time, as for editing; closing the share dialog comes back here.
         pfModal('pf-manage-modal')?.hide();
-        this.openShare(p.id, true);
+        this.openShare(p.id, true).catch((e) => consoleLog(e));
       });
       share.classList.add('pf-share');
       actions.appendChild(share);
@@ -1220,7 +1220,7 @@ class ProfilesUi {
     const next = document.getElementById('pf-share-qr-next');
     if (prev instanceof HTMLButtonElement) prev.disabled = this.shareQrIndex === 0;
     if (next instanceof HTMLButtonElement) next.disabled = this.shareQrIndex === count - 1;
-    this.drawShareQr(this.shareQrUrls[this.shareQrIndex], this.shareSerial);
+    this.drawShareQr(this.shareQrUrls[this.shareQrIndex], this.shareSerial).catch((e) => consoleLog(e));
   }
 
   /**
