@@ -2218,6 +2218,702 @@ function planProfilesRestore(storedIds, incoming) {
 }
 
 // ---------------------------------------------------------------------------
+// Share link: one profile carried to another device in a URL fragment
+// ---------------------------------------------------------------------------
+//
+// The fragment never reaches the server, a log or a Referer. Its value is
+// `d2.` + base64url(deflate-raw(JSON)) or, where the browser cannot compress,
+// `r2.` + base64url(UTF-8 JSON). The JSON is {pfp, k, profile, universes}: the
+// profile without the resources on its bodies, as the backup file carries it,
+// its value sets packed by SHARE_KEYS (the compact form, below), and the
+// universe settings the player picked for that profile's universe. The links
+// written before the compact form, `d1.`/`r1.` with every key named and no
+// `k`, are still read.
+//
+// The link to copy is always that one URL. A QR code holds less than a camera
+// can be trusted to read off a screen, so a payload too long for one code is
+// cut into a series: `p1.<id>.<n>.<k>.<chunk>`, each part an ordinary link of
+// its own. The page a part opens keeps it until the series is complete, and
+// the page that receives the last part takes the profile.
+
+/** Version of the share payload. Bump it with a reader for the old one. */
+const SHARE_FORMAT_VERSION = 1;
+
+/** The fragment key of a share link; base64url holds no `&`, `#` or `=`. */
+const SHARE_FRAGMENT_KEY = 'pfp';
+
+/**
+ * The longest URL one QR code of a share carries: version 25, error correction
+ * L, byte mode. Larger versions fit more but a phone camera reads them off a
+ * screen unreliably, so a longer link becomes a series of codes. Lower it if a
+ * phone cannot read a version-25 code; nothing else depends on the number.
+ */
+const QR_SINGLE_URL_LIMIT = 1273;
+
+/** The longest series of QR codes offered; a longer one is the link's or the backup file's job. */
+const QR_MAX_PARTS = 10;
+
+/** How long the parts of an unfinished series are kept. */
+const SHARE_PARTS_TTL_MS = 30 * 60 * 1000;
+
+/** A part's id: 8 base64url characters, 6 random bytes. */
+const SHARE_PART_ID = /^[\w-]{8}$/;
+
+/** A part as its fragment value spells it: `p1.<id>.<n>.<k>.<chunk>`. */
+const SHARE_PART_PATTERN = /^p1\.([\w-]{8})\.([1-9]\d?)\.([1-9]\d?)\.([\w.-]+)$/;
+
+// The compact form (`d2.`/`r2.`): the value keys of the account, a planet and
+// a moon are known in advance, so a share lists the game values in the order
+// of SHARE_KEYS instead of naming every key, and the overrides by index.
+//
+// SHARE_KEYS ONLY GROWS AT ITS END. A link carries how many keys of each list
+// its writer had (`k`), and a reader takes that many from its own copy - so a
+// key moved, removed or inserted in the middle would hand every later value to
+// the wrong key in links already sent. A key the code no longer writes keeps
+// its place; a new one is appended. A key missing from the lists still travels,
+// by name, in `x`. unit-tests/profiles-core.test.js holds a copy of the lists
+// as they were and fails on anything but an append.
+//
+// The order: the keys every import writes first, the sparse ones (a few ships'
+// and techs' life-form bonuses, the life-form techs of the four races) last,
+// where an account or a body that lacks them is cut short.
+
+/** @type {{account: string[], planet: string[], moon: string[]}} */
+const SHARE_KEYS = {
+  account: [
+    'class', 'allianceClass', 'officer.commander', 'officer.admiral', 'officer.engineer',
+    'officer.geologist', 'officer.technocrat', 'research.106', 'research.108', 'research.109',
+    'research.110', 'research.111', 'research.113', 'research.114', 'research.115', 'research.117',
+    'research.118', 'research.120', 'research.121', 'research.122', 'research.123', 'research.124',
+    'research.199', 'species.701.level', 'species.702.level', 'species.703.level',
+    'species.704.level', 'lf.prod.metal', 'lf.prod.crystal', 'lf.prod.deuterium', 'lf.prod.energy',
+    'lf.expedition.resources', 'lf.expedition.ships', 'lf.expedition.fleetLoss',
+    'lf.classBooster.1', 'lf.classBooster.2', 'lf.classBooster.3', 'lf.discovery', 'lf.crawler',
+    'lf.phalanxRange', 'item.expeditionResources', 'rates', 'lf.ship.202.armor',
+    'lf.ship.202.shield', 'lf.ship.202.cargo', 'lf.ship.202.speed', 'lf.ship.202.weapon',
+    'lf.ship.202.fuel', 'lf.ship.203.armor', 'lf.ship.203.shield', 'lf.ship.203.cargo',
+    'lf.ship.203.speed', 'lf.ship.203.weapon', 'lf.ship.203.fuel', 'lf.ship.204.armor',
+    'lf.ship.204.shield', 'lf.ship.204.cargo', 'lf.ship.204.speed', 'lf.ship.204.weapon',
+    'lf.ship.204.fuel', 'lf.ship.205.armor', 'lf.ship.205.shield', 'lf.ship.205.cargo',
+    'lf.ship.205.speed', 'lf.ship.205.weapon', 'lf.ship.205.fuel', 'lf.ship.206.armor',
+    'lf.ship.206.shield', 'lf.ship.206.cargo', 'lf.ship.206.speed', 'lf.ship.206.weapon',
+    'lf.ship.206.fuel', 'lf.ship.207.armor', 'lf.ship.207.shield', 'lf.ship.207.cargo',
+    'lf.ship.207.speed', 'lf.ship.207.weapon', 'lf.ship.207.fuel', 'lf.ship.208.armor',
+    'lf.ship.208.shield', 'lf.ship.208.cargo', 'lf.ship.208.speed', 'lf.ship.208.weapon',
+    'lf.ship.208.fuel', 'lf.ship.209.armor', 'lf.ship.209.shield', 'lf.ship.209.cargo',
+    'lf.ship.209.speed', 'lf.ship.209.weapon', 'lf.ship.209.fuel', 'lf.ship.210.armor',
+    'lf.ship.210.shield', 'lf.ship.210.cargo', 'lf.ship.210.speed', 'lf.ship.210.weapon',
+    'lf.ship.210.fuel', 'lf.ship.211.armor', 'lf.ship.211.shield', 'lf.ship.211.cargo',
+    'lf.ship.211.speed', 'lf.ship.211.weapon', 'lf.ship.211.fuel', 'lf.ship.213.armor',
+    'lf.ship.213.shield', 'lf.ship.213.cargo', 'lf.ship.213.speed', 'lf.ship.213.weapon',
+    'lf.ship.213.fuel', 'lf.ship.214.armor', 'lf.ship.214.shield', 'lf.ship.214.cargo',
+    'lf.ship.214.speed', 'lf.ship.214.weapon', 'lf.ship.214.fuel', 'lf.ship.215.armor',
+    'lf.ship.215.shield', 'lf.ship.215.cargo', 'lf.ship.215.speed', 'lf.ship.215.weapon',
+    'lf.ship.215.fuel', 'lf.ship.218.armor', 'lf.ship.218.shield', 'lf.ship.218.cargo',
+    'lf.ship.218.speed', 'lf.ship.218.weapon', 'lf.ship.218.fuel', 'lf.ship.219.armor',
+    'lf.ship.219.shield', 'lf.ship.219.cargo', 'lf.ship.219.speed', 'lf.ship.219.weapon',
+    'lf.ship.219.fuel', 'lf.cost.106.cost', 'lf.cost.106.time', 'lf.cost.108.cost',
+    'lf.cost.108.time', 'lf.cost.109.cost', 'lf.cost.109.time', 'lf.cost.110.cost',
+    'lf.cost.110.time', 'lf.cost.111.cost', 'lf.cost.111.time', 'lf.cost.113.cost',
+    'lf.cost.113.time', 'lf.cost.114.cost', 'lf.cost.114.time', 'lf.cost.115.cost',
+    'lf.cost.115.time', 'lf.cost.117.cost', 'lf.cost.117.time', 'lf.cost.118.cost',
+    'lf.cost.118.time', 'lf.cost.120.cost', 'lf.cost.120.time', 'lf.cost.121.cost',
+    'lf.cost.121.time', 'lf.cost.122.cost', 'lf.cost.122.time', 'lf.cost.123.cost',
+    'lf.cost.123.time', 'lf.cost.124.cost', 'lf.cost.124.time', 'lf.cost.199.cost',
+    'lf.cost.199.time', 'lf.cost.33.cost', 'lf.cost.33.time', 'lf.cost.11201.cost',
+    'lf.cost.11201.time',
+  ],
+  planet: [
+    'building.1', 'building.2', 'building.3', 'building.4', 'building.12', 'building.14',
+    'building.15', 'building.21', 'building.22', 'building.23', 'building.24', 'building.31',
+    'building.33', 'building.34', 'building.36', 'building.41', 'building.42', 'building.43',
+    'building.44', 'ship.202', 'ship.203', 'ship.204', 'ship.205', 'ship.206', 'ship.207',
+    'ship.208', 'ship.209', 'ship.210', 'ship.211', 'ship.212', 'ship.213', 'ship.214', 'ship.215',
+    'ship.217', 'ship.218', 'ship.219', 'defense.401', 'defense.402', 'defense.403', 'defense.404',
+    'defense.405', 'defense.406', 'defense.407', 'defense.408', 'defense.502', 'defense.503',
+    'fields.used', 'fields.total', 'diameter', 'temperature.min', 'temperature.max', 'lf.race',
+    'production.1', 'production.2', 'production.3', 'production.4', 'production.12',
+    'production.212', 'production.217', 'booster.1', 'booster.2', 'booster.3', 'energyBooster',
+    'lf.building.11101', 'lf.building.11102', 'lf.building.11103', 'lf.building.11104',
+    'lf.building.11105', 'lf.building.11106', 'lf.building.11107', 'lf.building.11108',
+    'lf.building.11109', 'lf.building.11110', 'lf.building.11111', 'lf.building.11112',
+    'lf.research.11201', 'lf.research.11202', 'lf.research.11203', 'lf.research.11204',
+    'lf.research.11205', 'lf.research.11206', 'lf.research.11207', 'lf.research.11208',
+    'lf.research.11209', 'lf.research.11210', 'lf.research.11211', 'lf.research.11212',
+    'lf.research.11213', 'lf.research.11214', 'lf.research.11215', 'lf.research.11216',
+    'lf.research.11217', 'lf.research.11218', 'lf.building.12101', 'lf.building.12102',
+    'lf.building.12103', 'lf.building.12104', 'lf.building.12105', 'lf.building.12106',
+    'lf.building.12107', 'lf.building.12108', 'lf.building.12109', 'lf.building.12110',
+    'lf.building.12111', 'lf.building.12112', 'lf.research.12201', 'lf.research.12202',
+    'lf.research.12203', 'lf.research.12204', 'lf.research.12205', 'lf.research.12206',
+    'lf.research.12207', 'lf.research.12208', 'lf.research.12209', 'lf.research.12210',
+    'lf.research.12211', 'lf.research.12212', 'lf.research.12213', 'lf.research.12214',
+    'lf.research.12215', 'lf.research.12216', 'lf.research.12217', 'lf.research.12218',
+    'lf.building.13101', 'lf.building.13102', 'lf.building.13103', 'lf.building.13104',
+    'lf.building.13105', 'lf.building.13106', 'lf.building.13107', 'lf.building.13108',
+    'lf.building.13109', 'lf.building.13110', 'lf.building.13111', 'lf.building.13112',
+    'lf.research.13201', 'lf.research.13202', 'lf.research.13203', 'lf.research.13204',
+    'lf.research.13205', 'lf.research.13206', 'lf.research.13207', 'lf.research.13208',
+    'lf.research.13209', 'lf.research.13210', 'lf.research.13211', 'lf.research.13212',
+    'lf.research.13213', 'lf.research.13214', 'lf.research.13215', 'lf.research.13216',
+    'lf.research.13217', 'lf.research.13218', 'lf.building.14101', 'lf.building.14102',
+    'lf.building.14103', 'lf.building.14104', 'lf.building.14105', 'lf.building.14106',
+    'lf.building.14107', 'lf.building.14108', 'lf.building.14109', 'lf.building.14110',
+    'lf.building.14111', 'lf.building.14112', 'lf.research.14201', 'lf.research.14202',
+    'lf.research.14203', 'lf.research.14204', 'lf.research.14205', 'lf.research.14206',
+    'lf.research.14207', 'lf.research.14208', 'lf.research.14209', 'lf.research.14210',
+    'lf.research.14211', 'lf.research.14212', 'lf.research.14213', 'lf.research.14214',
+    'lf.research.14215', 'lf.research.14216', 'lf.research.14217', 'lf.research.14218',
+  ],
+  moon: [
+    'building.1', 'building.2', 'building.3', 'building.4', 'building.12', 'building.14',
+    'building.15', 'building.21', 'building.22', 'building.23', 'building.24', 'building.31',
+    'building.33', 'building.34', 'building.36', 'building.41', 'building.42', 'building.43',
+    'building.44', 'ship.202', 'ship.203', 'ship.204', 'ship.205', 'ship.206', 'ship.207',
+    'ship.208', 'ship.209', 'ship.210', 'ship.211', 'ship.212', 'ship.213', 'ship.214', 'ship.215',
+    'ship.217', 'ship.218', 'ship.219', 'defense.401', 'defense.402', 'defense.403', 'defense.404',
+    'defense.405', 'defense.406', 'defense.407', 'defense.408', 'defense.502', 'defense.503',
+    'fields.used', 'fields.total', 'diameter',
+  ],
+};
+
+/**
+ * Whether a stored value is the two layers and nothing else, which the compact
+ * form can carry by position.
+ *
+ * @param {unknown} v
+ */
+function pfIsLayers(v) {
+  return isPlainObject(v) && Object.keys(v).every((k) => k === 'game' || k === 'override');
+}
+
+/**
+ * @typedef {Object} PackedShareValues
+ * @property {Array<*>} g The game values by key position, up to the last key there.
+ * @property {Array<*>} [o] The overrides: [position, value, position, value, …].
+ * @property {number[]} [a] Runs of positions within `g` whose key is not there
+ *   at all: [first, count, first, count, …]. The sparse keys (a life-form bonus of
+ *   a few ships out of fifteen) leave long gaps, which a list of runs keeps short.
+ * @property {number[]} [n] Positions within `g` whose key has no game value.
+ * @property {Object<string, *>} [x] Keys outside the list, or not two layers, as they are.
+ */
+
+/**
+ * @param {LayeredValues} values
+ * @param {string[]} keys
+ * @returns {PackedShareValues}
+ */
+function packShareValues(values, keys) {
+  const index = new Map(keys.map((key, i) => [key, i]));
+  /** @type {Object<string, *>} */
+  const x = {};
+  const present = new Set();
+  Object.entries(values).forEach(([key, v]) => {
+    const i = index.get(key);
+    if (i === undefined || !pfIsLayers(v)) x[key] = v;
+    else present.add(i);
+  });
+  const length = present.size > 0 ? Math.max(...present) + 1 : 0;
+  /** @type {PackedShareValues} */
+  const packed = { g: [] };
+  /** @type {Array<*>} */
+  const o = [];
+  /** @type {number[]} */
+  const a = [];
+  /** @type {number[]} */
+  const n = [];
+  for (let i = 0; i < length; i++) {
+    const v = values[keys[i]];
+    // A position with no game value holds a 0, the cheapest filler.
+    if (!present.has(i)) {
+      a.push(i);
+      packed.g.push(0);
+      continue;
+    }
+    if ('game' in v) {
+      packed.g.push(v.game);
+    } else {
+      n.push(i);
+      packed.g.push(0);
+    }
+    if ('override' in v) o.push(i, v.override);
+  }
+  if (o.length > 0) packed.o = o;
+  if (a.length > 0) packed.a = pfShareRuns(a);
+  if (n.length > 0) packed.n = n;
+  if (Object.keys(x).length > 0) packed.x = x;
+  return packed;
+}
+
+/**
+ * @param {number[]} positions Ascending.
+ * @returns {number[]} [first, count, first, count, …]
+ */
+function pfShareRuns(positions) {
+  /** @type {number[]} */
+  const runs = [];
+  positions.forEach((i) => {
+    const last = runs.length - 2;
+    if (last >= 0 && runs[last] + runs[last + 1] === i) runs[last + 1]++;
+    else runs.push(i, 1);
+  });
+  return runs;
+}
+
+/**
+ * @param {unknown} runs [first, count, first, count, …]
+ * @param {number} length
+ * @returns {?number[]} The positions, when every run is whole and below `length`.
+ */
+function pfShareFromRuns(runs, length) {
+  if (runs === undefined) return [];
+  if (!Array.isArray(runs) || runs.length % 2 !== 0) return null;
+  /** @type {number[]} */
+  const positions = [];
+  for (let j = 0; j < runs.length; j += 2) {
+    const [first, count] = [runs[j], runs[j + 1]];
+    if (!Number.isInteger(first) || !Number.isInteger(count) || first < 0 || count < 1 || first + count > length) return null;
+    for (let i = first; i < first + count; i++) positions.push(i);
+  }
+  return positions;
+}
+
+/**
+ * @param {unknown} list
+ * @param {number} length
+ * @returns {?number[]} The positions, when every one is below `length`.
+ */
+function pfSharePositions(list, length) {
+  if (list === undefined) return [];
+  if (!Array.isArray(list)) return null;
+  return list.every((i) => Number.isInteger(i) && i >= 0 && i < length) ? list : null;
+}
+
+/**
+ * @param {unknown} packed
+ * @param {string[]} keys The keys the link's writer had: a prefix of SHARE_KEYS.
+ * @returns {?LayeredValues} Null when it is not a packed value set.
+ */
+function unpackShareValues(packed, keys) {
+  if (!isPlainObject(packed) || !Array.isArray(packed.g) || packed.g.length > keys.length) return null;
+  const g = packed.g;
+  const absent = pfShareFromRuns(packed.a, g.length);
+  const noGame = pfSharePositions(packed.n, g.length);
+  const o = packed.o === undefined ? [] : packed.o;
+  if (absent === null || noGame === null || !Array.isArray(o) || o.length % 2 !== 0) return null;
+  if (packed.x !== undefined && !isPlainObject(packed.x)) return null;
+  const skip = new Set(absent);
+  const overrides = new Map();
+  for (let j = 0; j < o.length; j += 2) {
+    if (!Number.isInteger(o[j]) || o[j] < 0 || o[j] >= g.length || skip.has(o[j])) return null;
+    overrides.set(o[j], o[j + 1]);
+  }
+  const bare = new Set(noGame);
+  /** @type {LayeredValues} */
+  const values = {};
+  g.forEach((game, i) => {
+    if (skip.has(i)) return;
+    /** @type {{game?: *, override?: *}} */
+    const v = {};
+    if (!bare.has(i)) v.game = game;
+    if (overrides.has(i)) v.override = overrides.get(i);
+    values[keys[i]] = v;
+  });
+  return Object.assign(values, packed.x);
+}
+
+/**
+ * @param {Profile} profile
+ * @returns {Object<string, *>} The profile with its value sets packed.
+ */
+function packProfileShare(profile) {
+  /** @param {{values: LayeredValues}} body @param {string[]} keys */
+  const pack = (body, keys) => ({ ...body, values: packShareValues(body.values, keys) });
+  return {
+    ...profile,
+    account: pack(profile.account, SHARE_KEYS.account),
+    planets: profile.planets.map((p) => pack(p, SHARE_KEYS.planet)),
+    moons: profile.moons.map((m) => pack(m, SHARE_KEYS.moon)),
+  };
+}
+
+/**
+ * The profile of a compact share with its value sets unpacked, for readProfile().
+ *
+ * @param {Object<string, *>} raw The share's JSON.
+ * @returns {unknown} Null when the counts or a value set cannot be read.
+ */
+function unpackProfileShare(raw) {
+  const k = raw.k;
+  const parts = /** @type {const} */ (['account', 'planet', 'moon']);
+  // A link from code with more keys than this page knows names values it cannot place.
+  if (!Array.isArray(k) || k.length !== parts.length
+    || !parts.every((part, i) => Number.isInteger(k[i]) && k[i] >= 0 && k[i] <= SHARE_KEYS[part].length)) return null;
+  const p = raw.profile;
+  if (!isPlainObject(p) || !isPlainObject(p.account) || !Array.isArray(p.planets) || !Array.isArray(p.moons)) return null;
+  /**
+   * @param {unknown} body
+   * @param {string[]} keys
+   */
+  const unpack = (body, keys) => {
+    const values = isPlainObject(body) ? unpackShareValues(body.values, keys) : null;
+    return values === null || !isPlainObject(body) ? null : { ...body, values };
+  };
+  const account = unpack(p.account, SHARE_KEYS.account.slice(0, k[0]));
+  const planets = p.planets.map((b) => unpack(b, SHARE_KEYS.planet.slice(0, k[1])));
+  const moons = p.moons.map((b) => unpack(b, SHARE_KEYS.moon.slice(0, k[2])));
+  if (account === null || planets.includes(null) || moons.includes(null)) return null;
+  return { ...p, account, planets, moons };
+}
+
+/**
+ * The share payload's JSON, in the compact form: the profile without the
+ * resources on its bodies, its value sets packed by SHARE_KEYS.
+ *
+ * @param {Profile} profile
+ * @param {UniverseChoices[]} [universes] The choices for the profile's universe.
+ * @returns {string}
+ */
+function serializeProfileShare(profile, universes = []) {
+  return JSON.stringify({
+    pfp: SHARE_FORMAT_VERSION,
+    k: [SHARE_KEYS.account.length, SHARE_KEYS.planet.length, SHARE_KEYS.moon.length],
+    profile: packProfileShare(withoutResources(profile)),
+    universes,
+  });
+}
+
+/**
+ * @typedef {Object} ProfileShareResult
+ * @property {boolean} ok
+ * @property {Profile} [profile]
+ * @property {UniverseChoices[]} [universes]
+ * @property {'json'|'shape'|'version'} [reason]
+ */
+
+/**
+ * Read a share payload's JSON with the checks the backup file gets.
+ *
+ * @param {string} text
+ * @returns {ProfileShareResult}
+ */
+function parseProfileShare(text) {
+  let raw;
+  try {
+    raw = JSON.parse(text);
+  } catch {
+    return { ok: false, reason: 'json' };
+  }
+  if (!isPlainObject(raw) || !('pfp' in raw) || !('profile' in raw)) return { ok: false, reason: 'shape' };
+  if (raw.pfp !== SHARE_FORMAT_VERSION) return { ok: false, reason: 'version' };
+  // A share carries its counts of SHARE_KEYS when its value sets are packed;
+  // the links written before the compact form name every key.
+  const profile = readProfile('k' in raw ? unpackProfileShare(raw) : raw.profile);
+  if (profile === null) return { ok: false, reason: 'version' };
+  // A broken universe entry is dropped, not the profile (parseProfilesFile).
+  const universes = (Array.isArray(raw.universes) ? raw.universes : []).map(readUniverseChoices).filter((u) => u !== null);
+  return { ok: true, profile: withoutResources(profile), universes: /** @type {UniverseChoices[]} */ (universes) };
+}
+
+/**
+ * base64url without padding, over btoa.
+ *
+ * @param {Uint8Array} bytes
+ * @returns {string}
+ */
+function pfB64UrlEncode(bytes) {
+  // In slices: String.fromCharCode takes its arguments on the stack.
+  const SLICE = 0x8000;
+  let binary = '';
+  for (let i = 0; i < bytes.length; i += SLICE) {
+    binary += String.fromCodePoint(...bytes.subarray(i, i + SLICE));
+  }
+  return btoa(binary).replaceAll('+', '-').replaceAll('/', '_').replaceAll('=', '');
+}
+
+/**
+ * @param {string} text base64url, padded or not.
+ * @returns {?Uint8Array} Null when the text is not base64url.
+ */
+function pfB64UrlDecode(text) {
+  if (!/^[\w-]*={0,2}$/.test(text)) return null;
+  const bare = text.replaceAll('=', '');
+  if (bare.length % 4 === 1) return null;
+  const padded = bare.replaceAll('-', '+').replaceAll('_', '/') + '='.repeat((4 - (bare.length % 4)) % 4);
+  let binary;
+  try {
+    binary = atob(padded);
+  } catch {
+    return null;
+  }
+  const bytes = new Uint8Array(binary.length);
+  // atob yields one char per byte, all below 256.
+  for (let i = 0; i < binary.length; i++) bytes[i] = binary.codePointAt(i) ?? 0;
+  return bytes;
+}
+
+/**
+ * Push bytes through a transform stream and collect what comes out.
+ *
+ * @param {Uint8Array} bytes
+ * @param {{writable: WritableStream, readable: ReadableStream}} stream
+ * @returns {Promise<Uint8Array>} Rejects when the stream fails.
+ */
+async function pfPipeBytes(bytes, stream) {
+  const writer = stream.writable.getWriter();
+  const reader = stream.readable.getReader();
+  const readAll = async () => {
+    /** @type {Uint8Array[]} */
+    const chunks = [];
+    let total = 0;
+    for (;;) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      chunks.push(value);
+      total += value.length;
+    }
+    const out = new Uint8Array(total);
+    let at = 0;
+    for (const chunk of chunks) {
+      out.set(chunk, at);
+      at += chunk.length;
+    }
+    return out;
+  };
+  // Together, so a failure on either side rejects once and is never left unhandled.
+  const [, out] = await Promise.all([writer.write(bytes).then(() => writer.close()), readAll()]);
+  return out;
+}
+
+/**
+ * The fragment value for a share payload's JSON: compressed where the browser
+ * can, plain otherwise - and plain when compressing fails, as the link still works.
+ *
+ * @param {string} json
+ * @returns {Promise<string>}
+ */
+async function encodeSharePayload(json) {
+  const bytes = new TextEncoder().encode(json);
+  if (typeof CompressionStream !== 'undefined') {
+    try {
+      return 'd2.' + pfB64UrlEncode(await pfPipeBytes(bytes, new CompressionStream('deflate-raw')));
+    } catch {
+      // Falls through to the uncompressed form.
+    }
+  }
+  return 'r2.' + pfB64UrlEncode(bytes);
+}
+
+/** The payload tags a link may carry: deflated or raw, of the full (1) or the compact (2) form. */
+const SHARE_PAYLOAD_TAGS = new Set(['d1.', 'r1.', 'd2.', 'r2.']);
+
+/**
+ * @typedef {Object} SharePayloadResult
+ * @property {boolean} ok
+ * @property {string} [text] The payload's JSON.
+ * @property {'format'|'unsupported'|'corrupt'} [reason] `format`: not a payload
+ *   we know; `unsupported`: compressed, and this browser cannot decompress;
+ *   `corrupt`: the bytes do not decompress or decode.
+ */
+
+/**
+ * @param {string} payload The fragment value: `d2.…`/`r2.…`, or `d1.…`/`r1.…` of an older link.
+ * @returns {Promise<SharePayloadResult>}
+ */
+async function decodeSharePayload(payload) {
+  const tag = String(payload).slice(0, 3);
+  if (!SHARE_PAYLOAD_TAGS.has(tag)) return { ok: false, reason: 'format' };
+  const bytes = pfB64UrlDecode(String(payload).slice(3));
+  if (bytes === null || bytes.length === 0) return { ok: false, reason: 'format' };
+  let raw = bytes;
+  if (tag.startsWith('d')) {
+    if (typeof DecompressionStream === 'undefined') return { ok: false, reason: 'unsupported' };
+    try {
+      raw = await pfPipeBytes(bytes, new DecompressionStream('deflate-raw'));
+    } catch {
+      return { ok: false, reason: 'corrupt' };
+    }
+  }
+  try {
+    return { ok: true, text: new TextDecoder('utf-8', { fatal: true }).decode(raw) };
+  } catch {
+    return { ok: false, reason: 'corrupt' };
+  }
+}
+
+/**
+ * @param {string} payload
+ * @returns {string} `pfp=…`, without the `#`.
+ */
+function buildShareFragment(payload) {
+  return SHARE_FRAGMENT_KEY + '=' + payload;
+}
+
+/**
+ * The share payload a URL fragment carries. The value is taken as it is -
+ * base64url needs no decoding and is case-sensitive - and other `&`-separated
+ * keys are ignored.
+ *
+ * @param {string} hash `location.hash`, with or without the `#`.
+ * @returns {?string} Null when the fragment holds no share payload.
+ */
+function readShareFragment(hash) {
+  const text = String(hash ?? '').replace(/^#/, '');
+  for (const part of text.split('&')) {
+    const eq = part.indexOf('=');
+    if (eq > 0 && part.slice(0, eq) === SHARE_FRAGMENT_KEY) return part.slice(eq + 1) || null;
+  }
+  return null;
+}
+
+/**
+ * The fragment with the share payload taken out and any other key kept.
+ *
+ * @param {string} hash `location.hash`, with or without the `#`.
+ * @returns {string} What is left, without the `#`; empty when nothing is.
+ */
+function withoutShareFragment(hash) {
+  const text = String(hash ?? '').replace(/^#/, '');
+  return text.split('&').filter((part) => part !== '' && part.split('=')[0] !== SHARE_FRAGMENT_KEY).join('&');
+}
+
+/**
+ * Whether a URL fits in one QR code of a share (QR_SINGLE_URL_LIMIT bytes of UTF-8).
+ *
+ * @param {string} url
+ */
+function fitsQrCode(url) {
+  return new TextEncoder().encode(url).length <= QR_SINGLE_URL_LIMIT;
+}
+
+/**
+ * The fragments of the QR codes for a payload: the whole share link when it
+ * fits one code, otherwise a series of parts of equal length, each of whose
+ * URLs fits one.
+ *
+ * @param {string} payload `d2.…` or `r2.…`.
+ * @param {string} prefixUrl Everything the URL holds before the fragment, `#` included.
+ * @param {string} id The series id, 8 base64url characters.
+ * @returns {?string[]} The fragments, without the `#`; null when the series
+ *   would take more than QR_MAX_PARTS codes.
+ */
+function splitShareParts(payload, prefixUrl, id) {
+  const whole = buildShareFragment(payload);
+  const base = new TextEncoder().encode(prefixUrl).length;
+  if (base + whole.length <= QR_SINGLE_URL_LIMIT) return [whole];
+  for (let k = 2; k <= QR_MAX_PARTS; k++) {
+    // The part numbered k has the longest head: n takes as many digits as k.
+    const head = (n) => SHARE_FRAGMENT_KEY + '=p1.' + id + '.' + n + '.' + k + '.';
+    const size = Math.ceil(payload.length / k);
+    if (base + head(k).length + size <= QR_SINGLE_URL_LIMIT) {
+      // The smallest k that fits leaves no part empty: with one part less
+      // the same size would have held the whole payload.
+      return Array.from({ length: k }, (_, i) => head(i + 1) + payload.slice(i * size, (i + 1) * size));
+    }
+  }
+  return null;
+}
+
+/**
+ * @typedef {Object} SharePart
+ * @property {string} id
+ * @property {number} n 1-based.
+ * @property {number} k How many parts the series has.
+ * @property {string} chunk
+ */
+
+/**
+ * @param {string} value A fragment value.
+ * @returns {?SharePart} Null when it is not a part of a series.
+ */
+function readSharePart(value) {
+  const m = SHARE_PART_PATTERN.exec(String(value));
+  if (!m) return null;
+  const n = Number(m[2]);
+  const k = Number(m[3]);
+  if (n > k || k > QR_MAX_PARTS) return null;
+  return { id: m[1], n, k, chunk: m[4] };
+}
+
+/**
+ * The parts of a series received so far, as the page keeps them.
+ *
+ * @typedef {Object} SharePartsState
+ * @property {string} id
+ * @property {number} k
+ * @property {Record<string, string>} parts The chunks, by part number.
+ * @property {number} at When the last part came, in ms.
+ */
+
+/**
+ * Validate a series read back from storage.
+ *
+ * @param {unknown} raw
+ * @returns {?SharePartsState}
+ */
+function readSharePartsState(raw) {
+  if (!isPlainObject(raw) || typeof raw.id !== 'string' || !SHARE_PART_ID.test(raw.id)) return null;
+  if (!Number.isInteger(raw.k) || raw.k < 1 || raw.k > QR_MAX_PARTS) return null;
+  if (typeof raw.at !== 'number' || !Number.isFinite(raw.at) || !isPlainObject(raw.parts)) return null;
+  const k = raw.k;
+  const entries = Object.entries(raw.parts);
+  const valid = entries.every(([n, chunk]) => /^[1-9]\d?$/.test(n) && Number(n) <= k && typeof chunk === 'string' && /^[\w.-]+$/.test(chunk));
+  return valid ? { id: raw.id, k, parts: Object.fromEntries(entries), at: raw.at } : null;
+}
+
+/**
+ * Add a part to its series. The same part again changes nothing but the time.
+ *
+ * @param {?SharePartsState} state The series so far; null for its first part.
+ * @param {SharePart} part
+ * @param {number} now
+ * @returns {?SharePartsState} A new state; null when the part does not belong
+ *   to this series (another id, or another length under the same id).
+ */
+function addSharePart(state, part, now) {
+  if (state !== null && (state.id !== part.id || state.k !== part.k)) return null;
+  return { id: part.id, k: part.k, parts: { ...state?.parts, [part.n]: part.chunk }, at: now };
+}
+
+/**
+ * @param {SharePartsState} state
+ * @returns {?string} The payload once every part is there, null before.
+ */
+function assembleShareParts(state) {
+  const chunks = [];
+  for (let n = 1; n <= state.k; n++) {
+    const chunk = state.parts[n];
+    if (typeof chunk !== 'string') return null;
+    chunks.push(chunk);
+  }
+  return chunks.join('');
+}
+
+/**
+ * @param {SharePartsState} state
+ * @returns {number} How many of the parts have come.
+ */
+function countShareParts(state) {
+  return Object.keys(state.parts).length;
+}
+
+/**
+ * The stored series to drop: unreadable, or untouched for SHARE_PARTS_TTL_MS.
+ *
+ * @param {Record<string, unknown>} all The stored series, by storage key.
+ * @param {number} now
+ * @returns {string[]} Their keys.
+ */
+function purgeStaleShareParts(all, now) {
+  return Object.entries(all)
+    .filter(([, raw]) => {
+      const state = readSharePartsState(raw);
+      return state === null || now - state.at > SHARE_PARTS_TTL_MS;
+    })
+    .map(([key]) => key);
+}
+
+// ---------------------------------------------------------------------------
 // Exchange rates
 // ---------------------------------------------------------------------------
 
@@ -2650,6 +3346,12 @@ if (typeof window !== 'undefined') {
     readCompanionIgnoredEntry, sameCompanionAccount, mergeCompanionIgnored,
     RESOURCE_READING_STALE_MS, isResourceReadingStale, planResourceFill, keepBodyResources,
     readProfile, serializeProfilesFile, parseProfilesFile, planProfilesRestore,
+    SHARE_FORMAT_VERSION, QR_SINGLE_URL_LIMIT, QR_MAX_PARTS, SHARE_PARTS_TTL_MS,
+    SHARE_KEYS, packShareValues, unpackShareValues, serializeProfileShare, parseProfileShare,
+    pfB64UrlEncode, pfB64UrlDecode, encodeSharePayload, decodeSharePayload,
+    buildShareFragment, readShareFragment, withoutShareFragment, fitsQrCode,
+    splitShareParts, readSharePart, readSharePartsState, addSharePart, assembleShareParts,
+    countShareParts, purgeStaleShareParts,
     universeCacheKey, readUniverseChoices, UNIVERSE_SETTINGS_TTL_MS, UNIVERSE_SETTING_PARSERS,
     parseUniverseSettings, readUniverseEntry, isUniverseEntryFresh, universeLayer, universeValue,
     setUniverseChoice, mergeUniverseChoices, pfMarkState, listUniverseOverrides, resetUniverseChoices,

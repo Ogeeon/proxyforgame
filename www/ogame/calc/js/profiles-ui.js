@@ -2,8 +2,9 @@
 // PLAYER PROFILES - the selector, its dialogs and the field marks
 // ============================================================================
 // Wires profiles.tpl: the profile select in the top bar (with the import,
-// create and manage actions at the bottom of its list), the four dialogs, the
-// one-time offer to convert the old saved sets, and the marks a calculator
+// create, manage and share actions at the bottom of its list), its dialogs, the
+// one-time offer to convert the old saved sets, the share link that carries a
+// profile to another device (sending and taking it), and the marks a calculator
 // puts on profile-owned fields. A calculator talks to it through `pfgProfiles`,
 // which is null on a page without the selector. The fields, the widgets and the
 // binders a calculator builds on live in profiles-fields.js,
@@ -30,7 +31,16 @@ const SAVED_SET_KINDS = {
 const SAVED_SETS_ANSWERED_KEY = 'pfg_saved_sets_answered';
 
 /** The select's action entries, after the profiles. */
-const PF_ACTION = { import: '__import', create: '__create', manage: '__manage' };
+const PF_ACTION = { import: '__import', create: '__create', manage: '__manage', share: '__share' };
+
+/** The share dialog's QR code: modules per side of its white quiet zone. */
+const PF_QR_QUIET_MODULES = 4;
+/** Pixels per module: 4 is what a camera reliably reads off a screen, 8 keeps a small code from growing huge. */
+const PF_QR_MIN_CELL = 4;
+const PF_QR_MAX_CELL = 8;
+/** The canvas size the cell is picked for; a large code at the minimum cell goes past it. */
+const PF_QR_TARGET_PX = 720;
+
 const PFG_COMPANION_PENDING_KEY = 'pfg_companion_pending_export';
 const PFG_COMPANION_SYNC_EVENT = 'pfg-companion:sync';
 
@@ -158,6 +168,18 @@ class ProfilesUi {
     this.companionIgnoredExports = [];
     /** @type {?string} What the select's options say, as last drawn. */
     this.selectShown = null;
+    /** @type {?Promise<void>} The QR code generator loading, once asked for. */
+    this.qrLoading = null;
+    /** The link the share dialog shows, for its copy button. */
+    this.shareUrl = '';
+    /** Counts the share dialogs opened, so a slow one does not fill in a newer one. */
+    this.shareSerial = 0;
+    /** Set while the share dialog was opened from the manager, to go back to it. */
+    this.shareFromManage = false;
+    /** @type {string[]} The URLs of the share dialog's QR codes: one, a series, or none when too long. */
+    this.shareQrUrls = [];
+    /** The code of the series the dialog shows. */
+    this.shareQrIndex = 0;
   }
 
   init() {
@@ -168,6 +190,7 @@ class ProfilesUi {
     this.bindManage();
     this.bindMigration();
     this.bindReset();
+    this.bindShare();
     this.bindCompanionSync();
     this.store.subscribe((key) => {
       this.renderSelect();
@@ -181,13 +204,20 @@ class ProfilesUi {
     this.store.listenToOtherTabs(window);
     this.renderOverrides();
     this.renderCompanionBadge();
+    // A share link pasted into the address bar of a tab already on this page
+    // changes only the fragment: no reload, so no init() to read it.
+    window.addEventListener('hashchange', () => this.receiveShareLink());
+    // Read before anything else opens a dialog, and with or without storage:
+    // a link that cannot be taken says so rather than doing nothing.
+    const sharing = this.receiveShareLink();
     if (!this.store.available) {
       const select = selectEl('#pf-select');
       if (select) select.disabled = true;
       setAttr('#pf-selector', 'title', this.text.storageUnavailable);
       return;
     }
-    this.offerMigration(false);
+    // One dialog at a time: the conversion offer waits for another visit.
+    if (!sharing) this.offerMigration(false);
   }
 
   // -------------------------------------------------------------------------
@@ -366,7 +396,9 @@ class ProfilesUi {
     const activeId = this.store.getActiveId();
     /** @type {Array<[string, string]>} */
     const profiles = this.store.list().map((e) => [e.id, e.label + (e.universe ? ' · ' + pfUniverseLabel(e.universe) : '')]);
-    const shown = JSON.stringify(profiles);
+    // "Share" is offered only while a profile is active.
+    const canShare = !!activeId && profiles.some(([id]) => id === activeId);
+    const shown = JSON.stringify([profiles, canShare]);
     if (shown !== this.selectShown || select.options.length === 0) {
       this.selectShown = shown;
       select.innerHTML = '';
@@ -387,6 +419,7 @@ class ProfilesUi {
       add(PF_ACTION.import, this.text.actImport);
       add(PF_ACTION.create, this.text.actCreate);
       add(PF_ACTION.manage, this.text.actManage);
+      if (canShare) add(PF_ACTION.share, this.text.share);
     }
     select.value = activeId || '';
   }
@@ -399,6 +432,7 @@ class ProfilesUi {
       if (value === PF_ACTION.import) this.openImport();
       else if (value === PF_ACTION.create) this.openProps(null);
       else if (value === PF_ACTION.manage) this.openManage();
+      else if (value === PF_ACTION.share) this.openShare(this.store.getActiveId() || '', false);
       else {
         this.store.setActive(value || null);
         return;
@@ -957,6 +991,13 @@ class ProfilesUi {
         this.store.remove(p.id);
         this.renderManage();
       }));
+      const share = this.iconButton('bi-qr-code', this.text.share, () => {
+        // One modal at a time, as for editing; closing the share dialog comes back here.
+        pfModal('pf-manage-modal')?.hide();
+        this.openShare(p.id, true);
+      });
+      share.classList.add('pf-share');
+      actions.appendChild(share);
       row.appendChild(actions);
       body.appendChild(row);
     });
@@ -1076,21 +1117,7 @@ class ProfilesUi {
       await showAlertModal(this.text.fileErr, this.text.ok, this.text.attention);
       return;
     }
-    const plan = planProfilesRestore(this.store.list().map((e) => e.id), result.profiles);
-    /** @type {Profile[]} */
-    const restored = [];
-    plan.added.forEach((p) => { if (this.store.save(p)) restored.push(p); });
-    for (const p of plan.conflicts) {
-      if (await showConfirmModal(formatString(this.text.restoreConflict, p.label), this.text.replace, this.text.skip, this.text.attention)) {
-        // The file carries no resource readings: the stored profile's stay.
-        const replacement = keepBodyResources(p, this.store.get(p.id));
-        if (this.store.save(replacement)) restored.push(replacement);
-      }
-    }
-    // The universe choices come back with a profile of their universe.
-    (result.universes || [])
-      .filter((u) => restored.some((p) => p.universe && sameUniverse(p.universe, u.universe)))
-      .forEach((u) => this.universes.restoreChoices(u));
+    const restored = await this.applyIncomingProfiles(result.profiles, result.universes || [], this.text.restoreConflict);
     // The ignore list comes back beside the entries already there, so a
     // restored device is not asked about accounts it has refused either way.
     // The badge follows the store (replanCompanion).
@@ -1098,6 +1125,254 @@ class ProfilesUi {
     this.store.requestPersistence();
     this.renderManage();
     showToast(formatString(this.text.restoreDone, restored.length), 'success');
+  }
+
+  /**
+   * Store profiles that came from elsewhere - a backup file, a share link -
+   * asking about each one whose id is already here, and bring back the
+   * universe settings that go with the profiles taken.
+   *
+   * @param {Profile[]} profiles Without resources, as both carry them.
+   * @param {UniverseChoices[]} universes
+   * @param {string} conflictText The replace-or-skip question, with {0} for the profile's name.
+   * @returns {Promise<Profile[]>} The profiles stored.
+   */
+  async applyIncomingProfiles(profiles, universes, conflictText) {
+    const plan = planProfilesRestore(this.store.list().map((e) => e.id), profiles);
+    /** @type {Profile[]} */
+    const restored = [];
+    plan.added.forEach((p) => { if (this.store.save(p)) restored.push(p); });
+    for (const p of plan.conflicts) {
+      if (await showConfirmModal(formatString(conflictText, p.label), this.text.replace, this.text.skip, this.text.attention)) {
+        // Neither carries resource readings: the stored profile's stay.
+        const replacement = keepBodyResources(p, this.store.get(p.id));
+        if (this.store.save(replacement)) restored.push(replacement);
+      }
+    }
+    // The universe choices come back with a profile of their universe.
+    universes
+      .filter((u) => restored.some((p) => p.universe && sameUniverse(p.universe, u.universe)))
+      .forEach((u) => this.universes.restoreChoices(u));
+    return restored;
+  }
+
+  // -------------------------------------------------------------------------
+  // Share link
+  // -------------------------------------------------------------------------
+
+  bindShare() {
+    addEvent('#pf-share-copy', 'click', () => this.copyShareLink());
+    addEvent('#pf-share-qr-prev', 'click', () => this.showQrPart(this.shareQrIndex - 1));
+    addEvent('#pf-share-qr-next', 'click', () => this.showQrPart(this.shareQrIndex + 1));
+    addEvent('#pf-share-modal', BS_EVENT.modalHidden, () => {
+      if (!this.shareFromManage) return;
+      this.shareFromManage = false;
+      this.openManage();
+    });
+  }
+
+  /**
+   * Show the link and the QR code that carry one profile to another device.
+   *
+   * @param {string} id
+   * @param {boolean} fromManage Go back to the manager when the dialog closes.
+   */
+  async openShare(id, fromManage) {
+    const profile = this.store.get(id);
+    if (!profile) return;
+    const serial = ++this.shareSerial;
+    const json = serializeProfileShare(profile, this.universes.choicesOf([profile]));
+    const payload = await encodeSharePayload(json);
+    if (serial !== this.shareSerial) return;
+    const prefix = (pfgShareOrigin || location.origin) + location.pathname + '#';
+    // The link to copy is always the whole one; only the QR codes come in a series.
+    this.shareUrl = prefix + buildShareFragment(payload);
+    const fragments = splitShareParts(payload, prefix, pfB64UrlEncode(crypto.getRandomValues(new Uint8Array(6))));
+    this.shareQrUrls = (fragments ?? []).map((fragment) => prefix + fragment);
+    this.shareFromManage = fromManage;
+    setTextContent('#pf-share-label', formatString(this.text.shareHdr, profile.label));
+    setVal('#pf-share-link', this.shareUrl);
+    setTextContent('#pf-share-copied', '');
+    document.getElementById('pf-share-copied')?.classList.add('invisible');
+    const series = this.shareQrUrls.length > 1;
+    pfShow('#pf-share-qr-too-big', fragments === null);
+    pfShow('#pf-share-qr-box', false);
+    pfShow('#pf-share-qr-nav', series);
+    // A series says how many codes it takes: one of them is not enough.
+    setTextContent('#pf-share-qr-hint', series
+      ? formatString(this.text.shareQrSeriesHint, this.shareQrUrls.length)
+      : this.text.shareQrHint);
+    pfModal('pf-share-modal')?.show();
+    this.showQrPart(0);
+  }
+
+  /**
+   * Show one code of the series - the only one when the link fits one.
+   *
+   * @param {number} index 0-based; clamped to the series.
+   */
+  showQrPart(index) {
+    const count = this.shareQrUrls.length;
+    if (count === 0) return;
+    this.shareQrIndex = Math.min(count - 1, Math.max(0, index));
+    setTextContent('#pf-share-qr-part', formatString(this.text.shareQrPart, this.shareQrIndex + 1, count));
+    const prev = document.getElementById('pf-share-qr-prev');
+    const next = document.getElementById('pf-share-qr-next');
+    if (prev instanceof HTMLButtonElement) prev.disabled = this.shareQrIndex === 0;
+    if (next instanceof HTMLButtonElement) next.disabled = this.shareQrIndex === count - 1;
+    this.drawShareQr(this.shareQrUrls[this.shareQrIndex], this.shareSerial);
+  }
+
+  /**
+   * Draw the link's QR code once the generator has loaded. Without it - the
+   * script failed to load, the code would not build - the section stays
+   * hidden and the link is all the dialog offers.
+   *
+   * @param {string} url
+   * @param {number} serial The dialog this code is for.
+   */
+  async drawShareQr(url, serial) {
+    const canvas = document.getElementById('pf-share-qr');
+    if (!(canvas instanceof HTMLCanvasElement)) return;
+    try {
+      await this.loadQrGenerator();
+      if (serial !== this.shareSerial || typeof qrcode !== 'function') return;
+      const qr = qrcode(0, 'L');
+      qr.addData(url, 'Byte');
+      qr.make();
+      const modules = qr.getModuleCount();
+      const side = modules + 2 * PF_QR_QUIET_MODULES;
+      const cell = Math.min(PF_QR_MAX_CELL, Math.max(PF_QR_MIN_CELL, Math.floor(PF_QR_TARGET_PX / side)));
+      canvas.width = side * cell;
+      canvas.height = side * cell;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
+      ctx.fillStyle = '#fff';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = '#000';
+      for (let row = 0; row < modules; row++) {
+        for (let col = 0; col < modules; col++) {
+          if (qr.isDark(row, col)) ctx.fillRect((col + PF_QR_QUIET_MODULES) * cell, (row + PF_QR_QUIET_MODULES) * cell, cell, cell);
+        }
+      }
+      canvas.dataset.modules = String(modules);
+      canvas.dataset.url = url;
+      pfShow('#pf-share-qr-box', true);
+    } catch (e) {
+      consoleLog(e);
+    }
+  }
+
+  /**
+   * Load the QR code generator (www/vendor/qrcode/) the first time a share
+   * dialog needs it. A failed load is forgotten, so the next dialog tries again.
+   *
+   * @returns {Promise<void>}
+   */
+  loadQrGenerator() {
+    if (typeof qrcode === 'function') return Promise.resolve();
+    this.qrLoading ??= new Promise((resolve, reject) => {
+      const script = document.createElement('script');
+      script.src = pfgQrUrl;
+      script.onload = () => resolve();
+      script.onerror = () => {
+        this.qrLoading = null;
+        script.remove();
+        reject(new Error('The QR code generator did not load: ' + pfgQrUrl));
+      };
+      document.head.appendChild(script);
+    });
+    return this.qrLoading;
+  }
+
+  async copyShareLink() {
+    const input = inputEl('#pf-share-link');
+    try {
+      await navigator.clipboard.writeText(this.shareUrl);
+    } catch {
+      // No clipboard access (an insecure origin, a refused permission): the
+      // link is selected for the player to copy by hand.
+      input?.select();
+      return;
+    }
+    setTextContent('#pf-share-copied', this.text.shareCopied);
+    document.getElementById('pf-share-copied')?.classList.remove('invisible');
+  }
+
+  /**
+   * Take the profile a share link in the URL fragment carries. The link leaves
+   * the address bar at once - before it is even decoded - so a reload never
+   * asks again, whatever the answer or the error; other fragment keys stay.
+   *
+   * @returns {boolean} True when the fragment held a share link.
+   */
+  receiveShareLink() {
+    const payload = readShareFragment(location.hash);
+    if (payload === null) return false;
+    const rest = withoutShareFragment(location.hash);
+    history.replaceState(history.state, '', location.pathname + location.search + (rest ? '#' + rest : ''));
+    const accepting = payload.startsWith('p1.') ? this.acceptSharePart(payload) : this.acceptShare(payload);
+    accepting.catch((e) => consoleLog(e));
+    return true;
+  }
+
+  /**
+   * Keep one code of a QR series. Each scan opens a page of its own; the one
+   * that completes the series takes the profile, the others only say how far
+   * the series has come.
+   *
+   * @param {string} value The fragment value, `p1.…`.
+   */
+  async acceptSharePart(value) {
+    if (!this.store.available) {
+      await showAlertModal(this.text.storageUnavailable, this.text.ok, this.text.attention);
+      return;
+    }
+    const part = readSharePart(value);
+    const now = Date.now();
+    const stored = this.store.listShareParts();
+    purgeStaleShareParts(stored, now).forEach((key) => {
+      this.store.dropShareParts(key);
+      delete stored[key];
+    });
+    const key = part ? this.store.sharePartsKey(part.id) : '';
+    const state = part ? addSharePart(readSharePartsState(stored[key]), part, now) : null;
+    if (!state) {
+      // A broken code, or one that does not fit the series under its id.
+      if (key) this.store.dropShareParts(key);
+      await showAlertModal(this.text.shareErr, this.text.ok, this.text.attention);
+      return;
+    }
+    const payload = assembleShareParts(state);
+    if (payload === null) {
+      if (this.store.saveShareParts(state)) showToast(formatString(this.text.sharePartGot, countShareParts(state), state.k), 'info');
+      else showToast(this.text.saveFailed, 'danger');
+      return;
+    }
+    this.store.dropShareParts(key);
+    await this.acceptShare(payload);
+  }
+
+  /**
+   * @param {string} payload The fragment value.
+   */
+  async acceptShare(payload) {
+    if (!this.store.available) {
+      await showAlertModal(this.text.storageUnavailable, this.text.ok, this.text.attention);
+      return;
+    }
+    const decoded = await decodeSharePayload(payload);
+    const result = decoded.ok && decoded.text !== undefined ? parseProfileShare(decoded.text) : null;
+    if (!result?.ok || !result.profile) {
+      await showAlertModal(this.text.shareErr, this.text.ok, this.text.attention);
+      return;
+    }
+    const [taken] = await this.applyIncomingProfiles([result.profile], result.universes || [], this.text.shareConflict);
+    if (!taken) return;
+    this.store.requestPersistence();
+    // Carrying a profile over means working with it here.
+    this.store.setActive(taken.id);
+    showToast(formatString(this.text.shareDone, taken.label), 'success');
   }
 
   // -------------------------------------------------------------------------

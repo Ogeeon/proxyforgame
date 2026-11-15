@@ -628,6 +628,28 @@ fieldset.pf-bound.pf-differs {
   white-space: nowrap;
 }
 
+/* The QR code of a profile share link. ProfilesUi draws it at 4px or more per
+   module, which a camera reads off a screen, and on a desktop it is shown at
+   that size - scaled down, a large code blurs its modules together. A phone
+   has no room for it: there it fits the screen, and the frame scrolls only if
+   something still sticks out. The white quiet zone is part of the canvas. */
+.pf-share-qr-frame {
+  overflow-x: auto;
+}
+
+.pf-share-qr {
+  display: block;
+  margin: 0 auto;
+  image-rendering: pixelated;
+}
+
+@media (max-width: 575.98px) {
+  .pf-share-qr {
+    max-width: 100%;
+    height: auto;
+  }
+}
+
 /* Phone layout (docs/patterns.md, "Phone layout").
 
    A wide table on a narrow screen scrolls sideways inside a .pfg-scroll-x
