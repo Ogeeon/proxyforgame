@@ -3,19 +3,45 @@
 // The Model Context Protocol, server side, as plain JSON-RPC 2.0 - no SDK.
 //
 // The server is stateless and offers tools only, which keeps the protocol to
-// five methods: initialize, ping, tools/list, tools/call and the notifications
-// a client sends without expecting an answer. Everything transport-shaped
-// (HTTP status codes, headers, stdio framing) is the caller's; this module
-// takes one parsed message and returns the response object, or null for a
-// notification.
+// six methods: initialize, ping, server/discover, tools/list, tools/call and
+// the notifications a client sends without expecting an answer. Everything
+// transport-shaped (HTTP status codes, headers, stdio framing) is the caller's;
+// this module takes one parsed message and returns the response object, or
+// null for a notification.
+//
+// It serves both eras of the protocol. A legacy client (2025-11-25 and
+// earlier) opens with initialize and may ping. A modern one (2026-07-28 on)
+// sends no handshake: every request carries its protocol version, capabilities
+// and client info in params._meta, and the server checks them per request.
+// What tells the two apart is that _meta version, not the method.
 //
 // Spec: https://modelcontextprotocol.io/specification - the versions this
 // server speaks are listed in SUPPORTED_VERSIONS, newest first.
 
 const { validate } = require('./schema');
 
-/** Newest first: a client asking for a version we do not know gets the first. */
-const SUPPORTED_VERSIONS = ['2025-11-25', '2025-06-18', '2025-03-26'];
+/** Newest first, as server/discover and the version errors list them. */
+const SUPPORTED_VERSIONS = ['2026-07-28', '2025-11-25', '2025-06-18', '2025-03-26'];
+
+/** The versions without an initialize handshake; the rest are legacy. */
+const MODERN_VERSIONS = ['2026-07-28'];
+
+/** What initialize can negotiate, newest first: a client asking for a version we do not know gets the first. */
+const LEGACY_VERSIONS = SUPPORTED_VERSIONS.filter((version) => !MODERN_VERSIONS.includes(version));
+
+// The per-request fields of a modern request's params._meta, and the one a
+// modern result carries back.
+const META_PROTOCOL_VERSION = 'io.modelcontextprotocol/protocolVersion';
+const META_CLIENT_CAPABILITIES = 'io.modelcontextprotocol/clientCapabilities';
+const META_CLIENT_INFO = 'io.modelcontextprotocol/clientInfo';
+const META_SERVER_INFO = 'io.modelcontextprotocol/serverInfo';
+
+/**
+ * How long a client may keep tools/list and server/discover before asking
+ * again. Both change only with a deploy, and the answer is the same for
+ * everyone, hence "public".
+ */
+const LIST_TTL_MS = 60 * 60 * 1000;
 
 // JSON-RPC error codes.
 const PARSE_ERROR = -32700;
@@ -23,6 +49,9 @@ const INVALID_REQUEST = -32600;
 const METHOD_NOT_FOUND = -32601;
 const INVALID_PARAMS = -32602;
 const INTERNAL_ERROR = -32603;
+// The MCP specification's own, from 2026-07-28.
+const HEADER_MISMATCH = -32020;
+const UNSUPPORTED_PROTOCOL_VERSION = -32022;
 
 /**
  * A failure the caller of a tool caused and can fix - a coordinate out of
@@ -64,8 +93,12 @@ class ToolError extends Error {}
  * @property {string|null} [method]
  * @property {string|null} [tool]
  * @property {'ok'|'invalid'|'tool_error'|'internal'} [outcome]
- * @property {string|null} [clientName] clientInfo of an initialize
+ * @property {string|null} [clientName] clientInfo of an initialize, or of
+ *   any modern request that names its client in _meta
  * @property {string|null} [clientVersion]
+ * @property {number} [httpStatus] the status the Streamable HTTP binding ties
+ *   to a modern request's error, when it is not 200: 400 for a refused version
+ *   or malformed _meta, 404 for an unknown method. stdio has no use for it.
  * @property {string|null} [universe] e.g. "en-1", when a call named one
  * @property {string[]} [argKeys]
  * @property {string[]} [errorPaths]
@@ -75,19 +108,49 @@ class ToolError extends Error {}
  * @param {string|number|null} id
  * @param {number} code
  * @param {string} message
+ * @param {unknown} [data]
  * @returns {JsonRpcResponse}
  */
-function errorResponse(id, code, message) {
-    return { jsonrpc: '2.0', id, error: { code, message } };
+function errorResponse(id, code, message, data) {
+    return { jsonrpc: '2.0', id, error: data === undefined ? { code, message } : { code, message, data } };
 }
 
 /**
+ * Every result is a complete one: no tool here asks the client for more
+ * input. 2026-07-28 requires the field; earlier clients ignore it.
  * @param {string|number|null} id
- * @param {unknown} result
+ * @param {Record<string, unknown>} result
  * @returns {JsonRpcResponse}
  */
 function resultResponse(id, result) {
-    return { jsonrpc: '2.0', id, result };
+    return { jsonrpc: '2.0', id, result: { ...result, resultType: 'complete' } };
+}
+
+/**
+ * The UnsupportedProtocolVersionError of 2026-07-28, listing what a client
+ * can retry with.
+ * @param {string|number|null} id
+ * @param {unknown} requested
+ */
+function unsupportedVersion(id, requested) {
+    return errorResponse(id, UNSUPPORTED_PROTOCOL_VERSION, 'Unsupported protocol version', {
+        supported: SUPPORTED_VERSIONS,
+        requested: printable(requested, 32),
+    });
+}
+
+/**
+ * The protocol version a modern request declares in its _meta, or null for
+ * a message that declares none - a legacy one.
+ * @param {unknown} message
+ * @returns {string|null}
+ */
+function modernVersion(message) {
+    if (typeof message !== 'object' || message === null || Array.isArray(message)) {
+        return null;
+    }
+    const version = /** @type {Record<string, any>} */ (message).params?._meta?.[META_PROTOCOL_VERSION];
+    return typeof version === 'string' ? version : null;
 }
 
 /**
@@ -179,19 +242,81 @@ function createProtocol(tools, info, options = {}) {
             openWorldHint: tool.openWorld === true,
         },
     }));
+    const capabilities = { tools: { listChanged: false } };
+    const serverInfo = { name: info.name, title: info.title, version: info.version };
+    const listCache = { ttlMs: LIST_TTL_MS, cacheScope: 'public' };
 
     /**
      * @param {any} params
      */
     function initialize(params) {
+        // A handshake can only settle on a version that has one: a client
+        // asking for 2026-07-28 here gets the newest legacy version instead.
         const requested = params?.protocolVersion;
-        const protocolVersion = SUPPORTED_VERSIONS.includes(requested) ? requested : SUPPORTED_VERSIONS[0];
+        const protocolVersion = LEGACY_VERSIONS.includes(requested) ? requested : LEGACY_VERSIONS[0];
         return {
             protocolVersion,
-            capabilities: { tools: { listChanged: false } },
-            serverInfo: { name: info.name, title: info.title, version: info.version },
+            capabilities,
+            serverInfo,
             instructions: info.instructions,
         };
+    }
+
+    function discover() {
+        return {
+            supportedVersions: SUPPORTED_VERSIONS,
+            capabilities,
+            instructions: info.instructions,
+            ...listCache,
+        };
+    }
+
+    /**
+     * A modern request: its _meta is checked first, then the method runs,
+     * and its result names the server, as 2026-07-28 asks of every result.
+     * @param {Record<string, any>} msg a request with an id
+     * @param {string} version the version its _meta declares
+     * @param {Trace} trace
+     * @returns {Promise<JsonRpcResponse>}
+     */
+    async function handleModern(msg, version, trace) {
+        const meta = msg.params._meta;
+        const client = meta[META_CLIENT_INFO];
+        trace.clientName = printable(client?.name, 64);
+        trace.clientVersion = printable(client?.version, 32);
+        if (!SUPPORTED_VERSIONS.includes(version)) {
+            trace.outcome = 'invalid';
+            trace.httpStatus = 400;
+            return unsupportedVersion(msg.id, version);
+        }
+        const declared = meta[META_CLIENT_CAPABILITIES];
+        if (typeof declared !== 'object' || declared === null || Array.isArray(declared)) {
+            trace.outcome = 'invalid';
+            trace.httpStatus = 400;
+            return errorResponse(msg.id, INVALID_PARAMS, `params._meta must carry ${META_CLIENT_CAPABILITIES}`);
+        }
+        /** @type {JsonRpcResponse} */
+        let response;
+        switch (msg.method) {
+            case 'server/discover':
+                response = resultResponse(msg.id, discover());
+                break;
+            case 'tools/list':
+                response = resultResponse(msg.id, { tools: toolList, ...listCache });
+                break;
+            case 'tools/call':
+                response = await callTool(msg.params, msg.id, trace);
+                break;
+            default:
+                // initialize and ping included: 2026-07-28 has neither.
+                trace.outcome = 'invalid';
+                trace.httpStatus = 404;
+                return errorResponse(msg.id, METHOD_NOT_FOUND, `Method not found: ${msg.method}`);
+        }
+        if (typeof response.result === 'object' && response.result !== null) {
+            response.result = { ...response.result, _meta: { [META_SERVER_INFO]: serverInfo } };
+        }
+        return response;
     }
 
     /**
@@ -266,6 +391,10 @@ function createProtocol(tools, info, options = {}) {
             // nothing a cancellation could still stop.
             return null;
         }
+        const version = modernVersion(msg);
+        if (version !== null) {
+            return handleModern(msg, version, trace);
+        }
         switch (msg.method) {
             case 'initialize':
                 trace.clientName = printable(msg.params?.clientInfo?.name, 64);
@@ -290,8 +419,15 @@ module.exports = {
     createProtocol,
     ToolError,
     errorResponse,
+    unsupportedVersion,
+    modernVersion,
     printable,
     SUPPORTED_VERSIONS,
+    MODERN_VERSIONS,
+    LEGACY_VERSIONS,
+    META_CLIENT_INFO,
     PARSE_ERROR,
     INVALID_REQUEST,
+    HEADER_MISMATCH,
+    UNSUPPORTED_PROTOCOL_VERSION,
 };

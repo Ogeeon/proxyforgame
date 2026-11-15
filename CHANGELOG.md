@@ -15,6 +15,10 @@ release section; it is the source of truth for the other eleven translations.
 
 ## [Unreleased]
 
+### Fixed
+
+- MCP server: clients on protocol version 2026-07-28 - Claude's own connector (`Claude-User`) among them - can use it. Since 2026-11-08 every request of theirs was refused with 400 for its `MCP-Protocol-Version` header. The server now speaks that version next to the three 2025 ones: no `initialize`, the version, capabilities and client info read from `_meta` on every request, the new `server/discover`, `resultType` on every result, caching hints on `tools/list`, the server's info in each result's `_meta`, and the headers a 2026-07-28 request mirrors (`MCP-Protocol-Version`, `Mcp-Method`, `Mcp-Name`) checked against its body (`-32020`, 400). An unsupported version is answered with `-32022` and the list of supported ones, so a client can retry; a method 2026-07-28 does not have (`ping`, `initialize`) gets 404. A legacy `initialize` never negotiates 2026-07-28. Such a client has no session, so its rows in `mcp_event` carry no `session_id` but name the client on every row; `make mcp-stats` groups them by that name.
+
 ## [2026-11-15] - site entry 74
 
 ### Added

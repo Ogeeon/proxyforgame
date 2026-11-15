@@ -152,8 +152,8 @@ there. Keep the two in step.
 | File | |
 |---|---|
 | `server.js` | Entry point: configuration, HTTP or stdio |
-| `lib/protocol.js` | JSON-RPC and the MCP methods; transport-free |
-| `lib/http-transport.js` | Streamable HTTP, stateless: POST only, rate limit, origin check, 256 KB bodies |
+| `lib/protocol.js` | JSON-RPC and the MCP methods; transport-free. Speaks 2026-07-28 (no handshake, `_meta` on every request, `server/discover`) and the legacy 2025-11-25, 2025-06-18 and 2025-03-26 (`initialize`) - `SUPPORTED_VERSIONS` |
+| `lib/http-transport.js` | Streamable HTTP, stateless: POST only, rate limit, origin check, 256 KB bodies; checks a 2026-07-28 request's mirrored headers (`MCP-Protocol-Version`, `Mcp-Method`, `Mcp-Name`) against its body |
 | `lib/schema.js` | Validates arguments against the published input schema |
 | `lib/browser-scripts.js` | Runs `www/` scripts in a `vm` context - shared with the unit tests |
 | `lib/site-api.js` | Reads universe data from the site, with a short cache |

@@ -41,11 +41,13 @@ WHERE created_at > NOW() - INTERVAL @days DAY AND internal = 0 AND method = @cal
 GROUP BY tool
 ORDER BY calls DESC;
 
--- A session's client is the clientInfo of its initialize; requests without a
--- session id (a client that ignores it, or one refused before initialize) are
--- grouped by the product part of their user agent.
+-- A legacy session's client is the clientInfo of its initialize. A 2026-07-28
+-- client has no session but names itself on every row. Anything else (a client
+-- that ignores its session id, one refused before initialize) is grouped by
+-- the product part of its user agent.
 SELECT '== clients ==' AS report;
-SELECT COALESCE(i.client_name, CONCAT('(no session) ', SUBSTRING_INDEX(COALESCE(e.user_agent, '?'), '/', 1))) AS client,
+SELECT COALESCE(i.client_name, e.client_name,
+                CONCAT('(no session) ', SUBSTRING_INDEX(COALESCE(e.user_agent, '?'), '/', 1))) AS client,
        COUNT(DISTINCT e.session_id) AS sessions,
        SUM(e.method = @call) AS calls,
        SUM(e.method = @call AND e.outcome <> 'ok') AS failed_calls

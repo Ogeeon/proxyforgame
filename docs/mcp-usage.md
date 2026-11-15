@@ -22,13 +22,13 @@ same to the players.
 |---|---|
 | `created_at` | when the server received the request (ms) |
 | `host` | `proxyforgame.com` or `proxyforgame.net` |
-| `session_id` | the `Mcp-Session-Id` the server handed out with `initialize`; groups one connection's calls. The server keeps no record of it and never refuses a request over it |
-| `method` | `initialize`, `tools/list`, `tools/call`, `ping`, `notifications/…`; NULL for a request refused before a message was read |
+| `session_id` | the `Mcp-Session-Id` the server handed out with `initialize`; groups one connection's calls. The server keeps no record of it and never refuses a request over it. NULL for every row of a 2026-07-28 client: that version has no sessions |
+| `method` | `initialize`, `server/discover`, `tools/list`, `tools/call`, `ping`, `notifications/…`; NULL for a request refused before a message was read |
 | `tool` | for `tools/call` with a known tool |
-| `outcome` | `ok`; `invalid` (arguments failed the schema, unknown tool or method, malformed message); `tool_error` (a `ToolError` the model can act on); `internal` (a bug - the stack is in `journalctl -u pfg-mcp`); `rejected` (refused by the transport: 400 not JSON or unknown protocol version, 403 origin, 413 body, 429 rate limit) |
+| `outcome` | `ok`; `invalid` (arguments failed the schema, unknown tool or method, malformed message; for a 2026-07-28 request also an unsupported `_meta` version, missing client capabilities, or headers that contradict the body - those answer 400, or 404 for an unknown method); `tool_error` (a `ToolError` the model can act on); `internal` (a bug - the stack is in `journalctl -u pfg-mcp`); `rejected` (refused by the transport before the body was read: 400 not JSON or unknown `MCP-Protocol-Version` header, 403 origin, 413 body, 429 rate limit) |
 | `http_status` | of the answer; a 405 (`GET`, `DELETE`) is not recorded at all |
 | `duration_ms`, `body_bytes` | time to handle the message, size of the request body |
-| `client_name`, `client_version` | `clientInfo` - on the `initialize` row only; join on `session_id` for the rest |
+| `client_name`, `client_version` | `clientInfo`. A legacy client sends it with `initialize` only, so join on `session_id` for its other rows; a 2026-07-28 client names itself in `_meta` on every request, so it is on each of its rows |
 | `user_agent` | the request's, cut to 128 |
 | `universe` | `en-1` when a call passed `universe` |
 | `arg_keys` | names of the top-level arguments a call passed, comma-separated |
@@ -86,13 +86,15 @@ SELECT created_at, method, tool, outcome, arg_keys, error_paths, duration_ms
 FROM mcp_event WHERE session_id = '…' ORDER BY id;
 ```
 
-Returning clients - days on which each client version was seen:
+Returning clients - days on which each client version was seen. Legacy clients
+count by their `initialize`; a 2026-07-28 client has none, so its calls count instead:
 
 ```sql
-SELECT client_name, client_version, COUNT(DISTINCT DATE(created_at)) AS days, COUNT(*) AS sessions
+SELECT client_name, client_version, COUNT(DISTINCT DATE(created_at)) AS days,
+       SUM(method = 'initialize') AS sessions, SUM(session_id IS NULL) AS sessionless_requests
 FROM mcp_event
-WHERE method = 'initialize' AND internal = 0
-GROUP BY client_name, client_version ORDER BY sessions DESC;
+WHERE client_name IS NOT NULL AND internal = 0
+GROUP BY client_name, client_version ORDER BY days DESC;
 ```
 
 ## Setting it up

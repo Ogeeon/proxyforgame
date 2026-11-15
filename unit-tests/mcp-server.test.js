@@ -11,7 +11,7 @@ const { describe, it, before, after } = require('node:test');
 const { expect } = require('./expect');
 const { load } = require('./load');
 
-const { createProtocol, SUPPORTED_VERSIONS } = require('../mcp/lib/protocol');
+const { createProtocol, SUPPORTED_VERSIONS, LEGACY_VERSIONS } = require('../mcp/lib/protocol');
 const { createHttpHandler, clientAddress } = require('../mcp/lib/http-transport');
 const { createSiteApi } = require('../mcp/lib/site-api');
 const { createUsageRecorder, MAX_BATCH: USAGE_MAX_BATCH } = require('../mcp/lib/usage');
@@ -58,6 +58,34 @@ function rpc(protocol, message) {
     return protocol.handle(message);
 }
 
+/**
+ * A 2026-07-28 request and the headers that mirror it: version, method and,
+ * for tools/call, the tool's name.
+ * @param {string} method
+ * @param {Record<string, any>} [params]
+ * @param {string} [clientName]
+ * @returns {[any, Record<string, string>]}
+ */
+function modern(method, params = {}, clientName = 'claude-ai') {
+    const body = {
+        jsonrpc: '2.0', id: 1, method,
+        params: {
+            ...params,
+            _meta: {
+                'io.modelcontextprotocol/protocolVersion': '2026-07-28',
+                'io.modelcontextprotocol/clientCapabilities': {},
+                'io.modelcontextprotocol/clientInfo': { name: clientName, version: '0.1.0' },
+            },
+        },
+    };
+    /** @type {Record<string, string>} */
+    const headers = { 'mcp-protocol-version': '2026-07-28', 'mcp-method': method };
+    if (typeof params.name === 'string') {
+        headers['mcp-name'] = params.name;
+    }
+    return [body, headers];
+}
+
 /** Calls a tool through the protocol and returns the tool result. */
 async function call(protocol, name, args) {
     const answer = await rpc(protocol, { jsonrpc: '2.0', id: 1, method: 'tools/call', params: { name, arguments: args } });
@@ -77,9 +105,15 @@ describe('MCP protocol', () => {
         expect(answer.result.serverInfo.name).toBe('proxyforgame');
     });
 
-    it('offers its newest version to a client asking for one it does not know', async () => {
+    it('offers its newest legacy version to a client asking for one it does not know', async () => {
         const answer = await rpc(protocol, { jsonrpc: '2.0', id: 1, method: 'initialize', params: { protocolVersion: '1999-01-01' } });
-        expect(answer.result.protocolVersion).toBe(SUPPORTED_VERSIONS[0]);
+        expect(answer.result.protocolVersion).toBe(LEGACY_VERSIONS[0]);
+        expect(LEGACY_VERSIONS[0]).toBe('2025-11-25');
+    });
+
+    it('never negotiates 2026-07-28 in a handshake that version does not have', async () => {
+        const answer = await rpc(protocol, { jsonrpc: '2.0', id: 1, method: 'initialize', params: { protocolVersion: '2026-07-28' } });
+        expect(answer.result.protocolVersion).toBe('2025-11-25');
     });
 
     it('does not answer a notification', async () => {
@@ -87,7 +121,15 @@ describe('MCP protocol', () => {
     });
 
     it('answers ping with an empty result', async () => {
-        expect((await rpc(protocol, { jsonrpc: '2.0', id: 'p', method: 'ping' })).result).toEqual({});
+        expect((await rpc(protocol, { jsonrpc: '2.0', id: 'p', method: 'ping' })).result).toEqual({ resultType: 'complete' });
+    });
+
+    it('refuses a _meta version it does not speak - the stdio path, where no header checks it first', async () => {
+        const [body] = modern('tools/list');
+        body.params._meta['io.modelcontextprotocol/protocolVersion'] = '2099-01-01';
+        const answer = await rpc(protocol, body);
+        expect(answer.error.code).toBe(-32022);
+        expect(answer.error.data).toEqual({ supported: SUPPORTED_VERSIONS, requested: '2099-01-01' });
     });
 
     it('reports an unknown method as -32601', async () => {
@@ -202,7 +244,7 @@ describe('MCP HTTP transport', () => {
         const res = await post({ jsonrpc: '2.0', id: 1, method: 'ping' });
         expect(res.status).toBe(200);
         expect(res.headers.get('content-type')).toContain('application/json');
-        expect(await res.json()).toEqual({ jsonrpc: '2.0', id: 1, result: {} });
+        expect(await res.json()).toEqual({ jsonrpc: '2.0', id: 1, result: { resultType: 'complete' } });
     });
 
     it('accepts a notification with 202 and no body', async () => {
@@ -213,7 +255,7 @@ describe('MCP HTTP transport', () => {
 
     it('answers a batch with an array', async () => {
         const res = await post([{ jsonrpc: '2.0', id: 1, method: 'ping' }, { jsonrpc: '2.0', method: 'notifications/initialized' }]);
-        expect(await res.json()).toEqual([{ jsonrpc: '2.0', id: 1, result: {} }]);
+        expect(await res.json()).toEqual([{ jsonrpc: '2.0', id: 1, result: { resultType: 'complete' } }]);
     });
 
     it('opens no SSE stream: GET is 405', async () => {
@@ -241,9 +283,100 @@ describe('MCP HTTP transport', () => {
         expect((await post({ jsonrpc: '2.0', id: 1, method: 'ping' }, { origin: 'https://proxyforgame.com' })).status).toBe(200);
     });
 
-    it('refuses a protocol version header it does not speak', async () => {
+    it('refuses a protocol version header it does not speak, naming the versions it does', async () => {
         const res = await post({ jsonrpc: '2.0', id: 1, method: 'ping' }, { 'mcp-protocol-version': '1999-01-01' });
         expect(res.status).toBe(400);
+        const body = /** @type {any} */ (await res.json());
+        expect(body.error.code).toBe(-32022);
+        expect(body.error.data).toEqual({ supported: SUPPORTED_VERSIONS, requested: '1999-01-01' });
+    });
+
+    it('serves a 2026-07-28 tools/call with no initialize and no session', async () => {
+        const res = await post(...modern('tools/call', { name: 'ogame_build_cost', arguments: { item: 'metal-mine', toLevel: 1 } }));
+        expect(res.status).toBe(200);
+        expect(res.headers.get('mcp-session-id')).toBeNull();
+        const { result } = /** @type {any} */ (await res.json());
+        expect(result.resultType).toBe('complete');
+        expect(result.isError).toBe(false);
+        expect(result._meta['io.modelcontextprotocol/serverInfo'].name).toBe('proxyforgame');
+    });
+
+    it('answers server/discover with every version, the tools capability and caching hints', async () => {
+        const res = await post(...modern('server/discover'));
+        expect(res.status).toBe(200);
+        const { result } = /** @type {any} */ (await res.json());
+        expect(result).toMatchObject({
+            resultType: 'complete',
+            supportedVersions: ['2026-07-28', '2025-11-25', '2025-06-18', '2025-03-26'],
+            capabilities: { tools: { listChanged: false } },
+            ttlMs: 3_600_000,
+            cacheScope: 'public',
+        });
+    });
+
+    it('gives a 2026-07-28 tools/list its caching hints', async () => {
+        const { result } = /** @type {any} */ (await (await post(...modern('tools/list'))).json());
+        expect(result.tools.length).toBeGreaterThan(0);
+        expect(result).toMatchObject({ resultType: 'complete', ttlMs: 3_600_000, cacheScope: 'public' });
+    });
+
+    it('marks a tool failure of a 2026-07-28 call as a complete result too', async () => {
+        const res = await post(...modern('tools/call', { name: 'ogame_build_cost', arguments: { item: 'metal-mine', toLevel: -1 } }));
+        const { result } = /** @type {any} */ (await res.json());
+        expect(result).toMatchObject({ isError: true, resultType: 'complete' });
+    });
+
+    it('refuses a 2026-style request for a version it does not speak with 400 and the supported list', async () => {
+        const [body, headers] = modern('tools/list');
+        body.params._meta['io.modelcontextprotocol/protocolVersion'] = '2099-01-01';
+        const res = await post(body, { ...headers, 'mcp-protocol-version': '2099-01-01' });
+        expect(res.status).toBe(400);
+        const answer = /** @type {any} */ (await res.json());
+        expect(answer.error.code).toBe(-32022);
+        expect(answer.error.data.supported).toEqual(SUPPORTED_VERSIONS);
+    });
+
+    it('refuses a 2026-07-28 request without client capabilities as invalid params', async () => {
+        const [body, headers] = modern('tools/list');
+        delete body.params._meta['io.modelcontextprotocol/clientCapabilities'];
+        const res = await post(body, headers);
+        expect(res.status).toBe(400);
+        expect((/** @type {any} */ (await res.json())).error.code).toBe(-32602);
+    });
+
+    it('answers a method 2026-07-28 does not have with 404, ping included', async () => {
+        const res = await post(...modern('ping'));
+        expect(res.status).toBe(404);
+        expect((/** @type {any} */ (await res.json())).error.code).toBe(-32601);
+    });
+
+    it('refuses a 2026-07-28 request whose headers contradict its body', async () => {
+        const call = { name: 'ogame_build_cost', arguments: { item: 'metal-mine', toLevel: 1 } };
+        const overrides = [
+            { 'mcp-protocol-version': '2025-11-25' },
+            { 'mcp-method': 'tools/list' },
+            { 'mcp-name': 'ogame_flight' },
+            { 'mcp-name': null },
+        ];
+        for (const override of overrides) {
+            const [body, headers] = modern('tools/call', call);
+            const merged = Object.fromEntries(Object.entries({ ...headers, ...override }).filter(([, v]) => v !== null));
+            const res = await post(body, merged);
+            expect(res.status).toBe(400);
+            expect((/** @type {any} */ (await res.json())).error.code).toBe(-32020);
+        }
+    });
+
+    it('refuses a 2026-07-28 header on a body that declares no version', async () => {
+        const res = await post({ jsonrpc: '2.0', id: 1, method: 'tools/list' }, { 'mcp-protocol-version': '2026-07-28' });
+        expect(res.status).toBe(400);
+        expect((/** @type {any} */ (await res.json())).error.code).toBe(-32020);
+    });
+
+    it('decodes a base64-sentinel Mcp-Name before comparing it', async () => {
+        const [body, headers] = modern('tools/call', { name: 'ogame_build_cost', arguments: { item: 'metal-mine', toLevel: 1 } });
+        headers['mcp-name'] = `=?base64?${Buffer.from('ogame_build_cost').toString('base64')}?=`;
+        expect((await post(body, headers)).status).toBe(200);
     });
 
     it('answers a body that is not JSON with a parse error', async () => {
@@ -405,6 +538,25 @@ describe('MCP usage record', () => {
         expect((await post(initialize('pfg-watchdog'))).events[0].internal).toBe(true);
         expect((await post({ jsonrpc: '2.0', id: 1, method: 'ping' }, { 'x-forwarded-for': '198.51.100.50' })).events[0].internal).toBe(true);
         expect((await post({ jsonrpc: '2.0', id: 1, method: 'ping' }, { 'x-forwarded-for': '198.51.100.51' })).events[0].internal).toBe(false);
+    });
+
+    it('records a 2026-07-28 call with the client its _meta names and no session', async () => {
+        const [body, headers] = modern('tools/call', { name: 'ogame_build_cost', arguments: { item: 'metal-mine', toLevel: 5 } }, 'Claude-User');
+        const { res, events: [event] } = await post(body, headers);
+        expect(res.headers.get('mcp-session-id')).toBeNull();
+        expect(event).toMatchObject({
+            method: 'tools/call', tool: 'ogame_build_cost', outcome: 'ok', status: 200,
+            sessionId: null, clientName: 'Claude-User', clientVersion: '0.1.0',
+        });
+    });
+
+    it('records a refused 2026-07-28 request as invalid, with its status', async () => {
+        const [body, headers] = modern('tools/list');
+        delete body.params._meta['io.modelcontextprotocol/clientCapabilities'];
+        expect((await post(body, headers)).events[0]).toMatchObject({ method: 'tools/list', outcome: 'invalid', status: 400, clientName: 'claude-ai' });
+        const [call, callHeaders] = modern('tools/call', { name: 'ogame_build_cost', arguments: {} });
+        expect((await post(call, { ...callHeaders, 'mcp-name': 'other' })).events[0])
+            .toMatchObject({ method: 'tools/call', outcome: 'invalid', status: 400, clientName: 'claude-ai' });
     });
 
     it('ignores a session id it could not have issued', async () => {
