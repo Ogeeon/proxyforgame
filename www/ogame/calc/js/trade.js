@@ -42,6 +42,19 @@ const TRADE_SRC_RESOURCES = ['metal', 'crystal', 'deuterium'];
  */
 let linkOverrides = { rates: false, universe: false, coords: false };
 
+/**
+ * Every fragment key a deal link carries, as the _parse*FromParams readers
+ * below take them: rates, direction and types, the mix, the amounts, and the
+ * universe and coordinates.
+ */
+const TRADE_LINK_KEYS = new Set([
+    'rmd', 'rcd',
+    'dir', 'st', 'dt', 'dmt',
+    'mix', 'msrc', 'mp1', 'mp2', 'fix1', 'fix2',
+    'm', 'c', 'd', 'wm', 'wc', 'wd',
+    'l', 'lc', 'lm'
+]);
+
 let options = {
     // TRADE_DIR_FORWARD types what is sold, TRADE_DIR_REVERSE what is wanted.
     direction: TRADE_DIR_FORWARD,
@@ -153,6 +166,12 @@ let options = {
         saveToCookie('options_trade', saved);
     },
 
+    /**
+     * The deal-link keys of the fragment, or null when it carries none. A
+     * fragment that only holds other keys (a profile share link's `pfp`, an
+     * anchor) is not a deal link and must not reset the saved deal.
+     * @returns {Record<string, string>|null}
+     */
     _parseUrlParams: function() {
         const url = globalThis.location.href.split("#");
         if (url.length <= 1) return null;
@@ -160,13 +179,16 @@ let options = {
         const params = url[1].split('&');
         /** @type {Record<string, string>} */
         const prm = {};
+        let isDealLink = false;
         for (const ps of params) {
             const t = ps.split('=');
             if (t.length == 2) {
-                prm[decodeURIComponent(t[0]).toLowerCase()] = decodeURIComponent(t[1]).toLowerCase();
+                const key = decodeURIComponent(t[0]).toLowerCase();
+                prm[key] = decodeURIComponent(t[1]).toLowerCase();
+                if (TRADE_LINK_KEYS.has(key)) isDealLink = true;
             }
         }
-        return prm;
+        return isDealLink ? prm : null;
     },
 
     _parseRatesFromParams: function(prm) {

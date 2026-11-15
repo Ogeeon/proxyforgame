@@ -6,6 +6,12 @@
 // profiles-binders.js, profiles-ui.js, in that order) are
 // loaded by the calculator template itself, so its TypeScript project sees them.
 require_once __DIR__ . '/universes.inc.php';
+require_once __DIR__ . '/../../asset-version.inc.php';
+require_once __DIR__ . '/../../hosts.inc.php';
+// A share link points at the main domain on the public site: profiles live in
+// the localStorage of one origin, and .net is only an alias of .com. Empty
+// elsewhere (local, CI), where the page's own origin is used.
+$pfShareOrigin = isPublicHost() ? 'https://proxyforgame.com' : '';
 $pfCountries = loadUniverseCountries($lang);
 $pfUniverses = loadUniverses($pfCountries);
 $pfCountryList = array_map(fn($row) => array($row['lang'], $row['name']), $pfCountries ?: array());
@@ -81,7 +87,20 @@ $pfUniversePicker = function ($prefix) use ($l) {
     'companionIgnore' => $l['pf-companion-ignore'],
     'companionIgnoreConfirm' => $l['pf-companion-ignore-confirm'],
     'manageUnignore' => $l['pf-manage-unignore'],
+    'share' => $l['pf-share'],
+    'shareHdr' => $l['pf-share-hdr'],
+    'shareCopied' => $l['pf-share-copied'],
+    'shareErr' => $l['pf-share-err'],
+    'shareConflict' => $l['pf-share-conflict'],
+    'shareQrPart' => $l['pf-share-qr-part'],
+    'shareQrHint' => $l['pf-share-qr-hint'],
+    'shareQrSeriesHint' => $l['pf-share-qr-series-hint'],
+    'sharePartGot' => $l['pf-share-part-got'],
+    'shareDone' => $l['pf-share-done'],
   ), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
+  // The QR code generator from www/vendor/, loaded when the share dialog first opens.
+  var pfgQrUrl = '/vendor/qrcode/qrcode.js?v=<?= assetVersion(__DIR__ . '/../../vendor', '/qrcode/qrcode.js') ?>';
+  var pfgShareOrigin = <?= json_encode($pfShareOrigin, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
   var pfgCountries = <?= json_encode($pfCountryList, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
   var pfgUniverses = <?= universesJs($pfUniverses) ?>;
 </script>
@@ -203,6 +222,42 @@ $pfUniversePicker = function ($prefix) use ($l) {
             <button type="button" id="pf-migrate-open" class="btn btn-outline-secondary btn-sm d-none"><?= $l['pf-migrate-btn'] ?></button>
           </div>
         </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" data-bs-dismiss="modal"><?= $l['done'] ?></button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Carry one profile to another device: a link and its QR code -->
+<div class="modal fade" role="dialog" id="pf-share-modal" tabindex="-1" aria-labelledby="pf-share-label" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title fs-5" id="pf-share-label"><?= $l['pf-share'] ?></h3>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="<?= $l['cancel'] ?>"></button>
+      </div>
+      <div class="modal-body">
+        <p class="small mb-2"><?= $l['pf-share-hint'] ?></p>
+        <div class="input-group input-group-sm mb-1">
+          <input id="pf-share-link" type="text" class="form-control font-monospace" readonly aria-label="<?= $l['pf-share-hdr'] ?>">
+          <button type="button" id="pf-share-copy" class="btn btn-outline-secondary"><i class="bi bi-clipboard" aria-hidden="true"></i> <?= $l['pf-share-copy'] ?></button>
+        </div>
+        <div id="pf-share-copied" class="small text-success mb-2 invisible" role="status"></div>
+        <div id="pf-share-qr-box" class="text-center d-none">
+          <p id="pf-share-qr-hint" class="small mb-1"><?= $l['pf-share-qr-hint'] ?></p>
+          <div id="pf-share-qr-nav" class="d-flex justify-content-center align-items-center gap-2 mb-1 d-none">
+            <button type="button" id="pf-share-qr-prev" class="btn btn-outline-secondary btn-sm" aria-label="<?= $l['pf-share-qr-prev'] ?>"><i class="bi bi-chevron-left" aria-hidden="true"></i></button>
+            <span id="pf-share-qr-part" role="status"></span>
+            <button type="button" id="pf-share-qr-next" class="btn btn-outline-secondary btn-sm" aria-label="<?= $l['pf-share-qr-next'] ?>"><i class="bi bi-chevron-right" aria-hidden="true"></i></button>
+          </div>
+          <div class="pf-share-qr-frame">
+            <canvas id="pf-share-qr" class="pf-share-qr"></canvas>
+          </div>
+        </div>
+        <p id="pf-share-qr-too-big" class="small text-body-secondary d-none"><?= $l['pf-share-qr-too-big'] ?></p>
+        <p class="small text-body-secondary mb-0"><i class="bi bi-shield-exclamation" aria-hidden="true"></i> <?= $l['pf-share-warning'] ?></p>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-primary" data-bs-dismiss="modal"><?= $l['done'] ?></button>

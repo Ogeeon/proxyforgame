@@ -8,6 +8,8 @@
 //   pfg_profile_planets     the last planet picked, per calculator and profile
 //   pfg_companion_ignored   Companion accounts the player refused, by player id
 //                           and universe (CompanionIgnoredEntry, profiles-core.js)
+//   pfg-share-parts:<id>    the parts of a QR series received so far
+//                           (SharePartsState, profiles-core.js), until complete
 // The active profile itself is per tab (sessionStorage), so two accounts can be
 // open side by side. Storage can be missing or full - a private window, blocked
 // site data - so every access is guarded and the page keeps working without it.
@@ -20,6 +22,7 @@ const PROFILE_STORAGE_KEYS = {
   active: 'pfg_active_profile',
   planets: 'pfg_profile_planets',
   companionIgnored: 'pfg_companion_ignored',
+  shareParts: 'pfg-share-parts:',
 };
 
 /**
@@ -38,6 +41,8 @@ const PROFILE_STORAGE_KEYS = {
  * @property {(key: string) => ?string} getItem
  * @property {(key: string, value: string) => void} setItem
  * @property {(key: string) => void} removeItem
+ * @property {number} [length] With key(), lets the store list the keys of a prefix.
+ * @property {(index: number) => ?string} [key]
  */
 
 /**
@@ -289,6 +294,51 @@ class ProfileStore {
     const entries = this.listCompanionIgnored();
     const kept = entries.filter((e) => !sameCompanionAccount(e, account));
     if (kept.length !== entries.length) this.saveCompanionIgnored(kept);
+  }
+
+  /**
+   * The QR series being received, as stored: parsed but not validated, so the
+   * caller can drop what it cannot read.
+   *
+   * @returns {Record<string, unknown>} By storage key.
+   */
+  listShareParts() {
+    /** @type {Record<string, unknown>} */
+    const all = {};
+    const storage = this.local;
+    if (!storage || typeof storage.key !== 'function') return all;
+    try {
+      const keys = [];
+      for (let i = 0; i < (storage.length ?? 0); i++) {
+        const key = storage.key(i);
+        if (key?.startsWith(PROFILE_STORAGE_KEYS.shareParts)) keys.push(key);
+      }
+      keys.forEach((key) => { all[key] = this.read(storage, key); });
+    } catch {
+      // Storage that cannot be listed has no series to offer.
+    }
+    return all;
+  }
+
+  /**
+   * @param {string} id The series id.
+   * @returns {string} Its storage key.
+   */
+  sharePartsKey(id) {
+    return PROFILE_STORAGE_KEYS.shareParts + id;
+  }
+
+  /**
+   * @param {SharePartsState} state
+   * @returns {boolean} False when the browser refused the write.
+   */
+  saveShareParts(state) {
+    return this.write(this.local, this.sharePartsKey(state.id), state);
+  }
+
+  /** @param {string} key A key listShareParts() returned, or sharePartsKey()'s. */
+  dropShareParts(key) {
+    this.drop(this.local, key);
   }
 
   /**

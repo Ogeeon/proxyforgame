@@ -29,6 +29,12 @@ const WWW = join(__dirname, '..', '..', 'www');
 function loadBrowserScripts(files, names) {
     /** @type {Record<string, any>} */
     const sandbox = { console, setTimeout, clearTimeout };
+    // The web platform globals the profile share link codec needs (node 18+).
+    // Copied only where the running node has them, so an older one still loads
+    // every other script; the codec checks for them itself.
+    for (const name of ['CompressionStream', 'DecompressionStream', 'TextEncoder', 'TextDecoder', 'btoa', 'atob']) {
+        if (globalThis[name] !== undefined) sandbox[name] = globalThis[name];
+    }
     // Scripts that end with `Object.assign(window, {...})` expect a window; point
     // it at the sandbox so those assignments land among the globals too.
     sandbox.window = sandbox;

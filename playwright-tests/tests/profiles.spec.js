@@ -3227,3 +3227,300 @@ test('the size of the moon changed with a profile active is kept with "no profil
     await page.locator('#pf-select').selectOption('');
     await expect(page.locator('#moon-size')).toHaveValue('3000');
 });
+
+// ---------------------------------------------------------------------------
+// Share link: one profile carried to another device in the URL fragment
+// ---------------------------------------------------------------------------
+
+/**
+ * A second browser - another device: its own storage, nothing imported.
+ * @param {import('@playwright/test').Browser} browser
+ */
+async function otherDevice(browser) {
+    const context = await browser.newContext({ baseURL: test.info().project.use.baseURL, reducedMotion: 'reduce' });
+    await context.addInitScript(() => localStorage.setItem('lastChange', 'key-value;true,value;99999'));
+    return context;
+}
+
+/** Open the share dialog of the active profile from the select and read its link. */
+async function shareLink(page) {
+    await chooseAction(page, '__share');
+    await expect(page.locator('#pf-share-modal')).toBeVisible();
+    const link = await page.locator('#pf-share-link').inputValue();
+    expect(link).toMatch(/#pfp=d2\.[\w-]+$/);
+    return link;
+}
+
+/** The ids of the stored profiles. */
+async function storedIds(page) {
+    return page.evaluate(() => JSON.parse(localStorage.getItem('pfg_profiles') || '[]').map((e) => e.id));
+}
+
+test('the share dialog shows the link and its QR code, and goes back to the manager', async ({ page }) => {
+    await openWithProfile(page, '/production');
+    await chooseAction(page, '__manage');
+    await page.locator('#pf-manage-rows tr').first().locator('.pf-share').click();
+
+    const modal = page.locator('#pf-share-modal');
+    await expect(modal).toBeVisible();
+    await expect(dialogHeader(modal)).toContainText('Tester');
+    const link = await page.locator('#pf-share-link').inputValue();
+    // Not a public host: the link stays on this origin.
+    expect(link.startsWith(new URL(page.url()).origin + '/')).toBe(true);
+    expect(link).toMatch(/#pfp=d2\.[\w-]+$/);
+    // In the compact form the fixture profile fits one code, no larger than
+    // version 25 (117 modules), drawn at 4px a module or more.
+    const qr = page.locator('#pf-share-qr');
+    await expect(qr).toBeVisible();
+    await expect(page.locator('#pf-share-qr-too-big')).toBeHidden();
+    await expect(page.locator('#pf-share-qr-nav')).toBeHidden();
+    expect(await qr.evaluate((c) => c.dataset.url)).toBe(link);
+    const { width, modules } = await qr.evaluate((c) => ({ width: c.width, modules: Number(c.dataset.modules) }));
+    expect(modules).toBeGreaterThan(20);
+    expect(modules).toBeLessThanOrEqual(117);
+    expect(width).toBeGreaterThanOrEqual((modules + 8) * 4);
+
+    await dialogFooter(modal).locator('.btn-primary').click();
+    await expect(page.locator('#pf-manage-modal')).toBeVisible();
+});
+
+test('a small profile is shared by one QR code, the whole link', async ({ page }) => {
+    await page.goto('/production');
+    await chooseAction(page, '__create');
+    await page.locator('#pf-props-name').fill('Small');
+    await page.locator('#pf-props-go').click();
+    await expect(page.locator('#pf-props-modal')).toBeHidden();
+
+    const link = await shareLink(page);
+    const qr = page.locator('#pf-share-qr');
+    await expect(qr).toBeVisible();
+    await expect(page.locator('#pf-share-qr-nav')).toBeHidden();
+    await expect(page.locator('#pf-share-qr-hint')).toHaveText('Or point the camera of the other device at this code.');
+    expect(await qr.evaluate((c) => c.dataset.url)).toBe(link);
+});
+
+/**
+ * Grow the stored profile to 12 planets and 3 moons, half of every body's
+ * values overridden - a profile whose link takes a series of QR codes.
+ */
+async function makeHeavy(page) {
+    const heavy = await page.evaluate(() => {
+        const id = JSON.parse(localStorage.getItem('pfg_profiles') || '[]')[0].id;
+        const profile = JSON.parse(localStorage.getItem('pfg_profile_' + id) || 'null');
+        while (profile.planets.length < 12) {
+            const n = profile.planets.length + 1;
+            profile.planets.push({ ...structuredClone(profile.planets[0]), id: 'p' + n, name: 'Colony ' + n, coords: { galaxy: 1, system: 100 + n, position: 8 } });
+        }
+        while (profile.moons.length < 3) {
+            const n = profile.moons.length + 1;
+            profile.moons.push({ ...structuredClone(profile.moons[0]), id: 'm' + n, name: 'Moon ' + n, coords: { galaxy: 1, system: 200 + n, position: 8 } });
+        }
+        for (const body of [...profile.planets, ...profile.moons]) {
+            Object.keys(body.values).forEach((key, i) => {
+                const game = body.values[key].game;
+                if (i % 2 === 0 && typeof game === 'number') setProfileValue(body, key, game + 1 + (i % 7));
+            });
+        }
+        return { key: 'pfg_profile_' + id, json: JSON.stringify(profile) };
+    });
+    // Written from a page with no calculator on it: a save production still
+    // has pending would write its three planets back over the twelve.
+    const calculator = page.url();
+    await page.goto('/robots.txt');
+    await page.evaluate(({ key, json }) => localStorage.setItem(key, json), heavy);
+    await page.goto(calculator);
+}
+
+test('a heavy profile goes as a series of QR codes, taken on the last one in any order', async ({ page, browser }) => {
+    await openWithProfile(page, '/production');
+    await makeHeavy(page);
+    expect((await activeProfile(page)).planets).toHaveLength(12);
+    const [id] = await storedIds(page);
+    await shareLink(page);
+
+    // The series: one code at a time, paged with the arrows.
+    const label = page.locator('#pf-share-qr-part');
+    await expect(page.locator('#pf-share-qr-nav')).toBeVisible();
+    await expect(label).toHaveText(/^Code 1 of \d+$/);
+    const count = Number((await label.textContent()).match(/of (\d+)/)[1]);
+    expect(count).toBeGreaterThan(1);
+    // The hint names the count, so one code is not taken for the whole profile.
+    await expect(page.locator('#pf-share-qr-hint')).toContainText(`scan all ${count} codes`);
+    await expect(page.locator('#pf-share-qr-hint')).toContainText('One code is not enough');
+    await expect(page.locator('#pf-share-qr-prev')).toBeDisabled();
+    const qr = page.locator('#pf-share-qr');
+    const urls = [];
+    for (let i = 1; i <= count; i++) {
+        await expect(label).toHaveText(`Code ${i} of ${count}`);
+        await expect(qr).toHaveAttribute('data-url', /#pfp=p1\./);
+        const url = await qr.getAttribute('data-url');
+        expect(urls).not.toContain(url);
+        urls.push(url);
+        if (i < count) await page.locator('#pf-share-qr-next').click();
+    }
+    await expect(page.locator('#pf-share-qr-next')).toBeDisabled();
+    await page.locator('#pf-share-qr-prev').click();
+    await expect(label).toHaveText(`Code ${count - 1} of ${count}`);
+
+    // Each scan opens a page of its own; the order does not matter.
+    const device = await otherDevice(browser);
+    const order = [...urls.slice(1).reverse(), urls[0]];
+    for (const [i, url] of order.entries()) {
+        const scan = await device.newPage();
+        await scan.goto(url);
+        expect(scan.url()).not.toContain('#');
+        if (i < order.length - 1) {
+            await expect(toasts(scan, '.text-bg-info')).toContainText(`Received ${i + 1} of ${count} QR codes`);
+            await expect(scan.locator('#pf-select')).toHaveValue('');
+            expect(await storedIds(scan)).toEqual([]);
+        } else {
+            await expect(scan.locator('#pf-select')).toHaveValue(id);
+            await expect(toasts(scan, '.text-bg-success')).toContainText('Tester');
+            const profile = await activeProfile(scan);
+            expect(profile.planets).toHaveLength(12);
+            expect(profile.moons).toHaveLength(3);
+            // The series is gone once complete.
+            expect(await scan.evaluate(() => Object.keys(localStorage).filter((k) => k.startsWith('pfg-share-parts:')))).toEqual([]);
+        }
+    }
+
+    // A code scanned again afterwards starts nothing but a new count.
+    const again = await device.newPage();
+    await again.goto(urls[0]);
+    await expect(toasts(again, '.text-bg-info')).toContainText(`Received 1 of ${count}`);
+    await expect(again.locator('.modal.show')).toHaveCount(0);
+    expect(await storedIds(again)).toEqual([id]);
+    await device.close();
+});
+
+test('"share" is offered in the select only while a profile is active', async ({ page }) => {
+    await openWithProfile(page, '/production');
+    await expect(page.locator('#pf-select option[value="__share"]')).toHaveCount(1);
+    await page.locator('#pf-select').selectOption('');
+    await expect(page.locator('#pf-select option[value="__share"]')).toHaveCount(0);
+});
+
+test('a share link carries the profile to another device and makes it active', async ({ page, browser }) => {
+    await openWithProfile(page, '/production');
+    const [id] = await storedIds(page);
+    const link = await shareLink(page);
+
+    const device = await otherDevice(browser);
+    const other = await device.newPage();
+    await other.goto(link);
+    await expect(other.locator('#pf-select')).toHaveValue(id);
+    await expect(toasts(other, '.text-bg-success')).toContainText('Tester');
+    await expect(other.locator('#energy-tech-level')).toHaveValue('14');
+    // The link leaves the address bar at once.
+    expect(other.url()).not.toContain('#');
+    const profile = await activeProfile(other);
+    expect(profile.id).toBe(id);
+    expect('resources' in profile).toBe(false);
+
+    // A reload asks nothing and changes nothing.
+    await other.reload();
+    await expect(other.locator('#pf-select')).toHaveValue(id);
+    await expect(other.locator('.modal.show')).toHaveCount(0);
+    expect(await storedIds(other)).toEqual([id]);
+    await device.close();
+});
+
+test('a share link of a profile already here asks to replace or skip it', async ({ page }) => {
+    await openWithProfile(page, '/production');
+    const link = await shareLink(page);
+    const rename = (label) => page.evaluate((to) => {
+        const id = JSON.parse(localStorage.getItem('pfg_profiles') || '[]')[0].id;
+        const profile = JSON.parse(localStorage.getItem('pfg_profile_' + id) || 'null');
+        profile.label = to;
+        localStorage.setItem('pfg_profile_' + id, JSON.stringify(profile));
+        localStorage.setItem('pfg_profiles', JSON.stringify([{ ...JSON.parse(localStorage.getItem('pfg_profiles'))[0], label: to }]));
+    }, label);
+
+    // The dialog opens while the page is still loading; Bootstrap ignores a
+    // hide() that comes during the show transition, so a click that early can
+    // leave it open - press again until it closes.
+    const answer = async (button) => {
+        const dialog = openNonProfileDialog(page);
+        await expect(async () => {
+            await dialog.locator(button).click({ timeout: 1000 });
+            await expect(dialog).toHaveCount(0, { timeout: 1000 });
+        }).toPass();
+    };
+
+    // Skip: the profile here stays as it is.
+    await rename('Kept here');
+    await page.goto('about:blank');
+    await page.goto(link);
+    // Named as the link names it, as the backup file does.
+    await expect(openNonProfileDialog(page)).toContainText('Profile “Tester” already exists');
+    await answer('.btn-secondary');
+    await expect.poll(async () => (await activeProfile(page)).label).toBe('Kept here');
+
+    // Replace: the link's profile takes its place.
+    await page.goto('about:blank');
+    await page.goto(link);
+    await answer('.btn-primary');
+    await expect.poll(async () => (await activeProfile(page)).label).toBe('Tester');
+    expect(await storedIds(page)).toHaveLength(1);
+});
+
+test('a share link pasted into a tab already on the page is taken without a reload', async ({ page, browser }) => {
+    await openWithProfile(page, '/production');
+    const link = await shareLink(page);
+
+    const device = await otherDevice(browser);
+    const other = await device.newPage();
+    await other.goto('/production');
+    await expect(other.locator('#pf-select')).toHaveValue('');
+    await other.evaluate((hash) => { location.hash = hash; }, new URL(link).hash);
+    await expect(other.locator('#pf-select')).not.toHaveValue('');
+    await expect(other.locator('#energy-tech-level')).toHaveValue('14');
+    expect(other.url()).not.toContain('#');
+    await device.close();
+});
+
+test('a share link opened on trade keeps the saved deal direction', async ({ page, browser }) => {
+    await openWithProfile(page, '/production');
+    const link = new URL(await shareLink(page));
+
+    const device = await otherDevice(browser);
+    const other = await device.newPage();
+    await other.goto('/trade');
+    await other.locator('#res-src-2').click();
+    await other.locator('#dir-1').check();
+    await expect.poll(() => other.evaluate(() => JSON.parse(localStorage.getItem('options_trade') ?? '{}').direction)).toBe(1);
+
+    link.pathname = new URL(other.url()).pathname;
+    await other.goto('about:blank');
+    await other.goto(link.href);
+    await expect(other.locator('#pf-select')).not.toHaveValue('');
+    await expect(other.locator('#dir-1')).toBeChecked();
+    await device.close();
+});
+
+test('an uncompressed share link is taken too', async ({ page, browser }) => {
+    await openWithProfile(page, '/production');
+    const [id] = await storedIds(page);
+    const plainLink = await page.evaluate((profileId) => {
+        const profile = JSON.parse(localStorage.getItem('pfg_profile_' + profileId) || 'null');
+        const payload = 'r2.' + pfB64UrlEncode(new TextEncoder().encode(serializeProfileShare(profile, [])));
+        return location.origin + location.pathname + '#' + buildShareFragment(payload);
+    }, id);
+
+    const device = await otherDevice(browser);
+    const other = await device.newPage();
+    await other.goto(plainLink);
+    await expect(other.locator('#pf-select')).toHaveValue(id);
+    await device.close();
+});
+
+test('a broken share link says so once, and leaves the address bar', async ({ page }) => {
+    await page.goto('/production#pfp=d1.AbC-');
+    const dialog = openNonProfileDialog(page);
+    await expect(dialog).toContainText('cannot be read');
+    expect(page.url()).not.toContain('#');
+    await dialog.locator('.btn-primary').click();
+    await page.reload();
+    await expect(page.locator('.modal.show')).toHaveCount(0);
+    expect(await storedIds(page)).toEqual([]);
+});
