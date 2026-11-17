@@ -134,7 +134,7 @@
     "crawler": "Puzavac",
     "planet-pos": "Pozicija",
     "dm-abbr": "TM",
-    "dm-explanation": "Cijena jednog ubrzanja za tamnu materiju.\nZgrade i istraživanja se računaju zasebno,\nnoge i odbrane - prema ukupnom vremenu za tab.",
+    "dm-explanation": "Cijena jednog ubrzanja za tamnu materiju.\nZgrade i istraživanja se računaju zasebno,\nflota i odbrana - prema ukupnom vremenu za tab.",
     "datetime-format": "d.m.y H:s:s",
     "datetime-format-hint": "dd.mm.yyyy hh:mm:ss",
     "trader-bonus": "Klasa saveza je \"Trgovci\"",

@@ -133,7 +133,7 @@
     "pathfinder": "Explorador",
     "crawler": "Taladrador",
     "dm-abbr": "MO",
-    "dm-explanation": "El coste de una aceleración para la Materia Oscura.\nLos edificios y las investigaciones se calculan por separado,\nlos pies y las defensas - por el tiempo total de una ficha.",
+    "dm-explanation": "El coste de una aceleración para la Materia Oscura.\nLos edificios y las investigaciones se calculan por separado,\nla flota y las defensas - por el tiempo total de una ficha.",
     "moon": "Luna",
     "disr-chamber": "Cámara de Disrupción",
     "datetime-format": "d.m.y H:s:s",

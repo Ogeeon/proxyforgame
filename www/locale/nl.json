@@ -129,7 +129,7 @@
     "pathfinder": "Pathfinder",
     "crawler": "Crawler",
     "dm-abbr": "DM",
-    "dm-explanation": "De kosten van één versnelling voor de Donkere Materie.\nGebouwen en onderzoeken worden apart berekend,\nvoeten en verdedigingen - door de totale tijd voor een tabblad.",
+    "dm-explanation": "De kosten van één versnelling voor de Donkere Materie.\nGebouwen en onderzoeken worden apart berekend,\nvloot en verdediging - door de totale tijd voor een tabblad.",
     "moon": "Maan",
     "datetime-format": "d.m.y H:s:s",
     "datetime-format-hint": "dd.mm.jjjj uu:mm:ss",

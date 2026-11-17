@@ -134,7 +134,7 @@
     "crawler": "Crawler",
     "planet-pos": "Position",
     "dm-abbr": "DM",
-    "dm-explanation": "Die Kosten für einen Speed-Up für die Dunkle Materie.\nGebäude und Forschungen werden separat berechnet,\nFüße und Verteidigungen - durch die Gesamtzeit für eine Registerkarte.",
+    "dm-explanation": "Die Kosten für einen Speed-Up für die Dunkle Materie.\nGebäude und Forschungen werden separat berechnet,\nFlotte und Verteidigung - durch die Gesamtzeit für eine Registerkarte.",
     "moon": "Mond",
     "disr-chamber": "Disruptionskammer",
     "datetime-format": "d.m.y H:s:s",

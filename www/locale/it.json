@@ -131,7 +131,7 @@
     "pathfinder": "Pathfinder",
     "crawler": "Crawler",
     "dm-abbr": "MO",
-    "dm-explanation": "Il costo di un'accelerazione per la Materia Oscura.\nEdifici e ricerche sono calcolati separatamente,\npiedi e difese - per il tempo totale di una scheda.",
+    "dm-explanation": "Il costo di un'accelerazione per la Materia Oscura.\nEdifici e ricerche sono calcolati separatamente,\nflotta e difese - per il tempo totale di una scheda.",
     "moon": "Luna",
     "datetime-format-hint": "gg.mm.yyyy hh:mm:ss",
     "coords": "Coordinate",

@@ -132,7 +132,7 @@
     "pathfinder": "Pionier",
     "crawler": "Pełzacz",
     "dm-abbr": "CM",
-    "dm-explanation": "Koszt jednego przyspieszenia dla Ciemnej Materii.\nBudynki i badania są liczone osobno,\nstopy i obrona - według łącznego czasu dla danej karty.",
+    "dm-explanation": "Koszt jednego przyspieszenia dla Ciemnej Materii.\nBudynki i badania są liczone osobno,\nflota i obrona - według łącznego czasu dla danej karty.",
     "moon": "Księżyc",
     "datetime-format": "d.m.y H:s:s",
     "datetime-format-hint": "dd.mm.rrrr gg:mm:ss",

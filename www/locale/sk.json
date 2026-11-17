@@ -132,7 +132,7 @@
     "pathfinder": "Pathfinder",
     "crawler": "Crawler",
     "dm-abbr": "TH",
-    "dm-explanation": "Cena jedného zrýchlenia pre Temnú Hmotu.\nBudovy a výskumy sa počítajú samostatne,\nnohy a obrany - podľa celkového času na karte.",
+    "dm-explanation": "Cena jedného zrýchlenia pre Temnú Hmotu.\nBudovy a výskumy sa počítajú samostatne,\nflotila a obrana - podľa celkového času na karte.",
     "moon": "Mesiac",
     "datetime-format": "d.m.y H:s:s",
     "datetime-format-hint": "dd.mm.rrrr hh:mm:ss",

@@ -132,7 +132,7 @@
     "pathfinder": "Éclaireur",
     "planet-pos": "Position",
     "dm-abbr": "MN",
-    "dm-explanation": "Le coût d'un accélérateur pour la Matière Noire.\nLes bâtiments et les recherches sont calculés séparément,\nles pieds et les défenses - par le temps total pour un onglet.",
+    "dm-explanation": "Le coût d'un accélérateur pour la Matière Noire.\nLes bâtiments et les recherches sont calculés séparément,\nla flotte et les défenses - par le temps total pour un onglet.",
     "moon": "Lune",
     "datetime-format-hint": "jj.mm.yyyy hh:mm:ss",
     "coords": "Coordonnées",

@@ -134,7 +134,7 @@
     "crawler": "Crawler",
     "planet-pos": "Position",
     "dm-abbr": "DM",
-    "dm-explanation": "The cost of one speed-up for the Dark Matter.\nBuildings and researches are calculated separately,\nfeet and defenses - by total time for a tab.",
+    "dm-explanation": "The cost of one speed-up for the Dark Matter.\nBuildings and researches are calculated separately,\nfleet and defenses - by total time for a tab.",
     "moon": "Moon",
     "disr-chamber": "Disruption Chamber",
     "datetime-format": "m.d.y H:s:s",

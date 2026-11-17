@@ -133,7 +133,7 @@
     "pathfinder": "Rehber",
     "crawler": "Paletli",
     "dm-abbr": "KM",
-    "dm-explanation": "Karanlık Madde için bir hızlandırmanın bedeli.\nBinalar ve araştırmalar ayrı ayrı hesaplanır,\nayaklar ve savunmalar - bir sekme için toplam süreye göre.",
+    "dm-explanation": "Karanlık Madde için bir hızlandırmanın bedeli.\nBinalar ve araştırmalar ayrı ayrı hesaplanır,\nfilo ve savunmalar - bir sekme için toplam süreye göre.",
     "moon": "Ay",
     "datetime-format": "d.m.y H:s:s",
     "coords": "Koordinatlar",

@@ -133,7 +133,7 @@
     "pathfinder": "Pathfinder",
     "crawler": "Crawler",
     "dm-abbr": "MN",
-    "dm-explanation": "O custo de um speed-up para a Matéria Negra.\nOs edifícios e as investigações são calculados separadamente,\npés e defesas - por tempo total para um separador.",
+    "dm-explanation": "O custo de um speed-up para a Matéria Negra.\nOs edifícios e as investigações são calculados separadamente,\nfrota e defesas - por tempo total para um separador.",
     "moon": "Lua",
     "disr-chamber": "Câmara de Disrupção",
     "datetime-format": "d.m.y H:s:s",
