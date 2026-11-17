@@ -423,6 +423,8 @@
     "ai-link": "Calculators in ChatGPT, Claude & more"
   },
   "costs": {
+    "effect": "Effect",
+    "effect-hint": "The effect at the target level. Values from the game's beta; they may still change.",
     "title": "OGame - Costs calculator",
     "keywords": "proxyforgame,ogame,ogame cost calculator,price calculator,building costs,research costs,fleet costs,defence costs,construction costs,resource costs",
     "lf-full-table": "Full table",

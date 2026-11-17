@@ -423,6 +423,8 @@
     "ai-link": "Calculators in ChatGPT, Claude e.a."
   },
   "costs": {
+    "effect": "Effect",
+    "effect-hint": "Het effect op het doelniveau. Waarden uit de bèta van het spel; ze kunnen nog veranderen.",
     "title": "OGame - Kosten berekening",
     "keywords": "proxyforgame,ogame,kostencalculator,bouwkosten,onderzoekskosten,vlootkosten,verdedigingskosten,kostenberekening,grondstofkosten",
     "lf-full-table": "Volledige tabel",

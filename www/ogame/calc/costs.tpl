@@ -432,9 +432,12 @@
                 }
                  // quantity column for planet/moon buildings on both the single- and multi-level tabs
                  $hasQtyCol = ($j == 2 || $j == 3);
+                 // the Control Centre components show their effect in the same place instead
+                 $hasEffectCol = ($j === 7);
+                 $hasExtraCol = $hasQtyCol || $hasEffectCol;
                  $levelCols = ($i == 1) ? 2 : 1; // level columns: from+to (multi) or a single level
-                 $qtyOffset = $hasQtyCol ? 1 : 0;
-                 $qtyAfterIdx = ($i == 1) ? 2 : 1; // insert qty header after to-level (multi) or level (single)
+                 $qtyOffset = $hasExtraCol ? 1 : 0;
+                 $qtyAfterIdx = ($i == 1) ? 2 : 1; // insert the extra header after to-level (multi) or level (single)
               ?>
               <div class="tab-pane fade <?= $j === $firstInnerTab ? 'show active' : '' ?> no-mp" id="tab-<?=$i?>-<?=$j?>" role="tabpanel">
                 <div class="pfg-scroll-x pfg-sticky-col">
@@ -451,6 +454,9 @@
                       </th>
                        <?php if ($hasQtyCol && $idx == $qtyAfterIdx): ?>
                       <th class="text-center" style="white-space:nowrap"><?=$l['quantity'] ?></th>
+                      <?php endif; ?>
+                      <?php if ($hasEffectCol && $idx === $qtyAfterIdx): ?>
+                      <th class="text-center" style="white-space:nowrap"><abbr data-bs-toggle="tooltip" title="<?= htmlspecialchars($l['effect-hint'], ENT_QUOTES) ?>"><?= $l['effect'] ?></abbr></th>
                       <?php endif; ?>
                       <?php endforeach; ?>
                     </tr>
@@ -473,6 +479,9 @@
                        <?php if ($hasQtyCol): ?>
                         <td class="text-center"><input type="text" class="form-control form-control-sm qty-input ui-input-margin" value="1" style="text-align:center" aria-label="<?= $l['quantity'] ?>"></td>
                        <?php endif; ?>
+                       <?php if ($hasEffectCol): ?>
+                        <td class="text-center text-nowrap ias-effect" data-effect="<?= $techEffects[$tech] ?? '' ?>"><?= ($techEffects[$tech] ?? null) === null ? '—' : '0&nbsp;%' ?></td>
+                       <?php endif; ?>
                       <td class="text-center">0</td>
                       <td class="text-center">0</td>
                       <td class="text-center">0</td>
@@ -489,7 +498,7 @@
                       <td style="display: none;"></td>
                       <td colspan="<?= $levelCols ?>" class="border-n" ><?=$l['total']?></td>
                       <td class="border-n text-center" >0</td>
-                      <?php if ($hasQtyCol): ?><td class="border-n"></td><?php endif; ?>
+                      <?php if ($hasExtraCol): ?><td class="border-n"></td><?php endif; ?>
                       <td class="border-n border-s border-w text-center" ><b>0</b></td>
                       <td class="border-n border-s text-center" ><b>0</b></td>
                       <td class="border-n border-s text-center" ><b>0</b></td>
@@ -552,8 +561,8 @@
               <div class="d-flex flex-column gap-1 py-1">
                 <div class="d-flex align-items-center flex-wrap gap-2">
                   <select id="tech-types-select" name="tech-types-select" class="form-select form-select-sm w-auto" aria-label="<?= $l['one-item-mult-levels'] ?>">
-                  <?php $techTypes = array(2 => 'buildings-planet', 3 => 'buildings-moon', 4 => 'researches'); ?>
-                  <?php foreach ($techTypes as $type => $typeName) :?>
+                  <?php $rangeTechTypes = [2 => 'buildings-planet', 3 => 'buildings-moon', 7 => 'ias-control-centre', 4 => 'researches']; ?>
+                  <?php foreach ($rangeTechTypes as $type => $typeName) :?>
                     <optgroup label="<?=$l[$typeName]?>">
                     <?php $techs = getTechsByType($type);?>
                     <?php foreach ($techs as $tech) :?>

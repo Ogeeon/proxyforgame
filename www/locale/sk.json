@@ -423,6 +423,8 @@
     "ai-link": "Kalkulačky v ChatGPT, Claude a ďalších"
   },
   "costs": {
+    "effect": "Efekt",
+    "effect-hint": "Efekt na cieľovej úrovni. Hodnoty z bety hry; môžu sa ešte zmeniť.",
     "title": "OGame - Kalkulátor pre ceny",
     "lf-full-table": "Úplná tabuľka",
     "lf-full-table-hint": "Zadajte zníženie ceny a času pre každý výskum",

@@ -1216,7 +1216,7 @@ count = 1
 file = "www/ogame/calc/costs.tpl"
 code = "array-style"
 message = "Short array style `[..]` is preferred over `array(..)`."
-count = 3
+count = 2
 
 [[issues]]
 file = "www/ogame/calc/costs.tpl"

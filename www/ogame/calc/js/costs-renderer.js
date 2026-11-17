@@ -67,12 +67,12 @@ class Renderer {
     }
 
     const rows = getTableRows(`#${tableId}`);
-    const isMultiLevel = tableId.includes('-1-');
-    const hasQtyCol = ['table-0-2', 'table-0-3', 'table-1-2', 'table-1-3'].includes(tableId);
-    const firstDataCol = 3 + (isMultiLevel ? 1 : 0) + (hasQtyCol ? 1 : 0);
+    const { isMultiLevel, firstDataCol } = costsTableLayout(tableId);
 
     // Clear all data first
     this._clearTableData(tableId, rows, isMultiLevel);
+    // The effect follows the level entered, whether or not anything is built
+    this.renderEffects(tableId);
 
     // Accumulator for totals
     let totals = BuildCost.zero();
@@ -153,9 +153,8 @@ class Renderer {
    * NOTE: Does NOT clear input values - preserves user-entered levels
    * @private
    */
-  _clearTableData(_tableId, rows, isMultiLevel) {
-    const hasQtyCol = ['table-0-2', 'table-0-3', 'table-1-2', 'table-1-3'].includes(_tableId);
-    const firstDataCol = 3 + (isMultiLevel ? 1 : 0) + (hasQtyCol ? 1 : 0);
+  _clearTableData(tableId, rows, isMultiLevel) {
+    const { firstDataCol } = costsTableLayout(tableId);
     const numDataCols = isMultiLevel ? 7 : 8;
 
     // Clear data rows (skip header and footer)
@@ -202,17 +201,15 @@ class Renderer {
   _renderSubtotalRow(tableId, rows, totals, params, isMultiLevel) {
     const subtotalRow = rows.length - 6;
 
-    const isBuildingTable = tableId.endsWith('-2') || tableId.endsWith('-3');
+    const { isBuildingTable, subtotalStartCol } = costsTableLayout(tableId);
     const isFleetOrDefenseTable = tableId.endsWith('-5') || tableId.endsWith('-6');
-    const hasQtyCol = ['table-0-2', 'table-0-3', 'table-1-2', 'table-1-3'].includes(tableId);
 
     // Column 2: sum of building levels for buildings, empty otherwise
     rows[subtotalRow].cells[2].innerHTML = isBuildingTable
       ? `<b>${this._sumBuildingLevels(rows, isMultiLevel)}</b>`
       : '';
 
-    // Subtotals row - data columns start at column 3 (or 4 for planet buildings with qty col)
-    const subtotalStartCol = hasQtyCol ? 4 : 3;
+    // Subtotals row - data columns start at column 3, or 4 past a quantity or effect column
     rows[subtotalRow].cells[subtotalStartCol].innerHTML = `<b>${this._formatNumber(totals.metal, params)}</b>`;
     rows[subtotalRow].cells[subtotalStartCol + 1].innerHTML = `<b>${this._formatNumber(totals.crystal, params)}</b>`;
     rows[subtotalRow].cells[subtotalStartCol + 2].innerHTML = `<b>${this._formatNumber(totals.deuterium, params)}</b>`;
@@ -323,12 +320,52 @@ class Renderer {
    * @protected
    */
   _getTableIdsForTab(outerTab) {
-    if (outerTab === 0) {
-      return ['table-0-2', 'table-0-3', 'table-0-4', 'table-0-5', 'table-0-6'];
-    } else if (outerTab === 1) {
-      return ['table-1-2', 'table-1-3', 'table-1-4'];
+    return [...(COSTS_TAB_TABLES[outerTab] ?? [])];
+  }
+
+  /**
+   * Fill the effect column of the Control Centre table from the levels entered:
+   * the level on the single-level tab, the target level on the several-levels
+   * one. Any other table has no effect column and is left alone.
+   * @param {string} tableId
+   */
+  renderEffects(tableId) {
+    const { hasEffectCol, isMultiLevel } = costsTableLayout(tableId);
+    if (!hasEffectCol) {
+      return;
     }
-    return [];
+    const levelCol = isMultiLevel ? 3 : 2;
+    for (const cell of document.querySelectorAll(`#${tableId} td.ias-effect`)) {
+      if (!(cell instanceof HTMLTableCellElement)) {
+        continue;
+      }
+      const row = cell.parentElement;
+      const input = row instanceof HTMLTableRowElement ? row.cells[levelCol]?.querySelector('input') : null;
+      const perLevel = cell.dataset.effect === '' || cell.dataset.effect === undefined
+        ? null
+        : Number(cell.dataset.effect);
+      const level = input ? getInputNumber(input) : 0;
+      cell.innerHTML = Renderer.formatEffect(componentEffect(perLevel, level));
+    }
+  }
+
+  /**
+   * An effect in percent as the table shows it: "+2.5 %", "−2.5 %" for a
+   * discount, "0 %" at level 0, and a dash while the effect is not known.
+   * @param {number|null} percent
+   * @returns {string}
+   */
+  static formatEffect(percent) {
+    if (percent === null) {
+      return '—';
+    }
+    let sign = '';
+    if (percent > 0) {
+      sign = '+';
+    } else if (percent < 0) {
+      sign = '−';
+    }
+    return `${sign}${localizeFloat(Math.abs(percent))}&nbsp;%`;
   }
 
   // ==========================================================================

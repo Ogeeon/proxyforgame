@@ -423,6 +423,8 @@
     "ai-link": "Kalkulatori u ChatGPT-u, Claudeu i drugim"
   },
   "costs": {
+    "effect": "Efekat",
+    "effect-hint": "Efekat na ciljnom nivou. Vrijednosti iz beta verzije igre; mogu se promijeniti.",
     "title": "Ogame - kalkulator troškova",
     "keywords": "proxyforgame,ogame,kalkulator troškova,troškovi zgrada,troškovi istraživanja,troškovi flote,troškovi odbrane,računanje troškova,troškovi resursa",
     "lf-full-table": "Potpuna tabela",

@@ -14,6 +14,7 @@ const { expect } = require('./expect');
 // page does, with all four scripts sharing one global scope.
 const {
     GlobalParams, Calculator, BuildRequest, universeSpeeds, calcBuildCost_C, getBuildCost_C, getBuildTime_C,
+    componentEffect, costsTableLayout, COSTS_TAB_TABLES,
 } = load(
     [
         'ogame/calc/js/ogame-production.js',
@@ -22,7 +23,7 @@ const {
         'ogame/calc/js/costs-core.js',
     ],
     ['GlobalParams', 'Calculator', 'BuildRequest', 'universeSpeeds', 'calcBuildCost_C', 'getBuildCost_C',
-        'getBuildTime_C'],
+        'getBuildTime_C', 'componentEffect', 'costsTableLayout', 'COSTS_TAB_TABLES'],
 );
 
 // Research Lab levels the game requires, mirrored from $techReqs in costs.php.
@@ -611,5 +612,98 @@ describe('data/costs-techs.json: anomaly scanner', () => {
             robotsLevel: 0, nanitesLevel: 0, uniSpeed: 100,
         })));
         expect(times).toEqual(SHEET.map(row => row[3]));
+    });
+});
+
+describe('data/costs-techs.json: Control Centre components', () => {
+    const { readFileSync } = require('node:fs');
+    const path = require('node:path');
+    /** @type {{techs: Record<string, {key: string, type: number, cost: number[], growth: number, effect?: number|null}>}} */
+    const data = JSON.parse(readFileSync(path.join(__dirname, '../www/ogame/calc/data/costs-techs.json'), 'utf8'));
+    const components = Object.entries(data.techs).filter(([, tech]) => tech.type === 7);
+    const techData = Object.fromEntries(components.map(([id, tech]) => [id, [...tech.cost, tech.growth]]));
+
+    // Levels 1-3 as recorded in the game (Project Orion beta, D:\temp\IAS CP.xlsx),
+    // with the Catalytic Converter's metal typo on level 3 corrected (286875).
+    const SHEET = {
+        'ias-recovery-centre': [[75000, 52500, 22500], [112500, 78750, 33750], [168750, 118125, 50625]],
+        'ias-lithium-lab': [[52500, 37500, 37500], [78750, 56250, 56250], [118125, 84375, 84375]],
+        'ias-metal-recycling': [[112500, 37500, 18000], [168750, 56250, 27000], [253125, 84375, 40500]],
+        'ias-crystal-finishing': [[37500, 67500, 27000], [56250, 101250, 40500], [84375, 151875, 60750]],
+        'ias-anomaly-analysis': [[67500, 37500, 22500], [101250, 56250, 33750], [151875, 84375, 50625]],
+        'ias-deuterium-tanks': [[30000, 37500, 45000], [45000, 56250, 67500], [67500, 84375, 101250]],
+        'ias-catalytic-converter': [[127500, 112500, 52500], [191250, 168750, 78750], [286875, 253125, 118125]],
+    };
+
+    it('lists the seven components, all with growth 1.5', () => {
+        expect(components.map(([, tech]) => [tech.key, tech.growth]))
+            .toEqual(Object.keys(SHEET).map(key => [key, 1.5]));
+    });
+
+    it('costs what the game charges for levels 1-3', () => {
+        for (const [id, tech] of components) {
+            const costs = [1, 2, 3].map(level => calcBuildCost_C(Number(id), level, techData));
+            expect([tech.key, costs]).toEqual([tech.key, SHEET[tech.key]]);
+        }
+    });
+
+    it('rounds level 4 down, as the game shows the Lithium Electrolysis Lab', () => {
+        // 52500/37500/37500 x 1.5^3 = 177187.5/126562.5/126562.5
+        const [id] = components.find(([, tech]) => tech.key === 'ias-lithium-lab') ?? [];
+        expect(calcBuildCost_C(Number(id), 4, techData)).toEqual([177187, 126562, 126562]);
+    });
+
+    it('gives 0.5% per level, a 0.5% discount for the converter, and no effect yet for the analysis centre', () => {
+        const effects = Object.fromEntries(components.map(([, tech]) => [tech.key, tech.effect]));
+        expect(effects).toEqual({
+            'ias-recovery-centre': 0.5,
+            'ias-lithium-lab': 0.5,
+            'ias-metal-recycling': 0.5,
+            'ias-crystal-finishing': 0.5,
+            'ias-anomaly-analysis': null,
+            'ias-deuterium-tanks': 0.5,
+            'ias-catalytic-converter': -0.5,
+        });
+    });
+});
+
+describe('componentEffect', () => {
+    it('grows by the same step every level', () => {
+        expect([0, 1, 5, 20].map(level => componentEffect(0.5, level))).toEqual([0, 0.5, 2.5, 10]);
+    });
+
+    it('keeps the sign of a discount', () => {
+        expect(componentEffect(-0.5, 3)).toBe(-1.5);
+    });
+
+    it('is null while the effect is unknown', () => {
+        expect([componentEffect(null, 4), componentEffect(undefined, 4)]).toEqual([null, null]);
+    });
+});
+
+describe('costsTableLayout', () => {
+    it('puts the Control Centre next to the buildings on both "all items" tabs', () => {
+        expect([[...COSTS_TAB_TABLES[0]], [...COSTS_TAB_TABLES[1]]]).toEqual([
+            ['table-0-2', 'table-0-3', 'table-0-7', 'table-0-4', 'table-0-5', 'table-0-6'],
+            ['table-1-2', 'table-1-3', 'table-1-7', 'table-1-4'],
+        ]);
+    });
+
+    it('shifts the results past the quantity or the effect column', () => {
+        const first = id => costsTableLayout(id).firstDataCol;
+        expect(['table-0-4', 'table-0-2', 'table-0-7', 'table-1-4', 'table-1-3', 'table-1-7'].map(first))
+            .toEqual([3, 4, 4, 4, 5, 5]);
+    });
+
+    it('gives the effect column only to the Control Centre and the quantity only to buildings', () => {
+        const flags = id => {
+            const { hasQtyCol, hasEffectCol, isBuildingTable, subtotalStartCol } = costsTableLayout(id);
+            return [hasQtyCol, hasEffectCol, isBuildingTable, subtotalStartCol];
+        };
+        expect(['table-1-2', 'table-0-7', 'table-0-5'].map(flags)).toEqual([
+            [true, false, true, 4],
+            [false, true, true, 4],
+            [false, false, false, 3],
+        ]);
     });
 });

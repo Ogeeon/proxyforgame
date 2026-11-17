@@ -423,6 +423,8 @@
     "ai-link": "Rechner in ChatGPT, Claude & Co."
   },
   "costs": {
+    "effect": "Effekt",
+    "effect-hint": "Der Effekt auf der Zielstufe. Werte aus der Beta des Spiels; sie können sich noch ändern.",
     "title": "OGame - Kostenberechnung",
     "keywords": "proxyforgame,ogame,kostenrechner,baukosten,forschungskosten,flottenkosten,verteidigungskosten,kostenberechnung,rohstoffkosten",
     "lf-full-table": "Vollständige Tabelle",

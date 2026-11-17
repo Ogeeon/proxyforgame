@@ -736,6 +736,15 @@ describe('MCP tool ogame_build_cost', () => {
         expect(mine.isError).toBe(true);
     });
 
+    it('prices a Control Centre component as a planet building', async () => {
+        const out = (await call(protocolWith(), 'ogame_build_cost', { item: 'ias-catalytic-converter', toLevel: 3 })).structuredContent;
+        // Levels 1-3 as the game charges them: 127500/112500/52500 x (1 + 1.5 + 2.25).
+        expect([out.metal, out.crystal, out.deuterium]).toEqual([605625, 534375, 249375]);
+        expect(out.item).toEqual({ key: 'ias-catalytic-converter', name: 'Catalytic Converter', kind: 'building' });
+        const onMoon = await call(protocolWith(), 'ogame_build_cost', { item: 'ias-lithium-lab', toLevel: 1, location: 'moon' });
+        expect(onMoon.isError).toBe(true);
+    });
+
     it('refuses to demolish the terraformer', async () => {
         const result = await call(protocolWith(), 'ogame_build_cost', { item: 'terraformer', fromLevel: 3, toLevel: 2 });
         expect(result.isError).toBe(true);

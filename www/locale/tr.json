@@ -423,6 +423,8 @@
     "ai-link": "ChatGPT, Claude ve diğerlerinde hesaplayıcılar"
   },
   "costs": {
+    "effect": "Etki",
+    "effect-hint": "Hedef seviyedeki etki. Değerler oyunun beta sürümünden; değişebilir.",
     "title": "OGame – Maliyet Hesaplayıcı",
     "keywords": "proxyforgame,ogame,maliyet hesaplayıcı,bina maliyetleri,araştırma maliyetleri,filo maliyetleri,savunma maliyetleri,maliyet hesaplama,kaynak maliyeti",
     "lf-full-table": "Tam tablo",

@@ -1613,13 +1613,9 @@ class CostsCalculator {
     const scFull = options.scFull || 'Small Cargo';
     const lcFull = options.lcFull || 'Large Cargo';
 
-    // Clear all tab 0 tables (single-level)
-    const tab0Tables = ['table-0-2', 'table-0-3', 'table-0-4', 'table-0-5', 'table-0-6'];
-    tab0Tables.forEach(tableId => this._clearTableData(tableId, false, datetimeS, scShort, lcShort, scFull, lcFull));
-
-    // Clear all tab 1 tables (multi-level)
-    const tab1Tables = ['table-1-2', 'table-1-3', 'table-1-4'];
-    tab1Tables.forEach(tableId => this._clearTableData(tableId, true, datetimeS, scShort, lcShort, scFull, lcFull));
+    // Clear all tab 0 tables (single-level) and tab 1 tables (multi-level)
+    COSTS_TAB_TABLES[0].forEach(tableId => this._clearTableData(tableId, false, datetimeS, scShort, lcShort, scFull, lcFull));
+    COSTS_TAB_TABLES[1].forEach(tableId => this._clearTableData(tableId, true, datetimeS, scShort, lcShort, scFull, lcFull));
 
     // Clear range tables
     this._clearRangeTable('prods-table');
@@ -1634,9 +1630,9 @@ class CostsCalculator {
     const rows = getTableRows(`#${tableId}`);
     if (rows.length === 0) return;
 
-    const hasPlanetQtyCol = ['table-0-2', 'table-0-3', 'table-1-2', 'table-1-3'].includes(tableId);
-    const firstDataCol = 3 + (isMultiLevel ? 1 : 0) + (hasPlanetQtyCol ? 1 : 0);
-    const isBuildingTable = tableId.endsWith('-2') || tableId.endsWith('-3');
+    const { firstDataCol, isBuildingTable, subtotalStartCol } = costsTableLayout(tableId);
+    // The inputs are already reset, so the effect drops back to level 0
+    this.renderer.renderEffects(tableId);
 
     // Clear data rows (skip header and 6 footer rows)
     for (let i = 1; i < rows.length - 6; i++) {
@@ -1661,8 +1657,7 @@ class CostsCalculator {
     const resNeededRow = rows.length - 2;
     const deliveryTransportRow = rows.length - 1;
 
-    // Clear subtotal row (subtotalStartCol=3, or 4 for planet buildings with qty col)
-    const subtotalStartCol = hasPlanetQtyCol ? 4 : 3;
+    // Clear subtotal row (subtotalStartCol=3, or 4 past a quantity or effect column)
     if (isBuildingTable) {
       rows[subtotalRow].cells[2].innerHTML = '<b>0</b>';
     }
@@ -1834,12 +1829,7 @@ class CostsCalculator {
    * @private
    */
   _getTableIdsForTab(outerTab) {
-    if (outerTab === 0) {
-      return ['table-0-2', 'table-0-3', 'table-0-4', 'table-0-5', 'table-0-6'];
-    } else if (outerTab === 1) {
-      return ['table-1-2', 'table-1-3', 'table-1-4'];
-    }
-    return [];
+    return [...(COSTS_TAB_TABLES[outerTab] ?? [])];
   }
 
   /**

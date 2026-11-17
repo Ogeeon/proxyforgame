@@ -895,6 +895,64 @@ function universeSpeeds(serverData) {
 }
 
 // ============================================================================
+// THE ELEMENT TABLES OF THE TWO "ALL ITEMS" TABS
+// ============================================================================
+
+/**
+ * The element tables of each "all items" tab, in the order the page shows them:
+ * table-<tab>-<type>, the type being the one costs-techs.json gives (7 is the
+ * Interstellar Anomaly Scanner's Control Centre). The several-levels tab has no
+ * ships and no defence.
+ * @type {Readonly<Record<number, readonly string[]>>}
+ */
+const COSTS_TAB_TABLES = Object.freeze({
+  0: Object.freeze(['table-0-2', 'table-0-3', 'table-0-7', 'table-0-4', 'table-0-5', 'table-0-6']),
+  1: Object.freeze(['table-1-2', 'table-1-3', 'table-1-7', 'table-1-4']),
+});
+
+/**
+ * Where things are in one element table. A row is: the hidden id, the name,
+ * the level input (from and to on the several-levels tab), then on the
+ * building tables a quantity input and on the Control Centre table the
+ * effect, and then the results starting at `firstDataCol`.
+ * @param {string} tableId - e.g. 'table-0-2'
+ * @returns {{isMultiLevel: boolean, hasQtyCol: boolean, hasEffectCol: boolean,
+ *   isBuildingTable: boolean, firstDataCol: number, subtotalStartCol: number}}
+ */
+function costsTableLayout(tableId) {
+  const [, outer, inner] = tableId.split('-');
+  const isMultiLevel = outer === '1';
+  const hasQtyCol = inner === '2' || inner === '3';
+  const hasEffectCol = inner === '7';
+  const extra = hasQtyCol || hasEffectCol ? 1 : 0;
+  return {
+    isMultiLevel,
+    hasQtyCol,
+    hasEffectCol,
+    // Tables whose subtotal row sums the levels entered
+    isBuildingTable: hasQtyCol || hasEffectCol,
+    firstDataCol: 3 + (isMultiLevel ? 1 : 0) + extra,
+    // The subtotal row merges the level inputs into one cell, so it starts at 3
+    subtotalStartCol: 3 + extra,
+  };
+}
+
+/**
+ * The effect of a Control Centre component at a level, in percent: the same
+ * step every level. Negative for a discount (the Catalytic Converter), null
+ * while the effect is not known.
+ * @param {number|null|undefined} perLevel - percent per level, from costs-techs.json
+ * @param {number} level
+ * @returns {number|null}
+ */
+function componentEffect(perLevel, level) {
+  if (perLevel === null || perLevel === undefined) {
+    return null;
+  }
+  return perLevel * Math.max(0, level);
+}
+
+// ============================================================================
 // EXPORT FOR USE
 // ============================================================================
 

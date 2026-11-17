@@ -423,6 +423,8 @@
     "ai-link": "Calcolatori in ChatGPT, Claude e altri"
   },
   "costs": {
+    "effect": "Effetto",
+    "effect-hint": "L'effetto al livello di destinazione. Valori dalla beta del gioco; possono ancora cambiare.",
     "title": "OGame - Calcolatore di Costi",
     "keywords": "proxyforgame,ogame,calcolatore costi,costi edifici,costi ricerche,costi flotta,costi difese,calcolo dei costi,costo in risorse",
     "lf-full-table": "Tabella completa",

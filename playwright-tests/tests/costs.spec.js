@@ -443,6 +443,73 @@ test.describe('Costs Calculator Page', () => {
         await expect(page.locator('#table-1-4 tr:nth-last-child(4) td:nth-child(9)')).toContainText('2.174');
     });
 
+    test('[control centre - one level] prices the components, shows their effect and adds them to the grand total', async ({ page }) => {
+        await page.getByRole('tab', { name: 'Control Centre' }).first().click();
+        const table = page.locator('#table-0-7');
+        // Seven components; the effect column sits between the level and the metal
+        await expect(table.locator('tr[data-report-key]')).toHaveCount(7);
+        await expect(table.locator('tr:nth-child(1) th:nth-child(4)')).toContainText('Effect');
+
+        // Intergalactic Recovery Centre 3, Anomaly Analysis Centre 2, Catalytic Converter 2
+        for (const [row, level] of [[2, 3], [6, 2], [8, 2]]) {
+            await table.locator(`tr:nth-child(${row}) td:nth-child(3) input`).fill(String(level));
+            await table.locator(`tr:nth-child(${row}) td:nth-child(3) input`).press('Enter');
+        }
+        await expect(table.locator('tr:nth-child(2) td:nth-child(4)')).toHaveText('+1.5 %');
+        await expect(table.locator('tr:nth-child(2) td:nth-child(5)')).toContainText('168.750');
+        await expect(table.locator('tr:nth-child(2) td:nth-child(6)')).toContainText('118.125');
+        await expect(table.locator('tr:nth-child(2) td:nth-child(7)')).toContainText('50.625');
+        // Its effect is not known yet
+        await expect(table.locator('tr:nth-child(6) td:nth-child(4)')).toHaveText('—');
+        // The converter's effect is a discount
+        await expect(table.locator('tr:nth-child(8) td:nth-child(4)')).toHaveText('−1 %');
+
+        // 168750 + 101250 + 191250 metal, 118125 + 56250 + 168750 crystal, 50625 + 33750 + 78750 deuterium
+        for (const id of ['#table-0-7', '#table-0-2']) {
+            await expect(page.locator(`${id} tr:nth-last-child(4) td:nth-child(3)`)).toContainText('461.250');
+            await expect(page.locator(`${id} tr:nth-last-child(4) td:nth-child(4)`)).toContainText('343.125');
+            await expect(page.locator(`${id} tr:nth-last-child(4) td:nth-child(5)`)).toContainText('163.125');
+        }
+
+        // The header explains what the effect column shows
+        await table.locator('tr:nth-child(1) th:nth-child(4) abbr').hover();
+        await expect(page.locator('.tooltip')).toContainText('target level');
+
+        // The global reset takes the effect back to level 0
+        await page.locator('#reset').click();
+        await expect(table.locator('tr:nth-child(2) td:nth-child(4)')).toHaveText('0 %');
+        await expect(table.locator('tr:nth-child(6) td:nth-child(4)')).toHaveText('—');
+    });
+
+    test('[control centre - multiple levels] shows the effect at the target level', async ({ page }) => {
+        await page.getByRole('tab', { name: 'All items - multiple levels' }).click();
+        await page.locator('#tabtag-1-7').click();
+        const table = page.locator('#table-1-7');
+        // Lithium Electrolysis Lab from 2 to 4: levels 3 and 4, the fourth's .5 rounded down
+        await table.locator('tr:nth-child(3) td:nth-child(3) input').fill('2');
+        await table.locator('tr:nth-child(3) td:nth-child(4) input').fill('4');
+        await table.locator('tr:nth-child(3) td:nth-child(4) input').press('Enter');
+        await expect(table.locator('tr:nth-child(3) td:nth-child(5)')).toHaveText('+2 %');
+        await expect(table.locator('tr:nth-child(3) td:nth-child(6)')).toContainText('295.312');
+        await expect(table.locator('tr:nth-child(3) td:nth-child(7)')).toContainText('210.937');
+        await expect(table.locator('tr:nth-child(3) td:nth-child(8)')).toContainText('210.937');
+        // The subtotal row sums the target levels
+        await expect(table.locator('tr:nth-child(9) td:nth-child(3)')).toContainText('4');
+    });
+
+    test('[control centre - one item] the range tab prices a component level by level', async ({ page }) => {
+        await page.getByRole('tab', { name: 'One item - multiple levels' }).click();
+        // Lithium Electrolysis Lab, listed under the Control Centre
+        await expect(page.locator('#tech-types-select optgroup[label="Control Centre"] option')).toHaveCount(7);
+        await page.locator('#tech-types-select').selectOption('47');
+        await page.locator('#tab2-from-level').fill('2');
+        await page.locator('#tab2-to-level').fill('4');
+        await page.locator('#tab2-to-level').press('Enter');
+        await expect(page.locator('#commons-table tr:nth-child(2) td:nth-child(2)')).toContainText('118.125');
+        await expect(page.locator('#commons-table tr:nth-child(3) td:nth-child(2)')).toContainText('177.187');
+        await expect(page.locator('#commons-table tr:nth-child(4) td:nth-child(2)')).toContainText('295.312');
+    });
+
     test('deconstruction calculation is correct', async ({ page }) => {
         await page.getByRole('tab', { name: 'All items - multiple levels' }).click();
         await page.getByRole('tab', { name: 'Buildings (planet)' }).click();

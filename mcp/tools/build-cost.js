@@ -17,9 +17,11 @@ const { GlobalParams, BuildRequest, Calculator, universeSpeeds } = loadBrowserSc
 /**
  * @typedef {object} TechEntry
  * @property {string} key
- * @property {number} type 1 any building, 2 planet only, 3 moon only, 4 research, 5 ship, 6 defence
+ * @property {number} type 1 any building, 2 planet only, 3 moon only, 4 research, 5 ship, 6 defence,
+ *   7 a component of the Interstellar Anomaly Scanner's Control Centre (planet only)
  * @property {number[]} cost
  * @property {number} growth
+ * @property {number|null} [effect] type 7: the effect in percent per level, null while unknown
  */
 
 /** @type {{techs: Record<string, TechEntry>, labRequirements: Record<string, number>}} */
@@ -38,7 +40,11 @@ const IDS = new Map(Object.entries(TECHS.techs).map(([id, tech]) => [tech.key, N
 const TECH_COSTS = Object.fromEntries(Object.entries(TECHS.techs)
     .map(([id, tech]) => [id, [...tech.cost, tech.growth]]));
 
-const KIND = { 1: 'building', 2: 'building', 3: 'building', 4: 'research', 5: 'ship', 6: 'defence' };
+// A Control Centre component (7) is priced and timed like a building
+const KIND = { 1: 'building', 2: 'building', 3: 'building', 4: 'research', 5: 'ship', 6: 'defence', 7: 'building' };
+
+/** Types that only a planet can build. */
+const PLANET_ONLY = new Set([2, 7]);
 
 const itemList = [...IDS.keys()].map((key) => `${key} (${NAMES[key] ?? key})`).join(', ');
 
@@ -155,7 +161,7 @@ function createBuildCostTool({ siteApi }) {
             const isUnit = kind === 'ship' || kind === 'defence';
             const { from, to } = buildRange(args, id, kind);
             const onMoon = tech.type === 3 || args.location === 'moon';
-            if (onMoon && tech.type === 2) {
+            if (onMoon && PLANET_ONLY.has(tech.type)) {
                 throw new ToolError(`The ${NAMES[args.item]} cannot be built on a moon.`);
             }
 
