@@ -366,7 +366,10 @@ function productionReportPlanet(out, i) {
 	}
 	const ias = productionReportText('ias');
 	/** @param {string} id */
-	const iasLabel = (id) => `${ias} — ${cleanReportLabel(document.querySelector(`label[for="${id}"]`)?.textContent ?? id)}`;
+	const iasLabel = (id) => {
+		const label = document.querySelector('label[for="' + id + '"]');
+		return `${ias} — ${cleanReportLabel(label?.textContent ?? id)}`;
+	};
 	push(PLANET_IAS_ON, 'ias-enabled', ias);
 	push(PLANET_IAS_LEVEL, 'ias-level', iasLabel('ias-level'));
 	// Hundredths of a percent in the array: the report shows the percent.

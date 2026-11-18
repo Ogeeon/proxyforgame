@@ -160,8 +160,11 @@ const IAS_MAX_LEVEL = 100;
  */
 function lithiumConversion({ level, workloadPct, discountPct, resource }) {
 	const cost = [0, 0, 0];
+	// Written as positive tests so that NaN fails them too.
+	const valid = level > 0 && workloadPct > 0
+		&& Number.isInteger(resource) && resource >= 0 && resource < LITHIUM_CONVERSION_COST.length;
+	if (!valid) return { lithium: 0, cost };
 	const perLithium = LITHIUM_CONVERSION_COST[resource];
-	if (!(level > 0) || !(workloadPct > 0) || perLithium === undefined) return { lithium: 0, cost };
 	const lithium = Math.floor(LITHIUM_BASE * level * LITHIUM_LEVEL_GROWTH ** level * workloadPct / 100);
 	cost[resource] = Math.round(lithium * perLithium * (1 - discountPct / 100));
 	return { lithium, cost };
