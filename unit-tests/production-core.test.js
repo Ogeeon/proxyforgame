@@ -362,6 +362,7 @@ describe('lithiumConversion', () => {
     // Measured 2026-11-18 on a level-18 scanner with one Catalytic Converter
     // level, which the game shows as a 0.15% discount.
     it('reproduces the costs the game shows with a 0.15% discount', () => {
+        /** @type {Array<[number, number[], number]>} workload, cost per resource, lithium */
         const measured = [
             [100, [46047, 30698, 15349], 15372],
             [50, [23023, 15349, 7674], 7686],
