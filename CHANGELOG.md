@@ -15,6 +15,8 @@ release section; it is the source of truth for the other eleven translations.
 
 ## [Unreleased]
 
+## [2026-11-18] - site entry 75
+
 ### Added
 
 - Cost and queue calculators: the Interstellar Anomaly Scanner, the planet building of the Project Orion expansion now in beta on the test servers, is in the building lists - 90 metal, 45 crystal and 15 deuterium at level 1, each level 1.5 times the last, built in the usual building time with robotics and nanites and taking one planet field per level. The MCP server's cost and queue tools know it too, under id 45. Its name in every language is a draft until Orion leaves beta. <!-- site -->
@@ -23,15 +25,17 @@ release section; it is the source of truth for the other eleven translations.
 
 ### Changed
 
-- Cost and LF costs calculators: with a profile active, the range tab's "to" level starts three levels above the level the profile knows instead of one, and follows when another technology or planet is picked as long as it was not raised by hand beyond that. A "to" the player planned above both levels stays. <!-- site -->
-- Production calculator: the rows of the "One planet" table follow the game's production overview, so a row is where a player looks for it: the anomaly scanner's "Conversion" comes right after the items ("Booster") instead of last before the totals, and the Engineer comes before the Geologist. The page fills the rows by name rather than by position, so the order is set in one place. <!-- site -->
+- Cost and LF costs calculators: with a profile active, the range tab's "to" level starts three levels above the level the profile knows instead of one, and follows when another technology or planet is picked as long as it was not raised by hand beyond that. A "to" the player planned above both levels stays.
+- Production calculator: the rows of the "One planet" table follow the game's production overview, so a row is where a player looks for it: the anomaly scanner's "Conversion" comes right after the items ("Booster") instead of last before the totals, and the Engineer comes before the Geologist. The page fills the rows by name rather than by position, so the order is set in one place.
 
 ### Fixed
 
 - MCP server: clients on protocol version 2026-07-28 - Claude's own connector (`Claude-User`) among them - can use it. Since 2026-11-08 every request of theirs was refused with 400 for its `MCP-Protocol-Version` header. The server now speaks that version next to the three 2025 ones: no `initialize`, the version, capabilities and client info read from `_meta` on every request, the new `server/discover`, `resultType` on every result, caching hints on `tools/list`, the server's info in each result's `_meta`, and the headers a 2026-07-28 request mirrors (`MCP-Protocol-Version`, `Mcp-Method`, `Mcp-Name`) checked against its body (`-32020`, 400). An unsupported version is answered with `-32022` and the list of supported ones, so a client can retry; a method 2026-07-28 does not have (`ping`, `initialize`) gets 404. A legacy `initialize` never negotiates 2026-07-28. Such a client has no session, so its rows in `mcp_event` carry no `session_id` but name the client on every row; `make mcp-stats` groups them by that name.
 - Costs calculator: the tooltip of the Dark Matter column said "feet" where it meant "fleet", in eleven languages - "Füße", "pieds", "piedi", "voeten" and the like. It now says fleet in each of them; Russian was right all along.
 - Costs, LF costs: the page no longer jumps sideways while it loads. The calculator panel is as wide as its content, so a first paint made while the HTML was still arriving showed a narrow box that then widened - now and then, on a slow connection, which PageSpeed Insights caught as a layout shift of 0.34 on costs. A `rel="expect"` link holds the first paint until the panel has been parsed (Chrome 124 and later; other browsers ignore it). The Nu Html Checker still rejects `blocking` on that link, so `scripts/validate-html.js` lets this one message through for these two pages.
-- Production calculator: the settings above the "One planet" table take two lines instead of three. With a profile active the planet select stood on a line of its own, and the production factor and the "Extended view" switch were pushed to the far right of theirs, leaving a wide gap - wider still in the extended view. The planet, its life form and the anomaly scanner now share the first line with "Extended view"; the temperature, position and energy booster share the second with the production factor. <!-- site -->
+- Production calculator: the settings above the "One planet" table take two lines instead of three. With a profile active the planet select stood on a line of its own, and the production factor and the "Extended view" switch were pushed to the far right of theirs, leaving a wide gap - wider still in the extended view. The planet, its life form and the anomaly scanner now share the first line with "Extended view"; the temperature, position and energy booster share the second with the production factor.
+
+> **RU:** Добавлен Межпланетный сканер аномалий — новая постройка расширения Project Orion, которое пока в бете на тестовых серверах. Он есть в списке построек калькуляторов стоимости и очереди, а у семи компонентов его Центра управления в Расчёте стоимости своя вкладка: там видны стоимость, время и эффект каждого компонента на выбранном уровне.<br>В Калькуляторе производства на вкладке «Одна планета» можно учесть конвертацию ресурсов сканером в литий: включите «МСА» и задайте уровень, скидку, ресурс и загрузку.
 
 ## [2026-11-15] - site entry 74
 
