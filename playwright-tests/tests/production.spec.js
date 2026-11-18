@@ -1398,6 +1398,9 @@ test.describe('Production Calculator - calculation-error report', () => {
         await page.locator('#reset').click();
         await page.locator('#tabtag2').click();
         await page.locator('[data-bs-target="#all-pln-acc-priority"]').click();
+        // Mid-transition the selection over the cell can read empty, and the dialog
+        // then never opens: wait for the section to finish expanding.
+        await expectExpanded(page.locator('#all-pln-acc-priority'));
         const cell = page.locator('[data-report-cell="priority-1.amortization-time"]');
         await expect(cell).toBeVisible();
         const row = cell.locator('xpath=ancestor::tr');
