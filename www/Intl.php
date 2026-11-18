@@ -1,5 +1,7 @@
 <?php
 
+require_once __DIR__ . '/LocaleUnavailableException.php';
+
 /**
  * Manage the internationalization of the site.
  *
@@ -97,7 +99,7 @@ class Intl
         if (!isset(self::$translations[$locale])) {
             $json = file_get_contents(__DIR__ . '/locale/' . $locale . '.json');
             if ($json === false) {
-                throw new \RuntimeException('Locale "' . $locale . '" cannot be read.');
+                throw new LocaleUnavailableException('Locale "' . $locale . '" cannot be read.');
             }
             self::$translations[$locale] = self::asArray(json_decode($json, true, 512, JSON_THROW_ON_ERROR));
         }
