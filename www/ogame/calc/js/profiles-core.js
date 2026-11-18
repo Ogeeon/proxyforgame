@@ -2252,6 +2252,22 @@ function ratesFromTrade(trade) {
 const PRODUCTION_ROW_TECHS = [1, 2, 3, 4, 12, 212, 217];
 
 /**
+ * The anomaly scanner's lithium conversion, slots 37-41 of a production planet
+ * array, as profile values: the scanner level is the building the game
+ * reports; the rest is the page's own and the game never sends it. The
+ * discount is a percent in the profile and tenths of one in the array.
+ *
+ * @type {ReadonlyArray<{key: string, def: number, scale: number}>}
+ */
+const PRODUCTION_IAS_KEYS = Object.freeze([
+  { key: 'ias.on', def: 0, scale: 1 },
+  { key: 'building.45', def: 0, scale: 1 },
+  { key: 'ias.discount', def: 0, scale: 10 },
+  { key: 'ias.resource', def: 0, scale: 1 },
+  { key: 'ias.workload', def: 100, scale: 1 },
+]);
+
+/**
  * The profile value key of a production row's level: the satellite and the
  * crawler are ships, the rest are buildings.
  *
@@ -2368,7 +2384,8 @@ function legacyProductionStates(rows) {
  * One production planet array (`aPS[i]`) as profile values.
  * Layout: [0] max temperature, [1] position, [2] energy booster, then per row j
  * (1..7, techs PRODUCTION_ROW_TECHS[j-1]) level, production %, item booster at
- * j*3..j*3+2, [24] race, [25..36] the race's building levels by position.
+ * j*3..j*3+2, [24] race, [25..36] the race's building levels by position,
+ * [37..41] the anomaly scanner's lithium conversion (PRODUCTION_IAS_KEYS).
  *
  * @param {unknown[]} s
  * @returns {Object<string, number>}
@@ -2395,6 +2412,9 @@ function productionPlanetValues(s) {
       values['lf.building.' + lfBuildingGameId(race, k + 1)] = num(s[25 + k]);
     }
   }
+  PRODUCTION_IAS_KEYS.forEach(({ key, def, scale }, k) => {
+    values[key] = (finiteOrNull(s[37 + k]) ?? def * scale) / scale;
+  });
   return values;
 }
 
@@ -2430,6 +2450,9 @@ function productionPlanetState(planet) {
   for (let k = 0; k < 12; k++) {
     s[25 + k] = race >= 1 && race <= 4 ? get('lf.building.' + lfBuildingGameId(race, k + 1), 0) : 0;
   }
+  PRODUCTION_IAS_KEYS.forEach(({ key, def, scale }, k) => {
+    s[37 + k] = Math.round(get(key, def) * scale);
+  });
   return s;
 }
 

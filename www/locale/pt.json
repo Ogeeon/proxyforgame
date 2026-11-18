@@ -303,7 +303,8 @@
     "report-omitted-one": "mais {0} campo não anexado",
     "report-omitted-few": "mais {0} campos não anexados",
     "report-omitted-many": "mais {0} campos não anexados",
-    "report-omitted-other": "mais {0} campos não anexados"
+    "report-omitted-other": "mais {0} campos não anexados",
+    "ias-short": "IAS"
   },
   "index": {
     "title": "ProxyForGame - Calculadoras para OGame",
@@ -853,7 +854,16 @@
     "incl-yes": "Sim",
     "incl-no": "Não",
     "lifeform-tech": "Bônus de tecnologia de formas de vida",
-    "description": "Calcule a produção de metal, cristal e deutério, o consumo de energia e o retorno das melhorias das minas em um planeta ou em todo o império OGame."
+    "description": "Calcule a produção de metal, cristal e deutério, o consumo de energia e o retorno das melhorias das minas em um planeta ou em todo o império OGame.",
+    "ias-settings": "Definições da conversão em lítio",
+    "ias-conversion": "Conversão",
+    "ias-level": "Nível do sensor",
+    "ias-discount": "Desconto na conversão, %",
+    "ias-resource": "Recurso a converter",
+    "ias-workload": "Carga de trabalho",
+    "ias-lithium": "Lítio por hora",
+    "ias-cost": "Recurso consumido por hora",
+    "res-will-not-accumulate-ias": "Acumulação impossível (a conversão em lítio consome mais do que é produzido)"
   },
   "queue": {
     "start-time": "Hora de início",

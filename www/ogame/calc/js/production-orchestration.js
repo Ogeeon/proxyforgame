@@ -87,10 +87,11 @@ function updateParams() {
 // shape `production` already had. Naming the six resources one parameter each
 // is what pushed updateStorageBlinkFlags past the parameter limit (S107).
 
-// "How much will accumulate" panel
+// "How much will accumulate" panel. Metal and crystal can run negative too
+// now that the lithium conversion consumes them; a stock stops at zero.
 function renderAccumWhat(tab, curr, totalHours, production, deutAccum) {
-	const met = Math.round(curr[0] + totalHours * production[0]);
-	const crys = Math.round(curr[1] + totalHours * production[1]);
+	const met = Math.max(0, Math.round(curr[0] + totalHours * production[0]));
+	const crys = Math.max(0, Math.round(curr[1] + totalHours * production[1]));
 	if (tab === 'one') {
 		setHtml('#' + tab + 'pln-accumwhat-met', numToOGame(Math.min(options.metStorageCap, met)));
 		setHtml('#' + tab + 'pln-accumwhat-crys', numToOGame(Math.min(options.crysStorageCap, crys)));
@@ -125,8 +126,20 @@ function updateStorageBlinkFlags(curr, totalHours, production, deutAccum, need) 
 	}
 }
 
-// calculate the time in hours it takes to accumulate the required amount of each resource and take the maximum of these intervals
-function timeUntilResourcesAccumulate(curr, production, need) {
+/**
+ * The time in hours it takes to accumulate the required amount of each
+ * resource - the longest of the three - or null when the lithium conversion
+ * takes all of a resource still needed.
+ *
+ * @param {number[]} curr
+ * @param {number[]} production
+ * @param {number[]} need
+ * @param {number} [convertedRes] The resource the conversion consumes, -1 for none.
+ * @returns {?number}
+ */
+function timeUntilResourcesAccumulate(curr, production, need, convertedRes = -1) {
+	if (convertedRes >= 0 && need[convertedRes] > curr[convertedRes] && production[convertedRes] <= 0)
+		return null;
 	let t = 0;
 	if (need[0] > curr[0]) {
 		t = (need[0] - curr[0]) / production[0];
@@ -149,7 +162,9 @@ function timeUntilResourcesAccumulate(curr, production, need) {
 // "When it will accumulate" panel
 function renderAccumWhen(tab, t) {
 	const msgSelector = '#' + tab + 'pln-accumwhen-msg';
-	if (!Number.isFinite(t)) {
+	if (t === null) {
+		setHtml(msgSelector, options.resWillNotAccumIasMsg);
+	} else if (!Number.isFinite(t)) {
 		setHtml(msgSelector, t === Number.POSITIVE_INFINITY ? options.resWillNotAccumMsg : options.resWillNotAccumMsg1);
 	} else if (t > 0) {
 		setHtml(msgSelector, options.resReadyInMsg + timespanToShortenedString(t * 3600, options.datetimeW, options.datetimeD, options.datetimeH, options.datetimeM, options.datetimeS, true));
@@ -158,7 +173,12 @@ function renderAccumWhen(tab, t) {
 	}
 }
 
-function updateAccumulation(tab, production) {
+/**
+ * @param {string} tab 'one' or 'all'
+ * @param {number[]} production the net hourly production
+ * @param {number} [convertedRes] The resource the lithium conversion consumes, -1 for none.
+ */
+function updateAccumulation(tab, production, convertedRes = -1) {
 	if (tab !== 'one' && tab !== 'all')
 		return;
 	const curr = [
@@ -185,7 +205,7 @@ function updateAccumulation(tab, production) {
 
 	updateStorageBlinkFlags(curr, totalHours, production, deutAccum, need);
 
-	let t = timeUntilResourcesAccumulate(curr, production, need);
+	let t = timeUntilResourcesAccumulate(curr, production, need, convertedRes);
 	renderAccumWhen(tab, t);
 }
 
@@ -378,10 +398,13 @@ function updateOnePlnTab() {
 		coeffSpan.style.color = koeff < 1 ? 'brown' : '';
 	}
 
-	// +4 = header + separator + "Life form tech bonus" row on top of rowsToTechs.
-	let resultRow = options.rowsToTechs.length + 4;
+	// The totals follow the per-building rows and the conversion row; found by
+	// key, so a row added above them does not shift the index.
+	let resultRow = Array.from(rows).findIndex((row) => row.dataset.reportKey === 'prod-per-hour');
 	renderOnePlnProductionRows(rows, results, koeff);
-	renderOnePlnProductionSummary(rows, resultRow, production, totalEnergyProduced, totalEnergyUsed);
+	const conversion = updateIasConversion();
+	const netProduction = conversion === null ? production : production.map((v, res) => v - conversion.cost[res]);
+	renderOnePlnProductionSummary(rows, resultRow, netProduction, totalEnergyProduced, totalEnergyUsed);
 	options.prm.oPPP = params;
 
 	let rates = collectExchangeRates();
@@ -390,9 +413,93 @@ function updateOnePlnTab() {
 
 	updateOnePlnStorageCapacities();
 
-	updateAccumulation('one', production);
-	updateProduction('one', production);
+	updateAccumulation('one', netProduction, conversion === null ? -1 : conversion.resource);
+	updateProduction('one', netProduction);
 	options.save();
+}
+
+/**
+ * Read the anomaly scanner fields - #ias-enabled and the #ias-modal dialog -
+ * into a planet array's conversion slots.
+ *
+ * @template {any[]} T
+ * @param {T} target
+ * @returns {T}
+ */
+function readIasForm(target) {
+	target[PLANET_IAS_ON] = getChecked('#ias-enabled') ? 1 : 0;
+	target[PLANET_IAS_LEVEL] = getInputNumber($('#ias-level'));
+	// Tenths of a percent: the planet array holds integers.
+	target[PLANET_IAS_DISCOUNT] = Math.round(getInputNumber($('#ias-discount')) * 10);
+	target[PLANET_IAS_RESOURCE] = Number(getVal('#ias-resource')) || 0;
+	target[PLANET_IAS_WORKLOAD] = Number(getVal('#ias-workload')) || 100;
+	return target;
+}
+
+/**
+ * Show a planet array's conversion slots in the anomaly scanner fields. A
+ * planet saved before the scanner existed has none: it gets the defaults.
+ *
+ * @param {any[]} s
+ */
+function writeIasForm(s) {
+	setChecked('#ias-enabled', Number(s[PLANET_IAS_ON]) === 1);
+	setVal('#ias-level', Number(s[PLANET_IAS_LEVEL]) || 0);
+	setNumVal('#ias-discount', (Number(s[PLANET_IAS_DISCOUNT]) || 0) / 10);
+	setVal('#ias-resource', Number(s[PLANET_IAS_RESOURCE]) || 0);
+	setVal('#ias-workload', Number(s[PLANET_IAS_WORKLOAD]) || 100);
+}
+
+/**
+ * Keep options.prm in step with the anomaly scanner fields, show the lithium
+ * in the dialog and the cost in the conversion row.
+ *
+ * @returns {?{lithium: number, cost: number[], resource: number}} The
+ *   conversion, null while #ias-enabled is unchecked.
+ */
+function updateIasConversion() {
+	const slots = readIasForm(createEmptyPlanet());
+	options.prm.iasOn = slots[PLANET_IAS_ON] === 1;
+	options.prm.iasLevel = slots[PLANET_IAS_LEVEL];
+	options.prm.iasDiscount = slots[PLANET_IAS_DISCOUNT] / 10;
+	options.prm.iasResource = slots[PLANET_IAS_RESOURCE];
+	options.prm.iasWorkload = slots[PLANET_IAS_WORKLOAD];
+	// The dialog shows the lithium with the checkbox off too: it is where the
+	// conversion is set up before it is switched on.
+	const switchedOn = slots.slice();
+	switchedOn[PLANET_IAS_ON] = 1;
+	const preview = planetLithiumConversion(switchedOn);
+	setHtml('#ias-lithium', numToOGame(preview === null ? 0 : preview.lithium));
+	setHtml('#ias-cost', numToOGame(preview === null ? 0 : preview.cost[preview.resource] ?? 0));
+	const conversion = options.prm.iasOn ? preview : null;
+	const row = $('#ias-conversion-row');
+	if (row instanceof HTMLTableRowElement) {
+		row.style.display = conversion === null ? 'none' : '';
+		for (let res = 0; res < 3; res++) {
+			row.cells[res + 3].innerHTML = conversion === null ? '' : productionCell(-conversion.cost[res]);
+		}
+	}
+	return conversion;
+}
+
+// The anomaly scanner dialog: its gear button, the constraints and events of
+// its fields. #ias-enabled is a field of the one-planet panel, bound with them.
+function bindIasControls() {
+	setConstrains('ias-level', { 'min': 0, 'max': IAS_MAX_LEVEL, 'def': 0, 'allowFloat': false, 'allowNegative': false });
+	setConstrains('ias-discount', { 'min': 0, 'max': 100, 'def': 0, 'allowFloat': true, 'allowNegative': false });
+	for (const id of ['ias-level', 'ias-discount']) {
+		const input = inputEl('#' + id);
+		if (!input) continue;
+		// alt names the field in the blur validator's warning
+		input.alt = (document.querySelector('label[for="' + id + '"]')?.textContent ?? '').trim();
+		bindNumericInput(input, updateOnePlnTab);
+	}
+	for (const id of ['#ias-resource', '#ias-workload']) {
+		addEvent(id, 'change', updateOnePlnTab);
+	}
+	addEvent('#ias-settings', 'click', function () {
+		openModal(document.getElementById('ias-modal'));
+	});
 }
 
 function updateAllPlnTab() {
@@ -730,6 +837,11 @@ function resetParams() {
 	options.prm.onePlnExtView = false;
 	options.prm.onePlnRace = 0;
 	options.prm.onePlnLfLevels = [];
+	options.prm.iasOn = false;
+	options.prm.iasLevel = 0;
+	options.prm.iasDiscount = 0;
+	options.prm.iasResource = 0;
+	options.prm.iasWorkload = 100;
 	options.prm.oPPP = [[0, 100, 0], [0, 100, 0], [0, 100, 0], [0, 100, 0], [0, 100, 0], [0, 100, 0], [0, 100, 0]];
 	options.prm.metStorageLvl = 0;
 	options.prm.crysStorageLvl = 0;
@@ -889,7 +1001,7 @@ function readOnePlanetForm(target = createEmptyPlanet()) {
 		// Power plants, satellites and Crawlers have no boosters
 		target[slot + 2] = i > 3 ? 0 : Number(cellSelect(rows[i + 1], 1).value);
 	}
-	return target;
+	return readIasForm(target);
 }
 
 /**
@@ -914,6 +1026,7 @@ function fillOnePlanetForm(s) {
 		if (i === 7) cellSelect(rows[i + 1], 7).selectedIndex = (150 - s[slot + 1]) / 10;
 		if (i < 4) cellSelect(rows[i + 1], 1).selectedIndex = s[slot + 2];
 	}
+	writeIasForm(s);
 }
 
 function editRow(plnID) {
@@ -997,6 +1110,7 @@ async function clonePlnData() {
 				p[i * 3 + 2] = Number(cellSelect(rows[i + 1], 1).value);
 			}
 		}
+		readIasForm(p);
 	}
 
 	prepAllPlanetsTable();
@@ -1153,6 +1267,9 @@ async function initializeProductionCalculator() {
 		addEvent('#include-SS-y', 'click', updateOnePlnTab);
 		addEvent('#include-SS-n', 'click', updateOnePlnTab);
 		addEvent('#one-pln-race', 'change', updateLifeformRows);
+		// The anomaly scanner dialog sits outside the panel; #ias-enabled is inside
+		// it and already bound above.
+		bindIasControls();
 		// Reflect the race restored from storage on the initial render
 		updateLifeformRows();
 

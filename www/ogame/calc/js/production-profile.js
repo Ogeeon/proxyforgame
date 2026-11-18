@@ -445,6 +445,11 @@ class ProductionProfiles extends ProfileBinder {
         this.pf.describeField('lf.building.' + lfBuildingGameId(race, lfRowIndex(el) + 1), name);
       });
     }
+    this.pf.describeField('ias.on', pfFieldLabel($('#ias-enabled')));
+    this.pf.describeField('building.45', pfFieldLabel($('#ias-level')));
+    this.pf.describeField('ias.discount', pfFieldLabel($('#ias-discount')));
+    describeSelect('ias.resource', selectEl('#ias-resource'));
+    describeSelect('ias.workload', selectEl('#ias-workload'));
   }
 
   /**
@@ -474,6 +479,8 @@ class ProductionProfiles extends ProfileBinder {
         mark(cellSelect(row, 7), 'production.' + tech);
         if (i < 3) mark(selectEl('#boosted-prod' + (i + 1)), 'booster.' + tech);
       });
+      // The scanner level is the one conversion field the game reports.
+      mark($('#ias-level'), 'building.45');
       const race = pfNum(getProfileValue(planet, 'lf.race', 0));
       inputsAll('#one-planet-prod .lf-row-' + race + ' input[type=text]').forEach((el) => {
         const key = 'lf.building.' + lfBuildingGameId(race, lfRowIndex(el) + 1);

@@ -333,6 +333,33 @@ test('another planet is picked in the one-planet tab and remembered', async ({ p
     await expect(page.locator('#pf-planet option:checked')).toHaveText('Beta [2:150:12]');
 });
 
+test('the anomaly scanner level comes from the game, the conversion settings stay with the planet', async ({ page }) => {
+    const raw = JSON.parse(EXPORT);
+    Object.values(raw.planets)[0].buildings['45'] = 18;
+    await page.goto('/production');
+    await importExport(page, JSON.stringify(raw));
+
+    await expect(page.locator('#ias-level')).toHaveValue('18');
+    await expect(page.locator('#ias-level')).toHaveClass(/pf-bound/);
+    await page.locator('#ias-enabled').check();
+    await page.locator('#ias-settings').click();
+    await page.locator('#ias-workload').selectOption('50');
+    await page.locator('#ias-modal .modal-footer button').click();
+    await expect.poll(async () => {
+        const values = (await activeProfile(page)).planets[0].values;
+        return [values['ias.on']?.override, values['ias.workload']?.override];
+    }).toEqual([1, 50]);
+
+    // Another planet has a conversion of its own; the first keeps its settings.
+    await page.locator('#pf-planet').selectOption({ label: 'Beta [2:150:12]' });
+    await expect(page.locator('#ias-enabled')).not.toBeChecked();
+    await expect(page.locator('#ias-level')).toHaveValue('0');
+    await page.locator('#pf-planet').selectOption({ index: 0 });
+    await expect(page.locator('#ias-enabled')).toBeChecked();
+    await expect(page.locator('#ias-workload')).toHaveValue('50');
+    await expect(page.locator('#ias-conversion-row')).toBeVisible();
+});
+
 test('a new empty profile gains a planet only once it is edited', async ({ page }) => {
     await page.goto('/production');
     await chooseAction(page, '__create');

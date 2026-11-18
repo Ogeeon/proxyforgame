@@ -303,7 +303,8 @@
     "report-omitted-one": "jeszcze {0} pole nie zostało dołączone",
     "report-omitted-few": "jeszcze {0} pola nie zostały dołączone",
     "report-omitted-many": "jeszcze {0} pól nie zostało dołączonych",
-    "report-omitted-other": "jeszcze {0} pola nie zostało dołączone"
+    "report-omitted-other": "jeszcze {0} pola nie zostało dołączone",
+    "ias-short": "IAS"
   },
   "index": {
     "title": "Narzedzia do gier przegladarkowych OGame",
@@ -853,7 +854,16 @@
     "incl-yes": "Tak",
     "incl-no": "Nie",
     "lifeform-tech": "Premia technologii form życia",
-    "description": "Oblicz produkcję metalu, kryształu i deuteru, zużycie energii oraz zwrot z rozbudowy kopalń na jednej planecie lub w całym imperium OGame."
+    "description": "Oblicz produkcję metalu, kryształu i deuteru, zużycie energii oraz zwrot z rozbudowy kopalń na jednej planecie lub w całym imperium OGame.",
+    "ias-settings": "Ustawienia przekształcania w lit",
+    "ias-conversion": "Przekształcanie",
+    "ias-level": "Poziom skanera",
+    "ias-discount": "Zniżka na przekształcanie, %",
+    "ias-resource": "Przekształcany surowiec",
+    "ias-workload": "Obciążenie",
+    "ias-lithium": "Lit na godzinę",
+    "ias-cost": "Zużycie surowca na godzinę",
+    "res-will-not-accumulate-ias": "Gromadzenie surowców nie jest możliwe (przekształcanie w lit zużywa więcej, niż jest produkowane)"
   },
   "queue": {
     "start-time": "Początek",

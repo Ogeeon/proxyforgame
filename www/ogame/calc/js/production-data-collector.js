@@ -303,6 +303,10 @@ function productionReportOnePlanet(out, group) {
 			}));
 		});
 	}
+	out.add('ias-enabled', group, { label: productionReportText('ias') });
+	for (const id of ['ias-level', 'ias-discount', 'ias-resource', 'ias-workload']) {
+		out.add(id, productionReportText('ias'));
+	}
 	const amortization = productionReportText('mines-amortization');
 	const satellites = out.add('include-SS', amortization, { label: amortization });
 	if (satellites !== null) {
@@ -360,6 +364,19 @@ function productionReportPlanet(out, i) {
 			push(PLANET_LF_LEVELS + k, `${slug}.level`, cleanReportLabel(input.getAttribute('aria-label') ?? slug));
 		}
 	}
+	const ias = productionReportText('ias');
+	/** @param {string} id */
+	const iasLabel = (id) => `${ias} — ${cleanReportLabel(document.querySelector(`label[for="${id}"]`)?.textContent ?? id)}`;
+	push(PLANET_IAS_ON, 'ias-enabled', ias);
+	push(PLANET_IAS_LEVEL, 'ias-level', iasLabel('ias-level'));
+	// Tenths of a percent in the array: the report shows the percent.
+	push(PLANET_IAS_DISCOUNT, 'ias-discount', iasLabel('ias-discount'));
+	const discount = out.entries.at(-1);
+	if (discount) {
+		discount.display = String(Number(discount.value) / 10);
+	}
+	push(PLANET_IAS_RESOURCE, 'ias-resource', iasLabel('ias-resource'));
+	push(PLANET_IAS_WORKLOAD, 'ias-workload', iasLabel('ias-workload'));
 }
 
 /**

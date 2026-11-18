@@ -303,7 +303,8 @@
     "report-omitted-one": "ďalšie {0} pole nebolo priložené",
     "report-omitted-few": "ďalšie {0} polia neboli priložené",
     "report-omitted-many": "ďalších {0} polí nebolo priložených",
-    "report-omitted-other": "ďalších {0} polí nebolo priložených"
+    "report-omitted-other": "ďalších {0} polí nebolo priložených",
+    "ias-short": "IAS"
   },
   "index": {
     "title": "ProxyForGame - software pre online hry v prehliadači OGame",
@@ -853,7 +854,16 @@
     "incl-yes": "Áno",
     "incl-no": "Nie",
     "lifeform-tech": "Bonus technológie foriem života",
-    "description": "Vypočítajte produkciu kovu, kryštálu a deutéria, spotrebu energie a návratnosť vylepšení baní na jednej planéte alebo v celej ríši OGame."
+    "description": "Vypočítajte produkciu kovu, kryštálu a deutéria, spotrebu energie a návratnosť vylepšení baní na jednej planéte alebo v celej ríši OGame.",
+    "ias-settings": "Nastavenia konverzie na lítium",
+    "ias-conversion": "Konverzia",
+    "ias-level": "Úroveň skenera",
+    "ias-discount": "Zľava na konverziu, %",
+    "ias-resource": "Konvertovaný zdroj",
+    "ias-workload": "Vyťaženie",
+    "ias-lithium": "Lítium za hodinu",
+    "ias-cost": "Spotreba zdroja za hodinu",
+    "res-will-not-accumulate-ias": "Nemožné nazbieranie (konverzia na lítium spotrebuje viac, než sa vyprodukuje)"
   },
   "queue": {
     "start-time": "štart",

@@ -303,7 +303,8 @@
     "report-omitted-one": "{0} extra veld niet bijgevoegd",
     "report-omitted-few": "{0} extra velden niet bijgevoegd",
     "report-omitted-many": "{0} extra velden niet bijgevoegd",
-    "report-omitted-other": "{0} extra velden niet bijgevoegd"
+    "report-omitted-other": "{0} extra velden niet bijgevoegd",
+    "ias-short": "IAS"
   },
   "index": {
     "title": "ProxyForGame - instrumenten het browser spel OGame",
@@ -853,7 +854,16 @@
     "incl-yes": "Ja",
     "incl-no": "Nee",
     "lifeform-tech": "Levensvorm-technologiebonus",
-    "description": "Bereken metaal-, kristal- en deuteriumproductie, energieverbruik en terugverdientijd van mijnverbeteringen voor één planeet of je hele OGame-rijk."
+    "description": "Bereken metaal-, kristal- en deuteriumproductie, energieverbruik en terugverdientijd van mijnverbeteringen voor één planeet of je hele OGame-rijk.",
+    "ias-settings": "Instellingen van de omzetting in lithium",
+    "ias-conversion": "Omzetting",
+    "ias-level": "Niveau van de scanner",
+    "ias-discount": "Korting op omzetting, %",
+    "ias-resource": "Om te zetten grondstof",
+    "ias-workload": "Werklast",
+    "ias-lithium": "Lithium per uur",
+    "ias-cost": "Grondstofverbruik per uur",
+    "res-will-not-accumulate-ias": "Opslaan is niet mogelijk (de omzetting in lithium verbruikt meer dan er wordt geproduceerd)"
   },
   "queue": {
     "start-time": "Start",

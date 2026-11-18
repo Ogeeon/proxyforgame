@@ -20,6 +20,11 @@ function populateParams() {
 	if (typeof updateLifeformRows === 'function') updateLifeformRows();
 	if (typeof writeOnePlnLfLevels === 'function') writeOnePlnLfLevels(options.prm.onePlnRace, options.prm.onePlnLfLevels);
 	setVal('#planet-pos', options.prm.planetPos);
+	setChecked('#ias-enabled', options.prm.iasOn);
+	setVal('#ias-level', options.prm.iasLevel);
+	setNumVal('#ias-discount', options.prm.iasDiscount);
+	setVal('#ias-resource', options.prm.iasResource);
+	setVal('#ias-workload', options.prm.iasWorkload);
 	setChecked('#engineer', options.prm.engineer);
 	setChecked('#geologist', options.prm.geologist);
 	setChecked('#technocrat', options.prm.technocrat);

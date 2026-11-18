@@ -212,6 +212,115 @@ test('accumulation calculations are correct', async ({ page }) => {
     await expect(page.locator('#onepln-accumwhat-deut')).toHaveText('1.872');
 });
 
+test.describe('Lithium conversion of the anomaly scanner', () => {
+    const totalRow = (page) => page.locator('#one-planet-prod tr[data-report-key="prod-per-hour"]');
+    const conversionRow = (page) => page.locator('#ias-conversion-row');
+
+    /** Open the scanner dialog, set it up and close it again. */
+    async function setUpScanner(page, { level, discount = '0', resource = '0', workload = '100' }) {
+        await page.locator('#ias-settings').click();
+        await expect(page.locator('#ias-modal')).toBeVisible();
+        await page.locator('#ias-level').fill(level);
+        await page.locator('#ias-level').press('Tab');
+        await page.locator('#ias-discount').fill(discount);
+        await page.locator('#ias-discount').press('Tab');
+        await page.locator('#ias-resource').selectOption(resource);
+        await page.locator('#ias-workload').selectOption(workload);
+    }
+
+    async function closeScanner(page) {
+        await page.locator('#ias-modal .modal-footer button').click();
+        await expect(page.locator('#ias-modal')).toBeHidden();
+    }
+
+    test('stays out of the table and the totals until it is switched on', async ({ page }) => {
+        await expect(conversionRow(page)).toBeHidden();
+        await setUpScanner(page, { level: '11', workload: '50' });
+        // The dialog shows the lithium before the conversion is switched on.
+        await expect(page.locator('#ias-lithium')).toHaveText('2.410');
+        await expect(page.locator('#ias-cost')).toHaveText('7.230');
+        await closeScanner(page);
+        await expect(conversionRow(page)).toBeHidden();
+        // 1,356, not the 1,353 other tests see: beforeEach leaves the crawler
+        // field focused, and the first click elsewhere commits it.
+        await expect(totalRow(page).locator('td').nth(3)).toHaveText('1.356');
+    });
+
+    test('charges the resource settings page\'s 7,230 metal to the totals', async ({ page }) => {
+        await setUpScanner(page, { level: '11', workload: '50' });
+        await closeScanner(page);
+        await page.locator('#ias-enabled').check();
+        await expect(conversionRow(page)).toBeVisible();
+        await expect(conversionRow(page).locator('td').nth(3)).toHaveText('7.230');
+        await expect(conversionRow(page).locator('td').nth(4)).toHaveText('');
+        // 1,356 produced less 7,230 converted: a loss, shown brown
+        await expect(totalRow(page).locator('td').nth(3)).toHaveText('5.874');
+        await expect(totalRow(page).locator('td').nth(3).locator('span')).toHaveCSS('color', 'rgb(165, 42, 42)');
+        await expect(totalRow(page).locator('td').nth(4)).toHaveText('665');
+    });
+
+    test('applies the discount to the resource picked', async ({ page }) => {
+        await page.locator('#ias-enabled').check();
+        // Level 1: 168 lithium, 336 crystal, 10% off = 302
+        await setUpScanner(page, { level: '1', discount: '10', resource: '1' });
+        await expect(page.locator('#ias-cost')).toHaveText('302');
+        await closeScanner(page);
+        await expect(conversionRow(page).locator('td').nth(3)).toHaveText('');
+        await expect(conversionRow(page).locator('td').nth(4)).toHaveText('302');
+        // 665 produced less 302
+        await expect(totalRow(page).locator('td').nth(4)).toHaveText('363');
+    });
+
+    test('says the resources will not accumulate when the conversion takes all of one', async ({ page }) => {
+        await page.locator('#ias-enabled').check();
+        await setUpScanner(page, { level: '5', resource: '2' });
+        await closeScanner(page);
+        await page.locator('text=Resources accumulation').first().click();
+        await page.locator('#onepln-accumwhat-d').fill('1');
+        await page.locator('#onepln-accumwhat-d').press('Tab');
+        // The deuterium stock runs dry rather than going below zero.
+        await expect(page.locator('#onepln-accumwhat-deut')).toHaveText('0');
+        await page.locator('#onepln-accumwhen-deut').fill('1000');
+        await page.locator('#onepln-accumwhen-deut').press('Tab');
+        await expect(page.locator('#onepln-accumwhen-msg')).toHaveText(/lithium conversion uses more than is produced/);
+    });
+
+    test('survives a reload', async ({ page }) => {
+        await page.locator('#ias-enabled').check();
+        await setUpScanner(page, { level: '12', discount: '0.5', resource: '1', workload: '70' });
+        await closeScanner(page);
+        await page.reload();
+        await expect(page.locator('#ias-enabled')).toBeChecked();
+        await expect(page.locator('#ias-level')).toHaveValue('12');
+        await expect(page.locator('#ias-discount')).toHaveValue('0.5');
+        await expect(page.locator('#ias-resource')).toHaveValue('1');
+        await expect(page.locator('#ias-workload')).toHaveValue('70');
+        await expect(conversionRow(page)).toBeVisible();
+    });
+
+    test('is saved with a planet of the all-planets tab and comes back with it', async ({ page }) => {
+        // Planet 1 gets the conversion; planet 2 is left as it was.
+        await page.locator('#tabtag2').click();
+        await page.locator('#control-0-e').click();
+        await expect(page.locator('#ias-enabled')).not.toBeChecked();
+        await page.locator('#ias-enabled').check();
+        await setUpScanner(page, { level: '11', resource: '1', workload: '50' });
+        await closeScanner(page);
+        await page.locator('#save-planet-data').click();
+
+        await page.locator('#control-1-e').click();
+        await expect(page.locator('#ias-enabled')).not.toBeChecked();
+        await expect(conversionRow(page)).toBeHidden();
+
+        await page.locator('#tabtag2').click();
+        await page.locator('#control-0-e').click();
+        await expect(page.locator('#ias-enabled')).toBeChecked();
+        await expect(page.locator('#ias-level')).toHaveValue('11');
+        await expect(page.locator('#ias-resource')).toHaveValue('1');
+        await expect(conversionRow(page).locator('td').nth(4)).toHaveText('4.820');
+    });
+});
+
 test.describe('crawler count capped by mine levels', () => {
     // One-planet input-in-table order: metal(0) crystal(1) deut(2) solar(3)
     // fusion(4) sat(5) crawler(6).

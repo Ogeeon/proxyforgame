@@ -303,7 +303,8 @@
     "report-omitted-one": "{0} more field not attached",
     "report-omitted-few": "{0} more fields not attached",
     "report-omitted-many": "{0} more fields not attached",
-    "report-omitted-other": "{0} more fields not attached"
+    "report-omitted-other": "{0} more fields not attached",
+    "ias-short": "IAS"
   },
   "index": {
     "title": "ProxyForGame - tools for online browser game OGame",
@@ -853,7 +854,16 @@
     "incl-yes": "Yes",
     "incl-no": "No",
     "lifeform-tech": "Lifeform Tech Bonus",
-    "description": "Calculate metal, crystal, and deuterium production, energy use, and mine upgrade payback for one planet or your entire OGame empire."
+    "description": "Calculate metal, crystal, and deuterium production, energy use, and mine upgrade payback for one planet or your entire OGame empire.",
+    "ias-settings": "Lithium conversion settings",
+    "ias-conversion": "Conversion",
+    "ias-level": "Scanner level",
+    "ias-discount": "Conversion discount, %",
+    "ias-resource": "Resource to convert",
+    "ias-workload": "Workload",
+    "ias-lithium": "Lithium per hour",
+    "ias-cost": "Resource used per hour",
+    "res-will-not-accumulate-ias": "Accumulation not possible (the lithium conversion uses more than is produced)"
   },
   "queue": {
     "start-time": "Start",

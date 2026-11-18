@@ -303,7 +303,8 @@
     "report-omitted-one": "{0} weiteres Feld nicht angehängt",
     "report-omitted-few": "{0} weitere Felder nicht angehängt",
     "report-omitted-many": "{0} weitere Felder nicht angehängt",
-    "report-omitted-other": "{0} weitere Felder nicht angehängt"
+    "report-omitted-other": "{0} weitere Felder nicht angehängt",
+    "ias-short": "IAS"
   },
   "index": {
     "title": "ProxyForGame - Hilfsprogramme für das Online-Browsergame OGame",
@@ -853,7 +854,16 @@
     "incl-yes": "Ja",
     "incl-no": "Nein",
     "lifeform-tech": "Lebensform-Technologiebonus",
-    "description": "Berechne Metall-, Kristall- und Deuteriumproduktion, Energieverbrauch und Amortisation von Minen-Upgrades für einen Planeten oder dein ganzes OGame-Imperium."
+    "description": "Berechne Metall-, Kristall- und Deuteriumproduktion, Energieverbrauch und Amortisation von Minen-Upgrades für einen Planeten oder dein ganzes OGame-Imperium.",
+    "ias-settings": "Einstellungen der Lithium-Umwandlung",
+    "ias-conversion": "Umwandlung",
+    "ias-level": "Stufe des Scanners",
+    "ias-discount": "Umwandlungsrabatt, %",
+    "ias-resource": "Umzuwandelnde Ressource",
+    "ias-workload": "Auslastung",
+    "ias-lithium": "Lithium pro Stunde",
+    "ias-cost": "Ressourcenverbrauch pro Stunde",
+    "res-will-not-accumulate-ias": "Die Aufspeicherung von Ressourcen ist nicht möglich (die Lithium-Umwandlung verbraucht mehr, als produziert wird)"
   },
   "queue": {
     "start-time": "Start",

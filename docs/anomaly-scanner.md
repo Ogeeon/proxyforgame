@@ -1,8 +1,8 @@
 # The Interstellar Anomaly Scanner (Project Orion) in the calculators
 
 > **Status:** the scanner (costs, queue, MCP) and its seven Control Centre components (costs)
-> are implemented on `feat/anomaly-scanner`. The lithium conversion in the production
-> calculator is planned — see *Production: lithium conversion* at the end.
+> are implemented on `feat/anomaly-scanner`, and so is the lithium conversion in the
+> production calculator — see *Production: lithium conversion* at the end.
 > Decisions agreed in design sessions on 2026-11-14 and 2026-11-18.
 > Source data: `D:\temp\Interstellar Anomaly Scanner.xlsx` (levels 1–10, recorded from the game by the site author).
 
@@ -191,7 +191,7 @@ A saved page (s808-en, 2026-11-18) shows −7,230 metal per hour. That fits the 
 with L = 11, workload 50%, no discount: `floor(153.6 * 11 * 1.1^11 * 0.5) = 2410` lithium,
 `2410 * 3 = 7230`. The page does not show the scanner level, so L = 11 is inferred, not read.
 
-## Production: lithium conversion (planned, agreed 2026-11-18)
+## Production: lithium conversion (agreed and implemented 2026-11-18)
 
 The production calculator charges the resource cost of the conversion to the planet. Lithium
 itself is shown for reference only; the calculator has no lithium or food column.
@@ -199,16 +199,18 @@ itself is shown for reference only; the calculator has no lithium or food column
 | Topic | Decision |
 |---|---|
 | Scope | The "One planet" tab only. The settings are stored with the saved planet data, so "All planets" can take them up later without migrating anything |
-| Controls | A checkbox "IAS" (locale key `ias-short` in `common`; tooltip with the full name, key `anomaly-scanner`) in the second row next to the race select, plus a gear button that opens a modal through `openModal()` |
+| Controls | A checkbox "IAS" (locale key `ias-short` in `common`: "IAS" everywhere but RU, where the scanner is "Межпланетный сканер аномалий" and so "МСА"; tooltip with the full name, key `anomaly-scanner`) in the second row next to the race select, plus a gear button that opens a modal through `openModal()` |
 | Modal fields | Scanner level; total conversion discount, % (one decimal, locale-aware decimal helper, blur validation, 0-100); resource to convert — metal, crystal or deuterium (no food); workload — a select of 10-100% in steps of 10 (0 is the checkbox off). A read-only line "Lithium/hour: N" |
 | Table | A row "Conversion" (`data-report-key="ias-conversion"`, report cells like the other rows) before the totals, after `lifeform-tech`, with the hourly cost as a negative number in the chosen resource's column. Shown only while the checkbox is on, in both the normal and the extended view; the hourly, daily and weekly totals include it |
 | Formula | `lithiumConversion({ level, workloadPct, discountPct, resource })` in `production-core.js`, returning `{ lithium, cost: [m, c, d] }` per hour: `lithium = floor(153.6 * L * 1.1^L * w)`, `cost = round(lithium * k * (1 - discount))`, `k` = 3 / 2 / 1 |
 | Universe speed | **Not applied** — the numbers are taken as measured on s808-en; whether lithium and the conversion scale with economy speed is unverified |
-| Profile | The scanner level binds to `building.45` like the mine levels; discount, resource and workload are page settings only (the export has none of them) |
-| Resource accumulation | "What will accumulate" uses the net total including the conversion, floored at 0 (assumption: the game stops converting when the resource runs out). "When" shows the existing "never" message for a resource whose net total is not positive |
+| Planet array | Slots 37-41 after the life form levels (`PLANET_IAS_*`): on, level, discount in tenths of a percent (the array holds integers), resource, workload. A planet saved before reads as the defaults. The one-planet tab keeps them in `options.prm.ias*` as well, like its other fields |
+| Profile | Every setting is per planet. The scanner level is `building.45`, the value the game reports, marked like the mine levels; on, discount (percent), resource and workload are kept as the profile planet's own values `ias.on`, `ias.discount`, `ias.resource`, `ias.workload` (`PRODUCTION_IAS_KEYS` in `profiles-core.js`), which the export never carries |
+| Resource accumulation | "What will accumulate" uses the net total including the conversion, metal and crystal floored at 0 like deuterium (assumption: the game stops converting when the resource runs out). "When" shows `res-will-not-accumulate-ias` when a target needs the converted resource and its net total is not positive. The fleet and defence counts use the net total too |
+| Totals row | Found by `data-report-key="prod-per-hour"`, no longer by index, so the conversion row above it shifts nothing |
 | Amortization | Unchanged — the conversion does not affect what a mine upgrade adds |
 | MCP | Not in this change; the `ogame_production` tool gets an optional `ias` argument later, once level 1 is confirmed |
-| Tests | Unit tests in `unit-tests/production-core.test.js` on the 40 measured pairs above plus the resource-settings point (L 11, 50%, no discount → 7230 metal); Playwright for the modal, the row and the totals |
+| Tests | Unit tests in `unit-tests/production-core.test.js` on the measured lithium at every workload, the rounded crystal cost and the resource-settings point (L 11, 50%, no discount → 7230 metal), the profile round trip in `profiles-core.test.js`; Playwright for the dialog, the row, the totals, the accumulation, a reload, a saved planet and a profile |
 
 ## Beta caveat
 

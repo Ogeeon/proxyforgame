@@ -303,7 +303,8 @@
     "report-omitted-one": "{0} altro campo non allegato",
     "report-omitted-few": "{0} altri campi non allegati",
     "report-omitted-many": "{0} altri campi non allegati",
-    "report-omitted-other": "{0} altri campi non allegati"
+    "report-omitted-other": "{0} altri campi non allegati",
+    "ias-short": "IAS"
   },
   "index": {
     "title": "ProxyForGame - strumenti per i giochi per browser OGame",
@@ -853,7 +854,16 @@
     "incl-yes": "Sì",
     "incl-no": "No",
     "lifeform-tech": "Bonus tecnologia forme di vita",
-    "description": "Calcola produzione di metallo, cristallo e deuterio, consumo energetico e rientro degli investimenti nelle miniere per un pianeta o tutto l’impero OGame."
+    "description": "Calcola produzione di metallo, cristallo e deuterio, consumo energetico e rientro degli investimenti nelle miniere per un pianeta o tutto l’impero OGame.",
+    "ias-settings": "Impostazioni della trasformazione in litio",
+    "ias-conversion": "Trasformazione",
+    "ias-level": "Livello dello scanner",
+    "ias-discount": "Sconto sulla trasformazione, %",
+    "ias-resource": "Risorsa da trasformare",
+    "ias-workload": "Carico di lavoro",
+    "ias-lithium": "Litio all'ora",
+    "ias-cost": "Risorsa consumata all'ora",
+    "res-will-not-accumulate-ias": "Accumulo non è possibile (la trasformazione in litio consuma più di quanto si produce)"
   },
   "queue": {
     "start-time": "Inizio",

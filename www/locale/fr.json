@@ -303,7 +303,8 @@
     "report-omitted-one": "{0} autre champ non joint",
     "report-omitted-few": "{0} autres champs non joints",
     "report-omitted-many": "{0} autres champs non joints",
-    "report-omitted-other": "{0} autres champs non joints"
+    "report-omitted-other": "{0} autres champs non joints",
+    "ias-short": "IAS"
   },
   "index": {
     "title": "ProxyForGame - l'utilité pour les jeux par navigateurs OGame",
@@ -853,7 +854,16 @@
     "incl-yes": "Oui",
     "incl-no": "Non",
     "lifeform-tech": "Bonus technologie formes de vie",
-    "description": "Calculez la production de métal, cristal et deutérium, la consommation d’énergie et le retour sur investissement des mines pour une planète ou votre empire OGame."
+    "description": "Calculez la production de métal, cristal et deutérium, la consommation d’énergie et le retour sur investissement des mines pour une planète ou votre empire OGame.",
+    "ias-settings": "Réglages de la conversion en lithium",
+    "ias-conversion": "Conversion",
+    "ias-level": "Niveau du scanner",
+    "ias-discount": "Réduction de conversion, %",
+    "ias-resource": "Ressource à convertir",
+    "ias-workload": "Charge de travail",
+    "ias-lithium": "Lithium par heure",
+    "ias-cost": "Ressource consommée par heure",
+    "res-will-not-accumulate-ias": "Accumulation impossible (la conversion en lithium consomme plus que la production)"
   },
   "queue": {
     "start-time": "Début",

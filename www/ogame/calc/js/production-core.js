@@ -129,6 +129,60 @@ const PLANET_POS = 1;
 const PLANET_ENERGY_BOOST = 2;
 const PLANET_RACE = 24;
 const PLANET_LF_LEVELS = 25; // LF_BUILDINGS_PER_RACE levels, positional per race
+// The Interstellar Anomaly Scanner's conversion into lithium, after the life
+// form levels. The array holds integers (options.prm.validate parses aPS with
+// parseInt), so the discount is kept in tenths of a percent.
+const PLANET_IAS_ON = 37; // 1 when the conversion runs
+const PLANET_IAS_LEVEL = 38;
+const PLANET_IAS_DISCOUNT = 39; // tenths of a percent
+const PLANET_IAS_RESOURCE = 40; // 0 metal, 1 crystal, 2 deuterium
+const PLANET_IAS_WORKLOAD = 41; // percent, 10-100
+
+// Lithium per hour at scanner level L and full workload is 153.6 * L * 1.1^L,
+// and each lithium costs 3 metal, 2 crystal or 1 deuterium before the discount.
+// Measured on s808-en in the Orion beta - see docs/anomaly-scanner.md.
+const LITHIUM_BASE = 153.6;
+const LITHIUM_LEVEL_GROWTH = 1.1;
+const LITHIUM_CONVERSION_COST = [3, 2, 1];
+// The scanner level the page accepts, as the life form research levels do.
+const IAS_MAX_LEVEL = 100;
+
+/**
+ * The lithium the scanner makes in an hour and what that costs in the resource
+ * converted. The game floors the lithium and rounds the cost, computed from
+ * the floored lithium: a hand calculation from the unfloored amount drifts
+ * below 100% workload.
+ *
+ * @param {{level: number, workloadPct: number, discountPct: number, resource: number}} ias
+ *   discountPct is the total conversion discount, resource 0 metal, 1 crystal, 2 deuterium
+ * @returns {{lithium: number, cost: number[]}} cost as [metal, crystal, deuterium]
+ */
+function lithiumConversion({ level, workloadPct, discountPct, resource }) {
+	const cost = [0, 0, 0];
+	const perLithium = LITHIUM_CONVERSION_COST[resource];
+	if (!(level > 0) || !(workloadPct > 0) || perLithium === undefined) return { lithium: 0, cost };
+	const lithium = Math.floor(LITHIUM_BASE * level * LITHIUM_LEVEL_GROWTH ** level * workloadPct / 100);
+	cost[resource] = Math.round(lithium * perLithium * (1 - discountPct / 100));
+	return { lithium, cost };
+}
+
+/**
+ * The conversion a planet array describes, or null when it is off.
+ *
+ * @param {any[]} pln - a planet array (aPS[i] or readOnePlanetForm())
+ * @returns {?{lithium: number, cost: number[], resource: number}}
+ */
+function planetLithiumConversion(pln) {
+	if (Number(pln[PLANET_IAS_ON]) !== 1) return null;
+	const resource = Number(pln[PLANET_IAS_RESOURCE]) || 0;
+	const result = lithiumConversion({
+		level: Number(pln[PLANET_IAS_LEVEL]) || 0,
+		workloadPct: Number(pln[PLANET_IAS_WORKLOAD]) || 0,
+		discountPct: (Number(pln[PLANET_IAS_DISCOUNT]) || 0) / 10,
+		resource,
+	});
+	return { ...result, resource };
+}
 
 /**
  * The first index of a mine's slot in the planet array: its level, then its
@@ -153,6 +207,11 @@ function createEmptyPlanet() {
 	}
 	prm[PLANET_RACE] = 0;
 	for (let k = 0; k < LF_BUILDINGS_PER_RACE; k++) prm[PLANET_LF_LEVELS + k] = 0;
+	prm[PLANET_IAS_ON] = 0;
+	prm[PLANET_IAS_LEVEL] = 0;
+	prm[PLANET_IAS_DISCOUNT] = 0;
+	prm[PLANET_IAS_RESOURCE] = 0;
+	prm[PLANET_IAS_WORKLOAD] = 100;
 	return prm;
 }
 

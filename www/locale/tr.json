@@ -303,7 +303,8 @@
     "report-omitted-one": "{0} alan daha eklenmedi",
     "report-omitted-few": "{0} alan daha eklenmedi",
     "report-omitted-many": "{0} alan daha eklenmedi",
-    "report-omitted-other": "{0} alan daha eklenmedi"
+    "report-omitted-other": "{0} alan daha eklenmedi",
+    "ias-short": "IAS"
   },
   "index": {
     "title": "ProxyForGame - OGame için hesaplamalar",
@@ -853,7 +854,16 @@
     "incl-yes": "Evet",
     "incl-no": "Hayır",
     "lifeform-tech": "Yaşam formu teknoloji bonusu",
-    "description": "OGame imparatorluğunuzda tek bir gezegen veya tüm gezegenler için metal, kristal ve döteryum üretimini, enerji tüketimini ve maden yatırımlarının geri dönüşünü hesaplayın."
+    "description": "OGame imparatorluğunuzda tek bir gezegen veya tüm gezegenler için metal, kristal ve döteryum üretimini, enerji tüketimini ve maden yatırımlarının geri dönüşünü hesaplayın.",
+    "ias-settings": "Lityum dönüşümü ayarları",
+    "ias-conversion": "Dönüşüm",
+    "ias-level": "Tarayıcı seviyesi",
+    "ias-discount": "Dönüşüm indirimi, %",
+    "ias-resource": "Dönüştürülecek kaynak",
+    "ias-workload": "İş yükü",
+    "ias-lithium": "Saatlik lityum",
+    "ias-cost": "Saatlik kaynak tüketimi",
+    "res-will-not-accumulate-ias": "Birikim mümkün değil (lityum dönüşümü üretilenden fazlasını tüketiyor)"
   },
   "queue": {
     "start-time": "Başlama zamanı",
