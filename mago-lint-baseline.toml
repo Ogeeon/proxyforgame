@@ -350,26 +350,8 @@ count = 1
 
 [[issues]]
 file = "www/Intl.php"
-code = "no-else-clause"
-message = "Avoid `elseif` clauses."
-count = 1
-
-[[issues]]
-file = "www/Intl.php"
-code = "no-empty"
-message = "Use of the `empty` construct."
-count = 1
-
-[[issues]]
-file = "www/Intl.php"
 code = "no-isset"
 message = "Use of the `isset` construct."
-count = 3
-
-[[issues]]
-file = "www/Intl.php"
-code = "strict-behavior"
-message = "Call to `in_array` must enforce strict comparison."
 count = 1
 
 [[issues]]
