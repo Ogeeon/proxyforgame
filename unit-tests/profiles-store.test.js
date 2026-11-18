@@ -142,6 +142,25 @@ describe('ProfileStore', () => {
         expect(store.getActiveId()).toBeNull();
         expect(store.save(createProfile({ label: 'A', id: 'a' }))).toBe(false);
     });
+
+    it('keeps the parts of a QR series under their own keys', () => {
+        const { local, store } = freshStore();
+        // A Storage lists its keys through length and key().
+        Object.defineProperty(local, 'length', { get: () => local.map.size });
+        local.key = (i) => [...local.map.keys()][i] ?? null;
+        store.save(createProfile({ label: 'Main', id: 'a' }));
+        const state = { id: 'Ab3_-x9Z', k: 2, parts: { 1: 'd1.x' }, at: 5 };
+        expect(store.saveShareParts(state)).toBe(true);
+        local.setItem('pfg-share-parts:junk', 'not json');
+        expect(JSON.parse(JSON.stringify(store.listShareParts()))).toEqual({
+            'pfg-share-parts:Ab3_-x9Z': state,
+            'pfg-share-parts:junk': null,
+        });
+        store.dropShareParts(store.sharePartsKey('Ab3_-x9Z'));
+        expect(Object.keys(store.listShareParts())).toEqual(['pfg-share-parts:junk']);
+        // A storage that cannot list its keys has no series.
+        expect(freshStore().store.listShareParts()).toEqual({});
+    });
 });
 
 describe('migrateLfGameLevels', () => {

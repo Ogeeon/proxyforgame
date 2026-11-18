@@ -7,6 +7,8 @@
 
 const { describe, it } = require('node:test');
 const { readFileSync } = require('node:fs');
+const { createHash } = require('node:crypto');
+const { deflateRawSync } = require('node:zlib');
 const { join } = require('node:path');
 const { load } = require('./load');
 const { expect } = require('./expect');
@@ -29,6 +31,12 @@ const core = load(['ogame/calc/js/profiles-core.js'], [
     'universeValue', 'setUniverseChoice', 'mergeUniverseChoices', 'pfMarkState',
     'listUniverseOverrides', 'resetUniverseChoices', 'pfSnapKey', 'snapshotReadings', 'diffReadings',
     'pfOwnedGroups', 'pfPickOwn', 'pfSplitOwned', 'pfKeepOwn',
+    'SHARE_FORMAT_VERSION', 'QR_SINGLE_URL_LIMIT', 'QR_MAX_PARTS', 'SHARE_PARTS_TTL_MS',
+    'serializeProfileShare', 'parseProfileShare',
+    'pfB64UrlEncode', 'pfB64UrlDecode', 'encodeSharePayload', 'decodeSharePayload',
+    'buildShareFragment', 'readShareFragment', 'withoutShareFragment', 'fitsQrCode',
+    'splitShareParts', 'readSharePart', 'readSharePartsState', 'addSharePart', 'assembleShareParts',
+    'countShareParts', 'purgeStaleShareParts',
 ]);
 
 const plain = (value) => JSON.parse(JSON.stringify(value));
@@ -1504,6 +1512,500 @@ describe('the profile file', () => {
         const plan = core.planProfilesRestore(['a'], [a, b]);
         expect(plan.added.map((p) => p.id)).toEqual(['b']);
         expect(plan.conflicts.map((p) => p.id)).toEqual(['a']);
+    });
+});
+
+describe('the share link', () => {
+    const SHARE_UNIVERSES = [{ universe: EN1, overrides: { speed: 7, deuteriumInDebris: false } }];
+    const URL_PREFIX = 'https://proxyforgame.com/en/costs#';
+
+    /** The profile as the share link should bring it back: without its resources. */
+    function expectedOf(profile) {
+        const expected = plain(profile);
+        delete expected.resources;
+        return expected;
+    }
+
+    /** serialize → encode → decode → parse, failing on any refusal. */
+    async function roundTrip(profile, universes = SHARE_UNIVERSES) {
+        const payload = await core.encodeSharePayload(core.serializeProfileShare(profile, universes));
+        const decoded = await core.decodeSharePayload(payload);
+        if (!decoded.ok) throw new Error('payload refused: ' + decoded.reason);
+        return { payload, result: core.parseProfileShare(decoded.text) };
+    }
+
+    /** The fixture profile grown to 12 planets and 3 moons, half of every body's values overridden. */
+    function heavyProfile() {
+        const { profile } = imported();
+        const ids = idSource();
+        const planetTemplate = profile.planets[0];
+        const moonTemplate = profile.moons[0];
+        while (profile.planets.length < 12) {
+            const n = profile.planets.length + 1;
+            profile.planets.push({ ...plain(planetTemplate), id: 'p' + ids(), name: 'Colony ' + n, coords: { galaxy: 1, system: 100 + n, position: 8 } });
+        }
+        while (profile.moons.length < 3) {
+            const n = profile.moons.length + 1;
+            profile.moons.push({ ...plain(moonTemplate), id: 'm' + ids(), name: 'Moon ' + n, coords: { galaxy: 1, system: 200 + n, position: 8 } });
+        }
+        for (const body of [...profile.planets, ...profile.moons]) {
+            Object.keys(body.values).forEach((key, i) => {
+                const game = body.values[key].game;
+                if (i % 2 === 0 && typeof game === 'number') core.setProfileValue(body, key, game + 1 + (i % 7));
+            });
+        }
+        return profile;
+    }
+
+    it('round-trips a profile and its universe settings, without the resources', async () => {
+        const { profile } = imported();
+        expect(Object.keys(profile.resources).length).toBeGreaterThan(0);
+        const { payload, result } = await roundTrip(profile);
+        expect(payload.startsWith('d2.')).toBe(true);
+        expect(result.ok).toBe(true);
+        expect(plain(result.profile)).toEqual(expectedOf(profile));
+        expect(plain(result.universes)).toEqual(SHARE_UNIVERSES);
+        // The profile itself is not changed.
+        expect(Object.keys(profile.resources).length).toBeGreaterThan(0);
+    });
+
+    it('never writes the resources, even when the profile carries them', () => {
+        const { profile } = imported();
+        const json = JSON.parse(core.serializeProfileShare(profile, []));
+        expect(json.pfp).toBe(core.SHARE_FORMAT_VERSION);
+        expect('resources' in json.profile).toBe(false);
+    });
+
+    it('drops the resources a hand-made payload carries', () => {
+        const { profile } = imported();
+        const result = core.parseProfileShare(JSON.stringify({ pfp: 1, profile, universes: [] }));
+        expect(result.ok).toBe(true);
+        expect('resources' in result.profile).toBe(false);
+    });
+
+    it('round-trips a heavy profile, whose link no longer fits one QR code', async () => {
+        const profile = heavyProfile();
+        expect(profile.planets).toHaveLength(12);
+        expect(profile.moons).toHaveLength(3);
+        expect(core.countOverrides(profile)).toBeGreaterThan(100);
+        const { payload, result } = await roundTrip(profile);
+        expect(plain(result.profile)).toEqual(expectedOf(profile));
+        expect(core.fitsQrCode(URL_PREFIX + core.buildShareFragment(payload))).toBe(false);
+    });
+
+    it('holds a URL of exactly QR_SINGLE_URL_LIMIT bytes in one code, and not one more', () => {
+        expect(core.QR_SINGLE_URL_LIMIT).toBe(1273);
+        expect(core.fitsQrCode('a'.repeat(core.QR_SINGLE_URL_LIMIT))).toBe(true);
+        expect(core.fitsQrCode('a'.repeat(core.QR_SINGLE_URL_LIMIT + 1))).toBe(false);
+    });
+
+    it('keeps Cyrillic names, compressed and not', async () => {
+        const { profile } = imported();
+        profile.label = 'Основа — Вселенная 1';
+        profile.playerName = 'Командир';
+        profile.planets[0].name = 'Родина';
+        const compressed = await roundTrip(profile);
+        expect(compressed.payload.startsWith('d2.')).toBe(true);
+        expect(compressed.result.profile.label).toBe('Основа — Вселенная 1');
+        expect(compressed.result.profile.playerName).toBe('Командир');
+
+        const json = core.serializeProfileShare(profile, []);
+        const plainPayload = 'r2.' + core.pfB64UrlEncode(new TextEncoder().encode(json));
+        const decoded = await core.decodeSharePayload(plainPayload);
+        expect(decoded.ok).toBe(true);
+        const result = core.parseProfileShare(decoded.text);
+        expect(result.profile.label).toBe('Основа — Вселенная 1');
+        expect(result.profile.planets[0].name).toBe('Родина');
+    });
+
+    it('encodes base64url without padding and reads it back, padded or not', () => {
+        const bytes = new Uint8Array([0xfb, 0xff, 0xfe, 0x00, 0x41]);
+        const text = core.pfB64UrlEncode(bytes);
+        expect(text).toBe('-__-AEE');
+        expect([...core.pfB64UrlDecode(text)]).toEqual([...bytes]);
+        expect([...core.pfB64UrlDecode(text + '=')]).toEqual([...bytes]);
+        expect(core.pfB64UrlDecode('ab+c')).toBe(null);
+        expect(core.pfB64UrlDecode('abcde')).toBe(null);
+    });
+
+    it('refuses what is not a payload', async () => {
+        expect((await core.decodeSharePayload('d3.AAAA')).reason).toBe('format');
+        expect((await core.decodeSharePayload('d1.@@@')).reason).toBe('format');
+        expect((await core.decodeSharePayload('d1.')).reason).toBe('format');
+        expect((await core.decodeSharePayload('')).reason).toBe('format');
+        expect((await core.decodeSharePayload('d1.AbC-')).reason).toBe('corrupt');
+    });
+
+    it('refuses a payload cut short', async () => {
+        const { profile } = imported();
+        const payload = await core.encodeSharePayload(core.serializeProfileShare(profile, []));
+        for (const cut of [payload.length - 1, payload.length - 2, Math.floor(payload.length / 2)]) {
+            const result = await core.decodeSharePayload(payload.slice(0, cut));
+            expect(result.ok).toBe(false);
+            expect(['format', 'corrupt']).toContain(result.reason);
+        }
+    });
+
+    it('says a compressed payload is unsupported where the browser cannot decompress', async () => {
+        const saved = core.DecompressionStream;
+        delete core.DecompressionStream;
+        try {
+            expect((await core.decodeSharePayload('d1.AAAA')).reason).toBe('unsupported');
+        } finally {
+            core.DecompressionStream = saved;
+        }
+    });
+
+    it('falls back to the uncompressed form when compressing fails or is missing', async () => {
+        const { profile } = imported();
+        const json = core.serializeProfileShare(profile, SHARE_UNIVERSES);
+        const saved = core.CompressionStream;
+        try {
+            core.CompressionStream = class {
+                constructor() {
+                    throw new TypeError('no deflate here');
+                }
+            };
+            const payload = await core.encodeSharePayload(json);
+            expect(payload.startsWith('r2.')).toBe(true);
+            const decoded = await core.decodeSharePayload(payload);
+            expect(decoded.ok).toBe(true);
+            expect(plain(core.parseProfileShare(decoded.text).profile)).toEqual(expectedOf(profile));
+
+            delete core.CompressionStream;
+            expect((await core.encodeSharePayload(json)).startsWith('r2.')).toBe(true);
+        } finally {
+            core.CompressionStream = saved;
+        }
+    });
+
+    it('refuses a payload JSON that is not a share of a version we know', () => {
+        expect(core.parseProfileShare('nope').reason).toBe('json');
+        expect(core.parseProfileShare('{"pfgProfiles":1,"profiles":[]}').reason).toBe('shape');
+        expect(core.parseProfileShare('{"pfp":2,"profile":{}}').reason).toBe('version');
+        expect(core.parseProfileShare('{"pfp":1,"profile":{"id":"x"}}').reason).toBe('version');
+    });
+
+    it('drops a broken universe entry, not the profile', () => {
+        const { profile } = imported();
+        const result = core.parseProfileShare(JSON.stringify({ pfp: 1, profile, universes: ['nope', ...SHARE_UNIVERSES] }));
+        expect(result.ok).toBe(true);
+        expect(plain(result.universes)).toEqual(SHARE_UNIVERSES);
+    });
+
+    it('builds and reads the fragment, leaving the other keys alone', () => {
+        expect(core.buildShareFragment('d1.AbC-')).toBe('pfp=d1.AbC-');
+        expect(core.readShareFragment('#pfp=d1.AbC-')).toBe('d1.AbC-');
+        expect(core.readShareFragment('pfp=d1.AbC-')).toBe('d1.AbC-');
+        expect(core.readShareFragment('#rmd=2.5&pfp=d1.AbC-_x&st=1')).toBe('d1.AbC-_x');
+        expect(core.readShareFragment('')).toBe(null);
+        expect(core.readShareFragment('#')).toBe(null);
+        expect(core.readShareFragment('#rmd=2.5&st=1')).toBe(null);
+        expect(core.readShareFragment('#pfp=')).toBe(null);
+        expect(core.readShareFragment('#PFP=d1.AbC-')).toBe(null);
+        expect(core.withoutShareFragment('#rmd=2.5&pfp=d1.AbC-&st=1')).toBe('rmd=2.5&st=1');
+        expect(core.withoutShareFragment('#pfp=d1.AbC-')).toBe('');
+    });
+});
+
+describe('the compact share form (d2)', () => {
+    const PREFIX = 'https://proxyforgame.com/en/production#';
+    const UNIVERSES = [{ universe: EN1, overrides: { speed: 7, deuteriumInDebris: false } }];
+    const PARTS = ['account', 'planet', 'moon'];
+
+    /** Keys sorted at every level, so two profiles compare by value whatever their key order. */
+    const canonical = (value) => JSON.stringify(value, (_key, v) => (v && typeof v === 'object' && !Array.isArray(v)
+        ? Object.fromEntries(Object.keys(v).sort().map((k) => [k, v[k]])) : v));
+
+    const withoutResources = (profile) => {
+        const copy = plain(profile);
+        delete copy.resources;
+        return copy;
+    };
+
+    /**
+     * The fixture grown to 12 planets and 3 moons, half of every body's values
+     * overridden; with `vary`, every copied body's game numbers above 4 moved
+     * by -2..+2, so the planets are not copies deflate can simply repeat.
+     */
+    function grown(vary) {
+        const { profile } = imported();
+        let seed = 12345;
+        const next = () => { seed = (seed * 1103515245 + 12345) & 0x7fffffff; return seed; };
+        const nudge = (body) => {
+            if (!vary) return body;
+            for (const v of Object.values(body.values)) {
+                if (Number.isInteger(v.game) && v.game > 4) v.game += (next() % 5) - 2;
+            }
+            return body;
+        };
+        while (profile.planets.length < 12) {
+            const n = profile.planets.length + 1;
+            profile.planets.push(nudge({ ...plain(profile.planets[0]), id: 'p' + n, name: 'Colony ' + n, coords: { galaxy: 1, system: 100 + n, position: 8 } }));
+        }
+        while (profile.moons.length < 3) {
+            const n = profile.moons.length + 1;
+            profile.moons.push(nudge({ ...plain(profile.moons[0]), id: 'm' + n, name: 'Moon ' + n, coords: { galaxy: 1, system: 200 + n, position: 8 } }));
+        }
+        for (const body of [...profile.planets, ...profile.moons]) {
+            Object.keys(body.values).forEach((key, i) => {
+                const game = body.values[key].game;
+                if (i % 2 === 0 && typeof game === 'number') core.setProfileValue(body, key, game + 1 + (i % 7));
+            });
+        }
+        return profile;
+    }
+
+    const PROFILES = {
+        fixture: () => imported().profile,
+        heavy: () => grown(false),
+        heavyVaried: () => grown(true),
+    };
+
+    async function shareOf(profile) {
+        const payload = await core.encodeSharePayload(core.serializeProfileShare(profile, UNIVERSES));
+        const decoded = await core.decodeSharePayload(payload);
+        if (!decoded.ok) throw new Error('payload refused: ' + decoded.reason);
+        return { payload, result: core.parseProfileShare(decoded.text) };
+    }
+
+    for (const [name, make] of Object.entries(PROFILES)) {
+        it(`round-trips the ${name} profile by value`, async () => {
+            const profile = make();
+            const { payload, result } = await shareOf(profile);
+            expect(payload.startsWith('d2.')).toBe(true);
+            expect(result.ok).toBe(true);
+            expect(canonical(result.profile)).toBe(canonical(withoutResources(profile)));
+            expect(plain(result.universes)).toEqual(UNIVERSES);
+        });
+    }
+
+    it('keeps every kind of value: override only, a null game, lists, flags and keys outside the lists', async () => {
+        const { profile } = imported();
+        const [planet] = profile.planets;
+        const account = profile.account.values;
+        account.rates = { override: [3, 2, 1] };
+        account['officer.admiral'] = { game: true, override: false };
+        account['research.199'] = { game: null };
+        account['lf.ship.219.cargo'] = { override: 12.5 };
+        account['some.future.key'] = { game: 'text', override: { nested: [1, 2] } };
+        planet.values['lf.research.14218'] = { game: 3, override: 4 };
+        planet.values['ship.212'] = { game: 0, override: 0, note: 'not two layers' };
+        delete planet.values['building.1'];
+        profile.moons[0].values = {};
+        const { result } = await shareOf(profile);
+        expect(canonical(result.profile)).toBe(canonical(withoutResources(profile)));
+    });
+
+    it('takes no more QR codes than it has to', async () => {
+        // As measured once the compact form was written, not a target with room in it.
+        const counts = {};
+        for (const [name, make] of Object.entries(PROFILES)) {
+            const { payload } = await shareOf(make());
+            counts[name] = core.splitShareParts(payload, PREFIX, 'Ab3_-x9Z').length;
+        }
+        expect(counts).toEqual({ fixture: 1, heavy: 2, heavyVaried: 3 });
+    });
+
+    it('has every key the import writes in its lists', () => {
+        // A key the import starts writing must be appended to SHARE_KEYS (at the
+        // end of its list), or every link carries it by name.
+        const { profile } = imported();
+        const missing = (values, part) => Object.keys(values).filter((key) => !core.SHARE_KEYS[part].includes(key));
+        expect(missing(profile.account.values, 'account')).toEqual([]);
+        profile.planets.forEach((p) => expect(missing(p.values, 'planet')).toEqual([]));
+        profile.moons.forEach((m) => expect(missing(m.values, 'moon')).toEqual([]));
+    });
+
+    it('only ever grows its key lists at the end', () => {
+        // DO NOT update these numbers to make the test pass after moving,
+        // removing or inserting a key: links already sent name their values by
+        // position, and a reader takes the first k keys of its own lists. Append
+        // new keys at the end of a list, and only then raise its length here
+        // together with the hash of the longer prefix.
+        const SNAPSHOT = {
+            account: { length: 168, sha256: 'e0c3c4688099bc47a8031b2c0663fc978cdcc2b663075ca0bc9d629076fa9dce' },
+            planet: { length: 183, sha256: '4a1aed0657dbbbe0715293ac4c4bec86a3ce7245e6f1312332b5879173f44cf9' },
+            moon: { length: 49, sha256: '7785d5d45dfe3288dccbcb0b005661262979ef0fe2209528d7cfbdf5310b6850' },
+        };
+        for (const part of PARTS) {
+            const keys = core.SHARE_KEYS[part];
+            expect(keys.length).toBeGreaterThanOrEqual(SNAPSHOT[part].length);
+            const prefix = JSON.stringify(keys.slice(0, SNAPSHOT[part].length));
+            expect(createHash('sha256').update(prefix).digest('hex')).toBe(SNAPSHOT[part].sha256);
+            expect(new Set(keys).size).toBe(keys.length);
+        }
+    });
+
+    it('reads a link written with shorter lists, and keys it carried by name', async () => {
+        const { profile } = imported();
+        const k = [40, 100, 30];
+        const short = (part, i) => core.SHARE_KEYS[part].slice(0, k[i]);
+        const pack = (body, part, i) => ({ ...body, values: core.packShareValues(body.values, short(part, i)) });
+        const old = withoutResources(profile);
+        const json = JSON.stringify({
+            pfp: 1, k,
+            profile: {
+                ...old,
+                account: pack(old.account, 'account', 0),
+                planets: old.planets.map((p) => pack(p, 'planet', 1)),
+                moons: old.moons.map((m) => pack(m, 'moon', 2)),
+            },
+            universes: [],
+        });
+        // The keys past the old lists went by name - keys this page has in its lists.
+        expect(Object.keys(JSON.parse(json).profile.account.values.x).length).toBeGreaterThan(10);
+        const result = core.parseProfileShare(json);
+        expect(result.ok).toBe(true);
+        expect(canonical(result.profile)).toBe(canonical(old));
+    });
+
+    it('refuses a link from lists longer than this page knows, or with broken value sets', () => {
+        const { profile } = imported();
+        const share = JSON.parse(core.serializeProfileShare(profile, []));
+        const refused = (edit) => {
+            const copy = plain(share);
+            edit(copy);
+            return core.parseProfileShare(JSON.stringify(copy)).reason;
+        };
+        expect(refused((s) => { s.k[1] += 1; })).toBe('version');
+        expect(refused((s) => { s.k = [1, 2]; })).toBe('version');
+        expect(refused((s) => { s.profile.account.values.g = 'nope'; })).toBe('version');
+        expect(refused((s) => { s.profile.planets[0].values.o = [9999, 1]; })).toBe('version');
+        expect(refused((s) => { s.profile.planets[0].values.a = [-1]; })).toBe('version');
+        expect(refused((s) => { s.profile.moons[0].values.x = [1]; })).toBe('version');
+        expect(refused((s) => { s.profile.planets = 'none'; })).toBe('version');
+    });
+
+    it('still takes a link of the full form (d1)', async () => {
+        const { profile } = imported();
+        const json = JSON.stringify({ pfp: 1, profile: withoutResources(profile), universes: UNIVERSES });
+        const payload = 'd1.' + core.pfB64UrlEncode(deflateRawSync(Buffer.from(json, 'utf8')));
+        const decoded = await core.decodeSharePayload(payload);
+        expect(decoded.ok).toBe(true);
+        const result = core.parseProfileShare(decoded.text);
+        expect(result.ok).toBe(true);
+        expect(canonical(result.profile)).toBe(canonical(withoutResources(profile)));
+    });
+});
+
+describe('the share QR series', () => {
+    const PREFIX = 'https://proxyforgame.com/en/production#';
+    const ID = 'Ab3_-x9Z';
+    const NOW = 1_800_000_000_000;
+
+    /** The fixture grown to 12 planets and 3 moons, as in the share link tests. */
+    function heavy() {
+        const { profile } = imported();
+        while (profile.planets.length < 12) {
+            const n = profile.planets.length + 1;
+            profile.planets.push({ ...plain(profile.planets[0]), id: 'p' + n, name: 'Colony ' + n, coords: { galaxy: 1, system: 100 + n, position: 8 } });
+        }
+        while (profile.moons.length < 3) {
+            const n = profile.moons.length + 1;
+            profile.moons.push({ ...plain(profile.moons[0]), id: 'm' + n, name: 'Moon ' + n, coords: { galaxy: 1, system: 200 + n, position: 8 } });
+        }
+        for (const body of [...profile.planets, ...profile.moons]) {
+            Object.keys(body.values).forEach((key, i) => {
+                const game = body.values[key].game;
+                if (i % 2 === 0 && typeof game === 'number') core.setProfileValue(body, key, game + 1 + (i % 7));
+            });
+        }
+        return profile;
+    }
+
+    /** A deterministic shuffle: every other part first, then the rest backwards. */
+    function shuffled(list) {
+        return [...list.filter((_, i) => i % 2 === 1), ...list.filter((_, i) => i % 2 === 0).reverse()];
+    }
+
+    /** Collect the parts of a series in the given order. */
+    function collect(fragments) {
+        let state = null;
+        for (const fragment of fragments) {
+            const part = core.readSharePart(core.readShareFragment(fragment));
+            expect(part).toBeTruthy();
+            state = core.addSharePart(state, part, NOW);
+            expect(state).toBeTruthy();
+        }
+        return state;
+    }
+
+    // In the compact form the fixture takes one code; a series needs more.
+    for (const { name, make } of [{ name: 'a heavy 12+3 profile', make: heavy }, { name: 'a long payload', make: null }]) {
+        it(`cuts ${name} into codes that fit and puts it back together in any order`, async () => {
+            const payload = make
+                ? await core.encodeSharePayload(core.serializeProfileShare(make(), []))
+                : 'd2.' + 'AbC-_'.repeat(900);
+            const fragments = core.splitShareParts(payload, PREFIX, ID);
+            expect(fragments.length).toBeGreaterThan(1);
+            expect(fragments.length).toBeLessThanOrEqual(core.QR_MAX_PARTS);
+            fragments.forEach((f) => expect(core.fitsQrCode(PREFIX + f)).toBe(true));
+            const lengths = fragments.map((f) => core.readSharePart(core.readShareFragment(f)).chunk.length);
+            // Equal parts, the last one no longer than the others.
+            expect(new Set(lengths.slice(0, -1)).size).toBe(1);
+            expect(lengths.at(-1)).toBeLessThanOrEqual(lengths[0]);
+
+            const order = shuffled(fragments);
+            const partial = collect(order.slice(0, -1));
+            expect(core.assembleShareParts(partial)).toBe(null);
+            expect(core.countShareParts(partial)).toBe(fragments.length - 1);
+            const state = collect(order);
+            expect(core.assembleShareParts(state)).toBe(payload);
+        });
+    }
+
+    it('keeps a link that fits one code whole', () => {
+        const fits = 'd1.' + 'a'.repeat(core.QR_SINGLE_URL_LIMIT - PREFIX.length - 'pfp=d1.'.length);
+        expect(PREFIX.length + 'pfp='.length + fits.length).toBe(core.QR_SINGLE_URL_LIMIT);
+        expect(core.splitShareParts(fits, PREFIX, ID)).toEqual(['pfp=' + fits]);
+        const parts = core.splitShareParts(fits + 'a', PREFIX, ID);
+        expect(parts).toHaveLength(2);
+        expect(parts[0].startsWith('pfp=p1.' + ID + '.1.2.')).toBe(true);
+        parts.forEach((f) => expect(core.fitsQrCode(PREFIX + f)).toBe(true));
+        expect(core.assembleShareParts(collect(parts))).toBe(fits + 'a');
+    });
+
+    it('offers no QR code for a payload longer than QR_MAX_PARTS codes', () => {
+        const huge = 'd1.' + 'a'.repeat(core.QR_SINGLE_URL_LIMIT * (core.QR_MAX_PARTS + 1));
+        expect(core.splitShareParts(huge, PREFIX, ID)).toBe(null);
+        // Ten two-digit parts still fit just below the limit.
+        const ten = core.splitShareParts('d1.' + 'a'.repeat(10 * 1100), PREFIX, ID);
+        expect(ten).toHaveLength(10);
+        ten.forEach((f) => expect(core.fitsQrCode(PREFIX + f)).toBe(true));
+    });
+
+    it('takes the same part twice without harm', () => {
+        const fragments = core.splitShareParts('d1.' + 'a'.repeat(2000), PREFIX, ID);
+        const first = core.readSharePart(core.readShareFragment(fragments[0]));
+        const once = core.addSharePart(null, first, NOW);
+        const twice = core.addSharePart(once, first, NOW + 1);
+        expect(plain(twice.parts)).toEqual(plain(once.parts));
+        expect(twice.at).toBe(NOW + 1);
+    });
+
+    it('refuses a part of another length or another series', () => {
+        const state = core.addSharePart(null, { id: ID, n: 1, k: 3, chunk: 'd1.x' }, NOW);
+        expect(core.addSharePart(state, { id: ID, n: 2, k: 4, chunk: 'y' }, NOW)).toBe(null);
+        expect(core.addSharePart(state, { id: 'Other123', n: 2, k: 3, chunk: 'y' }, NOW)).toBe(null);
+    });
+
+    it('reads only well-formed parts', () => {
+        expect(core.readSharePart('p1.' + ID + '.2.3.d1.AbC-_')).toEqual({ id: ID, n: 2, k: 3, chunk: 'd1.AbC-_' });
+        for (const bad of [
+            'd1.AbC-', 'p2.' + ID + '.1.2.x', 'p1.short.1.2.x', 'p1.' + ID + '.0.2.x', 'p1.' + ID + '.3.2.x',
+            'p1.' + ID + '.1.11.x', 'p1.' + ID + '.1.2.', 'p1.' + ID + '.1.2.a@b', 'p1.' + ID + '.01.2.x', 'p1.' + ID + '.a.2.x',
+        ]) {
+            expect(core.readSharePart(bad)).toBe(null);
+        }
+    });
+
+    it('drops series left unfinished, and what is not a series', () => {
+        const fresh = { id: ID, k: 2, parts: { 1: 'd1.x' }, at: NOW - 1000 };
+        const stale = { id: 'Old_0001', k: 2, parts: { 2: 'y' }, at: NOW - core.SHARE_PARTS_TTL_MS - 1 };
+        const all = { fresh, stale, junk: { id: 'x' }, wrongPart: { ...fresh, parts: { 3: 'z' } } };
+        expect(core.purgeStaleShareParts(all, NOW).sort()).toEqual(['junk', 'stale', 'wrongPart']);
+        expect(plain(core.readSharePartsState(fresh))).toEqual(plain(fresh));
     });
 });
 

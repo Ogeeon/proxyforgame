@@ -91,6 +91,28 @@ declare const pfgProfileText: Record<string, string>;
 declare const pfgCountries: Array<[string, string]>;
 /** Universes per country code: [number, name]. */
 declare const pfgUniverses: Record<string, Array<[number, string]>>;
+/** The vendored QR code generator, with its cache-busting version; loaded when the share dialog first opens. */
+declare const pfgQrUrl: string;
+/**
+ * The origin a profile share link points at: the main domain on the public
+ * site, so the profile lands in the localStorage the player works in; empty
+ * elsewhere, where the page's own origin is used.
+ */
+declare const pfgShareOrigin: string;
+
+/** One QR code of the vendored qrcode-generator (www/vendor/qrcode/qrcode.js). */
+interface QrCodeGenerator {
+  addData(data: string, mode?: 'Numeric' | 'Alphanumeric' | 'Byte' | 'Kanji'): void;
+  make(): void;
+  getModuleCount(): number;
+  isDark(row: number, col: number): boolean;
+  renderTo2dContext(context: CanvasRenderingContext2D, cellSize?: number): void;
+}
+/**
+ * The generator's global, defined once pfgQrUrl has loaded. Type number 0
+ * picks the smallest version that holds the data.
+ */
+declare var qrcode: ((typeNumber: number, errorCorrectionLevel: 'L' | 'M' | 'Q' | 'H') => QrCodeGenerator) | undefined;
 
 /**
  * The pseudo-event the validation helpers are called with. The real listeners

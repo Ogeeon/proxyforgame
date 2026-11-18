@@ -8,17 +8,29 @@
 // the address as a page, which is redirected to the site page about the server
 // (HttpOptions.pagePath).
 //
-// An initialize answer carries an Mcp-Session-Id, which the client then sends
-// on every request. The server keeps no record of it and never refuses a
-// request for its id: it is only there so the usage record (lib/usage.js) can
-// tell which calls came over one connection. A DELETE that would end the
-// session gets the 405 the spec allows for a server that does not end them.
+// A legacy client (2025-11-25 and earlier) gets an Mcp-Session-Id with its
+// initialize answer, and then sends it on every request. The server keeps no
+// record of it and never refuses a request for its id: it is only there so
+// the usage record (lib/usage.js) can tell which calls came over one
+// connection. A DELETE that would end the session gets the 405 the spec
+// allows for a server that does not end them. A modern client (2026-07-28)
+// has no sessions, so its calls carry no id.
+//
+// A modern request mirrors parts of its body into headers - its version, its
+// method, the tool it calls - and 2026-07-28 makes the server refuse one whose
+// headers and body disagree, so that a proxy routing on the header cannot be
+// told one thing while the server does another. Its errors also carry an HTTP
+// status (the protocol module sets Trace.httpStatus); a legacy request's
+// JSON-RPC errors are answered with 200, as before.
 //
 // Apache proxies the public /mcp path here (deploy/apache-mcp.conf); the
 // process itself listens on loopback only.
 
 const { randomBytes } = require('node:crypto');
-const { errorResponse, printable, PARSE_ERROR, INVALID_REQUEST, SUPPORTED_VERSIONS } = require('./protocol');
+const {
+    errorResponse, unsupportedVersion, modernVersion, printable,
+    PARSE_ERROR, INVALID_REQUEST, HEADER_MISMATCH, SUPPORTED_VERSIONS, MODERN_VERSIONS, META_CLIENT_INFO,
+} = require('./protocol');
 
 /** The client the watchdog (deploy/watchdog.sh) introduces itself as. */
 const WATCHDOG_CLIENT = 'pfg-watchdog';
@@ -166,7 +178,7 @@ function createHttpHandler(protocol, options) {
             for (const [name, value] of Object.entries(refused.headers ?? {})) {
                 res.setHeader(name, value);
             }
-            sendJson(res, refused.status, errorResponse(null, INVALID_REQUEST, refused.message));
+            sendJson(res, refused.status, refused.body ?? errorResponse(null, INVALID_REQUEST, refused.message));
             // A 405 is a GET or a DELETE - scanners and session ends, not use.
             if (refused.status !== 405) {
                 record(facts, ts, refused.status, null, null);
@@ -187,8 +199,10 @@ function createHttpHandler(protocol, options) {
             return { ok: false };
         }
         facts.bodyBytes = Buffer.byteLength(body);
+        /** @type {unknown} */
+        let message;
         try {
-            return { ok: true, message: JSON.parse(body) };
+            message = JSON.parse(body);
         } catch {
             sendJson(res, 400, errorResponse(null, PARSE_ERROR, 'Body is not valid JSON'));
             record(facts, ts, 400, null, null);
@@ -197,6 +211,20 @@ function createHttpHandler(protocol, options) {
             options.log(`refused 400: body is not valid JSON (${facts.bodyBytes} bytes); user agent ${facts.userAgent ?? '-'}`);
             return { ok: false };
         }
+
+        const disagreement = headerMismatch(req, message);
+        if (disagreement) {
+            const msg = /** @type {Record<string, any>} */ (message);
+            sendJson(res, 400, errorResponse(msg.id ?? null, HEADER_MISMATCH, `Header mismatch: ${disagreement}`));
+            record(facts, ts, 400, {
+                method: typeof msg.method === 'string' ? msg.method.slice(0, 32) : null,
+                outcome: 'invalid',
+                clientName: printable(msg.params?._meta?.[META_CLIENT_INFO]?.name, 64),
+            }, null);
+            options.log(`refused 400: header mismatch: ${printable(disagreement, 200)}; user agent ${facts.userAgent ?? '-'}`);
+            return { ok: false };
+        }
+        return { ok: true, message };
     }
 
     /**
@@ -224,12 +252,19 @@ function createHttpHandler(protocol, options) {
             facts.sessionId = randomBytes(16).toString('hex');
             res.setHeader('Mcp-Session-Id', facts.sessionId);
         }
-        const status = answers.length === 0 ? 202 : 200;
+        // Only a modern request sets an HTTP status of its own, and a modern
+        // request never comes in a batch.
+        const own = Array.isArray(message) ? undefined : handled[0].trace.httpStatus;
+        const status = answers.length === 0 ? 202 : own ?? 200;
+        if (status === 400) {
+            const refused = /** @type {{error?: {message: string}}} */ (answers[0]);
+            options.log(`refused 400: ${printable(refused.error?.message, 200)}; user agent ${facts.userAgent ?? '-'}`);
+        }
         if (answers.length === 0) {
             // Notifications or responses only: accepted, nothing to say back.
             res.writeHead(202).end();
         } else {
-            sendJson(res, 200, Array.isArray(message) ? answers : answers[0]);
+            sendJson(res, status, Array.isArray(message) ? answers : answers[0]);
         }
         for (const h of handled) {
             record(facts, ts, status, h.trace, h.durationMs);
@@ -240,7 +275,8 @@ function createHttpHandler(protocol, options) {
      * Why a request to the endpoint is turned away before its body is read,
      * or null when it is not.
      * @param {import('node:http').IncomingMessage} req
-     * @returns {{status: number, message: string, headers?: Record<string, string>}|null}
+     * @returns {{status: number, message: string, headers?: Record<string, string>,
+     *            body?: import('./protocol').JsonRpcResponse}|null}
      */
     function refusal(req) {
         const origin = req.headers.origin;
@@ -254,13 +290,69 @@ function createHttpHandler(protocol, options) {
             return { status: 429, message: 'Too many requests', headers: { 'Retry-After': '60' } };
         }
         // Absent means a client from before the header existed, which the spec
-        // says to treat as 2025-03-26 - supported. Present and unknown is refused.
+        // says to treat as 2025-03-26 - supported. Present and unknown is refused
+        // with 2026-07-28's UnsupportedProtocolVersionError, whose list of
+        // versions lets a modern client retry with one we speak.
         const version = req.headers['mcp-protocol-version'];
         if (typeof version === 'string' && !SUPPORTED_VERSIONS.includes(version)) {
-            return { status: 400, message: `Unsupported MCP-Protocol-Version ${version}; supported: ${SUPPORTED_VERSIONS.join(', ')}` };
+            return {
+                status: 400,
+                message: `Unsupported MCP-Protocol-Version ${version}; supported: ${SUPPORTED_VERSIONS.join(', ')}`,
+                body: unsupportedVersion(null, version),
+            };
         }
         return null;
     }
+}
+
+/**
+ * How a request's headers contradict its body, or null when they agree. Only
+ * a modern request mirrors its body into headers; a legacy one, a batch and a
+ * notification are not checked.
+ * @param {import('node:http').IncomingMessage} req
+ * @param {unknown} message
+ * @returns {string|null}
+ */
+function headerMismatch(req, message) {
+    const header = req.headers['mcp-protocol-version'];
+    const version = modernVersion(message);
+    if (version === null) {
+        return typeof header === 'string' && MODERN_VERSIONS.includes(header)
+            ? `MCP-Protocol-Version is ${header}, but params._meta declares no protocol version`
+            : null;
+    }
+    const msg = /** @type {Record<string, any>} */ (message);
+    if (!('id' in msg) || msg.id === null) {
+        return null;
+    }
+    if (header !== version) {
+        return `MCP-Protocol-Version ${header ?? '(missing)'} does not match the body's ${version}`;
+    }
+    const method = req.headers['mcp-method'];
+    if (method !== msg.method) {
+        return `Mcp-Method ${method ?? '(missing)'} does not match the body's ${String(msg.method)}`;
+    }
+    if (msg.method === 'tools/call') {
+        const name = headerValue(req.headers['mcp-name']);
+        if (name !== msg.params?.name) {
+            return `Mcp-Name ${name ?? '(missing)'} does not match the body's ${String(msg.params?.name)}`;
+        }
+    }
+    return null;
+}
+
+/**
+ * A mirrored header's value, decoded when the client had to send it in the
+ * spec's =?base64?...?= form - non-ASCII, or spaces at either end.
+ * @param {string|string[]|undefined} raw
+ * @returns {string|undefined}
+ */
+function headerValue(raw) {
+    if (typeof raw !== 'string') {
+        return undefined;
+    }
+    const encoded = /^=\?base64\?([A-Za-z0-9+/=]*)\?=$/.exec(raw);
+    return encoded ? Buffer.from(encoded[1], 'base64').toString('utf8') : raw;
 }
 
 /**

@@ -272,6 +272,24 @@ test.describe('Trade Calculator Page', () => {
         await expect(page.locator('#res-src-3')).toBeDisabled();
     });
 
+    // A fragment without a single deal-link key - a profile share link, an
+    // anchor - is not a deal link: the saved direction and moon stay.
+    for (const fragment of ['#pfp=d1.AbC-', '#foo=bar']) {
+        test(`a foreign fragment ${fragment} keeps the saved deal`, async ({ page }) => {
+            await page.locator('#res-src-2').click();
+            await page.locator('#dir-1').check();
+            await page.locator('#moon').check();
+            await expect.poll(() => page.evaluate(() => JSON.parse(localStorage.getItem('options_trade') ?? '{}')))
+                .toMatchObject({ direction: 1, moon: true });
+
+            // A fresh load, not a same-document hash change.
+            await page.goto('about:blank');
+            await page.goto('/trade' + fragment);
+            await expect(page.locator('#dir-1')).toBeChecked();
+            await expect(page.locator('#moon')).toBeChecked();
+        });
+    }
+
     test('parsing a reverse link works', async ({ page }) => {
         await page.goto('/trade#rmd=2&rcd=1.5&st=2&dt=2&dir=1&wm=11000000&wc=4000000&l=en:1');
         await expect(page.locator('#dir-1')).toBeChecked();
