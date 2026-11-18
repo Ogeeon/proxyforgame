@@ -37,6 +37,10 @@
   <link type="text/css" href="/css/langs.css?v=<?php echo assetVersion($pfgPath, '/css/langs.css'); ?>" rel="stylesheet">
   <link type="text/css" href="/css/common.css?v=<?php echo assetVersion($pfgPath, '/css/common.css'); ?>" rel="stylesheet">
   <link type="text/css" href="/ogame/calc/css/costs.css?v=<?php echo assetVersion($pfgPath, '/ogame/calc/css/costs.css'); ?>" rel="stylesheet">
+  <!-- #lfcosts is as wide as its content (min-content), so a first paint made while the HTML is
+       still streaming in shows a narrow box that then jumps. Hold the first paint until the
+       marker after the panel is parsed. Browsers without rel=expect ignore this. -->
+  <link rel="expect" href="#lfcosts-end" blocking="render">
 
   <!-- Utility libraries -->
   <script src="/js/utils.js?v=<?php echo assetVersion($pfgPath, '/js/utils.js'); ?>" defer></script>
@@ -539,6 +543,7 @@
     <span id="hint-message"><?= $l['times-note'] ?></span>
   </div>
 </div>
+<div id="lfcosts-end" hidden></div>
 
     </div> <!-- End col-md-10 -->
   </div> <!-- End row -->

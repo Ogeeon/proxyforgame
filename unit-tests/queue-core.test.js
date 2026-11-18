@@ -22,6 +22,7 @@ const TECH_COSTS = {
     33: [0, 50000, 100000, 2],
     36: [200, 0, 50, 5],
     41: [20000, 40000, 20000, 2],
+    45: [90, 45, 15, 1.5],
 };
 const calc = new QueueCalculator(TECH_COSTS);
 
@@ -58,6 +59,11 @@ describe('QueueCalculator.simulate', () => {
         expect(run.steps.map((s) => s.usedFields)).toEqual([9, 10, 11]);
         expect(run.steps.map((s) => s.maxFields)).toEqual([10, 15, 21]);
         expect(run.steps.map((s) => s.overCapacity)).toEqual([false, false, false]);
+    });
+
+    it('counts a field for each level of the Interstellar Anomaly Scanner', () => {
+        const run = simulate({ 1: 9, 45: 0 }, [[45, 1], [45, 1]]);
+        expect(run.steps.map((s) => s.usedFields)).toEqual([10, 11]);
     });
 
     it('flags a step that needs a field the planet lacks', () => {

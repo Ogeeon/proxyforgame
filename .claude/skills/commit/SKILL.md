@@ -1,41 +1,18 @@
 ---
 name: commit
-description: Commit changes in this repo — the Conventional Commits subject and the body below it, the SonarQube question, and scoping the test run to what changed. Use whenever the user asks to commit, stage, or push work.
+description: Commit changes in this repo — the Conventional Commits subject and the body below it, the changelog bullet, and scoping the test run to what changed. Use whenever the user asks to commit, stage, or push work.
 ---
 
 # Committing in pfg.wmp
 
-Five steps, in order. Do not skip step 1 — it needs an answer before anything is committed.
+Four steps, in order.
 
-## 1. Ask about SonarQube — only if Sonar would see the change
+There is **no SonarQube pass before a commit**: do not ask about one and do not run
+`analyze_code_snippet` on the changed files. Sonar runs in the cloud after the push, and
+`CLAUDE.md` (*Deployment*, step 2) says how its result is checked; a new finding is fixed in a
+follow-up commit.
 
-Ask only when the commit touches a file Sonar actually analyzes:
-
-| Ask | Do not ask |
-|-----|------------|
-| `.js`, `.php`, `.tpl`, `.css`, `.html` | `.md` — CLAUDE.md, README, `docs/**`, `CHANGELOG.md` |
-| | `Makefile`, `.gitignore`, `.gitattributes`, CI workflows |
-| | `.claude/**` — skills, commands, plans |
-| | `www/locale/*.json` and other data-only JSON |
-| | `*.sql` — `schema.sql`, `changelog.sql` |
-
-A commit that is entirely in the right-hand column has nothing for `analyze_code_snippet` to
-report on; asking is noise. Commit it without the question. **Mixed commit → ask** — one
-analyzable file in the change is enough.
-
-When it does apply: ask the user whether the changed files should be run through SonarQube
-(`analyze_code_snippet` on the sonarqube MCP server, one call per changed file).
-**Wait for the answer.**
-
-Running it: pass `projectKey: "Ogeeon_proxyforgame"` — the repo has no
-`sonar-project.properties` or `.sonarlint/`, so there is nothing to look it up in, and a call
-without the key can fail with `Error while analyzing the code: null`. The tool takes the whole
-file as `fileContent`; for a file over ~500 lines, hand the analysis to a subagent so the file
-does not land in your context.
-
-Exception: work driven by `/sonar-fix` has already had its Sonar pass — commit without asking.
-
-## 2. Update the changelog
+## 1. Update the changelog
 
 A `feat` or `fix` commit carries its bullet under `## [Unreleased]` in `CHANGELOG.md`, in the
 same commit. `refactor`, `chore`, `docs`, `style` and `test` leave the file alone.
@@ -44,7 +21,7 @@ Whether the bullet also gets the `<!-- site -->` marker — that is, whether use
 sidebar — is decided by the table in the **`changelog` skill**. Read it rather than guessing;
 `make check` fails on a file that marks a bullet without carrying the matching Russian text.
 
-## 3. Run the right tests
+## 2. Run the right tests
 
 Resolve the scope from `docs/test-scope.md` — read it, don't guess the paths. In short:
 all changed files in one calculator → that calculator's unit test (if it exists) plus
@@ -55,7 +32,7 @@ Never commit an unverified fix. Every commit follows a passing run of its resolv
 
 Before `git push`, the full `make test`, regardless of how narrow the commits were.
 
-## 4. Write the message
+## 3. Write the message
 
 ### The subject
 
@@ -85,7 +62,7 @@ the new shape does instead, which constraint forced it, and what deliberately st
   practice, not just the harness default — 238 of the 351 commits since 2026-07-22 carry one,
   and the history holds Opus 5, Opus 4.8, Sonnet 5 and Haiku 4.5.
 
-## 5. Commit
+## 4. Commit
 
 Write the message to a temp file and use `git commit -F <file>`, or keep it to a single `-m`
 with no quotes or backticks.

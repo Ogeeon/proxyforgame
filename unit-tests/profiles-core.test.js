@@ -2252,8 +2252,23 @@ describe('the production planet array', () => {
         }
         s[24] = race;
         for (let k = 0; k < 12; k++) s[25 + k] = race >= 1 && race <= 4 ? k + 2 : 0;
+        // The lithium conversion: on, scanner level 15, a 0.5% discount (hundredths
+        // in the array), crystal at 70%.
+        s.push(1, 15, 50, 1, 70);
         return s;
     }
+
+    it('keeps the conversion as profile values: the scanner level as building.45, the discount as a percent', () => {
+        const values = core.productionPlanetValues(state(0));
+        expect(values['ias.on']).toBe(1);
+        expect(values['building.45']).toBe(15);
+        expect(values['ias.discount']).toBe(0.5);
+        expect(values['ias.resource']).toBe(1);
+        expect(values['ias.workload']).toBe(70);
+        // A planet saved before the scanner existed reads as the defaults.
+        const old = core.productionPlanetValues(state(0).slice(0, 37));
+        expect([old['ias.on'], old['building.45'], old['ias.discount'], old['ias.resource'], old['ias.workload']]).toEqual([0, 0, 0, 0, 100]);
+    });
 
     /** A profile planet holding what productionPlanetValues() reads out of `s`. */
     function planetOf(s) {

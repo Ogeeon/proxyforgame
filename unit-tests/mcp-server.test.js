@@ -158,8 +158,9 @@ describe('MCP protocol', () => {
     it('keeps tools/list within its size budget', async () => {
         // Every client loads the tool list into its model's context (mcp/README.md). Going over
         // the budget is a deliberate decision that raises it here, in the same commit.
-        // 52 KB until ogame_import_account added its 1.5 KB.
-        const BUDGET = 54 * 1024;
+        // 52 KB until ogame_import_account added its 1.5 KB; 54 KB until the anomaly scanner
+        // (one more building in ogame_build_cost and ogame_build_queue) went 30 bytes over.
+        const BUDGET = 55 * 1024;
         const { tools } = (await rpc(protocol, { jsonrpc: '2.0', id: 3, method: 'tools/list' })).result;
         const size = tools.reduce((sum, { name, title, description, inputSchema }) =>
             sum + JSON.stringify({ name, title, description, inputSchema }).length, 0);
@@ -887,6 +888,26 @@ describe('MCP tool ogame_build_cost', () => {
         expect(mine.isError).toBe(true);
     });
 
+    it('prices a Control Centre component as a planet building', async () => {
+        const out = (await call(protocolWith(), 'ogame_build_cost', { item: 'ias-catalytic-converter', toLevel: 3 })).structuredContent;
+        // Levels 1-3 as the game charges them: 127500/112500/52500 x (1 + 1.5 + 2.25).
+        expect([out.metal, out.crystal, out.deuterium]).toEqual([605625, 534375, 249375]);
+        expect(out.item).toEqual({ key: 'ias-catalytic-converter', name: 'Catalytic Converter', kind: 'building' });
+        const onMoon = await call(protocolWith(), 'ogame_build_cost', { item: 'ias-lithium-lab', toLevel: 1, location: 'moon' });
+        expect(onMoon.isError).toBe(true);
+    });
+
+    it('gives a Control Centre component its effect at the level reached, and nothing else an effect', async () => {
+        const outOf = async (args) => (await call(protocolWith(), 'ogame_build_cost', args)).structuredContent;
+        const effectOf = async (args) => (await outOf(args)).effectPercent;
+        // 0.2% a level, as the game's bonus table shows it; the converter's is a 0.05% discount a level
+        expect(await effectOf({ item: 'ias-lithium-lab', fromLevel: 2, toLevel: 3 })).toBe(0.6);
+        expect(await effectOf({ item: 'ias-catalytic-converter', toLevel: 3 })).toBe(-0.15);
+        // A demolition reports the level it goes down to
+        expect(await effectOf({ item: 'ias-metal-recycling', fromLevel: 5, toLevel: 4 })).toBe(0.8);
+        expect('effectPercent' in await outOf({ item: 'metal-mine', toLevel: 3 })).toBe(false);
+    });
+
     it('refuses to demolish the terraformer', async () => {
         const result = await call(protocolWith(), 'ogame_build_cost', { item: 'terraformer', fromLevel: 3, toLevel: 2 });
         expect(result.isError).toBe(true);
@@ -1266,6 +1287,16 @@ describe('MCP tool ogame_build_queue', () => {
         expect(await error({ levels: { terraformer: 2 }, queue: [{ building: 'terraformer', action: 'demolish' }] }))
             .toContain('cannot be demolished');
         expect(await error({ queue: [{ building: 'sensor-phalanx' }] })).toContain('cannot be built on a planet');
+        expect(await error({ queue: [{ building: 'warp-gate' }] })).toContain('Unknown building "warp-gate"');
+    });
+
+    it('takes a building by its English name as well as by its key', async () => {
+        const run = async (building) => (await call(protocolWith(), 'ogame_build_queue', {
+            levels: { 'metal-mine': 10 }, queue: [{ building }],
+        })).structuredContent.steps[0];
+        const byKey = await run('metal-mine');
+        expect(await run('  METAL MINE ')).toEqual(byKey);
+        expect(byKey.building).toBe('metal-mine');
     });
 });
 

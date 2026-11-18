@@ -105,7 +105,10 @@ foreach (json_decode(file_get_contents(__DIR__ . '/data/costs-techs.json'), true
     }
 }
 
-$oneTblProdRows = array('natural-production', 'metal-mine', 'crystal-mine', 'deut-synth', 'solar-plant', 'fusion-reactor', 'solar-sat', 'crawler', 'plasma-tech', 'booster', 'geologist', 'engineer', 'commanding-staff', 'class', 'alliance-class', 'lifeform-tech', 'prod-per-hour', 'prod-per-day', 'prod-per-week');
+// The rows of the one-planet table, in the order of the game's production overview so a player
+// finds a row where the game shows it; the template puts the anomaly scanner's conversion after
+// 'booster' (the game's "Items"). The JS fills them by key, not by position.
+$oneTblProdRows = array('natural-production', 'metal-mine', 'crystal-mine', 'deut-synth', 'solar-plant', 'fusion-reactor', 'solar-sat', 'crawler', 'plasma-tech', 'booster', 'engineer', 'geologist', 'commanding-staff', 'class', 'alliance-class', 'lifeform-tech', 'prod-per-hour', 'prod-per-day', 'prod-per-week');
 $allTblTotalRows = array('prod-per-hour', 'prod-per-day', 'prod-per-week');
 
 function getTechsByType($type) {

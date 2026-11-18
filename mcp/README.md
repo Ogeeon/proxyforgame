@@ -15,7 +15,7 @@ Why it is built this way - Node, no dependencies, one process behind Apache:
 |---|---|---|---|
 | `ogame_import_account` | profiles | The player's account export, under the other tools' argument names: account-wide values and every planet and moon | `profiles-core.js` |
 | `ogame_flight` | flight | Distance, one-way duration and deuterium at each speed step, cargo capacity | `flight-core.js` |
-| `ogame_build_cost` | costs | Metal, crystal, deuterium, energy, time, points, DM to halve, cargo ships - for a building or research range, or a number of ships or defences | `costs-core.js`, `ogame-costs.js`, `data/costs-techs.json` |
+| `ogame_build_cost` | costs | Metal, crystal, deuterium, energy, time, points, DM to halve, cargo ships - for a building or research range, or a number of ships or defences; the effect at the target level of a Control Centre component | `costs-core.js`, `ogame-costs.js`, `data/costs-techs.json` |
 | `ogame_lifeform_cost` | lfcosts | The same for a life form building or research, with the Megalith, MRC and research-building reductions | `lfcosts-core.js`, `ogame-lifeform.js`, `data/lf-techs.json` |
 | `ogame_build_queue` | queue | Each step of a build/demolish queue on a planet or moon, timed at the factory levels the steps before it reached; fields used | `QueueCalculator.simulate()` in `queue-core.js` |
 | `ogame_production` | production | One planet's hourly and daily output, energy balance and where each part comes from | `production-core.js`, `ogame-production.js`, `data/lf-building-bonuses.json` |
@@ -33,7 +33,7 @@ for s1-en - and read its speeds and settings through the site's `serverdata` and
 overrides what is read. The input schemas in `tools/*.js` are the reference: the
 server validates every call against the schema it publishes.
 
-Everything all thirteen publish in `tools/list` comes to about 53 KB, held to a 54 KB budget
+Everything all thirteen publish in `tools/list` comes to about 54 KB, held to a 55 KB budget
 by a test in `unit-tests/mcp-server.test.js` - every client loads it into its model's
 context, so keep new schemas lean: write a map from ships or buildings to a value with
 `keyedMap()` rather than one property per key, list an item's keys with their names in the
