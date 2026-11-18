@@ -35,7 +35,7 @@ foreach ($costsTechs['labRequirements'] as $id => $level) {
 }
 
 // Type 7 is the Interstellar Anomaly Scanner's Control Centre: its components sit next to the buildings
-$techTypes = array(2 => 'buildings-planet', 3 => 'buildings-moon', 7 => 'ias-control-centre', 4 => 'researches', 5 => 'fleet', 6 => 'defenses');
+$techTypes = array(2 => 'buildings-planet', 3 => 'buildings-moon', 7 => 'ias-control-centre-tab', 4 => 'researches', 5 => 'fleet', 6 => 'defenses');
 $tabTitles = array('all-items-one-level', 'all-items-mult-levels', 'one-item-mult-levels');
 $colHeadersAllOne = array('building', 'level', 'metal', 'crystal', 'deuterium', 'msu', 'energy', 'time', 'points', 'dm-abbr');
 $colHeadersAllMult = array('building', 'from-level', 'to-level', 'metal', 'crystal', 'deuterium', 'msu', 'energy', 'time', 'points');

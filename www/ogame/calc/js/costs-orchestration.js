@@ -210,7 +210,7 @@ class CostsCalculator {
     const results = this._calculateRequests(requests);
 
     // Calculate production/consumption if applicable
-    const isProducer = [1, 2, 3, 4, 12, 212].includes(techId);
+    const isProducer = COSTS_PRODUCERS.includes(techId);
     const isConsumer = [1, 2, 3, 12].includes(techId);
 
     const productions = {};
@@ -654,10 +654,8 @@ class CostsCalculator {
     });
 
     // Available resources inputs — recalculate needed and transport on change
-    const availableInputs = [
-      '#prods-metal-available', '#prods-crystal-available', '#prods-deut-available',
-      '#commons-metal-available', '#commons-crystal-available', '#commons-deut-available'
-    ];
+    const availableInputs = COSTS_RANGE_TABLES.flatMap(({ prefix }) =>
+      ['metal', 'crystal', 'deut'].map(resource => `#${prefix}-${resource}-available`));
     availableInputs.forEach(selector => {
       this._setLevelConstraints(selector);
       removeAllEvents(selector, 'keyup');
@@ -1614,39 +1612,32 @@ class CostsCalculator {
     const lcFull = options.lcFull || 'Large Cargo';
 
     // Clear all tab 0 tables (single-level) and tab 1 tables (multi-level)
-    COSTS_TAB_TABLES[0].forEach(tableId => this._clearTableData(tableId, false, datetimeS, scShort, lcShort, scFull, lcFull));
-    COSTS_TAB_TABLES[1].forEach(tableId => this._clearTableData(tableId, true, datetimeS, scShort, lcShort, scFull, lcFull));
+    [...COSTS_TAB_TABLES[0], ...COSTS_TAB_TABLES[1]]
+      .forEach(tableId => this._clearTableData(tableId, datetimeS, scShort, lcShort, scFull, lcFull));
 
     // Clear range tables
-    this._clearRangeTable('prods-table');
-    this._clearRangeTable('commons-table');
+    COSTS_RANGE_TABLES.forEach(table => this._clearRangeTable(table));
   }
 
   /**
    * Clear data cells in a specific table
    * @private
    */
-  _clearTableData(tableId, isMultiLevel, datetimeS, scShort, lcShort, scFull, lcFull) {
+  _clearTableData(tableId, datetimeS, scShort, lcShort, scFull, lcFull) {
     const rows = getTableRows(`#${tableId}`);
     if (rows.length === 0) return;
 
-    const { firstDataCol, isBuildingTable, subtotalStartCol } = costsTableLayout(tableId);
+    const { firstDataCol, isBuildingTable, subtotalStartCol, resultColumns } = costsTableLayout(tableId);
     // The inputs are already reset, so the effect drops back to level 0
     this.renderer.renderEffects(tableId);
+    /** @param {string} column */
+    const zero = column => (column === 'time' ? '0' + datetimeS : '0');
 
     // Clear data rows (skip header and 6 footer rows)
     for (let i = 1; i < rows.length - 6; i++) {
-      // Clear data cells (metal, crystal, deuterium, MSU, energy, time, points, DM)
-      rows[i].cells[firstDataCol].innerHTML = '0';
-      rows[i].cells[firstDataCol + 1].innerHTML = '0';
-      rows[i].cells[firstDataCol + 2].innerHTML = '0';
-      rows[i].cells[firstDataCol + 3].innerHTML = '0';
-      rows[i].cells[firstDataCol + 4].innerHTML = '0';
-      rows[i].cells[firstDataCol + 5].innerHTML = '0' + datetimeS;
-      rows[i].cells[firstDataCol + 6].innerHTML = '0';
-      if (!isMultiLevel) {
-        rows[i].cells[firstDataCol + 7].innerHTML = '0';
-      }
+      resultColumns.forEach((column, col) => {
+        rows[i].cells[firstDataCol + col].innerHTML = zero(column);
+      });
     }
 
     // Footer row indices — must match costs-renderer.js:
@@ -1661,29 +1652,12 @@ class CostsCalculator {
     if (isBuildingTable) {
       rows[subtotalRow].cells[2].innerHTML = '<b>0</b>';
     }
-    rows[subtotalRow].cells[subtotalStartCol].innerHTML = '<b>0</b>';
-    rows[subtotalRow].cells[subtotalStartCol + 1].innerHTML = '<b>0</b>';
-    rows[subtotalRow].cells[subtotalStartCol + 2].innerHTML = '<b>0</b>';
-    rows[subtotalRow].cells[subtotalStartCol + 3].innerHTML = '<b>0</b>';
-    rows[subtotalRow].cells[subtotalStartCol + 4].innerHTML = '<b>0</b>';
-    rows[subtotalRow].cells[subtotalStartCol + 5].innerHTML = '<b>0' + datetimeS + '</b>';
-    rows[subtotalRow].cells[subtotalStartCol + 6].innerHTML = '<b>0</b>';
-    if (!isMultiLevel) {
-      rows[subtotalRow].cells[subtotalStartCol + 7].innerHTML = '<b>0</b>';
-    }
-
-    // Clear grand total row
+    // Clear the subtotal and grand total rows
     const grandTotalStartCol = 2;
-    rows[grandTotalRow].cells[grandTotalStartCol].innerHTML = '<b>0</b>';
-    rows[grandTotalRow].cells[grandTotalStartCol + 1].innerHTML = '<b>0</b>';
-    rows[grandTotalRow].cells[grandTotalStartCol + 2].innerHTML = '<b>0</b>';
-    rows[grandTotalRow].cells[grandTotalStartCol + 3].innerHTML = '<b>0</b>';
-    rows[grandTotalRow].cells[grandTotalStartCol + 4].innerHTML = '<b>0</b>';
-    rows[grandTotalRow].cells[grandTotalStartCol + 5].innerHTML = '<b>0' + datetimeS + '</b>';
-    rows[grandTotalRow].cells[grandTotalStartCol + 6].innerHTML = '<b>0</b>';
-    if (!isMultiLevel) {
-      rows[grandTotalRow].cells[grandTotalStartCol + 7].innerHTML = '<b>0</b>';
-    }
+    resultColumns.forEach((column, col) => {
+      rows[subtotalRow].cells[subtotalStartCol + col].innerHTML = `<b>${zero(column)}</b>`;
+      rows[grandTotalRow].cells[grandTotalStartCol + col].innerHTML = `<b>${zero(column)}</b>`;
+    });
 
     // Clear resources-to-deliver row
     rows[resNeededRow].cells[2].innerHTML = '0';
@@ -1704,8 +1678,10 @@ class CostsCalculator {
   /**
    * Clear range table data
    * @private
+   * @param {CostsRangeTable} rangeTable
    */
-  _clearRangeTable(tableId) {
+  _clearRangeTable(rangeTable) {
+    const tableId = rangeTable.id;
     const table = $(`#${tableId}`);
     if (!table) return;
 
@@ -1728,19 +1704,11 @@ class CostsCalculator {
     const neededRow = remainingRows.length - 2;
     const transportRow = remainingRows.length - 1;
 
-    remainingRows[totalsRow].cells[1].innerHTML = '<b>0</b>';
-    remainingRows[totalsRow].cells[2].innerHTML = '<b>0</b>';
-    remainingRows[totalsRow].cells[3].innerHTML = '<b>0</b>';
-    remainingRows[totalsRow].cells[4].innerHTML = '<b>0</b>';
-    remainingRows[totalsRow].cells[5].innerHTML = '<b>0</b>';
-    remainingRows[totalsRow].cells[6].innerHTML = '<b>0' + datetimeS + '</b>';
-    remainingRows[totalsRow].cells[7].innerHTML = '<b>0</b>';
-
-    // Check if this is a producer table with extra columns
-    if (remainingRows[totalsRow].cells.length > 8) {
-      remainingRows[totalsRow].cells[8].innerHTML = '<b>0</b>';
-      remainingRows[totalsRow].cells[9].innerHTML = '<b>0</b>';
-    }
+    // The totals row: its label, then one cell per column from metal on
+    const results = rangeTable.columns.slice(rangeTable.columns.indexOf('metal'));
+    results.forEach((column, i) => {
+      remainingRows[totalsRow].cells[1 + i].innerHTML = column === 'time' ? '<b>0' + datetimeS + '</b>' : '<b>0</b>';
+    });
 
     // Reset needed row
     remainingRows[neededRow].cells[1].innerHTML = '0';

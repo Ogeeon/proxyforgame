@@ -745,6 +745,17 @@ describe('MCP tool ogame_build_cost', () => {
         expect(onMoon.isError).toBe(true);
     });
 
+    it('gives a Control Centre component its effect at the level reached, and nothing else an effect', async () => {
+        const outOf = async (args) => (await call(protocolWith(), 'ogame_build_cost', args)).structuredContent;
+        const effectOf = async (args) => (await outOf(args)).effectPercent;
+        // 0.2% a level, as the game's bonus table shows it; the converter's is a 0.05% discount a level
+        expect(await effectOf({ item: 'ias-lithium-lab', fromLevel: 2, toLevel: 3 })).toBe(0.6);
+        expect(await effectOf({ item: 'ias-catalytic-converter', toLevel: 3 })).toBe(-0.15);
+        // A demolition reports the level it goes down to
+        expect(await effectOf({ item: 'ias-metal-recycling', fromLevel: 5, toLevel: 4 })).toBe(0.8);
+        expect('effectPercent' in await outOf({ item: 'metal-mine', toLevel: 3 })).toBe(false);
+    });
+
     it('refuses to demolish the terraformer', async () => {
         const result = await call(protocolWith(), 'ogame_build_cost', { item: 'terraformer', fromLevel: 3, toLevel: 2 });
         expect(result.isError).toBe(true);

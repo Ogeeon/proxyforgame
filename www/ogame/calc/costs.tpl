@@ -438,6 +438,9 @@
                  $levelCols = ($i == 1) ? 2 : 1; // level columns: from+to (multi) or a single level
                  $qtyOffset = $hasExtraCol ? 1 : 0;
                  $qtyAfterIdx = ($i == 1) ? 2 : 1; // insert the extra header after to-level (multi) or level (single)
+                 // the components use no energy, so their table has no energy column (costsTableLayout() agrees)
+                 $hasEnergyCol = !$hasEffectCol;
+                 $energyCols = $hasEnergyCol ? 1 : 0;
               ?>
               <div class="tab-pane fade <?= $j === $firstInnerTab ? 'show active' : '' ?> no-mp" id="tab-<?=$i?>-<?=$j?>" role="tabpanel">
                 <div class="pfg-scroll-x pfg-sticky-col">
@@ -445,6 +448,7 @@
                     <tr>
                       <th style="display: none;"></th>
                       <?php foreach ($colHeaders as $idx => $header) :?>
+                      <?php if ($header === 'energy' && !$hasEnergyCol) { continue; } ?>
                       <th class="<?= ($idx > 0) ? 'text-center' : 'pfg-sticky' ?>" style="white-space:nowrap">
                         <?php if ($header == 'dm-abbr'): ?>
                           <abbr data-bs-toggle="tooltip" title="<?= $l['dm-explanation'] ?>"><?=$l[$header] ?></abbr>
@@ -467,7 +471,15 @@
                     ?>
                     <tr class="<?= ($row++ % 2) === 1 ? 'odd' : 'even' ?>" data-report-key="<?= ($j == 3 ? 'moon.' : '') . $techData[$tech][0] ?>">
                       <td style="display: none;"><?=$techID?></td>
-                      <td class="min pfg-sticky"><?=$l[$techData[$tech][0]]?><?php if ($tech == 14 || $tech == 15): ?> <i class="bi bi-info-circle text-primary" data-bs-toggle="popover" data-bs-trigger="hover focus" data-bs-html="true" data-bs-content="<?= htmlspecialchars($l['robot-nanite-hint'], ENT_QUOTES) ?>" style="cursor: pointer;"></i><?php endif; ?></td>
+                      <td class="min pfg-sticky">
+                        <?php if ($hasEffectCol): ?>
+                        <!-- a component's name carries the game's description of its effect -->
+                        <abbr data-bs-toggle="tooltip" title="<?= is_string($techData[$tech][0]) ? htmlspecialchars($l[$techData[$tech][0] . '-desc'], ENT_QUOTES) : '' ?>"><?=$l[$techData[$tech][0]]?></abbr>
+                        <?php endif; ?>
+                        <?php if (!$hasEffectCol): ?>
+                        <?=$l[$techData[$tech][0]]?>
+                        <?php endif; ?>
+                        <?php if ($tech == 14 || $tech == 15): ?> <i class="bi bi-info-circle text-primary" data-bs-toggle="popover" data-bs-trigger="hover focus" data-bs-html="true" data-bs-content="<?= htmlspecialchars($l['robot-nanite-hint'], ENT_QUOTES) ?>" style="cursor: pointer;"></i><?php endif; ?></td>
                       <?php if ($i == 1): ?>
                       <td class="text-center"><input type="text" class="form-control form-control-sm level-input ui-input-margin" value="0" aria-label="<?= $l[$colHeaders[1]] ?>"></td>
                       <?php endif;?>
@@ -486,7 +498,9 @@
                       <td class="text-center">0</td>
                       <td class="text-center">0</td>
                       <td class="text-center">0</td>
+                      <?php if ($hasEnergyCol): ?>
                       <td class="text-center">0</td>
+                      <?php endif; ?>
                       <td class="text-center">0<?=$l['datetime-s']?></td>
                       <td class="text-center">0</td>
                       <?php if ($i == 0):?>
@@ -503,14 +517,16 @@
                       <td class="border-n border-s text-center" ><b>0</b></td>
                       <td class="border-n border-s text-center" ><b>0</b></td>
                       <td class="border-n border-s text-center" ><b>0</b></td>
+                      <?php if ($hasEnergyCol): ?>
                       <td class="border-n border-s text-center" ><b>0</b></td>
+                      <?php endif; ?>
                       <td class="border-n border-s text-center" ><b>0</b></td>
                       <?php if ($i == 0):?>
                       <td class="border-n border-s text-center" ><b>0</b></td>
                       <?php endif; ?>
                       <td class="border-n border-s border-e text-center" ><b>0</b></td>
                     </tr>
-                    <tr><td colspan="<?= 11 + $qtyOffset ?>" style="height: 5px">&nbsp;</td></tr>
+                    <tr><td colspan="<?= 10 + $energyCols + $qtyOffset ?>" style="height: 5px">&nbsp;</td></tr>
                     <tr>
                       <td style="display: none;"></td>
                       <td colspan="<?= 1 + $levelCols + $qtyOffset ?>" class="border-n border-w" ><?=$l['grand-total']?></td>
@@ -518,7 +534,9 @@
                       <td class="border-n text-center" >0</td>
                       <td class="border-n text-center" >0</td>
                       <td class="border-n text-center" >0</td>
+                      <?php if ($hasEnergyCol): ?>
                       <td class="border-n text-center" >0</td>
+                      <?php endif; ?>
                       <td class="border-n text-center" >0</td>
                       <?php if ($i == 0):?>
                       <td class="border-n text-center" ><b>0</b></td>
@@ -531,7 +549,7 @@
                       <td class="text-center"><input id="metal-available-<?=$i?>-<?=$j?>" data-report-skip type="text" name="metal-available" class="form-control form-control-sm res-input" value="0"></td>
                       <td class="text-center"><input id="crystal-available-<?=$i?>-<?=$j?>" data-report-skip type="text" name="crystal-available" class="form-control form-control-sm res-input" value="0"></td>
                       <td class="text-center"><input id="deut-available-<?=$i?>-<?=$j?>" data-report-skip type="text" name="deut-available" class="form-control form-control-sm res-input" value="0"></td>
-                      <td colspan="<?= ($i == 1)?'4':'5' ?>" class="text-start border-e"><small id="resources-age-<?=$i?>-<?=$j?>" class="pf-resources-age text-body-secondary d-none"></small></td>
+                      <td colspan="<?= ($i == 1 ? 3 : 4) + $energyCols ?>" class="text-start border-e"><small id="resources-age-<?=$i?>-<?=$j?>" class="pf-resources-age text-body-secondary d-none"></small></td>
                     </tr>
                     <tr>
                       <td style="display: none;"></td>
@@ -540,7 +558,7 @@
                       <td class="text-center">0</td>
                       <td class="text-center">0</td>
                       <td></td>
-                      <td colspan="<?= ($i == 1)?'2':'3' ?>"></td>
+                      <td colspan="<?= ($i == 1 ? 1 : 2) + $energyCols ?>"></td>
                       <td class="border-e"></td>
                     </tr>
                     <tr>
@@ -548,7 +566,7 @@
                       <td class="border-s border-w"><?=$l['transports-needed']?></td>
                       <td class="border-s text-center">0 <?=$l['sc-short']?></td>
                       <td class="border-s text-center">0 <?=$l['lc-short']?></td>
-                      <td colspan="<?= 6 + $qtyOffset ?>" class="border-s text-center">&nbsp;</td>
+                      <td colspan="<?= 5 + $energyCols + $qtyOffset ?>" class="border-s text-center">&nbsp;</td>
                       <td class="border-s border-e text-center">&nbsp;</td>
                     </tr>
                   </table>
@@ -561,12 +579,12 @@
               <div class="d-flex flex-column gap-1 py-1">
                 <div class="d-flex align-items-center flex-wrap gap-2">
                   <select id="tech-types-select" name="tech-types-select" class="form-select form-select-sm w-auto" aria-label="<?= $l['one-item-mult-levels'] ?>">
-                  <?php $rangeTechTypes = [2 => 'buildings-planet', 3 => 'buildings-moon', 7 => 'ias-control-centre', 4 => 'researches']; ?>
+                  <?php $rangeTechTypes = [2 => 'buildings-planet', 3 => 'buildings-moon', 7 => 'ias-control-centre-tab', 4 => 'researches']; ?>
                   <?php foreach ($rangeTechTypes as $type => $typeName) :?>
                     <optgroup label="<?=$l[$typeName]?>">
                     <?php $techs = getTechsByType($type);?>
                     <?php foreach ($techs as $tech) :?>
-                      <option value="<?=$tech?>" <?= ($tech==1)?'selected="selected"':'' ?>><?=$l[$techData[$tech][0]]?></option>
+                      <option value="<?=$tech?>" <?= ($tech==1)?'selected="selected"':'' ?> <?php if ($type === 7): ?>data-effect="<?= $techEffects[$tech] ?? '' ?>"<?php endif; ?>><?=$l[$techData[$tech][0]]?></option>
                     <?php endforeach; ?>
                     </optgroup>
                   <?php endforeach; ?>
@@ -692,6 +710,55 @@
                     <td class="text-center" >0 <?=$l['sc-short']?></td>
                     <td class="text-center" >0 <?=$l['lc-short']?></td>
                     <td colspan="5" ></td>
+                  </tr>
+                </table>
+              </div>
+            </div>
+            <!-- A Control Centre component: its effect at each level, and no energy (COSTS_RANGE_TABLES) -->
+            <div id="ias-range-table-div" style="display: none;">
+              <div class="pfg-scroll-x pfg-sticky-col">
+                <table id="ias-range-table" class="lined w-100">
+                  <tr>
+                    <th><?= $l['level'] ?></th>
+                    <th><?= $l['effect'] ?></th>
+                    <th><?= $l['metal'] ?></th>
+                    <th><?= $l['crystal'] ?></th>
+                    <th><?= $l['deuterium'] ?></th>
+                    <th><?= $l['msu'] ?></th>
+                    <th><?= $l['time'] ?></th>
+                    <th><?= $l['points'] ?></th>
+                  </tr>
+                  <tr>
+                    <td colspan="8">&nbsp;</td>
+                  </tr>
+                  <tr class="odd">
+                    <td colspan="2" class="border-n text-center" ><?=$l['total']?></td>
+                    <td class="border-n border-s border-w text-center" ><b>0</b></td>
+                    <td class="border-n border-s text-center" ><b>0</b></td>
+                    <td class="border-n border-s text-center" ><b>0</b></td>
+                    <td class="border-n border-s text-center" ><b>0</b></td>
+                    <td class="border-n border-s text-center" ><b>0</b></td>
+                    <td class="border-n border-s border-e text-center" ><b>0</b></td>
+                  </tr>
+                  <tr>
+                    <td colspan="2" class="text-center"><?=$l['res-available']?></td>
+                    <td class="text-center"><input id="ias-metal-available" data-report-skip type="text" class="form-control form-control-sm res-input" value="0" aria-label="<?= $l['res-available'] ?>-<?= $l['metal'] ?>"></td>
+                    <td class="text-center"><input id="ias-crystal-available" data-report-skip type="text" class="form-control form-control-sm res-input" value="0" aria-label="<?= $l['res-available'] ?>-<?= $l['crystal'] ?>"></td>
+                    <td class="text-center"><input id="ias-deut-available" data-report-skip type="text" class="form-control form-control-sm res-input" value="0" aria-label="<?= $l['res-available'] ?>-<?= $l['deuterium'] ?>"></td>
+                    <td colspan="3" class="text-start"><small id="ias-resources-age" class="pf-resources-age text-body-secondary d-none"></small></td>
+                  </tr>
+                  <tr>
+                    <td colspan="2" class="text-center"><?=$l['res-needed']?></td>
+                    <td class="text-center">0</td>
+                    <td class="text-center">0</td>
+                    <td class="text-center">0</td>
+                    <td colspan="3"></td>
+                  </tr>
+                  <tr class="odd">
+                    <td colspan="2" class="text-center" ><?=$l['transports-needed-short']?></td>
+                    <td class="text-center" >0 <?=$l['sc-short']?></td>
+                    <td class="text-center" >0 <?=$l['lc-short']?></td>
+                    <td colspan="4" ></td>
                   </tr>
                 </table>
               </div>

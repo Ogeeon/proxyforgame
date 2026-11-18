@@ -911,13 +911,23 @@ const COSTS_TAB_TABLES = Object.freeze({
 });
 
 /**
+ * @typedef {'metal'|'crystal'|'deuterium'|'msu'|'energy'|'time'|'points'|'dm'} CostsResultColumn
+ */
+
+/**
  * Where things are in one element table. A row is: the hidden id, the name,
  * the level input (from and to on the several-levels tab), then on the
  * building tables a quantity input and on the Control Centre table the
- * effect, and then the results starting at `firstDataCol`.
+ * effect, and then the results starting at `firstDataCol`, one cell per
+ * entry of `resultColumns`. The subtotal and grand-total rows carry the same
+ * result columns, from `subtotalStartCol` and from cell 2.
+ *
+ * The Control Centre components use no energy, so their table has no energy
+ * column; only the single-level tab has a Dark Matter column.
  * @param {string} tableId - e.g. 'table-0-2'
  * @returns {{isMultiLevel: boolean, hasQtyCol: boolean, hasEffectCol: boolean,
- *   isBuildingTable: boolean, firstDataCol: number, subtotalStartCol: number}}
+ *   isBuildingTable: boolean, firstDataCol: number, subtotalStartCol: number,
+ *   resultColumns: readonly CostsResultColumn[]}}
  */
 function costsTableLayout(tableId) {
   const [, outer, inner] = tableId.split('-');
@@ -925,22 +935,79 @@ function costsTableLayout(tableId) {
   const hasQtyCol = inner === '2' || inner === '3';
   const hasEffectCol = inner === '7';
   const extra = hasQtyCol || hasEffectCol ? 1 : 0;
+  /** @type {CostsResultColumn[]} */
+  const resultColumns = ['metal', 'crystal', 'deuterium', 'msu'];
+  if (!hasEffectCol) {
+    resultColumns.push('energy');
+  }
+  resultColumns.push('time', 'points');
+  if (!isMultiLevel) {
+    resultColumns.push('dm');
+  }
   return {
     isMultiLevel,
     hasQtyCol,
     hasEffectCol,
-    // Tables whose subtotal row sums the levels entered
-    isBuildingTable: hasQtyCol || hasEffectCol,
+    // Tables whose subtotal row sums the levels entered (not the Control Centre's)
+    isBuildingTable: hasQtyCol,
     firstDataCol: 3 + (isMultiLevel ? 1 : 0) + extra,
     // The subtotal row merges the level inputs into one cell, so it starts at 3
     subtotalStartCol: 3 + extra,
+    resultColumns: Object.freeze(resultColumns),
   };
+}
+
+/** Buildings whose range table adds the hourly production (and consumption). */
+const COSTS_PRODUCERS = Object.freeze([1, 2, 3, 4, 12, 212]);
+
+/**
+ * @typedef {object} CostsRangeTable
+ * @property {string} id - the table element
+ * @property {string} prefix - of its "resources available" inputs and caption: `${prefix}-metal-available`
+ * @property {readonly string[]} columns - one per cell of a level row. The
+ *   totals row puts its label over the cells before 'metal', so its cells are
+ *   the label and then these from 'metal' on.
+ */
+
+/**
+ * The range tab's three tables, one of which shows at a time: the producers'
+ * with production and consumption, the Control Centre components' with the
+ * effect at each level and no energy, and the one for everything else.
+ * @type {readonly CostsRangeTable[]}
+ */
+const COSTS_RANGE_TABLES = Object.freeze([
+  Object.freeze({
+    id: 'prods-table', prefix: 'prods',
+    columns: Object.freeze(['level', 'metal', 'crystal', 'deuterium', 'msu', 'energy', 'time', 'points', 'production', 'consumption']),
+  }),
+  Object.freeze({
+    id: 'ias-range-table', prefix: 'ias',
+    columns: Object.freeze(['level', 'effect', 'metal', 'crystal', 'deuterium', 'msu', 'time', 'points']),
+  }),
+  Object.freeze({
+    id: 'commons-table', prefix: 'commons',
+    columns: Object.freeze(['level', 'metal', 'crystal', 'deuterium', 'msu', 'energy', 'time', 'points']),
+  }),
+]);
+
+/**
+ * The range table that shows the technology picked.
+ * @param {number} techId
+ * @param {boolean} isComponent - a Control Centre component is picked
+ * @returns {CostsRangeTable}
+ */
+function costsRangeTable(techId, isComponent) {
+  if (COSTS_PRODUCERS.includes(techId)) {
+    return COSTS_RANGE_TABLES[0];
+  }
+  return isComponent ? COSTS_RANGE_TABLES[1] : COSTS_RANGE_TABLES[2];
 }
 
 /**
  * The effect of a Control Centre component at a level, in percent: the same
  * step every level. Negative for a discount (the Catalytic Converter), null
- * while the effect is not known.
+ * while the effect is not known. Rounded to a millionth of a percent, so a
+ * step like 0.05 does not show a floating-point tail (0.05 * 3).
  * @param {number|null|undefined} perLevel - percent per level, from costs-techs.json
  * @param {number} level
  * @returns {number|null}
@@ -949,7 +1016,7 @@ function componentEffect(perLevel, level) {
   if (perLevel === null || perLevel === undefined) {
     return null;
   }
-  return perLevel * Math.max(0, level);
+  return Math.round(perLevel * Math.max(0, level) * 1e6) / 1e6;
 }
 
 // ============================================================================

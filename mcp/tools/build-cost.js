@@ -9,9 +9,9 @@ const { ToolError } = require('../lib/protocol');
 const { formatDuration } = require('../lib/format');
 const common = require('./common');
 
-const { GlobalParams, BuildRequest, Calculator, universeSpeeds } = loadBrowserScripts(
+const { GlobalParams, BuildRequest, Calculator, universeSpeeds, componentEffect } = loadBrowserScripts(
     ['ogame/calc/js/ogame-production.js', 'ogame/calc/js/ogame-costs.js', 'ogame/calc/js/ogame-cargo.js', 'ogame/calc/js/costs-core.js'],
-    ['GlobalParams', 'BuildRequest', 'Calculator', 'universeSpeeds'],
+    ['GlobalParams', 'BuildRequest', 'Calculator', 'universeSpeeds', 'componentEffect'],
 );
 
 /**
@@ -19,6 +19,9 @@ const { GlobalParams, BuildRequest, Calculator, universeSpeeds } = loadBrowserSc
  * @property {string} key
  * @property {number} type 1 any building, 2 planet only, 3 moon only, 4 research, 5 ship, 6 defence,
  *   7 a component of the Interstellar Anomaly Scanner's Control Centre (planet only)
+ * @property {number} [gameId] the game's own id where it differs from the key of the entry:
+ *   the Control Centre components are 4001-4007 in the game, which the id ranges of the
+ *   shared formulas would read as ships
  * @property {number[]} cost
  * @property {number} growth
  * @property {number|null} [effect] type 7: the effect in percent per level, null while unknown
@@ -150,7 +153,9 @@ function createBuildCostTool({ siteApi }) {
         title: 'OGame build and research cost',
         description: 'Metal, crystal, deuterium, energy, build time and points of an OGame building, research, '
             + 'ship or defence, using the formulas of the ProxyForGame costs calculator. Buildings and research '
-            + 'take fromLevel/toLevel and sum every level in between; ships and defence take quantity.',
+            + 'take fromLevel/toLevel and sum every level in between; ships and defence take quantity. '
+            + 'A component of the Interstellar Anomaly Scanner\'s Control Centre also gets effectPercent, its '
+            + 'bonus at toLevel; negative for the Catalytic Converter, whose effect is a discount.',
         inputSchema,
         openWorld: true,
         async run(args) {
@@ -220,6 +225,11 @@ function createBuildCostTool({ siteApi }) {
             }
             if (cost.energy > 0) {
                 result.energy = cost.energy;
+            }
+            // A Control Centre component's bonus at the level reached, as the costs page shows it
+            const effect = tech.type === 7 ? componentEffect(tech.effect, to) : null;
+            if (effect !== null) {
+                result.effectPercent = effect;
             }
             return result;
         },

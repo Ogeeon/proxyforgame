@@ -14,7 +14,7 @@ const { expect } = require('./expect');
 // page does, with all four scripts sharing one global scope.
 const {
     GlobalParams, Calculator, BuildRequest, universeSpeeds, calcBuildCost_C, getBuildCost_C, getBuildTime_C,
-    componentEffect, costsTableLayout, COSTS_TAB_TABLES,
+    componentEffect, costsTableLayout, COSTS_TAB_TABLES, costsRangeTable, COSTS_RANGE_TABLES,
 } = load(
     [
         'ogame/calc/js/ogame-production.js',
@@ -23,7 +23,8 @@ const {
         'ogame/calc/js/costs-core.js',
     ],
     ['GlobalParams', 'Calculator', 'BuildRequest', 'universeSpeeds', 'calcBuildCost_C', 'getBuildCost_C',
-        'getBuildTime_C', 'componentEffect', 'costsTableLayout', 'COSTS_TAB_TABLES'],
+        'getBuildTime_C', 'componentEffect', 'costsTableLayout', 'COSTS_TAB_TABLES', 'costsRangeTable',
+        'COSTS_RANGE_TABLES'],
 );
 
 // Research Lab levels the game requires, mirrored from $techReqs in costs.php.
@@ -618,7 +619,7 @@ describe('data/costs-techs.json: anomaly scanner', () => {
 describe('data/costs-techs.json: Control Centre components', () => {
     const { readFileSync } = require('node:fs');
     const path = require('node:path');
-    /** @type {{techs: Record<string, {key: string, type: number, cost: number[], growth: number, effect?: number|null}>}} */
+    /** @type {{techs: Record<string, {key: string, type: number, gameId?: number, cost: number[], growth: number, effect?: number|null}>}} */
     const data = JSON.parse(readFileSync(path.join(__dirname, '../www/ogame/calc/data/costs-techs.json'), 'utf8'));
     const components = Object.entries(data.techs).filter(([, tech]) => tech.type === 7);
     const techData = Object.fromEntries(components.map(([id, tech]) => [id, [...tech.cost, tech.growth]]));
@@ -653,27 +654,69 @@ describe('data/costs-techs.json: Control Centre components', () => {
         expect(calcBuildCost_C(Number(id), 4, techData)).toEqual([177187, 126562, 126562]);
     });
 
-    it('gives 0.5% per level, a 0.5% discount for the converter, and no effect yet for the analysis centre', () => {
+    it('carries the ids the game gives them in the Control Centre', () => {
+        // data-technology of each component on the game's Control Centre page
+        expect(Object.fromEntries(components.map(([, tech]) => [tech.key, tech.gameId]))).toEqual({
+            'ias-recovery-centre': 4001,
+            'ias-lithium-lab': 4002,
+            'ias-metal-recycling': 4003,
+            'ias-crystal-finishing': 4004,
+            'ias-anomaly-analysis': 4005,
+            'ias-deuterium-tanks': 4006,
+            'ias-catalytic-converter': 4007,
+        });
+    });
+
+    it('takes the build time the game shows for the next level', () => {
+        // Read in game (Singularity, 2026-11-17) on a planet with Robotics Factory 10 and
+        // Nanite Factory 3, universe speed 10: the level built up to and the time in whole
+        // seconds. Levels 3 and 4 only match with the early-level reduction.
+        const GAME = {
+            'ias-recovery-centre': [3, 187],
+            'ias-lithium-lab': [4, 248],
+            'ias-metal-recycling': [3, 220],
+            'ias-crystal-finishing': [3, 154],
+            'ias-anomaly-analysis': [3, 154],
+            'ias-deuterium-tanks': [3, 99],
+            'ias-catalytic-converter': [3, 353],
+        };
+        for (const [id, tech] of components) {
+            const [level] = GAME[tech.key];
+            const time = Math.floor(getBuildTime_C({
+                techID: Number(id), techLevelFrom: level - 1, techLevelTo: level, techData,
+                robotsLevel: 10, nanitesLevel: 3, uniSpeed: 10,
+            }));
+            expect([tech.key, level, time]).toEqual([tech.key, ...GAME[tech.key]]);
+        }
+    });
+
+    it('gives what the game\'s bonus tables show: 0.2% per level, a 0.05% discount for the converter', () => {
+        // The "?" table of each component (Singularity, 2026-11-18), levels 1-15
         const effects = Object.fromEntries(components.map(([, tech]) => [tech.key, tech.effect]));
         expect(effects).toEqual({
-            'ias-recovery-centre': 0.5,
-            'ias-lithium-lab': 0.5,
-            'ias-metal-recycling': 0.5,
-            'ias-crystal-finishing': 0.5,
-            'ias-anomaly-analysis': null,
-            'ias-deuterium-tanks': 0.5,
-            'ias-catalytic-converter': -0.5,
+            'ias-recovery-centre': 0.2,
+            'ias-lithium-lab': 0.2,
+            'ias-metal-recycling': 0.2,
+            'ias-crystal-finishing': 0.2,
+            'ias-anomaly-analysis': 0.2,
+            'ias-deuterium-tanks': 0.2,
+            'ias-catalytic-converter': -0.05,
         });
     });
 });
 
 describe('componentEffect', () => {
     it('grows by the same step every level', () => {
-        expect([0, 1, 5, 20].map(level => componentEffect(0.5, level))).toEqual([0, 0.5, 2.5, 10]);
+        expect([0, 1, 5, 15].map(level => componentEffect(0.2, level))).toEqual([0, 0.2, 1, 3]);
+    });
+
+    it('leaves no floating-point tail', () => {
+        // 0.05 * 3 is 0.15000000000000002 in plain arithmetic
+        expect([3, 7, 13].map(level => componentEffect(0.05, level))).toEqual([0.15, 0.35, 0.65]);
     });
 
     it('keeps the sign of a discount', () => {
-        expect(componentEffect(-0.5, 3)).toBe(-1.5);
+        expect(componentEffect(-0.05, 3)).toBe(-0.15);
     });
 
     it('is null while the effect is unknown', () => {
@@ -702,8 +745,41 @@ describe('costsTableLayout', () => {
         };
         expect(['table-1-2', 'table-0-7', 'table-0-5'].map(flags)).toEqual([
             [true, false, true, 4],
-            [false, true, true, 4],
+            [false, true, false, 4],
             [false, false, false, 3],
         ]);
+    });
+
+    it('drops the energy column from the Control Centre and Dark Matter from the several-levels tab', () => {
+        const columns = id => [...costsTableLayout(id).resultColumns];
+        expect(['table-0-2', 'table-0-7', 'table-1-4', 'table-1-7'].map(columns)).toEqual([
+            ['metal', 'crystal', 'deuterium', 'msu', 'energy', 'time', 'points', 'dm'],
+            ['metal', 'crystal', 'deuterium', 'msu', 'time', 'points', 'dm'],
+            ['metal', 'crystal', 'deuterium', 'msu', 'energy', 'time', 'points'],
+            ['metal', 'crystal', 'deuterium', 'msu', 'time', 'points'],
+        ]);
+    });
+});
+
+describe('costsRangeTable', () => {
+    const METAL_MINE = 1;
+    const ROBOTICS = 14;
+    const LITHIUM_LAB = 47;
+
+    it('picks the producers\' table, the components\' or the common one', () => {
+        expect([
+            costsRangeTable(METAL_MINE, false).id,
+            costsRangeTable(LITHIUM_LAB, true).id,
+            costsRangeTable(ROBOTICS, false).id,
+        ]).toEqual(['prods-table', 'ias-range-table', 'commons-table']);
+    });
+
+    it('shows a component\'s effect after the level and no energy', () => {
+        expect([...costsRangeTable(LITHIUM_LAB, true).columns])
+            .toEqual(['level', 'effect', 'metal', 'crystal', 'deuterium', 'msu', 'time', 'points']);
+    });
+
+    it('gives every range table its own resource inputs', () => {
+        expect(COSTS_RANGE_TABLES.map(table => table.prefix)).toEqual(['prods', 'ias', 'commons']);
     });
 });

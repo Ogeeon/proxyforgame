@@ -296,8 +296,27 @@ class DataCollector {
       fromLevel,
       toLevel,
       requests,
-      techName: this._getSelectedTechName()
+      techName: this._getSelectedTechName(),
+      ...this._getSelectedComponent(),
     };
+  }
+
+  /**
+   * Whether the range tab's technology is a Control Centre component, and its
+   * effect in percent per level (null while unknown). The template marks the
+   * options of the components with data-effect, empty when the effect is not
+   * known.
+   * @private
+   * @returns {{isComponent: boolean, effectPerLevel: number|null}}
+   */
+  _getSelectedComponent() {
+    const select = selectEl('#tech-types-select');
+    const option = select ? select.options[select.selectedIndex] : undefined;
+    const effect = option?.dataset.effect;
+    if (effect === undefined) {
+      return { isComponent: false, effectPerLevel: null };
+    }
+    return { isComponent: true, effectPerLevel: effect === '' ? null : Number(effect) };
   }
 
   /**

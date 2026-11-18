@@ -2,13 +2,12 @@
 // RENDERING LAYER
 // ============================================================================
 
-// The result columns of every costs table, in display order, as the
-// calculation-error report names them: a cell is marked
-// data-report-cell="<row>.<column>", e.g. "metal-mine.metal" or
-// "grand-total.metal", and describeCell() turns that into a caption.
-const REPORT_COLUMNS = ['metal', 'crystal', 'deuterium', 'msu', 'energy', 'time', 'points', 'dm'];
-// The range tab's producer table has two more after points.
-const REPORT_RANGE_COLUMNS = ['metal', 'crystal', 'deuterium', 'msu', 'energy', 'time', 'points', 'production', 'consumption'];
+// The calculation-error report names a result cell by its row and column: a
+// cell is marked data-report-cell="<row>.<column>", e.g. "metal-mine.metal" or
+// "grand-total.metal", and describeCell() turns that into a caption. Each
+// table's columns come from costsTableLayout() or COSTS_RANGE_TABLES; this
+// default names the resources, all the "resources needed" rows carry.
+const REPORT_COLUMNS = Object.freeze(['metal', 'crystal', 'deuterium']);
 
 /**
  * Marks `count` consecutive result cells of a row for the report dialog.
@@ -16,7 +15,7 @@ const REPORT_RANGE_COLUMNS = ['metal', 'crystal', 'deuterium', 'msu', 'energy', 
  * @param {number} firstCol - index of the row's metal cell
  * @param {string|undefined} rowKey - the row's name; nothing is marked without one
  * @param {number} count
- * @param {string[]} [columns]
+ * @param {readonly string[]} [columns]
  */
 function markReportCells(row, firstCol, rowKey, count, columns = REPORT_COLUMNS) {
   if (!rowKey) {
@@ -67,10 +66,11 @@ class Renderer {
     }
 
     const rows = getTableRows(`#${tableId}`);
-    const { isMultiLevel, firstDataCol } = costsTableLayout(tableId);
+    const layout = costsTableLayout(tableId);
+    const { isMultiLevel } = layout;
 
     // Clear all data first
-    this._clearTableData(tableId, rows, isMultiLevel);
+    this._clearTableData(tableId, rows);
     // The effect follows the level entered, whether or not anything is built
     this.renderEffects(tableId);
 
@@ -110,7 +110,7 @@ class Renderer {
       const row = rows[rowIndex];
 
       // Render the summed result
-      this._renderRowCost(row, firstDataCol, summedResult, Number(techId), isMultiLevel, params);
+      this._renderRowCost(row, layout, summedResult, Number(techId), params);
     });
 
     // Set max energy (not sum)
@@ -121,31 +121,46 @@ class Renderer {
   }
 
   /**
+   * The content of one result cell. The Dark Matter column is not a sum, so
+   * it has no value here: the callers fill it themselves.
+   * @private
+   * @param {string} column - a column of costsTableLayout() or costsRangeColumns()
+   * @param {BuildCost} cost
+   * @param {GlobalParams} params
+   * @returns {string}
+   */
+  _resultCell(column, cost, params) {
+    switch (column) {
+      case 'metal': return this._formatNumber(cost.metal, params);
+      case 'crystal': return this._formatNumber(cost.crystal, params);
+      case 'deuterium': return this._formatNumber(cost.deuterium, params);
+      case 'msu': return this._formatNumber(cost.msu(params.rates), params);
+      case 'energy': return this._formatNumber(cost.energy, params);
+      case 'time': return this._formatTime(cost.time);
+      case 'points': return this._formatNumber(cost.points, params);
+      default: return '';
+    }
+  }
+
+  /**
    * Render a single row's calculation results
    * @private
+   * @param {HTMLTableRowElement} row
+   * @param {ReturnType<typeof costsTableLayout>} layout
+   * @param {BuildCost} result
+   * @param {number} techId
+   * @param {GlobalParams} params
    */
-  _renderRowCost(row, firstDataCol, result, techId, isMultiLevel, params) {
-    // Metal, Crystal, Deuterium, MSU
-    row.cells[firstDataCol].innerHTML = this._formatNumber(result.metal, params);
-    row.cells[firstDataCol + 1].innerHTML = this._formatNumber(result.crystal, params);
-    row.cells[firstDataCol + 2].innerHTML = this._formatNumber(result.deuterium, params);
-    row.cells[firstDataCol + 3].innerHTML = this._formatNumber(result.msu(params.rates), params);
-
-    // Energy
-    row.cells[firstDataCol + 4].innerHTML = this._formatNumber(result.energy, params);
-
-    // Time
-    row.cells[firstDataCol + 5].innerHTML = this._formatTime(result.time);
-
-    // Points
-    row.cells[firstDataCol + 6].innerHTML = this._formatNumber(result.points, params);
-
-    // Dark Matter (only for single-level building/research tabs - not fleet/defense)
-    if (!isMultiLevel && techId < 200) {
-      const dmCost = Calculator.halvingCost(techId, result.time, params);
-      row.cells[firstDataCol + 7].innerHTML = this._formatNumber(dmCost, params);
-    }
-    markReportCells(row, firstDataCol, row.dataset.reportKey, !isMultiLevel && techId < 200 ? 8 : 7);
+  _renderRowCost(row, layout, result, techId, params) {
+    const { firstDataCol, resultColumns } = layout;
+    // Dark Matter only for buildings and researches - a ship or defence row leaves it alone
+    const columns = techId < 200 ? resultColumns : resultColumns.filter(column => column !== 'dm');
+    columns.forEach((column, i) => {
+      row.cells[firstDataCol + i].innerHTML = column === 'dm'
+        ? this._formatNumber(Calculator.halvingCost(techId, result.time, params), params)
+        : this._resultCell(column, result, params);
+    });
+    markReportCells(row, firstDataCol, row.dataset.reportKey, columns.length, columns);
   }
 
   /**
@@ -153,22 +168,15 @@ class Renderer {
    * NOTE: Does NOT clear input values - preserves user-entered levels
    * @private
    */
-  _clearTableData(tableId, rows, isMultiLevel) {
-    const { firstDataCol } = costsTableLayout(tableId);
-    const numDataCols = isMultiLevel ? 7 : 8;
+  _clearTableData(tableId, rows) {
+    const { firstDataCol, resultColumns } = costsTableLayout(tableId);
 
     // Clear data rows (skip header and footer)
     // Only clear calculated result cells, NOT input cells
     for (let i = 1; i < rows.length - 6; i++) {
-      for (let col = 0; col < numDataCols; col++) {
-        const cellIndex = firstDataCol + col;
-        if (col === 5) {
-          // Time cell
-          rows[i].cells[cellIndex].innerHTML = '0' + this.datetimeS;
-        } else {
-          rows[i].cells[cellIndex].innerHTML = '0';
-        }
-      }
+      resultColumns.forEach((column, col) => {
+        rows[i].cells[firstDataCol + col].innerHTML = column === 'time' ? '0' + this.datetimeS : '0';
+      });
 
       // DO NOT clear input values - preserve user-entered levels
       // Input cells are at column 2 (and 3 for multi-level)
@@ -201,27 +209,27 @@ class Renderer {
   _renderSubtotalRow(tableId, rows, totals, params, isMultiLevel) {
     const subtotalRow = rows.length - 6;
 
-    const { isBuildingTable, subtotalStartCol } = costsTableLayout(tableId);
+    const { isBuildingTable, subtotalStartCol, resultColumns } = costsTableLayout(tableId);
     const isFleetOrDefenseTable = tableId.endsWith('-5') || tableId.endsWith('-6');
 
-    // Column 2: sum of building levels for buildings, empty otherwise
+    // Column 2: sum of building levels for planet and moon buildings, empty otherwise
+    // (the Control Centre components' levels are not added up)
     rows[subtotalRow].cells[2].innerHTML = isBuildingTable
       ? `<b>${this._sumBuildingLevels(rows, isMultiLevel)}</b>`
       : '';
 
     // Subtotals row - data columns start at column 3, or 4 past a quantity or effect column
-    rows[subtotalRow].cells[subtotalStartCol].innerHTML = `<b>${this._formatNumber(totals.metal, params)}</b>`;
-    rows[subtotalRow].cells[subtotalStartCol + 1].innerHTML = `<b>${this._formatNumber(totals.crystal, params)}</b>`;
-    rows[subtotalRow].cells[subtotalStartCol + 2].innerHTML = `<b>${this._formatNumber(totals.deuterium, params)}</b>`;
-    rows[subtotalRow].cells[subtotalStartCol + 3].innerHTML = `<b>${this._formatNumber(totals.msu(params.rates), params)}</b>`;
-    rows[subtotalRow].cells[subtotalStartCol + 4].innerHTML = `<b>${this._formatNumber(totals.energy, params)}</b>`;
-    rows[subtotalRow].cells[subtotalStartCol + 5].innerHTML = `<b>${this._formatTime(totals.time)}</b>`;
-    rows[subtotalRow].cells[subtotalStartCol + 6].innerHTML = `<b>${this._formatNumber(totals.points, params)}</b>`;
-
-    if (!isMultiLevel) {
-      this._renderSubtotalDmCell(rows[subtotalRow].cells[subtotalStartCol + 7], isFleetOrDefenseTable, totals, params);
-    }
-    markReportCells(rows[subtotalRow], subtotalStartCol, 'total', isFleetOrDefenseTable ? 8 : 7);
+    resultColumns.forEach((column, i) => {
+      const cell = rows[subtotalRow].cells[subtotalStartCol + i];
+      if (column === 'dm') {
+        this._renderSubtotalDmCell(cell, isFleetOrDefenseTable, totals, params);
+      } else {
+        cell.innerHTML = `<b>${this._resultCell(column, totals, params)}</b>`;
+      }
+    });
+    // Only the fleet and defence tables sum a Dark Matter cost
+    const marked = isFleetOrDefenseTable ? resultColumns : resultColumns.filter(column => column !== 'dm');
+    markReportCells(rows[subtotalRow], subtotalStartCol, 'total', marked.length, marked);
   }
 
   /**
@@ -264,31 +272,25 @@ class Renderer {
    * @param {GlobalParams} params - For transport calculation
    */
   renderGrandTotals(outerTab, grandTotal, params) {
-    const isMultiLevel = outerTab === 1;
     const tableIds = this._getTableIdsForTab(outerTab);
 
     tableIds.forEach(tableId => {
       const rows = getTableRows(`#${tableId}`);
       const grandTotalRow = rows.length - 4;
+      const { resultColumns } = costsTableLayout(tableId);
       // In grand totals row, we use DOM child indices (not visual columns)
       // The "Grand Total" colspan cell is at child 1, so first data (metal) is at child 2
       // which is nth-child(3) in CSS 1-based indexing
       const startCol = 2;
 
-      // Update grand total row in each table
-      rows[grandTotalRow].cells[startCol].innerHTML = `<b>${this._formatNumber(grandTotal.metal, params)}</b>`;
-      rows[grandTotalRow].cells[startCol + 1].innerHTML = `<b>${this._formatNumber(grandTotal.crystal, params)}</b>`;
-      rows[grandTotalRow].cells[startCol + 2].innerHTML = `<b>${this._formatNumber(grandTotal.deuterium, params)}</b>`;
-      rows[grandTotalRow].cells[startCol + 3].innerHTML = `<b>${this._formatNumber(grandTotal.msu(params.rates), params)}</b>`;
-      rows[grandTotalRow].cells[startCol + 4].innerHTML = `<b>${this._formatNumber(grandTotal.energy, params)}</b>`;
-      rows[grandTotalRow].cells[startCol + 5].innerHTML = `<b>${this._formatTime(grandTotal.time)}</b>`;
-      rows[grandTotalRow].cells[startCol + 6].innerHTML = `<b>${this._formatNumber(grandTotal.points, params)}</b>`;
-
-      // DM column: Leave empty for all tables
-      if (!isMultiLevel) {
-        rows[grandTotalRow].cells[startCol + 7].innerHTML = '';
-      }
-      markReportCells(rows[grandTotalRow], startCol, 'grand-total', 7);
+      // Update grand total row in each table; the Control Centre's has no energy,
+      // and the Dark Matter cell stays empty everywhere
+      resultColumns.forEach((column, i) => {
+        rows[grandTotalRow].cells[startCol + i].innerHTML =
+          column === 'dm' ? '' : `<b>${this._resultCell(column, grandTotal, params)}</b>`;
+      });
+      const marked = resultColumns.filter(column => column !== 'dm');
+      markReportCells(rows[grandTotalRow], startCol, 'grand-total', marked.length, marked);
 
       // Update res-needed and delivery transport rows (grand total minus available resources)
       const [, tabOuter, tabInner] = tableId.split('-');
@@ -350,8 +352,8 @@ class Renderer {
   }
 
   /**
-   * An effect in percent as the table shows it: "+2.5 %", "−2.5 %" for a
-   * discount, "0 %" at level 0, and a dash while the effect is not known.
+   * An effect in percent as the table shows it, without a sign: "0.25 %",
+   * "0 %" at level 0, and a dash while the effect is not known.
    * @param {number|null} percent
    * @returns {string}
    */
@@ -359,13 +361,7 @@ class Renderer {
     if (percent === null) {
       return '—';
     }
-    let sign = '';
-    if (percent > 0) {
-      sign = '+';
-    } else if (percent < 0) {
-      sign = '−';
-    }
-    return `${sign}${localizeFloat(Math.abs(percent))}&nbsp;%`;
+    return `${localizeFloat(Math.abs(percent))}&nbsp;%`;
   }
 
   // ==========================================================================
@@ -381,19 +377,17 @@ class Renderer {
    * @param {GlobalParams} params - For transport calculation
    */
   renderRangeTable(rangeData, results, productions, consumptions, params) {
-    const { techId, fromLevel } = rangeData;
+    const { techId, fromLevel, isComponent, effectPerLevel } = rangeData;
 
-    // Determine which table to use
-    const isProducer = [1, 2, 3, 4, 12, 212].includes(techId);
-    const tableId = isProducer ? 'prods-table' : 'commons-table';
-
-    // Show/hide appropriate table
-    if (isProducer) {
-      show('#prods-table-div');
-      hide('#commons-table-div');
-    } else {
-      hide('#prods-table-div');
-      show('#commons-table-div');
+    // Determine which table to use, and show only that one
+    const table = costsRangeTable(techId, isComponent);
+    const tableId = table.id;
+    for (const { id } of COSTS_RANGE_TABLES) {
+      if (id === tableId) {
+        show(`#${id}-div`);
+      } else {
+        hide(`#${id}-div`);
+      }
     }
 
     // Clear and rebuild table
@@ -413,7 +407,8 @@ class Renderer {
       const production = productions ? productions[level] : null;
       const consumption = consumptions ? consumptions[level] : null;
 
-      this._appendRangeRow(tableId, level, result, production, consumption, i, params);
+      const effect = Renderer.formatEffect(componentEffect(effectPerLevel ?? null, level));
+      this._appendRangeRow(table, { level, effect, result, production, consumption }, i, params);
 
       totals = totals.add(result);
       maxEnergy = Math.max(maxEnergy, result.energy);
@@ -425,7 +420,7 @@ class Renderer {
     totals.energy = maxEnergy;
 
     // Render totals
-    this._renderRangeTotals(tableId, totals, maxProduction, maxConsumption, params, isProducer);
+    this._renderRangeTotals(table, totals, maxProduction, maxConsumption, params);
   }
 
   /**
@@ -433,7 +428,7 @@ class Renderer {
    * @param {number} techId
    */
   updateRangeControlVisibility(techId) {
-    const isProducer = [1, 2, 3, 4, 12, 212].includes(techId);
+    const isProducer = COSTS_PRODUCERS.includes(techId);
     ['#range-booster-wrap', '#range-producer-row', '#range-officers-row'].forEach(sel => {
       if (isProducer) {
         removeClass(sel, 'd-none');
@@ -461,68 +456,75 @@ class Renderer {
    * Append a row to range table
    * @private
    */
-  _appendRangeRow(tableId, level, result, production, consumption, index, params) {
+  /**
+   * Append a row to range table
+   * @private
+   * @param {CostsRangeTable} table
+   * @param {{level: number, effect: string, result: BuildCost, production: number|null,
+   *   consumption: number|null}} row - the level, its effect as shown, cost and rates
+   * @param {number} index
+   * @param {GlobalParams} params
+   */
+  _appendRangeRow(table, row, index, params) {
+    const { level, effect, result, production, consumption } = row;
     const rowClass = (index % 2) === 0 ? 'odd' : 'even';
-
-    let html = `<tr class="${rowClass}">`;
-    html += `<td align="center">${level}</td>`;
-    html += `<td align="center">${this._formatNumber(result.metal, params)}</td>`;
-    html += `<td align="center">${this._formatNumber(result.crystal, params)}</td>`;
-    html += `<td align="center">${this._formatNumber(result.deuterium, params)}</td>`;
-    html += `<td align="center">${this._formatNumber(result.msu(params.rates), params)}</td>`;
-    html += `<td align="center">${this._formatNumber(result.energy, params)}</td>`;
-    html += `<td align="center">${this._formatTime(result.time)}</td>`;
-    html += `<td align="center">${this._formatNumber(result.points, params)}</td>`;
-
-    if (production !== null) {
-      html += `<td align="center">${this._formatNumber(production, params)}</td>`;
-    }
-    if (consumption !== null) {
-      html += `<td align="center">${this._formatNumber(consumption, params)}</td>`;
-    } else if (production !== null) {
-      html += `<td align="center">-</td>`;
-    }
-
-    html += `</tr>`;
+    /** @type {Record<string, () => string>} */
+    const special = {
+      level: () => String(level),
+      effect: () => effect,
+      production: () => (production === null ? '-' : this._formatNumber(production, params)),
+      // Solar plant and satellite produce without consuming
+      consumption: () => (consumption === null ? '-' : this._formatNumber(consumption, params)),
+    };
+    const cells = table.columns.map(column => special[column]?.() ?? this._resultCell(column, result, params));
+    const cellsHtml = cells.map(cell => `<td align="center">${cell}</td>`).join('');
+    const html = `<tr class="${rowClass}">${cellsHtml}</tr>`;
 
     // Insert before the totals row (4th from the end)
-    const rows = getTableRows(`#${tableId}`);
+    const rows = getTableRows(`#${table.id}`);
     const insertBefore = rows.at(-4);
     insertBefore.insertAdjacentHTML('beforebegin', html);
     const added = insertBefore.previousElementSibling;
     if (added instanceof HTMLTableRowElement) {
-      const count = 7 + (production === null ? 0 : 1) + (consumption === null ? 0 : 1);
-      markReportCells(added, 1, `level-${level}`, count, REPORT_RANGE_COLUMNS);
+      // The report names the results; a missing consumption has nothing to name
+      const first = table.columns.indexOf('metal');
+      const named = table.columns.slice(first).filter(column => column !== 'consumption' || consumption !== null);
+      markReportCells(added, first, `level-${level}`, named.length, named);
     }
   }
 
   /**
    * Render range table totals
    * @private
+   * @param {CostsRangeTable} table
+   * @param {BuildCost} totals
+   * @param {number} maxProduction
+   * @param {number} maxConsumption
+   * @param {GlobalParams} params
    */
-  _renderRangeTotals(tableId, totals, maxProduction, maxConsumption, params, isProducer) {
-    const rows = getTableRows(`#${tableId}`);
+  _renderRangeTotals(table, totals, maxProduction, maxConsumption, params) {
+    const rows = getTableRows(`#${table.id}`);
     const totalsRow = rows.length - 4;
     const neededRow = rows.length - 2;
     const transportRow = rows.length - 1;
 
-    // Totals row
-    rows[totalsRow].cells[1].innerHTML = `<b>${this._formatNumber(totals.metal, params)}</b>`;
-    rows[totalsRow].cells[2].innerHTML = `<b>${this._formatNumber(totals.crystal, params)}</b>`;
-    rows[totalsRow].cells[3].innerHTML = `<b>${this._formatNumber(totals.deuterium, params)}</b>`;
-    rows[totalsRow].cells[4].innerHTML = `<b>${this._formatNumber(totals.msu(params.rates), params)}</b>`;
-    rows[totalsRow].cells[5].innerHTML = `<b>${this._formatNumber(totals.energy, params)}</b>`;
-    rows[totalsRow].cells[6].innerHTML = `<b>${this._formatTime(totals.time)}</b>`;
-    rows[totalsRow].cells[7].innerHTML = `<b>${this._formatNumber(totals.points, params)}</b>`;
-
-    if (isProducer) {
-      rows[totalsRow].cells[8].innerHTML = `<b>${this._formatNumber(maxProduction, params)}</b>`;
-      rows[totalsRow].cells[9].innerHTML = `<b>${this._formatNumber(maxConsumption, params)}</b>`;
-    }
-    markReportCells(rows[totalsRow], 1, 'total', isProducer ? 9 : 7, REPORT_RANGE_COLUMNS);
+    // Totals row: the label covers the columns before metal, then one cell per result
+    const results = table.columns.slice(table.columns.indexOf('metal'));
+    results.forEach((column, i) => {
+      let value;
+      if (column === 'production') {
+        value = this._formatNumber(maxProduction, params);
+      } else if (column === 'consumption') {
+        value = this._formatNumber(maxConsumption, params);
+      } else {
+        value = this._resultCell(column, totals, params);
+      }
+      rows[totalsRow].cells[1 + i].innerHTML = `<b>${value}</b>`;
+    });
+    markReportCells(rows[totalsRow], 1, 'total', results.length, results);
 
     // Read available resources from input fields
-    const prefix = isProducer ? 'prods' : 'commons';
+    const { prefix } = table;
     const metalAvail = getInputNumber(document.getElementById(`${prefix}-metal-available`)) || 0;
     const crystalAvail = getInputNumber(document.getElementById(`${prefix}-crystal-available`)) || 0;
     const deutAvail = getInputNumber(document.getElementById(`${prefix}-deut-available`)) || 0;

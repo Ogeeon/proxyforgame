@@ -444,25 +444,29 @@ test.describe('Costs Calculator Page', () => {
     });
 
     test('[control centre - one level] prices the components, shows their effect and adds them to the grand total', async ({ page }) => {
-        await page.getByRole('tab', { name: 'Control Centre' }).first().click();
+        await page.getByRole('tab', { name: 'IAS - Control Centre' }).first().click();
         const table = page.locator('#table-0-7');
         // Seven components; the effect column sits between the level and the metal
         await expect(table.locator('tr[data-report-key]')).toHaveCount(7);
         await expect(table.locator('tr:nth-child(1) th:nth-child(4)')).toContainText('Effect');
+        // The components use no energy: the time follows the MSU, where the buildings have their energy
+        await expect(table.locator('tr:nth-child(1) th')).not.toContainText(['Energy']);
+        await expect(table.locator('tr:nth-child(1) th:nth-child(9)')).toContainText('Time');
+        await expect(page.locator('#table-0-2 tr:nth-child(1) th:nth-child(9)')).toContainText('Energy');
 
         // Intergalactic Recovery Centre 3, Anomaly Analysis Centre 2, Catalytic Converter 2
         for (const [row, level] of [[2, 3], [6, 2], [8, 2]]) {
             await table.locator(`tr:nth-child(${row}) td:nth-child(3) input`).fill(String(level));
             await table.locator(`tr:nth-child(${row}) td:nth-child(3) input`).press('Enter');
         }
-        await expect(table.locator('tr:nth-child(2) td:nth-child(4)')).toHaveText('+1.5 %');
+        await expect(table.locator('tr:nth-child(2) td:nth-child(4)')).toHaveText('0.6 %');
         await expect(table.locator('tr:nth-child(2) td:nth-child(5)')).toContainText('168.750');
         await expect(table.locator('tr:nth-child(2) td:nth-child(6)')).toContainText('118.125');
         await expect(table.locator('tr:nth-child(2) td:nth-child(7)')).toContainText('50.625');
-        // Its effect is not known yet
-        await expect(table.locator('tr:nth-child(6) td:nth-child(4)')).toHaveText('—');
+        // The analysis centre gives 0.2% a level like the others
+        await expect(table.locator('tr:nth-child(6) td:nth-child(4)')).toHaveText('0.4 %');
         // The converter's effect is a discount
-        await expect(table.locator('tr:nth-child(8) td:nth-child(4)')).toHaveText('−1 %');
+        await expect(table.locator('tr:nth-child(8) td:nth-child(4)')).toHaveText('0.1 %');
 
         // 168750 + 101250 + 191250 metal, 118125 + 56250 + 168750 crystal, 50625 + 33750 + 78750 deuterium
         for (const id of ['#table-0-7', '#table-0-2']) {
@@ -471,14 +475,18 @@ test.describe('Costs Calculator Page', () => {
             await expect(page.locator(`${id} tr:nth-last-child(4) td:nth-child(5)`)).toContainText('163.125');
         }
 
-        // The header explains what the effect column shows
+        // The header explains what the effect column shows and points at the names
         await table.locator('tr:nth-child(1) th:nth-child(4) abbr').hover();
         await expect(page.locator('.tooltip')).toContainText('target level');
+        await expect(page.locator('.tooltip')).toContainText('component\'s name');
+        // ...whose tooltip is the game's own description of the effect
+        await table.locator('tr:nth-child(2) td:nth-child(2) abbr').hover();
+        await expect(page.locator('.tooltip.show')).toContainText('increases the number of ships gained from anomaly missions');
 
         // The global reset takes the effect back to level 0
         await page.locator('#reset').click();
         await expect(table.locator('tr:nth-child(2) td:nth-child(4)')).toHaveText('0 %');
-        await expect(table.locator('tr:nth-child(6) td:nth-child(4)')).toHaveText('—');
+        await expect(table.locator('tr:nth-child(6) td:nth-child(4)')).toHaveText('0 %');
     });
 
     test('[control centre - multiple levels] shows the effect at the target level', async ({ page }) => {
@@ -489,25 +497,41 @@ test.describe('Costs Calculator Page', () => {
         await table.locator('tr:nth-child(3) td:nth-child(3) input').fill('2');
         await table.locator('tr:nth-child(3) td:nth-child(4) input').fill('4');
         await table.locator('tr:nth-child(3) td:nth-child(4) input').press('Enter');
-        await expect(table.locator('tr:nth-child(3) td:nth-child(5)')).toHaveText('+2 %');
+        await expect(table.locator('tr:nth-child(3) td:nth-child(5)')).toHaveText('0.8 %');
         await expect(table.locator('tr:nth-child(3) td:nth-child(6)')).toContainText('295.312');
         await expect(table.locator('tr:nth-child(3) td:nth-child(7)')).toContainText('210.937');
         await expect(table.locator('tr:nth-child(3) td:nth-child(8)')).toContainText('210.937');
-        // The subtotal row sums the target levels
-        await expect(table.locator('tr:nth-child(9) td:nth-child(3)')).toContainText('4');
+        // The subtotal row does not add the levels up
+        await expect(table.locator('tr:nth-child(9) td:nth-child(3)')).toHaveText('');
     });
 
     test('[control centre - one item] the range tab prices a component level by level', async ({ page }) => {
         await page.getByRole('tab', { name: 'One item - multiple levels' }).click();
         // Lithium Electrolysis Lab, listed under the Control Centre
-        await expect(page.locator('#tech-types-select optgroup[label="Control Centre"] option')).toHaveCount(7);
+        await expect(page.locator('#tech-types-select optgroup[label="IAS - Control Centre"] option')).toHaveCount(7);
         await page.locator('#tech-types-select').selectOption('47');
         await page.locator('#tab2-from-level').fill('2');
         await page.locator('#tab2-to-level').fill('4');
         await page.locator('#tab2-to-level').press('Enter');
-        await expect(page.locator('#commons-table tr:nth-child(2) td:nth-child(2)')).toContainText('118.125');
-        await expect(page.locator('#commons-table tr:nth-child(3) td:nth-child(2)')).toContainText('177.187');
-        await expect(page.locator('#commons-table tr:nth-child(4) td:nth-child(2)')).toContainText('295.312');
+        // Its own table: the effect at each level after the level, and no energy column
+        const table = page.locator('#ias-range-table');
+        await expect(table).toBeVisible();
+        await expect(page.locator('#commons-table')).toBeHidden();
+        await expect(table.locator('tr:nth-child(1) th:nth-child(2)')).toContainText('Effect');
+        await expect(table.locator('tr:nth-child(1) th')).not.toContainText(['Energy']);
+        await expect(table.locator('tr:nth-child(2) td:nth-child(1)')).toHaveText('3');
+        await expect(table.locator('tr:nth-child(2) td:nth-child(2)')).toHaveText('0.6 %');
+        await expect(table.locator('tr:nth-child(2) td:nth-child(3)')).toContainText('118.125');
+        await expect(table.locator('tr:nth-child(3) td:nth-child(2)')).toHaveText('0.8 %');
+        await expect(table.locator('tr:nth-child(3) td:nth-child(3)')).toContainText('177.187');
+        // The totals row's label spans the level and the effect, so its metal is the second cell
+        await expect(table.locator('tr:nth-child(4) td:nth-child(2)')).toContainText('295.312');
+
+        // Any other building goes back to the common table
+        await page.locator('#tech-types-select').selectOption('14');
+        await page.locator('#tab2-to-level').press('Enter');
+        await expect(page.locator('#commons-table')).toBeVisible();
+        await expect(table).toBeHidden();
     });
 
     test('deconstruction calculation is correct', async ({ page }) => {

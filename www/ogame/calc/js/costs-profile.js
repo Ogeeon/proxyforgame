@@ -247,12 +247,14 @@ class CostsProfiles extends ProfileBinder {
     this.ownSaveState = app.saveState.bind(app);
     this.ownSaveTable = app.saveLfResearchTable.bind(app);
     this.bodyResources = [
-      // The range tab's two tables - one shows at a time - get the same reading.
+      // The range tab's tables - one shows at a time - get the same reading.
       new PfBodyResources(pf, {
-        groups: [
-          { metal: '#prods-metal-available', crystal: '#prods-crystal-available', deuterium: '#prods-deut-available', caption: '#prods-resources-age' },
-          { metal: '#commons-metal-available', crystal: '#commons-crystal-available', deuterium: '#commons-deut-available', caption: '#commons-resources-age' },
-        ],
+        groups: COSTS_RANGE_TABLES.map(({ prefix }) => ({
+          metal: `#${prefix}-metal-available`,
+          crystal: `#${prefix}-crystal-available`,
+          deuterium: `#${prefix}-deut-available`,
+          caption: `#${prefix}-resources-age`,
+        })),
         body: () => this.resourceBody(),
         recalc: () => this.app.recalculateRangeTab(),
       }),

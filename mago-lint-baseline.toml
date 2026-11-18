@@ -1238,12 +1238,6 @@ count = 1
 
 [[issues]]
 file = "www/ogame/calc/costs.tpl"
-code = "no-php-tag-terminator"
-message = "Semicolon terminator is preferred over tag-pair terminator."
-count = 1
-
-[[issues]]
-file = "www/ogame/calc/costs.tpl"
 code = "no-shorthand-ternary"
 message = "Use of the shorthand ternary operator."
 count = 1
