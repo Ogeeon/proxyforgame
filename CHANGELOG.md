@@ -15,8 +15,6 @@ release section; it is the source of truth for the other eleven translations.
 
 ## [Unreleased]
 
-## [2026-11-18] - site entry 74
-
 ### Added
 
 - Monitoring: the MCP server records its usage in the site's own database (`mcp_event`, migration 0004) - one row per JSON-RPC message, plus one per request the transport refused: the method and tool, the outcome (`ok`, `invalid`, `tool_error`, `internal`, `rejected`), the HTTP status, the time it took, the body size, the client's `clientInfo` and user agent, the universe, the names of the top-level arguments and the schema paths that failed validation. Never an argument value, a request body or an IP address. An `initialize` answer now carries an `Mcp-Session-Id`, which the server neither stores nor checks, so one connection's calls group together; the watchdog and the addresses in `PFG_MCP_INTERNAL_IPS` are marked internal. The server posts batches to a new `mcpUsage` service over loopback, with a token both sides read from `.env`, and records nothing without it. The page `/<lang>/mcp`, which said the server stores nothing, and the privacy policy now describe the record. `make mcp-stats` prints a summary; columns and queries: `docs/mcp-usage.md`.
@@ -26,8 +24,8 @@ release section; it is the source of truth for the other eleven translations.
 
 ### Changed
 
-- Cost and LF costs calculators: with a profile active, the range tab's "to" level starts three levels above the level the profile knows instead of one, and follows when another technology or planet is picked as long as it was not raised by hand beyond that. A "to" the player planned above both levels stays.
-- Production calculator: the rows of the "One planet" table follow the game's production overview, so a row is where a player looks for it: the anomaly scanner's "Conversion" comes right after the items ("Booster") instead of last before the totals, and the Engineer comes before the Geologist. The page fills the rows by name rather than by position, so the order is set in one place.
+- Cost and LF costs calculators: with a profile active, the range tab's "to" level starts three levels above the level the profile knows instead of one, and follows when another technology or planet is picked as long as it was not raised by hand beyond that. A "to" the player planned above both levels stays. <!-- site -->
+- Production calculator: the rows of the "One planet" table follow the game's production overview, so a row is where a player looks for it: the anomaly scanner's "Conversion" comes right after the items ("Booster") instead of last before the totals, and the Engineer comes before the Geologist. The page fills the rows by name rather than by position, so the order is set in one place. <!-- site -->
 
 ### Fixed
 
@@ -47,9 +45,7 @@ release section; it is the source of truth for the other eleven translations.
 - Graviton, terraformer: a result field grows with its number instead of letting it run out of the box - at a high terraformer level, or with a large satellite fleet, the energy, crystal, deuterium and time readouts held numbers wider than their fixed width, on the desktop too. Their old width is now a minimum. On a phone a long duration wraps at its spaces, and so does the unit of a power plant's energy ("283.935 / Энергия") when the line is too short for both.
 - Moon calculator: on a phone the page is laid out at the screen's width instead of zoomed out from 980px. The fleet and defense units stand in three groups - the three columns they had - that sit side by side where there is room and wrap where there is not: one group under another on a phone, one unit a line. The "%", "km" and "systems" units stay beside their fields.
 - Costs, LF costs: the page no longer jumps sideways while it loads. The calculator panel is as wide as its content, so a first paint made while the HTML was still arriving showed a narrow box that then widened - now and then, on a slow connection, which PageSpeed Insights caught as a layout shift of 0.34 on costs. A `rel="expect"` link holds the first paint until the panel has been parsed (Chrome 124 and later; other browsers ignore it). The Nu Html Checker still rejects `blocking` on that link, so `scripts/validate-html.js` lets this one message through for these two pages.
-- Production calculator: the settings above the "One planet" table take two lines instead of three. With a profile active the planet select stood on a line of its own, and the production factor and the "Extended view" switch were pushed to the far right of theirs, leaving a wide gap - wider still in the extended view. The planet, its life form and the anomaly scanner now share the first line with "Extended view"; the temperature, position and energy booster share the second with the production factor.
-
-> **RU:** Добавлен Межпланетный сканер аномалий — новая постройка расширения Project Orion, которое пока в бете на тестовых серверах. Он есть в списке построек калькуляторов стоимости и очереди, а у семи компонентов его Центра управления в Расчёте стоимости своя вкладка: там видны стоимость, время и эффект каждого компонента на выбранном уровне.<br>В Калькуляторе производства на вкладке «Одна планета» можно учесть конвертацию ресурсов сканером в литий: включите «МСА» и задайте уровень, скидку, ресурс и загрузку.
+- Production calculator: the settings above the "One planet" table take two lines instead of three. With a profile active the planet select stood on a line of its own, and the production factor and the "Extended view" switch were pushed to the far right of theirs, leaving a wide gap - wider still in the extended view. The planet, its life form and the anomaly scanner now share the first line with "Extended view"; the temperature, position and energy booster share the second with the production factor. <!-- site -->
 
 ## [2026-11-09] - site entry 73
 
