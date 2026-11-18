@@ -118,7 +118,7 @@ class ProductionProfiles extends ProfileBinder {
   }
 
   bindControls() {
-    this.insertPlanetSelect();
+    this.bindPlanetSelect();
     this.speed = new PfUniverseSetting(this.pf, PF_UNIVERSE_SPEED, '#universe-speed', () => updateParams(), 'universeSpeed');
     this.universeSettings = [this.speed];
   }
@@ -393,14 +393,8 @@ class ProductionProfiles extends ProfileBinder {
   // The planet select and the marks
   // -------------------------------------------------------------------------
 
-  insertPlanetSelect() {
-    const panel = document.getElementById('one-planet-panel');
-    if (!panel || document.getElementById('pf-planet-row')) return;
-    panel.insertAdjacentHTML('afterbegin',
-      '<div id="pf-planet-row" class="d-flex align-items-center gap-1 mb-1 d-none">'
-      + '<label for="pf-planet">' + options.planetLabel + '</label>'
-      + '<select id="pf-planet" class="form-select form-select-sm w-auto"></select></div>');
-    pfShow('#pf-planet-row', false);
+  /** The template holds the planet select, hidden; it is shown with a profile only. */
+  bindPlanetSelect() {
     addEvent('#pf-planet', 'change', () => {
       const profile = this.profile();
       if (profile) this.pickPlanet(profile, getVal('#pf-planet') || null, false);

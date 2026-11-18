@@ -1256,6 +1256,8 @@ async function initializeProductionCalculator() {
 			bindNumericInput(el, updateOnePlnTab);
 		});
 		$$('#one-planet-panel select').forEach(function (el) {
+			// The profile's planet select loads a planet itself (production-profile.js).
+			if (el.id === 'pf-planet') return;
 			addEvent(el, 'keyup', updateOnePlnTab);
 			addEvent(el, 'change', updateOnePlnTab);
 		});

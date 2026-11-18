@@ -254,7 +254,6 @@
     options.msgMinConstraintViolated = "<?= $l['msg-min-constraint-violated'] ?>";
     options.msgMaxConstraintViolated = "<?= $l['msg-max-constraint-violated'] ?>";
     options.planetNumStr = "<?= $l['planet-num'] ?>";
-    options.planetLabel = <?= json_encode($l['planet']) ?>;
     options.maxTempAlt = "<?= $l['max-planet-temp'] ?>";
     options.positionAlt = "<?= $l['planet-pos'] ?>";
     options.resReadyInMsg =  "<?= $l['res-ready-in'] ?>";
@@ -593,6 +592,32 @@
 
     <div class="tab-content" id="mainTabContent">
       <div class="tab-pane fade show active p-2" id="one-planet-panel" role="tabpanel">
+        <!-- what the planet is: the profile's planet (shown with a profile only), its life form and scanner -->
+        <div class="d-flex flex-wrap gap-2 align-items-center mb-1">
+          <div id="pf-planet-row" class="d-flex align-items-center gap-1 d-none">
+            <label for="pf-planet"><?= $l['planet'] ?></label>
+            <select id="pf-planet" class="form-select form-select-sm w-auto"></select>
+          </div>
+          <div class="d-flex align-items-center gap-1">
+            <label for="one-pln-race"><?= $l['race'] ?></label>
+            <select id="one-pln-race" name="one-pln-race" class="form-select form-select-sm w-auto">
+              <option value="0" selected="selected"><?= $l['none'] ?></option>
+              <?php for ($r = 1; $r <= 4; $r++): ?>
+              <option value="<?=$r?>"><?= $l['race-'.$r] ?></option>
+              <?php endfor; ?>
+            </select>
+          </div>
+          <div class="d-flex align-items-center gap-1">
+            <input id="ias-enabled" name="ias-enabled" type="checkbox" class="form-check-input">
+            <label for="ias-enabled" data-bs-toggle="tooltip" title="<?= htmlspecialchars($l['anomaly-scanner'], ENT_QUOTES) ?>"><?= $l['ias-short'] ?></label>
+            <button id="ias-settings" type="button" class="btn btn-outline-secondary btn-sm py-0" data-bs-toggle="tooltip" title="<?= htmlspecialchars($l['ias-settings'], ENT_QUOTES) ?>" aria-label="<?= htmlspecialchars($l['ias-settings'], ENT_QUOTES) ?>"><i class="bi bi-gear"></i></button>
+          </div>
+          <div class="d-flex align-items-center gap-1 ms-auto">
+            <input id="one-pln-extended-view" name="one-pln-extended-view" type="checkbox" class="form-check-input">
+            <label for="one-pln-extended-view"><?= $l['extended-view'] ?></label>
+          </div>
+        </div>
+        <!-- where it is and how it is powered, with the production factor that follows from the energy -->
         <div class="d-flex flex-wrap gap-2 align-items-center mb-1">
           <div class="d-flex align-items-center gap-1">
             <label for="max-planet-temp"><?= $l['max-planet-temp'] ?></label>
@@ -614,26 +639,6 @@
           </div>
           <div id="prod-coeff-div" class="d-flex align-items-center gap-1 ms-auto">
             <?= $l['prod-coeff'] ?>&nbsp;<span id="prod-coeff" data-report-cell="prod-coeff">0</span>
-          </div>
-        </div>
-        <div class="d-flex flex-wrap gap-2 align-items-center mb-1">
-          <div class="d-flex align-items-center gap-1">
-            <label for="one-pln-race"><?= $l['race'] ?></label>
-            <select id="one-pln-race" name="one-pln-race" class="form-select form-select-sm w-auto">
-              <option value="0" selected="selected"><?= $l['none'] ?></option>
-              <?php for ($r = 1; $r <= 4; $r++): ?>
-              <option value="<?=$r?>"><?= $l['race-'.$r] ?></option>
-              <?php endfor; ?>
-            </select>
-          </div>
-          <div class="d-flex align-items-center gap-1">
-            <input id="ias-enabled" name="ias-enabled" type="checkbox" class="form-check-input">
-            <label for="ias-enabled" data-bs-toggle="tooltip" title="<?= htmlspecialchars($l['anomaly-scanner'], ENT_QUOTES) ?>"><?= $l['ias-short'] ?></label>
-            <button id="ias-settings" type="button" class="btn btn-outline-secondary btn-sm py-0" data-bs-toggle="tooltip" title="<?= htmlspecialchars($l['ias-settings'], ENT_QUOTES) ?>" aria-label="<?= htmlspecialchars($l['ias-settings'], ENT_QUOTES) ?>"><i class="bi bi-gear"></i></button>
-          </div>
-          <div class="d-flex align-items-center gap-1 ms-auto">
-            <input id="one-pln-extended-view" name="one-pln-extended-view" type="checkbox" class="form-check-input">
-            <label for="one-pln-extended-view"><?= $l['extended-view'] ?></label>
           </div>
         </div>
 
