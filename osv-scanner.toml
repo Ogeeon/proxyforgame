@@ -1,4 +1,4 @@
-# OSV-Scanner configuration (`make vulns`). Empty: no advisory is accepted.
+# OSV-Scanner configuration (`make vulns`).
 #
 # To accept one, add an entry with a reason and an ignoreUntil date; after the
 # date the advisory fails the scan again and has to be looked at anew:
@@ -7,3 +7,8 @@
 # id = "GHSA-xxxx-xxxx-xxxx"
 # ignoreUntil = 2027-01-31
 # reason = "dev-only, the vulnerable code path is not reachable from our use"
+
+[[IgnoredVulns]]
+id = "GHSA-fc5q-39xc-vjpf"
+ignoreUntil = 2027-02-18
+reason = "picomatch ReDoS on crafted extglob patterns; dev-only (stylelint and tinyglobby), the globs are our own config, never user input; no fixed version yet"
