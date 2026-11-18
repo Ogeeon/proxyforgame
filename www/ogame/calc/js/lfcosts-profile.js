@@ -172,7 +172,7 @@ class LfCostsProfiles extends PlanetPrmBinder {
     if (!planet) return;
     this.fillStartLevels(planet);
     const level = this.rangeLevel(planet);
-    if (level !== null) pfFollowStart(inputEl('#tab2-from-level'), inputEl('#tab2-to-level'), level, 1);
+    if (level !== null) pfFollowStart(inputEl('#tab2-from-level'), inputEl('#tab2-to-level'), level, PF_RANGE_STEP);
     this.app.updateTab3();
   }
 

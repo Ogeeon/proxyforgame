@@ -593,7 +593,7 @@ class CostsProfiles extends ProfileBinder {
       return this.knownLevel(profile, t.where, t.prefix + techId);
     });
     const level = this.rangeLevel(profile);
-    if (level !== null) pfFollowStart(inputEl('#tab2-from-level'), inputEl('#tab2-to-level'), level, 1);
+    if (level !== null) pfFollowStart(inputEl('#tab2-from-level'), inputEl('#tab2-to-level'), level, PF_RANGE_STEP);
   }
 
   /**
