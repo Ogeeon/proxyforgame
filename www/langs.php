@@ -41,9 +41,9 @@ if ($uriLang != '' && $uriLang != $lang) {
   die();
 }
 
-function getLang() {
+function getLang(): string {
   global $lang;
-  return $lang;
+  return is_string($lang) ? $lang : 'en';
 }
 
 // BCP 47 tag for the <html lang> attribute. The URL prefix codes 'en' and 'us'

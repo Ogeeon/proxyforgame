@@ -325,7 +325,7 @@
   "index": {
     "title": "ProxyForGame - strumenti per i giochi per browser OGame",
     "keywords": "proxyforgame,ogame,calcolatore ogame,strumenti ogame,calcolatore online,gioco browser,calcolatore costi,calcolatore tempo di volo,calcolatore commercio,calcolatore produzione,calcolatore gravitone,calcolatore lune,calcolatore terraformer,calcolatore spedizioni,coda di costruzione",
-    "ai-card-text": "Per aprire un calcolatore, sceglilo nel menu. C'è anche un altro modo per usarli: direttamente da ChatGPT, Claude e altri assistenti IA. Chiedi quanto costa un edificio o quanto vola una flotta, e l'assistente lo calcola con le formule di questo sito.",
+    "ai-card-text": "Questi calcolatori si possono usare anche direttamente da ChatGPT, Claude e altri assistenti IA. Chiedi quanto costa un edificio o quanto vola una flotta, e l'assistente lo calcola con le formule di questo sito.",
     "ai-card-button": "Come collegarlo"
   },
   "assistants": {

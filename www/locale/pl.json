@@ -325,7 +325,7 @@
   "index": {
     "title": "Narzedzia do gier przegladarkowych OGame",
     "keywords": "proxyforgame,ogame,kalkulator ogame,narzędzia ogame,kalkulator online,gra przeglądarkowa,kalkulator kosztów,kalkulator czasu lotu,kalkulator handlu,kalkulator produkcji,kalkulator grawitonu,kalkulator księżyca,kalkulator terraformera,kalkulator ekspedycji,kolejka budowy",
-    "ai-card-text": "Aby otworzyć kalkulator, wybierz go w menu. Można z nich korzystać także inaczej: prosto z ChatGPT, Claude i innych asystentów AI. Zapytaj, ile kosztuje budynek albo jak długo leci flota, a asystent obliczy to według wzorów tej strony.",
+    "ai-card-text": "Z tych kalkulatorów można korzystać także prosto z ChatGPT, Claude i innych asystentów AI. Zapytaj, ile kosztuje budynek albo jak długo leci flota, a asystent obliczy to według wzorów tej strony.",
     "ai-card-button": "Jak go podłączyć"
   },
   "assistants": {

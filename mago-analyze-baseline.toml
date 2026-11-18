@@ -373,84 +373,6 @@ message = "Redundant `||` operation: left operand is always falsy and right oper
 count = 1
 
 [[issues]]
-file = "www/Intl.php"
-code = "invalid-iterator"
-message = "The expression provided to `foreach` is not iterable. It resolved to type `mixed`, which is not iterable."
-count = 1
-
-[[issues]]
-file = "www/Intl.php"
-code = "mixed-argument"
-message = "Invalid argument type for argument #1 of `array_merge`: expected `array<('K.array_merge() extends array-key), ('V.array_merge() extends mixed)>`, but found `nonnull`."
-count = 1
-
-[[issues]]
-file = "www/Intl.php"
-code = "mixed-argument"
-message = "Invalid argument type for argument #2 of `array_merge`: expected `array<('K.array_merge() extends array-key), ('V.array_merge() extends mixed)>`, but found `mixed`."
-count = 1
-
-[[issues]]
-file = "www/Intl.php"
-code = "mixed-argument"
-message = "Invalid argument type for argument #2 of `in_array`: expected `array<array-key, ('V.in_array() extends mixed)>`, but found `mixed`."
-count = 1
-
-[[issues]]
-file = "www/Intl.php"
-code = "mixed-array-assignment"
-message = "Unsafe array assignment on type `mixed`."
-count = 1
-
-[[issues]]
-file = "www/Intl.php"
-code = "mixed-array-index"
-message = "Invalid index type `mixed` used in array assignment on `mixed`."
-count = 1
-
-[[issues]]
-file = "www/Intl.php"
-code = "mixed-assignment"
-message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
-count = 1
-
-[[issues]]
-file = "www/Intl.php"
-code = "mixed-assignment"
-message = "Assigning `nonnull` type to a variable may lead to unexpected behavior."
-count = 1
-
-[[issues]]
-file = "www/Intl.php"
-code = "mixed-operand"
-message = "Invalid middle operand: type `mixed` cannot be reliably used in string concatenation."
-count = 2
-
-[[issues]]
-file = "www/Intl.php"
-code = "possibly-false-argument"
-message = "Argument #1 of function `json_decode` is possibly `false`, but parameter type `string` does not accept it."
-count = 1
-
-[[issues]]
-file = "www/Intl.php"
-code = "possibly-false-iterator"
-message = "Expression being iterated (type `false|list<non-empty-string>`) might be `false` at runtime."
-count = 1
-
-[[issues]]
-file = "www/Intl.php"
-code = "possibly-invalid-array-access"
-message = "Cannot perform array access on value of type `falsy-mixed`."
-count = 1
-
-[[issues]]
-file = "www/Intl.php"
-code = "too-few-arguments"
-message = "Too few arguments provided for method `Intl::getTranslations`."
-count = 1
-
-[[issues]]
 file = "www/ajax.php"
 code = "implicit-to-string-cast"
 message = "Implicit conversion to `string` for right operand via `Throwable::__toString()`."
@@ -1178,15 +1100,9 @@ count = 1
 
 [[issues]]
 file = "www/assistants.php"
-code = "mixed-array-access"
-message = "Unsafe array access on type `mixed`."
-count = 1
-
-[[issues]]
-file = "www/assistants.php"
 code = "mixed-assignment"
 message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
-count = 4
+count = 2
 
 [[issues]]
 file = "www/db.connect.inc.php"
@@ -1247,12 +1163,6 @@ file = "www/env.inc.php"
 code = "possibly-false-iterator"
 message = "Expression being iterated (type `array<int, string>|false`) might be `false` at runtime."
 count = 1
-
-[[issues]]
-file = "www/index.php"
-code = "mixed-assignment"
-message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
-count = 2
 
 [[issues]]
 file = "www/index.tpl"
@@ -1371,12 +1281,6 @@ count = 2
 [[issues]]
 file = "www/ogame/calc/costs.php"
 code = "mixed-argument"
-message = "Invalid argument type for argument #1 of `loadUniverseCountries`: expected `string`, but found `mixed`."
-count = 1
-
-[[issues]]
-file = "www/ogame/calc/costs.php"
-code = "mixed-argument"
 message = "Invalid argument type for argument #2 of `array_merge`: expected `array<non-negative-int, mixed>`, but found `mixed`."
 count = 1
 
@@ -1390,7 +1294,7 @@ count = 8
 file = "www/ogame/calc/costs.php"
 code = "mixed-assignment"
 message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
-count = 8
+count = 6
 
 [[issues]]
 file = "www/ogame/calc/costs.php"
@@ -1498,7 +1402,7 @@ count = 2
 file = "www/ogame/calc/expeditions.php"
 code = "mixed-assignment"
 message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
-count = 20
+count = 18
 
 [[issues]]
 file = "www/ogame/calc/expeditions.php"
@@ -1556,15 +1460,9 @@ count = 3
 
 [[issues]]
 file = "www/ogame/calc/flight.php"
-code = "mixed-argument"
-message = "Invalid argument type for argument #1 of `loadUniverseCountries`: expected `string`, but found `mixed`."
-count = 1
-
-[[issues]]
-file = "www/ogame/calc/flight.php"
 code = "mixed-assignment"
 message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
-count = 3
+count = 1
 
 [[issues]]
 file = "www/ogame/calc/flight.tpl"
@@ -1600,7 +1498,7 @@ count = 2
 file = "www/ogame/calc/graviton.php"
 code = "mixed-assignment"
 message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
-count = 3
+count = 1
 
 [[issues]]
 file = "www/ogame/calc/graviton.tpl"
@@ -1756,7 +1654,7 @@ count = 1
 file = "www/ogame/calc/lfcosts.php"
 code = "mixed-assignment"
 message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
-count = 4
+count = 2
 
 [[issues]]
 file = "www/ogame/calc/lfcosts.php"
@@ -1822,7 +1720,7 @@ count = 4
 file = "www/ogame/calc/moon.php"
 code = "mixed-assignment"
 message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
-count = 3
+count = 1
 
 [[issues]]
 file = "www/ogame/calc/moon.tpl"
@@ -1858,7 +1756,7 @@ count = 1
 file = "www/ogame/calc/production.php"
 code = "mixed-array-access"
 message = "Unsafe array access on type `mixed`."
-count = 21
+count = 20
 
 [[issues]]
 file = "www/ogame/calc/production.php"
@@ -1876,7 +1774,7 @@ count = 1
 file = "www/ogame/calc/production.php"
 code = "mixed-assignment"
 message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
-count = 15
+count = 12
 
 [[issues]]
 file = "www/ogame/calc/production.php"
@@ -1984,7 +1882,7 @@ count = 2
 file = "www/ogame/calc/queue.php"
 code = "mixed-assignment"
 message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
-count = 6
+count = 4
 
 [[issues]]
 file = "www/ogame/calc/queue.php"
@@ -2026,7 +1924,7 @@ count = 2
 file = "www/ogame/calc/terraformer.php"
 code = "mixed-assignment"
 message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
-count = 3
+count = 1
 
 [[issues]]
 file = "www/ogame/calc/terraformer.tpl"
@@ -2048,15 +1946,9 @@ count = 16
 
 [[issues]]
 file = "www/ogame/calc/trade.php"
-code = "mixed-argument"
-message = "Invalid argument type for argument #1 of `loadUniverseCountries`: expected `string`, but found `mixed`."
-count = 1
-
-[[issues]]
-file = "www/ogame/calc/trade.php"
 code = "mixed-assignment"
 message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
-count = 3
+count = 1
 
 [[issues]]
 file = "www/ogame/calc/trade.tpl"
@@ -2181,12 +2073,6 @@ count = 1
 [[issues]]
 file = "www/routes.inc.php"
 code = "mixed-operand"
-message = "Invalid middle operand: type `mixed` cannot be reliably used in string concatenation."
-count = 1
-
-[[issues]]
-file = "www/routes.inc.php"
-code = "mixed-operand"
 message = "Invalid right operand: type `mixed` cannot be reliably used in string concatenation."
 count = 1
 
@@ -2224,7 +2110,7 @@ count = 4
 file = "www/sidebar.tpl"
 code = "mixed-assignment"
 message = "Assigning `mixed` type to a variable may lead to unexpected behavior."
-count = 3
+count = 1
 
 [[issues]]
 file = "www/sidebar.tpl"

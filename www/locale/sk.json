@@ -325,7 +325,7 @@
   "index": {
     "title": "ProxyForGame - software pre online hry v prehliadači OGame",
     "keywords": "proxyforgame,ogame,ogame kalkulačka,ogame nástroje,online kalkulačka,prehliadačová hra,kalkulačka nákladov,kalkulačka času letu,kalkulačka obchodovania,kalkulačka produkcie,kalkulačka gravitónu,kalkulačka mesiacov,kalkulačka terraformera,kalkulačka expedícií,fronta výstavby",
-    "ai-card-text": "Ak chcete otvoriť kalkulačku, vyberte ju v menu. Dajú sa používať aj inak: priamo z ChatGPT, Claude a ďalších AI asistentov. Opýtajte sa, koľko stojí budova alebo ako dlho letí flotila, a asistent to vypočíta podľa vzorcov tejto stránky.",
+    "ai-card-text": "Tieto kalkulačky sa dajú používať aj priamo z ChatGPT, Claude a ďalších AI asistentov. Opýtajte sa, koľko stojí budova alebo ako dlho letí flotila, a asistent to vypočíta podľa vzorcov tejto stránky.",
     "ai-card-button": "Ako ho pripojiť"
   },
   "assistants": {

@@ -325,7 +325,7 @@
   "index": {
     "title": "ProxyForGame - Hilfsprogramme für das Online-Browsergame OGame",
     "keywords": "proxyforgame,ogame,ogame rechner,ogame tools,online rechner,browserspiel,kostenrechner,flugzeitrechner,handelsrechner,produktionsrechner,gravitonrechner,mondrechner,terraformer rechner,expeditionsrechner,bauliste",
-    "ai-card-text": "Um einen Rechner zu öffnen, wähle ihn im Menü. Es geht aber auch anders: direkt aus ChatGPT, Claude und anderen KI-Assistenten. Frag, was ein Gebäude kostet oder wie lange eine Flotte fliegt, und der Assistent rechnet es mit den Formeln dieser Seite aus.",
+    "ai-card-text": "Diese Rechner funktionieren auch direkt aus ChatGPT, Claude und anderen KI-Assistenten heraus. Frag, was ein Gebäude kostet oder wie lange eine Flotte fliegt, und der Assistent rechnet es mit den Formeln dieser Seite aus.",
     "ai-card-button": "So verbindest du ihn"
   },
   "assistants": {

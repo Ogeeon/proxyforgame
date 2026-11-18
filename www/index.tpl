@@ -41,6 +41,22 @@
   <?= str_replace('ProxyForGame', '<strong>ProxyForGame</strong>', $l['title']) ?>
 </div>
 
+<div class="mx-2 mb-3">
+  <div id="calc-grid" class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-3">
+  <?php /** @var list<array{url: string, title: string, description: string}> $calcCards built by index.php */ ?>
+  <?php foreach ($calcCards as $card): ?>
+    <div class="col">
+      <div class="card h-100">
+        <div class="card-body">
+          <h2 class="card-title h5"><a href="<?= htmlspecialchars($card['url'], ENT_QUOTES, 'UTF-8') ?>" class="stretched-link"><?= htmlspecialchars($card['title'], ENT_QUOTES, 'UTF-8') ?></a></h2>
+          <p class="card-text"><?= htmlspecialchars($card['description'], ENT_QUOTES, 'UTF-8') ?></p>
+        </div>
+      </div>
+    </div>
+  <?php endforeach; ?>
+  </div>
+</div>
+
 <div id="ai-card" class="card mx-2">
   <div class="card-body d-flex align-items-start gap-3">
     <i class="bi bi-robot fs-2 text-primary-emphasis" aria-hidden="true"></i>

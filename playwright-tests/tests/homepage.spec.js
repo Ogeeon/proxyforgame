@@ -1,8 +1,39 @@
 import { test, expect } from './base';
+import { readFileSync } from 'fs';
+import { join } from 'path';
+
+// The calculators in menu order, read from PFG_CALCULATORS in www/routes.inc.php -
+// the list the home page's grid and the sidebar are both built from.
+const CALCULATORS = (() => {
+  const source = readFileSync(join(__dirname, '../../www/routes.inc.php'), 'utf8');
+  const list = /const PFG_CALCULATORS = array\(([^)]*)\)/.exec(source);
+  if (!list) throw new Error('PFG_CALCULATORS not found in www/routes.inc.php');
+  return [...list[1].matchAll(/'([a-z]+)'/g)].map((m) => m[1]);
+})();
 
 test('homepage loads', async ({ page }) => {
   await page.goto('/');
   await expect(page).toHaveTitle(/ProxyForGame - tools for online browser game OGame/);
+});
+
+test('the home page has a card for every calculator, in menu order, before the AI card', async ({ page }) => {
+  expect(CALCULATORS.length).toBeGreaterThan(0);
+  await page.goto('/ru/');
+  const cards = page.locator('#calc-grid .card');
+  await expect(cards).toHaveCount(CALCULATORS.length);
+  for (const [i, calc] of CALCULATORS.entries()) {
+    const card = cards.nth(i);
+    await expect(card.locator('a.stretched-link')).toHaveAttribute('href', `/ru/${calc}`);
+    await expect(card.locator('a.stretched-link')).not.toHaveText('');
+    await expect(card.locator('.card-text')).not.toHaveText('');
+  }
+  // The grid comes first; the AI assistants card follows it.
+  const gridFirst = await page.evaluate(() => {
+    const grid = document.getElementById('calc-grid');
+    const ai = document.getElementById('ai-card');
+    return !!grid && !!ai && !!(grid.compareDocumentPosition(ai) & Node.DOCUMENT_POSITION_FOLLOWING);
+  });
+  expect(gridFirst).toBe(true);
 });
 
 test('the AI assistants card leads to the page about the MCP server', async ({ page }) => {

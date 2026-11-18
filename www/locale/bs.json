@@ -325,7 +325,7 @@
   "index": {
     "title": "ProxyForGame - alati za online igru Ogame",
     "keywords": "proxyforgame,ogame,ogame kalkulator,ogame alati,online kalkulator,igra u pregledniku,kalkulator troškova,kalkulator vremena leta,kalkulator trgovine,kalkulator proizvodnje,kalkulator gravitona,kalkulator mjeseca,kalkulator terraformera,kalkulator ekspedicija,red gradnje",
-    "ai-card-text": "Da otvorite kalkulator, izaberite ga u meniju. Može se koristiti i drugačije: direktno iz ChatGPT-a, Claudea i drugih AI asistenata. Pitajte koliko košta zgrada ili koliko dugo leti flota, a asistent će to izračunati po formulama ove stranice.",
+    "ai-card-text": "Ovi kalkulatori se mogu koristiti i direktno iz ChatGPT-a, Claudea i drugih AI asistenata. Pitajte koliko košta zgrada ili koliko dugo leti flota, a asistent će to izračunati po formulama ove stranice.",
     "ai-card-button": "Kako ga povezati"
   },
   "assistants": {
