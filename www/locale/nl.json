@@ -315,7 +315,7 @@
   "index": {
     "title": "ProxyForGame - instrumenten het browser spel OGame",
     "keywords": "proxyforgame,ogame,ogame calculator,ogame tools,online calculator,browsergame,kostencalculator,vliegtijd calculator,handelscalculator,productiecalculator,gravitoncalculator,maancalculator,terraformer calculator,expeditiecalculator,bouwwachtrij",
-    "ai-card-text": "Kies een calculator in het menu om hem te openen. Je kunt ze ook op een andere manier gebruiken: rechtstreeks vanuit ChatGPT, Claude en andere AI-assistenten. Vraag wat een gebouw kost of hoe lang een vloot onderweg is, en de assistent rekent het uit met de formules van deze site.",
+    "ai-card-text": "Deze calculators kun je ook rechtstreeks vanuit ChatGPT, Claude en andere AI-assistenten gebruiken. Vraag wat een gebouw kost of hoe lang een vloot onderweg is, en de assistent rekent het uit met de formules van deze site.",
     "ai-card-button": "Zo koppel je hem"
   },
   "assistants": {

@@ -315,7 +315,7 @@
   "index": {
     "title": "ProxyForGame - Calculadoras para OGame",
     "keywords": "proxyforgame,ogame,calculadora ogame,ferramentas ogame,calculadora online,jogo de navegador,calculadora de custos,calculadora de tempo de voo,calculadora de comércio,calculadora de produção,calculadora de gráviton,calculadora de luas,calculadora de terraformador,calculadora de expedições,fila de construção",
-    "ai-card-text": "Para abrir uma calculadora, escolha-a no menu. Também há outra forma de usá-las: diretamente a partir do ChatGPT, do Claude e de outros assistentes de IA. Pergunte quanto custa um edifício ou quanto tempo uma frota demora a voar, e o assistente calcula com as fórmulas deste site.",
+    "ai-card-text": "Estas calculadoras também podem ser usadas diretamente a partir do ChatGPT, do Claude e de outros assistentes de IA. Pergunte quanto custa um edifício ou quanto tempo uma frota demora a voar, e o assistente calcula com as fórmulas deste site.",
     "ai-card-button": "Como ligar"
   },
   "assistants": {

@@ -315,7 +315,7 @@
   "index": {
     "title": "ProxyForGame - OGame için hesaplamalar",
     "keywords": "proxyforgame,ogame,ogame hesaplayıcı,ogame araçları,çevrimiçi hesaplayıcı,tarayıcı oyunu,maliyet hesaplayıcı,uçuş süresi hesaplayıcı,ticaret hesaplayıcı,üretim hesaplayıcı,graviton hesaplayıcı,ay hesaplayıcı,terraformer hesaplayıcı,keşif seferi hesaplayıcı,inşaat kuyruğu",
-    "ai-card-text": "Bir hesaplayıcıyı açmak için menüden seçin. Onları kullanmanın başka bir yolu da var: doğrudan ChatGPT, Claude ve diğer yapay zekâ asistanlarından. Bir binanın ne kadara mal olduğunu ya da bir filonun ne kadar sürede uçtuğunu sorun, asistan bu sitenin formülleriyle hesaplasın.",
+    "ai-card-text": "Bu hesaplayıcıları doğrudan ChatGPT, Claude ve diğer yapay zekâ asistanlarından da kullanabilirsiniz. Bir binanın ne kadara mal olduğunu ya da bir filonun ne kadar sürede uçtuğunu sorun, asistan bu sitenin formülleriyle hesaplasın.",
     "ai-card-button": "Nasıl bağlanır"
   },
   "assistants": {

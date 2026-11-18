@@ -315,7 +315,7 @@
   "index": {
     "title": "ProxyForGame - tools for online browser game OGame",
     "keywords": "proxyforgame,ogame,ogame calculator,ogame tools,online calculator,browser game,cost calculator,flight time calculator,trade calculator,production calculator,graviton calculator,moon calculator,terraformer calculator,expedition calculator,construction queue",
-    "ai-card-text": "To open a calculator, pick it in the menu. There is another way to use them too: right from ChatGPT, Claude and other AI assistants. Ask what a building costs or how long a fleet takes to fly, and the assistant works it out with this site's formulas.",
+    "ai-card-text": "These calculators also work right from ChatGPT, Claude and other AI assistants. Ask what a building costs or how long a fleet takes to fly, and the assistant works it out with this site's formulas.",
     "ai-card-button": "How to connect"
   },
   "assistants": {
