@@ -119,13 +119,15 @@ const COSTS_START_TABLES = [
 
 /**
  * Where the range tab finds the level of its technology, by the optgroup it
- * is picked from: planet buildings, moon buildings, researches.
+ * is picked from: planet buildings, moon buildings, the Control Centre
+ * components (on the planet), researches.
  *
  * @type {Array<{where: 'planet'|'moon'|'account', prefix: string}>}
  */
 const COSTS_RANGE_GROUPS = [
   { where: 'planet', prefix: 'building.' },
   { where: 'moon', prefix: 'building.' },
+  { where: 'planet', prefix: 'building.' },
   { where: 'account', prefix: 'research.' },
 ];
 
@@ -146,9 +148,9 @@ function costsRangePick() {
 /**
  * The build tables of the one-level and the multi-level tab, as [outer tab,
  * inner tab]; each has its own available resources. Inner tab 3 is the moon
- * buildings'.
+ * buildings', 7 the Control Centre components'.
  */
-const COSTS_LEVEL_TABLES = [[0, 2], [0, 3], [0, 4], [0, 5], [0, 6], [1, 2], [1, 3], [1, 4]];
+const COSTS_LEVEL_TABLES = [[0, 2], [0, 3], [0, 7], [0, 4], [0, 5], [0, 6], [1, 2], [1, 3], [1, 7], [1, 4]];
 
 /**
  * The available resources of the build tables of the moon buildings, or of
@@ -245,12 +247,14 @@ class CostsProfiles extends ProfileBinder {
     this.ownSaveState = app.saveState.bind(app);
     this.ownSaveTable = app.saveLfResearchTable.bind(app);
     this.bodyResources = [
-      // The range tab's two tables - one shows at a time - get the same reading.
+      // The range tab's tables - one shows at a time - get the same reading.
       new PfBodyResources(pf, {
-        groups: [
-          { metal: '#prods-metal-available', crystal: '#prods-crystal-available', deuterium: '#prods-deut-available', caption: '#prods-resources-age' },
-          { metal: '#commons-metal-available', crystal: '#commons-crystal-available', deuterium: '#commons-deut-available', caption: '#commons-resources-age' },
-        ],
+        groups: COSTS_RANGE_TABLES.map(({ prefix }) => ({
+          metal: `#${prefix}-metal-available`,
+          crystal: `#${prefix}-crystal-available`,
+          deuterium: `#${prefix}-deut-available`,
+          caption: `#${prefix}-resources-age`,
+        })),
         body: () => this.resourceBody(),
         recalc: () => this.app.recalculateRangeTab(),
       }),
@@ -589,7 +593,7 @@ class CostsProfiles extends ProfileBinder {
       return this.knownLevel(profile, t.where, t.prefix + techId);
     });
     const level = this.rangeLevel(profile);
-    if (level !== null) pfFollowStart(inputEl('#tab2-from-level'), inputEl('#tab2-to-level'), level, 1);
+    if (level !== null) pfFollowStart(inputEl('#tab2-from-level'), inputEl('#tab2-to-level'), level, PF_RANGE_STEP);
   }
 
   /**

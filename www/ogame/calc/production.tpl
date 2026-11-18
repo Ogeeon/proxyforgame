@@ -82,6 +82,12 @@
         onePlnExtView: false,
         onePlnRace: 0,
         onePlnLfLevels: [],
+        // The anomaly scanner's conversion into lithium on the one-planet tab
+        iasOn: false,
+        iasLevel: 0,
+        iasDiscount: 0,
+        iasResource: 0,
+        iasWorkload: 100,
         oPPP: [[0, 100, 0], [0, 100, 0], [0, 100, 0], [0, 100, 0], [0, 100, 0], [0, 100, 0], [0, 100, 0]],
         metStorageLvl: 0,
         crysStorageLvl: 0,
@@ -142,6 +148,16 @@
               return value === 'true';
             case 'onePlnRace':
               return validateNumber(Number.parseInt(value), 0, 4, 0);
+            case 'iasOn':
+              return value === 'true';
+            case 'iasLevel':
+              return validateNumber(Number.parseInt(value), 0, IAS_MAX_LEVEL, 0);
+            case 'iasDiscount':
+              return validateNumber(Number.parseFloat(value), 0, 100, 0);
+            case 'iasResource':
+              return validateNumber(Number.parseInt(value), 0, 2, 0);
+            case 'iasWorkload':
+              return validateNumber(Number.parseInt(value), 10, 100, 100);
             case 'oPPP':
               return validateNumber(parseFloat(value), -272, Infinity, 0);
             case 'currPlanetsCount':
@@ -238,12 +254,12 @@
     options.msgMinConstraintViolated = "<?= $l['msg-min-constraint-violated'] ?>";
     options.msgMaxConstraintViolated = "<?= $l['msg-max-constraint-violated'] ?>";
     options.planetNumStr = "<?= $l['planet-num'] ?>";
-    options.planetLabel = <?= json_encode($l['planet']) ?>;
     options.maxTempAlt = "<?= $l['max-planet-temp'] ?>";
     options.positionAlt = "<?= $l['planet-pos'] ?>";
     options.resReadyInMsg =  "<?= $l['res-ready-in'] ?>";
     options.resWillNotAccumMsg = "<?= $l['res-will-not-accumulate'] ?>";
     options.resWillNotAccumMsg1 = "<?= $l['res-will-not-accumulate1'] ?>";
+    options.resWillNotAccumIasMsg = <?= json_encode($l['res-will-not-accumulate-ias']) ?>;
     options.enoughResAlreadyMsg = "<?= $l['enough-res-already'] ?>";
     options.plnDelConfMsg = "<?= $l['del-planet-confirm'] ?>";
     options.cloneConfMsg = "<?= $l['clone-confirm'] ?>";
@@ -291,6 +307,7 @@
       'allpln-accumwhat-crys' => $l['resources-will-be'] . ' ' . $l['crystal'],
       'allpln-accumwhat-deut' => $l['resources-will-be'] . ' ' . $l['deuterium'],
       'onepln-accumwhen-msg' => $l['accumulate-when'], 'allpln-accumwhen-msg' => $l['accumulate-when'],
+      'ias' => $l['anomaly-scanner'], 'ias-lithium' => $l['ias-lithium'], 'ias-cost' => $l['ias-cost'],
     )) ?>;
 
     <?php $techs = getTechsByType(2);?>
@@ -575,6 +592,32 @@
 
     <div class="tab-content" id="mainTabContent">
       <div class="tab-pane fade show active p-2" id="one-planet-panel" role="tabpanel">
+        <!-- what the planet is: the profile's planet (shown with a profile only), its life form and scanner -->
+        <div class="d-flex flex-wrap gap-2 align-items-center mb-1">
+          <div id="pf-planet-row" class="d-flex align-items-center gap-1 d-none">
+            <label for="pf-planet"><?= $l['planet'] ?></label>
+            <select id="pf-planet" class="form-select form-select-sm w-auto"></select>
+          </div>
+          <div class="d-flex align-items-center gap-1">
+            <label for="one-pln-race"><?= $l['race'] ?></label>
+            <select id="one-pln-race" name="one-pln-race" class="form-select form-select-sm w-auto">
+              <option value="0" selected="selected"><?= $l['none'] ?></option>
+              <?php for ($r = 1; $r <= 4; $r++): ?>
+              <option value="<?=$r?>"><?= $l['race-'.$r] ?></option>
+              <?php endfor; ?>
+            </select>
+          </div>
+          <div class="d-flex align-items-center gap-1">
+            <input id="ias-enabled" name="ias-enabled" type="checkbox" class="form-check-input">
+            <label for="ias-enabled" data-bs-toggle="tooltip" title="<?= htmlspecialchars($l['anomaly-scanner'], ENT_QUOTES) ?>"><?= $l['ias-short'] ?></label>
+            <button id="ias-settings" type="button" class="btn btn-outline-secondary btn-sm py-0" data-bs-toggle="tooltip" title="<?= htmlspecialchars($l['ias-settings'], ENT_QUOTES) ?>" aria-label="<?= htmlspecialchars($l['ias-settings'], ENT_QUOTES) ?>"><i class="bi bi-gear"></i></button>
+          </div>
+          <div class="d-flex align-items-center gap-1 ms-auto">
+            <input id="one-pln-extended-view" name="one-pln-extended-view" type="checkbox" class="form-check-input">
+            <label for="one-pln-extended-view"><?= $l['extended-view'] ?></label>
+          </div>
+        </div>
+        <!-- where it is and how it is powered, with the production factor that follows from the energy -->
         <div class="d-flex flex-wrap gap-2 align-items-center mb-1">
           <div class="d-flex align-items-center gap-1">
             <label for="max-planet-temp"><?= $l['max-planet-temp'] ?></label>
@@ -598,21 +641,6 @@
             <?= $l['prod-coeff'] ?>&nbsp;<span id="prod-coeff" data-report-cell="prod-coeff">0</span>
           </div>
         </div>
-        <div class="d-flex flex-wrap gap-2 align-items-center mb-1">
-          <div class="d-flex align-items-center gap-1">
-            <label for="one-pln-race"><?= $l['race'] ?></label>
-            <select id="one-pln-race" name="one-pln-race" class="form-select form-select-sm w-auto">
-              <option value="0" selected="selected"><?= $l['none'] ?></option>
-              <?php for ($r = 1; $r <= 4; $r++): ?>
-              <option value="<?=$r?>"><?= $l['race-'.$r] ?></option>
-              <?php endfor; ?>
-            </select>
-          </div>
-          <div class="d-flex align-items-center gap-1 ms-auto">
-            <input id="one-pln-extended-view" name="one-pln-extended-view" type="checkbox" class="form-check-input">
-            <label for="one-pln-extended-view"><?= $l['extended-view'] ?></label>
-          </div>
-        </div>
 
         <div class="pfg-scroll-x">
           <table id="one-planet-prod" class="lined w-100">
@@ -627,7 +655,7 @@
               <th style="display: none;">%</th>
             </tr>
             <?php for($i = 0; $i < count($oneTblProdRows); $i++): ?>
-              <?php if ($i == 16):?>
+              <?php if ($oneTblProdRows[$i] === 'prod-per-hour'):?>
                 <tr><td colspan="8" class="table-line-2px"></td></tr>
               <?php endif; ?>
               <tr class="<?= ($i % 2) === 1 ? 'odd' : 'even' ?>" data-report-key="<?= $oneTblProdRows[$i] ?>">
@@ -698,6 +726,16 @@
                     </tr>
                   <?php endforeach; ?>
                 <?php endforeach; ?>
+              <?php endif; ?>
+              <?php if ($oneTblProdRows[$i] === 'booster'): ?>
+                <?php // The anomaly scanner's conversion into lithium, after the items as in the game: a cost, shown while #ias-enabled is checked ?>
+                <tr id="ias-conversion-row" class="<?= ($i % 2) === 1 ? 'even' : 'odd' ?>" data-report-key="ias-conversion" style="display: none;">
+                  <td class="text-start"><?= $l['ias-conversion'] ?></td>
+                  <td class="text-center" style="display: none;"></td>
+                  <td class="text-center"></td>
+                  <?php foreach (array('metal', 'crystal', 'deuterium', 'energy') as $col): ?><td class="text-center" data-report-cell="ias-conversion.<?= $col ?>"></td><?php endforeach; ?>
+                  <td class="text-center" style="display: none;"></td>
+                </tr>
               <?php endif; ?>
             <?php endfor; ?>
             <tr><td colspan="8" class="table-line-3px"></td></tr>
@@ -1151,6 +1189,45 @@
     </div> <!-- End col-md-10 -->
   </div> <!-- End row -->
 </div> <!-- End container-fluid -->
+
+<!-- The anomaly scanner's conversion into lithium, for the one-planet tab -->
+<div class="modal fade" role="dialog" id="ias-modal" tabindex="-1" aria-labelledby="ias-modal-label" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title" id="ias-modal-label"><?= $l['anomaly-scanner'] ?></h3>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div id="ias-fields" class="d-grid gap-2 align-items-center" style="grid-template-columns: auto auto;">
+          <label for="ias-level"><?= $l['ias-level'] ?></label>
+          <input id="ias-level" type="text" name="ias-level" class="form-control form-control-sm input-4columns" value="0">
+          <label for="ias-discount"><?= $l['ias-discount'] ?></label>
+          <input id="ias-discount" type="text" name="ias-discount" class="form-control form-control-sm input-5columns" value="0">
+          <label for="ias-resource"><?= $l['ias-resource'] ?></label>
+          <select id="ias-resource" name="ias-resource" class="form-select form-select-sm w-auto">
+            <option value="0" selected="selected"><?= $l['metal'] ?></option>
+            <option value="1"><?= $l['crystal'] ?></option>
+            <option value="2"><?= $l['deuterium'] ?></option>
+          </select>
+          <label for="ias-workload"><?= $l['ias-workload'] ?></label>
+          <select id="ias-workload" name="ias-workload" class="form-select form-select-sm w-auto">
+            <?php for ($w = 100; $w >= 10; $w -= 10): ?>
+            <option value="<?= $w ?>"<?= $w === 100 ? ' selected="selected"' : '' ?>><?= $w ?>%</option>
+            <?php endfor; ?>
+          </select>
+          <span><?= $l['ias-lithium'] ?></span>
+          <span id="ias-lithium" data-report-cell="ias-lithium">0</span>
+          <span><?= $l['ias-cost'] ?></span>
+          <span id="ias-cost" data-report-cell="ias-cost">0</span>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" data-bs-dismiss="modal"><?= $l['done'] ?></button>
+      </div>
+    </div>
+  </div>
+</div>
 
 <?php require_once '../../analitics.tpl'; ?>
 

@@ -13,7 +13,8 @@ const { expect } = require('./expect');
 const ctx = load(
     ['ogame/calc/js/ogame-costs.js', 'ogame/calc/js/ogame-production.js', 'ogame/calc/js/production-core.js'],
     ['createEmptyPlanet', 'isPlnEmpty', 'mineSlot', 'PLANET_TEMP', 'PLANET_POS', 'PLANET_RACE', 'PLANET_LF_LEVELS', 'lfResearchIncrease', 'lfBuildingUpgradeLevels', 'lfBuildingCostReduction',
-        'calculateProduction', 'getSSCost', 'lfBuildingEffects', 'convertExchangeRates', 'convertAllPlanetParams'],
+        'calculateProduction', 'getSSCost', 'lfBuildingEffects', 'convertExchangeRates', 'convertAllPlanetParams',
+        'lithiumConversion', 'planetLithiumConversion', 'PLANET_IAS_ON', 'PLANET_IAS_LEVEL', 'PLANET_IAS_DISCOUNT', 'PLANET_IAS_RESOURCE', 'PLANET_IAS_WORKLOAD'],
 );
 const { createEmptyPlanet, isPlnEmpty, lfResearchIncrease, lfBuildingUpgradeLevels, lfBuildingCostReduction,
     calculateProduction, getSSCost, lfBuildingEffects, convertExchangeRates, convertAllPlanetParams } = ctx;
@@ -152,7 +153,9 @@ describe('the planet array layout', () => {
         expect(planet[PLANET_TEMP]).toBe(0);
         expect(planet[PLANET_POS]).toBe(8);
         expect(planet[PLANET_RACE]).toBe(0);
-        expect(planet).toHaveLength(PLANET_LF_LEVELS + 12);
+        // The life form levels, then the five slots of the lithium conversion.
+        expect(ctx.PLANET_IAS_ON).toBe(PLANET_LF_LEVELS + 12);
+        expect(planet).toHaveLength(ctx.PLANET_IAS_WORKLOAD + 1);
         expect(mineSlot(1)).toBe(3);
         expect(planet[mineSlot(7) + 1]).toBe(100);
     });
@@ -333,5 +336,73 @@ describe('convertAllPlanetParams', () => {
         expect(prm.aPNames).toEqual(['Planet 1']);
         expect(prm.aPPP).toEqual([[]]);
         expect(prm.aPB).toEqual([[]]);
+    });
+});
+
+// Measured in the Orion beta (docs/anomaly-scanner.md): the Lithium Production
+// tab of a level-20 scanner at every workload, and the resource settings page.
+describe('lithiumConversion', () => {
+    const { lithiumConversion, planetLithiumConversion } = ctx;
+    const at = (workloadPct, resource = 0, discountPct = 0, level = 20) =>
+        lithiumConversion({ level, workloadPct, discountPct, resource });
+
+    it('floors the lithium of a level-20 scanner at every workload the game offers', () => {
+        const lithium = [100, 90, 80, 70, 60, 50, 40, 30, 20, 10].map((w) => at(w).lithium);
+        expect(lithium).toEqual([20666, 18600, 16533, 14466, 12400, 10333, 8266, 6200, 4133, 2066]);
+    });
+
+    it('rounds the cost, computed from the floored lithium, with the discount', () => {
+        // 20666 * 2 * 0.999 = 41290.67, shown as 41,291
+        expect(at(100, 1, 0.1).cost).toEqual([0, 41291, 0]);
+        // 2066 * 3 * 0.999 = 6191.8, not 2066.688 * 3 * 0.999 = 6193.9
+        expect(at(10, 0, 0.1).cost).toEqual([6192, 0, 0]);
+        expect(at(100, 2, 0.1).cost).toEqual([0, 0, 20645]);
+    });
+
+    // Measured 2026-11-18 on a level-18 scanner with one Catalytic Converter
+    // level, which the game shows as a 0.15% discount.
+    it('reproduces the costs the game shows with a 0.15% discount', () => {
+        /** @type {Array<[number, number[], number]>} workload, cost per resource, lithium */
+        const measured = [
+            [100, [46047, 30698, 15349], 15372],
+            [50, [23023, 15349, 7674], 7686],
+            [10, [4604, 3069, 1535], 1537],
+        ];
+        for (const [workload, costs, lithium] of measured) {
+            costs.forEach((cost, resource) => {
+                const result = at(workload, resource, 0.15, 18);
+                expect(result.lithium).toBe(lithium);
+                expect(result.cost[resource]).toBe(cost);
+            });
+        }
+    });
+
+    it('matches the conversion row of the resource settings page', () => {
+        // -7,230 metal: level 11 at 50%, no discount, 2410 lithium
+        expect(lithiumConversion({ level: 11, workloadPct: 50, discountPct: 0, resource: 0 })).toEqual({ lithium: 2410, cost: [7230, 0, 0] });
+    });
+
+    it('costs nothing without a scanner, a workload or a known resource', () => {
+        expect(at(100, 0, 0, 0)).toEqual({ lithium: 0, cost: [0, 0, 0] });
+        expect(at(0)).toEqual({ lithium: 0, cost: [0, 0, 0] });
+        expect(at(100, 3)).toEqual({ lithium: 0, cost: [0, 0, 0] });
+    });
+
+    it('reads a planet array, the discount in hundredths of a percent, and skips one switched off', () => {
+        const planet = createEmptyPlanet();
+        planet[ctx.PLANET_IAS_LEVEL] = 20;
+        planet[ctx.PLANET_IAS_DISCOUNT] = 10;
+        planet[ctx.PLANET_IAS_RESOURCE] = 1;
+        expect(planetLithiumConversion(planet)).toBe(null);
+        planet[ctx.PLANET_IAS_ON] = 1;
+        expect(planetLithiumConversion(planet)).toEqual({ lithium: 20666, cost: [0, 41291, 0], resource: 1 });
+    });
+
+    it('leaves a planet empty while only the conversion defaults are set', () => {
+        const planet = createEmptyPlanet();
+        expect(planet[ctx.PLANET_IAS_WORKLOAD]).toBe(100);
+        expect(isPlnEmpty(planet)).toBe(true);
+        planet[ctx.PLANET_IAS_ON] = 1;
+        expect(isPlnEmpty(planet)).toBe(false);
     });
 });

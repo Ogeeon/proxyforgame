@@ -8,6 +8,9 @@
 
 'use strict';
 
+/** How many levels above the known one the range tab's "to" starts at. */
+const PF_RANGE_STEP = 3;
+
 /**
  * Move a build row's "from" and "to" fields to a body's level, unless the
  * player set the row up by hand (pfStartRange).
@@ -15,7 +18,7 @@
  * @param {?HTMLInputElement} from
  * @param {?HTMLInputElement} to
  * @param {number} level
- * @param {0|1} gap
+ * @param {number} gap
  * @returns {boolean} Whether a field changed.
  */
 function pfFollowStart(from, to, level, gap) {
@@ -58,15 +61,19 @@ function pfFillStartRows(tables, levelOf) {
 
 /**
  * Another technology was picked on the range tab: its "from" becomes the
- * level the profile knows, and "to" is raised to the next level when it is not
- * above it. Whatever the player typed was for the old technology.
+ * level the profile knows. "to" follows to PF_RANGE_STEP levels above it when
+ * the player left it alone (not beyond the old "from" + PF_RANGE_STEP, as
+ * pfStartRange reads it) or when it is not above the new level; a "to" planned
+ * by hand above both stays.
  *
  * @param {?number} level Null leaves the fields alone.
  */
 function pfFillRangeStart(level) {
   if (level === null) return;
+  const oldFrom = Number.parseInt(getVal('#tab2-from-level'), 10) || 0;
+  const oldTo = Number.parseInt(getVal('#tab2-to-level'), 10) || 0;
   setVal('#tab2-from-level', level);
-  if ((Number.parseInt(getVal('#tab2-to-level'), 10) || 0) <= level) setVal('#tab2-to-level', level + 1);
+  if (oldTo <= oldFrom + PF_RANGE_STEP || oldTo <= level) setVal('#tab2-to-level', level + PF_RANGE_STEP);
 }
 
 /**

@@ -161,6 +161,31 @@ function runVnu() {
     process.exit(1);
 }
 
+/**
+ * Findings the gate lets through. An exception is one rendered page, one exact
+ * message and a reason; it is never a rule switched off for the whole tree.
+ *
+ * costs and lfcosts: `<link rel="expect" href="#...-end" blocking="render">` holds the first
+ * paint until the panel is parsed, because the panel is `width: min-content` and a paint made
+ * while the HTML still streams in shows a narrow box that jumps (CLS 0.34 on costs in PSI).
+ * The HTML Standard allows `blocking` on rel=expect, but the Nu Html Checker still insists
+ * on rel=stylesheet (still so in vnu-jar 26.11.14, checked 2026-11-16). Nothing flags a stale
+ * entry, so after each vnu-jar bump run once without it and drop it when the markup passes.
+ * @type {{ pages: string[], message: string }[]}
+ */
+const KNOWN_EXCEPTIONS = [
+    {
+        pages: ['costs.html', 'lfcosts.html'],
+        message: 'A “link” element with a “blocking” attribute must have a “rel” attribute whose value is “stylesheet”.'
+    }
+];
+
+/** True when a message is one of KNOWN_EXCEPTIONS for the page it came from. */
+function isKnownException(msg) {
+    const file = path.basename(String(msg.url || ''));
+    return KNOWN_EXCEPTIONS.some((ex) => ex.message === msg.message && ex.pages.includes(file));
+}
+
 /** Group messages by rendered file. */
 function groupMessages(messages) {
     /** @type {Map<string, Array<object>>} */
@@ -230,7 +255,7 @@ function main() {
             }
             console.log('Running vnu over .html-check/...');
             const parsed = runVnu();
-            const { byFile } = groupMessages(parsed.messages || []);
+            const { byFile } = groupMessages((parsed.messages || []).filter((msg) => !isKnownException(msg)));
             const clean = printReport(byFile);
             if (!clean) {
                 console.error(colorize('\nRun make html-audit for the same report.', colors.gray));

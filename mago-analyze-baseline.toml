@@ -1375,18 +1375,6 @@ message = "The first value for `echo` might have the wrong type."
 count = 1
 
 [[issues]]
-file = "www/ogame/calc/costs.tpl"
-code = "undefined-int-array-index"
-message = "Undefined array key 5 accessed on `array{2: string('buildings-planet'), 3: string('buildings-moon'), 4: string('researches')}`."
-count = 1
-
-[[issues]]
-file = "www/ogame/calc/costs.tpl"
-code = "undefined-int-array-index"
-message = "Undefined array key 6 accessed on `array{2: string('buildings-planet'), 3: string('buildings-moon'), 4: string('researches')}`."
-count = 1
-
-[[issues]]
 file = "www/ogame/calc/expeditions.php"
 code = "less-specific-nested-argument-type"
 message = "Argument type mismatch for argument #1 of `array_column`: expected `array<array-key, array<string('upTo'), ('V.array_column() extends mixed)>|object>|list<array<string('upTo'), ('V.array_column() extends mixed)>|object>`, but provided type `array<array-key, mixed>|list<mixed>` is less specific."

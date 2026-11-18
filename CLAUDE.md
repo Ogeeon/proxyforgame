@@ -76,12 +76,9 @@ covers whether a given test belongs in Node or in Playwright. Tests live in
 The full procedure lives in the **`commit` skill** — Conventional Commits subject, test
 scoping, message mechanics. Two rules that must hold even if the skill is not invoked:
 
-- **When asked to commit, first ask whether the changed files should be run through SonarQube**
-  (`analyze_code_snippet` on the sonarqube MCP server, one call per changed file). Wait for the
-  answer before committing. Two exemptions: work driven by `/sonar-fix`, whose Sonar pass already
-  happened, and a commit that touches nothing Sonar analyzes — docs, `Makefile`, `.claude/**`,
-  locale JSON, `*.sql`. One analyzable file (`.js`, `.php`, `.tpl`, `.css`, `.html`) in the change
-  means the question applies. The table is in the `commit` skill.
+- **No SonarQube pass before a commit** — do not ask about one and do not run
+  `analyze_code_snippet` on the changed files. Sonar is the cloud scan after the push
+  (*Deployment*, step 2): its new findings are reported then and fixed in a follow-up commit.
 - **Never commit an unverified change.** Scope the run per `docs/test-scope.md`; full `make test`
   before any `git push`. Keep unrelated pre-existing changes in a separate commit.
 

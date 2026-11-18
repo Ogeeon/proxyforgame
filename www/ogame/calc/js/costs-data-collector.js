@@ -153,9 +153,8 @@ class DataCollector {
     const rows = this._getTableRows(tableId);
 
     // Determine table type from ID
-    const isMultiLevel = tableId.includes('-1-'); // table-1-* are multi-level
+    const { isMultiLevel, hasQtyCol } = costsTableLayout(tableId);
     const isMoonTable = tableId.endsWith('-3'); // table-*-3 are moon buildings
-    const hasQtyCol = ['table-0-2', 'table-0-3', 'table-1-2', 'table-1-3'].includes(tableId); // planet and moon buildings on both tabs have qty column
 
     // Skip header row (0) and footer rows (last 5)
     for (let i = 1; i < rows.length - 5; i++) {
@@ -258,6 +257,7 @@ class DataCollector {
       // Single-level tab
       result.buildingsPlanet = this.collectTableRequests('table-0-2');
       result.buildingsMoon = this.collectTableRequests('table-0-3');
+      result.controlCentre = this.collectTableRequests('table-0-7');
       result.research = this.collectTableRequests('table-0-4');
       result.fleet = this.collectTableRequests('table-0-5');
       result.defense = this.collectTableRequests('table-0-6');
@@ -265,6 +265,7 @@ class DataCollector {
       // Multi-level tab
       result.buildingsPlanet = this.collectTableRequests('table-1-2');
       result.buildingsMoon = this.collectTableRequests('table-1-3');
+      result.controlCentre = this.collectTableRequests('table-1-7');
       result.research = this.collectTableRequests('table-1-4');
     }
 
@@ -295,8 +296,27 @@ class DataCollector {
       fromLevel,
       toLevel,
       requests,
-      techName: this._getSelectedTechName()
+      techName: this._getSelectedTechName(),
+      ...this._getSelectedComponent(),
     };
+  }
+
+  /**
+   * Whether the range tab's technology is a Control Centre component, and its
+   * effect in percent per level (null while unknown). The template marks the
+   * options of the components with data-effect, empty when the effect is not
+   * known.
+   * @private
+   * @returns {{isComponent: boolean, effectPerLevel: number|null}}
+   */
+  _getSelectedComponent() {
+    const select = selectEl('#tech-types-select');
+    const option = select ? select.options[select.selectedIndex] : undefined;
+    const effect = option?.dataset.effect;
+    if (effect === undefined) {
+      return { isComponent: false, effectPerLevel: null };
+    }
+    return { isComponent: true, effectPerLevel: effect === '' ? null : Number(effect) };
   }
 
   /**
@@ -321,9 +341,10 @@ class DataCollector {
    */
   getAffectedTables(fieldId) {
     const affectedMap = {
-      // Robot factory affects planet buildings
+      // Robot factory affects planet buildings and the Control Centre components
       'robot-factory-level': [
-        'table-0-2', 'table-1-2' // Planet buildings
+        'table-0-2', 'table-1-2', // Planet buildings
+        'table-0-7', 'table-1-7'
       ],
 
       // Moon robot factory affects moon buildings
@@ -333,8 +354,8 @@ class DataCollector {
 
       // Nanite affects all construction
       'nanite-factory-level': [
-        'table-0-2', 'table-0-3', 'table-0-5', 'table-0-6',
-        'table-1-2', 'table-1-3'
+        'table-0-2', 'table-0-3', 'table-0-7', 'table-0-5', 'table-0-6',
+        'table-1-2', 'table-1-3', 'table-1-7'
       ],
 
       // Shipyard affects ships and defense
@@ -344,14 +365,12 @@ class DataCollector {
 
       // Ion tech affects deconstruction costs
       'ion-tech-level': [
-        'table-0-2', 'table-1-2' // Planet buildings
+        'table-0-2', 'table-1-2', // Planet buildings
+        'table-0-7', 'table-1-7'
       ],
 
       // Hyper tech affects all (cargo capacity in totals)
-      'hyper-tech-level': [
-        'table-0-2', 'table-0-3', 'table-0-4', 'table-0-5', 'table-0-6',
-        'table-1-2', 'table-1-3', 'table-1-4'
-      ],
+      'hyper-tech-level': ['*'],
 
       // Research lab affects research
       'research-lab-level': [
@@ -373,8 +392,8 @@ class DataCollector {
 
       // Speed affects all
       'universe-speed': [
-        'table-0-2', 'table-0-3', 'table-0-5', 'table-0-6',
-        'table-1-2', 'table-1-3'
+        'table-0-2', 'table-0-3', 'table-0-7', 'table-0-5', 'table-0-6',
+        'table-1-2', 'table-1-3', 'table-1-7'
       ],
 
       'research-speed': [
@@ -421,10 +440,7 @@ class DataCollector {
 
     if (affected.includes('*')) {
       // All tables affected
-      return [
-        'table-0-2', 'table-0-3', 'table-0-4', 'table-0-5', 'table-0-6',
-        'table-1-2', 'table-1-3', 'table-1-4'
-      ];
+      return [...COSTS_TAB_TABLES[0], ...COSTS_TAB_TABLES[1]];
     }
 
     return affected;

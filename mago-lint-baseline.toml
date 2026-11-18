@@ -1198,7 +1198,7 @@ count = 1
 file = "www/ogame/calc/costs.tpl"
 code = "array-style"
 message = "Short array style `[..]` is preferred over `array(..)`."
-count = 3
+count = 2
 
 [[issues]]
 file = "www/ogame/calc/costs.tpl"
@@ -1216,12 +1216,6 @@ count = 5
 file = "www/ogame/calc/costs.tpl"
 code = "no-else-clause"
 message = "Avoid `elseif` clauses."
-count = 1
-
-[[issues]]
-file = "www/ogame/calc/costs.tpl"
-code = "no-php-tag-terminator"
-message = "Semicolon terminator is preferred over tag-pair terminator."
 count = 1
 
 [[issues]]

@@ -333,6 +333,33 @@ test('another planet is picked in the one-planet tab and remembered', async ({ p
     await expect(page.locator('#pf-planet option:checked')).toHaveText('Beta [2:150:12]');
 });
 
+test('the anomaly scanner level comes from the game, the conversion settings stay with the planet', async ({ page }) => {
+    const raw = JSON.parse(EXPORT);
+    Object.values(raw.planets)[0].buildings['45'] = 18;
+    await page.goto('/production');
+    await importExport(page, JSON.stringify(raw));
+
+    await expect(page.locator('#ias-level')).toHaveValue('18');
+    await expect(page.locator('#ias-level')).toHaveClass(/pf-bound/);
+    await page.locator('#ias-enabled').check();
+    await page.locator('#ias-settings').click();
+    await page.locator('#ias-workload').selectOption('50');
+    await page.locator('#ias-modal .modal-footer button').click();
+    await expect.poll(async () => {
+        const values = (await activeProfile(page)).planets[0].values;
+        return [values['ias.on']?.override, values['ias.workload']?.override];
+    }).toEqual([1, 50]);
+
+    // Another planet has a conversion of its own; the first keeps its settings.
+    await page.locator('#pf-planet').selectOption({ label: 'Beta [2:150:12]' });
+    await expect(page.locator('#ias-enabled')).not.toBeChecked();
+    await expect(page.locator('#ias-level')).toHaveValue('0');
+    await page.locator('#pf-planet').selectOption({ index: 0 });
+    await expect(page.locator('#ias-enabled')).toBeChecked();
+    await expect(page.locator('#ias-workload')).toHaveValue('50');
+    await expect(page.locator('#ias-conversion-row')).toBeVisible();
+});
+
 test('a new empty profile gains a planet only once it is edited', async ({ page }) => {
     await page.goto('/production');
     await chooseAction(page, '__create');
@@ -1563,10 +1590,11 @@ test('costs fills in the known levels as the start levels, unbound', async ({ pa
     // The range tab starts from the level of the technology picked there.
     await page.locator('#tabtag-2').click();
     await expect(page.locator('#tab2-from-level')).toHaveValue('30');
-    await expect(page.locator('#tab2-to-level')).toHaveValue('31');
+    await expect(page.locator('#tab2-to-level')).toHaveValue('33');
     await page.locator('#tech-types-select').selectOption('113');
     await expect(page.locator('#tab2-from-level')).toHaveValue('14');
-    await expect(page.locator('#tab2-to-level')).toHaveValue('31');
+    // "to" was not touched by hand, so it follows the lower level too.
+    await expect(page.locator('#tab2-to-level')).toHaveValue('17');
     // The moon's robotics factory, not the planet's.
     await page.locator('#tech-types-select').selectOption({ index: await page.evaluate(() => {
         const select = /** @type {HTMLSelectElement} */ (document.getElementById('tech-types-select'));
@@ -1597,7 +1625,7 @@ test('costs rows left alone follow another planet, rows planned by hand stay', a
 
     await page.locator('#tabtag-2').click();
     await expect(page.locator('#tab2-from-level')).toHaveValue('28');
-    await expect(page.locator('#tab2-to-level')).toHaveValue('29');
+    await expect(page.locator('#tab2-to-level')).toHaveValue('31');
     await page.locator('#tab2-to-level').fill('35');
     await page.locator('#tab2-to-level').blur();
     await page.locator('#pf-planet').selectOption({ label: 'Alpha [2:148:8]' });
@@ -1705,7 +1733,7 @@ test('LF costs fill in the planet levels as the start levels, unbound', async ({
     await page.locator('#tabtag-2').click();
     await page.locator('#tech-types-select').selectOption('1001');
     await expect(page.locator('#tab2-from-level')).toHaveValue('40');
-    await expect(page.locator('#tab2-to-level')).toHaveValue('41');
+    await expect(page.locator('#tab2-to-level')).toHaveValue('43');
 
     // A research added to the multi-level table starts from the planet's level.
     await page.locator('#tabtag-1').click();

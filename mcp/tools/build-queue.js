@@ -44,7 +44,9 @@ const inputSchema = {
             items: {
                 type: 'object',
                 properties: {
-                    building: { type: 'string', enum: BUILDINGS.map((b) => b.key) },
+                    // Not an enum: levels' description lists every key with its name once, and
+                    // resolveKey() takes either (mcp/README.md).
+                    building: { type: 'string', description: 'A key or English name from the levels list.' },
                     action: { type: 'string', enum: ['build', 'demolish'], default: 'build' },
                     times: { type: 'integer', minimum: 1, maximum: 100, default: 1 },
                 },
@@ -95,7 +97,8 @@ function expandQueue(steps, startLevels, where) {
     const queue = [];
     const projected = { ...startLevels };
     for (const step of steps) {
-        const b = /** @type {{id: number, key: string}} */ (BY_KEY.get(step.building));
+        const key = common.resolveKey(step.building, BY_KEY.keys(), NAMES, 'building');
+        const b = /** @type {{id: number, key: string}} */ (BY_KEY.get(key));
         const build = step.action === 'build';
         projected[b.id] = levelAfter(b, build, step.times, projected[b.id], where);
         for (let i = 0; i < step.times; i++) {
