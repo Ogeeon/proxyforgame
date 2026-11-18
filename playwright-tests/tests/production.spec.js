@@ -94,6 +94,27 @@ test('officers bonuses calculations are correct', async ({ page }) => {
     await expect(totalRow.locator('td').nth(6)).toHaveText('180');
 });
 
+test('the one-planet rows follow the game\'s production overview', async ({ page }) => {
+    const keys = await page.locator('#one-planet-prod tr[data-report-key]:not(.lf-row)')
+        .evaluateAll((rows) => rows.map((tr) => /** @type {HTMLElement} */ (tr).dataset.reportKey));
+    expect(keys).toEqual(['natural-production', 'metal-mine', 'crystal-mine', 'deut-synth',
+        'solar-plant', 'fusion-reactor', 'solar-sat', 'crawler', 'plasma-tech', 'booster',
+        'ias-conversion', 'engineer', 'geologist', 'commanding-staff', 'class', 'alliance-class',
+        'lifeform-tech', 'prod-per-hour', 'prod-per-day', 'prod-per-week']);
+});
+
+test('each officer\'s bonus lands in that officer\'s own row', async ({ page }) => {
+    // The rows are filled by key; a mix-up would put the Engineer's energy
+    // in the Geologist's row, which only has resources.
+    const row = (key) => page.locator(`#one-planet-prod tr[data-report-key="${key}"] td`);
+    await page.locator('#engineer').click();
+    await expect(row('engineer').nth(6)).not.toHaveText('');
+    await expect(row('geologist').nth(3)).toHaveText('');
+    await page.locator('#geologist').click();
+    await expect(row('geologist').nth(3)).not.toHaveText('');
+    await expect(row('geologist').nth(6)).toHaveText('');
+});
+
 test('player class and Alliance Traders bonuses calculations are correct', async ({ page }) => {
     const totalRow = page.locator('#one-planet-prod tr').filter({ hasText: 'Total per hour' });
 
@@ -561,10 +582,10 @@ test.describe('Lifeform Tech Bonus row', () => {
 });
 
 test.describe('Collector character class bonus', () => {
-    // The Class row is #one-planet-prod row 14 (0 = header); td[3]=metal,
-    // [4]=crystal, [5]=deut, [6]=energy. With the standard setup (levels 10,
-    // temp 100, pos 8, Collector) the unamplified bonus is 263/130/67/141.
-    const classCell = (page, col) => page.locator('#one-planet-prod tr:not(.lf-row)').nth(14).locator('td').nth(col);
+    // The Class row of #one-planet-prod; td[3]=metal, [4]=crystal, [5]=deut,
+    // [6]=energy. With the standard setup (levels 10, temp 100, pos 8,
+    // Collector) the unamplified bonus is 263/130/67/141.
+    const classCell = (page, col) => page.locator('#one-planet-prod tr[data-report-key="class"]').locator('td').nth(col);
     // The Crawler row is row 8 of the same table - crawlers carry the Collector's
     // +50% production bonus in their own row rather than in the Class row.
     const crawlerCell = (page, col) => page.locator('#one-planet-prod tr:not(.lf-row)').nth(8).locator('td').nth(col);

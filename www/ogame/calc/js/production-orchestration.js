@@ -271,18 +271,28 @@ function productionCell(value) {
 	return '<span style="color: brown;">' + numToOGame(-1 * value) + '</span>';
 }
 
-// Fills the per-row production/consumption cells (rows 0-15, columns 0-3),
-// with column 3 of rows 1-3 showing the energy a mine draws (used/required).
+// The row of the one-planet table each entry of calculateProduction()'s
+// results fills, by its data-report-key. The table follows the game's order,
+// which is not the order of the results, so rows are found by key.
+const ONE_PLN_RESULT_KEYS = ['natural-production', 'metal-mine', 'crystal-mine', 'deut-synth',
+	'solar-plant', 'fusion-reactor', 'solar-sat', 'crawler', 'plasma-tech', 'booster',
+	'geologist', 'engineer', 'commanding-staff', 'class', 'alliance-class', 'lifeform-tech'];
+
+// Fills the per-row production/consumption cells (columns 0-3), with column 3
+// of results 1-3 showing the energy a mine draws (used/required).
 function renderOnePlnProductionRows(rows, results, koeff) {
-	for (let row = 0; row < 16; row++) {
+	const byKey = new Map(Array.from(rows, (tr) => [tr.dataset.reportKey, tr]));
+	ONE_PLN_RESULT_KEYS.forEach((key, row) => {
+		const tr = byKey.get(key);
+		if (!tr) return;
 		for (let col = 0; col < 4; col++) {
 			if (row > 0 && row < 4 && col === 3) {
-				rows[row + 1].children[6].innerHTML = mineEnergyCell(results, row, koeff);
+				tr.children[6].innerHTML = mineEnergyCell(results, row, koeff);
 				continue;
 			}
-			rows[row + 1].children[col + 3].innerHTML = productionCell(results[row][col]);
+			tr.children[col + 3].innerHTML = productionCell(results[row][col]);
 		}
-	}
+	});
 }
 
 // Display the current production data and sum up the totals: hourly/daily/weekly

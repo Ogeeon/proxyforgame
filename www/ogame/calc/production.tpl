@@ -655,15 +655,7 @@
               <th style="display: none;">%</th>
             </tr>
             <?php for($i = 0; $i < count($oneTblProdRows); $i++): ?>
-              <?php if ($i == 16):?>
-                <?php // The anomaly scanner's conversion into lithium: a cost, shown while #ias-enabled is checked ?>
-                <tr id="ias-conversion-row" class="even" data-report-key="ias-conversion" style="display: none;">
-                  <td class="text-start"><?= $l['ias-conversion'] ?></td>
-                  <td class="text-center" style="display: none;"></td>
-                  <td class="text-center"></td>
-                  <?php foreach (array('metal', 'crystal', 'deuterium', 'energy') as $col): ?><td class="text-center" data-report-cell="ias-conversion.<?= $col ?>"></td><?php endforeach; ?>
-                  <td class="text-center" style="display: none;"></td>
-                </tr>
+              <?php if ($oneTblProdRows[$i] === 'prod-per-hour'):?>
                 <tr><td colspan="8" class="table-line-2px"></td></tr>
               <?php endif; ?>
               <tr class="<?= ($i % 2) === 1 ? 'odd' : 'even' ?>" data-report-key="<?= $oneTblProdRows[$i] ?>">
@@ -734,6 +726,16 @@
                     </tr>
                   <?php endforeach; ?>
                 <?php endforeach; ?>
+              <?php endif; ?>
+              <?php if ($oneTblProdRows[$i] === 'booster'): ?>
+                <?php // The anomaly scanner's conversion into lithium, after the items as in the game: a cost, shown while #ias-enabled is checked ?>
+                <tr id="ias-conversion-row" class="<?= ($i % 2) === 1 ? 'even' : 'odd' ?>" data-report-key="ias-conversion" style="display: none;">
+                  <td class="text-start"><?= $l['ias-conversion'] ?></td>
+                  <td class="text-center" style="display: none;"></td>
+                  <td class="text-center"></td>
+                  <?php foreach (array('metal', 'crystal', 'deuterium', 'energy') as $col): ?><td class="text-center" data-report-cell="ias-conversion.<?= $col ?>"></td><?php endforeach; ?>
+                  <td class="text-center" style="display: none;"></td>
+                </tr>
               <?php endif; ?>
             <?php endfor; ?>
             <tr><td colspan="8" class="table-line-3px"></td></tr>

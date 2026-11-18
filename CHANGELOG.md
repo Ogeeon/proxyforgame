@@ -25,6 +25,7 @@ release section; it is the source of truth for the other eleven translations.
 ### Changed
 
 - Cost and LF costs calculators: with a profile active, the range tab's "to" level starts three levels above the level the profile knows instead of one, and follows when another technology or planet is picked as long as it was not raised by hand beyond that. A "to" the player planned above both levels stays. <!-- site -->
+- Production calculator: the rows of the "One planet" table follow the game's production overview, so a row is where a player looks for it: the anomaly scanner's "Conversion" comes right after the items ("Booster") instead of last before the totals, and the Engineer comes before the Geologist. The page fills the rows by name rather than by position, so the order is set in one place. <!-- site -->
 
 ### Fixed
 
