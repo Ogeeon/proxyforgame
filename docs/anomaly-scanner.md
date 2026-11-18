@@ -166,11 +166,11 @@ cost    = round( lithium * k * (1 - 0.001 * N) )
 ```
 
 - `k` = 3 metal, 2 crystal, 1 deuterium, 100 food per lithium.
-- `0.001 * N` is the conversion discount. **Only a discount of 0.1% was observed**, with one
-  Control Centre component built. Which component and level gave it is not recorded: the
-  game's bonus table gives the Catalytic Converter 0.05% per level, so 0.1% would be
-  converter level 2. Unverified — and irrelevant to the production calculator, which takes
-  the total discount in percent rather than a component level.
+- `0.001 * N` is the conversion discount: the Catalytic Converter's 0.05% per level, **summed
+  over every planet of the account**. Verified 2026-11-18: converter level 2 on one planet
+  (0.1%) plus level 1 on another (0.05%) gave 0.15%, and the costs at 100/50/10% workload on
+  all three resources matched exactly (a level-18 scanner). The production calculator takes the
+  total discount in percent rather than a component level.
 - The Lithium Electrolysis Lab (+0.2% lithium per level) is **not** in the formula: it was
   not measured whether it raises `lithium`, and with it the cost, or only the lithium credited.
 - The cost is computed from the **already floored** lithium, not from `B * w`. This is why a
@@ -200,11 +200,11 @@ itself is shown for reference only; the calculator has no lithium or food column
 |---|---|
 | Scope | The "One planet" tab only. The settings are stored with the saved planet data, so "All planets" can take them up later without migrating anything |
 | Controls | A checkbox "IAS" (locale key `ias-short` in `common`: "IAS" everywhere but RU, where the scanner is "Межпланетный сканер аномалий" and so "МСА"; tooltip with the full name, key `anomaly-scanner`) in the second row next to the race select, plus a gear button that opens a modal through `openModal()` |
-| Modal fields | Scanner level; total conversion discount, % (one decimal, locale-aware decimal helper, blur validation, 0-100); resource to convert — metal, crystal or deuterium (no food); workload — a select of 10-100% in steps of 10 (0 is the checkbox off). A read-only line "Lithium/hour: N" |
+| Modal fields | Scanner level; total conversion discount, % (two decimals - the game shows 0.15% for one converter level; locale-aware decimal helper, blur validation, 0-100); resource to convert — metal, crystal or deuterium (no food); workload — a select of 10-100% in steps of 10 (0 is the checkbox off). A read-only line "Lithium/hour: N" |
 | Table | A row "Conversion" (`data-report-key="ias-conversion"`, report cells like the other rows) before the totals, after `lifeform-tech`, with the hourly cost as a negative number in the chosen resource's column. Shown only while the checkbox is on, in both the normal and the extended view; the hourly, daily and weekly totals include it |
 | Formula | `lithiumConversion({ level, workloadPct, discountPct, resource })` in `production-core.js`, returning `{ lithium, cost: [m, c, d] }` per hour: `lithium = floor(153.6 * L * 1.1^L * w)`, `cost = round(lithium * k * (1 - discount))`, `k` = 3 / 2 / 1 |
 | Universe speed | **Not applied** — the numbers are taken as measured on s808-en; whether lithium and the conversion scale with economy speed is unverified |
-| Planet array | Slots 37-41 after the life form levels (`PLANET_IAS_*`): on, level, discount in tenths of a percent (the array holds integers), resource, workload. A planet saved before reads as the defaults. The one-planet tab keeps them in `options.prm.ias*` as well, like its other fields |
+| Planet array | Slots 37-41 after the life form levels (`PLANET_IAS_*`): on, level, discount in hundredths of a percent (the array holds integers), resource, workload. A planet saved before reads as the defaults. The one-planet tab keeps them in `options.prm.ias*` as well, like its other fields |
 | Profile | Every setting is per planet. The scanner level is `building.45`, the value the game reports, marked like the mine levels; on, discount (percent), resource and workload are kept as the profile planet's own values `ias.on`, `ias.discount`, `ias.resource`, `ias.workload` (`PRODUCTION_IAS_KEYS` in `profiles-core.js`), which the export never carries |
 | Resource accumulation | "What will accumulate" uses the net total including the conversion, metal and crystal floored at 0 like deuterium (assumption: the game stops converting when the resource runs out). "When" shows `res-will-not-accumulate-ias` when a target needs the converted resource and its net total is not positive. The fleet and defence counts use the net total too |
 | Totals row | Found by `data-report-key="prod-per-hour"`, no longer by index, so the conversion row above it shifts nothing |

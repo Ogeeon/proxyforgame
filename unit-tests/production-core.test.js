@@ -359,6 +359,23 @@ describe('lithiumConversion', () => {
         expect(at(100, 2, 0.1).cost).toEqual([0, 0, 20645]);
     });
 
+    // Measured 2026-11-18 on a level-18 scanner with one Catalytic Converter
+    // level, which the game shows as a 0.15% discount.
+    it('reproduces the costs the game shows with a 0.15% discount', () => {
+        const measured = [
+            [100, [46047, 30698, 15349], 15372],
+            [50, [23023, 15349, 7674], 7686],
+            [10, [4604, 3069, 1535], 1537],
+        ];
+        for (const [workload, costs, lithium] of measured) {
+            costs.forEach((cost, resource) => {
+                const result = at(workload, resource, 0.15, 18);
+                expect(result.lithium).toBe(lithium);
+                expect(result.cost[resource]).toBe(cost);
+            });
+        }
+    });
+
     it('matches the conversion row of the resource settings page', () => {
         // -7,230 metal: level 11 at 50%, no discount, 2410 lithium
         expect(lithiumConversion({ level: 11, workloadPct: 50, discountPct: 0, resource: 0 })).toEqual({ lithium: 2410, cost: [7230, 0, 0] });
@@ -370,10 +387,10 @@ describe('lithiumConversion', () => {
         expect(at(100, 3)).toEqual({ lithium: 0, cost: [0, 0, 0] });
     });
 
-    it('reads a planet array, the discount in tenths of a percent, and skips one switched off', () => {
+    it('reads a planet array, the discount in hundredths of a percent, and skips one switched off', () => {
         const planet = createEmptyPlanet();
         planet[ctx.PLANET_IAS_LEVEL] = 20;
-        planet[ctx.PLANET_IAS_DISCOUNT] = 1;
+        planet[ctx.PLANET_IAS_DISCOUNT] = 10;
         planet[ctx.PLANET_IAS_RESOURCE] = 1;
         expect(planetLithiumConversion(planet)).toBe(null);
         planet[ctx.PLANET_IAS_ON] = 1;

@@ -430,7 +430,7 @@ function readIasForm(target) {
 	target[PLANET_IAS_ON] = getChecked('#ias-enabled') ? 1 : 0;
 	target[PLANET_IAS_LEVEL] = getInputNumber($('#ias-level'));
 	// Tenths of a percent: the planet array holds integers.
-	target[PLANET_IAS_DISCOUNT] = Math.round(getInputNumber($('#ias-discount')) * 10);
+	target[PLANET_IAS_DISCOUNT] = Math.round(getInputNumber($('#ias-discount')) * 100);
 	target[PLANET_IAS_RESOURCE] = Number(getVal('#ias-resource')) || 0;
 	target[PLANET_IAS_WORKLOAD] = Number(getVal('#ias-workload')) || 100;
 	return target;
@@ -445,7 +445,7 @@ function readIasForm(target) {
 function writeIasForm(s) {
 	setChecked('#ias-enabled', Number(s[PLANET_IAS_ON]) === 1);
 	setVal('#ias-level', Number(s[PLANET_IAS_LEVEL]) || 0);
-	setNumVal('#ias-discount', (Number(s[PLANET_IAS_DISCOUNT]) || 0) / 10);
+	setNumVal('#ias-discount', (Number(s[PLANET_IAS_DISCOUNT]) || 0) / 100);
 	setVal('#ias-resource', Number(s[PLANET_IAS_RESOURCE]) || 0);
 	setVal('#ias-workload', Number(s[PLANET_IAS_WORKLOAD]) || 100);
 }
@@ -461,7 +461,7 @@ function updateIasConversion() {
 	const slots = readIasForm(createEmptyPlanet());
 	options.prm.iasOn = slots[PLANET_IAS_ON] === 1;
 	options.prm.iasLevel = slots[PLANET_IAS_LEVEL];
-	options.prm.iasDiscount = slots[PLANET_IAS_DISCOUNT] / 10;
+	options.prm.iasDiscount = slots[PLANET_IAS_DISCOUNT] / 100;
 	options.prm.iasResource = slots[PLANET_IAS_RESOURCE];
 	options.prm.iasWorkload = slots[PLANET_IAS_WORKLOAD];
 	// The dialog shows the lithium with the checkbox off too: it is where the

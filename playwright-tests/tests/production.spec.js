@@ -298,6 +298,18 @@ test.describe('Lithium conversion of the anomaly scanner', () => {
         await expect(conversionRow(page)).toBeVisible();
     });
 
+    test('keeps a two-decimal discount whole and charges the cost the game shows', async ({ page }) => {
+        // The game shows 0.15% for one converter level; a field of tenths would round it to 0.2%.
+        await page.locator('#ias-enabled').check();
+        await setUpScanner(page, { level: '18', discount: '0.15', resource: '0', workload: '100' });
+        await expect(page.locator('#ias-discount')).toHaveValue('0.15');
+        await expect(page.locator('#ias-lithium')).toHaveText('15.372');
+        await expect(page.locator('#ias-cost')).toHaveText('46.047');
+        await closeScanner(page);
+        await page.reload();
+        await expect(page.locator('#ias-discount')).toHaveValue('0.15');
+    });
+
     test('is saved with a planet of the all-planets tab and comes back with it', async ({ page }) => {
         // Planet 1 gets the conversion; planet 2 is left as it was.
         await page.locator('#tabtag2').click();

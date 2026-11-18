@@ -369,11 +369,11 @@ function productionReportPlanet(out, i) {
 	const iasLabel = (id) => `${ias} — ${cleanReportLabel(document.querySelector(`label[for="${id}"]`)?.textContent ?? id)}`;
 	push(PLANET_IAS_ON, 'ias-enabled', ias);
 	push(PLANET_IAS_LEVEL, 'ias-level', iasLabel('ias-level'));
-	// Tenths of a percent in the array: the report shows the percent.
+	// Hundredths of a percent in the array: the report shows the percent.
 	push(PLANET_IAS_DISCOUNT, 'ias-discount', iasLabel('ias-discount'));
 	const discount = out.entries.at(-1);
 	if (discount) {
-		discount.display = String(Number(discount.value) / 10);
+		discount.display = String(Number(discount.value) / 100);
 	}
 	push(PLANET_IAS_RESOURCE, 'ias-resource', iasLabel('ias-resource'));
 	push(PLANET_IAS_WORKLOAD, 'ias-workload', iasLabel('ias-workload'));

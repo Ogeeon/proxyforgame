@@ -131,10 +131,11 @@ const PLANET_RACE = 24;
 const PLANET_LF_LEVELS = 25; // LF_BUILDINGS_PER_RACE levels, positional per race
 // The Interstellar Anomaly Scanner's conversion into lithium, after the life
 // form levels. The array holds integers (options.prm.validate parses aPS with
-// parseInt), so the discount is kept in tenths of a percent.
+// parseInt), so the discount is kept in hundredths of a percent: the game
+// shows 0.15% for one converter level, which tenths would round to 0.2%.
 const PLANET_IAS_ON = 37; // 1 when the conversion runs
 const PLANET_IAS_LEVEL = 38;
-const PLANET_IAS_DISCOUNT = 39; // tenths of a percent
+const PLANET_IAS_DISCOUNT = 39; // hundredths of a percent
 const PLANET_IAS_RESOURCE = 40; // 0 metal, 1 crystal, 2 deuterium
 const PLANET_IAS_WORKLOAD = 41; // percent, 10-100
 
@@ -178,7 +179,7 @@ function planetLithiumConversion(pln) {
 	const result = lithiumConversion({
 		level: Number(pln[PLANET_IAS_LEVEL]) || 0,
 		workloadPct: Number(pln[PLANET_IAS_WORKLOAD]) || 0,
-		discountPct: (Number(pln[PLANET_IAS_DISCOUNT]) || 0) / 10,
+		discountPct: (Number(pln[PLANET_IAS_DISCOUNT]) || 0) / 100,
 		resource,
 	});
 	return { ...result, resource };

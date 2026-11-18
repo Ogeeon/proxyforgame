@@ -2255,14 +2255,14 @@ const PRODUCTION_ROW_TECHS = [1, 2, 3, 4, 12, 212, 217];
  * The anomaly scanner's lithium conversion, slots 37-41 of a production planet
  * array, as profile values: the scanner level is the building the game
  * reports; the rest is the page's own and the game never sends it. The
- * discount is a percent in the profile and tenths of one in the array.
+ * discount is a percent in the profile and hundredths of one in the array.
  *
  * @type {ReadonlyArray<{key: string, def: number, scale: number}>}
  */
 const PRODUCTION_IAS_KEYS = Object.freeze([
   { key: 'ias.on', def: 0, scale: 1 },
   { key: 'building.45', def: 0, scale: 1 },
-  { key: 'ias.discount', def: 0, scale: 10 },
+  { key: 'ias.discount', def: 0, scale: 100 },
   { key: 'ias.resource', def: 0, scale: 1 },
   { key: 'ias.workload', def: 100, scale: 1 },
 ]);

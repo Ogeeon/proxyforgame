@@ -1201,7 +1201,7 @@
           <label for="ias-level"><?= $l['ias-level'] ?></label>
           <input id="ias-level" type="text" name="ias-level" class="form-control form-control-sm input-4columns" value="0">
           <label for="ias-discount"><?= $l['ias-discount'] ?></label>
-          <input id="ias-discount" type="text" name="ias-discount" class="form-control form-control-sm input-4columns" value="0">
+          <input id="ias-discount" type="text" name="ias-discount" class="form-control form-control-sm input-5columns" value="0">
           <label for="ias-resource"><?= $l['ias-resource'] ?></label>
           <select id="ias-resource" name="ias-resource" class="form-select form-select-sm w-auto">
             <option value="0" selected="selected"><?= $l['metal'] ?></option>

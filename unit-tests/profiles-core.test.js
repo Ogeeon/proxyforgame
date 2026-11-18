@@ -1750,9 +1750,9 @@ describe('the production planet array', () => {
         }
         s[24] = race;
         for (let k = 0; k < 12; k++) s[25 + k] = race >= 1 && race <= 4 ? k + 2 : 0;
-        // The lithium conversion: on, scanner level 15, a 0.5% discount (tenths
+        // The lithium conversion: on, scanner level 15, a 0.5% discount (hundredths
         // in the array), crystal at 70%.
-        s.push(1, 15, 5, 1, 70);
+        s.push(1, 15, 50, 1, 70);
         return s;
     }
 
