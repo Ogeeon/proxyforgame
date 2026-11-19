@@ -23,9 +23,9 @@ Compare metal, crystal, and deuterium trades in OGame and see how much you recei
 
 | File | Lines |
 |------|-------|
-| `www/ogame/calc/js/trade-core.js` | 561 |
-| `www/ogame/calc/js/trade.js` | 1200 |
-| `www/ogame/calc/js/trade-profile.js` | 211 |
+| `www/ogame/calc/js/trade-core.js` | 552 |
+| `www/ogame/calc/js/trade.js` | 1377 |
+| `www/ogame/calc/js/trade-profile.js` | 207 |
 
 The page also loads these shared scripts:
 
@@ -38,6 +38,8 @@ The page also loads these shared scripts:
 - `www/ogame/calc/js/profiles-widgets.js`
 - `www/ogame/calc/js/profiles-binders.js`
 - `www/ogame/calc/js/profiles-ui.js`
+- `www/ogame/calc/js/ogame-universe.js`
+- `www/ogame/calc/js/ogame-cargo.js`
 
 ## Configuration Options
 

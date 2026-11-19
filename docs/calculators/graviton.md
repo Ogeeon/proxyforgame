@@ -23,11 +23,11 @@ Find how many Solar Satellites and how much energy you need to research Graviton
 
 | File | Lines |
 |------|-------|
-| `www/ogame/calc/js/graviton-core.js` | 222 |
-| `www/ogame/calc/js/graviton-data-collector.js` | 72 |
+| `www/ogame/calc/js/graviton-core.js` | 184 |
+| `www/ogame/calc/js/graviton-data-collector.js` | 134 |
 | `www/ogame/calc/js/graviton-renderer.js` | 105 |
-| `www/ogame/calc/js/graviton-orchestration.js` | 304 |
-| `www/ogame/calc/js/graviton-profile.js` | 90 |
+| `www/ogame/calc/js/graviton-orchestration.js` | 313 |
+| `www/ogame/calc/js/graviton-profile.js` | 91 |
 
 The page also loads these shared scripts:
 
@@ -40,6 +40,8 @@ The page also loads these shared scripts:
 - `www/ogame/calc/js/profiles-widgets.js`
 - `www/ogame/calc/js/profiles-binders.js`
 - `www/ogame/calc/js/profiles-ui.js`
+- `www/ogame/calc/js/ogame-production.js`
+- `www/ogame/calc/js/ogame-cargo.js`
 
 ## Configuration Options
 
@@ -70,6 +72,7 @@ The calculator keeps these settings in `options_graviton`:
 - `disChLevel`
 - `gravitonLevel`
 - `totalLFEnrgBonus`
+- `collectorClassBonus`
 - `scCapacityIncrease`
 - `lcCapacityIncrease`
 - `rcCapacityIncrease`

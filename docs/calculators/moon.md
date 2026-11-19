@@ -23,11 +23,11 @@ Calculate your chance of finding a moon, the outcome of a moon destruction attem
 
 | File | Lines |
 |------|-------|
-| `www/ogame/calc/js/moon-core.js` | 463 |
-| `www/ogame/calc/js/moon-data-collector.js` | 57 |
+| `www/ogame/calc/js/moon-core.js` | 537 |
+| `www/ogame/calc/js/moon-data-collector.js` | 126 |
 | `www/ogame/calc/js/moon-renderer.js` | 152 |
-| `www/ogame/calc/js/moon-orchestration.js` | 315 |
-| `www/ogame/calc/js/moon-profile.js` | 316 |
+| `www/ogame/calc/js/moon-orchestration.js` | 215 |
+| `www/ogame/calc/js/moon-profile.js` | 290 |
 
 The page also loads these shared scripts:
 
@@ -40,29 +40,13 @@ The page also loads these shared scripts:
 - `www/ogame/calc/js/profiles-widgets.js`
 - `www/ogame/calc/js/profiles-binders.js`
 - `www/ogame/calc/js/profiles-ui.js`
+- `www/ogame/calc/js/ogame-universe.js`
+- `www/ogame/calc/js/ogame-cargo.js`
 
 ## Configuration Options
 
 The calculator keeps these settings in `options_moon`:
 
-- `moonSize`
-- `dsCount`
-- `debrisPercent`
-- `hyperTechLevel`
-- `isGeneral`
-- `rcCapacityIncrease`
-- `defenseDebrisPercent`
-- `deutToDebris`
-- `promoMoon`
-- `supraRefractorLevel`
-- `phalanxLevel`
-- `phalanxRangeBonus`
-- `isDiscoverer`
-- `discovererBonus`
-- `ownSystem`
-- `targetSystem`
-- `circularSystems`
-- `numberOfSystems`
 - `validate`
 
 ## Usage
