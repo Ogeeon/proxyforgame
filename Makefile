@@ -39,7 +39,10 @@ DB_NAME ?= proxyforgame
 # make does the exporting. A local .env, when present, still wins inside
 # pfg-migrate (it is the real credentials on a dev box).
 
-# Extra flags for `playwright install`; CI passes --with-deps.
+# Extra flags for `playwright install`; CI passes --with-deps. Only Chromium is
+# installed: playwright.config.js has no `projects`, so the suite runs in Chromium
+# alone, and the system packages Firefox and WebKit need (gstreamer, libav, ...)
+# made the apt step of --with-deps take up to 40 minutes on a slow mirror.
 PW_DEPS ?=
 
 # Overrides `reporter` from playwright.config.js. `list` is the readable choice
@@ -98,7 +101,7 @@ install: ## Install the pinned checkers, test dependencies and Playwright browse
 	mise install
 	npm ci --ignore-scripts
 	cd playwright-tests && npm ci --ignore-scripts
-	cd playwright-tests && $(PW) install $(PW_DEPS)
+	cd playwright-tests && $(PW) install $(PW_DEPS) chromium
 
 ##@ Local server
 

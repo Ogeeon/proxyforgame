@@ -197,7 +197,8 @@ jobs:
       # flaky part of the install - keyed on playwright-tests/package-lock.json,
       # which is what pins the @playwright/test version that decides the browser
       # build. On a hit `playwright install` inside `make install` is a no-op.
-      # `--with-deps` still runs its apt step; that is fast and not cacheable here.
+      # `--with-deps` still runs its apt step, which is not cacheable here; it is
+      # kept short by installing Chromium alone (Makefile, `install`).
       - name: Cache Playwright browsers
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
@@ -209,7 +210,11 @@ jobs:
       - name: Set up mise
         uses: jdx/mise-action@d5574b52816a478f9d4e6529a3f6ff17a8a36785 # v5.2.8
 
+      # A slow apt or npm mirror can stall this step for most of the job's
+      # 45 minutes; failing it early makes a rerun the obvious next move.
+      # A cache miss downloads Chromium and normally takes about 7 minutes.
       - name: Install dependencies and browsers
+        timeout-minutes: 15
         run: make install PW_DEPS=--with-deps
 
       # The commits this push or pull request adds follow Conventional Commits.
