@@ -15,6 +15,8 @@ release section; it is the source of truth for the other eleven translations.
 
 ## [Unreleased]
 
+## [2026-11-19] - site entry 76
+
 ### Added
 
 - Start page: every calculator has a card - its name, linking to it, and what it does - in the menu's order, so a visitor on a phone, where the menu is folded away, sees them all on landing. One column on a phone, two from 768px, three from 1200px; the AI assistants card moves below the grid and no longer tells the reader to pick a calculator in the menu. The names come from the sidebar menu and the descriptions from each calculator's meta description, so the grid needs no new text.
@@ -25,6 +27,8 @@ release section; it is the source of truth for the other eleven translations.
 - Costs calculator: a Control Centre component cannot be demolished in the game, so a target level below the start level on the "all items, several levels" tab now prices nothing for it, instead of the cost of a demolition as for an ordinary building, and its effect column shows a dash instead of the effect of that level.
 - Terraformer and cost calculators: the life form Terraformer reduction is split in two fields, cost (up to 50%) and build time (up to 99%), as the game reports them. The single field used to apply the cost reduction, capped at 50%, to the build time too, while the game takes twice the cost reduction off the time - so at a 40% cost reduction the time was shown 40% shorter instead of 80%. A time field left at 0 follows the game's own pairing, twice the cost reduction up to 99%, and says so in an "auto" hint next to it, so saved settings give the right time without any change. A player profile fills both fields, and the MCP server's terraformer and cost tools take a `terraformerTimeReduction` next to the cost one, which the account import fills as well. <!-- site -->
 - Costs calculator: the "Reset" button now clears the life form building reductions too - the Mineral Research Centre level and the Terraformer cost and time reductions - which it used to leave as they were. <!-- site -->
+
+> **RU:** Скидка Форм Жизни на Терраформер разделена на два поля: стоимость (до 50%) и время постройки (до 99%), как в игре. Если поле времени оставить пустым (0), оно считается как удвоенная скидка стоимости — рядом показана подсказка «авто». Обе скидки теперь учитывает и Очередь строительства, а профиль заполняет их сам.
 
 ## [2026-11-18] - site entry 75
 
