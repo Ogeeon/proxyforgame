@@ -336,24 +336,32 @@ class Renderer {
     if (!hasEffectCol) {
       return;
     }
-    const levelCol = isMultiLevel ? 3 : 2;
     for (const cell of document.querySelectorAll(`#${tableId} td.ias-effect`)) {
-      if (!(cell instanceof HTMLTableCellElement)) {
-        continue;
+      if (cell instanceof HTMLTableCellElement) {
+        cell.innerHTML = Renderer.formatEffect(Renderer._cellEffect(cell, isMultiLevel));
       }
-      const row = cell.parentElement;
-      const input = row instanceof HTMLTableRowElement ? row.cells[levelCol]?.querySelector('input') : null;
-      const perLevel = cell.dataset.effect === '' || cell.dataset.effect === undefined
-        ? null
-        : Number(cell.dataset.effect);
-      const level = input ? getInputNumber(input) : 0;
-      // A component cannot be demolished, so a target not above the start has no effect to show
-      const fromInput = isMultiLevel && row instanceof HTMLTableRowElement
-        ? row.cells[2]?.querySelector('input')
-        : null;
-      const noGain = fromInput ? level <= getInputNumber(fromInput) : false;
-      cell.innerHTML = Renderer.formatEffect(noGain ? null : componentEffect(perLevel, level));
     }
+  }
+
+  /**
+   * The effect an effect cell shows: the component's effect at the level its
+   * row holds, or null (a dash) while the effect is not known.
+   * @param {HTMLTableCellElement} cell
+   * @param {boolean} isMultiLevel the several-levels tab: the level is the target
+   * @returns {number|null}
+   * @private
+   */
+  static _cellEffect(cell, isMultiLevel) {
+    const perLevel = cell.dataset.effect ? Number(cell.dataset.effect) : null;
+    const row = cell.parentElement instanceof HTMLTableRowElement ? cell.parentElement : null;
+    const input = row?.cells[isMultiLevel ? 3 : 2]?.querySelector('input');
+    const level = input ? getInputNumber(input) : 0;
+    // A component cannot be demolished, so a target not above the start has no effect to show
+    const fromInput = isMultiLevel ? row?.cells[2]?.querySelector('input') : null;
+    if (fromInput && level <= getInputNumber(fromInput)) {
+      return null;
+    }
+    return componentEffect(perLevel, level);
   }
 
   /**
