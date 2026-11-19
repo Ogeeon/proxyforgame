@@ -179,6 +179,40 @@ test.describe('Terraformer Calculator - DOM integration', () => {
         // Un-checking single-level on reset re-shows the "from" field.
         await expect(page.locator('#tf-level-from')).toBeVisible();
     });
+
+    test('the life form reductions cut the cost and the time apart', async ({ page }) => {
+        // Level 1: 50000 crystal, 20571 s (5h 42m 51s) without a robotics factory.
+        const enter = async (selector, value) => {
+            await page.locator(selector).fill(value);
+            await page.locator(selector).blur();
+        };
+        await enter('#tf-level-to', '1');
+        await openLifeformsTab(page);
+        const hint = page.locator('#lf-terraformer-time-auto');
+        await expect(hint).toBeHidden();
+
+        // 40% off the cost and, with no time entered, 80% off the time: 4114 s.
+        await enter('#lf-terraformer-rdc', '40');
+        await expect(page.locator('#crystal-required-tf')).toHaveText('30.000');
+        await expect(page.locator('#time-required-tf')).toHaveText('1h 8m 34s');
+        await expect(hint).toBeVisible();
+        await expect(hint).toHaveText('auto: 80%');
+
+        // An entered time reduction is taken as it is: 10% off is 18513 s.
+        await enter('#lf-terraformer-time-rdc', '10');
+        await expect(page.locator('#time-required-tf')).toHaveText('5h 8m 33s');
+        await expect(page.locator('#crystal-required-tf')).toHaveText('30.000');
+        await expect(hint).toBeHidden();
+
+        // The time reduction stops at 99%.
+        await enter('#lf-terraformer-time-rdc', '150');
+        await expect(page.locator('#lf-terraformer-time-rdc')).toHaveValue('99');
+
+        // The reset clears it.
+        await page.locator('#reset').click();
+        await expect(page.locator('#lf-terraformer-time-rdc')).toHaveValue('0');
+        await expect(hint).toBeHidden();
+    });
 });
 
 test.describe('Terraformer Calculator - Collector Enhancement', () => {
@@ -322,6 +356,7 @@ test.describe('Terraformer Calculator - MCP tools', () => {
             { tool: 'ogame_terraformer', arg: 'fromLevel', selector: '#tf-level-from', prm: 'tfLevelFrom' },
             { tool: 'ogame_terraformer', arg: 'toLevel', selector: '#tf-level-to', prm: 'tfLevelTo' },
             { tool: 'ogame_terraformer', arg: 'lifeforms.terraformerReduction', selector: '#lf-terraformer-rdc', prm: 'lfTerraformerRdc' },
+            { tool: 'ogame_terraformer', arg: 'lifeforms.terraformerTimeReduction', selector: '#lf-terraformer-time-rdc', prm: 'lfTerraformerTimeRdc' },
             { tool: 'ogame_terraformer', arg: 'facilities.roboticsFactory', selector: '#robots-factory-level', prm: 'robotsFactoryLevel' },
         ]);
     });

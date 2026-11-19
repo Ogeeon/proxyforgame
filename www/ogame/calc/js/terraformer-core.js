@@ -41,31 +41,37 @@ class TerraformerCalculator {
 
   /**
    * Crystal, deuterium and build time of the terraformer from one level to
-   * another, with the life-form cost reduction. As in the cost calculator, the
-   * reduction (capped at 50%) applies to each level on its own, rounded down,
-   * and to the time as well as to the resources.
+   * another, with the life-form reductions. As in the cost calculator, each
+   * reduction applies to each level on its own, rounded down: the cost one
+   * (capped at 50%) to the resources, the time one (capped at 99%) to the
+   * seconds. A time reduction of 0 means the game's own pairing, twice the
+   * cost reduction (see lfTerraformerTimeRdc in ogame-costs.js).
    *
-   * @param {{robotsFactoryLevel: number, nanitesFactoryLevel: number, universeSpeed: number, lfTerraformerRdc?: number}} p
+   * @param {{robotsFactoryLevel: number, nanitesFactoryLevel: number, universeSpeed: number, lfTerraformerRdc?: number, lfTerraformerTimeRdc?: number}} p
    * @param {number} from
    * @param {number} to
    * @returns {{crystal: number, deuterium: number, secs: number}}
    */
   static terraformerCost(p, from, to) {
-    const factor = 1 - Math.min(0.5, (p.lfTerraformerRdc || 0) / 100);
-    /** @param {number} v */
-    const reduce = (v) => (factor < 1 ? Math.floor(v * factor) : v);
+    const costFactor = 1 - Math.min(0.5, (p.lfTerraformerRdc || 0) / 100);
+    const timeFactor = lfTerraformerTimeFactor(p.lfTerraformerRdc || 0, p.lfTerraformerTimeRdc || 0);
+    /**
+     * @param {number} v
+     * @param {number} factor
+     */
+    const reduce = (v, factor) => (factor < 1 ? Math.floor(v * factor) : v);
     const total = { crystal: 0, deuterium: 0, secs: 0 };
     for (let level = from + 1; level <= to; level++) {
       const cost = getBuildCost_C(TF_TECH_ID, level - 1, level, TF_TECH_DATA);
-      total.crystal += reduce(cost[1]);
-      total.deuterium += reduce(cost[2]);
+      total.crystal += reduce(cost[1], costFactor);
+      total.deuterium += reduce(cost[2], costFactor);
       total.secs += reduce(getBuildTime_C({
         techID: TF_TECH_ID, techLevelFrom: level - 1, techLevelTo: level,
         techData: TF_TECH_DATA,
         robotsLevel: p.robotsFactoryLevel, nanitesLevel: p.nanitesFactoryLevel,
         researchLabLevel: 0, technocratFactor: 0, shipyardLevel: 0,
         uniSpeed: p.universeSpeed
-      }));
+      }), timeFactor);
     }
     return total;
   }
@@ -89,7 +95,7 @@ class TerraformerCalculator {
    *   solarPlantLevel, solarPlantPercent, fusionPlantLevel, fusionPlantPercent,
    *   solarSatellitesCount, solarSatellitesPercent, playerClass (0/1/2),
    *   isTrader, energyBoost, disChLevel, totalLFEnrgBonus, collectorClassBonus
-   *   (the Rock'tal Collector Enhancement total, %), lfTerraformerRdc, scCapacityIncrease,
+   *   (the Rock'tal Collector Enhancement total, %), lfTerraformerRdc, lfTerraformerTimeRdc, scCapacityIncrease,
    *   lcCapacityIncrease, tfSingleLevel, tfLevelFrom, tfLevelTo,
    *   crysAvailable, deutAvailable
    * @returns {Object} Result with the per-source energy breakdown, the

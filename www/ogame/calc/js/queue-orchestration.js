@@ -60,6 +60,8 @@ class QueueCalculatorApp {
     // the locale separator or the numeric validator would strip it.
     setNumVal('#sc-capacity-increase', options.prm.scCapacityIncrease);
     setNumVal('#lc-capacity-increase', options.prm.lcCapacityIncrease);
+    setNumVal('#lf-terraformer-rdc', options.prm.lfTerraformerRdc);
+    setNumVal('#lf-terraformer-time-rdc', options.prm.lfTerraformerTimeRdc);
     if (options.prm.sDTP) {
       setVal('#start-2', getDateStr(options.prm.sDTP, options.datetimeFormat));
     }
@@ -121,6 +123,9 @@ class QueueCalculatorApp {
     // Percentages: fractional values are the norm, matching the costs calculator.
     set('sc-capacity-increase', { min: 0, max: Infinity, def: 0, allowFloat: true, allowNegative: false });
     set('lc-capacity-increase', { min: 0, max: Infinity, def: 0, allowFloat: true, allowNegative: false });
+    // The life form Terraformer reductions; a time of 0 is twice the cost one.
+    set('lf-terraformer-rdc', { min: 0, max: 50, def: 0, allowFloat: true, allowNegative: false });
+    set('lf-terraformer-time-rdc', { min: 0, max: 99, def: 0, allowFloat: true, allowNegative: false });
     set(`total-fields-${PLANET_TAB}`, { min: 1, def: options.defPlfFlds, allowFloat: false, allowNegative: false });
     set(`total-fields-${MOON_TAB}`, { min: 1, def: options.defMnFlds, allowFloat: false, allowNegative: false });
     // Start levels: whole numbers, no upper bound (OGame caps none of them).
@@ -177,7 +182,8 @@ class QueueCalculatorApp {
     addEvent('#universe-speed', 'change', () => this.refreshBoth());
 
     // Numeric inputs that affect both queues
-    ['#ion-tech-level', '#hyper-tech-level', '#sc-capacity-increase', '#lc-capacity-increase'].forEach((sel) => {
+    ['#ion-tech-level', '#hyper-tech-level', '#sc-capacity-increase', '#lc-capacity-increase',
+      '#lf-terraformer-rdc', '#lf-terraformer-time-rdc'].forEach((sel) => {
       const el = $(sel);
       if (!el) return;
       addEvent(el, 'change', () => this.refreshBoth());
@@ -255,7 +261,17 @@ class QueueCalculatorApp {
     options.prm.playerClass = g.playerClass;
     options.prm.scCapacityIncrease = g.scCapacityIncrease;
     options.prm.lcCapacityIncrease = g.lcCapacityIncrease;
+    options.prm.lfTerraformerRdc = g.lfTerraformerRdc;
+    options.prm.lfTerraformerTimeRdc = g.lfTerraformerTimeRdc;
     return g;
+  }
+
+  /** Show the time reduction the Terraformer derives from its cost one while the time field is 0. */
+  _renderTerraformerTimeAuto(g) {
+    const hint = lfTerraformerTimeAutoHint(g.lfTerraformerRdc, g.lfTerraformerTimeRdc,
+      options.lfTerraformerTimeAuto, getOptionValue('decimalSeparator', '.'));
+    setTextContent('#lf-terraformer-time-auto', hint);
+    toggleClass('#lf-terraformer-time-auto', 'd-none', hint === '');
   }
 
   /**
@@ -286,7 +302,10 @@ class QueueCalculatorApp {
       maxFields: (tabNum === PLANET_TAB) ? g.totFldPln : g.totFldMn,
       universeSpeed: g.universeSpeed,
       ionTechLevel: g.ionTechLevel,
+      lfTerraformerRdc: g.lfTerraformerRdc,
+      lfTerraformerTimeRdc: g.lfTerraformerTimeRdc,
     });
+    this._renderTerraformerTimeAuto(g);
     state.totals = run.totals;
     state.maxFields = run.maxFields;
 
@@ -382,6 +401,8 @@ class QueueCalculatorApp {
     options.prm.playerClass = 0;
     options.prm.scCapacityIncrease = 0;
     options.prm.lcCapacityIncrease = 0;
+    options.prm.lfTerraformerRdc = 0;
+    options.prm.lfTerraformerTimeRdc = 0;
     options.prm.sDTP = 0;
     options.prm.sDTM = 0;
     options.prm.qp = [];
@@ -394,6 +415,8 @@ class QueueCalculatorApp {
     if (classRadio0) classRadio0.checked = true;
     setNumVal('#sc-capacity-increase', 0);
     setNumVal('#lc-capacity-increase', 0);
+    setNumVal('#lf-terraformer-rdc', 0);
+    setNumVal('#lf-terraformer-time-rdc', 0);
     setVal('#total-fields-2', options.defPlfFlds);
     setVal('#total-fields-3', options.defMnFlds);
     setVal('#start-2', '');

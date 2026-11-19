@@ -94,8 +94,9 @@ class CostsCalculator {
     // 5. Show the robot/nanite factory disclaimer once if applicable
     this._maybeShowRobotNaniteDisclaimer();
 
-    // 6. The lab level the research network reaches
+    // 6. The lab level the research network reaches, the Terraformer's auto time reduction
     this._renderIrnResult();
+    this._renderTerraformerTimeAuto();
 
     // 7. Save state
     this.saveState();
@@ -516,6 +517,7 @@ class CostsCalculator {
       '#lf-collector-class-bonus',
       '#mineral-res-cntr-lvl',
       '#lf-terraformer-rdc',
+      '#lf-terraformer-time-rdc',
       '#sc-capacity-increase',
       '#lc-capacity-increase'
     ];
@@ -524,6 +526,8 @@ class CostsCalculator {
     setConstrains('discoverer-class-bonus', { min: 0, max: Infinity, def: 0, allowFloat: true, allowNegative: false });
     setConstrains('lf-collector-class-bonus', { min: 0, max: Infinity, def: 0, allowFloat: true, allowNegative: false });
     setConstrains('lf-terraformer-rdc', { min: 0, max: 50, def: 0, allowFloat: true, allowNegative: false });
+    // 0 = twice the cost reduction, as the game pairs them
+    setConstrains('lf-terraformer-time-rdc', { min: 0, max: 99, def: 0, allowFloat: true, allowNegative: false });
     setConstrains('sc-capacity-increase', { min: 0, max: Infinity, def: 0, allowFloat: true, allowNegative: false });
     setConstrains('lc-capacity-increase', { min: 0, max: Infinity, def: 0, allowFloat: true, allowNegative: false });
 
@@ -1128,6 +1132,7 @@ class CostsCalculator {
     }
 
     this._renderIrnResult();
+    this._renderTerraformerTimeAuto();
 
     // Save state
     this.saveState();
@@ -1335,6 +1340,7 @@ class CostsCalculator {
       useIrn: params.useIrn,
       mineralResCntrLvl: params.mineralResCntrLvl,
       lfTerraformerRdc: params.lfTerraformerRdc,
+      lfTerraformerTimeRdc: params.lfTerraformerTimeRdc,
       discovererClassBonus: params.discovererClassBonus,
       collectorClassBonus: params.collectorClassBonus,
       scCapacityIncrease: params.scCapacityIncrease,
@@ -1398,6 +1404,7 @@ class CostsCalculator {
       planetPos: '#planet-pos',
       mineralResCntrLvl: '#mineral-res-cntr-lvl',
       lfTerraformerRdc: '#lf-terraformer-rdc',
+      lfTerraformerTimeRdc: '#lf-terraformer-time-rdc',
       discovererClassBonus: '#discoverer-class-bonus',
       collectorClassBonus: '#lf-collector-class-bonus',
       scCapacityIncrease: '#sc-capacity-increase',
@@ -1411,7 +1418,7 @@ class CostsCalculator {
     // value like 12.5 shows a dot the input's validator would later reject.
     const floatFields = new Set([
       'discovererClassBonus', 'collectorClassBonus',
-      'lfTerraformerRdc', 'scCapacityIncrease', 'lcCapacityIncrease'
+      'lfTerraformerRdc', 'lfTerraformerTimeRdc', 'scCapacityIncrease', 'lcCapacityIncrease'
     ]);
 
     for (const [key, selector] of Object.entries(fieldMap)) {
@@ -1575,6 +1582,11 @@ class CostsCalculator {
     setVal('#lf-collector-class-bonus', 0);
     setVal('#sc-capacity-increase', 0);
     setVal('#lc-capacity-increase', 0);
+
+    // LF building reductions: Mineral Research Centre, terraformer cost and time
+    setVal('#mineral-res-cntr-lvl', 0);
+    setVal('#lf-terraformer-rdc', 0);
+    setVal('#lf-terraformer-time-rdc', 0);
 
     // IRN
     setVal('#irn-level', 0);
@@ -1807,6 +1819,19 @@ class CostsCalculator {
   _getInputNumber(selector) {
     const val = getVal(selector);
     return val ? Number.parseInt(val, 10) || 0 : 0;
+  }
+
+  /**
+   * Show the time reduction the Terraformer gets from its cost reduction
+   * while the time field is left at 0 ("auto").
+   * @private
+   */
+  _renderTerraformerTimeAuto() {
+    const params = this.params();
+    const hint = lfTerraformerTimeAutoHint(params.lfTerraformerRdc, params.lfTerraformerTimeRdc,
+      options.lfTerraformerTimeAuto, getOptionValue('decimalSeparator', '.'));
+    setTextContent('#lf-terraformer-time-auto', hint);
+    toggleClass('#lf-terraformer-time-auto', 'd-none', hint === '');
   }
 
   /**

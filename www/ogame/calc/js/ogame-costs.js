@@ -276,3 +276,47 @@ function getHalvingCost(techID, timeSpan) {
 	}
 	return tmCost;
 }
+
+/**
+ * The terraformer build time reduction in percent. The game ties it to the cost reduction:
+ * every life form level gives 0.1% of cost and 0.2% of time, so a time of 0 (not entered)
+ * means twice the cost reduction, capped at 99%.
+ * @param {number} costRdc percent, 0-50
+ * @param {number} timeRdc percent, 0-99; 0 = derive from costRdc
+ * @returns {number}
+ */
+function lfTerraformerTimeRdc(costRdc, timeRdc) {
+	const time = Number(timeRdc) || 0;
+	if (time > 0)
+		return Math.min(99, time);
+	const cost = Math.min(50, Math.max(0, Number(costRdc) || 0));
+	return Math.min(99, 2 * cost);
+}
+
+/**
+ * What the terraformer build time is multiplied by: 1 - lfTerraformerTimeRdc / 100.
+ * Computed as (100 - percent) / 100, because 1 - 0.8 is 0.19999999999999996 in floating
+ * point and the per-level floor would then lose a second on round times.
+ * @param {number} costRdc percent, 0-50
+ * @param {number} timeRdc percent, 0-99; 0 = derive from costRdc
+ * @returns {number}
+ */
+function lfTerraformerTimeFactor(costRdc, timeRdc) {
+	return (100 - lfTerraformerTimeRdc(costRdc, timeRdc)) / 100;
+}
+
+/**
+ * The hint shown by a terraformer time reduction field left at 0: the reduction derived from
+ * the cost one. Empty when there is nothing to derive (an entered time, or no cost reduction).
+ * @param {number} costRdc percent, as entered
+ * @param {number} timeRdc percent, as entered
+ * @param {string} template localized text, {0} standing for the percent
+ * @param {string} decimalSeparator the locale's decimal separator
+ * @returns {string}
+ */
+function lfTerraformerTimeAutoHint(costRdc, timeRdc, template, decimalSeparator) {
+	if ((Number(timeRdc) || 0) > 0 || (Number(costRdc) || 0) <= 0)
+		return '';
+	const percent = String(lfTerraformerTimeRdc(costRdc, 0)).replace('.', decimalSeparator);
+	return template.replace('{0}', percent);
+}

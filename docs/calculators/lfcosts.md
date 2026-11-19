@@ -24,10 +24,10 @@ Calculate the cost and build time of Lifeform buildings and research in OGame, i
 | File | Lines |
 |------|-------|
 | `www/ogame/calc/js/lfcosts-core.js` | 97 |
-| `www/ogame/calc/js/lfcosts-data-collector.js` | 73 |
-| `www/ogame/calc/js/lfcosts-renderer.js` | 316 |
-| `www/ogame/calc/js/lfcosts-orchestration.js` | 802 |
-| `www/ogame/calc/js/lfcosts-profile.js` | 222 |
+| `www/ogame/calc/js/lfcosts-data-collector.js` | 289 |
+| `www/ogame/calc/js/lfcosts-renderer.js` | 333 |
+| `www/ogame/calc/js/lfcosts-orchestration.js` | 799 |
+| `www/ogame/calc/js/lfcosts-profile.js` | 221 |
 
 The page also loads these shared scripts:
 

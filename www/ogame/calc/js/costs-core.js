@@ -60,7 +60,8 @@ class GlobalParams {
   lfResCostRdcMap = {}; // { techId: cost reduction % }
   lfResTimeRdcMap = {}; // { techId: time reduction % }
   mineralResCntrLvl = 0; // Mineral Research Centre level (Rock'tal)
-  lfTerraformerRdc = 0;  // LF Terraformer reduction, %
+  lfTerraformerRdc = 0;  // LF Terraformer cost reduction, %
+  lfTerraformerTimeRdc = 0;  // LF Terraformer build time reduction, %; 0 = twice the cost one
 
   // By how much a player class' own bonuses are raised, in %. The game's life
   // form panel prints one figure per class - "Discoverer, Total: 57.35%" - and
@@ -114,9 +115,17 @@ class GlobalParams {
     return Math.min(0.5, this.mineralResCntrLvl * 0.005);
   }
 
-  /** LF Terraformer cost/time reduction factor (0–0.5) */
+  /** LF Terraformer cost reduction factor (0–0.5) */
   get lfTerraformerFactor() {
     return Math.min(0.5, this.lfTerraformerRdc / 100);
+  }
+
+  /**
+   * What the Terraformer build time is multiplied by (1–0.01): the entered time
+   * reduction, or twice the cost reduction when none is entered, capped at 99%.
+   */
+  get lfTerraformerTimeFactor() {
+    return lfTerraformerTimeFactor(this.lfTerraformerRdc, this.lfTerraformerTimeRdc);
   }
 
   /**
@@ -288,6 +297,7 @@ const STORED_RULES = {
   labChoice: { min: -1, max: IRN_MAX_PLANETS - 1, def: -1 },
   mineralResCntrLvl: { min: 0, max: Infinity, def: 0 },
   lfTerraformerRdc: { min: 0, max: 50, def: 0, float: true },
+  lfTerraformerTimeRdc: { min: 0, max: 99, def: 0, float: true },
   discovererClassBonus: { min: 0, max: Infinity, def: 0, float: true },
   collectorClassBonus: { min: 0, max: Infinity, def: 0, float: true },
   scCapacityIncrease: { min: 0, max: Infinity, def: 0, float: true },
@@ -881,7 +891,7 @@ class Calculator {
     }
     // Terraformer
     if (techId === 33) {
-      return 1 - params.lfTerraformerFactor;
+      return params.lfTerraformerTimeFactor;
     }
     return 1;
   }

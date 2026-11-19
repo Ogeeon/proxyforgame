@@ -457,6 +457,7 @@ describe('Calculator.calculate - life form reductions round each level of a rang
     const terraformerParams = () => Object.assign(new GlobalParams(), {
         robotFactoryLevelPlanet: 10,
         lfTerraformerRdc: 25,
+        lfTerraformerTimeRdc: 25,
     });
 
     it('floors the Terraformer time of each level, as the terraformer calculator does', () => {
@@ -490,6 +491,55 @@ describe('Calculator.calculate - life form reductions round each level of a rang
     });
 });
 
+// Life form research gives the Terraformer 0.1% off its cost and 0.2% off its
+// build time per level, capped at 50% and 99%. A time reduction of 0 means the
+// game's own pairing: twice the cost reduction.
+describe('Calculator.calculate - the Terraformer cost and time reductions', () => {
+    const TERRAFORMER = 33;
+    const ROBOTICS = 14;
+    const costs = { [TERRAFORMER]: [0, 50000, 100000, 2], [ROBOTICS]: [400, 120, 200, 2] };
+    const calc = new Calculator(costs, {});
+    const params = (overrides) => Object.assign(new GlobalParams(), overrides);
+    // Levels 1-4 without a robotics factory take 20571 + 48000 + 115200 + 288000
+    // = 471771 s and cost 750000 crystal, 1500000 deuterium.
+    const levels1to4 = (overrides) => calc.calculate(new BuildRequest(TERRAFORMER, 0, 4), params(overrides));
+
+    it('changes nothing without a reduction', () => {
+        const result = levels1to4({});
+        expect(result.crystal).toBe(750000);
+        expect(result.time).toBe(471771);
+    });
+
+    it('takes twice the cost reduction off the time when no time reduction is entered', () => {
+        // 40% off the cost, 80% off the time: 4114 + 9600 + 23040 + 57600.
+        const result = levels1to4({ lfTerraformerRdc: 40 });
+        expect(result.crystal).toBe(450000);
+        expect(result.deuterium).toBe(900000);
+        expect(result.time).toBe(94354);
+    });
+
+    it('uses an entered time reduction as it is', () => {
+        // 10% off the time: 18513 + 43200 + 103680 + 259200.
+        const result = levels1to4({ lfTerraformerRdc: 40, lfTerraformerTimeRdc: 10 });
+        expect(result.crystal).toBe(450000);
+        expect(result.time).toBe(424593);
+    });
+
+    it('caps the time reduction at 99%, the cost one at 50%', () => {
+        // 99% off the time: 205 + 480 + 1152 + 2880.
+        const result = levels1to4({ lfTerraformerRdc: 50 });
+        expect(result.crystal).toBe(375000);
+        expect(result.time).toBe(4717);
+    });
+
+    it('leaves the other buildings alone', () => {
+        const plain = calc.calculate(new BuildRequest(ROBOTICS, 0, 3), params({}));
+        const reduced = calc.calculate(new BuildRequest(ROBOTICS, 0, 3), params({ lfTerraformerRdc: 40, lfTerraformerTimeRdc: 60 }));
+        expect(reduced.metal).toBe(plain.metal);
+        expect(reduced.time).toBe(plain.time);
+    });
+});
+
 describe('GlobalParams.validate', () => {
     // loadFromCookie hands every stored leaf over as a string.
     const v = (field, value) => GlobalParams.validate(field, String(value));
@@ -498,6 +548,7 @@ describe('GlobalParams.validate', () => {
         expect(v('shipyardLevel', 12)).toBe(12);
         expect(v('maxPlanetTemp', -23)).toBe(-23);
         expect(v('lfTerraformerRdc', 12.5)).toBe(12.5);
+        expect(v('lfTerraformerTimeRdc', 85.5)).toBe(85.5);
         expect(v('rates', 1.75)).toBe(1.75);
         expect(v('labChoice', -1)).toBe(-1);
     });
@@ -508,6 +559,7 @@ describe('GlobalParams.validate', () => {
         expect(v('planetPos', 17)).toBe(8);
         expect(v('universeSpeed', 99)).toBe(1);
         expect(v('lfTerraformerRdc', 80)).toBe(0);
+        expect(v('lfTerraformerTimeRdc', 120)).toBe(0);
         expect(v('maxPlanetTemp', -500)).toBe(0);
     });
 

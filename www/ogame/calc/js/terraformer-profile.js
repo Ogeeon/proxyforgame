@@ -33,10 +33,11 @@
 /** @type {ProfilePrmField[]} */
 const TERRAFORMER_ACCOUNT_FIELDS = [
   ...PF_ENERGY_ACCOUNT_FIELDS,
-  // The game reports a cost reduction per technology; the calculator applies
-  // one number to the Terraformer's cost and time, so it takes the cost one,
-  // as the cost calculator does.
+  // The game reports the Terraformer's cost and time reductions apart, and the
+  // calculator takes both, as the cost calculator does. A time of 0 means
+  // twice the cost reduction (lfTerraformerTimeRdc in ogame-costs.js).
   pfConvNumField('lf.cost.33.cost', 'lfTerraformerRdc', '#lf-terraformer-rdc'),
+  pfConvNumField('lf.cost.33.time', 'lfTerraformerTimeRdc', '#lf-terraformer-time-rdc'),
   pfConvNumField('lf.ship.202.cargo', 'scCapacityIncrease', '#sc-capacity-increase'),
   pfConvNumField('lf.ship.203.cargo', 'lcCapacityIncrease', '#lc-capacity-increase'),
 ];

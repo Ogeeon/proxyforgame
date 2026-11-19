@@ -65,6 +65,7 @@
       options.fieldHint = '<?= $l['field-hint'] ?>';
       options.msgMinConstraintViolated = '<?= $l['msg-min-constraint-violated'] ?>';
       options.msgMaxConstraintViolated = '<?= $l['msg-max-constraint-violated'] ?>';
+      options.lfTerraformerTimeAuto = <?= json_encode($l['lf-terraformer-time-auto']) ?>;
       // Captions of the calculation-error report (terraformer-data-collector.js):
       // the groups and the fields with no label of their own, and every result
       // cell by its id.
@@ -238,6 +239,14 @@
                 <input id="lf-terraformer-rdc" type="text" name="lf-terraformer-rdc" class="form-control level-input m-0" value="0" data-field-title="<?= $l['lf-terraformer-rdc'] ?>">
                 <span class="input-group-text">%</span>
               </div>
+            </div>
+            <div class="d-flex align-items-center gap-1">
+              <label for="lf-terraformer-time-rdc"><?= $l['lf-terraformer-time-rdc'] ?></label>
+              <div class="input-group input-group-sm w-auto">
+                <input id="lf-terraformer-time-rdc" type="text" name="lf-terraformer-time-rdc" class="form-control level-input m-0" value="0" data-field-title="<?= $l['lf-terraformer-time-rdc'] ?>">
+                <span class="input-group-text">%</span>
+              </div>
+              <small id="lf-terraformer-time-auto" class="text-muted d-none"></small>
             </div>
             <div class="d-flex flex-wrap align-items-center gap-2 border rounded p-2">
               <span class="fw-semibold"><?= $l['class-collector'] ?>:</span>

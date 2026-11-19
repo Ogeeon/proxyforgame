@@ -23,11 +23,11 @@ Calculate the energy, resources, and time needed to terraform an OGame planet, i
 
 | File | Lines |
 |------|-------|
-| `www/ogame/calc/js/terraformer-core.js` | 267 |
-| `www/ogame/calc/js/terraformer-data-collector.js` | 73 |
+| `www/ogame/calc/js/terraformer-core.js` | 224 |
+| `www/ogame/calc/js/terraformer-data-collector.js` | 151 |
 | `www/ogame/calc/js/terraformer-renderer.js` | 107 |
-| `www/ogame/calc/js/terraformer-orchestration.js` | 346 |
-| `www/ogame/calc/js/terraformer-profile.js` | 119 |
+| `www/ogame/calc/js/terraformer-orchestration.js` | 367 |
+| `www/ogame/calc/js/terraformer-profile.js` | 112 |
 
 The page also loads these shared scripts:
 
@@ -41,6 +41,8 @@ The page also loads these shared scripts:
 - `www/ogame/calc/js/profiles-widgets.js`
 - `www/ogame/calc/js/profiles-binders.js`
 - `www/ogame/calc/js/profiles-ui.js`
+- `www/ogame/calc/js/ogame-production.js`
+- `www/ogame/calc/js/ogame-cargo.js`
 
 ## Configuration Options
 
@@ -70,7 +72,9 @@ The calculator keeps these settings in `options_terraformer`:
 - `energyBoost`
 - `disChLevel`
 - `totalLFEnrgBonus`
+- `collectorClassBonus`
 - `lfTerraformerRdc`
+- `lfTerraformerTimeRdc`
 - `scCapacityIncrease`
 - `lcCapacityIncrease`
 - `tfSingleLevel`

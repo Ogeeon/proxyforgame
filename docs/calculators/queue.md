@@ -23,11 +23,11 @@ Compare the cost and time of building upgrades in sequence on an OGame planet or
 
 | File | Lines |
 |------|-------|
-| `www/ogame/calc/js/queue-core.js` | 210 |
-| `www/ogame/calc/js/queue-data-collector.js` | 87 |
+| `www/ogame/calc/js/queue-core.js` | 239 |
+| `www/ogame/calc/js/queue-data-collector.js` | 235 |
 | `www/ogame/calc/js/queue-renderer.js` | 182 |
-| `www/ogame/calc/js/queue-orchestration.js` | 479 |
-| `www/ogame/calc/js/queue-profile.js` | 262 |
+| `www/ogame/calc/js/queue-orchestration.js` | 499 |
+| `www/ogame/calc/js/queue-profile.js` | 239 |
 
 The page also loads these shared scripts:
 
@@ -41,6 +41,7 @@ The page also loads these shared scripts:
 - `www/ogame/calc/js/profiles-widgets.js`
 - `www/ogame/calc/js/profiles-binders.js`
 - `www/ogame/calc/js/profiles-ui.js`
+- `www/ogame/calc/js/ogame-cargo.js`
 
 ## Configuration Options
 
@@ -52,6 +53,8 @@ The calculator keeps these settings in `options_queue`:
 - `playerClass`
 - `scCapacityIncrease`
 - `lcCapacityIncrease`
+- `lfTerraformerRdc`
+- `lfTerraformerTimeRdc`
 - `totFldPln`
 - `totFldMn`
 - `sDTP`

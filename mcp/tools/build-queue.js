@@ -61,6 +61,7 @@ const inputSchema = {
         universe: common.universeSchema,
         universeSpeed: common.universeSpeedSchema,
         ionTechnology: common.ionTechnologySchema,
+        lifeforms: common.lifeformsSchema(['terraformerReduction', 'terraformerTimeReduction']),
     },
     required: ['queue'],
     additionalProperties: false,
@@ -196,6 +197,9 @@ function createBuildQueueTool({ siteApi }) {
                 maxFields: checkFields ? args.fields : Number.MAX_SAFE_INTEGER,
                 universeSpeed,
                 ionTechLevel: args.ionTechnology,
+                // 0 (omitted) time is twice the cost reduction, resolved by the core
+                lfTerraformerRdc: args.lifeforms?.terraformerReduction ?? 0,
+                lfTerraformerTimeRdc: args.lifeforms?.terraformerTimeReduction ?? 0,
             });
 
             let elapsed = 0;

@@ -743,7 +743,8 @@ test.describe('Costs Calculator Page', () => {
         await expect(footRow(page, '#table-0-2', 'total').locator('td:nth-child(6)')).toContainText('9.639.946');
         await expect(footRow(page, '#table-0-2', 'total').locator('td:nth-child(7)')).toContainText('2.937.091');
         await expect(footRow(page, '#table-0-2', 'total').locator('td:nth-child(9)')).toContainText('16.000');
-        await expect(footRow(page, '#table-0-2', 'total').locator('td:nth-child(10)')).toContainText('61w 13h');
+        // No time reduction entered: the Terraformer's time takes twice the cost one, 40% off
+        await expect(footRow(page, '#table-0-2', 'total').locator('td:nth-child(10)')).toContainText('60w 5d 18h');
         await expect(footRow(page, '#table-0-2', 'total').locator('td:nth-child(11)')).toContainText('29.894'); // the terraformer reduction does not lower the points either
 
         await page.locator('#reset').click();
@@ -819,6 +820,63 @@ test.describe('Costs Calculator Page', () => {
         await page.locator('#planet-pos').fill('10');
         await page.locator('#planet-pos').blur();
         await expect(page.locator('#planet-pos')).toHaveValue('10');
+    });
+
+    test('the Terraformer takes its cost and time reductions apart', async ({ page }) => {
+        await page.getByRole('tab', { name: 'All items - one level' }).click();
+        await page.getByRole('tab', { name: 'Buildings (planet)' }).click();
+        // Level 4 without a robotics factory: 400.000 crystal, 288000 s (3d 8h).
+        await fillRows(page, '#table-0-2', ['terraformer'], 4);
+        const row = techRow(page, '#table-0-2', 'terraformer');
+        const hint = page.locator('#lf-terraformer-time-auto');
+        const enter = async (selector, value) => {
+            await page.locator(selector).fill(value);
+            await page.locator(selector).press('Tab');
+        };
+
+        await page.locator('#param-lifeforms-tab').click();
+        await expect(hint).toBeHidden();
+        // 40% off the cost, and with no time entered twice that off the time: 57600 s.
+        await enter('#lf-terraformer-rdc', '40');
+        await expect(row.locator('td:nth-child(6)')).toContainText('240.000');
+        await expect(row.locator('td:nth-child(10)')).toHaveText('16h');
+        await expect(hint).toBeVisible();
+        await expect(hint).toHaveText('auto: 80%');
+
+        // An entered time reduction is taken as it is: 10% off is 259200 s.
+        await enter('#lf-terraformer-time-rdc', '10');
+        await expect(row.locator('td:nth-child(10)')).toHaveText('3d');
+        await expect(row.locator('td:nth-child(6)')).toContainText('240.000');
+        await expect(hint).toBeHidden();
+
+        // The time is capped at 99%, the cost at 50%.
+        await enter('#lf-terraformer-time-rdc', '150');
+        await expect(page.locator('#lf-terraformer-time-rdc')).toHaveValue('99');
+        await enter('#lf-terraformer-rdc', '70');
+        await expect(page.locator('#lf-terraformer-rdc')).toHaveValue('50');
+
+        // Back to 0, the time follows the cost again: 99% off 288000 s is 2880 s.
+        await enter('#lf-terraformer-time-rdc', '0');
+        await expect(row.locator('td:nth-child(10)')).toHaveText('48m');
+        await expect(hint).toHaveText('auto: 99%');
+        await enter('#lf-terraformer-rdc', '0');
+        await expect(hint).toBeHidden();
+    });
+
+    test('the global reset clears the life form building reductions', async ({ page }) => {
+        await page.locator('#param-lifeforms-tab').click();
+        const fields = ['#mineral-res-cntr-lvl', '#lf-terraformer-rdc', '#lf-terraformer-time-rdc'];
+        for (const selector of fields) {
+            await page.locator(selector).fill('10');
+            await page.locator(selector).press('Tab');
+        }
+        await expect(page.locator('#lf-terraformer-time-rdc')).toHaveValue('10');
+
+        await page.locator('#reset').click();
+        for (const selector of fields) {
+            await expect(page.locator(selector)).toHaveValue('0');
+        }
+        await expect(page.locator('#lf-terraformer-time-auto')).toBeHidden();
     });
 });
 
@@ -1345,7 +1403,7 @@ test.describe('Costs Calculator - saved settings', () => {
         researchBonus: false, playerClass: 0, isTrader: false, booster: 0,
         irnLevel: 0, labLevels: [0, 0, 0, 0, 0, 0, 0, 0], labChoice: -1,
         fullNumbers: false, useIrn: false,
-        mineralResCntrLvl: 0, lfTerraformerRdc: 0, discovererClassBonus: 0, collectorClassBonus: 0,
+        mineralResCntrLvl: 0, lfTerraformerRdc: 0, lfTerraformerTimeRdc: 0, discovererClassBonus: 0, collectorClassBonus: 0,
         scCapacityIncrease: 0, lcCapacityIncrease: 0,
         rates: [1, 1.5, 3], country: '--', universe: ''
     };
@@ -1361,7 +1419,7 @@ test.describe('Costs Calculator - saved settings', () => {
         researchBonus: true, playerClass: 2, isTrader: true, booster: 3,
         irnLevel: 2, labLevels: [12, 11, 10], labChoice: 0,
         fullNumbers: true, useIrn: true,
-        mineralResCntrLvl: 6, lfTerraformerRdc: 12.5, discovererClassBonus: 3.25, collectorClassBonus: 1.5,
+        mineralResCntrLvl: 6, lfTerraformerRdc: 12.5, lfTerraformerTimeRdc: 33.5, discovererClassBonus: 3.25, collectorClassBonus: 1.5,
         scCapacityIncrease: 40.5, lcCapacityIncrease: 22,
         rates: [2.5, 1.75, 1], country: '--', universe: ''
     };
@@ -1393,7 +1451,7 @@ test.describe('Costs Calculator - saved settings', () => {
             '#ion-tech-level': '7', '#hyper-tech-level': '9', '#max-planet-temp': '-23',
             '#planet-pos': '11', '#booster': '3', '#irn-level': '2', '#planetsSpin': '3',
             '#mineral-res-cntr-lvl': '6',
-            '#lf-terraformer-rdc': num(12.5), '#discoverer-class-bonus': num(3.25),
+            '#lf-terraformer-rdc': num(12.5), '#lf-terraformer-time-rdc': num(33.5), '#discoverer-class-bonus': num(3.25),
             '#lf-collector-class-bonus': num(1.5), '#sc-capacity-increase': num(40.5),
             '#lc-capacity-increase': '22',
             '#exchange-rates-m': num(2.5), '#exchange-rates-c': num(1.75), '#exchange-rates-d': '1',
@@ -1469,6 +1527,7 @@ test.describe('Costs Calculator - saved settings', () => {
         await type('#discoverer-class-bonus', '2.25');
         await type('#mineral-res-cntr-lvl', '5');
         await type('#lf-terraformer-rdc', '12.5');
+        await type('#lf-terraformer-time-rdc', '30.5');
         await type('#sc-capacity-increase', '30');
         await type('#lc-capacity-increase', '20.5');
 
@@ -1480,7 +1539,7 @@ test.describe('Costs Calculator - saved settings', () => {
             '#hyper-tech-level': '11', '#universe-speed': '3', '#research-speed': '6',
             '#exchange-rates-m': '2.5', '#exchange-rates-c': '1.8', '#exchange-rates-d': '1.2',
             '#lf-collector-class-bonus': '1.5', '#discoverer-class-bonus': '2.25',
-            '#mineral-res-cntr-lvl': '5', '#lf-terraformer-rdc': '12.5',
+            '#mineral-res-cntr-lvl': '5', '#lf-terraformer-rdc': '12.5', '#lf-terraformer-time-rdc': '30.5',
             '#sc-capacity-increase': '30', '#lc-capacity-increase': '20.5'
         };
         for (const [selector, value] of Object.entries(values)) {
@@ -1510,6 +1569,7 @@ test.describe('Costs Calculator - saved settings', () => {
             { name: 'a level that is not a number', state: { robotFactoryLevelPlanet: 'abc' }, selector: '#robot-factory-level', value: '0' },
             { name: 'a speed the select does not offer', state: { universeSpeed: 99 }, selector: '#universe-speed', value: '1' },
             { name: 'a terraformer reduction above 50%', state: { lfTerraformerRdc: 80 }, selector: '#lf-terraformer-rdc', value: '0' },
+            { name: 'a terraformer time reduction above 99%', state: { lfTerraformerTimeRdc: 120 }, selector: '#lf-terraformer-time-rdc', value: '0' },
             { name: 'an exchange rate above 100', state: { rates: [1, 500, 3] }, selector: '#exchange-rates-c', value: '1.5' },
             { name: 'a temperature below -134', state: { maxPlanetTemp: -500 }, selector: '#max-planet-temp', value: '0' },
             { name: 'lab levels that are not a list', state: { labLevels: 'garbage' }, selector: '#planetsSpin', value: '8' },
@@ -1550,6 +1610,7 @@ test.describe('Costs Calculator - MCP tools', () => {
             { tool, arg: 'hyperspaceTechnology', selector: '#hyper-tech-level', prm: 'hyperTechLevel' },
             { tool, arg: 'lifeforms.mineralResearchCentre', selector: '#mineral-res-cntr-lvl', prm: 'mineralResCntrLvl' },
             { tool, arg: 'lifeforms.terraformerReduction', selector: '#lf-terraformer-rdc', prm: 'lfTerraformerRdc' },
+            { tool, arg: 'lifeforms.terraformerTimeReduction', selector: '#lf-terraformer-time-rdc', prm: 'lfTerraformerTimeRdc' },
             { tool, arg: 'lifeforms.discovererClassBonus', selector: '#discoverer-class-bonus', prm: 'discovererClassBonus' },
             { tool, arg: 'lifeforms.collectorClassBonus', selector: '#lf-collector-class-bonus', prm: 'collectorClassBonus' },
             { tool, arg: 'lifeforms.shipBonuses.small-cargo.cargo', selector: '#sc-capacity-increase', prm: 'scCapacityIncrease' },

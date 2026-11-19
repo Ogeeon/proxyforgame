@@ -67,9 +67,10 @@ const COSTS_ACCOUNT_FIELDS = [
   pfPercentField('lf.classBooster.3', 'discovererClassBonus', '#discoverer-class-bonus'),
   pfPercentField('lf.ship.202.cargo', 'scCapacityIncrease', '#sc-capacity-increase'),
   pfPercentField('lf.ship.203.cargo', 'lcCapacityIncrease', '#lc-capacity-increase'),
-  // The game reports a cost reduction per technology; the calculator applies
-  // one number to the Terraformer's cost and time, so it takes the cost one.
+  // The game reports a cost and a time reduction per technology; the
+  // Terraformer takes both, each in a field of its own.
   pfPercentField('lf.cost.33.cost', 'lfTerraformerRdc', '#lf-terraformer-rdc'),
+  pfPercentField('lf.cost.33.time', 'lfTerraformerTimeRdc', '#lf-terraformer-time-rdc'),
   pfInForm(pfRatesField('rates', '#exchange-rates-m'), (/** @type {number[]} */ rates) => {
     setNumVal('#exchange-rates-m', rates[0]);
     setNumVal('#exchange-rates-c', rates[1]);
@@ -491,7 +492,7 @@ class CostsProfiles extends ProfileBinder {
         changed = setProfileValue(planet, 'building.31', level) || changed;
         if (planet.id === this.planetSelect.id) shownLab = level;
       });
-      this.snapshot.labs = p.labLevels.map(pfNum);
+      this.snapshot.labs = p.labLevels.map((v) => pfNum(v));
       // The rows after the planets go nowhere in the profile, but the table
       // is rebuilt from it: keep them for the next showLabs().
       this.extraLabs = {

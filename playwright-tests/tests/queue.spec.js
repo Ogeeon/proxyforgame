@@ -173,6 +173,49 @@ test.describe('Construction Queue Calculator Page', () => {
         expect(timeAfterMoving).toBe('20h 9m 22s');
     });
 
+    test('[life form Terraformer reductions] cost and time are cut apart', async ({ page }) => {
+        // Terraformer level 1: 50.000 crystal, 100.000 deuterium, 20571 s.
+        await addToQueue(page, 33, 0);
+        await addToQueue(page, 1, 0);
+        const enter = async (selector, value) => {
+            await page.locator(selector).fill(value);
+            await page.locator(selector).blur();
+        };
+        const hint = page.locator('#lf-terraformer-time-auto');
+        await expect(hint).toBeHidden();
+        expect((await getQueueTotals(page)).time).toBe('5h 43m 21s');
+
+        // 40% off the cost and, with no time entered, 80% off the time: 4114 s.
+        // The metal mine (60 metal, 15 crystal, 30 s) is not touched.
+        await enter('#lf-terraformer-rdc', '40');
+        await expect(hint).toHaveText('auto: 80%');
+        let totals = await getQueueTotals(page);
+        expect(totals.metal).toBe('60');
+        expect(totals.crystal).toBe('30.015');
+        expect(totals.deuterium).toBe('60.000');
+        expect(totals.time).toBe('1h 9m 4s');
+
+        // An entered time reduction is taken as it is: 10% off is 18513 s.
+        await enter('#lf-terraformer-time-rdc', '10');
+        await expect(hint).toBeHidden();
+        totals = await getQueueTotals(page);
+        expect(totals.crystal).toBe('30.015');
+        expect(totals.time).toBe('5h 9m 3s');
+
+        // The bounds are 50% and 99%, and both survive a reload.
+        await enter('#lf-terraformer-rdc', '70');
+        await expect(page.locator('#lf-terraformer-rdc')).toHaveValue('50');
+        await enter('#lf-terraformer-time-rdc', '150');
+        await expect(page.locator('#lf-terraformer-time-rdc')).toHaveValue('99');
+        await page.reload();
+        await expect(page.locator('#lf-terraformer-rdc')).toHaveValue('50');
+        await expect(page.locator('#lf-terraformer-time-rdc')).toHaveValue('99');
+
+        await page.locator('#reset').click();
+        await expect(page.locator('#lf-terraformer-rdc')).toHaveValue('0');
+        await expect(page.locator('#lf-terraformer-time-rdc')).toHaveValue('0');
+    });
+
     test('[universe speed effect] time calculations update correctly', async ({ page }) => {
         // Add metal mine to queue
         await addToQueue(page, 1, 0);
@@ -407,6 +450,8 @@ test.describe('Queue Calculator - MCP tools', () => {
             { tool, arg: 'fields', selector: '#total-fields-2', prm: 'totFldPln' },
             { tool, arg: 'universeSpeed', selector: '#universe-speed', prm: 'universeSpeed' },
             { tool, arg: 'ionTechnology', selector: '#ion-tech-level', prm: 'ionTechLevel' },
+            { tool, arg: 'lifeforms.terraformerReduction', selector: '#lf-terraformer-rdc', prm: 'lfTerraformerRdc' },
+            { tool, arg: 'lifeforms.terraformerTimeReduction', selector: '#lf-terraformer-time-rdc', prm: 'lfTerraformerTimeRdc' },
         ]);
     });
 });

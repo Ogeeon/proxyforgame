@@ -23,11 +23,11 @@ Calculate the cost and build time of buildings, research, ships, and defenses in
 
 | File | Lines |
 |------|-------|
-| `www/ogame/calc/js/costs-core.js` | 919 |
-| `www/ogame/calc/js/costs-data-collector.js` | 642 |
-| `www/ogame/calc/js/costs-renderer.js` | 676 |
-| `www/ogame/calc/js/costs-orchestration.js` | 2374 |
-| `www/ogame/calc/js/costs-profile.js` | 722 |
+| `www/ogame/calc/js/costs-core.js` | 1059 |
+| `www/ogame/calc/js/costs-data-collector.js` | 953 |
+| `www/ogame/calc/js/costs-renderer.js` | 735 |
+| `www/ogame/calc/js/costs-orchestration.js` | 2370 |
+| `www/ogame/calc/js/costs-profile.js` | 754 |
 
 The page also loads these shared scripts:
 
@@ -42,6 +42,7 @@ The page also loads these shared scripts:
 - `www/ogame/calc/js/profiles-widgets.js`
 - `www/ogame/calc/js/profiles-binders.js`
 - `www/ogame/calc/js/profiles-ui.js`
+- `www/ogame/calc/js/ogame-cargo.js`
 
 ## Usage
 

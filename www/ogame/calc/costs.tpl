@@ -75,6 +75,7 @@
     options.msgMaxConstraintViolated = '<?= $l['msg-max-constraint-violated'] ?>';
     options.msgCantResearch = '<?= $l['msg-cant-research'] ?>';
     options.msgLabLevelRaised = <?= json_encode($l['msg-lab-level-raised']) ?>;
+    options.lfTerraformerTimeAuto = <?= json_encode($l['lf-terraformer-time-auto']) ?>;
     options.lfImportErrNotFound = '<?= $l['lf-import-err-not-found'] ?>';
     options.lfImportErrIncomplete = '<?= $l['lf-import-err-incomplete'] ?>';
     options.dialogOk = <?= json_encode($l['dialog-ok']) ?>;
@@ -365,6 +366,14 @@
                 <input id="lf-terraformer-rdc" type="text" name="lf-terraformer-rdc" class="form-control level-input m-0" value="0">
                 <span class="input-group-text">%</span>
               </div>
+            </div>
+            <div class="d-flex align-items-center gap-1">
+              <label for="lf-terraformer-time-rdc"><?= $l['lf-terraformer-time-rdc'] ?></label>
+              <div class="input-group input-group-sm w-auto">
+                <input id="lf-terraformer-time-rdc" type="text" name="lf-terraformer-time-rdc" class="form-control level-input m-0" value="0">
+                <span class="input-group-text">%</span>
+              </div>
+              <small id="lf-terraformer-time-auto" class="text-muted d-none"></small>
             </div>
             <div class="d-flex align-items-center gap-2">
               <span><?= $l['cargo-cap-increase'] ?></span>

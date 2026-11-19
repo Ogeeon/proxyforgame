@@ -23,11 +23,11 @@ Calculate fleet flight time, deuterium consumption, and the best departure time 
 
 | File | Lines |
 |------|-------|
-| `www/ogame/calc/js/flight-core.js` | 440 |
-| `www/ogame/calc/js/flight-data-collector.js` | 233 |
-| `www/ogame/calc/js/flight-renderer.js` | 285 |
-| `www/ogame/calc/js/flight-orchestration.js` | 2162 |
-| `www/ogame/calc/js/flight-profile.js` | 295 |
+| `www/ogame/calc/js/flight-core.js` | 697 |
+| `www/ogame/calc/js/flight-data-collector.js` | 539 |
+| `www/ogame/calc/js/flight-renderer.js` | 289 |
+| `www/ogame/calc/js/flight-orchestration.js` | 2015 |
+| `www/ogame/calc/js/flight-profile.js` | 292 |
 
 The page also loads these shared scripts:
 
@@ -41,6 +41,8 @@ The page also loads these shared scripts:
 - `www/ogame/calc/js/profiles-binders.js`
 - `www/ogame/calc/js/profiles-ui.js`
 - `www/ogame/calc/js/own-api.js`
+- `www/ogame/calc/js/ogame-universe.js`
+- `www/ogame/calc/js/ogame-cargo.js`
 
 ## Configuration Options
 
