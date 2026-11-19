@@ -21,7 +21,7 @@ release section; it is the source of truth for the other eleven translations.
 
 ### Fixed
 
-- Costs calculator: a Control Centre component cannot be demolished in the game, so a target level below the start level on the "all items, several levels" tab now prices nothing for it, instead of the cost of a demolition as for an ordinary building.
+- Costs calculator: a Control Centre component cannot be demolished in the game, so a target level below the start level on the "all items, several levels" tab now prices nothing for it, instead of the cost of a demolition as for an ordinary building, and its effect column shows a dash instead of the effect of that level.
 
 ## [2026-11-18] - site entry 75
 

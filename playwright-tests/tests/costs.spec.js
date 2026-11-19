@@ -544,6 +544,16 @@ test.describe('Costs Calculator Page', () => {
         await expect(table.locator('tr:nth-child(3) td:nth-child(8)')).toContainText('210.937');
         // The subtotal row does not add the levels up
         await expect(table.locator('tr:nth-child(9) td:nth-child(3)')).toHaveText('');
+
+        // A component cannot be demolished: a target below the start shows no effect and no cost
+        await table.locator('tr:nth-child(3) td:nth-child(4) input').fill('1');
+        await table.locator('tr:nth-child(3) td:nth-child(4) input').press('Enter');
+        await expect(table.locator('tr:nth-child(3) td:nth-child(5)')).toHaveText('—');
+        await expect(table.locator('tr:nth-child(3) td:nth-child(6)')).toHaveText('0');
+        // ...and so does a target equal to the start
+        await table.locator('tr:nth-child(3) td:nth-child(4) input').fill('2');
+        await table.locator('tr:nth-child(3) td:nth-child(4) input').press('Enter');
+        await expect(table.locator('tr:nth-child(3) td:nth-child(5)')).toHaveText('—');
     });
 
     test('[control centre - one item] the range tab prices a component level by level', async ({ page }) => {

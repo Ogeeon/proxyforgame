@@ -347,7 +347,12 @@ class Renderer {
         ? null
         : Number(cell.dataset.effect);
       const level = input ? getInputNumber(input) : 0;
-      cell.innerHTML = Renderer.formatEffect(componentEffect(perLevel, level));
+      // A component cannot be demolished, so a target not above the start has no effect to show
+      const fromInput = isMultiLevel && row instanceof HTMLTableRowElement
+        ? row.cells[2]?.querySelector('input')
+        : null;
+      const noGain = fromInput ? level <= getInputNumber(fromInput) : false;
+      cell.innerHTML = Renderer.formatEffect(noGain ? null : componentEffect(perLevel, level));
     }
   }
 
