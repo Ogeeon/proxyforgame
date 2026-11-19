@@ -508,7 +508,7 @@
                       <?php endif; ?>
                     </tr>
                     <?php endforeach; ?>
-                    <tr>
+                    <tr data-row-key="total">
                       <td style="display: none;"></td>
                       <td colspan="<?= $levelCols ?>" class="border-n" ><?=$l['total']?></td>
                       <td class="border-n text-center" >0</td>
@@ -527,7 +527,7 @@
                       <td class="border-n border-s border-e text-center" ><b>0</b></td>
                     </tr>
                     <tr><td colspan="<?= 10 + $energyCols + $qtyOffset ?>" style="height: 5px">&nbsp;</td></tr>
-                    <tr>
+                    <tr data-row-key="grand-total">
                       <td style="display: none;"></td>
                       <td colspan="<?= 1 + $levelCols + $qtyOffset ?>" class="border-n border-w" ><?=$l['grand-total']?></td>
                       <td class="border-n text-center" >0</td>
@@ -543,7 +543,7 @@
                       <?php endif; ?>
                       <td class="border-n border-e text-center" >0</td>
                     </tr>
-                    <tr>
+                    <tr data-row-key="available">
                       <td style="display: none;"></td>
                       <td colspan="<?= 1 + $levelCols + $qtyOffset ?>" class="border-w"><?=$l['res-available']?></td>
                       <td class="text-center"><input id="metal-available-<?=$i?>-<?=$j?>" data-report-skip type="text" name="metal-available" class="form-control form-control-sm res-input" value="0"></td>
@@ -551,7 +551,7 @@
                       <td class="text-center"><input id="deut-available-<?=$i?>-<?=$j?>" data-report-skip type="text" name="deut-available" class="form-control form-control-sm res-input" value="0"></td>
                       <td colspan="<?= ($i == 1 ? 3 : 4) + $energyCols ?>" class="text-start border-e"><small id="resources-age-<?=$i?>-<?=$j?>" class="pf-resources-age text-body-secondary d-none"></small></td>
                     </tr>
-                    <tr>
+                    <tr data-row-key="needed">
                       <td style="display: none;"></td>
                       <td colspan="<?= 1 + $levelCols + $qtyOffset ?>" class="border-w"><?=$l['res-needed']?></td>
                       <td class="text-center">0</td>
@@ -561,7 +561,7 @@
                       <td colspan="<?= ($i == 1 ? 1 : 2) + $energyCols ?>"></td>
                       <td class="border-e"></td>
                     </tr>
-                    <tr>
+                    <tr data-row-key="transport">
                       <td style="display: none;"></td>
                       <td class="border-s border-w"><?=$l['transports-needed']?></td>
                       <td class="border-s text-center">0 <?=$l['sc-short']?></td>
