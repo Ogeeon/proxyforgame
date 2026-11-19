@@ -69,6 +69,8 @@ class DataCollector {
     this._collectLfResearchReductions(params);
     params.mineralResCntrLvl = this._getInputNumber('#mineral-res-cntr-lvl');
     params.lfTerraformerRdc = this._getInputNumber('#lf-terraformer-rdc');
+    // Raw: 0 means "twice the cost reduction", resolved by the core.
+    params.lfTerraformerTimeRdc = this._getInputNumber('#lf-terraformer-time-rdc');
     params.discovererClassBonus = this._getInputNumber('#discoverer-class-bonus');
     params.collectorClassBonus = this._getInputNumber('#lf-collector-class-bonus');
 
@@ -421,8 +423,9 @@ class DataCollector {
       // Mineral Research Centre affects planet building tables (mines)
       'mineral-res-cntr-lvl': ['table-0-2', 'table-1-2'],
 
-      // LF Terraformer reduction affects planet building tables
+      // LF Terraformer reductions affect planet building tables
       'lf-terraformer-rdc': ['table-0-2', 'table-1-2'],
+      'lf-terraformer-time-rdc': ['table-0-2', 'table-1-2'],
 
       // Cargo capacity increase affects the transports-needed row under every table
       'sc-capacity-increase': ['*'],
@@ -460,7 +463,7 @@ class DataCollector {
       'shipyard-level', 'ion-tech-level', 'hyper-tech-level',
       'class-0', 'class-1', 'class-2', 'is-trader', 'full-numbers', 'use-irn',
       'lf-research-table', 'discoverer-class-bonus', 'lf-collector-class-bonus',
-      'mineral-res-cntr-lvl', 'lf-terraformer-rdc',
+      'mineral-res-cntr-lvl', 'lf-terraformer-rdc', 'lf-terraformer-time-rdc',
       'sc-capacity-increase', 'lc-capacity-increase',
       'exchange-rates'
     ];
@@ -800,7 +803,7 @@ function costsReportParameters(out) {
     const title = document.getElementById(id)?.dataset.fieldTitle;
     out.add(id, lifeforms, title ? { numeric: true, label: title } : { numeric: true });
   }
-  out.addNumbers(['mineral-res-cntr-lvl', 'lf-terraformer-rdc'], lifeforms);
+  out.addNumbers(['mineral-res-cntr-lvl', 'lf-terraformer-rdc', 'lf-terraformer-time-rdc'], lifeforms);
   const cargo = costsReportText('cargo-cap-increase');
   out.add('sc-capacity-increase', lifeforms, { numeric: true, label: `${cargo} — ${options.scFull}` });
   out.add('lc-capacity-increase', lifeforms, { numeric: true, label: `${cargo} — ${options.lcFull}` });

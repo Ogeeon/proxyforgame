@@ -9,9 +9,9 @@ const { load } = require('./load');
 const { expect } = require('./expect');
 
 // utils.js supplies dropFraction(); ogame-costs.js supplies getBuildCost_C/getBuildTime_C.
-const { TerraformerCalculator, getBuildEnergyCost_C } = load(
+const { TerraformerCalculator, getBuildEnergyCost_C, lfTerraformerTimeRdc } = load(
     ['js/utils.js', 'ogame/calc/js/ogame-costs.js', 'ogame/calc/js/ogame-production.js', 'ogame/calc/js/ogame-cargo.js', 'ogame/calc/js/terraformer-core.js'],
-    ['TerraformerCalculator', 'getBuildEnergyCost_C'],
+    ['TerraformerCalculator', 'getBuildEnergyCost_C', 'lfTerraformerTimeRdc'],
 );
 
 const BASE_PRM = {
@@ -36,6 +36,7 @@ const BASE_PRM = {
     totalLFEnrgBonus: 0,
     collectorClassBonus: 0,
     lfTerraformerRdc: 0,
+    lfTerraformerTimeRdc: 0,
     scCapacityIncrease: 0,
     lcCapacityIncrease: 0,
     tfSingleLevel: false,
@@ -300,33 +301,64 @@ describe('Terraformer Calculator - Life-form cost reduction', () => {
     it('rounds each level down on its own, as the cost calculator does', () => {
         const plain = [1, 2, 3].map((level) => compute({ tfLevelFrom: level - 1, tfLevelTo: level }));
         const r = compute({ tfLevelTo: 3, lfTerraformerRdc: 15.5 });
-        const expected = (key) => plain.reduce((sum, p) => sum + Math.floor(p[key] * 0.845), 0);
-        expect(r.crysTF).toBe(expected('crysTF'));
-        expect(r.deutTF).toBe(expected('deutTF'));
-        expect(r.secsTF).toBe(expected('secsTF'));
+        const expected = (key, factor) => plain.reduce((sum, p) => sum + Math.floor(p[key] * factor), 0);
+        expect(r.crysTF).toBe(expected('crysTF', 0.845));
+        expect(r.deutTF).toBe(expected('deutTF', 0.845));
+        // The time takes twice the cost reduction: 31% off.
+        expect(r.secsTF).toBe(expected('secsTF', 0.69));
     });
 
     it('floors the time of each level of a range, not the range total (#58)', () => {
         // Levels 5, 6, 7 at robotics 10 take 69818, 209454 and 418909 s (698181 in
         // all). A quarter off each, floored: 52363 + 157090 + 314181 = 523634 s,
         // where flooring 75% of the total would give 523635 s.
-        const r = compute({ tfLevelFrom: 4, tfLevelTo: 7, robotsFactoryLevel: 10, lfTerraformerRdc: 25 });
+        const r = compute({ tfLevelFrom: 4, tfLevelTo: 7, robotsFactoryLevel: 10, lfTerraformerRdc: 25, lfTerraformerTimeRdc: 25 });
         expect(r.secsTF).toBe(523634);
         expect(r.crysTF).toBe(4200000);
         expect(r.deutTF).toBe(8400000);
     });
 
-    it('shortens the build time as well', () => {
-        const plain = compute({ tfLevelTo: 2, robotsFactoryLevel: 10 });
-        const reduced = compute({ tfLevelTo: 2, robotsFactoryLevel: 10, lfTerraformerRdc: 20 });
-        expect(reduced.secsTF).toBeLessThan(plain.secsTF);
+    // Levels 1-4 without a robotics factory take 20571 + 48000 + 115200 + 288000
+    // = 471771 s and cost 750000 crystal, 1500000 deuterium.
+    it('takes twice the cost reduction off the time when no time reduction is entered', () => {
+        // 40% off the cost, 80% off the time: 4114 + 9600 + 23040 + 57600.
+        const r = compute({ tfLevelTo: 4, lfTerraformerRdc: 40 });
+        expect(r.crysTF).toBe(450000);
+        expect(r.deutTF).toBe(900000);
+        expect(r.secsTF).toBe(94354);
     });
 
-    it('is capped at 50%', () => {
+    it('uses an entered time reduction as it is', () => {
+        // 10% off the time: 18513 + 43200 + 103680 + 259200.
+        const r = compute({ tfLevelTo: 4, lfTerraformerRdc: 40, lfTerraformerTimeRdc: 10 });
+        expect(r.crysTF).toBe(450000);
+        expect(r.secsTF).toBe(424593);
+    });
+
+    it('reduces the time alone when only a time reduction is entered', () => {
+        // 30% off the time: 14399 + 33600 + 80640 + 201600.
+        const r = compute({ tfLevelTo: 4, lfTerraformerTimeRdc: 30 });
+        expect(r.crysTF).toBe(750000);
+        expect(r.deutTF).toBe(1500000);
+        expect(r.secsTF).toBe(330239);
+    });
+
+    it('caps the cost reduction at 50% and the time reduction at 99%', () => {
+        // 50% off the cost; 99% off the time: 205 + 480 + 1152 + 2880.
         const half = compute({ tfLevelTo: 4, lfTerraformerRdc: 50 });
-        const more = compute({ tfLevelTo: 4, lfTerraformerRdc: 80 });
-        expect(more.crysTF).toBe(half.crysTF);
-        expect(more.secsTF).toBe(half.secsTF);
+        expect(half.crysTF).toBe(375000);
+        expect(half.secsTF).toBe(4717);
+        const more = compute({ tfLevelTo: 4, lfTerraformerRdc: 80, lfTerraformerTimeRdc: 120 });
+        expect(more.crysTF).toBe(375000);
+        expect(more.deutTF).toBe(750000);
+        expect(more.secsTF).toBe(4717);
+    });
+
+    it('changes nothing without a reduction', () => {
+        const r = compute({ tfLevelTo: 4 });
+        expect(r.crysTF).toBe(750000);
+        expect(r.deutTF).toBe(1500000);
+        expect(r.secsTF).toBe(471771);
     });
 
     it('leaves the satellites alone', () => {
@@ -334,5 +366,27 @@ describe('Terraformer Calculator - Life-form cost reduction', () => {
         const reduced = compute({ tfLevelTo: 2, lfTerraformerRdc: 30 });
         expect(reduced.crysSS).toBe(plain.crysSS);
         expect(reduced.secsSS).toBe(plain.secsSS);
+    });
+});
+
+describe('lfTerraformerTimeRdc', () => {
+    it('is 0 without either reduction', () => {
+        expect(lfTerraformerTimeRdc(0, 0)).toBe(0);
+    });
+
+    it('takes an entered time reduction as it is', () => {
+        expect(lfTerraformerTimeRdc(0, 30)).toBe(30);
+        expect(lfTerraformerTimeRdc(40, 10)).toBe(10);
+    });
+
+    it('derives twice the cost reduction from a time of 0', () => {
+        expect(lfTerraformerTimeRdc(20, 0)).toBe(40);
+        expect(lfTerraformerTimeRdc(15.5, 0)).toBe(31);
+    });
+
+    it('caps the result at 99%', () => {
+        expect(lfTerraformerTimeRdc(50, 0)).toBe(99);
+        expect(lfTerraformerTimeRdc(80, 0)).toBe(99);
+        expect(lfTerraformerTimeRdc(10, 150)).toBe(99);
     });
 });

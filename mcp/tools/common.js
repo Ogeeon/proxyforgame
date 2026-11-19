@@ -311,7 +311,9 @@ const LIFEFORM_FIELDS = {
     itemTimeReduction: lfPercent('Time reduction of the item asked about', 99),
     researchCostReduction: lfPercent('Life form research cost reduction from technologies', 50),
     researchTimeReduction: lfPercent('Life form research time reduction from technologies', 99),
-    terraformerReduction: lfPercent('Terraformer cost and time reduction', 50),
+    terraformerReduction: lfPercent('Terraformer cost reduction', 50),
+    terraformerTimeReduction: lfPercent('Terraformer build time reduction; when omitted, twice the cost reduction '
+        + '(capped at 99%), as in the game', 99),
     megalith: level('Rock\'tal Megalith level: cheaper and faster buildings'),
     mineralResearchCentre: level('Rock\'tal Mineral Research Centre level: cheaper mines and production buildings'),
     researchBuilding: level('Level of the planet race\'s research building - Research Centre, Rune Technologium, '

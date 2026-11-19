@@ -70,6 +70,7 @@ const COSTS_ACCOUNT_FIELDS = [
   // The game reports a cost reduction per technology; the calculator applies
   // one number to the Terraformer's cost and time, so it takes the cost one.
   pfPercentField('lf.cost.33.cost', 'lfTerraformerRdc', '#lf-terraformer-rdc'),
+  pfPercentField('lf.cost.33.time', 'lfTerraformerTimeRdc', '#lf-terraformer-time-rdc'),
   pfInForm(pfRatesField('rates', '#exchange-rates-m'), (/** @type {number[]} */ rates) => {
     setNumVal('#exchange-rates-m', rates[0]);
     setNumVal('#exchange-rates-c', rates[1]);

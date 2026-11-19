@@ -19,7 +19,7 @@ const inputSchema = {
         fromLevel: { type: 'integer', minimum: 0, maximum: 100, default: 0, description: 'Terraformer level now.' },
         toLevel: { type: 'integer', minimum: 1, maximum: 100, description: 'Terraformer level to reach.' },
         ...common.energySchema,
-        lifeforms: common.lifeformsSchema([...common.ENERGY_LIFEFORMS, 'terraformerReduction'], common.ENERGY_SHIPS),
+        lifeforms: common.lifeformsSchema([...common.ENERGY_LIFEFORMS, 'terraformerReduction', 'terraformerTimeReduction'], common.ENERGY_SHIPS),
         facilities: common.facilitiesSchema(['roboticsFactory', 'shipyard', 'naniteFactory']),
         universe: common.universeSchema,
         universeSpeed: common.universeSpeedSchema,
@@ -55,6 +55,8 @@ function createTerraformerTool({ siteApi }) {
                 shipyardLevel: args.facilities.shipyard,
                 nanitesFactoryLevel: args.facilities.naniteFactory,
                 lfTerraformerRdc: args.lifeforms.terraformerReduction,
+                // 0 (omitted) is twice the cost reduction, resolved by the core
+                lfTerraformerTimeRdc: args.lifeforms.terraformerTimeReduction,
                 universeSpeed,
                 tfSingleLevel: false,
                 tfLevelFrom: args.fromLevel,

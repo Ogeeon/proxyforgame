@@ -87,7 +87,7 @@ const inputSchema = {
         ionTechnology: common.ionTechnologySchema,
         hyperspaceTechnology: common.hyperspaceTechnologySchema,
         lifeforms: common.lifeformsSchema(['itemCostReduction', 'itemTimeReduction', 'mineralResearchCentre',
-            'terraformerReduction', 'discovererClassBonus', 'collectorClassBonus'], ['small-cargo', 'large-cargo']),
+            'terraformerReduction', 'terraformerTimeReduction', 'discovererClassBonus', 'collectorClassBonus'], ['small-cargo', 'large-cargo']),
     },
     required: ['item'],
     additionalProperties: false,
@@ -195,6 +195,7 @@ function createBuildCostTool({ siteApi }) {
             params.lfResTimeRdcMap = { [id]: lf.itemTimeReduction };
             params.mineralResCntrLvl = lf.mineralResearchCentre;
             params.lfTerraformerRdc = lf.terraformerReduction;
+            params.lfTerraformerTimeRdc = lf.terraformerTimeReduction;
 
             if (kind === 'research' && !calculator.isResearchable(id, params)) {
                 throw new ToolError(`${NAMES[args.item]} needs a Research Lab of level `

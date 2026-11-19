@@ -1257,6 +1257,11 @@ test('costs takes the account, a planet and its moon from the profile', async ({
     await page.locator('#param-lifeforms-tab').click();
     await expect(page.locator('#lf-collector-class-bonus')).toHaveValue('2.15');
     await expect(page.locator('#sc-capacity-increase')).toHaveValue('1.23');
+    // The Terraformer's cost and time reductions, each as the game reports it.
+    await expect(page.locator('#lf-terraformer-rdc')).toHaveValue('4');
+    await expect(page.locator('#lf-terraformer-time-rdc')).toHaveValue('4');
+    await expect(page.locator('#lf-terraformer-time-rdc')).toHaveClass(/pf-bound/);
+    await expect(page.locator('#lf-terraformer-time-auto')).toBeHidden();
 
     // The research bonuses table is the account's too.
     const plasma = page.locator('#lf-research-bonuses-tbody tr[data-tech-id="122"]');
@@ -2340,6 +2345,8 @@ test('terraformer takes the account and a planet from the profile', async ({ pag
     await expect(page.locator('#lc-capacity-increase')).toHaveValue('2.5');
     await expect(page.locator('#lf-terraformer-rdc')).toHaveValue('4');
     await expect(page.locator('#lf-terraformer-rdc')).toHaveClass(/pf-bound/);
+    await expect(page.locator('#lf-terraformer-time-rdc')).toHaveValue('4');
+    await expect(page.locator('#lf-terraformer-time-rdc')).toHaveClass(/pf-bound/);
 
     await expect(page.locator('#pf-planet option')).toHaveCount(3);
     await expect(page.locator('#pf-planet option:checked')).toHaveText('Alpha [2:148:8]');
@@ -2426,6 +2433,18 @@ test('terraformer edits become overrides of the account and the planet', async (
     profile = await activeProfile(page);
     expect(profile.account.values['lf.cost.33.cost']).toEqual({ game: 4 });
     expect(profile.planets[0].values['building.33']).toEqual({ game: 5 });
+
+    // The time reduction is an override of its own; 0 is written as it is ("auto").
+    await page.locator('#lf-terraformer-time-rdc').fill('0');
+    await page.locator('#lf-terraformer-time-rdc').blur();
+    await expect(page.locator('#lf-terraformer-time-auto')).toHaveText('auto: 8%');
+    profile = await activeProfile(page);
+    expect(profile.account.values['lf.cost.33.time']).toEqual({ game: 4, override: 0 });
+    await page.locator('.input-group:has(#lf-terraformer-time-rdc) + .pf-reset').click();
+    await expect(page.locator('#lf-terraformer-time-rdc')).toHaveValue('4');
+    await expect(page.locator('#lf-terraformer-time-auto')).toBeHidden();
+    profile = await activeProfile(page);
+    expect(profile.account.values['lf.cost.33.time']).toEqual({ game: 4 });
 });
 
 test('"no profile" gives terraformer its own values back', async ({ page }) => {

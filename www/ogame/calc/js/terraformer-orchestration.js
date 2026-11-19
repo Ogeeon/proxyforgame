@@ -14,6 +14,8 @@ const options = {
   reportText: {},
   /** @type {Record<string, string>} Captions of the result cells by id, filled in by the template. */
   reportCells: {},
+  /** The "auto: {0}%" hint by the Terraformer time reduction, filled in by the template. */
+  lfTerraformerTimeAuto: '',
 
   prm: {
     robotsFactoryLevel: 0,
@@ -43,6 +45,7 @@ const options = {
     totalLFEnrgBonus: 0,
     collectorClassBonus: 0,
     lfTerraformerRdc: 0,
+    lfTerraformerTimeRdc: 0,
     scCapacityIncrease: 0,
     lcCapacityIncrease: 0,
     tfSingleLevel: false,
@@ -80,8 +83,10 @@ const options = {
         case 'totalLFEnrgBonus': return validateNumber(Number.parseFloat(value), 0, Infinity, 0);
         // The Rock'tal Collector Enhancement total, uncapped as in the cost calculator.
         case 'collectorClassBonus': return validateNumber(Number.parseFloat(value), 0, Infinity, 0);
-        // The game caps the Terraformer reduction at 50%, as the cost calculator does.
+        // The game caps the Terraformer cost reduction at 50% and the time one
+        // at 99%, as the cost calculator does. A time of 0 is "twice the cost".
         case 'lfTerraformerRdc': return validateNumber(Number.parseFloat(value), 0, 50, 0);
+        case 'lfTerraformerTimeRdc': return validateNumber(Number.parseFloat(value), 0, 99, 0);
         case 'scCapacityIncrease': return validateNumber(Number.parseFloat(value), 0, Infinity, 0);
         case 'lcCapacityIncrease': return validateNumber(Number.parseFloat(value), 0, Infinity, 0);
         case 'tfSingleLevel': return value === 'true';
@@ -120,7 +125,7 @@ class TerraformerApp {
       '#energy-tech-level', '#hyper-tech-level', '#max-planet-temp',
       '#solar-plant-level', '#fusion-plant-level', '#solar-satellites-count',
       '#disr-chamber-level', '#total-lf-energy-bonus', '#lf-collector-class-bonus', '#lf-terraformer-rdc',
-      '#sc-capacity-increase', '#lc-capacity-increase',
+      '#lf-terraformer-time-rdc', '#sc-capacity-increase', '#lc-capacity-increase',
       '#tf-level-from', '#tf-level-to',
       '#crystal-available', '#deuterium-available'
     ];
@@ -163,6 +168,7 @@ class TerraformerApp {
     setNumVal('#total-lf-energy-bonus', options.prm.totalLFEnrgBonus);
     setNumVal('#lf-collector-class-bonus', options.prm.collectorClassBonus);
     setNumVal('#lf-terraformer-rdc', options.prm.lfTerraformerRdc);
+    setNumVal('#lf-terraformer-time-rdc', options.prm.lfTerraformerTimeRdc);
     setNumVal('#sc-capacity-increase', options.prm.scCapacityIncrease);
     setNumVal('#lc-capacity-increase', options.prm.lcCapacityIncrease);
     setChecked('#single-level', options.prm.tfSingleLevel);
@@ -210,6 +216,7 @@ class TerraformerApp {
     set('total-lf-energy-bonus', percent(Infinity));
     set('lf-collector-class-bonus', percent(Infinity));
     set('lf-terraformer-rdc', percent(50));
+    set('lf-terraformer-time-rdc', percent(99));
     set('sc-capacity-increase', percent(Infinity));
     set('lc-capacity-increase', percent(Infinity));
     set('tf-level-from', level(100));
@@ -296,6 +303,10 @@ class TerraformerApp {
     Object.assign(options.prm, p);
     const result = this.calc.compute(p);
     TerraformerRenderer.render(result);
+    const hint = lfTerraformerTimeAutoHint(p.lfTerraformerRdc, p.lfTerraformerTimeRdc,
+      options.lfTerraformerTimeAuto, getOptionValue('decimalSeparator', '.'));
+    setTextContent('#lf-terraformer-time-auto', hint);
+    toggleClass('#lf-terraformer-time-auto', 'd-none', hint === '');
     options.save();
   }
 
@@ -322,6 +333,7 @@ class TerraformerApp {
     options.prm.totalLFEnrgBonus = 0;
     options.prm.collectorClassBonus = 0;
     options.prm.lfTerraformerRdc = 0;
+    options.prm.lfTerraformerTimeRdc = 0;
     options.prm.scCapacityIncrease = 0;
     options.prm.lcCapacityIncrease = 0;
     options.prm.tfSingleLevel = false;

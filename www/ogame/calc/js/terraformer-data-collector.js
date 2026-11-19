@@ -37,6 +37,8 @@ class TerraformerDataCollector {
       totalLFEnrgBonus: getInputNumber($('#total-lf-energy-bonus')),
       collectorClassBonus: getInputNumber($('#lf-collector-class-bonus')),
       lfTerraformerRdc: getInputNumber($('#lf-terraformer-rdc')),
+      // Raw: 0 means "twice the cost reduction", resolved by the core.
+      lfTerraformerTimeRdc: getInputNumber($('#lf-terraformer-time-rdc')),
       scCapacityIncrease: getInputNumber($('#sc-capacity-increase')),
       lcCapacityIncrease: getInputNumber($('#lc-capacity-increase')),
       tfSingleLevel: getChecked('#single-level'),
@@ -86,7 +88,7 @@ const TERRAFORMER_REPORT_TABS = [
   ['param-buildings-tab', ['robots-factory-level', 'shipyard-level', 'nanites-factory-level']],
   ['param-researches-tab', ['energy-tech-level', 'hyper-tech-level']],
   ['param-lifeforms-tab', ['disr-chamber-level', 'total-lf-energy-bonus', 'lf-terraformer-rdc',
-    'lf-collector-class-bonus', 'sc-capacity-increase', 'lc-capacity-increase']],
+    'lf-terraformer-time-rdc', 'lf-collector-class-bonus', 'sc-capacity-increase', 'lc-capacity-increase']],
 ];
 // The power plants under the tabs; the percent selects have no label of
 // their own, so they borrow the plant's.
