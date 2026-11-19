@@ -24,6 +24,7 @@ release section; it is the source of truth for the other eleven translations.
 
 - Costs calculator: a Control Centre component cannot be demolished in the game, so a target level below the start level on the "all items, several levels" tab now prices nothing for it, instead of the cost of a demolition as for an ordinary building, and its effect column shows a dash instead of the effect of that level.
 - Terraformer and cost calculators: the life form Terraformer reduction is split in two fields, cost (up to 50%) and build time (up to 99%), as the game reports them. The single field used to apply the cost reduction, capped at 50%, to the build time too, while the game takes twice the cost reduction off the time - so at a 40% cost reduction the time was shown 40% shorter instead of 80%. A time field left at 0 follows the game's own pairing, twice the cost reduction up to 99%, and says so in an "auto" hint next to it, so saved settings give the right time without any change. A player profile fills both fields, and the MCP server's terraformer and cost tools take a `terraformerTimeReduction` next to the cost one, which the account import fills as well. <!-- site -->
+- Costs calculator: the "Reset" button now clears the life form building reductions too - the Mineral Research Centre level and the Terraformer cost and time reductions - which it used to leave as they were. <!-- site -->
 
 ## [2026-11-18] - site entry 75
 

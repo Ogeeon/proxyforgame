@@ -1583,6 +1583,11 @@ class CostsCalculator {
     setVal('#sc-capacity-increase', 0);
     setVal('#lc-capacity-increase', 0);
 
+    // LF building reductions: Mineral Research Centre, terraformer cost and time
+    setVal('#mineral-res-cntr-lvl', 0);
+    setVal('#lf-terraformer-rdc', 0);
+    setVal('#lf-terraformer-time-rdc', 0);
+
     // IRN
     setVal('#irn-level', 0);
     setVal('#planetsSpin', 8);

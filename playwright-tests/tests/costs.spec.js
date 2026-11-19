@@ -862,6 +862,22 @@ test.describe('Costs Calculator Page', () => {
         await enter('#lf-terraformer-rdc', '0');
         await expect(hint).toBeHidden();
     });
+
+    test('the global reset clears the life form building reductions', async ({ page }) => {
+        await page.locator('#param-lifeforms-tab').click();
+        const fields = ['#mineral-res-cntr-lvl', '#lf-terraformer-rdc', '#lf-terraformer-time-rdc'];
+        for (const selector of fields) {
+            await page.locator(selector).fill('10');
+            await page.locator(selector).press('Tab');
+        }
+        await expect(page.locator('#lf-terraformer-time-rdc')).toHaveValue('10');
+
+        await page.locator('#reset').click();
+        for (const selector of fields) {
+            await expect(page.locator(selector)).toHaveValue('0');
+        }
+        await expect(page.locator('#lf-terraformer-time-auto')).toBeHidden();
+    });
 });
 
 test.describe('Costs Calculator - Robot/Nanite factory disclaimer', () => {
