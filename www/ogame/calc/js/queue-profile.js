@@ -40,6 +40,9 @@ const QUEUE_ACCOUNT_FIELDS = [
   pfInForm(pfCollectorClassField('playerClass', 'player-class-'), (v) => setChecked('#player-class-' + v, true)),
   pfPercentField('lf.ship.202.cargo', 'scCapacityIncrease', '#sc-capacity-increase'),
   pfPercentField('lf.ship.203.cargo', 'lcCapacityIncrease', '#lc-capacity-increase'),
+  // The Terraformer's life form reductions, cost and time apart as the game reports them.
+  pfPercentField('lf.cost.33.cost', 'lfTerraformerRdc', '#lf-terraformer-rdc'),
+  pfPercentField('lf.cost.33.time', 'lfTerraformerTimeRdc', '#lf-terraformer-time-rdc'),
 ];
 
 /** @type {QueueTab[]} */

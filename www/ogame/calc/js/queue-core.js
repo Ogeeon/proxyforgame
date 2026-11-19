@@ -63,6 +63,28 @@ class QueueCalculator {
   }
 
   /**
+   * A Terraformer build step under the life form reductions: the resources take
+   * the cost reduction (capped at 50%), the seconds the time one (capped at 99%;
+   * 0 = twice the cost reduction, see lfTerraformerTimeRdc in ogame-costs.js),
+   * each rounded down, as the game does for every level.
+   * @param {number[]} cost [metal, crystal, deuterium, seconds]
+   * @param {number} costRdc percent
+   * @param {number} timeRdc percent, 0 = derive from costRdc
+   * @returns {number[]}
+   */
+  static reduceTerraformerStep(cost, costRdc, timeRdc) {
+    const costFactor = 1 - Math.min(0.5, (costRdc || 0) / 100);
+    const timeFactor = lfTerraformerTimeFactor(costRdc || 0, timeRdc || 0);
+    /**
+     * @param {number} v
+     * @param {number} factor
+     */
+    const reduce = (v, factor) => (factor < 1 ? Math.floor(v * factor) : v);
+    return [reduce(cost[0], costFactor), reduce(cost[1], costFactor), reduce(cost[2], costFactor),
+      reduce(cost[3], timeFactor)];
+  }
+
+  /**
    * Bonus to total fields produced after a Terraformer step.
    * Even result levels add 6, odd add 5 (matches OGame formula).
    */
@@ -106,6 +128,9 @@ class QueueCalculator {
    * @param {number} p.maxFields fields of the planet or moon before the queue
    * @param {number} p.universeSpeed
    * @param {number} p.ionTechLevel discounts demolitions
+   * @param {number} [p.lfTerraformerRdc] life form Terraformer cost reduction, %
+   * @param {number} [p.lfTerraformerTimeRdc] life form Terraformer time reduction, %;
+   *   0 or left out = twice the cost reduction
    * @returns {{steps: QueueStep[], totals: number[], maxFields: number,
    *   finalLevels: Record<number, number>, overCapacity: boolean}} totals is
    *   [used fields, metal, crystal, deuterium, seconds]
@@ -134,7 +159,11 @@ class QueueCalculator {
       const resultLevel = levels[techId] + inc;
       levels[techId] = resultLevel;
 
-      const cost = this.getStepCost(techId, resultLevel, robots, nanites, p.universeSpeed, !isBuild, p.ionTechLevel);
+      let cost = this.getStepCost(techId, resultLevel, robots, nanites, p.universeSpeed, !isBuild, p.ionTechLevel);
+      // The Terraformer cannot be demolished, so only a build takes the reductions.
+      if (techId === TECH_TERRAFORMER && isBuild) {
+        cost = QueueCalculator.reduceTerraformerStep(cost, p.lfTerraformerRdc || 0, p.lfTerraformerTimeRdc || 0);
+      }
       if (techId === TECH_ROBOT_FACTORY) robots += inc;
       if (techId === TECH_NANITE_FACTORY && !p.isMoon) nanites += inc;
 

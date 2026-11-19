@@ -113,8 +113,8 @@ const ACCOUNT_MAP = [
     { key: 'lf.phalanxRange', path: 'lifeforms.analysisNetworkBonus', tools: [T.phalanx] },
     // The game reports a reduction per technology. The terraformer takes its cost and its time
     // one apart, as the pages do; life form research takes the reduction of the first one, 11201.
-    { key: 'lf.cost.33.cost', path: 'lifeforms.terraformerReduction', tools: [T.cost, T.terraformer] },
-    { key: 'lf.cost.33.time', path: 'lifeforms.terraformerTimeReduction', tools: [T.cost, T.terraformer] },
+    { key: 'lf.cost.33.cost', path: 'lifeforms.terraformerReduction', tools: [T.cost, T.terraformer, T.queue] },
+    { key: 'lf.cost.33.time', path: 'lifeforms.terraformerTimeReduction', tools: [T.cost, T.terraformer, T.queue] },
     { key: 'lf.cost.11201.cost', path: 'lifeforms.researchCostReduction', tools: [T.lfCost] },
     { key: 'lf.cost.11201.time', path: 'lifeforms.researchTimeReduction', tools: [T.lfCost] },
     ...FLEET_SHIPS.flatMap(([id, ship]) => ['speed', 'cargo', 'fuel'].map((stat) => ({

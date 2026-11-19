@@ -159,8 +159,9 @@ describe('MCP protocol', () => {
         // Every client loads the tool list into its model's context (mcp/README.md). Going over
         // the budget is a deliberate decision that raises it here, in the same commit.
         // 52 KB until ogame_import_account added its 1.5 KB; 54 KB until the anomaly scanner
-        // (one more building in ogame_build_cost and ogame_build_queue) went 30 bytes over.
-        const BUDGET = 55 * 1024;
+        // (one more building in ogame_build_cost and ogame_build_queue) went 30 bytes over;
+        // 55 KB until ogame_build_queue took a `lifeforms` with the Terraformer reductions.
+        const BUDGET = 56 * 1024;
         const { tools } = (await rpc(protocol, { jsonrpc: '2.0', id: 3, method: 'tools/list' })).result;
         const size = tools.reduce((sum, { name, title, description, inputSchema }) =>
             sum + JSON.stringify({ name, title, description, inputSchema }).length, 0);
@@ -1329,6 +1330,20 @@ describe('MCP tool ogame_build_queue', () => {
         const byKey = await run('metal-mine');
         expect(await run('  METAL MINE ')).toEqual(byKey);
         expect(byKey.building).toBe('metal-mine');
+    });
+
+    it('takes the life form Terraformer reductions, the time one twice the cost one when left out', async () => {
+        // Levels 1-4 without a robotics factory take 20571 + 48000 + 115200 + 288000 s.
+        const total = async (lifeforms) => (await call(protocolWith(), 'ogame_build_queue', {
+            queue: [{ building: 'terraformer', times: 4 }], ...(lifeforms ? { lifeforms } : {}),
+        })).structuredContent.total;
+        expect((await total()).durationSeconds).toBe(471771);
+        // 40% off the cost, 80% off the time: 4114 + 9600 + 23040 + 57600.
+        const auto = await total({ terraformerReduction: 40 });
+        expect(auto.crystal).toBe(450000);
+        expect(auto.durationSeconds).toBe(94354);
+        // 10% off the time: 18513 + 43200 + 103680 + 259200.
+        expect((await total({ terraformerReduction: 40, terraformerTimeReduction: 10 })).durationSeconds).toBe(424593);
     });
 });
 

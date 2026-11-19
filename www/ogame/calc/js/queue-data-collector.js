@@ -25,7 +25,13 @@ class QueueDataCollector {
     const playerClass = checkedClass ? Number.parseInt(checkedClass.value, 10) : 0;
     const scCapacityIncrease = num('#sc-capacity-increase');
     const lcCapacityIncrease = num('#lc-capacity-increase');
-    return { universeSpeed, ionTechLevel, hyperTechLevel, totFldPln, totFldMn, playerClass, scCapacityIncrease, lcCapacityIncrease };
+    const lfTerraformerRdc = num('#lf-terraformer-rdc');
+    // Raw: 0 means "twice the cost reduction", resolved by the core.
+    const lfTerraformerTimeRdc = num('#lf-terraformer-time-rdc');
+    return {
+      universeSpeed, ionTechLevel, hyperTechLevel, totFldPln, totFldMn, playerClass,
+      scCapacityIncrease, lcCapacityIncrease, lfTerraformerRdc, lfTerraformerTimeRdc,
+    };
   }
 
   /**
@@ -170,6 +176,8 @@ function queueReportSnapshot() {
   const cargo = queueReportText('cargo-cap-increase');
   push(reportFieldById('sc-capacity-increase', parameters, { label: `${cargo} — ${options.scFull}` }));
   push(reportFieldById('lc-capacity-increase', parameters, { label: `${cargo} — ${options.lcFull}` }));
+  push(reportFieldById('lf-terraformer-rdc', parameters));
+  push(reportFieldById('lf-terraformer-time-rdc', parameters));
 
   const tabNum = tab?.id === 'tabtag-3' ? 3 : 2;
   const buildingsGroup = queueReportText('buildings');

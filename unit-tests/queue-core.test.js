@@ -82,3 +82,37 @@ describe('QueueCalculator.simulate', () => {
         expect(run.steps.map((s) => s.index)).toEqual([1]);
     });
 });
+
+// Life form research gives the Terraformer 0.1% off its cost and 0.2% off its
+// build time per level, capped at 50% and 99%; a time reduction of 0 means
+// twice the cost one. Levels 1-4 without a robotics factory take 20571 + 48000
+// + 115200 + 288000 = 471771 s and cost 750000 crystal, 1500000 deuterium.
+describe('QueueCalculator.simulate - the Terraformer life form reductions', () => {
+    const TERRAFORMER_X4 = [[33, 1], [33, 1], [33, 1], [33, 1]];
+    const totals = (extra) => simulate({ 33: 0 }, TERRAFORMER_X4, extra).totals.slice(1);
+
+    it('changes nothing without them', () => {
+        expect(totals({})).toEqual([0, 750000, 1500000, 471771]);
+    });
+
+    it('takes twice the cost reduction off the time when no time reduction is given', () => {
+        // 40% off the cost, 80% off the time: 4114 + 9600 + 23040 + 57600.
+        expect(totals({ lfTerraformerRdc: 40 })).toEqual([0, 450000, 900000, 94354]);
+    });
+
+    it('uses a given time reduction as it is', () => {
+        // 10% off the time, each step floored: 18513 + 43200 + 103680 + 259200.
+        expect(totals({ lfTerraformerRdc: 40, lfTerraformerTimeRdc: 10 })).toEqual([0, 450000, 900000, 424593]);
+    });
+
+    it('caps the cost reduction at 50% and the time one at 99%', () => {
+        // 99% off the time: 205 + 480 + 1152 + 2880.
+        expect(totals({ lfTerraformerRdc: 80, lfTerraformerTimeRdc: 150 })).toEqual([0, 375000, 750000, 4717]);
+    });
+
+    it('leaves the other buildings alone', () => {
+        const plain = simulate({ 1: 10, 14: 2 }, [[1, 1], [14, 1]]).totals;
+        const reduced = simulate({ 1: 10, 14: 2 }, [[1, 1], [14, 1]], { lfTerraformerRdc: 40, lfTerraformerTimeRdc: 60 }).totals;
+        expect(reduced).toEqual(plain);
+    });
+});

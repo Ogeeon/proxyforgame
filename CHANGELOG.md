@@ -18,6 +18,7 @@ release section; it is the source of truth for the other eleven translations.
 ### Added
 
 - Start page: every calculator has a card - its name, linking to it, and what it does - in the menu's order, so a visitor on a phone, where the menu is folded away, sees them all on landing. One column on a phone, two from 768px, three from 1200px; the AI assistants card moves below the grid and no longer tells the reader to pick a calculator in the menu. The names come from the sidebar menu and the descriptions from each calculator's meta description, so the grid needs no new text.
+- Construction queue calculator: the life form Terraformer cost and build time reductions, as in the terraformer and cost calculators - each Terraformer level in the queue costs less by the cost reduction (up to 50%) and builds faster by the time one (up to 99%; left at 0, twice the cost one, with an "auto" hint), rounded down per level. Other buildings are not affected. A player profile fills both fields, and the MCP server's queue tool takes them under `lifeforms`, filled by the account import. <!-- site -->
 
 ### Fixed
 

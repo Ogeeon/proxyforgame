@@ -57,6 +57,8 @@
         playerClass: 0,
         scCapacityIncrease: 0,
         lcCapacityIncrease: 0,
+        lfTerraformerRdc: 0,
+        lfTerraformerTimeRdc: 0,
         totFldPln: 163,
         totFldMn: 1,
         sDTP: 0,
@@ -77,6 +79,10 @@
             // _constrains use.
             case 'scCapacityIncrease': return validateNumber(Number.parseFloat(value), 0, Infinity, 0);
             case 'lcCapacityIncrease': return validateNumber(Number.parseFloat(value), 0, Infinity, 0);
+            // The life form Terraformer reductions: cost up to 50%, time up to
+            // 99%, a time of 0 being twice the cost one (queue-core.js).
+            case 'lfTerraformerRdc': return validateNumber(Number.parseFloat(value), 0, 50, 0);
+            case 'lfTerraformerTimeRdc': return validateNumber(Number.parseFloat(value), 0, 99, 0);
             case 'totFldPln':      return validateNumber(Number.parseFloat(value), 1, Infinity, 163);
             case 'totFldMn':       return validateNumber(Number.parseFloat(value), 1, Infinity, 1);
             case 'sDTP':           return validateNumber(Number.parseFloat(value), 0, Infinity, 0);
@@ -118,6 +124,7 @@
     options.moveUpTitle = '<?= $l['move-up'] ?? '' ?>';
     options.moveDownTitle = '<?= $l['move-down'] ?? '' ?>';
     options.removeRowTitle = '<?= $l['remove-row'] ?? '' ?>';
+    options.lfTerraformerTimeAuto = <?= json_encode($l['lf-terraformer-time-auto']) ?>;
     // Captions of the calculation-error report (queue-data-collector.js): its
     // groups, and the rows and columns of the result cells.
     options.reportText = <?= json_encode(array(
@@ -197,6 +204,19 @@
             <input id="lc-capacity-increase" type="text" name="lc-capacity-increase" class="form-control level-input m-0" value="0" data-field-title="<?= $l['cargo-cap-increase'] ?><?= $l['lc-short'] ?>">
             <span class="input-group-text">%</span>
           </div>
+        </div>
+        <div class="d-flex flex-wrap align-items-center gap-1">
+          <label for="lf-terraformer-rdc"><?= $l['lf-terraformer-rdc'] ?></label>
+          <div class="input-group input-group-sm w-auto">
+            <input id="lf-terraformer-rdc" type="text" name="lf-terraformer-rdc" class="form-control level-input m-0" value="0" data-field-title="<?= $l['lf-terraformer-rdc'] ?>">
+            <span class="input-group-text">%</span>
+          </div>
+          <label for="lf-terraformer-time-rdc"><?= $l['lf-terraformer-time-rdc'] ?></label>
+          <div class="input-group input-group-sm w-auto">
+            <input id="lf-terraformer-time-rdc" type="text" name="lf-terraformer-time-rdc" class="form-control level-input m-0" value="0" data-field-title="<?= $l['lf-terraformer-time-rdc'] ?>">
+            <span class="input-group-text">%</span>
+          </div>
+          <small id="lf-terraformer-time-auto" class="text-muted d-none"></small>
         </div>
       </div>
     </div>

@@ -1070,6 +1070,10 @@ test('the queue takes the account, a planet and its moon from the profile', asyn
     await expect(page.locator('#lc-capacity-increase')).toHaveValue('2.5');
     await expect(page.locator('#hyper-tech-level')).toHaveClass(/pf-bound/);
     await expect(page.locator('#player-class-0').locator('xpath=ancestor::fieldset')).toHaveClass(/pf-bound/);
+    // The Terraformer's life form reductions, cost and time as the game reports them.
+    await expect(page.locator('#lf-terraformer-rdc')).toHaveValue('4');
+    await expect(page.locator('#lf-terraformer-time-rdc')).toHaveValue('4');
+    await expect(page.locator('#lf-terraformer-time-rdc')).toHaveClass(/pf-bound/);
 
     await expect(page.locator('#pf-body-2 option')).toHaveCount(3);
     await expect(page.locator('#pf-body-2 option:checked')).toHaveText('Alpha [2:148:8]');
