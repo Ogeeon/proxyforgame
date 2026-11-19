@@ -305,6 +305,16 @@ const STORED_RULES = {
 };
 
 /**
+ * Whether a technology is a Control Centre component (ids 46-52 in costs-techs.json,
+ * type 7). Components cannot be demolished.
+ * @param {number} techId
+ * @returns {boolean}
+ */
+function isControlCentreComponent(techId) {
+  return techId >= 46 && techId <= 52;
+}
+
+/**
  * Individual build/research request
  */
 class BuildRequest {
@@ -339,8 +349,8 @@ class BuildRequest {
     // No change = invalid
     if (this.fromLevel === this.toLevel) return false;
 
-    // Buildings can be demolished (toLevel < fromLevel)
-    if (this.techType === 'building') {
+    // Buildings can be demolished (toLevel < fromLevel), Control Centre components cannot
+    if (this.techType === 'building' && !isControlCentreComponent(this.techId)) {
       return true;
     }
 

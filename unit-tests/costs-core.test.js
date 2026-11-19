@@ -423,6 +423,19 @@ describe('Calculator.calculate - points ignore life form cost reductions', () =>
         expect(reduced.points).toBe(498);
     });
 
+    it('prices nothing for a Control Centre component whose target is below the start', () => {
+        const IAS_RECOVERY_CENTRE = 46;
+        const down = calc.calculate(new BuildRequest(IAS_RECOVERY_CENTRE, 5, 4), paramsWith({}));
+
+        expect(new BuildRequest(IAS_RECOVERY_CENTRE, 5, 4).isValid).toBe(false);
+        expect(new BuildRequest(IAS_RECOVERY_CENTRE, 4, 5).isValid).toBe(true);
+        expect(down.metal).toBe(0);
+        expect(down.time).toBe(0);
+        expect(down.points).toBe(0);
+        // An ordinary building can still be demolished
+        expect(calc.calculate(new BuildRequest(METAL_MINE, 5, 4), paramsWith({})).metal).toBeGreaterThan(0);
+    });
+
     it('still scales the unreduced points with the quantity', () => {
         const request = new BuildRequest(LASER_TECH, 0, 10, false, 2);
         const reduced = calc.calculate(request, paramsWith({ lfResCostRdcMap: { [LASER_TECH]: 50 } }));

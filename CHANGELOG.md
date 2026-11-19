@@ -19,6 +19,10 @@ release section; it is the source of truth for the other eleven translations.
 
 - Start page: every calculator has a card - its name, linking to it, and what it does - in the menu's order, so a visitor on a phone, where the menu is folded away, sees them all on landing. One column on a phone, two from 768px, three from 1200px; the AI assistants card moves below the grid and no longer tells the reader to pick a calculator in the menu. The names come from the sidebar menu and the descriptions from each calculator's meta description, so the grid needs no new text.
 
+### Fixed
+
+- Costs calculator: a Control Centre component cannot be demolished in the game, so a target level below the start level on the "all items, several levels" tab now prices nothing for it, instead of the cost of a demolition as for an ordinary building.
+
 ## [2026-11-18] - site entry 75
 
 ### Added
