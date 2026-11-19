@@ -315,7 +315,7 @@ function lfTerraformerTimeFactor(costRdc, timeRdc) {
  * @returns {string}
  */
 function lfTerraformerTimeAutoHint(costRdc, timeRdc, template, decimalSeparator) {
-	if ((Number(timeRdc) || 0) > 0 || !((Number(costRdc) || 0) > 0))
+	if ((Number(timeRdc) || 0) > 0 || (Number(costRdc) || 0) <= 0)
 		return '';
 	const percent = String(lfTerraformerTimeRdc(costRdc, 0)).replace('.', decimalSeparator);
 	return template.replace('{0}', percent);
