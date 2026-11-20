@@ -63,25 +63,34 @@
   overflow: hidden;
 }
 
-/* The transport accordion. Bootstrap's .accordion-item forces
-   color: var(--bs-accordion-color), which reads as white against the page's
-   default text in the dark theme: inherit so it matches the rest. Its header
-   and body are kept dense like production's. width:0 + min-width:100% keep
-   its content from widening the panel (max-content): it takes the width the
-   tables give the calculator and wraps inside it. */
-#transport-accordion {
+/* The transport and the sell-or-wait accordions. Bootstrap's .accordion-item
+   forces color: var(--bs-accordion-color), which reads as white against the
+   page's default text in the dark theme: inherit so it matches the rest. Their
+   headers and bodies are kept dense like production's. width:0 +
+   min-width:100% keep their content from widening the panel (max-content):
+   they take the width the tables give the calculator and wrap inside it. */
+#transport-accordion,
+#sell-timing-accordion {
   --bs-accordion-color: inherit;
   --bs-accordion-active-color: inherit;
   width: 0;
   min-width: 100%;
 }
 
-#transport-accordion .accordion-button {
+#transport-accordion .accordion-button,
+#sell-timing-accordion .accordion-button {
   padding: 0.4rem 0.75rem;
 }
 
-#transport-accordion .accordion-body {
+#transport-accordion .accordion-body,
+#sell-timing-accordion .accordion-body {
   padding: 0.5rem;
+}
+
+/* The advice's caveats: small print under its table. */
+#sell-timing-notes {
+  padding-left: 1.2rem;
+  white-space: normal;
 }
 
 /* Tables */

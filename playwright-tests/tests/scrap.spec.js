@@ -42,6 +42,24 @@ async function expectHeadCounts(page, small, large) {
     await expect(page.locator('#transport-large-head')).toHaveText(large);
 }
 
+/** The sell-or-wait settings of a fresh page, as options_scrap keeps them. */
+const SELL_TIMING_DEFAULTS = {
+    eventRate: 81, eventDays: 180, routeKind: 'galaxies', routeDelta: 1, fsSpeed: 10, fsTimes: 1, fsDays: 1,
+    cmbDrive: 0, impDrive: 0, hypDrive: 0, fuelDiscount: 0, rateMetal: 1, rateCrystal: 1.5, rateDeut: 3,
+};
+
+/** Open the "sell now or wait" accordion. */
+async function openSellTiming(page) {
+    await page.locator('#sell-timing-toggle').click();
+    await expect(page.locator('#event-rate')).toBeVisible();
+}
+
+/** The verdict counts in the sell-or-wait accordion's header, wait then sell. */
+async function expectVerdictCounts(page, wait, sell) {
+    await expect(page.locator('#sell-timing-wait-head')).toHaveText(wait);
+    await expect(page.locator('#sell-timing-sell-head')).toHaveText(sell);
+}
+
 /** Paste the API 2 export and import it. */
 async function importOwnApi(page, text = OWN_API) {
     await page.locator('#own-api-input').fill(text);
@@ -206,6 +224,7 @@ test.describe('Scrap Merchant - the page', () => {
         const saved = await page.evaluate(() => JSON.parse(localStorage.getItem('options_scrap') ?? '{}'));
         expect(saved).toEqual({
             fullNumbers: true, hyperTechLevel: 7, isCollector: true, collectorClassBonus: 1.5, scCapacityIncrease: 3.5, lcCapacityIncrease: 4.25,
+            ...SELL_TIMING_DEFAULTS,
         });
 
         // Unticked survives a reload too.
@@ -316,6 +335,119 @@ test.describe('Scrap Merchant - the page', () => {
         });
     }
 
+    test('the sell-or-wait accordion is collapsed, its header counts the verdicts', async ({ page }) => {
+        await expect(page.locator('#sell-timing-body')).toBeHidden();
+        await expectVerdictCounts(page, '0', '0');
+        await openSellTiming(page);
+        await expect(page.locator('#sell-timing-empty')).toBeVisible();
+        await expect(page.locator('#event-rate')).toHaveValue('81');
+        await expect(page.locator('#event-days')).toHaveValue('180');
+        await expect(page.locator('#route-kind')).toHaveValue('galaxies');
+        await expect(page.locator('#fs-speed')).toHaveValue('10');
+        // Every 10% without a profile: the General's 5% steps need one.
+        await expect(page.locator('#fs-speed option')).toHaveCount(10);
+        await expect(page.locator('#fuel-discount-box')).toBeVisible();
+        await expect(page.locator('#fuel-discount-profile')).toBeHidden();
+        await page.reload();
+        await expect(page.locator('#sell-timing-body')).toBeHidden();
+    });
+
+    test('a fleet gets a row per flying type and a verdict the event days and rate flip', async ({ page }) => {
+        // 100 battleships saved to the next galaxy at 10% once a day burn 34.571
+        // deuterium a day, 103.714 MSU: the event's 46% more on their 6.75M is worth
+        // 29 days of it.
+        await type(page, '#unit-207', '100');
+        await type(page, '#unit-212', '50');
+        await openSellTiming(page);
+        const rows = page.locator('#sell-timing-rows tr:not(#sell-timing-empty)');
+        await expect(rows).toHaveCount(1);
+        await expect(page.locator('#sell-timing-empty')).toBeHidden();
+        const cells = rows.first().locator('td');
+        await expect(cells.nth(0)).toHaveText('Battleship');
+        await expect(cells.nth(2)).toHaveText('29');
+        await expect(cells.nth(4)).toHaveText('sell');
+        await expectVerdictCounts(page, '0', '1');
+        await expect(page.locator('#sell-timing-gain')).toHaveText('0');
+
+        await type(page, '#event-days', '29');
+        await expect(cells.nth(4)).toHaveText('wait');
+        await expectVerdictCounts(page, '1', '0');
+        await page.locator('#full-numbers').check();
+        // 3.105.000 - 29 x 103.714,26
+        await expect(page.locator('#sell-timing-gain')).toHaveText('97.287');
+
+        // An event that pays what today pays is never worth waiting for.
+        await type(page, '#event-rate', '35');
+        await expect(cells.nth(2)).toHaveText('—');
+        await expect(cells.nth(4)).toHaveText('sell');
+
+        // Twice as often costs twice the fuel.
+        await type(page, '#event-rate', '81');
+        await type(page, '#fs-times', '2');
+        await expect(cells.nth(2)).toHaveText('14');
+    });
+
+    test('the route kind holds the steps to its range', async ({ page }) => {
+        await openSellTiming(page);
+        await type(page, '#route-delta', '20');
+        await page.locator('#route-kind').selectOption('system');
+        await expect(page.locator('#route-delta')).toHaveValue('14');
+    });
+
+    test('the sell-or-wait settings survive a reload, and the reset puts them back', async ({ page }) => {
+        await page.goto('/ru/scrap');
+        await openSellTiming(page);
+        await type(page, '#event-rate', '70,5');
+        await type(page, '#event-days', '30');
+        await page.locator('#route-kind').selectOption('systems');
+        await type(page, '#route-delta', '5');
+        await page.locator('#fs-speed').selectOption('20');
+        await type(page, '#fs-times', '2');
+        await type(page, '#fs-days', '3');
+        await type(page, '#cmb-drive', '4');
+        await type(page, '#imp-drive', '5');
+        await type(page, '#hyp-drive', '6');
+        await type(page, '#fuel-discount', '12,5');
+        await type(page, '#exchange-rates-m', '2');
+        await type(page, '#exchange-rates-c', '3');
+        await type(page, '#exchange-rates-d', '4');
+        const expected = {
+            eventRate: 70.5, eventDays: 30, routeKind: 'systems', routeDelta: 5, fsSpeed: 20, fsTimes: 2, fsDays: 3,
+            cmbDrive: 4, impDrive: 5, hypDrive: 6, fuelDiscount: 12.5, rateMetal: 2, rateCrystal: 3, rateDeut: 4,
+        };
+        const saved = async () => page.evaluate(() => JSON.parse(localStorage.getItem('options_scrap') ?? '{}'));
+        expect(await saved()).toMatchObject(expected);
+
+        await page.reload();
+        await openSellTiming(page);
+        await expect(page.locator('#event-rate')).toHaveValue('70,5');
+        await expect(page.locator('#route-kind')).toHaveValue('systems');
+        await expect(page.locator('#route-delta')).toHaveValue('5');
+        await expect(page.locator('#fs-speed')).toHaveValue('20');
+        await expect(page.locator('#fs-days')).toHaveValue('3');
+        await expect(page.locator('#hyp-drive')).toHaveValue('6');
+        await expect(page.locator('#fuel-discount')).toHaveValue('12,5');
+        await expect(page.locator('#exchange-rates-d')).toHaveValue('4');
+
+        await page.locator('#reset').click();
+        await expect(page.locator('#event-rate')).toHaveValue('81');
+        await expect(page.locator('#cmb-drive')).toHaveValue('0');
+        await expect(page.locator('#exchange-rates-c')).toHaveValue('1,5');
+        expect(await saved()).toMatchObject(SELL_TIMING_DEFAULTS);
+    });
+
+    test('the API 2 import fills the drives of the fleet save', async ({ page }) => {
+        const data = JSON.parse(OWN_API);
+        data.researches['115'] = 11;
+        data.researches['117'] = 9;
+        data.researches['118'] = 7;
+        await importOwnApi(page, JSON.stringify(data));
+        await openSellTiming(page);
+        await expect(page.locator('#cmb-drive')).toHaveValue('11');
+        await expect(page.locator('#imp-drive')).toHaveValue('9');
+        await expect(page.locator('#hyp-drive')).toHaveValue('7');
+    });
+
     test('without a profile there is no planet select and no planet counts', async ({ page }) => {
         await expect(page.locator('#pf-planet-box')).toBeHidden();
         await expect(page.locator('#unit-202-planet')).toBeHidden();
@@ -338,6 +470,14 @@ test.describe('Scrap Merchant - MCP tool', () => {
             { tool, arg: 'hyperspaceTechnology', selector: '#hyper-tech-level', prm: 'hyperTechLevel' },
             { tool, arg: 'lifeforms.collectorClassBonus', selector: '#lf-collector-class-bonus', prm: 'collectorClassBonus' },
             { tool, arg: 'lifeforms.shipBonuses.small-cargo.cargo', selector: '#sc-capacity-increase', prm: 'scCapacityIncrease' },
+            { tool, arg: 'sellTiming.eventRate', selector: '#event-rate', prm: 'eventRate' },
+            { tool, arg: 'sellTiming.daysToEvent', selector: '#event-days', prm: 'eventDays' },
+            { tool, arg: 'sellTiming.speedPercent', selector: '#fs-speed' },
+            { tool, arg: 'sellTiming.timesPerDays.times', selector: '#fs-times', prm: 'fsTimes' },
+            { tool, arg: 'sellTiming.timesPerDays.days', selector: '#fs-days', prm: 'fsDays' },
+            { tool, arg: 'sellTiming.drives.combustion', selector: '#cmb-drive', prm: 'cmbDrive' },
+            { tool, arg: 'sellTiming.fuelDiscount', selector: '#fuel-discount', prm: 'fuelDiscount' },
+            { tool, arg: 'sellTiming.exchangeRates.crystal', selector: '#exchange-rates-c', prm: 'rateCrystal' },
         ]);
     });
 });
@@ -504,6 +644,26 @@ test.describe('Scrap Merchant - player profiles', () => {
         await expect(page.locator('#sc-capacity-increase')).toHaveValue('5');
     });
 
+    test('the fleet save takes the drives and the discounts from the profile', async ({ page }) => {
+        await openSellTiming(page);
+        await expect(page.locator('#cmb-drive')).toHaveValue('16');
+        await expect(page.locator('#imp-drive')).toHaveValue('12');
+        await expect(page.locator('#hyp-drive')).toHaveValue('9');
+        await expect(page.locator('#fuel-discount-box')).toBeHidden();
+        await expect(page.locator('#fuel-discount-profile')).toBeVisible();
+        // A drive edited here is the profile's: flight reads it.
+        await type(page, '#hyp-drive', '11');
+        await page.goto('/en/flight');
+        await expect(page.locator('#hyp-drive')).toHaveValue('11');
+        // Without the profile the page's own drives and the discount field come back.
+        await page.goto('/en/scrap');
+        await page.locator('#pf-select').selectOption('');
+        await openSellTiming(page);
+        await expect(page.locator('#hyp-drive')).toHaveValue('0');
+        await expect(page.locator('#fuel-discount-box')).toBeVisible();
+        await expect(page.locator('#fuel-discount-profile')).toBeHidden();
+    });
+
     test('back to no profile hides the select and the counts', async ({ page }) => {
         await page.locator('#pf-select').selectOption('');
         await expect(page.locator('#pf-planet-box')).toBeHidden();
@@ -529,5 +689,12 @@ test.describe('Scrap Merchant - a General\'s profile', () => {
         // Unticked again, a Collector becomes no class, not the General back.
         await page.locator('#collector-class').uncheck();
         await expect.poll(() => profileClass(page)).toEqual({ game: 2, override: 0 });
+    });
+
+    test('offers the General\'s 5% speed steps for the fleet save', async ({ page }) => {
+        await openSellTiming(page);
+        await expect(page.locator('#fs-speed option')).toHaveCount(20);
+        await page.locator('#fs-speed').selectOption('15');
+        await expect(page.locator('#fs-speed')).toHaveValue('15');
     });
 });

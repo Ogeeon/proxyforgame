@@ -23,11 +23,12 @@ Find out what the Scrap Merchant pays for your fleet and defenses in OGame: the 
 
 | File | Lines |
 |------|-------|
-| `www/ogame/calc/js/scrap-core.js` | 262 |
-| `www/ogame/calc/js/scrap-data-collector.js` | 99 |
-| `www/ogame/calc/js/scrap-renderer.js` | 136 |
-| `www/ogame/calc/js/scrap-orchestration.js` | 283 |
-| `www/ogame/calc/js/scrap-profile.js` | 231 |
+| `www/ogame/calc/js/scrap-core.js` | 413 |
+| `www/ogame/calc/js/scrap-fleetsave.js` | 217 |
+| `www/ogame/calc/js/scrap-data-collector.js` | 163 |
+| `www/ogame/calc/js/scrap-renderer.js` | 215 |
+| `www/ogame/calc/js/scrap-orchestration.js` | 509 |
+| `www/ogame/calc/js/scrap-profile.js` | 339 |
 
 The page also loads these shared scripts:
 
@@ -42,6 +43,7 @@ The page also loads these shared scripts:
 - `www/ogame/calc/js/profiles-ui.js`
 - `www/ogame/calc/js/ogame-universe.js`
 - `www/ogame/calc/js/ogame-cargo.js`
+- `www/ogame/calc/js/flight-core.js`
 - `www/ogame/calc/js/own-api.js`
 
 ## Configuration Options
@@ -49,6 +51,20 @@ The page also loads these shared scripts:
 The calculator keeps these settings in `options_scrap`:
 
 - `fullNumbers`
+- `eventRate`
+- `eventDays`
+- `routeKind`
+- `routeDelta`
+- `fsSpeed`
+- `fsTimes`
+- `fsDays`
+- `cmbDrive`
+- `impDrive`
+- `hypDrive`
+- `fuelDiscount`
+- `rateMetal`
+- `rateCrystal`
+- `rateDeut`
 - `validate`
 
 ## Usage

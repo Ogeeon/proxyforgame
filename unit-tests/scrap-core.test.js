@@ -253,3 +253,166 @@ describe('the cargo holds', () => {
         expect(holds({ isCollector: null })).toEqual([5000, 25000, 5, 1]);
     });
 });
+
+// ---------------------------------------------------------------------------
+// Sell now or wait for the event
+// ---------------------------------------------------------------------------
+
+const ST = load(
+    ['js/utils.js', 'ogame/calc/js/ogame-universe.js', 'ogame/calc/js/ogame-cargo.js', 'ogame/calc/js/flight-core.js',
+        'ogame/calc/js/scrap-core.js', 'ogame/calc/js/scrap-fleetsave.js'],
+    ['scrapSellTiming', 'scrapEventRate', 'scrapExchangeWeights', 'SCRAP_SELL_TIMING_IDS', 'scrapFleetsaveFuel',
+        'scrapRouteDistance', 'scrapFuelPerDay', 'SCRAP_FLIGHT_SHIP_IDS', 'FlightCalculator', 'MISSION', 'PLAYER_CLASS'],
+);
+
+/**
+ * The advice with the defaults of the page: 35% today, 81% in 180 days, rates 1 : 1.5 : 3.
+ * @param {Record<string, number>} counts
+ * @param {Record<string, number>} fuelPerDay
+ * @param {object} [over]
+ */
+const timing = (counts, fuelPerDay, over = {}) => ST.scrapSellTiming({
+    counts, rate: 35, eventRate: 81, days: 180, fuelPerDay, ...over,
+}, PRICES);
+
+describe('scrapSellTiming', () => {
+    // A battleship: 45000 / 15000 / 0, so 67.500 MSU at 1 : 1.5 : 3.
+    it('weighs what the event adds against the deuterium burnt until then', () => {
+        const r = timing({ 207: 100 }, { 207: 1000 });
+        const row = r.rows[0];
+        expect(row.value).toBe(6750000);
+        // 46% of 6.75M is 3.105M; 1000 deuterium a day is 3000 MSU a day
+        expect(row.gain).toBeCloseTo(3105000 - 3000 * 180, 6);
+        expect(row.threshold).toBeCloseTo(3105000 / 3000, 9);
+        expect(row.wait).toBe(true);
+        expect(plain(r.summary)).toEqual({ wait: 1, sell: 0, gain: row.gain });
+    });
+
+    it('sells once the event is further off than the threshold', () => {
+        const near = timing({ 207: 100 }, { 207: 1000 }, { days: 1035 }).rows[0];
+        expect(near.gain).toBeCloseTo(0, 6);
+        expect(near.wait).toBe(false);
+        expect(timing({ 207: 100 }, { 207: 1000 }, { days: 1034 }).rows[0].wait).toBe(true);
+    });
+
+    it('holds ships that burn nothing, with no threshold', () => {
+        const row = timing({ 207: 1 }, {}).rows[0];
+        expect(row.fuelPerDay).toBe(0);
+        expect(row.threshold).toBe(Infinity);
+        expect(row.wait).toBe(true);
+    });
+
+    it('sells everything when the event pays no more than today', () => {
+        const same = timing({ 207: 1 }, {}, { eventRate: 35 }).rows[0];
+        expect(same.threshold).toBe(0);
+        expect(same.wait).toBe(false);
+        const lower = timing({ 207: 1 }, { 207: 10 }, { eventRate: 20 }).rows[0];
+        expect(lower.threshold).toBeLessThan(0);
+        expect(lower.wait).toBe(false);
+    });
+
+    it('leaves out what costs nothing to keep and what has no count', () => {
+        const r = timing({ 202: 0, 212: 50, 217: 50, 401: 10, 503: 5, 203: 3 }, { 203: 1 });
+        expect(r.rows.map((row) => row.id)).toEqual([203]);
+        expect(plain(ST.SCRAP_SELL_TIMING_IDS).includes(212)).toBe(false);
+        expect(plain(ST.SCRAP_SELL_TIMING_IDS).includes(217)).toBe(false);
+        expect(ST.SCRAP_SELL_TIMING_IDS.length).toBe(15);
+    });
+
+    it('prices the units and the deuterium at the exchange rates, metal being 1', () => {
+        expect(plain(ST.scrapExchangeWeights({ metal: 2, crystal: 3, deuterium: 4 }))).toEqual({ metal: 1, crystal: 1.5, deuterium: 2 });
+        // Out of range or not a number: the default of that rate
+        expect(plain(ST.scrapExchangeWeights({ metal: 0, crystal: 'x', deuterium: 500 }))).toEqual({ metal: 1, crystal: 1.5, deuterium: 3 });
+        // A large cargo: 6000 / 6000 / 0; 2 : 2 : 2 makes it 12000 and a deuterium worth 1
+        const row = timing({ 203: 1 }, { 203: 10 }, { exchangeRates: { metal: 2, crystal: 2, deuterium: 2 } }).rows[0];
+        expect(row.value).toBe(12000);
+        expect(row.gain).toBeCloseTo(12000 * 0.46 - 10 * 180, 9);
+    });
+
+    it('adds up the gain of the types worth holding only', () => {
+        const r = timing({ 207: 100, 203: 1 }, { 207: 1000, 203: 1000 });
+        expect(r.summary.wait).toBe(1);
+        expect(r.summary.sell).toBe(1);
+        expect(r.summary.gain).toBe(r.rows.find((row) => row.id === 207)?.gain);
+    });
+
+    it('holds the rates and the days to their ranges', () => {
+        expect(ST.scrapEventRate('')).toBe(81);
+        expect(ST.scrapEventRate(150)).toBe(100);
+        const r = timing({ 207: 1 }, {}, { rate: 'x', eventRate: null, days: -3 });
+        expect([r.rate, r.eventRate, r.days]).toEqual([35, 81, 0]);
+    });
+});
+
+describe('the fleet save behind the advice', () => {
+    const calc = new ST.FlightCalculator();
+
+    it('measures each route kind as flight does, never skipping a system', () => {
+        expect(ST.scrapRouteDistance({ kind: 'system', delta: 3 })).toBe(1015);
+        expect(ST.scrapRouteDistance({ kind: 'systems', delta: 3 })).toBe(2985);
+        expect(ST.scrapRouteDistance({ kind: 'galaxies', delta: 2 })).toBe(40000);
+        // A position is 14 steps away at most; an unknown kind is the next galaxy
+        expect(ST.scrapRouteDistance({ kind: 'system', delta: 99 })).toBe(1070);
+        expect(ST.scrapRouteDistance({ kind: 'moon', delta: 1 })).toBe(20000);
+        // A ring takes the short way round
+        expect(ST.scrapRouteDistance({ kind: 'galaxies', delta: 7 },
+            { circularGalaxies: true, numberOfGalaxies: 9 })).toBe(40000);
+        expect(ST.scrapRouteDistance({ kind: 'systems', delta: 400 },
+            { circularSystems: true, numberOfSystems: 499 })).toBe(2700 + 99 * 95);
+    });
+
+    it('bills what flight bills for a peaceful flight, the shares adding up to it', () => {
+        const counts = { 202: 1000, 207: 200, 214: 1, 212: 9 };
+        const settings = {
+            route: { kind: 'systems', delta: 5 }, speedPercent: 30, driveLevels: [12, 9, 7],
+            playerClass: ST.PLAYER_CLASS.GENERAL, lfMechanGE: 15,
+            shipBonuses: { 207: { speed: 10, fuel: 3 } },
+            universe: { fleetSpeedPeaceful: 3, deutFactor: 8, deutConsReduction: 36 },
+        };
+        const fuel = ST.scrapFleetsaveFuel(counts, settings);
+
+        const shipCounts = plain(ST.SCRAP_FLIGHT_SHIP_IDS).map((/** @type {number} */ id) => counts[id] ?? 0);
+        const bonuses = plain(ST.SCRAP_FLIGHT_SHIP_IDS).map((/** @type {number} */ id) => (id === 207 ? [10, 0, 3] : [0, 0, 0]));
+        const params = {
+            driveLevels: [12, 9, 7], playerClass: ST.PLAYER_CLASS.GENERAL, missionType: ST.MISSION.PEACEFUL,
+            fleetSpeedWar: 1, fleetSpeedPeaceful: 3, fleetSpeedHolding: 1, deutFactor: 8, deutConsReduction: 36,
+            lfMechanGE: 15, lfRocktalCE: 0, lfShipsBonuses: bonuses, traderBonus: false, warriorBonus: false,
+            hyperTechLvl: 0, spCargohold: 0,
+        };
+        const plan = calc.planFlight(calc.buildShipsData([12, 9, 7]), shipCounts, 2700 + 5 * 95, params, { percents: [30] });
+        expect(fuel.distance).toBe(3175);
+        expect(fuel.duration).toBe(plan.entries[0].duration);
+        expect(fuel.total).toBe(plan.entries[0].deut);
+        const shares = Object.values(fuel.perSave);
+        expect(Math.round(shares.reduce((a, b) => a + b, 0))).toBe(fuel.total);
+        expect(fuel.perSave[204]).toBe(0);
+        // The satellite does not fly: flight has no row for it
+        expect(212 in fuel.perSave).toBe(false);
+    });
+
+    it('applies one discount to every ship on top of its own', () => {
+        const counts = { 203: 100 };
+        const plain0 = ST.scrapFleetsaveFuel(counts, { route: { kind: 'galaxies', delta: 1 }, speedPercent: 100 });
+        const half = ST.scrapFleetsaveFuel(counts, {
+            route: { kind: 'galaxies', delta: 1 }, speedPercent: 100, fuelDiscount: 30, shipBonuses: { 203: { fuel: 20 } },
+        });
+        // A large cargo burns 50 a ship, 25 at half
+        expect(half.perSave[203]).toBeCloseTo(plain0.perSave[203] / 2, 9);
+    });
+
+    it('falls back to 10% for a speed the class does not offer, and costs nothing empty', () => {
+        const counts = { 203: 10 };
+        const route = { kind: 'galaxies', delta: 1 };
+        const odd = ST.scrapFleetsaveFuel(counts, { route, speedPercent: 15 });
+        expect(odd.duration).toBe(ST.scrapFleetsaveFuel(counts, { route, speedPercent: 10 }).duration);
+        const general = ST.scrapFleetsaveFuel(counts, { route, speedPercent: 15, playerClass: ST.PLAYER_CLASS.GENERAL });
+        expect(general.duration).toBeLessThan(odd.duration);
+        expect(ST.scrapFleetsaveFuel({ 212: 5 }, { route, speedPercent: 10 }).total).toBe(0);
+    });
+
+    it('spreads the saves over the days', () => {
+        expect(plain(ST.scrapFuelPerDay({ 202: 10, 203: 0 }, 3, 2))).toEqual({ 202: 15, 203: 0 });
+        // Fewer than one save, or one in fewer than one day, counts as one
+        expect(plain(ST.scrapFuelPerDay({ 202: 10 }, 0, -1))).toEqual({ 202: 10 });
+    });
+});

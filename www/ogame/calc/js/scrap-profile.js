@@ -13,6 +13,12 @@
 //     the values from before the profile stay in options_scrap, so "no
 //     profile" shows them again. They are account values: the planet select
 //     does not change them;
+//   - the "sell now or wait" fleet save: the three drive levels, bound like
+//     the cargo fields under flight's keys (research.115/117/118), and - read
+//     only - the class, the Mechan General Enhancement, every ship's life form
+//     speed and fuel bonus and the universe's fleet speed, deuterium
+//     consumption and size (the shared universe cache). They replace the one
+//     fuel discount field, which is hidden while a profile is shown;
 //   - a planet select (#pf-planet, planets only: storages are not built on a
 //     moon, so it is no place to sell for resources) and, beside every count
 //     field, how many of that unit the chosen planet has (`ship.<id>` /
@@ -39,7 +45,43 @@ const SCRAP_ACCOUNT_FIELDS = [
   pfPercentField('lf.classBooster.1', 'collectorClassBonus', SCRAP_CARGO_FIELDS.collectorClassBonus),
   pfPercentField('lf.ship.202.cargo', 'scCapacityIncrease', SCRAP_CARGO_FIELDS.scCapacityIncrease),
   pfPercentField('lf.ship.203.cargo', 'lcCapacityIncrease', SCRAP_CARGO_FIELDS.lcCapacityIncrease),
+  // The drives of the fleet save, under the keys flight binds them to (flight-profile.js).
+  pfLevelField('research.115', 'cmbDrive', SCRAP_SELL_TIMING_FIELDS.cmbDrive),
+  pfLevelField('research.117', 'impDrive', SCRAP_SELL_TIMING_FIELDS.impDrive),
+  pfLevelField('research.118', 'hypDrive', SCRAP_SELL_TIMING_FIELDS.hypDrive),
 ];
+
+/** The profile classes as flight-core.js counts them; none flies like the Discoverer. */
+const SCRAP_FLIGHT_CLASS = Object.freeze({
+  [PROFILE_CLASS.COLLECTOR]: PLAYER_CLASS.COLLECTOR,
+  [PROFILE_CLASS.GENERAL]: PLAYER_CLASS.GENERAL,
+});
+
+/**
+ * A universe's cache entry (UniverseCache, the `serverdata` settings) as the
+ * fleet save takes it; what the entry does not know is left out, and so is
+ * the 1x universe's (scrap-fleetsave.js).
+ *
+ * @param {?UniverseEntry} entry
+ * @returns {ScrapUniverse}
+ */
+function scrapUniverseFromEntry(entry) {
+  const value = (/** @type {string} */ key) => {
+    const v = universeValue(entry, key);
+    return v === null ? undefined : v;
+  };
+  const deut = value('globalDeuteriumSaveFactor');
+  return {
+    fleetSpeedPeaceful: value('speedFleetPeaceful'),
+    // Tenths, as flight's universe select holds it: 70% is 7.
+    deutFactor: deut === undefined ? undefined : Math.round(deut / 10),
+    deutConsReduction: value('warriorBonusFuelConsumption'),
+    circularGalaxies: value('donutGalaxy'),
+    circularSystems: value('donutSystem'),
+    numberOfGalaxies: value('galaxies'),
+    numberOfSystems: value('systems'),
+  };
+}
 
 /**
  * The profile's class for the Collector box. Ticked is the Collector;
@@ -83,6 +125,8 @@ class ScrapProfiles extends ProfileBinder {
     this.planetSelect = new PfBodySelect(pf, {
       select: '#pf-planet', box: '#pf-planet-box', bodies: (p) => p.planets, lastKey: 'scrap',
     });
+    /** @type {ScrapUniverse} The profile's universe, once its settings are known; 1x until then. */
+    this.fleetUniverse = {};
   }
 
   init() {
@@ -117,10 +161,70 @@ class ScrapProfiles extends ProfileBinder {
     // A General or a Discoverer shows the box unticked, as does no class.
     setChecked(SCRAP_COLLECTOR_BOX, pfNum(getProfileValue(profile.account, 'class', 0)) === PROFILE_CLASS.COLLECTOR);
     this.app.cargoOwnedByProfile = true;
+    this.showFleetsaveProfile(profile);
     this.planetSelect.render(profile);
     this.showPlanetCounts(profile);
     // Copies the fields into options.prm, which the snapshot is taken from.
     this.app.recalc();
+  }
+
+  /**
+   * The fleet save takes the class, the enhancements and the ships' bonuses
+   * from the profile, which replace the one fuel discount field; the universe
+   * follows once its settings are known (fetched at most once a day).
+   *
+   * @param {Profile} profile
+   */
+  showFleetsaveProfile(profile) {
+    this.app.fleetsaveProfile = () => this.fleetsaveProfile();
+    pfShow('#fuel-discount-box', false);
+    pfShow('#fuel-discount-profile', true);
+    this.fleetUniverse = {};
+    const universe = profile.universe;
+    if (!universe) return;
+    const key = 'speedFleetPeaceful';
+    const cache = this.pf.universes;
+    const known = cache.fresh(universe, key);
+    if (known) {
+      this.fleetUniverse = scrapUniverseFromEntry(known);
+      return;
+    }
+    const id = profile.id;
+    void cache.refresh(universe, key).then((entry) => {
+      // Another profile, or none, may be shown by the time the answer comes.
+      if (!entry || this.profileId !== id) return;
+      this.fleetUniverse = scrapUniverseFromEntry(entry);
+      this.app.recalc();
+    });
+  }
+
+  /**
+   * What the profile shown adds to the fleet save. The class is the one the
+   * Collector box stands for (scrapClassFromPrm), so ticking it counts at once.
+   *
+   * @returns {ScrapFleetsaveProfile}
+   */
+  fleetsaveProfile() {
+    const profile = this.profile();
+    const account = profile ? profile.account : { values: {} };
+    // Before the first snapshot the profile's own class is the one to keep.
+    const cls = scrapClassFromPrm(options.prm, this.snapshot.class ?? getProfileValue(account, 'class', 0));
+    /** @type {Object<string, {speed: number, fuel: number}>} */
+    const shipBonuses = {};
+    SCRAP_FLIGHT_SHIP_IDS.forEach((id) => {
+      shipBonuses[id] = {
+        speed: pfNum(getProfileValue(account, `lf.ship.${id}.speed`, 0)),
+        fuel: pfNum(getProfileValue(account, `lf.ship.${id}.fuel`, 0)),
+      };
+    });
+    return {
+      playerClass: SCRAP_FLIGHT_CLASS[cls] ?? PLAYER_CLASS.DISCOVERER,
+      lfMechanGE: pfNum(getProfileValue(account, 'lf.classBooster.2', 0)),
+      // The Collector Enhancement is a field of the page: what it shows counts.
+      lfRocktalCE: pfNum(options.prm.collectorClassBonus),
+      shipBonuses,
+      universe: this.fleetUniverse,
+    };
   }
 
   /**
@@ -154,6 +258,10 @@ class ScrapProfiles extends ProfileBinder {
     ScrapRenderer.renderPlanetCounts(null, null);
     super.restoreOwn();
     this.app.cargoOwnedByProfile = false;
+    this.app.fleetsaveProfile = null;
+    this.fleetUniverse = {};
+    pfShow('#fuel-discount-box', true);
+    pfShow('#fuel-discount-profile', false);
     this.app.restoreFromState();
   }
 

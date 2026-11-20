@@ -89,6 +89,39 @@ const SCRAP_CARGO_BASE_HOLD = Object.freeze({ small: 5000, large: 25000 });
  */
 
 /**
+ * The ships the "sell now or wait" advice weighs: those that fly, and so burn
+ * deuterium to be kept safe. The solar satellite and the crawler never leave
+ * the planet - they, the defenses and the missiles cost nothing to keep.
+ */
+const SCRAP_SELL_TIMING_IDS = Object.freeze(SCRAP_FLEET_IDS.filter((id) => id !== 212 && id !== 217));
+
+/** The rate the merchant pays during his event, in percent, as the advice starts with it. */
+const SCRAP_EVENT_RATE = Object.freeze({ def: 81, min: SCRAP_RATE.min, max: SCRAP_RATE.max });
+
+/** Days until the event, as the advice starts with them. */
+const SCRAP_EVENT_DAYS = Object.freeze({ def: 180, min: 0 });
+
+/**
+ * The exchange rates that turn the three resources into MSU, metal first:
+ * the cost calculator's defaults and range (costs-core.js).
+ */
+const SCRAP_EXCHANGE_RATES = Object.freeze({ metal: 1, crystal: 1.5, deuterium: 3, min: 0.1, max: 100 });
+
+/**
+ * Hold a rate to the merchant's range, rounded to SCRAP_RATE_DIGITS.
+ *
+ * @param {unknown} rate In percent.
+ * @param {number} def What anything that is not a number counts as.
+ * @returns {number}
+ */
+function scrapRateOr(rate, def) {
+  const value = Number(rate);
+  if (rate === null || rate === '' || !Number.isFinite(value)) return def;
+  const pow = 10 ** SCRAP_RATE_DIGITS;
+  return Math.round(Math.min(SCRAP_RATE.max, Math.max(SCRAP_RATE.min, value)) * pow) / pow;
+}
+
+/**
  * Hold a rate to the merchant's range. Anything that is not a number is the
  * default rate; the rest is clamped and rounded to SCRAP_RATE_DIGITS.
  *
@@ -96,10 +129,18 @@ const SCRAP_CARGO_BASE_HOLD = Object.freeze({ small: 5000, large: 25000 });
  * @returns {number}
  */
 function scrapRate(rate) {
-  const value = Number(rate);
-  if (rate === null || rate === '' || !Number.isFinite(value)) return SCRAP_RATE.def;
-  const pow = 10 ** SCRAP_RATE_DIGITS;
-  return Math.round(Math.min(SCRAP_RATE.max, Math.max(SCRAP_RATE.min, value)) * pow) / pow;
+  return scrapRateOr(rate, SCRAP_RATE.def);
+}
+
+/**
+ * The event rate, held like the merchant's rate; anything that is not a
+ * number is SCRAP_EVENT_RATE.def.
+ *
+ * @param {unknown} rate In percent.
+ * @returns {number}
+ */
+function scrapEventRate(rate) {
+  return scrapRateOr(rate, SCRAP_EVENT_RATE.def);
 }
 
 /**
@@ -253,9 +294,119 @@ function calculateScrap(params, techData) {
   };
 }
 
+// ----------------------------------------------------------------------------
+// Sell now or wait for the event
+// ----------------------------------------------------------------------------
+// The merchant pays far more during his event than on an ordinary day, but a
+// fleet kept until then has to be saved, and every save burns deuterium. Per
+// ship type i, with V_i the value of its ships in MSU and F_i its share of the
+// fleet save's deuterium a day (scrap-fleetsave.js works that out):
+//   gain of waiting   dP_i = V_i * (eventRate - rate) - F_i * wD * days
+//   worth waiting up to  t_i = (eventRate - rate) * V_i / (F_i * wD) days
+// where wD is the deuterium's weight in MSU. A type is held when dP_i > 0
+// and sold now otherwise. Holding the "wait" types and selling the rest gains
+// the sum of the positive dP_i over selling everything now.
+
+/**
+ * @typedef {object} ScrapSellTimingRow
+ * @property {number} id Tech id.
+ * @property {number} count
+ * @property {number} value What the ships cost, in MSU.
+ * @property {number} fuelPerDay Deuterium a day spent keeping them safe.
+ * @property {number} threshold Days until the event up to which waiting pays:
+ *   Infinity for ships that burn nothing, 0 or less when the event pays no
+ *   more than today.
+ * @property {number} gain What waiting brings over selling now, in MSU; negative when it loses.
+ * @property {boolean} wait True to hold the ships for the event, false to sell them now.
+ */
+
+/**
+ * @typedef {object} ScrapSellTimingResult
+ * @property {number} rate Today's rate, %, as held to the range.
+ * @property {number} eventRate The event's rate, %, as held to the range.
+ * @property {number} days Days until the event, as held to the range.
+ * @property {ScrapSellTimingRow[]} rows One per flying ship type with a count, in the game's order.
+ * @property {{wait: number, sell: number, gain: number}} summary How many types to hold and to
+ *   sell, and what following that advice gains over selling everything now, in MSU.
+ */
+
+/**
+ * The weights the exchange rates give crystal and deuterium against metal. A
+ * rate that is not a number in the cost calculator's range is its default.
+ *
+ * @param {{metal?: unknown, crystal?: unknown, deuterium?: unknown}} [rates]
+ * @returns {{metal: number, crystal: number, deuterium: number}} Metal is 1.
+ */
+function scrapExchangeWeights(rates = {}) {
+  const held = (/** @type {unknown} */ v, /** @type {number} */ def) => {
+    const n = Number(v);
+    return v !== null && v !== '' && Number.isFinite(n) && n >= SCRAP_EXCHANGE_RATES.min && n <= SCRAP_EXCHANGE_RATES.max
+      ? n : def;
+  };
+  const metal = held(rates.metal, SCRAP_EXCHANGE_RATES.metal);
+  return {
+    metal: 1,
+    crystal: held(rates.crystal, SCRAP_EXCHANGE_RATES.crystal) / metal,
+    deuterium: held(rates.deuterium, SCRAP_EXCHANGE_RATES.deuterium) / metal,
+  };
+}
+
+/**
+ * Whether to sell each flying ship type now or keep it, fleet-saved, until the
+ * merchant's event.
+ *
+ * @param {object} params
+ * @param {Object<string, unknown>} params.counts Counts by tech id; only SCRAP_SELL_TIMING_IDS are read.
+ * @param {unknown} params.rate Today's rate, %.
+ * @param {unknown} params.eventRate The event's rate, %.
+ * @param {unknown} params.days Days until the event: a whole number, at least 0.
+ * @param {{metal?: unknown, crystal?: unknown, deuterium?: unknown}} [params.exchangeRates]
+ * @param {Object<string, unknown>} params.fuelPerDay Deuterium a day each type burns, by tech id; missing is 0.
+ * @param {Object<string, number[]>} techData Unit prices, {id: [metal, crystal, deuterium, ...]}.
+ * @returns {ScrapSellTimingResult}
+ */
+function scrapSellTiming(params, techData) {
+  const rate = scrapRate(params.rate);
+  const eventRate = scrapEventRate(params.eventRate);
+  const days = scrapCount(params.days);
+  const w = scrapExchangeWeights(params.exchangeRates);
+  const uplift = (eventRate - rate) / 100;
+  const counts = params.counts || {};
+  const fuel = params.fuelPerDay || {};
+  /** @type {ScrapSellTimingRow[]} */
+  const rows = [];
+  SCRAP_SELL_TIMING_IDS.forEach((id) => {
+    const count = scrapCount(counts[id]);
+    const price = techData[id];
+    if (count === 0 || !price) return;
+    const value = count * (price[0] * w.metal + price[1] * w.crystal + price[2] * w.deuterium);
+    const fuelPerDay = scrapPercent(fuel[id]);
+    const fuelMsuPerDay = fuelPerDay * w.deuterium;
+    let threshold;
+    if (fuelMsuPerDay > 0) threshold = uplift * value / fuelMsuPerDay;
+    else threshold = uplift > 0 ? Infinity : 0;
+    const gain = value * uplift - fuelMsuPerDay * days;
+    rows.push({ id, count, value, fuelPerDay, threshold, gain, wait: gain > 0 });
+  });
+  const waiting = rows.filter((row) => row.wait);
+  return {
+    rate,
+    eventRate,
+    days,
+    rows,
+    summary: {
+      wait: waiting.length,
+      sell: rows.length - waiting.length,
+      gain: waiting.reduce((sum, row) => sum + row.gain, 0),
+    },
+  };
+}
+
 if (typeof window !== 'undefined') {
   Object.assign(window, {
     SCRAP_FLEET_IDS, SCRAP_DEFENSE_IDS, SCRAP_RATE, SCRAP_CARGO_BASE_HOLD, scrapRate, scrapCount,
     scrapPercent, scrapHoldParams, scrapUnitPayback, calculateScrap,
+    SCRAP_SELL_TIMING_IDS, SCRAP_EVENT_RATE, SCRAP_EVENT_DAYS, SCRAP_EXCHANGE_RATES, scrapEventRate,
+    scrapExchangeWeights, scrapSellTiming,
   });
 }

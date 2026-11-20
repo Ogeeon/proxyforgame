@@ -236,6 +236,9 @@ describe('UniverseCache', () => {
         expect(plain(entry)).toEqual({
             at: 1000, speed: 8, debrisFactor: 30, deuteriumInDebris: true, topScore: 40000,
             debrisFactorDef: 0, systems: 499, donutSystem: true,
+            // The answer carries none of the fleet save's settings: known as unknown
+            galaxies: null, donutGalaxy: null, speedFleetPeaceful: null, globalDeuteriumSaveFactor: null,
+            warriorBonusFuelConsumption: null,
         });
         expect(JSON.parse(local.getItem('pfg_universe_en_1'))).toEqual(plain(entry));
     });

@@ -162,8 +162,9 @@ describe('MCP protocol', () => {
         // (one more building in ogame_build_cost and ogame_build_queue) went 30 bytes over;
         // 55 KB until ogame_build_queue took a `lifeforms` with the Terraformer reductions;
         // 56 KB until ogame_scrap added its 1.3 KB; 57 KB until ogame_scrap took the cargo
-        // bonuses and left 4 bytes of room.
-        const BUDGET = 58 * 1024;
+        // bonuses and left 4 bytes of room; 58 KB until ogame_scrap took the 1.7 KB sellTiming
+        // block (the sell-now-or-wait advice) and every ship's life form bonuses.
+        const BUDGET = 59 * 1024;
         const { tools } = (await rpc(protocol, { jsonrpc: '2.0', id: 3, method: 'tools/list' })).result;
         const size = tools.reduce((sum, { name, title, description, inputSchema }) =>
             sum + JSON.stringify({ name, title, description, inputSchema }).length, 0);
@@ -1536,6 +1537,71 @@ describe('MCP tool ogame_scrap', () => {
         expect((await scrap({ rate: 0 })).isError).toBe(true);
         expect((await scrap({ rate: 101 })).isError).toBe(true);
         expect((await scrap({ defenses: { 'solar-sat': 1 } })).isError).toBe(true);
+    });
+
+    describe('sellTiming', () => {
+        const fs = load(
+            ['js/utils.js', 'ogame/calc/js/ogame-universe.js', 'ogame/calc/js/ogame-cargo.js', 'ogame/calc/js/flight-core.js',
+                'ogame/calc/js/scrap-core.js', 'ogame/calc/js/scrap-fleetsave.js'],
+            ['scrapSellTiming', 'scrapFleetsaveFuel', 'scrapFuelPerDay'],
+        );
+        const FLEET = { 'small-cargo': 1000, battleship: 200, 'death-star': 1 };
+        const COUNTS = { 202: 1000, 207: 200, 214: 1 };
+
+        it('leaves the answer as it was without the block', async () => {
+            const out = (await scrap({ ships: FLEET })).structuredContent;
+            expect('sellTiming' in out).toBe(false);
+        });
+
+        it('advises with the page\'s defaults when the block is empty', async () => {
+            const out = (await scrap({ ships: FLEET, solarSatellites: { count: 5 }, sellTiming: {} })).structuredContent;
+            const fuel = fs.scrapFleetsaveFuel(COUNTS, { route: { kind: 'galaxies', delta: 1 }, speedPercent: 10 });
+            const core = fs.scrapSellTiming({
+                counts: COUNTS, rate: 35, eventRate: 81, days: 180, fuelPerDay: fs.scrapFuelPerDay(fuel.perSave, 1, 1),
+            }, PRICES);
+            const st = out.sellTiming;
+            expect(st.eventRatePercent).toBe(81);
+            expect(st.daysToEvent).toBe(180);
+            expect(st.fleetSave).toEqual({ distance: 20000, durationSeconds: fuel.duration, deuterium: fuel.total });
+            // The satellites are not weighed: they cost nothing to keep.
+            expect(st.ships.map((/** @type {any} */ s) => s.ship)).toEqual(['small-cargo', 'battleship', 'death-star']);
+            expect(st.ships.map((/** @type {any} */ s) => s.advice)).toEqual(core.rows.map((r) => (r.wait ? 'wait' : 'sell')));
+            expect(st.gainOfAdviceMsu).toBe(Math.round(core.summary.gain));
+            expect(st.waitTypes + st.sellTypes).toBe(3);
+        });
+
+        it('takes the route, speed, frequency, drives, discounts, rates and universe it is given', async () => {
+            const args = {
+                ships: FLEET, rate: 40, playerClass: 'general',
+                lifeforms: { generalClassBonus: 10, shipBonuses: { battleship: { speed: 20, fuel: 5 } } },
+                sellTiming: {
+                    eventRate: 70, daysToEvent: 30, route: { kind: 'systems', delta: 3 }, speedPercent: 25,
+                    timesPerDays: { times: 3, days: 2 }, drives: { combustion: 10, impulse: 8, hyperspace: 6 },
+                    fuelDiscount: 4, exchangeRates: { metal: 2, crystal: 3, deuterium: 4 },
+                    fleetSpeedPeaceful: 2, deuteriumFactor: 0.7,
+                },
+            };
+            const st = (await scrap(args)).structuredContent.sellTiming;
+            const fuel = fs.scrapFleetsaveFuel(COUNTS, {
+                route: { kind: 'systems', delta: 3 }, speedPercent: 25, driveLevels: [10, 8, 6], playerClass: 1,
+                lfMechanGE: 10, shipBonuses: { 207: { speed: 20, fuel: 5 } }, fuelDiscount: 4,
+                universe: { fleetSpeedPeaceful: 2, deutFactor: 7 },
+            });
+            const core = fs.scrapSellTiming({
+                counts: COUNTS, rate: 40, eventRate: 70, days: 30, exchangeRates: { metal: 2, crystal: 3, deuterium: 4 },
+                fuelPerDay: fs.scrapFuelPerDay(fuel.perSave, 3, 2),
+            }, PRICES);
+            expect(st.fleetSave.distance).toBe(2700 + 3 * 95);
+            expect(st.fleetSave.deuterium).toBe(fuel.total);
+            expect(st.ships.map((/** @type {any} */ s) => s.gainOfWaitingMsu)).toEqual(core.rows.map((r) => Math.round(r.gain)));
+            expect(st.ships[0].valueMsu).toBe(Math.round(core.rows[0].value));
+        });
+
+        it('refuses a route kind or a frequency it does not know', async () => {
+            expect((await scrap({ ships: FLEET, sellTiming: { route: { kind: 'moon' } } })).isError).toBe(true);
+            expect((await scrap({ ships: FLEET, sellTiming: { timesPerDays: { days: 0 } } })).isError).toBe(true);
+            expect((await scrap({ ships: FLEET, sellTiming: { eventRate: 101 } })).isError).toBe(true);
+        });
     });
 });
 

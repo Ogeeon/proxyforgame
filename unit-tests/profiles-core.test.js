@@ -2016,10 +2016,14 @@ describe('the universe settings', () => {
         const data = {
             speed: '8', debrisFactor: '0.3', deuteriumInDebris: '1', topScore: '1000001',
             debrisFactorDef: '0.1', systems: '499', donutSystem: '0',
+            galaxies: '9', donutGalaxy: '1', speedFleetPeaceful: '4', globalDeuteriumSaveFactor: '0.7',
+            warriorBonusFuelConsumption: '0.5',
         };
         expect(plain(core.parseUniverseSettings(data))).toEqual({
             speed: 8, debrisFactor: 30, deuteriumInDebris: true, topScore: 1800000,
             debrisFactorDef: 10, systems: 499, donutSystem: false,
+            galaxies: 9, donutGalaxy: true, speedFleetPeaceful: 4, globalDeuteriumSaveFactor: 70,
+            warriorBonusFuelConsumption: 50,
         });
     });
 
@@ -2027,6 +2031,8 @@ describe('the universe settings', () => {
         expect(plain(core.parseUniverseSettings({}))).toEqual({
             speed: null, debrisFactor: null, deuteriumInDebris: null, topScore: null,
             debrisFactorDef: null, systems: null, donutSystem: null,
+            galaxies: null, donutGalaxy: null, speedFleetPeaceful: null, globalDeuteriumSaveFactor: null,
+            warriorBonusFuelConsumption: null,
         });
         const p = core.UNIVERSE_SETTING_PARSERS;
         expect(p.speed({ speed: '0' })).toBe(null);

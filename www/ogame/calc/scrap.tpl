@@ -96,8 +96,10 @@
   <script src="/ogame/calc/js/profiles-ui.js?v=<?php echo assetVersion($pfgPath, '/ogame/calc/js/profiles-ui.js'); ?>" defer></script>
   <script src="/ogame/calc/js/ogame-universe.js?v=<?php echo assetVersion($pfgPath, '/ogame/calc/js/ogame-universe.js'); ?>" defer></script>
   <script src="/ogame/calc/js/ogame-cargo.js?v=<?php echo assetVersion($pfgPath, '/ogame/calc/js/ogame-cargo.js'); ?>" defer></script>
+  <script src="/ogame/calc/js/flight-core.js?v=<?php echo assetVersion($pfgPath, '/ogame/calc/js/flight-core.js'); ?>" defer></script>
   <script src="/ogame/calc/js/own-api.js?v=<?php echo assetVersion($pfgPath, '/ogame/calc/js/own-api.js'); ?>" defer></script>
   <script src="/ogame/calc/js/scrap-core.js?v=<?php echo assetVersion($pfgPath, '/ogame/calc/js/scrap-core.js'); ?>" defer></script>
+  <script src="/ogame/calc/js/scrap-fleetsave.js?v=<?php echo assetVersion($pfgPath, '/ogame/calc/js/scrap-fleetsave.js'); ?>" defer></script>
   <script src="/ogame/calc/js/scrap-data-collector.js?v=<?php echo assetVersion($pfgPath, '/ogame/calc/js/scrap-data-collector.js'); ?>" defer></script>
   <script src="/ogame/calc/js/scrap-renderer.js?v=<?php echo assetVersion($pfgPath, '/ogame/calc/js/scrap-renderer.js'); ?>" defer></script>
   <script src="/ogame/calc/js/scrap-orchestration.js?v=<?php echo assetVersion($pfgPath, '/ogame/calc/js/scrap-orchestration.js'); ?>" defer></script>
@@ -122,6 +124,8 @@
       options.msgMaxConstraintViolated = <?= json_encode($l['msg-max-constraint-violated']) ?>;
       options.ownApiBadJsonMsg = <?= json_encode($l['own-api-bad-json-msg']) ?>;
       options.dialogOk = <?= json_encode($l['dialog-ok']) ?>;
+      options.verdictWait = <?= json_encode($l['verdict-wait']) ?>;
+      options.verdictSell = <?= json_encode($l['verdict-sell']) ?>;
       // Unit prices by tech id, [metal, crystal, deuterium] - data/costs-techs.json.
       options.prices = <?= json_encode((object) array_map(fn($unit) => $unit['cost'], $scrapUnits)) ?>;
     }
@@ -294,6 +298,123 @@
                   <div id="transport-large" class="form-control form-control-sm w-auto resource-show ui-state-disabled">0</div>
                 </div>
               </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Sell now or wait for the merchant's event: the flying ships, each
+           weighed against the deuterium its fleet saves burn until then. The
+           counts of the advice in the header; collapsed on every load. -->
+      <div class="accordion mt-2" id="sell-timing-accordion">
+        <div class="accordion-item">
+          <h2 class="accordion-header">
+            <button id="sell-timing-toggle" class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#sell-timing-body" aria-expanded="false" aria-controls="sell-timing-body">
+              <span><?= $l['sell-timing'] ?>&ensp;<?= $l['verdict-wait'] ?>:&nbsp;<span id="sell-timing-wait-head">0</span> / <?= $l['verdict-sell'] ?>:&nbsp;<span id="sell-timing-sell-head">0</span></span>
+            </button>
+          </h2>
+          <div id="sell-timing-body" class="accordion-collapse collapse">
+            <div class="accordion-body">
+              <div class="d-flex flex-wrap gap-3 align-items-center justify-content-center mb-2">
+                <div class="d-flex align-items-center gap-1">
+                  <label for="event-rate"><?= $l['event-rate'] ?></label>
+                  <div class="input-group input-group-sm w-auto">
+                    <input id="event-rate" type="text" name="event-rate" class="form-control rate-input m-0" value="81" data-field-title="<?= htmlspecialchars($l['event-rate'], ENT_QUOTES, 'UTF-8') ?>">
+                    <span class="input-group-text">%</span>
+                  </div>
+                  <i class="bi bi-question-circle" data-bs-toggle="tooltip" title="<?= htmlspecialchars($l['event-rate-hint'], ENT_QUOTES, 'UTF-8') ?>"></i>
+                </div>
+                <div class="d-flex align-items-center gap-1">
+                  <label for="event-days"><?= $l['event-days'] ?></label>
+                  <input id="event-days" type="text" name="event-days" class="form-control form-control-sm level-input" value="180" data-field-title="<?= htmlspecialchars($l['event-days'], ENT_QUOTES, 'UTF-8') ?>">
+                </div>
+              </div>
+              <!-- The fleet save: where to, how fast, how often, with which drives. -->
+              <div class="d-flex flex-wrap gap-3 align-items-center justify-content-center mb-2">
+                <div class="d-flex align-items-center gap-1">
+                  <label for="route-kind"><?= $l['fs-route'] ?></label>
+                  <select id="route-kind" name="route-kind" class="form-select form-select-sm w-auto">
+<?php foreach (['system', 'systems', 'galaxies'] as $kind): ?>
+                    <option value="<?= $kind ?>"<?= $kind === 'galaxies' ? ' selected' : '' ?>><?= $l['route-' . $kind] ?></option>
+<?php endforeach; ?>
+                  </select>
+                </div>
+                <div class="d-flex align-items-center gap-1">
+                  <label for="route-delta"><?= $l['route-delta'] ?></label>
+                  <input id="route-delta" type="text" name="route-delta" class="form-control form-control-sm level-input" value="1" data-field-title="<?= htmlspecialchars($l['route-delta'], ENT_QUOTES, 'UTF-8') ?>">
+                </div>
+                <div class="d-flex align-items-center gap-1">
+                  <label for="fs-speed"><?= $l['speed'] ?></label>
+                  <!-- The class's speed steps: the page rebuilds the list for a General's profile. -->
+                  <select id="fs-speed" name="fs-speed" class="form-select form-select-sm w-auto">
+<?php for ($percent = 100; $percent > 0; $percent -= 10): ?>
+                    <option value="<?= $percent ?>"<?= $percent === 10 ? ' selected' : '' ?>><?= $percent ?>%</option>
+<?php endfor; ?>
+                  </select>
+                </div>
+                <div class="d-flex align-items-center gap-1">
+                  <label for="fs-times"><?= $l['fs-frequency'] ?></label>
+                  <input id="fs-times" type="text" name="fs-times" class="form-control form-control-sm level-input" value="1" data-field-title="<?= htmlspecialchars($l['fs-frequency'], ENT_QUOTES, 'UTF-8') ?>">
+                  <label for="fs-days"><?= $l['fs-times-every'] ?></label>
+                  <input id="fs-days" type="text" name="fs-days" class="form-control form-control-sm level-input" value="1" data-field-title="<?= htmlspecialchars($l['fs-days'], ENT_QUOTES, 'UTF-8') ?>">
+                  <span><?= $l['fs-days'] ?></span>
+                </div>
+              </div>
+              <div class="d-flex flex-wrap gap-3 align-items-center justify-content-center mb-2">
+<?php foreach (['cmb-drive', 'imp-drive', 'hyp-drive'] as $drive): ?>
+                <div class="d-flex align-items-center gap-1">
+                  <label for="<?= $drive ?>"><?= $l[$drive] ?></label>
+                  <input id="<?= $drive ?>" type="text" name="<?= $drive ?>" class="form-control form-control-sm level-input" value="0" data-field-title="<?= htmlspecialchars($l[$drive], ENT_QUOTES, 'UTF-8') ?>">
+                </div>
+<?php endforeach; ?>
+              </div>
+              <div class="d-flex flex-wrap gap-3 align-items-center justify-content-center mb-2">
+                <!-- Without a profile one discount stands for the class and the
+                     life forms; a profile gives them apart, and hides it. -->
+                <div id="fuel-discount-box" class="d-flex align-items-center gap-1">
+                  <label for="fuel-discount"><?= $l['fuel-discount'] ?></label>
+                  <div class="input-group input-group-sm w-auto">
+                    <input id="fuel-discount" type="text" name="fuel-discount" class="form-control level-input m-0" value="0" data-field-title="<?= htmlspecialchars($l['fuel-discount'], ENT_QUOTES, 'UTF-8') ?>">
+                    <span class="input-group-text">%</span>
+                  </div>
+                  <i class="bi bi-question-circle" data-bs-toggle="tooltip" title="<?= htmlspecialchars($l['fuel-discount-hint'], ENT_QUOTES, 'UTF-8') ?>"></i>
+                </div>
+                <span id="fuel-discount-profile" class="small text-body-secondary d-none"><?= $l['fuel-discount-profile'] ?></span>
+                <div class="d-flex align-items-center gap-1">
+                  <label for="exchange-rates-m"><?= $l['exchange-rates'] ?>:</label>
+<?php
+  $rateTitle = static fn(string $res): string => htmlspecialchars(Intl::string($l, 'exchange-rates') . ' - ' . Intl::string($l, $res), ENT_QUOTES, 'UTF-8');
+?>
+                  <input id="exchange-rates-m" type="text" name="exchange-rates-m" class="form-control form-control-sm level-input" value="1" data-field-title="<?= $rateTitle('metal') ?>">:
+                  <input id="exchange-rates-c" type="text" name="exchange-rates-c" class="form-control form-control-sm level-input" value="1.5" aria-label="<?= $rateTitle('crystal') ?>" data-field-title="<?= $rateTitle('crystal') ?>">:
+                  <input id="exchange-rates-d" type="text" name="exchange-rates-d" class="form-control form-control-sm level-input" value="3" aria-label="<?= $rateTitle('deuterium') ?>" data-field-title="<?= $rateTitle('deuterium') ?>">
+                </div>
+              </div>
+              <div class="pfg-scroll-x">
+                <table id="sell-timing-table" class="lined mx-auto">
+                  <thead>
+                    <tr>
+                      <th class="text-center"><?= $l['ship'] ?></th>
+                      <th class="text-center"><?= $l['fuel-per-day'] ?></th>
+                      <th class="text-center"><?= $l['break-even'] ?> <i class="bi bi-question-circle" data-bs-toggle="tooltip" title="<?= htmlspecialchars($l['break-even-hint'], ENT_QUOTES, 'UTF-8') ?>"></i></th>
+                      <th class="text-center"><?= $l['wait-gain'] ?>, <?= $l['msu'] ?></th>
+                      <th class="text-center"><?= $l['verdict'] ?></th>
+                    </tr>
+                  </thead>
+                  <tbody id="sell-timing-rows">
+                    <tr id="sell-timing-empty"><td colspan="5" class="text-center text-body-secondary"><?= $l['sell-timing-no-ships'] ?></td></tr>
+                  </tbody>
+                </table>
+              </div>
+              <div class="d-flex flex-wrap gap-1 align-items-center justify-content-center mt-2">
+                <span><?= $l['sell-timing-gain'] ?></span>
+                <div id="sell-timing-gain" class="form-control form-control-sm w-auto resource-show ui-state-disabled">0</div>
+                <span><?= $l['msu'] ?></span>
+              </div>
+              <ul id="sell-timing-notes" class="small text-body-secondary mt-2 mb-0">
+<?php foreach (['risk', 'split', 'empty', 'free'] as $note): ?>
+                <li><?= $l['sell-timing-note-' . $note] ?></li>
+<?php endforeach; ?>
+              </ul>
             </div>
           </div>
         </div>

@@ -2,8 +2,8 @@
 // SCRAP MERCHANT CALCULATOR - RENDERER
 // ============================================================================
 // Writes a ScrapResult into the page: each row's return, each table's totals
-// and the results panel under the tables - the summary, the points and the
-// cargo counts in the transport accordion.
+// and the results panel under the tables - the summary, the points, the
+// cargo counts in the transport accordion and the "sell now or wait" advice.
 
 'use strict';
 
@@ -88,6 +88,85 @@ class ScrapRenderer {
     // collapsed, and in its body.
     ['#transport-small', '#transport-small-head'].forEach((sel) => setTextContent(sel, numToOGame(r.transport.small)));
     ['#transport-large', '#transport-large-head'].forEach((sel) => setTextContent(sel, numToOGame(r.transport.large)));
+  }
+
+  /**
+   * The "sell now or wait" advice: a row per flying ship type with a count,
+   * the counts of each verdict in the accordion's header and what following
+   * the advice gains. Without such ships the table says where to enter them.
+   *
+   * @param {ScrapSellTimingResult} r
+   */
+  static renderSellTiming(r) {
+    const body = $('#sell-timing-rows');
+    const empty = $('#sell-timing-empty');
+    if (body && empty) {
+      body.replaceChildren(empty, ...r.rows.map((row) => ScrapRenderer.sellTimingRow(row)));
+      empty.classList.toggle('d-none', r.rows.length > 0);
+    }
+    setTextContent('#sell-timing-wait-head', String(r.summary.wait));
+    setTextContent('#sell-timing-sell-head', String(r.summary.sell));
+    setTextContent('#sell-timing-gain', ScrapRenderer.formatSigned(r.summary.gain));
+  }
+
+  /**
+   * One ship type's row: its name as the fleet table labels it, the
+   * deuterium a day, the days waiting pays up to, the gain and the verdict.
+   *
+   * @param {ScrapSellTimingRow} row
+   * @returns {HTMLTableRowElement}
+   */
+  static sellTimingRow(row) {
+    const tr = document.createElement('tr');
+    tr.dataset.id = String(row.id);
+    const cell = (/** @type {string} */ text, /** @type {string} */ cls) => {
+      const td = document.createElement('td');
+      td.className = cls;
+      td.textContent = text;
+      tr.appendChild(td);
+      return td;
+    };
+    cell(getTextContent(`label[for="unit-${row.id}"]`), '');
+    cell(ScrapRenderer.formatFuel(row.fuelPerDay), 'text-end');
+    cell(ScrapRenderer.formatDays(row.threshold), 'text-end');
+    cell(ScrapRenderer.formatSigned(row.gain), 'text-end');
+    const verdict = cell(row.wait ? options.verdictWait : options.verdictSell, 'text-center fw-semibold');
+    verdict.classList.add(row.wait ? 'text-success' : 'text-danger');
+    return tr;
+  }
+
+  /**
+   * Deuterium a day: whole units, or a tenth for the small share of a few ships.
+   *
+   * @param {number} n
+   * @returns {string}
+   */
+  static formatFuel(n) {
+    return n >= 10 ? ScrapRenderer.formatNumber(Math.round(n)) : localizeFloat(Math.round(n * 10) / 10);
+  }
+
+  /**
+   * Days up to which waiting pays: whole days, "∞" when the ships burn
+   * nothing, a dash when the event pays no more than today.
+   *
+   * @param {number} days
+   * @returns {string}
+   */
+  static formatDays(days) {
+    if (days === Infinity) return '∞';
+    return days > 0 ? numToOGame(Math.floor(days)) : '—';
+  }
+
+  /**
+   * An amount that can be negative, rounded to whole units, shortened as the
+   * "full numbers" box says.
+   *
+   * @param {number} n
+   * @returns {string}
+   */
+  static formatSigned(n) {
+    const whole = Math.round(n);
+    return (whole < 0 ? '-' : '') + ScrapRenderer.formatNumber(Math.abs(whole));
   }
 
   /**
