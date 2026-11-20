@@ -149,13 +149,15 @@ The Companion's "copy for AI" sends a trimmed export to keep it small in a model
 `schemaVersion`, and the normalizer must keep accepting it:
 
 - planets and moons carry no `resources`, `defenses` or `baseProduction`, and there is no
-  `pfgCompanion.resources` — a trimmed export brings no available resources;
+  `pfgCompanion.resources` — a trimmed export brings no available resources, and no defences:
+  `ogame_import_account` then answers without the bodies' `defenses`, the one block that only
+  `ogame_scrap` reads;
 - every entry of `speciesBonuses` is reduced to its `totalBonus` — the normalizer reads nothing else
   of an entry (`spaceObjectBonus`, `technologyBonus`, the maxima go).
 
 Everything else stays as exported. `unit-tests/mcp-server.test.js` trims
 `playwright-tests/fixtures/account-export-large.json` (a synthetic 8-planet account) this way and
-checks that the tool's answer does not change.
+checks that the tool's answer does not change, the defences aside.
 
 ## The two bonus sources in the expeditions calculator
 

@@ -147,7 +147,7 @@ describe('MCP protocol', () => {
         expect(tools.map((t) => t.name)).toEqual([
             'ogame_import_account', 'ogame_flight', 'ogame_build_cost', 'ogame_lifeform_cost', 'ogame_build_queue', 'ogame_production',
             'ogame_expedition', 'ogame_moon_destruction', 'ogame_moon_creation', 'ogame_phalanx',
-            'ogame_graviton', 'ogame_terraformer', 'ogame_trade',
+            'ogame_graviton', 'ogame_terraformer', 'ogame_trade', 'ogame_scrap',
         ]);
         for (const tool of tools) {
             expect(tool.inputSchema.type).toBe('object');
@@ -160,8 +160,9 @@ describe('MCP protocol', () => {
         // the budget is a deliberate decision that raises it here, in the same commit.
         // 52 KB until ogame_import_account added its 1.5 KB; 54 KB until the anomaly scanner
         // (one more building in ogame_build_cost and ogame_build_queue) went 30 bytes over;
-        // 55 KB until ogame_build_queue took a `lifeforms` with the Terraformer reductions.
-        const BUDGET = 56 * 1024;
+        // 55 KB until ogame_build_queue took a `lifeforms` with the Terraformer reductions;
+        // 56 KB until ogame_scrap added its 1.3 KB.
+        const BUDGET = 57 * 1024;
         const { tools } = (await rpc(protocol, { jsonrpc: '2.0', id: 3, method: 'tools/list' })).result;
         const size = tools.reduce((sum, { name, title, description, inputSchema }) =>
             sum + JSON.stringify({ name, title, description, inputSchema }).length, 0);
@@ -1479,6 +1480,42 @@ describe('MCP tool ogame_trade', () => {
     });
 });
 
+describe('MCP tool ogame_scrap', () => {
+    const { calculateScrap } = load(
+        ['js/utils.js', 'ogame/calc/js/ogame-cargo.js', 'ogame/calc/js/scrap-core.js'], ['calculateScrap'],
+    );
+    const PRICES = Object.fromEntries(Object.entries(readWwwJson('ogame/calc/data/costs-techs.json').techs)
+        .map(([id, tech]) => [id, tech.cost]));
+    const scrap = async (args) => call(protocolWith(), 'ogame_scrap', args);
+
+    it('maps the keyed ships, satellites, crawlers and defences onto the core\'s tech ids', async () => {
+        const out = (await scrap({
+            ships: { 'death-star': 1, 'small-cargo': 10 }, solarSatellites: { count: 4, percent: 100 }, crawlers: { count: 2 },
+            defenses: { 'plasma-turret': 3, ipm: 2 }, rate: 37.3,
+        })).structuredContent;
+        const core = calculateScrap({ counts: { 214: 1, 202: 10, 212: 4, 217: 2, 406: 3, 503: 2 }, rate: 37.3 }, PRICES);
+        expect(out.ratePercent).toBe(37.3);
+        expect(out.fleet.payback).toEqual({ ...core.fleet.payback });
+        expect(out.defense.cost).toEqual({ ...core.defense.cost });
+        expect(out.total.paybackTotal).toBe(core.total.paybackSum);
+        expect(out.total.points).toBe(core.total.points);
+        expect(out.cargoShipsToHaulReturn).toEqual({ smallCargo: core.transport.small, largeCargo: core.transport.large });
+    });
+
+    it('pays 35% when no rate is given', async () => {
+        const out = (await scrap({ defenses: { 'rocket-launcher': 10 } })).structuredContent;
+        expect(out.ratePercent).toBe(35);
+        expect(out.defense.payback).toEqual({ metal: 7000, crystal: 0, deuterium: 0 });
+        expect(out.fleet.costTotal).toBe(0);
+    });
+
+    it('refuses a rate outside 1-100 and a unit it does not know', async () => {
+        expect((await scrap({ rate: 0 })).isError).toBe(true);
+        expect((await scrap({ rate: 101 })).isError).toBe(true);
+        expect((await scrap({ defenses: { 'solar-sat': 1 } })).isError).toBe(true);
+    });
+});
+
 describe('MCP tool ogame_import_account', () => {
     const { ACCOUNT_MAP, PLANET_MAP, BODY_MAP, lfBuildingFields } = require('../mcp/tools/import-account');
     const { readFileSync } = require('node:fs');
@@ -1542,12 +1579,15 @@ describe('MCP tool ogame_import_account', () => {
         expect(missing).toEqual([]);
     });
 
-    it('answers the same for a full export and the Companion\'s trimmed copy of it', async () => {
+    it('answers the same for a full export and the Companion\'s trimmed copy of it, defences aside', async () => {
         const full = await importAccount({ export: LARGE });
         expect(full.isError === true).toBe(false);
         const cut = trimmed(LARGE);
         expect(JSON.stringify(cut).length).toBeLessThan(JSON.stringify(LARGE).length * 0.6);
-        expect((await importAccount({ export: cut })).structuredContent).toEqual(full.structuredContent);
+        // The trimmed copy drops the defences, the one thing only ogame_scrap reads.
+        const withoutDefences = structuredClone(full.structuredContent);
+        for (const body of withoutDefences.bodies) delete body.defenses;
+        expect((await importAccount({ export: cut })).structuredContent).toEqual(withoutDefences);
     });
 
     it('reads the account and the bodies under the tools\' argument names', async () => {
@@ -1592,13 +1632,26 @@ describe('MCP tool ogame_import_account', () => {
                 LARGE.moons['30000104'].name, LARGE.moons['30000105'].name, LARGE.moons['30000106'].name]);
     });
 
-    it('leaves out who the player is, defences and resources', async () => {
+    it('leaves out who the player is and the resources', async () => {
         const text = JSON.stringify((await importAccount({ export: LARGE })).structuredContent);
         for (const secret of ['Synthetic Player', '104729', 'itemUuid', 'a83cfdc15b8dba27c82962d57e50d8101d263cfb', 'buffStart']) {
             expect(text.includes(secret)).toBe(false);
         }
-        expect(text.includes('rocket-launcher')).toBe(false);
         expect(text.includes('"resources"')).toBe(false);
+    });
+
+    it('gives each planet its ships, satellites, crawlers and defences for ogame_scrap', async () => {
+        const out = (await importAccount({ export: SMALL })).structuredContent;
+        const alpha = out.bodies.find((b) => b.name === 'Alpha');
+        expect(alpha.ships).toEqual({ 'large-cargo': 500, 'esp-probe': 10 });
+        expect(alpha.solarSatellites.count).toBe(250);
+        expect(alpha.crawlers.count).toBe(300);
+        expect(alpha.defenses).toEqual({
+            'rocket-launcher': 1000, 'light-laser': 500, 'heavy-laser': 100, 'gauss-cannon': 20,
+            'plasma-turret': 5, 'small-shield': 1, 'large-shield': 1,
+        });
+        const beta = out.bodies.find((b) => b.name === 'Beta');
+        expect(beta.defenses).toEqual({ 'rocket-launcher': 500, 'small-shield': 1, abm: 10 });
     });
 
     it('fills the other tools straight from its answer', async () => {
@@ -1619,6 +1672,7 @@ describe('MCP tool ogame_import_account', () => {
             ['ogame_build_cost', { item: 'plasma-tech', fromLevel: out.account.research['plasma-tech'], toLevel: 20 }],
             ['ogame_flight', { from: planet.coordinates, to: out.bodies[2].coordinates }],
             ['ogame_expedition', {}],
+            ['ogame_scrap', {}],
         ]) {
             const result = await call(protocolWith(), name, argsFor(name, extra));
             expect([name, result.isError ? result.content[0].text : 'ok']).toEqual([name, 'ok']);

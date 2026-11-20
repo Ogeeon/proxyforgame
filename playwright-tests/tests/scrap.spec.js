@@ -1,4 +1,5 @@
 import { test, expect, expectLoadsCleanly, openDialog, dialogBody } from './base';
+import { expectMcpBoundsMatchPage } from './mcp-bounds';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
@@ -163,6 +164,21 @@ test.describe('Scrap Merchant - the page', () => {
         await expect(page.locator('#unit-202-planet')).toBeHidden();
         await expect(page.locator('#fleet-planet-hint')).toBeHidden();
         await expect(page.locator('#defense-planet-hint')).toBeHidden();
+    });
+});
+
+test.describe('Scrap Merchant - MCP tool', () => {
+    test('the tool takes the ranges the page does', async ({ page }) => {
+        await page.goto('/en/scrap');
+        const tool = 'ogame_scrap';
+        await expectMcpBoundsMatchPage(page, [
+            { tool, arg: 'rate', selector: '#scrap-rate' },
+            { tool, arg: 'ships.small-cargo', selector: '#unit-202' },
+            { tool, arg: 'solarSatellites.count', selector: '#unit-212' },
+            { tool, arg: 'crawlers.count', selector: '#unit-217' },
+            { tool, arg: 'defenses.plasma-turret', selector: '#unit-406' },
+            { tool, arg: 'defenses.ipm', selector: '#unit-503' },
+        ]);
     });
 });
 

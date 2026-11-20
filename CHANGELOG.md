@@ -18,6 +18,7 @@ release section; it is the source of truth for the other eleven translations.
 ### Added
 
 - Scrap Merchant calculator: what the Scrap Merchant pays for a fleet and a defense. Paste the API 2 export from the Fleet page, or type the counts in; set the merchant's rate (1-100%, fractions allowed, 35% on every visit) and see, for the fleet and the defense apart and together, the full cost and the return in metal, crystal and deuterium, the total in MSU, the points lost and the small or large cargoes needed to haul the return away at base capacity. The return is computed per resource and rounded down per unit, deuterium included; missiles take the same rate. With a player profile active, a planet select shows next to every field how many of that unit the chosen planet has - a click copies the number in. Only the "full numbers" option is saved. <!-- site -->
+- MCP server: a fourteenth tool, `ogame_scrap`, prices ships, satellites, crawlers, defences and missiles at the Scrap Merchant's rate (35% unless given) with the scrap calculator's own `scrap-core.js`: full cost and return per resource, fleet and defence apart and together, points lost and the cargo ships to haul the return at base capacity. `ogame_import_account` now hands each body's defences over for it under `defenses` - an export the Companion trimmed for AI carries none - and `tools/list` grows to about 56.4 KB, under a budget raised from 56 to 57 KB.
 
 ### Fixed
 

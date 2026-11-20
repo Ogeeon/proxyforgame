@@ -14,6 +14,7 @@ const { createMoonTools } = require('./moon');
 const { createGravitonTool } = require('./graviton');
 const { createTerraformerTool } = require('./terraformer');
 const { createTradeTool } = require('./trade');
+const { createScrapTool } = require('./scrap');
 const { createImportAccountTool } = require('./import-account');
 
 /**
@@ -33,6 +34,7 @@ function createTools(deps) {
         createGravitonTool(deps),
         createTerraformerTool(deps),
         createTradeTool(),
+        createScrapTool(),
     ];
 }
 
