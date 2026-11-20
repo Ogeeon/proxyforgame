@@ -1001,12 +1001,12 @@
     "keywords": "proxyforgame,ogame,priekupník surovín,kalkulátor priekupníka surovín,predaj flotily,predaj obrany,sadzba priekupníka,hodnota flotily",
     "description": "Zistite, koľko vám priekupník surovín v OGame zaplatí za flotilu a obranu: plné náklady a vrátenie v kove, kryštáloch a deutériu, stratené body a transportéry na odvoz.",
     "rate": "Sadzba priekupníka",
+    "what-to-sell": "Čo predávame",
     "import-hint": "Vložte text z poľa API 2 na stránke „Flotila“ v OGame, aby sa vyplnili počty, alebo ich zadajte do tabuliek nižšie.",
     "full-cost": "Plné náklady",
     "payback": "Vrátenie",
     "points-lost": "Stratené body",
-    "transport": "Transportéry na odvoz vrátenia",
-    "base-capacity": "pri základnej kapacite, bez hyperpriestorovej technológie a bonusov triedy",
+    "transport": "Transportéry na odvoz surovín",
     "planet-count-hint": "Číslo vedľa každého poľa je počet na zvolenej planéte. Kliknutím ho vyplníte."
   }
 }

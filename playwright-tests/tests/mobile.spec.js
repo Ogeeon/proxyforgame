@@ -107,6 +107,7 @@ const PHONE_PAGES = [
       await page.locator('#full-numbers').check();
       await page.locator('#unit-214').fill('123456');
       await page.locator('#unit-214').blur();
+      await page.locator('#sell-defense-tab').click();
       await page.locator('#unit-406').fill('123456');
       await page.locator('#unit-406').blur();
     } },

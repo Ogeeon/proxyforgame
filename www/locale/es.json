@@ -1001,12 +1001,12 @@
     "keywords": "proxyforgame,ogame,chatarrero,calculadora chatarrero,vender flota,vender defensa,tasa del chatarrero,valor de la flota",
     "description": "Descubre cuánto paga el chatarrero por tu flota y tus defensas en OGame: el coste total y el reembolso en metal, cristal y deuterio, los puntos perdidos y las naves de carga para llevárselo.",
     "rate": "Tasa del chatarrero",
+    "what-to-sell": "Qué se vende",
     "import-hint": "Pega el texto del campo API 2 de la página «Flota» de OGame para rellenar las cantidades, o escríbelas en las tablas de abajo.",
     "full-cost": "Coste total",
     "payback": "Reembolso",
     "points-lost": "Puntos perdidos",
-    "transport": "Naves de carga para llevarse el reembolso",
-    "base-capacity": "con capacidad base, sin tecnología de hiperespacio ni bonificaciones de clase",
+    "transport": "Naves de carga para llevarse los recursos",
     "planet-count-hint": "El número junto a cada campo es lo que hay en el planeta elegido. Haz clic en él para rellenarlo."
   }
 }

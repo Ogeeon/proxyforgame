@@ -1001,12 +1001,12 @@
     "keywords": "proxyforgame,ogame,schrotthändler,schrotthändler rechner,flotte verkaufen,verteidigung verkaufen,schrottkurs,flottenwert",
     "description": "Finden Sie heraus, was der Schrotthändler in OGame für Ihre Flotte und Verteidigung zahlt: die vollen Kosten und die Rückerstattung in Metall, Kristall und Deuterium, die verlorenen Punkte und die Transporter für den Abtransport.",
     "rate": "Kurs des Händlers",
+    "what-to-sell": "Was verkauft wird",
     "import-hint": "Fügen Sie den Text aus dem Feld API 2 der Seite „Flotte“ in OGame ein, um die Anzahlen auszufüllen, oder tragen Sie sie in die Tabellen unten ein.",
     "full-cost": "Volle Kosten",
     "payback": "Rückerstattung",
     "points-lost": "Verlorene Punkte",
-    "transport": "Transporter für den Abtransport",
-    "base-capacity": "bei Grundkapazität, ohne Hyperraumtechnik und Klassenboni",
+    "transport": "Transporter für den Abtransport der Rohstoffe",
     "planet-count-hint": "Die Zahl neben jedem Feld ist der Bestand des gewählten Planeten. Klicken Sie darauf, um sie einzutragen."
   }
 }

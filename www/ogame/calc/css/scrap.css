@@ -41,18 +41,47 @@
   font-family: var(--bs-font-monospace);
 }
 
-/* The fleet and the defense tables stand side by side where there is room and
-   one under the other where there is not (docs/patterns.md, "Phone layout"). */
-.scrap-sections {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: safe center;
-  align-items: flex-start;
-  gap: 0.5rem;
+/* Stack the fleet and the defense tabs in one grid cell so the wider table
+   sizes the panel once and for all. Bootstrap hides an inactive pane with
+   display:none, which would drop it out of the intrinsic sizing and make the
+   whole (max-content, centred) calculator jump on every tab switch, so it is
+   hidden with visibility instead - and collapsed to zero height, so only the
+   active pane drives the panel's height. */
+#sellTabContent {
+  display: grid;
 }
 
-.scrap-sections > div {
-  max-width: 100%;
+#sellTabContent > .tab-pane {
+  display: block;
+  grid-area: 1 / 1;
+  min-width: 0;
+}
+
+#sellTabContent > .tab-pane:not(.active) {
+  visibility: hidden;
+  height: 0;
+  overflow: hidden;
+}
+
+/* The transport accordion. Bootstrap's .accordion-item forces
+   color: var(--bs-accordion-color), which reads as white against the page's
+   default text in the dark theme: inherit so it matches the rest. Its header
+   and body are kept dense like production's. width:0 + min-width:100% keep
+   its content from widening the panel (max-content): it takes the width the
+   tables give the calculator and wraps inside it. */
+#transport-accordion {
+  --bs-accordion-color: inherit;
+  --bs-accordion-active-color: inherit;
+  width: 0;
+  min-width: 100%;
+}
+
+#transport-accordion .accordion-button {
+  padding: 0.4rem 0.75rem;
+}
+
+#transport-accordion .accordion-body {
+  padding: 0.5rem;
 }
 
 /* Tables */

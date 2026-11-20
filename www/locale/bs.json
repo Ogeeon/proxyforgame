@@ -1001,12 +1001,12 @@
     "keywords": "proxyforgame,ogame,trgovac otpadom,kalkulator trgovca otpadom,prodaja flote,prodaja odbrane,stopa trgovca,vrijednost flote",
     "description": "Saznajte koliko trgovac otpadom u OGame plaća za vašu flotu i odbranu: puni trošak i povrat u metalu, kristalu i deuterijumu, izgubljeni bodovi i transporteri za odvoz.",
     "rate": "Stopa trgovca",
+    "what-to-sell": "Šta prodajemo",
     "import-hint": "Zalijepite tekst iz polja API 2 na stranici 'Flota' u OGame da popunite količine, ili ih unesite u tabele ispod.",
     "full-cost": "Puni trošak",
     "payback": "Povrat",
     "points-lost": "Izgubljeni bodovi",
-    "transport": "Transporteri za odvoz povrata",
-    "base-capacity": "pri osnovnom kapacitetu, bez hiperprostorne tehnologije i bonusa klase",
+    "transport": "Transporteri za odvoz resursa",
     "planet-count-hint": "Broj pored svakog polja je stanje na odabranoj planeti. Kliknite na njega da ga upišete."
   }
 }

@@ -1001,12 +1001,12 @@
     "keywords": "proxyforgame,ogame,ferrailleur,calculatrice ferrailleur,vendre flotte,vendre défense,taux du ferrailleur,valeur de la flotte",
     "description": "Découvrez ce que le ferrailleur paie pour votre flotte et vos défenses dans OGame : le coût total et le remboursement en métal, cristal et deutérium, les points perdus et les transporteurs pour tout emporter.",
     "rate": "Taux du ferrailleur",
+    "what-to-sell": "Ce que l’on vend",
     "import-hint": "Collez le texte du champ API 2 de la page « Flotte » d'OGame pour remplir les quantités, ou saisissez-les dans les tableaux ci-dessous.",
     "full-cost": "Coût total",
     "payback": "Remboursement",
     "points-lost": "Points perdus",
-    "transport": "Transporteurs pour emporter le remboursement",
-    "base-capacity": "à capacité de base, sans technologie hyperespace ni bonus de classe",
+    "transport": "Transporteurs pour emporter les ressources",
     "planet-count-hint": "Le nombre à côté de chaque champ est la quantité sur la planète choisie. Cliquez dessus pour le reporter."
   }
 }

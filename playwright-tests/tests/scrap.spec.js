@@ -24,6 +24,12 @@ async function type(page, selector, value) {
     await page.locator(selector).blur();
 }
 
+/** Open the Defense tab of What to sell, where the defense fields are. */
+async function openDefenseTab(page) {
+    await page.locator('#sell-defense-tab').click();
+    await expect(page.locator('#sell-defense')).toBeVisible();
+}
+
 /** Paste the API 2 export and import it. */
 async function importOwnApi(page, text = OWN_API) {
     await page.locator('#own-api-input').fill(text);
@@ -46,6 +52,45 @@ test.describe('Scrap Merchant - the page', () => {
         await expect(page.locator('#scrap-rate')).toHaveValue('35');
         await expect(page.locator('#total-payback-metal')).toHaveText('0');
         await expect(page.locator('#points-lost')).toHaveText('0');
+    });
+
+    test('the fleet and the defense are tabs, the fleet open on load', async ({ page }) => {
+        await expect(page.locator('#sell-fleet-tab')).toHaveText('Fleet');
+        await expect(page.locator('#sell-defense-tab')).toHaveText('Defenses');
+        await expect(page.locator('#fleet-table thead th').first()).toHaveText('Ship');
+        await expect(page.locator('#defense-table thead th').first()).toHaveText('Building');
+        await expect(page.locator('#unit-202')).toBeVisible();
+        await expect(page.locator('#unit-401')).toBeHidden();
+
+        await openDefenseTab(page);
+        await expect(page.locator('#unit-401')).toBeVisible();
+        await expect(page.locator('#unit-202')).toBeHidden();
+        await page.locator('#full-numbers').check();
+        await type(page, '#unit-401', '3');
+        await expect(page.locator('#defense-payback-metal')).toHaveText('2.100');
+
+        // Which tab is open is not saved.
+        await page.reload();
+        await expect(page.locator('#unit-202')).toBeVisible();
+        await expect(page.locator('#unit-401')).toBeHidden();
+    });
+
+    test('the transport accordion is collapsed and its header carries the counts', async ({ page }) => {
+        await expect(page.locator('#transport-body')).toBeHidden();
+        await expect(page.locator('#transport-toggle')).toHaveText(/Cargo ships to haul the resources away: SC\s0 \/ LC\s0/);
+        await importOwnApi(page);
+        await expect(page.locator('#transport-small-head')).toHaveText('19.498');
+        await expect(page.locator('#transport-large-head')).toHaveText('3.900');
+        await expect(page.locator('#transport-body')).toBeHidden();
+
+        await page.locator('#transport-toggle').click();
+        await expect(page.locator('#transport-body')).toBeVisible();
+        await expect(page.locator('#transport-small')).toHaveText('19.498');
+        await expect(page.locator('#transport-large')).toHaveText('3.900');
+
+        // The open state is not saved.
+        await page.reload();
+        await expect(page.locator('#transport-body')).toBeHidden();
     });
 
     test('importing the API 2 export fills the counts and prices them', async ({ page }) => {
@@ -94,6 +139,7 @@ test.describe('Scrap Merchant - the page', () => {
         await type(page, '#unit-202', '10');
         await expect(page.locator('#fleet-payback-metal')).toHaveText('7.000');
         await expect(page.locator('#defense-payback-metal')).toHaveText('0');
+        await openDefenseTab(page);
         await type(page, '#unit-401', '100');
         await expect(page.locator('#defense-payback-metal')).toHaveText('70.000');
         await expect(page.locator('#fleet-payback-metal')).toHaveText('7.000');
@@ -102,6 +148,7 @@ test.describe('Scrap Merchant - the page', () => {
 
     test('a fractional rate drops the fraction per unit and resource', async ({ page }) => {
         await page.locator('#full-numbers').check();
+        await openDefenseTab(page);
         await type(page, '#unit-503', '3');
         await type(page, '#scrap-rate', '37.3');
         // 37.3% of 12500 is 4662.5 a missile: 3 x 4662, not 13987.
@@ -236,6 +283,7 @@ test.describe('Scrap Merchant - player profiles', () => {
         await page.locator('#full-numbers').check();
         await expect(page.locator('#unit-217-metal')).toHaveText('210.000');
 
+        await openDefenseTab(page);
         await expect(page.locator('#unit-401-planet')).toHaveText('1.000');
         await page.locator('#unit-401-planet').click();
         await expect(page.locator('#unit-401')).toHaveValue('1000');
@@ -253,12 +301,14 @@ test.describe('Scrap Merchant - player profiles', () => {
         await page.locator('#pf-planet').selectOption({ label: 'Beta [2:150:12]' });
         await expect(page.locator('#fleet-planet-hint')).toBeHidden();
         await expect(page.locator('#unit-212-planet')).toBeHidden();
+        await openDefenseTab(page);
         await expect(page.locator('#defense-planet-hint')).toBeVisible();
         await expect(page.locator('#unit-401-planet')).toHaveText('500');
         await expect(page.locator('#unit-502-planet')).toHaveText('10');
     });
 
     test('another planet changes the counts beside the fields, not the fields', async ({ page }) => {
+        await openDefenseTab(page);
         await page.locator('#unit-401-planet').click();
         await expect(page.locator('#unit-401')).toHaveValue('1000');
         await page.locator('#pf-planet').selectOption({ label: 'Colony [3:20:4]' });

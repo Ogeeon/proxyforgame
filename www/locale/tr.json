@@ -1001,12 +1001,12 @@
     "keywords": "proxyforgame,ogame,hurdacı,hurdacı hesaplayıcı,filo satmak,savunma satmak,hurdacı oranı,filo değeri",
     "description": "OGame'de hurdacının filon ve savunman için ne ödeyeceğini öğren: metal, kristal ve deuterium olarak tam maliyet ve geri ödeme, kaybedilen puanlar ve taşımak için gereken nakliye gemileri.",
     "rate": "Hurdacı oranı",
+    "what-to-sell": "Satılacaklar",
     "import-hint": "Adetleri doldurmak için OGame'deki 'Filo' sayfasının API 2 alanındaki metni yapıştır ya da aşağıdaki tablolara yaz.",
     "full-cost": "Tam maliyet",
     "payback": "Geri ödeme",
     "points-lost": "Kaybedilen puanlar",
-    "transport": "Geri ödemeyi taşımak için nakliye gemileri",
-    "base-capacity": "temel kapasiteyle, hiperuzay tekniği ve sınıf bonusları olmadan",
+    "transport": "Kaynakları taşımak için nakliye gemileri",
     "planet-count-hint": "Her alanın yanındaki sayı seçilen gezegendeki adettir. Doldurmak için üzerine tıkla."
   }
 }

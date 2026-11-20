@@ -1001,12 +1001,12 @@
     "keywords": "proxyforgame,ogame,handlarz złomu,kalkulator handlarza złomu,sprzedaż floty,sprzedaż obrony,stawka handlarza,wartość floty",
     "description": "Sprawdź, ile handlarz złomu zapłaci w OGame za twoją flotę i obronę: pełny koszt i zwrot w metalu, krysztale i deuterze, utracone punkty oraz transportery do wywiezienia surowców.",
     "rate": "Stawka handlarza",
+    "what-to-sell": "Co sprzedajemy",
     "import-hint": "Wklej tekst z pola API 2 na stronie „Flota” w OGame, aby wypełnić liczby, albo wpisz je w tabelach poniżej.",
     "full-cost": "Pełny koszt",
     "payback": "Zwrot",
     "points-lost": "Utracone punkty",
-    "transport": "Transportery do wywiezienia zwrotu",
-    "base-capacity": "przy pojemności bazowej, bez technologii nadprzestrzennej i bonusów klasy",
+    "transport": "Transportery do wywiezienia surowców",
     "planet-count-hint": "Liczba obok każdego pola to stan na wybranej planecie. Kliknij ją, aby ją wpisać."
   }
 }

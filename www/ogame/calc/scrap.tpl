@@ -18,7 +18,8 @@
   /**
    * One unit table: a row per unit with its count field, the count the
    * profile's planet has beside it, and what the merchant pays for the row;
-   * the section's full cost and return under it.
+   * the section's full cost and return under it. The tab above it names the
+   * section, so the first column is headed the way costs heads its tables.
    *
    * @param 'fleet'|'defense' $section
    * @param list<int> $ids
@@ -26,7 +27,7 @@
    * @param array<array-key, mixed> $l The page's translations.
    */
   function scrapUnitTable(string $section, array $ids, array $scrapUnits, array $l): void {
-    $title = Intl::string($l, $section === 'fleet' ? 'fleet' : 'defenses');
+    $title = Intl::string($l, $section === 'fleet' ? 'ship' : 'building');
 ?>
       <p id="<?= $section ?>-planet-hint" class="text-center small text-body-secondary mb-1 d-none"><?= $l['planet-count-hint'] ?></p>
       <div class="pfg-scroll-x pfg-sticky-col">
@@ -174,6 +175,28 @@
       </div>
     </div>
 
+    <!-- What to sell: the fleet and the defenses, a tab each. Which tab is
+         open is not saved: the fleet is shown on every load. -->
+    <div id="sell-panel" class="border rounded m-1 p-2">
+      <p class="border rounded subheader bg-primary-subtle"><?= $l['what-to-sell'] ?></p>
+      <ul class="nav nav-tabs nav-tabs-sm" id="sellTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+          <button class="nav-link active" id="sell-fleet-tab" data-bs-toggle="tab" data-bs-target="#sell-fleet" type="button" role="tab" aria-controls="sell-fleet" aria-selected="true"><?= $l['fleet'] ?></button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button class="nav-link" id="sell-defense-tab" data-bs-toggle="tab" data-bs-target="#sell-defense" type="button" role="tab" aria-controls="sell-defense" aria-selected="false"><?= $l['defenses'] ?></button>
+        </li>
+      </ul>
+      <div class="tab-content" id="sellTabContent">
+        <div class="tab-pane fade show active pt-2" id="sell-fleet" role="tabpanel" aria-labelledby="sell-fleet-tab">
+<?php scrapUnitTable('fleet', $scrapFleet, $scrapUnits, $l); ?>
+        </div>
+        <div class="tab-pane fade pt-2" id="sell-defense" role="tabpanel" aria-labelledby="sell-defense-tab">
+<?php scrapUnitTable('defense', $scrapDefenses, $scrapUnits, $l); ?>
+        </div>
+      </div>
+    </div>
+
     <!-- Results -->
     <div id="results-panel" class="border rounded m-1 p-2">
       <p class="border rounded subheader bg-primary-subtle"><?= $l['calc-results'] ?></p>
@@ -206,29 +229,31 @@
           <div id="points-lost" class="form-control form-control-sm w-auto resource-show ui-state-disabled">0</div>
         </div>
       </div>
-      <p class="text-center mt-2 mb-1"><?= $l['transport'] ?> <span class="small text-body-secondary">(<?= $l['base-capacity'] ?>)</span></p>
-      <div class="d-flex flex-wrap gap-3 align-items-center justify-content-center">
-        <div class="d-flex align-items-center gap-1 text-nowrap">
-          <span><?= $l['small-cargo'] ?></span>
-          <div id="transport-small" class="form-control form-control-sm w-auto resource-show ui-state-disabled">0</div>
-        </div>
-        <div class="d-flex align-items-center gap-1 text-nowrap">
-          <span><?= $l['large-cargo'] ?></span>
-          <div id="transport-large" class="form-control form-control-sm w-auto resource-show ui-state-disabled">0</div>
+      <!-- The cargo ships to haul the return away: the counts in the header,
+           collapsed on every load (the open state is not saved). -->
+      <div class="accordion mt-2" id="transport-accordion">
+        <div class="accordion-item">
+          <h2 class="accordion-header">
+            <button id="transport-toggle" class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#transport-body" aria-expanded="false" aria-controls="transport-body">
+              <span><?= $l['transport'] ?>: <?= $l['sc-short'] ?>&nbsp;<span id="transport-small-head">0</span> / <?= $l['lc-short'] ?>&nbsp;<span id="transport-large-head">0</span></span>
+            </button>
+          </h2>
+          <div id="transport-body" class="accordion-collapse collapse">
+            <div class="accordion-body">
+              <div class="d-flex flex-wrap gap-3 align-items-center justify-content-center">
+                <div class="d-flex align-items-center gap-1 text-nowrap">
+                  <span><?= $l['small-cargo'] ?></span>
+                  <div id="transport-small" class="form-control form-control-sm w-auto resource-show ui-state-disabled">0</div>
+                </div>
+                <div class="d-flex align-items-center gap-1 text-nowrap">
+                  <span><?= $l['large-cargo'] ?></span>
+                  <div id="transport-large" class="form-control form-control-sm w-auto resource-show ui-state-disabled">0</div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
-    </div>
-  </div>
-
-  <div class="scrap-sections mt-2">
-    <!-- Fleet -->
-    <div id="fleet-panel" class="border rounded p-2">
-<?php scrapUnitTable('fleet', $scrapFleet, $scrapUnits, $l); ?>
-    </div>
-
-    <!-- Defenses and missiles -->
-    <div id="defense-panel" class="border rounded p-2">
-<?php scrapUnitTable('defense', $scrapDefenses, $scrapUnits, $l); ?>
     </div>
   </div>
 

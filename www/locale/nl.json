@@ -1001,12 +1001,12 @@
     "keywords": "proxyforgame,ogame,schroothandelaar,schroothandelaar calculator,vloot verkopen,verdediging verkopen,schroottarief,vlootwaarde",
     "description": "Ontdek wat de schroothandelaar in OGame betaalt voor je vloot en verdediging: de volledige kosten en de vergoeding in metaal, kristal en deuterium, de verloren punten en de vrachtschepen om alles af te voeren.",
     "rate": "Tarief van de handelaar",
+    "what-to-sell": "Wat wordt verkocht",
     "import-hint": "Plak de tekst uit het veld API 2 op de pagina 'Vloot' in OGame om de aantallen in te vullen, of typ ze in de tabellen hieronder.",
     "full-cost": "Volledige kosten",
     "payback": "Vergoeding",
     "points-lost": "Verloren punten",
-    "transport": "Vrachtschepen om de vergoeding af te voeren",
-    "base-capacity": "bij basiscapaciteit, zonder hyperruimtetechniek of klassebonussen",
+    "transport": "Vrachtschepen om de grondstoffen af te voeren",
     "planet-count-hint": "Het getal naast elk veld is het aantal op de gekozen planeet. Klik erop om het in te vullen."
   }
 }

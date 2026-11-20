@@ -1,8 +1,9 @@
 // ============================================================================
 // SCRAP MERCHANT CALCULATOR - RENDERER
 // ============================================================================
-// Writes a ScrapResult into the page: the summary above the tables, each
-// row's return and each table's totals.
+// Writes a ScrapResult into the page: each row's return, each table's totals
+// and the results panel under the tables - the summary, the points and the
+// cargo counts in the transport accordion.
 
 'use strict';
 
@@ -83,8 +84,10 @@ class ScrapRenderer {
     // Points and ship counts are written out in full: shortened, a count of
     // ships would read as an amount of resources.
     setTextContent('#points-lost', numToOGame(r.total.points));
-    setTextContent('#transport-small', numToOGame(r.transport.small));
-    setTextContent('#transport-large', numToOGame(r.transport.large));
+    // The cargo counts twice: in the accordion's header, readable while it is
+    // collapsed, and in its body.
+    ['#transport-small', '#transport-small-head'].forEach((sel) => setTextContent(sel, numToOGame(r.transport.small)));
+    ['#transport-large', '#transport-large-head'].forEach((sel) => setTextContent(sel, numToOGame(r.transport.large)));
   }
 
   /**

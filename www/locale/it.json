@@ -1001,12 +1001,12 @@
     "keywords": "proxyforgame,ogame,mercante di ferraglia,calcolatrice mercante di ferraglia,vendere flotta,vendere difese,tasso del mercante,valore della flotta",
     "description": "Scopri quanto paga il mercante di ferraglia per la tua flotta e le tue difese in OGame: il costo totale e il rimborso in metallo, cristallo e deuterio, i punti persi e le navi cargo per portarlo via.",
     "rate": "Tasso del mercante",
+    "what-to-sell": "Cosa si vende",
     "import-hint": "Incolla il testo del campo API 2 della pagina «Flotta» di OGame per compilare le quantità, oppure inseriscile nelle tabelle qui sotto.",
     "full-cost": "Costo totale",
     "payback": "Rimborso",
     "points-lost": "Punti persi",
-    "transport": "Navi cargo per portare via il rimborso",
-    "base-capacity": "a capacità base, senza Tecnologia Iperspaziale né bonus di classe",
+    "transport": "Navi cargo per portare via le risorse",
     "planet-count-hint": "Il numero accanto a ogni campo è quanto ne ha il pianeta scelto. Cliccalo per inserirlo."
   }
 }
