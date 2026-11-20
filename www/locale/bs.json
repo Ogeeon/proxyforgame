@@ -322,7 +322,10 @@
     "report-omitted-few": "još {0} polja nisu priložena",
     "report-omitted-many": "još {0} polja nije priloženo",
     "report-omitted-other": "još {0} polja nije priloženo",
-    "ias-short": "IAS"
+    "ias-short": "IAS",
+    "import": "Uvezi",
+    "quantity": "Količina",
+    "own-api-bad-json-msg": "Nije moguće očitati podatke.\\nProvjerite da ste zalijepili tekst iz polja API 2 na stranici 'Flota'."
   },
   "index": {
     "title": "ProxyForGame - alati za online igru Ogame",
@@ -367,7 +370,8 @@
       "terraformer-title": "Terraformer",
       "flight-title": "Kalkulator vremena letenja",
       "moon-title": "Kalkulatori za mjese",
-      "expeditions-title": "Ekspedicije"
+      "expeditions-title": "Ekspedicije",
+      "scrap-title": "Otkupljivač otpada"
     },
     "feedbackItems": {
       "header": "Povratne informacije",
@@ -465,7 +469,6 @@
     "lf-values-differ-hint": "Potpuna tabela sadrži različite vrijednosti za ovo polje",
     "lf-paste-title": "Uvoz iz OGame",
     "lf-paste-info": "Otvorite u OGame pregled bonusa istraživanja, označite i kopirajte cijelu tabelu i zalijepite je ovdje.",
-    "import": "Uvezi",
     "lf-import-err-not-found": "„{0}“ nije pronađeno u zalijepljenom tekstu. Kopirajte cijelu tabelu bonusa istraživanja iz OGame.",
     "lf-import-err-incomplete": "Zalijepljeni tekst ne sadrži podatke za svih 16 istraživanja.",
     "esp-tech": "Tehnologija za špijunažu",
@@ -482,7 +485,6 @@
     "graviton": "Tehnologija za gravitone",
     "buildings-planet": "Zgrade (planet)",
     "buildings-moon": "Zgrade (mjesec)",
-    "quantity": "Količina",
     "hourly-prod": "Proizv. po satu",
     "hourly-cons": "Potrošnja po satu",
     "times-note": "Kada računate trajanje izgradnje/istraživanja, alat koristi samo vrijednosti za levele tvornice brodova, tvornica i laboratorija koji su uneseni u gornjem panelu. Ako želite da izračunate vrijeme istraživanja sa levelima koje imate ako imate Intergalaktičku znanstvenu mrežu, molimo kliknite \"Izračunaj\" dugme pored polja \"Centar za istraživanje\".",
@@ -733,7 +735,6 @@
     "own-api-reader-note": "Imajte na umu da kod API 2 ne sadrži informacije o univerzumu, uključujući tri varijante brzine flote. Da biste automatski učitali ove podatke, koristite birače 'Zemlja' i 'Univerzum' na panelu parametara.",
     "own-api-import-btn": "Uvoz iz OGame",
     "own-api-import-title": "Uvezi",
-    "own-api-bad-json-msg": "Nije moguće očitati podatke.\\nProvjerite da ste zalijepili tekst iz polja API 2 na stranici 'Flota'.",
     "import-failed-msg": "Nije moguće učitati podatke.\\nServer je vratio neispravan odgovor. Molimo pokušajte ponovo kasnije.",
     "populated-systems-failed-msg": "Karta naseljenih sistema nije dostupna, pa se nijedan sistem ne broji kao preskočen. Njihov broj možete unijeti ručno.",
     "sr-profile-hdr": "Uvoz špijunskog izvještaja",
@@ -994,5 +995,19 @@
     "and": "i",
     "keywords": "proxyforgame,ogame,kalkulator trgovine,razmjena resursa,odnos razmjene,metal kristal deuterij,trgovac",
     "description": "Uporedite razmjenu metala, kristala i deuterija u OGameu i izračunajte količinu resursa prema zadatom kursu."
+  },
+  "scrap": {
+    "title": "OGame - Kalkulator otkupljivača otpada",
+    "keywords": "proxyforgame,ogame,otkupljivač otpada,kalkulator otkupljivača otpada,prodaja flote,prodaja odbrane,stopa otkupljivača,vrijednost flote",
+    "description": "Saznajte koliko otkupljivač otpada u OGame plaća za vašu flotu i odbranu: puni trošak i povrat u metalu, kristalu i deuterijumu, izgubljeni bodovi i transporteri za odvoz.",
+    "scrap-header": "Otkupljivač otpada",
+    "rate": "Stopa otkupljivača",
+    "import-hint": "Zalijepite tekst iz polja API 2 na stranici 'Flota' u OGame da popunite količine, ili ih unesite u tabele ispod.",
+    "full-cost": "Puni trošak",
+    "payback": "Povrat",
+    "points-lost": "Izgubljeni bodovi",
+    "transport": "Transporteri za odvoz povrata",
+    "base-capacity": "pri osnovnom kapacitetu, bez hiperprostorne tehnologije i bonusa klase",
+    "planet-count-hint": "Broj pored svakog polja je stanje na odabranoj planeti. Kliknite na njega da ga upišete."
   }
 }

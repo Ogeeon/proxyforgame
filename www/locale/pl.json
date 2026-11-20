@@ -322,7 +322,10 @@
     "report-omitted-few": "jeszcze {0} pola nie zostały dołączone",
     "report-omitted-many": "jeszcze {0} pól nie zostało dołączonych",
     "report-omitted-other": "jeszcze {0} pola nie zostało dołączone",
-    "ias-short": "IAS"
+    "ias-short": "IAS",
+    "import": "Importuj",
+    "quantity": "Ilość",
+    "own-api-bad-json-msg": "Nie udało się odczytać danych.\\nUpewnij się, że wkleiłeś tekst z pola API 2 na stronie „Flota”."
   },
   "index": {
     "title": "Narzedzia do gier przegladarkowych OGame",
@@ -367,7 +370,8 @@
       "terraformer-title": "Kalkulator Terraformeru",
       "flight-title": "Czas lotu floty",
       "moon-title": "Księżyce",
-      "expeditions-title": "Ekspedycje"
+      "expeditions-title": "Ekspedycje",
+      "scrap-title": "Handlarz złomem"
     },
     "feedbackItems": {
       "header": "Feedback",
@@ -465,7 +469,6 @@
     "lf-values-differ-hint": "Pełna tabela zawiera różne wartości dla tego pola",
     "lf-paste-title": "Import z OGame",
     "lf-paste-info": "Otwórz w OGame przegląd bonusów badań, zaznacz i skopiuj całą tabelę, a następnie wklej ją tutaj.",
-    "import": "Importuj",
     "lf-import-err-not-found": "Nie znaleziono „{0}” we wklejonym tekście. Skopiuj całą tabelę bonusów badań z OGame.",
     "lf-import-err-incomplete": "Wklejony tekst nie zawiera danych dla wszystkich 16 badań.",
     "esp-tech": "Technologia szpiegowska",
@@ -482,7 +485,6 @@
     "graviton": "Rozwój grawitonów",
     "buildings-planet": "Budynki (planeta)",
     "buildings-moon": "Budynki (księżyc)",
-    "quantity": "Ilość",
     "hourly-prod": "Prod. na godzinę",
     "hourly-cons": "Zużycie na godzinę",
     "times-note": "Podczas obliczania czasu budowy/badania wykorzystywane są tylko poziomy Fabryki, Stoczni i Laboratoriów wpisane w górnym panelu. Aby obliczyć całkowity poziom Laboratorium, jeśli masz MSBN, kliknij przycisk \"Oblicz\" obok poziomu Laboratorium.",
@@ -733,7 +735,6 @@
     "own-api-reader-note": "Pamiętaj, że kod API 2 nie zawiera informacji o wszechświecie, w tym o trzech wariantach prędkości floty. Aby automatycznie wczytać te dane, użyj list wyboru „Kraj” i „Wszechświat” w panelu parametrów.",
     "own-api-import-btn": "Import z OGame",
     "own-api-import-title": "Importuj",
-    "own-api-bad-json-msg": "Nie udało się odczytać danych.\\nUpewnij się, że wkleiłeś tekst z pola API 2 na stronie „Flota”.",
     "import-failed-msg": "Nie udało się wczytać danych.\\nSerwer zwrócił nieprawidłową odpowiedź. Spróbuj ponownie później.",
     "populated-systems-failed-msg": "Mapa zamieszkanych układów jest niedostępna, więc żaden układ nie jest liczony jako pominięty. Ich liczbę możesz wpisać ręcznie.",
     "sr-profile-hdr": "Import raportu szpiegowskiego",
@@ -994,5 +995,19 @@
     "and": "i",
     "keywords": "proxyforgame,ogame,kalkulator handlu,wymiana surowców,kurs wymiany,metal kryształ deuter,kupiec",
     "description": "Porównaj wymianę metalu, kryształu i deuteru w OGame oraz sprawdź ilość zasobów przy wybranym kursie."
+  },
+  "scrap": {
+    "title": "OGame - Kalkulator handlarza złomem",
+    "keywords": "proxyforgame,ogame,handlarz złomem,kalkulator handlarza złomem,sprzedaż floty,sprzedaż obrony,stawka handlarza,wartość floty",
+    "description": "Sprawdź, ile handlarz złomem zapłaci w OGame za twoją flotę i obronę: pełny koszt i zwrot w metalu, krysztale i deuterze, utracone punkty oraz transportery do wywiezienia surowców.",
+    "scrap-header": "Handlarz złomem",
+    "rate": "Stawka handlarza",
+    "import-hint": "Wklej tekst z pola API 2 na stronie „Flota” w OGame, aby wypełnić liczby, albo wpisz je w tabelach poniżej.",
+    "full-cost": "Pełny koszt",
+    "payback": "Zwrot",
+    "points-lost": "Utracone punkty",
+    "transport": "Transportery do wywiezienia zwrotu",
+    "base-capacity": "przy pojemności bazowej, bez technologii nadprzestrzennej i bonusów klasy",
+    "planet-count-hint": "Liczba obok każdego pola to stan na wybranej planecie. Kliknij ją, aby ją wpisać."
   }
 }

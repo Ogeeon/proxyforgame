@@ -101,6 +101,15 @@ const PHONE_PAGES = [
         await fields.nth(i).blur();
       }
     } },
+  { name: 'scrap merchant calculator', url: '/ru/ogame/calc/scrap.php',
+    calculate: async (page) => {
+      // Death Stars and plasma turrets by the hundred thousand, in full: the widest numbers in both tables.
+      await page.locator('#full-numbers').check();
+      await page.locator('#unit-214').fill('123456');
+      await page.locator('#unit-214').blur();
+      await page.locator('#unit-406').fill('123456');
+      await page.locator('#unit-406').blur();
+    } },
 ];
 
 /**

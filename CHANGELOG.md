@@ -15,6 +15,10 @@ release section; it is the source of truth for the other eleven translations.
 
 ## [Unreleased]
 
+### Added
+
+- Scrap Merchant calculator: what the Scrap Merchant pays for a fleet and a defense. Paste the API 2 export from the Fleet page, or type the counts in; set the merchant's rate (1-100%, fractions allowed, 35% on every visit) and see, for the fleet and the defense apart and together, the full cost and the return in metal, crystal and deuterium, the total in MSU, the points lost and the small or large cargoes needed to haul the return away at base capacity. The return is computed per resource and rounded down per unit, deuterium included; missiles take the same rate. With a player profile active, a planet select shows next to every field how many of that unit the chosen planet has - a click copies the number in. Only the "full numbers" option is saved. <!-- site -->
+
 ### Fixed
 
 - Translations: an audit of all 13 locale files against the Russian reference. The "how much will accumulate" and "when will it accumulate" headings of the production calculator were swapped in eight languages; the minimum and maximum field messages were swapped in Spanish; the "no save points found" message read as the opposite in Italian and Turkish; galaxy and system labels were swapped in German and Dutch; Slovak carried Slovenian text; the German cloning confirmation showed a raw `<br>`. Also fixed: untranslated English strings, lost diacritics (Polish, German, Italian, Bosnian, Portuguese) and typos, including in the Russian source.

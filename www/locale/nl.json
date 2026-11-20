@@ -322,7 +322,10 @@
     "report-omitted-few": "{0} extra velden niet bijgevoegd",
     "report-omitted-many": "{0} extra velden niet bijgevoegd",
     "report-omitted-other": "{0} extra velden niet bijgevoegd",
-    "ias-short": "IAS"
+    "ias-short": "IAS",
+    "import": "Importeren",
+    "quantity": "Hoeveelheid",
+    "own-api-bad-json-msg": "Kan de gegevens niet lezen.\\nControleer of je de tekst uit het veld API 2 op de pagina 'Vloot' hebt geplakt."
   },
   "index": {
     "title": "ProxyForGame - hulpmiddelen voor het browserspel OGame",
@@ -367,7 +370,8 @@
       "terraformer-title": "Terraformer",
       "flight-title": "Vluchttijden",
       "moon-title": "Manen",
-      "expeditions-title": "Expedities"
+      "expeditions-title": "Expedities",
+      "scrap-title": "Schroothandelaar"
     },
     "feedbackItems": {
       "header": "Feedback",
@@ -465,7 +469,6 @@
     "lf-values-differ-hint": "De volledige tabel bevat verschillende waarden voor dit veld",
     "lf-paste-title": "Importeren uit OGame",
     "lf-paste-info": "Open in OGame het overzicht van onderzoeksbonussen, selecteer en kopieer de hele tabel en plak deze hier.",
-    "import": "Importeren",
     "lf-import-err-not-found": "‘{0}’ niet gevonden in de geplakte tekst. Kopieer de volledige tabel met onderzoeksbonussen uit OGame.",
     "lf-import-err-incomplete": "De geplakte tekst bevat geen gegevens voor alle 16 onderzoeken.",
     "esp-tech": "Spionagetechniek",
@@ -482,7 +485,6 @@
     "graviton": "Gravitontechniek",
     "buildings-planet": "Gebouwen (planeet)",
     "buildings-moon": "Gebouwen (maan)",
-    "quantity": "Hoeveelheid",
     "hourly-prod": "Productie per uur",
     "hourly-cons": "Verbruik per uur",
     "times-note": "Om de duur van gebouwen/onderzoeken te berekenen, zal je alle velden in moeten vullen van werf, (nano)robotfabriek en onderzoekslab. Heb je IGON? Klik op de \"Bereken\" knop in het veld naast het onderzoekslab.",
@@ -733,7 +735,6 @@
     "own-api-reader-note": "Houd er rekening mee dat de API 2-code geen informatie over het universum bevat, inclusief de drie vlootsnelheidsopties. Gebruik de keuzelijsten 'Land' en 'Universum' op het parameterpaneel om deze gegevens automatisch te laden.",
     "own-api-import-btn": "Importeren uit OGame",
     "own-api-import-title": "Importeren",
-    "own-api-bad-json-msg": "Kan de gegevens niet lezen.\\nControleer of je de tekst uit het veld API 2 op de pagina 'Vloot' hebt geplakt.",
     "import-failed-msg": "Kan de gegevens niet laden.\\nDe server gaf een ongeldig antwoord. Probeer het later opnieuw.",
     "populated-systems-failed-msg": "De kaart met bewoonde systemen is niet beschikbaar, daarom worden er geen systemen als overgeslagen geteld. Je kunt het aantal handmatig invoeren.",
     "sr-profile-hdr": "Spionagerapport importeren",
@@ -994,5 +995,19 @@
     "and": "en",
     "keywords": "proxyforgame,ogame,handelscalculator,grondstoffenruil,ruilverhouding,metaal kristal deuterium,handelaar",
     "description": "Vergelijk ruilopties voor metaal, kristal en deuterium in OGame en bereken hoeveel grondstoffen je tegen een bepaalde koers ontvangt."
+  },
+  "scrap": {
+    "title": "OGame – Schroothandelaar calculator",
+    "keywords": "proxyforgame,ogame,schroothandelaar,schroothandelaar calculator,vloot verkopen,verdediging verkopen,schroottarief,vlootwaarde",
+    "description": "Ontdek wat de schroothandelaar in OGame betaalt voor je vloot en verdediging: de volledige kosten en de vergoeding in metaal, kristal en deuterium, de verloren punten en de vrachtschepen om alles af te voeren.",
+    "scrap-header": "Schroothandelaar",
+    "rate": "Tarief van de handelaar",
+    "import-hint": "Plak de tekst uit het veld API 2 op de pagina 'Vloot' in OGame om de aantallen in te vullen, of typ ze in de tabellen hieronder.",
+    "full-cost": "Volledige kosten",
+    "payback": "Vergoeding",
+    "points-lost": "Verloren punten",
+    "transport": "Vrachtschepen om de vergoeding af te voeren",
+    "base-capacity": "bij basiscapaciteit, zonder hyperruimtetechniek of klassebonussen",
+    "planet-count-hint": "Het getal naast elk veld is het aantal op de gekozen planeet. Klik erop om het in te vullen."
   }
 }

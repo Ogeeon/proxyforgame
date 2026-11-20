@@ -322,7 +322,10 @@
     "report-omitted-few": "{0} campos más no adjuntados",
     "report-omitted-many": "{0} campos más no adjuntados",
     "report-omitted-other": "{0} campos más no adjuntados",
-    "ias-short": "IAS"
+    "ias-short": "IAS",
+    "import": "Importar",
+    "quantity": "Cantidad",
+    "own-api-bad-json-msg": "No se pudieron leer los datos.\\nAsegúrate de haber pegado el texto del campo API 2 de la página «Flota»."
   },
   "index": {
     "title": "ProxyForGame - herramientas para los juegos de navegador en línea OGame",
@@ -367,7 +370,8 @@
       "terraformer-title": "Calculadora de Terraformer",
       "flight-title": "Calculadora de Vuelo",
       "moon-title": "Lunas",
-      "expeditions-title": "Expediciones"
+      "expeditions-title": "Expediciones",
+      "scrap-title": "Chatarrero"
     },
     "feedbackItems": {
       "header": "Feedback",
@@ -465,7 +469,6 @@
     "lf-values-differ-hint": "La tabla completa tiene valores diferentes para este campo",
     "lf-paste-title": "Importar desde OGame",
     "lf-paste-info": "Abre en OGame el resumen de bonificaciones de investigación, selecciona y copia toda la tabla y pégala aquí.",
-    "import": "Importar",
     "lf-import-err-not-found": "No se encontró «{0}» en el texto pegado. Copia la tabla completa de bonificaciones de investigación desde OGame.",
     "lf-import-err-incomplete": "El texto pegado no contiene datos de las 16 investigaciones.",
     "esp-tech": "Tecnología de Espionaje",
@@ -482,7 +485,6 @@
     "graviton": "Tecnología de Gravitón",
     "buildings-planet": "Edificios (planeta)",
     "buildings-moon": "Edificios (luna)",
-    "quantity": "Cantidad",
     "hourly-prod": "Producción por hora",
     "hourly-cons": "Consumo por hora",
     "times-note": "Para los cálculos de las duraciones de construcciones/investigaciones, las herramientas sólo usan los valores de los niveles de Hangar, Fábricas de Robots/Nanobots y Laboratorios introducidos en el panel superior. Si necesitas calcular el nivel resultante de tu red de Laboratorios de Investigación al aumentar el nivel de Red de Investigación Intergaláctica, por favor, haz clic en el botón \"Calcular\", al lado del campo Nivel de Laboratorio de Investigación.",
@@ -733,7 +735,6 @@
     "own-api-reader-note": "Ten en cuenta que el código API 2 no contiene información sobre el universo, incluidas las tres variantes de velocidad de la flota. Para cargar estos datos automáticamente, usa los selectores «País» y «Universo» en el panel de parámetros.",
     "own-api-import-btn": "Importar desde OGame",
     "own-api-import-title": "Importar",
-    "own-api-bad-json-msg": "No se pudieron leer los datos.\\nAsegúrate de haber pegado el texto del campo API 2 de la página «Flota».",
     "import-failed-msg": "No se pudieron cargar los datos.\\nEl servidor devolvió una respuesta no válida. Inténtalo de nuevo más tarde.",
     "populated-systems-failed-msg": "El mapa de sistemas poblados no está disponible, por lo que no se cuenta ningún sistema como omitido. Puedes introducir su número a mano.",
     "sr-profile-hdr": "Importar informe de espionaje",
@@ -994,5 +995,19 @@
     "and": "y",
     "keywords": "proxyforgame,ogame,calculadora de comercio,intercambio de recursos,tasa de intercambio,metal cristal deuterio,mercader",
     "description": "Compara intercambios de metal, cristal y deuterio en OGame y calcula los recursos que recibirás con una tasa determinada."
+  },
+  "scrap": {
+    "title": "OGame - Calculadora del chatarrero",
+    "keywords": "proxyforgame,ogame,chatarrero,calculadora chatarrero,vender flota,vender defensa,tasa del chatarrero,valor de la flota",
+    "description": "Descubre cuánto paga el chatarrero por tu flota y tus defensas en OGame: el coste total y el reembolso en metal, cristal y deuterio, los puntos perdidos y las naves de carga para llevárselo.",
+    "scrap-header": "Chatarrero",
+    "rate": "Tasa del chatarrero",
+    "import-hint": "Pega el texto del campo API 2 de la página «Flota» de OGame para rellenar las cantidades, o escríbelas en las tablas de abajo.",
+    "full-cost": "Coste total",
+    "payback": "Reembolso",
+    "points-lost": "Puntos perdidos",
+    "transport": "Naves de carga para llevarse el reembolso",
+    "base-capacity": "con capacidad base, sin tecnología de hiperespacio ni bonificaciones de clase",
+    "planet-count-hint": "El número junto a cada campo es lo que hay en el planeta elegido. Haz clic en él para rellenarlo."
   }
 }

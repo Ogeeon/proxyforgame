@@ -1,6 +1,6 @@
 # Importing game data from OGame
 
-Two calculators read data the player copies out of the game. Everything below is hand-maintained:
+Three calculators read data the player copies out of the game. Everything below is hand-maintained:
 `docs/calculators/*.md` is machine output (`make docs` overwrites it), so nothing here belongs there.
 
 ## The API 2 export
@@ -55,6 +55,7 @@ already converted to a percentage) or `null` when the text is not a JSON object.
 |------------|-------------|---------------|
 | `flight` | **Import from OGame** button (`#import-own-api`), clipboard icon above the parameters | Coordinates, character and alliance class, drive researches and hypertech, ship counts, per-ship life-form bonuses, class boosters. Checkboxes in the dialog select the categories. |
 | `expeditions` | The **API 2** field in the cargo-bonus reader (`#open-lfbr` on the cargo-bonus tab) | Nothing but `ships[*].cargo`, written into the per-ship bonus table. |
+| `scrap` | The paste field and **Import** button under the merchant's rate (`#own-api-input`, `#own-api-import`) | The counts alone: `ships[*].amount` for the 17 ships (the satellite and the crawler included), `defenses` and `missiles` for the rest. Every count field is overwritten, a unit the export leaves out with 0, so an export that names none of the 27 units is refused. |
 
 The flight calculator also imports **spy reports** through their `sr-...` API code
 (`#api-code` + `#api-get`, fetched by `ajax.php`). That payload is a different shape but states the

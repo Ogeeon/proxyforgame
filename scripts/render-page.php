@@ -5,7 +5,7 @@
  *
  * Usage: php scripts/render-page.php <page> [<lang>]
  *   page - one of: index, policy, assistants (/<lang>/mcp), or a calculator name (costs, expeditions,
- *          flight, graviton, lfcosts, moon, production, queue, terraformer, trade)
+ *          flight, graviton, lfcosts, moon, production, queue, scrap, terraformer, trade)
  *   lang - locale code, default 'en' (ignored by policy, which is static)
  *
  * Renders in "production" mode (HTTP_HOST=proxyforgame.com) so the cookie

@@ -322,7 +322,10 @@
     "report-omitted-few": "{0} autres champs non joints",
     "report-omitted-many": "{0} autres champs non joints",
     "report-omitted-other": "{0} autres champs non joints",
-    "ias-short": "IAS"
+    "ias-short": "IAS",
+    "import": "Importer",
+    "quantity": "Quantité",
+    "own-api-bad-json-msg": "Impossible de lire les données.\\nAssurez-vous d'avoir collé le texte du champ API 2 de la page « Flotte »."
   },
   "index": {
     "title": "ProxyForGame - utilitaires pour le jeu par navigateur OGame",
@@ -367,7 +370,8 @@
       "terraformer-title": "Calculateur de Terraformeur",
       "flight-title": "Calculateur de temps de vol",
       "moon-title": "Lunes",
-      "expeditions-title": "Expéditions"
+      "expeditions-title": "Expéditions",
+      "scrap-title": "Ferrailleur"
     },
     "feedbackItems": {
       "header": "Réaction",
@@ -465,7 +469,6 @@
     "lf-values-differ-hint": "Le tableau complet contient des valeurs différentes pour ce champ",
     "lf-paste-title": "Importer depuis OGame",
     "lf-paste-info": "Ouvrez dans OGame l'aperçu des bonus de recherche, sélectionnez et copiez tout le tableau, puis collez-le ici.",
-    "import": "Importer",
     "lf-import-err-not-found": "« {0} » est introuvable dans le texte collé. Copiez tout le tableau des bonus de recherche depuis OGame.",
     "lf-import-err-incomplete": "Le texte collé ne contient pas les données des 16 recherches.",
     "esp-tech": "Tech. Espionnage",
@@ -482,7 +485,6 @@
     "graviton": "Tech. Graviton",
     "buildings-planet": "Bâtiments (planète)",
     "buildings-moon": "Bâtiments (lune)",
-    "quantity": "Quantité",
     "hourly-prod": "Prod. par Heure",
     "hourly-cons": "Consom. par Heure",
     "times-note": "Lors du calcul des durées de construction/recherche, l’outil utilise uniquement les valeurs des niveaux du Chantier spatial, des Usines et du Laboratoire saisies dans le panneau supérieur. Si vous devez calculer le niveau de laboratoire résultant avec le RIN, veuillez cliquer sur le bouton \"Calculer\" à côté du champ de niveau du laboratoire de recherche.",
@@ -733,7 +735,6 @@
     "own-api-reader-note": "Veuillez noter que le code API 2 ne contient aucune information sur l'univers, y compris les trois variantes de vitesse de la flotte. Pour charger ces données automatiquement, utilisez les sélecteurs « Pays » et « Univers » sur le panneau des paramètres.",
     "own-api-import-btn": "Importer depuis OGame",
     "own-api-import-title": "Importer",
-    "own-api-bad-json-msg": "Impossible de lire les données.\\nAssurez-vous d'avoir collé le texte du champ API 2 de la page « Flotte ».",
     "import-failed-msg": "Impossible de charger les données.\\nLe serveur a renvoyé une réponse invalide. Veuillez réessayer plus tard.",
     "populated-systems-failed-msg": "La carte des systèmes peuplés est indisponible, aucun système n'est donc compté comme ignoré. Vous pouvez saisir leur nombre à la main.",
     "sr-profile-hdr": "Importer le rapport d’espionnage",
@@ -994,5 +995,19 @@
     "and": "et",
     "keywords": "proxyforgame,ogame,calculatrice de commerce,échange de ressources,taux d'échange,métal cristal deutérium,marchand",
     "description": "Comparez les échanges de métal, cristal et deutérium dans OGame et calculez les ressources obtenues selon un taux donné."
+  },
+  "scrap": {
+    "title": "OGame - Calculatrice du ferrailleur",
+    "keywords": "proxyforgame,ogame,ferrailleur,calculatrice ferrailleur,vendre flotte,vendre défense,taux du ferrailleur,valeur de la flotte",
+    "description": "Découvrez ce que le ferrailleur paie pour votre flotte et vos défenses dans OGame : le coût total et le remboursement en métal, cristal et deutérium, les points perdus et les transporteurs pour tout emporter.",
+    "scrap-header": "Ferrailleur",
+    "rate": "Taux du ferrailleur",
+    "import-hint": "Collez le texte du champ API 2 de la page « Flotte » d'OGame pour remplir les quantités, ou saisissez-les dans les tableaux ci-dessous.",
+    "full-cost": "Coût total",
+    "payback": "Remboursement",
+    "points-lost": "Points perdus",
+    "transport": "Transporteurs pour emporter le remboursement",
+    "base-capacity": "à capacité de base, sans technologie hyperespace ni bonus de classe",
+    "planet-count-hint": "Le nombre à côté de chaque champ est la quantité sur la planète choisie. Cliquez dessus pour le reporter."
   }
 }

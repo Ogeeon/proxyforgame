@@ -5,7 +5,7 @@ import { test, expect } from './base';
 // built-in server, scripts/dev-router.php).
 
 const CALCULATORS = ['costs', 'expeditions', 'flight', 'graviton', 'lfcosts',
-    'moon', 'production', 'queue', 'terraformer', 'trade'];
+    'moon', 'production', 'queue', 'scrap', 'terraformer', 'trade'];
 
 /** The status and Location of one request, redirects not followed. */
 async function head(request, path, headers = {}) {

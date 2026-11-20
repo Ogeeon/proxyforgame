@@ -322,7 +322,10 @@
     "report-omitted-few": "ďalšie {0} polia neboli priložené",
     "report-omitted-many": "ďalších {0} polí nebolo priložených",
     "report-omitted-other": "ďalších {0} polí nebolo priložených",
-    "ias-short": "IAS"
+    "ias-short": "IAS",
+    "import": "Importovať",
+    "quantity": "Množstvo",
+    "own-api-bad-json-msg": "Údaje sa nepodarilo načítať.\\nUistite sa, že ste vložili text z poľa API 2 na stránke „Flotila“."
   },
   "index": {
     "title": "ProxyForGame - software pre online hry v prehliadači OGame",
@@ -367,7 +370,8 @@
       "terraformer-title": "Kalkulátor pre Terraformer",
       "flight-title": "Kalkulátor pre časy letu",
       "moon-title": "Mesiace",
-      "expeditions-title": "Expedície"
+      "expeditions-title": "Expedície",
+      "scrap-title": "Obchodník so šrotom"
     },
     "feedbackItems": {
       "header": "Odozva",
@@ -464,7 +468,6 @@
     "lf-values-differ-hint": "Úplná tabuľka obsahuje rôzne hodnoty pre toto pole",
     "lf-paste-title": "Import z OGame",
     "lf-paste-info": "Otvorte v OGame prehľad bonusov výskumu, označte a skopírujte celú tabuľku a vložte ju sem.",
-    "import": "Importovať",
     "lf-import-err-not-found": "Vo vloženom texte sa nenašlo „{0}“. Skopírujte celú tabuľku bonusov výskumu z OGame.",
     "lf-import-err-incomplete": "Vložený text neobsahuje údaje pre všetkých 16 výskumov.",
     "esp-tech": "Špionážne technológie",
@@ -481,7 +484,6 @@
     "graviton": "Gravitonové technológie",
     "buildings-planet": "Budovy (planéta)",
     "buildings-moon": "Budovy (Mesiac)",
-    "quantity": "Množstvo",
     "hourly-prod": "Prod. za hodinu",
     "hourly-cons": "Spotr. za hodinu",
     "times-note": "Ak počítate trvanie výstavby/výskumu, nástroj používa iba hodnoty úrovní lodeníc, tovární a laboratórií vložených v hornom paneli. Ak máte IVS a potrebujete vypočítať výslednú úroveň laboratórií, prosím kliknite na tlačítko \"Vypočítať\" vedľa poľa s úrovňou výskumného laboratória",
@@ -732,7 +734,6 @@
     "own-api-reader-note": "Upozorňujeme, že kód API 2 neobsahuje informácie o vesmíre vrátane troch variantov rýchlosti flotily. Ak chcete tieto údaje načítať automaticky, použite výberové polia „Krajina“ a „Vesmír“ na paneli parametrov.",
     "own-api-import-btn": "Import z OGame",
     "own-api-import-title": "Importovať",
-    "own-api-bad-json-msg": "Údaje sa nepodarilo načítať.\\nUistite sa, že ste vložili text z poľa API 2 na stránke „Flotila“.",
     "import-failed-msg": "Údaje sa nepodarilo načítať.\\nServer vrátil neplatnú odpoveď. Skúste to znova neskôr.",
     "populated-systems-failed-msg": "Mapa obývaných systémov nie je dostupná, takže žiadny systém sa nepočíta ako preskočený. Ich počet môžete zadať ručne.",
     "keywords": "proxyforgame,ogame,kalkulačka času letu,čas letu,body uloženia,save,rýchlosť flotily,spotreba deutéria,spotreba paliva",
@@ -994,5 +995,19 @@
     "and": "a",
     "keywords": "proxyforgame,ogame,kalkulačka obchodovania,výmena surovín,výmenný kurz,kov kryštál deutérium,obchodník",
     "description": "Porovnajte výmenu kovu, kryštálu a deutéria v OGame a zistite množstvo získaných surovín pri zadanom kurze."
+  },
+  "scrap": {
+    "title": "OGame - Kalkulátor obchodníka so šrotom",
+    "keywords": "proxyforgame,ogame,obchodník so šrotom,kalkulátor obchodníka so šrotom,predaj flotily,predaj obrany,sadzba obchodníka,hodnota flotily",
+    "description": "Zistite, koľko vám obchodník so šrotom v OGame zaplatí za flotilu a obranu: plné náklady a vrátenie v kove, kryštáloch a deutériu, stratené body a transportéry na odvoz.",
+    "scrap-header": "Obchodník so šrotom",
+    "rate": "Sadzba obchodníka",
+    "import-hint": "Vložte text z poľa API 2 na stránke „Flotila“ v OGame, aby sa vyplnili počty, alebo ich zadajte do tabuliek nižšie.",
+    "full-cost": "Plné náklady",
+    "payback": "Vrátenie",
+    "points-lost": "Stratené body",
+    "transport": "Transportéry na odvoz vrátenia",
+    "base-capacity": "pri základnej kapacite, bez hyperpriestorovej technológie a bonusov triedy",
+    "planet-count-hint": "Číslo vedľa každého poľa je počet na zvolenej planéte. Kliknutím ho vyplníte."
   }
 }

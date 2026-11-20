@@ -11,6 +11,7 @@
 const PFG_CALCULATORS = array(
     'trade', 'costs', 'lfcosts', 'queue', 'production',
     'graviton', 'terraformer', 'flight', 'moon', 'expeditions',
+    'scrap',
 );
 
 // Pages that are not calculators, by their short address, with the controller

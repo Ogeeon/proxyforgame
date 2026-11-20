@@ -322,7 +322,10 @@
     "report-omitted-few": "{0} weitere Felder nicht angehängt",
     "report-omitted-many": "{0} weitere Felder nicht angehängt",
     "report-omitted-other": "{0} weitere Felder nicht angehängt",
-    "ias-short": "IAS"
+    "ias-short": "IAS",
+    "import": "Importieren",
+    "quantity": "Quantität",
+    "own-api-bad-json-msg": "Die Daten konnten nicht gelesen werden.\\nStellen Sie sicher, dass Sie den Text aus dem Feld API 2 auf der Seite „Flotte“ eingefügt haben."
   },
   "index": {
     "title": "ProxyForGame - Hilfsprogramme für das Online-Browsergame OGame",
@@ -367,7 +370,8 @@
       "terraformer-title": "Berechnung der Terraformer",
       "flight-title": "Berechnung der Flugzeit",
       "moon-title": "Monde",
-      "expeditions-title": "Expeditionen"
+      "expeditions-title": "Expeditionen",
+      "scrap-title": "Schrotthändler"
     },
     "feedbackItems": {
       "header": "Rückmeldung",
@@ -465,7 +469,6 @@
     "lf-values-differ-hint": "Die vollständige Tabelle enthält unterschiedliche Werte für dieses Feld",
     "lf-paste-title": "Import aus OGame",
     "lf-paste-info": "Öffne in OGame die Übersicht der Forschungsboni, markiere und kopiere die gesamte Tabelle und füge sie hier ein.",
-    "import": "Importieren",
     "lf-import-err-not-found": "„{0}“ wurde im eingefügten Text nicht gefunden. Kopiere die vollständige Forschungsboni-Tabelle aus OGame.",
     "lf-import-err-incomplete": "Der eingefügte Text enthält keine Daten für alle 16 Forschungen.",
     "esp-tech": "Spionagetechnik",
@@ -482,7 +485,6 @@
     "graviton": "Gravitonforschung",
     "buildings-planet": "Gebäude (Planet)",
     "buildings-moon": "Gebäude (Mond)",
-    "quantity": "Quantität",
     "hourly-prod": "Prod. pro Stunde",
     "hourly-cons": "Verb. pro Stunde",
     "times-note": "Bei der Berechnung der Dauer für Bau/Forschung verwendet das Tool nur die Stufen von Raumschiffswerft, Fabriken und Labor, die im oberen Feld eingegeben wurden. Wenn Sie die resultierende Laborstufe mit dem I.F. berechnen müssen, klicken Sie bitte auf die Schaltfläche „Berechnen“ neben dem Feld für die Stufe des Forschungslabors.",
@@ -733,7 +735,6 @@
     "own-api-reader-note": "Bitte beachten Sie, dass der API-2-Code keine Universumsdaten enthält, einschließlich der drei Flottengeschwindigkeitsvarianten. Um diese Daten automatisch zu laden, verwenden Sie die Auswahlfelder „Land“ und „Universum“ auf der Parameterleiste.",
     "own-api-import-btn": "Import aus OGame",
     "own-api-import-title": "Importieren",
-    "own-api-bad-json-msg": "Die Daten konnten nicht gelesen werden.\\nStellen Sie sicher, dass Sie den Text aus dem Feld API 2 auf der Seite „Flotte“ eingefügt haben.",
     "import-failed-msg": "Die Daten konnten nicht geladen werden.\\nDer Server hat eine ungültige Antwort zurückgegeben. Bitte versuchen Sie es später erneut.",
     "populated-systems-failed-msg": "Die Karte der besiedelten Systeme ist nicht verfügbar, daher wird kein System als übersprungen gezählt. Sie können ihre Anzahl von Hand eingeben.",
     "sr-profile-hdr": "Spionagebericht importieren",
@@ -994,5 +995,19 @@
     "and": "und",
     "keywords": "proxyforgame,ogame,handelsrechner,rohstofftausch,tauschverhältnis,metall kristall deuterium,händler",
     "description": "Vergleiche den Tausch von Metall, Kristall und Deuterium in OGame und ermittle die erhaltene Menge zum jeweiligen Kurs."
+  },
+  "scrap": {
+    "title": "OGame - Schrotthändler-Rechner",
+    "keywords": "proxyforgame,ogame,schrotthändler,schrotthändler rechner,flotte verkaufen,verteidigung verkaufen,schrottkurs,flottenwert",
+    "description": "Finden Sie heraus, was der Schrotthändler in OGame für Ihre Flotte und Verteidigung zahlt: die vollen Kosten und die Rückerstattung in Metall, Kristall und Deuterium, die verlorenen Punkte und die Transporter für den Abtransport.",
+    "scrap-header": "Schrotthändler",
+    "rate": "Kurs des Händlers",
+    "import-hint": "Fügen Sie den Text aus dem Feld API 2 der Seite „Flotte“ in OGame ein, um die Anzahlen auszufüllen, oder tragen Sie sie in die Tabellen unten ein.",
+    "full-cost": "Volle Kosten",
+    "payback": "Rückerstattung",
+    "points-lost": "Verlorene Punkte",
+    "transport": "Transporter für den Abtransport",
+    "base-capacity": "bei Grundkapazität, ohne Hyperraumtechnik und Klassenboni",
+    "planet-count-hint": "Die Zahl neben jedem Feld ist der Bestand des gewählten Planeten. Klicken Sie darauf, um sie einzutragen."
   }
 }

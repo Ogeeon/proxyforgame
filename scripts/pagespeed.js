@@ -41,7 +41,7 @@ const API = 'https://www.googleapis.com/pagespeedonline/v5/runPagespeed';
 /** The home page plus every calculator, in the order the sidebar lists them. */
 const ALL_PAGES = [
   'home', 'costs', 'expeditions', 'flight', 'graviton', 'lfcosts',
-  'moon', 'production', 'queue', 'terraformer', 'trade',
+  'moon', 'production', 'queue', 'scrap', 'terraformer', 'trade',
 ];
 const STRATEGIES = ['mobile', 'desktop'];
 

@@ -322,7 +322,10 @@
     "report-omitted-few": "{0} alan daha eklenmedi",
     "report-omitted-many": "{0} alan daha eklenmedi",
     "report-omitted-other": "{0} alan daha eklenmedi",
-    "ias-short": "IAS"
+    "ias-short": "IAS",
+    "import": "İçe aktar",
+    "quantity": "Adet",
+    "own-api-bad-json-msg": "Veriler okunamadı.\\n'Filo' sayfasındaki API 2 alanındaki metni yapıştırdığınızdan emin olun."
   },
   "index": {
     "title": "ProxyForGame - OGame için hesaplamalar",
@@ -367,7 +370,8 @@
       "terraformer-title": "Terraformer",
       "flight-title": "Uçuş Süresi Hesaplayıcı",
       "moon-title": "Aylar",
-      "expeditions-title": "Keşifler"
+      "expeditions-title": "Keşifler",
+      "scrap-title": "Hurdacı"
     },
     "feedbackItems": {
       "header": "Geri Bildirim",
@@ -465,7 +469,6 @@
     "lf-values-differ-hint": "Tam tablo bu alan için farklı değerler içeriyor",
     "lf-paste-title": "OGame'den içe aktar",
     "lf-paste-info": "OGame'de araştırma bonusları özetini açın, tüm tabloyu seçip kopyalayın ve buraya yapıştırın.",
-    "import": "İçe aktar",
     "lf-import-err-not-found": "Yapıştırılan metinde “{0}” bulunamadı. OGame’den araştırma bonusları tablosunun tamamını kopyalayın.",
     "lf-import-err-incomplete": "Yapıştırılan metin 16 araştırmanın tümü için veri içermiyor.",
     "esp-tech": "Casusluk Tekniği",
@@ -482,7 +485,6 @@
     "graviton": "Gravitasyon Araştırması",
     "buildings-planet": "Binalar (Gezegen)",
     "buildings-moon": "Binalar (Ay)",
-    "quantity": "Adet",
     "hourly-prod": "Saat başına üretilen",
     "hourly-cons": "Saat başına tüketilen",
     "times-note": "İnşaat/araştırma sürelerini hesaplarken araç yalnızca üst panele girilen Tersane, Fabrikalar ve Laboratuvar seviyelerini kullanır. GAAA'nız varsa ortaya çıkan laboratuvar seviyesini hesaplamak için Araştırma laboratuvarı seviyesi alanının yanındaki \"Hesapla\" düğmesine tıklayın.",
@@ -733,7 +735,6 @@
     "own-api-reader-note": "API 2 kodunun, üç filo hızı seçeneği dahil olmak üzere evren hakkında bilgi içermediğini lütfen unutmayın. Bu verileri otomatik olarak yüklemek için parametreler panelindeki 'Ülke' ve 'Evren' seçicilerini kullanın.",
     "own-api-import-btn": "OGame'den içe aktar",
     "own-api-import-title": "İçe Aktar",
-    "own-api-bad-json-msg": "Veriler okunamadı.\\n'Filo' sayfasındaki API 2 alanındaki metni yapıştırdığınızdan emin olun.",
     "import-failed-msg": "Veriler yüklenemedi.\\nSunucu geçersiz bir yanıt döndürdü. Lütfen daha sonra tekrar deneyin.",
     "populated-systems-failed-msg": "Yerleşim bulunan sistemlerin haritası kullanılamıyor, bu yüzden hiçbir sistem atlanmış sayılmıyor. Sayılarını elle girebilirsiniz.",
     "sr-profile-hdr": "Casusluk raporunu içe aktar",
@@ -994,5 +995,19 @@
     "and": "ve",
     "keywords": "proxyforgame,ogame,ticaret hesaplayıcı,kaynak takası,takas oranı,metal kristal döteryum,tüccar",
     "description": "OGame’de metal, kristal ve döteryum takaslarını karşılaştırın ve belirlenen kura göre alacağınız kaynak miktarını görün."
+  },
+  "scrap": {
+    "title": "OGame - Hurdacı Hesaplayıcı",
+    "keywords": "proxyforgame,ogame,hurdacı,hurdacı hesaplayıcı,filo satmak,savunma satmak,hurdacı oranı,filo değeri",
+    "description": "OGame'de hurdacının filon ve savunman için ne ödeyeceğini öğren: metal, kristal ve deuterium olarak tam maliyet ve geri ödeme, kaybedilen puanlar ve taşımak için gereken nakliye gemileri.",
+    "scrap-header": "Hurdacı",
+    "rate": "Hurdacı oranı",
+    "import-hint": "Adetleri doldurmak için OGame'deki 'Filo' sayfasının API 2 alanındaki metni yapıştır ya da aşağıdaki tablolara yaz.",
+    "full-cost": "Tam maliyet",
+    "payback": "Geri ödeme",
+    "points-lost": "Kaybedilen puanlar",
+    "transport": "Geri ödemeyi taşımak için nakliye gemileri",
+    "base-capacity": "temel kapasiteyle, hiperuzay tekniği ve sınıf bonusları olmadan",
+    "planet-count-hint": "Her alanın yanındaki sayı seçilen gezegendeki adettir. Doldurmak için üzerine tıkla."
   }
 }

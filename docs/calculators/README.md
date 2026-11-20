@@ -54,6 +54,12 @@ Compare the cost and time of building upgrades in sequence on an OGame planet or
 
 **View:** [OGame - Construction queue](http://pfg.wmp/ogame/calc/queue.php)
 
+### [OGame - Scrap Merchant calculator](scrap.md)
+
+Find out what the Scrap Merchant pays for your fleet and defenses in OGame: the full cost and the return in metal, crystal and deuterium, the points lost and the cargo ships to haul it away.
+
+**View:** [OGame - Scrap Merchant calculator](http://pfg.wmp/ogame/calc/scrap.php)
+
 ### [OGame - Terraformer calculator](terraformer.md)
 
 Calculate the energy, resources, and time needed to terraform an OGame planet, including Solar Satellites and bonuses.

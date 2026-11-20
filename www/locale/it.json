@@ -322,7 +322,10 @@
     "report-omitted-few": "{0} altri campi non allegati",
     "report-omitted-many": "{0} altri campi non allegati",
     "report-omitted-other": "{0} altri campi non allegati",
-    "ias-short": "IAS"
+    "ias-short": "IAS",
+    "import": "Importa",
+    "quantity": "Quantità",
+    "own-api-bad-json-msg": "Impossibile leggere i dati.\\nAssicurati di aver incollato il testo dal campo API 2 della pagina «Flotta»."
   },
   "index": {
     "title": "ProxyForGame - strumenti per i giochi per browser OGame",
@@ -367,7 +370,8 @@
       "terraformer-title": "Terraformer",
       "flight-title": "Tempi di viaggio",
       "moon-title": "Lune",
-      "expeditions-title": "Spedizioni"
+      "expeditions-title": "Spedizioni",
+      "scrap-title": "Rottamaio"
     },
     "feedbackItems": {
       "header": "Feedback",
@@ -465,7 +469,6 @@
     "lf-values-differ-hint": "La tabella completa contiene valori diversi per questo campo",
     "lf-paste-title": "Importa da OGame",
     "lf-paste-info": "Apri in OGame il riepilogo dei bonus di ricerca, seleziona e copia l'intera tabella, poi incollala qui.",
-    "import": "Importa",
     "lf-import-err-not-found": "Impossibile trovare «{0}» nel testo incollato. Copia l’intera tabella dei bonus di ricerca da OGame.",
     "lf-import-err-incomplete": "Il testo incollato non contiene i dati di tutte le 16 ricerche.",
     "esp-tech": "Tecnologie per lo spionaggio",
@@ -482,7 +485,6 @@
     "graviton": "Tecnologia Gravitonica",
     "buildings-planet": "Edifici (pianeta)",
     "buildings-moon": "Edifici (luna)",
-    "quantity": "Quantità",
     "hourly-prod": "Prod. per ora",
     "hourly-cons": "Cons. per ora",
     "times-note": "Per calcolare la durata di costruzione/ricerca, lo strumento usa solo i livelli di Cantiere Spaziale, Fabbriche e Laboratorio inseriti nel pannello superiore. Se ti serve calcolare il livello di laboratorio risultante con la RIR, fai clic sul pulsante \"Calcolo\" accanto al campo del livello del Laboratorio di Ricerca.",
@@ -733,7 +735,6 @@
     "own-api-reader-note": "Tieni presente che il codice API 2 non contiene informazioni sull'universo, incluse le tre varianti di velocità della flotta. Per caricare automaticamente questi dati, usa i selettori «Paese» e «Universo» nel pannello dei parametri.",
     "own-api-import-btn": "Importa da OGame",
     "own-api-import-title": "Importa",
-    "own-api-bad-json-msg": "Impossibile leggere i dati.\\nAssicurati di aver incollato il testo dal campo API 2 della pagina «Flotta».",
     "import-failed-msg": "Impossibile caricare i dati.\\nIl server ha restituito una risposta non valida. Riprova più tardi.",
     "populated-systems-failed-msg": "La mappa dei sistemi abitati non è disponibile, quindi nessun sistema viene contato come saltato. Puoi inserire il loro numero a mano.",
     "sr-profile-hdr": "Importa il rapporto di spionaggio",
@@ -994,5 +995,19 @@
     "and": "e",
     "keywords": "proxyforgame,ogame,calcolatore commercio,scambio di risorse,tasso di scambio,metallo cristallo deuterio,mercante",
     "description": "Confronta gli scambi di metallo, cristallo e deuterio in OGame e calcola le risorse ottenute con un determinato rapporto."
+  },
+  "scrap": {
+    "title": "OGame - Calcolatrice del rottamaio",
+    "keywords": "proxyforgame,ogame,rottamaio,calcolatrice rottamaio,vendere flotta,vendere difese,tasso del rottamaio,valore della flotta",
+    "description": "Scopri quanto paga il rottamaio per la tua flotta e le tue difese in OGame: il costo totale e il rimborso in metallo, cristallo e deuterio, i punti persi e le navi cargo per portarlo via.",
+    "scrap-header": "Rottamaio",
+    "rate": "Tasso del rottamaio",
+    "import-hint": "Incolla il testo del campo API 2 della pagina «Flotta» di OGame per compilare le quantità, oppure inseriscile nelle tabelle qui sotto.",
+    "full-cost": "Costo totale",
+    "payback": "Rimborso",
+    "points-lost": "Punti persi",
+    "transport": "Navi cargo per portare via il rimborso",
+    "base-capacity": "a capacità base, senza Tecnologia Iperspaziale né bonus di classe",
+    "planet-count-hint": "Il numero accanto a ogni campo è quanto ne ha il pianeta scelto. Cliccalo per inserirlo."
   }
 }

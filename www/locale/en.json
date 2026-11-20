@@ -322,7 +322,10 @@
     "report-omitted-few": "{0} more fields not attached",
     "report-omitted-many": "{0} more fields not attached",
     "report-omitted-other": "{0} more fields not attached",
-    "ias-short": "IAS"
+    "ias-short": "IAS",
+    "import": "Import",
+    "quantity": "Quantity",
+    "own-api-bad-json-msg": "Failed to read the data.\\nMake sure you pasted the text from the API 2 field on the 'Fleet' page."
   },
   "index": {
     "title": "ProxyForGame - tools for online browser game OGame",
@@ -367,7 +370,8 @@
       "terraformer-title": "Terraformer",
       "flight-title": "Flight time calculator",
       "moon-title": "Moons",
-      "expeditions-title": "Expeditions"
+      "expeditions-title": "Expeditions",
+      "scrap-title": "Scrap Merchant"
     },
     "feedbackItems": {
       "header": "Feedback",
@@ -465,7 +469,6 @@
     "lf-values-differ-hint": "The full table has different values for this field",
     "lf-paste-title": "Import from OGame",
     "lf-paste-info": "Open the research bonuses overview in OGame, select and copy the whole table, then paste it here.",
-    "import": "Import",
     "lf-import-err-not-found": "Couldn’t find “{0}” in the pasted text. Copy the full research bonuses table from OGame.",
     "lf-import-err-incomplete": "The pasted text doesn’t contain data for all 16 researches.",
     "esp-tech": "Espionage technology",
@@ -482,7 +485,6 @@
     "graviton": "Graviton technology",
     "buildings-planet": "Buildings (planet)",
     "buildings-moon": "Buildings (moon)",
-    "quantity": "Quantity",
     "hourly-prod": "Prod. per hour",
     "hourly-cons": "Consum. per hour",
     "times-note": "When calculating durations of construction/research, the tool uses only the values for levels of the Shipyard, Factories and Laboratory entered in the upper panel. If you need to calculate the resulting Lab level when you have IRN, please click the \"Calculate\" button next to the Research lab level field.",
@@ -733,7 +735,6 @@
     "own-api-reader-note": "Please note that the API 2 code contains no universe data, including the three fleet speed options. To load this data automatically, use the «Country» and «Universe» selectors on the parameters panel.",
     "own-api-import-btn": "Import from OGame",
     "own-api-import-title": "Import",
-    "own-api-bad-json-msg": "Failed to read the data.\\nMake sure you pasted the text from the API 2 field on the 'Fleet' page.",
     "import-failed-msg": "Failed to load the data.\\nThe server returned an invalid response. Please try again later.",
     "populated-systems-failed-msg": "The map of populated systems is unavailable, so no systems are counted as skipped. You can enter their number by hand.",
     "sr-profile-hdr": "Import the spy report",
@@ -994,5 +995,19 @@
     "and": "and",
     "keywords": "proxyforgame,ogame,trade calculator,resource exchange,trade ratio,metal crystal deuterium,merchant,resource trade",
     "description": "Compare metal, crystal, and deuterium trades in OGame and see how much you receive at a given exchange rate."
+  },
+  "scrap": {
+    "title": "OGame - Scrap Merchant calculator",
+    "keywords": "proxyforgame,ogame,scrap merchant,scrap merchant calculator,sell fleet,sell defense,scrap rate,fleet value",
+    "description": "Find out what the Scrap Merchant pays for your fleet and defenses in OGame: the full cost and the return in metal, crystal and deuterium, the points lost and the cargo ships to haul it away.",
+    "scrap-header": "Scrap Merchant",
+    "rate": "Merchant's rate",
+    "import-hint": "Paste the text from the API 2 field on the 'Fleet' page in OGame to fill in the counts, or type them into the tables below.",
+    "full-cost": "Full cost",
+    "payback": "Return",
+    "points-lost": "Points lost",
+    "transport": "Cargo ships to haul the return away",
+    "base-capacity": "at base capacity, without Hyperspace Technology or class bonuses",
+    "planet-count-hint": "The number next to each field is how many the chosen planet has. Click it to fill it in."
   }
 }
