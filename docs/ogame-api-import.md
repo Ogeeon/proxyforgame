@@ -40,6 +40,9 @@ already converted to a percentage) or `null` when the text is not a JSON object.
 
 - `ships` and `researches` are keyed by **tech id**, and the parser keeps nothing else: a named key
   belongs to some other JSON, not to an export.
+- `defenses` and `missiles` come out as tech id → count (`{"401": 26100}`); the per-unit
+  weapon/shield/armor values beside the count are dropped. Those blocks carry the **real** defense
+  counts: the export also lists `401`–`408` in `ships`, but always with an amount of 0.
 - A non-empty `ships` block is **no proof of an importable fleet**. The export lists the solar
   satellite, the crawler and the whole defense (`401`+) there too, so each calculator decides for
   itself by matching the ids it has a field for. Both clear those fields before they write, so an

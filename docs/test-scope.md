@@ -45,7 +45,7 @@ Anything not in a calculator's file set, notably:
 - `www/ogame/calc/js/ogame-production.js`, `ogame-costs.js`, `ogame-lifeform.js`, `ogame-cargo.js` — the game
   formulas; **note the path**, they sit in `www/ogame/calc/js/`, not in `www/ogame/`
 - `www/ogame/calc/js/dom-utils.js`
-- `www/ogame/calc/js/own-api.js` — the API 2 import, read by `flight` and `expeditions`
+- `www/ogame/calc/js/own-api.js` — the API 2 import, read by `flight`, `expeditions` and `scrap`
 - `www/ogame/calc/h_functions.php`, `www/ogame/calc/h_abox.php`
 - `www/ajax.php` and `www/api/*.inc.php` — the endpoint and its services; their own HTTP
   contract is covered by `playwright-tests/tests/api.spec.js`, which still does not narrow the
