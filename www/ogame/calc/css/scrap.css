@@ -113,6 +113,14 @@
   vertical-align: middle;
 }
 
+/* The advice's table sits in an accordion held to the calculator's width,
+   and its headers on one line each come out wider than that in some
+   languages: let them wrap, so the table fits rather than running past the
+   accordion's border. The cells keep .lined's nowrap. */
+#sell-timing-table th {
+  white-space: normal;
+}
+
 /* Bootstrap scopes --bs-table-striped-bg to .table, so it resolves to nothing
    here; mix the stripe off the body colour instead, which flips with the theme. */
 .lined tr.odd {
