@@ -65,7 +65,7 @@
 
   <h2 class="h5 mt-4"><?= $l['tools-header'] ?></h2>
   <ul>
-    <?php foreach (PFG_CALCULATORS as $calc): ?>
+    <?php foreach (pfgListedCalculators() as $calc): ?>
     <li><a href="/<?= $lang ?>/<?= $calc ?>"><?= $menu[$calc . '-title'] ?></a></li>
     <?php endforeach; ?>
     <li><?= $l['tools-import'] ?></li>

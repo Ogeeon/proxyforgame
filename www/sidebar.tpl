@@ -6,7 +6,7 @@
 
   require_once __DIR__ . '/routes.inc.php'; // NOSONAR
   $ogamePages = array();
-  foreach (PFG_CALCULATORS as $calc) {
+  foreach (pfgListedCalculators() as $calc) {
     $ogamePages[] = array('/' . $calc, $calc . '-title');
   }
 

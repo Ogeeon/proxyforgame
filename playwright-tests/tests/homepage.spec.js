@@ -2,14 +2,25 @@ import { test, expect } from './base';
 import { readFileSync } from 'fs';
 import { join } from 'path';
 
-// The calculators in menu order, read from PFG_CALCULATORS in www/routes.inc.php -
-// the list the home page's grid and the sidebar are both built from.
-const CALCULATORS = (() => {
+/**
+ * A list of calculator names out of www/routes.inc.php.
+ *
+ * @param {string} name The PHP constant.
+ * @returns {string[]}
+ */
+function routesList(name) {
   const source = readFileSync(join(__dirname, '../../www/routes.inc.php'), 'utf8');
-  const list = /const PFG_CALCULATORS = array\(([^)]*)\)/.exec(source);
-  if (!list) throw new Error('PFG_CALCULATORS not found in www/routes.inc.php');
+  const list = new RegExp(`const ${name} = array\\(([^)]*)\\)`).exec(source);
+  if (!list) throw new Error(`${name} not found in www/routes.inc.php`);
   return [...list[1].matchAll(/'([a-z]+)'/g)].map((m) => m[1]);
-})();
+}
+
+// Calculators that answer on their address but are not listed anywhere (a beta).
+const UNLISTED = routesList('PFG_UNLISTED_CALCULATORS');
+
+// The calculators in menu order, as the home page's grid, the sidebar and the
+// assistants page list them: PFG_CALCULATORS without the unlisted ones.
+const CALCULATORS = routesList('PFG_CALCULATORS').filter((calc) => !UNLISTED.includes(calc));
 
 test('homepage loads', async ({ page }) => {
   await page.goto('/');
@@ -34,6 +45,18 @@ test('the home page has a card for every calculator, in menu order, before the A
     return !!grid && !!ai && !!(grid.compareDocumentPosition(ai) & Node.DOCUMENT_POSITION_FOLLOWING);
   });
   expect(gridFirst).toBe(true);
+});
+
+test('an unlisted calculator is in no list, yet answers on its address', async ({ page }) => {
+  for (const calc of UNLISTED) {
+    for (const path of ['/ru/', '/ru/mcp']) {
+      await page.goto(path);
+      await expect(page.locator(`a[href="/ru/${calc}"]`)).toHaveCount(0);
+    }
+    const response = await page.goto(`/ru/${calc}`);
+    expect(response?.status()).toBe(200);
+    await expect(page.locator(`a.ogame-menu-item[href="/ru/${calc}"]`)).toHaveCount(0);
+  }
 });
 
 test('the AI assistants card leads to the page about the MCP server', async ({ page }) => {

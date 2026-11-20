@@ -14,6 +14,23 @@ const PFG_CALCULATORS = array(
     'scrap',
 );
 
+// Calculators that answer on their address but are left out of the sidebar
+// menu, the home page's grid and the assistants page's list: a beta that is
+// reached by a link handed to its testers. Drop a name from here to list it.
+const PFG_UNLISTED_CALCULATORS = array(
+    'scrap',
+);
+
+/**
+ * The calculators the site lists, in menu order: PFG_CALCULATORS without
+ * PFG_UNLISTED_CALCULATORS.
+ *
+ * @return list<string>
+ */
+function pfgListedCalculators(): array {
+    return array_values(array_diff(PFG_CALCULATORS, PFG_UNLISTED_CALCULATORS));
+}
+
 // Pages that are not calculators, by their short address, with the controller
 // each one runs. They follow the same rule: /<lang>/<page> is the one URL, and
 // the controller calls canonicalCalcPath() with the short name.
