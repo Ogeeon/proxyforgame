@@ -22,6 +22,7 @@ release section; it is the source of truth for the other eleven translations.
 
 ### Fixed
 
+- Flight calculator: the deuterium of a fleet of several ship types is rounded once, for the whole fleet, as the game does - each type's share used to be rounded on its own and then added up, which put a mixed fleet one unit off now and then. A type's share still counts as at least one unit. Checked against 96 readings of the game's own consumption figure; the MCP server's flight tool follows. <!-- site -->
 - Translations: an audit of all 13 locale files against the Russian reference. The "how much will accumulate" and "when will it accumulate" headings of the production calculator were swapped in eight languages; the minimum and maximum field messages were swapped in Spanish; the "no save points found" message read as the opposite in Italian and Turkish; galaxy and system labels were swapped in German and Dutch; Slovak carried Slovenian text; the German cloning confirmation showed a raw `<br>`. Also fixed: untranslated English strings, lost diacritics (Polish, German, Italian, Bosnian, Portuguese) and typos, including in the Russian source.
 
 ## [2026-11-19] - site entry 76

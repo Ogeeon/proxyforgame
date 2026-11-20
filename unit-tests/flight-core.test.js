@@ -811,9 +811,9 @@ describe('Flight Calculator - Deuterium Consumption', () => {
         expect(minSpeed).toBe(61577);
         expect(duration).toBe(110);
         // The lone recycler burns 0,0194 of a unit next to the million transports.
-        // The game rounds each ship type up to its own whole number before adding
-        // it in, so that fraction is worth a full deuterium - which is the whole
-        // difference between 1.140 and the 1.141 the game charges.
+        // The game raises a ship type's share to one unit before adding it in, so
+        // that fraction is worth a full deuterium - which is the whole difference
+        // between 1.140 and the 1.141 the game charges.
         expect(cons).toBe(1141);
     });
 
@@ -853,6 +853,77 @@ describe('Flight Calculator - Deuterium Consumption', () => {
         expect(calc.getCargoCapacity(
             calc.buildShipsData(params.driveLevels, params.spCargohold),
             fleet(counts), params)).toBe(6437646476159);
+    });
+
+    // Read off the game's own client-side fleetDispatcher.fleetHelper.calcConsumption
+    // on EN universe 1 (1x, deploy mission) on 2026-11-20, the speed handed to it as
+    // the steps 1..10 the dispatcher uses. The game's per-ship figures are fed in as
+    // they were: [speed, fuel per ship after the game's own discounts], so the
+    // consumption column carries ten times that fuel against a deutFactor of 1 and no
+    // discount. Single-type fleets match whether the shares are rounded per type or
+    // not; the mixed ones are what pins the single rounding of the fleet's sum.
+    describe('matches the game client on measured fleets', () => {
+        const GAME_SHIPS = {
+            202: [26040, 15], 204: [37550, 15], 207: [44040, 375],
+            213: [22020, 750], 214: [340, 1], 218: [30828, 825],
+        };
+        const FLEETS = {
+            lf100: { 204: 100 },
+            bs10: { 207: 10 },
+            mix: { 204: 100, 207: 10, 214: 1 },
+            big: { 218: 5000, 213: 3000, 202: 20000 },
+        };
+        const DISTANCES = [1005, 1070, 2795, 3650, 20000, 80000];
+        const PERCENTS = [10, 30, 50, 100];
+        // MEASURED[fleet][distance row][speed column]
+        const MEASURED = {
+            lf100: [[52, 73, 97, 172], [55, 77, 103, 183], [145, 202, 270, 479], [189, 264, 352, 626],
+                [1037, 1449, 1929, 3428], [4149, 5794, 7714, 13714]],
+            bs10: [[130, 182, 242, 431], [139, 194, 258, 459], [362, 506, 674, 1198], [473, 661, 880, 1564],
+                [2593, 3621, 4821, 8571], [10371, 14486, 19286, 34286]],
+            mix: [[154, 160, 166, 180], [164, 170, 176, 192], [428, 443, 459, 499], [558, 578, 599, 651],
+                [3055, 3165, 3277, 3566], [12220, 12660, 13109, 14265]],
+            big: [[227760, 309328, 403428, 693298], [242490, 329333, 429495, 738219],
+                [633421, 860286, 1122004, 1928600], [827185, 1123432, 1465210, 2518516],
+                [4532531, 6155906, 8028428, 13799777], [18130122, 24623476, 32113712, 55199107]],
+        };
+        // A calculator of its own whose ships fly at the game's speeds as given
+        const gameCalc = new FlightCalculator();
+        gameCalc.getShipSpeed = (shipsData, index) => shipsData[index][1];
+
+        for (const [name, ships] of Object.entries(FLEETS)) {
+            it(`${name}: every distance and speed`, () => {
+                const ids = Object.keys(ships);
+                const shipsData = ids.map((id) => [id, GAME_SHIPS[id][0], 0, GAME_SHIPS[id][1] * 10, 0]);
+                const counts = ids.map((id) => ships[id]);
+                const params = shipParams({ deutFactor: 1, lfShipsBonuses: ids.map(() => [0, 0, 0]) });
+                const slowest = Math.min(...shipsData.map((row) => row[1]));
+                DISTANCES.forEach((distance, row) => PERCENTS.forEach((percent, col) => {
+                    const duration = gameCalc.getFlightDuration(slowest, distance, percent, 1);
+                    expect(gameCalc.getDeutConsumption(shipsData, counts, distance, duration, 1, params))
+                        .toBe(MEASURED[name][row][col]);
+                }));
+            });
+        }
+
+        it('reports the unrounded share of each type, the total rounded once', () => {
+            const ids = Object.keys(FLEETS.mix);
+            const shipsData = ids.map((id) => [id, GAME_SHIPS[id][0], 0, GAME_SHIPS[id][1] * 10, 0]);
+            const counts = [...ids.map((id) => FLEETS.mix[id]), 0];
+            shipsData.push(['none', 1000, 0, 10, 0]);
+            const params = shipParams({ deutFactor: 1, lfShipsBonuses: shipsData.map(() => [0, 0, 0]) });
+            const duration = gameCalc.getFlightDuration(340, 1005, 10, 1);
+            const { total, perType } = gameCalc.getDeutConsumptionByType(shipsData, counts, 1005, duration, 1, params);
+            expect(total).toBe(154);
+            expect(perType.length).toBe(4);
+            // A type the fleet does not carry has no share
+            expect(perType[3]).toBe(0);
+            // The lone death star pays its share, at least one unit
+            expect(perType[2]).toBeGreaterThanOrEqual(1);
+            expect(Math.round(perType.reduce((a, b) => a + b, 0))).toBe(total);
+            // Not every share is whole, or the test would pin nothing
+            expect(perType.some((share) => !Number.isInteger(share))).toBe(true);
+        });
     });
 
     it('per-ship life form fuel reduction lowers consumption', () => {
