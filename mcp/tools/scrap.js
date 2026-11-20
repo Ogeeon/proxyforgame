@@ -54,19 +54,11 @@ const sellTimingSchema = {
     properties: {
         eventRate: { type: 'number', minimum: SCRAP_EVENT_RATE.min, maximum: SCRAP_EVENT_RATE.max },
         daysToEvent: { type: 'integer', minimum: SCRAP_EVENT_DAYS.min },
-        route: {
-            type: 'object',
-            description: '`delta` positions/systems/galaxies away.',
-            properties: { kind: { type: 'string', enum: ['system', 'systems', 'galaxies'] }, delta: atLeastOne },
-            additionalProperties: false,
-        },
+        routeKind: { type: 'string', enum: ['system', 'systems', 'galaxies'] },
+        routeDelta: { ...atLeastOne, description: 'Positions/systems/galaxies away.' },
         speedPercent: { type: 'integer', minimum: 5, maximum: 100 },
-        timesPerDays: {
-            type: 'object',
-            description: 'Saves `times` every `days` days.',
-            properties: { times: atLeastOne, days: atLeastOne },
-            additionalProperties: false,
-        },
+        saveTimes: { ...atLeastOne, description: 'Saves per saveEveryDays days.' },
+        saveEveryDays: atLeastOne,
         drives: {
             type: 'object',
             properties: { combustion: count, impulse: count, hyperspace: count },
@@ -133,7 +125,7 @@ function sellTiming(args, counts, rate) {
     const d = SCRAP_FLEETSAVE_DEFAULTS;
     const shipBonuses = args.lifeforms?.shipBonuses ?? {};
     const fuel = scrapFleetsaveFuel(counts, {
-        route: { kind: s.route?.kind ?? d.routeKind, delta: s.route?.delta ?? d.routeDelta },
+        route: { kind: s.routeKind ?? d.routeKind, delta: s.routeDelta ?? d.routeDelta },
         speedPercent: s.speedPercent ?? d.speedPercent,
         driveLevels: [s.drives?.combustion, s.drives?.impulse, s.drives?.hyperspace],
         playerClass: FLIGHT_CLASSES[/** @type {keyof typeof FLIGHT_CLASSES} */ (args.playerClass)],
@@ -153,7 +145,7 @@ function sellTiming(args, counts, rate) {
         eventRate: s.eventRate ?? SCRAP_EVENT_RATE.def,
         days: s.daysToEvent ?? SCRAP_EVENT_DAYS.def,
         exchangeRates: s.exchangeRates,
-        fuelPerDay: scrapFuelPerDay(fuel.perSave, s.timesPerDays?.times ?? d.times, s.timesPerDays?.days ?? d.days),
+        fuelPerDay: scrapFuelPerDay(fuel.perSave, s.saveTimes ?? d.times, s.saveEveryDays ?? d.days),
     }, PRICES);
     return {
         eventRatePercent: r.eventRate,

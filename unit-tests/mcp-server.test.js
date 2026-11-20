@@ -1575,8 +1575,8 @@ describe('MCP tool ogame_scrap', () => {
                 ships: FLEET, rate: 40, playerClass: 'general',
                 lifeforms: { generalClassBonus: 10, shipBonuses: { battleship: { speed: 20, fuel: 5 } } },
                 sellTiming: {
-                    eventRate: 70, daysToEvent: 30, route: { kind: 'systems', delta: 3 }, speedPercent: 25,
-                    timesPerDays: { times: 3, days: 2 }, drives: { combustion: 10, impulse: 8, hyperspace: 6 },
+                    eventRate: 70, daysToEvent: 30, routeKind: 'systems', routeDelta: 3, speedPercent: 25,
+                    saveTimes: 3, saveEveryDays: 2, drives: { combustion: 10, impulse: 8, hyperspace: 6 },
                     fuelDiscount: 4, exchangeRates: { metal: 2, crystal: 3, deuterium: 4 },
                     fleetSpeedPeaceful: 2, deuteriumFactor: 0.7,
                 },
@@ -1598,8 +1598,8 @@ describe('MCP tool ogame_scrap', () => {
         });
 
         it('refuses a route kind or a frequency it does not know', async () => {
-            expect((await scrap({ ships: FLEET, sellTiming: { route: { kind: 'moon' } } })).isError).toBe(true);
-            expect((await scrap({ ships: FLEET, sellTiming: { timesPerDays: { days: 0 } } })).isError).toBe(true);
+            expect((await scrap({ ships: FLEET, sellTiming: { routeKind: 'moon' } })).isError).toBe(true);
+            expect((await scrap({ ships: FLEET, sellTiming: { saveEveryDays: 0 } })).isError).toBe(true);
             expect((await scrap({ ships: FLEET, sellTiming: { eventRate: 101 } })).isError).toBe(true);
         });
     });
