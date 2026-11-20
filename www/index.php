@@ -12,7 +12,7 @@ $l = Intl::getTranslations($lang, 'index');
 // is the menu's, the text the calculator's meta description.
 $menuItems = Intl::block(Intl::getTranslations($lang, 'sidebar'), 'ogameMenuItems');
 $calcCards = [];
-foreach (PFG_CALCULATORS as $calc) {
+foreach (pfgListedCalculators() as $calc) {
     $calcCards[] = [
         'url' => '/' . $lang . '/' . $calc,
         'title' => Intl::string($menuItems, $calc . '-title'),

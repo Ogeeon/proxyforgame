@@ -6,10 +6,10 @@ Single source of truth for scoping a test run. Referenced by the `commit` skill 
 The rule has one question: **does every changed file belong to the same calculator?**
 If yes, run that calculator's tests. If even one file is shared, run everything.
 
-## The ten calculators
+## The eleven calculators
 
 `costs`, `expeditions`, `flight`, `graviton`, `lfcosts`, `moon`, `production`, `queue`,
-`terraformer`, `trade`.
+`scrap`, `terraformer`, `trade`.
 
 ## A calculator's file set
 
@@ -22,7 +22,7 @@ A file belongs to calculator `<name>` if it is one of:
 | `www/ogame/calc/js/<name>-*.js` | `-core`, `-data-collector`, `-orchestration`, `-renderer` |
 | `www/ogame/calc/js/trade.js` | `trade` only — its page code is still one file, `-core` aside |
 | `www/ogame/calc/css/<name>.css` | |
-| `unit-tests/<name>-core.test.js` | present for 8 of the 10 |
+| `unit-tests/<name>-core.test.js` | present for all 11 |
 | `playwright-tests/tests/<name>.spec.js` | |
 
 There is no `www/ogame/calc/js/<name>.js` for any calculator except `trade`.
@@ -35,7 +35,7 @@ node --test <name>-core.test.js    # from unit-tests/, only if that file exists
 make test-one spec=<name>
 ```
 
-All ten have a unit test now - `queue` was the last to get one. Check for the file rather
+All eleven have a unit test now - `scrap` came with one. Check for the file rather
 than trusting this line, and skip the step for a calculator that has none.
 
 ## Shared files — these force the full `make test`
@@ -45,7 +45,7 @@ Anything not in a calculator's file set, notably:
 - `www/ogame/calc/js/ogame-production.js`, `ogame-costs.js`, `ogame-lifeform.js`, `ogame-cargo.js` — the game
   formulas; **note the path**, they sit in `www/ogame/calc/js/`, not in `www/ogame/`
 - `www/ogame/calc/js/dom-utils.js`
-- `www/ogame/calc/js/own-api.js` — the API 2 import, read by `flight` and `expeditions`
+- `www/ogame/calc/js/own-api.js` — the API 2 import, read by `flight`, `expeditions` and `scrap`
 - `www/ogame/calc/h_functions.php`, `www/ogame/calc/h_abox.php`
 - `www/ajax.php` and `www/api/*.inc.php` — the endpoint and its services; their own HTTP
   contract is covered by `playwright-tests/tests/api.spec.js`, which still does not narrow the

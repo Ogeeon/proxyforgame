@@ -79,11 +79,25 @@ describe('parseOwnApi - a full export', () => {
         expect(plain(parseOwnApi(EXPORT).classBoosters)).toEqual({ 1: 0, 2: 15, 3: 0 });
     });
 
+    it('keeps the defense and missile counts', () => {
+        const data = parseOwnApi(EXPORT);
+        expect(plain(data.defenses)).toEqual({ 401: 26100 });
+        expect(plain(data.missiles)).toEqual({ 502: 0 });
+    });
+
     it('drops the fields no calculator consumes', () => {
         const data = parseOwnApi(EXPORT);
-        expect(Object.keys(data).sort()).toEqual(
-            ['allianceClassId', 'characterClassId', 'classBoosters', 'coords', 'researches', 'ships'],
-        );
+        expect(Object.keys(data).sort()).toEqual([
+            'allianceClassId', 'characterClassId', 'classBoosters', 'coords', 'defenses', 'missiles',
+            'researches', 'ships',
+        ]);
+    });
+
+    it('leaves the ship records as they were before defenses were read', () => {
+        // flight and expeditions read nothing new: a ship still carries only
+        // its count and the three bonuses, whatever else the export sends.
+        expect(Object.keys(plain(parseOwnApi(EXPORT).ships['204'])).sort())
+            .toEqual(['amount', 'cargo', 'fuel', 'speed']);
     });
 });
 
@@ -132,6 +146,26 @@ describe('parseOwnApi - partial exports', () => {
         // Sorting them out is the caller's job, not the normalizer's.
         const ships = parseOwnApi('{"ships":{"212":{"amount":3},"401":{"amount":26100}}}').ships;
         expect(Object.keys(plain(ships)).sort()).toEqual(['212', '401']);
+    });
+
+    it('gives empty defense and missile maps when the export has neither', () => {
+        const data = parseOwnApi('{"ships":{}}');
+        expect(plain(data.defenses)).toEqual({});
+        expect(plain(data.missiles)).toEqual({});
+    });
+
+    it('reads the count alone out of a defense record', () => {
+        const data = parseOwnApi(
+            '{"defenses":{"401":{"amount":26100,"weapon":0.1},"402":{}},"missiles":{"503":{"amount":"7"}}}',
+        );
+        expect(plain(data.defenses)).toEqual({ 401: 26100, 402: 0 });
+        expect(plain(data.missiles)).toEqual({ 503: 7 });
+    });
+
+    it('skips defense and missile entries that are not records keyed by a tech id', () => {
+        const data = parseOwnApi('{"defenses":{"401":5,"wall":{"amount":3}},"missiles":[1,2]}');
+        expect(plain(data.defenses)).toEqual({});
+        expect(plain(data.missiles)).toEqual({});
     });
 
     it('gives an empty booster map when the bonuses block is absent', () => {

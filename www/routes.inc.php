@@ -11,7 +11,25 @@
 const PFG_CALCULATORS = array(
     'trade', 'costs', 'lfcosts', 'queue', 'production',
     'graviton', 'terraformer', 'flight', 'moon', 'expeditions',
+    'scrap',
 );
+
+// Calculators that answer on their address but are left out of the sidebar
+// menu, the home page's grid and the assistants page's list: a beta that is
+// reached by a link handed to its testers. Drop a name from here to list it.
+const PFG_UNLISTED_CALCULATORS = array(
+    'scrap',
+);
+
+/**
+ * The calculators the site lists, in menu order: PFG_CALCULATORS without
+ * PFG_UNLISTED_CALCULATORS.
+ *
+ * @return list<string>
+ */
+function pfgListedCalculators(): array {
+    return array_values(array_diff(PFG_CALCULATORS, PFG_UNLISTED_CALCULATORS));
+}
 
 // Pages that are not calculators, by their short address, with the controller
 // each one runs. They follow the same rule: /<lang>/<page> is the one URL, and
@@ -34,7 +52,7 @@ const PFG_PAGES = array(
  * without it gets a temporary one, because its target depends on the
  * visitor's Accept-Language and must not be cached for everyone.
  */
-function canonicalCalcPath($calc) {
+function canonicalCalcPath(string $calc): string {
     $path = '/' . $calc;
     $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
     if ($method !== 'GET' && $method !== 'HEAD') {

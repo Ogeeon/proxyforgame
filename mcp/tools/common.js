@@ -351,8 +351,7 @@ function lifeformsSchema(fields, ships = [], extra = {}) {
     }
     return {
         type: 'object',
-        description: 'Life form bonuses in percent as the game shows them, and building levels. '
-            + 'Fields this tool does not read are ignored.',
+        description: 'Life form bonuses, % as the game shows them, and building levels. Unread fields are ignored.',
         properties: { ...properties, ...extra },
     };
 }

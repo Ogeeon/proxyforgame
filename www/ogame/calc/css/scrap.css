@@ -1,0 +1,201 @@
+/*
+ * Scrap Merchant calculator.
+ * Shared pieces (.main-header, .subheader, .pf-header-bodies, the phone
+ * layout) come from common.css; the table look follows costs' .lined.
+ */
+
+#scrap {
+  width: max-content;
+  max-width: 100%;
+  margin: 0 auto;
+  position: relative;
+}
+
+.main-header {
+  font-size: 0.95rem;
+  padding: 4px;
+  margin: 2px;
+}
+
+.subheader {
+  margin: 0 0 6px 0;
+  padding: 2px 6px;
+}
+
+#reset {
+  cursor: pointer;
+  z-index: 10;
+  width: 30px;
+  height: 30px;
+  border: 1px solid #dc3545;
+  border-radius: 8px;
+  margin-right: 0.2rem;
+}
+
+/* The paste field spans the panel without widening it. */
+#own-api-input {
+  width: 0;
+  min-width: 0;
+  flex: 1 1 auto;
+  resize: vertical;
+  font-family: var(--bs-font-monospace);
+}
+
+/* Stack the fleet and the defense tabs in one grid cell so the wider table
+   sizes the panel once and for all. Bootstrap hides an inactive pane with
+   display:none, which would drop it out of the intrinsic sizing and make the
+   whole (max-content, centred) calculator jump on every tab switch, so it is
+   hidden with visibility instead - and collapsed to zero height, so only the
+   active pane drives the panel's height. */
+#sellTabContent {
+  display: grid;
+}
+
+#sellTabContent > .tab-pane {
+  display: block;
+  grid-area: 1 / 1;
+  min-width: 0;
+}
+
+#sellTabContent > .tab-pane:not(.active) {
+  visibility: hidden;
+  height: 0;
+  overflow: hidden;
+}
+
+/* The transport and the sell-or-wait accordions. Bootstrap's .accordion-item
+   forces color: var(--bs-accordion-color), which reads as white against the
+   page's default text in the dark theme: inherit so it matches the rest. Their
+   headers and bodies are kept dense like production's. width:0 +
+   min-width:100% keep their content from widening the panel (max-content):
+   they take the width the tables give the calculator and wrap inside it. */
+#transport-accordion,
+#sell-timing-accordion {
+  --bs-accordion-color: inherit;
+  --bs-accordion-active-color: inherit;
+  width: 0;
+  min-width: 100%;
+}
+
+#transport-accordion .accordion-button,
+#sell-timing-accordion .accordion-button {
+  padding: 0.4rem 0.75rem;
+}
+
+#transport-accordion .accordion-body,
+#sell-timing-accordion .accordion-body {
+  padding: 0.5rem;
+}
+
+/* The advice's caveats: small print under its table. */
+#sell-timing-notes {
+  padding-left: 1.2rem;
+  white-space: normal;
+}
+
+/* Tables */
+.lined {
+  border-collapse: collapse;
+}
+
+.lined th {
+  background-color: var(--bs-tertiary-bg);
+  font-weight: 600;
+  padding: 2px 8px;
+  border: 1px solid var(--bs-border-color);
+  white-space: nowrap;
+}
+
+.lined td {
+  border: 1px solid var(--bs-border-color);
+  padding: 2px 8px;
+  white-space: nowrap;
+  vertical-align: middle;
+}
+
+/* The advice's table sits in an accordion held to the calculator's width,
+   and its headers on one line each come out wider than that in some
+   languages: let them wrap, so the table fits rather than running past the
+   accordion's border. The cells keep .lined's nowrap. */
+#sell-timing-table th {
+  white-space: normal;
+}
+
+/* Bootstrap scopes --bs-table-striped-bg to .table, so it resolves to nothing
+   here; mix the stripe off the body colour instead, which flips with the theme. */
+.lined tr.odd {
+  background-color: color-mix(in srgb, var(--bs-body-color) 7%, transparent);
+}
+
+.lined .form-control-sm {
+  height: 1.5rem;
+  min-height: unset;
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+/* The cargo fields: a level and three percentages. In an input-group the
+   width comes from common.css's escape rule (docs/patterns.md, (d)). */
+.level-input {
+  width: 3.5rem;
+  text-align: center;
+}
+
+.count-input {
+  width: 6.5rem;
+  text-align: right;
+}
+
+/* How many of the unit the profile's planet has, beside its field. */
+.planet-count {
+  font-size: 0.75rem;
+  color: var(--bs-secondary-color);
+  white-space: nowrap;
+}
+
+/* The renderer sets data-planet-count on a shown label only: that one fills
+   the adjacent field on a click. */
+.planet-count[data-planet-count] {
+  cursor: pointer;
+}
+
+.planet-count[data-planet-count]:hover {
+  color: var(--bs-primary);
+  text-decoration: underline;
+}
+
+/* The computed readouts are rendered as <div class="form-control">, which can
+   carry neither `readonly´ nor `disabled´, so they wear the `ui-state-disabled´
+   marker class instead - the fill :disabled paints (docs/patterns.md, (e)). */
+.ui-state-disabled {
+  background-color: var(--bs-secondary-bg);
+  cursor: default;
+}
+
+.resource-show {
+  min-width: 5rem;
+  text-align: right;
+}
+
+#warning {
+  position: absolute;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 9999;
+  padding: 10px 20px;
+  background-color: var(--bs-warning-bg-subtle);
+  border: 1px solid var(--bs-warning-border-subtle);
+  border-radius: var(--bs-border-radius);
+  color: var(--bs-body-color);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  min-width: 300px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+#warning.visible {
+  opacity: 1;
+  pointer-events: auto;
+}

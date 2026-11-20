@@ -40,6 +40,7 @@ const PAGES = [
     'moon',
     'production',
     'queue',
+    'scrap',
     'terraformer',
     'trade'
 ];

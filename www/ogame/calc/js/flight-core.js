@@ -306,12 +306,34 @@ class FlightCalculator {
      *   mission that pins it; 0 leaves each ship on its own speed. The duration
      *   was computed from that same speed, so the fuel has to follow it or the
      *   two columns describe different flights.
+     * @returns {number}
      */
     getDeutConsumption(shipsData, shipCounts, distance, duration, uniSpeedFactor, params, fixedSpeed = 0) {
-        let total = 0;
+        return this.getDeutConsumptionByType(
+            shipsData, shipCounts, distance, duration, uniSpeedFactor, params, fixedSpeed).total;
+    }
+
+    /**
+     * The trip's deuterium, with each ship type's share of it.
+     *
+     * Read off the game's own client (`fleetHelper.calcConsumption`, 96 readings
+     * in 2026-11): every type's share is left as the fraction it comes to, raised
+     * to one unit if it falls below, and only the fleet's sum is rounded. Rounding
+     * each type on its own put a mixed fleet one unit off in a third of them.
+     *
+     * @param {number} [fixedSpeed] as for getDeutConsumption()
+     * @returns {{total: number, perType: number[]}} total: the bill, whole and at
+     *   least 1; perType: one entry per row of shipsData, the type's unrounded
+     *   share (at least 1), 0 for a type the fleet does not carry
+     */
+    getDeutConsumptionByType(shipsData, shipCounts, distance, duration, uniSpeedFactor, params, fixedSpeed = 0) {
+        let sum = 0;
+        /** @type {number[]} */
+        const perType = [];
 
         for (let i = 0; i < shipsData.length; i++) {
             const count = shipCounts[i];
+            perType.push(0);
             if (count <= 0) {
                 continue;
             }
@@ -339,15 +361,17 @@ class FlightCalculator {
             ), 1);
             const fleetBase = Math.max(Math.round(perShip * count), 1);
 
-            // Each ship type is settled on a whole number of its own before it
-            // joins the fleet's bill, and no type is charged less than one, so a
-            // single ship among a million is a unit rather than a rounding error.
-            total += Math.max(Math.round(
-                fleetBase * distance / 35000 * ((speedValue / 10) + 1) ** 2), 1);
+            // No type is charged less than one unit, so a single ship among a
+            // million is a whole deuterium rather than a rounding error - but the
+            // share stays a fraction until the fleet's bill is added up.
+            const share = Math.max(fleetBase * distance / 35000 * ((speedValue / 10) + 1) ** 2, 1);
+            perType[i] = share;
+            sum += share;
         }
 
-        // Already whole - the floor is for the fleet with nothing in it
-        return Math.max(total, 1);
+        // Rounded once, for the whole fleet; the floor is for the fleet with
+        // nothing in it
+        return { total: Math.max(Math.round(sum), 1), perType };
     }
 
     // ------------------------------------------------------------------

@@ -38,6 +38,9 @@ const GAME_SHIPS = Object.fromEntries(
 /** The ships the fleet tools take (flight, expedition): every ship but the satellite and the crawler. */
 const FLEET_SHIPS = Object.entries(GAME_SHIPS).filter(([, key]) => key !== 'solar-sat' && key !== 'crawler');
 
+/** Game defense and missile ids to their kebab keys, for ogame_scrap. */
+const GAME_DEFENSES = Object.entries(COST_TECHS.techs).filter(([, t]) => t.type === 6);
+
 /** Game tech id to costs key, for the buildings, research and ships of costs-techs.json. */
 const GAME_TECHS = Object.fromEntries(
     Object.entries(COST_TECHS.techs).filter(([, t]) => t.type <= 5).map(([id, t]) => [id, t.key]),
@@ -64,6 +67,7 @@ const T = {
     flight: 'ogame_flight', cost: 'ogame_build_cost', lfCost: 'ogame_lifeform_cost', queue: 'ogame_build_queue',
     production: 'ogame_production', expedition: 'ogame_expedition', moonCreation: 'ogame_moon_creation',
     phalanx: 'ogame_phalanx', graviton: 'ogame_graviton', terraformer: 'ogame_terraformer', trade: 'ogame_trade',
+    scrap: 'ogame_scrap',
 };
 const SHIP_BONUS_TOOLS = [T.flight, T.cost, T.lfCost, T.expedition, T.moonCreation, T.graviton, T.terraformer, T.trade];
 
@@ -155,8 +159,8 @@ const PLANET_MAP = [
     ...row('deuteriumSynthesizer', 3, 'building.3', 'level', [T.production]), mineBooster('deuteriumSynthesizer', 3),
     ...row('solarPlant', 4, 'building.4', 'level', ENERGY_TOOLS),
     ...row('fusionReactor', 12, 'building.12', 'level', ENERGY_TOOLS),
-    ...row('solarSatellites', 212, 'ship.212', 'count', ENERGY_TOOLS),
-    ...row('crawlers', 217, 'ship.217', 'count', [T.production]),
+    ...row('solarSatellites', 212, 'ship.212', 'count', [...ENERGY_TOOLS, T.scrap]),
+    ...row('crawlers', 217, 'ship.217', 'count', [T.production, T.scrap]),
     { key: 'energyBooster', path: 'energyBoosterPercent', convert: (v) => v * 10, tools: ENERGY_TOOLS },
 ];
 
@@ -169,7 +173,9 @@ const BODY_MAP = [
     { key: 'building.21', path: 'facilities.shipyard', tools: [T.cost, T.graviton, T.terraformer] },
     { key: 'building.31', path: 'facilities.researchLab', tools: [T.cost] },
     ...BUILDING_IDS.map((id) => ({ key: 'building.' + id, path: 'levels.' + GAME_TECHS[id], tools: [T.queue], ...nonZero })),
-    ...FLEET_SHIPS.map(([id, ship]) => ({ key: 'ship.' + id, path: 'ships.' + ship, tools: [T.flight, T.expedition], ...nonZero })),
+    ...FLEET_SHIPS.map(([id, ship]) => ({ key: 'ship.' + id, path: 'ships.' + ship, tools: [T.flight, T.expedition, T.scrap], ...nonZero })),
+    // The defenses and missiles; a trimmed export carries none (docs/ogame-api-import.md).
+    ...GAME_DEFENSES.map(([id, t]) => ({ key: 'defense.' + id, path: 'defenses.' + t.key, tools: [T.scrap], ...nonZero })),
 ];
 
 /**
@@ -328,12 +334,12 @@ function createImportAccountTool() {
         title: 'OGame account import',
         description: 'Reads the player\'s account export once and returns it under the other tools\' argument '
             + 'names: `account` (class, officers, research, life form bonuses) and `bodies` (each planet and moon: '
-            + 'coordinates, temperature, buildings, production settings, boosters, ships, life form buildings). '
+            + 'coordinates, temperature, buildings, production settings, boosters, ships, defences, life form buildings). '
             + 'For a tool about one planet, merge `account.lifeforms` with that body\'s `lifeforms` and pass the '
             + 'fields the tool takes. `account.itemReductions[item]` goes into ogame_build_cost\'s lifeforms, '
             + '`research` and `levels`/`lifeformLevels` give fromLevel. With `universe` null, ask the player '
-            + 'which universe when a tool needs one. Player name and id are not returned; defences and stored '
-            + 'resources are left out.',
+            + 'which universe when a tool needs one. Player name and id are not returned; stored resources are '
+            + 'left out.',
         inputSchema,
         async run(args) {
             const raw = pickExport(args.export, args.universe);

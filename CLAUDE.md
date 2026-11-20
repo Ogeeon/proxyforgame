@@ -8,8 +8,8 @@ ProxyForGame (pfg.wmp) is a PHP-based calculator website for the OGame space str
 
 ## Which Calculator?
 
-This repo contains ten calculators: `costs`, `expeditions`, `flight`, `graviton`, `lfcosts`,
-`moon`, `production`, `queue`, `terraformer`, `trade`. Before exploring or editing, confirm which
+This repo contains eleven calculators: `costs`, `expeditions`, `flight`, `graviton`, `lfcosts`,
+`moon`, `production`, `queue`, `scrap`, `terraformer`, `trade`. Before exploring or editing, confirm which
 one the request targets if the file path is ambiguous — do not assume the cost calculator by default.
 
 ## Path-scoped rules

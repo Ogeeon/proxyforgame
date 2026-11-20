@@ -147,7 +147,7 @@ describe('MCP protocol', () => {
         expect(tools.map((t) => t.name)).toEqual([
             'ogame_import_account', 'ogame_flight', 'ogame_build_cost', 'ogame_lifeform_cost', 'ogame_build_queue', 'ogame_production',
             'ogame_expedition', 'ogame_moon_destruction', 'ogame_moon_creation', 'ogame_phalanx',
-            'ogame_graviton', 'ogame_terraformer', 'ogame_trade',
+            'ogame_graviton', 'ogame_terraformer', 'ogame_trade', 'ogame_scrap',
         ]);
         for (const tool of tools) {
             expect(tool.inputSchema.type).toBe('object');
@@ -160,8 +160,11 @@ describe('MCP protocol', () => {
         // the budget is a deliberate decision that raises it here, in the same commit.
         // 52 KB until ogame_import_account added its 1.5 KB; 54 KB until the anomaly scanner
         // (one more building in ogame_build_cost and ogame_build_queue) went 30 bytes over;
-        // 55 KB until ogame_build_queue took a `lifeforms` with the Terraformer reductions.
-        const BUDGET = 56 * 1024;
+        // 55 KB until ogame_build_queue took a `lifeforms` with the Terraformer reductions;
+        // 56 KB until ogame_scrap added its 1.3 KB; 57 KB until ogame_scrap took the cargo
+        // bonuses and left 4 bytes of room; 58 KB until ogame_scrap took the 1.7 KB sellTiming
+        // block (the sell-now-or-wait advice) and every ship's life form bonuses.
+        const BUDGET = 59 * 1024;
         const { tools } = (await rpc(protocol, { jsonrpc: '2.0', id: 3, method: 'tools/list' })).result;
         const size = tools.reduce((sum, { name, title, description, inputSchema }) =>
             sum + JSON.stringify({ name, title, description, inputSchema }).length, 0);
@@ -1479,6 +1482,129 @@ describe('MCP tool ogame_trade', () => {
     });
 });
 
+describe('MCP tool ogame_scrap', () => {
+    const { calculateScrap } = load(
+        ['js/utils.js', 'ogame/calc/js/ogame-cargo.js', 'ogame/calc/js/scrap-core.js'], ['calculateScrap'],
+    );
+    const PRICES = Object.fromEntries(Object.entries(readWwwJson('ogame/calc/data/costs-techs.json').techs)
+        .map(([id, tech]) => [id, tech.cost]));
+    const scrap = async (args) => call(protocolWith(), 'ogame_scrap', args);
+
+    it('maps the keyed ships, satellites, crawlers and defences onto the core\'s tech ids', async () => {
+        const out = (await scrap({
+            ships: { 'death-star': 1, 'small-cargo': 10 }, solarSatellites: { count: 4, percent: 100 }, crawlers: { count: 2 },
+            defenses: { 'plasma-turret': 3, ipm: 2 }, rate: 37.3,
+        })).structuredContent;
+        const core = calculateScrap({ counts: { 214: 1, 202: 10, 212: 4, 217: 2, 406: 3, 503: 2 }, rate: 37.3 }, PRICES);
+        expect(out.ratePercent).toBe(37.3);
+        expect(out.fleet.payback).toEqual({ ...core.fleet.payback });
+        expect(out.defense.cost).toEqual({ ...core.defense.cost });
+        expect(out.total.paybackTotal).toBe(core.total.paybackSum);
+        expect(out.total.points).toBe(core.total.points);
+        expect(out.cargoShipsToHaulReturn).toEqual({
+            smallCargo: core.transport.small, largeCargo: core.transport.large, smallCargoHold: 5000, largeCargoHold: 25000,
+        });
+    });
+
+    it('hauls with the cargo bonuses the page takes, at the base holds without them', async () => {
+        const cargo = {
+            hyperspaceTechnology: 8, playerClass: 'collector',
+            lifeforms: { collectorClassBonus: 2.15, shipBonuses: { 'small-cargo': { cargo: 1.23 }, 'large-cargo': { cargo: 2.5 } } },
+        };
+        const out = (await scrap({ ships: { 'death-star': 1 }, ...cargo })).structuredContent;
+        const core = calculateScrap({
+            counts: { 214: 1 }, rate: 35,
+            hyperTechLevel: 8, isCollector: true, collectorClassBonus: 2.15, scCapacityIncrease: 1.23, lcCapacityIncrease: 2.5,
+        }, PRICES);
+        expect(out.cargoShipsToHaulReturn).toEqual({
+            smallCargo: core.transport.small, largeCargo: core.transport.large, smallCargoHold: 8338, largeCargoHold: 42009,
+        });
+        // The Collector Enhancement raises the Collector's bonus only.
+        const general = (await scrap({ ships: { 'death-star': 1 }, ...cargo, playerClass: 'general' })).structuredContent;
+        expect(general.cargoShipsToHaulReturn.smallCargoHold).toBe(7061);
+        const none = (await scrap({ ships: { 'death-star': 1 } })).structuredContent;
+        expect(none.cargoShipsToHaulReturn.smallCargoHold).toBe(5000);
+    });
+
+    it('pays 35% when no rate is given', async () => {
+        const out = (await scrap({ defenses: { 'rocket-launcher': 10 } })).structuredContent;
+        expect(out.ratePercent).toBe(35);
+        expect(out.defense.payback).toEqual({ metal: 7000, crystal: 0, deuterium: 0 });
+        expect(out.fleet.costTotal).toBe(0);
+    });
+
+    it('refuses a rate outside 1-100 and a unit it does not know', async () => {
+        expect((await scrap({ rate: 0 })).isError).toBe(true);
+        expect((await scrap({ rate: 101 })).isError).toBe(true);
+        expect((await scrap({ defenses: { 'solar-sat': 1 } })).isError).toBe(true);
+    });
+
+    describe('sellTiming', () => {
+        const fs = load(
+            ['js/utils.js', 'ogame/calc/js/ogame-universe.js', 'ogame/calc/js/ogame-cargo.js', 'ogame/calc/js/flight-core.js',
+                'ogame/calc/js/scrap-core.js', 'ogame/calc/js/scrap-fleetsave.js'],
+            ['scrapSellTiming', 'scrapFleetsaveFuel', 'scrapFuelPerDay'],
+        );
+        const FLEET = { 'small-cargo': 1000, battleship: 200, 'death-star': 1 };
+        const COUNTS = { 202: 1000, 207: 200, 214: 1 };
+
+        it('leaves the answer as it was without the block', async () => {
+            const out = (await scrap({ ships: FLEET })).structuredContent;
+            expect('sellTiming' in out).toBe(false);
+        });
+
+        it('advises with the page\'s defaults when the block is empty', async () => {
+            const out = (await scrap({ ships: FLEET, solarSatellites: { count: 5 }, sellTiming: {} })).structuredContent;
+            const fuel = fs.scrapFleetsaveFuel(COUNTS, { route: { kind: 'galaxies', delta: 1 }, speedPercent: 10 });
+            const core = fs.scrapSellTiming({
+                counts: COUNTS, rate: 35, eventRate: 81, days: 180, fuelPerDay: fs.scrapFuelPerDay(fuel.perSave, 1, 1),
+            }, PRICES);
+            const st = out.sellTiming;
+            expect(st.eventRatePercent).toBe(81);
+            expect(st.daysToEvent).toBe(180);
+            expect(st.fleetSave).toEqual({ distance: 20000, durationSeconds: fuel.duration, deuterium: fuel.total });
+            // The satellites are not weighed: they cost nothing to keep.
+            expect(st.ships.map((/** @type {any} */ s) => s.ship)).toEqual(['small-cargo', 'battleship', 'death-star']);
+            expect(st.ships.map((/** @type {any} */ s) => s.advice)).toEqual(core.rows.map((r) => (r.wait ? 'wait' : 'sell')));
+            expect(st.gainOfAdviceMsu).toBe(Math.round(core.summary.gain));
+            expect(st.waitTypes + st.sellTypes).toBe(3);
+        });
+
+        it('takes the route, speed, frequency, drives, discounts, rates and universe it is given', async () => {
+            const args = {
+                ships: FLEET, rate: 40, playerClass: 'general',
+                lifeforms: { generalClassBonus: 10, shipBonuses: { battleship: { speed: 20, fuel: 5 } } },
+                sellTiming: {
+                    eventRate: 70, daysToEvent: 30, routeKind: 'systems', routeDelta: 3, speedPercent: 25,
+                    saveTimes: 3, saveEveryDays: 2, drives: { combustion: 10, impulse: 8, hyperspace: 6 },
+                    fuelDiscount: 4, exchangeRates: { metal: 2, crystal: 3, deuterium: 4 },
+                    fleetSpeedPeaceful: 2, deuteriumFactor: 0.7,
+                },
+            };
+            const st = (await scrap(args)).structuredContent.sellTiming;
+            const fuel = fs.scrapFleetsaveFuel(COUNTS, {
+                route: { kind: 'systems', delta: 3 }, speedPercent: 25, driveLevels: [10, 8, 6], playerClass: 1,
+                lfMechanGE: 10, shipBonuses: { 207: { speed: 20, fuel: 5 } }, fuelDiscount: 4,
+                universe: { fleetSpeedPeaceful: 2, deutFactor: 7 },
+            });
+            const core = fs.scrapSellTiming({
+                counts: COUNTS, rate: 40, eventRate: 70, days: 30, exchangeRates: { metal: 2, crystal: 3, deuterium: 4 },
+                fuelPerDay: fs.scrapFuelPerDay(fuel.perSave, 3, 2),
+            }, PRICES);
+            expect(st.fleetSave.distance).toBe(2700 + 3 * 95);
+            expect(st.fleetSave.deuterium).toBe(fuel.total);
+            expect(st.ships.map((/** @type {any} */ s) => s.gainOfWaitingMsu)).toEqual(core.rows.map((r) => Math.round(r.gain)));
+            expect(st.ships[0].valueMsu).toBe(Math.round(core.rows[0].value));
+        });
+
+        it('refuses a route kind or a frequency it does not know', async () => {
+            expect((await scrap({ ships: FLEET, sellTiming: { routeKind: 'moon' } })).isError).toBe(true);
+            expect((await scrap({ ships: FLEET, sellTiming: { saveEveryDays: 0 } })).isError).toBe(true);
+            expect((await scrap({ ships: FLEET, sellTiming: { eventRate: 101 } })).isError).toBe(true);
+        });
+    });
+});
+
 describe('MCP tool ogame_import_account', () => {
     const { ACCOUNT_MAP, PLANET_MAP, BODY_MAP, lfBuildingFields } = require('../mcp/tools/import-account');
     const { readFileSync } = require('node:fs');
@@ -1542,12 +1668,15 @@ describe('MCP tool ogame_import_account', () => {
         expect(missing).toEqual([]);
     });
 
-    it('answers the same for a full export and the Companion\'s trimmed copy of it', async () => {
+    it('answers the same for a full export and the Companion\'s trimmed copy of it, defences aside', async () => {
         const full = await importAccount({ export: LARGE });
         expect(full.isError === true).toBe(false);
         const cut = trimmed(LARGE);
         expect(JSON.stringify(cut).length).toBeLessThan(JSON.stringify(LARGE).length * 0.6);
-        expect((await importAccount({ export: cut })).structuredContent).toEqual(full.structuredContent);
+        // The trimmed copy drops the defences, the one thing only ogame_scrap reads.
+        const withoutDefences = structuredClone(full.structuredContent);
+        for (const body of withoutDefences.bodies) delete body.defenses;
+        expect((await importAccount({ export: cut })).structuredContent).toEqual(withoutDefences);
     });
 
     it('reads the account and the bodies under the tools\' argument names', async () => {
@@ -1592,13 +1721,26 @@ describe('MCP tool ogame_import_account', () => {
                 LARGE.moons['30000104'].name, LARGE.moons['30000105'].name, LARGE.moons['30000106'].name]);
     });
 
-    it('leaves out who the player is, defences and resources', async () => {
+    it('leaves out who the player is and the resources', async () => {
         const text = JSON.stringify((await importAccount({ export: LARGE })).structuredContent);
         for (const secret of ['Synthetic Player', '104729', 'itemUuid', 'a83cfdc15b8dba27c82962d57e50d8101d263cfb', 'buffStart']) {
             expect(text.includes(secret)).toBe(false);
         }
-        expect(text.includes('rocket-launcher')).toBe(false);
         expect(text.includes('"resources"')).toBe(false);
+    });
+
+    it('gives each planet its ships, satellites, crawlers and defences for ogame_scrap', async () => {
+        const out = (await importAccount({ export: SMALL })).structuredContent;
+        const alpha = out.bodies.find((b) => b.name === 'Alpha');
+        expect(alpha.ships).toEqual({ 'large-cargo': 500, 'esp-probe': 10 });
+        expect(alpha.solarSatellites.count).toBe(250);
+        expect(alpha.crawlers.count).toBe(300);
+        expect(alpha.defenses).toEqual({
+            'rocket-launcher': 1000, 'light-laser': 500, 'heavy-laser': 100, 'gauss-cannon': 20,
+            'plasma-turret': 5, 'small-shield': 1, 'large-shield': 1,
+        });
+        const beta = out.bodies.find((b) => b.name === 'Beta');
+        expect(beta.defenses).toEqual({ 'rocket-launcher': 500, 'small-shield': 1, abm: 10 });
     });
 
     it('fills the other tools straight from its answer', async () => {
@@ -1619,6 +1761,7 @@ describe('MCP tool ogame_import_account', () => {
             ['ogame_build_cost', { item: 'plasma-tech', fromLevel: out.account.research['plasma-tech'], toLevel: 20 }],
             ['ogame_flight', { from: planet.coordinates, to: out.bodies[2].coordinates }],
             ['ogame_expedition', {}],
+            ['ogame_scrap', {}],
         ]) {
             const result = await call(protocolWith(), name, argsFor(name, extra));
             expect([name, result.isError ? result.content[0].text : 'ok']).toEqual([name, 'ok']);

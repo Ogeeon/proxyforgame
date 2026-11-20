@@ -1968,6 +1968,13 @@ const UNIVERSE_SETTING_PARSERS = {
   systems: (data) => universeCount(data.systems),
   // The game sends "1" or "0" - flight compares it with 1 the same way.
   donutSystem: (data) => universeFlag(data.donutSystem),
+  // What a fleet save costs, for the scrap calculator's sell-or-wait advice.
+  galaxies: (data) => universeCount(data.galaxies),
+  donutGalaxy: (data) => universeFlag(data.donutGalaxy),
+  speedFleetPeaceful: (data) => universeCount(data.speedFleetPeaceful),
+  // Deuterium consumption and the General's fuel discount, in percent.
+  globalDeuteriumSaveFactor: (data) => universeShare(data.globalDeuteriumSaveFactor),
+  warriorBonusFuelConsumption: (data) => universeShare(data.warriorBonusFuelConsumption),
 };
 
 /**

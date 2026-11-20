@@ -2,15 +2,18 @@
 // OGAME OWN-API IMPORT - payload normalizer
 // ============================================================================
 // The "API 2" field on the game's Fleet page exports the player's own planet as
-// a single line of JSON. Two calculators read it: `flight` takes coordinates,
+// a single line of JSON. Three calculators read it: `flight` takes coordinates,
 // classes, researches, ship counts and per-ship bonuses; `expeditions` takes the
-// cargo bonuses alone. Both go through parseOwnApi(), so the shape of the export
-// and the unit conversions are described in exactly one place.
+// cargo bonuses alone; `scrap` takes the ship, defense and missile counts, and
+// the hyperspace level, class, Collector booster and cargo bonuses. All
+// of them go through parseOwnApi(), so the shape of the export and the unit
+// conversions are described in exactly one place.
 //
-// Fields the game sends but nobody consumes - `defenses`, `missiles`,
-// `fleetspeed`, the rest of `bonuses` - are dropped on purpose: `fleetspeed` in
-// particular is universe data the flight calculator deliberately ignores,
-// because the export carries no fleet-speed variant to attach it to.
+// Fields the game sends but nobody consumes - `fleetspeed`, the rest of
+// `bonuses`, the weapon/shield/armor bonuses of every unit - are dropped on
+// purpose: `fleetspeed` in particular is universe data the flight calculator
+// deliberately ignores, because the export carries no fleet-speed variant to
+// attach it to.
 //
 // No DOM access here: the caller writes the values into its own fields.
 
@@ -49,6 +52,8 @@ const OWN_API_BONUS_DIGITS = { cargo: 4, speed: 4, fuel: 5 };
  * @property {number} allianceClassId 0 when the export carries no class.
  * @property {Object<string, (number|undefined)>} researches Tech id to level.
  * @property {Object<string, (OwnApiShip|undefined)>} ships Tech id to counts and bonuses.
+ * @property {Object<string, (number|undefined)>} defenses Tech id (401+) to the count.
+ * @property {Object<string, (number|undefined)>} missiles Tech id (502, 503) to the count.
  * @property {Object<string, (number|undefined)>} classBoosters Booster index to percent.
  */
 
@@ -87,6 +92,8 @@ function parseOwnApi(text) {
     allianceClassId: Number(data.allianceClassId) || 0,
     researches: parseOwnApiLevels(data.researches),
     ships: parseOwnApiShips(data.ships),
+    defenses: parseOwnApiAmounts(data.defenses),
+    missiles: parseOwnApiAmounts(data.missiles),
     classBoosters: parseOwnApiBoosters(isOwnApiObject(data.bonuses) ? data.bonuses.characterClassBooster : null),
   };
 }
@@ -166,6 +173,25 @@ function parseOwnApiShips(raw) {
     };
   });
   return ships;
+}
+
+/**
+ * The `defenses` and `missiles` blocks carry a record per tech id, of which
+ * only the count is read. Their counts are the real ones: the export also
+ * lists the defense ids in the `ships` block, but always with an amount of 0.
+ *
+ * @param {unknown} raw Tech id to `{amount, ...}`, as exported.
+ * @returns {Object<string, number>} Tech id to the count.
+ */
+function parseOwnApiAmounts(raw) {
+  /** @type {Object<string, number>} */
+  const amounts = {};
+  if (!isOwnApiObject(raw)) return amounts;
+  Object.entries(raw).forEach(([techId, unit]) => {
+    if (!isOwnApiTechId(techId) || !isOwnApiObject(unit)) return;
+    amounts[techId] = Number(unit.amount) || 0;
+  });
+  return amounts;
 }
 
 /**
