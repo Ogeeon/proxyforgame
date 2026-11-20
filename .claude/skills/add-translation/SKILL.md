@@ -35,7 +35,8 @@ make i18n-validate   # must be green before you commit
 
 `make i18n-fix` writes placeholders, not translations — anything it inserts still needs a real
 string. Use the official OGame terminology of each language for game entities (buildings,
-technologies, ships, Life Forms).
+technologies, ships, Life Forms). To read a term in all 13 languages from the game itself — one
+account, switching its display language — see `docs/game-terms-in-game.md`.
 
 ## 4. Wire it to the client
 

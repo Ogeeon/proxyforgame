@@ -371,7 +371,7 @@
       "flight-title": "Kalkulátor pre časy letu",
       "moon-title": "Mesiace",
       "expeditions-title": "Expedície",
-      "scrap-title": "Obchodník so šrotom"
+      "scrap-title": "Priekupník surovín"
     },
     "feedbackItems": {
       "header": "Odozva",
@@ -997,11 +997,10 @@
     "description": "Porovnajte výmenu kovu, kryštálu a deutéria v OGame a zistite množstvo získaných surovín pri zadanom kurze."
   },
   "scrap": {
-    "title": "OGame - Kalkulátor obchodníka so šrotom",
-    "keywords": "proxyforgame,ogame,obchodník so šrotom,kalkulátor obchodníka so šrotom,predaj flotily,predaj obrany,sadzba obchodníka,hodnota flotily",
-    "description": "Zistite, koľko vám obchodník so šrotom v OGame zaplatí za flotilu a obranu: plné náklady a vrátenie v kove, kryštáloch a deutériu, stratené body a transportéry na odvoz.",
-    "scrap-header": "Obchodník so šrotom",
-    "rate": "Sadzba obchodníka",
+    "title": "OGame - Výpočty pre Priekupníka surovín",
+    "keywords": "proxyforgame,ogame,priekupník surovín,kalkulátor priekupníka surovín,predaj flotily,predaj obrany,sadzba priekupníka,hodnota flotily",
+    "description": "Zistite, koľko vám priekupník surovín v OGame zaplatí za flotilu a obranu: plné náklady a vrátenie v kove, kryštáloch a deutériu, stratené body a transportéry na odvoz.",
+    "rate": "Sadzba priekupníka",
     "import-hint": "Vložte text z poľa API 2 na stránke „Flotila“ v OGame, aby sa vyplnili počty, alebo ich zadajte do tabuliek nižšie.",
     "full-cost": "Plné náklady",
     "payback": "Vrátenie",

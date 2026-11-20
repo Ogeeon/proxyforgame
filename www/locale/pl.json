@@ -371,7 +371,7 @@
       "flight-title": "Czas lotu floty",
       "moon-title": "Księżyce",
       "expeditions-title": "Ekspedycje",
-      "scrap-title": "Handlarz złomem"
+      "scrap-title": "Handlarz złomu"
     },
     "feedbackItems": {
       "header": "Feedback",
@@ -997,10 +997,9 @@
     "description": "Porównaj wymianę metalu, kryształu i deuteru w OGame oraz sprawdź ilość zasobów przy wybranym kursie."
   },
   "scrap": {
-    "title": "OGame - Kalkulator handlarza złomem",
-    "keywords": "proxyforgame,ogame,handlarz złomem,kalkulator handlarza złomem,sprzedaż floty,sprzedaż obrony,stawka handlarza,wartość floty",
-    "description": "Sprawdź, ile handlarz złomem zapłaci w OGame za twoją flotę i obronę: pełny koszt i zwrot w metalu, krysztale i deuterze, utracone punkty oraz transportery do wywiezienia surowców.",
-    "scrap-header": "Handlarz złomem",
+    "title": "OGame - Obliczenia dla Handlarza złomu",
+    "keywords": "proxyforgame,ogame,handlarz złomu,kalkulator handlarza złomu,sprzedaż floty,sprzedaż obrony,stawka handlarza,wartość floty",
+    "description": "Sprawdź, ile handlarz złomu zapłaci w OGame za twoją flotę i obronę: pełny koszt i zwrot w metalu, krysztale i deuterze, utracone punkty oraz transportery do wywiezienia surowców.",
     "rate": "Stawka handlarza",
     "import-hint": "Wklej tekst z pola API 2 na stronie „Flota” w OGame, aby wypełnić liczby, albo wpisz je w tabelach poniżej.",
     "full-cost": "Pełny koszt",

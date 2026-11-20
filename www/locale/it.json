@@ -371,7 +371,7 @@
       "flight-title": "Tempi di viaggio",
       "moon-title": "Lune",
       "expeditions-title": "Spedizioni",
-      "scrap-title": "Rottamaio"
+      "scrap-title": "Mercante di ferraglia"
     },
     "feedbackItems": {
       "header": "Feedback",
@@ -997,11 +997,10 @@
     "description": "Confronta gli scambi di metallo, cristallo e deuterio in OGame e calcola le risorse ottenute con un determinato rapporto."
   },
   "scrap": {
-    "title": "OGame - Calcolatrice del rottamaio",
-    "keywords": "proxyforgame,ogame,rottamaio,calcolatrice rottamaio,vendere flotta,vendere difese,tasso del rottamaio,valore della flotta",
-    "description": "Scopri quanto paga il rottamaio per la tua flotta e le tue difese in OGame: il costo totale e il rimborso in metallo, cristallo e deuterio, i punti persi e le navi cargo per portarlo via.",
-    "scrap-header": "Rottamaio",
-    "rate": "Tasso del rottamaio",
+    "title": "OGame - Calcoli per il Mercante di ferraglia",
+    "keywords": "proxyforgame,ogame,mercante di ferraglia,calcolatrice mercante di ferraglia,vendere flotta,vendere difese,tasso del mercante,valore della flotta",
+    "description": "Scopri quanto paga il mercante di ferraglia per la tua flotta e le tue difese in OGame: il costo totale e il rimborso in metallo, cristallo e deuterio, i punti persi e le navi cargo per portarlo via.",
+    "rate": "Tasso del mercante",
     "import-hint": "Incolla il testo del campo API 2 della pagina «Flotta» di OGame per compilare le quantità, oppure inseriscile nelle tabelle qui sotto.",
     "full-cost": "Costo totale",
     "payback": "Rimborso",

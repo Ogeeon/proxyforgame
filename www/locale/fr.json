@@ -997,10 +997,9 @@
     "description": "Comparez les échanges de métal, cristal et deutérium dans OGame et calculez les ressources obtenues selon un taux donné."
   },
   "scrap": {
-    "title": "OGame - Calculatrice du ferrailleur",
+    "title": "OGame - Calculs pour le Ferrailleur",
     "keywords": "proxyforgame,ogame,ferrailleur,calculatrice ferrailleur,vendre flotte,vendre défense,taux du ferrailleur,valeur de la flotte",
     "description": "Découvrez ce que le ferrailleur paie pour votre flotte et vos défenses dans OGame : le coût total et le remboursement en métal, cristal et deutérium, les points perdus et les transporteurs pour tout emporter.",
-    "scrap-header": "Ferrailleur",
     "rate": "Taux du ferrailleur",
     "import-hint": "Collez le texte du champ API 2 de la page « Flotte » d'OGame pour remplir les quantités, ou saisissez-les dans les tableaux ci-dessous.",
     "full-cost": "Coût total",

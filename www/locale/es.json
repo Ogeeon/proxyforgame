@@ -997,10 +997,9 @@
     "description": "Compara intercambios de metal, cristal y deuterio en OGame y calcula los recursos que recibirás con una tasa determinada."
   },
   "scrap": {
-    "title": "OGame - Calculadora del chatarrero",
+    "title": "OGame - Cálculos para el Chatarrero",
     "keywords": "proxyforgame,ogame,chatarrero,calculadora chatarrero,vender flota,vender defensa,tasa del chatarrero,valor de la flota",
     "description": "Descubre cuánto paga el chatarrero por tu flota y tus defensas en OGame: el coste total y el reembolso en metal, cristal y deuterio, los puntos perdidos y las naves de carga para llevárselo.",
-    "scrap-header": "Chatarrero",
     "rate": "Tasa del chatarrero",
     "import-hint": "Pega el texto del campo API 2 de la página «Flota» de OGame para rellenar las cantidades, o escríbelas en las tablas de abajo.",
     "full-cost": "Coste total",

@@ -371,7 +371,7 @@
       "flight-title": "Calculadora tempos de voo",
       "moon-title": "Luas",
       "expeditions-title": "Expedições",
-      "scrap-title": "Sucateiro"
+      "scrap-title": "Mercador de sucata"
     },
     "feedbackItems": {
       "header": "Feedback",
@@ -997,11 +997,10 @@
     "description": "Compare trocas de metal, cristal e deutério em OGame e veja quantos recursos recebe com uma taxa definida."
   },
   "scrap": {
-    "title": "OGame - Calculadora do sucateiro",
-    "keywords": "proxyforgame,ogame,sucateiro,calculadora do sucateiro,vender frota,vender defesa,taxa do sucateiro,valor da frota",
-    "description": "Descubra quanto o sucateiro paga pela sua frota e pelas suas defesas no OGame: o custo total e o reembolso em metal, cristal e deutério, os pontos perdidos e os cargueiros para levar tudo.",
-    "scrap-header": "Sucateiro",
-    "rate": "Taxa do sucateiro",
+    "title": "OGame - Cálculos para o Mercador de sucata",
+    "keywords": "proxyforgame,ogame,mercador de sucata,calculadora do mercador de sucata,vender frota,vender defesa,taxa do mercador,valor da frota",
+    "description": "Descubra quanto o mercador de sucata paga pela sua frota e pelas suas defesas no OGame: o custo total e o reembolso em metal, cristal e deutério, os pontos perdidos e os cargueiros para levar tudo.",
+    "rate": "Taxa do mercador",
     "import-hint": "Cole o texto do campo API 2 da página «Frota» do OGame para preencher as quantidades, ou escreva-as nas tabelas abaixo.",
     "full-cost": "Custo total",
     "payback": "Reembolso",

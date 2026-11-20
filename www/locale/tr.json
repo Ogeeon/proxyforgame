@@ -997,10 +997,9 @@
     "description": "OGame’de metal, kristal ve döteryum takaslarını karşılaştırın ve belirlenen kura göre alacağınız kaynak miktarını görün."
   },
   "scrap": {
-    "title": "OGame - Hurdacı Hesaplayıcı",
+    "title": "OGame - Hurdacı için hesaplamalar",
     "keywords": "proxyforgame,ogame,hurdacı,hurdacı hesaplayıcı,filo satmak,savunma satmak,hurdacı oranı,filo değeri",
     "description": "OGame'de hurdacının filon ve savunman için ne ödeyeceğini öğren: metal, kristal ve deuterium olarak tam maliyet ve geri ödeme, kaybedilen puanlar ve taşımak için gereken nakliye gemileri.",
-    "scrap-header": "Hurdacı",
     "rate": "Hurdacı oranı",
     "import-hint": "Adetleri doldurmak için OGame'deki 'Filo' sayfasının API 2 alanındaki metni yapıştır ya da aşağıdaki tablolara yaz.",
     "full-cost": "Tam maliyet",

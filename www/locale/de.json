@@ -997,10 +997,9 @@
     "description": "Vergleiche den Tausch von Metall, Kristall und Deuterium in OGame und ermittle die erhaltene Menge zum jeweiligen Kurs."
   },
   "scrap": {
-    "title": "OGame - Schrotthändler-Rechner",
+    "title": "OGame - Berechnungen für den Schrotthändler",
     "keywords": "proxyforgame,ogame,schrotthändler,schrotthändler rechner,flotte verkaufen,verteidigung verkaufen,schrottkurs,flottenwert",
     "description": "Finden Sie heraus, was der Schrotthändler in OGame für Ihre Flotte und Verteidigung zahlt: die vollen Kosten und die Rückerstattung in Metall, Kristall und Deuterium, die verlorenen Punkte und die Transporter für den Abtransport.",
-    "scrap-header": "Schrotthändler",
     "rate": "Kurs des Händlers",
     "import-hint": "Fügen Sie den Text aus dem Feld API 2 der Seite „Flotte“ in OGame ein, um die Anzahlen auszufüllen, oder tragen Sie sie in die Tabellen unten ein.",
     "full-cost": "Volle Kosten",

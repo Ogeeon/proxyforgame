@@ -371,7 +371,7 @@
       "flight-title": "Kalkulator vremena letenja",
       "moon-title": "Kalkulatori za mjese",
       "expeditions-title": "Ekspedicije",
-      "scrap-title": "Otkupljivač otpada"
+      "scrap-title": "Trgovac otpadom"
     },
     "feedbackItems": {
       "header": "Povratne informacije",
@@ -997,11 +997,10 @@
     "description": "Uporedite razmjenu metala, kristala i deuterija u OGameu i izračunajte količinu resursa prema zadatom kursu."
   },
   "scrap": {
-    "title": "OGame - Kalkulator otkupljivača otpada",
-    "keywords": "proxyforgame,ogame,otkupljivač otpada,kalkulator otkupljivača otpada,prodaja flote,prodaja odbrane,stopa otkupljivača,vrijednost flote",
-    "description": "Saznajte koliko otkupljivač otpada u OGame plaća za vašu flotu i odbranu: puni trošak i povrat u metalu, kristalu i deuterijumu, izgubljeni bodovi i transporteri za odvoz.",
-    "scrap-header": "Otkupljivač otpada",
-    "rate": "Stopa otkupljivača",
+    "title": "OGame - Proračuni za Trgovca otpadom",
+    "keywords": "proxyforgame,ogame,trgovac otpadom,kalkulator trgovca otpadom,prodaja flote,prodaja odbrane,stopa trgovca,vrijednost flote",
+    "description": "Saznajte koliko trgovac otpadom u OGame plaća za vašu flotu i odbranu: puni trošak i povrat u metalu, kristalu i deuterijumu, izgubljeni bodovi i transporteri za odvoz.",
+    "rate": "Stopa trgovca",
     "import-hint": "Zalijepite tekst iz polja API 2 na stranici 'Flota' u OGame da popunite količine, ili ih unesite u tabele ispod.",
     "full-cost": "Puni trošak",
     "payback": "Povrat",

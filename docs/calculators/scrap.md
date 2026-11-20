@@ -1,4 +1,4 @@
-# OGame - Scrap Merchant calculator
+# OGame - Calculations for the Scrap Merchant
 
 **URL:** `http://pfg.wmp/ogame/calc/scrap.php`
 
@@ -53,7 +53,7 @@ The calculator keeps these settings in `options_scrap`:
 
 ## Usage
 
-1. Navigate to [OGame - Scrap Merchant calculator](http://pfg.wmp/ogame/calc/scrap.php)
+1. Navigate to [OGame - Calculations for the Scrap Merchant](http://pfg.wmp/ogame/calc/scrap.php)
 2. Configure input parameters
 3. View calculated results
 

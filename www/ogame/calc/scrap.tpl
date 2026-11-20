@@ -141,7 +141,7 @@
 <div id="scrap">
   <div class="border rounded">
     <div class="d-flex flex-wrap align-items-center">
-      <div class="text-primary-emphasis rounded main-header text-center flex-grow-1"><?= $l['scrap-header'] ?></div>
+      <div class="text-primary-emphasis rounded main-header text-center flex-grow-1"><?= $l['title'] ?></div>
       <div id="pf-planet-box" class="pf-header-bodies d-flex align-items-center gap-1 ms-auto ps-2 me-1 d-none">
         <label for="pf-planet"><?= $l['planet'] ?></label>
         <select id="pf-planet" class="form-select form-select-sm w-auto"></select>

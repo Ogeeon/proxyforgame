@@ -997,10 +997,9 @@
     "description": "Vergelijk ruilopties voor metaal, kristal en deuterium in OGame en bereken hoeveel grondstoffen je tegen een bepaalde koers ontvangt."
   },
   "scrap": {
-    "title": "OGame – Schroothandelaar calculator",
+    "title": "OGame - Berekeningen voor de Schroothandelaar",
     "keywords": "proxyforgame,ogame,schroothandelaar,schroothandelaar calculator,vloot verkopen,verdediging verkopen,schroottarief,vlootwaarde",
     "description": "Ontdek wat de schroothandelaar in OGame betaalt voor je vloot en verdediging: de volledige kosten en de vergoeding in metaal, kristal en deuterium, de verloren punten en de vrachtschepen om alles af te voeren.",
-    "scrap-header": "Schroothandelaar",
     "rate": "Tarief van de handelaar",
     "import-hint": "Plak de tekst uit het veld API 2 op de pagina 'Vloot' in OGame om de aantallen in te vullen, of typ ze in de tabellen hieronder.",
     "full-cost": "Volledige kosten",
