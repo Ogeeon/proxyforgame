@@ -247,19 +247,14 @@
                   <label for="hyper-tech-level"><?= $l['hyper-tech'] ?></label>
                   <input id="hyper-tech-level" type="text" name="hyper-tech-level" class="form-control form-control-sm level-input" value="0" data-field-title="<?= htmlspecialchars($l['hyper-tech'], ENT_QUOTES, 'UTF-8') ?>">
                 </div>
-                <fieldset class="d-flex flex-wrap align-items-center column-gap-2 fieldset-reset">
-                  <legend><?= $l['class'] ?>:</legend>
-<?php foreach (['class-collector', 'class-general', 'class-discoverer'] as $i => $key): ?>
+                <!-- Only the Collector raises a small or large cargo's hold, so
+                     the class is one box; the enhancement stays enabled, as in
+                     costs, and counts only while the box is ticked. -->
+                <div class="d-flex flex-wrap align-items-center gap-2">
                   <div class="d-flex align-items-center gap-1">
-                    <input id="class-<?= $i ?>" type="radio" name="class" value="<?= $i ?>" class="form-check-input m-0">
-                    <label for="class-<?= $i ?>"><?= $l[$key] ?></label>
+                    <input id="collector-class" type="checkbox" name="collector-class" class="form-check-input m-0">
+                    <label for="collector-class"><?= $l['class'] ?>: <?= $l['class-collector'] ?></label>
                   </div>
-<?php endforeach; ?>
-                </fieldset>
-              </div>
-              <div class="d-flex flex-wrap gap-2 align-items-center justify-content-center mb-2">
-                <div class="d-flex flex-wrap align-items-center gap-2 border rounded p-1">
-                  <span class="fw-semibold"><?= $l['class-collector'] ?>:</span>
                   <div class="d-flex align-items-center gap-1">
                     <label for="lf-collector-class-bonus"><?= $l['lf-class-bonus'] ?></label>
                     <div class="input-group input-group-sm w-auto">
@@ -269,6 +264,8 @@
                     <i class="bi bi-question-circle" data-bs-toggle="tooltip" title="<?= htmlspecialchars($l['lf-class-bonus-hint'], ENT_QUOTES, 'UTF-8') ?>"></i>
                   </div>
                 </div>
+              </div>
+              <div class="d-flex flex-wrap gap-2 align-items-center justify-content-center mb-2">
                 <div class="d-flex flex-wrap align-items-center gap-2">
                   <span><?= $l['cargo-cap-increase'] ?></span>
                   <div class="d-flex align-items-center gap-1">

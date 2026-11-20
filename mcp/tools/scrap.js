@@ -72,8 +72,8 @@ function createScrapTool() {
                 counts,
                 rate: args.rate ?? SCRAP_RATE.def,
                 hyperTechLevel: args.hyperspaceTechnology,
-                // The cost calculator's class numbers, the scrap core's too: 'none' is -1.
-                playerClass: common.classId(args.playerClass),
+                // Only the Collector raises a cargo ship's hold.
+                isCollector: args.playerClass === 'collector',
                 collectorClassBonus: args.lifeforms?.collectorClassBonus,
                 scCapacityIncrease: common.shipCargoBonus(args.lifeforms, 'small-cargo'),
                 lcCapacityIncrease: common.shipCargoBonus(args.lifeforms, 'large-cargo'),

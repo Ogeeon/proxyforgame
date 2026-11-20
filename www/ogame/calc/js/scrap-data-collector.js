@@ -21,7 +21,8 @@ function scrapCountSelector(id) {
 
 /**
  * The cargo fields of the transport accordion, by the options.prm key each is
- * saved under: the level and the three percentages (the class is a radio group).
+ * saved under: the level and the three percentages (the Collector is a
+ * checkbox, SCRAP_COLLECTOR_BOX).
  */
 const SCRAP_CARGO_FIELDS = Object.freeze({
   hyperTechLevel: '#hyper-tech-level',
@@ -30,10 +31,13 @@ const SCRAP_CARGO_FIELDS = Object.freeze({
   lcCapacityIncrease: '#lc-capacity-increase',
 });
 
+/** The Collector checkbox: the only class that raises a cargo ship's hold. */
+const SCRAP_COLLECTOR_BOX = '#collector-class';
+
 /**
  * @typedef {object} ScrapCargoValues
  * @property {number} hyperTechLevel
- * @property {number} playerClass SCRAP_CLASS: 0 Collector, 1 General, 2 Discoverer.
+ * @property {boolean} isCollector
  * @property {number} collectorClassBonus %
  * @property {number} scCapacityIncrease %
  * @property {number} lcCapacityIncrease %
@@ -55,7 +59,7 @@ class ScrapDataCollector {
 
   /**
    * The cargo fields. The fractions go through the locale's decimal
-   * separator; a radio left unchecked reads as the Collector, as in costs.
+   * separator.
    *
    * @returns {ScrapCargoValues}
    */
@@ -66,7 +70,7 @@ class ScrapDataCollector {
     };
     return {
       hyperTechLevel: num(SCRAP_CARGO_FIELDS.hyperTechLevel),
-      playerClass: Number.parseInt(checkedRadio('class')?.value ?? '', 10) || SCRAP_CLASS.COLLECTOR,
+      isCollector: getChecked(SCRAP_COLLECTOR_BOX),
       collectorClassBonus: num(SCRAP_CARGO_FIELDS.collectorClassBonus),
       scCapacityIncrease: num(SCRAP_CARGO_FIELDS.scCapacityIncrease),
       lcCapacityIncrease: num(SCRAP_CARGO_FIELDS.lcCapacityIncrease),
@@ -90,5 +94,5 @@ class ScrapDataCollector {
 }
 
 if (typeof window !== 'undefined') {
-  Object.assign(window, { ScrapDataCollector, SCRAP_UNIT_IDS, SCRAP_CARGO_FIELDS, scrapCountSelector });
+  Object.assign(window, { ScrapDataCollector, SCRAP_UNIT_IDS, SCRAP_CARGO_FIELDS, SCRAP_COLLECTOR_BOX, scrapCountSelector });
 }

@@ -6,7 +6,7 @@
 // every change and reads the API 2 export into the count and cargo fields.
 //
 // Saved in options_scrap: the "full numbers" box and the cargo fields - the
-// hyperspace technology, the class, the Collector Enhancement and the two
+// hyperspace technology, the Collector box, the Collector Enhancement and the two
 // cargo bonuses - which describe the player, not the sale. The counts describe
 // one sale and the rate one visit to the merchant: both start over on every
 // load (the rate at SCRAP_RATE.def).
@@ -14,11 +14,12 @@
 'use strict';
 
 /**
- * The cargo settings as they start, and as the reset puts them back: the
- * cost calculator's defaults, the Collector included.
+ * The cargo settings as they start, and as the reset puts them back: no
+ * bonus at all, so a fresh page hauls at the base holds, as the MCP tool
+ * does by default.
  */
 const SCRAP_CARGO_DEFAULTS = Object.freeze({
-  hyperTechLevel: 0, playerClass: SCRAP_CLASS.COLLECTOR, collectorClassBonus: 0, scCapacityIncrease: 0, lcCapacityIncrease: 0,
+  hyperTechLevel: 0, isCollector: false, collectorClassBonus: 0, scCapacityIncrease: 0, lcCapacityIncrease: 0,
 });
 
 /**
@@ -32,9 +33,10 @@ const SCRAP_CARGO_DEFAULTS = Object.freeze({
  */
 function scrapValidatePrm(prm, value) {
   switch (prm) {
-    case 'fullNumbers': return value === 'true';
+    case 'fullNumbers':
+    case 'isCollector':
+      return value === 'true';
     case 'hyperTechLevel': return validateNumber(Number.parseInt(value, 10), 0, Infinity, SCRAP_CARGO_DEFAULTS.hyperTechLevel);
-    case 'playerClass': return validateNumber(Number.parseInt(value, 10), SCRAP_CLASS.COLLECTOR, SCRAP_CLASS.DISCOVERER, SCRAP_CARGO_DEFAULTS.playerClass);
     case 'collectorClassBonus':
     case 'scCapacityIncrease':
     case 'lcCapacityIncrease':
@@ -95,8 +97,11 @@ function scrapCountsFromOwnApi(data) {
   return matched ? counts : null;
 }
 
-/** The character class ids of the API 2 export (1 Collector, 2 General, 3 Discoverer), as SCRAP_CLASS. */
-const SCRAP_OWN_API_CLASS = Object.freeze({ 1: SCRAP_CLASS.COLLECTOR, 2: SCRAP_CLASS.GENERAL, 3: SCRAP_CLASS.DISCOVERER });
+/**
+ * The character class ids of the API 2 export (1 Collector, 2 General,
+ * 3 Discoverer), as the Collector box shows them.
+ */
+const SCRAP_OWN_API_COLLECTOR = Object.freeze({ 1: true, 2: false, 3: false });
 
 /** The index of the Collector Enhancement among the export's class boosters. */
 const SCRAP_OWN_API_COLLECTOR_BOOSTER = '1';
@@ -138,7 +143,7 @@ class ScrapApp {
       addEvent(el, 'blur', (e) => { validateInputNumberOnBlurNative(e); this.recalc(); });
     });
     addEvent('#full-numbers', 'change', () => this.recalc());
-    inputsAll('input[name="class"]').forEach((radio) => addEvent(radio, 'change', () => this.recalc()));
+    addEvent(SCRAP_COLLECTOR_BOX, 'change', () => this.recalc());
     addEvent('#own-api-import', 'click', () => { void this.importOwnApi(getVal('#own-api-input')); });
     addEvent('#reset', 'click', () => this.reset());
 
@@ -187,7 +192,7 @@ class ScrapApp {
    */
   showCargo(cargo) {
     setVal(SCRAP_CARGO_FIELDS.hyperTechLevel, cargo.hyperTechLevel);
-    setChecked('#class-' + cargo.playerClass, true);
+    setChecked(SCRAP_COLLECTOR_BOX, cargo.isCollector);
     setNumVal(SCRAP_CARGO_FIELDS.collectorClassBonus, cargo.collectorClassBonus);
     setNumVal(SCRAP_CARGO_FIELDS.scCapacityIncrease, cargo.scCapacityIncrease);
     setNumVal(SCRAP_CARGO_FIELDS.lcCapacityIncrease, cargo.lcCapacityIncrease);
@@ -199,7 +204,7 @@ class ScrapApp {
     const prm = options.prm;
     prm.fullNumbers = p.fullNumbers;
     prm.hyperTechLevel = p.hyperTechLevel;
-    prm.playerClass = p.playerClass;
+    prm.isCollector = p.isCollector;
     prm.collectorClassBonus = p.collectorClassBonus;
     prm.scCapacityIncrease = p.scCapacityIncrease;
     prm.lcCapacityIncrease = p.lcCapacityIncrease;
@@ -229,17 +234,18 @@ class ScrapApp {
   }
 
   /**
-   * The cargo fields from an API 2 export: hyperspace technology, the class,
-   * the Collector Enhancement and the two cargo ships' bonuses. What the
-   * export leaves out - no class, no booster block - keeps its field as it was.
+   * The cargo fields from an API 2 export: hyperspace technology, the class
+   * (the Collector ticks the box, another class clears it), the Collector
+   * Enhancement and the two cargo ships' bonuses. What the export leaves out -
+   * no class, no booster block - keeps its field as it was.
    *
    * @param {OwnApiPayload} data
    */
   _importOwnApiCargo(data) {
     const level = data.researches[114];
     if (level !== undefined) setVal(SCRAP_CARGO_FIELDS.hyperTechLevel, level);
-    const playerClass = SCRAP_OWN_API_CLASS[/** @type {1|2|3} */ (data.characterClassId)];
-    if (playerClass !== undefined) setChecked('#class-' + playerClass, true);
+    const collector = SCRAP_OWN_API_COLLECTOR[/** @type {1|2|3} */ (data.characterClassId)];
+    if (collector !== undefined) setChecked(SCRAP_COLLECTOR_BOX, collector);
     const booster = data.classBoosters[SCRAP_OWN_API_COLLECTOR_BOOSTER];
     if (booster !== undefined) setNumVal(SCRAP_CARGO_FIELDS.collectorClassBonus, booster);
     const small = data.ships[202]?.cargo;

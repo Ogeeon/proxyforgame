@@ -202,7 +202,7 @@ describe('the cargo holds', () => {
 
     it('stays at the base holds without any cargo bonus', () => {
         expect(holds({})).toEqual([5000, 25000, 5, 1]);
-        expect(holds({ hyperTechLevel: 0, playerClass: 1, collectorClassBonus: 0, scCapacityIncrease: 0, lcCapacityIncrease: 0 }))
+        expect(holds({ hyperTechLevel: 0, isCollector: false, collectorClassBonus: 0, scCapacityIncrease: 0, lcCapacityIncrease: 0 }))
             .toEqual([5000, 25000, 5, 1]);
     });
 
@@ -210,16 +210,16 @@ describe('the cargo holds', () => {
         expect(holds({ hyperTechLevel: 10 })).toEqual([7500, 37500, 3, 1]);
     });
 
-    it('gives the Collector +25%, and no other class anything', () => {
-        expect(holds({ playerClass: 0 })).toEqual([6250, 31250, 4, 1]);
-        expect(holds({ playerClass: 1 })).toEqual([5000, 25000, 5, 1]);
-        expect(holds({ playerClass: 2 })).toEqual([5000, 25000, 5, 1]);
+    it('gives the Collector +25% while the flag is on', () => {
+        expect(holds({ isCollector: true })).toEqual([6250, 31250, 4, 1]);
+        expect(holds({ isCollector: false })).toEqual([5000, 25000, 5, 1]);
     });
 
-    it('raises the Collector bonus by the enhancement, for the Collector only', () => {
+    it('raises the Collector bonus by the enhancement, with the flag on only', () => {
         // 25% raised by 60% is 40%.
-        expect(holds({ playerClass: 0, collectorClassBonus: 60 })).toEqual([7000, 35000, 3, 1]);
-        expect(holds({ playerClass: 1, collectorClassBonus: 60 })).toEqual([5000, 25000, 5, 1]);
+        expect(holds({ isCollector: true, collectorClassBonus: 60 })).toEqual([7000, 35000, 3, 1]);
+        expect(holds({ isCollector: false, collectorClassBonus: 60 })).toEqual([5000, 25000, 5, 1]);
+        expect(holds({ collectorClassBonus: 60 })).toEqual([5000, 25000, 5, 1]);
     });
 
     it('gives each ship its own life form bonus', () => {
@@ -230,28 +230,26 @@ describe('the cargo holds', () => {
         // The account of the profile fixtures: hyperspace 8, Collector, enhancement
         // 2.15%, cargo bonuses 1.23% and 2.5% - 7000 + 1276.875 + 61.5 and
         // 35000 + 6384.375 + 625, floored per ship.
-        const all = { hyperTechLevel: 8, playerClass: 0, collectorClassBonus: 2.15, scCapacityIncrease: 1.23, lcCapacityIncrease: 2.5 };
-        expect(holds(all)).toEqual([8338, 42009, 3, 1]);
-        // The cost calculator, given the same settings, holds the same.
-        const costs = Object.assign(new GlobalParams(), all);
+        const bonuses = { hyperTechLevel: 8, collectorClassBonus: 2.15, scCapacityIncrease: 1.23, lcCapacityIncrease: 2.5 };
+        expect(holds({ ...bonuses, isCollector: true })).toEqual([8338, 42009, 3, 1]);
+        // The cost calculator, given the same settings, holds the same: its
+        // class 0 is the Collector, 1 and 2 the General and the Discoverer.
+        const costs = Object.assign(new GlobalParams(), { ...bonuses, playerClass: 0 });
         expect([costs.smallCargoCapacity, costs.largeCargoCapacity]).toEqual([8338, 42009]);
         for (const playerClass of [1, 2]) {
-            const other = { ...all, playerClass };
-            const p = Object.assign(new GlobalParams(), other);
-            expect(holds(other).slice(0, 2)).toEqual([p.smallCargoCapacity, p.largeCargoCapacity]);
+            const p = Object.assign(new GlobalParams(), { ...bonuses, playerClass });
+            expect(holds({ ...bonuses, isCollector: false }).slice(0, 2)).toEqual([p.smallCargoCapacity, p.largeCargoCapacity]);
         }
     });
 
     it('reads the bonuses the way the page saves them, and drops what is out of range', () => {
-        expect(holds({ hyperTechLevel: '10', playerClass: '0', collectorClassBonus: '60' })).toEqual([9500, 47500, 3, 1]);
+        expect(holds({ hyperTechLevel: '10', isCollector: true, collectorClassBonus: '60' })).toEqual([9500, 47500, 3, 1]);
         // A negative level or bonus counts as none, a fractional level as its whole part.
         expect(holds({ hyperTechLevel: -3, scCapacityIncrease: -10 })).toEqual([5000, 25000, 5, 1]);
         expect(holds({ hyperTechLevel: 10.9 })).toEqual([7500, 37500, 3, 1]);
-        // An unknown class, or none at all, is no class.
-        expect(holds({ playerClass: 3 })).toEqual([5000, 25000, 5, 1]);
-        expect(holds({ playerClass: -1 })).toEqual([5000, 25000, 5, 1]);
-        expect(holds({ playerClass: null })).toEqual([5000, 25000, 5, 1]);
-        expect(holds({ playerClass: '' })).toEqual([5000, 25000, 5, 1]);
-        expect(holds({ playerClass: 'collector' })).toEqual([5000, 25000, 5, 1]);
+        // Only a true flag is the Collector.
+        expect(holds({ isCollector: 'true' })).toEqual([5000, 25000, 5, 1]);
+        expect(holds({ isCollector: 1 })).toEqual([5000, 25000, 5, 1]);
+        expect(holds({ isCollector: null })).toEqual([5000, 25000, 5, 1]);
     });
 });

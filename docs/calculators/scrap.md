@@ -23,11 +23,11 @@ Find out what the Scrap Merchant pays for your fleet and defenses in OGame: the 
 
 | File | Lines |
 |------|-------|
-| `www/ogame/calc/js/scrap-core.js` | 274 |
-| `www/ogame/calc/js/scrap-data-collector.js` | 95 |
+| `www/ogame/calc/js/scrap-core.js` | 262 |
+| `www/ogame/calc/js/scrap-data-collector.js` | 99 |
 | `www/ogame/calc/js/scrap-renderer.js` | 136 |
-| `www/ogame/calc/js/scrap-orchestration.js` | 277 |
-| `www/ogame/calc/js/scrap-profile.js` | 163 |
+| `www/ogame/calc/js/scrap-orchestration.js` | 283 |
+| `www/ogame/calc/js/scrap-profile.js` | 231 |
 
 The page also loads these shared scripts:
 

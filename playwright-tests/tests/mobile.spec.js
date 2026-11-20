@@ -110,6 +110,9 @@ const PHONE_PAGES = [
       await page.locator('#sell-defense-tab').click();
       await page.locator('#unit-406').fill('123456');
       await page.locator('#unit-406').blur();
+      // The cargo fields, the Collector box among them, have to wrap inside the panel too.
+      await page.locator('#transport-toggle').click();
+      await page.locator('#collector-class').check();
     } },
 ];
 

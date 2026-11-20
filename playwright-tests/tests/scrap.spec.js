@@ -123,7 +123,7 @@ test.describe('Scrap Merchant - the page', () => {
         // The export's player: hyperspace 9, a Discoverer, no cargo bonuses -
         // 7250 and 36250 a ship.
         await expect(page.locator('#hyper-tech-level')).toHaveValue('9');
-        await expect(page.locator('#class-2')).toBeChecked();
+        await expect(page.locator('#collector-class')).not.toBeChecked();
         await expect(page.locator('#lf-collector-class-bonus')).toHaveValue('0');
         await expect(page.locator('#sc-capacity-increase')).toHaveValue('0');
         await expect(page.locator('#transport-small')).toHaveText('13.447');
@@ -190,7 +190,7 @@ test.describe('Scrap Merchant - the page', () => {
         await type(page, '#unit-202', '10');
         await openTransport(page);
         await type(page, '#hyper-tech-level', '7');
-        await page.locator('#class-1').check();
+        await page.locator('#collector-class').check();
         await type(page, '#lf-collector-class-bonus', '1.5');
         await type(page, '#sc-capacity-increase', '3.5');
         await type(page, '#lc-capacity-increase', '4.25');
@@ -199,14 +199,20 @@ test.describe('Scrap Merchant - the page', () => {
         await expect(page.locator('#unit-202')).toHaveValue('0');
         await expect(page.locator('#full-numbers')).toBeChecked();
         await expect(page.locator('#hyper-tech-level')).toHaveValue('7');
-        await expect(page.locator('#class-1')).toBeChecked();
+        await expect(page.locator('#collector-class')).toBeChecked();
         await expect(page.locator('#lf-collector-class-bonus')).toHaveValue('1.5');
         await expect(page.locator('#sc-capacity-increase')).toHaveValue('3.5');
         await expect(page.locator('#lc-capacity-increase')).toHaveValue('4.25');
         const saved = await page.evaluate(() => JSON.parse(localStorage.getItem('options_scrap') ?? '{}'));
         expect(saved).toEqual({
-            fullNumbers: true, hyperTechLevel: 7, playerClass: 1, collectorClassBonus: 1.5, scCapacityIncrease: 3.5, lcCapacityIncrease: 4.25,
+            fullNumbers: true, hyperTechLevel: 7, isCollector: true, collectorClassBonus: 1.5, scCapacityIncrease: 3.5, lcCapacityIncrease: 4.25,
         });
+
+        // Unticked survives a reload too.
+        await openTransport(page);
+        await page.locator('#collector-class').uncheck();
+        await page.reload();
+        await expect(page.locator('#collector-class')).not.toBeChecked();
     });
 
     test('a comma typed on the Russian page is saved as a plain number', async ({ page }) => {
@@ -220,18 +226,23 @@ test.describe('Scrap Merchant - the page', () => {
     });
 
     test('the cargo fields change the cargo counts', async ({ page }) => {
-        // A Death Star returns 3.5M. The page starts as a Collector: 6250 and 31250 a ship.
+        // A Death Star returns 3.5M. A fresh page counts at the base holds, the
+        // Collector box unticked: 5000 and 25000 a ship.
         await type(page, '#unit-214', '1');
-        await expectHeadCounts(page, '560', '112');
+        await expectHeadCounts(page, '700', '140');
         await openTransport(page);
-        await page.locator('#class-1').check();
+        await expect(page.locator('#collector-class')).not.toBeChecked();
+        await page.locator('#collector-class').check();
+        await expectHeadCounts(page, '560', '112');
+        await page.locator('#collector-class').uncheck();
         await expectHeadCounts(page, '700', '140');
         await type(page, '#hyper-tech-level', '10');
         await expectHeadCounts(page, '467', '94');
-        // The enhancement raises the Collector's bonus, and nobody else's.
+        // The enhancement raises the Collector's bonus: nothing while the box is unticked.
+        await expect(page.locator('#lf-collector-class-bonus')).toBeEnabled();
         await type(page, '#lf-collector-class-bonus', '60');
         await expectHeadCounts(page, '467', '94');
-        await page.locator('#class-0').check();
+        await page.locator('#collector-class').check();
         await expectHeadCounts(page, '369', '74');
         await type(page, '#sc-capacity-increase', '10');
         await type(page, '#lc-capacity-increase', '20');
@@ -246,7 +257,7 @@ test.describe('Scrap Merchant - the page', () => {
         data.ships['202'].cargo = 0.1;
         data.ships['203'].cargo = 0.2;
         await importOwnApi(page, JSON.stringify(data));
-        await expect(page.locator('#class-0')).toBeChecked();
+        await expect(page.locator('#collector-class')).toBeChecked();
         await expect(page.locator('#lf-collector-class-bonus')).toHaveValue('60');
         await expect(page.locator('#sc-capacity-increase')).toHaveValue('10');
         await expect(page.locator('#lc-capacity-increase')).toHaveValue('20');
@@ -254,22 +265,38 @@ test.describe('Scrap Merchant - the page', () => {
         await expectHeadCounts(page, '9.999', '1.903');
     });
 
+    test('the import ticks the box for a Collector only, and leaves it without a class', async ({ page }) => {
+        const data = JSON.parse(OWN_API);
+        data.characterClassId = 2;
+        await openTransport(page);
+        await page.locator('#collector-class').check();
+        await importOwnApi(page, JSON.stringify(data));
+        await expect(page.locator('#collector-class')).not.toBeChecked();
+        data.characterClassId = 1;
+        await importOwnApi(page, JSON.stringify(data));
+        await expect(page.locator('#collector-class')).toBeChecked();
+        delete data.characterClassId;
+        await importOwnApi(page, JSON.stringify(data));
+        await expect(page.locator('#collector-class')).toBeChecked();
+    });
+
     test('the reset clears the counts and the rate, and the cargo fields too', async ({ page }) => {
         await importOwnApi(page);
         await type(page, '#scrap-rate', '42');
         await openTransport(page);
         await type(page, '#sc-capacity-increase', '5');
+        await page.locator('#collector-class').check();
         await page.locator('#reset').click();
         await expect(page.locator('#unit-202')).toHaveValue('0');
         await expect(page.locator('#unit-401')).toHaveValue('0');
         await expect(page.locator('#scrap-rate')).toHaveValue('35');
         await expect(page.locator('#total-cost-metal')).toHaveText('0');
         await expect(page.locator('#hyper-tech-level')).toHaveValue('0');
-        await expect(page.locator('#class-0')).toBeChecked();
+        await expect(page.locator('#collector-class')).not.toBeChecked();
         await expect(page.locator('#sc-capacity-increase')).toHaveValue('0');
         const saved = await page.evaluate(() => JSON.parse(localStorage.getItem('options_scrap') ?? '{}'));
         expect(saved.hyperTechLevel).toBe(0);
-        expect(saved.playerClass).toBe(0);
+        expect(saved.isCollector).toBe(false);
     });
 
     for (const [what, text] of [
@@ -324,11 +351,26 @@ test.describe('Scrap Merchant - MCP tool', () => {
  * export leaves out is a unit the planet does not have), Beta no ships at all
  * (a planet whose fleet nobody imported).
  */
-function editedExport() {
+function editedExport(characterClassId = 1) {
     const data = JSON.parse(ACCOUNT_EXPORT);
     delete data.planets['900001'].ships['203'];
     delete data.planets['900002'].ships;
+    data.characterClassId = characterClassId;
     return JSON.stringify(data);
+}
+
+/** The class the active profile holds: {game, override?}. */
+async function profileClass(page) {
+    return page.evaluate(() => {
+        const own = sessionStorage.getItem('pfg_active_profile');
+        const id = JSON.parse(own ?? localStorage.getItem('pfg_active_profile') ?? '""');
+        return id ? JSON.parse(localStorage.getItem('pfg_profile_' + id) || 'null')?.account.values.class : null;
+    });
+}
+
+/** The class a stored {game, override?} pair stands for (1 Collector, 2 General, 3 Discoverer). */
+function effectiveClass(cls) {
+    return cls?.override ?? cls?.game;
 }
 
 /** Import an account export into a new profile, picking the first universe offered. */
@@ -407,7 +449,7 @@ test.describe('Scrap Merchant - player profiles', () => {
         // 8338 and 42009 a ship, as the cost calculator holds them.
         await openTransport(page);
         await expect(page.locator('#hyper-tech-level')).toHaveValue('8');
-        await expect(page.locator('#class-0')).toBeChecked();
+        await expect(page.locator('#collector-class')).toBeChecked();
         await expect(page.locator('#lf-collector-class-bonus')).toHaveValue('2.15');
         await expect(page.locator('#sc-capacity-increase')).toHaveValue('1.23');
         await expect(page.locator('#lc-capacity-increase')).toHaveValue('2.5');
@@ -421,22 +463,31 @@ test.describe('Scrap Merchant - player profiles', () => {
     test('a cargo field edited under a profile goes into the profile, not into the own settings', async ({ page }) => {
         await openTransport(page);
         await type(page, '#hyper-tech-level', '12');
-        await page.locator('#class-1').check();
+        // Unticking under a Collector's profile leaves it with no class.
+        await page.locator('#collector-class').uncheck();
+        await expect.poll(() => profileClass(page)).toEqual({ game: 1, override: 0 });
         await page.reload();
         await expect(page.locator('#hyper-tech-level')).toHaveValue('12');
-        await expect(page.locator('#class-1')).toBeChecked();
+        await expect(page.locator('#collector-class')).not.toBeChecked();
         // The cost calculator reads the same profile.
         await page.goto('/en/costs');
         await expect(page.locator('#hyper-tech-level')).toHaveValue('12');
-        await expect(page.locator('#class-1')).toBeChecked();
         // Without the profile the page's own values come back.
         await page.goto('/en/scrap');
         await page.locator('#pf-select').selectOption('');
         await expect(page.locator('#hyper-tech-level')).toHaveValue('0');
-        await expect(page.locator('#class-0')).toBeChecked();
+        await expect(page.locator('#collector-class')).not.toBeChecked();
         const saved = await page.evaluate(() => JSON.parse(localStorage.getItem('options_scrap') ?? '{}'));
         expect(saved.hyperTechLevel).toBe(0);
-        expect(saved.playerClass).toBe(0);
+        expect(saved.isCollector).toBe(false);
+    });
+
+    test('ticking the box under a profile writes the Collector back', async ({ page }) => {
+        await openTransport(page);
+        await page.locator('#collector-class').uncheck();
+        await expect.poll(() => profileClass(page)).toEqual({ game: 1, override: 0 });
+        await page.locator('#collector-class').check();
+        await expect.poll(async () => effectiveClass(await profileClass(page))).toBe(1);
     });
 
     test('the reset keeps the cargo fields the profile owns', async ({ page }) => {
@@ -449,6 +500,7 @@ test.describe('Scrap Merchant - player profiles', () => {
         await expect(page.locator('#scrap-rate')).toHaveValue('35');
         await expect(page.locator('#unit-202')).toHaveValue('0');
         await expect(page.locator('#hyper-tech-level')).toHaveValue('8');
+        await expect(page.locator('#collector-class')).toBeChecked();
         await expect(page.locator('#sc-capacity-increase')).toHaveValue('5');
     });
 
@@ -457,5 +509,25 @@ test.describe('Scrap Merchant - player profiles', () => {
         await expect(page.locator('#pf-planet-box')).toBeHidden();
         await expect(page.locator('#unit-217-planet')).toBeHidden();
         await expect(page.locator('#fleet-planet-hint')).toBeHidden();
+    });
+});
+
+test.describe('Scrap Merchant - a General\'s profile', () => {
+    test.beforeEach(async ({ page }) => {
+        await page.goto('/en/scrap');
+        await importAccount(page, editedExport(2));
+    });
+
+    test('shows the box unticked and keeps the class until the box is ticked', async ({ page }) => {
+        await openTransport(page);
+        await expect(page.locator('#collector-class')).not.toBeChecked();
+        // An edit elsewhere leaves the General alone.
+        await type(page, '#hyper-tech-level', '9');
+        await expect.poll(async () => effectiveClass(await profileClass(page))).toBe(2);
+        await page.locator('#collector-class').check();
+        await expect.poll(() => profileClass(page)).toEqual({ game: 2, override: 1 });
+        // Unticked again, a Collector becomes no class, not the General back.
+        await page.locator('#collector-class').uncheck();
+        await expect.poll(() => profileClass(page)).toEqual({ game: 2, override: 0 });
     });
 });

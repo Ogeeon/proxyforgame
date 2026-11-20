@@ -44,16 +44,16 @@ const SCRAP_RATE_DIGITS = 2;
  */
 const SCRAP_CARGO_BASE_HOLD = Object.freeze({ small: 5000, large: 25000 });
 
-/** The player class numbers, as the cost calculator has them: 0 is the Collector. */
-const SCRAP_CLASS = Object.freeze({ COLLECTOR: 0, GENERAL: 1, DISCOVERER: 2 });
-
 /**
  * The bonuses to the cargo holds, all optional. A missing or unreadable one
- * counts as none, so a call without them hauls at the base holds.
+ * counts as none, so a call without them hauls at the base holds. Of the
+ * classes only the Collector raises a small or a large cargo's hold (the
+ * General's cargo bonus is the recycler's and the pathfinder's), so the class
+ * is a flag here.
  *
  * @typedef {object} ScrapCargoParams
  * @property {unknown} [hyperTechLevel] Hyperspace technology level.
- * @property {unknown} [playerClass] SCRAP_CLASS; anything else is no class.
+ * @property {unknown} [isCollector] True for the Collector; anything else is another class or none.
  * @property {unknown} [collectorClassBonus] The Collector Enhancement total, %: raises the Collector's bonus.
  * @property {unknown} [scCapacityIncrease] The small cargo's life form cargo bonus, %.
  * @property {unknown} [lcCapacityIncrease] The large cargo's life form cargo bonus, %.
@@ -126,18 +126,6 @@ function scrapPercent(percent) {
 }
 
 /**
- * A player class as SCRAP_CLASS numbers it, or -1 for none.
- *
- * @param {unknown} playerClass
- * @returns {number}
- */
-function scrapClass(playerClass) {
-  const value = Number(playerClass);
-  if (playerClass === null || playerClass === '' || !Number.isInteger(value)) return -1;
-  return value >= SCRAP_CLASS.COLLECTOR && value <= SCRAP_CLASS.DISCOVERER ? value : -1;
-}
-
-/**
  * What a cargo ship's hold takes, the way the cost calculator builds it
  * (costs-core.js, _holdParams): hyperspace technology, the Collector's +25%
  * raised by the Collector Enhancement - for the Collector only - and the
@@ -148,7 +136,7 @@ function scrapClass(playerClass) {
  * @returns {HoldParams}
  */
 function scrapHoldParams(params, lfBonus) {
-  const collector = scrapClass(params.playerClass) === SCRAP_CLASS.COLLECTOR;
+  const collector = params.isCollector === true;
   return {
     // A level is a whole number, at least 0 - the rule a count follows.
     hyperTechLevel: scrapCount(params.hyperTechLevel),
@@ -267,7 +255,7 @@ function calculateScrap(params, techData) {
 
 if (typeof window !== 'undefined') {
   Object.assign(window, {
-    SCRAP_FLEET_IDS, SCRAP_DEFENSE_IDS, SCRAP_RATE, SCRAP_CARGO_BASE_HOLD, SCRAP_CLASS, scrapRate, scrapCount,
-    scrapPercent, scrapClass, scrapHoldParams, scrapUnitPayback, calculateScrap,
+    SCRAP_FLEET_IDS, SCRAP_DEFENSE_IDS, SCRAP_RATE, SCRAP_CARGO_BASE_HOLD, scrapRate, scrapCount,
+    scrapPercent, scrapHoldParams, scrapUnitPayback, calculateScrap,
   });
 }

@@ -1513,7 +1513,7 @@ describe('MCP tool ogame_scrap', () => {
         const out = (await scrap({ ships: { 'death-star': 1 }, ...cargo })).structuredContent;
         const core = calculateScrap({
             counts: { 214: 1 }, rate: 35,
-            hyperTechLevel: 8, playerClass: 0, collectorClassBonus: 2.15, scCapacityIncrease: 1.23, lcCapacityIncrease: 2.5,
+            hyperTechLevel: 8, isCollector: true, collectorClassBonus: 2.15, scCapacityIncrease: 1.23, lcCapacityIncrease: 2.5,
         }, PRICES);
         expect(out.cargoShipsToHaulReturn).toEqual({
             smallCargo: core.transport.small, largeCargo: core.transport.large, smallCargoHold: 8338, largeCargoHold: 42009,
