@@ -37,11 +37,27 @@ const SCRAP_RATE_DIGITS = 2;
 
 /**
  * The base holds of the two cargo ships the return is hauled away in. They go
- * through shipHold() (ogame-cargo.js) with no technology and no bonus, and the
- * page labels the counts "at base capacity": the player's hyperspace
- * technology and class are inputs this calculator does not ask for.
+ * through shipHold() (ogame-cargo.js) with the player's hyperspace technology,
+ * the Collector's bonus raised by the Collector Enhancement, and each ship's
+ * own life form cargo bonus - the bonuses the cost calculator gives its
+ * transports. Without them the holds are these.
  */
 const SCRAP_CARGO_BASE_HOLD = Object.freeze({ small: 5000, large: 25000 });
+
+/** The player class numbers, as the cost calculator has them: 0 is the Collector. */
+const SCRAP_CLASS = Object.freeze({ COLLECTOR: 0, GENERAL: 1, DISCOVERER: 2 });
+
+/**
+ * The bonuses to the cargo holds, all optional. A missing or unreadable one
+ * counts as none, so a call without them hauls at the base holds.
+ *
+ * @typedef {object} ScrapCargoParams
+ * @property {unknown} [hyperTechLevel] Hyperspace technology level.
+ * @property {unknown} [playerClass] SCRAP_CLASS; anything else is no class.
+ * @property {unknown} [collectorClassBonus] The Collector Enhancement total, %: raises the Collector's bonus.
+ * @property {unknown} [scCapacityIncrease] The small cargo's life form cargo bonus, %.
+ * @property {unknown} [lcCapacityIncrease] The large cargo's life form cargo bonus, %.
+ */
 
 /**
  * @typedef {object} ScrapResources
@@ -68,7 +84,8 @@ const SCRAP_CARGO_BASE_HOLD = Object.freeze({ small: 5000, large: 25000 });
  * @property {ScrapSection} defense
  * @property {ScrapSection} total
  * @property {{small: number, large: number, smallHold: number, largeHold: number}} transport
- *   Small or large cargoes needed to haul the whole return away, at base capacity.
+ *   Small or large cargoes needed to haul the whole return away, and the hold
+ *   of one of each with the cargo bonuses given (ScrapCargoParams).
  */
 
 /**
@@ -94,6 +111,51 @@ function scrapRate(rate) {
 function scrapCount(count) {
   const value = Math.floor(Number(count));
   return Number.isFinite(value) && value > 0 ? value : 0;
+}
+
+/**
+ * A cargo bonus in percent, as the cost calculator holds it: at least 0, a
+ * fraction allowed; anything that is not a number is 0.
+ *
+ * @param {unknown} percent
+ * @returns {number}
+ */
+function scrapPercent(percent) {
+  const value = Number(percent);
+  return percent !== null && percent !== '' && Number.isFinite(value) && value > 0 ? value : 0;
+}
+
+/**
+ * A player class as SCRAP_CLASS numbers it, or -1 for none.
+ *
+ * @param {unknown} playerClass
+ * @returns {number}
+ */
+function scrapClass(playerClass) {
+  const value = Number(playerClass);
+  if (playerClass === null || playerClass === '' || !Number.isInteger(value)) return -1;
+  return value >= SCRAP_CLASS.COLLECTOR && value <= SCRAP_CLASS.DISCOVERER ? value : -1;
+}
+
+/**
+ * What a cargo ship's hold takes, the way the cost calculator builds it
+ * (costs-core.js, _holdParams): hyperspace technology, the Collector's +25%
+ * raised by the Collector Enhancement - for the Collector only - and the
+ * ship's own bonus.
+ *
+ * @param {ScrapCargoParams} params
+ * @param {unknown} lfBonus The ship's life form cargo bonus, %.
+ * @returns {HoldParams}
+ */
+function scrapHoldParams(params, lfBonus) {
+  const collector = scrapClass(params.playerClass) === SCRAP_CLASS.COLLECTOR;
+  return {
+    // A level is a whole number, at least 0 - the rule a count follows.
+    hyperTechLevel: scrapCount(params.hyperTechLevel),
+    classBonus: collector ? HOLD_CLASS_BONUS.COLLECTOR : 0,
+    classEnhancement: collector ? scrapPercent(params.collectorClassBonus) : 0,
+    lfBonus: scrapPercent(lfBonus),
+  };
 }
 
 /** @returns {ScrapResources} */
@@ -169,9 +231,9 @@ function scrapSectionOf(cost, payback) {
 /**
  * What a fleet and a defense cost and what the merchant pays for them.
  *
- * @param {{counts: Object<string, unknown>, rate: unknown}} params Counts by tech
+ * @param {{counts: Object<string, unknown>, rate: unknown} & ScrapCargoParams} params Counts by tech
  *   id - ships, defenses and missiles in one map; an id the merchant does not
- *   buy is ignored - and the rate in percent.
+ *   buy is ignored - the rate in percent, and the bonuses to the cargo holds.
  * @param {Object<string, number[]>} techData Unit prices, {id: [metal, crystal, deuterium, ...]}.
  * @returns {ScrapResult}
  */
@@ -186,8 +248,8 @@ function calculateScrap(params, techData) {
     metal: a.metal + b.metal, crystal: a.crystal + b.crystal, deuterium: a.deuterium + b.deuterium,
   });
   const total = scrapSectionOf(add(fleet.cost, defense.cost), add(fleet.payback, defense.payback));
-  const smallHold = shipHold(SCRAP_CARGO_BASE_HOLD.small, { hyperTechLevel: 0 });
-  const largeHold = shipHold(SCRAP_CARGO_BASE_HOLD.large, { hyperTechLevel: 0 });
+  const smallHold = shipHold(SCRAP_CARGO_BASE_HOLD.small, scrapHoldParams(params, params.scCapacityIncrease));
+  const largeHold = shipHold(SCRAP_CARGO_BASE_HOLD.large, scrapHoldParams(params, params.lcCapacityIncrease));
   return {
     rate,
     units,
@@ -205,7 +267,7 @@ function calculateScrap(params, techData) {
 
 if (typeof window !== 'undefined') {
   Object.assign(window, {
-    SCRAP_FLEET_IDS, SCRAP_DEFENSE_IDS, SCRAP_RATE, SCRAP_CARGO_BASE_HOLD, scrapRate, scrapCount, scrapUnitPayback,
-    calculateScrap,
+    SCRAP_FLEET_IDS, SCRAP_DEFENSE_IDS, SCRAP_RATE, SCRAP_CARGO_BASE_HOLD, SCRAP_CLASS, scrapRate, scrapCount,
+    scrapPercent, scrapClass, scrapHoldParams, scrapUnitPayback, calculateScrap,
   });
 }

@@ -39,6 +39,10 @@ const inputSchema = {
             type: 'number', minimum: SCRAP_RATE.min, maximum: SCRAP_RATE.max, default: SCRAP_RATE.def,
             description: 'Merchant\'s rate, % of the cost.',
         },
+        // The cargo holds, as ogame_build_cost takes them.
+        hyperspaceTechnology: common.hyperspaceTechnologySchema,
+        playerClass: common.playerClassSchema,
+        lifeforms: common.lifeformsSchema(['collectorClassBonus'], ['small-cargo', 'large-cargo']),
     },
     additionalProperties: false,
 };
@@ -53,9 +57,9 @@ function createScrapTool() {
     return {
         name: 'ogame_scrap',
         title: 'OGame Scrap Merchant',
-        description: 'What the Scrap Merchant pays for ships, defenses and missiles: full cost and return per '
-            + 'resource, fleet and defense apart and together, points lost, cargo ships to haul the return (base '
-            + 'capacity). Uses the ProxyForGame scrap calculator.',
+        description: 'What the Scrap Merchant pays for ships, defenses and missiles: cost and return per resource, '
+            + 'fleet and defense apart and in total, points lost, cargo ships to haul it. '
+            + 'Uses the ProxyForGame scrap calculator.',
         inputSchema,
         run(args) {
             /** @type {Record<string, number>} */
@@ -64,13 +68,25 @@ function createScrapTool() {
             counts[SATELLITE] = args.solarSatellites?.count ?? 0;
             counts[CRAWLER] = args.crawlers?.count ?? 0;
             DEFENSE_IDS.forEach((id) => { counts[id] = args.defenses?.[keyOf(id)] ?? 0; });
-            const r = calculateScrap({ counts, rate: args.rate ?? SCRAP_RATE.def }, PRICES);
+            const r = calculateScrap({
+                counts,
+                rate: args.rate ?? SCRAP_RATE.def,
+                hyperTechLevel: args.hyperspaceTechnology,
+                // The cost calculator's class numbers, the scrap core's too: 'none' is -1.
+                playerClass: common.classId(args.playerClass),
+                collectorClassBonus: args.lifeforms?.collectorClassBonus,
+                scCapacityIncrease: common.shipCargoBonus(args.lifeforms, 'small-cargo'),
+                lcCapacityIncrease: common.shipCargoBonus(args.lifeforms, 'large-cargo'),
+            }, PRICES);
             return {
                 ratePercent: r.rate,
                 fleet: section(r.fleet),
                 defense: section(r.defense),
                 total: section(r.total),
-                cargoShipsToHaulReturn: { smallCargo: r.transport.small, largeCargo: r.transport.large },
+                cargoShipsToHaulReturn: {
+                    smallCargo: r.transport.small, largeCargo: r.transport.large,
+                    smallCargoHold: r.transport.smallHold, largeCargoHold: r.transport.largeHold,
+                },
             };
         },
     };

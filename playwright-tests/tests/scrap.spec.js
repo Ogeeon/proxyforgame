@@ -30,6 +30,18 @@ async function openDefenseTab(page) {
     await expect(page.locator('#sell-defense')).toBeVisible();
 }
 
+/** Open the transport accordion, where the cargo fields are. */
+async function openTransport(page) {
+    await page.locator('#transport-toggle').click();
+    await expect(page.locator('#hyper-tech-level')).toBeVisible();
+}
+
+/** The cargo counts in the accordion's header, small then large. */
+async function expectHeadCounts(page, small, large) {
+    await expect(page.locator('#transport-small-head')).toHaveText(small);
+    await expect(page.locator('#transport-large-head')).toHaveText(large);
+}
+
 /** Paste the API 2 export and import it. */
 async function importOwnApi(page, text = OWN_API) {
     await page.locator('#own-api-input').fill(text);
@@ -79,14 +91,13 @@ test.describe('Scrap Merchant - the page', () => {
         await expect(page.locator('#transport-body')).toBeHidden();
         await expect(page.locator('#transport-toggle')).toHaveText(/Cargo ships to haul the resources away: SC\s0 \/ LC\s0/);
         await importOwnApi(page);
-        await expect(page.locator('#transport-small-head')).toHaveText('19.498');
-        await expect(page.locator('#transport-large-head')).toHaveText('3.900');
+        await expectHeadCounts(page, '13.447', '2.690');
         await expect(page.locator('#transport-body')).toBeHidden();
 
         await page.locator('#transport-toggle').click();
         await expect(page.locator('#transport-body')).toBeVisible();
-        await expect(page.locator('#transport-small')).toHaveText('19.498');
-        await expect(page.locator('#transport-large')).toHaveText('3.900');
+        await expect(page.locator('#transport-small')).toHaveText('13.447');
+        await expect(page.locator('#transport-large')).toHaveText('2.690');
 
         // The open state is not saved.
         await page.reload();
@@ -109,8 +120,14 @@ test.describe('Scrap Merchant - the page', () => {
         await expect(page.locator('#total-cost-msu')).toHaveText('278.5M');
         await expect(page.locator('#total-payback-msu')).toHaveText('97.4M');
         await expect(page.locator('#points-lost')).toHaveText('278.540');
-        await expect(page.locator('#transport-small')).toHaveText('19.498');
-        await expect(page.locator('#transport-large')).toHaveText('3.900');
+        // The export's player: hyperspace 9, a Discoverer, no cargo bonuses -
+        // 7250 and 36250 a ship.
+        await expect(page.locator('#hyper-tech-level')).toHaveValue('9');
+        await expect(page.locator('#class-2')).toBeChecked();
+        await expect(page.locator('#lf-collector-class-bonus')).toHaveValue('0');
+        await expect(page.locator('#sc-capacity-increase')).toHaveValue('0');
+        await expect(page.locator('#transport-small')).toHaveText('13.447');
+        await expect(page.locator('#transport-large')).toHaveText('2.690');
 
         await page.locator('#full-numbers').check();
         await expect(page.locator('#fleet-payback-metal')).toHaveText('16.861.950');
@@ -167,26 +184,92 @@ test.describe('Scrap Merchant - the page', () => {
         await expect(page.locator('#total-payback-metal')).toHaveText('2.000');
     });
 
-    test('the rate and the counts start over after a reload, the full numbers stay', async ({ page }) => {
+    test('the rate and the counts start over after a reload, the full numbers and the cargo stay', async ({ page }) => {
         await page.locator('#full-numbers').check();
         await type(page, '#scrap-rate', '50');
         await type(page, '#unit-202', '10');
+        await openTransport(page);
+        await type(page, '#hyper-tech-level', '7');
+        await page.locator('#class-1').check();
+        await type(page, '#lf-collector-class-bonus', '1.5');
+        await type(page, '#sc-capacity-increase', '3.5');
+        await type(page, '#lc-capacity-increase', '4.25');
         await page.reload();
         await expect(page.locator('#scrap-rate')).toHaveValue('35');
         await expect(page.locator('#unit-202')).toHaveValue('0');
         await expect(page.locator('#full-numbers')).toBeChecked();
+        await expect(page.locator('#hyper-tech-level')).toHaveValue('7');
+        await expect(page.locator('#class-1')).toBeChecked();
+        await expect(page.locator('#lf-collector-class-bonus')).toHaveValue('1.5');
+        await expect(page.locator('#sc-capacity-increase')).toHaveValue('3.5');
+        await expect(page.locator('#lc-capacity-increase')).toHaveValue('4.25');
         const saved = await page.evaluate(() => JSON.parse(localStorage.getItem('options_scrap') ?? '{}'));
-        expect(saved).toEqual({ fullNumbers: true });
+        expect(saved).toEqual({
+            fullNumbers: true, hyperTechLevel: 7, playerClass: 1, collectorClassBonus: 1.5, scCapacityIncrease: 3.5, lcCapacityIncrease: 4.25,
+        });
     });
 
-    test('the reset clears the counts and the rate', async ({ page }) => {
+    test('a comma typed on the Russian page is saved as a plain number', async ({ page }) => {
+        await page.goto('/ru/scrap');
+        await openTransport(page);
+        await type(page, '#sc-capacity-increase', '3,5');
+        const saved = await page.evaluate(() => JSON.parse(localStorage.getItem('options_scrap') ?? '{}'));
+        expect(saved.scCapacityIncrease).toBe(3.5);
+        await page.reload();
+        await expect(page.locator('#sc-capacity-increase')).toHaveValue('3,5');
+    });
+
+    test('the cargo fields change the cargo counts', async ({ page }) => {
+        // A Death Star returns 3.5M. The page starts as a Collector: 6250 and 31250 a ship.
+        await type(page, '#unit-214', '1');
+        await expectHeadCounts(page, '560', '112');
+        await openTransport(page);
+        await page.locator('#class-1').check();
+        await expectHeadCounts(page, '700', '140');
+        await type(page, '#hyper-tech-level', '10');
+        await expectHeadCounts(page, '467', '94');
+        // The enhancement raises the Collector's bonus, and nobody else's.
+        await type(page, '#lf-collector-class-bonus', '60');
+        await expectHeadCounts(page, '467', '94');
+        await page.locator('#class-0').check();
+        await expectHeadCounts(page, '369', '74');
+        await type(page, '#sc-capacity-increase', '10');
+        await type(page, '#lc-capacity-increase', '20');
+        await expectHeadCounts(page, '350', '67');
+        await expect(page.locator('#transport-small')).toHaveText('350');
+    });
+
+    test('the import fills the class booster and the cargo bonuses the export carries', async ({ page }) => {
+        const data = JSON.parse(OWN_API);
+        data.characterClassId = 1;
+        data.bonuses.characterClassBooster['1'] = 0.6;
+        data.ships['202'].cargo = 0.1;
+        data.ships['203'].cargo = 0.2;
+        await importOwnApi(page, JSON.stringify(data));
+        await expect(page.locator('#class-0')).toBeChecked();
+        await expect(page.locator('#lf-collector-class-bonus')).toHaveValue('60');
+        await expect(page.locator('#sc-capacity-increase')).toHaveValue('10');
+        await expect(page.locator('#lc-capacity-increase')).toHaveValue('20');
+        // 7250 + 2000 + 500 and 36250 + 10000 + 5000 a ship.
+        await expectHeadCounts(page, '9.999', '1.903');
+    });
+
+    test('the reset clears the counts and the rate, and the cargo fields too', async ({ page }) => {
         await importOwnApi(page);
         await type(page, '#scrap-rate', '42');
+        await openTransport(page);
+        await type(page, '#sc-capacity-increase', '5');
         await page.locator('#reset').click();
         await expect(page.locator('#unit-202')).toHaveValue('0');
         await expect(page.locator('#unit-401')).toHaveValue('0');
         await expect(page.locator('#scrap-rate')).toHaveValue('35');
         await expect(page.locator('#total-cost-metal')).toHaveText('0');
+        await expect(page.locator('#hyper-tech-level')).toHaveValue('0');
+        await expect(page.locator('#class-0')).toBeChecked();
+        await expect(page.locator('#sc-capacity-increase')).toHaveValue('0');
+        const saved = await page.evaluate(() => JSON.parse(localStorage.getItem('options_scrap') ?? '{}'));
+        expect(saved.hyperTechLevel).toBe(0);
+        expect(saved.playerClass).toBe(0);
     });
 
     for (const [what, text] of [
@@ -225,6 +308,9 @@ test.describe('Scrap Merchant - MCP tool', () => {
             { tool, arg: 'crawlers.count', selector: '#unit-217' },
             { tool, arg: 'defenses.plasma-turret', selector: '#unit-406' },
             { tool, arg: 'defenses.ipm', selector: '#unit-503' },
+            { tool, arg: 'hyperspaceTechnology', selector: '#hyper-tech-level', prm: 'hyperTechLevel' },
+            { tool, arg: 'lifeforms.collectorClassBonus', selector: '#lf-collector-class-bonus', prm: 'collectorClassBonus' },
+            { tool, arg: 'lifeforms.shipBonuses.small-cargo.cargo', selector: '#sc-capacity-increase', prm: 'scCapacityIncrease' },
         ]);
     });
 });
@@ -314,6 +400,56 @@ test.describe('Scrap Merchant - player profiles', () => {
         await page.locator('#pf-planet').selectOption({ label: 'Colony [3:20:4]' });
         await expect(page.locator('#unit-401-planet')).toHaveText('0');
         await expect(page.locator('#unit-401')).toHaveValue('1000');
+    });
+
+    test('the profile fills the cargo fields from the account', async ({ page }) => {
+        // Hyperspace 8, a Collector, enhancement 2.15%, cargo bonuses 1.23% and 2.5%:
+        // 8338 and 42009 a ship, as the cost calculator holds them.
+        await openTransport(page);
+        await expect(page.locator('#hyper-tech-level')).toHaveValue('8');
+        await expect(page.locator('#class-0')).toBeChecked();
+        await expect(page.locator('#lf-collector-class-bonus')).toHaveValue('2.15');
+        await expect(page.locator('#sc-capacity-increase')).toHaveValue('1.23');
+        await expect(page.locator('#lc-capacity-increase')).toHaveValue('2.5');
+        await type(page, '#unit-214', '1');
+        await expectHeadCounts(page, '420', '84');
+        // Account values: another planet leaves them as they are.
+        await page.locator('#pf-planet').selectOption({ label: 'Beta [2:150:12]' });
+        await expect(page.locator('#hyper-tech-level')).toHaveValue('8');
+    });
+
+    test('a cargo field edited under a profile goes into the profile, not into the own settings', async ({ page }) => {
+        await openTransport(page);
+        await type(page, '#hyper-tech-level', '12');
+        await page.locator('#class-1').check();
+        await page.reload();
+        await expect(page.locator('#hyper-tech-level')).toHaveValue('12');
+        await expect(page.locator('#class-1')).toBeChecked();
+        // The cost calculator reads the same profile.
+        await page.goto('/en/costs');
+        await expect(page.locator('#hyper-tech-level')).toHaveValue('12');
+        await expect(page.locator('#class-1')).toBeChecked();
+        // Without the profile the page's own values come back.
+        await page.goto('/en/scrap');
+        await page.locator('#pf-select').selectOption('');
+        await expect(page.locator('#hyper-tech-level')).toHaveValue('0');
+        await expect(page.locator('#class-0')).toBeChecked();
+        const saved = await page.evaluate(() => JSON.parse(localStorage.getItem('options_scrap') ?? '{}'));
+        expect(saved.hyperTechLevel).toBe(0);
+        expect(saved.playerClass).toBe(0);
+    });
+
+    test('the reset keeps the cargo fields the profile owns', async ({ page }) => {
+        await expect(page.locator('#reset')).toBeVisible();
+        await type(page, '#scrap-rate', '42');
+        await type(page, '#unit-202', '10');
+        await openTransport(page);
+        await type(page, '#sc-capacity-increase', '5');
+        await page.locator('#reset').click();
+        await expect(page.locator('#scrap-rate')).toHaveValue('35');
+        await expect(page.locator('#unit-202')).toHaveValue('0');
+        await expect(page.locator('#hyper-tech-level')).toHaveValue('8');
+        await expect(page.locator('#sc-capacity-increase')).toHaveValue('5');
     });
 
     test('back to no profile hides the select and the counts', async ({ page }) => {

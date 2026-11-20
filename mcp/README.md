@@ -26,7 +26,7 @@ Why it is built this way - Node, no dependencies, one process behind Apache:
 | `ogame_graviton` | graviton | Energy Graviton Technology needs against what the planet makes; satellites, cost, time, debris | `graviton-core.js` |
 | `ogame_terraformer` | terraformer | Terraformer cost, fields and energy, and the satellites that cover the shortfall | `terraformer-core.js`, `ogame-costs.js` |
 | `ogame_trade` | trade | What resources buy at given rates - one for one, one for a mix, two for one - and the cargo ships | `trade-core.js` |
-| `ogame_scrap` | scrap | What the Scrap Merchant pays for ships, defences and missiles at a rate: full cost and return per resource, points lost, cargo ships at base capacity | `scrap-core.js`, `data/costs-techs.json` |
+| `ogame_scrap` | scrap | What the Scrap Merchant pays for ships, defences and missiles at a rate: full cost and return per resource, points lost, cargo ships with hyperspace technology, class and life form cargo bonuses | `scrap-core.js`, `data/costs-techs.json` |
 
 Most take an optional `universe: {country, number}` - `{"country": "en", "number": 1}`
 for s1-en - and read its speeds and settings through the site's `serverdata` and
@@ -34,7 +34,7 @@ for s1-en - and read its speeds and settings through the site's `serverdata` and
 overrides what is read. The input schemas in `tools/*.js` are the reference: the
 server validates every call against the schema it publishes.
 
-Everything all fourteen publish in `tools/list` comes to about 56.4 KB, held to a 57 KB budget
+Everything all fourteen publish in `tools/list` comes to just under 57 KB, held to a 57 KB budget
 by a test in `unit-tests/mcp-server.test.js` - every client loads it into its model's
 context, so keep new schemas lean: write a map from ships or buildings to a value with
 `keyedMap()` rather than one property per key, list an item's keys with their names in the

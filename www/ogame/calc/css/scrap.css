@@ -117,6 +117,13 @@
   padding-bottom: 0;
 }
 
+/* The cargo fields: a level and three percentages. In an input-group the
+   width comes from common.css's escape rule (docs/patterns.md, (d)). */
+.level-input {
+  width: 3.5rem;
+  text-align: center;
+}
+
 .count-input {
   width: 6.5rem;
   text-align: right;

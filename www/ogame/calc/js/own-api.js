@@ -4,7 +4,8 @@
 // The "API 2" field on the game's Fleet page exports the player's own planet as
 // a single line of JSON. Three calculators read it: `flight` takes coordinates,
 // classes, researches, ship counts and per-ship bonuses; `expeditions` takes the
-// cargo bonuses alone; `scrap` takes the ship, defense and missile counts. All
+// cargo bonuses alone; `scrap` takes the ship, defense and missile counts, and
+// the hyperspace level, class, Collector booster and cargo bonuses. All
 // of them go through parseOwnApi(), so the shape of the export and the unit
 // conversions are described in exactly one place.
 //

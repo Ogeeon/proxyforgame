@@ -240,6 +240,53 @@
           </h2>
           <div id="transport-body" class="accordion-collapse collapse">
             <div class="accordion-body">
+              <!-- What the holds take: the controls and keys of the cost
+                   calculator, so a profile binds them the same way. -->
+              <div class="d-flex flex-wrap gap-2 align-items-center justify-content-center mb-2">
+                <div class="d-flex align-items-center gap-1">
+                  <label for="hyper-tech-level"><?= $l['hyper-tech'] ?></label>
+                  <input id="hyper-tech-level" type="text" name="hyper-tech-level" class="form-control form-control-sm level-input" value="0" data-field-title="<?= htmlspecialchars($l['hyper-tech'], ENT_QUOTES, 'UTF-8') ?>">
+                </div>
+                <fieldset class="d-flex flex-wrap align-items-center column-gap-2 fieldset-reset">
+                  <legend><?= $l['class'] ?>:</legend>
+<?php foreach (['class-collector', 'class-general', 'class-discoverer'] as $i => $key): ?>
+                  <div class="d-flex align-items-center gap-1">
+                    <input id="class-<?= $i ?>" type="radio" name="class" value="<?= $i ?>" class="form-check-input m-0">
+                    <label for="class-<?= $i ?>"><?= $l[$key] ?></label>
+                  </div>
+<?php endforeach; ?>
+                </fieldset>
+              </div>
+              <div class="d-flex flex-wrap gap-2 align-items-center justify-content-center mb-2">
+                <div class="d-flex flex-wrap align-items-center gap-2 border rounded p-1">
+                  <span class="fw-semibold"><?= $l['class-collector'] ?>:</span>
+                  <div class="d-flex align-items-center gap-1">
+                    <label for="lf-collector-class-bonus"><?= $l['lf-class-bonus'] ?></label>
+                    <div class="input-group input-group-sm w-auto">
+                      <input id="lf-collector-class-bonus" type="text" name="lf-collector-class-bonus" class="form-control level-input m-0" value="0" data-field-title="<?= htmlspecialchars($l['collectors-character-bonus'], ENT_QUOTES, 'UTF-8') ?>">
+                      <span class="input-group-text">%</span>
+                    </div>
+                    <i class="bi bi-question-circle" data-bs-toggle="tooltip" title="<?= htmlspecialchars($l['lf-class-bonus-hint'], ENT_QUOTES, 'UTF-8') ?>"></i>
+                  </div>
+                </div>
+                <div class="d-flex flex-wrap align-items-center gap-2">
+                  <span><?= $l['cargo-cap-increase'] ?></span>
+                  <div class="d-flex align-items-center gap-1">
+                    <label for="sc-capacity-increase"><?= $l['sc-short'] ?></label>
+                    <div class="input-group input-group-sm w-auto">
+                      <input id="sc-capacity-increase" type="text" name="sc-capacity-increase" class="form-control level-input m-0" value="0" data-field-title="<?= htmlspecialchars(Intl::string($l, 'cargo-cap-increase') . Intl::string($l, 'sc-short'), ENT_QUOTES, 'UTF-8') ?>">
+                      <span class="input-group-text">%</span>
+                    </div>
+                  </div>
+                  <div class="d-flex align-items-center gap-1">
+                    <label for="lc-capacity-increase"><?= $l['lc-short'] ?></label>
+                    <div class="input-group input-group-sm w-auto">
+                      <input id="lc-capacity-increase" type="text" name="lc-capacity-increase" class="form-control level-input m-0" value="0" data-field-title="<?= htmlspecialchars(Intl::string($l, 'cargo-cap-increase') . Intl::string($l, 'lc-short'), ENT_QUOTES, 'UTF-8') ?>">
+                      <span class="input-group-text">%</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
               <div class="d-flex flex-wrap gap-3 align-items-center justify-content-center">
                 <div class="d-flex align-items-center gap-1 text-nowrap">
                   <span><?= $l['small-cargo'] ?></span>

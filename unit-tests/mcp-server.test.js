@@ -1499,7 +1499,29 @@ describe('MCP tool ogame_scrap', () => {
         expect(out.defense.cost).toEqual({ ...core.defense.cost });
         expect(out.total.paybackTotal).toBe(core.total.paybackSum);
         expect(out.total.points).toBe(core.total.points);
-        expect(out.cargoShipsToHaulReturn).toEqual({ smallCargo: core.transport.small, largeCargo: core.transport.large });
+        expect(out.cargoShipsToHaulReturn).toEqual({
+            smallCargo: core.transport.small, largeCargo: core.transport.large, smallCargoHold: 5000, largeCargoHold: 25000,
+        });
+    });
+
+    it('hauls with the cargo bonuses the page takes, at the base holds without them', async () => {
+        const cargo = {
+            hyperspaceTechnology: 8, playerClass: 'collector',
+            lifeforms: { collectorClassBonus: 2.15, shipBonuses: { 'small-cargo': { cargo: 1.23 }, 'large-cargo': { cargo: 2.5 } } },
+        };
+        const out = (await scrap({ ships: { 'death-star': 1 }, ...cargo })).structuredContent;
+        const core = calculateScrap({
+            counts: { 214: 1 }, rate: 35,
+            hyperTechLevel: 8, playerClass: 0, collectorClassBonus: 2.15, scCapacityIncrease: 1.23, lcCapacityIncrease: 2.5,
+        }, PRICES);
+        expect(out.cargoShipsToHaulReturn).toEqual({
+            smallCargo: core.transport.small, largeCargo: core.transport.large, smallCargoHold: 8338, largeCargoHold: 42009,
+        });
+        // The Collector Enhancement raises the Collector's bonus only.
+        const general = (await scrap({ ships: { 'death-star': 1 }, ...cargo, playerClass: 'general' })).structuredContent;
+        expect(general.cargoShipsToHaulReturn.smallCargoHold).toBe(7061);
+        const none = (await scrap({ ships: { 'death-star': 1 } })).structuredContent;
+        expect(none.cargoShipsToHaulReturn.smallCargoHold).toBe(5000);
     });
 
     it('pays 35% when no rate is given', async () => {
