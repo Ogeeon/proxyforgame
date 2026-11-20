@@ -3,7 +3,7 @@
   // for large screens and once in the offcanvas for small ones, so it must stay
   // free of ids. Reads $loc, $lang, $ogamePages and $currUrl from sidebar.tpl.
 ?>
-    <div class="sidebar-panel bg-body-secondary text-primary-emphasis"><?=$loc['ogameMenuItems']['header']?> <small>(13.0)</small></div>
+    <div class="sidebar-panel bg-body-secondary text-primary-emphasis"><?=$loc['ogameMenuItems']['header']?> <small>(13.1)</small></div>
     <div class="list-group list-group-flush">
     <a class="list-group-item list-group-item-action ogame-menu-item text-center" href="/<?=$lang?>/"><?=$loc['ogameMenuItems']['main-title']?></a>
     <?php foreach ($ogamePages as $page): ?>
