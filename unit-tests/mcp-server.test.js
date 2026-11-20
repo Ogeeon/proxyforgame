@@ -161,8 +161,9 @@ describe('MCP protocol', () => {
         // 52 KB until ogame_import_account added its 1.5 KB; 54 KB until the anomaly scanner
         // (one more building in ogame_build_cost and ogame_build_queue) went 30 bytes over;
         // 55 KB until ogame_build_queue took a `lifeforms` with the Terraformer reductions;
-        // 56 KB until ogame_scrap added its 1.3 KB.
-        const BUDGET = 57 * 1024;
+        // 56 KB until ogame_scrap added its 1.3 KB; 57 KB until ogame_scrap took the cargo
+        // bonuses and left 4 bytes of room.
+        const BUDGET = 58 * 1024;
         const { tools } = (await rpc(protocol, { jsonrpc: '2.0', id: 3, method: 'tools/list' })).result;
         const size = tools.reduce((sum, { name, title, description, inputSchema }) =>
             sum + JSON.stringify({ name, title, description, inputSchema }).length, 0);
