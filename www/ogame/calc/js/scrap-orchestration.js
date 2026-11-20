@@ -203,24 +203,24 @@ const SCRAP_OWN_API_COLLECTOR = Object.freeze({ 1: true, 2: false, 3: false });
 const SCRAP_OWN_API_COLLECTOR_BOOSTER = '1';
 
 class ScrapApp {
-  constructor() {
-    /**
-     * True while a player profile is shown: it owns the cargo fields then, so
-     * the reset leaves them alone (scrap-profile.js sets it).
-     */
-    this.cargoOwnedByProfile = false;
-    /**
-     * While a player profile is shown: what it adds to the fleet save - the
-     * class, the enhancements, the ships' life form bonuses and the universe.
-     * Null without a profile, when the one fuel discount field stands for the
-     * class and the life forms (scrap-profile.js sets it).
-     *
-     * @type {?() => ScrapFleetsaveProfile}
-     */
-    this.fleetsaveProfile = null;
-    /** The class whose speed steps #fs-speed offers, flight-core.js PLAYER_CLASS. */
-    this.speedClass = PLAYER_CLASS.DISCOVERER;
-  }
+  /**
+   * True while a player profile is shown: it owns the cargo fields then, so
+   * the reset leaves them alone (scrap-profile.js sets it).
+   */
+  cargoOwnedByProfile = false;
+
+  /**
+   * While a player profile is shown: what it adds to the fleet save - the
+   * class, the enhancements, the ships' life form bonuses and the universe.
+   * Null without a profile, when the one fuel discount field stands for the
+   * class and the life forms (scrap-profile.js sets it).
+   *
+   * @type {?() => ScrapFleetsaveProfile}
+   */
+  fleetsaveProfile = null;
+
+  /** The class whose speed steps #fs-speed offers, flight-core.js PLAYER_CLASS. */
+  speedClass = PLAYER_CLASS.DISCOVERER;
 
   init() {
     options.load();
@@ -468,7 +468,11 @@ class ScrapApp {
       const drive = data.researches[tech];
       if (drive !== undefined) setVal(SCRAP_SELL_TIMING_FIELDS[SCRAP_DRIVE_KEYS[i]], drive);
     });
-    const collector = SCRAP_OWN_API_COLLECTOR[/** @type {1|2|3} */ (data.characterClassId)];
+    // An export may carry no class (0) or one this map does not know, so the
+    // lookup can miss even though the map's own type says otherwise.
+    /** @type {Record<number, boolean | undefined>} */
+    const collectors = SCRAP_OWN_API_COLLECTOR;
+    const collector = collectors[data.characterClassId];
     if (collector !== undefined) setChecked(SCRAP_COLLECTOR_BOX, collector);
     const booster = data.classBoosters[SCRAP_OWN_API_COLLECTOR_BOOSTER];
     if (booster !== undefined) setNumVal(SCRAP_CARGO_FIELDS.collectorClassBonus, booster);

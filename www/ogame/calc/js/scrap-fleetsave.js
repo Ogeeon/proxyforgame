@@ -85,7 +85,11 @@ function scrapNonNegative(v) {
 function scrapUniverse(universe = {}) {
   /** @type {Record<string, any>} */
   const out = { ...SCRAP_DEFAULT_UNIVERSE };
-  Object.entries(universe).forEach(([key, value]) => {
+  // A setting the caller does not know comes as undefined or null (a profile
+  // whose universe was never fetched), which ScrapUniverse's own types hide.
+  /** @type {Record<string, unknown>} */
+  const given = universe;
+  Object.entries(given).forEach(([key, value]) => {
     if (value !== undefined && value !== null) out[key] = value;
   });
   return /** @type {Required<ScrapUniverse>} */ (out);
