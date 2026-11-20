@@ -34,7 +34,7 @@ const PFG_PAGES = array(
  * without it gets a temporary one, because its target depends on the
  * visitor's Accept-Language and must not be cached for everyone.
  */
-function canonicalCalcPath($calc) {
+function canonicalCalcPath(string $calc): string {
     $path = '/' . $calc;
     $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
     if ($method !== 'GET' && $method !== 'HEAD') {
