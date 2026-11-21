@@ -352,13 +352,18 @@ function emptyLfEffects() {
 
 // Energy consumed by a single life form building at a given level.
 // Mirrors OGame's mine-style formula: floor(base * level * coeff^level),
-// where base and coeff come from the lfEnergy table (see lf-techdata.inc.php).
+// where base and coeff come from the lfEnergy table (see lf-techdata.inc.php) -
+// from level 2 on. At level 1 the game draws the base itself, without the growth
+// coefficient (Planetary Shield 100, Advanced Recycling Plant 100, Robotics
+// Research Centre 13, Deuterium Synthesiser 90 - the formula would give 102,
+// 110, 14 and 99). See docs/calculators/production-vs-ogame.md, section 3.
 /** @param {Object<string, number[]>} [lfEnergy] */
 function lfBuildingEnergy(bldId, level, lfEnergy) {
 	level = Number(level) || 0;
 	if (level < 1) return 0;
 	let data = lfEnergy ? lfEnergy[bldId] : undefined;
 	if (data === undefined) return 0;
+	if (level === 1) return data[0];
 	return Math.floor(data[0] * level * Math.pow(data[1], level));
 }
 

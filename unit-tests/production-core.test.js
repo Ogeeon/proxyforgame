@@ -274,6 +274,41 @@ describe('lfBuildingEffects', () => {
     it('has no effect without a life form', () => {
         expect(lfBuildingEffects(0, levels, tables).energyUsed).toBe(0);
     });
+
+    describe('energy draw at level 1', () => {
+        // Observed on s1-en, 2026-07 and 2026-11 (issue #88): at level 1 the game
+        // draws the base energy, with no growth coefficient applied.
+        const real = {
+            1012: [100, 1.02], // Planetary Shield
+            2004: [20, 1.35], // Rune Forge
+            2010: [90, 1.1], // Deuterium Synthesiser
+            2012: [100, 1.1], // Advanced Recycling Plant
+            3003: [13, 1.08], // Robotics Research Centre
+        };
+        const draw = (race, position, level) => {
+            const lv = new Array(12).fill(0);
+            lv[position - 1] = level;
+            return lfBuildingEffects(race, lv, { lfEnergy: real, lfBonus: {} }).energyUsed;
+        };
+
+        it('is the base energy', () => {
+            expect(draw(1, 12, 1)).toBe(100);
+            expect(draw(2, 12, 1)).toBe(100);
+            expect(draw(3, 3, 1)).toBe(13);
+            expect(draw(2, 10, 1)).toBe(90);
+            expect(draw(2, 4, 1)).toBe(20); // the formula would say 27
+        });
+
+        it('returns to the formula from level 2', () => {
+            expect(draw(1, 12, 3)).toBe(318); // Planetary Shield 3
+            expect(draw(2, 10, 2)).toBe(217); // Deuterium Synthesiser 2: floor(90 * 2 * 1.21)
+            expect(draw(2, 4, 12)).toBe(8794); // Rune Forge 12
+        });
+
+        it('draws nothing at level 0', () => {
+            expect(draw(2, 12, 0)).toBe(0);
+        });
+    });
 });
 
 describe('getSSCost', () => {

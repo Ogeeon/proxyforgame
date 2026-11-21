@@ -145,7 +145,7 @@ Not changed yet: `ogame-production.js` is shared by the costs and production cal
 and the Playwright expectations encode the current numbers, so switching to `Math.floor`
 needs a coordinated pass over the tests.
 
-## 3. Level-1 buildings draw base energy, without the growth coefficient — OPEN
+## 3. Level-1 buildings draw base energy, without the growth coefficient — FIXED
 
 The energy formula `floor(base × level × coeff^level)` (`lfBuildingEnergy`) matches
 OGame for every building at level 2 or above:
@@ -196,17 +196,21 @@ them multiplied by 0.96.)
 The formula is also confirmed by
 [sidian.app/s/ogame-wiki/lifeforms/formulas](https://sidian.app/s/ogame-wiki/lifeforms/formulas).
 
-Both level-1 observations we have, however, come out at exactly the base energy, with
+Every level-1 observation we have, however, comes out at exactly the base energy, with
 no growth coefficient applied:
 
 | Building | Level | Formula | OGame |
 |---|---|---|---|
 | **Planetary Shield** | **1** | 100 × 1 × 1.02 = 102 | **100** |
 | **Advanced Recycling Plant** | **1** | 100 × 1 × 1.1 = 110 | **100** (96 after −4 %) |
+| **Robotics Research Centre** | **1** | 13 × 1 × 1.08 = 14.04 | **13** (on four planets, 2026-11-21) |
+| **Deuterium Synthesiser** | **1** | 90 × 1 × 1.1 = 99 | **87** after −3 %, at 100 % production (90 × 0.97 = 87.3; the formula would give 96) |
 
-The two buildings have the same base (100) but different coefficients (1.02 and 1.1),
-and both land on 100 — a 2 % and a 10 % miss respectively, so this is not rounding
-noise. It looks like OGame simply does not apply the coefficient at level 1:
+The first two buildings share a base of 100, which left room for a coincidence; the
+Robotics Research Centre (base 13, coefficient 1.08) and the Deuterium Synthesiser
+(base 90, coefficient 1.1) do not. Four buildings, four different base/coefficient
+pairs, all landing on the base — so this is not rounding noise. OGame simply does not
+apply the coefficient at level 1:
 
 ```
 f(1) = base
@@ -227,13 +231,14 @@ The same building slot obeys the standard formula at levels 2 and 3, so
 `lf-techdata.inc.php` is correct — do not change it. What is special is the *level*, not
 the building.
 
-Still OPEN because the level-1 rule rests on two observations of buildings that happen
-to share a base of 100 — no level-1 building appears in cases C or D. The cheapest
-decisive test is a level-1 building with a large coefficient — e.g. Rune Forge
-(base 20, coeff 1.35): the formula predicts 27, the level-1 rule predicts 20.
+**Fix:** `lfBuildingEnergy` (`production-core.js`) returns the base at level 1 and the
+formula from level 2 (issue #88). A level-1 building used to over-draw by
+`base × (coeff − 1)`, which is small on one planet but shifts the production factor of
+an energy-short planet: on Epsilon the level-1 Deuterium Synthesiser made the
+factor 0.8948 against the game's 0.8950, 19 metal on the mine row.
 
-The practical impact is small (a level-1 building over-draws by `base × (coeff − 1)`
-energy), so the special case has not been added to `lfBuildingEnergy` yet.
+One prediction is still untested: a level-1 Rune Forge (base 20, coeff 1.35) should draw
+20, where the formula says 27. It does not block the rule.
 
 ## 4. Disruption Chamber energy-consumption reduction was not shown per row — FIXED
 
