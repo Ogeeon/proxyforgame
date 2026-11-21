@@ -574,11 +574,24 @@ function applyLfEnergyReduction(lfEff, totalEnergyUsed, crawlersEenergyCons, res
 	if (lfEff.enR <= 0) return totalEnergyUsed;
 	let enRFactor = 1 - Math.min(lfEff.enR, 100) / 100;
 	for (let i = 1; i < 4; i++)
-		results[i][4] = floorExact(results[i][4] * enRFactor);
+		results[i][4] = floorExact(floorExact(results[i][4]) * enRFactor);
 	results[7][3] = -floorExact(crawlersEenergyCons * enRFactor);
 	for (const bld of lfBld)
-		bld[4] = floorExact(bld[4] * enRFactor);
+		bld[4] = floorExact(floorExact(bld[4]) * enRFactor);
 	return totalEnergyUsed * enRFactor;
+}
+
+// On a planet short of energy the game shows every consumer's draw scaled by the
+// production coefficient: the draw at full production rounded down, times the
+// coefficient and the Disruption Chamber factor, rounded down once more. The
+// reduction is not rounded before the scaling. The planet's total draw and the
+// coefficient itself stay unscaled. Returns the shown amounts of the three mines and
+// of every life form building; crawlers are not scaled, as no capture of a deficit
+// planet with crawlers confirms it.
+function scaleConsumerRows(koeff, enR, draws) {
+	const enRFactor = 1 - Math.min(Math.max(enR, 0), 100) / 100;
+	const scaled = (/** @type {number} */ draw) => floorExact(floorExact(draw) * koeff * enRFactor);
+	return { mines: draws.mines.map(scaled), buildings: draws.buildings.map(scaled) };
 }
 
 // Base resource production (mines/synthesizer rows plus officer/class/plasma
@@ -675,12 +688,14 @@ function applyLfBuildingProduction(lfEff, results, lfBld, production) {
  * @param {boolean} [opts.normalized] - mines at 100% with all the energy they
  *   need, the base for payback estimates
  * @param {LfEffects} [opts.lfEff] - omitted where the planet has no life form data
- * @returns {[number[][], number[], number, number, number, number[][], number[], number[]]} the 16
+ * @returns {[number[][], number[], number, number, number, number[][], number[], number[], {mines: number[], buildings: number[]}]} the 16
  *   result rows, the planet totals, energy produced, energy used, the energy
  *   coefficient, one row per life form building, then the unrounded totals the
  *   shown ones are cut from: [metal, crystal, deuterium] per hour, and
  *   [energy produced, energy used]. The game forms its per-day and per-week
- *   figures and the energy balance from those, not from the shown totals.
+ *   figures and the energy balance from those, not from the shown totals. Last, the
+ *   draw of the three mines and of every life form building as the game shows it,
+ *   scaled by the coefficient on a planet short of energy.
  */
 function calculateProduction(prodParams, plnData, settings, { normalized = false, lfEff = undefined } = {}) {
 	if (!lfEff) lfEff = emptyLfEffects();
@@ -710,6 +725,7 @@ function calculateProduction(prodParams, plnData, settings, { normalized = false
 	totalEnergyUsed += crawlersEenergyCons;
 	// Life form buildings draw energy from the same pool as mines and crawlers.
 	totalEnergyUsed += lfEff.energyUsed;
+	const draws = { mines: [results[1][4], results[2][4], results[3][4]], buildings: lfBld.map((bld) => bld[4]) };
 	totalEnergyUsed = applyLfEnergyReduction(lfEff, totalEnergyUsed, crawlersEenergyCons, results, lfBld);
 
 	let koeff = 1.0;
@@ -718,6 +734,7 @@ function calculateProduction(prodParams, plnData, settings, { normalized = false
 	if (koeff > 1) {
 		koeff = 1;
 	}
+	const shownDraws = scaleConsumerRows(koeff, lfEff.enR, draws);
 
 	computeResourceProduction(prodParams, plnData, settings, koeff, normalized, results, production);
 	applyCrawlerProductionBonus(prodParams, settings, results, production);
@@ -725,5 +742,5 @@ function calculateProduction(prodParams, plnData, settings, { normalized = false
 	applyLfBuildingProduction(lfEff, results, lfBld, production);
 
 	return [results, production.map((amount) => floorExact(amount)),floorExact(totalEnergyProduced), floorExact(totalEnergyUsed), koeff, lfBld,
-		production, [totalEnergyProduced, totalEnergyUsed]];
+		production, [totalEnergyProduced, totalEnergyUsed], shownDraws];
 }

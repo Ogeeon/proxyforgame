@@ -252,10 +252,10 @@ function updateProduction(tab, production) {
 }
 
 // Column 3 of rows 1-3: the energy a mine draws, as used/required.
-function mineEnergyCell(results, row, koeff) {
+function mineEnergyCell(results, row, shownDraws) {
 	let cons = results[row][4];
 	if (cons > 0) {
-		return numToOGame(Math.round(koeff * cons)) + '/' + numToOGame(cons);
+		return numToOGame(shownDraws.mines[row - 1]) + '/' + numToOGame(cons);
 	}
 	return '';
 }
@@ -280,14 +280,14 @@ const ONE_PLN_RESULT_KEYS = ['natural-production', 'metal-mine', 'crystal-mine',
 
 // Fills the per-row production/consumption cells (columns 0-3), with column 3
 // of results 1-3 showing the energy a mine draws (used/required).
-function renderOnePlnProductionRows(rows, results, koeff) {
+function renderOnePlnProductionRows(rows, results, shownDraws) {
 	const byKey = new Map(Array.from(rows, (tr) => [tr.dataset.reportKey, tr]));
 	ONE_PLN_RESULT_KEYS.forEach((key, row) => {
 		const tr = byKey.get(key);
 		if (!tr) return;
 		for (let col = 0; col < 4; col++) {
 			if (row > 0 && row < 4 && col === 3) {
-				tr.children[6].innerHTML = mineEnergyCell(results, row, koeff);
+				tr.children[6].innerHTML = mineEnergyCell(results, row, shownDraws);
 				continue;
 			}
 			tr.children[col + 3].innerHTML = productionCell(results[row][col]);
@@ -403,7 +403,7 @@ function updateOnePlnTab() {
 	let results = prodData[0];
 	let production = prodData[1];
 	let koeff = prodData[4];
-	renderOnePlnLfRows(options.prm.onePlnRace, prodData[5]);
+	renderOnePlnLfRows(options.prm.onePlnRace, prodData[5], prodData[8].buildings);
 
 	let coeffSpan = $('#prod-coeff');
 	if (coeffSpan) {
@@ -415,7 +415,7 @@ function updateOnePlnTab() {
 	// The totals follow the per-building rows and the conversion row; found by
 	// key, so a row added above them does not shift the index.
 	let resultRow = Array.from(rows).findIndex((row) => row.dataset.reportKey === 'prod-per-hour');
-	renderOnePlnProductionRows(rows, results, koeff);
+	renderOnePlnProductionRows(rows, results, prodData[8]);
 	const conversion = updateIasConversion();
 	const conversionCost = conversion === null ? [0, 0, 0] : conversion.cost;
 	const netProduction = production.map((v, res) => v - conversionCost[res]);
@@ -985,14 +985,16 @@ function lfCellValue(val) {
 
 // Show what each life form building contributes in its own row: extra metal,
 // crystal and deuterium, and its net effect on the planet energy pool.
-function renderOnePlnLfRows(race, lfBld) {
+function renderOnePlnLfRows(race, lfBld, shownDraws) {
 	if (race < 1 || race > 4) return;
 	let rows = $$('#one-planet-prod .lf-row-' + race);
 	rows.forEach(function (tr) {
-		let bld = lfBld[lfRowIndex(tr.querySelector('input[type=text]'))] || [0, 0, 0, 0, 0];
+		const index = lfRowIndex(tr.querySelector('input[type=text]'));
+		let bld = lfBld[index] || [0, 0, 0, 0, 0];
 		for (let res = 0; res < 3; res++)
 			tr.children[res + 3].innerHTML = lfCellValue(bld[res]);
-		tr.children[6].innerHTML = lfCellValue(bld[3] - bld[4]);
+		// The draw as the game shows it: scaled by the production coefficient on a planet short of energy
+		tr.children[6].innerHTML = lfCellValue(bld[3] - (shownDraws[index] || 0));
 	});
 }
 

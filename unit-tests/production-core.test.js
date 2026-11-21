@@ -14,11 +14,11 @@ const ctx = load(
     ['ogame/calc/js/ogame-costs.js', 'ogame/calc/js/ogame-production.js', 'ogame/calc/js/production-core.js'],
     ['createEmptyPlanet', 'isPlnEmpty', 'mineSlot', 'PLANET_TEMP', 'PLANET_POS', 'PLANET_RACE', 'PLANET_LF_LEVELS', 'lfResearchIncrease', 'lfBuildingUpgradeLevels', 'lfBuildingCostReduction',
         'calculateProduction', 'getSSCost', 'lfBuildingEffects', 'convertExchangeRates', 'convertAllPlanetParams',
-        'floorExact', 'getProductionRateSplit', 'getProductionRateExact', 'lithiumConversion', 'planetLithiumConversion', 'PLANET_IAS_ON', 'PLANET_IAS_LEVEL', 'PLANET_IAS_DISCOUNT', 'PLANET_IAS_RESOURCE', 'PLANET_IAS_WORKLOAD'],
+        'floorExact', 'scaleConsumerRows', 'getProductionRateSplit', 'getProductionRateExact', 'lithiumConversion', 'planetLithiumConversion', 'PLANET_IAS_ON', 'PLANET_IAS_LEVEL', 'PLANET_IAS_DISCOUNT', 'PLANET_IAS_RESOURCE', 'PLANET_IAS_WORKLOAD'],
 );
 const { createEmptyPlanet, isPlnEmpty, lfResearchIncrease, lfBuildingUpgradeLevels, lfBuildingCostReduction,
     calculateProduction, getSSCost, lfBuildingEffects, convertExchangeRates, convertAllPlanetParams,
-    floorExact, getProductionRateSplit } = ctx;
+    floorExact, scaleConsumerRows, getProductionRateSplit } = ctx;
 
 const check = (planet) => isPlnEmpty(planet);
 
@@ -520,6 +520,34 @@ describe('calculateProduction against the game\'s resource settings page', () =>
             boosterType: 0, allOfficers: false, playerClass: 2, isTrader: false,
         });
         expect(split[1]).toBe(72717);
+    });
+});
+
+// The draw the game shows on a planet short of energy (issue #89), s1-en, 2026-11-21, Ogeeon.
+describe('scaleConsumerRows against the game\'s resource settings page', () => {
+    it('scales the draw floored at full production by the unrounded coefficient (Zeta)', () => {
+        const shown = scaleConsumerRows(0.78222, 0, { mines: [3098, 0, 0], buildings: [120, 8794] });
+        expect(shown.mines[0]).toBe(2423); // 3098 * 0.78222 = 2423.2
+        expect(shown.buildings).toEqual([93, 6878]);
+    });
+
+    it('floors the draw before the reduction, not after (Gamma, Mineral Research Centre 5)', () => {
+        // 2227.76 at a coefficient of 1 and -4%: 2227 * 0.96 = 2137.9 -> 2137, where 2227.76 * 0.96 gives 2138
+        expect(scaleConsumerRows(1, 4, { mines: [], buildings: [2227.76] }).buildings).toEqual([2137]);
+    });
+
+    it('does not round the reduction before the coefficient (Epsilon, Deuterium Synthesiser 1)', () => {
+        // 90 * 0.895017 * 0.965 = 77.73 -> 77; flooring the reduced 86.85 first would give 86 * 0.895017 = 76.97 -> 76
+        expect(scaleConsumerRows(0.895017, 3.5, { mines: [90, 0, 0], buildings: [] }).mines[0]).toBe(77);
+    });
+
+    it('is what calculateProduction returns last, next to an unscaled total draw (Zeta)', () => {
+        const prod = calculateProduction(rows({ mines: [26, 25, 24], sats: 0, solar: 10 }), [17, 10, 0], settings());
+        const [results, , produced, used, koeff, , , , shown] = prod;
+        expect(koeff < 1).toBe(true);
+        expect(shown.mines[0]).toBe(Math.floor(results[1][4] * koeff));
+        expect(used).toBe(results[1][4] + results[2][4] + results[3][4]); // the total stays the unscaled sum
+        expect(koeff).toBe(produced / used > 1 ? 1 : prod[7][0] / prod[7][1]);
     });
 });
 
