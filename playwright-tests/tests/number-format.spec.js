@@ -59,11 +59,6 @@ for (const { lang, locale, group, dec } of LOCALES) {
         });
 
         test('costs: the compact and the full totals', async ({ page }) => {
-            // costs.tpl inlines msg-cant-research into a quoted literal without
-            // json_encode, and the apostrophe of the French text ("n'est") is a
-            // syntax error that stops the page script - the French costs page
-            // calculates nothing. A bug of its own, not of the number format.
-            test.fixme(lang === 'fr', 'the French costs page script does not run (costs.tpl, msg-cant-research)');
             await page.goto('/costs');
             await page.locator('#tabtag-0').click();
             await page.locator('#tabtag-0-2').click();

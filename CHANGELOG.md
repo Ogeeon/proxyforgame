@@ -26,6 +26,7 @@ release section; it is the source of truth for the other eleven translations.
 
 ### Fixed
 
+- Costs calculator: the French page calculates again - the apostrophe of one of its messages ("n'est") broke the page script, so nothing was computed. All the page's texts are now handed to the script escaped, so no translation can break it this way. <!-- site -->
 - Expeditions calculator: the life form bonus report pasted from a German game client (`52,38%`) is read with its decimals - the comma used to cut the value at the decimal separator, as only a dot was accepted. <!-- site -->
 - Flight calculator: the deuterium of a fleet of several ship types is rounded once, for the whole fleet, as the game does - each type's share used to be rounded on its own and then added up, which put a mixed fleet one unit off now and then. A type's share still counts as at least one unit. Checked against 96 readings of the game's own consumption figure; the MCP server's flight tool follows. <!-- site -->
 - Production calculator: a life form building at level 1 draws its base energy, with no growth coefficient, as the game does - a level-1 Deuterium Synthesiser draws 90, not 99, a Planetary Shield 100, not 102. Every such building used to draw up to 10% too much, which lowered the production factor of an energy-short planet; from level 2 on the figures are unchanged. Checked against four different level-1 buildings of three life forms in the game's own energy column; the MCP server's production tool follows. <!-- site -->
