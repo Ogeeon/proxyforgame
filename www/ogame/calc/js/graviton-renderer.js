@@ -17,6 +17,8 @@ class GravitonRenderer {
   static formatTime(seconds) {
     return timespanToShortenedString(
       seconds,
+      options.datetimeY,
+      options.datetimeMo,
       options.datetimeW,
       options.datetimeD,
       options.datetimeH,

@@ -167,7 +167,7 @@ function renderAccumWhen(tab, t) {
 	} else if (!Number.isFinite(t)) {
 		setHtml(msgSelector, t === Number.POSITIVE_INFINITY ? options.resWillNotAccumMsg : options.resWillNotAccumMsg1);
 	} else if (t > 0) {
-		setHtml(msgSelector, options.resReadyInMsg + timespanToShortenedString(t * 3600, options.datetimeW, options.datetimeD, options.datetimeH, options.datetimeM, options.datetimeS, true));
+		setHtml(msgSelector, options.resReadyInMsg + timespanToShortenedString(t * 3600, options.datetimeY, options.datetimeMo, options.datetimeW, options.datetimeD, options.datetimeH, options.datetimeM, options.datetimeS, true));
 	} else {
 		setHtml(msgSelector, options.enoughResAlreadyMsg);
 	}
@@ -642,7 +642,7 @@ function paybackToString(normCost, normIncrease) {
 	if (normIncrease <= 0)
 		return '&mdash;';
 	return timespanToShortenedString(Math.ceil(normCost / normIncrease * 3600),
-		options.datetimeW, options.datetimeD, options.datetimeH, options.datetimeM, options.datetimeS, true);
+		options.datetimeY, options.datetimeMo, options.datetimeW, options.datetimeD, options.datetimeH, options.datetimeM, options.datetimeS, true);
 }
 
 /**
@@ -693,7 +693,7 @@ function updateMinesPriority() {
 		const cell = `priority-${n + 1}`;
 		html += `<td class="centered" data-report-cell="${cell}.upgrade-cost">${resourcesToString(c.costs)}</td>`;
 		html += `<td class="centered" data-report-cell="${cell}.production-increase">${resourcesToString(c.delta)}</td>`;
-		html += `<td class="centered" data-report-cell="${cell}.amortization-time">` + timespanToShortenedString(Math.ceil(c.time * 3600), options.datetimeW, options.datetimeD, options.datetimeH, options.datetimeM, options.datetimeS, true) + '</td>';
+		html += `<td class="centered" data-report-cell="${cell}.amortization-time">` + timespanToShortenedString(Math.ceil(c.time * 3600), options.datetimeY, options.datetimeMo, options.datetimeW, options.datetimeD, options.datetimeH, options.datetimeM, options.datetimeS, true) + '</td>';
 		html += '</tr>';
 	}
 	if (shown === 0)

@@ -37,6 +37,8 @@ class Renderer {
   constructor() {
     // Get display settings from options
     this.unitSuffix = options.unitSuffix || '';
+    this.datetimeY = options.datetimeY || 'y';
+    this.datetimeMo = options.datetimeMo || 'mo';
     this.datetimeW = options.datetimeW || 'w';
     this.datetimeD = options.datetimeD || 'd';
     this.datetimeH = options.datetimeH || 'h';
@@ -175,7 +177,7 @@ class Renderer {
     // Only clear calculated result cells, NOT input cells
     for (let i = 1; i < rows.length - 6; i++) {
       resultColumns.forEach((column, col) => {
-        rows[i].cells[firstDataCol + col].innerHTML = column === 'time' ? '0' + this.datetimeS : '0';
+        rows[i].cells[firstDataCol + col].innerHTML = column === 'time' ? '00:00:00' : '0';
       });
 
       // DO NOT clear input values - preserve user-entered levels
@@ -614,6 +616,8 @@ class Renderer {
   _formatTime(seconds) {
     return timespanToShortenedString(
       seconds,
+      this.datetimeY,
+      this.datetimeMo,
       this.datetimeW,
       this.datetimeD,
       this.datetimeH,

@@ -250,7 +250,7 @@ class LfCostsOrchestrator {
         row.children[fdc + 1].innerHTML = '0';
         row.children[fdc + 2].innerHTML = '0';
         row.children[fdc + 3].innerHTML = '0';
-        row.children[fdc + 4].innerHTML = '0' + this.opts.datetimeS;
+        row.children[fdc + 4].innerHTML = '00:00:00';
         row.children[fdc + 5].innerHTML = '0';
         if (outerTab === 0) row.children[fdc + 6].innerHTML = '0';
     }
@@ -763,7 +763,7 @@ class LfCostsOrchestrator {
         const numDataCells = outerTab === 0 ? 7 : 6;
         const timeOffset   = 4;
         for (let c = 0; c < numDataCells; c++) {
-            rowHtml += `<td align="center">${c === timeOffset ? '0' + this.opts.datetimeS : '0'}</td>`;
+            rowHtml += `<td align="center">${c === timeOffset ? '00:00:00' : '0'}</td>`;
         }
         rowHtml += '</tr>';
 

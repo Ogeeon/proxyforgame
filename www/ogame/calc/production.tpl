@@ -243,6 +243,8 @@
     options.metal = <?= json_encode($l['metal']) ?>;
     options.crystal = <?= json_encode($l['crystal']) ?>;
     options.deuterium = <?= json_encode($l['deuterium']) ?>;
+    options.datetimeY = <?= json_encode($l['datetime-y']) ?>;
+    options.datetimeMo = <?= json_encode($l['datetime-mo']) ?>;
     options.datetimeW = <?= json_encode($l['datetime-w']) ?>;
     options.datetimeD = <?= json_encode($l['datetime-d']) ?>;
     options.datetimeH = <?= json_encode($l['datetime-h']) ?>;

@@ -9,7 +9,9 @@
 //   - the compact (M/G/T) mantissa takes the locale decimal separator, is cut rather than
 //     rounded, and from 10^15 grows past 999 under the T letter - there is no P tier;
 //   - with no separators configured the output is the legacy dot grouping;
-//   - the grouping spaces the page displays never reach a parsed number.
+//   - the grouping spaces the page displays never reach a parsed number;
+//   - a duration is a clock under a day, weeks to seconds up to 364 days and years, months and
+//     weeks from 365 days, never with a trailing space.
 
 const { describe, it } = require('node:test');
 const { readFileSync } = require('node:fs');
@@ -136,6 +138,64 @@ describe('numberToShortenedString and numToDisplay', () => {
     it('switches between the full and the compact form on options.prm.fullNumbers', () => {
         expect(locale('ru', true).numToDisplay(1500000, 'КМГ')).toBe(`1${NBSP}500${NBSP}000`);
         expect(locale('ru', false).numToDisplay(1500000, 'КМГ')).toBe('1,5М');
+    });
+});
+
+describe('timespanToShortenedString', () => {
+    const RU = ['г', 'мес', 'нд', 'д', 'ч', 'м', 'с'];
+    const H = 3600;
+    const D = 86400;
+    /** The ru form of a span, minimized or not. */
+    const ru = (seconds, minimize) => locale('ru').timespanToShortenedString(seconds, ...RU, minimize);
+    /** The same span both ways, when the two forms agree. */
+    function both(seconds) {
+        const minimized = ru(seconds, true);
+        expect(ru(seconds, false)).toBe(minimized);
+        return minimized;
+    }
+
+    it('writes a span under a day as a zero-padded clock, in every language', () => {
+        expect(both(0)).toBe('00:00:00');
+        expect(both(45 * 60)).toBe('00:45:00');
+        expect(both(10 * H)).toBe('10:00:00');
+        expect(both(2 * H + 5 * 60 + 3)).toBe('02:05:03');
+        expect(both(D - 1)).toBe('23:59:59');
+        expect(locale('en').timespanToShortenedString(D - 1, 'y', 'mo', 'w', 'd', 'h', 'm', 's')).toBe('23:59:59');
+    });
+
+    it('floors the seconds of the clock', () => {
+        expect(both(59.9)).toBe('00:00:59');
+    });
+
+    it('switches to days at exactly one day', () => {
+        expect(both(D)).toBe('1д');
+    });
+
+    it('keeps the week/day form from 1 to 364 days, minimize dropping the small units', () => {
+        const span = 3 * D + 4 * H + 5 * 60 + 6;
+        expect(ru(span, true)).toBe('3д 4ч 5м');
+        expect(ru(span, false)).toBe('3д 4ч 5м 6с');
+        const weeks = 2 * 7 * D + 3 * H + 5 * 60 + 6;
+        expect(ru(weeks, true)).toBe('2нд 3ч');
+        expect(ru(weeks, false)).toBe('2нд 3ч 5м 6с');
+        expect(both(364 * D)).toBe('52нд');
+    });
+
+    it('writes a year and more as years, months and weeks only', () => {
+        expect(both(365 * D)).toBe('1г');
+        expect(both(370 * D + 5 * H)).toBe('1г');
+        expect(both(379 * D)).toBe('1г 2нд');
+        expect(both(400 * D)).toBe('1г 1мес');
+        expect(both(472 * D + 23 * H + 59 * 60 + 59)).toBe('1г 3мес 2нд');
+        expect(both(725 * D)).toBe('1г 12мес');
+        expect(both(730 * D)).toBe('2г');
+        expect(both(1825 * D)).toBe('5г');
+    });
+
+    it('never ends with a space', () => {
+        for (const seconds of [0, 45 * 60, 10 * H, D, 3 * D + 4 * H, 364 * D, 365 * D, 400 * D, 1825 * D])
+            for (const minimize of [true, false])
+                expect(ru(seconds, minimize).endsWith(' ')).toBe(false);
     });
 });
 

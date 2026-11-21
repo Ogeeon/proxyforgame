@@ -1,5 +1,7 @@
 {
   "common": {
+    "datetime-y": "a",
+    "datetime-mo": "m",
     "datetime-w": "w",
     "datetime-d": "d",
     "datetime-h": "h",

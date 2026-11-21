@@ -194,13 +194,13 @@ test.describe('Terraformer Calculator - DOM integration', () => {
         // 40% off the cost and, with no time entered, 80% off the time: 4114 s.
         await enter('#lf-terraformer-rdc', '40');
         await expect(page.locator('#crystal-required-tf')).toHaveText('30,000');
-        await expect(page.locator('#time-required-tf')).toHaveText('1h 8m 34s');
+        await expect(page.locator('#time-required-tf')).toHaveText('01:08:34');
         await expect(hint).toBeVisible();
         await expect(hint).toHaveText('auto: 80%');
 
         // An entered time reduction is taken as it is: 10% off is 18513 s.
         await enter('#lf-terraformer-time-rdc', '10');
-        await expect(page.locator('#time-required-tf')).toHaveText('5h 8m 33s');
+        await expect(page.locator('#time-required-tf')).toHaveText('05:08:33');
         await expect(page.locator('#crystal-required-tf')).toHaveText('30,000');
         await expect(hint).toBeHidden();
 

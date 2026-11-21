@@ -81,7 +81,7 @@ class LfRenderer {
         const fdc = outerTab === 1 ? 4 : 3;
         const numCells = outerTab === 0 ? 7 : 6;
         for (let cell = fdc; cell < fdc + numCells; cell++) {
-            row.children[cell].innerHTML = (cell === fdc + 4) ? ('0' + this.opts.datetimeS) : '0';
+            row.children[cell].innerHTML = (cell === fdc + 4) ? '00:00:00' : '0';
         }
         const techID = Number(row.children[0].innerHTML);
         if (ENERGY_TECH_IDS.has(techID)) this.renderEnergyTooltip(row, 0);
@@ -312,6 +312,7 @@ class LfRenderer {
 
     _fmtTime(seconds) {
         return timespanToShortenedString(seconds,
+            this.opts.datetimeY, this.opts.datetimeMo,
             this.opts.datetimeW, this.opts.datetimeD, this.opts.datetimeH,
             this.opts.datetimeM, this.opts.datetimeS, true);
     }

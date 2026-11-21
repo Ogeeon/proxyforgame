@@ -186,50 +186,63 @@ function appendTimespanUnit(timeStr, seconds, divisor, label) {
 }
 
 /**
- * Builds a string representation of a time span. If some unit (weeks, days, hours, minutes, seconds) is zero, it is omitted from the returned string.
- * @param seconds Number of seconds in the time span
- * @param w Label for weeks
- * @param d Label for days
- * @param h Label for hours
- * @param m Label for minutes
- * @param s Label for seconds
- * @param [minimize] Flag indicating that minutes and seconds should be dropped if the time span is longer than a week
- * @returns String of the form [Xw] [Xd] [Xh] [Xm] [Xs]
+ * Builds the display form of a time span, in one of three regimes:
+ * - under a day, a zero-padded clock "hh:mm:ss" (seconds floored; zero is "00:00:00"), the
+ *   same in every language;
+ * - from a day to 364 days, "[Xw] [Xd] [Xh] [Xm] [Xs]" with the locale labels, a zero unit
+ *   left out;
+ * - from 365 days, "[Xy] [Xmo] [Xw]" only - a year is 365 days, a month 30, and a remainder
+ *   under a week is dropped. 725-729 days read "1y 12mo", as 12 months are not a year.
+ * The result never ends with a space.
+ * @param {number} seconds Number of seconds in the time span
+ * @param {string} y Label for years
+ * @param {string} mo Label for months
+ * @param {string} w Label for weeks
+ * @param {string} d Label for days
+ * @param {string} h Label for hours
+ * @param {string} m Label for minutes
+ * @param {string} s Label for seconds
+ * @param {boolean} [minimize] In the day regime, drop the minutes and seconds when there are
+ *   weeks, and the seconds when there are days
+ * @returns {string}
  */
-function timespanToShortenedString(seconds, w, d, h, m, s, minimize) {
-	if (seconds == 0)
-		return '0'+s;
+function timespanToShortenedString(seconds, y, mo, w, d, h, m, s, minimize) {
+	if (seconds < 86400) {
+		const whole = Math.floor(seconds);
+		const pad = (/** @type {number} */ n) => String(n).padStart(2, '0');
+		return pad(Math.floor(whole / 3600)) + ':' + pad(Math.floor(whole % 3600 / 60)) + ':' + pad(whole % 60);
+	}
 	let timeStr = '';
-	let haveWeeks = false, haveDays = false;
+	// A year and a month as this format counts them: 365 and 30 days
+	const year = 365 * 86400, month = 30 * 86400;
+	if (seconds >= year) {
+		timeStr = appendTimespanUnit(timeStr, seconds, year, y);
+		seconds = seconds % year;
+		timeStr = appendTimespanUnit(timeStr, seconds, month, mo);
+		seconds = seconds % month;
+		timeStr = appendTimespanUnit(timeStr, seconds, 604800, w);
+		return timeStr.trimEnd();
+	}
+	let haveWeeks = false;
 	if (seconds >= 604800) {
 		timeStr = appendTimespanUnit(timeStr, seconds, 604800, w);
 		seconds = seconds % 604800;
 		haveWeeks = true;
 	}
-	if (seconds >= 86400 || timeStr.length > 0) {
-		timeStr = appendTimespanUnit(timeStr, seconds, 86400, d);
-		seconds = seconds % 86400;
-		haveDays = true;
-	}
-	if (seconds >= 3600 || timeStr.length > 0) {
-		timeStr = appendTimespanUnit(timeStr, seconds, 3600, h);
-		seconds = seconds % 3600;
-	}
-	// If there are weeks and minimization was requested - drop the minutes
+	timeStr = appendTimespanUnit(timeStr, seconds, 86400, d);
+	seconds = seconds % 86400;
+	timeStr = appendTimespanUnit(timeStr, seconds, 3600, h);
+	seconds = seconds % 3600;
+	// With weeks and minimization requested - drop the minutes
 	if (minimize && haveWeeks)
-		return timeStr;
-	if (seconds >= 60 || timeStr.length > 0) {
-		timeStr = appendTimespanUnit(timeStr, seconds, 60, m);
-		seconds = seconds % 60;
-	}
-	// If there are days and minimization was requested - drop the seconds
-	if (minimize && haveDays)
-		return timeStr;
-	if (seconds > 0) {
-		timeStr += Math.floor(seconds);
-		timeStr += s;
-	}
-	return timeStr;
+		return timeStr.trimEnd();
+	timeStr = appendTimespanUnit(timeStr, seconds, 60, m);
+	seconds = seconds % 60;
+	// The day regime always has days or weeks, so minimization drops the seconds
+	if (minimize)
+		return timeStr.trimEnd();
+	timeStr = appendTimespanUnit(timeStr, seconds, 1, s);
+	return timeStr.trimEnd();
 }
 
 function numberToShortenedString(number, suffixes) {

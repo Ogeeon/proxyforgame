@@ -1617,7 +1617,6 @@ class CostsCalculator {
    * @private
    */
   _clearAllTablesData() {
-    const datetimeS = options.datetimeS || 's';
     const scShort = options.scShort || 'SC';
     const lcShort = options.lcShort || 'LC';
     const scFull = options.scFull || 'Small Cargo';
@@ -1625,7 +1624,7 @@ class CostsCalculator {
 
     // Clear all tab 0 tables (single-level) and tab 1 tables (multi-level)
     [...COSTS_TAB_TABLES[0], ...COSTS_TAB_TABLES[1]]
-      .forEach(tableId => this._clearTableData(tableId, datetimeS, scShort, lcShort, scFull, lcFull));
+      .forEach(tableId => this._clearTableData(tableId, scShort, lcShort, scFull, lcFull));
 
     // Clear range tables
     COSTS_RANGE_TABLES.forEach(table => this._clearRangeTable(table));
@@ -1635,7 +1634,7 @@ class CostsCalculator {
    * Clear data cells in a specific table
    * @private
    */
-  _clearTableData(tableId, datetimeS, scShort, lcShort, scFull, lcFull) {
+  _clearTableData(tableId, scShort, lcShort, scFull, lcFull) {
     const rows = getTableRows(`#${tableId}`);
     if (rows.length === 0) return;
 
@@ -1643,7 +1642,7 @@ class CostsCalculator {
     // The inputs are already reset, so the effect drops back to level 0
     this.renderer.renderEffects(tableId);
     /** @param {string} column */
-    const zero = column => (column === 'time' ? '0' + datetimeS : '0');
+    const zero = column => (column === 'time' ? '00:00:00' : '0');
 
     // Clear data rows (skip header and 6 footer rows)
     for (let i = 1; i < rows.length - 6; i++) {
@@ -1698,8 +1697,6 @@ class CostsCalculator {
     if (!table) return;
 
     const rows = getTableRows(`#${tableId}`);
-    const datetimeS = options.datetimeS || 's';
-
     // Remove all data rows (keep header and footer)
     for (let i = rows.length - 1; i > 0; i--) {
       const row = rows[i];
@@ -1719,7 +1716,7 @@ class CostsCalculator {
     // The totals row: its label, then one cell per column from metal on
     const results = rangeTable.columns.slice(rangeTable.columns.indexOf('metal'));
     results.forEach((column, i) => {
-      remainingRows[totalsRow].cells[1 + i].innerHTML = column === 'time' ? '<b>0' + datetimeS + '</b>' : '<b>0</b>';
+      remainingRows[totalsRow].cells[1 + i].innerHTML = column === 'time' ? '<b>00:00:00</b>' : '<b>0</b>';
     });
 
     // Reset needed row

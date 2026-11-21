@@ -1,5 +1,7 @@
 {
   "common": {
+    "datetime-y": "г",
+    "datetime-mo": "мес",
     "datetime-w": "нд",
     "datetime-d": "д",
     "datetime-h": "ч",

@@ -107,11 +107,11 @@ test.describe('Lifeforms costs Calculator Page', () => {
         await expect(page.locator('#table-0-1 tr:nth-child(50) td:nth-child(8)')).toContainText('1d 12h 59m');
         await page.locator('#nanite-factory-level').fill('10');
         await page.locator('#nanite-factory-level').press('Enter');
-        await expect(page.locator('#table-0-1 tr:nth-child(50) td:nth-child(8)')).toContainText('2m 9s');
+        await expect(page.locator('#table-0-1 tr:nth-child(50) td:nth-child(8)')).toContainText('00:02:09');
 
         await page.locator('#param-common-tab').click();
         await page.locator('#universe-speed').selectOption('3');
-        await expect(page.locator('#table-0-1 tr:nth-child(50) td:nth-child(8)')).toContainText('43s');
+        await expect(page.locator('#table-0-1 tr:nth-child(50) td:nth-child(8)')).toContainText('00:00:43');
     });
 
     test('[exchange rates] MSU column reflects user-entered rates', async ({ page }) => {
@@ -325,7 +325,7 @@ test.describe('Lifeforms costs Calculator Page', () => {
 
         // Raw 200% would make the duration negative, which getBuildTimeLF floors to 1s.
         // Clamping to 99% keeps 1/100 of the baseline instead.
-        expect(centreOnly.time).toBe('1h 13m 8s');
+        expect(centreOnly.time).toBe('01:13:08');
         expect(centreOnly.metal).toBe('5.847M');
         expect(baseline.time).toBe('5d 2h 8m');
 

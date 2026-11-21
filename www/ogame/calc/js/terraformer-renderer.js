@@ -14,11 +14,14 @@ class TerraformerRenderer {
 
   /**
    * Format a duration in seconds using the locale-aware suffixes from `options`.
-   * Kept at full precision (no minimize) to preserve the legacy output.
+   * Not minimized: a span of days keeps its minutes and seconds (under a day it is a clock,
+   * from a year y/mo/w, either way).
    */
   static formatTime(seconds) {
     return timespanToShortenedString(
       seconds,
+      options.datetimeY,
+      options.datetimeMo,
       options.datetimeW,
       options.datetimeD,
       options.datetimeH,

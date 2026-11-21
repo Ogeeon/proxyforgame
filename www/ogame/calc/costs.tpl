@@ -56,6 +56,8 @@
     // the decimal separator will be used by the functions that validate numbers in inputs
     options.decimalSeparator = <?= json_encode($l['decimal-separator']) ?>;
     options.thousandsSeparator = <?= json_encode($l['thousands-separator']) ?>;
+    options.datetimeY = <?= json_encode($l['datetime-y']) ?>;
+    options.datetimeMo = <?= json_encode($l['datetime-mo']) ?>;
     options.datetimeW = <?= json_encode($l['datetime-w']) ?>;
     options.datetimeD = <?= json_encode($l['datetime-d']) ?>;
     options.datetimeH = <?= json_encode($l['datetime-h']) ?>;
@@ -511,7 +513,7 @@
                       <?php if ($hasEnergyCol): ?>
                       <td class="text-center">0</td>
                       <?php endif; ?>
-                      <td class="text-center">0<?=$l['datetime-s']?></td>
+                      <td class="text-center">00:00:00</td>
                       <td class="text-center">0</td>
                       <?php if ($i == 0):?>
                         <td class="text-center">0</td>

@@ -78,3 +78,25 @@ extra digit groups.
 - **The letter comes from the locale**, by position in `unit-suffix`, which grows from `KMG` to
   `KMGT` (`КМГТ` in `ru`, a Cyrillic Т). No new key. `numToLocal` and the "full numbers" mode
   are untouched, and there is no tooltip with the exact value - that checkbox is the way to it.
+
+## Addendum 2026-11-21: the duration format
+
+`timespanToShortenedString` wrote every span as weeks, days, hours, minutes and seconds with
+the locale letters, so five years read `260w 5d` and a short build `45m ` (with a trailing
+space). One format now serves all its call sites - costs, LF costs, queue, production,
+graviton, terraformer and flight - in three regimes:
+
+- **Under a day, a clock**: `hh:mm:ss`, zero-padded, seconds floored (`00:45:00`,
+  `23:59:59`; zero is `00:00:00`). It is the same in every language - the locale letters are
+  dropped on purpose - and the zero cells the server renders, and the ones a reset writes,
+  show it too, so a cell does not change shape on the first recalculation.
+- **From 1 to 364 days, unchanged**: `3d 4h 5m`, `52w`, with the `minimize` behaviour as it
+  was (minutes and seconds dropped with weeks, seconds with days).
+- **From 365 days, years, months and weeks only**: a year is 365 days and a month 30, each
+  floored, zero units left out and a remainder under a week dropped (`1y`, `1y 1mo`,
+  `1y 3mo 2w`, `5y`), minimized or not. The two new letters are the `common` keys
+  `datetime-y` and `datetime-mo` in all 13 locales. Because 12 × 30 ≠ 365, 725-729 days read
+  `1y 12mo` rather than rolling into `2y` - an accepted seam, not worth a calendar.
+
+The result never ends with a space. The parameter order is largest unit first -
+`(seconds, y, mo, w, d, h, m, s, minimize)` - applied at every call site at once.

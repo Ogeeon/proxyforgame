@@ -63,7 +63,7 @@ test.describe('Construction Queue Calculator Page', () => {
         expect(totals.metal).toBe('60');
         expect(totals.crystal).toBe('15');
         expect(totals.deuterium).toBe('0');
-        expect(totals.time).toBe('30s');
+        expect(totals.time).toBe('00:00:30');
     });
 
     test('[planet / metal mine / from level 10] calculates correctly', async ({ page }) => {
@@ -74,7 +74,7 @@ test.describe('Construction Queue Calculator Page', () => {
         expect(totals.metal).toBe('3,459');
         expect(totals.crystal).toBe('864');
         expect(totals.deuterium).toBe('0');
-        expect(totals.time).toBe('1h 43m 45s');
+        expect(totals.time).toBe('01:43:45');
     });
 
     test('[planet / crystal mine / from level 0] calculates correctly', async ({ page }) => {
@@ -85,7 +85,7 @@ test.describe('Construction Queue Calculator Page', () => {
         expect(totals.metal).toBe('48');
         expect(totals.crystal).toBe('24');
         expect(totals.deuterium).toBe('0');
-        expect(totals.time).toBe('29s');
+        expect(totals.time).toBe('00:00:29');
     });
 
     test('[planet / crystal mine / from level 10] calculates correctly', async ({ page }) => {
@@ -96,7 +96,7 @@ test.describe('Construction Queue Calculator Page', () => {
         expect(totals.metal).toBe('5,277');
         expect(totals.crystal).toBe('2,638');
         expect(totals.deuterium).toBe('0');
-        expect(totals.time).toBe('3h 9m 57s');
+        expect(totals.time).toBe('03:09:57');
     });
 
     test('[planet / deut synthesizer / from level 0] calculates correctly', async ({ page }) => {
@@ -107,7 +107,7 @@ test.describe('Construction Queue Calculator Page', () => {
         expect(totals.metal).toBe('225');
         expect(totals.crystal).toBe('75');
         expect(totals.deuterium).toBe('0');
-        expect(totals.time).toBe('2m 3s');
+        expect(totals.time).toBe('00:02:03');
     });
 
     test('[planet / deut synthesizer / from level 10] calculates correctly', async ({ page }) => {
@@ -118,7 +118,7 @@ test.describe('Construction Queue Calculator Page', () => {
         expect(totals.metal).toBe('12,974');
         expect(totals.crystal).toBe('4,324');
         expect(totals.deuterium).toBe('0');
-        expect(totals.time).toBe('6h 55m 9s');
+        expect(totals.time).toBe('06:55:09');
     });
 
     test('[planet / 9 element queue] totals are correct', async ({ page }) => {
@@ -139,7 +139,7 @@ test.describe('Construction Queue Calculator Page', () => {
         expect(totals.metal).toBe('1,599');
         expect(totals.crystal).toBe('548');
         expect(totals.deuterium).toBe('0');
-        expect(totals.time).toBe('18m 13s');
+        expect(totals.time).toBe('00:18:13');
     });
 
     test('[robotics factory level effect] time calculations update correctly', async ({ page }) => {
@@ -147,20 +147,20 @@ test.describe('Construction Queue Calculator Page', () => {
         await addToQueue(page, 12, 5);
 
         const initialTime = (await getQueueTotals(page)).time;
-        expect(initialTime).toBe('9h 31m 23s');
+        expect(initialTime).toBe('09:31:23');
 
         // Set robotics factory to level 10
         await page.locator('#startlvl-2-14').fill('10');
         await page.locator('#startlvl-2-14').press('Enter');
 
         const timeAfterRobo10 = (await getQueueTotals(page)).time;
-        expect(timeAfterRobo10).toBe('51m 56s');
+        expect(timeAfterRobo10).toBe('00:51:56');
 
         // Add robotics factory to queue (builds from level 10 to 11)
         await addToQueue(page, 14, 10);
         const timeWithRoboInQueue = (await getQueueTotals(page)).time;
         // The time should include the fusion reactor + robotics factory upgrade
-        expect(timeWithRoboInQueue).toBe('20h 13m 42s');
+        expect(timeWithRoboInQueue).toBe('20:13:42');
 
         // Move robotics factory up in queue by clicking control button
         // The robotics factory gets rowId = 1 (added after fusion reactor at index 0)
@@ -169,8 +169,8 @@ test.describe('Construction Queue Calculator Page', () => {
 
         const timeAfterMoving = (await getQueueTotals(page)).time;
         // When robo factory builds first, fusion reactor benefits from level 11 during its construction
-        // Time should be slightly shorter (20h 9m 22s vs 20h 13m 42s)
-        expect(timeAfterMoving).toBe('20h 9m 22s');
+        // Time should be slightly shorter (20:09:22 vs 20:13:42)
+        expect(timeAfterMoving).toBe('20:09:22');
     });
 
     test('[life form Terraformer reductions] cost and time are cut apart', async ({ page }) => {
@@ -183,7 +183,7 @@ test.describe('Construction Queue Calculator Page', () => {
         };
         const hint = page.locator('#lf-terraformer-time-auto');
         await expect(hint).toBeHidden();
-        expect((await getQueueTotals(page)).time).toBe('5h 43m 21s');
+        expect((await getQueueTotals(page)).time).toBe('05:43:21');
 
         // 40% off the cost and, with no time entered, 80% off the time: 4114 s.
         // The metal mine (60 metal, 15 crystal, 30 s) is not touched.
@@ -193,14 +193,14 @@ test.describe('Construction Queue Calculator Page', () => {
         expect(totals.metal).toBe('60');
         expect(totals.crystal).toBe('30,015');
         expect(totals.deuterium).toBe('60,000');
-        expect(totals.time).toBe('1h 9m 4s');
+        expect(totals.time).toBe('01:09:04');
 
         // An entered time reduction is taken as it is: 10% off is 18513 s.
         await enter('#lf-terraformer-time-rdc', '10');
         await expect(hint).toBeHidden();
         totals = await getQueueTotals(page);
         expect(totals.crystal).toBe('30,015');
-        expect(totals.time).toBe('5h 9m 3s');
+        expect(totals.time).toBe('05:09:03');
 
         // The bounds are 50% and 99%, and both survive a reload.
         await enter('#lf-terraformer-rdc', '70');
@@ -222,19 +222,19 @@ test.describe('Construction Queue Calculator Page', () => {
 
         // Check time at universe speed 1
         const timeSpeed1 = (await getQueueTotals(page)).time;
-        expect(timeSpeed1).toBe('30s');
+        expect(timeSpeed1).toBe('00:00:30');
 
         // Change to universe speed 2
         await page.locator('#universe-speed').selectOption('2');
 
         const timeSpeed2 = (await getQueueTotals(page)).time;
-        expect(timeSpeed2).toBe('15s');
+        expect(timeSpeed2).toBe('00:00:15');
 
         // Change to universe speed 5
         await page.locator('#universe-speed').selectOption('5');
 
         const timeSpeed5 = (await getQueueTotals(page)).time;
-        expect(timeSpeed5).toBe('6s');
+        expect(timeSpeed5).toBe('00:00:06');
     });
 
     test('[hyperspace tech effect] transport calculations update correctly', async ({ page }) => {

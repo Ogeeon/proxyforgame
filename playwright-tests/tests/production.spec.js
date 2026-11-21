@@ -487,7 +487,7 @@ test('amortization calculations are correct', async ({ page }) => {
     // Metal Mine row
     await expect(amortTable.locator('tbody tr:nth-child(1) td:nth-child(2)')).toHaveText('3,459 Metal, 864 Crystal');
     await expect(amortTable.locator('tbody tr:nth-child(1) td:nth-child(3)')).toHaveText('277');
-    await expect(amortTable.locator('tbody tr:nth-child(1) td:nth-child(4)')).toHaveText('17h 9m 58s');
+    await expect(amortTable.locator('tbody tr:nth-child(1) td:nth-child(4)')).toHaveText('17:09:58');
 
     // Crystal Mine row
     await expect(amortTable.locator('tbody tr:nth-child(2) td:nth-child(2)')).toHaveText('5,277 Metal, 2,638 Crystal');
@@ -1229,11 +1229,15 @@ test.describe('Life Forms amortization', () => {
         await input.press('Tab');
     }
 
-    // Payback cells read like "2d 10h 57m"; turn them into seconds to compare order.
+    // Payback cells read like "17:09:58", "2d 10h 57m" or "1y 2mo 3w"; turn them into seconds
+    // to compare order.
     function seconds(text) {
-        const units = { w: 604800, d: 86400, h: 3600, m: 60, s: 1 };
+        const clock = (text ?? '').trim().match(/^(\d+):(\d+):(\d+)$/);
+        if (clock)
+            return Number(clock[1]) * 3600 + Number(clock[2]) * 60 + Number(clock[3]);
+        const units = { y: 365 * 86400, mo: 30 * 86400, w: 604800, d: 86400, h: 3600, m: 60, s: 1 };
         let total = 0;
-        for (const [, n, u] of (text ?? '').matchAll(/(\d+)\s*([wdhms])/g))
+        for (const [, n, u] of (text ?? '').matchAll(/(\d+)\s*(mo|[ywdhms])/g))
             total += Number(n) * units[u];
         return total;
     }
@@ -1413,7 +1417,7 @@ test.describe('Production Calculator - calculation-error report', () => {
             .toHaveText(`Selected: Priority mine upgrades #1 (${planet}, Metal mine 0 → 1), Amortisation time`);
 
         await sendReport(page, sent, '1h 31m');
-        expect(sent()?.get('context')?.split('\n')[1]).toMatch(/^selected: priority-1\.amortization-time = "1h 30m\s*"$/);
+        expect(sent()?.get('context')?.split('\n')[1]).toMatch(/^selected: priority-1\.amortization-time = "01:30:00"$/);
     });
 });
 

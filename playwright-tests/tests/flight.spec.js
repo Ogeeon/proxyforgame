@@ -951,7 +951,7 @@ test.describe('Flight Calculator - Results Table', () => {
 });
 
 test.describe('Flight Calculator - Moon Destruction Mission', () => {
-    /** The numbers of a speed row's duration cell, e.g. "5h 32m 18s" -> [5, 32, 18]. */
+    /** The numbers of a speed row's duration cell, e.g. "05:32:18" -> [5, 32, 18]. */
     async function rowDuration(page, idx) {
         const text = await speedRows(page).nth(idx).locator('td').nth(1).innerText();
         return (text.match(/\d+/g) ?? []).map(Number);
@@ -1007,7 +1007,7 @@ test.describe('Flight Calculator - Moon Destruction Mission', () => {
         }
         await expect(rows.nth(1)).toBeHidden();
 
-        // Half the speed, twice the flight: 5h 32m 18s becomes 11h 4m 27s
+        // Half the speed, twice the flight: 05:32:18 becomes 11:04:27
         const half = await rowDuration(page, 10);
         expect(half).toEqual([11, 4, 27]);
     });
