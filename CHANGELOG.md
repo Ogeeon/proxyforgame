@@ -23,6 +23,7 @@ release section; it is the source of truth for the other eleven translations.
 ### Changed
 
 - All calculators: numbers are written the way the site language writes them, per CLDR, instead of with a dot between the thousands in every language. English groups with a comma (`1,234,567`), Russian, Polish, Portuguese and Slovak with a no-break space, French with a narrow no-break space, and German, Spanish, Italian, Dutch, Turkish and Bosnian keep the dot. A fraction now always takes the language's decimal separator, so a number like `12,345.678` (`12.345,678` in German) no longer reads as `12.345.678`; the compact form follows too (`1,5M` in comma languages, still `1.5M` in English), and so do the trade calculator's exchange rates and the limits under its sliders. Typing is unchanged: a group separator is still never part of a field, and a number copied off the page pastes back whole. Grouping stays three by three in every language. <!-- site -->
+- Costs, LF costs, production, queue and scrap calculators: the compact form of a number gains a T tier for trillions. A value from 10¹² on is written as `1T`, `1.234T` (`1,234Т` in Russian) instead of stretching the G figure into `1,000G` or `1,234.567G`; as with M and G the figure is cut, not rounded, to three decimals. There is no tier above it: from 10¹⁵ the T figure simply grows past 999 (`1,234.567T`). Below a million and with "full numbers" ticked nothing changes. <!-- site -->
 
 ### Fixed
 

@@ -60,3 +60,21 @@ file. Two problems followed:
   the key through `json_encode` so it is readable in page source.
 - A spec that reads a displayed number back must not strip one known separator; it uses
   `wholeNumber` from `playwright-tests/tests/base.js`.
+
+## Addendum 2026-11-21: a T tier for the compact form
+
+This supersedes "K/M/G suffixes exactly as it was" in *Decision*. The compact form of
+`numberToShortenedString` (and so `numToDisplay`) used to stop at G, so a trillion came out as
+`1,000G` and 1.234×10¹² as `1,234.567G` - the wrong letter, and a mantissa stretched into
+extra digit groups.
+
+- **A T tier from 10¹²**, shaped like M and G: mantissa `0.001 × floor(n / 10⁹)`, at most three
+  fraction digits, cut and not rounded, trailing zeros dropped. The seam is `999.999G` ->
+  `1T` at exactly 10¹² (not `1.000T`).
+- **No P tier.** From 10¹⁵ the T mantissa grows past 999 and takes grouping: `1,234.567T` in
+  `en`, `1.234,567T` in `de`, `1 234,567Т` in `ru`. That is the accepted ceiling - game values
+  do not reach it, and exact integers end at 2⁵³ anyway.
+- **Below 10⁶ nothing changes**: the full grouped number; the K letter stays unused.
+- **The letter comes from the locale**, by position in `unit-suffix`, which grows from `KMG` to
+  `KMGT` (`КМГТ` in `ru`, a Cyrillic Т). No new key. `numToLocal` and the "full numbers" mode
+  are untouched, and there is no tooltip with the exact value - that checkbox is the way to it.

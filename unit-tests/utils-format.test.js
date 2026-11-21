@@ -6,7 +6,8 @@
 //
 //   - numToLocal groups the integer part only, so a fraction never meets the grouping
 //     character - the de case, where both would otherwise be a dot;
-//   - the compact (K/M/G) mantissa takes the locale decimal separator;
+//   - the compact (M/G/T) mantissa takes the locale decimal separator, is cut rather than
+//     rounded, and from 10^15 grows past 999 under the T letter - there is no P tier;
 //   - with no separators configured the output is the legacy dot grouping;
 //   - the grouping spaces the page displays never reach a parsed number.
 
@@ -99,6 +100,37 @@ describe('numberToShortenedString and numToDisplay', () => {
 
     it('groups a number below the compact threshold in full', () => {
         expect(locale('ru').numberToShortenedString(999999, 'КМГ')).toBe(`999${NBSP}999`);
+        expect(locale('en').numberToShortenedString(987654, 'KMGT')).toBe('987,654');
+        expect(locale('de').numberToShortenedString(987654, 'KMGT')).toBe('987.654');
+    });
+
+    it('switches tier at 10^6, 10^9 and 10^12, dropping trailing zeros', () => {
+        const { numberToShortenedString } = locale('en');
+        expect(numberToShortenedString(999999, 'KMGT')).toBe('999,999');
+        expect(numberToShortenedString(1000000, 'KMGT')).toBe('1M');
+        expect(numberToShortenedString(999999999, 'KMGT')).toBe('999.999M');
+        expect(numberToShortenedString(1000000000, 'KMGT')).toBe('1G');
+        expect(numberToShortenedString(999999999999, 'KMGT')).toBe('999.999G');
+        expect(numberToShortenedString(1e12, 'KMGT')).toBe('1T');
+    });
+
+    it('writes trillions under T, cut to three fraction digits', () => {
+        expect(locale('en').numberToShortenedString(1234567890123, 'KMGT')).toBe('1.234T');
+        expect(locale('de').numberToShortenedString(1234567890123, 'KMGT')).toBe('1,234T');
+        expect(locale('ru').numberToShortenedString(1234567890123, 'КМГТ')).toBe('1,234Т');
+        expect(locale('ru').numberToShortenedString(1e12, 'КМГТ')).toBe('1Т');
+    });
+
+    it('lets the T mantissa grow past 999 from 10^15 (no P tier)', () => {
+        expect(locale('en').numberToShortenedString(1234567890123456, 'KMGT')).toBe('1,234.567T');
+        // The one compact value where the de grouping dot and decimal comma meet.
+        expect(locale('de').numberToShortenedString(1234567890123456, 'KMGT')).toBe('1.234,567T');
+        expect(locale('ru').numberToShortenedString(1234567890123456, 'КМГТ')).toBe(`1${NBSP}234,567Т`);
+    });
+
+    it('takes the T letter by position from the locale suffixes', () => {
+        expect(locale('ru', false).numToDisplay(2e12, 'КМГТ')).toBe('2Т');
+        expect(locale('en', false).numToDisplay(2e12, 'KMGT')).toBe('2T');
     });
 
     it('switches between the full and the compact form on options.prm.fullNumbers', () => {

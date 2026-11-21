@@ -18,7 +18,7 @@ class ScrapRenderer {
    * @returns {string}
    */
   static formatNumber(n) {
-    return numToDisplay(n, getOptionValue('unitSuffix', 'KMG'));
+    return numToDisplay(n, getOptionValue('unitSuffix', 'KMGT'));
   }
 
   /**
@@ -30,7 +30,7 @@ class ScrapRenderer {
    */
   static formatMsu(sum) {
     const millions = Math.floor(sum / 100000) / 10;
-    return localizeFloat(millions.toFixed(1)) + String(getOptionValue('unitSuffix', 'KMG')).charAt(1);
+    return localizeFloat(millions.toFixed(1)) + String(getOptionValue('unitSuffix', 'KMGT')).charAt(1);
   }
 
   /** @param {ScrapResult} r */

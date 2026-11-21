@@ -235,7 +235,11 @@ function timespanToShortenedString(seconds, w, d, h, m, s, minimize) {
 function numberToShortenedString(number, suffixes) {
 	let value = 0, suff = '';
 	value = number;
-	if (number >= 1000000000) {
+	// No tier above T: from 10^15 the T mantissa simply grows past 999 (1,234.567T).
+	if (number >= 1000000000000) {
+		value = 0.001 * Math.floor(value / 1000000000.0);
+		suff = suffixes.substring(3, 4);
+	} else if (number >= 1000000000) {
 		value = 0.001 * Math.floor(value / 1000000.0);
 		suff = suffixes.substring(2, 3);
 	} else if (number >= 1000000) {
@@ -255,7 +259,8 @@ function numberToShortenedString(number, suffixes) {
  * - Otherwise, the value is converted using `numberToShortenedString(num, suffix)` (shortened form).
  *
  * @param {number} num - The numeric value to format.
- * @param {string} [suffix] - Optional suffix passed to the shortening helper (e.g. "K", "M").
+ * @param {string} [suffix] - The tier letters passed to the shortening helper, K/M/G/T by position
+ *                            (e.g. "KMGT"; K is never used).
  *                            Ignored when `options.prm.fullNumbers` is truthy.
  * @returns {string} A formatted string representing the number, either full or shortened.
  * @see options.prm.fullNumbers
@@ -266,7 +271,8 @@ function numberToShortenedString(number, suffixes) {
  * // numToDisplay(1234567) -> "1,234,567" / "1.234.567" / "1 234 567" (no-break space)
  *
  * // When fullNumbers is false (en / ru):
- * // numToDisplay(1500000, "KMG") -> "1.5M" / "1,5M"
+ * // numToDisplay(1500000, "KMGT") -> "1.5M" / "1,5M"
+ * // numToDisplay(1234567890123, "KMGT") -> "1.234T" / "1,234T"
  */
 function numToDisplay(num, suffix) {
 	if (options.prm.fullNumbers)

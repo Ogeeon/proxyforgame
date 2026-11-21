@@ -5,7 +5,7 @@
     "datetime-h": "ч",
     "datetime-m": "м",
     "datetime-s": "с",
-    "unit-suffix": "КМГ",
+    "unit-suffix": "КМГТ",
     "sc-short": "МТ",
     "lc-short": "БТ",
     "cargo-cap-increase": "Увеличение грузоподъёмности: ",
