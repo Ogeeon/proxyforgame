@@ -80,9 +80,17 @@ function numToLocal(n) {
 	const s = String(dropFraction(n, 3));
 	if (/e/i.test(s))
 		return s;
-	const [intPart, frac] = s.split('.');
-	const grouped = intPart.replace(/\B(?=(\d{3})+(?!\d))/g, () => getOptionValue('thousandsSeparator', '.'));
-	return frac === undefined ? grouped : grouped + getOptionValue('decimalSeparator', '.') + frac;
+	const dot = s.indexOf('.');
+	const intPart = dot < 0 ? s : s.slice(0, dot);
+	const sign = intPart.startsWith('-') ? '-' : '';
+	const digits = intPart.slice(sign.length);
+	const sep = getOptionValue('thousandsSeparator', '.');
+	// Groups of three from the right; a loop, as a lookahead regex backtracks super-linearly
+	let grouped = digits.slice(Math.max(0, digits.length - 3));
+	for (let i = digits.length - 3; i > 0; i -= 3)
+		grouped = digits.slice(Math.max(0, i - 3), i) + sep + grouped;
+	grouped = sign + grouped;
+	return dot < 0 ? grouped : grouped + getOptionValue('decimalSeparator', '.') + s.slice(dot + 1);
 }
 
 /**
