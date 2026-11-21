@@ -114,36 +114,90 @@ High-Performance Transformer 4 (+1.2 %) and Chip Mass Production 5 (+2.0 %), i.e
 the multiplier it would have been 3 753. The implied percentages are stable across all
 four planets (4.180 / 3.352 / 4.599 / 1.0220), as expected for account-wide research.
 
-## 2. OGame floors bonus rows, the calculator rounds them — OPEN
+## 2. OGame floors bonus rows and forms its totals from the unrounded amounts — FIXED
 
-Every remaining ±1 difference is a floor-vs-round mismatch:
+The first finding was a floor-vs-round mismatch in the bonus rows; four further captures
+(2026-11-21, issue #87) showed that the totals follow a different rule from the rows, and
+settled which base the bonuses use.
 
-| Row | OGame | Calculator | Exact value |
+### The rows
+
+Every bonus row is the amount **rounded down**:
+
+| Row | OGame | Calculator (before) | Exact value |
 |---|---|---|---|
 | High Energy Smelting (metal) | 3 915 | 3 916 | 87012 × 4.5 % = 3915.54 |
 | Fusion-Powered Production (crystal) | 5 814 | 5 815 | 64606 × 9 % = 5814.54 |
 | Plasma technology (crystal) | 3 837 | 3 838 | 64606 × 5.94 % = 3837.6 |
 | Plasma technology (deuterium) | 1 803 | 1 804 | 60740 × 2.97 % = 1803.98 |
 | Alliance class (metal) | 4 350 | 4 351 | 87012 × 5 % = 4350.6 |
+| Metal booster +30 % | 34 302 | 34 303 | 114342 × 30 % = 34302.6 |
+| Geologist | 10 876 | 10 877 | 108765 × 10 % = 10876.5 |
+| Collector class (energy) | 1 782 | 1 783 | 17825 × 10 % = 1782.5 |
+| Crawlers (crystal), 87 at 150 % | 2 120 | 2 121 | 54173 × 3.915 % = 2120.9 |
 
-Case B shows the same pattern: Magma Forge metal 7 317 vs. 7 318 (91474 × 8 % =
-7317.92), plasma 8 232 / 2 944 / 1 451 vs. 8 233 / 2 945 / 1 452, alliance class
-4 573 / 2 478 / 2 443 vs. 4 574 / 2 479 / 2 444, Disruption Chamber energy gain
-3 240 vs. 3 241.
+The same holds for plasma, boosters, Geologist, Engineer, the commanding staff, the
+Collector and alliance class, the life form tech bonus, the life form buildings and the
+crawlers: five captures, 21 planets and some 900 cells, floor in every one where floor and round differ.
 
-Cases C and D add twelve more plasma / alliance-class data points. Eight of them are
-values where `floor` and `round` disagree, and OGame matched `floor` in all eight.
+### The base of a bonus is the mine's rounded-down output
 
-Sources of the rounding:
+A mine makes `floor(basePR × speed)` at 100 % production; every bonus row is that whole
+number times its percentage (plasma 1 % / 0.66 % / 0.33 % per level, booster 10 % per step,
+Geologist and Engineer 10 %, the commanding staff 2 %, the class 25 % and the alliance class
+5 %, the crawlers `count × 0.0002 × multiplier × percent`). The test is a planet at 100 %
+production, where the unrounded mine output is known exactly: Ogeeon's Gamma, hourly metal
+178 948, rounded mine as the base 178 948.6, unrounded as the base 178 950.2.
 
-* `js/ogame-production.js` — `getProductionRateSplit`, rows 2/3/4/6/7/8 (plasma, booster,
-  geologist, all officers, player class, alliance class) use `Math.round`.
-* `js/production-core.js` — life form tech bonus and per-building bonus rows use
-  `Math.round`.
+### With an energy deficit the mine is scaled as a whole number
 
-Not changed yet: `ogame-production.js` is shared by the costs and production calculators
-and the Playwright expectations encode the current numbers, so switching to `Math.floor`
-needs a coordinated pass over the tests.
+The energy coefficient and the mine's own percentage scale the **rounded** output, and the
+result is rounded down again: Zeta's metal mine makes 92 961.78 at 100 %, `92961 × 0.78224
+= 72717.8`, the game shows 72 717 (scaling the unrounded figure gives 72 718). Bonuses of a
+mine at less than 100 % are taken from that scaled output.
+
+### The totals
+
+The totals — production per hour, the energy produced, the energy used — are **not** the
+sum of the displayed rows. They are the floor of the sum of the unrounded amounts:
+
+```
+Mechas, energy produced:  19 638 (base) + 1 963.8 (Engineer) + 392.76 (staff)
+   + 981.9 (Traders) + 200.7 (life form) + 785.52 (Transformer) = 23 962.68  ->  23 962
+   the rows as shown add up to 23 959
+```
+
+The per-day and per-week figures multiply the unrounded hourly amount (Cradle metal:
+hourly 34 611, daily 830 675, not 24 × 34 611). The production coefficient is the unrounded
+energy produced over the unrounded energy used, which is what makes the mine rows of a
+planet with an energy deficit land on the game's numbers (Epsilon: 80 220 against 80 214
+with the sums of the shown rows). The page shows the coefficient rounded down to a whole
+percent.
+
+### Floating point
+
+A product such as `0.29 * 100` is `28.999999999999996`, and the crawler draw
+`76 × (1 + 0.4 × 2) × 50` is `6839.999999999999` although the game shows 6 840 (`1.4 − 1` is
+`0.3999999999999999`). Every floor goes through `floorExact` (`ogame-production.js`), which
+adds a tolerance of 1e-9 first; the amounts are whole numbers times percentages with at most
+four decimals, so no real fraction is that close to a whole number.
+
+### What changed in the code
+
+* `ogame-production.js`: `getProductionRateExact` returns the unrounded rows,
+  `getProductionRateSplit` the rounded-down ones, `getProductionRate` the floored sum.
+* `production-core.js`: `calculateProduction` shows every row rounded down and keeps the
+  unrounded amounts for the totals, the energy and the coefficient.
+* The costs, graviton and terraformer calculators read the production through the same
+  functions, so their hourly figures follow the game too (a few units out of 100 000).
+
+### Not covered by a capture
+
+The life form tech bonus on **crawlers** (Ion Crystal Modules) — the crawler part of the row
+is taken from the shown crawler row; no account had a crawler bonus from research. The
+amplified Collector class bonus of section 6 was captured with the research at 0. The
+50 % crawler ceiling was not reached. How the draw of a building is scaled on a deficit
+planet is issue #89.
 
 ## 3. Level-1 buildings draw base energy, without the growth coefficient — FIXED
 

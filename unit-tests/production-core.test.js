@@ -14,10 +14,11 @@ const ctx = load(
     ['ogame/calc/js/ogame-costs.js', 'ogame/calc/js/ogame-production.js', 'ogame/calc/js/production-core.js'],
     ['createEmptyPlanet', 'isPlnEmpty', 'mineSlot', 'PLANET_TEMP', 'PLANET_POS', 'PLANET_RACE', 'PLANET_LF_LEVELS', 'lfResearchIncrease', 'lfBuildingUpgradeLevels', 'lfBuildingCostReduction',
         'calculateProduction', 'getSSCost', 'lfBuildingEffects', 'convertExchangeRates', 'convertAllPlanetParams',
-        'lithiumConversion', 'planetLithiumConversion', 'PLANET_IAS_ON', 'PLANET_IAS_LEVEL', 'PLANET_IAS_DISCOUNT', 'PLANET_IAS_RESOURCE', 'PLANET_IAS_WORKLOAD'],
+        'floorExact', 'getProductionRateSplit', 'getProductionRateExact', 'lithiumConversion', 'planetLithiumConversion', 'PLANET_IAS_ON', 'PLANET_IAS_LEVEL', 'PLANET_IAS_DISCOUNT', 'PLANET_IAS_RESOURCE', 'PLANET_IAS_WORKLOAD'],
 );
 const { createEmptyPlanet, isPlnEmpty, lfResearchIncrease, lfBuildingUpgradeLevels, lfBuildingCostReduction,
-    calculateProduction, getSSCost, lfBuildingEffects, convertExchangeRates, convertAllPlanetParams } = ctx;
+    calculateProduction, getSSCost, lfBuildingEffects, convertExchangeRates, convertAllPlanetParams,
+    floorExact, getProductionRateSplit } = ctx;
 
 const check = (planet) => isPlnEmpty(planet);
 
@@ -91,11 +92,11 @@ describe('lfResearchIncrease', () => {
     // [metal mine, crystal mine, deuterium synthesizer] per planet
     const mines = [[21200, 9000, 4000], [10000, 5000, 2500]];
 
-    it('adds base% of every planet\'s mine output, rounded per planet', () => {
+    it('adds base% of every planet\'s mine output, rounded down per planet', () => {
         // High-Performance Extractors: 0.06% of all three resources
         const bonus = { met: [0.06, 1, null], cry: [0.06, 1, null], deu: [0.06, 1, null] };
-        // 21200*0.0006 = 12.72 -> 13, 10000*0.0006 = 6; 5.4 -> 5, 3; 2.4 -> 2, 1.5 -> 2
-        expect(lfResearchIncrease(mines, bonus, 0)).toEqual([19, 8, 4]);
+        // 21200*0.0006 = 12.72 -> 12, 10000*0.0006 = 6; 5.4 -> 5, 3; 2.4 -> 2, 1.5 -> 1
+        expect(lfResearchIncrease(mines, bonus, 0)).toEqual([18, 8, 3]);
     });
 
     it('touches only the resources the research boosts', () => {
@@ -182,11 +183,15 @@ function rows({ mines = [30, 26, 24], solar = 30, fusion = 0, sats = 0, crawlers
 const PLANET = [40, 8, 0]; // max temperature, position, energy booster
 
 describe('calculateProduction', () => {
-    it('sums the result rows into the planet totals', () => {
+    it('forms the planet totals from the unrounded rows, so they can exceed the sum of the shown ones', () => {
+        // The game floors every row it shows but adds up the unrounded amounts, then floors the sum
+        // (production-vs-ogame.md, section 2): the total is never below the rows, and above them by
+        // less than one unit per row.
         const [results, production] = calculateProduction(rows(), PLANET, settings());
         for (let res = 0; res < 3; res++) {
             const sum = results.reduce((acc, row) => acc + row[res], 0);
-            expect(production[res]).toBe(sum);
+            expect(production[res]).toBeGreaterThanOrEqual(sum);
+            expect(production[res]).toBeLessThan(sum + results.length);
         }
     });
 
@@ -210,7 +215,7 @@ describe('calculateProduction', () => {
     it('gives the Engineer 10% of the energy produced', () => {
         const [results] = calculateProduction(rows(), PLANET, settings({ engineer: true }));
         const base = results[4][3] + results[5][3] + results[6][3];
-        expect(results[11][3]).toBe(Math.round(base * 0.1));
+        expect(results[11][3]).toBe(Math.floor(base * 0.1));
         const [without] = calculateProduction(rows(), PLANET, settings());
         expect(without[11][3]).toBe(0);
     });
@@ -240,7 +245,7 @@ describe('calculateProduction', () => {
 
     it('adds the life form research bonus on the base output of the mines', () => {
         const [results] = calculateProduction(rows({ solar: 40 }), PLANET, settings({ lfMetProdBonus: 10 }));
-        expect(results[15][0]).toBe(Math.round(results[1][0] * 0.1));
+        expect(results[15][0]).toBe(Math.floor(results[1][0] * 0.1));
         expect(results[15][1]).toBe(0);
     });
 
@@ -250,7 +255,7 @@ describe('calculateProduction', () => {
         const levels = [0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0];
         const lfEff = lfBuildingEffects(2, levels, tables);
         const [results, , , , , lfBld] = calculateProduction(rows({ solar: 40 }), PLANET, settings(), { lfEff });
-        expect(lfBld[5][0]).toBe(Math.round(results[1][0] * 0.1));
+        expect(lfBld[5][0]).toBe(Math.floor(results[1][0] * 0.1));
         expect(lfBld[0][0]).toBe(0);
     });
 });
@@ -439,5 +444,95 @@ describe('lithiumConversion', () => {
         expect(isPlnEmpty(planet)).toBe(true);
         planet[ctx.PLANET_IAS_ON] = 1;
         expect(isPlnEmpty(planet)).toBe(false);
+    });
+});
+
+// What the game itself shows on the resource settings page, s1-en, 2026-11-21 (issue #87). Every row is
+// rounded down; the totals, the production factor and the energy come from the unrounded amounts.
+describe('calculateProduction against the game\'s resource settings page', () => {
+    const gameSettings = (over = {}) => settings({
+        energyTechLevel: 15, plasmaTechLevel: 9, universeSpeed: 10, playerClass: 0, isTrader: true,
+        lfMetProdBonus: 2.7848, lfCrysProdBonus: 2.7844, lfDeutProdBonus: 5.2871, lfCollectorBonus: 0, ...over,
+    });
+    // Rune Technologium (Rock'tal, 3rd building), draws 87 at level 4
+    const runeTech = lfBuildingEffects(2, [0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0], { lfEnergy: { 2003: [15, 1.1] }, lfBonus: {} });
+
+    it('floors the bonus rows and the totals of a Collector with Traders (OgTheMiner, Theta)', () => {
+        const [res, hourly, produced] = calculateProduction(
+            rows({ mines: [26, 26, 26], solar: 27, fusion: 11, sats: 62 }), [60, 7, 0], gameSettings(), { lfEff: runeTech });
+        expect(res[1][0]).toBe(114342);
+        expect(res[2][1]).toBe(61974);
+        expect(res[3][2]).toBe(37184);
+        expect(res[8].slice(0, 3)).toEqual([10290, 3681, 1104]); // plasma: 10290.78, 3681.9, 1104.7
+        expect(res[13]).toEqual([28585, 15493, 9296, 1157, 0]); // Collector: 28585.5, 15493.5
+        expect(res[14].slice(0, 4)).toEqual([5717, 3098, 1859, 578]); // Traders: 5717.1, 3098.7
+        expect(res[15].slice(0, 3)).toEqual([3184, 1725, 1965]);
+        expect(hourly).toEqual([162488, 86123, 48271]); // the sum of the shown rows is 162487 / 86121 / 48269
+        expect(produced).toBe(13312);
+    });
+
+    it('takes the crawler bonus from the shown mine row, at every overload (OgTheMiner)', () => {
+        // 87 crawlers at 150% on Alpha: 0.0002 * 1.5 (Collector) * 1.5 = 3.915% of each mine
+        const alpha = calculateProduction(
+            rows({ mines: [26, 25, 24], solar: 23, fusion: 12, sats: 362, crawlers: [87, 150] }), [35, 9, 0], gameSettings())[0];
+        expect(alpha[7]).toEqual([4476, 2120, 1203, -8700, 0]); // 2120.9 and 1203.1 are rounded down
+        expect(alpha[13].slice(0, 4)).toEqual([28585, 13543, 7682, 1782]);
+        // and a 100% planet on the other side of the range
+        const zeta = calculateProduction(
+            rows({ mines: [26, 25, 24], solar: 24, fusion: 10, sats: 320, crawlers: [91, 100] }), [17, 10, 0], gameSettings())[0];
+        expect(zeta[7].slice(0, 4)).toEqual([2969, 1478, 885, -4550]);
+    });
+
+    it('does not lose a unit of crawler energy to floating point (OgTheMiner, Beta and Delta)', () => {
+        // 76 * (1 + 0.4 * 2) * 50 is exactly 6840, but 1.4 - 1 is 0.3999999999999999 and the product 6839.999999999999
+        const beta = calculateProduction(rows({ solar: 40, crawlers: [76, 140] }), [32, 8, 0], gameSettings())[0];
+        expect(beta[7][3]).toBe(-6840);
+        const delta = calculateProduction(rows({ solar: 40, crawlers: [46, 120] }), [43, 10, 0], gameSettings())[0];
+        expect(delta[7][3]).toBe(-3220);
+    });
+
+    it('floors the geologist, engineer and commanding staff rows (Ogeeon, Alpha)', () => {
+        const staff = { geologist: true, engineer: true, technocrat: true, admiral: true, commander: true };
+        const res = calculateProduction(
+            rows({ mines: [26, 28, 31], solar: 30, fusion: 15, sats: 308 }), [41, 10, 0],
+            settings({ energyTechLevel: 15, plasmaTechLevel: 9, universeSpeed: 10, playerClass: 2, isTrader: true, ...staff }))[0];
+        expect(res[10].slice(0, 3)).toEqual([10876, 8075, 7592]); // 10876.5, 8075.7, 7592.5
+        expect(res[12].slice(0, 4)).toEqual([2175, 1615, 1518, 532]); // 2% of the mines and of the 26642 base energy
+        expect(res[11][3]).toBe(2664); // Engineer: 10% of 26642
+    });
+
+    it('floors a resource booster row (Ogeeon, Gamma)', () => {
+        // Metal booster +30% on a 114342 mine: 34302.6; deuterium +30% on 61091: 18327.3 (18327.6 on the unrounded mine)
+        const withBooster = rows({ mines: [26, 26, 29], solar: 30, fusion: 15, sats: 343 });
+        withBooster[0][2] = 3;
+        withBooster[2][2] = 3;
+        const [res] = calculateProduction(withBooster, [28, 9, 0], settings({ energyTechLevel: 15, plasmaTechLevel: 9, universeSpeed: 10, isTrader: true }));
+        expect(res[9][0]).toBe(34302);
+        expect(res[9][2]).toBe(18327);
+    });
+
+    it('scales a mine\'s rounded-down output by the energy coefficient (Ogeeon, Zeta)', () => {
+        // The metal mine makes 92961.78 at 100%. The game floors that to 92961 first, then scales it:
+        // 92961 * 0.78224 = 72717.8 -> 72717. Scaling the unrounded figure would give 72718.4 -> 72718.
+        const split = getProductionRateSplit({
+            techID: 1, techLevel: 26, energyTechLevel: 15, plasmaTechLevel: 9, maxTemp: -112, pos: 14,
+            universeSpeedFactor: 10, geologist: false, engineer: false, productionFactor: 0.78224, powerFactor: 1,
+            boosterType: 0, allOfficers: false, playerClass: 2, isTrader: false,
+        });
+        expect(split[1]).toBe(72717);
+    });
+});
+
+describe('floorExact', () => {
+    it('rounds down amounts a float error would pull under the next whole number', () => {
+        expect(Math.floor(0.29 * 100)).toBe(28); // what a plain Math.floor does
+        expect(floorExact(0.29 * 100)).toBe(29);
+        expect(floorExact(76 * (1 + (1.4 - 1) * 2) * 50)).toBe(6840);
+    });
+
+    it('still rounds a real fraction down', () => {
+        expect(floorExact(2536.535)).toBe(2536);
+        expect(floorExact(4847.8)).toBe(4847);
+        expect(floorExact(-0.5)).toBe(-1);
     });
 });

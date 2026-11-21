@@ -448,7 +448,7 @@ function lfBuildingCostReduction(race, levels) {
  * production research grows linearly, so the gain does not depend on the
  * current level: each planet gets base% of its mines' output, amplified by
  * the life form technology bonus - on the same base and with the same per-row
- * rounding as the "Life form tech bonus" row of calculateProduction.
+ * rounding (down) as the "Life form tech bonus" row of calculateProduction.
  * @param {number[][]} minePerPlanet - [metal mine, crystal mine, deuterium
  *   synthesizer] output of every planet
  * @param {Object<string, number[]>} bonus - {met|cry|deu: [base, factor, max]}
@@ -463,7 +463,7 @@ function lfResearchIncrease(minePerPlanet, bonus, techBonusPct) {
 		for (let res = 0; res < 3; res++) {
 			const b = bonus[kinds[res]];
 			if (b)
-				delta[res] += Math.round(mine[res] * b[0] / 100 * amp);
+				delta[res] += floorExact(mine[res] * b[0] / 100 * amp);
 		}
 	}
 	return delta;
@@ -505,7 +505,9 @@ function computeBaseEnergyProduction(prodParams, plnData, settings, results, pro
 }
 
 // Adds the booster/officer/class/life-form energy bonuses on top of the base
-// production, plus what each life form building contributes to its own row.
+// production, plus what each life form building contributes to its own row. Every
+// bonus row shows its amount rounded down, while the total it returns is the
+// unrounded sum: the game forms the planet's energy from the exact amounts.
 function applyEnergyBonuses(totalEnergyProduced, plnData, settings, lfEff, results, lfBld) {
 	let energyBalance = totalEnergyProduced; // the base for calculating energy bonuses must be taken before Crawlers
 	if (energyBalance < 0) energyBalance = 0;
@@ -515,18 +517,19 @@ function applyEnergyBonuses(totalEnergyProduced, plnData, settings, lfEff, resul
 	const classFactor = settings.playerClass === 0 ? 0.1 * (1 + 0.01 * collectorClassBonusPct(settings)) : 0;
 	const allianceClassFactor = settings.isTrader ? 0.05 : 0;
 	const lfEnergyFactor = (settings.lfEnergyProdBonus || 0) / 100;
-	results[9][3] = Math.round(energyBalance * boosterFactor);
-	results[11][3] = Math.round(energyBalance * engineerFactor);
-	results[12][3] = Math.round(energyBalance * allStaffFactor);
-	results[13][3] = Math.round(energyBalance * classFactor);
-	results[14][3] = Math.round(energyBalance * allianceClassFactor);
-	// Life form tech bonus: energy production increase from the base output
-	results[15][3] = Math.round(energyBalance * lfEnergyFactor);
-	let total = totalEnergyProduced + results[9][3] + results[11][3] + results[12][3] + results[13][3] + results[14][3] + results[15][3];
+	// Rows 9 booster, 11 engineer, 12 commanding staff, 13 class, 14 alliance class, 15 life form tech bonus
+	const bonuses = [[9, boosterFactor], [11, engineerFactor], [12, allStaffFactor], [13, classFactor], [14, allianceClassFactor], [15, lfEnergyFactor]];
+	let total = totalEnergyProduced;
+	for (const [row, factor] of bonuses) {
+		const exact = energyBalance * factor;
+		results[row][3] = floorExact(exact);
+		total += exact;
+	}
 	// Energy production increase from buildings - into the building's own row
 	for (let b = 0; b < lfBld.length; b++) {
-		lfBld[b][3] = Math.round(energyBalance * lfEff.perBld[b].enP / 100);
-		total += lfBld[b][3];
+		const exact = energyBalance * lfEff.perBld[b].enP / 100;
+		lfBld[b][3] = floorExact(exact);
+		total += exact;
 	}
 	return total;
 }
@@ -544,7 +547,8 @@ function computeEnergyConsumption(prodParams, settings, results) {
 	return totalEnergyUsed;
 }
 
-// Crawlers are in row 6
+// Crawlers are in row 6. The row shows the draw rounded down; the amount it returns
+// stays unrounded, because it joins the planet's total draw.
 function computeCrawlersEnergyConsumption(prodParams, settings, results) {
 	let crawlersPwrPcnt = prodParams[6][1] / 100.0;
 	let crawlersOlPcnt = 0;
@@ -556,35 +560,35 @@ function computeCrawlersEnergyConsumption(prodParams, settings, results) {
 	// crawler production also cuts their energy draw - see
 	// docs/calculators/production-vs-ogame.md.
 	let lfCrawlerFactor = Math.min(settings.lfCrawlerBonus || 0, 100) / 100;
-	let crawlersEenergyCons = Math.round((prodParams[6][0] * (crawlersPwrPcnt + crawlersOlPcnt * 2)) * 50 * (1 - lfCrawlerFactor));
-	results[7][3] = -crawlersEenergyCons;
+	let crawlersEenergyCons = prodParams[6][0] * (crawlersPwrPcnt + crawlersOlPcnt * 2) * 50 * (1 - lfCrawlerFactor);
+	results[7][3] = -floorExact(crawlersEenergyCons);
 	return crawlersEenergyCons;
 }
 
 // Disruption Chamber (and similar) reduces the planet's energy consumption.
 // OGame applies the reduction to every consumer row as well, flooring each row
-// on its own, so the rows can add up to slightly less than the total above -
-// which is derived from the unreduced sum. Reproduced verbatim: matching the
-// game's table is the point, and the total keeps driving the production
-// coefficient exactly as before.
+// on its own, so the rows can add up to slightly less than the total, which is
+// the unrounded sum of the draws times the same factor. The total keeps driving
+// the production coefficient.
 function applyLfEnergyReduction(lfEff, totalEnergyUsed, crawlersEenergyCons, results, lfBld) {
 	if (lfEff.enR <= 0) return totalEnergyUsed;
 	let enRFactor = 1 - Math.min(lfEff.enR, 100) / 100;
 	for (let i = 1; i < 4; i++)
-		results[i][4] = Math.floor(results[i][4] * enRFactor);
-	results[7][3] = -Math.floor(crawlersEenergyCons * enRFactor);
+		results[i][4] = floorExact(results[i][4] * enRFactor);
+	results[7][3] = -floorExact(crawlersEenergyCons * enRFactor);
 	for (const bld of lfBld)
-		bld[4] = Math.floor(bld[4] * enRFactor);
-	return Math.floor(totalEnergyUsed * enRFactor);
+		bld[4] = floorExact(bld[4] * enRFactor);
+	return totalEnergyUsed * enRFactor;
 }
 
 // Base resource production (mines/synthesizer rows plus officer/class/plasma
-// bonus rows 8-14), scaled by the energy coefficient unless normalized.
+// bonus rows 8-14), scaled by the energy coefficient unless normalized. Each row
+// shows its amount rounded down; `production` collects the unrounded amounts.
 function computeResourceProduction(prodParams, plnData, settings, koeff, normalized, results, production) {
 	let prodFactor = normalized ? 1 : koeff;
 	for (const i of [0, 1, 2]) {
 		let pwrFactor = normalized ? 1 : prodParams[i][1] / 100.0;
-		let prod = getProductionRateSplit({
+		let prod = getProductionRateExact({
 			techID: PRODUCTION_ROWS[i], techLevel: prodParams[i][0],
 			energyTechLevel: settings.energyTechLevel, plasmaTechLevel: settings.plasmaTechLevel,
 			maxTemp: plnData[0], pos: plnData[1], universeSpeedFactor: settings.universeSpeed,
@@ -594,14 +598,14 @@ function computeResourceProduction(prodParams, plnData, settings, koeff, normali
 			isTrader: settings.isTrader, collectorClassBonusPct: collectorClassBonusPct(settings)
 		});
 		// Save the resource production data
-		results[0][i] += prod[PRODUCTION_ROW.NATURAL];  // base production
+		results[0][i] += floorExact(prod[PRODUCTION_ROW.NATURAL]);  // base production
 		production[i] += prod[PRODUCTION_ROW.NATURAL];
-		results[i + 1][i] += prod[PRODUCTION_ROW.BUILDING];  // production at the mine
+		results[i + 1][i] += floorExact(prod[PRODUCTION_ROW.BUILDING]);  // production at the mine
 		production[i] += prod[PRODUCTION_ROW.BUILDING];
 		// Table rows 8-14 show the bonus rows PLASMA..ALLIANCE_CLASS in order
 		for (let line = 8; line < 15; line++) {
 			const bonus = prod[PRODUCTION_ROW.PLASMA + line - 8];
-			results[line][i] += bonus;
+			results[line][i] += floorExact(bonus);
 			production[i] += bonus;
 		}
 	}
@@ -615,12 +619,13 @@ function applyCrawlerProductionBonus(prodParams, settings, results, production) 
 	// ceiling is flat: neither the crawler count nor the 150% overload raises it -
 	// overload only reaches it faster (and doubles the energy draw).
 	const factor = Math.min(prodParams[6][0] * 0.0002 * crMult * prodParams[6][1] / 100.0, 0.5);
-	results[7][0] = Math.round(results[1][0] * factor);
-	production[0] += results[7][0];
-	results[7][1] = Math.round(results[2][1] * factor);
-	production[1] += results[7][1];
-	results[7][2] = Math.round(results[3][2] * factor);
-	production[2] += results[7][2];
+	// The bonus is a share of the mine's displayed (rounded down) output, like every bonus row
+	const minesShown = [results[1][0], results[2][1], results[3][2]];
+	for (let res = 0; res < 3; res++) {
+		const exact = minesShown[res] * factor;
+		results[7][res] = floorExact(exact);
+		production[res] += exact;
+	}
 }
 
 // Life form tech bonus: extra resource production from RESEARCH (percentages
@@ -630,16 +635,15 @@ function applyCrawlerProductionBonus(prodParams, settings, results, production) 
 // The crawler bonus percentage also reduces crawler energy consumption - that
 // side of it is applied earlier, in computeCrawlersEnergyConsumption().
 function applyLfTechProductionBonus(settings, results, production) {
-	let lfMetFactor = (settings.lfMetProdBonus || 0) / 100;
-	let lfCrysFactor = (settings.lfCrysProdBonus || 0) / 100;
-	let lfDeutFactor = (settings.lfDeutProdBonus || 0) / 100;
+	const factors = [(settings.lfMetProdBonus || 0) / 100, (settings.lfCrysProdBonus || 0) / 100, (settings.lfDeutProdBonus || 0) / 100];
 	let lfCrawlerFactor = (settings.lfCrawlerBonus || 0) / 100;
-	results[15][0] = Math.round(results[1][0] * lfMetFactor) + Math.round(results[7][0] * lfCrawlerFactor);
-	results[15][1] = Math.round(results[2][1] * lfCrysFactor) + Math.round(results[7][1] * lfCrawlerFactor);
-	results[15][2] = Math.round(results[3][2] * lfDeutFactor) + Math.round(results[7][2] * lfCrawlerFactor);
-	production[0] += results[15][0];
-	production[1] += results[15][1];
-	production[2] += results[15][2];
+	const minesShown = [results[1][0], results[2][1], results[3][2]];
+	for (let res = 0; res < 3; res++) {
+		// The crawler part is taken from the crawler row as shown; no capture has a crawler bonus yet
+		const exact = minesShown[res] * factors[res] + results[7][res] * lfCrawlerFactor;
+		results[15][res] = floorExact(exact);
+		production[res] += exact;
+	}
 }
 
 // Extraction increase from life form buildings - into each building's own row
@@ -649,14 +653,20 @@ function applyLfBuildingProduction(lfEff, results, lfBld, production) {
 		let bld = lfEff.perBld[b];
 		let pcts = [bld.met, bld.cry, bld.deu];
 		for (let res = 0; res < 3; res++) {
-			lfBld[b][res] = Math.round(mineProd[res] * pcts[res] / 100);
-			production[res] += lfBld[b][res];
+			const exact = mineProd[res] * pcts[res] / 100;
+			lfBld[b][res] = floorExact(exact);
+			production[res] += exact;
 		}
 	}
 }
 
 /**
- * Hourly production and energy balance of one planet.
+ * Hourly production and energy balance of one planet. Every row of the result
+ * is rounded down, as the game's table shows it; the totals (production per hour,
+ * energy produced, energy used) are the rounded-down sums of the unrounded
+ * amounts, which can exceed the sum of the rows by a few units - the game does
+ * the same, and so does the production coefficient, which is formed from the
+ * unrounded energy totals.
  * @param {number[][]} prodParams - [level, percent, booster] of each of the
  *   PRODUCTION_ROWS, in that order
  * @param {number[]} plnData - [max temperature, position, energy booster]
@@ -665,9 +675,12 @@ function applyLfBuildingProduction(lfEff, results, lfBld, production) {
  * @param {boolean} [opts.normalized] - mines at 100% with all the energy they
  *   need, the base for payback estimates
  * @param {LfEffects} [opts.lfEff] - omitted where the planet has no life form data
- * @returns {[number[][], number[], number, number, number, number[][]]} the 16
+ * @returns {[number[][], number[], number, number, number, number[][], number[], number[]]} the 16
  *   result rows, the planet totals, energy produced, energy used, the energy
- *   coefficient and one row per life form building
+ *   coefficient, one row per life form building, then the unrounded totals the
+ *   shown ones are cut from: [metal, crystal, deuterium] per hour, and
+ *   [energy produced, energy used]. The game forms its per-day and per-week
+ *   figures and the energy balance from those, not from the shown totals.
  */
 function calculateProduction(prodParams, plnData, settings, { normalized = false, lfEff = undefined } = {}) {
 	if (!lfEff) lfEff = emptyLfEffects();
@@ -682,7 +695,7 @@ function calculateProduction(prodParams, plnData, settings, { normalized = false
 	// the one-planet table can show it in the building's own row.
 	let lfBld = (lfEff.perBld || []).map(function (bld) { return [0, 0, 0, 0, bld.energyUsed]; });
 	let results = [];
-	let production = [0, 0, 0];
+	let production = [0, 0, 0]; // unrounded; rounded down when returned
 	// 0-base production, 1-metal mine, 2-crystal mine, 3-deut synthesizer, 4-solar plant,
 	// 5-fusion reactor, 6-solar satellite, 7-crawlers, 8-plasma tech, 9-items,
 	// 10-geologist, 11-engineer, 12-officers, 13-class, 14-alliance class,
@@ -711,5 +724,6 @@ function calculateProduction(prodParams, plnData, settings, { normalized = false
 	applyLfTechProductionBonus(settings, results, production);
 	applyLfBuildingProduction(lfEff, results, lfBld, production);
 
-	return [results, production, totalEnergyProduced, totalEnergyUsed, koeff, lfBld];
+	return [results, production.map(floorExact), floorExact(totalEnergyProduced), floorExact(totalEnergyUsed), koeff, lfBld,
+		production, [totalEnergyProduced, totalEnergyUsed]];
 }

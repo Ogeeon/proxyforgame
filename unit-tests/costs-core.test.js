@@ -307,8 +307,9 @@ describe('Calculator.calculateProduction', () => {
             1, 10, mineParams({ collectorClassBonus: 22 })
         );
 
-        // The class row is round(basePR * 0.25 * k): 263 at k=1, 320 at k=1.22
-        expect(boosted - bare).toBe(57);
+        // The mine makes 1050 an hour, so the class row is 1050 * 0.25 * k: 262.5 at k=1,
+        // 320.25 at k=1.22. The game floors the total, not each row: 1352 and 1410.
+        expect(boosted - bare).toBe(58);
     });
 
     it('adds nothing for a class other than the Collector', () => {
@@ -322,7 +323,8 @@ describe('Calculator.calculateProduction', () => {
         const bare = calculator.calculateProduction(1, 10, mineParams());
         const traded = calculator.calculateProduction(1, 10, mineParams({ isTrader: true }));
 
-        // The alliance class row is round(basePR * 0.05): round(1050.4657... * 0.05) = 53
+        // The alliance class row is 5% of the 1050 the mine makes: 52.5. The totals are floored
+        // once, floor(1352.5) and floor(1405), so they differ by 53
         expect(traded - bare).toBe(53);
     });
 
