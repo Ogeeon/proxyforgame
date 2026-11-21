@@ -51,21 +51,21 @@
     if (typeof options === 'undefined') {
       pfgScriptsFailed();
     } else {
-      options.decimalSeparator = '<?= $l['decimal-separator'] ?>';
+      options.decimalSeparator = <?= json_encode($l['decimal-separator']) ?>;
       options.thousandsSeparator = <?= json_encode($l['thousands-separator']) ?>;
-      options.datetimeW = '<?= $l['datetime-w'] ?>';
-      options.datetimeD = '<?= $l['datetime-d'] ?>';
-      options.datetimeH = '<?= $l['datetime-h'] ?>';
-      options.datetimeM = '<?= $l['datetime-m'] ?>';
-      options.datetimeS = '<?= $l['datetime-s'] ?>';
-      options.scShort = '<?= $l['sc-short'] ?>';
-      options.lcShort = '<?= $l['lc-short'] ?>';
+      options.datetimeW = <?= json_encode($l['datetime-w']) ?>;
+      options.datetimeD = <?= json_encode($l['datetime-d']) ?>;
+      options.datetimeH = <?= json_encode($l['datetime-h']) ?>;
+      options.datetimeM = <?= json_encode($l['datetime-m']) ?>;
+      options.datetimeS = <?= json_encode($l['datetime-s']) ?>;
+      options.scShort = <?= json_encode($l['sc-short']) ?>;
+      options.lcShort = <?= json_encode($l['lc-short']) ?>;
       options.warnindDivId = 'warning';
       options.warnindMsgDivId = 'warning-message';
-      options.fieldHint = '<?= $l['field-hint'] ?>';
-      options.msgMinConstraintViolated = '<?= $l['msg-min-constraint-violated'] ?>';
-      options.msgMaxConstraintViolated = '<?= $l['msg-max-constraint-violated'] ?>';
-      options.energyReqConjunction = '<?= $l['energy-needed'] ?>';
+      options.fieldHint = <?= json_encode($l['field-hint']) ?>;
+      options.msgMinConstraintViolated = <?= json_encode($l['msg-min-constraint-violated']) ?>;
+      options.msgMaxConstraintViolated = <?= json_encode($l['msg-max-constraint-violated']) ?>;
+      options.energyReqConjunction = <?= json_encode($l['energy-needed']) ?>;
       // Captions of the calculation-error report (graviton-data-collector.js):
       // the groups below the parameter tabs, and every result cell by its id.
       options.reportText = <?= json_encode(array('energy' => $l['energy'], 'recycling' => $l['recycling'])) ?>;

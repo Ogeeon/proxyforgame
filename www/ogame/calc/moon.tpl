@@ -67,13 +67,13 @@
     if (typeof options === 'undefined') {
       pfgScriptsFailed();
     } else {
-      options.decimalSeparator = '<?= $l['decimal-separator'] ?>';
+      options.decimalSeparator = <?= json_encode($l['decimal-separator']) ?>;
       options.thousandsSeparator = <?= json_encode($l['thousands-separator']) ?>;
       options.warnindDivId = 'warning';
       options.warnindMsgDivId = 'warning-message';
-      options.fieldHint = '<?= $l['field-hint'] ?>';
-      options.msgMinConstraintViolated = '<?= $l['msg-min-constraint-violated'] ?>';
-      options.msgMaxConstraintViolated = '<?= $l['msg-max-constraint-violated'] ?>';
+      options.fieldHint = <?= json_encode($l['field-hint']) ?>;
+      options.msgMinConstraintViolated = <?= json_encode($l['msg-min-constraint-violated']) ?>;
+      options.msgMaxConstraintViolated = <?= json_encode($l['msg-max-constraint-violated']) ?>;
       // Captions of the calculation-error report (moon-data-collector.js): the
       // panels its groups are named after, and every result cell by its id.
       options.reportText = <?= json_encode(array('destroy' => $l['destroy-title'], 'phalanx' => $l['phalanx-title'])) ?>;

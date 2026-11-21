@@ -104,27 +104,27 @@
     };
 
     // Localized strings used by JS modules
-    options.decimalSeparator = '<?= $l['decimal-separator'] ?>';
+    options.decimalSeparator = <?= json_encode($l['decimal-separator']) ?>;
     options.thousandsSeparator = <?= json_encode($l['thousands-separator']) ?>;
-    options.datetimeW = '<?= $l['datetime-w'] ?>';
-    options.datetimeD = '<?= $l['datetime-d'] ?>';
-    options.datetimeH = '<?= $l['datetime-h'] ?>';
-    options.datetimeM = '<?= $l['datetime-m'] ?>';
-    options.datetimeS = '<?= $l['datetime-s'] ?>';
-    options.unitSuffix = '<?= $l['unit-suffix'] ?>';
-    options.scShort = '<?= $l['sc-short'] ?>';
-    options.lcShort = '<?= $l['lc-short'] ?>';
-    options.scFull = '<?= $l['small-cargo'] ?>';
-    options.lcFull = '<?= $l['large-cargo'] ?>';
-    options.datetimeFormat = '<?= $l['datetime-format'] ?>';
+    options.datetimeW = <?= json_encode($l['datetime-w']) ?>;
+    options.datetimeD = <?= json_encode($l['datetime-d']) ?>;
+    options.datetimeH = <?= json_encode($l['datetime-h']) ?>;
+    options.datetimeM = <?= json_encode($l['datetime-m']) ?>;
+    options.datetimeS = <?= json_encode($l['datetime-s']) ?>;
+    options.unitSuffix = <?= json_encode($l['unit-suffix']) ?>;
+    options.scShort = <?= json_encode($l['sc-short']) ?>;
+    options.lcShort = <?= json_encode($l['lc-short']) ?>;
+    options.scFull = <?= json_encode($l['small-cargo']) ?>;
+    options.lcFull = <?= json_encode($l['large-cargo']) ?>;
+    options.datetimeFormat = <?= json_encode($l['datetime-format']) ?>;
     options.warnindDivId = 'warning';
     options.warnindMsgDivId = 'warning-message';
-    options.fieldHint = '<?= $l['field-hint'] ?>';
-    options.msgMinConstraintViolated = '<?= $l['msg-min-constraint-violated'] ?>';
-    options.msgMaxConstraintViolated = '<?= $l['msg-max-constraint-violated'] ?>';
-    options.moveUpTitle = '<?= $l['move-up'] ?? '' ?>';
-    options.moveDownTitle = '<?= $l['move-down'] ?? '' ?>';
-    options.removeRowTitle = '<?= $l['remove-row'] ?? '' ?>';
+    options.fieldHint = <?= json_encode($l['field-hint']) ?>;
+    options.msgMinConstraintViolated = <?= json_encode($l['msg-min-constraint-violated']) ?>;
+    options.msgMaxConstraintViolated = <?= json_encode($l['msg-max-constraint-violated']) ?>;
+    options.moveUpTitle = <?= json_encode($l['move-up'] ?? '') ?>;
+    options.moveDownTitle = <?= json_encode($l['move-down'] ?? '') ?>;
+    options.removeRowTitle = <?= json_encode($l['remove-row'] ?? '') ?>;
     options.lfTerraformerTimeAuto = <?= json_encode($l['lf-terraformer-time-auto']) ?>;
     // Captions of the calculation-error report (queue-data-collector.js): its
     // groups, and the rows and columns of the result cells.

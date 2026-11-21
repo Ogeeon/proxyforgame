@@ -45,21 +45,21 @@
     if (typeof l === 'undefined' || typeof options === 'undefined') {
       pfgScriptsFailed();
     } else {
-      l.sc ='<?= $l['sc-short'] ?>';
-      l.lc = '<?= $l['lc-short'] ?>';
-      l.metal = '<?= $l['metal'] ?>';
-      l.crystal = '<?= $l['crystal'] ?>';
-      l.deuterium = '<?= $l['deuterium'] ?>';
-      l.met = '<?= $l['met'] ?>';
-      l.crys = '<?= $l['crys'] ?>';
-      l.deut = '<?= $l['deut'] ?>';
-      l.src = '<?= $l['src'] ?>';
-      l.dst = '<?= $l['dst'] ?>';
-      l.fix = '<?= $l['fix'] ?>';
-      l.and = '<?= $l['and'] ?>';
-      l.coords = '<?= $l['coords'] ?>';
-      l.rates = '<?= $l['rates'] ?>';
-      l.moonstr = '<?= $l['moon'] ?>';
+      l.sc =<?= json_encode($l['sc-short']) ?>;
+      l.lc = <?= json_encode($l['lc-short']) ?>;
+      l.metal = <?= json_encode($l['metal']) ?>;
+      l.crystal = <?= json_encode($l['crystal']) ?>;
+      l.deuterium = <?= json_encode($l['deuterium']) ?>;
+      l.met = <?= json_encode($l['met']) ?>;
+      l.crys = <?= json_encode($l['crys']) ?>;
+      l.deut = <?= json_encode($l['deut']) ?>;
+      l.src = <?= json_encode($l['src']) ?>;
+      l.dst = <?= json_encode($l['dst']) ?>;
+      l.fix = <?= json_encode($l['fix']) ?>;
+      l.and = <?= json_encode($l['and']) ?>;
+      l.coords = <?= json_encode($l['coords']) ?>;
+      l.rates = <?= json_encode($l['rates']) ?>;
+      l.moonstr = <?= json_encode($l['moon']) ?>;
       l.dirPairHint = <?= json_encode($l['dir-pair-hint']) ?>;
       // Group captions of the calculation-error report (trade.js, tradeReportSnapshot).
       l.parameters = <?= json_encode($l['parameters']) ?>;
@@ -67,7 +67,7 @@
       l.country = <?= json_encode($l['country']) ?>;
       l.universe = <?= json_encode($l['universe']) ?>;
       l.cargoCapIncrease = <?= json_encode($l['cargo-cap-increase']) ?>;
-      options.decimalSeparator = '<?= $l['decimal-separator'] ?>';
+      options.decimalSeparator = <?= json_encode($l['decimal-separator']) ?>;
       options.thousandsSeparator = <?= json_encode($l['thousands-separator']) ?>;
       options.moonLabel = <?= json_encode($l['moon']) ?>;
       options.universeFromProfile = <?= json_encode($l['pf-universe-from-profile']) ?>;
