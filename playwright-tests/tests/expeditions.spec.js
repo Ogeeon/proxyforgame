@@ -231,6 +231,16 @@ test.describe('Expeditions Calculator - cargo bonus import', () => {
         await expect(page.locator('#lf-cargo-203')).toHaveValue('12');
     });
 
+    test('a report from a comma-decimal game client keeps its fraction', async ({ page }) => {
+        // The German client writes "12,5%", the English one "12.5%"; both are read whole.
+        await page.locator('#lf-bonuses-txtarea').fill(buildBonusReport({ 1: '12,5', 2: '0.75' }));
+        await page.locator('#lf-bonuses-read-btn').click();
+
+        await expect(page.locator('#lf-bonuses-reader')).toBeHidden();
+        await expect(page.locator('#lf-cargo-203')).toHaveValue('12.5');
+        await expect(page.locator('#lf-cargo-204')).toHaveValue('0.75');
+    });
+
     test('an imported bonus is counted per ship, as the game holds it', async ({ page }) => {
         await page.locator('#own-api-input').fill(OWN_API_FIXTURE);
         await page.locator('#lf-bonuses-read-btn').click();

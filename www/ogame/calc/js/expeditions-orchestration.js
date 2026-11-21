@@ -335,7 +335,10 @@ class ExpeditionsApp {
       const bonuses = options.prm.lfShipsBonuses;
       let ship = 0;
       for (let block = 0; block < 17; block++) {
-        bonuses[ship] = Number.parseFloat(lines[scLine + block * 8 + 4].replace('%', '').replace('-', '0'));
+        // The decimal separator follows the game client's language: "52.38%" on
+        // the English and Russian clients, "52,38%" on the German one. A cargo
+        // bonus is a percentage under 1000, so neither can be a thousands separator.
+        bonuses[ship] = Number.parseFloat(lines[scLine + block * 8 + 4].replace('%', '').replace('-', '0').replace(',', '.'));
         if (block === 9 || block === 13) block++; // skip the lamp and the crawler
         ship++;
       }
