@@ -994,6 +994,8 @@ test.describe('Life Forms building energy consumption', () => {
 
     test('shows each building energy draw using floor(base*level*coeff^level)', async ({ page }) => {
         await page.locator('#one-pln-race').selectOption('1');
+        // Oversized solar plant so the planet stays at 100%: a planet short of energy shows every draw scaled
+        await page.locator('#one-planet-prod tr:not(.lf-row)').nth(5).locator('input').fill('45');
 
         // Research Centre is the 3rd Human building (base 10, coeff 1.08).
         // Level 10 -> floor(10 * 10 * 1.08^10) = 215.

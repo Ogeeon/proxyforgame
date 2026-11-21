@@ -196,8 +196,27 @@ four decimals, so no real fraction is that close to a whole number.
 The life form tech bonus on **crawlers** (Ion Crystal Modules) — the crawler part of the row
 is taken from the shown crawler row; no account had a crawler bonus from research. The
 amplified Collector class bonus of section 6 was captured with the research at 0. The
-50 % crawler ceiling was not reached. How the draw of a building is scaled on a deficit
-planet is issue #89.
+50 % crawler ceiling was not reached. Whether the crawler row is scaled on a deficit planet
+is not confirmed either (no capture has crawlers and a deficit together).
+
+### The draw of a consumer on a deficit planet — FIXED (#89)
+
+On a planet whose energy production is below its draw, the game shows the draw of **every**
+consumer scaled by the production factor:
+
+```
+shown = floor( floor(draw at 100 %) × production factor × (1 − Disruption Chamber) )
+```
+
+with the factor unrounded (`energy produced / energy used`). It held on all 33 cells of
+three Rock'tal deficit planets (factors 0.89, 0.78 and 0.66). Two details were pinned by
+single rows: the draw is floored **before** the reduction (Mineral Research Centre 5 with
+−4 %: 2 227 × 0.96 = 2 137, the game shows 2 137, not 2 138), and the reduction is **not**
+floored before the factor (Deuterium Synthesiser 1: 90 × 0.895017 × 0.965 = 77.7 → 77).
+The planet's total draw and the factor stay unscaled. `calculateProduction` returns the
+shown draws of the three mines and of every life form building as its last element
+(`scaleConsumerRows`); a building that also produces energy shows the net of its gain and
+the scaled draw. Crawlers are left as they were.
 
 ## 3. Level-1 buildings draw base energy, without the growth coefficient — FIXED
 
@@ -342,21 +361,23 @@ Energy totals confirm both readings:
   section 3 fixed the calculator lands on floor(33 176 × 0.96) = 31 848 and the same
   balance of 24.
 
-## 5. Where a building's energy-production bonus is displayed — OPEN (cosmetic)
+## 5. Where a building's energy-production bonus is displayed — FIXED in the game
 
 The calculator always shows a life form building's `enP` gain in the building's own
-row, net of that building's own draw. OGame only does that when the building draws no
-energy at all:
+row, net of that building's own draw. In July OGame did that only when the building drew
+no energy at all; for a building that both produces and consumes it showed the draw and
+folded the production bonus into the Lifeform Tech Bonus row. Captured again on
+2026-11-21 (s1-en, Mechas planet, energy base 19 638), the game now shows the net in the
+building's own row, exactly as the calculator does:
 
-| Case | Building | Its own row in OGame | OGame's "Lifeform Tech Bonus" energy |
-|---|---|---|---|
-| B (Rock'tal) | Disruption Chamber 8 (`enP` +12 %, draws 0) | **3 240** = 12 % of 27 006 | 276 = 1.022 % of 27 006 |
-| C (Mechas) | High-Performance Transformer 4 (`enP` +4 %, draws 194) | **194** (its draw) | 986 = **(1.022 + 4) %** of 19 638 |
+| Row | July | 2026-11-21 |
+|---|---|---|
+| High-Performance Transformer 4 (`enP` +4 %, draws 194) | 194 (its draw) | **591** = floor(19 638 × 0.04 = 785.5) − 194 |
+| Lifeform Tech Bonus, energy | 986 = (1.022 + 4) % of 19 638 | **200** = 1.022 % of 19 638 |
 
-So when a building both produces and consumes, OGame shows the consumption in its row
-and folds the production bonus into the Lifeform Tech Bonus row. Case D (Kaelesh) has
-no `enP` building and its Lifeform Tech Bonus energy is 230 = 1.022 % of 22 507, which
-pins the research percentage independently.
+Case B (Rock'tal, Disruption Chamber 8, `enP` +12 %, draws 0) was always shown in its own
+row: 3 240 = 12 % of 27 006. Case D (Kaelesh) has no `enP` building and its Lifeform Tech
+Bonus energy is 230 = 1.022 % of 22 507, which pins the research percentage independently.
 
 Totals are unaffected — this is purely which row the number lands in.
 
