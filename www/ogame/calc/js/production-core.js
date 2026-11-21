@@ -724,6 +724,6 @@ function calculateProduction(prodParams, plnData, settings, { normalized = false
 	applyLfTechProductionBonus(settings, results, production);
 	applyLfBuildingProduction(lfEff, results, lfBld, production);
 
-	return [results, production.map(floorExact), floorExact(totalEnergyProduced), floorExact(totalEnergyUsed), koeff, lfBld,
+	return [results, production.map((amount) => floorExact(amount)),floorExact(totalEnergyProduced), floorExact(totalEnergyUsed), koeff, lfBld,
 		production, [totalEnergyProduced, totalEnergyUsed]];
 }

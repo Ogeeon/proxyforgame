@@ -185,7 +185,7 @@ function getProductionRateExact(params) {
  * @returns {number[]} Production broken down by source, indexed by PRODUCTION_ROW, every row rounded down as the game's table shows it
  */
 function getProductionRateSplit(params) {
-	return getProductionRateExact(params).map(floorExact);
+	return getProductionRateExact(params).map((amount) => floorExact(amount));
 }
 
 /**
