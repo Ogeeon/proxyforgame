@@ -11,6 +11,7 @@
     "lc-short": "GV",
     "cargo-cap-increase": "Toename laadcapaciteit: ",
     "decimal-separator": ",",
+    "thousands-separator": ".",
     "metal": "Metaal",
     "crystal": "Kristal",
     "deuterium": "Deuterium",

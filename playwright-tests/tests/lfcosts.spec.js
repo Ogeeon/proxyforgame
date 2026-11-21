@@ -83,20 +83,20 @@ test.describe('Lifeforms costs Calculator Page', () => {
         await page.locator('#tabtag-0-1').click();
         await fillTableRows(page, '#table-0-1', 2, 13, 2);
         await expect(page.locator('#table-0-1 tr:nth-child(50) td:nth-child(4)')).toContainText('1.785M');
-        await expect(page.locator('#table-0-1 tr:nth-child(50) td:nth-child(5)')).toContainText('836.528');
-        await expect(page.locator('#table-0-1 tr:nth-child(50) td:nth-child(6)')).toContainText('825.960');
+        await expect(page.locator('#table-0-1 tr:nth-child(50) td:nth-child(5)')).toContainText('836,528');
+        await expect(page.locator('#table-0-1 tr:nth-child(50) td:nth-child(6)')).toContainText('825,960');
         await expect(page.locator('#table-0-1 tr:nth-child(50) td:nth-child(7)')).toContainText('5.517M');
         await expect(page.locator('#table-0-1 tr:nth-child(50) td:nth-child(8)')).toContainText('2w 2d 22h');
         await page.locator('#param-common-tab').click();
         await page.locator('#full-numbers').check();
-        await expect(page.locator('#table-0-1 tr:nth-child(50) td:nth-child(4)')).toContainText('1.785.028');
-        await expect(page.locator('#table-0-1 tr:nth-child(50) td:nth-child(7)')).toContainText('5.517.700');
+        await expect(page.locator('#table-0-1 tr:nth-child(50) td:nth-child(4)')).toContainText('1,785,028');
+        await expect(page.locator('#table-0-1 tr:nth-child(50) td:nth-child(7)')).toContainText('5,517,700');
         await page.locator('#metal-available-0-1').fill('700000');
         await page.locator('#metal-available-0-1').press('Enter');
-        await expect(page.locator('#table-0-1 tr:nth-child(54) td:nth-child(3)')).toContainText('1.085.028');
+        await expect(page.locator('#table-0-1 tr:nth-child(54) td:nth-child(3)')).toContainText('1,085,028');
         await page.locator('#crystal-available-0-1').fill('800000');
         await page.locator('#crystal-available-0-1').press('Enter');
-        await expect(page.locator('#table-0-1 tr:nth-child(54) td:nth-child(4)')).toContainText('36.528');
+        await expect(page.locator('#table-0-1 tr:nth-child(54) td:nth-child(4)')).toContainText('36,528');
         await page.locator('#deut-available-0-1').fill('1000000');
         await page.locator('#deut-available-0-1').press('Enter');
         await expect(page.locator('#table-0-1 tr:nth-child(54) td:nth-child(5)')).toContainText('0');
@@ -121,7 +121,7 @@ test.describe('Lifeforms costs Calculator Page', () => {
         await page.locator('#param-common-tab').click();
         await page.locator('#full-numbers').check();
         // Default rates 1:1.5:3 → MSU = m + 1.5c + 3d = 5.517.700
-        await expect(page.locator('#table-0-1 tr:nth-child(50) td:nth-child(7)')).toContainText('5.517.700');
+        await expect(page.locator('#table-0-1 tr:nth-child(50) td:nth-child(7)')).toContainText('5,517,700');
         // Flip rates so multipliers become 1, 2, 2 → MSU = m + 2c + 2d = 5.110.004
         await page.locator('#exchange-rates-m').fill('1');
         await page.locator('#exchange-rates-m').press('Enter');
@@ -129,11 +129,11 @@ test.describe('Lifeforms costs Calculator Page', () => {
         await page.locator('#exchange-rates-c').press('Enter');
         await page.locator('#exchange-rates-d').fill('2');
         await page.locator('#exchange-rates-d').press('Enter');
-        await expect(page.locator('#table-0-1 tr:nth-child(50) td:nth-child(7)')).toContainText('5.110.004');
+        await expect(page.locator('#table-0-1 tr:nth-child(50) td:nth-child(7)')).toContainText('5,110,004');
         // Doubling metal rate halves crystal/deut multipliers → MSU = m + c + d = 3.447.516
         await page.locator('#exchange-rates-m').fill('2');
         await page.locator('#exchange-rates-m').press('Enter');
-        await expect(page.locator('#table-0-1 tr:nth-child(50) td:nth-child(7)')).toContainText('3.447.516');
+        await expect(page.locator('#table-0-1 tr:nth-child(50) td:nth-child(7)')).toContainText('3,447,516');
     });
 
     test('[all items - one level / researches / human] calculations are correct', async ({ page }) => {
@@ -496,7 +496,7 @@ test.describe('Calculation-error report without a calculator hook', () => {
         expect(lines.some((line) => line.startsWith('Exchange rates'))).toBe(false);
         expect(availableCaption).toBeTruthy();
         expect(lines.some((line) => line.startsWith(`${availableCaption}:`))).toBe(false);
-        expect(lines.some((line) => line.includes('5000') || line.includes('5.000'))).toBe(false);
+        expect(lines.some((line) => line.includes('5000') || line.includes('5,000'))).toBe(false);
     });
 });
 

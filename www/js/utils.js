@@ -67,17 +67,22 @@ function validateNumber(num, min, max, def) {
 }
 
 /**
- * Formats a number OGame-style, inserting a dot as the thousands separator.
- * If the number has significant digits in the fractional part, they are dropped.
+ * Formats a number the way the site language writes it: the integer digits are grouped by
+ * three with the locale's thousands separator (options.thousandsSeparator), and a fraction,
+ * cut to three digits, follows the locale's decimal separator (options.decimalSeparator).
+ * The integer part is grouped on its own, so the two separators can never be confused -
+ * which matters where the grouping character is the dot (de: "12.345,678").
+ * Exponent notation is returned unchanged, as it has nothing to group.
+ * @param {number|string} n the number to format
+ * @returns {string}
  */
-function numToOGame(n) {
-	n = dropFraction(n, 3);
-	n += '';
-	const rgx = /(\d+)(\d{3})/;
-	while (rgx.test(n)) {
-		n = n.replace(rgx, '$1' + '.' + '$2');
-	}
-	return n;
+function numToLocal(n) {
+	const s = String(dropFraction(n, 3));
+	if (/e/i.test(s))
+		return s;
+	const [intPart, frac] = s.split('.');
+	const grouped = intPart.replace(/\B(?=(\d{3})+(?!\d))/g, () => getOptionValue('thousandsSeparator', '.'));
+	return frac === undefined ? grouped : grouped + getOptionValue('decimalSeparator', '.') + frac;
 }
 
 /**
@@ -110,14 +115,16 @@ function isset(e) {
 }
 
 /**
- * Parses the number value from the given input element
+ * Parses the number value from the given input element.
+ * The grouping spaces the page displays (U+00A0, U+202F) are dropped first, so a number copied
+ * from the page and read before the field was validated still parses whole.
  * @param input
  */
 function getInputNumber(input) {
-	let decimalSeparator = getOptionValue('decimalSeparator', '.');
+	const decimalSeparator = getOptionValue('decimalSeparator', '.');
 	let n = 0;
 	try {
-		n = Number.parseFloat(input.value.replace(decimalSeparator, '.'));
+		n = Number.parseFloat(input.value.replaceAll(/[\u00A0\u202F]/g, '').replace(decimalSeparator, '.'));
 	} catch (e) {
 		consoleLog(e);
 	}
@@ -236,14 +243,15 @@ function numberToShortenedString(number, suffixes) {
 		suff = suffixes.substring(1, 2);
 	}
 	value = dropFraction(value, 3);
-	return numToOGame(value)+suff;
+	// The mantissa goes through numToLocal too, so its fraction takes the locale decimal separator.
+	return numToLocal(value)+suff;
 }
 
 /**
- * Format a numeric value either as a full OGame-style number or as a shortened string.
+ * Format a numeric value either as a full locale-formatted number or as a shortened string.
  *
  * The returned format depends on the global flag `options.prm.fullNumbers`:
- * - If truthy, the value is formatted using `numToOGame(num)` (full formatting).
+ * - If truthy, the value is formatted using `numToLocal(num)` (full formatting).
  * - Otherwise, the value is converted using `numberToShortenedString(num, suffix)` (shortened form).
  *
  * @param {number} num - The numeric value to format.
@@ -251,18 +259,18 @@ function numberToShortenedString(number, suffixes) {
  *                            Ignored when `options.prm.fullNumbers` is truthy.
  * @returns {string} A formatted string representing the number, either full or shortened.
  * @see options.prm.fullNumbers
- * @see numToOGame
+ * @see numToLocal
  * @see numberToShortenedString
  * @example
- * // When fullNumbers is true:
- * // ogamizeNum(1234567) -> "1.234.567" (format depends on numToOGame implementation)
+ * // When fullNumbers is true (en / de / ru):
+ * // numToDisplay(1234567) -> "1,234,567" / "1.234.567" / "1 234 567" (no-break space)
  *
- * // When fullNumbers is false:
- * // ogamizeNum(1500000, "M") -> "1.5M" (format depends on numberToShortenedString implementation)
+ * // When fullNumbers is false (en / ru):
+ * // numToDisplay(1500000, "KMG") -> "1.5M" / "1,5M"
  */
-function ogamizeNum(num, suffix) {
+function numToDisplay(num, suffix) {
 	if (options.prm.fullNumbers)
-		return numToOGame(num);
+		return numToLocal(num);
 	else
 		return numberToShortenedString(num, suffix);
 }

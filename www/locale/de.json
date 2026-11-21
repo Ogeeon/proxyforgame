@@ -11,6 +11,7 @@
     "lc-short": "GT",
     "cargo-cap-increase": "Erhöhung der Frachtkapazität: ",
     "decimal-separator": ",",
+    "thousands-separator": ".",
     "metal": "Metall",
     "crystal": "Kristall",
     "deuterium": "Deuterium",

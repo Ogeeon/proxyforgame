@@ -38,21 +38,21 @@ test.describe('Trade Calculator Page', () => {
     const SINGLE_SOURCES = [
         {
             name: 'Metal', src: 0, field: 'm', first: 'c', second: 'd',
-            onlyFirst: ['62.500', '10 SC / 2 LC'], onlySecond: ['41.667', '7 SC / 2 LC'],
-            percent: ['31.250', '20.833', '9 SC / 2 LC'], proportion: ['35.714', '17.857'],
-            fixFirst: ['20.000', '28.333'], fixSecond: ['47.500', '10.000'], hyperCargo: '6 SC / 2 LC',
+            onlyFirst: ['62,500', '10 SC / 2 LC'], onlySecond: ['41,667', '7 SC / 2 LC'],
+            percent: ['31,250', '20,833', '9 SC / 2 LC'], proportion: ['35,714', '17,857'],
+            fixFirst: ['20,000', '28,333'], fixSecond: ['47,500', '10,000'], hyperCargo: '6 SC / 2 LC',
         },
         {
             name: 'Crystal', src: 1, field: 'c', first: 'm', second: 'd',
-            onlyFirst: ['160.000', '26 SC / 6 LC'], onlySecond: ['66.667', '11 SC / 3 LC'],
-            percent: ['61.538', '41.026', '17 SC / 4 LC'], proportion: ['72.727', '36.364'],
-            fixFirst: ['20.000', '58.333'], fixSecond: ['136.000', '10.000'], hyperCargo: '13 SC / 3 LC',
+            onlyFirst: ['160,000', '26 SC / 6 LC'], onlySecond: ['66,667', '11 SC / 3 LC'],
+            percent: ['61,538', '41,026', '17 SC / 4 LC'], proportion: ['72,727', '36,364'],
+            fixFirst: ['20,000', '58,333'], fixSecond: ['136,000', '10,000'], hyperCargo: '13 SC / 3 LC',
         },
         {
             name: 'Deut', src: 2, field: 'd', first: 'm', second: 'c',
-            onlyFirst: ['240.000', '39 SC / 8 LC'], onlySecond: ['150.000', '24 SC / 5 LC'],
-            percent: ['116.129', '77.419', '31 SC / 7 LC'], proportion: ['133.333', '66.667', '32 SC / 7 LC'],
-            fixFirst: ['20.000', '137.500'], fixSecond: ['224.000', '10.000'], hyperCargo: '21 SC / 5 LC',
+            onlyFirst: ['240,000', '39 SC / 8 LC'], onlySecond: ['150,000', '24 SC / 5 LC'],
+            percent: ['116,129', '77,419', '31 SC / 7 LC'], proportion: ['133,333', '66,667', '32 SC / 7 LC'],
+            fixFirst: ['20,000', '137,500'], fixSecond: ['224,000', '10,000'], hyperCargo: '21 SC / 5 LC',
         },
     ];
 
@@ -105,18 +105,18 @@ test.describe('Trade Calculator Page', () => {
         await enter(page, '#mix-src-balance-proc', '50');
         // 50.000 deut buys metal at 2.4 and the other 50.000 buys crystal at 1.5
         await expect(page.locator('#res-dst-mix-4')).toBeChecked();
-        await expect(page.locator('#res-dst-m')).toHaveValue('120.000');
-        await expect(page.locator('#res-dst-c')).toHaveValue('75.000');
+        await expect(page.locator('#res-dst-m')).toHaveValue('120,000');
+        await expect(page.locator('#res-dst-c')).toHaveValue('75,000');
         await enter(page, '#mix-src-balance-proc', '25');
-        await expect(page.locator('#res-dst-m')).toHaveValue('60.000');
-        await expect(page.locator('#res-dst-c')).toHaveValue('112.500');
+        await expect(page.locator('#res-dst-m')).toHaveValue('60,000');
+        await expect(page.locator('#res-dst-c')).toHaveValue('112,500');
     });
 
     // Selling a pair: the one resource it can buy, at 2.4 : 1.5 : 1.
     const PAIR_SOURCES = [
-        { name: 'Metal+Crystal', src: 3, sold: [['m', '100000'], ['c', '50000']], dst: 'd', value: '75.000', cargo: '12 SC / 3 LC' },
-        { name: 'Metal+Deut', src: 4, sold: [['m', '100000'], ['d', '50000']], dst: 'c', value: '137.500', cargo: '22 SC / 5 LC' },
-        { name: 'Crystal+Deut', src: 5, sold: [['c', '100000'], ['d', '50000']], dst: 'm', value: '280.000', cargo: '45 SC / 9 LC' },
+        { name: 'Metal+Crystal', src: 3, sold: [['m', '100000'], ['c', '50000']], dst: 'd', value: '75,000', cargo: '12 SC / 3 LC' },
+        { name: 'Metal+Deut', src: 4, sold: [['m', '100000'], ['d', '50000']], dst: 'c', value: '137,500', cargo: '22 SC / 5 LC' },
+        { name: 'Crystal+Deut', src: 5, sold: [['c', '100000'], ['d', '50000']], dst: 'm', value: '280,000', cargo: '45 SC / 9 LC' },
     ];
 
     for (const c of PAIR_SOURCES) {
@@ -150,12 +150,12 @@ test.describe('Trade Calculator Page', () => {
         await page.locator('#coord-p').pressSequentially('2');
         // toContainText retries until the keyup-triggered recalculation lands
         await expect(page.locator('#alink')).toContainText('/trade#rmd=2.4&rcd=1.5&st=0&dt=2&dmt=3&fix2=10000&m=100000&l=en:1&lc=4:3:2&lm=0');
-        await expect(page.locator('#atext')).toContainText('Selling 100.000 met. Buying 47.500 crys and 10.000 deut. Exchange rates 2.4:1.5:1. Coordinates [4:3:2] (Universe 1, en.ogame.gameforge.com)');
-        await expect(page.locator('#abbcode')).toContainText('/trade#rmd=2.4&rcd=1.5&st=0&dt=2&dmt=3&fix2=10000&m=100000&l=en:1&lc=4:3:2&lm=0]Selling 100.000 met. Buying 47.500 crys and 10.000 deut. Exchange rates 2.4:1.5:1. Coordinates [4:3:2] (Universe 1, en.ogame.gameforge.com)[/url]');
+        await expect(page.locator('#atext')).toContainText('Selling 100,000 met. Buying 47,500 crys and 10,000 deut. Exchange rates 2.4:1.5:1. Coordinates [4:3:2] (Universe 1, en.ogame.gameforge.com)');
+        await expect(page.locator('#abbcode')).toContainText('/trade#rmd=2.4&rcd=1.5&st=0&dt=2&dmt=3&fix2=10000&m=100000&l=en:1&lc=4:3:2&lm=0]Selling 100,000 met. Buying 47,500 crys and 10,000 deut. Exchange rates 2.4:1.5:1. Coordinates [4:3:2] (Universe 1, en.ogame.gameforge.com)[/url]');
         await page.locator('#moon').check();
         await expect(page.locator('#alink')).toContainText('/trade#rmd=2.4&rcd=1.5&st=0&dt=2&dmt=3&fix2=10000&m=100000&l=en:1&lc=4:3:2&lm=1');
-        await expect(page.locator('#atext')).toContainText('Selling 100.000 met. Buying 47.500 crys and 10.000 deut. Exchange rates 2.4:1.5:1. Coordinates [4:3:2], Moon (Universe 1, en.ogame.gameforge.com)');
-        await expect(page.locator('#abbcode')).toContainText('/trade#rmd=2.4&rcd=1.5&st=0&dt=2&dmt=3&fix2=10000&m=100000&l=en:1&lc=4:3:2&lm=1]Selling 100.000 met. Buying 47.500 crys and 10.000 deut. Exchange rates 2.4:1.5:1. Coordinates [4:3:2], Moon (Universe 1, en.ogame.gameforge.com)[/url]');
+        await expect(page.locator('#atext')).toContainText('Selling 100,000 met. Buying 47,500 crys and 10,000 deut. Exchange rates 2.4:1.5:1. Coordinates [4:3:2], Moon (Universe 1, en.ogame.gameforge.com)');
+        await expect(page.locator('#abbcode')).toContainText('/trade#rmd=2.4&rcd=1.5&st=0&dt=2&dmt=3&fix2=10000&m=100000&l=en:1&lc=4:3:2&lm=1]Selling 100,000 met. Buying 47,500 crys and 10,000 deut. Exchange rates 2.4:1.5:1. Coordinates [4:3:2], Moon (Universe 1, en.ogame.gameforge.com)[/url]');
     });
 
     test('switching to a country without the universe picks its first one', async ({ page }) => {
@@ -182,8 +182,8 @@ test.describe('Trade Calculator Page', () => {
         await expect(page.locator('#res-src-2')).toBeChecked();
         await expect(page.locator('#res-dst-mix-4')).toBeChecked();
         await expect(page.locator('#mix-src-balance-proc')).toHaveValue('50');
-        await expect(page.locator('#res-dst-m')).toHaveValue('120.000');
-        await expect(page.locator('#res-dst-c')).toHaveValue('75.000');
+        await expect(page.locator('#res-dst-m')).toHaveValue('120,000');
+        await expect(page.locator('#res-dst-c')).toHaveValue('75,000');
     });
 
     test('parsing from link works', async ({ page }) => {
@@ -194,8 +194,8 @@ test.describe('Trade Calculator Page', () => {
         await expect(page.locator('#mix-balance-prop1')).toHaveValue('2');
         await expect(page.locator('#mix-balance-prop2')).toHaveValue('3');
         await expect(page.locator('#res-src-c')).toHaveValue('100000');
-        await expect(page.locator('#res-dst-m')).toHaveValue('34.783');
-        await expect(page.locator('#res-dst-d')).toHaveValue('52.174');
+        await expect(page.locator('#res-dst-m')).toHaveValue('34,783');
+        await expect(page.locator('#res-dst-d')).toHaveValue('52,174');
         await expect(page.locator('#rate-md')).toHaveValue('2.4');
         await expect(page.locator('#rate-cd')).toHaveValue('1.5');
         await expect(page.locator('#trade')).toContainText('1.600');
@@ -235,11 +235,11 @@ test.describe('Trade Calculator Page', () => {
         await enter(page, '#res-dst-m', '11000000');
         await enter(page, '#res-dst-c', '4000000');
         // 11 000 000 / 2 + 4 000 000 / 1.5 = 8 166 666.67, rounded up.
-        await expect(page.locator('#res-src-d')).toHaveValue('8.166.667');
-        await expect(page.locator('#res-src-cargo')).toContainText('1.307 SC / 262 LC');
-        await expect(page.locator('#res-dst-cargo')).toContainText('2.400 SC / 480 LC');
+        await expect(page.locator('#res-src-d')).toHaveValue('8,166,667');
+        await expect(page.locator('#res-src-cargo')).toContainText('1,307 SC / 262 LC');
+        await expect(page.locator('#res-dst-cargo')).toContainText('2,400 SC / 480 LC');
         await expect(page.locator('#alink')).toContainText('&st=2&dt=2&dir=1&wm=11000000&wc=4000000&');
-        await expect(page.locator('#atext')).toContainText('Selling 8.166.667 deut. Buying 11.000.000 met and 4.000.000 crys.');
+        await expect(page.locator('#atext')).toContainText('Selling 8,166,667 deut. Buying 11,000,000 met and 4,000,000 crys.');
     });
 
     test('the arrow flips the direction and keeps the deal', async ({ page }) => {
@@ -247,19 +247,19 @@ test.describe('Trade Calculator Page', () => {
         await page.locator('#res-src-0').click();
         await page.locator('#res-dst-0').click();
         await enter(page, '#res-src-m', '100000');
-        await expect(page.locator('#res-dst-c')).toHaveValue('62.500');
+        await expect(page.locator('#res-dst-c')).toHaveValue('62,500');
         await expect(page.locator('#res-dst-c')).not.toBeEditable();
 
         await page.locator('#dir-switch').click();
         await expect(page.locator('#dir-1')).toBeChecked();
         await expect(page.locator('#res-dst-c')).toHaveValue('62500');
-        await expect(page.locator('#res-src-m')).toHaveValue('100.000');
+        await expect(page.locator('#res-src-m')).toHaveValue('100,000');
 
         await page.locator('#dir-switch').click();
         await expect(page.locator('#dir-0')).toBeChecked();
         await expect(page.locator('#big-arrow')).toHaveClass(/bi-caret-right-fill/);
         await expect(page.locator('#res-src-m')).toHaveValue('100000');
-        await expect(page.locator('#res-dst-c')).toHaveValue('62.500');
+        await expect(page.locator('#res-dst-c')).toHaveValue('62,500');
     });
 
     test('reverse is not offered for a pair source', async ({ page }) => {
@@ -294,7 +294,7 @@ test.describe('Trade Calculator Page', () => {
         await page.goto('/trade#rmd=2&rcd=1.5&st=2&dt=2&dir=1&wm=11000000&wc=4000000&l=en:1');
         await expect(page.locator('#dir-1')).toBeChecked();
         await expect(page.locator('#res-dst-m')).toHaveValue('11000000');
-        await expect(page.locator('#res-src-d')).toHaveValue('8.166.667');
+        await expect(page.locator('#res-src-d')).toHaveValue('8,166,667');
     });
 });
 
@@ -319,7 +319,7 @@ test.describe('Trade Calculator - calculation-error report', () => {
         await expect(page.locator('#report-calc-values li')).toHaveText([
             'Selected: Buying, Cargoes',
             'Selling',
-            'Deuterium: 100.000',
+            'Deuterium: 100,000',
             'Buying',
             'Metal',
             'Location',

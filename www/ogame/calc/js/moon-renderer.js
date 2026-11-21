@@ -9,7 +9,7 @@
 
 class MoonRenderer {
   static formatNumber(value) {
-    return numToOGame(value);
+    return numToLocal(value);
   }
 
   /**
@@ -18,9 +18,9 @@ class MoonRenderer {
    * percentage readout wears it as an input-group addon, the way the editable
    * percentage fields do.
    *
-   * The fraction is localized, because numToOGame groups thousands with a dot in
-   * every language - a raw "9.09" would read as nine thousand next to the
-   * "8.366" diameters right below it.
+   * The fraction takes the locale decimal separator, the same one numToLocal
+   * uses for the diameters right below it. A percentage never reaches a
+   * thousand, so it needs no grouping and localizeFloat is enough.
    */
   static formatPercent(value) {
     return localizeFloat(dropFraction(0.01 * Math.round(100 * value), 2));

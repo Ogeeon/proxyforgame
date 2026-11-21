@@ -11,6 +11,7 @@
     "lc-short": "CG",
     "cargo-cap-increase": "Aumento de la capacidad de carga: ",
     "decimal-separator": ",",
+    "thousands-separator": ".",
     "metal": "Metal",
     "crystal": "Cristal",
     "deuterium": "Deuterio",

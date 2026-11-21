@@ -9,7 +9,7 @@
 
 class TerraformerRenderer {
   static formatNumber(value) {
-    return numToOGame(value);
+    return numToLocal(value);
   }
 
   /**

@@ -386,7 +386,7 @@ test.describe('Graviton Calculator - calculation-error report', () => {
         await page.locator('#crystal-available').fill('5000');
         await page.locator('#crystal-available').blur();
         const cell = page.locator('[data-report-cell="solar-satellites-needed"]');
-        await expect(cell).toHaveText('9.091');
+        await expect(cell).toHaveText('9,091');
 
         await reportCell(page, cell);
         await expect(page.locator('#report-calc-values li')).toHaveText([
@@ -396,9 +396,9 @@ test.describe('Graviton Calculator - calculation-error report', () => {
             'Class: Collector',
         ]);
 
-        await sendReport(page, sent, '9.092');
+        await sendReport(page, sent, '9,092');
         expect(sent()?.get('context')).toBe([
-            'selected: solar-satellites-needed = "9.091"',
+            'selected: solar-satellites-needed = "9,091"',
             'max-planet-temp = 40',
             'player-class = 1',
         ].join('\n'));

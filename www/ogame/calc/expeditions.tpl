@@ -130,6 +130,7 @@
       pfgScriptsFailed();
     } else {
       options.decimalSeparator = <?= json_encode($l['decimal-separator'], JSON_UNESCAPED_UNICODE) ?>;
+      options.thousandsSeparator = <?= json_encode($l['thousands-separator']) ?>;
       options.locaYes = <?= json_encode($l['LOCA_YES'], JSON_UNESCAPED_UNICODE) ?>;
       options.locaNo = <?= json_encode($l['LOCA_NO'], JSON_UNESCAPED_UNICODE) ?>;
       options.smallCargoName = <?= json_encode($l['small-cargo'], JSON_UNESCAPED_UNICODE) ?>;

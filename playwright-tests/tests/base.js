@@ -9,6 +9,19 @@ import { expect } from '@playwright/test';
 
 export { test, expect } from '@playwright/test';
 
+/**
+ * The whole number a page shows, read back from its text. The grouping character
+ * follows the site language - "1,234" in en, "1.234" in de, a no-break space in ru
+ * (docs/adr/0006-locale-number-formatting.md) - so a spec that parses a displayed
+ * number keeps only its digits and sign rather than stripping one known separator.
+ * Only for integers: a fraction's decimal separator would be dropped with the rest.
+ * @param {string|null} text - the element's innerText or textContent
+ * @returns {number}
+ */
+export function wholeNumber(text) {
+    return Number(String(text ?? '').replaceAll(/[^\d-]/g, '') || '0');
+}
+
 // ---------------------------------------------------------------------------
 // Bootstrap's markup, in one place. Specs reach a tooltip bubble, a dialog or a
 // toast through these rather than through Bootstrap's class names, so the day

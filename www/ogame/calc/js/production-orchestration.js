@@ -39,7 +39,7 @@ function updateCrawlerLimit(input, metalMineLvl, crystalMineLvl, deutSynthLvl, g
 	if (options.crawlerName) input.alt = options.crawlerName;
 	if (!options.crawlerLimitHint) return;
 
-	const hint = options.crawlerLimitHint.replace('{0}', numToOGame(max));
+	const hint = options.crawlerLimitHint.replace('{0}', numToLocal(max));
 	// The marker makes the field one of the page's tooltip anchors; the text
 	// itself goes through the facade, which knows that an adopted element keeps
 	// it somewhere other than `title´.
@@ -93,13 +93,13 @@ function renderAccumWhat(tab, curr, totalHours, production, deutAccum) {
 	const met = Math.max(0, Math.round(curr[0] + totalHours * production[0]));
 	const crys = Math.max(0, Math.round(curr[1] + totalHours * production[1]));
 	if (tab === 'one') {
-		setHtml('#' + tab + 'pln-accumwhat-met', numToOGame(Math.min(options.metStorageCap, met)));
-		setHtml('#' + tab + 'pln-accumwhat-crys', numToOGame(Math.min(options.crysStorageCap, crys)));
-		setHtml('#' + tab + 'pln-accumwhat-deut', numToOGame(Math.min(options.deutStorageCap, deutAccum)));
+		setHtml('#' + tab + 'pln-accumwhat-met', numToLocal(Math.min(options.metStorageCap, met)));
+		setHtml('#' + tab + 'pln-accumwhat-crys', numToLocal(Math.min(options.crysStorageCap, crys)));
+		setHtml('#' + tab + 'pln-accumwhat-deut', numToLocal(Math.min(options.deutStorageCap, deutAccum)));
 	} else {
-		setHtml('#' + tab + 'pln-accumwhat-met', numToOGame(met));
-		setHtml('#' + tab + 'pln-accumwhat-crys', numToOGame(crys));
-		setHtml('#' + tab + 'pln-accumwhat-deut', numToOGame(deutAccum));
+		setHtml('#' + tab + 'pln-accumwhat-met', numToLocal(met));
+		setHtml('#' + tab + 'pln-accumwhat-crys', numToLocal(crys));
+		setHtml('#' + tab + 'pln-accumwhat-deut', numToLocal(deutAccum));
 	}
 }
 
@@ -255,7 +255,7 @@ function updateProduction(tab, production) {
 function mineEnergyCell(results, row, shownDraws) {
 	let cons = results[row][4];
 	if (cons > 0) {
-		return numToOGame(shownDraws.mines[row - 1]) + '/' + numToOGame(cons);
+		return numToLocal(shownDraws.mines[row - 1]) + '/' + numToLocal(cons);
 	}
 	return '';
 }
@@ -266,9 +266,9 @@ function productionCell(value) {
 		return '';
 	}
 	if (value >= 0) {
-		return numToOGame(value);
+		return numToLocal(value);
 	}
-	return '<span style="color: brown;">' + numToOGame(-1 * value) + '</span>';
+	return '<span style="color: brown;">' + numToLocal(-1 * value) + '</span>';
 }
 
 // The row of the one-planet table each entry of calculateProduction()'s
@@ -368,15 +368,15 @@ function renderMinesAmortizationTable(rows, params, plnData, lfEff) {
 function updateOnePlnStorageCapacities() {
 	options.prm.metStorageLvl = getInputNumber($('#storage-met'));
 	options.metStorageCap = getStorageCapacity(options.prm.metStorageLvl);
-	setHtml('#storage-cap-met', numToOGame(options.metStorageCap));
+	setHtml('#storage-cap-met', numToLocal(options.metStorageCap));
 
 	options.prm.crysStorageLvl = getInputNumber($('#storage-crys'));
 	options.crysStorageCap = getStorageCapacity(options.prm.crysStorageLvl);
-	setHtml('#storage-cap-crys', numToOGame(options.crysStorageCap));
+	setHtml('#storage-cap-crys', numToLocal(options.crysStorageCap));
 
 	options.prm.deutStorageLvl = getInputNumber($('#storage-deut'));
 	options.deutStorageCap = getStorageCapacity(options.prm.deutStorageLvl);
-	setHtml('#storage-cap-deut', numToOGame(options.deutStorageCap));
+	setHtml('#storage-cap-deut', numToLocal(options.deutStorageCap));
 }
 
 function updateOnePlnTab() {
@@ -485,8 +485,8 @@ function updateIasConversion() {
 	const switchedOn = slots.slice();
 	switchedOn[PLANET_IAS_ON] = 1;
 	const preview = planetLithiumConversion(switchedOn);
-	setHtml('#ias-lithium', numToOGame(preview === null ? 0 : preview.lithium));
-	setHtml('#ias-cost', numToOGame(preview === null ? 0 : preview.cost[preview.resource] ?? 0));
+	setHtml('#ias-lithium', numToLocal(preview === null ? 0 : preview.lithium));
+	setHtml('#ias-cost', numToLocal(preview === null ? 0 : preview.cost[preview.resource] ?? 0));
 	const conversion = options.prm.iasOn ? preview : null;
 	const row = $('#ias-conversion-row');
 	if (row instanceof HTMLTableRowElement) {
@@ -557,7 +557,7 @@ function updateAllPlnTab() {
 		rows[i * 2 + 2].children[2].children[0].innerHTML = options.energyShort + 10 * options.prm.aPS[i][2] + '%';
 		for (let j = 0; j < 3; j++) {
 			// Show resource production taking into account the selected mine power percentages
-			rows[i * 2 + 1].children[LEVEL_COLUMNS[j] + 1].innerHTML = numToOGame(production[j]);
+			rows[i * 2 + 1].children[LEVEL_COLUMNS[j] + 1].innerHTML = numToLocal(production[j]);
 			// ...as well as the production boosters and factors
 			rows[i * 2 + 2].children[LEVEL_COLUMNS[j] - 1].children[0].innerHTML = // adjustment for colspan=2
 				10 * options.prm.aPS[i][(j + 1) * 3 + 2] + '% / ' + options.prm.aPS[i][(j + 1) * 3 + 1] + '%';
@@ -608,8 +608,8 @@ function updateAllPlnTab() {
 	let normIncrease = increase[0] + msuMult[1] * increase[1] + msuMult[2] * increase[2];
 	rows = $$('#plasma-amort-tbl tr');
 	for (let i = 0; i < 3; i++) {
-		rows[1].children[i + 1].innerHTML = numToOGame(costs[i]);
-		rows[2].children[i + 1].innerHTML = numToOGame(increase[i]);
+		rows[1].children[i + 1].innerHTML = numToLocal(costs[i]);
+		rows[2].children[i + 1].innerHTML = numToLocal(increase[i]);
 	}
 	rows[3].children[1].innerHTML = paybackToString(normCost, normIncrease);
 
@@ -979,8 +979,8 @@ function writeOnePlnLfLevels(race, levels) {
 function lfCellValue(val) {
 	if (!val) return '';
 	return val > 0
-		? numToOGame(val)
-		: '<span style="color: brown;">' + numToOGame(-val) + '</span>';
+		? numToLocal(val)
+		: '<span style="color: brown;">' + numToLocal(-val) + '</span>';
 }
 
 // Show what each life form building contributes in its own row: extra metal,

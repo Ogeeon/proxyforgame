@@ -71,6 +71,7 @@
       pfgScriptsFailed();
     } else {
       options.decimalSeparator='<?= $l['decimal-separator'] ?>';
+      options.thousandsSeparator = <?= json_encode($l['thousands-separator']) ?>;
       options.datetimeW = '<?= $l['datetime-w'] ?>';
       options.datetimeD = '<?= $l['datetime-d'] ?>';
       options.datetimeH = '<?= $l['datetime-h'] ?>';

@@ -68,6 +68,7 @@
       pfgScriptsFailed();
     } else {
       options.decimalSeparator = '<?= $l['decimal-separator'] ?>';
+      options.thousandsSeparator = <?= json_encode($l['thousands-separator']) ?>;
       options.warnindDivId = 'warning';
       options.warnindMsgDivId = 'warning-message';
       options.fieldHint = '<?= $l['field-hint'] ?>';

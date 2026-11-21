@@ -1,4 +1,4 @@
-import { test, expect, expectLoadsCleanly } from './base';
+import { test, expect, expectLoadsCleanly, wholeNumber } from './base';
 import { energyRows, expectMcpBoundsMatchPage } from './mcp-bounds';
 import { catchReport, reportCell, sendReport } from './report-dialog';
 
@@ -78,7 +78,7 @@ test.describe('Terraformer Calculator - DOM integration', () => {
         await page.locator('#tf-level-to').fill('2');
         await page.locator('#tf-level-to').blur();
         // getBuildEnergyCost_C(33, 2) = 2000.
-        await expect(page.locator('#energy-needed')).toHaveText('2.000');
+        await expect(page.locator('#energy-needed')).toHaveText('2,000');
     });
 
     test('the single-level checkbox hides the "from" level field', async ({ page }) => {
@@ -193,7 +193,7 @@ test.describe('Terraformer Calculator - DOM integration', () => {
 
         // 40% off the cost and, with no time entered, 80% off the time: 4114 s.
         await enter('#lf-terraformer-rdc', '40');
-        await expect(page.locator('#crystal-required-tf')).toHaveText('30.000');
+        await expect(page.locator('#crystal-required-tf')).toHaveText('30,000');
         await expect(page.locator('#time-required-tf')).toHaveText('1h 8m 34s');
         await expect(hint).toBeVisible();
         await expect(hint).toHaveText('auto: 80%');
@@ -201,7 +201,7 @@ test.describe('Terraformer Calculator - DOM integration', () => {
         // An entered time reduction is taken as it is: 10% off is 18513 s.
         await enter('#lf-terraformer-time-rdc', '10');
         await expect(page.locator('#time-required-tf')).toHaveText('5h 8m 33s');
-        await expect(page.locator('#crystal-required-tf')).toHaveText('30.000');
+        await expect(page.locator('#crystal-required-tf')).toHaveText('30,000');
         await expect(hint).toBeHidden();
 
         // The time reduction stops at 99%.
@@ -261,7 +261,7 @@ test.describe('Terraformer Calculator - Officers', () => {
     });
 
     async function officersBonus(page) {
-        return Number.parseInt((await page.locator('#officers-bonus-energy').textContent()) || '0', 10);
+        return wholeNumber(await page.locator('#officers-bonus-energy').textContent());
     }
 
     test('the engineer adds a bonus, the whole staff a bigger one', async ({ page }) => {

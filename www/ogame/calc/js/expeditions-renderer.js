@@ -9,7 +9,7 @@
 
 class ExpeditionsRenderer {
   static formatNumber(value) {
-    return numToOGame(value);
+    return numToLocal(value);
   }
 
   /** Highlight a value that is worth reading (a non-zero find). */

@@ -7,7 +7,7 @@
  * calculates anything: the orchestrator hands over already-computed values and
  * the renderer only paints them.
  *
- * Relies on the global formatting helpers from utils.js (numToOGame,
+ * Relies on the global formatting helpers from utils.js (numToLocal,
  * timespanToShortenedString, getDateStr) and on the dom-utils fade helpers, exactly as the
  * other Bootstrap-migrated calculators do.
  */
@@ -47,7 +47,7 @@ class FlightRenderer {
         SHIPS_BASE.forEach((ship, i) => {
             const label = document.getElementById(`${ship[0]}-speed`);
             if (label) {
-                label.textContent = numToOGame(Math.round(speeds[i]));
+                label.textContent = numToLocal(Math.round(speeds[i]));
             }
         });
     }
@@ -58,7 +58,7 @@ class FlightRenderer {
 
     /** Show the trip distance, or a dash when the coordinates are invalid. */
     renderDistance(distance) {
-        this._setText('distance', distance == null ? '-' : numToOGame(distance));
+        this._setText('distance', distance == null ? '-' : numToLocal(distance));
     }
 
     /**
@@ -96,8 +96,8 @@ class FlightRenderer {
                 return;
             }
             row.children[1].innerHTML = this._fmtTime(entry.duration);
-            row.children[2].innerHTML = numToOGame(entry.deut);
-            row.children[3].innerHTML = numToOGame(cargo);
+            row.children[2].innerHTML = numToLocal(entry.deut);
+            row.children[3].innerHTML = numToLocal(cargo);
             takeToCalcButton(row).hidden = false;
             this._stripeRow(row, i + 1, playerClass);
         });
@@ -241,7 +241,7 @@ class FlightRenderer {
                 `<td data-report-cell="${cell}.coords"><a href="#" class="save-point-link" data-point="${row.point.join(',')}"` +
                 ` data-start="${this._escapeAttr(startDT)}" data-speed="${row.speedPercent}"` +
                 ` data-legs="${legs}">${row.coordLabel}</a></td>` +
-                `<td data-report-cell="${cell}.deuterium">${numToOGame(row.cost)}</td>` +
+                `<td data-report-cell="${cell}.deuterium">${numToLocal(row.cost)}</td>` +
                 `<td class="savepoint-return" data-report-cell="${cell}.return">${getDateStr(row.arriveAt, this.opts.datetimeFormat)}</td>` +
                 '</tr>');
         });

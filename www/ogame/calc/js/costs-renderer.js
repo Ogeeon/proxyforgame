@@ -601,9 +601,9 @@ class Renderer {
     const useFullNumbers = params?.fullNumbers || options.prm?.fullNumbers || false;
 
     if (useFullNumbers) {
-      return numToOGame(value);
+      return numToLocal(value);
     } else {
-      return ogamizeNum(value, this.unitSuffix);
+      return numToDisplay(value, this.unitSuffix);
     }
   }
 

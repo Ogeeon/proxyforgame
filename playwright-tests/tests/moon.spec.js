@@ -89,9 +89,9 @@ test.describe('Moon Calculator - DOM integration', () => {
         await page.locator('#light-fighter').blur();
 
         await expect(page.locator('#moon-create-chance')).toHaveText('1.2');
-        await expect(page.locator('#metal-required')).toHaveText('300.000');
-        await expect(page.locator('#metal-recyclable')).toHaveText('90.000');
-        await expect(page.locator('#debris-total')).toHaveText('120.000');
+        await expect(page.locator('#metal-required')).toHaveText('300,000');
+        await expect(page.locator('#metal-recyclable')).toHaveText('90,000');
+        await expect(page.locator('#debris-total')).toHaveText('120,000');
         await expect(page.locator('#recyclers')).toHaveText('6');
     });
 
@@ -127,19 +127,19 @@ test.describe('Moon Calculator - DOM integration', () => {
         // Defenses stay out of the field by default (0%)...
         await expect(page.locator('#debris-total')).toHaveText('0');
         // ...but the resources were still spent.
-        await expect(page.locator('#metal-required')).toHaveText('500.000');
+        await expect(page.locator('#metal-required')).toHaveText('500,000');
         await expect(page.locator('#plasma-turret-max')).toHaveText('-');
 
         await page.locator('#param-common-tab').click();
         await page.locator('#defense-debris-percent').selectOption('30');
-        await expect(page.locator('#debris-total')).toHaveText('300.000');
+        await expect(page.locator('#debris-total')).toHaveText('300,000');
         await expect(page.locator('#moon-create-chance')).toHaveText('3');
 
         // Their own share, not the fleet's.
         await page.locator('#debris-percent').selectOption('80');
-        await expect(page.locator('#debris-total')).toHaveText('300.000');
+        await expect(page.locator('#debris-total')).toHaveText('300,000');
         await page.locator('#defense-debris-percent').selectOption('10');
-        await expect(page.locator('#debris-total')).toHaveText('100.000');
+        await expect(page.locator('#debris-total')).toHaveText('100,000');
     });
 
     test('the deuterium checkbox adds deuterium to the recycling block', async ({ page }) => {
@@ -150,7 +150,7 @@ test.describe('Moon Calculator - DOM integration', () => {
 
         await page.locator('#param-common-tab').click();
         await page.locator('#deut-to-debris').check();
-        await expect(page.locator('#deuterium-recyclable')).toHaveText('150.000');
+        await expect(page.locator('#deuterium-recyclable')).toHaveText('150,000');
     });
 
     test('the general class lowers the recyclers needed', async ({ page }) => {
@@ -195,11 +195,11 @@ test.describe('Moon Calculator - DOM integration', () => {
         await page.locator('#death-star').fill('1'); // 2.7M of debris, past the cap
         await page.locator('#death-star').blur();
 
-        await expect(page.locator('#moon-size-range')).toHaveText('8.366 – 8.944');
+        await expect(page.locator('#moon-size-range')).toHaveText('8,366 – 8,944');
         const badges = page.locator('#moon-size-variants .size-badge');
         await expect(badges).toHaveCount(11);
-        await expect(badges.first()).toHaveText('8.366');
-        await expect(badges.last()).toHaveText('8.944');
+        await expect(badges.first()).toHaveText('8,366');
+        await expect(badges.last()).toHaveText('8,944');
         // Eleven equally likely rolls.
         await expect(page.locator('#moon-size-roll-chance')).toHaveText('9.09');
     });
@@ -216,7 +216,7 @@ test.describe('Moon Calculator - DOM integration', () => {
         // 20 levels add 10%: the chance cap becomes 22% and the diameter is
         // scaled until it hits the 9400 km hard cap.
         await expect(page.locator('#moon-create-chance')).toHaveText('22');
-        await expect(page.locator('#moon-size-range')).toHaveText('9.203 – 9.400');
+        await expect(page.locator('#moon-size-range')).toHaveText('9,203 – 9,400');
     });
 
     test('the destruction reset restores its own fields only', async ({ page }) => {

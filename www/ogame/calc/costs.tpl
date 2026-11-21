@@ -55,6 +55,7 @@
 
     // the decimal separator will be used by the functions that validate numbers in inputs
     options.decimalSeparator='<?= $l['decimal-separator'] ?>';
+    options.thousandsSeparator = <?= json_encode($l['thousands-separator']) ?>;
     options.datetimeW = '<?= $l['datetime-w'] ?>';
     options.datetimeD = '<?= $l['datetime-d'] ?>';
     options.datetimeH = '<?= $l['datetime-h'] ?>';

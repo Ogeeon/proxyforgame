@@ -11,6 +11,7 @@
     "lc-short": "DT",
     "cargo-cap-increase": "Zwiększenie pojemności ładunku: ",
     "decimal-separator": ",",
+    "thousands-separator": "\u00a0",
     "metal": "Metal",
     "crystal": "Kryształ",
     "deuterium": "Deuter",

@@ -81,12 +81,12 @@ test.describe('Expeditions Calculator - DOM integration', () => {
     test('the fleet drives the capacity, points and resource readouts', async ({ page }) => {
         await fillNumber(page, '#numLC', 10);
 
-        await expect(page.locator('#storage-capacity')).toHaveText('250.000');
-        await expect(page.locator('#max-points')).toHaveText('60.000 (3 LC)');
-        await expect(page.locator('#max-find-met')).toHaveText('60.000');
-        await expect(page.locator('#max-find-cry')).toHaveText('30.000');
-        await expect(page.locator('#max-find-deu')).toHaveText('20.000');
-        await expect(page.locator('#dark-matter-find')).toHaveText('1.800');
+        await expect(page.locator('#storage-capacity')).toHaveText('250,000');
+        await expect(page.locator('#max-points')).toHaveText('60,000 (3 LC)');
+        await expect(page.locator('#max-find-met')).toHaveText('60,000');
+        await expect(page.locator('#max-find-cry')).toHaveText('30,000');
+        await expect(page.locator('#max-find-deu')).toHaveText('20,000');
+        await expect(page.locator('#dark-matter-find')).toHaveText('1,800');
     });
 
     test('the "can be found" column follows the fleet', async ({ page }) => {
@@ -106,34 +106,34 @@ test.describe('Expeditions Calculator - DOM integration', () => {
     test('the hyperspace level raises the capacity', async ({ page }) => {
         await fillNumber(page, '#numLC', 10);
         await fillNumber(page, '#tech-hyper-level', 8);
-        await expect(page.locator('#storage-capacity')).toHaveText('350.000');
+        await expect(page.locator('#storage-capacity')).toHaveText('350,000');
     });
 
     test('the player class changes the capacity and the points', async ({ page }) => {
         await fillNumber(page, '#numRC', 10);
-        await expect(page.locator('#storage-capacity')).toHaveText('200.000');
-        await expect(page.locator('#max-points')).toHaveText(/^60\.000/);
+        await expect(page.locator('#storage-capacity')).toHaveText('200,000');
+        await expect(page.locator('#max-points')).toHaveText(/^60,000/);
 
         await page.locator('#player-class').selectOption('2');
-        await expect(page.locator('#storage-capacity')).toHaveText('240.000');
-        await expect(page.locator('#max-points')).toHaveText(/^40\.000/);
+        await expect(page.locator('#storage-capacity')).toHaveText('240,000');
+        await expect(page.locator('#max-points')).toHaveText(/^40,000/);
     });
 
     test('the life-form cargo bonus feeds the capacity', async ({ page }) => {
         await fillNumber(page, '#numLC', 10);
         await page.locator('#param-lf-tab').click();
         await fillNumber(page, '#lf-cargo-203', 10);
-        await expect(page.locator('#storage-capacity')).toHaveText('275.000');
+        await expect(page.locator('#storage-capacity')).toHaveText('275,000');
     });
 
     test('the Dark Matter bonus is applied', async ({ page }) => {
         await fillNumber(page, '#dark-matter-discovery-bonus', 50);
-        await expect(page.locator('#dark-matter-find')).toHaveText('2.700');
+        await expect(page.locator('#dark-matter-find')).toHaveText('2,700');
     });
 
     test('the clear button empties the fleet', async ({ page }) => {
         await fillNumber(page, '#numLC', 10);
-        await expect(page.locator('#storage-capacity')).toHaveText('250.000');
+        await expect(page.locator('#storage-capacity')).toHaveText('250,000');
 
         await page.locator('#clear-fleet').click();
         await expect(page.locator('#numLC')).toHaveValue('0');
@@ -240,7 +240,7 @@ test.describe('Expeditions Calculator - cargo bonus import', () => {
         // game drops that fraction per ship - the fleet carries 50 000, not 50 153.
         await page.locator('#param-common-tab').click();
         await fillNumber(page, '#numLF', 1000);
-        await expect(page.locator('#storage-capacity')).toHaveText('50.000');
+        await expect(page.locator('#storage-capacity')).toHaveText('50,000');
     });
 
     test('the API 2 export wins over a report pasted alongside it', async ({ page }) => {
@@ -305,7 +305,7 @@ test.describe('Expeditions Calculator - calculation-error report', () => {
         await fillNumber(page, '#numLC', '100');
         await fillNumber(page, '#tech-hyper-level', '10');
         const cell = page.locator('[data-report-cell="storage"]');
-        await expect(cell).toHaveText('3.750.000');
+        await expect(cell).toHaveText('3,750,000');
 
         await reportCell(page, cell);
         await expect(page.locator('#report-calc-values li')).toHaveText([
@@ -318,9 +318,9 @@ test.describe('Expeditions Calculator - calculation-error report', () => {
         // A fleet-table cell is named by its ship and its column.
         expect(await page.evaluate(() => describeCell?.('light-fighter.found'))).toBe('Light fighter, Discoverable number of ships (max)');
 
-        await sendReport(page, sent, '3.750.001');
+        await sendReport(page, sent, '3,750,001');
         expect(sent()?.get('context')).toBe([
-            'selected: storage = "3.750.000"',
+            'selected: storage = "3,750,000"',
             'tech-hyper-level = 10',
             'large-cargo.qty = 100',
         ].join('\n'));

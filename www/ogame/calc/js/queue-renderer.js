@@ -161,8 +161,8 @@ class QueueRenderer {
     // anchors, and a tooltip disposed after that would leave its bubble on
     // screen with nothing to point at (this row is rewritten on every keystroke).
     disposeTooltips(transportsRow);
-    cells[1].innerHTML = `${numToOGame(needSC)} <abbr data-bs-toggle="tooltip" title="${options.scFull}">${options.scShort}</abbr>`;
-    cells[2].innerHTML = `${numToOGame(needLC)} <abbr data-bs-toggle="tooltip" title="${options.lcFull}">${options.lcShort}</abbr>`;
+    cells[1].innerHTML = `${numToLocal(needSC)} <abbr data-bs-toggle="tooltip" title="${options.scFull}">${options.scShort}</abbr>`;
+    cells[2].innerHTML = `${numToLocal(needLC)} <abbr data-bs-toggle="tooltip" title="${options.lcFull}">${options.lcShort}</abbr>`;
     QueueRenderer.markReportCells(transportsRow, 1, 'transports', ['sc', 'lc']);
     // Skin the transport abbreviations with Bootstrap tooltips.
     attachTooltips(transportsRow);

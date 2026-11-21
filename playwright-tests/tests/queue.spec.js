@@ -71,7 +71,7 @@ test.describe('Construction Queue Calculator Page', () => {
         const totals = await getQueueTotals(page);
 
         expect(totals.level).toBe('11/163');
-        expect(totals.metal).toBe('3.459');
+        expect(totals.metal).toBe('3,459');
         expect(totals.crystal).toBe('864');
         expect(totals.deuterium).toBe('0');
         expect(totals.time).toBe('1h 43m 45s');
@@ -93,8 +93,8 @@ test.describe('Construction Queue Calculator Page', () => {
         const totals = await getQueueTotals(page);
 
         expect(totals.level).toBe('11/163');
-        expect(totals.metal).toBe('5.277');
-        expect(totals.crystal).toBe('2.638');
+        expect(totals.metal).toBe('5,277');
+        expect(totals.crystal).toBe('2,638');
         expect(totals.deuterium).toBe('0');
         expect(totals.time).toBe('3h 9m 57s');
     });
@@ -115,8 +115,8 @@ test.describe('Construction Queue Calculator Page', () => {
         const totals = await getQueueTotals(page);
 
         expect(totals.level).toBe('11/163');
-        expect(totals.metal).toBe('12.974');
-        expect(totals.crystal).toBe('4.324');
+        expect(totals.metal).toBe('12,974');
+        expect(totals.crystal).toBe('4,324');
         expect(totals.deuterium).toBe('0');
         expect(totals.time).toBe('6h 55m 9s');
     });
@@ -136,7 +136,7 @@ test.describe('Construction Queue Calculator Page', () => {
         const totals = await getQueueTotals(page);
 
         expect(totals.level).toBe('9/163');
-        expect(totals.metal).toBe('1.599');
+        expect(totals.metal).toBe('1,599');
         expect(totals.crystal).toBe('548');
         expect(totals.deuterium).toBe('0');
         expect(totals.time).toBe('18m 13s');
@@ -191,15 +191,15 @@ test.describe('Construction Queue Calculator Page', () => {
         await expect(hint).toHaveText('auto: 80%');
         let totals = await getQueueTotals(page);
         expect(totals.metal).toBe('60');
-        expect(totals.crystal).toBe('30.015');
-        expect(totals.deuterium).toBe('60.000');
+        expect(totals.crystal).toBe('30,015');
+        expect(totals.deuterium).toBe('60,000');
         expect(totals.time).toBe('1h 9m 4s');
 
         // An entered time reduction is taken as it is: 10% off is 18513 s.
         await enter('#lf-terraformer-time-rdc', '10');
         await expect(hint).toBeHidden();
         totals = await getQueueTotals(page);
-        expect(totals.crystal).toBe('30.015');
+        expect(totals.crystal).toBe('30,015');
         expect(totals.time).toBe('5h 9m 3s');
 
         // The bounds are 50% and 99%, and both survive a reload.
@@ -309,9 +309,9 @@ test.describe('Construction Queue Calculator Page', () => {
         // Starting with 1 base field: 1 + 3 = 4 fields available total
         // 4 buildings built (lunar base + 3 robotics), using 4 fields, with only 4 available = 4/4 (within limits)
         expect(levelText.trim()).toBe('4/4');
-        expect(metalText.trim()).toBe('22.800');
-        expect(crystalText.trim()).toBe('40.840');
-        expect(deutText.trim()).toBe('21.400');
+        expect(metalText.trim()).toBe('22,800');
+        expect(crystalText.trim()).toBe('40,840');
+        expect(deutText.trim()).toBe('21,400');
         expect(timeText.trim()).toBe('1d 14m');
 
         // Add another robotics factory - this should exceed available fields even more and show brown color
@@ -407,7 +407,7 @@ test.describe('Queue Calculator - calculation-error report', () => {
         await page.locator('#build-2-1').click();
         await page.locator('#destroy-2-1').click();
         const cell = page.locator('#table-dst-2 [data-report-cell="total.metal"]');
-        await expect(cell).toHaveText('5.765');
+        await expect(cell).toHaveText('5,765');
 
         await reportCell(page, cell);
         await expect(page.locator('#report-calc-values li')).toHaveText([
@@ -420,10 +420,10 @@ test.describe('Queue Calculator - calculation-error report', () => {
             '#2: Metal mine ↓ 10',
         ]);
 
-        await sendReport(page, sent, '5.766');
+        await sendReport(page, sent, '5,766');
         expect(sent()?.get('context')).toBe([
             'mode: tabtag-2',
-            'selected: total.metal = "5.765"',
+            'selected: total.metal = "5,765"',
             'metal-mine.level = 10',
             'queue.1 = metal-mine:11',
             'queue.2 = metal-mine:10:demolish',

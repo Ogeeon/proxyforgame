@@ -8,7 +8,7 @@
 
 class GravitonRenderer {
   static formatNumber(value) {
-    return numToOGame(value);
+    return numToLocal(value);
   }
 
   /**

@@ -11,6 +11,7 @@
     "lc-short": "BN",
     "cargo-cap-increase": "Kargo kapasitesi artışı: ",
     "decimal-separator": ",",
+    "thousands-separator": ".",
     "metal": "Metal",
     "crystal": "Kristal",
     "deuterium": "Deuterium",

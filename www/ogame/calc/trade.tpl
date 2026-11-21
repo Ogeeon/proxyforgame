@@ -68,6 +68,7 @@
       l.universe = <?= json_encode($l['universe']) ?>;
       l.cargoCapIncrease = <?= json_encode($l['cargo-cap-increase']) ?>;
       options.decimalSeparator = '<?= $l['decimal-separator'] ?>';
+      options.thousandsSeparator = <?= json_encode($l['thousands-separator']) ?>;
       options.moonLabel = <?= json_encode($l['moon']) ?>;
       options.universeFromProfile = <?= json_encode($l['pf-universe-from-profile']) ?>;
       options.dialogOk = <?= json_encode($l['dialog-ok']) ?>;

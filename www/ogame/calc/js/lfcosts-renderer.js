@@ -146,8 +146,8 @@ class LfRenderer {
         markLfReportCells(needRow, 2, 'res-needed', 3);
 
         const tRow = rows.at(-1);
-        this._setCellHtml(tRow.children[2], numToOGame(needSC) + ' <abbr data-bs-toggle="tooltip" title="' + this.opts.scFull + '">' + this.opts.scShort + '</abbr>');
-        this._setCellHtml(tRow.children[3], numToOGame(needLC) + ' <abbr data-bs-toggle="tooltip" title="' + this.opts.lcFull + '">' + this.opts.lcShort + '</abbr>');
+        this._setCellHtml(tRow.children[2], numToLocal(needSC) + ' <abbr data-bs-toggle="tooltip" title="' + this.opts.scFull + '">' + this.opts.scShort + '</abbr>');
+        this._setCellHtml(tRow.children[3], numToLocal(needLC) + ' <abbr data-bs-toggle="tooltip" title="' + this.opts.lcFull + '">' + this.opts.lcShort + '</abbr>');
         markLfReportCells(tRow, 2, 'transports', 2, LF_REPORT_TRANSPORTS);
     }
 
@@ -260,8 +260,8 @@ class LfRenderer {
         rows[totalsRow + 2].children[3].innerHTML = '<b>' + this._fmt(needDeut) + '</b>';
         markLfReportCells(rows[totalsRow + 2], 1, 'res-needed', 3);
 
-        this._setCellHtml(rows[totalsRow + 3].children[1], numToOGame(needSC) + ' <abbr data-bs-toggle="tooltip" title="' + this.opts.scFull + '">' + this.opts.scShort + '</abbr>');
-        this._setCellHtml(rows[totalsRow + 3].children[2], numToOGame(needLC) + ' <abbr data-bs-toggle="tooltip" title="' + this.opts.lcFull + '">' + this.opts.lcShort + '</abbr>');
+        this._setCellHtml(rows[totalsRow + 3].children[1], numToLocal(needSC) + ' <abbr data-bs-toggle="tooltip" title="' + this.opts.scFull + '">' + this.opts.scShort + '</abbr>');
+        this._setCellHtml(rows[totalsRow + 3].children[2], numToLocal(needLC) + ' <abbr data-bs-toggle="tooltip" title="' + this.opts.lcFull + '">' + this.opts.lcShort + '</abbr>');
         markLfReportCells(rows[totalsRow + 3], 1, 'transports', 2, LF_REPORT_TRANSPORTS);
     }
 
@@ -307,7 +307,7 @@ class LfRenderer {
     }
 
     _fmt(num) {
-        return ogamizeNum(num, this.opts.unitSuffix);
+        return numToDisplay(num, this.opts.unitSuffix);
     }
 
     _fmtTime(seconds) {

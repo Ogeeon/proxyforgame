@@ -239,6 +239,7 @@
 
     // Localized strings used by JS modules
     options.decimalSeparator = "<?= $l['decimal-separator'] ?>";
+    options.thousandsSeparator = <?= json_encode($l['thousands-separator']) ?>;
     options.metal = "<?= $l['metal'] ?>";
     options.crystal = "<?= $l['crystal'] ?>";
     options.deuterium = "<?= $l['deuterium'] ?>";

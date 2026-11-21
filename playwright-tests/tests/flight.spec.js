@@ -1,4 +1,4 @@
-import { test, expect, expectLoadsCleanly, expectTooltipTitle, tooltipBubble, openDialog, dialogBody, toasts, toastBody, toastClose } from './base';
+import { test, expect, expectLoadsCleanly, expectTooltipTitle, tooltipBubble, openDialog, dialogBody, toasts, toastBody, toastClose, wholeNumber } from './base';
 import { expectMcpBoundsMatchPage } from './mcp-bounds';
 import { catchReport, reportCell, sendReport } from './report-dialog';
 import { readFileSync } from 'fs';
@@ -608,9 +608,9 @@ test.describe('Flight Calculator - Slowest Ship', () => {
         await openParams(page);
         await page.locator('#cmb-drive').fill('5'); // +50% on combustion ships
         await page.evaluate(() => updateNumbers());
-        await expect(page.locator('#light-fighter-speed')).toHaveText('18.750');
-        await expect(page.locator('#small-cargo-speed')).toHaveText('7.500');
-        await expect(page.locator('#cruiser-speed')).toHaveText('15.000');
+        await expect(page.locator('#light-fighter-speed')).toHaveText('18,750');
+        await expect(page.locator('#small-cargo-speed')).toHaveText('7,500');
+        await expect(page.locator('#cruiser-speed')).toHaveText('15,000');
     });
 });
 
@@ -753,7 +753,7 @@ test.describe('Flight Calculator - Results Table', () => {
 
     test('slower speeds take longer and burn less fuel', async ({ page }) => {
         const fuelAt = async (idx) =>
-            Number((await speedRows(page).nth(idx).locator('td').nth(2).innerText()).replace(/\./g, ''));
+            wholeNumber(await speedRows(page).nth(idx).locator('td').nth(2).innerText());
 
         const at100 = await fuelAt(0);
         const at50 = await fuelAt(10);
@@ -822,7 +822,7 @@ test.describe('Flight Calculator - Results Table', () => {
         await openParams(page);
         await page.locator('#departure-g').fill('1');
         await page.locator('#destination-g').fill('4');
-        await expect(page.locator('#distance')).toHaveText('60.000');
+        await expect(page.locator('#distance')).toHaveText('60,000');
     });
 
     test('an out-of-range coordinate blanks the distance and clears the table', async ({ page }) => {
@@ -1019,8 +1019,8 @@ test.describe('Flight Calculator - Moon Destruction Mission', () => {
         await openFlightTimesTab(page);
         await page.locator('#mission-type-3').check();
 
-        const deut = async (idx) => Number.parseInt(
-            (await speedRows(page).nth(idx).locator('td').nth(2).innerText()).replace(/\D/g, ''), 10);
+        const deut = async (idx) =>
+            wholeNumber(await speedRows(page).nth(idx).locator('td').nth(2).innerText());
         const full = await deut(0);
         expect(full).toBeGreaterThan(1);
         expect(await deut(10)).toBeLessThan(full);
@@ -2422,7 +2422,7 @@ test.describe('Flight Calculator - calculation-error report', () => {
         await page.locator('#destination-s').fill('50');
         await page.locator('#destination-s').blur();
         const cell = page.locator('[data-report-cell="speed-100.fuel"]');
-        await expect(cell).toHaveText('3.110');
+        await expect(cell).toHaveText('3,110');
 
         await reportCell(page, cell);
         await expect(page.locator('#report-calc-values li')).toHaveText([
@@ -2440,7 +2440,7 @@ test.describe('Flight Calculator - calculation-error report', () => {
         await sendReport(page, sent, '1');
         expect(sent()?.get('context')).toBe([
             'mode: tabtag1 / recall-tabtag-regular',
-            'selected: speed-100.fuel = "3.110"',
+            'selected: speed-100.fuel = "3,110"',
             'class = 1',
             'large-cargo.qty = 100',
             'mission-type = 0',

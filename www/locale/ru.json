@@ -10,6 +10,7 @@
     "lc-short": "БТ",
     "cargo-cap-increase": "Увеличение грузоподъёмности: ",
     "decimal-separator": ",",
+    "thousands-separator": "\u00a0",
     "metal": "Металл",
     "crystal": "Кристалл",
     "deuterium": "Дейтерий",

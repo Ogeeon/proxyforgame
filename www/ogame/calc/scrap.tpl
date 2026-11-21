@@ -116,6 +116,7 @@
       pfgScriptsFailed();
     } else {
       options.decimalSeparator = <?= json_encode($l['decimal-separator']) ?>;
+      options.thousandsSeparator = <?= json_encode($l['thousands-separator']) ?>;
       options.unitSuffix = <?= json_encode($l['unit-suffix']) ?>;
       options.warnindDivId = 'warning';
       options.warnindMsgDivId = 'warning-message';

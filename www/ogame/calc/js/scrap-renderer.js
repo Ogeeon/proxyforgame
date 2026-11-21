@@ -18,7 +18,7 @@ class ScrapRenderer {
    * @returns {string}
    */
   static formatNumber(n) {
-    return ogamizeNum(n, getOptionValue('unitSuffix', 'KMG'));
+    return numToDisplay(n, getOptionValue('unitSuffix', 'KMG'));
   }
 
   /**
@@ -83,11 +83,11 @@ class ScrapRenderer {
     setTextContent('#total-payback-msu', ScrapRenderer.formatMsu(r.total.paybackSum));
     // Points and ship counts are written out in full: shortened, a count of
     // ships would read as an amount of resources.
-    setTextContent('#points-lost', numToOGame(r.total.points));
+    setTextContent('#points-lost', numToLocal(r.total.points));
     // The cargo counts twice: in the accordion's header, readable while it is
     // collapsed, and in its body.
-    ['#transport-small', '#transport-small-head'].forEach((sel) => setTextContent(sel, numToOGame(r.transport.small)));
-    ['#transport-large', '#transport-large-head'].forEach((sel) => setTextContent(sel, numToOGame(r.transport.large)));
+    ['#transport-small', '#transport-small-head'].forEach((sel) => setTextContent(sel, numToLocal(r.transport.small)));
+    ['#transport-large', '#transport-large-head'].forEach((sel) => setTextContent(sel, numToLocal(r.transport.large)));
   }
 
   /**
@@ -154,7 +154,7 @@ class ScrapRenderer {
    */
   static formatDays(days) {
     if (days === Infinity) return '∞';
-    return days > 0 ? numToOGame(Math.floor(days)) : '—';
+    return days > 0 ? numToLocal(Math.floor(days)) : '—';
   }
 
   /**
@@ -201,7 +201,7 @@ class ScrapRenderer {
       }
       const count = counts[id] ?? 0;
       label.classList.remove('d-none');
-      label.textContent = numToOGame(count);
+      label.textContent = numToLocal(count);
       // The raw integer, so a click copies the number without parsing the
       // thousands separators back out of the text.
       label.dataset.planetCount = String(count);

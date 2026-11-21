@@ -143,14 +143,40 @@ a dynamically built row that inits tooltips but never disposes them.
 
 ---
 
-## (b) Locale-aware decimal input and parsing
+## (b) Locale-aware numbers: display, input and parsing
 
-RU and several other locales use `,` as the decimal separator. The separator reaches JS
-from the locale file through the template:
+Every number the page shows follows the site language's own convention, per CLDR
+(`docs/adr/0006-locale-number-formatting.md`). Two locale keys in `common` carry it, and the
+template hands both to JS:
 
 ```php
 options.decimalSeparator = '<?= $l['decimal-separator'] ?>';
+options.thousandsSeparator = <?= json_encode($l['thousands-separator']) ?>;
 ```
+
+The thousands separator goes through `json_encode`: in `fr` it is U+202F and in `pl`/`pt`/`ru`/
+`sk` U+00A0, and a raw invisible character inside a quoted literal cannot be seen in the page
+source or a diff. `,` (`en`, `us`) and `.` (`de`, `es`, `it`, `nl`, `tr`, `bs`) are the others;
+`unit-tests/locale-separators.test.js` pins every code point.
+
+| Locale | Decimal | Grouping | `1234567.5` shows as |
+|--------|---------|----------|----------------------|
+| en, us | `.` | `,` | `1,234,567.5` |
+| de, es, it, nl, tr, bs | `,` | `.` | `1.234.567,5` |
+| pl, pt, ru, sk | `,` | U+00A0 | `1␣234␣567,5` (no-break space) |
+| fr | `,` | U+202F | `1␣234␣567,5` (narrow no-break space) |
+
+**Displaying** a number — `numToLocal(n)` (`utils.js`) for the full form, or `numToDisplay(n,
+suffix)` where the page's full-numbers toggle decides between full and compact (`1,5M`). Both
+own the two separators: the integer part is grouped on its own, then the fraction (cut to three
+digits) follows the locale decimal. Never build a display string with `toFixed` alone — wrap it
+in `localizeFloat` (`trade.js`'s rates do). Grouping is three by three in every locale; CLDR's
+"no grouping below 10 000" rule for `pl`/`es`/`pt` is deliberately not followed.
+
+**Input never takes a grouping separator.** A field holds digits, the sign and the locale
+decimal only; `getCorrectedValue` (the keyup and blur filter) drops everything else, so a
+number copied off the page with its grouping spaces pastes back whole. `getInputNumber` also
+strips U+00A0/U+202F itself, for a value read before the field was filtered.
 
 **Reading** a user-entered fractional value — always `getInputNumber(el)` (`utils.js`),
 never `parseFloat(el.value)`:
@@ -186,9 +212,15 @@ this._setClassVal(`${id}-speed`, localizeFloat(frac(v.speed, 6) * 100, 4));
 uses `.` (`.claude/rules/ui.md`). Likewise, never persist a locale separator into a comma-delimited
 cookie: serialise with a canonical dot.
 
+Text the player pastes out of the *game* is a third case: its separators follow the game
+client's language, not the site's, so a paste parser accepts both `.` and `,` as the decimal
+(`costs-orchestration.js`, `expeditions-orchestration.js`).
+
 **Deviation to look for**: `parseFloat(input.value)` / `Number(input.value)` on a
-user-entered field; `el.value = someFloat` without either helper; a locale separator
-applied to an API-imported number.
+user-entered field; `el.value = someFloat` without either helper; a displayed number built
+with `toFixed` or string concatenation instead of `numToLocal`/`localizeFloat`; a locale
+separator applied to an API-imported number; a spec that parses a displayed number by
+stripping one known separator (use `wholeNumber` from `playwright-tests/tests/base.js`).
 
 ---
 
@@ -246,7 +278,8 @@ _bindInputs() {
 Two rules the exclusion list encodes, both learned the hard way:
 
 - **Date, duration and tolerance fields must never get the numeric validator** — it strips
-  `.` and `:` as illegal characters. They get an overtype mask instead
+  `.` and `:` as illegal characters (and any grouping separator, U+00A0/U+202F included:
+  the filter is a whitelist of digits, sign and the locale decimal). They get an overtype mask instead
   (`attachInputMask`, `dom-utils.js`), and their own parser.
 - The warning banner is addressed through `options.warnindDivId` /
   `options.warnindMsgDivId` (note the existing spelling) plus the

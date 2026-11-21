@@ -372,7 +372,7 @@ let options = {
 
     _addResourceIfNeeded: function(resources, typeIndex, value, label) {
         if (TRADE_RES_TYPES[this.srcType][typeIndex] === 1 && value) {
-            resources.push(numToOGame(value) + ' ' + label);
+            resources.push(numToLocal(value) + ' ' + label);
         }
     },
 
@@ -388,9 +388,9 @@ let options = {
         if (!dm && !dc && !dd) return '';
 
         const resources = [];
-        if (dm) resources.push(numToOGame(dm) + ' ' + l.met);
-        if (dc) resources.push(numToOGame(dc) + ' ' + l.crys);
-        if (dd) resources.push(numToOGame(dd) + ' ' + l.deut);
+        if (dm) resources.push(numToLocal(dm) + ' ' + l.met);
+        if (dc) resources.push(numToLocal(dc) + ' ' + l.crys);
+        if (dd) resources.push(numToLocal(dd) + ' ' + l.deut);
         return l.dst + ' ' + resources.join(' ' + l.and + ' ') + '. ';
     },
 
@@ -426,7 +426,7 @@ function syncMcRate() {
 
 /** Shows the derived metal:crystal rate in the two controls that carry it. */
 function renderMcRate() {
-    setTextContent('#rate-mc', options.rates.mc.toFixed(TRADE_MC_DECIMALS));
+    setTextContent('#rate-mc', localizeFloat(options.rates.mc.toFixed(TRADE_MC_DECIMALS)));
     setVal('#mc-slider', options.rates.mc);
 }
 
@@ -776,8 +776,8 @@ function resetParams() {
     setVal('#res-dst-m', '');
     setVal('#res-dst-c', '');
     setVal('#res-dst-d', '');
-    setVal('#rate-md', options.rates.md);
-    setVal('#rate-cd', options.rates.cd);
+    setNumVal('#rate-md', options.rates.md);
+    setNumVal('#rate-cd', options.rates.cd);
     setVal('#md-slider', options.rates.md);
     setVal('#cd-slider', options.rates.cd);
     renderMcRate();
@@ -835,7 +835,7 @@ function collectInputs() {
  * @param {{sc: number, lc: number}} cargo - from TradeCalculator
  */
 function formatCargo(cargo) {
-    return numToOGame(cargo.sc) + ' ' + l.sc + ' / ' + numToOGame(cargo.lc) + ' ' + l.lc;
+    return numToLocal(cargo.sc) + ' ' + l.sc + ' / ' + numToLocal(cargo.lc) + ' ' + l.lc;
 }
 
 /**
@@ -871,11 +871,11 @@ function renderResults(result) {
         // player typed there in forward, for when they flip back.
         const sold = [result.sm, result.sc, result.sd];
         const fields = ['#res-src-m', '#res-src-c', '#res-src-d'];
-        setVal(fields[options.srcType], numToOGame(sold[options.srcType]));
+        setVal(fields[options.srcType], numToLocal(sold[options.srcType]));
     } else {
-        setVal('#res-dst-m', numToOGame(result.dm));
-        setVal('#res-dst-c', numToOGame(result.dc));
-        setVal('#res-dst-d', numToOGame(result.dd));
+        setVal('#res-dst-m', numToLocal(result.dm));
+        setVal('#res-dst-c', numToLocal(result.dc));
+        setVal('#res-dst-d', numToLocal(result.dd));
     }
     setTextContent('#res-src-cargo', formatCargo(result.srcCargo));
     setTextContent('#res-dst-cargo', formatCargo(result.dstCargo));
@@ -912,7 +912,7 @@ function initSliders() {
     mdSlider.value = String(options.rates.md);
     addEvent(mdSlider, 'input', function() {
         options.rates.md = Number.parseFloat(mdSlider.value);
-        setVal('#rate-md', options.rates.md);
+        setNumVal('#rate-md', options.rates.md);
         applyRateChange();
     });
 
@@ -923,7 +923,7 @@ function initSliders() {
     cdSlider.value = String(options.rates.cd);
     addEvent(cdSlider, 'input', function() {
         options.rates.cd = Number.parseFloat(cdSlider.value);
-        setVal('#rate-cd', options.rates.cd);
+        setNumVal('#rate-cd', options.rates.cd);
         applyRateChange();
     });
 
@@ -982,8 +982,8 @@ function restoreFromState() {
     setVal('#country', options.country);
     setUniList(options.country, options.universe);
 
-    setVal('#rate-md', options.rates.md);
-    setVal('#rate-cd', options.rates.cd);
+    setNumVal('#rate-md', options.rates.md);
+    setNumVal('#rate-cd', options.rates.cd);
     setVal('#md-slider', options.rates.md);
     setVal('#cd-slider', options.rates.cd);
     renderMcRate();
@@ -1000,12 +1000,12 @@ function renderInitialState() {
     inputEl('#sc-capacity-increase')._constrains = { min: 0, def: 0, allowFloat: true, allowNegative: false };
     inputEl('#lc-capacity-increase')._constrains = { min: 0, def: 0, allowFloat: true, allowNegative: false };
 
-    setTextContent('#rate-md-min', TRADE_RATE_LIMITS.md.min.toFixed(1));
-    setTextContent('#rate-md-max', TRADE_RATE_LIMITS.md.max.toFixed(1));
-    setTextContent('#rate-cd-min', TRADE_RATE_LIMITS.cd.min.toFixed(1));
-    setTextContent('#rate-cd-max', TRADE_RATE_LIMITS.cd.max.toFixed(1));
-    setTextContent('#rate-mc-min', TRADE_RATE_LIMITS.mc.min.toFixed(1));
-    setTextContent('#rate-mc-max', TRADE_RATE_LIMITS.mc.max.toFixed(1));
+    setTextContent('#rate-md-min', localizeFloat(TRADE_RATE_LIMITS.md.min.toFixed(1)));
+    setTextContent('#rate-md-max', localizeFloat(TRADE_RATE_LIMITS.md.max.toFixed(1)));
+    setTextContent('#rate-cd-min', localizeFloat(TRADE_RATE_LIMITS.cd.min.toFixed(1)));
+    setTextContent('#rate-cd-max', localizeFloat(TRADE_RATE_LIMITS.cd.max.toFixed(1)));
+    setTextContent('#rate-mc-min', localizeFloat(TRADE_RATE_LIMITS.mc.min.toFixed(1)));
+    setTextContent('#rate-mc-max', localizeFloat(TRADE_RATE_LIMITS.mc.max.toFixed(1)));
     setVal('#mix-balance-proc', options.mixBalance);
     setVal('#mix-balance-prop1', options.mixProp1);
     setVal('#mix-balance-prop2', options.mixProp2);
@@ -1119,7 +1119,7 @@ function tradeReportAmounts(side, group, fields) {
     return TRADE_SRC_RESOURCES.map((resource, i) => {
         const field = fields[i];
         return tradeReportEntry(`${side}.${resource}`, group, l[resource], options[field],
-            TRADE_FACTORY_OPTIONS[field], numToOGame(options[field]));
+            TRADE_FACTORY_OPTIONS[field], numToLocal(options[field]));
     });
 }
 
@@ -1189,8 +1189,8 @@ function initRateButtons() {
         addEvent('#rate-btn-' + (i + 1), 'click', function() {
             options.rates.md = md;
             options.rates.cd = cd;
-            setVal('#rate-md', md);
-            setVal('#rate-cd', cd);
+            setNumVal('#rate-md', md);
+            setNumVal('#rate-cd', cd);
             setVal('#md-slider', md);
             setVal('#cd-slider', cd);
             applyRateChange();

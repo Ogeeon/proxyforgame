@@ -97,7 +97,7 @@ test.describe('Scrap Merchant - the page', () => {
         await expect(page.locator('#unit-202')).toBeHidden();
         await page.locator('#full-numbers').check();
         await type(page, '#unit-401', '3');
-        await expect(page.locator('#defense-payback-metal')).toHaveText('2.100');
+        await expect(page.locator('#defense-payback-metal')).toHaveText('2,100');
 
         // Which tab is open is not saved.
         await page.reload();
@@ -109,13 +109,13 @@ test.describe('Scrap Merchant - the page', () => {
         await expect(page.locator('#transport-body')).toBeHidden();
         await expect(page.locator('#transport-toggle')).toHaveText(/Cargo ships to haul the resources away: SC\s0 \/ LC\s0/);
         await importOwnApi(page);
-        await expectHeadCounts(page, '13.447', '2.690');
+        await expectHeadCounts(page, '13,447', '2,690');
         await expect(page.locator('#transport-body')).toBeHidden();
 
         await page.locator('#transport-toggle').click();
         await expect(page.locator('#transport-body')).toBeVisible();
-        await expect(page.locator('#transport-small')).toHaveText('13.447');
-        await expect(page.locator('#transport-large')).toHaveText('2.690');
+        await expect(page.locator('#transport-small')).toHaveText('13,447');
+        await expect(page.locator('#transport-large')).toHaveText('2,690');
 
         // The open state is not saved.
         await page.reload();
@@ -137,24 +137,24 @@ test.describe('Scrap Merchant - the page', () => {
         await expect(page.locator('#total-payback-metal')).toHaveText('57.491M');
         await expect(page.locator('#total-cost-msu')).toHaveText('278.5M');
         await expect(page.locator('#total-payback-msu')).toHaveText('97.4M');
-        await expect(page.locator('#points-lost')).toHaveText('278.540');
+        await expect(page.locator('#points-lost')).toHaveText('278,540');
         // The export's player: hyperspace 9, a Discoverer, no cargo bonuses -
         // 7250 and 36250 a ship.
         await expect(page.locator('#hyper-tech-level')).toHaveValue('9');
         await expect(page.locator('#collector-class')).not.toBeChecked();
         await expect(page.locator('#lf-collector-class-bonus')).toHaveValue('0');
         await expect(page.locator('#sc-capacity-increase')).toHaveValue('0');
-        await expect(page.locator('#transport-small')).toHaveText('13.447');
-        await expect(page.locator('#transport-large')).toHaveText('2.690');
+        await expect(page.locator('#transport-small')).toHaveText('13,447');
+        await expect(page.locator('#transport-large')).toHaveText('2,690');
 
         await page.locator('#full-numbers').check();
-        await expect(page.locator('#fleet-payback-metal')).toHaveText('16.861.950');
-        await expect(page.locator('#fleet-payback-crystal')).toHaveText('19.311.250');
-        await expect(page.locator('#fleet-payback-deuterium')).toHaveText('366.800');
-        await expect(page.locator('#defense-cost-metal')).toHaveText('116.085.000');
-        await expect(page.locator('#defense-payback-deuterium')).toHaveText('4.970.000');
-        await expect(page.locator('#total-payback-crystal')).toHaveText('34.660.500');
-        await expect(page.locator('#unit-406-deuterium')).toHaveText('4.200.000');
+        await expect(page.locator('#fleet-payback-metal')).toHaveText('16,861,950');
+        await expect(page.locator('#fleet-payback-crystal')).toHaveText('19,311,250');
+        await expect(page.locator('#fleet-payback-deuterium')).toHaveText('366,800');
+        await expect(page.locator('#defense-cost-metal')).toHaveText('116,085,000');
+        await expect(page.locator('#defense-payback-deuterium')).toHaveText('4,970,000');
+        await expect(page.locator('#total-payback-crystal')).toHaveText('34,660,500');
+        await expect(page.locator('#unit-406-deuterium')).toHaveText('4,200,000');
     });
 
     test('a count typed by hand recalculates at once', async ({ page }) => {
@@ -163,22 +163,22 @@ test.describe('Scrap Merchant - the page', () => {
         // Typed key by key, not left: the result follows every keystroke.
         await page.locator('#unit-214').fill('');
         await page.locator('#unit-214').pressSequentially('1');
-        await expect(page.locator('#unit-214-metal')).toHaveText('1.750.000');
-        await expect(page.locator('#fleet-payback-metal')).toHaveText('18.611.950');
+        await expect(page.locator('#unit-214-metal')).toHaveText('1,750,000');
+        await expect(page.locator('#fleet-payback-metal')).toHaveText('18,611,950');
         // The other section is left alone.
-        await expect(page.locator('#defense-payback-metal')).toHaveText('40.629.750');
+        await expect(page.locator('#defense-payback-metal')).toHaveText('40,629,750');
     });
 
     test('the sections are independent', async ({ page }) => {
         await page.locator('#full-numbers').check();
         await type(page, '#unit-202', '10');
-        await expect(page.locator('#fleet-payback-metal')).toHaveText('7.000');
+        await expect(page.locator('#fleet-payback-metal')).toHaveText('7,000');
         await expect(page.locator('#defense-payback-metal')).toHaveText('0');
         await openDefenseTab(page);
         await type(page, '#unit-401', '100');
-        await expect(page.locator('#defense-payback-metal')).toHaveText('70.000');
-        await expect(page.locator('#fleet-payback-metal')).toHaveText('7.000');
-        await expect(page.locator('#total-payback-metal')).toHaveText('77.000');
+        await expect(page.locator('#defense-payback-metal')).toHaveText('70,000');
+        await expect(page.locator('#fleet-payback-metal')).toHaveText('7,000');
+        await expect(page.locator('#total-payback-metal')).toHaveText('77,000');
     });
 
     test('a fractional rate drops the fraction per unit and resource', async ({ page }) => {
@@ -187,9 +187,9 @@ test.describe('Scrap Merchant - the page', () => {
         await type(page, '#unit-503', '3');
         await type(page, '#scrap-rate', '37.3');
         // 37.3% of 12500 is 4662.5 a missile: 3 x 4662, not 13987.
-        await expect(page.locator('#unit-503-metal')).toHaveText('13.986');
-        await expect(page.locator('#unit-503-crystal')).toHaveText('2.796');
-        await expect(page.locator('#unit-503-deuterium')).toHaveText('11.190');
+        await expect(page.locator('#unit-503-metal')).toHaveText('13,986');
+        await expect(page.locator('#unit-503-crystal')).toHaveText('2,796');
+        await expect(page.locator('#unit-503-deuterium')).toHaveText('11,190');
     });
 
     test('the rate is held to 1-100 on blur', async ({ page }) => {
@@ -199,7 +199,7 @@ test.describe('Scrap Merchant - the page', () => {
         await expect(page.locator('#scrap-rate')).toHaveValue('100');
         await page.locator('#full-numbers').check();
         await type(page, '#unit-202', '1');
-        await expect(page.locator('#total-payback-metal')).toHaveText('2.000');
+        await expect(page.locator('#total-payback-metal')).toHaveText('2,000');
     });
 
     test('the rate and the counts start over after a reload, the full numbers and the cargo stay', async ({ page }) => {
@@ -281,7 +281,7 @@ test.describe('Scrap Merchant - the page', () => {
         await expect(page.locator('#sc-capacity-increase')).toHaveValue('10');
         await expect(page.locator('#lc-capacity-increase')).toHaveValue('20');
         // 7250 + 2000 + 500 and 36250 + 10000 + 5000 a ship.
-        await expectHeadCounts(page, '9.999', '1.903');
+        await expectHeadCounts(page, '9,999', '1,903');
     });
 
     test('the import ticks the box for a Collector only, and leaves it without a class', async ({ page }) => {
@@ -374,7 +374,7 @@ test.describe('Scrap Merchant - the page', () => {
         await expectVerdictCounts(page, '1', '0');
         await page.locator('#full-numbers').check();
         // 3.105.000 - 29 x 103.714,26
-        await expect(page.locator('#sell-timing-gain')).toHaveText('97.287');
+        await expect(page.locator('#sell-timing-gain')).toHaveText('97,287');
 
         // An event that pays what today pays is never worth waiting for.
         await type(page, '#event-rate', '35');
@@ -549,10 +549,10 @@ test.describe('Scrap Merchant - player profiles', () => {
         await page.locator('#unit-217-planet').click();
         await expect(page.locator('#unit-217')).toHaveValue('300');
         await page.locator('#full-numbers').check();
-        await expect(page.locator('#unit-217-metal')).toHaveText('210.000');
+        await expect(page.locator('#unit-217-metal')).toHaveText('210,000');
 
         await openDefenseTab(page);
-        await expect(page.locator('#unit-401-planet')).toHaveText('1.000');
+        await expect(page.locator('#unit-401-planet')).toHaveText('1,000');
         await page.locator('#unit-401-planet').click();
         await expect(page.locator('#unit-401')).toHaveValue('1000');
     });
