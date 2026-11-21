@@ -1358,17 +1358,22 @@ describe('MCP tool ogame_production', () => {
 
     it('produces the same hour as the page\'s own core', async () => {
         const out = (await call(protocolWith(), 'ogame_production', base)).structuredContent;
-        expect(out.perDay.metal).toBe(out.perHour.metal * 24);
+        // The game floors every row but forms the totals - and the day - from the unrounded amounts, so
+        // the hour is never below the shown rows and a day never below 24 hours (nor 24 above them)
+        expect(out.perDay.metal).toBeGreaterThanOrEqual(out.perHour.metal * 24);
+        expect(out.perDay.metal).toBeLessThan(out.perHour.metal * 24 + 24);
         expect(out.productionFactor).toBe(1);
-        const parts = Object.values(out.breakdownPerHour).reduce((sum, r) => sum + r.metal, 0);
-        expect(parts).toBe(out.perHour.metal);
+        const rowsShown = Object.values(out.breakdownPerHour);
+        const parts = rowsShown.reduce((sum, r) => sum + r.metal, 0);
+        expect(out.perHour.metal).toBeGreaterThanOrEqual(parts);
+        expect(out.perHour.metal).toBeLessThan(parts + rowsShown.length);
     });
 
     it('lets a Magma Forge raise the metal output', async () => {
         const plain = (await call(protocolWith(), 'ogame_production', base)).structuredContent;
         const forge = (await call(protocolWith(), 'ogame_production', { ...base, lifeforms: { buildings: { 'magma-forge': 10 } } })).structuredContent;
         // 2% per level of the mine's output
-        expect(forge.breakdownPerHour.lifeformBuildings.metal).toBe(Math.round(plain.breakdownPerHour.mines.metal * 0.2));
+        expect(forge.breakdownPerHour.lifeformBuildings.metal).toBe(Math.floor(plain.breakdownPerHour.mines.metal * 0.2));
     });
 
     it('caps crawlers at 8 per mine level and says so', async () => {

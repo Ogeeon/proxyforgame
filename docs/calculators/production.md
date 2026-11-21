@@ -23,10 +23,10 @@ Calculate metal, crystal, and deuterium production, energy use, and mine upgrade
 
 | File | Lines |
 |------|-------|
-| `www/ogame/calc/js/production-core.js` | 711 |
+| `www/ogame/calc/js/production-core.js` | 730 |
 | `www/ogame/calc/js/production-data-collector.js` | 455 |
 | `www/ogame/calc/js/production-renderer.js` | 223 |
-| `www/ogame/calc/js/production-orchestration.js` | 1325 |
+| `www/ogame/calc/js/production-orchestration.js` | 1331 |
 | `www/ogame/calc/js/production-profile.js` | 539 |
 
 The page also loads these shared scripts:

@@ -58,8 +58,8 @@ function getProductionRate(params) {
 		case 1:
 		case 2:
 		case 3:
-			prod = getProductionRateSplit(params);
-			return prod.reduce((sum, row) => sum + row, 0);
+			// The game floors the sum of the unrounded rows, not each row on its own
+			return floorExact(getProductionRateExact(params).reduce((sum, row) => sum + row, 0));
 		case 4:
 		case 12:
 		case 212:
@@ -71,12 +71,32 @@ function getProductionRate(params) {
 	}
 }
 
+// The game shows every row rounded DOWN and forms its totals from the unrounded values
+// (production-vs-ogame.md, section 2). A product such as 0.29 * 100 is 28.999999999999996 in
+// floating point, so the floor adds a tolerance far below any real fraction (the amounts are
+// whole numbers times percentages with at most four decimals) before cutting.
+const FLOOR_TOLERANCE = 1e-9;
+
 /**
+ * Rounds a computed amount down the way the game's tables do.
+ * @param {number} value
+ * @returns {number}
+ */
+function floorExact(value) {
+	return Math.floor(value + FLOOR_TOLERANCE);
+}
+
+/**
+ * The unrounded rows of the resource and energy production, in PRODUCTION_ROW order. The natural
+ * production and a mine's output at 100% are whole numbers - the game floors them before anything
+ * else uses them - and every bonus row is a percentage of the output, left fractional here so a
+ * caller can sum the rows the way the game does: floor of the sum, not the sum of the floors.
+ *
  * Calculates the resource (units/hour) and energy production rate. When calculating metal and crystal mines, returns the natural production in row zero
  * @param {ProductionParams} params
  * @returns {number[]} Production broken down by source, indexed by PRODUCTION_ROW
  */
-function getProductionRateSplit(params) {
+function getProductionRateExact(params) {
 	const {
 		techID, techLevel, energyTechLevel, plasmaTechLevel, maxTemp, pos,
 		universeSpeedFactor, geologist, engineer, productionFactor, powerFactor,
@@ -92,6 +112,23 @@ function getProductionRateSplit(params) {
 	let positionFactor = 1;
 	let basePR;
 	const rows = Object.values(PRODUCTION_ROW).map(() => 0);
+	// A mine's output at 100% production is rounded down first; the energy coefficient and the
+	// mine's own percentage then scale that whole number. The scaled amount is left unrounded: the
+	// totals add it up, every bonus is a percentage of it, and each row shown is cut from it. At full
+	// production it is a whole number, so the bonuses are taken from the rounded-down output; below
+	// it the game does the same with the scaled one (planets with an energy deficit,
+	// production-vs-ogame.md, section 2).
+	const scaledOutput = (outputAt100) => floorExact(outputAt100 * universeSpeedFactor) * productionFactor * powerFactor;
+	const mineBonuses = (output, plasmaPerLevel) => {
+		rows[PRODUCTION_ROW.BUILDING] = output;
+		rows[PRODUCTION_ROW.PLASMA] = output * plasmaPerLevel * plasmaTechLevel;
+		rows[PRODUCTION_ROW.BOOSTER] = output * boostFactor;
+		rows[PRODUCTION_ROW.GEOLOGIST] = output * geologistFactor;
+		rows[PRODUCTION_ROW.ENGINEER] = 0; // the Engineer only boosts energy
+		rows[PRODUCTION_ROW.ALL_OFFICERS] = output * allStaffFactor;
+		rows[PRODUCTION_ROW.CLASS] = output * classFactor;
+		rows[PRODUCTION_ROW.ALLIANCE_CLASS] = output * allianceClassFactor;
+	};
 	switch (techID*1) {
 		case 1:
 			switch (pos*1) {
@@ -99,16 +136,9 @@ function getProductionRateSplit(params) {
 				case 7: case 9: positionFactor = 1.23; break;
 				case 8: positionFactor = 1.35; break;
 			}
-			rows[PRODUCTION_ROW.NATURAL] = Math.floor(30 * universeSpeedFactor * positionFactor);
-			basePR = 30.0 * techLevel * Math.pow(1.1, techLevel) * productionFactor * powerFactor * positionFactor;
-			rows[PRODUCTION_ROW.BUILDING] = Math.floor(basePR * universeSpeedFactor);
-			rows[PRODUCTION_ROW.PLASMA] = Math.round(basePR * 0.01 * plasmaTechLevel * universeSpeedFactor);
-			rows[PRODUCTION_ROW.BOOSTER] = Math.round(basePR * boostFactor * universeSpeedFactor);
-			rows[PRODUCTION_ROW.GEOLOGIST] = Math.round(basePR * geologistFactor * universeSpeedFactor);
-			rows[PRODUCTION_ROW.ENGINEER] = 0; // the Engineer only boosts energy
-			rows[PRODUCTION_ROW.ALL_OFFICERS] = Math.round(basePR * allStaffFactor * universeSpeedFactor);
-			rows[PRODUCTION_ROW.CLASS] = Math.round(basePR * classFactor * universeSpeedFactor);
-			rows[PRODUCTION_ROW.ALLIANCE_CLASS] = Math.round(basePR * allianceClassFactor * universeSpeedFactor);
+			rows[PRODUCTION_ROW.NATURAL] = floorExact(30 * universeSpeedFactor * positionFactor);
+			basePR = 30.0 * techLevel * Math.pow(1.1, techLevel) * positionFactor;
+			mineBonuses(scaledOutput(basePR), 0.01);
 			break;
 		case 2:
 			switch (pos*1) {
@@ -116,40 +146,26 @@ function getProductionRateSplit(params) {
 				case 2: positionFactor = 1.296; break;
 				case 3: positionFactor = 1.2; break;
 			}
-			rows[PRODUCTION_ROW.NATURAL] = Math.floor(15 * universeSpeedFactor * positionFactor);
-			basePR = 20.0 * techLevel * Math.pow(1.1, techLevel) * productionFactor * powerFactor * positionFactor;
-			rows[PRODUCTION_ROW.BUILDING] = Math.floor(basePR * universeSpeedFactor);
-			rows[PRODUCTION_ROW.PLASMA] = Math.round(basePR * 0.0066 * plasmaTechLevel * universeSpeedFactor);
-			rows[PRODUCTION_ROW.BOOSTER] = Math.round(basePR * boostFactor * universeSpeedFactor);
-			rows[PRODUCTION_ROW.GEOLOGIST] = Math.round(basePR * geologistFactor * universeSpeedFactor);
-			rows[PRODUCTION_ROW.ENGINEER] = 0;
-			rows[PRODUCTION_ROW.ALL_OFFICERS] = Math.round(basePR * allStaffFactor * universeSpeedFactor);
-			rows[PRODUCTION_ROW.CLASS] = Math.round(basePR * classFactor * universeSpeedFactor);
-			rows[PRODUCTION_ROW.ALLIANCE_CLASS] = Math.round(basePR * allianceClassFactor * universeSpeedFactor);
+			rows[PRODUCTION_ROW.NATURAL] = floorExact(15 * universeSpeedFactor * positionFactor);
+			basePR = 20.0 * techLevel * Math.pow(1.1, techLevel) * positionFactor;
+			mineBonuses(scaledOutput(basePR), 0.0066);
 			break;
-		case 3:			
+		case 3:
 			rows[PRODUCTION_ROW.NATURAL] = 0;
-			basePR = 10.0 * techLevel * Math.pow(1.1, techLevel) * (1.44 - 0.004 * maxTemp) * productionFactor * powerFactor;
-			rows[PRODUCTION_ROW.BUILDING] = Math.floor(basePR * universeSpeedFactor);
-			rows[PRODUCTION_ROW.PLASMA] = Math.round(basePR * 0.0033 * plasmaTechLevel * universeSpeedFactor);
-			rows[PRODUCTION_ROW.BOOSTER] = Math.round(basePR * boostFactor * universeSpeedFactor);
-			rows[PRODUCTION_ROW.GEOLOGIST] = Math.round(basePR * geologistFactor * universeSpeedFactor);
-			rows[PRODUCTION_ROW.ENGINEER] = 0;
-			rows[PRODUCTION_ROW.ALL_OFFICERS] = Math.round(basePR * allStaffFactor * universeSpeedFactor);
-			rows[PRODUCTION_ROW.CLASS] = Math.round(basePR * classFactor * universeSpeedFactor);
-			rows[PRODUCTION_ROW.ALLIANCE_CLASS] = Math.round(basePR * allianceClassFactor * universeSpeedFactor);
+			basePR = 10.0 * techLevel * Math.pow(1.1, techLevel) * (1.44 - 0.004 * maxTemp);
+			mineBonuses(scaledOutput(basePR), 0.0033);
 			break;
 		case 4:
 			//productionRate = Math.floor(20.0 * techLevel * Math.pow(1.1, techLevel) * engineerFactor * powerFactor);
-			basePR = Math.floor(20.0 * techLevel * Math.pow(1.1, techLevel) * powerFactor);
-			rows[PRODUCTION_ROW.BUILDING] = Math.floor(basePR);
-			rows[PRODUCTION_ROW.ENGINEER] = Math.round(basePR * engineerFactor);
+			basePR = floorExact(20.0 * techLevel * Math.pow(1.1, techLevel) * powerFactor);
+			rows[PRODUCTION_ROW.BUILDING] = basePR;
+			rows[PRODUCTION_ROW.ENGINEER] = basePR * engineerFactor;
 			break;
 		case 12:
 			//productionRate = Math.floor(30.0 * techLevel * Math.pow((1.05 + energyTechLevel * 0.01), techLevel) * engineerFactor * powerFactor);
-			basePR = Math.floor(30.0 * techLevel * Math.pow((1.05 + energyTechLevel * 0.01), techLevel) * powerFactor);
-			rows[PRODUCTION_ROW.BUILDING] = Math.floor(basePR);
-			rows[PRODUCTION_ROW.ENGINEER] = Math.round(basePR * engineerFactor);
+			basePR = floorExact(30.0 * techLevel * Math.pow((1.05 + energyTechLevel * 0.01), techLevel) * powerFactor);
+			rows[PRODUCTION_ROW.BUILDING] = basePR;
+			rows[PRODUCTION_ROW.ENGINEER] = basePR * engineerFactor;
 			break;
 		case 212:
 			//productionRate = techLevel * Math.floor((maxTemp + 140) / 6) * engineerFactor * powerFactor;
@@ -158,9 +174,18 @@ function getProductionRateSplit(params) {
 			if (basePR < 0) {
 				basePR = 0;
 			}
-			rows[PRODUCTION_ROW.BUILDING] = Math.floor(basePR);
+			rows[PRODUCTION_ROW.BUILDING] = floorExact(basePR);
 	}
 	return rows;
+}
+
+/**
+ * Calculates the resource (units/hour) and energy production rate. When calculating metal and crystal mines, returns the natural production in row zero
+ * @param {ProductionParams} params
+ * @returns {number[]} Production broken down by source, indexed by PRODUCTION_ROW, every row rounded down as the game's table shows it
+ */
+function getProductionRateSplit(params) {
+	return getProductionRateExact(params).map((amount) => floorExact(amount));
 }
 
 /**

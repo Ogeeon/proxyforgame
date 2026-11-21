@@ -298,7 +298,11 @@ function renderOnePlnProductionRows(rows, results, koeff) {
 // Display the current production data and sum up the totals: hourly/daily/weekly
 // totals per resource plus the energy balance, all in the summary rows below
 // the per-building table.
-function renderOnePlnProductionSummary(rows, resultRow, production, totalEnergyProduced, totalEnergyUsed) {
+// `production` is the hourly total as the game shows it (rounded down); `productionExact` the unrounded
+// amount the game multiplies for the day and the week, and `energy` is [produced, used], also unrounded:
+// the balance is the rounded-down difference of those, which can differ by one from the difference of the
+// shown figures.
+function renderOnePlnProductionSummary(rows, resultRow, production, productionExact, energy) {
 	for (let i = 1; i < 4; i++) {
 		let lb = '', rb = '', s = 1;
 		if (production[i - 1] < 0) {
@@ -306,11 +310,13 @@ function renderOnePlnProductionSummary(rows, resultRow, production, totalEnergyP
 			rb = '</span>';
 			s = -1;
 		}
+		// The magnitude of the day and the week, rounded down (a deficit is shown as a positive number in brown)
+		const magnitude = Math.abs(productionExact[i - 1]);
 		rows[resultRow].children[2 + i].innerHTML = lb + numberToShortenedString(s * production[i - 1], options.unitSuffix) + rb;
-		rows[resultRow + 1].children[2 + i].innerHTML = lb + numberToShortenedString(24 * s * production[i - 1], options.unitSuffix) + rb;
-		rows[resultRow + 2].children[2 + i].innerHTML = lb + numberToShortenedString(7 * 24 * s * production[i - 1], options.unitSuffix) + rb;
+		rows[resultRow + 1].children[2 + i].innerHTML = lb + numberToShortenedString(floorExact(24 * magnitude), options.unitSuffix) + rb;
+		rows[resultRow + 2].children[2 + i].innerHTML = lb + numberToShortenedString(floorExact(7 * 24 * magnitude), options.unitSuffix) + rb;
 	}
-	let energyLeft = Math.round(totalEnergyProduced - totalEnergyUsed);
+	let energyLeft = floorExact(energy[0] - energy[1]);
 	let spanColor = energyLeft < 0 ? 'brown' : 'inherit';
 	let energyLeftStr = numberToShortenedString(Math.abs(energyLeft), options.unitSuffix);
 	rows[resultRow].children[6].innerHTML = '<span style="color: ' + spanColor + ';">' + energyLeftStr + '</span>';
@@ -396,8 +402,6 @@ function updateOnePlnTab() {
 	let prodData = calculateProduction(params, plnData, options.prm, { lfEff });
 	let results = prodData[0];
 	let production = prodData[1];
-	let totalEnergyProduced = prodData[2];
-	let totalEnergyUsed = prodData[3];
 	let koeff = prodData[4];
 	renderOnePlnLfRows(options.prm.onePlnRace, prodData[5]);
 
@@ -413,8 +417,10 @@ function updateOnePlnTab() {
 	let resultRow = Array.from(rows).findIndex((row) => row.dataset.reportKey === 'prod-per-hour');
 	renderOnePlnProductionRows(rows, results, koeff);
 	const conversion = updateIasConversion();
-	const netProduction = conversion === null ? production : production.map((v, res) => v - conversion.cost[res]);
-	renderOnePlnProductionSummary(rows, resultRow, netProduction, totalEnergyProduced, totalEnergyUsed);
+	const conversionCost = conversion === null ? [0, 0, 0] : conversion.cost;
+	const netProduction = production.map((v, res) => v - conversionCost[res]);
+	const netExact = prodData[6].map((v, res) => v - conversionCost[res]);
+	renderOnePlnProductionSummary(rows, resultRow, netProduction, netExact, prodData[7]);
 	options.prm.oPPP = params;
 
 	let rates = collectExchangeRates();

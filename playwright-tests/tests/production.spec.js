@@ -28,17 +28,17 @@ test('economy speed factored correctly', async ({ page }) => {
     const totalRow = page.locator('#one-planet-prod tr').filter({ hasText: 'Total per hour' });
 
     // Default universe speed is 1
-    await expect(totalRow.locator('td').nth(3)).toHaveText('1.353');
-    await expect(totalRow.locator('td').nth(4)).toHaveText('663');
+    await expect(totalRow.locator('td').nth(3)).toHaveText('1.352');
+    await expect(totalRow.locator('td').nth(4)).toHaveText('662');
     await expect(totalRow.locator('td').nth(5)).toHaveText('77');
-    await expect(totalRow.locator('td').nth(6)).toHaveText('511');
+    await expect(totalRow.locator('td').nth(6)).toHaveText('510');
 
     // Set universe speed to 10 and trigger recalculation
     await page.locator('#universe-speed').selectOption('10');
-    await expect(totalRow.locator('td').nth(3)).toHaveText('13.567');
-    await expect(totalRow.locator('td').nth(4)).toHaveText('6.650');
+    await expect(totalRow.locator('td').nth(3)).toHaveText('13.566');
+    await expect(totalRow.locator('td').nth(4)).toHaveText('6.649');
     await expect(totalRow.locator('td').nth(5)).toHaveText('786');
-    await expect(totalRow.locator('td').nth(6)).toHaveText('11');
+    await expect(totalRow.locator('td').nth(6)).toHaveText('10');
 });
 
 test('fleet production prices each ship row by its own cost', async ({ page }) => {
@@ -60,38 +60,38 @@ test('officers bonuses calculations are correct', async ({ page }) => {
     // Check Engineer
     await page.locator('#engineer').click();
     const totalRow = page.locator('#one-planet-prod tr').filter({ hasText: 'Total per hour' });
-    await expect(totalRow.locator('td').nth(3)).toHaveText('1.356');
-    await expect(totalRow.locator('td').nth(4)).toHaveText('665');
+    await expect(totalRow.locator('td').nth(3)).toHaveText('1.355');
+    await expect(totalRow.locator('td').nth(4)).toHaveText('664');
     await expect(totalRow.locator('td').nth(5)).toHaveText('78');
-    await expect(totalRow.locator('td').nth(6)).toHaveText('152');
+    await expect(totalRow.locator('td').nth(6)).toHaveText('151');
 
     // Add Geologist
     await page.locator('#geologist').click();
-    await expect(totalRow.locator('td').nth(3)).toHaveText('1.461');
-    await expect(totalRow.locator('td').nth(4)).toHaveText('717');
-    await expect(totalRow.locator('td').nth(5)).toHaveText('105');
-    await expect(totalRow.locator('td').nth(6)).toHaveText('152');
+    await expect(totalRow.locator('td').nth(3)).toHaveText('1.460');
+    await expect(totalRow.locator('td').nth(4)).toHaveText('715');
+    await expect(totalRow.locator('td').nth(5)).toHaveText('104');
+    await expect(totalRow.locator('td').nth(6)).toHaveText('151');
 
     // Add Technocrat
     await page.locator('#technocrat').click();
-    await expect(totalRow.locator('td').nth(3)).toHaveText('1.461');
-    await expect(totalRow.locator('td').nth(4)).toHaveText('717');
-    await expect(totalRow.locator('td').nth(5)).toHaveText('105');
-    await expect(totalRow.locator('td').nth(6)).toHaveText('152');
+    await expect(totalRow.locator('td').nth(3)).toHaveText('1.460');
+    await expect(totalRow.locator('td').nth(4)).toHaveText('715');
+    await expect(totalRow.locator('td').nth(5)).toHaveText('104');
+    await expect(totalRow.locator('td').nth(6)).toHaveText('151');
 
     // Add Admiral
     await page.locator('#admiral').click();
-    await expect(totalRow.locator('td').nth(3)).toHaveText('1.461');
-    await expect(totalRow.locator('td').nth(4)).toHaveText('717');
-    await expect(totalRow.locator('td').nth(5)).toHaveText('105');
-    await expect(totalRow.locator('td').nth(6)).toHaveText('152');
+    await expect(totalRow.locator('td').nth(3)).toHaveText('1.460');
+    await expect(totalRow.locator('td').nth(4)).toHaveText('715');
+    await expect(totalRow.locator('td').nth(5)).toHaveText('104');
+    await expect(totalRow.locator('td').nth(6)).toHaveText('151');
 
     // Add Commander
     await page.locator('#commander').click();
-    await expect(totalRow.locator('td').nth(3)).toHaveText('1.482');
-    await expect(totalRow.locator('td').nth(4)).toHaveText('727');
+    await expect(totalRow.locator('td').nth(3)).toHaveText('1.481');
+    await expect(totalRow.locator('td').nth(4)).toHaveText('726');
     await expect(totalRow.locator('td').nth(5)).toHaveText('110');
-    await expect(totalRow.locator('td').nth(6)).toHaveText('180');
+    await expect(totalRow.locator('td').nth(6)).toHaveText('179');
 });
 
 test('the one-planet rows follow the game\'s production overview', async ({ page }) => {
@@ -135,8 +135,8 @@ test('player class and Alliance Traders bonuses calculations are correct', async
     // Check Alliance class is "Traders" (with Discoverer still active)
     await page.locator('#is-trader').click();
     await expect(totalRow.locator('td').nth(3)).toHaveText('1.101');
-    await expect(totalRow.locator('td').nth(4)).toHaveText('539');
-    await expect(totalRow.locator('td').nth(5)).toHaveText('14');
+    await expect(totalRow.locator('td').nth(4)).toHaveText('538');
+    await expect(totalRow.locator('td').nth(5)).toHaveText('12');
     await expect(totalRow.locator('td').nth(6)).toHaveText('60');
 });
 
@@ -150,8 +150,8 @@ test('energy tech level 10 and plasma tech level 10 bonuses calculations are cor
 
     // Verify Total per hour row with energy tech 10
     const totalRow = page.locator('#one-planet-prod tr').filter({ hasText: 'Total per hour' });
-    await expect(totalRow.locator('td').nth(3)).toHaveText('1.356');
-    await expect(totalRow.locator('td').nth(4)).toHaveText('665');
+    await expect(totalRow.locator('td').nth(3)).toHaveText('1.355');
+    await expect(totalRow.locator('td').nth(4)).toHaveText('664');
     await expect(totalRow.locator('td').nth(5)).toHaveText('78');
     await expect(totalRow.locator('td').nth(6)).toHaveText('808');
 
@@ -160,9 +160,9 @@ test('energy tech level 10 and plasma tech level 10 bonuses calculations are cor
     await page.locator('#plasma-tech-level').press('Tab');
 
     // Verify Total per hour row with energy tech 10 + plasma tech 10
-    await expect(totalRow.locator('td').nth(3)).toHaveText('1.461');
-    await expect(totalRow.locator('td').nth(4)).toHaveText('699');
-    await expect(totalRow.locator('td').nth(5)).toHaveText('87');
+    await expect(totalRow.locator('td').nth(3)).toHaveText('1.460');
+    await expect(totalRow.locator('td').nth(4)).toHaveText('698');
+    await expect(totalRow.locator('td').nth(5)).toHaveText('86');
     await expect(totalRow.locator('td').nth(6)).toHaveText('808');
 });
 
@@ -172,26 +172,26 @@ test('temperature and position bonuses calculations are correct', async ({ page 
     // Set max planet temperature to -100 (position stays at default 8)
     await page.locator('#max-planet-temp').fill('-100');
     await page.locator('#max-planet-temp').press('Tab');
-    await expect(totalRow.locator('td').nth(3)).toHaveText('1.045');
-    await expect(totalRow.locator('td').nth(4)).toHaveText('511');
+    await expect(totalRow.locator('td').nth(3)).toHaveText('1.044');
+    await expect(totalRow.locator('td').nth(4)).toHaveText('510');
     await expect(totalRow.locator('td').nth(5)).toHaveText('197');
-    await expect(totalRow.locator('td').nth(6)).toHaveText('363');
+    await expect(totalRow.locator('td').nth(6)).toHaveText('364');
 
     // Set position to 1 (temperature stays at -100)
     await page.locator('#planet-pos').fill('1');
     await page.locator('#planet-pos').press('Tab');
-    await expect(totalRow.locator('td').nth(3)).toHaveText('775');
-    await expect(totalRow.locator('td').nth(4)).toHaveText('716');
+    await expect(totalRow.locator('td').nth(3)).toHaveText('774');
+    await expect(totalRow.locator('td').nth(4)).toHaveText('715');
     await expect(totalRow.locator('td').nth(5)).toHaveText('197');
-    await expect(totalRow.locator('td').nth(6)).toHaveText('363');
+    await expect(totalRow.locator('td').nth(6)).toHaveText('364');
 
     // Set position to 15
     await page.locator('#planet-pos').fill('15');
     await page.locator('#planet-pos').press('Tab');
-    await expect(totalRow.locator('td').nth(3)).toHaveText('775');
-    await expect(totalRow.locator('td').nth(4)).toHaveText('511');
+    await expect(totalRow.locator('td').nth(3)).toHaveText('774');
+    await expect(totalRow.locator('td').nth(4)).toHaveText('510');
     await expect(totalRow.locator('td').nth(5)).toHaveText('197');
-    await expect(totalRow.locator('td').nth(6)).toHaveText('363');
+    await expect(totalRow.locator('td').nth(6)).toHaveText('364');
 });
 
 test('booster calculations are correct', async ({ page }) => {
@@ -205,10 +205,10 @@ test('booster calculations are correct', async ({ page }) => {
 
     // Verify Total per hour row with 40% boosters
     const totalRow = page.locator('#one-planet-prod tr').filter({ hasText: 'Total per hour' });
-    await expect(totalRow.locator('td').nth(3)).toHaveText('1.776');
-    await expect(totalRow.locator('td').nth(4)).toHaveText('872');
-    await expect(totalRow.locator('td').nth(5)).toHaveText('186');
-    await expect(totalRow.locator('td').nth(6)).toHaveText('11');
+    await expect(totalRow.locator('td').nth(3)).toHaveText('1.775');
+    await expect(totalRow.locator('td').nth(4)).toHaveText('871');
+    await expect(totalRow.locator('td').nth(5)).toHaveText('185');
+    await expect(totalRow.locator('td').nth(6)).toHaveText('10');
 });
 
 test('accumulation calculations are correct', async ({ page }) => {
@@ -228,8 +228,8 @@ test('accumulation calculations are correct', async ({ page }) => {
     await page.locator('#onepln-accumwhat-d').press('Tab');
 
     // Verify Metal, Crystal, Deuterium results
-    await expect(page.locator('#onepln-accumwhat-met')).toHaveText('32.544');
-    await expect(page.locator('#onepln-accumwhat-crys')).toHaveText('15.960');
+    await expect(page.locator('#onepln-accumwhat-met')).toHaveText('32.520');
+    await expect(page.locator('#onepln-accumwhat-crys')).toHaveText('15.936');
     await expect(page.locator('#onepln-accumwhat-deut')).toHaveText('1.872');
 });
 
@@ -264,7 +264,7 @@ test.describe('Lithium conversion of the anomaly scanner', () => {
         await expect(conversionRow(page)).toBeHidden();
         // 1,356, not the 1,353 other tests see: beforeEach leaves the crawler
         // field focused, and the first click elsewhere commits it.
-        await expect(totalRow(page).locator('td').nth(3)).toHaveText('1.356');
+        await expect(totalRow(page).locator('td').nth(3)).toHaveText('1.355');
     });
 
     test('charges the resource settings page\'s 7,230 metal to the totals', async ({ page }) => {
@@ -275,9 +275,9 @@ test.describe('Lithium conversion of the anomaly scanner', () => {
         await expect(conversionRow(page).locator('td').nth(3)).toHaveText('7.230');
         await expect(conversionRow(page).locator('td').nth(4)).toHaveText('');
         // 1,356 produced less 7,230 converted: a loss, shown brown
-        await expect(totalRow(page).locator('td').nth(3)).toHaveText('5.874');
+        await expect(totalRow(page).locator('td').nth(3)).toHaveText('5.875');
         await expect(totalRow(page).locator('td').nth(3).locator('span')).toHaveCSS('color', 'rgb(165, 42, 42)');
-        await expect(totalRow(page).locator('td').nth(4)).toHaveText('665');
+        await expect(totalRow(page).locator('td').nth(4)).toHaveText('664');
     });
 
     test('applies the discount to the resource picked', async ({ page }) => {
@@ -289,7 +289,7 @@ test.describe('Lithium conversion of the anomaly scanner', () => {
         await expect(conversionRow(page).locator('td').nth(3)).toHaveText('');
         await expect(conversionRow(page).locator('td').nth(4)).toHaveText('302');
         // 665 produced less 302
-        await expect(totalRow(page).locator('td').nth(4)).toHaveText('363');
+        await expect(totalRow(page).locator('td').nth(4)).toHaveText('362');
     });
 
     test('says the resources will not accumulate when the conversion takes all of one', async ({ page }) => {
@@ -496,8 +496,8 @@ test('amortization calculations are correct', async ({ page }) => {
 
     // Deuterium Synthesizer row
     await expect(amortTable.locator('tbody tr:nth-child(3) td:nth-child(2)')).toHaveText('12.974 Metal, 4.324 Crystal');
-    await expect(amortTable.locator('tbody tr:nth-child(3) td:nth-child(3)')).toHaveText('72');
-    await expect(amortTable.locator('tbody tr:nth-child(3) td:nth-child(4)')).toHaveText('3d 18h 5m');
+    await expect(amortTable.locator('tbody tr:nth-child(3) td:nth-child(3)')).toHaveText('71');
+    await expect(amortTable.locator('tbody tr:nth-child(3) td:nth-child(4)')).toHaveText('3d 19h 21m');
 
     // Enable radiobutton #include-SS-y
     await page.locator('#include-SS-y').click();
@@ -515,8 +515,8 @@ test('amortization calculations are correct', async ({ page }) => {
 
     // Deuterium Synthesizer row - costs include solar satellite cost (Crystal + Deuterium)
     await expect(amortTable.locator('tbody tr:nth-child(3) td:nth-child(2)')).toHaveText('12.974 Metal, 10.324 Crystal, 1.500 Deuterium');
-    await expect(amortTable.locator('tbody tr:nth-child(3) td:nth-child(3)')).toHaveText('72');
-    await expect(amortTable.locator('tbody tr:nth-child(3) td:nth-child(4)')).toHaveText('6d 8h 35m');
+    await expect(amortTable.locator('tbody tr:nth-child(3) td:nth-child(3)')).toHaveText('71');
+    await expect(amortTable.locator('tbody tr:nth-child(3) td:nth-child(4)')).toHaveText('6d 10h 44m');
 });
 
 test.describe('Lifeform Tech Bonus row', () => {
@@ -598,27 +598,27 @@ test.describe('Collector character class bonus', () => {
         const totalRow = page.locator('#one-planet-prod tr').filter({ hasText: 'Total per hour' });
 
         // Baseline: the plain +25% mine / +10% satellite Collector bonuses.
-        await expect(classCell(page, 3)).toHaveText('263');
-        await expect(classCell(page, 4)).toHaveText('130');
+        await expect(classCell(page, 3)).toHaveText('262');
+        await expect(classCell(page, 4)).toHaveText('129');
         await expect(classCell(page, 5)).toHaveText('67');
-        await expect(classCell(page, 6)).toHaveText('141');
-        await expect(totalRow.locator('td').nth(6)).toHaveText('11');
+        await expect(classCell(page, 6)).toHaveText('140');
+        await expect(totalRow.locator('td').nth(6)).toHaveText('10');
 
         // A 10% enhancement scales the bonus by 1.1: 27.5% on mines, 11% on satellites.
         await page.locator('#param-lifeforms-tab').click();
         await page.locator('#lf-collector-bonus').fill('10');
         await page.locator('#lf-collector-bonus').press('Tab');
 
-        await expect(classCell(page, 3)).toHaveText('289');
-        await expect(classCell(page, 4)).toHaveText('143');
-        await expect(classCell(page, 5)).toHaveText('74');
-        await expect(classCell(page, 6)).toHaveText('155');
+        await expect(classCell(page, 3)).toHaveText('288');
+        await expect(classCell(page, 4)).toHaveText('142');
+        await expect(classCell(page, 5)).toHaveText('73');
+        await expect(classCell(page, 6)).toHaveText('154');
 
         // The hourly totals move by exactly the amplified class bonus.
         await expect(totalRow.locator('td').nth(3)).toHaveText('1.382');
-        await expect(totalRow.locator('td').nth(4)).toHaveText('678');
-        await expect(totalRow.locator('td').nth(5)).toHaveText('85');
-        await expect(totalRow.locator('td').nth(6)).toHaveText('25');
+        await expect(totalRow.locator('td').nth(4)).toHaveText('677');
+        await expect(totalRow.locator('td').nth(5)).toHaveText('84');
+        await expect(totalRow.locator('td').nth(6)).toHaveText('24');
 
         // A 100% enhancement doubles the bonus (2.0 factor); removing it restores the base.
         await page.locator('#lf-collector-bonus').fill('100');
@@ -628,8 +628,8 @@ test.describe('Collector character class bonus', () => {
 
         await page.locator('#lf-collector-bonus').fill('0');
         await page.locator('#lf-collector-bonus').press('Tab');
-        await expect(classCell(page, 3)).toHaveText('263');
-        await expect(classCell(page, 6)).toHaveText('141');
+        await expect(classCell(page, 3)).toHaveText('262');
+        await expect(classCell(page, 6)).toHaveText('140');
     });
 
     test('amplifies the Collector bonus on crawlers', async ({ page }) => {
@@ -644,8 +644,8 @@ test.describe('Collector character class bonus', () => {
         await expect(page.locator('#prod-coeff')).toHaveText('100%');
 
         // 50 crawlers at 100% power: mine output * 50 * 0.02% * 1.5 for a Collector.
-        await expect(crawlerCell(page, 3)).toHaveText('16');
-        await expect(crawlerCell(page, 4)).toHaveText('8');
+        await expect(crawlerCell(page, 3)).toHaveText('15');
+        await expect(crawlerCell(page, 4)).toHaveText('7');
         await expect(crawlerCell(page, 5)).toHaveText('4');
 
         // A 100% enhancement doubles the class bonus, so the multiplier goes 1.5 -> 2.0.
@@ -661,8 +661,8 @@ test.describe('Collector character class bonus', () => {
         // Removing the enhancement restores the plain 1.5 multiplier.
         await page.locator('#lf-collector-bonus').fill('0');
         await page.locator('#lf-collector-bonus').press('Tab');
-        await expect(crawlerCell(page, 3)).toHaveText('16');
-        await expect(crawlerCell(page, 4)).toHaveText('8');
+        await expect(crawlerCell(page, 3)).toHaveText('15');
+        await expect(crawlerCell(page, 4)).toHaveText('7');
         await expect(crawlerCell(page, 5)).toHaveText('4');
     });
 
@@ -707,7 +707,7 @@ test.describe('Collector character class bonus', () => {
         for (const [col, label] of resources) {
             const mine = digits(await mineRow(label).locator('td').nth(col).textContent());
             const crawler = digits(await crawlerCell(page, col).textContent());
-            expect(crawler).toBe(Math.round(mine * 0.5));
+            expect(crawler).toBe(Math.floor(mine * 0.5)); // rows are rounded down, as in the game
         }
     });
 
@@ -810,11 +810,11 @@ test.describe('Collector character class bonus', () => {
         // nothing is added on top of it here.
         await page.locator('#lf-collector-bonus').fill('10');
         await page.locator('#lf-collector-bonus').press('Tab');
-        await expect(classCell(page, 3)).toHaveText('289');
+        await expect(classCell(page, 3)).toHaveText('288');
 
         await page.locator('#lf-collector-bonus').fill('11');
         await page.locator('#lf-collector-bonus').press('Tab');
-        await expect(classCell(page, 3)).toHaveText('292');
+        await expect(classCell(page, 3)).toHaveText('291');
     });
 
     test('the class bonus reaches the crawler bonus too', async ({ page }) => {
@@ -823,7 +823,7 @@ test.describe('Collector character class bonus', () => {
         await levels.nth(3).fill('25');  // solar plant
         await levels.nth(6).fill('50');  // crawlers
         await levels.nth(6).press('Tab');
-        await expect(crawlerCell(page, 3)).toHaveText('16');
+        await expect(crawlerCell(page, 3)).toHaveText('15');
 
         // A 110% class bonus takes the crawler multiplier from 1.5 to
         // 1 + 0.5 * 2.1 = 2.05.
@@ -832,9 +832,9 @@ test.describe('Collector character class bonus', () => {
         await page.locator('#lf-collector-bonus').press('Tab');
 
         await expect(page.locator('#prod-coeff')).toHaveText('100%');
-        await expect(crawlerCell(page, 3)).toHaveText('22');
-        await expect(crawlerCell(page, 4)).toHaveText('11');
-        await expect(crawlerCell(page, 5)).toHaveText('6');
+        await expect(crawlerCell(page, 3)).toHaveText('21');
+        await expect(crawlerCell(page, 4)).toHaveText('10');
+        await expect(crawlerCell(page, 5)).toHaveText('5');
     });
 });
 
@@ -1098,7 +1098,7 @@ test.describe('Life Forms building production bonuses', () => {
         await hes.locator('input').press('Tab');
 
         const mineMetal = digits(await named(page, 'Metal Mine').locator('td').nth(3).textContent());
-        expect(digits(await hes.locator('td').nth(3).textContent())).toBe(Math.round(mineMetal * 0.15));
+        expect(digits(await hes.locator('td').nth(3).textContent())).toBe(Math.floor(mineMetal * 0.15));
         // Building bonuses are no longer folded into the research bonus row.
         await expect(named(page, 'Lifeform Tech Bonus').locator('td').nth(3)).toHaveText('');
     });
@@ -1122,7 +1122,7 @@ test.describe('Life Forms building production bonuses', () => {
         let baseEnergy = 0;
         for (const row of [5, 6, 7])
             baseEnergy += digits(await powerRows.nth(row).locator('td').nth(6).textContent());
-        const net = Math.round(baseEnergy * 0.10) - 651;
+        const net = Math.floor(baseEnergy * 0.10) - 651;
         expect(net).toBeLessThan(0);
         const cell = transformer.locator('td').nth(6);
         expect(digits(await cell.textContent())).toBe(-net);
@@ -1313,7 +1313,7 @@ test.describe('Life Forms amortization', () => {
         await makeAvailable(page, 1102);
         await openLfAmort(page);
         const hpe = rowOf(page, 'High-Performance Extractors');
-        await expect(hpe.locator('td').nth(5)).toHaveText('13 Metal, 4 Crystal, 2 Deuterium');
+        await expect(hpe.locator('td').nth(5)).toHaveText('12 Metal, 3 Crystal, 1 Deuterium');
 
         // Level 2 -> 3 costs 3 * base * 1.5^2: 47.250 / 67.500 / 33.750.
         await fillLf(page, 'lf-res-1102', '2');
@@ -1326,7 +1326,7 @@ test.describe('Life Forms amortization', () => {
 
         // A 50% technology bonus amplifies the gain: 21.200 * 0.06% * 1.5 = 19.
         await fillLf(page, 'lf-tech-bonus', '50');
-        await expect(hpe.locator('td').nth(5)).toHaveText('19 Metal, 6 Crystal, 2 Deuterium');
+        await expect(hpe.locator('td').nth(5)).toHaveText('19 Metal, 5 Crystal, 2 Deuterium');
     });
 
     test('the research inputs persist on reload', async ({ page }) => {

@@ -7,9 +7,9 @@ const { loadBrowserScripts, readWwwJson } = require('../lib/browser-scripts');
 const { ToolError } = require('../lib/protocol');
 const common = require('./common');
 
-const { calculateProduction, lfBuildingEffects, maxCrawlers, LF_BUILDINGS_PER_RACE } = loadBrowserScripts(
+const { calculateProduction, lfBuildingEffects, maxCrawlers, LF_BUILDINGS_PER_RACE, floorExact } = loadBrowserScripts(
     ['ogame/calc/js/ogame-production.js', 'ogame/calc/js/production-core.js'],
-    ['calculateProduction', 'lfBuildingEffects', 'maxCrawlers', 'LF_BUILDINGS_PER_RACE'],
+    ['calculateProduction', 'lfBuildingEffects', 'maxCrawlers', 'LF_BUILDINGS_PER_RACE', 'floorExact'],
 );
 
 /** @type {Record<string, any[]>} */
@@ -147,7 +147,7 @@ function createProductionTool({ siteApi }) {
             ];
             const planet = [args.maxTemperature, args.position, args.energyBoosterPercent / 10];
             const lfEff = lfBuildingEffects(race, levels, LF_TABLES);
-            const [results, perHour, energyProduced, energyUsed, factor, lfBld] =
+            const [results, perHour, energyProduced, energyUsed, factor, lfBld, perHourExact, energyExact] =
                 calculateProduction(rows, planet, settings, { lfEff });
 
             const row = (/** @type {number} */ i) => ({ metal: results[i][0], crystal: results[i][1], deuterium: results[i][2] });
@@ -162,8 +162,9 @@ function createProductionTool({ siteApi }) {
             /** @type {Record<string, unknown>} */
             const result = {
                 perHour: hourly,
-                perDay: { metal: hourly.metal * 24, crystal: hourly.crystal * 24, deuterium: hourly.deuterium * 24 },
-                energy: { produced: energyProduced, used: energyUsed, balance: energyProduced - energyUsed },
+                // The game multiplies the unrounded hourly amount, so a day is not 24 times the hourly figure
+                perDay: { metal: floorExact(perHourExact[0] * 24), crystal: floorExact(perHourExact[1] * 24), deuterium: floorExact(perHourExact[2] * 24) },
+                energy: { produced: energyProduced, used: energyUsed, balance: floorExact(energyExact[0] - energyExact[1]) },
                 productionFactor: Math.round(factor * 10000) / 10000,
                 breakdownPerHour: {
                     natural: row(0),
