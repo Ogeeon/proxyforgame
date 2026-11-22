@@ -194,6 +194,34 @@ function appendTimespanUnit(timeStr, seconds, divisor, label) {
 }
 
 /**
+ * The labels of the seven duration units, as a calculator page receives them from its
+ * locale through its datetimeY … datetimeS options. Build one with datetimeLabels().
+ * @typedef {Object} DatetimeLabels
+ * @property {string} y years
+ * @property {string} mo months
+ * @property {string} w weeks
+ * @property {string} d days
+ * @property {string} h hours
+ * @property {string} m minutes
+ * @property {string} s seconds
+ */
+
+/**
+ * Collects a page's datetimeY … datetimeS options (or a renderer's copy of them) into the
+ * one label object timespanToShortenedString takes. Typed like options-global.d.ts types the
+ * page options: each template declares the object its own way, and only these seven string
+ * fields are read here.
+ * @param {Record<string, any>} opts
+ * @returns {DatetimeLabels}
+ */
+function datetimeLabels(opts) {
+	return {
+		y: opts.datetimeY, mo: opts.datetimeMo, w: opts.datetimeW, d: opts.datetimeD,
+		h: opts.datetimeH, m: opts.datetimeM, s: opts.datetimeS
+	};
+}
+
+/**
  * Builds the display form of a time span, in one of three regimes:
  * - under a day, a zero-padded clock "hh:mm:ss" (seconds floored; zero is "00:00:00"), the
  *   same in every language;
@@ -203,18 +231,12 @@ function appendTimespanUnit(timeStr, seconds, divisor, label) {
  *   under a week is dropped. 725-729 days read "1y 12mo", as 12 months are not a year.
  * The result never ends with a space.
  * @param {number} seconds Number of seconds in the time span
- * @param {string} y Label for years
- * @param {string} mo Label for months
- * @param {string} w Label for weeks
- * @param {string} d Label for days
- * @param {string} h Label for hours
- * @param {string} m Label for minutes
- * @param {string} s Label for seconds
+ * @param {DatetimeLabels} labels The labels of the duration units, from datetimeLabels()
  * @param {boolean} [minimize] In the day regime, drop the minutes and seconds when there are
  *   weeks, and the seconds when there are days
  * @returns {string}
  */
-function timespanToShortenedString(seconds, y, mo, w, d, h, m, s, minimize) {
+function timespanToShortenedString(seconds, labels, minimize) {
 	if (seconds < 86400) {
 		const whole = Math.floor(seconds);
 		const pad = (/** @type {number} */ n) => String(n).padStart(2, '0');
@@ -224,32 +246,32 @@ function timespanToShortenedString(seconds, y, mo, w, d, h, m, s, minimize) {
 	// A year and a month as this format counts them: 365 and 30 days
 	const year = 365 * 86400, month = 30 * 86400;
 	if (seconds >= year) {
-		timeStr = appendTimespanUnit(timeStr, seconds, year, y);
+		timeStr = appendTimespanUnit(timeStr, seconds, year, labels.y);
 		seconds = seconds % year;
-		timeStr = appendTimespanUnit(timeStr, seconds, month, mo);
+		timeStr = appendTimespanUnit(timeStr, seconds, month, labels.mo);
 		seconds = seconds % month;
-		timeStr = appendTimespanUnit(timeStr, seconds, 604800, w);
+		timeStr = appendTimespanUnit(timeStr, seconds, 604800, labels.w);
 		return timeStr.trimEnd();
 	}
 	let haveWeeks = false;
 	if (seconds >= 604800) {
-		timeStr = appendTimespanUnit(timeStr, seconds, 604800, w);
+		timeStr = appendTimespanUnit(timeStr, seconds, 604800, labels.w);
 		seconds = seconds % 604800;
 		haveWeeks = true;
 	}
-	timeStr = appendTimespanUnit(timeStr, seconds, 86400, d);
+	timeStr = appendTimespanUnit(timeStr, seconds, 86400, labels.d);
 	seconds = seconds % 86400;
-	timeStr = appendTimespanUnit(timeStr, seconds, 3600, h);
+	timeStr = appendTimespanUnit(timeStr, seconds, 3600, labels.h);
 	seconds = seconds % 3600;
 	// With weeks and minimization requested - drop the minutes
 	if (minimize && haveWeeks)
 		return timeStr.trimEnd();
-	timeStr = appendTimespanUnit(timeStr, seconds, 60, m);
+	timeStr = appendTimespanUnit(timeStr, seconds, 60, labels.m);
 	seconds = seconds % 60;
 	// The day regime always has days or weeks, so minimization drops the seconds
 	if (minimize)
 		return timeStr.trimEnd();
-	timeStr = appendTimespanUnit(timeStr, seconds, 1, s);
+	timeStr = appendTimespanUnit(timeStr, seconds, 1, labels.s);
 	return timeStr.trimEnd();
 }
 

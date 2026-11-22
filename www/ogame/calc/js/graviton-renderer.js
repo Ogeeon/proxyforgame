@@ -15,17 +15,7 @@ class GravitonRenderer {
    * Format a duration in seconds using the locale-aware suffixes from `options`.
    */
   static formatTime(seconds) {
-    return timespanToShortenedString(
-      seconds,
-      options.datetimeY,
-      options.datetimeMo,
-      options.datetimeW,
-      options.datetimeD,
-      options.datetimeH,
-      options.datetimeM,
-      options.datetimeS,
-      true
-    );
+    return timespanToShortenedString(seconds, datetimeLabels(options), true);
   }
 
   /**

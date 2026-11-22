@@ -142,11 +142,12 @@ describe('numberToShortenedString and numToDisplay', () => {
 });
 
 describe('timespanToShortenedString', () => {
-    const RU = ['г', 'мес', 'нд', 'д', 'ч', 'м', 'с'];
+    const RU = { y: 'г', mo: 'мес', w: 'нд', d: 'д', h: 'ч', m: 'м', s: 'с' };
+    const EN = { y: 'y', mo: 'mo', w: 'w', d: 'd', h: 'h', m: 'm', s: 's' };
     const H = 3600;
     const D = 86400;
     /** The ru form of a span, minimized or not. */
-    const ru = (seconds, minimize) => locale('ru').timespanToShortenedString(seconds, ...RU, minimize);
+    const ru = (seconds, minimize) => locale('ru').timespanToShortenedString(seconds, RU, minimize);
     /** The same span both ways, when the two forms agree. */
     function both(seconds) {
         const minimized = ru(seconds, true);
@@ -160,7 +161,7 @@ describe('timespanToShortenedString', () => {
         expect(both(10 * H)).toBe('10:00:00');
         expect(both(2 * H + 5 * 60 + 3)).toBe('02:05:03');
         expect(both(D - 1)).toBe('23:59:59');
-        expect(locale('en').timespanToShortenedString(D - 1, 'y', 'mo', 'w', 'd', 'h', 'm', 's')).toBe('23:59:59');
+        expect(locale('en').timespanToShortenedString(D - 1, EN)).toBe('23:59:59');
     });
 
     it('floors the seconds of the clock', () => {

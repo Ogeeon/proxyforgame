@@ -37,13 +37,15 @@ class Renderer {
   constructor() {
     // Get display settings from options
     this.unitSuffix = options.unitSuffix || '';
-    this.datetimeY = options.datetimeY || 'y';
-    this.datetimeMo = options.datetimeMo || 'mo';
-    this.datetimeW = options.datetimeW || 'w';
-    this.datetimeD = options.datetimeD || 'd';
-    this.datetimeH = options.datetimeH || 'h';
-    this.datetimeM = options.datetimeM || 'm';
-    this.datetimeS = options.datetimeS || 's';
+    this.datetimeLabels = {
+      y: options.datetimeY || 'y',
+      mo: options.datetimeMo || 'mo',
+      w: options.datetimeW || 'w',
+      d: options.datetimeD || 'd',
+      h: options.datetimeH || 'h',
+      m: options.datetimeM || 'm',
+      s: options.datetimeS || 's'
+    };
     this.scShort = options.scShort || 'SC';
     this.lcShort = options.lcShort || 'LC';
     this.scFull = options.scFull || 'Small Cargo';
@@ -614,17 +616,7 @@ class Renderer {
    * @private
    */
   _formatTime(seconds) {
-    return timespanToShortenedString(
-      seconds,
-      this.datetimeY,
-      this.datetimeMo,
-      this.datetimeW,
-      this.datetimeD,
-      this.datetimeH,
-      this.datetimeM,
-      this.datetimeS,
-      true
-    );
+    return timespanToShortenedString(seconds, this.datetimeLabels, true);
   }
 
   /**

@@ -277,10 +277,7 @@ class FlightRenderer {
     }
 
     _fmtTime(seconds) {
-        return timespanToShortenedString(seconds,
-            this.opts.datetimeY, this.opts.datetimeMo,
-            this.opts.datetimeW, this.opts.datetimeD, this.opts.datetimeH,
-            this.opts.datetimeM, this.opts.datetimeS);
+        return timespanToShortenedString(seconds, datetimeLabels(this.opts));
     }
 
     _escapeAttr(value) {

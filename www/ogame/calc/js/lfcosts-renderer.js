@@ -311,10 +311,7 @@ class LfRenderer {
     }
 
     _fmtTime(seconds) {
-        return timespanToShortenedString(seconds,
-            this.opts.datetimeY, this.opts.datetimeMo,
-            this.opts.datetimeW, this.opts.datetimeD, this.opts.datetimeH,
-            this.opts.datetimeM, this.opts.datetimeS, true);
+        return timespanToShortenedString(seconds, datetimeLabels(this.opts), true);
     }
 
     _msu(cost) {

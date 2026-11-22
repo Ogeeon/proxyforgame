@@ -18,17 +18,7 @@ class TerraformerRenderer {
    * from a year y/mo/w, either way).
    */
   static formatTime(seconds) {
-    return timespanToShortenedString(
-      seconds,
-      options.datetimeY,
-      options.datetimeMo,
-      options.datetimeW,
-      options.datetimeD,
-      options.datetimeH,
-      options.datetimeM,
-      options.datetimeS,
-      false
-    );
+    return timespanToShortenedString(seconds, datetimeLabels(options), false);
   }
 
   /**
