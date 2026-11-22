@@ -25,7 +25,7 @@ Find how many Solar Satellites and how much energy you need to research Graviton
 |------|-------|
 | `www/ogame/calc/js/graviton-core.js` | 184 |
 | `www/ogame/calc/js/graviton-data-collector.js` | 134 |
-| `www/ogame/calc/js/graviton-renderer.js` | 105 |
+| `www/ogame/calc/js/graviton-renderer.js` | 97 |
 | `www/ogame/calc/js/graviton-orchestration.js` | 313 |
 | `www/ogame/calc/js/graviton-profile.js` | 91 |
 

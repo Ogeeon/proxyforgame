@@ -25,7 +25,7 @@ Compare the cost and time of building upgrades in sequence on an OGame planet or
 |------|-------|
 | `www/ogame/calc/js/queue-core.js` | 239 |
 | `www/ogame/calc/js/queue-data-collector.js` | 235 |
-| `www/ogame/calc/js/queue-renderer.js` | 182 |
+| `www/ogame/calc/js/queue-renderer.js` | 174 |
 | `www/ogame/calc/js/queue-orchestration.js` | 499 |
 | `www/ogame/calc/js/queue-profile.js` | 239 |
 

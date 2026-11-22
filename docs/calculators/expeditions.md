@@ -26,7 +26,7 @@ Estimate the resources, ships, and Dark Matter you may find on OGame expeditions
 | `www/ogame/calc/js/expeditions-core.js` | 222 |
 | `www/ogame/calc/js/expeditions-data-collector.js` | 155 |
 | `www/ogame/calc/js/expeditions-renderer.js` | 75 |
-| `www/ogame/calc/js/expeditions-orchestration.js` | 409 |
+| `www/ogame/calc/js/expeditions-orchestration.js` | 412 |
 | `www/ogame/calc/js/expeditions-profile.js` | 166 |
 
 The page also loads these shared scripts:

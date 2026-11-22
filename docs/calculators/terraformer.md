@@ -25,7 +25,7 @@ Calculate the energy, resources, and time needed to terraform an OGame planet, i
 |------|-------|
 | `www/ogame/calc/js/terraformer-core.js` | 224 |
 | `www/ogame/calc/js/terraformer-data-collector.js` | 151 |
-| `www/ogame/calc/js/terraformer-renderer.js` | 107 |
+| `www/ogame/calc/js/terraformer-renderer.js` | 100 |
 | `www/ogame/calc/js/terraformer-orchestration.js` | 367 |
 | `www/ogame/calc/js/terraformer-profile.js` | 112 |
 

@@ -25,8 +25,8 @@ Calculate the cost and build time of buildings, research, ships, and defenses in
 |------|-------|
 | `www/ogame/calc/js/costs-core.js` | 1059 |
 | `www/ogame/calc/js/costs-data-collector.js` | 953 |
-| `www/ogame/calc/js/costs-renderer.js` | 735 |
-| `www/ogame/calc/js/costs-orchestration.js` | 2370 |
+| `www/ogame/calc/js/costs-renderer.js` | 739 |
+| `www/ogame/calc/js/costs-orchestration.js` | 2367 |
 | `www/ogame/calc/js/costs-profile.js` | 754 |
 
 The page also loads these shared scripts:
