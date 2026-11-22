@@ -322,8 +322,13 @@ is missing from that host's `.env`.
 The crontab lines name the job and then the command:
 
 ```
-0 0 * * * /usr/local/bin/pfg-cron-run uni-list /usr/bin/php .../uni.list.cron.php >> log 2>&1
+0 1 * * * /usr/local/bin/pfg-cron-run uni-list /usr/bin/php .../uni.list.cron.php >> log 2>&1
 ```
+
+`uni-list` runs at 01:00, not midnight, on purpose: a reboot in the small hours
+(a quiet-hour restart took the host down at 00:00 on 2026-11-22, mid-run, and
+cost the watchdog a day of `uni-list last exited 255`) should not collide with
+the one job that empties and refills a table.
 
 The job name is what appears in the health report and in the watchdog's output.
 `pfg-cron-run` never changes a job's exit status and never stops it running: a
@@ -439,7 +444,7 @@ migrations. The one file that cannot be recreated from git is the shared
 7. The `www-data` crontab: `uni.list.cron.php` and `get_population.php` under
    `pfg-cron-run`, both named through `/var/www/pfg-current/` (see above),
    and `*/5 * * * * /usr/local/bin/pfg-sync`. Run
-   both jobs once by hand so the pickers are not empty until midnight.
+   both jobs once by hand so the pickers are not empty until the 01:00 run.
 8. Point DNS at the new address, then `certbot --apache` for every name.
    `bash deploy/watchdog.sh` going green is the definition of done.
 
