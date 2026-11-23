@@ -330,7 +330,9 @@
                       <label for="deut-generals-bonus"><?= $l['deut-cons-reduction'] ?></label>
                       <select id="deut-generals-bonus" name="deut-generals-bonus" class="form-select form-select-sm d-inline-block w-auto">
                         <option value="25">25%</option>
+                        <option value="31">31%</option>
                         <option value="36">36%</option>
+                        <option value="42">42%</option>
                         <option value="50">50%</option>
                       </select>
                     </div>

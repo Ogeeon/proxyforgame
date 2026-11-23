@@ -15,6 +15,8 @@ release section; it is the source of truth for the other eleven translations.
 
 ## [Unreleased]
 
+### Fixed
+- Flight: the General's fuel-discount dropdown gains the 31% and 42% some universes carry alongside the 25%, 36% and 50% it held - among the Russian ones Mars, Nembus and Regulus take 42%. An import of those universes' data used to leave the choice it found, so a General's deuterium was counted with the wrong discount. The universe's own deuterium consumption dropdown needs no new values: all 370 open universes of the game set it between 50% and 100%, and the dropdown already carries every step.
 ## [2026-11-21] - site entry 77
 
 ### Added
