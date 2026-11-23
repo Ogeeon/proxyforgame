@@ -1284,7 +1284,9 @@ class FlightOrchestrator {
         const numeric = Number.parseFloat(String(value));
         if (!Number.isFinite(numeric)) { return; }
         const rounded = Math.abs(numeric - Math.round(numeric)) < 1e-9 ? Math.round(numeric) : null;
-        const wanted = rounded === null ? String(numeric) : String(rounded);
+        // The value the option's own text is written from, float noise gone.
+        const canonical = rounded === null ? numeric : rounded;
+        const wanted = String(canonical);
         const existing = [...el.options].find((option) => option.value === wanted
             || Math.abs(Number.parseFloat(option.value) - numeric) < 1e-9);
         if (existing) {
@@ -1293,7 +1295,7 @@ class FlightOrchestrator {
         }
         const option = document.createElement('option');
         option.value = wanted;
-        option.textContent = format ? format(rounded === null ? numeric : rounded) : wanted;
+        option.textContent = format ? format(canonical) : wanted;
         const after = [...el.options].find((o) => Number.parseFloat(o.value) > numeric);
         if (after) {
             after.before(option);
