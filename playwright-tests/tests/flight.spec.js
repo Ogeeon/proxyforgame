@@ -268,6 +268,51 @@ test.describe('Flight Calculator - Server data fetch', () => {
         await expect(page.locator('#circular-systems')).not.toBeChecked();
     });
 
+    // The game keeps inventing per-universe figures no fixed list can foresee
+    // (the General's 42% discount sat outside this list for months), so a value
+    // no option carries is added to the select instead of dropped - and what
+    // the import landed has to come back from the saved settings on a reload.
+    test('a figure no option carries is added, selected and kept over a reload', async ({ page }) => {
+        const novelFigures = SERVER_DATA.replace('"warriorBonusFuelConsumption":"0.25"', '"warriorBonusFuelConsumption":"0.44"');
+        await page.route(/\/ajax\.php\?.*service=serverdata/, (route) => {
+            route.fulfill({ status: 200, contentType: 'application/json', body: novelFigures });
+        });
+
+        await openParams(page, '#country');
+        await page.locator('#country').selectOption('en');
+        await page.locator('#universe').selectOption({ index: 0 });
+        await expect(page.locator('.panel-overlay')).toHaveCount(0, { timeout: 5000 });
+
+        const generals = page.locator('#deut-generals-bonus');
+        await expect(generals).toHaveValue('44');
+        await expect(generals.locator('option')).toHaveText(['25%', '31%', '36%', '42%', '44%', '50%']);
+
+        await page.evaluate(() => window.flightOrchestrator.recalc());
+        await page.reload();
+        await openParams(page, '#deut-generals-bonus');
+        await expect(generals).toHaveValue('44');
+        await expect(generals.locator('option')).toHaveText(['25%', '31%', '36%', '42%', '44%', '50%']);
+    });
+
+    // "0.7" * 10 arrives as 7.000000000000001, which matches no option's exact
+    // text: it has to land on the plain 7 the list already carries, not spawn a
+    // duplicate next to it.
+    test('a float-noisy factor selects the integer option it nearly is', async ({ page }) => {
+        const noisyFactor = SERVER_DATA.replace('"globalDeuteriumSaveFactor":"1"', '"globalDeuteriumSaveFactor":"0.7"');
+        await page.route(/\/ajax\.php\?.*service=serverdata/, (route) => {
+            route.fulfill({ status: 200, contentType: 'application/json', body: noisyFactor });
+        });
+
+        await openParams(page, '#country');
+        await page.locator('#country').selectOption('en');
+        await page.locator('#universe').selectOption({ index: 0 });
+        await expect(page.locator('.panel-overlay')).toHaveCount(0, { timeout: 5000 });
+
+        const deutFactor = page.locator('#deut-factor');
+        await expect(deutFactor).toHaveValue('7');
+        await expect(deutFactor.locator('option')).toHaveText(['50%', '60%', '70%', '80%', '90%', '100%']);
+    });
+
     // Nobody asked for this request, so it cannot answer with an alert - but
     // staying silent would leave the panel showing its defaults as if they had
     // been loaded, and every figure computed from them would be wrong.

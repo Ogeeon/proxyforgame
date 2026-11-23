@@ -9,6 +9,12 @@ const POPULATED_SYSTEMS_TTL_MS = 24 * 60 * 60 * 1000;
 // The hh:mm the save-point tolerance field holds.
 const TOLERANCE_RE = /(\d\d):(\d\d)/;
 
+// The label an option added to a select on the fly carries. The universe's
+// deuterium consumption is held in tenths (10 is 100%), the General's fuel
+// discount in percent.
+const DEUT_FACTOR_LABEL = (value) => `${value * 10}%`;
+const PERCENT_LABEL = (value) => `${value}%`;
+
 // The persisted state object. The TPL inline script fills in the translation
 // strings; the orchestrator reads/writes prm and calls load/save (cookie I/O in
 // utils.js). Transient bits (populated systems, manual overrides) live on the
@@ -729,15 +735,15 @@ class FlightOrchestrator {
         setVal('#cmb-drive', prm.driveLevels[0]);
         setVal('#imp-drive', prm.driveLevels[1]);
         setVal('#hyp-drive', prm.driveLevels[2]);
-        setVal('#speed-fleet-war', prm.fleetSpeedWar);
-        setVal('#speed-fleet-peaceful', prm.fleetSpeedPeaceful);
-        setVal('#speed-fleet-holding', prm.fleetSpeedHolding);
+        this._selectOption('speed-fleet-war', prm.fleetSpeedWar);
+        this._selectOption('speed-fleet-peaceful', prm.fleetSpeedPeaceful);
+        this._selectOption('speed-fleet-holding', prm.fleetSpeedHolding);
         setChecked('#circular-galaxies', prm.circularGalaxies);
         setChecked('#circular-systems', prm.circularSystems);
         setVal('#galaxies-num', prm.numberOfGalaxies);
         setVal('#systems-num', prm.numberOfSystems);
-        setVal('#deut-factor', prm.deutFactor);
-        setVal('#deut-generals-bonus', prm.deutConsReduction);
+        this._selectOption('deut-factor', prm.deutFactor, DEUT_FACTOR_LABEL);
+        this._selectOption('deut-generals-bonus', prm.deutConsReduction, PERCENT_LABEL);
         setVal('#departure-g', prm.departure[0]);
         setVal('#departure-s', prm.departure[1]);
         setVal('#departure-p', prm.departure[2]);
@@ -1157,8 +1163,8 @@ class FlightOrchestrator {
             setVal('#systems-num', json.systems);
             setVal('#galaxies-num', json.galaxies);
             setVal('#sp-cargohold', json.probeCargo);
-            this._selectOption('deut-factor', frac(json.globalDeuteriumSaveFactor * 10, 0));
-            this._selectOption('deut-generals-bonus', frac(json.warriorBonusFuelConsumption * 100, 0));
+            this._selectOption('deut-factor', json.globalDeuteriumSaveFactor * 10, DEUT_FACTOR_LABEL);
+            this._selectOption('deut-generals-bonus', json.warriorBonusFuelConsumption * 100, PERCENT_LABEL);
             this.opts.prm.fleetIgnoreEmptySystems = json.fleetIgnoreEmptySystems === '1';
             this.opts.prm.fleetIgnoreInactiveSystems = json.fleetIgnoreInactiveSystems === '1';
             this._applySystemSkipState();
@@ -1255,20 +1261,46 @@ class FlightOrchestrator {
     /**
      * Picks the option that carries the value. A select holds only the values
      * the page put into it, and assigning anything else silently empties the
-     * field, so a value none of the options carries leaves the current choice
-     * alone: an import that brings nothing usable must not wipe what the user
-     * already had.
+     * field, so a value none of the options carries is added as a new option
+     * rather than dropped: the game keeps inventing per-universe figures no
+     * fixed list can foresee, and an import must always land. Only a value
+     * that is not a number at all still leaves the current choice alone - an
+     * import that brings nothing usable must not wipe what the user already
+     * had.
+     *
+     * A value within a float's noise of an integer (0.7 * 10 arrives as
+     * 7.000000000000001) is taken as that integer, so it matches the plain
+     * option instead of spawning a duplicate. The lists are sorted, so a new
+     * option goes in before the first bigger value.
      *
      * @param {string} id
      * @param {number|string} value
+     * @param {?function(number): string} [format] The label of an option added
+     *   on the fly; the bare value when left out.
      */
-    _selectOption(id, value) {
+    _selectOption(id, value, format) {
         const el = selectEl(`#${id}`);
         if (!el) { return; }
-        const wanted = String(value);
-        if ([...el.options].some((option) => option.value === wanted)) {
-            el.value = wanted;
+        const numeric = Number.parseFloat(String(value));
+        if (!Number.isFinite(numeric)) { return; }
+        const rounded = Math.abs(numeric - Math.round(numeric)) < 1e-9 ? Math.round(numeric) : null;
+        const wanted = rounded === null ? String(numeric) : String(rounded);
+        const existing = [...el.options].find((option) => option.value === wanted
+            || Math.abs(Number.parseFloat(option.value) - numeric) < 1e-9);
+        if (existing) {
+            el.value = existing.value;
+            return;
         }
+        const option = document.createElement('option');
+        option.value = wanted;
+        option.textContent = format ? format(rounded === null ? numeric : rounded) : wanted;
+        const after = [...el.options].find((o) => Number.parseFloat(o.value) > numeric);
+        if (after) {
+            after.before(option);
+        } else {
+            el.append(option);
+        }
+        el.value = wanted;
     }
 
     // ------------------------------------------------------------------
@@ -1327,8 +1359,8 @@ class FlightOrchestrator {
         setVal('#systems-num', rd.universes.systems);
         setVal('#galaxies-num', rd.universes.galaxies);
         setVal('#sp-cargohold', rd.universes.probeCargo);
-        this._selectOption('deut-factor', rd.universes.globalDeuteriumSaveFactor * 10);
-        this._selectOption('deut-generals-bonus', rd.universes.warriorBonusFuelConsumption * 100);
+        this._selectOption('deut-factor', rd.universes.globalDeuteriumSaveFactor * 10, DEUT_FACTOR_LABEL);
+        this._selectOption('deut-generals-bonus', rd.universes.warriorBonusFuelConsumption * 100, PERCENT_LABEL);
         this.opts.prm.fleetIgnoreEmptySystems = rd.universes.fleetIgnoreEmptySystems === '1';
         this.opts.prm.fleetIgnoreInactiveSystems = rd.universes.fleetIgnoreInactiveSystems === '1';
         // The import can move the fleet to a universe with different settings, so
