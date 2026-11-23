@@ -975,6 +975,8 @@
     "class-bonus-discoverer": "Bonus triedy \"Bádateľ\"",
     "resources-discovery-booster": "Zvýšenie objavu zdrojov",
     "dark-matter-discovery-bonus": "Bonus k objavu Temnej hmoty",
+    "orion-eco-rewards": "Rýchlosť ekonomiky zvyšuje odmeny z expedícií",
+    "orion-eco-rewards-hint": "Vesmíry s aktívnym Orionom (OGame 13.1): nálezy surovín a lodí pre Generála a Zberateľa sa dodatočne násobia rýchlosťou ekonomiky. Tmavá hmota sa nemení. V nových vesmíroch od 06.11.2026, vo všetkých ostatných očakávane od 30.11.2026.",
     "large-cargo-abbrev": "VT",
     "description": "Odhadnite suroviny, lode a temnú hmotu získateľné na expedíciách OGame a porovnajte očakávaný výnos rôznych flotíl."
   },

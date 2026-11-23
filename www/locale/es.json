@@ -975,6 +975,8 @@
     "class-bonus-discoverer": "Bonificación de clase \"Descubridor\"",
     "resources-discovery-booster": "Potenciador de descubrimiento de recursos",
     "dark-matter-discovery-bonus": "Bonificación de descubrimiento de Materia Oscura",
+    "orion-eco-rewards": "La velocidad de economía aumenta las recompensas de expedición",
+    "orion-eco-rewards-hint": "Universos con Orion activo (OGame 13.1): los hallazgos de recursos y naves del General y el Coleccionista se multiplican además por la velocidad de economía. La Materia Oscura no cambia. En universos nuevos desde el 06.11.2026; en todos los demás, previsiblemente desde el 30.11.2026.",
     "large-cargo-abbrev": "CG",
     "description": "Estima los recursos, naves y materia oscura que puedes encontrar en expediciones de OGame y compara el rendimiento esperado de distintas flotas."
   },

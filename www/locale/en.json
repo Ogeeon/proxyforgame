@@ -975,6 +975,8 @@
     "class-bonus-discoverer": "Discoverer class bonus",
     "resources-discovery-booster": "Resources discovery booster",
     "dark-matter-discovery-bonus": "Dark Matter discovery bonus",
+    "orion-eco-rewards": "Economy speed increases expedition rewards",
+    "orion-eco-rewards-hint": "Universes with Orion active (OGame 13.1): resource and ship finds for the General and the Collector are additionally multiplied by the economy speed. Dark Matter is unaffected. Live in new universes since 2026-11-06; expected in all existing ones on 2026-11-30.",
     "large-cargo-abbrev": "LC",
     "description": "Estimate the resources, ships, and Dark Matter you may find on OGame expeditions and compare expected returns for different fleets."
   },

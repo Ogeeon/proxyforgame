@@ -229,6 +229,11 @@ endforeach; ?>
 <?php endfor; ?>
               </select>
             </div>
+            <div id="orion-eco-rewards-row" class="d-flex align-items-center gap-1 d-none">
+              <input id="orion-eco-rewards" type="checkbox" name="orion-eco-rewards" class="form-check-input">
+              <label for="orion-eco-rewards"><?= $l['orion-eco-rewards'] ?></label>
+              <i class="bi bi-question-circle" data-bs-toggle="tooltip" title="<?= htmlspecialchars($l['orion-eco-rewards-hint'], ENT_QUOTES) ?>"></i>
+            </div>
             <div class="d-flex align-items-center gap-1">
               <label for="tech-hyper-level"><?= $l['LOCA_TECH_HYPER'] ?></label>
               <input id="tech-hyper-level" type="text" name="tech-hyper-level" class="form-control form-control-sm level-input" value="0" data-field-title="<?= $l['LOCA_TECH_HYPER'] ?>">

@@ -13,6 +13,7 @@ class ExpeditionsDataCollector {
       highTop: Number.parseInt(getVal('#highTop'), 10) || 0,
       playerClass: Number.parseInt(getVal('#player-class'), 10) || 0,
       universeSpeed: Number.parseInt(getVal('#universe-speed'), 10) || 1,
+      orionEcoRewards: getChecked('#orion-eco-rewards'),
       hyperTechLevel: getInputNumber($('#tech-hyper-level')),
       percentRes: getInputNumber($('#percent-resources')),
       percentShips: getInputNumber($('#percent-ships')),
@@ -106,7 +107,8 @@ function expeditionsReportSnapshot() {
   }
   entries.push(strongest,
     expeditionsReportField('player-class', { group: common }),
-    expeditionsReportField('universe-speed', { group: common }));
+    expeditionsReportField('universe-speed', { group: common }),
+    expeditionsReportField('orion-eco-rewards', { group: common }));
   for (const id of EXPEDITIONS_REPORT_NUMBERS) {
     entries.push(expeditionsReportField(id, { group: common, numeric: true }));
   }

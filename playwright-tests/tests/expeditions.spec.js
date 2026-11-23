@@ -119,6 +119,38 @@ test.describe('Expeditions Calculator - DOM integration', () => {
         await expect(page.locator('#max-points')).toHaveText(/^40,000/);
     });
 
+    test('the Orion checkbox scales a General\'s finds with the economy speed', async ({ page }) => {
+        // The Discoverer the page opens on already has the speed in its finds.
+        await expect(page.locator('#orion-eco-rewards-row')).toBeHidden();
+
+        await fillNumber(page, '#numLC', 100);
+        await page.locator('#universe-speed').selectOption('5');
+        await page.locator('#player-class').selectOption('2');
+
+        await expect(page.locator('#orion-eco-rewards-row')).toBeVisible();
+        await expect(page.locator('#max-points')).toHaveText(/^40,000/);
+
+        await page.locator('#orion-eco-rewards').check();
+        await expect(page.locator('#max-points')).toHaveText(/^200,000/); // 1 * 5 * 40000
+        await expect(page.locator('#max-find-met')).toHaveText(/^200,000/);
+        await expect(page.locator('#dark-matter-find')).toHaveText('1,800'); // never eco-scaled
+    });
+
+    test('the Orion checkbox keeps its state across a class switch', async ({ page }) => {
+        await page.locator('#universe-speed').selectOption('5');
+        await page.locator('#player-class').selectOption('2');
+        await page.locator('#orion-eco-rewards').check();
+
+        await page.locator('#player-class').selectOption('0');
+        await expect(page.locator('#orion-eco-rewards-row')).toBeHidden();
+        await expect(page.locator('#max-points')).toHaveText(/^300,000/); // 1.5 * 5 * 40000
+
+        await page.locator('#player-class').selectOption('2');
+        await expect(page.locator('#orion-eco-rewards-row')).toBeVisible();
+        await expect(page.locator('#orion-eco-rewards')).toBeChecked();
+        await expect(page.locator('#max-points')).toHaveText(/^200,000/);
+    });
+
     test('the life-form cargo bonus feeds the capacity', async ({ page }) => {
         await fillNumber(page, '#numLC', 10);
         await page.locator('#param-lf-tab').click();
@@ -144,11 +176,14 @@ test.describe('Expeditions Calculator - DOM integration', () => {
         await fillNumber(page, '#numLC', 10);
         await fillNumber(page, '#percent-resources', 25);
         await page.locator('#player-class').selectOption('2');
+        await page.locator('#orion-eco-rewards').check();
 
         await page.locator('#reset').click();
         await expect(page.locator('#numLC')).toHaveValue('0');
         await expect(page.locator('#percent-resources')).toHaveValue('0');
         await expect(page.locator('#player-class')).toHaveValue('0');
+        await expect(page.locator('#orion-eco-rewards')).not.toBeChecked();
+        await expect(page.locator('#orion-eco-rewards-row')).toBeHidden();
         await expect(page.locator('#storage-capacity')).toHaveText('0');
     });
 
@@ -165,6 +200,15 @@ test.describe('Expeditions Calculator - DOM integration', () => {
         await page.reload();
         await expect(page.locator('#numLC')).toHaveValue('7');
         await expect(page.locator('#percent-ships')).toHaveValue('12');
+    });
+
+    test('the Orion checkbox survives a reload', async ({ page }) => {
+        await page.locator('#player-class').selectOption('1');
+        await page.locator('#orion-eco-rewards').check();
+
+        await page.reload();
+        await expect(page.locator('#orion-eco-rewards-row')).toBeVisible();
+        await expect(page.locator('#orion-eco-rewards')).toBeChecked();
     });
 
     test('the API accordion documents the URL parameters', async ({ page }) => {
@@ -353,6 +397,14 @@ test.describe('Expeditions Calculator - URL API', () => {
         await expect(page.locator('#dark-matter-discovery-bonus')).toHaveValue('50');
         await expect(page.locator('#numLC')).toHaveValue('12');
         await expect(page.locator('#numPA')).toHaveValue('1');
+    });
+
+    test('a class from the URL shows the Orion checkbox row unchecked', async ({ context, page }) => {
+        await openDom(context, page, PAGE_URL + '?c=1');
+
+        await expect(page.locator('#player-class')).toHaveValue('1');
+        await expect(page.locator('#orion-eco-rewards-row')).toBeVisible();
+        await expect(page.locator('#orion-eco-rewards')).not.toBeChecked();
     });
 });
 

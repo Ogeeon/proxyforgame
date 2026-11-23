@@ -975,6 +975,8 @@
     "class-bonus-discoverer": "\"Kâşif\" sınıf bonusu",
     "resources-discovery-booster": "Kaynak keşif güçlendirici",
     "dark-matter-discovery-bonus": "Karanlık Madde keşif bonusu",
+    "orion-eco-rewards": "Ekonomi hızı sefer ödüllerini artırır",
+    "orion-eco-rewards-hint": "Orion'ın aktif olduğu evrenlerde (OGame 13.1): General ve Toplayıcı'nın kaynak ve gemi buluntuları ayrıca ekonomi hızıyla çarpılır. Karanlık Madde değişmez. 06.11.2026'dan beri yeni evrenlerde; tüm mevcut evrenlerde 30.11.2026'da bekleniyor.",
     "large-cargo-abbrev": "BN",
     "description": "OGame keşiflerinde bulunabilecek kaynak, gemi ve Karanlık Madde miktarını tahmin edin ve farklı filoların beklenen getirisini karşılaştırın."
   },

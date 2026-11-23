@@ -140,10 +140,10 @@ class ExpeditionsCalculator {
    * Run the full computation for a set of parameters.
    *
    * @param {Object} p Parameters collected from the form:
-   *   highTop, playerClass, universeSpeed, hyperTechLevel, percentRes,
-   *   percentShips, classBonusCollector, classBonusDiscoverer,
-   *   resourceDiscoveryBooster, darkMatterDiscoveryBonus, lfShipsBonuses,
-   *   counts {abbrev: number}
+   *   highTop, playerClass, universeSpeed, orionEcoRewards (optional boolean),
+   *   hyperTechLevel, percentRes, percentShips, classBonusCollector,
+   *   classBonusDiscoverer, resourceDiscoveryBooster, darkMatterDiscoveryBonus,
+   *   lfShipsBonuses, counts {abbrev: number}
    * @returns {Object} Result with the fleet capacity, the maximum expedition
    *   points, the per-resource finds, the findable ships and the Dark Matter.
    */
@@ -153,13 +153,16 @@ class ExpeditionsCalculator {
     const isDiscoverer = p.playerClass === EXPEDITION_CLASS.DISCOVERER;
 
     // Pathfinders raise the expedition yield; for a Discoverer both the base and
-    // the pathfinder multiplier scale with the universe speed.
+    // the pathfinder multiplier scale with the universe speed. Since Orion
+    // (OGame 13.1) the Collector and the General scale the same way - opt-in,
+    // because Orion reached the existing universes only gradually.
     const hasPathfinder = (p.counts.PA || 0) > 0;
+    const speed = (isDiscoverer || p.orionEcoRewards === true) ? p.universeSpeed : 1;
     let factor;
     if (hasPathfinder) {
-      factor = isDiscoverer ? 3 * p.universeSpeed : 2;
+      factor = (isDiscoverer ? 3 : 2) * speed;
     } else {
-      factor = isDiscoverer ? 1.5 * p.universeSpeed : 1;
+      factor = (isDiscoverer ? 1.5 : 1) * speed;
     }
 
     const basePoints = factor * p.highTop;

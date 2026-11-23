@@ -97,6 +97,32 @@ describe('Expeditions Calculator - Expedition points', () => {
         expect(r.maxPoints).toBe(40000);
     });
 
+    it('the Orion option scales a General or Collector with the universe speed', () => {
+        const plain = compute({ playerClass: 2, universeSpeed: 5, orionEcoRewards: true });
+        expect(plain.maxPoints).toBe(200000); // 1 * 5 * 40000
+
+        const withPathfinder = compute({ playerClass: 2, universeSpeed: 5, orionEcoRewards: true, counts: { PA: 1 } });
+        expect(withPathfinder.maxPoints).toBe(400000); // 2 * 5 * 40000
+
+        const collector = compute({ playerClass: 1, universeSpeed: 4, orionEcoRewards: true, counts: { LC: 100 } });
+        expect(collector.maxPoints).toBe(160000); // 1 * 4 * 40000
+        // The resource pool follows basePoints; the fleet can carry it all.
+        expect(collector.maxFindMetal).toBe(160000);
+    });
+
+    it('an explicit false keeps the flat yield for other classes', () => {
+        const r = compute({ playerClass: 1, universeSpeed: 5, orionEcoRewards: false });
+        expect(r.maxPoints).toBe(40000);
+    });
+
+    it('the Orion option changes nothing for a Discoverer and never the Dark Matter', () => {
+        const discoverer = compute({ universeSpeed: 5, orionEcoRewards: true });
+        expect(discoverer.maxPoints).toBe(300000); // 1.5 * 5, as without the option
+
+        const general = compute({ playerClass: 2, universeSpeed: 5, orionEcoRewards: true, darkMatterDiscoveryBonus: 50 });
+        expect(general.darkMatter).toBe(2700); // 1800 * 1.5, no economy speed
+    });
+
     it('a pathfinder doubles the yield, or triples it for a Discoverer', () => {
         const discoverer = compute({ counts: { PA: 1 } });
         expect(discoverer.maxPoints).toBe(120000); // 3 * 1 * 40000

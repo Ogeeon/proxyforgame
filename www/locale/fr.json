@@ -975,6 +975,8 @@
     "class-bonus-discoverer": "Bonus de classe \"Explorateur\"",
     "resources-discovery-booster": "Amplificateur de découverte de ressources",
     "dark-matter-discovery-bonus": "Bonus de découverte de Matière Noire",
+    "orion-eco-rewards": "La vitesse d'économie augmente les récompenses d'expédition",
+    "orion-eco-rewards-hint": "Univers avec Orion actif (OGame 13.1) : les trouvailles de ressources et de vaisseaux du Général et du Collecteur sont en plus multipliées par la vitesse d'économie. La Matière Noire ne change pas. Dans les nouveaux univers depuis le 06.11.2026 ; dans tous les autres, prévu vers le 30.11.2026.",
     "large-cargo-abbrev": "GT",
     "description": "Estimez les ressources, vaisseaux et matières noires trouvés lors des expéditions OGame et comparez le rendement attendu de différentes flottes."
   },

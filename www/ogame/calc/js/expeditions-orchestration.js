@@ -28,6 +28,8 @@ const options = {
     playerClass: 0,
     // The select offers 1..10, so 0 would leave it without a selected option.
     universeSpeed: 1,
+    // Orion (OGame 13.1): Collector/General finds scale with the economy speed.
+    orionEcoRewards: false,
     hyperTechLevel: 0,
     percentRes: 0,
     percentShips: 0,
@@ -47,6 +49,7 @@ const options = {
         case 'highTop': return validateNumber(Number.parseFloat(value), 40000, 5000000, EXPEDITIONS_HIGH_TOP_DEFAULT);
         case 'playerClass': return validateNumber(Number.parseFloat(value), 0, 2, 0);
         case 'universeSpeed': return validateNumber(Number.parseFloat(value), 1, 10, 1);
+        case 'orionEcoRewards': return value === 'true';
         case 'hyperTechLevel': return validateNumber(Number.parseFloat(value), 0, 50, 0);
         case 'percentRes': return validateNumber(Number.parseFloat(value), 0, Infinity, 0);
         case 'percentShips': return validateNumber(Number.parseFloat(value), 0, Infinity, 0);
@@ -165,6 +168,7 @@ class ExpeditionsApp {
     setVal('#highTop', options.prm.highTop);
     setVal('#player-class', options.prm.playerClass);
     setVal('#universe-speed', options.prm.universeSpeed);
+    setChecked('#orion-eco-rewards', options.prm.orionEcoRewards === true);
     setVal('#tech-hyper-level', options.prm.hyperTechLevel);
     setNumVal('#percent-resources', options.prm.percentRes);
     setNumVal('#percent-ships', options.prm.percentShips);
@@ -239,6 +243,9 @@ class ExpeditionsApp {
       const el = $(sel);
       if (el) addEvent(el, 'change', () => this.recalc());
     });
+
+    // The Orion eco-speed checkbox; the class select is covered by this.selects.
+    addEvent('#orion-eco-rewards', 'change', () => this.recalc());
 
     addEvent('#reset', 'click', () => this._resetParams(true));
     addEvent('#clear-fleet', 'click', () => this._clearFleet());
@@ -352,6 +359,23 @@ class ExpeditionsApp {
   }
 
   /**
+   * The Orion eco-speed checkbox means nothing to a Discoverer - the speed
+   * already scales their finds - so its row is hidden for that class. Called
+   * from recalc(), the one funnel every class change goes through: the select,
+   * the URL API, a profile apply and the reset all end in a recalc, and the
+   * first two of them set the class without firing a change event.
+   *
+   * @param {number} playerClass The class as read from the form.
+   */
+  _applyOrionRewardsVisibility(playerClass) {
+    const row = $('#orion-eco-rewards-row');
+    if (!row) return;
+    const isDiscoverer = playerClass === EXPEDITION_CLASS.DISCOVERER;
+    row.classList.toggle('d-none', isDiscoverer);
+    row.classList.toggle('d-flex', !isDiscoverer);
+  }
+
+  /**
    * Read the form, run the core computation, render the result and persist the
    * parameters.
    */
@@ -362,6 +386,7 @@ class ExpeditionsApp {
     });
     options.prm.fleet = JSON.stringify(this._collectFleet());
 
+    this._applyOrionRewardsVisibility(p.playerClass);
     ExpeditionsRenderer.render(this.calc.compute(p));
     options.save();
   }
@@ -381,6 +406,7 @@ class ExpeditionsApp {
     options.prm.highTop = 40000;
     options.prm.playerClass = 0;
     options.prm.universeSpeed = 1;
+    options.prm.orionEcoRewards = false;
     options.prm.hyperTechLevel = 0;
     options.prm.percentRes = 0;
     options.prm.percentShips = 0;

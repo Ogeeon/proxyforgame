@@ -15,6 +15,10 @@ release section; it is the source of truth for the other eleven translations.
 
 ## [Unreleased]
 
+### Added
+
+- Expeditions calculator: an "Economy speed increases expedition rewards" checkbox for the Collector and the General - the Orion rebalancing (OGame 13.1) extends the economy-speed multiplier of expedition finds to these classes, so far only in the universes that run Orion: the new ones since 06.11.2026, all existing ones expected on 30.11.2026. Unticked by default; hidden for the Discoverer, whose finds have always scaled, and it never touches Dark Matter. The MCP server's `ogame_expedition` tool takes the same choice as its `orionEcoRewards` argument. <!-- site -->
+
 ### Fixed
 
 - Flight: the General's fuel-discount dropdown gains the 31% and 42% some universes carry alongside the 25%, 36% and 50% it held - among the Russian ones Mars, Nembus and Regulus take 42%. An import of those universes' data used to leave the choice it found, so a General's deuterium was counted with the wrong discount. The universe's own deuterium consumption dropdown needs no new values: all 370 open universes of the game set it between 50% and 100%, and the dropdown already carries every step.

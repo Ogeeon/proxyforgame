@@ -975,6 +975,8 @@
     "class-bonus-discoverer": "\"Ontdekker\"-klassebonus",
     "resources-discovery-booster": "Hulpmiddel voor grondstofontdekking",
     "dark-matter-discovery-bonus": "Bonus voor Donkere Materie ontdekking",
+    "orion-eco-rewards": "De economische snelheid verhoogt de expeditiebeloningen",
+    "orion-eco-rewards-hint": "Universums met actieve Orion (OGame 13.1): vondsten van grondstoffen en schepen voor de Generaal en de Verzamelaar worden extra vermenigvuldigd met de economische snelheid. Donkere Materie verandert niet. In nieuwe universums sinds 06.11.2026; in alle bestaande verwacht rond 30.11.2026.",
     "large-cargo-abbrev": "GV",
     "description": "Schat de mogelijke vondsten van grondstoffen, schepen en Donkere Materie bij OGame-expedities en vergelijk het verwachte rendement van vloten."
   },

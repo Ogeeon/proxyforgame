@@ -23,10 +23,10 @@ Estimate the resources, ships, and Dark Matter you may find on OGame expeditions
 
 | File | Lines |
 |------|-------|
-| `www/ogame/calc/js/expeditions-core.js` | 222 |
-| `www/ogame/calc/js/expeditions-data-collector.js` | 155 |
+| `www/ogame/calc/js/expeditions-core.js` | 225 |
+| `www/ogame/calc/js/expeditions-data-collector.js` | 157 |
 | `www/ogame/calc/js/expeditions-renderer.js` | 75 |
-| `www/ogame/calc/js/expeditions-orchestration.js` | 412 |
+| `www/ogame/calc/js/expeditions-orchestration.js` | 438 |
 | `www/ogame/calc/js/expeditions-profile.js` | 166 |
 
 The page also loads these shared scripts:
@@ -50,6 +50,7 @@ The calculator keeps these settings in `options_expeditions`:
 - `highTop`
 - `playerClass`
 - `universeSpeed`
+- `orionEcoRewards`
 - `hyperTechLevel`
 - `percentRes`
 - `percentShips`

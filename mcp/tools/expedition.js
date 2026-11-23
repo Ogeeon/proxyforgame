@@ -40,7 +40,13 @@ const inputSchema = {
         },
         playerClass: common.playerClassSchema,
         universe: common.universeSchema,
-        universeSpeed: { ...common.universeSpeedSchema, description: 'Economy speed: scales a Discoverer\'s finds. ' + common.universeSpeedSchema.description },
+        universeSpeed: { ...common.universeSpeedSchema, description: 'Economy speed: scales a Discoverer\'s finds, and a Collector\'s or General\'s with `orionEcoRewards`. ' + common.universeSpeedSchema.description },
+        orionEcoRewards: {
+            type: 'boolean', default: false,
+            description: 'Orion (OGame 13.1): Collector and General resource and ship finds also scale with the '
+                + 'economy speed. Active in new universes since 2026-11-06, expected in all existing ones on 2026-11-30. '
+                + 'Dark Matter is never eco-scaled.',
+        },
         hyperspaceTechnology: common.hyperspaceTechnologySchema,
         lifeforms: common.lifeformsSchema(['resourceFindBonus', 'shipFindBonus', 'darkMatterFindBonus',
             'collectorClassBonus', 'discovererClassBonus'], SHIPS.map((ship) => ship.id)),
@@ -98,6 +104,7 @@ function createExpeditionTool({ siteApi }) {
                 highTop,
                 playerClass: CLASSES[/** @type {keyof typeof CLASSES} */ (args.playerClass)],
                 universeSpeed,
+                orionEcoRewards: args.orionEcoRewards === true,
                 hyperTechLevel: args.hyperspaceTechnology,
                 percentRes: lf.resourceFindBonus,
                 percentShips: lf.shipFindBonus,

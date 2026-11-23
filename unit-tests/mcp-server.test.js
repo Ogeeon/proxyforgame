@@ -1161,6 +1161,18 @@ describe('MCP tool ogame_expedition', () => {
         expect(await metal(20)).toBeGreaterThan(await metal(0));
     });
 
+    it('scales a General\'s finds with the economy speed only with orionEcoRewards', async () => {
+        const args = { ships: { 'large-cargo': 10 }, playerClass: 'general', universeSpeed: 5, topPlayerPoints: 9999 };
+        const points = (extra) => call(protocolWith(), 'ogame_expedition', { ...args, ...extra })
+            .then((r) => r.structuredContent.maxExpeditionPoints);
+        // Flat without the flag, the economy speed applied with it - and the
+        // Dark Matter never scales.
+        expect(await points({})).toBe(40000);
+        expect(await points({ orionEcoRewards: true })).toBe(200000);
+        expect((await call(protocolWith(), 'ogame_expedition', { ...args, orionEcoRewards: true }))
+            .structuredContent.darkMatter).toBe(1800);
+    });
+
     it('lists only the ships the fleet unlocks', async () => {
         const out = (await call(protocolWith(), 'ogame_expedition', { ships: { 'small-cargo': 100 } })).structuredContent;
         expect(Object.keys(out.findableShips)).toEqual(['esp-probe', 'small-cargo', 'light-fighter']);

@@ -975,6 +975,8 @@
     "class-bonus-discoverer": "Bonus klasy \"Odkrywca\"",
     "resources-discovery-booster": "Wzmocnienie odkrywania zasobów",
     "dark-matter-discovery-bonus": "Bonus do odkrycia Ciemnej Materii",
+    "orion-eco-rewards": "Prędkość ekonomii zwiększa nagrody z ekspedycji",
+    "orion-eco-rewards-hint": "Wszechświaty z aktywnym Orionem (OGame 13.1): znaleziska surowców i statków Generała i Kolekcjonera są dodatkowo mnożone przez prędkość ekonomii. Antymateria się nie zmienia. W nowych wszechświatach od 06.11.2026, a we wszystkich pozostałych — orientacyjnie od 30.11.2026.",
     "large-cargo-abbrev": "DT",
     "description": "Oszacuj możliwe znaleziska zasobów, statków i Ciemnej Materii podczas ekspedycji OGame oraz porównaj spodziewane zyski różnych flot."
   },

@@ -975,6 +975,8 @@
     "class-bonus-discoverer": "Bonus klase \"Istraživač\"",
     "resources-discovery-booster": "Pojačivač otkrića resursa",
     "dark-matter-discovery-bonus": "Bonus otkrića Tamne materije",
+    "orion-eco-rewards": "Brzina ekonomije povećava nagrade ekspedicija",
+    "orion-eco-rewards-hint": "Univerzumi s aktivnim Orionom (OGame 13.1): nalazi resursa i brodova za Generala i Sakupljača dodatno se množe s brzinom ekonomije. Tamna materija se ne mijenja. U novim univerzumima od 06.11.2026, a u svim ostalima očekivano od 30.11.2026.",
     "large-cargo-abbrev": "VT",
     "description": "Procijenite resurse, brodove i tamnu materiju koje možete pronaći u OGame ekspedicijama i uporedite očekivanu korist različitih flota."
   },

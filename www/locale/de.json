@@ -975,6 +975,8 @@
     "class-bonus-discoverer": "\"Entdecker\"-Klassenbonus",
     "resources-discovery-booster": "Ressourcenentdeckungs-Booster",
     "dark-matter-discovery-bonus": "Bonus auf Dunkle-Materie-Entdeckung",
+    "orion-eco-rewards": "Wirtschaftsgeschwindigkeit erhöht die Expeditionsbelohnungen",
+    "orion-eco-rewards-hint": "In Universen mit aktivem Orion (OGame 13.1): Ressourcen- und Schiffsfunde für General und Sammler werden zusätzlich mit der Wirtschaftsgeschwindigkeit multipliziert. Dunkle Materie bleibt unverändert. In neuen Universen seit dem 06.11.2026, in allen bestehenden voraussichtlich ab dem 30.11.2026.",
     "large-cargo-abbrev": "GT",
     "description": "Schätze mögliche Funde von Ressourcen, Schiffen und Dunkler Materie bei OGame-Expeditionen und vergleiche den erwarteten Ertrag verschiedener Flotten."
   },

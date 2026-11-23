@@ -975,6 +975,8 @@
     "class-bonus-discoverer": "Bónus da classe \"Explorador\"",
     "resources-discovery-booster": "Impulso de descoberta de recursos",
     "dark-matter-discovery-bonus": "Bónus de descoberta de Matéria Negra",
+    "orion-eco-rewards": "A velocidade da economia aumenta as recompensas de expedição",
+    "orion-eco-rewards-hint": "Universos com Orion ativo (OGame 13.1): as descobertas de recursos e naves do General e do Colecionador são ainda multiplicadas pela velocidade da economia. A Matéria Negra não muda. Em universos novos desde 06.11.2026; em todos os demais, previsto para 30.11.2026.",
     "large-cargo-abbrev": "CG",
     "description": "Estime os recursos, naves e Matéria Negra encontrados em expedições de OGame e compare o retorno esperado de diferentes frotas."
   },
