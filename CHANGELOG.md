@@ -15,6 +15,8 @@ release section; it is the source of truth for the other eleven translations.
 
 ## [Unreleased]
 
+## [2026-11-23] - site entry 78
+
 ### Added
 
 - Expeditions calculator: an "Economy speed increases expedition rewards" checkbox for the Collector and the General - the Orion rebalancing (OGame 13.1) extends the economy-speed multiplier of expedition finds to these classes, so far only in the universes that run Orion: the new ones since 06.11.2026, all existing ones expected on 30.11.2026. Unticked by default; hidden for the Discoverer, whose finds have always scaled, and it never touches Dark Matter. The MCP server's `ogame_expedition` tool takes the same choice as its `orionEcoRewards` argument. <!-- site -->
@@ -23,6 +25,8 @@ release section; it is the source of truth for the other eleven translations.
 
 - Flight: the General's fuel-discount dropdown gains the 31% and 42% some universes carry alongside the 25%, 36% and 50% it held - among the Russian ones Mars, Nembus and Regulus take 42%. An import of those universes' data used to leave the choice it found, so a General's deuterium was counted with the wrong discount. The universe's own deuterium consumption dropdown needs no new values: all 370 open universes of the game set it between 50% and 100%, and the dropdown already carries every step.
 - Flight: a universe figure no dropdown option carries is added to the list on the fly instead of being dropped - both on an import and when the saved settings come back after a reload - so the game's next novel value cannot silently leave a field at its old choice. A figure that reaches the page as float noise (0.7 * 10 arrives as 7.000000000000001) now lands on the integer option it nearly is instead of matching nothing.
+
+> **RU:** В калькулятор экспедиций добавлена галочка «Скорость экономики повышает награды экспедиций» — она учитывает скорость экономики при расчёте находок ресурсов и кораблей для Генерала и Коллекционера, как во вселенных с активным Orion.
 
 ## [2026-11-21] - site entry 77
 
