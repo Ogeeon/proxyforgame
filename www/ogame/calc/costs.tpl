@@ -491,7 +491,7 @@
                         <?php if (!$hasEffectCol): ?>
                         <?=$l[$techData[$tech][0]]?>
                         <?php endif; ?>
-                        <?php if ($tech == 14 || $tech == 15): ?> <i class="bi bi-info-circle text-primary" data-bs-toggle="popover" data-bs-trigger="hover focus" data-bs-html="true" data-bs-content="<?= htmlspecialchars($l['robot-nanite-hint'], ENT_QUOTES) ?>" style="cursor: pointer;"></i><?php endif; ?></td>
+                        <?php if ($tech == 14 || $tech == 15): ?> <i class="bi bi-info-circle text-primary" data-bs-toggle="popover" data-bs-trigger="hover focus" data-bs-html="true" data-bs-content="<?= htmlspecialchars($l['robot-nanite-hint'], ENT_QUOTES) ?>"></i><?php endif; ?></td>
                       <?php if ($i == 1): ?>
                       <td class="text-center"><input type="text" class="form-control form-control-sm level-input ui-input-margin" value="0" aria-label="<?= $l[$colHeaders[1]] ?>"></td>
                       <?php endif;?>

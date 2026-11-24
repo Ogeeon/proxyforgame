@@ -100,6 +100,14 @@ function attachTooltips(root, { refresh = false } = {}) {
     const Tooltip = bsTooltip();
     if (!root || !Tooltip) return;
     root.querySelectorAll(TOOLTIP_SELECTOR).forEach((el) => {
+        // The default trigger is 'hover focus': an anchor that cannot take
+        // focus leaves the focus half dead - the `<i>` hint icons carry no
+        // tabindex - so give every anchor a tab stop. iOS Safari does not
+        // focus tabindex elements on tap (there the cursor: pointer rule in
+        // common.css is what makes the hover heuristic fire); Android and
+        // keyboard Tab do focus it. The narrowing is what gives tabIndex, as
+        // in setTooltipText().
+        if (el instanceof HTMLElement && !el.hasAttribute('tabindex')) el.tabIndex = 0;
         if (refresh) Tooltip.getInstance(el)?.dispose();
         Tooltip.getOrCreateInstance(el);
     });
@@ -172,7 +180,14 @@ function hideTooltip(el) {
 function attachPopovers(root) {
     const Popover = bsPopover();
     if (!root || !Popover) return;
-    root.querySelectorAll('[data-bs-toggle="popover"]').forEach((el) => Popover.getOrCreateInstance(el));
+    root.querySelectorAll('[data-bs-toggle="popover"]').forEach((el) => {
+        // Activation, same as in attachTooltips(): the default trigger is
+        // 'hover focus', iOS Safari does not focus tabindex elements on tap
+        // (the cursor: pointer rule in common.css covers it there), Android
+        // and keyboard Tab do.
+        if (el instanceof HTMLElement && !el.hasAttribute('tabindex')) el.tabIndex = 0;
+        Popover.getOrCreateInstance(el);
+    });
 }
 
 // ==========================================================================

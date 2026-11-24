@@ -135,10 +135,19 @@ rather than left to taste:
 | **Masked date / duration / tolerance inputs** | **native `title=`** — a bubble anchored to the field sits over the digits being overtyped |
 | A button whose `title` merely repeats its own visible label | leave it; a bubble that echoes the button is noise (`production.tpl:616-617`) |
 
+Activation is centralized with the instance plumbing: `attachTooltips()` and
+`attachPopovers()` give every anchor a `tabindex` — the default trigger is
+`hover focus`, and an unfocusable `<i>` icon would leave its focus half dead
+(Android and keyboard Tab focus it; iOS Safari does not focus a tabindex
+element on tap, which is why `common.css` also gives every anchor
+`cursor: pointer`, the mark its first-tap hover heuristic looks for). Never
+add an inline `cursor` style to a tooltip anchor.
+
 **Deviation to look for**: a `.tooltip-inner` block still sitting in a per-calculator CSS
 file (or in `www/css/sidebar.css`, which still carries its own stale, non-matching copy);
 any `bootstrap.*` outside `www/js/bootstrap-access.js` (ESLint catches the `.js` files, not the
 `.tpl` blocks); an icon-only button still on a bare native `title=`;
+an inline `cursor: pointer` on a tooltip anchor (activation is centralized, see above);
 a dynamically built row that inits tooltips but never disposes them.
 
 ---

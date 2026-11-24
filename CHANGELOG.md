@@ -15,6 +15,10 @@ release section; it is the source of truth for the other eleven translations.
 
 ## [Unreleased]
 
+### Fixed
+
+- All calculators: the tooltip hint icons open on a tap on touch devices and by keyboard Tab - the icons used to be neither tappable nor focusable, so without a mouse a hint stayed out of reach.
+
 ## [2026-11-23] - site entry 78
 
 ### Added

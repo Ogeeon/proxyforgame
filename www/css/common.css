@@ -501,6 +501,16 @@ textarea:disabled {
   border-left-color: var(--bs-tooltip-bg);
 }
 
+/* The anchors read as interactive, not the bubbles: the pointer cursor is what
+   iOS Safari's first-tap hover heuristic looks for before it emulates the
+   mouse events of a tap, so without it a tap on a hint icon does nothing
+   there. Kept here with the rest of the tooltip rules rather than inline per
+   anchor — see attachTooltips() in bootstrap-access.js for the focus half. */
+[data-bs-toggle="tooltip"],
+[data-bs-toggle="popover"] {
+  cursor: pointer;
+}
+
 /* Flattens <fieldset>/<legend> browser chrome (border, padding, block-level
    legend) so a semantic form-field group can sit inline in a flex row instead
    of rendering as a bordered box. Used where a group heading was a bare

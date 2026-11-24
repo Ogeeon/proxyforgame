@@ -751,7 +751,15 @@ function stepChangelogPage(delta) {
 // capture phase, before the page handler runs and possibly re-renders or removes the row.
 // Form fields are skipped: there the focus-driven tooltip is the intended behaviour
 // (e.g. the crawler-limit hint attached in production-orchestration.js).
+//
+// A touch pointer is skipped as a whole: there the click this handler reacts to is the
+// very tap that opens the bubble - Android's tap synthesizes the mouseenter that shows
+// it, iOS gets there through the focus trigger - so hiding on it would close every
+// tooltip the instant it appears. The pinned state this handler exists to clear is a
+// mouse luxury a coarse pointer never reaches.
+const coarsePointerMedia = window.matchMedia('(hover: none)');
 document.addEventListener('click', function (event) {
+    if (coarsePointerMedia.matches) return;
     // `typeof` first: when the facade itself failed to load, calling it would throw.
     if (typeof bootstrapAvailable !== 'function' || !bootstrapAvailable()) return;
     const target = /** @type {HTMLElement|null} */ (event.target);

@@ -1,4 +1,4 @@
-import { test, expect, expectLoadsCleanly, expectTooltipTitle, openDialog, dialogBody } from './base';
+import { test, expect, expectLoadsCleanly, expectTooltipTitle, tooltipBubble, openDialog, dialogBody } from './base';
 import { expectMcpBoundsMatchPage } from './mcp-bounds';
 import { catchReport, reportCell, sendReport } from './report-dialog';
 import { readFileSync } from 'fs';
@@ -428,5 +428,76 @@ test.describe('Expeditions Calculator - MCP tools', () => {
             { tool, arg: 'lifeforms.discovererClassBonus', selector: '#class-bonus-discoverer', prm: 'classBonusDiscoverer' },
             { tool, arg: 'discoveryBoosterPercent', selector: '#resource-discovery-booster', prm: 'resourceDiscoveryBooster' },
         ]);
+    });
+});
+
+// ---------------------------------------------------------------------------
+// Tooltip activation: attachTooltips() gives every anchor a tabindex and
+// common.css gives it cursor: pointer, so a hint icon opens by tap and by Tab
+// as well as by hover. The Orion row's question mark stands in for them all.
+// ---------------------------------------------------------------------------
+
+const orionHintIcon = '#orion-eco-rewards-row i[data-bs-toggle="tooltip"]';
+
+// The row starts d-none in the markup and is hidden for the Discoverer the
+// page opens on - its finds already scale with the economy speed - so a
+// non-Discoverer class has to be selected before the icon is reachable.
+async function showOrionRow(context, page) {
+    await openDom(context, page);
+    await page.locator('#player-class').selectOption('2');
+    await expect(page.locator('#orion-eco-rewards-row')).toBeVisible();
+}
+
+test.describe('Expeditions Calculator - tooltip activation', () => {
+    test.beforeEach(async ({ context, page }) => {
+        await showOrionRow(context, page);
+    });
+
+    test('the hint icon takes focus and shows the tooltip', async ({ page }) => {
+        const icon = page.locator(orionHintIcon);
+        await expectTooltipTitle(icon, /Dark Matter is unaffected/);
+
+        await icon.focus();
+        await expect(tooltipBubble(page)).toContainText('Dark Matter is unaffected');
+    });
+
+    test('the hint icon reads as interactive in the computed style', async ({ page }) => {
+        // cursor: pointer is what iOS Safari's first-tap hover heuristic
+        // looks for before it emulates the mouse events of a tap.
+        await expect(page.locator(orionHintIcon)).toHaveCSS('cursor', 'pointer');
+    });
+
+    test('a mouse click un-pins the tooltip again', async ({ page }) => {
+        // The other half of the activation story: on a mouse pointer the
+        // click-to-unpin handler in sidebar.js still hides the bubble the
+        // click would otherwise leave pinned on the focused anchor (touch
+        // pointers skip it - there the click is the tap that opens the bubble).
+        const icon = page.locator(orionHintIcon);
+        await icon.hover();
+        await expect(tooltipBubble(page)).toContainText('Dark Matter is unaffected');
+        await icon.click();
+        await expect(tooltipBubble(page)).toBeHidden();
+    });
+});
+
+test.describe('Expeditions Calculator - tooltip activation on a touch screen', () => {
+    // isMobile, not just hasTouch: only the full mobile emulation reports
+    // (hover: none), which is what the click-to-unpin handler in sidebar.js
+    // keys on - the tap path under test behaves differently without it.
+    test.use({ isMobile: true, hasTouch: true });
+
+    test.beforeEach(async ({ context, page }) => {
+        await showOrionRow(context, page);
+    });
+
+    test('the hint icon shows the tooltip on a tap', async ({ page }) => {
+        await page.locator(orionHintIcon).tap();
+        await expect(tooltipBubble(page)).toContainText('Dark Matter is unaffected');
+        // A tap is a click too, and the unpin handler in sidebar.js used to
+        // hide the bubble in the same instant (once directly, once via a
+        // setTimeout(0)); the bubble must outlive both.
+        await page.waitForTimeout(400);
+        await expect(tooltipBubble(page)).toBeVisible();
+        await expect(tooltipBubble(page)).toContainText('Dark Matter is unaffected');
     });
 });
