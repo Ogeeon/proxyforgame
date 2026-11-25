@@ -3,10 +3,10 @@
 Three calculators read data the player copies out of the game. Everything below is hand-maintained:
 `docs/calculators/*.md` is machine output (`make docs` overwrites it), so nothing here belongs there.
 
-## The API 2 export
+## The API export
 
-The game's **Fleet** page carries a field labelled **API 2**. It holds one line of JSON describing
-the player's own planet:
+The game's **Fleet** page carries a field labelled **API** (formerly **API 2**: the game removed
+API 1 and dropped the numeral). It holds one line of JSON describing the player's own planet:
 
 ```json
 {
@@ -54,12 +54,12 @@ already converted to a percentage) or `null` when the text is not a JSON object.
 | Calculator | Entry point | What it takes |
 |------------|-------------|---------------|
 | `flight` | **Import from OGame** button (`#import-own-api`), clipboard icon above the parameters | Coordinates, character and alliance class, drive researches and hypertech, ship counts, per-ship life-form bonuses, class boosters. Checkboxes in the dialog select the categories. |
-| `expeditions` | The **API 2** field in the cargo-bonus reader (`#open-lfbr` on the cargo-bonus tab) | Nothing but `ships[*].cargo`, written into the per-ship bonus table. |
+| `expeditions` | The **API** field in the cargo-bonus reader (`#open-lfbr` on the cargo-bonus tab) | Nothing but `ships[*].cargo`, written into the per-ship bonus table. |
 | `scrap` | The paste field and **Import** button under the merchant's rate (`#own-api-input`, `#own-api-import`) | The counts: `ships[*].amount` for the 17 ships (the satellite and the crawler included), `defenses` and `missiles` for the rest. Every count field is overwritten, a unit the export leaves out with 0, so an export that names none of the 27 units is refused. Then the cargo fields of the transport panel: `researches[114]` (hyperspace technology), `characterClassId` (1, the Collector, ticks the Collector box; 2 or 3 clears it), `classBoosters[1]` (the Collector Enhancement) and `ships[202].cargo` / `ships[203].cargo`. A value the export leaves out - no class, no booster block - keeps its field as it was. |
 
 The flight calculator also imports **spy reports** through their `sr-...` API code
 (`#api-code` + `#api-get`, fetched by `ajax.php`). That payload is a different shape but states the
-per-ship bonuses as the same fractions, so it shares `bonusPercent()` with the API 2 path.
+per-ship bonuses as the same fractions, so it shares `bonusPercent()` with the API path.
 
 ## The account export
 
@@ -165,7 +165,7 @@ The cargo-bonus reader accepts either input, in one dialog:
 
 1. the text of the game's ship-bonus table, pasted into the textarea — parsed by counting
    eight-line blocks from the line that names the small cargo;
-2. the API 2 export, pasted into the single-line field.
+2. the API export, pasted into the single-line field.
 
 They are **mutually exclusive and the export wins**: it is machine data, independent of line order
 and of localized ship names. So `readBonuses()` tries the export first, falls back to the report,

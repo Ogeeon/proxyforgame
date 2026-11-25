@@ -219,7 +219,7 @@ test.describe('Expeditions Calculator - DOM integration', () => {
 });
 
 // ---------------------------------------------------------------------------
-// Reading the cargo bonuses: the pasted bonus report or the API 2 export.
+// Reading the cargo bonuses: the pasted bonus report or the API export.
 // ---------------------------------------------------------------------------
 
 // The same fixture the flight importer is tested against: an object exported
@@ -252,12 +252,12 @@ test.describe('Expeditions Calculator - cargo bonus import', () => {
         await expect(page.locator('#lf-bonuses-reader')).toBeVisible();
     });
 
-    test('the dialog offers both the report box and the API 2 field', async ({ page }) => {
+    test('the dialog offers both the report box and the API field', async ({ page }) => {
         await expect(page.locator('#lf-bonuses-txtarea')).toBeVisible();
         await expect(page.locator('#own-api-input')).toBeVisible();
     });
 
-    test('the API 2 export fills the bonus table', async ({ page }) => {
+    test('the API export fills the bonus table', async ({ page }) => {
         await page.locator('#own-api-input').fill(OWN_API_FIXTURE);
         await page.locator('#lf-bonuses-read-btn').click();
 
@@ -297,7 +297,7 @@ test.describe('Expeditions Calculator - cargo bonus import', () => {
         await expect(page.locator('#storage-capacity')).toHaveText('50,000');
     });
 
-    test('the API 2 export wins over a report pasted alongside it', async ({ page }) => {
+    test('the API export wins over a report pasted alongside it', async ({ page }) => {
         await page.locator('#lf-bonuses-txtarea').fill(buildBonusReport({ 1: 12 }));
         await page.locator('#own-api-input').fill(OWN_API_FIXTURE);
         await page.locator('#lf-bonuses-read-btn').click();
@@ -325,7 +325,7 @@ test.describe('Expeditions Calculator - cargo bonus import', () => {
         const dialog = openDialog(page);
         await expect(dialog).toBeVisible();
         const alertMsg = await dialogBody(dialog).innerText();
-        expect(alertMsg).toContain('API 2');
+        expect(alertMsg).toContain('API');
         await dialog.locator('.btn-primary').click();
         await expect(dialog).toHaveCount(0);
         await expect(page.locator('#lf-bonuses-reader')).toBeVisible();

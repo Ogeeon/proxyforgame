@@ -18,6 +18,7 @@ release section; it is the source of truth for the other eleven translations.
 ### Fixed
 
 - All calculators: the tooltip hint icons open on a tap on touch devices and by keyboard Tab - the icons used to be neither tappable nor focusable, so without a mouse a hint stayed out of reach.
+- Flight, Expeditions, Scrap Merchant: the game renamed the Fleet page's export field (the old API 2 is now just API); our hints and error messages follow it. <!-- site -->
 
 ## [2026-11-23] - site entry 78
 

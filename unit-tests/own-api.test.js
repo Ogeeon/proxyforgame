@@ -1,6 +1,6 @@
 'use strict';
 
-// Tests for the shared normalizer of OGame's "API 2" export (own-api.js). It is
+// Tests for the shared normalizer of OGame's "API" export (own-api.js). It is
 // DOM-free by design, so the Playwright suites only need to cover the wiring
 // around it: the shapes the game can send are pinned down here.
 

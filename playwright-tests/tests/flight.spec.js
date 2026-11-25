@@ -359,7 +359,7 @@ test.describe('Flight Calculator - Server data fetch', () => {
     });
 });
 
-// Fixture: object exported from the OGame client (API 2 field on the 'Fleet' page).
+// Fixture: object exported from the OGame client (API field on the 'Fleet' page).
 // Coordinates 5:254:14, discoverer class, trader alliance, drives 14/10/8, hypertech 9,
 // fleetspeed x10 (universe data, intentionally ignored on import).
 const OWN_API_FIXTURE = readFileSync(
@@ -414,7 +414,7 @@ test.describe('Flight Calculator - OGame Object Import', () => {
         await expect(page.locator('#esp-probe')).toHaveValue('9994');
         await expect(page.locator('#pathfinder')).toHaveValue('106');
 
-        // Universe data (fleetspeed etc.) from the API 2 export is intentionally ignored,
+        // Universe data (fleetspeed etc.) from the API export is intentionally ignored,
         // so the fleet speed select keeps its default value despite fleetspeed x10 in the fixture.
         await expect(page.locator('#speed-fleet-war')).toHaveValue('1');
 

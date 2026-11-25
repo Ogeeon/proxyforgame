@@ -3,7 +3,7 @@
 // ============================================================================
 // Top-level controller. Owns `options` (the saved settings, the strings and
 // the unit prices the template fills in), wires the DOM events, recalculates on
-// every change and reads the API 2 export into the count and cargo fields.
+// every change and reads the API export into the count and cargo fields.
 //
 // Saved in options_scrap: the "full numbers" box, the cargo fields - the
 // hyperspace technology, the Collector box, the Collector Enhancement and the two
@@ -128,7 +128,7 @@ const options = {
 
   /** @type {Record<string, number[]>} Unit prices by tech id, filled in by the template. */
   prices: {},
-  /** Shown when the pasted text is not an API 2 export; filled in by the template. */
+  /** Shown when the pasted text is not an API export; filled in by the template. */
   ownApiBadJsonMsg: '',
   dialogOk: 'OK',
 
@@ -166,7 +166,7 @@ const options = {
 };
 
 /**
- * The counts an API 2 export gives the page: every unit the page has a field
+ * The counts an API export gives the page: every unit the page has a field
  * for, 0 for one the export does not list. Null when it lists none of them -
  * the fields are overwritten wholesale, so an export that matches nothing must
  * be refused rather than wipe them.
@@ -194,7 +194,7 @@ function scrapCountsFromOwnApi(data) {
 }
 
 /**
- * The character class ids of the API 2 export (1 Collector, 2 General,
+ * The character class ids of the API export (1 Collector, 2 General,
  * 3 Discoverer), as the Collector box shows them.
  */
 const SCRAP_OWN_API_COLLECTOR = Object.freeze({ 1: true, 2: false, 3: false });
@@ -431,7 +431,7 @@ class ScrapApp {
   }
 
   /**
-   * Fill the counts from a pasted API 2 export, and the cargo fields from
+   * Fill the counts from a pasted API export, and the cargo fields from
    * what it says of the player. A text that is not one, or one that names
    * none of the units, gets the error dialog and changes nothing.
    *
@@ -452,7 +452,7 @@ class ScrapApp {
   }
 
   /**
-   * The cargo fields from an API 2 export: hyperspace technology, the class
+   * The cargo fields from an API export: hyperspace technology, the class
    * (the Collector ticks the box, another class clears it), the Collector
    * Enhancement and the two cargo ships' bonuses - and the three drive levels
    * of the fleet save. What the export leaves out -

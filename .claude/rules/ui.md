@@ -20,7 +20,7 @@ implementation for every pattern.
 
 ## Validation & Input Conventions
 - All numeric inputs use the **blur-validation pattern** (validate/clamp on blur, never live-clamp while typing). Follow the existing helpers rather than inventing new behavior.
-- Always use the locale-aware decimal helper for user-entered fractional values (RU uses `,`). **Never** apply locale separators to imported OGame API data — the API 2 export and the spy-report JSON always use `.`.
+- Always use the locale-aware decimal helper for user-entered fractional values (RU uses `,`). **Never** apply locale separators to imported OGame API data — the API export and the spy-report JSON always use `.`.
 - **Text the player pastes out of the game UI is different**: its separator follows the game client's language (`.` on EN/RU, `,` on DE), so a paste parser accepts both.
 - **Displayed numbers follow the site language (CLDR), not the game**: `numToLocal`/`numToDisplay` group with `options.thousandsSeparator` (`,` en, `.` de, a no-break space ru/fr/pl/pt/sk) and write the fraction with the locale decimal; a bare `toFixed` in a display is a bug. Grouping separators are never valid input — the filter drops them. See `docs/patterns.md` §(b) and `docs/adr/0006-locale-number-formatting.md`.
 - Never persist a locale decimal separator into comma-delimited cookies; serialize with a canonical dot format.

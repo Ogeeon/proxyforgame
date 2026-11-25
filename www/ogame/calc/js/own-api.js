@@ -1,7 +1,7 @@
 // ============================================================================
 // OGAME OWN-API IMPORT - payload normalizer
 // ============================================================================
-// The "API 2" field on the game's Fleet page exports the player's own planet as
+// The "API" field on the game's Fleet page exports the player's own planet as
 // a single line of JSON. Three calculators read it: `flight` takes coordinates,
 // classes, researches, ship counts and per-ship bonuses; `expeditions` takes the
 // cargo bonuses alone; `scrap` takes the ship, defense and missile counts, and
@@ -72,7 +72,7 @@ function bonusPercent(fraction, digits) {
 }
 
 /**
- * Parse and normalize the API 2 export.
+ * Parse and normalize the API export.
  *
  * @param {string} text The pasted export.
  * @returns {?OwnApiPayload} Null when the text is not a JSON object - which

@@ -7,7 +7,7 @@ ProxyForGame is a set of free browser calculators for the space strategy game
 [OGame](https://ogame.gameforge.com/). Ten of them are live: build costs and times
 (`costs`, `lfcosts`, `queue`, `terraformer`), mine output and energy (`production`,
 `graviton`), fleet missions (`flight`, `expeditions`, `moon`) and resource exchange (`trade`).
-Several accept the game's own API 2 export, so a fleet or a planet can be pasted straight in
+Several accept the game's own API export, so a fleet or a planet can be pasted straight in
 instead of being typed out.
 
 Each page is a small PHP controller that loads its translations and includes a template; the

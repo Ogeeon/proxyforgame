@@ -2,7 +2,7 @@
 
 // Tests for the Scrap Merchant calculator's formulas (scrap-core.js): the
 // return per resource, its rounding, the rate's range, the flagship case -
-// the API 2 export the e2e suite imports too - and the cargo holds, checked
+// the API export the e2e suite imports too - and the cargo holds, checked
 // against the cost calculator's.
 
 const { describe, it } = require('node:test');
@@ -172,7 +172,7 @@ describe('calculateScrap', () => {
         expect(r.transport.large).toBe(1);
     });
 
-    it('prices a planet out of the API 2 export at the default rate', () => {
+    it('prices a planet out of the API export at the default rate', () => {
         const ownApi = JSON.parse(readFileSync(join(__dirname, '../playwright-tests/fixtures/own_api.json'), 'utf8'));
         /** @type {Record<string, number>} */
         const counts = {};

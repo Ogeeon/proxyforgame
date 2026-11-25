@@ -100,6 +100,7 @@ of the game layer: it is never marked or restored, and the backup file leaves it
 calculator shows it in its "resources available" fields, as it was, never projected to now.
 _Avoid_: current resources, stock, balance
 
-**API 2 export**:
-The one-line JSON the game shows on its Fleet page. It describes one planet's fleet and the
-account's drive technologies, and is not a source for profiles.
+**API export**:
+The one-line JSON the game shows on its Fleet page, in the field labelled **API**. It describes
+one planet's fleet and the account's drive technologies, and is not a source for profiles.
+_Avoid_: API 2 export (the game removed API 1 and dropped the numeral)

@@ -3,7 +3,7 @@ import { expectMcpBoundsMatchPage } from './mcp-bounds';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
-// The Scrap Merchant calculator: the API 2 export fills the counts, the rate
+// The Scrap Merchant calculator: the API export fills the counts, the rate
 // and the counts drive the return, and a player profile shows each planet's
 // counts beside the fields. The formulas themselves are covered by
 // unit-tests/scrap-core.test.js; this spec checks the page wiring.
@@ -60,7 +60,7 @@ async function expectVerdictCounts(page, wait, sell) {
     await expect(page.locator('#sell-timing-sell-head')).toHaveText(sell);
 }
 
-/** Paste the API 2 export and import it. */
+/** Paste the API export and import it. */
 async function importOwnApi(page, text = OWN_API) {
     await page.locator('#own-api-input').fill(text);
     await page.locator('#own-api-import').click();
@@ -122,7 +122,7 @@ test.describe('Scrap Merchant - the page', () => {
         await expect(page.locator('#transport-body')).toBeHidden();
     });
 
-    test('importing the API 2 export fills the counts and prices them', async ({ page }) => {
+    test('importing the API export fills the counts and prices them', async ({ page }) => {
         await importOwnApi(page);
         await expect(page.locator('#unit-202')).toHaveValue('8855');
         await expect(page.locator('#unit-212')).toHaveValue('400');
@@ -328,7 +328,7 @@ test.describe('Scrap Merchant - the page', () => {
             await importOwnApi(page, text);
             const dialog = openDialog(page);
             await expect(dialog).toBeVisible();
-            await expect(dialogBody(dialog)).toContainText('API 2');
+            await expect(dialogBody(dialog)).toContainText('API');
             await dialog.locator('.modal-footer button').click();
             await expect(dialog).toHaveCount(0);
             await expect(page.locator('#unit-202')).toHaveValue('7');
@@ -436,7 +436,7 @@ test.describe('Scrap Merchant - the page', () => {
         expect(await saved()).toMatchObject(SELL_TIMING_DEFAULTS);
     });
 
-    test('the API 2 import fills the drives of the fleet save', async ({ page }) => {
+    test('the API import fills the drives of the fleet save', async ({ page }) => {
         const data = JSON.parse(OWN_API);
         data.researches['115'] = 11;
         data.researches['117'] = 9;

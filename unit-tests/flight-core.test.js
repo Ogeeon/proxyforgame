@@ -822,7 +822,7 @@ describe('Flight Calculator - Deuterium Consumption', () => {
     // probe and the death star both sit on a base consumption of 1 - so it is what
     // pins the one-deuterium floor a single ship pays.
     it('matches the game on the whole fleet', () => {
-        // [count, speed %, cargo %, fuel %] per hull, from the player's API 2 export
+        // [count, speed %, cargo %, fuel %] per hull, from the player's API export
         const FLEET = [
             [4509818, 461.0264, 397.5824, 12.24096],   // small cargo
             [3876344, 461.0264, 397.5824, 12.24096],   // large cargo

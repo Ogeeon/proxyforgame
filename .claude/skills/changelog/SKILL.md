@@ -27,7 +27,7 @@ Append `<!-- site -->` to the bullet when a player would notice the change:
 |------------------|-------------------|
 | A new calculator or page | Refactoring |
 | A new field, option or setting | Tests |
-| Importing game data (API 2, spy report) | Build, tooling, CI |
+| Importing game data (API, spy report) | Build, tooling, CI |
 | A change to the calculations | Documentation |
 | A visual change | Wording and translation fixes |
 | A fix to a bug users could hit — wrong output, settings not saved, a broken import | Type-checking, Sonar findings |

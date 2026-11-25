@@ -1398,7 +1398,7 @@ class FlightOrchestrator {
 
     /**
      * Write the per-ship bonuses a spy report carries. The report states them as
-     * the same fractions the API 2 export uses, so the conversion is shared.
+     * the same fractions the API export uses, so the conversion is shared.
      */
     _applyPerShipBonuses(ships) {
         Object.entries(ships || {}).forEach(([id, v]) => {
@@ -2026,7 +2026,7 @@ const FLIGHT_TECH_MAPPING = [
 ];
 
 // The researches this page has a field for. Both importers read them, and the
-// API 2 import also decides by this list whether an export has anything to give.
+// API import also decides by this list whether an export has anything to give.
 const FLIGHT_RESEARCH_MAPPING = [
     [114, 'hypertech-lvl'], [115, 'cmb-drive'], [117, 'imp-drive'], [118, 'hyp-drive'],
 ];

@@ -250,7 +250,7 @@ class ExpeditionsApp {
     addEvent('#reset', 'click', () => this._resetParams(true));
     addEvent('#clear-fleet', 'click', () => this._clearFleet());
 
-    // Cargo bonuses reader modal: the pasted bonus report or the API 2 export.
+    // Cargo bonuses reader modal: the pasted bonus report or the API export.
     addEvent('#open-lfbr', 'click', () => {
       setVal('#lf-bonuses-txtarea', '');
       setVal('#own-api-input', '');
@@ -282,7 +282,7 @@ class ExpeditionsApp {
 
   /**
    * Read the cargo bonuses from whichever of the two modal fields carries them.
-   * The sources are mutually exclusive and the API 2 export wins: it is machine
+   * The sources are mutually exclusive and the API export wins: it is machine
    * data, with no dependence on the line order or the ship names of a report.
    * Whichever source loses says nothing about why - a single message covers
    * every way of ending up with no bonuses at all.
@@ -296,7 +296,7 @@ class ExpeditionsApp {
   }
 
   /**
-   * Read the cargo bonuses out of the API 2 export from the game's Fleet page.
+   * Read the cargo bonuses out of the API export from the game's Fleet page.
    * The export states every ship the player can build, so the whole table is
    * cleared first: a ship missing from it has no bonus rather than the one left
    * over from an earlier read.
