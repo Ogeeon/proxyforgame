@@ -104,3 +104,17 @@ _Avoid_: current resources, stock, balance
 The one-line JSON the game shows on its Fleet page, in the field labelled **API**. It describes
 one planet's fleet and the account's drive technologies, and is not a source for profiles.
 _Avoid_: API 2 export (the game removed API 1 and dropped the numeral)
+
+## Numeric fields
+
+**Def**:
+The placeholder a cleared numeric field shows, selected so the next keystroke replaces it. It
+means "unset", not the value the field loads with — that comes from the calculator's settings —
+and it may lie outside the field's min..max: an unset flight coordinate shows 0 where valid
+coordinates start at 1, and the route reads as invalid rather than as an invented coordinate.
+_Avoid_: default, initial value
+
+**Min**:
+The lower bound of what a numeric field may hold, not of what it may show. It is enforced when
+the player leaves the field; a cleared field shows its def even when that is below min.
+_Avoid_: floor, lower limit
