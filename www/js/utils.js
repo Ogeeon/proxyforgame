@@ -855,7 +855,12 @@ function stepNumberOnArrowKey(e) {
 	// Holding the arrow repeats at the OS rate - one repeat, one step.
 	e.preventDefault();
 	const direction = e.key === 'ArrowUp' ? 1 : -1;
-	const multiplier = e.ctrlKey ? 100 : (e.shiftKey ? 10 : 1);
+	// Unfolded for Sonar S3358: a nested ternary is the one shape it flags.
+	let multiplier = 1;
+	if (e.ctrlKey)
+		multiplier = 100;
+	else if (e.shiftKey)
+		multiplier = 10;
 	const result = stepNumber(target.value, direction, multiplier, target._constrains,
 		getOptionValue('decimalSeparator', '.'));
 	target.value = localizeFloat(result);
