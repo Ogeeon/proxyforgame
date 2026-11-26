@@ -797,8 +797,11 @@ function frac(x, n) {
  * @returns {number}
  */
 function stepDecimals(step) {
-	const digits = String(step).split('.')[1];
-	return digits === undefined ? 0 : digits.length;
+	// The parts.length guard is the dropFraction idiom: indexing the split
+	// result and comparing it to undefined trips Sonar S3403, which reads the
+	// index access through TypeScript's non-optional array typing.
+	const parts = String(step).split('.');
+	return parts.length > 1 ? parts[1].length : 0;
 }
 
 /**
