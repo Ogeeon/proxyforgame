@@ -15,6 +15,10 @@ release section; it is the source of truth for the other eleven translations.
 
 ## [Unreleased]
 
+### Changed
+
+- Scrap Merchant: pasting the API export no longer fills the ship and defense counts into the fields - the numbers appear as the clickable hints beside them, the way a player profile's planet counts do, and a click puts one in. Everything else the export carries still fills on import: the hyperspace technology, the three drives, the Collector box, the Collector Enhancement and the two cargo bonuses; a count typed by hand survives it. <!-- site -->
+
 ### Fixed
 
 - All calculators: the tooltip hint icons open on a tap on touch devices and by keyboard Tab - the icons used to be neither tappable nor focusable, so without a mouse a hint stayed out of reach.

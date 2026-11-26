@@ -3,10 +3,11 @@ import { expectMcpBoundsMatchPage } from './mcp-bounds';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
-// The Scrap Merchant calculator: the API export fills the counts, the rate
-// and the counts drive the return, and a player profile shows each planet's
-// counts beside the fields. The formulas themselves are covered by
-// unit-tests/scrap-core.test.js; this spec checks the page wiring.
+// The Scrap Merchant calculator: the API export shows the counts as hints
+// beside the fields, the rate and the counts drive the return, and a player
+// profile paints the same slot with the chosen planet's counts. The formulas
+// themselves are covered by unit-tests/scrap-core.test.js; this spec checks
+// the page wiring.
 
 const OWN_API = readFileSync(join(__dirname, '../fixtures/own_api.json'), 'utf-8');
 const ACCOUNT_EXPORT = readFileSync(join(__dirname, '../fixtures/account-export-v1.json'), 'utf8');
@@ -66,6 +67,15 @@ async function importOwnApi(page, text = OWN_API) {
     await page.locator('#own-api-import').click();
 }
 
+/** Click every planet-count hint standing on the page: the bound handler
+ *  copies each hint's data-planet-count into the field beside it. Rows of
+ *  the closed tab count too - a programmatic click needs no open pane. */
+async function applyHints(page) {
+    await page.evaluate(() => {
+        document.querySelectorAll('span.planet-count:not(.d-none)').forEach((el) => el.click());
+    });
+}
+
 test.describe('Scrap Merchant - the page', () => {
     test.beforeEach(async ({ page }) => {
         await page.goto('/en/scrap');
@@ -109,6 +119,7 @@ test.describe('Scrap Merchant - the page', () => {
         await expect(page.locator('#transport-body')).toBeHidden();
         await expect(page.locator('#transport-toggle')).toHaveText(/Cargo ships to haul the resources away: SC\s0 \/ LC\s0/);
         await importOwnApi(page);
+        await applyHints(page);
         await expectHeadCounts(page, '13,447', '2,690');
         await expect(page.locator('#transport-body')).toBeHidden();
 
@@ -122,17 +133,34 @@ test.describe('Scrap Merchant - the page', () => {
         await expect(page.locator('#transport-body')).toBeHidden();
     });
 
-    test('importing the API export fills the counts and prices them', async ({ page }) => {
+    test('importing the API export shows its counts as hints, a click fills and prices them', async ({ page }) => {
         await importOwnApi(page);
+        // The export paints the hint slot, not the fields: a fresh page stays at 0.
+        await expect(page.locator('#unit-202')).toHaveValue('0');
+        await expect(page.locator('#fleet-planet-hint')).toBeVisible();
+        // Localized, as numToLocal writes them, not the raw digits.
+        await expect(page.locator('#unit-202-planet')).toHaveText('8,855');
+        await expect(page.locator('#unit-212-planet')).toHaveText('400');
+        await expect(page.locator('#unit-219-planet')).toHaveText('106');
+        // The defense counts come from the defenses block, not from the zeros
+        // the export lists under ships.
+        await expect(page.locator('#unit-401-planet')).toHaveText('26,100');
+        await expect(page.locator('#unit-408-planet')).toHaveText('1');
+        await expect(page.locator('#unit-503-planet')).toHaveText('0');
+
+        // A click on a hint puts the number in and prices it.
+        await openDefenseTab(page);
+        await page.locator('#unit-401-planet').click();
+        await expect(page.locator('#unit-401')).toHaveValue('26100');
+        await expect(page.locator('#defense-payback-metal')).toHaveText('18.27M');
+
+        // Every hint clicked, the page prices the whole export.
+        await applyHints(page);
         await expect(page.locator('#unit-202')).toHaveValue('8855');
         await expect(page.locator('#unit-212')).toHaveValue('400');
         await expect(page.locator('#unit-219')).toHaveValue('106');
-        // The defense counts come from the defenses block, not from the zeros
-        // the export lists under ships.
-        await expect(page.locator('#unit-401')).toHaveValue('26100');
         await expect(page.locator('#unit-408')).toHaveValue('1');
         await expect(page.locator('#unit-503')).toHaveValue('0');
-
         await expect(page.locator('#total-cost-metal')).toHaveText('164.262M');
         await expect(page.locator('#total-payback-metal')).toHaveText('57.491M');
         await expect(page.locator('#total-cost-msu')).toHaveText('278.5M');
@@ -157,9 +185,38 @@ test.describe('Scrap Merchant - the page', () => {
         await expect(page.locator('#unit-406-deuterium')).toHaveText('4,200,000');
     });
 
+    test('a count typed by hand survives the import', async ({ page }) => {
+        await page.locator('#full-numbers').check();
+        await type(page, '#unit-202', '7');
+        await openDefenseTab(page);
+        await type(page, '#unit-401', '12');
+        await importOwnApi(page);
+        // The fields keep what stood there, and the result prices those, not
+        // the export: only the hint slot was painted.
+        await expect(page.locator('#unit-202')).toHaveValue('7');
+        await expect(page.locator('#unit-401')).toHaveValue('12');
+        await expect(page.locator('#fleet-payback-metal')).toHaveText('4,900');
+        await expect(page.locator('#defense-payback-metal')).toHaveText('8,400');
+        await expect(page.locator('#unit-202-planet')).toHaveText('8,855');
+        await expect(page.locator('#unit-401-planet')).toHaveText('26,100');
+    });
+
+    test('a zero of the export shows as a hint and clicks a 0 in', async ({ page }) => {
+        await openDefenseTab(page);
+        await type(page, '#unit-503', '4');
+        await importOwnApi(page);
+        await expect(page.locator('#defense-planet-hint')).toBeVisible();
+        await expect(page.locator('#unit-503-planet')).toBeVisible();
+        await expect(page.locator('#unit-503-planet')).toHaveText('0');
+        await expect(page.locator('#unit-503')).toHaveValue('4');
+        await page.locator('#unit-503-planet').click();
+        await expect(page.locator('#unit-503')).toHaveValue('0');
+    });
+
     test('a count typed by hand recalculates at once', async ({ page }) => {
         await page.locator('#full-numbers').check();
         await importOwnApi(page);
+        await applyHints(page);
         // Typed key by key, not left: the result follows every keystroke.
         await page.locator('#unit-214').fill('');
         await page.locator('#unit-214').pressSequentially('1');
@@ -276,6 +333,7 @@ test.describe('Scrap Merchant - the page', () => {
         data.ships['202'].cargo = 0.1;
         data.ships['203'].cargo = 0.2;
         await importOwnApi(page, JSON.stringify(data));
+        await applyHints(page);
         await expect(page.locator('#collector-class')).toBeChecked();
         await expect(page.locator('#lf-collector-class-bonus')).toHaveValue('60');
         await expect(page.locator('#sc-capacity-increase')).toHaveValue('10');
@@ -301,6 +359,7 @@ test.describe('Scrap Merchant - the page', () => {
 
     test('the reset clears the counts and the rate, and the cargo fields too', async ({ page }) => {
         await importOwnApi(page);
+        await applyHints(page);
         await type(page, '#scrap-rate', '42');
         await openTransport(page);
         await type(page, '#sc-capacity-increase', '5');
@@ -448,11 +507,21 @@ test.describe('Scrap Merchant - the page', () => {
         await expect(page.locator('#hyp-drive')).toHaveValue('7');
     });
 
-    test('without a profile there is no planet select and no planet counts', async ({ page }) => {
+    test('on a fresh page there is no planet select and no planet counts', async ({ page }) => {
         await expect(page.locator('#pf-planet-box')).toBeHidden();
         await expect(page.locator('#unit-202-planet')).toBeHidden();
         await expect(page.locator('#fleet-planet-hint')).toBeHidden();
         await expect(page.locator('#defense-planet-hint')).toBeHidden();
+
+        // The API export paints the same slot without a profile: a standing
+        // hint is no promise that a profile is behind it.
+        await importOwnApi(page);
+        await expect(page.locator('#pf-planet-box')).toBeHidden();
+        await expect(page.locator('#fleet-planet-hint')).toBeVisible();
+        await expect(page.locator('#unit-202-planet')).toHaveText('8,855');
+        await openDefenseTab(page);
+        await expect(page.locator('#defense-planet-hint')).toBeVisible();
+        await expect(page.locator('#unit-401-planet')).toHaveText('26,100');
     });
 });
 
@@ -582,6 +651,22 @@ test.describe('Scrap Merchant - player profiles', () => {
         await page.locator('#pf-planet').selectOption({ label: 'Colony [3:20:4]' });
         await expect(page.locator('#unit-401-planet')).toHaveText('0');
         await expect(page.locator('#unit-401')).toHaveValue('1000');
+    });
+
+    test('an API import replaces the planet hints, the profile takes the slot back', async ({ page }) => {
+        await expect(page.locator('#unit-210-planet')).toHaveText('10'); // Alpha's battleships
+        await importOwnApi(page);
+        // The export's one record stands in the slot now, the fields untouched.
+        await expect(page.locator('#unit-210-planet')).toHaveText('9,994');
+        await expect(page.locator('#unit-210')).toHaveValue('0');
+        await expect(page.locator('#unit-401-planet')).toHaveText('26,100');
+        // Choosing another planet brings the profile's own numbers back.
+        await page.locator('#pf-planet').selectOption({ label: 'Colony [3:20:4]' });
+        await expect(page.locator('#unit-210-planet')).toHaveText('0');
+        // Leaving the profile hides the slot, the API set with it.
+        await page.locator('#pf-select').selectOption('');
+        await expect(page.locator('#fleet-planet-hint')).toBeHidden();
+        await expect(page.locator('#unit-210-planet')).toBeHidden();
     });
 
     test('the profile fills the cargo fields from the account', async ({ page }) => {

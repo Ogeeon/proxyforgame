@@ -168,8 +168,8 @@ const options = {
 /**
  * The counts an API export gives the page: every unit the page has a field
  * for, 0 for one the export does not list. Null when it lists none of them -
- * the fields are overwritten wholesale, so an export that matches nothing must
- * be refused rather than wipe them.
+ * the hint slot is overwritten wholesale, so an export that matches nothing
+ * must be refused rather than paint it with a garbage paste.
  *
  * @param {OwnApiPayload} data
  * @returns {?Record<string, number>}
@@ -431,12 +431,13 @@ class ScrapApp {
   }
 
   /**
-   * Fill the counts from a pasted API export, and the cargo fields from
-   * what it says of the player. A text that is not one, or one that names
-   * none of the units, gets the error dialog and changes nothing.
+   * Show the counts of a pasted API export as the hints beside the fields,
+   * like a profile's planet does, and fill the cargo fields from what it says
+   * of the player. A text that is not one, or one that names none of the
+   * units, gets the error dialog and changes nothing.
    *
    * @param {string} text
-   * @returns {Promise<boolean>} True when the counts were filled.
+   * @returns {Promise<boolean>} True when the hints were shown.
    */
   async importOwnApi(text) {
     const data = parseOwnApi(text);
@@ -445,7 +446,9 @@ class ScrapApp {
       await showAlertModal(options.ownApiBadJsonMsg, options.dialogOk);
       return false;
     }
-    Object.entries(counts).forEach(([id, count]) => setVal(scrapCountSelector(id), String(count)));
+    // One record for both sections: renderPlanetSection picks its own ids and
+    // keeps the zeros visible and clickable, as with a profile's planet.
+    ScrapRenderer.renderPlanetCounts(counts, counts);
     this._importOwnApiCargo(data);
     this.recalc();
     return true;

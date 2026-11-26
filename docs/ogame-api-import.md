@@ -45,9 +45,10 @@ already converted to a percentage) or `null` when the text is not a JSON object.
   counts: the export also lists `401`–`408` in `ships`, but always with an amount of 0.
 - A non-empty `ships` block is **no proof of an importable fleet**. The export lists the solar
   satellite, the crawler and the whole defense (`401`+) there too, so each calculator decides for
-  itself by matching the ids it has a field for. Both clear those fields before they write, so an
-  export that matches nothing has to be refused rather than applied — otherwise it wipes the page
-  and reports success.
+  itself by matching the ids it has a field for. Each overwrites its target wholesale, so an
+  export that matches nothing has to be refused rather than applied: flight would wipe the count
+  fields it fills, scrap would paint the hint slot beside the fields with a garbage paste — and
+  both would report success.
 
 ## Who reads what
 
@@ -55,7 +56,7 @@ already converted to a percentage) or `null` when the text is not a JSON object.
 |------------|-------------|---------------|
 | `flight` | **Import from OGame** button (`#import-own-api`), clipboard icon above the parameters | Coordinates, character and alliance class, drive researches and hypertech, ship counts, per-ship life-form bonuses, class boosters. Checkboxes in the dialog select the categories. |
 | `expeditions` | The **API** field in the cargo-bonus reader (`#open-lfbr` on the cargo-bonus tab) | Nothing but `ships[*].cargo`, written into the per-ship bonus table. |
-| `scrap` | The paste field and **Import** button under the merchant's rate (`#own-api-input`, `#own-api-import`) | The counts: `ships[*].amount` for the 17 ships (the satellite and the crawler included), `defenses` and `missiles` for the rest. Every count field is overwritten, a unit the export leaves out with 0, so an export that names none of the 27 units is refused. Then the cargo fields of the transport panel: `researches[114]` (hyperspace technology), `characterClassId` (1, the Collector, ticks the Collector box; 2 or 3 clears it), `classBoosters[1]` (the Collector Enhancement) and `ships[202].cargo` / `ships[203].cargo`. A value the export leaves out - no class, no booster block - keeps its field as it was. |
+| `scrap` | The paste field and **Import** button under the merchant's rate (`#own-api-input`, `#own-api-import`) | The counts: `ships[*].amount` for the 17 ships (the satellite and the crawler included), `defenses` and `missiles` for the rest — shown as the clickable hints beside the fields, never written into them, so the user applies each number (0 included) with a click and values typed by hand survive the import. The whole hint slot is repainted, a unit the export leaves out with 0, so an export that names none of the 27 units is refused rather than paint the hints with a garbage paste. Then the cargo fields of the transport panel: `researches[114]` (hyperspace technology), `characterClassId` (1, the Collector, ticks the Collector box; 2 or 3 clears it), `classBoosters[1]` (the Collector Enhancement) and `ships[202].cargo` / `ships[203].cargo`. A value the export leaves out - no class, no booster block - keeps its field as it was. |
 
 The flight calculator also imports **spy reports** through their `sr-...` API code
 (`#api-code` + `#api-get`, fetched by `ajax.php`). That payload is a different shape but states the
