@@ -15,18 +15,22 @@ release section; it is the source of truth for the other eleven translations.
 
 ## [Unreleased]
 
+## [2026-11-27] - site entry 79
+
 ### Added
 
 - All calculators: the up and down arrow keys step the number in a numeric field, the way a native spinbox does - one step per press, Shift by ten and Ctrl by a hundred for the large numbers, integer fields moving by 1 and fractional ones by 0.1. An emptied field starts from its default, and a value stops at the field's minimum and maximum instead of wrapping. Holding the key repeats at the usual system rate; the page no longer scrolls while a field is being stepped. <!-- site -->
 
 ### Changed
 
-- Scrap Merchant: pasting the API export no longer fills the ship and defense counts into the fields - the numbers appear as the clickable hints beside them, the way a player profile's planet counts do, and a click puts one in. Everything else the export carries still fills on import: the hyperspace technology, the three drives, the Collector box, the Collector Enhancement and the two cargo bonuses; a count typed by hand survives it. <!-- site -->
+- Scrap Merchant: pasting the API export no longer fills the ship and defense counts into the fields - the numbers appear as the clickable hints beside them, the way a player profile's planet counts do, and a click puts one in. Everything else the export carries still fills on import: the hyperspace technology, the three drives, the Collector box, the Collector Enhancement and the two cargo bonuses; a count typed by hand survives it.
 
 ### Fixed
 
 - All calculators: the tooltip hint icons open on a tap on touch devices and by keyboard Tab - the icons used to be neither tappable nor focusable, so without a mouse a hint stayed out of reach.
 - Flight, Expeditions, Scrap Merchant: the game renamed the Fleet page's export field (the old API 2 is now just API); our hints and error messages follow it.
+
+> **RU:** Во всех калькуляторах стрелки ↑ и ↓ меняют число в поле, как обычный спиннер: одно нажатие — один шаг (1 для целых полей, 0,1 для дробных), с Shift шаг умножается на 10, с Ctrl — на 100. Значение останавливается на границах поля, пустое поле начинает от значения по умолчанию, страница при этом не прокручивается.
 
 ## [2026-11-23] - site entry 78
 
