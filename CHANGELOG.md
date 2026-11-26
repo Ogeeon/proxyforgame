@@ -15,6 +15,11 @@ release section; it is the source of truth for the other eleven translations.
 
 ## [Unreleased]
 
+### Fixed
+
+- Terraformer, Graviton: a target whose satellite need is beyond what a counter can reach no
+  longer freezes the tab; it is reported the same way as satellites that yield nothing. <!-- site -->
+
 ## [2026-11-27] - site entry 79
 
 ### Added

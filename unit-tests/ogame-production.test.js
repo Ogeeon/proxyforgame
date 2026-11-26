@@ -122,6 +122,21 @@ describe('satellitesForEnergy', () => {
         expect(satellitesForEnergy({ ...POWER, satellitesPercent: 0 }, 1e9)).toBe(Infinity);
     });
 
+    it('gives up instead of freezing on an astronomical requirement', () => {
+        // Terraformer level 100 asks for ~6.34e32 energy; the estimate then
+        // sits past 2^53, where ±1 no longer changes the count and no higher
+        // count moves the rounded total either. Must return, not spin.
+        expect(satellitesForEnergy(POWER, 6.34e32)).toBe(Infinity);
+        expect(satellitesForEnergy(POWER, Infinity)).toBe(Infinity);
+    });
+
+    it('still answers exactly at the last walkable count', () => {
+        // Estimate ~2^53-1 satellites: right below the ulp cliff, the answer
+        // is exact rather than Infinity.
+        const required = planetEnergy(POWER).total + 30 * (2 ** 53 - 1);
+        expect(satellitesForEnergy(POWER, required)).toBe(2 ** 53 - 1);
+    });
+
     it('counts every bonus on a cold planet\'s satellite, however small its share', () => {
         // floor((-120 + 140) / 6) = 3 per satellite; the 45% building bonus adds
         // 1.35 on top of it, which a rounded share would lose entirely

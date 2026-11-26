@@ -81,6 +81,18 @@ test.describe('Terraformer Calculator - DOM integration', () => {
         await expect(page.locator('#energy-needed')).toHaveText('2,000');
     });
 
+    test('level 100 recalculates instead of freezing the tab', async ({ page }) => {
+        // Regression for issue #95: the ~6.3e32 energy of level 100 needs a
+        // satellite count past 2^53, where the old ±1 walk in
+        // satellitesForEnergy could never move - the keyup recalculation hung
+        // the tab. The count is reported the same way as an unreachable
+        // zero-yield planet: "Infinity" with dashed cost figures.
+        await page.locator('#tf-level-to').fill('100');
+        await page.locator('#tf-level-to').blur();
+        await expect(page.locator('#solar-satellites-needed')).toHaveText('Infinity');
+        await expect(page.locator('#crystal-required-ss')).toHaveText('-');
+    });
+
     test('the single-level checkbox hides the "from" level field', async ({ page }) => {
         await expect(page.locator('#tf-level-from')).toBeVisible();
         await page.locator('#single-level').check();

@@ -107,6 +107,14 @@ class GravitonCalculator {
     }
 
     const neededSats = satellitesForEnergy(planet, energyRequirement);
+    // A requirement so huge that the satellite count passes the float's exact
+    // range is as unreachable as a zero-yield planet: report it the same way
+    // (placeholder Infinity, dashed figures) instead of propagating Infinity
+    // through the costs and the durations.
+    if (neededSats === Infinity) {
+      result.feasible = false;
+      return result;
+    }
     result.neededSats = neededSats;
 
     const crysNeeded = neededSats * 2000;

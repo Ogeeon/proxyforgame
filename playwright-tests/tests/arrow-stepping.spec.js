@@ -52,9 +52,7 @@ test.describe('Arrow-key stepping - terraformer', () => {
     });
 
     test('Ctrl multiplies the step by 100 and clamps the jump at max', async ({ page }) => {
-        // The LF cost-reduction field: fractional, max 50. (Not tf-level-to's
-        // max of 100 - recalculation at level 100 hangs in
-        // satellitesForEnergy, a pre-existing bug on main, unrelated here.)
+        // The LF cost-reduction field: fractional, max 50.
         await page.locator('#param-lifeforms-tab').click();
         const rdc = page.locator('#lf-terraformer-rdc');
         await rdc.fill('45');

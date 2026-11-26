@@ -340,7 +340,21 @@ function satellitesForEnergy(p, required) {
 	// The unrounded yield lands within a satellite or two of the answer; the
 	// rounding of the individual rows decides which side
 	let n = Math.max(Math.ceil((required - planetEnergy(p).total) / perSatellite), 1);
-	while (n > 1 && reaches(n - 1)) n--;
-	while (!reaches(n)) n++;
+	// Each step must actually move n. Around 2^53 and beyond, ±1 falls below
+	// the float's ulp: the walk would never terminate, and no higher count
+	// could move the rounded total either - that many satellites is out of
+	// reach, like the zero-yield case above.
+	while (n > 1 && reaches(n - 1)) {
+		if (n - 1 === n) {
+			return Infinity;
+		}
+		n--;
+	}
+	while (!reaches(n)) {
+		if (n + 1 === n) {
+			return Infinity;
+		}
+		n++;
+	}
 	return n;
 }

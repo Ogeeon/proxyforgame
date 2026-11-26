@@ -114,6 +114,15 @@ describe('Graviton Calculator - Core computation', () => {
         expect(r.neededSats).toBe(Infinity);
     });
 
+    it('an astronomical requirement is infeasible, not a hang', () => {
+        // Issue #95, same as in the terraformer core: 3^39 growth at level 40
+        // asks for ~1.2e24 energy, a satellite count far past 2^53.
+        const r = compute({ gravitonLevel: 40 });
+        expect(r.feasible).toBe(false);
+        expect(r.neededSats).toBe(Infinity);
+        expect(r.crysNeeded).toBe(0);
+    });
+
     it('build time scales down with universe speed', () => {
         const x1 = compute({ gravitonLevel: 1, universeSpeed: 1 });
         const x5 = compute({ gravitonLevel: 1, universeSpeed: 5 });

@@ -133,6 +133,17 @@ describe('Terraformer Calculator - Core computation', () => {
         expect(r.neededSats).toBe(Infinity);
     });
 
+    it('an astronomical requirement is infeasible, not a hang', () => {
+        // Issue #95: level 100 asks for ~6.3e32 energy; the count that needs
+        // is past 2^53, where satellitesForEnergy cannot tell adjacent counts
+        // apart. Report it like the zero-yield case, with placeholder figures.
+        const r = compute({ tfLevelTo: 100 });
+        expect(r.feasible).toBe(false);
+        expect(r.neededSats).toBe(Infinity);
+        expect(r.crysSS).toBe(0);
+        expect(r.secsSS).toBe(0);
+    });
+
     it('build time scales down with economy speed', () => {
         const x1 = compute({ tfLevelTo: 1, universeSpeed: 1 });
         const x5 = compute({ tfLevelTo: 1, universeSpeed: 5 });
