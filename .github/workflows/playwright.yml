@@ -220,7 +220,11 @@ jobs:
       # The commits this push or pull request adds follow Conventional Commits.
       # Not part of `make check`, which has no range to look at on main itself.
       # One shard is enough. A new branch pushed with no `before` (all zeros) and
-      # a manual dispatch have no range, so they skip.
+      # a manual dispatch have no range, so they skip. A force-push orphans the
+      # old tip - no ref advertises it, so the clone does not have it and the
+      # range dies with "Invalid revision range": fetch the SHA back (GitHub
+      # serves a recently orphaned one), and lint the pushed tip alone when
+      # even that fails.
       - name: Commit messages (make commitlint)
         if: ${{ strategy.job-index == 0 }}
         env:
@@ -231,7 +235,16 @@ jobs:
             echo "No commit range for this event; nothing to check."
             exit 0
           fi
-          make commitlint FROM="$FROM" TO="$TO"
+          if ! git cat-file -e "$FROM^{commit}" 2>/dev/null; then
+            git fetch --no-tags origin "$FROM" || true
+          fi
+          if git cat-file -e "$FROM^{commit}" 2>/dev/null; then
+            make commitlint FROM="$FROM" TO="$TO"
+          else
+            echo "FROM $FROM is unreachable (a force-push orphaned it); checking the pushed tip only."
+            set -o pipefail
+            git log -1 --format=%B "$TO" | npx --no-install commitlint --strict
+          fi
 
       # -------------------------------------------------------------
       # The gate - the same target developers run before a commit
