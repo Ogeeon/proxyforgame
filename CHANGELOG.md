@@ -15,6 +15,10 @@ release section; it is the source of truth for the other eleven translations.
 
 ## [Unreleased]
 
+### Added
+
+- All calculators: the up and down arrow keys step the number in a numeric field, the way a native spinbox does - one step per press, Shift by ten and Ctrl by a hundred for the large numbers, integer fields moving by 1 and fractional ones by 0.1. An emptied field starts from its default, and a value stops at the field's minimum and maximum instead of wrapping. Holding the key repeats at the usual system rate; the page no longer scrolls while a field is being stepped. <!-- site -->
+
 ### Changed
 
 - Scrap Merchant: pasting the API export no longer fills the ship and defense counts into the fields - the numbers appear as the clickable hints beside them, the way a player profile's planet counts do, and a click puts one in. Everything else the export carries still fills on import: the hyperspace technology, the three drives, the Collector box, the Collector Enhancement and the two cargo bonuses; a count typed by hand survives it. <!-- site -->

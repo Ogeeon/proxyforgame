@@ -133,6 +133,13 @@ function bindPlanetRowInputs(rows, i) {
 	});
 	newInputs[0]._constrains = { 'min': -134, 'def': 0, 'allowNegative': true };
 	newInputs[1]._constrains = { 'min': 1, 'max': 16, 'def': 8, 'allowNegative': false };
+	// The seven building-level cells after temperature and position: whole
+	// non-negative counts (the crawler's max is re-capped dynamically by
+	// updateCrawlerLimit on every refresh). They had no constraints at all, so
+	// the page's options.defConstraints applied to them and the arrow keys in
+	// utils.js stepped none of these fields.
+	for (let j = 2; j < newInputs.length; j++)
+		newInputs[j]._constrains = { 'min': 0, 'max': Infinity, 'def': 0, 'allowFloat': false, 'allowNegative': false };
 }
 
 function prepAllPlanetsTable() {

@@ -1000,6 +1000,33 @@ function renderInitialState() {
     inputEl('#sc-capacity-increase')._constrains = { min: 0, def: 0, allowFloat: true, allowNegative: false };
     inputEl('#lc-capacity-increase')._constrains = { min: 0, def: 0, allowFloat: true, allowNegative: false };
 
+    // The remaining numeric text fields, with the bounds their keyup handlers
+    // already clamp through (initMixInputs / initTextInputs) and the defaults
+    // the options object starts from. Without `_constrains` a field is skipped
+    // by the shared arrow-key stepping in utils.js; the page defines no
+    // options.defConstraints, so every key the fallbacks would supply is
+    // spelled out here too.
+    const amount = { min: 0, max: Infinity, def: 0, allowFloat: false, allowNegative: false };
+    setConstrains('hypertech-lvl', amount);
+    ['res-src-m', 'res-src-c', 'res-src-d', 'res-dst-m', 'res-dst-c', 'res-dst-d'].forEach((id) => setConstrains(id, amount));
+    // Coordinates: galaxy and system fields start empty (0 shows as ''), the
+    // planet one is 1..15 in the game but the handler clamps 0..15.
+    setConstrains('coord-g', { min: 0, max: UNIVERSE_MAX_GALAXIES, def: 0, allowFloat: false, allowNegative: false });
+    setConstrains('coord-s', { min: 0, max: UNIVERSE_MAX_SYSTEMS, def: 0, allowFloat: false, allowNegative: false });
+    setConstrains('coord-p', { min: 0, max: 15, def: 0, allowFloat: false, allowNegative: false });
+    // Exchange rates: the keyup handlers clamp the fields to 1..5, and the
+    // sliders beside them echo fractional values (0.05 steps within
+    // TRADE_RATE_LIMITS), so the fields float; def is the slider midpoint.
+    const defaults = tradeDefaultRates();
+    setConstrains('rate-md', { min: 1, max: 5, def: defaults.md, allowFloat: true, allowNegative: false });
+    setConstrains('rate-cd', { min: 1, max: 5, def: defaults.cd, allowFloat: true, allowNegative: false });
+    // Mix percentages are fractional 0..100, the proportions whole 0..Infinity
+    // (the same split their keyup clamps and options.validate make).
+    ['mix-balance-proc', 'mix-src-balance-proc'].forEach((id) =>
+        setConstrains(id, { min: 0, max: 100, def: 50, allowFloat: true, allowNegative: false }));
+    ['mix-balance-prop1', 'mix-balance-prop2'].forEach((id) =>
+        setConstrains(id, { min: 0, max: Infinity, def: 1, allowFloat: false, allowNegative: false }));
+
     setTextContent('#rate-md-min', localizeFloat(TRADE_RATE_LIMITS.md.min.toFixed(1)));
     setTextContent('#rate-md-max', localizeFloat(TRADE_RATE_LIMITS.md.max.toFixed(1)));
     setTextContent('#rate-cd-min', localizeFloat(TRADE_RATE_LIMITS.cd.min.toFixed(1)));

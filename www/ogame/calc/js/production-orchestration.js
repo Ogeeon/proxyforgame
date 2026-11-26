@@ -1247,6 +1247,25 @@ async function initializeProductionCalculator() {
 		$$('#one-planet-prod .lf-row input[type=text]').forEach(function (el) {
 			el._constrains = { 'min': 0, 'def': 0, 'allowFloat': false, 'allowNegative': false };
 		});
+		// The one-planet table's building quantity cells: whole non-negative
+		// counts, none of them ever bounded on this page (the crawler cell is
+		// re-capped by updateCrawlerLimit on every recalculation).
+		$$('#one-planet-prod input.input-in-table').forEach(function (el) {
+			el._constrains = { 'min': 0, 'max': Infinity, 'def': 0, 'allowFloat': false, 'allowNegative': false };
+		});
+		// The loose numeric fields of both tabs - storage levels, the current and
+		// the needed resource amounts, the accumulation durations - same shape.
+		// Every key is spelled out because getConstraint() consults
+		// options.defConstraints only while a field has no _constrains at all.
+		['storage-met', 'storage-crys', 'storage-deut',
+			'onepln-curr-met', 'onepln-curr-crys', 'onepln-curr-deut',
+			'onepln-accumwhen-met', 'onepln-accumwhen-crys', 'onepln-accumwhen-deut',
+			'onepln-accumwhat-d', 'onepln-accumwhat-h', 'onepln-accumwhat-m',
+			'allpln-curr-met', 'allpln-curr-crys', 'allpln-curr-deut',
+			'allpln-accumwhen-met', 'allpln-accumwhen-crys', 'allpln-accumwhen-deut',
+			'allpln-accumwhat-d', 'allpln-accumwhat-h', 'allpln-accumwhat-m'].forEach(function (id) {
+			setConstrains(id, { 'min': 0, 'max': Infinity, 'def': 0, 'allowFloat': false, 'allowNegative': false });
+		});
 
 		// General settings panel
 		$$('#general-settings-panel input[type=text]').forEach(function (el) {

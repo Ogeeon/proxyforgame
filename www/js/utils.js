@@ -770,3 +770,103 @@ function frac(x, n) {
     const pow = Math.pow(10, n);
     return Math.round(x * pow) / pow;
 }
+
+// --- Arrow-key stepping ------------------------------------------------------
+// ArrowUp/ArrowDown step a numeric text field like a native spinbox does, on
+// every page (docs/plans/arrow-key-stepping.md). The arithmetic lives in the
+// pure stepNumber below - unit-tested in unit-tests/utils-stepping.test.js;
+// the listener at the end of the file only moves DOM values through it.
+
+/**
+ * The constraint object a numeric field carries as `_constrains`. Every key is
+ * optional: getConstraint answers a missing one with its caller's default - or,
+ * while the field has no `_constrains` at all, with options.defConstraints.
+ * @typedef {Object} NumberConstraints
+ * @property {number} [min]
+ * @property {number} [max]
+ * @property {number} [def] value an emptied field falls back to
+ * @property {boolean} [allowFloat]
+ * @property {boolean} [allowNegative]
+ * @property {number} [step] arrow step; 1 by default, 0.1 where allowFloat
+ */
+
+/**
+ * The decimal digits a step writes, i.e. the precision its stepped values are
+ * kept to: 0.1 -> 1, 1 -> 0, 0.05 -> 2.
+ * @param {number} step
+ * @returns {number}
+ */
+function stepDecimals(step) {
+	const digits = String(step).split('.')[1];
+	return digits === undefined ? 0 : digits.length;
+}
+
+/**
+ * Steps one numeric field value in an arrow-key direction. Pure: no DOM, no
+ * options. Parses `current` the way getInputNumber does (the locale decimal
+ * separator, grouping spaces tolerated); an empty or unparseable field starts
+ * from the constraint's `def` (0 when unset). The delta is
+ * direction × step × multiplier, the result rounded to the step's decimal
+ * precision so float noise (0.2 + 0.1) never reaches the field, then clamped
+ * to whichever bounds the constraints define.
+ * @param {string} current the value displayed in the field
+ * @param {number} direction +1 for ArrowUp, -1 for ArrowDown
+ * @param {number} multiplier 1 plain arrow, 10 with Shift, 100 with Ctrl
+ * @param {NumberConstraints} constraints the field's _constrains
+ * @param {string} decimalSeparator the locale's decimal separator
+ * @returns {string} the new value with a plain ".", to be localized by the caller
+ */
+function stepNumber(current, direction, multiplier, constraints, decimalSeparator) {
+	const cleaned = String(current).replaceAll(/[\u00A0\u202F]/g, '').replace(decimalSeparator, '.');
+	let n = Number.parseFloat(cleaned);
+	if (Number.isNaN(n))
+		n = constraints.def ?? 0;
+	const step = constraints.step ?? (constraints.allowFloat ? 0.1 : 1);
+	n = frac(n + direction * step * multiplier, stepDecimals(step));
+	if (constraints.min !== undefined || constraints.max !== undefined)
+		n = clampNumber(n, constraints.min ?? -Infinity, constraints.max ?? Infinity);
+	return String(n);
+}
+
+/**
+ * The document-level ArrowUp/ArrowDown handler. Steps a numeric text field:
+ * a field without `_constrains` (a name, a date mask, a paste box) passes
+ * through to the browser, and so does a native `type=number` spinbox - the
+ * type check uses the DOM property, which also covers inputs written without
+ * a type attribute. Alt and Meta combinations are left to the browser/OS.
+ * After writing the stepped value the caret goes to its end, and a synthetic
+ * keyup plus input event wake the page's own validate-and-recalc handlers -
+ * the input one must bubble, because some pages delegate it on a table.
+ * @param {KeyboardEvent} e
+ */
+function stepNumberOnArrowKey(e) {
+	if (e.key !== 'ArrowUp' && e.key !== 'ArrowDown')
+		return;
+	if (e.altKey || e.metaKey)
+		return;
+	const target = e.target;
+	if (!(target instanceof HTMLInputElement) || target.type !== 'text')
+		return;
+	if (target.readOnly || target.disabled || target._constrains === undefined)
+		return;
+	// Holding the arrow repeats at the OS rate - one repeat, one step.
+	e.preventDefault();
+	const direction = e.key === 'ArrowUp' ? 1 : -1;
+	const multiplier = e.ctrlKey ? 100 : (e.shiftKey ? 10 : 1);
+	const result = stepNumber(target.value, direction, multiplier, target._constrains,
+		getOptionValue('decimalSeparator', '.'));
+	target.value = localizeFloat(result);
+	target.setSelectionRange(target.value.length, target.value.length);
+	// The original key travels with the synthetic keyup, so handlers that read
+	// it still see the arrow the user pressed. A rare handler bound to both
+	// events recalculates twice - accepted as harmless.
+	target.dispatchEvent(new KeyboardEvent('keyup', { key: e.key, code: e.code, bubbles: true }));
+	target.dispatchEvent(new Event('input', { bubbles: true }));
+}
+
+// Self-registration, guarded like interaction-timing.js does: unit tests run
+// this file in vm sandboxes, some of whose stub documents carry no listener
+// machinery at all (unit-tests/settings-serialization.test.js).
+if (typeof document !== 'undefined' && typeof document.addEventListener === 'function') {
+	document.addEventListener('keydown', stepNumberOnArrowKey);
+}

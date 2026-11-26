@@ -530,6 +530,10 @@ class CostsCalculator {
     setConstrains('lf-terraformer-time-rdc', { min: 0, max: 99, def: 0, allowFloat: true, allowNegative: false });
     setConstrains('sc-capacity-increase', { min: 0, max: Infinity, def: 0, allowFloat: true, allowNegative: false });
     setConstrains('lc-capacity-increase', { min: 0, max: Infinity, def: 0, allowFloat: true, allowNegative: false });
+    // The mineral resource centre level: a whole-number building level like the
+    // tech levels bound with the default constraints. It had none, so the arrow
+    // keys in utils.js skipped it.
+    setConstrains('mineral-res-cntr-lvl', { min: 0, max: Infinity, def: 0, allowFloat: false, allowNegative: false });
 
     this._bindNumericFieldEvents(lfInputs);
 

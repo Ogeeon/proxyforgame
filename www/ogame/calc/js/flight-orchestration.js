@@ -1697,6 +1697,18 @@ class FlightOrchestrator {
                 el._constrains = { min: 0, max: Infinity, def: 0, allowFloat: true, allowNegative: false };
             }
         });
+        // The ship counts, the three drive levels and hyper tech never carried
+        // their own _constrains: they fell through to flight's
+        // options.defConstraints. getConstraint() consults that only while the
+        // field has no _constrains at all, so the objects below spell the same
+        // keys out - validation behaves exactly as before, and the arrow keys
+        // now step these fields too. The handlers clamp nothing above zero,
+        // so the fields stay open-ended (options.prm.validate caps a restored
+        // drive level at 50, but a typed one was never clamped on the page).
+        const count = { min: 0, max: Infinity, def: 0, allowFloat: false, allowNegative: false };
+        // SHIPS_BASE rows are (string|number)[]; the id is the first cell.
+        SHIPS_BASE.forEach((ship) => setConstrains(String(ship[0]), count));
+        ['cmb-drive', 'imp-drive', 'hyp-drive', 'hypertech-lvl'].forEach((id) => setConstrains(id, count));
         this._setCoordConstraint('departure-g', UNIVERSE_MAX_GALAXIES); this._setCoordConstraint('destination-g', UNIVERSE_MAX_GALAXIES);
         this._setCoordConstraint('departure-s', UNIVERSE_MAX_SYSTEMS); this._setCoordConstraint('destination-s', UNIVERSE_MAX_SYSTEMS);
         this._setCoordConstraint('departure-p', 16); this._setCoordConstraint('destination-p', 16);
